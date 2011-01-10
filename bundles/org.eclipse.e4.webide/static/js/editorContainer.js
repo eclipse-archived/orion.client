@@ -138,7 +138,7 @@ eclipse.EditorContainer = (function() {
 		},
 		getTitle : function() {
 			if (this._codeTitle instanceof dijit._Widget) {
-				return this._codeTitle.attr("title");
+				return this._codeTitle.get("title");
 			} else if (this._codeTitle.innerHTML) {
 				return this._codeTitle.innerHTML;
 			}
@@ -195,7 +195,7 @@ eclipse.EditorContainer = (function() {
 			if (this._editor) {
 				var titlePane = this._codeTitle;
 				if (titlePane instanceof dijit._Widget) {
-					titlePane.attr("title", shortTitle);
+					titlePane.set("title", shortTitle);
 				} else {
 					titlePane = this._codeTitle;
 					if (titlePane) {

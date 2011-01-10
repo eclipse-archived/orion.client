@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2010,2011 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -50,7 +50,7 @@ eclipse.CommandService = (function() {
 		 *  this might be the id of the page or of a dom element.
 		 */	
 		 
-		// see https://kanrtc01.ottawa.ibm.com:9446/ies/web/projects/EclipseWeb#action=com.ibm.team.workitem.viewWorkItem&id=414
+		// see WorkItem 414
 		addCommand: function(command, scope, scopeId) {
 			switch (scope) {
 			case "global":

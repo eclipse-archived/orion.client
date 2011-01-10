@@ -226,7 +226,7 @@ eclipse.Favorites = (function() {
 					return (function (oldName, path, id) {
 						return function(event) {
 							var editBox = dijit.byId(id + "EditBox"),
-								newName = editBox.attr("value");
+								newName = editBox.get("value");
 							if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
 								return;
 							} else if (!editBox.isValid() || newName === oldName) {

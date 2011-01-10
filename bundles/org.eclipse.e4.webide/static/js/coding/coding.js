@@ -88,7 +88,7 @@ dojo.addOnLoad(function(){
 			topContainerWidget, contentassist, leftPane, searchFloat);
 	
 	// The eWebBorderContainer widget needs to know the editorContainer
-	topContainerWidget.attr("editorContainer", editorContainer);
+	topContainerWidget.set("editorContainer", editorContainer);
 	
 	var syntaxChecker = new eclipse.SyntaxChecker(registry, editorContainer);
 	
@@ -96,7 +96,7 @@ dojo.addOnLoad(function(){
 	new eclipse.Outliner({parent: outlineDomNode, serviceRegistry: registry});
 	
 	// FIXME: only leaving this here because editorContainer's verifyInputChange handler doesn't work
-	// see https://kanrtc01.ottawa.ibm.com:9446/ies/web/projects/EclipseWeb#action=com.ibm.team.workitem.viewWorkItem&id=408
+	// see WorkItem 408
 	window.onbeforeunload = function() {
 		if (editorContainer.isDirty()) {
 			 return "There are unsaved changes.";

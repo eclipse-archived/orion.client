@@ -91,7 +91,7 @@ dojo.declare("widgets.OpenResourceDialog", [dijit._Widget, dijit._Templated], {
 	},
 	
 	doSearch: function() {
-		var text = this.resourceName && this.resourceName.attr("value");
+		var text = this.resourceName && this.resourceName.get("value");
 		if (!text) {
 			return;
 		}

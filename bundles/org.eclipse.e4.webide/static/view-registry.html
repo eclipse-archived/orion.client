@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+		<title>Plug-in Registry Viewer</title>
+<script type="text/javascript">
+	var djConfig = {
+		isDebug : true,
+		modulePaths : {
+			'widgets' : '/js/widgets'
+		},
+		parseOnLoad : true
+	};
+</script>
+<script src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+<script type="text/javascript">
+	dojo.require("dijit.form.Button");
+	dojo.require("dijit.form.TextBox");
+	dojo.require("dijit.layout.BorderContainer");
+	dojo.require("dijit.layout.ContentPane");
+</script>
+<style type="text/css">
+	@import "/org.dojotoolkit/dojo/resources/dojo.css";
+	@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
+	@import "/org.dojotoolkit/dijit/themes/soria/Tree.css";
+	@import "/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css";
+	@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
+	@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
+	@import "/ide.css";
+</style>
+</head>
+	<body style="height: 100%" class="soria">
+	<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<script src="js/registry.js"></script>
+	<script src="js/plugin.js"></script>
+	<script type="text/javascript" src="js/auth.js"></script>
+	
+	<!-- TODO: scripts below are only for testing, remove later -->
+ 	<script src="js/util.js"></script>
+ 	<script src="js/commands.js"></script>
+ 	<script src="js/dialogs.js"></script>
+ 	<script src="js/input.js"></script>
+ 	<script src="js/log.js"></script>
+ 	<script src="js/preferences.js"></script>
+ 	<script src="js/saveable.js"></script>
+ 	<script src="js/selection.js"></script>
+ 	<script src="js/status.js"></script>
+ 	<script src="js/users.js"></script>
+  	<script src="js/fileClient.js"></script>
+  	<script src="js/breadcrumbs.js"></script>
+	<script src="js/favorites.js"></script>
+	<script src="js/searchClient.js"></script>
+	
+	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="width: 100%; height: 100%;">
+		<div dojoType="dijit.layout.ContentPane" region="top" class="toolbar">
+			<div style="float: left;">
+				<img class="toolbarLabel" src="/images/Eclipse-Logo.gif" alt="Eclipse Logo" align="top">
+			</div>
+			<div style="float: right;" class="innerToolbar">
+				<div id="installUrlTextBox" dojoType="dijit.form.TextBox" placeHolder="Type a plugin URL here" intermediateChanges="true" style="width:25em;"></div>
+				<button id="installButton" dojoType="dijit.form.Button" disabled="disabled">Install</button>
+			</div>
+		</div>
+		<div dojoType="dijit.layout.ContentPane" region="center">
+			<h2>Installed Plug-ins and Services <button id="refreshButton" dojoType="dijit.form.Button" iconClass="refresh"><img src="/images/silk/arrow_refresh.png" alt="Refresh" title="Refresh"></button></h2>
+			<div id="registry-tree">Loading&#8230;</div>
+		</div>
+	</div>
+	
+	<!-- Glue -->
+	<script src="js/view-registry/view-registry.js"></script>
+	</body>
+</html>

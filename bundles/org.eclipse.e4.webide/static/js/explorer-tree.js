@@ -78,7 +78,7 @@ eclipse.ExplorerTree = (function() {
 		},
 		makeFavorite: function() {
 			if (this._contextMenuNode) {
-				var items = this._contextMenuNode.attr("tree").getSelectedItems();
+				var items = this._contextMenuNode.get("tree").getSelectedItems();
 			this.registry.callService("IFavorites", "makeFavorites", null, [items]);
 			}
 		},
@@ -113,7 +113,7 @@ eclipse.ExplorerTree = (function() {
 		
 		deleteFiles: function() {
 			if (this._contextMenuNode) {
-				var items = this._contextMenuNode.attr("tree").getSelectedItems();
+				var items = this._contextMenuNode.get("tree").getSelectedItems();
 				if (items.length < 1) {
 					return;
 				}
@@ -245,7 +245,7 @@ eclipse.ExplorerTree = (function() {
 				// establish which item the menu applies to
 				dojo.connect(this.contextMenu, "_openMyself", this, function(event) {
 					var treeNode = dijit.getEnclosingWidget(event.target);
-					var tree = treeNode.attr("tree");
+					var tree = treeNode.get("tree");
 					var selectedNodes = tree._getSelectedNodes();
 					if (dojo.indexOf(selectedNodes, treeNode) === -1) {
 						// change selection to match where menu appears

@@ -149,8 +149,8 @@ eclipse.TestConfigurator = (function() {
 		dojo.connect(this._configSelDiv, "onchange", function() {
 			self._onSelChange();
 		});
-		this._delConfigBtnDiv.attr('disabled' , true);
-		this._editConfigBtnDiv.attr('disabled' , true);
+		this._delConfigBtnDiv.set('disabled' , true);
+		this._editConfigBtnDiv.set('disabled' , true);
 		this._registry = options.serviceRegistry;
 		var self = this;
 		this._registry.callService("ITestConfigs", "addEventListener", null, [function(configs, selIndex) {
@@ -199,11 +199,11 @@ eclipse.TestConfigurator = (function() {
 				this._resultController.clearResultUI();
 			var selIndex = this._configSelDiv.selectedIndex;
 			if(selIndex === 0){
-				this._delConfigBtnDiv.attr('disabled' , true);
-				this._editConfigBtnDiv.attr('disabled' , true);
+				this._delConfigBtnDiv.set('disabled' , true);
+				this._editConfigBtnDiv.set('disabled' , true);
 			} else {
-				this._delConfigBtnDiv.attr('disabled' , false);
-				this._editConfigBtnDiv.attr('disabled' , false);
+				this._delConfigBtnDiv.set('disabled' , false);
+				this._editConfigBtnDiv.set('disabled' , false);
 			}
 			this._registry.callService("ITestConfigs", "setCurConfigIndex", null, [selIndex]);
 			if(selIndex !== 0){

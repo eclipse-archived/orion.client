@@ -59,7 +59,7 @@ function handleAuthenticationError(ioArgs, channelListener) {
 		        title: "Forbidden access"
 		    });
 		
-		forbiddenAccessDlg.attr("content", "No rights to access <b>" + ioArgs.url + "</b>");
+		forbiddenAccessDlg.set("content", "No rights to access <b>" + ioArgs.url + "</b>");
 		forbiddenAccessDlg.show();
 	}
 	if (ioArgs.xhr.status == 401) { 

@@ -45,7 +45,7 @@ eclipse.InputService.prototype = {
 	   	this._previousInput = dojo.hash();
 	   	var input = this;
 	   	// I'm beginning to think this is a bad idea, that we shouldn't be the ones monitoring hashes.
-	   	// See https://kanrtc01.ottawa.ibm.com:9446/ies/web/projects/EclipseWeb#action=com.ibm.team.workitem.viewWorkItem&id=408
+	   	// See WorkItem 408
 	   	dojo.subscribe("/dojo/hashchange", input, function() {
 	   	    // if we are restoring the hash to what we think it should be, ignore
 	   	    if (dojo.hash() === this._previousInput)
@@ -75,7 +75,7 @@ eclipse.InputService.prototype = {
 	    
 	// TODO This callback is used by parties that want to veto the input change from afar.  For the editor,
 	// it is not necessary because the onunload performs the check.  
-	// See https://kanrtc01.ottawa.ibm.com:9446/ies/web/projects/EclipseWeb#action=com.ibm.team.workitem.viewWorkItem&id=408
+	// See WorkItem 408
 	verifyInputChange : function(callback) {
 		this._checkSubscribed();
 		this._verifyInputChangeCallback.push(callback);

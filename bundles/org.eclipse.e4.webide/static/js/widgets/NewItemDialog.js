@@ -50,7 +50,7 @@ dojo.declare("widgets.NewItemDialog", [dijit.Dialog], {
 		if (this.options.advanced) {
 			this.itemAdvancedInfo.style.display = "table-row";
 			this.itemAdvancedInfo1.style.display = "table-row";
-			this.protocol.attr('value', 'file');
+			this.protocol.set('value', 'file');
 			dojo.connect(this.protocol, "onChange", dojo.hitch(this, this.onModuleChange));
 			dojo.connect(this.itemURL, "onkeyup", dojo.hitch(this, this.onURLChange));
 		} else {
@@ -71,42 +71,42 @@ dojo.declare("widgets.NewItemDialog", [dijit.Dialog], {
 	execute: function() {
 		var url, create;
 		if (this.options.advanced) {
-			var protocol = this.protocol.attr("value");
-			url = (protocol !== 'file' ? this.protocol.attr("value") + ":/" : "");
+			var protocol = this.protocol.get("value");
+			url = (protocol !== 'file' ? this.protocol.get("value") + ":/" : "");
 			url = url + this.itemURL.value.replace(/^\s+|\s+$/g, '');
 			if (this.module.style.display !== "none") {
 				url = url + "?/" + this.module.value.replace(/^\s+|\s+$/g, '');
 			}
-			if (this.createCheckbox.attr('disabled')) {
+			if (this.createCheckbox.get('disabled')) {
 				create = false;
 			} else {
-				create = this.createCheckbox.attr('checked');
+				create = this.createCheckbox.get('checked');
 			}
 		}
 		this.options.func(this.itemName.value, (url && url !== "") ? url : undefined, create);
 	},
 	onURLChange : function(evt) {
-		var protocol = this.protocol.attr("value");
+		var protocol = this.protocol.get("value");
 		if (protocol === 'file') {
-			this.createCheckbox.attr('disabled', false);
+			this.createCheckbox.set('disabled', false);
 			return;
 		}
 		var url = this.itemURL.value;
 		if (url.match(new RegExp("^file://"))) {
-			this.createCheckbox.attr('disabled', false);
+			this.createCheckbox.set('disabled', false);
 			return;
 		}
 		var remoteRegExp = new RegExp('^[a-zA-Z][a-zA-Z]+\:\/\/.+');
 		if (url.match(remoteRegExp)) {
-			this.createCheckbox.attr('disabled', true);
+			this.createCheckbox.set('disabled', true);
 			return;
 		} else {
-			this.createCheckbox.attr('disabled', false);
+			this.createCheckbox.set('disabled', false);
 			return;
 		}
 	},
 	onModuleChange : function(evt) {
-		if (this.protocol.attr("value") === 'gitfs') {
+		if (this.protocol.get("value") === 'gitfs') {
 			this.moduleLabel.style.display = 'inline-block';
 			this.module.style.display = 'inline-block';
 			this.itemURL.style.width = '50%';
