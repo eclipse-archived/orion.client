@@ -7,6 +7,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/*global document window navigator */
+
 var eclipse = eclipse || {};
 
 eclipse.TextStyler = (function() {
@@ -591,7 +593,7 @@ eclipse.TextStyler = (function() {
 			if (this._matchingBracket && start < this._matchingBracket) { this._matchingBracket += addedCharCount + removedCharCount; }
 			if (this._currentBracket && start < this._currentBracket) { this._currentBracket += addedCharCount + removedCharCount; }
 			if (start >= this.commentOffset) { return; }
-			var model = this.editor.getModel();;
+			var model = this.editor.getModel();
 			
 //			window.console.log("start=" + start + " added=" + addedCharCount + " removed=" + removedCharCount)
 //			for (var i=0; i< this.commentOffsets.length; i++) {

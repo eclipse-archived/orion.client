@@ -54,6 +54,7 @@
 
 .ruler_annotation {
 	background-color: #e1ebfb;
+	width: 16px;
 }
 
 .ruler_annotation_todo {

@@ -36,6 +36,7 @@ var eclipse = eclipse || {};
 eclipse.TextModel = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 
+	/** @private */
 	function TextModel(text, lineDelimiter) {
 		this._listeners = [];
 		this._lineDelimiter = lineDelimiter ? lineDelimiter : (isWindows ? "\r\n" : "\n"); 

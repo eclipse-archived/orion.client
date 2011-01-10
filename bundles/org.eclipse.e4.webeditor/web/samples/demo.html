@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=8"/>
 <meta http-equiv="PRAGMA" content="NO-CACHE"/>
 <meta http-equiv="Expires" content="-1"/>
-<title>Web Editor</title>
+<title>Eclipse Web Editor</title>
 <script language="javascript" type="text/javascript" src="console.js"></script>
 <script language="javascript" type="text/javascript" src="styler.js"></script>
 <script language="javascript" type="text/javascript" src="rulers.js"></script>
@@ -52,6 +52,18 @@ function checkEditor() {
 		undoStack.redo();
 		return true;
 	});
+	
+	editor.setKeyBinding(new eclipse.KeyBinding('s', true), "save");
+	editor.setAction("save", function() {
+		log("*****************SAVE");
+		return true;
+	});
+	editor.setKeyBinding(new eclipse.KeyBinding('f', true), "find");
+	editor.setAction("find", function() {
+		log("*****************FIND");
+		return true;
+	});
+
 	
 	var breakpoint = {
 		html: "<img src='brkp_obj.gif'></img>",

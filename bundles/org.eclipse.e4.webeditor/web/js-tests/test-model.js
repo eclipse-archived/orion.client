@@ -7,12 +7,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/*global assertEquals eclipse */
+
 TextModelTestCase = TestCase("TextModelTestCase"); 
 
 TextModelTestCase.prototype = {
 	test_Empty: function () {
 		var content = new eclipse.TextModel();
-		
 		assertEquals(":1a:", content.getLineCount(), 1);
 		assertEquals(":1b:", content.getLine(0), "");
 
