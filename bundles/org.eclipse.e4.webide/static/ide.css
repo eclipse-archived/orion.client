@@ -1,0 +1,241 @@
+html {
+  overflow-x: hidden; // hack to get rid of horizontal scrollbar
+}
+
+html, body {
+	margin: 0;
+	padding: 0;
+	font-size: 12px;
+}
+
+h1 {
+	font-size:1.5em;
+	font-weight:bold;
+	color: #316ac5;
+	line-height: 36px;
+	position:absolute;
+	top:0;
+	bottom:0;
+	margin:auto;
+}
+
+h2 {
+	font-size: 1.1em;
+	font-weight: bold;
+	color: #316ac5;
+	margin: 0;
+}
+
+.pane {
+   	margin: 0px;
+    	padding: 0px;
+    	background: #FFFFFF;
+    	border-color: #EEEEEE;
+}
+
+.paneScrolled {
+    	margin: 0px;
+    	padding: 0px;
+    	background: #FFFFFF;
+	overflow: auto;
+    	border-color: #EEEEEE;
+}
+
+.statusPane {
+	height: 1.5em; 
+	font-weight: bold;
+	cursor: pointer;
+	padding: 2px;
+	margin-left: 8px;
+	margin-right: 8px;
+	vertical-align:middle;
+}
+
+.toolbar {
+	background: #fff url("images/titleBar.png") repeat-x top left;
+	border:1px solid #bfbfbf;
+	padding:0px;
+	cursor: pointer;
+	font-size: 0.9em;
+	font-weight: bold;
+	color: #6d6d6d;
+}
+
+.toolbarTest {
+	background: url("images/titleBar.png");
+	border:1px solid #bfbfbf;
+	padding:0px;
+	cursor: default;
+	font-size: 0.9em;
+	font-weight: bold;
+	color: #6d6d6d;
+}
+
+.toolbarLocal {
+	padding:0px;
+	cursor: pointer;
+	font-size: 0.9em;
+	font-weight: bold;
+	background: #fff url("images/titleBar.png") repeat-x top left;
+	min-width: 600px;
+}
+
+.toolbarButton {
+        background: transparent;
+	width: 28px;
+	height: 28px;
+	margin: 2px;
+}
+
+.searchFloat {
+	display: none;
+	background: #ffffe0;
+	position: absolute;
+	left: 20px;
+	top: 10px;
+	width: 300px;
+	border: 1px solid #bfbfbf;
+	padding: 4px;
+}
+
+.soria .dijitSplitterV .dijitSplitterThumb {
+	background: #FFFFFF;
+}
+
+.soria .dijitSplitterV {
+	background: #FFFFFF;
+}
+
+#rightPane .dijitTitlePaneContentInner {
+	padding: 0px; // Remove the padding around the editor
+}
+
+#codeTitle .dijitTitlePaneContentInner {
+	padding: 0px; // Remove the padding around the editor
+}
+
+#outline a {
+	color: black;
+	text-decoration: none;
+}
+
+#outline a:hover {
+	color: #05386B;
+	text-decoration: underline;
+}
+
+#tree {
+	margin-right: 9em;
+	overflow-x: hidden;
+}
+
+#treeButtons br {
+	line-height: 0.5em;
+}
+
+#treeButtons {
+	margin: 0;
+	padding: 0;
+	float: right;
+	width: 9em;
+}
+
+#treeButtons .contentButton {
+	width: 8.5em;
+	margin: 0;
+	margin-bottom: 3px;
+	font-size: 1em;
+}
+
+.checkedRow {
+	background-color: #FFFFCC !important;
+}
+
+.testResult {
+	background-color: #444444 !important;
+	color: white;
+}
+
+.launchItemGo {
+	background: url(images/silk/server_go.png);
+}
+.launchItemStop {
+	background: url(images/silk/server_stop.png);
+}
+
+.projectItem {
+	background: url(images/prj_obj.gif);
+}
+
+.folderItem {
+	background: url(images/silk/folder.png);
+}
+
+.fileItem {
+	background: url(images/silk/page.png);
+}
+
+.newItem {
+	background: url(images/silk/add.png);
+}
+
+.treetable {
+	cellspacing: 0px;
+	min-width: 600px;
+}
+
+.commandImage {
+	margin-left: 2px;
+	margin-right: 2px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding: 0px;
+}
+
+.commandLink {
+	color: #666666;
+}
+
+.secondaryColumn {
+	color: #666666;
+}
+
+.navlinkonpage {
+	cursor: hand;
+	text-decoration: none;
+	color: #105CB6;
+	
+}
+
+.followFile {
+	background: url(images/silk/page_go.png);
+}
+
+.navlinkonpage:hover {
+	color: #05386B;
+	text-decoration: underline;
+}
+
+.currentLocation {
+	font-size: 1.1em;
+	font-weight: bold;
+	color: #E89970;
+	text-decoration: none;
+	margin-right: 4px;
+	margin-left: 4px;
+	cursor: pointer;
+}
+
+.contentassist {
+	display: none;
+	background-color: white;
+	position: fixed;
+	top: 100px;
+	left: 100px;
+	border: 1px solid black;
+	z-index:10;
+}
+
+.contentassist .selected {
+	background-color: #DDDDDD;
+}

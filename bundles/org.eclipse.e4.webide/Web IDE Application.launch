@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="org.eclipse.pde.ui.RuntimeWorkbench">
+<booleanAttribute key="append.args" value="true"/>
+<stringAttribute key="application" value="org.eclipse.e4.webide.application"/>
+<booleanAttribute key="askclear" value="true"/>
+<booleanAttribute key="automaticAdd" value="true"/>
+<booleanAttribute key="automaticValidate" value="false"/>
+<stringAttribute key="bad_container_name" value="webApplication"/>
+<stringAttribute key="bootstrap" value=""/>
+<stringAttribute key="checked" value="[NONE]"/>
+<booleanAttribute key="clearConfig" value="false"/>
+<booleanAttribute key="clearws" value="false"/>
+<booleanAttribute key="clearwslog" value="false"/>
+<stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/Web IDE Application"/>
+<booleanAttribute key="default" value="false"/>
+<booleanAttribute key="includeOptional" value="false"/>
+<stringAttribute key="location" value="${workspace_loc}/../web"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog"/>
+<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms256m -Xmx768m&#13;&#10;-Dorg.eclipse.equinox.http.jetty.http.port=8080"/>
+<stringAttribute key="pde.version" value="3.3"/>
+<stringAttribute key="product" value="org.eclipse.sdk.ide"/>
+<stringAttribute key="selected_target_plugins" value="com.jcraft.jsch@default:default,org.eclipse.equinox.app@default:default,org.eclipse.ant.core@default:default,javax.servlet@default:default,org.eclipse.core.net@default:default,org.eclipse.osgi@-1:true,org.hamcrest.core@default:default,org.eclipse.core.runtime.compatibility.registry@default:false,org.eclipse.core.filesystem@default:default,org.eclipse.core.runtime@default:true,org.eclipse.equinox.common@2:true,org.eclipse.equinox.registry@default:default,org.eclipse.osgi.services@default:default,org.eclipse.jsch.core@default:default,org.eclipse.core.expressions@default:default,org.mortbay.jetty.util@default:default,org.eclipse.core.variables@default:default,org.eclipse.jdt.junit.runtime@default:default,org.eclipse.equinox.preferences@default:default,org.eclipse.equinox.http.servlet@default:default,org.eclipse.team.core@default:default,org.mortbay.jetty.server@default:default,com.ibm.icu@default:default,org.eclipse.core.jobs@default:default,org.eclipse.core.contenttype@default:default,org.eclipse.equinox.security@default:default,org.junit*4.8.1.v4_8_1_v20100427-1100@default:default"/>
+<stringAttribute key="selected_workspace_plugins" value="org.eclipse.e4.webide.server.authentication.formopenid@default:default,org.eclipse.e4.webide.server.authentication.openid@default:default,org.eclipse.e4.webide.server.useradmin.xml@default:default,org.apache.jackrabbit.jackrabbit-spi@default:default,org.apache.commons.digester@default:default,org.eclipse.filesystem.git@default:default,ch.qos.logback.slf4j@default:false,org.eclipse.e4.webide.server.useradmin@default:default,org.eclipse.e4.webide.server.configurator@default:default,javax.servlet@default:default,org.eclipse.filesystem.git.ui@default:default,org.apache.commons.pool@default:default,nekohtml@default:default,org.apache.commons.logging@default:default,org.eclipse.e4.webide.server.authentication.form@default:default,org.dojotoolkit@default:default,org.eclipse.e4.webide.tasks@default:default,javax.mail@default:default,org.eclipse.e4.webide.server.servlets@default:default,org.mortbay.jetty.util@default:default,org.openajax@default:default,org.apache.jackrabbit.jackrabbit-api@default:default,org.eclipse.e4.webide.server@default:default,org.eclipse.filesystem.jackrabbit@default:default,org.apache.commons.dbcp@default:default,org.eclipse.e4.webide.launching@default:default,org.slf4j.api@default:default,org.eclipse.e4.webeditor@default:default,org.eclipse.e4.webide@default:default,ch.qos.logback.core@default:default,org.apache.commons.fileupload@default:default,org.apache.derby@default:default,org.apache.jackrabbit.jackrabbit-core@default:default,org.eclipse.e4.webide.doc@default:default,org.apache.jackrabbit.jackrabbit-spi-commons@default:default,org.eclipse.e4.languages.javascript.framework@default:default,org.apache.log4j@default:default,org.apache.commons.cli@default:default,org.eclipse.e4.webide.server.tests@default:default,jline@default:default,net.sf.cglib@default:default,openid4java@default:default,org.apache.commons.lang@default:default,org.apache.jackrabbit.jackrabbit-jcr-commons@default:default,org.apache.commons.chain@default:default,javax.activation@default:default,org.apache.commons.io@default:default,org.mozilla.javascript.source@default:default,org.eclipse.e4.webide.server.authentication.openid.core@default:default,org.apache.jackrabbit.jackrabbit-jcr-tests@default:default,ch.qos.logback.classic@default:default,org.eclipse.e4.webide.server.authentication.form.core@default:default,org.apache.commons.httpclient@default:default,org.mozilla.javascript@default:default,org.apache.geronimo.j2ee.connector@default:default,edu.oswego.cs.dl.util.concurrent@default:default,org.eclipse.equinox.http.registry@default:default,org.json@default:default,org.eclipse.e4.webide.server.basicauth@default:default,org.mortbay.jetty@default:default,org.apache.commons.codec@default:default,org.apache.lucene.core@default:default,javax.jcr@default:default,javax.jta@default:default,org.apache.commons.collections@default:default,org.apache.tika.core@default:default"/>
+<booleanAttribute key="show_selected_only" value="false"/>
+<stringAttribute key="templateConfig" value="${target_home}/configuration/config.ini"/>
+<booleanAttribute key="tracing" value="false"/>
+<booleanAttribute key="useCustomFeatures" value="false"/>
+<booleanAttribute key="useDefaultConfig" value="true"/>
+<booleanAttribute key="useDefaultConfigArea" value="true"/>
+<booleanAttribute key="useProduct" value="false"/>
+</launchConfiguration>

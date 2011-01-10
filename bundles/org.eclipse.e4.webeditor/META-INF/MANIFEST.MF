@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Web Editor (Incubation)
+Bundle-SymbolicName: org.eclipse.e4.webeditor
+Bundle-Version: 0.1.0.qualifier
+Eclipse-BundleShape: dir

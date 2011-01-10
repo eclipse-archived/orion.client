@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<TITLE>Running the Eclipse Web Demo</TITLE>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Running the Eclipse Web Demo</H2>
+<p>This document provides an overview of the current functionality in the
+Eclipse Web Demo, how to get started, and what you can expect to work.
+</p>
+<h3>Client Side How-To</h3>
+<p>
+Point your browser to <b>(we really need a demo URL)</b>.  To run
+the server side yourself, see <a href="#server">Running the Server</a>.
+(If we have a demo server with sample workspaces, we can have a more 
+scripted demo, with some development scenario.  Until then, this is kind
+of generic....)
+</p>
+<h4>Browsing a Workspace</h4>
+<p>The tree on the left shows the projects in your workspace.  You can navigate
+the workspace using the tree.  If you click on a file, the code will be displayed
+in the editor on the right.  You can also create new projects, folders, or files
+using the <b>New</b> dropdown on the toolbar.
+</p>
+<h4>Editing and Saving Code</h4>
+<p>The code editor supports syntax highlighting for Javascript, HTML, and CSS.
+Clicking in the editor will show you the line number/column in the status area.
+To save a file, click on the save icon in the toolbar.
+</p>
+<h4>Checking out Code from CVS</h4>
+<h4>Changing Workspaces</h4>
+<p>You can change between workspaces, provided they are located as sibling folders
+to the default workspace used. Click on the <b>Workspace</b> button on the toolbar
+and enter the folder name of the workspace that you want to switch to.  (Note: when
+we have a demo server set up, we can change these instructions to discuss what 
+workspaces are available so that a script could be followed.)
+</p>
+<h3><a name="server">Running the Server</a></h3>
+<h4>CVS Access</h4>
+<p>The code is currently hosted in the Ottawa CVS server.  If you don't
+have access to this server, you'll need to do the following:</p>
+<ol>
+<li>Go to <a href="https://iam2.torolab.ibm.com/AM/">the Toronto access server</a>.</li>
+<li>Click on "My Userids".  Hopefully you will see an account listed for you called
+"Ottawa LDAP 2670 Queensview" .  If not, you'll need to follow the instructions
+to set up an account.</li>
+<li>If you have an account but don't remember your password, you can click the
+link to reset your password.  It should take 1/2 hour or so to get an email back
+with a temporary password and instructions for resetting it.</li>
+</ol>
+<p>Once you have a password, point your CVS connection to:
+<pre>
+ottcvs1.ottawa.ibm.com
+/home/cvs/desktop
+</pre>
+</p>
+<h4>Loading and Running the Server Side</h4>
+<ol>
+<li>Check out the <b>org.eclipse.e4.webide.releng</b> project from HEAD.</li>
+<li>Import the <b>webide.psf</b> project set file.</li>
+<li>Click on the project <b>org.eclipse.e4.webide</b> and choose 
+<b>PDE Tools - Update Classpath</b> from the popup menu.  (This seems to be
+necessary in some installations, not sure why).</li>
+<li>open the launch configuration dialog for the <b>web-ide.launch</b> file.
+In the <b>Arguments</b> tab, add a workspace location to your arguments.  For example:
+<pre>
+-data c:\workspaces\demo
+</pre>
+If you want to switch between workspaces, you should set up a directory structure
+whereby the different workspaces are siblings underneath the same folder.  Something
+like:
+<pre>
+c:\workspaces\
+    demo1
+    demo2
+    demo3
+</pre>
+</li>
+<li>Launch the web ide.</li>
+<li>Point your browser at <a href="http://localhost:8080/simpleide.html">http://localhost:8080/simpleide.html</a></li>
+</ol>
+</BODY>
+</HTML>

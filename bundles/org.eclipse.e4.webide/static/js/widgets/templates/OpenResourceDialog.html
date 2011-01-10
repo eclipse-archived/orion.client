@@ -1,0 +1,24 @@
+<div dojoAttachPoint="containerNode">
+	<div dojoAttachPoint="dialog" dojoType="dijit.Dialog" title="${title}" widgetsInTemplate="true">
+		<div style="display:table">
+			<div style="display:table-row">
+				<div style="display:table-cell; padding:5;">
+					<label for="resourceName" style="padding-right:10">${selectFile}</label>
+				</div>
+			</div>
+			<div style="display:table-row">
+				<div style="display:table-cell; padding:5;">
+					<input type="text" dojoType="dijit.form.TextBox" dojoAttachPoint="resourceName" 
+						placeHolder="${searchPlaceHolder}"
+						intermediateChanges="true" style="width:30em;">
+				</div>
+			</div>
+			<div style="display:table-row">
+				<div dojoAttachPoint="results" style="max-height:400px; height:auto; overflow-y:auto;"></div>
+			</div>
+			<div style="display:table-row">
+				<div dojoAttachPoint="statusbar" style="display:table-cell;"></div>
+			</div>
+		</div>
+	</div>
+</div>

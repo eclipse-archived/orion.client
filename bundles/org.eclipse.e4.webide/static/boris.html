@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    	<title></title>    
+    
+    <script type="text/javascript">
+        var djConfig = {
+		    isDebug:false,
+		    parseOnLoad:true
+        };
+    </script>
+    <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+    <script type="text/javascript">
+    dojo.require("dijit.layout.BorderContainer");
+    dojo.require("dojo.hash");
+	</script>    	
+	<style type="text/css">
+		@import "/org.dojotoolkit/dojo/resources/dojo.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css";
+	    @import "/ide.css";
+	</style>
+	
+		<!-- Web Editor -->
+		<!-- TODO: use sample styler and ruler for testing (until the real one is ready) -->
+		<script src="/webeditor/samples/styler.js"></script>
+		<script src="/webeditor/samples/rulers.js"></script>
+		<script src="/webeditor/js/model.js"></script>
+		<script src="/webeditor/js/editor.js"></script>
+	
+    </head>
+
+	<body onload="init();" class="soria" style="width:100%;height:100%;border: 0px;margin:0px;overflow:auto;">
+		<div id="divParent" style="width:100%;height:100%;border: 0px;"></div>
+
+ 	<!-- Editor -->
+ 	<!-- Our own local copy -->
+	<script type="text/javascript" src="js/editor.js"></script>
+	<script type="text/javascript">
+		var editor;
+		var dirty = false;
+		var originalTitle;
+		function checkDirty() {
+			var d = editor.getHistorySize().undo>0;
+			if (d && !dirty) {
+			  originalTitle = window.document.title;
+			  window.document.title = "* " + window.document.title;
+			} else if (!d && dirty && originalTitle) {
+			  window.document.title = originalTitle;
+			}
+			dirty = d;
+		}
+		function onHashChange() {
+	    	var fileURI = dojo.hash();
+	    	if (fileURI) {
+	    		var fullPathName = fileURI;
+	    		dojo.xhrGet({
+	    			url: fileURI, 
+	    			timeout: 5000,
+	    			load: function(contents, secondArg) {
+	    				// var path = secondArg.xhr.getResponseHeader("Eclipse-Path");
+	    				editor.setText(contents);
+	    				window.document.title = fileURI;
+	    				editor.focus();
+	    				checkDirty();
+	    				// that.onInputChange(path, null, contents);
+					},
+					error: function(error, ioArgs) {
+						editor.setText("");
+						checkDirty();
+						alert(error.message);
+						// that.onInputChange(fullPathName, "Sorry, an error ocurred: " + error.message, null);
+						// console.error("HTTP status code: ", ioArgs.xhr.status);
+					}
+	    		});	
+	    	} else {
+	    		editor.setText("");
+	    		checkDirty();
+	    		window.document.title = "Untitled";
+	    	}
+		}
+		function bind(editor, key, action) {
+			var kb = new KeyBinding(key, true);
+			editor.setKeyBinding(kb, "action-"+key);
+			editor.setAction("action-"+key, action);
+		}
+		var searchPattern = "";
+		function init() {
+			var model = new TextModel();
+			var options = {
+				parent: "divParent",
+				model: model,
+				styleSheet: "samples/editor.css"
+			};
+			editor = new Editor(options);
+			editor.setStyler(new TextStyler("html"));
+			bind(editor, 's', function() {
+				alert("save!");
+			});
+			bind(editor, 'f', function() {
+				searchPattern = prompt("Enter search term:", searchPattern);
+				if (!searchPattern) return true;
+				var index = editor.getText().indexOf(searchPattern, editor.getCaretOffset());
+				if (index != -1) {
+					editor.setSelection(index, index+searchPattern.length);
+					// workaround for not having showSelection:
+					var model = editor.getModel();
+					var line = model.getLineAtOffset(index);
+					editor.setTopIndex(line);
+				}
+				return true;
+			});
+			bind(editor, 'l', function() {
+				var line = editor.getModel().getLineAtOffset(editor.getCaretOffset());
+				var line = prompt("Go to line:", line);
+				if (line) {
+					var index = editor.getModel().getLineStart(line);
+					editor.setSelection(index, index);
+					// workaround for not having showSelection:
+					var model = editor.getModel();
+					var line = model.getLineAtOffset(index);
+					editor.setTopIndex(line);
+				}
+				return true;
+			});
+			editor.setText("");
+			model.addListener({onTextChanged:function(){checkDirty();}});
+			dojo.subscribe("/dojo/hashchange", window, onHashChange);
+			onHashChange();
+			window.onbeforeunload = function() {
+			  if (dirty) {
+			  	return "There are unsaved changes.";
+			  }
+			};
+		}
+	</script>
+		
+</body>
+</html>

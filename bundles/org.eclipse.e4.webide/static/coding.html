@@ -1,0 +1,120 @@
+<!doctype html>
+<html style="height: 100%">
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+    	<title>Untitled</title>
+		<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+		<!-- 
+		<script type="text/javascript" src="/openajax/src/OpenAjax-mashup.js"></script>
+		<script type="text/javascript" src="/openajax/src/containers/iframe/crypto.js"></script>
+		<script type="text/javascript" src="/openajax/src/containers/iframe/json2.js"></script>
+		<script type="text/javascript" src="/openajax/src/containers/iframe/iframe.js"></script>
+		 -->
+		
+		<script type="text/javascript">
+			var djConfig = {
+				isDebug:false,
+				modulePaths: {'widgets': '/js/widgets'},
+				parseOnLoad:true
+			};
+		</script>
+	    <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+    	<script type="text/javascript">
+	    dojo.require("dijit.layout.BorderContainer");
+ 	    dojo.require("dijit.layout.ContentPane");
+ 	    dojo.require("dijit.Dialog");
+ 	    dojo.require("dijit.form.TextBox");
+ 	    dojo.require("widgets.eWebBorderContainer");
+ 	   dojo.require("widgets.OpenResourceDialog");
+ 		</script>    	
+		<style type="text/css">
+			@import "/org.dojotoolkit/dojo/resources/dojo.css";
+			@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
+			@import "/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css";
+			@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
+			@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
+			@import "/org.dojotoolkit/dojox/layout/resources/ToggleSplitter.css";
+		    @import "/ide.css";
+		    @import "/customsplitter.css";
+		</style>
+	
+		<!-- Web Editor -->
+		<!-- TODO: use sample styler, ruler, and undo stack (until the real one is ready) -->
+		<script src="/webeditor/samples/styler.js"></script>
+		<script src="/webeditor/samples/rulers.js"></script>
+		<script src="/webeditor/samples/undoStack.js"></script>
+		<script src="/webeditor/js/model.js"></script>
+		<script src="/webeditor/js/editor.js"></script>	
+    </head>
+
+    <body class="soria" style="height: 100%">
+    
+	<!-- Extension Registry -->
+	<script src="js/registry.js"></script>
+    
+	<!--Authentication -->
+	<script type="text/javascript" src="js/auth.js"></script>
+	
+    <!-- Eclipse Application Services -->
+ 	<script src="js/util.js"></script>
+ 	<script src="js/commands.js"></script>
+ 	<script src="js/dialogs.js"></script>
+ 	<script src="js/input.js"></script>
+ 	<script src="js/log.js"></script>
+ 	<script src="js/preferences.js"></script>
+ 	<script src="js/saveable.js"></script>
+ 	<script src="js/selection.js"></script>
+ 	<script src="js/status.js"></script>
+ 	<script src="js/users.js"></script>
+	
+	<script src="js/fileClient.js"></script>
+	<script src="js/favorites.js"></script>
+	<script src="js/searchClient.js"></script>
+	
+ 	<!-- Editor and Outliner -->
+ 	<script src="js/outliner.js"></script>
+ 	<script src="js/problems.js"></script>
+ 	<script src="js/editorContainer.js"></script>
+	
+	<!-- Editor Syntax Checker using the defined syntax checker extension -->
+	<script src="js/syntaxchecker.js"></script>
+	
+    <div id ="topContainer" dojoType="widgets.eWebBorderContainer" design="headline"  liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
+		<div id="toolbar" class="toolbar" dojoType="dijit.layout.ContentPane" region="top">
+			<div style="float: left;">
+				<table><tr>
+		    		<td><a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/Eclipse-Logo.gif" alt="Eclipse Logo" align="top"></a></td>
+					<td><b class="statuspane" id="statusPane"></td>
+				</tr></table>
+			</div>
+			<div id="eclipseWebToolbar" style="float: right;">
+				<b class="currentLocation" id="codeTitle"></b>
+				<button dojoType="dijit.form.Button" class="toolbarButton" id="save">
+					<img src="/images/silk/page_save.png" alt="Save" title="Save">
+				</button>
+				<button dojoType="dijit.form.Button" class="toolbarButton" id="undo">
+					<img src="/images/silk/arrow_undo.png" alt="Undo" title="Undo">
+				</button>
+				<button dojoType="dijit.form.Button" class="toolbarButton" id="redo">
+					<img src="/images/silk/arrow_redo.png" alt="Redo" title="Redo">
+				</button>
+			</div>
+		</div>
+		<div class="paneScrolled" id="leftPane" dojoType="dijit.layout.ContentPane" open="true" region="leading" style="width: 20%" splitter="true">
+			<div id="outline" style="margin:10px; margin-top:0;"></div>
+		</div>
+		<div id = "rightPane" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center">
+			<div id="searchFloat" class="searchFloat">
+			</div>
+			<div id="editorContainer" style="width: 100%; height: 100%;">
+			</div>
+		</div>
+	</div>
+	<div id="contentassist" class="contentassist"></div>
+	
+	<script src="js/coding/coding.js"></script>
+</body>
+</html>

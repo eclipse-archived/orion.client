@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<!-- 
+	<script type="text/javascript" src="/openajax/src/OpenAjax-mashup.js"></script>
+	<script type="text/javascript" src="/openajax/src/containers/iframe/crypto.js"></script>
+	<script type="text/javascript" src="/openajax/src/containers/iframe/json2.js"></script>
+	<script type="text/javascript" src="/openajax/src/containers/iframe/iframe.js"></script>
+	 -->
+	<script type="text/javascript" src="js/plugin.js"></script>
+	<script type="text/javascript">
+		document.addEventListener("DOMContentLoaded", function() {
+			var testPlugin = new eclipse.Plugin({
+				extensions: [
+		             {
+		            	 name: "testExtension1",
+		            	 point: "testExentsionPoint",
+		            	 label: "Test Extension 1",
+		            	 someData: {id: "SomeDataOject", label: "Some Data"}
+		             },
+		             {
+		            	 name: "testExtension2",
+		            	 point: "testExentsionPoint",
+		            	 label: "Test Extension 2",
+		            	 someMoreData: {id: "SomeMoreDataOject", label: "Some More Data"}
+		             }
+				]
+			});
+			testPlugin.start();
+		}, false);
+	</script>
+</head>
+<body>
+</body>
+</html>

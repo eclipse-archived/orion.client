@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   		<title>Eclipse Web Navigator</title>  
+   		<script type="text/javascript">
+			var djConfig = {
+				isDebug:false,
+			    parseOnLoad:true
+	        };
+    	</script>
+	    <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+		<!--Authentication -->
+		<script type="text/javascript" src="js/auth.js"></script>
+		
+	    <!-- Eclipse Application Services and Service Registry -->
+   		<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+		<script src="js/registry.js"></script>
+	 	<script src="js/util.js"></script>
+		<script src="js/preferences.js"></script>
+    	<script type="text/javascript">
+    		dojo.addOnLoad(function() {
+	  			registry = new eclipse.Registry();
+				registry.start();
+	
+				// Register needed EAS
+				registry.registerLocalService("IPreferenceService", "EASPreferences", new eclipse.Preferences(registry, "/prefs/user"));
+    	
+    			registry.callService("IPreferenceService", "get", null, ["window/orientation", function(home) {
+					switch (home) {
+						case "navigate.html":
+						case "navigate-tree.html":
+							home = "navigate-tree.html";
+							break;
+						default:
+							home = "navigate-table.html";
+							break;
+					}
+					window.location.replace(home);
+				}]);
+			});
+			
+			dojo.addOnUnload(function(){
+				registry.stop();
+			});
+		</script>     
+ 	</head>
+	<body>
+	</body>
+</html>	
