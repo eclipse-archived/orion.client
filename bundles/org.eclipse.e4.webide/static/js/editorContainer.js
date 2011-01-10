@@ -1126,21 +1126,6 @@ eclipse.EditorContainer = (function() {
 			//Adding selection changed listener
 			editor.addEventListener("Selection", this, updateCursorStatus);
 			
-			function setSize() {
-				if (editorContainer._codeTitle) {
-					var titlePane = editorContainer._codeTitle;
-					var node = editorContainer._domNode;
-					if (node && titlePane) {
-						node.style.height = titlePane.clientHeight - node.offsetTop - 1;
-					}
-				}
-			}
-			// If we are hosted in a title pane (such as in simpleide), we have additional work to do
-			if (this._codeTitle) {
-				setSize();
-				dojo.connect(this._codeTitle, "resize", this, setSize);
-			}
-			
 			// Create rulers
 			this._annotationsRuler = this._annotationRulerFactory();
 			this._annotationsRuler.onClick = function(lineIndex, e) {
@@ -1205,7 +1190,6 @@ eclipse.EditorContainer = (function() {
 						this.showSelection(input.start, input.end, input.line, input.offset, input.length);
 					}),
 					error: dojo.hitch(this, function(error, ioArgs) {
-						alert(error.message);
 						handleGetAuthenticationError(this, ioArgs);
 						this.onInputChange(fullPathName, "Sorry, an error ocurred: " + error.message, null);
 						console.error("HTTP status code: ", ioArgs.xhr.status);

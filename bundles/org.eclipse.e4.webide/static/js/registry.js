@@ -26,12 +26,14 @@ eclipse.Service = function(serviceReference, registry, onLoadCallback) {
 	var pluginContainer = registry._managedHub.getContainer(serviceReference._pluginServiceProvider.pluginURL);
 	if (pluginContainer !== null) {
 		//console.debug("pluginContainer already exists for ["+serviceReference._pluginServiceProvider.pluginURL+"]");
+		this._createProxies();
 		onLoadCallback(this);
 	} else {
 		var scope = this;
 		//console.debug("loading pluginContainer for ["+serviceReference._pluginServiceProvider.pluginURL+"]");
 		registry.loadPlugin(serviceReference._pluginServiceProvider.pluginURL, function(plugin) {
 			//console.debug("pluginContainer for ["+serviceReference._pluginServiceProvider.pluginURL+"] loaded");
+			scope._createProxies();
 			onLoadCallback(scope);
 		});
 	}
@@ -59,13 +61,26 @@ eclipse.Service.prototype = {
 		}
 	},
 	
-	_fireEvent: function(eventType, eventData) {
+	_dispatchEvent: function(eventType, eventData) {
 		if (this._eventListeners[eventType] !== undefined) {
 			for (var i = 0; i < this._eventListeners[eventType].length; i++) {
 				this._eventListeners[eventType][i]({type: eventType, data: eventData});
 			}
 		}
-	} 
+	},
+	
+	_createProxies: function() {
+		if (this._serviceReference._serviceType.interfaces !== undefined) {
+			var interfaces = this._serviceReference._serviceType.interfaces;
+			for (var i = 0; i < interfaces.length; i++) {
+				var scope = this;
+				var methodName = interfaces[i]; 
+				this[methodName] = function() {
+					scope._registry._sendPluginRequest("servicecall", {method: methodName, params: arguments[0]}, scope._serviceReference._serviceType.provider, arguments[1]);
+				};
+			}
+		}
+	}
 };
 
 /**
@@ -77,7 +92,7 @@ eclipse.ServiceReference = function(serviceType, pluginServiceProvider, registry
 	this._serviceType = serviceType;
 	this._registry = registry;
 	this._useCount = 0;
-	this._pluginServiceProvider._serviceReferences[this._serviceType] = this;
+	this._pluginServiceProvider._serviceReferences[this._serviceType.id] = this;
 };
 
 eclipse.ServiceReference.prototype = {
@@ -88,7 +103,7 @@ eclipse.ServiceReference.prototype = {
 		this._useCount--;
 	},	
 	_unget: function() {
-		//console.debug("unget for service reference of type ["+this._serviceType+"] count = "+this._useCount);
+		//console.debug("unget for service reference of type ["+this._serviceType.id+"] count = "+this._useCount);
 		this._decrementUseCount();
 		if (this._useCount < 1) {
 			this._registry._cleanupServiceReference(this);
@@ -107,6 +122,7 @@ eclipse.Registry = function() {
 	this._eventListeners = {onPluginLoad: [], onPluginInstall: [], onPluginUninstall: []};
 	this._localServices = {};
 	this._loadPluginCallbacks = {};
+	this._serviceTypes = {};
 	
 	this._managedHub = new OpenAjax.hub.ManagedHub({
 		onPublish:       function(topic, data, publishContainer, subscribeContainer) { return true; },
@@ -216,6 +232,11 @@ eclipse.Registry.prototype = {
 			if (pluginContainer !== null) {
 				this._managedHub.removeContainer(pluginContainer);
 			}
+			for (var serviceType in this._serviceTypes) {
+				if (this._serviceTypes[serviceType].provider === pluginURL) {
+					delete this._serviceTypes[serviceType];
+				}
+			}
 			for (var i = 0; i < this._eventListeners.onPluginUninstall.length; i++) {
 				this._eventListeners.onPluginUninstall[i]({pluginURL: pluginURL});
 			}
@@ -263,7 +284,7 @@ eclipse.Registry.prototype = {
 				if (typeof(serviceInstance.serviceImpl[methodName]) === "function") {
 					result = serviceInstance.serviceImpl[methodName].apply(serviceInstance.serviceImpl, params); 
 					if (callback) {
-						setTimeout(callback(result), 0);
+						setTimeout(function(){callback(result);} , 0);
 					}
 					return;
 				}
@@ -280,16 +301,17 @@ eclipse.Registry.prototype = {
 		});
 	},
 
-	getServiceReference: function(serviceType) {
-		var pluginServiceProvider = this._findServiceProvider(serviceType);
-		if (pluginServiceProvider == null) {
-			throw new Error("No service of type ["+serviceType+"] is available");
+	getServiceReference: function(serviceTypeId) {
+		if (this._serviceTypes[serviceTypeId] === undefined) {
+			throw new Error("No service of type ["+serviceTypeId+"] is available");
 		}
+		var serviceType = this._serviceTypes[serviceTypeId];
+		var pluginServiceProvider = this.getPlugin(serviceType.provider);
 		if (pluginServiceProvider._serviceReferences === undefined) {
 			//console.debug("creating serviceReferences");
 			pluginServiceProvider._serviceReferences = {};
 		}
-		var serviceReference = pluginServiceProvider._serviceReferences[serviceType];
+		var serviceReference = pluginServiceProvider._serviceReferences[serviceTypeId];
 		if (serviceReference === undefined) {
 			//console.debug("creating service reference for ["+serviceType+"]");
 			serviceReference = new eclipse.ServiceReference(serviceType, pluginServiceProvider, this);
@@ -301,10 +323,10 @@ eclipse.Registry.prototype = {
 		var service = serviceReference._service;
 		serviceReference._incrementUseCount();
 		if (service === undefined) {
-			//console.debug("creating service for ["+serviceReference._serviceType+"]");
+			//console.debug("creating service for ["+serviceReference._serviceType.id+"]");
 			service = new eclipse.Service(serviceReference, this, loadedCallback);
 		} else {
-			//console.debug("using existing service for ["+serviceReference._serviceType+"]");
+			//console.debug("using existing service for ["+serviceReference._serviceType.id+"]");
 			loadedCallback(service);
 		}
 		return service;
@@ -318,6 +340,10 @@ eclipse.Registry.prototype = {
 		console.debug("writing localstorage with key ["+"org.eclipse.e4.plugin."+metadata.pluginURL+"]");
 		localStorage["org.eclipse.e4.plugin."+metadata.pluginURL] = JSON.stringify(metadata);
 		scope._plugins[metadata.pluginURL] = metadata;
+		if (metadata.pluginData.services !== undefined) {
+			scope._loadServiceTypes(metadata.pluginURL, metadata.pluginData.services);
+		}
+
 		for (var i = 0; i < scope._eventListeners.onPluginInstall.length; i++) {
 			scope._eventListeners.onPluginInstall[i]({pluginURL: metadata.pluginURL});
 		}
@@ -349,7 +375,7 @@ eclipse.Registry.prototype = {
 				if (serviceReference === undefined) {
 					throw new Error("Unable to locate service reference in provider identified by ["+msg.result.pluginURL+"] type ["+msg.result.serviceType+"]");
 				}
-				serviceReference._service._fireEvent(msg.result.eventType, msg.result.eventData);
+				serviceReference._service._dispatchEvent(msg.result.eventType, msg.result.eventData);
 				break;
 			}
 		}
@@ -378,8 +404,11 @@ eclipse.Registry.prototype = {
 					var pluginURL = storageKey.substring(index+"org.eclipse.e4.plugin.".length);
 					var pluginDataString = localStorage[localStorage.key(i)];
 					this._plugins[pluginURL] = JSON.parse(pluginDataString);
+					if (this._plugins[pluginURL].pluginData.services !== undefined) {
+						this._loadServiceTypes(pluginURL, this._plugins[pluginURL].pluginData.services);
+					}
 				} catch (exc) {
-					console.debug("unable to parse plugin string ["+pluginDataString+"]");
+					console.debug("unable to parse plugin string ["+pluginDataString+"] : "+exc);
 				}
 			}
 		}
@@ -401,26 +430,9 @@ eclipse.Registry.prototype = {
 		}
 	},
 	
-	_findServiceProvider: function(serviceType) {
-		var pluginServiceProvider = null;
-		var plugins = this.getPlugins();
-		for (var plugin in plugins) {
-			var pluginData = plugins[plugin].pluginData;
-			if (pluginData.services !== undefined) {
-				for (var i = 0; i < pluginData.services.length; i++) {
-					if (pluginData.services[i].serviceType === serviceType) {
-						pluginServiceProvider = plugins[plugin];
-						break;
-					}
-				}
-			}
-		}
-		return pluginServiceProvider;
-	},
-	
 	_cleanupServiceReference: function(serviceReference) {
-		//console.debug("deleting service reference for ["+serviceReference._serviceType+"]");
-		delete serviceReference._pluginServiceProvider._serviceReferences[serviceReference._serviceType];
+		//console.debug("deleting service reference for ["+serviceReference._serviceType.id+"]");
+		delete serviceReference._pluginServiceProvider._serviceReferences[serviceReference._serviceType.id];
 		var count = 0;
 		for (var p in serviceReference._pluginServiceProvider._serviceReferences) { 
 			count++;
@@ -432,6 +444,18 @@ eclipse.Registry.prototype = {
 				//console.debug("removing container for ["+serviceReference._pluginServiceProvider.pluginURL+"]");
 				this._managedHub.removeContainer(pluginContainer);
 			}
+		}
+	},
+	
+	_loadServiceTypes: function(pluginURL, services) {
+		for (var i = 0; i < services.length; i++) {
+			var serviceType = services[i].serviceType;
+			if (typeof serviceType == "string" || serviceType instanceof String) {
+				this._serviceTypes[serviceType] = {id: serviceType, provider: pluginURL};
+			} else if (typeof serviceType == "object") {
+				serviceType.provider = pluginURL;
+				this._serviceTypes[serviceType.id] = serviceType;
+			}	
 		}
 	}
 };

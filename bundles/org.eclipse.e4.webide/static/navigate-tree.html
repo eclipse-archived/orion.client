@@ -17,6 +17,8 @@
     dojo.require("dijit.Menu");
     dojo.require("dijit.MenuItem");
     dojo.require("dijit.Dialog");
+    dojo.require("dijit.form.CheckBox");
+    dojo.require("widgets.NewItemDialog");
  	</script>    	
 	<style type="text/css">
 		@import "/org.dojotoolkit/dojo/resources/dojo.css";
@@ -55,7 +57,6 @@
      
  	<!-- File Operations Client -->
   	<script src="js/fileClient.js"></script>
-	<script src="js/newItemDialog.js"></script>
       
  	<!-- Breadcrumbs -->
   	<script src="js/breadcrumbs.js"></script>
@@ -73,9 +74,12 @@
     <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
 			<div style="float: left;">
-				<img class="toolbarLabel" src="/images/Eclipse-Logo.gif" alt="Eclipse Logo" align="top">
+				<table><tr>
+		    		<td><img class="toolbarLabel" src="/images/Eclipse-Logo.gif" alt="Eclipse Logo" align="top"></td>
+					<td><b class="statuspane" id="statusPane"></td>
+				</tr></table>
 			</div>
-			<div id="eclipseWebToolbar" style="float: right;">
+			<div id="eclipseWebToolbar" class="innerToolbar" style="float: right;">
 				<button dojoType="dijit.form.Button" class="button" id="switchView">
 					<img src="/images/flatLayout.gif" alt="Grid View" title="Grid View">
 				</button>
@@ -86,13 +90,12 @@
 				<button dojoType="dijit.form.Button" type="button" id="linkProjectButton">Link Project
 				</button>
 				
-				<input id="search" align="center" type="search" style="margin: 2px; padding: 1px;">
+				<input id="search" align="center" type="search" class="searchbox">
 				<button dojoType="dijit.form.Button" type="button" id="searchTextButton">Search
 				</button>
 				
 				<button dojoType="dijit.form.Button" type="button" id="searchNamesButton">Search Names
 				</button>
-    			<b class="statuspane" id="statusPane"></b>
 			</div>
 		</div>
 		
@@ -119,45 +122,6 @@
 		</div>
 	</div>
 
-	<!-- Dialogs -->
-	<div dojoType="dijit.Dialog" id="newItemDialog">
-		<script type="dojo/connect" event="onKeyPress" args="evt">
-			if (evt.keyCode === dojo.keys.ENTER) {
-				this.domNode.focus(); // FF throws DOM error if textfield is focused after dialog closes
-				this._onSubmit();
-			}
-		</script>
-		<div style="display: table">
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5">
-					<label id="itemNameLabel" for="itemName" style="padding-right: 10">Name:</label>
-				</div>
-				<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
-					<input id="itemName" style="display: inline-block; width: 98%;">
-				</div>
-			</div>
-			<div style="display: none;" id="itemAdvancedInfo">
-				<div style="display: table-cell; padding: 5">
-					<label id="itemURLLabel" for="itemURL" style="padding-right: 10">Server Path:</label>
-				</div>
-				<div style="display: table-cell; width: 40em; text-align: left; padding:5;">
-					<div dojoType="dojo.data.ItemFileReadStore" id="stateStore" jsId="stateStore" url="/filesystems"></div>
-					<select id="protocol" dojoType="dijit.form.ComboBox" value="file" store="stateStore" searchAttr="name" style="display: inline-block; width: 10%;" ></select>
-					<input id="itemURL" style="display: inline-block; width: 86%;">
-					<label id="moduleLabel" for="module" style="display: none; width: 9%;">Module:</label>
-					<input id="module" style="display: none; width: 25%;">
-				</div>
-			</div>
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5"></div>
-				<div style="display: table-cell; padding: 5">
-					<button id="newItemButton" dojoType="dijit.form.Button" type="submit" value="OK" style="padding: 20 0 10 0; float: right; clear: both;">Ok
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	
 	<script src="js/navigate-tree/navigate-tree.js"></script>
 </body>
 </html>

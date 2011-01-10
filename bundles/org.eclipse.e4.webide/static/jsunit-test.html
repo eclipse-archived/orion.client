@@ -18,6 +18,7 @@
     <script type="text/javascript">
 		dojo.require("dijit.Dialog");
  	    dojo.require("dijit.form.TextBox");
+		dojo.require("widgets.NewItemDialog");
 		dojo.require("widgets.OpenResourceDialog");
  	</script>    	
 	<style type="text/css">
@@ -77,13 +78,13 @@
     <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="true" style="width: 100%; height: 100%;">
 		<div class="toolbarTest" id="toolbar" dojoType="dijit.layout.ContentPane" region="top" >
 			<div style="float: top;" align="center">
-				<button dojoType="dijit.form.Button" class="button" id="add_test_config" style="padding-right:15px">
+				<button dojoType="dijit.form.Button" class="button" id="add_test_config" style="padding-right:6px">
 					<img src="/images/unit_test/add-test-config.png" alt="Create New Config" title="Create New Config">
 					<script type="dojo/connect" event="onClick" args="evt">
 						createNewConfig();
 					</script>
 				</button>
-				<span style="padding-right:2px; color: black; font-size: 10pt">Current Test Config </span>
+				<span style="padding-right:0px; color: black; font-size: 10pt">Current Test Config </span>
 				<select id="testConfig">
 				</select>
 				<button dojoType="dijit.form.Button" class="button" id="del_test_config" style="padding-right:0px">
@@ -93,21 +94,21 @@
 					</script>
 				</button>
 				<button dojoType="dijit.form.Button" class="button" id="edit_test_config" style="padding-right:0px">
-					<img src="/images/unit_test/edit-test-config.png" alt="Edit Config" title="Edit Config">
+					<img src="/images/unit_test/edit-test-config.png" alt="Update Config" title="Update Config">
 					<script type="dojo/connect" event="onClick" args="evt">
 						editTestConfig();
 					</script>
 				</button>
-				<button dojoType="dijit.form.Button" class="button" id="unittest" style="padding-left:20px">
-					<img src="/images/unit_test/unit-test.png" alt="Unit Test" title="Test Mock">
+				<button dojoType="dijit.form.Button" class="button" id="unittest" style="padding-left:10px">
+					<img src="/images/unit_test/test-go.png" alt="Unit Test" title="Test Current Configuration">
 					<script type="dojo/connect" event="onClick" args="evt">
-						loadTestResultMock();
+						loadTestResultFiles();
 					</script>
 				</button>
 				<button dojoType="dijit.form.Button" class="button" id="unittest1">
-					<img src="/images/unit_test/unit-test.png" alt="Unit Test" title="Test From selected Files">
+					<img src="/images/unit_test/test-go-mock.png" alt="Unit Test" title="Test Mock Data">
 					<script type="dojo/connect" event="onClick" args="evt">
-						loadTestResultFiles();
+						loadTestResultMock();
 					</script>
 				</button>
 			</div>
@@ -118,7 +119,7 @@
 				<span id="testFailures" style="padding-right:20px; color: red; font-size: 10pt">   </span>
 			</div>
 			<div  style="float: bottom;"  align="center">
-				<hr id="testState" width="25%" color= "white" size="12" />
+				<hr id="testState" width="25%" color= "#eeeeee" size="12" />
 			</div>
 		</div>
 		
@@ -134,7 +135,10 @@
 		<div class="paneScrolled" dojoType="dijit.layout.BorderContainer" design="headline"  liveSplitters="true" persist="true" gutters="true" region="center" splitter="false">
 			<div class="paneScrolled" id="resultPane" dojoType="dijit.layout.ContentPane" region="center"  splitter="true">				
 				<div id="result">
-					<h2>Test Result</h2>
+					<div style="float: top;" align="left">
+						<span style="padding-right:10px; color: blue; font-size: 10pt">Test Result : <span>
+						<input id = "filterResult" type = "checkbox">Only show failures</input>
+					</div>
 					<div id="result-tree">
 					</div>
 				</div>
@@ -149,41 +153,6 @@
 		
 	</div>
 
-	<!-- Dialogs -->
-	<div dojoType="dijit.Dialog" id="newItemDialog">
-		<script type="dojo/connect" event="onKeyPress" args="evt">
-			if (evt.keyCode === dojo.keys.ENTER) {
-				this.domNode.focus(); // FF throws DOM error if textfield is focused after dialog closes
-				this._onSubmit();
-			}
-		</script>
-		<div style="display: table">
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5">
-					<label id="itemNameLabel" for="itemName" style="padding-right: 10">Name:</label>
-				</div>
-				<div style="display: table-cell; padding: 5">
-					<input id="itemName" style="width: 30em;">
-				</div>
-			</div>
-			<div style="display: none;" id="itemAdvancedInfo">
-				<div style="display: table-cell; padding: 5">
-					<label id="itemURLLabel" for="itemURL" style="padding-right: 10">Server Path:</label>
-				</div>
-				<div style="display: table-cell; padding: 5">
-					<input id="itemURL" style="width: 30em;">
-				</div>
-			</div>
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5"></div>
-				<div style="display: table-cell; padding: 5">
-					<button id="newItemButton" dojoType="dijit.form.Button" type="submit" value="OK" style="padding: 20 0 10 0; float: right; clear: both;">Ok
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	
 	<script src="js/jsunit-test/jsunit-test.js"></script>
 	
 </body>

@@ -14,6 +14,38 @@
 var eclipse = eclipse || {};
 
 /**
+ * A Service Provider is an object that implements a Service Type
+ * @class A Service Provider is an object that implements a Service Type
+ */
+eclipse.ServiceProvider = function() {
+};
+
+eclipse.ServiceProvider.prototype = {
+	_initialize: function(plugin) {
+		this._plugin = plugin;
+	},
+	
+	dispatchEvent: function(eventType, eventData, serviceType, serviceId) {
+		var event = {
+			pluginURL: this.pluginURL,
+			eventType: eventType,
+			eventData: eventData,	
+			serviceType: serviceType,
+			serviceId: serviceId
+		};
+		this._plugin._hubClient.publish("org.eclipse.e4.plugin.PluginResponse", {type: "event", result: event, error: null});
+	}
+};
+
+eclipse.ServiceProvider.extend = function(extender) {
+	var serviceProvider = new eclipse.ServiceProvider();
+	for (var name in extender) {
+		serviceProvider[name] = extender[name];
+	}
+	return serviceProvider;
+};
+
+/**
  * A plugin is an object that is isolated in its own frame, and obtains and provides services
  * via the asynchronous postMessage mechanism.
  * @class A plugin is an object that is isolated in its own frame, and obtains and provides services
@@ -29,6 +61,9 @@ eclipse.Plugin.prototype = {
 		this.pluginData = pluginData;
 		if (service !== undefined) {
 			this.service = service;
+			if (service["_initialize"] !== undefined) {
+				service._initialize(this);
+			}
 		}
 	},
 	
@@ -92,7 +127,7 @@ eclipse.Plugin.prototype = {
 		this._hubClient.publish("org.eclipse.e4.plugin.PluginResponse", {type: "servicecall", id: request.id, result: result, error: error});
 	},
 	
-	fireEvent: function(eventType, eventData, serviceType, serviceId) {
+	dispatchEvent: function(eventType, eventData, serviceType, serviceId) {
 		var event = {
 			pluginURL: this.pluginURL,
 			eventType: eventType,

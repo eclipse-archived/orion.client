@@ -18,6 +18,7 @@
     <script type="text/javascript">
 		dojo.require("dijit.Dialog");
  	    dojo.require("dijit.form.TextBox");
+		dojo.require("widgets.NewItemDialog");
 		dojo.require("widgets.OpenResourceDialog");
  	</script>    	
 	<style type="text/css">
@@ -156,41 +157,6 @@
 		
 	</div>
 
-	<!-- Dialogs -->
-	<div dojoType="dijit.Dialog" id="newItemDialog">
-		<script type="dojo/connect" event="onKeyPress" args="evt">
-			if (evt.keyCode === dojo.keys.ENTER) {
-				this.domNode.focus(); // FF throws DOM error if textfield is focused after dialog closes
-				this._onSubmit();
-			}
-		</script>
-		<div style="display: table">
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5">
-					<label id="itemNameLabel" for="itemName" style="padding-right: 10">Name:</label>
-				</div>
-				<div style="display: table-cell; padding: 5">
-					<input id="itemName" style="width: 30em;">
-				</div>
-			</div>
-			<div style="display: none;" id="itemAdvancedInfo">
-				<div style="display: table-cell; padding: 5">
-					<label id="itemURLLabel" for="itemURL" style="padding-right: 10">Server Path:</label>
-				</div>
-				<div style="display: table-cell; padding: 5">
-					<input id="itemURL" style="width: 30em;">
-				</div>
-			</div>
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5"></div>
-				<div style="display: table-cell; padding: 5">
-					<button id="newItemButton" dojoType="dijit.form.Button" type="submit" value="OK" style="padding: 20 0 10 0; float: right; clear: both;">Ok
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	
 	<script src="js/jsunit-test/jsunit-test.js"></script>
 	
 </body>

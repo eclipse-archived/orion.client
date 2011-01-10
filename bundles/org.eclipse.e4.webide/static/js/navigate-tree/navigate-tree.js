@@ -8,17 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global dojo dijit window eclipse registry*/
+/*global dojo dijit window eclipse registry:true widgets*/
 dojo.addOnLoad(function(){
-	
-	// initialize things that services need
-	var itemAdvancedInfo = dojo.byId("itemAdvancedInfo"),
-		itemName = dojo.byId("itemName"),
-		itemNameLabel = dojo.byId("itemNameLabel"),
-		itemURL = dojo.byId("itemURL"),
-		newItemDialog = dijit.byId("newItemDialog"),
-		protocol = dijit.byId("protocol"),
-		module = dojo.byId("module");
 	
 	// FIXME until we sort out where service registration happens, and how dependencies on
 	// services are expressed, just copy this code around...
@@ -56,7 +47,6 @@ dojo.addOnLoad(function(){
 	};
 	var searcher = new eclipse.Searcher({serviceRegistry: registry});
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: registry});
-	var newItemDialogProvider = new eclipse.NewItemDialogProvider(itemAdvancedInfo, itemName, itemNameLabel, itemURL, newItemDialog, protocol, module);
 	
 	var contextMenu = dijit.byId("treeContextMenu"),
 		newFileFolderMenu = dijit.byId("NewFileFolderMenu");
@@ -67,7 +57,7 @@ dojo.addOnLoad(function(){
 	
 	var explorer = new eclipse.ExplorerTree(registry, treeRoot,
 			searcher, "explorer-tree", contextMenu, newFileFolderMenu,
-			makeFavoriteDomNode, deleteFilesDomNode, newFolderDomNode, newFileDomNode, newItemDialogProvider);
+			makeFavoriteDomNode, deleteFilesDomNode, newFolderDomNode, newFileDomNode);
 	explorer.loadResourceList(dojo.hash());
 
 	//every time the user manually changes the hash, we need to load the workspace with that name
@@ -108,17 +98,30 @@ dojo.addOnLoad(function(){
 		window.location.replace("/navigate-table.html#" + dojo.hash());
 	};
 	dojo.byId("newProjectButton").onclick = function(evt) {
-		newItemDialogProvider.show("New Project", "Project name:", function(name){ explorer.createProject(name); });
+		var dialog = new widgets.NewItemDialog({
+			title: "New Project",
+			label: "Project name:",
+			func:  function(name){ explorer.createProject(name); }
+		});
+		dialog.startup();
+		dialog.show();
 	};
 	dojo.byId("linkProjectButton").onclick = function(evt) {
-		newItemDialogProvider.show("Link Project", "Project name:", function(name, url){ explorer.createProject(name,url); }, true);
+		var dialog = new widgets.NewItemDialog({
+			title: "Link Project",
+			label: "Project name:",
+			func:  function(name, url, create){ explorer.createProject(name,url,create); },
+			advanced: true
+		});
+		dialog.startup();
+		dialog.show();
 	};
 	dojo.byId("searchTextButton").onclick = function(evt) {
 		var query = explorer.treeRoot.SearchLocation + searchField.value;
 		explorer.loadResourceList(query);
 	};
 	dojo.byId("searchNamesButton").onclick = function(evt) {
-		var query = treeRoot.SearchLocation + "Name:" + searchField.value;
+		var query = explorer.treeRoot.SearchLocation + "Name:" + searchField.value;
 		explorer.loadResourceList(query);
 	};
 	

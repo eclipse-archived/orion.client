@@ -8,16 +8,18 @@
  ******************************************************************************/
 
  /*
- 	Authentication error handling. Adds methods that handle 401 responses for 
+ 	Authentication and authorization error handling. Adds methods that handle 401 and 403 responses for 
  	XHR calls.
  	
- 	To handle 401 error add the following line to 'error' function in your dojo.xhr<method> request,
+ 	To handle 401 and 403 error add the following line to 'error' function in your dojo.xhr<method> request,
  	where <method> is the method you would like to call
  		handle<method>AuthenticationError(this, ioArgs);
 
  */
 
 var authenticationInProgress = false;
+
+var forbiddenAccessDlg;
 
 function handleGetAuthenticationError(xhrArgs, ioArgs) {
 	handleAuthenticationError(ioArgs, function(){
@@ -51,6 +53,15 @@ function handlePutAuthenticationError(xhrArgs, ioArgs) {
 }
 
 function handleAuthenticationError(ioArgs, channelListener) {
+	if (ioArgs.xhr.status == 403) { 
+		if (forbiddenAccessDlg == null)
+			forbiddenAccessDlg = new dijit.Dialog({
+		        title: "Forbidden access"
+		    });
+		
+		forbiddenAccessDlg.attr("content", "No rights to access <b>" + ioArgs.url + "</b>");
+		forbiddenAccessDlg.show();
+	}
 	if (ioArgs.xhr.status == 401) { 
 		if (ioArgs.xhr.getResponseHeader("WWW-Authenticate") == "OpenID") {
 			var handle = dojo.subscribe("/auth", function(message){

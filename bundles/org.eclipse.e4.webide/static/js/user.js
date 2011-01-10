@@ -18,13 +18,16 @@ dojo.addOnLoad(function() {
 		handleAs : "json",
 		load : function (data) {
 			var b = dojo.byId("username");
-			if (b) 
+			if (b) {
 				b.innerHTML = data.login;
+				dojo.addClass(b, "button");
+			}
 			registry.callService("IUsers", "setUser", null, [data.login]);
 			
 			var b2 = dojo.byId("userProfile");
-			if (b2)
+			if (b2) {
 				b2.href = "/tasks/user.html?uN=" + data.login + "#userProfile";
+			}
 		},
 		error : function (error) {
 			var b = dojo.byId("username");
@@ -40,6 +43,7 @@ dojo.addOnLoad(function() {
 			signOutUser();
 		}
 	}, "signOutUser");
+	dojo.addClass(button, "toolbarButton");
 	
 	
 });

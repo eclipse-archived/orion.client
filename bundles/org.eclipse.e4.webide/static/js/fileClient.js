@@ -11,16 +11,17 @@
   handleDeleteAuthenticationError */
 /*jslint forin:true devel:true*/
 
+/** @namespace The global container for eclipse APIs. */
 var eclipse = eclipse || {};
 
 eclipse.FileService = (function() {
 	/**
-	 * @class Provides CRUD operations on files, folders, and projects.
+	 * @class Provides operations on files, folders, and projects.
 	 * @name eclipse.FileService
 	 */
 	function FileService() {
 	}
-	FileService.prototype = {
+	FileService.prototype = /**@lends eclipse.FileService.prototype */{
 		/**
 		 * @param parentItem
 		 * @param {Function(Object, Array} updateFunction First param is parentItem, second is children
@@ -125,11 +126,13 @@ eclipse.FileService = (function() {
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					handleGetAuthenticationError(this, ioArgs);
+					// TODO need a better error handling
+					onLoad(response);
 					return response;
 				}
 			});
 		},
-		createProject: function(url, projectName, serverPath, callback) {
+		createProject: function(url, projectName, serverPath, create, callback) {
 			if (!url) { // null, undefined, '' ...
 				// window.document.eas.status.setErrorMessage("<enter message here>");
 				console.error("url is undefined, make sure you're signed in before creating a project");
@@ -138,6 +141,9 @@ eclipse.FileService = (function() {
 			var data = {Name: projectName};
 			if (serverPath) {
 				data.ContentLocation = serverPath;
+			}
+			if(create){
+				data.CreateIfDoesntExist = create;
 			}
 			dojo.xhrPost({
 				url: url,

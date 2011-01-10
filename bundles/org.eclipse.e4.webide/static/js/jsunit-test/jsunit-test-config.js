@@ -9,53 +9,194 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 eclipse = eclipse || {};
+eclipse.TestConfigService = (function() {
+	function TestConfigService(options) {
+		this._selectedConfigIndex = 0;
+		this._registry = options.serviceRegistry;
+		this._listeners = [];
+		this._initConfig();
+	}
+	TestConfigService.prototype = {
+		/**
+		 * Private functions
+		 */	
+		_initConfig: function(){
+			this._listeners = [];
+			this._configs = [];
+			this._configs.push({name:"Test Selected" , value:""});
+			var self = this;
+			this._registry.callService("IPreferenceService", "get", null, ["jsunit_test/configs", function(prefs) {
+				if (prefs) {
+					var prefJson = JSON.parse(prefs);
+					for (var i = 0 ; i < prefJson.length ; i++) {
+						var configValues = prefJson[i].value;
+						var config = {name:prefJson[i].name, value:[]};
+						self._configs.push(config);
+						for(var j = 0 ; j < configValues.length ; j++){
+							var singleValue = {location:eclipse.util.makeFullPath(configValues[j]) , parents:[]};
+							config.value.push(singleValue);
+							self._loadFileParents(i,j);
+						}
+					}
+					self._notifyListeners();
+				}
+			}]);
+		},
+			
+		_loadFileParents: function(configIndex , valueIndex){
+			var configValue = this._configs[configIndex+1].value[valueIndex];
+			dojo.xhrGet({
+				url: configValue.location,
+				content: { "parts": "meta" },
+				headers: { "EclipseWeb-Version": "1" },
+				handleAs: "json",
+				timeout: 5000,
+				load: dojo.hitch(this, function(metadata, secondArg) {
+					var parents = metadata.Parents;
+					if(parents){
+						for(var k = 0; k < parents.length ; k++){
+							configValue.parents.push(parents[k].Location);
+						}
+					}
+				}),
+				error: dojo.hitch(this, function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("Error loading file metadata: " + error.message);
+				})
+			});
+		},
+		
+		_saveConfigs: function(){
+			if (this._configs.length >  1) {
+				var storedConfigs = [];
+				for(var i = 1 ; i <  this._configs.length ; i++){
+					var configValues = this._configs[i].value;
+					var config = {name: this._configs[i].name , value:[]};
+					for(var j = 0 ; j < configValues.length ; j++){
+						config.value.push(eclipse.util.makeRelative(configValues[j].location));
+					}
+					storedConfigs.push(config);
+				}
+				this._registry.callService("IPreferenceService", "put", null, ["jsunit_test/configs", JSON.stringify(storedConfigs)]); 
+			} else {
+				this._registry.callService("IPreferenceService", "put", null, ["jsunit_test/configs", ""]); 
+			}
+		},
+		
+		_notifyListeners: function() {
+			for (var i = 0; i < this._listeners.length; i++) {
+				this._listeners[i](this._configs , this._selectedConfigIndex);
+			}
+		},
+		
+		/**
+		 * @param callback Callback to be notified when configurations change
+		*/
+		addEventListener: function(callback) {
+			this._listeners.push(callback);
+			callback(this._configs , this._selectedConfigIndex);
+		},
+			
+		addConfig: function(configName , configValue){
+		    var config = {name: configName ,
+				      	  value: configValue};
+			this._configs.push(config);
+			this._selectedConfigIndex = this._configs.length - 1;
+			this._saveConfigs();
+			this._notifyListeners();
+		},
+		
+		updateConfig: function(configValue){
+			if(this._selectedConfigIndex === 0)
+				return;
+			var config = this._configs[this._selectedConfigIndex];
+			config.value =configValue;
+			this._saveConfigs();
+		},
+		
+		deleteConfig: function(){
+			if(this._selectedConfigIndex === 0)
+				return;
+			this._configs.splice(this._selectedConfigIndex , 1);
+			this._saveConfigs();
+			this._selectedConfigIndex = this._selectedConfigIndex - 1;
+			this._notifyListeners();
+		},
+		
+		getCurrentConfig: function(){
+			return this._selectedConfigIndex  === 0 ? null : this._configs[this._selectedConfigIndex ].value;
+		},
+		
+		getCurConfigIndex: function(){
+			return this._selectedConfigIndex;
+		},
+		
+		setCurConfigIndex: function(index){
+			this._selectedConfigIndex = index;
+		}		
+	};
+	return TestConfigService;
+}());
+
 eclipse.TestConfigurator = (function() {
-	function Configurator(options) {
+	function TestConfigurator(options) {
 		this._navigator =  eclipse.uTestUtils.getOptionValue(options , "navigator" , undefined);
+		this._resultController = options.resultController;
 		this._configSelDiv = dojo.byId("testConfig");
 		this._delConfigBtnDiv = dijit.byId("del_test_config");
 		this._editConfigBtnDiv = dijit.byId("edit_test_config");
 		var self = this;
 		dojo.connect(this._configSelDiv, "onchange", function() {
-			self.onSelChange();
+			self._onSelChange();
 		});
 		this._delConfigBtnDiv.attr('disabled' , true);
 		this._editConfigBtnDiv.attr('disabled' , true);
 		this._registry = options.serviceRegistry;
-		this._initConfig();
+		var self = this;
+		this._registry.callService("ITestConfigs", "addEventListener", null, [function(configs, selIndex) {
+			self._render(configs, selIndex);
+		}]);
 	}
-	Configurator.prototype = {
+	TestConfigurator.prototype = {
 		showNewItemDialog: function() {
-			var dialog = dijit.byId('newItemDialog');
-			dialog.attr('title', "Create Test Config From Selected Files");
-			var itemNameLabel = dojo.byId("itemNameLabel");
-			itemNameLabel.value = "Config name";
-			var itemName = dojo.byId("itemName");
-			var self = this;
-			dialog.execute = function(){
-				self.addConfig(itemName.value);
-			};
+			var dialog = new widgets.NewItemDialog({
+				title: "Create Test Config From Selected Files",
+				label: "Config name:",
+				func:  dojo.hitch(this, function(itemName){
+					var cValue = this._makeConfigValue(this._navigator._renderer.getSelectedURL(true));
+					this._registry.callService("ITestConfigs", "addConfig", null, [itemName, cValue]);
+					if(this._resultController)
+						this._resultController.clearResultUI();
+				})
+			});
+			dialog.startup();
 			dialog.show();
 		},
-		
-		_makeRelative: function(configValue){
-			for(var i = 0; i < configValue.length ; i++){
-				configValue[i] = eclipse.util.makeRelative(configValue[i]);
-			}
-			return configValue;
+			
+		_makeConfigParents: function(configVal , originalFileItem){
+			if(originalFileItem.parent === undefined || originalFileItem === null)
+				return;
+			configVal.parents.push( originalFileItem.parent.Location);
+			this._makeConfigParents(configVal , originalFileItem.parent);
 		},
 		
-		_makeFullPath: function(configValue){
-	    	var nonHash = window.location.href.split('#')[0];
-			var hostName = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+		_makeSingleConfig: function(originalFileItem){
+			var configVal = {location: originalFileItem.Location,parents:[]};
+			this._makeConfigParents(configVal , originalFileItem);
+			return configVal;
+		},
+		
+		_makeConfigValue: function(selectedFiles){
 			var retVal = [];
-			for(var i = 0; i < configValue.length ; i++){
-				retVal.push(hostName + configValue[i]);
+			for(var i = 0; i < selectedFiles.length ; i++){
+				retVal.push(this._makeSingleConfig(selectedFiles[i]));
 			}
 			return retVal;
 		},
 		
-		onSelChange: function(){
+		_onSelChange: function(){
+			if(this._resultController)
+				this._resultController.clearResultUI();
 			var selIndex = this._configSelDiv.selectedIndex;
 			if(selIndex === 0){
 				this._delConfigBtnDiv.attr('disabled' , true);
@@ -63,6 +204,13 @@ eclipse.TestConfigurator = (function() {
 			} else {
 				this._delConfigBtnDiv.attr('disabled' , false);
 				this._editConfigBtnDiv.attr('disabled' , false);
+			}
+			this._registry.callService("ITestConfigs", "setCurConfigIndex", null, [selIndex]);
+			if(selIndex !== 0){
+				var self = this;
+				this._registry.callService("ITestConfigs", "getCurrentConfig", 
+		   					  function(result) {self._navigator._renderer.updateBySelection(result);},
+		   					  []);
 			}
 		},
 		
@@ -76,75 +224,34 @@ eclipse.TestConfigurator = (function() {
 		    this._configSelDiv.add(elOptNew , null);
 		},
 		
-		_updateConfigUI: function(){
-  			for (var i=0; i < this._configs.length; i++) {
-  				this._addConfigUI(this._configs[i].name);
+		_render: function(configs, selIndex){
+			this._clearConfigUI();
+  			for (var i=0; i < configs.length; i++) {
+  				this._addConfigUI(configs[i].name);
   			}
+			this._configSelDiv.selectedIndex =selIndex;
 		},
 		
-		addConfig: function(configName){
-		    var cValue = this._makeRelative(this._navigator._renderer.getSelectedURL(true));
-			
-		    var config = {name: configName ,
-				      	  value: cValue};
-			this._configs.push(config);
-			this._addConfigUI(configName);
-			this._configSelDiv.selectedIndex = this._configSelDiv.options.length  -1;
-			this.onSelChange();
-			this._saveConfigs();
-			
-		},
-		
-		editConfig: function(){
-			var selIndex = this._configSelDiv.selectedIndex;
-			if(selIndex === 0)
-					return;
-			var config = this._configs[selIndex];
-			config.value =this._makeRelative(this._navigator._renderer.getSelectedURL(true));
-			this._saveConfigs();
+		updateConfig: function(){
+		    var cValue = this._makeConfigValue(this._navigator._renderer.getSelectedURL(true));
+		    this._registry.callService("ITestConfigs", "updateConfig", null, [cValue]);
 		},
 		
 		deleteConfig: function(){
-			var selIndex = this._configSelDiv.selectedIndex;
-			if(selIndex === 0)
-					return;
-			this._configs.splice(selIndex , 1);
-			this._saveConfigs();
-			this._clearConfigUI();
-			this._updateConfigUI();
-			this._configSelDiv.selectedIndex =selIndex  -1;
-			this.onSelChange();
-		},
-		
-		_initConfig: function(){
-			this._configs = [];
-			this._configs.push({name:"Test Selected" , value:""});
 			var self = this;
-			//window.document.eas.preferences.get("jsunit_test/configs", function(prefs) { // TODO refactor eas
-			this._registry.callService("IPreferenceService", "get", null, ["jsunit_test/configs", function(prefs) {
-				if (prefs) {
-					var configs = JSON.parse(prefs);
-					for (var i in configs) {
-						self._configs.push(configs[i]);
-					}
-				}
-				self._updateConfigUI();
-			}]);
+			this._registry.callService("ITestConfigs", "deleteConfig", function(result){self._onSelChange();}, []);
 		},
 		
-		_saveConfigs: function(){
-			if (this._configs.length > 1) {
-				var storedConfigs = this._configs.slice(1);
-				this._registry.callService("IPreferenceService", "put", null, ["jsunit_test/configs", JSON.stringify(storedConfigs)]); 
-				//window.document.eas.preferences.put("jsunit_test/configs", JSON.stringify(storedConfigs)); // TODO refactor eas
-			}
-		},
-		
-		getCurrentConfig: function(){
+		testCurrentConfig: function(callBack){
 			var selIndex = this._configSelDiv.selectedIndex;
-			return selIndex === 0 ?this._navigator._renderer.getSelectedURL(true) : this._makeFullPath(this._configs[selIndex].value);
+			this._testCallBack = callBack;
+			var self = this;
+			return selIndex === 0 ?callBack(this._navigator._renderer.getSelectedURL(false)) : 
+								   this._registry.callService("ITestConfigs", "getCurrentConfig", 
+										   					  function(result) {callBack(result);},
+										   					  []);
 		}
-		
+
 	};
-	return Configurator;
-}());
+	return TestConfigurator;
+})();

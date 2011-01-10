@@ -20,12 +20,10 @@ var eclipse = eclipse || {};
  */
 eclipse.CommandService = (function() {
 	/**
-	 * Constructs a new command with the given options.
-	 * @param {Object} options The command options object
-	 * @class A command is an object visible to end users and performs some operation when invoked.
-	 *  Define commands in terms of function (and presentation for now) and then use helpers to generate
-	 *  DOM elements that perform these commands. What is the relationship to this and editor KeyBindings?
-	 * @name eclipse.Command
+	 * Constructs a new command service with the given options.
+	 * @param {Object} options The command options object which includes the service registry.
+	 * @class CommandService can render commands appropriate for a particular scope and DOM element.
+	 * @name eclipse.CommandService
 	 */
 	function CommandService(options) {
 		this._globalScope = [];
@@ -39,6 +37,20 @@ eclipse.CommandService = (function() {
 			this._registry = options.serviceRegistry;
 		},
 		
+		/**
+		 * Registers a new command and specifies the scope of the command.  Note this
+		 * is not yet fully implemented. 
+		 * @param {Command} command The command being added
+		 * @param {String} scope The scope to which the command applies.  "global"
+		 *  commands apply everywhere, "page" level commands apply to a particular
+		 *  page, "dom" level commands apply only when the specified dom element is
+		 *  rendering commands, and "object" scope applies to particular objects 
+		 *  being displayed in widgets such as lists or trees.
+		 * @param {String} scopeId The id related to the scope.  Depending on the scope,
+		 *  this might be the id of the page or of a dom element.
+		 */	
+		 
+		// see https://kanrtc01.ottawa.ibm.com:9446/ies/web/projects/EclipseWeb#action=com.ibm.team.workitem.viewWorkItem&id=414
 		addCommand: function(command, scope, scopeId) {
 			switch (scope) {
 			case "global":
@@ -58,6 +70,21 @@ eclipse.CommandService = (function() {
 				break;
 			}
 		},
+		
+		/**
+		 * Render the commands that are appropriate for the given scope.
+		 * @param {DOMElement} parent The element in which commands should be rendered.
+		 * @param {String} scope The scope to which the command applies.  "global"
+		 *  commands apply everywhere, "page" level commands apply to a particular
+		 *  page, "dom" level commands apply only when the specified dom element is
+		 *  rendering commands, and "object" scope applies to particular objects 
+		 *  being displayed in widgets such as lists or trees.
+		 * @param {Object} items An item or array of items to which the command applies.
+		 * @param {Object} handler The object that will perform the command
+		 * @param {String} style The style in which the command should be rendered.  Currently
+		 *  only "image" is implemented, but this should involve into something like "button,"
+		 *  "menu," "link," etc.
+		 */	
 		
 		renderCommands: function(parent, scope, items, handler, style) {
 			var i, command;
@@ -132,9 +159,9 @@ eclipse.Command = (function() {
 	/**
 	 * Constructs a new command with the given options.
 	 * @param {Object} options The command options object
-	 * @class A command is an object visible to end users and performs some operation when invoked.
-	 *  Define commands in terms of function (and presentation for now) and then use helpers to generate
-	 *  DOM elements that perform these commands. What is the relationship to this and editor KeyBindings?
+	 * @class A command is an object that describes an action a user can perform, as well as when and
+	 *  what it should look like when presented in various contexts.  Commands are identified by a
+	 *  unique id.
 	 * @name eclipse.Command
 	 */
 	function Command (options) {

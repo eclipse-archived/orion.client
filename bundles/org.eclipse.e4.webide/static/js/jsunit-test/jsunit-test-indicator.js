@@ -24,8 +24,24 @@ eclipse.TestIndicator = (function() {
 			if(failures !== undefined)
 				failures.innerHTML = failNumber;
 			var testState = dojo.byId(this._testIndicatorId);
-			if(testState !== undefined)
-				testState.color = failNumber === 0 ? "green" : "red";
+			if(testState !== undefined){
+				if(testNumber === 0)
+					testState.color = "#eeeeee";
+				else
+					testState.color = failNumber === 0 ? "green" : "red";
+				/*
+				if(testNumber === 0){
+					if(testState.children && testState.children.length > 0)
+						testState.removeChild(testState.children[0]);
+					testState.innerHTML = "";
+				} else {
+					var indicator = document.createElement('hr');
+					indicator.color = failNumber === 0 ? "green" : "red";
+					indicator.width = "50px";
+					testState.appendChild(indicator);
+					
+				}*/
+			}
 		}
 	};
 	return Indicator;

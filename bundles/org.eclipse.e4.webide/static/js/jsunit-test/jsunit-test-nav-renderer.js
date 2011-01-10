@@ -18,7 +18,7 @@ eclipse.TestNavigatorRenderer = (function() {
 		initTable: function (tableNode, treeTable) {
 			this.setTreeTable(treeTable);
 			
-			dojo.addClass(tableNode, 'treetable');
+			dojo.addClass(tableNode, 'testNavTreetable');
 			var thead = document.createElement('thead');
 			var row = document.createElement('tr');
 			var th;
@@ -31,8 +31,44 @@ eclipse.TestNavigatorRenderer = (function() {
 			tableNode.appendChild(thead);
 		},
 		
-		updateBySelection: function(){
-			
+		_findParentDepth: function(parents){
+			var length = parents.length;
+			for(var i = 0 ; i < length ; i++){
+				if(dojo.byId( parents[i]))
+					return i;
+			}
+			return length;
+		},
+		
+		_expandParents: function(args){
+			var selection = args[0];
+			var depth = args[1];
+			if(depth < 0)
+				return;
+			var self = this;
+			if(depth > 0)
+				this._treeTable.expand(selection.parents[depth] ,function(arg){self._expandParents(arg);} ,[selection , depth-1]);
+			else
+				this._treeTable.expand(selection.parents[depth] ,function(arg){self._checkSingleFile(arg);} ,[selection.location]);
+		},
+		
+		_updateSingleSelection: function(){
+			var selection = this._selectionList[this._selectionCursor];
+			var loc = selection.location;
+			var fileItemDiv = dojo.byId(loc);
+			if(!fileItemDiv ){
+				var depth = this._findParentDepth(selection.parents);
+				this._expandParents([selection, depth]);
+			} else {
+				this._checkSingleFile([selection.location]);
+			}
+		},
+		
+		updateBySelection: function(selectionList){
+			this._selectionList = selectionList;
+			this._selectionCursor = 0;
+			this._unCheckFiles();
+			this._updateSingleSelection();
 		},
 		
 		setTreeTable: function(treeTable) {
@@ -51,7 +87,7 @@ eclipse.TestNavigatorRenderer = (function() {
 				var checkColumn = document.createElement('td');
 				var check = document.createElement('input');
 				check.type = "checkbox";
-				check.id = tableRow+"selectedState";
+				check.id = tableRow.id+"_selectedState";
 				dojo.addClass(check, "selectionCheckmark");
 				check.itemId = tableRow.id;
 				checkColumn.appendChild(check);
@@ -76,6 +112,26 @@ eclipse.TestNavigatorRenderer = (function() {
 			}
 		},
 		
+		_unCheckFiles: function() {
+			var rootChildren = this._treeTable._treeModel.root.children;
+			for (var i = 0; i< rootChildren.length ; i++){
+				this._treeTable.collapse(rootChildren[i]);
+			}
+		},
+		
+		_checkSingleFile: function(args) {
+			var itemId = args[0];
+			var node = dojo.byId(itemId + "_selectedState");
+			if (node && !node.checked) {
+				node.checked = true;
+				dojo.toggleClass(node.parentNode.parentNode, "checkedRow", true);
+			}
+			if(this._selectionCursor < (this._selectionList.length - 1 )){
+				this._selectionCursor++;
+				this._updateSingleSelection();
+			}
+		},
+		
 		getSelected: function() {
 			var selected = [];
 			dojo.query(".selectionCheckmark").forEach(function(node) {
@@ -86,17 +142,17 @@ eclipse.TestNavigatorRenderer = (function() {
 			return selected;
 		},
 		
-		getSelectedURL: function(url) {
+		getSelectedURL: function(withParentInfo) {
 			var selected = [];
 			var self = this;
 			dojo.query(".selectionCheckmark").forEach(function(node) {
 				if (node.checked && !node.Directory) {
    					var item = self._treeTable.getItem(node.itemId);
 					if(item && !item.Directory){
-						if(url){
-							selected.push(item.Location);
+						if(withParentInfo){
+							selected.push(item);
 						} else {
-							selected.push(item.Name);
+							selected.push(item.Location);
 						}
 					}
 				}

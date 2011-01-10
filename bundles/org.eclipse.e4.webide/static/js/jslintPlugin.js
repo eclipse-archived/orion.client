@@ -13,28 +13,30 @@
  */ 
 var eclipse = eclipse || {};
 
-eclipse.JSLintPlugin = function() {
+eclipse.JSLintServiceProvider = function() {
+};
+
+eclipse.JSLintServiceProvider.prototype = eclipse.ServiceProvider.extend({
+	checkSyntax: function(title, contents) {
+		JSLINT(contents, {white: false, onevar: false, undef: true, nomen: false, eqeqeq: true, plusplus: false, bitwise: false, regexp: true, newcap: true, immed: true, strict: false});
+		var result = JSLINT.data();
+		this.dispatchEvent("syntaxChecked", {title: title, result: result}, this.pluginData.services[0].serviceType.id, this.pluginData.services[0].id);
+		return result;
+	}
+});
+
+document.addEventListener("DOMContentLoaded", function() {
 	var pluginData = {
 		services : [{
 			id : "JSLintEditorSyntaxChecker", 
-			serviceType : "IEditorSyntaxChecker",
+			serviceType : {
+				id: "IEditorSyntaxChecker", 
+				interfaces : ["checkSyntax"]
+			},
 			properties: {}
 		}]
 	};
-	this._initialize(pluginData);
-};
-
-eclipse.JSLintPlugin.prototype = new eclipse.Plugin({});
-eclipse.JSLintPlugin.prototype.constructor = eclipse.JSLintPlugin;
-
-eclipse.JSLintPlugin.prototype.checkSyntax = function(title, contents) {
-	JSLINT(contents, {white: false, onevar: false, undef: true, nomen: false, eqeqeq: true, plusplus: false, bitwise: false, regexp: true, newcap: true, immed: true, strict: false});
-	var result = JSLINT.data();
-	this.fireEvent("syntaxChecked", {title: title, result: result}, this.pluginData.services[0].serviceType, this.pluginData.services[0].id);
-	return result;
-};
-
-document.addEventListener("DOMContentLoaded", function() {
-	var jslintPlugin = new eclipse.JSLintPlugin();
+	var serviceProvider = new eclipse.JSLintServiceProvider();
+	var jslintPlugin = new eclipse.Plugin(pluginData, serviceProvider);
 	jslintPlugin.start();
 }, false);

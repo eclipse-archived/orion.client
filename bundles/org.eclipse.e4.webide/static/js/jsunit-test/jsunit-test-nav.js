@@ -31,7 +31,7 @@ eclipse.TestNavigator = (function() {
 		createNavTree: function(){
 			this._navModel = this._createModel(this._navRoot , this._navTreeId, this._registry);
 			this.removeResourceList();
-			this._navTree = new TableTree({
+			this._navTree = new eclipse.TableTree({
 			    id: this._navTreeId,
 			    model: this._navModel,
 			    showRoot: true,

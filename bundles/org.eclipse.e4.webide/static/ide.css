@@ -11,7 +11,7 @@ html, body {
 h1 {
 	font-size:1.5em;
 	font-weight:bold;
-	color: #316ac5;
+	color: #6d6d6d;
 	line-height: 36px;
 	position:absolute;
 	top:0;
@@ -22,7 +22,7 @@ h1 {
 h2 {
 	font-size: 1.1em;
 	font-weight: bold;
-	color: #316ac5;
+	color: #6d6d6d;
 	margin: 0;
 }
 
@@ -42,29 +42,61 @@ h2 {
 }
 
 .statusPane {
-	height: 1.5em; 
 	font-weight: bold;
 	cursor: pointer;
-	padding: 2px;
-	margin-left: 8px;
-	margin-right: 8px;
-	vertical-align:middle;
+	text-decoration: none;
+	margin-right: 4px;
+	margin-left: 4px;
+	cursor: pointer;
+	height: 20px;
+
+}
+
+.statuspane {
+	font-weight: bold;
+	text-decoration: none;
+	margin-right: 4px;
+	margin-left: 4px;
+	cursor: pointer;
+	height: 20px;
 }
 
 .toolbar {
 	background: #fff url("images/titleBar.png") repeat-x top left;
-	border:1px solid #bfbfbf;
-	padding:0px;
+	border:1px #bfbfbf;
 	cursor: pointer;
 	font-size: 0.9em;
 	font-weight: bold;
 	color: #6d6d6d;
 }
 
+.innerToolbar {
+	float: right;
+	padding-right: 8px;
+	padding-top: 4px;
+}
+
+.searchbox {
+	
+}
+
+.soria .dijitButtonNode {
+	background-image: none;
+	background: #eeeeee;
+	border: 0px;
+	padding: 0px;
+	height: 20px;
+}
+
+.toolbarButton {
+	border: 0px;
+	padding: 0px
+	height: 20px;
+}
+
 .toolbarTest {
-	background: url("images/titleBar.png");
+	background: #fff url("images/titleBarTest.png")  repeat-x top left;
 	border:1px solid #bfbfbf;
-	padding:0px;
 	cursor: default;
 	font-size: 0.9em;
 	font-weight: bold;
@@ -78,13 +110,6 @@ h2 {
 	font-weight: bold;
 	background: #fff url("images/titleBar.png") repeat-x top left;
 	min-width: 600px;
-}
-
-.toolbarButton {
-        background: transparent;
-	width: 28px;
-	height: 28px;
-	margin: 2px;
 }
 
 .searchFloat {
@@ -180,6 +205,16 @@ h2 {
 }
 
 .treetable {
+	cellspacing: 0px;
+	min-width: 600px;
+}
+
+.testNavTreetable {
+	cellspacing: 0px;
+	min-width: 150px;
+}
+
+.testResultTreetable {
 	cellspacing: 0px;
 	min-width: 600px;
 }

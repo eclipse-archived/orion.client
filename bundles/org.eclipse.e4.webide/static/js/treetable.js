@@ -7,41 +7,45 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
- /*global dojo, document*/
+/*jslint forin:true devel:true*/
+/*global dojo, document*/
  
+/** @namespace */
+var eclipse = eclipse || {};
 
-/*	
-	TableTree generates an HTML table where one of the columns is indented according
-	to depth of children.  Clients must supply a model that generates children items,
-	and a renderer can be supplied which generates the HTML table row for each child.
-	Custom rendering allows clients to use checkboxes, images, links, etc. to describe each 
-	element in the tree.  Renderers handle all clicks and other behavior via their
-	supplied row content.
-	
-	The table tree parent can be specified by id or DOM node.
-	
-	The tree provides API for the client to programmatically expand and collapse
-	nodes, based on the client renderer's definition of how that is done (click on icon, etc.).
-	The tree will manage the hiding and showing of child DOM elements and proper indent.
-	
-	The model must implement
-		getRoot(onItem)  
-		getChildren(parentItem, onComplete)
-		getId(item)  // must be a valid DOM id
-		
-	Renderers must implement
-		initTable(tableNode) // set up table attributes and a header if desired
-		render(item, tr) // generate tds for the row
-		labelColumnIndex() // 0 based index of which td contains the primary label which will be indented
-	
-*/
-
-var TableTree = (function() {
-	/******************************* Constructor ***************************/
+eclipse.TableTree = (function() {
+	/**
+	 * Constructs a new TableTree with the given options.
+	 * 
+	 * @param options 
+	 * @name eclipse.TableTree 
+	 * @class Generates an HTML table where one of the columns is indented according to depth of children.
+	 * Clients must supply a model that generates children items, and a renderer can be supplied which
+	 * generates the HTML table row for each child. Custom rendering allows clients to use checkboxes,
+	 * images, links, etc. to describe each  element in the tree.  Renderers handle all clicks and other
+	 * behavior via their supplied row content.<p>
+	 * 
+	 * The table tree parent can be specified by id or DOM node.<p>
+	 * 
+	 * The tree provides API for the client to programmatically expand and collapse
+	 * nodes, based on the client renderer's definition of how that is done (click on icon, etc.).
+	 * The tree will manage the hiding and showing of child DOM elements and proper indent.<p>
+	 * 
+	 * The model must implement<ul>
+	 *   <li>getRoot(onItem)  
+	 *   <li>getChildren(parentItem, onComplete)
+	 *   <li>getId(item)  // must be a valid DOM id</ul>
+	 * 
+	 * Renderers must implement<ul>
+	 *   <li>initTable(tableNode) // set up table attributes and a header if desired
+	 *   <li>render(item, tr) // generate tds for the row
+	 *   <li>labelColumnIndex() // 0 based index of which td contains the primary label which will be indented</ul>
+	 * 
+	 */
 	function TableTree (options) {
 		this._init(options);
 	}
-	TableTree.prototype = {
+	TableTree.prototype = /** @lends eclipse.TableTree.prototype */ {
 		_init: function(options) {
 			var parent = options.parent;
 			var tree = this;
@@ -49,8 +53,8 @@ var TableTree = (function() {
 				parent = dojo.byId(parent);
 			}
 			if (!parent) { throw "no parent"; }
-			if (!options.model) { throw "no tree model" };
-			if (!options.renderer) { throw "no renderer" };
+			if (!options.model) { throw "no tree model"; }
+			if (!options.renderer) { throw "no renderer"; }
 			this._parent = parent;
 			this._treeModel = options.model;
 			this._renderer = options.renderer;
@@ -86,7 +90,7 @@ var TableTree = (function() {
 		},
 		
 		_generateChildren: function(children, indentLevel, referenceNode, position) {
-			for (i in children) {
+			for (var i in children) {
 				var row = document.createElement('tr');
 				row.id = this._treeModel.getId(children[i]);
 				row._depth = indentLevel;
@@ -115,7 +119,7 @@ var TableTree = (function() {
 		
 		refresh: function(item, children, /* optional */ forceExpand) {
 			var parentId = this._treeModel.getId(item);
-			if (parentId == this._id) {
+			if (parentId === this._id) {
 				this._removeChildRows(parentId);
 				this._generateChildren(children, 0, dojo.byId(parentId+"tbody"), "last");
 				this._rowsChanged();
@@ -144,10 +148,11 @@ var TableTree = (function() {
 		
 		getItem: function(id) {
 			var node = dojo.byId(id);
-			if (node)
+			if (node) {
 				return node._item;
+			}
 			return null;
-    	},
+		},
 		
 		toggle: function(id, imgName, expandedImage, collapsedImage) {
 			var row = dojo.byId(id);
@@ -167,44 +172,48 @@ var TableTree = (function() {
 			}
 		},
 		
-		expand: function(itemOrId) {
+		expand: function(itemOrId , postExpandFunc , args) {
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId);
 			var row = dojo.byId(id);
 			if (row) {
-				if (row._expanded)
+				if (row._expanded) {
 					return;
+				}
 				row._expanded = true;
 				var tree = this;
 				var children = this._treeModel.getChildren(row._item, function(children) {
 					tree._generateChildren(children, row._depth+1, row, "after");
 					tree._rowsChanged();
-				});
+				} , postExpandFunc  ,args);
 			}
 		}, 
 		
 		_removeChildRows: function(parentId) {
 			var table = dojo.byId(this._id);
 			// true if we are removing directly from table
-			var foundParent = parentId == this._id;
+			var foundParent = parentId === this._id;
 			var stop = false;
 			var parentDepth = -1;
 			var toRemove = [];
 			dojo.query(".treeTableRow").forEach(function(row, i) {
-				if (stop)
+				if (stop) {
 					return;
+				}
 				if (foundParent) {
-					if (row._depth > parentDepth)
+					if (row._depth > parentDepth) {
 						toRemove.push(row);
-					else
+					}
+					else {
 						stop = true;  // we reached a sibling to our parent
+					}
 				} else {
-					if (row.id == parentId) {
+					if (row.id === parentId) {
 						foundParent = true;
 						parentDepth = row._depth;
 					}
 				}
 			});
-			for (i in toRemove) {
+			for (var i in toRemove) {
 				//table.removeChild(toRemove[i]); // IE barfs on this
 				var child = toRemove[i];
 				child.parentNode.removeChild(child);
@@ -215,14 +224,15 @@ var TableTree = (function() {
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId);
 			var row = dojo.byId(id);
 			if (row) {
-				if (!row._expanded)
+				if (!row._expanded) {
 					return;
+				}
 				row._expanded = false;
 				this._removeChildRows(id);
 				this._rowsChanged();
 			}
 		}
-	}  // end prototype
+	};  // end prototype
 	return TableTree;
 }());
 

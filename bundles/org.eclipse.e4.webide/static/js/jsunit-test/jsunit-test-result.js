@@ -24,16 +24,21 @@ eclipse.UnitTestResult = (function() {
 		this._resultRoot = {
 			children:[]
 		};
+		this._filterDiv = dojo.byId("filterResult");
+		//var toolBarDom = dojo.byId("toolbar");
+		//dojo.style(tableRow, "background-color", "#eeeeee");
+		var self = this;
+		dojo.connect(this._filterDiv, "onchange", function() {
+			self.onFilterChange();
+		});
   }
   
   Result.prototype = {
 
-	createResultTree: function(){
-	  	this._resultModel = this._createModel(this._resultRoot, this._resultTreeId);
-	  	var resultTreeDomNode = dojo.byId( this._resultTreeId);
-	  	if(resultTreeDomNode)
-	  		this._resultDivDomNode.removeChild(resultTreeDomNode);
-	  	this._resultTree = new TableTree({
+	createResultTree: function(keepIndicator){
+	  	this._resultModel = this._createModel(this._resultRoot, this._resultTreeId , this._filterDiv.checked);
+	  	this.clearResultUI(keepIndicator);
+	  	this._resultTree = new eclipse.TableTree({
 	    	id: this._resultTreeId,
 	    	model: this._resultModel,
 	    	showRoot: true,
@@ -42,20 +47,24 @@ eclipse.UnitTestResult = (function() {
 	    	renderer: this._renderer
 	  	});
 	  	this._renderer.setTreeTable(this._resultTree);
-	  	for(var i = 0 ; i < this._resultRoot.children.length ; i++){
-		  	this._expandAll(this._resultRoot.children[i]);
-	  	}
+	  	this._renderer.expandAll();
 	},
 	
-	_expandAll: function(root)	{
-		var children = root.children;
-		if(children === undefined || children === null)
-				return;
-		this._resultTree.expand(this._resultModel.getId(root));
-		var len = children.length;
-		for (var i = 0; i < len ; i++){
-			this._expandAll(children[i]);
-		}
+	onFilterChange: function(){
+		this.createResultTree(true);
+	},
+	
+	clearResultUI: function(keepIndicator){
+	  	var resultTreeDomNode = dojo.byId( this._resultTreeId);
+	  	if(resultTreeDomNode){
+	  		resultTreeDomNode.innerHTML = "";
+	  		this._resultDivDomNode.removeChild(resultTreeDomNode);
+	  	}
+	  	this._renderer._stackRenderer.update(null);
+	  	if(keepIndicator)
+	  		return;
+		if(this._indicator)
+			this._indicator.update(0,0);
 	},
 	
 	getTestCaseModel: function(testSuiteNo , tcName){
@@ -125,9 +134,9 @@ eclipse.UnitTestResult = (function() {
 		if(!result.success)
 			this._failureCounter++;
 		if(this._testCounter == this._testNumber){
+			this.createResultTree();
 			if(this._indicator !== undefined)
 				this._indicator.update( this._testNumber , this._failureCounter );
-			this.createResultTree();
 		}
 	},
 
@@ -153,8 +162,12 @@ eclipse.UnitTestResult = (function() {
 	
 	//This function is for test simulation
 	//It simulates the result from the input selected files and will be removed later
-	loadTestResultFiles: function(fileNames){
-		var len = fileNames.length;
+	loadTestResultFiles: function(configValue){
+		if(configValue === null || configValue === undefined)
+			return;
+		var len = configValue.length;
+		if(len === 0)
+			return;
 		var succeed =  len < 4;
 		var root = {
 			children:[],
@@ -167,10 +180,11 @@ eclipse.UnitTestResult = (function() {
 		this._resultRoot.children = [];
 		this._resultRoot.children.push(root);
 		for(var i=0 ; i < len; i++){
+			var location = configValue[i].location ? configValue[i].location : configValue[i];
 			var testCase = {
 				children:[],
 				type: "case",
-				name: "Test Case :  " + fileNames[i],
+				name: "Test Case :  " + location,
 				fileUrl: "",
 				line: 0,
 				succeed: succeed
@@ -179,19 +193,18 @@ eclipse.UnitTestResult = (function() {
 			for(var j=0; j < 3;j++){
 				var test = {
 					type: "test",
-					name: fileNames[i] + "test result   " + j,
+					name: location + "test result   " + j,
 					fileUrl: "",
 					line: 0,
 					succeed: succeed ? true : (j===2 ? false:true),
-					detail: succeed? "" : "failed at :" + fileNames[i]+ ":12:10   " + "test details   " + j
+					detail: succeed? "" : "failed at :" + location + ":12:10   " + "test details   " + j
 				};
 				testCase.children.push(test);
 			}
 		}
-		
+		this.createResultTree();
 		if(this._indicator !== undefined)
 			this._indicator.update(len*3 , succeed ? 0 :  len );
-		this.createResultTree();
 	}
 
   };

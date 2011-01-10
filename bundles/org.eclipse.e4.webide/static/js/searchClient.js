@@ -49,17 +49,20 @@ eclipse.Searcher = (function() {
 				sync: false,
 				timeout: 15000,
 				// need to use inline errback to get ioArgs
-				error: function(response, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs, dojo.hitch(this, showSearchResult), handleError);
+				error: dojo.hitch(this, function(response, ioArgs) {
+					this.handleError(response, resultsNode);
+					handleGetAuthenticationError(this, ioArgs, 
+						dojo.hitch(this, this.showSearchResult),
+						dojo.hitch(this,function(response) { this.handleError(response, resultsNode); }));
 					return response;
-				},
+				}),
 				load: dojo.hitch(this, function(jsonData) {
 					this.showSearchResult(resultsNode, query, excludeFile, generateHeadingAndSaveLink, onResultReady, 
 							hideSummaries, jsonData); 
 				})
 			});
 		},
-		handleError: function(response) {
+		handleError: function(response, resultsNode) {
 			console.error(response);
 			resultsNode.innerHTML = response;
 			return response;

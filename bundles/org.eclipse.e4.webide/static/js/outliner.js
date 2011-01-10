@@ -48,7 +48,8 @@ eclipse.Outliner.prototype = {
 				if (name[0]==='"') {
 					isAnonymousFunction = true;
 					f.name = name = name.substring(1, name.length-1);
-					name = "<i>" + name;
+					// name = "<i>" + name;
+					name = name;
 				}
 				name += "(";
 				if (f.param) {
@@ -64,7 +65,7 @@ eclipse.Outliner.prototype = {
 				}
 				name += ")";
 				if (isAnonymousFunction) {
-					name += "</i>";
+					// name += "</i>";
 				}
 				var nonHash = window.location.href.split('#')[0];
 				var href = nonHash +  eclipse.util.hashFromPosition(resource.title, null, null, f.line, null, null, f.name);
@@ -85,8 +86,8 @@ eclipse.Outliner.prototype = {
 					end = start + name.length;
 				} else {
 					start += 4;
-					name = "<i>" + name.substring(4, name.length-1) + "</i>";
-					end = start+name.length-7;  // subtracting the <i></i>
+					name = name.substring(4, name.length-1);
+					end = start+name.length;
 				}
 				var nonHash = window.location.href.split('#')[0];
 				var href = nonHash +  eclipse.util.hashFromPosition(resource.title, start, end);

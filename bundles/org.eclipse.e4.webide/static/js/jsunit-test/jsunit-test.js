@@ -25,8 +25,8 @@ var uTestNavigator;
 var testConfig;
 
 
-function createResModel(root ,rootId) {
-    return new eclipse.TestResultModel(root,rootId);
+function createResModel(root ,rootId ,filter) {
+    return new eclipse.TestResultModel(root,rootId,filter);
 }
 
 function createNavModel(root , rootId  ,reg) {
@@ -44,6 +44,10 @@ dojo.addOnLoad(function(){
 	
 	// Register the file service
 	registry.registerLocalService("IFileService", "FileService", new eclipse.FileService());
+
+	// Register the test configuration service
+	registry.registerLocalService("ITestConfigs", "TestConfigService", new eclipse.TestConfigService({serviceRegistry: registry}));
+	
 
 	//Create the unit test result tree
 	//It is a container of 3 separated component :
@@ -64,7 +68,7 @@ dojo.addOnLoad(function(){
 	uTestNavigator = new eclipse.TestNavigator(navRenderer, createNavModel, registry);
    	uTestNavigator.loadResourceList(dojo.hash());
    	
-	testConfig = new eclipse.TestConfigurator({serviceRegistry: registry, navigator: uTestNavigator});
+	testConfig = new eclipse.TestConfigurator({serviceRegistry: registry, navigator: uTestNavigator , resultController:uTestResult});
 	
 	dojo.subscribe("/dojo/hashchange", navRenderer, function() {
 	   	uTestNavigator.loadResourceList(dojo.hash());
@@ -81,7 +85,7 @@ function deleteTestConfig(){
 }
 
 function editTestConfig(){
-	testConfig.editConfig();
+	testConfig.updateConfig();
 }
 
 function loadTestResultMock(){
@@ -90,8 +94,9 @@ function loadTestResultMock(){
 	
 function loadTestResultFiles(){
 	//var fileNames =  uTestNavigator._renderer.getSelectedURL(true);
-	var fileNames =  testConfig.getCurrentConfig();
-	uTestResult.loadTestResultFiles(fileNames);
+	//var fileNames = 
+	testConfig.testCurrentConfig(function(arg){uTestResult.loadTestResultFiles(arg);} );
+	
 }
 
 dojo.addOnUnload(function(){

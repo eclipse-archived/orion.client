@@ -7,7 +7,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo eclipse:true confirm document TableTree*/
+/*global dojo eclipse:true widgets*/
+/*jslint regexp:false browser:true forin:true*/
 
 var eclipse = eclipse || {};
 eclipse.Explorer = (function() {
@@ -15,8 +16,7 @@ eclipse.Explorer = (function() {
 	 * @name eclipse.Explorer
 	 * @class A table-based explorer component
 	 */
-	function Explorer(newItemDialogProvider, serviceRegistry, treeRoot, breadcrumbParentId, searcher, parentId, navToolBarId) {
-		this.newItemDialogProvider = newItemDialogProvider;
+	function Explorer(serviceRegistry, treeRoot, breadcrumbParentId, searcher, parentId, navToolBarId) {
 		this.registry = serviceRegistry;
 		this.treeRoot = treeRoot;
 		this.breadcrumbParentId = breadcrumbParentId;
@@ -38,14 +38,14 @@ eclipse.Explorer = (function() {
 			this.registry.callService("IFavorites", "makeFavorites", null, [item]);
 		},
 		
-	    removeResourceList: function() {
-	    	var container = dojo.byId(this.parentId);
-	    	dojo.empty(container);
-	    },
-	    
-		createProject: function(name, serverPath) {
+		removeResourceList: function() {
+			var container = dojo.byId(this.parentId);
+			dojo.empty(container);
+		},
+		
+		createProject: function(name, serverPath, create) {
 			this.registry.callService("IFileService", "createProject", null, 
-					[this.treeRoot.ChildrenLocation, name, serverPath,
+					[this.treeRoot.ChildrenLocation, name, serverPath, create,
 					 dojo.hitch(this, function() {this.changedItem(this.treeRoot);})]);
 		},
 		
@@ -64,59 +64,69 @@ eclipse.Explorer = (function() {
 			}
 			this.registry.callService("IFileService", "createFile", null, [name, item, dojo.hitch(this, this.changedItem)]); 
 		},
-	    
-	    deleteFile: function(itemId) {
-	   		var item = this.myTree.getItem(itemId);
-	   		if (!item)
-	   			return;
+	
+		deleteFile: function(itemId) {
+			var item = this.myTree.getItem(itemId);
+			if (!item) {
+				return;
+			}
 			// prompt since it's so easy to push that X!
-			this.registry.callService("IDialogService", "confirm", null, ["Are you sure you want to delete '" + item.Name + "'?", function(doit) {
-				if (!doit) {
-					return;
-				}
-				if (item.parent.Path === "") {
-					this.registry.callService("IFileService", "removeProject", null,
-						[item.parent, item, dojo.hitch(this, function() {this.changedItem(this.treeRoot);})]);
-				} else {
-					this.registry.callService("IFileService", "deleteFile", null, [item, dojo.hitch(this, this.changedItem)]);
-				}
-			}]);
+			this.registry.callService("IDialogService", "confirm", null, ["Are you sure you want to delete '" + item.Name + "'?", 
+				dojo.hitch(this, function(doit) {
+					if (!doit) {
+						return;
+					}
+					if (item.parent.Path === "") {
+						this.registry.callService("IFileService", "removeProject", null,
+							[item.parent, item, dojo.hitch(this, function() {this.changedItem(this.treeRoot);})]);
+					} else {
+						this.registry.callService("IFileService", "deleteFile", null, [item, dojo.hitch(this, this.changedItem)]);
+					}
+				})]);
 	    },
 	    
-	    loadResourceList: function(path) {
-	    	path = eclipse.util.makeRelative(path);
-	    	if (path == this._lastHash)
-	    		return;
-	    	this._lastHash = path;
-	    	dojo.hash(path, true);
-	   	
-	  		// Progress indicator
-	  		var progress = document.createElement('div');
-	  		progress.innerHTML = "Loading <b>" + path + "</b>...";
-	  		progress.id = "innerTree";
-	  		this.removeResourceList();
-	  		var parent = dojo.byId(this.parentId);
-	  		dojo.place(progress, parent, "only");
-	  		// we are refetching everything so clean up the root
-	  		this.treeRoot = {}
+		loadResourceList: function(path) {
+			path = eclipse.util.makeRelative(path);
+			if (path === this._lastHash) {
+				return;
+			}
+			this._lastHash = path;
+			dojo.hash(path, true);
+		
+			// Progress indicator
+			var progress = document.createElement('div');
+			progress.innerHTML = "Loading <b>" + path + "</b>...";
+			progress.id = "innerTree";
+			this.removeResourceList();
+			var parent = dojo.byId(this.parentId);
+			dojo.place(progress, parent, "only");
+			// we are refetching everything so clean up the root
+			this.treeRoot = {};
 	
-	  		//TODO we need a reliable way to infer search from the path
-	  		var isSearch = path.indexOf("search?") > 0;
-	  		if (isSearch) {
-	 		  	var results = document.createElement('div');
-	 		  	// TODO this must be the same id as the table or else the search won't get deleted
-	 		  	// when a breadcrumb or favorite is chosen
-	 		  	results.id = "innerTree";
-	  			this.searcher.search(results, path, null, true); // true means generate a "save search" link and heading
-	  			//fall through and set the tree root to be the workspace root
-	  			path ="";
-	  			dojo.place(results, parent, "only");
-	  		}
-	  		if (path != this.treeRoot.Path) {
-	  			//the tree root object has changed so we need to load the new one
-	  			this.treeRoot.Path = path;
+			//TODO we need a reliable way to infer search from the path
+			var isSearch = path.indexOf("search?") > 0;
+			if (isSearch) {
+				var results = document.createElement('div');
+				// TODO this must be the same id as the table or else the search won't get deleted
+				// when a breadcrumb or favorite is chosen
+				results.id = "innerTree";
+				this.searcher.search(results, path, null, true); // true means generate a "save search" link and heading
+				//fall through and set the tree root to be the workspace root
+				path ="";
+				dojo.place(results, parent, "only");
+			}
+			if (path !== this.treeRoot.Path) {
+				//the tree root object has changed so we need to load the new one
+				this.treeRoot.Path = path;
 					this.registry.callService("IFileService", "loadWorkspace", null, [path,
 							dojo.hitch(this, function(loadedWorkspace) {
+								// Show an error message when a problem happens during getting the workspace
+								// Don't show the error for 401 since the login dialog is shown anyway
+								if (loadedWorkspace.status != null && loadedWorkspace.status != 401){
+									document.createElement('div'); 
+									progress.innerHTML = "Sorry, an error ocurred: <b>" + loadedWorkspace.message + "</b>";
+									return;
+								}
 								//copy fields of resulting object into the tree root
 								for (var i  in loadedWorkspace) {
 									this.treeRoot[i] = loadedWorkspace[i];
@@ -130,7 +140,7 @@ eclipse.Explorer = (function() {
 											})]);
 								}
 							})]);
-	 		}
+			}
 		},
 		
 		createTree: function (){
@@ -139,7 +149,7 @@ eclipse.Explorer = (function() {
 			// remove any existing tree or other DOM element occupying that space
 			this.removeResourceList();
 	
-			this.myTree = new TableTree({
+			this.myTree = new eclipse.TableTree({
 				id: "innerTree",
 				model: this.model,
 				showRoot: false,
@@ -172,33 +182,53 @@ eclipse.Explorer = (function() {
 					image: "images/silk/page_add-gray.png",
 					hotImage: "images/silk/page_add.png",
 					callback: function(item) {
-						this.newItemDialogProvider.show('Create File', 'File name:',
-								dojo.hitch(this, function(name){this.createFile(name, item);}));
+						var dialog = new widgets.NewItemDialog({
+							title: "Create File",
+							label: "File name:",
+							func:  dojo.hitch(this, function(name){this.createFile(name, item);})
+						});
+						dialog.startup();
+						dialog.show();
 					}}),
 		_newFolderCommand: new eclipse.Command({
 					name: "New Folder",
 					image: "images/silk/folder_add-gray.png",
 					hotImage: "images/silk/folder_add.png",
 					callback: function(item) {
-						this.newItemDialogProvider.show('Create Folder', 'Folder name:',
-								dojo.hitch(this, function(name){this.createFolder(name, item);}));
+						var dialog = new widgets.NewItemDialog({
+							title: "Create Folder",
+							label: "Folder name:",
+							func:  dojo.hitch(this, function(name){this.createFolder(name, item);})
+						});
+						dialog.startup();
+						dialog.show();
 					}}),
 		_newProjectCommand: new eclipse.Command({
 					name: "New Folder",
 					image: "images/silk/folder_add-gray.png",
 					hotImage: "images/silk/folder_add.png",
 					callback: function(item) {
-						this.newItemDialogProvider.show('Create Folder', 'Folder name:',
-								dojo.hitch(this, function(name){this.createProject(name);}));
+						var dialog = new widgets.NewItemDialog({
+							title: "Create Project",
+							label: "Project name:",
+							func:  dojo.hitch(this, function(name){this.createProject(name);})
+						});
+						dialog.startup();
+						dialog.show();
 					}}),
 		_linkProjectCommand: new eclipse.Command({
 					name: "Link Folder",
 					image: "images/silk/link_add-gray.png",
 					hotImage: "images/silk/link_add.png",
 					callback: function(item) {
-						this.newItemDialogProvider.show('Link Folder', 'Folder name:',
-								dojo.hitch(this, function(name,url){this.createProject(name, url);}),
-								true);
+						var dialog = new widgets.NewItemDialog({
+							title: "Link Folder",
+							label: "Folder name:",
+							func:  dojo.hitch(this, function(name,url,create){this.createProject(name, url, create);}),
+							advanced: true
+						});
+						dialog.startup();
+						dialog.show();
 					}}),
 		_openResourceCommand: new eclipse.Command({
 					name: "Open Resource",
@@ -215,7 +245,7 @@ eclipse.Explorer = (function() {
 					}})
 		};
 	return Explorer;
-})();
+}());
 
 eclipse = eclipse || {};
 eclipse.Model = (function() {
@@ -251,9 +281,9 @@ eclipse.Model = (function() {
 		},
 		getId: function(/* item */ item){
 			var result;
-			if (item === this.root)
+			if (item === this.root) {
 				result = "innerTree";
-			else {
+			} else {
 				result = item.Location;
 				// remove all non valid chars to make a dom id. 
 				result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
@@ -262,7 +292,7 @@ eclipse.Model = (function() {
 		}
 	};
 	return Model;
-})();
+}());
 
 /********* Rendering json items into columns in the tree **************/
 eclipse = eclipse || {};
@@ -363,14 +393,15 @@ eclipse.FileRenderer = (function() {
 			}
 			var dateColumn = document.createElement('td');
 			tableRow.appendChild(dateColumn);
-			if (item.LocalTimeStamp)
+			if (item.LocalTimeStamp) {
 				dateColumn.innerHTML = new Date(item.LocalTimeStamp).toLocaleDateString();
+			}
 			dojo.addClass(dateColumn, 'secondaryColumn');
 			
 			var sizeColumn = document.createElement('td');
 			tableRow.appendChild(sizeColumn);
 			if (!item.Directory && typeof item.Length === "number") {
-				var length = parseInt(item.Length),
+				var length = parseInt(item.Length, 10),
 					kb = length / 1024,
 					mb = length / 1048576,
 					label = "";

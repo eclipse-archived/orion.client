@@ -8,16 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global dojo dijit window eclipse registry widgets*/
+/*global dojo dijit window eclipse registry:true widgets alert*/
+/*jslint browser:true*/
 dojo.addOnLoad(function(){
-	// Things that services need...
-	var itemAdvancedInfo = dojo.byId("itemAdvancedInfo"),
-		itemName = dojo.byId("itemName"),
-		itemNameLabel = dojo.byId("itemNameLabel"),
-		itemURL = dojo.byId("itemURL"),
-		newItemDialog = dijit.byId("newItemDialog"),
-		protocol = dijit.byId("protocol"),
-		module = dojo.byId("module");
 	
 	// FIXME until we sort out where service registration happens, and how dependencies on
 	// services are expressed, just copy this code around...
@@ -55,11 +48,8 @@ dojo.addOnLoad(function(){
 	};
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: registry});
 	var searcher = new eclipse.Searcher({serviceRegistry: registry});
-	var newItemDialogProvider = new eclipse.NewItemDialogProvider(itemAdvancedInfo, itemName, itemNameLabel,
-				itemURL, newItemDialog, protocol, module);
 	
-	var explorer = new eclipse.Explorer(newItemDialogProvider, registry, treeRoot, "breadcrumbParent", 
-						searcher, "explorer-tree", "navToolBar");
+	var explorer = new eclipse.Explorer(registry, treeRoot, "breadcrumbParent", searcher, "explorer-tree", "navToolBar");
 	// declare commands
 	
 	var favoriteCommand = new eclipse.Command({
@@ -80,14 +70,21 @@ dojo.addOnLoad(function(){
 			explorer.deleteFile(id);
 		}});
 	commandService.addCommand(deleteCommand, "object");
+	
+	/* NOT USED YET...TBD after M4 
 	var newFileCommand = new eclipse.Command({
 		name: "New File",
 		image: "images/silk/page_add-gray.png",
 		hotImage: "images/silk/page_add.png",
 		id: "eclipse.createFile",
 		callback: function(item) {
-			newItemDialogProvider.showNewItemDialog('Create File', 'File name:',
-				dojo.hitch(explorer, function(name){explorer.createFile(item);}));
+			var dialog = new widgets.NewItemDialog({
+				title: "Create File",
+				label: "File name:",
+				func:  dojo.hitch(explorer, function(name){explorer.createFile(item);})
+			});
+			dialog.startup();
+			dialog.show();
 		}});
 	commandService.addCommand(newFileCommand, "dom", "navToolBar");
 	var newFolderCommand = new eclipse.Command({
@@ -96,8 +93,13 @@ dojo.addOnLoad(function(){
 		hotImage: "images/silk/folder_add.png",
 		id: "eclipse.createFolder",
 		callback: function(item) {
-			newItemDialogProvider.showNewItemDialog('Create Folder', 'Folder name:',
-				dojo.hitch(explorer, function(name){explorer.createFolder(item);}));
+			var dialog = new widgets.NewItemDialog({
+				title: "Create Folder",
+				label: "Folder name:",
+				func:  dojo.hitch(explorer, function(name){explorer.createFolder(item);})
+			});
+			dialog.startup();
+			dialog.show();
 		}});
 	commandService.addCommand(newFolderCommand, "dom", "navToolBar");
 	var newProjectCommand = new eclipse.Command({
@@ -106,8 +108,13 @@ dojo.addOnLoad(function(){
 		hotImage: "images/silk/folder_add.png",
 		id: "eclipse.createProject",
 		callback: function(item) {
-			newItemDialogProvider.showNewItemDialog('Create Folder', 'Folder name:',
-				dojo.hitch(explorer, function(name){explorer.createProject(name);}));
+			var dialog = new widgets.NewItemDialog({
+				title: "Create Project",
+				label: "Project name:",
+				func:  dojo.hitch(explorer, function(name){explorer.createProject(name);})
+			});
+			dialog.startup();
+			dialog.show();
 		}});
 	commandService.addCommand(newProjectCommand, "dom", "navToolBar");
 	var linkProjectCommand = new eclipse.Command({
@@ -115,9 +122,14 @@ dojo.addOnLoad(function(){
 		image: "images/silk/link_add-gray.png",
 		hotImage: "images/silk/link_add.png",
 		callback: function(item) {
-			newItemDialogProvider.showNewItemDialog('Link Folder', 'Folder name:',
-				dojo.hitch(explorer, function(name,url){explorer.createProject(name,url);}),
-								true);
+			var dialog = new widgets.NewItemDialog({
+				title: "Link Folder",
+				label: "Folder name:",
+				func:  dojo.hitch(explorer, function(name,url,create){explorer.createProject(name,url,create);}),
+				advanced: true
+			});
+			dialog.startup();
+			dialog.show();
 		}});
 	commandService.addCommand(linkProjectCommand, "dom", "navToolBar");
 	var openResourceCommand = new eclipse.Command({
@@ -135,6 +147,7 @@ dojo.addOnLoad(function(){
 			}, 0);
 		}});
 	commandService.addCommand(openResourceCommand, "global");
+	*/
 	
 	explorer.loadResourceList(dojo.hash());
 	
@@ -146,12 +159,15 @@ dojo.addOnLoad(function(){
 	var search = dojo.byId("search");
 	if (search) {
 		dojo.connect(search, "onkeypress", function(e){
-			switch(e.charOrCode){
-			case dojo.keys.ENTER:
-				var query = treeRoot.SearchLocation + search.value;
-				explorer.loadResourceList(query);
-				dojo.stopEvent(e);
-				break;
+			if (e.charOrCode === dojo.keys.ENTER) {
+				// We expect ExplorerTree to fill in the SearchLocation on the treeRoot
+				if (explorer.treeRoot.SearchLocation) {
+					var query = explorer.treeRoot.SearchLocation + search.value;
+					explorer.loadResourceList(query);
+					dojo.stopEvent(e);
+				} else {
+					alert("Can't search: SearchLocation not available");
+				}
 			}
 		});
 	}
@@ -160,6 +176,7 @@ dojo.addOnLoad(function(){
 		preferenceService.put("window/orientation", "navigate-tree.html");
 		window.location.replace("/navigate-tree.html#" + dojo.hash());
 	};
+	
 });
 
 dojo.addOnUnload(function(){

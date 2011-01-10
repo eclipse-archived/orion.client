@@ -20,7 +20,7 @@ eclipse.TestResultRenderer = (function() {
 		initTable: function (tableNode, treeTable) {
 			this.setTreeTable(treeTable);
 			
-			dojo.addClass(tableNode, 'treetable');
+			dojo.addClass(tableNode, 'testResultTreetable');
 			var thead = document.createElement('thead');
 			var row = document.createElement('tr');
 			thead.appendChild(row);
@@ -45,7 +45,7 @@ eclipse.TestResultRenderer = (function() {
 				col = document.createElement('td');
 				tableRow.appendChild(col);
 				var nameId =  tableRow.id + "__expand";
-				if(item.succeed)
+				if(item.succeed )
 					col.innerHTML = "<div><img name=\"" + nameId + "\"  src=\"/images/collapsed-gray.png\"><img src=\"/images/unit_test/test_succeed.png\">" + "<span>" + item.name + "</span>" + "</div>";
 				else
 					col.innerHTML = "<div><img name=\"" + nameId + "\"  src=\"/images/collapsed-gray.png\"><img src=\"/images/unit_test/test_fail.png\">" + "<span>" + item.name + "</span>" + "</div>";
@@ -82,6 +82,24 @@ eclipse.TestResultRenderer = (function() {
 			}
 		},
 
+	  	expandAll: function(){
+	  		var len = this._treeTable._treeModel.root.children.length;
+			for(var i = 0 ; i < len ; i++){
+			  	this._expandAll(this._treeTable._treeModel.root.children[i]);
+		  	}
+	  	},
+	  	
+		_expandAll: function(root)	{
+			var children = root.children;
+			if(children === undefined || children === null)
+					return;
+			this._treeTable.expand(this._treeTable._treeModel.getId(root));
+			var len = children.length;
+			for (var i = 0; i < len ; i++){
+				this._expandAll(children[i]);
+			}
+		},
+		
 		rowsChanged: function() {
 			dojo.query(".treeTableRow").forEach(function(node, i) {
 				var color = i % 2 ? "FFFFFF" : "EFEFEF";

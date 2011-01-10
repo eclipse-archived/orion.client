@@ -195,7 +195,7 @@ dojo.declare(
 	
 	// Adds or removes node from the selection
 	_toggleSelectNode: function(/**dijit._TreeNode*/ node) {
-		if (this.selectedNodes[node.get("id")]) {
+		if (this.selectedNodes[node.attr("id")]) {
 			node.setSelected(false);
 			this._removeFromSelection(node);
 		} else {
@@ -205,11 +205,11 @@ dojo.declare(
 	},
 	
 	_addToSelection: function(node) {
-		this.selectedNodes[node.get("id")] = node;
+		this.selectedNodes[node.attr("id")] = node;
 	},
 	
 	_removeFromSelection: function(node) {
-		delete this.selectedNodes[node.get("id")];
+		delete this.selectedNodes[node.attr("id")];
 	},
 	
 	/**

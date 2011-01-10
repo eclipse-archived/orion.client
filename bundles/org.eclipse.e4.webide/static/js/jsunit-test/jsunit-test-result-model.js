@@ -11,9 +11,10 @@
 eclipse = eclipse || {};
 
 eclipse.TestResultModel = (function() {
-  function Model(root , rootId) {
+  function Model(root , rootId , onlyFailure) {
 	this.root=root;
 	this.rootId = rootId;
+	this._onlyFailure = onlyFailure;
   }
   Model.prototype = {
 	  destroy: function(){
@@ -26,7 +27,17 @@ eclipse.TestResultModel = (function() {
 	  getChildren: function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
 	    // the root already has the children fetched
 	    if (parentItem.children) {
-			onComplete(parentItem.children);
+	    	if(this._onlyFailure){
+	    		var children = parentItem.children;
+	    		var failures = [];
+	    		for(var i = 0; i < children.length ; i++ ){
+	    			if(!children[i].succeed)
+	    				failures.push(children[i]);
+	    		}
+	    		onComplete(failures);
+	    	} else {
+				onComplete(parentItem.children);
+	    	}
 	    } else if (parentItem.type!==undefined && parentItem.type==="test") {
 			onComplete([]);
 	    }  else {

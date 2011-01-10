@@ -126,6 +126,15 @@ eclipse.util.makeRelative = function(location) {
 	return location;
 };
 
+eclipse.util.makeFullPath = function(location) {
+	if (!location) {
+		return location;
+	}
+	var nonHash = window.location.href.split('#')[0];
+	var hostName = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+	return (hostName + location);
+};
+
 /**
  * Determines if the path represents the workspace root
  */

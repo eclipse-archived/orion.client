@@ -24,7 +24,7 @@ eclipse.TestNavigatorModel = (function() {
 	    onItem(this.root);
 	  },
 	  
-	  getChildren: function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
+	  getChildren: function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete , postExpandFunc , args){
 	    // the root already has the children fetched
 	    if (parentItem.children) {
 			onComplete(parentItem.children);
@@ -34,10 +34,15 @@ eclipse.TestNavigatorModel = (function() {
 	    	this.registry.callService("IFileService", "getChildren", null, [parentItem,
     			dojo.hitch(this, function(parent, children) {
     				onComplete(children);
+    				if(postExpandFunc)
+    					postExpandFunc(args);
     			})]);
+	    	return;
 	    } else {
 			onComplete([]);
 	    }
+		if(postExpandFunc)
+			postExpandFunc(args);
 	  },
 	  
 	  getId: function(/* item */ item){
@@ -47,7 +52,7 @@ eclipse.TestNavigatorModel = (function() {
 	    else {
 			result = item.Location;
 			// remove all non valid chars to make a dom id. 
-			result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+			//result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
 	    } 
 	    return result;
 	  }

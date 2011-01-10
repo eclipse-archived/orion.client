@@ -7,7 +7,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo eclipse*/
+/*global dijit dojo eclipse:true widgets*/
 /*jslint browser:true*/
 
 dojo.require("dijit.Tree");
@@ -20,8 +20,8 @@ dojo.require("dijit.layout.BorderContainer");
 dojo.require("dijit.layout.ContentPane");
 dojo.require("dijit.TitlePane");
 dojo.require("dojo.data.ItemFileReadStore");
-dojo.require("dojox.layout.ScrollPane");
 dojo.require("widgets.ExplorerTree");
+dojo.require("widgets.NewItemDialog");
 
 var eclipse = eclipse || {};
 eclipse.ExplorerTree = (function() {
@@ -30,8 +30,7 @@ eclipse.ExplorerTree = (function() {
 	 */
 	function ExplorerTree(serviceRegistry, treeRoot, searcher, parentId, 
 			/**dijit.Menu*/ contextMenu, /**dijit._Widget*/ newFileFolderMenu,
-			makeFavoriteDomNode, deleteFilesDomNode, newFolderDomNode, newFileDomNode,
-			newItemDialogProvider) {
+			makeFavoriteDomNode, deleteFilesDomNode, newFolderDomNode, newFileDomNode) {
 		this.registry = serviceRegistry;
 		this.treeRoot = treeRoot;
 		this.searcher = searcher;
@@ -44,8 +43,6 @@ eclipse.ExplorerTree = (function() {
 		this.deleteFilesDomNode = deleteFilesDomNode;
 		this.newFolderDomNode = newFolderDomNode;
 		this.newFileDomNode = newFileDomNode;
-		
-		this.newItemDialogProvider = newItemDialogProvider;
 		
 		this.model = null;
 		this.myTree = null; /**{dijit.Widget}*/
@@ -61,43 +58,44 @@ eclipse.ExplorerTree = (function() {
 			this._selectedNode = treeNode;
 			if (item.Directory===false && item.Location) {
 				this.registry.callService("IInputProvider", "setInput", null, [item.Location, event]);
-	 		}
+			}
 			
 		},
-	    getSelectedItem : function() {
-	    	return this._selectedItem;
-	    },
-	    getCurrentContainerPath : function() {
-	      if (this._selectedItem) {
-	        if (this._selectedItem.file) {
-	          return this._selectedItem.path.substring(0, this._selectedItem.path.length - this._selectedItem.name.length - 1);
-	        }
-	        return this._selectedItem.path;
-	      }
-	    },
+		getSelectedItem : function() {
+			return this._selectedItem;
+		},
+		getCurrentContainerPath : function() {
+			if (this._selectedItem) {
+				if (this._selectedItem.file) {
+				  return this._selectedItem.path.substring(0, this._selectedItem.path.length - this._selectedItem.name.length - 1);
+				}
+				return this._selectedItem.path;
+			}
+		},
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, /* optional */ children) {
 			this.registry.callService("IFileService", "getChildren", null, [parent, dojo.hitch(this.model, this.model.onChildrenChange)]);
 		},
-	    makeFavorite: function() {
-	    	if (this._contextMenuNode) {
-	    		var items = this._contextMenuNode.attr("tree").getSelectedItems();
+		makeFavorite: function() {
+			if (this._contextMenuNode) {
+				var items = this._contextMenuNode.attr("tree").getSelectedItems();
 			this.registry.callService("IFavorites", "makeFavorites", null, [items]);
-	    	}
-	    },
-	    removeResourceList: function() {
-	  		if (this.myTree)
-	  			this.myTree.destroyRecursive();
-	  		// there may be something else, such as a progress div, occupying this space.
-	  		// TODO kind of hokey that we use the same id
-	  		var container = dojo.byId(this.parentId);
-	  		var another = dojo.byId("myTree");
-			if (another) {
-	  			container.removeChild(another);
-	  		}
-	    },
-		createProject: function(name, url) {
-			this.registry.callService("IFileService", "createProject", null, [this.treeRoot.ChildrenLocation, name, url, 
+			}
+		},
+		removeResourceList: function() {
+			if (this.myTree) {
+				this.myTree.destroyRecursive();
+			}
+			// there may be something else, such as a progress div, occupying this space.
+			// TODO kind of hokey that we use the same id
+			var container = dojo.byId(this.parentId);
+			var another = dojo.byId("myTree");
+				if (another) {
+				container.removeChild(another);
+			}
+		},
+		createProject: function(name, url, create) {
+			this.registry.callService("IFileService", "createProject", null, [this.treeRoot.ChildrenLocation, name, url, create,
 							dojo.hitch(this, function() {this.changedItem(this.treeRoot);})]);
 		},
 		createFolder: function(name) {
@@ -115,14 +113,15 @@ eclipse.ExplorerTree = (function() {
 		
 		deleteFiles: function() {
 			if (this._contextMenuNode) {
-				var items = this._contextMenuNode.get("tree").getSelectedItems();
+				var items = this._contextMenuNode.attr("tree").getSelectedItems();
 				if (items.length < 1) {
 					return;
 				}
 				var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
-				this.registry.callService("IDialogService", "confirm", null, [confirmMessage, new function(doit) {
-					if (!doit)
+				this.registry.callService("IDialogService", "confirm", null, [confirmMessage, dojo.hitch(this, function(doit) {
+					if (!doit) {
 						return;
+					}
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
 						if (item.parent.Path === "") {
@@ -132,57 +131,58 @@ eclipse.ExplorerTree = (function() {
 							this.registry.callService("IFileService", "deleteFile", null, [item, dojo.hitch(this, this.changedItem)]);
 						}
 					}
-				}]);
+				})]);
 			}
 		},
-	    // TODO right now we blow away the tree because we might be replacing it
-	    // with a search div.  We could optimize by detecting when we go tree to tree
-	    // and simply update the model.
-	    loadResourceList: function(path) {
-	    	path = eclipse.util.makeRelative(path);
-	       	if (path == this._lastHash)
-	    		return;
-	    	this._lastHash = path;
-	    	dojo.hash(path, true);
-	    	var container = dojo.byId(this.parentId);
-	  		// Progress indicator
-	  		var progress = document.createElement('div');
-	  		progress.innerHTML = "Loading <b>" + path + "</b>...";
-	  		progress.id = "myTree";
-	  		this.removeResourceList();
-	  		dojo.place(progress, container, "only");
-	  		// we are refetching everything so clean up the root
-	  		this.treeRoot = {}
-	  		
-	  		//TODO we need a reliable way to infer search from the path
-	  		var isSearch = path.indexOf("search?") > 0;
-	  		if (isSearch) {
-	  		  	var results = document.createElement('div');
-	 	 		results.id = "myTree";
-	 	 		
-	  			this.searcher.search(results, path, null, true); // true means generate a "save search" link and header
-	  			//fall through and set the tree root to be the workspace root
-	  			path ="";
-	  			dojo.place(results, container, "only");
-	  		}
-	  		if (path != this.treeRoot.Path) {
-	  			//the tree root object has changed so we need to load the new one
-	  			this.treeRoot.Path = path;
-	  			this.registry.callService("IFileService", "loadWorkspace", null, [path,
-	  					dojo.hitch(this, function(loadedWorkspace) {
-	  						//copy fields of resulting object into the tree root
-	  						for (var i  in loadedWorkspace) {
-	  							this.treeRoot[i] = loadedWorkspace[i];
-	  						}
-	  						if (!isSearch) {
-	  							this.registry.callService("IFileService", "getChildren", null, [this.treeRoot, 
-			  							dojo.hitch(this, function(parent, children) {
-			  								new eclipse.BreadCrumbs({container: this.parentId, resource: parent});
-			  								this.createTree();
-			  							})]); 
-	  						}})]);
-	 		}
-	    },
+		// TODO right now we blow away the tree because we might be replacing it
+		// with a search div.  We could optimize by detecting when we go tree to tree
+		// and simply update the model.
+		loadResourceList: function(path) {
+			path = eclipse.util.makeRelative(path);
+			if (path == this._lastHash) {
+				return;
+			}
+			this._lastHash = path;
+			dojo.hash(path, true);
+			var container = dojo.byId(this.parentId);
+			// Progress indicator
+			var progress = document.createElement('div');
+			progress.innerHTML = "Loading <b>" + path + "</b>...";
+			progress.id = "myTree";
+			this.removeResourceList();
+			dojo.place(progress, container, "only");
+			// we are refetching everything so clean up the root
+			this.treeRoot = {};
+			
+			//TODO we need a reliable way to infer search from the path
+			var isSearch = path.indexOf("search?") > 0;
+			if (isSearch) {
+				var results = document.createElement('div');
+				results.id = "myTree";
+				
+				this.searcher.search(results, path, null, true); // true means generate a "save search" link and header
+				//fall through and set the tree root to be the workspace root
+				path ="";
+				dojo.place(results, container, "only");
+			}
+			if (path != this.treeRoot.Path) {
+				//the tree root object has changed so we need to load the new one
+				this.treeRoot.Path = path;
+				this.registry.callService("IFileService", "loadWorkspace", null, [path,
+						dojo.hitch(this, function(loadedWorkspace) {
+							//copy fields of resulting object into the tree root
+							for (var i  in loadedWorkspace) {
+								this.treeRoot[i] = loadedWorkspace[i];
+							}
+							if (!isSearch) {
+								this.registry.callService("IFileService", "getChildren", null, [this.treeRoot, 
+										dojo.hitch(this, function(parent, children) {
+											new eclipse.BreadCrumbs({container: this.parentId, resource: parent});
+											this.createTree();
+										})]); 
+							}})]);
+			}
+		},
 		createTree: function(){
 			this.model = new eclipse.TreeModel(this.registry, this.treeRoot);
 			
@@ -225,17 +225,27 @@ eclipse.ExplorerTree = (function() {
 				this.makeFavoriteDomNode.onclick = function(evt) { explorer.makeFavorite(); };
 				this.deleteFilesDomNode.onclick = function(evt) { explorer.deleteFiles(); };
 				this.newFolderDomNode.onclick = function(evt) {
-						explorer.newItemDialogProvider.show('Create Folder', 'Folder name:', function() { explorer.createFolder(); });
+						var dialog = new widgets.NewItemDialog({
+							title: "New Folder",
+							label: "Folder name:",
+							func:  function(name) { explorer.createFolder(name); }});
+						dialog.startup();
+						dialog.show();
 					};
 				this.newFileDomNode.onclick = function(evt) {
-						explorer.newItemDialogProvider.show('Create File', 'File name:', function() { explorer.createFile(); });
+						var dialog = new widgets.NewItemDialog({
+							title: "New File",
+							label: "File name:",
+							func:  function(name) { explorer.createFile(name); } });
+						dialog.startup();
+						dialog.show();
 					};
 				
 				this.contextMenu.bindDomNode(this.myTree.domNode);
 				// establish which item the menu applies to
 				dojo.connect(this.contextMenu, "_openMyself", this, function(event) {
 					var treeNode = dijit.getEnclosingWidget(event.target);
-					var tree = treeNode.get("tree");
+					var tree = treeNode.attr("tree");
 					var selectedNodes = tree._getSelectedNodes();
 					if (dojo.indexOf(selectedNodes, treeNode) === -1) {
 						// change selection to match where menu appears
