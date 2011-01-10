@@ -17,11 +17,11 @@ eclipse.Ruler = (function() {
 		this._editor = null;
 	}
 	Ruler.prototype = {
-		setView: function (view) {
+		setEditor: function (editor) {
 			if (this._onModelChanged && this._editor) {
 				this._editor.removeEventListener("ModelChanged", this, this._onModelChanged); 
 			}
-			this._editor = view;
+			this._editor = editor;
 			if (this._onModelChanged && this._editor) {
 				this._editor.addEventListener("ModelChanged", this, this._onModelChanged);
 			}

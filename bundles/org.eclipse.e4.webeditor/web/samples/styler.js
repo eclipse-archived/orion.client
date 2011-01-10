@@ -223,7 +223,7 @@ eclipse.TextStyler = (function() {
 		return WhitespaceScanner;
 	}());
 	
-	function TextStyler (view, lang) {
+	function TextStyler (editor, lang) {
 		this.commentStart = "/*";
 		this.commentEnd = "*/";
 		var keywords = [];
@@ -240,27 +240,27 @@ eclipse.TextStyler = (function() {
 			this._scanner.isCSS = true;
 		}
 		this._whitespaceScanner = new WhitespaceScanner();
-		this.view = view;
+		this.editor = editor;
 		this.commentOffset = 0;
 		this.commentOffsets = [];
 		this._currentBracket = undefined; 
 		this._matchingBracket = undefined;
 		
-		view.addEventListener("Selection", this, this._onSelection);
-		view.addEventListener("ModelChanged", this, this._onModelChanged);
-		view.addEventListener("Destroy", this, this._onDestroy);
-		view.addEventListener("LineStyle", this, this._onLineStyle);
+		editor.addEventListener("Selection", this, this._onSelection);
+		editor.addEventListener("ModelChanged", this, this._onModelChanged);
+		editor.addEventListener("Destroy", this, this._onDestroy);
+		editor.addEventListener("LineStyle", this, this._onLineStyle);
 	}
 	
 	TextStyler.prototype = {
 		destroy: function() {
-			var view = this._view;
-			if (view) {
-				view.removeEventListener("Selection", this, this._onSelection);
-				view.removeEventListener("ModelChanged", this, this._onModelChanged);
-				view.removeEventListener("Destroy", this, this._onDestroy);
-				view.removeEventListener("LineStyle", this, this._onLineStyle);
-				this._view = null;
+			var editor = this.editor;
+			if (editor) {
+				editor.removeEventListener("Selection", this, this._onSelection);
+				editor.removeEventListener("ModelChanged", this, this._onModelChanged);
+				editor.removeEventListener("Destroy", this, this._onDestroy);
+				editor.removeEventListener("LineStyle", this, this._onLineStyle);
+				this.editor = null;
 			}
 		},
 		setHighlightCaretLine: function(highlight) {
@@ -285,7 +285,7 @@ eclipse.TextStyler = (function() {
 		_computeComments: function(end) {
 			// compute comments between commentOffset and end
 			if (end <= this.commentOffset) { return; }
-			var model = this.view.getModel();
+			var model = this.editor.getModel();
 			var charCount = model.getCharCount();
 			var e = end;
 			// Uncomment to compute all comments
@@ -321,9 +321,9 @@ eclipse.TextStyler = (function() {
 		},
 		_getLineStyle: function(lineIndex) {
 			if (this.highlightCaretLine) {
-				var view = this.view;
-				var model = this.view.getModel();
-				var selection = view.getSelection();
+				var editor = this.editor;
+				var model = this.editor.getModel();
+				var selection = editor.getSelection();
 				if (selection.start === selection.end && model.getLineAtOffset(selection.start) === lineIndex) {
 					return caretLineStyle;
 				}
@@ -332,7 +332,7 @@ eclipse.TextStyler = (function() {
 		},
 		_getStyles: function(text, start) {
 			var end = start + text.length;
-			var model = this.view.getModel();
+			var model = this.editor.getModel();
 			
 			// get comment ranges that intersect with range
 			var commentRanges = this._getCommentRanges (start, end);
@@ -475,12 +475,12 @@ eclipse.TextStyler = (function() {
 		_onSelection: function(e) {
 			var oldSelection = e.oldValue;
 			var newSelection = e.newValue;
-			var view = this.view;
-			var model = view.getModel();
+			var editor = this.editor;
+			var model = editor.getModel();
 			var lineIndex;
 			if (this._matchingBracket !== undefined) {
 				lineIndex = model.getLineAtOffset(this._matchingBracket);
-				view.redrawLines(lineIndex, lineIndex + 1);
+				editor.redrawLines(lineIndex, lineIndex + 1);
 				this._matchingBracket = this._currentBracket = undefined;
 			}
 			if (this.highlightCaretLine) {
@@ -490,17 +490,17 @@ eclipse.TextStyler = (function() {
 				var oldEmpty = oldSelection.start === oldSelection.end;
 				if (!(oldLineIndex === lineIndex && oldEmpty && newEmpty)) {
 					if (oldEmpty) {
-						view.redrawLines(oldLineIndex, oldLineIndex + 1);
+						editor.redrawLines(oldLineIndex, oldLineIndex + 1);
 					}
 					if ((oldLineIndex !== lineIndex || !oldEmpty) && newEmpty) {
-						view.redrawLines(lineIndex, lineIndex + 1);
+						editor.redrawLines(lineIndex, lineIndex + 1);
 					}
 				}
 			}
 			if (newSelection.start !== newSelection.end || newSelection.start === 0) {
 				return;
 			}
-			var caret = view.getCaretOffset();
+			var caret = editor.getCaretOffset();
 			if (caret === 0) { return; }
 			var brackets = "{}()[]<>";
 			var bracket = model.getText(caret - 1, caret);
@@ -529,7 +529,7 @@ eclipse.TextStyler = (function() {
 							level += sign;
 							if (level === 0) {
 								this._matchingBracket = brackets[i] * sign;
-								view.redrawLines(lineIndex, lineIndex + 1);
+								editor.redrawLines(lineIndex, lineIndex + 1);
 								return;
 							}
 						}
@@ -544,7 +544,7 @@ eclipse.TextStyler = (function() {
 								level += sign;
 								if (level === 0) {
 									this._matchingBracket = brackets[j] * sign;
-									view.redrawLines(lineIndex, lineIndex + 1);
+									editor.redrawLines(lineIndex, lineIndex + 1);
 									return;
 								}
 							}
@@ -557,7 +557,7 @@ eclipse.TextStyler = (function() {
 							level += sign;
 							if (level === 0) {
 								this._matchingBracket = brackets[i] * sign;
-								view.redrawLines(lineIndex, lineIndex + 1);
+								editor.redrawLines(lineIndex, lineIndex + 1);
 								return;
 							}
 						}
@@ -573,7 +573,7 @@ eclipse.TextStyler = (function() {
 								level += sign;
 								if (level === 0) {
 									this._matchingBracket = brackets[k] * sign;
-									view.redrawLines(lineIndex, lineIndex + 1);
+									editor.redrawLines(lineIndex, lineIndex + 1);
 									return;
 								}
 							}
@@ -591,7 +591,7 @@ eclipse.TextStyler = (function() {
 			if (this._matchingBracket && start < this._matchingBracket) { this._matchingBracket += addedCharCount + removedCharCount; }
 			if (this._currentBracket && start < this._currentBracket) { this._currentBracket += addedCharCount + removedCharCount; }
 			if (start >= this.commentOffset) { return; }
-			var model = this.view.getModel();;
+			var model = this.editor.getModel();;
 			
 //			window.console.log("start=" + start + " added=" + addedCharCount + " removed=" + removedCharCount)
 //			for (var i=0; i< this.commentOffsets.length; i++) {
@@ -689,7 +689,7 @@ eclipse.TextStyler = (function() {
 			
 			if (redraw) {
 //				window.console.log ("redraw " + (start + addedCharCount) + " " + redrawEnd);
-				this.view.redrawRange(start + addedCharCount, redrawEnd);
+				this.editor.redrawRange(start + addedCharCount, redrawEnd);
 			}
 
 //			for (var i=0; i< this.commentOffsets.length; i++) {

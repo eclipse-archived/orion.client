@@ -4,13 +4,35 @@
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
  * 
- * Contributors: IBM Corporation - initial API and implementation
+ * Contributors: 
+ *		Felipe Heidrich (IBM Corporation) - initial API and implementation
+ *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
  
 /*global navigator */
 
+/**
+ * @namespace The global container for eclipse APIs.
+ */ 
 var eclipse = eclipse || {};
 
+/**
+ * Constructs a new TextModel with the given text and default line delimiter.
+ *
+ * @param {String} [text=""] the text that the model will store
+ * @param {String} [lineDelimiter=platform delimiter] the line delimiter used when inserting new lines to the model.
+ *
+ * @name eclipse.TextModel
+ * @class The TextModel is an interface that provides text for the editor. Applications may
+ * implement the TextModel interface to provide a custom store for the editor content. The
+ * editor interacts with its text model in order to access and update the text that is being
+ * displayed and edited in the editor. This is the default implementation.
+ * <p>
+ * <b>See:</b><br>
+ * {@link eclipse.Editor}<br>
+ * {@link eclipse.Editor#setModel}
+ * </p>
+ */
 eclipse.TextModel = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 
@@ -23,10 +45,26 @@ eclipse.TextModel = (function() {
 		this.setText(text);
 	}
 
-	TextModel.prototype = {
+	TextModel.prototype = /** @lends eclipse.TextModel.prototype */ {
+		/**
+		 * Adds a listener to the model.
+		 * 
+		 * @param {Object} listener the listener to add.
+		 * @param {Function} [listener.onChanged] see {@link #onChanged}.
+		 * @param {Function} [listener.onChanging] see {@link #onChanging}.
+		 * 
+		 * @see removeListener
+		 */
 		addListener: function(listener) {
 			this._listeners.push(listener);
 		},
+		/**
+		 * Removes a listener from the model.
+		 * 
+		 * @param {Object} listener the listener to remove
+		 * 
+		 * @see #addListener
+		 */
 		removeListener: function(listener) {
 			for (var i = 0; i < this._listeners.length; i++) {
 				if (this._listeners[i] === listener) {
@@ -35,6 +73,11 @@ eclipse.TextModel = (function() {
 				}
 			}
 		},
+		/**
+		 * Returns the number of characters in the model.
+		 *
+		 * @returns {Number} the number of characters in the model.
+		 */
 		getCharCount: function() {
 			var count = 0;
 			for (var i = 0; i<this._text.length; i++) {
@@ -42,7 +85,20 @@ eclipse.TextModel = (function() {
 			}
 			return count;
 		},
-		getLine: function(lineIndex, includeDelimiter /*optional*/) {
+		/**
+		 * Returns the text of the line at the given index.
+		 * <p>
+		 * The valid indices are 0 to line count exclusive.  Returns <code>null</code> 
+		 * if the index is out of range. 
+		 * </p>
+		 *
+		 * @param {Number} lineIndex the zero based index of the line.
+		 * @param {Boolean} [includeDelimiter=false] whether or not to include the line delimiter. 
+		 * @returns {String} the line text or <code>null</code> if out of range.
+		 *
+		 * @see #getLineAtOffset
+		 */
+		getLine: function(lineIndex, includeDelimiter) {
 			var lineCount = this.getLineCount();
 			if (!(0 <= lineIndex && lineIndex < lineCount)) {
 				return null;
@@ -62,6 +118,17 @@ eclipse.TextModel = (function() {
 				return this.getText(start); 
 			}
 		},
+		/**
+		 * Returns the line index at the given character offset.
+		 * <p>
+		 * The valid offsets are 0 to char count inclusive. The line index for
+		 * char count is <code>line count - 1</code>. Returns <code>-1</code> if
+		 * the offset is out of range.
+		 * </p>
+		 *
+		 * @param {Number} offset a character offset.
+		 * @returns {Number} the zero based line index or <code>-1</code> if out of range.
+		 */
 		getLineAtOffset: function(offset) {
 			if (!(0 <= offset && offset <= this.getCharCount())) {
 				return -1;
@@ -98,13 +165,46 @@ eclipse.TextModel = (function() {
 			this._lastLineIndex = high;
 			return high;
 		},
+		/**
+		 * Returns the number of lines in the model.
+		 * <p>
+		 * The model always has at least one line.
+		 * </p>
+		 *
+		 * @returns {Number} the number of lines.
+		 */
 		getLineCount: function() {
 			return this._lineOffsets.length;
 		},
+		/**
+		 * Returns the line delimiter that is used by the editor
+		 * when inserting new lines. New lines entered using key strokes 
+		 * and paste operations use this line delimiter.
+		 *
+		 * @return {String} the line delimiter that is used by the editor when inserting new lines.
+		 */
 		getLineDelimiter: function() {
 			return this._lineDelimiter;
 		},
-		getLineEnd: function(lineIndex, includeDelimiter /*optional*/) {
+		/**
+		 * Returns the end character offset for the given line. 
+		 * <p>
+		 * The end offset is not inclusive. This means that when the line delimiter is included, the 
+		 * offset is either the start offset of the next line or char count. When the line delimiter is
+		 * not included, the offset is the offset of the line delimiter.
+		 * </p>
+		 * <p>
+		 * The valid indices are 0 to line count exclusive.  Returns <code>-1</code> 
+		 * if the index is out of range. 
+		 * </p>
+		 *
+		 * @param {Number} lineIndex the zero based index of the line.
+		 * @param {Boolean} [includeDelimiter=false] whether or not to include the line delimiter. 
+		 * @return {Number} the line end offset or <code>-1</code> if out of range.
+		 *
+		 * @see #getLineStart
+		 */
+		getLineEnd: function(lineIndex, includeDelimiter) {
 			var lineCount = this.getLineCount();
 			if (!(0 <= lineIndex && lineIndex < lineCount)) {
 				return -1;
@@ -124,12 +224,36 @@ eclipse.TextModel = (function() {
 				return this.getCharCount();
 			}
 		},
+		/**
+		 * Returns the start character offset for the given line.
+		 * <p>
+		 * The valid indices are 0 to line count exclusive.  Returns <code>-1</code> 
+		 * if the index is out of range. 
+		 * </p>
+		 *
+		 * @param {Number} lineIndex the zero based index of the line.
+		 * @return {Number} the line start offset or <code>-1</code> if out of range.
+		 *
+		 * @see #getLineEnd
+		 */
 		getLineStart: function(lineIndex) {
 			if (!(0 <= lineIndex && lineIndex < this.getLineCount())) {
 				return -1;
 			}
 			return this._lineOffsets[lineIndex];
 		},
+		/**
+		 * Returns the text for the given range.
+		 * <p>
+		 * The end offset is not inclusive. This means that character at the end offset
+		 * is not included in the returned text.
+		 * </p>
+		 *
+		 * @param {Number} [start=0] the zero based start offset of text range.
+		 * @param {Number} [end=char count] the zero based end offset of text range.
+		 *
+		 * @see #setText
+		 */
 		getText: function(start, end) {
 			if (start === undefined) { start = 0; }
 			if (end === undefined) { end = this.getCharCount(); }
@@ -157,22 +281,77 @@ eclipse.TextModel = (function() {
 			var afterText = this._text[lastChunk].substring(0, end - lastOffset);
 			return beforeText + this._text.slice(firstChunk+1, lastChunk).join("") + afterText; 
 		},
-		onChanging: function(newText, eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+		/**
+		 * Notifies all listeners that the text is about to change.
+		 * <p>
+		 * This notification is intended to be used only by the editor. Application clients should
+		 * use {@link eclipse.Editor#event:onModelChanging}.
+		 * </p>
+		 * <p>
+		 * NOTE: This method is not meant to called directly by application code. It is called internally by the TextModel
+		 * as part of the implementation of {@link #setText}. This method is included in the public API for documentation
+		 * purposes and to allow integration with other toolkit frameworks.
+		 * </p>
+		 *
+		 * @param {String} text the text that is about to be inserted in the model.
+		 * @param {Number} start the character offset in the model where the change will occur.
+		 * @param {Number} removedCharCount the number of characters being removed from the model.
+		 * @param {Number} addedCharCount the number of characters being added to the model.
+		 * @param {Number} removedLineCount the number of lines being removed from the model.
+		 * @param {Number} addedLineCount the number of lines being added to the model.
+		 */
+		onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanging) { 
-					l.onChanging(newText, eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+					l.onChanging(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 				}
 			}
 		},
-		onChanged: function(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+		/**
+		 * Notifies all listeners that the text has changed.
+		 * <p>
+		 * This notification is intended to be used only by the editor. Application clients should
+		 * use {@link eclipse.Editor#event:onModelChanged}.
+		 * </p>
+		 * <p>
+		 * NOTE: This method is not meant to called directly by application code. It is called internally by the TextModel
+		 * as part of the implementation of {@link #setText}. This method is included in the public API for documentation
+		 * purposes and to allow integration with other toolkit frameworks.
+		 * </p>
+		 *
+		 * @param {Number} start the character offset in the model where the change occurred.
+		 * @param {Number} removedCharCount the number of characters removed from the model.
+		 * @param {Number} addedCharCount the number of characters added to the model.
+		 * @param {Number} removedLineCount the number of lines removed from the model.
+		 * @param {Number} addedLineCount the number of lines added to the model.
+		 */
+		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanged) { 
-					l.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+					l.onChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 				}
 			}
 		},
+		/**
+		 * Replaces the text in the given range with the given text.
+		 * <p>
+		 * The end offset is not inclusive. This means that the character at the 
+		 * end offset is not replaced.
+		 * </p>
+		 * <p>
+		 * The text model must notify the listeners before and after the
+		 * the text is changed by calling {@link #onChanging} and {@link #onChanged}
+		 * respectively. 
+		 * </p>
+		 *
+		 * @param {String} [text=""] the new text.
+		 * @param {Number} [start=0] the zero based start offset of text range.
+		 * @param {Number} [end=char count] the zero based end offset of text range.
+		 *
+		 * @see #getText
+		 */
 		setText: function(text, start, end) {
 			if (text === undefined) { text = ""; }
 			if (start === undefined) { start = 0; }

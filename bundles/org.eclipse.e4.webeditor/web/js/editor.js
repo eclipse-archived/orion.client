@@ -4,13 +4,38 @@
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
  * 
- * Contributors: IBM Corporation - initial API and implementation
+ * Contributors: 
+ *		Felipe Heidrich (IBM Corporation) - initial API and implementation
+ *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout alert XMLHttpRequest */
 
+/**
+ * @namespace The global container for eclipse APIs.
+ */ 
 var eclipse = eclipse || {};
 
+/**
+ * Constructs a new key binding with the given key code and modifiers.
+ * 
+ * @param {String|Number} keyCode the key code.
+ * @param {Boolean} mod1 the primary modifier (usually Command on Mac and Control on other platforms).
+ * @param {Boolean} mod2 the secondary modifier (usually Shift).
+ * @param {Boolean} mod3 the third modifier (usually Alt).
+ * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
+ * 
+ * @class A KeyBinding represents of a key code and a modifier state that can be triggered by the user using the keyboard.
+ * @name eclipse.KeyBinding
+ * 
+ * @property {String|Number} keyCode The key code.
+ * @property {Boolean} mod1 The primary modifier (usually Command on Mac and Control on other platforms).
+ * @property {Boolean} mod2 The secondary modifier (usually Shift).
+ * @property {Boolean} mod3 The third modifier (usually Alt).
+ * @property {Boolean} mod4 The fourth modifier (usually Control on the Mac).
+ *
+ * @see eclipse.Editor#setKeyBinding
+ */
 eclipse.KeyBinding = (function() {
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	function KeyBinding (keyCode, mod1, mod2, mod3, mod4) {
@@ -24,18 +49,30 @@ eclipse.KeyBinding = (function() {
 		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;
 		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
 	}
-	KeyBinding.prototype = {
+	KeyBinding.prototype = /** @lends eclipse.KeyBinding.prototype */ {
+		/**
+		 * Returns whether this key binding matches the given key event.
+		 * 
+		 * @param e the key event.
+		 * @returns {Boolean} <code>true</code> whether the key binding matches the key event.
+		 */
 		match: function (e) {
 			if (this.keyCode === e.keyCode) {
 				var mod1 = isMac ? e.metaKey : e.ctrlKey;
 				if (this.mod1 !== mod1) { return false; }
 				if (this.mod2 !== e.shiftKey) { return false; }
 				if (this.mod3 !== e.altKey) { return false; }
-				if (isMac && this.mod4 !== e.ctrlKey) { return false; }//mac only
+				if (isMac && this.mod4 !== e.ctrlKey) { return false; }
 				return true;
 			}
 			return false;
 		},
+		/**
+		 * Returns whether this key binding is the same as the given parameter.
+		 * 
+		 * @param {eclipse.KeyBinding} kb the key binding to compare with.
+		 * @returns {Boolean} whether or not the parameter and the receiver describe the same key binding.
+		 */
 		equals: function(kb) {
 			if (!kb) { return false; }
 			if (this.keyCode !== kb.keyCode) { return false; }
@@ -49,9 +86,20 @@ eclipse.KeyBinding = (function() {
 	return KeyBinding;
 }());
 
+/**
+ * Constructs a new editor
+ * 
+ * @param options the editor options.
+ * @param {String|DOMElement} options.parent the parent element for the editor, it can be either a DOM element or an ID for a DOM element.
+ * @param {eclipse.TextModel} [options.model] the text model for the editor. If this options is not set the editor creates an empty {@link eclipse.TextModel}.
+ * @param {Boolean} [options.readonly=false] whether or not the editor is read-only.
+ * @param {String|String[]} [options.stylesheet] one or more stylesheet URIs for the editor.
+ * 
+ * @class A Editor is a user interface for editing text.
+ * @name eclipse.Editor
+ */
 eclipse.Editor = (function() {
 	
-	/** Private Helpers */
 	function addHandler(node, type, handler, capture) {
 		if (typeof node.addEventListener === "function") {
 			node.addEventListener(type, handler, capture === true);
@@ -74,12 +122,29 @@ eclipse.Editor = (function() {
 	var isW3CEvents = typeof window.document.documentElement.addEventListener === "function";
 
 	var Selection = (function() {
+		/** 
+		 * Constructs a new Selection object.
+		 * 
+		 * @class A Selection represents a range of selected text in the editor.
+		 * @name eclipse.Selection
+		 * @public
+		 */
 		function Selection (start, end, caret) {
+			/**
+			 * The selection start offset.
+			 *
+			 * @name eclipse.Selection#start
+			 */
 			this.start = start;
+			/**
+			 * The selection end offset.
+			 *
+			 * @name eclipse.Selection#end
+			 */
 			this.end = end;
 			this.caret = caret; //true if the start, false if the caret is at end
 		}
-		Selection.prototype = {
+		Selection.prototype = /** @lends eclipse.Selection.prototype */ {
 			clone: function() {
 				return new Selection(this.start, this.end, this.caret);
 			},
@@ -167,16 +232,123 @@ eclipse.Editor = (function() {
 		return EventTable;
 	}());
 	
-	/******************************* Constructor ***************************/
 	function Editor (options) {
 		this._init(options);
 	}
 	
-	Editor.prototype = {
-		/*************************************** API **********************************/
+	Editor.prototype = /** @lends eclipse.Editor.prototype */ {
+		/**
+		 * Adds an event listener to the editor.
+		 * 
+		 * @param {String} type the event type. The supported events are:
+		 * <ul>
+		 * <li>"Modify" See {@link #onModify} </li>
+		 * <li>"Selection" See {@link #onSelection} </li>
+		 * <li>"Scroll" See {@link #onScroll} </li>
+		 * <li>"Verify" See {@link #onVerify} </li>
+		 * <li>"Destroy" See {@link #onDestroy} </li>
+		 * <li>"LineStyle" See {@link #onLineStyle} </li>
+		 * <li>"ModelChanging" See {@link #onModelChanging} </li>
+		 * <li>"ModelChanged" See {@link #onModelChanged} </li>
+		 * </ul>
+		 * @param {Object} context the context of the function.
+		 * @param {Function} func the function that will be executed when the event happens. 
+		 *   The function should take an event as the first parameter and optional data as the second parameter.
+		 * @param {Object} [data] optional data passed to the function.
+		 * 
+		 * @see #removeEventListener
+		 */
 		addEventListener: function(type, context, func, data) {
 			this._eventTable.addEventListener(type, context, func, data);
 		},
+		/**
+		 * @class This interface represents a ruler for the editor.
+		 * <p>
+		 * A Ruler is a graphical element that is placed either on the left or on the right side of 
+		 * the editor. It can be used to provide the editor with per line decoration such as line numbering,
+		 * bookmarks, breakpoints, folding disclosures, etc. 
+		 * </p><p>
+		 * There are two types of rulers: page and document. A page ruler only shows the content for the lines that are
+		 * visible, while a document ruler always shows the whole content.
+		 * </p>
+		 * <b>See:</b><br>
+		 * {@link eclipse.Editor}<br>
+		 * {@link eclipse.Editor#addRuler}
+		 * </p>		 
+		 * @name eclipse.Ruler
+		 * 
+		 */
+		/**
+		 * Returns the ruler overview type.
+		 *
+		 * @name getOverview
+		 * @methodOf eclipse.Ruler#
+		 * @returns {String} the overview type, which is either "page" or "document".
+		 */
+		/**
+		 * Returns the ruler location.
+		 *
+		 * @name getLocation
+		 * @methodOf eclipse.Ruler#
+		 * @returns {String} the ruler location, which is either "left" or "right".
+		 */
+		/**
+		 * Returns the HTML content for the decoration of a given line.
+		 * <p>
+		 * If the line index is <code>-1</code>, the HTML content for the decoration
+		 * that determines the width of the ruler should be returned.
+		 * </p>
+		 *
+		 * @name getHTML
+		 * @methodOf eclipse.Ruler#
+		 * @param {Number} lineIndex
+		 * @returns {String} the HTML content for a given line, or generic line.
+		 */
+		/**
+		 * Returns the CSS styling information for the decoration of a given line.
+		 * <p>
+		 * If the line index is <code>-1</code>, the CSS styling information for the decoration
+		 * that determines the width of the ruler should be returned. If the line is
+		 * <code>undefined</code>, the ruler styling information should be returned.
+		 * </p>
+		 *
+		 * @name getStyle
+		 * @methodOf eclipse.Ruler#
+		 * @param {Number} lineIndex
+		 * @returns {eclipse.Style} the CSS styling for ruler, given line, or generic line.
+		 */
+		/**
+		 * Returns the indices of the lines that have decoration.
+		 * <p>
+		 * This function is only called for rulers with "document" overview type.
+		 * </p>
+		 * @name getAnnotations
+		 * @methodOf eclipse.Ruler#
+		 * @returns {Number[]} an array of line indices.
+		 */
+		/**
+		 * This event is sent when the user clicks a line decoration.
+		 *
+		 * @name onClick
+		 * @event
+		 * @methodOf eclipse.Ruler#
+		 * @param {Number} lineIndex the line index of the clicked decoration
+		 * @param {DOMEvent} e the click event
+		 */
+		/**
+		 * This event is sent when the user double clicks a line decoration.
+		 *
+		 * @name onDblClick
+		 * @event
+		 * @methodOf eclipse.Ruler#
+		 * @param {Number} lineIndex the line index of the double clicked decoration
+		 * @param {DOMEvent} e the double click event
+		 */
+		/**
+		 * Adds a ruler to the editor.
+		 *
+		 * @param {eclipse.Ruler} ruler the ruler.
+		 */
 		addRuler: function (ruler) {
 			var document = this._frameDocument;
 			var body = document.body;
@@ -220,9 +392,33 @@ eclipse.Editor = (function() {
 			var cell = row.insertCell(index);
 			cell.vAlign = "top";
 			cell.appendChild(div);
-			ruler.setView(this);
+			ruler.setEditor(this);
 			this._updatePage();
 		},
+		/**
+		 * Converts the given rectangle from one coordinate spaces to another.
+		 * <p>The supported coordinate spaces are:
+		 * <ul>
+		 *   <li>"document" - relative to document, the origin is the top-left corner of first line</li>
+		 *   <li>"page" - relative to html page that contains the editor</li>
+		 *   <li>"editor" - relative to editor, the origin is the top-left corner of the editor container</li>
+		 * </ul>
+		 * </p>
+		 * <p>All methods in the editor that take or return a position are in the document coordinate space.</p>
+		 *
+		 * @param rect the rectangle to convert.
+		 * @param rect.x the x of the rectangle.
+		 * @param rect.y the y of the rectangle.
+		 * @param rect.width the width of the rectangle.
+		 * @param rect.height the height of the rectangle.
+		 * @param {String} from the source coordinate space.
+		 * @param {String} to the destination coordinate space.
+		 *
+		 * @see #getLocationAtOffset
+		 * @see #getOffsetAtLocation
+		 * @see #getTopPixel
+		 * @see #setTopPixel
+		 */
 		convert: function(rect, from, to) {
 			var scroll = this._getScroll();
 			var editorPad = this._getEditorPadding();
@@ -266,6 +462,16 @@ eclipse.Editor = (function() {
 					break;
 			}
 		},
+		/**
+		 * Destroys the editor. 
+		 * <p>
+		 * Removes the editor from the page and frees all resources created by the editor.
+		 * Calling this function causes the "Destroy" event to be fire so that all components
+		 * attached to editor can release their references.
+		 * </p>
+		 *
+		 * @see #onDestroy
+		 */
 		destroy: function() {
 			this._setGrab(null);
 			this._unhookEvents();
@@ -278,7 +484,7 @@ eclipse.Editor = (function() {
 				var cells = rulerDiv.firstChild.rows[0].cells;
 				for (var i = 0; i < cells.length; i++) {
 					var div = cells[i].firstChild;
-					div._ruler.setView(null);
+					div._ruler.setEditor(null);
 				}
 			};
 			destroyRulers (this._leftDiv);
@@ -319,6 +525,9 @@ eclipse.Editor = (function() {
 			this._keyBindings = null;
 			this._actions = null;
 		},
+		/**
+		 * Gives focus to the editor.
+		 */
 		focus: function() {
 			/*
 			* Feature in Chrome. When focus is called in the clientDiv without
@@ -335,9 +544,71 @@ eclipse.Editor = (function() {
 			*/
 			this._updateDOMSelection();
 		},
-		/*
-		 * returns a string arrays with the name of all actions
-		 * if defaultAction is true it also includes the predefined actions 
+		/**
+		 * Returns all action names defined in the editor.
+		 * <p>
+		 * There are two types of actions, the predefined actions of the editor 
+		 * and the actions added by application code.
+		 * </p>
+		 * <p>
+		 * The predefined actions are:
+		 * <ul>
+		 *   <li>Navigation actions. These actions move the caret collaping the selection.</li>
+		 *     <ul>
+		 *       <li>"lineUp" - moves the caret up by one line</li>
+		 *       <li>"lineDown" - moves the caret down by one line</li>
+		 *       <li>"lineStart" - moves the caret to beginning of the current line</li>
+		 *       <li>"lineEnd" - moves the caret to end of the current line </li>
+		 *       <li>"charPrevious" - moves the caret to the previous character</li>
+		 *       <li>"charNext" - moves the caret to the next character</li>
+		 *       <li>"pageUp" - moves the caret up by one page</li>
+		 *       <li>"pageDown" - moves the caret down by one page</li>
+		 *       <li>"wordPrevious" - moves the caret to the previous word</li>
+		 *       <li>"wordNext" - moves the caret to the next word</li>
+		 *       <li>"textStart" - moves the caret to the beginning of the document</li>
+		 *       <li>"textEnd" - moves the caret to the end of the document</li>
+		 *     </ul>
+		 *   <li>Selection actions. These actions move the caret extending the selection.</li>
+		 *     <ul>
+		 *       <li>"selectLineUp" - moves the caret up by one line</li>
+		 *       <li>"selectLineDown" - moves the caret down by one line</li>
+		 *       <li>"selectLineStart" - moves the caret to beginning of the current line</li>
+		 *       <li>"selectLineEnd" - moves the caret to end of the current line </li>
+		 *       <li>"selectCharPrevious" - moves the caret to the previous character</li>
+		 *       <li>"selectCharNext" - moves the caret to the next character</li>
+		 *       <li>"selectPageUp" - moves the caret up by one page</li>
+		 *       <li>"selectPageDown" - moves the caret down by one page</li>
+		 *       <li>"selectWordPrevious" - moves the caret to the previous word</li>
+		 *       <li>"selectWordNext" - moves the caret to the next word</li>
+		 *       <li>"selectTextStart" - moves the caret to the beginning of the document</li>
+		 *       <li>"selectTextEnd" - moves the caret to the end of the document</li>
+		 *       <li>"selectAll" - selects the entire document</li>
+		 *     </ul>
+		 *   <li>Edit actions. These actions modify the editor text</li>
+		 *     <ul>
+		 *       <li>"deletePrevious" - deletes the character preceding the caret</li>
+		 *       <li>"deleteNext" - deletes the charecter following the caret</li>
+		 *       <li>"deleteWordPrevious" - deletes the word preceding the caret</li>
+		 *       <li>"deleteWordNext" - deletes the word following the caret</li>
+		 *       <li>"tab" - inserts a tab character at the caret</li>
+		 *       <li>"enter" - inserts a line delimiter at the caret</li>
+		 *     </ul>
+		 *   <li>Clipboard actions.</li>
+		 *     <ul>
+		 *       <li>"copy" - copies the selected text to the clipboard</li>
+		 *       <li>"cut" - copies the selected text to the clipboard and deletes the selection</li>
+		 *       <li>"paste" - replaces the selected text with the clipboard contents</li>
+		 *     </ul>
+		 * </ul>
+		 * </p>
+		 *
+		 * @param {Boolean} [defaultAction=false] whether or not the predefined actions are included.
+		 * @returns {String[]} an array of action names defined in the editor.
+		 *
+		 * @see #invokeAction
+		 * @see #setAction
+		 * @see #setKeyBinding
+		 * @see #getKeyBindings
 		 */
 		getActions: function (defaultAction) {
 			var result = [];
@@ -348,25 +619,96 @@ eclipse.Editor = (function() {
 			}
 			return result;
 		},
-		getBottomIndex: function(fullyVisible /*optional*/) {
+		/**
+		 * Returns the bottom index.
+		 * <p>
+		 * The bottom index is the line that is currently at the bottom of the editor.  This
+		 * line may be partially visible depending on the vertical scroll of the editor. The parameter
+		 * <code>fullyVisible</code> determines whether to return only fully visible lines. 
+		 * </p>
+		 *
+		 * @param {Boolean} [fullyVisible=false] if <code>true</code>, returns the index of the last fully visible line. This
+		 *    parameter is ignored if the editor is not big enough to show one line.
+		 * @returns {Number} the index of the bottom line.
+		 *
+		 * @see #getTopIndex
+		 * @see #setTopIndex
+		 */
+		getBottomIndex: function(fullyVisible) {
 			return this._getBottomIndex(fullyVisible);
 		},
+		/**
+		 * Returns the bottom pixel.
+		 * <p>
+		 * The bottom pixel is the pixel position that is currently at
+		 * the bottom edge of the editor.  This position is relative to the
+		 * beginning of the document.
+		 * </p>
+		 *
+		 * @returns {Number} the bottom pixel.
+		 *
+		 * @see #getTopPixel
+		 * @see #setTopPixel
+		 * @see #convert
+		 */
 		getBottomPixel: function() {
 			return this._getScroll().y + this._getClientHeight();
 		},
+		/**
+		 * Returns the caret offset relative to the start of the document.
+		 *
+		 * @returns the caret offset relative to the start of the document.
+		 *
+		 * @see #setCaretOffset
+		 * @see #setSelection
+		 * @see #getSelection
+		 */
 		getCaretOffset: function () {
 			var s = this._getSelection();
 			return s.getCaret();
 		},
+		/**
+		 * Returns the client area.
+		 * <p>
+		 * The client area is the portion in pixels of the document that is visible. The
+		 * client area position is relative to the beginning of the document.
+		 * </p>
+		 *
+		 * @returns the client area rectangle {x, y, width, height}.
+		 *
+		 * @see #getTopPixel
+		 * @see #getBottomPixel
+		 * @see #getHorizontalPixel
+		 * @see #convert
+		 */
 		getClientArea: function() {
 			var scroll = this._getScroll();
 			return {x: scroll.x, y: scroll.y, width: this._getClientWidth(), height: this._getClientHeight()};
 		},
+		/**
+		 * Returns the horizontal pixel.
+		 * <p>
+		 * The horizontal pixel is the pixel position that is currently at
+		 * the left edge of the editor.  This position is relative to the
+		 * beginning of the document.
+		 * </p>
+		 *
+		 * @returns {Number} the horizontal pixel.
+		 *
+		 * @see #setHorizontalPixel
+		 * @see #convert
+		 */
 		getHorizontalPixel: function() {
 			return this._getScroll().x;
 		},
-		/*
-		 * Returns the array of KeyBinding for the given name 
+		/**
+		 * Returns all the key bindings associated to the given action name.
+		 *
+		 * @param {String} name the action name.
+		 * @returns {eclipse.KeyBinding[]} the array of key bindings associated to the given action name.
+		 *
+		 * @see #setKeyBinding
+		 * @see #setAction
 		 */
 		getKeyBindings: function (name) {
 			var result = [];
@@ -378,16 +720,53 @@ eclipse.Editor = (function() {
 			}
 			return result;
 		},
-		getLineHeight: function(lineIndex/*optional*/) {
+		/**
+		 * Returns the line height for a given line index.  Returns the default line
+		 * height if the line index is not specified.
+		 *
+		 * @param {Number} [lineIndex] the line index.
+		 * @returns {Number} the height of the line in pixels.
+		 *
+		 * @see #getLinePixel
+		 */
+		getLineHeight: function(lineIndex) {
 			return this._getLineHeight();
 		},
+		/**
+		 * Returns the top pixel position of a given line index relative to the beginning
+		 * of the document.
+		 * <p>
+		 * Clamps out of range indices.
+		 * </p>
+		 *
+		 * @param {Number} lineIndex the line index.
+		 * @returns {Number} the pixel position of the line.
+		 *
+		 * @see #setTopPixel
+		 * @see #convert
+		 */
 		getLinePixel: function(lineIndex) {
-			lineIndex= Math.min(Math.max(0, lineIndex), this._model.getLineCount());
+			lineIndex = Math.min(Math.max(0, lineIndex), this._model.getLineCount());
 			var lineHeight = this._getLineHeight();
 			return lineHeight * lineIndex;
 		},
+		/**
+		 * Returns the {x, y} pixel location of the top-left corner of the character
+		 * bounding box at the specified offset in the document.  The pixel location
+		 * is relative to the document.
+		 * <p>
+		 * Clamps out of range offsets.
+		 * </p>
+		 *
+		 * @param {Number} offset the character offset
+		 * @returns the {x, y} pixel location of the given offset.
+		 *
+		 * @see #getOffsetAtLocation
+		 * @see #convert
+		 */
 		getLocationAtOffset: function(offset) {
 			var model = this._model;
+			offset = Math.min(Math.max(0, offset), model.getCharCount());
 			var lineIndex = model.getLineAtOffset(offset);
 			var scroll = this._getScroll();
 			var editorRect = this._editorDiv.getBoundingClientRect();
@@ -396,9 +775,24 @@ eclipse.Editor = (function() {
 			var y = this.getLinePixel(lineIndex);
 			return {x: x, y: y};
 		},
+		/**
+		 * Returns the text model of the editor.
+		 *
+		 * @returns {eclipse.TextModel} the text model of the editor.
+		 */
 		getModel: function() {
 			return this._model;
 		},
+		/**
+		 * Returns the character offset nearest to the given pixel location.  The
+		 * pixel location is relative to the document.
+		 *
+		 * @param x the x of the location
+		 * @param y the y of the location
+		 * @returns the character offset at the given location.
+		 *
+		 * @see #getLocationAtOffset
+		 */
 		getOffsetAtLocation: function(x, y) {
 			var model = this._model;
 			var scroll = this._getScroll();
@@ -409,85 +803,326 @@ eclipse.Editor = (function() {
 			var offset = this._getXToOffset(lineIndex, x);
 			return offset;
 		},
-		/*
-		* start offset -
-		* end offset - the char at end offset is not included
-		*/
+		/**
+		 * Returns the editor selection.
+		 * <p>
+		 * The selection is defined by a start and end character offset relative to the
+		 * document. The character at end offset is not included in the selection.
+		 * </p>
+		 * 
+		 * @returns {start, end} the editor selection
+		 *
+		 * @see #setSelection
+		 */
 		getSelection: function () {
 			var s = this._getSelection();
 			return {start: s.start, end: s.end};
 		},
-		/*
-		* start offset -
-		* end offset - the char at end offset is not included
-		*/
-		getText: function(start /*optional*/, end /*optional*/) {
+		/**
+		 * Returns the text for the given range.
+		 * <p>
+		 * The text does not include the character at the end offset.
+		 * </p>
+		 *
+		 * @param {Number} [start=0] the start offset of text range.
+		 * @param {Number} [end=char count] the end offset of text range.
+		 *
+		 * @see #setText
+		 */
+		getText: function(start, end) {
 			var model = this._model;
 			return model.getText(start, end);
 		},
-		getTopIndex: function(fullyVisible /*optional*/) {
+		/**
+		 * Returns the top index.
+		 * <p>
+		 * The top index is the line that is currently at the top of the editor.  This
+		 * line may be partially visible depending on the vertical scroll of the editor. The parameter
+		 * <code>fullyVisible</code> determines whether to return only fully visible lines. 
+		 * </p>
+		 *
+		 * @param {Boolean} [fullyVisible=false] if <code>true</code>, returns the index of the first fully visible line. This
+		 *    parameter is ignored if the editor is not big enough to show one line.
+		 * @returns {Number} the index of the top line.
+		 *
+		 * @see #getBottomIndex
+		 * @see #setTopIndex
+		 */
+		getTopIndex: function(fullyVisible) {
 			return this._getTopIndex(fullyVisible);
 		},
+		/**
+		 * Returns the top pixel.
+		 * <p>
+		 * The top pixel is the pixel position that is currently at
+		 * the top edge of the editor.  This position is relative to the
+		 * beginning of the document.
+		 * </p>
+		 *
+		 * @returns {Number} the top pixel.
+		 *
+		 * @see #getBottomPixel
+		 * @see #setTopPixel
+		 * @see #convert
+		 */
 		getTopPixel: function() {
 			return this._getScroll().y;
 		},
+		/**
+		 * Executes the action handler associated with the given name.
+		 * <p>
+		 * The application defined action takes precedence over predefined actions unless
+		 * the <code>defaultAction</code> paramater is <code>true</code>.
+		 * </p>
+		 * <p>
+		 * If the application defined action returns <code>false</code>, the editor predefined
+		 * action is executed if present.
+		 * </p>
+		 *
+		 * @param {String} name the action name.
+		 * @param {Boolean} [defaultAction] whether to always execute the predefined action.
+		 * @returns {Boolean} <code>true</code> if the action was executed.
+		 *
+		 * @see #setAction
+		 * @see #getActions
+		 */
 		invokeAction: function (name, defaultAction) {
 			var actions = this._actions;
 			for (var i = 0; i < actions.length; i++) {
 				var a = actions[i];
 				if (a.name && a.name === name) {
-					if (!defaultAction && a.userHandler) { return a.userHandler(); }
+					if (!defaultAction && a.userHandler) {
+						if (a.userHandler()) { return; }
+					}
 					if (a.defaultHandler) { return a.defaultHandler(); }
 					return false;
 				}
 			}
 			return false;
 		},
-		/*
-		 * Events.
-		 * public so that dojo.connect can see it
+		/**
+		 * @class This is the event sent when the editor is destroyed.
+		 * <p>
+		 * <b>See:</b><br>
+		 * {@link eclipse.Editor}<br>
+		 * {@link eclipse.Editor#event:onDestroy}
+		 * </p>
+		 * @name eclipse.DestroyEvent
+		 */
+		/**
+		 * This event is sent when the editor has been destroyed.
+		 *
+		 * @event
+		 * @param {eclipse.DestroyEvent} destroyEvent the event
+		 *
+		 * @see #destroy
 		 */
 		onDestroy: function(destroyEvent) {
 			this._eventTable.sendEvent("Destroy", destroyEvent);
 		},
+		/**
+		 * @class This object is used to define style information for the editor.
+		 * <p>
+		 * <b>See:</b><br>
+		 * {@link eclipse.Editor}<br>
+		 * {@link eclipse.Editor#event:onLineStyle}
+		 * </p>		 
+		 * @name eclipse.Style
+		 * 
+		 * @property {String} styleClass A CSS class name.
+		 * @property {Object} style An object with CSS properties.
+		 */
+		/**
+		 * @class This object is used to style range.
+		 * <p>
+		 * <b>See:</b><br>
+		 * {@link eclipse.Editor}<br>
+		 * {@link eclipse.Editor#event:onLineStyle}
+		 * </p>		 
+		 * @name eclipse.StyleRange
+		 * 
+		 * @property {Number} start The start character offset, relative to the document, where the style should be applied.
+		 * @property {Number} end The end character offset (exclusive), relative to the document, where the style should be applied.
+		 * @property {eclipse.Style} style The style for the range.
+		 */
+		/**
+		 * @class This is the event sent when the editor needs the style information for a line.
+		 * <p>
+		 * <b>See:</b><br>
+		 * {@link eclipse.Editor}<br>
+		 * {@link eclipse.Editor#event:onLineStyle}
+		 * </p>		 
+		 * @name eclipse.LineStyleEvent
+		 * 
+		 * @property {Number} lineIndex The line index.
+		 * @property {String} lineText The line text.
+		 * @property {Number} lineStart The character offset, relative to document, of the first character in the line.
+		 * @property {eclipse.Style} style The style for the entire line (output argument).
+		 * @property {eclipse.StyleRange[]} ranges An array of style ranges for the line (output argument).		 
+		 */
+		/**
+		 * This event is sent when the editor needs the style information for a line.
+		 *
+		 * @event
+		 * @param {eclipse.LineStyleEvent} lineStyleEvent the event
+		 */
 		onLineStyle: function(lineStyleEvent) {
 			this._eventTable.sendEvent("LineStyle", lineStyleEvent);
 		},
+		/**
+		 * @class This is the event sent when the text in the model has changed.
+		 * <p>
+		 * <b>See:</b><br>
+		 * {@link eclipse.Editor}<br>
+		 * {@link eclipse.Editor#event:onModelChanged}<br>
+		 * {@link eclipse.TextModel#onChanged}
+		 * </p>
+		 * @name eclipse.ModelChangedEvent
+		 * 
+		 * @property {Number} start The character offset in the model where the change has occurred.
+		 * @property {Number} removedCharCount The number of characters removed from the model.
+		 * @property {Number} addedCharCount The number of characters added to the model.
+		 * @property {Number} removedLineCount The number of lines removed from the model.
+		 * @property {Number} addedLineCount The number of lines added to the model.
+		 */
+		/**
+		 * This event is sent when the text in the model has changed.
+		 *
+		 * @event
+		 * @param {eclipse.ModelChangingEvent} modelChangingEvent the event
+		 */
 		onModelChanged: function(modelChangedEvent) {
 			this._eventTable.sendEvent("ModelChanged", modelChangedEvent);
 		},
+		/**
+		 * @class This is the event sent when the text in the model is about to change.
+		 * <p>
+		 * <b>See:</b><br>
+		 * {@link eclipse.Editor}<br>
+		 * {@link eclipse.Editor#event:onModelChanging}<br>
+		 * {@link eclipse.TextModel#onChanging}
+		 * </p>
+		 * @name eclipse.ModelChangingEvent
+		 * 
+		 * @property {String} text The text that is about to be inserted in the model.
+		 * @property {Number} start The character offset in the model where the change will occur.
+		 * @property {Number} removedCharCount The number of characters being removed from the model.
+		 * @property {Number} addedCharCount The number of characters being added to the model.
+		 * @property {Number} removedLineCount The number of lines being removed from the model.
+		 * @property {Number} addedLineCount The number of lines being added to the model.
+		 */
+		/**
+		 * This event is sent when the text in the model is about to change.
+		 *
+		 * @event
+		 * @param {eclipse.ModelChangingEvent} modelChangingEvent the event
+		 */
 		onModelChanging: function(modelChangingEvent) {
 			this._eventTable.sendEvent("ModelChanging", modelChangingEvent);
 		},
 		/**
-		* This method is called when the editor has changed text in the model.
-		*/
+		 * @class This is the event sent when the text is modified by the editor.
+		 * <p>
+		 * <b>See:</b><br>
+		 * {@link eclipse.Editor}<br>
+		 * {@link eclipse.Editor#event:onModify}
+		 * </p>
+		 * @name eclipse.ModifyEvent
+		 */
+		/**
+		 * This event is sent when the editor has changed text in the model.
+		 * <p>
+		 * If the text is changed directly through the model API, this event
+		 * is not sent.
+		 * </p>
+		 *
+		 * @event
+		 * @param {eclipse.ModifyEvent} modifyEvent the event
+		 */
 		onModify: function(modifyEvent) {
 			this._eventTable.sendEvent("Modify", modifyEvent);
 		},
+		/**
+		 * @class This is the event sent when the selection changes in the editor.
+		 * <p>
+		 * <b>See:</b><br>
+		 * {@link eclipse.Editor}<br>
+		 * {@link eclipse.Editor#event:onSelection}
+		 * </p>		 
+		 * @name eclipse.SelectionEvent
+		 * 
+		 * @property {eclipse.Selection} oldValue The old selection.
+		 * @property {eclipse.Selection} newValue The new selection.
+		 */
+		/**
+		 * This event is sent when the editor selection has changed.
+		 *
+		 * @event
+		 * @param {eclipse.SelectionEvent} selectionEvent the event
+		 */
 		onSelection: function(selectionEvent) {
 			this._eventTable.sendEvent("Selection", selectionEvent);
 		},
+		/**
+		 * @class This is the event sent when the editor scrolls.
+		 * <p>
+		 * <b>See:</b><br>
+		 * {@link eclipse.Editor}<br>
+		 * {@link eclipse.Editor#event:onScroll}
+		 * </p>		 
+		 * @name eclipse.ScrollEvent
+		 * 
+		 * @property oldValue The old scroll {x,y}.
+		 * @property newValue The new scroll {x,y}.
+		 */
+		/**
+		 * This event is sent when the editor scrolls vertically or horizontally.
+		 *
+		 * @event
+		 * @param {eclipse.ScrollEvent} scrollEvent the event
+		 */
 		onScroll: function(scrollEvent) {
 			this._eventTable.sendEvent("Scroll", scrollEvent);
 		},
 		/**
-		* This method is called when the editor is about to change text in the model. The
-		* data parameter has these fields:
-		* 
-		*	text -> text being inserted
-		*	start,end -> range of text being deleted (end is not included)
-		*
-		* Listeners are allowed to change these parameters. Setting text to null
-		* or undefined stops the change.
-		*/
+		 * @class This is the event sent when the text is about to be modified by the editor.
+		 * <p>
+		 * <b>See:</b><br>
+		 * {@link eclipse.Editor}<br>
+		 * {@link eclipse.Editor#event:onVerify}
+		 * </p>
+		 * @name eclipse.VerifyEvent
+		 * 
+		 * @property {String} text The text being inserted.
+		 * @property {Number} start The start offset of the text range to be replaced.
+		 * @property {Number} end The end offset (exclusive) of the text range to be replaced.
+		 */
+		/**
+		 * This event is sent when the editor is about to change text in the model.
+		 * <p>
+		 * If the text is changed directly through the model API, this event
+		 * is not sent.
+		 * </p>
+		 * <p>
+		 * Listeners are allowed to change these parameters. Setting text to null
+		 * or undefined stops the change.
+		 * </p>
+		 *
+		 * @event
+		 * @param {eclipse.VerifyEvent} verifyEvent the event
+		 */
 		onVerify: function(verifyEvent) {
 			this._eventTable.sendEvent("Verify", verifyEvent);
 		},
-		/*
-		* start line -
-		* end line - is not included in the redraw range
-		*/
+		/**
+		 * Redraws the text in the given line range.
+		 * <p>
+		 * The line at the end index is not redrawn.
+		 * </p>
+		 *
+		 * @param {Number} [startLine=0] the start line
+		 * @param {Number} [endLine=line count] the end line
+		 */
 		redrawLines: function(startLine, endLine, ruler) {
 			if (startLine === undefined) { startLine = 0; }
 			if (endLine === undefined) { endLine = this._model.getLineCount(); }
@@ -525,10 +1160,15 @@ eclipse.Editor = (function() {
 			}
 			this._queueUpdatePage();
 		},
-		/*
-		* start offset -
-		* end offset - is not included in the redraw range
-		*/
+		/**
+		 * Redraws the text in the given range.
+		 * <p>
+		 * The character at the end offset is not redrawn.
+		 * </p>
+		 *
+		 * @param {Number} [start=0] the start offset of text range
+		 * @param {Number} [end=char count] the end offset of text range
+		 */
 		redrawRange: function(start, end) {
 			var model = this._model;
 			if (start === undefined) { start = 0; }
@@ -538,11 +1178,29 @@ eclipse.Editor = (function() {
 			var endLine = model.getLineAtOffset(Math.max(0, end - 1)) + 1;
 			this.redrawLines(startLine, endLine);
 		},
+		/**
+		 * Removes an event listener from the editor.
+		 * <p>
+		 * All the parameters must be the same ones used to add the listener.
+		 * </p>
+		 * 
+		 * @param {String} type the event type.
+		 * @param {Object} context the context of the function.
+		 * @param {Function} func the function that will be executed when the event happens. 
+		 * @param {Object} [data] optional data passed to the function.
+		 * 
+		 * @see #addEventListener
+		 */
 		removeEventListener: function(type, context, func, data) {
 			this._eventTable.removeEventListener(type, context, func, data);
 		},
+		/**
+		 * Removes a ruler from the editor.
+		 *
+		 * @param {eclipse.Ruler} ruler the ruler.
+		 */
 		removeRuler: function (ruler) {
-			ruler.setView(null);
+			ruler.setEditor(null);
 			var side = ruler.getLocation();
 			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv;
 			var row = rulerParent.firstChild.rows[0];
@@ -556,8 +1214,16 @@ eclipse.Editor = (function() {
 			row.deleteCell(index);
 			this._updatePage();
 		},
-		/*
-		 * if handler is null the default action handler is reinstall to the name, if available
+		/**
+		 * Associates an application defined handler to an action name.
+		 * <p>
+		 * If the action name is a predefined action, the given handler executes before
+		 * the default action handler.  If the given handler returns <code>true</code>, the
+		 * default action handler is not called.
+		 * </p>
+		 *
+		 * @param {String} name the action name.
+		 * @param {Function} handler the action handler.
 		 */
 		setAction: function(name, handler) {
 			if (!name) { return; }
@@ -571,15 +1237,13 @@ eclipse.Editor = (function() {
 			}
 			actions.push({name: name, userHandler: handler});
 		},
-		/*
-		 * Sets a new keybinding,
-		 * the name can be a predefined name, a user name, a null
-		 * if the keybinding already exists the new name overrides the old one
-		 * for use names use setAction to seta action for the new name
+		/**
+		 * Associates a key binding with the given action name. Any previous
+		 * association with the specified key binding is overwriten. If the
+		 * action name is <code>null</code>, the association is removed.
 		 * 
-		 * if name==null it removes the keybinding.
-		 * Removing all the keybinding associated to a name will cause the user action to be removed.
-		 * predefined action are never removed (so they can be reinstalled in the future). 
+		 * @param {eclipse.KeyBinding} keyBinding the key binding
+		 * @param {String} name the action
 		 */
 		setKeyBinding: function(keyBinding, name) {
 			var keyBindings = this._keyBindings;
@@ -599,7 +1263,12 @@ eclipse.Editor = (function() {
 								index++;
 							}
 							if (index === keyBindings.length) {
-								//remove action when last keybinding is remved
+								/* <p>
+								 * Removing all the key bindings associated to an user action will cause
+								 * the user action to be removed. Editor predefined actions are never
+								 * removed (so they can be reinstalled in the future). 
+								 * </p>
+								 */
 								var actions = this._actions;
 								for (var j = 0; j < actions.length; j++) {
 									if (actions[j].name === oldName) {
@@ -618,16 +1287,44 @@ eclipse.Editor = (function() {
 				keyBindings.push({keyBinding: keyBinding, name: name});
 			}
 		},
-		setCaretOffset: function(offset, show /*optional*/) {
+		/**
+		 * Sets the caret offset relative to the start of the document.
+		 *
+		 * @param {Number} caret the caret offset relative to the start of the document.
+		 * @param {Boolean} [show=true] if <code>true</coce>, the editor will scroll if needed to show the caret location.
+		 *
+		 * @see #getCaretOffset
+		 * @see #setSelection
+		 * @see #getSelection
+		 */
+		setCaretOffset: function(offset, show) {
 			var charCount = this._model.getCharCount();
 			offset = Math.max(0, Math.min (offset, charCount));
 			var selection = new Selection(offset, offset, false);
 			this._setSelection (selection, show === undefined || show);
 		},
+		/**
+		 * Sets the horizontal pixel.
+		 * <p>
+		 * The horizontal pixel is the pixel position that is currently at
+		 * the left edge of the editor.  This position is relative to the
+		 * beginning of the document.
+		 * </p>
+		 *
+		 * @param {Number} pixel the horizontal pixel.
+		 *
+		 * @see #getHorizontalPixel
+		 * @see #convert
+		 */
 		setHorizontalPixel: function(pixel) {
 			pixel = Math.max(0, pixel);
 			this._scrollView(pixel - this._getScroll().x, 0);
 		},
+		/**
+		 * Sets the text model of the editor.
+		 *
+		 * @param {eclipse.TextModel} model the text model of the editor.
+		 */
 		setModel: function(model) {
 			if (!model) { return; }
 			this._model.removeListener(this._modelListener);
@@ -658,11 +1355,28 @@ eclipse.Editor = (function() {
 			this._model.addListener(this._modelListener);
 			this.redrawRange();
 		},
-		/*
-		* start offset -
-		* end offset  - is not included in the selection
-		*/
-		setSelection: function (start, end, show /*optional*/ ) {
+		/**
+		 * Sets the editor selection.
+		 * <p>
+		 * The selection is defined by a start and end character offset relative to the
+		 * document. The character at end offset is not included in the selection.
+		 * </p>
+		 * <p>
+		 * The caret is always placed at the end offset. The start offset of can be
+		 * greater than the end offset to place the caret at the beginning of the
+		 * selection.
+		 * </p>
+		 * <p>
+		 * Clamps out of range offsets.
+		 * </p>
+		 * 
+		 * @param {Number} start the start offset of the selection
+		 * @param {Number} end the end offset of the selection
+		 * @param {Boolean} [show=true] if <code>true</coce>, the editor will scroll if needed to show the caret location.
+		 *
+		 * @see #getSelection
+		 */
+		setSelection: function (start, end, show) {
 			var caret = start > end;
 			if (caret) {
 				var tmp = start;
@@ -675,11 +1389,24 @@ eclipse.Editor = (function() {
 			var selection = new Selection(start, end, caret);
 			this._setSelection(selection, show === undefined || show);
 		},
-		/*
-		* start offset -
-		* end offset  - the character at end offset is not included in the text range removed from the editor
-		*/
-		setText: function (text, start /*optional*/, end /*optional*/) {
+		/**
+		 * Replaces the text in the given range with the given text.
+		 * <p>
+		 * The character at the end offset is not replaced.
+		 * </p>
+		 * <p>
+		 * When both <code>start</code> and <code>end</code> parameters
+		 * are not specified, the editor places the caret at the beginning
+		 * of the document and scrolls to make it visible.
+		 * </p>
+		 *
+		 * @param {String} text the new text.
+		 * @param {Number} [start=0] the start offset of text range.
+		 * @param {Number} [end=char count] the end offset of text range.
+		 *
+		 * @see #getText
+		 */
+		setText: function (text, start, end) {
 			var reset = start === undefined && end === undefined;
 			if (start === undefined) { start = 0; }
 			if (end === undefined) { end = this._model.getCharCount(); }
@@ -690,6 +1417,19 @@ eclipse.Editor = (function() {
 				this._showCaret();
 			}
 		},
+		/**
+		 * Sets the top index.
+		 * <p>
+		 * The top index is the line that is currently at the top of the editor.  This
+		 * line may be partially visible depending on the vertical scroll of the editor. The parameter
+		 * <code>fullyVisible</code> determines whether to return only fully visible lines. 
+		 * </p>
+		 *
+		 * @param {Number} topIndex the index of the top line.
+		 *
+		 * @see #getBottomIndex
+		 * @see #getTopIndex
+		 */
 		setTopIndex: function(topIndex) {
 			var model = this._model;
 			if (model.getCharCount() === 0) {
@@ -706,6 +1446,20 @@ eclipse.Editor = (function() {
 			var pixel = topIndex * lineHeight - this._getScroll().y;
 			this._scrollView(0, pixel);
 		},
+		/**
+		 * Sets the top pixel.
+		 * <p>
+		 * The top pixel is the pixel position that is currently at
+		 * the top edge of the editor.  This position is relative to the
+		 * beginning of the document.
+		 * </p>
+		 *
+		 * @param {Number} pixel the top pixel.
+		 *
+		 * @see #getBottomPixel
+		 * @see #getTopPixel
+		 * @see #convert
+		 */
 		setTopPixel: function(pixel) {
 			var lineHeight = this._getLineHeight();
 			var clientHeight = this._getClientHeight();
@@ -713,6 +1467,12 @@ eclipse.Editor = (function() {
 			pixel = Math.min(Math.max(0, pixel), lineHeight * lineCount - clientHeight);
 			this._scrollView(0, pixel - this._getScroll().y);
 		},
+		/**
+		 * Scrolls the selection into view if needed.
+		 *
+		 * @see #getSelection
+		 * @see #setSelection
+		 */
 		showSelection: function() {
 			return this._showCaret();
 		},
