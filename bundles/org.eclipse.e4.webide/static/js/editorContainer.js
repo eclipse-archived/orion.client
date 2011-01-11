@@ -297,7 +297,7 @@ eclipse.EditorContainer = (function() {
 						this._incrementalFindIgnoreSelection = false;
 					} else {
 						// should turn message red
-						this.registry.callService("IStatusReporter", "setErrorMessage", null, ["Incremental find: " + prefix + " (not found)"]);
+						this._registry.callService("IStatusReporter", "setErrorMessage", null, ["Incremental find: " + prefix + " (not found)"]);
 						this._incrementalFindSuccess = false;
 					}
 					event.text = null;
