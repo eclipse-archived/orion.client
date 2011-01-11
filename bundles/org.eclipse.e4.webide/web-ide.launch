@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
 <setAttribute key="additional_plugins"/>
 <booleanAttribute key="append.args" value="true"/>
 <booleanAttribute key="automaticAdd" value="false"/>
@@ -18,11 +19,11 @@
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true&#13;&#10;-Dorg.eclipse.equinox.http.jetty.http.port=8080&#10;-Dorg.eclipse.equinox.http.jetty.autostart=false&#10;-Dorg.eclipse.e4.webide.server.allowedPathPrefixes=${workspace_loc}"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <setAttribute key="selected_features">
-<setEntry value="org.eclipse.e4.webide.authentication.feature:default"/>
-<setEntry value="org.eclipse.e4.webide.base.feature:default"/>
-<setEntry value="org.eclipse.e4.webide.client.feature:default"/>
-<setEntry value="org.eclipse.e4.webide.search.feature:default"/>
-<setEntry value="org.eclipse.e4.webide.server.feature:default"/>
+<setEntry value="org.eclipse.orion.base.feature:default"/>
+<setEntry value="org.eclipse.orion.client.feature:default"/>
+<setEntry value="org.eclipse.orion.server.authentication.feature:default"/>
+<setEntry value="org.eclipse.orion.server.feature:default"/>
+<setEntry value="org.eclipse.orion.server.search.feature:default"/>
 </setAttribute>
 <booleanAttribute key="show_selected_only" value="false"/>
 <booleanAttribute key="tracing" value="false"/>
