@@ -63,7 +63,7 @@ dojo.addOnLoad(function(){
 	var editorFactory = function() {
 		return new eclipse.Editor({
 			parent: editorContainerDomNode,
-			stylesheet: "/webeditor/samples/editor.css"
+			stylesheet: "/editor/samples/editor.css"
 		});
 	};
 	var undoStackFactory = function(editor) { return new eclipse.UndoStack(editor, 200); };
