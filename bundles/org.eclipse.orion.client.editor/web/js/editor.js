@@ -119,10 +119,11 @@ eclipse.Editor = (function() {
 	}
 	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent);
 	var isFirefox = navigator.userAgent.indexOf("Firefox") !== -1;
-	var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
-	var isMac = navigator.platform.indexOf("Mac") !== -1;
-	var isWebkit = navigator.userAgent.indexOf("WebKit") !== -1;
 	var isOpera = navigator.userAgent.indexOf("Opera") !== -1;
+	var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
+	var isSafari = navigator.userAgent.indexOf("Safari") !== -1;
+	var isWebkit = navigator.userAgent.indexOf("WebKit") !== -1;
+	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 	var isW3CEvents = typeof window.document.documentElement.addEventListener === "function";
 
@@ -1858,10 +1859,28 @@ eclipse.Editor = (function() {
 			} else {
 				//Webkit
 				if (isMac) {
-					pixelX = -e.wheelDeltaX / 40;
+					/*
+					* In Safari, the wheel delta is a multiple of 120. In order to
+					* convert delta to pixel values, it is necessary to divide delta
+					* by 40.
+					*
+					* In Chrome, the wheel delta depends on the type of the mouse. In
+					* general, it is the pixel value for Mac mice and track pads, but
+					* it is a multiple of 120 for other mice. There is no presise
+					* way to determine if it is pixel value or a multiple of 120.
+					* 
+					* Note that the current approach does not calculate the correct
+					* pixel value for Mac mice when the delta is a multiple of 120.
+					*/
+					var denominatorX = 40, denominatorY = 40;
+					if (isChrome) {
+						if (e.wheelDeltaX % 120 !== 0) { denominatorX = 1; }
+						if (e.wheelDeltaY % 120 !== 0) { denominatorY = 1; }
+					}
+					pixelX = -e.wheelDeltaX / denominatorX;
 					if (-1 < pixelX && pixelX < 0) { pixelX = -1; }
 					if (0 < pixelX && pixelX < 1) { pixelX = 1; }
-					pixelY = -e.wheelDeltaY / 40;
+					pixelY = -e.wheelDeltaY / denominatorY;
 					if (-1 < pixelY && pixelY < 0) { pixelY = -1; }
 					if (0 < pixelY && pixelY < 1) { pixelY = 1; }
 				} else {
@@ -1870,7 +1889,21 @@ eclipse.Editor = (function() {
 					pixelY = (-e.wheelDeltaY / 120 * linesToScroll) * lineHeight;
 				}
 			}
+			/* 
+			* Feature in Safari. If the event target is removed from the DOM 
+			* safari stops smooth scrolling. The fix is keep the element target
+			* in the DOM and remove it on a later time. 
+			*
+			* Note: Using a timer is not a solution, because the timeout needs to
+			* be at least as long as the gesture (which is too long).
+			*/
+			if (isSafari) {
+				var lineDiv = e.target;
+				while (lineDiv.lineIndex === undefined) { lineDiv = lineDiv.parentNode; }
+				this._mouseWheelLine = lineDiv;
+			}
 			this._scrollView(pixelX, pixelY);
+			if (isSafari) { this._mouseWheelLine = null; }
 			if (e.preventDefault) { e.preventDefault(); }
 			return false;
 		},
@@ -2616,9 +2649,8 @@ eclipse.Editor = (function() {
 			if (fullyVisible && this._getClientHeight() > this._getLineHeight()) {
 				var rect = child.getBoundingClientRect();
 				var clientRect = this._clientDiv.getBoundingClientRect();
-				if (rect.bottom > clientRect.bottom && child.previousSibling) {
-					child = child.previousSibling;
-				}
+				if (rect.bottom > clientRect.bottom) {
+					child = this._getLinePrevious(child) || child;				}
 			}
 			return child.lineIndex;
 		},
@@ -2758,6 +2790,20 @@ eclipse.Editor = (function() {
 				child = child.nextSibling;
 			}
 			return undefined;
+		},
+		_getLineNext: function (lineNode) {
+			var node = lineNode ? lineNode.nextSibling : this._clientDiv.firstChild;
+			while (node && node.lineIndex === -1) {
+				node = node.nextSibling;
+			}
+			return node;
+		},
+		_getLinePrevious: function (lineNode) {
+			var node = lineNode ? lineNode.previousSibling : this._clientDiv.lastChild;
+			while (node && node.lineIndex === -1) {
+				node = node.previousSibling;
+			}
+			return node;
 		},
 		_getOffset: function (offset, word, direction) {
 			return isIE ?  this._getOffset_IE(offset, word, direction) : this._getOffset_FF(offset, word, direction);
@@ -2901,8 +2947,8 @@ eclipse.Editor = (function() {
 				var rect = child.getBoundingClientRect();
 				var editorPad = this._getEditorPadding();
 				var editorRect = this._editorDiv.getBoundingClientRect();
-				if (rect.top < editorRect.top + editorPad.top && child.nextSibling) {
-					child = child.nextSibling;
+				if (rect.top < editorRect.top + editorPad.top) {
+					child = this._getLineNext(child) || child;
 				}
 			}
 			return child.lineIndex;
@@ -3324,7 +3370,7 @@ eclipse.Editor = (function() {
 						if (lineChild.ignoreChars) { return false; }
 						lineChild = lineChild.nextSibling;
 					}
-					child = child.nextSibling;
+					child = this._getLineNext(child);
 				}
 				return true;
 			}
@@ -3377,8 +3423,7 @@ eclipse.Editor = (function() {
 			
 			var model = this._model;
 			var startLine = model.getLineAtOffset(start);
-			var clientDiv = this._clientDiv;
-			var child = clientDiv.firstChild;
+			var child = this._getLineNext();
 			while (child) {
 				var lineIndex = child.lineIndex;
 				if (startLine <= lineIndex && lineIndex <= startLine + removedLineCount) {
@@ -3387,7 +3432,7 @@ eclipse.Editor = (function() {
 				if (lineIndex > startLine + removedLineCount) {
 					child.lineIndex = lineIndex + addedLineCount - removedLineCount;
 				}
-				child = child.nextSibling;
+				child = this._getLineNext(child);
 			}
 			if (startLine <= this._maxLineIndex && this._maxLineIndex <= startLine + removedLineCount) {
 				this._maxLineIndex = -1;
@@ -3481,7 +3526,6 @@ eclipse.Editor = (function() {
 		},
 		_setDOMSelection: function (startNode, startOffset, endNode, endOffset) {
 			var window = this._frameWindow;
-			var clientDiv = this._clientDiv;
 			var document = this._frameDocument;
 			var startLineNode, startLineOffset, endLineNode, endLineOffset;
 			var offset = 0;
@@ -3738,14 +3782,13 @@ eclipse.Editor = (function() {
 			var model = this._model;
 			var startLine = model.getLineAtOffset(selection.start);
 			var endLine = model.getLineAtOffset(selection.end);
-			var clientDiv = this._clientDiv;
-			var firstNode = clientDiv.firstChild;
+			var firstNode = this._getLineNext();
 			/*
 			* Bug in Firefox. For some reason, after a update page sometimes the 
 			* firstChild returns null incorrectly. The fix is to ignore show selection.
 			*/
 			if (!firstNode) { return; }
-			var lastNode = clientDiv.lastChild;
+			var lastNode = this._getLinePrevious();
 			
 			var topNode, bottomNode, topOffset, bottomOffset;
 			if (startLine < firstNode.lineIndex) {
@@ -3809,15 +3852,20 @@ eclipse.Editor = (function() {
 			while (child) {
 				lineIndex = child.lineIndex;
 				var nextChild = child.nextSibling;
-				if (!(lineStart <= lineIndex && lineIndex <= lineEnd) || child.lineChanged) {
-					clientDiv.removeChild(child);
+				if (!(lineStart <= lineIndex && lineIndex <= lineEnd) || child.lineChanged || child.lineIndex === -1) {
+					if (this._mouseWheelLine === child) {
+						child.style.display = "none";
+						child.lineIndex = -1;
+					} else {
+						clientDiv.removeChild(child);
+					}
 				}
 				child = nextChild;
 			}
 			// Webkit still wraps even if pre is used
 			clientDiv.style.width = (0x7FFFF).toString() + "px";
 
-			child = clientDiv.firstChild;
+			child = this._getLineNext();
 			for (lineIndex=lineStart; lineIndex<=lineEnd; lineIndex++) {
 				if (!child || child.lineIndex > lineIndex) {
 					child = this._createLine(clientDiv, child, document, lineIndex, model);
@@ -3835,20 +3883,20 @@ eclipse.Editor = (function() {
 				if (lineIndex === topIndex) { this._topChild = child; }
 				if (lineIndex === bottomIndex) { this._bottomChild = child; }
 				if (child.lineIndex === lineIndex) {
-					child = child.nextSibling;
+					child = this._getLineNext(child);
 				}
 			}
 
 			// when the maxLineIndex is not known all the visible lines need to be measured
 			if (this._maxLineIndex === -1) {
-				child = clientDiv.firstChild;
+				child = this._getLineNext();
 				while (child) {
 					lineWidth = child.lineWidth;
 					if (lineWidth >= this._maxLineWidth) {
 						this._maxLineWidth = lineWidth;
 						this._maxLineIndex = child.lineIndex;
 					}
-					child = child.nextSibling;
+					child = this._getLineNext(child);
 				}
 			}
 			
