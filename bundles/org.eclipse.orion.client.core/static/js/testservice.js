@@ -53,7 +53,7 @@ eclipse.testSuite.prototype.runTest = function(testName, callback) {
 	}
 };
 
-// Simon's crap
+// commented out by Simon
 /*
 eclipse.testService.loadFailMock = {
 	load : {success: false},

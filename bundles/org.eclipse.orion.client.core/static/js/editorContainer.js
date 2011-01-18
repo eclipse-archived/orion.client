@@ -1252,7 +1252,7 @@ eclipse.EditorContainer = (function() {
 									//TODO
 									break;
 								case "css":
-									// sorry for the ugly hack, this is for testing content assist
+									// sorry for hard-coding it here, this is temporary and only for testing content assist
 									this._contentAssistKeywords = ["color", "text-align", "text-indent", "text-decoration", 
 										 "font", "font-style", "font-family", "font-weight", "font-size", "font-variant", "line-height",
 										 "background", "background-color", "background-image", "background-position", "background-repeat", "background-attachment",

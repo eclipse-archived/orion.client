@@ -1,5 +1,5 @@
 html {
-  overflow-x: hidden; // hack to get rid of horizontal scrollbar
+  overflow-x: hidden; // workaround to get rid of horizontal scrollbar
 }
 
 html, body {
