@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2009, 2011 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -426,6 +426,14 @@ eclipse.FileRenderer = (function() {
 			dojo.style(actionsWrapper, "visibility", "hidden");
 			// contact the command service to render appropriate commands here.
 			this.explorer.registry.callService("ICommandService", "renderCommands", null, [actionsWrapper, "object", tableRow.id, this.explorer, "image"]);
+			// temporary until we get link commands properly represented in the command service.
+			if (item.Directory && item.ExportLocation) {
+				var anchor = document.createElement('a');
+				anchor.innerHTML = "Download as Zip";
+				anchor.href=item.ExportLocation;
+				dojo.addClass(anchor, 'commandLink');
+				dojo.place(anchor, actionsWrapper, "last");
+			}
 		},
 		
 		getSelected: function() {
