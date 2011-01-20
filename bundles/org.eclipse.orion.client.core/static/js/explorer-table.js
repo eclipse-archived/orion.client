@@ -94,9 +94,11 @@ eclipse.Explorer = (function() {
 			dojo.hash(path, true);
 		
 			// Progress indicator
-			var progress = document.createElement('div');
-			progress.innerHTML = "Loading <b>" + path + "</b>...";
-			progress.id = "innerTree";
+			var progress = dojo.create("div", {id: "innerTree"});
+			    b = dojo.create("b");
+			dojo.place(document.createTextNode("Loading "), progress, "last");
+			dojo.place(document.createTextNode("..."), progress, "last");
+			dojo.place(document.createTextNode(path), b, "last");
 			this.removeResourceList();
 			var parent = dojo.byId(this.parentId);
 			dojo.place(progress, parent, "only");
@@ -123,8 +125,7 @@ eclipse.Explorer = (function() {
 								// Show an error message when a problem happens during getting the workspace
 								// Don't show the error for 401 since the login dialog is shown anyway
 								if (loadedWorkspace.status != null && loadedWorkspace.status != 401){
-									document.createElement('div'); 
-									progress.innerHTML = "Sorry, an error ocurred: <b>" + loadedWorkspace.message + "</b>";
+									dojo.place(document.createTextNode("Sorry, an error ocurred: " + loadedWorkspace.message), progress, "only");
 									return;
 								}
 								//copy fields of resulting object into the tree root
@@ -360,12 +361,16 @@ eclipse.FileRenderer = (function() {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
 				});
 			}
-			var col;
+			var col, div, link;
 			if (item.Directory) {
 				col = document.createElement('td');
 				tableRow.appendChild(col);
 				var nameId =  tableRow.id + "__expand";
-				col.innerHTML = "<div><img name=\"" + nameId + "\" src=\"/images/collapsed-gray.png\"><img src=\"/images/silk/folder.png\">" + "<a class=\"navlinkonpage\" href=\"#" + item.ChildrenLocation + "\">" + item.Name + "</a>" + "</div>";
+				div = dojo.create("div", null, col, "only");
+				dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
+				dojo.create("img", {src: "/images/silk/folder.png"}, div, "last");
+				link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
+				dojo.place(document.createTextNode(item.Name), link, "only");
 				col.onclick = dojo.hitch(this, function(evt) {
 					this.tableTree.toggle(tableRow.id, nameId, '/images/expanded-gray.png', '/images/collapsed-gray.png');
 				});
@@ -389,7 +394,11 @@ eclipse.FileRenderer = (function() {
 								break;
 					}
 				}
-				col.innerHTML = "<div><img src=\"/images/none.png\"><img src=\"/images/silk/page.png\"><a class=\"navlink\" href=\"" + href + "\">" + item.Name + "</a></div>";
+				div = dojo.create("div", null, col, "only");
+				dojo.create("img", {src: "/images/none.png"}, div, "last");
+				dojo.create("img", {src: "/images/silk/page.png"}, div, "last");
+				link = dojo.create("a", {className: "navlink", href: href}, div, "last");
+				dojo.place(document.createTextNode(item.Name), link, "only");
 			}
 			var dateColumn = document.createElement('td');
 			tableRow.appendChild(dateColumn);

@@ -215,7 +215,7 @@ eclipse.Command = (function() {
 		_asLink: function(items, handler) {
 			handler =  handler || this;
 			var anchor = document.createElement('a');
-			anchor.innerHTML = this.name;
+			dojo.place(document.createTextNode(this.name), anchor, "only");
 			anchor.href="";
 			dojo.connect(anchor, "onclick", this, function() {
 				this._callback.call(handler, items);

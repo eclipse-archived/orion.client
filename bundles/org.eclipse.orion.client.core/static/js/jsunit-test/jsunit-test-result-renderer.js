@@ -39,23 +39,24 @@ eclipse.TestResultRenderer = (function() {
 			tableRow.cellSpacing = "1px";
 			dojo.style(tableRow, "verticalAlign", "baseline");
 			dojo.addClass(tableRow, "treeTableRow");
-			var col;
+			var col, div;
 			var self = this;
 			if (item.type !== "test") {
 				col = document.createElement('td');
 				tableRow.appendChild(col);
 				var nameId =  tableRow.id + "__expand";
-				if(item.succeed )
-					col.innerHTML = "<div><img name=\"" + nameId + "\"  src=\"/images/collapsed-gray.png\"><img src=\"/images/unit_test/test_succeed.png\">" + "<span>" + item.name + "</span>" + "</div>";
-				else
-					col.innerHTML = "<div><img name=\"" + nameId + "\"  src=\"/images/collapsed-gray.png\"><img src=\"/images/unit_test/test_fail.png\">" + "<span>" + item.name + "</span>" + "</div>";
+				div = dojo.create("div", null, col, "only");
+				var testStatus = (item.succeed ? "/images/unit_test/test_succeed.png" : "/images/unit_test/test_fail.png");
+				dojo.create("img", {name: nameId, src: "/images/collapsed-gray.png"}, div, "last");
+				dojo.create("img", {name: nameId, src: testStatus}, div, "last");
+				dojo.place(document.createTextNode(item.name), div, "last");
 				col.onclick = function(){self.onToggleDirectory ( tableRow.id ,nameId );};
 			} else {
 				col = document.createElement('td');
 				tableRow.appendChild(col);
 				
 				var testRes =  document.createElement('span');
-				testRes.innerHTML = item.name;
+				dojo.place(document.createTextNode(item.name), testRes, "only")
 				testRes.style.cursor = "pointer";
 				
 				dojo.connect(testRes, "onmouseover", testRes, function() {
@@ -74,11 +75,10 @@ eclipse.TestResultRenderer = (function() {
 						self._stackRenderer.update(item.detail);
 				});
 				
-				if(item.succeed)
-					col.innerHTML = "<div><img src=\"/images/none.png\"><img src=\"/images/unit_test/test_succeed.png\"></div>";
-				else
-					col.innerHTML = "<div><img src=\"/images/none.png\"><img src=\"/images/unit_test/test_fail.png\"></div>";
-				col.childNodes[0].appendChild(testRes);
+				div = dojo.create("div", null, col, "only");
+				dojo.create("img", {src: "/images/none.png"}, div, "last");
+				dojo.create("img", {src: (item.succeed ? "/images/unit_test/test_succeed.png" : "/images/unit_test/test_fail.png")}, div, "last");
+				div.appendChild(testRes);
 			}
 		},
 

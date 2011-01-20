@@ -48,7 +48,7 @@ eclipse.BreadCrumbs = (function() {
 			//add the root location
 			var seg = document.createElement('a');
 			dojo.addClass(seg, "breadcrumb");
-			seg.innerHTML = "root";
+			dojo.place(document.createTextNode("root"), seg, "only");
 			seg.href = "#";
 			crumbs.appendChild(seg);
 
@@ -59,7 +59,7 @@ eclipse.BreadCrumbs = (function() {
 				for (var i = parents.length; --i >= 0 ;){
 					var seg = document.createElement('a');
 					dojo.addClass(seg, "breadcrumb");
-					seg.innerHTML = parents[i].Name;
+					dojo.place(document.createTextNode(parents[i].Name), seg, "only");
 					seg.href = "#" + parents[i].ChildrenLocation;
 					crumbs.appendChild(seg);
 					crumbs.appendChild(document.createTextNode('/'));
@@ -67,7 +67,7 @@ eclipse.BreadCrumbs = (function() {
 				//add a final entry for the current location
 				if (this._resource) {
 					var seg = document.createElement('a');
-					seg.innerHTML = this._resource.Name;
+					dojo.place(document.createTextNode(this._resource.Name), seg, "only");
 					dojo.addClass(seg, "currentLocation");
 					crumbs.appendChild(seg);
 				}

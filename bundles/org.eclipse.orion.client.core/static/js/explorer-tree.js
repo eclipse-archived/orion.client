@@ -147,7 +147,12 @@ eclipse.ExplorerTree = (function() {
 			var container = dojo.byId(this.parentId);
 			// Progress indicator
 			var progress = document.createElement('div');
-			progress.innerHTML = "Loading <b>" + path + "</b>...";
+			
+			dojo.place(document.createTextNode("Loading "), progress);
+			var b = dojo.create("b", null, progress);
+			dojo.place(document.createTextNode(path), b);
+			dojo.place(document.createTextNode("..."), progress);
+			
 			progress.id = "myTree";
 			this.removeResourceList();
 			dojo.place(progress, container, "only");

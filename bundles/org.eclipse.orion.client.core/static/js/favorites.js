@@ -174,36 +174,68 @@ eclipse.Favorites = (function() {
 	Favorites.prototype = {
 		// FIXME: it should really be up to the UI to organize favorites as being searches or not.
 		render: function(favorites, searches) {
-			var html = "<table>";
+			var faveTable = dojo.create("table");
+			var tr, col1, col2, col3, link;
 			for (var i=0; i < favorites.length; i++) {
 				var fave = favorites[i];
-				var href = fave.directory ? "#"+fave.path : "coding.html#"+fave.path;
+				var href = fave.directory ? "#" + fave.path : "coding.html#" + fave.path;
 				if (href=="#")
-	  				href="";
-	  			var clazz = " class=\"";
-	  			clazz += fave.directory ? "navlinkonpage\"" : "navlink\"";
-	  			var img="";
-	  			var img2="";
-	  			var editable="";
-	  			var id = "fave"+i;
-	  			if (i > 0) {
-	  				img = "<img id=\"" + (id + "img1") + "\" style=\"margin-left: 4px;\" src=\"images/silk/cross-gray.png\" alt=\"Delete\" title=\"Delete\" name=\"closefave" + i + "\"onMouseOver= \"document.closefave"+i+".src='images/silk/cross.png'\" onMouseOut = \"document.closefave"+i+".src='images/silk/cross-gray.png'\" >";
-	  				img2 = "<img id=\"" + (id + "img2") + "\"style=\"margin-left: 4px;\" src=\"images/silk/pencil-gray.png\" alt=\"Rename\" title=\"Rename\" name=\"editfave" + i + "\"onMouseOver= \"document.editfave"+i+".src='images/silk/pencil.png'\" onMouseOut = \"document.editfave"+i+".src='images/silk/pencil-gray.png'\" >";
-	 			}
-				html += "<tr><td><a id=\"" + id + "\" href=\"" + href + "\"" + clazz + ">" + fave.name + "</a></td><td>" + img + "</td><td>" + img2 + "</td></tr>";
+					href="";
+				var clazz = fave.directory ? "navlinkonpage" : "navlink";
+				var img="";
+				var img2="";
+				var editable="";
+				var id = "fave"+i;
+				if (i > 0) {
+					img = "<img id=\""
+							+ (id + "img1")
+							+ "\" style=\"margin-left: 4px;\" src=\"images/silk/cross-gray.png\" alt=\"Delete\" title=\"Delete\" name=\"closefave"
+							+ i + "\"onMouseOver= \"document.closefave" + i
+							+ ".src='images/silk/cross.png'\" onMouseOut = \"document.closefave" + i
+							+ ".src='images/silk/cross-gray.png'\" >";
+					img2 = "<img id=\""
+							+ (id + "img2")
+							+ "\"style=\"margin-left: 4px;\" src=\"images/silk/pencil-gray.png\" alt=\"Rename\" title=\"Rename\" name=\"editfave"
+							+ i + "\"onMouseOver= \"document.editfave" + i
+							+ ".src='images/silk/pencil.png'\" onMouseOut = \"document.editfave" + i
+							+ ".src='images/silk/pencil-gray.png'\" >";
+				}
+				tr = dojo.create("tr"),
+					col1 = dojo.create("td", null, tr, "last"),
+					col2 = dojo.create("td", null, tr, "last"),
+					col3 = dojo.create("td", null, tr, "last"),
+					link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
+				dojo.place(document.createTextNode(fave.name), link, "only");
+				col2.innerHTML = img;
+				col3.innerHTML = img2;
+				dojo.place(tr, faveTable, "last");
 			}
-			html+="</table>";
+			dojo.place(faveTable, this._parent, "only");
+			
 			if (searches.length > 0) {
-				html += "<br><h2>Searches</h2><table>";
+				dojo.place("<br><h2>Searches</h2>", this._parent, "last");
+				var searchTable = dojo.create("table");
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
-	 				var href="#"+search.query;
-	 				var img = "<img id=\"" + "search" + i + "\"style=\"margin-left: 4px;\" src=\"images/silk/cross-gray.png\" alt=\"Delete\" title=\"Delete\" name=\"search" + i + "\"onMouseOver= \"document.search"+i+".src='images/silk/cross.png'\" onMouseOut = \"document.search"+i+".src='images/silk/cross-gray.png'\" >";
-	 				html += "<tr><td><a href=\"" + href + "\">" + search.name + "</a></td><td>" + img + "</td></tr>";
-	 			}
-	 			html += "</table>";
+					var href="#" + search.query;
+					var img = "<img id=\""
+							+ "search"
+							+ i
+							+ "\"style=\"margin-left: 4px;\" src=\"images/silk/cross-gray.png\" alt=\"Delete\" title=\"Delete\" name=\"search"
+							+ i + "\"onMouseOver= \"document.search" + i
+							+ ".src='images/silk/cross.png'\" onMouseOut = \"document.search" + i
+							+ ".src='images/silk/cross-gray.png'\" >";
+					// mamacdon: so does this
+					tr = dojo.create("tr"),
+						col1 = dojo.create("td", null, tr, "last"),
+						col2 = dojo.create("td", null, tr, "last"),
+						link = dojo.create("a", {href: href}, col1, "only");
+					dojo.place(document.createTextNode(search.name), link, "only");
+					col2.innerHTML = img;
+					dojo.place(tr, searchTable, "last");
+				}
+				dojo.place(searchTable, this._parent, "last");
 			}
-			this._parent.innerHTML = html;
 			
 			// attach listeners
 			var reg = this._registry;

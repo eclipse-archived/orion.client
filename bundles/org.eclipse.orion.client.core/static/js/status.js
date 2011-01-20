@@ -26,7 +26,7 @@ eclipse.StatusReportingService = function(serviceRegistry, domId) {
  
 eclipse.StatusReportingService.prototype = {
 	setMessage : function(msg) {
-      		dojo.byId(this.domId).innerHTML = msg;
+		dojo.place(document.createTextNode(msg), this.domId, "only");
 	},
 
 	setErrorMessage : function(st) {
@@ -54,7 +54,9 @@ eclipse.StatusReportingService.prototype = {
 				break;
 			}
 		}
-		dojo.byId(this.domId).innerHTML = "<span style=\"color: " + color + "\">" + message + "</span>";
+		var span = dojo.create("span", {style: {color: color}}); 
+		dojo.place(document.createTextNode(message), span);
+		dojo.place(span, this.domId, "only");
 	}
 };
 	

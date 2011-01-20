@@ -97,18 +97,24 @@ eclipse.TestNavigatorRenderer = (function() {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
 				});
 			}
-			var col;
+			var col, div;
 			if (item.Directory) {
 				col = document.createElement('td');
 				tableRow.appendChild(col);
 				var nameId =  tableRow.id + "__expand";
-				col.innerHTML = "<div><img name=\"" + nameId + "\"  src=\"/images/collapsed-gray.png\"><img src=\"/images/silk/folder.png\">" + "<span>" + item.Name + "</span>" + "</div>";
+				div = dojo.create("div", null, col, "only");
+				dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
+				dojo.create("img", {src: "/images/silk/folder.png"}, div, "last");
+				dojo.place(document.createTextNode(item.Name), div, "last");
 				var self = this;
 				col.onclick = function(){self.onToggleDirectory ( tableRow.id ,nameId );};
 			} else {
 				col = document.createElement('td');
 				tableRow.appendChild(col);
-				col.innerHTML = "<div><img src=\"/images/none.png\"><img src=\"/images/silk/page.png\"><span>" + item.Name + "</span></div>";
+				div = dojo.create("div", null, col, "only");
+				dojo.create("img", {src: "/images/none.png"}, div, "last");
+				dojo.create("img", {src: "/images/silk/page.png"}, div, "last");
+				dojo.place(document.createTextNode(item.Name), div, "last");
 			}
 		},
 		

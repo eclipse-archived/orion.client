@@ -61,7 +61,7 @@ eclipse.TestNavigator = (function() {
 	   	
 	  		// Progress indicator
 	  		var progress = document.createElement('div');
-	  		progress.innerHTML = "Loading <b>" + path + "</b>...";
+	  		dojo.place(document.createTextNode("Loading " + path + "..."), progress, "only");
 	  		progress.id = this._navTreeId;
 	  		this.removeResourceList();
 	  		this._navDivDomNode.appendChild(progress);

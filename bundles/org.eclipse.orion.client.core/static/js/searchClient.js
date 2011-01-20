@@ -64,16 +64,35 @@ eclipse.Searcher = (function() {
 		},
 		handleError: function(response, resultsNode) {
 			console.error(response);
-			resultsNode.innerHTML = response;
+			var errorText = document.createTextNode(response);
+			dojo.place(errorText, resultsNode, "only");
 			return response;
 		},
 		saveSearch: function(favoriteName, query) {
 			this.registry.callService("IFavorites", "addFavoriteSearch", null, [favoriteName, query]);
 		},
+		/**
+		 * @param {String} str The highlight string we got from the server
+		 * @return {DomNode}
+		 */
 		formatHighlight: function(str) {
-			str = String(str).replace(/&/gm, "&amp;").replace(/</gm, "&lt;").replace(/>/gm, "&gt;").replace(/"/gm, "&quot;");
-			str = str.replace(/##match/gm, "<b>").replace(/match##/gm,"</b>");
-			return str;
+			var start = "##match",
+			    end = "match##",
+			    array = str.split(/(##match|match##)/),
+			    div = dojo.create("div"),
+			    bold;
+			for (var i=0; i < array.length; i++) {
+				var token = array[i];
+				if (token === start) {
+					bold = dojo.create("b");
+				} else if (token === end) {
+					dojo.place(bold, div, "last");
+					bold = null;
+				} else {
+					dojo.place(document.createTextNode(token), (bold || div), "last");
+				}
+			}
+			return div;
 		},
 		showSearchResult: function(resultsNode, query, excludeFile, generateHeadingAndSaveLink, onResultReady, hideSummaries, jsonData) {
 			// WORKAROUND - window.location.hostname is returning "http://localhost:8080/localhost" in FF 3.6.10 
@@ -119,9 +138,9 @@ eclipse.Searcher = (function() {
 						col = row.insertCell(0);
 						col.colspan = 2;
 						var hitLink = document.createElement('a');
-						hitLink.innerHTML = hit.Name;
+						dojo.place(document.createTextNode(hit.Name), hitLink);
 						if (hit.LineNumber) { // FIXME LineNumber === 0 
-							hitLink.innerHTML += ' (Line ' + hit.LineNumber + ')';
+							dojo.place(document.createTextNode(' (Line ' + hit.LineNumber + ')'), hitLink);
 						}
 						var loc;
 						// if we know what to highlight...
@@ -137,7 +156,7 @@ eclipse.Searcher = (function() {
 							var highlight = table.insertRow(-1);
 							col = highlight.insertCell(0);
 							col.colspan = 2;
-							col.innerHTML = this.formatHighlight(highlightText);
+							dojo.place(this.formatHighlight(highlightText), col, "only");
 						}
 					}
 				}
@@ -147,7 +166,9 @@ eclipse.Searcher = (function() {
 				}
 			}
 			if (!foundValidHit) {
-				resultsNode.innerHTML = "No matches found for <b>" + token +"</b>.";
+				var div = dojo.place("<div>No matches found for </div>", resultsNode, "only");
+				var b = dojo.create("b", null, div, "last");
+				dojo.place(document.createTextNode(token), b, "only");
 			}
 		}
 	};

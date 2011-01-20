@@ -1044,15 +1044,23 @@ eclipse.EditorContainer = (function() {
 					// TEMPORARY until we can better scope the search
 					var extensionFilter = "";
 					var fileName = editorContainer.getTitle();
-					searchFloat.innerHTML = "Searching for occurrences of <b>" + searchPattern + "</b>...";
+					
+					dojo.place(document.createTextNode("Searching for occurrences of "), searchFloat, "last");
+					var b = dojo.create("b", null, searchFloat, "last");
+					dojo.place(document.createTextNode("\"" + searchPattern + "\""), b, "only");
+					
 					if (fileName) {
 						var splits = fileName.split(".");
 						if (splits.length > 0) {
 							var extension = splits.pop().toLowerCase();
 							extensionFilter = "+Name:*." + extension + "+";
-							searchFloat.innerHTML = "Searching for occurrences of <b>" + searchPattern + "</b> in *." + extension + "...";
+							
+							dojo.place(document.createTextNode(" in *."), searchFloat, "last");
+							dojo.place(document.createTextNode(extension), searchFloat, "last");
 						}
 					}
+					dojo.place(document.createTextNode("..."), searchFloat, "last");
+					
 					searchFloat.style.display = "block";
 					var query = editorContainer.getFileMetadata().SearchLocation + searchPattern + extensionFilter;
 					editorContainer._searcher.search(searchFloat, query, fileURI);

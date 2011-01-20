@@ -38,7 +38,7 @@ eclipse.Outliner.prototype = {
 	// this is closely tied to the jslint format right now
 	render: function(resource) {
 		if (resource.title && resource.title.indexOf(".js") === resource.title.length - 3) {
-			var html = "";
+			var items = dojo.create("div");
 			functions = resource.data.functions;
 			for (k in functions) {
 				var f = functions[k];
@@ -69,11 +69,13 @@ eclipse.Outliner.prototype = {
 				}
 				var nonHash = window.location.href.split('#')[0];
 				var href = nonHash +  eclipse.util.hashFromPosition(resource.title, null, null, f.line, null, null, f.name);
-				html += "<a href=\"" + href + "\">" + name + "</a><br>";
+				var link = dojo.create("a", {href: href}, items, "last");
+				dojo.place(document.createTextNode(name), link);
+				dojo.create("br", null, items, "last");
 			}
-			this._parent.innerHTML = html;
+			dojo.place(items, this._parent, "only");
 		} else if (resource.title.indexOf(".html") === resource.title.length - 5) {
-			var html = "";
+			var items = dojo.create("div");
 			var pattern = /id=['"]\S*["']/gi; // experimental: |<head[^>]*|<body[^>]*|<script[^>]*/gi;
 			var result;
 			while ((result = pattern.exec(resource.contents)) !== null) {
@@ -91,9 +93,11 @@ eclipse.Outliner.prototype = {
 				}
 				var nonHash = window.location.href.split('#')[0];
 				var href = nonHash +  eclipse.util.hashFromPosition(resource.title, start, end);
-				html += "<a href=\""+href+"\">"+name+"</a><br>";
+				var link = dojo.create("a", {href: href}, items, "last");
+				dojo.place(document.createTextNode(name), link);
+				dojo.create("br", null, items, "last");
 			}
-			this._parent.innerHTML = html;
+			dojo.place(items, this._parent, "only");
 		}
 	}	
 };

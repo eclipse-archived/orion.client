@@ -42,13 +42,21 @@ eclipse.TestStackRenderer = (function() {
 							var others = stack.split(anchorPart);
 							if(others.length === 2){
 								var href = "/coding.html#file=" + parts2[1]+parts2[2]+parts1[1] + "&line=" +parts3[1];
-								stackDetailsDiv.innerHTML = stackDetailsDiv.innerHTML + others[0] + "<a class=\"navlink\" href=\"" + href + "\"" + " target=\"_blank\">" + anchorPart + "</a>" + others[1] + "<br>";
+								var linkPart = dojo.create("span");
+								var link = dojo.create("a", {href: href, target: "_blank"});
+								dojo.place(link, linkPart, "last");
+								dojo.place(document.createTextNode(anchorPart), link);
+								
+								stackDetailsDiv.innerHTML = stackDetailsDiv.innerHTML
+										+ document.createTextNode(others[0]).textContent
+										+ linkPart.innerHTML
+										+ document.createTextNode(others[1]).textContent + "<br>";
 								return;
 							}
 						}
 					}
 				}
-			} 
+			}
 			stackDetailsDiv.innerHTML = stackDetailsDiv.innerHTML + stack + "<br>";
 		}
 		

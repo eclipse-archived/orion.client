@@ -18,11 +18,13 @@ eclipse.TestIndicator = (function() {
 	Indicator.prototype = {
 		update: function(testNumber , failNumber){
 			var testRuns = dojo.byId(this._testNumberId);
-			if(testRuns !== undefined)
-				testRuns.innerHTML = testNumber;
+			if(testRuns !== undefined){
+				dojo.place(document.createTextNode(testNumber), testRuns, "only");
+			}
 			var failures = dojo.byId(this._testFailureId);
-			if(failures !== undefined)
-				failures.innerHTML = failNumber;
+			if(failures !== undefined){
+				dojo.place(document.createTextNode(failNumber), failures, "only");
+			}
 			var testState = dojo.byId(this._testIndicatorId);
 			if(testState !== undefined){
 				if(testNumber === 0)
