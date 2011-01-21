@@ -117,12 +117,16 @@ dojo.addOnLoad(function(){
 		dialog.show();
 	};
 	dojo.byId("searchTextButton").onclick = function(evt) {
-		var query = explorer.treeRoot.SearchLocation + searchField.value;
-		explorer.loadResourceList(query);
+		if (searchField.value.length > 0) {
+			var query = explorer.treeRoot.SearchLocation + searchField.value;
+			explorer.loadResourceList(query);
+		}
 	};
 	dojo.byId("searchNamesButton").onclick = function(evt) {
-		var query = explorer.treeRoot.SearchLocation + "Name:" + searchField.value;
-		explorer.loadResourceList(query);
+		if (searchField.value.length > 0) {
+			var query = explorer.treeRoot.SearchLocation + "Name:" + searchField.value;
+			explorer.loadResourceList(query);
+		}
 	};
 	
 });

@@ -162,9 +162,11 @@ dojo.addOnLoad(function(){
 			if (e.charOrCode === dojo.keys.ENTER) {
 				// We expect ExplorerTree to fill in the SearchLocation on the treeRoot
 				if (explorer.treeRoot.SearchLocation) {
-					var query = explorer.treeRoot.SearchLocation + search.value;
-					explorer.loadResourceList(query);
-					dojo.stopEvent(e);
+					if (search.value.length > 0) {
+						var query = explorer.treeRoot.SearchLocation + search.value;
+						explorer.loadResourceList(query);
+						dojo.stopEvent(e);
+					}
 				} else {
 					alert("Can't search: SearchLocation not available");
 				}
