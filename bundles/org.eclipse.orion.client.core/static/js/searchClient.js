@@ -44,7 +44,7 @@ eclipse.Searcher = (function() {
 				handleAs: "json",
 				headers: {
 					"Accept": "application/json",
-					"EclipseWeb-Version": "1"
+					"Orion-Version": "1"
 				},
 				sync: false,
 				timeout: 15000,

@@ -57,7 +57,7 @@ eclipse.Preferences = (function() {
 	 		dojo.xhrGet({
 	                url: servicePath + "?key=" + window.encodeURIComponent(key),
 	                headers: {
-	 					"EclipseWeb-Version" : "1"
+	 					"Orion-Version" : "1"
 	 				},
 	                handleAs: "json",
 	                timeout: 15000,
@@ -84,7 +84,7 @@ eclipse.Preferences = (function() {
 	 		dojo.xhrGet({
 	 			url: servicePath + node,
 	 			headers: {
-	 				"EclipseWeb-Version" : "1"
+	 				"Orion-Version" : "1"
 	 			},
 	 			handleAs: "json",
 	 			timeout: 15000,
@@ -115,7 +115,7 @@ eclipse.Preferences = (function() {
 	 		dojo.xhrPut({
 	                url: servicePath + "?key=" + window.encodeURIComponent(key) + "&value=" + window.encodeURIComponent(value),
 	                headers: {
-	 					"EclipseWeb-Version" : "1"
+	 					"Orion-Version" : "1"
 	 				},
 	                handleAs: "json",
 	                timeout: 15000,

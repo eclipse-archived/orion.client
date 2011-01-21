@@ -30,7 +30,7 @@ eclipse.FileService = (function() {
 			dojo.xhrGet({
 					url: parentItem.ChildrenLocation,
 					headers: {
-						"EclipseWeb-Version" : "1"
+						"Orion-Version" : "1"
 					},
 					handleAs: "json",
 					timeout: 15000,
@@ -76,7 +76,7 @@ eclipse.FileService = (function() {
 			dojo.xhrPost({
 				url: "/workspace",
 				headers: {
-					"EclipseWeb-Version" : "1",
+					"Orion-Version" : "1",
 					"Slug" : name
 				},
 				handleAs: "json",
@@ -103,7 +103,7 @@ eclipse.FileService = (function() {
 			dojo.xhrGet({
 				url: location ? location : "/workspace",
 				headers: {
-					"EclipseWeb-Version" : "1"
+					"Orion-Version" : "1"
 				},
 				handleAs: "json",
 				timeout: 15000,
@@ -148,7 +148,7 @@ eclipse.FileService = (function() {
 			dojo.xhrPost({
 				url: url,
 				headers: {
-					"EclipseWeb-Version": "1",
+					"Orion-Version": "1",
 					"Content-Type": "application/json"
 				},
 				handleAs: "json",
@@ -171,7 +171,7 @@ eclipse.FileService = (function() {
 			dojo.xhrPost({
 				url: workspace.Location,
 				headers: {
-					"EclipseWeb-Version": "1",
+					"Orion-Version": "1",
 					"Content-Type": "application/json"
 				},
 				handleAs: "json",
@@ -197,7 +197,7 @@ eclipse.FileService = (function() {
 			dojo.xhrPost({
 				url: (item.Location),
 				headers: {
-					"EclipseWeb-Version": "1",
+					"Orion-Version": "1",
 					"Slug": folderName,
 					"Content-Type": "application/json"
 				},
@@ -227,7 +227,7 @@ eclipse.FileService = (function() {
 			dojo.xhrPost({
 				url: (item.Location),
 					headers: {
-						"EclipseWeb-Version": "1",
+						"Orion-Version": "1",
 						"Slug": fileName,
 						"Content-Type": "application/json"
 					},
@@ -256,7 +256,7 @@ eclipse.FileService = (function() {
 			dojo.xhrDelete({
 				url: (item.Location),
 				headers: {
-					"EclipseWeb-Version": "1"
+					"Orion-Version": "1"
 				},
 				handleAs: "json",
 				timeout: 15000,

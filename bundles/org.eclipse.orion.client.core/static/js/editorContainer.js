@@ -1198,7 +1198,7 @@ eclipse.EditorContainer = (function() {
 				dojo.xhrGet({
 					url: fileURI,
 					content: { "parts": "meta" },
-					headers: { "EclipseWeb-Version": "1" },
+					headers: { "Orion-Version": "1" },
 					handleAs: "json",
 					timeout: 5000,
 					load: dojo.hitch(this, function(metadata, secondArg) {
