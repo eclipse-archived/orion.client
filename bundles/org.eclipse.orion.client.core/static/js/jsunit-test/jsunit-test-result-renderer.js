@@ -56,7 +56,7 @@ eclipse.TestResultRenderer = (function() {
 				tableRow.appendChild(col);
 				
 				var testRes =  document.createElement('span');
-				dojo.place(document.createTextNode(item.name), testRes, "only")
+				dojo.place(document.createTextNode(item.name), testRes, "only");
 				testRes.style.cursor = "pointer";
 				
 				dojo.connect(testRes, "onmouseover", testRes, function() {

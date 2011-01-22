@@ -25,7 +25,7 @@ eclipse.testSuite.prototype.load = function(files, callback) {
 	} else {
 		setTimeout(callback({
 			success: true
-		}), 0)
+		}), 0);
 	}
 };
 
@@ -36,7 +36,7 @@ eclipse.testSuite.prototype.testNames = function(callback) {
 	} else {
 		setTimeout(callback({
 			testNames: [ "TestCase1.testName1", "TestCase1.testName2", "TestCase2.testName1" ]
-		}), 0)
+		}), 0);
 	}
 };
 
@@ -49,7 +49,7 @@ eclipse.testSuite.prototype.runTest = function(testName, callback) {
 			success: true,
 			testName: testName,
 			stack: null
-		}), 0)
+		}), 0);
 	}
 };
 

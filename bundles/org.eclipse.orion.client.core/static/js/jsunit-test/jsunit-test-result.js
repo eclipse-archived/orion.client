@@ -16,9 +16,9 @@ eclipse.UnitTestResult = (function() {
 	   	this._renderer = renderer;
 	   	this._createModel = createModel;
 	  
-		this._resultDivId  = eclipse.uTestUtils.getOptionValue(options , "resultDivId" , eclipse.uTestConsts.RESULT_DIV_ID);
-		this._resultTreeId  = eclipse.uTestUtils.getOptionValue(options , "resultTreeId" , eclipse.uTestConsts.RESULT_TREE_ID);
-		this._indicator =  eclipse.uTestUtils.getOptionValue(options , "indicator" , undefined)
+		this._resultDivId  = eclipse.uTestUtils.getOptionValue(options, "resultDivId", eclipse.uTestConsts.RESULT_DIV_ID);
+		this._resultTreeId  = eclipse.uTestUtils.getOptionValue(options, "resultTreeId", eclipse.uTestConsts.RESULT_TREE_ID);
+		this._indicator =  eclipse.uTestUtils.getOptionValue(options, "indicator", undefined);
 			
 		this._resultDivDomNode = dojo.byId( this._resultDivId);
 		this._resultRoot = {
