@@ -1,7 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Orion Client Core (Incubation)
+Bundle-Name: %Bundle-Name
+Bundle-Localization: bundle
 Bundle-SymbolicName: org.eclipse.orion.client.core;singleton:=true
-Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Eclipse.org
+Bundle-Version: 0.2.0.qualifier
+Bundle-Vendor: %Bundle-Vendor
 Eclipse-BundleShape: dir

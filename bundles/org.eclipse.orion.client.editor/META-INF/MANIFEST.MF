@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Web Editor (Incubation)
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.orion.client.editor
 Bundle-Version: 0.1.0.qualifier
+Bundle-Localization: bundle
 Eclipse-BundleShape: dir
