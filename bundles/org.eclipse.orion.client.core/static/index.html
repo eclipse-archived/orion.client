@@ -39,7 +39,13 @@
 							break;
 					}
 					window.location.replace(home);
-				}]);
+				}, function(status) {
+					if (status === 401) {
+						return;
+					} else {
+						window.location.replace("navigate-table.html");
+					}
+				} ]);
 			});
 			
 			dojo.addOnUnload(function(){

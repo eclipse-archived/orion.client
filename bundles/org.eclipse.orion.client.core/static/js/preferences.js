@@ -43,9 +43,11 @@ eclipse.Preferences = (function() {
 	 	 * or if there was an error retrieving the value.
 	 	 * @param {String} key The preference key. The key is either a simple name, or a path where the key is the final segment.
 	 	 * @param {Function} onDone A function that is invoked with the loaded preference as an argument, or
-	 	 * with no argument if the preference could not be retrieved.
+	 	 * with no argument if the preference could not be retrieved and <code>onError</code> is not provided.
+	 	 * @param {Function} onError Function to be invoked if retrieval failed, if not profiled <code>onDone</code> 
+	 	 * is invoked with no argument.
 	 	 */
-	 	get: function(key, onDone) {
+	 	get: function(key, onDone, /** optional **/onError) {
 	 		var servicePath = this.serviceLocation;
 	 		var separator = key.lastIndexOf('/');
 	 		if (separator) {
@@ -66,7 +68,11 @@ eclipse.Preferences = (function() {
 		            },
 	                error: function(response, ioArgs) {
 						handleGetAuthenticationError(this, ioArgs);
-						onDone();
+		 				if(onError){
+		 					onError(ioArgs.xhr.status);
+		 				}else{
+		 					onDone();
+		 				}
 						return response;
 	                }
 			});
