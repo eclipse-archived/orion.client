@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.orion.server.useradmin.ui
+Bundle-SymbolicName: org.eclipse.orion.client.users.ui
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.eclipse.orion.client.users.ui.Activator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.json,
+ org.osgi.framework;version="1.3.0"
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.orion.client.core;bundle-version="0.1.0",
+ org.dojotoolkit;bundle-version="1.4.0",
+ org.openajax;bundle-version="2.0.3"

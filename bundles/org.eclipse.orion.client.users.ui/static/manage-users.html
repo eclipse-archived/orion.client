@@ -1,0 +1,93 @@
+<!doctype html>
+<html style="height: 100%">
+<head>
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2011.">
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="X-UA-Compatible" content="IE=8">
+<title>Manage Users</title>
+<script type="text/javascript"
+	src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+<script type="text/javascript">
+	var djConfig = {
+		isDebug : true,
+		modulePaths : {'profile.widgets': '/profile/widgets'},
+		parseOnLoad : true
+	};
+</script>
+
+
+<script type="text/javascript"
+	src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+<script type="text/javascript">
+	dojo.require("dijit.Dialog");
+	dojo.require("dijit.layout.BorderContainer");
+	dojo.require("dijit.layout.ContentPane");
+	dojo.require("dijit.form.TextBox");
+	dojo.require("dijit.form.Button");
+	dojo.require("profile.widgets.NewUserDialog");
+</script>
+<style type="text/css">
+@import "/org.dojotoolkit/dojo/resources/dojo.css";
+
+@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
+
+@import "/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css"
+	;
+
+@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
+
+@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
+
+@import "/ide.css";
+
+@import "/profile/css/userprofile.css";
+</style>
+<!--Authentication -->
+<script type="text/javascript" src="/js/auth.js"></script>
+<!-- Extension Registry -->
+<script src="js/registry.js"></script>
+<!-- Eclipse Application Services -->
+<script src="js/input.js"></script>
+<!--Profile logic -->
+<script type="text/javascript" src="/profile/js/UsersList.js"></script>
+<script type="text/javascript" src="/profile/js/manage-users.js"></script>
+<script type="text/javascript" src="/profile/widgets/NewUserDialog.js"></script>
+</head>
+<body style="height: 100%" class="soria">
+	<div dojoType="dijit.layout.BorderContainer" design="headline"
+		liveSplitters="true" persist="true" gutters="false"
+		style="width: 100%; height: 100%;">
+		<div id="toolbar" class="toolbar" dojoType="dijit.layout.ContentPane"
+			region="top">
+			<div style="float: left;">
+				<table>
+					<tr>
+						<td><a id="home" href="/navigate-table.html"><img
+								class="toolbarLabel" src="/images/Eclipse-Logo.gif"
+								alt="Eclipse Logo" align="top"> </a></td>
+						<td><b class="statuspane" id="statusPane"></b>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div id="eclipseWebToolbar" style="float: right;"
+				class="innerToolbar">
+			</div>
+		</div>
+		<div class="paneScrolled" style="margin-left: 8px;" id="usersPane"
+			dojoType="dijit.layout.ContentPane" region="center" splitter="false">
+			<div id="personalInfoToolbar" class="toolbar"
+				dojoType="dijit.layout.ContentPane" region="top"
+				style="height: 20px;">
+				<h2>
+					Orion Users <img title="Add user" alt="Add user" id="addUserLink" style="margin-left: 50px" src="/profile/images/newuser.gif">
+				</h2>
+			</div>
+			<div id="usersList">
+			</div>
+		</div>
+	</div>
+</body>
+</html>
