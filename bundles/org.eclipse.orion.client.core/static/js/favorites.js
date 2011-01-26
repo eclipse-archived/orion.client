@@ -143,8 +143,9 @@ eclipse.FavoritesService = (function() {
 		},
 		
 		_storeSearches: function() {
+			var storedSearches = this._searches;
 			this._registry.getService("IPreferenceService").then(function(service) {
-				service.put("window/favorites/search", JSON.stringify(this._searches)); 
+				service.put("window/favorites/search", JSON.stringify(storedSearches)); 
 			});
 		}
 	};
