@@ -17,18 +17,14 @@
 		
 	    <!-- Eclipse Application Services and Service Registry -->
    		<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
-		<script src="js/registry.js"></script>
+		<script src="js/serviceregistry.js"></script>
 	 	<script src="js/util.js"></script>
 		<script src="js/preferences.js"></script>
     	<script type="text/javascript">
     		dojo.addOnLoad(function() {
-	  			registry = new eclipse.Registry();
-				registry.start();
-	
-				// Register needed EAS
-				registry.registerLocalService("IPreferenceService", "EASPreferences", new eclipse.Preferences(registry, "/prefs/user"));
-    	
-    			registry.callService("IPreferenceService", "get", null, ["window/orientation", function(home) {
+				var serviceRegistry = new eclipse.ServiceRegistry();
+				var prefsService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+				prefsService.get("window/orientation", function(home) {
 					switch (home) {
 						case "navigate.html":
 						case "navigate-tree.html":
@@ -45,11 +41,7 @@
 					} else {
 						window.location.replace("navigate-table.html");
 					}
-				} ]);
-			});
-			
-			dojo.addOnUnload(function(){
-				registry.stop();
+				});
 			});
 		</script>     
  	</head>

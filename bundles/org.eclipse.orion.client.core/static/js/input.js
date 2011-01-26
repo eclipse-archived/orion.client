@@ -22,13 +22,13 @@ var eclipse = eclipse || {};
  * @class Services for editor inputs
  */
 eclipse.InputService = function(serviceRegistry) {
-	this.serviceRegistry = serviceRegistry;
-	this._verifyInputChangeCallback = [];
-	this._inputChangedCallback = [];
+	this._serviceRegistry = serviceRegistry;
+	this._serviceRegistration = serviceRegistry.registerService("IInputProvider", this);
 	this._subscribed = false;
 	this._previousInput = null;
 	this._triggeringEvent = null;
 	this._shouldManageDocumentTitle = false;
+	this._init();
 };
  
 eclipse.InputService.prototype = {
@@ -38,7 +38,7 @@ eclipse.InputService.prototype = {
 		}
 	},
 	
-	_checkSubscribed : function() {
+	_init : function() {
 	   	if (this._subscribed)
 	   		return;
 	   	this._subscribed = true;
@@ -50,45 +50,10 @@ eclipse.InputService.prototype = {
 	   	    // if we are restoring the hash to what we think it should be, ignore
 	   	    if (dojo.hash() === this._previousInput)
 	   	    	return;
-	   		if (this._okToChange()) {
-	   			this._previousInput = dojo.hash();
-	   			for (var i = 0; i < this._inputChangedCallback.length; i++) {
-	   				this._inputChangedCallback[i].call(this, this._getInputSync(), this._triggeringEvent);
-	   			}
-	   			this._triggeringEvent = null;
-	   		} else {
-	   			// restore hash, user rejected the change
-	   			dojo.hash(this._previousInput);
-	   		}
+	   		this._previousInput = dojo.hash();
+	   		this._serviceRegistration.dispatchEvent("inputChanged", this._getInputSync());
+	   		this._triggeringEvent = null;
 	   	});
-	},
-	
-	_okToChange : function() {
-		for (var i = 0; i < this._verifyInputChangeCallback.length; i++) {
-      		var ok = this._verifyInputChangeCallback[i].apply(this);
-      		if (!ok) {
-      			return false;
-      		}
-		}
-	    return true;
-	},
-	    
-	// TODO This callback is used by parties that want to veto the input change from afar.  For the editor,
-	// it is not necessary because the onunload performs the check.  
-	// See WorkItem 408
-	verifyInputChange : function(callback) {
-		this._checkSubscribed();
-		this._verifyInputChangeCallback.push(callback);
-	},
-	  
-	inputChanged : function(callback) {
-		this._checkSubscribed();
-		this._inputChangedCallback.push(callback);
-		var hash = dojo.hash();
-		if (hash) {
-			callback(hash);
-		}
-			
 	},
 	
 	_getInputSync: function() {

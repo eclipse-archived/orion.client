@@ -69,7 +69,9 @@ eclipse.Searcher = (function() {
 			return response;
 		},
 		saveSearch: function(favoriteName, query) {
-			this.registry.callService("IFavorites", "addFavoriteSearch", null, [favoriteName, query]);
+			registry.getService("IFavorites").then(function(favorites) {
+				favorites.addFavoriteSearch(favoriteName, query);
+			});
 		},
 		/**
 		 * @param {String} str The highlight string we got from the server

@@ -38,7 +38,7 @@
 	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
 	
 	<!-- Extension Registry -->
-	<script src="js/registry.js"></script>
+	<script src="js/serviceregistry.js"></script>
 	
 	<!--Authentication -->
 	<script type="text/javascript" src="js/auth.js"></script>
@@ -81,6 +81,12 @@
 			</div>
 			<div id="eclipseWebToolbar" class="innerToolbar" style="float: right;">
 				<button dojoType="dijit.form.Button" class="button" id="switchView">
+					<script type="dojo/connect" event="onClick" args="evt">
+						serviceRegistry.getService("IPreferencesService").then(function(service) {
+							service.put("window/orientation", "navigate-table.html");
+						});
+						window.location.replace("/navigate-table.html#" + dojo.hash());
+					</script>
 					<img src="/images/flatLayout.gif" alt="Grid View" title="Grid View">
 				</button>
 				

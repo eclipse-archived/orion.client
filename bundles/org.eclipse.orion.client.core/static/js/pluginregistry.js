@@ -18,7 +18,7 @@ var eclipse = eclipse || {};
  * A ServiceReference enables services to be called and released.
  * @class A ServiceReference enables services to be called and released.
  */
-eclipse.Service = function(serviceReference, registry, onLoadCallback) {
+eclipse.Service0 = function(serviceReference, registry, onLoadCallback) {
 	serviceReference._service = this;
 	this._serviceReference = serviceReference;
 	this._registry = registry;
@@ -39,7 +39,7 @@ eclipse.Service = function(serviceReference, registry, onLoadCallback) {
 	}
 };
 
-eclipse.Service.prototype = {
+eclipse.Service0.prototype = {
 	invoke: function(methodName, params, callback) {
 		this._registry._sendPluginRequest("servicecall", {method: methodName, params: params}, this._serviceReference._pluginServiceProvider.pluginURL, callback);
 	},
@@ -87,7 +87,7 @@ eclipse.Service.prototype = {
  * A ServiceReference enables services to be called and released.
  * @class A ServiceReference enables services to be called and released.
  */
-eclipse.ServiceReference = function(serviceType, pluginServiceProvider, registry) {
+eclipse.ServiceReference0 = function(serviceType, pluginServiceProvider, registry) {
 	this._pluginServiceProvider = pluginServiceProvider;
 	this._serviceType = serviceType;
 	this._registry = registry;
@@ -95,7 +95,7 @@ eclipse.ServiceReference = function(serviceType, pluginServiceProvider, registry
 	this._pluginServiceProvider._serviceReferences[this._serviceType.id] = this;
 };
 
-eclipse.ServiceReference.prototype = {
+eclipse.ServiceReference0.prototype = {
 	_incrementUseCount: function() {
 		this._useCount++;
 	},	
@@ -314,7 +314,7 @@ eclipse.Registry.prototype = {
 		var serviceReference = pluginServiceProvider._serviceReferences[serviceTypeId];
 		if (serviceReference === undefined) {
 			//console.debug("creating service reference for ["+serviceType+"]");
-			serviceReference = new eclipse.ServiceReference(serviceType, pluginServiceProvider, this);
+			serviceReference = new eclipse.ServiceReference0(serviceType, pluginServiceProvider, this);
 		}
 		return serviceReference;
 	},
@@ -324,7 +324,7 @@ eclipse.Registry.prototype = {
 		serviceReference._incrementUseCount();
 		if (service === undefined) {
 			//console.debug("creating service for ["+serviceReference._serviceType.id+"]");
-			service = new eclipse.Service(serviceReference, this, loadedCallback);
+			service = new eclipse.Service0(serviceReference, this, loadedCallback);
 		} else {
 			//console.debug("using existing service for ["+serviceReference._serviceType.id+"]");
 			loadedCallback(service);

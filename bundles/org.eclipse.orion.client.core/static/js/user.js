@@ -22,7 +22,9 @@ dojo.addOnLoad(function() {
 				b.innerHTML = data.login;
 				dojo.addClass(b, "button");
 			}
-			registry.callService("IUsers", "setUser", null, [data.login]);
+			serviceRegistry.getService("IUsers").then(function(service) {
+				service.setUser(data.login);
+			});
 			
 			var b2 = dojo.byId("userProfile");
 			if (b2) {

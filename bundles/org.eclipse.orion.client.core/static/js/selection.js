@@ -20,7 +20,8 @@ var eclipse = eclipse || {};
  * @class Service for providing selections
  */
 eclipse.SelectionService = function(serviceRegistry) {
-	this.serviceRegistry = serviceRegistry;
+	this._serviceRegistry = serviceRegistry;
+	this._serviceRegistration = serviceRegistry.registerService("ISelectionService", this);
 	this.selections = null;
 	this._listeners = [];
 };
@@ -29,16 +30,8 @@ eclipse.SelectionService.prototype = {
 	// provider
 	_setSelection: function(selections) {
 		this.selections = selections;
-		for (var i = 0; i < this._listeners.length; i++) {
-			this._listeners[i](selections);
-		}
-	},
-	
-	addEventListener: function(callback) {
-		this._listeners.push(callback);
-		if (this.selections) {
-			callback(selections);
-		}
+		this._serviceRegistration.dispatchEvent("selectionChanged", selections);
+
 	},
 	
 	getSelection: function(onDone) {

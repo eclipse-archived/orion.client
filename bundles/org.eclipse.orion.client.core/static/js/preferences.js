@@ -34,6 +34,7 @@ eclipse.Preferences = (function() {
 		_init: function(serviceRegistry, location) {
 			this.serviceLocation = location;
 			this.registry = serviceRegistry;
+			this._serviceRegistration = serviceRegistry.registerService("IPreferenceService", this);
 		},
 
 	 	/**

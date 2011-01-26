@@ -13,7 +13,7 @@ eclipse.TestConfigService = (function() {
 	function TestConfigService(options) {
 		this._selectedConfigIndex = 0;
 		this._registry = options.serviceRegistry;
-		this._listeners = [];
+		this._serviceRegistration = this._registry.registerService("ITestConfigs", this);
 		this._initConfig();
 	}
 	TestConfigService.prototype = {
@@ -21,26 +21,27 @@ eclipse.TestConfigService = (function() {
 		 * Private functions
 		 */	
 		_initConfig: function(){
-			this._listeners = [];
 			this._configs = [];
 			this._configs.push({name:"Test Selected" , value:""});
 			var self = this;
-			this._registry.callService("IPreferenceService", "get", null, ["jsunit_test/configs", function(prefs) {
-				if (prefs) {
-					var prefJson = JSON.parse(prefs);
-					for (var i = 0 ; i < prefJson.length ; i++) {
-						var configValues = prefJson[i].value;
-						var config = {name:prefJson[i].name, value:[]};
-						self._configs.push(config);
-						for(var j = 0 ; j < configValues.length ; j++){
-							var singleValue = {location:eclipse.util.makeFullPath(configValues[j]) , parents:[]};
-							config.value.push(singleValue);
-							self._loadFileParents(i,j);
+			this._registry.getService("IPreferenceService").then(function(service) {
+				service.get("jsunit_test/configs", function(prefs) {
+					if (prefs) {
+						var prefJson = JSON.parse(prefs);
+						for (var i = 0 ; i < prefJson.length ; i++) {
+							var configValues = prefJson[i].value;
+							var config = {name:prefJson[i].name, value:[]};
+							self._configs.push(config);
+							for(var j = 0 ; j < configValues.length ; j++){
+								var singleValue = {location:eclipse.util.makeFullPath(configValues[j]) , parents:[]};
+								config.value.push(singleValue);
+								self._loadFileParents(i,j);
+							}
 						}
+						self._notifyListeners();
 					}
-					self._notifyListeners();
-				}
-			}]);
+				});
+			});
 		},
 			
 		_loadFileParents: function(configIndex , valueIndex){
@@ -77,24 +78,18 @@ eclipse.TestConfigService = (function() {
 					}
 					storedConfigs.push(config);
 				}
-				this._registry.callService("IPreferenceService", "put", null, ["jsunit_test/configs", JSON.stringify(storedConfigs)]); 
+				this._registry.getService("IPreferenceService").then(function(service) {
+					service.put("jsunit_test/configs", JSON.stringify(storedConfigs)); 
+				});
 			} else {
-				this._registry.callService("IPreferenceService", "put", null, ["jsunit_test/configs", ""]); 
+				this._registry.getService("IPreferenceService").then(function(service) {
+					service.put("jsunit_test/configs", ""); 
+				});
 			}
 		},
 		
 		_notifyListeners: function() {
-			for (var i = 0; i < this._listeners.length; i++) {
-				this._listeners[i](this._configs , this._selectedConfigIndex);
-			}
-		},
-		
-		/**
-		 * @param callback Callback to be notified when configurations change
-		*/
-		addEventListener: function(callback) {
-			this._listeners.push(callback);
-			callback(this._configs , this._selectedConfigIndex);
+			this._serviceRegistration.dispatchEvent("configsChanged", this._configs , this._selectedConfigIndex);
 		},
 			
 		addConfig: function(configName , configValue){
@@ -153,9 +148,11 @@ eclipse.TestConfigurator = (function() {
 		this._editConfigBtnDiv.set('disabled' , true);
 		this._registry = options.serviceRegistry;
 		var self = this;
-		this._registry.callService("ITestConfigs", "addEventListener", null, [function(configs, selIndex) {
-			self._render(configs, selIndex);
-		}]);
+		this._registry.getService("ITestConfigs").then(function(service) {
+			service.addEventListener("configsChanged", function(configs, selIndex) {
+				self._render(configs, selIndex);
+			});
+		});
 	}
 	TestConfigurator.prototype = {
 		showNewItemDialog: function() {
@@ -164,7 +161,9 @@ eclipse.TestConfigurator = (function() {
 				label: "Config name:",
 				func:  dojo.hitch(this, function(itemName){
 					var cValue = this._makeConfigValue(this._navigator._renderer.getSelectedURL(true));
-					this._registry.callService("ITestConfigs", "addConfig", null, [itemName, cValue]);
+					this._registry.getService("ITestConfigs").then(function(service) {
+						service.addConfig(itemName, cValue);
+					});
 					if(this._resultController)
 						this._resultController.clearResultUI();
 				})
@@ -205,12 +204,15 @@ eclipse.TestConfigurator = (function() {
 				this._delConfigBtnDiv.set('disabled' , false);
 				this._editConfigBtnDiv.set('disabled' , false);
 			}
-			this._registry.callService("ITestConfigs", "setCurConfigIndex", null, [selIndex]);
+			this._registry.getService("ITestConfigs").then(function(service) {
+				service.setCurConfigIndex(selIndex);
+			});
 			if(selIndex !== 0){
 				var self = this;
-				this._registry.callService("ITestConfigs", "getCurrentConfig", 
-		   					  function(result) {self._navigator._renderer.updateBySelection(result);},
-		   					  []);
+				this._registry.getService("ITestConfigs").then(function(service) {
+					return service.getCurrentConfig()}).then(function(result) {
+		   				self._navigator._renderer.updateBySelection(result);
+		   			});
 			}
 		},
 		
@@ -234,22 +236,29 @@ eclipse.TestConfigurator = (function() {
 		
 		updateConfig: function(){
 		    var cValue = this._makeConfigValue(this._navigator._renderer.getSelectedURL(true));
-		    this._registry.callService("ITestConfigs", "updateConfig", null, [cValue]);
+		    this._registry.getService("ITestConfigs").then(function(service) {
+		    	service.updateConfig(cValue);
+		    });
 		},
 		
 		deleteConfig: function(){
 			var self = this;
-			this._registry.callService("ITestConfigs", "deleteConfig", function(result){self._onSelChange();}, []);
+		    this._registry.getService("ITestConfigs").then(function(service) {
+				service.deleteConfig().then(function(result) {
+					self._onSelChange();
+				});
+			});
 		},
 		
 		testCurrentConfig: function(callBack){
 			var selIndex = this._configSelDiv.selectedIndex;
 			this._testCallBack = callBack;
 			var self = this;
-			return selIndex === 0 ?callBack(this._navigator._renderer.getSelectedURL(false)) : 
-								   this._registry.callService("ITestConfigs", "getCurrentConfig", 
-										   					  function(result) {callBack(result);},
-										   					  []);
+			return selIndex === 0 ? callBack(this._navigator._renderer.getSelectedURL(false)) : 
+								   this._registry.getService("ITestConfigs").then(function(service) {
+								  		return service.getCurrentConfig()}).then(function(result) {
+								  			callback(result);
+								  		});
 		}
 
 	};

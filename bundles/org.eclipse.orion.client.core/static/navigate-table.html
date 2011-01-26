@@ -47,7 +47,7 @@
     <script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
     
     <!-- Extension Registry -->
-	<script src="js/registry.js"></script>
+	<script src="js/serviceregistry.js"></script>
         
     <!-- Eclipse Application Services -->
  	<script src="js/util.js"></script>
@@ -86,7 +86,9 @@
 			<div id="eclipseWebToolbar" style="float: right;" class="innerToolbar">
 				<button dojoType="dijit.form.Button" class="button" id="switchView">
 					<script type="dojo/connect" event="onClick" args="evt">
-						registry.callService("IPreferencesService", "put", null, ["window/orientation", "navigate-tree.html"]);
+						serviceRegistry.getService("IPreferencesService").then(function(service) {
+							service.put("window/orientation", "navigate-tree.html");
+						});
 						window.location.replace("/navigate-tree.html#" + dojo.hash());
 					</script>
 					<img src="/images/hierarchicalLayout.gif" alt="Tree View" title="Tree View">

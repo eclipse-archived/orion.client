@@ -34,19 +34,11 @@ function createNavModel(root , rootId  ,reg) {
 }
 
 dojo.addOnLoad(function(){
-	// FIXME until we sort out where service registration happens, and how dependencies on
-	// services are expressed, just copy this code around...
-	registry = new eclipse.Registry();
-	registry.start();
-	
-	// Register needed EAS
-	registry.registerLocalService("IPreferenceService", "EASPreferences", new eclipse.Preferences(registry, "/prefs/user"));
-	
-	// Register the file service
-	registry.registerLocalService("IFileService", "FileService", new eclipse.FileService());
-
-	// Register the test configuration service
-	registry.registerLocalService("ITestConfigs", "TestConfigService", new eclipse.TestConfigService({serviceRegistry: registry}));
+	// create registry and instantiate needed services
+	serviceRegistry = new eclipse.ServiceRegistry();
+	new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	new eclipse.FileService(serviceRegistry);
+	new eclipse.TestConfigService({serviceRegistry: serviceRegistry});
 	
 
 	//Create the unit test result tree
@@ -65,10 +57,10 @@ dojo.addOnLoad(function(){
 	
 	// Create the unit test navigator and load the file workspace
     var navRenderer = new eclipse.TestNavigatorRenderer({checkbox: true});
-	uTestNavigator = new eclipse.TestNavigator(navRenderer, createNavModel, registry);
+	uTestNavigator = new eclipse.TestNavigator(navRenderer, createNavModel, serviceRegistry);
    	uTestNavigator.loadResourceList(dojo.hash());
    	
-	testConfig = new eclipse.TestConfigurator({serviceRegistry: registry, navigator: uTestNavigator , resultController:uTestResult});
+	testConfig = new eclipse.TestConfigurator({serviceRegistry: serviceRegistry, navigator: uTestNavigator , resultController:uTestResult});
 	
 	dojo.subscribe("/dojo/hashchange", navRenderer, function() {
 	   	uTestNavigator.loadResourceList(dojo.hash());
@@ -98,7 +90,3 @@ function loadTestResultFiles(){
 	testConfig.testCurrentConfig(function(arg){uTestResult.loadTestResultFiles(arg);} );
 	
 }
-
-dojo.addOnUnload(function(){
-	registry.stop();
-});

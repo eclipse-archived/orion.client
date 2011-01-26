@@ -15,8 +15,9 @@ dojo.require("dojo._base.json");
 
 var eclipse = eclipse || {};
 eclipse.SyntaxChecker = (function () {
-	function SyntaxChecker(registry, editorContainer) {
-		this.registry = registry;
+	function SyntaxChecker(serviceRegistry, pluginRegistry, editorContainer) {
+		this.registry = serviceRegistry;
+		this.pluginRegistry = pluginRegistry;
 		this.editorContainer = editorContainer;
 		dojo.connect(this.editorContainer, "onInputChange", this, this.checkSyntax);
 	}
@@ -28,16 +29,22 @@ eclipse.SyntaxChecker = (function () {
 				// FIXME this doesn't belong here, seems like we should get the right service for the given title
 				if (title.indexOf(".js") === title.length - 3) {
 					var syntaxCheckerCallback = dojo.hitch(this, function (data) {
-						this.registry.callService("IProblemProvider", "_setProblems", null, [data.errors]);
-						this.registry.callService("IOutlineProvider", "_setItems", null, [{"title": t, "contents": c, "data": data}]);
+						this.registry.getService("IProblemProvider").then(function(service) {
+							service._setProblems(data.errors);
+						});
+						this.registry.getService("IOutlineProvider").then(function(service) {
+							service._setItems({"title": t, "contents": c, "data": data});
+						});
 					});
 					try {
-						this.registry.callService("IEditorSyntaxChecker", "checkSyntax", syntaxCheckerCallback, [title, contents]);
+						this.pluginRegistry.callService("IEditorSyntaxChecker", "checkSyntax", syntaxCheckerCallback, [title, contents]);
 					} catch (exc) {
 						console.debug(exc.toString());
 					}
 				} else {
-					this.registry.callService("IOutlineProvider", "_setItems", null, [{title: t, contents: c}]);
+					this.registry.getService("IOutlineProvider").then(function(service) {
+						service._setItems({title: t, contents: c});
+					});
 				}
 			}
 		}

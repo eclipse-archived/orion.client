@@ -16,7 +16,7 @@ dojo.require("dijit.TitlePane");
 var eclipse = eclipse || {};
 eclipse.EditorContainer = (function() {
 	function EditorContainer(
-			registry,
+			registry, reg2,
 			/**function():eclipse.Editor*/ editorFactory,
 			/**function(eclipse.Editor):eclipse.UndoStack*/ undoStackFactory,
 			/**function():eclipse.AnnotationRuler*/ annotationRulerFactory,
@@ -27,6 +27,7 @@ eclipse.EditorContainer = (function() {
 			/**widgets.eWebBorderContainer*/ topContainer, contentassist,
 			leftPane, searchFloat) {
 		this._registry = registry;
+		this._reg2 = reg2;
 		this._editorFactory = editorFactory;
 		this._undoStackFactory = undoStackFactory;
 		this._annotationRulerFactory = annotationRulerFactory;
@@ -65,18 +66,22 @@ eclipse.EditorContainer = (function() {
 			var editorContainer = this;
 			
 			// This is legitimate editor client-side code...establishing dependencies on registered services
-			registry.callService("IProblemProvider", "addEventListener", null, [function(problems) {
-				editorContainer.showProblems(problems);
-			}]);
-				
-			registry.callService("IInputProvider", "inputChanged", null, [function(fileURI) {
-				editorContainer.setInput(fileURI);
-			}]);
+			this._reg2.getService("IProblemProvider").then(function(problemProvider) {
+				problemProvider.addEventListener("problemsChanged", function(problems) {
+					editorContainer.showProblems(problems);
+				});
+			});
 			
-			this._registry.callService("ISaveable", "setDirtyCallback", null, [function () {
-				return editorContainer.isDirty();
-			}]);
+			this._reg2.getService("IInputProvider").then(function(input) {
+				input.addEventListener("inputChanged", function(fileURI) {
+					editorContainer.setInput(fileURI);
+				});
+				input.getInput(function(fileURI) {
+					editorContainer.setInput(fileURI);
+				});
+			});
 		},
+		
 		/**
 		 * @static
 		 * @param editor
@@ -188,7 +193,9 @@ eclipse.EditorContainer = (function() {
 					shortTitle = '*' + shortTitle;
 				}
 			}
-			this._registry.callService("IInputProvider", "setTitle", null, [shortTitle]);
+			this._reg2.getService("IInputProvider").then(function(myService) {
+				myService.setTitle(shortTitle);
+			});
 			// for now use the short title.  This could evolve into an
 			// eclipse desktop-style breadcrumb that one could use to actually
 			// navigate
@@ -287,7 +294,9 @@ eclipse.EditorContainer = (function() {
 					match = prefix.match(new RegExp("^"+dojo.regexp.escapeString(txt), "i"));
 				if (match && match.length > 0) {
 					prefix = this._incrementalFindPrefix += event.text;
-					this._registry.callService("IStatusReporter", "setMessage", null, ["Incremental find: " + prefix]);
+					this._reg2.getService("IStatusReporter").then(function(service) {
+						service.setMessage("Incremental find: " + prefix);
+					});
 					var flags = prefix.toLowerCase() === prefix ? "i" : "";
 					var result = this.doFind(dojo.regexp.escapeString(prefix), flags, this._editor.getSelection().start);
 					if (result) {
@@ -297,7 +306,9 @@ eclipse.EditorContainer = (function() {
 						this._incrementalFindIgnoreSelection = false;
 					} else {
 						// should turn message red
-						this._registry.callService("IStatusReporter", "setErrorMessage", null, ["Incremental find: " + prefix + " (not found)"]);
+						this._reg2.getService("IStatusReporter").then(function(service) {
+							service.setErrorMessage("Incremental find: " + prefix + " (not found)");
+						});
 						this._incrementalFindSuccess = false;
 					}
 					event.text = null;
@@ -315,12 +326,16 @@ eclipse.EditorContainer = (function() {
 		_toggleIncrementalFind: function() {
 			this._incrementalFindMode = !this._incrementalFindMode;
 			if (this._incrementalFindMode) {
-				this._registry.callService("IStatusReporter", "setMessage", null, ["Incremental find: " + this._incrementalFindPrefix]);
+				this._reg2.getService("IStatusReporter").then(function(service) {
+					service.setMessage("Incremental find: " + this._incrementalFindPrefix);
+				});
 				this._editor.addEventListener("Verify", this, this._incrementalFindListener.onVerify);
 				this._editor.addEventListener("Selection", this, this._incrementalFindListener.onSelection);
 			} else {
 				this._incrementalFindPrefix = "";
-				this._registry.callService("IStatusReporter", "setMessage", null, [""]);
+				this._reg2.getService("IStatusReporter").then(function(service) {
+					service.setMessage("");
+				});
 				this._editor.removeEventListener("Verify", this, this._incrementalFindListener.onVerify);
 				this._editor.removeEventListener("Selection", this, this._incrementalFindListener.onSelection);
 				this._editor.setCaretOffset(this._editor.getCaretOffset());
@@ -430,7 +445,7 @@ eclipse.EditorContainer = (function() {
 			return match;
 		},
 		installEditor : function(fileURI) {
-			var registry = this._registry;
+			var registry = this._reg2;
 			
 			// Create editor and undo stack
 			this._editor = this._editorFactory();
@@ -446,7 +461,9 @@ eclipse.EditorContainer = (function() {
 			editor.setKeyBinding(new KeyBinding('s', true), "save");
 			editor.setAction("save", function () {
 				var contents = editor.getText();
-				registry.callService("ISaveable", "doSave", null, [fileURI, contents]);
+				registry.getService("ISaveable").then(function(saveService) {
+					saveService.doSave(fileURI, contents);
+				});
 				editorContainer.onInputChange(fileURI, null, contents, true);
 			});
 			
@@ -489,7 +506,9 @@ eclipse.EditorContainer = (function() {
 					if (result) {
 						editorContainer.moveSelection(editor, result.index, result.index+result.length);
 					} else {
-						registry.callService("IStatusReporter", "setErrorMessage", null, ["not found"]);
+						registry.getService("IStatusReporter").then(function(service) {
+							status.setErrorMessage("not found");
+						});
 					}
 				}, 0);
 			});
@@ -509,7 +528,9 @@ eclipse.EditorContainer = (function() {
 					editorContainer.moveSelection(editor, result.index, result.index+result.length);
 					editorContainer._incrementalFindIgnoreSelection = false;
 				} else {
-					registry.callService("IStatusReporter", "setErrorMessage", null,  ["not found"]);
+					registry.getService("IStatusReporter").then(function(service) {
+						service.setErrorMessage("not found");
+					});
 				}
 			});
 			editor.setKeyBinding(new KeyBinding("k", true, true), "find previous");
@@ -530,7 +551,9 @@ eclipse.EditorContainer = (function() {
 					editorContainer.moveSelection(editor, result.index, result.index+result.length);
 					editorContainer._incrementalFindIgnoreSelection = false;
 				} else {
-					registry.callService("IStatusReporter", "setErrorMessage", null, ["not found"]);
+					registry.getService("IStatusReporter").then(function(service) {
+						service.setErrorMessage("not found");
+					});
 				}
 			});
 			editor.setKeyBinding(new KeyBinding("j", true), "incremental find");
@@ -556,10 +579,14 @@ eclipse.EditorContainer = (function() {
 						editorContainer._incrementalFindIgnoreSelection = true;
 						editorContainer.moveSelection(editorContainer._editor, result.index, result.index + result.length);
 						editorContainer._incrementalFindIgnoreSelection = false;
-						registry.callService("IStatusReporter", "setMessage", null, ["Incremental find: " + p]);
+						registry.getService("IStatusReporter").then(function(service) {
+							service.setMessage("Incremental find: " + p);
+						});
 					} else {
 						// should turn message red
-						registry.callService("IStatusReporter", "setErrorMessage", null,  ["Incremental find: " + p + " (not found)"]);
+						registry.getService("IStatusReporter").then(function(service) {
+							service.setErrorMessage("Incremental find: " + p + " (not found)");
+						});
 						editorContainer._incrementalFindSuccess = false;
 					}
 				}
@@ -588,7 +615,9 @@ eclipse.EditorContainer = (function() {
 						editorContainer._toggleIncrementalFind();
 						return;
 					}
-					registry.callService("IStatusReporter", "setMessage", null, ["Incremental find: " + p]);	
+					registry.getService("IStatusReporter").then(function(service) {
+						service.setMessage("Incremental find: " + p);
+					});	
 					var index = editorContainer._editor.getText().lastIndexOf(p, editorContainer._editor.getCaretOffset() - p.length - 1);
 					if (index !== -1) {
 						editorContainer._incrementalFindSuccess = true;
@@ -596,7 +625,9 @@ eclipse.EditorContainer = (function() {
 						editorContainer.moveSelection(editorContainer._editor, index,index+p.length);
 						editorContainer._incrementalFindIgnoreSelection = false;
 					} else {
-						registry.callService("IStatusReporter", "setErrorMessage", null, ["Incremental find: " + p + " (not found)"]);	
+						registry.getService("IStatusReporter").then(function(service) {
+							service.setErrorMessage("Incremental find: " + p + " (not found)");
+						});
 					}
 					return true;
 				} else {
@@ -619,7 +650,9 @@ eclipse.EditorContainer = (function() {
 						editorContainer._incrementalFindIgnoreSelection = false;
 					} else {
 						// should turn message red
-						registry.callService("IStatusReporter", "setErrorMessage", null, ["Incremental find: " + p + " (not found)"]);	
+						registry.getService("IStatusReporter").then(function(service) {
+							service.setErrorMessage("Incremental find: " + p + " (not found)");	
+						});
 						editorContainer._incrementalFindSuccess = false;
 					}
 					return true;
@@ -662,10 +695,14 @@ eclipse.EditorContainer = (function() {
 						editorContainer._incrementalFindIgnoreSelection = true;
 						editorContainer.moveSelection(editorContainer._editor, index, index+p.length);
 						editorContainer._incrementalFindIgnoreSelection = false;
-						registry.callService("IStatusReporter", "setMessage", null, ["Incremental find: " + p]);	
+						registry.getService("IStatusReporter").then(function(service) {
+							service.setMessage("Incremental find: " + p);
+						});	
 					} else {
 						// should turn message red
-						registry.callService("IStatusReporter", "setErrorMessage", null, ["Incremental find: " + p + " (not found)"]);	
+						registry.getService("IStatusReporter").then(function(service) {
+							service.setErrorMessage("Incremental find: " + p + " (not found)");
+						});	
 						editorContainer._incrementalFindSuccess = false;
 					}
 					return true;
@@ -1124,7 +1161,9 @@ eclipse.EditorContainer = (function() {
 				var lineStart = model.getLineStart(lineIndex);
 				var offsetInLine = caretOffset - lineStart;
 				if (!editorContainer._incrementalFindMode) {
-					this._registry.callService("IStatusReporter", "setMessage", null, ["Line " + (lineIndex + 1) + " : Col " + offsetInLine]);	
+					this._reg2.getService("IStatusReporter").then(function(service) {
+						service.setMessage("Line " + (lineIndex + 1) + " : Col " + offsetInLine);	
+					});
 				}
 			}
 			

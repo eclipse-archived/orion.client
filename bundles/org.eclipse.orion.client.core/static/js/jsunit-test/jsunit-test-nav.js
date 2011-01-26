@@ -70,16 +70,21 @@ eclipse.TestNavigator = (function() {
 	  		if (path != this._navRoot.Path) {
 	  			//the tree root object has changed so we need to load the new one
 	  			this._navRoot.Path = path;
-	  			this._registry.callService("IFileService", "loadWorkspace", null, 
-					[path, dojo.hitch(this, function(loadedWorkspace) {
+	  			var self = this;
+	  			this._registry.getService("IFileService").then(function(service) {
+	  				service.loadWorkspace( 
+					 path, dojo.hitch(self, function(loadedWorkspace) {
 						//copy fields of resulting object into the tree root
 						for (var i  in loadedWorkspace)
 							this._navRoot[i] = loadedWorkspace[i];
-						this._registry.callService("IFileService", "getChildren", null,
-							[this._navRoot, dojo.hitch(this, function(parent, children) {
+						this._registry.getService("IFileService").then(function(service) {
+							service.getChildren(
+							 self._navRoot, dojo.hitch(self, function(parent, children) {
 								this.createNavTree();
-							})]);
-					})]);
+							}));
+						});
+					}));
+				});
 	 		}
 		}
 	};
