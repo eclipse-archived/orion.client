@@ -44,6 +44,7 @@
 	<script type="text/javascript" src="js/auth.js"></script>
 
     <!-- Eclipse Application Services -->
+    <!-- START:eas.js -->
  	<script src="js/util.js"></script>
  	<script src="js/commands.js"></script>
  	<script src="js/dialogs.js"></script>
@@ -55,22 +56,20 @@
  	<script src="js/status.js"></script>
  	<script src="js/users.js"></script>
      
- 	<!-- File Operations Client -->
-  	<script src="js/fileClient.js"></script>
-      
- 	<!-- Breadcrumbs -->
-  	<script src="js/breadcrumbs.js"></script>
-      
-	<!-- Tree -->
-	<script src="js/explorer-tree.js"></script>
-	
-	<!-- Favorites List -->
+ 	<script src="js/fileClient.js"></script>
 	<script src="js/favorites.js"></script>
-
-	<!--Search -->
 	<script src="js/searchClient.js"></script>
-
-
+	<!-- END:eas.js -->
+	<!-- INSERT:eas.js -->
+      
+ 	<!-- Breadcrumbs, Tree -->
+ 	<!-- START:navigate-tree.js -->
+  	<script src="js/breadcrumbs.js"></script> 
+	<script src="js/explorer-tree.js"></script>
+	<script src="js/navigate-tree/navigate-tree.js"></script>
+	<!-- END:navigate-tree.js -->
+	<!-- INSERT:navigate-tree.js -->
+	
     <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
 			<div style="float: left;">
@@ -128,6 +127,5 @@
 		</div>
 	</div>
 
-	<script src="js/navigate-tree/navigate-tree.js"></script>
 </body>
 </html>
