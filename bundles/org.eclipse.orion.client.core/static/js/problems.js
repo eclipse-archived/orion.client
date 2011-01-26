@@ -8,24 +8,18 @@
  ******************************************************************************/
 var eclipse = eclipse || {};
 
-eclipse.ProblemService = function() {
-	this._listeners = [];
+eclipse.ProblemService = function(serviceRegistry) {
+	this._serviceRegistry = serviceRegistry;
+	this._serviceRegistration = serviceRegistry.registerService("IProblemProvider", this);
+
 };
 
 eclipse.ProblemService.prototype = {
 	// provider
 	_setProblems: function(problems) {
 		this.problems = problems;
-		for (var i = 0; i < this._listeners.length; i++) {
-			this._listeners[i](problems);
-		}
-	},
-	
-	addEventListener: function(callback) {
-		this._listeners.push(callback);
-		if (this.problems) {
-			callback(this.problems);
-		}
+		this._serviceRegistration.dispatchEvent("problemsChanged", problems);
+
 	}	    
 };
 

@@ -8,48 +8,35 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global dojo dijit window eclipse registry:true widgets alert*/
-/*jslint browser:true*/
+/*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
+/*browser:true*/
 dojo.addOnLoad(function(){
 	
-	// FIXME until we sort out where service registration happens, and how dependencies on
-	// services are expressed, just copy this code around...
-	registry = new eclipse.Registry();
-	registry.start();
-	
-	var jslintPlugin = registry.getPlugin("/jslintPlugin.html");
-	if (jslintPlugin === null) {
-		registry.loadPlugin("/jslintPlugin.html", function(plugin) {
-			registry.installPlugin(plugin.pluginURL, plugin.pluginData);
-		});
-	}
-	
-	// Register EAS
-	registry.registerLocalService("IStatusReporter", "EASStatusReporter", new eclipse.StatusReportingService(registry, "statusPane"));
-	registry.registerLocalService("ILogService", "EASLog", new eclipse.LogService(registry));
-	registry.registerLocalService("IDialogService", "EASDialogs", new eclipse.DialogService(registry));
-	registry.registerLocalService("ISaveable", "EASSaveable", new eclipse.SaveableService(registry));
-	registry.registerLocalService("IInputProvider", "EASInputProvider", new eclipse.InputService(registry));
-	registry.registerLocalService("IUsers", "EASUsers", new eclipse.UserService(registry));
-	registry.registerLocalService("ISelectionService", "EASSelection", new eclipse.SelectionService(registry));
-	var preferenceService = new eclipse.Preferences(registry, "/prefs/user");
-	registry.registerLocalService("IPreferenceService", "EASPreferences", preferenceService);
-	var commandService = new eclipse.CommandService(registry);
-	registry.registerLocalService("ICommandService", "CommandService", commandService);
+	// initialize service registry and EAS services
+	serviceRegistry = new eclipse.ServiceRegistry();
+	new eclipse.InputService(serviceRegistry);		
+	new eclipse.StatusReportingService(serviceRegistry, "statusPane");
+	new eclipse.LogService(serviceRegistry);
+	new eclipse.DialogService(serviceRegistry);
+	new eclipse.UserService(serviceRegistry);
+	new eclipse.SelectionService(serviceRegistry);
+	var preferenceService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	new eclipse.SaveableService(serviceRegistry);
+	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 
 	// File operations
-	registry.registerLocalService("IFileService", "FileService", new eclipse.FileService());
+	new eclipse.FileService(serviceRegistry);
 	
 	// Favorites
-	registry.registerLocalService("IFavorites", "FavoritesService", new eclipse.FavoritesService({serviceRegistry: registry}));
+	new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
 	
 	var treeRoot = {
 		children:[]
 	};
-	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: registry});
-	var searcher = new eclipse.Searcher({serviceRegistry: registry});
+	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var explorer = new eclipse.Explorer(registry, treeRoot, "breadcrumbParent", searcher, "explorer-tree", "navToolBar");
+	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, "breadcrumbParent", searcher, "explorer-tree", "navToolBar");
 	// declare commands
 	
 	var favoriteCommand = new eclipse.Command({
@@ -179,8 +166,4 @@ dojo.addOnLoad(function(){
 		window.location.replace("/navigate-tree.html#" + dojo.hash());
 	};
 	
-});
-
-dojo.addOnUnload(function(){
-	registry.stop();
 });

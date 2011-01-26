@@ -20,7 +20,8 @@ var eclipse = eclipse || {};
  * @class Service for reporting status
  */
 eclipse.StatusReportingService = function(serviceRegistry, domId) {
-	this.serviceRegistry = serviceRegistry;
+	this._serviceRegistry = serviceRegistry;
+	this._serviceRegistration = serviceRegistry.registerService("IStatusReporter", this);
 	this.domId = domId;
 };
  

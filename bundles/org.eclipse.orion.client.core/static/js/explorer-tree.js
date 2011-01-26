@@ -57,7 +57,9 @@ eclipse.ExplorerTree = (function() {
 			this._selectedItem = item;
 			this._selectedNode = treeNode;
 			if (item.Directory===false && item.Location) {
-				this.registry.callService("IInputProvider", "setInput", null, [item.Location, event]);
+				this.registry.getService("IInputProvider").then(function(service) {
+					service.setInput(item.Location, event);
+				});
 			}
 			
 		},
@@ -74,12 +76,17 @@ eclipse.ExplorerTree = (function() {
 		},
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, /* optional */ children) {
-			this.registry.callService("IFileService", "getChildren", null, [parent, dojo.hitch(this.model, this.model.onChildrenChange)]);
+			var self = this;
+			this.registry.getService("IFileService").then(function(service) {
+				service.getChildren(parent, dojo.hitch(self.model, self.model.onChildrenChange));
+			});
 		},
 		makeFavorite: function() {
 			if (this._contextMenuNode) {
 				var items = this._contextMenuNode.get("tree").getSelectedItems();
-			this.registry.callService("IFavorites", "makeFavorites", null, [items]);
+			this.registry.getService("IFavorites").then(function(service) {
+				service.makeFavorites(items);
+			});
 			}
 		},
 		removeResourceList: function() {
@@ -95,19 +102,28 @@ eclipse.ExplorerTree = (function() {
 			}
 		},
 		createProject: function(name, url, create) {
-			this.registry.callService("IFileService", "createProject", null, [this.treeRoot.ChildrenLocation, name, url, create,
-							dojo.hitch(this, function() {this.changedItem(this.treeRoot);})]);
+			var self = this;
+			this.registry.getService("IFileService").then(function(service) {
+				service.createProject(self.treeRoot.ChildrenLocation, name, url, create,
+							dojo.hitch(self, function() {this.changedItem(this.treeRoot);}));
+			});
 		},
 		createFolder: function(name) {
 			if (this._contextMenuNode) {
 				var item = this._contextMenuNode.item;
-				this.registry.callService("IFileService", "createFolder", null, [name, item, dojo.hitch(this, this.changedItem)]);
+				var self = this;
+				this.registry.getService("IFileService").then(function(service) {
+					service.createFolder(name, item, dojo.hitch(self, self.changedItem));
+				});
 			}
 		},
 		createFile: function(name) {
 			if (this._contextMenuNode) {
 				var item = this._contextMenuNode.item;
-				this.registry.callService("IFileService", "createFile", null, [name, item, dojo.hitch(this, this.changedItem)]);
+				var self = this;
+				this.registry.getService("IFileService").then(function(service) {
+					service.createFile(name, item, dojo.hitch(self, self.changedItem));
+				});
 			}
 		},
 		
@@ -118,20 +134,27 @@ eclipse.ExplorerTree = (function() {
 					return;
 				}
 				var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
-				this.registry.callService("IDialogService", "confirm", null, [confirmMessage, dojo.hitch(this, function(doit) {
-					if (!doit) {
-						return;
-					}
-					for (var i=0; i < items.length; i++) {
-						var item = items[i];
-						if (item.parent.Path === "") {
-							this.registry.callService("IFileService", "removeProject", null, [item.parent /*workspace*/, item /*project*/, 
-								dojo.hitch(this, function() { this.changedItem(this.treeRoot); })]);
-						} else {
-							this.registry.callService("IFileService", "deleteFile", null, [item, dojo.hitch(this, this.changedItem)]);
+				var self = this;
+				this.registry.getService("IDialogService").then(function(service) {
+					service.confirm(confirmMessage, dojo.hitch(self, function(doit) {
+						if (!doit) {
+							return;
 						}
-					}
-				})]);
+						for (var i=0; i < items.length; i++) {
+							var item = items[i];
+							if (item.parent.Path === "") {
+								this.registry.getService("IFileService").then(function(service) {
+									service.removeProject(item.parent /*workspace*/, item /*project*/, 
+									dojo.hitch(self, function() { self.changedItem(self.treeRoot); }));
+								});
+							} else {
+								this.registry.getService("IFileService").then(function(service) {
+									service.deleteFile(item, dojo.hitch(self, self.changedItem));
+								});
+							}
+						}
+					}));
+				});
 			}
 		},
 		// TODO right now we blow away the tree because we might be replacing it
@@ -173,19 +196,25 @@ eclipse.ExplorerTree = (function() {
 			if (path != this.treeRoot.Path) {
 				//the tree root object has changed so we need to load the new one
 				this.treeRoot.Path = path;
-				this.registry.callService("IFileService", "loadWorkspace", null, [path,
-						dojo.hitch(this, function(loadedWorkspace) {
+				var self = this;
+				this.registry.getService("IFileService").then(function(service) {
+					service.loadWorkspace(path,
+						dojo.hitch(self, function(loadedWorkspace) {
 							//copy fields of resulting object into the tree root
 							for (var i  in loadedWorkspace) {
 								this.treeRoot[i] = loadedWorkspace[i];
 							}
 							if (!isSearch) {
-								this.registry.callService("IFileService", "getChildren", null, [this.treeRoot, 
-										dojo.hitch(this, function(parent, children) {
+								this.registry.getService("IFileService").then(function(service) {
+									service.getChildren(self.treeRoot, 
+										dojo.hitch(self, function(parent, children) {
 											new eclipse.BreadCrumbs({container: this.parentId, resource: parent});
 											this.createTree();
-										})]); 
-							}})]);
+										})); 
+								});
+							}
+						}));
+				});
 			}
 		},
 		createTree: function(){
@@ -296,8 +325,10 @@ eclipse.TreeModel = (function() {
 			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
 				onComplete([]);
 			} else if (parentItem.Location) {
-				this.registry.callService("IFileService", "getChildren", null, [parentItem, 
-						function(parent, children) { onComplete(children); }]);
+				this.registry.getService("IFileService").then(function(service) {
+					service.getChildren(parentItem, 
+						function(parent, children) { onComplete(children); });
+				});
 			} else {
 				onComplete([]);
 			}

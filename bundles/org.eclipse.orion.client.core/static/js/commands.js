@@ -35,6 +35,7 @@ eclipse.CommandService = (function() {
 	CommandService.prototype = /** @lends eclipse.CommandService.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
+			this._serviceRegistration = this._registry.registerService("ICommandService", this);
 		},
 		
 		/**
@@ -119,9 +120,11 @@ eclipse.CommandService = (function() {
 					command = this._objectScope[i].command;
 					if (!items) {
 						var cmdService = this;
-						this._registry.callService("ISelectionService", "getSelection", null, [function(selection) {
-							cmdService._renderObjectScope(parent, command, selection, handler, style);
-						}]);
+						this._registry.getService("ISelectionService").then(function(service) {
+							service.getSelection(function(selection) {
+								cmdService._renderObjectScope(parent, command, selection, handler, style);
+							});
+						});
 					} else {
 						this._renderObjectScope(parent, command, items, handler, style);		
 					}

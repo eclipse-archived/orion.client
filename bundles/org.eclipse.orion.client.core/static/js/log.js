@@ -20,13 +20,16 @@ var eclipse = eclipse || {};
  * @class Services for logging
  */
 eclipse.LogService = function(serviceRegistry) {
-	this.serviceRegistry = serviceRegistry;
+	this._serviceRegistry = serviceRegistry;
+	this._serviceRegistration = serviceRegistry.registerService("ILogService", this);
 };
  
 eclipse.LogService.prototype = {
 	info : function(msg) {
 		// TODO temporary implementation uses status line
 		// obviously not the real answer
-		this.serviceRegistry.callService("IStatusReporter", "setMessage", null, ["LOG: " + msg]);
+		this._serviceRegistry.getService("IStatusReporter").then(function(service) {
+			service.setMessage("LOG: " + msg);
+		});
 	}
 };

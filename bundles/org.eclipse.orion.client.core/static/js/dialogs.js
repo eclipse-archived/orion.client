@@ -20,7 +20,8 @@ var eclipse = eclipse || {};
  * @class Common dialog services
  */
 eclipse.DialogService = function(serviceRegistry) {
-	this.serviceRegistry = serviceRegistry;
+	this._serviceRegistry = serviceRegistry;
+	this._serviceRegistration = serviceRegistry.registerService("IDialogService", this);
 };
  
 eclipse.DialogService.prototype = {

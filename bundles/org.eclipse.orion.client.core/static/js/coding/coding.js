@@ -13,38 +13,47 @@
 
 dojo.addOnLoad(function(){
 
-	var registry = null;
+	var pluginRegistry = null;
+	var serviceRegistry = null;
 	var document = window.document;
 	var inputService;
 	var prefsService;
 	
 	// Initialize the plugin registry
 	(function() {
-		registry = new eclipse.Registry();
-		registry.start();
+		// This is the original registry.  For M5 we need it for plugin management.
+		pluginRegistry = new eclipse.Registry();
+		pluginRegistry.start();
 		
-		// Register EAS
-		registry.registerLocalService("IStatusReporter", "EASStatusReporter", new eclipse.StatusReportingService(registry, "statusPane"));
-		registry.registerLocalService("ILogService", "EASLog", new eclipse.LogService(registry));
-		registry.registerLocalService("IDialogService", "EASDialogs", new eclipse.DialogService(registry));
-		registry.registerLocalService("ISaveable", "EASSaveable", new eclipse.SaveableService(registry));
-		inputService = new eclipse.InputService(registry);
-		registry.registerLocalService("IInputProvider", "EASInputProvider", inputService);
-		registry.registerLocalService("IUsers", "EASUsers", new eclipse.UserService(registry));
-		registry.registerLocalService("ISelectionService", "EASSelection", new eclipse.SelectionService(registry));
-		prefsService = new eclipse.Preferences(registry, "/prefs/user");
-		registry.registerLocalService("IPreferenceService", "EASPreferences", prefsService);
+		var jslintPlugin = pluginRegistry.getPlugin("/jslintPlugin.html");
+		if (jslintPlugin === null) {
+			pluginRegistry.loadPlugin("/jslintPlugin.html", function(plugin) {
+				pluginRegistry.installPlugin(plugin.pluginURL, plugin.pluginData);
+			});
+		}
+		
+		// This is the new service registry.  All services should be registered and obtained here.
+		serviceRegistry = new eclipse.ServiceRegistry();
+		var inputService = new eclipse.InputService(serviceRegistry);
+		inputService.initializeContext({"manageDocumentTitle": true});	
+		new eclipse.StatusReportingService(serviceRegistry, "statusPane");
+		new eclipse.LogService(serviceRegistry);
+		new eclipse.DialogService(serviceRegistry);
+		new eclipse.UserService(serviceRegistry);
+		new eclipse.SelectionService(serviceRegistry);
+		prefsService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+		new eclipse.SaveableService(serviceRegistry);
 		
 		// Editor needs additional services besides EAS.
-		registry.registerLocalService("IProblemProvider", "JSProblems", new eclipse.ProblemService());
-		registry.registerLocalService("IOutlineProvider", "OutlineProvider", new eclipse.OutlineService());
-		registry.registerLocalService("IFavorites", "FavoritesService", new eclipse.FavoritesService({serviceRegistry: registry}));
-		registry.registerLocalService("IFileService", "FileService", new eclipse.FileService());
+		new eclipse.ProblemService(serviceRegistry);
+		new eclipse.OutlineService(serviceRegistry);
+		new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
+		new eclipse.FileService(serviceRegistry);
 	}());
 	
 	dojo.addOnUnload(function(){
 		// FIXME: if editor is dirty and user answers "stay" to the prompt, this still stops registry
-		registry.stop();
+		pluginRegistry.stop();
 	});
 	
 	var topContainerWidget = dijit.byId("topContainer"),
@@ -55,10 +64,7 @@ dojo.addOnLoad(function(){
 		contentassist = dojo.byId("contentassist"),
 		leftPane = dojo.byId("leftPane");
 	
-	var searcher = new eclipse.Searcher({serviceRegistry: registry});
-	
-	// Initialize EAS context-specific values
-	inputService.initializeContext({"manageDocumentTitle": true});
+	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
 	var editorFactory = function() {
 		return new eclipse.Editor({
@@ -80,7 +86,7 @@ dojo.addOnLoad(function(){
 			return new eclipse.OverviewRuler("right", rulerStyle, annotationRuler);
 	};
 	
-	var editorContainer = new eclipse.EditorContainer(registry, 
+	var editorContainer = new eclipse.EditorContainer(pluginRegistry, serviceRegistry,
 			editorFactory, undoStackFactory,
 			annotationRulerFactory, lineNumberRulerFactory, overviewRulerFactory,
 			searcher,
@@ -90,13 +96,11 @@ dojo.addOnLoad(function(){
 	// The eWebBorderContainer widget needs to know the editorContainer
 	topContainerWidget.set("editorContainer", editorContainer);
 	
-	var syntaxChecker = new eclipse.SyntaxChecker(registry, editorContainer);
+	var syntaxChecker = new eclipse.SyntaxChecker(serviceRegistry, pluginRegistry, editorContainer);
 	
 	// Create outliner "gadget"
-	new eclipse.Outliner({parent: outlineDomNode, serviceRegistry: registry});
+	new eclipse.Outliner({parent: outlineDomNode, serviceRegistry: serviceRegistry});	
 	
-	// FIXME: only leaving this here because editorContainer's verifyInputChange handler doesn't work
-	// see WorkItem 408
 	window.onbeforeunload = function() {
 		if (editorContainer.isDirty()) {
 			 return "There are unsaved changes.";

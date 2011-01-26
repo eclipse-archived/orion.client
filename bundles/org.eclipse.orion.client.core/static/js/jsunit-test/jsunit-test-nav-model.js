@@ -31,12 +31,14 @@ eclipse.TestNavigatorModel = (function() {
 	    } else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
 			onComplete([]);
 	    } else if (parentItem.Location) {
-	    	this.registry.callService("IFileService", "getChildren", null, [parentItem,
-    			dojo.hitch(this, function(parent, children) {
-    				onComplete(children);
-    				if(postExpandFunc)
-    					postExpandFunc(args);
-    			})]);
+	    	this.registry.getService("IFileService").then(function(service) {
+	    		service.getChildren(parentItem,
+    				dojo.hitch(this, function(parent, children) {
+    					onComplete(children);
+    					if(postExpandFunc)
+    						postExpandFunc(args);
+    				}));
+	    	});
 	    	return;
 	    } else {
 			onComplete([]);

@@ -16,30 +16,20 @@ eclipse.FavoritesService = (function() {
 	function FavoritesService(options) {
 		this._favorites = [];
 		this._searches = [];
-		this._listeners = [];
 		this._init(options);
 		this._initializeFavorites();
 	}
 	FavoritesService.prototype = {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-		},
-	
-		/**
-		 * @param callback Callback to be notified when favorites change
-		 */
-		addEventListener: function(callback) {
-			this._listeners.push(callback);
-			callback(this._favorites, this._searches);
+			this._serviceRegistration = this._registry.registerService("IFavorites", this);
 		},
 		
 		_notifyListeners: function() {
-			for (var i = 0; i < this._listeners.length; i++) {
-				// FIXME: it is bogus that we separate favorites and searches
-				// we need a general representation and let the UI (and user) sort out
-				// how it is filtered or organized
-				this._listeners[i](this._favorites, this._searches);
-			}
+			// FIXME: it is bogus that we separate favorites and searches
+			// we need a general representation and let the UI (and user) sort out
+			// how it is filtered or organized
+	   		this._serviceRegistration.dispatchEvent("favoritesChanged", this._favorites, this._searches);
 		},
 	
 		/**
@@ -55,7 +45,6 @@ eclipse.FavoritesService = (function() {
 				// it would be cool if the location were a real document location
 				// for now I'll assume it's from the same host in order to get the pathname
 				location = eclipse.util.makeRelative(location);
-				
 				this.addFavorite(item.Name, location, item.Directory);
 			}
 			this._storeFavorites();
@@ -122,35 +111,41 @@ eclipse.FavoritesService = (function() {
 			
 			var favorites = this;
 			var favesDone, searchesDone;
-			this._registry.callService("IPreferenceService", "getNode", null, ["window/favorites", function(prefs) { 
-				if (prefs) {
-					var i;
-					if (prefs.navigate) {
-						var navigate = JSON.parse(prefs.navigate);
-						for (i in navigate) {
-							favorites._favorites.push(navigate[i]);
+			this._registry.getService("IPreferenceService").then(function(service) {
+				service.getNode("window/favorites", function(prefs) { 
+					if (prefs) {
+						var i;
+						if (prefs.navigate) {
+							var navigate = JSON.parse(prefs.navigate);
+							for (i in navigate) {
+								favorites._favorites.push(navigate[i]);
+							}
+						}
+						if (prefs.search) {
+							var search = JSON.parse(prefs.search);
+							for (i in search) {
+								favorites._searches.push(search[i]);
+							}
 						}
 					}
-					if (prefs.search) {
-						var search = JSON.parse(prefs.search);
-						for (i in search) {
-							favorites._searches.push(search[i]);
-						}
-					}
-				}
-				favorites._notifyListeners();
-			}]);
+					favorites._notifyListeners();
+				});
+			});
 		}, 
 		
 		_storeFavorites: function() {
 			if (this._favorites.length > 0) {
 				var storedFavorites = this._favorites.slice(1);
-				this._registry.callService("IPreferenceService", "put", null, ["window/favorites/navigate", JSON.stringify(storedFavorites)]); 
+				this._registry.getService("IPreferenceService").then(function(service) {
+					service.put("window/favorites/navigate", JSON.stringify(storedFavorites)); 
+				});
 			}
 		},
 		
 		_storeSearches: function() {
-			this._registry.callService("IPreferenceService", "put", null, ["window/favorites/search", JSON.stringify(this._searches)]); 
+			this._registry.getService("IPreferenceService").then(function(service) {
+				service.put("window/favorites/search", JSON.stringify(this._searches)); 
+			});
 		}
 	};
 	return FavoritesService;
@@ -167,9 +162,11 @@ eclipse.Favorites = (function() {
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
 		var favorites = this;
-		this._registry.callService("IFavorites", "addEventListener", null, [function(favs, searches) {
-			favorites.render(favs, searches);
-		}]);
+		this._registry.getService("IFavorites").then(function(service) {
+			service.addEventListener("favoritesChanged", function(favs, searches) {
+				favorites.render(favs, searches);
+			});
+		});
 	}
 	Favorites.prototype = {
 		// FIXME: it should really be up to the UI to organize favorites as being searches or not.
@@ -248,7 +245,9 @@ eclipse.Favorites = (function() {
 				
 				dojo.byId(id + "img1").onclick = (function(path) {
 					return function(event) {
-						reg.callService("IFavorites", "removeFavorite", null, [path]);
+						reg.getService("IFavorites").then(function(service) {
+							service.removeFavorite(path);
+						});
 					};
 				
 				})(fave.path);
@@ -266,7 +265,9 @@ eclipse.Favorites = (function() {
 								dojo.style(dojo.byId(id), "display", "inline");
 							} else {
 								// Will update old link
-								reg.callService("IFavorites", "renameFavorite", null, [path, newName]);
+								reg.getService("IFavorites").then(function(service) {
+									service.renameFavorite(path, newName);
+								});
 							}
 							editBox.destroyRecursive();
 							dojo.style(dojo.byId(id + "img1"), "display", "inline");
@@ -299,7 +300,9 @@ eclipse.Favorites = (function() {
 			for (var i=0; i < searches.length; i++) {
 				dojo.byId("search" + i).onclick = (function(query) {
 					return function(event) {
-						reg.callService("IFavorites", "removeSearch", null, [search.query]);
+						reg.getService("IFavorites").then(function(service) {
+							service.removeSearch(search.query);
+						});
 					};
 				})(searches[i].query);
  			}

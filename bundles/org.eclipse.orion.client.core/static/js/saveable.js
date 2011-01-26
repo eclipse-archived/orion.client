@@ -20,8 +20,8 @@ var eclipse = eclipse || {};
  * @class Service for saving things
  */
 eclipse.SaveableService = function(serviceRegistry) {
-	this.serviceRegistry = serviceRegistry;
-	this._dirtyCallback = null;
+	this._serviceRegistry = serviceRegistry;
+	this._serviceRegistration = this._serviceRegistry.registerService("ISaveable", this);
 };
  
 eclipse.SaveableService.prototype = {
@@ -37,17 +37,5 @@ eclipse.SaveableService.prototype = {
 				handlePutAuthenticationError(this, ioArgs);
 			}
 		});	
-	},
-		
-	isDirty : function(onDone) {
-		if (this._dirtyCallback) {
-			onDone(this._dirtyCallback.apply(this));
-		} else {
-			onDone(false);
-		}
-	},
-
-	setDirtyCallback : function(callback) {
-		this._dirtyCallback = callback;
 	}
 };

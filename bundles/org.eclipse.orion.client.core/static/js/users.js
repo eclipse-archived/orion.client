@@ -15,7 +15,8 @@
  * @class Service for keeping track of the user
  */
 eclipse.UserService = function(serviceRegistry) {
-	this.serviceRegistry = serviceRegistry;
+	this._serviceRegistry = serviceRegistry;
+	this._serviceRegistration = serviceRegistry.registerService("IUsers", this);
 	this._user = null;
 };
  

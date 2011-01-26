@@ -43,22 +43,27 @@
 	
 		<!-- Web Editor -->
 		<!-- TODO: use sample styler, ruler, and undo stack (until the real one is ready) -->
+		<!-- START:coding-editor.js -->
 		<script src="/editor/samples/styler.js"></script>
 		<script src="/editor/samples/rulers.js"></script>
 		<script src="/editor/samples/undoStack.js"></script>
 		<script src="/editor/js/model.js"></script>
 		<script src="/editor/js/editor.js"></script>	
+		<!-- END:coding-editor.js -->
+		<!-- INSERT:coding-editor.js -->	
     </head>
 
     <body class="soria" style="height: 100%">
     
 	<!-- Extension Registry -->
-	<script src="js/registry.js"></script>
+	<script src="js/serviceregistry.js"></script>
+    <script src="js/pluginregistry.js"></script>
     
 	<!--Authentication -->
 	<script type="text/javascript" src="js/auth.js"></script>
-	
+
     <!-- Eclipse Application Services -->
+    <!-- START:eas.js -->
  	<script src="js/util.js"></script>
  	<script src="js/commands.js"></script>
  	<script src="js/dialogs.js"></script>
@@ -73,14 +78,16 @@
 	<script src="js/fileClient.js"></script>
 	<script src="js/favorites.js"></script>
 	<script src="js/searchClient.js"></script>
+	<!-- END:eas.js -->
+	<!-- INSERT:eas.js -->
 	
- 	<!-- Editor and Outliner -->
+ 	<!-- Editor and Outliner, Syntax Checker using the defined syntax checker extension -->
+ 	<!-- START:coding-editor.js -->
  	<script src="js/outliner.js"></script>
  	<script src="js/problems.js"></script>
  	<script src="js/editorContainer.js"></script>
-	
-	<!-- Editor Syntax Checker using the defined syntax checker extension -->
 	<script src="js/syntaxchecker.js"></script>
+	<!-- END:coding-editor.js -->
 	
     <div id ="topContainer" dojoType="widgets.eWebBorderContainer" design="headline"  liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
 		<div id="toolbar" class="toolbar" dojoType="dijit.layout.ContentPane" region="top">

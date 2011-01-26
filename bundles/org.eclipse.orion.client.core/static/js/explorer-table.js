@@ -30,12 +30,17 @@ eclipse.Explorer = (function() {
 	Explorer.prototype = /** @lends eclipse.Explorer.prototype */ {
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, /* optional */ children) {
-			this.registry.callService("IFileService", "getChildren", null, [parent, dojo.hitch(this.myTree, this.myTree.refreshAndExpand)]);
+			var self = this;
+			this.registry.getService("IFileService").then(function(service) {
+				service.getChildren(parent, dojo.hitch(self.myTree, self.myTree.refreshAndExpand));
+			});
 		},
 		
 		makeFavorite: function(itemOrId) {
 			var item = this.myTree.getItem(itemOrId);
-			this.registry.callService("IFavorites", "makeFavorites", null, [item]);
+			this.registry.getService("IFavorites").then(function(service) {
+				service.makeFavorites(item);
+			});
 		},
 		
 		removeResourceList: function() {
@@ -44,9 +49,11 @@ eclipse.Explorer = (function() {
 		},
 		
 		createProject: function(name, serverPath, create) {
-			this.registry.callService("IFileService", "createProject", null, 
-					[this.treeRoot.ChildrenLocation, name, serverPath, create,
-					 dojo.hitch(this, function() {this.changedItem(this.treeRoot);})]);
+			var self = this;
+			this.registry.getService("IFileService").then(function(service) {
+				service.createProject(self.treeRoot.ChildrenLocation, name, serverPath, create,
+					 dojo.hitch(self, function() {this.changedItem(this.treeRoot);}));
+			});
 		},
 		
 		createFolder: function(name, itemOrId) {
@@ -54,7 +61,10 @@ eclipse.Explorer = (function() {
 			if (typeof(item) === "string") {
 				item = this.myTree.getItem(itemOrId);
 			}
-			this.registry.callService("IFileService", "createFolder", null, [name, item, dojo.hitch(this, this.changedItem)]);
+			var self = this;
+			this.registry.getService("IFileService").then(function(service) {
+				service.createFolder(name, item, dojo.hitch(self, self.changedItem));
+			});
 		},
 		
 		createFile: function(name, itemOrId) {
@@ -62,7 +72,10 @@ eclipse.Explorer = (function() {
 			if (typeof(item) === "string") {
 				item = this.myTree.getItem(itemOrId);
 			}
-			this.registry.callService("IFileService", "createFile", null, [name, item, dojo.hitch(this, this.changedItem)]); 
+			var self = this;
+			this.registry.getService("IFileService").then(function(service) {
+				service.createFile(name, item, dojo.hitch(self, self.changedItem)); 
+			});
 		},
 	
 		deleteFile: function(itemId) {
@@ -71,18 +84,25 @@ eclipse.Explorer = (function() {
 				return;
 			}
 			// prompt since it's so easy to push that X!
-			this.registry.callService("IDialogService", "confirm", null, ["Are you sure you want to delete '" + item.Name + "'?", 
-				dojo.hitch(this, function(doit) {
+			var self = this;
+			this.registry.getService("IDialogService").then(function(service) {
+				service.confirm("Are you sure you want to delete '" + item.Name + "'?", 
+				dojo.hitch(self, function(doit) {
 					if (!doit) {
 						return;
 					}
 					if (item.parent.Path === "") {
-						this.registry.callService("IFileService", "removeProject", null,
-							[item.parent, item, dojo.hitch(this, function() {this.changedItem(this.treeRoot);})]);
+						this.registry.getService("IFileService").then(function(service) {
+							service.removeProject(
+								item.parent, item, dojo.hitch(self, function() {self.changedItem(self.treeRoot);}));
+						});
 					} else {
-						this.registry.callService("IFileService", "deleteFile", null, [item, dojo.hitch(this, this.changedItem)]);
+						this.registry.getService("IFileService").then(function(service) {
+							service.deleteFile(item, dojo.hitch(self, self.changedItem));
+						});
 					}
-				})]);
+				}));
+			});
 	    },
 	    
 		loadResourceList: function(path) {
@@ -120,8 +140,10 @@ eclipse.Explorer = (function() {
 			if (path !== this.treeRoot.Path) {
 				//the tree root object has changed so we need to load the new one
 				this.treeRoot.Path = path;
-					this.registry.callService("IFileService", "loadWorkspace", null, [path,
-							dojo.hitch(this, function(loadedWorkspace) {
+				var self = this;
+					this.registry.getService("IFileService").then(function(service) {
+						service.loadWorkspace(path,
+							dojo.hitch(self, function(loadedWorkspace) {
 								// Show an error message when a problem happens during getting the workspace
 								// Don't show the error for 401 since the login dialog is shown anyway
 								if (loadedWorkspace.status != null && loadedWorkspace.status != 401){
@@ -133,14 +155,18 @@ eclipse.Explorer = (function() {
 									this.treeRoot[i] = loadedWorkspace[i];
 								}
 								if (!isSearch) {
-									this.registry.callService("IFileService", "getChildren", null, 
-											[this.treeRoot, dojo.hitch(this, function(parent, children) {
+									var self = this;
+									this.registry.getService("IFileService").then(function(service) {
+										service.getChildren(
+											self.treeRoot, dojo.hitch(self, function(parent, children) {
 												new eclipse.BreadCrumbs({container: this.breadcrumbParentId, resource: parent});
 												this.updateNavTools(parent.Location);
 												this.createTree();
-											})]);
+											}));
+									});
 								}
-							})]);
+							}));
+					});
 			}
 		},
 		
@@ -272,10 +298,12 @@ eclipse.Model = (function() {
 			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
 				onComplete([]);
 			} else if (parentItem.Location) {
-				this.registry.callService("IFileService", "getChildren", null, [parentItem, 
+				this.registry.getService("IFileService").then(function(service) {
+					service.getChildren(parentItem, 
 						dojo.hitch(this, function(parent, children) {
 							onComplete(children);
-						})]);
+						}));
+				});
 			} else {
 				onComplete([]);
 			}
@@ -434,7 +462,9 @@ eclipse.FileRenderer = (function() {
 			actionsColumn.appendChild(actionsWrapper);
 			dojo.style(actionsWrapper, "visibility", "hidden");
 			// contact the command service to render appropriate commands here.
-			this.explorer.registry.callService("ICommandService", "renderCommands", null, [actionsWrapper, "object", tableRow.id, this.explorer, "image"]);
+			this.explorer.registry.getService("ICommandService").then(function(service) {
+				service.renderCommands(actionsWrapper, "object", tableRow.id, this.explorer, "image");
+			});
 			// temporary until we get link commands properly represented in the command service.
 			if (item.Directory && item.ExportLocation) {
 				var anchor = document.createElement('a');

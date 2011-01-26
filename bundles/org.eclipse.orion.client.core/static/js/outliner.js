@@ -30,9 +30,11 @@ eclipse.Outliner.prototype = {
 		if (!options.serviceRegistry) {throw "no service registry"; }
 		this._parent = parent;
 		var outliner = this;
-		options.serviceRegistry.callService("IOutlineProvider", "addEventListener", null, [function(resource) {
-			outliner.render(resource);
-		}]);
+		options.serviceRegistry.getService("IOutlineProvider").then(function(service) {
+			service.addEventListener("resourceChanged", function(resource) {
+				outliner.render(resource);
+			});
+		});
 		
 	},
 	// this is closely tied to the jslint format right now
@@ -102,25 +104,18 @@ eclipse.Outliner.prototype = {
 	}	
 };
 
-eclipse.OutlineService = function() {
-	this._listeners = [];
+eclipse.OutlineService = function(serviceRegistry) {
+	this._serviceRegistry = serviceRegistry;
+	this._serviceRegistration = serviceRegistry.registerService("IOutlineProvider", this);
 };
 
 eclipse.OutlineService.prototype = {
 	// provider
 	_setItems: function(resource) {
 		this.resource = resource;
-		for (var i = 0; i < this._listeners.length; i++) {
-			this._listeners[i](resource);
-		}
-	},
-	
-	addEventListener: function(callback) {
-		this._listeners.push(callback);
-		if (this.resource) {
-			callback(this.resource);
-		}
-	}	      
+		this._serviceRegistration.dispatchEvent("resourceChanged", resource);
+		
+	}      
 };
  
 
