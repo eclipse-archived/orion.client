@@ -113,6 +113,9 @@ dojo.addOnLoad(function(){
 		});
 	}
 	
+	// add plugin actions
+	dojo.byId("editorActions").innerHTML = "hello";
+	
 	// Attach listeners to toolbar
 	dojo.byId("save").onclick = function(evt) {
 		editorContainer._editor.invokeAction("save");
