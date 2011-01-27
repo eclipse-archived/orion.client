@@ -162,7 +162,7 @@ eclipse.ExplorerTree = (function() {
 		// and simply update the model.
 		loadResourceList: function(path) {
 			path = eclipse.util.makeRelative(path);
-			if (path == this._lastHash) {
+			if (path === this._lastHash) {
 				return;
 			}
 			this._lastHash = path;
@@ -201,17 +201,13 @@ eclipse.ExplorerTree = (function() {
 					service.loadWorkspace(path,
 						dojo.hitch(self, function(loadedWorkspace) {
 							//copy fields of resulting object into the tree root
-							for (var i  in loadedWorkspace) {
+							for (var i in loadedWorkspace) {
 								this.treeRoot[i] = loadedWorkspace[i];
 							}
+							eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace);
 							if (!isSearch) {
-								this.registry.getService("IFileService").then(function(service) {
-									service.getChildren(self.treeRoot, 
-										dojo.hitch(self, function(parent, children) {
-											new eclipse.BreadCrumbs({container: this.parentId, resource: parent});
-											this.createTree();
-										})); 
-								});
+								new eclipse.BreadCrumbs({container: this.parentId, resource: this.treeRoot});
+								this.createTree();
 							}
 						}));
 				});
@@ -319,7 +315,7 @@ eclipse.TreeModel = (function() {
 			return item.Directory != false;
 		},
 		getChildren: function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
-			// the root already has the children fetched
+			// the parent item may already have the children fetched
 			if (parentItem.children) {
 				onComplete(parentItem.children);
 			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {

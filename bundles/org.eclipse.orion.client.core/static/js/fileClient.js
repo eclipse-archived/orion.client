@@ -37,27 +37,7 @@ eclipse.FileService = (function() {
 					handleAs: "json",
 					timeout: 15000,
 					load: function(jsonData, ioArgs) {
-						var fileChildren = jsonData.Children;
-						parentItem.children = [];
-						for (var e in fileChildren) {
-							var child = fileChildren[e];
-							child.parent=parentItem;
-							parentItem.children.push(child);
-						}
-						// not ideal, but for now, sort here so it's done in one place.
-						// this should really be something pluggable that the UI defines
-						parentItem.children = parentItem.children.sort(function(a, b) {
-							var isDir1 = a.Directory;
-							var isDir2 = b.Directory;
-							if (isDir1 !== isDir2) {
-								return isDir1 ? -1 : 1;
-							}
-							var n1 = a.Name && a.Name.toLowerCase();
-							var n2 = b.Name && b.Name.toLowerCase();
-							if (n1 < n2) { return -1; }
-							if (n1 > n2) { return 1; }
-							return 0;
-						}); 
+						eclipse.util.processNavigatorParent(parentItem, jsonData);
 						updateFunction(parentItem, parentItem.children);
 					},
 					error: function(response, ioArgs) {

@@ -154,16 +154,11 @@ eclipse.Explorer = (function() {
 								for (var i  in loadedWorkspace) {
 									this.treeRoot[i] = loadedWorkspace[i];
 								}
+								eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace);
 								if (!isSearch) {
-									var self = this;
-									this.registry.getService("IFileService").then(function(service) {
-										service.getChildren(
-											self.treeRoot, dojo.hitch(self, function(parent, children) {
-												new eclipse.BreadCrumbs({container: this.breadcrumbParentId, resource: parent});
-												this.updateNavTools(parent.Location);
-												this.createTree();
-											}));
-									});
+									new eclipse.BreadCrumbs({container: this.breadcrumbParentId, resource: this.treeRoot});
+									this.updateNavTools(this.treeRoot.Location);
+									this.createTree();
 								}
 							}));
 					});
@@ -304,7 +299,7 @@ eclipse.Model = (function() {
 			onItem(this.root);
 		},
 		getChildren: function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
-			// the root already has the children fetched
+			// the parent already has the children fetched
 			if (parentItem.children) {
 				onComplete(parentItem.children);
 			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
