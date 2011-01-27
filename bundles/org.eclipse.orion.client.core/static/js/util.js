@@ -44,38 +44,37 @@ eclipse.util.getPositionInfo =
 		// most likely this is just the hash portion of a URL.  In case not...
 		var hashSegments = fileString.split('#');
 		var postHash = hashSegments[hashSegments.length - 1];
-		var segments = postHash.split('&');
-		for (var i = 0; i < segments.length; i++) {
-			var subsegments = segments[i].split('=');
-			if (subsegments.length > 1) {
-				switch (subsegments[0]) {
-				case 'file':
-					filePath = subsegments[1];
-					break;
-				case 'char':
-					var positions = subsegments[1].split(',');
-					if (line === undefined) {
-						start = parseInt(positions[0]);
-						if (positions.length > 1) {
-							end = parseInt(positions[1]);
+		var querySegments = postHash.split('?');
+		filePath = querySegments[0];
+		if (querySegments.length > 1) {
+			var segments = querySegments[1].split('&');
+			for (var i = 0; i < segments.length; i++) {
+				var subsegments = segments[i].split('=');
+				if (subsegments.length > 1) {
+					switch (subsegments[0]) {
+					case 'char':
+						var positions = subsegments[1].split(',');
+						if (line === undefined) {
+							start = parseInt(positions[0]);
+							if (positions.length > 1) {
+								end = parseInt(positions[1]);
+							}
+						} else {
+							offset = positions[0];
+							if (positions.length > 1) {
+								length = parseInt(positions[1] - offset);
+							}
 						}
-					} else {
-						offset = positions[0];
-						if (positions.length > 1) {
-							length = parseInt(positions[1] - offset);
-						}
+						break;
+					case 'line':
+						var positions = subsegments[1].split(',');
+						line = parseInt(positions[0]);
+						break;
+					default:
+						// ignore anything unrecognized
+						break;
 					}
-					break;
-				case 'line':
-					var positions = subsegments[1].split(',');
-					line = parseInt(positions[0]);
-					break;
-				default:
-					// ignore anything unrecognized
-					break;
-				}
-			} else {
-				filePath = subsegments[0];
+				}  // ignore any unrecognized segments without '='
 			}
 		}
 		return {"filePath": filePath, "start": start, "end": end, "line": line, "offset": offset, "length": length};
@@ -93,7 +92,7 @@ eclipse.util.getPositionInfo =
  */
 eclipse.util.hashFromPosition = function(filePath, start, end, line, offset, length) {
 	if (typeof(start) === "number") {
-		var hash = "#file=" + filePath + "&char=" + start;
+		var hash = '#' + filePath + "?char=" + start;
 		if (typeof(end) === "number") {
 			hash = hash + "," + end;
 		} else if (typeof(length) === "number") {
@@ -102,7 +101,7 @@ eclipse.util.hashFromPosition = function(filePath, start, end, line, offset, len
 		return hash;
 	}
 	if (typeof(line) === "number") {
-		var hash = "#file=" + filePath + "&line=" + line;
+		var hash = '#' + filePath + "?line=" + line;
 		if (typeof(offset) === "number") {
 			hash = hash + "&char=" + offset;
 			if (typeof(length) === "number") {

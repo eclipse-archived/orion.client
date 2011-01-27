@@ -86,7 +86,7 @@ dojo.addOnLoad(function(){
 			return new eclipse.OverviewRuler("right", rulerStyle, annotationRuler);
 	};
 	
-	var editorContainer = new eclipse.EditorContainer(pluginRegistry, serviceRegistry,
+	var editorContainer = new eclipse.EditorContainer(serviceRegistry,
 			editorFactory, undoStackFactory,
 			annotationRulerFactory, lineNumberRulerFactory, overviewRulerFactory,
 			searcher,

@@ -87,8 +87,8 @@ dojo.addOnLoad(function(){
 	};
 	dojo.byId("newProjectButton").onclick = function(evt) {
 		var dialog = new widgets.NewItemDialog({
-			title: "New Project",
-			label: "Project name:",
+			title: "New Folder",
+			label: "Folder name:",
 			func:  function(name){ explorer.createProject(name); }
 		});
 		dialog.startup();
@@ -96,8 +96,8 @@ dojo.addOnLoad(function(){
 	};
 	dojo.byId("linkProjectButton").onclick = function(evt) {
 		var dialog = new widgets.NewItemDialog({
-			title: "Link Project",
-			label: "Project name:",
+			title: "Link Folder",
+			label: "Folder name:",
 			func:  function(name, url, create){ explorer.createProject(name,url,create); },
 			advanced: true
 		});
