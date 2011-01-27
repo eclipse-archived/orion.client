@@ -29,9 +29,7 @@ dojo.declare("widgets.ImportDialog", [ dijit.Dialog ], {
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = this.options.title || "No title";
-		this.itemNameLabelText = this.options.label || "Name:";
-		this.buttonCancel = "Cancel";
+		this.title = "Import from zip";
 	},
 	postCreate : function() {
 		this.inherited(arguments);

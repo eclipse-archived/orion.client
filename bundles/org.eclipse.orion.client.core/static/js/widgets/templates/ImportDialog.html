@@ -1,26 +1,17 @@
-<div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="labelledby-${id}_title">
+<div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="Import">
 	<div dojoAttachPoint="titleBar" class="dijitDialogTitleBar">
-		<span dojoAttachPoint="titleNode" class="dijitDialogTitle" id="${id}_title"></span>
-		<span dojoAttachPoint="closeButtonNode" class="dijitDialogCloseIcon" dojoAttachEvent="onclick: onCancel" title="${buttonCancel}">
-			<span dojoAttachPoint="closeText" class="closeText" title="${buttonCancel}">x</span>
+		<span dojoAttachPoint="titleNode" class="dijitDialogTitle" id="Import">Import</span>
+		<span dojoAttachPoint="closeButtonNode" class="dijitDialogCloseIcon" dojoAttachEvent="onclick: onCancel">
+			<span dojoAttachPoint="closeText" class="closeText">x</span>
 		</span>
 	</div>
 	<div dojoAttachPoint="containerNode" class="dijitDialogPaneContent">
 		<!-- Actual content here -->
 		<form id="importDialogForm" class="form">
-		<div style="display: table">
+		<div style="display: table">			
 			<div style="display: table-row">
 				<div style="display: table-cell; padding: 5">
-					<label dojoAttachPoint="itemNameLabel" for="${id}_itemName" style="padding-right: 10">${itemNameLabelText}</label>
-				</div>
-				<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
-					<input dojoAttachPoint="itemName" id="folder_itemName" style="display: inline-block; width: 98%;" value="">
-				</div>
-			</div>
-			
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5">
-					<label>Files:</label>
+					<label>File:</label>
 				</div>
 				<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
 				</div>
@@ -33,7 +24,7 @@
 					<div id="importDialogFilesList"></div>
 					<div id="importDialogSelectButton">Select File</div>
 					<div indeterminate="false" id="importDialogProgressBar" class="progBar" dojoType="dijit.ProgressBar"></div>
-					<button id="hSubmit" dojoType="dijit.form.Button">Submit</button>
+					<button id="hSubmit" dojoType="dijit.form.Button" style="padding: 20 0 10 0; float: right; clear: both;">Submit</button>
 				</div>
 			</div>
 		</div>
