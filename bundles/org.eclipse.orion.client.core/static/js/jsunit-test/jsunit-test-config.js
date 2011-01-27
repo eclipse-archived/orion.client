@@ -257,7 +257,7 @@ eclipse.TestConfigurator = (function() {
 			return selIndex === 0 ? callBack(this._navigator._renderer.getSelectedURL(false)) : 
 								   this._registry.getService("ITestConfigs").then(function(service) {
 								  		return service.getCurrentConfig()}).then(function(result) {
-								  			callback(result);
+								  			callBack(result);
 								  		});
 		}
 
