@@ -199,6 +199,7 @@ eclipse.Explorer = (function() {
 					bar.appendChild(this._newFolderCommand._asImage("NewFolder", this.treeRoot, this));
 					bar.appendChild(this._newFileCommand._asImage("NewFile", this.treeRoot, this));
 					bar.appendChild(this._openResourceCommand._asImage("Open Resource", this.treeRoot, this));
+					//bar.appendChild(this._importCommand._asImage("Import", this.treeRoot, this));
 				}
 			}
 		},
@@ -269,6 +270,17 @@ eclipse.Explorer = (function() {
 								searcher: that.searcher
 							}).show();
 						}, 0);
+					}}),
+		_importCommand : new eclipse.Command({
+					name : "Import",
+					image : "images/silk/find-gray.png",
+					hotImage : "images/silk/find.png",
+					callback : function(item) {
+						var dialog = new widgets.ImportDialog({
+							importLocation: item.ImportLocation
+						});
+						dialog.startup();
+						dialog.show();
 					}})
 		};
 	return Explorer;
