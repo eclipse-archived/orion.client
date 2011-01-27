@@ -16,7 +16,7 @@ dojo.require("dijit.TitlePane");
 var eclipse = eclipse || {};
 eclipse.EditorContainer = (function() {
 	function EditorContainer(
-			registry, reg2,
+			serviceRegistry,
 			/**function():eclipse.Editor*/ editorFactory,
 			/**function(eclipse.Editor):eclipse.UndoStack*/ undoStackFactory,
 			/**function():eclipse.AnnotationRuler*/ annotationRulerFactory,
@@ -26,8 +26,7 @@ eclipse.EditorContainer = (function() {
 			domNode, /**DomNode|dijit._Widget*/ codeTitle,
 			/**widgets.eWebBorderContainer*/ topContainer, contentassist,
 			leftPane, searchFloat) {
-		this._registry = registry;
-		this._reg2 = reg2;
+		this._serviceRegistry = serviceRegistry;
 		this._editorFactory = editorFactory;
 		this._undoStackFactory = undoStackFactory;
 		this._annotationRulerFactory = annotationRulerFactory;
@@ -62,17 +61,16 @@ eclipse.EditorContainer = (function() {
 	EditorContainer.prototype = {
 		// This is legitimate editor client-side code...establishing dependencies on registered services
 		registerServiceHandlers: function() {
-			var registry = this._registry;
 			var editorContainer = this;
 			
 			// This is legitimate editor client-side code...establishing dependencies on registered services
-			this._reg2.getService("IProblemProvider").then(function(problemProvider) {
+			this._serviceRegistry.getService("IProblemProvider").then(function(problemProvider) {
 				problemProvider.addEventListener("problemsChanged", function(problems) {
 					editorContainer.showProblems(problems);
 				});
 			});
 			
-			this._reg2.getService("IInputProvider").then(function(input) {
+			this._serviceRegistry.getService("IInputProvider").then(function(input) {
 				input.addEventListener("inputChanged", function(fileURI) {
 					editorContainer.setInput(fileURI);
 				});
@@ -193,7 +191,7 @@ eclipse.EditorContainer = (function() {
 					shortTitle = '*' + shortTitle;
 				}
 			}
-			this._reg2.getService("IInputProvider").then(function(myService) {
+			this._serviceRegistry.getService("IInputProvider").then(function(myService) {
 				myService.setTitle(shortTitle);
 			});
 			// for now use the short title.  This could evolve into an
@@ -294,7 +292,7 @@ eclipse.EditorContainer = (function() {
 					match = prefix.match(new RegExp("^"+dojo.regexp.escapeString(txt), "i"));
 				if (match && match.length > 0) {
 					prefix = this._incrementalFindPrefix += event.text;
-					this._reg2.getService("IStatusReporter").then(function(service) {
+					this._serviceRegistry.getService("IStatusReporter").then(function(service) {
 						service.setMessage("Incremental find: " + prefix);
 					});
 					var flags = prefix.toLowerCase() === prefix ? "i" : "";
@@ -306,7 +304,7 @@ eclipse.EditorContainer = (function() {
 						this._incrementalFindIgnoreSelection = false;
 					} else {
 						// should turn message red
-						this._reg2.getService("IStatusReporter").then(function(service) {
+						this._serviceRegistry.getService("IStatusReporter").then(function(service) {
 							service.setErrorMessage("Incremental find: " + prefix + " (not found)");
 						});
 						this._incrementalFindSuccess = false;
@@ -326,14 +324,14 @@ eclipse.EditorContainer = (function() {
 		_toggleIncrementalFind: function() {
 			this._incrementalFindMode = !this._incrementalFindMode;
 			if (this._incrementalFindMode) {
-				this._reg2.getService("IStatusReporter").then(function(service) {
+				this._serviceRegistry.getService("IStatusReporter").then(function(service) {
 					service.setMessage("Incremental find: " + this._incrementalFindPrefix);
 				});
 				this._editor.addEventListener("Verify", this, this._incrementalFindListener.onVerify);
 				this._editor.addEventListener("Selection", this, this._incrementalFindListener.onSelection);
 			} else {
 				this._incrementalFindPrefix = "";
-				this._reg2.getService("IStatusReporter").then(function(service) {
+				this._serviceRegistry.getService("IStatusReporter").then(function(service) {
 					service.setMessage("");
 				});
 				this._editor.removeEventListener("Verify", this, this._incrementalFindListener.onVerify);
@@ -445,7 +443,7 @@ eclipse.EditorContainer = (function() {
 			return match;
 		},
 		installEditor : function(fileURI) {
-			var registry = this._reg2;
+			var registry = this._serviceRegistry;
 			
 			// Create editor and undo stack
 			this._editor = this._editorFactory();
@@ -1161,7 +1159,7 @@ eclipse.EditorContainer = (function() {
 				var lineStart = model.getLineStart(lineIndex);
 				var offsetInLine = caretOffset - lineStart;
 				if (!editorContainer._incrementalFindMode) {
-					this._reg2.getService("IStatusReporter").then(function(service) {
+					this._serviceRegistry.getService("IStatusReporter").then(function(service) {
 						service.setMessage("Line " + (lineIndex + 1) + " : Col " + offsetInLine);	
 					});
 				}
