@@ -186,6 +186,7 @@ dojo.addOnLoad(function(){
 					a.setAttribute("alt", info.name);
 					a.setAttribute("title", info.name);
 					a.onclick = action;
+					dojo.addClass(a, "commandImage");
 					toolbar.appendChild(a);
 					toolbar.appendChild(document.createTextNode(" "));
 				} else {
@@ -193,6 +194,7 @@ dojo.addOnLoad(function(){
 					a.setAttribute("class", "editorAction");
 					a.appendChild(document.createTextNode(info.name));
 					a.onclick = action;
+					dojo.addClass(a, "commandLink");
 					toolbar.appendChild(a);
 					toolbar.appendChild(document.createTextNode(" "));
 				}

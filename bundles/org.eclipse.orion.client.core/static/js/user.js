@@ -38,16 +38,14 @@ dojo.addOnLoad(function() {
 		}
 	});
 	
-	// Create buttons programmatically:	
-	var button = new dijit.form.Button( {
-		label : "Sign Out",
-		onClick : function() {
+	// Create sign out programmatically:	
+	var signout = document.createElement('span');
+	signout.appendChild(document.createTextNode("Sign out"));
+	signout.onclick = function() {
 			signOutUser();
-		}
-	}, "signOutUser");
-	dojo.addClass(button, "toolbarButton");
-	
-	
+	};
+	signout.id = "signOutUser";
+	dojo.addClass(signout, "commandLink");
 });
 
 function ensureSignedIn() {

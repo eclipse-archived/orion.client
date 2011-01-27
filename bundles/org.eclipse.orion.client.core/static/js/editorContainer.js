@@ -507,7 +507,7 @@ eclipse.EditorContainer = (function() {
 						editorContainer.moveSelection(editor, result.index, result.index+result.length);
 					} else {
 						registry.getService("IStatusReporter").then(function(service) {
-							status.setErrorMessage("not found");
+							service.setErrorMessage("not found");
 						});
 					}
 				}, 0);

@@ -82,7 +82,7 @@ h2 {
 
 .soria .dijitButtonNode {
 	background-image: none;
-	background: #eeeeee;
+	background: none;
 	border: 0px;
 	padding: 0px;
 	height: 20px;
@@ -228,7 +228,10 @@ h2 {
 }
 
 .commandLink {
+	margin-left: 2px;
+	margin-right: 2px;
 	color: #666666;
+	text-decoration: underline;
 }
 
 .secondaryColumn {
