@@ -33,7 +33,7 @@ eclipse.ServiceProvider.prototype = {
 			serviceType: serviceType,
 			serviceId: serviceId
 		};
-		this._plugin._hubClient.publish("org.eclipse.e4.plugin.PluginResponse", {type: "event", result: event, error: null});
+		this._plugin._hubClient.publish("orion.plugin.response", {type: "event", result: event, error: null});
 	}
 };
 
@@ -76,12 +76,12 @@ eclipse.Plugin.prototype = {
 		var scope = this;
 		this._hubClient.connect(function(hubClient, success, error) {
 			if (success) {
-				scope._hubClient.subscribe("org.eclipse.e4.plugin.PluginRequest["+scope.pluginURL+"]", scope._handlePluginRequest, scope);
+				scope._hubClient.subscribe("orion.plugin.request["+scope.pluginURL+"]", scope._handlePluginRequest, scope);
 				var result = {
 					pluginURL: scope.pluginURL,
 					pluginData: scope.pluginData
 				};
-				scope._hubClient.publish("org.eclipse.e4.plugin.PluginLoad", result);
+				scope._hubClient.publish("orion.plugin.load", result);
 			}
 		});
 	},
@@ -93,7 +93,7 @@ eclipse.Plugin.prototype = {
 	_handlePluginRequest: function(topic, request, subscriberData) {
 		if (request.type === "metadata") {
 			this._getMetadata(request);
-		} else if (request.type === "servicecall") {
+		} else if (request.type === "service") {
 			this._callService(request);
 		}
 	},
@@ -103,7 +103,7 @@ eclipse.Plugin.prototype = {
 			pluginURL: this.pluginURL,
 			pluginData: this.pluginData
 		};
-		this._hubClient.publish("org.eclipse.e4.plugin.PluginResponse", {type: "metadata", id: request.id, result: result, error: null});
+		this._hubClient.publish("orion.plugin.response", {type: "metadata", id: request.id, result: result, error: null});
 	},
 	
 	_callService: function(request) {
@@ -124,7 +124,7 @@ eclipse.Plugin.prototype = {
 		} catch (e) {
 			error = e;
 		}
-		this._hubClient.publish("org.eclipse.e4.plugin.PluginResponse", {type: "servicecall", id: request.id, result: result, error: error});
+		this._hubClient.publish("orion.plugin.response", {type: "service", id: request.id, result: result, error: error});
 	},
 	
 	dispatchEvent: function(eventType, eventData, serviceType, serviceId) {

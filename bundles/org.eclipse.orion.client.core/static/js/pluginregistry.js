@@ -41,7 +41,7 @@ eclipse.Service0 = function(serviceReference, registry, onLoadCallback) {
 
 eclipse.Service0.prototype = {
 	invoke: function(methodName, params, callback) {
-		this._registry._sendPluginRequest("servicecall", {method: methodName, params: params}, this._serviceReference._pluginServiceProvider.pluginURL, callback);
+		this._registry._sendPluginRequest("service", {method: methodName, params: params}, this._serviceReference._pluginServiceProvider.pluginURL, callback);
 	},
 	
 	addEventListener: function(eventType, eventListener) {
@@ -76,7 +76,7 @@ eclipse.Service0.prototype = {
 				var scope = this;
 				var methodName = interfaces[i]; 
 				this[methodName] = function() {
-					scope._registry._sendPluginRequest("servicecall", {method: methodName, params: arguments[0]}, scope._serviceReference._serviceType.provider, arguments[1]);
+					scope._registry._sendPluginRequest("service", {method: methodName, params: arguments[0]}, scope._serviceReference._serviceType.provider, arguments[1]);
 				};
 			}
 		}
@@ -115,12 +115,11 @@ eclipse.ServiceReference0.prototype = {
  * The registry manages the set of available plugins.
  * @class The registry manages the set of available plugins.
  */
-eclipse.Registry = function() {
+eclipse.PluginRegistry = function() {
 	this._currentId = 0;
 	this._msgCallbacks = {};
 	this._plugins = {};
 	this._eventListeners = {onPluginLoad: [], onPluginInstall: [], onPluginUninstall: []};
-	this._localServices = {};
 	this._loadPluginCallbacks = {};
 	this._serviceTypes = {};
 	
@@ -132,12 +131,12 @@ eclipse.Registry = function() {
 	});
 };
 
-eclipse.Registry.prototype = {
+eclipse.PluginRegistry.prototype = {
 	start: function() {
 		console.debug("registry.start()");
 		this._loadFromStorage();
-		this._managedHub.subscribe("org.eclipse.e4.plugin.PluginResponse", this._handlePluginResponse, this);
-		this._managedHub.subscribe("org.eclipse.e4.plugin.PluginLoad", this._handlePluginLoad, this);
+		this._managedHub.subscribe("orion.plugin.response", this._handlePluginResponse, this);
+		this._managedHub.subscribe("orion.plugin.load", this._handlePluginLoad, this);
 	},
 	
 	stop: function() {
@@ -150,7 +149,7 @@ eclipse.Registry.prototype = {
 		var pluginKeys = [];
 		for (var i = 0; i < localStorage.length; i++) {
 			var key = localStorage.key(i);
-			var index = key.search(/^org.eclipse.e4.plugin./); 
+			var index = key.search(/^orion.plugin./); 
 			if (index != -1) {
 				pluginKeys.push(key);
 			}
@@ -208,7 +207,7 @@ eclipse.Registry.prototype = {
 	
 	installPlugin: function(pluginURL, pluginData) {
 		pluginURL = this._resolvePluginURL(pluginURL);
-		if (localStorage["org.eclipse.e4.plugin."+pluginURL] !== undefined && localStorage["org.eclipse.e4.plugin."+pluginURL] !== null) {
+		if (localStorage["orion.plugin."+pluginURL] !== undefined && localStorage["orion.plugin."+pluginURL] !== null) {
 			throw new Error("Plugin ["+pluginURL+"] has already been installed");
 		}
 		console.debug("installing plugin url["+pluginURL+"]");
@@ -225,9 +224,9 @@ eclipse.Registry.prototype = {
 	
 	uninstallPlugin: function(pluginURL) {
 		pluginURL = this._resolvePluginURL(pluginURL);
-		if (localStorage["org.eclipse.e4.plugin."+pluginURL] !== undefined && localStorage["org.eclipse.e4.plugin."+pluginURL] !== null) {
+		if (localStorage["orion.plugin."+pluginURL] !== undefined && localStorage["orion.plugin."+pluginURL] !== null) {
 			delete this._plugins[pluginURL];
-			localStorage.removeItem("org.eclipse.e4.plugin."+pluginURL);
+			localStorage.removeItem("orion.plugin."+pluginURL);
 			var pluginContainer = this._managedHub.getContainer(pluginURL);
 			if (pluginContainer !== null) {
 				this._managedHub.removeContainer(pluginContainer);
@@ -257,40 +256,7 @@ eclipse.Registry.prototype = {
 			return null;
 		}
 	},
-	
-	// FIXME this was a quick and dirty way to accomplish local (non-sandboxed) services
-	registerLocalService: function(serviceType, id, serviceImpl, properties) {
-		var service = this._localServices[serviceType];
-		if (service === undefined) {
-			service = {instances: []};
-			this._localServices[serviceType] = service;
-		}
-		service.instances[id] = {id: id, properties: properties, serviceImpl: serviceImpl};
-	},
-	
 	callService: function(serviceType, methodName, callback, params, instanceId) {
-		// FIXME  Look in local services first.
-		var service = this._localServices[serviceType];
-		if (service !== undefined) {
-			if (instanceId !== undefined) {
-				var serviceInstance = service.instances[instanceId];
-			} else {
-				for (var name in service.instances) {
-					serviceInstance = service.instances[name];
-					break;
-				}
-			}
-			if (serviceInstance !== undefined) {
-				if (typeof(serviceInstance.serviceImpl[methodName]) === "function") {
-					result = serviceInstance.serviceImpl[methodName].apply(serviceInstance.serviceImpl, params); 
-					if (callback) {
-						setTimeout(function(){callback(result);} , 0);
-					}
-					return;
-				}
-			}
-		}
-		
 		var scope = this;
 		var serviceReference = this.getServiceReference(serviceType);
 		this.getService(serviceReference, function(service) {
@@ -337,8 +303,8 @@ eclipse.Registry.prototype = {
 	},
 	
 	_installPlugin: function(metadata, scope) {
-		console.debug("writing localstorage with key ["+"org.eclipse.e4.plugin."+metadata.pluginURL+"]");
-		localStorage["org.eclipse.e4.plugin."+metadata.pluginURL] = JSON.stringify(metadata);
+		console.debug("writing localstorage with key ["+"orion.plugin."+metadata.pluginURL+"]");
+		localStorage["orion.plugin."+metadata.pluginURL] = JSON.stringify(metadata);
 		scope._plugins[metadata.pluginURL] = metadata;
 		if (metadata.pluginData.services !== undefined) {
 			scope._loadServiceTypes(metadata.pluginURL, metadata.pluginData.services);
@@ -359,7 +325,7 @@ eclipse.Registry.prototype = {
 	
 	_handlePluginResponse: function(topic, msg, subscriberData) {
 		switch (msg.type) { 
-			case "servicecall" :
+			case "service" :
 			case "metadata": {
 				var callback = this._msgCallbacks[String(msg.id)];
 				delete this._msgCallbacks[String(msg.id)];
@@ -398,10 +364,10 @@ eclipse.Registry.prototype = {
 	_loadFromStorage: function() {
 		for (var i = 0; i < localStorage.length; i++) {
 			var storageKey = localStorage.key(i);
-			var index = storageKey.search(/^org.eclipse.e4.plugin./); 
+			var index = storageKey.search(/^orion.plugin./); 
 			if (index != -1) {
 				try {
-					var pluginURL = storageKey.substring(index+"org.eclipse.e4.plugin.".length);
+					var pluginURL = storageKey.substring(index+"orion.plugin.".length);
 					var pluginDataString = localStorage[localStorage.key(i)];
 					this._plugins[pluginURL] = JSON.parse(pluginDataString);
 					if (this._plugins[pluginURL].pluginData.services !== undefined) {
@@ -424,7 +390,7 @@ eclipse.Registry.prototype = {
 				type: type,
 				msgData: msgData
 			};
-			this._managedHub.publish("org.eclipse.e4.plugin.PluginRequest["+pluginURL+"]", msg);
+			this._managedHub.publish("orion.plugin.request["+pluginURL+"]", msg);
 		} else {
 			throw new Error("Unable to locate plugin container for ["+pluginURL+"]");
 		}
