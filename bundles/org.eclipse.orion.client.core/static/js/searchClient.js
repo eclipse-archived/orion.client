@@ -69,7 +69,7 @@ eclipse.Searcher = (function() {
 			return response;
 		},
 		saveSearch: function(favoriteName, query) {
-			registry.getService("IFavorites").then(function(favorites) {
+			this.registry.getService("IFavorites").then(function(favorites) {
 				favorites.addFavoriteSearch(favoriteName, query);
 			});
 		},
