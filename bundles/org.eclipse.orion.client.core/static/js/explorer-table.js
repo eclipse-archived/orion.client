@@ -106,6 +106,7 @@ eclipse.Explorer = (function() {
 	    },
 	    
 		loadResourceList: function(path) {
+			// console.log("loadResourceList old " + this._lastHash + " new " + path);
 			path = eclipse.util.makeRelative(path);
 			if (path === this._lastHash) {
 				return;
@@ -402,11 +403,11 @@ eclipse.FileRenderer = (function() {
 				tableRow.appendChild(col);
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
-				dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
+				var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
 				dojo.create("img", {src: "/images/silk/folder.png"}, div, "last");
 				link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				col.onclick = dojo.hitch(this, function(evt) {
+				expandImg.onclick = dojo.hitch(this, function(evt) {
 					this.tableTree.toggle(tableRow.id, nameId, '/images/expanded-gray.png', '/images/collapsed-gray.png');
 				});
 			} else {

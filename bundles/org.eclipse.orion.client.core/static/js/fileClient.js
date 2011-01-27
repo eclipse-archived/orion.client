@@ -29,6 +29,7 @@ eclipse.FileService = (function() {
 		 * @param {Function(Object, Array} updateFunction First param is parentItem, second is children
 		 */
 		getChildren: function(parentItem, updateFunction) {
+			// console.log("get children");
 			dojo.xhrGet({
 					url: parentItem.ChildrenLocation,
 					headers: {
@@ -82,6 +83,7 @@ eclipse.FileService = (function() {
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location, onLoad) {
+			// console.log("loadWorkspace");
 			dojo.xhrGet({
 				url: location ? location : "/workspace",
 				headers: {
