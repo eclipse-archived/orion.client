@@ -144,8 +144,9 @@ dojo.addOnLoad(function(){
 	 run: function(text) { return text.toUpperCase(); }
 	});
 	serviceRegistry.registerService("editorAction", {
-	 info: function() {return {name:"boo"};},
-	 run: function(selectedText, text, selection) { return {text:"boo!! (hit Ctrl-Z to undo)", selection: {start:3,end:5}}; }
+	 info: function() {return {name:"Comment"};},
+	 run: function(selectedText, text, selection) { return {text: text.substring(0,selection.start) + "/*" + text.substring(selection.start,selection.end) + "*/" + text.substring(selection.end),
+	 selection: {start:selection.start,end:selection.end+4}}; }
 	});
 
 	// Add the plugin actions to the toolbar. This code is not real - it doesn't handle errors at all, for example.
