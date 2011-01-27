@@ -9,15 +9,8 @@
 
 dojo.addOnLoad(function() {
 
-	// FIXME until we sort out where service registration happens, and how
-	// dependencies on
-	// services are expressed, just copy this code around...
-	var registry = new eclipse.Registry();
-	registry.start();
-
-	var inputService = new eclipse.InputService(registry);
-	registry.registerLocalService("IInputProvider", "EASInputProvider",
-			inputService);
+	var serviceRegistry = new eclipse.ServiceRegistry();
+	var inputService = new eclipse.InputService(serviceRegistry);
 
 	/* set the login information in toolbar */
 	dojo.xhrGet({
@@ -29,7 +22,7 @@ dojo.addOnLoad(function() {
 		}
 	});
 	var profile = new eclipse.Profile({
-		registry : registry,
+		registry : serviceRegistry,
 		browsePhotoButton : dijit.byId('browsePhotoButton'),
 		saveProfileButton : dijit.byId('saveProfileButton'),
 		deleteProfileButton : dijit.byId('deleteProfileButton'),
@@ -73,8 +66,16 @@ eclipse.Profile = (function() {
 
 			// TODO if no hash provided current user profile should be loaded
 
-			this.registry.callService("IInputProvider", "inputChanged", null,
-					[ dojo.hitch(this, this.setUserToDisplay) ]);
+			var userProfile = this;
+
+			this.registry.getService("IInputProvider").then(function(input) {
+				input.addEventListener("inputChanged", function(uri) {
+					dojo.hitch(userProfile, userProfile.setUserToDisplay(uri));
+				});
+				input.getInput(function(uri) {
+					dojo.hitch(userProfile, userProfile.setUserToDisplay(uri));
+				});
+			});
 
 			dojo.connect(this.userprofilefile, "onmouseover", dojo.hitch(this,
 					this.focusPhoto));
@@ -139,7 +140,7 @@ eclipse.Profile = (function() {
 			}
 
 			var uri = this.currentUserURI + "?name=" + this.nameInput.value;
-			if (password!=null) {
+			if (password != null) {
 				uri = uri + "&password=" + password;
 			}
 
