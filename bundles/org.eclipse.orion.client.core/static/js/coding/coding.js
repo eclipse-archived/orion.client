@@ -117,8 +117,94 @@ dojo.addOnLoad(function(){
 		});
 	}
 	
-	// add plugin actions
-	dojo.byId("editorActions").innerHTML = "hello";
+
+	// These are two example actions - they should be coming from plug-ins.
+
+	// Note that this is not in any shape or form that could be considered final.
+	// We've included it to enable experimentation. Please provide feedback (in Bugzilla, on IRC, on the mailing list).
+	
+	// The shape of the contributed actions is (for now):
+	// info - information about the action (object).
+	//        required attribute: name - the name of the action
+	//        optional attribute: key - an array with values to pass to the eclipse.KeyBinding constructor
+	//        optional attribute: img - a URL to an image for the action
+	// run - the implementation of the action (function).
+	//        arguments passed to run: (selectedText, fullText, selection)
+	//          selectedText (string) - the currently selected text in the editor
+	//          fullText (string) - the complete text of the editor
+	//          selection (object) - an object with attributes: start, end
+	//        the return value of the run function will be used as follows:
+	//          if the return value is a string, the current selection in the editor will be replaced with the returned string
+	//          if the return value is an object, its "text" attribute (required) will be used to replace the contents of the editor,
+	//                                            and its "selection" attribute (optional) will be used to set the new selection.
+	serviceRegistry.registerService("editorAction", {
+	 info: function() {return {name:"UPPERCASE", img: "/favicon.ico", key:["u",true]};},
+	 run: function(text) { return text.toUpperCase(); }
+	});
+	serviceRegistry.registerService("editorAction", {
+	 info: function() {return {name:"boo"};},
+	 run: function(selectedText, text, selection) { return {text:"boo!! (hit Ctrl-Z to undo)", selection: {start:3,end:5}}; }
+	});
+
+	// Add the plugin actions to the toolbar. This code is not real - it doesn't handle errors at all, for example.
+	// Note that this is not in any shape or form that could be considered final.
+	// We've included it to enable experimentation. Please provide feedback (in Bugzilla, on IRC, on the mailing list).
+	var actionReferences = serviceRegistry.getServiceReferences("editorAction");
+	for (var i=0; i<actionReferences.length; i++) {
+		serviceRegistry.getService(actionReferences[i]).then(function(service) {
+			service.info().then(function(info) {
+				var editor = editorContainer._editor;
+				var action = function() {
+					var text = editor.getText();
+					var selection = editor.getSelection();
+					service.run(editor.getText(selection.start,selection.end),text,selection).then(function(result){
+						if (result.text) {
+							editor.setText(result.text);
+							if (result.selection) {
+								editor.setSelection(result.selection.start, result.selection.end);
+								editor.focus();
+							}
+						} else {
+							if (typeof result === 'string') {
+								editor.setText(result, selection.start, selection.end);
+								editor.setSelection(selection.start, selection.end);
+								editor.focus();
+							}
+						}
+					});
+				};
+				// add it to toolbar
+				var toolbar = dojo.byId("editorActions");
+				if (info.img) {
+					var a = document.createElement('img');
+					a.setAttribute("class", "editorAction");
+					a.setAttribute("src", info.img);
+					a.setAttribute("alt", info.name);
+					a.setAttribute("title", info.name);
+					a.onclick = action;
+					toolbar.appendChild(a);
+					toolbar.appendChild(document.createTextNode(" "));
+				} else {
+					var a = document.createElement('span');
+					a.setAttribute("class", "editorAction");
+					a.appendChild(document.createTextNode(info.name));
+					a.onclick = action;
+					toolbar.appendChild(a);
+					toolbar.appendChild(document.createTextNode(" "));
+				}
+				if (info.key) {
+					// add it to the editor as a keybinding
+					// KB exists so that we can pass an array (from info.key) rather than actual arguments
+					function KB(args) {
+						return eclipse.KeyBinding.apply(this, args);
+					}
+					KB.prototype = eclipse.KeyBinding.prototype;
+					editor.setKeyBinding(new KB(info.key), info.name);
+					editor.setAction(info.name, action);
+				}
+			});
+		});
+	}
 	
 	// Attach listeners to toolbar
 	dojo.byId("save").onclick = function(evt) {
