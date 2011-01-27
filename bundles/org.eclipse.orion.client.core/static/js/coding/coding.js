@@ -118,7 +118,8 @@ dojo.addOnLoad(function(){
 	}
 	
 
-	// These are two example actions - they should be coming from plug-ins.
+	// These are two example actions - they should be coming from plug-ins, and they
+	// should ideally be contributed using the command service.  That is TBD.
 
 	// Note that this is not in any shape or form that could be considered final.
 	// We've included it to enable experimentation. Please provide feedback (in Bugzilla, on IRC, on the mailing list).
@@ -137,6 +138,7 @@ dojo.addOnLoad(function(){
 	//          if the return value is a string, the current selection in the editor will be replaced with the returned string
 	//          if the return value is an object, its "text" attribute (required) will be used to replace the contents of the editor,
 	//                                            and its "selection" attribute (optional) will be used to set the new selection.
+	// These actions will be migrated to commands in the future, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=334189
 	serviceRegistry.registerService("editorAction", {
 	 info: function() {return {name:"UPPERCASE", img: "/favicon.ico", key:["u",true]};},
 	 run: function(text) { return text.toUpperCase(); }
@@ -148,7 +150,7 @@ dojo.addOnLoad(function(){
 
 	// Add the plugin actions to the toolbar. This code is not real - it doesn't handle errors at all, for example.
 	// Note that this is not in any shape or form that could be considered final.
-	// We've included it to enable experimentation. Please provide feedback (in Bugzilla, on IRC, on the mailing list).
+	// We've included it to enable experimentation. Please provide feedback (in Bugzilla, on IRC, on the mailing list)
 	var actionReferences = serviceRegistry.getServiceReferences("editorAction");
 	for (var i=0; i<actionReferences.length; i++) {
 		serviceRegistry.getService(actionReferences[i]).then(function(service) {
@@ -173,7 +175,9 @@ dojo.addOnLoad(function(){
 						}
 					});
 				};
-				// add it to toolbar
+				// add it to toolbar.  This is similar to what the command service does in its render methods.
+				// This should be switched over to use the command service to render the 'page' level scopes once
+				// that is implemented.
 				var toolbar = dojo.byId("editorActions");
 				if (info.img) {
 					var a = document.createElement('img');
