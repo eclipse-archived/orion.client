@@ -10,6 +10,7 @@
  *******************************************************************************/
 /*global eclipse */
 /*global console */
+/*global dojo */
 var eclipse = eclipse || {};
 eclipse.ServiceReference = function(serviceId, name, properties) {
 	this.getServiceId = function() {

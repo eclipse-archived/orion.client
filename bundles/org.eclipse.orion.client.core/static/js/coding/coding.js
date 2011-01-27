@@ -22,7 +22,7 @@ dojo.addOnLoad(function(){
 	// Initialize the plugin registry
 	(function() {
 		// This is the original registry.  For M5 we need it for plugin management.
-		pluginRegistry = new eclipse.Registry();
+		pluginRegistry = new eclipse.PluginRegistry();
 		pluginRegistry.start();
 		
 		var jslintPlugin = pluginRegistry.getPlugin("/jslintPlugin.html");
