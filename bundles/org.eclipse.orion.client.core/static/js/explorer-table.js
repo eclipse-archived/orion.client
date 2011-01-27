@@ -199,7 +199,7 @@ eclipse.Explorer = (function() {
 					bar.appendChild(this._newFolderCommand._asImage("NewFolder", this.treeRoot, this));
 					bar.appendChild(this._newFileCommand._asImage("NewFile", this.treeRoot, this));
 					bar.appendChild(this._openResourceCommand._asImage("Open Resource", this.treeRoot, this));
-					//bar.appendChild(this._importCommand._asImage("Import", this.treeRoot, this));
+					bar.appendChild(this._importCommand._asImage("Import", this.treeRoot, this));
 				}
 			}
 		},
@@ -273,8 +273,8 @@ eclipse.Explorer = (function() {
 					}}),
 		_importCommand : new eclipse.Command({
 					name : "Import",
-					image : "images/silk/find-gray.png",
-					hotImage : "images/silk/find.png",
+					image : "images/silk/zip_import-gray.gif",
+					hotImage : "images/silk/zip_import.gif",
 					callback : function(item) {
 						var dialog = new widgets.ImportDialog({
 							importLocation: item.ImportLocation
