@@ -115,7 +115,8 @@ eclipse.ServiceReference0.prototype = {
  * The registry manages the set of available plugins.
  * @class The registry manages the set of available plugins.
  */
-eclipse.PluginRegistry = function() {
+eclipse.PluginRegistry = function(serviceRegistry) {
+	this._serviceRegistry;
 	this._currentId = 0;
 	this._msgCallbacks = {};
 	this._plugins = {};

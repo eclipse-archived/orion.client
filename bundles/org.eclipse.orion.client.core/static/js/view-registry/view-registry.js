@@ -6,7 +6,7 @@ dojo.require("widgets.RegistryTree");
 dojo.addOnLoad(function() {
 	
 	// TODO get the registry from somewhere else
-	var registry = new eclipse.PluginRegistry();
+	var registry = new eclipse.PluginRegistry(new eclipse.ServiceRegistry());
 	registry.start();
 	
 	var initTree = function() {

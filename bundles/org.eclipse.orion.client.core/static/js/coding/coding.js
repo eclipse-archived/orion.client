@@ -21,19 +21,30 @@ dojo.addOnLoad(function(){
 	
 	// Initialize the plugin registry
 	(function() {
+		// This is the new service registry.  All services should be registered and obtained here.
+		serviceRegistry = new eclipse.ServiceRegistry();
+		
 		// This is the original registry.  For M5 we need it for plugin management.
-		pluginRegistry = new eclipse.PluginRegistry();
+		pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 		pluginRegistry.start();
 		
+		
+		// this is temporary
 		var jslintPlugin = pluginRegistry.getPlugin("/jslintPlugin.html");
 		if (jslintPlugin === null) {
 			pluginRegistry.loadPlugin("/jslintPlugin.html", function(plugin) {
 				pluginRegistry.installPlugin(plugin.pluginURL, plugin.pluginData);
 			});
 		}
+		serviceRegistry.registerService("IEditorSyntaxChecker", {checkSyntax : function(title, contents) {
+				var d = new dojo.Deferred();
+				pluginRegistry.callService("IEditorSyntaxChecker", "checkSyntax", dojo.hitch(d, d.resolve), [title, contents]);
+				return d.promise;
+			}
+		});
 		
-		// This is the new service registry.  All services should be registered and obtained here.
-		serviceRegistry = new eclipse.ServiceRegistry();
+		
+
 		var inputService = new eclipse.InputService(serviceRegistry);
 		inputService.initializeContext({"manageDocumentTitle": true});	
 		new eclipse.StatusReportingService(serviceRegistry, "statusPane");
@@ -96,7 +107,7 @@ dojo.addOnLoad(function(){
 	// The eWebBorderContainer widget needs to know the editorContainer
 	topContainerWidget.set("editorContainer", editorContainer);
 	
-	var syntaxChecker = new eclipse.SyntaxChecker(serviceRegistry, pluginRegistry, editorContainer);
+	var syntaxChecker = new eclipse.SyntaxChecker(serviceRegistry, editorContainer);
 	
 	// Create outliner "gadget"
 	new eclipse.Outliner({parent: outlineDomNode, serviceRegistry: serviceRegistry});	

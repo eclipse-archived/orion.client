@@ -15,9 +15,8 @@ dojo.require("dojo._base.json");
 
 var eclipse = eclipse || {};
 eclipse.SyntaxChecker = (function () {
-	function SyntaxChecker(serviceRegistry, pluginRegistry, editorContainer) {
+	function SyntaxChecker(serviceRegistry, editorContainer) {
 		this.registry = serviceRegistry;
-		this.pluginRegistry = pluginRegistry;
 		this.editorContainer = editorContainer;
 		dojo.connect(this.editorContainer, "onInputChange", this, this.checkSyntax);
 	}
@@ -36,11 +35,11 @@ eclipse.SyntaxChecker = (function () {
 							service._setItems({"title": t, "contents": c, "data": data});
 						});
 					});
-					try {
-						this.pluginRegistry.callService("IEditorSyntaxChecker", "checkSyntax", syntaxCheckerCallback, [title, contents]);
-					} catch (exc) {
-						console.debug(exc.toString());
-					}
+						this.registry.getService("IEditorSyntaxChecker")
+							.then(function(service) {
+								return service.checkSyntax(title, contents);
+							})
+							.then(syntaxCheckerCallback);
 				} else {
 					this.registry.getService("IOutlineProvider").then(function(service) {
 						service._setItems({title: t, contents: c});
