@@ -1,46 +1,58 @@
-<div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="Import">
+<div class="dijitDialog" tabindex="-1" waiRole="dialog"
+	waiState="Import">
 	<div dojoAttachPoint="titleBar" class="dijitDialogTitleBar">
 		<span dojoAttachPoint="titleNode" class="dijitDialogTitle" id="Import">Import</span>
-		<span dojoAttachPoint="closeButtonNode" class="dijitDialogCloseIcon" dojoAttachEvent="onclick: onCancel">
-			<span dojoAttachPoint="closeText" class="closeText">x</span>
-		</span>
+		<span dojoAttachPoint="closeButtonNode" class="dijitDialogCloseIcon"
+			dojoAttachEvent="onclick: onCancel"> <span
+			dojoAttachPoint="closeText" class="closeText">x</span> </span>
 	</div>
 	<div dojoAttachPoint="containerNode" class="dijitDialogPaneContent">
 		<!-- Actual content here -->
 		<form id="importDialogForm" class="form">
-		<div style="display: table">			
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5">
-					<label>File:</label>
+			<div style="display: table">
+				<div style="display: table-row">
+					<div
+						style="display: table-cell; padding: 1px; vertical-align: bottom;">
+						<label>File:</label>
+					</div>
+					<div
+						style="display: table-cell; padding: 1px; vertical-align: bottom;">
+						<div
+							style="border: 1px solid #ccc; min-width: 35em; height: 19px; line-height: 19px; vertical-align: bottom;">
+							<div id="importDialogFilesList" style="margin-top: -3px;"></div>
+						</div>
+					</div>
+					<div style="display: table-cell; padding: 1px; vertical-align: bottom;">
+						<div id="importDialogSelectButton">
+							Browse...
+						</div>
+					</div>
 				</div>
-				<div style="display: table-cell; padding: 5">
-					<div id="importDialogFilesList" style="border:1px solid #ccc; width: 20em; height: 2em"></div>
+
+				<div style="display: table-row">
+					<div style="display: table-cell; padding: 1px;">
+					</div>
+					<div style="display: table-cell; padding: 1px;">
+						<div indeterminate="false" id="importDialogProgressBar"
+							class="progBar" dojoType="dijit.ProgressBar"></div>
+					</div>
+					<div style="display: table-cell; padding: 1px;">
+					</div>
 				</div>
-				<div style="display: table-cell; padding: 5">
-					<div id="importDialogSelectButton" class="uploadBtn">Browse...</div>
+
+				<div style="display: table-row">
+					<div style="display: table-cell; padding: 1px;">
+					</div>
+					<div style="display: table-cell; padding: 1px;">
+					</div>
+					<div style="display: table-cell; padding: 1px;">
+						<button id="hSubmit" dojoType="dijit.form.Button"
+							style="padding: 20 0 10 0; float: right; clear: both;">
+							Finish
+						</button>
+					</div>
 				</div>
 			</div>
-		
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5">
-				</div>
-				<div style="display: table-cell; padding: 5">
-					<div indeterminate="false" id="importDialogProgressBar" class="progBar" dojoType="dijit.ProgressBar"></div>
-				</div>
-				<div style="display: table-cell; padding: 5">
-				</div>
-			</div>
-			
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5">
-				</div>
-				<div style="display: table-cell; padding: 5">
-				</div>
-				<div style="display: table-cell; padding: 5">
-					<button id="hSubmit" dojoType="dijit.form.Button" style="padding: 20 0 10 0; float: right; clear: both;">Finish</button>
-				</div>
-			</div>
-		</div>
 		</form>
 	</div>
 </div>
