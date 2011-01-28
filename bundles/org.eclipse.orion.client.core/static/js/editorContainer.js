@@ -330,8 +330,9 @@ eclipse.EditorContainer = (function() {
 		_toggleIncrementalFind: function() {
 			this._incrementalFindMode = !this._incrementalFindMode;
 			if (this._incrementalFindMode) {
+				var self = this;
 				this._serviceRegistry.getService("IStatusReporter").then(function(service) {
-					service.setMessage("Incremental find: " + this._incrementalFindPrefix);
+					service.setMessage("Incremental find: " + self._incrementalFindPrefix);
 				});
 				this._editor.addEventListener("Verify", this, this._incrementalFindListener.onVerify);
 				this._editor.addEventListener("Selection", this, this._incrementalFindListener.onSelection);
