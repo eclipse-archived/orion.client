@@ -143,10 +143,6 @@ dojo.addOnLoad(function(){
 	//                                            and its "selection" attribute (optional) will be used to set the new selection.
 	// These actions will be migrated to commands in the future, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=334189
 	serviceRegistry.registerService("editorAction", {
-	 info: function() {return {name:"UPPERCASE", img: "/favicon.ico", key:["u",true]};},
-	 run: function(text) { return text.toUpperCase(); }
-	});
-	serviceRegistry.registerService("editorAction", {
 	 info: function() {return {name:"Comment"};},
 	 run: function(selectedText, text, selection) { return {text: text.substring(0,selection.start) + "/*" + text.substring(selection.start,selection.end) + "*/" + text.substring(selection.end),
 	 selection: {start:selection.start,end:selection.end+4}}; }

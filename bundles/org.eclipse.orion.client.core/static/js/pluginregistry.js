@@ -428,11 +428,13 @@ eclipse.PluginRegistry.prototype = {
 		if (serviceType.interfaces) {
 			for (var i = 0; i < serviceType.interfaces.length; i++) {
 				var method = serviceType.interfaces[i];
-				serviceProxy[method] = function() {
-					var d = new dojo.Deferred();
-					boundCallService(serviceType.id, method, dojo.hitch(d, d.resolve), Array.prototype.slice.call(arguments));
-					return d.promise;
-				};
+				serviceProxy[method] = function(methodName) {
+					return function() {
+						var d = new dojo.Deferred();
+						boundCallService(serviceType.id, methodName, dojo.hitch(d, d.resolve), Array.prototype.slice.call(arguments));
+						return d.promise;
+					};
+				}(method);
 			}
 		}
 		return serviceProxy;
