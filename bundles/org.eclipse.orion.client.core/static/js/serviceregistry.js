@@ -56,7 +56,7 @@ eclipse.Service = function(serviceId, implementation, internalRegistry) {
 					if (internalRegistry.isRegistered(serviceId)) {
 						var d = new dojo.Deferred();
 						try {
-							var result = implementation[methodName].apply(implementation, arguments || []);
+							var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
 							dojo.when(result, dojo.hitch(d, d.resolve));
 						} catch (e) {
 							d.reject(e);

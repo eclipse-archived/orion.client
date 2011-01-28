@@ -36,14 +36,6 @@ dojo.addOnLoad(function(){
 				pluginRegistry.installPlugin(plugin.pluginURL, plugin.pluginData);
 			});
 		}
-		serviceRegistry.registerService("IEditorSyntaxChecker", {checkSyntax : function(title, contents) {
-				var d = new dojo.Deferred();
-				pluginRegistry.callService("IEditorSyntaxChecker", "checkSyntax", dojo.hitch(d, d.resolve), [title, contents]);
-				return d.promise;
-			}
-		});
-		
-		
 
 		var inputService = new eclipse.InputService(serviceRegistry);
 		inputService.initializeContext({"manageDocumentTitle": true});	

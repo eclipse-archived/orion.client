@@ -116,7 +116,7 @@ eclipse.ServiceReference0.prototype = {
  * @class The registry manages the set of available plugins.
  */
 eclipse.PluginRegistry = function(serviceRegistry) {
-	this._serviceRegistry;
+	this._serviceRegistry = serviceRegistry;
 	this._currentId = 0;
 	this._msgCallbacks = {};
 	this._plugins = {};
@@ -257,7 +257,7 @@ eclipse.PluginRegistry.prototype = {
 			return null;
 		}
 	},
-	callService: function(serviceType, methodName, callback, params, instanceId) {
+	callService: function(serviceType, methodName, callback, params) {
 		var scope = this;
 		var serviceReference = this.getServiceReference(serviceType);
 		this.getService(serviceReference, function(service) {
@@ -417,13 +417,25 @@ eclipse.PluginRegistry.prototype = {
 	_loadServiceTypes: function(pluginURL, services) {
 		for (var i = 0; i < services.length; i++) {
 			var serviceType = services[i].serviceType;
-			if (typeof serviceType == "string" || serviceType instanceof String) {
-				this._serviceTypes[serviceType] = {id: serviceType, provider: pluginURL};
-			} else if (typeof serviceType == "object") {
-				serviceType.provider = pluginURL;
-				this._serviceTypes[serviceType.id] = serviceType;
-			}	
+			serviceType.provider = pluginURL;
+			this._serviceTypes[serviceType.id] = serviceType;
+			this._serviceRegistry.registerService(serviceType.id, this._createServiceProxy(serviceType));
 		}
+	},
+	_createServiceProxy: function(serviceType) {
+		var serviceProxy = {};
+		var boundCallService = dojo.hitch(this, this.callService);
+		if (serviceType.interfaces) {
+			for (var i = 0; i < serviceType.interfaces.length; i++) {
+				var method = serviceType.interfaces[i];
+				serviceProxy[method] = function() {
+					var d = new dojo.Deferred();
+					boundCallService(serviceType.id, method, dojo.hitch(d, d.resolve), Array.prototype.slice.call(arguments));
+					return d.promise;
+				};
+			}
+		}
+		return serviceProxy;
 	}
 };
 
