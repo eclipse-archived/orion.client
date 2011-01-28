@@ -50,16 +50,17 @@ dojo.declare("widgets.ImportDialog", [ dijit.Dialog ], {
 			activeClass : "uploadPress",
 			disabledClass : "uploadDisabled",
 			fileMask : ["Zip", "*.zip"],
+			uploadUrl : this.options.importLocation,
 			force : "html",
 			showProgress : true,
 			selectMultipleFiles : false,
 			progressWidgetId : this.importDialogProgressBar.id,
-			fileListId : this.importDialogFilesList.id
+			fileListId : this.importDialogFilesList.id,
+			destroy : function(){ /* workaround for error in FileUploader#destroy */ }
 		}, this.importDialogSelectButton.id);
 
 		dojo.connect(this.importButton, "onClick", dojo.hitch(this, function() {
-			h.uploadUrl = dojo.moduleUrl("dojox.form", this.options.importLocation);
-			h.submit(this.importDialogForm.id);
+			h.upload();
 		}));
 		
 		dojo.connect(h, "onError", dojo.hitch(this, function(dataArray) {
