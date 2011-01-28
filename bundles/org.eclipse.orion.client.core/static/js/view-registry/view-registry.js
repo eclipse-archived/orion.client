@@ -17,7 +17,8 @@ dojo.addOnLoad(function() {
 	// Hook up event handlers
 	var installUrlTextBox = dijit.byId("installUrlTextBox"),
 		installButton = dijit.byId("installButton"),
-		refreshButton = dijit.byId("refreshButton");
+		refreshButton = dijit.byId("refreshButton"),
+		clearButton = dijit.byId("clearButton");
 	
 	dojo.connect(installUrlTextBox, "onChange", function(evt) {
 		var url = installUrlTextBox.get("value");
@@ -29,6 +30,15 @@ dojo.addOnLoad(function() {
 			//old.destroyRecursive();
 			dijit.registry.remove("registry-tree");
 		}
+		initTree();
+	});
+	dojo.connect(clearButton, "onClick", function(evt) {
+		var old = dijit.byId("registry-tree");
+		if (old) {
+			//old.destroyRecursive();
+			dijit.registry.remove("registry-tree");
+		}
+		registry.clear();
 		initTree();
 	});
 	var installHandler = function(evt) {
