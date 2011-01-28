@@ -45,7 +45,7 @@ eclipse.util.getPositionInfo =
 		var hashSegments = fileString.split('#');
 		var postHash = hashSegments[hashSegments.length - 1];
 		var querySegments = postHash.split('?');
-		filePath = querySegments[0];
+		filePath = eclipse.util.makeRelative(querySegments[0]);
 		if (querySegments.length > 1) {
 			var segments = querySegments[1].split('&');
 			for (var i = 0; i < segments.length; i++) {

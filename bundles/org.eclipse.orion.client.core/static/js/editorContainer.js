@@ -129,10 +129,16 @@ eclipse.EditorContainer = (function() {
 			}
 			var title = this.getTitle();
 			if (dirty && !this._dirty) {
+				this._serviceRegistry.getService("IInputProvider").then(function(service) {
+					service.setDirty(true);
+				});
 				if (title && title.charAt(0) !== '*') {
 					this.setTitle('*'+title);
 				}
 			} else if (!dirty && this._dirty) {
+				this._serviceRegistry.getService("IInputProvider").then(function(service) {
+					service.setDirty(false);
+				});
 				if (title.charAt(0) === '*') {
 					this.setTitle(title.substring(1));
 				}

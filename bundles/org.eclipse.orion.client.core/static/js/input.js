@@ -9,8 +9,7 @@
  *******************************************************************************/
  
 "use strict";
- 
-dojo.require("dojo.hash");
+ dojo.require("dojo.hash");
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -39,20 +38,27 @@ eclipse.InputService.prototype = {
 	},
 	
 	_init : function() {
+		this.dirty = false;
 	   	if (this._subscribed)
 	   		return;
 	   	this._subscribed = true;
 	   	this._previousInput = dojo.hash();
 	   	var input = this;
-	   	// I'm beginning to think this is a bad idea, that we shouldn't be the ones monitoring hashes.
-	   	// See WorkItem 408
+	   	// I'm think this is a bad idea, that we shouldn't be the ones monitoring hashes.
+	   	// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=334195
 	   	dojo.subscribe("/dojo/hashchange", input, function() {
-	   	    // if we are restoring the hash to what we think it should be, ignore
-	   	    if (dojo.hash() === this._previousInput)
-	   	    	return;
-	   		this._previousInput = dojo.hash();
-	   		this._serviceRegistration.dispatchEvent("inputChanged", this._getInputSync());
-	   		this._triggeringEvent = null;
+			// if we are restoring the hash to what we think it should be, ignore
+			if (dojo.hash() === this._previousInput)
+				return;
+			if (this._okToChange(this._previousInput, dojo.hash())) {
+	   			this._previousInput = dojo.hash();
+	   			this._serviceRegistration.dispatchEvent("inputChanged", this._getInputSync());
+	   			this._triggeringEvent = null;
+	   		} else {
+	   			// restore hash, user rejected the change
+	   			dojo.hash(this._previousInput);
+	   		}
+	   	
 	   	});
 	},
 	
@@ -65,10 +71,27 @@ eclipse.InputService.prototype = {
 	},
 		
 	setInput : function(fileURI, event) {
-		if (fileURI !== dojo.hash() && this._okToChange()) {
+		if (fileURI !== dojo.hash() && this._okToChange(this._previousInput, fileURI)) {
 			this._triggeringEvent = event;
 			dojo.hash(fileURI);
 		}
+	},
+	
+	// Strip out all line number and char info so we don't prompt when simply navigating
+	// the file.  This is starting to get ridiculous.  See
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=334195
+	_okToChange : function(oldURI, newURI) {
+		if (this.dirty) {
+			var oldStripped = eclipse.util.getPositionInfo(oldURI).filePath;
+			var newStripped = eclipse.util.getPositionInfo(newURI).filePath;
+			if (oldStripped !== newStripped) 
+				return window.confirm("There are unsaved changes.  Do you still want to navigate away?");
+		}
+		return true;
+	},
+	
+	setDirty : function(isDirty) {
+		this.dirty = isDirty;
 	},
 
 	setTitle : function(title) {
