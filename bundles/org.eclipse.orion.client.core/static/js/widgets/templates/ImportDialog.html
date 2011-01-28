@@ -13,7 +13,21 @@
 				<div style="display: table-cell; padding: 5">
 					<label>File:</label>
 				</div>
-				<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
+				<div style="display: table-cell; padding: 5">
+					<div id="importDialogFilesList" style="border:1px solid #ccc; width: 20em; height: 2em"></div>
+				</div>
+				<div style="display: table-cell; padding: 5">
+					<div id="importDialogSelectButton" class="uploadBtn">Browse...</div>
+				</div>
+			</div>
+		
+			<div style="display: table-row">
+				<div style="display: table-cell; padding: 5">
+				</div>
+				<div style="display: table-cell; padding: 5">
+					<div indeterminate="false" id="importDialogProgressBar" class="progBar" dojoType="dijit.ProgressBar"></div>
+				</div>
+				<div style="display: table-cell; padding: 5">
 				</div>
 			</div>
 			
@@ -21,10 +35,9 @@
 				<div style="display: table-cell; padding: 5">
 				</div>
 				<div style="display: table-cell; padding: 5">
-					<div id="importDialogFilesList"></div>
-					<div id="importDialogSelectButton">Select File</div>
-					<div indeterminate="false" id="importDialogProgressBar" class="progBar" dojoType="dijit.ProgressBar"></div>
-					<button id="hSubmit" dojoType="dijit.form.Button" style="padding: 20 0 10 0; float: right; clear: both;">Submit</button>
+				</div>
+				<div style="display: table-cell; padding: 5">
+					<button id="hSubmit" dojoType="dijit.form.Button" style="padding: 20 0 10 0; float: right; clear: both;">Finish</button>
 				</div>
 			</div>
 		</div>
