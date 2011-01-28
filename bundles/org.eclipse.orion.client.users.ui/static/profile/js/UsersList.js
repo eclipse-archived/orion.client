@@ -28,21 +28,21 @@ eclipse.UsersList = (function() {
 				load : dojo.hitch(this, function(jsonData, secondArg) {
 
 					var table = dojo.create("table", {
-						class : "usersTable"
+						className : "usersTable"
 					});
 					var titleRow = dojo.doc.createElement("tr");
 
 					dojo.create("td", {
 						innerHTML : "Login",
-						class : "usersTable"
+						className : "usersTable"
 					}, titleRow);
 					dojo.create("td", {
 						innerHTML : "Name",
-						class : "usersTable"
+						className : "usersTable"
 					}, titleRow);
 					dojo.create("td", {
 						innerHTML : "Actions",
-						class : "usersTable"
+						className : "usersTable"
 					}, titleRow);
 
 					dojo.place(titleRow, table);
@@ -53,18 +53,18 @@ eclipse.UsersList = (function() {
 						dojo.create("td", {
 							innerHTML : this
 									.getUserTab(jsonData.users[i].login),
-							class : "usersTable"
+									className : "usersTable"
 						}, userRow);
 						dojo.create("td", {
 							innerHTML : jsonData.users[i].name,
-							class: "usersTable"
+							className: "usersTable"
 						}, userRow);
-						var actions = dojo.create("td", {class: "usersTable"});
+						var actions = dojo.create("td", {className: "usersTable"});
 						var deleteAction = dojo.create("img", {
 							src : "images/silk/cross.png",
 							alt : "Delete",
 							title : "Delete user " + jsonData.users[i].login,
-							class: "usersTable"
+							className: "usersTable"
 						}, actions);
 						dojo.connect(deleteAction, "onclick", dojo.hitch(this,
 								function(login) {
