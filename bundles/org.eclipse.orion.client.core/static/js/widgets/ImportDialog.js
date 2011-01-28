@@ -68,6 +68,7 @@ dojo.declare("widgets.ImportDialog", [ dijit.Dialog ], {
 		
 		dojo.connect(h, "onComplete", dojo.hitch(this, function(dataArray) {
 			this.hide();
+			this.options.func();
 		}));
 	},
 	onHide : function() {

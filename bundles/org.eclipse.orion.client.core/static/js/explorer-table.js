@@ -273,7 +273,8 @@ eclipse.Explorer = (function() {
 					hotImage : "images/silk/zip_import.gif",
 					callback : function(item) {
 						var dialog = new widgets.ImportDialog({
-							importLocation: item.ImportLocation
+							importLocation: item.ImportLocation,
+							func: dojo.hitch(this, function(){this.changedItem(item);})
 						});
 						dialog.startup();
 						dialog.show();
