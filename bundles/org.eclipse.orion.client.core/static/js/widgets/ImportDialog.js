@@ -30,6 +30,7 @@ dojo.declare("widgets.ImportDialog", [ dijit.Dialog ], {
 	postMixInProperties : function() {
 		this.inherited(arguments);
 		this.title = "Import from zip";
+		this.buttonCancel = "Cancel";
 	},
 	postCreate : function() {
 		this.inherited(arguments);
@@ -51,17 +52,23 @@ dojo.declare("widgets.ImportDialog", [ dijit.Dialog ], {
 			fileMask : ["Zip", "*.zip"],
 			force : "html",
 			showProgress : true,
-			progressWidgetId : "importDialogProgressBar",
 			selectMultipleFiles : false,
-			fileListId : "importDialogFilesList"
-		}, "importDialogSelectButton");
+			progressWidgetId : this.importDialogProgressBar.id,
+			fileListId : this.importDialogFilesList.id
+		}, this.importDialogSelectButton.id);
 
-		dojo.connect(dijit.byId("hSubmit"), "onClick", dojo.hitch(this, function() {
+		dojo.connect(this.importButton, "onClick", dojo.hitch(this, function() {
 			h.uploadUrl = dojo.moduleUrl("dojox.form", this.options.importLocation);
-			h.submit(dojo.byId("importDialogForm"));
+			h.submit(this.importDialogForm.id);
 		}));
-		dojo.connect(h, "onComplete", function(dataArray) {
-		});
+		
+		dojo.connect(h, "onError", dojo.hitch(this, function(dataArray) {
+			this.hide();
+		}));
+		
+		dojo.connect(h, "onComplete", dojo.hitch(this, function(dataArray) {
+			this.hide();
+		}));
 	},
 	onHide : function() {
 		// This assumes we don't reuse the dialog
