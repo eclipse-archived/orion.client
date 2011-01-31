@@ -135,6 +135,6 @@ eclipse.Plugin.prototype = {
 			serviceType: serviceType,
 			serviceId: serviceId
 		};
-		this._hubClient.publish("org.eclipse.e4.plugin.PluginResponse", {type: "event", result: event, error: null});
+		this._hubClient.publish("orion.plugin.response", {type: "event", result: event, error: null});
 	}
 };
