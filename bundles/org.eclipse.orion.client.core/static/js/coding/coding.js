@@ -142,11 +142,11 @@ dojo.addOnLoad(function(){
 	//          if the return value is an object, its "text" attribute (required) will be used to replace the contents of the editor,
 	//                                            and its "selection" attribute (optional) will be used to set the new selection.
 	// These actions will be migrated to commands in the future, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=334189
-	serviceRegistry.registerService("editorAction", {
-	 info: function() {return {name:"Comment"};},
-	 run: function(selectedText, text, selection) { return {text: text.substring(0,selection.start) + "/*" + text.substring(selection.start,selection.end) + "*/" + text.substring(selection.end),
-	 selection: {start:selection.start,end:selection.end+4}}; }
-	});
+//	serviceRegistry.registerService("editorAction", {
+//	 info: function() {return {name:"Comment"};},
+//	 run: function(selectedText, text, selection) { return {text: text.substring(0,selection.start) + "/*" + text.substring(selection.start,selection.end) + "*/" + text.substring(selection.end),
+//	 selection: {start:selection.start,end:selection.end+4}}; }
+//	});
 
 	// Add the plugin actions to the toolbar. This code is not real - it doesn't handle errors at all, for example.
 	// Note that this is not in any shape or form that could be considered final.
