@@ -25,7 +25,7 @@ eclipse.JSLintServiceProvider.prototype = eclipse.ServiceProvider.extend({
 	}
 });
 
-document.addEventListener("DOMContentLoaded", function() {
+window.onload = function() {
 	var pluginData = {
 		services : [{
 			id : "JSLintEditorSyntaxChecker", 
@@ -39,4 +39,4 @@ document.addEventListener("DOMContentLoaded", function() {
 	var serviceProvider = new eclipse.JSLintServiceProvider();
 	var jslintPlugin = new eclipse.Plugin(pluginData, serviceProvider);
 	jslintPlugin.start();
-}, false);
+};
