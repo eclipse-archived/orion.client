@@ -301,8 +301,8 @@ eclipse.EditorContainer = (function() {
 					this._serviceRegistry.getService("IStatusReporter").then(function(service) {
 						service.setMessage("Incremental find: " + prefix);
 					});
-					var ignoreCase = prefix.toLowerCase() === prefix;
-					var result = this.doFind(prefix, this._editor.getSelection().start, ignoreCase);
+					var flags = prefix.toLowerCase() === prefix ? "i" : "";
+					var result = this.doFind(dojo.regexp.escapeString(prefix), flags, this._editor.getSelection().start);
 					if (result) {
 						this._incrementalFindSuccess = true;
 						this._incrementalFindIgnoreSelection = true;
@@ -407,48 +407,9 @@ eclipse.EditorContainer = (function() {
 			a.play();
 		},
 		
-		/**
-		 * Helper for finding occurrences of str in the editor.
-		 * @param str {String}
-		 * @param startIndex {number}
-		 * @param [ignoreCase] {boolean} Default is false
-		 * @param [reverse] {boolean} Default is false
-		 * @return {index: number, length: number} giving the match details, or null if no match found.
-		 */
-		doFind: function(str, startIndex, ignoreCase, reverse) {
-			var text = this._editor.getText();
-			if (ignoreCase) {
-				str = str.toLowerCase();
-				text = text.toLowerCase();
-			}
-			
-			var i;
-			if (reverse) {
-				text = text.split("").reverse().join("");
-				str = str.split("").reverse().join("");
-				startIndex = text.length - startIndex - 1;
-				i = text.indexOf(str, startIndex);
-				if (i !== -1) {
-					return {index: text.length - str.length - i, length: str.length};
-				}
-			} else {
-				i = text.indexOf(str, startIndex);
-				if (i !== -1) {
-					return {index: i, length: str.length};
-				}
-			}
-			return null;
-		},
-		
-		/**
-		 * Helper for finding regexp matches. Use doFind() for simple string searches.
-		 * @param pattern {String} A valid regexp pattern
-		 * @param flags {String} Valid regexp flags: [gis]
-		 * @param [startIndex] {number} Default is false
-		 * @param [reverse] {boolean} Default is false
-		 * @return {index: number, length: number} giving the match details, or null if no match found.
-		 */
-		doFindRegExp: function(pattern, flags, startIndex, reverse) {
+		// Helper function for find
+		// @return { index: number, length: number } or null
+		doFind: function(pattern/*regex-escaped string*/, flags, startIndex, reverse/*boolean*/) {
 			if (!pattern) {
 				return null;
 			}
@@ -488,17 +449,6 @@ eclipse.EditorContainer = (function() {
 			}
 			return match;
 		},
-		/**
-		 * @param {String} Input string
-		 * @return {pattern: String, flags:String} if str looks like a RegExp, or null otherwise
-		 */
-		parseRegExp: function(str) {
-			var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
-			if (regexp) {
-				return {pattern: regexp[1], flags: regexp[2]};
-			}
-			return null;
-		},
 		installEditor : function(fileURI) {
 			var registry = this._serviceRegistry;
 			
@@ -529,11 +479,10 @@ eclipse.EditorContainer = (function() {
 			});
 			
 			// Find actions
-			// These variables are used among the various find actions:
-			var searchString = "",
-			    pattern,
-			    flags;
 			editor.setKeyBinding(new KeyBinding("f", true), "find");
+			var searchString = "";
+			var searchPattern;
+			var flags;
 			editor.setAction("find", function() {
 				setTimeout(function() {
 					var selection = editor.getSelection();
@@ -547,20 +496,18 @@ eclipse.EditorContainer = (function() {
 						return;
 					}
 					
-					var ignoreCase = searchString.toLowerCase() === searchString,
-					    regexp = editorContainer.parseRegExp(searchString),
-					    result;
+					var caseInsensitive = searchString.toLowerCase() === searchString;
+					var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(searchString);
 					if (regexp) {
-						pattern = regexp.pattern,
-						flags = regexp.flags;
-						flags = flags + (ignoreCase && flags.indexOf("i") === -1 ? "i" : "");
-						result = editorContainer.doFindRegExp(pattern, flags, editor.getCaretOffset());
+						searchPattern = regexp[1];
+						flags = regexp[2] || "";
+						flags = flags + (caseInsensitive && flags.indexOf("i") === -1 ? "i" : "");
 					} else {
-						pattern = null;
-						flags = null;
-						result = editorContainer.doFind(searchString, editor.getCaretOffset(), ignoreCase);
+						searchPattern = dojo.regexp.escapeString(searchString);
+						flags = caseInsensitive ? "i" : "";
 					}
 					
+					var result = editorContainer.doFind(searchPattern, flags, editor.getCaretOffset());
 					if (result) {
 						editorContainer.moveSelection(editor, result.index, result.index+result.length);
 					} else {
@@ -572,17 +519,13 @@ eclipse.EditorContainer = (function() {
 			});
 			editor.setKeyBinding(new KeyBinding("k", true), "find next");
 			editor.setAction("find next", function() {
-				var result, ignoreCase;
+				var result;
 				if (editorContainer._incrementalFindMode) {
-					var str = editorContainer._incrementalFindPrefix;
-					ignoreCase = str.toLowerCase() === str;
-					result = editorContainer.doFind(str, editor.getCaretOffset(), ignoreCase);
-				} else if (pattern) {
-					// RegExp search
-					result = editorContainer.doFindRegExp(pattern, flags, editor.getCaretOffset());
+					var incrFlags = editorContainer._incrementalFindPrefix.toLowerCase() === editorContainer._incrementalFindPrefix ? "i" : "";
+					var pattern = dojo.regexp.escapeString(editorContainer._incrementalFindPrefix);
+					result = editorContainer.doFind(pattern, incrFlags, editor.getCaretOffset());
 				} else {
-					ignoreCase = searchString.toLowerCase() === searchString;
-					result = editorContainer.doFind(searchString, editor.getCaretOffset(), ignoreCase);
+					result = editorContainer.doFind(searchPattern, flags, editor.getCaretOffset());
 				}
 				
 				if (result) {
@@ -599,17 +542,13 @@ eclipse.EditorContainer = (function() {
 			editor.setAction("find previous", function() {
 				var selection = editor.getSelection();
 				var selectionSize = (selection.end > selection.start) ? selection.end - selection.start : 0;
-				var result, ignoreCase;
+				var result;
 				if (editorContainer._incrementalFindMode) {
-					var str = editorContainer._incrementalFindPrefix;
-					var ignoreCase = str.toLowerCase() === str;
-					result = editorContainer.doFind(str, editor.getCaretOffset() - selectionSize - 1, ignoreCase, true);
-				} else if (pattern) {
-					// RegExp search
-					result = editorContainer.doFindRegExp(pattern, flags, editor.getCaretOffset() - selectionSize - 1, true);
+					var incrFlags = editorContainer._incrementalFindPrefix.toLowerCase() === editorContainer._incrementalFindPrefix ? "i" : "";
+					var pattern = dojo.regexp.escapeString(editorContainer._incrementalFindPrefix);
+					result = editorContainer.doFind(pattern, incrFlags, editor.getCaretOffset() - selectionSize - 1, true);
 				} else {
-					ignoreCase = searchString.toLowerCase() === searchString;
-					result = editorContainer.doFind(searchString, editor.getCaretOffset() - selectionSize - 1, ignoreCase, true);
+					result = editorContainer.doFind(searchPattern, flags, editor.getCaretOffset() - selectionSize - 1, true);
 				}
 				
 				if (result) {
@@ -639,7 +578,7 @@ eclipse.EditorContainer = (function() {
 					}
 					
 					var caseInsensitive = p.toLowerCase() === p;
-					var result = editorContainer.doFind(p, start, caseInsensitive);
+					var result = editorContainer.doFind(dojo.regexp.escapeString(p), caseInsensitive ? "i" : "", start);
 					if (result) {
 						editorContainer._incrementalFindSuccess = true;
 						editorContainer._incrementalFindIgnoreSelection = true;
