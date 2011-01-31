@@ -67,6 +67,7 @@ dojo.declare("profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 			},
 			handleAs : "text",
 			timeout : 15000,
+			load: this.func,
 			error : function(response, ioArgs) {
 				if (ioArgs.xhr.responseText) {
 
@@ -83,6 +84,5 @@ dojo.declare("profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 				}
 			}
 		});
-		this.func();
 	}
 });
