@@ -267,6 +267,20 @@ eclipse.PluginRegistry.prototype = {
 			});
 		});
 	},
+	callService2: function(serviceType, methodName, callback, params) {
+		var scope = this;
+		var plugin = this.getPlugin(serviceType.provider);
+		if (plugin._serviceReferences === undefined) {
+			plugin._serviceReferences = {};
+		}
+		var serviceReference = new eclipse.ServiceReference0(serviceType, plugin, this);
+		this.getService(serviceReference, function(service) {
+			service.invoke(methodName, params, function(data) {
+				callback(data);
+				//scope.ungetService(serviceReference);
+			});
+		});
+	},
 
 	getServiceReference: function(serviceTypeId) {
 		if (this._serviceTypes[serviceTypeId] === undefined) {
@@ -424,14 +438,14 @@ eclipse.PluginRegistry.prototype = {
 	},
 	_createServiceProxy: function(serviceType) {
 		var serviceProxy = {};
-		var boundCallService = dojo.hitch(this, this.callService);
+		var boundCallService = dojo.hitch(this, this.callService2);
 		if (serviceType.interfaces) {
 			for (var i = 0; i < serviceType.interfaces.length; i++) {
 				var method = serviceType.interfaces[i];
 				serviceProxy[method] = function(methodName) {
 					return function() {
 						var d = new dojo.Deferred();
-						boundCallService(serviceType.id, methodName, dojo.hitch(d, d.resolve), Array.prototype.slice.call(arguments));
+						boundCallService(serviceType, methodName, dojo.hitch(d, d.resolve), Array.prototype.slice.call(arguments));
 						return d.promise;
 					};
 				}(method);
