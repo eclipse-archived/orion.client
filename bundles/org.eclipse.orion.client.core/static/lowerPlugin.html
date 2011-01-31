@@ -6,18 +6,18 @@
 	<script type="text/javascript" src="js/plugin.js"></script>
 	<script type="text/javascript">
 	(function(){
-		function UpperProvider() {}
+		function LowerProvider() {}
 		
-		UpperProvider.prototype = window.eclipse.ServiceProvider.extend({
+		LowerProvider.prototype = window.eclipse.ServiceProvider.extend({
 			info : function() {
 				return {
-					name : "Uppercase",
+					name : "Lowercase",
 					img : "/favicon.ico",
-					key : [ "u", true ] // ctrl+u
+					key : [ "u", true, true ] // ctrl+shift+u
 				};
 			},
 			run : function(text) {
-				return text.toUpperCase();
+				return text.toLowerCase();
 			}
 		});
 		
@@ -25,7 +25,7 @@
 		window.onload = function() {
 			var pluginData = {
 				services : [{
-					id : "UpperCaseEditorAction", 
+					id : "LowerCaseEditorAction", 
 					serviceType : {
 						id: "editorAction", 
 						interfaces : ["info","run"]
@@ -33,9 +33,9 @@
 					properties: {}
 				}]
 			};
-			var serviceProvider = new UpperProvider();
-			var upperPlugin = new window.eclipse.Plugin(pluginData, serviceProvider);
-			upperPlugin.start();
+			var serviceProvider = new LowerProvider();
+			var lowerPlugin = new window.eclipse.Plugin(pluginData, serviceProvider);
+			lowerPlugin.start();
 		};
 	}());
 	</script>
