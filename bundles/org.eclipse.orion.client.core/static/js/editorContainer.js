@@ -441,9 +441,9 @@ eclipse.EditorContainer = (function() {
 		},
 		
 		/**
-		 * Helper for finding regexp matches. Use doFind() for simple string searches.
+		 * Helper for finding regexp matches in the editor. Use doFind() for simple string searches.
 		 * @param pattern {String} A valid regexp pattern
-		 * @param flags {String} Valid regexp flags: [gis]
+		 * @param flags {String} Valid regexp flags: [is]
 		 * @param [startIndex] {number} Default is false
 		 * @param [reverse] {boolean} Default is false
 		 * @return {index: number, length: number} giving the match details, or null if no match found.
@@ -453,9 +453,9 @@ eclipse.EditorContainer = (function() {
 				return null;
 			}
 			
-			// Global search required for exec() to iterate all matches
 			flags = flags || "";
-			flags = flags + (flags.indexOf("g") === -1 ? "g" : "");
+			// 'g' makes exec() iterate all matches, 'm' makes ^$ work linewise
+			flags += (flags.indexOf("g") === -1 ? "g" : "") + (flags.indexOf("m") === -1 ? "m" : "");
 			var regexp = new RegExp(pattern, flags);
 			var text = this._editor.getText();
 			var result = null,
@@ -477,7 +477,7 @@ eclipse.EditorContainer = (function() {
 		
 		/**
 		 * @param {String} Input string
-		 * @return {pattern: String, flags: String} if str looks like a RegExp, or null otherwise
+		 * @return {pattern:String, flags:String} if str looks like a RegExp, or null otherwise
 		 */
 		parseRegExp: function(str) {
 			var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
