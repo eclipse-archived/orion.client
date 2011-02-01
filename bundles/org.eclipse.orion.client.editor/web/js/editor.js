@@ -1636,7 +1636,13 @@ eclipse.Editor = (function() {
 			}
 			
 			if (this._doAction(e)) {
-				if (e.preventDefault) { e.preventDefault(); }
+				if (e.preventDefault) {
+					e.preventDefault(); 
+				} else {
+					e.cancelBubble = true;
+					e.returnValue = false;
+					e.keyCode = 0;
+				}
 				return false;
 			}
 		},
