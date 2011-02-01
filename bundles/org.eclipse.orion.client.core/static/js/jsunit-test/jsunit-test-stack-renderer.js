@@ -41,7 +41,7 @@ eclipse.TestStackRenderer = (function() {
 							var anchorPart = parts2[1]+parts2[2]+parts1[1]+parts3[0]+":"+parts3[1];
 							var others = stack.split(anchorPart);
 							if(others.length === 2){
-								var href = "/coding.html#file=" + parts2[1]+parts2[2]+parts1[1] + "&line=" +parts3[1];
+								var href = "/coding.html#" + parts2[1]+parts2[2]+parts1[1] + "?line=" +parts3[1];
 								var linkPart = dojo.create("span");
 								var link = dojo.create("a", {href: href, target: "_blank"});
 								dojo.place(link, linkPart, "last");
