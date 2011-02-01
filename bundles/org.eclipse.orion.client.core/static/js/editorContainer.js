@@ -458,39 +458,26 @@ eclipse.EditorContainer = (function() {
 			flags = flags + (flags.indexOf("g") === -1 ? "g" : "");
 			var regexp = new RegExp(pattern, flags);
 			var text = this._editor.getText();
-			var matches = [];
-			while (true) {
-				var result = regexp.exec(text);
-				if (result) {
-					matches.push({ index: result.index, length: result[0].length });
-				} else {
-					break;
-				}
-			}
-			
-			var index, match = null, i;
+			var result = null,
+			    match = null;
 			if (reverse) {
-				for (i=matches.length-1; i >=0; i--) {
-					match = matches[i];
-					if (match.index <= startIndex) {
-						index = match.index;
-						break;
+				while (true) {
+					result = regexp.exec(text);
+					if (result && result.index <= startIndex) {
+						match = {index: result.index, length: result[0].length};
+					} else {
+						return match;
 					}
 				}
 			} else {
-				for (i=0; i < matches.length; i++) {
-					match = matches[i];
-					if (match.index >= startIndex) {
-						index = match.index;
-						break;
-					}
-				}
+				result = regexp.exec(text.substring(startIndex));
+				return result && {index: result.index + startIndex, length: result[0].length};
 			}
-			return match;
 		},
+		
 		/**
 		 * @param {String} Input string
-		 * @return {pattern: String, flags:String} if str looks like a RegExp, or null otherwise
+		 * @return {pattern: String, flags: String} if str looks like a RegExp, or null otherwise
 		 */
 		parseRegExp: function(str) {
 			var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
@@ -499,6 +486,7 @@ eclipse.EditorContainer = (function() {
 			}
 			return null;
 		},
+		
 		installEditor : function(fileURI) {
 			var registry = this._serviceRegistry;
 			
@@ -551,7 +539,7 @@ eclipse.EditorContainer = (function() {
 					    regexp = editorContainer.parseRegExp(searchString),
 					    result;
 					if (regexp) {
-						pattern = regexp.pattern,
+						pattern = regexp.pattern;
 						flags = regexp.flags;
 						flags = flags + (ignoreCase && flags.indexOf("i") === -1 ? "i" : "");
 						result = editorContainer.doFindRegExp(pattern, flags, editor.getCaretOffset());
@@ -602,7 +590,7 @@ eclipse.EditorContainer = (function() {
 				var result, ignoreCase;
 				if (editorContainer._incrementalFindMode) {
 					var str = editorContainer._incrementalFindPrefix;
-					var ignoreCase = str.toLowerCase() === str;
+					ignoreCase = str.toLowerCase() === str;
 					result = editorContainer.doFind(str, editor.getCaretOffset() - selectionSize - 1, ignoreCase, true);
 				} else if (pattern) {
 					// RegExp search
