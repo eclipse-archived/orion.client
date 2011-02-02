@@ -2640,6 +2640,10 @@ eclipse.Editor = (function() {
 							range.moveEnd("character", offset - lineOffset + 1);
 							range.moveStart("character", offset - lineOffset);
 							result = range.getBoundingClientRect();
+							var logicalXDPI = window.screen.logicalXDPI;
+							var deviceXDPI = window.screen.deviceXDPI;
+							result.left = result.left * logicalXDPI / deviceXDPI;
+							result.right = result.right * logicalXDPI / deviceXDPI;
 							break;
 						}
 						lineOffset += node.length;
@@ -3073,6 +3077,8 @@ eclipse.Editor = (function() {
 			}
 			var offset = model.getLineStart(lineIndex);
 			var lineChild = child.firstChild;
+			var logicalXDPI = window.screen.logicalXDPI;
+			var deviceXDPI = window.screen.deviceXDPI;
 			done:
 			while (lineChild) {
 				if (!lineChild.ignoreChars) {
@@ -3094,7 +3100,9 @@ eclipse.Editor = (function() {
 								var found = false;
 								for (var k = 0; k < rects.length; k++) {
 									rect = rects[k];
-									if ((rect.left - deltaX) <= x && x < (rect.right - deltaX)) {
+									var rangeLeft = rect.left * logicalXDPI / deviceXDPI - deltaX;
+									var rangeRight = rect.right * logicalXDPI / deviceXDPI - deltaX;
+									if (rangeLeft <= x && x < rangeRight) {
 										found = true;
 										break;
 									}
