@@ -165,8 +165,13 @@ eclipse.ExplorerTree = (function() {
 			if (path === this._lastHash) {
 				return;
 			}
+			
+			//TODO we need a reliable way to infer search from the path
+			var isSearch = path.indexOf("search?") > 0;
+			
 			this._lastHash = path;
-			dojo.hash(path, true);
+			dojo.hash(path, !isSearch);
+			
 			var container = dojo.byId(this.parentId);
 			// Progress indicator
 			var progress = document.createElement('div');
@@ -182,8 +187,6 @@ eclipse.ExplorerTree = (function() {
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
 			
-			//TODO we need a reliable way to infer search from the path
-			var isSearch = path.indexOf("search?") > 0;
 			if (isSearch) {
 				var results = document.createElement('div');
 				results.id = "myTree";

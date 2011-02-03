@@ -111,9 +111,13 @@ eclipse.Explorer = (function() {
 			if (path === this._lastHash) {
 				return;
 			}
+			
+			//TODO we need a reliable way to infer search from the path
+			var isSearch = path.indexOf("search?") > 0;
+			
 			this._lastHash = path;
-			dojo.hash(path, true);
-		
+			dojo.hash(path, !isSearch);
+			
 			// Progress indicator
 			var progress = dojo.create("div", {id: "innerTree"});
 			    b = dojo.create("b");
@@ -126,8 +130,6 @@ eclipse.Explorer = (function() {
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
 	
-			//TODO we need a reliable way to infer search from the path
-			var isSearch = path.indexOf("search?") > 0;
 			if (isSearch) {
 				var results = document.createElement('div');
 				// TODO this must be the same id as the table or else the search won't get deleted
