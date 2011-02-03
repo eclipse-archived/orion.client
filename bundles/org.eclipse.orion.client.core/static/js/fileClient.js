@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2010, 2011 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -19,11 +19,13 @@ eclipse.FileService = (function() {
 	 * @class Provides operations on files, folders, and projects.
 	 * @name eclipse.FileService
 	 */
+
 	function FileService(serviceRegistry) {
 		this._serviceRegistry = serviceRegistry;
 		this._serviceRegistration = serviceRegistry.registerService("IFileService", this);
 	}
-	FileService.prototype = /**@lends eclipse.FileService.prototype */{
+	FileService.prototype = /**@lends eclipse.FileService.prototype */
+	{
 		/**
 		 * @param parentItem
 		 * @param {Function(Object, Array} updateFunction First param is parentItem, second is children
@@ -31,36 +33,36 @@ eclipse.FileService = (function() {
 		getChildren: function(parentItem, updateFunction) {
 			// console.log("get children");
 			dojo.xhrGet({
-					url: parentItem.ChildrenLocation,
-					headers: {
-						"Orion-Version" : "1"
-					},
-					handleAs: "json",
-					timeout: 15000,
-					load: function(jsonData, ioArgs) {
-						eclipse.util.processNavigatorParent(parentItem, jsonData);
-						updateFunction(parentItem, parentItem.children);
-					},
-					error: function(response, ioArgs) {
-						console.error("HTTP status code: ", ioArgs.xhr.status);
-						handleGetAuthenticationError(this, ioArgs);
-						return response;
-					}
+				url: parentItem.ChildrenLocation,
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, ioArgs) {
+					eclipse.util.processNavigatorParent(parentItem, jsonData);
+					updateFunction(parentItem, parentItem.children);
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
 			});
 		},
-		
+
 		/**
 		 * Creates a new workspace with the given name. The resulting workspace is
 		 * passed as a parameter to the provided onCreate function.
 		 * @param {String} name The name of the new workspace
 		 *@param {Function} onCreate The function to invoke after the workspace is created
-		 */	
+		 */
 		createWorkspace: function(name, onCreate) {
 			dojo.xhrPost({
 				url: "/workspace",
 				headers: {
-					"Orion-Version" : "1",
-					"Slug" : name
+					"Orion-Version": "1",
+					"Slug": name
 				},
 				handleAs: "json",
 				timeout: 15000,
@@ -75,7 +77,7 @@ eclipse.FileService = (function() {
 				}
 			});
 		},
-		
+
 		/**
 		 * Loads the workspace with the given id and sets it to be the current
 		 * workspace for the IDE. The workspace is created if none already exists.
@@ -87,7 +89,7 @@ eclipse.FileService = (function() {
 			dojo.xhrGet({
 				url: location ? location : "/workspace",
 				headers: {
-					"Orion-Version" : "1"
+					"Orion-Version": "1"
 				},
 				handleAs: "json",
 				timeout: 15000,
@@ -122,11 +124,13 @@ eclipse.FileService = (function() {
 				console.error("url is undefined, make sure you're signed in before creating a project");
 				return;
 			}
-			var data = {Name: projectName};
+			var data = {
+				Name: projectName
+			};
 			if (serverPath) {
 				data.ContentLocation = serverPath;
 			}
-			if(create){
+			if (create) {
 				data.CreateIfDoesntExist = create;
 			}
 			dojo.xhrPost({
@@ -150,7 +154,9 @@ eclipse.FileService = (function() {
 			});
 		},
 		removeProject: function(workspace, project, callback) {
-			var data = {ProjectURL: project.Location};
+			var data = {
+				ProjectURL: project.Location
+			};
 			data.Remove = true;
 			dojo.xhrPost({
 				url: workspace.Location,
@@ -185,9 +191,11 @@ eclipse.FileService = (function() {
 					"Slug": folderName,
 					"Content-Type": "application/json"
 				},
-				postData: dojo.toJson({"Name": folderName,
-					"LocalTimeStamp" : "0",
-					"Directory" : "true"}),
+				postData: dojo.toJson({
+					"Name": folderName,
+					"LocalTimeStamp": "0",
+					"Directory": "true"
+				}),
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
@@ -210,26 +218,28 @@ eclipse.FileService = (function() {
 		createFile: function(fileName, item, updateFunction) {
 			dojo.xhrPost({
 				url: (item.Location),
-					headers: {
-						"Orion-Version": "1",
-						"Slug": fileName,
-						"Content-Type": "application/json"
-					},
-					postData: dojo.toJson({"Name" : fileName,
-						"LocalTimeStamp" : "0",
-						"Directory" : "false"}),
-					handleAs: "json",
-					timeout: 15000,
-					load: function(jsonData, ioArgs) {
-						updateFunction(item);
-						return jsonData;
-					},
-					error: function(response, ioArgs) {
-						console.error("HTTP status code: ", ioArgs.xhr.status);
-						handlePostAuthenticationError(this, ioArgs);
-						return response;
-					}
-				});
+				headers: {
+					"Orion-Version": "1",
+					"Slug": fileName,
+					"Content-Type": "application/json"
+				},
+				postData: dojo.toJson({
+					"Name": fileName,
+					"LocalTimeStamp": "0",
+					"Directory": "false"
+				}),
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, ioArgs) {
+					updateFunction(item);
+					return jsonData;
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handlePostAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
 		},
 		/**
 		 * 
