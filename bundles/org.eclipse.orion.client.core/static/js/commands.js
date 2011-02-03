@@ -193,7 +193,7 @@ eclipse.Command = (function() {
 			image.id = name;
 			if (this._callback) {
 				dojo.connect(image, "onclick", this, function() {
-					this._callback.call(handler, items);
+					this._callback.call(handler, items, image.id);
 				});
 			}
 			if (this._deviceSupportsHover) {
