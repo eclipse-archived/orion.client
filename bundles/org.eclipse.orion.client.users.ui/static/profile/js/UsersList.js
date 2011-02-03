@@ -16,16 +16,12 @@ eclipse.UsersList = (function() {
 	UsersList.prototype = {
 		_init : function(options) {
 			this.parent = options.parent;
+			this.registry = options.registry;
 		},
 		loadUsers : function() {
-			dojo.xhrGet({
-				url : "/users",
-				headers : {
-					"EclipseWeb-Version" : "1"
-				},
-				handleAs : "json",
-				timeout : 15000,
-				load : dojo.hitch(this, function(jsonData, secondArg) {
+			var userList = this;
+			this.registry.getService("IUsersService").then(function(service) {
+			  service.getUsersList(dojo.hitch(userList, function(jsonData, secondArg) {
 
 					var table = dojo.create("table", {
 						className : "usersTable"
@@ -68,18 +64,15 @@ eclipse.UsersList = (function() {
 						}, actions);
 						dojo.connect(deleteAction, "onclick", dojo.hitch(this,
 								function(login) {
-									this.deleteUser(login)
+									this.deleteUser(login);
 								}, jsonData.users[i].login));
 						dojo.place(actions, userRow);
 						dojo.place(userRow, table);
 					}
 
-				}),
-				error : function(error, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-				}
+				}));
 			});
+			
 
 		},
 		getUserTab : function(userName) {
@@ -92,23 +85,14 @@ eclipse.UsersList = (function() {
 		},
 		deleteUser : function(userName) {
 			if (confirm("Do you want to delete user " + userName + "?")) {
-				dojo.xhrDelete({
-					url : "/users/" + userName,
-					headers : {
-						"EclipseWeb-Version" : "1"
-					},
-					handleAs : "json",
-					timeout : 15000,
-					load : dojo.hitch(this, function(jsonData, secondArg) {
-						this.reloadUsers();
-					}),
-					error : function(error, ioArgs) {
-						handleGetAuthenticationError(this, ioArgs);
-						console.error("HTTP status code: ", ioArgs.xhr.status);
-					}
+				var userList = this;
+				this.registry.getService("IUsersService").then(function(service) {
+				  service.deleteUser("/users/" + userName, dojo.hitch(userList, function(jsonData, secondArg) {
+					  this.reloadUsers();
+				  }));
 				});
 			}
 		}
-	}
+	};
 	return UsersList;
 }());

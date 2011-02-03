@@ -25,6 +25,7 @@ dojo.declare("profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 		this.inherited(arguments);
 		this.func = arguments[0] || function() {
 		};
+		this.registry = arguments[1];
 	},
 	onHide : function() {
 		// This assumes we don't reuse the dialog
@@ -55,34 +56,26 @@ dojo.declare("profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 			alert("Passwords don't match!");
 			return;
 		}
+		
+		var dialog = this;
+		
+		this.registry.getService("IUsersService").then(function(service) {
+			  service.createUser(dialog.userName.value, dialog.password.value, dialog.func, function(response, ioArgs) {
+					if (ioArgs.xhr.responseText) {
 
-		dojo.xhrPost({
-			url : "/users",
-			headers : {
-				"Orion-Version" : "1"
-			},
-			content : {
-				login : this.userName.value,
-				password : this.password.value
-			},
-			handleAs : "text",
-			timeout : 15000,
-			load: this.func,
-			error : function(response, ioArgs) {
-				if (ioArgs.xhr.responseText) {
-
-					var tempDiv = document.createElement('div');
-					tempDiv.innerHTML = ioArgs.xhr.responseText;
-					tempDiv.childNodes;
-					var error = tempDiv.getElementsByTagName("title")[0];
-					if (error)
-						alert(error.text);
-					else
+						var tempDiv = document.createElement('div');
+						tempDiv.innerHTML = ioArgs.xhr.responseText;
+						tempDiv.childNodes;
+						var error = tempDiv.getElementsByTagName("title")[0];
+						if (error)
+							alert(error.text);
+						else
+							alert("User could not be created.");
+					} else {
 						alert("User could not be created.");
-				} else {
-					alert("User could not be created.");
-				}
-			}
+					}
+				});
 		});
+		
 	}
 });

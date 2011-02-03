@@ -7,6 +7,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 dojo.addOnLoad(function() {
+
+	var serviceRegistry = new eclipse.ServiceRegistry();
+	var usersService = new eclipse.UsersService(serviceRegistry);
+
 	/* set the login information in toolbar */
 	dojo.xhrGet({
 		url : "/auth2",
@@ -18,7 +22,8 @@ dojo.addOnLoad(function() {
 	});
 
 	var usersList = new eclipse.UsersList({
-		parent : "usersList"
+		parent : "usersList",
+		registry : serviceRegistry
 	});
 	usersList.loadUsers();
 
@@ -26,7 +31,8 @@ dojo.addOnLoad(function() {
 		var dialog = new profile.widgets.NewUserDialog({
 			func : dojo.hitch(usersList, function() {
 				this.reloadUsers();
-			})
+			}),
+			registry : serviceRegistry
 		});
 		dialog.startup();
 		dialog.show();
