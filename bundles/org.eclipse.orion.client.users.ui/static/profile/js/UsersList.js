@@ -46,6 +46,8 @@ eclipse.UsersList = (function() {
 
 					for ( var i in jsonData.users) {
 						var userRow = dojo.doc.createElement("tr");
+						dojo.connect(userRow, "onmouseover", dojo.hitch(this, function(i){document.getElementById("usersActions"+i).style.visibility="";}, i));
+						dojo.connect(userRow, "onmouseout", dojo.hitch(this, function(i){document.getElementById("usersActions"+i).style.visibility="hidden";}, i));
 						dojo.create("td", {
 							innerHTML : this
 									.getUserTab(jsonData.users[i].login),
@@ -53,20 +55,24 @@ eclipse.UsersList = (function() {
 						}, userRow);
 						dojo.create("td", {
 							innerHTML : jsonData.users[i].name,
-							className: "usersTable"
+							className: "usersTable secondaryColumn"
 						}, userRow);
-						var actions = dojo.create("td", {className: "usersTable"});
+						var actionsTd = dojo.create("td", {className: "usersTable secondaryColumn"});
+						var actions = dojo.create("span",{id: "usersActions"+i, style: "visibility: hidden"}, actionsTd);
 						var deleteAction = dojo.create("img", {
-							src : "images/silk/cross.png",
+							id: "deleteAction"+i,
+							src : "images/silk/cross-gray.png",
 							alt : "Delete",
 							title : "Delete user " + jsonData.users[i].login,
-							className: "usersTable"
+							className: "commandImage"
 						}, actions);
+						dojo.connect(deleteAction, "onmouseover", dojo.hitch(this, function(i){document.getElementById("deleteAction"+i).src="images/silk/cross.png";}, i));
+						dojo.connect(deleteAction, "onmouseout", dojo.hitch(this, function(i){document.getElementById("deleteAction"+i).src="images/silk/cross-gray.png";}, i));
 						dojo.connect(deleteAction, "onclick", dojo.hitch(this,
 								function(login) {
 									this.deleteUser(login);
 								}, jsonData.users[i].login));
-						dojo.place(actions, userRow);
+						dojo.place(actionsTd, userRow);
 						dojo.place(userRow, table);
 					}
 
@@ -76,7 +82,7 @@ eclipse.UsersList = (function() {
 
 		},
 		getUserTab : function(userName) {
-			return tab = "<a href=\"/user-profile.html#/users/" + userName
+			return tab = "<a class=\"navlinkonpage\" href=\"/user-profile.html#/users/" + userName
 					+ "\">" + userName + "</a>";
 		},
 		reloadUsers : function() {
