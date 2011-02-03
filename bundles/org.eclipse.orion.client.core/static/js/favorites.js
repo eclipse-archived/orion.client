@@ -8,7 +8,7 @@
  ******************************************************************************/
 
  
-/*global dijit dojo window eclipse:true setTimeout */
+/*global dijit dojo window document eclipse:true setTimeout */
 /*jslint forin:true*/
 
 var eclipse = eclipse || {};
@@ -29,7 +29,7 @@ eclipse.FavoritesService = (function() {
 			// FIXME: it is bogus that we separate favorites and searches
 			// we need a general representation and let the UI (and user) sort out
 			// how it is filtered or organized
-	   		this._serviceRegistration.dispatchEvent("favoritesChanged", this._favorites, this._searches);
+			this._serviceRegistration.dispatchEvent("favoritesChanged", this._favorites, this._searches);
 		},
 	
 		/**
@@ -163,6 +163,29 @@ eclipse.Favorites = (function() {
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
 		var favorites = this;
+		this._deleteFaveCommand = new eclipse.Command({
+			name: "Delete",
+			image: "images/silk/cross.png",
+			callback: function(item) {
+				this._registry.getService("IFavorites").then(function(service) {
+					service.removeFavorite(item.path);
+				});
+			}
+		});
+		// Hook up the callback TBD
+		this._renameFaveCommand = new eclipse.Command({
+			name: "Rename",
+			image: "images/silk/pencil.png"
+		});
+		this._deleteSearchCommand = new eclipse.Command({
+			name: "Delete",
+			image: "images/silk/cross.png",
+			callback: function(item) {
+				this._registry.getService("IFavorites").then(function(service) {
+					service.removeSearch(item.query);
+				});
+			}
+		});
 		this._registry.getService("IFavorites").then(function(service) {
 			service.addEventListener("favoritesChanged", function(favs, searches) {
 				favorites.render(favs, searches);
@@ -177,36 +200,76 @@ eclipse.Favorites = (function() {
 			for (var i=0; i < favorites.length; i++) {
 				var fave = favorites[i];
 				var href = fave.directory ? "#" + fave.path : "coding.html#" + fave.path;
-				if (href=="#")
+				if (href==="#") {
 					href="";
+				}
 				var clazz = fave.directory ? "navlinkonpage" : "navlink";
 				var img="";
 				var img2="";
 				var editable="";
 				var id = "fave"+i;
-				if (i > 0) {
-					img = "<img id=\""
-							+ (id + "img1")
-							+ "\" style=\"margin-left: 4px;\" src=\"images/silk/cross-gray.png\" alt=\"Delete\" title=\"Delete\" name=\"closefave"
-							+ i + "\"onMouseOver= \"document.closefave" + i
-							+ ".src='images/silk/cross.png'\" onMouseOut = \"document.closefave" + i
-							+ ".src='images/silk/cross-gray.png'\" >";
-					img2 = "<img id=\""
-							+ (id + "img2")
-							+ "\"style=\"margin-left: 4px;\" src=\"images/silk/pencil-gray.png\" alt=\"Rename\" title=\"Rename\" name=\"editfave"
-							+ i + "\"onMouseOver= \"document.editfave" + i
-							+ ".src='images/silk/pencil.png'\" onMouseOut = \"document.editfave" + i
-							+ ".src='images/silk/pencil-gray.png'\" >";
-				}
-				tr = dojo.create("tr"),
-					col1 = dojo.create("td", null, tr, "last"),
-					col2 = dojo.create("td", null, tr, "last"),
-					col3 = dojo.create("td", null, tr, "last"),
-					link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
+				tr = dojo.create("tr");
+				col1 = dojo.create("td", null, tr, "last");
+				col2 = dojo.create("td", null, tr, "last");
+				col3 = dojo.create("td", null, tr, "last");
+				link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
 				dojo.place(document.createTextNode(fave.name), link, "only");
-				col2.innerHTML = img;
-				col3.innerHTML = img2;
+				if (i > 0) {
+					// FIXME command service should render, that will be the next step.
+					img = this._deleteFaveCommand._asImage(id+"img1", fave, this);
+					img2 = this._renameFaveCommand._asImage(id+"img2", fave);
+					dojo.place(img, col2, "only");
+					dojo.place(img2, col3, "only");
+				}
+
 				dojo.place(tr, faveTable, "last");
+				if (i > 0) {
+					var reg = this._registry;
+					/** @return function(event) */
+					var makeRenameHandler = function(isKeyEvent) {
+						return (function (oldName, path, id) {
+							return function(event) {
+								var editBox = dijit.byId(id + "EditBox"),
+									newName = editBox.get("value");
+								if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
+									return;
+								} else if (!editBox.isValid() || newName === oldName) {
+									// No change; restore the old link
+									dojo.style(dojo.byId(id), "display", "inline");
+								} else {
+									// Will update old link
+									reg.getService("IFavorites").then(function(service) {
+										service.renameFavorite(path, newName);
+									});
+								}
+								editBox.destroyRecursive();
+								dojo.style(dojo.byId(id + "img1"), "display", "inline");
+								dojo.style(dojo.byId(id + "img2"), "display", "inline");
+							};
+						}(fave.name, fave.path, id));
+					};
+					
+					dojo.connect(img2, "onclick", this, (function(faveName, id) {
+						return function(event) {
+							// Swap in an editable text field
+							var editBox = new dijit.form.ValidationTextBox({
+								id: id + "EditBox",
+								required: true, // disallows empty string
+								value: faveName
+							});
+							var link = dojo.byId(id);
+							dojo.place(editBox.domNode, link, "before");
+							// hide link & buttons for reuse later
+							dojo.style(link, "display", "none");
+							dojo.style(dojo.byId(id + "img1"), "display", "none");
+							dojo.style(dojo.byId(id + "img2"), "display", "none");
+							
+							dojo.connect(editBox, "onKeyDown", makeRenameHandler(true));
+							dojo.connect(editBox, "onBlur", makeRenameHandler(false));
+							setTimeout(function() { editBox.focus(); }, 0);
+						};
+					})(fave.name, id));
+				}
 			}
 			dojo.place(faveTable, this._parent, "only");
 			
@@ -216,99 +279,20 @@ eclipse.Favorites = (function() {
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
 					var href="#" + search.query;
-					var img = "<img id=\""
-							+ "search"
-							+ i
-							+ "\"style=\"margin-left: 4px;\" src=\"images/silk/cross-gray.png\" alt=\"Delete\" title=\"Delete\" name=\"search"
-							+ i + "\"onMouseOver= \"document.search" + i
-							+ ".src='images/silk/cross.png'\" onMouseOut = \"document.search" + i
-							+ ".src='images/silk/cross-gray.png'\" >";
-					// mamacdon: so does this
-					tr = dojo.create("tr"),
-						col1 = dojo.create("td", null, tr, "last"),
-						col2 = dojo.create("td", null, tr, "last"),
-						link = dojo.create("a", {href: href}, col1, "only");
+					// FIXME command service should render this
+					var img = this._deleteSearchCommand._asImage("search"+i, search, this);
+					tr = dojo.create("tr");
+					col1 = dojo.create("td", null, tr, "last");
+					col2 = dojo.create("td", null, tr, "last");
+					link = dojo.create("a", {href: href}, col1, "only");
 					dojo.place(document.createTextNode(search.name), link, "only");
-					col2.innerHTML = img;
+					// FIXME rendering should go in command service.  That is the next step.
+					dojo.place(img, col2, "only");
 					dojo.place(tr, searchTable, "last");
 				}
 				dojo.place(searchTable, this._parent, "last");
 			}
-			
-			// attach listeners
-			var reg = this._registry;
-			for (var i=0; i < favorites.length; i++) {
-				if (i === 0) {
-					continue;
-				}
-				var id = "fave"+i;
-				var fave = favorites[i];
-				
-				dojo.byId(id + "img1").onclick = (function(path) {
-					return function(event) {
-						reg.getService("IFavorites").then(function(service) {
-							service.removeFavorite(path);
-						});
-					};
-				
-				})(fave.path);
-				
-				/** @return function(event) */
-				var makeRenameHandler = function(isKeyEvent) {
-					return (function (oldName, path, id) {
-						return function(event) {
-							var editBox = dijit.byId(id + "EditBox"),
-								newName = editBox.get("value");
-							if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
-								return;
-							} else if (!editBox.isValid() || newName === oldName) {
-								// No change; restore the old link
-								dojo.style(dojo.byId(id), "display", "inline");
-							} else {
-								// Will update old link
-								reg.getService("IFavorites").then(function(service) {
-									service.renameFavorite(path, newName);
-								});
-							}
-							editBox.destroyRecursive();
-							dojo.style(dojo.byId(id + "img1"), "display", "inline");
-							dojo.style(dojo.byId(id + "img2"), "display", "inline");
-						};
-					}(fave.name, fave.path, id));
-				};
-				
-				dojo.byId(id + "img2").onclick = (function(faveName, id) {
-					return function(event) {
-						// Swap in an editable text field
-						var editBox = new dijit.form.ValidationTextBox({
-							id: id + "EditBox",
-							required: true, // disallows empty string
-							value: faveName
-						});
-						var link = dojo.byId(id);
-						dojo.place(editBox.domNode, link, "before");
-						// hide link & buttons for reuse later
-						dojo.style(link, "display", "none");
-						dojo.style(dojo.byId(id + "img1"), "display", "none");
-						dojo.style(dojo.byId(id + "img2"), "display", "none");
-						
-						dojo.connect(editBox, "onKeyDown", makeRenameHandler(true));
-						dojo.connect(editBox, "onBlur", makeRenameHandler(false));
-						setTimeout(function() { editBox.focus(); }, 0);
-					};
-				})(fave.name, id);
-			}
-			for (var i=0; i < searches.length; i++) {
-				dojo.byId("search" + i).onclick = (function(query) {
-					return function(event) {
-						reg.getService("IFavorites").then(function(service) {
-							service.removeSearch(search.query);
-						});
-					};
-				})(searches[i].query);
- 			}
- 		}
-		
+		}
 	};
 	return Favorites;
 })();
