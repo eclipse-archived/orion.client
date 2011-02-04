@@ -52,7 +52,7 @@ eclipse.FavoritesService = (function() {
 		},
 		
 		addFavorite: function(theName, thePath, isDirectory) {
-			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory });
+			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory, "isFavorite": true });
 		},
 		
 		removeFavorite: function(path) {
@@ -85,7 +85,7 @@ eclipse.FavoritesService = (function() {
 		
 		
 		addFavoriteSearch: function(theName, theQuery) {
-			this._searches.push({ "name": theName, "query": theQuery });
+			this._searches.push({ "name": theName, "query": theQuery, "isSearch": true });
 			this._storeSearches();
 			this._notifyListeners();
 		},
@@ -116,12 +116,14 @@ eclipse.FavoritesService = (function() {
 						if (prefs.navigate) {
 							var navigate = JSON.parse(prefs.navigate);
 							for (i in navigate) {
+								navigate[i].isFavorite = true;  // migration code, may not have been stored
 								favorites._favorites.push(navigate[i]);
 							}
 						}
 						if (prefs.search) {
 							var search = JSON.parse(prefs.search);
 							for (i in search) {
+								search[i].isSearch = true; // migration code, may not been stored
 								favorites._searches.push(search[i]);
 							}
 						}
@@ -133,7 +135,7 @@ eclipse.FavoritesService = (function() {
 		
 		_storeFavorites: function() {
 			if (this._favorites.length > 0) {
-				var storedFavorites = this._favorites.slice(1);
+				var storedFavorites = this._favorites;
 				this._registry.getService("IPreferenceService").then(function(service) {
 					service.put("window/favorites/navigate", JSON.stringify(storedFavorites)); 
 				});
@@ -161,30 +163,41 @@ eclipse.Favorites = (function() {
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
 		var favorites = this;
-		this._deleteFaveCommand = new eclipse.Command({
+		var deleteFaveCommand = new eclipse.Command({
 			name: "Delete",
 			image: "images/silk/cross.png",
+			id: "deleteFave",
+			visibleWhen: function(item) {return item.isFavorite;},
 			callback: function(item) {
-				this._registry.getService("IFavorites").then(function(service) {
+				options.serviceRegistry.getService("IFavorites").then(function(service) {
 					service.removeFavorite(item.path);
 				});
 			}
 		});
-		this._renameFaveCommand = new eclipse.Command({
+		var renameFaveCommand = new eclipse.Command({
 			name: "Rename",
 			image: "images/silk/pencil.png",
-			callback: dojo.hitch(this, function(item, id) {
-				this.editFavoriteName(item, id);
+			id: "renameFave",
+			visibleWhen: function(item) {return item.isFavorite;},
+			callback: dojo.hitch(this, function(item, commandId, domId, faveIndex) {
+				this.editFavoriteName(item, commandId, domId, faveIndex);
 			})
 		});
-		this._deleteSearchCommand = new eclipse.Command({
+		var deleteSearchCommand = new eclipse.Command({
 			name: "Delete",
 			image: "images/silk/cross.png",
+			id: "deleteSearch",
+			visibleWhen: function(item) {return item.isSearch;},
 			callback: function(item) {
-				this._registry.getService("IFavorites").then(function(service) {
+				options.serviceRegistry.getService("IFavorites").then(function(service) {
 					service.removeSearch(item.query);
 				});
 			}
+		});
+		this._registry.getService("ICommandService").then(function(commandService) {
+			commandService.addCommand(deleteFaveCommand, "object");
+			commandService.addCommand(renameFaveCommand, "object");
+			commandService.addCommand(deleteSearchCommand, "object");
 		});
 		this._registry.getService("IFavorites").then(function(service) {
 			service.addEventListener("favoritesChanged", function(favs, searches) {
@@ -193,21 +206,20 @@ eclipse.Favorites = (function() {
 		});
 	}
 	Favorites.prototype = {
-		editFavoriteName: function(fave, id) {
-			// TEMP
-			id = id.substring(0, id.length-4);
+		editFavoriteName: function(fave, commandId, imageId, faveIndex) {
 			var reg = this._registry;
+			var linkId = "fave"+faveIndex;
 			/** @return function(event) */
 			var makeRenameHandler = function(isKeyEvent) {
-				return (function (oldName, path, id) {
+				return (function (oldName, path, linkId, imageId) {
 					return function(event) {
-						var editBox = dijit.byId(id + "EditBox"),
+						var editBox = dijit.byId(imageId+ "EditBox"),
 							newName = editBox.get("value");
 						if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
 							return;
 						} else if (!editBox.isValid() || newName === oldName) {
 							// No change; restore the old link
-							dojo.style(dojo.byId(id), "display", "inline");
+							dojo.style(dojo.byId(linkId), "display", "inline");
 						} else {
 							// Will update old link
 							reg.getService("IFavorites").then(function(service) {
@@ -215,23 +227,30 @@ eclipse.Favorites = (function() {
 							});
 						}
 						editBox.destroyRecursive();
-						dojo.style(dojo.byId(id + "img1"), "display", "inline");
-						dojo.style(dojo.byId(id + "img2"), "display", "inline");
+						// re-show the local commands
+						var commandParent = dojo.byId(imageId).parentNode;
+						var children = commandParent.childNodes;
+						for (var i = 0; i < children.length; i++) {
+							dojo.style(children[i], "display", "inline");
+						}
 					};
-				}(fave.name, fave.path, id));
+				}(fave.name, fave.path, linkId, imageId));
 			};
 			// Swap in an editable text field
 			var editBox = new dijit.form.ValidationTextBox({
-				id: id + "EditBox",
+				id: imageId+ "EditBox",
 				required: true, // disallows empty string
 				value: fave.name
 			});
-			var link = dojo.byId(id);
+			var link = dojo.byId(linkId);
 			dojo.place(editBox.domNode, link, "before");
 			// hide link & buttons for reuse later
+			var commandParent = dojo.byId(imageId).parentNode;
 			dojo.style(link, "display", "none");
-			dojo.style(dojo.byId(id + "img1"), "display", "none");
-			dojo.style(dojo.byId(id + "img2"), "display", "none");
+			var children = commandParent.childNodes;
+			for (var i = 0; i < children.length; i++) {
+				dojo.style(children[i], "display", "none");
+			}
 					
 			dojo.connect(editBox, "onKeyDown", makeRenameHandler(true));
 			dojo.connect(editBox, "onBlur", makeRenameHandler(false));
@@ -249,22 +268,19 @@ eclipse.Favorites = (function() {
 					href="";
 				}
 				var clazz = fave.directory ? "navlinkonpage" : "navlink";
-				var img="";
-				var img2="";
 				var editable="";
 				var id = "fave"+i;
 				tr = dojo.create("tr");
 				col1 = dojo.create("td", null, tr, "last");
+				dojo.style(col1, "whiteSpace", "nowrap");
 				col2 = dojo.create("td", null, tr, "last");
-				col3 = dojo.create("td", null, tr, "last");
+				dojo.style(col2, "whiteSpace", "nowrap");
 				link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
 				dojo.place(document.createTextNode(fave.name), link, "only");
-				
-				// FIXME command service should render, that will be the next step.
-				img = this._deleteFaveCommand._asImage(id+"img1", fave, this);
-				img2 = this._renameFaveCommand._asImage(id+"img2", fave);
-				dojo.place(img, col2, "only");
-				dojo.place(img2, col3, "only");
+				var actionsWrapper = dojo.create("span", {id: "actionsWrapper" + i}, col2, "only");
+				this._registry.getService("ICommandService").then(function(service) {
+					service.renderCommands(actionsWrapper, "object", fave, this, "image", i);
+				});
 				dojo.place(tr, faveTable, "last");
 			}
 			
@@ -276,15 +292,16 @@ eclipse.Favorites = (function() {
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
 					var href="#" + search.query;
-					// FIXME command service should render this
-					var img = this._deleteSearchCommand._asImage("search"+i, search, this);
 					tr = dojo.create("tr");
 					col1 = dojo.create("td", null, tr, "last");
 					col2 = dojo.create("td", null, tr, "last");
 					link = dojo.create("a", {href: href}, col1, "only");
 					dojo.place(document.createTextNode(search.name), link, "only");
-					// FIXME rendering should go in command service.  That is the next step.
-					dojo.place(img, col2, "only");
+					// render local commands
+					var actionsWrapper = dojo.create("span", {id: "actionsWrapper" + i}, col2, "only");
+					this._registry.getService("ICommandService").then(function(service) {
+						service.renderCommands(actionsWrapper, "object", search, this, "image", i);
+					});
 					dojo.place(tr, searchTable, "last");
 				}
 				dojo.place(searchTable, this._parent, "last");

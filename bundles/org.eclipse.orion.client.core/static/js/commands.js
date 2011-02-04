@@ -85,15 +85,16 @@ eclipse.CommandService = (function() {
 		 * @param {String} style The style in which the command should be rendered.  Currently
 		 *  only "image" is implemented, but this should involve into something like "button,"
 		 *  "menu," "link," etc.
+		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
 		 */	
 		
-		renderCommands: function(parent, scope, items, handler, style) {
+		renderCommands: function(parent, scope, items, handler, style, userData) {
 			var i, command;
 			switch (scope) {
 			case "global":
 				for (i = 0; i < this._globalScope.length; i++) { 
 					command = this._globalScope[i].command;
-					this._render(parent, command, items, handler, style);
+					this._render(parent, command, items, handler, style, userData, i);
 				}
 				break;
 				
@@ -101,7 +102,7 @@ eclipse.CommandService = (function() {
 				for (i = 0; i < this._pageScope.length; i++) { 
 					command = this._pageScope[i].command;
 					if (window.document.id === this._pageScope[i].scopeId) {
-						this._render(parent, command, items, handler, style);		
+						this._render(parent, command, items, handler, style, userData, i);		
 					}
 				}
 				break;
@@ -110,7 +111,7 @@ eclipse.CommandService = (function() {
 				for (i = 0; i < this._domScope.length; i++) { 
 					command = this._domScope[i].command;
 					if (parent.id === this._domScope[i].scopeId) {
-						this._render(parent, command, items, handler, style);		
+						this._render(parent, command, items, handler, style, userData, i);		
 					}
 				}				
 				break;
@@ -122,18 +123,18 @@ eclipse.CommandService = (function() {
 						var cmdService = this;
 						this._registry.getService("ISelectionService").then(function(service) {
 							service.getSelection(function(selection) {
-								cmdService._renderObjectScope(parent, command, selection, handler, style);
+								cmdService._renderObjectScope(parent, command, selection, handler, style, userData, i);
 							});
 						});
 					} else {
-						this._renderObjectScope(parent, command, items, handler, style);		
+						this._renderObjectScope(parent, command, items, handler, style, userData, i);		
 					}
 				}				
 				break;
 			}
 		},
 		
-		_renderObjectScope: function(parent, command, items, handler, style) {
+		_renderObjectScope: function(parent, command, items, handler, style, userData, i) {
 			if (!items) {
 				return;
 			}
@@ -142,13 +143,14 @@ eclipse.CommandService = (function() {
 				render = command.visibleWhen(items);
 			}
 			if (render) {
-				this._render(parent, command, items, handler, style);
+				this._render(parent, command, items, handler, style, userData, i);
 			}
 		},
 		
-		_render: function(parent, command, items, handler, style) {
+		_render: function(parent, command, items, handler, style, userData, i) {
 			if (style === "image") {
-				var image = command._asImage("image"+command.id, items, handler);
+				var id = "image" + command.id + i;  // using the index ensures unique ids
+				var image = command._asImage(id, items, handler, userData);
 				dojo.place(image, parent, "last");	
 			}
 		}
@@ -184,7 +186,7 @@ eclipse.Command = (function() {
 			//how will we know this?
 			this._deviceSupportsHover = false;  
 		},
-		_asImage: function(name, items, handler) {
+		_asImage: function(name, items, handler, userData) {
 			handler = handler || this;
 			var image = new Image();
 			image.alt = this.name;
@@ -193,7 +195,7 @@ eclipse.Command = (function() {
 			image.id = name;
 			if (this._callback) {
 				dojo.connect(image, "onclick", this, function() {
-					this._callback.call(handler, items, image.id);
+					this._callback.call(handler, items, this.id, image.id, userData);
 				});
 			}
 			if (this._deviceSupportsHover) {

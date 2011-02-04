@@ -468,7 +468,7 @@ eclipse.FileRenderer = (function() {
 			dojo.style(actionsWrapper, "visibility", "hidden");
 			// contact the command service to render appropriate commands here.
 			this.explorer.registry.getService("ICommandService").then(function(service) {
-				service.renderCommands(actionsWrapper, "object", tableRow.id, this.explorer, "image");
+				service.renderCommands(actionsWrapper, "object", item, this.explorer, "image");
 			});
 			// temporary until we get link commands properly represented in the command service.
 			if (item.Directory && item.ExportLocation) {
