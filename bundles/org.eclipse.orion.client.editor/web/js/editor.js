@@ -1908,10 +1908,14 @@ eclipse.Editor = (function() {
 				while (lineDiv.lineIndex === undefined) { lineDiv = lineDiv.parentNode; }
 				this._mouseWheelLine = lineDiv;
 			}
+			var oldScroll = this._getScroll();
 			this._scrollView(pixelX, pixelY);
+			var newScroll = this._getScroll();
 			if (isSafari) { this._mouseWheelLine = null; }
-			if (e.preventDefault) { e.preventDefault(); }
-			return false;
+			if (oldScroll.x !== newScroll.x || oldScroll.y !== newScroll.y) {
+				if (e.preventDefault) { e.preventDefault(); }
+				return false;
+			}
 		},
 		_handlePaste: function (e) {
 			if (this._ignorePaste) { return; }
