@@ -3,41 +3,30 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<!-- 
+	<script type="text/javascript" src="/openajax/src/OpenAjax-mashup.js"></script>
+	<script type="text/javascript" src="/openajax/src/containers/iframe/crypto.js"></script>
+	<script type="text/javascript" src="/openajax/src/containers/iframe/json2.js"></script>
+	<script type="text/javascript" src="/openajax/src/containers/iframe/iframe.js"></script>
+	 -->
 	<script type="text/javascript" src="js/plugin.js"></script>
-	<script type="text/javascript">
-	(function(){
-		function UpperProvider() {}
-		
-		UpperProvider.prototype = window.eclipse.ServiceProvider.extend({
-			info : function() {
-				return {
-					name : "Uppercase",
-					img : "/favicon.ico",
-					key : [ "u", true ] // ctrl+u
-				};
-			},
-			run : function(text) {
-				return text.toUpperCase();
-			}
-		});
-		
-		
+	<script>
 		window.onload = function() {
-			var pluginData = {
-				services : [{
-					id : "UpperCaseEditorAction", 
-					serviceType : {
-						id: "editorAction", 
-						interfaces : ["info","run"]
-					},
-					properties: {}
-				}]
-			};
-			var serviceProvider = new UpperProvider();
-			var upperPlugin = new window.eclipse.Plugin(pluginData, serviceProvider);
-			upperPlugin.start();
+			var provider = new eclipse.PluginProvider();
+			provider.registerServiceProvider("editorAction", {
+				info : function() {
+					return {
+						name : "UPPERCASE",
+						img : "/favicon.ico",
+						key : [ "u", true ]
+					};
+				},
+				run : function(text) {
+					return text.toUpperCase();
+				}
+			});
+			provider.connect();
 		};
-	}());
 	</script>
 </head>
 <body>

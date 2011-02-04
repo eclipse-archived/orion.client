@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,128 +13,138 @@
  */ 
 var eclipse = eclipse || {};
 
-/**
- * A Service Provider is an object that implements a Service Type
- * @class A Service Provider is an object that implements a Service Type
- */
-eclipse.ServiceProvider = function() {
-};
-
-eclipse.ServiceProvider.prototype = {
-	_initialize: function(plugin) {
-		this._plugin = plugin;
-	},
+eclipse.ServiceProvider = function(serviceId, internalProvider) {
 	
-	dispatchEvent: function(eventType, eventData, serviceType, serviceId) {
-		var event = {
-			pluginURL: this.pluginURL,
-			eventType: eventType,
-			eventData: eventData,	
-			serviceType: serviceType,
-			serviceId: serviceId
-		};
-		this._plugin._hubClient.publish("orion.plugin.response", {type: "event", result: event, error: null});
+	this.dispatchEvent = function(eventName) {
+		internalProvider.dispatchEvent.apply(internalProvider, [serviceId, eventName].concat(Array.prototype.slice.call(arguments, 1)));	
+	};
+	
+	this.unregister = function() {
+		internalProvider.unregisterServiceProvider(serviceId);
+	};
+};
+
+eclipse.PluginProvider = function() {
+	var _hubClient;
+	var _services = [];
+	var _connected = false;
+
+	function _publish(message) {
+		_hubClient.publish("orion.plugin.response", message);
 	}
-};
-
-eclipse.ServiceProvider.extend = function(extender) {
-	var serviceProvider = new eclipse.ServiceProvider();
-	for (var name in extender) {
-		serviceProvider[name] = extender[name];
-	}
-	return serviceProvider;
-};
-
-/**
- * A plugin is an object that is isolated in its own frame, and obtains and provides services
- * via the asynchronous postMessage mechanism.
- * @class A plugin is an object that is isolated in its own frame, and obtains and provides services
- * via the asynchronous postMessage mechanism.
- */
-eclipse.Plugin = function(pluginData, service) {
-	this._initialize(pluginData, service);
-};
-
-eclipse.Plugin.prototype = {
-	_initialize: function(pluginData, service) {
-		this.pluginURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
-		this.pluginData = pluginData;
-		if (service !== undefined) {
-			this.service = service;
-			if (service["_initialize"] !== undefined) {
-				service._initialize(this);
+	
+	var _internalProvider = {
+			dispatchEvent: function(serviceId, eventName) {
+				if (!_connected) {
+					throw new Error("Cannot dispatchEvent. Plugin Provider not connected");
+				}
+				var message = {
+					serviceId: serviceId,
+					method: "dispatchEvent",
+					params: [eventName].concat(Array.prototype.slice.call(arguments, 2))
+				};
+				_publish(message);
+				
+			},
+			unregisterServiceProvider: function(serviceId) {
+				if (_connected) {
+					throw new Error("Cannot unregister. Plugin Provider is connected");
+				}
+				//_services[serviceId] = null;
+				_services = [];
+			}
+	};
+	
+	function _getPluginData() {
+		var services = [];
+		for (var i = 0; i < _services.length; i++) {
+			if (_services[i]) {
+				services.push({id: "" + i, serviceType: {id: _services[i].type, interfaces: _services[i].methods, properties: _services[i].properties}});
 			}
 		}
-	},
+		return {services: services};		
+	}
 	
-	start: function() {
-		this._hubClient = new OpenAjax.hub.IframeHubClient({
+	function _handleRequest(topic, message) {
+		try {
+			if (message.type === "metadata") {
+				_publish({type: "metadata", id: message.id, result: _getPluginData(), error: null});
+			} else {
+				var service = _services[0].implementation;
+				var method = service[message.msgData.method];
+				var response = {type: "service", id: message.id, result: null, err: null};
+				var promiseOrResult = method.apply(service, message.msgData.params);
+				if(promiseOrResult && typeof promiseOrResult.then === "function"){
+					promiseOrResult.then(function(result) {
+						response.result = result;
+						_publish(response);
+					}, function(error) {
+						response.error = error;
+						_publish(response);
+					});
+				} else {
+					response.result = promiseOrResult;
+					_publish(response);
+				}
+			}
+		} catch (error) {
+			response.error = error;
+			_publish(response);
+		}
+	}
+	
+	this.registerServiceProvider = function(type, implementation, properties) {
+		if (_connected) {
+			throw new Error("Cannot register. Plugin Provider is connected");
+		}
+		
+		if (_services.length == 1) {
+			throw new Error("Implementation restriction. There can be only one");
+		}
+		
+		var method;
+		var methods = [];
+		for (method in implementation) {
+			if (typeof implementation[method] === 'function') {
+				methods.push(method);
+			}
+		}
+		
+		var serviceId = _services.length;
+		_services[serviceId] = {type: type, methods: methods, implementation: implementation, properties: properties || {}};
+		return new eclipse.ServiceProvider(serviceId, _internalProvider);	
+	};
+	
+	this.connect = function() {
+		if (_hubClient) {
+			return;
+		}
+		
+		_hubClient = new OpenAjax.hub.IframeHubClient({
 	        HubClient: {
 	          onSecurityAlert: function(source, alertType) {}
 	        }
-	    });
-		var scope = this;
-		this._hubClient.connect(function(hubClient, success, error) {
+		});
+		_hubClient.connect(function(hubClient, success, error) {
 			if (success) {
-				scope._hubClient.subscribe("orion.plugin.request["+scope.pluginURL+"]", scope._handlePluginRequest, scope);
-				var result = {
-					pluginURL: scope.pluginURL,
-					pluginData: scope.pluginData
+				_hubClient.subscribe("orion.plugin.request[" + _hubClient.getClientID() + "]", _handleRequest);
+				var message = {
+					pluginURL: _hubClient.getClientID(),
+					pluginData: _getPluginData()
 				};
-				scope._hubClient.publish("orion.plugin.load", result);
+				_hubClient.publish("orion.plugin.load", message);
+				_connected = true;
 			}
 		});
-	},
+	};
 	
-	stop: function() {
-		this._hubClient.disconnect();
-	},
-	
-	_handlePluginRequest: function(topic, request, subscriberData) {
-		if (request.type === "metadata") {
-			this._getMetadata(request);
-		} else if (request.type === "service") {
-			this._callService(request);
+	this.disconnect = function() {
+		if (_hubClient) { 
+			var doomed = _hubClient; 
+			_hubClient = null;
+			doomed.disconnect( function() {
+				_connected = false;
+			});
 		}
-	},
-	
-	_getMetadata: function(request) {
-		var result = {
-			pluginURL: this.pluginURL,
-			pluginData: this.pluginData
-		};
-		this._hubClient.publish("orion.plugin.response", {type: "metadata", id: request.id, result: result, error: null});
-	},
-	
-	_callService: function(request) {
-		var method = request.msgData.method;
-		var params = request.msgData.params;
-		var result = null, error = null;
-		try {
-			if (this.service !== undefined) {
-				if (typeof this.service[method] === "function") {
-					result = this.service[method].apply(this, params); 
-				}
-			} else if (typeof this[method] === "function") {
-				result = this[method].apply(this, params); 
-			}
-			if (result === null) {
-				error = new Error("Unable to locate service method with name ["+method+"]");
-			}
-		} catch (e) {
-			error = e;
-		}
-		this._hubClient.publish("orion.plugin.response", {type: "service", id: request.id, result: result, error: error});
-	},
-	
-	dispatchEvent: function(eventType, eventData, serviceType, serviceId) {
-		var event = {
-			pluginURL: this.pluginURL,
-			eventType: eventType,
-			eventData: eventData,	
-			serviceType: serviceType,
-			serviceId: serviceId
-		};
-		this._hubClient.publish("orion.plugin.response", {type: "event", result: event, error: null});
-	}
+	};
 };
