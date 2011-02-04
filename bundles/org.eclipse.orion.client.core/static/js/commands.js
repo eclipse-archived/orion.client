@@ -7,7 +7,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
- /*global dojo, document, window, eclipse, alert, Image */
+ /*global dojo, document, window, eclipse:true, alert, Image */
  
 /**
  * @namespace The global container for eclipse APIs.
@@ -76,7 +76,7 @@ eclipse.CommandService = (function() {
 		 * Render the commands that are appropriate for the given scope.
 		 * @param {DOMElement} parent The element in which commands should be rendered.
 		 * @param {String} scope The scope to which the command applies.  "global"
-		 *  commands apply everywhere, "page" level commands apply to a particular
+		 *  commands are not related to page content, "page" level commands apply to a particular
 		 *  page, "dom" level commands apply only when the specified dom element is
 		 *  rendering commands, and "object" scope applies to particular objects 
 		 *  being displayed in widgets such as lists or trees.
@@ -85,15 +85,16 @@ eclipse.CommandService = (function() {
 		 * @param {String} style The style in which the command should be rendered.  Currently
 		 *  only "image" is implemented, but this should involve into something like "button,"
 		 *  "menu," "link," etc.
+		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
 		 */	
 		
-		renderCommands: function(parent, scope, items, handler, style) {
+		renderCommands: function(parent, scope, items, handler, style, userData) {
 			var i, command;
 			switch (scope) {
 			case "global":
 				for (i = 0; i < this._globalScope.length; i++) { 
 					command = this._globalScope[i].command;
-					this._render(parent, command, items, handler, style);
+					this._render(parent, command, items, handler, style, userData, i);
 				}
 				break;
 				
@@ -101,7 +102,7 @@ eclipse.CommandService = (function() {
 				for (i = 0; i < this._pageScope.length; i++) { 
 					command = this._pageScope[i].command;
 					if (window.document.id === this._pageScope[i].scopeId) {
-						this._render(parent, command, items, handler, style);		
+						this._render(parent, command, items, handler, style, userData, i);		
 					}
 				}
 				break;
@@ -110,7 +111,7 @@ eclipse.CommandService = (function() {
 				for (i = 0; i < this._domScope.length; i++) { 
 					command = this._domScope[i].command;
 					if (parent.id === this._domScope[i].scopeId) {
-						this._render(parent, command, items, handler, style);		
+						this._render(parent, command, items, handler, style, userData, i);		
 					}
 				}				
 				break;
@@ -122,18 +123,18 @@ eclipse.CommandService = (function() {
 						var cmdService = this;
 						this._registry.getService("ISelectionService").then(function(service) {
 							service.getSelection(function(selection) {
-								cmdService._renderObjectScope(parent, command, selection, handler, style);
+								cmdService._renderObjectScope(parent, command, selection, handler, style, userData, i);
 							});
 						});
 					} else {
-						this._renderObjectScope(parent, command, items, handler, style);		
+						this._renderObjectScope(parent, command, items, handler, style, userData, i);		
 					}
 				}				
 				break;
 			}
 		},
 		
-		_renderObjectScope: function(parent, command, items, handler, style) {
+		_renderObjectScope: function(parent, command, items, handler, style, userData, i) {
 			if (!items) {
 				return;
 			}
@@ -142,13 +143,14 @@ eclipse.CommandService = (function() {
 				render = command.visibleWhen(items);
 			}
 			if (render) {
-				this._render(parent, command, items, handler, style);
+				this._render(parent, command, items, handler, style, userData, i);
 			}
 		},
 		
-		_render: function(parent, command, items, handler, style) {
+		_render: function(parent, command, items, handler, style, userData, i) {
 			if (style === "image") {
-				var image = command._asImage("image"+command.id, items, handler);
+				var id = "image" + command.id + i;  // using the index ensures unique ids
+				var image = command._asImage(id, items, handler, userData);
 				dojo.place(image, parent, "last");	
 			}
 		}
@@ -173,10 +175,10 @@ eclipse.Command = (function() {
 	Command.prototype = /** @lends eclipse.Command.prototype */ {
 		_init: function(options) {
 			this.name = options.name || "Empty Command";
-			this.tooltip = options.tooltip || "Empty Tooltip";
-			this._callback = options.callback || function() { alert("Empty Command"); };
+			this.tooltip = options.tooltip || options.name;
+			this.key = options.key; // an array of values to pass to eclipse.KeyBinding constructor
+			this._callback = options.callback;
 			this.image = options.image || "/images/none.png";
-			this.hotImage = options.hotImage;
 			this.visibleWhen = options.visibleWhen;
 			this.id = options.id;
 			// when false, affordances for commands are always shown.  When true,
@@ -184,33 +186,36 @@ eclipse.Command = (function() {
 			//how will we know this?
 			this._deviceSupportsHover = false;  
 		},
-		_asImage: function(name, items, handler) {
+		_asImage: function(name, items, handler, userData) {
 			handler = handler || this;
 			var image = new Image();
 			image.alt = this.name;
 			image.title = this.name;
 			image.name = name;
-			dojo.connect(image, "onclick", this, function() {
-				this._callback.call(handler, items);
-			});
+			image.id = name;
+			if (this._callback) {
+				dojo.connect(image, "onclick", this, function() {
+					this._callback.call(handler, items, this.id, image.id, userData);
+				});
+			}
 			if (this._deviceSupportsHover) {
 				image.src = "/images/none.png";
 				dojo.connect(image, "onmouseover", this, function() {
-					image.src = this.hotImage;
+					image.src = this.image;
 				});
 				dojo.connect(image, "onmouseout", this, function() {
 					image.src = "/images/none.png";
 				});	
 			} else {
 				image.src = this.image;	
-				if (this.hotImage) {
-					dojo.connect(image, "onmouseover", this, function() {
-						image.src = this.hotImage;
-					});
-					dojo.connect(image, "onmouseout", this, function() {
-						image.src = this.image;
-					});
-				}
+				dojo.style(image, "opacity", "0.4");
+				dojo.connect(image, "onmouseover", this, function() {
+					dojo.style(image, "opacity", "1");
+				});
+				dojo.connect(image, "onmouseout", this, function() {
+					image.src = this.image;
+					dojo.style(image, "opacity", "0.4");
+				});
 			}
 			dojo.addClass(image, 'commandImage');
 			return image;

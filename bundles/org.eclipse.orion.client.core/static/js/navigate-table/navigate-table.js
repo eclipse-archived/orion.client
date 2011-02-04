@@ -41,20 +41,20 @@ dojo.addOnLoad(function(){
 	
 	var favoriteCommand = new eclipse.Command({
 		name: "Make Favorite",
-		image: "images/silk/star-gray.png",
-		hotImage: "images/silk/star.png",
+		image: "images/silk/star.png",
 		id: "eclipse.makeFavorite",
-		callback: function(id) {
-			explorer.makeFavorite(id);
+		visibleWhen: function(item) {return item.Location;}, //TODO need a better way to identify file/folder objects
+		callback: function(item) {
+			explorer.makeFavorite(item);
 		}});
 	commandService.addCommand(favoriteCommand, "object");
 	var deleteCommand = new eclipse.Command({
 		name: "Delete",
-		image: "images/silk/cross-gray.png",
-		hotImage: "images/silk/cross.png",
+		image: "images/silk/cross.png",
 		id: "eclipse.deleteFile",
-		callback: function(id) {
-			explorer.deleteFile(id);
+		visibleWhen: function(item) {return item.Location;},
+		callback: function(item) {
+			explorer.deleteFile(item);
 		}});
 	commandService.addCommand(deleteCommand, "object");
 	

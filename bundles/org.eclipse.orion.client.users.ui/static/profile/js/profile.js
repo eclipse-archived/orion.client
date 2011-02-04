@@ -11,6 +11,7 @@ dojo.addOnLoad(function() {
 
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var inputService = new eclipse.InputService(serviceRegistry);
+	var usersService = new eclipse.UsersService(serviceRegistry);
 
 	/* set the login information in toolbar */
 	dojo.xhrGet({
@@ -101,21 +102,14 @@ eclipse.Profile = (function() {
 		},
 		setUserToDisplay : function(userURI) {
 			this.currentUserURI = userURI;
-			dojo.xhrGet({
-				url : userURI,
-				headers : {
-					"EclipseWeb-Version" : "1"
-				},
-				handleAs : "json",
-				timeout : 15000,
-				load : dojo.hitch(this, function(jsonData, secondArg) {
-					this.displayProfileData(jsonData);
-				}),
-				error : function(error, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-				}
-			})
+			var profile = this;
+			this.registry.getService("IUsersService").then(
+					function(service) {
+						service.getUserInfo(userURI, dojo.hitch(profile,
+								function(jsonData, secondArg) {
+									this.displayProfileData(jsonData);
+								}));
+					});
 		},
 		displayProfileData : function(jsonData) {
 			if (jsonData.login) {
@@ -138,51 +132,36 @@ eclipse.Profile = (function() {
 					password = this.passwordInput.value;
 				}
 			}
+			
 
-			var uri = this.currentUserURI + "?name=" + this.nameInput.value;
-			if (password != null) {
-				uri = uri + "&password=" + password;
-			}
+			var profile = this;
+			this.registry.getService("IUsersService").then(
+					function(service) {
+						service.updateUserInfo(profile.currentUserURI,
+								profile.nameInput.value, password, dojo.hitch(
+										profile, function(jsonData, secondArg) {
+											this.redisplayLastUser();
+											alert("Profile saved!");
 
-			dojo.xhrPut({
-				url : uri,
-				headers : {
-					"EclipseWeb-Version" : "1"
-				},
-				handleAs : "json",
-				timeout : 15000,
-				load : dojo.hitch(this, function(jsonData, secondArg) {
-					this.redisplayLastUser();
-					alert("Profile saved!");
-				}),
-				error : function(error, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-				}
-			})
+										}));
+					});
 		},
 		deleteProfile : function() {
 			if (confirm("Do you really want to delete user "
 					+ this.loginInput.value + "?")) {
-				dojo.xhrDelete({
-					url : this.currentUserURI,
-					headers : {
-						"EclipseWeb-Version" : "1"
-					},
-					handleAs : "json",
-					timeout : 15000,
-					load : dojo.hitch(this, function(jsonData, secondArg) {
-						// TODO where to go?
-						window.location.replace("navigate-table.html");
-					}),
-					error : function(error, ioArgs) {
-						handleGetAuthenticationError(this, ioArgs);
-						console.error("HTTP status code: ", ioArgs.xhr.status);
-					}
-				})
+				
+				var profile = this;
+				this.registry.getService("IUsersService").then(
+					function(service) {
+						service.deleteUser(profile.currentUserURI, dojo.hitch(
+								profile, function(jsonData, secondArg) {
+									// TODO where to go?
+									window.location.replace("navigate-table.html");
+								}));
+					});
 			}
 		}
-	}
+	};
 	return Profile;
 }());
 dojo.addOnUnload(function() {

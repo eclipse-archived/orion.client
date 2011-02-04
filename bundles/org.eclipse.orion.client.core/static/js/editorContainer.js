@@ -667,7 +667,7 @@ eclipse.EditorContainer = (function() {
 						editorContainer._editor.setCaretOffset(editorContainer._editor.getSelection().start);
 						editorContainer._incrementalFindIgnoreSelection = false;
 						editorContainer._toggleIncrementalFind();
-						return;
+						return true;
 					}
 					registry.getService("IStatusReporter").then(function(service) {
 						service.setMessage("Incremental find: " + p);

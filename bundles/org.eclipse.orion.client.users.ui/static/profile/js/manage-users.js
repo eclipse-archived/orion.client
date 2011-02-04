@@ -7,6 +7,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 dojo.addOnLoad(function() {
+
+	var serviceRegistry = new eclipse.ServiceRegistry();
+	var usersService = new eclipse.UsersService(serviceRegistry);
+	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+
 	/* set the login information in toolbar */
 	dojo.xhrGet({
 		url : "/auth2",
@@ -18,17 +23,28 @@ dojo.addOnLoad(function() {
 	});
 
 	var usersList = new eclipse.UsersList({
-		parent : "usersList"
+		parent : "usersList",
+		registry : serviceRegistry
 	});
 	usersList.loadUsers();
-
-	dojo.connect(dojo.byId("addUserLink"), "onclick", function() {
-		var dialog = new profile.widgets.NewUserDialog({
-			func : dojo.hitch(usersList, function() {
-				this.reloadUsers();
-			})
-		});
-		dialog.startup();
-		dialog.show();
+	
+	var createUserCommand = new eclipse.Command({
+		name: "Create User",
+		image: "profile/images/create_user_gray.gif",
+		hotImage: "profile/images/create_user.gif",
+		id: "eclipse.createUser",
+		callback: function() {
+			var dialog = new profile.widgets.NewUserDialog({
+				func : dojo.hitch(usersList, function() {
+					this.reloadUsers();
+				}),
+				registry : serviceRegistry
+			});
+			dialog.startup();
+			dialog.show();
+		}
 	});
+	commandService.addCommand(createUserCommand, "dom", "userCommandsToolbar");
+	commandService.renderCommands(document.getElementById("userCommandsToolbar"), "dom", 0, this, "image");
+
 });

@@ -36,6 +36,10 @@ input.userprofilefile {
 	z-index: 2;
 }
 
+table.usersTable {
+	min-width: 300px;
+}
+
 td.usersTable {
 	padding-right: 10px;
 	padding-left: 10px;

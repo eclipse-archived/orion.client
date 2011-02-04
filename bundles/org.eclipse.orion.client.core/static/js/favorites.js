@@ -8,7 +8,7 @@
  ******************************************************************************/
 
  
-/*global dijit dojo window eclipse:true setTimeout */
+/*global dijit dojo window document eclipse:true setTimeout */
 /*jslint forin:true*/
 
 var eclipse = eclipse || {};
@@ -29,7 +29,7 @@ eclipse.FavoritesService = (function() {
 			// FIXME: it is bogus that we separate favorites and searches
 			// we need a general representation and let the UI (and user) sort out
 			// how it is filtered or organized
-	   		this._serviceRegistration.dispatchEvent("favoritesChanged", this._favorites, this._searches);
+			this._serviceRegistration.dispatchEvent("favoritesChanged", this._favorites, this._searches);
 		},
 	
 		/**
@@ -52,7 +52,7 @@ eclipse.FavoritesService = (function() {
 		},
 		
 		addFavorite: function(theName, thePath, isDirectory) {
-			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory });
+			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory, "isFavorite": true });
 		},
 		
 		removeFavorite: function(path) {
@@ -85,7 +85,7 @@ eclipse.FavoritesService = (function() {
 		
 		
 		addFavoriteSearch: function(theName, theQuery) {
-			this._searches.push({ "name": theName, "query": theQuery });
+			this._searches.push({ "name": theName, "query": theQuery, "isSearch": true });
 			this._storeSearches();
 			this._notifyListeners();
 		},
@@ -107,8 +107,6 @@ eclipse.FavoritesService = (function() {
 		},
 			
 		_initializeFavorites: function () {
-			this._favorites.push({ "name": "root", "path": "", "directory": true });
-			
 			var favorites = this;
 			var favesDone, searchesDone;
 			this._registry.getService("IPreferenceService").then(function(service) {
@@ -118,12 +116,14 @@ eclipse.FavoritesService = (function() {
 						if (prefs.navigate) {
 							var navigate = JSON.parse(prefs.navigate);
 							for (i in navigate) {
+								navigate[i].isFavorite = true;  // migration code, may not have been stored
 								favorites._favorites.push(navigate[i]);
 							}
 						}
 						if (prefs.search) {
 							var search = JSON.parse(prefs.search);
 							for (i in search) {
+								search[i].isSearch = true; // migration code, may not been stored
 								favorites._searches.push(search[i]);
 							}
 						}
@@ -135,7 +135,7 @@ eclipse.FavoritesService = (function() {
 		
 		_storeFavorites: function() {
 			if (this._favorites.length > 0) {
-				var storedFavorites = this._favorites.slice(1);
+				var storedFavorites = this._favorites;
 				this._registry.getService("IPreferenceService").then(function(service) {
 					service.put("window/favorites/navigate", JSON.stringify(storedFavorites)); 
 				});
@@ -163,6 +163,42 @@ eclipse.Favorites = (function() {
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
 		var favorites = this;
+		var deleteFaveCommand = new eclipse.Command({
+			name: "Delete",
+			image: "images/silk/cross.png",
+			id: "deleteFave",
+			visibleWhen: function(item) {return item.isFavorite;},
+			callback: function(item) {
+				options.serviceRegistry.getService("IFavorites").then(function(service) {
+					service.removeFavorite(item.path);
+				});
+			}
+		});
+		var renameFaveCommand = new eclipse.Command({
+			name: "Rename",
+			image: "images/silk/pencil.png",
+			id: "renameFave",
+			visibleWhen: function(item) {return item.isFavorite;},
+			callback: dojo.hitch(this, function(item, commandId, domId, faveIndex) {
+				this.editFavoriteName(item, commandId, domId, faveIndex);
+			})
+		});
+		var deleteSearchCommand = new eclipse.Command({
+			name: "Delete",
+			image: "images/silk/cross.png",
+			id: "deleteSearch",
+			visibleWhen: function(item) {return item.isSearch;},
+			callback: function(item) {
+				options.serviceRegistry.getService("IFavorites").then(function(service) {
+					service.removeSearch(item.query);
+				});
+			}
+		});
+		this._registry.getService("ICommandService").then(function(commandService) {
+			commandService.addCommand(deleteFaveCommand, "object");
+			commandService.addCommand(renameFaveCommand, "object");
+			commandService.addCommand(deleteSearchCommand, "object");
+		});
 		this._registry.getService("IFavorites").then(function(service) {
 			service.addEventListener("favoritesChanged", function(favs, searches) {
 				favorites.render(favs, searches);
@@ -170,6 +206,57 @@ eclipse.Favorites = (function() {
 		});
 	}
 	Favorites.prototype = {
+		editFavoriteName: function(fave, commandId, imageId, faveIndex) {
+			var reg = this._registry;
+			var linkId = "fave"+faveIndex;
+			/** @return function(event) */
+			var makeRenameHandler = function(isKeyEvent) {
+				return (function (oldName, path, linkId, imageId) {
+					return function(event) {
+						var editBox = dijit.byId(imageId+ "EditBox"),
+							newName = editBox.get("value");
+						if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
+							return;
+						} else if (!editBox.isValid() || newName === oldName) {
+							// No change; restore the old link
+							dojo.style(dojo.byId(linkId), "display", "inline");
+						} else {
+							// Will update old link
+							reg.getService("IFavorites").then(function(service) {
+								service.renameFavorite(path, newName);
+							});
+						}
+						editBox.destroyRecursive();
+						// re-show the local commands
+						var commandParent = dojo.byId(imageId).parentNode;
+						var children = commandParent.childNodes;
+						for (var i = 0; i < children.length; i++) {
+							dojo.style(children[i], "display", "inline");
+						}
+					};
+				}(fave.name, fave.path, linkId, imageId));
+			};
+			// Swap in an editable text field
+			var editBox = new dijit.form.ValidationTextBox({
+				id: imageId+ "EditBox",
+				required: true, // disallows empty string
+				value: fave.name
+			});
+			var link = dojo.byId(linkId);
+			dojo.place(editBox.domNode, link, "before");
+			// hide link & buttons for reuse later
+			var commandParent = dojo.byId(imageId).parentNode;
+			dojo.style(link, "display", "none");
+			var children = commandParent.childNodes;
+			for (var i = 0; i < children.length; i++) {
+				dojo.style(children[i], "display", "none");
+			}
+					
+			dojo.connect(editBox, "onKeyDown", makeRenameHandler(true));
+			dojo.connect(editBox, "onBlur", makeRenameHandler(false));
+			setTimeout(function() { editBox.focus(); }, 0);
+					
+		},
 		// FIXME: it should really be up to the UI to organize favorites as being searches or not.
 		render: function(favorites, searches) {
 			var faveTable = dojo.create("table");
@@ -177,37 +264,26 @@ eclipse.Favorites = (function() {
 			for (var i=0; i < favorites.length; i++) {
 				var fave = favorites[i];
 				var href = fave.directory ? "#" + fave.path : "coding.html#" + fave.path;
-				if (href=="#")
+				if (href==="#") {
 					href="";
+				}
 				var clazz = fave.directory ? "navlinkonpage" : "navlink";
-				var img="";
-				var img2="";
 				var editable="";
 				var id = "fave"+i;
-				if (i > 0) {
-					img = "<img id=\""
-							+ (id + "img1")
-							+ "\" style=\"margin-left: 4px;\" src=\"images/silk/cross-gray.png\" alt=\"Delete\" title=\"Delete\" name=\"closefave"
-							+ i + "\"onMouseOver= \"document.closefave" + i
-							+ ".src='images/silk/cross.png'\" onMouseOut = \"document.closefave" + i
-							+ ".src='images/silk/cross-gray.png'\" >";
-					img2 = "<img id=\""
-							+ (id + "img2")
-							+ "\"style=\"margin-left: 4px;\" src=\"images/silk/pencil-gray.png\" alt=\"Rename\" title=\"Rename\" name=\"editfave"
-							+ i + "\"onMouseOver= \"document.editfave" + i
-							+ ".src='images/silk/pencil.png'\" onMouseOut = \"document.editfave" + i
-							+ ".src='images/silk/pencil-gray.png'\" >";
-				}
-				tr = dojo.create("tr"),
-					col1 = dojo.create("td", null, tr, "last"),
-					col2 = dojo.create("td", null, tr, "last"),
-					col3 = dojo.create("td", null, tr, "last"),
-					link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
+				tr = dojo.create("tr");
+				col1 = dojo.create("td", null, tr, "last");
+				dojo.style(col1, "whiteSpace", "nowrap");
+				col2 = dojo.create("td", null, tr, "last");
+				dojo.style(col2, "whiteSpace", "nowrap");
+				link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
 				dojo.place(document.createTextNode(fave.name), link, "only");
-				col2.innerHTML = img;
-				col3.innerHTML = img2;
+				var actionsWrapper = dojo.create("span", {id: "actionsWrapper" + i}, col2, "only");
+				this._registry.getService("ICommandService").then(function(service) {
+					service.renderCommands(actionsWrapper, "object", fave, this, "image", i);
+				});
 				dojo.place(tr, faveTable, "last");
 			}
+			
 			dojo.place(faveTable, this._parent, "only");
 			
 			if (searches.length > 0) {
@@ -216,99 +292,21 @@ eclipse.Favorites = (function() {
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
 					var href="#" + search.query;
-					var img = "<img id=\""
-							+ "search"
-							+ i
-							+ "\"style=\"margin-left: 4px;\" src=\"images/silk/cross-gray.png\" alt=\"Delete\" title=\"Delete\" name=\"search"
-							+ i + "\"onMouseOver= \"document.search" + i
-							+ ".src='images/silk/cross.png'\" onMouseOut = \"document.search" + i
-							+ ".src='images/silk/cross-gray.png'\" >";
-					// mamacdon: so does this
-					tr = dojo.create("tr"),
-						col1 = dojo.create("td", null, tr, "last"),
-						col2 = dojo.create("td", null, tr, "last"),
-						link = dojo.create("a", {href: href}, col1, "only");
+					tr = dojo.create("tr");
+					col1 = dojo.create("td", null, tr, "last");
+					col2 = dojo.create("td", null, tr, "last");
+					link = dojo.create("a", {href: href}, col1, "only");
 					dojo.place(document.createTextNode(search.name), link, "only");
-					col2.innerHTML = img;
+					// render local commands
+					var actionsWrapper = dojo.create("span", {id: "actionsWrapper" + i}, col2, "only");
+					this._registry.getService("ICommandService").then(function(service) {
+						service.renderCommands(actionsWrapper, "object", search, this, "image", i);
+					});
 					dojo.place(tr, searchTable, "last");
 				}
 				dojo.place(searchTable, this._parent, "last");
 			}
-			
-			// attach listeners
-			var reg = this._registry;
-			for (var i=0; i < favorites.length; i++) {
-				if (i === 0) {
-					continue;
-				}
-				var id = "fave"+i;
-				var fave = favorites[i];
-				
-				dojo.byId(id + "img1").onclick = (function(path) {
-					return function(event) {
-						reg.getService("IFavorites").then(function(service) {
-							service.removeFavorite(path);
-						});
-					};
-				
-				})(fave.path);
-				
-				/** @return function(event) */
-				var makeRenameHandler = function(isKeyEvent) {
-					return (function (oldName, path, id) {
-						return function(event) {
-							var editBox = dijit.byId(id + "EditBox"),
-								newName = editBox.get("value");
-							if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
-								return;
-							} else if (!editBox.isValid() || newName === oldName) {
-								// No change; restore the old link
-								dojo.style(dojo.byId(id), "display", "inline");
-							} else {
-								// Will update old link
-								reg.getService("IFavorites").then(function(service) {
-									service.renameFavorite(path, newName);
-								});
-							}
-							editBox.destroyRecursive();
-							dojo.style(dojo.byId(id + "img1"), "display", "inline");
-							dojo.style(dojo.byId(id + "img2"), "display", "inline");
-						};
-					}(fave.name, fave.path, id));
-				};
-				
-				dojo.byId(id + "img2").onclick = (function(faveName, id) {
-					return function(event) {
-						// Swap in an editable text field
-						var editBox = new dijit.form.ValidationTextBox({
-							id: id + "EditBox",
-							required: true, // disallows empty string
-							value: faveName
-						});
-						var link = dojo.byId(id);
-						dojo.place(editBox.domNode, link, "before");
-						// hide link & buttons for reuse later
-						dojo.style(link, "display", "none");
-						dojo.style(dojo.byId(id + "img1"), "display", "none");
-						dojo.style(dojo.byId(id + "img2"), "display", "none");
-						
-						dojo.connect(editBox, "onKeyDown", makeRenameHandler(true));
-						dojo.connect(editBox, "onBlur", makeRenameHandler(false));
-						setTimeout(function() { editBox.focus(); }, 0);
-					};
-				})(fave.name, id);
-			}
-			for (var i=0; i < searches.length; i++) {
-				dojo.byId("search" + i).onclick = (function(query) {
-					return function(event) {
-						reg.getService("IFavorites").then(function(service) {
-							service.removeSearch(search.query);
-						});
-					};
-				})(searches[i].query);
- 			}
- 		}
-		
+		}
 	};
 	return Favorites;
 })();

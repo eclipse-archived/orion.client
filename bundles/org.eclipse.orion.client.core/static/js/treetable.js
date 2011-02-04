@@ -146,12 +146,14 @@ eclipse.TableTree = (function() {
 			this.refresh(item, children, true);
 		},
 		
-		getItem: function(id) {
-			var node = dojo.byId(id);
-			if (node) {
-				return node._item;
+		getItem: function(itemOrId) {
+			if (typeof(itemOrId) === "string") {
+				var node = dojo.byId(id);
+				if (node) {
+					return node._item;
+				}
 			}
-			return null;
+			return itemOrId;
 		},
 		
 		toggle: function(id, imgName, expandedImage, collapsedImage) {

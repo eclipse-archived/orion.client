@@ -111,9 +111,13 @@ eclipse.Explorer = (function() {
 			if (path === this._lastHash) {
 				return;
 			}
+			
+			//TODO we need a reliable way to infer search from the path
+			var isSearch = path.indexOf("search?") > 0;
+			
 			this._lastHash = path;
-			dojo.hash(path, true);
-		
+			dojo.hash(path, !isSearch);
+			
 			// Progress indicator
 			var progress = dojo.create("div", {id: "innerTree"});
 			    b = dojo.create("b");
@@ -126,8 +130,6 @@ eclipse.Explorer = (function() {
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
 	
-			//TODO we need a reliable way to infer search from the path
-			var isSearch = path.indexOf("search?") > 0;
 			if (isSearch) {
 				var results = document.createElement('div');
 				// TODO this must be the same id as the table or else the search won't get deleted
@@ -203,8 +205,7 @@ eclipse.Explorer = (function() {
 	    _lastHash: null, 
 	    _newFileCommand: new eclipse.Command({
 					name: "New File",
-					image: "images/silk/page_add-gray.png",
-					hotImage: "images/silk/page_add.png",
+					image: "images/silk/page_add.png",
 					callback: function(item) {
 						var dialog = new widgets.NewItemDialog({
 							title: "Create File",
@@ -216,8 +217,7 @@ eclipse.Explorer = (function() {
 					}}),
 		_newFolderCommand: new eclipse.Command({
 					name: "New Folder",
-					image: "images/silk/folder_add-gray.png",
-					hotImage: "images/silk/folder_add.png",
+					image: "images/silk/folder_add.png",
 					callback: function(item) {
 						var dialog = new widgets.NewItemDialog({
 							title: "Create Folder",
@@ -229,8 +229,7 @@ eclipse.Explorer = (function() {
 					}}),
 		_newProjectCommand: new eclipse.Command({
 					name: "New Folder",
-					image: "images/silk/folder_add-gray.png",
-					hotImage: "images/silk/folder_add.png",
+					image: "images/silk/folder_add.png",
 					callback: function(item) {
 						var dialog = new widgets.NewItemDialog({
 							title: "Create Project",
@@ -242,8 +241,7 @@ eclipse.Explorer = (function() {
 					}}),
 		_linkProjectCommand: new eclipse.Command({
 					name: "Link Folder",
-					image: "images/silk/link_add-gray.png",
-					hotImage: "images/silk/link_add.png",
+					image: "images/silk/link_add.png",
 					callback: function(item) {
 						var dialog = new widgets.NewItemDialog({
 							title: "Link Folder",
@@ -256,8 +254,7 @@ eclipse.Explorer = (function() {
 					}}),
 		_openResourceCommand: new eclipse.Command({
 					name: "Open Resource",
-					image: "images/silk/find-gray.png",
-					hotImage: "images/silk/find.png",
+					image: "images/silk/find.png",
 					callback: function(item) {
 						var that = this;
 						setTimeout(function() {
@@ -269,8 +266,7 @@ eclipse.Explorer = (function() {
 					}}),
 		_importCommand : new eclipse.Command({
 					name : "Import",
-					image : "images/silk/zip_import-gray.gif",
-					hotImage : "images/silk/zip_import.gif",
+					image : "images/silk/zip_import.gif",
 					callback : function(item) {
 						var dialog = new widgets.ImportDialog({
 							importLocation: item.ImportLocation,
@@ -472,7 +468,7 @@ eclipse.FileRenderer = (function() {
 			dojo.style(actionsWrapper, "visibility", "hidden");
 			// contact the command service to render appropriate commands here.
 			this.explorer.registry.getService("ICommandService").then(function(service) {
-				service.renderCommands(actionsWrapper, "object", tableRow.id, this.explorer, "image");
+				service.renderCommands(actionsWrapper, "object", item, this.explorer, "image");
 			});
 			// temporary until we get link commands properly represented in the command service.
 			if (item.Directory && item.ExportLocation) {
