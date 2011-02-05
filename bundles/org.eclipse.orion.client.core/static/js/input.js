@@ -8,8 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-"use strict";
- dojo.require("dojo.hash");
+dojo.require("dojo.hash");
 
 /**
  * @namespace The global container for eclipse APIs.

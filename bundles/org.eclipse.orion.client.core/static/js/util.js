@@ -8,8 +8,6 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-"use strict";
- 
 dojo.require("dojo.hash");
 
 // FIXME this doesn't really belong here anymore, it belongs in the glue.
@@ -168,4 +166,4 @@ eclipse.util.processNavigatorParent = function(parentItem, jsonData) {
 		if (n1 > n2) { return 1; }
 		return 0;
 	}); 
-}
+};

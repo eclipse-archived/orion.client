@@ -9,8 +9,6 @@
 
  /*global window dojo*/
 
-"use strict";
-
 dojo.require("dojo._base.json");
 
 var eclipse = eclipse || {};

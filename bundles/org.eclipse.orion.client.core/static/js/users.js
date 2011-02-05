@@ -8,8 +8,6 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-"use strict";
- 
 /**
  * User Service
  * @class Service for keeping track of the user

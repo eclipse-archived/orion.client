@@ -8,8 +8,6 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-"use strict";
-
 /**
  * @namespace The global container for eclipse APIs.
  */
