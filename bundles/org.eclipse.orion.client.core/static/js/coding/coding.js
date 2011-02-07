@@ -23,18 +23,13 @@ dojo.addOnLoad(function(){
 	(function() {
 		// This is the new service registry.  All services should be registered and obtained here.
 		serviceRegistry = new eclipse.ServiceRegistry();
-		
-		// This is the original registry.  For M5 we need it for plugin management.
 		pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
-		pluginRegistry.start();
 		
 		
 		// this is temporary
 		var jslintPlugin = pluginRegistry.getPlugin("/jslintPlugin.html");
 		if (jslintPlugin === null) {
-			pluginRegistry.loadPlugin("/jslintPlugin.html", function(plugin) {
-				pluginRegistry.installPlugin(plugin.pluginURL, plugin.pluginData);
-			});
+			pluginRegistry.installPlugin("/jslintPlugin.html");
 		}
 
 		var inputService = new eclipse.InputService(serviceRegistry);
@@ -53,11 +48,6 @@ dojo.addOnLoad(function(){
 		new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
 		new eclipse.FileService(serviceRegistry);
 	}());
-	
-	dojo.addOnUnload(function(){
-		// FIXME: if editor is dirty and user answers "stay" to the prompt, this still stops registry
-		pluginRegistry.stop();
-	});
 	
 	var topContainerWidget = dijit.byId("topContainer"),
 		codeTitle = dojo.byId("codeTitle"),

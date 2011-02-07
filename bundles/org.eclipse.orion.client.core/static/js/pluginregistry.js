@@ -8,444 +8,55 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global eclipse */
+
+/*global dojo*/
+/*global OpenAjax*/
+/*global document*/
+/*global window*/
+
 /**
  * @namespace The global container for eclipse APIs.
  */ 
 var eclipse = eclipse || {};
 
-/**
- * A ServiceReference enables services to be called and released.
- * @class A ServiceReference enables services to be called and released.
- */
-eclipse.Service0 = function(serviceReference, registry, onLoadCallback) {
-	serviceReference._service = this;
-	this._serviceReference = serviceReference;
-	this._registry = registry;
-	this._eventListeners = {};
-	var pluginContainer = registry._managedHub.getContainer(serviceReference._pluginServiceProvider.pluginURL);
-	if (pluginContainer !== null) {
-		//console.debug("pluginContainer already exists for ["+serviceReference._pluginServiceProvider.pluginURL+"]");
-		this._createProxies();
-		onLoadCallback(this);
-	} else {
-		var scope = this;
-		//console.debug("loading pluginContainer for ["+serviceReference._pluginServiceProvider.pluginURL+"]");
-		registry.loadPlugin(serviceReference._pluginServiceProvider.pluginURL, function(plugin) {
-			//console.debug("pluginContainer for ["+serviceReference._pluginServiceProvider.pluginURL+"] loaded");
-			scope._createProxies();
-			onLoadCallback(scope);
-		});
+eclipse.Plugin = function(url, data, internalRegistry) {
+	var _self = this;
+	
+	var _container;
+	var _deferredLoad = new dojo.Deferred();
+	var _loaded = false;
+	
+	var _currentMessageId = 0;
+	var _deferredResponses = {};
+	var _serviceRegistrations = {};
+		
+	function _callService(serviceId, method, params, deferred) {
+		if (!_container) {
+			throw new Error("service container not ready");
+		}
+		var requestId = _currentMessageId++;
+		_deferredResponses[String(requestId)] = deferred;
+		var message = {
+			id: requestId,
+			serviceId: serviceId,
+			method: method,
+			params: params
+		};
+		internalRegistry.publish("request["+url+"]", message);
 	}
-};
 
-eclipse.Service0.prototype = {
-	invoke: function(methodName, params, callback) {
-		this._registry._sendPluginRequest("service", {method: methodName, params: params}, this._serviceReference._pluginServiceProvider.pluginURL, callback);
-	},
-	
-	addEventListener: function(eventType, eventListener) {
-		if (this._eventListeners[eventType] === undefined) {
-			this._eventListeners[eventType] = [];
-		}
-		this._eventListeners[eventType].push(eventListener);
-	},
-	
-	removeEventListener: function(eventType, eventListener) {
-		if (this._eventListeners[eventType] !== undefined) {
-			for (var i = 0; i < this._eventListeners[eventType].length; i++) {
-				if (this._eventListeners[eventType][i] === eventListener) {
-					this._eventListeners[eventType].splice(i, 1);
-				}
-			}
-		}
-	},
-	
-	_dispatchEvent: function(eventType, eventData) {
-		if (this._eventListeners[eventType] !== undefined) {
-			for (var i = 0; i < this._eventListeners[eventType].length; i++) {
-				this._eventListeners[eventType][i]({type: eventType, data: eventData});
-			}
-		}
-	},
-	
-	_createProxies: function() {
-		if (this._serviceReference._serviceType.interfaces !== undefined) {
-			var interfaces = this._serviceReference._serviceType.interfaces;
-			for (var i = 0; i < interfaces.length; i++) {
-				var scope = this;
-				var methodName = interfaces[i]; 
-				this[methodName] = function() {
-					scope._registry._sendPluginRequest("service", {method: methodName, params: arguments[0]}, scope._serviceReference._serviceType.provider, arguments[1]);
-				};
-			}
-		}
-	}
-};
-
-/**
- * A ServiceReference enables services to be called and released.
- * @class A ServiceReference enables services to be called and released.
- */
-eclipse.ServiceReference0 = function(serviceType, pluginServiceProvider, registry) {
-	this._pluginServiceProvider = pluginServiceProvider;
-	this._serviceType = serviceType;
-	this._registry = registry;
-	this._useCount = 0;
-	this._pluginServiceProvider._serviceReferences[this._serviceType.id] = this;
-};
-
-eclipse.ServiceReference0.prototype = {
-	_incrementUseCount: function() {
-		this._useCount++;
-	},	
-	_decrementUseCount: function() {
-		this._useCount--;
-	},	
-	_unget: function() {
-		//console.debug("unget for service reference of type ["+this._serviceType.id+"] count = "+this._useCount);
-		this._decrementUseCount();
-		if (this._useCount < 1) {
-			this._registry._cleanupServiceReference(this);
-		}
-	}
-};
-
-/**
- * The registry manages the set of available plugins.
- * @class The registry manages the set of available plugins.
- */
-eclipse.PluginRegistry = function(serviceRegistry) {
-	this._serviceRegistry = serviceRegistry;
-	this._currentId = 0;
-	this._msgCallbacks = {};
-	this._plugins = {};
-	this._eventListeners = {onPluginLoad: [], onPluginInstall: [], onPluginUninstall: []};
-	this._loadPluginCallbacks = {};
-	this._serviceTypes = {};
-	
-	this._managedHub = new OpenAjax.hub.ManagedHub({
-		onPublish:       function(topic, data, publishContainer, subscribeContainer) { return true; },
-        onSubscribe:     function(topic, container) { return true; },
-        onUnsubscribe:   function(topic, container) { return true; },
-        onSecurityAlert: function(source, alertType) {}
-	});
-};
-
-eclipse.PluginRegistry.prototype = {
-	start: function() {
-		console.debug("registry.start()");
-		this._loadFromStorage();
-		this._managedHub.subscribe("orion.plugin.response", this._handlePluginResponse, this);
-		this._managedHub.subscribe("orion.plugin.load", this._handlePluginLoad, this);
-	},
-	
-	stop: function() {
-		console.debug("registry.stop()");
-		//this.clear();
-	},
-	
-	clear: function() {
-		console.debug("registry.clear()");
-		var pluginKeys = [];
-		for (var i = 0; i < localStorage.length; i++) {
-			var key = localStorage.key(i);
-			var index = key.search(/^orion.plugin./); 
-			if (index != -1) {
-				pluginKeys.push(key);
-			}
-		}
-		for (i = 0; i < pluginKeys.length; i++) {
-			console.debug("removing localstorage item ["+pluginKeys[i]+"]");
-			localStorage.removeItem(pluginKeys[i]);
-		}
-		this._plugins = {};
-	},
-	
-	addEventListener: function(eventType, eventListener) {
-		if (eventType === "onPluginLoad") {
-			this._eventListeners.onPluginLoad.push(eventListener);
-		} else if (eventType === "onPluginInstall") {
-			this._eventListeners.onPluginInstall.push(eventListener);
-		} else if (eventType === "onPluginUninstall") {
-			this._eventListeners.onPluginUninstall.push(eventListener);
-		} else {
-			throw new Error("Invalid event type ["+eventType+"]");
-		}
-	},
-	
-	loadPlugin: function(pluginURL, callback) {
-		pluginURL = this._resolvePluginURL(pluginURL);
-		var pluginContainer = this._managedHub.getContainer(pluginURL);
-		if (pluginContainer === null) {
-			if (callback !== undefined) {
-				if (this._loadPluginCallbacks[pluginURL] === undefined) {
-					this._loadPluginCallbacks[pluginURL] = [];
-				}
-				this._loadPluginCallbacks[pluginURL].push(callback);
-			}
-			console.debug("loading plugin url["+pluginURL+"]");
-		    pluginContainer = new OpenAjax.hub.IframeContainer(this._managedHub, pluginURL, {
-    			Container: {
-    				onSecurityAlert: function(source, alertType) {},
-    	            onConnect:       function(container) {},
-    	            onDisconnect:    function(container) {}
-    			},
-    			IframeContainer: {
-    				parent:  document.body, 
-    	            iframeAttrs: { style: { display: "none" }},
-    	            uri: pluginURL,
-    	            tunnelURI : window.location.protocol + "//"+window.location.host+"/openajax/release/all/tunnel.html"
-    			}
-		    });
-		} else {
-			this._sendPluginRequest("metadata", {}, pluginURL, function(metadata) {
-				callback(metadata);
-			});
-		}
-	    return pluginContainer.getIframe();
-	},
-	
-	installPlugin: function(pluginURL, pluginData) {
-		pluginURL = this._resolvePluginURL(pluginURL);
-		if (localStorage["orion.plugin."+pluginURL] !== undefined && localStorage["orion.plugin."+pluginURL] !== null) {
-			throw new Error("Plugin ["+pluginURL+"] has already been installed");
-		}
-		console.debug("installing plugin url["+pluginURL+"]");
-		if (pluginData !== undefined) {
-			var metadata = {pluginURL: pluginURL, pluginData: pluginData};
-			this._installPlugin(metadata, this);
-		} else {
-			var scope = this;
-			this.loadPlugin(pluginURL, function(metadata){
-				scope._installPlugin(metadata, scope);
-			});
-		}
-	},
-	
-	uninstallPlugin: function(pluginURL) {
-		pluginURL = this._resolvePluginURL(pluginURL);
-		if (localStorage["orion.plugin."+pluginURL] !== undefined && localStorage["orion.plugin."+pluginURL] !== null) {
-			delete this._plugins[pluginURL];
-			localStorage.removeItem("orion.plugin."+pluginURL);
-			var pluginContainer = this._managedHub.getContainer(pluginURL);
-			if (pluginContainer !== null) {
-				this._managedHub.removeContainer(pluginContainer);
-			}
-			for (var serviceType in this._serviceTypes) {
-				if (this._serviceTypes[serviceType].provider === pluginURL) {
-					delete this._serviceTypes[serviceType];
-				}
-			}
-			for (var i = 0; i < this._eventListeners.onPluginUninstall.length; i++) {
-				this._eventListeners.onPluginUninstall[i]({pluginURL: pluginURL});
-			}
-		} else {
-			throw new Error("Plugin ["+pluginURL+"] is not currently installed");
-		}
-	},
-	
-	getPlugins: function() {
-		return this._plugins;
-	},
-	
-	getPlugin: function(pluginURL) {
-		pluginURL = this._resolvePluginURL(pluginURL);
-		if (this._plugins[pluginURL] !== undefined) {
-			return this._plugins[pluginURL];
-		} else {
-			return null;
-		}
-	},
-	callService: function(serviceType, methodName, callback, params) {
-		var scope = this;
-		var serviceReference = this.getServiceReference(serviceType);
-		this.getService(serviceReference, function(service) {
-			service.invoke(methodName, params, function(data) {
-				callback(data);
-				scope.ungetService(serviceReference);
-			});
-		});
-	},
-	callService2: function(serviceType, methodName, callback, params) {
-		var scope = this;
-		var plugin = this.getPlugin(serviceType.provider);
-		if (plugin._serviceReferences === undefined) {
-			plugin._serviceReferences = {};
-		}
-		var serviceReference = new eclipse.ServiceReference0(serviceType, plugin, this);
-		this.getService(serviceReference, function(service) {
-			service.invoke(methodName, params, function(data) {
-				callback(data);
-				//scope.ungetService(serviceReference);
-			});
-		});
-	},
-
-	getServiceReference: function(serviceTypeId) {
-		if (this._serviceTypes[serviceTypeId] === undefined) {
-			throw new Error("No service of type ["+serviceTypeId+"] is available");
-		}
-		var serviceType = this._serviceTypes[serviceTypeId];
-		var pluginServiceProvider = this.getPlugin(serviceType.provider);
-		if (pluginServiceProvider._serviceReferences === undefined) {
-			//console.debug("creating serviceReferences");
-			pluginServiceProvider._serviceReferences = {};
-		}
-		var serviceReference = pluginServiceProvider._serviceReferences[serviceTypeId];
-		if (serviceReference === undefined) {
-			//console.debug("creating service reference for ["+serviceType+"]");
-			serviceReference = new eclipse.ServiceReference0(serviceType, pluginServiceProvider, this);
-		}
-		return serviceReference;
-	},
-	
-	getService: function(serviceReference, loadedCallback) {
-		var service = serviceReference._service;
-		serviceReference._incrementUseCount();
-		if (service === undefined) {
-			//console.debug("creating service for ["+serviceReference._serviceType.id+"]");
-			service = new eclipse.Service0(serviceReference, this, loadedCallback);
-		} else {
-			//console.debug("using existing service for ["+serviceReference._serviceType.id+"]");
-			loadedCallback(service);
-		}
-		return service;
-	},
-	
-	ungetService: function(serviceReference) {
-		serviceReference._unget();
-	},
-	
-	_installPlugin: function(metadata, scope) {
-		console.debug("writing localstorage with key ["+"orion.plugin."+metadata.pluginURL+"]");
-		localStorage["orion.plugin."+metadata.pluginURL] = JSON.stringify(metadata);
-		scope._plugins[metadata.pluginURL] = metadata;
-		if (metadata.pluginData.services !== undefined) {
-			scope._loadServiceTypes(metadata.pluginURL, metadata.pluginData.services);
-		}
-
-		for (var i = 0; i < scope._eventListeners.onPluginInstall.length; i++) {
-			scope._eventListeners.onPluginInstall[i]({pluginURL: metadata.pluginURL});
-		}
-	},
-	
-	_resolvePluginURL: function(pluginURL) {
-		if (pluginURL.indexOf("://") == -1) {
-			return window.location.protocol + "//"+window.location.host + pluginURL; 
-		} else {
-			return pluginURL;
-		}
-	}, 
-	
-	_handlePluginResponse: function(topic, msg, subscriberData) {
-		switch (msg.type) { 
-			case "service" :
-			case "metadata": {
-				var callback = this._msgCallbacks[String(msg.id)];
-				delete this._msgCallbacks[String(msg.id)];
-				callback(msg.result);
-				break;
-			}
-			case "event" : {
-				var pluginServiceProvider = this.getPlugin(msg.result.pluginURL);
-				if (pluginServiceProvider === null) {
-					throw new Error("Unable to locate plugin service provider identified by ["+msg.result.pluginURL+"]");
-				}
-				var serviceReference = pluginServiceProvider._serviceReferences[msg.result.serviceType];
-				if (serviceReference === undefined) {
-					throw new Error("Unable to locate service reference in provider identified by ["+msg.result.pluginURL+"] type ["+msg.result.serviceType+"]");
-				}
-				serviceReference._service._dispatchEvent(msg.result.eventType, msg.result.eventData);
-				break;
-			}
-		}
-	},
-	
-	_handlePluginLoad: function(topic, result, subscriberData) {
-		console.debug("_handlePluginLoad ["+result.pluginURL+"]");
-		for (var i = 0; i < this._eventListeners.onPluginLoad.length; i++) {
-			this._eventListeners.onPluginLoad[i](result);
-		}
-		if (this._loadPluginCallbacks[result.pluginURL] !== undefined) {
-			var callbacks = this._loadPluginCallbacks[result.pluginURL];
-			for (var i = 0; i < callbacks.length; i++) {
-				callbacks[i](result);
-			}
-			delete this._loadPluginCallbacks[result.pluginURL];
-		}
-	},
-	
-	_loadFromStorage: function() {
-		for (var i = 0; i < localStorage.length; i++) {
-			var storageKey = localStorage.key(i);
-			var index = storageKey.search(/^orion.plugin./); 
-			if (index != -1) {
-				try {
-					var pluginURL = storageKey.substring(index+"orion.plugin.".length);
-					var pluginDataString = localStorage[localStorage.key(i)];
-					this._plugins[pluginURL] = JSON.parse(pluginDataString);
-					if (this._plugins[pluginURL].pluginData.services !== undefined) {
-						this._loadServiceTypes(pluginURL, this._plugins[pluginURL].pluginData.services);
-					}
-				} catch (exc) {
-					console.debug("unable to parse plugin string ["+pluginDataString+"] : "+exc);
-				}
-			}
-		}
-	},
-	
-	_sendPluginRequest: function(type, msgData, pluginURL, callback) {
-		var pluginContainer = this._managedHub.getContainer(pluginURL);
-		if (pluginContainer !== null) {
-			var requestId = ++this._currentId;
-			this._msgCallbacks[String(requestId)] = callback;
-			var msg = {
-				id: requestId,
-				type: type,
-				msgData: msgData
-			};
-			this._managedHub.publish("orion.plugin.request["+pluginURL+"]", msg);
-		} else {
-			throw new Error("Unable to locate plugin container for ["+pluginURL+"]");
-		}
-	},
-	
-	_cleanupServiceReference: function(serviceReference) {
-		//console.debug("deleting service reference for ["+serviceReference._serviceType.id+"]");
-		delete serviceReference._pluginServiceProvider._serviceReferences[serviceReference._serviceType.id];
-		var count = 0;
-		for (var p in serviceReference._pluginServiceProvider._serviceReferences) { 
-			count++;
-		}
-		//console.debug("pluginServiceProvider ["+serviceReference._pluginServiceProvider.pluginURL+"] has "+count+" service references");
-		if (count < 1) {
-			var pluginContainer = this._managedHub.getContainer(serviceReference._pluginServiceProvider.pluginURL);
-			if (pluginContainer !== null) {
-				//console.debug("removing container for ["+serviceReference._pluginServiceProvider.pluginURL+"]");
-				this._managedHub.removeContainer(pluginContainer);
-			}
-		}
-	},
-	
-	_loadServiceTypes: function(pluginURL, services) {
-		for (var i = 0; i < services.length; i++) {
-			var serviceType = services[i].serviceType;
-			serviceType.provider = pluginURL;
-			this._serviceTypes[serviceType.id] = serviceType;
-			this._serviceRegistry.registerService(serviceType.id, this._createServiceProxy(serviceType));
-		}
-	},
-	_createServiceProxy: function(serviceType) {
+	function _createServiceProxy(service) {
 		var serviceProxy = {};
-		var boundCallService = dojo.hitch(this, this.callService2);
-		if (serviceType.interfaces) {
-			for (var i = 0; i < serviceType.interfaces.length; i++) {
-				var method = serviceType.interfaces[i];
+		if (service.methods) {
+			for (var i = 0; i < service.methods.length; i++) {
+				var method = service.methods[i];
 				serviceProxy[method] = function(methodName) {
 					return function() {
+						var params = Array.prototype.slice.call(arguments);
 						var d = new dojo.Deferred();
-						boundCallService(serviceType, methodName, dojo.hitch(d, d.resolve), Array.prototype.slice.call(arguments));
+						_self._load().then( function() {
+							_callService(service.serviceId, methodName, params, d);
+						});
 						return d.promise;
 					};
 				}(method);
@@ -453,5 +64,238 @@ eclipse.PluginRegistry.prototype = {
 		}
 		return serviceProxy;
 	}
+	
+	function _parseData() {
+		var services = data.services;
+		if (services) {
+			for(var i = 0; i < services.length; i++) {
+				var service = services[i];
+				var serviceProxy = _createServiceProxy(service);
+				_serviceRegistrations[service.serviceId] = internalRegistry.serviceRegistry.registerService(service.type, serviceProxy, service.properties);
+			}
+		}	
+	}
+	
+	function _responseHandler(topic, message) {
+		try {
+			if (message.method) {
+				if ("plugin" === message.method) {
+					if (!data) {
+						data = message.params[0];
+						_parseData();
+					}
+					if (!_loaded) {
+						_loaded = true;
+						_deferredLoad.resolve(_self);
+					}
+				} else if ("dispatchEvent" === message.method){
+					_serviceRegistrations[message.serviceId].dispatchEvent(message.params[0], message.params.slice(1));		
+				} else {
+					throw new Error("Bad response method: " + message.method);
+				}		
+			} else {
+				var deferred = _deferredResponses[String(message.id)];
+				delete _deferredResponses[String(message.id)];
+				if (message.error) {
+					deferred.reject(message.error);
+				} else {
+					deferred.resolve(message.result);
+				}
+			}
+		} catch (e) {
+			console.err(e);
+		}
+	}
+	
+	this.getLocation = function() {
+		return url;
+	};
+	
+	this.getData = function() {
+		return data;
+	};
+	
+	this.uninstall = function() {
+		var serviceId;
+		for (serviceId in _serviceRegistrations) {
+			if (_serviceRegistrations.hasOwnProperty(serviceId)) {
+				_serviceRegistrations[serviceId].unregister();
+				delete _serviceRegistrations[serviceId];
+			}
+		}
+		internalRegistry.uninstallPlugin(this);
+	};
+	
+	this.getServiceReferences = function() {
+		var result = [];
+		var serviceId;
+		for (serviceId in _serviceRegistrations) {
+			if (_serviceRegistrations.hasOwnProperty(serviceId)) {
+				result.push(_serviceRegistrations[serviceId].getServiceReference());
+			}
+		}
+		return result;
+	};
+	
+	this._load = function() {
+		if (!_container) {
+			var hub = internalRegistry.hub;
+			_container = new OpenAjax.hub.IframeContainer(hub, url, {
+				Container : {
+					onSecurityAlert : function(source, alertType) {
+					},
+					onConnect : function(container) {
+						hub.subscribe("response[" + url + "]", _responseHandler);
+					},
+					onDisconnect : function(container) {
+						hub.unsubscribe("response[" + url + "]");
+					}
+				},
+				IframeContainer : {
+					parent : document.body,
+					iframeAttrs : {
+						style : {
+							display : "none"
+						}
+					},
+					uri : url,
+//					tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/release/all/tunnel.html"
+					tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/src/containers/iframe/tunnel.html"					
+				}
+			});
+		}
+		return _deferredLoad.promise;
+	};
+	
+	if (typeof url !== "string") {
+		throw new Error("invalid url:" + url);
+	}
+	
+	if (data) {
+		_parseData();
+	}
 };
 
+eclipse.PluginRegistry = function(serviceRegistry) {
+	var _plugins = [];
+	var _pluginEventTarget = new eclipse.EventTarget();
+	
+	var _managedHub = new OpenAjax.hub.ManagedHub({
+		onPublish:       function(topic, data, publishContainer, subscribeContainer) { return true; },
+        onSubscribe:     function(topic, container) { return true; },
+        onUnsubscribe:   function(topic, container) { return true; },
+        onSecurityAlert: function(source, alertType) {}
+	});
+
+	function _loadFromStorage() {
+		for (var i = 0; i < localStorage.length; i++) {
+			var key = localStorage.key(i);
+			if (key.indexOf("plugin.") === 0) {
+				var pluginURL = key.substring("plugin.".length);
+				var pluginData = JSON.parse(localStorage[key]);
+				var plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
+				_plugins[_plugins.length] = plugin;
+			}
+		}	
+	}
+	
+	function _persist(plugin) {
+		localStorage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
+	}
+
+	function _clear(plugin) {
+		delete localStorage["plugin."+plugin.getLocation()];
+	}
+	
+	function _normalizeURL(location) {
+		if (location.indexOf("://") == -1) {
+			var temp = document.createElement('a');
+			temp.href = location;
+	        return temp.href;
+		}
+		return location;
+	}
+	
+	var internalRegistry = {
+			serviceRegistry: serviceRegistry,
+			hub: _managedHub,
+			uninstallPlugin: function(plugin) {
+				_clear(plugin);
+				for (var i = 0; i < _plugins.length; i++) {
+					if (plugin === _plugins[i]) {
+						_plugins.splice(i,1);
+						_pluginEventTarget.dispatchEvent("pluginRemoved", plugin);
+						break;
+					}
+				}
+			},
+			publish: function(topic, message) {
+				_managedHub.publish(topic, message);
+			}
+	};
+	
+	this.installPlugin = function(url) {
+		url = _normalizeURL(url);
+		var d = new dojo.Deferred();
+		var plugin;
+		for (var i = 0; i < _plugins.length; i++) {
+			if (url === _plugins[i].getLocation()) {
+				plugin = _plugins[i];
+				break;
+			}
+		}
+		if (plugin) {
+			if(plugin.getData()) {
+				d.resolve(plugin);
+			} else {
+				var pluginTracker = function(plugin) {
+					if (plugin.getLocation() === url) {
+						d.resolve(plugin);
+						_pluginEventTarget.removeEventListener("pluginAdded", pluginTracker);
+					}
+				};
+				_pluginEventTarget.addEventListener("pluginAdded", pluginTracker);
+			}
+		} else {
+			plugin = new eclipse.Plugin(url, null, internalRegistry);
+			_plugins.push(plugin);
+			plugin._load().then(function() {
+				_persist(plugin);
+				_pluginEventTarget.dispatchEvent("pluginAdded", plugin);
+				d.resolve(plugin);
+			});			
+		}
+		return d.promise;	
+	};
+	
+	this.getPlugins = function() {
+		var result =[];
+		for (var i = 0; i < _plugins.length; i++) {
+			if (_plugins[i].getData()) {
+				result.push(_plugins[i]);
+			}
+		}
+		return result;
+	};
+
+	this.getPlugin = function(url) {
+		url = _normalizeURL(url);
+		for (var i = 0; i < _plugins.length; i++) {
+			if (_plugins[i].getData() && url === _plugins[i].getLocation()) {
+				return _plugins[i];
+			}
+		}
+		return null;
+	};
+	
+	// pluginAdded, pluginRemoved
+	this.addEventListener = function(eventName, listener) {
+		_pluginEventTarget.addEventListener(eventName, listener);
+	};
+	
+	this.removeEventListener = function(eventName, listener) {
+		_pluginEventTarget.removeEventListener(eventName, listener);
+	};
+	
+	_loadFromStorage();
+};

@@ -25,12 +25,13 @@ eclipse.ServiceProvider = function(serviceId, internalProvider) {
 };
 
 eclipse.PluginProvider = function() {
-	var _hubClient;
+	var _hubClient = null;
+	
 	var _services = [];
 	var _connected = false;
 
 	function _publish(message) {
-		_hubClient.publish("orion.plugin.response", message);
+		_hubClient.publish("response["+_hubClient.getClientID()+"]", message);
 	}
 	
 	var _internalProvider = {
@@ -50,8 +51,7 @@ eclipse.PluginProvider = function() {
 				if (_connected) {
 					throw new Error("Cannot unregister. Plugin Provider is connected");
 				}
-				//_services[serviceId] = null;
-				_services = [];
+				_services[serviceId] = null;
 			}
 	};
 	
@@ -59,7 +59,7 @@ eclipse.PluginProvider = function() {
 		var services = [];
 		for (var i = 0; i < _services.length; i++) {
 			if (_services[i]) {
-				services.push({id: "" + i, serviceType: {id: _services[i].type, interfaces: _services[i].methods, properties: _services[i].properties}});
+				services.push({serviceId: i, type: _services[i].type, methods: _services[i].methods, properties: _services[i].properties });
 			}
 		}
 		return {services: services};		
@@ -67,25 +67,23 @@ eclipse.PluginProvider = function() {
 	
 	function _handleRequest(topic, message) {
 		try {
-			if (message.type === "metadata") {
-				_publish({type: "metadata", id: message.id, result: _getPluginData(), error: null});
+			var serviceId = message.serviceId;
+			var service = _services[serviceId].implementation;
+			var method = service[message.method];
+			
+			var response = {id: message.id, result: null, err: null};
+			var promiseOrResult = method.apply(service, message.params);
+			if(promiseOrResult && typeof promiseOrResult.then === "function"){
+				promiseOrResult.then(function(result) {
+					response.result = result;
+					_publish(message);
+				}, function(error) {
+					response.error = error;
+					_publish(message);
+				});
 			} else {
-				var service = _services[0].implementation;
-				var method = service[message.msgData.method];
-				var response = {type: "service", id: message.id, result: null, err: null};
-				var promiseOrResult = method.apply(service, message.msgData.params);
-				if(promiseOrResult && typeof promiseOrResult.then === "function"){
-					promiseOrResult.then(function(result) {
-						response.result = result;
-						_publish(response);
-					}, function(error) {
-						response.error = error;
-						_publish(response);
-					});
-				} else {
-					response.result = promiseOrResult;
-					_publish(response);
-				}
+				response.result = promiseOrResult;
+				_publish(response);
 			}
 		} catch (error) {
 			response.error = error;
@@ -96,10 +94,6 @@ eclipse.PluginProvider = function() {
 	this.registerServiceProvider = function(type, implementation, properties) {
 		if (_connected) {
 			throw new Error("Cannot register. Plugin Provider is connected");
-		}
-		
-		if (_services.length == 1) {
-			throw new Error("Implementation restriction. There can be only one");
 		}
 		
 		var method;
@@ -127,12 +121,12 @@ eclipse.PluginProvider = function() {
 		});
 		_hubClient.connect(function(hubClient, success, error) {
 			if (success) {
-				_hubClient.subscribe("orion.plugin.request[" + _hubClient.getClientID() + "]", _handleRequest);
+				_hubClient.subscribe("request["+_hubClient.getClientID()+"]", _handleRequest);
 				var message = {
-					pluginURL: _hubClient.getClientID(),
-					pluginData: _getPluginData()
+					method: "plugin",
+					params: [_getPluginData()]
 				};
-				_hubClient.publish("orion.plugin.load", message);
+				_publish(message);
 				_connected = true;
 			}
 		});

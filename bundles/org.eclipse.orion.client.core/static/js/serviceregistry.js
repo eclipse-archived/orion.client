@@ -45,6 +45,10 @@ eclipse.ServiceRegistration = function(serviceId, serviceReference, internalRegi
 	this.dispatchEvent = function(eventName) {
 		internalRegistry.dispatchEvent.apply(internalRegistry, [serviceId, eventName].concat(Array.prototype.slice.call(arguments, 1)));
 	};
+	
+	this.getServiceReference = function() {
+		return serviceReference;
+	};
 };
 
 eclipse.Service = function(serviceId, implementation, internalRegistry) {

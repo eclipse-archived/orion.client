@@ -42,26 +42,29 @@ dojo.declare("widgets.RegistryTree", [dijit.Tree], {
 		    plugins = registry.getPlugins();
 		this.forEach(registry.getPlugins(), dojo.hitch(this, function(name, value) {
 			var plugin = value,
-			    newPrefix = prefix + "|" + plugin.pluginURL,
-			    //services = this.buildServices(newPrefix, plugin.pluginData.services),
-			    extensions = this.buildExtensions(newPrefix, plugin.pluginData.extensions);
+			    newPrefix = prefix + "|" + plugin.getLocation(),
+			    services = this.buildServices(newPrefix, plugin.getServiceReferences());
 			nodes.push({
 				id: newPrefix,
-				label: plugin.pluginURL,
-				children: [/*services,*/ extensions]
+				label: plugin.getLocation(),
+				children: [services]
 			});
 		}));
 		return nodes;
 	},
-	buildProperties: function(prefix, /** Object */ properties) {
+	buildProperties: function(prefix, /** Object */ reference) {
 		var newPrefix = prefix + "|properties",
 		    data = [];
-		this.forEach(properties, function(key, value) {
-				data.push({
-					id: newPrefix + "|" + key,
-					value: value
-				});
+		
+		var propertyNames = reference.getPropertyNames();
+		for (var i =0; i < propertyNames.length; i++) {
+			var key = propertyNames[i];
+			var value = reference.getProperty(key);
+			data.push({
+				id: newPrefix + "|" + key,
+				label: key + " = " + value
 			});
+		}
 		var result = {
 			id: newPrefix,
 			label: "Properties",
@@ -72,63 +75,23 @@ dojo.declare("widgets.RegistryTree", [dijit.Tree], {
 		}
 		return result;
 	},
-//	buildServices: function(prefix, /** Array */ services) {
-//		var scope = this;
-//		function buildInterfaces(prefix, /** Object*/ serviceType) {
-//			var interfaces = serviceType.interfaces /** Array */,
-//			    data = [],
-//			    newPrefix = prefix + "|interfaces";
-//			for (var i=0; i < interfaces.length; i++) {
-//				var interfaze = interfaces[i]; /** String */
-//				data.push({
-//					id: newPrefix + "|" + i,
-//					label: interfaze
-//				});
-//			}
-//			return {
-//				id: newPrefix,
-//				label: "Interfaces",
-//				children: data
-//			};
-//		}
-//		
-//		var data = [];
-//		for (var i=0; i < services.length; i++) {
-//			var service = services[i],
-//			    servicePrefix = prefix + "|services|" + i,
-//			    serviceType = service.serviceType;
-//			data.push({
-//				id: servicePrefix,
-//				label: service.id + " (Service type: " + serviceType.id + ")",
-//				children: [buildInterfaces(servicePrefix, serviceType), this.buildProperties(servicePrefix, service.properties)]
-//			});
-//		}
-//		return {
-//			id: prefix + "|services",
-//			label: "Services",
-//			children: data
-//		};
-//	},
-	buildExtensions: function(prefix, /** eclipse.Plugin? */plugin) {
-		var newPrefix = prefix + "|extensions",
-		    extensions = plugin && plugin.extensions,
-		    data = [];
-		if (!extensions) {
-			return {
-				id: newPrefix,
-				label: "Extensions"
-			};
-		}
-		
-		for (var i=0; i < extensions.length; i++) {
-			var extension = extensions[i];
+	buildServices: function(prefix, /** Array */ references) {
+		var scope = this;
+		var data = [];
+		for (var i=0; i < references.length; i++) {
+			var reference = references[i],
+			    servicePrefix = prefix + "|services|" + i,
+			    serviceName = reference.getName();
 			data.push({
-				id: newPrefix + extension.name,
-				label: extension.name + " (Extension point: " + extension.point + ")"			});
+				id: servicePrefix,
+				label: serviceName + " (Service Id: " + reference.getServiceId() + ")",
+				children: [this.buildProperties(servicePrefix, reference)]
+			});
 		}
 		return {
-			id: newPrefix,
-			label: "Extensions"
+			id: prefix + "|services",
+			label: "Services",
+			children: data
 		};
 	},
 	/** @return {Array} */

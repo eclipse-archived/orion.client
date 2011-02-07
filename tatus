@@ -1,0 +1,572 @@
+commit 9867e614e484fa7d3c986f2df7e191d02ce760f8
+Merge: f32824c ccb3b4c
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 31 13:44:36 2011 -0500
+
+    Merge branch 'master' of ssh://dev.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit f32824cd2ab78cb9e1304d2c52fed692a42baa1f
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 31 13:44:25 2011 -0500
+
+    changed favico and logo to what Nathan did on orion.eclipse.org
+
+commit ccb3b4cb32552ea86c7fa2d7b55cc36734bae797
+Merge: e2d0385 a755962
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Mon Jan 31 13:20:15 2011 -0500
+
+    Merge branch 'master' of ssh://git.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit e2d0385517f22c479d0578d2bcf8be6888833652
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Mon Jan 31 13:19:24 2011 -0500
+
+    fixing image urls in unit test page
+
+commit a755962d9c8748f3bb8b59c1a74ef361c54d930b
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 31 13:15:03 2011 -0500
+
+    remove button that links to non-functional unit test page
+
+commit 4395c7c19d97fcbc6381f81f01d0592baf39e97b
+Author: John Arthorne <John_Arthorne@ca.ibm.com>
+Date:   Mon Jan 31 12:45:55 2011 -0500
+
+    Revert fix for bug 335603
+
+commit 53d67bb0444b44ac1f554116551d33d7dec0ce1c
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 31 12:19:40 2011 -0500
+
+    removed singleton restriction, fixed performance problem caused by creating and deleting iframes
+
+commit b268911c086c6e5c5223189053fd51e17154acc5
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 31 12:18:57 2011 -0500
+
+    moved plugin code into the HTML file, and created a second example
+
+commit 610c173cf3880998b2df7a8bc8c5e672ae05413d
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 31 12:17:14 2011 -0500
+
+    removed unused file
+
+commit 0e2ad544a167a371f395a2942363084a3a6ebce9
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 31 12:17:04 2011 -0500
+
+    removed unused file
+
+commit 7b911594d73244d115e4d6366d5294d656e1c716
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 31 12:16:27 2011 -0500
+
+    remove editor action for commenting out - these are supposed to be installed by the user.
+
+commit b30b1c44ddfd1b9567866cd3e243d23536879f63
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 31 12:15:40 2011 -0500
+
+    window.onload instead of dom content loaded event, for IE
+
+commit ec1d2a0c43c3e9f8dbac7fb1de1b2311ce823e31
+Author: Malgorzata Janczarska <malgorzata.tomczyk@pl.ibm.com>
+Date:   Mon Jan 31 10:42:14 2011 +0100
+
+    Bug 335747 [client] [IE] I have to refresh the page manually to see a newly added user
+
+commit 7d36bc0c99e8c54967f4871917d98fa1b8a6e341
+Merge: 9e86393 ab30eca
+Author: Szymon Brandys <Szymon.Brandys@pl.ibm.com>
+Date:   Sat Jan 29 00:46:38 2011 +0100
+
+    Merge remote branch 'origin/master' into HEAD
+
+commit 9e8639396898bcc0c1839485994077f3b14d92a1
+Author: Szymon Brandys <Szymon.Brandys@pl.ibm.com>
+Date:   Sat Jan 29 00:44:41 2011 +0100
+
+    Bug 335740 - [client][IE] User management page doesn't work on IE
+
+commit ab30ecab35dd15e5c9cc2f7b198a419fbf72c499
+Author: Mark Macdonald <mamacdon@ca.ibm.com>
+Date:   Fri Jan 28 18:18:27 2011 -0500
+
+    Bug 335603 - [client] [IE] Incremental search slow in IE
+    - Don't use RegExp.exec() for simple searches
+
+commit f51e132bceebc3431cc0af7e22b5a6244444c90c
+Author: Mark Macdonald <mamacdon@ca.ibm.com>
+Date:   Fri Jan 28 11:43:26 2011 -0500
+
+    Bug 335603 - [client]Incremental search broken
+    - Fix Ctrl+J showing "undefined"
+
+commit c770f3b03953d528e63c8aa4cf3e0fcbf8bf6e6d
+Author: Szymon Brandys <Szymon.Brandys@pl.ibm.com>
+Date:   Fri Jan 28 19:13:06 2011 +0100
+
+    Can't upload zip files on IE8 - fixed
+
+commit 353a596544581da79d036a0322075e69d2ae8e97
+Author: Szymon Brandys <Szymon.Brandys@pl.ibm.com>
+Date:   Fri Jan 28 14:13:14 2011 +0100
+
+    Bug 334720 - The navigator is refreshed after the import now
+
+commit 82483cf831e6b45815f901867604e265973437cb
+Author: Szymon Brandys <Szymon.Brandys@pl.ibm.com>
+Date:   Fri Jan 28 12:48:37 2011 +0100
+
+    Bug 334720 - [client] need UI for import/export
+
+commit 8d4dbce161bb417a8f4f9ecd23e58a677dd90aa2
+Author: Malgorzata Janczarska <malgorzata.tomczyk@pl.ibm.com>
+Date:   Fri Jan 28 12:41:25 2011 +0100
+
+    Adjust layout of window to import files.
+
+commit 6c7c2eac2b9b9cdd4c946641b733b16c5bb50150
+Author: Szymon Brandys <Szymon.Brandys@pl.ibm.com>
+Date:   Fri Jan 28 11:11:44 2011 +0100
+
+    Import UI polishing
+
+commit 83adac1643062ad0de50f8ff337b04ec855ee480
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Thu Jan 27 22:35:49 2011 -0500
+
+    adding clear registry to view-pluginregistry.html
+
+commit cf30063eb1b20391b021b8b47110803ef8f04395
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Thu Jan 27 22:23:44 2011 -0500
+
+    adding upperPlugin.html as an example
+
+commit a40a668248221b1378677a75ec69da06f975f58d
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Thu Jan 27 21:38:56 2011 -0500
+
+    wiring pluginregistry to serviceregistry
+
+commit 7513d250dac4aa504dcae788ba4cd3f8a03c37ff
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Thu Jan 27 16:49:58 2011 -0800
+
+    Bug 335631 - [client] prompting when leaving a dirty editor no longer works for just a hash change
+
+commit 78e8ded3f4541f0c773bd9774609e391a9f59a48
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Thu Jan 27 17:05:04 2011 -0500
+
+    making asynch services work and isolating plugin registry further
+
+commit 069ece14c37f188a92592c1e432e939de04a1fc7
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Thu Jan 27 11:59:03 2011 -0800
+
+    Bug 334193 - [client] double GETs when using favorites, folder links, or breadcrumb
+    
+    Part 2 of fix (see bug)
+
+commit af6594961c1a62ed44e2588968cbafc2b3ca29c0
+Merge: bc74b14 62d6ec3
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Thu Jan 27 11:23:42 2011 -0800
+
+    Merge branch 'master' of ssh://git.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit bc74b141ff98dd2872f93783aa018240d1aea1de
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Thu Jan 27 11:06:13 2011 -0800
+
+    Bug 334193 - [client] double GETs when using favorites, folder links, or breadcrumb
+
+commit 62d6ec3ed91734f038b24849d36f10c7844fef4b
+Merge: a201611 3cc6e79
+Author: Szymon Brandys <Szymon.Brandys@pl.ibm.com>
+Date:   Thu Jan 27 19:26:10 2011 +0100
+
+    Merge branch 'refs/heads/master' of ssh://sbrandys@dev.eclipse.org/gitroot/e4/org.eclipse.orion.client.git into HEAD
+
+commit a2016115b4e15592f23c0ac6df9ef35605aaecf7
+Author: Szymon Brandys <Szymon.Brandys@pl.ibm.com>
+Date:   Thu Jan 27 19:25:23 2011 +0100
+
+    Minor polish in Import UI
+
+commit 3cc6e796b587db3184d4034c0eeccabd8d41d443
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Thu Jan 27 10:16:32 2011 -0800
+
+    Bug 334815 - [client] Can't load editor if filename contains =
+
+commit 8eac721812e925d872ee8f0ff0ec44e62f2dba3a
+Author: Szymon Brandys <Szymon.Brandys@pl.ibm.com>
+Date:   Thu Jan 27 19:15:22 2011 +0100
+
+    Bug 334720 - [client] need UI for import/export
+
+commit 8c1dbac65eadec33ced928097bd6a047d90bad4d
+Merge: 282387e 586fd1e
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Thu Jan 27 12:53:23 2011 -0500
+
+    Merge branch 'master' of ssh://git.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit 282387ef2f462559e103a609879d13095aa8bb4f
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Thu Jan 27 12:52:23 2011 -0500
+
+    removing a reference to plugin registry that is no longer needed
+
+commit 586fd1eef642754b545b20d9cca3749ebf6a88c8
+Merge: a2a768b ae119a0
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Thu Jan 27 09:40:08 2011 -0800
+
+    Merge branch 'master' of ssh://git.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit a2a768bf5d06b8508431ecd66dd9716b4eae3816
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Thu Jan 27 09:39:18 2011 -0800
+
+    Bug 335487 - Inconsistent terms: Folder vs Project
+
+commit ae119a0953cf289205f7ba4812ad96f3d48de0ff
+Author: Szymon Brandys <Szymon.Brandys@pl.ibm.com>
+Date:   Thu Jan 27 18:38:47 2011 +0100
+
+    Bug 334720 - [client] need UI for import/export
+
+commit 1d7b452ae9fad7904784b8b232c1153b805f623e
+Author: Szymon Brandys <Szymon.Brandys@pl.ibm.com>
+Date:   Thu Jan 27 18:31:16 2011 +0100
+
+    Bug 334720 - [client] need UI for import/export
+
+commit 1e5e269f671bbd686611b51338d663b07c58249c
+Merge: 422e640 5da190e
+Author: John Arthorne <John_Arthorne@ca.ibm.com>
+Date:   Thu Jan 27 11:53:18 2011 -0500
+
+    Merge branch 'master' of ssh://git.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit 422e64036eb74d9ab582ae194ac130751f5024f6
+Author: John Arthorne <John_Arthorne@ca.ibm.com>
+Date:   Thu Jan 27 11:52:59 2011 -0500
+
+    Bug 335581 - Change boo into command to insert block comment
+
+commit 5da190e34168ae084544e5f0353b9abd737fb4ab
+Merge: f921d9f 02531ca
+Author: Malgorzata Janczarska <malgorzata.tomczyk@pl.ibm.com>
+Date:   Thu Jan 27 17:47:59 2011 +0100
+
+    Merge branch 'refs/heads/master' of ssh://mjanczarska@dev.eclipse.org/gitroot/e4/org.eclipse.orion.client.git into HEAD
+
+commit 02531ca2900f032dfadae2677967b1ba4b7670e3
+Merge: 7a6ca50 73e0f6d
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Thu Jan 27 11:43:37 2011 -0500
+
+    Merge branch 'master' of ssh://dev.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit 7a6ca5021bfd900342fbee5d0d61eae9e16f1866
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Thu Jan 27 11:43:27 2011 -0500
+
+    removed file that should not have been in the repository - bug 335578
+
+commit f921d9f987c46ac586140f0001168a892b033144
+Author: Malgorzata Janczarska <malgorzata.tomczyk@pl.ibm.com>
+Date:   Thu Jan 27 17:43:06 2011 +0100
+
+    Bug 335552 [client] "eclipse.Registry is not a constructor" error in user profile view
+
+commit 73e0f6d12b803afb9730a58badcd712a2c242a52
+Merge: b624344 744c46d
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Thu Jan 27 11:37:49 2011 -0500
+
+    Merge branch 'master' of ssh://git.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit b624344ac236cc0da0cf2edcdc2746392368eed5
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Thu Jan 27 11:36:04 2011 -0500
+
+    pre-cleanup before changing the plug-registry
+
+commit 744c46dfe6018c130add74c31ced5c36cd3ef537
+Author: Libing Wang <libingw@ca.ibm.com>
+Date:   Thu Jan 27 10:05:55 2011 -0500
+
+    fixed typo at line 260
+
+commit ef4052cc65e6ca4724b18dfd905630984675e557
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Wed Jan 26 23:46:55 2011 -0500
+
+    fixing copyrights and add another global comment for jslint sake
+
+commit 2d8df236519ec7fac5deb8060284b1fc309e6021
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Wed Jan 26 23:40:43 2011 -0500
+
+    changed cursor when over commands
+
+commit ddc11744ff3f018401563158ffc0dd6325704d88
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Wed Jan 26 18:30:18 2011 -0800
+
+    underline styling for text command links so we can remove gray on image buttons
+
+commit 2c185d859f3b5d40f04aba17ecf0db47df6c1cd2
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Wed Jan 26 16:59:57 2011 -0800
+
+    update doc to explain relationship between editor actions and command service
+
+commit 1a03221694b291482b24d5f69b6e5a4368a54d62
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Wed Jan 26 19:33:57 2011 -0500
+
+    added code for actions to be contributed to the editor toolbar (with two example actions that we will have to remove before M5)
+
+commit 26453d104457d5757f197e3c000d0714fafa0b5f
+Merge: 981f0e7 acaf455
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Wed Jan 26 19:32:35 2011 -0500
+
+    Merge branch 'master' of ssh://dev.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit acaf455f537894e144085549d62f0da9d1e580d2
+Author: Mark Macdonald <mamacdon@ca.ibm.com>
+Date:   Wed Jan 26 18:07:10 2011 -0500
+
+    Fix saved searches
+
+commit 981f0e7253a10966db76b8a5c802613a4650a3f7
+Merge: 9c70eca 1c9da0d
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Wed Jan 26 17:42:27 2011 -0500
+
+    Merge branch 'master' of ssh://dev.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit 9c70ecac2cd10c9dedf87e2ed9a6669f9d637947
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Wed Jan 26 17:42:23 2011 -0500
+
+    adding actions to editor toolbar
+
+commit 1c9da0dd3e4c0ee3107f290955b4d4d6b3201e5b
+Author: Andrew Niefer <aniefer@ca.ibm.com>
+Date:   Wed Jan 26 17:42:10 2011 -0500
+
+    bug 335238 - concat/minify
+
+commit 8c85041968a5ea1bbe585231b1f17c2d022a0c50
+Merge: ec526b2 2aac530
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Wed Jan 26 14:24:35 2011 -0800
+
+    Merge branch 'master' of ssh://git.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit ec526b24c9f7baec2c2cf8c8cf272bb74f1031cf
+Merge: 55e103c 6b691a0
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Wed Jan 26 14:19:24 2011 -0800
+
+    Merge branch 'master' of ssh://git.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit 2aac5308a8758a6b8c7ef6c79dfaed261de41a18
+Author: Mark Macdonald <mamacdon@ca.ibm.com>
+Date:   Wed Jan 26 17:10:01 2011 -0500
+
+    Bug 334567 - [client] [IE] Unit Test page doesn't open
+
+commit 55e103c6abde0173e13efe98f7a0ca45d6cf65f0
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Wed Jan 26 14:15:04 2011 -0800
+
+    https://bugs.eclipse.org/bugs/show_bug.cgi?id=334198
+    
+    Changes in service registry, handling of listeners, updates to all clients
+    Renamed registry.js to pluginregistry.js
+    The new good stuff is in serviceregistry.js
+
+commit 6b691a0da8e2ef7558b69342530f01113b4216cc
+Author: Andrew Niefer <aniefer@ca.ibm.com>
+Date:   Wed Jan 26 14:38:32 2011 -0500
+
+    bug 335498 - Navigate title should be Orion
+
+commit bb885cb1bc0d08f358f82b19ee7a3e4de5ac2a76
+Author: Andrew Niefer <aniefer@ca.ibm.com>
+Date:   Tue Jan 25 17:22:26 2011 -0500
+
+    fix project configuration
+
+commit 57e1d1ba381ad6fe35b7f533829d06478cabbc97
+Author: Andrew Niefer <aniefer@ca.ibm.com>
+Date:   Tue Jan 25 16:38:42 2011 -0500
+
+    fix build setup
+
+commit 2507a7780aee917a71208fb5d07d67531743eb83
+Author: Malgorzata Janczarska <malgorzata.tomczyk@pl.ibm.com>
+Date:   Tue Jan 25 15:47:17 2011 +0100
+
+    Bug 334318 [client] Double login prompt is bad
+
+commit 185c5223ad105df0e3e71fa07b1e76b99cc5a52a
+Author: Malgorzata Janczarska <malgorzata.tomczyk@pl.ibm.com>
+Date:   Tue Jan 25 14:15:34 2011 +0100
+
+    An administrator view to manage users: activation is needless
+
+commit 733bd8057a245f8c701cea074c52b0571bc70bc2
+Author: Malgorzata Janczarska <malgorzata.tomczyk@pl.ibm.com>
+Date:   Tue Jan 25 13:10:06 2011 +0100
+
+    Bug 334139 [client] An administrator view to manage users
+
+commit 7a4faa3c84801728d7cd82e15bf042a3aa7cc904
+Author: John Arthorne <John_Arthorne@ca.ibm.com>
+Date:   Mon Jan 24 11:43:30 2011 -0500
+
+    Bug 335207 - Bundle names and versions
+
+commit 0ea1ac2572659913a3cb57c4eadeaabab697461e
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Sat Jan 22 08:02:49 2011 -0500
+
+    More cleanup of client.core
+
+commit b464f9a3f903e77a1787606b0e3ca8e0c82029be
+Author: Simon Kaegi <simon_kaegi@ca.ibm.com>
+Date:   Sat Jan 22 01:10:05 2011 -0500
+
+    Tidying up client.core project
+
+commit dc5850c462c1520cb3443026290bfb9cfef92d8a
+Author: Mark Macdonald <mamacdon@ca.ibm.com>
+Date:   Thu Jan 20 10:55:56 2011 -0500
+
+    Bug 334415: [client] Scripting exploit in search dialog
+    
+    Don't use innerHTML for user input
+
+commit ebe3f6c9b25071ca8d9c3d76e5844414090fc2e0
+Author: John Arthorne <John_Arthorne@ca.ibm.com>
+Date:   Fri Jan 21 16:11:38 2011 -0500
+
+    Bug 335057 - EclipseWeb-Version header should be Orion-Version
+
+commit fea3eac70f788b79da112a1a864463884dd7d482
+Author: John Arthorne <John_Arthorne@ca.ibm.com>
+Date:   Fri Jan 21 15:46:49 2011 -0500
+
+    Bug 334469 - Search without any data leads to error
+
+commit 5f5e3a431713de54dc882b7c102e65117968f539
+Author: Susan McCourt <susan_franklin@us.ibm.com>
+Date:   Wed Jan 19 14:21:01 2011 -0800
+
+    Bug 334720 - [client] need UI for import/export
+
+commit ba5869a5b6d00e8f17427f4c1bfdc62ccd3b3e75
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Tue Jan 18 13:15:11 2011 -0500
+
+    cleaned up some comments
+
+commit cfb73c6f7eb8633726ac8406028a622bf0ec096b
+Author: Felipe Heidrich <Felipe_Heidrich@ca.ibm.com>
+Date:   Mon Jan 17 11:39:35 2011 -0500
+
+    Bug 334071 - [client][editor]Scrolling in a source file very slow
+
+commit d86180fa57c11e64504e14f0181f8ab7216fc482
+Author: Silenio Quarti <Silenio_Quarti@ca.ibm.com>
+Date:   Wed Jan 12 23:03:34 2011 -0500
+
+    rename HTML title  to Orion instead of Eclipse
+    fix delimiter
+
+commit 551c58c2fc33dddc8c56919bbb4d6c7f6b6af745
+Author: John Arthorne <John_Arthorne@ca.ibm.com>
+Date:   Wed Jan 12 13:24:57 2011 -0500
+
+    Changed project name on disk
+
+commit 48c2e3c129ac8207cde39ae6818af5201ebed1c1
+Author: Felipe Heidrich <Felipe_Heidrich@ca.ibm.com>
+Date:   Wed Jan 12 12:40:41 2011 -0500
+
+    rename the editor URI namespace from /webeditor to /editor
+
+commit 59ded64ed121bb6ceb25da4865925f4ee67450a9
+Merge: c471aa5 fd31620
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Wed Jan 12 11:58:22 2011 -0500
+
+    Merge branch 'master' of ssh://dev.eclipse.org/gitroot/e4/org.eclipse.orion.client
+
+commit c471aa5a9070316f8f657b22303cc6012228aef0
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Wed Jan 12 11:58:04 2011 -0500
+
+    renamed editor bundle to .orion.client.editor
+
+commit fd31620e48c3165cc6026d9ef56c7f13d6fc9d39
+Author: Felipe Heidrich <Felipe_Heidrich@ca.ibm.com>
+Date:   Wed Jan 12 11:34:50 2011 -0500
+
+    change the allow path key to the new name
+
+commit 35d86dae5c40570ddc3839dc15be8153317a2f03
+Author: Silenio Quarti <Silenio_Quarti@ca.ibm.com>
+Date:   Tue Jan 11 16:52:34 2011 -0500
+
+    exception in increment find
+
+commit 485358c90ba57984504657cfe23434df7975c648
+Author: John Arthorne <John_Arthorne@ca.ibm.com>
+Date:   Tue Jan 11 13:15:15 2011 -0500
+
+    Bundle and package rename
+
+commit e673a529a1ed1bb2ef600ba3c96c5a262869e081
+Author: Felipe Heidrich <Felipe_Heidrich@ca.ibm.com>
+Date:   Mon Jan 10 18:00:36 2011 -0500
+
+    Opera support, JSDoc
+
+commit 3caa00095b8ed1c8f2a001453b29e850fe74aa65
+Author: Mark Macdonald <mamacdon@ca.ibm.com>
+Date:   Mon Jan 10 17:49:13 2011 -0500
+
+    cleanup, replaced attr with get or set, registry view
+
+commit cb3bc789c273f9bb3506a347acc36a552d67cc3c
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 10 15:02:59 2011 -0500
+
+    cleanup, JSDoc, bug fixes in webide
+
+commit 8b75d71731ae009440a131f0093e83c7ff429c3c
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 10 14:54:22 2011 -0500
+
+    copyright and JSDoc changes
+
+commit 10078573fc0c4ca964c88ca135426c4bae1a5a16
+Author: Boris Bokowski <Boris_Bokowski@ca.ibm.com>
+Date:   Mon Jan 10 14:26:24 2011 -0500
+
+    initial contribution (see bug 331897)

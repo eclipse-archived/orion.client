@@ -7,7 +7,6 @@ dojo.addOnLoad(function() {
 	
 	// TODO get the registry from somewhere else
 	var registry = new eclipse.PluginRegistry(new eclipse.ServiceRegistry());
-	registry.start();
 	
 	var initTree = function() {
 		var tree = new widgets.RegistryTree({ registry: registry }, "registry-tree");
@@ -38,19 +37,20 @@ dojo.addOnLoad(function() {
 			//old.destroyRecursive();
 			dijit.registry.remove("registry-tree");
 		}
-		registry.clear();
+		var plugins = registry.getPlugins();
+		for (var i = 0; i < plugins.length; i++) {
+			plugins[i].uninstall();
+		}
 		initTree();
 	});
 	var installHandler = function(evt) {
 		var pluginUrl = installUrlTextBox.get("value");
-		registry.loadPlugin(pluginUrl, function(plugin) {
-			registry.installPlugin(plugin.pluginURL, plugin.pluginData);
+		registry.installPlugin(pluginUrl);
 			// FIXME: Add a callback for installPlugin() instead of using a timer
-			setTimeout(function() {
-				refreshButton.onClick();
-				installUrlTextBox.set("value", "");
-			}, 500);
-		});
+		setTimeout(function() {
+			refreshButton.onClick();
+			installUrlTextBox.set("value", "");
+		}, 500);
 	};
 	dojo.connect(installUrlTextBox, "onKeyPress", function(e) {
 		if (dojo.keys.ENTER === e.keyCode) {
