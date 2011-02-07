@@ -56,7 +56,7 @@ eclipse.TestConfigService = (function() {
 					var parents = metadata.Parents;
 					if(parents){
 						for(var k = 0; k < parents.length ; k++){
-							configValue.parents.push(parents[k].Location);
+							configValue.parents.push(parents[k].Location );
 						}
 					}
 				}),

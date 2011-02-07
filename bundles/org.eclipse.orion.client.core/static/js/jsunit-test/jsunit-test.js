@@ -33,6 +33,10 @@ function createNavModel(root , rootId  ,reg) {
     return new eclipse.TestNavigatorModel(root,rootId , reg);
 }
 
+function handleMessage(evt) {
+	uTestResult.handleMessage(evt);
+}
+
 dojo.addOnLoad(function(){
 	// create registry and instantiate needed services
 	serviceRegistry = new eclipse.ServiceRegistry();
@@ -65,7 +69,7 @@ dojo.addOnLoad(function(){
 	dojo.subscribe("/dojo/hashchange", navRenderer, function() {
 	   	uTestNavigator.loadResourceList(dojo.hash());
 	});
-	
+	window.addEventListener("message", handleMessage, false);
 });
 
 function createNewConfig(){

@@ -24,9 +24,8 @@ eclipse.UnitTestResult = (function() {
 		this._resultRoot = {
 			children:[]
 		};
+		this._testFiles = [];
 		this._filterDiv = dojo.byId("filterResult");
-		//var toolBarDom = dojo.byId("toolbar");
-		//dojo.style(tableRow, "background-color", "#eeeeee");
 		var self = this;
 		dojo.connect(this._filterDiv, "onchange", function() {
 			self.onFilterChange();
@@ -160,8 +159,128 @@ eclipse.UnitTestResult = (function() {
 		this._mockSuite.load([], f);
 	},
 	
-	//This function is for test simulation
-	//It simulates the result from the input selected files and will be removed later
+	//Modified by Libing after 20110124
+	_createIFrame: function(src) {
+	    var iframe = document.createElement("iframe");
+	    iframe.src = src;
+	    iframe.name = src;
+		var style = iframe.style;
+		style.position = "absolute";
+		style.left = "-2000px";
+		style.top = "0px";
+	    document.body.appendChild(iframe);
+	    return iframe;
+	},
+	
+	_initResultRoot: function(){
+		var root = {
+				children:[],
+				type: "root",
+				name: "Test Suite",
+				fileUrl: "",
+				line: 0,
+				succeed: true
+		};
+		this._resultRoot.children = [];
+		this._resultRoot.children.push(root);
+		this._testNumber = 0;
+		this._failureCounter = 0;
+	},
+	
+	_buildResultRecord: function(response){
+		console.log("building!!!!!!!!!!!!!!");
+		var self = top.uTestResult;
+		//var responseJson =  JSON.parse(response.response);
+		var responseJson =  response.response;
+		if(!responseJson)
+				return;
+		var len = responseJson.length;
+		for (var i= 0 ; i < len ; i++){
+			if(responseJson[i]){
+				var testCaseName = responseJson[i]["testCaseName"];
+				if(!testCaseName || testCaseName === "")
+						continue;
+				var testName = responseJson[i]["testName"];
+				var result =  responseJson[i]["result"];
+				var testCase = self.getTestCaseModel(0 , testCaseName);
+				self._testNumber = self._testNumber + 1;
+				self._failureCounter = self._failureCounter + (result === "passed" ?0:1);
+				var message = "";
+				if(responseJson[i].message){
+					var messageJson =  JSON.parse(responseJson[i].message);
+					if(messageJson.stack)
+						message = messageJson.stack;
+				}
+				var testSucceed = result === "passed" ?true:false;
+				if(!testSucceed){
+					testCase.succeed = false;
+					self._resultRoot.children[0].succeed = false;
+				}
+				var test = {
+						type: "test",
+						name: testName,
+						fileUrl: "",
+						line: 0,
+						succeed: testSucceed,
+						detail: message
+					};
+				testCase.children.push(test);
+			}
+		}
+	},
+	
+	_closeResultRecord: function(response){
+		console.log("closing!!!!!!!!!!!!!!");
+		var self = top.uTestResult;
+		self._buildResultRecord(response);
+		self.createResultTree();
+		if(self._indicator !== undefined)
+			self._indicator.update( self._testNumber , self._failureCounter );
+		
+		if(self._iframe){
+			//self._iframe.close();
+			self._iframe = null;
+		}
+	},
+
+	_startTest: function (param){
+		var self = this;
+		self._iframe.contentWindow.startTesting(param , self._closeResultRecord , self._buildResultRecord);
+	},
+	
+	handleMessage: function(evt) {
+		console.log("+++++++++++++" + evt.data);
+		
+		var messageJson =  JSON.parse(evt.data);
+		var self = this;
+		if("frameReady" === messageJson.type){
+			self._startTest([JSON.stringify(self._testFiles)]);
+		} else if ("continue" === messageJson.type){
+			self._buildResultRecord(messageJson.response);		
+		} else if ("close" === messageJson.type){
+			self._closeResultRecord(messageJson.response);		
+		}
+	},
+
+	//This function is for real test from JSTD
+	loadTestResultFiles: function(configValue){
+		if(configValue === null || configValue === undefined)
+			return;
+		var len = configValue.length;
+		this._testFiles = [];
+		for(var i=0 ; i < len; i++){
+			var location = configValue[i].location ? configValue[i].location : configValue[i];
+			this._testFiles.push({"fileSrc" : location});
+		}
+		//messageHandle.postMessage(JSON.stringify(param), "http://localhost:8080/jstest/IFrameRunner.html");
+		var self = this;
+		
+		this._initResultRoot();
+		this._iframe = this._createIFrame("/js/jsunit-test/jstd-iframe.html");
+	}
+
+  };
+/*  
 	loadTestResultFiles: function(configValue){
 		if(configValue === null || configValue === undefined)
 			return;
@@ -208,5 +327,6 @@ eclipse.UnitTestResult = (function() {
 	}
 
   };
+*/
   return Result;
 }());
