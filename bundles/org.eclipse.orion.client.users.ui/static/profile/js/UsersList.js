@@ -61,13 +61,14 @@ eclipse.UsersList = (function() {
 						var actions = dojo.create("span",{id: "usersActions"+i, style: "visibility: hidden"}, actionsTd);
 						var deleteAction = dojo.create("img", {
 							id: "deleteAction"+i,
-							src : "images/silk/cross-gray.png",
+							src : "images/silk/cross.png",
 							alt : "Delete",
 							title : "Delete user " + jsonData.users[i].login,
 							className: "commandImage"
 						}, actions);
-						dojo.connect(deleteAction, "onmouseover", dojo.hitch(this, function(i){document.getElementById("deleteAction"+i).src="images/silk/cross.png";}, i));
-						dojo.connect(deleteAction, "onmouseout", dojo.hitch(this, function(i){document.getElementById("deleteAction"+i).src="images/silk/cross-gray.png";}, i));
+						dojo.style(deleteAction, "opacity", "0.4");
+						dojo.connect(deleteAction, "onmouseover", dojo.hitch(this, function(i){dojo.style(dojo.byId("deleteAction"+i), "opacity", "1");}, i));
+						dojo.connect(deleteAction, "onmouseout", dojo.hitch(this, function(i){dojo.style(dojo.byId("deleteAction"+i), "opacity", "0.4");}, i));
 						dojo.connect(deleteAction, "onclick", dojo.hitch(this,
 								function(login) {
 									this.deleteUser(login);
