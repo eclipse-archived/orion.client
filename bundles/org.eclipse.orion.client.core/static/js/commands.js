@@ -51,7 +51,6 @@ eclipse.CommandService = (function() {
 		 *  this might be the id of the page or of a dom element.
 		 */	
 		 
-		// see WorkItem 414
 		addCommand: function(command, scope, scopeId) {
 			switch (scope) {
 			case "global":
@@ -177,7 +176,8 @@ eclipse.Command = (function() {
 			this.name = options.name || "Empty Command";
 			this.tooltip = options.tooltip || options.name;
 			this.key = options.key; // an array of values to pass to eclipse.KeyBinding constructor
-			this._callback = options.callback;
+			this._callback = options.callback; // optional callback that should be called when command is activated (clicked)
+			this._hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.image = options.image || "/images/none.png";
 			this.visibleWhen = options.visibleWhen;
 			this.id = options.id;
@@ -189,11 +189,15 @@ eclipse.Command = (function() {
 		_asImage: function(name, items, handler, userData) {
 			handler = handler || this;
 			var image = new Image();
+			var link;
 			image.alt = this.name;
 			image.title = this.name;
 			image.name = name;
 			image.id = name;
-			if (this._callback) {
+			if (this._hrefCallback) {
+				link = dojo.create("a");
+				link.href = this._hrefCallback.call(handler, items, this.id, userData);
+			} else if (this._callback) {
 				dojo.connect(image, "onclick", this, function() {
 					this._callback.call(handler, items, this.id, image.id, userData);
 				});
@@ -218,6 +222,10 @@ eclipse.Command = (function() {
 				});
 			}
 			dojo.addClass(image, 'commandImage');
+			if (link) {
+				dojo.place(image, link, "last");
+				return link;
+			}
 			return image;
 		},
 		_asLink: function(items, handler) {

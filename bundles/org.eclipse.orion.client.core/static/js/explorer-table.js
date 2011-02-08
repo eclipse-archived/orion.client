@@ -470,14 +470,6 @@ eclipse.FileRenderer = (function() {
 			this.explorer.registry.getService("ICommandService").then(function(service) {
 				service.renderCommands(actionsWrapper, "object", item, this.explorer, "image");
 			});
-			// temporary until we get link commands properly represented in the command service.
-			if (item.Directory && item.ExportLocation) {
-				var anchor = document.createElement('a');
-				anchor.innerHTML = "Download as Zip";
-				anchor.href=item.ExportLocation;
-				dojo.addClass(anchor, 'commandLink');
-				dojo.place(anchor, actionsWrapper, "last");
-			}
 		},
 		
 		getSelected: function() {

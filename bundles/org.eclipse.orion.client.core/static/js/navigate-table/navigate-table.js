@@ -57,6 +57,16 @@ dojo.addOnLoad(function(){
 			explorer.deleteFile(item);
 		}});
 	commandService.addCommand(deleteCommand, "object");
+
+	var downloadCommand = new eclipse.Command({
+		name: "Download as Zip",
+		image: "images/silk/arrow_down.png",
+		id: "eclipse.downloadFile",
+		visibleWhen: function(item) {return item.ExportLocation && item.Directory;},
+		hrefCallback: function(item) {
+			return item.ExportLocation;
+		}});
+	commandService.addCommand(downloadCommand, "object");
 	
 	/* NOT USED YET...TBD after M4 
 	var newFileCommand = new eclipse.Command({
