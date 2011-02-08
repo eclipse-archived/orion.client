@@ -210,7 +210,7 @@ eclipse.TestConfigurator = (function() {
 			if(selIndex !== 0){
 				var self = this;
 				this._registry.getService("ITestConfigs").then(function(service) {
-					return service.getCurrentConfig()}).then(function(result) {
+					return service.getCurrentConfig();}).then(function(result) {
 		   				self._navigator._renderer.updateBySelection(result);
 		   			});
 			}
@@ -256,7 +256,7 @@ eclipse.TestConfigurator = (function() {
 			var self = this;
 			return selIndex === 0 ? callBack(this._navigator._renderer.getSelectedURL(false)) : 
 								   this._registry.getService("ITestConfigs").then(function(service) {
-								  		return service.getCurrentConfig()}).then(function(result) {
+								  		return service.getCurrentConfig();}).then(function(result) {
 								  			callBack(result);
 								  		});
 		}
