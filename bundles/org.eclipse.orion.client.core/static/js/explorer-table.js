@@ -353,15 +353,15 @@ eclipse.FileRenderer = (function() {
 			row.appendChild(th);
 			// date
 			th = document.createElement('th');
+			th.innerHTML = "Actions";
+			row.appendChild(th);
+			// size
+			th = document.createElement('th');
 			th.innerHTML = "Date";
 			row.appendChild(th);
 			// size
 			th = document.createElement('th');
 			th.innerHTML = "Size";
-			row.appendChild(th);
-			// size
-			th = document.createElement('th');
-			th.innerHTML = "Actions";
 			row.appendChild(th);
 			
 			thead.appendChild(row);
@@ -433,6 +433,19 @@ eclipse.FileRenderer = (function() {
 				link = dojo.create("a", {className: "navlink", href: href}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			}
+			
+			var actionsColumn = document.createElement('td');
+			actionsColumn.id = tableRow.id + "actions";
+			tableRow.appendChild(actionsColumn);
+			var actionsWrapper = document.createElement('span');
+			actionsWrapper.id = tableRow.id + "actionswrapper";
+			actionsColumn.appendChild(actionsWrapper);
+			dojo.style(actionsWrapper, "visibility", "hidden");
+			// contact the command service to render appropriate commands here.
+			this.explorer.registry.getService("ICommandService").then(function(service) {
+				service.renderCommands(actionsWrapper, "object", item, this.explorer, "image");
+			});
+
 			var dateColumn = document.createElement('td');
 			tableRow.appendChild(dateColumn);
 			if (item.LocalTimeStamp) {
@@ -458,18 +471,6 @@ eclipse.FileRenderer = (function() {
 			}
 			dojo.style(sizeColumn, "textAlign", "right");
 			dojo.addClass(sizeColumn, 'secondaryColumn');
-			
-			var actionsColumn = document.createElement('td');
-			actionsColumn.id = tableRow.id + "actions";
-			tableRow.appendChild(actionsColumn);
-			var actionsWrapper = document.createElement('span');
-			actionsWrapper.id = tableRow.id + "actionswrapper";
-			actionsColumn.appendChild(actionsWrapper);
-			dojo.style(actionsWrapper, "visibility", "hidden");
-			// contact the command service to render appropriate commands here.
-			this.explorer.registry.getService("ICommandService").then(function(service) {
-				service.renderCommands(actionsWrapper, "object", item, this.explorer, "image");
-			});
 		},
 		
 		getSelected: function() {
