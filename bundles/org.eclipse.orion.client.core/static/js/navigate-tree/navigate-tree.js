@@ -37,11 +37,11 @@ dojo.addOnLoad(function(){
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	
 	var contextMenu = dijit.byId("treeContextMenu"),
-		newFileFolderMenu = dijit.byId("NewFileFolderMenu");
+	newFileFolderMenu = dijit.byId("NewFileFolderMenu");
 	var makeFavoriteDomNode = dojo.byId("makeFavorite"),
-		deleteFilesDomNode = dojo.byId("deleteFiles"),
-		newFolderDomNode = dojo.byId("newFolder"),
-		newFileDomNode = dojo.byId("newFile");
+	deleteFilesDomNode = dojo.byId("deleteFiles"),
+	newFolderDomNode = dojo.byId("newFolder"),
+	newFileDomNode = dojo.byId("newFile");
 	
 	var explorer = new eclipse.ExplorerTree(serviceRegistry, treeRoot,
 			searcher, "explorer-tree", contextMenu, newFileFolderMenu,

@@ -36,15 +36,21 @@ eclipse.BreadCrumbs = (function() {
 			}
 			if (!container) { throw "no parent container"; }
 			this._container = container;
+			this._id = options.id || "eclipse.breadcrumbs";
 			this._resource = options.resource|| null;
 			this.render();
 		},
 
 		render: function() {
 			var container = this._container;
-			var crumbs = document.createElement('h2');
-			crumbs.id = "breadcrumbs";
-			
+			var crumbs = dojo.byId(this._id);
+			if (crumbs) {
+				dojo.empty(crumbs);
+			} else {
+				crumbs = document.createElement('h2');
+				crumbs.id = this._id;
+				container.appendChild(crumbs);
+			}
 			//add the root location
 			var seg = document.createElement('a');
 			dojo.addClass(seg, "breadcrumb");
@@ -75,11 +81,6 @@ eclipse.BreadCrumbs = (function() {
 			
 			crumbs.appendChild(document.createElement('br'));
 			crumbs.appendChild(document.createElement('br'));
-		   	var oldCrumbs = dojo.byId("breadcrumbs");
-			if (oldCrumbs)
-				container.replaceChild(crumbs, oldCrumbs);
-		 	else
-				container.appendChild(crumbs);
 		}
 	};
 	return BreadCrumbs;

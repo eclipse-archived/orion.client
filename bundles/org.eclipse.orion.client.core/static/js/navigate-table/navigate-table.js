@@ -36,7 +36,7 @@ dojo.addOnLoad(function(){
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, "breadcrumbParent", searcher, "explorer-tree", "navToolBar");
+	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, "explorer-tree", "navToolBar");
 	// declare commands
 	
 	var favoriteCommand = new eclipse.Command({

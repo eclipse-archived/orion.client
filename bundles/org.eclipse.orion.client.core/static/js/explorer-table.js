@@ -16,14 +16,13 @@ eclipse.Explorer = (function() {
 	 * @name eclipse.Explorer
 	 * @class A table-based explorer component
 	 */
-	function Explorer(serviceRegistry, treeRoot, breadcrumbParentId, searcher, parentId, navToolBarId) {
+	function Explorer(serviceRegistry, treeRoot, searcher, parentId, toolbarId) {
 		this.registry = serviceRegistry;
 		this.treeRoot = treeRoot;
-		this.breadcrumbParentId = breadcrumbParentId;
 		this.searcher = searcher;
 		this.parentId = parentId;
-		this.navToolBarId = navToolBarId;
-		
+		this.innerId = parentId+"inner";
+		this.toolbarId = toolbarId;
 		this.model = null;
 		this.myTree = null;
 	}
@@ -44,8 +43,10 @@ eclipse.Explorer = (function() {
 		},
 		
 		removeResourceList: function() {
-			var container = dojo.byId(this.parentId);
-			dojo.empty(container);
+			var container = dojo.byId(this.innerId);
+			if (container) {
+				dojo.empty(container);
+			}
 		},
 		
 		createProject: function(name, serverPath, create) {
@@ -117,28 +118,30 @@ eclipse.Explorer = (function() {
 			
 			this._lastHash = path;
 			dojo.hash(path, !isSearch);
-			
+			// empty the inner area (progress, breadcrumbs, etc.)
+			this.removeResourceList();
+			var parent = dojo.byId(this.parentId);
+
 			// Progress indicator
-			var progress = dojo.create("div", {id: "innerTree"});
-			    b = dojo.create("b");
+			var inner = dojo.byId(this.innerId);
+			if (!inner) {
+				inner= dojo.create("div", {id: this.innerId}, parent);
+			}
+			var progress = dojo.create("div", {id: this.innerId+"progress"}, progress);
+			b = dojo.create("b");
 			dojo.place(document.createTextNode("Loading "), progress, "last");
 			dojo.place(document.createTextNode("..."), progress, "last");
 			dojo.place(document.createTextNode(path), b, "last");
-			this.removeResourceList();
-			var parent = dojo.byId(this.parentId);
-			dojo.place(progress, parent, "only");
+
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
 	
 			if (isSearch) {
-				var results = document.createElement('div');
-				// TODO this must be the same id as the table or else the search won't get deleted
-				// when a breadcrumb or favorite is chosen
-				results.id = "innerTree";
+				var results = dojo.create("div", null, inner);
 				this.searcher.search(results, path, null, true); // true means generate a "save search" link and heading
 				//fall through and set the tree root to be the workspace root
 				path ="";
-				dojo.place(results, parent, "only");
+				dojo.place(results, inner, "only");
 			}
 			if (path !== this.treeRoot.Path) {
 				//the tree root object has changed so we need to load the new one
@@ -159,8 +162,9 @@ eclipse.Explorer = (function() {
 								}
 								eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace);
 								if (!isSearch) {
-									new eclipse.BreadCrumbs({container: this.breadcrumbParentId, resource: this.treeRoot});
-									this.updateNavTools(this.treeRoot.Location);
+									dojo.empty(inner);
+									new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
+									this.updateNavTools(this.innerId, this.toolbarId, this.treeRoot.Location);
 									this.createTree();
 								}
 							}));
@@ -170,35 +174,34 @@ eclipse.Explorer = (function() {
 		
 		createTree: function (){
 			this.model = new eclipse.Model(this.registry, this.treeRoot);
-	
-			// remove any existing tree or other DOM element occupying that space
-			this.removeResourceList();
-	
 			this.myTree = new eclipse.TableTree({
 				id: "innerTree",
 				model: this.model,
 				showRoot: false,
-				parent: this.parentId,
+				parent: this.innerId,
 				labelColumnIndex: 1,  // 0 if no checkboxes
 				renderer: new eclipse.FileRenderer({checkbox: true }, this)
 			});
 		},
 		
-		updateNavTools: function(path) {
-			var bar = dojo.byId(this.navToolBarId);
-			if (bar) {
-				dojo.empty(bar);
-				// FIXME this should be populated by command service
-				if (eclipse.util.isAtRoot(path)) {
-					bar.appendChild(this._newProjectCommand._asImage("NewProject", this.treeRoot, this));
-					bar.appendChild(this._linkProjectCommand._asImage("LinkProject", this.treeRoot, this));
-					bar.appendChild(this._openResourceCommand._asImage("Open Resource", this.treeRoot, this));
-				} else {
-					bar.appendChild(this._newFolderCommand._asImage("NewFolder", this.treeRoot, this));
-					bar.appendChild(this._newFileCommand._asImage("NewFile", this.treeRoot, this));
-					bar.appendChild(this._openResourceCommand._asImage("Open Resource", this.treeRoot, this));
-					bar.appendChild(this._importCommand._asImage("Import", this.treeRoot, this));
-				}
+		updateNavTools: function(parentId, toolbarId, path) {
+			var parent = dojo.byId(parentId);
+			var toolbar = dojo.byId(toolbarId);
+			if (toolbar) {
+				dojo.empty(toolbar);
+			} else {
+				toolbar = dojo.create("div",{id: toolbarId}, parent, "last");
+			}
+			// FIXME this should be populated by command service
+			if (eclipse.util.isAtRoot(path)) {
+				toolbar.appendChild(this._newProjectCommand._asImage("NewProject", this.treeRoot, this));
+				toolbar.appendChild(this._linkProjectCommand._asImage("LinkProject", this.treeRoot, this));
+				toolbar.appendChild(this._openResourceCommand._asImage("Open Resource", this.treeRoot, this));
+			} else {
+				toolbar.appendChild(this._newFolderCommand._asImage("NewFolder", this.treeRoot, this));
+				toolbar.appendChild(this._newFileCommand._asImage("NewFile", this.treeRoot, this));
+				toolbar.appendChild(this._openResourceCommand._asImage("Open Resource", this.treeRoot, this));
+				toolbar.appendChild(this._importCommand._asImage("Import", this.treeRoot, this));
 			}
 		},
 	    
@@ -342,30 +345,33 @@ eclipse.FileRenderer = (function() {
 			dojo.addClass(tableNode, 'treetable');
 			var thead = document.createElement('thead');
 			var row = document.createElement('tr');
-			var th;
+			var th, actions, size;
 			if (this._useCheckboxSelection) {
 				th = document.createElement('th');
 				row.appendChild(th);
 			}
-			// name
 			th = document.createElement('th');
 			th.innerHTML = "Name";
 			row.appendChild(th);
-			// date
-			th = document.createElement('th');
-			th.innerHTML = "Actions";
-			row.appendChild(th);
-			// size
+
+			actions= document.createElement('th');
+			actions.innerHTML = "Actions";
+			row.appendChild(actions);
+
 			th = document.createElement('th');
 			th.innerHTML = "Date";
 			row.appendChild(th);
-			// size
-			th = document.createElement('th');
-			th.innerHTML = "Size";
-			row.appendChild(th);
+
+			size= document.createElement('th');
+			size.innerHTML = "Size";
+			row.appendChild(size);
 			
 			thead.appendChild(row);
 			tableNode.appendChild(thead);
+			
+			dojo.style(actions, "textAlign", "center");
+			dojo.style(size, "textAlign", "right");
+
 		},
 		
 		render: function(item, tableRow) {
