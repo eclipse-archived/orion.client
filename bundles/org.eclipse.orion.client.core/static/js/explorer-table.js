@@ -34,14 +34,7 @@ eclipse.Explorer = (function() {
 				service.getChildren(parent, dojo.hitch(self.myTree, self.myTree.refreshAndExpand));
 			});
 		},
-		
-		makeFavorite: function(itemOrId) {
-			var item = this.myTree.getItem(itemOrId);
-			this.registry.getService("IFavorites").then(function(service) {
-				service.makeFavorites(item);
-			});
-		},
-		
+				
 		removeResourceList: function() {
 			var container = dojo.byId(this.innerId);
 			if (container) {
@@ -49,63 +42,6 @@ eclipse.Explorer = (function() {
 			}
 		},
 		
-		createProject: function(name, serverPath, create) {
-			var self = this;
-			this.registry.getService("IFileService").then(function(service) {
-				service.createProject(self.treeRoot.ChildrenLocation, name, serverPath, create,
-					 dojo.hitch(self, function() {this.changedItem(this.treeRoot);}));
-			});
-		},
-		
-		createFolder: function(name, itemOrId) {
-			var item = itemOrId;
-			if (typeof(item) === "string") {
-				item = this.myTree.getItem(itemOrId);
-			}
-			var self = this;
-			this.registry.getService("IFileService").then(function(service) {
-				service.createFolder(name, item, dojo.hitch(self, self.changedItem));
-			});
-		},
-		
-		createFile: function(name, itemOrId) {
-			var item = itemOrId;
-			if (typeof(item) === "string") {
-				item = this.myTree.getItem(itemOrId);
-			}
-			var self = this;
-			this.registry.getService("IFileService").then(function(service) {
-				service.createFile(name, item, dojo.hitch(self, self.changedItem)); 
-			});
-		},
-	
-		deleteFile: function(itemId) {
-			var item = this.myTree.getItem(itemId);
-			if (!item) {
-				return;
-			}
-			// prompt since it's so easy to push that X!
-			var self = this;
-			this.registry.getService("IDialogService").then(function(service) {
-				service.confirm("Are you sure you want to delete '" + item.Name + "'?", 
-				dojo.hitch(self, function(doit) {
-					if (!doit) {
-						return;
-					}
-					if (item.parent.Path === "") {
-						this.registry.getService("IFileService").then(function(service) {
-							service.removeProject(
-								item.parent, item, dojo.hitch(self, function() {self.changedItem(self.treeRoot);}));
-						});
-					} else {
-						this.registry.getService("IFileService").then(function(service) {
-							service.deleteFile(item, dojo.hitch(self, self.changedItem));
-						});
-					}
-				}));
-			});
-	    },
-	    
 		loadResourceList: function(path) {
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
 			path = eclipse.util.makeRelative(path);
@@ -164,7 +100,7 @@ eclipse.Explorer = (function() {
 								if (!isSearch) {
 									dojo.empty(inner);
 									new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
-									this.updateNavTools(this.innerId, this.toolbarId, this.treeRoot.Location);
+									this.updateNavTools(this.innerId, this.toolbarId, this.treeRoot);
 									this.createTree();
 								}
 							}));
@@ -184,101 +120,23 @@ eclipse.Explorer = (function() {
 			});
 		},
 		
-		updateNavTools: function(parentId, toolbarId, path) {
+		updateNavTools: function(parentId, toolbarId, item) {
 			var parent = dojo.byId(parentId);
 			var toolbar = dojo.byId(toolbarId);
 			if (toolbar) {
 				dojo.empty(toolbar);
 			} else {
 				toolbar = dojo.create("div",{id: toolbarId}, parent, "last");
+				dojo.addClass(toolbar, "domCommandToolbar");
 			}
-			// FIXME this should be populated by command service
-			if (eclipse.util.isAtRoot(path)) {
-				toolbar.appendChild(this._newProjectCommand._asImage("NewProject", this.treeRoot, this));
-				toolbar.appendChild(this._linkProjectCommand._asImage("LinkProject", this.treeRoot, this));
-				toolbar.appendChild(this._openResourceCommand._asImage("Open Resource", this.treeRoot, this));
-			} else {
-				toolbar.appendChild(this._newFolderCommand._asImage("NewFolder", this.treeRoot, this));
-				toolbar.appendChild(this._newFileCommand._asImage("NewFile", this.treeRoot, this));
-				toolbar.appendChild(this._openResourceCommand._asImage("Open Resource", this.treeRoot, this));
-				toolbar.appendChild(this._importCommand._asImage("Import", this.treeRoot, this));
-			}
+			this.registry.getService("ICommandService").then(dojo.hitch(this, function(service) {
+				service.renderCommands(toolbar, "dom", item, this, "image");
+			}));
+
 		},
 	    
-	    _lastHash: null, 
-	    _newFileCommand: new eclipse.Command({
-					name: "New File",
-					image: "images/silk/page_add.png",
-					callback: function(item) {
-						var dialog = new widgets.NewItemDialog({
-							title: "Create File",
-							label: "File name:",
-							func:  dojo.hitch(this, function(name){this.createFile(name, item);})
-						});
-						dialog.startup();
-						dialog.show();
-					}}),
-		_newFolderCommand: new eclipse.Command({
-					name: "New Folder",
-					image: "images/silk/folder_add.png",
-					callback: function(item) {
-						var dialog = new widgets.NewItemDialog({
-							title: "Create Folder",
-							label: "Folder name:",
-							func:  dojo.hitch(this, function(name){this.createFolder(name, item);})
-						});
-						dialog.startup();
-						dialog.show();
-					}}),
-		_newProjectCommand: new eclipse.Command({
-					name: "New Folder",
-					image: "images/silk/folder_add.png",
-					callback: function(item) {
-						var dialog = new widgets.NewItemDialog({
-							title: "Create Project",
-							label: "Project name:",
-							func:  dojo.hitch(this, function(name){this.createProject(name);})
-						});
-						dialog.startup();
-						dialog.show();
-					}}),
-		_linkProjectCommand: new eclipse.Command({
-					name: "Link Folder",
-					image: "images/silk/link_add.png",
-					callback: function(item) {
-						var dialog = new widgets.NewItemDialog({
-							title: "Link Folder",
-							label: "Folder name:",
-							func:  dojo.hitch(this, function(name,url,create){this.createProject(name, url, create);}),
-							advanced: true
-						});
-						dialog.startup();
-						dialog.show();
-					}}),
-		_openResourceCommand: new eclipse.Command({
-					name: "Open Resource",
-					image: "images/silk/find.png",
-					callback: function(item) {
-						var that = this;
-						setTimeout(function() {
-							new widgets.OpenResourceDialog({
-								SearchLocation: that.treeRoot.SearchLocation,
-								searcher: that.searcher
-							}).show();
-						}, 0);
-					}}),
-		_importCommand : new eclipse.Command({
-					name : "Import",
-					image : "images/silk/zip_import.gif",
-					callback : function(item) {
-						var dialog = new widgets.ImportDialog({
-							importLocation: item.ImportLocation,
-							func: dojo.hitch(this, function(){this.changedItem(item);})
-						});
-						dialog.startup();
-						dialog.show();
-					}})
-		};
+	    _lastHash: null
+	};
 	return Explorer;
 }());
 
