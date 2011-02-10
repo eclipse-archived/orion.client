@@ -37,114 +37,22 @@ dojo.addOnLoad(function(){
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
 	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, "explorer-tree", "navToolBar");
+	
 	// declare commands
+	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar");
 	
-	var favoriteCommand = new eclipse.Command({
-		name: "Make Favorite",
-		image: "images/silk/star.png",
-		id: "eclipse.makeFavorite",
-		visibleWhen: function(item) {return item.Location;}, //TODO need a better way to identify file/folder objects
-		callback: function(item) {
-			explorer.makeFavorite(item);
-		}});
-	commandService.addCommand(favoriteCommand, "object");
-	var deleteCommand = new eclipse.Command({
-		name: "Delete",
-		image: "images/silk/cross.png",
-		id: "eclipse.deleteFile",
-		visibleWhen: function(item) {return item.Location;},
-		callback: function(item) {
-			explorer.deleteFile(item);
-		}});
-	commandService.addCommand(deleteCommand, "object");
-
-	var downloadCommand = new eclipse.Command({
-		name: "Download as Zip",
-		image: "images/silk/arrow_down.png",
-		id: "eclipse.downloadFile",
-		visibleWhen: function(item) {return item.ExportLocation && item.Directory;},
-		hrefCallback: function(item) {
-			return item.ExportLocation;
-		}});
-	commandService.addCommand(downloadCommand, "object");
-	
-	/* NOT USED YET...TBD after M4 
-	var newFileCommand = new eclipse.Command({
-		name: "New File",
-		image: "images/silk/page_add-gray.png",
-		hotImage: "images/silk/page_add.png",
-		id: "eclipse.createFile",
-		callback: function(item) {
-			var dialog = new widgets.NewItemDialog({
-				title: "Create File",
-				label: "File name:",
-				func:  dojo.hitch(explorer, function(name){explorer.createFile(item);})
+	var treeViewCommand = new eclipse.Command({
+		name : "Tree View",
+		image : "images/hierarchicalLayout.gif",
+		id: "eclipse.treeViewCommand",
+		groupId: "eclipse.viewGroup",
+		callback : function() {
+			serviceRegistry.getService("IPreferencesService").then(function(service) {
+				service.put("window/orientation", "navigate-tree.html");
 			});
-			dialog.startup();
-			dialog.show();
+			window.location.replace("/navigate-tree.html#" + dojo.hash());
 		}});
-	commandService.addCommand(newFileCommand, "dom", "navToolBar");
-	var newFolderCommand = new eclipse.Command({
-		name: "New Folder",
-		image: "images/silk/folder_add-gray.png",
-		hotImage: "images/silk/folder_add.png",
-		id: "eclipse.createFolder",
-		callback: function(item) {
-			var dialog = new widgets.NewItemDialog({
-				title: "Create Folder",
-				label: "Folder name:",
-				func:  dojo.hitch(explorer, function(name){explorer.createFolder(item);})
-			});
-			dialog.startup();
-			dialog.show();
-		}});
-	commandService.addCommand(newFolderCommand, "dom", "navToolBar");
-	var newProjectCommand = new eclipse.Command({
-		name: "New Folder",
-		image: "images/silk/folder_add-gray.png",
-		hotImage: "images/silk/folder_add.png",
-		id: "eclipse.createProject",
-		callback: function(item) {
-			var dialog = new widgets.NewItemDialog({
-				title: "Create Project",
-				label: "Project name:",
-				func:  dojo.hitch(explorer, function(name){explorer.createProject(name);})
-			});
-			dialog.startup();
-			dialog.show();
-		}});
-	commandService.addCommand(newProjectCommand, "dom", "navToolBar");
-	var linkProjectCommand = new eclipse.Command({
-		name: "Link Folder",
-		image: "images/silk/link_add-gray.png",
-		hotImage: "images/silk/link_add.png",
-		callback: function(item) {
-			var dialog = new widgets.NewItemDialog({
-				title: "Link Folder",
-				label: "Folder name:",
-				func:  dojo.hitch(explorer, function(name,url,create){explorer.createProject(name,url,create);}),
-				advanced: true
-			});
-			dialog.startup();
-			dialog.show();
-		}});
-	commandService.addCommand(linkProjectCommand, "dom", "navToolBar");
-	var openResourceCommand = new eclipse.Command({
-		name: "Open Resource",
-		image: "images/silk/find-gray.png",
-		hotImage: "images/silk/find.png",
-		id: "eclipse.openResource",
-		callback: function() {
-			var that = this;
-			setTimeout(function() {
-				new widgets.OpenResourceDialog({
-					SearchLocation: treeRoot.SearchLocation,
-					searcher: searcher
-				}).show();
-			}, 0);
-		}});
-	commandService.addCommand(openResourceCommand, "global");
-	*/
+	commandService.addCommand(treeViewCommand, "dom", "navToolBar");
 	
 	explorer.loadResourceList(dojo.hash());
 	
@@ -170,10 +78,4 @@ dojo.addOnLoad(function(){
 			}
 		});
 	}
-	
-	dojo.byId("switchView").onclick = function(evt) {
-		preferenceService.put("window/orientation", "navigate-tree.html");
-		window.location.replace("/navigate-tree.html#" + dojo.hash());
-	};
-	
 });

@@ -26,10 +26,8 @@ eclipse.CommandService = (function() {
 	 * @name eclipse.CommandService
 	 */
 	function CommandService(options) {
-		this._globalScope = [];
-		this._pageScope = [];
-		this._domScope = [];
-		this._objectScope = [];
+		this._domScope = {sorted: false, commands:[]};
+		this._objectScope = {sorted: false, commands:[]};
 		this._init(options);
 	}
 	CommandService.prototype = /** @lends eclipse.CommandService.prototype */ {
@@ -53,20 +51,14 @@ eclipse.CommandService = (function() {
 		 
 		addCommand: function(command, scope, scopeId) {
 			switch (scope) {
-			case "global":
-				this._globalScope.push({scopeId: scopeId, command: command});
-				break;
-				
-			case "page":
-				this._pageScope.push({scopeId: scopeId, command: command});
-				break;
-				
 			case "dom":
-				this._domScope.push({scopeId: scopeId, command: command});
+				this._domScope.commands.push({scopeId: scopeId, command: command});
+				this._domScope.sorted = false;
 				break;
 				
 			case "object":
-				this._objectScope.push({scopeId: scopeId, command: command});
+				this._objectScope.commands.push({scopeId: scopeId, command: command});
+				this._objectScope.sorted = false;
 				break;
 			}
 		},
@@ -74,11 +66,10 @@ eclipse.CommandService = (function() {
 		/**
 		 * Render the commands that are appropriate for the given scope.
 		 * @param {DOMElement} parent The element in which commands should be rendered.
-		 * @param {String} scope The scope to which the command applies.  "global"
-		 *  commands are not related to page content, "page" level commands apply to a particular
-		 *  page, "dom" level commands apply only when the specified dom element is
-		 *  rendering commands, and "object" scope applies to particular objects 
-		 *  being displayed in widgets such as lists or trees.
+		 * @param {String} scope The scope to which the command applies.  "dom" level 
+		 *  commands apply only when a specified dom element is rendering commands.
+		 *  "object" scope applies to particular objects/items displayed in widgets
+		 *  such as list or trees.
 		 * @param {Object} items An item or array of items to which the command applies.
 		 * @param {Object} handler The object that will perform the command
 		 * @param {String} style The style in which the command should be rendered.  Currently
@@ -90,68 +81,69 @@ eclipse.CommandService = (function() {
 		renderCommands: function(parent, scope, items, handler, style, userData) {
 			var i, command;
 			switch (scope) {
-			case "global":
-				for (i = 0; i < this._globalScope.length; i++) { 
-					command = this._globalScope[i].command;
-					this._render(parent, command, items, handler, style, userData, i);
-				}
-				break;
-				
-			case "page":
-				for (i = 0; i < this._pageScope.length; i++) { 
-					command = this._pageScope[i].command;
-					if (window.document.id === this._pageScope[i].scopeId) {
-						this._render(parent, command, items, handler, style, userData, i);		
-					}
-				}
-				break;
-				
 			case "dom":
-				for (i = 0; i < this._domScope.length; i++) { 
-					command = this._domScope[i].command;
-					if (parent.id === this._domScope[i].scopeId) {
-						this._render(parent, command, items, handler, style, userData, i);		
+				this._sortCommands(this._domScope);
+				var currentGroup = this._domScope.commands[0].command.groupId;  // ensures we don't render a separator first
+				for (i = 0; i < this._domScope.commands.length; i++) { 
+					command = this._domScope.commands[i].command;
+					if (parent.id === this._domScope.commands[i].scopeId) {
+						if (this._render(parent, command, items, handler, style, currentGroup !== command.groupId, userData, i)) {
+							currentGroup = command.groupId;
+						}		
 					}
 				}				
 				break;
 				
 			case "object":
-				for (i = 0; i < this._objectScope.length; i++) { 
-					command = this._objectScope[i].command;
+				this._sortCommands(this._objectScope);
+				var currentGroup = this._objectScope.commands[0].command.groupId;
+				for (i = 0; i < this._objectScope.commands.length; i++) { 
+					command = this._objectScope.commands[i].command;
 					if (!items) {
 						var cmdService = this;
 						this._registry.getService("ISelectionService").then(function(service) {
 							service.getSelection(function(selection) {
-								cmdService._renderObjectScope(parent, command, selection, handler, style, userData, i);
+								if (selection) {
+									if (cmdService._render(parent, command, selection, handler, style, userData, i)) {
+										currentGroup = command.groupId;
+									}
+								}
 							});
 						});
 					} else {
-						this._renderObjectScope(parent, command, items, handler, style, userData, i);		
+						if (this._render(parent, command, items, handler, style, currentGroup !== command.groupId, userData, i)) {
+							currentGroup = command.groupId;
+						}		
 					}
 				}				
 				break;
 			}
 		},
 		
-		_renderObjectScope: function(parent, command, items, handler, style, userData, i) {
-			if (!items) {
-				return;
-			}
+		_sortCommands: function(scope) {
+			scope.commands.sort(function(a,b) {
+				return a-b;
+			});
+			scope.sorted = true;
+		},
+				
+		_render: function(parent, command, items, handler, style, sepBefore, userData, i) {
 			var render = true;
 			if (command.visibleWhen) {
 				render = command.visibleWhen(items);
 			}
-			if (render) {
-				this._render(parent, command, items, handler, style, userData, i);
+			if (!render) {
+				return false;
 			}
-		},
-		
-		_render: function(parent, command, items, handler, style, userData, i) {
 			if (style === "image") {
-				var id = "image" + command.id + i;  // using the index ensures unique ids
+				if (sepBefore) {
+					// create an image separator.  need to use an image class or something easy to override
+				}
+				var id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
 				var image = command._asImage(id, items, handler, userData);
 				dojo.place(image, parent, "last");	
 			}
+			return true;
 		}
 
 	};  // end prototype
@@ -173,6 +165,7 @@ eclipse.Command = (function() {
 	}
 	Command.prototype = /** @lends eclipse.Command.prototype */ {
 		_init: function(options) {
+			this.id = options.id;  // unique id
 			this.name = options.name || "Empty Command";
 			this.tooltip = options.tooltip || options.name;
 			this.key = options.key; // an array of values to pass to eclipse.KeyBinding constructor
@@ -180,7 +173,8 @@ eclipse.Command = (function() {
 			this._hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.image = options.image || "/images/none.png";
 			this.visibleWhen = options.visibleWhen;
-			this.id = options.id;
+			this.position = options.position || 500;  // numeric position used to sort commands in a presentation
+			this.groupId = options.groupId; // optional group id which signifies the need for a separator
 			// when false, affordances for commands are always shown.  When true,
 			// they are shown on hover only.
 			//how will we know this?
