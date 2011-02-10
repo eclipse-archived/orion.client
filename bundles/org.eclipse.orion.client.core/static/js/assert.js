@@ -78,12 +78,14 @@ orion.Assert = (function() {
 	function _deepEqual(actual, expected) {
 		if (actual === expected) {
 			return true;
+		} else if (actual === null || expected === null || typeof actual === "undefined" || typeof expected === "undefined") {
+			return false;
 		} else if (actual instanceof Date && expected instanceof Date) {
 			return actual.getTime() === expected.getTime();
 		} else if (typeof actual !== 'object' || typeof expected !== 'object') {
 			return actual == expected;
 		} else {
-			if (actual === null || expected === null || actual.prototype !== expected.prototype) {
+			if (actual.prototype !== expected.prototype) {
 				return false;
 			}
 
@@ -152,7 +154,7 @@ orion.Assert = (function() {
 		}
 	};
 
-	exports["throws"] = function(block, Error_opt, message_opt) {
+	exports.raises = function(block, Error_opt, message_opt) {
 		if (typeof Error_opt === "string") {
 			message_opt = Error_opt;
 			Error_opt = undefined;
@@ -173,5 +175,7 @@ orion.Assert = (function() {
 			}
 		}
 	};
+	exports["throws"] = exports.raises;
+	
 	return exports;
 }());
