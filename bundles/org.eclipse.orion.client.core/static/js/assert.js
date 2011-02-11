@@ -167,11 +167,7 @@ orion.Assert = (function() {
 			});
 		} catch (e) {
 			if (Error_opt && !(e instanceof Error_opt)) {
-				throw new AssertionError({
-					message : message_opt || "throws failed",
-					expected : Error_opt,
-					actual : e
-				});
+				throw e;
 			}
 		}
 	};
