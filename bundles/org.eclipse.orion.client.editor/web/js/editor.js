@@ -2521,6 +2521,7 @@ eclipse.Editor = (function() {
 			if (ranges) {
 				for (var i = 0; i < ranges.length; i++) {
 					var range = ranges[i];
+					if (range.end <= lineStart) { continue; }
 					var styleStart = Math.max(lineStart, range.start) - lineStart;
 					var styleEnd = Math.min(lineStart + text.length, range.end) - lineStart;
 					if (styleStart >= end) { break; }
