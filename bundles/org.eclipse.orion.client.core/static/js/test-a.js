@@ -60,6 +60,7 @@ orion.Test = (function() {
 				if (testResult instanceof TestResult) {
 					//result of running an individual test
 					if (testResult.getStatus() !== "pass") {
+						console.log("TEST: '" + testName + "' failed. " + (testResult.getResult() || ""));
 						failureCount++;
 					}
 				} else {
