@@ -8,6 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*global dojo window eclipse:true */
+
 eclipse = eclipse || {};
 
 eclipse.TestNavigatorModel = (function() {
@@ -31,27 +33,30 @@ eclipse.TestNavigatorModel = (function() {
 	    } else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
 			onComplete([]);
 	    } else if (parentItem.Location) {
-	    	this.registry.getService("IFileService").then(function(service) {
-	    		service.fetchChildren(parentItem.ChildrenLocation,
-    				dojo.hitch(this, function(children) {
-    					onComplete(children);
-    					if(postExpandFunc)
-    						postExpandFunc(args);
-    				}));
-	    	});
-	    	return;
+		this.registry.getService("IFileService").then(function(service) {
+			service.fetchChildren(parentItem.ChildrenLocation,
+				dojo.hitch(this, function(children) {
+					eclipse.util.processNavigatorParent(parentItem, children);
+					onComplete(children);
+					if(postExpandFunc) {
+						postExpandFunc(args);
+					}
+				}));
+		});
+		return;
 	    } else {
 			onComplete([]);
 	    }
-		if(postExpandFunc)
+		if(postExpandFunc) {
 			postExpandFunc(args);
+		}
 	  },
 	  
 	  getId: function(/* item */ item){
 	    var result;
-	    if (item === this.root)
-	    	result = this.rootId;
-	    else {
+	    if (item === this.root) {
+		result = this.rootId;
+	    } else {
 			result = item.Location;
 			// remove all non valid chars to make a dom id. 
 			//result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
