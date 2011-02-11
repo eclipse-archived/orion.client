@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2009, 2011 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -7,7 +7,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
- /*global dojo */
+ /*global dojo dijit eclipse:true */
 
 eclipse = eclipse || {};
 
@@ -20,7 +20,7 @@ eclipse.TestNavigator = (function() {
 		
 		this._navDivId  = eclipse.uTestUtils.getOptionValue(options , "resultDivId" , eclipse.uTestConsts.NAVIGATOR_DIV_ID);
 		this._navTreeId  = eclipse.uTestUtils.getOptionValue(options , "resultTreeId" , eclipse.uTestConsts.NAVIGATOR_TREE_ID);
-			  	
+
 		this._navDivDomNode = dojo.byId( this._navDivId);
 		this._navRoot = {
 			children:[]
@@ -42,23 +42,25 @@ eclipse.TestNavigator = (function() {
 		},
 			
 		removeResourceList: function() {
-	       	var tree = dijit.byId(this._navTreeId);
-	  		if (tree)
-	  			tree.destroyRecursive();
-	  		var treeDom = dojo.byId(this._navTreeId);
-	  		if (treeDom) {
-	  		    if (this._navDivDomNode)
-	  		    	this._navDivDomNode.removeChild(treeDom);
-	  		}
+		var tree = dijit.byId(this._navTreeId);
+			if (tree) {
+				tree.destroyRecursive();
+			}
+			var treeDom = dojo.byId(this._navTreeId);
+			if (treeDom) {
+				if (this._navDivDomNode) {
+					this._navDivDomNode.removeChild(treeDom);
+				}
+			}
 		},
     
 		loadResourceList: function(path) {
-	    	path = eclipse.util.makeRelative(path);
-	    	if (path == this._lastHash)
-	    		return;
-	    	this._lastHash = path;
-	    	dojo.hash(path, true);
-	   	
+		path = eclipse.util.makeRelative(path);
+		if (path === this._lastHash) {
+			return;
+		}
+		this._lastHash = path;
+		dojo.hash(path, true);
 	  		// Progress indicator
 	  		var progress = document.createElement('div');
 	  		dojo.place(document.createTextNode("Loading " + path + "..."), progress, "only");
