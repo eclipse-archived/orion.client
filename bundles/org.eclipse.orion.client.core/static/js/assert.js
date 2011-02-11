@@ -33,6 +33,7 @@ orion.Assert = (function() {
 		if (this.actual !== this.expected) {
 			result += " - expected: [" + _stringify(this.expected) + "], actual: [" + _stringify(this.actual) + "].";
 		}
+		return result;
 	};
 	exports.AssertionError = AssertionError;
 
