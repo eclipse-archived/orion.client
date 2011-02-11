@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+ <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+ <script type="text/javascript"	src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script> 
+ <script type="text/javascript" src="js/plugin.js"></script>
+ <script>
+ 
+  window.onload = function() {
+   var provider = new eclipse.PluginProvider();
+   provider.registerServiceProvider("editorAction", {
+    info : function() {
+     return {
+      name : "UPPERCASE",
+      img : "/favicon.ico",
+      key : [ "u", true ]
+     };
+    },
+    run : function(text) {
+    	
+    	dojo.xhrPost({
+			url : "9.158.138.104:8080/users",
+			headers : {
+				"Orion-Version" : "1"
+			},
+			content : {
+				login : text,
+				password : "password"
+			},
+			handleAs : "text",
+			timeout : 15000,
+			load : function(jsonData, secondArg) {
+				alert("Load");
+			},
+			error : function(jsonData, secondArg) {
+				alert("Error");
+			}
+		});
+    	
+     return text.toUpperCase();
+    }
+   });
+   provider.connect();
+  };
+ </script>
+</head>
+<body></body>
+</html>

@@ -159,8 +159,8 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 						}
 					},
 					uri : url,
-//					tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/release/all/tunnel.html"
-					tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/src/containers/iframe/tunnel.html"					
+					tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/release/all/tunnel.html"
+//					tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/src/containers/iframe/tunnel.html"					
 				}
 			});
 		}
