@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+ <script type="text/javascript" src="/js/plugin.js"></script>
+ <script>
+  window.onload = function() {
+   var provider = new eclipse.PluginProvider();
+   provider.registerServiceProvider("mainProfilePlugin", {
+    info : function() {
+     return {
+      name : "Personal Information"
+     };
+    },
+    getDivContent : function() {
+    	
+    	var content = {"sections" : [
+    	                             {"id": "personalInformation", "name" : "Personal Information", "data" :[
+    	                                                                                                     {"id": "login", "label" : "Login", "readonly" : true,  "type" : "", "value" : "login"},
+    	                                                                                                     {"id": "name", "label" : "Name", "readonly" : false,  "type" : "", "value" : "name"},
+    	                                                                                                     {"id": "lastLogin", "label" : "Last login", "readonly" : true,  "type" : "", "value" : "lastlogintimestamp"}
+    	                                                                                                     ]
+    	                             },
+    	                             {"id": "changePassword", "name" : "Change Password", "data" : [
+    	                                                                                            {"id": "password", "label" : "Password", "readonly" : false,  "type" : "password", "value" : "password"},
+    	                                                                                            {"id": "passwordRetype", "label" : "Retype password", "readonly" : false,  "type" : "password", "value" : "passwordRetype"}
+    	                                                                                            ]
+    	                             }
+    	                             ]
+    	};
+    	    	
+  	return content;
+    },
+    populateContent : function(userJson){
+    	//TODO
+    },
+    action: function(actionName, fieldsJson){
+    	
+    }
+   });
+   provider.connect();
+  };
+ </script>
+</head>
+<body></body>
+</html>

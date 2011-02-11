@@ -47,6 +47,7 @@
 <script type="text/javascript" src="/js/auth.js"></script>
 <!-- Extension Registry -->
 <script src="js/serviceregistry.js"></script>
+<script src="js/pluginregistry.js"></script>
 <!-- Eclipse Application Services -->
 <script src="js/input.js"></script>
 <!--Profile logic -->
@@ -74,79 +75,12 @@
 				class="innerToolbar">
 			</div>
 		</div>
-		<div class="paneScrolled" style="margin-left: 8px;" id="photoPane"
-			dojoType="dijit.layout.ContentPane" region="leading"
-			style="width: 200px" splitter="true">
-			<div id="photoToolbar" class="toolbar"
-				dojoType="dijit.layout.ContentPane" region="top"
-				style="width: 200px; height: 20px; display: none;">
-				<h2>
-					Photo
-				</h2>
-			</div>
-			<div style="width: 150px; height: 150px; border: 1px solid; display:none;">
-				PHOTO 150x150 HERE
-			</div>
-		</div>
-		<div class="paneScrolled" style="margin-left: 8px;" id="profilePane"
+		<div class="paneScrolled" style="margin-left: 8px;"
 			dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-			<div id="personalInfoToolbar" class="toolbar"
-				dojoType="dijit.layout.ContentPane" region="top"
-				style="height: 20px;">
-				<h2>
-					Personal Information
-				</h2>
+			<div id="profilePane">
 			</div>
-			<div>
-				<div>
-					<label class="userprofile" for="loginInput">Login:</label> <input
-						class="userprofile" value="" id="loginInput" readonly=true>
-				</div>
-				<div>
-					<label class="userprofile" for="nameInput">Name:</label>
-					<input class="userprofile" value="" id="nameInput">
-				</div>
-				<div>
-				</div>
-				<div id="changePasswordToolbar" class="toolbar"
-					dojoType="dijit.layout.ContentPane" region="top"
-					style="height: 20px;">
-					<h2>
-						Change password
-					</h2>
-				</div>
-				<div>
-					<div>
-						<label class="userprofile" for="passwordInput">Password:</label> <input
-							class="userprofile" type="password" value="" id="passwordInput">
-					</div>
-					<div>
-						<label class="userprofile" for="passwordRetypeInput">Retype
-							password:</label> <input class="userprofile" type="password" value=""
-							id="passwordRetypeInput">
-					</div>
-				</div>
-				<div id="changePhotoToolbar" class="toolbar"
-					dojoType="dijit.layout.ContentPane" region="top"
-					style="height: 20px; display: none;">
-					<h2>
-						Change photo
-					</h2>
-				</div>
-				<div class="fileinputs" style="display: none;">
-					<input type="file" class="userprofilefile" id="userprofilefile"
-						style="width: 70px;" />
-					<div class="fakefile">
-						<input class="userprofile" id="photoURL" style="width: 200px"
-							readonly=true />
-						<button id="browsePhotoButton" dojoType="dijit.form.Button"
-							style="padding: 20 0 10 0; float: right; clear: both;">
-							Browse...
-						</button>
-					</div>
-				</div>
-			</div>
-			<div style="float: left; clear: both; margin-top: 30px;">
+			<div id="profileExtentionsPane"></div>
+			<div style="margin-top: 30px;">
 				<button id="saveProfileButton" dojoType="dijit.form.Button"
 					type="submit" value="OK" class="userprofile"
 					style="padding: 20 0 10 0;">
@@ -161,7 +95,7 @@
 					Delete Profile
 				</button>
 			</div>
-		</div>
+		</div>  
 	</div>
 </body>
 </html>
