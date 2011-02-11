@@ -28,10 +28,13 @@ eclipse.Explorer = (function() {
 	}
 	Explorer.prototype = /** @lends eclipse.Explorer.prototype */ {
 		// we have changed an item on the server at the specified parent node
-		changedItem: function(parent, /* optional */ children) {
+		changedItem: function(parent) {
 			var self = this;
 			this.registry.getService("IFileService").then(function(service) {
-				service.getChildren(parent, dojo.hitch(self.myTree, self.myTree.refreshAndExpand));
+				service.fetchChildren(parent.ChildrenLocation, function(children) {
+					eclipse.util.processNavigatorParent(parent, children);
+					dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
+				});
 			});
 		},
 				
@@ -96,7 +99,7 @@ eclipse.Explorer = (function() {
 								for (var i  in loadedWorkspace) {
 									this.treeRoot[i] = loadedWorkspace[i];
 								}
-								eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace);
+								eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
 								if (!isSearch) {
 									dojo.empty(inner);
 									new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
@@ -165,8 +168,9 @@ eclipse.Model = (function() {
 				onComplete([]);
 			} else if (parentItem.Location) {
 				this.registry.getService("IFileService").then(function(service) {
-					service.getChildren(parentItem, 
-						dojo.hitch(this, function(parent, children) {
+					service.fetchChildren(parentItem.ChildrenLocation, 
+						dojo.hitch(this, function(children) {
+							eclipse.util.processNavigatorParent(parentItem, children);
 							onComplete(children);
 						}));
 				});
