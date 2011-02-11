@@ -42,22 +42,26 @@ eclipse.UsersService = (function() {
 			});
 		},
 		deleteUser : function(userURI, onLoad) {
-			dojo.xhrDelete({
-				url : userURI,
-				headers : {
-					"EclipseWeb-Version" : "1"
-				},
-				handleAs : "json",
-				timeout : 15000,
-				load : function(jsonData, secondArg) {
-					if (onLoad)
-						onLoad(jsonData, secondArg);
-				},
-				error : function(error, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-				}
-			});
+			
+
+		
+				dojo.xhrDelete({
+					url : userURI,
+					headers : {
+						"EclipseWeb-Version" : "1"
+					},
+					handleAs : "json",
+					timeout : 15000,
+					load : function(jsonData, secondArg) {
+						if (onLoad)
+							onLoad(jsonData, secondArg);
+					},
+					error : function(error, ioArgs) {
+						handleGetAuthenticationError(this, ioArgs);
+						console.error("HTTP status code: ", ioArgs.xhr.status);
+					}
+				});
+
 		},
 		createUser : function(userName, password, onLoad, onError) {
 			dojo.xhrPost({
@@ -99,10 +103,15 @@ eclipse.UsersService = (function() {
 				}
 			});
 		},
-		updateUserInfo: function(userUri, newName, newPassword, onLoad){
-			var uri = userUri + "?name=" + newName;
-			if (newPassword != null) {
-				uri = uri + "&password=" + newPassword;
+		updateUserInfo: function(userUri, data, onLoad){
+			var uri = userUri + "?name=" + data.name;
+			
+			if(data.password && data.passwordRetype && (data.password!=="" || data.passwordRetype!=="")){
+				if(data.password===data.passwordRetype){
+					uri = uri + "&password=" + data.password;	
+				}else{
+					alert("Passwords do not match!");
+				}
 			}
 
 			dojo.xhrPut({
