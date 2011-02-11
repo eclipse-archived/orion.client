@@ -7,23 +7,11 @@
 	<script type="text/javascript" src="js/plugin.js"></script>
 	<script type="text/javascript" src="js/fileClient.js"></script>
 	<script type="text/javascript">
-	(function(){
 		window.onload = function() {
-			var pluginData = {
-				services : [{
-					id : "OrionFileClient", 
-					serviceType : {
-						id: "IFileService", 
-						interfaces : ["getChildren","loadWorkspace","createProject", "removeProject", "createFolder", "createFile", "deleteFile"]
-					},
-					properties: {}
-				}]
-			};
-			var serviceProvider = new eclipse.FileService();
-			var filePlugin = new window.eclipse.Plugin(pluginData, serviceProvider);
-			filePlugin.start();
+			var provider = new eclipse.PluginProvider();
+			provider.registerServiceProvider("IFileService", new eclipse.FileService(), {name : "File Service"});
+			provider.connect();
 		};
-	}());
 	</script>
 </head>
 <body>
