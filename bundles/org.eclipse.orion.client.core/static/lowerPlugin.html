@@ -3,41 +3,30 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<!-- 
+	<script type="text/javascript" src="/openajax/src/OpenAjax-mashup.js"></script>
+	<script type="text/javascript" src="/openajax/src/containers/iframe/crypto.js"></script>
+	<script type="text/javascript" src="/openajax/src/containers/iframe/json2.js"></script>
+	<script type="text/javascript" src="/openajax/src/containers/iframe/iframe.js"></script>
+	 -->
 	<script type="text/javascript" src="js/plugin.js"></script>
-	<script type="text/javascript">
-	(function(){
-		function LowerProvider() {}
-		
-		LowerProvider.prototype = window.eclipse.ServiceProvider.extend({
-			info : function() {
-				return {
-					name : "Lowercase",
-					img : "/favicon.ico",
-					key : [ "u", true, true ] // ctrl+shift+u
-				};
-			},
-			run : function(text) {
-				return text.toLowerCase();
-			}
-		});
-		
-		
+	<script>
 		window.onload = function() {
-			var pluginData = {
-				services : [{
-					id : "LowerCaseEditorAction", 
-					serviceType : {
-						id: "editorAction", 
-						interfaces : ["info","run"]
-					},
-					properties: {}
-				}]
-			};
-			var serviceProvider = new LowerProvider();
-			var lowerPlugin = new window.eclipse.Plugin(pluginData, serviceProvider);
-			lowerPlugin.start();
+			var provider = new eclipse.PluginProvider();
+			provider.registerServiceProvider("editorAction", {
+				info : function() {
+					return {
+						name : "Lowercase",
+						img : "/favicon.ico",
+						key : [ "u", true, true ] // ctrl+shift+u
+					};
+				},
+				run : function(text) {
+					return text.toLowerCase();
+				}
+			}, {name : "Lowercase", img : "/favicon.ico"});
+			provider.connect();
 		};
-	}());
 	</script>
 </head>
 <body>
