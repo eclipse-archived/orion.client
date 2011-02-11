@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,8 +32,8 @@ eclipse.TestNavigatorModel = (function() {
 			onComplete([]);
 	    } else if (parentItem.Location) {
 	    	this.registry.getService("IFileService").then(function(service) {
-	    		service.getChildren(parentItem,
-    				dojo.hitch(this, function(parent, children) {
+	    		service.fetchChildren(parentItem.ChildrenLocation,
+    				dojo.hitch(this, function(children) {
     					onComplete(children);
     					if(postExpandFunc)
     						postExpandFunc(args);
