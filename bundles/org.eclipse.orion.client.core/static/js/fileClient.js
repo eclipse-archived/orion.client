@@ -27,21 +27,21 @@ eclipse.FileService = (function() {
 	FileService.prototype = /**@lends eclipse.FileService.prototype */
 	{
 		/**
-		 * @param parentItem
-		 * @param {Function(Object, Array} updateFunction First param is parentItem, second is children
+		 * Obtains the children of a remote resource
+		 * @param location The location of the item to obtain children for
+		 * @param {Function(Array)} A function that will be provided with an array of children
 		 */
-		getChildren: function(parentItem, updateFunction) {
+		fetchChildren: function(location, updateFunction) {
 			// console.log("get children");
 			dojo.xhrGet({
-				url: parentItem.ChildrenLocation,
+				url: location,
 				headers: {
 					"Orion-Version": "1"
 				},
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					eclipse.util.processNavigatorParent(parentItem, jsonData);
-					updateFunction(parentItem, parentItem.children);
+					updateFunction(jsonData.Children);
 				},
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -55,7 +55,7 @@ eclipse.FileService = (function() {
 		 * Creates a new workspace with the given name. The resulting workspace is
 		 * passed as a parameter to the provided onCreate function.
 		 * @param {String} name The name of the new workspace
-		 *@param {Function} onCreate The function to invoke after the workspace is created
+		 * @param {Function} onCreate The function to invoke after the workspace is created
 		 */
 		createWorkspace: function(name, onCreate) {
 			dojo.xhrPost({

@@ -78,8 +78,8 @@ eclipse.TestNavigator = (function() {
 						for (var i  in loadedWorkspace)
 							this._navRoot[i] = loadedWorkspace[i];
 						this._registry.getService("IFileService").then(function(service) {
-							service.getChildren(
-							 self._navRoot, dojo.hitch(self, function(parent, children) {
+							service.fetchChildren(
+							 self._navRoot.ChildrenLocation, dojo.hitch(self, function(children) {
 								this.createNavTree();
 							}));
 						});

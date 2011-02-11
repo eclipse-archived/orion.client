@@ -75,10 +75,13 @@ eclipse.ExplorerTree = (function() {
 			}
 		},
 		// we have changed an item on the server at the specified parent node
-		changedItem: function(parent, /* optional */ children) {
+		changedItem: function(parent) {
 			var self = this;
 			this.registry.getService("IFileService").then(function(service) {
-				service.getChildren(parent, dojo.hitch(self.model, self.model.onChildrenChange));
+				service.fetchChildren(parent.ChildrenLocation, function(children) {
+					eclipse.util.processNavigatorParent(parent, children);
+					dojo.hitch(self.model, self.model.onChildrenChange)(parent, children);
+				});
 			});
 		},
 		makeFavorite: function() {
@@ -207,7 +210,7 @@ eclipse.ExplorerTree = (function() {
 							for (var i in loadedWorkspace) {
 								this.treeRoot[i] = loadedWorkspace[i];
 							}
-							eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace);
+							eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
 							if (!isSearch) {
 								new eclipse.BreadCrumbs({container: this.parentId, resource: this.treeRoot});
 								this.createTree();
@@ -325,8 +328,7 @@ eclipse.TreeModel = (function() {
 				onComplete([]);
 			} else if (parentItem.Location) {
 				this.registry.getService("IFileService").then(function(service) {
-					service.getChildren(parentItem, 
-						function(parent, children) { onComplete(children); });
+					service.fetchChildren(parentItem.ChildrenLocation, onComplete);
 				});
 			} else {
 				onComplete([]);

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<script type="text/javascript" src="js/plugin.js"></script>
+	<script type="text/javascript" src="js/fileClient.js"></script>
+	<script type="text/javascript">
+	(function(){
+		window.onload = function() {
+			var pluginData = {
+				services : [{
+					id : "OrionFileClient", 
+					serviceType : {
+						id: "IFileService", 
+						interfaces : ["getChildren","loadWorkspace","createProject", "removeProject", "createFolder", "createFile", "deleteFile"]
+					},
+					properties: {}
+				}]
+			};
+			var serviceProvider = new eclipse.FileService();
+			var filePlugin = new window.eclipse.Plugin(pluginData, serviceProvider);
+			filePlugin.start();
+		};
+	}());
+	</script>
+</head>
+<body>
+</body>
+</html>
