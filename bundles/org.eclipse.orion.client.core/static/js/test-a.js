@@ -13,6 +13,7 @@ var orion = orion || {};
 orion.Test = (function() {
 
 	function TestResult(status, elapsed, result) {
+
 		this.getStatus = function() {
 			return status;
 		};
@@ -40,10 +41,11 @@ orion.Test = (function() {
 		} catch (e) {
 			var status = (e instanceof orion.Assert.AssertionError) ? "fail" : "error";
 			runResult.callback(new TestResult(status, new Date().getTime() - startTime, e));
+			return runResult.promise;
 		}
 
 		dojo.when(testResult, _resolve("pass"), _resolve("fail"));
-		return runResult.promise();
+		return runResult.promise;
 	}
 
 	function run(test) {
@@ -58,6 +60,7 @@ orion.Test = (function() {
 				if (testResult instanceof TestResult) {
 					//result of running an individual test
 					if (testResult.getStatus() !== "pass") {
+						console.log("TEST: '" + testName + "' failed. " + (testResult.getResult() || ""));
 						failureCount++;
 					}
 				} else {
@@ -70,19 +73,28 @@ orion.Test = (function() {
 			};
 		}
 
+		var tests = [];
 		for (var key in test) {
-			if (key.match(/^test/) && key !== "test") {
-				if (typeof(test[key]) === "function") {
-					testCount++;
-					_runTest(test[key]).then(_count(key));
-				} else if (typeof(test[key]) === "object") {
-					testCount++;
-					run(test[key]).then(_count(key));
-				}
+			if (key.match(/^test/) && key !== "test" && (typeof(test[key]) === "function" || typeof(test[key]) === "object")) {
+				tests.push({
+					name: key,
+					test: test[key]
+				});
+			}
+		}
+		testCount = tests.length;
+		for (var i = 0; i < tests.length; i++) {
+			var theTest = tests[i].test;
+			var testName = tests[i].name;
+			if (typeof(theTest) === "function") {
+				_runTest(theTest).then(_count(testName));
+			} else {
+				run(theTest).then(_count(testName));
 			}
 		}
 
-		return deferred.promise();
+
+		return deferred.promise;
 	}
 
 	return {
