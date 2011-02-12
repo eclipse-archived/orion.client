@@ -30,8 +30,10 @@ eclipse.DiffParser = (function() {
 			this._nFileContents = [];
 		},
 		
-		parseAllLines: function(oFileString , diffString){
+		parse: function(oFileString , diffString){
 			this._init();
+			if(diffString === "")
+				return ["",[]];
 			this._oFileContents = oFileString.split('\n');
 			this._diffContents = diffString.split('\n');
 			var lineNumber = this._diffContents.length;
@@ -41,6 +43,9 @@ eclipse.DiffParser = (function() {
 				  if(hunkRange)
 					  this._hunkRanges.push(hunkRange); 
 			}
+			if(0 === this._hunkRanges.length)
+				return ["",[]];
+
 			//console.log(JSON.stringify(this._hunkRanges));
 			for(var j = 0; j <this._hunkRanges.length ; j++){
 				this._parsehunkBlock(j);
@@ -48,21 +53,23 @@ eclipse.DiffParser = (function() {
 			//console.log(JSON.stringify(this._oBlocks));
 			//console.log(JSON.stringify(this._nBlocks));
 			this._buildMap();
-			this._logMap();
-			console.log("Total line number in original file: " + this._oFileContents.length);
+			//this._logMap();
+			//console.log("Total line number in original file: " + this._oFileContents.length);
 			this._buildNewFile();
-			this._logNewFile();
-			console.log("Total line number in new file: " + this._nFileContents.length);
+			//this._logNewFile();
+			//console.log("Total line number in new file: " + this._nFileContents.length);
+			return [this._nFileContents.join("\n"),this._deltaMap];
 		},
 		
 		_logMap: function(){
 			for(var i = 0;i < this._deltaMap.length ; i++){
 				console.log(JSON.stringify(this._deltaMap[i]));
+				/*
 				if(this._deltaMap[i][2] > 0){
 					for(var j = 0;j < this._deltaMap[i][0] ; j++){
 						console.log(this._diffContents[this._deltaMap[i][2]+j-1]);
 					}
-				}
+				}*/
 			}
 		},
 		
@@ -89,7 +96,7 @@ eclipse.DiffParser = (function() {
 		_createMinusBlock: function(oBlkStart , nBlkStart , oBlockLength){
 			var len = this._oBlocks.length;
 			if(len === 0 || oBlkStart !== this._oBlocks[len-1][0]){
-				this._oBlocks.push([oBlkStart , oBlockLength]);
+				this._oBlocks.push([oBlkStart === 0 ? 1 : oBlkStart , oBlockLength]);
 				this._nBlocks.push([nBlkStart , 0 , -2]);
 			} else {
 				this._oBlocks[len-1][1] = this._oBlocks[len-1][1] + oBlockLength;
@@ -99,7 +106,7 @@ eclipse.DiffParser = (function() {
 		_createPlusBlock: function(oBlkStart , nBlkStart , nBlockLength , lastPlusPos ){
 			var len = this._nBlocks.length;
 			if(len === 0 || nBlkStart !== this._nBlocks[len-1][0]){
-				this._oBlocks.push([oBlkStart , 0]);
+				this._oBlocks.push([oBlkStart === 0 ? 1 : oBlkStart , 0]);
 				this._nBlocks.push([nBlkStart , nBlockLength , lastPlusPos]);
 			} else {
 				this._nBlocks[len-1][1] = this._nBlocks[len-1][1] + nBlockLength;
@@ -119,7 +126,18 @@ eclipse.DiffParser = (function() {
 			var nBlkStart = this._hunkRanges[hunkRangeNo][3];
 			var lastPlusPos = startNo;
 			for (var i = startNo ; i< endNo ; i++){
+				if( 0 === this._diffContents[i].length)
+					continue;
 				var curToken = this._diffContents[i][0];
+				switch(curToken){
+				case "-":
+				case "+":
+				case " ":
+					break;
+				default:
+					continue;
+				}
+				
 				if(lastToken !== curToken){
 					if(curToken === "+")
 						lastPlusPos = i;
@@ -138,6 +156,7 @@ eclipse.DiffParser = (function() {
 					}
 					lastToken = curToken;
 				}
+				
 				switch(curToken){
 				case "-":
 					oCursor++;
@@ -145,10 +164,19 @@ eclipse.DiffParser = (function() {
 				case "+":
 					nCursor++;
 					break;
-				default:
+				case " ":
 					oCursor++;
 					nCursor++;
+					break;
 				}
+			}
+			switch(lastToken){
+			case "-":
+				this._createMinusBlock(oBlkStart , nBlkStart ,this._hunkRanges[hunkRangeNo][1] + oCursor - oBlkStart);
+				break;
+			case "+":
+				this._createPlusBlock(oBlkStart , nBlkStart ,this._hunkRanges[hunkRangeNo][3] + nCursor - nBlkStart , lastPlusPos);
+				break;
 			}
 		},
 		

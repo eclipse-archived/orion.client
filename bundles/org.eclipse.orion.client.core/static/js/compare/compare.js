@@ -130,6 +130,6 @@ window.onload = function() {
     if(len === 0)
     	return;
     for (var i = 0 ; i < len ; i++){
-    	diffParser.parseAllLines(diffMock[i][1],diffMock[i][0]);
+    	diffParser.parse(diffMock[i][1],diffMock[i][0]);
     }
 };
