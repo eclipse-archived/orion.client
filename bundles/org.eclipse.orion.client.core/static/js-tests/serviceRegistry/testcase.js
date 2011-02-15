@@ -98,7 +98,6 @@ tests.testEvents = function(){
 	assert.equal(1,serviceRemovedCount);
 };
 
-test.DEBUG = true;
 var testPromise = test.runAsynch(tests);
 testPromise.then(function(result) {console.log("Failures: " + result);});
 	
