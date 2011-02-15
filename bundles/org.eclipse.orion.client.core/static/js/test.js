@@ -26,7 +26,6 @@ orion.Test = (function(assert) {
 			}
 		}
 	}
-	;
 
 	exports.addEventListener = function(eventName, listener) {
 		_namedlisteners[eventName] = _namedlisteners[eventName] || [];
