@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<script type="text/javascript" src="/js/assert.js"></script>
+	<script type="text/javascript" src="/js/test.js"></script>
+	<script type="text/javascript">
+		function require(module) {
+			if (module==="assert") {
+				return orion.Assert;
+			} else if (module==="test") {
+				return orion.Test;
+			}
+		}
+		exports = {};
+		module = {};
+	</script>
+	<script type="text/javascript" src="https://github.com/commonjs/commonjs/raw/master/tests/unit-testing/1.0/program.js"></script>
+	<script type="text/javascript">
+		console.log("Failure count: " + require("test").run(exports));
+		
+		require("test").runAsynch(exports).then(function(result) {
+			console.log("(Asynch) Failure count: " + result);
+		});
+	</script>
+</head>
+<body>
+</body>
+</html>

@@ -7,10 +7,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo */
+/* global dojo */
 
 var orion = orion || {};
-orion.Test = (function() {
+orion.Test = (function(assert) {
 
 	function TestResult(status, elapsed, result) {
 
@@ -39,7 +39,7 @@ orion.Test = (function() {
 		try {
 			testResult = test();
 		} catch (e) {
-			var status = (e instanceof orion.Assert.AssertionError) ? "fail" : "error";
+			var status = (e instanceof assert.AssertionError) ? "fail" : "error";
 			runResult.callback(new TestResult(status, new Date().getTime() - startTime, e));
 			return runResult.promise;
 		}
@@ -58,13 +58,13 @@ orion.Test = (function() {
 			return function(testResult) {
 				finished++;
 				if (testResult instanceof TestResult) {
-					//result of running an individual test
+					// result of running an individual test
 					if (testResult.getStatus() !== "pass") {
 						console.log("TEST: '" + testName + "' failed. " + (testResult.getResult() || ""));
 						failureCount++;
 					}
 				} else {
-					//result of running a sub-suite
+					// result of running a sub-suite
 					failureCount += testResult;
 				}
 				if (finished === testCount) {
@@ -74,30 +74,29 @@ orion.Test = (function() {
 		}
 
 		var tests = [];
-		for (var key in test) {
-			if (key.match(/^test/) && key !== "test" && (typeof(test[key]) === "function" || typeof(test[key]) === "object")) {
+		for ( var key in test) {
+			if (key.match(/^test/) && key !== "test" && (typeof (test[key]) === "function" || typeof (test[key]) === "object")) {
 				tests.push({
-					name: key,
-					test: test[key]
+					name : key,
+					test : test[key]
 				});
 			}
 		}
 		testCount = tests.length;
-		for (var i = 0; i < tests.length; i++) {
+		for ( var i = 0; i < tests.length; i++) {
 			var theTest = tests[i].test;
 			var testName = tests[i].name;
-			if (typeof(theTest) === "function") {
+			if (typeof (theTest) === "function") {
 				_runTest(theTest).then(_count(testName));
 			} else {
 				run(theTest).then(_count(testName));
 			}
 		}
 
-
 		return deferred.promise;
 	}
 
 	return {
-		run: run
+		run : run
 	};
-}());
+}(orion.Assert));
