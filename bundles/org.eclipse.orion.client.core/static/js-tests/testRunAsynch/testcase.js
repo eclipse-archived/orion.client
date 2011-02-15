@@ -7,7 +7,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-(function(test, assert) {
+var testcase = function(test, assert) {
 	
 var tests = {};
 tests["test basic synch"] = function() {
@@ -30,9 +30,5 @@ tests["test expected asynch failure"] = function() {
 	},100);
 	return d;
 };
-var testPromise = test.runAsynch(tests);
-console.debug("Expect Failures: 1");
-
-testPromise.then(function(result) {console.log("Failures: " + result);});
-	
-}(orion.Test, orion.Assert));
+return tests;
+}(orion.Test, orion.Assert);
