@@ -13,6 +13,14 @@ var tests = {};
 tests["test basic synch"] = function() {
 };
 
+tests["test subtest"] = {
+		"test sub1" : function() {
+		},
+		"test sub2" : function() {
+		}
+};
+
+
 tests["test basic asynch"] = function() {
 	var d = new dojo.Deferred();
 	setTimeout(function(){d.callback();}, 100);
