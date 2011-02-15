@@ -9,6 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 var eclipse = eclipse || {};
+
+eclipse.compareConsts =eclipse.compareConsts || {
+	LINE_SEPERATOR: "\n",
+	//NEW_LINE: "\r",
+	NO_NEW_LINE: "\\ No newline at end of file"
+};
+
 eclipse.DiffParser = (function() {
 	function DiffParser(options) {
 		//this._init();
@@ -28,14 +35,19 @@ eclipse.DiffParser = (function() {
 			//Final result as out put
 			this._deltaMap = [];
 			this._nFileContents = [];
+			
+			//Flag of new line at file end
+			this._oNewLineAtEnd = true;
+			this._nNewLineAtEnd = true;
 		},
 		
 		parse: function(oFileString , diffString){
 			this._init();
 			if(diffString === "")
 				return ["",[]];
-			this._oFileContents = oFileString.split('\n');
-			this._diffContents = diffString.split('\n');
+			var lSep = eclipse.compareConsts.LINE_SEPERATOR;
+			this._oFileContents = oFileString.split(lSep);
+			this._diffContents = diffString.split(lSep);
 			var lineNumber = this._diffContents.length;
 			this._hunkRanges = [];
 			for(var i = 0; i <lineNumber ; i++){
@@ -58,7 +70,7 @@ eclipse.DiffParser = (function() {
 			this._buildNewFile();
 			//this._logNewFile();
 			//console.log("Total line number in new file: " + this._nFileContents.length);
-			return [this._nFileContents.join("\n"),this._deltaMap];
+			return [this._nFileContents.join(lSep),this._deltaMap];
 		},
 		
 		_logMap: function(){
@@ -129,6 +141,16 @@ eclipse.DiffParser = (function() {
 				if( 0 === this._diffContents[i].length)
 					continue;
 				var curToken = this._diffContents[i][0];
+				if(curToken === "\\"){
+					if( eclipse.compareConsts.NO_NEW_LINE === this._diffContents[i].substring(0 , this._diffContents[i].length-1) ||
+						eclipse.compareConsts.NO_NEW_LINE === this._diffContents[i]){
+						lastToken === "-" ? this._oNewLineAtEnd = false:this._nNewLineAtEnd = false ;
+						if(i > startNo){
+							this._diffContents[i-1] = this._diffContents[i-1].substring(0 , this._diffContents[i-1].length-1);
+						}
+						continue;
+					}
+				}
 				switch(curToken){
 				case "-":
 				case "+":
@@ -183,34 +205,58 @@ eclipse.DiffParser = (function() {
 		_buildMap: function(){
 			var  blockLen = this._oBlocks.length;
 			var oFileLen = this._oFileContents.length;
+			var oFileLineCounter = 0;
 			var lastSamePos = 1;
 			for(var i = 0 ; i < blockLen ; i++){
 				var delta =  this._oBlocks[i][0] - lastSamePos;
 				//Create the "same on both" delta 
 				if(delta > 0){
 					this._deltaMap.push([delta , delta , 0]);
+					oFileLineCounter += delta;
 				}
 				this._deltaMap.push([this._nBlocks[i][1] , this._oBlocks[i][1] , this._nBlocks[i][2]+1]);
+				oFileLineCounter += this._oBlocks[i][1];
 				lastSamePos = this._oBlocks[i][0] + this._oBlocks[i][1];
 			}
 			if(0 < (oFileLen - lastSamePos)){
 				this._deltaMap.push([oFileLen - lastSamePos+1 , oFileLen - lastSamePos+1 , 0]);
+				oFileLineCounter += (oFileLen - lastSamePos+1);
+			}
+			if(oFileLineCounter < oFileLen){
+				var delta = oFileLen - oFileLineCounter;
+				var lastMapItem = this._deltaMap[this._deltaMap.length-1];
+				if(lastMapItem[2] === 0){
+					lastMapItem[0] += delta;
+					lastMapItem[1] += delta;
+				} else if (lastMapItem[2] === -1){
+					this._deltaMap.push([delta , delta , 0]);
+				} else {
+					lastMapItem[1] += delta;
+				}
 			}
 		},
 		
 		_buildNewFile: function(){
 			var oFileCursor = 1;
-			for(var i = 0;i < this._deltaMap.length ; i++){
+			var lastUpdateBySameBlk = false;
+			var len = this._deltaMap.length;
+			for(var i = 0;i < len ; i++){
+				lastUpdateBySameBlk = false;
 				if(this._deltaMap[i][2] === 0){
 					for(var j = 0;j < this._deltaMap[i][0] ; j++){
 						this._nFileContents.push(this._oFileContents[oFileCursor+j-1]);
 					}
+					lastUpdateBySameBlk = true;
 				} else if(this._deltaMap[i][2] > 0){
 					for(var j = 0;j < this._deltaMap[i][0] ; j++){
 						this._nFileContents.push(this._diffContents[this._deltaMap[i][2]+j-1].substring(1));
 					}
 				}
 				oFileCursor = oFileCursor + this._deltaMap[i][1];
+			}
+			if(this._nNewLineAtEnd && !lastUpdateBySameBlk){
+				this._nFileContents.push("");
+				this._deltaMap[len-1][0] = this._deltaMap[len-1][0] + 1;
 			}
 		},
 		
