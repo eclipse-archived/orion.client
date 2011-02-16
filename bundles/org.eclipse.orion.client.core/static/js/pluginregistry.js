@@ -78,6 +78,15 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	
 	function _responseHandler(topic, message) {
 		try {
+			if (topic === "onSecurityAlert") {
+				if (message === "OpenAjax.hub.SecurityAlert.LoadTimeout") {
+					_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
+				} else {
+					console.log("Security Alert [" + url +"]: " + message);
+				}
+				return;
+			}
+			
 			if (message.method) {
 				if ("plugin" === message.method) {
 					if (!data) {
@@ -175,6 +184,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 			return true;
 		},
 		onSecurityAlert : function(source, alertType) {
+			console.log(source + ":" + alertType );
 		}
 	});
 
@@ -216,6 +226,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 							console.log(message);
 						},
 						onSecurityAlert : function(source, alertType) {
+							responseHandler("onSecurityAlert", alertType);
 						},
 						onConnect : function(container) {
 							_managedHub.subscribe("response[" + url + "]", responseHandler);
@@ -288,6 +299,8 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				_persist(plugin);
 				_pluginEventTarget.dispatchEvent("pluginAdded", plugin);
 				d.resolve(plugin);
+			}, function(e) {
+				d.reject(e);
 			});			
 		}
 		return d.promise;	
