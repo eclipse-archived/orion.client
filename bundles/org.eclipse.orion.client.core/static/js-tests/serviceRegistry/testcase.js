@@ -7,7 +7,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-var testcase = function(test, assert) {
+var testcase = function(assert) {
 	var tests = {};
 	tests.testRegisterAndGetService = function() {
 		var count = 0;
@@ -123,4 +123,4 @@ var testcase = function(test, assert) {
 	};
 
 	return tests;
-}(orion.Test, orion.Assert);
+}(orion.Assert);
