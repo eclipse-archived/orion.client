@@ -11,8 +11,8 @@
 var eclipse = eclipse || {};
 
 eclipse.compareConsts =eclipse.compareConsts || {
-	LINE_SEPERATOR: "\n",
-	//NEW_LINE: "\r",
+	LINE_SEPERATOR: "\r\n",
+	NEW_LINE: "\r",
 	NO_NEW_LINE: "\\ No newline at end of file"
 };
 
@@ -137,6 +137,7 @@ eclipse.DiffParser = (function() {
 			var oBlkStart = this._hunkRanges[hunkRangeNo][1];
 			var nBlkStart = this._hunkRanges[hunkRangeNo][3];
 			var lastPlusPos = startNo;
+			var nl = eclipse.compareConsts.NEW_LINE;
 			for (var i = startNo ; i< endNo ; i++){
 				if( 0 === this._diffContents[i].length)
 					continue;
@@ -145,7 +146,7 @@ eclipse.DiffParser = (function() {
 					if( eclipse.compareConsts.NO_NEW_LINE === this._diffContents[i].substring(0 , this._diffContents[i].length-1) ||
 						eclipse.compareConsts.NO_NEW_LINE === this._diffContents[i]){
 						lastToken === "-" ? this._oNewLineAtEnd = false:this._nNewLineAtEnd = false ;
-						if(i > startNo){
+						if(i > startNo && nl === this._diffContents[i-1].substring(this._diffContents[i-1].length-1)){
 							this._diffContents[i-1] = this._diffContents[i-1].substring(0 , this._diffContents[i-1].length-1);
 						}
 						continue;
@@ -283,7 +284,7 @@ eclipse.DiffParser = (function() {
 		 */
 		_parseHunkRange: function(lineNumber){
 			var oneLine = this._diffContents[lineNumber];
-			if(12 > oneLine.length )
+			if(8 > oneLine.length )
 				return undefined;//to be qualified as a hunkSign line , the line has to match the @@-l,s+l,s@@ pattern
 			var subStr = oneLine.substring(0,2);
 			if("@@" !== subStr)
