@@ -11,7 +11,6 @@ dojo.addOnLoad(function() {
 
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var inputService = new eclipse.InputService(serviceRegistry);
-	var usersService = new eclipse.UsersService(serviceRegistry);
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 
 	/* set the login information in toolbar */
@@ -26,11 +25,7 @@ dojo.addOnLoad(function() {
 	var profile = new eclipse.Profile({
 		registry : serviceRegistry,
 		pluginRegistry: pluginRegistry,
-		saveProfileButton : dijit.byId('saveProfileButton'),
-		deleteProfileButton : dijit.byId('deleteProfileButton'),
-		resetProfileButton : dijit.byId('resetProfileButton'),
-		profilePane: dojo.byId('profilePane'),
-		profileExtentionPane: dojo.byId('profileExtentionsPane')
+		profileForm: dijit.byId('profileForm')
 	});
 });
 
@@ -48,34 +43,63 @@ eclipse.Profile = (function() {
 	Profile.prototype = {
 		_init : function(options) {
 
-			this.saveProfileButton = options.saveProfileButton;
-			this.deleteProfileButton = options.deleteProfileButton;
-			this.resetProfileButton = options.resetProfileButton;
 			this.registry = options.registry;
 			this.pluginRegistry = options.pluginRegistry;
-			this.profilePane = options.profilePane;
-			this.profileExtentionPane = options.profileExtentionPane;
-			this.isProfileRendered = false;
+			this.profileForm = options.profileForm;
 			
-			// TODO if no hash provided current user profile should be loaded
-
 			var userProfile = this;
-			this.fieldMapping = new Object();
 			
 			
-			if(this.pluginRegistry.getPlugin("/profile/userprofilePlugin.html")===null){
-				this.pluginRegistry.installPlugin("/profile/userprofilePlugin.html");
+
+			if(this.pluginRegistry.getPlugin("/profile/userservicePlugin.html")===null){
+				this.pluginRegistry.installPlugin("/profile/userservicePlugin.html");
 			}
 			
-			this.mainProfileService = this.registry.getService("mainProfilePlugin");
+			this.usersService = this.registry.getService("IUsersService");
+			
+			if(this.usersService!==null){
+				this.usersService.then(function(service) {
+					service.getDivContent().then(function(content) {
+						dojo.hitch(userProfile, userProfile.draw(content, userProfile.profileForm.get("domNode")));
+					});
+					service.addEventListener("userInfoChanged", function(jsonData){
+						dojo.hitch(userProfile,	userProfile.populateData(jsonData));
+					});
+					service.addEventListener("userDeleted", function(jsonData){
+						window.location.replace("/");
+					});
+				});
 
+			}
+			
 			
 			this.registry.getService("IInputProvider").then(function(input) {
 				input.addEventListener("inputChanged", function(uri) {
 					dojo.hitch(userProfile, userProfile.setUserToDisplay(uri));
 				});
 				input.getInput(function(uri) {
-					dojo.hitch(userProfile, userProfile.setUserToDisplay(uri));
+					if(uri && uri!=null && uri!="")
+						dojo.hitch(userProfile, userProfile.setUserToDisplay(uri));
+					else{
+						
+						// TODO if no hash provided current user profile should be loaded - need a better way to find logged user URI
+						
+						dojo.xhrPost({
+							url : "/login",
+							headers : {
+								"Orion-Version" : "1"
+							},
+							handleAs : "json",
+							timeout : 15000,
+							load : function(jsonData, ioArgs) {
+								input.setInput("/users/"+jsonData.login);
+								return jsonData;
+							},
+							error : function(response, ioArgs) {
+								handleGetAuthenticationError(this, ioArgs);
+							}
+						});
+					}
 				});
 			});
 			
@@ -90,73 +114,52 @@ eclipse.Profile = (function() {
 		setUserToDisplay : function(userURI) {
 			this.currentUserURI = userURI;
 			var profile = this;
-			this.registry.getService("IUsersService").then(
+			this.usersService.then(
 					function(service) {
-						service.getUserInfo(userURI, dojo.hitch(profile,
-								function(jsonData, secondArg) {
-									this.renderProfile(jsonData);
-								}));
+						service.getUserInfo(userURI, "userInfoChanged");
 					});
-		},
-		renderProfile : function(jsonData) {
-			if (jsonData.login) {
-				
-				var profile = this;
-				
-				if(this.isProfileRendered){
-					dojo.hitch(profile, profile.populateData(jsonData));
-					return;
-				}
-				
-				
-				if(this.mainProfileService!==null){
-						this.mainProfileService.then(function(service) {
-							service.getDivContent().then(function(content) {
-								var affectedFields = dojo.hitch(profile, function () {return profile.draw(content, profile.profilePane);});
-								dojo.hitch(profile, profile.populateData(jsonData, affectedFields()));
-							});
-						});
-
-				}
-				
-				var profileExtentions = this.registry.getServiceReferences("profilePlugin");
-				for (var i=0; i<profileExtentions.length; i++) {
-					this.registry.getService(profileExtentions[i]).then(function(service) {
-						service.getDivContent().then(function(content) {
-							var affectedFields = dojo.hitch(profile, function() {return profile.draw(content, profile.profileExtentionPane);});
-							dojo.hitch(profile, profile.populateData(jsonData, affectedFields()));
-						});
-					});
-				}
-				this.isProfileRendered = true;
-				
-			}
 		},
 		redisplayLastUser : function(){
 			var profile = this;
-			this.registry.getService("IUsersService").then(
+			this.usersService.then(
 					function(service) {
-						service.getUserInfo(profile.currentUserURI, dojo.hitch(profile,
-								function(jsonData, secondArg) {
-									this.populateData(jsonData);
-								}));
+						service.getUserInfo(profile.currentUserURI);
 					});
 		},
-		populateData: function(jsonData, fieldMapping){
-			if(!fieldMapping){
-				fieldMapping = this.fieldMapping;
-			}
-			for(var key in fieldMapping){
-				if(dojo.byId(key).innerHTML){
-					dojo.byId(key).innerHTML = jsonData[fieldMapping[key]] ? jsonData[fieldMapping[key]] : "&nbsp;";
-					dojo.byId(key).value = jsonData[fieldMapping[key]] ? jsonData[fieldMapping[key]] : "";
-				}else{
-					dojo.byId(key).value= jsonData[fieldMapping[key]] ? jsonData[fieldMapping[key]] : "";
-				}
+		populateData: function(jsonData){
+			if(jsonData && jsonData[0].login){//TODO why is it [0]?
+				this.profileForm.reset();
+				this.profileForm.set('value', jsonData[0]);
+			}else{
+				throw new Error("User is not defined");
 			}
 		},
+		
+		createFormElem: function(json, node){
+			  if(!json.type){
+			    throw new Error("type is missing!");
+			  }
+			  var cls = dojo.getObject(json.type, false, dijit.form);
+			  if(!cls){
+			    cls = dojo.getObject(json.type, false);
+			  }
+			  if(cls){
+				  formElem = new cls(json.props);
+				  formElem.placeAt(node);
+				  if(formElem.get('readOnly')===true){
+					  formElem.set('style', 'display: none');
+					  var p = dojo.create("p", {id: formElem.get('id')+"_p", className: "userprofile", innerHTML: formElem.get('value')?formElem.get('value'):"&nbsp;"}, node, "last");
+					  dojo.connect(formElem, "onChange", dojo.hitch(this, function(myDijit,p){p.innerHTML = myDijit.get('value'); if(p.innerHTML=="") p.innerHTML="&nbsp";}, formElem, p));
+				  }
+				  
+				  return formElem;
+			  }else{
+				  return new Error("Type not found " + json.type);
+			  }
+			  
+			},
+		
 		draw: function(content, placeholder){
-			var affectedFields = new Object();
 			var profile = this;
 			for(var i=0; i<content.sections.length; i++){
 				
@@ -176,57 +179,33 @@ eclipse.Profile = (function() {
 					var data = content.sections[i].data[j];
 					var dataDiv = dojo.create("div", null, sectionContents);
 					dojo.create("label", {className: "userprofile", innerHTML: data.label, "for": data.id}, dataDiv);
-					if(data.readonly){
-						dojo.create("p", {className: "userprofile", id: data.id, innerHTML: "&nbsp;"}, dataDiv);
-					}else{
-						var input = dojo.create("input", {className: "userprofile", id: data.id, value: "", type: data.type ? data.type : "text"}, dataDiv);
-						dojo.connect(input, "onkeypress", dojo.hitch(profile, function(event){ if (event.keyCode === 13) { this.saveProfile(); } else {return true;}}));
-					}
-					this.fieldMapping[data.id] = data.value;
-					affectedFields[data.id] = data.value;
+									
+						var input = this.createFormElem(data, dataDiv);
+						dojo.connect(input, "onKeyPress", dojo.hitch(profile, function(event){ if (event.keyCode === 13) { this.fire(); } else {return true;}}));
 				}
 			}
-			return affectedFields;
-		},
-		saveProfile : function() {
-			var data = new Object();
-			for(var key in this.fieldMapping){
-				data[this.fieldMapping[key]] = dojo.byId(key).value;
+			if(content.actions && content.actions.length>0){
+				var dataDiv = dojo.create("div", {style: "margin-top: 30px;"}, sectionContents);
 			}
-
-			var profile = this;
-			this.registry.getService("IUsersService").then(
-					function(service) {
-						service.updateUserInfo(profile.currentUserURI,
-								data, dojo.hitch(
-										profile, function(jsonData, secondArg) {
-											this.redisplayLastUser();
-											alert("Profile saved!");
-
-										}));
-					});
-		},
-		deleteProfile : function() {
-			var login = dojo.byId("login") ? dojo.byId("login").value
-					: this.currentUserURI;
-			if (confirm("Do you really want to delete user "
-					+ login + "?")) {
-			var profile = this;
-			this.registry.getService("IUsersService").then(
-					function(service) {
-						service.deleteUser(profile.currentUserURI, dojo.hitch(
-								profile, function(jsonData, secondArg) {
-									// TODO where to go?
-									window.location
-											.replace("navigate-table.html");
-								}));
-					});
+			for(var i=0; i<content.actions.length; i++){
+				var actionData = content.actions[i];
+				var actionDijit = this.createFormElem(actionData, dataDiv);
+				for(var j=0; j<actionData.events.length; j++){
+					dojo.connect(actionDijit, actionData.events[j].event, dojo.hitch(profile, function(action){this.fire(action);}, actionData.events[j].action));
+				}
 			}
-
+		},
+		fire: function(action){
+			var data = dijit.byId('profileForm').get('value');
+			var url = this.currentUserURI;
+			this.usersService.then(function(service) {
+						service.fire(action, url, data);
+					});
 		}
 	};
 	return Profile;
 }());
 dojo.addOnUnload(function() {
-	registry.stop();
+	if(registry)
+		registry.stop();
 });

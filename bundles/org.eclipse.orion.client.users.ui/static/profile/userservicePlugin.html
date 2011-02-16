@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+ <script type="text/javascript" src="/js/plugin.js"></script>
+ <script type="text/javascript" src="/profile/js/UsersService.js"></script>
+ <script type="text/javascript"
+	src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<!--Authentication -->
+<script type="text/javascript" src="/js/auth.js"></script>
+ <script>
+  window.onload = function() {
+   var provider = new eclipse.PluginProvider();
+   
+   var usersService = new eclipse.UsersService();
+   usersService.info = function() {
+	     return {
+		      name : "Personal Information"
+		     };
+		    };
+   
+   
+	usersService.getDivContent = function() {
+  	var content = {"sections" : [
+  	                             {"id": "personalInformation", "name" : "Personal Information", "data" :[
+  	                                                                                                     {"type": "TextBox", "props": {"id": "pi_login", "readOnly" : true, "name" : "login"}, "label": "Login"},
+  	                                                                                                     {"type": "TextBox", "props": {"id": "pi_name", "readOnly" : false,  "type" : "", "name" : "name"}, "label" : "Name"},
+  	                                                                                                     {"type": "TextBox", "props": {"id": "pi_lastLogin", "readOnly" : true,  "type" : "", "name" : "lastlogintimestamp"}, "label" : "Last login"}
+  	                                                                                                     ]
+  	                             },
+  	                             {"id": "changePassword", "name" : "Change Password", "data" : [
+  	                                                                                            {"type": "TextBox", "props": {"id": "cp_password", "readOnly" : false,  "type" : "password", "name" : "password"}, "label" : "Password"},
+  	                                                                                            {"type": "TextBox", "props": {"id": "cp_passwordRetype", "readOnly" : false,  "type" : "password", "name" : "passwordRetype"}, "label" : "Retype password"}
+  	                                                                                            ]
+  	                             }
+  	                             ],
+  	               "actions": [
+  	                          	{"type": "Button", "props": {"id": "saveProfileButton", "label": "Save Profile"}, "events": [{"event": "onClick", "action": "saveProfile"}]},
+  	                        	{"type": "Button", "props": {"id": "resetProfileButton", "label": "Reset"}, "events": [{"event": "onClick", "action": "resetProfile"}]},
+  	                        	{"type": "Button", "props": {"id": "deleteProfileButton", "label": "Delete Profile"}, "events": [{"event": "onClick", "action": "deleteProfile"}]}
+  	                          ]
+  	};
+  	    	
+	return content;
+  };
+  
+  usersService.fire = function(action, url, jsonData){
+	  switch(action){
+	  	case "saveProfile":
+	  		this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url) {alert("Profile saved!"); this.getUserInfo(url, "userInfoChanged")}, url));
+	  		break;
+	  	case "resetProfile":
+	  		this.getUserInfo(url, "userInfoChanged");
+	  		break;
+	  	case "deleteProfile":
+			var login = jsonData.login ? jsonData.login
+					: url;
+			if (confirm("Do you really want to delete user "
+					+ login + "?")) {
+				this.deleteUser(url, "userDeleted");
+			}
+			break;
+		default:
+			this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url) {alert("Profile saved!"); this.getUserInfo(url, "userInfoChanged")}, url));
+  			break;
+	  }
+  };
+   
+  usersService._serviceRegistration = provider.registerServiceProvider("IUsersService", usersService);
+   provider.connect();
+  };
+ </script>
+</head>
+<body></body>
+</html>

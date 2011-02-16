@@ -3,6 +3,7 @@
 label.userprofile {
 	min-width: 120px;
 	float: left;
+	clear: both;
 }
 
 .userprofile {
