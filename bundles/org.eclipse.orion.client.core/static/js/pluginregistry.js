@@ -71,7 +71,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 			for(var i = 0; i < services.length; i++) {
 				var service = services[i];
 				var serviceProxy = _createServiceProxy(service);
-				_serviceRegistrations[service.serviceId] = internalRegistry.serviceRegistry.registerService(service.type, serviceProxy, service.properties);
+				_serviceRegistrations[service.serviceId] = internalRegistry.registerService(service.type, serviceProxy, service.properties);
 			}
 		}	
 	}
@@ -103,7 +103,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 				}
 			}
 		} catch (e) {
-			console.err(e);
+			console.log(e);
 		}
 	}
 	
@@ -116,12 +116,14 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	};
 	
 	this.uninstall = function() {
-		var serviceId;
-		for (serviceId in _serviceRegistrations) {
+		for (var serviceId in _serviceRegistrations) {
 			if (_serviceRegistrations.hasOwnProperty(serviceId)) {
 				_serviceRegistrations[serviceId].unregister();
 				delete _serviceRegistrations[serviceId];
 			}
+		}
+		if (_container) {
+			internalRegistry.disconnect(_container);
 		}
 		internalRegistry.uninstallPlugin(this);
 	};
@@ -139,30 +141,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	
 	this._load = function() {
 		if (!_container) {
-			var hub = internalRegistry.hub;
-			_container = new OpenAjax.hub.IframeContainer(hub, url, {
-				Container : {
-					onSecurityAlert : function(source, alertType) {
-					},
-					onConnect : function(container) {
-						hub.subscribe("response[" + url + "]", _responseHandler);
-					},
-					onDisconnect : function(container) {
-						hub.unsubscribe("response[" + url + "]");
-					}
-				},
-				IframeContainer : {
-					parent : document.body,
-					iframeAttrs : {
-						style : {
-							display : "none"
-						}
-					},
-					uri : url,
-					tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/release/all/tunnel.html"
-//					tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/src/containers/iframe/tunnel.html"					
-				}
-			});
+			_container = internalRegistry.connect(url, _responseHandler);
 		}
 		return _deferredLoad.promise;
 	};
@@ -176,23 +155,35 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	}
 };
 
-eclipse.PluginRegistry = function(serviceRegistry) {
+eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
+	var _storage = opt_storage || localStorage;
 	var _plugins = [];
 	var _pluginEventTarget = new eclipse.EventTarget();
 	
-	var _managedHub = new OpenAjax.hub.ManagedHub({
-		onPublish:       function(topic, data, publishContainer, subscribeContainer) { return true; },
-        onSubscribe:     function(topic, container) { return true; },
-        onUnsubscribe:   function(topic, container) { return true; },
-        onSecurityAlert: function(source, alertType) {}
+
+		var _managedHub = new OpenAjax.hub.ManagedHub({
+		log : function(message) {
+			console.log(message);
+		},
+		onPublish : function(topic, data, publishContainer, subscribeContainer) {
+			return true;
+		},
+		onSubscribe : function(topic, container) {
+			return true;
+		},
+		onUnsubscribe : function(topic, container) {
+			return true;
+		},
+		onSecurityAlert : function(source, alertType) {
+		}
 	});
 
 	function _loadFromStorage() {
-		for (var i = 0; i < localStorage.length; i++) {
-			var key = localStorage.key(i);
+		for (var i = 0; i < _storage.length; i++) {
+			var key = _storage.key(i);
 			if (key.indexOf("plugin.") === 0) {
 				var pluginURL = key.substring("plugin.".length);
-				var pluginData = JSON.parse(localStorage[key]);
+				var pluginData = JSON.parse(_storage[key]);
 				var plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
 				_plugins[_plugins.length] = plugin;
 			}
@@ -200,11 +191,11 @@ eclipse.PluginRegistry = function(serviceRegistry) {
 	}
 	
 	function _persist(plugin) {
-		localStorage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
+		_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
 	}
 
 	function _clear(plugin) {
-		delete localStorage["plugin."+plugin.getLocation()];
+		delete _storage["plugin."+plugin.getLocation()];
 	}
 	
 	function _normalizeURL(location) {
@@ -217,8 +208,38 @@ eclipse.PluginRegistry = function(serviceRegistry) {
 	}
 	
 	var internalRegistry = {
-			serviceRegistry: serviceRegistry,
-			hub: _managedHub,
+			registerService: dojo.hitch(serviceRegistry, serviceRegistry.registerService),
+			connect: function(url, responseHandler) {
+				return new OpenAjax.hub.IframeContainer(_managedHub, url, {
+					Container : {
+						log : function(message) {
+							console.log(message);
+						},
+						onSecurityAlert : function(source, alertType) {
+						},
+						onConnect : function(container) {
+							_managedHub.subscribe("response[" + url + "]", responseHandler);
+						},
+						onDisconnect : function(container) {
+							_managedHub.unsubscribe("response[" + url + "]");
+						}
+					},
+					IframeContainer : {
+						parent : document.body,
+						iframeAttrs : {
+							style : {
+								display : "none"
+							}
+						},
+						uri : url,
+						tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/release/all/tunnel.html"
+//						tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/src/containers/iframe/tunnel.html"					
+					}
+				});
+			},
+			disconnect: function(container) {
+				_managedHub.removeContainer(container);
+			},
 			uninstallPlugin: function(plugin) {
 				_clear(plugin);
 				for (var i = 0; i < _plugins.length; i++) {
@@ -232,6 +253,10 @@ eclipse.PluginRegistry = function(serviceRegistry) {
 			publish: function(topic, message) {
 				_managedHub.publish(topic, message);
 			}
+	};
+	
+	this._shutdown = function() {
+		_managedHub.disconnect();
 	};
 	
 	this.installPlugin = function(url) {
