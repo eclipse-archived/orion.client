@@ -36,22 +36,37 @@ dojo.addOnLoad(function(){
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	
-	var contextMenu = dijit.byId("treeContextMenu"),
-	newFileFolderMenu = dijit.byId("NewFileFolderMenu");
-	var makeFavoriteDomNode = dojo.byId("makeFavorite"),
-	deleteFilesDomNode = dojo.byId("deleteFiles"),
-	newFolderDomNode = dojo.byId("newFolder"),
-	newFileDomNode = dojo.byId("newFile");
+	var contextMenu = dijit.byId("treeContextMenu");
 	
 	var explorer = new eclipse.ExplorerTree(serviceRegistry, treeRoot,
-			searcher, "explorer-tree", contextMenu, newFileFolderMenu,
-			makeFavoriteDomNode, deleteFilesDomNode, newFolderDomNode, newFileDomNode);
+			searcher, "explorer-tree", "navToolBar", contextMenu);
+			
+	// declare commands
+	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar");
+	
+	var tableViewCommand = new eclipse.Command({
+		name : "Table View",
+		image : "images/flatLayout.gif",
+		id: "eclipse.tableViewCommand",
+		groupId: "eclipse.viewGroup",
+		callback : function() {
+			serviceRegistry.getService("IPreferencesService").then(function(service) {
+				service.put("window/orientation", "navigate-table.html");
+			});
+			window.location.replace("/navigate-table.html#" + dojo.hash());
+		}});
+	commandService.addCommand(tableViewCommand, "dom", "navToolBar");
+	commandService.addCommandGroup("eclipse.viewGroup", 700);
 	explorer.loadResourceList(dojo.hash());
+	
 
 	//every time the user manually changes the hash, we need to load the workspace with that name
 	dojo.subscribe("/dojo/hashchange", explorer, function() {
 		explorer.loadResourceList(dojo.hash());
 	});
+	
+	eclipse.fileCommandUtils.hookUpSearch("search", explorer);
+
 	
 	// it's important to replace the implementation of setInput here, so that we get
 	// the event at the time it happens as opposed to using a stored event. Firefox
@@ -77,44 +92,5 @@ dojo.addOnLoad(function(){
 	    	}
 	    	window.location.href = target;
 	    }
-	};
-
-	// Attach event handlers
-	var searchField = dojo.byId("search");
-	dojo.byId("switchView").onclick = function(evt) {
-		preferenceService.put("window/orientation", "navigate-table.html");
-		window.location.replace("/navigate-table.html#" + dojo.hash());
-	};
-	dojo.byId("newProjectButton").onclick = function(evt) {
-		var dialog = new widgets.NewItemDialog({
-			title: "New Folder",
-			label: "Folder name:",
-			func:  function(name){ explorer.createProject(name); }
-		});
-		dialog.startup();
-		dialog.show();
-	};
-	dojo.byId("linkProjectButton").onclick = function(evt) {
-		var dialog = new widgets.NewItemDialog({
-			title: "Link Folder",
-			label: "Folder name:",
-			func:  function(name, url, create){ explorer.createProject(name,url,create); },
-			advanced: true
-		});
-		dialog.startup();
-		dialog.show();
-	};
-	dojo.byId("searchTextButton").onclick = function(evt) {
-		if (searchField.value.length > 0) {
-			var query = explorer.treeRoot.SearchLocation + searchField.value;
-			explorer.loadResourceList(query);
-		}
-	};
-	dojo.byId("searchNamesButton").onclick = function(evt) {
-		if (searchField.value.length > 0) {
-			var query = explorer.treeRoot.SearchLocation + "Name:" + searchField.value;
-			explorer.loadResourceList(query);
-		}
-	};
-	
+	};	
 });

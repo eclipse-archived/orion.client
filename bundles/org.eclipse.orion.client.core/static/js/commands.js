@@ -7,8 +7,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
- /*global dojo, document, window, eclipse:true, alert, Image */
+ /*global dojo, dijit, document, window, eclipse:true, alert, Image */
  
+dojo.require("dijit.Menu");
+
 /**
  * @namespace The global container for eclipse APIs.
  */ 
@@ -28,6 +30,7 @@ eclipse.CommandService = (function() {
 	function CommandService(options) {
 		this._domScope = {sorted: false, commands:[]};
 		this._objectScope = {sorted: false, commands:[]};
+		this._namedGroups = {};
 		this._init(options);
 	}
 	CommandService.prototype = /** @lends eclipse.CommandService.prototype */ {
@@ -64,6 +67,18 @@ eclipse.CommandService = (function() {
 		},
 		
 		/**
+		 * Registers a command group and specifies visual information about the group.
+		 * @param {String} the id of the group, must be unique
+		 * @param {Number} the relative position of the group
+		 * @param {String} the title of the group, optional
+		 */	
+		 
+		addCommandGroup: function(groupId, position, title) {
+			this._namedGroups[groupId] = {title: title, position: position};
+		},
+
+		
+		/**
 		 * Render the commands that are appropriate for the given scope.
 		 * @param {DOMElement} parent The element in which commands should be rendered.
 		 * @param {String} scope The scope to which the command applies.  "dom" level 
@@ -79,15 +94,30 @@ eclipse.CommandService = (function() {
 		 */	
 		
 		renderCommands: function(parent, scope, items, handler, style, userData) {
-			var i, command;
+			var i, command, isNewGroup, currentGroup, currentParent, renderedParent, groupId;
 			switch (scope) {
 			case "dom":
+				if (this._domScope.commands.length < 1) {
+					return;
+				}
 				this._sortCommands(this._domScope);
-				var currentGroup = this._domScope.commands[0].command.groupId;  // ensures we don't render a separator first
+				currentParent = parent;
+				// determine if a grouping will need to be created
+				groupId = this._domScope.commands[0].command.groupId;
+				if (!(groupId && this._namedGroups[groupId] && this._namedGroups[groupId].title)) {
+					// ensures we don't render a separator first
+					currentGroup = groupId;
+				}
 				for (i = 0; i < this._domScope.commands.length; i++) { 
 					command = this._domScope.commands[i].command;
+					isNewGroup = currentGroup !== command.groupId;
+					if (isNewGroup) { // a new group is starting
+						currentParent = parent;
+					}
 					if (parent.id === this._domScope.commands[i].scopeId) {
-						if (this._render(parent, command, items, handler, style, currentGroup !== command.groupId, userData, i)) {
+						renderedParent = this._render(currentParent, command, items, handler, style, isNewGroup, userData, i);
+						if (renderedParent) {
+							currentParent = renderedParent;
 							currentGroup = command.groupId;
 						}		
 					}
@@ -95,23 +125,38 @@ eclipse.CommandService = (function() {
 				break;
 				
 			case "object":
+				if (this._objectScope.commands.length < 1) {
+					return;
+				}
 				this._sortCommands(this._objectScope);
-				var currentGroup = this._objectScope.commands[0].command.groupId;
+				currentParent = parent;
+				// determine if a grouping will need to be created
+				groupId = this._domScope.commands[0].command.groupId;
+				if (!(groupId && this._namedGroups[groupId] && this._namedGroups[groupId].title)) {
+					// ensures we don't render a separator first
+					currentGroup = groupId;
+				}
 				for (i = 0; i < this._objectScope.commands.length; i++) { 
 					command = this._objectScope.commands[i].command;
+					isNewGroup = currentGroup !== command.groupId;
+					if (isNewGroup) { // a new group is starting, reset parent to original
+						currentParent = parent;
+					}
 					if (!items) {
 						var cmdService = this;
 						this._registry.getService("ISelectionService").then(function(service) {
 							service.getSelection(function(selection) {
-								if (selection) {
-									if (cmdService._render(parent, command, selection, handler, style, userData, i)) {
-										currentGroup = command.groupId;
-									}
-								}
+								renderedParent = this._render(currentParent, command, selection, handler, style, isNewGroup, userData, i);
+								if (renderedParent) {
+									currentParent = renderedParent;
+									currentGroup = command.groupId;
+								}		
 							});
 						});
 					} else {
-						if (this._render(parent, command, items, handler, style, currentGroup !== command.groupId, userData, i)) {
+						renderedParent = this._render(currentParent, command, items, handler, style, isNewGroup, userData, i);
+						if (renderedParent) {
+							currentParent = renderedParent;
 							currentGroup = command.groupId;
 						}		
 					}
@@ -121,13 +166,26 @@ eclipse.CommandService = (function() {
 		},
 		
 		_sortCommands: function(scope) {
-			scope.commands.sort(function(a,b) {
-				return a-b;
-			});
+			scope.commands.sort(dojo.hitch(this, function(a,b) {
+				var aPos, bPos, group;
+				if (a.command.groupId) {
+					group = this._namedGroups[a.command.groupId];
+					aPos = group ? group.position + a.command.position : a.command.position;
+				} else {
+					aPos = a.command.position;
+				}
+				if (b.command.groupId) {
+					group = this._namedGroups[b.command.groupId];
+					bPos = group ? group.position + b.command.position : b.command.position;
+				} else {
+					bPos = b.command.position;
+				}
+				return aPos - bPos;
+			}));
 			scope.sorted = true;
 		},
 				
-		_render: function(parent, command, items, handler, style, sepBefore, userData, i) {
+		_render: function(parent, command, items, handler, style, newGroup, userData, i) {
 			var render = true;
 			if (command.visibleWhen) {
 				render = command.visibleWhen(items);
@@ -136,14 +194,34 @@ eclipse.CommandService = (function() {
 				return false;
 			}
 			if (style === "image") {
-				if (sepBefore) {
+				if (newGroup) {
 					// create an image separator.  need to use an image class or something easy to override
 				}
 				var id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
 				var image = command._asImage(id, items, handler, userData);
 				dojo.place(image, parent, "last");	
+			} else if (style === "menu") {
+				if (newGroup) {
+					var groupInfo = this._namedGroups[command.groupId];
+					var subMenuText = groupInfo ? groupInfo.title : null;
+					if (subMenuText) {
+						var subMenu = new dijit.Menu();
+						parent.addChild(new dijit.PopupMenuItem({
+							label: subMenuText,
+							popup: subMenu
+						}));
+						parent = subMenu;
+					} else {
+						// render a separator if appropriate.
+						var children = parent.getChildren();
+						if (children.length > 0 && !(children[children.length-1] instanceof dijit.MenuSeparator)) {
+							parent.addChild(new dijit.MenuSeparator());
+						}
+					}
+				}
+				var menuItem = command._asMenuItem(parent, items, handler, userData);
 			}
-			return true;
+			return parent;
 		}
 
 	};  // end prototype
@@ -173,7 +251,7 @@ eclipse.Command = (function() {
 			this._hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.image = options.image || "/images/none.png";
 			this.visibleWhen = options.visibleWhen;
-			this.position = options.position || 500;  // numeric position used to sort commands in a presentation
+			this.position = options.position || 0;  // numeric position used to sort commands in a presentation
 			this.groupId = options.groupId; // optional group id which signifies the need for a separator
 			// when false, affordances for commands are always shown.  When true,
 			// they are shown on hover only.
@@ -227,11 +305,32 @@ eclipse.Command = (function() {
 			var anchor = document.createElement('a');
 			dojo.place(document.createTextNode(this.name), anchor, "only");
 			anchor.href="";
-			dojo.connect(anchor, "onclick", this, function() {
-				this._callback.call(handler, items);
-			});
+			if (this._callback) {
+				dojo.connect(anchor, "onclick", this, function() {
+					this._callback.call(handler, items);
+				});
+			} else if (this._hrefCallback) {
+				anchor.href = this._hrefCallback.call(handler, items, this.id);
+			}
 			dojo.addClass(anchor, 'commandLink');
 			return anchor;
+		},
+		_asMenuItem: function(parent, items, handler, userData) {
+			var menuitem = new dijit.MenuItem({
+				label: this.name,
+				tooltip: this.tooltip,
+				onClick: dojo.hitch(this, function() {
+					if (this._callback) {
+						this._callback.call(handler, items, this.id, parent.id, userData);
+					} else if (this._hrefCallback) {
+						var href = this._hrefCallback.call(handler, items, this.id, parent.id, userData);
+						if (href) {
+							window.location = href;
+						}
+					}
+				})
+			});
+			parent.addChild(menuitem);
 		}
 		
 	};  // end prototype

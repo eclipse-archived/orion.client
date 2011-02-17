@@ -28,28 +28,20 @@ eclipse.ExplorerTree = (function() {
 	/**
 	 * @name eclipse.ExplorerTree
 	 */
-	function ExplorerTree(serviceRegistry, treeRoot, searcher, parentId, 
-			/**dijit.Menu*/ contextMenu, /**dijit._Widget*/ newFileFolderMenu,
-			makeFavoriteDomNode, deleteFilesDomNode, newFolderDomNode, newFileDomNode) {
+	function ExplorerTree(serviceRegistry, treeRoot, searcher, parentId, toolbarId,
+			/**dijit.Menu*/ contextMenu) {
 		this.registry = serviceRegistry;
 		this.treeRoot = treeRoot;
 		this.searcher = searcher;
 		this.parentId = parentId;
+		this.toolbarId = toolbarId;
 		
-		this.contextMenu = contextMenu;
-		this.newFileFolderMenu = newFileFolderMenu;
-		this.makeFavoriteDomNode = makeFavoriteDomNode;
-		
-		this.deleteFilesDomNode = deleteFilesDomNode;
-		this.newFolderDomNode = newFolderDomNode;
-		this.newFileDomNode = newFileDomNode;
-		
+		this.contextMenu = contextMenu;		
 		this.model = null;
 		this.myTree = null; /**{dijit.Widget}*/
 
 		this._selectedItem = null;
 		this._selectedNode = null;
-		this._contextMenuNode = null;
 		this._lastHash = null;
 	}
 	ExplorerTree.prototype = /**@lends eclipse.ExplorerTree.prototype*/ {
@@ -84,14 +76,6 @@ eclipse.ExplorerTree = (function() {
 				});
 			});
 		},
-		makeFavorite: function() {
-			if (this._contextMenuNode) {
-				var items = this._contextMenuNode.get("tree").getSelectedItems();
-			this.registry.getService("IFavorites").then(function(service) {
-				service.makeFavorites(items);
-			});
-			}
-		},
 		removeResourceList: function() {
 			if (this.myTree) {
 				this.myTree.destroyRecursive();
@@ -104,62 +88,8 @@ eclipse.ExplorerTree = (function() {
 				container.removeChild(another);
 			}
 		},
-		createProject: function(name, url, create) {
-			var self = this;
-			this.registry.getService("IFileService").then(function(service) {
-				service.createProject(self.treeRoot.ChildrenLocation, name, url, create,
-							dojo.hitch(self, function() {this.changedItem(this.treeRoot);}));
-			});
-		},
-		createFolder: function(name) {
-			if (this._contextMenuNode) {
-				var item = this._contextMenuNode.item;
-				var self = this;
-				this.registry.getService("IFileService").then(function(service) {
-					service.createFolder(name, item, dojo.hitch(self, self.changedItem));
-				});
-			}
-		},
-		createFile: function(name) {
-			if (this._contextMenuNode) {
-				var item = this._contextMenuNode.item;
-				var self = this;
-				this.registry.getService("IFileService").then(function(service) {
-					service.createFile(name, item, dojo.hitch(self, self.changedItem));
-				});
-			}
-		},
 		
-		deleteFiles: function() {
-			if (this._contextMenuNode) {
-				var items = this._contextMenuNode.get("tree").getSelectedItems();
-				if (items.length < 1) {
-					return;
-				}
-				var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
-				var self = this;
-				this.registry.getService("IDialogService").then(function(service) {
-					service.confirm(confirmMessage, dojo.hitch(self, function(doit) {
-						if (!doit) {
-							return;
-						}
-						for (var i=0; i < items.length; i++) {
-							var item = items[i];
-							if (item.parent.Path === "") {
-								this.registry.getService("IFileService").then(function(service) {
-									service.removeProject(item.parent /*workspace*/, item /*project*/, 
-									dojo.hitch(self, function() { self.changedItem(self.treeRoot); }));
-								});
-							} else {
-								this.registry.getService("IFileService").then(function(service) {
-									service.deleteFile(item, dojo.hitch(self, self.changedItem));
-								});
-							}
-						}
-					}));
-				});
-			}
-		},
+
 		// TODO right now we blow away the tree because we might be replacing it
 		// with a search div.  We could optimize by detecting when we go tree to tree
 		// and simply update the model.
@@ -213,6 +143,7 @@ eclipse.ExplorerTree = (function() {
 							eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
 							if (!isSearch) {
 								new eclipse.BreadCrumbs({container: this.parentId, resource: this.treeRoot});
+								eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.parentId, this.toolbarId, this.treeRoot);
 								this.createTree();
 							}
 						}));
@@ -256,44 +187,27 @@ eclipse.ExplorerTree = (function() {
 			var container = dojo.byId(this.parentId);
 			container.appendChild(this.myTree.domNode);
 			if (this.contextMenu) {
-				// Hook up listeners to MenuItems
-				var explorer = this;
-				this.makeFavoriteDomNode.onclick = function(evt) { explorer.makeFavorite(); };
-				this.deleteFilesDomNode.onclick = function(evt) { explorer.deleteFiles(); };
-				this.newFolderDomNode.onclick = function(evt) {
-						var dialog = new widgets.NewItemDialog({
-							title: "New Folder",
-							label: "Folder name:",
-							func:  function(name) { explorer.createFolder(name); }});
-						dialog.startup();
-						dialog.show();
-					};
-				this.newFileDomNode.onclick = function(evt) {
-						var dialog = new widgets.NewItemDialog({
-							title: "New File",
-							label: "File name:",
-							func:  function(name) { explorer.createFile(name); } });
-						dialog.startup();
-						dialog.show();
-					};
-				
-				this.contextMenu.bindDomNode(this.myTree.domNode);
+				var contextMenu = this.contextMenu;
+				contextMenu.bindDomNode(this.myTree.domNode);
 				// establish which item the menu applies to
-				dojo.connect(this.contextMenu, "_openMyself", this, function(event) {
+				dojo.connect(contextMenu, "_openMyself", this, function(event) {
+					// see http://bugs.dojotoolkit.org/ticket/10296
+					contextMenu.focusedChild = null;
+					dojo.forEach(contextMenu.getChildren(), function(child) {
+						contextMenu.removeChild(child);
+						child.destroy();
+					});
 					var treeNode = dijit.getEnclosingWidget(event.target);
 					var tree = treeNode.get("tree");
 					var selectedNodes = tree._getSelectedNodes();
 					if (dojo.indexOf(selectedNodes, treeNode) === -1) {
 						// change selection to match where menu appears
 						tree._selectNode(treeNode);
-						selectedNodes = tree._getSelectedNodes();
 					}
-					this._contextMenuNode = treeNode;
-					if(selectedNodes.length === 1 && treeNode.item.Directory){
-						dojo.style(this.newFileFolderMenu.domNode, "display", "");
-					}else{
-						dojo.style(this.newFileFolderMenu.domNode, "display", "none");
-					}
+					// contact the command service to render appropriate commands here.
+					this.registry.getService("ICommandService").then(function(service) {
+						service.renderCommands(contextMenu, "object", tree.getSelectedItems(), this, "menu");
+					});
 				});
 			}
 		}
@@ -318,7 +232,7 @@ eclipse.TreeModel = (function() {
 			onItem(this.root);
 		},
 		mayHaveChildren: function(/* dojo.data.Item */ item){
-			return item.Directory != false;
+			return item.Directory !== false;
 		},
 		getChildren: function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
 			// the parent item may already have the children fetched
@@ -328,7 +242,11 @@ eclipse.TreeModel = (function() {
 				onComplete([]);
 			} else if (parentItem.Location) {
 				this.registry.getService("IFileService").then(function(service) {
-					service.fetchChildren(parentItem.ChildrenLocation, onComplete);
+					service.fetchChildren(parentItem.ChildrenLocation, 
+						dojo.hitch(this, function(children) {
+							eclipse.util.processNavigatorParent(parentItem, children);
+							onComplete(children);
+						}));
 				});
 			} else {
 				onComplete([]);

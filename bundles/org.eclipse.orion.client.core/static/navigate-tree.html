@@ -14,11 +14,13 @@
 	</script>
     <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
     <script type="text/javascript">
-    dojo.require("dijit.Menu");
-    dojo.require("dijit.MenuItem");
-    dojo.require("dijit.Dialog");
-    dojo.require("dijit.form.CheckBox");
-    dojo.require("widgets.NewItemDialog");
+	dojo.require("dijit.Menu");
+	dojo.require("dijit.MenuItem");
+	dojo.require("dijit.Dialog");
+	dojo.require("dijit.form.CheckBox");
+	dojo.require("widgets.NewItemDialog");
+    	dojo.require("widgets.OpenResourceDialog");
+	dojo.require("widgets.ImportDialog");
  	</script>    	
 	<style type="text/css">
 		@import "/org.dojotoolkit/dojo/resources/dojo.css";
@@ -29,6 +31,7 @@
 		@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
 	    @import "/ide.css";
 	    @import "/breadcrumbs.css";
+	    @import "/commands.css";
 	</style>
 	
    </head>
@@ -66,6 +69,7 @@
  	<!-- START:navigate-tree.js -->
   	<script src="js/breadcrumbs.js"></script> 
 	<script src="js/explorer-tree.js"></script>
+	<script src="js/fileCommands.js"></script>
 	<script src="js/navigate-tree/navigate-tree.js"></script>
 	<!-- END:navigate-tree.js -->
 	<!-- INSERT:navigate-tree.js -->
@@ -79,28 +83,7 @@
 				</tr></table>
 			</div>
 			<div id="eclipseWebToolbar" class="innerToolbar" style="float: right;">
-				<button dojoType="dijit.form.Button" class="button" id="switchView">
-					<script type="dojo/connect" event="onClick" args="evt">
-						serviceRegistry.getService("IPreferencesService").then(function(service) {
-							service.put("window/orientation", "navigate-table.html");
-						});
-						window.location.replace("/navigate-table.html#" + dojo.hash());
-					</script>
-					<img src="/images/flatLayout.gif" alt="Grid View" title="Grid View">
-				</button>
-				
-				<button dojoType="dijit.form.Button" type="button" id="newProjectButton">New Folder
-				</button>
-				
-				<button dojoType="dijit.form.Button" type="button" id="linkProjectButton">Link Folder
-				</button>
-				
-				<input id="search" align="center" type="search" class="searchbox">
-				<button dojoType="dijit.form.Button" type="button" id="searchTextButton">Search
-				</button>
-				
-				<button dojoType="dijit.form.Button" type="button" id="searchNamesButton">Search Names
-				</button>
+				<input type="search" id="search" class="searchbox">
 			</div>
 		</div>
 		
@@ -116,13 +99,6 @@
 				<!-- Breadcrumbs, tree content go here -->
 			</div>
 			<ul dojoType="dijit.Menu" id="treeContextMenu" style="display: none;">
-				<li dojoType="dijit.MenuItem" id="makeFavorite">Make Favorite</li>
-				<li dojoType="dijit.MenuItem" id="deleteFiles">Delete</li>
-				<li dojoType="dijit.PopupMenuItem" id="NewFileFolderMenu"><span>New</span>
-					<ul dojoType="dijit.Menu" id="NewItemsSubmenu">
-						<li dojoType="dijit.MenuItem" id="newFolder">Folder</li>
-						<li dojoType="dijit.MenuItem" id="newFile">File</li>
-					</ul></li>
 			</ul>
 		</div>
 	</div>
