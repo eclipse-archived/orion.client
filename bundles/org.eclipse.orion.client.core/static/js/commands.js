@@ -10,6 +10,7 @@
  /*global dojo, dijit, document, window, eclipse:true, alert, Image */
  
 dojo.require("dijit.Menu");
+dojo.require("dijit.form.DropDownButton");
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -94,6 +95,8 @@ eclipse.CommandService = (function() {
 		 */	
 		
 		renderCommands: function(parent, scope, items, handler, style, userData) {
+			// TODO not happy with the shape of this internally but focusing on API for now
+			// (strange data structures, redundant code)
 			var i, command, isNewGroup, currentGroup, currentParent, renderedParent, groupId;
 			switch (scope) {
 			case "dom":
@@ -195,21 +198,33 @@ eclipse.CommandService = (function() {
 			}
 			if (style === "image") {
 				if (newGroup) {
-					var children = parent.childNodes;
-					if (children.length > 0) {
-						var lastNode = children[children.length-1];
-						if (lastNode.src !== "images/sep.gif") {
-							var sep = new Image();
-							// TODO should get this from CSS
-							sep.src = "images/sep.gif";
-							dojo.addClass(sep, "commandImage");
-							dojo.place(sep, parent, "last");
-						}
-					}
-				}
-				var id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-				var image = command._asImage(id, items, handler, userData);
-				dojo.place(image, parent, "last");	
+					/* var groupInfo = this._namedGroups[command.groupId];
+					var subMenuText = groupInfo ? groupInfo.title : null;
+					if (subMenuText) {
+						var menuButton = new dijit.form.DropDownButton({
+							label: subMenuText
+						});
+						dojo.place(parent, menuButton.domNode, "last");
+						var subMenu = new dijit.Menu();
+						var menuItem = command._asMenuItem(subMenu, items, handler, userData);
+						parent = subMenu;
+					} else { */
+						// a separator
+						var children = parent.childNodes;
+						if (children.length > 0) {
+							var lastNode = children[children.length-1];
+							if (lastNode.src !== "images/sep.gif") {
+								var sep = new Image();
+								// TODO should get this from CSS
+								sep.src = "images/sep.gif";
+								dojo.addClass(sep, "commandImage");
+								dojo.place(sep, parent, "last");
+							}
+						}}
+						var id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
+						var image = command._asImage(id, items, handler, userData);
+						dojo.place(image, parent, "last");	
+				//}
 			} else if (style === "menu") {
 				if (newGroup) {
 					var groupInfo = this._namedGroups[command.groupId];
@@ -341,6 +356,12 @@ eclipse.Command = (function() {
 				})
 			});
 			parent.addChild(menuitem);
+			if (this.image) {
+				dojo.addClass(menuitem.iconNode, 'commandImage');
+				// reaching...
+				menuitem.iconNode.src = this.image;
+			}
+
 		}
 		
 	};  // end prototype
