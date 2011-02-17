@@ -19,7 +19,7 @@ dojo.addOnLoad(function() {
 		handleAs : 'javascript',
 		sync : true,
 		headers : {
-			"EclipseWeb-Version" : "1"
+			"Orion-Version" : "1"
 		}
 	});
 	var profile = new eclipse.Profile({
