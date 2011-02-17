@@ -195,7 +195,17 @@ eclipse.CommandService = (function() {
 			}
 			if (style === "image") {
 				if (newGroup) {
-					// create an image separator.  need to use an image class or something easy to override
+					var children = parent.childNodes;
+					if (children.length > 0) {
+						var lastNode = children[children.length-1];
+						if (lastNode.src !== "images/sep.gif") {
+							var sep = new Image();
+							// TODO should get this from CSS
+							sep.src = "images/sep.gif";
+							dojo.addClass(sep, "commandImage");
+							dojo.place(sep, parent, "last");
+						}
+					}
 				}
 				var id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
 				var image = command._asImage(id, items, handler, userData);
