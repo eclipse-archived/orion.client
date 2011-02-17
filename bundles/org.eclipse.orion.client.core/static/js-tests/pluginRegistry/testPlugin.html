@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<script type="text/javascript" src="../../js/plugin.js"></script>
+	<script>
+		window.onload = function() {
+			var provider = new eclipse.PluginProvider();
+			provider.registerServiceProvider("editorAction", {
+				info : function() {
+					return {
+						name : "test",
+						img : "/favicon.ico",
+						key : [ "u", true ]
+					};
+				},
+				run : function(text) {
+					return console.log("test");
+				}
+			}, {name : "test", img : "/favicon.ico"});
+			provider.connect();
+		};
+	</script>
+</head>
+<body>
+</body>
+</html>

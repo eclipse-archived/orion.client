@@ -10,9 +10,11 @@ var orion = orion || {};
 orion.Assert = (function() {
 	var exports = {};
 	function AssertionError(options) {
-		this.message = options.message;
-		this.actual = options.actual;
-		this.expected = options.expected;
+		if (options) {
+			this.message = options.message;
+			this.actual = options.actual;
+			this.expected = options.expected;
+		}
 	}
 
 	AssertionError.prototype = new Error();
