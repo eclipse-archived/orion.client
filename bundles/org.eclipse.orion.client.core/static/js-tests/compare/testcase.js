@@ -18,14 +18,15 @@ var testcase = function(assert) {
 		var expectedOutput = testCase[2];
 		var expectedMapping = testCase[3];
 		var description = testCase[4];
-			
+		var j = i + 1;
+		
 		// Note: This is not a great way to do tests. Each test should be separate
-		tests["test " + description] = function(input, diff, expectedOutput, expectedMapping) {
+		tests["test " + j + ": " + description] = function(input, diff, expectedOutput, expectedMapping) {
 			return function() {
-				var diffParser = new eclipse.DiffParser();
+				var diffParser = new eclipse.DiffParser("\r\n");
 				var result = diffParser.parse(input, diff);
-				assert.equal(result[0], expectedOutput);
-				assert.deepEqual(result[1], expectedMapping);
+				assert.deepEqual(result.mapper, expectedMapping);
+				assert.equal(result.outPutFile, expectedOutput);
 			};				
 		}(input, diff, expectedOutput, expectedMapping);
 	}
