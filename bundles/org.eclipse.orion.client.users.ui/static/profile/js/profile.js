@@ -59,8 +59,8 @@ eclipse.Profile = (function() {
 			
 			if(this.usersService!==null){
 				this.usersService.then(function(service) {
-					service.addEventListener("requiredPluginsChanged", function(pluginsList){
-						dojo.hitch(userProfile, userProfile.drawPlugins(pluginsList[0].plugins));
+					service.getDivContent().then(function(content) {
+						dojo.hitch(userProfile, userProfile.draw(content, userProfile.profileForm.get("domNode")));
 					});
 					service.addEventListener("userInfoChanged", function(jsonData){
 						dojo.hitch(userProfile,	userProfile.populateData(jsonData));
@@ -68,7 +68,6 @@ eclipse.Profile = (function() {
 					service.addEventListener("userDeleted", function(jsonData){
 						window.location.replace("/");
 					});
-					service.getRequiredPlugins("requiredPluginsChanged");
 				});
 
 			}
@@ -104,45 +103,20 @@ eclipse.Profile = (function() {
 				});
 			});
 			
-		},
-		drawPlugins : function(pluginsList){
-			
-			var userProfile = this;
-			
-			for(var i=0; i<pluginsList.length; i++){
-				var pluginDiv = dojo.create("div", null, userProfile.profileForm.get("domNode"));
-				var pluginReference= this.pluginRegistry.getPlugin(pluginsList[i].plugin);
-				if(pluginReference===null){
-					this.pluginRegistry.installPlugin(pluginsList[i].plugin);
-					pluginReference= this.pluginRegistry.getPlugin(pluginsList[i].plugin);
-				}
-				var plugin = this.registry.getService(pluginReference.getServiceReferences()[0]);
-				
-				if(plugin===null){
-					console.error("Could not deploy plugin " + pluginsList[i].plugin);
-					continue;
-				}
-				plugin.then(function(pluginService){
-					pluginService.getDivContent().then(function(content) {
-						dojo.hitch(userProfile, userProfile.draw(content, pluginDiv));
-					});
-				});
-			}
-			
-			var userPluginDiv = dojo.create("div", null, userProfile.profileForm.get("domNode"));
-			
-			this.usersService.then(function(service) {
-				service.getDivContent().then(function(content) {
-					dojo.hitch(userProfile, userProfile.draw(content, userPluginDiv));
-				});
-			});
+
+			dojo.connect(this.resetProfileButton, "onClick", dojo.hitch(this,
+					this.redisplayLastUser));
+			dojo.connect(this.saveProfileButton, "onClick", dojo.hitch(this,
+					this.saveProfile));
+			dojo.connect(this.deleteProfileButton, "onClick", dojo.hitch(this,
+					this.deleteProfile));
 		},
 		setUserToDisplay : function(userURI) {
 			this.currentUserURI = userURI;
 			var profile = this;
 			this.usersService.then(
 					function(service) {
-						service.getRequiredPlugins("requiredPluginsChanged");
+						service.getUserInfo(userURI, "userInfoChanged");
 					});
 		},
 		redisplayLastUser : function(){
@@ -153,10 +127,9 @@ eclipse.Profile = (function() {
 					});
 		},
 		populateData: function(jsonData){
-			if(jsonData && jsonData.login){
-				this.lastJSON = jsonData[0];
+			if(jsonData && jsonData[0].login){//TODO why is it [0]?
 				this.profileForm.reset();
-				this.profileForm.set('value', jsonData);
+				this.profileForm.set('value', jsonData[0]);
 			}else{
 				throw new Error("User is not defined");
 			}
@@ -188,7 +161,6 @@ eclipse.Profile = (function() {
 		
 		draw: function(content, placeholder){
 			var profile = this;
-			if(content.sections)
 			for(var i=0; i<content.sections.length; i++){
 				
 				var sectionPane = new dijit.layout.ContentPane({id: content.sections[i].id,
@@ -210,22 +182,18 @@ eclipse.Profile = (function() {
 									
 						var input = this.createFormElem(data, dataDiv);
 						dojo.connect(input, "onKeyPress", dojo.hitch(profile, function(event){ if (event.keyCode === 13) { this.fire(); } else {return true;}}));
-						if(this.lastJSON && data.props && this.lastJSON[data.props.name]){
-							input.set('value', this.lastJSON[data.props.name]);
-						}
 				}
 			}
 			if(content.actions && content.actions.length>0){
-				var dataDiv = dojo.create("div", {style: "margin-top: 30px;"}, placeholder);
-				for(var i=0; i<content.actions.length; i++){
-					var actionData = content.actions[i];
-					var actionDijit = this.createFormElem(actionData, dataDiv);
-					for(var j=0; j<actionData.events.length; j++){
-						dojo.connect(actionDijit, actionData.events[j].event, dojo.hitch(profile, function(action){this.fire(action);}, actionData.events[j].action));
-					}
+				var dataDiv = dojo.create("div", {style: "margin-top: 30px;"}, sectionContents);
+			}
+			for(var i=0; i<content.actions.length; i++){
+				var actionData = content.actions[i];
+				var actionDijit = this.createFormElem(actionData, dataDiv);
+				for(var j=0; j<actionData.events.length; j++){
+					dojo.connect(actionDijit, actionData.events[j].event, dojo.hitch(profile, function(action){this.fire(action);}, actionData.events[j].action));
 				}
 			}
-			
 		},
 		fire: function(action){
 			var data = dijit.byId('profileForm').get('value');
