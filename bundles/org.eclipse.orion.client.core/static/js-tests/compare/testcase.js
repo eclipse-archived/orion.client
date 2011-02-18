@@ -30,6 +30,208 @@ var testcase = function(assert) {
 			};				
 		}(input, diff, expectedOutput, expectedMapping);
 	}
+		
+	tests["test empty case"] = function() {
+		var input = "";
+		var diff = "";
+		var expectedOutput = "";
+		var expectedMapping = [];
+
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	};
+	
+
+	tests["test add 1 empty line to empty file"] = function() {
+		var input = "";
+		var diff = "@@ -0,0 +1 @@\r\n" + 
+		  "+\r\n" + 
+		  "";
+		var expectedOutput = "\r\n" +
+		  "";
+		var expectedMapping = [[2, 1, 2]];
+
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	};
+	
+
+	tests["test add 2 empty lines to empty file"] = function() {
+		var input = "";
+		
+		var diff = "@@ -0,0 +1,2 @@\r\n" + 
+		  "+\r\n" + 
+		  "+\r\n" + 
+		  "";
+		
+		var expectedOutput = "\r\n" + 
+		  "\r\n" + 
+		  "";
+		
+		var expectedMapping = [[3, 1, 2]];
+
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	};
+	
+	
+	
+	/*
+
+	tests["test "] = function() {
+		var input = ;
+		var diff = ;
+		var expectedOutput = ;
+		var expectedMapping = ;
+		
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	}
+
+	tests["test "] = function() {
+		var input = ;
+		var diff = ;
+		var expectedOutput = ;
+		var expectedMapping = ;
+		
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	}
+
+	tests["test "] = function() {
+		var input = ;
+		var diff = ;
+		var expectedOutput = ;
+		var expectedMapping = ;
+		
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	}
+
+	tests["test "] = function() {
+		var input = ;
+		var diff = ;
+		var expectedOutput = ;
+		var expectedMapping = ;
+		
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	}
+
+	tests["test "] = function() {
+		var input = ;
+		var diff = ;
+		var expectedOutput = ;
+		var expectedMapping = ;
+		
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	}
+
+	tests["test "] = function() {
+		var input = ;
+		var diff = ;
+		var expectedOutput = ;
+		var expectedMapping = ;
+		
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	}
+
+	tests["test "] = function() {
+		var input = ;
+		var diff = ;
+		var expectedOutput = ;
+		var expectedMapping = ;
+		
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	}
+
+	tests["test "] = function() {
+		var input = ;
+		var diff = ;
+		var expectedOutput = ;
+		var expectedMapping = ;
+		
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	}
+
+	tests["test "] = function() {
+		var input = ;
+		var diff = ;
+		var expectedOutput = ;
+		var expectedMapping = ;
+		
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	}
+
+	tests["test "] = function() {
+		var input = ;
+		var diff = ;
+		var expectedOutput = ;
+		var expectedMapping = ;
+		
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	}
+
+	tests["test "] = function() {
+		var input = ;
+		var diff = ;
+		var expectedOutput = ;
+		var expectedMapping = ;
+		
+		var diffParser = new eclipse.DiffParser();
+		var result = diffParser.parse(input, diff);
+		assert.deepEqual(result[1], expectedMapping);
+		assert.equal(result[0], expectedOutput);
+	}
+
+*/	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	return tests;
 }(orion.Assert);
