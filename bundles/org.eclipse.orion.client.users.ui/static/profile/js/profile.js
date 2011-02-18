@@ -59,8 +59,8 @@ eclipse.Profile = (function() {
 			
 			if(this.usersService!==null){
 				this.usersService.then(function(service) {
-					service.getDivContent().then(function(content) {
-						dojo.hitch(userProfile, userProfile.draw(content, userProfile.profileForm.get("domNode")));
+					service.addEventListener("requiredPluginsChanged", function(pluginsList){
+						dojo.hitch(userProfile, userProfile.drawPlugins(pluginsList.plugins));
 					});
 					service.addEventListener("userInfoChanged", function(jsonData){
 						dojo.hitch(userProfile,	userProfile.populateData(jsonData));
@@ -103,20 +103,58 @@ eclipse.Profile = (function() {
 				});
 			});
 			
-
-			dojo.connect(this.resetProfileButton, "onClick", dojo.hitch(this,
-					this.redisplayLastUser));
-			dojo.connect(this.saveProfileButton, "onClick", dojo.hitch(this,
-					this.saveProfile));
-			dojo.connect(this.deleteProfileButton, "onClick", dojo.hitch(this,
-					this.deleteProfile));
+		},
+		drawPlugins : function(pluginsList){
+			
+			var userProfile = this;
+			
+			while(this.profileForm.get("domNode").lastChild){
+				dojo.destroy(this.profileForm.get("domNode").lastChild);
+			}
+			
+			for(var i=0; i<pluginsList.length; i++){
+				var pluginDiv = dojo.create("div", null, userProfile.profileForm.get("domNode"));
+				var pluginReference= this.pluginRegistry.getPlugin(pluginsList[i].plugin);
+				if(pluginReference===null){
+					var registry = this.registry;
+					this.pluginRegistry.installPlugin(pluginsList[i].plugin).then(
+							function(ref){
+								var plugin = registry.getService(ref.getServiceReferences()[0]);
+								plugin.then(function(pluginService){
+									pluginService.getDivContent().then(function(content) {
+										dojo.hitch(userProfile, userProfile.draw(content, pluginDiv));
+									});
+								});
+							});
+					continue;
+				}
+				var plugin = this.registry.getService(pluginReference.getServiceReferences()[0]);
+				
+				if(plugin===null){
+					console.error("Could not deploy plugin " + pluginsList[i].plugin);
+					continue;
+				}
+				plugin.then(function(pluginService){
+					pluginService.getDivContent().then(function(content) {
+						dojo.hitch(userProfile, userProfile.draw(content, pluginDiv));
+					});
+				});
+			}
+			
+			var userPluginDiv = dojo.create("div", null, userProfile.profileForm.get("domNode"));
+			
+			this.usersService.then(function(service) {
+				service.getDivContent().then(function(content) {
+					dojo.hitch(userProfile, userProfile.draw(content, userPluginDiv));
+				});
+			});
 		},
 		setUserToDisplay : function(userURI) {
 			this.currentUserURI = userURI;
 			var profile = this;
 			this.usersService.then(
 					function(service) {
-						service.getUserInfo(userURI, "userInfoChanged");
+						service.initProfile(userURI, "requiredPluginsChanged", "userInfoChanged");
 					});
 		},
 		redisplayLastUser : function(){
@@ -128,8 +166,11 @@ eclipse.Profile = (function() {
 		},
 		populateData: function(jsonData){
 			if(jsonData && jsonData.login){
-				this.profileForm.reset();
-				this.profileForm.set('value', jsonData);
+				this.lastJSON = jsonData;
+				if(this.profileForm){
+					this.profileForm.reset();
+					this.profileForm.set('value', jsonData);
+				}
 			}else{
 				throw new Error("User is not defined");
 			}
@@ -144,8 +185,12 @@ eclipse.Profile = (function() {
 			    cls = dojo.getObject(json.type, false);
 			  }
 			  if(cls){
+				  if(dijit.byId(json.props.id))
+					  dijit.byId(json.props.id).destroy();
+				  
 				  formElem = new cls(json.props);
 				  formElem.placeAt(node);
+				  
 				  if(formElem.get('readOnly')===true){
 					  formElem.set('style', 'display: none');
 					  var p = dojo.create("p", {id: formElem.get('id')+"_p", className: "userprofile", innerHTML: formElem.get('value')?formElem.get('value'):"&nbsp;"}, node, "last");
@@ -161,16 +206,21 @@ eclipse.Profile = (function() {
 		
 		draw: function(content, placeholder){
 			var profile = this;
+			if(content.sections)
 			for(var i=0; i<content.sections.length; i++){
 				
+				if(dijit.byId(content.sections[i].id))
+					dijit.byId(content.sections[i].id).destroy();
+				
 				var sectionPane = new dijit.layout.ContentPane({id: content.sections[i].id,
+						"class": "toolbar userprofile",
 			    		dojoType: "dijit.layout.ContentPane",
 			    		region: "top",
 			    		style: "height: 20px;",
 			    		content: "<h2>"+content.sections[i].name+"</h2>"
 				});
 				sectionPane.placeAt(placeholder);
-				dojo.addClass(sectionPane.id, "toolbar");
+				
 				
 				
 				var sectionContents = dojo.create("div", null, placeholder);
@@ -182,18 +232,22 @@ eclipse.Profile = (function() {
 									
 						var input = this.createFormElem(data, dataDiv);
 						dojo.connect(input, "onKeyPress", dojo.hitch(profile, function(event){ if (event.keyCode === 13) { this.fire(); } else {return true;}}));
+						if(this.lastJSON && data.props && this.lastJSON[data.props.name]){
+							input.set('value', this.lastJSON[data.props.name]);
+						}
 				}
 			}
 			if(content.actions && content.actions.length>0){
-				var dataDiv = dojo.create("div", {style: "margin-top: 30px;"}, sectionContents);
-			}
-			for(var i=0; i<content.actions.length; i++){
-				var actionData = content.actions[i];
-				var actionDijit = this.createFormElem(actionData, dataDiv);
-				for(var j=0; j<actionData.events.length; j++){
-					dojo.connect(actionDijit, actionData.events[j].event, dojo.hitch(profile, function(action){this.fire(action);}, actionData.events[j].action));
+				var dataDiv = dojo.create("div", {style: "margin-top: 30px;"}, placeholder);
+				for(var i=0; i<content.actions.length; i++){
+					var actionData = content.actions[i];
+					var actionDijit = this.createFormElem(actionData, dataDiv);
+					for(var j=0; j<actionData.events.length; j++){
+						dojo.connect(actionDijit, actionData.events[j].event, dojo.hitch(profile, function(action){this.fire(action);}, actionData.events[j].action));
+					}
 				}
 			}
+			
 		},
 		fire: function(action){
 			var data = dijit.byId('profileForm').get('value');
