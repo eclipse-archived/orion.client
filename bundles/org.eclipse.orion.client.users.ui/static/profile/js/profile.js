@@ -127,9 +127,9 @@ eclipse.Profile = (function() {
 					});
 		},
 		populateData: function(jsonData){
-			if(jsonData && jsonData[0].login){//TODO why is it [0]?
+			if(jsonData && jsonData.login){
 				this.profileForm.reset();
-				this.profileForm.set('value', jsonData[0]);
+				this.profileForm.set('value', jsonData);
 			}else{
 				throw new Error("User is not defined");
 			}

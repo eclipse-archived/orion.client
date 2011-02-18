@@ -98,7 +98,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 						_deferredLoad.resolve(_self);
 					}
 				} else if ("dispatchEvent" === message.method){
-					_serviceRegistrations[message.serviceId].dispatchEvent(message.params[0], message.params.slice(1));		
+					_serviceRegistrations[message.serviceId].dispatchEvent.apply(null, message.params);		
 				} else {
 					throw new Error("Bad response method: " + message.method);
 				}		
