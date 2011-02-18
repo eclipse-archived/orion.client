@@ -31,51 +31,14 @@ var mapperTestCases = [
 	, 
     *************************************************************/ 
 
-    //empty test
-	[ "", 
-	  "", 
-	  "", 
-	  [],  
-	  "empty case"]
-	, 
 	/***************************************************************************/
 	/****************************   Add Lines **********************************/
 	/***************************************************************************/
 	/**********   adding to empty file *********/
 	//add 1 empty line to empty file
-	[ 
-	  //input file 
-	  "", 
-	  //diff
-	  "@@ -0,0 +1 @@\r\n" + 
-	  "+\r\n" + 
-	  "", 
-	  //output file
-	  "\r\n" +
-	  "", 
-	  //mapper
-	  [[2,1,2]],
-	  //description  
-	  "add 1 empty line to empty file"]
-	, 
+
 	//add 2 empty lines to empty file
-	[ 
-	  //input file 
-	  "", 
-	  //diff
-	  "@@ -0,0 +1,2 @@\r\n" + 
-	  "+\r\n" + 
-	  "+\r\n" + 
-	  "", 
-	  //output file
-	  "\r\n" + 
-	  "\r\n" + 
-	  "", 
-	  //mapper
-	  [[3,1,2]],
-	  //description  
-	  "add 2 empty lines to empty file"]
-	, 
+
 	//add 1 line without \r  to empty file
 	[ 
 	  //input file 

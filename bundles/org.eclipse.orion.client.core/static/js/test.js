@@ -76,7 +76,8 @@ orion.Test = (function(assert) {
 									e.log = false;
 									dispatchEvent("testDone", testName, {
 										result : false,
-										message : e.toString()
+										message : e.toString(),
+										error : e
 									});
 								};
 							}(testName)).then(function() {
@@ -92,17 +93,11 @@ orion.Test = (function(assert) {
 						}
 					} catch (e) {
 						failures++;
-						if (e instanceof AssertionError) {
-							dispatchEvent("testDone", testName, {
-								result : false,
-								message : e.toString()
-							});
-						} else {
-							dispatchEvent("testDone", testName, {
-								result : false,
-								message : e.toString()
-							});
-						}
+						dispatchEvent("testDone", testName, {
+							result : false,
+							message : e.toString(),
+							error : e
+						});
 					}
 				} else if (typeof test === "object") {
 					deferredCount++;
@@ -116,6 +111,7 @@ orion.Test = (function(assert) {
 							}
 						});
 					} else {
+						deferredCount--;
 						failures += runResult;
 					}
 				}
@@ -166,9 +162,9 @@ orion.Test = (function(assert) {
 		exports.addEventListener("runDone", function(name, obj) {
 			var name = name ? name : "<top>";
 			var result = [];
-			result.push("[Test Run] - " + name + " done\n");
+			result.push("[Test Run] - " + name + " done - ");
 			result.push("[Failures:" + obj.failures + (name === top ? ", Test Count:" + testCount : "") +"] ");
-			result.push("Total time:" + (new Date().getTime() - times[name]) / 1000 + "s)");
+			result.push("(" + (new Date().getTime() - times[name]) / 1000 + "s)");
 			delete times[name];
 			console.log(result.join(""));
 		});

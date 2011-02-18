@@ -206,7 +206,9 @@ eclipse.ServiceRegistry = function() {
 		}
 		var result = [];
 		for (var i = 0; i <_entries.length; i++) {
-			result.push(_entries[i].reference);
+			if (_entries[i]) {
+				result.push(_entries[i].reference);
+			}
 		}
 		return result;
 	};
