@@ -45,7 +45,7 @@ eclipse.GapTextModel = (function() {
 		
 		//Get the index for the _text from the virtual index
 		//Returns -1 if the lineIndex is inside a gap block
-		_lookUpRealIndex: function(lineIndex){
+		lookUpRealIndex: function(lineIndex){
 			var gapsBefore = 0;
 			for (var i = 0 ; i < this._gapBlocks.length ; i++){
 				var gapStart = this._gapBlocks[i][0];
@@ -104,7 +104,7 @@ eclipse.GapTextModel = (function() {
 		},
 
 		getLine: function(lineIndex, includeDelimiter) {
-			var realIndex = this._lookUpRealIndex(lineIndex);
+			var realIndex = this.lookUpRealIndex(lineIndex);
 			if (realIndex.lineIndex < 0) {
 				if(includeDelimiter)
 					return this.getLineDelimiter();
@@ -120,17 +120,17 @@ eclipse.GapTextModel = (function() {
 			var lineIndex = 0;
 			var lineOffset = 0;
 			while (lineIndex < lineCount) {
-				var realIndex = this._lookUpRealIndex(lineIndex);
+				var realIndex = this.lookUpRealIndex(lineIndex);
 				if (realIndex.lineIndex < 0) {
 					lineOffset += this.getLineDelimiter().length; 
 				} else {
 					lineOffset += this._model.getLine (realIndex.lineIndex, true).length;
 				}
+				lineIndex++;
 				if (lineOffset > offset) 
 					break;
-				lineIndex++;
 			}
-			return lineIndex;
+			return lineIndex-1;
 		},
 		
 		getLineCount: function() {
@@ -142,7 +142,7 @@ eclipse.GapTextModel = (function() {
 		},
 		
 		getLineEnd: function(lineIndex, includeDelimiter) {
-			var realIndex = this._lookUpRealIndex(lineIndex);
+			var realIndex = this.lookUpRealIndex(lineIndex);
 			var gaps = 0;
 			var newLineIndex = -1;
 			if (realIndex.lineIndex < 0) {
@@ -162,7 +162,7 @@ eclipse.GapTextModel = (function() {
 		},
 		
 		getLineStart: function(lineIndex) {
-			var realIndex = this._lookUpRealIndex(lineIndex);
+			var realIndex = this.lookUpRealIndex(lineIndex);
 			var gaps = 0;
 			var newLineIndex = -1;
 			if (realIndex.lineIndex < 0) {
