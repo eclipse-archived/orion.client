@@ -53,6 +53,7 @@ dojo.addOnLoad(function(){
 			window.location.replace("/navigate-tree.html#" + dojo.hash());
 		}});
 	commandService.addCommand(treeViewCommand, "dom", "navToolBar");
+	commandService.addCommandGroup("eclipse.viewGroup", 700);
 	
 	explorer.loadResourceList(dojo.hash());
 	
@@ -61,21 +62,6 @@ dojo.addOnLoad(function(){
 	   explorer.loadResourceList(dojo.hash());
 	});
 	
-	var search = dojo.byId("search");
-	if (search) {
-		dojo.connect(search, "onkeypress", function(e){
-			if (e.charOrCode === dojo.keys.ENTER) {
-				// We expect ExplorerTree to fill in the SearchLocation on the treeRoot
-				if (explorer.treeRoot.SearchLocation) {
-					if (search.value.length > 0) {
-						var query = explorer.treeRoot.SearchLocation + search.value;
-						explorer.loadResourceList(query);
-						dojo.stopEvent(e);
-					}
-				} else {
-					alert("Can't search: SearchLocation not available");
-				}
-			}
-		});
-	}
+	eclipse.fileCommandUtils.hookUpSearch("search", explorer);
+
 });

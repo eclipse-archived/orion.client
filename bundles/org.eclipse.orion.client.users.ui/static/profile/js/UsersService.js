@@ -30,7 +30,7 @@ eclipse.UsersService = (function() {
 			dojo.xhrGet({
 				url : "/users",
 				headers : {
-					"EclipseWeb-Version" : "1"
+					"Orion-Version" : "1"
 				},
 				handleAs : "json",
 				timeout : 15000,
@@ -53,7 +53,7 @@ eclipse.UsersService = (function() {
 				dojo.xhrDelete({
 					url : userURI,
 					headers : {
-						"EclipseWeb-Version" : "1"
+						"Orion-Version" : "1"
 					},
 					handleAs : "json",
 					timeout : 15000,
@@ -104,7 +104,7 @@ eclipse.UsersService = (function() {
 			dojo.xhrGet({
 				url : userURI,
 				headers : {
-					"EclipseWeb-Version" : "1"
+					"Orion-Version" : "1"
 				},
 				handleAs : "json",
 				timeout : 15000,
@@ -139,7 +139,7 @@ eclipse.UsersService = (function() {
 			dojo.xhrPut({
 				url : uri,
 				headers : {
-					"EclipseWeb-Version" : "1"
+					"Orion-Version" : "1"
 				},
 				handleAs : "json",
 				timeout : 15000,

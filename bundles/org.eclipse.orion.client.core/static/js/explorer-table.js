@@ -103,7 +103,7 @@ eclipse.Explorer = (function() {
 								if (!isSearch) {
 									dojo.empty(inner);
 									new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
-									this.updateNavTools(this.innerId, this.toolbarId, this.treeRoot);
+									eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.treeRoot);
 									this.createTree();
 								}
 							}));
@@ -121,21 +121,6 @@ eclipse.Explorer = (function() {
 				labelColumnIndex: 1,  // 0 if no checkboxes
 				renderer: new eclipse.FileRenderer({checkbox: true }, this)
 			});
-		},
-		
-		updateNavTools: function(parentId, toolbarId, item) {
-			var parent = dojo.byId(parentId);
-			var toolbar = dojo.byId(toolbarId);
-			if (toolbar) {
-				dojo.empty(toolbar);
-			} else {
-				toolbar = dojo.create("div",{id: toolbarId}, parent, "last");
-				dojo.addClass(toolbar, "domCommandToolbar");
-			}
-			this.registry.getService("ICommandService").then(dojo.hitch(this, function(service) {
-				service.renderCommands(toolbar, "dom", item, this, "image");
-			}));
-
 		},
 	    
 	    _lastHash: null

@@ -8,8 +8,8 @@
  ******************************************************************************/
 
 function compareResult(result , expectedOutput , expectedMapper){
-	var output = result[0];
-	var mapping = result[1];
+	var output = result.outPutFile;
+	var mapping = result.mapper;
 	for(var i = 0 ; i < mapping.length ; i++){
 		for (var j = 0; j < 3;j++){
 			if(expectedMapper[i][j] !== mapping[i][j])
@@ -22,7 +22,7 @@ function compareResult(result , expectedOutput , expectedMapper){
 }
 
 function runTests() {
-    var diffParser = new eclipse.DiffParser();
+    var diffParser = new eclipse.DiffParser("\r\n");
     var testFrom = 1;
     var testTo =  mapperTestCases.length;
     
