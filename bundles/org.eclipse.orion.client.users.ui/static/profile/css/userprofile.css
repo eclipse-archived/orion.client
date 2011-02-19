@@ -6,6 +6,10 @@ label.userprofile {
 	clear: both;
 }
 
+div.userprofile {
+	clear: left;
+}
+
 .userprofile {
 	margin-top: 2.5px;
 	margin-bottom: 2.5px;

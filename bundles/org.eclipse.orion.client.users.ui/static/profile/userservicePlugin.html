@@ -16,26 +16,13 @@
    var usersService = new eclipse.UsersService();
    usersService.info = function() {
 	     return {
-		      name : "Personal Information"
+		      name : "User profile"
 		     };
 		    };
    
    
 	usersService.getDivContent = function() {
-  	var content = {"sections" : [
-  	                             {"id": "personalInformation", "name" : "Personal Information", "data" :[
-  	                                                                                                     {"type": "TextBox", "props": {"id": "pi_login", "readOnly" : true, "name" : "login"}, "label": "Login"},
-  	                                                                                                     {"type": "TextBox", "props": {"id": "pi_name", "readOnly" : false,  "type" : "", "name" : "name"}, "label" : "Name"},
-  	                                                                                                     {"type": "TextBox", "props": {"id": "pi_lastLogin", "readOnly" : true,  "type" : "", "name" : "lastlogintimestamp"}, "label" : "Last login"}
-  	                                                                                                     ]
-  	                             },
-  	                             {"id": "changePassword", "name" : "Change Password", "data" : [
-  	                                                                                            {"type": "TextBox", "props": {"id": "cp_password", "readOnly" : false,  "type" : "password", "name" : "password"}, "label" : "Password"},
-  	                                                                                            {"type": "TextBox", "props": {"id": "cp_passwordRetype", "readOnly" : false,  "type" : "password", "name" : "passwordRetype"}, "label" : "Retype password"}
-  	                                                                                            ]
-  	                             }
-  	                             ],
-  	               "actions": [
+  	var content = { "actions": [
   	                          	{"type": "Button", "props": {"id": "saveProfileButton", "label": "Save Profile"}, "events": [{"event": "onClick", "action": "saveProfile"}]},
   	                        	{"type": "Button", "props": {"id": "resetProfileButton", "label": "Reset"}, "events": [{"event": "onClick", "action": "resetProfile"}]},
   	                        	{"type": "Button", "props": {"id": "deleteProfileButton", "label": "Delete Profile"}, "events": [{"event": "onClick", "action": "deleteProfile"}]}
@@ -44,6 +31,11 @@
   	    	
 	return content;
   };
+  
+  usersService.initProfile = function(userURI, pluginsEventName, dataEventName){
+	  this._serviceRegistration.dispatchEvent(pluginsEventName, {"plugins": [{"plugin": "/profile/personalInformationPlugin.html"}]});
+	  this.getUserInfo(userURI, dataEventName);
+  },
   
   usersService.fire = function(action, url, jsonData){
 	  switch(action){
