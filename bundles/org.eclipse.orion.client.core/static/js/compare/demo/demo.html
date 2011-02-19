@@ -189,6 +189,17 @@ function createCompareEditor() {
 		}
 	}); 
 	editorRight.redrawRange();
+	
+	var lines = compareModelLeft.getLineCount();
+	var scroll  = document.getElementById("scrollId");
+	scroll.innerHTML = "";
+	for (var i = 0 ; i < lines; i++){
+		scroll.innerHTML = scroll.innerHTML +"<br>";
+	}	
+}
+
+function scrollHandler(evt){
+	console.log(evt.scrollTop);
 }
 
 window.onload = function() {
@@ -216,6 +227,12 @@ window.onload = function() {
 <div id='divParentR' style='border: 1px solid teal;width:100%;height:650px;'>
 
 </div>
+</td>
+<td>
+<div id= "scrollId" onscroll="scrollHandler(this)" style="
+	width: 18px;
+	height: 650px;
+	overflow-y: scroll;"></div>
 </td>
 </tr>
 </table>
