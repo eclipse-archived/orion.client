@@ -6,8 +6,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
-var testcase = function(assert) {
+/*global eclipse orion*/
+var testcase = (function(assert) {
 	var tests = {};
 	
 	tests["test empty registry"] = function() {
@@ -15,12 +15,8 @@ var testcase = function(assert) {
 		var serviceRegistry = new eclipse.ServiceRegistry();
 		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
 		
-		var plugins = pluginRegistry.getPlugins();
-		assert.equal(plugins.length, 0);
-		
-		var serviceReferences = serviceRegistry.getServiceReferences();
-		assert.equal(serviceReferences.length, 0);
-		
+		assert.equal(pluginRegistry.getPlugins().length, 0);
+		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
 	};
 
 	tests["test install plugin"] = function() {
@@ -28,15 +24,72 @@ var testcase = function(assert) {
 		var serviceRegistry = new eclipse.ServiceRegistry();
 		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
 		
-		var plugins = pluginRegistry.getPlugins();
-		assert.equal(plugins.length, 0);
+		assert.equal(pluginRegistry.getPlugins().length, 0);
+		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
 		
-		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function() {
-			plugins = pluginRegistry.getPlugins();
-			assert.equal(plugins.length, 1);
+		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+			assert.equal(pluginRegistry.getPlugins().length, 1);
+			assert.equal(serviceRegistry.getServiceReferences().length, 1);		
+			
+			plugin.uninstall();
+			
+			assert.equal(pluginRegistry.getPlugins().length, 0);
+			assert.equal(serviceRegistry.getServiceReferences().length, 0);
+			pluginRegistry._shutdown();
 		});
 		return promise;
 	};
+	
+	tests["test plugin service call"] = function() {
+		var storage = {};
+		var serviceRegistry = new eclipse.ServiceRegistry();
+		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		
+		assert.equal(pluginRegistry.getPlugins().length, 0);
+		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
+		
+		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+			return serviceRegistry.getService("test");
+		}).then(function(service) {
+			return service.test("echo");
+		}).then(function(result) {
+			assert.equal(result, "echo");
+			pluginRegistry._shutdown();
+		});
+		return promise;
+	};
+	
+	tests["test plugin event"] = function() {
+		var storage = {};
+		var serviceRegistry = new eclipse.ServiceRegistry();
+		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		
+		assert.equal(pluginRegistry.getPlugins().length, 0);
+		assert.equal(serviceRegistry.getServiceReferences().length, 0);
+		
+		var eventListenerCalls = 0;
+		function eventListener(result) {
+			if (result === "echotest") {
+				eventListenerCalls++;
+			}
+		}
+		
+		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+			return serviceRegistry.getService("test");
+		}).then(function(service) {
+			service.addEventListener("echo", eventListener);
+			return service.testEvent("echo").then(function() {
+				service.removeEventListener("echo", eventListener);
+				return service.testEvent("echo");
+			});
+		}).then(function(result) {
+			assert.equal(eventListenerCalls, 1);
+			pluginRegistry._shutdown();
+		});
+		return promise;
+	};
+	
+	
 	
 	tests["test 404 plugin"] = function() {
 		var storage = {};
@@ -52,10 +105,11 @@ var testcase = function(assert) {
 			assert.ok(e.message.match(/Load timeout for plugin/));
 			plugins = pluginRegistry.getPlugins();
 			assert.equal(plugins.length, 0);
+			pluginRegistry._shutdown();
 		});
 		return promise;
 	};
 	
 	
 	return tests;
-}(orion.Assert);
+}(orion.Assert));

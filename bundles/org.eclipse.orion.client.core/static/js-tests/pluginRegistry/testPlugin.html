@@ -7,18 +7,14 @@
 	<script>
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("editorAction", {
-				info : function() {
-					return {
-						name : "test",
-						img : "/favicon.ico",
-						key : [ "u", true ]
-					};
+			var serviceProvider = provider.registerServiceProvider("test", {
+				test: function(echo) {
+					return echo;
 				},
-				run : function(text) {
-					return console.log("test");
-				}
-			}, {name : "test", img : "/favicon.ico"});
+				testEvent: function(name) {
+					serviceProvider.dispatchEvent(name, name + "test");
+				}					
+			}, {name : "echotest"});
 			provider.connect();
 		};
 	</script>

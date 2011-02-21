@@ -10,15 +10,12 @@
  *******************************************************************************/
 var eclipse = eclipse || {};
 
-eclipse.compareConsts =eclipse.compareConsts || {
-	LINE_SEPERATOR: "\r\n",
-	NEW_LINE: "\r",
-	NO_NEW_LINE: "\\ No newline at end of file"
-};
-
 eclipse.DiffParser = (function() {
-	function DiffParser(options) {
-		//this._init();
+	var isWindows = navigator.platform.indexOf("Win") !== -1;
+	var NO_NEW_LINE = "\\ No newline at end of file";
+	/** @private */
+	function DiffParser(lineDelimiter) {
+		this._lineDelimiter = lineDelimiter ? lineDelimiter : (isWindows ? "\r\n" : "\n"); 
 	}
 	DiffParser.prototype = {
 		_init: function(){
@@ -44,10 +41,9 @@ eclipse.DiffParser = (function() {
 		parse: function(oFileString , diffString){
 			this._init();
 			if(diffString === "")
-				return ["",[]];
-			var lSep = eclipse.compareConsts.LINE_SEPERATOR;
-			this._oFileContents = oFileString.split(lSep);
-			this._diffContents = diffString.split(lSep);
+				return {outPutFile:"",mapper:[]};
+			this._oFileContents = oFileString.split(this._lineDelimiter);
+			this._diffContents = diffString.split(this._lineDelimiter);
 			var lineNumber = this._diffContents.length;
 			this._hunkRanges = [];
 			for(var i = 0; i <lineNumber ; i++){
@@ -56,7 +52,7 @@ eclipse.DiffParser = (function() {
 					  this._hunkRanges.push(hunkRange); 
 			}
 			if(0 === this._hunkRanges.length)
-				return ["",[]];
+				return {outPutFile:"",mapper:[]};
 
 			//console.log(JSON.stringify(this._hunkRanges));
 			for(var j = 0; j <this._hunkRanges.length ; j++){
@@ -70,7 +66,7 @@ eclipse.DiffParser = (function() {
 			this._buildNewFile();
 			//this._logNewFile();
 			//console.log("Total line number in new file: " + this._nFileContents.length);
-			return [this._nFileContents.join(lSep),this._deltaMap];
+			return {outPutFile:this._nFileContents.join(this._lineDelimiter),mapper:this._deltaMap};
 		},
 		
 		_logMap: function(){
@@ -137,14 +133,14 @@ eclipse.DiffParser = (function() {
 			var oBlkStart = this._hunkRanges[hunkRangeNo][1];
 			var nBlkStart = this._hunkRanges[hunkRangeNo][3];
 			var lastPlusPos = startNo;
-			var nl = eclipse.compareConsts.NEW_LINE;
+			var nl = "\r";
 			for (var i = startNo ; i< endNo ; i++){
 				if( 0 === this._diffContents[i].length)
 					continue;
 				var curToken = this._diffContents[i][0];
 				if(curToken === "\\"){
-					if( eclipse.compareConsts.NO_NEW_LINE === this._diffContents[i].substring(0 , this._diffContents[i].length-1) ||
-						eclipse.compareConsts.NO_NEW_LINE === this._diffContents[i]){
+					if( NO_NEW_LINE === this._diffContents[i].substring(0 , this._diffContents[i].length-1) ||
+						NO_NEW_LINE === this._diffContents[i]){
 						lastToken === "-" ? this._oNewLineAtEnd = false:this._nNewLineAtEnd = false ;
 						if(i > startNo && nl === this._diffContents[i-1].substring(this._diffContents[i-1].length-1)){
 							this._diffContents[i-1] = this._diffContents[i-1].substring(0 , this._diffContents[i-1].length-1);
