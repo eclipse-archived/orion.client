@@ -12,7 +12,8 @@ orion.Test = (function(assert) {
 	var AssertionError = assert.AssertionError;
 
 	var _namedlisteners = {};
-	function dispatchEvent(eventName) {
+	var _tests = [];
+	exports.dispatchEvent = function(eventName) {
 		var listeners = _namedlisteners[eventName];
 		if (listeners) {
 			for ( var i = 0; i < listeners.length; i++) {
@@ -49,7 +50,7 @@ orion.Test = (function(assert) {
 	};
 
 	function _run(runName, obj) {
-		dispatchEvent("runStart", runName);
+		exports.dispatchEvent("runStart", runName);
 		var failures = 0;
 		var deferredCount = 1;
 		var result = new dojo.Deferred();
@@ -59,14 +60,14 @@ orion.Test = (function(assert) {
 				var test = obj[property];
 				var testName = runName ? runName + "." + property : property;
 				if (typeof test === "function") {
-					dispatchEvent("testStart", testName);
+					exports.dispatchEvent("testStart", testName);
 					try {
 						var testResult = test();
 						if (testResult && typeof testResult.then === "function") {
 							deferredCount++;
 							testResult.then(function(testName) {
 								return function() {
-									dispatchEvent("testDone", testName, {
+									exports.dispatchEvent("testDone", testName, {
 										result : true
 									});
 								};
@@ -74,7 +75,7 @@ orion.Test = (function(assert) {
 								return function(e) {
 									failures++;
 									e.log = false;
-									dispatchEvent("testDone", testName, {
+									exports.dispatchEvent("testDone", testName, {
 										result : false,
 										message : e.toString(),
 										error : e
@@ -87,13 +88,13 @@ orion.Test = (function(assert) {
 								}
 							});
 						} else {
-							dispatchEvent("testDone", testName, {
+							exports.dispatchEvent("testDone", testName, {
 								result : true
 							});
 						}
 					} catch (e) {
 						failures++;
-						dispatchEvent("testDone", testName, {
+						exports.dispatchEvent("testDone", testName, {
 							result : false,
 							message : e.toString(),
 							error : e
@@ -120,13 +121,13 @@ orion.Test = (function(assert) {
 		deferredCount--;
 
 		if (deferredCount == 0) {
-			dispatchEvent("runDone", runName, {
+			exports.dispatchEvent("runDone", runName, {
 				failures : failures
 			});
 			return failures;
 		} else {
 			result.then(function() {
-				dispatchEvent("runDone", runName, {
+				exports.dispatchEvent("runDone", runName, {
 					failures : failures
 				});
 			});
@@ -141,10 +142,18 @@ orion.Test = (function(assert) {
 		}
 
 		if (!obj || typeof obj !== "object") {
-			throw Error("not a test object");
+			if (_tests[0]) {
+				obj = _tests[0];
+			} else {
+				throw new Error("not a test object");
+			}
 		}
 		return _run(name, obj);
 	};
+	
+	exports.add = function(obj) {
+		_tests.push(obj);
+	}
 	
 	exports.useConsole = function() {
 		var times = {};
