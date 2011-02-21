@@ -216,7 +216,6 @@ eclipse.FileRenderer = (function() {
 			thead.appendChild(row);
 			tableNode.appendChild(thead);
 			
-			dojo.style(actions, "textAlign", "center");
 			dojo.style(size, "textAlign", "right");
 
 		},

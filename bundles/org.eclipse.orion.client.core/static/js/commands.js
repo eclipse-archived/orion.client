@@ -29,8 +29,9 @@ eclipse.CommandService = (function() {
 	 * @name eclipse.CommandService
 	 */
 	function CommandService(options) {
-		this._domScope = {sorted: false, commands:[]};
-		this._objectScope = {sorted: false, commands:[]};
+		this._domScope = {};
+		this._objectScope = {};
+		this._globalScope = {};
 		this._namedGroups = {};
 		this._init(options);
 	}
@@ -40,42 +41,107 @@ eclipse.CommandService = (function() {
 			this._serviceRegistration = this._registry.registerService("ICommandService", this);
 		},
 		
-		/**
-		 * Registers a new command and specifies the scope of the command.  Note this
-		 * is not yet fully implemented. 
-		 * @param {Command} command The command being added
+		/** 
+		 * Add a command at a particular scope.
+		 * @param {Command} the command being added.
 		 * @param {String} scope The scope to which the command applies.  "global"
-		 *  commands apply everywhere, "page" level commands apply to a particular
-		 *  page, "dom" level commands apply only when the specified dom element is
-		 *  rendering commands, and "object" scope applies to particular objects 
-		 *  being displayed in widgets such as lists or trees.
-		 * @param {String} scopeId The id related to the scope.  Depending on the scope,
-		 *  this might be the id of the page or of a dom element.
-		 */	
-		 
-		addCommand: function(command, scope, scopeId) {
+		 *  commands apply across the page, "dom" level commands apply only when the 
+		 *  specified dom element is rendering commands, and "object" scope applies 
+		 *  to particular objects being displayed in widgets such as lists or trees.
+		 */
+		addCommand: function(command, scope) {
 			switch (scope) {
 			case "dom":
-				this._domScope.commands.push({scopeId: scopeId, command: command});
-				this._domScope.sorted = false;
+				this._domScope[command.id] = command;
 				break;
-				
 			case "object":
-				this._objectScope.commands.push({scopeId: scopeId, command: command});
-				this._objectScope.sorted = false;
+				this._objectScope[command.id] = command;
 				break;
+			case "global":
+				this._globalScope[command.id] = command;
+				break;
+			default:
+				throw "unrecognized command scope " + scope;
 			}
 		},
 		
 		/**
 		 * Registers a command group and specifies visual information about the group.
-		 * @param {String} the id of the group, must be unique
-		 * @param {Number} the relative position of the group
+		 * @param {String} the id of the group, must be unique.  Also used for dom node id
+		 * @param {String} the path of parent groups, separated by '/'.  For example,
+		 *  a path of "group1Id/group2Id" indicates that the group belongs as a child of 
+		 *  group2Id, which is itself a child of group1Id.  Optional.
+		 * @param {Number} the relative position of the group within its parent
 		 * @param {String} the title of the group, optional
 		 */	
 		 
-		addCommandGroup: function(groupId, position, title) {
-			this._namedGroups[groupId] = {title: title, position: position};
+		addCommandGroup: function(groupId, position, title, parentPath, scopeId) {
+			var parentTable = this._namedGroups;
+			if (parentPath) {
+				parentTable = this._createEntryForPath(parentPath);		
+			} 
+			if (parentTable[groupId]) {
+				// update existing group definition if info has been supplied
+				if (title) {
+					parentTable[groupId].title = title;
+				}
+				if (position) {
+					parentTable[groupId].position = position;
+				}
+				if (scopeId) {
+					parentTable[groupId].scopeId = scopeId;
+				}
+			} else {
+				// create new group definition
+				parentTable[groupId] = {title: title, position: position, children: {}, scopeId: scopeId};
+			}
+		},
+		
+		_createEntryForPath: function(parentPath) {
+			var parentTable = this._namedGroups;
+			if (parentPath) {
+				var segments = parentPath.split("/");
+				for (var i = 0; i < segments.length; i++) {
+					if (segments[i].length > 1) {
+						if (!parentTable[segments[i]]) {
+							// empty slot with children
+							parentTable[segments[i]] = {position: 0, children: {}};
+						} 
+						parentTable = parentTable[segments[i]].children;
+					}
+				}
+			}
+			return parentTable;	
+		},
+		
+		/**
+		 * Register a command contribution, which identifies how a command appears
+		 * on a page and how it is invoked.
+		 * @param {String} the id of the command
+		 * @param {String} scopeId The id related to the scope.  Depending on the scope,
+		 *  this might be the id of the page or of a dom element.
+		 * @param {String} the path on which the command is located.  Optional.
+		 * @param {Number} the relative position of the command within its parent
+		 * @param {Array} an array of values to pass to eclipse.KeyBinding constructor.  Optional.
+
+		 */
+		registerCommandContribution: function(commandId, position, scopeId, parentPath, keys) {
+			// first ensure the parentPath is represented
+			var parentTable = this._createEntryForPath(parentPath);
+			parentTable[commandId] = {scopeId: scopeId, position: position, keys: keys};
+			// get rid of sort cache because we have a new contribution
+			parentTable.sortedCommands = null;
+		},
+		
+		_isLastChildSeparator: function(parent, style) {
+			if (style === "image") {
+				return parent.childNodes.length > 0 && dojo.hasClass(parent.childNodes[parent.childNodes.length - 1], "commandSeparator");
+			}
+			if (style === "menu") {
+				var menuChildren = parent.getChildren();
+				return menuChildren.length > 0 && (menuChildren[menuChildren.length-1] instanceof dijit.MenuSeparator);
+			}
+			return false;
 		},
 
 		
@@ -95,158 +161,184 @@ eclipse.CommandService = (function() {
 		 */	
 		
 		renderCommands: function(parent, scope, items, handler, style, userData) {
-			// TODO not happy with the shape of this internally but focusing on API for now
-			// (strange data structures, redundant code)
-			var i, command, isNewGroup, currentGroup, currentParent, renderedParent, groupId;
-			switch (scope) {
-			case "dom":
-				if (this._domScope.commands.length < 1) {
-					return;
+			if (!items) {
+				var cmdService = this;
+				this._registry.getService("ISelectionService").then(function(service) {
+					service.getSelection(function(selection) {
+						if (!selection) {
+							return;
+						}
+						this.renderCommands(parent, scope, selection, handler, style, userData);
+					});
+				});
+				return;
+			} 
+			var refCommands;
+			if (scope === "object") {
+				refCommands = this._objectScope;
+			} else if (scope === "dom") {
+				refCommands = this._domScope;
+			} else if (scope === "global") {
+				refCommands = this._globalScope;
+			} else {
+				throw "Unrecognized command scope " + scope;
+			}
+			this._render(this._namedGroups, parent, scope, items, handler, style, userData, refCommands);
+			// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
+			if (style === "image") {
+				if (this._isLastChildSeparator(parent, style)) {
+					parent.removeChild(parent.childNodes[parent.childNodes.length-1]);
 				}
-				this._sortCommands(this._domScope);
-				currentParent = parent;
-				// determine if a grouping will need to be created
-				groupId = this._domScope.commands[0].command.groupId;
-				if (!(groupId && this._namedGroups[groupId] && this._namedGroups[groupId].title)) {
-					// ensures we don't render a separator first
-					currentGroup = groupId;
+			} else if (style === "menu") {
+				if (this._isLastChildSeparator(parent, style)) {
+					var child = parent.getChildren()[parent.getChildren().length-1];
+					parent.removeChild(child);
+					child.destroy();
 				}
-				for (i = 0; i < this._domScope.commands.length; i++) { 
-					command = this._domScope.commands[i].command;
-					isNewGroup = currentGroup !== command.groupId;
-					if (isNewGroup) { // a new group is starting
-						currentParent = parent;
-					}
-					if (parent.id === this._domScope.commands[i].scopeId) {
-						renderedParent = this._render(currentParent, command, items, handler, style, isNewGroup, userData, i);
-						if (renderedParent) {
-							currentParent = renderedParent;
-							currentGroup = command.groupId;
-						}		
-					}
-				}				
-				break;
-				
-			case "object":
-				if (this._objectScope.commands.length < 1) {
-					return;
-				}
-				this._sortCommands(this._objectScope);
-				currentParent = parent;
-				// determine if a grouping will need to be created
-				groupId = this._domScope.commands[0].command.groupId;
-				if (!(groupId && this._namedGroups[groupId] && this._namedGroups[groupId].title)) {
-					// ensures we don't render a separator first
-					currentGroup = groupId;
-				}
-				for (i = 0; i < this._objectScope.commands.length; i++) { 
-					command = this._objectScope.commands[i].command;
-					isNewGroup = currentGroup !== command.groupId;
-					if (isNewGroup) { // a new group is starting, reset parent to original
-						currentParent = parent;
-					}
-					if (!items) {
-						var cmdService = this;
-						this._registry.getService("ISelectionService").then(function(service) {
-							service.getSelection(function(selection) {
-								renderedParent = this._render(currentParent, command, selection, handler, style, isNewGroup, userData, i);
-								if (renderedParent) {
-									currentParent = renderedParent;
-									currentGroup = command.groupId;
-								}		
-							});
-						});
-					} else {
-						renderedParent = this._render(currentParent, command, items, handler, style, isNewGroup, userData, i);
-						if (renderedParent) {
-							currentParent = renderedParent;
-							currentGroup = command.groupId;
-						}		
-					}
-				}				
-				break;
 			}
 		},
 		
-		_sortCommands: function(scope) {
-			scope.commands.sort(dojo.hitch(this, function(a,b) {
-				var aPos, bPos, group;
-				if (a.command.groupId) {
-					group = this._namedGroups[a.command.groupId];
-					aPos = group ? group.position + a.command.position : a.command.position;
-				} else {
-					aPos = a.command.position;
+		_render: function(commandItems, parent, scope, items, handler, style, userData, commandList) {
+			// sort the items
+			var positionOrder = commandItems.sortedCommands;
+			if (!positionOrder) {
+				positionOrder = [];
+				for (var key in commandItems) {
+					if (commandItems[key] && commandItems[key].position) {
+						commandItems[key].id = key;
+						positionOrder.push(commandItems[key]);
+					}
 				}
-				if (b.command.groupId) {
-					group = this._namedGroups[b.command.groupId];
-					bPos = group ? group.position + b.command.position : b.command.position;
-				} else {
-					bPos = b.command.position;
-				}
-				return aPos - bPos;
-			}));
-			scope.sorted = true;
-		},
-				
-		_render: function(parent, command, items, handler, style, newGroup, userData, i) {
-			var render = true;
-			if (command.visibleWhen) {
-				render = command.visibleWhen(items);
+				positionOrder.sort(function(a,b) {
+					return a.position-b.position;
+				});
+				commandItems.sortedCommands = positionOrder;
 			}
-			if (!render) {
-				return false;
-			}
-			if (style === "image") {
-				if (newGroup) {
-					/* var groupInfo = this._namedGroups[command.groupId];
-					var subMenuText = groupInfo ? groupInfo.title : null;
-					if (subMenuText) {
-						var menuButton = new dijit.form.DropDownButton({
-							label: subMenuText
-						});
-						dojo.place(parent, menuButton.domNode, "last");
-						var subMenu = new dijit.Menu();
-						var menuItem = command._asMenuItem(subMenu, items, handler, userData);
-						parent = subMenu;
-					} else { */
-						// a separator
-						var children = parent.childNodes;
-						if (children.length > 0) {
-							var lastNode = children[children.length-1];
-							if (lastNode.src !== "images/sep.gif") {
-								var sep = new Image();
+			// now traverse the command items and render as we go
+			for (var i = 0; i < positionOrder.length; i++) {
+				var image, id;
+				if (positionOrder[i].children) {
+					var group = positionOrder[i];
+					if (group.scopeId && parent.id !== group.scopeId) {
+						break;
+					}
+					var children;
+					if (style === "image") {
+						if (group.title) {
+							// we need a named menu button, but first let's see if we actually have content
+							var newMenu= new dijit.Menu({
+								style: "display: none;"
+							});
+							// if commands are scoped to the dom, we'll need to identify a menu with the dom id of its original parent
+							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
+							// render the children
+							this._render(positionOrder[i].children, newMenu, scope, items, handler, "menu", userData, commandList); 
+							// special post-processing when we've created a menu in an image bar.
+							// we want to get rid of a trailing separator in the menu first, and then decide if a menu is necessary
+							children = newMenu.getChildren();
+							if (this._isLastChildSeparator(newMenu, "menu")) {
+								var trailingSep = children[children.length-1];
+								newMenu.removeChild(trailingSep);
+								trailingSep.destroy();
+								children = newMenu.getChildren();
+							}
+							// now decide if we needed the menu or not
+							if (children.length > 1) {
+								var menuButton = new dijit.form.DropDownButton({
+									label: group.title,
+									dropDown: newMenu
+							        });
+								dojo.place(menuButton.domNode, parent, "last");
+							} else if (children.length === 1) {
+								// we don't want to put a single command in a button menu, just add the image
+								var menuCommand = children[0].eclipseCommand;
+								if (menuCommand) {
+									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
+									image = menuCommand._asImage(id, items, handler, userData);
+									dojo.place(image, parent, "last");
+								}
+							}
+						} else {
+							var sep;
+							// Only draw a separator if there is a non-separator preceding it.
+							if (parent.childNodes.length > 0 && !this._isLastChildSeparator(parent, style)) {
+								sep = new Image();
 								// TODO should get this from CSS
 								sep.src = "images/sep.gif";
 								dojo.addClass(sep, "commandImage");
+								dojo.addClass(sep, "commandSeparator");
 								dojo.place(sep, parent, "last");
 							}
-						}}
-						var id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-						var image = command._asImage(id, items, handler, userData);
-						dojo.place(image, parent, "last");	
-				//}
-			} else if (style === "menu") {
-				if (newGroup) {
-					var groupInfo = this._namedGroups[command.groupId];
-					var subMenuText = groupInfo ? groupInfo.title : null;
-					if (subMenuText) {
-						var subMenu = new dijit.Menu();
-						parent.addChild(new dijit.PopupMenuItem({
-							label: subMenuText,
-							popup: subMenu
-						}));
-						parent = subMenu;
+							this._render(positionOrder[i].children, parent, scope, items, handler, style, userData, commandList); 
+
+							// make sure that more than just the separator got rendered before rendering a trailing separator
+							if (parent.childNodes.length > 0) {
+								var lastRendered = parent.childNodes[parent.childNodes.length - 1];
+								if (lastRendered !== sep) {
+									sep = new Image();
+								// TODO should get this from CSS
+									sep.src = "images/sep.gif";
+									dojo.addClass(sep, "commandImage");
+									dojo.addClass(sep, "commandSeparator");
+									dojo.place(sep, parent, "last");
+								}
+							}
+						}
 					} else {
-						// render a separator if appropriate.
-						var children = parent.getChildren();
-						if (children.length > 0 && !(children[children.length-1] instanceof dijit.MenuSeparator)) {
-							parent.addChild(new dijit.MenuSeparator());
+						// group within a menu
+						if (group.title) {
+							var subMenu = new dijit.Menu();
+							this._render(positionOrder[i].children, subMenu, scope, items, handler, style, userData, commandList); 
+							if (subMenu.getChildren().length > 0) {
+								parent.addChild(new dijit.PopupMenuItem({
+									label: group.title,
+									popup: subMenu
+								}));
+							}
+						} else {
+							// don't render a separator if there is nothing preceding, or if the last thing was a separator
+							var menuSep;
+							if (parent.getChildren().length > 0 && !this._isLastChildSeparator(parent, style)) {
+								menuSep = new dijit.MenuSeparator();
+								parent.addChild(menuSep);
+							}
+							this._render(positionOrder[i].children, parent, scope, items, handler, style, userData, commandList); 
+							// Add a trailing separator if children rendered.
+							var menuChildren = parent.getChildren();
+							if (menuChildren[menuChildren.length - 1] !== menuSep) {
+								menuSep = new dijit.MenuSeparator();
+								parent.addChild(menuSep);
+							}
+						}
+					}
+				} else {
+					var command = commandList[positionOrder[i].id];
+					var render = command ? true : false;
+					if (command) {
+						if (scope === "dom") {
+							if (style === "image") {
+								render = parent.id === positionOrder[i].scopeId;
+							} else if (style === "menu") {
+								render = parent.eclipseScopeId === positionOrder[i].scopeId;
+							} else {
+								render = false;
+							}
+						} 
+						if (render && command.visibleWhen) {
+							render = command.visibleWhen(items);
+						}
+					}
+					if (render) {
+						if (style === "image") {
+							id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
+							image = command._asImage(id, items, handler, userData);
+							dojo.place(image, parent, "last");
+						} else if (style === "menu") {
+							command._addMenuItem(parent, items, handler, userData);
 						}
 					}
 				}
-				var menuItem = command._asMenuItem(parent, items, handler, userData);
 			}
-			return parent;
 		}
 
 	};  // end prototype
@@ -271,13 +363,10 @@ eclipse.Command = (function() {
 			this.id = options.id;  // unique id
 			this.name = options.name || "Empty Command";
 			this.tooltip = options.tooltip || options.name;
-			this.key = options.key; // an array of values to pass to eclipse.KeyBinding constructor
 			this._callback = options.callback; // optional callback that should be called when command is activated (clicked)
 			this._hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.image = options.image || "/images/none.png";
 			this.visibleWhen = options.visibleWhen;
-			this.position = options.position || 0;  // numeric position used to sort commands in a presentation
-			this.groupId = options.groupId; // optional group id which signifies the need for a separator
 			// when false, affordances for commands are always shown.  When true,
 			// they are shown on hover only.
 			//how will we know this?
@@ -340,7 +429,7 @@ eclipse.Command = (function() {
 			dojo.addClass(anchor, 'commandLink');
 			return anchor;
 		},
-		_asMenuItem: function(parent, items, handler, userData) {
+		_addMenuItem: function(parent, items, handler, userData) {
 			var menuitem = new dijit.MenuItem({
 				label: this.name,
 				tooltip: this.tooltip,
@@ -355,6 +444,8 @@ eclipse.Command = (function() {
 					}
 				})
 			});
+			// we may need to refer back to the command.  
+			menuitem.eclipseCommand = this;
 			parent.addChild(menuitem);
 			if (this.image) {
 				dojo.addClass(menuitem.iconNode, 'commandImage');

@@ -58,9 +58,6 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId,
 };
 
 eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
-	commandService.addCommandGroup("eclipse.fileGroup", 100);
-	commandService.addCommandGroup("eclipse.newResources", 200, "New");
-
 	function forceSingleItem(item) {
 		if (dojo.isArray(item)) {
 			if (item.length > 1) {
@@ -94,7 +91,6 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		name: "Delete",
 		image: "images/silk/cross.png",
 		id: "eclipse.deleteFile",
-		groupId: "eclipse.fileGroup",
 		visibleWhen: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
 			for (var i=0; i < items.length; i++) {
@@ -146,7 +142,6 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		name: "New File",
 		image: "images/silk/page_add.png",
 		id: "eclipse.newFile",
-		groupId: "eclipse.newResources",
 		callback: function(item) {
 			item = forceSingleItem(item);
 			var dialog = new widgets.NewItemDialog({
@@ -164,14 +159,13 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
 			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
-	commandService.addCommand(newFileCommand, "dom", toolbarId);
+	commandService.addCommand(newFileCommand, "dom");
 	commandService.addCommand(newFileCommand, "object");
 	
 	var newFolderCommand = new eclipse.Command({
 		name: "New Folder",
 		image: "images/silk/folder_add.png",
 		id: "eclipse.newFolder",
-		groupId: "eclipse.newResources",
 		callback: function(item) {
 			item = forceSingleItem(item);
 			var dialog = new widgets.NewItemDialog({
@@ -190,14 +184,13 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
 
-	commandService.addCommand(newFolderCommand, "dom", toolbarId);
+	commandService.addCommand(newFolderCommand, "dom");
 	commandService.addCommand(newFolderCommand, "object");
 	
 	var newProjectCommand = new eclipse.Command({
 		name: "New Folder",
 		image: "images/silk/folder_add.png",
 		id: "eclipse.newProject",
-		groupId: "eclipse.newResources",
 		callback: function(item) {
 			var dialog = new widgets.NewItemDialog({
 				title: "Create Folder",
@@ -216,13 +209,12 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			return item.Location && eclipse.util.isAtRoot(item.Location);}});
 
-	commandService.addCommand(newProjectCommand, "dom", toolbarId);
+	commandService.addCommand(newProjectCommand, "dom");
 	
 	var linkProjectCommand = new eclipse.Command({
 		name: "Link Folder",
 		image: "images/silk/link_add.png",
 		id: "eclipse.linkProject",
-		groupId: "eclipse.newResources",
 		callback: function(item) {
 			var dialog = new widgets.NewItemDialog({
 				title: "Link Folder",
@@ -241,13 +233,12 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
 			return item.Location && eclipse.util.isAtRoot(item.Location);}});
-	commandService.addCommand(linkProjectCommand, "dom", toolbarId);
+	commandService.addCommand(linkProjectCommand, "dom");
 		
 	var openResourceCommand = new eclipse.Command({
 		name: "Open Resource",
 		image: "images/silk/find.png",
 		id: "eclipse.openResource",
-		position: 700,
 		callback: function(item) {
 			window.setTimeout(function() {
 				new widgets.OpenResourceDialog({
@@ -256,13 +247,12 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				}).show();
 			}, 0);
 		}});
-	commandService.addCommand(openResourceCommand, "dom", toolbarId);
+	commandService.addCommand(openResourceCommand, "dom");
 		
 	var importCommand = new eclipse.Command({
 		name : "Import",
 		image : "images/silk/zip_import.gif",
 		id: "eclipse.importCommand",
-		groupId: "eclipse.fileGroup",
 		callback : function(item) {
 			item = forceSingleItem(item);
 			var dialog = new widgets.ImportDialog({
@@ -276,5 +266,5 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(importCommand, "object");
-	commandService.addCommand(importCommand, "dom", toolbarId);
+	commandService.addCommand(importCommand, "dom");
 };

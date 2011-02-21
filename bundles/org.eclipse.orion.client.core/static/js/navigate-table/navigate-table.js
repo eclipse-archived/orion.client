@@ -38,8 +38,27 @@ dojo.addOnLoad(function(){
 	
 	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, "explorer-tree", "navToolBar");
 	
-	// declare commands
+	// commands shared by navigators
 	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar");
+	
+	// define the command contributions - where things appear
+	commandService.addCommandGroup("eclipse.fileGroup", 100, "More");
+	commandService.addCommandGroup("eclipse.newResources", 100, null, "eclipse.fileGroup");
+	commandService.addCommandGroup("eclipse.fileGroup.unlabeled", 100, null, null, "navToolBar");
+	commandService.registerCommandContribution("eclipse.makeFavorite", 1);
+	commandService.registerCommandContribution("eclipse.downloadFile", 2);
+	commandService.registerCommandContribution("eclipse.openResource", 500, "navToolBar");
+	commandService.registerCommandContribution("eclipse.deleteFile", 3, null, "eclipse.fileGroup");
+	commandService.registerCommandContribution("eclipse.importCommand", 4, null, "eclipse.fileGroup");
+	// new file and new folder in the object contribution uses the labeled group
+	commandService.registerCommandContribution("eclipse.newFile", 1, null, "eclipse.fileGroup/eclipse.newResources");
+	commandService.registerCommandContribution("eclipse.newFolder", 2, null, "eclipse.fileGroup/eclipse.newResources");
+	//new file and new folder in the nav bar do not label the group (we don't want a menu)
+	commandService.registerCommandContribution("eclipse.newFile", 1, "navToolBar", "eclipse.fileGroup.unlabeled");
+	commandService.registerCommandContribution("eclipse.newFolder", 2, "navToolBar", "eclipse.fileGroup.unlabeled");
+	commandService.registerCommandContribution("eclipse.newProject", 3, "navToolBar", "eclipse.fileGroup.unlabeled");
+	commandService.registerCommandContribution("eclipse.linkProject", 4, "navToolBar", "eclipse.fileGroup.unlabeled");
+
 	
 	var treeViewCommand = new eclipse.Command({
 		name : "Tree View",
@@ -52,9 +71,11 @@ dojo.addOnLoad(function(){
 			});
 			window.location.replace("/navigate-tree.html#" + dojo.hash());
 		}});
-	commandService.addCommand(treeViewCommand, "dom", "navToolBar");
-	commandService.addCommandGroup("eclipse.viewGroup", 700);
-	
+		
+	commandService.addCommand(treeViewCommand, "dom");
+	commandService.addCommandGroup("eclipse.viewGroup", 800);
+	commandService.registerCommandContribution("eclipse.treeViewCommand", 1, "navToolBar", "eclipse.viewGroup");
+		
 	explorer.loadResourceList(dojo.hash());
 	
 	//every time the user manually changes the hash, we need to load the workspace with that name

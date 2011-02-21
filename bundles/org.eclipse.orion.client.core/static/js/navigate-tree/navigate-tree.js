@@ -41,22 +41,37 @@ dojo.addOnLoad(function(){
 	var explorer = new eclipse.ExplorerTree(serviceRegistry, treeRoot,
 			searcher, "explorer-tree", "navToolBar", contextMenu);
 			
-	// declare commands
+	// commands shared among navigators
 	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar");
-	
+
+	// define the command contributions - where things appear
+	commandService.addCommandGroup("eclipse.fileGroup", 100);
+	commandService.addCommandGroup("eclipse.newResources", 100, "New", "eclipse.fileGroup");
+	commandService.registerCommandContribution("eclipse.makeFavorite", 1);
+	commandService.registerCommandContribution("eclipse.downloadFile", 2);
+	commandService.registerCommandContribution("eclipse.openResource", 500, "navToolBar");
+	commandService.registerCommandContribution("eclipse.deleteFile", 2, null, "eclipse.fileGroup");
+	commandService.registerCommandContribution("eclipse.importCommand", 3, null, "eclipse.fileGroup");
+	commandService.registerCommandContribution("eclipse.newFile", 1, null, "eclipse.fileGroup/eclipse.newResources");
+	commandService.registerCommandContribution("eclipse.newFolder", 2, null, "eclipse.fileGroup/eclipse.newResources");
+	commandService.registerCommandContribution("eclipse.newProject", 1, "navToolBar", "eclipse.fileGroup");
+	commandService.registerCommandContribution("eclipse.linkProject", 2, "navToolBar", "eclipse.fileGroup");
+
+	// commands specific to this page
 	var tableViewCommand = new eclipse.Command({
 		name : "Table View",
 		image : "images/flatLayout.gif",
 		id: "eclipse.tableViewCommand",
-		groupId: "eclipse.viewGroup",
 		callback : function() {
 			serviceRegistry.getService("IPreferencesService").then(function(service) {
 				service.put("window/orientation", "navigate-table.html");
 			});
 			window.location.replace("/navigate-table.html#" + dojo.hash());
 		}});
-	commandService.addCommand(tableViewCommand, "dom", "navToolBar");
-	commandService.addCommandGroup("eclipse.viewGroup", 700);
+	commandService.addCommand(tableViewCommand, "dom");
+	commandService.addCommandGroup("eclipse.viewGroup", 800);
+	commandService.registerCommandContribution("eclipse.tableViewCommand", 1, "navToolBar", "eclipse.viewGroup");
+
 	explorer.loadResourceList(dojo.hash());
 	
 

@@ -166,7 +166,7 @@ eclipse.Favorites = (function() {
 		var deleteFaveCommand = new eclipse.Command({
 			name: "Delete",
 			image: "images/silk/cross.png",
-			id: "deleteFave",
+			id: "eclipse.deleteFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: function(item) {
 				options.serviceRegistry.getService("IFavorites").then(function(service) {
@@ -177,7 +177,7 @@ eclipse.Favorites = (function() {
 		var renameFaveCommand = new eclipse.Command({
 			name: "Rename",
 			image: "images/silk/pencil.png",
-			id: "renameFave",
+			id: "eclipse.renameFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: dojo.hitch(this, function(item, commandId, domId, faveIndex) {
 				this.editFavoriteName(item, commandId, domId, faveIndex);
@@ -186,7 +186,7 @@ eclipse.Favorites = (function() {
 		var deleteSearchCommand = new eclipse.Command({
 			name: "Delete",
 			image: "images/silk/cross.png",
-			id: "deleteSearch",
+			id: "eclipse.deleteSearch",
 			visibleWhen: function(item) {return item.isSearch;},
 			callback: function(item) {
 				options.serviceRegistry.getService("IFavorites").then(function(service) {
@@ -195,9 +195,15 @@ eclipse.Favorites = (function() {
 			}
 		});
 		this._registry.getService("ICommandService").then(function(commandService) {
+			// register commands with object scope
 			commandService.addCommand(deleteFaveCommand, "object");
 			commandService.addCommand(renameFaveCommand, "object");
 			commandService.addCommand(deleteSearchCommand, "object");
+			// declare the contribution to the ui
+			commandService.registerCommandContribution("eclipse.renameFave", 1);
+			commandService.registerCommandContribution("eclipse.deleteFave", 2);
+			commandService.registerCommandContribution("eclipse.deleteSearch", 1);
+
 		});
 		this._registry.getService("IFavorites").then(function(service) {
 			service.addEventListener("favoritesChanged", function(favs, searches) {
