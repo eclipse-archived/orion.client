@@ -136,7 +136,8 @@ function createOutputEditor() {
 	var editorLeft = new eclipse.Editor(optionsLeft);
 	initEditor(editorLeft);
 }
-
+var editorLeft;
+var editorRight;
 function createCompareEditor() {
 	var leftTH = document.getElementById("LeftTH");
 	var rightTH = document.getElementById("RightTH");
@@ -155,7 +156,7 @@ function createCompareEditor() {
 			readonly: editorReadOnly,
 			stylesheet: "editor.css" 
 		};
-	var editorRight = new eclipse.Editor(optionsRight);
+	editorRight = new eclipse.Editor(optionsRight);
 	initEditor(editorRight);
 	var optionsLeft = {
 		parent: "divParentL",
@@ -163,7 +164,7 @@ function createCompareEditor() {
 		readonly: editorReadOnly,
 		stylesheet: "editor.css" 
 	};
-	var editorLeft = new eclipse.Editor(optionsLeft);
+	editorLeft = new eclipse.Editor(optionsLeft);
 	initEditor(editorLeft);
 	editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
 		var lineIndex = lineStyleEvent.lineIndex;
@@ -200,6 +201,10 @@ function createCompareEditor() {
 
 function scrollHandler(evt){
 	console.log(evt.scrollTop);
+	//editorLeft.focus();
+	editorLeft.invokeAction("lineDown");
+	//editorRight.focus();
+	editorRight.invokeAction("lineDown");
 }
 
 window.onload = function() {
@@ -232,7 +237,7 @@ window.onload = function() {
 <div id= "scrollId" onscroll="scrollHandler(this)" style="
 	width: 18px;
 	height: 650px;
-	overflow-y: scroll;"></div>
+	overflow-y: auto;"></div>
 </td>
 </tr>
 </table>

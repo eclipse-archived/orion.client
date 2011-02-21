@@ -104,6 +104,10 @@ eclipse.GapTextModel = (function() {
 		},
 
 		getLine: function(lineIndex, includeDelimiter) {
+			var lineCount = this.getLineCount();
+			if (!(0 <= lineIndex && lineIndex < lineCount)) {
+				return null;
+			}
 			var realIndex = this.lookUpRealIndex(lineIndex);
 			if (realIndex.lineIndex < 0) {
 				if(includeDelimiter)
@@ -115,6 +119,9 @@ eclipse.GapTextModel = (function() {
 		},
 		
 		getLineAtOffset: function(offset) {
+			if (!(0 <= offset && offset <= this.getCharCount())) {
+				return -1;
+			}
 			var model = this._model;
 			var lineCount = this.getLineCount();
 			var lineIndex = 0;
@@ -142,26 +149,28 @@ eclipse.GapTextModel = (function() {
 		},
 		
 		getLineEnd: function(lineIndex, includeDelimiter) {
-			var realIndex = this.lookUpRealIndex(lineIndex);
-			var gaps = 0;
-			var newLineIndex = -1;
-			if (realIndex.lineIndex < 0) {
-				var gaps = realIndex.gapsBefore+1;
-				if((lineIndex - gaps) >= 0 )
-					newLineIndex = lineIndex - gaps;
-			} else {
-				gaps = realIndex.gapsBefore;
-				newLineIndex = realIndex.lineIndex;
+			var lineCount = this.getLineCount();
+			if (!(0 <= lineIndex && lineIndex < lineCount)) {
+				return -1;
 			}
-			var offset = 0;
-			if(includeDelimiter)
-				offset += this.getLineDelimiter().length*gaps;
-			if(newLineIndex >= 0)
-				offset += this._model.getLineEnd(newLineIndex, includeDelimiter);
+			var realIndex = this.lookUpRealIndex(lineIndex);
+			var offset = realIndex.gapsBefore * this.getLineDelimiter().length;
+			if (realIndex.lineIndex < 0) {
+				var realLinesBefore = lineIndex -  realIndex.gapsBefore;
+				if(realLinesBefore > 0)
+					offset += this._model.getLineEnd(realLinesBefore - 1, true);
+				if(includeDelimiter)
+					offset += this.getLineDelimiter().length;
+			} else{
+				offset += this._model.getLineEnd(realIndex.lineIndex, includeDelimiter);
+			}
 			return offset;
 		},
 		
 		getLineStart: function(lineIndex) {
+			if (!(0 <= lineIndex && lineIndex < this.getLineCount())) {
+				return -1;
+			}
 			var realIndex = this.lookUpRealIndex(lineIndex);
 			var gaps = 0;
 			var newLineIndex = -1;
