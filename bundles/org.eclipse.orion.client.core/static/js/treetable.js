@@ -39,7 +39,9 @@ eclipse.TableTree = (function() {
 	 * Renderers must implement<ul>
 	 *   <li>initTable(tableNode) // set up table attributes and a header if desired
 	 *   <li>render(item, tr) // generate tds for the row
-	 *   <li>labelColumnIndex() // 0 based index of which td contains the primary label which will be indented</ul>
+	 *   <li>labelColumnIndex() // 0 based index of which td contains the primary label which will be indented
+	 *   <li>rowsChanged() 
+	 * </ul>
 	 * 
 	 */
 	function TableTree (options) {
