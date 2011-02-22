@@ -112,7 +112,7 @@ eclipse.EventTarget = function() {
 					if(listeners.length === 1) {
 						delete _namedlisteners[eventName];
 					} else {
-						_namedlisteners[eventName].splice(i,1);
+						listeners.splice(i,1);
 					}
 					break;
 				}
@@ -138,9 +138,9 @@ eclipse.ServiceRegistry = function() {
 					for (var i = 0; i < namedReferences.length; i++) {
 						if (namedReferences[i] === reference) {
 							if(namedReferences.length === 1) {
-								delete _namedReferences [reference.getName()];
+								delete _namedReferences[reference.getName()];
 							} else {
-								_namedReferences.splice(i,1);
+								namedReferences.splice(i,1);
 							}
 							break;
 						}
