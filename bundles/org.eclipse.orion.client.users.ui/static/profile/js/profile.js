@@ -12,16 +12,7 @@ dojo.addOnLoad(function() {
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var inputService = new eclipse.InputService(serviceRegistry);
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
-
-	/* set the login information in toolbar */
-	dojo.xhrGet({
-		url : "/auth2",
-		handleAs : 'javascript',
-		sync : true,
-		headers : {
-			"Orion-Version" : "1"
-		}
-	});
+	
 	var profile = new eclipse.Profile({
 		registry : serviceRegistry,
 		pluginRegistry: pluginRegistry,

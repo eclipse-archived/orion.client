@@ -17,6 +17,10 @@
 
  */
  
+var authenticationInProgress = false;
+
+var forbiddenAccessDlg;
+
 dojo.addOnLoad(function () {
 	dojo.xhrGet({
 		url: "/auth2",
@@ -27,10 +31,6 @@ dojo.addOnLoad(function () {
 		}
 	});
 });
-
-var authenticationInProgress = false;
-
-var forbiddenAccessDlg;
 
 function handleGetAuthenticationError(xhrArgs, ioArgs) {
 	handleAuthenticationError(ioArgs, function(){

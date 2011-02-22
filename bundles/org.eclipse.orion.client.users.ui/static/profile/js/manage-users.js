@@ -12,16 +12,6 @@ dojo.addOnLoad(function() {
 	var usersService = new eclipse.UsersService(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 
-	/* set the login information in toolbar */
-	dojo.xhrGet({
-		url : "/auth2",
-		handleAs : 'javascript',
-		sync : true,
-		headers : {
-			"Orion-Version" : "1"
-		}
-	});
-
 	var usersList = new eclipse.UsersList({
 		parent : "usersList",
 		registry : serviceRegistry
