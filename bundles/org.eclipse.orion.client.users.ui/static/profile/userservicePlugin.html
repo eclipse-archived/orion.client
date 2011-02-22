@@ -33,8 +33,11 @@
   };
   
   usersService.initProfile = function(userURI, pluginsEventName, dataEventName){
-	  this._serviceRegistration.dispatchEvent(pluginsEventName, {"plugins": [{"plugin": "/profile/personalInformationPlugin.html"}]});
-	  this.getUserInfo(userURI, dataEventName);
+	  var userService = this._serviceRegistration;
+	  this.getUserInfo(userURI, function(json){
+	  		userService.dispatchEvent(pluginsEventName, {"plugins": json.Plugins});
+	  		userService.dispatchEvent(dataEventName, json);
+	  });
   },
   
   usersService.fire = function(action, url, jsonData){

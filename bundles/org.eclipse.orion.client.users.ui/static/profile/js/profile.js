@@ -114,10 +114,10 @@ eclipse.Profile = (function() {
 			
 			for(var i=0; i<pluginsList.length; i++){
 				var pluginDiv = dojo.create("div", null, userProfile.profileForm.get("domNode"));
-				var pluginReference= this.pluginRegistry.getPlugin(pluginsList[i].plugin);
+				var pluginReference= this.pluginRegistry.getPlugin(pluginsList[i].Url);
 				if(pluginReference===null){
 					var registry = this.registry;
-					this.pluginRegistry.installPlugin(pluginsList[i].plugin).then(
+					this.pluginRegistry.installPlugin(pluginsList[i].Url).then(
 							function(ref){
 								var plugin = registry.getService(ref.getServiceReferences()[0]);
 								plugin.then(function(pluginService){
@@ -131,7 +131,7 @@ eclipse.Profile = (function() {
 				var plugin = this.registry.getService(pluginReference.getServiceReferences()[0]);
 				
 				if(plugin===null){
-					console.error("Could not deploy plugin " + pluginsList[i].plugin);
+					console.error("Could not deploy plugin " + pluginsList[i].Url);
 					continue;
 				}
 				plugin.then(function(pluginService){
