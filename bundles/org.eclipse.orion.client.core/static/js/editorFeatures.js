@@ -31,7 +31,7 @@ eclipse.editorFeatures.updateEditorToolbar = function(toolbarId, editor, command
 		dojo.empty(toolbar);
 		commandService.renderCommands(toolbar, "dom", editor, editor, "image");
 	}
-}
+};
 
 eclipse.editorFeatures.createEditorCommands = function(serviceRegistry, commandService, editor, toolbarId) {
 
