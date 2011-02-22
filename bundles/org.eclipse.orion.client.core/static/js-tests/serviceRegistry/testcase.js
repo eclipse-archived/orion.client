@@ -54,6 +54,58 @@ var testcase = function(assert) {
 		count++;
 		assert.equal(3, count);
 	};
+	
+	tests.testRegisterUnregisterMultipleServices = function() {
+		
+		var serviceRegistry = new eclipse.ServiceRegistry();
+		
+		assert.equal(serviceRegistry.getServiceReferences().length, 0);	
+		var registration1 = serviceRegistry.registerService("testRegister", {
+			test : function() {
+				return count + 1;
+			}
+		}, {
+			test : 1
+		});
+		assert.equal(serviceRegistry.getServiceReferences().length, 1);	
+		
+		var registration2 = serviceRegistry.registerService("testRegister", {
+			test : function() {
+				return count + 1;
+			}
+		}, {
+			test : 2
+		});
+		assert.equal(serviceRegistry.getServiceReferences().length, 2);
+		
+		var registration3 = serviceRegistry.registerService("testRegister_different", {
+			test : function() {
+				return count + 1;
+			}
+		}, {
+			test : 3
+		});
+		
+		assert.equal(serviceRegistry.getServiceReferences("testRegister").length, 2);
+		assert.equal(serviceRegistry.getServiceReferences("testRegister_different").length, 1);
+		assert.equal(serviceRegistry.getServiceReferences().length, 3);
+		
+		registration1.unregister();
+		assert.equal(serviceRegistry.getServiceReferences("testRegister").length, 1);
+		assert.equal(serviceRegistry.getServiceReferences("testRegister_different").length, 1);
+		assert.equal(serviceRegistry.getServiceReferences().length, 2);
+		
+		registration2.unregister();
+		assert.equal(serviceRegistry.getServiceReferences("testRegister").length, 0);
+		assert.equal(serviceRegistry.getServiceReferences("testRegister_different").length, 1);
+		assert.equal(serviceRegistry.getServiceReferences().length, 1);
+		
+		registration3.unregister();
+		assert.equal(serviceRegistry.getServiceReferences("testRegister").length, 0);
+		assert.equal(serviceRegistry.getServiceReferences("testRegister_different").length, 0);
+		assert.equal(serviceRegistry.getServiceReferences().length, 0);
+		
+	};
 
 	tests.testGetServiceDelayed = function() {
 		var count = 0;
