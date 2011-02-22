@@ -6,16 +6,27 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
+/*global dojo*/
  /*
- 	Authentication and authorization error handling. Adds methods that handle 401 and 403 responses for 
- 	XHR calls.
- 	
- 	To handle 401 and 403 error add the following line to 'error' function in your dojo.xhr<method> request,
- 	where <method> is the method you would like to call
- 		handle<method>AuthenticationError(this, ioArgs);
+	Authentication and authorization error handling. Adds methods that handle 401 and 403 responses for 
+	XHR calls.
+
+	To handle 401 and 403 error add the following line to 'error' function in your dojo.xhr<method> request,
+	where <method> is the method you would like to call
+		handle<method>AuthenticationError(this, ioArgs);
 
  */
+ 
+dojo.addOnLoad(function () {
+	dojo.xhrGet({
+		url: "/auth2",
+		handleAs: 'javascript',
+        sync:true,
+        headers: {
+			"Orion-Version" : "1"
+		}
+	});
+});
 
 var authenticationInProgress = false;
 
