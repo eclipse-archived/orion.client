@@ -204,9 +204,10 @@ eclipse.CommandService = (function() {
 			if (!positionOrder) {
 				positionOrder = [];
 				for (var key in commandItems) {
-					if (commandItems[key] && commandItems[key].position) {
-						commandItems[key].id = key;
-						positionOrder.push(commandItems[key]);
+					var item = commandItems[key];
+					if (item && typeof(item.position) === "number") {
+						item.id = key;
+						positionOrder.push(item);
 					}
 				}
 				positionOrder.sort(function(a,b) {
@@ -243,16 +244,21 @@ eclipse.CommandService = (function() {
 								children = newMenu.getChildren();
 							}
 							// now decide if we needed the menu or not
-							if (children.length > 1) {
-								var menuButton = new dijit.form.DropDownButton({
-									label: group.title,
-									dropDown: newMenu
-							        });
-								dojo.place(menuButton.domNode, parent, "last");
-							} else if (children.length === 1) {
-								// we don't want to put a single command in a button menu, just add the image
+							if (children.length > 0) {
+								var needMenu = true;
 								var menuCommand = children[0].eclipseCommand;
-								if (menuCommand) {
+								if (children.length === 1) {
+									// we don't want to put a single command in a button menu, just add the image
+									needMenu = !(menuCommand && menuCommand.hasImage());
+								}
+								if (needMenu) {
+									var menuButton = new dijit.form.DropDownButton({
+										label: group.title,
+										dropDown: newMenu
+								        });
+								        dojo.addClass(menuButton.domNode, "commandImage");
+									dojo.place(menuButton.domNode, parent, "last");
+								} else {
 									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
 									image = menuCommand._asImage(id, items, handler, userData);
 									dojo.place(image, parent, "last");
@@ -359,12 +365,15 @@ eclipse.Command = (function() {
 		this._init(options);
 	}
 	Command.prototype = /** @lends eclipse.Command.prototype */ {
+		hasImage: function() {
+			return this.image !== "/images/none.png";
+		},
 		_init: function(options) {
 			this.id = options.id;  // unique id
 			this.name = options.name || "Empty Command";
 			this.tooltip = options.tooltip || options.name;
-			this._callback = options.callback; // optional callback that should be called when command is activated (clicked)
-			this._hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
+			this.callback = options.callback; // optional callback that should be called when command is activated (clicked)
+			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.image = options.image || "/images/none.png";
 			this.visibleWhen = options.visibleWhen;
 			// when false, affordances for commands are always shown.  When true,
@@ -380,12 +389,12 @@ eclipse.Command = (function() {
 			image.title = this.name;
 			image.name = name;
 			image.id = name;
-			if (this._hrefCallback) {
+			if (this.hrefCallback) {
 				link = dojo.create("a");
-				link.href = this._hrefCallback.call(handler, items, this.id, userData);
-			} else if (this._callback) {
+				link.href = this.hrefCallback.call(handler, items, this.id, userData);
+			} else if (this.callback) {
 				dojo.connect(image, "onclick", this, function() {
-					this._callback.call(handler, items, this.id, image.id, userData);
+					this.callback.call(handler, items, this.id, image.id, userData);
 				});
 			}
 			if (this._deviceSupportsHover) {
@@ -419,12 +428,12 @@ eclipse.Command = (function() {
 			var anchor = document.createElement('a');
 			dojo.place(document.createTextNode(this.name), anchor, "only");
 			anchor.href="";
-			if (this._callback) {
+			if (this.callback) {
 				dojo.connect(anchor, "onclick", this, function() {
-					this._callback.call(handler, items);
+					this.callback.call(handler, items);
 				});
-			} else if (this._hrefCallback) {
-				anchor.href = this._hrefCallback.call(handler, items, this.id);
+			} else if (this.hrefCallback) {
+				anchor.href = this.hrefCallback.call(handler, items, this.id);
 			}
 			dojo.addClass(anchor, 'commandLink');
 			return anchor;
@@ -434,10 +443,10 @@ eclipse.Command = (function() {
 				label: this.name,
 				tooltip: this.tooltip,
 				onClick: dojo.hitch(this, function() {
-					if (this._callback) {
-						this._callback.call(handler, items, this.id, parent.id, userData);
-					} else if (this._hrefCallback) {
-						var href = this._hrefCallback.call(handler, items, this.id, parent.id, userData);
+					if (this.callback) {
+						this.callback.call(handler, items, this.id, parent.id, userData);
+					} else if (this.hrefCallback) {
+						var href = this.hrefCallback.call(handler, items, this.id, parent.id, userData);
 						if (href) {
 							window.location = href;
 						}
