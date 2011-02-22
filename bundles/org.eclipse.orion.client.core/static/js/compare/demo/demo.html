@@ -13,6 +13,9 @@
 <script language="javascript" type="text/javascript" src="../diff-parser.js"></script>
 <script language="javascript" type="text/javascript" src="../text-model.js"></script>
 <script language="javascript" type="text/javascript" src="../rulers.js"></script>
+	<style type="text/css">
+		@import "editor.css";
+	</style>
 
 <script language="javascript" type="text/javascript">
 
@@ -192,19 +195,26 @@ function createCompareEditor() {
 	editorRight.redrawRange();
 	
 	var lines = compareModelLeft.getLineCount();
-	var scroll  = document.getElementById("scrollId");
-	scroll.innerHTML = "";
+	var lineH = editorLeft.getLineHeight();
+	var scroll  = document.getElementById("scrollContent");
+	/*
+	var manyLines = "";
 	for (var i = 0 ; i < lines; i++){
-		scroll.innerHTML = scroll.innerHTML +"<br>";
+		manyLines += "<br>";
 	}	
+	scroll.innerHTML = manyLines;
+	*/
+	scroll.style.width = 0 + "px";
+	scroll.style.height = lines*lineH + "px";
+	
 }
 
 function scrollHandler(evt){
 	console.log(evt.scrollTop);
 	//editorLeft.focus();
-	editorLeft.invokeAction("lineDown");
+	editorLeft.setTopPixel(evt.scrollTop);
 	//editorRight.focus();
-	editorRight.invokeAction("lineDown");
+	editorRight.setTopPixel(evt.scrollTop);
 }
 
 window.onload = function() {
@@ -234,10 +244,12 @@ window.onload = function() {
 </div>
 </td>
 <td>
-<div id= "scrollId" onscroll="scrollHandler(this)" style="
-	width: 18px;
+<div id= "scrollId" class="editorContainer" onscroll="scrollHandler(this)" style="
+	width: 20px;
 	height: 650px;
-	overflow-y: auto;"></div>
+	overflow-y: auto;">
+<div id = "scrollContent"></div>
+</div>
 </td>
 </tr>
 </table>
