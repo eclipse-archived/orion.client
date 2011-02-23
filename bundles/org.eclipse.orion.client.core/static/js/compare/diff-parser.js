@@ -41,7 +41,7 @@ eclipse.DiffParser = (function() {
 		parse: function(oFileString , diffString){
 			this._init();
 			if(diffString === "")
-				return {outPutFile:"",mapper:[]};
+				return {outPutFile:oFileString ,mapper:[]};
 			this._oFileContents = oFileString.split(this._lineDelimiter);
 			this._diffContents = diffString.split(this._lineDelimiter);
 			var lineNumber = this._diffContents.length;

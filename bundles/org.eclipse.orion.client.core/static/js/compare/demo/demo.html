@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2010."/>
@@ -6,9 +6,14 @@
 <meta http-equiv="PRAGMA" content="NO-CACHE"/>
 <meta http-equiv="Expires" content="-1"/>
 <title>Orion Compare Editor</title>
+
+<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+
 <script language="javascript" type="text/javascript" src="/editor/js/editor.js"></script>
 <script language="javascript" type="text/javascript" src="/editor/js/model.js"></script>
 
+<!-- Authentication (required for handleAuthenticationError) -->
+<script type="text/javascript" src="../../auth.js"></script>
 <script language="javascript" type="text/javascript" src="demo-data.js"></script>
 <script language="javascript" type="text/javascript" src="../diff-parser.js"></script>
 <script language="javascript" type="text/javascript" src="../text-model.js"></script>
@@ -40,21 +45,14 @@ function _getTestData(){
 	if(caseNo < 1 || caseNo > demoData.length)
 		caseNo = demoData.length;
 	var testCase = demoData[caseNo -1];
-	var input = testCase[0];
-	var diff = testCase[1];
-	var result = diffParser.parse(input ,diff);
-
-	var output = result.outPutFile;
-	var mapper = result.mapper;
-	return {input:input,output:output,mapper:mapper};
-	
+	return testCase;
 }
 
 function initEditor(editor){
 	var lines = new eclipse.LineNumberCompareRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
 	editor.addRuler(lines);
 }
-
+/*
 function createStaticEditor() {
 	var leftTH = document.getElementById("LeftTH");
 	var rightTH = document.getElementById("RightTH");
@@ -139,19 +137,21 @@ function createOutputEditor() {
 	var editorLeft = new eclipse.Editor(optionsLeft);
 	initEditor(editorLeft);
 }
+*/
 var editorLeft;
 var editorRight;
-function createCompareEditor() {
-	var leftTH = document.getElementById("LeftTH");
-	var rightTH = document.getElementById("RightTH");
-	leftTH.innerHTML = "Output File With Gaps";
-	rightTH.innerHTML = "Input File With Gaps";
+
+
+function createEditor(input , diff , delim){
+	var diffParser = new eclipse.DiffParser(delim);
+	var result = diffParser.parse(input ,diff);
+	var output = result.outPutFile;
+	var mapper = result.mapper;
 	
-	var testData = _getTestData();
-	var modelLeft = new eclipse.TextModel(testData.output, "\r\n");
-	var compareModelLeft = new eclipse.GapTextModel(modelLeft, false , testData.mapper);
-	var modelRight = new eclipse.TextModel(testData.input, "\r\n");
-	var compareModelRight = new eclipse.GapTextModel(modelRight, true , testData.mapper);
+	var modelLeft = new eclipse.TextModel(output, delim);
+	var compareModelLeft = new eclipse.GapTextModel(modelLeft, false , mapper);
+	var modelRight = new eclipse.TextModel(input, delim);
+	var compareModelRight = new eclipse.GapTextModel(modelRight, true , mapper);
 	
 	var optionsRight = {
 			parent: "divParentR",
@@ -214,6 +214,18 @@ function createCompareEditor() {
 	scroll.style.width = 0 + "px";
 	scroll.style.height = lines*lineH + "px";
 	*/
+	
+}
+
+function createCompareEditor() {
+	var leftTH = document.getElementById("LeftTH");
+	var rightTH = document.getElementById("RightTH");
+	leftTH.innerHTML = "Output File With Gaps";
+	rightTH.innerHTML = "Input File With Gaps";
+	
+	var testData = _getTestData();
+	createEditor(testData[0] ,testData[1] , "\r\n" );
+	
 }
 
 function scrollHandler(evt){
@@ -224,9 +236,67 @@ function scrollHandler(evt){
 	editorRight.setTopPixel(evt.scrollTop);
 }
 
+var fileContent ;
+var fileDiff;
+function getFileContentGit(hashValue){
+	
+	var url = "/git/index" + hashValue;
+	dojo.xhrGet({
+		url: url, //"/git/index" + hashValue;//file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.html"
+		headers: {
+			"Orion-Version": "1"
+		},
+		handleAs: "text",
+		timeout: 5000,
+		load: function(jsonData, ioArgs) {
+			console.log(jsonData);
+			fileContent = jsonData;
+			getFileDiffGit(hashValue);
+		},
+		error: function(response, ioArgs) {
+			console.error("HTTP status code: ", ioArgs.xhr.status);
+			handleGetAuthenticationError(this, ioArgs);
+			return response;
+		}
+	});
+	
+}
+
+function getFileDiffGit(hashValue){
+	
+	var url = "/git/diff" + hashValue;
+	dojo.xhrGet({
+		url: url , //"/git/diff" + hashValue;///file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.html"
+		headers: {
+			"Orion-Version": "1"
+		},
+		handleAs: "text",
+		timeout: 5000,
+		load: function(jsonData, ioArgs) {
+			console.log(jsonData);
+			fileDiff = jsonData;
+			createEditor(fileContent , fileDiff ,"\n");
+		},
+		error: function(response, ioArgs) {
+			console.error("HTTP status code: ", ioArgs.xhr.status);
+			handleGetAuthenticationError(this, ioArgs);
+			return response;
+		}
+	});
+	
+}
+
 window.onload = function() {
 	var demo = document.getElementById("dataLength");
 	demo.innerHTML = demoData.length + ")";
+	var leftTH = document.getElementById("LeftTH");
+	var rightTH = document.getElementById("RightTH");
+	leftTH.innerHTML = "File On Local";
+	rightTH.innerHTML = "File On Git";
+	var splitted = window.location.href.split('#');
+	if(splitted.length > 1){
+		getFileContentGit(splitted[1]);
+	}
 };
 </script>
 </head>
