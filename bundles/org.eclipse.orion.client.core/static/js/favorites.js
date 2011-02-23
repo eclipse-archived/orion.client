@@ -165,7 +165,7 @@ eclipse.Favorites = (function() {
 		var favorites = this;
 		var deleteFaveCommand = new eclipse.Command({
 			name: "Delete",
-			image: "images/silk/cross.png",
+			image: "images/remove.gif",
 			id: "eclipse.deleteFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: function(item) {
@@ -176,7 +176,7 @@ eclipse.Favorites = (function() {
 		});
 		var renameFaveCommand = new eclipse.Command({
 			name: "Rename",
-			image: "images/silk/pencil.png",
+			image: "images/editing_16.gif",
 			id: "eclipse.renameFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: dojo.hitch(this, function(item, commandId, domId, faveIndex) {
@@ -185,7 +185,7 @@ eclipse.Favorites = (function() {
 		});
 		var deleteSearchCommand = new eclipse.Command({
 			name: "Delete",
-			image: "images/silk/cross.png",
+			image: "images/remove.gif",
 			id: "eclipse.deleteSearch",
 			visibleWhen: function(item) {return item.isSearch;},
 			callback: function(item) {
