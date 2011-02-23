@@ -176,37 +176,44 @@ function createCompareEditor() {
 		//lineStyleEvent.ranges = [];
 		//lineStyleEvent.ranges.push ({start: lineStart, end: lineStart + 3, style: {style: {backgroundColor: "blue"} }});
 		if(lineType === "added") {
-			lineStyleEvent.style = {style: {backgroundColor: "#CCFFCC"}};
+			lineStyleEvent.style = {style: {backgroundColor: "#99EE99"}};
 		} else if (lineType === "changed"){
-			lineStyleEvent.style = {style: {backgroundColor: "#CCCCCC"}};
-		}
+			lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
+		} else if (lineType === "removed" || lineType === "changed_gap"){
+			lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
+		} 
 	}); 
+
+	editorLeft.addEventListener("Scroll", window, function(scrollEvent) {
+		editorRight.setTopPixel(editorLeft.getTopPixel());
+	}); 
+	
 	editorLeft.redrawRange();
 	editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
 		var lineIndex = lineStyleEvent.lineIndex;
 		var lineStart = lineStyleEvent.lineStart;
 		var lineType = compareModelRight.getLineType(lineIndex);
 		if(lineType === "removed") {
-			lineStyleEvent.style = {style: {backgroundColor: "yellow"}};
+			lineStyleEvent.style = {style: {backgroundColor: "#EE9999"}};
 		} else if (lineType === "changed"){
-			lineStyleEvent.style = {style: {backgroundColor: "#CCCCCC"}};
-		}
+			lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
+		} else if (lineType === "added" || lineType === "changed_gap"){
+			lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
+		} 
 	}); 
-	editorRight.redrawRange();
+
+	editorRight.addEventListener("Scroll", window, function(scrollEvent) {
+		editorLeft.setTopPixel(editorRight.getTopPixel());
+	}); 
 	
-	var lines = compareModelLeft.getLineCount();
+	editorRight.redrawRange();
+	/*
+	var lines = compareModelLeft.getLineCount()+1;
 	var lineH = editorLeft.getLineHeight();
 	var scroll  = document.getElementById("scrollContent");
-	/*
-	var manyLines = "";
-	for (var i = 0 ; i < lines; i++){
-		manyLines += "<br>";
-	}	
-	scroll.innerHTML = manyLines;
-	*/
 	scroll.style.width = 0 + "px";
 	scroll.style.height = lines*lineH + "px";
-	
+	*/
 }
 
 function scrollHandler(evt){
@@ -243,6 +250,7 @@ window.onload = function() {
 
 </div>
 </td>
+<!-- 
 <td>
 <div id= "scrollId" class="editorContainer" onscroll="scrollHandler(this)" style="
 	width: 20px;
@@ -251,6 +259,7 @@ window.onload = function() {
 <div id = "scrollContent"></div>
 </div>
 </td>
+-->
 </tr>
 </table>
 <span>Demo Data Number(1-</span>
