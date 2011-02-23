@@ -16,24 +16,31 @@ eclipse.UsersService = (function() {
 	 * @name eclipse.UsersService
 	 */
 	function UsersService(serviceRegistry) {
-		this._serviceRegistry = serviceRegistry;
-		this._serviceRegistration = serviceRegistry.registerService(
-				"IUsersService", this);
+		if(serviceRegistry){
+			this._serviceRegistry = serviceRegistry;
+			this._serviceRegistration = serviceRegistry.registerService(
+					"IUsersService", this);
+		}
 	}
 
 	UsersService.prototype = /** @lends eclipse.FileService.prototype */
 	{
 		getUsersList : function(onLoad) {
+			var service = this;
 			dojo.xhrGet({
 				url : "/users",
 				headers : {
-					"EclipseWeb-Version" : "1"
+					"Orion-Version" : "1"
 				},
 				handleAs : "json",
 				timeout : 15000,
 				load : function(jsonData, secondArg) {
-					if (onLoad)
-						onLoad(jsonData, secondArg);
+					if (onLoad){
+						if(typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+					}
 				},
 				error : function(error, ioArgs) {
 					handleGetAuthenticationError(this, ioArgs);
@@ -42,19 +49,21 @@ eclipse.UsersService = (function() {
 			});
 		},
 		deleteUser : function(userURI, onLoad) {
-			
-
-		
+			var service = this;
 				dojo.xhrDelete({
 					url : userURI,
 					headers : {
-						"EclipseWeb-Version" : "1"
+						"Orion-Version" : "1"
 					},
 					handleAs : "json",
 					timeout : 15000,
 					load : function(jsonData, secondArg) {
-						if (onLoad)
-							onLoad(jsonData, secondArg);
+						if (onLoad){
+							if(typeof onLoad === "function")
+								onLoad(jsonData, secondArg);
+							else
+								service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+						}
 					},
 					error : function(error, ioArgs) {
 						handleGetAuthenticationError(this, ioArgs);
@@ -64,6 +73,7 @@ eclipse.UsersService = (function() {
 
 		},
 		createUser : function(userName, password, onLoad, onError) {
+			var service = this;
 			dojo.xhrPost({
 				url : "/users",
 				headers : {
@@ -76,8 +86,12 @@ eclipse.UsersService = (function() {
 				handleAs : "text",
 				timeout : 15000,
 				load : function(jsonData, secondArg) {
-					if (onLoad)
-						onLoad(jsonData, secondArg);
+					if (onLoad){
+						if(typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+					}
 				},
 				error : function(jsonData, secondArg) {
 					if (onError)
@@ -86,16 +100,22 @@ eclipse.UsersService = (function() {
 			});
 		},
 		getUserInfo: function(userURI, onLoad){
+			var service = this;
 			dojo.xhrGet({
 				url : userURI,
 				headers : {
-					"EclipseWeb-Version" : "1"
+					"Orion-Version" : "1"
 				},
 				handleAs : "json",
 				timeout : 15000,
+				sync: false,
 				load : function(jsonData, secondArg) {
-					if (onLoad)
-						onLoad(jsonData, secondArg);
+					if (onLoad){
+						if(typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+					}
 				},
 				error : function(error, ioArgs) {
 					handleGetAuthenticationError(this, ioArgs);
@@ -104,6 +124,7 @@ eclipse.UsersService = (function() {
 			});
 		},
 		updateUserInfo: function(userUri, data, onLoad){
+			var service = this;
 			var uri = userUri + "?name=" + data.name;
 			
 			if(data.password && data.passwordRetype && (data.password!=="" || data.passwordRetype!=="")){
@@ -111,19 +132,24 @@ eclipse.UsersService = (function() {
 					uri = uri + "&password=" + data.password;	
 				}else{
 					alert("Passwords do not match!");
+					return;
 				}
 			}
 
 			dojo.xhrPut({
 				url : uri,
 				headers : {
-					"EclipseWeb-Version" : "1"
+					"Orion-Version" : "1"
 				},
 				handleAs : "json",
 				timeout : 15000,
 				load : function(jsonData, secondArg) {
-					if (onLoad)
-						onLoad(jsonData, secondArg);
+					if (onLoad){
+						if(typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+					}
 				},
 				error : function(error, ioArgs) {
 					handleGetAuthenticationError(this, ioArgs);

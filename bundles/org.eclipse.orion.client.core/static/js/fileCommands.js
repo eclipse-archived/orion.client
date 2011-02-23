@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window eclipse:true serviceRegistry */
+/*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
 
 /**
@@ -23,13 +23,64 @@ var eclipse = eclipse || {};
  
 eclipse.fileCommandUtils = eclipse.fileCommandUtils || {};
 
+eclipse.fileCommandUtils.hookUpSearch = function(searchBoxId, explorer) {
+	var searchField = dojo.byId(searchBoxId);
+	if (searchField) {
+		dojo.connect(searchField, "onkeypress", function(e){
+			if (e.charOrCode === dojo.keys.ENTER) {
+				// We expect ExplorerTree to fill in the SearchLocation on the treeRoot
+				if (explorer.treeRoot.SearchLocation) {
+					if (searchField.value.length > 0) {
+						var query = explorer.treeRoot.SearchLocation + searchField.value;
+						explorer.loadResourceList(query);
+						dojo.stopEvent(e);
+					}
+				} else {
+					window.alert("Can't search: SearchLocation not available");
+				}
+			}
+		});
+	}
+};
+
+eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, item) {
+	var parent = dojo.byId(parentId);
+	var toolbar = dojo.byId(toolbarId);
+	if (toolbar) {
+		dojo.empty(toolbar);
+	} else {
+		toolbar = dojo.create("div",{id: toolbarId}, parent, "last");
+		dojo.addClass(toolbar, "domCommandToolbar");
+	}
+	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
+		service.renderCommands(toolbar, "dom", item, explorer, "image");
+	}));
+};
+
 eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
+	function forceSingleItem(item) {
+		if (dojo.isArray(item)) {
+			if (item.length > 1) {
+				item = {};
+			} else {
+				item = item[0];
+			}
+		}
+		return item;
+	}
 
 	var favoriteCommand = new eclipse.Command({
 		name: "Make Favorite",
 		image: "images/silk/star.png",
 		id: "eclipse.makeFavorite",
-		visibleWhen: function(item) {return item.Location;}, //TODO need a better way to identify file/folder objects
+		visibleWhen: function(item) {
+			var items = dojo.isArray(item) ? item : [item];
+			for (var i=0; i < items.length; i++) {
+				if (!items[i].Location) {
+					return false;
+				}
+			}
+			return true;},
 		callback: function(item) {
 			serviceRegistry.getService("IFavorites").then(function(service) {
 				service.makeFavorites(item);
@@ -40,24 +91,35 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		name: "Delete",
 		image: "images/silk/cross.png",
 		id: "eclipse.deleteFile",
-		visibleWhen: function(item) {return item.Location;},
+		visibleWhen: function(item) {
+			var items = dojo.isArray(item) ? item : [item];
+			for (var i=0; i < items.length; i++) {
+				if (!items[i].Location) {
+					return false;
+				}
+			}
+			return true;},
 		callback: function(item) {
-			// prompt since it's so easy to push that X!
+			var items = dojo.isArray(item) ? item : [item];
+			var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
 			serviceRegistry.getService("IDialogService").then(function(service) {
-				service.confirm("Are you sure you want to delete '" + item.Name + "'?", 
+				service.confirm(confirmMessage, 
 				dojo.hitch(explorer, function(doit) {
 					if (!doit) {
 						return;
 					}
-					if (item.parent.Path === "") {
-						serviceRegistry.getService("IFileService").then(function(service) {
-							service.removeProject(
-								item.parent, item, dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
-						});
-					} else {
-						serviceRegistry.getService("IFileService").then(function(service) {
-							service.deleteFile(item, dojo.hitch(explorer, explorer.changedItem));
-						});
+					for (var i=0; i < items.length; i++) {
+						var item = items[i];
+						if (item.parent.Path === "") {
+							serviceRegistry.getService("IFileService").then(function(service) {
+								service.removeProject(
+									item.parent, item, dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
+							});
+						} else {
+							serviceRegistry.getService("IFileService").then(function(service) {
+								service.deleteFile(item, dojo.hitch(explorer, explorer.changedItem));
+							});
+						}
 					}
 				}));
 			});		
@@ -68,9 +130,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		name: "Download as Zip",
 		image: "images/silk/arrow_down.png",
 		id: "eclipse.downloadFile",
-		visibleWhen: function(item) {return item.ExportLocation && item.Directory;},
+		visibleWhen: function(item) {
+			item = forceSingleItem(item);
+			return item.ExportLocation && item.Directory;},
 		hrefCallback: function(item) {
-			return item.ExportLocation;
+			return forceSingleItem(item).ExportLocation;
 		}});
 	commandService.addCommand(downloadCommand, "object");
 	
@@ -79,6 +143,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		image: "images/silk/page_add.png",
 		id: "eclipse.newFile",
 		callback: function(item) {
+			item = forceSingleItem(item);
 			var dialog = new widgets.NewItemDialog({
 				title: "Create File",
 				label: "File name:",
@@ -91,8 +156,10 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			dialog.startup();
 			dialog.show();
 		},
-		visibleWhen: function(item) {return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
-	commandService.addCommand(newFileCommand, "dom", toolbarId);
+		visibleWhen: function(item) {
+			item = forceSingleItem(item);
+			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+	commandService.addCommand(newFileCommand, "dom");
 	commandService.addCommand(newFileCommand, "object");
 	
 	var newFolderCommand = new eclipse.Command({
@@ -100,6 +167,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		image: "images/silk/folder_add.png",
 		id: "eclipse.newFolder",
 		callback: function(item) {
+			item = forceSingleItem(item);
 			var dialog = new widgets.NewItemDialog({
 				title: "Create Folder",
 				label: "Folder name:",
@@ -112,9 +180,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			dialog.startup();
 			dialog.show();
 		},
-		visibleWhen: function(item) {return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+		visibleWhen: function(item) {
+			item = forceSingleItem(item);
+			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
 
-	commandService.addCommand(newFolderCommand, "dom", toolbarId);
+	commandService.addCommand(newFolderCommand, "dom");
 	commandService.addCommand(newFolderCommand, "object");
 	
 	var newProjectCommand = new eclipse.Command({
@@ -128,16 +198,18 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				func:  function(name, serverPath, create){
 					serviceRegistry.getService("IFileService").then(function(service) {
 						service.createProject(explorer.treeRoot.ChildrenLocation, name, serverPath, create,
-					 		dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
 					});
 				}
 			});
 			dialog.startup();
 			dialog.show();
 		},
-		visibleWhen: function(item) {return eclipse.util.isAtRoot(item.Location);}});
+		visibleWhen: function(item) {
+			item = forceSingleItem(item);
+			return item.Location && eclipse.util.isAtRoot(item.Location);}});
 
-	commandService.addCommand(newProjectCommand, "dom", toolbarId);
+	commandService.addCommand(newProjectCommand, "dom");
 	
 	var linkProjectCommand = new eclipse.Command({
 		name: "Link Folder",
@@ -150,7 +222,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				func:  function(name, url, create){
 					serviceRegistry.getService("IFileService").then(function(service) {
 						service.createProject(explorer.treeRoot.ChildrenLocation, name, url, create,
-					 		dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
 						});
 				},
 				advanced: true
@@ -158,36 +230,41 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			dialog.startup();
 			dialog.show();
 		},
-		visibleWhen: function(item) {return eclipse.util.isAtRoot(item.Location);}});
-	commandService.addCommand(linkProjectCommand, "dom", toolbarId);
+		visibleWhen: function(item) {
+			item = forceSingleItem(item);
+			return item.Location && eclipse.util.isAtRoot(item.Location);}});
+	commandService.addCommand(linkProjectCommand, "dom");
 		
 	var openResourceCommand = new eclipse.Command({
 		name: "Open Resource",
 		image: "images/silk/find.png",
 		id: "eclipse.openResource",
 		callback: function(item) {
-			setTimeout(function() {
+			window.setTimeout(function() {
 				new widgets.OpenResourceDialog({
 					SearchLocation: explorer.treeRoot.SearchLocation,
 					searcher: explorer.searcher
 				}).show();
 			}, 0);
 		}});
-	commandService.addCommand(openResourceCommand, "dom", toolbarId);
+	commandService.addCommand(openResourceCommand, "dom");
 		
 	var importCommand = new eclipse.Command({
 		name : "Import",
 		image : "images/silk/zip_import.gif",
 		id: "eclipse.importCommand",
 		callback : function(item) {
+			item = forceSingleItem(item);
 			var dialog = new widgets.ImportDialog({
 				importLocation: item.ImportLocation,
-				func: function(){explorer.changedItem(item);}
+				func: dojo.hitch(explorer, explorer.changedItem(item))
 			});
 			dialog.startup();
 			dialog.show();
 		},
-		visibleWhen: function(item) {return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+		visibleWhen: function(item) {
+			item = forceSingleItem(item);
+			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(importCommand, "object");
-	commandService.addCommand(importCommand, "dom", toolbarId);
+	commandService.addCommand(importCommand, "dom");
 };

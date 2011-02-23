@@ -7,22 +7,8 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
- 
+/*global dojo window eclipse:true */
 dojo.require("dojo.hash");
-
-// FIXME this doesn't really belong here anymore, it belongs in the glue.
-// However there were timing problems when moving it over, will figure it
-// out later.
-dojo.addOnLoad(function () {
-	dojo.xhrGet({
-		url: "/auth2",
-		handleAs: 'javascript',
-        sync:true,
-        headers: {
-			"Orion-Version" : "1"
-		}
-	});
-});
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -49,9 +35,10 @@ eclipse.util.getPositionInfo =
 			for (var i = 0; i < segments.length; i++) {
 				var subsegments = segments[i].split('=');
 				if (subsegments.length > 1) {
+					var positions;
 					switch (subsegments[0]) {
 					case 'char':
-						var positions = subsegments[1].split(',');
+						positions = subsegments[1].split(',');
 						if (line === undefined) {
 							start = parseInt(positions[0]);
 							if (positions.length > 1) {
@@ -65,7 +52,7 @@ eclipse.util.getPositionInfo =
 						}
 						break;
 					case 'line':
-						var positions = subsegments[1].split(',');
+						positions = subsegments[1].split(',');
 						line = parseInt(positions[0]);
 						break;
 					default:
@@ -77,7 +64,7 @@ eclipse.util.getPositionInfo =
 		}
 		return {"filePath": filePath, "start": start, "end": end, "line": line, "offset": offset, "length": length};
 	};
-	   	
+	
 /**
  * Construct a URL hash that represents the given file path at the given position,
  * with the specified selection range. 
@@ -89,8 +76,9 @@ eclipse.util.getPositionInfo =
  * @param {Number} length of the selection, used to compute the ending point from a start or line offset
  */
 eclipse.util.hashFromPosition = function(filePath, start, end, line, offset, length) {
+	var hash;
 	if (typeof(start) === "number") {
-		var hash = '#' + filePath + "?char=" + start;
+		hash = '#' + filePath + "?char=" + start;
 		if (typeof(end) === "number") {
 			hash = hash + "," + end;
 		} else if (typeof(length) === "number") {
@@ -99,7 +87,7 @@ eclipse.util.hashFromPosition = function(filePath, start, end, line, offset, len
 		return hash;
 	}
 	if (typeof(line) === "number") {
-		var hash = '#' + filePath + "?line=" + line;
+		hash = '#' + filePath + "?line=" + line;
 		if (typeof(offset) === "number") {
 			hash = hash + "&char=" + offset;
 			if (typeof(length) === "number") {
@@ -145,16 +133,15 @@ eclipse.util.isAtRoot = function(path) {
 
 
 eclipse.util.processNavigatorParent = function(parent, children) {
-	parent.children = [];
 	//link the parent and children together
+	parent.children = children;
 	for (var e in children) {
 		var child = children[e];
 		child.parent=parent;
-		parent.children.push(child);
 	}
 	// not ideal, but for now, sort here so it's done in one place.
 	// this should really be something pluggable that the UI defines
-	parent.children = parent.children.sort(function(a, b) {
+	parent.children.sort(function(a, b) {
 		var isDir1 = a.Directory;
 		var isDir2 = b.Directory;
 		if (isDir1 !== isDir2) {

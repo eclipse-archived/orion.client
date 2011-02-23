@@ -10,9 +10,11 @@ var orion = orion || {};
 orion.Assert = (function() {
 	var exports = {};
 	function AssertionError(options) {
-		this.message = options.message;
-		this.actual = options.actual;
-		this.expected = options.expected;
+		if (options) {
+			this.message = options.message;
+			this.actual = options.actual;
+			this.expected = options.expected;
+		}
 	}
 
 	AssertionError.prototype = new Error();
@@ -33,6 +35,7 @@ orion.Assert = (function() {
 		if (this.actual !== this.expected) {
 			result += " - expected: [" + _stringify(this.expected) + "], actual: [" + _stringify(this.actual) + "].";
 		}
+		return result;
 	};
 	exports.AssertionError = AssertionError;
 
@@ -167,11 +170,7 @@ orion.Assert = (function() {
 			});
 		} catch (e) {
 			if (Error_opt && !(e instanceof Error_opt)) {
-				throw new AssertionError({
-					message : message_opt || "throws failed",
-					expected : Error_opt,
-					actual : e
-				});
+				throw e;
 			}
 		}
 	};

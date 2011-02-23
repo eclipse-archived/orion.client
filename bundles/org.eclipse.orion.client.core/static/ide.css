@@ -23,7 +23,8 @@ h2 {
 	font-size: 1.1em;
 	font-weight: bold;
 	color: #6d6d6d;
-	margin: 0;
+	margin-top: 4px;
+	margin-bottom: 4px;
 }
 
 .pane {
@@ -63,21 +64,32 @@ h2 {
 
 .toolbar {
 	background: #fff url("images/titleBar.png") repeat-x top left;
-	border:1px #bfbfbf;
+	border: 0px;
 	cursor: pointer;
 	font-size: 0.9em;
 	font-weight: bold;
 	color: #6d6d6d;
+	height: 35px;
+}
+
+.leftInnerToolbar {
+	float: left;
+	padding-top: 6px;
+	padding-left: 6px;
 }
 
 .innerToolbar {
 	float: right;
-	padding-right: 8px;
-	padding-top: 4px;
+	padding-top: 6px;
+	padding-right: 6px;
 }
 
 .searchbox {
 	
+}
+
+.navigator {
+	min-width: 600px;
 }
 
 .soria .dijitButtonNode {
@@ -205,8 +217,20 @@ h2 {
 }
 
 .treetable {
-	cellspacing: 0px;
+	border-spacing: 0px;
 	min-width: 600px;
+}
+
+.secondaryColumn {
+	color: #666666;	
+}
+
+.lightTreeTableRow {
+	background-color: #FFFFFF;
+}
+
+.darkTreeTableRow {
+	background-color: #f8f8ff;
 }
 
 .testNavTreetable {
@@ -217,10 +241,6 @@ h2 {
 .testResultTreetable {
 	cellspacing: 0px;
 	min-width: 600px;
-}
-
-.secondaryColumn {
-	color: #666666;
 }
 
 .navlinkonpage {
@@ -242,7 +262,7 @@ h2 {
 .currentLocation {
 	font-size: 1.1em;
 	font-weight: bold;
-	color: #E89970;
+	color: #F0B604;
 	text-decoration: none;
 	margin-right: 4px;
 	margin-left: 4px;

@@ -26,6 +26,7 @@
 	dojo.require("dijit.layout.ContentPane");
 	dojo.require("dijit.form.TextBox");
 	dojo.require("dijit.form.Button");
+	dojo.require("dijit.form.Form");
 </script>
 <style type="text/css">
 @import "/org.dojotoolkit/dojo/resources/dojo.css";
@@ -77,24 +78,8 @@
 		</div>
 		<div class="paneScrolled" style="margin-left: 8px;"
 			dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-			<div id="profilePane">
-			</div>
-			<div id="profileExtentionsPane"></div>
-			<div style="margin-top: 30px;">
-				<button id="saveProfileButton" dojoType="dijit.form.Button"
-					type="submit" value="OK" class="userprofile"
-					style="padding: 20 0 10 0;">
-					Save Profile
-				</button>
-				<button id="resetProfileButton" dojoType="dijit.form.Button"
-					value="reset" class="userprofile" style="padding: 20 0 10 0;">
-					Reset
-				</button>
-				<button id="deleteProfileButton" dojoType="dijit.form.Button"
-					value="reset" class="userprofile" style="padding: 20 0 10 0;">
-					Delete Profile
-				</button>
-			</div>
+			<form id="profileForm" dojoType="dijit.form.Form">
+			</form>			
 		</div>  
 	</div>
 </body>

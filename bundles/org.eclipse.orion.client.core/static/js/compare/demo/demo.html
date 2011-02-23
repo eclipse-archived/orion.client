@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010."/>
+<meta http-equiv="X-UA-Compatible" content="IE=8"/>
+<meta http-equiv="PRAGMA" content="NO-CACHE"/>
+<meta http-equiv="Expires" content="-1"/>
+<title>Orion Compare Editor</title>
+<script language="javascript" type="text/javascript" src="/editor/js/editor.js"></script>
+<script language="javascript" type="text/javascript" src="/editor/js/model.js"></script>
+
+<script language="javascript" type="text/javascript" src="demo-data.js"></script>
+<script language="javascript" type="text/javascript" src="../diff-parser.js"></script>
+<script language="javascript" type="text/javascript" src="../text-model.js"></script>
+<script language="javascript" type="text/javascript" src="../rulers.js"></script>
+	<style type="text/css">
+		@import "editor.css";
+	</style>
+
+<script language="javascript" type="text/javascript">
+
+var editorReadOnly = true;
+var isMac = navigator.platform.indexOf("Mac") !== -1;
+
+function getFile(file) {
+	try {
+		var objXml = new XMLHttpRequest();
+		objXml.open("GET",file,false);
+		objXml.send(null);
+		return objXml.responseText;
+	} catch (e) {
+		return null;
+	}
+}
+
+function _getTestData(){
+	var number = document.getElementById("caseNo");
+	var diffParser = new eclipse.DiffParser("\r\n");
+	var caseNo = number.value;
+	if(caseNo < 1 || caseNo > demoData.length)
+		caseNo = demoData.length;
+	var testCase = demoData[caseNo -1];
+	var input = testCase[0];
+	var diff = testCase[1];
+	var result = diffParser.parse(input ,diff);
+
+	var output = result.outPutFile;
+	var mapper = result.mapper;
+	return {input:input,output:output,mapper:mapper};
+	
+}
+
+function initEditor(editor){
+	var lines = new eclipse.LineNumberCompareRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+	editor.addRuler(lines);
+}
+
+function createStaticEditor() {
+	var leftTH = document.getElementById("LeftTH");
+	var rightTH = document.getElementById("RightTH");
+	leftTH.innerHTML = "Input File With Gaps";
+	rightTH.innerHTML = "Input File Without Gaps";
+	
+	var text = "Line0\nLine1\nLine2\nLine3\nLine4";
+	var model = new eclipse.TextModel(text, "\n");
+	var mapper = [[0 , 2, -1] , [2,2,0] , [0,3,-1],[3,3,0],[0,4,-1]]; 	
+	var compareModel = new eclipse.GapTextModel(model, false , mapper);
+	
+	var optionsRight = {
+			parent: "divParentR",
+			model: model,
+			readonly: editorReadOnly,
+			stylesheet: "editor.css" 
+		};
+	var editorRight = new eclipse.Editor(optionsRight);
+	initEditor(editorRight);
+	var optionsLeft = {
+		parent: "divParentL",
+		model: compareModel,
+		readonly: editorReadOnly,
+		stylesheet: "editor.css" 
+	};
+	var editorLeft = new eclipse.Editor(optionsLeft);
+	initEditor(editorLeft);
+}
+
+function createInputEditor() {
+	var leftTH = document.getElementById("LeftTH");
+	var rightTH = document.getElementById("RightTH");
+	leftTH.innerHTML = "Input File With Gaps";
+	rightTH.innerHTML = "Input File Without Gaps";
+	
+	var testData = _getTestData();
+	var model = new eclipse.TextModel(testData.input, "\r\n");
+	var compareModel = new eclipse.GapTextModel(model, true , testData.mapper);
+	
+	var optionsRight = {
+			parent: "divParentR",
+			model: model,
+			readonly: editorReadOnly,
+			stylesheet: "editor.css" 
+		};
+	var editorRight = new eclipse.Editor(optionsRight);
+	initEditor(editorRight);
+	var optionsLeft = {
+		parent: "divParentL",
+		model: compareModel,
+		readonly: editorReadOnly,
+		stylesheet: "editor.css" 
+	};
+	var editorLeft = new eclipse.Editor(optionsLeft);
+	initEditor(editorLeft);
+}
+
+function createOutputEditor() {
+	var leftTH = document.getElementById("LeftTH");
+	var rightTH = document.getElementById("RightTH");
+	leftTH.innerHTML = "Output File With Gaps";
+	rightTH.innerHTML = "Output File Without Gaps";
+	
+	var testData = _getTestData();
+	var model = new eclipse.TextModel(testData.output, "\r\n");
+	var compareModel = new eclipse.GapTextModel(model, false , testData.mapper);
+	
+	var optionsRight = {
+			parent: "divParentR",
+			model: model,
+			readonly: editorReadOnly,
+			stylesheet: "editor.css" 
+		};
+	var editorRight = new eclipse.Editor(optionsRight);
+	initEditor(editorRight);
+	var optionsLeft = {
+		parent: "divParentL",
+		model: compareModel,
+		readonly: editorReadOnly,
+		stylesheet: "editor.css" 
+	};
+	var editorLeft = new eclipse.Editor(optionsLeft);
+	initEditor(editorLeft);
+}
+var editorLeft;
+var editorRight;
+function createCompareEditor() {
+	var leftTH = document.getElementById("LeftTH");
+	var rightTH = document.getElementById("RightTH");
+	leftTH.innerHTML = "Output File With Gaps";
+	rightTH.innerHTML = "Input File With Gaps";
+	
+	var testData = _getTestData();
+	var modelLeft = new eclipse.TextModel(testData.output, "\r\n");
+	var compareModelLeft = new eclipse.GapTextModel(modelLeft, false , testData.mapper);
+	var modelRight = new eclipse.TextModel(testData.input, "\r\n");
+	var compareModelRight = new eclipse.GapTextModel(modelRight, true , testData.mapper);
+	
+	var optionsRight = {
+			parent: "divParentR",
+			model: compareModelRight,
+			readonly: editorReadOnly,
+			stylesheet: "editor.css" 
+		};
+	editorRight = new eclipse.Editor(optionsRight);
+	initEditor(editorRight);
+	var optionsLeft = {
+		parent: "divParentL",
+		model: compareModelLeft,
+		readonly: editorReadOnly,
+		stylesheet: "editor.css" 
+	};
+	editorLeft = new eclipse.Editor(optionsLeft);
+	initEditor(editorLeft);
+	editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
+		var lineIndex = lineStyleEvent.lineIndex;
+		var lineStart = lineStyleEvent.lineStart;
+		var lineType = compareModelLeft.getLineType(lineIndex);
+		//lineStyleEvent.ranges = [];
+		//lineStyleEvent.ranges.push ({start: lineStart, end: lineStart + 3, style: {style: {backgroundColor: "blue"} }});
+		if(lineType === "added") {
+			lineStyleEvent.style = {style: {backgroundColor: "#99EE99"}};
+		} else if (lineType === "changed"){
+			lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
+		} else if (lineType === "removed" || lineType === "changed_gap"){
+			lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
+		} 
+	}); 
+
+	editorLeft.addEventListener("Scroll", window, function(scrollEvent) {
+		editorRight.setTopPixel(editorLeft.getTopPixel());
+	}); 
+	
+	editorLeft.redrawRange();
+	editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
+		var lineIndex = lineStyleEvent.lineIndex;
+		var lineStart = lineStyleEvent.lineStart;
+		var lineType = compareModelRight.getLineType(lineIndex);
+		if(lineType === "removed") {
+			lineStyleEvent.style = {style: {backgroundColor: "#EE9999"}};
+		} else if (lineType === "changed"){
+			lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
+		} else if (lineType === "added" || lineType === "changed_gap"){
+			lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
+		} 
+	}); 
+
+	editorRight.addEventListener("Scroll", window, function(scrollEvent) {
+		editorLeft.setTopPixel(editorRight.getTopPixel());
+	}); 
+	
+	editorRight.redrawRange();
+	/*
+	var lines = compareModelLeft.getLineCount()+1;
+	var lineH = editorLeft.getLineHeight();
+	var scroll  = document.getElementById("scrollContent");
+	scroll.style.width = 0 + "px";
+	scroll.style.height = lines*lineH + "px";
+	*/
+}
+
+function scrollHandler(evt){
+	console.log(evt.scrollTop);
+	//editorLeft.focus();
+	editorLeft.setTopPixel(evt.scrollTop);
+	//editorRight.focus();
+	editorRight.setTopPixel(evt.scrollTop);
+}
+
+window.onload = function() {
+	var demo = document.getElementById("dataLength");
+	demo.innerHTML = demoData.length + ")";
+};
+</script>
+</head>
+<body>
+
+<h1>Orion Compare Editor</h1>
+
+<table width="100%">
+<tr>
+<th id="LeftTH" />
+<th id="RightTH"/>
+</tr>
+<tr>
+<td width="50%">
+<div id='divParentL' style='border: 1px solid teal;width:100%;height:650px;'>
+
+</div>
+</td>
+<td width="50%">
+<div id='divParentR' style='border: 1px solid teal;width:100%;height:650px;'>
+
+</div>
+</td>
+<!-- 
+<td>
+<div id= "scrollId" class="editorContainer" onscroll="scrollHandler(this)" style="
+	width: 20px;
+	height: 650px;
+	overflow-y: auto;">
+<div id = "scrollContent"></div>
+</div>
+</td>
+-->
+</tr>
+</table>
+<span>Demo Data Number(1-</span>
+<span id="dataLength"></span>
+<input id="caseNo" type="text" />
+<button onclick='createCompareEditor()'  padding: 0 2 0 2'>Compare</button>
+<!-- 
+<button onclick='createInputEditor()'  padding: 0 2 0 2'>Test Input</button>
+<button onclick='createOutputEditor()'  padding: 0 2 0 2'>Test Output</button>
+<button onclick='createStaticEditor()'  padding: 0 2 0 2'>Test Static Data</button>
+-->
+<br>
+</body>
+</html>

@@ -103,7 +103,7 @@ eclipse.Explorer = (function() {
 								if (!isSearch) {
 									dojo.empty(inner);
 									new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
-									this.updateNavTools(this.innerId, this.toolbarId, this.treeRoot);
+									eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.treeRoot);
 									this.createTree();
 								}
 							}));
@@ -121,21 +121,6 @@ eclipse.Explorer = (function() {
 				labelColumnIndex: 1,  // 0 if no checkboxes
 				renderer: new eclipse.FileRenderer({checkbox: true }, this)
 			});
-		},
-		
-		updateNavTools: function(parentId, toolbarId, item) {
-			var parent = dojo.byId(parentId);
-			var toolbar = dojo.byId(toolbarId);
-			if (toolbar) {
-				dojo.empty(toolbar);
-			} else {
-				toolbar = dojo.create("div",{id: toolbarId}, parent, "last");
-				dojo.addClass(toolbar, "domCommandToolbar");
-			}
-			this.registry.getService("ICommandService").then(dojo.hitch(this, function(service) {
-				service.renderCommands(toolbar, "dom", item, this, "image");
-			}));
-
 		},
 	    
 	    _lastHash: null
@@ -207,6 +192,7 @@ eclipse.FileRenderer = (function() {
 			dojo.addClass(tableNode, 'treetable');
 			var thead = document.createElement('thead');
 			var row = document.createElement('tr');
+			dojo.addClass(row, "domCommandBackground");
 			var th, actions, size;
 			if (this._useCheckboxSelection) {
 				th = document.createElement('th');
@@ -231,7 +217,6 @@ eclipse.FileRenderer = (function() {
 			thead.appendChild(row);
 			tableNode.appendChild(thead);
 			
-			dojo.style(actions, "textAlign", "center");
 			dojo.style(size, "textAlign", "right");
 
 		},
@@ -352,9 +337,15 @@ eclipse.FileRenderer = (function() {
 		},
 		
 		rowsChanged: function() {
+			// this seems to no longer work.  Why?
 			dojo.query(".treeTableRow").forEach(function(node, i) {
-				var color = i % 2 ? "FFFFFF" : "EFEFEF";
-				dojo.style(node, "backgroundColor", color);
+				if (i % 2) {
+					dojo.addClass(node, "darkTreeTableRow");
+					dojo.removeClass(node, "lightTreeTableRow");
+				} else {
+					dojo.addClass(node, "lightTreeTableRow");
+					dojo.removeClass(node, "darkTreeTableRow");
+				}
 			});
 		},
 		

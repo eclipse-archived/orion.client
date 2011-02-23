@@ -12,12 +12,12 @@
 /*jslint devel:true*/
 
 dojo.addOnLoad(function(){
-
 	var pluginRegistry = null;
 	var serviceRegistry = null;
 	var document = window.document;
 	var inputService;
 	var prefsService;
+	var commandService;
 	
 	// Initialize the plugin registry
 	(function() {
@@ -41,7 +41,8 @@ dojo.addOnLoad(function(){
 		new eclipse.SelectionService(serviceRegistry);
 		prefsService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
 		new eclipse.SaveableService(serviceRegistry);
-		
+		commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+
 		// Editor needs additional services besides EAS.
 		new eclipse.ProblemService(serviceRegistry);
 		new eclipse.OutlineService(serviceRegistry);
@@ -65,7 +66,7 @@ dojo.addOnLoad(function(){
 			stylesheet: "/editor/samples/editor.css"
 		});
 	};
-	var undoStackFactory = function(editor) { return new eclipse.UndoStack(editor, 200); };
+
 	var rulerStyle = {style: { backgroundColor: "#eee" }};
 	var annotationRuler;
 	var annotationRulerFactory = function() {
@@ -80,11 +81,11 @@ dojo.addOnLoad(function(){
 	};
 	
 	var editorContainer = new eclipse.EditorContainer(serviceRegistry,
-			editorFactory, undoStackFactory,
+			editorFactory, commandService, eclipse.editorFeatures.createEditorCommands, eclipse.editorFeatures.undoFactory,
 			annotationRulerFactory, lineNumberRulerFactory, overviewRulerFactory,
 			searcher,
 			editorContainerDomNode, codeTitle,
-			topContainerWidget, contentassist, leftPane, searchFloat);
+			topContainerWidget, contentassist, leftPane, searchFloat, "editorActions");
 	
 	// The eWebBorderContainer widget needs to know the editorContainer
 	topContainerWidget.set("editorContainer", editorContainer);
@@ -109,109 +110,8 @@ dojo.addOnLoad(function(){
 			homeNode.href=home;
 		});
 	}
-	
-
-	// These are two example actions - they should be coming from plug-ins, and they
-	// should ideally be contributed using the command service.  That is TBD.
-
-	// Note that this is not in any shape or form that could be considered final.
-	// We've included it to enable experimentation. Please provide feedback (in Bugzilla, on IRC, on the mailing list).
-	
-	// The shape of the contributed actions is (for now):
-	// info - information about the action (object).
-	//        required attribute: name - the name of the action
-	//        optional attribute: key - an array with values to pass to the eclipse.KeyBinding constructor
-	//        optional attribute: img - a URL to an image for the action
-	// run - the implementation of the action (function).
-	//        arguments passed to run: (selectedText, fullText, selection)
-	//          selectedText (string) - the currently selected text in the editor
-	//          fullText (string) - the complete text of the editor
-	//          selection (object) - an object with attributes: start, end
-	//        the return value of the run function will be used as follows:
-	//          if the return value is a string, the current selection in the editor will be replaced with the returned string
-	//          if the return value is an object, its "text" attribute (required) will be used to replace the contents of the editor,
-	//                                            and its "selection" attribute (optional) will be used to set the new selection.
-	// These actions will be migrated to commands in the future, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=334189
-//	serviceRegistry.registerService("editorAction", {
-//	 info: function() {return {name:"Comment"};},
-//	 run: function(selectedText, text, selection) { return {text: text.substring(0,selection.start) + "/*" + text.substring(selection.start,selection.end) + "*/" + text.substring(selection.end),
-//	 selection: {start:selection.start,end:selection.end+4}}; }
-//	});
-
-	// Add the plugin actions to the toolbar. This code is not real - it doesn't handle errors at all, for example.
-	// Note that this is not in any shape or form that could be considered final.
-	// We've included it to enable experimentation. Please provide feedback (in Bugzilla, on IRC, on the mailing list)
-	var actionReferences = serviceRegistry.getServiceReferences("editorAction");
-	for (var i=0; i<actionReferences.length; i++) {
-		serviceRegistry.getService(actionReferences[i]).then(function(service) {
-			service.info().then(function(info) {
-				var editor = editorContainer._editor;
-				var action = function() {
-					var text = editor.getText();
-					var selection = editor.getSelection();
-					service.run(editor.getText(selection.start,selection.end),text,selection).then(function(result){
-						if (result.text) {
-							editor.setText(result.text);
-							if (result.selection) {
-								editor.setSelection(result.selection.start, result.selection.end);
-								editor.focus();
-							}
-						} else {
-							if (typeof result === 'string') {
-								editor.setText(result, selection.start, selection.end);
-								editor.setSelection(selection.start, selection.end);
-								editor.focus();
-							}
-						}
-					});
-				};
-				// add it to toolbar.  This is similar to what the command service does in its render methods.
-				// This should be switched over to use the command service to render the 'page' level scopes once
-				// that is implemented.
-				var toolbar = dojo.byId("editorActions");
-				if (info.img) {
-					var a = document.createElement('img');
-					a.setAttribute("class", "editorAction");
-					a.setAttribute("src", info.img);
-					a.setAttribute("alt", info.name);
-					a.setAttribute("title", info.name);
-					a.onclick = action;
-					dojo.addClass(a, "commandImage");
-					toolbar.appendChild(a);
-					toolbar.appendChild(document.createTextNode(" "));
-				} else {
-					var a = document.createElement('span');
-					a.setAttribute("class", "editorAction");
-					a.appendChild(document.createTextNode(info.name));
-					a.onclick = action;
-					dojo.addClass(a, "commandLink");
-					toolbar.appendChild(a);
-					toolbar.appendChild(document.createTextNode(" "));
-				}
-				if (info.key) {
-					// add it to the editor as a keybinding
-					// KB exists so that we can pass an array (from info.key) rather than actual arguments
-					function KB(args) {
-						return eclipse.KeyBinding.apply(this, args);
-					}
-					KB.prototype = eclipse.KeyBinding.prototype;
-					editor.setKeyBinding(new KB(info.key), info.name);
-					editor.setAction(info.name, action);
-				}
-			});
-		});
-	}
-	
-	// Attach listeners to toolbar
-	dojo.byId("save").onclick = function(evt) {
-		editorContainer._editor.invokeAction("save");
-	};
-	dojo.byId("undo").onclick = function(evt) {
-		editorContainer._editor.invokeAction("undo");
-	};
-	dojo.byId("redo").onclick = function(evt) {
-		editorContainer._editor.invokeAction("redo");
-	};
+		
+	eclipse.editorFeatures.updateEditorToolbar("editorActions", editorContainer, commandService);
 	
 	// Ctrl+o handler for toggling outline 
 	document.onkeydown = function (evt){

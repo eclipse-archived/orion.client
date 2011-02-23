@@ -18,6 +18,7 @@ eclipse.EditorContainer = (function() {
 	function EditorContainer(
 			serviceRegistry,
 			/**function():eclipse.Editor*/ editorFactory,
+			commandService, commandGenerator,
 			/**function(eclipse.Editor):eclipse.UndoStack*/ undoStackFactory,
 			/**function():eclipse.AnnotationRuler*/ annotationRulerFactory,
 			/**function():eclipse.LineNumberRuler*/ lineNumberRulerFactory,
@@ -25,9 +26,11 @@ eclipse.EditorContainer = (function() {
 			searcher,
 			domNode, /**DomNode|dijit._Widget*/ codeTitle,
 			/**widgets.eWebBorderContainer*/ topContainer, contentassist,
-			leftPane, searchFloat) {
+			leftPane, searchFloat, toolbarId) {
 		this._serviceRegistry = serviceRegistry;
 		this._editorFactory = editorFactory;
+		this._commandService = commandService;
+		this._commandGenerator = commandGenerator;
 		this._undoStackFactory = undoStackFactory;
 		this._annotationRulerFactory = annotationRulerFactory;
 		this._lineNumberRulerFactory = lineNumberRulerFactory;
@@ -40,11 +43,13 @@ eclipse.EditorContainer = (function() {
 		this._contentassist = contentassist;
 		this._leftPane = leftPane;
 		this._searchFloat = searchFloat;
+		this._toolbarId = toolbarId;
 		
 		this._annotationsRuler = null;
 		this._overviewRuler = null;
 		this._fileMetadata = null;
 		this._dirty = false;
+		this._fileURI = null;
 		
 		this._leftPaneWidth = "";
 		
@@ -59,6 +64,14 @@ eclipse.EditorContainer = (function() {
 		this.registerServiceHandlers();
 	}
 	EditorContainer.prototype = {
+		getEditorWidget: function() {
+			return this._editor;
+		},
+		
+		getFileURI: function() {
+			return this._fileURI;
+		},
+	
 		// This is legitimate editor client-side code...establishing dependencies on registered services
 		registerServiceHandlers: function() {
 			var editorContainer = this;
@@ -489,26 +502,21 @@ eclipse.EditorContainer = (function() {
 		
 		installEditor : function(fileURI) {
 			var registry = this._serviceRegistry;
+			this._fileURI = fileURI;
 			
-			// Create editor and undo stack
+			// Create editor and install optional features
 			this._editor = this._editorFactory();
-			this._undoStack = this._undoStackFactory(this._editor);
+			if (this._commandGenerator) {
+				this._commandGenerator(registry, this._commandService, this, this._toolbarId);
+			}
+			if (this._undoStackFactory) {
+				this._undoStack = this._undoStackFactory(registry, this._commandService, this, this._toolbarId);
+			}
 			
 			var editorContainer = this,
 				editor = this._editor,
 				KeyBinding = eclipse.KeyBinding,
 				undoStack = this._undoStack;
-			
-			// Attach actions to the editor
-			//Adding Save action
-			editor.setKeyBinding(new KeyBinding('s', true), "save");
-			editor.setAction("save", function () {
-				var contents = editor.getText();
-				registry.getService("ISaveable").then(function(saveService) {
-					saveService.doSave(fileURI, contents);
-				});
-				editorContainer.onInputChange(fileURI, null, contents, true);
-			});
 			
 			// Collapse/Expand left pane 
 			editor.setKeyBinding(new KeyBinding("o", true), "toggle");
@@ -1185,20 +1193,8 @@ eclipse.EditorContainer = (function() {
 					}
 					return true;
 			});
-			
-			/* Undo/Redo bindings */
-			editor.setKeyBinding(new KeyBinding('z', true), "undo");
-			editor.setAction("undo", function() {
-				undoStack.undo();
-				return true;
-			});
-			
+						
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			editor.setKeyBinding(isMac ? new KeyBinding('z', true, true) : new KeyBinding('y', true), "redo");
-			editor.setAction("redo", function() {
-				undoStack.redo();
-				return true;
-			});
 			
 			// Content assist
 			editor.setKeyBinding(isMac ? new KeyBinding(' ', false, false, false, true) : new KeyBinding(' ', true), "content assist");
@@ -1271,6 +1267,7 @@ eclipse.EditorContainer = (function() {
 		setInput : function(location) {
 			var input = eclipse.util.getPositionInfo(location);
 			var fileURI = input.filePath;
+			this._fileURI = fileURI;
 			// populate editor
 			if (fileURI) {
 				if (fileURI === this._lastFilePath) {

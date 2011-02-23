@@ -78,9 +78,6 @@ eclipse.BreadCrumbs = (function() {
 					crumbs.appendChild(seg);
 				}
 			}
-			
-			crumbs.appendChild(document.createElement('br'));
-			crumbs.appendChild(document.createElement('br'));
 		}
 	};
 	return BreadCrumbs;
