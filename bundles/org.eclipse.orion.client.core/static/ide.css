@@ -221,6 +221,10 @@ h2 {
 	min-width: 600px;
 }
 
+.favoritesTable {
+	border-spacing: 0px;
+}
+
 .secondaryColumn {
 	color: #666666;	
 }
