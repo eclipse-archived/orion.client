@@ -71,7 +71,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 
 	var favoriteCommand = new eclipse.Command({
 		name: "Make Favorite",
-		image: "images/silk/star.png",
+		image: "images/silk/star.gif",
 		id: "eclipse.makeFavorite",
 		visibleWhen: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
