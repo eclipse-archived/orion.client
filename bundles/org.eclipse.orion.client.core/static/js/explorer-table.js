@@ -337,7 +337,6 @@ eclipse.FileRenderer = (function() {
 		},
 		
 		rowsChanged: function() {
-			// this seems to no longer work.  Why?
 			dojo.query(".treeTableRow").forEach(function(node, i) {
 				if (i % 2) {
 					dojo.addClass(node, "darkTreeTableRow");

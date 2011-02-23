@@ -266,28 +266,38 @@ eclipse.Favorites = (function() {
 		// FIXME: it should really be up to the UI to organize favorites as being searches or not.
 		render: function(favorites, searches) {
 			var faveTable = dojo.create("table");
-			var tr, col1, col2, col3, link;
-			for (var i=0; i < favorites.length; i++) {
-				var fave = favorites[i];
+			var tr, col1, col2;
+			for (var j=0; j < favorites.length; j++) {
+				var fave = favorites[j];
 				var href = fave.directory ? "#" + fave.path : "coding.html#" + fave.path;
 				if (href==="#") {
 					href="";
 				}
 				var clazz = fave.directory ? "navlinkonpage" : "navlink";
 				var editable="";
-				var id = "fave"+i;
+				var id = "fave"+j;
 				tr = dojo.create("tr");
+				tr.id = "row"+id;
 				col1 = dojo.create("td", null, tr, "last");
 				dojo.style(col1, "whiteSpace", "nowrap");
-				col2 = dojo.create("td", null, tr, "last");
+				col2 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
 				dojo.style(col2, "whiteSpace", "nowrap");
-				link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
+				var link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
 				dojo.place(document.createTextNode(fave.name), link, "only");
-				var actionsWrapper = dojo.create("span", {id: "actionsWrapper" + i}, col2, "only");
+				var actionsWrapper = dojo.create("span", {id: "actionsWrapper" + j}, col2, "only");
+				dojo.style(col2, "visibility", "hidden");
 				this._registry.getService("ICommandService").then(function(service) {
-					service.renderCommands(actionsWrapper, "object", fave, this, "image", i);
+					service.renderCommands(actionsWrapper, "object", fave, this, "image", j);
 				});
 				dojo.place(tr, faveTable, "last");
+				dojo.connect(tr, "onmouseover", tr, function() {
+					var col = dojo.byId(this.id+"actions");
+					dojo.style(col, "visibility", "visible");
+				});
+				dojo.connect(tr, "onmouseout", tr, function() {
+					var col = dojo.byId(this.id+"actions");
+					dojo.style(col, "visibility", "hidden");
+				});
 			}
 			
 			dojo.place(faveTable, this._parent, "only");
@@ -299,16 +309,27 @@ eclipse.Favorites = (function() {
 					var search = searches[i];
 					var href="#" + search.query;
 					tr = dojo.create("tr");
+					tr.id = "searchRow"+i;
 					col1 = dojo.create("td", null, tr, "last");
-					col2 = dojo.create("td", null, tr, "last");
-					link = dojo.create("a", {href: href}, col1, "only");
+					col2 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
+					var link = dojo.create("a", {href: href}, col1, "only");
 					dojo.place(document.createTextNode(search.name), link, "only");
 					// render local commands
 					var actionsWrapper = dojo.create("span", {id: "actionsWrapper" + i}, col2, "only");
+					dojo.style(col2, "visibility", "hidden");
 					this._registry.getService("ICommandService").then(function(service) {
 						service.renderCommands(actionsWrapper, "object", search, this, "image", i);
 					});
 					dojo.place(tr, searchTable, "last");
+					dojo.connect(tr, "onmouseover", tr, function() {
+						var col = dojo.byId(this.id+"actions");
+						dojo.style(col, "visibility", "visible");
+					});
+					dojo.connect(tr, "onmouseout", tr, function() {
+						var col = dojo.byId(this.id+"actions");
+						dojo.style(col, "visibility", "hidden");
+					});
+
 				}
 				dojo.place(searchTable, this._parent, "last");
 			}
