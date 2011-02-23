@@ -192,6 +192,7 @@ eclipse.FileRenderer = (function() {
 			dojo.addClass(tableNode, 'treetable');
 			var thead = document.createElement('thead');
 			var row = document.createElement('tr');
+			dojo.addClass(row, "domCommandBackground");
 			var th, actions, size;
 			if (this._useCheckboxSelection) {
 				th = document.createElement('th');
@@ -336,9 +337,15 @@ eclipse.FileRenderer = (function() {
 		},
 		
 		rowsChanged: function() {
+			// this seems to no longer work.  Why?
 			dojo.query(".treeTableRow").forEach(function(node, i) {
-				var color = i % 2 ? "FFFFFF" : "EFEFEF";
-				dojo.style(node, "backgroundColor", color);
+				if (i % 2) {
+					dojo.addClass(node, "darkTreeTableRow");
+					dojo.removeClass(node, "lightTreeTableRow");
+				} else {
+					dojo.addClass(node, "lightTreeTableRow");
+					dojo.removeClass(node, "darkTreeTableRow");
+				}
 			});
 		},
 		

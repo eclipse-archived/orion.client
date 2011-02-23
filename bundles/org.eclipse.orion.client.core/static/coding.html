@@ -88,14 +88,14 @@
 	
     <div id ="topContainer" dojoType="widgets.eWebBorderContainer" design="headline"  liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
 		<div id="toolbar" class="toolbar" dojoType="dijit.layout.ContentPane" region="top">
-			<div style="float: left;">
-				<table><tr>
-		    		<td><a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/orion.png" alt="Eclipse Logo" align="top"></a></td>
-					<td><b class="statuspane" id="statusPane"></td>
-				</tr></table>
+			<div id="bannerLeftArea" style="float: left;">
+				<a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/orion.png" alt="Orion Logo" align="top"></a>
 			</div>
-			<div id="eclipseWebToolbar" style="float: right;" class="innerToolbar">
+			<div class="leftInnerToolbar">
 				<b class="currentLocation" id="codeTitle"></b>
+				<b class="statuspane" id="statusPane"></b>
+			</div>
+			<div id="eclipseWebToolbar" class="innerToolbar">
 				<span id="editorActions"></span>
 			</div>
 		</div>

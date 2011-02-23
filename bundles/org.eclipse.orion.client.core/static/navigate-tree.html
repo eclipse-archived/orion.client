@@ -76,11 +76,11 @@
 	
     <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
-			<div style="float: left;">
-				<table><tr>
-		    		<td><img class="toolbarLabel" src="/images/orion.png" alt="Eclipse Logo" align="top"></td>
-					<td><b class="statuspane" id="statusPane"></td>
-				</tr></table>
+			<div id="bannerLeftArea" style="float: left;">
+				<a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/orion.png" alt="Orion Logo" align="top"></a>
+			</div>
+			<div class="leftInnerToolbar">
+				<b class="statuspane" id="statusPane"></b>
 			</div>
 			<div id="eclipseWebToolbar" class="innerToolbar" style="float: right;">
 				<input type="search" id="search" class="searchbox">
@@ -95,7 +95,7 @@
 		</div>
 
 		<div class="paneScrolled" style="margin-left: 8px;" id="rightPane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-			<div id="explorer-tree">
+			<div id="explorer-tree" class="navigator">
 				<!-- Breadcrumbs, tree content go here -->
 			</div>
 			<ul dojoType="dijit.Menu" id="treeContextMenu" style="display: none;">

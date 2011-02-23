@@ -82,21 +82,14 @@
 	
 	<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
-			<div style="float: left;">
-				<table><tr>
-		    		<td><img class="toolbarLabel" src="/images/orion.png" alt="Eclipse Logo" align="top"></td>
-					<td><b class="statuspane" id="statusPane"></td>
-				</tr></table>
+			<div id="bannerLeftArea" style="float: left;">
+				<a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/orion.png" alt="Orion Logo" align="top"></a>
+			</div>
+			<div class="leftInnerToolbar">
+				<b class="statuspane" id="statusPane"></b>
 			</div>
 			<div id="eclipseWebToolbar" style="float: right;" class="innerToolbar">
 				<input type="search" id="search" class="searchbox">
-				<!--
-				<button dojoType="dijit.form.Button" class="button" id="unittest">
-					<script type="dojo/connect" event="onClick" args="evt">
-						window.open("/jsunit-test.html#" , "unitTest");
-					</script>
-					<img src="/images/unit_test/unit-test.png" alt="Unit Test" title="Unit Test">
-				</button> -->
 			</div>
 		</div>
 		
@@ -108,7 +101,7 @@
 		</div>
 
 		<div class="paneScrolled" style="margin-left: 8px;" id="rightPane" dojoType="dijit.layout.ContentPane" region="center" style="width: 80%; height: 100%;" splitter="false">
-			<div id="explorer-tree">
+			<div id="explorer-tree" class="navigator">
 				<!-- Breadcrumbs, tree content go here -->
 			</div>
 		</div>

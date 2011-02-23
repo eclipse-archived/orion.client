@@ -1,7 +1,10 @@
 .domCommandToolbar {
-	width: 100%;
 	height: 24px;
-	background-color: #f8f8ff;
+}
+
+.domCommandBackground {
+	height: 24px;
+	background-color: #f6f6ff;
 }
 
 .commandImage {
