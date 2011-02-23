@@ -1166,6 +1166,22 @@ eclipse.EditorContainer = (function() {
 				}, 0);
 			});
 			
+			// Open Resource
+			editor.setKeyBinding(new KeyBinding("r", true, true, false), "open resource");
+			editor.setAction("open resource", function() {
+				setTimeout(function() {
+					var dialog = new widgets.OpenResourceDialog({
+							SearchLocation: editorContainer.getFileMetadata().SearchLocation,
+							searcher: editorContainer._searcher
+						});
+					dojo.connect(dialog, "onHide", function() {
+							editor.focus(); // Focus editor after dialog close, Dojo's doesn't work
+						});
+					dialog.show();
+				}, 0);
+				return true;
+			});
+			
 			// Go To Line action
 			editor.setKeyBinding(new KeyBinding("l", true), "goto-line");
 			editor.setAction("goto-line", function() {
