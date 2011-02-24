@@ -72,6 +72,10 @@ h2 {
 	height: 35px;
 }
 
+.toolbarLabel {
+	padding-left: 8px;
+}
+
 .leftInnerToolbar {
 	float: left;
 	padding-top: 6px;
