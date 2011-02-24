@@ -307,7 +307,7 @@ eclipse.Favorites = (function() {
 			if (searches.length > 0) {
 				dojo.place("<br><h2>Searches</h2>", this._parent, "last");
 				var searchTable = dojo.create("table");
-				dojo.addClass("favoritesTable");
+				dojo.addClass(searchTable, "favoritesTable");
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
 					var href="#" + search.query;
@@ -332,7 +332,6 @@ eclipse.Favorites = (function() {
 						var wrapper = dojo.byId(this.id+"actionsWrapper");
 						dojo.style(wrapper, "visibility", "hidden");
 					});
-
 				}
 				dojo.place(searchTable, this._parent, "last");
 			}
