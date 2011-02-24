@@ -13,6 +13,7 @@ dojo.addOnLoad(function(){
 	
 	// initialize service registry and EAS services
 	serviceRegistry = new eclipse.ServiceRegistry();
+	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	var inputService = new eclipse.InputService(serviceRegistry);		
 	new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	new eclipse.LogService(serviceRegistry);
@@ -34,12 +35,16 @@ dojo.addOnLoad(function(){
 		children:[]
 	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	
 	var contextMenu = dijit.byId("treeContextMenu");
 	
 	var explorer = new eclipse.ExplorerTree(serviceRegistry, treeRoot,
 			searcher, "explorer-tree", "navToolBar", contextMenu);
+			
+	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+	
+	// global commands
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
 			
 	// commands shared among navigators
 	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar");
@@ -57,6 +62,8 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.newProject", 1, "navToolBar", "eclipse.fileGroup");
 	commandService.registerCommandContribution("eclipse.linkProject", 2, "navToolBar", "eclipse.fileGroup");
 
+	eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands(serviceRegistry, commandService, explorer, "navToolBar", "eclipse.fileGroup");
+	
 	// commands specific to this page
 	var tableViewCommand = new eclipse.Command({
 		name : "Table View",
@@ -79,9 +86,6 @@ dojo.addOnLoad(function(){
 	dojo.subscribe("/dojo/hashchange", explorer, function() {
 		explorer.loadResourceList(dojo.hash());
 	});
-	
-	eclipse.fileCommandUtils.hookUpSearch("search", explorer);
-
 	
 	// it's important to replace the implementation of setInput here, so that we get
 	// the event at the time it happens as opposed to using a stored event. Firefox

@@ -14,6 +14,7 @@ dojo.addOnLoad(function(){
 	
 	// initialize service registry and EAS services
 	serviceRegistry = new eclipse.ServiceRegistry();
+	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	new eclipse.InputService(serviceRegistry);		
 	new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	new eclipse.LogService(serviceRegistry);
@@ -33,11 +34,14 @@ dojo.addOnLoad(function(){
 	var treeRoot = {
 		children:[]
 	};
-	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
 	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, "explorer-tree", "navToolBar");
 	
+	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+
+	// global commands
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
 	// commands shared by navigators
 	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar");
 	
@@ -59,6 +63,7 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.newProject", 3, "navToolBar", "eclipse.fileGroup.unlabeled");
 	commandService.registerCommandContribution("eclipse.linkProject", 4, "navToolBar", "eclipse.fileGroup.unlabeled");
 
+	eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands(serviceRegistry, commandService, explorer, "navToolBar", "eclipse.fileGroup");
 	
 	var treeViewCommand = new eclipse.Command({
 		name : "Tree View",
@@ -82,7 +87,4 @@ dojo.addOnLoad(function(){
 	dojo.subscribe("/dojo/hashchange", explorer, function() {
 	   explorer.loadResourceList(dojo.hash());
 	});
-	
-	eclipse.fileCommandUtils.hookUpSearch("search", explorer);
-
 });

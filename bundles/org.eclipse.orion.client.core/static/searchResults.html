@@ -5,7 +5,7 @@
 		<meta http-equiv="Content-Language" content="en-us">
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 		<meta http-equiv="X-UA-Compatible" content="IE=8">
-    	<title>Orion Navigator</title>    
+    	<title>Orion Search Results</title>    
     
     <script type="text/javascript">
         var djConfig = {
@@ -16,13 +16,12 @@
     </script>
     <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
     <script type="text/javascript">
+	dojo.require("dijit.Menu");
+	dojo.require("dijit.MenuItem");
 	dojo.require("dijit.Dialog");
-	dojo.require("dijit.form.TextBox"); dojo.require("dijit.form.ComboBox");
 	dojo.require("dijit.form.CheckBox");
-	dojo.require("dojo.data.ItemFileReadStore");
-	dojo.require("widgets.NewItemDialog");
+	dojo.require("dijit.Dialog");
 	dojo.require("widgets.OpenResourceDialog");
-	dojo.require("widgets.ImportDialog");
  	</script>    	
 	<style type="text/css">
 		@import "/org.dojotoolkit/dojo/resources/dojo.css";
@@ -30,8 +29,6 @@
 		@import "/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css";
 		@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
 		@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
-		@import "/org.dojotoolkit/dijit/themes/soria/ProgressBar.css";
-		@import "/org.dojotoolkit/dojox/form/resources/FileUploader.css";
 	    @import "/ide.css";
 	    @import "/breadcrumbs.css"; 
 	    @import "/commands.css";
@@ -39,10 +36,7 @@
 	
 	<!-- Authentication (required for handleAuthenticationError) -->
 	<script type="text/javascript" src="js/auth.js"></script>
-	  	
- 	<!-- TreeTable -->
-	<script src="js/treetable.js"></script>
- 	
+	  	 	
    </head>
 
     <body style="height: 100%" class="soria">
@@ -51,18 +45,14 @@
     
     <!-- Extension Registry -->
 	<script src="js/serviceregistry.js"></script>
-	<script src="js/pluginregistry.js"></script>
         
     <!-- Eclipse Application Services -->
     <!-- START:eas.js -->
  	<script src="js/util.js"></script>
  	<script src="js/commands.js"></script>
  	<script src="js/dialogs.js"></script>
- 	<script src="js/input.js"></script>
  	<script src="js/log.js"></script>
  	<script src="js/preferences.js"></script>
- 	<script src="js/saveable.js"></script>
- 	<script src="js/selection.js"></script>
  	<script src="js/status.js"></script>
  	<script src="js/users.js"></script>
 
@@ -72,15 +62,12 @@
 	<!-- END:eas.js -->
 	<!-- INSERT:eas.js -->
  	
-	<!-- Breadcrumbs, table -->
-	<!-- START:navigate-table.js -->
+	<!-- START:searchResults.js -->
 	<script src="js/globalCommands.js"></script>
-  	<script src="js/breadcrumbs.js"></script>
-	<script src="js/explorer-table.js"></script>
-	<script src="js/fileCommands.js"></script>
-	<script src="js/navigate-table/navigate-table.js"></script>
-	<!-- END:navigate-table.js -->
- 	<!-- INSERT:navigate-table.js -->
+	<script src="js/searchResults.js"></script>
+	<script src="js/searchResults/search.js"></script>
+	<!-- END:searchResults.js -->
+ 	<!-- INSERT:searchResults.js -->
 	
 	<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
@@ -94,8 +81,8 @@
 		</div>
 
 		<div class="paneScrolled" style="margin-left: 8px;" id="rightPane" dojoType="dijit.layout.ContentPane" region="center" style="width: 80%; height: 100%;" splitter="false">
-			<div id="explorer-tree" class="navigator">
-				<!-- Breadcrumbs, tree content go here -->
+			<div id="results">
+				<!-- Generated search results go here -->
 			</div>
 		</div>
 	</div>

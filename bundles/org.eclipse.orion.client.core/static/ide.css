@@ -72,6 +72,10 @@ h2 {
 	height: 35px;
 }
 
+.toolbarLabel {
+	padding-left: 8px;
+}
+
 .leftInnerToolbar {
 	float: left;
 	padding-top: 6px;
@@ -85,7 +89,7 @@ h2 {
 }
 
 .searchbox {
-	
+	margin-left: 12px;
 }
 
 .navigator {
@@ -205,20 +209,24 @@ h2 {
 }
 
 .folderItem {
-	background: url(images/silk/folder.png);
+	background: url(images/fldr_obj.gif);
 }
 
 .fileItem {
-	background: url(images/silk/page.png);
+	background: url(images/file_obj.gif);
 }
 
 .newItem {
-	background: url(images/silk/add.png);
+	background: url(images/add_obj.gif);
 }
 
 .treetable {
 	border-spacing: 0px;
 	min-width: 600px;
+}
+
+.favoritesTable {
+	border-spacing: 0px;
 }
 
 .secondaryColumn {

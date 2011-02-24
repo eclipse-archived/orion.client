@@ -165,7 +165,7 @@ eclipse.Favorites = (function() {
 		var favorites = this;
 		var deleteFaveCommand = new eclipse.Command({
 			name: "Delete",
-			image: "images/silk/cross.png",
+			image: "images/remove.gif",
 			id: "eclipse.deleteFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: function(item) {
@@ -176,7 +176,7 @@ eclipse.Favorites = (function() {
 		});
 		var renameFaveCommand = new eclipse.Command({
 			name: "Rename",
-			image: "images/silk/pencil.png",
+			image: "images/editing_16.gif",
 			id: "eclipse.renameFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: dojo.hitch(this, function(item, commandId, domId, faveIndex) {
@@ -185,7 +185,7 @@ eclipse.Favorites = (function() {
 		});
 		var deleteSearchCommand = new eclipse.Command({
 			name: "Delete",
-			image: "images/silk/cross.png",
+			image: "images/remove.gif",
 			id: "eclipse.deleteSearch",
 			visibleWhen: function(item) {return item.isSearch;},
 			callback: function(item) {
@@ -266,49 +266,72 @@ eclipse.Favorites = (function() {
 		// FIXME: it should really be up to the UI to organize favorites as being searches or not.
 		render: function(favorites, searches) {
 			var faveTable = dojo.create("table");
-			var tr, col1, col2, col3, link;
-			for (var i=0; i < favorites.length; i++) {
-				var fave = favorites[i];
-				var href = fave.directory ? "#" + fave.path : "coding.html#" + fave.path;
+			dojo.addClass(faveTable, "favoritesTable");
+			var tr, col1, col2;
+			for (var j=0; j < favorites.length; j++) {
+				var fave = favorites[j];
+				var href = fave.directory ? "navigate-table.html#" + fave.path : "coding.html#" + fave.path;
 				if (href==="#") {
 					href="";
 				}
 				var clazz = fave.directory ? "navlinkonpage" : "navlink";
 				var editable="";
-				var id = "fave"+i;
+				var id = "fave"+j;
 				tr = dojo.create("tr");
+				tr.id = "row"+id;
 				col1 = dojo.create("td", null, tr, "last");
 				dojo.style(col1, "whiteSpace", "nowrap");
-				col2 = dojo.create("td", null, tr, "last");
+				col2 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
 				dojo.style(col2, "whiteSpace", "nowrap");
-				link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
+				var link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
 				dojo.place(document.createTextNode(fave.name), link, "only");
-				var actionsWrapper = dojo.create("span", {id: "actionsWrapper" + i}, col2, "only");
+				var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
+				// we must hide/show the span rather than the column.  IE and Chrome will not consider
+				// the mouse as being over the table row if it's in a hidden column
+				dojo.style(actionsWrapper, "visibility", "hidden");
 				this._registry.getService("ICommandService").then(function(service) {
-					service.renderCommands(actionsWrapper, "object", fave, this, "image", i);
+					service.renderCommands(actionsWrapper, "object", fave, this, "image", j);
 				});
 				dojo.place(tr, faveTable, "last");
+				dojo.connect(tr, "onmouseover", tr, function() {
+					var wrapper = dojo.byId(this.id+"actionsWrapper");
+					dojo.style(wrapper, "visibility", "visible");
+				});
+				dojo.connect(tr, "onmouseout", tr, function() {
+					var wrapper = dojo.byId(this.id+"actionsWrapper");
+					dojo.style(wrapper, "visibility", "hidden");
+				});
 			}
-			
 			dojo.place(faveTable, this._parent, "only");
 			
 			if (searches.length > 0) {
 				dojo.place("<br><h2>Searches</h2>", this._parent, "last");
 				var searchTable = dojo.create("table");
+				dojo.addClass(searchTable, "favoritesTable");
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
-					var href="#" + search.query;
+					var href="searchResults.html#" + search.query;
 					tr = dojo.create("tr");
+					tr.id = "searchRow"+i;
 					col1 = dojo.create("td", null, tr, "last");
-					col2 = dojo.create("td", null, tr, "last");
-					link = dojo.create("a", {href: href}, col1, "only");
+					col2 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
+					var link = dojo.create("a", {href: href}, col1, "only");
 					dojo.place(document.createTextNode(search.name), link, "only");
 					// render local commands
-					var actionsWrapper = dojo.create("span", {id: "actionsWrapper" + i}, col2, "only");
+					var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
+					dojo.style(actionsWrapper, "visibility", "hidden");
 					this._registry.getService("ICommandService").then(function(service) {
 						service.renderCommands(actionsWrapper, "object", search, this, "image", i);
 					});
 					dojo.place(tr, searchTable, "last");
+					dojo.connect(tr, "onmouseover", tr, function() {
+						var wrapper = dojo.byId(this.id+"actionsWrapper");
+						dojo.style(wrapper, "visibility", "visible");
+					});
+					dojo.connect(tr, "onmouseout", tr, function() {
+						var wrapper = dojo.byId(this.id+"actionsWrapper");
+						dojo.style(wrapper, "visibility", "hidden");
+					});
 				}
 				dojo.place(searchTable, this._parent, "last");
 			}
