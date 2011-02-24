@@ -94,6 +94,7 @@ eclipse.CommandService = (function() {
 			} else {
 				// create new group definition
 				parentTable[groupId] = {title: title, position: position, children: {}, scopeId: scopeId};
+				parentTable.sortedCommands = null;
 			}
 		},
 		

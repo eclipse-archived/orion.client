@@ -234,3 +234,77 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(importCommand, "object");
 	commandService.addCommand(importCommand, "dom");
 };
+
+eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){
+    if(item == null || typeof(item) != 'object')
+        return item;
+
+    var temp = item.constructor(); // changed
+
+    for(var key in item){
+    	if(key!=="children" && key!=="Children")
+    		temp[key] = clone(item[key]);
+    }
+    return temp;
+};
+
+eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands = function(serviceRegistry, commandService, explorer, toolbarId, fileGroup) {
+	
+	
+	var commandsReferences = serviceRegistry.getServiceReferences("fileCommands");
+	var items = this.items;
+	
+	for (var i=0; i<commandsReferences.length; i++) {
+		serviceRegistry.getService(commandsReferences[i]).then(function(service) {
+			service.info().then(function(info) {
+				if(!(info.commands) || info.commands.length==0){
+					return;
+				}
+				var fileGroupCreated = false;
+				var navGroupCreated = false;
+				for(var j=0; j<info.commands.length; j++){
+					var commandDescription = info.commands[j];
+					var command = new eclipse.Command({
+						name: commandDescription.name,
+						image: commandDescription.image,
+						id: info.prefix + "." + commandDescription.id,
+						tooltip: commandDescription.tooltip,
+						callback: dojo.hitch(commandDescription, function(items){
+							var shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
+							service.run(this.id, shallowItemsClone);
+						}),
+						visibleWhen: function(items){
+							//TODO add some validation description on client site
+							return true;
+						}
+					});
+					if(commandDescription.type==="tree" || commandDescription.type==="both"){
+						if(!fileGroupCreated){
+							commandService.addCommandGroup("fileGroup."+info.prefix, 100, info.displayName ? info.name : null, fileGroup);
+							fileGroupCreated=true;
+						}
+						commandService.addCommand(command, "object");
+						commandService.registerCommandContribution(command.id, commandDescription.index, null, fileGroup+"/fileGroup."+info.prefix);
+					}
+					if(commandDescription.type==="toolbar" || commandDescription.type==="both"){
+						if(!navGroupCreated){
+							commandService.addCommandGroup("toolbarGroup."+info.prefix, 100, null, null, toolbarId);
+							navGroupCreated=true;
+						}
+						commandService.addCommand(command, "dom");
+						commandService.registerCommandContribution(command.id, commandDescription.index, toolbarId, "toolbarGroup."+info.prefix);
+					}
+				}
+				eclipse.fileCommandUtils.updateNavTools(serviceRegistry, explorer, explorer.innerId, toolbarId, explorer.treeRoot);
+				explorer.updateCommands();
+				
+			});
+			
+		});
+	}
+	
+	
+
+	
+	
+};
