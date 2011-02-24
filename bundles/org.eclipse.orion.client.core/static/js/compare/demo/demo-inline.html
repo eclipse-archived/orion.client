@@ -153,12 +153,12 @@ function getFileDiffGit(hashValue){
 }
 
 window.onload = function() {
-	var demo = document.getElementById("dataLength");
-	demo.innerHTML = demoData.length + ")";
-	var TH = document.getElementById("TH");
-	TH.innerHTML = "File On Local and Git";
+	//var demo = document.getElementById("dataLength");
+	//demo.innerHTML = demoData.length + ")";
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
+		var TH = document.getElementById("TH");
+		TH.innerHTML = "File : " + splitted[1];
 		getFileContentGit(splitted[1]);
 	}
 };
@@ -180,10 +180,12 @@ window.onload = function() {
 
 </tr>
 </table>
+<!-- 
 <span>Demo Data Number(1-</span>
 <span id="dataLength"></span>
 <input id="caseNo" type="text" />
 <button onclick='createCompareEditor()'  padding: 0 2 0 2'>Compare</button>
+-->
 <br>
 </body>
 </html>
