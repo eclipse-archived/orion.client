@@ -25,13 +25,7 @@ var eclipse = eclipse || {};
  
 eclipse.editorFeatures = eclipse.editorFeatures || {};
 
-eclipse.editorFeatures.updateEditorToolbar = function(toolbarId, editor, commandService) {
-	var toolbar = dojo.byId(toolbarId);
-	if (toolbar) {	
-		dojo.empty(toolbar);
-		commandService.renderCommands(toolbar, "dom", editor, editor, "image");
-	}
-};
+
 /**
  * Creates the common text editing commands.  Also generates commands for any installed plug-ins that
  * contribute editor actions.  
@@ -130,7 +124,11 @@ eclipse.editorFeatures.createEditorCommands = function(serviceRegistry, commandS
 					// if there is no image it will be grouped in a "More..." menu button
 					commandService.registerCommandContribution(command.id, i, toolbarId, "eclipse.editorActions.contributed.noImages");
 				}
-				eclipse.editorFeatures.updateEditorToolbar(toolbarId, editor, commandService);
+				// We must regenerate the command toolbar everytime we process an extension because
+				// this is asynchronous and we probably have already populated the toolbar.
+				// In the editor, we generate page level commands to the banner.
+				eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, editor);
+
 				if (info.key) {
 					// add it to the editor as a keybinding
 					KB.prototype = eclipse.KeyBinding.prototype;

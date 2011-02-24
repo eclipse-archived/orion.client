@@ -67,6 +67,7 @@
       
  	<!-- Breadcrumbs, Tree -->
  	<!-- START:navigate-tree.js -->
+ 	<script scr="js/globalCommands.js></script>
   	<script src="js/breadcrumbs.js"></script> 
 	<script src="js/explorer-tree.js"></script>
 	<script src="js/fileCommands.js"></script>
@@ -76,15 +77,6 @@
 	
     <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
-			<div id="bannerLeftArea" style="float: left;">
-				<a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/orion.png" alt="Orion Logo" align="top"></a>
-			</div>
-			<div class="leftInnerToolbar">
-				<b class="statuspane" id="statusPane"></b>
-			</div>
-			<div id="eclipseWebToolbar" class="innerToolbar" style="float: right;">
-				<input type="search" id="search" class="searchbox">
-			</div>
 		</div>
 		
 		<div class="paneScrolled" style="margin-left: 8px; width: 20%" id="leftPane" dojoType="dijit.layout.ContentPane" region="leading" splitter="true">

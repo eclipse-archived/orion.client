@@ -23,26 +23,6 @@ var eclipse = eclipse || {};
  
 eclipse.fileCommandUtils = eclipse.fileCommandUtils || {};
 
-eclipse.fileCommandUtils.hookUpSearch = function(searchBoxId, explorer) {
-	var searchField = dojo.byId(searchBoxId);
-	if (searchField) {
-		dojo.connect(searchField, "onkeypress", function(e){
-			if (e.charOrCode === dojo.keys.ENTER) {
-				// We expect ExplorerTree to fill in the SearchLocation on the treeRoot
-				if (explorer.treeRoot.SearchLocation) {
-					if (searchField.value.length > 0) {
-						var query = explorer.treeRoot.SearchLocation + searchField.value;
-						explorer.loadResourceList(query);
-						dojo.stopEvent(e);
-					}
-				} else {
-					window.alert("Can't search: SearchLocation not available");
-				}
-			}
-		});
-	}
-};
-
 eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, item) {
 	var parent = dojo.byId(parentId);
 	var toolbar = dojo.byId(toolbarId);

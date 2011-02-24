@@ -38,6 +38,9 @@ dojo.addOnLoad(function(){
 	
 	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, "explorer-tree", "navToolBar");
 	
+	// TODO search location needs to be gotten from somewhere
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, "/search?q=", explorer);
+
 	// commands shared by navigators
 	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar");
 	
