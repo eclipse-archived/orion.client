@@ -40,6 +40,45 @@ var testcase = (function(assert) {
 		return promise;
 	};
 	
+	tests["test reload installed plugin"] = function() {
+		var storage = {};
+		var serviceRegistry = new eclipse.ServiceRegistry();
+		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+
+		assert.equal(pluginRegistry.getPlugins().length, 0);
+		assert.equal(serviceRegistry.getServiceReferences().length, 0);
+
+		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+			var pluginInfo = {
+				location: plugin.getLocation(),
+				data: plugin.getData()
+			};
+
+			assert.equal(pluginRegistry.getPlugins().length, 1);
+			assert.equal(serviceRegistry.getServiceReferences().length, 1);
+
+			plugin.uninstall();
+
+			assert.equal(pluginRegistry.getPlugins().length, 0);
+			assert.equal(serviceRegistry.getServiceReferences().length, 0);
+			return pluginInfo;
+		}).then(function(pluginInfo) {
+			return pluginRegistry.installPlugin(pluginInfo.location, pluginInfo.data);
+		}).then(function(plugin) {
+			assert.equal(pluginRegistry.getPlugins().length, 1);
+			assert.equal(serviceRegistry.getServiceReferences().length, 1);
+
+			plugin.uninstall();
+
+			assert.equal(pluginRegistry.getPlugins().length, 0);
+			assert.equal(serviceRegistry.getServiceReferences().length, 0);
+			pluginRegistry._shutdown();
+		});
+
+		return promise;
+	};
+	
+	
 	tests["test plugin service call"] = function() {
 		var storage = {};
 		var serviceRegistry = new eclipse.ServiceRegistry();

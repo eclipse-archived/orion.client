@@ -152,17 +152,20 @@ eclipse.EditorContainer = (function() {
 				this._serviceRegistry.getService("IInputProvider").then(function(service) {
 					service.setDirty(false);
 				});
-				if (title.charAt(0) === '*') {
+				if (title && title.charAt(0) === '*') {
 					this.setTitle(title.substring(1));
 				}
 			}
 			this._dirty = dirty;
 		},
 		getTitle : function() {
-			if (this._codeTitle instanceof dijit._Widget) {
-				return this._codeTitle.get("title");
-			} else if (this._codeTitle.innerHTML) {
-				return this._codeTitle.innerHTML;
+			var title = dojo.byId(this._codeTitle);
+			if (title) {
+				return title.innerHTML;
+			}
+			title = dijit.byId(this._codeTitle);
+			if (title) {
+				returntitle.get("title");
 			}
 			return null;
 		},
@@ -217,11 +220,11 @@ eclipse.EditorContainer = (function() {
 			// eclipse desktop-style breadcrumb that one could use to actually
 			// navigate
 			if (this._editor) {
-				var titlePane = this._codeTitle;
-				if (titlePane instanceof dijit._Widget) {
+				var titlePane = dijit.byId(this._codeTitle);
+				if (titlePane) {
 					titlePane.set("title", shortTitle);
 				} else {
-					titlePane = this._codeTitle;
+					titlePane = dojo.byId(this._codeTitle);
 					if (titlePane) {
 						titlePane.innerHTML = shortTitle;
 					}

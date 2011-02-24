@@ -36,36 +36,38 @@ eclipse.CompareRuler = (function() {
 	return CompareRuler;
 }());
 
-eclipse.LineNumberCompareRuler = (function() {
-	function LineNumberCompareRuler (rulerLocation, rulerStyle, oddStyle, evenStyle) {
+eclipse.LineNumberDiffRuler = (function() {
+	function LineNumberDiffRuler (forDiff , rulerLocation, rulerStyle, oddStyle, evenStyle) {
 		eclipse.CompareRuler.call(this, rulerLocation, "page", rulerStyle);
 		this._oddStyle = oddStyle || {style: {backgroundColor: "white"}};
 		this._evenStyle = evenStyle || {style: {backgroundColor: "white"}};
 		this._numOfDigits = 0;
+		this._forDiff = forDiff;
 	}
-	LineNumberCompareRuler.prototype = new eclipse.CompareRuler(); 
-	LineNumberCompareRuler.prototype.getStyle = function(lineIndex) {
+	LineNumberDiffRuler.prototype = new eclipse.CompareRuler(); 
+	LineNumberDiffRuler.prototype.getStyle = function(lineIndex) {
 		if (lineIndex === undefined) {
 			return this._rulerStyle;
 		} else {
 			return false/*lineIndex & 1 */? this._oddStyle : this._evenStyle;
 		}
 	};
-	LineNumberCompareRuler.prototype.getHTML = function(lineIndex) {
+	LineNumberDiffRuler.prototype.getHTML = function(lineIndex) {
 		var model = this._editor.getModel();
 		if (lineIndex === -1) {
 			return model.getLineCount();
 		} else {
-			if(model.lookUpRealIndex){
-				var realIndex = model.lookUpRealIndex(lineIndex);
-				if(realIndex.lineIndex === -1)
+			if(model._lineFeeder.getLineNumber){
+				var realIndex = model._lineFeeder.getLineNumber(lineIndex , this._forDiff ? 0:1);
+				if(realIndex === -1){
 					return "";
-				return  realIndex.lineIndex + 1;
+				}
+				return  realIndex + 1;
 			}
 			return lineIndex + 1;;
 		}
 	};
-	LineNumberCompareRuler.prototype._onModelChanged = function(e) {
+	LineNumberDiffRuler.prototype._onModelChanged = function(e) {
 		var start = e.start;
 		var model = this._editor.getModel();
 		var lineCount = model.getLineCount();
@@ -76,5 +78,5 @@ eclipse.LineNumberCompareRuler = (function() {
 			this._editor.redrawLines(startLine, lineCount, this);
 		}
 	};
-	return LineNumberCompareRuler;
+	return LineNumberDiffRuler;
 }());

@@ -1,51 +1,54 @@
 <!doctype html>
-<html style="height: 100%" lang="en-us">
+<html style="height: 100%" >
     <head>
 		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 		<meta http-equiv="X-UA-Compatible" content="IE=8">
     	<title>Orion Navigator</title>    
-	<script type="text/javascript">
-		var djConfig = {
-			isDebug:false,
-			modulePaths: {'widgets': '/js/widgets'},
-			parseOnLoad:true
-		};
-	</script>
+    
+    <script type="text/javascript">
+        var djConfig = {
+		isDebug: true,
+		modulePaths: {'widgets': '/js/widgets'},
+		parseOnLoad: true
+        };
+    </script>
     <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
     <script type="text/javascript">
-	dojo.require("dijit.Menu");
-	dojo.require("dijit.MenuItem");
 	dojo.require("dijit.Dialog");
+	dojo.require("dijit.form.TextBox"); dojo.require("dijit.form.ComboBox");
 	dojo.require("dijit.form.CheckBox");
+	dojo.require("dojo.data.ItemFileReadStore");
 	dojo.require("widgets.NewItemDialog");
-    	dojo.require("widgets.OpenResourceDialog");
+	dojo.require("widgets.OpenResourceDialog");
 	dojo.require("widgets.ImportDialog");
  	</script>    	
 	<style type="text/css">
 		@import "/org.dojotoolkit/dojo/resources/dojo.css";
 		@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
-		@import "/org.dojotoolkit/dijit/themes/soria/Tree.css";
 		@import "/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css";
 		@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
 		@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/ProgressBar.css";
+		@import "/org.dojotoolkit/dojox/form/resources/FileUploader.css";
 	    @import "/ide.css";
-	    @import "/breadcrumbs.css";
+	    @import "/breadcrumbs.css"; 
 	    @import "/commands.css";
 	</style>
 	
+	<!-- Authentication (required for handleAuthenticationError) -->
+	<script type="text/javascript" src="js/auth.js"></script>
    </head>
 
     <body style="height: 100%" class="soria">
     
 	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
 	
-	<!-- Extension Registry -->
+    <!-- Extension Registry -->
 	<script src="js/serviceregistry.js"></script>
+	<script src="js/pluginregistry.js"></script>
 	
-	<!--Authentication -->
-	<script type="text/javascript" src="js/auth.js"></script>
-
     <!-- Eclipse Application Services -->
     <!-- START:eas.js -->
  	<script src="js/util.js"></script>
@@ -67,6 +70,7 @@
       
  	<!-- Breadcrumbs, Tree -->
  	<!-- START:navigate-tree.js -->
+ 	<script src="js/globalCommands.js"></script>
   	<script src="js/breadcrumbs.js"></script> 
 	<script src="js/explorer-tree.js"></script>
 	<script src="js/fileCommands.js"></script>
@@ -76,15 +80,6 @@
 	
     <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
-			<div style="float: left;">
-				<table><tr>
-		    		<td><img class="toolbarLabel" src="/images/orion.png" alt="Eclipse Logo" align="top"></td>
-					<td><b class="statuspane" id="statusPane"></td>
-				</tr></table>
-			</div>
-			<div id="eclipseWebToolbar" class="innerToolbar" style="float: right;">
-				<input type="search" id="search" class="searchbox">
-			</div>
 		</div>
 		
 		<div class="paneScrolled" style="margin-left: 8px; width: 20%" id="leftPane" dojoType="dijit.layout.ContentPane" region="leading" splitter="true">
@@ -95,7 +90,7 @@
 		</div>
 
 		<div class="paneScrolled" style="margin-left: 8px;" id="rightPane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-			<div id="explorer-tree">
+			<div id="explorer-tree" class="navigator">
 				<!-- Breadcrumbs, tree content go here -->
 			</div>
 			<ul dojoType="dijit.Menu" id="treeContextMenu" style="display: none;">

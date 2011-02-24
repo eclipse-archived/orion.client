@@ -116,7 +116,9 @@ eclipse.PluginProvider = function() {
 		
 		_hubClient = new OpenAjax.hub.IframeHubClient({
 	        HubClient: {
-	          onSecurityAlert: function(source, alertType) {}
+	          onSecurityAlert: function(source, alertType) {
+	        	  console.log(source + ":" + alertType );
+	          }
 	        }
 		});
 		_hubClient.connect(function(hubClient, success, error) {
