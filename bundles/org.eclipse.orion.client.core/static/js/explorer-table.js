@@ -51,12 +51,9 @@ eclipse.Explorer = (function() {
 			if (path === this._lastHash) {
 				return;
 			}
-			
-			//TODO we need a reliable way to infer search from the path
-			var isSearch = path.indexOf("search?") > 0;
-			
+						
 			this._lastHash = path;
-			dojo.hash(path, !isSearch);
+			dojo.hash(path, true);
 			// empty the inner area (progress, breadcrumbs, etc.)
 			this.removeResourceList();
 			var parent = dojo.byId(this.parentId);
@@ -75,13 +72,6 @@ eclipse.Explorer = (function() {
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
 	
-			if (isSearch) {
-				var results = dojo.create("div", null, inner);
-				this.searcher.search(results, path, null, true); // true means generate a "save search" link and heading
-				//fall through and set the tree root to be the workspace root
-				path ="";
-				dojo.place(results, inner, "only");
-			}
 			if (path !== this.treeRoot.Path) {
 				//the tree root object has changed so we need to load the new one
 				this.treeRoot.Path = path;
@@ -100,12 +90,10 @@ eclipse.Explorer = (function() {
 									this.treeRoot[i] = loadedWorkspace[i];
 								}
 								eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
-								if (!isSearch) {
-									dojo.empty(inner);
-									new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
-									eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.treeRoot);
-									this.createTree();
-								}
+								dojo.empty(inner);
+								new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
+								eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.treeRoot);
+								this.createTree();
 							}));
 					});
 			}

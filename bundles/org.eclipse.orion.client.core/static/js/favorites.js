@@ -270,7 +270,7 @@ eclipse.Favorites = (function() {
 			var tr, col1, col2;
 			for (var j=0; j < favorites.length; j++) {
 				var fave = favorites[j];
-				var href = fave.directory ? "#" + fave.path : "coding.html#" + fave.path;
+				var href = fave.directory ? "navigate-table.html#" + fave.path : "coding.html#" + fave.path;
 				if (href==="#") {
 					href="";
 				}
@@ -310,7 +310,7 @@ eclipse.Favorites = (function() {
 				dojo.addClass(searchTable, "favoritesTable");
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
-					var href="#" + search.query;
+					var href="searchResults.html#" + search.query;
 					tr = dojo.create("tr");
 					tr.id = "searchRow"+i;
 					col1 = dojo.create("td", null, tr, "last");

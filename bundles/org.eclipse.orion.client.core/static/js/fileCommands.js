@@ -23,26 +23,6 @@ var eclipse = eclipse || {};
  
 eclipse.fileCommandUtils = eclipse.fileCommandUtils || {};
 
-eclipse.fileCommandUtils.hookUpSearch = function(searchBoxId, explorer) {
-	var searchField = dojo.byId(searchBoxId);
-	if (searchField) {
-		dojo.connect(searchField, "onkeypress", function(e){
-			if (e.charOrCode === dojo.keys.ENTER) {
-				// We expect ExplorerTree to fill in the SearchLocation on the treeRoot
-				if (explorer.treeRoot.SearchLocation) {
-					if (searchField.value.length > 0) {
-						var query = explorer.treeRoot.SearchLocation + searchField.value;
-						explorer.loadResourceList(query);
-						dojo.stopEvent(e);
-					}
-				} else {
-					window.alert("Can't search: SearchLocation not available");
-				}
-			}
-		});
-	}
-};
-
 eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, item) {
 	var parent = dojo.byId(parentId);
 	var toolbar = dojo.byId(toolbarId);
@@ -234,21 +214,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			return item.Location && eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(linkProjectCommand, "dom");
-		
-	var openResourceCommand = new eclipse.Command({
-		name: "Open Resource",
-		image: "images/find.gif",
-		id: "eclipse.openResource",
-		callback: function(item) {
-			window.setTimeout(function() {
-				new widgets.OpenResourceDialog({
-					SearchLocation: explorer.treeRoot.SearchLocation,
-					searcher: explorer.searcher
-				}).show();
-			}, 0);
-		}});
-	commandService.addCommand(openResourceCommand, "dom");
-		
+				
 	var importCommand = new eclipse.Command({
 		name : "Import",
 		image : "images/zip_import.gif",
