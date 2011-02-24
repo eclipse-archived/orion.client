@@ -214,21 +214,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			return item.Location && eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(linkProjectCommand, "dom");
-		
-	var openResourceCommand = new eclipse.Command({
-		name: "Open Resource",
-		image: "images/find.gif",
-		id: "eclipse.openResource",
-		callback: function(item) {
-			window.setTimeout(function() {
-				new widgets.OpenResourceDialog({
-					SearchLocation: explorer.treeRoot.SearchLocation,
-					searcher: explorer.searcher
-				}).show();
-			}, 0);
-		}});
-	commandService.addCommand(openResourceCommand, "dom");
-		
+				
 	var importCommand = new eclipse.Command({
 		name : "Import",
 		image : "images/zip_import.gif",
