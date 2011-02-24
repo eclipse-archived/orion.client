@@ -23,26 +23,6 @@ var eclipse = eclipse || {};
  
 eclipse.fileCommandUtils = eclipse.fileCommandUtils || {};
 
-eclipse.fileCommandUtils.hookUpSearch = function(searchBoxId, explorer) {
-	var searchField = dojo.byId(searchBoxId);
-	if (searchField) {
-		dojo.connect(searchField, "onkeypress", function(e){
-			if (e.charOrCode === dojo.keys.ENTER) {
-				// We expect ExplorerTree to fill in the SearchLocation on the treeRoot
-				if (explorer.treeRoot.SearchLocation) {
-					if (searchField.value.length > 0) {
-						var query = explorer.treeRoot.SearchLocation + searchField.value;
-						explorer.loadResourceList(query);
-						dojo.stopEvent(e);
-					}
-				} else {
-					window.alert("Can't search: SearchLocation not available");
-				}
-			}
-		});
-	}
-};
-
 eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, item) {
 	var parent = dojo.byId(parentId);
 	var toolbar = dojo.byId(toolbarId);
@@ -71,7 +51,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 
 	var favoriteCommand = new eclipse.Command({
 		name: "Make Favorite",
-		image: "images/silk/star.png",
+		image: "images/silk/star.gif",
 		id: "eclipse.makeFavorite",
 		visibleWhen: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
@@ -89,7 +69,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(favoriteCommand, "object");
 	var deleteCommand = new eclipse.Command({
 		name: "Delete",
-		image: "images/silk/cross.png",
+		image: "images/remove.gif",
 		id: "eclipse.deleteFile",
 		visibleWhen: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
@@ -128,7 +108,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 
 	var downloadCommand = new eclipse.Command({
 		name: "Download as Zip",
-		image: "images/silk/arrow_down.png",
+		image: "images/down.gif",
 		id: "eclipse.downloadFile",
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
@@ -140,7 +120,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var newFileCommand=  new eclipse.Command({
 		name: "New File",
-		image: "images/silk/page_add.png",
+		image: "images/newfile_wiz.gif",
 		id: "eclipse.newFile",
 		callback: function(item) {
 			item = forceSingleItem(item);
@@ -164,7 +144,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var newFolderCommand = new eclipse.Command({
 		name: "New Folder",
-		image: "images/silk/folder_add.png",
+		image: "images/newfolder_wiz.gif",
 		id: "eclipse.newFolder",
 		callback: function(item) {
 			item = forceSingleItem(item);
@@ -189,7 +169,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var newProjectCommand = new eclipse.Command({
 		name: "New Folder",
-		image: "images/silk/folder_add.png",
+		image: "images/newfolder_wiz.gif",
 		id: "eclipse.newProject",
 		callback: function(item) {
 			var dialog = new widgets.NewItemDialog({
@@ -213,7 +193,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var linkProjectCommand = new eclipse.Command({
 		name: "Link Folder",
-		image: "images/silk/link_add.png",
+		image: "images/link_obj.gif",
 		id: "eclipse.linkProject",
 		callback: function(item) {
 			var dialog = new widgets.NewItemDialog({
@@ -234,24 +214,10 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			return item.Location && eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(linkProjectCommand, "dom");
-		
-	var openResourceCommand = new eclipse.Command({
-		name: "Open Resource",
-		image: "images/silk/find.png",
-		id: "eclipse.openResource",
-		callback: function(item) {
-			window.setTimeout(function() {
-				new widgets.OpenResourceDialog({
-					SearchLocation: explorer.treeRoot.SearchLocation,
-					searcher: explorer.searcher
-				}).show();
-			}, 0);
-		}});
-	commandService.addCommand(openResourceCommand, "dom");
-		
+				
 	var importCommand = new eclipse.Command({
 		name : "Import",
-		image : "images/silk/zip_import.gif",
+		image : "images/zip_import.gif",
 		id: "eclipse.importCommand",
 		callback : function(item) {
 			item = forceSingleItem(item);

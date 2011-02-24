@@ -51,12 +51,9 @@ eclipse.Explorer = (function() {
 			if (path === this._lastHash) {
 				return;
 			}
-			
-			//TODO we need a reliable way to infer search from the path
-			var isSearch = path.indexOf("search?") > 0;
-			
+						
 			this._lastHash = path;
-			dojo.hash(path, !isSearch);
+			dojo.hash(path, true);
 			// empty the inner area (progress, breadcrumbs, etc.)
 			this.removeResourceList();
 			var parent = dojo.byId(this.parentId);
@@ -75,13 +72,6 @@ eclipse.Explorer = (function() {
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
 	
-			if (isSearch) {
-				var results = dojo.create("div", null, inner);
-				this.searcher.search(results, path, null, true); // true means generate a "save search" link and heading
-				//fall through and set the tree root to be the workspace root
-				path ="";
-				dojo.place(results, inner, "only");
-			}
 			if (path !== this.treeRoot.Path) {
 				//the tree root object has changed so we need to load the new one
 				this.treeRoot.Path = path;
@@ -100,12 +90,10 @@ eclipse.Explorer = (function() {
 									this.treeRoot[i] = loadedWorkspace[i];
 								}
 								eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
-								if (!isSearch) {
-									dojo.empty(inner);
-									new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
-									eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.treeRoot);
-									this.createTree();
-								}
+								dojo.empty(inner);
+								new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
+								eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.treeRoot);
+								this.createTree();
 							}));
 					});
 			}
@@ -192,6 +180,7 @@ eclipse.FileRenderer = (function() {
 			dojo.addClass(tableNode, 'treetable');
 			var thead = document.createElement('thead');
 			var row = document.createElement('tr');
+			dojo.addClass(row, "domCommandBackground");
 			var th, actions, size;
 			if (this._useCheckboxSelection) {
 				th = document.createElement('th');
@@ -253,7 +242,7 @@ eclipse.FileRenderer = (function() {
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
-				dojo.create("img", {src: "/images/silk/folder.png"}, div, "last");
+				dojo.create("img", {src: "/images/fldr_obj.gif"}, div, "last");
 				link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 				expandImg.onclick = dojo.hitch(this, function(evt) {
@@ -281,7 +270,7 @@ eclipse.FileRenderer = (function() {
 				}
 				div = dojo.create("div", null, col, "only");
 				dojo.create("img", {src: "/images/none.png"}, div, "last");
-				dojo.create("img", {src: "/images/silk/page.png"}, div, "last");
+				dojo.create("img", {src: "/images/file_obj.gif"}, div, "last");
 				link = dojo.create("a", {className: "navlink", href: href}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			}
@@ -337,8 +326,13 @@ eclipse.FileRenderer = (function() {
 		
 		rowsChanged: function() {
 			dojo.query(".treeTableRow").forEach(function(node, i) {
-				var color = i % 2 ? "FFFFFF" : "EFEFEF";
-				dojo.style(node, "backgroundColor", color);
+				if (i % 2) {
+					dojo.addClass(node, "darkTreeTableRow");
+					dojo.removeClass(node, "lightTreeTableRow");
+				} else {
+					dojo.addClass(node, "lightTreeTableRow");
+					dojo.removeClass(node, "darkTreeTableRow");
+				}
 			});
 		},
 		

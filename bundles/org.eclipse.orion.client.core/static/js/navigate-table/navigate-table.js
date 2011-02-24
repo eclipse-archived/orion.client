@@ -33,11 +33,14 @@ dojo.addOnLoad(function(){
 	var treeRoot = {
 		children:[]
 	};
-	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
 	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, "explorer-tree", "navToolBar");
 	
+	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+
+	// global commands
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
 	// commands shared by navigators
 	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar");
 	
@@ -82,7 +85,4 @@ dojo.addOnLoad(function(){
 	dojo.subscribe("/dojo/hashchange", explorer, function() {
 	   explorer.loadResourceList(dojo.hash());
 	});
-	
-	eclipse.fileCommandUtils.hookUpSearch("search", explorer);
-
 });

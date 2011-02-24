@@ -165,7 +165,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 };
 
 eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
-	var _storage = opt_storage || localStorage;
+	var _storage = opt_storage || localStorage || {};
 	var _plugins = [];
 	var _pluginEventTarget = new eclipse.EventTarget();
 	
@@ -195,7 +195,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				var pluginURL = key.substring("plugin.".length);
 				var pluginData = JSON.parse(_storage[key]);
 				var plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
-				_plugins[_plugins.length] = plugin;
+				_plugins.push(plugin);
 			}
 		}	
 	}
@@ -270,7 +270,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		_managedHub.disconnect();
 	};
 	
-	this.installPlugin = function(url) {
+	this.installPlugin = function(url, opt_data) {
 		url = _normalizeURL(url);
 		var d = new dojo.Deferred();
 		var plugin;
@@ -293,15 +293,21 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				_pluginEventTarget.addEventListener("pluginAdded", pluginTracker);
 			}
 		} else {
-			plugin = new eclipse.Plugin(url, null, internalRegistry);
+			plugin = new eclipse.Plugin(url, opt_data, internalRegistry);
 			_plugins.push(plugin);
-			plugin._load().then(function() {
+			if(plugin.getData()) {
 				_persist(plugin);
 				_pluginEventTarget.dispatchEvent("pluginAdded", plugin);
 				d.resolve(plugin);
-			}, function(e) {
-				d.reject(e);
-			});			
+			} else {		
+				plugin._load().then(function() {
+					_persist(plugin);
+					_pluginEventTarget.dispatchEvent("pluginAdded", plugin);
+					d.resolve(plugin);
+				}, function(e) {
+					d.reject(e);
+				});
+			}
 		}
 		return d.promise;	
 	};

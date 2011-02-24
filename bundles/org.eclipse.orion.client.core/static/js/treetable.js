@@ -40,8 +40,7 @@ eclipse.TableTree = (function() {
 	 *   <li>initTable(tableNode) // set up table attributes and a header if desired
 	 *   <li>render(item, tr) // generate tds for the row
 	 *   <li>labelColumnIndex() // 0 based index of which td contains the primary label which will be indented
-	 *   <li>rowsChanged() 
-	 * </ul>
+	 *   <li>rowsChanged // optional, perform any work (such as styling) that should happen after the row content changes</ul>
 	 * 
 	 */
 	function TableTree (options) {
@@ -112,7 +111,10 @@ eclipse.TableTree = (function() {
 		},
 		
 		_rowsChanged: function() {
-			this._renderer.rowsChanged();
+			// notify the renderer if it has implemented the function
+			if (this._renderer.rowsChanged) {
+				this._renderer.rowsChanged();
+			}
 		},
 		
 		getSelected: function() {

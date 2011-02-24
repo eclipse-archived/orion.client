@@ -268,11 +268,7 @@ eclipse.CommandService = (function() {
 							var sep;
 							// Only draw a separator if there is a non-separator preceding it.
 							if (parent.childNodes.length > 0 && !this._isLastChildSeparator(parent, style)) {
-								sep = new Image();
-								// TODO should get this from CSS
-								sep.src = "images/sep.gif";
-								dojo.addClass(sep, "commandImage");
-								dojo.addClass(sep, "commandSeparator");
+								sep = this.generateSeparatorImage();
 								dojo.place(sep, parent, "last");
 							}
 							this._render(positionOrder[i].children, parent, scope, items, handler, style, userData, commandList); 
@@ -281,11 +277,7 @@ eclipse.CommandService = (function() {
 							if (parent.childNodes.length > 0) {
 								var lastRendered = parent.childNodes[parent.childNodes.length - 1];
 								if (lastRendered !== sep) {
-									sep = new Image();
-								// TODO should get this from CSS
-									sep.src = "images/sep.gif";
-									dojo.addClass(sep, "commandImage");
-									dojo.addClass(sep, "commandSeparator");
+									sep = this.generateSeparatorImage();
 									dojo.place(sep, parent, "last");
 								}
 							}
@@ -345,6 +337,14 @@ eclipse.CommandService = (function() {
 					}
 				}
 			}
+		},
+		generateSeparatorImage: function() {
+			sep = new Image();
+			// TODO should get this from CSS
+			sep.src = "images/sep.gif";
+			dojo.addClass(sep, "commandImage");
+			dojo.addClass(sep, "commandSeparator");
+			return sep;
 		}
 
 	};  // end prototype

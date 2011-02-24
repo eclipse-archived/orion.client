@@ -34,12 +34,16 @@ dojo.addOnLoad(function(){
 		children:[]
 	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	
 	var contextMenu = dijit.byId("treeContextMenu");
 	
 	var explorer = new eclipse.ExplorerTree(serviceRegistry, treeRoot,
 			searcher, "explorer-tree", "navToolBar", contextMenu);
+			
+	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+	
+	// global commands
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
 			
 	// commands shared among navigators
 	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar");
@@ -79,9 +83,6 @@ dojo.addOnLoad(function(){
 	dojo.subscribe("/dojo/hashchange", explorer, function() {
 		explorer.loadResourceList(dojo.hash());
 	});
-	
-	eclipse.fileCommandUtils.hookUpSearch("search", explorer);
-
 	
 	// it's important to replace the implementation of setInput here, so that we get
 	// the event at the time it happens as opposed to using a stored event. Firefox
