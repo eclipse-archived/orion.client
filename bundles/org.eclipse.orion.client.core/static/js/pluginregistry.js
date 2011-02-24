@@ -270,7 +270,10 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		_managedHub.disconnect();
 	};
 	
-	this.installPlugin = function(url, opt_data) {
+	this.installPlugin = function(url, opt_data, persist) {
+		if (persist === undefined) {
+			persist = true;
+		}
 		url = _normalizeURL(url);
 		var d = new dojo.Deferred();
 		var plugin;
@@ -296,7 +299,9 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 			plugin = new eclipse.Plugin(url, opt_data, internalRegistry);
 			_plugins.push(plugin);
 			if(plugin.getData()) {
-				_persist(plugin);
+			        if (persist) {
+				    _persist(plugin);
+			        }
 				_pluginEventTarget.dispatchEvent("pluginAdded", plugin);
 				d.resolve(plugin);
 			} else {		

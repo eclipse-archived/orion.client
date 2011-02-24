@@ -111,7 +111,7 @@ h2 {
 }
 
 .toolbarTest {
-	background: #fff url("images/titleBarTest.png")  repeat-x top left;
+//	background: #fff url("images/titleBarTest.png")  repeat-x top left;
 	border:1px solid #bfbfbf;
 	cursor: default;
 	font-size: 0.9em;
@@ -289,4 +289,12 @@ h2 {
 
 .contentassist .selected {
 	background-color: #DDDDDD;
+}
+
+.test-passed {
+	background-color: #11FF11;
+}
+
+.test-failed {
+	background-color: #FF1111;
 }

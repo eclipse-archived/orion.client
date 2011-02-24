@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+<!-- standard scripts -->
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
 	<script type="text/javascript" src="../../js/assert.js"></script>
 	<script type="text/javascript" src="../../js/test.js"></script>
+	<script type="text/javascript" src="../../js/plugin.js"></script>
+	<script type="text/javascript" src="../../js/test-plugin.js"></script>
+
+<!-- JavaScript files containing the tests and their dependencies -->
+	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script type="text/javascript" src="../../js/compare/diff-parser.js"></script>
 	<script type="text/javascript" src="../../js/compare/text-model.js"></script>
 	<script type="text/javascript" src="mapper-test-data.js"></script>
 	<script type="text/javascript" src ="testcase.js"></script>
 	<script type="text/javascript" src="/editor/js/model.js"></script>
 	<script type="text/javascript" src ="testcase-model.js"></script>
+
+<!-- tests to be run -->
 	<script type="text/javascript">
-	window.onload = function() {
-		orion.Test.useConsole();
-		orion.Test.run(testcase);
-		orion.Test.run(testcaseModel);
-	};
+		orion.TestPlugin.add("gap", testcase);
+		orion.TestPlugin.add("model", testcaseModel);
 	</script>
 </head>
 <body>
