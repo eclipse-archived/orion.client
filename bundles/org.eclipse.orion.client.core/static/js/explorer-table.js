@@ -254,7 +254,7 @@ eclipse.FileRenderer = (function() {
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
-				dojo.create("img", {src: "/images/silk/folder.png"}, div, "last");
+				dojo.create("img", {src: "/images/fldr_obj.gif"}, div, "last");
 				link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 				expandImg.onclick = dojo.hitch(this, function(evt) {
@@ -282,7 +282,7 @@ eclipse.FileRenderer = (function() {
 				}
 				div = dojo.create("div", null, col, "only");
 				dojo.create("img", {src: "/images/none.png"}, div, "last");
-				dojo.create("img", {src: "/images/silk/page.png"}, div, "last");
+				dojo.create("img", {src: "/images/file_obj.gif"}, div, "last");
 				link = dojo.create("a", {className: "navlink", href: href}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			}
@@ -337,7 +337,6 @@ eclipse.FileRenderer = (function() {
 		},
 		
 		rowsChanged: function() {
-			// this seems to no longer work.  Why?
 			dojo.query(".treeTableRow").forEach(function(node, i) {
 				if (i % 2) {
 					dojo.addClass(node, "darkTreeTableRow");
