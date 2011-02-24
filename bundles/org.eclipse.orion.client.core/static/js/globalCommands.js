@@ -11,8 +11,14 @@
 /*global window dijit document widgets eclipse:true serviceRegistry dojo login logout */
 /*browser:true*/
 
+/**
+ * @namespace The global container for eclipse APIs.
+ */ 
+var eclipse = eclipse || {};
+
+
 // begin HTML fragment for top area
-var top =
+var topHTMLFragment =
 '<div id="bannerLeftArea" style="float: left;">' +
 	'<a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/orion.png" alt="Orion Logo" align="top"></a>' +
 '</div>' +
@@ -27,11 +33,6 @@ var top =
 	'<span id="userInfo" class="statuspane"></span>' +
 '</div>';
 // end HTML fragment
-
-/**
- * @namespace The global container for eclipse APIs.
- */ 
-var eclipse = eclipse || {};
 
 /**
  * Utility methods
@@ -93,14 +94,16 @@ eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService
 	}
 };
 
-eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, prefsService, searcher, searchLocation, handler, editor) {
+eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, prefsService, searcher, handler, editor) {
+	// this needs to come from somewhere but I'm not going to do a separate get for it
+	var searchLocation = "/search?q=";
 	var parent = dojo.byId(parentId);
 	if (!parent) {
 		throw "could not find banner parent, id was " + parentId;
 	}
 	
 	// place the HTML fragment from above.
-	dojo.place(top, parent, "only");
+	dojo.place(topHTMLFragment, parent, "only");
 	
 	// hook up search box behavior
 	var searchField = dojo.byId("search");
@@ -112,8 +115,7 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 			if (searchLocation) {
 				if (searchField.value.length > 0) {
 					var query = searchLocation + searchField.value;
-					// FIXME will be a search results page
-					window.location = "navigate-table.html#"+query;
+					window.location = "searchResults.html#"+query;
 				}
 			} else {
 				window.alert("Can't search: SearchLocation not available");
