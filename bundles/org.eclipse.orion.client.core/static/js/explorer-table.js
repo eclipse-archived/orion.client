@@ -77,12 +77,12 @@ eclipse.Explorer = (function() {
 				this.treeRoot.Path = path;
 				var self = this;
 					this.registry.getService("IFileService").then(function(service) {
-						service.loadWorkspace(path,
+						service.loadWorkspace(path).then(
 							dojo.hitch(self, function(loadedWorkspace) {
 								// Show an error message when a problem happens during getting the workspace
 								// Don't show the error for 401 since the login dialog is shown anyway
 								if (loadedWorkspace.status != null && loadedWorkspace.status != 401){
-									dojo.place(document.createTextNode("Sorry, an error ocurred: " + loadedWorkspace.message), progress, "only");
+									dojo.place(document.createTextNode("Sorry, an error occurred: " + loadedWorkspace.message), progress, "only");
 									return;
 								}
 								//copy fields of resulting object into the tree root

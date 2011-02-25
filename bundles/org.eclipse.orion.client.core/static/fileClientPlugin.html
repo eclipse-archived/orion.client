@@ -3,14 +3,48 @@
 <head>
 	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript">
+        var djConfig = {
+		isDebug: true,
+		modulePaths: {'widgets': '/js/widgets'},
+		parseOnLoad: true
+        };
+    </script>
+
 	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
 	<script type="text/javascript" src="js/plugin.js"></script>
+	<script type="text/javascript" src="js/globalCommands.js"></script>
 	<script type="text/javascript" src="js/fileClient.js"></script>
+	<script type="text/javascript" src="js/auth.js"></script>
+    <script type="text/javascript">
+		<!-- Used by authentication callback -->
+	dojo.require("dijit.Dialog");
+	dojo.require("dijit.form.TextBox"); dojo.require("dijit.form.ComboBox");
+	dojo.require("dijit.form.CheckBox");
+	dojo.require("dojo.data.ItemFileReadStore");
+	dojo.require("widgets.NewItemDialog");
+	dojo.require("widgets.OpenResourceDialog");
+	dojo.require("widgets.ImportDialog");
+ 	</script>    	
+	<style type="text/css">
+		@import "/org.dojotoolkit/dojo/resources/dojo.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/ProgressBar.css";
+		@import "/org.dojotoolkit/dojox/form/resources/FileUploader.css";
+	    @import "/ide.css";
+	    @import "/breadcrumbs.css"; 
+	    @import "/commands.css";
+	</style>
 	<script type="text/javascript">
 		window.onload = function() {
+			var service = new eclipse.FileService();
 			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("IFileService", new eclipse.FileService(), {name : "File Service"});
+			provider.registerServiceProvider("IFileService", service);
+			service.dispatchEvent = provider.dispatchEvent;
 			provider.connect();
 		};
 	</script>

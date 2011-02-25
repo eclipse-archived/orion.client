@@ -19,19 +19,18 @@ eclipse.FileService = (function() {
 	 * @class Provides operations on files, folders, and projects.
 	 * @name eclipse.FileService
 	 */
-
 	function FileService(serviceRegistry) {
-		this._serviceRegistry = serviceRegistry;
-		this._serviceRegistration = serviceRegistry.registerService("IFileService", this);
+		if (serviceRegistry)
+			this._serviceRegistration = serviceRegistry.registerService("IFileService", this);
 	}
+	
 	FileService.prototype = /**@lends eclipse.FileService.prototype */
 	{
 		/**
 		 * Obtains the children of a remote resource
 		 * @param location The location of the item to obtain children for
-		 * @param {Function(Array)} A function that will be provided with an array of children
 		 */
-		fetchChildren: function(location, updateFunction) {
+		fetchChildren: function(location) {
 			// console.log("get children");
 			dojo.xhrGet({
 				url: location,
@@ -41,7 +40,7 @@ eclipse.FileService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					updateFunction(jsonData.Children);
+					return jsonData.Children;
 				},
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -55,27 +54,22 @@ eclipse.FileService = (function() {
 		 * Creates a new workspace with the given name. The resulting workspace is
 		 * passed as a parameter to the provided onCreate function.
 		 * @param {String} name The name of the new workspace
-		 * @param {Function} onCreate The function to invoke after the workspace is created
 		 */
-		createWorkspace: function(name, onCreate) {
-			dojo.xhrPost({
+		createWorkspace: function(name) {
+			//return the deferred so client can chain on post-processing
+			return dojo.xhrPost({
 				url: "/workspace",
 				headers: {
 					"Orion-Version": "1",
 					"Slug": name
 				},
 				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					onCreate(jsonData);
-					return jsonData;
-				},
-				error: function(response, ioArgs) {
+				timeout: 15000
+			}).addErrback(function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					handlePostAuthenticationError(this, ioArgs);
 					return response;
-				}
-			});
+				});
 		},
 
 		/**
@@ -84,39 +78,38 @@ eclipse.FileService = (function() {
 		 * @param {String} location the location of the workspace to load
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
-		loadWorkspace: function(location, onLoad) {
+		loadWorkspace: function(location) {
 			// console.log("loadWorkspace");
-			dojo.xhrGet({
+			var deferred = dojo.xhrGet({
 				url: location ? location : "/workspace",
 				headers: {
 					"Orion-Version": "1"
 				},
 				handleAs: "json",
 				timeout: 15000,
-				load: dojo.hitch(this, function(jsonData, ioArgs) {
+				load: dojo.hitch(this, function(jsonData) {
 					//in most cases the returned object is the workspace we care about
 					if (location) {
-						onLoad(jsonData);
+						return jsonData;
 					} else {
 						//user didn't specify a workspace so we are at the root
 						//just pick the first location in the provided list
 						if (jsonData.Workspaces.length > 0) {
-							this.loadWorkspace(jsonData.Workspaces[0].Location, onLoad);
+							return this.loadWorkspace(jsonData.Workspaces[0].Location);
 						} else {
 							//no workspace exists, and the user didn't specify one. We'll create one for them
-							this.createWorkspace("MyWorkspace", onLoad);
+							return this.createWorkspace("MyWorkspace");
 						}
 					}
-					return jsonData;
 				}),
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					handleGetAuthenticationError(this, ioArgs);
 					// TODO need a better error handling
-					onLoad(response);
 					return response;
 				}
 			});
+			return deferred;
 		},
 		createProject: function(url, projectName, serverPath, create, callback) {
 			if (!url) { // null, undefined, '' ...
