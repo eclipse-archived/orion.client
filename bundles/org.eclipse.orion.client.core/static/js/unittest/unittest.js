@@ -133,10 +133,15 @@ dojo.addOnLoad(function(){
 	
 	function runTests(fileURI) {
 		//console.log("installing non-persistent plugin: " + fileURI);
-		pluginRegistry.installPlugin(fileURI, /*don't persist*/ false).then(function() {
-			//console.log("installed non-persistent plugin: " + fileURI);
-		});
-		serviceRegistry.getService("testRunner").then(function(service) {
+		
+		// these are isolated from the regular service and plugin registry
+		var testServiceRegistry = new eclipse.ServiceRegistry();
+		var testPluginRegistry = new eclipse.PluginRegistry(testServiceRegistry, {});
+		
+		
+		testPluginRegistry.installPlugin(fileURI).then(function() {
+			return testServiceRegistry.getService("testRunner");
+		}).then(function(service) {
 			//console.log("got service: " + service);
 
 			var myTree = new eclipse.TableTree({
@@ -149,11 +154,11 @@ dojo.addOnLoad(function(){
 
 			var times = {};
 			var testCount = 0;
-			var top;
+			var _top;
 			service.addEventListener("runStart", function(name) {
 				var n = name ? name : "<top>";
-				if (!top) {
-					top = n;
+				if (!_top) {
+					_top = n;
 				}
 //				console.log("[Test Run] - " + name + " start");
 				times[n] = new Date().getTime();
@@ -184,8 +189,7 @@ dojo.addOnLoad(function(){
 //				console.log(result.join(""));
 				root.children.push({"Name":name, result: obj.result, message: obj.message, millis: millis});
 				myTree.refresh(root, root.children);
-			});
-			
+			});	
 			service.run();
 		});
 	}

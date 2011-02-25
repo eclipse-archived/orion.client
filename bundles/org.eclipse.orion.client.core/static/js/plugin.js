@@ -109,8 +109,11 @@ eclipse.PluginProvider = function() {
 		return new eclipse.ServiceProvider(serviceId, _internalProvider);	
 	};
 	
-	this.connect = function() {
+	this.connect = function(callback, errback) {
 		if (_hubClient) {
+			if (callback) {
+				callback();
+			}
 			return;
 		}
 		
@@ -130,6 +133,13 @@ eclipse.PluginProvider = function() {
 				};
 				_publish(message);
 				_connected = true;
+				if (callback) {
+					callback();
+				}
+			} else {
+				if (errback) {
+					errback(error);
+				}
 			}
 		});
 	};
