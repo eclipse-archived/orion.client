@@ -76,10 +76,10 @@ eclipse.PluginProvider = function() {
 			if(promiseOrResult && typeof promiseOrResult.then === "function"){
 				promiseOrResult.then(function(result) {
 					response.result = result;
-					_publish(message);
+					_publish(response);
 				}, function(error) {
 					response.error = error;
-					_publish(message);
+					_publish(response);
 				});
 			} else {
 				response.result = promiseOrResult;
