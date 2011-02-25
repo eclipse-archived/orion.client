@@ -19,6 +19,7 @@ dojo.addOnLoad(function() {
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var dialogService = new eclipse.DialogService(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	var fileService = new eclipse.FileService(serviceRegistry);
 	var siteService = new eclipse.sites.SiteService();
 	serviceRegistry.registerService(eclipse.sites.SITE_SERVICE_NAME, siteService);
 	
@@ -36,6 +37,12 @@ dojo.addOnLoad(function() {
 		});
 	}());
 	
+	var refreshFunction = function() {
+		siteService.getSiteConfigurations().then(function(siteConfigs) {
+			treeWidget.refreshAndExpand("site-table-tree", siteConfigs);
+		});
+	};
+	
 	(function() {
 		// Page-level commands
 		var createCommand = new eclipse.Command({
@@ -44,7 +51,14 @@ dojo.addOnLoad(function() {
 			id: "eclipse.sites.create",
 			groupId: "eclipse.sitesGroup",
 			callback : function() {
-				alert("TODO CREATE");
+				var dialog = new widgets.SiteConfigEditor({
+					title: "Create Site Configuration",
+					fileService: fileService,
+					callback: function(name, workspace, mappings, hostHint) {
+						siteService.createSiteConfiguration(name, workspace, mappings, hostHint).then(refreshFunction);
+					}});
+				dialog.startup();
+				dialog.show();
 			}});
 		commandService.addCommand(createCommand, "dom");
 		
@@ -57,7 +71,6 @@ dojo.addOnLoad(function() {
 				return true;
 			},
 			callback: function(item) {
-				// TODO Show edit popup
 				alert("TODO edit");
 			}});
 		commandService.addCommand(editCommand, "object");
@@ -77,7 +90,7 @@ dojo.addOnLoad(function() {
 				});
 			}});
 		commandService.addCommand(startCommand, "object");
-
+		
 		var stopCommand = new eclipse.Command({
 			name: "Stop",
 			image: "images/stop.gif",

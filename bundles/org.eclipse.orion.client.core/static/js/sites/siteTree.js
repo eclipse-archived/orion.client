@@ -89,11 +89,11 @@ sites.SiteRenderer = (function() {
 			dojo.place(document.createTextNode(item.Name), nameTag, "last");
 			var detailsDiv = dojo.create("div", null, siteConfigCol, "last");
 			dojo.addClass(detailsDiv, "siteConfigDetails");
-			dojo.place(document.createTextNode("Id:" + item.Id), detailsDiv, "last");
-			dojo.create("br", null, detailsDiv, "last");
-			dojo.place(document.createTextNode("Mappings:" + item.Mappings), detailsDiv, "last");
-			dojo.create("br", null, detailsDiv, "last");
-			dojo.place(document.createTextNode("Workspace:" + item.Workspace), detailsDiv, "last");
+//			dojo.place(document.createTextNode("Id:" + item.Id), detailsDiv, "last");
+//			dojo.create("br", null, detailsDiv, "last");
+			dojo.place(document.createTextNode("Mappings:" + JSON.stringify(item.Mappings)), detailsDiv, "last");
+//			dojo.create("br", null, detailsDiv, "last");
+//			dojo.place(document.createTextNode("Workspace:" + item.Workspace), detailsDiv, "last");
 			
 			// Status column
 			var status = item.HostingStatus;

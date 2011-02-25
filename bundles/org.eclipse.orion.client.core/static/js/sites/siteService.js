@@ -63,6 +63,14 @@ sites.SiteService = (function() {
 			
 		},
 		
+		/**
+		 * 
+		 * @param name {String}
+		 * @param workspace {String}
+		 * @param mappings [Object]
+		 * @param hostHint [String]
+		 * @returns A promise
+		 */
 		createSiteConfiguration: function(name, workspace, mappings, hostHint) {
 			var toCreate = {
 					Name: name,
@@ -72,7 +80,7 @@ sites.SiteService = (function() {
 			if (hostHint) { toCreate.HostHint = hostHint; }
 			return dojo.xhrPost({
 				url: this._siteUrl,
-				content: toCreate,
+				postData: dojo.toJson(toCreate),
 				headers: {
 					"Orion-Version": "1"
 				},

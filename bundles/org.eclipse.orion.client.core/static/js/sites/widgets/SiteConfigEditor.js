@@ -16,13 +16,16 @@ dojo.require("dijit.form.ComboBox");
 dojo.require("dojo.data.ItemFileReadStore");
 
 /**
- * @param options {
+ * @param options <code>{
  *    title {String} Title for the dialog
- * }
+ *    callback {Function} Invoked on OK
+ *    fileService {eclipse.FileService}
+ * }</code>
  */
-dojo.declare("widgets.NewItemDialog", [dijit.Dialog], {
+dojo.declare("widgets.SiteConfigEditor", [dijit.Dialog], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache("widgets", "templates/SiteConfigEditor.html"),
+	workspaceIds: null,
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -30,37 +33,52 @@ dojo.declare("widgets.NewItemDialog", [dijit.Dialog], {
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
+		this.callback = this.options.callback || null;
 		this.title = this.options.title || "No title";
-		this.siteConfigNamelabelText = "";
+		this.siteConfigNameLabelText = "Name:";
+		this.mappingsLabelText = "Mappings:";
+		this.hostHintLabelText = "Hostname hint:";
+		this.workspaceLabelText = "Workspace:";
 		this.buttonCancel = "Cancel";
 	},
 	postCreate: function() {
 		this.inherited(arguments);
-		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) {
-			if (evt.keyCode === dojo.keys.ENTER) {
-				this.domNode.focus(); // FF throws DOM error if textfield is focused after dialog closes
-				this._onSubmit();
-			}
-		}));
+		this.refocus = false; // Dojo 10654
 		
-		if (this.options.advanced) {
-			this.itemAdvancedInfo.style.display = "table-row";
-			this.itemAdvancedInfo1.style.display = "table-row";
-			this.protocol.set('value', 'file');
-			dojo.connect(this.protocol, "onChange", dojo.hitch(this, this.onModuleChange));
-			dojo.connect(this.itemURL, "onkeyup", dojo.hitch(this, this.onURLChange));
+		this.name.isValid = dojo.hitch(this, function() {
+			return dojo.trim(this.name.value) !== "";
+		});
+		
+		// Populate fields here if we're editing existing site config
+		if (this.options.siteConfiguration) {
+			var site = this.options.siteConfiguration;
+			this.name.set("value", site.Name);
+			this.mappings.set("value", JSON.stringify(site.Mappings));
+			this.hostHint.set("value", site.HostHint);
+			//this.workspace
 		} else {
-			this.itemAdvancedInfo.style.display = "none";
-			this.itemAdvancedInfo1.style.display = "none";
+			this.mappings.set("value", "[ ]");
 		}
 		
-		this.refocus = false; // Dojo 10654
+		this.options.fileService.loadWorkspaces(dojo.hitch(this, function(workspaces) {
+			var i = 0;
+			var options = dojo.map(workspaces, function(workspace) {
+				return {label: workspace.Name, value: workspace.Id, selected: i++ === 0};
+			});
+			this.workspace.set("options", options);
+			this.workspace._loadChildren();
+		}));
 	},
 	onHide: function() {
-		// This assumes we don't reuse the dialog
 		this.inherited(arguments);
 		setTimeout(dojo.hitch(this, function() {
-			this.destroyRecursive(); // TODO make sure this removes DOM elements
+			this.destroyRecursive();
 		}), this.duration);
+	},
+	execute: function() {
+		if (this.callback) {
+			var mappingsObject = JSON.parse(this.mappings.value);
+			this.callback(this.name.value, this.workspace.value, mappingsObject, this.hostHint.value);
+		}
 	}
 });
