@@ -71,15 +71,15 @@ eclipse.PluginProvider = function() {
 			var service = _services[serviceId].implementation;
 			var method = service[message.method];
 			
-			var response = {id: message.id, result: null, err: null};
+			var response = {id: message.id, result: null, error: null};
 			var promiseOrResult = method.apply(service, message.params);
 			if(promiseOrResult && typeof promiseOrResult.then === "function"){
 				promiseOrResult.then(function(result) {
 					response.result = result;
-					_publish(message);
+					_publish(response);
 				}, function(error) {
 					response.error = error;
-					_publish(message);
+					_publish(response);
 				});
 			} else {
 				response.result = promiseOrResult;
