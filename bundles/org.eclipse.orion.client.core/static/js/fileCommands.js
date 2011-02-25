@@ -167,7 +167,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(newFolderCommand, "dom");
 	commandService.addCommand(newFolderCommand, "object");
 	
-	var newFolderCommand = new eclipse.Command({
+	var cloneGitRepositoryCommand = new eclipse.Command({
 		name: "Clone Git Repository",
 		image: "images/git/cloneGit.gif",
 		id: "eclipse.cloneGitRepository",
@@ -189,7 +189,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 //			dialog.show();
 		}});
 
-	commandService.addCommand(newFolderCommand, "dom");
+	commandService.addCommand(cloneGitRepositoryCommand, "dom");
 	
 	var newProjectCommand = new eclipse.Command({
 		name: "New Folder",
@@ -257,7 +257,6 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(importCommand, "object");
 	commandService.addCommand(importCommand, "dom");
-};
 };
 
 eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){
