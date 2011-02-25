@@ -95,6 +95,7 @@ eclipse.KeyBinding = (function() {
  * @param {eclipse.TextModel} [options.model] the text model for the editor. If this options is not set the editor creates an empty {@link eclipse.TextModel}.
  * @param {Boolean} [options.readonly=false] whether or not the editor is read-only.
  * @param {String|String[]} [options.stylesheet] one or more stylesheet URIs for the editor.
+ * @param {Number} [options.tabSize] The number of spaces in a tab.
  * 
  * @class A Editor is a user interface for editing text.
  * @name eclipse.Editor
@@ -118,7 +119,7 @@ eclipse.Editor = (function() {
 		}
 	}
 	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent);
-	var isFirefox = navigator.userAgent.indexOf("Firefox") !== -1;
+	var isFirefox =  parseFloat(navigator.userAgent.split("Firefox/")[1] || navigator.userAgent.split("Minefield/")[1]) || undefined;
 	var isOpera = navigator.userAgent.indexOf("Opera") !== -1;
 	var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
 	var isSafari = navigator.userAgent.indexOf("Safari") !== -1;
@@ -2504,7 +2505,39 @@ eclipse.Editor = (function() {
 					child.appendChild(span);
 				}
 			} else {
-				this._createRange(child, document, e.ranges, 0, lineText.length, lineText, lineStart);
+				var start = 0;
+				var tabSize = this._tabSize;
+				if (tabSize && tabSize !== 8) {
+					var tabIndex = lineText.indexOf("\t"), ignoreChars = 0;;
+					while (tabIndex !== -1) {
+						this._createRange(child, document, e.ranges, start, tabIndex, lineText, lineStart);
+						var spacesCount = tabSize - ((tabIndex + ignoreChars) % tabSize);
+						var spaces = "\u00A0";
+						for (var i = 1; i < spacesCount; i++) {
+							spaces += " ";
+						}
+						var tabSpan = document.createElement("SPAN");
+						tabSpan.appendChild(document.createTextNode(spaces));
+						tabSpan.ignoreChars = spacesCount - 1;
+						ignoreChars += tabSpan.ignoreChars
+						if (e.ranges) {
+							for (var i = 0; i < e.ranges.length; i++) {
+								var range = e.ranges[i];
+								var styleStart = range.start - lineStart;
+								var styleEnd = range.end - lineStart;
+								if (styleStart > tabIndex) break; 
+								if (styleStart <= tabIndex && tabIndex < styleEnd) {
+									this._applyStyle(range.style, tabSpan);
+									break;
+								}
+							}
+						} 
+						child.appendChild(tabSpan);
+						start = tabIndex + 1;
+						tabIndex = lineText.indexOf("\t", start);
+					}
+				}
+				this._createRange(child, document, e.ranges, start, lineText.length, lineText, lineStart);
 			}
 			if (extendSelection) {
 				var ext = document.createElement("SPAN");
@@ -2521,11 +2554,11 @@ eclipse.Editor = (function() {
 			if (ranges) {
 				for (var i = 0; i < ranges.length; i++) {
 					var range = ranges[i];
-					if (range.end <= lineStart) { continue; }
-					var styleStart = Math.max(lineStart, range.start) - lineStart;
-					var styleEnd = Math.min(lineStart + text.length, range.end) - lineStart;
+					if (range.end <= lineStart + start) { continue; }
+					var styleStart = Math.max(lineStart + start, range.start) - lineStart;
 					if (styleStart >= end) { break; }
-					if ((start <= styleStart && styleStart < end) || (start <= styleEnd && styleEnd < end)) {
+					var styleEnd = Math.min(lineStart + end, range.end) - lineStart;
+					if (styleStart < styleEnd) {
 						styleStart = Math.max(start, styleStart);
 						styleEnd = Math.min(end, styleEnd);
 						if (start < styleStart) {
@@ -2575,39 +2608,40 @@ eclipse.Editor = (function() {
 			}
 			var result = null;
 			if (offset < model.getLineEnd(lineIndex)) {
+				var lineOffset = model.getLineStart(lineIndex);
 				var lineChild = child.firstChild;
-				var spanOffset = model.getLineStart(lineIndex);
 				while (lineChild) {
-					if (!lineChild.ignoreChars) {
-						var textNode = lineChild.firstChild;
-						var spanEndOffset = spanOffset + textNode.length; 
-						if (spanEndOffset > offset) {
-							var text = textNode.data;
-							var index = offset - spanOffset;
-							lineChild.removeChild(textNode);
-							lineChild.appendChild(document.createTextNode(text.substring(0, index)));
-							var span = document.createElement("SPAN");
-							span.appendChild(document.createTextNode(text.substring(index, index + 1)));
-							lineChild.appendChild(span);
-							lineChild.appendChild(document.createTextNode(text.substring(index + 1)));
-							result = span.getBoundingClientRect();
-							lineChild.innerHTML = "";
-							lineChild.appendChild(textNode);
-							if (!dummy) {
-								/*
-								 * Removing the element node that holds the selection start or end
-								 * causes the selection to be lost. The fix is to detect this case
-								 * and restore the selection. 
-								 */
-								var selection = this._getSelection();
-								if ((spanOffset <= selection.start && selection.start < spanEndOffset) || (spanOffset <= selection.end && selection.end < spanEndOffset)) {
-									this._updateDOMSelection();
-								}
-							}
-							break;
-						}
-						spanOffset = spanEndOffset;
+					var textNode = lineChild.firstChild;
+					var nodeLength = textNode.length; 
+					if (lineChild.ignoreChars) {
+						nodeLength -= lineChild.ignoreChars;
 					}
+					if (lineOffset + nodeLength > offset) {
+						var text = textNode.data;
+						var index = offset - lineOffset;
+						lineChild.removeChild(textNode);
+						lineChild.appendChild(document.createTextNode(text.substring(0, index)));
+						var span = document.createElement("SPAN");
+						span.appendChild(document.createTextNode(text.substring(index, index + 1)));
+						lineChild.appendChild(span);
+						lineChild.appendChild(document.createTextNode(text.substring(index + 1)));
+						result = span.getBoundingClientRect();
+						lineChild.innerHTML = "";
+						lineChild.appendChild(textNode);
+						if (!dummy) {
+							/*
+							 * Removing the element node that holds the selection start or end
+							 * causes the selection to be lost. The fix is to detect this case
+							 * and restore the selection. 
+							 */
+							var s = this._getSelection();
+							if ((lineOffset <= s.start && s.start < lineOffset + nodeLength) ||  (lineOffset <= s.end && s.end < lineOffset + nodeLength)) {
+								this._updateDOMSelection();
+							}
+						}
+						break;
+					}
+					lineOffset += nodeLength;
 					lineChild = lineChild.nextSibling;
 				}
 			}
@@ -2636,23 +2670,25 @@ eclipse.Editor = (function() {
 				var lineOffset = model.getLineStart(lineIndex);
 				var lineChild = child.firstChild;
 				while (lineChild) {
-					var node = lineChild.firstChild;
-					if (!node.ignoreChars) {
-						if (node.length + lineOffset > offset) {
-							var range = document.body.createTextRange();
-							range.moveToElementText(lineChild);
-							range.collapse();
-							range.moveEnd("character", offset - lineOffset + 1);
-							range.moveStart("character", offset - lineOffset);
-							result = range.getBoundingClientRect();
-							var logicalXDPI = window.screen.logicalXDPI;
-							var deviceXDPI = window.screen.deviceXDPI;
-							result.left = result.left * logicalXDPI / deviceXDPI;
-							result.right = result.right * logicalXDPI / deviceXDPI;
-							break;
-						}
-						lineOffset += node.length;
+					var textNode = lineChild.firstChild;
+					var nodeLength = textNode.length;
+					if (lineChild.ignoreChars) {
+						nodeLength -= lineChild.ignoreChars;
 					}
+					if (lineOffset + nodeLength > offset) {
+						var range = document.body.createTextRange();
+						range.moveToElementText(lineChild);
+						range.collapse();
+						range.moveEnd("character", offset - lineOffset + 1);
+						range.moveStart("character", offset - lineOffset);
+						result = range.getBoundingClientRect();
+						var logicalXDPI = window.screen.logicalXDPI;
+						var deviceXDPI = window.screen.deviceXDPI;
+						result.left = result.left * logicalXDPI / deviceXDPI;
+						result.right = result.right * logicalXDPI / deviceXDPI;
+						break;
+					}
+					lineOffset += nodeLength;
 					lineChild = lineChild.nextSibling;
 				}
 			}
@@ -2758,15 +2794,19 @@ eclipse.Editor = (function() {
 			var lineChild = child.firstChild;
 			var text = "";
 			while (lineChild) {
-				var subNode = lineChild.firstChild;
-				while (subNode) {
-					// Note: This assumes that the ignoreChars are always at the end of the lineChild
-					if (lineChild.ignoreChars && lineChild.lastChild === subNode) {
-						text += subNode.data.substring (0, subNode.length - lineChild.ignoreChars);
+				var textNode = lineChild.firstChild;
+				while (textNode) {
+					if (lineChild.ignoreChars) {
+						for (var i = 0; i < textNode.length; i++) {
+							var char = textNode.data.substring(i, i + 1);
+							if (char !== " ") {
+								text += char;
+							}
+						}
 					} else {
-						text += subNode.data;
+						text += textNode.data;
 					}
-					subNode = subNode.nextSibling;
+					textNode = textNode.nextSibling;
 				}
 				lineChild = lineChild.nextSibling;
 			}
@@ -2781,8 +2821,12 @@ eclipse.Editor = (function() {
 		_getLineBoundingClientRect: function (child) {
 			var rect = child.getBoundingClientRect();
 			var lastChild = child.lastChild;
-			while (lastChild && lastChild.ignoreChars) {
-				lastChild = lastChild.previousSibling;
+			//Remove any artificial trailing whitespace in the line
+			if (lastChild && lastChild.ignoreChars === 1) {
+				var textNode = lastChild.firstChild;
+				if (textNode.data === " ") {
+					lastChild = lastChild.previousSibling;
+				}
 			}
 			if (!lastChild) {
 				return {left: rect.left, top: rect.top, right: rect.left, bottom: rect.bottom};
@@ -2901,24 +2945,26 @@ eclipse.Editor = (function() {
 			} else {
 				var lineChild = child.firstChild;
 				while (lineChild) {
-					if (!lineChild.ignoreChars) {
-						var node = lineChild.firstChild;
-						if (node.length + lineOffset > offset) {
-							range = document.body.createTextRange();
-							if (offset === lineOffset && direction < 0) {
-								range.moveToElementText(lineChild.previousSibling);
-							} else {
-								range.moveToElementText(lineChild);
-								range.collapse();
-								range.moveEnd("character", offset - lineOffset);
-							}
-							length = range.text.length;
-							range.moveEnd(word ? "word" : "character", direction);
-							result = offset + range.text.length - length;
-							break;
-						}
-						lineOffset = node.length + lineOffset;
+					var textNode = lineChild.firstChild;
+					var nodeLength = textNode.length;
+					if (lineChild.ignoreChars) {
+						nodeLength -= lineChild.ignoreChars;
 					}
+					if (lineOffset + nodeLength > offset) {
+						range = document.body.createTextRange();
+						if (offset === lineOffset && direction < 0) {
+							range.moveToElementText(lineChild.previousSibling);
+						} else {
+							range.moveToElementText(lineChild);
+							range.collapse();
+							range.moveEnd("character", offset - lineOffset);
+						}
+						length = range.text.length;
+						range.moveEnd(word ? "word" : "character", direction);
+						result = offset + range.text.length - length;
+						break;
+					}
+					lineOffset = nodeLength + lineOffset;
 					lineChild = lineChild.nextSibling;
 				}
 			}
@@ -2987,51 +3033,56 @@ eclipse.Editor = (function() {
 			var lineChild = child.firstChild;
 			done:
 			while (lineChild) {
-				if (!lineChild.ignoreChars) {
-					var textNode = lineChild.firstChild;
-					var rects = lineChild.getClientRects();
-					for (var i = 0; i < rects.length; i++) {
-						var rect = rects[i];
-						if (rect.left <= x && x < rect.right) {
-							var newText = [];
-							for (var j = 0; j < textNode.length; j++) {
-								newText.push("<span>");
-								newText.push(textNode.substringData(j, 1));
-								newText.push("</span>");
-							}
-							lineChild.innerHTML = newText.join("");
-							var rangeChild = lineChild.firstChild;
-							while (rangeChild) {
-								rect = rangeChild.getBoundingClientRect();
-								if (rect.left <= x && x < rect.right) {
-									//TODO test for character trailing (wrong for bidi)
-									if (x > rect.left + (rect.right - rect.left) / 2) {
-										offset++;
-									}
-									break;
-								}
-								offset++;
-								rangeChild = rangeChild.nextSibling;
-							}
-							if (!dummy) {
-								lineChild.innerHTML = "";
-								lineChild.appendChild(textNode);
-								/*
-								 * Removing the element node that holds the selection start or end
-								 * causes the selection to be lost. The fix is to detect this case
-								 * and restore the selection. 
-								 */
-								var selection = this._getSelection();
-								var spanOffset = offset, spanEndOffset = offset + textNode.length;
-								if ((spanOffset <= selection.start && selection.start < spanEndOffset) || (spanOffset <= selection.end && selection.end < spanEndOffset)) {
-									this._updateDOMSelection();
-								}
-							}
-							break done;
-						}
-					}
-					offset += textNode.length;
+				var textNode = lineChild.firstChild;
+				var nodeLength = textNode.length;
+				if (lineChild.ignoreChars) {
+					nodeLength -= lineChild.ignoreChars;
 				}
+				var rects = lineChild.getClientRects();
+				for (var i = 0; i < rects.length; i++) {
+					var rect = rects[i];
+					if (rect.left <= x && x < rect.right) {
+						var newText = [];
+						for (var j = 0; j < nodeLength; j++) {
+							newText.push("<span>");
+							if (j === nodeLength - 1) {
+								newText.push(textNode.data.substring(j));
+							} else {
+								newText.push(textNode.data.substring(j, 1));
+							}
+							newText.push("</span>");
+						}
+						lineChild.innerHTML = newText.join("");
+						var rangeChild = lineChild.firstChild;
+						while (rangeChild) {
+							rect = rangeChild.getBoundingClientRect();
+							if (rect.left <= x && x < rect.right) {
+								//TODO test for character trailing (wrong for bidi)
+								if (x > rect.left + (rect.right - rect.left) / 2) {
+									offset++;
+								}
+								break;
+							}
+							offset++;
+							rangeChild = rangeChild.nextSibling;
+						}
+						if (!dummy) {
+							lineChild.innerHTML = "";
+							lineChild.appendChild(textNode);
+							/*
+							 * Removing the element node that holds the selection start or end
+							 * causes the selection to be lost. The fix is to detect this case
+							 * and restore the selection. 
+							 */
+							var s = this._getSelection();
+							if ((offset <= s.start && s.start < offset + nodeLength) || (offset <= s.end && s.end < offset + nodeLength)) {
+								this._updateDOMSelection();
+							}
+						}
+						break done;
+					}
+				}
+				offset += nodeLength;
 				lineChild = lineChild.nextSibling;
 			}
 			if (dummy) { clientDiv.removeChild(dummy); }
@@ -3086,52 +3137,60 @@ eclipse.Editor = (function() {
 			var deviceXDPI = window.screen.deviceXDPI;
 			done:
 			while (lineChild) {
-				if (!lineChild.ignoreChars) {
-					var textNode = lineChild.firstChild;
-					rects = _getClientRects(lineChild);
-					for (var j = 0; j < rects.length; j++) {
-						var rect = rects[j];
-						if (rect.left <= x && x < rect.right) {
-							var range = document.body.createTextRange();
-							var length = textNode.length;
-							var high = length;
-							var low = -1;
-							while ((high - low) > 1) {
-								var mid = Math.floor((high + low) / 2);
-								range.moveToElementText(lineChild);
-								range.move("character", low + 1);
-								range.moveEnd("character", mid - low);
-								rects = range.getClientRects();
-								var found = false;
-								for (var k = 0; k < rects.length; k++) {
-									rect = rects[k];
-									var rangeLeft = rect.left * logicalXDPI / deviceXDPI - deltaX;
-									var rangeRight = rect.right * logicalXDPI / deviceXDPI - deltaX;
-									if (rangeLeft <= x && x < rangeRight) {
-										found = true;
-										break;
-									}
-								}
-								if (found) {
-									high = mid;
-								} else {
-									low = mid;
-								}
-							}
-							offset += high;
-							range.moveToElementText(lineChild);
-							range.move("character", high);
-							range.moveEnd("character", 1);
-							rect = range.getClientRects()[0];
-							//TODO test for character trailing (wrong for bidi)
-							if (x > ((rect.left - deltaX) + ((rect.right - rect.left) / 2))) {
-								offset++;
-							}
-							break done;
-						}
-					}
-					offset += textNode.length;
+				var textNode = lineChild.firstChild;
+				var nodeLength = textNode.length;
+				if (lineChild.ignoreChars) {
+					nodeLength -= lineChild.ignoreChars;
 				}
+				rects = _getClientRects(lineChild);
+				for (var j = 0; j < rects.length; j++) {
+					var rect = rects[j];
+					if (rect.left <= x && x < rect.right) {
+						var range = document.body.createTextRange();
+						var high = textNode.length;
+						var low = -1;
+						while ((high - low) > 1) {
+							var mid = Math.floor((high + low) / 2);
+							range.moveToElementText(lineChild);
+							range.move("character", low + 1);
+							range.moveEnd("character", mid - low);
+							rects = range.getClientRects();
+							var found = false;
+							for (var k = 0; k < rects.length; k++) {
+								rect = rects[k];
+								var rangeLeft = rect.left * logicalXDPI / deviceXDPI - deltaX;
+								var rangeRight = rect.right * logicalXDPI / deviceXDPI - deltaX;
+								if (rangeLeft <= x && x < rangeRight) {
+									found = true;
+									break;
+								}
+							}
+							if (found) {
+								high = mid;
+							} else {
+								low = mid;
+							}
+						}
+						if (lineChild.ignoreChars && high >= nodeLength) {
+							high = nodeLength - 1;
+						}
+						offset += high;
+						range.moveToElementText(lineChild);
+						range.move("character", high);
+						if (high === nodeLength - 1 && lineChild.ignoreChars) {
+							range.moveEnd("character", 1 + lineChild.ignoreChars);
+						} else {
+							range.moveEnd("character", 1);
+						}
+						rect = range.getClientRects()[0];
+						//TODO test for character trailing (wrong for bidi)
+						if (x > ((rect.left - deltaX) + ((rect.right - rect.left) / 2))) {
+							offset++;
+						}
+						break done;
+					}
+				}
+				offset += nodeLength;
 				lineChild = lineChild.nextSibling;
 			}
 			if (dummy) { clientDiv.removeChild(dummy); }
@@ -3371,6 +3430,15 @@ eclipse.Editor = (function() {
 			}
 			clientDiv.contentEditable = "true";
 			body.style.lineHeight = this._calculateLineHeight() + "px";
+			if (options.tabSize) {
+				if (isOpera) {
+					clientDiv.style.OTabSize = options.tabSize+"";
+				} else if (isFirefox >= 4) {
+					clientDiv.style.MozTabSize = options.tabSize+"";
+				} else if (options.tabSize !== 8) {
+					this._tabSize = options.tabSize;
+				}
+			}
 			this._createActions();
 			this._hookEvents();
 		},
@@ -3549,42 +3617,44 @@ eclipse.Editor = (function() {
 			var startLineNode, startLineOffset, endLineNode, endLineOffset;
 			var offset = 0;
 			var lineChild = startNode.firstChild;
-			var node;
+			var node, nodeLength, lineEnd;
+			lineEnd = this._model.getLine(startNode.lineIndex).length;
 			while (lineChild) {
 				node = lineChild.firstChild;
-				if (node.length + offset > startOffset) {
+				nodeLength = node.length;
+				if (lineChild.ignoreChars) {
+					nodeLength -= lineChild.ignoreChars;
+				}
+				if (offset + nodeLength > startOffset || offset + nodeLength >= lineEnd) {
 					startLineNode = node;
 					startLineOffset = startOffset - offset;
+					if (lineChild.ignoreChars && nodeLength > 0 && startLineOffset === nodeLength) {
+						startLineOffset += lineChild.ignoreChars; 
+					}
 					break;
 				}
-				offset += node.length;
-				if (lineChild.ignoreChars) {
-					startOffset += node.length;
-				}
+				offset += nodeLength;
 				lineChild = lineChild.nextSibling;
 			}
-			if (!lineChild) {
-				startLineNode = node;
-				startLineOffset = node.length;
-			}
 			offset = 0;
+			lineEnd = this._model.getLine(endNode.lineIndex).length;
 			lineChild = endNode.firstChild;
 			while (lineChild) {
 				node = lineChild.firstChild;
-				if (node.length + offset > endOffset) {
+				nodeLength = node.length;
+				if (lineChild.ignoreChars) {
+					nodeLength -= lineChild.ignoreChars;
+				}
+				if (nodeLength + offset > endOffset || offset + nodeLength >= lineEnd) {
 					endLineNode = node;
 					endLineOffset = endOffset - offset;
+					if (lineChild.ignoreChars && nodeLength > 0 && endLineOffset === nodeLength) {
+						endLineOffset += lineChild.ignoreChars; 
+					}
 					break;
 				}
-				offset += node.length;
-				if (lineChild.ignoreChars) {
-					endOffset += node.length;
-				}
+				offset += nodeLength;
 				lineChild = lineChild.nextSibling;
-			}
-			if (!lineChild) {
-				endLineNode = node;
-				endLineOffset = node.length;
 			}
 			var range;
 			if (window.getSelection) {

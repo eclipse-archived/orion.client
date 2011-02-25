@@ -196,6 +196,9 @@ eclipse.ExplorerTree = (function() {
 					});
 				});
 			}
+		},
+		updateCommands: function(){
+			//commands build dynamically, no need to refresh
 		}
 	};
 	return ExplorerTree;

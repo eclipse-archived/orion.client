@@ -143,6 +143,38 @@ orion.Test = (function(assert) {
 		if (!obj || typeof obj !== "object") {
 			throw Error("not a test object");
 		}
+		
+		if (top != self && typeof(eclipse) !== "undefined" && eclipse.PluginProvider) {
+			var result = new dojo.Deferred();
+			try {
+				var provider = new eclipse.PluginProvider();
+				var serviceProvider = provider.registerServiceProvider("testRunner", {
+					run: function() {
+						dojo.when(_run(name, obj), dojo.hitch(result, "resolve"));
+					}
+				});
+
+				provider.connect(function() {
+					exports.addEventListener("runStart", function(name) { serviceProvider.dispatchEvent("runStart", name); });
+					exports.addEventListener("runDone", function(name, obj) { serviceProvider.dispatchEvent("runDone", name, obj); });
+					exports.addEventListener("testStart", function(name) { serviceProvider.dispatchEvent("testStart", name); });
+					exports.addEventListener("testDone", function(name, obj) { serviceProvider.dispatchEvent("testDone", name, obj); });
+				}, function() {
+					if (!(_namedlisteners.runStart ||_namedlisteners.runDone ||_namedlisteners.testStart  ||_namedlisteners.testDone)) {
+						exports.useConsole();
+					}
+					dojo.when(_run(name, obj), dojo.hitch(result, "resolve"));
+				});
+				return result;
+			} catch (e) {
+				// fall through
+				console.log(e);
+			}
+		}
+		// if no listeners add the console
+		if (!(_namedlisteners.runStart ||_namedlisteners.runDone ||_namedlisteners.testStart  ||_namedlisteners.testDone)) {
+			exports.useConsole();
+		}
 		return _run(name, obj);
 	};
 	
