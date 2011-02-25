@@ -14,6 +14,7 @@ dojo.addOnLoad(function(){
 	
 	// initialize service registry and EAS services
 	serviceRegistry = new eclipse.ServiceRegistry();
+	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	new eclipse.InputService(serviceRegistry);		
 	new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	new eclipse.LogService(serviceRegistry);
@@ -68,6 +69,7 @@ dojo.addOnLoad(function(){
 	// git contributions
 	commandService.registerCommandContribution("eclipse.cloneGitRepository", 1, "navToolBar", "eclipse.gitGroup");
 
+	eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands(serviceRegistry, commandService, explorer, "navToolBar", "eclipse.fileGroup");
 	
 	var treeViewCommand = new eclipse.Command({
 		name : "Tree View",

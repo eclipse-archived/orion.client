@@ -98,7 +98,9 @@ eclipse.Explorer = (function() {
 					});
 			}
 		},
-		
+		updateCommands: function(item){
+			dojo.hitch(this.myTree._renderer, this.myTree._renderer.updateCommands(item));
+		},
 		createTree: function (){
 			this.model = new eclipse.Model(this.registry, this.treeRoot);
 			this.myTree = new eclipse.TableTree({
@@ -333,6 +335,21 @@ eclipse.FileRenderer = (function() {
 					dojo.addClass(node, "lightTreeTableRow");
 					dojo.removeClass(node, "darkTreeTableRow");
 				}
+			});
+		},
+		updateCommands: function(){
+			var registry = this.explorer.registry;
+			dojo.query(".treeTableRow").forEach(function(node, i) {
+				
+				var actionsWrapperId = node.id + "actionswrapper";
+				var actionsWrapper = dojo.byId(actionsWrapperId);
+				
+				dojo.empty(actionsWrapper);
+				// contact the command service to render appropriate commands here.
+				registry.getService("ICommandService").then(function(service) {
+					service.renderCommands(actionsWrapper, "object", node._item, this.explorer, "image");
+				});
+
 			});
 		},
 		

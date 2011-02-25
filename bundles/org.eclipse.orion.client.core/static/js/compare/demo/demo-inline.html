@@ -16,9 +16,9 @@
 <script type="text/javascript" src="../../auth.js"></script>
 <script language="javascript" type="text/javascript" src="demo-data.js"></script>
 <script language="javascript" type="text/javascript" src="../diff-parser.js"></script>
-<script language="javascript" type="text/javascript" src="../rulers.js"></script>
+<script language="javascript" type="text/javascript" src="../rulers-inline.js"></script>
 <script language="javascript" type="text/javascript" src="../compare-model.js"></script>
-<script language="javascript" type="text/javascript" src="../gap-line-feeder.js"></script>
+<script language="javascript" type="text/javascript" src="../diff-line-feeder.js"></script>
 
 <script language="javascript" type="text/javascript">
 
@@ -47,110 +47,51 @@ function _getTestData(){
 }
 
 function initEditor(editor){
-	var lines = new eclipse.LineNumberCompareRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
-	//var lines1 = new eclipse.LineNumberCompareRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
-	editor.addRuler(lines);
-	//editor.addRuler(lines1);
+	var rulerOrigin = new eclipse.LineNumberDiffRuler(false,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+	var rulerNew = new eclipse.LineNumberDiffRuler(true,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+	editor.addRuler(rulerOrigin);
+	editor.addRuler(rulerNew);
 }
-
-var editorLeft;
-var editorRight;
-
+var editor;
 
 function createEditor(input , diff , delim){
 	var diffParser = new eclipse.DiffParser(delim);
-	var result = diffParser.parse(input ,diff);
+	var result = diffParser.parse(input ,diff,false);
 	var output = result.outPutFile;
 	var mapper = result.mapper;
 	
-	var modelLeft = new eclipse.TextModel(output, delim);
-	//var compareModelLeft = new eclipse.GapTextModel(modelLeft, false , mapper);
-	var compareModelLeft = new eclipse.CompareTextModel(modelLeft, {mapper:mapper , columnIndex:0} , new eclipse.GapLineFeeder(mapper , delim));
-	var modelRight = new eclipse.TextModel(input, delim);
+	var model = new eclipse.TextModel(input, delim);
 	//var compareModelRight = new eclipse.GapTextModel(modelRight, true , mapper);
-	var compareModelRight = new eclipse.CompareTextModel(modelRight, {mapper:mapper , columnIndex:1} , new eclipse.GapLineFeeder(mapper , delim));
+	var compareModel = new eclipse.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new eclipse.DiffLineFeeder(mapper , diffParser.getDiffArray() , delim));
 	
-	var optionsRight = {
-			parent: "divParentR",
-			model: compareModelRight,
-			readonly: editorReadOnly,
-			stylesheet: "editor.css" 
-		};
-	editorRight = new eclipse.Editor(optionsRight);
-	initEditor(editorRight);
-	var optionsLeft = {
+	var options = {
 		parent: "divParentL",
-		model: compareModelLeft,
+		model: compareModel,
 		readonly: editorReadOnly,
 		stylesheet: "editor.css" 
 	};
-	editorLeft = new eclipse.Editor(optionsLeft);
-	initEditor(editorLeft);
-	editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
+	editor = new eclipse.Editor(options);
+	initEditor(editor);
+	editor.addEventListener("LineStyle", window, function(lineStyleEvent) {
 		var lineIndex = lineStyleEvent.lineIndex;
 		var lineStart = lineStyleEvent.lineStart;
-		var lineType = compareModelLeft.getLineType(lineIndex);
+		var lineType = compareModel.getLineType(lineIndex);
 		//lineStyleEvent.ranges = [];
 		//lineStyleEvent.ranges.push ({start: lineStart, end: lineStart + 3, style: {style: {backgroundColor: "blue"} }});
 		if(lineType === "added") {
 			lineStyleEvent.style = {style: {backgroundColor: "#99EE99"}};
-		} else if (lineType === "changed"){
-			lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
-		} else if (lineType === "removed" || lineType === "changed_gap"){
-			lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
-		} 
-	}); 
-
-	editorLeft.addEventListener("Scroll", window, function(scrollEvent) {
-		editorRight.setTopPixel(editorLeft.getTopPixel());
-	}); 
-	
-	editorLeft.redrawRange();
-	editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
-		var lineIndex = lineStyleEvent.lineIndex;
-		var lineStart = lineStyleEvent.lineStart;
-		var lineType = compareModelRight.getLineType(lineIndex);
-		if(lineType === "removed") {
+		} else if (lineType === "removed"){
 			lineStyleEvent.style = {style: {backgroundColor: "#EE9999"}};
-		} else if (lineType === "changed"){
-			lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
-		} else if (lineType === "added" || lineType === "changed_gap"){
-			lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
 		} 
 	}); 
 
-	editorRight.addEventListener("Scroll", window, function(scrollEvent) {
-		editorLeft.setTopPixel(editorRight.getTopPixel());
-	}); 
-	
-	editorRight.redrawRange();
-	/*
-	var lines = compareModelLeft.getLineCount()+1;
-	var lineH = editorLeft.getLineHeight();
-	var scroll  = document.getElementById("scrollContent");
-	scroll.style.width = 0 + "px";
-	scroll.style.height = lines*lineH + "px";
-	*/
-	
+	editor.redrawRange();
 }
 
 function createCompareEditor() {
-	var leftTH = document.getElementById("LeftTH");
-	var rightTH = document.getElementById("RightTH");
-	leftTH.innerHTML = "Output File With Gaps";
-	rightTH.innerHTML = "Input File With Gaps";
-	
 	var testData = _getTestData();
 	createEditor(testData[0] ,testData[1] , "\r\n" );
 	
-}
-
-function scrollHandler(evt){
-	console.log(evt.scrollTop);
-	//editorLeft.focus();
-	editorLeft.setTopPixel(evt.scrollTop);
-	//editorRight.focus();
-	editorRight.setTopPixel(evt.scrollTop);
 }
 
 var fileContent ;
@@ -159,7 +100,8 @@ function getFileContentGit(hashValue){
 	
 	var url = "/git/index" + hashValue;
 	dojo.xhrGet({
-		url: url, 
+		url: url, //"/git/index" + hashValue;//file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.html"
+		//adding some thing 
 		headers: {
 			"Orion-Version": "1"
 		},
@@ -171,6 +113,9 @@ function getFileContentGit(hashValue){
 			fileContent = jsonData;
 			getFileDiffGit(hashValue);
 		},
+		
+		///adding
+		///adding
 		
 		error: function(response, ioArgs) {
 			console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -185,13 +130,15 @@ function getFileDiffGit(hashValue){
 	
 	var url = "/git/diff" + hashValue;
 	dojo.xhrGet({
-		url: url , 
+		url: url , //"/git/diff" + hashValue;///file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.htmlsfasf"
+		//changing some thing
 		headers: {
 			"Orion-Version": "1"
 		},
 		handleAs: "text",
 		timeout: 5000,
 		load: function(jsonData, ioArgs) {
+			//addingg
 			console.log(jsonData);
 			fileDiff = jsonData;
 			createEditor(fileContent , fileDiff ,"\n");
@@ -210,10 +157,8 @@ window.onload = function() {
 	//demo.innerHTML = demoData.length + ")";
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
-		var leftTH = document.getElementById("LeftTH");
-		var rightTH = document.getElementById("RightTH");
-		leftTH.innerHTML = "File On Local : " + splitted[1];
-		rightTH.innerHTML = "File On Git : " + splitted[1];
+		var TH = document.getElementById("TH");
+		TH.innerHTML = "File : " + splitted[1];
 		getFileContentGit(splitted[1]);
 	}
 };
@@ -225,42 +170,21 @@ window.onload = function() {
 
 <table width="100%">
 <tr>
-<th id="LeftTH" />
-<th id="RightTH"/>
+<th id="TH" />
 </tr>
 <tr>
-<td width="50%">
+<td width="100%">
 <div id='divParentL' style='border: 1px solid teal;width:100%;height:650px;'>
+</div>
+</td>
 
-</div>
-</td>
-<td width="50%">
-<div id='divParentR' style='border: 1px solid teal;width:100%;height:650px;'>
-
-</div>
-</td>
-<!-- 
-<td>
-<div id= "scrollId" class="editorContainer" onscroll="scrollHandler(this)" style="
-	width: 20px;
-	height: 650px;
-	overflow-y: auto;">
-<div id = "scrollContent"></div>
-</div>
-</td>
--->
 </tr>
 </table>
-<!--  
+<!-- 
 <span>Demo Data Number(1-</span>
 <span id="dataLength"></span>
 <input id="caseNo" type="text" />
 <button onclick='createCompareEditor()'  padding: 0 2 0 2'>Compare</button>
--->
-<!-- 
-<button onclick='createInputEditor()'  padding: 0 2 0 2'>Test Input</button>
-<button onclick='createOutputEditor()'  padding: 0 2 0 2'>Test Output</button>
-<button onclick='createStaticEditor()'  padding: 0 2 0 2'>Test Static Data</button>
 -->
 <br>
 </body>
