@@ -1,0 +1,91 @@
+<!doctype html>
+<html style="height: 100%" >
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+    	<title>Orion Search Results</title>    
+    
+    <script type="text/javascript">
+        var djConfig = {
+		isDebug: true,
+		modulePaths: {'widgets': '/js/widgets'},
+		parseOnLoad: true
+        };
+    </script>
+    <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+    <script type="text/javascript">
+	dojo.require("dijit.Menu");
+	dojo.require("dijit.MenuItem");
+	dojo.require("dijit.Dialog");
+	dojo.require("dijit.form.CheckBox");
+	dojo.require("dijit.Dialog");
+	dojo.require("widgets.OpenResourceDialog");
+ 	</script>    	
+	<style type="text/css">
+		@import "/org.dojotoolkit/dojo/resources/dojo.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
+	    @import "/ide.css";
+	    @import "/breadcrumbs.css"; 
+	    @import "/commands.css";
+	</style>
+	
+	<!-- Authentication (required for handleAuthenticationError) -->
+	<script type="text/javascript" src="js/auth.js"></script>
+	  	 	
+   </head>
+
+    <body style="height: 100%" class="soria">
+    
+    <script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+    
+    <!-- Extension Registry -->
+	<script src="js/serviceregistry.js"></script>
+        
+    <!-- Eclipse Application Services -->
+    <!-- START:eas.js -->
+ 	<script src="js/util.js"></script>
+ 	<script src="js/commands.js"></script>
+ 	<script src="js/dialogs.js"></script>
+ 	<script src="js/log.js"></script>
+ 	<script src="js/preferences.js"></script>
+ 	<script src="js/status.js"></script>
+ 	<script src="js/users.js"></script>
+
+	<script src="js/favorites.js"></script>
+	<script src="js/fileClient.js"></script>
+	<script src="js/searchClient.js"></script>
+	<!-- END:eas.js -->
+	<!-- INSERT:eas.js -->
+ 	
+	<!-- START:searchResults.js -->
+	<script src="js/globalCommands.js"></script>
+	<script src="js/searchResults.js"></script>
+	<script src="js/searchResults/search.js"></script>
+	<!-- END:searchResults.js -->
+ 	<!-- INSERT:searchResults.js -->
+	
+	<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
+		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
+		</div>
+		
+		<div class="paneScrolled" style="margin-left: 8px; " id="leftPane" dojoType="dijit.layout.ContentPane" region="leading" style="width: 20%" splitter="true">
+				<div id="favorites">
+				<h2>Favorites</h2>
+				<div  id="favoriteProgress">Loading favorites...</div>
+				</div>
+		</div>
+
+		<div class="paneScrolled" style="margin-left: 8px;" id="rightPane" dojoType="dijit.layout.ContentPane" region="center" style="width: 80%; height: 100%;" splitter="false">
+			<div id="results">
+				<!-- Generated search results go here -->
+			</div>
+		</div>
+	</div>
+	
+</body>
+</html>

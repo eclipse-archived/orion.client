@@ -38,10 +38,14 @@ eclipse.DiffParser = (function() {
 			this._nNewLineAtEnd = true;
 		},
 		
-		parse: function(oFileString , diffString){
+		getDiffArray: function(){
+			return this._diffContents;
+		},
+		
+		parse: function(oFileString , diffString , doNotBuildNewFile){
 			this._init();
 			if(diffString === "")
-				return {outPutFile:"",mapper:[]};
+				return {outPutFile:oFileString ,mapper:[]};
 			this._oFileContents = oFileString.split(this._lineDelimiter);
 			this._diffContents = diffString.split(this._lineDelimiter);
 			var lineNumber = this._diffContents.length;
@@ -63,7 +67,8 @@ eclipse.DiffParser = (function() {
 			this._buildMap();
 			//this._logMap();
 			//console.log("Total line number in original file: " + this._oFileContents.length);
-			this._buildNewFile();
+			if(doNotBuildNewFile === undefined || !doNotBuildNewFile)
+				this._buildNewFile();
 			//this._logNewFile();
 			//console.log("Total line number in new file: " + this._nFileContents.length);
 			return {outPutFile:this._nFileContents.join(this._lineDelimiter),mapper:this._deltaMap};

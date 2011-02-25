@@ -60,7 +60,7 @@ eclipse.LineNumberCompareRuler = (function() {
 				var realIndex = model.lookUpRealIndex(lineIndex);
 				if(realIndex.lineIndex === -1)
 					return "";
-				return realIndex.lineIndex + 1;
+				return  realIndex.lineIndex + 1;
 			}
 			return lineIndex + 1;;
 		}

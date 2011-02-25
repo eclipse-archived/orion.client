@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2010."/>
@@ -6,16 +6,19 @@
 <meta http-equiv="PRAGMA" content="NO-CACHE"/>
 <meta http-equiv="Expires" content="-1"/>
 <title>Orion Compare Editor</title>
+
+<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+
 <script language="javascript" type="text/javascript" src="/editor/js/editor.js"></script>
 <script language="javascript" type="text/javascript" src="/editor/js/model.js"></script>
 
+<!-- Authentication (required for handleAuthenticationError) -->
+<script type="text/javascript" src="../../auth.js"></script>
 <script language="javascript" type="text/javascript" src="demo-data.js"></script>
 <script language="javascript" type="text/javascript" src="../diff-parser.js"></script>
-<script language="javascript" type="text/javascript" src="../text-model.js"></script>
 <script language="javascript" type="text/javascript" src="../rulers.js"></script>
-	<style type="text/css">
-		@import "editor.css";
-	</style>
+<script language="javascript" type="text/javascript" src="../compare-model.js"></script>
+<script language="javascript" type="text/javascript" src="../gap-line-feeder.js"></script>
 
 <script language="javascript" type="text/javascript">
 
@@ -40,118 +43,32 @@ function _getTestData(){
 	if(caseNo < 1 || caseNo > demoData.length)
 		caseNo = demoData.length;
 	var testCase = demoData[caseNo -1];
-	var input = testCase[0];
-	var diff = testCase[1];
-	var result = diffParser.parse(input ,diff);
-
-	var output = result.outPutFile;
-	var mapper = result.mapper;
-	return {input:input,output:output,mapper:mapper};
-	
+	return testCase;
 }
 
 function initEditor(editor){
 	var lines = new eclipse.LineNumberCompareRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+	//var lines1 = new eclipse.LineNumberCompareRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
 	editor.addRuler(lines);
+	//editor.addRuler(lines1);
 }
 
-function createStaticEditor() {
-	var leftTH = document.getElementById("LeftTH");
-	var rightTH = document.getElementById("RightTH");
-	leftTH.innerHTML = "Input File With Gaps";
-	rightTH.innerHTML = "Input File Without Gaps";
-	
-	var text = "Line0\nLine1\nLine2\nLine3\nLine4";
-	var model = new eclipse.TextModel(text, "\n");
-	var mapper = [[0 , 2, -1] , [2,2,0] , [0,3,-1],[3,3,0],[0,4,-1]]; 	
-	var compareModel = new eclipse.GapTextModel(model, false , mapper);
-	
-	var optionsRight = {
-			parent: "divParentR",
-			model: model,
-			readonly: editorReadOnly,
-			stylesheet: "editor.css" 
-		};
-	var editorRight = new eclipse.Editor(optionsRight);
-	initEditor(editorRight);
-	var optionsLeft = {
-		parent: "divParentL",
-		model: compareModel,
-		readonly: editorReadOnly,
-		stylesheet: "editor.css" 
-	};
-	var editorLeft = new eclipse.Editor(optionsLeft);
-	initEditor(editorLeft);
-}
-
-function createInputEditor() {
-	var leftTH = document.getElementById("LeftTH");
-	var rightTH = document.getElementById("RightTH");
-	leftTH.innerHTML = "Input File With Gaps";
-	rightTH.innerHTML = "Input File Without Gaps";
-	
-	var testData = _getTestData();
-	var model = new eclipse.TextModel(testData.input, "\r\n");
-	var compareModel = new eclipse.GapTextModel(model, true , testData.mapper);
-	
-	var optionsRight = {
-			parent: "divParentR",
-			model: model,
-			readonly: editorReadOnly,
-			stylesheet: "editor.css" 
-		};
-	var editorRight = new eclipse.Editor(optionsRight);
-	initEditor(editorRight);
-	var optionsLeft = {
-		parent: "divParentL",
-		model: compareModel,
-		readonly: editorReadOnly,
-		stylesheet: "editor.css" 
-	};
-	var editorLeft = new eclipse.Editor(optionsLeft);
-	initEditor(editorLeft);
-}
-
-function createOutputEditor() {
-	var leftTH = document.getElementById("LeftTH");
-	var rightTH = document.getElementById("RightTH");
-	leftTH.innerHTML = "Output File With Gaps";
-	rightTH.innerHTML = "Output File Without Gaps";
-	
-	var testData = _getTestData();
-	var model = new eclipse.TextModel(testData.output, "\r\n");
-	var compareModel = new eclipse.GapTextModel(model, false , testData.mapper);
-	
-	var optionsRight = {
-			parent: "divParentR",
-			model: model,
-			readonly: editorReadOnly,
-			stylesheet: "editor.css" 
-		};
-	var editorRight = new eclipse.Editor(optionsRight);
-	initEditor(editorRight);
-	var optionsLeft = {
-		parent: "divParentL",
-		model: compareModel,
-		readonly: editorReadOnly,
-		stylesheet: "editor.css" 
-	};
-	var editorLeft = new eclipse.Editor(optionsLeft);
-	initEditor(editorLeft);
-}
 var editorLeft;
 var editorRight;
-function createCompareEditor() {
-	var leftTH = document.getElementById("LeftTH");
-	var rightTH = document.getElementById("RightTH");
-	leftTH.innerHTML = "Output File With Gaps";
-	rightTH.innerHTML = "Input File With Gaps";
+
+
+function createEditor(input , diff , delim){
+	var diffParser = new eclipse.DiffParser(delim);
+	var result = diffParser.parse(input ,diff);
+	var output = result.outPutFile;
+	var mapper = result.mapper;
 	
-	var testData = _getTestData();
-	var modelLeft = new eclipse.TextModel(testData.output, "\r\n");
-	var compareModelLeft = new eclipse.GapTextModel(modelLeft, false , testData.mapper);
-	var modelRight = new eclipse.TextModel(testData.input, "\r\n");
-	var compareModelRight = new eclipse.GapTextModel(modelRight, true , testData.mapper);
+	var modelLeft = new eclipse.TextModel(output, delim);
+	//var compareModelLeft = new eclipse.GapTextModel(modelLeft, false , mapper);
+	var compareModelLeft = new eclipse.CompareTextModel(modelLeft, {mapper:mapper , columnIndex:0} , new eclipse.GapLineFeeder(mapper , delim));
+	var modelRight = new eclipse.TextModel(input, delim);
+	//var compareModelRight = new eclipse.GapTextModel(modelRight, true , mapper);
+	var compareModelRight = new eclipse.CompareTextModel(modelRight, {mapper:mapper , columnIndex:1} , new eclipse.GapLineFeeder(mapper , delim));
 	
 	var optionsRight = {
 			parent: "divParentR",
@@ -214,6 +131,18 @@ function createCompareEditor() {
 	scroll.style.width = 0 + "px";
 	scroll.style.height = lines*lineH + "px";
 	*/
+	
+}
+
+function createCompareEditor() {
+	var leftTH = document.getElementById("LeftTH");
+	var rightTH = document.getElementById("RightTH");
+	leftTH.innerHTML = "Output File With Gaps";
+	rightTH.innerHTML = "Input File With Gaps";
+	
+	var testData = _getTestData();
+	createEditor(testData[0] ,testData[1] , "\r\n" );
+	
 }
 
 function scrollHandler(evt){
@@ -224,9 +153,69 @@ function scrollHandler(evt){
 	editorRight.setTopPixel(evt.scrollTop);
 }
 
+var fileContent ;
+var fileDiff;
+function getFileContentGit(hashValue){
+	
+	var url = "/git/index" + hashValue;
+	dojo.xhrGet({
+		url: url, 
+		headers: {
+			"Orion-Version": "1"
+		},
+		handleAs: "text",
+		timeout: 5000,
+		//adding
+		load: function(jsonData, ioArgs) {
+			console.log(jsonData);
+			fileContent = jsonData;
+			getFileDiffGit(hashValue);
+		},
+		
+		error: function(response, ioArgs) {
+			console.error("HTTP status code: ", ioArgs.xhr.status);
+			handleGetAuthenticationError(this, ioArgs);
+			return response;
+		}
+	});
+	
+}
+
+function getFileDiffGit(hashValue){
+	
+	var url = "/git/diff" + hashValue;
+	dojo.xhrGet({
+		url: url , 
+		headers: {
+			"Orion-Version": "1"
+		},
+		handleAs: "text",
+		timeout: 5000,
+		load: function(jsonData, ioArgs) {
+			console.log(jsonData);
+			fileDiff = jsonData;
+			createEditor(fileContent , fileDiff ,"\n");
+		},
+		error: function(response, ioArgs) {
+			console.error("HTTP status code: ", ioArgs.xhr.status);
+			handleGetAuthenticationError(this, ioArgs);
+			return response;
+		}
+	});
+	
+}
+
 window.onload = function() {
-	var demo = document.getElementById("dataLength");
-	demo.innerHTML = demoData.length + ")";
+	//var demo = document.getElementById("dataLength");
+	//demo.innerHTML = demoData.length + ")";
+	var splitted = window.location.href.split('#');
+	if(splitted.length > 1){
+		var leftTH = document.getElementById("LeftTH");
+		var rightTH = document.getElementById("RightTH");
+		leftTH.innerHTML = "File On Local : " + splitted[1];
+		rightTH.innerHTML = "File On Git : " + splitted[1];
+		getFileContentGit(splitted[1]);
+	}
 };
 </script>
 </head>
@@ -262,10 +251,12 @@ window.onload = function() {
 -->
 </tr>
 </table>
+<!--  
 <span>Demo Data Number(1-</span>
 <span id="dataLength"></span>
 <input id="caseNo" type="text" />
 <button onclick='createCompareEditor()'  padding: 0 2 0 2'>Compare</button>
+-->
 <!-- 
 <button onclick='createInputEditor()'  padding: 0 2 0 2'>Test Input</button>
 <button onclick='createOutputEditor()'  padding: 0 2 0 2'>Test Output</button>

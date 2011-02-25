@@ -23,26 +23,6 @@ var eclipse = eclipse || {};
  
 eclipse.fileCommandUtils = eclipse.fileCommandUtils || {};
 
-eclipse.fileCommandUtils.hookUpSearch = function(searchBoxId, explorer) {
-	var searchField = dojo.byId(searchBoxId);
-	if (searchField) {
-		dojo.connect(searchField, "onkeypress", function(e){
-			if (e.charOrCode === dojo.keys.ENTER) {
-				// We expect ExplorerTree to fill in the SearchLocation on the treeRoot
-				if (explorer.treeRoot.SearchLocation) {
-					if (searchField.value.length > 0) {
-						var query = explorer.treeRoot.SearchLocation + searchField.value;
-						explorer.loadResourceList(query);
-						dojo.stopEvent(e);
-					}
-				} else {
-					window.alert("Can't search: SearchLocation not available");
-				}
-			}
-		});
-	}
-};
-
 eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, item) {
 	var parent = dojo.byId(parentId);
 	var toolbar = dojo.byId(toolbarId);
@@ -71,7 +51,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 
 	var favoriteCommand = new eclipse.Command({
 		name: "Make Favorite",
-		image: "images/silk/star.png",
+		image: "images/silk/star.gif",
 		id: "eclipse.makeFavorite",
 		visibleWhen: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
@@ -89,7 +69,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(favoriteCommand, "object");
 	var deleteCommand = new eclipse.Command({
 		name: "Delete",
-		image: "images/silk/cross.png",
+		image: "images/remove.gif",
 		id: "eclipse.deleteFile",
 		visibleWhen: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
@@ -128,7 +108,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 
 	var downloadCommand = new eclipse.Command({
 		name: "Download as Zip",
-		image: "images/silk/arrow_down.png",
+		image: "images/down.gif",
 		id: "eclipse.downloadFile",
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
@@ -140,7 +120,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var newFileCommand=  new eclipse.Command({
 		name: "New File",
-		image: "images/silk/page_add.png",
+		image: "images/newfile_wiz.gif",
 		id: "eclipse.newFile",
 		callback: function(item) {
 			item = forceSingleItem(item);
@@ -164,7 +144,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var newFolderCommand = new eclipse.Command({
 		name: "New Folder",
-		image: "images/silk/folder_add.png",
+		image: "images/newfolder_wiz.gif",
 		id: "eclipse.newFolder",
 		callback: function(item) {
 			item = forceSingleItem(item);
@@ -187,9 +167,33 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(newFolderCommand, "dom");
 	commandService.addCommand(newFolderCommand, "object");
 	
+	var cloneGitRepositoryCommand = new eclipse.Command({
+		name: "Clone Git Repository",
+		image: "images/git/cloneGit.gif",
+		id: "eclipse.cloneGitRepository",
+		callback: function(item) {
+			serviceRegistry.getService("IGitService").then(function(service) {
+				service.checkGitService();
+			});
+			
+//			var dialog = new widgets.NewItemDialog({
+//				title: "Clone Git Repository",
+//				label: "Clone Git Repository:",
+//				func:  function(name){
+//					serviceRegistry.getService("IGitService").then(function(service) {
+//						service.createFolder(name, item, dojo.hitch(explorer, explorer.changedItem));
+//					});
+//				}
+//			});
+//			dialog.startup();
+//			dialog.show();
+		}});
+
+	commandService.addCommand(cloneGitRepositoryCommand, "dom");
+	
 	var newProjectCommand = new eclipse.Command({
 		name: "New Folder",
-		image: "images/silk/folder_add.png",
+		image: "images/newfolder_wiz.gif",
 		id: "eclipse.newProject",
 		callback: function(item) {
 			var dialog = new widgets.NewItemDialog({
@@ -213,7 +217,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var linkProjectCommand = new eclipse.Command({
 		name: "Link Folder",
-		image: "images/silk/link_add.png",
+		image: "images/link_obj.gif",
 		id: "eclipse.linkProject",
 		callback: function(item) {
 			var dialog = new widgets.NewItemDialog({
@@ -234,24 +238,10 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			return item.Location && eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(linkProjectCommand, "dom");
-		
-	var openResourceCommand = new eclipse.Command({
-		name: "Open Resource",
-		image: "images/silk/find.png",
-		id: "eclipse.openResource",
-		callback: function(item) {
-			window.setTimeout(function() {
-				new widgets.OpenResourceDialog({
-					SearchLocation: explorer.treeRoot.SearchLocation,
-					searcher: explorer.searcher
-				}).show();
-			}, 0);
-		}});
-	commandService.addCommand(openResourceCommand, "dom");
-		
+				
 	var importCommand = new eclipse.Command({
 		name : "Import",
-		image : "images/silk/zip_import.gif",
+		image : "images/zip_import.gif",
 		id: "eclipse.importCommand",
 		callback : function(item) {
 			item = forceSingleItem(item);
@@ -267,4 +257,78 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(importCommand, "object");
 	commandService.addCommand(importCommand, "dom");
+};
+
+eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){
+    if(item == null || typeof(item) != 'object')
+        return item;
+
+    var temp = item.constructor(); // changed
+
+    for(var key in item){
+    	if(key!=="children" && key!=="Children")
+    		temp[key] = clone(item[key]);
+    }
+    return temp;
+};
+
+eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands = function(serviceRegistry, commandService, explorer, toolbarId, fileGroup) {
+	
+	
+	var commandsReferences = serviceRegistry.getServiceReferences("fileCommands");
+	var items = this.items;
+	
+	for (var i=0; i<commandsReferences.length; i++) {
+		serviceRegistry.getService(commandsReferences[i]).then(function(service) {
+			service.info().then(function(info) {
+				if(!(info.commands) || info.commands.length==0){
+					return;
+				}
+				var fileGroupCreated = false;
+				var navGroupCreated = false;
+				for(var j=0; j<info.commands.length; j++){
+					var commandDescription = info.commands[j];
+					var command = new eclipse.Command({
+						name: commandDescription.name,
+						image: commandDescription.image,
+						id: info.prefix + "." + commandDescription.id,
+						tooltip: commandDescription.tooltip,
+						callback: dojo.hitch(commandDescription, function(items){
+							var shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
+							service.run(this.id, shallowItemsClone);
+						}),
+						visibleWhen: function(items){
+							//TODO add some validation description on client site
+							return true;
+						}
+					});
+					if(commandDescription.type==="tree" || commandDescription.type==="both"){
+						if(!fileGroupCreated){
+							commandService.addCommandGroup("fileGroup."+info.prefix, 100, info.displayName ? info.name : null, fileGroup);
+							fileGroupCreated=true;
+						}
+						commandService.addCommand(command, "object");
+						commandService.registerCommandContribution(command.id, commandDescription.index, null, fileGroup+"/fileGroup."+info.prefix);
+					}
+					if(commandDescription.type==="toolbar" || commandDescription.type==="both"){
+						if(!navGroupCreated){
+							commandService.addCommandGroup("toolbarGroup."+info.prefix, 100, null, null, toolbarId);
+							navGroupCreated=true;
+						}
+						commandService.addCommand(command, "dom");
+						commandService.registerCommandContribution(command.id, commandDescription.index, toolbarId, "toolbarGroup."+info.prefix);
+					}
+				}
+				eclipse.fileCommandUtils.updateNavTools(serviceRegistry, explorer, explorer.innerId, toolbarId, explorer.treeRoot);
+				explorer.updateCommands();
+				
+			});
+			
+		});
+	}
+	
+	
+
+	
+	
 };

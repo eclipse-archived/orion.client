@@ -51,7 +51,6 @@ dojo.addOnLoad(function(){
 	}());
 	
 	var topContainerWidget = dijit.byId("topContainer"),
-		codeTitle = dojo.byId("codeTitle"),
 		outlineDomNode = dojo.byId("outline"),
 		editorContainerDomNode = dojo.byId("editorContainer"),
 		searchFloat = dojo.byId("searchFloat"),
@@ -63,7 +62,8 @@ dojo.addOnLoad(function(){
 	var editorFactory = function() {
 		return new eclipse.Editor({
 			parent: editorContainerDomNode,
-			stylesheet: "/editor/samples/editor.css"
+			stylesheet: "/editor/samples/editor.css",
+			tabSize: 4
 		});
 	};
 
@@ -84,9 +84,12 @@ dojo.addOnLoad(function(){
 			editorFactory, commandService, eclipse.editorFeatures.createEditorCommands, eclipse.editorFeatures.undoFactory,
 			annotationRulerFactory, lineNumberRulerFactory, overviewRulerFactory,
 			searcher,
-			editorContainerDomNode, codeTitle,
-			topContainerWidget, contentassist, leftPane, searchFloat, "editorActions");
+			editorContainerDomNode, "pageTitle",
+			topContainerWidget, contentassist, leftPane, searchFloat, "pageActions");
 	
+	// TODO search location needs to be gotten from somewhere
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, editorContainer, editorContainer);
+
 	// The eWebBorderContainer widget needs to know the editorContainer
 	topContainerWidget.set("editorContainer", editorContainer);
 	
@@ -100,19 +103,7 @@ dojo.addOnLoad(function(){
 			 return "There are unsaved changes.";
 		}
 	};
-	
-	// Initialize link to home page
-	var homeNode = dojo.byId("home");
-	if (homeNode) {
-		prefsService.get("window/orientation", function (home) {
-			home = home || "navigate-table.html";
-			prefsService.put("window/orientation", home);
-			homeNode.href=home;
-		});
-	}
-		
-	eclipse.editorFeatures.updateEditorToolbar("editorActions", editorContainer, commandService);
-	
+			
 	// Ctrl+o handler for toggling outline 
 	document.onkeydown = function (evt){
 		evt = evt || window.event;

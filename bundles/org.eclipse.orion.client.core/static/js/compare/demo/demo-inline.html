@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010."/>
+<meta http-equiv="X-UA-Compatible" content="IE=8"/>
+<meta http-equiv="PRAGMA" content="NO-CACHE"/>
+<meta http-equiv="Expires" content="-1"/>
+<title>Orion Compare Editor</title>
+
+<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+
+<script language="javascript" type="text/javascript" src="/editor/js/editor.js"></script>
+<script language="javascript" type="text/javascript" src="/editor/js/model.js"></script>
+
+<!-- Authentication (required for handleAuthenticationError) -->
+<script type="text/javascript" src="../../auth.js"></script>
+<script language="javascript" type="text/javascript" src="demo-data.js"></script>
+<script language="javascript" type="text/javascript" src="../diff-parser.js"></script>
+<script language="javascript" type="text/javascript" src="../rulers-inline.js"></script>
+<script language="javascript" type="text/javascript" src="../compare-model.js"></script>
+<script language="javascript" type="text/javascript" src="../diff-line-feeder.js"></script>
+
+<script language="javascript" type="text/javascript">
+
+var editorReadOnly = true;
+var isMac = navigator.platform.indexOf("Mac") !== -1;
+
+function getFile(file) {
+	try {
+		var objXml = new XMLHttpRequest();
+		objXml.open("GET",file,false);
+		objXml.send(null);
+		return objXml.responseText;
+	} catch (e) {
+		return null;
+	}
+}
+
+function _getTestData(){
+	var number = document.getElementById("caseNo");
+	var diffParser = new eclipse.DiffParser("\r\n");
+	var caseNo = number.value;
+	if(caseNo < 1 || caseNo > demoData.length)
+		caseNo = demoData.length;
+	var testCase = demoData[caseNo -1];
+	return testCase;
+}
+
+function initEditor(editor){
+	var rulerOrigin = new eclipse.LineNumberDiffRuler(false,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+	var rulerNew = new eclipse.LineNumberDiffRuler(true,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+	editor.addRuler(rulerOrigin);
+	editor.addRuler(rulerNew);
+}
+var editor;
+
+function createEditor(input , diff , delim){
+	var diffParser = new eclipse.DiffParser(delim);
+	var result = diffParser.parse(input ,diff,false);
+	var output = result.outPutFile;
+	var mapper = result.mapper;
+	
+	var model = new eclipse.TextModel(input, delim);
+	//var compareModelRight = new eclipse.GapTextModel(modelRight, true , mapper);
+	var compareModel = new eclipse.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new eclipse.DiffLineFeeder(mapper , diffParser.getDiffArray() , delim));
+	
+	var options = {
+		parent: "divParentL",
+		model: compareModel,
+		readonly: editorReadOnly,
+		stylesheet: "editor.css" 
+	};
+	editor = new eclipse.Editor(options);
+	initEditor(editor);
+	editor.addEventListener("LineStyle", window, function(lineStyleEvent) {
+		var lineIndex = lineStyleEvent.lineIndex;
+		var lineStart = lineStyleEvent.lineStart;
+		var lineType = compareModel.getLineType(lineIndex);
+		//lineStyleEvent.ranges = [];
+		//lineStyleEvent.ranges.push ({start: lineStart, end: lineStart + 3, style: {style: {backgroundColor: "blue"} }});
+		if(lineType === "added") {
+			lineStyleEvent.style = {style: {backgroundColor: "#99EE99"}};
+		} else if (lineType === "removed"){
+			lineStyleEvent.style = {style: {backgroundColor: "#EE9999"}};
+		} 
+	}); 
+
+	editor.redrawRange();
+}
+
+function createCompareEditor() {
+	var testData = _getTestData();
+	createEditor(testData[0] ,testData[1] , "\r\n" );
+	
+}
+
+var fileContent ;
+var fileDiff;
+function getFileContentGit(hashValue){
+	
+	var url = "/git/index" + hashValue;
+	dojo.xhrGet({
+		url: url, //"/git/index" + hashValue;//file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.html"
+		//adding some thing 
+		headers: {
+			"Orion-Version": "1"
+		},
+		handleAs: "text",
+		timeout: 5000,
+		//adding
+		load: function(jsonData, ioArgs) {
+			console.log(jsonData);
+			fileContent = jsonData;
+			getFileDiffGit(hashValue);
+		},
+		
+		///adding
+		///adding
+		
+		error: function(response, ioArgs) {
+			console.error("HTTP status code: ", ioArgs.xhr.status);
+			handleGetAuthenticationError(this, ioArgs);
+			return response;
+		}
+	});
+	
+}
+
+function getFileDiffGit(hashValue){
+	
+	var url = "/git/diff" + hashValue;
+	dojo.xhrGet({
+		url: url , //"/git/diff" + hashValue;///file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.htmlsfasf"
+		//changing some thing
+		headers: {
+			"Orion-Version": "1"
+		},
+		handleAs: "text",
+		timeout: 5000,
+		load: function(jsonData, ioArgs) {
+			//addingg
+			console.log(jsonData);
+			fileDiff = jsonData;
+			createEditor(fileContent , fileDiff ,"\n");
+		},
+		error: function(response, ioArgs) {
+			console.error("HTTP status code: ", ioArgs.xhr.status);
+			handleGetAuthenticationError(this, ioArgs);
+			return response;
+		}
+	});
+	
+}
+
+window.onload = function() {
+	//var demo = document.getElementById("dataLength");
+	//demo.innerHTML = demoData.length + ")";
+	var splitted = window.location.href.split('#');
+	if(splitted.length > 1){
+		var TH = document.getElementById("TH");
+		TH.innerHTML = "File : " + splitted[1];
+		getFileContentGit(splitted[1]);
+	}
+};
+</script>
+</head>
+<body>
+
+<h1>Orion Compare Editor</h1>
+
+<table width="100%">
+<tr>
+<th id="TH" />
+</tr>
+<tr>
+<td width="100%">
+<div id='divParentL' style='border: 1px solid teal;width:100%;height:650px;'>
+</div>
+</td>
+
+</tr>
+</table>
+<!-- 
+<span>Demo Data Number(1-</span>
+<span id="dataLength"></span>
+<input id="caseNo" type="text" />
+<button onclick='createCompareEditor()'  padding: 0 2 0 2'>Compare</button>
+-->
+<br>
+</body>
+</html>
