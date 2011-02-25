@@ -19,7 +19,7 @@ var sites = dojo.getObject("eclipse.sites", true);
  */
 sites.SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 
-// TODO call authentication as a service
+// requires: authentication service
 sites.SiteService = (function() {
 	/**
 	 * Constructs a new SiteService.
@@ -63,16 +63,77 @@ sites.SiteService = (function() {
 			
 		},
 		
-		createSiteConfiguration: function() {
-			
+		createSiteConfiguration: function(name, workspace, mappings, hostHint) {
+			var toCreate = {
+					Name: name,
+					Workspace: workspace
+				};
+			if (mappings) { toCreate.Mappings = mappings; }
+			if (hostHint) { toCreate.HostHint = hostHint; }
+			return dojo.xhrPost({
+				url: this._siteUrl,
+				content: toCreate,
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 5000,
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
 		},
 		
-		updateSiteConfiguration: function() {
-			
+		startStopSiteConfiguration: function(id, action) {
+			return dojo.xhrPost({
+				url: this._siteUrl + "/" + id,
+				headers: {
+					"Orion-Version": "1",
+					"X-Action": action
+				},
+				handleAs: "json",
+				timeout: 5000,
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
 		},
 		
-		deleteSiteConfiguration: function() {
-			
+		updateSiteConfiguration: function(id, updatedSiteConfig) {
+			return dojo.xhrPut({
+				url: this._siteUrl + "/" + id,
+				content: updatedSiteConfig,
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 5000,
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		deleteSiteConfiguration: function(id) {
+			return dojo.xhrDelete({
+				url: this._siteUrl + "/" + id,
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 5000,
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
 		}
 	};
 	return SiteService;
