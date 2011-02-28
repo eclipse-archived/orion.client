@@ -277,6 +277,26 @@ eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){
 
 eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands = function(serviceRegistry, commandService, explorer, toolbarId, fileGroup) {
 	
+	function getPattern(wildCard){
+		var pattern = '^';
+        for (var i = 0; i < wildCard.length; i++ ) {
+                var c = wildCard.charAt(i);
+                switch (c) {
+                        case '?':
+                                pattern += '.';
+                                break;
+                        case '*':
+                                pattern += '.*';
+                                break;
+                        default:
+                                pattern += c;
+                }
+        }
+        pattern += '$';
+        
+        return new RegExp(pattern);
+	}
+	
 	
 	var commandsReferences = serviceRegistry.getServiceReferences("fileCommands");
 	var items = this.items;
@@ -300,10 +320,35 @@ eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands = function(service
 							var shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
 							service.run(this.id, shallowItemsClone);
 						}),
-						visibleWhen: function(items){
-							//TODO add some validation description on client site
+						visibleWhen: dojo.hitch(commandDescription, function(item){
+							if(!this.validationProperties){
+								return true;
+							}
+							for(var keyWildCard in this.validationProperties){
+								var keyPattern = getPattern(keyWildCard);
+								var matchFound = false;
+								for(var key in item){
+									if(keyPattern.test(key)){
+										if(typeof(this.validationProperties[keyWildCard])=='string'){
+											var valuePattern = getPattern(this.validationProperties[keyWildCard]);
+											if(valuePattern.test(item[key])){
+												matchFound = true;
+												break;
+											}
+										}else{
+											if(this.validationProperties[keyWildCard]==item[key]){
+												matchFound = true;
+												break;
+											}
+										}
+									}
+								}
+								if(!matchFound){
+									return false;
+								}
+							}
 							return true;
-						}
+						})
 					});
 					if(commandDescription.type==="tree" || commandDescription.type==="both"){
 						if(!fileGroupCreated){
