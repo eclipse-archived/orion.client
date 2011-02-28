@@ -32,7 +32,7 @@ eclipse.FileService = (function() {
 		 */
 		fetchChildren: function(location) {
 			// console.log("get children");
-			dojo.xhrGet({
+			return dojo.xhrGet({
 				url: location,
 				headers: {
 					"Orion-Version": "1"

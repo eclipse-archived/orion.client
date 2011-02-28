@@ -70,7 +70,7 @@ eclipse.ExplorerTree = (function() {
 		changedItem: function(parent) {
 			var self = this;
 			this.registry.getService("IFileService").then(function(service) {
-				service.fetchChildren(parent.ChildrenLocation, function(children) {
+				service.fetchChildren(parent.ChildrenLocation).then(function(children) {
 					eclipse.util.processNavigatorParent(parent, children);
 					dojo.hitch(self.model, self.model.onChildrenChange)(parent, children);
 				});
@@ -231,7 +231,7 @@ eclipse.TreeModel = (function() {
 				onComplete([]);
 			} else if (parentItem.Location) {
 				this.registry.getService("IFileService").then(function(service) {
-					service.fetchChildren(parentItem.ChildrenLocation, 
+					service.fetchChildren(parentItem.ChildrenLocation).then(
 						dojo.hitch(this, function(children) {
 							eclipse.util.processNavigatorParent(parentItem, children);
 							onComplete(children);
