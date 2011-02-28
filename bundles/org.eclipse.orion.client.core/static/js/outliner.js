@@ -72,6 +72,7 @@ eclipse.Outliner.prototype = {
 				var nonHash = window.location.href.split('#')[0];
 				var href = nonHash +  eclipse.util.hashFromPosition(resource.title, null, null, f.line, null, null, f.name);
 				var link = dojo.create("a", {href: href}, items, "last");
+				dojo.addClass(link, "navlinkonpage");
 				dojo.place(document.createTextNode(name), link);
 				dojo.create("br", null, items, "last");
 			}
@@ -96,6 +97,7 @@ eclipse.Outliner.prototype = {
 				var nonHash = window.location.href.split('#')[0];
 				var href = nonHash +  eclipse.util.hashFromPosition(resource.title, start, end);
 				var link = dojo.create("a", {href: href}, items, "last");
+				dojo.addClass(link, "navlinkonpage");
 				dojo.place(document.createTextNode(name), link);
 				dojo.create("br", null, items, "last");
 			}
