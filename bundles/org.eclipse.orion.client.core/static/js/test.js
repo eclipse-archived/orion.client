@@ -134,6 +134,40 @@ orion.Test = (function(assert) {
 		}
 	}
 
+	exports.list = function(name, obj) {
+		if (typeof obj === "undefined") {
+			obj = name;
+			name = "";
+		}
+
+		if (!obj || typeof obj !== "object") {
+			throw Error("not a test object");
+		}
+		return _list(name, obj);
+	};
+	
+
+	function _list(runName, obj) {
+		var result = [],
+			property,
+			test,
+			testName;
+		
+		for (property in obj) {
+			if (property.match(/^test.+/)) {
+				test = obj[property];
+				testName = runName ? runName + "." + property : property;
+				if (typeof test === "function") {
+					result.push(testName);
+				} else if (typeof test === "object") {
+					result = result.concat(_list(testName, test, result));
+				}
+			}
+		}
+		return result;
+	};
+
+	
 	exports.run = function(name, obj) {
 		if (typeof obj === "undefined") {
 			obj = name;
@@ -151,6 +185,9 @@ orion.Test = (function(assert) {
 				var serviceProvider = provider.registerServiceProvider("testRunner", {
 					run: function() {
 						dojo.when(_run(name, obj), dojo.hitch(result, "resolve"));
+					},
+					list: function() {
+						return _list(name, obj);
 					}
 				});
 

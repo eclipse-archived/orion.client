@@ -20,7 +20,6 @@ tests["test subtest"] = {
 		}
 };
 
-
 tests["test basic asynch"] = function() {
 	var d = new dojo.Deferred();
 	setTimeout(function(){d.callback();}, 100);
@@ -37,6 +36,20 @@ tests["test expected asynch failure"] = function() {
 		}
 	},100);
 	return d;
+};
+
+tests["test basic list"] = function() {
+	var listTests = {
+		"test 1": function() {
+		},
+		"test obj": {
+			"test2": function() {
+				
+			}
+		}
+		
+	};
+	assert.deepEqual(orion.Test.list(listTests), ["test 1", "test obj.test2"]);
 };
 return tests;
 }(orion.Assert);
