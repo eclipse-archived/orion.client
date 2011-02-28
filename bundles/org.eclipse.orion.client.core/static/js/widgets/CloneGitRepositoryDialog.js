@@ -8,7 +8,7 @@
  ******************************************************************************/
 /*global dojo dijit*/
 /*jslint browser:true*/
-dojo.provide("widgets.NewItemDialog");
+dojo.provide("widgets.CloneGitRepositoryDialog");
 
 dojo.require("dijit.Dialog");
 dojo.require("dijit.form.CheckBox");
@@ -33,8 +33,8 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = this.options.title || "No title";
-		this.itemNameLabelText = this.options.label || "Name:";
+		this.title = "Clone Git Repository";
+		this.itemNameLabelText = "Repository URL:";
 		this.buttonCancel = "Cancel";
 	},
 	postCreate: function() {
