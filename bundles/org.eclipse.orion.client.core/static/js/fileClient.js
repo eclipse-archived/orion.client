@@ -73,6 +73,31 @@ eclipse.FileService = (function() {
 		},
 
 		/**
+		 * Loads all the user's workspaces.
+		 * @param {Function} onLoad the function to invoke with the loaded workspaces
+		 */
+		loadWorkspaces: function(onLoad) {
+			dojo.xhrGet({
+				url: "/workspace",
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				load: dojo.hitch(this, function(jsonData, ioArgs) {
+					onLoad(jsonData.Workspaces);
+				}),
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					// TODO need a better error handling
+					onLoad(response);
+					return response;
+				}
+			});
+		},
+		
+		/**
 		 * Loads the workspace with the given id and sets it to be the current
 		 * workspace for the IDE. The workspace is created if none already exists.
 		 * @param {String} location the location of the workspace to load
