@@ -29,20 +29,19 @@ eclipse.GitService = (function() {
 			var service = this;
 			console.info("Git Service checked");
 		},
-		cloneGitRepo : function(cloneRepoLocation, gitRepoUrl, credentials,
-				onLoad) {
+		cloneGitRepository : function(gitName, gitRepoUrl, onLoad) {
 			var service = this;
-			dojo.xhrDelete({
-				url : userURI,
+			dojo.xhrPost({
+				url : "/git/clone/",
 				headers : {
 					"Orion-Version" : "1"
 				},
 				postData : dojo.toJson({
-					"Name" : folderName,
+					"Name" : gitName,
 					"GitUrl" : gitRepoUrl
 				}),
 				handleAs : "json",
-				timeout : 5000,
+				timeout : 15000,
 				load : function(jsonData, secondArg) {
 					if (onLoad) {
 						if (typeof onLoad === "function")
