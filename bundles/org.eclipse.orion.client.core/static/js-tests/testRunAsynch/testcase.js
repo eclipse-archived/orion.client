@@ -20,7 +20,6 @@ tests["test subtest"] = {
 		}
 };
 
-
 tests["test basic asynch"] = function() {
 	var d = new dojo.Deferred();
 	setTimeout(function(){d.callback();}, 100);
@@ -28,15 +27,41 @@ tests["test basic asynch"] = function() {
 };
 
 tests["test expected asynch failure"] = function() {
-	var d = new dojo.Deferred();
-	setTimeout(function(){
-		try {
-			assert.ok(false, "expected failure");
-		} catch (e) {
-			d.errback(e);			
+	
+	var failureTest = {
+		"test Failure": function() {
+			var d = new dojo.Deferred();
+			setTimeout(function(){
+				try {
+					assert.ok(false, "expected failure");
+				} catch (e) {
+					d.errback(e);			
+				}
+			},100);
+			return d;
 		}
-	},100);
-	return d;
+	};
+	var newTest = orion.Test.newTest();
+	// by adding a dummy listener we avoid the error from useConsole() which is added if there are no listeners
+	newTest.addEventListener("testDone", function() {});	
+	
+	return newTest.run(failureTest).then(function(failures) {
+		assert.equal(failures, 1);
+	});
+};
+
+tests["test basic list"] = function() {
+	var listTests = {
+		"test 1": function() {
+		},
+		"test obj": {
+			"test2": function() {
+				
+			}
+		}
+		
+	};
+	assert.deepEqual(orion.Test.list(listTests), ["test 1", "test obj.test2"]);
 };
 return tests;
 }(orion.Assert);
