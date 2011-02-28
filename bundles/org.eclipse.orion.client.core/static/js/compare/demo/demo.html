@@ -206,14 +206,14 @@ function getFileDiffGit(hashValue){
 }
 
 window.onload = function() {
-	var demo = document.getElementById("dataLength");
-	demo.innerHTML = demoData.length + ")";
-	var leftTH = document.getElementById("LeftTH");
-	var rightTH = document.getElementById("RightTH");
-	leftTH.innerHTML = "File On Local";
-	rightTH.innerHTML = "File On Git";
+	//var demo = document.getElementById("dataLength");
+	//demo.innerHTML = demoData.length + ")";
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
+		var leftTH = document.getElementById("LeftTH");
+		var rightTH = document.getElementById("RightTH");
+		leftTH.innerHTML = "File On Local : " + splitted[1];
+		rightTH.innerHTML = "File On Git : " + splitted[1];
 		getFileContentGit(splitted[1]);
 	}
 };
@@ -251,10 +251,12 @@ window.onload = function() {
 -->
 </tr>
 </table>
+<!--  
 <span>Demo Data Number(1-</span>
 <span id="dataLength"></span>
 <input id="caseNo" type="text" />
 <button onclick='createCompareEditor()'  padding: 0 2 0 2'>Compare</button>
+-->
 <!-- 
 <button onclick='createInputEditor()'  padding: 0 2 0 2'>Test Input</button>
 <button onclick='createOutputEditor()'  padding: 0 2 0 2'>Test Output</button>

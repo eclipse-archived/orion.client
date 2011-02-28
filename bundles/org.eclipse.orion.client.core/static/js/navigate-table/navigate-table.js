@@ -31,6 +31,9 @@ dojo.addOnLoad(function(){
 	// Favorites
 	new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
 	
+	// Git operations
+	new eclipse.GitService(serviceRegistry);
+	
 	var treeRoot = {
 		children:[]
 	};
@@ -49,6 +52,7 @@ dojo.addOnLoad(function(){
 	commandService.addCommandGroup("eclipse.fileGroup", 100, "More");
 	commandService.addCommandGroup("eclipse.newResources", 100, null, "eclipse.fileGroup");
 	commandService.addCommandGroup("eclipse.fileGroup.unlabeled", 100, null, null, "navToolBar");
+	commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "navToolBar");
 	commandService.registerCommandContribution("eclipse.makeFavorite", 1);
 	commandService.registerCommandContribution("eclipse.downloadFile", 2);
 	commandService.registerCommandContribution("eclipse.openResource", 500, "navToolBar");
@@ -62,6 +66,8 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.newFolder", 2, "navToolBar", "eclipse.fileGroup.unlabeled");
 	commandService.registerCommandContribution("eclipse.newProject", 3, "navToolBar", "eclipse.fileGroup.unlabeled");
 	commandService.registerCommandContribution("eclipse.linkProject", 4, "navToolBar", "eclipse.fileGroup.unlabeled");
+	// git contributions
+	commandService.registerCommandContribution("eclipse.cloneGitRepository", 1, "navToolBar", "eclipse.gitGroup");
 
 	eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands(serviceRegistry, commandService, explorer, "navToolBar", "eclipse.fileGroup");
 	

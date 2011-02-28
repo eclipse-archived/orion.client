@@ -1,0 +1,62 @@
+<div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="labelledby-${id}_title">
+	<div dojoAttachPoint="titleBar" class="dijitDialogTitleBar">
+		<span dojoAttachPoint="titleNode" class="dijitDialogTitle" id="${id}_title"></span>
+		<span dojoAttachPoint="closeButtonNode" class="dijitDialogCloseIcon" dojoAttachEvent="onclick: onCancel" title="${buttonCancel}">
+			<span dojoAttachPoint="closeText" class="closeText" title="${buttonCancel}">x</span>
+		</span>
+	</div>
+	<div dojoAttachPoint="containerNode" class="dijitDialogPaneContent">
+		<div style="display: table">
+			<div style="display: table-row">
+				<div style="display: table-cell; padding: 5px">
+					<label dojoAttachPoint="siteConfigNameLabel" for="${id}_name">${siteConfigNameLabelText}</label>
+				</div>
+				<div style="display: table-cell; padding: 5px 5px 15px 5px; text-align: left;">
+					<input dojoType="dijit.form.ValidationTextBox" dojoAttachPoint="name" id="${id}_name"
+						required="true"
+						invalidMessage="Enter a name for the site configuration." 
+						style="display: inline-block; width: 20em;" value="">
+				</div>
+			</div>
+			
+			<div style="display: table-row">
+				<div style="display: table-cell; padding: 5px">
+					<label dojoAttachPoint="mappingsLabel" for="${id}_mappings">${mappingsLabelText}</label>
+				</div>
+				<div style="display: table-cell; padding: 5px 5px 15px 5px; text-align: left;">
+					<textarea dojoType="dijit.form.Textarea" dojoAttachPoint="mappings" id="${id}_mappings" style="display: inline-block; width: 30em;"></textarea>
+					<div style="font-size: x-small;">Example:<br>
+					<code>[ {Source: "/",&nbsp;&nbsp;&nbsp;&nbsp;Target:"/ProjectA"},<br>
+					&nbsp;&nbsp;{Source: "/bar", Target:"/ProjectB"} ]</code>
+					</div>
+				</div>
+			</div>
+			
+			<div style="display: table-row">
+				<div style="display: table-cell; padding: 5px">
+					<label dojoAttachPoint="hostHintLabel" for="${id}_hostHint" style="padding-right: 10">${hostHintLabelText}</label>
+				</div>
+				<div style="display: table-cell; padding: 5px 5px 15px 5px; width: 10em; text-align: left;">
+					<input dojoAttachPoint="hostHint" id="${id}_hostHint" style="display: inline-block;" value="">
+				</div>
+			</div>
+			
+			<div style="display: table-row">
+				<div style="display: table-cell; padding: 5px">
+					<label dojoAttachPoint="workspaceLabel" for="${id}_workspace" style="padding-right: 10">${workspaceLabelText}</label>
+				</div>
+				<div style="display: table-cell; padding: 5px 5px 15px 5px; width: 20em; text-align: left;">
+					<div dojoType="dijit.form.Select" dojoAttachPoint="workspace" id="${id}_workspace" style="display: inline-block;">
+					</div>
+				</div>
+			</div>
+			
+			<div style="display: table-row">
+				<div style="display: table-cell; padding: 5px"></div>
+				<div style="display: table-cell; padding: 5px">
+					<button dojoAttachPoint="okButton" dojoType="dijit.form.Button" type="submit" value="OK" style="padding: 20 0 10 0; float: right; clear: both;">OK</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

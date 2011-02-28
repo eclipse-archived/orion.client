@@ -71,15 +71,15 @@ eclipse.PluginProvider = function() {
 			var service = _services[serviceId].implementation;
 			var method = service[message.method];
 			
-			var response = {id: message.id, result: null, err: null};
+			var response = {id: message.id, result: null, error: null};
 			var promiseOrResult = method.apply(service, message.params);
 			if(promiseOrResult && typeof promiseOrResult.then === "function"){
 				promiseOrResult.then(function(result) {
 					response.result = result;
-					_publish(message);
+					_publish(response);
 				}, function(error) {
 					response.error = error;
-					_publish(message);
+					_publish(response);
 				});
 			} else {
 				response.result = promiseOrResult;
@@ -109,8 +109,11 @@ eclipse.PluginProvider = function() {
 		return new eclipse.ServiceProvider(serviceId, _internalProvider);	
 	};
 	
-	this.connect = function() {
+	this.connect = function(callback, errback) {
 		if (_hubClient) {
+			if (callback) {
+				callback();
+			}
 			return;
 		}
 		
@@ -130,6 +133,13 @@ eclipse.PluginProvider = function() {
 				};
 				_publish(message);
 				_connected = true;
+				if (callback) {
+					callback();
+				}
+			} else {
+				if (errback) {
+					errback(error);
+				}
 			}
 		});
 	};

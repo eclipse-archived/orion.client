@@ -2,8 +2,11 @@
 <html>
 <head>
 	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<!-- ^temporary^ - will remove this dependency for the test framework-->
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>	
 	<script type="text/javascript" src="../../js/assert.js"></script>
 	<script type="text/javascript" src="../../js/test.js"></script>
+	<script type="text/javascript" src="../../js/plugin.js"></script>
 	<script type="text/javascript">
 		function require(module) {
 			if (module==="assert") {
@@ -17,8 +20,9 @@
 	</script>
 	<script type="text/javascript" src="https://github.com/commonjs/commonjs/raw/master/tests/unit-testing/1.0/program.js"></script>
 	<script type="text/javascript">
-	orion.Test.useConsole();
-	orion.Test.run(exports);
+	window.onload = function() {
+		orion.Test.run(exports);
+	};
 	</script>
 </head>
 <body>
