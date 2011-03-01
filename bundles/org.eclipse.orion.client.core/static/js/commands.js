@@ -449,7 +449,13 @@ eclipse.Command = (function() {
 					} else if (this.hrefCallback) {
 						var href = this.hrefCallback.call(handler, items, this.id, parent.id, userData);
 						if (href) {
-							window.location = href;
+							if (href.then) {
+								href.then(function(l) {
+									window.location = l;
+								});
+							} else {
+								window.location = href;
+							}
 						}
 					}
 				})
