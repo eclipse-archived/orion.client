@@ -34,6 +34,13 @@ dojo.addOnLoad(function(){
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
 	
+	// this is temporary
+	var unittestPlugin = pluginRegistry.getPlugin("/unittestPlugin.html");
+	if (unittestPlugin === null) {
+		pluginRegistry.installPlugin("/unittestPlugin.html");
+	}
+
+	
 	var treeRoot = {
 		children:[]
 	};

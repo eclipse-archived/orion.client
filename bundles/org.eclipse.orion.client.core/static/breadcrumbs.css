@@ -1,16 +1,14 @@
 .breadcrumb {
-	font-size: 1.1em;
-	color: #316ac5;
 	text-decoration: none;
-	margin-right: 4px;
-	margin-left: 4px;
+	margin-right: 2px;
+	margin-left: 2px;
+	color: #05386B;
 }
 
 .breadcrumb:hover {
-	font-size: 1.1em;
+	text-decoration: none;
+	margin-right: 2px;
+	margin-left: 2px;
+	border-bottom: 1px dotted;
 	color: #05386B;
-	text-decoration: underline;
-	margin-right: 4px;
-	margin-left: 4px;
 }
-

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<script type="text/javascript" src="/js/plugin.js"></script>
+	<script>
+		window.onload = function() {
+			var provider = new eclipse.PluginProvider();
+			provider.registerServiceProvider("fileCommands", {
+				info : function() {
+					return {
+						name : "Unittest commands",
+						displayName: false,
+						prefix : "unittest.commands",
+						href: true,
+						commands: [
+							{
+								type: "tree",
+								name: "Run as Unit Test",
+								id: "run",
+								tooltip: "Run as Unit Test",
+								validationProperties: {"Name":"*.html"},
+								index: 1
+							}
+						]
+					};
+				},
+				run: function(commandId, items) {
+					return "/unittest.html#" + this._forceSingleItem(items).Location;
+				},
+				_forceSingleItem: function(item) {
+					if (item.constructor == Array) {
+						if (item.length > 1) {
+							item = {};
+						} else {
+							item = item[0];
+						}
+					}
+					return item;
+				}
+			});
+			provider.connect();
+		};
+	</script>
+</head>
+<body>
+</body>
+</html>
