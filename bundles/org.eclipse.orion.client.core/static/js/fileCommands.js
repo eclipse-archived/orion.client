@@ -346,15 +346,17 @@ eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands = function(service
 							return true;
 						})
 					};
-					if (info.href) {
+					if (commandDescription.href) {
 						commandOptions.hrefCallback = dojo.hitch(commandDescription, function(items){
 							var shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
-							return service.run(this.id, shallowItemsClone);
+							if(service.getHref)
+								return service.getHref(this.id, shallowItemsClone);
 						});
 					} else {
 						commandOptions.callback = dojo.hitch(commandDescription, function(items){
 							var shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
-							service.run(this.id, shallowItemsClone);
+							if(service.run)
+								service.run(this.id, shallowItemsClone);
 						});
 					}
 					var command = new eclipse.Command(commandOptions);
