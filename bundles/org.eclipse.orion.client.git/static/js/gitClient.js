@@ -29,7 +29,7 @@ eclipse.GitService = (function() {
 			var service = this;
 			console.info("Git Service checked");
 		},
-		cloneGitRepository : function(gitName, gitRepoUrl, onLoad) {
+		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost, onLoad) {
 			var service = this;
 			dojo.xhrPost({
 				url : "/git/clone/",
@@ -38,7 +38,10 @@ eclipse.GitService = (function() {
 				},
 				postData : dojo.toJson({
 					"Name" : gitName,
-					"GitUrl" : gitRepoUrl
+					"GitUrl" : gitRepoUrl,
+					"GitSshUsername" : gitSshUsername,
+					"GitSshPassword" : gitSshPassword,
+					"GitSshKnownHost" : gitSshKnownHost
 				}),
 				handleAs : "json",
 				timeout : 15000,

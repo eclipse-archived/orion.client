@@ -173,10 +173,10 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		id : "eclipse.cloneGitRepository",
 		callback : function(item) {
 			var dialog = new widgets.CloneGitRepositoryDialog({
-				func : function(gitUrl) {
+				func : function(gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
 					serviceRegistry.getService("IGitService").then(
 							function(service) {
-								service.cloneGitRepository("", gitUrl,
+								service.cloneGitRepository("", gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost, 
 										function(jsonData, secondArg) {
 											alert("Repository cloned. You may now link to " 
 													+ jsonData.ContentLocation);
@@ -188,7 +188,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			dialog.show();
 		},
 		visibleWhen : function(item) {
-			return false;
+			return true;
 		}
 	});
 
