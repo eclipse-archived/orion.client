@@ -11,14 +11,16 @@ var eclipse = eclipse || {};
 eclipse.GapLineFeeder = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 
-	function GapLineFeeder(mapper, lineDelimeter) {
-		this._mapper = mapper;
+	function GapLineFeeder(lineDelimeter) {
 		this._lineDelimeter = lineDelimeter;
+		this._annotations = [];
 	}
 
 	GapLineFeeder.prototype = /** @lends eclipse.TextModel.prototype */ {
-		generateGapBlocks: function( mapperColumnIndex ){
+			generateGapBlocks: function( mapper, mapperColumnIndex , diffLinesArray ){
 		    var gapBlocks = [];//Each item represents the start lineIndex and the line number of a gap block , and the string index of the dummyLineArray
+			this._mapper = mapper;
+			this._annotations = [];
 		    var gapNumber = 0;
 			var curLineindex = 0;//zero based
 			var mapperColumnIndexCompare = 1 - mapperColumnIndex;
@@ -28,7 +30,10 @@ eclipse.GapLineFeeder = (function() {
 					gapNumber +=gap;
 					gapBlocks.push([curLineindex + this._mapper[i][mapperColumnIndex] , gap , 1]);
 				}
-				curLineindex += Math.max(this._mapper[i][mapperColumnIndexCompare], this._mapper[i][mapperColumnIndex]);
+				var delta = Math.max(this._mapper[i][mapperColumnIndexCompare], this._mapper[i][mapperColumnIndex]);
+				if((this._mapper[i][2] !== 0))
+					this._annotations.push([curLineindex , delta]);
+				curLineindex += delta;
 			}
 			return {gapBlocks:gapBlocks , gapNumber:gapNumber};
 		},
@@ -61,6 +66,18 @@ eclipse.GapLineFeeder = (function() {
 				curLineindex += Math.max(this._mapper[i][mapperColumnIndex], this._mapper[i][mapperColumnIndexCompare]);
 			}
 			return "unchnaged";
+		},
+		
+		getAnnotations: function(){
+			return this._annotations;
+		},
+		
+		getAnnotationH: function(lineIndex){
+			for (var i = 0 ; i < this._annotations.length ; i++){
+				if(this._annotations[i][0] === lineIndex)
+					return this._annotations[i][1];
+			}
+			return 0;
 		}
 		
 	};
