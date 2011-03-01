@@ -47,7 +47,12 @@ dojo.addOnLoad(function(){
 		new eclipse.ProblemService(serviceRegistry);
 		new eclipse.OutlineService(serviceRegistry);
 		new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
-		new eclipse.FileService(serviceRegistry);
+
+		// File operations
+		var filePlugin = pluginRegistry.getPlugin("/fileClientPlugin.html");
+		if (filePlugin === null) {
+			pluginRegistry.installPlugin("/fileClientPlugin.html");
+		}
 	}());
 	
 	var topContainerWidget = dijit.byId("topContainer"),
