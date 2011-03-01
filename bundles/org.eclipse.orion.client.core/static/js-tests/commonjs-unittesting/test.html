@@ -17,6 +17,19 @@
 		}
 		exports = {};
 		module = {};
+		
+		if (!Object.keys) {
+			Object.keys = function(obj) {
+				var key,
+					keys = [];
+			    for (key in obj) {
+			        if (obj.hasOwnProperty(key)) {
+			            keys.push(key);
+			        }
+			    }
+			    return keys;
+			}
+		}
 	</script>
 	<script type="text/javascript" src="https://github.com/commonjs/commonjs/raw/master/tests/unit-testing/1.0/program.js"></script>
 	<script type="text/javascript">

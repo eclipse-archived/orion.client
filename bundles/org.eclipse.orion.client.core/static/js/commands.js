@@ -392,7 +392,14 @@ eclipse.Command = (function() {
 			image.id = name;
 			if (this.hrefCallback) {
 				link = dojo.create("a");
-				link.href = this.hrefCallback.call(handler, items, this.id, userData);
+				var href = this.hrefCallback.call(handler, items, this.id, userData);
+				if(href.then){
+					href.then(function(l){
+						link.href = l;
+					});
+				}else{
+					link.href = href; 
+				}
 			} else if (this.callback) {
 				dojo.connect(image, "onclick", this, function() {
 					this.callback.call(handler, items, this.id, image.id, userData);
@@ -434,7 +441,14 @@ eclipse.Command = (function() {
 					this.callback.call(handler, items);
 				});
 			} else if (this.hrefCallback) {
-				anchor.href = this.hrefCallback.call(handler, items, this.id);
+				var href = this.hrefCallback.call(handler, items, this.id);
+				if(href.then){
+					href.then(function(link){
+						anchor.href = link;
+					});
+				}else{
+					anchor.href = this.hrefCallback.call(handler, items, this.id);
+				}
 			}
 			dojo.addClass(anchor, 'commandLink');
 			return anchor;
@@ -449,7 +463,13 @@ eclipse.Command = (function() {
 					} else if (this.hrefCallback) {
 						var href = this.hrefCallback.call(handler, items, this.id, parent.id, userData);
 						if (href) {
-							window.location = href;
+							if (href.then) {
+								href.then(function(l) {
+									window.location = l;
+								});
+							} else {
+								window.location = href;
+							}
 						}
 					}
 				})

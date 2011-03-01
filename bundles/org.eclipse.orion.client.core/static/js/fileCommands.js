@@ -92,12 +92,13 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 						var item = items[i];
 						if (item.parent.Path === "") {
 							serviceRegistry.getService("IFileService").then(function(service) {
-								service.removeProject(
-									item.parent, item, dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
+								service.removeProject(item.parent.Location, item.Location).then(
+									dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 							});
 						} else {
 							serviceRegistry.getService("IFileService").then(function(service) {
-								service.deleteFile(item, dojo.hitch(explorer, explorer.changedItem));
+								service.deleteFile(item.Location).then(
+									dojo.hitch(explorer, function() {explorer.changedItem(item.parent)}));//refresh the parent
 							});
 						}
 					}
@@ -129,7 +130,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				label: "File name:",
 				func:  function(name){
 					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createFile(name, item, dojo.hitch(explorer, explorer.changedItem)); 
+						service.createFile(item.Location, name).then(
+						dojo.hitch(explorer, function() {this.changedItem(item)})); //refresh the parent
 					});
 				}
 			});
@@ -153,7 +155,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				label: "Folder name:",
 				func:  function(name){
 					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createFolder(name, item, dojo.hitch(explorer, explorer.changedItem));
+						service.createFolder(item.Location, name).then(
+							dojo.hitch(explorer, function() {this.changedItem(item)}));//refresh the parent
 					});
 				}
 			});
@@ -173,10 +176,10 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		id : "eclipse.cloneGitRepository",
 		callback : function(item) {
 			var dialog = new widgets.CloneGitRepositoryDialog({
-				func : function(gitUrl) {
+				func : function(gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
 					serviceRegistry.getService("IGitService").then(
 							function(service) {
-								service.cloneGitRepository("", gitUrl,
+								service.cloneGitRepository("", gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost, 
 										function(jsonData, secondArg) {
 											alert("Repository cloned. You may now link to " 
 													+ jsonData.ContentLocation);
@@ -188,7 +191,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			dialog.show();
 		},
 		visibleWhen : function(item) {
-			return false;
+			return true;
 		}
 	});
 
@@ -204,8 +207,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				label: "Folder name:",
 				func:  function(name, serverPath, create){
 					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createProject(explorer.treeRoot.ChildrenLocation, name, serverPath, create,
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
+						service.createProject(explorer.treeRoot.ChildrenLocation, name, serverPath, create).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 					});
 				}
 			});
@@ -228,8 +231,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				label: "Folder name:",
 				func:  function(name, url, create){
 					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createProject(explorer.treeRoot.ChildrenLocation, name, url, create,
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
+						service.createProject(explorer.treeRoot.ChildrenLocation, name, url, create).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 						});
 				},
 				advanced: true
@@ -250,7 +253,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			var dialog = new widgets.ImportDialog({
 				importLocation: item.ImportLocation,
-				func: dojo.hitch(explorer, explorer.changedItem(item))
+				func: dojo.hitch(explorer, this.changedItem(item))
 			});
 			dialog.startup();
 			dialog.show();
@@ -311,15 +314,11 @@ eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands = function(service
 				var navGroupCreated = false;
 				for(var j=0; j<info.commands.length; j++){
 					var commandDescription = info.commands[j];
-					var command = new eclipse.Command({
+					var commandOptions = {
 						name: commandDescription.name,
 						image: commandDescription.image,
 						id: info.prefix + "." + commandDescription.id,
 						tooltip: commandDescription.tooltip,
-						callback: dojo.hitch(commandDescription, function(items){
-							var shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
-							service.run(this.id, shallowItemsClone);
-						}),
 						visibleWhen: dojo.hitch(commandDescription, function(item){
 							if(!this.validationProperties){
 								return true;
@@ -349,7 +348,21 @@ eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands = function(service
 							}
 							return true;
 						})
-					});
+					};
+					if (commandDescription.href) {
+						commandOptions.hrefCallback = dojo.hitch(commandDescription, function(items){
+							var shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
+							if(service.getHref)
+								return service.getHref(this.id, shallowItemsClone);
+						});
+					} else {
+						commandOptions.callback = dojo.hitch(commandDescription, function(items){
+							var shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
+							if(service.run)
+								service.run(this.id, shallowItemsClone);
+						});
+					}
+					var command = new eclipse.Command(commandOptions);
 					if(commandDescription.type==="tree" || commandDescription.type==="both"){
 						if(!fileGroupCreated){
 							commandService.addCommandGroup("fileGroup."+info.prefix, 100, info.displayName ? info.name : null, fileGroup);

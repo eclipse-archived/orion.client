@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,13 +26,28 @@ dojo.addOnLoad(function(){
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 
 	// File operations
-	new eclipse.FileService(serviceRegistry);
+	var filePlugin = pluginRegistry.getPlugin("/fileClientPlugin.html");
+	if (filePlugin === null) {
+		pluginRegistry.installPlugin("/fileClientPlugin.html");
+	}
 	
 	// Favorites
 	new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
 	
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
+	
+	// this is temporary
+	var unittestPlugin = pluginRegistry.getPlugin("/unittestPlugin.html");
+	if (unittestPlugin === null) {
+		pluginRegistry.installPlugin("/unittestPlugin.html");
+	}
+	
+	var gitPlugin = pluginRegistry.getPlugin("/plugins/gitPlugin.html");
+	if (gitPlugin === null) {
+		pluginRegistry.installPlugin("/plugins/gitPlugin.html");
+	}
+
 	
 	var treeRoot = {
 		children:[]

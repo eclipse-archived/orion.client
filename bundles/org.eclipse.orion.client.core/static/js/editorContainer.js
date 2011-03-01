@@ -165,7 +165,7 @@ eclipse.EditorContainer = (function() {
 			}
 			title = dijit.byId(this._codeTitle);
 			if (title) {
-				returntitle.get("title");
+				return title.get("title");
 			}
 			return null;
 		},

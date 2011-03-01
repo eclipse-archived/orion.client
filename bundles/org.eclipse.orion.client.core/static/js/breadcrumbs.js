@@ -47,7 +47,7 @@ eclipse.BreadCrumbs = (function() {
 			if (crumbs) {
 				dojo.empty(crumbs);
 			} else {
-				crumbs = document.createElement('h2');
+				crumbs = document.createElement('span');
 				crumbs.id = this._id;
 				container.appendChild(crumbs);
 			}
@@ -60,7 +60,10 @@ eclipse.BreadCrumbs = (function() {
 
 			// walk up the parent chain and insert a crumb for each parent
 			if (this._resource && this._resource.Parents) {
-				crumbs.appendChild(document.createTextNode('/'));
+				var slash = document.createElement('span');
+				dojo.place(document.createTextNode('/'), slash, "only");
+				dojo.addClass(slash, "breadcrumb");
+				crumbs.appendChild(slash);
 				var parents = this._resource.Parents;
 				for (var i = parents.length; --i >= 0 ;){
 					var seg = document.createElement('a');
@@ -68,12 +71,16 @@ eclipse.BreadCrumbs = (function() {
 					dojo.place(document.createTextNode(parents[i].Name), seg, "only");
 					seg.href = "#" + parents[i].ChildrenLocation;
 					crumbs.appendChild(seg);
-					crumbs.appendChild(document.createTextNode('/'));
+					var slash = document.createElement('span');
+					dojo.place(document.createTextNode('/'), slash, "only");
+					dojo.addClass(slash, "breadcrumb");
+					crumbs.appendChild(slash);
 				}
 				//add a final entry for the current location
 				if (this._resource) {
 					var seg = document.createElement('a');
 					dojo.place(document.createTextNode(this._resource.Name), seg, "only");
+					dojo.addClass(seg, "breadcrumb");
 					dojo.addClass(seg, "currentLocation");
 					crumbs.appendChild(seg);
 				}

@@ -34,7 +34,10 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
 	postMixInProperties : function() {
 		this.inherited(arguments);
 		this.title = "Clone Git Repository";
-		this.itemNameLabelText = "Repository URL:";
+		this.gitUrlLabelText = "Repository URL:";
+		this.gitSshUsernameLabelText = "Ssh username:";
+		this.gitSshPasswordLabelText = "Ssh password:";
+		this.gitSshKnownHostsLabelText = "Ssh known hosts:";
 		this.buttonCancel = "Cancel";
 	},
 	postCreate: function() {
@@ -56,6 +59,6 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
 	},
 	// Stuff from newItemDialog.js is below
 	execute: function() {
-		this.options.func(this.itemName.value);
+		this.options.func(this.gitUrl.value, this.gitSshUsername.value, this.gitSshPassword.value, this.gitSshKnownHosts.value);
 	}
 });

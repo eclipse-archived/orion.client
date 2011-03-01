@@ -31,7 +31,7 @@ eclipse.Explorer = (function() {
 		changedItem: function(parent) {
 			var self = this;
 			this.registry.getService("IFileService").then(function(service) {
-				service.fetchChildren(parent.ChildrenLocation, function(children) {
+				service.fetchChildren(parent.ChildrenLocation).then(function(children) {
 					eclipse.util.processNavigatorParent(parent, children);
 					dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
 				});
@@ -77,14 +77,8 @@ eclipse.Explorer = (function() {
 				this.treeRoot.Path = path;
 				var self = this;
 					this.registry.getService("IFileService").then(function(service) {
-						service.loadWorkspace(path,
+						service.loadWorkspace(path).then(
 							dojo.hitch(self, function(loadedWorkspace) {
-								// Show an error message when a problem happens during getting the workspace
-								// Don't show the error for 401 since the login dialog is shown anyway
-								if (loadedWorkspace.status != null && loadedWorkspace.status != 401){
-									dojo.place(document.createTextNode("Sorry, an error ocurred: " + loadedWorkspace.message), progress, "only");
-									return;
-								}
 								//copy fields of resulting object into the tree root
 								for (var i  in loadedWorkspace) {
 									this.treeRoot[i] = loadedWorkspace[i];
@@ -94,12 +88,21 @@ eclipse.Explorer = (function() {
 								new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
 								eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.treeRoot);
 								this.createTree();
+							}),
+							dojo.hitch(self, function(error) {
+								// Show an error message when a problem happens during getting the workspace
+								// Don't show the error for 401 since the login dialog is shown anyway
+								if (error.status != null && error.status != 401){
+									dojo.place(document.createTextNode("Sorry, an error occurred: " + error.message), progress, "only");
+								}
 							}));
 					});
 			}
 		},
 		updateCommands: function(item){
-			dojo.hitch(this.myTree._renderer, this.myTree._renderer.updateCommands(item));
+			if (this.myTree) {
+				dojo.hitch(this.myTree._renderer, this.myTree._renderer.updateCommands(item));
+			}
 		},
 		createTree: function (){
 			this.model = new eclipse.Model(this.registry, this.treeRoot);
@@ -143,7 +146,7 @@ eclipse.Model = (function() {
 				onComplete([]);
 			} else if (parentItem.Location) {
 				this.registry.getService("IFileService").then(function(service) {
-					service.fetchChildren(parentItem.ChildrenLocation, 
+					service.fetchChildren(parentItem.ChildrenLocation).then( 
 						dojo.hitch(this, function(children) {
 							eclipse.util.processNavigatorParent(parentItem, children);
 							onComplete(children);

@@ -56,12 +56,23 @@ eclipse.globalCommandUtils.generateUserInfo = function(userName, userStatusText)
 				style: "display: none;",
 				id: "userMenu"
 			});
+			
+			// profile item
+			var menuitem2 = new dijit.MenuItem({
+				label: "Profile",
+				onClick: 
+					dojo.hitch(this, 
+							function(){window.location.replace("/user-profile.html#/users/" + userName);})	
+			});
+			newMenu.addChild(menuitem2);
+			
 			// signout item
 			var menuitem = new dijit.MenuItem({
 				label: "Sign out",
 				onClick: logout
 			});
 			newMenu.addChild(menuitem);
+
 			var menuButton = new dijit.form.DropDownButton({
 				label: userName,
 				dropDown: newMenu,
