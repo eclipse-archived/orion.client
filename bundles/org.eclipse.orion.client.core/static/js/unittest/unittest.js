@@ -100,22 +100,17 @@ eclipse.Unittest.Renderer = (function() {
 			} else {
 				col = document.createElement('td');
 				tableRow.appendChild(col);
-				// only go to the coding page for things we know how to edit.  This way we can still view images, etc.
-				div = dojo.create("div", {className: item.result?"test-passed":"test-failed"}, col, "only");
+				div = dojo.create("div", null, col, "only");
 //				dojo.create("img", {src: "/images/none.png"}, div, "last");
-//				dojo.create("img", {src: "/images/silk/page.png"}, div, "last");
+				dojo.create("img", {src: item.result?"/images/unit_test/testok.gif":"/images/unit_test/testfail.gif"}, div, "first");
 //				link = dojo.create("a", {className: "navlink", href: "/"}, div, "last");
-				dojo.place(document.createTextNode(item.Name), div, "only");
+				dojo.place(document.createTextNode(item.Name), div, "last");
 			}
 			
 			var resultColumn = document.createElement('td');
 			tableRow.appendChild(resultColumn);
 		},
 		rowsChanged: function() {
-			dojo.query(".treeTableRow").forEach(function(node, i) {
-				var color = i % 2 ? "FFFFFF" : "EFEFEF";
-				dojo.style(node, "backgroundColor", color);
-			});
 		}
 		
 	};
@@ -133,6 +128,10 @@ dojo.addOnLoad(function(){
 	
 	function runTests(fileURI) {
 		//console.log("installing non-persistent plugin: " + fileURI);
+		var testOverview = dojo.byId("test-overview");
+		dojo.place(document.createTextNode("Running tests from: "), testOverview, "last");
+		var link = dojo.create("a", {className: "navlink", href: "/coding.html#"+fileURI}, testOverview, "last");
+		dojo.place(document.createTextNode(fileURI.substring(fileURI.lastIndexOf("/")+1)), link, "last");
 		
 		// these are isolated from the regular service and plugin registry
 		var testServiceRegistry = new eclipse.ServiceRegistry();
