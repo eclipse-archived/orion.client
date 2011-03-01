@@ -79,12 +79,6 @@ eclipse.Explorer = (function() {
 					this.registry.getService("IFileService").then(function(service) {
 						service.loadWorkspace(path).then(
 							dojo.hitch(self, function(loadedWorkspace) {
-								// Show an error message when a problem happens during getting the workspace
-								// Don't show the error for 401 since the login dialog is shown anyway
-								if (loadedWorkspace.status != null && loadedWorkspace.status != 401){
-									dojo.place(document.createTextNode("Sorry, an error occurred: " + loadedWorkspace.message), progress, "only");
-									return;
-								}
 								//copy fields of resulting object into the tree root
 								for (var i  in loadedWorkspace) {
 									this.treeRoot[i] = loadedWorkspace[i];
@@ -94,12 +88,21 @@ eclipse.Explorer = (function() {
 								new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
 								eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.treeRoot);
 								this.createTree();
+							}),
+							dojo.hitch(self, function(error) {
+								// Show an error message when a problem happens during getting the workspace
+								// Don't show the error for 401 since the login dialog is shown anyway
+								if (error.status != null && error.status != 401){
+									dojo.place(document.createTextNode("Sorry, an error occurred: " + error.message), progress, "only");
+								}
 							}));
 					});
 			}
 		},
 		updateCommands: function(item){
-			dojo.hitch(this.myTree._renderer, this.myTree._renderer.updateCommands(item));
+			if (this.myTree) {
+				dojo.hitch(this.myTree._renderer, this.myTree._renderer.updateCommands(item));
+			}
 		},
 		createTree: function (){
 			this.model = new eclipse.Model(this.registry, this.treeRoot);

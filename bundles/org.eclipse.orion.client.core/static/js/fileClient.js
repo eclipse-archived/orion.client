@@ -65,12 +65,16 @@ eclipse.FileService = (function() {
 					"Slug": name
 				},
 				handleAs: "json",
-				timeout: 15000
-			}).addErrback(function(response, ioArgs) {
+				timeout: 15000,
+				load: function(jsonData, ioArgs) {
+					return jsonData.Workspaces;
+				},
+				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					handlePostAuthenticationError(this, ioArgs);
 					return response;
-				});
+				}
+			});
 		},
 
 		/**
@@ -129,7 +133,6 @@ eclipse.FileService = (function() {
 					}
 				}),
 				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
 					handleGetAuthenticationError(this, ioArgs);
 					// TODO need a better error handling
 					return response;

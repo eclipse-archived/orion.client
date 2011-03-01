@@ -93,7 +93,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 						if (item.parent.Path === "") {
 							serviceRegistry.getService("IFileService").then(function(service) {
 								service.removeProject(item.parent.Location, item.Location).then(
-									dojo.hitch(explorer, function() {explorer.changedItem(this.treeRoot)}));
+									dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 							});
 						} else {
 							serviceRegistry.getService("IFileService").then(function(service) {
@@ -131,7 +131,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				func:  function(name){
 					serviceRegistry.getService("IFileService").then(function(service) {
 						service.createFile(item.Location, name).then(
-						dojo.hitch(explorer, function() {explorer.changedItem(item)})); //refresh the parent
+						dojo.hitch(explorer, function() {this.changedItem(item)})); //refresh the parent
 					});
 				}
 			});
@@ -156,7 +156,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				func:  function(name){
 					serviceRegistry.getService("IFileService").then(function(service) {
 						service.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {explorer.changedItem(item)}));//refresh the parent
+							dojo.hitch(explorer, function() {this.changedItem(item)}));//refresh the parent
 					});
 				}
 			});
@@ -253,7 +253,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			var dialog = new widgets.ImportDialog({
 				importLocation: item.ImportLocation,
-				func: dojo.hitch(explorer, explorer.changedItem(item))
+				func: dojo.hitch(explorer, this.changedItem(item))
 			});
 			dialog.startup();
 			dialog.show();
