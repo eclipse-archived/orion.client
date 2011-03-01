@@ -39,6 +39,11 @@ dojo.addOnLoad(function(){
 	if (unittestPlugin === null) {
 		pluginRegistry.installPlugin("/unittestPlugin.html");
 	}
+	
+	var gitPlugin = pluginRegistry.getPlugin("/plugins/gitPlugin.html");
+	if (gitPlugin === null) {
+		pluginRegistry.installPlugin("/plugins/gitPlugin.html");
+	}
 
 	
 	var treeRoot = {
