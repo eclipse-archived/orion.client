@@ -29,6 +29,7 @@ eclipse.FileService = (function() {
 		/**
 		 * Obtains the children of a remote resource
 		 * @param location The location of the item to obtain children for
+		 * @return A deferred that will provide the array of child objects when complete
 		 */
 		fetchChildren: function(location) {
 			// console.log("get children");
@@ -40,7 +41,7 @@ eclipse.FileService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					return jsonData.Children;
+					return jsonData.Children || [];
 				},
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -73,11 +74,11 @@ eclipse.FileService = (function() {
 		},
 
 		/**
-		 * Loads all the user's workspaces.
-		 * @param {Function} onLoad the function to invoke with the loaded workspaces
+		 * Loads all the user's workspaces. Returns a deferred that will provide the loaded
+		 * workspaces when ready.
 		 */
-		loadWorkspaces: function(onLoad) {
-			dojo.xhrGet({
+		loadWorkspaces: function() {
+			return dojo.xhrGet({
 				url: "/workspace",
 				headers: {
 					"Orion-Version": "1"
@@ -85,7 +86,7 @@ eclipse.FileService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: dojo.hitch(this, function(jsonData, ioArgs) {
-					onLoad(jsonData.Workspaces);
+					return jsonData.Workspaces;
 				}),
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -136,7 +137,14 @@ eclipse.FileService = (function() {
 			});
 			return deferred;
 		},
-		createProject: function(url, projectName, serverPath, create, callback) {
+		/**
+		 * Adds a project to a workspace.
+		 * @param {String} url The workspace location
+		 * @param {String} projectName the human-readable name of the project
+		 * @param {String} serverPath The optional path of the project on the server.
+		 * @param {Boolean} create If true, the project is created on the server file system if it doesn't already exist
+		 */
+		createProject: function(url, projectName, serverPath, create) {
 			if (!url) { // null, undefined, '' ...
 				// window.document.eas.status.setErrorMessage("<enter message here>");
 				console.error("url is undefined, make sure you're signed in before creating a project");
@@ -151,7 +159,7 @@ eclipse.FileService = (function() {
 			if (create) {
 				data.CreateIfDoesntExist = create;
 			}
-			dojo.xhrPost({
+			return dojo.xhrPost({
 				url: url,
 				headers: {
 					"Orion-Version": "1",
@@ -160,32 +168,6 @@ eclipse.FileService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					callback();
-					return jsonData;
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handlePostAuthenticationError(this, ioArgs);
-					return response;
-				},
-				postData: dojo.toJson(data)
-			});
-		},
-		removeProject: function(workspace, project, callback) {
-			var data = {
-				ProjectURL: project.Location
-			};
-			data.Remove = true;
-			dojo.xhrPost({
-				url: workspace.Location,
-				headers: {
-					"Orion-Version": "1",
-					"Content-Type": "application/json"
-				},
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					callback();
 					return jsonData;
 				},
 				error: function(response, ioArgs) {
@@ -197,13 +179,40 @@ eclipse.FileService = (function() {
 			});
 		},
 		/**
-		 * @param folderName
-		 * @param item
-		 * @param {Function(Object)} updateFunction
+		 * Removes a project from a workspace. Note that project contents are not deleted.
+		 * @param {String} workspaceLocation The workspace URL
+		 * @param {String} projectLocation The location of the project to be removed
+		 * @return A deferred that can be used to chain events after the deletion completes
 		 */
-		createFolder: function(folderName, item, updateFunction) {
-			dojo.xhrPost({
-				url: (item.Location),
+		removeProject: function(workspaceLocation, projectLocation) {
+			return dojo.xhrPost({
+				url: workspaceLocation,
+				headers: {
+					"Orion-Version": "1",
+					"Content-Type": "application/json"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, ioArgs) {
+					return jsonData;
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handlePostAuthenticationError(this, ioArgs);
+					return response;
+				},
+				postData: dojo.toJson({ProjectURL: projectLocation, Remove: true})
+			});
+		},
+		/**
+		 * Creates a folder.
+		 * @param {String} parentLocation The location of the parent folder
+		 * @param {String} folderName The name of the folder to create
+		 * @return {Object} JSON representation of the created folder
+		 */
+		createFolder: function(parentLocation, folderName) {
+			return dojo.xhrPost({
+				url: parentLocation,
 				headers: {
 					"Orion-Version": "1",
 					"Slug": folderName,
@@ -217,7 +226,6 @@ eclipse.FileService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					updateFunction(item);
 					return jsonData;
 				},
 				error: function(response, ioArgs) {
@@ -228,14 +236,15 @@ eclipse.FileService = (function() {
 			});
 		},
 		/**
-		 * 
-		 * @param fileName
-		 * @param item
-		 * @param {Function(Object)} updateFunction
+		 * Create a new file in a specified location. Returns a deferred that will provide
+		 * The new file object when ready.
+		 * @param {String} parentLocation The location of the parent folder
+		 * @param {String} fileName The name of the file to create
+		 * @return {Object} A deferred that will provide the new file object
 		 */
-		createFile: function(fileName, item, updateFunction) {
-			dojo.xhrPost({
-				url: (item.Location),
+		createFile: function(parentLocation, fileName) {
+			return dojo.xhrPost({
+				url: parentLocation,
 				headers: {
 					"Orion-Version": "1",
 					"Slug": fileName,
@@ -249,7 +258,6 @@ eclipse.FileService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					updateFunction(item);
 					return jsonData;
 				},
 				error: function(response, ioArgs) {
@@ -260,24 +268,18 @@ eclipse.FileService = (function() {
 			});
 		},
 		/**
-		 * 
-		 * @param item
-		 * @param function(Object) updateFunction
+		 * Deletes a file or directory.
+		 * @param {String} location The location of the file or directory to delete.
 		 */
-		deleteFile: function(item, updateFunction) {
-			dojo.xhrDelete({
-				url: (item.Location),
+		deleteFile: function(location) {
+			return dojo.xhrDelete({
+				url: location,
 				headers: {
 					"Orion-Version": "1"
 				},
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					if (item.parent) {
-						updateFunction(item.parent);
-					} else {
-						updateFunction(item);
-					}
 					return jsonData;
 				},
 				error: function(response, ioArgs) {

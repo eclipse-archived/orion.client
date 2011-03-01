@@ -53,7 +53,7 @@ dojo.addOnLoad(function() {
 			callback : function() {
 				var dialog = new widgets.SiteConfigEditor({
 					title: "Create Site Configuration",
-					fileService: fileService,
+					serviceRegistry: serviceRegistry,
 					callback: function(name, workspace, mappings, hostHint) {
 						siteService.createSiteConfiguration(name, workspace, mappings, hostHint).then(refreshFunction);
 					}});
