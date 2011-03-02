@@ -1742,5 +1742,507 @@ var demoData = [
 	  "\\ No newline at end of file\r\n" + 
 	  "" 
 	]
-		
+	,
+	[
+	 "<!doctype html>\r\n" + 
+	 "<html style=\"height: 100%\" >\r\n" + 
+	 "    <head>\r\n" + 
+	 "		<meta name=\"copyright\" content=\"Copyright (c) IBM Corporation and others 2010.\" >\r\n" + 
+	 "		<meta http-equiv=\"Content-Language\" content=\"en-us\">\r\n" + 
+	 "		<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">\r\n" + 
+	 "		<meta http-equiv=\"X-UA-Compatible\" content=\"IE=8\">\r\n" + 
+	 "    	<title>Orion Navigator</title>    \r\n" + 
+	 "    \r\n" + 
+	 "    <script type=\"text/javascript\">\r\n" + 
+	 "        var djConfig = {\r\n" + 
+	 "		isDebug: true,\r\n" + 
+	 "		modulePaths: {\'widgets\': \'/js/widgets\'},\r\n" + 
+	 "		parseOnLoad: true\r\n" + 
+	 "        };\r\n" + 
+	 "    </script>\r\n" + 
+	 "    <script type=\"text/javascript\" src=\"/org.dojotoolkit/dojo/dojo.js.uncompressed.js\"></script>\r\n" + 
+	 "    <script type=\"text/javascript\">\r\n" + 
+	 "	dojo.require(\"dijit.Dialog\");\r\n" + 
+	 "	dojo.require(\"dijit.form.TextBox\"); dojo.require(\"dijit.form.ComboBox\");\r\n" + 
+	 "	dojo.require(\"dijit.form.CheckBox\");\r\n" + 
+	 "	dojo.require(\"dojo.data.ItemFileReadStore\");\r\n" + 
+	 "	dojo.require(\"widgets.NewItemDialog\");\r\n" + 
+	 "	dojo.require(\"widgets.OpenResourceDialog\");\r\n" + 
+	 "	dojo.require(\"widgets.ImportDialog\");\r\n" + 
+	 " 	</script>    	\r\n" + 
+	 "	<style type=\"text/css\">\r\n" + 
+	 "		@import \"/org.dojotoolkit/dojo/resources/dojo.css\";\r\n" + 
+	 "		@import \"/org.dojotoolkit/dijit/themes/soria/soria.css\";\r\n" + 
+	 "		@import \"/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css\";\r\n" + 
+	 "		@import \"/org.dojotoolkit/dijit/themes/soria/form/Common.css\";\r\n" + 
+	 "		@import \"/org.dojotoolkit/dijit/themes/soria/form/Button.css\";\r\n" + 
+	 "		@import \"/org.dojotoolkit/dijit/themes/soria/ProgressBar.css\";\r\n" + 
+	 "		@import \"/org.dojotoolkit/dojox/form/resources/FileUploader.css\";\r\n" + 
+	 "	    @import \"/ide.css\";\r\n" + 
+	 "	    @import \"/breadcrumbs.css\"; \r\n" + 
+	 "	    @import \"/commands.css\";\r\n" + 
+	 "	</style>\r\n" + 
+	 "	\r\n" + 
+	 "	<!-- Authentication (required for handleAuthenticationError) -->\r\n" + 
+	 "	<script type=\"text/javascript\" src=\"js/auth.js\"></script>\r\n" + 
+	 "	  	\r\n" + 
+	 "   </head>\r\n" + 
+	 "\r\n" + 
+	 "    <body style=\"height: 100%\" class=\"soria\">\r\n" + 
+	 "    \r\n" + 
+	 "    <script type=\"text/javascript\" src=\"/openajax/release/all/OpenAjaxManagedHub-all.js\"></script>\r\n" + 
+	 "    \r\n" + 
+	 "    <!-- Extension Registry -->\r\n" + 
+	 "	<script src=\"js/serviceregistry.js\"></script>\r\n" + 
+	 "	<script src=\"js/pluginregistry.js\"></script>\r\n" + 
+	 "        \r\n" + 
+	 "    <!-- Eclipse Application Services -->\r\n" + 
+	 "    <!-- START:eas.js -->\r\n" + 
+	 " 	<script src=\"js/util.js\"></script>\r\n" + 
+	 " 	<script src=\"js/commands.js\"></script>\r\n" + 
+	 " 	<script src=\"js/dialogs.js\"></script>\r\n" + 
+	 " 	<script src=\"js/input.js\"></script>\r\n" + 
+	 " 	<script src=\"js/log.js\"></script>\r\n" + 
+	 " 	<script src=\"js/selection.js\"></script>\r\n" + 
+	 " 	<script src=\"js/status.js\"></script>\r\n" + 
+	 " 	<script src=\"js/users.js\"></script>\r\n" + 
+	 "\r\n" + 
+	 "	<!-- END:eas.js -->\r\n" + 
+	 "	<!-- INSERT:eas.js -->\r\n" + 
+	 " 	\r\n" + 
+	 "	<!-- Breadcrumbs, table -->\r\n" + 
+	 "	<!-- START:navigate-table.js -->\r\n" + 
+	 "	<script src=\"js/globalCommands.js\"></script>\r\n" + 
+	 "	<!-- END:navigate-table.js -->\r\n" + 
+	 " 	<!-- INSERT:navigate-table.js -->\r\n" + 
+	 "	\r\n" + 
+	 "	<div dojoType=\"dijit.layout.BorderContainer\" design=\"headline\" liveSplitters=\"true\" persist=\"true\" gutters=\"true\" style=\"width: 100%; height: 100%;\">\r\n" + 
+	 "		<div class=\"toolbar\" id=\"toolbar\" dojoType=\"dijit.layout.ContentPane\" region=\"top\">\r\n" + 
+	 "		</div>\r\n" + 
+	 "		\r\n" + 
+	 "		<div class=\"paneScrolled\" dojoType=\"dijit.layout.BorderContainer\" design=\"headline\"  liveSplitters=\"true\" persist=\"true\" gutters=\"true\" region=\"leading\" splitter=\"false\">\r\n" + 
+	 "			<div class=\"paneScrolled\" id=\"unstagePane\" dojoType=\"dijit.layout.ContentPane\" region=\"center\"  splitter=\"true\">				\r\n" + 
+	 "				<div id=\"result\">\r\n" + 
+	 "				</div>\r\n" + 
+	 "			</div>\r\n" + 
+	 "			<div class=\"paneScrolled\" id=\"statgePane\" dojoType=\"dijit.layout.ContentPane\" region=\"bottom\" style=\"height: 40%\" splitter=\"true\">\r\n" + 
+	 "				<div id=\"details\">\r\n" + 
+	 "					<h2>Failure Stack ...</h2>\r\n" + 
+	 "					<div id=\"stackDetails\"></div>\r\n" + 
+	 "				</div>\r\n" + 
+	 "			</div>\r\n" + 
+	 "		</div>\r\n" + 
+	 "		\r\n" + 
+	 "		<div class=\"paneScrolled\" style=\"margin-left: 8px;\" id=\"rightPane\" dojoType=\"dijit.layout.ContentPane\" region=\"center\" style=\"width: 80%; height: 100%;\" splitter=\"false\">\r\n" + 
+	 "			<div id=\"inline-compare-view\">\r\n" + 
+	 "				<!-- Breadcrumbs, tree content go here -->\r\n" + 
+	 "			</div>\r\n" + 
+	 "		</div>\r\n" + 
+	 "	</div>\r\n" + 
+	 "	\r\n" + 
+	 "</body>\r\n" + 
+	 "</html>\r\n" + 
+	 "",
+	 "--- test1n.js	Sat Feb 26 13:01:20 2011\r\n" + 
+	 "+++ test1o.js	Sat Feb 26 13:00:38 2011\r\n" + 
+	 "@@ -5,24 +5,21 @@\r\n" + 
+	 " 		<meta http-equiv=\"Content-Language\" content=\"en-us\">\r\n" + 
+	 " 		<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">\r\n" + 
+	 " 		<meta http-equiv=\"X-UA-Compatible\" content=\"IE=8\">\r\n" + 
+	 "-    	<title>Orion Navigator</title>    \r\n" + 
+	 "+    	<title>Git Status</title>    \r\n" + 
+	 "     \r\n" + 
+	 "     <script type=\"text/javascript\">\r\n" + 
+	 "         var djConfig = {\r\n" + 
+	 "-		isDebug: true,\r\n" + 
+	 "-		modulePaths: {\'widgets\': \'/js/widgets\'},\r\n" + 
+	 "-		parseOnLoad: true\r\n" + 
+	 "+		    isDebug:false,\r\n" + 
+	 "+			modulePaths: {\'widgets\': \'/js/widgets\'},\r\n" + 
+	 "+		    parseOnLoad:true\r\n" + 
+	 "         };\r\n" + 
+	 "     </script>\r\n" + 
+	 "     <script type=\"text/javascript\" src=\"/org.dojotoolkit/dojo/dojo.js.uncompressed.js\"></script>\r\n" + 
+	 "     <script type=\"text/javascript\">\r\n" + 
+	 "-	dojo.require(\"dijit.Dialog\");\r\n" + 
+	 "-	dojo.require(\"dijit.form.TextBox\"); dojo.require(\"dijit.form.ComboBox\");\r\n" + 
+	 "-	dojo.require(\"dijit.form.CheckBox\");\r\n" + 
+	 "-	dojo.require(\"dojo.data.ItemFileReadStore\");\r\n" + 
+	 "-	dojo.require(\"widgets.NewItemDialog\");\r\n" + 
+	 "-	dojo.require(\"widgets.OpenResourceDialog\");\r\n" + 
+	 "-	dojo.require(\"widgets.ImportDialog\");\r\n" + 
+	 "+		dojo.require(\"dijit.Dialog\");\r\n" + 
+	 "+ 	    dojo.require(\"dijit.form.TextBox\");\r\n" + 
+	 "+		dojo.require(\"widgets.NewItemDialog\");\r\n" + 
+	 "+		dojo.require(\"widgets.OpenResourceDialog\");\r\n" + 
+	 "  	</script>    	\r\n" + 
+	 " 	<style type=\"text/css\">\r\n" + 
+	 " 		@import \"/org.dojotoolkit/dojo/resources/dojo.css\";\r\n" + 
+	 "@@ -30,69 +27,322 @@\r\n" + 
+	 " 		@import \"/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css\";\r\n" + 
+	 " 		@import \"/org.dojotoolkit/dijit/themes/soria/form/Common.css\";\r\n" + 
+	 " 		@import \"/org.dojotoolkit/dijit/themes/soria/form/Button.css\";\r\n" + 
+	 "-		@import \"/org.dojotoolkit/dijit/themes/soria/ProgressBar.css\";\r\n" + 
+	 "-		@import \"/org.dojotoolkit/dojox/form/resources/FileUploader.css\";\r\n" + 
+	 " 	    @import \"/ide.css\";\r\n" + 
+	 " 	    @import \"/breadcrumbs.css\"; \r\n" + 
+	 "-	    @import \"/commands.css\";\r\n" + 
+	 " 	</style>\r\n" + 
+	 " 	\r\n" + 
+	 "+	<!-- Extension Registry -->\r\n" + 
+	 "+	<script type=\"text/javascript\" src=\"/openajax/release/all/OpenAjaxManagedHub-all.js\"></script>\r\n" + 
+	 "+	<script src=\"js/serviceregistry.js\"></script>\r\n" + 
+	 "+	\r\n" + 
+	 " 	<!-- Authentication (required for handleAuthenticationError) -->\r\n" + 
+	 " 	<script type=\"text/javascript\" src=\"js/auth.js\"></script>\r\n" + 
+	 "+\r\n" + 
+	 "+	<!-- Commands-->\r\n" + 
+	 "+	<script src=\"js/commands.js\"></script>\r\n" + 
+	 "+	  	\r\n" + 
+	 "+ 	\r\n" + 
+	 "+ <script language=\"javascript\" type=\"text/javascript\" src=\"/editor/js/editor.js\"></script>\r\n" + 
+	 "+<script language=\"javascript\" type=\"text/javascript\" src=\"/editor/js/model.js\"></script>\r\n" + 
+	 "+<script language=\"javascript\" type=\"text/javascript\" src=\"js/compare/diff-parser.js\"></script>\r\n" + 
+	 "+<script language=\"javascript\" type=\"text/javascript\" src=\"js/compare/rulers-inline.js\"></script>\r\n" + 
+	 "+<script language=\"javascript\" type=\"text/javascript\" src=\"js/compare/compare-model.js\"></script>\r\n" + 
+	 "+<script language=\"javascript\" type=\"text/javascript\" src=\"js/compare/diff-line-feeder.js\"></script>\r\n" + 
+	 " 	  	\r\n" + 
+	 "-   </head>\r\n" + 
+	 "+<script language=\"javascript\" type=\"text/javascript\">\r\n" + 
+	 "+\r\n" + 
+	 "+var editorReadOnly = true;\r\n" + 
+	 "+\r\n" + 
+	 "+function initEditor(editor){\r\n" + 
+	 "+	var rulerOrigin = new eclipse.LineNumberDiffRuler(false,\"left\", {styleClass: \"ruler_lines\"}, {styleClass: \"ruler_lines_odd\"}, {styleClass: \"ruler_lines_even\"});\r\n" + 
+	 "+	var rulerNew = new eclipse.LineNumberDiffRuler(true,\"left\", {styleClass: \"ruler_lines\"}, {styleClass: \"ruler_lines_odd\"}, {styleClass: \"ruler_lines_even\"});\r\n" + 
+	 "+	editor.addRuler(rulerOrigin);\r\n" + 
+	 "+	editor.addRuler(rulerNew);\r\n" + 
+	 "+}\r\n" + 
+	 "+var editor;\r\n" + 
+	 "+\r\n" + 
+	 "+function createEditor(input , diff , delim){\r\n" + 
+	 "+	var diffParser = new eclipse.DiffParser(delim);\r\n" + 
+	 "+	var result = diffParser.parse(input ,diff,false);\r\n" + 
+	 "+	var output = result.outPutFile;\r\n" + 
+	 "+	var mapper = result.mapper;\r\n" + 
+	 "+	\r\n" + 
+	 "+	var model = new eclipse.TextModel(input, delim);\r\n" + 
+	 "+	//var compareModelRight = new eclipse.GapTextModel(modelRight, true , mapper);\r\n" + 
+	 "+	var compareModel = new eclipse.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new eclipse.DiffLineFeeder(mapper , diffParser.getDiffArray() , delim));\r\n" + 
+	 "+	\r\n" + 
+	 "+	var options = {\r\n" + 
+	 "+		parent: \"inline-compare-viewer\",\r\n" + 
+	 "+		model: compareModel,\r\n" + 
+	 "+		readonly: editorReadOnly,\r\n" + 
+	 "+		stylesheet: \"js/compare/demo/editor.css\" \r\n" + 
+	 "+	};\r\n" + 
+	 "+	editor = new eclipse.Editor(options);\r\n" + 
+	 "+	initEditor(editor);\r\n" + 
+	 "+	editor.addEventListener(\"LineStyle\", window, function(lineStyleEvent) {\r\n" + 
+	 "+		var lineIndex = lineStyleEvent.lineIndex;\r\n" + 
+	 "+		var lineStart = lineStyleEvent.lineStart;\r\n" + 
+	 "+		var lineType = compareModel.getLineType(lineIndex);\r\n" + 
+	 "+		//lineStyleEvent.ranges = [];\r\n" + 
+	 "+		//lineStyleEvent.ranges.push ({start: lineStart, end: lineStart + 3, style: {style: {backgroundColor: \"blue\"} }});\r\n" + 
+	 "+		if(lineType === \"added\") {\r\n" + 
+	 "+			lineStyleEvent.style = {style: {backgroundColor: \"#99EE99\"}};\r\n" + 
+	 "+		} else if (lineType === \"removed\"){\r\n" + 
+	 "+			lineStyleEvent.style = {style: {backgroundColor: \"#EE9999\"}};\r\n" + 
+	 "+		} \r\n" + 
+	 "+	}); \r\n" + 
+	 "+\r\n" + 
+	 "+	editor.redrawRange();\r\n" + 
+	 "+}\r\n" + 
+	 "+\r\n" + 
+	 "+var fileContent ;\r\n" + 
+	 "+var fileDiff;\r\n" + 
+	 "+function getFileContentGit(hashValue){\r\n" + 
+	 "+	\r\n" + 
+	 "+	var url = \"/git/index\" + hashValue;\r\n" + 
+	 "+	dojo.xhrGet({\r\n" + 
+	 "+		url: url, //\"/git/index\" + hashValue;//file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.html\"\r\n" + 
+	 "+		//adding some thing \r\n" + 
+	 "+		headers: {\r\n" + 
+	 "+			\"Orion-Version\": \"1\"\r\n" + 
+	 "+		},\r\n" + 
+	 "+		handleAs: \"text\",\r\n" + 
+	 "+		timeout: 5000,\r\n" + 
+	 "+		//adding\r\n" + 
+	 "+		load: function(jsonData, ioArgs) {\r\n" + 
+	 "+			console.log(jsonData);\r\n" + 
+	 "+			fileContent = jsonData;\r\n" + 
+	 "+			getFileDiffGit(hashValue);\r\n" + 
+	 "+		},\r\n" + 
+	 "+		\r\n" + 
+	 "+		///adding\r\n" + 
+	 "+		///adding\r\n" + 
+	 "+		\r\n" + 
+	 "+		error: function(response, ioArgs) {\r\n" + 
+	 "+			console.error(\"HTTP status code: \", ioArgs.xhr.status);\r\n" + 
+	 "+			handleGetAuthenticationError(this, ioArgs);\r\n" + 
+	 "+			return response;\r\n" + 
+	 "+		}\r\n" + 
+	 "+	});\r\n" + 
+	 "+	\r\n" + 
+	 "+}\r\n" + 
+	 "+\r\n" + 
+	 "+// THis needs a comment.\r\n" + 
+	 "+function getFileDiffGit(hashValue){\r\n" + 
+	 "+	\r\n" + 
+	 "+	var url = \"/git/diff\" + hashValue;\r\n" + 
+	 "+	dojo.xhrGet({\r\n" + 
+	 "+		url: url , //\"/git/diff\" + hashValue;///file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.htmlsfasf\"\r\n" + 
+	 "+		//changing some thing\r\n" + 
+	 "+		headers: {\r\n" + 
+	 "+			\"Orion-Version\": \"1\"\r\n" + 
+	 "+		},\r\n" + 
+	 "+		handleAs: \"text\",\r\n" + 
+	 "+		timeout: 5000,\r\n" + 
+	 "+		load: function(jsonData, ioArgs) {\r\n" + 
+	 "+			//addingg\r\n" + 
+	 "+			console.log(jsonData);\r\n" + 
+	 "+			fileDiff = jsonData;\r\n" + 
+	 "+			createEditor(fileContent , fileDiff ,\"\\n\");\r\n" + 
+	 "+		},\r\n" + 
+	 "+		error: function(response, ioArgs) {\r\n" + 
+	 "+			console.error(\"HTTP status code: \", ioArgs.xhr.status);\r\n" + 
+	 "+			handleGetAuthenticationError(this, ioArgs);\r\n" + 
+	 "+			return response;\r\n" + 
+	 "+		}\r\n" + 
+	 "+	});\r\n" + 
+	 "+	\r\n" + 
+	 "+}\r\n" + 
+	 "+\r\n" + 
+	 "+window.onload = function() {\r\n" + 
+	 "+	var splitted = window.location.href.split(\'#\');\r\n" + 
+	 "+	if(splitted.length > 1){\r\n" + 
+	 "+		getFileContentGit(splitted[1]);\r\n" + 
+	 "+	}\r\n" + 
+	 "+};\r\n" + 
+	 "+</script>\r\n" + 
+	 "+</head>\r\n" + 
+	 " \r\n" + 
+	 "     <body style=\"height: 100%\" class=\"soria\">\r\n" + 
+	 "     \r\n" + 
+	 "-    <script type=\"text/javascript\" src=\"/openajax/release/all/OpenAjaxManagedHub-all.js\"></script>\r\n" + 
+	 "-    \r\n" + 
+	 "-    <!-- Extension Registry -->\r\n" + 
+	 "-	<script src=\"js/serviceregistry.js\"></script>\r\n" + 
+	 "-	<script src=\"js/pluginregistry.js\"></script>\r\n" + 
+	 "-        \r\n" + 
+	 "-    <!-- Eclipse Application Services -->\r\n" + 
+	 "-    <!-- START:eas.js -->\r\n" + 
+	 "+    <!-- Utilities -->\r\n" + 
+	 "  	<script src=\"js/util.js\"></script>\r\n" + 
+	 "- 	<script src=\"js/commands.js\"></script>\r\n" + 
+	 "- 	<script src=\"js/dialogs.js\"></script>\r\n" + 
+	 "- 	<script src=\"js/input.js\"></script>\r\n" + 
+	 "- 	<script src=\"js/log.js\"></script>\r\n" + 
+	 "- 	<script src=\"js/selection.js\"></script>\r\n" + 
+	 "- 	<script src=\"js/status.js\"></script>\r\n" + 
+	 "- 	<script src=\"js/users.js\"></script>\r\n" + 
+	 "-\r\n" + 
+	 "-	<!-- END:eas.js -->\r\n" + 
+	 "-	<!-- INSERT:eas.js -->\r\n" + 
+	 "  	\r\n" + 
+	 "-	<!-- Breadcrumbs, table -->\r\n" + 
+	 "-	<!-- START:navigate-table.js -->\r\n" + 
+	 "-	<script src=\"js/globalCommands.js\"></script>\r\n" + 
+	 "-	<!-- END:navigate-table.js -->\r\n" + 
+	 "- 	<!-- INSERT:navigate-table.js -->\r\n" + 
+	 "+ 	\r\n" + 
+	 "+ 	<!-- Tree -->\r\n" + 
+	 " 	\r\n" + 
+	 "-	<div dojoType=\"dijit.layout.BorderContainer\" design=\"headline\" liveSplitters=\"true\" persist=\"true\" gutters=\"true\" style=\"width: 100%; height: 100%;\">\r\n" + 
+	 "+	<!-- Favorites List -->\r\n" + 
+	 "+	<script src=\"js/favorites.js\"></script>\r\n" + 
+	 "+\r\n" + 
+	 "+	<!--Search -->\r\n" + 
+	 "+	<script src=\"js/searchClient.js\"></script>\r\n" + 
+	 "+    <div dojoType=\"dijit.layout.BorderContainer\" design=\"headline\" liveSplitters=\"true\" persist=\"true\" gutters=\"true\" style=\"width: 100%; height: 100%;\" splitter=\"true\">\r\n" + 
+	 " 		<div class=\"toolbar\" id=\"toolbar\" dojoType=\"dijit.layout.ContentPane\" region=\"top\">\r\n" + 
+	 " 		</div>\r\n" + 
+	 "-		\r\n" + 
+	 "-		<div class=\"paneScrolled\" dojoType=\"dijit.layout.BorderContainer\" design=\"headline\"  liveSplitters=\"true\" persist=\"true\" gutters=\"true\" region=\"leading\" splitter=\"false\">\r\n" + 
+	 "-			<div class=\"paneScrolled\" id=\"unstagePane\" dojoType=\"dijit.layout.ContentPane\" region=\"center\"  splitter=\"true\">				\r\n" + 
+	 "-				<div id=\"result\">\r\n" + 
+	 "+		<!--  \r\n" + 
+	 "+   		<div dojoType=\"dijit.layout.BorderContainer\" design=\"headline\" liveSplitters=\"true\" region=\"leading\"   persist=\"true\" gutters=\"true\" style=\"width: 40%; height: 100%;\" splitter=\"true\">\r\n" + 
+	 "+		-->\r\n" + 
+	 "+		<div class=\"paneScrolled\" id=\"statusPane\" dojoType=\"dijit.layout.ContentPane\" region=\"leading\"  style=\"width: 40%;\" splitter=\"true\">				\r\n" + 
+	 "+				<table width=\"100%\">\r\n" + 
+	 "+					<tr>\r\n" + 
+	 "+						<td width=\"50%\" height=\"100%\">\r\n" + 
+	 "+							<h2>Unstaged</h2>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td width=\"50%\" height=\"100%\" nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"right\">\r\n" + 
+	 "+								<button id = \"stageAll\">Stage All</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+					</tr>\r\n" + 
+	 "+				</table>\r\n" + 
+	 "+				<hr>\r\n" + 
+	 "+				<div id = \"unstagedZone\">\r\n" + 
+	 "+				<table width=\"100%\" >\r\n" + 
+	 "+					<tr>\r\n" + 
+	 "+						<td width=\"100%\" nowrap=\"nowrap\">\r\n" + 
+	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo-inline.html</a>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
+	 "+								<button >Compare</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
+	 "+								<button \">Stage</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+					</tr>\r\n" + 
+	 "+					<tr>\r\n" + 
+	 "+						<td width=\"100%\" nowrap=\"nowrap\">\r\n" + 
+	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/compare-model.js</a>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
+	 "+								<button >Compare</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
+	 "+								<button \">Stage</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+					</tr>\r\n" + 
+	 "+				</table>\r\n" + 
+	 " 				</div>\r\n" + 
+	 "+				<table width=\"100%\" height = \"30px\">\r\n" + 
+	 "+				</table>\r\n" + 
+	 "+			<!-- \r\n" + 
+	 " 			</div>\r\n" + 
+	 "-			<div class=\"paneScrolled\" id=\"statgePane\" dojoType=\"dijit.layout.ContentPane\" region=\"bottom\" style=\"height: 40%\" splitter=\"true\">\r\n" + 
+	 "-				<div id=\"details\">\r\n" + 
+	 "-					<h2>Failure Stack ...</h2>\r\n" + 
+	 "-					<div id=\"stackDetails\"></div>\r\n" + 
+	 "+			<div class=\"paneScrolled\" id=\"stagedPane\" dojoType=\"dijit.layout.ContentPane\" region=\"bottom\" style=\"height: 50%\" splitter=\"true\">	\r\n" + 
+	 "+			-->			\r\n" + 
+	 "+				<table width=\"100%\">\r\n" + 
+	 "+					<tr>\r\n" + 
+	 "+						<td width=\"50%\" height=\"100%\">\r\n" + 
+	 "+							<h2>Staged</h2>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td width=\"50%\" height=\"100%\" nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"right\">\r\n" + 
+	 "+								<button id = \"stageAll\">Unstage All</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+					</tr>\r\n" + 
+	 "+				</table>\r\n" + 
+	 "+				<hr>\r\n" + 
+	 "+				<div id = \"stagedZone\">\r\n" + 
+	 "+				<table width=\"100%\" >\r\n" + 
+	 "+					<tr>\r\n" + 
+	 "+						<td width=\"100%\" nowrap=\"nowrap\">\r\n" + 
+	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/diff-line-feeder.js</a>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
+	 "+								<button >Compare</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
+	 "+								<button \">Unstage</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+					</tr>\r\n" + 
+	 "+					<tr>\r\n" + 
+	 "+						<td width=\"100%\" nowrap=\"nowrap\">\r\n" + 
+	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/gap-line-feeder.js</a>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
+	 "+								<button >Compare</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
+	 "+								<button \">Unstage</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+					</tr>\r\n" + 
+	 "+					<tr>\r\n" + 
+	 "+						<td width=\"100%\" nowrap=\"nowrap\">\r\n" + 
+	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/diff-parser.js</a>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
+	 "+								<button >Compare</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
+	 "+								<button \">Unstage</button>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+					</tr>\r\n" + 
+	 "+				</table>\r\n" + 
+	 "+				</div>\r\n" + 
+	 "+				<table width=\"100%\" height = \"30px\">\r\n" + 
+	 "+				</table>\r\n" + 
+	 "+\r\n" + 
+	 "+				<div id = \"commitZone\">\r\n" + 
+	 "+				<span>Commit Message : </span>\r\n" + 
+	 "+				<table >\r\n" + 
+	 "+					<tr>\r\n" + 
+	 "+						<td nowrap=\"nowrap\">\r\n" + 
+	 "+							<textarea  COLS=40 ROWS=6></textarea>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+						<td  nowrap=\"nowrap\">\r\n" + 
+	 "+							<div style=\"float: top;\" align=\"top\">\r\n" + 
+	 "+								<table>\r\n" + 
+	 "+									<tr>\r\n" + 
+	 "+										<td nowrap=\"nowrap\">\r\n" + 
+	 "+											<button id = \"commit\">commit</button>\r\n" + 
+	 "+										</td>\r\n" + 
+	 "+									</tr>\r\n" + 
+	 "+									<tr>\r\n" + 
+	 "+										<td  nowrap=\"nowrap\">\r\n" + 
+	 "+											<button id = \"commit\">ammend</button>\r\n" + 
+	 "+										</td>\r\n" + 
+	 "+									</tr>\r\n" + 
+	 "+								</table>\r\n" + 
+	 "+							</div>\r\n" + 
+	 "+						</td>\r\n" + 
+	 "+					</tr>\r\n" + 
+	 "+				</table>\r\n" + 
+	 " 				</div>\r\n" + 
+	 "+\r\n" + 
+	 "+			<!-- \r\n" + 
+	 " 			</div>\r\n" + 
+	 "+			-->\r\n" + 
+	 " 		</div>\r\n" + 
+	 "+\r\n" + 
+	 " 		\r\n" + 
+	 "-		<div class=\"paneScrolled\" style=\"margin-left: 8px;\" id=\"rightPane\" dojoType=\"dijit.layout.ContentPane\" region=\"center\" style=\"width: 80%; height: 100%;\" splitter=\"false\">\r\n" + 
+	 "-			<div id=\"inline-compare-view\">\r\n" + 
+	 "-				<!-- Breadcrumbs, tree content go here -->\r\n" + 
+	 "+		<div id = \"rightPane\" style=\"overflow: hidden;\" dojoType=\"dijit.layout.ContentPane\" region=\"center\">\r\n" + 
+	 "+			<div >\r\n" + 
+	 "+				<h2>/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo-inline.html</h2>\r\n" + 
+	 "+			</div>\r\n" + 
+	 "+			<hr>\r\n" + 
+	 "+			<div id=\"inline-compare-viewer\" style=\"width: 100%; height: 100%;\">\r\n" + 
+	 " 			</div>\r\n" + 
+	 " 		</div>\r\n" + 
+	 "+\r\n" + 
+	 " 	</div>\r\n" + 
+	 "-	\r\n" + 
+	 " </body>\r\n" + 
+	 "-</html>\r\n" + 
+	 "+</html>\r\n" + 
+	 "\\ No newline at end of file\r\n" + 
+	 ""
+	 ]
 ];
