@@ -54,20 +54,24 @@ dojo.addOnLoad(function(){
 	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, "explorer-tree", "navToolBar");
+	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, "explorer-tree", "navToolBar", "selectionTools");
 	
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
 	// commands shared by navigators
-	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar");
+	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools");
+	
+	//TODO this should be removed and contributed by a plug-in
+	eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools");
 	
 	// define the command contributions - where things appear
 	commandService.addCommandGroup("eclipse.fileGroup", 100, "More");
 	commandService.addCommandGroup("eclipse.newResources", 100, null, "eclipse.fileGroup");
 	commandService.addCommandGroup("eclipse.fileGroup.unlabeled", 100, null, null, "navToolBar");
 	commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "navToolBar");
+	commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
 	commandService.registerCommandContribution("eclipse.makeFavorite", 1);
 	commandService.registerCommandContribution("eclipse.downloadFile", 2);
 	commandService.registerCommandContribution("eclipse.openResource", 500, "navToolBar");
@@ -81,10 +85,14 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.newFolder", 2, "navToolBar", "eclipse.fileGroup.unlabeled");
 	commandService.registerCommandContribution("eclipse.newProject", 3, "navToolBar", "eclipse.fileGroup.unlabeled");
 	commandService.registerCommandContribution("eclipse.linkProject", 4, "navToolBar", "eclipse.fileGroup.unlabeled");
+	// selection based command contributions
+	commandService.registerCommandContribution("eclipse.copyFile", 1, "selectionTools", "eclipse.selectionGroup");
+	commandService.registerCommandContribution("eclipse.moveFile", 2, "selectionTools", "eclipse.selectionGroup");
+	commandService.registerCommandContribution("eclipse.deleteFile", 3, "selectionTools", "eclipse.selectionGroup");
 	// git contributions
 	commandService.registerCommandContribution("eclipse.cloneGitRepository", 1, "navToolBar", "eclipse.gitGroup");
 
-	eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands(serviceRegistry, commandService, explorer, "navToolBar", "eclipse.fileGroup");
+	eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools", "eclipse.fileGroup", "eclipse.selectionGroup");
 	
 	var treeViewCommand = new eclipse.Command({
 		name : "Tree View",

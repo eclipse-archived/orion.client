@@ -222,7 +222,7 @@ eclipse.CommandService = (function() {
 				if (positionOrder[i].children) {
 					var group = positionOrder[i];
 					if (group.scopeId && parent.id !== group.scopeId) {
-						break;
+						continue;
 					}
 					var children;
 					if (style === "image") {
@@ -442,12 +442,14 @@ eclipse.Command = (function() {
 				});
 			} else if (this.hrefCallback) {
 				var href = this.hrefCallback.call(handler, items, this.id);
-				if(href.then){
-					href.then(function(link){
-						anchor.href = link;
-					});
-				}else{
-					anchor.href = this.hrefCallback.call(handler, items, this.id);
+				if (href) {
+					if (href.then){
+						href.then(function(link){
+							anchor.href = link;
+						});
+					}else{
+						anchor.href = href;
+					}
 				}
 			}
 			dojo.addClass(anchor, 'commandLink');

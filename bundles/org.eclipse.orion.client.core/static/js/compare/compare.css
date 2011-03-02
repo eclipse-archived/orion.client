@@ -1,0 +1,12 @@
+.fileNameCheckedRow {
+	background-color: #FFFFCC !important;
+	color: white;
+}
+
+.fileNameSelectedRow {
+	background-color: #00FF00 !important;
+}
+
+.fileNameNormalRow {
+	color: #0000FF;
+}

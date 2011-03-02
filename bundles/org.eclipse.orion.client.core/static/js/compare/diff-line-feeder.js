@@ -11,16 +11,20 @@ var eclipse = eclipse || {};
 eclipse.DiffLineFeeder = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 
-	function DiffLineFeeder(mapper, diffLinesArray , lineDelimeter) {
-		this._mapper = mapper;
+	function DiffLineFeeder(diffLinesArray , lineDelimeter) {
 		this._diffLinesArray = diffLinesArray;
 		this._lineDelimeter = lineDelimeter;
+		this._annotations = [];
 	}
 
 	DiffLineFeeder.prototype = /** @lends eclipse.TextModel.prototype */ {
 	
-		generateGapBlocks: function( mapperColumnIndex ){
+		generateGapBlocks: function( mapper, mapperColumnIndex , diffLinesArray ){
 		    var gapBlocks = [];//Each item represents the start lineIndex and the line number of a gap block , and the string index of the dummyLineArray
+			this._mapper = mapper;
+			if(diffLinesArray)
+				this._diffLinesArray = diffLinesArray ;
+		    this._annotations = [];
 		    var gapNumber = 0;
 			var curLineindex = 0;//zero based
 			var mapperColumnIndexCompare = 1 - mapperColumnIndex;
@@ -35,6 +39,8 @@ eclipse.DiffLineFeeder = (function() {
 					gapNumber +=gap;
 					gapBlocks.push([curLineindex + this._mapper[i][mapperColumnIndexCompare] , gap , this._mapper[i][2]]);
 				}
+				if((this._mapper[i][2] !== 0))
+					this._annotations.push([curLineindex , delta]);
 				curLineindex += delta;
 			}
 			return {gapBlocks:gapBlocks , gapNumber:gapNumber};
@@ -108,6 +114,18 @@ eclipse.DiffLineFeeder = (function() {
 				curMyLineindex += this._mapper[i][mapperColumnIndex];
 			}
 			return lineIndex;
+		},
+		
+		getAnnotations: function(){
+			return this._annotations;
+		},
+		
+		getAnnotationH: function(lineIndex){
+			for (var i = 0 ; i < this._annotations.length ; i++){
+				if(this._annotations[i][0] === lineIndex)
+					return this._annotations[i][1];
+			}
+			return 0;
 		}
 		
 	};

@@ -21,7 +21,6 @@ eclipse.SelectionService = function(serviceRegistry) {
 	this._serviceRegistry = serviceRegistry;
 	this._serviceRegistration = serviceRegistry.registerService("ISelectionService", this);
 	this.selections = null;
-	this._listeners = [];
 };
  
 eclipse.SelectionService.prototype = {

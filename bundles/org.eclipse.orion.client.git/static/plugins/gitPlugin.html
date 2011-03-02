@@ -10,24 +10,15 @@
 			provider.registerServiceProvider("fileCommands", {
 				info : function() {
 					return {
-						name : "Git commands",
-						displayName: false,
-						prefix : "git.commands",
-						href: false,
-						commands: [
-							{
-								type: "tree",
-								name: "Git Status",
-								id: "gitStatus",
-								tooltip: "Open Git Status",
-								validationProperties: {"Git":"*"},
-								index: 1
-							}
-						]
-					};
+						name: "Git Status",
+						id: "eclipse.git.status",
+						tooltip: "Go to Git Status",
+						validationProperties: {"Git":"*"},
+						href: true,
+						forceSingleItem: true};
 				},
-				run: function(commandId, items) {
-					return "/git-status.html#" + items.git.statusLocation;
+				run: function(item) {
+					return "/git-status.html#" + item.Git.StatusLocation;
 				}
 			});
 			provider.connect();
