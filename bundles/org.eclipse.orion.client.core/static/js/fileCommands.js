@@ -114,7 +114,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 						} else {
 							serviceRegistry.getService("IFileService").then(function(service) {
 								service.deleteFile(item.Location).then(
-									dojo.hitch(explorer, function() {explorer.changedItem(item.parent)}));//refresh the parent
+									dojo.hitch(explorer, function() {explorer.changedItem(item.parent);}));//refresh the parent
 							});
 						}
 					}
@@ -148,7 +148,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				func:  function(name){
 					serviceRegistry.getService("IFileService").then(function(service) {
 						service.createFile(item.Location, name).then(
-						dojo.hitch(explorer, function() {this.changedItem(item)})); //refresh the parent
+						dojo.hitch(explorer, function() {this.changedItem(item);})); //refresh the parent
 					});
 				}
 			});
@@ -173,7 +173,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				func:  function(name){
 					serviceRegistry.getService("IFileService").then(function(service) {
 						service.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item)}));//refresh the parent
+							dojo.hitch(explorer, function() {this.changedItem(item);}));//refresh the parent
 					});
 				}
 			});
