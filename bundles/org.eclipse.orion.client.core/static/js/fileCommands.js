@@ -334,6 +334,33 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
         return new RegExp(pattern);
 	}
 	
+	function validateSingleItem(item, validationProperties){
+		for(var keyWildCard in validationProperties){
+			var keyPattern = getPattern(keyWildCard);
+			var matchFound = false;
+			for(var key in item){
+				if(keyPattern.test(key)){
+					if(typeof(validationProperties[keyWildCard])==='string'){
+						var valuePattern = getPattern(validationProperties[keyWildCard]);
+						if(valuePattern.test(item[key])){
+							matchFound = true;
+							break;
+						}
+					}else{
+						if(validationProperties[keyWildCard]===item[key]){
+							matchFound = true;
+							break;
+						}
+					}
+				}
+			}
+			if(!matchFound){
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	// Note that the shape of the "fileCommands" extension is not in any shape or form that could be considered final.
 	// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 	
@@ -363,42 +390,32 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 					image: info.image,
 					id: info.id,
 					tooltip: info.tooltip,
-					visibleWhen: dojo.hitch(info, function(item){
-						if (this.forceSingleItem || this.href) {
-							if (dojo.isArray(item)) {
-								if (item.length !== 1) {
-									return false;
-								}
-								item = item[0];
+					visibleWhen: dojo.hitch(info, function(items){
+						
+						if(dojo.isArray(items)){
+							if ((this.forceSingleItem || this.href) && items.length !== 1) {
+								return false;
 							}
+							if(!this.forceSingleItem && items.length<1){
+								return false;
+							}
+						} else{
+							var items_array = new Array();
+							items_array[0] = items;
+							items = items_array;
 						}
+						
 						if(!this.validationProperties){
 							return true;
 						}
-						for(var keyWildCard in this.validationProperties){
-							var keyPattern = getPattern(keyWildCard);
-							var matchFound = false;
-							for(var key in item){
-								if(keyPattern.test(key)){
-									if(typeof(this.validationProperties[keyWildCard])==='string'){
-										var valuePattern = getPattern(this.validationProperties[keyWildCard]);
-										if(valuePattern.test(item[key])){
-											matchFound = true;
-											break;
-										}
-									}else{
-										if(this.validationProperties[keyWildCard]===item[key]){
-											matchFound = true;
-											break;
-										}
-									}
-								}
-							}
-							if(!matchFound){
+						
+						for(var i in items){
+							if(!validateSingleItem(items[i], this.validationProperties)){
 								return false;
 							}
 						}
 						return true;
+						
 					})
 				};
 				if (info.href) {
