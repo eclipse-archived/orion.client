@@ -23,12 +23,15 @@ var eclipse = eclipse || {};
  
 eclipse.fileCommandUtils = eclipse.fileCommandUtils || {};
 
+eclipse.selectionListenerRegistered = false;
+
 eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, selectionToolbarId, item) {
 	var parent = dojo.byId(parentId);
 	var toolbar = dojo.byId(toolbarId);
 	if (toolbar) {
 		dojo.empty(toolbar);
 	} else {
+		// first time through
 		toolbar = dojo.create("div",{id: toolbarId}, parent, "last");
 		dojo.addClass(toolbar, "domCommandToolbar");
 	}
@@ -40,17 +43,20 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId,
 		}
 	}));
 	
-	registry.getService("ISelectionService").then(function(service) {
-		service.addEventListener("selectionChanged", function(selections) {
-			var selectionTools = dojo.byId(selectionToolbarId);
-			if (selectionTools) {
-				dojo.empty(selectionTools);
-				registry.getService("ICommandService").then(function(commandService) {
-					commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
-				});
-			}
+	if (!eclipse.selectionListenerRegistered) {
+		eclipse.selectionListenerRegistered = true;
+		registry.getService("ISelectionService").then(function(service) {
+			service.addEventListener("selectionChanged", function(selections) {
+				var selectionTools = dojo.byId(selectionToolbarId);
+				if (selectionTools) {
+					dojo.empty(selectionTools);
+					registry.getService("ICommandService").then(function(commandService) {
+						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
+					});
+				}
+			});
 		});
-	});
+	}
 };
 
 eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
@@ -64,6 +70,39 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		}
 		return item;
 	}
+	
+	function makeMoveCopyTargetChoices(items, userData, isCopy) {
+		var callback = isCopy ? 
+			function(items) {
+				window.alert("Copy" + items + " to " + this.path);
+			} :
+			function(items) {
+				window.alert("Move" + items + " to " + this.path);
+			};
+			
+		var prompt = function() {
+			window.alert("what path do you want?");
+		};
+		return [
+			{name: "choice1", path: "path/choice1", callback: callback},
+			{name: "choice2", path: "path/choice2", callback: callback},
+			{name: "choice3", path: "path/choice3", callback: callback},
+			{name: "Other...", callback: prompt}
+		];
+	}
+	
+	var oneOrMoreFilesOrFolders = function(item) {
+		var items = dojo.isArray(item) ? item : [item];
+		if (items.length === 0) {
+			return false;
+		}
+		for (var i=0; i < items.length; i++) {
+			if (!items[i].Location) {
+				return false;
+			}
+		}
+		return true;
+	};
 
 	var favoriteCommand = new eclipse.Command({
 		name: "Make Favorite",
@@ -87,17 +126,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		name: "Delete",
 		image: "images/remove.gif",
 		id: "eclipse.deleteFile",
-		visibleWhen: function(item) {
-			var items = dojo.isArray(item) ? item : [item];
-			if (items.length === 0) {
-				return false;
-			}
-			for (var i=0; i < items.length; i++) {
-				if (!items[i].Location) {
-					return false;
-				}
-			}
-			return true;},
+		visibleWhen: oneOrMoreFilesOrFolders,
 		callback: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
 			var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
@@ -260,40 +289,21 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	var copyCommand = new eclipse.Command({
 		name : "Copy",
 		id: "eclipse.copyFile",
-		callback : function(item) {
-			window.alert("placeholder for copy");
+		choiceCallback: function(items, userData) {
+			return makeMoveCopyTargetChoices(items, userData, true);
 		},
-		visibleWhen: function(item) {			
-			var items = dojo.isArray(item) ? item : [item];
-			if (items.length === 0) {
-				return false;
-			}
-			for (var i=0; i < items.length; i++) {
-				if (!items[i].Location) {
-					return false;
-				}
-			}
-			return true;}
+		visibleWhen: oneOrMoreFilesOrFolders 
 	});
 	commandService.addCommand(copyCommand, "dom");
 	
 	var moveCommand = new eclipse.Command({
 		name : "Move",
 		id: "eclipse.moveFile",
-		callback : function(item) {
-			window.alert("placeholder for move");
+		choiceCallback: function(items, userData) {
+			return makeMoveCopyTargetChoices(items, userData, false);
 		},
-		visibleWhen: function(item) {
-			var items = dojo.isArray(item) ? item : [item];
-			if (items.length === 0) {
-				return false;
-			}
-			for (var i=0; i < items.length; i++) {
-				if (!items[i].Location) {
-					return false;
-				}
-			}
-			return true;}});
+		visibleWhen: oneOrMoreFilesOrFolders
+		});
 	commandService.addCommand(moveCommand, "dom");
 };
 
