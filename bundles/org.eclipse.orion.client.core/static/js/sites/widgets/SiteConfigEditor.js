@@ -68,7 +68,7 @@ dojo.declare("widgets.SiteConfigEditor", [dijit.Dialog], {
 				});
 				this.workspace.set("options", options);
 				this.workspace._loadChildren();
-			}))});
+			}));});
 	},
 	onHide: function() {
 		this.inherited(arguments);
