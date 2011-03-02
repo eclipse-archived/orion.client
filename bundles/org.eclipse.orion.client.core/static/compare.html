@@ -5,7 +5,7 @@
 		<meta http-equiv="Content-Language" content="en-us">
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 		<meta http-equiv="X-UA-Compatible" content="IE=8">
-    	<title>Git Status</title>    
+    	<title>Compare</title>    
     
     <script type="text/javascript">
         var djConfig = {
@@ -49,16 +49,81 @@
 <script language="javascript" type="text/javascript" src="js/compare/rulers.js"></script>
 <script language="javascript" type="text/javascript" src="js/compare/compare-model.js"></script>
 <script language="javascript" type="text/javascript" src="js/compare/compare-container.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/diff-line-feeder.js"></script>
+<script language="javascript" type="text/javascript" src="js/compare/gap-line-feeder.js"></script>
 <script language="javascript" type="text/javascript" src="js/compare/git-status-table.js"></script>
 	  	
 <script language="javascript" type="text/javascript">
 
+var sBSCompareContainerEditor = null;
+
+function createEditor(input , diff , delim){
+	sBSCompareContainerEditor.setEditor(input , diff);
+}
+
+var fileContent ;
+var fileDiff;
+function getFileContentGit(hashValue){
+	
+	var url = "/git/index" + hashValue;
+	dojo.xhrGet({
+		url: url, 
+		headers: {
+			"Orion-Version": "1"
+		},
+		handleAs: "text",
+		timeout: 5000,
+		//adding
+		load: function(jsonData, ioArgs) {
+			console.log(jsonData);
+			fileContent = jsonData;
+			getFileDiffGit(hashValue);
+		},
+		
+		error: function(response, ioArgs) {
+			console.error("HTTP status code: ", ioArgs.xhr.status);
+			handleGetAuthenticationError(this, ioArgs);
+			return response;
+		}
+	});
+	
+}
+
+function getFileDiffGit(hashValue){
+	
+	var url = "/git/diff" + hashValue;
+	dojo.xhrGet({
+		url: url , 
+		headers: {
+			"Orion-Version": "1"
+		},
+		handleAs: "text",
+		timeout: 5000,
+		load: function(jsonData, ioArgs) {
+			console.log(jsonData);
+			fileDiff = jsonData;
+			createEditor(fileContent , fileDiff ,"\n");
+		},
+		error: function(response, ioArgs) {
+			console.error("HTTP status code: ", ioArgs.xhr.status);
+			handleGetAuthenticationError(this, ioArgs);
+			return response;
+		}
+	});
+	
+}
+
 window.onload = function() {
+	
+	sBSCompareContainerEditor = new orion.SBSCompareContainer("left-viewer" , "right-viewer");
+	//var demo = document.getElementById("dataLength");
+	//demo.innerHTML = demoData.length + ")";
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
-		var controller = new orion.GitStatusController(null , splitted[1] , "unstagedZone" , "stagedZone");
-		controller.getGitStatus(splitted[1]);
+		var leftTH = document.getElementById("left-viewer-title");
+		var rightTH = document.getElementById("right-viewer-title");
+		leftTH.innerHTML = "File  : " + splitted[1];
+		rightTH.innerHTML = "File On Git : " + splitted[1];
+		getFileContentGit(splitted[1]);
 	}
 };
 </script>
@@ -78,89 +143,27 @@ window.onload = function() {
 	<!--Search -->
 	<script src="js/searchClient.js"></script>
     <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;" splitter="true">
-		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
+		<div   class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-		<!--  
-   		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" region="leading"   persist="true" gutters="true" style="width: 40%; height: 100%;" splitter="true">
-		-->
-		<div class="paneScrolled" id="statusPane" dojoType="dijit.layout.ContentPane" region="leading"  style="width: 40%;" splitter="true">				
-				<table width="100%">
-					<tr>
-						<td width="50%" height="100%">
-							<h2>Unstaged</h2>
-						</td>
-						<td width="50%" height="100%" nowrap="nowrap">
-							<div style="float: right;" align="right">
-								<button id = "stageAll">Stage All</button>
-							</div>
-						</td>
-					</tr>
-				</table>
-				<hr>
-				<div id = "unstagedZone">
-				</div>
-				<table width="100%" height = "30px">
-				</table>
-
-				<table width="100%">
-					<tr>
-						<td width="50%" height="100%">
-							<h2>Staged</h2>
-						</td>
-						<td width="50%" height="100%" nowrap="nowrap">
-							<div style="float: right;" align="right">
-								<button id = "stageAll">Unstage All</button>
-							</div>
-						</td>
-					</tr>
-				</table>
-				<hr>
-				<div id = "stagedZone">
-				</div>
-				<table width="100%" height = "30px">
-				</table>
-
-				<div id = "commitZone">
-				<span>Commit Message : </span>
-				<table >
-					<tr>
-						<td nowrap="nowrap">
-							<textarea  COLS=40 ROWS=6></textarea>
-						</td>
-						<td  nowrap="nowrap">
-							<div style="float: top;" align="top">
-								<table>
-									<tr>
-										<td nowrap="nowrap">
-											<button id = "commit">commit</button>
-										</td>
-									</tr>
-									<tr>
-										<td  nowrap="nowrap">
-											<button id = "commit">amend</button>
-										</td>
-									</tr>
-								</table>
-							</div>
-						</td>
-					</tr>
-				</table>
-				</div>
-
-			<!-- 
-			</div>
-			-->
-		</div>
-
 		
+		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="false" gutters="false" region="leading"  style="width: 50%;" splitter="true">
+			<div style='width:100%;height:30px;' dojoType="dijit.layout.ContentPane" region="top">
+				<div >
+					<h2 id = "left-viewer-title"></h2>
+				</div>
+				<hr>
+			</div>
+			<div class="paneScrolled" id="left-viewer" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center"  style="width: 100%; height: 100%;" splitter="false">				
+			</div>
+		</div>
 		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false" persist="false" gutters="false" region="center"  splitter="false">
 			<div  style='width:100%;height:30px;' dojoType="dijit.layout.ContentPane" region="top">
 				<div >
-					<h2 id = "fileNameInViewer">Select A file to display the difference</h2>
+					<h2 id = "right-viewer-title"></h2>
 				</div>
 				<hr>
 			</div>
-			<div class="paneScrolled" id="inline-compare-viewer" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center"  style="width: 100%; height: 100%;" splitter="false">				
+			<div class="paneScrolled" id="right-viewer" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center"  style="width: 100%; height: 100%;" splitter="false">				
 			</div>
 		</div>
 	</div>

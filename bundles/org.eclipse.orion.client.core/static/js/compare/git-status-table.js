@@ -183,7 +183,7 @@ orion.GitStatusController = (function() {
 		
 		openSBSViewer: function(hash){
 			//var url = "/compare.html#/" + hash;
-			var url = "/js/compare/demo/demo.html#/" + hash;
+			var url = "/compare.html#" + hash;
 			window.open(url,"");
 		},
 		
