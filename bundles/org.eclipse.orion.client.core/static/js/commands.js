@@ -442,12 +442,14 @@ eclipse.Command = (function() {
 				});
 			} else if (this.hrefCallback) {
 				var href = this.hrefCallback.call(handler, items, this.id);
-				if(href.then){
-					href.then(function(link){
-						anchor.href = link;
-					});
-				}else{
-					anchor.href = this.hrefCallback.call(handler, items, this.id);
+				if (href) {
+					if (href.then){
+						href.then(function(link){
+							anchor.href = link;
+						});
+					}else{
+						anchor.href = href;
+					}
 				}
 			}
 			dojo.addClass(anchor, 'commandLink');

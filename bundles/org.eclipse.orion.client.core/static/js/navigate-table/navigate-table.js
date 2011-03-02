@@ -89,7 +89,7 @@ dojo.addOnLoad(function(){
 	// git contributions
 	commandService.registerCommandContribution("eclipse.cloneGitRepository", 1, "navToolBar", "eclipse.gitGroup");
 
-	eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools", "eclipse.fileGroup");
+	eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools", "eclipse.fileGroup", "eclipse.selectionGroup");
 	
 	var treeViewCommand = new eclipse.Command({
 		name : "Tree View",
