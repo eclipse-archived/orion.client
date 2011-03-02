@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
 <setAttribute key="additional_plugins"/>
 <booleanAttribute key="append.args" value="true"/>
 <booleanAttribute key="automaticAdd" value="false"/>
@@ -15,7 +16,7 @@
 <booleanAttribute key="includeOptional" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console&#13;&#10;-data ${workspace_loc}/../foo -clean"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true &#13;&#10;-Dosgi.noShutdown=true&#13;&#10;-Dorg.eclipse.equinox.http.jetty.http.port=8080 &#10;&#13;&#10;-Dorg.eclipse.equinox.http.jetty.autostart=false&#13;&#10;&#10;-Dorg.eclipse.orion.server.core.allowedPathPrefixes=${workspace_loc}"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true &#13;&#10;-Dosgi.noShutdown=true&#13;&#10;-Dorg.eclipse.equinox.http.jetty.http.port=8080 &#10;&#13;&#10;-Dorg.eclipse.equinox.http.jetty.autostart=false&#13;&#10;&#10;-Dorg.eclipse.orion.server.core.allowedPathPrefixes=${workspace_loc}&#13;&#10;-Dorg.eclipse.orion.server.core.userArea=${workspace_loc}/../foo/.userarea"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <setAttribute key="selected_features">
 <setEntry value="org.eclipse.orion.base.feature:default"/>
