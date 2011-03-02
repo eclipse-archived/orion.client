@@ -222,7 +222,7 @@ eclipse.CommandService = (function() {
 				if (positionOrder[i].children) {
 					var group = positionOrder[i];
 					if (group.scopeId && parent.id !== group.scopeId) {
-						break;
+						continue;
 					}
 					var children;
 					if (style === "image") {

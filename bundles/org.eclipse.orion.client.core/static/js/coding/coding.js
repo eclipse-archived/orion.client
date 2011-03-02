@@ -94,6 +94,7 @@ dojo.addOnLoad(function(){
 	
 	// TODO search location needs to be gotten from somewhere
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, editorContainer, editorContainer);
+	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, editorContainer);
 
 	// The eWebBorderContainer widget needs to know the editorContainer
 	topContainerWidget.set("editorContainer", editorContainer);

@@ -23,7 +23,7 @@ var eclipse = eclipse || {};
  
 eclipse.fileCommandUtils = eclipse.fileCommandUtils || {};
 
-eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, item) {
+eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, selectionToolbarId, item) {
 	var parent = dojo.byId(parentId);
 	var toolbar = dojo.byId(toolbarId);
 	if (toolbar) {
@@ -34,7 +34,23 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId,
 	}
 	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
 		service.renderCommands(toolbar, "dom", item, explorer, "image");
+		if (selectionToolbarId) {
+			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
+			service.renderCommands(selectionTools, "dom", null, explorer, "image");
+		}
 	}));
+	
+	registry.getService("ISelectionService").then(function(service) {
+		service.addEventListener("selectionChanged", function(selections) {
+			var selectionTools = dojo.byId(selectionToolbarId);
+			if (selectionTools) {
+				dojo.empty(selectionTools);
+				registry.getService("ICommandService").then(function(commandService) {
+					commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
+				});
+			}
+		});
+	});
 };
 
 eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
@@ -106,6 +122,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			});		
 		}});
 	commandService.addCommand(deleteCommand, "object");
+	commandService.addCommand(deleteCommand, "dom");
 
 	var downloadCommand = new eclipse.Command({
 		name: "Download as Zip",
@@ -263,6 +280,33 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(importCommand, "object");
 	commandService.addCommand(importCommand, "dom");
+	
+	var copyCommand = new eclipse.Command({
+		name : "Copy",
+		id: "eclipse.copyFile",
+		callback : function(item) {
+			alert("placeholder for copy");
+		},
+		visibleWhen: function(item) {			
+			var items = dojo.isArray(item) ? item : [item];
+			for (var i=0; i < items.length; i++) {
+				if (!items[i].Location) {
+					return false;
+				}
+			}
+			return true;}
+	});
+	commandService.addCommand(copyCommand, "dom");
+	
+	var moveCommand = new eclipse.Command({
+		name : "Move",
+		id: "eclipse.moveFile",
+		callback : function(item) {
+			alert("placeholder for move");
+		},
+		visibleWhen: function(item) {
+			return dojo.isArray(item) && item.length > 0;}});
+	commandService.addCommand(moveCommand, "dom");
 };
 
 eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){
@@ -278,7 +322,7 @@ eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){
     return temp;
 };
 
-eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands = function(serviceRegistry, commandService, explorer, toolbarId, fileGroup) {
+eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, fileGroup) {
 	
 	function getPattern(wildCard){
 		var pattern = '^';
@@ -380,7 +424,7 @@ eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands = function(service
 						commandService.registerCommandContribution(command.id, commandDescription.index, toolbarId, "toolbarGroup."+info.prefix);
 					}
 				}
-				eclipse.fileCommandUtils.updateNavTools(serviceRegistry, explorer, explorer.innerId, toolbarId, explorer.treeRoot);
+				eclipse.fileCommandUtils.updateNavTools(serviceRegistry, explorer, explorer.innerId, toolbarId, selectionToolbarId, explorer.treeRoot);
 				explorer.updateCommands();
 				
 			});

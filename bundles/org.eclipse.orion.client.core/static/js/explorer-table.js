@@ -16,13 +16,14 @@ eclipse.Explorer = (function() {
 	 * @name eclipse.Explorer
 	 * @class A table-based explorer component
 	 */
-	function Explorer(serviceRegistry, treeRoot, searcher, parentId, toolbarId) {
+	function Explorer(serviceRegistry, treeRoot, searcher, parentId, toolbarId, selectionToolsId) {
 		this.registry = serviceRegistry;
 		this.treeRoot = treeRoot;
 		this.searcher = searcher;
 		this.parentId = parentId;
 		this.innerId = parentId+"inner";
 		this.toolbarId = toolbarId;
+		this.selectionToolsId = selectionToolsId;
 		this.model = null;
 		this.myTree = null;
 	}
@@ -86,20 +87,22 @@ eclipse.Explorer = (function() {
 								eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
 								dojo.empty(inner);
 								new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
-								eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.treeRoot);
+								eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.selectionToolsId, this.treeRoot);
 								this.createTree();
 							}),
 							dojo.hitch(self, function(error) {
 								// Show an error message when a problem happens during getting the workspace
 								// Don't show the error for 401 since the login dialog is shown anyway
-								if (error.status != null && error.status != 401){
+								if (error.status !== null && error.status !== 401){
 									dojo.place(document.createTextNode("Sorry, an error occurred: " + error.message), progress, "only");
 								}
 							}));
 					});
 			}
 		},
+
 		updateCommands: function(item){
+			// update the commands in the tree if the tree exists.
 			if (this.myTree) {
 				dojo.hitch(this.myTree._renderer, this.myTree._renderer.updateCommands(item));
 			}
@@ -236,9 +239,12 @@ eclipse.FileRenderer = (function() {
 				checkColumn.appendChild(check);
 				tableRow.appendChild(checkColumn);
 				
-				dojo.connect(check, "onclick", function(evt) {
+				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
-				});
+					this.explorer.registry.getService("ISelectionService").then(dojo.hitch(this, function(service) {
+						service._setSelection(this.getSelected());
+					}));				
+				}));
 			}
 			var col, div, link;
 			if (item.Directory) {
@@ -321,11 +327,12 @@ eclipse.FileRenderer = (function() {
 		
 		getSelected: function() {
 			var selected = [];
-			dojo.query(".selectionCheckmark").forEach(function(node) {
+			dojo.query(".selectionCheckmark").forEach(dojo.hitch(this, function(node) {
 				if (node.checked) {
-					selected.push(node.itemId);
+					var row = node.parentNode.parentNode;
+					selected.push(this.tableTree.getItem(row));
 				}
-			});
+			}));
 			return selected;
 		},
 		
