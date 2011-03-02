@@ -83,7 +83,8 @@ orion.GitStatusRenderer = (function() {
 			//render the file name field
 			var nameColumn = document.createElement('td');
 			nameColumn.width="100%";
-			nameColumn.nowrap="nowrap";
+			//nameColumn.nowrap="nowrap";
+			nameColumn.noWrap= true;
 			row.appendChild(nameColumn);
 			
 			var nameSpan =  document.createElement('span');
@@ -118,6 +119,7 @@ orion.GitStatusRenderer = (function() {
 			var sbsViewerImg = document.createElement('img');//dojo.create("img", {src: "/images/redo_edit.gif"}, sbsViewerCol, "last");
 			sbsViewerImg.src = "/images/redo_edit.gif";
 			sbsViewerCol.appendChild(sbsViewerImg);
+			sbsViewerImg.style.cursor = "pointer";
 			sbsViewerImg.onclick = dojo.hitch(this, function(evt) {
 				this._controller.openSBSViewer(itemModel.name);
 			});
@@ -128,6 +130,7 @@ orion.GitStatusRenderer = (function() {
 			var stageImg = document.createElement('img');//dojo.create("img", {src: "/images/down.gif"}, sbsViewerCol, "last");
 			stageImg.src = "/images/down.gif";
 			stageCol.appendChild(stageImg);
+			stageImg.style.cursor = "pointer";
 			stageImg.onclick = dojo.hitch(this, function(evt) {
 				this._controller.doAction(itemModel.name , itemModel.type);
 			});
@@ -163,6 +166,13 @@ orion.GitStatusController = (function() {
 				} 
 			}
 		},
+		
+		openSBSViewer: function(hash){
+			var splittedUrl = this._url.split("/");
+			var url = "/js/compare/demo/demo.html#/" + splittedUrl[3] + "/" + splittedUrl[4] + "/" + hash;
+			window.open(url,"");
+		},
+		
 		getGitStatus: function(url){
 			var self = this;
 			dojo.xhrGet({
