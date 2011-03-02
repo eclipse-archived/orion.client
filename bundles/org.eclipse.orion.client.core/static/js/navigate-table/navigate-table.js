@@ -63,6 +63,9 @@ dojo.addOnLoad(function(){
 	// commands shared by navigators
 	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools");
 	
+	//TODO this should be removed and contributed by a plug-in
+	eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools");
+	
 	// define the command contributions - where things appear
 	commandService.addCommandGroup("eclipse.fileGroup", 100, "More");
 	commandService.addCommandGroup("eclipse.newResources", 100, null, "eclipse.fileGroup");

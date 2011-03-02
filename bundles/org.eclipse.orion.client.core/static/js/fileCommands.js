@@ -190,32 +190,6 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(newFolderCommand, "dom");
 	commandService.addCommand(newFolderCommand, "object");
 	
-	var cloneGitRepositoryCommand = new eclipse.Command({
-		name : "Clone Git Repository",
-		image : "images/git/cloneGit.gif",
-		id : "eclipse.cloneGitRepository",
-		callback : function(item) {
-			var dialog = new widgets.CloneGitRepositoryDialog({
-				func : function(gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
-					serviceRegistry.getService("IGitService").then(
-							function(service) {
-								service.cloneGitRepository("", gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost, 
-										function(jsonData, secondArg) {
-											window.alert("Repository cloned. You may now link to " + jsonData.ContentLocation);
-										});
-							});
-				}
-			});
-			dialog.startup();
-			dialog.show();
-		},
-		visibleWhen : function(item) {
-			return true;
-		}
-	});
-
-	commandService.addCommand(cloneGitRepositoryCommand, "dom");
-	
 	var newProjectCommand = new eclipse.Command({
 		name: "New Folder",
 		image: "images/newfolder_wiz.gif",
