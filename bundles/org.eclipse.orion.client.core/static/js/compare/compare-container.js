@@ -30,6 +30,20 @@ orion.CompareContainer = (function() {
 			var mapper = result.mapper;
 			var diffArray = this._diffParser.getDiffArray();
 			return {delim:delim , mapper:result.mapper , output:result.outPutFile ,diffArray:diffArray};
+		},
+				
+		_initDiffPosition: function(editor){
+			var model = editor.getModel();
+			if(model && model._lineFeeder && model._lineFeeder.getAnnotations){
+				var annotations = model._lineFeeder.getAnnotations();
+				if(annotations.length > 0) {
+					var lineIndex = annotations[0][0];
+					var lineHeight = editor.getLineHeight();
+					var clientArea = editor.getClientArea();
+					var lines = Math.floor(clientArea.height / lineHeight/3);
+					editor.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
+				}
+			}
 		}
 		
 	};
@@ -53,6 +67,7 @@ orion.SBSCompareContainer = (function() {
 				this._editorLeft.setText(result.output);
 				this._editorRight.getModel().init(result.mapper);
 				this._editorRight.setText(input);
+				this._initDiffPosition(this._editorLeft);
 				return;
 			}
 		}
@@ -122,6 +137,7 @@ orion.SBSCompareContainer = (function() {
 		var overview  = new eclipse.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
 		this._editorRight.addRuler(overview);
 				
+		this._initDiffPosition(this._editorLeft);
 		this._editorRight.redrawRange();
 	};
 	return SBSCompareContainer;
@@ -138,8 +154,9 @@ orion.InlineCompareContainer = (function() {
 		var result = this.parseMapper(input , diff , true);
 		if(this._editor){
 			if(result.delim === this._editor.getModel().getLineDelimiter() ){
-				this._editor.getModel().init(result.mapper);
+				this._editor.getModel().init(result.mapper , result.diffArray);
 				this._editor.setText(input);
+				this._initDiffPosition(this._editor);
 				return;
 			}
 		}
@@ -172,6 +189,7 @@ orion.InlineCompareContainer = (function() {
 			} 
 		}); 
 				
+		this._initDiffPosition(this._editor);
 		this._editor.redrawRange();
 	};
 	return InlineCompareContainer;
