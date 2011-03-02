@@ -150,14 +150,17 @@ eclipse.TableTree = (function() {
 			this.refresh(item, children, true);
 		},
 		
-		getItem: function(itemOrId) {
-			if (typeof(itemOrId) === "string") {
-				var node = dojo.byId(id);
+		getItem: function(itemOrId) {  // a dom node, a dom id, or the item
+			if (typeof(itemOrId) === "string") {  //dom id
+				var node = dojo.byId(itemOrId);
 				if (node) {
 					return node._item;
 				}
 			}
-			return itemOrId;
+			if (itemOrId._item) {  // is it a dom node that knows its item?
+				return itemOrId._item;
+			}
+			return itemOrId;  // return what we were given
 		},
 		
 		toggle: function(id, imgName, expandedImage, collapsedImage) {

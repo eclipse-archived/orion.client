@@ -55,14 +55,16 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.makeFavorite", 1);
 	commandService.registerCommandContribution("eclipse.downloadFile", 2);
 	commandService.registerCommandContribution("eclipse.openResource", 500, "navToolBar");
-	commandService.registerCommandContribution("eclipse.deleteFile", 2, null, "eclipse.fileGroup");
-	commandService.registerCommandContribution("eclipse.importCommand", 3, null, "eclipse.fileGroup");
+	commandService.registerCommandContribution("eclipse.deleteFile", 1, null, "eclipse.fileGroup");
+	commandService.registerCommandContribution("eclipse.copyFile", 2, null, "eclipse.fileGroup");
+	commandService.registerCommandContribution("eclipse.moveFile", 3, null, "eclipse.fileGroup");
+	commandService.registerCommandContribution("eclipse.importCommand", 4, null, "eclipse.fileGroup");
 	commandService.registerCommandContribution("eclipse.newFile", 1, null, "eclipse.fileGroup/eclipse.newResources");
 	commandService.registerCommandContribution("eclipse.newFolder", 2, null, "eclipse.fileGroup/eclipse.newResources");
 	commandService.registerCommandContribution("eclipse.newProject", 1, "navToolBar", "eclipse.fileGroup");
 	commandService.registerCommandContribution("eclipse.linkProject", 2, "navToolBar", "eclipse.fileGroup");
 
-	eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands(serviceRegistry, commandService, explorer, "navToolBar", "eclipse.fileGroup");
+	eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "navToolBar", null, "eclipse.fileGroup");
 	
 	// commands specific to this page
 	var tableViewCommand = new eclipse.Command({
