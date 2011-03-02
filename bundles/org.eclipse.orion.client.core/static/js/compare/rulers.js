@@ -144,7 +144,10 @@ eclipse.CompareOverviewRuler = (function() {
 	};
 	CompareOverviewRuler.prototype.onClick = function(lineIndex, e) {
 		if (lineIndex === undefined) { return; }
-		this._editor.setTopIndex(lineIndex === 0 ? 0 : lineIndex - 1);
+		var lineHeight = this._editor.getLineHeight();
+		var clientArea = this._editor.getClientArea();
+		var lines = Math.floor(clientArea.height / lineHeight/3);
+		this._editor.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
 	};
 	CompareOverviewRuler.prototype._onModelChanged = function(e) {
 		var model = this._editor.getModel();

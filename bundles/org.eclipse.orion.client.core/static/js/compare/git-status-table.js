@@ -15,8 +15,8 @@ var orion = orion || {};
 orion.GitStatusModel = (function() {
 	function GitStatusModel() {
 		this.selectedFileName = undefined;
-		this.interestedUnstagedGroup = ["Modified" , "Missing" ,"Untracked"];
-		this.interestedStagedGroup = ["Added"];
+		this.interestedUnstagedGroup = ["Missing","Modified","Removed","Untracked"];
+		this.interestedStagedGroup = ["Added", "Changed"];
 	}
 	GitStatusModel.prototype = {
 		destroy: function(){
@@ -93,6 +93,9 @@ orion.GitStatusRenderer = (function() {
 			nameSpan.style.cursor = "pointer";
 			nameSpan.style.color = "#0000FF";
 			nameColumn.appendChild(nameSpan);
+			if(itemModel.name === self._controller._model.selectedFileName ){
+				dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
+			}
 			
 			dojo.connect(nameSpan, "onmouseover", nameSpan, function() {
 				dojo.toggleClass(nameSpan, "fileNameCheckedRow", true);
@@ -105,11 +108,12 @@ orion.GitStatusRenderer = (function() {
 				if(itemModel.name !== self._controller._model.selectedFileName ){
 					if(self._controller._model.selectedFileName !== undefined){
 						var selected = document.getElementById(self._controller._model.selectedFileName + "_nameSpan");
-						dojo.toggleClass(selected, "fileNameSelectedRow", false);
+						if(selected)
+							dojo.toggleClass(selected, "fileNameSelectedRow", false);
 					}
 					dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 					self._controller._model.selectedFileName = itemModel.name;
-					self._controller.getFileContentGit(itemModel.name);
+					self._controller.getFileContentGit(itemModel.location);
 				}
 			});
 			
@@ -121,7 +125,7 @@ orion.GitStatusRenderer = (function() {
 			sbsViewerCol.appendChild(sbsViewerImg);
 			sbsViewerImg.style.cursor = "pointer";
 			sbsViewerImg.onclick = dojo.hitch(this, function(evt) {
-				this._controller.openSBSViewer(itemModel.name);
+				this._controller.openSBSViewer(itemModel.location);
 			});
 			
 			//render the stage / unstage action  icon
@@ -132,7 +136,8 @@ orion.GitStatusRenderer = (function() {
 			stageCol.appendChild(stageImg);
 			stageImg.style.cursor = "pointer";
 			stageImg.onclick = dojo.hitch(this, function(evt) {
-				this._controller.doAction(itemModel.name , itemModel.type);
+				//this._controller.doAction(itemModel.location , itemModel.type);
+				this._controller.getGitStatus(this._controller._url);
 			});
 		}
 	};
@@ -154,6 +159,15 @@ orion.GitStatusController = (function() {
 			this._loadBlock(this._unstagedTableRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedTableRenderer , this._model.interestedStagedGroup);
 		},
+		
+		_makeLocation: function(location , name){//temporary
+			var relative = eclipse.util.makeRelative(location);
+			var splitted = relative.split("/");
+			if(splitted.length > 2)
+				return "/" + splitted[1] + "/" + splitted[2] + "/" + name;
+			return name;
+		},
+		
 		_loadBlock: function(renderer , interedtedGroup){
 			renderer.initTable();
 			for (var i = 0; i < interedtedGroup.length ; i++){
@@ -162,15 +176,19 @@ orion.GitStatusController = (function() {
 				if(!groupData)
 					break;
 				for(var j = 0 ; j < groupData.length ; j++){
-					renderer.renderRow({name:groupData[j].Name , type:groupName});
+					renderer.renderRow({name:groupData[j].Name , type:groupName , location:this._makeLocation(groupData[j].Location , groupData[j].Name)});
 				} 
 			}
 		},
 		
 		openSBSViewer: function(hash){
-			var splittedUrl = this._url.split("/");
-			var url = "/js/compare/demo/demo.html#/" + splittedUrl[3] + "/" + splittedUrl[4] + "/" + hash;
+			//var url = "/compare.html#/" + hash;
+			var url = "/js/compare/demo/demo.html#/" + hash;
 			window.open(url,"");
+		},
+		
+		doActon: function(location  ,type){
+			this.getGitStatus(this._url);
 		},
 		
 		getGitStatus: function(url){
@@ -194,8 +212,7 @@ orion.GitStatusController = (function() {
 			});
 		},
 		getFileDiffGit: function(hashValue){
-			var splittedUrl = this._url.split("/");
-			var url = "/git/diff/" + splittedUrl[3] + "/" + splittedUrl[4] + "/" + hashValue;
+			var url = "/git/diff" + hashValue;
 			var self = this;
 			dojo.xhrGet({
 				url: url , 
@@ -219,8 +236,7 @@ orion.GitStatusController = (function() {
 			});
 		},
 		getFileContentGit: function(hashValue){
-			var splittedUrl = this._url.split("/");
-			var url = "/git/index/" + splittedUrl[3] + "/" + splittedUrl[4] + "/" + hashValue;
+			var url = "/git/index" + hashValue;
 			var self = this;
 			dojo.xhrGet({
 				url: url, 

@@ -48,6 +48,9 @@ eclipse.DiffLineFeeder = (function() {
 		
 		getLineAt: function(blocks , blockNumber , delta , includeDelimiter ){
 			var lineText = this._diffLinesArray[blocks[blockNumber][2] + delta -1];
+			if(!lineText){
+				console.log(blocks);
+			}
 			lineText = lineText.substring(1);
 			if (includeDelimiter) {
 				return lineText + this._lineDelimeter;
