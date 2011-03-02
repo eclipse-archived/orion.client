@@ -207,6 +207,8 @@ orion.GitStatusController = (function() {
 				timeout: 5000,
 				load: function(jsonData, ioArgs) {
 					fileDiff = jsonData;
+					var fileNameDiv = document.getElementById("fileNameInViewer");
+					fileNameDiv.innerHTML = hashValue;
 					self._inlineCompareContainer.setEditor(self.fileContent , fileDiff );
 				},
 				error: function(response, ioArgs) {
