@@ -326,3 +326,11 @@ a:hover {
 .test-failed {
 	background-color: #FF1111;
 }
+
+#test-overview {
+	margin: 8px;
+}
+
+#test-tree {
+	margin: 8px;
+}

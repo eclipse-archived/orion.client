@@ -23,9 +23,9 @@
    
 	usersService.getDivContent = function() {
   	var content = { "actions": [
-  	                          	{"type": "Button", "props": {"id": "saveProfileButton", "label": "Save Profile"}, "events": [{"event": "onClick", "action": "saveProfile"}]},
-  	                        	{"type": "Button", "props": {"id": "resetProfileButton", "label": "Reset"}, "events": [{"event": "onClick", "action": "resetProfile"}]},
-  	                        	{"type": "Button", "props": {"id": "deleteProfileButton", "label": "Delete Profile"}, "events": [{"event": "onClick", "action": "deleteProfile"}]}
+ 	                          	{"id": "saveProfileButton", "name": "Save Profile", "tooltip": "Save Profile", "image": "/images/save_edit.gif", "action": "saveProfile"},
+  	                        	{"id": "resetProfileButton", "name": "Reset", "tooltip": "Reset Profile Information", "image": "/images/undo_edit.gif", "action": "resetProfile"},
+  	                        	{"id": "deleteProfileButton", "name": "Delete Profile", "tooltip": "Delete Profile", "image":"/images/remove.gif", "action": "deleteProfile"}
   	                          ]
   	};
   	    	

@@ -100,12 +100,7 @@ eclipse.FavoritesService = (function() {
 			this._storeSearches();
 			this._notifyListeners();
 		},
-		
-		
-		defaultFavorite: function(onDone) {
-			onDone(this._favorites[0]);
-		},
-			
+					
 		_initializeFavorites: function () {
 			var favorites = this;
 			var favesDone, searchesDone;
@@ -147,6 +142,10 @@ eclipse.FavoritesService = (function() {
 			this._registry.getService("IPreferenceService").then(function(service) {
 				service.put("window/favorites/search", JSON.stringify(storedSearches)); 
 			});
+		},
+		
+		getFavorites: function(onDone) {
+			onDone(this._favorites);
 		}
 	};
 	return FavoritesService;
@@ -270,6 +269,7 @@ eclipse.Favorites = (function() {
 			var tr, col1, col2;
 			for (var j=0; j < favorites.length; j++) {
 				var fave = favorites[j];
+				// TODO we should be getting this value from the preferences (table or tree)
 				var href = fave.directory ? "navigate-table.html#" + fave.path : "coding.html#" + fave.path;
 				if (href==="#") {
 					href="";

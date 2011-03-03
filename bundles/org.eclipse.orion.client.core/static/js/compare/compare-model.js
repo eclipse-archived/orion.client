@@ -19,13 +19,15 @@ eclipse.CompareTextModel = (function() {
 		this._listeners = [];
 		model.addListener(this);
 		this._lineFeeder = lineFeeder;
-	    this._init();
+	    this.init();
 	}
 
 	CompareTextModel.prototype = /** @lends eclipse.TextModel.prototype */ {
 		//private functions
-		_init: function(){
-			var result = this._lineFeeder.generateGapBlocks(this._mapperColumnIndex);
+		init: function(mapper , diffArray){
+			if(mapper)
+				this._mapper = mapper;
+			var result = this._lineFeeder.generateGapBlocks(this._mapper , this._mapperColumnIndex , diffArray);
 			this._dummyLBlock = result.gapBlocks;
 			this._dummyLNumber = result.gapNumber;
 		},
@@ -185,7 +187,7 @@ eclipse.CompareTextModel = (function() {
 		},
 		
 		setText: function(text, start, end) {
-			this._model.setText (text, start, end);
+			this._model.setText (text, 0, this._model.getCharCount());
 		}
 	};
 	

@@ -2798,9 +2798,9 @@ eclipse.Editor = (function() {
 				while (textNode) {
 					if (lineChild.ignoreChars) {
 						for (var i = 0; i < textNode.length; i++) {
-							var char = textNode.data.substring(i, i + 1);
-							if (char !== " ") {
-								text += char;
+							var ch = textNode.data.substring(i, i + 1);
+							if (ch !== " ") {
+								text += ch;
 							}
 						}
 					} else {

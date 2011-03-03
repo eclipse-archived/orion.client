@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<script type="text/javascript" src="/js/plugin.js"></script>
+	<script>
+		window.onload = function() {
+			var provider = new eclipse.PluginProvider();
+			provider.registerServiceProvider("fileCommands", {
+				info : function() {
+					return {
+						name: "Git Status",
+						id: "eclipse.git.status",
+						tooltip: "Go to Git Status",
+						validationProperties: {"Git":"*"},
+						href: true,
+						forceSingleItem: true};
+				},
+				run: function(item) {
+					return "/git-status.html#" + item.Git.StatusLocation;
+				}
+			});
+			provider.connect();
+		};
+	</script>
+</head>
+<body>
+</body>
+</html>

@@ -18,23 +18,10 @@
 <script language="javascript" type="text/javascript" src="../diff-parser.js"></script>
 <script language="javascript" type="text/javascript" src="../rulers.js"></script>
 <script language="javascript" type="text/javascript" src="../compare-model.js"></script>
+<script language="javascript" type="text/javascript" src="../compare-container.js"></script>
 <script language="javascript" type="text/javascript" src="../gap-line-feeder.js"></script>
 
 <script language="javascript" type="text/javascript">
-
-var editorReadOnly = true;
-var isMac = navigator.platform.indexOf("Mac") !== -1;
-
-function getFile(file) {
-	try {
-		var objXml = new XMLHttpRequest();
-		objXml.open("GET",file,false);
-		objXml.send(null);
-		return objXml.responseText;
-	} catch (e) {
-		return null;
-	}
-}
 
 function _getTestData(){
 	var number = document.getElementById("caseNo");
@@ -46,111 +33,10 @@ function _getTestData(){
 	return testCase;
 }
 
-function initEditor(editor){
-	var lines = new eclipse.LineNumberCompareRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
-	//var lines1 = new eclipse.LineNumberCompareRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
-	editor.addRuler(lines);
-	//editor.addRuler(lines1);
-}
-
-var editorLeft;
-var editorRight;
-
+var sBSCompareContainerEditor = null;
 
 function createEditor(input , diff , delim){
-	var diffParser = new eclipse.DiffParser(delim);
-	var result = diffParser.parse(input ,diff);
-	var output = result.outPutFile;
-	var mapper = result.mapper;
-	
-	var modelLeft = new eclipse.TextModel(output, delim);
-	//var compareModelLeft = new eclipse.GapTextModel(modelLeft, false , mapper);
-	var compareModelLeft = new eclipse.CompareTextModel(modelLeft, {mapper:mapper , columnIndex:0} , new eclipse.GapLineFeeder(mapper , delim));
-	var modelRight = new eclipse.TextModel(input, delim);
-	//var compareModelRight = new eclipse.GapTextModel(modelRight, true , mapper);
-	var compareModelRight = new eclipse.CompareTextModel(modelRight, {mapper:mapper , columnIndex:1} , new eclipse.GapLineFeeder(mapper , delim));
-	
-	var optionsRight = {
-			parent: "divParentR",
-			model: compareModelRight,
-			readonly: editorReadOnly,
-			stylesheet: "editor.css" 
-		};
-	editorRight = new eclipse.Editor(optionsRight);
-	initEditor(editorRight);
-	var optionsLeft = {
-		parent: "divParentL",
-		model: compareModelLeft,
-		readonly: editorReadOnly,
-		stylesheet: "editor.css" 
-	};
-	editorLeft = new eclipse.Editor(optionsLeft);
-	initEditor(editorLeft);
-	editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
-		var lineIndex = lineStyleEvent.lineIndex;
-		var lineStart = lineStyleEvent.lineStart;
-		var lineType = compareModelLeft.getLineType(lineIndex);
-		//lineStyleEvent.ranges = [];
-		//lineStyleEvent.ranges.push ({start: lineStart, end: lineStart + 3, style: {style: {backgroundColor: "blue"} }});
-		if(lineType === "added") {
-			lineStyleEvent.style = {style: {backgroundColor: "#99EE99"}};
-		} else if (lineType === "changed"){
-			lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
-		} else if (lineType === "removed" || lineType === "changed_gap"){
-			lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
-		} 
-	}); 
-
-	editorLeft.addEventListener("Scroll", window, function(scrollEvent) {
-		editorRight.setTopPixel(editorLeft.getTopPixel());
-	}); 
-	
-	editorLeft.redrawRange();
-	editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
-		var lineIndex = lineStyleEvent.lineIndex;
-		var lineStart = lineStyleEvent.lineStart;
-		var lineType = compareModelRight.getLineType(lineIndex);
-		if(lineType === "removed") {
-			lineStyleEvent.style = {style: {backgroundColor: "#EE9999"}};
-		} else if (lineType === "changed"){
-			lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
-		} else if (lineType === "added" || lineType === "changed_gap"){
-			lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
-		} 
-	}); 
-
-	editorRight.addEventListener("Scroll", window, function(scrollEvent) {
-		editorLeft.setTopPixel(editorRight.getTopPixel());
-	}); 
-	
-	editorRight.redrawRange();
-	/*
-	var lines = compareModelLeft.getLineCount()+1;
-	var lineH = editorLeft.getLineHeight();
-	var scroll  = document.getElementById("scrollContent");
-	scroll.style.width = 0 + "px";
-	scroll.style.height = lines*lineH + "px";
-	*/
-	
-}
-
-function createCompareEditor() {
-	var leftTH = document.getElementById("LeftTH");
-	var rightTH = document.getElementById("RightTH");
-	leftTH.innerHTML = "Output File With Gaps";
-	rightTH.innerHTML = "Input File With Gaps";
-	
-	var testData = _getTestData();
-	createEditor(testData[0] ,testData[1] , "\r\n" );
-	
-}
-
-function scrollHandler(evt){
-	console.log(evt.scrollTop);
-	//editorLeft.focus();
-	editorLeft.setTopPixel(evt.scrollTop);
-	//editorRight.focus();
-	editorRight.setTopPixel(evt.scrollTop);
+	sBSCompareContainerEditor.setEditor(input , diff);
 }
 
 var fileContent ;
@@ -206,6 +92,7 @@ function getFileDiffGit(hashValue){
 }
 
 window.onload = function() {
+	sBSCompareContainerEditor = new orion.SBSCompareContainer("divParentL" , "divParentR");
 	//var demo = document.getElementById("dataLength");
 	//demo.innerHTML = demoData.length + ")";
 	var splitted = window.location.href.split('#');
@@ -223,18 +110,18 @@ window.onload = function() {
 
 <h1>Orion Compare Editor</h1>
 
-<table width="100%">
+<table width="100%" height="100%">
 <tr>
 <th id="LeftTH" />
 <th id="RightTH"/>
 </tr>
 <tr>
-<td width="50%">
+<td width="50%" height="100">
 <div id='divParentL' style='border: 1px solid teal;width:100%;height:650px;'>
 
 </div>
 </td>
-<td width="50%">
+<td width="50%" height="100%">
 <div id='divParentR' style='border: 1px solid teal;width:100%;height:650px;'>
 
 </div>
@@ -251,7 +138,7 @@ window.onload = function() {
 -->
 </tr>
 </table>
-<!--  
+<!-- 
 <span>Demo Data Number(1-</span>
 <span id="dataLength"></span>
 <input id="caseNo" type="text" />

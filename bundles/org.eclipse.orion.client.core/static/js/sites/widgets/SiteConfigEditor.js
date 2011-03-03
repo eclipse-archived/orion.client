@@ -19,7 +19,7 @@ dojo.require("dojo.data.ItemFileReadStore");
  * @param options <code>{
  *    title {String} Title for the dialog
  *    callback {Function} Invoked on OK
- *    fileService {eclipse.FileService}
+ *    serviceRegistry {eclipse.ServiceRegistry}
  * }</code>
  */
 dojo.declare("widgets.SiteConfigEditor", [dijit.Dialog], {
@@ -60,14 +60,16 @@ dojo.declare("widgets.SiteConfigEditor", [dijit.Dialog], {
 			this.mappings.set("value", "[ ]");
 		}
 		
-		this.options.fileService.loadWorkspaces(dojo.hitch(this, function(workspaces) {
-			var i = 0;
-			var options = dojo.map(workspaces, function(workspace) {
-				return {label: workspace.Name, value: workspace.Id, selected: i++ === 0};
-			});
-			this.workspace.set("options", options);
-			this.workspace._loadChildren();
-		}));
+		var widget = this;
+		this.options.serviceRegistry.getService("IFileService").then(function(service) {
+			service.loadWorkspaces().then(dojo.hitch(widget, function(workspaces) {
+				var i = 0;
+				var options = dojo.map(workspaces, function(workspace) {
+					return {label: workspace.Name, value: workspace.Id, selected: i++ === 0};
+				});
+				this.workspace.set("options", options);
+				this.workspace._loadChildren();
+			}));});
 	},
 	onHide: function() {
 		this.inherited(arguments);

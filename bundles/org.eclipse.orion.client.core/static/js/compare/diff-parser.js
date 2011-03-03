@@ -38,6 +38,10 @@ eclipse.DiffParser = (function() {
 			this._nNewLineAtEnd = true;
 		},
 		
+		setLineDelim: function(lineDelimiter){
+			this._lineDelimiter = lineDelimiter;
+		},
+		
 		getDiffArray: function(){
 			return this._diffContents;
 		},

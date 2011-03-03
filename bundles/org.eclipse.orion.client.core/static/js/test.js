@@ -79,7 +79,7 @@ orion.Test = (function(assert) {
 										dispatchEvent("testDone", testName, {
 											result : false,
 											message : e.toString(),
-											error : e
+											stack: e.stack || e.stacktrace
 										});
 									};
 								}(testName)).then(function() {
@@ -98,7 +98,7 @@ orion.Test = (function(assert) {
 							dispatchEvent("testDone", testName, {
 								result : false,
 								message : e.toString(),
-								error : e
+								stack: e.stack || e.stacktrace
 							});
 						}
 					} else if (typeof test === "object") {
@@ -251,6 +251,9 @@ orion.Test = (function(assert) {
 				delete times[name];
 				if (!obj.result) {
 					result.push("\n  " + obj.message);
+					if (obj.stack) {
+						result.push("\n Stack Trace:\n" + obj.stack);
+					}
 				}
 				console.log(result.join(""));
 			});

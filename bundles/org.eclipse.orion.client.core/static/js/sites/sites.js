@@ -53,7 +53,7 @@ dojo.addOnLoad(function() {
 			callback : function() {
 				var dialog = new widgets.SiteConfigEditor({
 					title: "Create Site Configuration",
-					fileService: fileService,
+					serviceRegistry: serviceRegistry,
 					callback: function(name, workspace, mappings, hostHint) {
 						siteService.createSiteConfiguration(name, workspace, mappings, hostHint).then(refreshFunction);
 					}});
@@ -68,7 +68,7 @@ dojo.addOnLoad(function() {
 			image: "images/editing_16.gif",
 			id: "eclipse.sites.edit",
 			visibleWhen: function(item) {
-				return true;
+				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
 			callback: function(item) {
 				alert("TODO edit");
@@ -83,6 +83,7 @@ dojo.addOnLoad(function() {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
 			callback: function(item) {
+				// TODO show "Starting..."
 				siteService.startStopSiteConfiguration(item.Id, "start").then(function() {
 					siteService.getSiteConfigurations().then(function(siteConfigs) {
 						treeWidget.refreshAndExpand("site-table-tree", siteConfigs);

@@ -15,9 +15,27 @@ orion.Assert = (function() {
 			this.actual = options.actual;
 			this.expected = options.expected;
 		}
+		Error.prototype.constructor.call(this, this.message);
+		
+		if (!this.stack) {
+			if (this.stacktrace) {
+				this.stack = this.stacktrace;
+			} else {
+				var e = new Error();
+				if (e.stack) {
+					this.stack = e.stack;
+				}
+				if (!e.stack && e.stacktrace) {
+					this.stack = this.stacktrace = e.stacktrace;
+				}			
+			}
+		}
 	}
 
-	AssertionError.prototype = new Error();
+	function F() {};
+	F.prototype = Error.prototype;
+	AssertionError.prototype = new F();
+	AssertionError.prototype.constructor = AssertionError;
 	
 	function _stringify(obj) {
 		try {

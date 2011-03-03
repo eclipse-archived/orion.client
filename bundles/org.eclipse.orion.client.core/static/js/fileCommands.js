@@ -23,18 +23,74 @@ var eclipse = eclipse || {};
  
 eclipse.fileCommandUtils = eclipse.fileCommandUtils || {};
 
-eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, item) {
+eclipse.favoritesCache = null;
+
+// I'm not sure where this belongs.  This is the first time an outer party consumes
+// favorites and understands the structure.  We need a cache for synchronous requests
+// for move/copy targets.
+eclipse.FavoriteFoldersCache = (function() {
+	function FavoriteFoldersCache(registry) {
+		this.registry = registry;
+		this.favorites = [];
+		var self = this;
+		this.registry.getService("IFavorites").then(function(service) {
+			service.getFavorites(function(faves) {
+				self.cacheFavorites(faves);
+			});
+			service.addEventListener("favoritesChanged", function(faves) {
+				self.cacheFavorites(faves);
+			});
+		});
+	}
+	FavoriteFoldersCache.prototype = {
+		cacheFavorites: function(faves) {
+			this.favorites = [];
+			for (var i=0; i<faves.length; i++) {
+				if (faves[i].directory) {
+					this.favorites.push(faves[i]);
+				}
+			}
+			this.favorites.sort(function(a,b) {
+				return a.name-b.name;
+			});
+		}
+	};
+	return FavoriteFoldersCache;
+}());
+
+eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, selectionToolbarId, item) {
 	var parent = dojo.byId(parentId);
 	var toolbar = dojo.byId(toolbarId);
 	if (toolbar) {
 		dojo.empty(toolbar);
 	} else {
+		// first time through
 		toolbar = dojo.create("div",{id: toolbarId}, parent, "last");
 		dojo.addClass(toolbar, "domCommandToolbar");
 	}
 	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
 		service.renderCommands(toolbar, "dom", item, explorer, "image");
+		if (selectionToolbarId) {
+			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
+			service.renderCommands(selectionTools, "dom", null, explorer, "image");
+		}
 	}));
+	
+	// Stuff we do only the first time
+	if (!eclipse.favoritesCache) {
+		eclipse.favoritesCache = new eclipse.FavoriteFoldersCache(registry);
+		registry.getService("ISelectionService").then(function(service) {
+			service.addEventListener("selectionChanged", function(selections) {
+				var selectionTools = dojo.byId(selectionToolbarId);
+				if (selectionTools) {
+					dojo.empty(selectionTools);
+					registry.getService("ICommandService").then(function(commandService) {
+						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
+					});
+				}
+			});
+		});
+	}
 };
 
 eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
@@ -48,6 +104,58 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		}
 		return item;
 	}
+	
+	function makeMoveCopyTargetChoices(items, userData, isCopy) {
+		items = dojo.isArray(items) ? items : [items];
+		var callback = function(items) {
+			for (var i=0; i < items.length; i++) {
+				var item = items[i];
+				serviceRegistry.getService("IFileService").then(dojo.hitch(this, function(service) {
+					if (isCopy) {
+						service.copyFile(item.Location, this.path).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+					} else {
+						service.moveFile(item.Location, this.path).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+					}
+				}));
+			}
+			window.alert("Not yet implemented.  See log for operation parameters.");
+		};
+		
+		var prompt = function() {
+			window.alert("Directory prompter appears here.");
+		};
+		var choices = [];
+		if (eclipse.favoritesCache) {
+			var favorites = eclipse.favoritesCache.favorites;
+			for (var i=0; i<favorites.length; i++) {
+				// get hash part and strip query off
+				var splits = favorites[i].path.split('#');
+				var path = splits[splits.length-1];
+				var qIndex = path.indexOf("/?");
+				if (qIndex > 0) {
+					path = path.substring(0, qIndex);
+				}
+				choices.push({name: favorites[i].name, path: path, callback: callback});
+			}
+		}
+		choices.push({name: "Choose target...", callback: prompt});
+		return choices;
+	}
+	
+	var oneOrMoreFilesOrFolders = function(item) {
+		var items = dojo.isArray(item) ? item : [item];
+		if (items.length === 0) {
+			return false;
+		}
+		for (var i=0; i < items.length; i++) {
+			if (!items[i].Location) {
+				return false;
+			}
+		}
+		return true;
+	};
 
 	var favoriteCommand = new eclipse.Command({
 		name: "Make Favorite",
@@ -71,14 +179,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		name: "Delete",
 		image: "images/remove.gif",
 		id: "eclipse.deleteFile",
-		visibleWhen: function(item) {
-			var items = dojo.isArray(item) ? item : [item];
-			for (var i=0; i < items.length; i++) {
-				if (!items[i].Location) {
-					return false;
-				}
-			}
-			return true;},
+		visibleWhen: oneOrMoreFilesOrFolders,
 		callback: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
 			var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
@@ -92,12 +193,13 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 						var item = items[i];
 						if (item.parent.Path === "") {
 							serviceRegistry.getService("IFileService").then(function(service) {
-								service.removeProject(
-									item.parent, item, dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
+								service.removeProject(item.parent.Location, item.Location).then(
+									dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 							});
 						} else {
 							serviceRegistry.getService("IFileService").then(function(service) {
-								service.deleteFile(item, dojo.hitch(explorer, explorer.changedItem));
+								service.deleteFile(item.Location).then(
+									dojo.hitch(explorer, function() {explorer.changedItem(item.parent);}));//refresh the parent
 							});
 						}
 					}
@@ -105,6 +207,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			});		
 		}});
 	commandService.addCommand(deleteCommand, "object");
+	commandService.addCommand(deleteCommand, "dom");
 
 	var downloadCommand = new eclipse.Command({
 		name: "Download as Zip",
@@ -129,7 +232,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				label: "File name:",
 				func:  function(name){
 					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createFile(name, item, dojo.hitch(explorer, explorer.changedItem)); 
+						service.createFile(item.Location, name).then(
+						dojo.hitch(explorer, function() {this.changedItem(item);})); //refresh the parent
 					});
 				}
 			});
@@ -153,7 +257,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				label: "Folder name:",
 				func:  function(name){
 					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createFolder(name, item, dojo.hitch(explorer, explorer.changedItem));
+						service.createFolder(item.Location, name).then(
+							dojo.hitch(explorer, function() {this.changedItem(item);}));//refresh the parent
 					});
 				}
 			});
@@ -167,33 +272,6 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(newFolderCommand, "dom");
 	commandService.addCommand(newFolderCommand, "object");
 	
-	var cloneGitRepositoryCommand = new eclipse.Command({
-		name : "Clone Git Repository",
-		image : "images/git/cloneGit.gif",
-		id : "eclipse.cloneGitRepository",
-		callback : function(item) {
-			var dialog = new widgets.CloneGitRepositoryDialog({
-				func : function(gitUrl) {
-					serviceRegistry.getService("IGitService").then(
-							function(service) {
-								service.cloneGitRepository("", gitUrl,
-										function(jsonData, secondArg) {
-											alert("Repository cloned. You may now link to " 
-													+ jsonData.ContentLocation);
-										});
-							});
-				}
-			});
-			dialog.startup();
-			dialog.show();
-		},
-		visibleWhen : function(item) {
-			return false;
-		}
-	});
-
-	commandService.addCommand(cloneGitRepositoryCommand, "dom");
-	
 	var newProjectCommand = new eclipse.Command({
 		name: "New Folder",
 		image: "images/newfolder_wiz.gif",
@@ -204,8 +282,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				label: "Folder name:",
 				func:  function(name, serverPath, create){
 					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createProject(explorer.treeRoot.ChildrenLocation, name, serverPath, create,
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
+						service.createProject(explorer.treeRoot.ChildrenLocation, name, serverPath, create).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 					});
 				}
 			});
@@ -228,8 +306,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				label: "Folder name:",
 				func:  function(name, url, create){
 					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createProject(explorer.treeRoot.ChildrenLocation, name, url, create,
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));
+						service.createProject(explorer.treeRoot.ChildrenLocation, name, url, create).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 						});
 				},
 				advanced: true
@@ -250,7 +328,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			var dialog = new widgets.ImportDialog({
 				importLocation: item.ImportLocation,
-				func: dojo.hitch(explorer, explorer.changedItem(item))
+				func: dojo.hitch(explorer, this.changedItem(item))
 			});
 			dialog.startup();
 			dialog.show();
@@ -260,22 +338,44 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(importCommand, "object");
 	commandService.addCommand(importCommand, "dom");
+	
+	var copyCommand = new eclipse.Command({
+		name : "Copy to",
+		id: "eclipse.copyFile",
+		choiceCallback: function(items, userData) {
+			return makeMoveCopyTargetChoices(items, userData, true);
+		},
+		visibleWhen: oneOrMoreFilesOrFolders 
+	});
+	commandService.addCommand(copyCommand, "dom");
+	
+	var moveCommand = new eclipse.Command({
+		name : "Move to",
+		id: "eclipse.moveFile",
+		choiceCallback: function(items, userData) {
+			return makeMoveCopyTargetChoices(items, userData, false);
+		},
+		visibleWhen: oneOrMoreFilesOrFolders
+		});
+	commandService.addCommand(moveCommand, "dom");
 };
 
 eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){
-    if(item == null || typeof(item) != 'object')
+    if (item === null || typeof(item) !== 'object') {
         return item;
+      }
 
     var temp = item.constructor(); // changed
 
     for(var key in item){
-    	if(key!=="children" && key!=="Children")
-    		temp[key] = clone(item[key]);
+		if(key!=="children" && key!=="Children") {
+			temp[key] = clone(item[key]);
+		}
     }
     return temp;
 };
 
-eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands = function(serviceRegistry, commandService, explorer, toolbarId, fileGroup) {
+eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, fileGroup, selectionGroup) {
 	
 	function getPattern(wildCard){
 		var pattern = '^';
@@ -297,86 +397,140 @@ eclipse.fileCommandUtils.createAndPlaceFileExtentionsCommands = function(service
         return new RegExp(pattern);
 	}
 	
+	function validateSingleItem(item, validationProperties){
+		for(var keyWildCard in validationProperties){
+			var keyPattern = getPattern(keyWildCard);
+			var matchFound = false;
+			for(var key in item){
+				if(keyPattern.test(key)){
+					if(typeof(validationProperties[keyWildCard])==='string'){
+						var valuePattern = getPattern(validationProperties[keyWildCard]);
+						if(valuePattern.test(item[key])){
+							matchFound = true;
+							break;
+						}
+					}else{
+						if(validationProperties[keyWildCard]===item[key]){
+							matchFound = true;
+							break;
+						}
+					}
+				}
+			}
+			if(!matchFound){
+				return false;
+			}
+		}
+		return true;
+	}
 	
+	// Note that the shape of the "fileCommands" extension is not in any shape or form that could be considered final.
+	// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
+	
+	// The shape of the contributed commands is (for now):
+	// info - information about the command (object).
+	//		required attribute: name - the name of the command
+	//		required attribute: id - the id of the command
+	//		optional attribute: tooltip - the tooltip to use for the command
+	//        optional attribute: image - a URL to an image for the command
+	//        optional attribute: href - if true, then the service returns an href when it runs
+	//        optional attribute: forceSingleItem - if true, then the service is only invoked when a single item is selected
+	//			and the item parameter to the run method is guaranteed to be a single item vs. an array.  When this is not true, 
+	//			the item parameter to the run method may be an array of items.
+	// run - the implementation of the command (function).
+	//        arguments passed to run: (itemOrItems)
+	//          itemOrItems (object or array) - an array of items to which the item applies, or a single item if the info.forceSingleItem is true
+	//        the return value of the run function will be used as follows:
+	//          if info.href is true, the return value should be an href and the window location will be replaced with the href
+	//			if info.href is not true, the run function is assumed to perform all necessary action and the return is not used.
 	var commandsReferences = serviceRegistry.getServiceReferences("fileCommands");
-	var items = this.items;
-	
+
 	for (var i=0; i<commandsReferences.length; i++) {
 		serviceRegistry.getService(commandsReferences[i]).then(function(service) {
 			service.info().then(function(info) {
-				if(!(info.commands) || info.commands.length==0){
-					return;
-				}
-				var fileGroupCreated = false;
-				var navGroupCreated = false;
-				for(var j=0; j<info.commands.length; j++){
-					var commandDescription = info.commands[j];
-					var command = new eclipse.Command({
-						name: commandDescription.name,
-						image: commandDescription.image,
-						id: info.prefix + "." + commandDescription.id,
-						tooltip: commandDescription.tooltip,
-						callback: dojo.hitch(commandDescription, function(items){
-							var shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
-							service.run(this.id, shallowItemsClone);
-						}),
-						visibleWhen: dojo.hitch(commandDescription, function(item){
-							if(!this.validationProperties){
-								return true;
+				var commandOptions = {
+					name: info.name,
+					image: info.image,
+					id: info.id,
+					tooltip: info.tooltip,
+					visibleWhen: dojo.hitch(info, function(items){
+						if(dojo.isArray(items)){
+							if ((this.forceSingleItem || this.href) && items.length !== 1) {
+								return false;
 							}
-							for(var keyWildCard in this.validationProperties){
-								var keyPattern = getPattern(keyWildCard);
-								var matchFound = false;
-								for(var key in item){
-									if(keyPattern.test(key)){
-										if(typeof(this.validationProperties[keyWildCard])=='string'){
-											var valuePattern = getPattern(this.validationProperties[keyWildCard]);
-											if(valuePattern.test(item[key])){
-												matchFound = true;
-												break;
-											}
-										}else{
-											if(this.validationProperties[keyWildCard]==item[key]){
-												matchFound = true;
-												break;
-											}
-										}
-									}
-								}
-								if(!matchFound){
-									return false;
-								}
+							if(!this.forceSingleItem && items.length < 1){
+								return false;
 							}
+						} else{
+							items = [items];
+						}
+						
+						if(!this.validationProperties){
 							return true;
-						})
+						}
+						
+						for(var i in items){
+							if(!validateSingleItem(items[i], this.validationProperties)){
+								return false;
+							}
+						}
+						return true;
+						
+					})
+				};
+				if (info.href) {
+					commandOptions.hrefCallback = dojo.hitch(info, function(items){
+						var item = dojo.isArray(items) ? items[0] : items;
+						var shallowItemClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(item);
+						if(service.run) {
+							return service.run(shallowItemClone);
+						}
 					});
-					if(commandDescription.type==="tree" || commandDescription.type==="both"){
-						if(!fileGroupCreated){
-							commandService.addCommandGroup("fileGroup."+info.prefix, 100, info.displayName ? info.name : null, fileGroup);
-							fileGroupCreated=true;
+				} else {
+					commandOptions.callback = dojo.hitch(info, function(items){
+						var shallowItemsClone;
+						if (this.forceSingleItem) {
+							var item = dojo.isArray() ? items[0] : items;
+							shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(item);
+						} else {
+							if (dojo.isArray(items)) {
+								shallowItemsClone = [];
+								for (var j = 0; j<items.length; j++) {
+									shallowItemsClone.push(eclipse.fileCommandUtils._cloneItemWithoutChildren(items[j]));
+								}
+							} else {
+								shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
+							}
 						}
-						commandService.addCommand(command, "object");
-						commandService.registerCommandContribution(command.id, commandDescription.index, null, fileGroup+"/fileGroup."+info.prefix);
-					}
-					if(commandDescription.type==="toolbar" || commandDescription.type==="both"){
-						if(!navGroupCreated){
-							commandService.addCommandGroup("toolbarGroup."+info.prefix, 100, null, null, toolbarId);
-							navGroupCreated=true;
+						if(service.run) {
+							service.run(shallowItemsClone);
 						}
-						commandService.addCommand(command, "dom");
-						commandService.registerCommandContribution(command.id, commandDescription.index, toolbarId, "toolbarGroup."+info.prefix);
-					}
+					});
 				}
-				eclipse.fileCommandUtils.updateNavTools(serviceRegistry, explorer, explorer.innerId, toolbarId, explorer.treeRoot);
-				explorer.updateCommands();
-				
-			});
-			
+				var command = new eclipse.Command(commandOptions);
+				var extensionGroupCreated = false;
+				var selectionGroupCreated = false;
+				if (info.forceSingleItem || info.href) {
+					// single items go in the local actions column, grouped in their own unnamed group to get a separator
+					commandService.addCommand(command, "object");
+					if (!extensionGroupCreated) {
+						extensionGroupCreated = true;
+						commandService.addCommandGroup("eclipse.fileCommandExtensions", 1000, null, fileGroup);
+					}
+					commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions");
+				} else {  
+					// items based on selection are added to the selections toolbar, grouped in their own unnamed group to get a separator
+					// TODO would we also want to add these to the menu above so that they are available for single selections?  
+					// For now we do not do this to reduce clutter, but we may revisit this.
+					commandService.addCommand(command, "dom");
+					if (!selectionGroupCreated) {
+						selectionGroupCreated = true;
+						commandService.addCommandGroup("eclipse.bulkFileCommandExtensions", 1000, null, selectionGroup);
+					}
+					commandService.registerCommandContribution(command.id, i, selectionToolbarId, selectionGroup + "/eclipse.bulkFileCommandExtensions");
+				}
+			eclipse.fileCommandUtils.updateNavTools(serviceRegistry, explorer, explorer.innerId, toolbarId, selectionToolbarId, explorer.treeRoot);
+			explorer.updateCommands();
 		});
-	}
-	
-	
-
-	
-	
+	});}
 };

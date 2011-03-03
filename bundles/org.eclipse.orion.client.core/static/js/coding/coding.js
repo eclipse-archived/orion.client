@@ -27,9 +27,9 @@ dojo.addOnLoad(function(){
 		
 		
 		// this is temporary
-		var jslintPlugin = pluginRegistry.getPlugin("/jslintPlugin.html");
+		var jslintPlugin = pluginRegistry.getPlugin("/plugins/jslintPlugin.html");
 		if (jslintPlugin === null) {
-			pluginRegistry.installPlugin("/jslintPlugin.html");
+			pluginRegistry.installPlugin("/plugins/jslintPlugin.html");
 		}
 
 		var inputService = new eclipse.InputService(serviceRegistry);
@@ -47,7 +47,12 @@ dojo.addOnLoad(function(){
 		new eclipse.ProblemService(serviceRegistry);
 		new eclipse.OutlineService(serviceRegistry);
 		new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
-		new eclipse.FileService(serviceRegistry);
+
+		// File operations
+		var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
+		if (filePlugin === null) {
+			pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
+		}
 	}());
 	
 	var topContainerWidget = dijit.byId("topContainer"),
@@ -89,6 +94,7 @@ dojo.addOnLoad(function(){
 	
 	// TODO search location needs to be gotten from somewhere
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, editorContainer, editorContainer);
+	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, editorContainer);
 
 	// The eWebBorderContainer widget needs to know the editorContainer
 	topContainerWidget.set("editorContainer", editorContainer);

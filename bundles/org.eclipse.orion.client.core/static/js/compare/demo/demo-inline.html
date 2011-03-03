@@ -16,25 +16,12 @@
 <script type="text/javascript" src="../../auth.js"></script>
 <script language="javascript" type="text/javascript" src="demo-data.js"></script>
 <script language="javascript" type="text/javascript" src="../diff-parser.js"></script>
-<script language="javascript" type="text/javascript" src="../rulers-inline.js"></script>
+<script language="javascript" type="text/javascript" src="../rulers.js"></script>
 <script language="javascript" type="text/javascript" src="../compare-model.js"></script>
+<script language="javascript" type="text/javascript" src="../compare-container.js"></script>
 <script language="javascript" type="text/javascript" src="../diff-line-feeder.js"></script>
 
 <script language="javascript" type="text/javascript">
-
-var editorReadOnly = true;
-var isMac = navigator.platform.indexOf("Mac") !== -1;
-
-function getFile(file) {
-	try {
-		var objXml = new XMLHttpRequest();
-		objXml.open("GET",file,false);
-		objXml.send(null);
-		return objXml.responseText;
-	} catch (e) {
-		return null;
-	}
-}
 
 function _getTestData(){
 	var number = document.getElementById("caseNo");
@@ -46,46 +33,8 @@ function _getTestData(){
 	return testCase;
 }
 
-function initEditor(editor){
-	var rulerOrigin = new eclipse.LineNumberDiffRuler(false,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
-	var rulerNew = new eclipse.LineNumberDiffRuler(true,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
-	editor.addRuler(rulerOrigin);
-	editor.addRuler(rulerNew);
-}
-var editor;
-
 function createEditor(input , diff , delim){
-	var diffParser = new eclipse.DiffParser(delim);
-	var result = diffParser.parse(input ,diff,false);
-	var output = result.outPutFile;
-	var mapper = result.mapper;
-	
-	var model = new eclipse.TextModel(input, delim);
-	//var compareModelRight = new eclipse.GapTextModel(modelRight, true , mapper);
-	var compareModel = new eclipse.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new eclipse.DiffLineFeeder(mapper , diffParser.getDiffArray() , delim));
-	
-	var options = {
-		parent: "divParentL",
-		model: compareModel,
-		readonly: editorReadOnly,
-		stylesheet: "editor.css" 
-	};
-	editor = new eclipse.Editor(options);
-	initEditor(editor);
-	editor.addEventListener("LineStyle", window, function(lineStyleEvent) {
-		var lineIndex = lineStyleEvent.lineIndex;
-		var lineStart = lineStyleEvent.lineStart;
-		var lineType = compareModel.getLineType(lineIndex);
-		//lineStyleEvent.ranges = [];
-		//lineStyleEvent.ranges.push ({start: lineStart, end: lineStart + 3, style: {style: {backgroundColor: "blue"} }});
-		if(lineType === "added") {
-			lineStyleEvent.style = {style: {backgroundColor: "#99EE99"}};
-		} else if (lineType === "removed"){
-			lineStyleEvent.style = {style: {backgroundColor: "#EE9999"}};
-		} 
-	}); 
-
-	editor.redrawRange();
+	inlineCompareContainer.setEditor(input, diff);
 }
 
 function createCompareEditor() {
@@ -93,11 +42,11 @@ function createCompareEditor() {
 	createEditor(testData[0] ,testData[1] , "\r\n" );
 	
 }
-
+var inlineCompareContainer = null;
 var fileContent ;
 var fileDiff;
 function getFileContentGit(hashValue){
-	
+
 	var url = "/git/index" + hashValue;
 	dojo.xhrGet({
 		url: url, //"/git/index" + hashValue;//file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.html"
@@ -126,6 +75,7 @@ function getFileContentGit(hashValue){
 	
 }
 
+// THis needs a comment.
 function getFileDiffGit(hashValue){
 	
 	var url = "/git/diff" + hashValue;
@@ -153,8 +103,9 @@ function getFileDiffGit(hashValue){
 }
 
 window.onload = function() {
-	//var demo = document.getElementById("dataLength");
-	//demo.innerHTML = demoData.length + ")";
+	inlineCompareContainer = new orion.InlineCompareContainer("divParentL");
+	var demo = document.getElementById("dataLength");
+	demo.innerHTML = demoData.length + ")";
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
 		var TH = document.getElementById("TH");
@@ -180,12 +131,12 @@ window.onload = function() {
 
 </tr>
 </table>
-<!-- 
+
 <span>Demo Data Number(1-</span>
 <span id="dataLength"></span>
 <input id="caseNo" type="text" />
 <button onclick='createCompareEditor()'  padding: 0 2 0 2'>Compare</button>
--->
+
 <br>
 </body>
 </html>
