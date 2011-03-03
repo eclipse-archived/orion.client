@@ -60,8 +60,9 @@ dojo.declare("widgets.SiteConfigEditor", [dijit.Dialog], {
 			this.mappings.set("value", "[ ]");
 		}
 		
+		var widget = this;
 		this.options.serviceRegistry.getService("IFileService").then(function(service) {
-			service.loadWorkspaces().then(dojo.hitch(this, function(workspaces) {
+			service.loadWorkspaces().then(dojo.hitch(widget, function(workspaces) {
 				var i = 0;
 				var options = dojo.map(workspaces, function(workspace) {
 					return {label: workspace.Name, value: workspace.Id, selected: i++ === 0};

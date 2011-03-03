@@ -3048,7 +3048,7 @@ eclipse.Editor = (function() {
 							if (j === nodeLength - 1) {
 								newText.push(textNode.data.substring(j));
 							} else {
-								newText.push(textNode.data.substring(j, 1));
+								newText.push(textNode.data.substring(j, j + 1));
 							}
 							newText.push("</span>");
 						}

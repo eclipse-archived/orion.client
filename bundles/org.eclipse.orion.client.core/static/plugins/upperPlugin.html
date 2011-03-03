@@ -9,23 +9,22 @@
 	<script type="text/javascript" src="/openajax/src/containers/iframe/json2.js"></script>
 	<script type="text/javascript" src="/openajax/src/containers/iframe/iframe.js"></script>
 	 -->
-	<script type="text/javascript" src="js/plugin.js"></script>
+	<script type="text/javascript" src="../js/plugin.js"></script>
 	<script>
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
-			// testing that command service handles image-less actions properly
 			provider.registerServiceProvider("editorAction", {
 				info : function() {
 					return {
-						name : "Comment",
-						key : [ "m", true, true ] // ctrl+shift+m
+						name : "UPPERCASE",
+						img : "/images/gear.gif",
+						key : [ "u", true ]
 					};
 				},
-				run : function(selectedText, text, selection) { 
-					return {text: text.substring(0,selection.start) + "/*" + text.substring(selection.start,selection.end) + "*/" + text.substring(selection.end),
-					selection: {start:selection.start,end:selection.end+4}}; 
+				run : function(text) {
+					return text.toUpperCase();
 				}
-			}, {name : "Comment"});
+			}, {name : "UPPERCASE", img : "/images/gear.gif"});
 			provider.connect();
 		};
 	</script>
