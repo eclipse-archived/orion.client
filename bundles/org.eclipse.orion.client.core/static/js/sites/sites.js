@@ -18,6 +18,7 @@ dojo.addOnLoad(function() {
 	// Register services
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var dialogService = new eclipse.DialogService(serviceRegistry);
+	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var fileService = new eclipse.FileService(serviceRegistry);
 	var siteService = new eclipse.sites.SiteService();
@@ -27,19 +28,26 @@ dojo.addOnLoad(function() {
 	var model;
 	var treeWidget;
 	(function() {
-		model = new eclipse.sites.SiteTreeModel(siteService, "site-table-tree");
+		statusService.setMessage("Loading...");
+		var renderer = new eclipse.sites.SiteRenderer(commandService);
+		dojo.connect(renderer, "rowsChanged", null, function() {
+			console.debug("rowsChanged");
+			statusService.setMessage("");
+		});
 		treeWidget = new eclipse.TableTree({
 			id: "site-table-tree",
 			parent: dojo.byId("site-table"),
-			model: model,
+			model: new eclipse.sites.SiteTreeModel(siteService, "site-table-tree"),
 			showRoot: false,
-			renderer: new eclipse.sites.SiteRenderer(commandService)
+			renderer: renderer
 		});
 	}());
 	
 	var refreshFunction = function() {
+		statusService.setMessage("Loading...");
 		siteService.getSiteConfigurations().then(function(siteConfigs) {
 			treeWidget.refreshAndExpand("site-table-tree", siteConfigs);
+			statusService.setMessage("");
 		});
 	};
 	
@@ -47,7 +55,7 @@ dojo.addOnLoad(function() {
 		// Page-level commands
 		var createCommand = new eclipse.Command({
 			name : "Create Site Configuration",
-			image : "/images/add_obj.gif",
+			image : "/images/add_obj.gif", // TODO remove this
 			id: "eclipse.sites.create",
 			groupId: "eclipse.sitesGroup",
 			callback : function() {
@@ -70,8 +78,8 @@ dojo.addOnLoad(function() {
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
-			callback: function(item) {
-				alert("TODO edit");
+			hrefCallback: function(item) {
+				return "edit-site.html#site=" + item.Location;
 			}});
 		commandService.addCommand(editCommand, "object");
 		
@@ -83,7 +91,7 @@ dojo.addOnLoad(function() {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
 			callback: function(item) {
-				// TODO show "Starting..."
+				statusService.setMessage("Starting " + item.Name + "...");
 				siteService.startStopSiteConfiguration(item.Id, "start").then(function() {
 					siteService.getSiteConfigurations().then(function(siteConfigs) {
 						treeWidget.refreshAndExpand("site-table-tree", siteConfigs);
@@ -100,6 +108,7 @@ dojo.addOnLoad(function() {
 				return item.HostingStatus && item.HostingStatus.Status === "started";
 			},
 			callback: function(item) {
+				statusService.setMessage("Stopping " + item.Name + "...");
 				siteService.startStopSiteConfiguration(item.Id, "stop").then(function() {
 					siteService.getSiteConfigurations().then(function(siteConfigs) {
 						treeWidget.refreshAndExpand("site-table-tree", siteConfigs);

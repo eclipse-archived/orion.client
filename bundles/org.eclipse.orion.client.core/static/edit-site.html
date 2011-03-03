@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html style="height: 100%">
+<html>
 	<head>
 		<meta charset="UTF-8">
-		<title>Site Configurations</title>
-		
-		<script type="text/javascript">
+		<title>Edit site configuration</title>
+	</head>
+	
+	<script type="text/javascript">
 var djConfig = {
 	isDebug : true,
 	modulePaths : {
@@ -34,28 +35,13 @@ var djConfig = {
 			.statusPane {
 				font-weight: bold;
 			}
-			.domCommandToolbar {
-				padding-left: 8px;
-			}
-			tr.treeTableRow td:first-child {
-				padding-left: 16px !important;
-			}
-			.treetable th {
-				font-weight: bold;
-			}
-			.treetable td, .treetable th {
-				padding: 16px 0 16px 16px
-			}
-			.siteConfigDetails {
-				padding-left: 16px;
-			}
 		</style>
 	</head>
+
 <body class="soria">
 	
 	<script src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script type="text/javascript">
-dojo.require("dojo.date.locale");
 dojo.require("dijit.form.Button");
 dojo.require("dijit.form.Select");
 dojo.require("dijit.form.Textarea");
@@ -93,9 +79,9 @@ dojo.require("widgets.SiteConfigEditor");
 		</div>
 		
 		<div dojoType="dijit.layout.ContentPane" region="center">
-			<h1>Site Configurations</h1>
+			<h1>Edit Site Configuration</h1>
 			<div id="site-toolbar" class="domCommandToolbar"></div>
-			<div id="site-table"></div>
+			<div id="site"></div>
 		</div>
 	</div>
 	
