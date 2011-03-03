@@ -26,9 +26,9 @@ dojo.addOnLoad(function(){
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 
 	// File operations
-	var filePlugin = pluginRegistry.getPlugin("/fileClientPlugin.html");
+	var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
 	if (filePlugin === null) {
-		pluginRegistry.installPlugin("/fileClientPlugin.html");
+		pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
 	}
 	
 	// Favorites
@@ -38,9 +38,9 @@ dojo.addOnLoad(function(){
 	new eclipse.GitService(serviceRegistry);
 	
 	// this is temporary
-	var unittestPlugin = pluginRegistry.getPlugin("/unittestPlugin.html");
+	var unittestPlugin = pluginRegistry.getPlugin("/plugins/unittestPlugin.html");
 	if (unittestPlugin === null) {
-		pluginRegistry.installPlugin("/unittestPlugin.html");
+		pluginRegistry.installPlugin("/plugins/unittestPlugin.html");
 	}
 	
 	var gitPlugin = pluginRegistry.getPlugin("/plugins/gitPlugin.html");
