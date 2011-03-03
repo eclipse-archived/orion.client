@@ -467,6 +467,7 @@ eclipse.Command = (function() {
 				});
 			}
 			dojo.addClass(image, 'commandImage');
+			dojo.addClass(link, 'commandLink');
 			dojo.place(image, link, "last");
 			return link;
 		},
