@@ -15,8 +15,8 @@ var orion = orion || {};
 orion.GitStatusModel = (function() {
 	function GitStatusModel() {
 		this.selectedFileId = undefined;
-		this.interestedUnstagedGroup = ["Missing","Modified","Removed","Untracked"];
-		this.interestedStagedGroup = ["Added", "Changed"];
+		this.interestedUnstagedGroup = ["Missing","Modified","Untracked"];
+		this.interestedStagedGroup = ["Added", "Changed","Removed"];
 	}
 	GitStatusModel.prototype = {
 		destroy: function(){
@@ -113,7 +113,9 @@ orion.GitStatusRenderer = (function() {
 					}
 					dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 					self._controller._model.selectedFileId = nameSpan.id;
-					self._controller.getFileContentGit(itemModel.location);
+					//self._controller.getFileContentGit(itemModel.location);
+					self._controller.loadDiffContent(itemModel.location , itemModel.type === "Untracked" ? null : itemModel.location);
+					
 				}
 			});
 			
@@ -179,6 +181,15 @@ orion.GitStatusController = (function() {
 					renderer.renderRow({name:groupData[j].Name , type:groupName , location:this._makeLocation(groupData[j].Location , groupData[j].Name)});
 				} 
 			}
+		},
+		
+		loadDiffContent: function(fileContentURI , diffURI){
+			this._inlineCompareContainer.resolveDiff(fileContentURI,
+					                                function(){					
+														var fileNameDiv = document.getElementById("fileNameInViewer");
+														fileNameDiv.innerHTML = fileContentURI;
+													} , 
+					                                diffURI);
 		},
 		
 		openSBSViewer: function(hash){
