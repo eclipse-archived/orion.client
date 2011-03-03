@@ -13,6 +13,7 @@ var orion = orion || {};
 orion.CompareContainer = (function() {
 	function CompareContainer () {
 		this._diffParser = new eclipse.DiffParser();
+		self.fileContent = null;
 	}
 	CompareContainer.prototype = {
 		_getLineDelim: function(input , diff){	
@@ -20,6 +21,80 @@ orion.CompareContainer = (function() {
 			//if(input.indexOf("\r\n") > -1 || diff.indexOf("\r\n") > -1)
 			//	delim = "\r\n";
 			return delim;
+		},
+		
+		getFileDiffGit: function(hashValue , callBack){
+			var url = "/git/diff" + hashValue;
+			var self = this;
+			dojo.xhrGet({
+				url: url , 
+				//changing some thing
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "text",
+				timeout: 5000,
+				load: function(jsonData, ioArgs) {
+					fileDiff = jsonData;
+					if(callBack)
+						callBack();
+					self.setEditor(self.fileContent , fileDiff );
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		getFileContentGit: function(hashValue , callBack){
+			var url = "/git/index" + hashValue;
+			var self = this;
+			dojo.xhrGet({
+				url: url, 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "text",
+				timeout: 5000,
+				load: function(jsonData, ioArgs) {
+					//console.log(jsonData);
+					self.fileContent = jsonData;
+					self.getFileDiffGit(hashValue , callBack);
+				},
+				error: function(response, ioArgs) {
+					if(ioArgs.xhr.status === 500)
+						self.getFileContent(hashValue , callBack);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		getFileContent: function(hashValue  ,callBack){
+			var url = hashValue;
+			var self = this;
+			dojo.xhrGet({
+				url: url, 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "text",
+				timeout: 5000,
+				load: function(jsonData, ioArgs) {
+					if(callBack)
+						callBack();
+					self.fileContent = jsonData;
+					self.setEditor("" ,self.fileContent);
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
 		},
 		
 		parseMapper: function(input , diff , doNotBuildNewFile){
@@ -30,6 +105,14 @@ orion.CompareContainer = (function() {
 			var mapper = result.mapper;
 			var diffArray = this._diffParser.getDiffArray();
 			return {delim:delim , mapper:result.mapper , output:result.outPutFile ,diffArray:diffArray};
+		},
+		
+		resolveDiff: function(fileContentURI , callBack ,diffURI){
+			if(diffURI){
+				this.getFileContentGit(fileContentURI , callBack);
+			} else {
+				this.getFileContent(fileContentURI , callBack);
+			}
 		},
 				
 		_initDiffPosition: function(editor){
