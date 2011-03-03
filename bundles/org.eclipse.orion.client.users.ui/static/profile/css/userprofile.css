@@ -6,6 +6,14 @@ label.userprofile {
 	clear: both;
 }
 
+.userprofileSection{
+	margin-top: 10px;
+	margin-bottom: 5px;
+	background-color: #F6F6FF;
+	height: 24px;
+	vertical-align: middle;
+}
+
 div.userprofile {
 	clear: left;
 }
