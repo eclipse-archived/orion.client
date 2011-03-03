@@ -348,6 +348,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		visibleWhen: oneOrMoreFilesOrFolders 
 	});
 	commandService.addCommand(copyCommand, "dom");
+	commandService.addCommand(copyCommand, "object");
 	
 	var moveCommand = new eclipse.Command({
 		name : "Move to",
@@ -358,6 +359,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		visibleWhen: oneOrMoreFilesOrFolders
 		});
 	commandService.addCommand(moveCommand, "dom");
+	commandService.addCommand(moveCommand, "object");
 };
 
 eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){
