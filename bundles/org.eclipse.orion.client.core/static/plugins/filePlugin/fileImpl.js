@@ -7,22 +7,25 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo window eclipse:true handleGetAuthenticationError handlePostAuthenticationError
-  handleDeleteAuthenticationError */
+/*global dojo window eclipse:true */
 /*jslint forin:true devel:true*/
 
 /** @namespace The global container for eclipse APIs. */
 var eclipse = eclipse || {};
 
-eclipse.FileService = (function() {
+/**
+ * An implementation of the file service that understands the Orion 
+ * server file API. This implementation is suitable for invocation by a remote plugin.
+ */
+eclipse.FileServiceImpl= (function() {
 	/**
 	 * @class Provides operations on files, folders, and projects.
-	 * @name eclipse.FileService
+	 * @name FileServiceImpl
 	 */
-	function FileService() {
+	function FileServiceImpl() {
 	}
 	
-	FileService.prototype = /**@lends eclipse.FileService.prototype */
+	FileServiceImpl.prototype = /**@lends eclipse.FileServiceImpl.prototype */
 	{
 		/**
 		 * Obtains the children of a remote resource
@@ -317,5 +320,5 @@ eclipse.FileService = (function() {
 			}
 		}
 	};
-	return FileService;
+	return FileServiceImpl;
 }());

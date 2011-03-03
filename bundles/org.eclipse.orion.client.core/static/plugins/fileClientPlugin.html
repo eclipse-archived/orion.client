@@ -19,7 +19,7 @@
 	<script type="text/javascript" src="../js/auth.js"></script>
 	<script type="text/javascript">
 		window.onload = function() {
-			var service = new eclipse.FileService();
+			var service = new eclipse.FileServiceImpl();
 			var provider = new eclipse.PluginProvider();
 			provider.registerServiceProvider("IFileService", service);
 			service.dispatchEvent = provider.dispatchEvent;
