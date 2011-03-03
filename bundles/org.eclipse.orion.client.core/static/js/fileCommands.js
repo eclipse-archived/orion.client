@@ -112,13 +112,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				var item = items[i];
 				serviceRegistry.getService("IFileService").then(dojo.hitch(this, function(service) {
 					if (isCopy) {
-						// service.copyFile(item.Location, this.path).then(
-							//dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-						window.console.log("Not yet implemented.  Copying " + item.Location + " to " + this.path);
+						service.copyFile(item.Location, this.path).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 					} else {
-						// service.moveFile(item.Location, this.path).then(
-							//dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-						window.console.log("Not yet implemented.  Moving " + item.Location + " to " + this.path);
+						service.moveFile(item.Location, this.path).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 					}
 				}));
 			}

@@ -291,6 +291,24 @@ eclipse.FileService = (function() {
 					return response;
 				}
 			});
+		},
+		
+		/**
+		 * Moves a file or directory.
+		 * @param {String} sourceLocation The location of the file or directory to move.
+		 * @param {String} targetLocation The location of the target folder.
+		 */
+		moveFile: function(sourceLocation, targetLocation) {
+			window.console.log("Not yet implemented.  Moving " + sourceLocation + " to " + targetLocation);
+		},
+		 
+		/**
+		 * Copies a file or directory.
+		 * @param {String} sourceLocation The location of the file or directory to copy.
+		 * @param {String} targetLocation The location of the target folder.
+		 */
+		copyFile: function(sourceLocation, targetLocation) {
+			window.console.log("Not yet implemented.  Copying " + sourceLocation + " to " + targetLocation);
 		}
 	};
 	return FileService;
