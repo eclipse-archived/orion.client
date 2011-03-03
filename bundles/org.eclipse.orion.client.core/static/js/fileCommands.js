@@ -328,7 +328,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			var dialog = new widgets.ImportDialog({
 				importLocation: item.ImportLocation,
-				func: dojo.hitch(explorer, this.changedItem(item))
+				func: dojo.hitch(explorer, function() { this.changedItem(item); })
 			});
 			dialog.startup();
 			dialog.show();
