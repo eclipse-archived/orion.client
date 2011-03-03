@@ -14,7 +14,7 @@ var orion = orion || {};
 
 orion.GitStatusModel = (function() {
 	function GitStatusModel() {
-		this.selectedFileName = undefined;
+		this.selectedFileId = undefined;
 		this.interestedUnstagedGroup = ["Missing","Modified","Removed","Untracked"];
 		this.interestedStagedGroup = ["Added", "Changed"];
 	}
@@ -88,12 +88,12 @@ orion.GitStatusRenderer = (function() {
 			row.appendChild(nameColumn);
 			
 			var nameSpan =  document.createElement('span');
-			nameSpan.id = itemModel.name + "_nameSpan";
+			nameSpan.id = itemModel.name + "_" + itemModel.type +  "_nameSpan";
 			dojo.place(document.createTextNode(itemModel.name), nameSpan, "only");
 			nameSpan.style.cursor = "pointer";
 			nameSpan.style.color = "#0000FF";
 			nameColumn.appendChild(nameSpan);
-			if(itemModel.name === self._controller._model.selectedFileName ){
+			if(nameSpan.id === self._controller._model.selectedFileId ){
 				dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 			}
 			
@@ -105,14 +105,14 @@ orion.GitStatusRenderer = (function() {
 			});
 			
 			dojo.connect(nameSpan, "onclick", nameSpan, function() {
-				if(itemModel.name !== self._controller._model.selectedFileName ){
-					if(self._controller._model.selectedFileName !== undefined){
-						var selected = document.getElementById(self._controller._model.selectedFileName + "_nameSpan");
+				if(itemModel.name !== self._controller._model.selectedFileId ){
+					if(self._controller._model.selectedFileId !== undefined){
+						var selected = document.getElementById(self._controller._model.selectedFileId);
 						if(selected)
 							dojo.toggleClass(selected, "fileNameSelectedRow", false);
 					}
 					dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
-					self._controller._model.selectedFileName = itemModel.name;
+					self._controller._model.selectedFileId = nameSpan.id;
 					self._controller.getFileContentGit(itemModel.location);
 				}
 			});
