@@ -31,7 +31,6 @@ dojo.addOnLoad(function() {
 		statusService.setMessage("Loading...");
 		var renderer = new eclipse.sites.SiteRenderer(commandService);
 		dojo.connect(renderer, "rowsChanged", null, function() {
-			console.debug("rowsChanged");
 			statusService.setMessage("");
 		});
 		treeWidget = new eclipse.TableTree({
@@ -55,15 +54,15 @@ dojo.addOnLoad(function() {
 		// Page-level commands
 		var createCommand = new eclipse.Command({
 			name : "Create Site Configuration",
-			image : "/images/add_obj.gif", // TODO remove this
+			image : "/images/add_obj.gif", // TODO icon is not very descriptive
 			id: "eclipse.sites.create",
 			groupId: "eclipse.sitesGroup",
 			callback : function() {
-				var dialog = new widgets.SiteConfigEditor({
+				var dialog = new sites.widgets.NewSiteDialog({
 					title: "Create Site Configuration",
 					serviceRegistry: serviceRegistry,
-					callback: function(name, workspace, mappings, hostHint) {
-						siteService.createSiteConfiguration(name, workspace, mappings, hostHint).then(refreshFunction);
+					func: function(name, workspace) {
+						siteService.createSiteConfiguration(name, workspace).then(refreshFunction);
 					}});
 				dialog.startup();
 				dialog.show();

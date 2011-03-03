@@ -7,8 +7,10 @@
 		<script type="text/javascript">
 var djConfig = {
 	isDebug : true,
+	debugAtAllCosts: true,
 	modulePaths : {
-		'widgets' : '/js/sites/widgets'
+		'sites'   : '/js/sites',
+		'widgets' : '/js/widgets'
 	},
 	parseOnLoad : true
 };
@@ -28,8 +30,8 @@ var djConfig = {
 				height: 100%;
 			}
 			h1 {
-				position:relative;
-				margin-top:18px;
+				position: relative;
+				margin-top: 18px;
 			}
 			.statusPane {
 				font-weight: bold;
@@ -43,9 +45,12 @@ var djConfig = {
 			.treetable th {
 				font-weight: bold;
 			}
-			.treetable td, .treetable th {
-				padding: 16px 0 16px 16px
+			.treetable td {
+				padding: 16px 0 16px 16px;
 			}
+			.treetable th {
+				padding: 16px 0 0 16px;
+			} 
 			.siteConfigDetails {
 				padding-left: 16px;
 			}
@@ -63,7 +68,7 @@ dojo.require("dijit.form.TextBox");
 dojo.require("dijit.form.ValidationTextBox");
 dojo.require("dijit.layout.BorderContainer");
 dojo.require("dijit.layout.ContentPane");
-dojo.require("widgets.SiteConfigEditor");
+dojo.require("sites.widgets.NewSiteDialog");
 	</script>
 	
 	<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>

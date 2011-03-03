@@ -8,23 +8,22 @@
  ******************************************************************************/
 /*global dojo dijit*/
 /*jslint browser:true*/
-dojo.provide("widgets.SiteConfigEditor");
+dojo.provide("sites.widgets.SiteEditor");
 
 dojo.require("dijit.Dialog");
-dojo.require("dijit.form.CheckBox");
 dojo.require("dijit.form.ComboBox");
-dojo.require("dojo.data.ItemFileReadStore");
+dojo.require("dijit.form.Form");
 
 /**
  * @param options <code>{
- *    title {String} Title for the dialog
- *    callback {Function} Invoked on OK
+ *    siteConfiguration: {SiteConfiguration} The site configuration data object to edit
+ *    callback {Function} Invoked on Save
  *    serviceRegistry {eclipse.ServiceRegistry}
  * }</code>
  */
-dojo.declare("widgets.SiteConfigEditor", [dijit.Dialog], {
+dojo.declare("sites.widgets.SiteEditor", [dijit.Dialog/*dijit.form.Form*/], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache("widgets", "templates/SiteConfigEditor.html"),
+	templateString: dojo.cache("widgets", "templates/SiteEditor.html"),
 	workspaceIds: null,
 	
 	constructor : function() {
@@ -49,7 +48,7 @@ dojo.declare("widgets.SiteConfigEditor", [dijit.Dialog], {
 			return dojo.trim(this.name.value) !== "";
 		});
 		
-		// Populate fields here if we're editing existing site config
+		// Populate fields here
 		if (this.options.siteConfiguration) {
 			var site = this.options.siteConfiguration;
 			this.name.set("value", site.Name);

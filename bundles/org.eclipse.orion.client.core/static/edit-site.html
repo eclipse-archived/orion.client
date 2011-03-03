@@ -9,7 +9,8 @@
 var djConfig = {
 	isDebug : true,
 	modulePaths : {
-		'widgets' : '/js/sites/widgets'
+		'sites'   : '/js/sites'
+		'widgets' : '/js/widgets'
 	},
 	parseOnLoad : true
 };
@@ -49,7 +50,7 @@ dojo.require("dijit.form.TextBox");
 dojo.require("dijit.form.ValidationTextBox");
 dojo.require("dijit.layout.BorderContainer");
 dojo.require("dijit.layout.ContentPane");
-dojo.require("widgets.SiteConfigEditor");
+dojo.require("sites.widgets.SiteEditor");
 	</script>
 	
 	<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
@@ -86,6 +87,6 @@ dojo.require("widgets.SiteConfigEditor");
 	</div>
 	
 	<!-- Glue -->
-	<script src="js/sites/sites.js"></script>
+	<script src="js/sites/edit-site.js"></script>
 </body>
 </html>
