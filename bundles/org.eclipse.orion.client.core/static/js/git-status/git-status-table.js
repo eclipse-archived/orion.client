@@ -138,8 +138,8 @@ orion.GitStatusRenderer = (function() {
 			stageCol.appendChild(stageImg);
 			stageImg.style.cursor = "pointer";
 			stageImg.onclick = dojo.hitch(this, function(evt) {
-				//this._controller.doAction(itemModel.location , itemModel.type);
-				this._controller.getGitStatus(this._controller._url);
+				this._controller.doAction(itemModel.location , itemModel.type);
+				//this._controller.getGitStatus(this._controller._url);
 			});
 		}
 	};
@@ -198,8 +198,17 @@ orion.GitStatusController = (function() {
 			window.open(url,"");
 		},
 		
-		doActon: function(location  ,type){
-			this.getGitStatus(this._url);
+		doAction: function(location  ,type){
+			var shouldStage = false;
+			for(var i = 0; i < this._model.interestedUnstagedGroup.length ; i++){
+				if(type === this._model.interestedUnstagedGroup[i]){
+					shouldStage = true;
+				}
+			}
+			if(shouldStage)
+				this.stage(location);
+			else
+				this.unstage(location);
 		},
 		
 		getGitStatus: function(url){
@@ -222,22 +231,20 @@ orion.GitStatusController = (function() {
 				}
 			});
 		},
-		getFileDiffGit: function(hashValue){
-			var url = "/git/diff" + hashValue;
+		
+		stage: function(location){
 			var self = this;
-			dojo.xhrGet({
+			var url = "/git/index" + location;
+			dojo.xhrPut({
 				url: url , 
-				//changing some thing
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "text",
+				handleAs: "json",
 				timeout: 5000,
 				load: function(jsonData, ioArgs) {
-					fileDiff = jsonData;
-					var fileNameDiv = document.getElementById("fileNameInViewer");
-					fileNameDiv.innerHTML = hashValue;
-					self._inlineCompareContainer.setEditor(self.fileContent , fileDiff );
+					console.log(JSON.stringify(jsonData));
+					self.getGitStatus(self._url);;
 				},
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -246,20 +253,21 @@ orion.GitStatusController = (function() {
 				}
 			});
 		},
-		getFileContentGit: function(hashValue){
-			var url = "/git/index" + hashValue;
+		
+		unstage: function(location){
 			var self = this;
-			dojo.xhrGet({
-				url: url, 
+			var url = "/git/index" + location;
+			dojo.xhrPost({
+				url: url , 
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "text",
+				handleAs: "json",
 				timeout: 5000,
+				postData: dojo.toJson({"Reset":"MIXED"} ),
 				load: function(jsonData, ioArgs) {
-					//console.log(jsonData);
-					self.fileContent = jsonData;
-					self.getFileDiffGit(hashValue);
+					console.log(JSON.stringify(jsonData));
+					self.getGitStatus(self._url);;
 				},
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -268,6 +276,8 @@ orion.GitStatusController = (function() {
 				}
 			});
 		}
+		
+		
 	};
 	return GitStatusController;
 }());
