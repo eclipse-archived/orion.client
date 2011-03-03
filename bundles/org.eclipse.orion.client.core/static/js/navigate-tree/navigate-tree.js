@@ -25,9 +25,9 @@ dojo.addOnLoad(function(){
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	
 	// File operations
-	var filePlugin = pluginRegistry.getPlugin("/fileClientPlugin.html");
+	var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
 	if (filePlugin === null) {
-		pluginRegistry.installPlugin("/fileClientPlugin.html");
+		pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
 	}
 	
 	// Favorites

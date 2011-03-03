@@ -23,7 +23,40 @@ var eclipse = eclipse || {};
  
 eclipse.fileCommandUtils = eclipse.fileCommandUtils || {};
 
-eclipse.selectionListenerRegistered = false;
+eclipse.favoritesCache = null;
+
+// I'm not sure where this belongs.  This is the first time an outer party consumes
+// favorites and understands the structure.  We need a cache for synchronous requests
+// for move/copy targets.
+eclipse.FavoriteFoldersCache = (function() {
+	function FavoriteFoldersCache(registry) {
+		this.registry = registry;
+		this.favorites = [];
+		var self = this;
+		this.registry.getService("IFavorites").then(function(service) {
+			service.getFavorites(function(faves) {
+				self.cacheFavorites(faves);
+			});
+			service.addEventListener("favoritesChanged", function(faves) {
+				self.cacheFavorites(faves);
+			});
+		});
+	}
+	FavoriteFoldersCache.prototype = {
+		cacheFavorites: function(faves) {
+			this.favorites = [];
+			for (var i=0; i<faves.length; i++) {
+				if (faves[i].directory) {
+					this.favorites.push(faves[i]);
+				}
+			}
+			this.favorites.sort(function(a,b) {
+				return a.name-b.name;
+			});
+		}
+	};
+	return FavoriteFoldersCache;
+}());
 
 eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, selectionToolbarId, item) {
 	var parent = dojo.byId(parentId);
@@ -43,8 +76,9 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId,
 		}
 	}));
 	
-	if (!eclipse.selectionListenerRegistered) {
-		eclipse.selectionListenerRegistered = true;
+	// Stuff we do only the first time
+	if (!eclipse.favoritesCache) {
+		eclipse.favoritesCache = new eclipse.FavoriteFoldersCache(registry);
 		registry.getService("ISelectionService").then(function(service) {
 			service.addEventListener("selectionChanged", function(selections) {
 				var selectionTools = dojo.byId(selectionToolbarId);
@@ -72,23 +106,42 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	}
 	
 	function makeMoveCopyTargetChoices(items, userData, isCopy) {
-		var callback = isCopy ? 
-			function(items) {
-				window.alert("Copy" + items + " to " + this.path);
-			} :
-			function(items) {
-				window.alert("Move" + items + " to " + this.path);
-			};
-			
-		var prompt = function() {
-			window.alert("what path do you want?");
+		items = dojo.isArray(items) ? items : [items];
+		var callback = function(items) {
+			for (var i=0; i < items.length; i++) {
+				var item = items[i];
+				serviceRegistry.getService("IFileService").then(dojo.hitch(this, function(service) {
+					if (isCopy) {
+						service.copyFile(item.Location, this.path).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+					} else {
+						service.moveFile(item.Location, this.path).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+					}
+				}));
+			}
+			window.alert("Not yet implemented.  See log for operation parameters.");
 		};
-		return [
-			{name: "choice1", path: "path/choice1", callback: callback},
-			{name: "choice2", path: "path/choice2", callback: callback},
-			{name: "choice3", path: "path/choice3", callback: callback},
-			{name: "Other...", callback: prompt}
-		];
+		
+		var prompt = function() {
+			window.alert("Directory prompter appears here.");
+		};
+		var choices = [];
+		if (eclipse.favoritesCache) {
+			var favorites = eclipse.favoritesCache.favorites;
+			for (var i=0; i<favorites.length; i++) {
+				// get hash part and strip query off
+				var splits = favorites[i].path.split('#');
+				var path = splits[splits.length-1];
+				var qIndex = path.indexOf("/?");
+				if (qIndex > 0) {
+					path = path.substring(0, qIndex);
+				}
+				choices.push({name: favorites[i].name, path: path, callback: callback});
+			}
+		}
+		choices.push({name: "Choose target...", callback: prompt});
+		return choices;
 	}
 	
 	var oneOrMoreFilesOrFolders = function(item) {
@@ -275,7 +328,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			var dialog = new widgets.ImportDialog({
 				importLocation: item.ImportLocation,
-				func: dojo.hitch(explorer, this.changedItem(item))
+				func: dojo.hitch(explorer, function() { this.changedItem(item); })
 			});
 			dialog.startup();
 			dialog.show();
@@ -287,7 +340,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(importCommand, "dom");
 	
 	var copyCommand = new eclipse.Command({
-		name : "Copy",
+		name : "Copy to",
 		id: "eclipse.copyFile",
 		choiceCallback: function(items, userData) {
 			return makeMoveCopyTargetChoices(items, userData, true);
@@ -297,7 +350,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(copyCommand, "dom");
 	
 	var moveCommand = new eclipse.Command({
-		name : "Move",
+		name : "Move to",
 		id: "eclipse.moveFile",
 		choiceCallback: function(items, userData) {
 			return makeMoveCopyTargetChoices(items, userData, false);
@@ -401,18 +454,15 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 					id: info.id,
 					tooltip: info.tooltip,
 					visibleWhen: dojo.hitch(info, function(items){
-						
 						if(dojo.isArray(items)){
 							if ((this.forceSingleItem || this.href) && items.length !== 1) {
 								return false;
 							}
-							if(!this.forceSingleItem && items.length<1){
+							if(!this.forceSingleItem && items.length < 1){
 								return false;
 							}
 						} else{
-							var items_array = new Array();
-							items_array[0] = items;
-							items = items_array;
+							items = [items];
 						}
 						
 						if(!this.validationProperties){

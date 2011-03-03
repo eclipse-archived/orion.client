@@ -19,9 +19,7 @@ eclipse.FileService = (function() {
 	 * @class Provides operations on files, folders, and projects.
 	 * @name eclipse.FileService
 	 */
-	function FileService(serviceRegistry) {
-		if (serviceRegistry)
-			this._serviceRegistration = serviceRegistry.registerService("IFileService", this);
+	function FileService() {
 	}
 	
 	FileService.prototype = /**@lends eclipse.FileService.prototype */
