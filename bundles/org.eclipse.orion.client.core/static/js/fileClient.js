@@ -60,22 +60,26 @@ eclipse.FileClient = (function() {
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location) {
+			return this._doServiceCall("loadWorkspace", [location]);
+		},
+		
+		_doServiceCall: function(funcName, funcArgs) {
 			var clientDeferred = new dojo.Deferred();
 			this.serviceRegistry.getService("IFileService").then(
 				function(fileService) {
-					fileService.loadWorkspace(location).then(
-						//on success, just forward the workspace to the client
-						function(workspace) {
-							clientDeferred.callback(workspace);
+					fileService[funcName].apply(fileService, funcArgs).then(
+						//on success, just forward the result to the client
+						function(result) {
+							clientDeferred.callback(result);
 						},
 						//on failure we might need to retry
 						function(error) {
 							if (error.status === 401) {
 								var handle = dojo.subscribe("/auth", function(message) {
 									//try again
-									fileService.loadWorkspace(location).then(
-										function(workspace) {
-											clientDeferred.callback(workspace);
+									fileService[funcName].apply(fileService, funcArgs).then(
+										function(result) {
+											clientDeferred.callback(result);
 										},
 										function(error) {
 											clientDeferred.errback(error);
