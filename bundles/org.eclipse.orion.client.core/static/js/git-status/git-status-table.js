@@ -15,6 +15,7 @@ var orion = orion || {};
 orion.GitStatusModel = (function() {
 	function GitStatusModel() {
 		this.selectedFileId = undefined;
+		this.selectedItem = undefined;
 		this.interestedUnstagedGroup = ["Missing","Modified","Untracked"];
 		this.interestedStagedGroup = ["Added", "Changed","Removed"];
 	}
@@ -108,6 +109,7 @@ orion.GitStatusRenderer = (function() {
 			nameSpan.title = "Click to compare";
 			nameColumn.appendChild(nameSpan);
 			if(nameSpan.id === self._controller._model.selectedFileId ){
+				self._controller._model.selectedItem = itemModel;
 				dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 			}
 			
@@ -144,6 +146,8 @@ orion.GitStatusRenderer = (function() {
 			});
 			
 			//render the stage / unstage action  icon
+			if(this._controller._model.isStaged(itemModel.type))
+				return;
 			stageCol = document.createElement('td');
 			row.appendChild(stageCol);
 			var stageImg = document.createElement('img');//dojo.create("img", {src: "/images/down.gif"}, sbsViewerCol, "last");
@@ -172,8 +176,14 @@ orion.GitStatusController = (function() {
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
 			this._model.init(jsonData);
+			this.initViewer();
 			this._loadBlock(this._unstagedTableRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedTableRenderer , this._model.interestedStagedGroup);
+			if(this._model.selectedItem)
+				this.loadDiffContent(this._model.selectedItem);
+			else
+				this._model.selectedFileId = null;
+				
 		},
 		
 		_makeLocation: function(location , name){//temporary
@@ -182,6 +192,19 @@ orion.GitStatusController = (function() {
 			if(splitted.length > 2)
 				return "/" + splitted[1] + "/" + splitted[2] + "/" + name;
 			return name;
+		},
+		
+		initViewer: function () {
+			tableId = this._tableParentDivId + "_table";
+		  	var tableDomNode = dojo.byId( tableId);
+		  	var viewerParentDomNode = dojo.byId( "inline-compare-viewer");
+		  	this._inlineCompareContainer.destroyEditor();
+		  	viewerParentDomNode.innerHTML = "";
+			this._model.selectedItem = null;
+			var fileNameDiv = document.getElementById("fileNameInViewer");
+			fileNameDiv.innerHTML = "Select a file to compare";
+		  	//viewerParentDomNode.removeChild(viewerParentDomNode.getChildren()[0]);
+		  	
 		},
 		
 		_loadBlock: function(renderer , interedtedGroup){

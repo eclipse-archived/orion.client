@@ -204,6 +204,11 @@ orion.InlineCompareContainer = (function() {
 		this._editorDivId = editorDivId;
 	}
 	InlineCompareContainer.prototype = new orion.CompareContainer();
+	
+	InlineCompareContainer.prototype.destroyEditor = function(){
+		this._editor = null;
+	};
+
 	InlineCompareContainer.prototype.setEditor = function(input , diff){	
 		var result = this.parseMapper(input , diff , true);
 		if(this._editor){
