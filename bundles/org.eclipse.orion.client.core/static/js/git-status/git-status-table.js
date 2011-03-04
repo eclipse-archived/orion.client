@@ -15,6 +15,7 @@ var orion = orion || {};
 orion.GitStatusModel = (function() {
 	function GitStatusModel() {
 		this.selectedFileId = undefined;
+		this.selectedItem = undefined;
 		this.interestedUnstagedGroup = ["Missing","Modified","Untracked"];
 		this.interestedStagedGroup = ["Added", "Changed","Removed"];
 	}
@@ -32,11 +33,29 @@ orion.GitStatusModel = (function() {
 		
 		getGroupData: function(groupName){
 			return this.items[groupName];
+		},
+		
+		isStaged: function(type){
+			for(var i = 0; i < this.interestedStagedGroup.length ; i++){
+				if(type === this.interestedStagedGroup[i]){
+					return  true;
+				}
+			}
+			return false;
 		}
 		
 	};
 	return GitStatusModel;
 }());
+
+orion.statusTypeMap = { "Missing":["/images/git/git-removed.gif", "Removed unstaged" , "/images/git/git-stage.gif", "Stage removed" ],
+						"Removed":["/images/git/git-removed.gif","Removed staged" ,"/images/git/git-unstage.gif", "Unstage removed" ],	
+						 "Modified":["/images/git/git-modify.gif","Modified unstaged" ,"/images/git/git-stage.gif", "Stage modified" ],	
+						 "Changed":["/images/git/git-modify.gif","Modified staged" ,"/images/git/git-unstage.gif", "Untage modified"],	
+					     "Untracked":["/images/git/git-added.gif","Added unstaged" ,"/images/git/git-stage.gif", "Stage untracked"],	
+						 "Added":["/images/git/git-added.gif","Added staged" ,"/images/git/git-unstage.gif" , "Unstage added"]	
+					  };
+
 
 orion.GitStatusRenderer = (function() {
 	function GitStatusRenderer(tableDivId , model) {
@@ -70,13 +89,8 @@ orion.GitStatusRenderer = (function() {
 			//render the type icon (added , modified ,untracked ...)
 			var typeColumn = document.createElement('td');
 			var typeImg = document.createElement('img');
-			if(true/*itemModel.type === "added"*/){
-				typeImg.src = "/images/newfile_wiz.gif";
-			} else if (itemModel.type === "modified"){
-				typeImg.src = "/images/newfile_wiz.gif";
-			} else {
-				typeImg.src = "/images/newfile_wiz.gif";
-			}
+			typeImg.src = orion.statusTypeMap[itemModel.type][0];
+			typeImg.title = "Item type : " + orion.statusTypeMap[itemModel.type][1];
 			typeColumn.appendChild(typeImg);
 			row.appendChild(typeColumn);
 			
@@ -92,8 +106,10 @@ orion.GitStatusRenderer = (function() {
 			dojo.place(document.createTextNode(itemModel.name), nameSpan, "only");
 			nameSpan.style.cursor = "pointer";
 			nameSpan.style.color = "#0000FF";
+			nameSpan.title = "Click to compare";
 			nameColumn.appendChild(nameSpan);
 			if(nameSpan.id === self._controller._model.selectedFileId ){
+				self._controller._model.selectedItem = itemModel;
 				dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 			}
 			
@@ -113,9 +129,7 @@ orion.GitStatusRenderer = (function() {
 					}
 					dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 					self._controller._model.selectedFileId = nameSpan.id;
-					//self._controller.getFileContentGit(itemModel.location);
-					self._controller.loadDiffContent(itemModel.location , itemModel.type === "Untracked" ? null : itemModel.location);
-					
+					self._controller.loadDiffContent(itemModel);
 				}
 			});
 			
@@ -123,18 +137,22 @@ orion.GitStatusRenderer = (function() {
 			sbsViewerCol = document.createElement('td');
 			row.appendChild(sbsViewerCol);
 			var sbsViewerImg = document.createElement('img');//dojo.create("img", {src: "/images/redo_edit.gif"}, sbsViewerCol, "last");
-			sbsViewerImg.src = "/images/redo_edit.gif";
+			sbsViewerImg.src = "/images/git/compare-sbs.gif";
+			sbsViewerImg.title="Click to open two way compare";
 			sbsViewerCol.appendChild(sbsViewerImg);
 			sbsViewerImg.style.cursor = "pointer";
 			sbsViewerImg.onclick = dojo.hitch(this, function(evt) {
-				this._controller.openSBSViewer(itemModel.location);
+				this._controller.openSBSViewer(itemModel);
 			});
 			
 			//render the stage / unstage action  icon
+			if(this._controller._model.isStaged(itemModel.type))
+				return;
 			stageCol = document.createElement('td');
 			row.appendChild(stageCol);
 			var stageImg = document.createElement('img');//dojo.create("img", {src: "/images/down.gif"}, sbsViewerCol, "last");
-			stageImg.src = "/images/down.gif";
+			stageImg.src = orion.statusTypeMap[itemModel.type][2];
+			stageImg.title = orion.statusTypeMap[itemModel.type][3];
 			stageCol.appendChild(stageImg);
 			stageImg.style.cursor = "pointer";
 			stageImg.onclick = dojo.hitch(this, function(evt) {
@@ -158,8 +176,14 @@ orion.GitStatusController = (function() {
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
 			this._model.init(jsonData);
+			this.initViewer();
 			this._loadBlock(this._unstagedTableRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedTableRenderer , this._model.interestedStagedGroup);
+			if(this._model.selectedItem)
+				this.loadDiffContent(this._model.selectedItem);
+			else
+				this._model.selectedFileId = null;
+				
 		},
 		
 		_makeLocation: function(location , name){//temporary
@@ -170,6 +194,19 @@ orion.GitStatusController = (function() {
 			return name;
 		},
 		
+		initViewer: function () {
+			tableId = this._tableParentDivId + "_table";
+		  	var tableDomNode = dojo.byId( tableId);
+		  	var viewerParentDomNode = dojo.byId( "inline-compare-viewer");
+		  	this._inlineCompareContainer.destroyEditor();
+		  	viewerParentDomNode.innerHTML = "";
+			this._model.selectedItem = null;
+			var fileNameDiv = document.getElementById("fileNameInViewer");
+			fileNameDiv.innerHTML = "Select a file to compare";
+		  	//viewerParentDomNode.removeChild(viewerParentDomNode.getChildren()[0]);
+		  	
+		},
+		
 		_loadBlock: function(renderer , interedtedGroup){
 			renderer.initTable();
 			for (var i = 0; i < interedtedGroup.length ; i++){
@@ -178,37 +215,46 @@ orion.GitStatusController = (function() {
 				if(!groupData)
 					break;
 				for(var j = 0 ; j < groupData.length ; j++){
-					renderer.renderRow({name:groupData[j].Name , type:groupName , location:this._makeLocation(groupData[j].Location , groupData[j].Name)});
+					renderer.renderRow({name:groupData[j].Name , 
+										type:groupName , 
+										//location:this._makeLocation(groupData[j].Location , groupData[j].Name),
+										location:groupData[j].Location,
+										commitURI:groupData[j].Git.CommitLocation,
+										diffURI:groupData[j].Git.DiffLocation
+					});
 				} 
 			}
 		},
 		
-		loadDiffContent: function(fileContentURI , diffURI){
-			this._inlineCompareContainer.resolveDiff(fileContentURI,
-					                                function(){					
-														var fileNameDiv = document.getElementById("fileNameInViewer");
-														fileNameDiv.innerHTML = fileContentURI;
-													} , 
-					                                diffURI);
+		_resolveURI: function(itemModel){
+			var untracked = (itemModel.type === "Untracked");
+			var added = (itemModel.type === "Added");
+			var diffURI =  (untracked || added) ? null : itemModel.diffURI;
+			var fileURI =  (untracked || added) ? itemModel.location : (this._model.isStaged(itemModel.type) ? itemModel.commitURI: "/git/index" + eclipse.util.makeRelative(itemModel.location));
+			return {diffURI:diffURI , fileURI:fileURI };
 		},
 		
-		openSBSViewer: function(hash){
-			//var url = "/compare.html#/" + hash;
-			var url = "/compare.html#" + hash;
+		loadDiffContent: function(itemModel){
+			var result = this._resolveURI(itemModel);
+			this._inlineCompareContainer.resolveDiff(result.diffURI,
+													result.fileURI,
+					                                function(){					
+														var fileNameDiv = document.getElementById("fileNameInViewer");
+														fileNameDiv.innerHTML = itemModel.name;
+													});
+		},
+		
+		openSBSViewer: function(itemModel){
+			var result = this._resolveURI(itemModel);
+			var url = "/compare.html#" + (result.diffURI ?  result.diffURI+"?" : "")  + result.fileURI;
 			window.open(url,"");
 		},
 		
 		doAction: function(location  ,type){
-			var shouldStage = false;
-			for(var i = 0; i < this._model.interestedUnstagedGroup.length ; i++){
-				if(type === this._model.interestedUnstagedGroup[i]){
-					shouldStage = true;
-				}
-			}
-			if(shouldStage)
-				this.stage(location);
+			if(this._model.isStaged(type))
+				this.unstage(eclipse.util.makeRelative(location));
 			else
-				this.unstage(location);
+				this.stage(eclipse.util.makeRelative(location));
 		},
 		
 		getGitStatus: function(url){
@@ -254,9 +300,15 @@ orion.GitStatusController = (function() {
 			});
 		},
 		
+		stageAll: function(){
+			var start = this._url.indexOf("/file/");
+			if(start != -1)
+				this.stage(this._url.substring(start));
+		},
+		
 		unstage: function(location){
 			var self = this;
-			var url = "/git/index" + location;
+			var url = "/git/index" +  location;
 			dojo.xhrPost({
 				url: url , 
 				headers: {
@@ -275,6 +327,46 @@ orion.GitStatusController = (function() {
 					return response;
 				}
 			});
+		},
+		
+		unstageAll: function(){
+			var start = this._url.indexOf("/file/");
+			if(start != -1)
+				this.unstage(this._url.substring(start));
+		},
+		
+		commitAll: function(location , message){
+			var self = this;
+			var url = "/git/commit" +  location;
+			dojo.xhrPost({
+				url: url , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 5000,
+				postData: dojo.toJson({"Message":message} ),
+				load: function(jsonData, ioArgs) {
+					console.log(JSON.stringify(jsonData));
+					self.getGitStatus(self._url);;
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		commit: function(message){
+			var start = this._url.indexOf("/file/");
+			if(start != -1){
+				var sub = this._url.substring(start);
+				var subSlitted = sub.split("/");
+				if(subSlitted.length > 2){
+					this.commitAll([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") , message);
+				}
+			}
 		}
 		
 		

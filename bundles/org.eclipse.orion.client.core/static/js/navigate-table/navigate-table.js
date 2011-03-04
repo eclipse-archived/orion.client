@@ -22,14 +22,8 @@ dojo.addOnLoad(function(){
 	new eclipse.UserService(serviceRegistry);
 	new eclipse.SelectionService(serviceRegistry);
 	var preferenceService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
-	new eclipse.SaveableService(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 
-	// File operations
-	var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
-	if (filePlugin === null) {
-		pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
-	}
 	
 	// Favorites
 	new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
@@ -54,30 +48,38 @@ dojo.addOnLoad(function(){
 	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, "explorer-tree", "navToolBar", "selectionTools");
+	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
+	
+	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, fileClient, "explorer-tree", "navToolBar", "selectionTools");
 	
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
 	// commands shared by navigators
-	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools");
+	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "navToolBar", "selectionTools");
 	
 	//TODO this should be removed and contributed by a plug-in
 	eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools");
 	
-	// define the command contributions - where things appear
+	// define the command contributions - where things appear, first the groups
 	commandService.addCommandGroup("eclipse.fileGroup", 100, "More");
 	commandService.addCommandGroup("eclipse.newResources", 100, null, "eclipse.fileGroup");
 	commandService.addCommandGroup("eclipse.fileGroup.unlabeled", 100, null, null, "navToolBar");
 	commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "navToolBar");
 	commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
+	
+	// commands appearing directly in local actions column
 	commandService.registerCommandContribution("eclipse.makeFavorite", 1);
 	commandService.registerCommandContribution("eclipse.downloadFile", 2);
+	// commands appearing in nav tool bar
 	commandService.registerCommandContribution("eclipse.openResource", 500, "navToolBar");
+	// commands appearing in local actions "More"
+	commandService.registerCommandContribution("eclipse.copyFile", 1, null, "eclipse.fileGroup");
+	commandService.registerCommandContribution("eclipse.moveFile", 2, null, "eclipse.fileGroup");
 	commandService.registerCommandContribution("eclipse.deleteFile", 3, null, "eclipse.fileGroup");
 	commandService.registerCommandContribution("eclipse.importCommand", 4, null, "eclipse.fileGroup");
-	// new file and new folder in the object contribution uses the labeled group
+	// new file and new folder in the actions column uses the labeled group
 	commandService.registerCommandContribution("eclipse.newFile", 1, null, "eclipse.fileGroup/eclipse.newResources");
 	commandService.registerCommandContribution("eclipse.newFolder", 2, null, "eclipse.fileGroup/eclipse.newResources");
 	//new file and new folder in the nav bar do not label the group (we don't want a menu)
@@ -85,15 +87,16 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.newFolder", 2, "navToolBar", "eclipse.fileGroup.unlabeled");
 	commandService.registerCommandContribution("eclipse.newProject", 3, "navToolBar", "eclipse.fileGroup.unlabeled");
 	commandService.registerCommandContribution("eclipse.linkProject", 4, "navToolBar", "eclipse.fileGroup.unlabeled");
-	// selection based command contributions
+	// selection based command contributions in nav toolbar
 	commandService.registerCommandContribution("eclipse.copyFile", 1, "selectionTools", "eclipse.selectionGroup");
 	commandService.registerCommandContribution("eclipse.moveFile", 2, "selectionTools", "eclipse.selectionGroup");
 	commandService.registerCommandContribution("eclipse.deleteFile", 3, "selectionTools", "eclipse.selectionGroup");
 	// git contributions
-	commandService.registerCommandContribution("eclipse.cloneGitRepository", 1, "navToolBar", "eclipse.gitGroup");
+	commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "navToolBar", "eclipse.gitGroup");
 
 	eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools", "eclipse.fileGroup", "eclipse.selectionGroup");
 	
+	/*  For now I'm hiding the concept of switchable views. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=338608
 	var treeViewCommand = new eclipse.Command({
 		name : "Tree View",
 		image : "images/hierarchicalLayout.gif",
@@ -109,11 +112,12 @@ dojo.addOnLoad(function(){
 	commandService.addCommand(treeViewCommand, "dom");
 	commandService.addCommandGroup("eclipse.viewGroup", 800);
 	commandService.registerCommandContribution("eclipse.treeViewCommand", 1, "navToolBar", "eclipse.viewGroup");
-		
+	*/
 	explorer.loadResourceList(dojo.hash());
 	
 	//every time the user manually changes the hash, we need to load the workspace with that name
 	dojo.subscribe("/dojo/hashchange", explorer, function() {
 	   explorer.loadResourceList(dojo.hash());
 	});
+	
 });

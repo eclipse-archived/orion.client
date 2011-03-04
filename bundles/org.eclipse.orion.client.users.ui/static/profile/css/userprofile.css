@@ -51,6 +51,7 @@ input.userprofilefile {
 
 table.usersTable {
 	min-width: 300px;
+	border-spacing: 0px;
 }
 
 td.usersTable {

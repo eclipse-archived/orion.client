@@ -13,7 +13,8 @@ var orion = orion || {};
 orion.CompareContainer = (function() {
 	function CompareContainer () {
 		this._diffParser = new eclipse.DiffParser();
-		self.fileContent = null;
+		this.fileContent = null;
+		this.diffURI = null;
 	}
 	CompareContainer.prototype = {
 		_getLineDelim: function(input , diff){	
@@ -23,12 +24,14 @@ orion.CompareContainer = (function() {
 			return delim;
 		},
 		
-		getFileDiffGit: function(hashValue , callBack){
-			var url = "/git/diff" + hashValue;
+		getFileDiffGit: function(diffURI , callBack){
 			var self = this;
+			if(diffURI === null || diffURI === undefined){
+				self.setEditor("" ,self.fileContent);
+				return;
+			}
 			dojo.xhrGet({
-				url: url , 
-				//changing some thing
+				url: diffURI , 
 				headers: {
 					"Orion-Version": "1"
 				},
@@ -48,46 +51,18 @@ orion.CompareContainer = (function() {
 			});
 		},
 		
-		getFileContentGit: function(hashValue , callBack){
-			var url = "/git/index" + hashValue;
+		getFileContent: function(diffURI ,fileURI , callBack){
 			var self = this;
 			dojo.xhrGet({
-				url: url, 
+				url: fileURI, 
 				headers: {
 					"Orion-Version": "1"
 				},
 				handleAs: "text",
 				timeout: 5000,
 				load: function(jsonData, ioArgs) {
-					//console.log(jsonData);
 					self.fileContent = jsonData;
-					self.getFileDiffGit(hashValue , callBack);
-				},
-				error: function(response, ioArgs) {
-					if(ioArgs.xhr.status === 500)
-						self.getFileContent(hashValue , callBack);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
-		},
-		
-		getFileContent: function(hashValue  ,callBack){
-			var url = hashValue;
-			var self = this;
-			dojo.xhrGet({
-				url: url, 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "text",
-				timeout: 5000,
-				load: function(jsonData, ioArgs) {
-					if(callBack)
-						callBack();
-					self.fileContent = jsonData;
-					self.setEditor("" ,self.fileContent);
+					self.getFileDiffGit(diffURI , callBack);
 				},
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -107,12 +82,8 @@ orion.CompareContainer = (function() {
 			return {delim:delim , mapper:result.mapper , output:result.outPutFile ,diffArray:diffArray};
 		},
 		
-		resolveDiff: function(fileContentURI , callBack ,diffURI){
-			if(diffURI){
-				this.getFileContentGit(fileContentURI , callBack);
-			} else {
-				this.getFileContent(fileContentURI , callBack);
-			}
+		resolveDiff: function(diffURI ,fileURI , callBack){
+			this.getFileContent(diffURI ,fileURI , callBack);
 		},
 				
 		_initDiffPosition: function(editor){
@@ -233,6 +204,11 @@ orion.InlineCompareContainer = (function() {
 		this._editorDivId = editorDivId;
 	}
 	InlineCompareContainer.prototype = new orion.CompareContainer();
+	
+	InlineCompareContainer.prototype.destroyEditor = function(){
+		this._editor = null;
+	};
+
 	InlineCompareContainer.prototype.setEditor = function(input , diff){	
 		var result = this.parseMapper(input , diff , true);
 		if(this._editor){

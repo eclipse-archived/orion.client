@@ -328,24 +328,14 @@ eclipse.CommandService = (function() {
 						}
 					}
 					if (render) {
-						var choices = command.getChoices(items, handler, userData);
 						// special case.  The item wants to provide a set of choices
-						if (choices) {
+						if (command.choiceCallback) {
 							var choicesMenu = new dijit.Menu({
 								style: "display: none;"
 							});
-							for (var j=0; j<choices.length; j++) {
-								var choice = choices[j];
-								var menuitem = new dijit.MenuItem({
-									label: choice.name,
-									onClick: command.makeChoiceCallback(choice, items)
-								});
-								if (choice.image) {
-									dojo.addClass(menuitem.iconNode, 'commandImage');
-									menuitem.iconNode.src = choice.image;
-								}
-								choicesMenu.addChild(menuitem);
-							}
+							// TODO should populate this on the fly
+							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=338887
+							command.populateChoicesMenu(choicesMenu, items, handler, userData);
 							if (style === "image") {
 								var menuButton = new dijit.form.DropDownButton({
 										label: command.name,
@@ -353,15 +343,16 @@ eclipse.CommandService = (function() {
 								        });
 								if (command.image) {
 									dojo.addClass(menuButton.iconNode, "commandImage");
-									menuButton.iconNode.src = command.Image
+									menuButton.iconNode.src = command.image;
 								}
 								dojo.place(menuButton.domNode, parent, "last");
 							} else if (style === "menu") {
 								// parent is already a menu
-								parent.addChild(new dijit.PopupMenuItem({
+								var popup = new dijit.PopupMenuItem({
 									label: command.name,
 									popup: choicesMenu
-								}));
+								});
+								parent.addChild(popup);
 							}
 						} else {
 							if (style === "image") {
@@ -523,6 +514,33 @@ eclipse.Command = (function() {
 				dojo.addClass(menuitem.iconNode, 'commandImage');
 				// reaching...
 				menuitem.iconNode.src = this.image;
+			}
+		},
+		populateChoicesMenu: function(menu, items, handler, userData) {
+			// see http://bugs.dojotoolkit.org/ticket/10296
+			menu.focusedChild = null;
+			dojo.forEach(menu.getChildren(), function(child) {
+				menu.removeChild(child);
+				child.destroy();
+			});
+
+			var choices = this.getChoices(items, handler, userData);
+			for (var j=0; j<choices.length; j++) {
+				var choice = choices[j];
+				var menuitem;
+				if (choice.name) {
+					menuitem = new dijit.MenuItem({
+						label: choice.name,
+						onClick: this.makeChoiceCallback(choice, items)
+					});
+					if (choice.image) {
+						dojo.addClass(menuitem.iconNode, 'commandImage');
+						menuitem.iconNode.src = choice.image;
+					}
+				} else {  // anything not named is a separator
+					menuitem = new dijit.MenuSeparator();
+				}
+				menu.addChild(menuitem);
 			}
 		},
 		getChoices: function(items, handler, userData) {

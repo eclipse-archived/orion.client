@@ -2508,7 +2508,7 @@ eclipse.Editor = (function() {
 				var start = 0;
 				var tabSize = this._tabSize;
 				if (tabSize && tabSize !== 8) {
-					var tabIndex = lineText.indexOf("\t"), ignoreChars = 0;;
+					var tabIndex = lineText.indexOf("\t"), ignoreChars = 0;
 					while (tabIndex !== -1) {
 						this._createRange(child, document, e.ranges, start, tabIndex, lineText, lineStart);
 						var spacesCount = tabSize - ((tabIndex + ignoreChars) % tabSize);
@@ -2519,13 +2519,13 @@ eclipse.Editor = (function() {
 						var tabSpan = document.createElement("SPAN");
 						tabSpan.appendChild(document.createTextNode(spaces));
 						tabSpan.ignoreChars = spacesCount - 1;
-						ignoreChars += tabSpan.ignoreChars
+						ignoreChars += tabSpan.ignoreChars;
 						if (e.ranges) {
-							for (var i = 0; i < e.ranges.length; i++) {
-								var range = e.ranges[i];
+							for (var j = 0; j < e.ranges.length; j++) {
+								var range = e.ranges[j];
 								var styleStart = range.start - lineStart;
 								var styleEnd = range.end - lineStart;
-								if (styleStart > tabIndex) break; 
+								if (styleStart > tabIndex) { break; } 
 								if (styleStart <= tabIndex && tabIndex < styleEnd) {
 									this._applyStyle(range.style, tabSpan);
 									break;

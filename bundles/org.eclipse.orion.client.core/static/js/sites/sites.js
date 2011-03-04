@@ -21,7 +21,7 @@ dojo.addOnLoad(function() {
 	var dialogService = new eclipse.DialogService(serviceRegistry);
 	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	var fileService = new eclipse.FileService(serviceRegistry);
+	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 	var siteService = new eclipse.sites.SiteService();
 	serviceRegistry.registerService(eclipse.sites.SITE_SERVICE_NAME, siteService);
 	

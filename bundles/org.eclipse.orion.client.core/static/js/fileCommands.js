@@ -51,7 +51,13 @@ eclipse.FavoriteFoldersCache = (function() {
 				}
 			}
 			this.favorites.sort(function(a,b) {
-				return a.name-b.name;
+				if (a < b) {
+					return -1;
+				}
+				if (a > b) {
+					return 1;
+				}
+				return 0;
 			});
 		}
 	};
@@ -93,7 +99,8 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId,
 	}
 };
 
-eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
+eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient, toolbarId) {
+	
 	function forceSingleItem(item) {
 		if (dojo.isArray(item)) {
 			if (item.length > 1) {
@@ -105,20 +112,36 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		return item;
 	}
 	
+	function contains(arr, item) {
+		for (var i=0; i<arr.length; i++) {
+			if (arr[i] === item) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	function stripPath(location) {
+		location = eclipse.util.makeRelative(location);
+		// get hash part and strip query off
+		var splits = location.split('#');
+		var path = splits[splits.length-1];
+		var qIndex = path.indexOf("/?");
+		if (qIndex > 0) {
+			path = path.substring(0, qIndex);
+		}
+		return path;
+	}
+	
 	function makeMoveCopyTargetChoices(items, userData, isCopy) {
 		items = dojo.isArray(items) ? items : [items];
 		var callback = function(items) {
 			for (var i=0; i < items.length; i++) {
 				var item = items[i];
-				serviceRegistry.getService("IFileService").then(dojo.hitch(this, function(service) {
-					if (isCopy) {
-						service.copyFile(item.Location, this.path).then(
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-					} else {
-						service.moveFile(item.Location, this.path).then(
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-					}
-				}));
+				var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
+				func.apply(fileClient, [item.Location, this.path]).then(
+					dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);})//refresh the root
+				);
 			}
 			window.alert("Not yet implemented.  See log for operation parameters.");
 		};
@@ -126,19 +149,82 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		var prompt = function() {
 			window.alert("Directory prompter appears here.");
 		};
+		
+		// gather up source paths so we do not propose to move/copy a source to its own location
+		var sourceLocations = [];
+		for (var i=0; i<items.length; i++) {
+			sourceLocations.push(stripPath(items[i].Location));
+		}
 		var choices = [];
 		if (eclipse.favoritesCache) {
 			var favorites = eclipse.favoritesCache.favorites;
 			for (var i=0; i<favorites.length; i++) {
-				// get hash part and strip query off
-				var splits = favorites[i].path.split('#');
-				var path = splits[splits.length-1];
-				var qIndex = path.indexOf("/?");
-				if (qIndex > 0) {
-					path = path.substring(0, qIndex);
+				var path = stripPath(favorites[i].path);
+				if (!contains(sourceLocations, path)) {
+					choices.push({name: favorites[i].name, image: "images/silk/star.gif", path: path, callback: callback});
 				}
-				choices.push({name: favorites[i].name, path: path, callback: callback});
 			}
+		}
+		choices.push({});  //separator
+		// Now we propose the most common cases.  Parent, siblings, and visible child folders of items (no fetch required)
+		// Don't propose a target if it's a source
+		var proposedPaths = [];
+		var alreadySeen = [];
+		for (var i= 0; i<items.length; i++) {
+			// for the purposes of finding parents and siblings, if this is a file, consider its parent folder for finding targets, not itself.
+			var item = items[i];
+			if (!item.Directory && item.parent) {
+				item = item.parent;
+			}
+			if (item.parent) {
+				var parentPath = item.parent.Location;
+				if (parentPath) {
+					var stripped = stripPath(parentPath);
+					if (!contains(alreadySeen, stripped) && !contains(sourceLocations, stripped)) {
+						alreadySeen.push(stripped);
+						proposedPaths.push(item.parent);
+						item.parent.stripped = stripped;
+					}
+				}
+				// siblings
+				if (item.parent.Children) {
+					for (var j=0; j<item.parent.Children.length; j++) {
+						var child = item.parent.Children[j];
+						var childPath = stripPath(child.Location);
+						if (child.Directory && !contains(alreadySeen, childPath) && !contains(sourceLocations, childPath)) {
+							alreadySeen.push(childPath);
+							child.stripped = childPath;
+							proposedPaths.push(child);
+						}
+					}
+				}
+			}
+		}
+		// sort the choices
+		proposedPaths.sort(function(a,b) {
+			if (a.stripped < b.stripped) {
+				return -1;
+			}
+			if (a.stripped > b.stripped) {
+				return 1;
+			}
+			return 0;
+		});
+		// now add them
+		for (var i=0; i<proposedPaths.length; i++) {
+			var item = proposedPaths[i];
+			var displayPath = item.Name;
+			// we know we've left leading and trailing slash so slashes is splits + 1
+			var slashes = item.stripped.split('/').length + 1;
+			// but don't indent for leading or trailing slash
+			// TODO is there a smarter way to do this?
+			for (var j=0; j<slashes-2; j++) {
+				displayPath = "  " + displayPath;
+			}
+			choices.push({name: displayPath, path: item.stripped, callback: callback});
+		}
+		if (proposedPaths.length > 0) {
+			choices.push({});  //separator
 		}
 		choices.push({name: "Choose target...", callback: prompt});
 		return choices;
@@ -192,15 +278,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
 						if (item.parent.Path === "") {
-							serviceRegistry.getService("IFileService").then(function(service) {
-								service.removeProject(item.parent.Location, item.Location).then(
-									dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-							});
+							fileClient.removeProject(item.parent.Location, item.Location).then(
+								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 						} else {
-							serviceRegistry.getService("IFileService").then(function(service) {
-								service.deleteFile(item.Location).then(
-									dojo.hitch(explorer, function() {explorer.changedItem(item.parent);}));//refresh the parent
-							});
+							fileClient.deleteFile(item.Location).then(
+								dojo.hitch(explorer, function() {explorer.changedItem(item.parent);}));//refresh the parent
 						}
 					}
 				}));
@@ -231,10 +313,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				title: "Create File",
 				label: "File name:",
 				func:  function(name){
-					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createFile(item.Location, name).then(
-						dojo.hitch(explorer, function() {this.changedItem(item);})); //refresh the parent
-					});
+					fileClient.createFile(item.Location, name).then(
+					dojo.hitch(explorer, function() {this.changedItem(item);})); //refresh the parent
 				}
 			});
 			dialog.startup();
@@ -256,10 +336,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				title: "Create Folder",
 				label: "Folder name:",
 				func:  function(name){
-					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}));//refresh the parent
-					});
+					fileClient.createFolder(item.Location, name).then(
+						dojo.hitch(explorer, function() {this.changedItem(item);}));//refresh the parent
 				}
 			});
 			dialog.startup();
@@ -281,10 +359,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				title: "Create Folder",
 				label: "Folder name:",
 				func:  function(name, serverPath, create){
-					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createProject(explorer.treeRoot.ChildrenLocation, name, serverPath, create).then(
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-					});
+					fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, serverPath, create).then(
+						dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 				}
 			});
 			dialog.startup();
@@ -305,10 +381,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				title: "Link Folder",
 				label: "Folder name:",
 				func:  function(name, url, create){
-					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createProject(explorer.treeRoot.ChildrenLocation, name, url, create).then(
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-						});
+					fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, create).then(
+						dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 				},
 				advanced: true
 			});
@@ -348,6 +422,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		visibleWhen: oneOrMoreFilesOrFolders 
 	});
 	commandService.addCommand(copyCommand, "dom");
+	// don't do this at the row-level until we figure out bug 338888
+	// commandService.addCommand(copyCommand, "object");
 	
 	var moveCommand = new eclipse.Command({
 		name : "Move to",
@@ -358,6 +434,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		visibleWhen: oneOrMoreFilesOrFolders
 		});
 	commandService.addCommand(moveCommand, "dom");
+	// don't do this at the row-level until we figure out bug 338888
+	// commandService.addCommand(moveCommand, "object");
 };
 
 eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){

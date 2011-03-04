@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2009, 2011 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -24,6 +24,7 @@ eclipse.EditorContainer = (function() {
 			/**function():eclipse.LineNumberRuler*/ lineNumberRulerFactory,
 			/**function():eclipse.OverviewRuler*/ overviewRulerFactory,
 			searcher,
+			fileClient,
 			domNode, /**DomNode|dijit._Widget*/ codeTitle,
 			/**widgets.eWebBorderContainer*/ topContainer, contentassist,
 			leftPane, searchFloat, toolbarId) {
@@ -36,7 +37,7 @@ eclipse.EditorContainer = (function() {
 		this._lineNumberRulerFactory = lineNumberRulerFactory;
 		this._overviewRulerFactory = overviewRulerFactory;
 		this._searcher = searcher;
-		
+		this._fileClient = fileClient;
 		this._domNode = domNode;
 		this._codeTitle = codeTitle;
 		this._topContainer = topContainer;
@@ -510,7 +511,7 @@ eclipse.EditorContainer = (function() {
 			// Create editor and install optional features
 			this._editor = this._editorFactory();
 			if (this._commandGenerator) {
-				this._commandGenerator(registry, this._commandService, this, this._toolbarId);
+				this._commandGenerator(registry, this._commandService, this._fileClient, this, this._toolbarId);
 			}
 			if (this._undoStackFactory) {
 				this._undoStack = this._undoStackFactory(registry, this._commandService, this, this._toolbarId);
@@ -1260,40 +1261,29 @@ eclipse.EditorContainer = (function() {
 				if (fileURI === this._lastFilePath) {
 					this.showSelection(input.start, input.end, input.line, input.offset, input.length);
 				} else {
-				if (!this._editor) {
-					this.installEditor(fileURI);
-				}
-				var fullPathName = fileURI;
-				this.onInputChange(fullPathName, "Fetching " + fullPathName, null);
-				dojo.xhrGet({
-					url: fileURI,
-					timeout: 5000,
-					load: dojo.hitch(this, function(contents, secondArg) {
-						var path = secondArg.xhr.getResponseHeader("Eclipse-Path");
-						if (!path) { path = fileURI; }
-						this.onInputChange(path, null, contents);
-						this.showSelection(input.start, input.end, input.line, input.offset, input.length);
-					}),
-					error: dojo.hitch(this, function(error, ioArgs) {
-						handleGetAuthenticationError(this, ioArgs);
-						this.onInputChange(fullPathName, "Sorry, an error ocurred: " + error.message, null);
-						console.error("HTTP status code: ", ioArgs.xhr.status);
-					})
-				});
-				dojo.xhrGet({
-					url: fileURI,
-					content: { "parts": "meta" },
-					headers: { "Orion-Version": "1" },
-					handleAs: "json",
-					timeout: 5000,
-					load: dojo.hitch(this, function(metadata, secondArg) {
-						this.setFileMetadata(metadata);
-					}),
-					error: dojo.hitch(this, function(error, ioArgs) {
-						handleGetAuthenticationError(this, ioArgs);
-						console.error("Error loading file metadata: " + error.message);
-					})
-				});
+					if (!this._editor) {
+						this.installEditor(fileURI);
+					}
+					var fullPathName = fileURI;
+					this.onInputChange(fullPathName, "Fetching " + fullPathName, null);
+					this._fileClient.read(fileURI).then(
+						dojo.hitch(this, function(contents) {
+							this.onInputChange(fileURI, null, contents);
+							this.showSelection(input.start, input.end, input.line, input.offset, input.length);
+						}),
+						dojo.hitch(this, function(error) {
+							this.onInputChange(fullPathName, "Sorry, an error ocurred: " + error.message, null);
+							console.error("HTTP status code: ", error.status);
+						})
+					);
+					this._fileClient.read(fileURI, true).then(
+						dojo.hitch(this, function(metadata) {
+							this.setFileMetadata(metadata);
+						}),
+						dojo.hitch(this, function(error) {
+							console.error("Error loading file metadata: " + error.message);
+						})
+					);
 				}
 				this._lastFilePath = fileURI;
 			} else {
@@ -1403,4 +1393,3 @@ eclipse.EditorContainer = (function() {
 	};
 	return EditorContainer;
 }());
-

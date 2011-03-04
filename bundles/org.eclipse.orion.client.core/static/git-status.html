@@ -36,6 +36,10 @@
 	<script src="js/compare/diff-line-feeder.js"></script>
 	<script src="js/git-status/git-status-table.js"></script>
  	<script src="js/util.js"></script>
+	<script src="js/globalCommands.js"></script>
+	<script src="js/serviceregistry.js"></script>
+ 	<script src="js/commands.js"></script>
+ 	<script src="js/preferences.js"></script>
 	<script src="js/searchClient.js"></script>
     <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;" splitter="true">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
@@ -73,7 +77,7 @@
 					</td>
 					<td width="50%" height="100%" nowrap="nowrap">
 						<div style="float: right;" align="right">
-							<button id = "stageAll">Unstage All</button>
+							<button id = "unstageAll">Unstage All</button>
 						</div>
 					</td>
 				</tr>
@@ -91,7 +95,7 @@
 				<table >
 					<tr>
 						<td nowrap="nowrap">
-							<textarea  COLS=40 ROWS=6></textarea>
+							<textarea  id = "commitMessage" COLS=40 ROWS=6></textarea>
 						</td>
 						<td  nowrap="nowrap">
 							<div style="float: top;" align="top">
@@ -103,7 +107,7 @@
 									</tr>
 									<tr>
 										<td  nowrap="nowrap">
-											<button id = "commit">amend</button>
+											<button id = "amend">amend</button>
 										</td>
 									</tr>
 								</table>
@@ -120,7 +124,7 @@
 		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false" persist="false" gutters="false" region="center"  splitter="false">
 			<div  style='width:100%;height:30px;' dojoType="dijit.layout.ContentPane" region="top">
 				<div >
-					<h2 id = "fileNameInViewer">Select A file to display the difference</h2>
+					<h2 id = "fileNameInViewer">Select a file to compare</h2>
 				</div>
 				<hr>
 			</div>
