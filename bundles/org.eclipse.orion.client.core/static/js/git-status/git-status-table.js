@@ -32,19 +32,28 @@ orion.GitStatusModel = (function() {
 		
 		getGroupData: function(groupName){
 			return this.items[groupName];
+		},
+		
+		isStaged: function(type){
+			for(var i = 0; i < this.interestedStagedGroup.length ; i++){
+				if(type === this.interestedStagedGroup[i]){
+					return  true;
+				}
+			}
+			return false;
 		}
 		
 	};
 	return GitStatusModel;
 }());
 
-orion.gitStatusFileImgMap = { "Missing":["/images/git/git-removed.gif", "Removed unstaged" , "/images/git/git-stage.gif", "Stage removed" ],
-							  "Removed":["/images/git/git-removed.gif","Removed staged" ,"/images/git/git-unstage.gif", "Unstage removed" ],	
-							  "Modified":["/images/git/git-modify.gif","Modified unstaged" ,"/images/git/git-stage.gif", "Stage modified" ],	
-							  "Changed":["/images/git/git-modify.gif","Modified staged" ,"/images/git/git-unstage.gif", "Untage modified"],	
-							  "Untracked":["/images/git/git-added.gif","Added unstaged" ,"/images/git/git-stage.gif", "Stage untracked"],	
-							  "Added":["/images/git/git-added.gif","Added staged" ,"/images/git/git-unstage.gif" , "Unstage added"]	
-							};
+orion.statusTypeMap = { "Missing":["/images/git/git-removed.gif", "Removed unstaged" , "/images/git/git-stage.gif", "Stage removed" ],
+						"Removed":["/images/git/git-removed.gif","Removed staged" ,"/images/git/git-unstage.gif", "Unstage removed" ],	
+						 "Modified":["/images/git/git-modify.gif","Modified unstaged" ,"/images/git/git-stage.gif", "Stage modified" ],	
+						 "Changed":["/images/git/git-modify.gif","Modified staged" ,"/images/git/git-unstage.gif", "Untage modified"],	
+					     "Untracked":["/images/git/git-added.gif","Added unstaged" ,"/images/git/git-stage.gif", "Stage untracked"],	
+						 "Added":["/images/git/git-added.gif","Added staged" ,"/images/git/git-unstage.gif" , "Unstage added"]	
+					  };
 
 
 orion.GitStatusRenderer = (function() {
@@ -79,8 +88,8 @@ orion.GitStatusRenderer = (function() {
 			//render the type icon (added , modified ,untracked ...)
 			var typeColumn = document.createElement('td');
 			var typeImg = document.createElement('img');
-			typeImg.src = orion.gitStatusFileImgMap[itemModel.type][0];
-			typeImg.title = "Item type : " + orion.gitStatusFileImgMap[itemModel.type][1];
+			typeImg.src = orion.statusTypeMap[itemModel.type][0];
+			typeImg.title = "Item type : " + orion.statusTypeMap[itemModel.type][1];
 			typeColumn.appendChild(typeImg);
 			row.appendChild(typeColumn);
 			
@@ -119,8 +128,11 @@ orion.GitStatusRenderer = (function() {
 					dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 					self._controller._model.selectedFileId = nameSpan.id;
 					//self._controller.getFileContentGit(itemModel.location);
-					self._controller.loadDiffContent(itemModel.location , itemModel.type === "Untracked" ? null : itemModel.location);
-					
+					var untracked = (itemModel.type === "Untracked");
+					var added = (itemModel.type === "Added");
+					var diffParam = self._controller._model.isStaged(itemModel.type) ? "/Cached" : "/Default";
+					var fileParam = untracked | added ? "" : (self._controller._model.isStaged(itemModel.type) ? "/git/commit/HEAD" : "/git/index");
+					self._controller.loadDiffContent(fileParam + itemModel.location , untracked | added? null : diffParam + itemModel.location);
 				}
 			});
 			
@@ -140,8 +152,8 @@ orion.GitStatusRenderer = (function() {
 			stageCol = document.createElement('td');
 			row.appendChild(stageCol);
 			var stageImg = document.createElement('img');//dojo.create("img", {src: "/images/down.gif"}, sbsViewerCol, "last");
-			stageImg.src = orion.gitStatusFileImgMap[itemModel.type][2];
-			stageImg.title = orion.gitStatusFileImgMap[itemModel.type][3];
+			stageImg.src = orion.statusTypeMap[itemModel.type][2];
+			stageImg.title = orion.statusTypeMap[itemModel.type][3];
 			stageCol.appendChild(stageImg);
 			stageImg.style.cursor = "pointer";
 			stageImg.onclick = dojo.hitch(this, function(evt) {
@@ -212,10 +224,10 @@ orion.GitStatusController = (function() {
 					shouldStage = true;
 				}
 			}
-			if(shouldStage)
-				this.stage(location);
-			else
+			if(this._model.isStaged(type))
 				this.unstage(location);
+			else
+				this.stage(location);
 		},
 		
 		getGitStatus: function(url){
