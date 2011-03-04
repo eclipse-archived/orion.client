@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript">
+        var djConfig = {
+		isDebug: true,
+		modulePaths: {'widgets': '/js/widgets'},
+		parseOnLoad: true
+        };
+    </script>
+
+	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<script type="text/javascript" src="../js/plugin.js"></script>
+	<script type="text/javascript" src="../js/globalCommands.js"></script>
+	<script type="text/javascript" src="filePlugin/fileClient.js"></script>
+	<script type="text/javascript" src="../js/auth.js"></script>
+	<script type="text/javascript">
+		window.onload = function() {
+			var service = new eclipse.FileService();
+			var provider = new eclipse.PluginProvider();
+			provider.registerServiceProvider("IFileService", service);
+			service.dispatchEvent = provider.dispatchEvent;
+			provider.connect();
+		};
+	</script>
+</head>
+<body>
+</body>
+</html>

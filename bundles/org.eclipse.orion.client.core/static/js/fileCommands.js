@@ -23,12 +23,54 @@ var eclipse = eclipse || {};
  
 eclipse.fileCommandUtils = eclipse.fileCommandUtils || {};
 
+eclipse.favoritesCache = null;
+
+// I'm not sure where this belongs.  This is the first time an outer party consumes
+// favorites and understands the structure.  We need a cache for synchronous requests
+// for move/copy targets.
+eclipse.FavoriteFoldersCache = (function() {
+	function FavoriteFoldersCache(registry) {
+		this.registry = registry;
+		this.favorites = [];
+		var self = this;
+		this.registry.getService("IFavorites").then(function(service) {
+			service.getFavorites(function(faves) {
+				self.cacheFavorites(faves);
+			});
+			service.addEventListener("favoritesChanged", function(faves) {
+				self.cacheFavorites(faves);
+			});
+		});
+	}
+	FavoriteFoldersCache.prototype = {
+		cacheFavorites: function(faves) {
+			this.favorites = [];
+			for (var i=0; i<faves.length; i++) {
+				if (faves[i].directory) {
+					this.favorites.push(faves[i]);
+				}
+			}
+			this.favorites.sort(function(a,b) {
+				if (a < b) {
+					return -1;
+				}
+				if (a > b) {
+					return 1;
+				}
+				return 0;
+			});
+		}
+	};
+	return FavoriteFoldersCache;
+}());
+
 eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, selectionToolbarId, item) {
 	var parent = dojo.byId(parentId);
 	var toolbar = dojo.byId(toolbarId);
 	if (toolbar) {
 		dojo.empty(toolbar);
 	} else {
+		// first time through
 		toolbar = dojo.create("div",{id: toolbarId}, parent, "last");
 		dojo.addClass(toolbar, "domCommandToolbar");
 	}
@@ -40,17 +82,21 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId,
 		}
 	}));
 	
-	registry.getService("ISelectionService").then(function(service) {
-		service.addEventListener("selectionChanged", function(selections) {
-			var selectionTools = dojo.byId(selectionToolbarId);
-			if (selectionTools) {
-				dojo.empty(selectionTools);
-				registry.getService("ICommandService").then(function(commandService) {
-					commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
-				});
-			}
+	// Stuff we do only the first time
+	if (!eclipse.favoritesCache) {
+		eclipse.favoritesCache = new eclipse.FavoriteFoldersCache(registry);
+		registry.getService("ISelectionService").then(function(service) {
+			service.addEventListener("selectionChanged", function(selections) {
+				var selectionTools = dojo.byId(selectionToolbarId);
+				if (selectionTools) {
+					dojo.empty(selectionTools);
+					registry.getService("ICommandService").then(function(commandService) {
+						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
+					});
+				}
+			});
 		});
-	});
+	}
 };
 
 eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
@@ -64,6 +110,142 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		}
 		return item;
 	}
+	
+	function contains(arr, item) {
+		for (var i=0; i<arr.length; i++) {
+			if (arr[i] === item) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	function stripPath(location) {
+		location = eclipse.util.makeRelative(location);
+		// get hash part and strip query off
+		var splits = location.split('#');
+		var path = splits[splits.length-1];
+		var qIndex = path.indexOf("/?");
+		if (qIndex > 0) {
+			path = path.substring(0, qIndex);
+		}
+		return path;
+	}
+	
+	function makeMoveCopyTargetChoices(items, userData, isCopy) {
+		items = dojo.isArray(items) ? items : [items];
+		var callback = function(items) {
+			for (var i=0; i < items.length; i++) {
+				var item = items[i];
+				serviceRegistry.getService("IFileService").then(dojo.hitch(this, function(service) {
+					if (isCopy) {
+						service.copyFile(item.Location, this.path).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+					} else {
+						service.moveFile(item.Location, this.path).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+					}
+				}));
+			}
+			window.alert("Not yet implemented.  See log for operation parameters.");
+		};
+		
+		var prompt = function() {
+			window.alert("Directory prompter appears here.");
+		};
+		
+		// gather up source paths so we do not propose to move/copy a source to its own location
+		var sourceLocations = [];
+		for (var i=0; i<items.length; i++) {
+			sourceLocations.push(stripPath(items[i].Location));
+		}
+		var choices = [];
+		if (eclipse.favoritesCache) {
+			var favorites = eclipse.favoritesCache.favorites;
+			for (var i=0; i<favorites.length; i++) {
+				var path = stripPath(favorites[i].path);
+				if (!contains(sourceLocations, path)) {
+					choices.push({name: favorites[i].name, image: "images/silk/star.gif", path: path, callback: callback});
+				}
+			}
+		}
+		choices.push({});  //separator
+		// Now we propose the most common cases.  Parent, siblings, and visible child folders of items (no fetch required)
+		// Don't propose a target if it's a source
+		var proposedPaths = [];
+		var alreadySeen = [];
+		for (var i= 0; i<items.length; i++) {
+			// for the purposes of finding parents and siblings, if this is a file, consider its parent folder for finding targets, not itself.
+			var item = items[i];
+			if (!item.Directory && item.parent) {
+				item = item.parent;
+			}
+			if (item.parent) {
+				var parentPath = item.parent.Location;
+				if (parentPath) {
+					var stripped = stripPath(parentPath);
+					if (!contains(alreadySeen, stripped) && !contains(sourceLocations, stripped)) {
+						alreadySeen.push(stripped);
+						proposedPaths.push(item.parent);
+						item.parent.stripped = stripped;
+					}
+				}
+				// siblings
+				if (item.parent.Children) {
+					for (var j=0; j<item.parent.Children.length; j++) {
+						var child = item.parent.Children[j];
+						var childPath = stripPath(child.Location);
+						if (child.Directory && !contains(alreadySeen, childPath) && !contains(sourceLocations, childPath)) {
+							alreadySeen.push(childPath);
+							child.stripped = childPath;
+							proposedPaths.push(child);
+						}
+					}
+				}
+			}
+		}
+		// sort the choices
+		proposedPaths.sort(function(a,b) {
+			if (a.stripped < b.stripped) {
+				return -1;
+			}
+			if (a.stripped > b.stripped) {
+				return 1;
+			}
+			return 0;
+		});
+		// now add them
+		for (var i=0; i<proposedPaths.length; i++) {
+			var item = proposedPaths[i];
+			var displayPath = item.Name;
+			// we know we've left leading and trailing slash so slashes is splits + 1
+			var slashes = item.stripped.split('/').length + 1;
+			// but don't indent for leading or trailing slash
+			// TODO is there a smarter way to do this?
+			for (var j=0; j<slashes-2; j++) {
+				displayPath = "  " + displayPath;
+			}
+			choices.push({name: displayPath, path: item.stripped, callback: callback});
+		}
+		if (proposedPaths.length > 0) {
+			choices.push({});  //separator
+		}
+		choices.push({name: "Choose target...", callback: prompt});
+		return choices;
+	}
+	
+	var oneOrMoreFilesOrFolders = function(item) {
+		var items = dojo.isArray(item) ? item : [item];
+		if (items.length === 0) {
+			return false;
+		}
+		for (var i=0; i < items.length; i++) {
+			if (!items[i].Location) {
+				return false;
+			}
+		}
+		return true;
+	};
 
 	var favoriteCommand = new eclipse.Command({
 		name: "Make Favorite",
@@ -87,17 +269,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		name: "Delete",
 		image: "images/remove.gif",
 		id: "eclipse.deleteFile",
-		visibleWhen: function(item) {
-			var items = dojo.isArray(item) ? item : [item];
-			if (items.length === 0) {
-				return false;
-			}
-			for (var i=0; i < items.length; i++) {
-				if (!items[i].Location) {
-					return false;
-				}
-			}
-			return true;},
+		visibleWhen: oneOrMoreFilesOrFolders,
 		callback: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
 			var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
@@ -190,32 +362,6 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(newFolderCommand, "dom");
 	commandService.addCommand(newFolderCommand, "object");
 	
-	var cloneGitRepositoryCommand = new eclipse.Command({
-		name : "Clone Git Repository",
-		image : "images/git/cloneGit.gif",
-		id : "eclipse.cloneGitRepository",
-		callback : function(item) {
-			var dialog = new widgets.CloneGitRepositoryDialog({
-				func : function(gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
-					serviceRegistry.getService("IGitService").then(
-							function(service) {
-								service.cloneGitRepository("", gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost, 
-										function(jsonData, secondArg) {
-											window.alert("Repository cloned. You may now link to " + jsonData.ContentLocation);
-										});
-							});
-				}
-			});
-			dialog.startup();
-			dialog.show();
-		},
-		visibleWhen : function(item) {
-			return true;
-		}
-	});
-
-	commandService.addCommand(cloneGitRepositoryCommand, "dom");
-	
 	var newProjectCommand = new eclipse.Command({
 		name: "New Folder",
 		image: "images/newfolder_wiz.gif",
@@ -272,7 +418,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			var dialog = new widgets.ImportDialog({
 				importLocation: item.ImportLocation,
-				func: dojo.hitch(explorer, this.changedItem(item))
+				func: dojo.hitch(explorer, function() { this.changedItem(item); })
 			});
 			dialog.startup();
 			dialog.show();
@@ -284,43 +430,28 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(importCommand, "dom");
 	
 	var copyCommand = new eclipse.Command({
-		name : "Copy",
+		name : "Copy to",
 		id: "eclipse.copyFile",
-		callback : function(item) {
-			window.alert("placeholder for copy");
+		choiceCallback: function(items, userData) {
+			return makeMoveCopyTargetChoices(items, userData, true);
 		},
-		visibleWhen: function(item) {			
-			var items = dojo.isArray(item) ? item : [item];
-			if (items.length === 0) {
-				return false;
-			}
-			for (var i=0; i < items.length; i++) {
-				if (!items[i].Location) {
-					return false;
-				}
-			}
-			return true;}
+		visibleWhen: oneOrMoreFilesOrFolders 
 	});
 	commandService.addCommand(copyCommand, "dom");
+	// don't do this at the row-level until we figure out bug 338888
+	// commandService.addCommand(copyCommand, "object");
 	
 	var moveCommand = new eclipse.Command({
-		name : "Move",
+		name : "Move to",
 		id: "eclipse.moveFile",
-		callback : function(item) {
-			window.alert("placeholder for move");
+		choiceCallback: function(items, userData) {
+			return makeMoveCopyTargetChoices(items, userData, false);
 		},
-		visibleWhen: function(item) {
-			var items = dojo.isArray(item) ? item : [item];
-			if (items.length === 0) {
-				return false;
-			}
-			for (var i=0; i < items.length; i++) {
-				if (!items[i].Location) {
-					return false;
-				}
-			}
-			return true;}});
+		visibleWhen: oneOrMoreFilesOrFolders
+		});
 	commandService.addCommand(moveCommand, "dom");
+	// don't do this at the row-level until we figure out bug 338888
+	// commandService.addCommand(moveCommand, "object");
 };
 
 eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){
@@ -360,6 +491,33 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
         return new RegExp(pattern);
 	}
 	
+	function validateSingleItem(item, validationProperties){
+		for(var keyWildCard in validationProperties){
+			var keyPattern = getPattern(keyWildCard);
+			var matchFound = false;
+			for(var key in item){
+				if(keyPattern.test(key)){
+					if(typeof(validationProperties[keyWildCard])==='string'){
+						var valuePattern = getPattern(validationProperties[keyWildCard]);
+						if(valuePattern.test(item[key])){
+							matchFound = true;
+							break;
+						}
+					}else{
+						if(validationProperties[keyWildCard]===item[key]){
+							matchFound = true;
+							break;
+						}
+					}
+				}
+			}
+			if(!matchFound){
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	// Note that the shape of the "fileCommands" extension is not in any shape or form that could be considered final.
 	// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 	
@@ -389,42 +547,29 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 					image: info.image,
 					id: info.id,
 					tooltip: info.tooltip,
-					visibleWhen: dojo.hitch(info, function(item){
-						if (this.forceSingleItem || this.href) {
-							if (dojo.isArray(item)) {
-								if (item.length !== 1) {
-									return false;
-								}
-								item = item[0];
+					visibleWhen: dojo.hitch(info, function(items){
+						if(dojo.isArray(items)){
+							if ((this.forceSingleItem || this.href) && items.length !== 1) {
+								return false;
 							}
+							if(!this.forceSingleItem && items.length < 1){
+								return false;
+							}
+						} else{
+							items = [items];
 						}
+						
 						if(!this.validationProperties){
 							return true;
 						}
-						for(var keyWildCard in this.validationProperties){
-							var keyPattern = getPattern(keyWildCard);
-							var matchFound = false;
-							for(var key in item){
-								if(keyPattern.test(key)){
-									if(typeof(this.validationProperties[keyWildCard])==='string'){
-										var valuePattern = getPattern(this.validationProperties[keyWildCard]);
-										if(valuePattern.test(item[key])){
-											matchFound = true;
-											break;
-										}
-									}else{
-										if(this.validationProperties[keyWildCard]===item[key]){
-											matchFound = true;
-											break;
-										}
-									}
-								}
-							}
-							if(!matchFound){
+						
+						for(var i in items){
+							if(!validateSingleItem(items[i], this.validationProperties)){
 								return false;
 							}
 						}
 						return true;
+						
 					})
 				};
 				if (info.href) {

@@ -1,0 +1,70 @@
+<!doctype html>
+<html style="height: 100%" >
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2011." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+    	<title>Compare</title>    
+    
+    <script type="text/javascript">
+        var djConfig = {
+		    isDebug:false,
+			modulePaths: {'widgets': '/js/widgets'},
+		    parseOnLoad:true
+        };
+    </script>
+    <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<style type="text/css">
+		@import "/org.dojotoolkit/dojo/resources/dojo.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
+	    @import "/ide.css";
+	    @import "/js/compare/compare.css"; 
+	</style>
+	  	
+</head>
+
+<body style="height: 100%" class="soria">
+	<script src="js/auth.js"></script>
+	<script src="/editor/js/editor.js"></script>
+	<script src="/editor/js/model.js"></script>
+	<script src="js/compare/diff-parser.js"></script>
+	<script src="js/compare/rulers.js"></script>
+	<script src="js/compare/compare-model.js"></script>
+	<script src="js/compare/compare-container.js"></script>
+	<script src="js/compare/gap-line-feeder.js"></script>
+	<script src="js/searchClient.js"></script>
+	
+    <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;" splitter="true">
+		<div   class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
+		</div>
+		
+		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="false" gutters="false" region="leading"  style="width: 50%;" splitter="true">
+			<div style='width:100%;height:30px;' dojoType="dijit.layout.ContentPane" region="top">
+				<div >
+					<h2 id = "left-viewer-title"></h2>
+				</div>
+				<hr>
+			</div>
+			<div class="paneScrolled" id="left-viewer" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center"  style="width: 100%; height: 100%;" splitter="false">				
+			</div>
+		</div>
+		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false" persist="false" gutters="false" region="center"  splitter="false">
+			<div  style='width:100%;height:30px;' dojoType="dijit.layout.ContentPane" region="top">
+				<div >
+					<h2 id = "right-viewer-title"></h2>
+				</div>
+				<hr>
+			</div>
+			<div class="paneScrolled" id="right-viewer" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center"  style="width: 100%; height: 100%;" splitter="false">				
+			</div>
+		</div>
+	</div>
+	
+	<!-- Glue -->
+	<script src="js/compare/compare-glue.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others. All rights reserved. This
+ * Copyright (c) 2010, 2011 IBM Corporation and others. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -46,13 +46,11 @@ dojo.declare("widgets.NewItemDialog", [dijit.Dialog], {
 				this._onSubmit();
 			}
 		}));
-		
+
 		if (this.options.advanced) {
 			this.itemAdvancedInfo.style.display = "table-row";
 			this.itemAdvancedInfo1.style.display = "table-row";
-			this.protocol.set('value', 'file');
-			dojo.connect(this.protocol, "onChange", dojo.hitch(this, this.onModuleChange));
-			dojo.connect(this.itemURL, "onkeyup", dojo.hitch(this, this.onURLChange));
+			dojo.connect(this.itemURL, "onkeyup", null, dojo.hitch(this, this.onURLChange));
 		} else {
 			this.itemAdvancedInfo.style.display = "none";
 			this.itemAdvancedInfo1.style.display = "none";
@@ -71,12 +69,7 @@ dojo.declare("widgets.NewItemDialog", [dijit.Dialog], {
 	execute: function() {
 		var url, create;
 		if (this.options.advanced) {
-			var protocol = this.protocol.get("value");
-			url = (protocol !== 'file' ? this.protocol.get("value") + ":/" : "");
-			url = url + this.itemURL.value.replace(/^\s+|\s+$/g, '');
-			if (this.module.style.display !== "none") {
-				url = url + "?/" + this.module.value.replace(/^\s+|\s+$/g, '');
-			}
+			url = this.itemURL.value.replace(/^\s+|\s+$/g, '');
 			if (this.createCheckbox.get('disabled')) {
 				create = false;
 			} else {
@@ -86,11 +79,6 @@ dojo.declare("widgets.NewItemDialog", [dijit.Dialog], {
 		this.options.func(this.itemName.value, (url && url !== "") ? url : undefined, create);
 	},
 	onURLChange : function(evt) {
-		var protocol = this.protocol.get("value");
-		if (protocol === 'file') {
-			this.createCheckbox.set('disabled', false);
-			return;
-		}
 		var url = this.itemURL.value;
 		if (url.match(new RegExp("^file://"))) {
 			this.createCheckbox.set('disabled', false);
@@ -104,17 +92,5 @@ dojo.declare("widgets.NewItemDialog", [dijit.Dialog], {
 			this.createCheckbox.set('disabled', false);
 			return;
 		}
-	},
-	onModuleChange : function(evt) {
-		if (this.protocol.get("value") === 'gitfs') {
-			this.moduleLabel.style.display = 'inline-block';
-			this.module.style.display = 'inline-block';
-			this.itemURL.style.width = '50%';
-		} else {
-			this.moduleLabel.style.display = 'none';
-			this.module.style.display = 'none';
-			this.itemURL.style.width = '86%';
-		}
-		this.onURLChange(evt);
 	}
 });

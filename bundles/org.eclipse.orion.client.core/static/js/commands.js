@@ -328,12 +328,40 @@ eclipse.CommandService = (function() {
 						}
 					}
 					if (render) {
-						if (style === "image") {
-							id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-							image = command._asImage(id, items, handler, userData);
-							dojo.place(image, parent, "last");
-						} else if (style === "menu") {
-							command._addMenuItem(parent, items, handler, userData);
+						// special case.  The item wants to provide a set of choices
+						if (command.choiceCallback) {
+							var choicesMenu = new dijit.Menu({
+								style: "display: none;"
+							});
+							// TODO should populate this on the fly
+							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=338887
+							command.populateChoicesMenu(choicesMenu, items, handler, userData);
+							if (style === "image") {
+								var menuButton = new dijit.form.DropDownButton({
+										label: command.name,
+										dropDown: choicesMenu
+								        });
+								if (command.image) {
+									dojo.addClass(menuButton.iconNode, "commandImage");
+									menuButton.iconNode.src = command.image;
+								}
+								dojo.place(menuButton.domNode, parent, "last");
+							} else if (style === "menu") {
+								// parent is already a menu
+								var popup = new dijit.PopupMenuItem({
+									label: command.name,
+									popup: choicesMenu
+								});
+								parent.addChild(popup);
+							}
+						} else {
+							if (style === "image") {
+								id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
+								image = command._asImage(id, items, handler, userData);
+								dojo.place(image, parent, "last");
+							} else if (style === "menu") {
+								command._addMenuItem(parent, items, handler, userData);
+							}
 						}
 					}
 				}
@@ -366,15 +394,14 @@ eclipse.Command = (function() {
 		this._init(options);
 	}
 	Command.prototype = /** @lends eclipse.Command.prototype */ {
-		hasImage: function() {
-			return this.image !== "/images/none.png";
-		},
 		_init: function(options) {
 			this.id = options.id;  // unique id
 			this.name = options.name || "Empty Command";
 			this.tooltip = options.tooltip || options.name;
 			this.callback = options.callback; // optional callback that should be called when command is activated (clicked)
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
+			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
+														// A choice is an object with a name, callback, and optional image
 			this.image = options.image || "/images/none.png";
 			this.visibleWhen = options.visibleWhen;
 			// when false, affordances for commands are always shown.  When true,
@@ -385,13 +412,16 @@ eclipse.Command = (function() {
 		_asImage: function(name, items, handler, userData) {
 			handler = handler || this;
 			var image = new Image();
-			var link;
+			var link = dojo.create("a");
 			image.alt = this.name;
 			image.title = this.name;
 			image.name = name;
 			image.id = name;
+			if (!this.hasImage()) {
+				var text = document.createTextNode(this.name);
+				dojo.place(text, link, "last");
+			}
 			if (this.hrefCallback) {
-				link = dojo.create("a");
 				var href = this.hrefCallback.call(handler, items, this.id, userData);
 				if(href.then){
 					href.then(function(l){
@@ -401,6 +431,9 @@ eclipse.Command = (function() {
 					link.href = href; 
 				}
 			} else if (this.callback) {
+				dojo.connect(link, "onclick", this, function() {
+					this.callback.call(handler, items, this.id, image.id, userData);
+				});
 				dojo.connect(image, "onclick", this, function() {
 					this.callback.call(handler, items, this.id, image.id, userData);
 				});
@@ -425,11 +458,9 @@ eclipse.Command = (function() {
 				});
 			}
 			dojo.addClass(image, 'commandImage');
-			if (link) {
-				dojo.place(image, link, "last");
-				return link;
-			}
-			return image;
+			dojo.addClass(link, 'commandLink');
+			dojo.place(image, link, "last");
+			return link;
 		},
 		_asLink: function(items, handler) {
 			handler =  handler || this;
@@ -484,9 +515,51 @@ eclipse.Command = (function() {
 				// reaching...
 				menuitem.iconNode.src = this.image;
 			}
+		},
+		populateChoicesMenu: function(menu, items, handler, userData) {
+			// see http://bugs.dojotoolkit.org/ticket/10296
+			menu.focusedChild = null;
+			dojo.forEach(menu.getChildren(), function(child) {
+				menu.removeChild(child);
+				child.destroy();
+			});
 
-		}
+			var choices = this.getChoices(items, handler, userData);
+			for (var j=0; j<choices.length; j++) {
+				var choice = choices[j];
+				var menuitem;
+				if (choice.name) {
+					menuitem = new dijit.MenuItem({
+						label: choice.name,
+						onClick: this.makeChoiceCallback(choice, items)
+					});
+					if (choice.image) {
+						dojo.addClass(menuitem.iconNode, 'commandImage');
+						menuitem.iconNode.src = choice.image;
+					}
+				} else {  // anything not named is a separator
+					menuitem = new dijit.MenuSeparator();
+				}
+				menu.addChild(menuitem);
+			}
+		},
+		getChoices: function(items, handler, userData) {
+			if (this.choiceCallback) {
+				return this.choiceCallback.call(handler, items, userData);
+			}
+			return null;
+		},
 		
+		makeChoiceCallback: function(choice, items) {
+			return function() {
+				if (choice.callback) {
+					choice.callback.call(choice, items);
+				}
+			};
+		},
+		hasImage: function() {
+			return this.image !== "/images/none.png";
+		}
 	};  // end prototype
 	return Command;
 }());

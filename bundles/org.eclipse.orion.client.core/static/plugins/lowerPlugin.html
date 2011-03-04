@@ -9,9 +9,25 @@
 	<script type="text/javascript" src="/openajax/src/containers/iframe/json2.js"></script>
 	<script type="text/javascript" src="/openajax/src/containers/iframe/iframe.js"></script>
 	 -->
-	<script type="text/javascript" src="js/plugin.js"></script>
-	<script type="text/javascript" src="js/jslintworker.js"></script>
-	<script type="text/javascript" src="js/jslintPlugin.js"></script>
+	<script type="text/javascript" src="../js/plugin.js"></script>
+	<script>
+		window.onload = function() {
+			var provider = new eclipse.PluginProvider();
+			provider.registerServiceProvider("editorAction", {
+				info : function() {
+					return {
+						name : "Lowercase",
+						img : "/images/gear.gif",
+						key : [ "u", true, true ] // ctrl+shift+u
+					};
+				},
+				run : function(text) {
+					return text.toLowerCase();
+				}
+			}, {name : "Lowercase", img : "/images/gear.gif"});
+			provider.connect();
+		};
+	</script>
 </head>
 <body>
 </body>

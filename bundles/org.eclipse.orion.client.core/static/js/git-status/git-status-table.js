@@ -14,9 +14,9 @@ var orion = orion || {};
 
 orion.GitStatusModel = (function() {
 	function GitStatusModel() {
-		this.selectedFileName = undefined;
-		this.interestedUnstagedGroup = ["Modified" , "Missing" ,"Untracked"];
-		this.interestedStagedGroup = ["Added"];
+		this.selectedFileId = undefined;
+		this.interestedUnstagedGroup = ["Missing","Modified","Untracked"];
+		this.interestedStagedGroup = ["Added", "Changed","Removed"];
 	}
 	GitStatusModel.prototype = {
 		destroy: function(){
@@ -32,11 +32,29 @@ orion.GitStatusModel = (function() {
 		
 		getGroupData: function(groupName){
 			return this.items[groupName];
+		},
+		
+		isStaged: function(type){
+			for(var i = 0; i < this.interestedStagedGroup.length ; i++){
+				if(type === this.interestedStagedGroup[i]){
+					return  true;
+				}
+			}
+			return false;
 		}
 		
 	};
 	return GitStatusModel;
 }());
+
+orion.statusTypeMap = { "Missing":["/images/git/git-removed.gif", "Removed unstaged" , "/images/git/git-stage.gif", "Stage removed" ],
+						"Removed":["/images/git/git-removed.gif","Removed staged" ,"/images/git/git-unstage.gif", "Unstage removed" ],	
+						 "Modified":["/images/git/git-modify.gif","Modified unstaged" ,"/images/git/git-stage.gif", "Stage modified" ],	
+						 "Changed":["/images/git/git-modify.gif","Modified staged" ,"/images/git/git-unstage.gif", "Untage modified"],	
+					     "Untracked":["/images/git/git-added.gif","Added unstaged" ,"/images/git/git-stage.gif", "Stage untracked"],	
+						 "Added":["/images/git/git-added.gif","Added staged" ,"/images/git/git-unstage.gif" , "Unstage added"]	
+					  };
+
 
 orion.GitStatusRenderer = (function() {
 	function GitStatusRenderer(tableDivId , model) {
@@ -70,28 +88,28 @@ orion.GitStatusRenderer = (function() {
 			//render the type icon (added , modified ,untracked ...)
 			var typeColumn = document.createElement('td');
 			var typeImg = document.createElement('img');
-			if(true/*itemModel.type === "added"*/){
-				typeImg.src = "/images/newfile_wiz.gif";
-			} else if (itemModel.type === "modified"){
-				typeImg.src = "/images/newfile_wiz.gif";
-			} else {
-				typeImg.src = "/images/newfile_wiz.gif";
-			}
+			typeImg.src = orion.statusTypeMap[itemModel.type][0];
+			typeImg.title = "Item type : " + orion.statusTypeMap[itemModel.type][1];
 			typeColumn.appendChild(typeImg);
 			row.appendChild(typeColumn);
 			
 			//render the file name field
 			var nameColumn = document.createElement('td');
 			nameColumn.width="100%";
-			nameColumn.nowrap="nowrap";
+			//nameColumn.nowrap="nowrap";
+			nameColumn.noWrap= true;
 			row.appendChild(nameColumn);
 			
 			var nameSpan =  document.createElement('span');
-			nameSpan.id = itemModel.name + "_nameSpan";
+			nameSpan.id = itemModel.name + "_" + itemModel.type +  "_nameSpan";
 			dojo.place(document.createTextNode(itemModel.name), nameSpan, "only");
 			nameSpan.style.cursor = "pointer";
 			nameSpan.style.color = "#0000FF";
+			nameSpan.title = "Click to compare";
 			nameColumn.appendChild(nameSpan);
+			if(nameSpan.id === self._controller._model.selectedFileId ){
+				dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
+			}
 			
 			dojo.connect(nameSpan, "onmouseover", nameSpan, function() {
 				dojo.toggleClass(nameSpan, "fileNameCheckedRow", true);
@@ -101,14 +119,20 @@ orion.GitStatusRenderer = (function() {
 			});
 			
 			dojo.connect(nameSpan, "onclick", nameSpan, function() {
-				if(itemModel.name !== self._controller._model.selectedFileName ){
-					if(self._controller._model.selectedFileName !== undefined){
-						var selected = document.getElementById(self._controller._model.selectedFileName + "_nameSpan");
-						dojo.toggleClass(selected, "fileNameSelectedRow", false);
+				if(itemModel.name !== self._controller._model.selectedFileId ){
+					if(self._controller._model.selectedFileId !== undefined){
+						var selected = document.getElementById(self._controller._model.selectedFileId);
+						if(selected)
+							dojo.toggleClass(selected, "fileNameSelectedRow", false);
 					}
 					dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
-					self._controller._model.selectedFileName = itemModel.name;
-					self._controller.getFileContentGit(itemModel.name);
+					self._controller._model.selectedFileId = nameSpan.id;
+					//self._controller.getFileContentGit(itemModel.location);
+					var untracked = (itemModel.type === "Untracked");
+					var added = (itemModel.type === "Added");
+					var diffParam = self._controller._model.isStaged(itemModel.type) ? "/Cached" : "/Default";
+					var fileParam = untracked | added ? "" : (self._controller._model.isStaged(itemModel.type) ? "/git/commit/HEAD" : "/git/index");
+					self._controller.loadDiffContent(fileParam + itemModel.location , untracked | added? null : diffParam + itemModel.location);
 				}
 			});
 			
@@ -116,20 +140,25 @@ orion.GitStatusRenderer = (function() {
 			sbsViewerCol = document.createElement('td');
 			row.appendChild(sbsViewerCol);
 			var sbsViewerImg = document.createElement('img');//dojo.create("img", {src: "/images/redo_edit.gif"}, sbsViewerCol, "last");
-			sbsViewerImg.src = "/images/redo_edit.gif";
+			sbsViewerImg.src = "/images/git/compare-sbs.gif";
+			sbsViewerImg.title="Click to open two way compare";
 			sbsViewerCol.appendChild(sbsViewerImg);
+			sbsViewerImg.style.cursor = "pointer";
 			sbsViewerImg.onclick = dojo.hitch(this, function(evt) {
-				this._controller.openSBSViewer(itemModel.name);
+				this._controller.openSBSViewer(itemModel.location);
 			});
 			
 			//render the stage / unstage action  icon
 			stageCol = document.createElement('td');
 			row.appendChild(stageCol);
 			var stageImg = document.createElement('img');//dojo.create("img", {src: "/images/down.gif"}, sbsViewerCol, "last");
-			stageImg.src = "/images/down.gif";
+			stageImg.src = orion.statusTypeMap[itemModel.type][2];
+			stageImg.title = orion.statusTypeMap[itemModel.type][3];
 			stageCol.appendChild(stageImg);
+			stageImg.style.cursor = "pointer";
 			stageImg.onclick = dojo.hitch(this, function(evt) {
-				this._controller.doAction(itemModel.name , itemModel.type);
+				this._controller.doAction(itemModel.location , itemModel.type);
+				//this._controller.getGitStatus(this._controller._url);
 			});
 		}
 	};
@@ -151,6 +180,15 @@ orion.GitStatusController = (function() {
 			this._loadBlock(this._unstagedTableRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedTableRenderer , this._model.interestedStagedGroup);
 		},
+		
+		_makeLocation: function(location , name){//temporary
+			var relative = eclipse.util.makeRelative(location);
+			var splitted = relative.split("/");
+			if(splitted.length > 2)
+				return "/" + splitted[1] + "/" + splitted[2] + "/" + name;
+			return name;
+		},
+		
 		_loadBlock: function(renderer , interedtedGroup){
 			renderer.initTable();
 			for (var i = 0; i < interedtedGroup.length ; i++){
@@ -159,10 +197,39 @@ orion.GitStatusController = (function() {
 				if(!groupData)
 					break;
 				for(var j = 0 ; j < groupData.length ; j++){
-					renderer.renderRow({name:groupData[j].Name , type:groupName});
+					renderer.renderRow({name:groupData[j].Name , type:groupName , location:this._makeLocation(groupData[j].Location , groupData[j].Name)});
 				} 
 			}
 		},
+		
+		loadDiffContent: function(fileContentURI , diffURI){
+			this._inlineCompareContainer.resolveDiff(fileContentURI,
+					                                function(){					
+														var fileNameDiv = document.getElementById("fileNameInViewer");
+														fileNameDiv.innerHTML = fileContentURI;
+													} , 
+					                                diffURI);
+		},
+		
+		openSBSViewer: function(hash){
+			//var url = "/compare.html#/" + hash;
+			var url = "/compare.html#" + hash;
+			window.open(url,"");
+		},
+		
+		doAction: function(location  ,type){
+			var shouldStage = false;
+			for(var i = 0; i < this._model.interestedUnstagedGroup.length ; i++){
+				if(type === this._model.interestedUnstagedGroup[i]){
+					shouldStage = true;
+				}
+			}
+			if(this._model.isStaged(type))
+				this.unstage(location);
+			else
+				this.stage(location);
+		},
+		
 		getGitStatus: function(url){
 			var self = this;
 			dojo.xhrGet({
@@ -183,21 +250,20 @@ orion.GitStatusController = (function() {
 				}
 			});
 		},
-		getFileDiffGit: function(hashValue){
-			var splittedUrl = this._url.split("/");
-			var url = "/git/diff/" + splittedUrl[3] + "/" + splittedUrl[4] + "/" + hashValue;
+		
+		stage: function(location){
 			var self = this;
-			dojo.xhrGet({
+			var url = "/git/index" + location;
+			dojo.xhrPut({
 				url: url , 
-				//changing some thing
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "text",
+				handleAs: "json",
 				timeout: 5000,
 				load: function(jsonData, ioArgs) {
-					fileDiff = jsonData;
-					self._inlineCompareContainer.setEditor(self.fileContent , fileDiff );
+					console.log(JSON.stringify(jsonData));
+					self.getGitStatus(self._url);;
 				},
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -206,21 +272,21 @@ orion.GitStatusController = (function() {
 				}
 			});
 		},
-		getFileContentGit: function(hashValue){
-			var splittedUrl = this._url.split("/");
-			var url = "/git/index/" + splittedUrl[3] + "/" + splittedUrl[4] + "/" + hashValue;
+		
+		unstage: function(location){
 			var self = this;
-			dojo.xhrGet({
-				url: url, 
+			var url = "/git/index" + location;
+			dojo.xhrPost({
+				url: url , 
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "text",
+				handleAs: "json",
 				timeout: 5000,
+				postData: dojo.toJson({"Reset":"MIXED"} ),
 				load: function(jsonData, ioArgs) {
-					//console.log(jsonData);
-					self.fileContent = jsonData;
-					self.getFileDiffGit(hashValue);
+					console.log(JSON.stringify(jsonData));
+					self.getGitStatus(self._url);;
 				},
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -229,6 +295,8 @@ orion.GitStatusController = (function() {
 				}
 			});
 		}
+		
+		
 	};
 	return GitStatusController;
 }());

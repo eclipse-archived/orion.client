@@ -13,6 +13,8 @@ var orion = orion || {};
 orion.CompareContainer = (function() {
 	function CompareContainer () {
 		this._diffParser = new eclipse.DiffParser();
+		this.fileContent = null;
+		this.diffURI = null;
 	}
 	CompareContainer.prototype = {
 		_getLineDelim: function(input , diff){	
@@ -20,6 +22,81 @@ orion.CompareContainer = (function() {
 			//if(input.indexOf("\r\n") > -1 || diff.indexOf("\r\n") > -1)
 			//	delim = "\r\n";
 			return delim;
+		},
+		
+		getFileDiffGit: function(hashValue , callBack){
+			var url = "/git/diff" + hashValue;
+			var self = this;
+			dojo.xhrGet({
+				url: url , 
+				//changing some thing
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "text",
+				timeout: 5000,
+				load: function(jsonData, ioArgs) {
+					fileDiff = jsonData;
+					if(callBack)
+						callBack();
+					self.setEditor(self.fileContent , fileDiff );
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		getFileContentGit: function(hashValue , callBack){
+			var url =  hashValue;
+			var self = this;
+			dojo.xhrGet({
+				url: url, 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "text",
+				timeout: 5000,
+				load: function(jsonData, ioArgs) {
+					//console.log(jsonData);
+					self.fileContent = jsonData;
+					self.getFileDiffGit(self.diffURI , callBack);
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					if(ioArgs.xhr.status === 401)
+						handleGetAuthenticationError(this, ioArgs);
+					else
+						self.getFileContent(hashValue , callBack);
+					return response;
+				}
+			});
+		},
+		
+		getFileContent: function(hashValue  ,callBack){
+			var url = hashValue;
+			var self = this;
+			dojo.xhrGet({
+				url: url, 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "text",
+				timeout: 5000,
+				load: function(jsonData, ioArgs) {
+					if(callBack)
+						callBack();
+					self.fileContent = jsonData;
+					self.setEditor("" ,self.fileContent);
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
 		},
 		
 		parseMapper: function(input , diff , doNotBuildNewFile){
@@ -30,6 +107,29 @@ orion.CompareContainer = (function() {
 			var mapper = result.mapper;
 			var diffArray = this._diffParser.getDiffArray();
 			return {delim:delim , mapper:result.mapper , output:result.outPutFile ,diffArray:diffArray};
+		},
+		
+		resolveDiff: function(fileContentURI , callBack ,diffURI){
+			this.diffURI = diffURI;
+			if(diffURI){
+				this.getFileContentGit(fileContentURI , callBack);
+			} else {
+				this.getFileContent(fileContentURI , callBack);
+			}
+		},
+				
+		_initDiffPosition: function(editor){
+			var model = editor.getModel();
+			if(model && model._lineFeeder && model._lineFeeder.getAnnotations){
+				var annotations = model._lineFeeder.getAnnotations();
+				if(annotations.length > 0) {
+					var lineIndex = annotations[0][0];
+					var lineHeight = editor.getLineHeight();
+					var clientArea = editor.getClientArea();
+					var lines = Math.floor(clientArea.height / lineHeight/3);
+					editor.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
+				}
+			}
 		}
 		
 	};
@@ -53,6 +153,7 @@ orion.SBSCompareContainer = (function() {
 				this._editorLeft.setText(result.output);
 				this._editorRight.getModel().init(result.mapper);
 				this._editorRight.setText(input);
+				this._initDiffPosition(this._editorLeft);
 				return;
 			}
 		}
@@ -122,6 +223,7 @@ orion.SBSCompareContainer = (function() {
 		var overview  = new eclipse.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
 		this._editorRight.addRuler(overview);
 				
+		this._initDiffPosition(this._editorLeft);
 		this._editorRight.redrawRange();
 	};
 	return SBSCompareContainer;
@@ -138,8 +240,9 @@ orion.InlineCompareContainer = (function() {
 		var result = this.parseMapper(input , diff , true);
 		if(this._editor){
 			if(result.delim === this._editor.getModel().getLineDelimiter() ){
-				this._editor.getModel().init(result.mapper);
+				this._editor.getModel().init(result.mapper , result.diffArray);
 				this._editor.setText(input);
+				this._initDiffPosition(this._editor);
 				return;
 			}
 		}
@@ -172,6 +275,7 @@ orion.InlineCompareContainer = (function() {
 			} 
 		}); 
 				
+		this._initDiffPosition(this._editor);
 		this._editor.redrawRange();
 	};
 	return InlineCompareContainer;

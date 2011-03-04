@@ -27,9 +27,9 @@ dojo.addOnLoad(function(){
 		
 		
 		// this is temporary
-		var jslintPlugin = pluginRegistry.getPlugin("/jslintPlugin.html");
+		var jslintPlugin = pluginRegistry.getPlugin("/plugins/jslintPlugin.html");
 		if (jslintPlugin === null) {
-			pluginRegistry.installPlugin("/jslintPlugin.html");
+			pluginRegistry.installPlugin("/plugins/jslintPlugin.html");
 		}
 
 		var inputService = new eclipse.InputService(serviceRegistry);
@@ -49,9 +49,9 @@ dojo.addOnLoad(function(){
 		new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
 
 		// File operations
-		var filePlugin = pluginRegistry.getPlugin("/fileClientPlugin.html");
+		var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
 		if (filePlugin === null) {
-			pluginRegistry.installPlugin("/fileClientPlugin.html");
+			pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
 		}
 	}());
 	

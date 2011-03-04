@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
-	<script type="text/javascript" src="/js/plugin.js"></script>
+	<script type="text/javascript" src="../js/plugin.js"></script>
 	<script>
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
@@ -25,7 +25,7 @@
 				info : function() {
 					return {
 						image: "/profile/images/create_user.gif",
-						name: "Open Browser",
+						name: "Open HTML Raw",
 						id: "sample.commands.sample2",
 						forceSingleItem: true,
 						href: true,
@@ -34,7 +34,7 @@
 					};
 				},
 				run : function(item) {
-					return "/" + item.Location;
+					return item.Location;
 				}
 			});
 			
@@ -47,8 +47,12 @@
 						tooltip: "Bulk command operates on selections"
 					};
 				},
-				run : function(commandId, items) {
-					window.alert("Bulk operation on: " + items);
+				run : function(items) {
+					var locations = [];
+					for (var i = 0; i<items.length; i++) {
+						locations.push(items[i].Location);
+					}
+					window.alert("Bulk operation on: " + locations);
 				}
 			});
 				

@@ -100,12 +100,7 @@ eclipse.FavoritesService = (function() {
 			this._storeSearches();
 			this._notifyListeners();
 		},
-		
-		
-		defaultFavorite: function(onDone) {
-			onDone(this._favorites[0]);
-		},
-			
+					
 		_initializeFavorites: function () {
 			var favorites = this;
 			var favesDone, searchesDone;
@@ -147,6 +142,10 @@ eclipse.FavoritesService = (function() {
 			this._registry.getService("IPreferenceService").then(function(service) {
 				service.put("window/favorites/search", JSON.stringify(storedSearches)); 
 			});
+		},
+		
+		getFavorites: function(onDone) {
+			onDone(this._favorites);
 		}
 	};
 	return FavoritesService;

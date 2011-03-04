@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="org.eclipse.orion.dojo" default="build" basedir=".">
+	
+	<property name="dojoBundle" value="${basedir}/../org.dojotoolkit" />
+	<property name="dojoBuilder" value="${basedir}/../org.dojotoolkit/util/buildscripts" />
+
+	<target name="build" >
+		<mkdir dir="${basedir}/temp/layer" />
+		<copy todir="${basedir}/temp/layer" >
+			<fileset dir="${basedir}/layer" />
+		</copy>
+		<replace file="${basedir}/temp/layer/orion.profile.js" >
+			<replacefilter token="@DOJO_BUNDLE@" value="${dojoBundle}" />
+			<replacefilter token="@ORION_DOJO@" value="${basedir}/temp" />
+		</replace>
+		
+		<java dir="${dojoBuilder}" fork="true" classname="org.mozilla.javascript.tools.shell.Main" >
+			<classpath>
+				<pathelement location="${dojoBuilder}/../shrinksafe/js.jar" />
+				<pathelement location="${dojoBuilder}/../shrinksafe/shrinksafe.jar" />
+			</classpath>
+			<arg value="${dojoBuilder}/build.js" />
+			<arg value="profileFile=${basedir}/temp/layer/orion.profile.js" />
+			<arg value="action=clean,release" />
+			<arg value="version=${dojoVersion}" />
+			<arg value="releaseName=" />
+			<arg value="releaseDir=${basedir}/temp/release" />
+		</java>
+		
+		<delete>
+			<fileset dir="${basedir}/static" includes="**" />
+		</delete>
+		<move todir="${basedir}/static" >
+			<fileset dir="${basedir}/temp/release/orion" includes="**" />
+		</move>
+		<delete dir="${basedir}/temp" />
+		<delete file="${basedir}/static/orion.profile.js" />
+	</target>
+</project>

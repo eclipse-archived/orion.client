@@ -12,7 +12,10 @@ eclipse.DiffLineFeeder = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 
 	function DiffLineFeeder(diffLinesArray , lineDelimeter) {
-		this._diffLinesArray = diffLinesArray;
+		if(diffLinesArray){
+			this._diffLinesArray = diffLinesArray.array;
+			this._diffLinesArrayIndex = diffLinesArray.index;
+		}
 		this._lineDelimeter = lineDelimeter;
 		this._annotations = [];
 	}
@@ -22,8 +25,10 @@ eclipse.DiffLineFeeder = (function() {
 		generateGapBlocks: function( mapper, mapperColumnIndex , diffLinesArray ){
 		    var gapBlocks = [];//Each item represents the start lineIndex and the line number of a gap block , and the string index of the dummyLineArray
 			this._mapper = mapper;
-			if(diffLinesArray)
-				this._diffLinesArray = diffLinesArray ;
+			if(diffLinesArray){
+				this._diffLinesArray = diffLinesArray.array;
+				this._diffLinesArrayIndex = diffLinesArray.index;
+			}
 		    this._annotations = [];
 		    var gapNumber = 0;
 			var curLineindex = 0;//zero based
@@ -47,8 +52,13 @@ eclipse.DiffLineFeeder = (function() {
 		},
 		
 		getLineAt: function(blocks , blockNumber , delta , includeDelimiter ){
-			var lineText = this._diffLinesArray[blocks[blockNumber][2] + delta -1];
-			lineText = lineText.substring(1);
+			var index = blocks[blockNumber][2];
+			index += (delta -1);
+			var lineText = this._diffLinesArray[index];
+			if(lineText === undefined){
+				console.log(blocks);
+			}
+			lineText = lineText.substring(this._diffLinesArrayIndex);
 			if (includeDelimiter) {
 				return lineText + this._lineDelimeter;
 			}

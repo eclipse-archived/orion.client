@@ -39,17 +39,6 @@ function createEditor(input , diff , delim){
 	sBSCompareContainerEditor.setEditor(input , diff);
 }
 
-function createCompareEditor() {
-	var leftTH = document.getElementById("LeftTH");
-	var rightTH = document.getElementById("RightTH");
-	leftTH.innerHTML = "Output File With Gaps";
-	rightTH.innerHTML = "Input File With Gaps";
-	
-	var testData = _getTestData();
-	createEditor(testData[0] ,testData[1] , "\r\n" );
-	
-}
-
 var fileContent ;
 var fileDiff;
 function getFileContentGit(hashValue){
@@ -104,8 +93,8 @@ function getFileDiffGit(hashValue){
 
 window.onload = function() {
 	sBSCompareContainerEditor = new orion.SBSCompareContainer("divParentL" , "divParentR");
-	var demo = document.getElementById("dataLength");
-	demo.innerHTML = demoData.length + ")";
+	//var demo = document.getElementById("dataLength");
+	//demo.innerHTML = demoData.length + ")";
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
 		var leftTH = document.getElementById("LeftTH");
@@ -149,12 +138,12 @@ window.onload = function() {
 -->
 </tr>
 </table>
-
+<!-- 
 <span>Demo Data Number(1-</span>
 <span id="dataLength"></span>
 <input id="caseNo" type="text" />
 <button onclick='createCompareEditor()'  padding: 0 2 0 2'>Compare</button>
-
+-->
 <!-- 
 <button onclick='createInputEditor()'  padding: 0 2 0 2'>Test Input</button>
 <button onclick='createOutputEditor()'  padding: 0 2 0 2'>Test Output</button>

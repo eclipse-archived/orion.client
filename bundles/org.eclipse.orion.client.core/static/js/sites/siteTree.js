@@ -71,7 +71,7 @@ sites.SiteRenderer = (function() {
 			
 			dojo.addClass(tableNode, 'treetable');
 			var thead = dojo.create("thead", null);
-			dojo.create("th", {innerHTML: ""}, thead, "last");
+			dojo.create("th", {innerHTML: "Name"}, thead, "last");
 			dojo.create("th", {innerHTML: "Status"}, thead, "last");
 			dojo.create("th", {innerHTML: "Actions"}, thead, "last");
 			tableNode.appendChild(thead);
@@ -92,8 +92,10 @@ sites.SiteRenderer = (function() {
 //			dojo.place(document.createTextNode("Id:" + item.Id), detailsDiv, "last");
 //			dojo.create("br", null, detailsDiv, "last");
 			dojo.place(document.createTextNode("Mappings:" + JSON.stringify(item.Mappings)), detailsDiv, "last");
-//			dojo.create("br", null, detailsDiv, "last");
-//			dojo.place(document.createTextNode("Workspace:" + item.Workspace), detailsDiv, "last");
+			if (item.HostHint && item.HostHint !== "") {
+				dojo.create("br", null, detailsDiv, "last");
+				dojo.place(document.createTextNode("Host hint:" + item.HostHint), detailsDiv, "last");
+			}
 			
 			// Status column
 			var status = item.HostingStatus;

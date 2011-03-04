@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Language" content="en-us">
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta http-equiv="X-UA-Compatible" content="IE=8">
-<title>Eclipse Web User Profile</title>
+<title>Orion User Profile</title>
 <script type="text/javascript"
 	src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
 <script type="text/javascript">
@@ -45,10 +45,14 @@
 @import "/profile/css/userprofile.css";
 </style>
 <!--Authentication -->
+<script src="/js/globalCommands.js"></script>
 <script type="text/javascript" src="/js/auth.js"></script>
 <!-- Extension Registry -->
 <script src="js/serviceregistry.js"></script>
 <script src="js/pluginregistry.js"></script>
+<script src="js/commands.js"></script>
+<script src="js/searchClient.js"></script>
+<script src="js/preferences.js"></script>
 <!-- Eclipse Application Services -->
 <script src="js/input.js"></script>
 <!--Profile logic -->
@@ -65,7 +69,7 @@
 				<table>
 					<tr>
 						<td><a id="home" href="/navigate-table.html"><img
-								class="toolbarLabel" src="/images/Eclipse-Logo.gif"
+								class="toolbarLabel" src="/images/orion.png"
 								alt="Eclipse Logo" align="top"> </a></td>
 						<td><b class="statuspane" id="statusPane"></b>
 						</td>
@@ -77,9 +81,8 @@
 			</div>
 		</div>
 		<div class="paneScrolled" style="margin-left: 8px;"
-			dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-			<form id="profileForm" dojoType="dijit.form.Form">
-			</form>			
+			dojoType="dijit.layout.ContentPane" region="leading" splitter="false" id="profileContent">
+			<div>Loading user profile...</div>		
 		</div>  
 	</div>
 </body>

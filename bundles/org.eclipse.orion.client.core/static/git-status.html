@@ -1,12 +1,11 @@
 <!doctype html>
 <html style="height: 100%" >
-    <head>
-		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
+<head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2011." >
 		<meta http-equiv="Content-Language" content="en-us">
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 		<meta http-equiv="X-UA-Compatible" content="IE=8">
     	<title>Git Status</title>    
-    
     <script type="text/javascript">
         var djConfig = {
 		    isDebug:false,
@@ -15,12 +14,6 @@
         };
     </script>
     <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-    <script type="text/javascript">
-		dojo.require("dijit.Dialog");
- 	    dojo.require("dijit.form.TextBox");
-		dojo.require("widgets.NewItemDialog");
-		dojo.require("widgets.OpenResourceDialog");
- 	</script>    	
 	<style type="text/css">
 		@import "/org.dojotoolkit/dojo/resources/dojo.css";
 		@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
@@ -28,99 +21,72 @@
 		@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
 		@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
 	    @import "/ide.css";
-	    @import "/breadcrumbs.css"; 
 	    @import "/js/compare/compare.css"; 
 	</style>
 	
-	<!-- Extension Registry -->
-	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
-	<script src="js/serviceregistry.js"></script>
-	
-	<!-- Authentication (required for handleAuthenticationError) -->
-	<script type="text/javascript" src="js/auth.js"></script>
-
-	<!-- Commands-->
-	<script src="js/commands.js"></script>
-	  	
- 	
-<script language="javascript" type="text/javascript" src="/editor/js/editor.js"></script>
-<script language="javascript" type="text/javascript" src="/editor/js/model.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/diff-parser.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/rulers.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/compare-model.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/compare-container.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/diff-line-feeder.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/git-status-table.js"></script>
-	  	
-<script language="javascript" type="text/javascript">
-
-window.onload = function() {
-	var splitted = window.location.href.split('#');
-	if(splitted.length > 1){
-		var controller = new orion.GitStatusController(null , splitted[1] , "unstagedZone" , "stagedZone");
-		controller.getGitStatus(splitted[1]);
-	}
-};
-</script>
 </head>
-
-    <body style="height: 100%" class="soria">
-    
-    <!-- Utilities -->
+<body style="height: 100%" class="soria">
+	<script src="js/auth.js"></script>
+	<script src="/editor/js/editor.js"></script>
+	<script src="/editor/js/model.js"></script>
+	<script src="js/compare/diff-parser.js"></script>
+	<script src="js/compare/rulers.js"></script>
+	<script src="js/compare/compare-model.js"></script>
+	<script src="js/compare/compare-container.js"></script>
+	<script src="js/compare/diff-line-feeder.js"></script>
+	<script src="js/git-status/git-status-table.js"></script>
  	<script src="js/util.js"></script>
- 	
- 	
- 	<!-- Tree -->
-	
-	<!-- Favorites List -->
-	<script src="js/favorites.js"></script>
-
-	<!--Search -->
 	<script src="js/searchClient.js"></script>
-    <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="true" style="width: 100%; height: 100%;" splitter="true">
+    <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;" splitter="true">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-		<!--  
-   		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" region="leading"   persist="true" gutters="true" style="width: 40%; height: 100%;" splitter="true">
-		-->
+		
+		<!-- status pane on left : start vvv-->
 		<div class="paneScrolled" id="statusPane" dojoType="dijit.layout.ContentPane" region="leading"  style="width: 40%;" splitter="true">				
-				<table width="100%">
-					<tr>
-						<td width="50%" height="100%">
-							<h2>Unstaged</h2>
-						</td>
-						<td width="50%" height="100%" nowrap="nowrap">
-							<div style="float: right;" align="right">
-								<button id = "stageAll">Stage All</button>
-							</div>
-						</td>
-					</tr>
-				</table>
-				<hr>
-				<div id = "unstagedZone">
-				</div>
-				<table width="100%" height = "30px">
-				</table>
+			<!-- unstaged zone : start vvv-->
+			<table width="100%">
+				<tr>
+					<td width="50%" height="100%">
+						<h2>Unstaged</h2>
+					</td>
+					<td width="50%" height="100%" nowrap="nowrap">
+						<div style="float: right;" align="right">
+							<button id = "stageAll">Stage All</button>
+						</div>
+					</td>
+				</tr>
+			</table>
+			<hr>
+			<div id = "unstagedZone">
+			</div>
+			<!-- unstaged zone : end ^^^-->
+			
+			<!-- separator space -->
+			<table width="100%" height = "30px">
+			</table>
 
-				<table width="100%">
-					<tr>
-						<td width="50%" height="100%">
-							<h2>Staged</h2>
-						</td>
-						<td width="50%" height="100%" nowrap="nowrap">
-							<div style="float: right;" align="right">
-								<button id = "stageAll">Unstage All</button>
-							</div>
-						</td>
-					</tr>
-				</table>
-				<hr>
-				<div id = "stagedZone">
-				</div>
-				<table width="100%" height = "30px">
-				</table>
+			<!-- staged zone : start vvv-->
+			<table width="100%">
+				<tr>
+					<td width="50%" height="100%">
+						<h2>Staged</h2>
+					</td>
+					<td width="50%" height="100%" nowrap="nowrap">
+						<div style="float: right;" align="right">
+							<button id = "stageAll">Unstage All</button>
+						</div>
+					</td>
+				</tr>
+			</table>
+			<hr>
+			<div id = "stagedZone">
+			</div>
+			<table width="100%" height = "30px">
+			</table>
+			<!-- staged zone : end ^^^-->
 
-				<div id = "commitZone">
+			<!-- commit zone : start vvv-->
+			<div id = "commitZone">
 				<span>Commit Message : </span>
 				<table >
 					<tr>
@@ -137,7 +103,7 @@ window.onload = function() {
 									</tr>
 									<tr>
 										<td  nowrap="nowrap">
-											<button id = "commit">ammend</button>
+											<button id = "commit">amend</button>
 										</td>
 									</tr>
 								</table>
@@ -145,23 +111,26 @@ window.onload = function() {
 						</td>
 					</tr>
 				</table>
-				</div>
-
-			<!-- 
 			</div>
-			-->
+			<!-- commit zone : end ^^^-->
 		</div>
-
+		<!-- status pane on left : end ^^^-->
 		
-		<div id = "rightPane" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center">
-			<div >
-				<h2>/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo-inline.html</h2>
+		<!-- inline compare viewer : start vvv-->
+		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false" persist="false" gutters="false" region="center"  splitter="false">
+			<div  style='width:100%;height:30px;' dojoType="dijit.layout.ContentPane" region="top">
+				<div >
+					<h2 id = "fileNameInViewer">Select A file to display the difference</h2>
+				</div>
+				<hr>
 			</div>
-			<hr>
-			<div id="inline-compare-viewer" style="width: 100%; height: 100%;">
+			<div class="paneScrolled" id="inline-compare-viewer" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center"  style="width: 100%; height: 100%;" splitter="false">				
 			</div>
 		</div>
-
+		<!-- inline compare viewer : end ^^^-->
 	</div>
+	
+	<!-- Glue -->
+	<script src="js/git-status/git-status-glue.js"></script>
 </body>
 </html>
