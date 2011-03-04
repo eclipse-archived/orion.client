@@ -17,12 +17,19 @@
 dojo.addOnLoad(function() {
 	// Register services
 	var serviceRegistry = new eclipse.ServiceRegistry();
+	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	var dialogService = new eclipse.DialogService(serviceRegistry);
 	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var fileService = new eclipse.FileService(serviceRegistry);
 	var siteService = new eclipse.sites.SiteService();
 	serviceRegistry.registerService(eclipse.sites.SITE_SERVICE_NAME, siteService);
+	
+	// File operations
+	var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
+	if (filePlugin === null) {
+		pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
+	}
 	
 	// Create the visuals
 	var model;
@@ -54,7 +61,7 @@ dojo.addOnLoad(function() {
 		// Page-level commands
 		var createCommand = new eclipse.Command({
 			name : "Create Site Configuration",
-			image : "/images/add_obj.gif", // TODO icon is not very descriptive
+			image : "/images/add_obj.gif",
 			id: "eclipse.sites.create",
 			groupId: "eclipse.sitesGroup",
 			callback : function() {
@@ -77,9 +84,7 @@ dojo.addOnLoad(function() {
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
-			hrefCallback: function(item) {
-				return "edit-site.html#site=" + item.Location;
-			}});
+			hrefCallback: eclipse.sites.util.generateEditSiteHref});
 		commandService.addCommand(editCommand, "object");
 		
 		var startCommand = new eclipse.Command({

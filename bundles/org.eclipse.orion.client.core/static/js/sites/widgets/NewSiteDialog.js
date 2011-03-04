@@ -19,26 +19,26 @@ dojo.require("widgets.NewItemDialog");
  * Requires IFileService to get the user's workspace, which is in turn required to create a
  * site configuration.
  * 
- * @param options <code>{{
- *    serviceRegistry {eclipse.ServiceRegistry}
- *    func {Function} Will be invoked with 
- * }}</code>
+ * @param options.serviceRegistry {eclipse.ServiceRegistry}
+ * @param options.func {Function} Invoked on OK with (name, workspace) as parameters
  */
 dojo.declare("sites.widgets.NewSiteDialog", [widgets.NewItemDialog], {
 	/** Array */
 	workspaceIds: null,
+	
 	/** String */
 	workspaceId: null,
 	
 	constructor: function() {
-		//this.inherited(arguments);
 		this.options = arguments[0] || {};
 		this.options.title = this.options.title || "New Site Configuration";
 		this.options.label = this.options.label || "Name:";
 	},
-	postMixInProperties : function() {
+	
+	postMixInProperties: function() {
 		this.inherited(arguments);
 	},
+	
 	postCreate: function() {
 		this.inherited(arguments);
 		
@@ -63,21 +63,21 @@ dojo.declare("sites.widgets.NewSiteDialog", [widgets.NewItemDialog], {
 				this.workspaceId = this.workspaceIds[0];
 			}));});
 	},
+	
 	_onSubmit: function() {
 		// Prevent onSubmit() if name is invalid or workspace not loaded yet
 		if (this.itemName.isValid() && this.workspaceId !== null) {
 			this.inherited(arguments);
 		}
 	},
+	
 	onHide: function() {
 		this.inherited(arguments);
 		setTimeout(dojo.hitch(this, function() {
 			this.destroyRecursive();
 		}), this.duration);
 	},
-	/**
-	 * @Override
-	 */
+	
 	execute: function() {
 		if (this.options.func) {
 			this.options.func(this.itemName.value, this.workspaceId);

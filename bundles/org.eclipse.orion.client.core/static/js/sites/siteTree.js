@@ -39,13 +39,6 @@ sites.SiteTreeModel = (function() {
 						parentItem.children = siteConfigurations;
 						onComplete(siteConfigurations);
 					});
-			} else if (parentItem.Id) {
-//				// A site configuration
-//				//Id Location Mappings Name Workspace HostingStatus
-//				var result = [];
-//				result.push({ Id: parentItem.Id});
-//				result.push({ Location: parentItem.Location});
-//				onComplete(result);
 			} else {
 				return onComplete([]);
 			}
@@ -85,12 +78,12 @@ sites.SiteRenderer = (function() {
 			var actionCol = dojo.create("td", {id: tableRow.id + "col3"});
 			
 			// Site config column
-			var url = "edit-site.html#site=" + item.Location;
-			var imgLink = dojo.create("a", {href: url}, siteConfigCol, "last");
+			var href = eclipse.sites.util.generateEditSiteHref(item);
+			var imgLink = dojo.create("a", {href: href}, siteConfigCol, "last");
 			var icon = dojo.create("img",
 					{src: "/images/config_obj.gif", style: {verticalAlign: "bottom", paddingRight: "3px"}},
 				imgLink, "last");
-			var nameLink = dojo.create("a", {href: url}, siteConfigCol, "last");
+			var nameLink = dojo.create("a", {href: href}, siteConfigCol, "last");
 			dojo.place(document.createTextNode(item.Name), nameLink, "last");
 			
 			// Status column

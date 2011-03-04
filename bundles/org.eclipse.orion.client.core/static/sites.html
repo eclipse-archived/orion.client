@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html style="height: 100%">
+<html>
 	<head>
 		<meta charset="UTF-8">
 		<title>Site Configurations</title>
@@ -26,7 +26,7 @@ var djConfig = {
 			@import "/commands.css";
 		</style>
 		<style type="text/css">
-			body {
+			html, body {
 				height: 100%;
 			}
 			h1 {
@@ -84,9 +84,13 @@ dojo.require("sites.widgets.NewSiteDialog");
 	<script src="js/status.js"></script>
 	<script src="js/users.js"></script>
 	<script src="js/treetable.js"></script>
+	<script src="js/globalCommands.js"></script>
 	<script src="js/sites/siteService.js"></script>
 	<script src="js/sites/siteTree.js"></script>
-	<script src="js/globalCommands.js"></script>
+	<script src="js/sites/siteUtils.js"></script>
+	
+	<!-- Glue -->
+	<script src="js/sites/sites.js"></script>
 	
 	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="width: 100%; height: 100%;">
 		<div dojoType="dijit.layout.ContentPane" region="top" class="toolbar">
@@ -104,7 +108,5 @@ dojo.require("sites.widgets.NewSiteDialog");
 		</div>
 	</div>
 	
-	<!-- Glue -->
-	<script src="js/sites/sites.js"></script>
 </body>
 </html>
