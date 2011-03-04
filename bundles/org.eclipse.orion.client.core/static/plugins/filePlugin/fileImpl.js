@@ -132,12 +132,7 @@ eclipse.FileServiceImpl= (function() {
 							return this.createWorkspace("MyWorkspace");
 						}
 					}
-				}),
-				error: function(response, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					// TODO need a better error handling
-					return response;
-				}
+				})
 			});
 			return deferred;
 		},

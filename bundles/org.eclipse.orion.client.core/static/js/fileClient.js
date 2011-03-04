@@ -14,17 +14,21 @@
 /** @namespace The global container for eclipse APIs. */
 var eclipse = eclipse || {};
 
-eclipse.FileService = (function() {
+/**
+ * The file client provides a convenience API for interacting with a file service
+ * provided by a plugin. This class handles authorization, and authentication-related
+ * error handling.
+ */
+eclipse.FileClient = (function() {
 	/**
 	 * @class Provides operations on files, folders, and projects.
-	 * @name eclipse.FileService
+	 * @name eclipse.FileClient
 	 */
-	function FileService(serviceRegistry) {
-		if (serviceRegistry)
-			this._serviceRegistration = serviceRegistry.registerService("IFileService", this);
+	function FileClient(serviceRegistry) {
+		this.serviceRegistry = serviceRegistry;
 	}
 	
-	FileService.prototype = /**@lends eclipse.FileService.prototype */
+	FileClient.prototype = /**@lends eclipse.FileClient.prototype */
 	{
 		/**
 		 * Obtains the children of a remote resource
@@ -56,6 +60,38 @@ eclipse.FileService = (function() {
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location) {
+			var clientDeferred = new dojo.Deferred();
+			this.serviceRegistry.getService("IFileService").then(
+				function(fileService) {
+					fileService.loadWorkspace(location).then(
+						//on success, just forward the workspace to the client
+						function(workspace) {
+							clientDeferred.callback(workspace);
+						},
+						//on failure we might need to retry
+						function(error) {
+							if (error.status === 401) {
+								var handle = dojo.subscribe("/auth", function(message) {
+									//try again
+									fileService.loadWorkspace(location).then(
+										function(workspace) {
+											clientDeferred.callback(workspace);
+										},
+										function(error) {
+											clientDeferred.errback(error);
+										}
+									);
+									dojo.unsubscribe(handle); // ... but only once
+								});
+							} else {
+								//forward other errors to client
+								clientDeferred.errback(error);
+							}
+						}
+					);
+				}
+			);
+			return clientDeferred;
 		},
 		/**
 		 * Adds a project to a workspace.
@@ -116,5 +152,5 @@ eclipse.FileService = (function() {
 		copyFile: function(sourceLocation, targetLocation) {
 		}
 	};
-	return FileService;
+	return FileClient;
 }());

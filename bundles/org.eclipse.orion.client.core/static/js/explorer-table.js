@@ -26,16 +26,15 @@ eclipse.Explorer = (function() {
 		this.selectionToolsId = selectionToolsId;
 		this.model = null;
 		this.myTree = null;
+		this.fileClient = new eclipse.FileClient(serviceRegistry);
 	}
 	Explorer.prototype = /** @lends eclipse.Explorer.prototype */ {
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent) {
 			var self = this;
-			this.registry.getService("IFileService").then(function(service) {
-				service.fetchChildren(parent.ChildrenLocation).then(function(children) {
-					eclipse.util.processNavigatorParent(parent, children);
-					dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
-				});
+			this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
+				eclipse.util.processNavigatorParent(parent, children);
+				dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
 			});
 		},
 				
@@ -77,27 +76,26 @@ eclipse.Explorer = (function() {
 				//the tree root object has changed so we need to load the new one
 				this.treeRoot.Path = path;
 				var self = this;
-					this.registry.getService("IFileService").then(function(service) {
-						service.loadWorkspace(path).then(
-							dojo.hitch(self, function(loadedWorkspace) {
-								//copy fields of resulting object into the tree root
-								for (var i  in loadedWorkspace) {
-									this.treeRoot[i] = loadedWorkspace[i];
-								}
-								eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
-								dojo.empty(inner);
-								new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
-								eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.selectionToolsId, this.treeRoot);
-								this.createTree();
-							}),
-							dojo.hitch(self, function(error) {
-								// Show an error message when a problem happens during getting the workspace
-								// Don't show the error for 401 since the login dialog is shown anyway
-								if (error.status !== null && error.status !== 401){
-									dojo.place(document.createTextNode("Sorry, an error occurred: " + error.message), progress, "only");
-								}
-							}));
-					});
+				this.fileClient.loadWorkspace(path).then(
+					//do we really need hitch - could just refer to self rather than this
+					dojo.hitch(self, function(loadedWorkspace) {
+						//copy fields of resulting object into the tree root
+						for (var i  in loadedWorkspace) {
+							this.treeRoot[i] = loadedWorkspace[i];
+						}
+						eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
+						dojo.empty(inner);
+						new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
+						eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.selectionToolsId, this.treeRoot);
+						this.createTree();
+					}),
+					dojo.hitch(self, function(error) {
+						// Show an error message when a problem happens during getting the workspace
+						if (error.status !== null && error.status !== 401){
+							dojo.place(document.createTextNode("Sorry, an error occurred: " + error.message), progress, "only");
+						}
+					})
+				);
 			}
 		},
 
@@ -108,7 +106,7 @@ eclipse.Explorer = (function() {
 			}
 		},
 		createTree: function (){
-			this.model = new eclipse.Model(this.registry, this.treeRoot);
+			this.model = new eclipse.Model(this.registry, this.treeRoot, this.fileClient);
 			this.myTree = new eclipse.TableTree({
 				id: "innerTree",
 				model: this.model,
@@ -131,9 +129,10 @@ eclipse.Model = (function() {
 	 * @class Tree model used by eclipse.Explorer.
 	 * TODO: Consolidate with eclipse.TreeModel.
 	 */
-	function Model(serviceRegistry, root) {
+	function Model(serviceRegistry, root, fileClient) {
 		this.registry = serviceRegistry;
 		this.root = root;
+		this.fileClient = fileClient;
 	}
 	Model.prototype = {
 		destroy: function(){
@@ -148,13 +147,12 @@ eclipse.Model = (function() {
 			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
 				onComplete([]);
 			} else if (parentItem.Location) {
-				this.registry.getService("IFileService").then(function(service) {
-					service.fetchChildren(parentItem.ChildrenLocation).then( 
-						dojo.hitch(this, function(children) {
-							eclipse.util.processNavigatorParent(parentItem, children);
-							onComplete(children);
-						}));
-				});
+				fileClient.fetchChildren(parentItem.ChildrenLocation).then( 
+					dojo.hitch(this, function(children) {
+						eclipse.util.processNavigatorParent(parentItem, children);
+						onComplete(children);
+					})
+				);
 			} else {
 				onComplete([]);
 			}
