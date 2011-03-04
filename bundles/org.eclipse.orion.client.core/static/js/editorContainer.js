@@ -1269,9 +1269,7 @@ eclipse.EditorContainer = (function() {
 					url: fileURI,
 					timeout: 5000,
 					load: dojo.hitch(this, function(contents, secondArg) {
-						var path = secondArg.xhr.getResponseHeader("Eclipse-Path");
-						if (!path) { path = fileURI; }
-						this.onInputChange(path, null, contents);
+						this.onInputChange(fileURI, null, contents);
 						this.showSelection(input.start, input.end, input.line, input.offset, input.length);
 					}),
 					error: dojo.hitch(this, function(error, ioArgs) {
