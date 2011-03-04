@@ -28,11 +28,12 @@ eclipse.ExplorerTree = (function() {
 	/**
 	 * @name eclipse.ExplorerTree
 	 */
-	function ExplorerTree(serviceRegistry, treeRoot, searcher, parentId, toolbarId,
+	function ExplorerTree(serviceRegistry, treeRoot, searcher, fileClient, parentId, toolbarId,
 			/**dijit.Menu*/ contextMenu) {
 		this.registry = serviceRegistry;
 		this.treeRoot = treeRoot;
 		this.searcher = searcher;
+		this.fileClient = fileClient;
 		this.parentId = parentId;
 		this.toolbarId = toolbarId;
 		
@@ -69,11 +70,9 @@ eclipse.ExplorerTree = (function() {
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent) {
 			var self = this;
-			this.registry.getService("IFileService").then(function(service) {
-				service.fetchChildren(parent.ChildrenLocation).then(function(children) {
-					eclipse.util.processNavigatorParent(parent, children);
-					dojo.hitch(self.model, self.model.onChildrenChange)(parent, children);
-				});
+			this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
+				eclipse.util.processNavigatorParent(parent, children);
+				dojo.hitch(self.model, self.model.onChildrenChange)(parent, children);
 			});
 		},
 		removeResourceList: function() {
@@ -121,23 +120,21 @@ eclipse.ExplorerTree = (function() {
 				//the tree root object has changed so we need to load the new one
 				this.treeRoot.Path = path;
 				var self = this;
-				this.registry.getService("IFileService").then(function(service) {
-					service.loadWorkspace(path,
-						dojo.hitch(self, function(loadedWorkspace) {
-							//copy fields of resulting object into the tree root
-							for (var i in loadedWorkspace) {
-								this.treeRoot[i] = loadedWorkspace[i];
-							}
-							eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
-							new eclipse.BreadCrumbs({container: this.parentId, resource: this.treeRoot});
-							eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.parentId, this.toolbarId, this.treeRoot);
-							this.createTree();
-						}));
-				});
+				this.fileClient.loadWorkspace(path).then(
+					dojo.hitch(self, function(loadedWorkspace) {
+						//copy fields of resulting object into the tree root
+						for (var i in loadedWorkspace) {
+							this.treeRoot[i] = loadedWorkspace[i];
+						}
+						eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
+						new eclipse.BreadCrumbs({container: this.parentId, resource: this.treeRoot});
+						eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.parentId, this.toolbarId, this.treeRoot);
+						this.createTree();
+					}));
 			}
 		},
 		createTree: function(){
-			this.model = new eclipse.TreeModel(this.registry, this.treeRoot);
+			this.model = new eclipse.TreeModel(this.registry, this.treeRoot, this.fileClient);
 			
 			// remove any existing tree or other DOM element occupying that space
 			this.removeResourceList();
@@ -210,9 +207,10 @@ eclipse.TreeModel = (function() {
 	 * @class Tree model used by eclipse.ExplorerTree.
 	 * TODO Consolidate with eclipse.Model.
 	 */
-	function TreeModel(serviceRegistry, root) {
+	function TreeModel(serviceRegistry, root, fileClient) {
 		this.registry = serviceRegistry;
 		this.root = root;
+		this.fileClient = fileClient;
 	}
 	TreeModel.prototype = {
 		destroy: function(){
@@ -230,13 +228,11 @@ eclipse.TreeModel = (function() {
 			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
 				onComplete([]);
 			} else if (parentItem.Location) {
-				this.registry.getService("IFileService").then(function(service) {
-					service.fetchChildren(parentItem.ChildrenLocation).then(
-						dojo.hitch(this, function(children) {
-							eclipse.util.processNavigatorParent(parentItem, children);
-							onComplete(children);
-						}));
-				});
+				this.fileClient.fetchChildren(parentItem.ChildrenLocation).then(
+					dojo.hitch(this, function(children) {
+						eclipse.util.processNavigatorParent(parentItem, children);
+						onComplete(children);
+					}));
 			} else {
 				onComplete([]);
 			}

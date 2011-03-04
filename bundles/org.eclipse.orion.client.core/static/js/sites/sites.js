@@ -17,9 +17,10 @@
 dojo.addOnLoad(function() {
 	// Register services
 	var serviceRegistry = new eclipse.ServiceRegistry();
+	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	var dialogService = new eclipse.DialogService(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	var fileService = new eclipse.FileService(serviceRegistry);
+	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 	var siteService = new eclipse.sites.SiteService();
 	serviceRegistry.registerService(eclipse.sites.SITE_SERVICE_NAME, siteService);
 	
@@ -54,6 +55,7 @@ dojo.addOnLoad(function() {
 				var dialog = new widgets.SiteConfigEditor({
 					title: "Create Site Configuration",
 					serviceRegistry: serviceRegistry,
+					fileClient: fileClient;
 					callback: function(name, workspace, mappings, hostHint) {
 						siteService.createSiteConfiguration(name, workspace, mappings, hostHint).then(refreshFunction);
 					}});

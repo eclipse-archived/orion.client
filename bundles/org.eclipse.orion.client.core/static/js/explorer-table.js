@@ -16,17 +16,17 @@ eclipse.Explorer = (function() {
 	 * @name eclipse.Explorer
 	 * @class A table-based explorer component
 	 */
-	function Explorer(serviceRegistry, treeRoot, searcher, parentId, toolbarId, selectionToolsId) {
+	function Explorer(serviceRegistry, treeRoot, searcher, fileClient, parentId, toolbarId, selectionToolsId) {
 		this.registry = serviceRegistry;
 		this.treeRoot = treeRoot;
 		this.searcher = searcher;
+		this.fileClient = fileClient;
 		this.parentId = parentId;
 		this.innerId = parentId+"inner";
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
 		this.model = null;
 		this.myTree = null;
-		this.fileClient = new eclipse.FileClient(serviceRegistry);
 	}
 	Explorer.prototype = /** @lends eclipse.Explorer.prototype */ {
 		// we have changed an item on the server at the specified parent node
@@ -147,7 +147,7 @@ eclipse.Model = (function() {
 			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
 				onComplete([]);
 			} else if (parentItem.Location) {
-				fileClient.fetchChildren(parentItem.ChildrenLocation).then( 
+				this.fileClient.fetchChildren(parentItem.ChildrenLocation).then( 
 					dojo.hitch(this, function(children) {
 						eclipse.util.processNavigatorParent(parentItem, children);
 						onComplete(children);

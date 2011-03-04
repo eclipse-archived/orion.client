@@ -99,7 +99,8 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId,
 	}
 };
 
-eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
+eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient, toolbarId) {
+	
 	function forceSingleItem(item) {
 		if (dojo.isArray(item)) {
 			if (item.length > 1) {
@@ -137,15 +138,13 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		var callback = function(items) {
 			for (var i=0; i < items.length; i++) {
 				var item = items[i];
-				serviceRegistry.getService("IFileService").then(dojo.hitch(this, function(service) {
-					if (isCopy) {
-						service.copyFile(item.Location, this.path).then(
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-					} else {
-						service.moveFile(item.Location, this.path).then(
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-					}
-				}));
+				if (isCopy) {
+					fileClient.copyFile(item.Location, this.path).then(
+						dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+				} else {
+					fileClient.moveFile(item.Location, this.path).then(
+						dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+				}
 			}
 			window.alert("Not yet implemented.  See log for operation parameters.");
 		};
@@ -282,15 +281,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
 						if (item.parent.Path === "") {
-							serviceRegistry.getService("IFileService").then(function(service) {
-								service.removeProject(item.parent.Location, item.Location).then(
-									dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-							});
+							fileClient.removeProject(item.parent.Location, item.Location).then(
+								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 						} else {
-							serviceRegistry.getService("IFileService").then(function(service) {
-								service.deleteFile(item.Location).then(
-									dojo.hitch(explorer, function() {explorer.changedItem(item.parent);}));//refresh the parent
-							});
+							fileClient.deleteFile(item.Location).then(
+								dojo.hitch(explorer, function() {explorer.changedItem(item.parent);}));//refresh the parent
 						}
 					}
 				}));
@@ -321,10 +316,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				title: "Create File",
 				label: "File name:",
 				func:  function(name){
-					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createFile(item.Location, name).then(
-						dojo.hitch(explorer, function() {this.changedItem(item);})); //refresh the parent
-					});
+					fileClient.createFile(item.Location, name).then(
+					dojo.hitch(explorer, function() {this.changedItem(item);})); //refresh the parent
 				}
 			});
 			dialog.startup();
@@ -346,10 +339,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				title: "Create Folder",
 				label: "Folder name:",
 				func:  function(name){
-					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}));//refresh the parent
-					});
+					fileClient.createFolder(item.Location, name).then(
+						dojo.hitch(explorer, function() {this.changedItem(item);}));//refresh the parent
 				}
 			});
 			dialog.startup();
@@ -371,10 +362,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				title: "Create Folder",
 				label: "Folder name:",
 				func:  function(name, serverPath, create){
-					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createProject(explorer.treeRoot.ChildrenLocation, name, serverPath, create).then(
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-					});
+					fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, serverPath, create).then(
+						dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 				}
 			});
 			dialog.startup();
@@ -395,10 +384,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				title: "Link Folder",
 				label: "Folder name:",
 				func:  function(name, url, create){
-					serviceRegistry.getService("IFileService").then(function(service) {
-						service.createProject(explorer.treeRoot.ChildrenLocation, name, url, create).then(
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-						});
+					fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, create).then(
+						dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 				},
 				advanced: true
 			});

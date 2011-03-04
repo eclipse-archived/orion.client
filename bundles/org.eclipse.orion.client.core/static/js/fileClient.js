@@ -24,8 +24,13 @@ eclipse.FileClient = (function() {
 	 * @class Provides operations on files, folders, and projects.
 	 * @name eclipse.FileClient
 	 */
-	function FileClient(serviceRegistry) {
+	function FileClient(serviceRegistry, pluginRegistry) {
 		this.serviceRegistry = serviceRegistry;
+		//ensure the plugin is installed
+		var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
+		if (filePlugin === null) {
+			pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
+		}
 	}
 	
 	FileClient.prototype = /**@lends eclipse.FileClient.prototype */
