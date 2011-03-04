@@ -11,12 +11,16 @@ dojo.addOnLoad(function() {
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var usersService = new eclipse.UsersService(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	var prefsService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+
 
 	var usersList = new eclipse.UsersList({
 		parent : "usersList",
 		registry : serviceRegistry
 	});
 	usersList.loadUsers();
+
 	
 	var createUserCommand = new eclipse.Command({
 		name: "Create User",
@@ -33,7 +37,15 @@ dojo.addOnLoad(function() {
 			dialog.show();
 		}
 	});
-	commandService.addCommand(createUserCommand, "dom", "userCommandsToolbar");
-	commandService.renderCommands(document.getElementById("userCommandsToolbar"), "dom", 0, this, "image");
+	
+	commandService.addCommandGroup("eclipse.manageuserscommands", 100, null, null, "userCommandsToolbar");
+	commandService.addCommand(createUserCommand, "dom");
+	commandService.registerCommandContribution("eclipse.createUser", 1, "userCommandsToolbar", "eclipse.manageuserscommands");
+	
+	
+	commandService.renderCommands(document.getElementById("userCommandsToolbar"), "dom", {}, {}, "image");
+	
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, usersList, usersList);
+	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, usersList);
 
 });

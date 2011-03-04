@@ -36,6 +36,7 @@ eclipse.DiffParser = (function() {
 			//Flag of new line at file end
 			this._oNewLineAtEnd = true;
 			this._nNewLineAtEnd = true;
+			this._diffContentIndex = 1;
 		},
 		
 		setLineDelim: function(lineDelimiter){
@@ -43,7 +44,7 @@ eclipse.DiffParser = (function() {
 		},
 		
 		getDiffArray: function(){
-			return this._diffContents;
+			return {array:this._diffContents , index:this._diffContentIndex};
 		},
 		
 		parse: function(oFileString , diffString , doNotBuildNewFile){
@@ -59,8 +60,13 @@ eclipse.DiffParser = (function() {
 				  if(hunkRange)
 					  this._hunkRanges.push(hunkRange); 
 			}
-			if(0 === this._hunkRanges.length)
+			if(0 === this._hunkRanges.length){
+				if(oFileString === ""){
+					this._diffContentIndex = 0;
+					return {outPutFile:diffString,mapper:[[  this._diffContents[this._diffContents.length-1] === "" ? this._diffContents.length-1 :this._diffContents.length, 0 , 1],[1,1,0]]};
+				}
 				return {outPutFile:"",mapper:[]};
+			}
 
 			//console.log(JSON.stringify(this._hunkRanges));
 			for(var j = 0; j <this._hunkRanges.length ; j++){

@@ -24,9 +24,10 @@ eclipse.UsersList = (function() {
 			  service.getUsersList(dojo.hitch(userList, function(jsonData, secondArg) {
 
 					var table = dojo.create("table", {
-						className : "usersTable"
+						className : "treetable"
 					});
-					var titleRow = dojo.doc.createElement("tr");
+					var thead = dojo.create("thead");
+					var titleRow = dojo.create("tr", {"class": "domCommandBackground"}, thead);
 
 					dojo.create("td", {
 						innerHTML : "Login",
@@ -41,11 +42,13 @@ eclipse.UsersList = (function() {
 						className : "usersTable"
 					}, titleRow);
 
-					dojo.place(titleRow, table);
+					dojo.place(thead, table);
 					dojo.place(table, this.parent);
+					
+					var tbody = dojo.create("tbody", null, table);
 
 					for ( var i in jsonData.users) {
-						var userRow = dojo.doc.createElement("tr");
+						var userRow = dojo.create("tr", {"class": i%2==0 ? "treeTableRow lightTreeTableRow" : "treeTableRow darkTreeTableRow"});
 						dojo.connect(userRow, "onmouseover", dojo.hitch(this, function(i){document.getElementById("usersActions"+i).style.visibility="";}, i));
 						dojo.connect(userRow, "onmouseout", dojo.hitch(this, function(i){document.getElementById("usersActions"+i).style.visibility="hidden";}, i));
 						dojo.create("td", {
@@ -74,7 +77,7 @@ eclipse.UsersList = (function() {
 									this.deleteUser(login);
 								}, jsonData.users[i].login));
 						dojo.place(actionsTd, userRow);
-						dojo.place(userRow, table);
+						dojo.place(userRow, tbody);
 					}
 
 				}));

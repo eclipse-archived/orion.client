@@ -15,12 +15,6 @@
         };
     </script>
     <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-    <script type="text/javascript">
-		dojo.require("dijit.Dialog");
- 	    dojo.require("dijit.form.TextBox");
-		dojo.require("widgets.NewItemDialog");
-		dojo.require("widgets.OpenResourceDialog");
- 	</script>    	
 	<style type="text/css">
 		@import "/org.dojotoolkit/dojo/resources/dojo.css";
 		@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
@@ -28,120 +22,22 @@
 		@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
 		@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
 	    @import "/ide.css";
-	    @import "/breadcrumbs.css"; 
 	    @import "/js/compare/compare.css"; 
 	</style>
-	
-	<!-- Extension Registry -->
-	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
-	<script src="js/serviceregistry.js"></script>
-	
-	<!-- Authentication (required for handleAuthenticationError) -->
-	<script type="text/javascript" src="js/auth.js"></script>
-
-	<!-- Commands-->
-	<script src="js/commands.js"></script>
 	  	
- 	
-<script language="javascript" type="text/javascript" src="/editor/js/editor.js"></script>
-<script language="javascript" type="text/javascript" src="/editor/js/model.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/diff-parser.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/rulers.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/compare-model.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/compare-container.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/gap-line-feeder.js"></script>
-<script language="javascript" type="text/javascript" src="js/compare/git-status-table.js"></script>
-	  	
-<script language="javascript" type="text/javascript">
-
-var sBSCompareContainerEditor = null;
-
-function createEditor(input , diff , delim){
-	sBSCompareContainerEditor.setEditor(input , diff);
-}
-
-var fileContent ;
-var fileDiff;
-function getFileContentGit(hashValue){
-	
-	var url = "/git/index" + hashValue;
-	dojo.xhrGet({
-		url: url, 
-		headers: {
-			"Orion-Version": "1"
-		},
-		handleAs: "text",
-		timeout: 5000,
-		//adding
-		load: function(jsonData, ioArgs) {
-			console.log(jsonData);
-			fileContent = jsonData;
-			getFileDiffGit(hashValue);
-		},
-		
-		error: function(response, ioArgs) {
-			console.error("HTTP status code: ", ioArgs.xhr.status);
-			handleGetAuthenticationError(this, ioArgs);
-			return response;
-		}
-	});
-	
-}
-
-function getFileDiffGit(hashValue){
-	
-	var url = "/git/diff" + hashValue;
-	dojo.xhrGet({
-		url: url , 
-		headers: {
-			"Orion-Version": "1"
-		},
-		handleAs: "text",
-		timeout: 5000,
-		load: function(jsonData, ioArgs) {
-			console.log(jsonData);
-			fileDiff = jsonData;
-			createEditor(fileContent , fileDiff ,"\n");
-		},
-		error: function(response, ioArgs) {
-			console.error("HTTP status code: ", ioArgs.xhr.status);
-			handleGetAuthenticationError(this, ioArgs);
-			return response;
-		}
-	});
-	
-}
-
-window.onload = function() {
-	
-	sBSCompareContainerEditor = new orion.SBSCompareContainer("left-viewer" , "right-viewer");
-	//var demo = document.getElementById("dataLength");
-	//demo.innerHTML = demoData.length + ")";
-	var splitted = window.location.href.split('#');
-	if(splitted.length > 1){
-		var leftTH = document.getElementById("left-viewer-title");
-		var rightTH = document.getElementById("right-viewer-title");
-		leftTH.innerHTML = "File  : " + splitted[1];
-		rightTH.innerHTML = "File On Git : " + splitted[1];
-		getFileContentGit(splitted[1]);
-	}
-};
-</script>
 </head>
 
-    <body style="height: 100%" class="soria">
-    
-    <!-- Utilities -->
- 	<script src="js/util.js"></script>
- 	
- 	
- 	<!-- Tree -->
-	
-	<!-- Favorites List -->
-	<script src="js/favorites.js"></script>
-
-	<!--Search -->
+<body style="height: 100%" class="soria">
+	<script src="js/auth.js"></script>
+	<script src="/editor/js/editor.js"></script>
+	<script src="/editor/js/model.js"></script>
+	<script src="js/compare/diff-parser.js"></script>
+	<script src="js/compare/rulers.js"></script>
+	<script src="js/compare/compare-model.js"></script>
+	<script src="js/compare/compare-container.js"></script>
+	<script src="js/compare/gap-line-feeder.js"></script>
 	<script src="js/searchClient.js"></script>
+	
     <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;" splitter="true">
 		<div   class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
@@ -167,5 +63,8 @@ window.onload = function() {
 			</div>
 		</div>
 	</div>
+	
+	<!-- Glue -->
+	<script src="js/compare/compare-glue.js"></script>
 </body>
 </html>

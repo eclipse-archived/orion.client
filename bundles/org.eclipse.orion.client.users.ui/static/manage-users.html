@@ -41,10 +41,14 @@
 @import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
 
 @import "/ide.css";
+@import "/commands.css";
 
 @import "/profile/css/userprofile.css";
 </style>
 <!--Authentication -->
+<script src="/js/globalCommands.js"></script>
+<script src="/js/searchClient.js"></script>
+<script src="/js/preferences.js"></script>
 <script type="text/javascript" src="/js/auth.js"></script>
 <!-- Extension Registry -->
 <script src="js/serviceregistry.js"></script>
@@ -80,20 +84,20 @@
 		</div>
 		<div class="paneScrolled" style="margin-left: 8px;" id="usersPane"
 			dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-			<table>
-			<tr id="personalInfoToolbar" class="toolbar">
-			<td>
+			<div>
+			
+			<div>
 				<h2>
 					Orion Users
 				</h2>
-			</td>
-			<td id="userCommandsToolbar" style="text-align: right;"></td>
-			</tr>
-			<tr><td colspan=2>
+			</div>
+			<div id="userCommandsToolbar"></div>
+			
+			
 			<div id="usersList">
 			</div>
-			</td></tr>
-			</table>
+			
+			</div>
 		</div>
 	</div>
 </body>
