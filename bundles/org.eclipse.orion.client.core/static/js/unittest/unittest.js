@@ -105,8 +105,9 @@ eclipse.Unittest.Renderer = (function() {
 				dojo.create("img", {src: item.result?"/images/unit_test/testok.gif":"/images/unit_test/testfail.gif"}, div, "first");
 //				link = dojo.create("a", {className: "navlink", href: "/"}, div, "last");
 				dojo.place(document.createTextNode(item.Name + " (" + (item.millis / 1000) + "s)"), div, "last");
-				if (!item.result) {
+				if (!item.result && !item.logged) {
 					console.log("[FAILURE][" + item.Name + "][" + item.message + "]\n" + item.stack ? item.stack : "");
+					item.logged =true;
 				}
 			}
 			

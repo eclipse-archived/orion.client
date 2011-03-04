@@ -127,12 +127,7 @@ orion.GitStatusRenderer = (function() {
 					}
 					dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 					self._controller._model.selectedFileId = nameSpan.id;
-					//self._controller.getFileContentGit(itemModel.location);
-					var untracked = (itemModel.type === "Untracked");
-					var added = (itemModel.type === "Added");
-					var diffParam = self._controller._model.isStaged(itemModel.type) ? "/Cached" : "/Default";
-					var fileParam = untracked | added ? "" : (self._controller._model.isStaged(itemModel.type) ? "/git/commit/HEAD" : "/git/index");
-					self._controller.loadDiffContent(fileParam + itemModel.location , untracked | added? null : diffParam + itemModel.location);
+					self._controller.loadDiffContent(itemModel);
 				}
 			});
 			
@@ -145,7 +140,7 @@ orion.GitStatusRenderer = (function() {
 			sbsViewerCol.appendChild(sbsViewerImg);
 			sbsViewerImg.style.cursor = "pointer";
 			sbsViewerImg.onclick = dojo.hitch(this, function(evt) {
-				this._controller.openSBSViewer(itemModel.location);
+				this._controller.openSBSViewer(itemModel);
 			});
 			
 			//render the stage / unstage action  icon
@@ -197,37 +192,46 @@ orion.GitStatusController = (function() {
 				if(!groupData)
 					break;
 				for(var j = 0 ; j < groupData.length ; j++){
-					renderer.renderRow({name:groupData[j].Name , type:groupName , location:this._makeLocation(groupData[j].Location , groupData[j].Name)});
+					renderer.renderRow({name:groupData[j].Name , 
+										type:groupName , 
+										//location:this._makeLocation(groupData[j].Location , groupData[j].Name),
+										location:groupData[j].Location,
+										commitURI:groupData[j].Git.CommitLocation,
+										diffURI:groupData[j].Git.DiffLocation
+					});
 				} 
 			}
 		},
 		
-		loadDiffContent: function(fileContentURI , diffURI){
-			this._inlineCompareContainer.resolveDiff(fileContentURI,
-					                                function(){					
-														var fileNameDiv = document.getElementById("fileNameInViewer");
-														fileNameDiv.innerHTML = fileContentURI;
-													} , 
-					                                diffURI);
+		_resolveURI: function(itemModel){
+			var untracked = (itemModel.type === "Untracked");
+			var added = (itemModel.type === "Added");
+			var diffURI =  (untracked || added) ? null : itemModel.diffURI;
+			var fileURI =  (untracked || added) ? itemModel.location : (this._model.isStaged(itemModel.type) ? itemModel.commitURI: "/git/index" + eclipse.util.makeRelative(itemModel.location));
+			return {diffURI:diffURI , fileURI:fileURI };
 		},
 		
-		openSBSViewer: function(hash){
-			//var url = "/compare.html#/" + hash;
-			var url = "/compare.html#" + hash;
+		loadDiffContent: function(itemModel){
+			var result = this._resolveURI(itemModel);
+			this._inlineCompareContainer.resolveDiff(result.diffURI,
+													result.fileURI,
+					                                function(){					
+														var fileNameDiv = document.getElementById("fileNameInViewer");
+														fileNameDiv.innerHTML = itemModel.name;
+													});
+		},
+		
+		openSBSViewer: function(itemModel){
+			var result = this._resolveURI(itemModel);
+			var url = "/compare.html#" + (result.diffURI ?  result.diffURI+"?" : "")  + result.fileURI;
 			window.open(url,"");
 		},
 		
 		doAction: function(location  ,type){
-			var shouldStage = false;
-			for(var i = 0; i < this._model.interestedUnstagedGroup.length ; i++){
-				if(type === this._model.interestedUnstagedGroup[i]){
-					shouldStage = true;
-				}
-			}
 			if(this._model.isStaged(type))
-				this.unstage(location);
+				this.unstage(eclipse.util.makeRelative(location));
 			else
-				this.stage(location);
+				this.stage(eclipse.util.makeRelative(location));
 		},
 		
 		getGitStatus: function(url){
@@ -273,9 +277,15 @@ orion.GitStatusController = (function() {
 			});
 		},
 		
+		stageAll: function(){
+			var start = this._url.indexOf("/file/");
+			if(start != -1)
+				this.stage(this._url.substring(start));
+		},
+		
 		unstage: function(location){
 			var self = this;
-			var url = "/git/index" + location;
+			var url = "/git/index" +  location;
 			dojo.xhrPost({
 				url: url , 
 				headers: {
@@ -294,6 +304,46 @@ orion.GitStatusController = (function() {
 					return response;
 				}
 			});
+		},
+		
+		unstageAll: function(){
+			var start = this._url.indexOf("/file/");
+			if(start != -1)
+				this.unstage(this._url.substring(start));
+		},
+		
+		commitAll: function(location , message){
+			var self = this;
+			var url = "/git/commit" +  location;
+			dojo.xhrPost({
+				url: url , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 5000,
+				postData: dojo.toJson({"Message":message} ),
+				load: function(jsonData, ioArgs) {
+					console.log(JSON.stringify(jsonData));
+					self.getGitStatus(self._url);;
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		commit: function(message){
+			var start = this._url.indexOf("/file/");
+			if(start != -1){
+				var sub = this._url.substring(start);
+				var subSlitted = sub.split("/");
+				if(subSlitted.length > 2){
+					this.commitAll([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") , message);
+				}
+			}
 		}
 		
 		
