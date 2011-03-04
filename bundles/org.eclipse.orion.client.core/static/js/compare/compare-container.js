@@ -13,7 +13,8 @@ var orion = orion || {};
 orion.CompareContainer = (function() {
 	function CompareContainer () {
 		this._diffParser = new eclipse.DiffParser();
-		self.fileContent = null;
+		this.fileContent = null;
+		this.diffURI = null;
 	}
 	CompareContainer.prototype = {
 		_getLineDelim: function(input , diff){	
@@ -49,7 +50,7 @@ orion.CompareContainer = (function() {
 		},
 		
 		getFileContentGit: function(hashValue , callBack){
-			var url = "/git/index" + hashValue;
+			var url =  hashValue;
 			var self = this;
 			dojo.xhrGet({
 				url: url, 
@@ -61,7 +62,7 @@ orion.CompareContainer = (function() {
 				load: function(jsonData, ioArgs) {
 					//console.log(jsonData);
 					self.fileContent = jsonData;
-					self.getFileDiffGit(hashValue , callBack);
+					self.getFileDiffGit(self.diffURI , callBack);
 				},
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -109,6 +110,7 @@ orion.CompareContainer = (function() {
 		},
 		
 		resolveDiff: function(fileContentURI , callBack ,diffURI){
+			this.diffURI = diffURI;
 			if(diffURI){
 				this.getFileContentGit(fileContentURI , callBack);
 			} else {
