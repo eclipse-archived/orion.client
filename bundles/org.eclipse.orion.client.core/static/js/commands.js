@@ -421,13 +421,16 @@ eclipse.Command = (function() {
 		_asImage: function(name, items, handler, userData) {
 			handler = handler || this;
 			var image = new Image();
-			var link;
+			var link = dojo.create("a");
 			image.alt = this.name;
 			image.title = this.name;
 			image.name = name;
 			image.id = name;
+			if (!this.hasImage()) {
+				var text = document.createTextNode(this.name);
+				dojo.place(text, link, "last");
+			}
 			if (this.hrefCallback) {
-				link = dojo.create("a");
 				var href = this.hrefCallback.call(handler, items, this.id, userData);
 				if(href.then){
 					href.then(function(l){
@@ -436,11 +439,10 @@ eclipse.Command = (function() {
 				}else{
 					link.href = href; 
 				}
-				if (!this.hasImage()) {
-					var text = document.createTextNode(this.name);
-					dojo.place(text, link, "last");
-				}
 			} else if (this.callback) {
+				dojo.connect(link, "onclick", this, function() {
+					this.callback.call(handler, items, this.id, image.id, userData);
+				});
 				dojo.connect(image, "onclick", this, function() {
 					this.callback.call(handler, items, this.id, image.id, userData);
 				});
@@ -465,11 +467,9 @@ eclipse.Command = (function() {
 				});
 			}
 			dojo.addClass(image, 'commandImage');
-			if (link) {
-				dojo.place(image, link, "last");
-				return link;
-			}
-			return image;
+			dojo.addClass(link, 'commandLink');
+			dojo.place(image, link, "last");
+			return link;
 		},
 		_asLink: function(items, handler) {
 			handler =  handler || this;
