@@ -229,9 +229,9 @@ orion.GitStatusController = (function() {
 		
 		doAction: function(location  ,type){
 			if(this._model.isStaged(type))
-				this.unstage(location);
+				this.unstage(eclipse.util.makeRelative(location));
 			else
-				this.stage(location);
+				this.stage(eclipse.util.makeRelative(location));
 		},
 		
 		getGitStatus: function(url){
@@ -257,7 +257,7 @@ orion.GitStatusController = (function() {
 		
 		stage: function(location){
 			var self = this;
-			var url = "/git/index" +  eclipse.util.makeRelative(location);
+			var url = "/git/index" + location;
 			dojo.xhrPut({
 				url: url , 
 				headers: {
@@ -277,9 +277,15 @@ orion.GitStatusController = (function() {
 			});
 		},
 		
+		stageAll: function(){
+			var start = this._url.indexOf("/file/");
+			if(start != -1)
+				this.stage(this._url.substring(start));
+		},
+		
 		unstage: function(location){
 			var self = this;
-			var url = "/git/index" +  eclipse.util.makeRelative(location);
+			var url = "/git/index" +  location;
 			dojo.xhrPost({
 				url: url , 
 				headers: {
@@ -298,6 +304,41 @@ orion.GitStatusController = (function() {
 					return response;
 				}
 			});
+		},
+		
+		unstageAll: function(){
+			var start = this._url.indexOf("/file/");
+			if(start != -1)
+				this.unstage(this._url.substring(start));
+		},
+		
+		commitAll: function(location , message){
+			var self = this;
+			var url = "/git/commit" +  location;
+			dojo.xhrPost({
+				url: url , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 5000,
+				postData: dojo.toJson({"Message":message} ),
+				load: function(jsonData, ioArgs) {
+					console.log(JSON.stringify(jsonData));
+					self.getGitStatus(self._url);;
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		commit: function(message){
+			var start = this._url.indexOf("/file/");
+			if(start != -1)
+				this.commitAll(this._url.substring(start) , message);
 		}
 		
 		
