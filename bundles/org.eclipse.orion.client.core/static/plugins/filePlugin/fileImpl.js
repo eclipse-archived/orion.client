@@ -7,22 +7,25 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo window eclipse:true handleGetAuthenticationError handlePostAuthenticationError
-  handleDeleteAuthenticationError */
+/*global dojo window eclipse:true */
 /*jslint forin:true devel:true*/
 
 /** @namespace The global container for eclipse APIs. */
 var eclipse = eclipse || {};
 
-eclipse.FileService = (function() {
+/**
+ * An implementation of the file service that understands the Orion 
+ * server file API. This implementation is suitable for invocation by a remote plugin.
+ */
+eclipse.FileServiceImpl= (function() {
 	/**
 	 * @class Provides operations on files, folders, and projects.
-	 * @name eclipse.FileService
+	 * @name FileServiceImpl
 	 */
-	function FileService() {
+	function FileServiceImpl() {
 	}
 	
-	FileService.prototype = /**@lends eclipse.FileService.prototype */
+	FileServiceImpl.prototype = /**@lends eclipse.FileServiceImpl.prototype */
 	{
 		/**
 		 * Obtains the children of a remote resource
@@ -40,11 +43,6 @@ eclipse.FileService = (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData.Children || [];
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
 				}
 			});
 		},
@@ -66,11 +64,6 @@ eclipse.FileService = (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData.Workspaces;
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handlePostAuthenticationError(this, ioArgs);
-					return response;
 				}
 			});
 		},
@@ -89,14 +82,7 @@ eclipse.FileService = (function() {
 				timeout: 15000,
 				load: dojo.hitch(this, function(jsonData, ioArgs) {
 					return jsonData.Workspaces;
-				}),
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handleGetAuthenticationError(this, ioArgs);
-					// TODO need a better error handling
-					onLoad(response);
-					return response;
-				}
+				})
 			});
 		},
 		
@@ -107,8 +93,7 @@ eclipse.FileService = (function() {
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location) {
-			// console.log("loadWorkspace");
-			var deferred = dojo.xhrGet({
+			return dojo.xhrGet({
 				url: location ? location : "/workspace",
 				headers: {
 					"Orion-Version": "1"
@@ -130,13 +115,12 @@ eclipse.FileService = (function() {
 						}
 					}
 				}),
-				error: function(response, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					// TODO need a better error handling
-					return response;
-				}
+				error: function(error) {
+					error.log=false;
+					return error;
+				},
+				failOk: true
 			});
-			return deferred;
 		},
 		/**
 		 * Adds a project to a workspace.
@@ -171,11 +155,6 @@ eclipse.FileService = (function() {
 				load: function(jsonData, ioArgs) {
 					return jsonData;
 				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handlePostAuthenticationError(this, ioArgs);
-					return response;
-				},
 				postData: dojo.toJson(data)
 			});
 		},
@@ -196,11 +175,6 @@ eclipse.FileService = (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData;
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handlePostAuthenticationError(this, ioArgs);
-					return response;
 				},
 				postData: dojo.toJson({ProjectURL: projectLocation, Remove: true})
 			});
@@ -228,11 +202,6 @@ eclipse.FileService = (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData;
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handlePostAuthenticationError(this, ioArgs);
-					return response;
 				}
 			});
 		},
@@ -260,11 +229,6 @@ eclipse.FileService = (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData;
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handlePostAuthenticationError(this, ioArgs);
-					return response;
 				}
 			});
 		},
@@ -282,11 +246,6 @@ eclipse.FileService = (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData;
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handleDeleteAuthenticationError(this, ioArgs);
-					return response;
 				}
 			});
 		},
@@ -295,19 +254,41 @@ eclipse.FileService = (function() {
 		 * Moves a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to move.
 		 * @param {String} targetLocation The location of the target folder.
+		 * @param {String} [name] The name of the destination file or directory in the case of a rename
 		 */
-		moveFile: function(sourceLocation, targetLocation) {
-			window.console.log("Not yet implemented.  Moving " + sourceLocation + " to " + targetLocation);
+		moveFile: function(sourceLocation, targetLocation, name) {
+			this._doCopyMove(sourceLocation, targetLocation, true, name);
 		},
 		 
 		/**
 		 * Copies a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to copy.
 		 * @param {String} targetLocation The location of the target folder.
+		 * @param {String} [name] The name of the destination file or directory in the case of a rename
 		 */
-		copyFile: function(sourceLocation, targetLocation) {
-			window.console.log("Not yet implemented.  Copying " + sourceLocation + " to " + targetLocation);
+		copyFile: function(sourceLocation, targetLocation, name) {
+			this._doCopyMove(sourceLocation, targetLocation, false, name);
+		},
+		
+		_doCopyMove: function(sourceLocation, targetLocation, isMove, name) {
+			if (!name) {
+				name = sourceLocation.slice(sourceLocation.lastIndexOf('/'));
+			}
+			return dojo.xhrPost({
+				url: targetLocation,
+				headers: {
+					"Orion-Version": "1",
+					"Slug": name,
+					"X-Create-Options": isMove ? "move" : "copy"
+				},
+				postData: dojo.toJson({"Location": sourceLocation}),
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, ioArgs) {
+					return jsonData;
+				}
+			});
 		}
 	};
-	return FileService;
+	return FileServiceImpl;
 }());

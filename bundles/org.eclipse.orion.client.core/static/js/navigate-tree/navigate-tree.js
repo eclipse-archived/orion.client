@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,25 +24,20 @@ dojo.addOnLoad(function(){
 	new eclipse.SaveableService(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	
-	// File operations
-	var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
-	if (filePlugin === null) {
-		pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
-	}
-	
 	// Favorites
 	new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
-
 
 	var treeRoot = {
 		children:[]
 	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
+	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
+	
 	var contextMenu = dijit.byId("treeContextMenu");
 	
 	var explorer = new eclipse.ExplorerTree(serviceRegistry, treeRoot,
-			searcher, "explorer-tree", "navToolBar", contextMenu);
+			searcher, fileClient, "explorer-tree", "navToolBar", contextMenu);
 			
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	
