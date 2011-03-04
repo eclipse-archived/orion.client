@@ -138,13 +138,10 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		var callback = function(items) {
 			for (var i=0; i < items.length; i++) {
 				var item = items[i];
-				if (isCopy) {
-					fileClient.copyFile(item.Location, this.path).then(
-						dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-				} else {
-					fileClient.moveFile(item.Location, this.path).then(
-						dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-				}
+				var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
+				func.apply(fileClient, [item.Location, this.path]).then(
+					dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);})//refresh the root
+				);
 			}
 			window.alert("Not yet implemented.  See log for operation parameters.");
 		};

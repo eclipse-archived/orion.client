@@ -272,8 +272,22 @@ eclipse.FileServiceImpl= (function() {
 		
 		_doCopyMove: function(sourceLocation, targetLocation, isMove, name) {
 			if (!name) {
-				name = "";
+				name = sourceLocation.slice(sourceLocation.lastIndexOf('/'));
 			}
+			return dojo.xhrPost({
+				url: targetLocation,
+				headers: {
+					"Orion-Version": "1",
+					"Slug": name,
+					"X-Create-Options": isMove ? "move" : "copy"
+				},
+				postData: dojo.toJson({"Location": sourceLocation}),
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, ioArgs) {
+					return jsonData;
+				}
+			});
 		}
 	};
 	return FileServiceImpl;
