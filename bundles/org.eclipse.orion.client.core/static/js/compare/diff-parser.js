@@ -63,7 +63,7 @@ eclipse.DiffParser = (function() {
 			if(0 === this._hunkRanges.length){
 				if(oFileString === ""){
 					this._diffContentIndex = 0;
-					return {outPutFile:diffString,mapper:[[  this._diffContents[this._diffContents.length-1] === "" ? this._diffContents.length-1 :this._diffContents.length, 0 , 1]]};
+					return {outPutFile:diffString,mapper:[[  this._diffContents[this._diffContents.length-1] === "" ? this._diffContents.length-1 :this._diffContents.length, 0 , 1],[1,1,0]]};
 				}
 				return {outPutFile:"",mapper:[]};
 			}

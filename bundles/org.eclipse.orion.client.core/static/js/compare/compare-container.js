@@ -64,10 +64,11 @@ orion.CompareContainer = (function() {
 					self.getFileDiffGit(hashValue , callBack);
 				},
 				error: function(response, ioArgs) {
-					if(ioArgs.xhr.status === 500)
-						self.getFileContent(hashValue , callBack);
 					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handleGetAuthenticationError(this, ioArgs);
+					if(ioArgs.xhr.status === 401)
+						handleGetAuthenticationError(this, ioArgs);
+					else
+						self.getFileContent(hashValue , callBack);
 					return response;
 				}
 			});
