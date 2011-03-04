@@ -41,7 +41,6 @@ dojo.addOnLoad(function(){
 	// create registry and instantiate needed services
 	serviceRegistry = new eclipse.ServiceRegistry();
 	new eclipse.Preferences(serviceRegistry, "/prefs/user");
-	new eclipse.FileService(serviceRegistry);
 	new eclipse.TestConfigService({serviceRegistry: serviceRegistry});
 	
 
