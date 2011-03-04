@@ -288,6 +288,55 @@ eclipse.FileServiceImpl= (function() {
 					return jsonData;
 				}
 			});
+		},
+		/**
+		 * Returns the contents or metadata of the file at the given location.
+		 *
+		 * @param {String} location The location of the file to get contents for
+		 * @param {Boolean} [isMetadata] If defined and true, returns the file metadata, 
+		 *   otherwise file contents are returned
+		 * @return A deferred that will be provided with the contents or metadata when available
+		 */
+		read: function(location, isMetadata) {
+			var xhrArgs = {
+				url: location,
+				timeout: 5000,
+				headers: { "Orion-Version": "1" },
+				load: function(data, ioArgs) {
+					return data;
+				},
+				error: function(error) {
+					error.log=false;
+					return error;
+				},
+				failOk: true
+			};
+			//some different header for getting metadata
+			if (isMetadata) {
+				xhrArgs.content = { "parts": "meta" };
+				xhrArgs.handleAs = "json";
+			}
+			return dojo.xhrGet(xhrArgs);
+		},
+		/**
+		 * Writes the contents or metadata of the file at the given location.
+		 *
+		 * @param {String} location The location of the file to set contents for
+		 * @param {String|Object} contents The content string, or metadata object to write
+		 * @return A deferred for chaining events after the write completes
+		 */		
+		write: function(location, contents) {
+			var xhrArgs = {
+				url: location,
+				timeout: 5000,
+				putData: contents
+			};
+			//some different header for putting metadata
+			if (typeof contents === "string") {
+				xhrArgs.url = location + "?parts=meta";
+				xhrArgs.handleAs = "json";
+			}
+			return dojo.xhrPut(xhrArgs);
 		}
 	};
 	return FileServiceImpl;

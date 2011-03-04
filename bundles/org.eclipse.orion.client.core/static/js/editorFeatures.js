@@ -30,16 +30,15 @@ eclipse.editorFeatures = eclipse.editorFeatures || {};
  * Creates the common text editing commands.  Also generates commands for any installed plug-ins that
  * contribute editor actions.  
  */
-eclipse.editorFeatures.createEditorCommands = function(serviceRegistry, commandService, editor, toolbarId) {
+eclipse.editorFeatures.createEditorCommands = function(serviceRegistry, commandService, fileClient, editor, toolbarId) {
 
 	// create commands common to all editors
 	editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding('s', true), "eclipse.save");
 	editor.getEditorWidget().setAction("eclipse.save", function () {
 		var contents = editor.getEditorWidget().getText();
-		serviceRegistry.getService("ISaveable").then(function(saveService) {
-			saveService.doSave(editor.getFileURI(), contents);
+		fileClient.write(editor.getFileURI(), contents).then(function() {
+			editor.onInputChange(editor.getFileURI(), null, contents, true);
 		});
-		editor.onInputChange(editor.getFileURI(), null, contents, true);
 	});
 	var saveCommand = new eclipse.Command({
 		name: "Save",
