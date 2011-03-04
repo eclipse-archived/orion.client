@@ -136,7 +136,30 @@ eclipse.FileClient = (function() {
 		copyFile: function(sourceLocation, targetLocation) {
 			return this._doServiceCall("copyFile", arguments);
 		},
-		
+
+		/**
+		 * Returns the contents or metadata of the file at the given location.
+		 *
+		 * @param {String} location The location of the file to get contents for
+		 * @param {Boolean} [isMetadata] If defined and true, returns the file metadata, 
+		 *   otherwise file contents are returned
+		 * @return A deferred that will be provided with the contents or metadata when available
+		 */
+		read: function(location, isMetadata) {
+			return this._doServiceCall("read", arguments);
+		},
+
+		/**
+		 * Writes the contents or metadata of the file at the given location.
+		 *
+		 * @param {String} location The location of the file to set contents for
+		 * @param {String|Object} contents The content string, or metadata object to write
+		 * @return A deferred for chaining events after the write completes
+		 */		
+		write: function(location, contents) {
+			return this._doServiceCall("write", arguments);
+		},
+
 		/**
 		 * This helper method implements invocation of the service call,
 		 * with retry on authentication error if needed.
