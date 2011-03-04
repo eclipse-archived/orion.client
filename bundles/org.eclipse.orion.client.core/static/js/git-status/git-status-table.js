@@ -337,8 +337,13 @@ orion.GitStatusController = (function() {
 		
 		commit: function(message){
 			var start = this._url.indexOf("/file/");
-			if(start != -1)
-				this.commitAll(this._url.substring(start) , message);
+			if(start != -1){
+				var sub = this._url.substring(start);
+				var subSlitted = sub.split("/");
+				if(subSlitted.length > 2){
+					this.commitAll([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") , message);
+				}
+			}
 		}
 		
 		
