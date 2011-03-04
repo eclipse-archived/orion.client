@@ -38,6 +38,15 @@ orion.GitStatusModel = (function() {
 	return GitStatusModel;
 }());
 
+orion.gitStatusFileImgMap = { "Missing":["/images/git/git-removed.gif", "Removed unstaged" , "/images/git/git-stage.gif", "Stage removed" ],
+							  "Removed":["/images/git/git-removed.gif","Removed staged" ,"/images/git/git-unstage.gif", "Unstage removed" ],	
+							  "Modified":["/images/git/git-modify.gif","Modified unstaged" ,"/images/git/git-stage.gif", "Stage modified" ],	
+							  "Changed":["/images/git/git-modify.gif","Modified staged" ,"/images/git/git-unstage.gif", "Untage modified"],	
+							  "Untracked":["/images/git/git-added.gif","Added unstaged" ,"/images/git/git-stage.gif", "Stage untracked"],	
+							  "Added":["/images/git/git-added.gif","Added staged" ,"/images/git/git-unstage.gif" , "Unstage added"]	
+							};
+
+
 orion.GitStatusRenderer = (function() {
 	function GitStatusRenderer(tableDivId , model) {
 		this._tableParentDivId = tableDivId;
@@ -70,13 +79,8 @@ orion.GitStatusRenderer = (function() {
 			//render the type icon (added , modified ,untracked ...)
 			var typeColumn = document.createElement('td');
 			var typeImg = document.createElement('img');
-			if(true/*itemModel.type === "added"*/){
-				typeImg.src = "/images/newfile_wiz.gif";
-			} else if (itemModel.type === "modified"){
-				typeImg.src = "/images/newfile_wiz.gif";
-			} else {
-				typeImg.src = "/images/newfile_wiz.gif";
-			}
+			typeImg.src = orion.gitStatusFileImgMap[itemModel.type][0];
+			typeImg.title = "Item type : " + orion.gitStatusFileImgMap[itemModel.type][1];
 			typeColumn.appendChild(typeImg);
 			row.appendChild(typeColumn);
 			
@@ -92,6 +96,7 @@ orion.GitStatusRenderer = (function() {
 			dojo.place(document.createTextNode(itemModel.name), nameSpan, "only");
 			nameSpan.style.cursor = "pointer";
 			nameSpan.style.color = "#0000FF";
+			nameSpan.title = "Click to compare";
 			nameColumn.appendChild(nameSpan);
 			if(nameSpan.id === self._controller._model.selectedFileId ){
 				dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
@@ -123,7 +128,8 @@ orion.GitStatusRenderer = (function() {
 			sbsViewerCol = document.createElement('td');
 			row.appendChild(sbsViewerCol);
 			var sbsViewerImg = document.createElement('img');//dojo.create("img", {src: "/images/redo_edit.gif"}, sbsViewerCol, "last");
-			sbsViewerImg.src = "/images/redo_edit.gif";
+			sbsViewerImg.src = "/images/git/compare-sbs.gif";
+			sbsViewerImg.title="Click to open two way compare";
 			sbsViewerCol.appendChild(sbsViewerImg);
 			sbsViewerImg.style.cursor = "pointer";
 			sbsViewerImg.onclick = dojo.hitch(this, function(evt) {
@@ -134,7 +140,8 @@ orion.GitStatusRenderer = (function() {
 			stageCol = document.createElement('td');
 			row.appendChild(stageCol);
 			var stageImg = document.createElement('img');//dojo.create("img", {src: "/images/down.gif"}, sbsViewerCol, "last");
-			stageImg.src = "/images/down.gif";
+			stageImg.src = orion.gitStatusFileImgMap[itemModel.type][2];
+			stageImg.title = orion.gitStatusFileImgMap[itemModel.type][3];
 			stageCol.appendChild(stageImg);
 			stageImg.style.cursor = "pointer";
 			stageImg.onclick = dojo.hitch(this, function(evt) {
