@@ -127,12 +127,7 @@ orion.GitStatusRenderer = (function() {
 					}
 					dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 					self._controller._model.selectedFileId = nameSpan.id;
-					//self._controller.getFileContentGit(itemModel.location);
-					var untracked = (itemModel.type === "Untracked");
-					var added = (itemModel.type === "Added");
-					var diffParam = self._controller._model.isStaged(itemModel.type) ? "/Cached" : "/Default";
-					var fileParam = untracked | added ? "" : (self._controller._model.isStaged(itemModel.type) ? "/git/commit/HEAD" : "/git/index");
-					self._controller.loadDiffContent(fileParam + itemModel.location , untracked | added? null : diffParam + itemModel.location);
+					self._controller.loadDiffContent(itemModel);
 				}
 			});
 			
@@ -145,7 +140,7 @@ orion.GitStatusRenderer = (function() {
 			sbsViewerCol.appendChild(sbsViewerImg);
 			sbsViewerImg.style.cursor = "pointer";
 			sbsViewerImg.onclick = dojo.hitch(this, function(evt) {
-				this._controller.openSBSViewer(itemModel.location);
+				this._controller.openSBSViewer(itemModel);
 			});
 			
 			//render the stage / unstage action  icon
@@ -197,33 +192,42 @@ orion.GitStatusController = (function() {
 				if(!groupData)
 					break;
 				for(var j = 0 ; j < groupData.length ; j++){
-					renderer.renderRow({name:groupData[j].Name , type:groupName , location:this._makeLocation(groupData[j].Location , groupData[j].Name)});
+					renderer.renderRow({name:groupData[j].Name , 
+										type:groupName , 
+										//location:this._makeLocation(groupData[j].Location , groupData[j].Name),
+										location:groupData[j].Location,
+										commitURI:groupData[j].Git.CommitLocation,
+										diffURI:groupData[j].Git.DiffLocation
+					});
 				} 
 			}
 		},
 		
-		loadDiffContent: function(fileContentURI , diffURI){
-			this._inlineCompareContainer.resolveDiff(fileContentURI,
-					                                function(){					
-														var fileNameDiv = document.getElementById("fileNameInViewer");
-														fileNameDiv.innerHTML = fileContentURI;
-													} , 
-					                                diffURI);
+		_resolveURI: function(itemModel){
+			var untracked = (itemModel.type === "Untracked");
+			var added = (itemModel.type === "Added");
+			var diffURI =  (untracked || added) ? null : itemModel.diffURI;
+			var fileURI =  (untracked || added) ? itemModel.location : (this._model.isStaged(itemModel.type) ? itemModel.commitURI: "/git/index" + eclipse.util.makeRelative(itemModel.location));
+			return {diffURI:diffURI , fileURI:fileURI };
 		},
 		
-		openSBSViewer: function(hash){
-			//var url = "/compare.html#/" + hash;
-			var url = "/compare.html#" + hash;
+		loadDiffContent: function(itemModel){
+			var result = this._resolveURI(itemModel);
+			this._inlineCompareContainer.resolveDiff(result.diffURI,
+													result.fileURI,
+					                                function(){					
+														var fileNameDiv = document.getElementById("fileNameInViewer");
+														fileNameDiv.innerHTML = itemModel.name;
+													});
+		},
+		
+		openSBSViewer: function(itemModel){
+			var result = this._resolveURI(itemModel);
+			var url = "/compare.html#" + (result.diffURI ?  result.diffURI+"?" : "")  + result.fileURI;
 			window.open(url,"");
 		},
 		
 		doAction: function(location  ,type){
-			var shouldStage = false;
-			for(var i = 0; i < this._model.interestedUnstagedGroup.length ; i++){
-				if(type === this._model.interestedUnstagedGroup[i]){
-					shouldStage = true;
-				}
-			}
 			if(this._model.isStaged(type))
 				this.unstage(location);
 			else
@@ -253,7 +257,7 @@ orion.GitStatusController = (function() {
 		
 		stage: function(location){
 			var self = this;
-			var url = "/git/index" + location;
+			var url = "/git/index" +  eclipse.util.makeRelative(location);
 			dojo.xhrPut({
 				url: url , 
 				headers: {
@@ -275,7 +279,7 @@ orion.GitStatusController = (function() {
 		
 		unstage: function(location){
 			var self = this;
-			var url = "/git/index" + location;
+			var url = "/git/index" +  eclipse.util.makeRelative(location);
 			dojo.xhrPost({
 				url: url , 
 				headers: {

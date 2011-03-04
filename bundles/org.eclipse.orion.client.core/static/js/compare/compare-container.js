@@ -24,12 +24,14 @@ orion.CompareContainer = (function() {
 			return delim;
 		},
 		
-		getFileDiffGit: function(hashValue , callBack){
-			var url = "/git/diff" + hashValue;
+		getFileDiffGit: function(diffURI , callBack){
 			var self = this;
+			if(diffURI === null || diffURI === undefined){
+				self.setEditor("" ,self.fileContent);
+				return;
+			}
 			dojo.xhrGet({
-				url: url , 
-				//changing some thing
+				url: diffURI , 
 				headers: {
 					"Orion-Version": "1"
 				},
@@ -49,47 +51,18 @@ orion.CompareContainer = (function() {
 			});
 		},
 		
-		getFileContentGit: function(hashValue , callBack){
-			var url =  hashValue;
+		getFileContent: function(diffURI ,fileURI , callBack){
 			var self = this;
 			dojo.xhrGet({
-				url: url, 
+				url: fileURI, 
 				headers: {
 					"Orion-Version": "1"
 				},
 				handleAs: "text",
 				timeout: 5000,
 				load: function(jsonData, ioArgs) {
-					//console.log(jsonData);
 					self.fileContent = jsonData;
-					self.getFileDiffGit(self.diffURI , callBack);
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					if(ioArgs.xhr.status === 401)
-						handleGetAuthenticationError(this, ioArgs);
-					else
-						self.getFileContent(hashValue , callBack);
-					return response;
-				}
-			});
-		},
-		
-		getFileContent: function(hashValue  ,callBack){
-			var url = hashValue;
-			var self = this;
-			dojo.xhrGet({
-				url: url, 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "text",
-				timeout: 5000,
-				load: function(jsonData, ioArgs) {
-					if(callBack)
-						callBack();
-					self.fileContent = jsonData;
-					self.setEditor("" ,self.fileContent);
+					self.getFileDiffGit(diffURI , callBack);
 				},
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -109,13 +82,8 @@ orion.CompareContainer = (function() {
 			return {delim:delim , mapper:result.mapper , output:result.outPutFile ,diffArray:diffArray};
 		},
 		
-		resolveDiff: function(fileContentURI , callBack ,diffURI){
-			this.diffURI = diffURI;
-			if(diffURI){
-				this.getFileContentGit(fileContentURI , callBack);
-			} else {
-				this.getFileContent(fileContentURI , callBack);
-			}
+		resolveDiff: function(diffURI ,fileURI , callBack){
+			this.getFileContent(diffURI ,fileURI , callBack);
 		},
 				
 		_initDiffPosition: function(editor){

@@ -6,10 +6,18 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-window.onload = function() {
+dojo.addOnLoad(function(){
+	// initialize service registry and EAS services
+	serviceRegistry = new eclipse.ServiceRegistry();
+	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	var preferenceService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
 		var controller = new orion.GitStatusController(null , splitted[1] , "unstagedZone" , "stagedZone");
 		controller.getGitStatus(splitted[1]);
 	}
-};
+	
+});
