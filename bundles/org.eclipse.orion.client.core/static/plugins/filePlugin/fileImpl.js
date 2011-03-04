@@ -43,11 +43,6 @@ eclipse.FileServiceImpl= (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData.Children || [];
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
 				}
 			});
 		},
@@ -69,11 +64,6 @@ eclipse.FileServiceImpl= (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData.Workspaces;
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handlePostAuthenticationError(this, ioArgs);
-					return response;
 				}
 			});
 		},
@@ -92,14 +82,7 @@ eclipse.FileServiceImpl= (function() {
 				timeout: 15000,
 				load: dojo.hitch(this, function(jsonData, ioArgs) {
 					return jsonData.Workspaces;
-				}),
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handleGetAuthenticationError(this, ioArgs);
-					// TODO need a better error handling
-					onLoad(response);
-					return response;
-				}
+				})
 			});
 		},
 		
@@ -110,8 +93,7 @@ eclipse.FileServiceImpl= (function() {
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location) {
-			// console.log("loadWorkspace");
-			var deferred = dojo.xhrGet({
+			return dojo.xhrGet({
 				url: location ? location : "/workspace",
 				headers: {
 					"Orion-Version": "1"
@@ -132,9 +114,13 @@ eclipse.FileServiceImpl= (function() {
 							return this.createWorkspace("MyWorkspace");
 						}
 					}
-				})
+				}),
+				error: function(error) {
+					error.log=false;
+					return error;
+				},
+				failOk: true
 			});
-			return deferred;
 		},
 		/**
 		 * Adds a project to a workspace.
@@ -169,11 +155,6 @@ eclipse.FileServiceImpl= (function() {
 				load: function(jsonData, ioArgs) {
 					return jsonData;
 				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handlePostAuthenticationError(this, ioArgs);
-					return response;
-				},
 				postData: dojo.toJson(data)
 			});
 		},
@@ -194,11 +175,6 @@ eclipse.FileServiceImpl= (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData;
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handlePostAuthenticationError(this, ioArgs);
-					return response;
 				},
 				postData: dojo.toJson({ProjectURL: projectLocation, Remove: true})
 			});
@@ -226,11 +202,6 @@ eclipse.FileServiceImpl= (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData;
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handlePostAuthenticationError(this, ioArgs);
-					return response;
 				}
 			});
 		},
@@ -258,11 +229,6 @@ eclipse.FileServiceImpl= (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData;
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handlePostAuthenticationError(this, ioArgs);
-					return response;
 				}
 			});
 		},
@@ -280,11 +246,6 @@ eclipse.FileServiceImpl= (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					return jsonData;
-				},
-				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-					handleDeleteAuthenticationError(this, ioArgs);
-					return response;
 				}
 			});
 		},

@@ -36,6 +36,7 @@ eclipse.FileClient = (function() {
 		 * @return A deferred that will provide the array of child objects when complete
 		 */
 		fetchChildren: function(location) {
+			return this._doServiceCall("fetchChildren", arguments);
 		},
 
 		/**
@@ -44,6 +45,7 @@ eclipse.FileClient = (function() {
 		 * @param {String} name The name of the new workspace
 		 */
 		createWorkspace: function(name) {
+			return this._doServiceCall("createWorkspace", arguments);
 		},
 
 		/**
@@ -51,6 +53,7 @@ eclipse.FileClient = (function() {
 		 * workspaces when ready.
 		 */
 		loadWorkspaces: function() {
+			return this._doServiceCall("loadWorkspaces", arguments);
 		},
 		
 		/**
@@ -60,9 +63,79 @@ eclipse.FileClient = (function() {
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location) {
-			return this._doServiceCall("loadWorkspace", [location]);
+			return this._doServiceCall("loadWorkspace", arguments);
 		},
 		
+		/**
+		 * Adds a project to a workspace.
+		 * @param {String} url The workspace location
+		 * @param {String} projectName the human-readable name of the project
+		 * @param {String} serverPath The optional path of the project on the server.
+		 * @param {Boolean} create If true, the project is created on the server file system if it doesn't already exist
+		 */
+		createProject: function(url, projectName, serverPath, create) {
+			return this._doServiceCall("createProject", arguments);
+		},
+		/**
+		 * Removes a project from a workspace. Note that project contents are not deleted.
+		 * @param {String} workspaceLocation The workspace URL
+		 * @param {String} projectLocation The location of the project to be removed
+		 * @return A deferred that can be used to chain events after the deletion completes
+		 */
+		removeProject: function(workspaceLocation, projectLocation) {
+			return this._doServiceCall("removeProject", arguments);
+		},
+		/**
+		 * Creates a folder.
+		 * @param {String} parentLocation The location of the parent folder
+		 * @param {String} folderName The name of the folder to create
+		 * @return {Object} JSON representation of the created folder
+		 */
+		createFolder: function(parentLocation, folderName) {
+			return this._doServiceCall("createFolder", arguments);
+		},
+		/**
+		 * Create a new file in a specified location. Returns a deferred that will provide
+		 * The new file object when ready.
+		 * @param {String} parentLocation The location of the parent folder
+		 * @param {String} fileName The name of the file to create
+		 * @return {Object} A deferred that will provide the new file object
+		 */
+		createFile: function(parentLocation, fileName) {
+			return this._doServiceCall("createFile", arguments);
+		},
+		/**
+		 * Deletes a file or directory.
+		 * @param {String} location The location of the file or directory to delete.
+		 */
+		deleteFile: function(location) {
+			return this._doServiceCall("deleteFile", arguments);
+		},
+		
+		/**
+		 * Moves a file or directory.
+		 * @param {String} sourceLocation The location of the file or directory to move.
+		 * @param {String} targetLocation The location of the target folder.
+		 * @param {String} [name] The name of the destination file or directory in the case of a rename
+		 */
+		moveFile: function(sourceLocation, targetLocation) {
+			return this._doServiceCall("moveFile", arguments);
+		},
+		 
+		/**
+		 * Copies a file or directory.
+		 * @param {String} sourceLocation The location of the file or directory to copy.
+		 * @param {String} targetLocation The location of the target folder.
+		 * @param {String} [name] The name of the destination file or directory in the case of a rename
+		 */
+		copyFile: function(sourceLocation, targetLocation) {
+			return this._doServiceCall("copyFile", arguments);
+		},
+		
+		/**
+		 * This helper method implements invocation of the service call,
+		 * with retry on authentication error if needed.
+		 */
 		_doServiceCall: function(funcName, funcArgs) {
 			var clientDeferred = new dojo.Deferred();
 			this.serviceRegistry.getService("IFileService").then(
@@ -96,64 +169,6 @@ eclipse.FileClient = (function() {
 				}
 			);
 			return clientDeferred;
-		},
-		/**
-		 * Adds a project to a workspace.
-		 * @param {String} url The workspace location
-		 * @param {String} projectName the human-readable name of the project
-		 * @param {String} serverPath The optional path of the project on the server.
-		 * @param {Boolean} create If true, the project is created on the server file system if it doesn't already exist
-		 */
-		createProject: function(url, projectName, serverPath, create) {
-		},
-		/**
-		 * Removes a project from a workspace. Note that project contents are not deleted.
-		 * @param {String} workspaceLocation The workspace URL
-		 * @param {String} projectLocation The location of the project to be removed
-		 * @return A deferred that can be used to chain events after the deletion completes
-		 */
-		removeProject: function(workspaceLocation, projectLocation) {
-		},
-		/**
-		 * Creates a folder.
-		 * @param {String} parentLocation The location of the parent folder
-		 * @param {String} folderName The name of the folder to create
-		 * @return {Object} JSON representation of the created folder
-		 */
-		createFolder: function(parentLocation, folderName) {
-		},
-		/**
-		 * Create a new file in a specified location. Returns a deferred that will provide
-		 * The new file object when ready.
-		 * @param {String} parentLocation The location of the parent folder
-		 * @param {String} fileName The name of the file to create
-		 * @return {Object} A deferred that will provide the new file object
-		 */
-		createFile: function(parentLocation, fileName) {
-		},
-		/**
-		 * Deletes a file or directory.
-		 * @param {String} location The location of the file or directory to delete.
-		 */
-		deleteFile: function(location) {
-		},
-		
-		/**
-		 * Moves a file or directory.
-		 * @param {String} sourceLocation The location of the file or directory to move.
-		 * @param {String} targetLocation The location of the target folder.
-		 * @param {String} [name] The name of the destination file or directory in the case of a rename
-		 */
-		moveFile: function(sourceLocation, targetLocation) {
-		},
-		 
-		/**
-		 * Copies a file or directory.
-		 * @param {String} sourceLocation The location of the file or directory to copy.
-		 * @param {String} targetLocation The location of the target folder.
-		 * @param {String} [name] The name of the destination file or directory in the case of a rename
-		 */
-		copyFile: function(sourceLocation, targetLocation) {
 		}
 	};
 	return FileClient;
