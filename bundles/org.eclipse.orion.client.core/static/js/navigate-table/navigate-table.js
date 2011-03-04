@@ -22,14 +22,8 @@ dojo.addOnLoad(function(){
 	new eclipse.UserService(serviceRegistry);
 	new eclipse.SelectionService(serviceRegistry);
 	var preferenceService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
-	new eclipse.SaveableService(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 
-	// File operations
-	var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
-	if (filePlugin === null) {
-		pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
-	}
 	
 	// Favorites
 	new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
@@ -54,14 +48,16 @@ dojo.addOnLoad(function(){
 	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, "explorer-tree", "navToolBar", "selectionTools");
+	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
+	
+	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, fileClient, "explorer-tree", "navToolBar", "selectionTools");
 	
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
 	// commands shared by navigators
-	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools");
+	eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "navToolBar", "selectionTools");
 	
 	//TODO this should be removed and contributed by a plug-in
 	eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "navToolBar", "selectionTools");

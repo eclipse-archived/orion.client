@@ -180,13 +180,14 @@ orion.Test = (function(assert) {
 				throw Error("not a test object");
 			}
 			
-			if (top != self && typeof(eclipse) !== "undefined" && eclipse.PluginProvider) {
+			if (!exports.useLocal && top != self && typeof(eclipse) !== "undefined" && eclipse.PluginProvider) {
 				var result = new dojo.Deferred();
 				try {
 					var provider = new eclipse.PluginProvider();
 					var serviceProvider = provider.registerServiceProvider("testRunner", {
 						run: function() {
 							dojo.when(_run(name, obj), dojo.hitch(result, "resolve"));
+							return result;
 						},
 						list: function() {
 							return _list(name, obj);
@@ -260,7 +261,9 @@ orion.Test = (function(assert) {
 		};
 		
 		exports.newTest = function() {
-			return Test();
+			var result = Test();
+			result.useLocal = true;
+			return result;
 		};
 		return exports;
 	};

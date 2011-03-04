@@ -60,13 +60,13 @@ eclipse.Unittest.Renderer = (function() {
 			var thead = document.createElement('thead');
 			var row = document.createElement('tr');
 
-			var th = document.createElement('th');
-			th.innerHTML = "Name";
-			row.appendChild(th);
-
-			var result= document.createElement('th');
-			result.innerHTML = "Result";
-			row.appendChild(result);
+//			var th = document.createElement('th');
+//			th.innerHTML = "Name";
+//			row.appendChild(th);
+//
+//			var result= document.createElement('th');
+//			result.innerHTML = "Result";
+//			row.appendChild(result);
 
 //			th = document.createElement('th');
 //			th.innerHTML = "Date";
@@ -104,7 +104,11 @@ eclipse.Unittest.Renderer = (function() {
 //				dojo.create("img", {src: "/images/none.png"}, div, "last");
 				dojo.create("img", {src: item.result?"/images/unit_test/testok.gif":"/images/unit_test/testfail.gif"}, div, "first");
 //				link = dojo.create("a", {className: "navlink", href: "/"}, div, "last");
-				dojo.place(document.createTextNode(item.Name), div, "last");
+				dojo.place(document.createTextNode(item.Name + " (" + (item.millis / 1000) + "s)"), div, "last");
+				if (!item.result && !item.logged) {
+					console.log("[FAILURE][" + item.Name + "][" + item.message + "]\n" + item.stack ? item.stack : "");
+					item.logged =true;
+				}
 			}
 			
 			var resultColumn = document.createElement('td');
@@ -131,7 +135,7 @@ dojo.addOnLoad(function(){
 		var testOverview = dojo.byId("test-overview");
 		dojo.place(document.createTextNode("Running tests from: "), testOverview, "last");
 		var link = dojo.create("a", {className: "navlink", href: "/coding.html#"+fileURI}, testOverview, "last");
-		dojo.place(document.createTextNode(fileURI.substring(fileURI.lastIndexOf("/")+1)), link, "last");
+		dojo.place(document.createTextNode(fileURI), link, "last");
 		
 		// these are isolated from the regular service and plugin registry
 		var testServiceRegistry = new eclipse.ServiceRegistry();
@@ -186,10 +190,12 @@ dojo.addOnLoad(function(){
 //					result.push("\n  " + obj.message);
 //				}
 //				console.log(result.join(""));
-				root.children.push({"Name":name, result: obj.result, message: obj.message, millis: millis});
+				root.children.push({"Name":name, result: obj.result, message: obj.message, stack: obj.stack, millis: millis});
 				myTree.refresh(root, root.children);
 			});	
-			service.run();
+			service.run().then(function(result) {
+				testPluginRegistry._shutdown();
+			});
 		});
 	}
 

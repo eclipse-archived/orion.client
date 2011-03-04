@@ -32,19 +32,28 @@ orion.GitStatusModel = (function() {
 		
 		getGroupData: function(groupName){
 			return this.items[groupName];
+		},
+		
+		isStaged: function(type){
+			for(var i = 0; i < this.interestedStagedGroup.length ; i++){
+				if(type === this.interestedStagedGroup[i]){
+					return  true;
+				}
+			}
+			return false;
 		}
 		
 	};
 	return GitStatusModel;
 }());
 
-orion.gitStatusFileImgMap = { "Missing":["/images/git/git-removed.gif", "Removed unstaged" , "/images/git/git-stage.gif", "Stage removed" ],
-							  "Removed":["/images/git/git-removed.gif","Removed staged" ,"/images/git/git-unstage.gif", "Unstage removed" ],	
-							  "Modified":["/images/git/git-modify.gif","Modified unstaged" ,"/images/git/git-stage.gif", "Stage modified" ],	
-							  "Changed":["/images/git/git-modify.gif","Modified staged" ,"/images/git/git-unstage.gif", "Untage modified"],	
-							  "Untracked":["/images/git/git-added.gif","Added unstaged" ,"/images/git/git-stage.gif", "Stage untracked"],	
-							  "Added":["/images/git/git-added.gif","Added staged" ,"/images/git/git-unstage.gif" , "Unstage added"]	
-							};
+orion.statusTypeMap = { "Missing":["/images/git/git-removed.gif", "Removed unstaged" , "/images/git/git-stage.gif", "Stage removed" ],
+						"Removed":["/images/git/git-removed.gif","Removed staged" ,"/images/git/git-unstage.gif", "Unstage removed" ],	
+						 "Modified":["/images/git/git-modify.gif","Modified unstaged" ,"/images/git/git-stage.gif", "Stage modified" ],	
+						 "Changed":["/images/git/git-modify.gif","Modified staged" ,"/images/git/git-unstage.gif", "Untage modified"],	
+					     "Untracked":["/images/git/git-added.gif","Added unstaged" ,"/images/git/git-stage.gif", "Stage untracked"],	
+						 "Added":["/images/git/git-added.gif","Added staged" ,"/images/git/git-unstage.gif" , "Unstage added"]	
+					  };
 
 
 orion.GitStatusRenderer = (function() {
@@ -79,8 +88,8 @@ orion.GitStatusRenderer = (function() {
 			//render the type icon (added , modified ,untracked ...)
 			var typeColumn = document.createElement('td');
 			var typeImg = document.createElement('img');
-			typeImg.src = orion.gitStatusFileImgMap[itemModel.type][0];
-			typeImg.title = "Item type : " + orion.gitStatusFileImgMap[itemModel.type][1];
+			typeImg.src = orion.statusTypeMap[itemModel.type][0];
+			typeImg.title = "Item type : " + orion.statusTypeMap[itemModel.type][1];
 			typeColumn.appendChild(typeImg);
 			row.appendChild(typeColumn);
 			
@@ -118,9 +127,7 @@ orion.GitStatusRenderer = (function() {
 					}
 					dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 					self._controller._model.selectedFileId = nameSpan.id;
-					//self._controller.getFileContentGit(itemModel.location);
-					self._controller.loadDiffContent(itemModel.location , itemModel.type === "Untracked" ? null : itemModel.location);
-					
+					self._controller.loadDiffContent(itemModel);
 				}
 			});
 			
@@ -133,15 +140,15 @@ orion.GitStatusRenderer = (function() {
 			sbsViewerCol.appendChild(sbsViewerImg);
 			sbsViewerImg.style.cursor = "pointer";
 			sbsViewerImg.onclick = dojo.hitch(this, function(evt) {
-				this._controller.openSBSViewer(itemModel.location);
+				this._controller.openSBSViewer(itemModel);
 			});
 			
 			//render the stage / unstage action  icon
 			stageCol = document.createElement('td');
 			row.appendChild(stageCol);
 			var stageImg = document.createElement('img');//dojo.create("img", {src: "/images/down.gif"}, sbsViewerCol, "last");
-			stageImg.src = orion.gitStatusFileImgMap[itemModel.type][2];
-			stageImg.title = orion.gitStatusFileImgMap[itemModel.type][3];
+			stageImg.src = orion.statusTypeMap[itemModel.type][2];
+			stageImg.title = orion.statusTypeMap[itemModel.type][3];
 			stageCol.appendChild(stageImg);
 			stageImg.style.cursor = "pointer";
 			stageImg.onclick = dojo.hitch(this, function(evt) {
@@ -185,37 +192,46 @@ orion.GitStatusController = (function() {
 				if(!groupData)
 					break;
 				for(var j = 0 ; j < groupData.length ; j++){
-					renderer.renderRow({name:groupData[j].Name , type:groupName , location:this._makeLocation(groupData[j].Location , groupData[j].Name)});
+					renderer.renderRow({name:groupData[j].Name , 
+										type:groupName , 
+										//location:this._makeLocation(groupData[j].Location , groupData[j].Name),
+										location:groupData[j].Location,
+										commitURI:groupData[j].Git.CommitLocation,
+										diffURI:groupData[j].Git.DiffLocation
+					});
 				} 
 			}
 		},
 		
-		loadDiffContent: function(fileContentURI , diffURI){
-			this._inlineCompareContainer.resolveDiff(fileContentURI,
-					                                function(){					
-														var fileNameDiv = document.getElementById("fileNameInViewer");
-														fileNameDiv.innerHTML = fileContentURI;
-													} , 
-					                                diffURI);
+		_resolveURI: function(itemModel){
+			var untracked = (itemModel.type === "Untracked");
+			var added = (itemModel.type === "Added");
+			var diffURI =  (untracked || added) ? null : itemModel.diffURI;
+			var fileURI =  (untracked || added) ? itemModel.location : (this._model.isStaged(itemModel.type) ? itemModel.commitURI: "/git/index" + eclipse.util.makeRelative(itemModel.location));
+			return {diffURI:diffURI , fileURI:fileURI };
 		},
 		
-		openSBSViewer: function(hash){
-			//var url = "/compare.html#/" + hash;
-			var url = "/compare.html#" + hash;
+		loadDiffContent: function(itemModel){
+			var result = this._resolveURI(itemModel);
+			this._inlineCompareContainer.resolveDiff(result.diffURI,
+													result.fileURI,
+					                                function(){					
+														var fileNameDiv = document.getElementById("fileNameInViewer");
+														fileNameDiv.innerHTML = itemModel.name;
+													});
+		},
+		
+		openSBSViewer: function(itemModel){
+			var result = this._resolveURI(itemModel);
+			var url = "/compare.html#" + (result.diffURI ?  result.diffURI+"?" : "")  + result.fileURI;
 			window.open(url,"");
 		},
 		
 		doAction: function(location  ,type){
-			var shouldStage = false;
-			for(var i = 0; i < this._model.interestedUnstagedGroup.length ; i++){
-				if(type === this._model.interestedUnstagedGroup[i]){
-					shouldStage = true;
-				}
-			}
-			if(shouldStage)
-				this.stage(location);
+			if(this._model.isStaged(type))
+				this.unstage(eclipse.util.makeRelative(location));
 			else
-				this.unstage(location);
+				this.stage(eclipse.util.makeRelative(location));
 		},
 		
 		getGitStatus: function(url){
@@ -261,9 +277,15 @@ orion.GitStatusController = (function() {
 			});
 		},
 		
+		stageAll: function(){
+			var start = this._url.indexOf("/file/");
+			if(start != -1)
+				this.stage(this._url.substring(start));
+		},
+		
 		unstage: function(location){
 			var self = this;
-			var url = "/git/index" + location;
+			var url = "/git/index" +  location;
 			dojo.xhrPost({
 				url: url , 
 				headers: {
@@ -282,6 +304,46 @@ orion.GitStatusController = (function() {
 					return response;
 				}
 			});
+		},
+		
+		unstageAll: function(){
+			var start = this._url.indexOf("/file/");
+			if(start != -1)
+				this.unstage(this._url.substring(start));
+		},
+		
+		commitAll: function(location , message){
+			var self = this;
+			var url = "/git/commit" +  location;
+			dojo.xhrPost({
+				url: url , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 5000,
+				postData: dojo.toJson({"Message":message} ),
+				load: function(jsonData, ioArgs) {
+					console.log(JSON.stringify(jsonData));
+					self.getGitStatus(self._url);;
+				},
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		commit: function(message){
+			var start = this._url.indexOf("/file/");
+			if(start != -1){
+				var sub = this._url.substring(start);
+				var subSlitted = sub.split("/");
+				if(subSlitted.length > 2){
+					this.commitAll([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") , message);
+				}
+			}
 		}
 		
 		

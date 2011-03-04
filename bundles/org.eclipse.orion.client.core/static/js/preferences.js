@@ -78,7 +78,8 @@ eclipse.Preferences = (function() {
 						onDone();
 					}
 					return response;
-				}
+				},
+				failOk: true //don't log errors on get
 			});
 		},
 		/**
@@ -132,7 +133,6 @@ eclipse.Preferences = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
 					handlePutAuthenticationError(this, ioArgs);
 					return response;
 				}
@@ -154,7 +154,6 @@ eclipse.Preferences = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
 					handlePutAuthenticationError(this, ioArgs);
 					return response;
 				}

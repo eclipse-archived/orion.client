@@ -6,21 +6,37 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-window.onload = function() {
+dojo.addOnLoad(function(){
+	// initialize service registry and EAS services
+	serviceRegistry = new eclipse.ServiceRegistry();
+	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	var preferenceService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	var sBSCompareContainerEditor = new orion.SBSCompareContainer("left-viewer" , "right-viewer");
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
-		var leftTH = document.getElementById("left-viewer-title");
-		var rightTH = document.getElementById("right-viewer-title");
-		leftTH.innerHTML = "File  : " + splitted[1];
-		rightTH.innerHTML = "File On Git : " + splitted[1];
-		sBSCompareContainerEditor.resolveDiff(splitted[1], 
+		var hash = splitted[1];
+		var params = hash.split("?");
+		var diffURI = null;
+		var fileURI = null;
+		if(params.length === 1){
+			fileURI = params[0];
+		} else {
+			fileURI = params[1];
+			diffURI = params[0];
+		}
+		
+		sBSCompareContainerEditor.resolveDiff(diffURI, 
+											  fileURI,
 				  function(){
 					var leftTH = document.getElementById("left-viewer-title");
 					var rightTH = document.getElementById("right-viewer-title");
-					leftTH.innerHTML = "File  : " + splitted[1];
-					rightTH.innerHTML = "File On Git : " + splitted[1];
-				  },
-				splitted[1]);
+					leftTH.innerHTML = "File  : " + fileURI;
+					rightTH.innerHTML = "File On Git : " + fileURI;
+				  });
 	}
-};
+	
+});
+
