@@ -39,13 +39,6 @@ sites.SiteTreeModel = (function() {
 						parentItem.children = siteConfigurations;
 						onComplete(siteConfigurations);
 					});
-			} else if (parentItem.Id) {
-//				// A site configuration
-//				//Id Location Mappings Name Workspace HostingStatus
-//				var result = [];
-//				result.push({ Id: parentItem.Id});
-//				result.push({ Location: parentItem.Location});
-//				onComplete(result);
 			} else {
 				return onComplete([]);
 			}
@@ -85,17 +78,13 @@ sites.SiteRenderer = (function() {
 			var actionCol = dojo.create("td", {id: tableRow.id + "col3"});
 			
 			// Site config column
-			var nameTag = dojo.create("b", null, siteConfigCol, "last");
-			dojo.place(document.createTextNode(item.Name), nameTag, "last");
-			var detailsDiv = dojo.create("div", null, siteConfigCol, "last");
-			dojo.addClass(detailsDiv, "siteConfigDetails");
-//			dojo.place(document.createTextNode("Id:" + item.Id), detailsDiv, "last");
-//			dojo.create("br", null, detailsDiv, "last");
-			dojo.place(document.createTextNode("Mappings:" + JSON.stringify(item.Mappings)), detailsDiv, "last");
-			if (item.HostHint && item.HostHint !== "") {
-				dojo.create("br", null, detailsDiv, "last");
-				dojo.place(document.createTextNode("Host hint:" + item.HostHint), detailsDiv, "last");
-			}
+			var href = eclipse.sites.util.generateEditSiteHref(item);
+			var imgLink = dojo.create("a", {href: href}, siteConfigCol, "last");
+			var icon = dojo.create("img",
+					{src: "/images/config_obj.gif", style: {verticalAlign: "bottom", paddingRight: "3px"}},
+				imgLink, "last");
+			var nameLink = dojo.create("a", {href: href}, siteConfigCol, "last");
+			dojo.place(document.createTextNode(item.Name), nameLink, "last");
 			
 			// Status column
 			var status = item.HostingStatus;
