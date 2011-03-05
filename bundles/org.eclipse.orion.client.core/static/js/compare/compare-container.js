@@ -206,6 +206,8 @@ orion.InlineCompareContainer = (function() {
 	InlineCompareContainer.prototype = new orion.CompareContainer();
 	
 	InlineCompareContainer.prototype.destroyEditor = function(){
+		if(this._editor)
+			this._editor.destroy();
 		this._editor = null;
 	};
 

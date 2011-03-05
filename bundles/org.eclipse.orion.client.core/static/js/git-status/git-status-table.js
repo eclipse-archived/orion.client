@@ -195,16 +195,50 @@ orion.GitStatusController = (function() {
 		},
 		
 		initViewer: function () {
-			tableId = this._tableParentDivId + "_table";
-		  	var tableDomNode = dojo.byId( tableId);
-		  	var viewerParentDomNode = dojo.byId( "inline-compare-viewer");
-		  	this._inlineCompareContainer.destroyEditor();
-		  	viewerParentDomNode.innerHTML = "";
+		  	this._inlineCompareContainer.destroyEditor();//
 			this._model.selectedItem = null;
 			var fileNameDiv = document.getElementById("fileNameInViewer");
-			fileNameDiv.innerHTML = "Select a file to compare";
-		  	//viewerParentDomNode.removeChild(viewerParentDomNode.getChildren()[0]);
-		  	
+			fileNameDiv.innerHTML = "Compare...";
+			this.createProgressDiv("Select a file on the left to compare..");
+		},
+		
+		createProgressDiv: function(message){
+			var table = document.createElement('table');
+			var tableParentDiv = document.getElementById("inline-compare-viewer");
+			table.id = "progress";
+			table.width = "100%";
+			table.height = tableParentDiv.clientHeight;
+			table.style.backgroundColor = "#DDDDDD";
+			table.style.zIndex =100;
+			table.style.alpha =0.3;
+			tableParentDiv.appendChild(table);
+			this._progressDiv = table;
+			
+			var row = document.createElement('tr');
+			this._progressDiv.appendChild(row);
+
+			//render the type icon (added , modified ,untracked ...)
+			var progressColumn = document.createElement('td');
+			progressColumn.width = "100%";
+			progressColumn.height = tableParentDiv.clientHeight;
+			progressColumn.noWrap= true;
+			row.appendChild(progressColumn);
+			
+			var progressDiv = document.createElement('DIV');
+			progressDiv.style.width = "100%";
+			progressDiv.style.height = "100%";
+			progressDiv.float = "center";
+			progressDiv.align="center";
+			progressColumn.appendChild(progressDiv);
+			
+			var progressMessage = document.createElement('h2');
+			progressMessage.innerHTML = message;
+			progressDiv.appendChild(progressMessage);
+		},
+		
+		removeProgressDiv: function(){
+			var tableParentDiv = document.getElementById("inline-compare-viewer");
+			tableParentDiv.removeChild(this._progressDiv);
 		},
 		
 		_loadBlock: function(renderer , interedtedGroup){
@@ -236,11 +270,13 @@ orion.GitStatusController = (function() {
 		
 		loadDiffContent: function(itemModel){
 			var result = this._resolveURI(itemModel);
+			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) >>> " : "local VS index ) >>> " ;
+			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS + itemModel.name;
 			this._inlineCompareContainer.resolveDiff(result.diffURI,
 													result.fileURI,
 					                                function(){					
 														var fileNameDiv = document.getElementById("fileNameInViewer");
-														fileNameDiv.innerHTML = itemModel.name;
+														fileNameDiv.innerHTML = message;
 													});
 		},
 		
