@@ -1970,20 +1970,7 @@ eclipse.Editor = (function() {
 			}
 		},
 		_handleScroll: function () {
-			var scroll = this._getScroll ();
-			var oldX = this._hScroll;
-			var oldY = this._vScroll;
-			if (oldX !== scroll.x || (oldY !== scroll.y)) {
-				this._hScroll = scroll.x;
-				this._vScroll = scroll.y;
-				this._commitIME();
-				this._updatePage();
-				var e = {
-					oldValue: {x: oldX, y: oldY},
-					newValue: scroll
-				};
-				this.onScroll(e);
-			}
+			this._doScroll(this._getScroll());
 		},
 		_handleSelectStart: function (e) {
 			if (!e) { e = window.event; }
@@ -2250,6 +2237,21 @@ eclipse.Editor = (function() {
 				this._doContent(text);
 			}
 			return text !== null;
+		},
+		_doScroll: function (scroll) {
+			var oldX = this._hScroll;
+			var oldY = this._vScroll;
+			if (oldX !== scroll.x || (oldY !== scroll.y)) {
+				this._hScroll = scroll.x;
+				this._vScroll = scroll.y;
+				this._commitIME();
+				this._updatePage();
+				var e = {
+					oldValue: {x: oldX, y: oldY},
+					newValue: scroll
+				};
+				this.onScroll(e);
+			}
 		},
 		_doSelectAll: function (args) {
 			var model = this._model;
@@ -3553,14 +3555,18 @@ eclipse.Editor = (function() {
 			* to improve performance, the page is hidden during scroll causing only on redraw
 			* to happen. Note that this approach causes flashing on Firefox.
 			*
-			* This code is intentionally commented. It causes focus to loose focus.
+			* This code is intentionally commented. It causes editor to loose focus.
 			*/
 //			if (isIE) {
 //				this._frameDocument.body.style.visibility = "hidden";
 //			}
-			this._editorDiv.scrollLeft += pixelX;
-			this._editorDiv.scrollTop += pixelY;
-			this._handleScroll();
+			var editorDiv = this._editorDiv;
+			var newX = editorDiv.scrollLeft + pixelX;
+			if (pixelX) { editorDiv.scrollLeft = newX; }
+			var newY = editorDiv.scrollTop + pixelY;
+			if (pixelY) { editorDiv.scrollTop = newY; }
+			this._doScroll({x: newX, y: newY});
+//			this._handleScroll();
 //			if (isIE) {
 //				this._frameDocument.body.style.visibility = "visible";
 //				this.focus();
