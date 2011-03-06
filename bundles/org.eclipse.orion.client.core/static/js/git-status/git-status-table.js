@@ -140,14 +140,19 @@ orion.GitStatusRenderer = (function() {
 			sbsViewerImg.src = "/images/git/compare-sbs.gif";
 			sbsViewerImg.title="Click to open two way compare";
 			sbsViewerCol.appendChild(sbsViewerImg);
-			sbsViewerImg.style.cursor = "pointer";
+			dojo.toggleClass(sbsViewerImg, "commandLink", true);
+			//sbsViewerImg.style.cursor = "pointer";
 			sbsViewerImg.onclick = dojo.hitch(this, function(evt) {
 				this._controller.openSBSViewer(itemModel);
 			});
 			
 			//render the stage / unstage action  icon
-			if(this._controller._model.isStaged(itemModel.type))
+			if(this._controller._model.isStaged(itemModel.type)){
+				this._controller.hasStaged = true;
 				return;
+			} else {
+				this._controller.hasUnstaged = true;
+			}
 			stageCol = document.createElement('td');
 			row.appendChild(stageCol);
 			var stageImg = document.createElement('img');//dojo.create("img", {src: "/images/down.gif"}, sbsViewerCol, "last");
@@ -183,7 +188,18 @@ orion.GitStatusController = (function() {
 				this.loadDiffContent(this._model.selectedItem);
 			else
 				this._model.selectedFileId = null;
-				
+			
+			var stageAllBtn = document.getElementById("stageAll");
+			var unstageAllBtn = document.getElementById("unstageAll");
+			var commitBtn = document.getElementById("commit");
+			var amendBtn = document.getElementById("amend");
+			var messageArea = document.getElementById("commitMessage");
+			
+			stageAllBtn.disabled = !this.hasUnstaged;
+			unstageAllBtn.disabled = !this.hasStaged;
+			commitBtn.disabled = !this.hasStaged;
+			amendBtn.disabled = !this.hasStaged;
+			messageArea.disabled = !this.hasStaged;
 		},
 		
 		_makeLocation: function(location , name){//temporary
@@ -197,48 +213,52 @@ orion.GitStatusController = (function() {
 		initViewer: function () {
 		  	this._inlineCompareContainer.destroyEditor();//
 			this._model.selectedItem = null;
+			this.hasStaged = false;
+			this.hasUnstaged = false;
 			var fileNameDiv = document.getElementById("fileNameInViewer");
 			fileNameDiv.innerHTML = "Compare...";
-			this.createProgressDiv("Select a file on the left to compare..");
+			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
+			this.createProgressDiv("inline-compare-viewer"  , "compareIndicatorId" , "Select a file on the left to compare..");
 		},
 		
-		createProgressDiv: function(message){
+		createProgressDiv: function(progressParentId , progressId,message){
+			var tableParentDiv = dojo.byId(progressParentId);
+			
 			var table = document.createElement('table');
-			var tableParentDiv = document.getElementById("inline-compare-viewer");
-			table.id = "progress";
+			tableParentDiv.appendChild(table);
+			table.id = progressId;
 			table.width = "100%";
-			table.height = tableParentDiv.clientHeight;
+			table.height = "100%";
 			table.style.backgroundColor = "#DDDDDD";
 			table.style.zIndex =100;
-			table.style.alpha =0.3;
-			tableParentDiv.appendChild(table);
-			this._progressDiv = table;
+			table.style.opacity =0.5;
 			
 			var row = document.createElement('tr');
-			this._progressDiv.appendChild(row);
+			table.appendChild(row);
 
-			//render the type icon (added , modified ,untracked ...)
 			var progressColumn = document.createElement('td');
-			progressColumn.width = "100%";
-			progressColumn.height = tableParentDiv.clientHeight;
-			progressColumn.noWrap= true;
 			row.appendChild(progressColumn);
+			progressColumn.width = "100%";
+			progressColumn.height =tableParentDiv.clientHeight;//"100%" ;"100%" ;
+			progressColumn.noWrap= true;
 			
 			var progressDiv = document.createElement('DIV');
-			progressDiv.style.width = "100%";
-			progressDiv.style.height = "100%";
-			progressDiv.float = "center";
-			progressDiv.align="center";
 			progressColumn.appendChild(progressDiv);
+			progressDiv.width = "100%";
+			progressDiv.height = tableParentDiv.clientHeight;//"100%" ;
+			progressDiv.align="center";
 			
 			var progressMessage = document.createElement('h2');
-			progressMessage.innerHTML = message;
 			progressDiv.appendChild(progressMessage);
+			progressMessage.innerHTML = message;
+			
 		},
 		
-		removeProgressDiv: function(){
-			var tableParentDiv = document.getElementById("inline-compare-viewer");
-			tableParentDiv.removeChild(this._progressDiv);
+		removeProgressDiv: function(progressParentId , progressId){
+			var tableParentDiv = dojo.byId(progressParentId);
+			var progressDiv = document.getElementById(progressId);
+			if(progressDiv)
+				tableParentDiv.removeChild(progressDiv);
 		},
 		
 		_loadBlock: function(renderer , interedtedGroup){
@@ -251,7 +271,6 @@ orion.GitStatusController = (function() {
 				for(var j = 0 ; j < groupData.length ; j++){
 					renderer.renderRow({name:groupData[j].Name , 
 										type:groupName , 
-										//location:this._makeLocation(groupData[j].Location , groupData[j].Name),
 										location:groupData[j].Location,
 										commitURI:groupData[j].Git.CommitLocation,
 										diffURI:groupData[j].Git.DiffLocation
@@ -269,6 +288,7 @@ orion.GitStatusController = (function() {
 		},
 		
 		loadDiffContent: function(itemModel){
+			var self = this;
 			var result = this._resolveURI(itemModel);
 			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) >>> " : "local VS index ) >>> " ;
 			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS + itemModel.name;
