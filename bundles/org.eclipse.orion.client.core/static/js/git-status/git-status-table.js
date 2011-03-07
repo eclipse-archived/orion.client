@@ -15,6 +15,7 @@ var orion = orion || {};
 orion.GitStatusModel = (function() {
 	function GitStatusModel() {
 		this.selectedFileId = undefined;
+		this.selectedItem = undefined;
 		this.interestedUnstagedGroup = ["Missing","Modified","Untracked"];
 		this.interestedStagedGroup = ["Added", "Changed","Removed"];
 	}
@@ -108,6 +109,7 @@ orion.GitStatusRenderer = (function() {
 			nameSpan.title = "Click to compare";
 			nameColumn.appendChild(nameSpan);
 			if(nameSpan.id === self._controller._model.selectedFileId ){
+				self._controller._model.selectedItem = itemModel;
 				dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 			}
 			
@@ -144,6 +146,8 @@ orion.GitStatusRenderer = (function() {
 			});
 			
 			//render the stage / unstage action  icon
+			if(this._controller._model.isStaged(itemModel.type))
+				return;
 			stageCol = document.createElement('td');
 			row.appendChild(stageCol);
 			var stageImg = document.createElement('img');//dojo.create("img", {src: "/images/down.gif"}, sbsViewerCol, "last");
@@ -172,8 +176,14 @@ orion.GitStatusController = (function() {
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
 			this._model.init(jsonData);
+			this.initViewer();
 			this._loadBlock(this._unstagedTableRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedTableRenderer , this._model.interestedStagedGroup);
+			if(this._model.selectedItem)
+				this.loadDiffContent(this._model.selectedItem);
+			else
+				this._model.selectedFileId = null;
+				
 		},
 		
 		_makeLocation: function(location , name){//temporary
@@ -182,6 +192,53 @@ orion.GitStatusController = (function() {
 			if(splitted.length > 2)
 				return "/" + splitted[1] + "/" + splitted[2] + "/" + name;
 			return name;
+		},
+		
+		initViewer: function () {
+		  	this._inlineCompareContainer.destroyEditor();//
+			this._model.selectedItem = null;
+			var fileNameDiv = document.getElementById("fileNameInViewer");
+			fileNameDiv.innerHTML = "Compare...";
+			this.createProgressDiv("Select a file on the left to compare..");
+		},
+		
+		createProgressDiv: function(message){
+			var table = document.createElement('table');
+			var tableParentDiv = document.getElementById("inline-compare-viewer");
+			table.id = "progress";
+			table.width = "100%";
+			table.height = tableParentDiv.clientHeight;
+			table.style.backgroundColor = "#DDDDDD";
+			table.style.zIndex =100;
+			table.style.alpha =0.3;
+			tableParentDiv.appendChild(table);
+			this._progressDiv = table;
+			
+			var row = document.createElement('tr');
+			this._progressDiv.appendChild(row);
+
+			//render the type icon (added , modified ,untracked ...)
+			var progressColumn = document.createElement('td');
+			progressColumn.width = "100%";
+			progressColumn.height = tableParentDiv.clientHeight;
+			progressColumn.noWrap= true;
+			row.appendChild(progressColumn);
+			
+			var progressDiv = document.createElement('DIV');
+			progressDiv.style.width = "100%";
+			progressDiv.style.height = "100%";
+			progressDiv.float = "center";
+			progressDiv.align="center";
+			progressColumn.appendChild(progressDiv);
+			
+			var progressMessage = document.createElement('h2');
+			progressMessage.innerHTML = message;
+			progressDiv.appendChild(progressMessage);
+		},
+		
+		removeProgressDiv: function(){
+			var tableParentDiv = document.getElementById("inline-compare-viewer");
+			tableParentDiv.removeChild(this._progressDiv);
 		},
 		
 		_loadBlock: function(renderer , interedtedGroup){
@@ -213,11 +270,13 @@ orion.GitStatusController = (function() {
 		
 		loadDiffContent: function(itemModel){
 			var result = this._resolveURI(itemModel);
+			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) >>> " : "local VS index ) >>> " ;
+			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS + itemModel.name;
 			this._inlineCompareContainer.resolveDiff(result.diffURI,
 													result.fileURI,
 					                                function(){					
 														var fileNameDiv = document.getElementById("fileNameInViewer");
-														fileNameDiv.innerHTML = itemModel.name;
+														fileNameDiv.innerHTML = message;
 													});
 		},
 		

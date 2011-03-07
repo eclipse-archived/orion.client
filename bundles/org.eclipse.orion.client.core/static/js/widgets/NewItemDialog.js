@@ -13,6 +13,8 @@ dojo.provide("widgets.NewItemDialog");
 dojo.require("dijit.Dialog");
 dojo.require("dijit.form.CheckBox");
 dojo.require("dijit.form.ComboBox");
+dojo.require("dijit.form.Form");
+dojo.require("dijit.form.ValidationTextBox");
 dojo.require("dojo.data.ItemFileReadStore");
 
 /**
@@ -28,7 +30,7 @@ dojo.declare("widgets.NewItemDialog", [dijit.Dialog], {
 	templateString: dojo.cache("widgets", "templates/NewItemDialog.html"),
 	
 	constructor : function() {
-		this.inherited(arguments);
+		//this.inherited(arguments);
 		this.options = arguments[0] || {};
 		this.options.advanced = this.options.advanced || false;
 	},

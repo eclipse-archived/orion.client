@@ -11,16 +11,16 @@
   handleDeleteAuthenticationError */
 /*jslint devel:true*/
 
-var sites = dojo.getObject("eclipse.sites", true);
+dojo.getObject("eclipse.sites", true);
 
 /**
  * @name eclipse.sites.SITE_SERVICE_NAME
  * @property Constant used to identify the site service name.
  */
-sites.SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
+eclipse.sites.SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 
 // requires: authentication service
-sites.SiteService = (function() {
+eclipse.sites.SiteService = (function() {
 	/**
 	 * Constructs a new SiteService.
 	 * 
@@ -38,8 +38,9 @@ sites.SiteService = (function() {
 	}
 	SiteService.prototype = /** @lends eclipse.sites.SiteService.prototype */ {
 		/**
-		 * @return {dojo.Deferred} A future for the result. Future will be resolved with the 
-		 * argument {SiteConfiguration[]}.
+		 * Gets all site configurations defined by the logged-in user.
+		 * @return {dojo.Deferred} A deferred for the result. Will be resolved with the 
+		 * argument {SiteConfiguration[]} on success.
 		 */
 		getSiteConfigurations: function() {
 			return dojo.xhrGet({
@@ -48,7 +49,7 @@ sites.SiteService = (function() {
 						"Orion-Version": "1"
 					},
 					handleAs: "json",
-					timeout: 5000,
+					timeout: 15000,
 					error: function(response, ioArgs) {
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 						handleGetAuthenticationError(this, ioArgs);
@@ -59,17 +60,37 @@ sites.SiteService = (function() {
 				});
 		},
 		
-		getSiteConfiguration: function(id) {
-			
+		/**
+		 * Loads an individual site configuration from the URL.
+		 * @static
+		 * @param {String} location URL of a site configuration resource.
+		 * @return {dojo.Deferred} A future for the result. Future will be resolved with the 
+		 * argument {SiteConfiguration} on success.
+		 */
+		loadSiteConfiguration: function(location) {
+			return dojo.xhrGet({
+				url: location,//this._siteUrl + "/" + id,
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				error: function(response, ioArgs) {
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
 		},
 		
 		/**
-		 * 
-		 * @param name {String}
-		 * @param workspace {String}
-		 * @param mappings [Object]
-		 * @param hostHint [String]
-		 * @returns A promise
+		 * Creates a site configuration.
+		 * @param {String} name
+		 * @param {String} workspace
+		 * @param {Object} [mappings]
+		 * @param {String} [hostHint]
+		 * @return {dojo.Deferred} A deferred for the result. Will be resolved with the 
+		 * created {SiteConfiguration} as argument on success.
 		 */
 		createSiteConfiguration: function(name, workspace, mappings, hostHint) {
 			var toCreate = {
@@ -85,7 +106,7 @@ sites.SiteService = (function() {
 					"Orion-Version": "1"
 				},
 				handleAs: "json",
-				timeout: 5000,
+				timeout: 15000,
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					handleGetAuthenticationError(this, ioArgs);
@@ -94,6 +115,13 @@ sites.SiteService = (function() {
 			});
 		},
 		
+		/**
+		 * Performs a start or stop action on a site configuration.
+		 * @param {String} id
+		 * @param {String} action
+		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
+		 * changed {SiteConfiguration} on success.
+		 */
 		startStopSiteConfiguration: function(id, action) {
 			return dojo.xhrPost({
 				url: this._siteUrl + "/" + id,
@@ -102,7 +130,7 @@ sites.SiteService = (function() {
 					"X-Action": action
 				},
 				handleAs: "json",
-				timeout: 5000,
+				timeout: 15000,
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					handleGetAuthenticationError(this, ioArgs);
@@ -111,15 +139,22 @@ sites.SiteService = (function() {
 			});
 		},
 		
+		/**
+		 * Edits an existing site configuration.
+		 * @param id
+		 * @param updatedSiteConfig
+		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
+		 * updated {SiteConfiguration} on success.
+		 */
 		updateSiteConfiguration: function(id, updatedSiteConfig) {
 			return dojo.xhrPut({
 				url: this._siteUrl + "/" + id,
-				content: updatedSiteConfig,
+				putData: dojo.toJson(updatedSiteConfig),
 				headers: {
 					"Orion-Version": "1"
 				},
 				handleAs: "json",
-				timeout: 5000,
+				timeout: 15000,
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					handleGetAuthenticationError(this, ioArgs);
@@ -128,6 +163,11 @@ sites.SiteService = (function() {
 			});
 		},
 		
+		/**
+		 * Deletes a site configuration.
+		 * @param id
+		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with no argument on success.
+		 */
 		deleteSiteConfiguration: function(id) {
 			return dojo.xhrDelete({
 				url: this._siteUrl + "/" + id,
@@ -135,7 +175,7 @@ sites.SiteService = (function() {
 					"Orion-Version": "1"
 				},
 				handleAs: "json",
-				timeout: 5000,
+				timeout: 15000,
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					handleGetAuthenticationError(this, ioArgs);

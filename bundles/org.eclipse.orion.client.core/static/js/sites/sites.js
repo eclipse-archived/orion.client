@@ -19,28 +19,41 @@ dojo.addOnLoad(function() {
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	var dialogService = new eclipse.DialogService(serviceRegistry);
+	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 	var siteService = new eclipse.sites.SiteService();
 	serviceRegistry.registerService(eclipse.sites.SITE_SERVICE_NAME, siteService);
 	
+	// File operations
+	var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
+	if (filePlugin === null) {
+		pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
+	}
+	
 	// Create the visuals
 	var model;
 	var treeWidget;
 	(function() {
-		model = new eclipse.sites.SiteTreeModel(siteService, "site-table-tree");
+		statusService.setMessage("Loading...");
+		var renderer = new eclipse.sites.SiteRenderer(commandService);
+		dojo.connect(renderer, "rowsChanged", null, function() {
+			statusService.setMessage("");
+		});
 		treeWidget = new eclipse.TableTree({
 			id: "site-table-tree",
 			parent: dojo.byId("site-table"),
-			model: model,
+			model: new eclipse.sites.SiteTreeModel(siteService, "site-table-tree"),
 			showRoot: false,
-			renderer: new eclipse.sites.SiteRenderer(commandService)
+			renderer: renderer
 		});
 	}());
 	
 	var refreshFunction = function() {
+		statusService.setMessage("Loading...");
 		siteService.getSiteConfigurations().then(function(siteConfigs) {
 			treeWidget.refreshAndExpand("site-table-tree", siteConfigs);
+			statusService.setMessage("");
 		});
 	};
 	
@@ -52,12 +65,11 @@ dojo.addOnLoad(function() {
 			id: "eclipse.sites.create",
 			groupId: "eclipse.sitesGroup",
 			callback : function() {
-				var dialog = new widgets.SiteConfigEditor({
+				var dialog = new sites.widgets.NewSiteDialog({
 					title: "Create Site Configuration",
 					serviceRegistry: serviceRegistry,
-					fileClient: fileClient;
-					callback: function(name, workspace, mappings, hostHint) {
-						siteService.createSiteConfiguration(name, workspace, mappings, hostHint).then(refreshFunction);
+					func: function(name, workspace) {
+						siteService.createSiteConfiguration(name, workspace).then(refreshFunction);
 					}});
 				dialog.startup();
 				dialog.show();
@@ -72,9 +84,7 @@ dojo.addOnLoad(function() {
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
-			callback: function(item) {
-				alert("TODO edit");
-			}});
+			hrefCallback: eclipse.sites.util.generateEditSiteHref});
 		commandService.addCommand(editCommand, "object");
 		
 		var startCommand = new eclipse.Command({
@@ -85,7 +95,7 @@ dojo.addOnLoad(function() {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
 			callback: function(item) {
-				// TODO show "Starting..."
+				statusService.setMessage("Starting " + item.Name + "...");
 				siteService.startStopSiteConfiguration(item.Id, "start").then(function() {
 					siteService.getSiteConfigurations().then(function(siteConfigs) {
 						treeWidget.refreshAndExpand("site-table-tree", siteConfigs);
@@ -102,6 +112,7 @@ dojo.addOnLoad(function() {
 				return item.HostingStatus && item.HostingStatus.Status === "started";
 			},
 			callback: function(item) {
+				statusService.setMessage("Stopping " + item.Name + "...");
 				siteService.startStopSiteConfiguration(item.Id, "stop").then(function() {
 					siteService.getSiteConfigurations().then(function(siteConfigs) {
 						treeWidget.refreshAndExpand("site-table-tree", siteConfigs);

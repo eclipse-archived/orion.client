@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,6 @@ dojo.addOnLoad(function(){
 		serviceRegistry = new eclipse.ServiceRegistry();
 		pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 		
-		
 		// this is temporary
 		var jslintPlugin = pluginRegistry.getPlugin("/plugins/jslintPlugin.html");
 		if (jslintPlugin === null) {
@@ -40,19 +39,12 @@ dojo.addOnLoad(function(){
 		new eclipse.UserService(serviceRegistry);
 		new eclipse.SelectionService(serviceRegistry);
 		prefsService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
-		new eclipse.SaveableService(serviceRegistry);
 		commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 
 		// Editor needs additional services besides EAS.
 		new eclipse.ProblemService(serviceRegistry);
 		new eclipse.OutlineService(serviceRegistry);
 		new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
-
-		// File operations
-		var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
-		if (filePlugin === null) {
-			pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
-		}
 	}());
 	
 	var topContainerWidget = dijit.byId("topContainer"),
@@ -62,6 +54,9 @@ dojo.addOnLoad(function(){
 		contentassist = dojo.byId("contentassist"),
 		leftPane = dojo.byId("leftPane");
 	
+	// File operations
+	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
+
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
 	var editorFactory = function() {
@@ -88,7 +83,7 @@ dojo.addOnLoad(function(){
 	var editorContainer = new eclipse.EditorContainer(serviceRegistry,
 			editorFactory, commandService, eclipse.editorFeatures.createEditorCommands, eclipse.editorFeatures.undoFactory,
 			annotationRulerFactory, lineNumberRulerFactory, overviewRulerFactory,
-			searcher,
+			searcher, fileClient,
 			editorContainerDomNode, "pageTitle",
 			topContainerWidget, contentassist, leftPane, searchFloat, "pageActions");
 	
