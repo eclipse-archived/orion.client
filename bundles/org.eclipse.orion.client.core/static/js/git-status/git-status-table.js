@@ -7,9 +7,6 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo eclipse:true widgets*/
-/*jslint regexp:false browser:true forin:true*/
-
 var orion = orion || {};
 
 orion.GitStatusModel = (function() {
@@ -136,15 +133,10 @@ orion.GitStatusRenderer = (function() {
 			//render the side by side viewer icon
 			sbsViewerCol = document.createElement('td');
 			row.appendChild(sbsViewerCol);
-			var sbsViewerImg = document.createElement('img');//dojo.create("img", {src: "/images/redo_edit.gif"}, sbsViewerCol, "last");
-			sbsViewerImg.src = "/images/git/compare-sbs.gif";
-			sbsViewerImg.title="Click to open two way compare";
-			sbsViewerCol.appendChild(sbsViewerImg);
-			dojo.toggleClass(sbsViewerImg, "commandLink", true);
-			//sbsViewerImg.style.cursor = "pointer";
-			sbsViewerImg.onclick = dojo.hitch(this, function(evt) {
-				this._controller.openSBSViewer(itemModel);
-			});
+			this._controller.createImgButton(sbsViewerCol , "/images/git/compare-sbs.gif", "Click to open two way compare",
+					function(evt) {
+						self._controller.openSBSViewer(itemModel);
+					} );
 			
 			//render the stage / unstage action  icon
 			if(this._controller._model.isStaged(itemModel.type)){
@@ -155,15 +147,10 @@ orion.GitStatusRenderer = (function() {
 			}
 			stageCol = document.createElement('td');
 			row.appendChild(stageCol);
-			var stageImg = document.createElement('img');//dojo.create("img", {src: "/images/down.gif"}, sbsViewerCol, "last");
-			stageImg.src = orion.statusTypeMap[itemModel.type][2];
-			stageImg.title = orion.statusTypeMap[itemModel.type][3];
-			stageCol.appendChild(stageImg);
-			stageImg.style.cursor = "pointer";
-			stageImg.onclick = dojo.hitch(this, function(evt) {
-				this._controller.doAction(itemModel.location , itemModel.type);
-				//this._controller.getGitStatus(this._controller._url);
-			});
+			this._controller.createImgButton(stageCol , orion.statusTypeMap[itemModel.type][2], orion.statusTypeMap[itemModel.type][3],
+					function(evt) {
+						self._controller.doAction(itemModel.location , itemModel.type);
+					} );
 		}
 	};
 	return GitStatusRenderer;
@@ -189,17 +176,19 @@ orion.GitStatusController = (function() {
 			else
 				this._model.selectedFileId = null;
 			
+			var self = this;
+			var messageArea = document.getElementById("commitMessage");
+			messageArea.disabled = !this.hasStaged;
+			
 			var stageAllBtn = document.getElementById("stageAll");
 			var unstageAllBtn = document.getElementById("unstageAll");
 			var commitBtn = document.getElementById("commit");
 			var amendBtn = document.getElementById("amend");
-			var messageArea = document.getElementById("commitMessage");
 			
-			stageAllBtn.disabled = !this.hasUnstaged;
-			unstageAllBtn.disabled = !this.hasStaged;
-			commitBtn.disabled = !this.hasStaged;
-			amendBtn.disabled = !this.hasStaged;
-			messageArea.disabled = !this.hasStaged;
+			this.modifyImageButton(stageAllBtn , "Stage all", function(evt){self.stageAll();} , !this.hasUnstaged);
+			this.modifyImageButton(unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
+			this.modifyImageButton(commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value);} , !this.hasStaged);
+			this.modifyImageButton(amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value);} , !this.hasStaged);
 		},
 		
 		_makeLocation: function(location , name){//temporary
@@ -252,6 +241,40 @@ orion.GitStatusController = (function() {
 			progressDiv.appendChild(progressMessage);
 			progressMessage.innerHTML = message;
 			
+		},
+		
+		createImgButton: function(imgParentDiv , imgSrc, imgTitle,onClick){
+			var imgBtn = document.createElement('img');
+			imgBtn.src = imgSrc;
+			imgParentDiv.appendChild(imgBtn);
+			this.modifyImageButton(imgBtn , imgTitle,onClick);
+		},
+		
+		modifyImageButton: function(imgBtnDiv , imgTitle, onClick , disabled){
+			if(disabled === undefined || !disabled){
+				imgBtnDiv.title= imgTitle;
+				imgBtnDiv.style.cursor = "pointer";
+				
+				dojo.style(imgBtnDiv, "opacity", "0.4");
+				dojo.connect(imgBtnDiv, "onmouseover", imgBtnDiv, function() {
+					dojo.style(imgBtnDiv, "opacity", "1");
+				});
+				dojo.connect(imgBtnDiv, "onmouseout", imgBtnDiv , function() {
+					dojo.style(imgBtnDiv, "opacity", "0.4");
+				});
+				imgBtnDiv.onclick = onClick;
+			} else {
+				imgBtnDiv.title= "";
+				imgBtnDiv.style.cursor = "default";
+				dojo.style(imgBtnDiv, "opacity", "0.0");
+				dojo.connect(imgBtnDiv, "onmouseover", imgBtnDiv, function() {
+					dojo.style(imgBtnDiv, "opacity", "0");
+				});
+				dojo.connect(imgBtnDiv, "onmouseout", imgBtnDiv , function() {
+					dojo.style(imgBtnDiv, "opacity", "0");
+				});
+				imgBtnDiv.onclick = null;
+			}
 		},
 		
 		removeProgressDiv: function(progressParentId , progressId){

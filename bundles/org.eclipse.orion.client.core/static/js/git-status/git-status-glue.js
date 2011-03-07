@@ -18,21 +18,6 @@ dojo.addOnLoad(function(){
 	if(splitted.length > 1){
 		var controller = new orion.GitStatusController(null , splitted[1] , "unstagedZone" , "stagedZone");
 		controller.getGitStatus(splitted[1]);
-	
-		var stageAll = document.getElementById("stageAll");
-		dojo.connect(stageAll, "onclick", stageAll, function() {
-			controller.stageAll();
-		});
-		var unstageAll = document.getElementById("unstageAll");
-		dojo.connect(unstageAll, "onclick", unstageAll, function() {
-			controller.unstageAll();
-		});
-		var commit = document.getElementById("commit");
-		var commitMessage = document.getElementById("commitMessage");
-		dojo.connect(commit, "onclick", commit, function() {
-			controller.commit(commitMessage.value);
-		});
-	
 	}
 	
 });
