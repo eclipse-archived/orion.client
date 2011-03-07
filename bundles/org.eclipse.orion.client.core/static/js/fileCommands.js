@@ -128,7 +128,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		var path = splits[splits.length-1];
 		var qIndex = path.indexOf("/?");
 		if (qIndex > 0) {
-			path = path.substring(0, qIndex);
+			//remove the query but not the trailing separator
+			path = path.substring(0, qIndex+1);
 		}
 		return path;
 	}

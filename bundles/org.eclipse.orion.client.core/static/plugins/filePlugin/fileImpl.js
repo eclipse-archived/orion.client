@@ -272,7 +272,9 @@ eclipse.FileServiceImpl= (function() {
 		
 		_doCopyMove: function(sourceLocation, targetLocation, isMove, name) {
 			if (!name) {
-				name = sourceLocation.slice(sourceLocation.lastIndexOf('/'));
+				//take the last segment (trailing slash will product an empty segment)
+				var segments = sourceLocation.split("/");
+				name = segments.pop() || segments.pop();
 			}
 			return dojo.xhrPost({
 				url: targetLocation,
