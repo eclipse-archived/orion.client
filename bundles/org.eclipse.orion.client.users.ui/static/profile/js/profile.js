@@ -32,6 +32,40 @@ dojo.addOnLoad(function() {
  */
 var eclipse = eclipse || {};
 
+/**
+ * Used when a value should be displayed as Date but is returned as long.
+ * Value displayed in always read only.
+ */
+eclipse.DateLong = (function(){
+		function DateLong(options){
+			this._init(options);
+		};
+		DateLong.prototype = {
+			_init: function(options){
+				options.style = "display: none";
+				this.contentText = new dijit.form.TextBox(options);
+				this.contentText.set('ecliplseCustomValue',true);
+				this.dateP = dojo.create("p", {innerHTML: "&nbsp;", className: "userprofile"});
+				dojo.connect(this.contentText, "onChange", dojo.hitch(this, function(myDijit,p){
+						if(myDijit.get('value')!=""){
+							var value = parseInt(myDijit.get('value'));
+							p.innerHTML = dojo.date.locale.format(new Date(value), {formatLength: "short"});
+						}
+						if(p.innerHTML=="")
+							p.innerHTML="&nbsp";
+					}, this.contentText, this.dateP));
+				this.get = dojo.hitch(this.contentText,this.contentText.get);
+				this.set = dojo.hitch(this.contentText,this.contentText.set);
+			},
+			placeAt: function(node){
+				this.contentText.placeAt(node);
+				dojo.place(this.dateP, node);
+			}
+		};
+		return DateLong;
+}());
+
+
 eclipse.Profile = (function() {
 
 	function Profile(options) {
@@ -205,7 +239,7 @@ eclipse.Profile = (function() {
 				  formElem = new cls(json.props);
 				  formElem.placeAt(node);
 				  
-				  if(formElem.get('readOnly')===true){
+				  if(formElem.get('readOnly')===true && !formElem.get('ecliplseCustomValue')){
 					  formElem.set('style', 'display: none');
 					  var p = dojo.create("p", {id: formElem.get('id')+"_p", className: "userprofile", innerHTML: formElem.get('value')?formElem.get('value'):"&nbsp;"}, node, "last");
 					  dojo.connect(formElem, "onChange", dojo.hitch(this, function(myDijit,p){p.innerHTML = myDijit.get('value'); if(p.innerHTML=="") p.innerHTML="&nbsp";}, formElem, p));
@@ -257,9 +291,9 @@ eclipse.Profile = (function() {
 				
 				var bannerPane = dojo.create("div", null, placeholder, "first");
 
-				dojo.create("h2", {id:"profileBanner", style: "float: left; margin-top: 10px; margin-bottom: 10px;", innerHTML: profile.lastJSON ? "Profile Information for <b style='color: #000'>" + profile.lastJSON.login + "</b>" : ""}, bannerPane);
+				dojo.create("h2", {id:"profileBanner", style: "margin-top: 10px;", innerHTML: profile.lastJSON ? "Profile Information for <b style='color: #000'>" + profile.lastJSON.login + "</b>" : ""}, bannerPane);
 
-				var dataDiv = dojo.create("div", {id: "profile.actions", style: "float: right; margin-top: 10px; margin-bottom: 10px;"}, bannerPane);
+				var dataDiv = dojo.create("div", {id: "profile.actions"}, bannerPane);
 				this.commandService.addCommandGroup("eclipse.profileActionsGroup", 100, null, null, "profile.actions");
 				for(var i=0; i<content.actions.length; i++){
 					var info = content.actions[i];
