@@ -8,14 +8,17 @@
  ******************************************************************************/
 /*global dojo dijit eclipse*/
 /*jslint browser:true*/
-dojo.provide("sites.widgets.SiteEditor");
+dojo.provide("widgets.SiteEditor");
 
+dojo.require("dijit.form.Button");
 dojo.require("dijit.form.ComboBox");
 dojo.require("dijit.form.Form");
+dojo.require("dijit.form.Select");
+dojo.require("dijit.form.Textarea");
+dojo.require("dijit.form.ValidationTextBox");
 dojo.require("dijit.layout.ContentPane");
 dojo.require("dijit._Templated");
-dojo.require("dijit._Widget");
-dojo.require("dijit.Dialog");
+//dojo.require("dijit._Widget");
 // require eclipse.sites.utils
 
 /**
@@ -26,9 +29,9 @@ dojo.require("dijit.Dialog");
  * @param {String} [options.location] Optional URL of a site configuration to load & edit 
  * immediately after widget is created.
  */
-dojo.declare("sites.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, dijit._Templated], {
+dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, dijit._Templated], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache("sites.widgets", "templates/SiteEditor.html"),
+	templateString: dojo.cache("widgets", "templates/SiteEditor.html"),
 	
 	/** dojo.Deferred */
 	_workspaces: null,

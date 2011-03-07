@@ -60,7 +60,7 @@ dojo.addOnLoad(function() {
 	
 	// Initialize the widget
 	(function() {
-		var widget = new sites.widgets.SiteEditor({serviceRegistry: serviceRegistry, id: "site-editor"});
+		var widget = new widgets.SiteEditor({serviceRegistry: serviceRegistry, id: "site-editor"});
 		dojo.place(widget.domNode, dojo.byId("site"), "only");
 		widget.startup();
 		
