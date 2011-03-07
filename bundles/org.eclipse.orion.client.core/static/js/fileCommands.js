@@ -143,7 +143,6 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 					dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);})//refresh the root
 				);
 			}
-			window.alert("Not yet implemented.  See log for operation parameters.");
 		};
 		
 		var prompt = function() {
