@@ -119,7 +119,7 @@ eclipse.Editor = (function() {
 		}
 	}
 	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent);
-	var isFirefox =  parseFloat(navigator.userAgent.split("Firefox/")[1] || navigator.userAgent.split("Minefield/")[1]) || undefined;
+	var isFirefox = parseFloat(navigator.userAgent.split("Firefox/")[1] || navigator.userAgent.split("Minefield/")[1]) || undefined;
 	var isOpera = navigator.userAgent.indexOf("Opera") !== -1;
 	var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
 	var isSafari = navigator.userAgent.indexOf("Safari") !== -1;
@@ -127,6 +127,7 @@ eclipse.Editor = (function() {
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 	var isW3CEvents = typeof window.document.documentElement.addEventListener === "function";
+	var isRangeRects = !isIE && typeof window.document.createRange().getBoundingClientRect === "function";
 
 	/** 
 	 * Constructs a new Selection object.
@@ -1970,20 +1971,7 @@ eclipse.Editor = (function() {
 			}
 		},
 		_handleScroll: function () {
-			var scroll = this._getScroll ();
-			var oldX = this._hScroll;
-			var oldY = this._vScroll;
-			if (oldX !== scroll.x || (oldY !== scroll.y)) {
-				this._hScroll = scroll.x;
-				this._vScroll = scroll.y;
-				this._commitIME();
-				this._updatePage();
-				var e = {
-					oldValue: {x: oldX, y: oldY},
-					newValue: scroll
-				};
-				this.onScroll(e);
-			}
+			this._doScroll(this._getScroll());
 		},
 		_handleSelectStart: function (e) {
 			if (!e) { e = window.event; }
@@ -2250,6 +2238,21 @@ eclipse.Editor = (function() {
 				this._doContent(text);
 			}
 			return text !== null;
+		},
+		_doScroll: function (scroll) {
+			var oldX = this._hScroll;
+			var oldY = this._vScroll;
+			if (oldX !== scroll.x || (oldY !== scroll.y)) {
+				this._hScroll = scroll.x;
+				this._vScroll = scroll.y;
+				this._commitIME();
+				this._updatePage();
+				var e = {
+					oldValue: {x: oldX, y: oldY},
+					newValue: scroll
+				};
+				this.onScroll(e);
+			}
 		},
 		_doSelectAll: function (args) {
 			var model = this._model;
@@ -2617,26 +2620,33 @@ eclipse.Editor = (function() {
 						nodeLength -= lineChild.ignoreChars;
 					}
 					if (lineOffset + nodeLength > offset) {
-						var text = textNode.data;
 						var index = offset - lineOffset;
-						lineChild.removeChild(textNode);
-						lineChild.appendChild(document.createTextNode(text.substring(0, index)));
-						var span = document.createElement("SPAN");
-						span.appendChild(document.createTextNode(text.substring(index, index + 1)));
-						lineChild.appendChild(span);
-						lineChild.appendChild(document.createTextNode(text.substring(index + 1)));
-						result = span.getBoundingClientRect();
-						lineChild.innerHTML = "";
-						lineChild.appendChild(textNode);
-						if (!dummy) {
-							/*
-							 * Removing the element node that holds the selection start or end
-							 * causes the selection to be lost. The fix is to detect this case
-							 * and restore the selection. 
-							 */
-							var s = this._getSelection();
-							if ((lineOffset <= s.start && s.start < lineOffset + nodeLength) ||  (lineOffset <= s.end && s.end < lineOffset + nodeLength)) {
-								this._updateDOMSelection();
+						if (isRangeRects) {
+							var range = document.createRange();
+							range.setStart(textNode, index);
+							range.setEnd(textNode, index + 1);
+							result = range.getBoundingClientRect();
+						} else {
+							var text = textNode.data;
+							lineChild.removeChild(textNode);
+							lineChild.appendChild(document.createTextNode(text.substring(0, index)));
+							var span = document.createElement("SPAN");
+							span.appendChild(document.createTextNode(text.substring(index, index + 1)));
+							lineChild.appendChild(span);
+							lineChild.appendChild(document.createTextNode(text.substring(index + 1)));
+							result = span.getBoundingClientRect();
+							lineChild.innerHTML = "";
+							lineChild.appendChild(textNode);
+							if (!dummy) {
+								/*
+								 * Removing the element node that holds the selection start or end
+								 * causes the selection to be lost. The fix is to detect this case
+								 * and restore the selection. 
+								 */
+								var s = this._getSelection();
+								if ((lineOffset <= s.start && s.start < lineOffset + nodeLength) ||  (lineOffset <= s.end && s.end < lineOffset + nodeLength)) {
+									this._updateDOMSelection();
+								}
 							}
 						}
 						break;
@@ -3042,41 +3052,60 @@ eclipse.Editor = (function() {
 				for (var i = 0; i < rects.length; i++) {
 					var rect = rects[i];
 					if (rect.left <= x && x < rect.right) {
-						var newText = [];
-						for (var j = 0; j < nodeLength; j++) {
-							newText.push("<span>");
-							if (j === nodeLength - 1) {
-								newText.push(textNode.data.substring(j));
-							} else {
-								newText.push(textNode.data.substring(j, j + 1));
-							}
-							newText.push("</span>");
-						}
-						lineChild.innerHTML = newText.join("");
-						var rangeChild = lineChild.firstChild;
-						while (rangeChild) {
-							rect = rangeChild.getBoundingClientRect();
-							if (rect.left <= x && x < rect.right) {
-								//TODO test for character trailing (wrong for bidi)
-								if (x > rect.left + (rect.right - rect.left) / 2) {
-									offset++;
+						if (isRangeRects) {
+							var range = document.createRange();
+							var index = 0;
+							while (index < nodeLength) {
+								range.setStart(textNode, index);
+								range.setEnd(textNode, index + 1);
+								rect = range.getBoundingClientRect();
+								if (rect.left <= x && x < rect.right) {
+									//TODO test for character trailing (wrong for bidi)
+									if (x > rect.left + (rect.right - rect.left) / 2) {
+										index++;
+									}
+									break;
 								}
-								break;
+								index++;						
 							}
-							offset++;
-							rangeChild = rangeChild.nextSibling;
-						}
-						if (!dummy) {
-							lineChild.innerHTML = "";
-							lineChild.appendChild(textNode);
-							/*
-							 * Removing the element node that holds the selection start or end
-							 * causes the selection to be lost. The fix is to detect this case
-							 * and restore the selection. 
-							 */
-							var s = this._getSelection();
-							if ((offset <= s.start && s.start < offset + nodeLength) || (offset <= s.end && s.end < offset + nodeLength)) {
-								this._updateDOMSelection();
+							offset += index;
+						} else {
+							var newText = [];
+							for (var j = 0; j < nodeLength; j++) {
+								newText.push("<span>");
+								if (j === nodeLength - 1) {
+									newText.push(textNode.data.substring(j));
+								} else {
+									newText.push(textNode.data.substring(j, j + 1));
+								}
+								newText.push("</span>");
+							}
+							lineChild.innerHTML = newText.join("");
+							var rangeChild = lineChild.firstChild;
+							while (rangeChild) {
+								rect = rangeChild.getBoundingClientRect();
+								if (rect.left <= x && x < rect.right) {
+									//TODO test for character trailing (wrong for bidi)
+									if (x > rect.left + (rect.right - rect.left) / 2) {
+										offset++;
+									}
+									break;
+								}
+								offset++;
+								rangeChild = rangeChild.nextSibling;
+							}
+							if (!dummy) {
+								lineChild.innerHTML = "";
+								lineChild.appendChild(textNode);
+								/*
+								 * Removing the element node that holds the selection start or end
+								 * causes the selection to be lost. The fix is to detect this case
+								 * and restore the selection. 
+								 */
+								var s = this._getSelection();
+								if ((offset <= s.start && s.start < offset + nodeLength) || (offset <= s.end && s.end < offset + nodeLength)) {
+									this._updateDOMSelection();
+								}
 							}
 						}
 						break done;
@@ -3553,14 +3582,18 @@ eclipse.Editor = (function() {
 			* to improve performance, the page is hidden during scroll causing only on redraw
 			* to happen. Note that this approach causes flashing on Firefox.
 			*
-			* This code is intentionally commented. It causes focus to loose focus.
+			* This code is intentionally commented. It causes editor to loose focus.
 			*/
 //			if (isIE) {
 //				this._frameDocument.body.style.visibility = "hidden";
 //			}
-			this._editorDiv.scrollLeft += pixelX;
-			this._editorDiv.scrollTop += pixelY;
-			this._handleScroll();
+			var editorDiv = this._editorDiv;
+			var newX = editorDiv.scrollLeft + pixelX;
+			if (pixelX) { editorDiv.scrollLeft = newX; }
+			var newY = editorDiv.scrollTop + pixelY;
+			if (pixelY) { editorDiv.scrollTop = newY; }
+			this._doScroll({x: newX, y: newY});
+//			this._handleScroll();
 //			if (isIE) {
 //				this._frameDocument.body.style.visibility = "visible";
 //				this.focus();
