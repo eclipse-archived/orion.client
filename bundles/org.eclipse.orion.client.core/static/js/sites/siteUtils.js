@@ -10,8 +10,8 @@
 /*global dojo eclipse:true */
 /*jslint devel:true*/
 
-dojo.getObject("eclipse.sites.util", true);
 // require utils.js
+dojo.getObject("eclipse.sites.util", true);
 
 /**
  * Utility methods
@@ -19,8 +19,9 @@ dojo.getObject("eclipse.sites.util", true);
  */
 eclipse.sites.util = {
 	/**
+	 * @static
 	 * @param {SiteConfiguration} siteConfig
-	 * @return Href for a link to the editing page of the given siteConfiguration.
+	 * @return The href for a link to the editing page of the given siteConfiguration.
 	 */
 	generateEditSiteHref: function(siteConfig) {
 		return "edit-site.html#site=" + eclipse.util.makeRelative(siteConfig.Location);
@@ -28,6 +29,7 @@ eclipse.sites.util = {
 	
 	/**
 	 * Parses the state of the edit-site page from a hash value.
+	 * @static
 	 * @param {String} hash
 	 * @return {site: String, [action: String], [actionDetails:String]}
 	 */
@@ -37,6 +39,7 @@ eclipse.sites.util = {
 	
 	/**
 	 * Turns the state of the edit-site page into a hash value.
+	 * @static
 	 * @param {String} siteLocation
 	 * @param {String} action
 	 * @param {String} actionDetails
@@ -54,5 +57,66 @@ eclipse.sites.util = {
 			obj.actionDetails = actionDetails;
 		}
 		return dojo.objectToQuery(obj);
+	},
+	
+	/**
+	 * Creates & adds commands that act on an individual site configuration.
+	 * @static
+	 * @param errorCallback {Function} Called when a server request fails.
+	 */
+	createSiteConfigurationCommands: function(commandService, siteService, statusService, dialogService,
+			startCallback, stopCallback, deleteCallback, errorCallback) {
+		var editCommand = new eclipse.Command({
+			name: "Edit",
+			image: "images/editing_16.gif",
+			id: "eclipse.sites.edit",
+			visibleWhen: function(item) {
+				return item.HostingStatus && item.HostingStatus.Status === "stopped";
+			},
+			hrefCallback: eclipse.sites.util.generateEditSiteHref});
+		commandService.addCommand(editCommand, "object");
+		
+		var startCommand = new eclipse.Command({
+			name: "Start",
+			image: "images/lrun_obj.gif",
+			id: "eclipse.sites.start",
+			visibleWhen: function(item) {
+				return item.HostingStatus && item.HostingStatus.Status === "stopped";
+			},
+			callback: function(item) {
+				statusService.setMessage("Starting...");
+				siteService.startStopSiteConfiguration(item.Id, "start").then(startCallback, errorCallback);
+			}});
+		commandService.addCommand(startCommand, "object");
+		
+		var stopCommand = new eclipse.Command({
+			name: "Stop",
+			image: "images/stop.gif",
+			id: "eclipse.sites.stop",
+			visibleWhen: function(item) {
+				return item.HostingStatus && item.HostingStatus.Status === "started";
+			},
+			callback: function(item) {
+				statusService.setMessage("Stopping " + item.Name + "...");
+				siteService.startStopSiteConfiguration(item.Id, "stop").then(stopCallback, errorCallback);
+			}});
+		commandService.addCommand(stopCommand, "object");
+		
+		var deleteCommand = new eclipse.Command({
+			name: "Delete",
+			image: "images/remove.gif",
+			id: "eclipse.sites.delete",
+			visibleWhen: function(item) {
+				return item.HostingStatus && item.HostingStatus.Status === "stopped";
+			},
+			callback: function(item) {
+				var msg = "Are you sure you want to delete the site configuration '" + item.Name + "'?";
+				dialogService.confirm(msg, function(confirmed) {
+						if (confirmed) {
+							siteService.deleteSiteConfiguration(item.Id).then(deleteCallback, errorCallback);
+						}
+					});
+			}});
+		commandService.addCommand(deleteCommand, "object");
 	}
 };
