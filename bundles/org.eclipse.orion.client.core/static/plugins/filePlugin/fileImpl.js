@@ -281,7 +281,7 @@ eclipse.FileServiceImpl= (function() {
 				headers: {
 					"Orion-Version": "1",
 					"Slug": name,
-					"X-Create-Options": isMove ? "move" : "copy"
+					"X-Create-Options": "no-overwrite," + (isMove ? "move" : "copy")
 				},
 				postData: dojo.toJson({"Location": sourceLocation}),
 				handleAs: "json",
