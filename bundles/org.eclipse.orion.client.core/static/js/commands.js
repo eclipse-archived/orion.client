@@ -431,12 +431,15 @@ eclipse.Command = (function() {
 					link.href = href; 
 				}
 			} else if (this.callback) {
-				dojo.connect(link, "onclick", this, function() {
-					this.callback.call(handler, items, this.id, image.id, userData);
-				});
-				dojo.connect(image, "onclick", this, function() {
-					this.callback.call(handler, items, this.id, image.id, userData);
-				});
+				if (this.hasImage()) {
+					dojo.connect(image, "onclick", this, function() {
+						this.callback.call(handler, items, this.id, image.id, userData);
+					});
+				} else {
+					dojo.connect(link, "onclick", this, function() {
+						this.callback.call(handler, items, this.id, image.id, userData);
+					});
+				}
 			}
 			if (this._deviceSupportsHover) {
 				image.src = "/images/none.png";
