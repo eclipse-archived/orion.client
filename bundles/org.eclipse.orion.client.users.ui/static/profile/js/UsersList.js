@@ -38,6 +38,10 @@ eclipse.UsersList = (function() {
 						className : "usersTable"
 					}, titleRow);
 					dojo.create("td", {
+						innerHTML : "Last Login",
+						className : "usersTable"
+					}, titleRow);
+					dojo.create("td", {
 						innerHTML : "Actions",
 						className : "usersTable"
 					}, titleRow);
@@ -57,7 +61,11 @@ eclipse.UsersList = (function() {
 									className : "usersTable"
 						}, userRow);
 						dojo.create("td", {
-							innerHTML : jsonData.users[i].name,
+							innerHTML : jsonData.users[i].Name ? jsonData.users[i].Name : '&nbsp;',
+							className: "usersTable secondaryColumn"
+						}, userRow);
+						dojo.create("td", {
+							innerHTML : jsonData.users[i].LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(jsonData.users[i].LastLogInTimestamp)), {formatLength: "short"}) : '&nbsp;',
 							className: "usersTable secondaryColumn"
 						}, userRow);
 						var actionsTd = dojo.create("td", {className: "usersTable secondaryColumn"});

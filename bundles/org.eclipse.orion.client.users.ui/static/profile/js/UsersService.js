@@ -125,16 +125,14 @@ eclipse.UsersService = (function() {
 		},
 		updateUserInfo: function(userUri, data, onLoad){
 			var service = this;
-			var uri = userUri + "?name=" + data.name;
+			var uri = userUri;
 			
-			if(data.password && data.passwordRetype && (data.password!=="" || data.passwordRetype!=="")){
-				if(data.password===data.passwordRetype){
-					uri = uri + "&password=" + data.password;	
-				}else{
-					alert("Passwords do not match!");
-					return;
-				}
+
+			if(data.password!==data.passwordRetype){
+				alert("Passwords do not match!");
+				return;
 			}
+
 
 			dojo.xhrPut({
 				url : uri,
@@ -142,6 +140,7 @@ eclipse.UsersService = (function() {
 					"Orion-Version" : "1"
 				},
 				handleAs : "json",
+				putData: dojo.toJson(data),
 				timeout : 15000,
 				load : function(jsonData, secondArg) {
 					if (onLoad){
