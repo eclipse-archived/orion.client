@@ -229,7 +229,7 @@ orion.GitStatusController = (function() {
 			table.id = progressId;
 			table.width = "100%";
 			table.height = "100%";
-			table.style.backgroundColor = "#DDDDDD";
+			table.style.backgroundColor = "#EEEEEE";
 			table.style.zIndex =100;
 			table.style.opacity =0.5;
 			
