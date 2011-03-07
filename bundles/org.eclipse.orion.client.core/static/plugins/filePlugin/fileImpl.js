@@ -272,14 +272,16 @@ eclipse.FileServiceImpl= (function() {
 		
 		_doCopyMove: function(sourceLocation, targetLocation, isMove, name) {
 			if (!name) {
-				name = sourceLocation.slice(sourceLocation.lastIndexOf('/'));
+				//take the last segment (trailing slash will product an empty segment)
+				var segments = sourceLocation.split("/");
+				name = segments.pop() || segments.pop();
 			}
 			return dojo.xhrPost({
 				url: targetLocation,
 				headers: {
 					"Orion-Version": "1",
 					"Slug": name,
-					"X-Create-Options": isMove ? "move" : "copy"
+					"X-Create-Options": "no-overwrite," + (isMove ? "move" : "copy")
 				},
 				postData: dojo.toJson({"Location": sourceLocation}),
 				handleAs: "json",

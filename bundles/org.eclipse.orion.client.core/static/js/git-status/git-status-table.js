@@ -188,7 +188,7 @@ orion.GitStatusController = (function() {
 			this.modifyImageButton(stageAllBtn , "Stage all", function(evt){self.stageAll();} , !this.hasUnstaged);
 			this.modifyImageButton(unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
 			this.modifyImageButton(commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value);} , !this.hasStaged);
-			this.modifyImageButton(amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value);} , !this.hasStaged);
+			this.modifyImageButton(amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value , true);} , !this.hasStaged);
 		},
 		
 		_makeLocation: function(location , name){//temporary
@@ -315,6 +315,7 @@ orion.GitStatusController = (function() {
 			var result = this._resolveURI(itemModel);
 			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) >>> " : "local VS index ) >>> " ;
 			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS + itemModel.name;
+			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
 			this._inlineCompareContainer.resolveDiff(result.diffURI,
 													result.fileURI,
 					                                function(){					
@@ -414,7 +415,7 @@ orion.GitStatusController = (function() {
 				this.unstage(this._url.substring(start));
 		},
 		
-		commitAll: function(location , message){
+		commitAll: function(location , message , body){
 			var self = this;
 			var url = "/git/commit" +  location;
 			dojo.xhrPost({
@@ -424,7 +425,7 @@ orion.GitStatusController = (function() {
 				},
 				handleAs: "json",
 				timeout: 5000,
-				postData: dojo.toJson({"Message":message} ),
+				postData: body,
 				load: function(jsonData, ioArgs) {
 					console.log(JSON.stringify(jsonData));
 					self.getGitStatus(self._url);;
@@ -437,13 +438,13 @@ orion.GitStatusController = (function() {
 			});
 		},
 		
-		commit: function(message){
+		commit: function(message , amend){
 			var start = this._url.indexOf("/file/");
 			if(start != -1){
 				var sub = this._url.substring(start);
 				var subSlitted = sub.split("/");
 				if(subSlitted.length > 2){
-					this.commitAll([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") , message);
+					this.commitAll([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") , message , amend ?dojo.toJson({"Message":message,"Amend":"true"}): dojo.toJson({"Message":message}));
 				}
 			}
 		}

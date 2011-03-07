@@ -128,7 +128,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		var path = splits[splits.length-1];
 		var qIndex = path.indexOf("/?");
 		if (qIndex > 0) {
-			path = path.substring(0, qIndex);
+			//remove the query but not the trailing separator
+			path = path.substring(0, qIndex+1);
 		}
 		return path;
 	}
@@ -151,13 +152,14 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		
 		// gather up source paths so we do not propose to move/copy a source to its own location
 		var sourceLocations = [];
-		for (var i=0; i<items.length; i++) {
+		var i;
+		for (i=0; i<items.length; i++) {
 			sourceLocations.push(stripPath(items[i].Location));
 		}
 		var choices = [];
 		if (eclipse.favoritesCache) {
 			var favorites = eclipse.favoritesCache.favorites;
-			for (var i=0; i<favorites.length; i++) {
+			for (i=0; i<favorites.length; i++) {
 				var path = stripPath(favorites[i].path);
 				if (!contains(sourceLocations, path)) {
 					choices.push({name: favorites[i].name, image: "images/silk/star.gif", path: path, callback: callback});
@@ -169,12 +171,24 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		// Don't propose a target if it's a source
 		var proposedPaths = [];
 		var alreadySeen = [];
-		for (var i= 0; i<items.length; i++) {
-			// for the purposes of finding parents and siblings, if this is a file, consider its parent folder for finding targets, not itself.
+		var j, child, childPath;
+		for (i= 0; i<items.length; i++) {
 			var item = items[i];
+			var sibling = items[i];
+			// for the purposes of finding parents, if this is a file, consider its parent folder for finding targets, not itself.
 			if (!item.Directory && item.parent) {
 				item = item.parent;
 			}
+			if (item.Parents) {
+				for (j=0; j<item.Parents.length; j++) {
+					child = item.Parents[j];
+					childPath = stripPath(child.Location);
+					if (child.Directory && !contains(alreadySeen, childPath) && !contains(sourceLocations, childPath)) {
+						alreadySeen.push(childPath);
+						child.stripped = childPath;
+						proposedPaths.push(child);
+					}
+				}			}
 			if (item.parent) {
 				var parentPath = item.parent.Location;
 				if (parentPath) {
@@ -185,16 +199,15 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 						item.parent.stripped = stripped;
 					}
 				}
-				// siblings
-				if (item.parent.Children) {
-					for (var j=0; j<item.parent.Children.length; j++) {
-						var child = item.parent.Children[j];
-						var childPath = stripPath(child.Location);
-						if (child.Directory && !contains(alreadySeen, childPath) && !contains(sourceLocations, childPath)) {
-							alreadySeen.push(childPath);
-							child.stripped = childPath;
-							proposedPaths.push(child);
-						}
+			}
+			if (sibling.parent && sibling.parent.children) {	// siblings
+				for (j=0; j<sibling.parent.children.length; j++) {
+					child = sibling.parent.children[j];
+					childPath = stripPath(child.Location);
+					if (child.Directory && !contains(alreadySeen, childPath) && !contains(sourceLocations, childPath)) {
+						alreadySeen.push(childPath);
+						child.stripped = childPath;
+						proposedPaths.push(child);
 					}
 				}
 			}
@@ -210,14 +223,14 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			return 0;
 		});
 		// now add them
-		for (var i=0; i<proposedPaths.length; i++) {
+		for (i=0; i<proposedPaths.length; i++) {
 			var item = proposedPaths[i];
 			var displayPath = item.Name;
 			// we know we've left leading and trailing slash so slashes is splits + 1
 			var slashes = item.stripped.split('/').length + 1;
 			// but don't indent for leading or trailing slash
 			// TODO is there a smarter way to do this?
-			for (var j=0; j<slashes-2; j++) {
+			for (j=0; j<slashes-2; j++) {
 				displayPath = "  " + displayPath;
 			}
 			choices.push({name: displayPath, path: item.stripped, callback: callback});

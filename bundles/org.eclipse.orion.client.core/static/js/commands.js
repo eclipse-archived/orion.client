@@ -169,7 +169,7 @@ eclipse.CommandService = (function() {
 						if (!selection) {
 							return;
 						}
-						this.renderCommands(parent, scope, selection, handler, style, userData);
+						cmdService.renderCommands(parent, scope, selection, handler, style, userData);
 					});
 				});
 				return;
