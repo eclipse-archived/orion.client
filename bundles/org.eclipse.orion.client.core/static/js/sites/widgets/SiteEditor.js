@@ -19,20 +19,22 @@ dojo.require("dijit.Dialog");
 // require eclipse.sites.utils
 
 /**
- * Editor for an individual SiteConfiguration data object.
- * @param {Object} options
- * @param {eclipse.ServiceRegistry} options.serviceRegistry Must have FileService, SiteService.
- * @param {String} [options.location] Optional URL of a site configuration to initially load & edit.
+ * Editor for an individual SiteConfiguration model object.
+ * @param {Object} options Dijit options bag for creating the widget.
+ * @param {eclipse.ServiceRegistry} options.serviceRegistry The service registry to use.
+ * Must have FileClient, SiteService.
+ * @param {String} [options.location] Optional URL of a site configuration to load & edit 
+ * immediately after widget is created.
  */
 dojo.declare("sites.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, dijit._Templated], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache("sites.widgets", "templates/SiteEditor.html"),
 	
 	/** dojo.Deferred */
-	workspaces: null,
+	_workspaces: null,
 	
 	/** SiteConfiguration */
-	siteConfiguration: null,
+	_siteConfiguration: null,
 	
 	/** Array */
 	_modelListeners: null,
@@ -44,6 +46,9 @@ dojo.declare("sites.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widge
 		if (this.options.location) {
 			this.load(this.options.location);
 		}
+		
+		// Start loading workspaces right away
+		this._loadWorkspaces();
 	},
 	
 	postMixInProperties: function() {
@@ -71,47 +76,59 @@ dojo.declare("sites.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widge
 		
 		// dijit.form.Form doesn't work in dojoAttachPoint for some reason
 		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.onSubmit);
-		
-		// Start loading workspaces right away
-		this._loadWorkspaces();
+	},
+	
+	startup: function() {
+		this.inherited(arguments);
 	},
 	
 	/**
-	 * Loads site configuration at the given URL into the editor.
+	 * Loads site configuration from a URL into the editor.
 	 * @param {String} location URL of the site configuration to load.
 	 * @return {dojo.Deferred} A deferred, resolved when the editor has loaded & refreshed itself.
 	 */
 	load: function(location) {
-		return this._getSiteService().then(dojo.hitch(this, function(siteService) {
-			siteService.loadSiteConfiguration(location).then(dojo.hitch(this, this._setSiteConfiguration));
+		this._busy("Loading...");
+		var deferred = new dojo.Deferred();
+		// TODO errback for the deferred(s)
+		this._getSiteService().then(dojo.hitch(this, function(siteService) {
+			siteService.loadSiteConfiguration(location).then(dojo.hitch(this, function(siteConfig) {
+				this._setSiteConfiguration(siteConfig);
+				this._done("Done.");
+				deferred.callback(siteConfig);
+			}));
 		}));
+		return deferred;
 	},
 	
 	_setSiteConfiguration: function(siteConfiguration) {
-		this._detach(this.siteConfiguration);
-		this.siteConfiguration = siteConfiguration;
+		this._detach(this._siteConfiguration);
+		this._siteConfiguration = siteConfiguration;
 		
 		// Refresh fields
-		this.name.set("value", this.siteConfiguration.Name);
-		this.mappings.set("value", JSON.stringify(this.siteConfiguration.Mappings));
-		this.hostHint.set("value", this.siteConfiguration.HostHint);
+		this.name.set("value", this._siteConfiguration.Name);
+		this.mappings.set("value", JSON.stringify(this._siteConfiguration.Mappings));
+		this.hostHint.set("value", this._siteConfiguration.HostHint);
 		
-		var widget = this;
-		dojo.when(widget.workspaces, function(workspaces) {
-			// Workspaces are available so refresh that field
+		var editor = this;
+		dojo.when(editor._workspaces, function(workspaces) {
+			// Workspaces are available so refresh that widget
 			var options = dojo.map(workspaces, function(workspace) {
 				return {
 					label: workspace.Name,
 					value: workspace.Id,
-					selected: workspace.Id === widget.siteConfiguration.Workspace };});
-			widget.workspace.set("options", options);
-			widget.workspace._loadChildren();
+					selected: workspace.Id === editor._siteConfiguration.Workspace };});
+			editor.workspace.set("options", options);
+			editor.workspace._loadChildren();
 		});
 		
-		// Update data object when fields change
-		this._attach(this.siteConfiguration);
+		this._attach(this._siteConfiguration);
 	},
 	
+	/**
+	 * Hook up listeners for field -> model updates.
+	 * @param site {SiteConfiguration}
+	 */
 	_attach: function(site) {
 		this._modelListeners = [];
 		var w = this;
@@ -121,7 +138,7 @@ dojo.declare("sites.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widge
 				if (decodeJson) {
 					value = dojo.fromJson(value);
 				}
-				this.siteConfiguration[modelField] = value;
+				this._siteConfiguration[modelField] = value;
 				console.debug("Change " + modelField + " to " + value);
 			});
 			w._modelListeners.push(handle);
@@ -148,18 +165,18 @@ dojo.declare("sites.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widge
 	},
 	
 	/**
-	 * Starts loading workspaces and resolves this.workspaces when they're ready.
+	 * Starts loading workspaces and resolves this._workspaces when they're ready.
 	 */
 	_loadWorkspaces: function() {
 		var widget = this;
-		widget.workspaces = new dojo.Deferred();
+		widget._workspaces = new dojo.Deferred();
 		this.options.serviceRegistry.getService("IFileService").then(
 			function(fileService) {
 				fileService.loadWorkspaces().then(function(workspaces) {
-					widget.workspaces.callback(workspaces);
+					widget._workspaces.callback(workspaces);
 				},
 				function(error) {
-					widget.workspaces.errback(error);
+					widget._workspaces.errback(error);
 				});
 			});
 	},
@@ -168,36 +185,56 @@ dojo.declare("sites.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widge
 	 * @return {SiteConfiguration} The site configuration that is being edited.
 	 */
 	getSiteConfiguration: function() {
-		return this.siteConfiguration;
+		return this._siteConfiguration;
 	},
 	
 	/**
 	 * Callback when 'save' is clicked.
 	 * @Override
-	 * @return True to allow save to proceed.
+	 * @return True to allow save to proceed, false to prevent it.
 	 */
 	onSubmit: function(/**Event*/ e) {
 		var form = dijit.byId("siteForm");
 		if (form.isValid()) {
-			this._onBusy("Saving...");
+			this._busy("Saving...");
 			var widget = this;
 			this._getSiteService().then(
 					function(siteService) {
-						var siteConfig = widget.siteConfiguration;
+						var siteConfig = widget._siteConfiguration;
 						siteService.updateSiteConfiguration(siteConfig.Id, siteConfig).then(
 								function(updatedSiteConfig) {
 									widget._setSiteConfiguration(updatedSiteConfig);
-									widget._onDone();
+									widget._done("Saved.");
 								});
 					});
 			return true;
 		} else {
-			alert("invalid");
+			//alert("invalid");
 			return false;
 		}
 	},
-	_onBusy: function(msg) {
+	_busy: function(msg) {
+		dojo.forEach(this.getDescendants(), function(widget) {
+			widget.set("disabled", true);
+		});
+		this.onMessage(msg);
 	},
-	_onDone: function() {
+	_done: function(msg) {
+		dojo.forEach(this.getDescendants(), function(widget) {
+			widget.set("disabled", false);
+		});
+		this.onMessage(msg);
+	},
+	/**
+	 * Clients can override or dojo.connect() to this function to receive notifications about 
+	 * server calls that failed.
+	 */
+	onError: function(error) {
+	},
+	/**
+	 * Clients can override or dojo.connect() to this function to receive notifications about
+	 * server calls that succeeded.
+	 */
+	onMessage: function(message) {
 	}
 });
