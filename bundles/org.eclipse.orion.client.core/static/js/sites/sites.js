@@ -22,14 +22,17 @@ dojo.addOnLoad(function() {
 	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
-	var siteService = new eclipse.sites.SiteService();
-	serviceRegistry.registerService(eclipse.sites.SITE_SERVICE_NAME, siteService);
+	var siteService = new eclipse.sites.SiteService(serviceRegistry);
+	var preferenceService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
 	// File operations
 	var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
 	if (filePlugin === null) {
 		pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
 	}
+	
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	
 	// Create the visuals
 	var model;

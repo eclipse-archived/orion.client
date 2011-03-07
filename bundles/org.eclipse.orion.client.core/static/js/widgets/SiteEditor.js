@@ -23,9 +23,9 @@ dojo.require("dijit._Templated");
 
 /**
  * Editor for an individual SiteConfiguration model object.
- * @param {Object} options Dijit options bag for creating the widget.
- * @param {eclipse.ServiceRegistry} options.serviceRegistry The service registry to use.
- * Must have FileClient, SiteService.
+ * @param {Object} options Options bag for creating the widget.
+ * @param {eclipse.FileClient} options.fileClient
+ * @param {eclipse.SiteService} options.siteService
  * @param {String} [options.location] Optional URL of a site configuration to load & edit 
  * immediately after widget is created.
  */
@@ -45,13 +45,17 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	constructor: function() {
 		this.inherited(arguments);
 		this.options = arguments[0] || {};
-		if (!this.options.serviceRegistry) { throw new Error("options.serviceRegistry is required"); }
-		if (this.options.location) {
-			this.load(this.options.location);
-		}
+		if (!this.options.fileClient) { throw new Error("options.fileClient is required"); }
+		if (!this.options.siteService) { throw new Error("options.siteService is required"); }
+		this._fileClient = this.options.fileClient;
+		this._siteService = this.options.siteService;
 		
 		// Start loading workspaces right away
 		this._loadWorkspaces();
+		
+		if (this.options.location) {
+			this.load(this.options.location);
+		}
 	},
 	
 	postMixInProperties: function() {
@@ -94,13 +98,12 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this._busy("Loading...");
 		var deferred = new dojo.Deferred();
 		// TODO errback for the deferred(s)
-		this._getSiteService().then(dojo.hitch(this, function(siteService) {
-			siteService.loadSiteConfiguration(location).then(dojo.hitch(this, function(siteConfig) {
+		this._siteService.loadSiteConfiguration(location).then(dojo.hitch(this, 
+			function(siteConfig) {
 				this._setSiteConfiguration(siteConfig);
-				this._done("Done.");
+				this._done("");
 				deferred.callback(siteConfig);
 			}));
-		}));
 		return deferred;
 	},
 	
@@ -161,26 +164,16 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	},
 	
 	/**
-	 * @return {dojo.Deferred} A deferred, resolved with the service
-	 */
-	_getSiteService: function() {
-		return this.options.serviceRegistry.getService(eclipse.sites.SITE_SERVICE_NAME);
-	},
-	
-	/**
 	 * Starts loading workspaces and resolves this._workspaces when they're ready.
 	 */
 	_loadWorkspaces: function() {
 		var widget = this;
 		widget._workspaces = new dojo.Deferred();
-		this.options.serviceRegistry.getService("IFileService").then(
-			function(fileService) {
-				fileService.loadWorkspaces().then(function(workspaces) {
-					widget._workspaces.callback(workspaces);
-				},
-				function(error) {
-					widget._workspaces.errback(error);
-				});
+		this._fileClient.loadWorkspaces().then(function(workspaces) {
+				widget._workspaces.callback(workspaces);
+			},
+			function(error) {
+				widget._workspaces.errback(error);
 			});
 	},
 	
@@ -201,14 +194,12 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		if (form.isValid()) {
 			this._busy("Saving...");
 			var widget = this;
-			this._getSiteService().then(
-					function(siteService) {
-						var siteConfig = widget._siteConfiguration;
-						siteService.updateSiteConfiguration(siteConfig.Id, siteConfig).then(
-								function(updatedSiteConfig) {
-									widget._setSiteConfiguration(updatedSiteConfig);
-									widget._done("Saved.");
-								});
+			
+			var siteConfig = widget._siteConfiguration;
+			this._siteService.updateSiteConfiguration(siteConfig.Id, siteConfig).then(
+					function(updatedSiteConfig) {
+						widget._setSiteConfiguration(updatedSiteConfig);
+						widget._done("Saved.");
 					});
 			return true;
 		} else {

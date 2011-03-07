@@ -25,16 +25,13 @@ eclipse.sites.SiteService = (function() {
 	 * Constructs a new SiteService.
 	 * 
 	 * @name eclipse.sites.SiteService
-	 * @class Implements a service that provides access to the server API for managing site configurations.
-	 * To do this it may be registered with a {eclipse.ServiceRegistry}, for example:
-	 * <code>
-	 * var serviceRegistry = ...
-	 * var siteService = new eclipse.sites.SiteService();
-	 * var registration = serviceRegistry.registerService(eclipse.sites.SITE_SERVICE_NAME, siteService);
-	 * </code>
+	 * @class Defines and implements a service that provides access to the server API for managing site 
+	 * configurations.
+	 * @param serviceRegistry {eclipse.ServiceRegistry} The service registry to register ourself with.
 	 */
-	function SiteService() {
+	function SiteService(serviceRegistry) {
 		this._siteUrl = "/site";
+		this._serviceRegistration = serviceRegistry.registerService(eclipse.sites.SITE_SERVICE_NAME, this);
 	}
 	SiteService.prototype = /** @lends eclipse.sites.SiteService.prototype */ {
 		/**
