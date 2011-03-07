@@ -94,11 +94,20 @@ a:hover {
     	border-color: #EEEEEE;
 }
 
+.soria .dijitSplitterV .dijitSplitterThumb {	
+	background: #F5F5F5;
+}
+
+.soria .dijitSplitterV {
+	background: #F5F5F5;
+}
+
+
 .paneScrolled {
     	margin: 0px;
     	padding: 0px;
     	background: #FFFFFF;
-	overflow: auto;
+		overflow: auto;
     	border-color: #EEEEEE;
 }
 
@@ -197,14 +206,6 @@ a:hover {
 	width: 300px;
 	border: 1px solid #bfbfbf;
 	padding: 4px;
-}
-
-.soria .dijitSplitterV .dijitSplitterThumb {
-	background: #FFFFFF;
-}
-
-.soria .dijitSplitterV {
-	background: #FFFFFF;
 }
 
 #rightPane .dijitTitlePaneContentInner {
