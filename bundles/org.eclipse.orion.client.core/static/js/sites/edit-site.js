@@ -60,14 +60,18 @@ dojo.addOnLoad(function() {
 	
 	// Initialize the widget
 	(function() {
-		var widget = new sites.widgets.SiteEditor({serviceRegistry: serviceRegistry, id: "site-editor"});
+		var widget = new widgets.SiteEditor({serviceRegistry: serviceRegistry, id: "site-editor"});
 		dojo.place(widget.domNode, dojo.byId("site"), "only");
 		widget.startup();
 		
-		var errorHandler = function(error) {
-			dojo.place(document.createTextNode(JSON.stringify(error)), dojo.byId("site"), "only");
-		};
+		dojo.connect(widget, "onError", function(error) {
+			statusService.setMessage(JSON.stringify(error));
+		});
+		dojo.connect(widget, "onMessage", function(message) {
+			statusService.setMessage(message, 3000);
+			// TODO fadeout after a few seconds?
+		});
 		
-		onHashChange(); // kick hash
+		onHashChange();
 	}());
 });

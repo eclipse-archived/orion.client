@@ -61,15 +61,15 @@ eclipse.sites.SiteService = (function() {
 		},
 		
 		/**
-		 * Loads an individual site configuration from the URL.
+		 * Loads an individual site configuration from the given location.
 		 * @static
 		 * @param {String} location URL of a site configuration resource.
-		 * @return {dojo.Deferred} A future for the result. Future will be resolved with the 
-		 * argument {SiteConfiguration} on success.
+		 * @return {dojo.Deferred} A deferred for the result. Will be resolved with the 
+		 * loaded {SiteConfiguration} on success.
 		 */
 		loadSiteConfiguration: function(location) {
 			return dojo.xhrGet({
-				url: location,//this._siteUrl + "/" + id,
+				url: location,
 				headers: {
 					"Orion-Version": "1"
 				},
@@ -143,8 +143,8 @@ eclipse.sites.SiteService = (function() {
 		 * Edits an existing site configuration.
 		 * @param id
 		 * @param updatedSiteConfig
-		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
-		 * updated {SiteConfiguration} on success.
+		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the updated
+		 * {SiteConfiguration} on success.
 		 */
 		updateSiteConfiguration: function(id, updatedSiteConfig) {
 			return dojo.xhrPut({

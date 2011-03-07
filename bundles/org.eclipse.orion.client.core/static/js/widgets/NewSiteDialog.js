@@ -8,7 +8,7 @@
  ******************************************************************************/
 /*global dojo dijit*/
 /*jslint browser:true*/
-dojo.provide("sites.widgets.NewSiteDialog");
+dojo.provide("widgets.NewSiteDialog");
 
 dojo.require("dijit.Dialog");
 dojo.require("dijit.form.CheckBox");
@@ -22,7 +22,7 @@ dojo.require("widgets.NewItemDialog");
  * @param options.serviceRegistry {eclipse.ServiceRegistry}
  * @param options.func {Function} Invoked on OK with (name, workspace) as parameters
  */
-dojo.declare("sites.widgets.NewSiteDialog", [widgets.NewItemDialog], {
+dojo.declare("widgets.NewSiteDialog", [widgets.NewItemDialog], {
 	/** Array */
 	workspaceIds: null,
 	
