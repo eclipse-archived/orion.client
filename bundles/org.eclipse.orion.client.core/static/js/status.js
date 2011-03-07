@@ -24,8 +24,20 @@ eclipse.StatusReportingService = function(serviceRegistry, domId) {
 };
  
 eclipse.StatusReportingService.prototype = {
-	setMessage : function(msg) {
+	/**
+	 * @param msg {String} Message to display.
+	 * @param timeout [Number] Optional time to display the message before hiding it.
+	 */
+	setMessage : function(msg, timeout) {
 		dojo.place(document.createTextNode(msg), this.domId, "only");
+		if (typeof(timeout) === "number") {
+			var that = this;
+			setTimeout(function() {
+				if (dojo.byId(that.domId).textContent === msg) {
+					dojo.place(document.createTextNode(""), that.domId, "only");
+				}
+			}, timeout);
+		}
 	},
 
 	setErrorMessage : function(st) {
