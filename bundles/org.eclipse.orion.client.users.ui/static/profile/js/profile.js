@@ -43,6 +43,7 @@ eclipse.DateLong = (function(){
 		DateLong.prototype = {
 			_init: function(options){
 				options.style = "display: none";
+				options.readOnly = true;
 				this.contentText = new dijit.form.TextBox(options);
 				this.contentText.set('ecliplseCustomValue',true);
 				this.dateP = dojo.create("p", {innerHTML: "&nbsp;", className: "userprofile"});
@@ -314,7 +315,14 @@ eclipse.Profile = (function() {
 			
 		},
 		fire: function(action){
-			var data = dijit.byId('profileForm').get('value');
+			var data = new Object();
+			//collect all data that are not reaonly and are not empty passwords
+			dojo.forEach(dijit.byId('profileForm').getDescendants(), function(widget){ 
+                var name = widget.name; 
+                if(!name || widget.disabled || widget.get('readOnly')){ return; }
+                if(widget.get('type') && widget.get('type')=='password' && widget.get('value')==="") {return;}
+                data[name] = widget.get('value');
+			});
 			var url = this.currentUserURI;
 			this.usersService.then(function(service) {
 						service.fire(action, url, data);
