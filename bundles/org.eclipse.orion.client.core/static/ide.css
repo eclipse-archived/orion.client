@@ -153,8 +153,8 @@ a:hover {
 	background: #404040;
 	padding-right: 8px;
 	text-align: right;
+	vertical-align: middle;
 	height: 28px;
-	width: auto;
 }
 
 .searchbox {
