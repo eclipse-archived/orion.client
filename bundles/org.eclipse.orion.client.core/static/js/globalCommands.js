@@ -29,6 +29,7 @@ var topHTMLFragment =
 			'<span class="statuspane" id="statusPane"></span>' +
 		'</td>' +
 		'<td class="rightGlobalToolbar">' +
+			'<span id="primaryNav"></span>' +
 			'<span id="globalActions"></span>' +
 			'<input type="search" id="search" class="searchbox">' +
 			'<span class="bannerSeparator">|</span>' +
@@ -119,6 +120,18 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 	
 	// place the HTML fragment from above.
 	dojo.place(topHTMLFragment, parent, "only");
+	
+	// generate primary nav links.  This needs to come from some place (extension?  registry?)
+	var primaryNav = dojo.byId("primaryNav");
+	if (primaryNav) {
+		var primaryLinks = [{name: "Git", url: "git-status.html"},{name: "Sites", url: "sites.html"},{name: "Plugins", url: "view-registry.html"}];
+		for (var i=0; i<primaryLinks.length; i++) {
+			var link = dojo.create("a", {href: primaryLinks[i].url}, primaryNav, "last");
+			dojo.addClass(link, "commandLink");
+			var text = document.createTextNode(primaryLinks[i].name);
+			dojo.place(text, link, "only");
+		}
+	}
 	
 	// hook up search box behavior
 	var searchField = dojo.byId("search");
