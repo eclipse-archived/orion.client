@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2010, 2011 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -63,7 +63,12 @@ function handlePutAuthenticationError(xhrArgs, ioArgs) {
 	});
 }
 
-function handleAuthenticationError(error, channelListener) {
+/**
+ * Handles authentication problems coming from remote xhr service calls.
+ * @param error The error object returned by xhr
+ * @param retry A function to invoke after authentication to retry the server request.
+ */
+function handleAuthenticationError(error, retry) {
 	if (error.status == 403) { 
 		if (forbiddenAccessDlg == null)
 			forbiddenAccessDlg = new dijit.Dialog({
@@ -75,7 +80,7 @@ function handleAuthenticationError(error, channelListener) {
 	}
 	if (error.status == 401) { 
 		var handle = dojo.subscribe("/auth", function(message){
-			channelListener(); // retry...
+			retry();
 			dojo.unsubscribe(handle); // ... but only once
 		});
 		if (!authenticationInProgress) {
