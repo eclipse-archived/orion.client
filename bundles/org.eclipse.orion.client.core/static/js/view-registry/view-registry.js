@@ -1,28 +1,39 @@
 /*jslint browser:true devel:true*/
-/*global dijit dojo eclipse widgets*/
+/*global dijit dojo eclipse widgets serviceRegistry:true*/
 dojo.require("dijit.tree.ForestStoreModel");
 dojo.require("widgets.RegistryTree");
 
 dojo.addOnLoad(function() {
 	
 	// TODO get the registry from somewhere else
-	var registry = new eclipse.PluginRegistry(new eclipse.ServiceRegistry());
+	serviceRegistry = new eclipse.ServiceRegistry();
+	var registry = new eclipse.PluginRegistry(serviceRegistry);
+	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
+	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
 	var initTree = function() {
 		var tree = new widgets.RegistryTree({ registry: registry }, "registry-tree");
 		tree.startup();
 	};
 	
+	// global commands
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
+
+	// add install stuff to page actions toolbar
+	var pageActions = dojo.byId("pageActions");
+	if (pageActions) {
+		dojo.place('<input type="text" id="installUrlTextBox" value="Type a plugin URL here" style="width:16em;"></input>',
+			pageActions, "last");
+		dojo.place('<button id="installButton">Install</button>',
+			pageActions, "last");
+	}	
 	// Hook up event handlers
-	var installUrlTextBox = dijit.byId("installUrlTextBox"),
-		installButton = dijit.byId("installButton"),
-		refreshButton = dijit.byId("refreshButton"),
-		clearButton = dijit.byId("clearButton");
-	
-	dojo.connect(installUrlTextBox, "onChange", function(evt) {
-		var url = installUrlTextBox.get("value");
-		installButton.set("disabled", !/^\S+$/.test(dojo.trim(url)));
-	});
+	var installUrlTextBox = dojo.byId("installUrlTextBox");
+	var installButton = dojo.byId("installButton");
+	var refreshButton = dijit.byId("refreshButton");
+	var clearButton = dijit.byId("clearButton");
+
 	dojo.connect(refreshButton, "onClick", function(evt) {
 		var old = dijit.byId("registry-tree");
 		if (old) {
@@ -44,23 +55,27 @@ dojo.addOnLoad(function() {
 		initTree();
 	});
 	var installHandler = function(evt) {
-		var pluginUrl = installUrlTextBox.get("value");
-		registry.installPlugin(pluginUrl);
+		var pluginUrl = installUrlTextBox.value;
+		if (/^\S+$/.test(dojo.trim(pluginUrl))) {
+			registry.installPlugin(pluginUrl);
 			// FIXME: Add a callback for installPlugin() instead of using a timer
-		setTimeout(function() {
-			refreshButton.onClick();
-			installUrlTextBox.set("value", "");
-		}, 500);
+			setTimeout(function() {
+				refreshButton.onClick();
+				installUrlTextBox.value="";
+			}, 500);
+		}
 	};
-	dojo.connect(installUrlTextBox, "onKeyPress", function(e) {
+	dojo.connect(installUrlTextBox, "onkeypress", function(e) {
 		if (dojo.keys.ENTER === e.keyCode) {
 			installHandler(e);
 		}
 	});
-	dojo.connect(installButton, "onClick", installHandler);
-	
+	dojo.connect(installButton, "onclick", installHandler);
+		
 	// Wait until the JSLint plugin has (hopefully) loaded, then draw the tree
 	setTimeout(function() {
 		initTree();
+		installUrlTextBox.focus();
+		installUrlTextBox.select();
 	}, 500);
 });
