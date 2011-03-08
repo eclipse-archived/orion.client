@@ -205,7 +205,9 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 	var toolbar = dojo.byId("globalActions");
 	if (toolbar) {	
 		dojo.empty(toolbar);
-		commandService.renderCommands(toolbar, "global", handler, handler, "image");
+		// need to have some item, for global scoped commands it won't matter
+		var item = handler || {};
+		commandService.renderCommands(toolbar, "global", item, handler, "image");
 	}	
 
 };
