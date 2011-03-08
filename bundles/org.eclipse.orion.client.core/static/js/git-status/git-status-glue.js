@@ -10,7 +10,7 @@ dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
 	serviceRegistry = new eclipse.ServiceRegistry();
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	var preferenceService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
