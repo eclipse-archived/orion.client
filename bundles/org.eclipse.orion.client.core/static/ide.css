@@ -105,7 +105,6 @@ a:hover {
     	padding-top: 20px;
     	background: #FFFFFF;
 		overflow: auto;
-		min-width: 600px;
 }
 
 .statusPane {
