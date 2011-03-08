@@ -21,14 +21,14 @@ eclipse.Preferences = function(_name, _provider) {
 	
 	function _flush() {
 		return _provider.put(_name, _store);
-	};
+	}
 	
 	function _scheduleFlush() {
 		if (_flushPending) {
 			return;
 		}
 		_flushPending = true;
-		setTimeout( function() {
+		window.setTimeout( function() {
 			if (_flushPending) {
 				_flushPending = false;
 				_flush();
