@@ -28,6 +28,8 @@ orion.CompareContainer = (function() {
 			var self = this;
 			if(diffURI === null || diffURI === undefined){
 				self.setEditor("" ,self.fileContent);
+				if(callBack)
+					callBack();
 				return;
 			}
 			dojo.xhrGet({
@@ -36,12 +38,12 @@ orion.CompareContainer = (function() {
 					"Orion-Version": "1"
 				},
 				handleAs: "text",
-				timeout: 5000,
+				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					fileDiff = jsonData;
+					self.setEditor(self.fileContent , fileDiff );
 					if(callBack)
 						callBack();
-					self.setEditor(self.fileContent , fileDiff );
 				},
 				error: function(response, ioArgs) {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
@@ -59,7 +61,7 @@ orion.CompareContainer = (function() {
 					"Orion-Version": "1"
 				},
 				handleAs: "text",
-				timeout: 5000,
+				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					self.fileContent = jsonData;
 					self.getFileDiffGit(diffURI , callBack);

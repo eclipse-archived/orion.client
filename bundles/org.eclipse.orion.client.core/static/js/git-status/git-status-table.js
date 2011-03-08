@@ -101,7 +101,6 @@ orion.GitStatusRenderer = (function() {
 			var nameSpan =  document.createElement('span');
 			nameSpan.id = itemModel.name + "_" + itemModel.type +  "_nameSpan";
 			dojo.place(document.createTextNode(itemModel.name), nameSpan, "only");
-			nameSpan.style.cursor = "pointer";
 			nameSpan.style.color = "#0000FF";
 			nameSpan.title = "Click to compare";
 			nameColumn.appendChild(nameSpan);
@@ -111,9 +110,11 @@ orion.GitStatusRenderer = (function() {
 			}
 			
 			dojo.connect(nameSpan, "onmouseover", nameSpan, function() {
+				nameSpan.style.cursor = self._controller.loading ? 'wait' :"pointer";
 				dojo.toggleClass(nameSpan, "fileNameCheckedRow", true);
 			});
 			dojo.connect(nameSpan, "onmouseout", nameSpan, function() {
+				nameSpan.style.cursor = self._controller.loading ? 'wait' :"default";
 				dojo.toggleClass(nameSpan, "fileNameCheckedRow", false);
 			});
 			
@@ -124,6 +125,7 @@ orion.GitStatusRenderer = (function() {
 						if(selected)
 							dojo.toggleClass(selected, "fileNameSelectedRow", false);
 					}
+					self._controller.cursorWait(nameSpan , true);
 					dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 					self._controller._model.selectedFileId = nameSpan.id;
 					self._controller.loadDiffContent(itemModel);
@@ -133,7 +135,7 @@ orion.GitStatusRenderer = (function() {
 			//render the side by side viewer icon
 			sbsViewerCol = document.createElement('td');
 			row.appendChild(sbsViewerCol);
-			this._controller.createImgButton(sbsViewerCol , "/images/git/compare-sbs.gif", "Click to open two way compare",
+			this._controller.createImgButton(false ,sbsViewerCol , "/images/git/compare-sbs.gif", "Click to open two way compare",
 					function(evt) {
 						self._controller.openSBSViewer(itemModel);
 					} );
@@ -147,7 +149,7 @@ orion.GitStatusRenderer = (function() {
 			}
 			stageCol = document.createElement('td');
 			row.appendChild(stageCol);
-			this._controller.createImgButton(stageCol , orion.statusTypeMap[itemModel.type][2], orion.statusTypeMap[itemModel.type][3],
+			this._controller.createImgButton(true ,stageCol , orion.statusTypeMap[itemModel.type][2], orion.statusTypeMap[itemModel.type][3],
 					function(evt) {
 						self._controller.doAction(itemModel.location , itemModel.type);
 					} );
@@ -169,12 +171,13 @@ orion.GitStatusController = (function() {
 		loadStatus: function(jsonData){
 			this._model.init(jsonData);
 			this.initViewer();
+			this._model.selectedFileId = null;
 			this._loadBlock(this._unstagedTableRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedTableRenderer , this._model.interestedStagedGroup);
-			if(this._model.selectedItem)
-				this.loadDiffContent(this._model.selectedItem);
-			else
-				this._model.selectedFileId = null;
+			//if(this._model.selectedItem)
+			//	this.loadDiffContent(this._model.selectedItem);
+			//else
+			//	this._model.selectedFileId = null;
 			
 			var self = this;
 			var messageArea = document.getElementById("commitMessage");
@@ -185,10 +188,11 @@ orion.GitStatusController = (function() {
 			var commitBtn = document.getElementById("commit");
 			var amendBtn = document.getElementById("amend");
 			
-			this.modifyImageButton(stageAllBtn , "Stage all", function(evt){self.stageAll();} , !this.hasUnstaged);
-			this.modifyImageButton(unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
-			this.modifyImageButton(commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value);} , !this.hasStaged);
-			this.modifyImageButton(amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value , true);} , !this.hasStaged);
+			this.modifyImageButton(true ,stageAllBtn , "Stage all", function(evt){self.stageAll();} , !this.hasUnstaged);
+			this.modifyImageButton(true ,unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
+			this.modifyImageButton(true ,commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value);} , !this.hasStaged);
+			this.modifyImageButton(true ,amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value , true);} , !this.hasStaged);
+			this.cursorClear();
 		},
 		
 		_makeLocation: function(location , name){//temporary
@@ -197,6 +201,23 @@ orion.GitStatusController = (function() {
 			if(splitted.length > 2)
 				return "/" + splitted[1] + "/" + splitted[2] + "/" + name;
 			return name;
+		},
+		
+		cursorWait: function(currentDiv , remember){
+			this.loading = true;
+			document.body.style.cursor = 'wait';
+			if(currentDiv)
+				currentDiv.style.cursor = 'wait';
+			if(remember)
+				this.currentDiv = currentDiv;
+		},
+		
+		cursorClear: function() {
+			this.loading = false;
+			document.body.style.cursor = 'default';
+			if(this.currentDiv)
+				this.currentDiv.style.cursor = 'default';
+			this.currentDiv = undefined;
 		},
 		
 		initViewer: function () {
@@ -243,34 +264,44 @@ orion.GitStatusController = (function() {
 			
 		},
 		
-		createImgButton: function(imgParentDiv , imgSrc, imgTitle,onClick){
+		createImgButton: function(enableWaitCursor ,imgParentDiv , imgSrc, imgTitle,onClick){
 			var imgBtn = document.createElement('img');
 			imgBtn.src = imgSrc;
 			imgParentDiv.appendChild(imgBtn);
-			this.modifyImageButton(imgBtn , imgTitle,onClick);
+			this.modifyImageButton(enableWaitCursor ,imgBtn , imgTitle,onClick);
 		},
 		
-		modifyImageButton: function(imgBtnDiv , imgTitle, onClick , disabled){
+		modifyImageButton: function(enableWaitCursor , imgBtnDiv , imgTitle, onClick , disabled ){
+			var self = this;
 			if(disabled === undefined || !disabled){
 				imgBtnDiv.title= imgTitle;
-				imgBtnDiv.style.cursor = "pointer";
 				
 				dojo.style(imgBtnDiv, "opacity", "0.4");
 				dojo.connect(imgBtnDiv, "onmouseover", imgBtnDiv, function() {
+					console.log( "onmouseover : " + self.loading );
+					imgBtnDiv.style.cursor = self.loading ? 'wait' : "pointer";
 					dojo.style(imgBtnDiv, "opacity", "1");
 				});
 				dojo.connect(imgBtnDiv, "onmouseout", imgBtnDiv , function() {
+					console.log( "onmouseout : " + self.loading );
+					imgBtnDiv.style.cursor = self.loading ? 'wait' : "default";
 					dojo.style(imgBtnDiv, "opacity", "0.4");
 				});
-				imgBtnDiv.onclick = onClick;
+				imgBtnDiv.onclick = function(evt){
+					if(enableWaitCursor)
+						self.cursorWait(imgBtnDiv , true) ;
+					onClick(evt);
+				};
 			} else {
 				imgBtnDiv.title= "";
-				imgBtnDiv.style.cursor = "default";
+				imgBtnDiv.style.cursor =  self.loading ? 'wait' : "default";
 				dojo.style(imgBtnDiv, "opacity", "0.0");
 				dojo.connect(imgBtnDiv, "onmouseover", imgBtnDiv, function() {
+					imgBtnDiv.style.cursor = self.loading ? 'wait' : "default";
 					dojo.style(imgBtnDiv, "opacity", "0");
 				});
 				dojo.connect(imgBtnDiv, "onmouseout", imgBtnDiv , function() {
+					imgBtnDiv.style.cursor = self.loading ? 'wait' : "default";
 					dojo.style(imgBtnDiv, "opacity", "0");
 				});
 				imgBtnDiv.onclick = null;
@@ -311,6 +342,7 @@ orion.GitStatusController = (function() {
 		},
 		
 		loadDiffContent: function(itemModel){
+			this.cursorWait();
 			var self = this;
 			var result = this._resolveURI(itemModel);
 			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) >>> " : "local VS index ) >>> " ;
@@ -321,6 +353,7 @@ orion.GitStatusController = (function() {
 					                                function(){					
 														var fileNameDiv = document.getElementById("fileNameInViewer");
 														fileNameDiv.innerHTML = message;
+														self.cursorClear();
 													});
 		},
 		
@@ -338,6 +371,7 @@ orion.GitStatusController = (function() {
 		},
 		
 		getGitStatus: function(url){
+			this.cursorWait();
 			var self = this;
 			dojo.xhrGet({
 				url: url , 
