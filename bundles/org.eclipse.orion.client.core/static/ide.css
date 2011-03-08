@@ -178,6 +178,8 @@ a:hover {
 
 .searchbox {
 	margin-left: 12px;
+	background: #c5c5c5;
+	border: 1px solid #7a7979;
 }
 
 .soria .dijitButtonNode {
