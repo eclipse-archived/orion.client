@@ -1,14 +1,21 @@
 .breadcrumb {
 	text-decoration: none;
-	margin-right: 2px;
 	margin-left: 2px;
-	color: #05386B;
+	margin-right: 2px;
+	color: #5a5a5a;
 }
 
 .breadcrumb:hover {
 	text-decoration: none;
-	margin-right: 2px;
 	margin-left: 2px;
+	margin-right: 2px;
 	border-bottom: 1px dotted;
-	color: #05386B;
+	color: #5a5a5a;
+}
+
+.breadcrumb:visited {
+	margin-left:2px;
+	text-decoration: none;
+	margin-right: 2px;
+	color: #5a5a5a;
 }

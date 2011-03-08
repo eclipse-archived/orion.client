@@ -6,7 +6,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo window eclipse*/
+/*global dojo window eclipse:true document*/
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -20,7 +20,7 @@ var eclipse = eclipse || {};
  */
 eclipse.BreadCrumbs = (function() {
 	/**
- 	 * Constructs a new BreadCrumb with the given options.
+	 * Constructs a new BreadCrumb with the given options.
 	 * @param {Object} options The options object which must specify the parent container
 	 * @param options.container The parent container for the bread crumb presentation
 	 * @param options.resource The current resource
@@ -51,25 +51,15 @@ eclipse.BreadCrumbs = (function() {
 				crumbs.id = this._id;
 				container.appendChild(crumbs);
 			}
-			//add the root location
-			var seg = document.createElement('a');
-			dojo.addClass(seg, "breadcrumb");
-			dojo.place(document.createTextNode("root"), seg, "only");
-			seg.href = "#";
-			crumbs.appendChild(seg);
-
+			var seg;
 			// walk up the parent chain and insert a crumb for each parent
 			if (this._resource && this._resource.Parents) {
-				var slash = document.createElement('span');
-				dojo.place(document.createTextNode('/'), slash, "only");
-				dojo.addClass(slash, "breadcrumb");
-				crumbs.appendChild(slash);
 				var parents = this._resource.Parents;
 				for (var i = parents.length; --i >= 0 ;){
-					var seg = document.createElement('a');
+					seg = document.createElement('a');
 					dojo.addClass(seg, "breadcrumb");
 					dojo.place(document.createTextNode(parents[i].Name), seg, "only");
-					seg.href = "#" + parents[i].ChildrenLocation;
+					seg.href = "navigate-table.html#" + parents[i].ChildrenLocation;
 					crumbs.appendChild(seg);
 					var slash = document.createElement('span');
 					dojo.place(document.createTextNode('/'), slash, "only");
@@ -78,7 +68,7 @@ eclipse.BreadCrumbs = (function() {
 				}
 				//add a final entry for the current location
 				if (this._resource) {
-					var seg = document.createElement('a');
+					seg = document.createElement('a');
 					dojo.place(document.createTextNode(this._resource.Name), seg, "only");
 					dojo.addClass(seg, "breadcrumb");
 					dojo.addClass(seg, "currentLocation");
@@ -88,4 +78,4 @@ eclipse.BreadCrumbs = (function() {
 		}
 	};
 	return BreadCrumbs;
-})();
+}());
