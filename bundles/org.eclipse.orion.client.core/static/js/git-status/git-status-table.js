@@ -62,17 +62,12 @@ orion.GitStatusRenderer = (function() {
 	GitStatusRenderer.prototype = {
 		initTable: function () {
 			tableId = this._tableParentDivId + "_table";
-		  	var tableDomNode = dojo.byId( tableId);
 		  	var tableParentDomNode = dojo.byId( this._tableParentDivId);
-		  	if(tableDomNode){
-		  		tableDomNode.innerHTML = "";
-		  		tableParentDomNode.removeChild(tableDomNode);
-		  	}
+		  	tableParentDomNode.innerHTML = "";// document.createTextNode("").textContent;
 			var table = document.createElement('table');
 			table.id = tableId;
 			table.width = "100%";
-			var tableParentDiv = document.getElementById(this._tableParentDivId);
-			tableParentDiv.appendChild(table);
+			tableParentDomNode.appendChild(table);
 			this._table = table;
 		},
 		
@@ -94,7 +89,6 @@ orion.GitStatusRenderer = (function() {
 			//render the file name field
 			var nameColumn = document.createElement('td');
 			nameColumn.width="100%";
-			//nameColumn.nowrap="nowrap";
 			nameColumn.noWrap= true;
 			row.appendChild(nameColumn);
 			
@@ -174,6 +168,8 @@ orion.GitStatusController = (function() {
 			this._model.selectedFileId = null;
 			this._loadBlock(this._unstagedTableRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedTableRenderer , this._model.interestedStagedGroup);
+			
+			//We do not want to reload the diff viewer when status is reloaded.
 			//if(this._model.selectedItem)
 			//	this.loadDiffContent(this._model.selectedItem);
 			//else
@@ -227,12 +223,27 @@ orion.GitStatusController = (function() {
 			this.hasStaged = false;
 			this.hasUnstaged = false;
 			var fileNameDiv = document.getElementById("fileNameInViewer");
-			fileNameDiv.innerHTML = "Compare...";
+			fileNameDiv.innerHTML = "Compare...";//document.createTextNode("Compare...").textContent;
 			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
 			this.createProgressDiv("inline-compare-viewer"  , "compareIndicatorId" , "Select a file on the left to compare..");
 		},
 		
 		createProgressDiv: function(progressParentId , progressId,message){
+			var tableParentDiv = dojo.byId(progressParentId);
+		
+			var progressDiv = document.createElement('DIV');
+			progressDiv.id = progressId;
+			tableParentDiv.appendChild(progressDiv);
+			progressDiv.width = "100%";
+			progressDiv.align="center";
+			
+			var progressMessage = document.createElement('h2');
+			progressMessage.innerHTML = message;//document.createTextNode(message).textContent;
+			progressDiv.appendChild(progressMessage);
+			
+		},
+		
+		_createProgressDivCenter: function(progressParentId , progressId,message){
 			var tableParentDiv = dojo.byId(progressParentId);
 			
 			var table = document.createElement('table');
@@ -250,7 +261,7 @@ orion.GitStatusController = (function() {
 			var progressColumn = document.createElement('td');
 			row.appendChild(progressColumn);
 			progressColumn.width = "100%";
-			progressColumn.height =tableParentDiv.clientHeight;//"100%" ;"100%" ;
+			progressColumn.height =tableParentDiv.clientHeight;//"100%" ;
 			progressColumn.noWrap= true;
 			
 			var progressDiv = document.createElement('DIV');
@@ -260,11 +271,11 @@ orion.GitStatusController = (function() {
 			progressDiv.align="center";
 			
 			var progressMessage = document.createElement('h2');
+			progressMessage.innerHTML =  message;//document.createTextNode(message).textContent;;
 			progressDiv.appendChild(progressMessage);
-			progressMessage.innerHTML = message;
 			
 		},
-		
+	
 		createImgButton: function(enableWaitCursor ,imgParentDiv , imgSrc, imgTitle,onClick){
 			var imgBtn = document.createElement('img');
 			imgBtn.src = imgSrc;
@@ -323,7 +334,7 @@ orion.GitStatusController = (function() {
 			var tableParentDiv = dojo.byId(progressParentId);
 			var progressDiv = document.getElementById(progressId);
 			if(progressDiv)
-				tableParentDiv.removeChild(progressDiv);
+				tableParentDiv.innerHTML =  "";//document.createTextNode("").textContent;
 		},
 		
 		_loadBlock: function(renderer , interedtedGroup){
@@ -363,7 +374,7 @@ orion.GitStatusController = (function() {
 													result.fileURI,
 					                                function(){					
 														var fileNameDiv = document.getElementById("fileNameInViewer");
-														fileNameDiv.innerHTML = message;
+														fileNameDiv.innerHTML =  message;//document.createTextNode(message).textContent;
 														self.cursorClear();
 													});
 		},
