@@ -99,6 +99,12 @@ a:hover {
 	background: #F5F5F5;
 }
 
+.soria .dijitDialogTitleBar {
+    background: #5c5c5c;
+    color: white;
+    outline: 0 none;
+    padding: 5px 6px 3px;
+}
 
 .mainpane{
     	margin: 0px;
