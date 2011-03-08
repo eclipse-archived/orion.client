@@ -23,12 +23,15 @@ var topHTMLFragment =
 	'<tr class="topRowBanner">' +
 		'<td width=93px rowspan=2><a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
 		'<td class="leftGlobalToolbar">' +
-			'<span id="pageTitle"></span>' +
+			'<span class="bannerSeparator">|</span>' +
+			'<span id="pageTitle" class="statuspane"></span>' +
+			'<span class="bannerSeparator">  </span>' +  // empty space between title and status
 			'<span class="statuspane" id="statusPane"></span>' +
 		'</td>' +
 		'<td class="rightGlobalToolbar">' +
 			'<span id="globalActions"></span>' +
 			'<input type="search" id="search" class="searchbox">' +
+			'<span class="bannerSeparator">|</span>' +
 			'<span id="userInfo" class="statuspane"></span>' +
 		'</td>' +
 		'</tr>' +
@@ -144,6 +147,13 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 			prefs.put("orientation", home);
 			homeNode.href=home;
 		});
+	}
+	
+	// Put page title in title area.  This gets replaced by breadcrumbs, etc. in some pages.
+	var title = dojo.byId("pageTitle");
+	if (title) {
+		var text = document.createTextNode(document.title);
+		dojo.place(text, title, "last");
 	}
 
 	var openResourceDialog = function(searchLocation, searcher, /* optional */ editor) {
