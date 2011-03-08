@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global eclipse dojo dijit sites window*/
+/*global eclipse dojo dijit widgets window*/
 /*jslint devel:true browser:true*/
 
 /*
@@ -23,7 +23,7 @@ dojo.addOnLoad(function() {
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 	var siteService = new eclipse.sites.SiteService(serviceRegistry);
-	var preferenceService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
 	// File operations
