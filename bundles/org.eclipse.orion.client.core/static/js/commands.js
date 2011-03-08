@@ -257,11 +257,10 @@ eclipse.CommandService = (function() {
 										label: group.title,
 										dropDown: newMenu
 								        });
-								        if (cssClass) {
-											dojo.addClass(menuButton.domNode, cssClass);
-								        } else {
-											dojo.addClass(menuButton.domNode, "commandImage");
-								        }
+									dojo.addClass(menuButton.domNode, "commandImage");
+							        if (cssClass) {
+										dojo.addClass(menuButton.domNode, cssClass);
+							        } 
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
@@ -346,10 +345,9 @@ eclipse.CommandService = (function() {
 										dropDown: choicesMenu
 								        });
 								if (command.image) {
+									dojo.addClass(menuButton.iconNode, "commandImage");
 									if (cssClass) {
 										dojo.addClass(menuButton.iconNode, cssClass);
-									} else {
-										dojo.addClass(menuButton.iconNode, "commandImage");
 									}
 									menuButton.iconNode.src = command.image;
 								}
@@ -468,13 +466,12 @@ eclipse.Command = (function() {
 					dojo.style(image, "opacity", "0.7");
 				});
 			}
+			dojo.addClass(image, 'commandImage');
+			dojo.addClass(link, 'commandLink');
 			if (cssClass) {
 				dojo.addClass(image, cssClass);
 				dojo.addClass(link, cssClass);
-			} else {
-				dojo.addClass(image, 'commandImage');
-				dojo.addClass(link, 'commandLink');
-			}
+			}			
 			dojo.place(image, link, "last");
 			return link;
 		},
@@ -499,11 +496,10 @@ eclipse.Command = (function() {
 					}
 				}
 			}
+			dojo.addClass(anchor, 'commandLink');
 			if (cssClass) {
 				dojo.addClass(anchor, cssClass);
-			} else {
-				dojo.addClass(anchor, 'commandLink');
-			}
+			} 
 			return anchor;
 		},
 		_addMenuItem: function(parent, items, handler, userData, cssClass) {
@@ -531,10 +527,9 @@ eclipse.Command = (function() {
 			menuitem.eclipseCommand = this;
 			parent.addChild(menuitem);
 			if (this.image) {
+				dojo.addClass(menuitem.iconNode, 'commandImage');
 				if (cssClass) {
 					dojo.addClass(menuitem.iconNode, cssClass);
-				} else {
-					dojo.addClass(menuitem.iconNode, 'commandImage');
 				}
 				// reaching...
 				menuitem.iconNode.src = this.image;

@@ -38,22 +38,21 @@
 }
 
 .commandLinkLight {
-	margin-left: 4px;
-	margin-right: 4px;
 	color: #ffffff;
 	cursor: pointer;
 }
 
 .commandLinkLight:visited {
-	margin-left: 4px;
-	margin-right: 4px;
 	color: #ffffff;
 	cursor: pointer;
 }
 
 .commandLinkLight:hover {
-	margin-left: 4px;
-	margin-right: 4px;
+	color: #ffffff;
+	cursor: hand;
+}
+
+.commandLinkLight a:hover {
 	color: #ffffff;
 	cursor: hand;
 	text-decoration: underline;
