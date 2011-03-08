@@ -77,7 +77,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		}));
 		this.hostHint.set("invalidMessage", "Not a valid hostname");
 		this.hostHint.set("isValid", dojo.hitch(this, function(focused) {
-			var hostish = /^s+$|^[A-Za-z0-9-_]+$/;
+			var hostish = /^(?:\s*|[A-Za-z0-9-_]+)$/;
 			return focused || hostish.test(this.hostHint.get("value"));
 		}));
 		

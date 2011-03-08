@@ -100,6 +100,7 @@ eclipse.sites.SiteService = (function() {
 				url: this._siteUrl,
 				postData: dojo.toJson(toCreate),
 				headers: {
+					"Content-Type": "application/json; charset=utf-8",
 					"Orion-Version": "1"
 				},
 				handleAs: "json",
@@ -123,6 +124,7 @@ eclipse.sites.SiteService = (function() {
 			return dojo.xhrPost({
 				url: this._siteUrl + "/" + id,
 				headers: {
+					"Content-Type": "application/json, charset=utf-8",
 					"Orion-Version": "1",
 					"X-Action": action
 				},
@@ -148,6 +150,7 @@ eclipse.sites.SiteService = (function() {
 				url: this._siteUrl + "/" + id,
 				putData: dojo.toJson(updatedSiteConfig),
 				headers: {
+					"Content-Type": "application/json; charset=utf-8",
 					"Orion-Version": "1"
 				},
 				handleAs: "json",
