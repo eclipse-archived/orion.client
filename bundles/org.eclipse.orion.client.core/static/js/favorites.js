@@ -298,7 +298,7 @@ eclipse.Favorites = (function() {
 				// the mouse as being over the table row if it's in a hidden column
 				dojo.style(actionsWrapper, "visibility", "hidden");
 				this._registry.getService("ICommandService").then(function(service) {
-					service.renderCommands(actionsWrapper, "object", fave, this, "image", j);
+					service.renderCommands(actionsWrapper, "object", fave, this, "image", null, j);
 				});
 				dojo.place(tr, faveTable, "last");
 				dojo.connect(tr, "onmouseover", tr, function() {
@@ -329,7 +329,7 @@ eclipse.Favorites = (function() {
 					var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
 					dojo.style(actionsWrapper, "visibility", "hidden");
 					this._registry.getService("ICommandService").then(function(service) {
-						service.renderCommands(actionsWrapper, "object", search, this, "image", i);
+						service.renderCommands(actionsWrapper, "object", search, this, "image", null, i);
 					});
 					dojo.place(tr, searchTable, "last");
 					dojo.connect(tr, "onmouseover", tr, function() {

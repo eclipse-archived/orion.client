@@ -161,7 +161,7 @@ eclipse.CommandService = (function() {
 		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
 		 */	
 		
-		renderCommands: function(parent, scope, items, handler, style, userData) {
+		renderCommands: function(parent, scope, items, handler, renderType, cssClass, userData) {
 			if (!items) {
 				var cmdService = this;
 				this._registry.getService("ISelectionService").then(function(service) {
@@ -169,7 +169,7 @@ eclipse.CommandService = (function() {
 						if (!selection) {
 							return;
 						}
-						cmdService.renderCommands(parent, scope, selection, handler, style, userData);
+						cmdService.renderCommands(parent, scope, selection, handler, renderType, cssClass, userData);
 					});
 				});
 				return;
@@ -184,14 +184,14 @@ eclipse.CommandService = (function() {
 			} else {
 				throw "Unrecognized command scope " + scope;
 			}
-			this._render(this._namedGroups, parent, scope, items, handler, style, userData, refCommands);
+			this._render(this._namedGroups, parent, scope, items, handler, renderType, cssClass, userData, refCommands);
 			// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
-			if (style === "image") {
-				if (this._isLastChildSeparator(parent, style)) {
+			if (renderType === "image") {
+				if (this._isLastChildSeparator(parent, renderType)) {
 					parent.removeChild(parent.childNodes[parent.childNodes.length-1]);
 				}
-			} else if (style === "menu") {
-				if (this._isLastChildSeparator(parent, style)) {
+			} else if (renderType=== "menu") {
+				if (this._isLastChildSeparator(parent, renderType)) {
 					var child = parent.getChildren()[parent.getChildren().length-1];
 					parent.removeChild(child);
 					child.destroy();
@@ -199,7 +199,7 @@ eclipse.CommandService = (function() {
 			}
 		},
 		
-		_render: function(commandItems, parent, scope, items, handler, style, userData, commandList) {
+		_render: function(commandItems, parent, scope, items, handler, renderType, cssClass, userData, commandList) {
 			// sort the items
 			var positionOrder = commandItems.sortedCommands;
 			if (!positionOrder) {
@@ -225,7 +225,7 @@ eclipse.CommandService = (function() {
 						continue;
 					}
 					var children;
-					if (style === "image") {
+					if (renderType === "image") {
 						if (group.title) {
 							// we need a named menu button, but first let's see if we actually have content
 							var newMenu= new dijit.Menu({
@@ -234,7 +234,7 @@ eclipse.CommandService = (function() {
 							// if commands are scoped to the dom, we'll need to identify a menu with the dom id of its original parent
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children
-							this._render(positionOrder[i].children, newMenu, scope, items, handler, "menu", userData, commandList); 
+							this._render(positionOrder[i].children, newMenu, scope, items, handler, "menu", cssClass, userData, commandList); 
 							// special post-processing when we've created a menu in an image bar.
 							// we want to get rid of a trailing separator in the menu first, and then decide if a menu is necessary
 							children = newMenu.getChildren();
@@ -257,7 +257,11 @@ eclipse.CommandService = (function() {
 										label: group.title,
 										dropDown: newMenu
 								        });
-								        dojo.addClass(menuButton.domNode, "commandImage");
+								        if (cssClass) {
+											dojo.addClass(menuButton.domNode, cssClass);
+								        } else {
+											dojo.addClass(menuButton.domNode, "commandImage");
+								        }
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
@@ -268,11 +272,11 @@ eclipse.CommandService = (function() {
 						} else {
 							var sep;
 							// Only draw a separator if there is a non-separator preceding it.
-							if (parent.childNodes.length > 0 && !this._isLastChildSeparator(parent, style)) {
+							if (parent.childNodes.length > 0 && !this._isLastChildSeparator(parent, renderType)) {
 								sep = this.generateSeparatorImage();
 								dojo.place(sep, parent, "last");
 							}
-							this._render(positionOrder[i].children, parent, scope, items, handler, style, userData, commandList); 
+							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList); 
 
 							// make sure that more than just the separator got rendered before rendering a trailing separator
 							if (parent.childNodes.length > 0) {
@@ -287,7 +291,7 @@ eclipse.CommandService = (function() {
 						// group within a menu
 						if (group.title) {
 							var subMenu = new dijit.Menu();
-							this._render(positionOrder[i].children, subMenu, scope, items, handler, style, userData, commandList); 
+							this._render(positionOrder[i].children, subMenu, scope, items, handler, renderType, cssClass, userData, commandList); 
 							if (subMenu.getChildren().length > 0) {
 								parent.addChild(new dijit.PopupMenuItem({
 									label: group.title,
@@ -297,11 +301,11 @@ eclipse.CommandService = (function() {
 						} else {
 							// don't render a separator if there is nothing preceding, or if the last thing was a separator
 							var menuSep;
-							if (parent.getChildren().length > 0 && !this._isLastChildSeparator(parent, style)) {
+							if (parent.getChildren().length > 0 && !this._isLastChildSeparator(parent, renderType)) {
 								menuSep = new dijit.MenuSeparator();
 								parent.addChild(menuSep);
 							}
-							this._render(positionOrder[i].children, parent, scope, items, handler, style, userData, commandList); 
+							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList); 
 							// Add a trailing separator if children rendered.
 							var menuChildren = parent.getChildren();
 							if (menuChildren[menuChildren.length - 1] !== menuSep) {
@@ -315,9 +319,9 @@ eclipse.CommandService = (function() {
 					var render = command ? true : false;
 					if (command) {
 						if (scope === "dom") {
-							if (style === "image") {
+							if (renderType=== "image") {
 								render = parent.id === positionOrder[i].scopeId;
-							} else if (style === "menu") {
+							} else if (renderType=== "menu") {
 								render = parent.eclipseScopeId === positionOrder[i].scopeId;
 							} else {
 								render = false;
@@ -336,17 +340,21 @@ eclipse.CommandService = (function() {
 							// TODO should populate this on the fly
 							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=338887
 							command.populateChoicesMenu(choicesMenu, items, handler, userData);
-							if (style === "image") {
+							if (renderType === "image") {
 								var menuButton = new dijit.form.DropDownButton({
 										label: command.name,
 										dropDown: choicesMenu
 								        });
 								if (command.image) {
-									dojo.addClass(menuButton.iconNode, "commandImage");
+									if (cssClass) {
+										dojo.addClass(menuButton.iconNode, cssClass);
+									} else {
+										dojo.addClass(menuButton.iconNode, "commandImage");
+									}
 									menuButton.iconNode.src = command.image;
 								}
 								dojo.place(menuButton.domNode, parent, "last");
-							} else if (style === "menu") {
+							} else if (renderType === "menu") {
 								// parent is already a menu
 								var popup = new dijit.PopupMenuItem({
 									label: command.name,
@@ -355,12 +363,12 @@ eclipse.CommandService = (function() {
 								parent.addChild(popup);
 							}
 						} else {
-							if (style === "image") {
+							if (renderType === "image") {
 								id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								image = command._asImage(id, items, handler, userData);
+								image = command._asImage(id, items, handler, userData, cssClass);
 								dojo.place(image, parent, "last");
-							} else if (style === "menu") {
-								command._addMenuItem(parent, items, handler, userData);
+							} else if (renderType === "menu") {
+								command._addMenuItem(parent, items, handler, userData, cssClass);
 							}
 						}
 					}
@@ -368,7 +376,7 @@ eclipse.CommandService = (function() {
 			}
 		},
 		generateSeparatorImage: function() {
-			sep = new Image();
+			var sep = new Image();
 			// TODO should get this from CSS
 			sep.src = "images/sep.gif";
 			dojo.addClass(sep, "commandImage");
@@ -409,7 +417,7 @@ eclipse.Command = (function() {
 			//how will we know this?
 			this._deviceSupportsHover = false;  
 		},
-		_asImage: function(name, items, handler, userData) {
+		_asImage: function(name, items, handler, userData, cssClass) {
 			handler = handler || this;
 			var image = new Image();
 			var link = dojo.create("a");
@@ -460,12 +468,17 @@ eclipse.Command = (function() {
 					dojo.style(image, "opacity", "0.7");
 				});
 			}
-			dojo.addClass(image, 'commandImage');
-			dojo.addClass(link, 'commandLink');
+			if (cssClass) {
+				dojo.addClass(image, cssClass);
+				dojo.addClass(link, cssClass);
+			} else {
+				dojo.addClass(image, 'commandImage');
+				dojo.addClass(link, 'commandLink');
+			}
 			dojo.place(image, link, "last");
 			return link;
 		},
-		_asLink: function(items, handler) {
+		_asLink: function(items, handler, cssClass) {
 			handler =  handler || this;
 			var anchor = document.createElement('a');
 			dojo.place(document.createTextNode(this.name), anchor, "only");
@@ -486,10 +499,14 @@ eclipse.Command = (function() {
 					}
 				}
 			}
-			dojo.addClass(anchor, 'commandLink');
+			if (cssClass) {
+				dojo.addClass(anchor, cssClass);
+			} else {
+				dojo.addClass(anchor, 'commandLink');
+			}
 			return anchor;
 		},
-		_addMenuItem: function(parent, items, handler, userData) {
+		_addMenuItem: function(parent, items, handler, userData, cssClass) {
 			var menuitem = new dijit.MenuItem({
 				label: this.name,
 				tooltip: this.tooltip,
@@ -514,7 +531,11 @@ eclipse.Command = (function() {
 			menuitem.eclipseCommand = this;
 			parent.addChild(menuitem);
 			if (this.image) {
-				dojo.addClass(menuitem.iconNode, 'commandImage');
+				if (cssClass) {
+					dojo.addClass(menuitem.iconNode, cssClass);
+				} else {
+					dojo.addClass(menuitem.iconNode, 'commandImage');
+				}
 				// reaching...
 				menuitem.iconNode.src = this.image;
 			}
