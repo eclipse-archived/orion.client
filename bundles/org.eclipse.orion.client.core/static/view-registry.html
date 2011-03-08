@@ -27,6 +27,7 @@
 	@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
 	@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
 	@import "/ide.css";
+	@import "/commands.css";
 </style>
 </head>
 	<body style="height: 100%" class="soria">
@@ -34,33 +35,27 @@
 	<script src="js/serviceregistry.js"></script>
 	<script src="js/pluginregistry.js"></script>
 	<script type="text/javascript" src="js/auth.js"></script>
+	<script src="js/util.js"></script>
+ 	<script src="js/commands.js"></script>
+	<script src="js/globalCommands.js"></script>
+ 	<script src="js/preferences.js"></script>
+	<script src="js/searchClient.js"></script>
 	
 	<!-- TODO: scripts below are only for testing, remove later -->
- 	<script src="js/util.js"></script>
- 	<script src="js/commands.js"></script>
  	<script src="js/dialogs.js"></script>
  	<script src="js/input.js"></script>
  	<script src="js/log.js"></script>
- 	<script src="js/preferences.js"></script>
  	<script src="js/selection.js"></script>
  	<script src="js/status.js"></script>
  	<script src="js/users.js"></script>
   	<script src="js/fileClient.js"></script>
   	<script src="js/breadcrumbs.js"></script>
 	<script src="js/favorites.js"></script>
-	<script src="js/searchClient.js"></script>
 	
-	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="width: 100%; height: 100%;">
-		<div dojoType="dijit.layout.ContentPane" region="top" class="toolbar">
-			<div style="float: left;">
-				<img class="toolbarLabel" src="/images/orion.png" alt="Eclipse Logo" align="top">
-			</div>
-			<div style="float: right;" class="innerToolbar">
-				<div id="installUrlTextBox" dojoType="dijit.form.TextBox" placeHolder="Type a plugin URL here" intermediateChanges="true" style="width:25em;"></div>
-				<button id="installButton" dojoType="dijit.form.Button" disabled="disabled">Install</button>
-			</div>
+	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
+		<div dojoType="dijit.layout.ContentPane" id="toolbar" region="top" class="toolbar">
 		</div>
-		<div dojoType="dijit.layout.ContentPane" region="center">
+		<div dojoType="dijit.layout.ContentPane" class="mainpane" style="margin-left: 44px" region="center">
 			<h2>Installed Plug-ins and Services <button id="refreshButton" dojoType="dijit.form.Button" iconClass="refresh"><img src="/images/silk/arrow_redo.png" alt="Refresh" title="Refresh"></button><button id="clearButton" dojoType="dijit.form.Button" iconClass="clear"><img src="/images/silk/cross.png" alt="Clear" title="Clear"></button></h2>
 			<div id="registry-tree">Loading&#8230;</div>
 		</div>

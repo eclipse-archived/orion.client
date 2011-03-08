@@ -65,6 +65,8 @@ eclipse.FavoriteFoldersCache = (function() {
 }());
 
 eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
+	// TODO this knowledge shouldn't be here...the fact that we know we are on a dark toolbar
+	var cssClass = "commandLinkLight";
 	var toolbar = dojo.byId(toolbarId);
 	if (toolbar) {
 		dojo.empty(toolbar);
@@ -72,10 +74,10 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId
 		throw "could not find toolbar " + toolbarId;
 	}
 	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
-		service.renderCommands(toolbar, "dom", item, explorer, "image");
+		service.renderCommands(toolbar, "dom", item, explorer, "image", cssClass);
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			service.renderCommands(selectionTools, "dom", null, explorer, "image");
+			service.renderCommands(selectionTools, "dom", null, explorer, "image", cssClass);
 		}
 	}));
 	
@@ -88,7 +90,7 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId
 				if (selectionTools) {
 					dojo.empty(selectionTools);
 					registry.getService("ICommandService").then(function(commandService) {
-						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
+						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", cssClass);
 					});
 				}
 			});
