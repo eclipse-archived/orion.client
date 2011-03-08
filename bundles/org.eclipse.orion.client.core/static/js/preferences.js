@@ -7,7 +7,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo window handleGetAuthenticationError handlePutAuthenticationError console */
+/*global dojo window handleGetAuthenticationError handlePutAuthenticationError console setTimeout localStorage*/
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -21,14 +21,14 @@ eclipse.Preferences = function(_name, _provider) {
 	
 	function _flush() {
 		return _provider.put(_name, _store);
-	};
+	}
 	
 	function _scheduleFlush() {
 		if (_flushPending) {
 			return;
 		}
 		_flushPending = true;
-		setTimeout( function() {
+		window.setTimeout( function() {
 			if (_flushPending) {
 				_flushPending = false;
 				_flush();
@@ -41,7 +41,7 @@ eclipse.Preferences = function(_name, _provider) {
 		var i, 
 			result = [];
 		for (i in _store) {
-			if (_store.hasOwnProperty(i)) {
+			if (_store.hasOwnProperty(i) && i.charAt(0) !== '/') {
 				result.push(i);
 			}
 		}
@@ -50,10 +50,17 @@ eclipse.Preferences = function(_name, _provider) {
 
 	
 	this.get = function(key) {
+		if (key.charAt(0) === '/') {
+			throw new Error("Bad character in key name: " + key);
+		}
 		return _store[key];
 	};
 	
 	this.put = function(key, value) {
+		if (key.charAt(0) === '/') {
+			throw new Error("Bad character in key name: " + key);
+		}
+		
 		if (_store[key] !== value) {
 			_store[key] = value;
 			_scheduleFlush();
@@ -61,6 +68,10 @@ eclipse.Preferences = function(_name, _provider) {
 	};
 	
 	this.remove = function(key) {
+		if (key.charAt(0) === '/') {
+			throw new Error("Bad character in key name: " + key);
+		}
+		
 		if (_store[key]) {
 			delete _store[key];
 			_scheduleFlush();
@@ -72,7 +83,7 @@ eclipse.Preferences = function(_name, _provider) {
 	this.clear = function() {
 		var i;
 		for (i in _store) {
-			if (_store.hasOwnProperty(i)) {
+			if (_store.hasOwnProperty(i) && i.charAt(0) !== '/') {
 				delete _store[i];
 			}
 		}
@@ -82,7 +93,7 @@ eclipse.Preferences = function(_name, _provider) {
 	this.sync = function() {
 		if(_flushPending) {
 			_flushPending = false;
-			return flush();
+			return _flush();
 		}
 		return _provider.get(_name).then(function(store) {
 			_store = store;
@@ -93,15 +104,22 @@ eclipse.Preferences = function(_name, _provider) {
 };
 
 eclipse.UserPreferenceProvider = function(location) {
+	
+	var currentPromise;
+	
 	this.get = function(name) {
+		if (currentPromise) {
+			return promise;
+		}
 		var d = new dojo.Deferred();
 		var key = "/orion/preferences/user" + name;
-		var data = sessionStorage.getItem(key);
+		var data = localStorage.getItem(key);
 		if (data !== null) {
 			setTimeout(function() {
 				d.resolve(JSON.parse(data));
 			},0);
 		} else {
+			currentPromise = d;
 			dojo.xhrGet({
 				url: location + name,
 				headers: {
@@ -110,14 +128,15 @@ eclipse.UserPreferenceProvider = function(location) {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					sessionStorage.setItem(key, JSON.stringify(jsonData));
+					localStorage.setItem(key, JSON.stringify(jsonData));
+					currentPromise = null;
 					d.resolve(jsonData);
 				},
 				error: function(response, ioArgs) {
-					if (ioArgs.xhr.status == 401) {
-						handleGetAuthenticationError(this, ioArgs);
+					if (ioArgs.xhr.status === 401) {
+						handleGetAuthenticationError(ioArgs.xhr, ioArgs);
 					} else {
-						sessionStorage.setItem(key, "{}");
+						currentPromise = null;
 						d.resolve({});
 					}
 				}
@@ -130,7 +149,7 @@ eclipse.UserPreferenceProvider = function(location) {
 		var d = new dojo.Deferred();
 		var key = "/orion/preferences/user" + name;
 		var jsonData = JSON.stringify(data);
-		sessionStorage.setItem(key, jsonData);
+		localStorage.setItem(key, jsonData);
 		dojo.xhrPut({
 			url: location + name,
 			putData: jsonData,
@@ -144,8 +163,8 @@ eclipse.UserPreferenceProvider = function(location) {
 				d.resolve();
 			},
 			error: function(response, ioArgs) {
-				if (ioArgs.xhr.status == 401) {
-					handlePutAuthenticationError(this, ioArgs);
+				if (ioArgs.xhr.status === 401) {
+					handlePutAuthenticationError(ioArgs.xhr, ioArgs);
 				} else {
 					d.resolve(); // consider throwing here
 				}
@@ -154,7 +173,6 @@ eclipse.UserPreferenceProvider = function(location) {
 		return d;
 	};
 };
-
 
 eclipse.PreferencesService = function(serviceRegistry, location) {
 	

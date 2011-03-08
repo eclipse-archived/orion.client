@@ -106,7 +106,7 @@ eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService
 	var toolbar = dojo.byId("pageActions");
 	if (toolbar) {	
 		dojo.empty(toolbar);
-		commandService.renderCommands(toolbar, "dom", handler, handler, "image");
+		commandService.renderCommands(toolbar, "dom", handler, handler, "image", "commandLinkLight");
 	}
 };
 
