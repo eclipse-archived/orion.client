@@ -92,13 +92,14 @@ eclipse.Explorer = (function() {
 			}
 		},
 		createTree: function (){
-			var existing = dojo.byId(this.parentId+"innerTree");
+			var treeId = this.parentId+"innerTree";
+			var existing = dojo.byId(treeId);
 			if (existing) {
 				dojo.destroy(existing);
 			}
-			this.model = new eclipse.Model(this.registry, this.treeRoot, this.fileClient);
+			this.model = new eclipse.Model(this.registry, this.treeRoot, this.fileClient, treeId);
 			this.myTree = new eclipse.TableTree({
-				id: this.parentId+"innerTree",
+				id: treeId,
 				model: this.model,
 				showRoot: false,
 				parent: this.parentId,
@@ -119,10 +120,11 @@ eclipse.Model = (function() {
 	 * @class Tree model used by eclipse.Explorer.
 	 * TODO: Consolidate with eclipse.TreeModel.
 	 */
-	function Model(serviceRegistry, root, fileClient) {
+	function Model(serviceRegistry, root, fileClient, treeId) {
 		this.registry = serviceRegistry;
 		this.root = root;
 		this.fileClient = fileClient;
+		this.treeId = treeId;
 	}
 	Model.prototype = {
 		destroy: function(){
@@ -150,7 +152,7 @@ eclipse.Model = (function() {
 		getId: function(/* item */ item){
 			var result;
 			if (item === this.root) {
-				result = "innerTree";
+				result = this.treeId;
 			} else {
 				result = item.Location;
 				// remove all non valid chars to make a dom id. 
