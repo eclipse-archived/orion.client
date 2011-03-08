@@ -11,7 +11,7 @@ dojo.addOnLoad(function() {
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var usersService = new eclipse.UsersService(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	var prefsService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	var prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 
 

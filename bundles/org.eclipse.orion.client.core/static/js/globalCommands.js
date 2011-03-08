@@ -137,9 +137,10 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 	// Initialize link to home page
 	var homeNode = dojo.byId("home");
 	if (homeNode) {
-		prefsService.get("window/orientation", function (home) {
+		prefsService.getPreferences("/window").then(function (prefs) {
+			var home = prefs.get("orientation");
 			home = home || "navigate-table.html";
-			prefsService.put("window/orientation", home);
+			prefs.put("orientation", home);
 			homeNode.href=home;
 		});
 	}

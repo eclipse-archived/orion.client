@@ -23,8 +23,9 @@
     	<script type="text/javascript">
     		dojo.addOnLoad(function() {
 				var serviceRegistry = new eclipse.ServiceRegistry();
-				var prefsService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
-				prefsService.get("window/orientation", function(home) {
+				var prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
+				prefsService.getPreferences("/window").then(function(prefs) {
+					var home = prefs.get("orientation")
 					switch (home) {
 						case "navigate.html":
 						case "navigate-tree.html":

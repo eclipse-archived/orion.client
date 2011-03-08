@@ -38,7 +38,7 @@ dojo.addOnLoad(function(){
 		new eclipse.DialogService(serviceRegistry);
 		new eclipse.UserService(serviceRegistry);
 		new eclipse.SelectionService(serviceRegistry);
-		prefsService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+		prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 		commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 
 		// Editor needs additional services besides EAS.

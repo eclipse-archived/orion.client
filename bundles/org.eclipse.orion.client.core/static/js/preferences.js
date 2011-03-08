@@ -14,151 +14,163 @@
  */
 var eclipse = eclipse || {};
 
-/**
- * A preference object provides functions for accessing and setting preferences
- * stored in some asynchronously accessible back end store (for example on a server).
- * @class A preference object provides functions for accessing and setting preferences
- * @name eclipse.Preferences
- */
-eclipse.Preferences = (function() {
-	/**
-	 * Creates a new preferences object that interacts with a remote preference server
-	 * at the given location.
-	 * @param {String} location The location of the remote preference service
-	 * @constructs
-	 */
-
-	function Preferences(serviceRegistry, location) {
-		this._init(serviceRegistry, location);
+eclipse.Preferences = function(_name, _provider) {
+	
+	var _flushPending = false;
+	var _store;
+	
+	function _flush() {
+		return _provider.put(_name, _store);
+	};
+	
+	function _scheduleFlush() {
+		if (_flushPending) {
+			return;
+		}
+		_flushPending = true;
+		setTimeout( function() {
+			if (_flushPending) {
+				_flushPending = false;
+				_flush();
+			}
+		},0);
 	}
-	Preferences.prototype = /** @lends eclipse.Preferences */
-	{
-		_init: function(serviceRegistry, location) {
-			this.serviceLocation = location;
-			this.registry = serviceRegistry;
-			this._serviceRegistration = serviceRegistry.registerService("IPreferenceService", this);
-		},
+	
+	
+	this.keys = function() {
+		var i, 
+			result = [];
+		for (i in _store) {
+			if (_store.hasOwnProperty(i)) {
+				result.push(i);
+			}
+		}
+		return result;
+	};
 
-		/**
-		 * Retrieves the preference with the given key from the preference service at the 
-		 * given location. On completion, the onDone method is invoked with the preference 
-		 * value as a parameter. A null value is returned if there is no preference defined 
-		 * or if there was an error retrieving the value.
-		 * @param {String} key The preference key. The key is either a simple name, or a path where the key is the final segment.
-		 * @param {Function} onDone A function that is invoked with the loaded preference as an argument, or
-		 * with no argument if the preference could not be retrieved and <code>onError</code> is not provided.
-		 * @param {Function} onError Function to be invoked if retrieval failed, if not profiled <code>onDone</code> 
-		 * is invoked with no argument.
-		 */
-		get: function(key, onDone, /** optional **/ onError) {
-			var servicePath = this.serviceLocation;
-			var separator = key.lastIndexOf('/');
-			if (separator) {
-				if (key.charAt(0) !== '/')  {
-					servicePath += '/';
-				}
-				servicePath += key.substring(0, separator);
-				key = key.substring(separator + 1);
+	
+	this.get = function(key) {
+		return _store[key];
+	};
+	
+	this.put = function(key, value) {
+		if (_store[key] !== value) {
+			_store[key] = value;
+			_scheduleFlush();
+		}
+	};
+	
+	this.remove = function(key) {
+		if (_store[key]) {
+			delete _store[key];
+			_scheduleFlush();
+			return true;			
+		}
+		return false;
+	};
+		
+	this.clear = function() {
+		var i;
+		for (i in _store) {
+			if (_store.hasOwnProperty(i)) {
+				delete _store[i];
 			}
+		}
+		_scheduleFlush();
+	};
+	
+	this.sync = function() {
+		if(_flushPending) {
+			_flushPending = false;
+			return flush();
+		}
+		return _provider.get(_name).then(function(store) {
+			_store = store;
+		});
+	};
+	
+	this.flush = _flush;
+};
+
+eclipse.UserPreferenceProvider = function(location) {
+	this.get = function(name) {
+		var d = new dojo.Deferred();
+		var key = "/orion/preferences/user" + name;
+		var data = sessionStorage.getItem(key);
+		if (data !== null) {
+			setTimeout(function() {
+				d.resolve(JSON.parse(data));
+			},0);
+		} else {
 			dojo.xhrGet({
-				url: servicePath + "?key=" + window.encodeURIComponent(key),
+				url: location + name,
 				headers: {
 					"Orion-Version": "1"
 				},
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					onDone(jsonData[key]);
+					sessionStorage.setItem(key, JSON.stringify(jsonData));
+					d.resolve(jsonData);
 				},
 				error: function(response, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					if (onError) {
-						onError(ioArgs.xhr.status);
+					if (ioArgs.xhr.status == 401) {
+						handleGetAuthenticationError(this, ioArgs);
 					} else {
-						onDone();
+						sessionStorage.setItem(key, "{}");
+						d.resolve({});
 					}
-					return response;
-				},
-				failOk: true //don't log errors on get
-			});
-		},
-		/**
-		 * Retrieves the preferences and children of the given preferences node.
-		 * @param {String} node Path to a preference node
-		 * @param {Function} onDone Function to be invoked with the result, or with no argument if retrieval failed.
-		 */
-		getNode: function(node, onDone) {
-			var servicePath = this.serviceLocation;
-			if (node.charAt(0) !== "/") {
-				servicePath += "/";
-			}
-			dojo.xhrGet({
-				url: servicePath + node,
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					onDone(jsonData);
-				},
-				error: function(response, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					onDone();
-					return response;
-				}
-			});
-		},
-		/**
-		 * Sets the preference with the given key to the provided value.
-		 * @param {String} key The preference key. The key is either a simple name, or a path where the key is the final segment.
-		 * @param {String} value The preference value.
-		 */
-		put: function(key, value) {
-			var servicePath = this.serviceLocation;
-			var separator = key.lastIndexOf('/');
-			if (separator) {
-				if (key[0] !== '/') {
-					servicePath += '/';
-				}
-				servicePath += key.substring(0, separator);
-				key = key.substring(separator + 1);
-			}
-			dojo.xhrPut({
-				url: servicePath,
-				putData: "key=" + window.encodeURIComponent(key) + "&value=" + window.encodeURIComponent(value),
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				timeout: 15000,
-				error: function(response, ioArgs) {
-					handlePutAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
-		},
-		/**
-		 * Sets an entire node of preferences.
-		 * @param {String} node Path to a preference node
-		 * @param {String} value A JSON object of key/value pairs to save
-		 */
-		putNode: function(node, values) {
-			var servicePath = this.serviceLocation;
-			dojo.xhrPut({
-				url: servicePath + node,
-				putData: values,
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				timeout: 15000,
-				error: function(response, ioArgs) {
-					handlePutAuthenticationError(this, ioArgs);
-					return response;
 				}
 			});
 		}
-	}; // end prototype
-	return Preferences;
-}());
+		return d;
+	};
+	
+	this.put = function(name, data) {
+		var d = new dojo.Deferred();
+		var key = "/orion/preferences/user" + name;
+		var jsonData = JSON.stringify(data);
+		sessionStorage.setItem(key, jsonData);
+		dojo.xhrPut({
+			url: location + name,
+			putData: jsonData,
+			headers: {
+				"Orion-Version": "1"
+			},
+			handleAs: "json",
+			contentType: "application/json",
+			timeout: 15000,
+			load: function(jsonData, ioArgs) {
+				d.resolve();
+			},
+			error: function(response, ioArgs) {
+				if (ioArgs.xhr.status == 401) {
+					handlePutAuthenticationError(this, ioArgs);
+				} else {
+					d.resolve(); // consider throwing here
+				}
+			}
+		});
+		return d;
+	};
+};
+
+
+eclipse.PreferencesService = function(serviceRegistry, location) {
+	
+	var _userProvider = new eclipse.UserPreferenceProvider(location);
+	
+	/**
+	 * Retrieves the preferences of the given node name.
+	 * @param {String} node Path to a preference node
+	 */
+	this.getPreferences = function(name) {
+		var preferences = new eclipse.Preferences(name, _userProvider);
+		var promise = preferences.sync().then(function() {
+			return preferences;
+		});
+		return promise;
+	};
+	
+	var _serviceRegistration = serviceRegistry.registerService("IPreferenceService", this);
+};

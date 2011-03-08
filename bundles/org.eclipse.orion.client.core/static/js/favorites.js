@@ -105,22 +105,26 @@ eclipse.FavoritesService = (function() {
 			var favorites = this;
 			var favesDone, searchesDone;
 			this._registry.getService("IPreferenceService").then(function(service) {
-				service.getNode("window/favorites", function(prefs) { 
-					if (prefs) {
-						var i;
-						if (prefs.navigate) {
-							var navigate = JSON.parse(prefs.navigate);
-							for (i in navigate) {
-								navigate[i].isFavorite = true;  // migration code, may not have been stored
-								favorites._favorites.push(navigate[i]);
-							}
+				service.getPreferences("/window/favorites").then(function(prefs) { 
+					var i;
+					var navigate = prefs.get("navigate");
+					if (typeof navigate === "string") {
+						navigate = JSON.parse(navigate);
+					}
+					if (navigate) {
+						for (i in navigate) {
+							navigate[i].isFavorite = true;  // migration code, may not have been stored
+							favorites._favorites.push(navigate[i]);
 						}
-						if (prefs.search) {
-							var search = JSON.parse(prefs.search);
-							for (i in search) {
-								search[i].isSearch = true; // migration code, may not been stored
-								favorites._searches.push(search[i]);
-							}
+					}
+					var search = prefs.get("search");
+					if (typeof search === "string") {
+						search = JSON.parse(search);
+					}
+					if (search) {
+						for (i in search) {
+							search[i].isSearch = true; // migration code, may not been stored
+							favorites._searches.push(search[i]);
 						}
 					}
 					favorites._notifyListeners();
@@ -132,16 +136,20 @@ eclipse.FavoritesService = (function() {
 			if (this._favorites.length > 0) {
 				var storedFavorites = this._favorites;
 				this._registry.getService("IPreferenceService").then(function(service) {
-					service.put("window/favorites/navigate", JSON.stringify(storedFavorites)); 
-				});
+					return service.getPreferences("/window/favorites");
+				}).then(function(prefs){
+					prefs.put("navigate", storedFavorites);
+				}); 
 			}
 		},
 		
 		_storeSearches: function() {
 			var storedSearches = this._searches;
 			this._registry.getService("IPreferenceService").then(function(service) {
-				service.put("window/favorites/search", JSON.stringify(storedSearches)); 
-			});
+				return service.getPreferences("/window/favorites");
+			}).then(function(prefs){
+				prefs.put("search", storedSearches);
+			}); 
 		},
 		
 		getFavorites: function(onDone) {

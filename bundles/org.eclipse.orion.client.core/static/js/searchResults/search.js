@@ -18,7 +18,7 @@ dojo.addOnLoad(function(){
 	new eclipse.LogService(serviceRegistry);
 	new eclipse.DialogService(serviceRegistry);
 	new eclipse.UserService(serviceRegistry);
-	var preferenceService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 
 	// Favorites

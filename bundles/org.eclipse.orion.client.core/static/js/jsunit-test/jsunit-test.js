@@ -40,7 +40,7 @@ function handleMessage(evt) {
 dojo.addOnLoad(function(){
 	// create registry and instantiate needed services
 	serviceRegistry = new eclipse.ServiceRegistry();
-	new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	new eclipse.TestConfigService({serviceRegistry: serviceRegistry});
 	
 
