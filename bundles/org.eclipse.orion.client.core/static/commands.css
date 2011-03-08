@@ -2,11 +2,6 @@
 	height: 24px;
 }
 
-.domCommandBackground {
-	height: 24px;
-	background-color: #f6f6ff;
-}
-
 .commandImage {
 	margin-left: 2px;
 	margin-right: 2px;
@@ -23,9 +18,16 @@
 .commandLink {
 	margin-left: 2px;
 	margin-right: 2px;
-	color: #666666;
-	text-decoration: underline;
+	color: #464646;
 	cursor: pointer;
+}
+
+.commandLink:hover {
+	margin-left: 2px;
+	margin-right: 2px;
+	color: #464646;
+	cursor: hand;
+	text-decoration: underline;
 }
 
 .commandMenu {

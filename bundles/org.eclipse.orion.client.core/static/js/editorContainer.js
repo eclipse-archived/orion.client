@@ -160,15 +160,7 @@ eclipse.EditorContainer = (function() {
 			this._dirty = dirty;
 		},
 		getTitle : function() {
-			var title = dojo.byId(this._codeTitle);
-			if (title) {
-				return title.innerHTML;
-			}
-			title = dijit.byId(this._codeTitle);
-			if (title) {
-				return title.get("title");
-			}
-			return null;
+			return this._lastTitle;
 		},
 		getAnnotationsRuler : function() {
 			return this._annotationsRuler;
@@ -214,6 +206,7 @@ eclipse.EditorContainer = (function() {
 					shortTitle = '*' + shortTitle;
 				}
 			}
+			this._lastTitle = shortTitle;
 			this._serviceRegistry.getService("IInputProvider").then(function(myService) {
 				myService.setTitle(shortTitle);
 			});
@@ -221,13 +214,13 @@ eclipse.EditorContainer = (function() {
 			// eclipse desktop-style breadcrumb that one could use to actually
 			// navigate
 			if (this._editor) {
-				var titlePane = dijit.byId(this._codeTitle);
+				var titlePane = dojo.byId(this._codeTitle);
 				if (titlePane) {
-					titlePane.set("title", shortTitle);
-				} else {
-					titlePane = dojo.byId(this._codeTitle);
-					if (titlePane) {
-						titlePane.innerHTML = shortTitle;
+					dojo.empty(titlePane);
+					new eclipse.BreadCrumbs({container: this._codeTitle, resource: this._fileMetadata});
+					if (title.charAt(0) === '*') {
+						var dirty = dojo.create('b', null, titlePane, "last");
+						dirty.innerHTML = '*';
 					}
 				}
 			}
@@ -1279,9 +1272,11 @@ eclipse.EditorContainer = (function() {
 					this._fileClient.read(fileURI, true).then(
 						dojo.hitch(this, function(metadata) {
 							this.setFileMetadata(metadata);
+							this.setTitle(metadata.Location);
 						}),
 						dojo.hitch(this, function(error) {
 							console.error("Error loading file metadata: " + error.message);
+							this.setTitle(fileURI);
 						})
 					);
 				}

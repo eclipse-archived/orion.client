@@ -16,13 +16,13 @@ eclipse.Explorer = (function() {
 	 * @name eclipse.Explorer
 	 * @class A table-based explorer component
 	 */
-	function Explorer(serviceRegistry, treeRoot, searcher, fileClient, parentId, toolbarId, selectionToolsId) {
+	function Explorer(serviceRegistry, treeRoot, searcher, fileClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
 		this.registry = serviceRegistry;
 		this.treeRoot = treeRoot;
 		this.searcher = searcher;
 		this.fileClient = fileClient;
 		this.parentId = parentId;
-		this.innerId = parentId+"inner";
+		this.pageTitleId = pageTitleId;
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
 		this.model = null;
@@ -37,14 +37,7 @@ eclipse.Explorer = (function() {
 				dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
 			});
 		},
-				
-		removeResourceList: function() {
-			var container = dojo.byId(this.innerId);
-			if (container) {
-				dojo.empty(container);
-			}
-		},
-		
+						
 		loadResourceList: function(path) {
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
 			path = eclipse.util.makeRelative(path);
@@ -54,16 +47,10 @@ eclipse.Explorer = (function() {
 						
 			this._lastHash = path;
 			dojo.hash(path, true);
-			// empty the inner area (progress, breadcrumbs, etc.)
-			this.removeResourceList();
 			var parent = dojo.byId(this.parentId);
 
 			// Progress indicator
-			var inner = dojo.byId(this.innerId);
-			if (!inner) {
-				inner= dojo.create("div", {id: this.innerId}, parent);
-			}
-			var progress = dojo.create("div", {id: this.innerId+"progress"}, progress);
+			var progress = dojo.create("div", {id: this.innerId+"progress"}, this.parent);
 			b = dojo.create("b");
 			dojo.place(document.createTextNode("Loading "), progress, "last");
 			dojo.place(document.createTextNode("..."), progress, "last");
@@ -84,9 +71,8 @@ eclipse.Explorer = (function() {
 							this.treeRoot[i] = loadedWorkspace[i];
 						}
 						eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
-						dojo.empty(inner);
-						new eclipse.BreadCrumbs({container: this.innerId, resource: this.treeRoot});
-						eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.innerId, this.toolbarId, this.selectionToolsId, this.treeRoot);
+						new eclipse.BreadCrumbs({container: this.pageTitleId, resource: this.treeRoot});
+						eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
 						this.createTree();
 					}),
 					dojo.hitch(self, function(error) {
@@ -106,12 +92,16 @@ eclipse.Explorer = (function() {
 			}
 		},
 		createTree: function (){
+			var existing = dojo.byId(this.parentId+"innerTree");
+			if (existing) {
+				dojo.destroy(existing);
+			}
 			this.model = new eclipse.Model(this.registry, this.treeRoot, this.fileClient);
 			this.myTree = new eclipse.TableTree({
-				id: "innerTree",
+				id: this.parentId+"innerTree",
 				model: this.model,
 				showRoot: false,
-				parent: this.innerId,
+				parent: this.parentId,
 				labelColumnIndex: 1,  // 0 if no checkboxes
 				renderer: new eclipse.FileRenderer({checkbox: true }, this)
 			});
@@ -186,26 +176,26 @@ eclipse.FileRenderer = (function() {
 			dojo.addClass(tableNode, 'treetable');
 			var thead = document.createElement('thead');
 			var row = document.createElement('tr');
-			dojo.addClass(row, "domCommandBackground");
+			dojo.addClass(row, "navTableHeading");
 			var th, actions, size;
 			if (this._useCheckboxSelection) {
 				th = document.createElement('th');
 				row.appendChild(th);
 			}
 			th = document.createElement('th');
-			th.innerHTML = "Name";
+			th.innerHTML = "<h2>Name</h2>";
 			row.appendChild(th);
 
 			actions= document.createElement('th');
-			actions.innerHTML = "Actions";
+			actions.innerHTML = "<h2>Actions</h2>";
 			row.appendChild(actions);
 
 			th = document.createElement('th');
-			th.innerHTML = "Date";
+			th.innerHTML = "<h2>Date</h2>";
 			row.appendChild(th);
 
 			size= document.createElement('th');
-			size.innerHTML = "Size";
+			size.innerHTML = "<h2>Size</h2>";
 			row.appendChild(size);
 			
 			thead.appendChild(row);

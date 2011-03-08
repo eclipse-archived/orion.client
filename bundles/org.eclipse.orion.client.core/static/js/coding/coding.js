@@ -67,14 +67,14 @@ dojo.addOnLoad(function(){
 		});
 	};
 
-	var rulerStyle = {style: { backgroundColor: "#eee" }};
+	var rulerStyle = {style: { backgroundColor: "#ffffff" }};
 	var annotationRuler;
 	var annotationRulerFactory = function() {
 			annotationRuler = new eclipse.AnnotationRuler("left", rulerStyle, {html: "<img src='images/problem.gif'></img>"});
 			return annotationRuler;
 	};
 	var lineNumberRulerFactory = function() {
-			return new eclipse.LineNumberRuler("left", {style: {backgroundColor: "#eee", textAlign: "right", borderLeft:"1px solid #ddd", borderRight:"1px solid #ddd"}}, {style: { backgroundColor: "#eee" }}, {style: { backgroundColor: "#eee" }});
+			return new eclipse.LineNumberRuler("left", {style: {backgroundColor: "#ffffff", textAlign: "right", borderLeft:"1px solid #ddd", borderRight:"1px solid #ddd"}}, {style: { backgroundColor: "#ffffff" }}, {style: { backgroundColor: "#ffffff" }});
 	};
 	var overviewRulerFactory = function() {
 			return new eclipse.OverviewRuler("right", rulerStyle, annotationRuler);

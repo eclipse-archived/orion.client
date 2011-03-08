@@ -64,15 +64,12 @@ eclipse.FavoriteFoldersCache = (function() {
 	return FavoriteFoldersCache;
 }());
 
-eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, parentId, toolbarId, selectionToolbarId, item) {
-	var parent = dojo.byId(parentId);
+eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
 	var toolbar = dojo.byId(toolbarId);
 	if (toolbar) {
 		dojo.empty(toolbar);
 	} else {
-		// first time through
-		toolbar = dojo.create("div",{id: toolbarId}, parent, "last");
-		dojo.addClass(toolbar, "domCommandToolbar");
+		throw "could not find toolbar " + toolbarId;
 	}
 	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
 		service.renderCommands(toolbar, "dom", item, explorer, "image");
@@ -619,7 +616,7 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 					}
 					commandService.registerCommandContribution(command.id, i, selectionToolbarId, selectionGroup + "/eclipse.bulkFileCommandExtensions");
 				}
-			eclipse.fileCommandUtils.updateNavTools(serviceRegistry, explorer, explorer.innerId, toolbarId, selectionToolbarId, explorer.treeRoot);
+			eclipse.fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
 			explorer.updateCommands();
 		});
 	});}
