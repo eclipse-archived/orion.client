@@ -16,19 +16,49 @@
 }
 
 .commandLink {
-	margin-left: 2px;
-	margin-right: 2px;
-	color: #464646;
+	margin-left: 4px;
+	margin-right: 4px;
+	color: #6d6d6d;
+	cursor: pointer;
+}
+
+.commandLink:visited {
+	margin-left: 4px;
+	margin-right: 4px;
+	color: #6d6d6d;
 	cursor: pointer;
 }
 
 .commandLink:hover {
-	margin-left: 2px;
-	margin-right: 2px;
-	color: #464646;
+	margin-left: 4px;
+	margin-right: 4px;
+	color: #6d6d6d;
 	cursor: hand;
 	text-decoration: underline;
 }
+
+.commandLinkLight {
+	margin-left: 4px;
+	margin-right: 4px;
+	color: #ffffff;
+	cursor: pointer;
+}
+
+.commandLinkLight:visited {
+	margin-left: 4px;
+	margin-right: 4px;
+	color: #ffffff;
+	cursor: pointer;
+}
+
+.commandLinkLight:hover {
+	margin-left: 4px;
+	margin-right: 4px;
+	color: #ffffff;
+	cursor: hand;
+	text-decoration: underline;
+}
+
 
 .commandMenu {
 	color: #666666;

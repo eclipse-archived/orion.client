@@ -71,7 +71,12 @@ eclipse.Explorer = (function() {
 							this.treeRoot[i] = loadedWorkspace[i];
 						}
 						eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
-						new eclipse.BreadCrumbs({container: this.pageTitleId, resource: this.treeRoot});
+						// erase any old page title
+						var pageTitle = dojo.byId(this.pageTitleId);
+						if (pageTitle) {
+							dojo.empty(pageTitle);
+							new eclipse.BreadCrumbs({container: pageTitle, resource: this.treeRoot});
+						}
 						eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
 						this.createTree();
 					}),

@@ -107,18 +107,10 @@ a:hover {
 		overflow: auto;
 }
 
-.statusPane {
-	cursor: pointer;
-	text-decoration: none;
-	margin-right: 8px;
-	margin-left: 8px;
-	cursor: pointer;
-}
-
 .statuspane {
 	text-decoration: none;
-	margin-right: 8px;
-	margin-left: 8px;
+	margin-right: 2px;
+	margin-left: 2px;
 	cursor: pointer;
 }
 
@@ -137,7 +129,8 @@ a:hover {
 
 .leftGlobalToolbar {
 	height: 40px;
-	padding-left: 8px;
+	padding-left: 24px;
+	padding-top: 8px;
 	background: #c5c5c5;
 	text-align: left;
 }
@@ -145,8 +138,15 @@ a:hover {
 .rightGlobalToolbar {
 	height: 40px;
 	padding-right: 8px;
+	padding-top: 8px;
 	background: #c5c5c5;
 	text-align: right;
+}
+
+.bannerSeparator {
+	margin-left: 2px;
+	margin-right: 2px;
+	font-size: 1.1em;
 }
 
 .pageToolbar {
@@ -159,8 +159,10 @@ a:hover {
 
 .searchbox {
 	margin-left: 12px;
+	margin-right: 8px;
 	background: #c5c5c5;
 	border: 1px solid #7a7979;
+	font-size: 0.9em;
 }
 
 .soria .dijitButtonNode {
