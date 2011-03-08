@@ -14,6 +14,10 @@ dojo.addOnLoad(function() {
 	var prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, usersList, usersList);
+	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, usersList);
+
+	dojo.create("a", {id:"profileBanner", className: "breadcrumb currentLocation", innerHTML: "Orion Users"}, dojo.byId('pageTitle'));
 
 	var usersList = new eclipse.UsersList({
 		parent : "usersList",
@@ -38,14 +42,14 @@ dojo.addOnLoad(function() {
 		}
 	});
 	
-	commandService.addCommandGroup("eclipse.manageuserscommands", 100, null, null, "userCommandsToolbar");
+	
+	commandService.addCommandGroup("eclipse.manageuserscommands", 100, null, null, "pageActions");
 	commandService.addCommand(createUserCommand, "dom");
-	commandService.registerCommandContribution("eclipse.createUser", 1, "userCommandsToolbar", "eclipse.manageuserscommands");
+	commandService.registerCommandContribution("eclipse.createUser", 1, "pageActions", "eclipse.manageuserscommands");
 	
 	
-	commandService.renderCommands(document.getElementById("userCommandsToolbar"), "dom", {}, {}, "image");
+	commandService.renderCommands(dojo.byId("pageActions"), "dom", {}, {}, "image");
 	
-	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, usersList, usersList);
-	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, usersList);
+
 
 });

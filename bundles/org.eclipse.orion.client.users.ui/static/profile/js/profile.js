@@ -20,7 +20,8 @@ dojo.addOnLoad(function() {
 		registry : serviceRegistry,
 		pluginRegistry: pluginRegistry,
 		profilePlaceholder: dojo.byId('profileContent'),
-		commandService: commandService
+		commandService: commandService,
+		pageActionsPlaceholder: dojo.byId('pageActions')
 	});
 	
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, profile, profile);
@@ -80,6 +81,7 @@ eclipse.Profile = (function() {
 			this.pluginRegistry = options.pluginRegistry;
 			this.profilePlaceholder = options.profilePlaceholder;
 			this.commandService = options.commandService;
+			this.pageActionsPlaceholder = options.pageActionsPlaceholder;
 			
 			var userProfile = this;
 			
@@ -149,6 +151,8 @@ eclipse.Profile = (function() {
 				
 				this.profileForm.destroy();
 			}
+			this.pageActionsPlaceholder =  dojo.byId('pageActions');
+			dojo.empty(this.pageActionsPlaceholder);
 			
 			this.profileForm = new dijit.form.Form({id: "profileForm"});
 			this.profilePlaceholder.innerHTML = "";
@@ -290,12 +294,13 @@ eclipse.Profile = (function() {
 			}
 			if(content.actions && content.actions.length>0){
 				
-				var bannerPane = dojo.create("div", null, placeholder, "first");
-
-				dojo.create("h2", {id:"profileBanner", style: "margin-top: 10px;", innerHTML: profile.lastJSON ? "Profile Information for <b style='color: #000'>" + profile.lastJSON.login + "</b>" : ""}, bannerPane);
+				var bannerPane = dojo.byId('pageTitle');
+				
+				dojo.empty(bannerPane);
+				dojo.create("a", {id:"profileBanner", className: "breadcrumb currentLocation", innerHTML: profile.lastJSON ? "Profile Information for <b style='color: #000'>" + profile.lastJSON.login + "</b>" : ""}, bannerPane);
 
 				var dataDiv = dojo.create("div", {id: "profile.actions"}, bannerPane);
-				this.commandService.addCommandGroup("eclipse.profileActionsGroup", 100, null, null, "profile.actions");
+				this.commandService.addCommandGroup("eclipse.profileActionsGroup", 100, null, null, this.pageActionsPlaceholder.id);
 				for(var i=0; i<content.actions.length; i++){
 					var info = content.actions[i];
 					var commandOptions = {
@@ -307,9 +312,9 @@ eclipse.Profile = (function() {
 					};
 					var command = new eclipse.Command(commandOptions);
 					this.commandService.addCommand(command, "dom");					
-					this.commandService.registerCommandContribution(info.id, i, "profile.actions", "eclipse.profileActionsGroup");
+					this.commandService.registerCommandContribution(info.id, i, this.pageActionsPlaceholder.id, "eclipse.profileActionsGroup");
 				}
-				this.commandService.renderCommands(dataDiv, "dom", {}, {}, "image");
+				this.commandService.renderCommands(this.pageActionsPlaceholder, "dom", {}, {}, "image");
 				
 			}
 			

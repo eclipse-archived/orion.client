@@ -30,21 +30,22 @@ eclipse.UsersList = (function() {
 					var titleRow = dojo.create("tr", {"class": "domCommandBackground"}, thead);
 
 					dojo.create("td", {
-						innerHTML : "Login",
+						innerHTML : "<h2>Login</h2>",
 						className : "usersTable"
 					}, titleRow);
 					dojo.create("td", {
-						innerHTML : "Name",
+						innerHTML : "<h2>Actions</h2>",
 						className : "usersTable"
 					}, titleRow);
 					dojo.create("td", {
-						innerHTML : "Last Login",
+						innerHTML : "<h2>Name</h2>",
 						className : "usersTable"
 					}, titleRow);
 					dojo.create("td", {
-						innerHTML : "Actions",
+						innerHTML : "<h2>Last Login</h2>",
 						className : "usersTable"
 					}, titleRow);
+
 
 					dojo.place(thead, table);
 					dojo.place(table, this.parent);
@@ -59,14 +60,6 @@ eclipse.UsersList = (function() {
 							innerHTML : this
 									.getUserTab(jsonData.users[i].login),
 									className : "usersTable"
-						}, userRow);
-						dojo.create("td", {
-							innerHTML : jsonData.users[i].Name ? jsonData.users[i].Name : '&nbsp;',
-							className: "usersTable secondaryColumn"
-						}, userRow);
-						dojo.create("td", {
-							innerHTML : jsonData.users[i].LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(jsonData.users[i].LastLogInTimestamp)), {formatLength: "short"}) : '&nbsp;',
-							className: "usersTable secondaryColumn"
 						}, userRow);
 						var actionsTd = dojo.create("td", {className: "usersTable secondaryColumn"});
 						var actions = dojo.create("span",{id: "usersActions"+i, style: "visibility: hidden"}, actionsTd);
@@ -85,6 +78,14 @@ eclipse.UsersList = (function() {
 									this.deleteUser(login);
 								}, jsonData.users[i].login));
 						dojo.place(actionsTd, userRow);
+						dojo.create("td", {
+							innerHTML : jsonData.users[i].Name ? jsonData.users[i].Name : '&nbsp;',
+							className: "usersTable secondaryColumn"
+						}, userRow);
+						dojo.create("td", {
+							innerHTML : jsonData.users[i].LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(jsonData.users[i].LastLogInTimestamp)), {formatLength: "short"}) : '&nbsp;',
+							className: "usersTable secondaryColumn"
+						}, userRow);
 						dojo.place(userRow, tbody);
 					}
 
