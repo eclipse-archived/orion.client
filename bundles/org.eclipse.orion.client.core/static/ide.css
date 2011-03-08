@@ -49,19 +49,6 @@ a:hover {
 	color: #05386B;
 }
 
-.currentLocation {
-	font-weight: bold;
-	text-decoration: none;
-	cursor: pointer;
-}
-
-.currentLocation:hover {
-	font-weight: bold;
-	text-decoration: none;
-	border-bottom: 0px;
-	cursor: pointer;
-}
-
 .navlinkonpage {
 	color: #05386B;
 	cursor: hand;
@@ -124,19 +111,16 @@ a:hover {
 .statusPane {
 	cursor: pointer;
 	text-decoration: none;
-	margin-right: 4px;
-	margin-left: 4px;
+	margin-right: 8px;
+	margin-left: 8px;
 	cursor: pointer;
-	height: 20px;
-
 }
 
 .statuspane {
 	text-decoration: none;
-	margin-right: 4px;
-	margin-left: 4px;
+	margin-right: 8px;
+	margin-left: 8px;
 	cursor: pointer;
-	height: 20px;
 }
 
 .toolbar {
