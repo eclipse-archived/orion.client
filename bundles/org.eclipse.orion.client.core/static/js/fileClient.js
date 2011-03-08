@@ -176,7 +176,7 @@ eclipse.FileClient = (function() {
 						//on failure we might need to retry
 						function(error) {
 							if (error.status === 401) {
-								var handle = dojo.subscribe("/auth", function(message) {
+								handleAuthenticationError(error, function(message) {
 									//try again
 									fileService[funcName].apply(fileService, funcArgs).then(
 										function(result) {
@@ -186,7 +186,6 @@ eclipse.FileClient = (function() {
 											clientDeferred.errback(error);
 										}
 									);
-									dojo.unsubscribe(handle); // ... but only once
 								});
 							} else {
 								//forward other errors to client
