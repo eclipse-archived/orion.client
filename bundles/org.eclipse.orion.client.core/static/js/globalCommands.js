@@ -17,21 +17,28 @@
 var eclipse = eclipse || {};
 
 
-// begin HTML fragment for top area
+// begin HTML fragment for top area.
 var topHTMLFragment =
-'<div id="bannerLeftArea" style="float: left;">' +
-	'<a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/orion.png" alt="Orion Logo" align="top"></a>' +
-'</div>' +
-'<div class="leftInnerToolbar">' +
-	'<b class="currentLocation" id="pageTitle"></b>' +
-	'<b class="statuspane" id="statusPane"></b>' +
-'</div>' +
-'<div id="eclipseWebToolbar" class="innerToolbar">' +
-	'<span id="pageActions"></span>' +
-	'<span id="globalActions"></span>' +
-	'<input type="search" id="search" class="searchbox">' +
-	'<span id="userInfo" class="statuspane"></span>' +
-'</div>';
+'<table style="border-spacing: 0px; width: 100%; height: 61px">' +   // a table?!!?  Couldn't get bottom bar to float right and pin to bottom while also spanning entire page.  Can't mix floats and absolutes.
+	'<tr class="topRowBanner">' +
+		'<td width=93px rowspan=2><a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
+		'<td class="leftGlobalToolbar">' +
+			'<span class="currentLocation" id="pageTitle"></span>' +
+			'<span class="statuspane" id="statusPane"></span>' +
+		'</td>' +
+		'<td class="rightGlobalToolbar">' +
+			'<span id="globalActions"></span>' +
+			'<input type="search" id="search" class="searchbox">' +
+			'<span id="userInfo" class="statuspane"></span>' +
+		'</td>' +
+		'</tr>' +
+	'<tr class="bottomRowBanner">' +
+		'<td colspan=2 id="pageToolbar" class="pageToolbar">' +
+			'<span id="pageActions"></span>' +
+		'</td>' +
+	'</tr>' +
+'</table>';
+
 // end HTML fragment
 
 /**
@@ -96,12 +103,6 @@ eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService
 	if (toolbar) {	
 		dojo.empty(toolbar);
 		commandService.renderCommands(toolbar, "dom", handler, handler, "image");
-		// we need a separator if the global commands are there
-		var globalCommands = dojo.byId("globalActions");
-		if (globalCommands && globalCommands.childNodes.length > 0) {
-			var sep = commandService.generateSeparatorImage();
-			dojo.place(sep, toolbar, "last");
-		}
 	}
 };
 

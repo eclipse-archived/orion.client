@@ -451,13 +451,13 @@ eclipse.Command = (function() {
 				});	
 			} else {
 				image.src = this.image;	
-				dojo.style(image, "opacity", "0.4");
+				dojo.style(image, "opacity", "0.7");
 				dojo.connect(image, "onmouseover", this, function() {
 					dojo.style(image, "opacity", "1");
 				});
 				dojo.connect(image, "onmouseout", this, function() {
 					image.src = this.image;
-					dojo.style(image, "opacity", "0.4");
+					dojo.style(image, "opacity", "0.7");
 				});
 			}
 			dojo.addClass(image, 'commandImage');

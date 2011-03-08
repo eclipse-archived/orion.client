@@ -6,6 +6,7 @@ html, body {
 	margin: 0;
 	padding: 0;
 	font-size: 12px;
+	background: #c5c5c5
 }
 
 h1 {
@@ -87,11 +88,21 @@ a:hover {
 	border-bottom: 1px dotted;
 }
 
+.navTableHeading {
+	border-bottom: 1px;
+}
+
 .pane {
-   	margin: 0px;
+   		margin: 0px;
     	padding: 0px;
     	background: #FFFFFF;
-    	border-color: #EEEEEE;
+}
+
+.auxpane {
+    	padding-left: 32px;
+    	padding-top: 20px;
+    	background: #EDEDED;
+    	overflow: auto;
 }
 
 .soria .dijitSplitterV .dijitSplitterThumb {	
@@ -103,16 +114,15 @@ a:hover {
 }
 
 
-.paneScrolled {
+.mainpane{
     	margin: 0px;
-    	padding: 0px;
+    	padding-top: 20px;
     	background: #FFFFFF;
 		overflow: auto;
-    	border-color: #EEEEEE;
+		min-width: 600px;
 }
 
 .statusPane {
-	font-weight: bold;
 	cursor: pointer;
 	text-decoration: none;
 	margin-right: 4px;
@@ -123,7 +133,6 @@ a:hover {
 }
 
 .statuspane {
-	font-weight: bold;
 	text-decoration: none;
 	margin-right: 4px;
 	margin-left: 4px;
@@ -132,37 +141,43 @@ a:hover {
 }
 
 .toolbar {
-	background: #fff url("images/titleBar.png") repeat-x top left;
+	background: #c5c5c5;
 	border: 0px;
 	cursor: pointer;
 	font-size: 0.9em;
 	font-weight: bold;
 	color: #6d6d6d;
-	height: 35px;
+	height: 61px;
 }
 
 .toolbarLabel {
 	padding-left: 8px;
 }
 
-.leftInnerToolbar {
-	float: left;
-	padding-top: 6px;
-	padding-left: 6px;
+.leftGlobalToolbar {
+	height: 40px;
+	padding-left: 8px;
+	background: #c5c5c5;
+	text-align: left;
 }
 
-.innerToolbar {
-	float: right;
-	padding-top: 6px;
-	padding-right: 6px;
+.rightGlobalToolbar {
+	height: 40px;
+	padding-right: 8px;
+	background: #c5c5c5;
+	text-align: right;
+}
+
+.pageToolbar {
+	background: #404040;
+	padding-right: 8px;
+	text-align: right;
+	height: 21px;
+	width: auto;
 }
 
 .searchbox {
 	margin-left: 12px;
-}
-
-.navigator {
-	min-width: 600px;
 }
 
 .soria .dijitButtonNode {
