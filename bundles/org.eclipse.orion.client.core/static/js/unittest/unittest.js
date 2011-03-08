@@ -129,6 +129,12 @@ dojo.addOnLoad(function(){
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	var inputService = new eclipse.InputService(serviceRegistry);
+	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
+	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	
+	// global banner
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	
 	function runTests(fileURI) {
 		//console.log("installing non-persistent plugin: " + fileURI);

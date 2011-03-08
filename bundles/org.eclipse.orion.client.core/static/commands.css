@@ -1,7 +1,3 @@
-.domCommandToolbar {
-	height: 24px;
-}
-
 .commandImage {
 	margin-left: 2px;
 	margin-right: 2px;
@@ -16,34 +12,70 @@
 }
 
 .commandLink {
-	margin-left: 2px;
-	margin-right: 2px;
-	color: #464646;
+	margin-left: 4px;
+	margin-right: 4px;
+	color: #6d6d6d;
+	cursor: pointer;
+}
+
+.commandLink:visited {
+	margin-left: 4px;
+	margin-right: 4px;
+	color: #6d6d6d;
 	cursor: pointer;
 }
 
 .commandLink:hover {
-	margin-left: 2px;
-	margin-right: 2px;
-	color: #464646;
+	margin-left: 4px;
+	margin-right: 4px;
+	color: #6d6d6d;
 	cursor: hand;
 	text-decoration: underline;
 }
 
-.commandMenu {
-	color: #666666;
-	height: 28px;
+.commandLinkLight {
+	color: #ffffff;
+	cursor: pointer;
 }
 
-.commandMenu li {
-	height: 28px;
-	float: left;
-	margin-left: 2px;
-	margin-right: 2px;
-	margin-top: 9px;
-	margin-bottom: 0px;
+.commandLinkLight:visited {
+	color: #ffffff;
+	cursor: pointer;
 }
 
-.commandSubMenu {
-	float: block;
+.commandLinkLight:hover {
+	color: #ffffff;
+	cursor: hand;
+}
+
+.commandLinkLight a:hover {
+	color: #ffffff;
+	cursor: hand;
+	text-decoration: underline;
+}
+
+.soria .dijitMenu, .soria .dijitMenuBar {
+    background-color: #FFFFFF;
+    border: 1px solid #888787;
+    margin: 0;
+    padding: 0;
+}
+
+.soria .dijitMenuItem {
+    color: black;
+    font-family: sans-serif;
+    margin: 0;
+}
+
+.soria .dijitMenuPassive .dijitMenuItemHover, .soria .dijitMenuItemSelected {
+    background-color: #fedda7;
+    color: black;
+}
+
+soria .dijitButtonHover .dijitButtonNode, .soria .dijitButtonNodeHover, .soria .dijitToggleButtonHover .dijitButtonNode, .soria .dijitDropDownButtonHover .dijitButtonNode, .soria .dijitButtonContentsHover, .soria .dijitUpArrowButtonHover, .soria .dijitDownArrowButtonHover {
+    background: #ededed;
+    color: black;
+}
+.soria .dijitButtonActive .dijitButtonNode, .soria .dijitToggleButtonActive .dijitButtonNode, .soria .dijitDropDownButtonActive .dijitButtonNode, .soria .dijitComboButtonActive .dijitButtonContents, .soria .dijitStackController .dijitToggleButtonChecked .dijitButtonNode {
+    background: #ededed;
 }

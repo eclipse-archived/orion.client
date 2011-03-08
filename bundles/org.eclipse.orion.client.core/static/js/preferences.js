@@ -28,7 +28,7 @@ eclipse.Preferences = function(_name, _provider) {
 			return;
 		}
 		_flushPending = true;
-		setTimeout( function() {
+		window.setTimeout( function() {
 			if (_flushPending) {
 				_flushPending = false;
 				_flush();

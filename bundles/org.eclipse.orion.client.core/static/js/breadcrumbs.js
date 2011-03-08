@@ -74,6 +74,14 @@ eclipse.BreadCrumbs = (function() {
 					dojo.addClass(seg, "currentLocation");
 					crumbs.appendChild(seg);
 				}
+			} 
+			// if we had no resource, or had no parents, we need some kind of current location in the breadcrumb
+			if (crumbs.childNodes.length === 0) {
+					seg = document.createElement('a');
+					dojo.place(document.createTextNode(document.title), seg, "only");
+					dojo.addClass(seg, "breadcrumb");
+					dojo.addClass(seg, "currentLocation");
+					crumbs.appendChild(seg);
 			}
 		}
 	};
