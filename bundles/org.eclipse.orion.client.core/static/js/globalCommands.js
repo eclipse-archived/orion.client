@@ -23,7 +23,7 @@ var topHTMLFragment =
 	'<tr class="topRowBanner">' +
 		'<td width=93px rowspan=2><a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
 		'<td class="leftGlobalToolbar">' +
-			'<span class="currentLocation" id="pageTitle"></span>' +
+			'<span id="pageTitle"></span>' +
 			'<span class="statuspane" id="statusPane"></span>' +
 		'</td>' +
 		'<td class="rightGlobalToolbar">' +
