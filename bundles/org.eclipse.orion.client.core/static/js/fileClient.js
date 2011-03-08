@@ -175,7 +175,7 @@ eclipse.FileClient = (function() {
 						},
 						//on failure we might need to retry
 						function(error) {
-							if (error.status === 401) {
+							if (error.status === 401 || error.status === 403) {
 								handleAuthenticationError(error, function(message) {
 									//try again
 									fileService[funcName].apply(fileService, funcArgs).then(
