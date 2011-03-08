@@ -190,8 +190,9 @@ orion.GitStatusController = (function() {
 			
 			this.modifyImageButton(true ,stageAllBtn , "Stage all", function(evt){self.stageAll();} , !this.hasUnstaged);
 			this.modifyImageButton(true ,unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
-			this.modifyImageButton(true ,commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value);} , !this.hasStaged);
-			this.modifyImageButton(true ,amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value , true);} , !this.hasStaged);
+			this.modifyImageButton(true ,commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value);} , !this.hasStaged , function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
+			this.modifyImageButton(false ,amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value , true);} , true , function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
+			
 			this.cursorClear();
 		},
 		
@@ -271,26 +272,36 @@ orion.GitStatusController = (function() {
 			this.modifyImageButton(enableWaitCursor ,imgBtn , imgTitle,onClick);
 		},
 		
-		modifyImageButton: function(enableWaitCursor , imgBtnDiv , imgTitle, onClick , disabled ){
+		modifyImageButton: function(enableWaitCursor , imgBtnDiv , imgTitle, onClick , disabled , onHoverCallBack){
 			var self = this;
 			if(disabled === undefined || !disabled){
 				imgBtnDiv.title= imgTitle;
 				
 				dojo.style(imgBtnDiv, "opacity", "0.4");
 				dojo.connect(imgBtnDiv, "onmouseover", imgBtnDiv, function() {
-					console.log( "onmouseover : " + self.loading );
-					imgBtnDiv.style.cursor = self.loading ? 'wait' : "pointer";
-					dojo.style(imgBtnDiv, "opacity", "1");
+					//console.log( "onmouseover : " + self.loading );
+					var disableOnHover = false;
+					if(onHoverCallBack)
+						disableOnHover = onHoverCallBack();
+					imgBtnDiv.style.cursor = self.loading ? 'wait' : (disableOnHover ? "default" : "pointer");
+					if(disableOnHover)
+						dojo.style(imgBtnDiv, "opacity", "0.4");
+					else
+						dojo.style(imgBtnDiv, "opacity", "1");
 				});
 				dojo.connect(imgBtnDiv, "onmouseout", imgBtnDiv , function() {
-					console.log( "onmouseout : " + self.loading );
+					//console.log( "onmouseout : " + self.loading );
 					imgBtnDiv.style.cursor = self.loading ? 'wait' : "default";
 					dojo.style(imgBtnDiv, "opacity", "0.4");
 				});
 				imgBtnDiv.onclick = function(evt){
-					if(enableWaitCursor)
+					var disableOnHover = false;
+					if(onHoverCallBack)
+						disableOnHover = onHoverCallBack();
+					if(enableWaitCursor && !disableOnHover)
 						self.cursorWait(imgBtnDiv , true) ;
-					onClick(evt);
+					if(!disableOnHover)
+						onClick(evt);
 				};
 			} else {
 				imgBtnDiv.title= "";
@@ -381,7 +392,7 @@ orion.GitStatusController = (function() {
 				handleAs: "json",
 				timeout: 5000,
 				load: function(jsonData, ioArgs) {
-					console.log(JSON.stringify(jsonData));
+					//console.log(JSON.stringify(jsonData));
 					self.loadStatus(jsonData);
 				},
 				error: function(response, ioArgs) {
@@ -403,7 +414,7 @@ orion.GitStatusController = (function() {
 				handleAs: "json",
 				timeout: 5000,
 				load: function(jsonData, ioArgs) {
-					console.log(JSON.stringify(jsonData));
+					//console.log(JSON.stringify(jsonData));
 					self.getGitStatus(self._url);;
 				},
 				error: function(response, ioArgs) {
@@ -432,7 +443,7 @@ orion.GitStatusController = (function() {
 				timeout: 5000,
 				postData: dojo.toJson({"Reset":"MIXED"} ),
 				load: function(jsonData, ioArgs) {
-					console.log(JSON.stringify(jsonData));
+					//console.log(JSON.stringify(jsonData));
 					self.getGitStatus(self._url);;
 				},
 				error: function(response, ioArgs) {
@@ -461,7 +472,7 @@ orion.GitStatusController = (function() {
 				timeout: 5000,
 				postData: body,
 				load: function(jsonData, ioArgs) {
-					console.log(JSON.stringify(jsonData));
+					//console.log(JSON.stringify(jsonData));
 					self.getGitStatus(self._url);;
 				},
 				error: function(response, ioArgs) {
