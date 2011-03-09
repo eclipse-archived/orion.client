@@ -127,6 +127,9 @@ a:hover {
 .toolbar {
 	background: #c5c5c5;
 	border: 0px;
+	padding: 0px;
+	margin: 0px;
+	overflow: hidden; // works around a "mystery pixels" problem in IE, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339302
 	cursor: pointer;
 	font-size: 0.9em;
 	color: #5a5a5a;
