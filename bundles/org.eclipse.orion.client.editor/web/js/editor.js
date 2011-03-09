@@ -1555,8 +1555,9 @@ eclipse.Editor = (function() {
 				* fix is to create a DOM element in the body to force a redraw.
 				*/
 				if (!this._getSelection().isEmpty()) {
+					var document = this._frameDocument;
 					var child = document.createElement("DIV");
-					var body = this._frameDocument.body;
+					var body = document.body;
 					body.appendChild(child);
 					body.removeChild(child);
 				}
@@ -4103,7 +4104,7 @@ eclipse.Editor = (function() {
 			if (!divRuler) { return; }
 			var cells = divRuler.firstChild.rows[0].cells;
 			var lineHeight = this._getLineHeight();
-			var parentDocument = this._parentDocument;
+			var parentDocument = this._frameDocument;
 			var editorPad = this._getEditorPadding();
 			for (var i = 0; i < cells.length; i++) {
 				var div = cells[i].firstChild;
