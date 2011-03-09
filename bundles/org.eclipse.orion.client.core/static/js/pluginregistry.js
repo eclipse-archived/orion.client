@@ -345,7 +345,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 			}
 	};
 	
-	this._shutdown = function() {
+	this.shutdown = function() {
 		_managedHub.disconnect();
 	};
 	

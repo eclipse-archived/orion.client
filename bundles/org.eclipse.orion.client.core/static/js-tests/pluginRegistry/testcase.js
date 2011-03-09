@@ -35,7 +35,7 @@ var testcase = (function(assert) {
 			
 			assert.equal(pluginRegistry.getPlugins().length, 0);
 			assert.equal(serviceRegistry.getServiceReferences().length, 0);
-			pluginRegistry._shutdown();
+			pluginRegistry.shutdown();
 		});
 		return promise;
 	};
@@ -72,7 +72,7 @@ var testcase = (function(assert) {
 
 			assert.equal(pluginRegistry.getPlugins().length, 0);
 			assert.equal(serviceRegistry.getServiceReferences().length, 0);
-			pluginRegistry._shutdown();
+			pluginRegistry.shutdown();
 		});
 
 		return promise;
@@ -93,7 +93,7 @@ var testcase = (function(assert) {
 			return service.test("echo");
 		}).then(function(result) {
 			assert.equal(result, "echo");
-			pluginRegistry._shutdown();
+			pluginRegistry.shutdown();
 		});
 		return promise;
 	};
@@ -123,7 +123,7 @@ var testcase = (function(assert) {
 			});
 		}).then(function(result) {
 			assert.equal(eventListenerCalls, 1);
-			pluginRegistry._shutdown();
+			pluginRegistry.shutdown();
 		});
 		return promise;
 	};
@@ -144,7 +144,7 @@ var testcase = (function(assert) {
 			assert.ok(e.message.match(/Load timeout for plugin/));
 			plugins = pluginRegistry.getPlugins();
 			assert.equal(plugins.length, 0);
-			pluginRegistry._shutdown();
+			pluginRegistry.shutdown();
 		});
 		return promise;
 	};
