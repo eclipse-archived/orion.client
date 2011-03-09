@@ -17,8 +17,6 @@ dojo.addOnLoad(function() {
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, usersList, usersList);
 	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, usersList);
 
-	dojo.create("a", {id:"profileBanner", className: "breadcrumb currentLocation", innerHTML: "Orion Users"}, dojo.byId('pageTitle'));
-
 	var usersList = new eclipse.UsersList({
 		parent : "usersList",
 		registry : serviceRegistry

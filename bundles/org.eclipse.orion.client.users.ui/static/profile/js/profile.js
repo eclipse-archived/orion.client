@@ -15,13 +15,15 @@ dojo.addOnLoad(function() {
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var prefsService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	var usersClient = new eclipse.UsersClient(serviceRegistry, pluginRegistry);
 	
 	var profile = new eclipse.Profile({
 		registry : serviceRegistry,
 		pluginRegistry: pluginRegistry,
 		profilePlaceholder: dojo.byId('profileContent'),
 		commandService: commandService,
-		pageActionsPlaceholder: dojo.byId('pageActions')
+		pageActionsPlaceholder: dojo.byId('pageActions'),
+		usersClient: usersClient
 	});
 	
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, profile, profile);
@@ -82,14 +84,9 @@ eclipse.Profile = (function() {
 			this.profilePlaceholder = options.profilePlaceholder;
 			this.commandService = options.commandService;
 			this.pageActionsPlaceholder = options.pageActionsPlaceholder;
+			this.usersClient = options.usersClient;
 			
 			var userProfile = this;
-			
-			
-
-			if(this.pluginRegistry.getPlugin("/profile/userservicePlugin.html")===null){
-				this.pluginRegistry.installPlugin("/profile/userservicePlugin.html");
-			}
 			
 			this.usersService = this.registry.getService("IUsersService");
 			
@@ -104,11 +101,14 @@ eclipse.Profile = (function() {
 					service.addEventListener("userDeleted", function(jsonData){
 						window.location.replace("/");
 					});
+					dojo.hitch(userProfile, function(){this.addInputListener();})();
 				});
 
 			}
-			
-			
+	
+		},
+		addInputListener: function(){
+			var userProfile = this;
 			this.registry.getService("IInputProvider").then(function(input) {
 				input.addEventListener("inputChanged", function(uri) {
 					dojo.hitch(userProfile, userProfile.setUserToDisplay(uri));
@@ -138,7 +138,6 @@ eclipse.Profile = (function() {
 					}
 				});
 			});
-			
 		},
 		drawPlugins : function(pluginsList){
 			
@@ -160,11 +159,11 @@ eclipse.Profile = (function() {
 			
 			var userPluginDiv = dojo.create("div", null, userProfile.profileForm.get("domNode"));
 			
-			this.usersService.then(function(service) {
-				service.getDivContent().then(function(content) {
-					dojo.hitch(userProfile, userProfile.draw(content, userPluginDiv));
-				});
+			
+			this.usersClient.getDivContent().then(function(content) {
+				dojo.hitch(userProfile, userProfile.draw(content, userPluginDiv));
 			});
+			
 			
 			
 			for(var i=0; i<pluginsList.length; i++){
@@ -203,17 +202,13 @@ eclipse.Profile = (function() {
 		setUserToDisplay : function(userURI) {
 			this.currentUserURI = userURI;
 			var profile = this;
-			this.usersService.then(
-					function(service) {
-						service.initProfile(userURI, "requiredPluginsChanged", "userInfoChanged");
-					});
+			
+			this.usersClient.initProfile(userURI, "requiredPluginsChanged", "userInfoChanged");
+			
 		},
 		redisplayLastUser : function(){
 			var profile = this;
-			this.usersService.then(
-					function(service) {
-						service.getUserInfo(profile.currentUserURI);
-					});
+			this.usersClient.getUserInfo(profile.currentUserURI);
 		},
 		populateData: function(jsonData){
 			if(jsonData && jsonData.login){
@@ -300,6 +295,7 @@ eclipse.Profile = (function() {
 				dojo.create("a", {id:"profileBanner", className: "breadcrumb currentLocation", innerHTML: profile.lastJSON ? "Profile Information for <b style='color: #000'>" + profile.lastJSON.login + "</b>" : ""}, bannerPane);
 
 				var dataDiv = dojo.create("div", {id: "profile.actions"}, bannerPane);
+				dojo.empty(this.pageActionsPlaceholder);
 				this.commandService.addCommandGroup("eclipse.profileActionsGroup", 100, null, null, this.pageActionsPlaceholder.id);
 				for(var i=0; i<content.actions.length; i++){
 					var info = content.actions[i];
@@ -329,9 +325,8 @@ eclipse.Profile = (function() {
                 data[name] = widget.get('value');
 			});
 			var url = this.currentUserURI;
-			this.usersService.then(function(service) {
-						service.fire(action, url, data);
-					});
+			this.usersClient.fire(action, url, data);
+
 		}
 	};
 	return Profile;
