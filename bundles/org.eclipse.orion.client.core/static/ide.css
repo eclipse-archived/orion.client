@@ -112,6 +112,7 @@ a:hover {
 
 .mainpane{
     margin: 0px;
+    padding-left: 8px;
     padding-top: 20px;
     background: #FFFFFF;
 	overflow: auto;
@@ -139,9 +140,11 @@ a:hover {
 .footer {
 	text-align: center;
 	width: 100%;
+	height: 24px;
 	background: #c5c5c5;
 	border: 0px;
 	padding: 0px;
+	margin-top: 4px;
 	margin-left: 44px;
 	cursor: pointer;
 	font-size: 0.9em;

@@ -69,6 +69,7 @@ dojo.addOnLoad(function() {
 		var widget = new widgets.SiteEditor({
 			fileClient: fileClient,
 			siteService: siteService,
+			commandService: commandService,
 			id: "site-editor"});
 		dojo.place(widget.domNode, dojo.byId("site"), "only");
 		widget.startup();
