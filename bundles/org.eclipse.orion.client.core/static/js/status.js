@@ -33,7 +33,9 @@ eclipse.StatusReportingService.prototype = {
 		if (typeof(timeout) === "number") {
 			var that = this;
 			setTimeout(function() {
-				if (dojo.byId(that.domId).textContent === msg) {
+				var node = dojo.byId(that.domId);
+				var text = typeof(node.textContent) === "string" ? node.textContent : node.innerText;
+				if (text === msg) {
 					dojo.place(document.createTextNode(""), that.domId, "only");
 				}
 			}, timeout);
