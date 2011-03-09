@@ -331,7 +331,8 @@ orion.GitStatusController = (function() {
 		},
 		
 		removeProgressDiv: function(progressParentId , progressId){
-			dojo.place(document.createTextNode(""), progressParentId, "only");
+			if(dojo.byId(progressId))
+				dojo.place(document.createTextNode(""), progressParentId, "only");
 		},
 		
 		_loadBlock: function(renderer , interedtedGroup){

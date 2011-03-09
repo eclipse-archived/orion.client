@@ -32,13 +32,6 @@ dojo.addOnLoad(function () {
 	});
 });
 
-
-//function handleGetAuthenticationError(xhrArgs, ioArgs) {
-//	handleAuthenticationError(ioArgs.xhr, function(){
-//		dojo.xhrGet(xhrArgs); // retry GET
-//	});
-//}
-
 function handleGetAuthenticationError(xhrArgs, ioArgs, cb, eb) {
 	handleAuthenticationError(ioArgs.xhr, function(){
 		var dfd = dojo.xhrGet(xhrArgs); // retry GET
