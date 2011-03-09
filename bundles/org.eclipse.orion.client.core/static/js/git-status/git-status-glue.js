@@ -13,10 +13,15 @@ dojo.addOnLoad(function(){
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 
-	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	var splitted = window.location.href.split('#');
+	var controller = null;
 	if(splitted.length > 1){
-		var controller = new orion.GitStatusController(null , splitted[1] , "unstagedZone" , "stagedZone");
+		controller = new orion.GitStatusController(null , splitted[1] , "unstagedZone" , "stagedZone");
+		document.title =  controller.findFolderName();
+	}
+
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
+	if(splitted.length > 1){
 		controller.getGitStatus(splitted[1]);
 	}
 	
