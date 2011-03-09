@@ -499,9 +499,16 @@ orion.GitStatusController = (function() {
 					this.commitAll([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") , message , amend ?dojo.toJson({"Message":message,"Amend":"true"}): dojo.toJson({"Message":message}));
 				}
 			}
-		}
+		},
 		
-		
+		findFolderName: function(){
+			var start = this._url.indexOf("/file/");
+			if(start != -1){
+				var sub = this._url.substring(start);
+				return sub;
+			}
+			return this._url;
+		}		
 	};
 	return GitStatusController;
 }());
