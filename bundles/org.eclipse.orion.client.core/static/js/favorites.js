@@ -133,14 +133,12 @@ eclipse.FavoritesService = (function() {
 		}, 
 		
 		_storeFavorites: function() {
-			if (this._favorites.length > 0) {
-				var storedFavorites = this._favorites;
-				this._registry.getService("IPreferenceService").then(function(service) {
-					return service.getPreferences("/window/favorites");
-				}).then(function(prefs){
-					prefs.put("navigate", storedFavorites);
-				}); 
-			}
+			var storedFavorites = this._favorites;
+			this._registry.getService("IPreferenceService").then(function(service) {
+				return service.getPreferences("/window/favorites");
+			}).then(function(prefs){
+				prefs.put("navigate", storedFavorites);
+			}); 
 		},
 		
 		_storeSearches: function() {
