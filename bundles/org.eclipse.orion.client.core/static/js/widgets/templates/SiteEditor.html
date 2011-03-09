@@ -1,7 +1,10 @@
 <div>
 	<style type="text/css">
 		.pathCell {
-			font-family: monospace;
+			/* font-family: monospace; */
+		}
+		.workspacePathError {
+			text-align: center;
 		}
 		.actionCell {
 			height: 20px !important;
@@ -9,13 +12,6 @@
 		td.dojoxGridCellFocus,th.dojoxGridCellFocus {
 			/* Remove annoying dashed border */
 			border: none !important;
-		}
-		.addMappingIcon {
-			background-image: url('/images/add_obj.gif');
-			background-repeat: no-repeat;
-			width: 18px;
-			height: 18px;
-			text-align: center;
 		}
 	</style>
 	<div dojoAttachPoint="containerNode">
@@ -39,11 +35,10 @@
 					<table dojoType="widgets.MappingsGrid" dojoAttachPoint="mappings"
 							autoHeight="true" singleClickEdit="true" selectionMode="none"
 							selectable="true"
-							style="width: 50em">
+							style="width: auto" autoWidth="true">
 					</table>
 					<div style="padding: 5px 0 0 5px;">
-						<button dojoType="dijit.form.Button" dojoAttachPoint="addMappingButton"
-							type="button" iconClass="addMappingIcon">${addMappingButtonText}</button>
+						<div dojoAttachPoint="addMappingToolbar" id="${id}_addMappingToolbar"></div>
 					</div>
 				</div>
 			</div>
