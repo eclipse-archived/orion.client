@@ -1,0 +1,11 @@
+{
+	"/plugins":{
+		"/plugins/fileClientPlugin.html":true,
+		"/plugins/jslintPlugin.html":true,
+		"/plugins/unittestPlugin.html":true,
+		"/plugins/gitPlugin.html":true,
+		"/profile/userservicePlugin.html":true,
+		"/plugins/user/userProfilePlugin.html":true,
+		"/plugins/git/userProfilePlugin.html":true
+	}
+}
