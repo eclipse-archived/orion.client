@@ -63,8 +63,9 @@ orion.GitStatusRenderer = (function() {
 		initTable: function () {
 			tableId = this._tableParentDivId + "_table";
 		  	var tableParentDomNode = dojo.byId( this._tableParentDivId);
-		  	tableParentDomNode.innerHTML = "";// document.createTextNode("").textContent;
-			var table = document.createElement('table');
+			dojo.place(document.createTextNode(""), tableParentDomNode, "only");
+			
+		  	var table = document.createElement('table');
 			table.id = tableId;
 			table.width = "100%";
 			tableParentDomNode.appendChild(table);
@@ -222,8 +223,7 @@ orion.GitStatusController = (function() {
 			this._model.selectedItem = null;
 			this.hasStaged = false;
 			this.hasUnstaged = false;
-			var fileNameDiv = document.getElementById("fileNameInViewer");
-			fileNameDiv.innerHTML = "Compare...";//document.createTextNode("Compare...").textContent;
+			dojo.place(document.createTextNode("Compare..."), "fileNameInViewer", "only");
 			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
 			this.createProgressDiv("inline-compare-viewer"  , "compareIndicatorId" , "Select a file on the left to compare..");
 		},
@@ -238,7 +238,7 @@ orion.GitStatusController = (function() {
 			progressDiv.align="center";
 			
 			var progressMessage = document.createElement('h2');
-			progressMessage.innerHTML = message;//document.createTextNode(message).textContent;
+			dojo.place(document.createTextNode(message), progressMessage, "only");
 			progressDiv.appendChild(progressMessage);
 			
 		},
@@ -271,7 +271,7 @@ orion.GitStatusController = (function() {
 			progressDiv.align="center";
 			
 			var progressMessage = document.createElement('h2');
-			progressMessage.innerHTML =  message;//document.createTextNode(message).textContent;;
+			dojo.place(document.createTextNode(message), progressMessage, "only");
 			progressDiv.appendChild(progressMessage);
 			
 		},
@@ -331,10 +331,7 @@ orion.GitStatusController = (function() {
 		},
 		
 		removeProgressDiv: function(progressParentId , progressId){
-			var tableParentDiv = dojo.byId(progressParentId);
-			var progressDiv = document.getElementById(progressId);
-			if(progressDiv)
-				tableParentDiv.innerHTML =  "";//document.createTextNode("").textContent;
+			dojo.place(document.createTextNode(""), progressParentId, "only");
 		},
 		
 		_loadBlock: function(renderer , interedtedGroup){
@@ -373,8 +370,7 @@ orion.GitStatusController = (function() {
 			this._inlineCompareContainer.resolveDiff(result.diffURI,
 													result.fileURI,
 					                                function(){					
-														var fileNameDiv = document.getElementById("fileNameInViewer");
-														fileNameDiv.innerHTML =  message;//document.createTextNode(message).textContent;
+														dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
 														self.cursorClear();
 													});
 		},

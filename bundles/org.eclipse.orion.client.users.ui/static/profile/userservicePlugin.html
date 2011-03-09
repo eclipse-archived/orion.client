@@ -4,16 +4,16 @@
  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
  <script type="text/javascript" src="/js/plugin.js"></script>
+ <script type="text/javascript" src="/js/globalCommands.js"></script>
  <script type="text/javascript" src="/profile/js/UsersService.js"></script>
  <script type="text/javascript"
 	src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<!--Authentication -->
-<script type="text/javascript" src="/js/auth.js"></script>
  <script>
   window.onload = function() {
+	var usersService = new eclipse.UsersService();
    var provider = new eclipse.PluginProvider();
    
-   var usersService = new eclipse.UsersService();
    usersService.info = function() {
 	     return {
 		      name : "User profile"
@@ -34,7 +34,7 @@
   
   usersService.initProfile = function(userURI, pluginsEventName, dataEventName){
 	  var userService = this._serviceRegistration;
-	  this.getUserInfo(userURI, function(json){
+	  return this.getUserInfo(userURI, function(json){
 	  		userService.dispatchEvent(pluginsEventName, {"plugins": json.Plugins});
 	  		userService.dispatchEvent(dataEventName, json);
 	  });
@@ -63,6 +63,7 @@
   };
    
   usersService._serviceRegistration = provider.registerServiceProvider("IUsersService", usersService);
+  usersService.dispatchEvent = provider.dispatchEvent;
    provider.connect();
   };
  </script>

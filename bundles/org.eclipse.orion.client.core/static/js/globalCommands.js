@@ -19,7 +19,7 @@ var eclipse = eclipse || {};
 
 // begin HTML fragment for top area.
 var topHTMLFragment =
-'<table style="border-spacing: 0px; width: 100%; height: 61px">' +   // a table?!!?  Couldn't get bottom bar to float right and pin to bottom while also spanning entire page.  Can't mix floats and absolutes.
+'<table style="border-spacing: 0px; border-collapse: collapse; width: 100%; height: 61px">' +   // a table?!!?  Couldn't get bottom bar to float right and pin to bottom while also spanning entire page.  Can't mix floats and absolutes.
 	'<tr class="topRowBanner">' +
 		'<td width=93px rowspan=2><a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
 		'<td class="leftGlobalToolbar">' +
@@ -27,14 +27,14 @@ var topHTMLFragment =
 			'<span id="pageTitle" class="statuspane"></span>' +
 			'<span class="bannerSeparator">  </span>' +  // empty space between title and status
 			'<span class="statuspane" id="statusPane"></span>' +
-		'</td>' +
+		'</td>' + 
 		'<td class="rightGlobalToolbar">' +
 			'<span id="primaryNav"></span>' +
 			'<span id="globalActions"></span>' +
 			'<input type="search" id="search" class="searchbox">' +
 			'<span class="bannerSeparator">|</span>' +
 			'<span id="userInfo" class="statuspane"></span>' +
-		'</td>' +
+		'</td>' + 
 		'</tr>' +
 	'<tr class="bottomRowBanner">' +
 		'<td colspan=2 id="pageToolbar" class="pageToolbar">' +

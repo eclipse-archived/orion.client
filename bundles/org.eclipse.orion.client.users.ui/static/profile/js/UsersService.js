@@ -27,7 +27,7 @@ eclipse.UsersService = (function() {
 	{
 		getUsersList : function(onLoad) {
 			var service = this;
-			dojo.xhrGet({
+			return dojo.xhrGet({
 				url : "/users",
 				headers : {
 					"Orion-Version" : "1"
@@ -43,14 +43,14 @@ eclipse.UsersService = (function() {
 					}
 				},
 				error : function(error, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
+					if(!service.info) handleGetAuthenticationError(this, ioArgs);
+					return error;
 				}
 			});
 		},
 		deleteUser : function(userURI, onLoad) {
 			var service = this;
-				dojo.xhrDelete({
+				return dojo.xhrDelete({
 					url : userURI,
 					headers : {
 						"Orion-Version" : "1"
@@ -66,15 +66,15 @@ eclipse.UsersService = (function() {
 						}
 					},
 					error : function(error, ioArgs) {
-						handleGetAuthenticationError(this, ioArgs);
-						console.error("HTTP status code: ", ioArgs.xhr.status);
+						if(!service.info) handleDeleteAuthenticationError(this, ioArgs);
+						return error;
 					}
 				});
 
 		},
 		createUser : function(userName, password, onLoad, onError) {
 			var service = this;
-			dojo.xhrPost({
+			return dojo.xhrPost({
 				url : "/users",
 				headers : {
 					"Orion-Version" : "1"
@@ -93,22 +93,22 @@ eclipse.UsersService = (function() {
 							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
 					}
 				},
-				error : function(jsonData, secondArg) {
+				error : function(error, secondArg) {
 					if (onError)
-						onError(jsonData, secondArg);
+						onError(error, secondArg);
+					return error;
 				}
 			});
 		},
 		getUserInfo: function(userURI, onLoad){
 			var service = this;
-			dojo.xhrGet({
+			return dojo.xhrGet({
 				url : userURI,
 				headers : {
 					"Orion-Version" : "1"
 				},
 				handleAs : "json",
 				timeout : 15000,
-				sync: false,
 				load : function(jsonData, secondArg) {
 					if (onLoad){
 						if(typeof onLoad === "function")
@@ -118,8 +118,9 @@ eclipse.UsersService = (function() {
 					}
 				},
 				error : function(error, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
+					if(!service.info)
+						handleGetAuthenticationError(this, ioArgs);
+					return error;
 				}
 			});
 		},
@@ -134,7 +135,7 @@ eclipse.UsersService = (function() {
 			}
 
 
-			dojo.xhrPut({
+			return dojo.xhrPut({
 				url : uri,
 				headers : {
 					"Orion-Version" : "1"
@@ -151,8 +152,9 @@ eclipse.UsersService = (function() {
 					}
 				},
 				error : function(error, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
+					if(!service.info)
+						handlePutAuthenticationError(this, ioArgs);
+					return error;
 				}
 			});
 		}
