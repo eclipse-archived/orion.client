@@ -45,12 +45,12 @@ orion.GitStatusModel = (function() {
 	return GitStatusModel;
 }());
 
-orion.statusTypeMap = { "Missing":["/images/git/git-removed.gif", "Removed unstaged" , "/images/git/git-stage.gif", "Stage removed" ],
-						"Removed":["/images/git/git-removed.gif","Removed staged" ,"/images/git/git-unstage.gif", "Unstage removed" ],	
-						 "Modified":["/images/git/git-modify.gif","Modified unstaged" ,"/images/git/git-stage.gif", "Stage modified" ],	
-						 "Changed":["/images/git/git-modify.gif","Modified staged" ,"/images/git/git-unstage.gif", "Untage modified"],	
-					     "Untracked":["/images/git/git-added.gif","Added unstaged" ,"/images/git/git-stage.gif", "Stage untracked"],	
-						 "Added":["/images/git/git-added.gif","Added staged" ,"/images/git/git-unstage.gif" , "Unstage added"]	
+orion.statusTypeMap = { "Missing":["/images/git/git-removed.gif", "Removed unstaged" , "/images/git/git-stage.gif", "Stage" ],
+						"Removed":["/images/git/git-removed.gif","Removed staged" ,"/images/git/git-unstage.gif", "Unstage" ],	
+						 "Modified":["/images/git/git-modify.gif","Modified unstaged" ,"/images/git/git-stage.gif", "Stage" ],	
+						 "Changed":["/images/git/git-modify.gif","Modified staged" ,"/images/git/git-unstage.gif", "Untage"],	
+					     "Untracked":["/images/git/git-added.gif","Added unstaged" ,"/images/git/git-stage.gif", "Stage"],	
+						 "Added":["/images/git/git-added.gif","Added staged" ,"/images/git/git-unstage.gif" , "Unstage"]	
 					  };
 
 
@@ -83,7 +83,6 @@ orion.GitStatusRenderer = (function() {
 			var typeColumn = document.createElement('td');
 			var typeImg = document.createElement('img');
 			typeImg.src = orion.statusTypeMap[itemModel.type][0];
-			typeImg.title = "Item type : " + orion.statusTypeMap[itemModel.type][1];
 			typeColumn.appendChild(typeImg);
 			row.appendChild(typeColumn);
 			
@@ -130,7 +129,7 @@ orion.GitStatusRenderer = (function() {
 			//render the side by side viewer icon
 			sbsViewerCol = document.createElement('td');
 			row.appendChild(sbsViewerCol);
-			this._controller.createImgButton(false ,sbsViewerCol , "/images/git/compare-sbs.gif", "Click to open two way compare",
+			this._controller.createImgButton(false ,sbsViewerCol , "/images/git/compare-sbs.gif", "Side by side compare",
 					function(evt) {
 						self._controller.openSBSViewer(itemModel);
 					} );
