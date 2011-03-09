@@ -50,11 +50,17 @@ eclipse.Explorer = (function() {
 			var parent = dojo.byId(this.parentId);
 
 			// Progress indicator
-			var progress = dojo.create("div", {id: this.innerId+"progress"}, this.parent);
+			var progress = dojo.byId("progress"); 
+			if(!progress){
+				progress = dojo.create("div", {id: "progress"}, parent, "only");
+			}
+			dojo.empty(progress);
 			b = dojo.create("b");
 			dojo.place(document.createTextNode("Loading "), progress, "last");
-			dojo.place(document.createTextNode("..."), progress, "last");
 			dojo.place(document.createTextNode(path), b, "last");
+			dojo.place(b, progress, "last");
+			dojo.place(document.createTextNode("..."), progress, "last");
+			
 
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
@@ -102,6 +108,7 @@ eclipse.Explorer = (function() {
 			if (existing) {
 				dojo.destroy(existing);
 			}
+			dojo.empty(this.parentId);
 			this.model = new eclipse.Model(this.registry, this.treeRoot, this.fileClient, treeId);
 			this.myTree = new eclipse.TableTree({
 				id: treeId,
@@ -183,7 +190,7 @@ eclipse.FileRenderer = (function() {
 			dojo.addClass(tableNode, 'treetable');
 			var thead = document.createElement('thead');
 			var row = document.createElement('tr');
-			dojo.addClass(row, "navTableHeading");
+			dojo.addClass(thead, "navTableHeading");
 			var th, actions, size;
 			if (this._useCheckboxSelection) {
 				th = document.createElement('th');
@@ -191,18 +198,22 @@ eclipse.FileRenderer = (function() {
 			}
 			th = document.createElement('th');
 			th.innerHTML = "<h2>Name</h2>";
+			dojo.addClass(th, "navColumn");
 			row.appendChild(th);
 
 			actions= document.createElement('th');
 			actions.innerHTML = "<h2>Actions</h2>";
+			dojo.addClass(actions, "navColumn");
 			row.appendChild(actions);
 
 			th = document.createElement('th');
 			th.innerHTML = "<h2>Date</h2>";
+			dojo.addClass(th, "navColumn");
 			row.appendChild(th);
 
 			size= document.createElement('th');
 			size.innerHTML = "<h2>Size</h2>";
+			dojo.addClass(size, "navColumn");
 			row.appendChild(size);
 			
 			thead.appendChild(row);

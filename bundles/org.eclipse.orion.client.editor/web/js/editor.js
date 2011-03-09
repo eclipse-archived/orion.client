@@ -1555,8 +1555,9 @@ eclipse.Editor = (function() {
 				* fix is to create a DOM element in the body to force a redraw.
 				*/
 				if (!this._getSelection().isEmpty()) {
+					var document = this._frameDocument;
 					var child = document.createElement("DIV");
-					var body = this._frameDocument.body;
+					var body = document.body;
 					body.appendChild(child);
 					body.removeChild(child);
 				}
@@ -4103,7 +4104,7 @@ eclipse.Editor = (function() {
 			if (!divRuler) { return; }
 			var cells = divRuler.firstChild.rows[0].cells;
 			var lineHeight = this._getLineHeight();
-			var parentDocument = this._parentDocument;
+			var parentDocument = this._frameDocument;
 			var editorPad = this._getEditorPadding();
 			for (var i = 0; i < cells.length; i++) {
 				var div = cells[i].firstChild;
@@ -4158,30 +4159,36 @@ eclipse.Editor = (function() {
 						}
 					}
 				} else {
+					var buttonHeight = 17;
+					var clientHeight = this._getClientHeight ();
+					var trackHeight = clientHeight + editorPad.top + editorPad.bottom - 2 * buttonHeight;
+					var lineCount = this._model.getLineCount ();
+					var divHeight = trackHeight / lineCount;
 					if (div.rulerChanged) {
 						var count = div.childNodes.length;
 						while (count > 1) {
 							div.removeChild(div.lastChild);
 							count--;
 						}
-	
-						var buttonHeight = 17;
-						var clientHeight = this._getClientHeight ();
-						var trackHeight = clientHeight + editorPad.top + editorPad.bottom - 2 * buttonHeight;
-						var lineCount = this._model.getLineCount ();
 						var lines = ruler.getAnnotations ();
 						for (var j = 0; j < lines.length; j++) {
 							lineIndex = lines[j];
 							lineDiv = parentDocument.createElement("DIV");
 							this._applyStyle(ruler.getStyle(lineIndex), lineDiv);
 							lineDiv.style.position = "absolute";
-							var divHeight = trackHeight / lineCount;
 							lineDiv.style.top = buttonHeight + lineHeight + Math.floor(lineIndex * divHeight) + "px";
 							lineDiv.innerHTML = ruler.getHTML(lineIndex);
 							lineDiv.lineIndex = lineIndex;
 							div.appendChild(lineDiv);
 						}
+					} else if (div._oldTrackHeight !== trackHeight) {
+						lineDiv = div.firstChild ? div.firstChild.nextSibling : null;
+						while (lineDiv) {
+							lineDiv.style.top = buttonHeight + lineHeight + Math.floor(lineDiv.lineIndex * divHeight) + "px";
+							lineDiv = lineDiv.nextSibling;
+						}
 					}
+					div._oldTrackHeight = trackHeight;
 				}
 				div.rulerChanged = false;
 				div = div.nextSibling;

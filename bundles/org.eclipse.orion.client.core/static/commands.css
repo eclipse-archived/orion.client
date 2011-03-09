@@ -72,10 +72,10 @@
     color: black;
 }
 
-soria .dijitButtonHover .dijitButtonNode, .soria .dijitButtonNodeHover, .soria .dijitToggleButtonHover .dijitButtonNode, .soria .dijitDropDownButtonHover .dijitButtonNode, .soria .dijitButtonContentsHover, .soria .dijitUpArrowButtonHover, .soria .dijitDownArrowButtonHover {
+.soria dijitButtonHover, .soria .dijitButtonHover .dijitButtonNode, .soria .dijitButtonNodeHover, .soria .dijitToggleButtonHover .dijitButtonNode, .soria .dijitDropDownButtonHover .dijitButtonNode, .soria .dijitButtonContentsHover, .soria .dijitUpArrowButtonHover, .soria .dijitDownArrowButtonHover {
     background: #ededed;
     color: black;
 }
-.soria .dijitButtonActive .dijitButtonNode, .soria .dijitToggleButtonActive .dijitButtonNode, .soria .dijitDropDownButtonActive .dijitButtonNode, .soria .dijitComboButtonActive .dijitButtonContents, .soria .dijitStackController .dijitToggleButtonChecked .dijitButtonNode {
+.soria .dijitButtonActive, .soria .dijitButtonActive .dijitButtonNode, .soria .dijitToggleButtonActive .dijitButtonNode, .soria .dijitDropDownButtonActive .dijitButtonNode, .soria .dijitComboButtonActive .dijitButtonContents, .soria .dijitStackController .dijitToggleButtonChecked .dijitButtonNode {
     background: #ededed;
 }
