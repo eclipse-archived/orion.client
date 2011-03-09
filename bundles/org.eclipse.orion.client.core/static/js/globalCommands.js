@@ -124,7 +124,12 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 	// generate primary nav links.  This needs to come from some place (extension?  registry?)
 	var primaryNav = dojo.byId("primaryNav");
 	if (primaryNav) {
-		var primaryLinks = [{name: "Git", url: "git-status.html"},{name: "Sites", url: "sites.html"},{name: "Plugins", url: "view-registry.html"}];
+		var primaryLinks = [
+			// disabled for M6 since git-status needs a parameter.  For M7 should link to the clone page.	{name: "Git", url: "git-status.html"},
+			{name: "Navigator", url: "navigate-table.html"},
+			{name: "Sites", url: "sites.html"},
+			{name: "Plugins", url: "view-registry.html"}
+		];
 		for (var i=0; i<primaryLinks.length; i++) {
 			var link = dojo.create("a", {href: primaryLinks[i].url}, primaryNav, "last");
 			dojo.addClass(link, "commandLink");
