@@ -75,7 +75,7 @@ a:hover {
 }
 
 .navTableHeading {
-	border-bottom: 1px;
+	border-bottom: 1px solid #404040;
 }
 
 .navColumn {
@@ -137,10 +137,21 @@ a:hover {
 	padding-left: 8px;
 }
 
+.topRowBanner {
+	margin: 0px;
+	border: 0px;
+	padding: 0px;
+}
+
+.bottomRowBanner {
+	margin: 0px;
+	border: 0px;
+	padding: 0px;
+}
+
 .leftGlobalToolbar {
 	height: 40px;
 	padding-left: 24px;
-	padding-top: 8px;
 	background: #c5c5c5;
 	text-align: left;
 }
@@ -148,7 +159,6 @@ a:hover {
 .rightGlobalToolbar {
 	height: 40px;
 	padding-right: 8px;
-	padding-top: 8px;
 	background: #c5c5c5;
 	text-align: right;
 }
