@@ -13,7 +13,7 @@ dojo.addOnLoad(function() {
 	var inputService = new eclipse.InputService(serviceRegistry);
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	var prefsService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	var prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	var usersClient = new eclipse.UsersClient(serviceRegistry, pluginRegistry);
 	
@@ -26,7 +26,7 @@ dojo.addOnLoad(function() {
 		usersClient: usersClient
 	});
 	
-	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, profile, profile);
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, profile);
 	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, profile);
 });
 
