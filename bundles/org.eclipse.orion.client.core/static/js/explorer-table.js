@@ -50,11 +50,17 @@ eclipse.Explorer = (function() {
 			var parent = dojo.byId(this.parentId);
 
 			// Progress indicator
-			var progress = dojo.create("div", {id: this.innerId+"progress"}, this.parent);
+			var progress = dojo.byId("progress"); 
+			if(!progress){
+				progress = dojo.create("div", {id: "progress"}, parent, "only");
+			}
+			dojo.empty(progress);
 			b = dojo.create("b");
 			dojo.place(document.createTextNode("Loading "), progress, "last");
-			dojo.place(document.createTextNode("..."), progress, "last");
 			dojo.place(document.createTextNode(path), b, "last");
+			dojo.place(b, progress, "last");
+			dojo.place(document.createTextNode("..."), progress, "last");
+			
 
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
@@ -102,6 +108,7 @@ eclipse.Explorer = (function() {
 			if (existing) {
 				dojo.destroy(existing);
 			}
+			dojo.empty(this.parentId);
 			this.model = new eclipse.Model(this.registry, this.treeRoot, this.fileClient, treeId);
 			this.myTree = new eclipse.TableTree({
 				id: treeId,
