@@ -18,6 +18,9 @@ dojo.addOnLoad(function() {
 	// Register services
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+	dojo.addOnUnload(function() {
+		pluginRegistry.shutdown();
+	});
 	var dialogService = new eclipse.DialogService(serviceRegistry);
 	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});

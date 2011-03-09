@@ -24,6 +24,9 @@ dojo.addOnLoad(function(){
 		// This is the new service registry.  All services should be registered and obtained here.
 		serviceRegistry = new eclipse.ServiceRegistry();
 		pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+		dojo.addOnUnload(function() {
+			pluginRegistry.shutdown();
+		});
 		
 //		// this is temporary
 //		var jslintPlugin = pluginRegistry.getPlugin("/plugins/jslintPlugin.html");
