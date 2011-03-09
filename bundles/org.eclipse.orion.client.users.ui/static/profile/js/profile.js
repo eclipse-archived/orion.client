@@ -13,12 +13,12 @@ dojo.addOnLoad(function() {
 	var inputService = new eclipse.InputService(serviceRegistry);
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	var prefsService = new eclipse.Preferences(serviceRegistry, "/prefs/user");
+	var prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	var usersClient = new eclipse.UsersClient(serviceRegistry, pluginRegistry);
 	
 	var profile = new eclipse.Profile({
-		registry : serviceRegistry,
+		registry: serviceRegistry,
 		pluginRegistry: pluginRegistry,
 		profilePlaceholder: dojo.byId('profileContent'),
 		commandService: commandService,
@@ -26,7 +26,7 @@ dojo.addOnLoad(function() {
 		usersClient: usersClient
 	});
 	
-	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, profile, profile);
+	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, profile);
 	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, profile);
 });
 
@@ -294,7 +294,6 @@ eclipse.Profile = (function() {
 				dojo.empty(bannerPane);
 				dojo.create("a", {id:"profileBanner", className: "breadcrumb currentLocation", innerHTML: profile.lastJSON ? "Profile Information for <b style='color: #000'>" + profile.lastJSON.login + "</b>" : ""}, bannerPane);
 
-				var dataDiv = dojo.create("div", {id: "profile.actions"}, bannerPane);
 				dojo.empty(this.pageActionsPlaceholder);
 				this.commandService.addCommandGroup("eclipse.profileActionsGroup", 100, null, null, this.pageActionsPlaceholder.id);
 				for(var i=0; i<content.actions.length; i++){
@@ -331,7 +330,3 @@ eclipse.Profile = (function() {
 	};
 	return Profile;
 }());
-dojo.addOnUnload(function() {
-	if(registry)
-		registry.stop();
-});
