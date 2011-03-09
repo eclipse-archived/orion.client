@@ -18,7 +18,7 @@ dojo.addOnLoad(function() {
 	var usersClient = new eclipse.UsersClient(serviceRegistry, pluginRegistry);
 	
 	var profile = new eclipse.Profile({
-		registry : serviceRegistry,
+		registry: serviceRegistry,
 		pluginRegistry: pluginRegistry,
 		profilePlaceholder: dojo.byId('profileContent'),
 		commandService: commandService,
@@ -330,7 +330,3 @@ eclipse.Profile = (function() {
 	};
 	return Profile;
 }());
-dojo.addOnUnload(function() {
-	if(registry)
-		registry.stop();
-});
