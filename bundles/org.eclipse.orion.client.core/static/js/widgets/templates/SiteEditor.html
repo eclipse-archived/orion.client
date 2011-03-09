@@ -1,4 +1,23 @@
 <div>
+	<style type="text/css">
+		.pathCell {
+			font-family: monospace;
+		}
+		.actionCell {
+			height: 20px !important;
+		}
+		td.dojoxGridCellFocus,th.dojoxGridCellFocus {
+			/* Remove annoying dashed border */
+			border: none !important;
+		}
+		.addMappingIcon {
+			background-image: url('/images/add_obj.gif');
+			background-repeat: no-repeat;
+			width: 18px;
+			height: 18px;
+			text-align: center;
+		}
+	</style>
 	<div dojoAttachPoint="containerNode">
 		<div dojoType="dijit.form.Form" id="siteForm" style="display: table; pading: 10px;">
 			<div style="display: table-row">
@@ -12,14 +31,20 @@
 				</div>
 			</div>
 			
-			<!-- TODO break up the mapping here -->
 			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5px;">
+				<div style="display: table-cell; padding: 5px; vertical-align: top">
 					<label dojoAttachPoint="mappingsLabel" for="${id}_mappings">${mappingsLabelText}</label>
 				</div>
 				<div style="display: table-cell; padding: 5px 5px 15px 5px; text-align: left;">
-					<textarea dojoType="dijit.form.Textarea" dojoAttachPoint="mappings" id="${id}_mappings"
-						style="display: inline-block; width: 24em;"></textarea>
+					<table dojoType="widgets.MappingsGrid" dojoAttachPoint="mappings"
+							autoHeight="true" singleClickEdit="true" selectionMode="none"
+							selectable="true"
+							style="width: 50em">
+					</table>
+					<div style="padding: 5px 0 0 5px;">
+						<button dojoType="dijit.form.Button" dojoAttachPoint="addMappingButton"
+							type="button" iconClass="addMappingIcon">${addMappingButtonText}</button>
+					</div>
 				</div>
 			</div>
 			
@@ -47,8 +72,8 @@
 			
 			<div style="display: table-row">
 				<div style="display: table-cell; padding: 5px;">
-					<button dojoAttachPoint="okButton" dojoType="dijit.form.Button" 
-						type="submit" value="Save"
+					<button dojoAttachPoint="saveButton" dojoType="dijit.form.Button" 
+						type="button" value="Save"
 						style="padding: 10px 0 10px 0; float: right; clear: both; font-weight: bold; !important">Save</button>
 				</div>
 				<div style="display: table-cell; padding: 5px;"></div>
