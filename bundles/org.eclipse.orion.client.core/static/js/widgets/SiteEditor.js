@@ -6,7 +6,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit eclipse*/
+/*global dojo dijit dojox eclipse*/
 /*jslint browser:true*/
 dojo.provide("widgets.SiteEditor");
 
@@ -18,14 +18,141 @@ dojo.require("dijit.form.Textarea");
 dojo.require("dijit.form.ValidationTextBox");
 dojo.require("dijit.layout.ContentPane");
 dojo.require("dijit._Templated");
-//dojo.require("dijit._Widget");
-// require eclipse.sites.utils
+dojo.require("dojo.data.ItemFileWriteStore");
+dojo.require("dojox.grid.DataGrid");
+dojo.require("dojox.grid.cells");
+
+/**
+ * Visualizes the Mappings array of a SiteConfiguration as a data grid.
+ */
+dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
+	
+	/**
+	 * {Array} of Mappings. The model object being edited by this grid.
+	 */
+	_mappings: null,
+	
+	constructor: function() {
+		this.inherited(arguments);
+	},
+	
+	setServices: function(commandService) {
+		this._commandService = commandService;
+		
+		// Register commands used for editing mappings
+		var deleteMappingCommand = new eclipse.Command({
+			name: "Delete",
+			image: "images/remove.gif",
+			id: "eclipse.site.mappings.remove",
+			visibleWhen: function(item) {
+				return true;
+			},
+			callback: /** @this {widgets.MappingsGrid} */ function(item) {
+				this.get("store").deleteItem(item);
+				this.get("store").save();
+				this.render();
+			}});
+		this._commandService.addCommand(deleteMappingCommand, "object");
+		this._commandService.registerCommandContribution("eclipse.site.mappings.remove", 1);
+	},
+	
+	/**
+	 * @param mappings The Mappings field of a site configuration
+	 */
+	setMappings: function(mappings) {
+		// Hang onto the variable; will be mutated as user makes changes to grid store
+		this._mappings = mappings;
+		this.setStore(this._createGridStore(mappings));
+	},
+	
+	/**
+	 * @param mappings {Array}
+	 * @returns {dojo.data.ItemFileWriteStore} A store which will power the grid.
+	 */
+	_createGridStore: function(mappings) {
+		var store = new dojo.data.ItemFileWriteStore({
+			data: {
+				items: dojo.map(mappings, dojo.hitch(this, function(mapping) {
+					return this._createMappingObject(mapping.Source, mapping.Target);
+				}))
+			}
+		});
+		dojo.connect(store, "setValue", store, function() {
+			// Save whenever user edits an attribute
+			this.save();
+		});
+		store._saveEverything = dojo.hitch(this, function(saveCompleteCallback, saveFailedCallback, updatedContentString) {
+			// Save: push latest data from store back into the _mappings model object
+			var content = dojo.fromJson(updatedContentString);
+			while (this._mappings.length > 0) { this._mappings.pop(); }
+			dojo.forEach(content.items, dojo.hitch(this, function(item) {
+				this._mappings.push(this._createMappingObject(item.Source, item.Target));
+			}));
+			console.debug("Set Mappings to " + dojo.toJson(this._mappings));
+			saveCompleteCallback();
+		});
+		return store;
+	},
+	
+	_createMappingObject: function(source, target) {
+		return {Source: source, Target: target};
+	},
+	
+	// TODO implement as a Command
+	// TODO return deferred for when mapping is done being added so we can do focus tricks
+	_addMapping: function(source, target) {
+		source = typeof(source) === "string" ? source : "/";
+		target = typeof(target) === "string" ? target : "/";
+		this.get("store").newItem(this._createMappingObject(source, target));
+		this.get("store").save();
+	},
+	
+	postCreate: function() {
+		this.inherited(arguments);
+		var structure = [
+				{field: "Source", name: "Virtual Path", editable: true, commitOnBlur: true,
+					width: "23em", cellClasses: "pathCell"},
+				{field: "Target", name: "Target", editable: true, commitOnBlur: true,
+						width: "23em", cellClasses: "pathCell"},
+				{field: "_item", name: " ", editable: false, width: "auto", cellClasses: "actionCell", 
+						formatter: dojo.hitch(this, this._actionColumnFormatter)}
+			];
+		this.set("structure", structure);
+		
+		// Workaround for commitOnBlur not being handled correctly by dojox.grid.cells._Base 
+		dojo.connect(this, "onStartEdit", this, function(inCell, inRowIndex) {
+			var handle = dojo.connect(inCell, "registerOnBlur", inCell, function(inNode, inRowIndex) {
+				var handle2 = dojo.connect(inNode, "onblur", function(e) {
+					setTimeout(dojo.hitch(inCell, "_onEditBlur", inRowIndex), 250);
+					dojo.disconnect(handle2);
+					dojo.disconnect(handle);
+				});
+			});
+		});
+		
+		dojo.connect(this, "onStyleRow", this, this._renderCommands);
+	},
+	
+	_actionColumnFormatter: function(item) {
+		return " ";
+	},
+	
+	// TODO: this is called often. Try to find event that fires only on row added/removed
+	_renderCommands: function(rowInfo) {
+		var item = this.getItem(rowInfo.index);
+		var actionCell = dojo.query("td.actionCell", rowInfo.node)[0];
+		if (actionCell && dojo.query("a", actionCell).length === 0) {
+			this._commandService.renderCommands(actionCell, "object", item, this, "image", "deleteMappingCell");
+		}
+	}
+});
 
 /**
  * Editor for an individual SiteConfiguration model object.
  * @param {Object} options Options bag for creating the widget.
  * @param {eclipse.FileClient} options.fileClient
  * @param {eclipse.SiteService} options.siteService
+ * @param {eclipse.CommandService} options.commandService
  * @param {String} [options.location] Optional URL of a site configuration to load & edit 
  * immediately after widget is created.
  */
@@ -47,8 +174,10 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.options = arguments[0] || {};
 		if (!this.options.fileClient) { throw new Error("options.fileClient is required"); }
 		if (!this.options.siteService) { throw new Error("options.siteService is required"); }
+		if (!this.options.commandService) { throw new Error("options.commandService is required"); }
 		this._fileClient = this.options.fileClient;
 		this._siteService = this.options.siteService;
+		this._commandService = this.options.commandService;
 		
 		// Start loading workspaces right away
 		this._loadWorkspaces();
@@ -64,6 +193,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.mappingsLabelText = "Mappings:";
 		this.hostHintLabelText = "Hostname hint:";
 		this.workspaceLabelText = "Workspace:";
+		this.addMappingButtonText = "Add";
 	},
 	
 	postCreate: function() {
@@ -81,12 +211,19 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 			return focused || hostish.test(this.hostHint.get("value"));
 		}));
 		
+		// Mappings grid
+		this.mappings.setServices(this._commandService);
+		dojo.connect(this.addMappingButton, "onClick", this.mappings, "_addMapping");
+		
 		// dijit.form.Form doesn't work in dojoAttachPoint for some reason
+		dojo.connect(this.saveButton, "onClick", dijit.byId("siteForm"), function() { this.onSubmit(arguments); });;
 		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.onSubmit);
 	},
 	
 	startup: function() {
 		this.inherited(arguments);
+		// Render the commands
+		console.debug("started");
 	},
 	
 	/**
@@ -98,23 +235,27 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this._busy("Loading...");
 		var deferred = new dojo.Deferred();
 		// TODO errback for the deferred(s)
-		this._siteService.loadSiteConfiguration(location).then(dojo.hitch(this, 
-			function(siteConfig) {
+		this._siteService.loadSiteConfiguration(location).then(
+			dojo.hitch(this, function(siteConfig) {
 				this._setSiteConfiguration(siteConfig);
 				this._done("");
 				deferred.callback(siteConfig);
-			}));
+			}),
+			function(error) {
+				deferred.errback(error);
+			});
 		return deferred;
 	},
 	
 	_setSiteConfiguration: function(siteConfiguration) {
-		this._detach(this._siteConfiguration);
+		this._detachListeners(this._siteConfiguration);
 		this._siteConfiguration = siteConfiguration;
 		
 		// Refresh fields
 		this.name.set("value", this._siteConfiguration.Name);
-		this.mappings.set("value", JSON.stringify(this._siteConfiguration.Mappings));
 		this.hostHint.set("value", this._siteConfiguration.HostHint);
+		this.mappings.setMappings(this._siteConfiguration.Mappings);
+		this.mappings.startup();
 		
 		var editor = this;
 		dojo.when(editor._workspaces, function(workspaces) {
@@ -128,52 +269,54 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 			editor.workspace._loadChildren();
 		});
 		
-		this._attach(this._siteConfiguration);
+		this._attachListeners(this._siteConfiguration);
 	},
 	
 	/**
-	 * Hook up listeners for field -> model updates.
+	 * Hook up listeners that perform form widget -> model updates.
 	 * @param site {SiteConfiguration}
 	 */
-	_attach: function(site) {
+	_attachListeners: function(site) {
 		this._modelListeners = [];
-		var w = this;
-		function listen(widgetField, modelField, decodeJson) {
-			var handle = dojo.connect(w[widgetField], "onChange", w, function() {
-				var value = w[widgetField].get("value");
-				if (decodeJson) {
-					value = dojo.fromJson(value);
-				}
-				this._siteConfiguration[modelField] = value;
+		
+		var editor = this;
+		function bindText(widget, modelField) {
+			// Bind widget's onChange to site[modelField]
+			var handle = dojo.connect(widget, "onChange", null, function(/**Event*/ e) {
+				var value = widget.get("value");
+				site[modelField] = value;
+				
 				console.debug("Change " + modelField + " to " + value);
 			});
-			w._modelListeners.push(handle);
+			editor._modelListeners.push(handle);
 		}
-		listen("name", "Name");
-		listen("mappings", "Mappings", true);
-		listen("hostHint", "HostHint");
-		listen("workspace", "Workspace");
+		
+		bindText(this.name, "Name");
+		bindText(this.hostHint, "HostHint");
+		bindText(this.workspace, "Workspace");
 	},
 	
-	_detach: function() {
+	_detachListeners: function() {
 		if (this._modelListeners) {
 			for (var i=0; i < this._modelListeners.length; i++) {
 				dojo.disconnect(this._modelListeners[i]);
 			}
 		}
+		
+		// Detach grid
 	},
 	
 	/**
 	 * Starts loading workspaces and resolves this._workspaces when they're ready.
 	 */
 	_loadWorkspaces: function() {
-		var widget = this;
-		widget._workspaces = new dojo.Deferred();
+		var editor = this;
+		editor._workspaces = new dojo.Deferred();
 		this._fileClient.loadWorkspaces().then(function(workspaces) {
-				widget._workspaces.callback(workspaces);
+				editor._workspaces.callback(workspaces);
 			},
 			function(error) {
-				widget._workspaces.errback(error);
+				editor._workspaces.errback(error);
 			});
 	},
 	
@@ -189,17 +332,17 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	 * @Override
 	 * @return True to allow save to proceed, false to prevent it.
 	 */
-	onSubmit: function(/**Event*/ e) {
+	onSubmit: function(/** Event */ e) {
 		var form = dijit.byId("siteForm");
 		if (form.isValid()) {
 			this._busy("Saving...");
-			var widget = this;
 			
-			var siteConfig = widget._siteConfiguration;
+			var editor = this;
+			var siteConfig = editor._siteConfiguration;
 			this._siteService.updateSiteConfiguration(siteConfig.Id, siteConfig).then(
 					function(updatedSiteConfig) {
-						widget._setSiteConfiguration(updatedSiteConfig);
-						widget._done("Saved.");
+						editor._setSiteConfiguration(updatedSiteConfig);
+						editor._done("Saved.");
 					});
 			return true;
 		} else {
@@ -207,24 +350,29 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 			return false;
 		}
 	},
+	
 	_busy: function(msg) {
 		dojo.forEach(this.getDescendants(), function(widget) {
 			widget.set("disabled", true);
 		});
 		this.onMessage(msg);
 	},
+	
 	_done: function(msg) {
 		dojo.forEach(this.getDescendants(), function(widget) {
 			widget.set("disabled", false);
 		});
 		this.onMessage(msg);
 	},
+	
 	/**
 	 * Clients can override or dojo.connect() to this function to receive notifications about 
 	 * server calls that failed.
+	 * TODO
 	 */
 	onError: function(error) {
 	},
+	
 	/**
 	 * Clients can override or dojo.connect() to this function to receive notifications about
 	 * server calls that succeeded.
