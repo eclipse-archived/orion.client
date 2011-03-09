@@ -17,9 +17,10 @@
 var eclipse = eclipse || {};
 
 
-// begin HTML fragment for top area.
+// BEGIN TOP BANNER FRAGMENT
 var topHTMLFragment =
-'<table style="border-spacing: 0px; border-collapse: collapse; width: 100%; height: 61px">' +   // a table?!!?  Couldn't get bottom bar to float right and pin to bottom while also spanning entire page.  Can't mix floats and absolutes.
+// a table?!!?  Yes, you can't mix CSS float right and absolutes to pin the bottom.
+'<table style="border-spacing: 0px; border-collapse: collapse; width: 100%; height: 61px">' +
 	'<tr class="topRowBanner">' +
 		'<td width=93px rowspan=2><a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
 		'<td class="leftGlobalToolbar">' +
@@ -42,8 +43,14 @@ var topHTMLFragment =
 		'</td>' +
 	'</tr>' +
 '</table>';
+// END TOP BANNER FRAGMENT
 
-// end HTML fragment
+// BEGIN BOTTOM BANNER FRAGMENT
+// styling of the surrounding div (text-align, etc) is in ide.css "footer"
+var bottomHTMLFragment = 
+'<a style="margin-right: 8px;" href="http://wiki.eclipse.org/Orion/FAQ">Orion FAQ</a>' +
+'<a style="margin-left: 8px;" href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=e4&component=Orion&version=0.2">Report a bug</a>';
+// END BOTTOM BANNER FRAGEMENT
 
 /**
  * Utility methods
@@ -124,7 +131,12 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 	// generate primary nav links.  This needs to come from some place (extension?  registry?)
 	var primaryNav = dojo.byId("primaryNav");
 	if (primaryNav) {
-		var primaryLinks = [{name: "Git", url: "git-status.html"},{name: "Sites", url: "sites.html"},{name: "Plugins", url: "view-registry.html"}];
+		var primaryLinks = [
+			// disabled for M6 since git-status needs a parameter.  For M7 should link to the clone page.	{name: "Git", url: "git-status.html"},
+			{name: "Navigator", url: "navigate-table.html"},
+			{name: "Sites", url: "sites.html"},
+			{name: "Plugins", url: "view-registry.html"}
+		];
 		for (var i=0; i<primaryLinks.length; i++) {
 			var link = dojo.create("a", {href: primaryLinks[i].url}, primaryNav, "last");
 			dojo.addClass(link, "commandLink");
@@ -209,5 +221,14 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 		var item = handler || {};
 		commandService.renderCommands(toolbar, "global", item, handler, "image");
 	}	
+	
+	// generate the footer. The footer div id should not be assumed here, but that will be
+	// fixed post M6.  
+	if (bottomHTMLFragment) {
+		var footer = dojo.byId("footer");
+		if (footer) {
+			dojo.place(bottomHTMLFragment, footer, "only");
+		}
+	}
 
 };

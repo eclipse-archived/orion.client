@@ -294,7 +294,6 @@ eclipse.Profile = (function() {
 				dojo.empty(bannerPane);
 				dojo.create("a", {id:"profileBanner", className: "breadcrumb currentLocation", innerHTML: profile.lastJSON ? "Profile Information for <b style='color: #000'>" + profile.lastJSON.login + "</b>" : ""}, bannerPane);
 
-				var dataDiv = dojo.create("div", {id: "profile.actions"}, bannerPane);
 				dojo.empty(this.pageActionsPlaceholder);
 				this.commandService.addCommandGroup("eclipse.profileActionsGroup", 100, null, null, this.pageActionsPlaceholder.id);
 				for(var i=0; i<content.actions.length; i++){
