@@ -141,13 +141,15 @@ eclipse.UserPreferencesProvider = function(location) {
 					d.resolve(jsonData);
 				},
 				error: function(response, ioArgs) {
+					response.log=false;
 					if (ioArgs.xhr.status === 401) {
 						handleGetAuthenticationError(ioArgs.xhr, ioArgs);
 					} else {
 						_currentPromise = null;
 						d.resolve({});
 					}
-				}
+				},
+				failOk: true
 			});
 		}
 		return d;

@@ -6,7 +6,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo*/
+/*global dojo dijit handleAuthenticationError */
  /*
 	Authentication and authorization error handling. Adds methods that handle 401 and 403 responses for 
 	XHR calls.
@@ -32,16 +32,19 @@ dojo.addOnLoad(function () {
 	});
 });
 
-function handleGetAuthenticationError(xhrArgs, ioArgs) {
-	handleAuthenticationError(ioArgs.xhr, function(){
-		dojo.xhrGet(xhrArgs); // retry GET
-	});
-}
+
+//function handleGetAuthenticationError(xhrArgs, ioArgs) {
+//	handleAuthenticationError(ioArgs.xhr, function(){
+//		dojo.xhrGet(xhrArgs); // retry GET
+//	});
+//}
 
 function handleGetAuthenticationError(xhrArgs, ioArgs, cb, eb) {
 	handleAuthenticationError(ioArgs.xhr, function(){
 		var dfd = dojo.xhrGet(xhrArgs); // retry GET
-		dfd.then(cb, eb); // add callback and errback
+		if (cb) {
+			dfd.then(cb, eb); // add callback and errback
+		}
 	});
 }
 
@@ -69,16 +72,17 @@ function handlePutAuthenticationError(xhrArgs, ioArgs) {
  * @param retry A function to invoke after authentication to retry the server request.
  */
 function handleAuthenticationError(error, retry) {
-	if (error.status == 403) { 
-		if (forbiddenAccessDlg == null)
+	if (error.status === 403) { 
+		if (forbiddenAccessDlg === null) {
 			forbiddenAccessDlg = new dijit.Dialog({
 		        title: "Forbidden access"
 		    });
+		}
 		
 		forbiddenAccessDlg.set("content", error.message);
 		forbiddenAccessDlg.show();
 	}
-	if (error.status == 401) { 
+	if (error.status === 401) { 
 		var handle = dojo.subscribe("/auth", function(message){
 			retry();
 			dojo.unsubscribe(handle); // ... but only once
