@@ -183,7 +183,7 @@ eclipse.FileRenderer = (function() {
 			dojo.addClass(tableNode, 'treetable');
 			var thead = document.createElement('thead');
 			var row = document.createElement('tr');
-			dojo.addClass(row, "navTableHeading");
+			dojo.addClass(thead, "navTableHeading");
 			var th, actions, size;
 			if (this._useCheckboxSelection) {
 				th = document.createElement('th');
@@ -191,18 +191,22 @@ eclipse.FileRenderer = (function() {
 			}
 			th = document.createElement('th');
 			th.innerHTML = "<h2>Name</h2>";
+			dojo.addClass(th, "navColumn");
 			row.appendChild(th);
 
 			actions= document.createElement('th');
 			actions.innerHTML = "<h2>Actions</h2>";
+			dojo.addClass(actions, "navColumn");
 			row.appendChild(actions);
 
 			th = document.createElement('th');
 			th.innerHTML = "<h2>Date</h2>";
+			dojo.addClass(th, "navColumn");
 			row.appendChild(th);
 
 			size= document.createElement('th');
 			size.innerHTML = "<h2>Size</h2>";
+			dojo.addClass(size, "navColumn");
 			row.appendChild(size);
 			
 			thead.appendChild(row);

@@ -78,17 +78,21 @@ a:hover {
 	border-bottom: 1px;
 }
 
+.navColumn {
+	min-width: 150px;
+}
+
 .pane {
-   		margin: 0px;
-    	padding: 0px;
-    	background: #FFFFFF;
+   	margin: 0px;
+    padding: 0px;
+    background: #FFFFFF;
 }
 
 .auxpane {
-    	padding-left: 32px;
-    	padding-top: 20px;
-    	background: #EDEDED;
-    	overflow: auto;
+    padding-left: 32px;
+    padding-top: 20px;
+    background: #EDEDED;
+    overflow: auto;
 }
 
 .soria .dijitSplitterV .dijitSplitterThumb {	
@@ -107,10 +111,10 @@ a:hover {
 }
 
 .mainpane{
-    	margin: 0px;
-    	padding-top: 20px;
-    	background: #FFFFFF;
-		overflow: auto;
+    margin: 0px;
+    padding-top: 20px;
+    background: #FFFFFF;
+	overflow: auto;
 }
 
 .statuspane {
