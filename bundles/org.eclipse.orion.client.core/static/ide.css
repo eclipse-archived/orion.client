@@ -112,6 +112,7 @@ a:hover {
 
 .mainpane{
     margin: 0px;
+    padding-left: 8px;
     padding-top: 20px;
     background: #FFFFFF;
 	overflow: auto;
