@@ -48,20 +48,28 @@
 		</div>
 		
 		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="false" gutters="false" region="leading"  style="margin-left: 44px; width: 50%;" splitter="true">
-			<div style='width:100%;height:30px;' dojoType="dijit.layout.ContentPane" region="top">
-				<div >
-					<h2 id = "left-viewer-title"></h2>
-				</div>
+			<div style='width:100%;height:30px;overflow: hidden;' dojoType="dijit.layout.ContentPane" region="top">
+				<table width="100%">
+					<tr>
+						<td  nowrap="nowrap">
+							<h2 id = "left-viewer-title">Compare...</h2>
+						</td>
+					</tr>
+				</table>
 				<hr>
 			</div>
 			<div class="paneScrolled" id="left-viewer" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center"  style="width: 100%; height: 100%;" splitter="false">				
 			</div>
 		</div>
 		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false" persist="false" gutters="false" region="center"  splitter="false">
-			<div  style='width:100%;height:30px;' dojoType="dijit.layout.ContentPane" region="top">
-				<div >
-					<h2 id = "right-viewer-title"></h2>
-				</div>
+			<div  style='width:100%;height:30px;overflow: hidden;' dojoType="dijit.layout.ContentPane" region="top">
+				<table width="100%">
+					<tr>
+						<td  nowrap="nowrap">
+							<h2 id = "right-viewer-title">Compare...</h2>
+						</td>
+					</tr>
+				</table>
 				<hr>
 			</div>
 			<div class="paneScrolled" id="right-viewer" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center"  style="width: 100%; height: 100%;" splitter="false">				
