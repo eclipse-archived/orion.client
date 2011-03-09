@@ -2428,9 +2428,14 @@ eclipse.Editor = (function() {
 				bindings.push({name: "deleteWordNext",		keyBinding: new KeyBinding(46, null, null, true), predefined: true});
 			}
 				
-			//bug in IE: prevent ctrl+'u' and ctrl+'i' from applying styles to the text
-			bindings.push({name: null,			keyBinding: new KeyBinding('u', true), predefined: true});
-			bindings.push({name: null,			keyBinding: new KeyBinding('i', true), predefined: true});
+			/*
+			* Feature in IE/Chrome: prevent ctrl+'u' and ctrl+'i' from applying styles to the text.
+			*
+			* Note that Chrome applies the styles on the Mac with Ctrl instead of Cmd.
+			*/
+			var isMacChrome = isMac && isChrome;
+			bindings.push({name: null, keyBinding: new KeyBinding('u', !isMacChrome, false, false, isMacChrome), predefined: true});
+			bindings.push({name: null, keyBinding: new KeyBinding('i', !isMacChrome, false, false, isMacChrome), predefined: true});
 
 			if (isFirefox) {
 				bindings.push({name: "copy", keyBinding: new KeyBinding(45, true), predefined: true});
