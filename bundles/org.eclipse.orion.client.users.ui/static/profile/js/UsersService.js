@@ -43,7 +43,10 @@ eclipse.UsersService = (function() {
 					}
 				},
 				error : function(error, ioArgs) {
-					if(!service.info) handleGetAuthenticationError(this, ioArgs);
+					var xhrCall = this;
+					if(!service.info) handleAuthenticationError(error, function(){
+						dojo.xhrGet(xhrCall); // retry GET
+					});
 					return error;
 				}
 			});
@@ -66,7 +69,10 @@ eclipse.UsersService = (function() {
 						}
 					},
 					error : function(error, ioArgs) {
-						if(!service.info) handleDeleteAuthenticationError(this, ioArgs);
+						var xhrCall = this;
+						if(!service.info) handleAuthenticationError(error, function(){
+							dojo.xhrDelete(xhrCall); // retry DELETE
+						});
 						return error;
 					}
 				});
@@ -118,8 +124,10 @@ eclipse.UsersService = (function() {
 					}
 				},
 				error : function(error, ioArgs) {
-					if(!service.info)
-						handleGetAuthenticationError(this, ioArgs);
+					var xhrCall = this;
+					if(!service.info) handleAuthenticationError(error, function(){
+						dojo.xhrGet(xhrCall); // retry GET
+					});
 					return error;
 				}
 			});
@@ -152,8 +160,10 @@ eclipse.UsersService = (function() {
 					}
 				},
 				error : function(error, ioArgs) {
-					if(!service.info)
-						handlePutAuthenticationError(this, ioArgs);
+					var xhrCall = this;
+					if(!service.info) handleAuthenticationError(error, function(){
+						dojo.xhrPut(xhrCall); // retry GET
+					});
 					return error;
 				}
 			});
