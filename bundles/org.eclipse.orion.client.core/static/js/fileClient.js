@@ -27,10 +27,10 @@ eclipse.FileClient = (function() {
 	function FileClient(serviceRegistry, pluginRegistry) {
 		this.serviceRegistry = serviceRegistry;
 		//ensure the plugin is installed
-		var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
-		if (filePlugin === null) {
-			pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
-		}
+//		var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
+//		if (filePlugin === null) {
+//			pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
+//		}
 	}
 	
 	FileClient.prototype = /**@lends eclipse.FileClient.prototype */

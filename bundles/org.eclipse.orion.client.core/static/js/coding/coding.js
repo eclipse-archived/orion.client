@@ -25,11 +25,11 @@ dojo.addOnLoad(function(){
 		serviceRegistry = new eclipse.ServiceRegistry();
 		pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 		
-		// this is temporary
-		var jslintPlugin = pluginRegistry.getPlugin("/plugins/jslintPlugin.html");
-		if (jslintPlugin === null) {
-			pluginRegistry.installPlugin("/plugins/jslintPlugin.html");
-		}
+//		// this is temporary
+//		var jslintPlugin = pluginRegistry.getPlugin("/plugins/jslintPlugin.html");
+//		if (jslintPlugin === null) {
+//			pluginRegistry.installPlugin("/plugins/jslintPlugin.html");
+//		}
 
 		var inputService = new eclipse.InputService(serviceRegistry);
 		inputService.initializeContext({"manageDocumentTitle": true});	

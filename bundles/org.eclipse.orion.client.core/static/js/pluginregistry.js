@@ -165,12 +165,17 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 };
 
 eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
+	var _self = this;
 	var _storage = opt_storage || localStorage || {};
 	var _plugins = [];
 	var _pluginEventTarget = new eclipse.EventTarget();
 	
-
-		var _managedHub = new OpenAjax.hub.ManagedHub({
+	// storage
+	var _defaultPlugins = {};
+	var _userPlugins;
+	
+	
+	var _managedHub = new OpenAjax.hub.ManagedHub({
 		log : function(message) {
 			console.log(message);
 		},
@@ -189,27 +194,101 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	});
 
 	function _loadFromStorage() {
-		for (var i = 0; i < _storage.length; i++) {
-			var key = _storage.key(i);
-			if (key.indexOf("plugin.") === 0) {
-				var pluginURL = key.substring("plugin.".length);
-				var pluginData = JSON.parse(_storage[key]);
-				var plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
-				_plugins.push(plugin);
+		var plugin,
+			pluginURL,
+			pluginData,
+			key,
+			defaults;
+		
+		//default
+		defaults = _storage["/orion/preferences/default"] ? JSON.parse(_storage["/orion/preferences/default"]) : null;
+		if (defaults && defaults["/plugins"]) {
+			_defaultPlugins = defaults["/plugins"];
+			for(pluginURL in _defaultPlugins) {
+				if (_defaultPlugins.hasOwnProperty(pluginURL)) {
+					pluginURL = _normalizeURL(pluginURL);
+					key = "plugin." + pluginURL;
+					if (_storage[key]) {
+						pluginData = JSON.parse(_storage[key]);
+						plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
+						_plugins.push(plugin);
+					} else {
+						_self.installPlugin(pluginURL);
+					}
+				}
 			}
-		}	
+		}
+		
+		//user
+		_userPlugins = _storage["/orion/preferences/user/plugins"] ? JSON.parse(_storage["/orion/preferences/user/plugins"]) : null;
+		if (!_userPlugins) {
+			_userPlugins = {};
+		}
+		for(pluginURL in _userPlugins) {
+			if (_userPlugins.hasOwnProperty(pluginURL)) {
+				pluginURL = _normalizeURL(pluginURL);
+				key = "plugin." + pluginURL;
+				if (_storage[key]) {
+					pluginData = JSON.parse(_storage[key]);
+					plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
+					_plugins.push(plugin);
+				} else {
+					_self.installPlugin(pluginURL);
+				}
+			}
+		}
+		
+		
+		
+//		for (var i = 0; i < _storage.length; i++) {
+//			var key = _storage.key(i);
+//			if (key.indexOf("plugin.") === 0) {
+//				var pluginURL = key.substring("plugin.".length);
+//				var pluginData = JSON.parse(_storage[key]);
+//				var plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
+//				_plugins.push(plugin);
+//			}
+//		}	
 	}
 	
 	function _persist(plugin) {
+		var pluginURL;
 		_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
+		for(pluginURL in _defaultPlugins) {
+			if (_defaultPlugins.hasOwnProperty(pluginURL)) {
+				if (plugin.getLocation() === _normalizeURL(pluginURL)) {
+					return;
+				}
+			}
+		}
+		for(pluginURL in _userPlugins) {
+			if (_userPlugins.hasOwnProperty(pluginURL)) {
+				if (plugin.getLocation() === _normalizeURL(pluginURL)) {
+					return;
+				}
+			}
+		}
+		_userPlugins[plugin.getLocation()] = true;
+		_storage["/orion/preferences/user/plugins"] = JSON.stringify(_userPlugins);
 	}
 
 	function _clear(plugin) {
+		var pluginURL;
+		
 		delete _storage["plugin."+plugin.getLocation()];
+		for(pluginURL in _userPlugins) {
+			if (_userPlugins.hasOwnProperty(pluginURL)) {
+				if (plugin.getLocation() === _normalizeURL(pluginURL)) {
+					delete _userPlugins[plugin.getLocation()];
+					_storage["/orion/preferences/user/plugins"] = JSON.stringify(_userPlugins);
+					return;
+				}
+			}
+		}
 	}
 	
 	function _normalizeURL(location) {
-		if (location.indexOf("://") == -1) {
+		if (location.indexOf("://") === -1) {
 			var temp = document.createElement('a');
 			temp.href = location;
 	        return temp.href;

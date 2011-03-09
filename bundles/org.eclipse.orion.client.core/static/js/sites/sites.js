@@ -27,10 +27,10 @@ dojo.addOnLoad(function() {
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
 	// File operations
-	var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
-	if (filePlugin === null) {
-		pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
-	}
+//	var filePlugin = pluginRegistry.getPlugin("/plugins/fileClientPlugin.html");
+//	if (filePlugin === null) {
+//		pluginRegistry.installPlugin("/plugins/fileClientPlugin.html");
+//	}
 	
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	

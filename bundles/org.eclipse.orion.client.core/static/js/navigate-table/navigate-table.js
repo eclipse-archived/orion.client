@@ -32,15 +32,15 @@ dojo.addOnLoad(function(){
 	new eclipse.GitService(serviceRegistry);
 	
 	// this is temporary
-	var unittestPlugin = pluginRegistry.getPlugin("/plugins/unittestPlugin.html");
-	if (unittestPlugin === null) {
-		pluginRegistry.installPlugin("/plugins/unittestPlugin.html");
-	}
-	
-	var gitPlugin = pluginRegistry.getPlugin("/plugins/gitPlugin.html");
-	if (gitPlugin === null) {
-		pluginRegistry.installPlugin("/plugins/gitPlugin.html");
-	}
+//	var unittestPlugin = pluginRegistry.getPlugin("/plugins/unittestPlugin.html");
+//	if (unittestPlugin === null) {
+//		pluginRegistry.installPlugin("/plugins/unittestPlugin.html");
+//	}
+//	
+//	var gitPlugin = pluginRegistry.getPlugin("/plugins/gitPlugin.html");
+//	if (gitPlugin === null) {
+//		pluginRegistry.installPlugin("/plugins/gitPlugin.html");
+//	}
 
 	
 	var treeRoot = {
