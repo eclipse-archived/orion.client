@@ -4158,30 +4158,36 @@ eclipse.Editor = (function() {
 						}
 					}
 				} else {
+					var buttonHeight = 17;
+					var clientHeight = this._getClientHeight ();
+					var trackHeight = clientHeight + editorPad.top + editorPad.bottom - 2 * buttonHeight;
+					var lineCount = this._model.getLineCount ();
+					var divHeight = trackHeight / lineCount;
 					if (div.rulerChanged) {
 						var count = div.childNodes.length;
 						while (count > 1) {
 							div.removeChild(div.lastChild);
 							count--;
 						}
-	
-						var buttonHeight = 17;
-						var clientHeight = this._getClientHeight ();
-						var trackHeight = clientHeight + editorPad.top + editorPad.bottom - 2 * buttonHeight;
-						var lineCount = this._model.getLineCount ();
 						var lines = ruler.getAnnotations ();
 						for (var j = 0; j < lines.length; j++) {
 							lineIndex = lines[j];
 							lineDiv = parentDocument.createElement("DIV");
 							this._applyStyle(ruler.getStyle(lineIndex), lineDiv);
 							lineDiv.style.position = "absolute";
-							var divHeight = trackHeight / lineCount;
 							lineDiv.style.top = buttonHeight + lineHeight + Math.floor(lineIndex * divHeight) + "px";
 							lineDiv.innerHTML = ruler.getHTML(lineIndex);
 							lineDiv.lineIndex = lineIndex;
 							div.appendChild(lineDiv);
 						}
+					} else if (div._oldTrackHeight !== trackHeight) {
+						lineDiv = div.firstChild ? div.firstChild.nextSibling : null;
+						while (lineDiv) {
+							lineDiv.style.top = buttonHeight + lineHeight + Math.floor(lineDiv.lineIndex * divHeight) + "px";
+							lineDiv = lineDiv.nextSibling;
+						}
 					}
+					div._oldTrackHeight = trackHeight;
 				}
 				div.rulerChanged = false;
 				div = div.nextSibling;
