@@ -143,7 +143,7 @@ eclipse.UserPreferencesProvider = function(location) {
 				error: function(response, ioArgs) {
 					response.log=false;
 					if (ioArgs.xhr.status === 401) {
-						handleGetAuthenticationError(ioArgs.xhr, ioArgs);
+						handleGetAuthenticationError(this, ioArgs);
 					} else {
 						_currentPromise = null;
 						d.resolve({});
@@ -174,7 +174,7 @@ eclipse.UserPreferencesProvider = function(location) {
 			},
 			error: function(response, ioArgs) {
 				if (ioArgs.xhr.status === 401) {
-					handlePutAuthenticationError(ioArgs.xhr, ioArgs);
+					handlePutAuthenticationError(this, ioArgs);
 				} else {
 					d.resolve(); // consider throwing here
 				}
