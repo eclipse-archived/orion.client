@@ -14,7 +14,7 @@ dojo.addOnLoad(function(){
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
-	var sBSCompareContainerEditor = new orion.SBSCompareContainer("left-viewer" , "right-viewer");
+	var sBSCompareContainer = new orion.SBSCompareContainer("left-viewer" , "right-viewer");
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
 		var hash = splitted[1];
@@ -28,14 +28,20 @@ dojo.addOnLoad(function(){
 			diffURI = params[0];
 		}
 		
-		sBSCompareContainerEditor.resolveDiff(diffURI, 
+		sBSCompareContainer.resolveDiff(diffURI, 
 											  fileURI,
 				  function(){
-					var leftTH = document.getElementById("left-viewer-title");
-					var rightTH = document.getElementById("right-viewer-title");
-					leftTH.innerHTML = "File  : " + fileURI;
-					rightTH.innerHTML = "File On Git : " + fileURI;
-				  });
+					  dojo.place(document.createTextNode("File: " + fileURI), "left-viewer-title", "only");				  
+					  dojo.place(document.createTextNode("File On Git: " + fileURI), "right-viewer-title", "only");				  
+				  },
+				  function(errorResponse , ioArgs){
+					  var message = typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; 
+					  dojo.place(document.createTextNode(message), "left-viewer-title", "only");				  
+					  dojo.place(document.createTextNode(message), "right-viewer-title", "only");				  
+					  dojo.style("left-viewer-title", "color", "red");
+					  dojo.style("right-viewer-title", "color", "red");
+				  }
+		);
 	}
 	
 });
