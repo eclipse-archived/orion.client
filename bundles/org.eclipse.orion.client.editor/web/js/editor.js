@@ -3477,15 +3477,6 @@ eclipse.Editor = (function() {
 				scrollDiv.appendChild(overlayDiv);
 			}
 			clientDiv.contentEditable = "true";
-/*			var self = this;
-			setTimeout(function() {
-				window.console.log("hack");
-				clientDiv.contentEditable = "false";
-				clientDiv.contentEditable = "true";
-				self.focus();
-				window.console.log("hack done");
-			}, 0);
-			window.console.log("HERE");*/
 			body.style.lineHeight = this._calculateLineHeight() + "px";
 			if (options.tabSize) {
 				if (isOpera) {
