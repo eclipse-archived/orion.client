@@ -167,7 +167,8 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 					for (var i=0; i < children.length; i++) {
 						var child = children[i];
 						var path = eclipse.sites.util.makeRelativeFilePath(child.Location);
-						if (target.indexOf(path + "/") === 0) {
+						// Match if target is "/path/something" or just "/path"
+						if (target.indexOf(path + "/") === 0 || target === path) {
 							folderExists = true;
 							var rest = target.substring(path.length);
 							var linkText = "/" + child.Name + rest;
@@ -313,7 +314,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		 */
 		var editor = this;
 		var callback = function(item) {
-			editor.mappings._addMapping(this.name, this.path);
+			editor.mappings._addMapping("/virtualPath", this.path);
 		};
 		var addOther = function() {
 			editor.mappings._addMapping("/virtualPath", "/FolderId/somepath");
