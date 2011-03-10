@@ -8,18 +8,16 @@
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
 			provider.registerServiceProvider("fileCommands", {
-				info : function() {
-					return {
-						name: "Run as Unit Test",
-						id: "eclipse.runUnitTest",
-						tooltip: "Run as Unit Test",
-						validationProperties: {"Name":"*.html"},
-						href: true,
-						forceSingleItem: true};
-				},
 				run: function(item) {
 					return "/unittest.html#" + item.Location;
 				}
+			}, {
+				name: "Run as Unit Test",
+				id: "eclipse.runUnitTest",
+				tooltip: "Run as Unit Test",
+				validationProperties: {"Name":"*.html"},
+				href: true,
+				forceSingleItem: true
 			});
 			provider.connect();
 		};

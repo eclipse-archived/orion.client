@@ -8,45 +8,31 @@
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
 			provider.registerServiceProvider("fileCommands", {
-				info : function() {
-					return {
-						image: "/profile/images/create_user.gif",
-						name: "Run Code on Single Item",
-						id: "sample.commands.sample1",
-						forceSingleItem: true,
-						tooltip: "Run plugin code only on single file/dir"
-					};
-				},
 				run : function(item) {
 					window.alert("Running code on: " + item.Location);
 				}
+			}, {
+				image: "/profile/images/create_user.gif",
+				name: "Run Code on Single Item",
+				id: "sample.commands.sample1",
+				forceSingleItem: true,
+				tooltip: "Run plugin code only on single file/dir"
 			});
 			provider.registerServiceProvider("fileCommands", {
-				info : function() {
-					return {
-						image: "/profile/images/create_user.gif",
-						name: "Open HTML Raw",
-						id: "sample.commands.sample2",
-						forceSingleItem: true,
-						href: true,
-						validationProperties: {"Name":"*.html"},
-						tooltip: "Link to raw html on server"
-					};
-				},
 				run : function(item) {
 					return item.Location;
 				}
+			}, {
+				image: "/profile/images/create_user.gif",
+				name: "Open HTML Raw",
+				id: "sample.commands.sample2",
+				forceSingleItem: true,
+				href: true,
+				validationProperties: {"Name":"*.html"},
+				tooltip: "Link to raw html on server"
 			});
 			
 			provider.registerServiceProvider("fileCommands", {
-				info : function() {
-					return {
-						image: "/profile/images/create_user.gif",
-						name: "Bulk Item Command",
-						id: "sample.commands.sample3",
-						tooltip: "Bulk command operates on selections"
-					};
-				},
 				run : function(items) {
 					var locations = [];
 					for (var i = 0; i<items.length; i++) {
@@ -54,6 +40,11 @@
 					}
 					window.alert("Bulk operation on: " + locations);
 				}
+			}, {
+				image: "/profile/images/create_user.gif",
+				name: "Bulk Item Command",
+				id: "sample.commands.sample3",
+				tooltip: "Bulk command operates on selections"
 			});
 				
 			provider.connect();

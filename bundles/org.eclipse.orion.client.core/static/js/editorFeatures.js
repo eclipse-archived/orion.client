@@ -87,54 +87,57 @@ eclipse.editorFeatures.createEditorCommands = function(serviceRegistry, commandS
 
 	for (var i=0; i<actionReferences.length; i++) {
 		serviceRegistry.getService(actionReferences[i]).then(function(service) {
-			service.info().then(function(info) {
-				var editorWidget = editor.getEditorWidget();
-				var command = new eclipse.Command({
-					name: info.name,
-					image: info.img,
-					id: info.name,
-					callback: dojo.hitch(editor, function(editor) {
-						// command service will provide editor parameter but editor widget callback will not
-						var editorWidget = editor ? editor.getEditorWidget() : this.getEditorWidget();
-						var text = editorWidget.getText();
-						var selection = editorWidget.getSelection();
-						service.run(editorWidget.getText(selection.start,selection.end),text,selection).then(function(result){
-							if (result.text) {
-								editorWidget.setText(result.text);
-								if (result.selection) {
-									editorWidget.setSelection(result.selection.start, result.selection.end);
-									editorWidget.focus();
-								}
-							} else {
-								if (typeof result === 'string') {
-									editorWidget.setText(result, selection.start, selection.end);
-									editorWidget.setSelection(selection.start, selection.end);
-									editorWidget.focus();
-								}
+			var info = {};
+			var propertyNames = actionReferences[i].getPropertyNames();
+			for (var j = 0; j < propertyNames.length; j++) {
+				info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
+			}
+			var editorWidget = editor.getEditorWidget();
+			var command = new eclipse.Command({
+				name: info.name,
+				image: info.img,
+				id: info.name,
+				callback: dojo.hitch(editor, function(editor) {
+					// command service will provide editor parameter but editor widget callback will not
+					var editorWidget = editor ? editor.getEditorWidget() : this.getEditorWidget();
+					var text = editorWidget.getText();
+					var selection = editorWidget.getSelection();
+					service.run(editorWidget.getText(selection.start,selection.end),text,selection).then(function(result){
+						if (result.text) {
+							editorWidget.setText(result.text);
+							if (result.selection) {
+								editorWidget.setSelection(result.selection.start, result.selection.end);
+								editorWidget.focus();
 							}
-						});
-						
-					})});
-				commandService.addCommand(command, "dom");
-				if (info.img) {
-					// image will be placed on toolbar
-					commandService.registerCommandContribution(command.id, i, toolbarId, "eclipse.editorActions.contributed.images");
-				} else {
-					// if there is no image it will be grouped in a "More..." menu button
-					commandService.registerCommandContribution(command.id, i, toolbarId, "eclipse.editorActions.contributed.noImages");
-				}
-				// We must regenerate the command toolbar everytime we process an extension because
-				// this is asynchronous and we probably have already populated the toolbar.
-				// In the editor, we generate page level commands to the banner.
-				eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, editor);
+						} else {
+							if (typeof result === 'string') {
+								editorWidget.setText(result, selection.start, selection.end);
+								editorWidget.setSelection(selection.start, selection.end);
+								editorWidget.focus();
+							}
+						}
+					});
+					
+				})});
+			commandService.addCommand(command, "dom");
+			if (info.img) {
+				// image will be placed on toolbar
+				commandService.registerCommandContribution(command.id, i, toolbarId, "eclipse.editorActions.contributed.images");
+			} else {
+				// if there is no image it will be grouped in a "More..." menu button
+				commandService.registerCommandContribution(command.id, i, toolbarId, "eclipse.editorActions.contributed.noImages");
+			}
+			// We must regenerate the command toolbar everytime we process an extension because
+			// this is asynchronous and we probably have already populated the toolbar.
+			// In the editor, we generate page level commands to the banner.
+			eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, editor);
 
-				if (info.key) {
-					// add it to the editor as a keybinding
-					KB.prototype = eclipse.KeyBinding.prototype;
-					editorWidget.setKeyBinding(new KB(info.key), command.id);
-					editorWidget.setAction(command.id, command.callback);
-				}
-			});
+			if (info.key) {
+				// add it to the editor as a keybinding
+				KB.prototype = eclipse.KeyBinding.prototype;
+				editorWidget.setKeyBinding(new KB(info.key), command.id);
+				editorWidget.setAction(command.id, command.callback);
+			}
 		});
 	}
 };

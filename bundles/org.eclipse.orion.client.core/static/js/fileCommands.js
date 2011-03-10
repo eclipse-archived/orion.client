@@ -536,90 +536,95 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 
 	for (var i=0; i<commandsReferences.length; i++) {
 		serviceRegistry.getService(commandsReferences[i]).then(function(service) {
-			service.info().then(function(info) {
-				var commandOptions = {
-					name: info.name,
-					image: info.image,
-					id: info.id,
-					tooltip: info.tooltip,
-					visibleWhen: dojo.hitch(info, function(items){
-						if(dojo.isArray(items)){
-							if ((this.forceSingleItem || this.href) && items.length !== 1) {
-								return false;
-							}
-							if(!this.forceSingleItem && items.length < 1){
-								return false;
-							}
-						} else{
-							items = [items];
+			var info = {};
+			var propertyNames = commandsReferences[i].getPropertyNames();
+			for (var j = 0; j < propertyNames.length; j++) {
+				info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
+			}
+
+			var commandOptions = {
+				name: info.name,
+				image: info.image,
+				id: info.id,
+				tooltip: info.tooltip,
+				visibleWhen: dojo.hitch(info, function(items){
+					if(dojo.isArray(items)){
+						if ((this.forceSingleItem || this.href) && items.length !== 1) {
+							return false;
 						}
-						
-						if(!this.validationProperties){
-							return true;
+						if(!this.forceSingleItem && items.length < 1){
+							return false;
 						}
-						
-						for(var i in items){
-							if(!validateSingleItem(items[i], this.validationProperties)){
-								return false;
-							}
-						}
+					} else{
+						items = [items];
+					}
+					
+					if(!this.validationProperties){
 						return true;
-						
-					})
-				};
-				if (info.href) {
-					commandOptions.hrefCallback = dojo.hitch(info, function(items){
-						var item = dojo.isArray(items) ? items[0] : items;
-						var shallowItemClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(item);
-						if(service.run) {
-							return service.run(shallowItemClone);
+					}
+					
+					for(var i in items){
+						if(!validateSingleItem(items[i], this.validationProperties)){
+							return false;
 						}
-					});
-				} else {
-					commandOptions.callback = dojo.hitch(info, function(items){
-						var shallowItemsClone;
-						if (this.forceSingleItem) {
-							var item = dojo.isArray() ? items[0] : items;
-							shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(item);
-						} else {
-							if (dojo.isArray(items)) {
-								shallowItemsClone = [];
-								for (var j = 0; j<items.length; j++) {
-									shallowItemsClone.push(eclipse.fileCommandUtils._cloneItemWithoutChildren(items[j]));
-								}
-							} else {
-								shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
+					}
+					return true;
+					
+				})
+			};
+			if (info.href) {
+				commandOptions.hrefCallback = dojo.hitch(info, function(items){
+					var item = dojo.isArray(items) ? items[0] : items;
+					var shallowItemClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(item);
+					if(service.run) {
+						return service.run(shallowItemClone);
+					}
+				});
+			} else {
+				commandOptions.callback = dojo.hitch(info, function(items){
+					var shallowItemsClone;
+					if (this.forceSingleItem) {
+						var item = dojo.isArray() ? items[0] : items;
+						shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(item);
+					} else {
+						if (dojo.isArray(items)) {
+							shallowItemsClone = [];
+							for (var j = 0; j<items.length; j++) {
+								shallowItemsClone.push(eclipse.fileCommandUtils._cloneItemWithoutChildren(items[j]));
 							}
+						} else {
+							shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
 						}
-						if(service.run) {
-							service.run(shallowItemsClone);
-						}
-					});
-				}
-				var command = new eclipse.Command(commandOptions);
-				var extensionGroupCreated = false;
-				var selectionGroupCreated = false;
-				if (info.forceSingleItem || info.href) {
-					// single items go in the local actions column, grouped in their own unnamed group to get a separator
-					commandService.addCommand(command, "object");
-					if (!extensionGroupCreated) {
-						extensionGroupCreated = true;
-						commandService.addCommandGroup("eclipse.fileCommandExtensions", 1000, null, fileGroup);
 					}
-					commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions");
-				} else {  
-					// items based on selection are added to the selections toolbar, grouped in their own unnamed group to get a separator
-					// TODO would we also want to add these to the menu above so that they are available for single selections?  
-					// For now we do not do this to reduce clutter, but we may revisit this.
-					commandService.addCommand(command, "dom");
-					if (!selectionGroupCreated) {
-						selectionGroupCreated = true;
-						commandService.addCommandGroup("eclipse.bulkFileCommandExtensions", 1000, null, selectionGroup);
+					if(service.run) {
+						service.run(shallowItemsClone);
 					}
-					commandService.registerCommandContribution(command.id, i, selectionToolbarId, selectionGroup + "/eclipse.bulkFileCommandExtensions");
+				});
+			}
+			var command = new eclipse.Command(commandOptions);
+			var extensionGroupCreated = false;
+			var selectionGroupCreated = false;
+			if (info.forceSingleItem || info.href) {
+				// single items go in the local actions column, grouped in their own unnamed group to get a separator
+				commandService.addCommand(command, "object");
+				if (!extensionGroupCreated) {
+					extensionGroupCreated = true;
+					commandService.addCommandGroup("eclipse.fileCommandExtensions", 1000, null, fileGroup);
 				}
+				commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions");
+			} else {  
+				// items based on selection are added to the selections toolbar, grouped in their own unnamed group to get a separator
+				// TODO would we also want to add these to the menu above so that they are available for single selections?  
+				// For now we do not do this to reduce clutter, but we may revisit this.
+				commandService.addCommand(command, "dom");
+				if (!selectionGroupCreated) {
+					selectionGroupCreated = true;
+					commandService.addCommandGroup("eclipse.bulkFileCommandExtensions", 1000, null, selectionGroup);
+				}
+				commandService.registerCommandContribution(command.id, i, selectionToolbarId, selectionGroup + "/eclipse.bulkFileCommandExtensions");
+			}
 			eclipse.fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
 			explorer.updateCommands();
 		});
-	});}
+	}
 };
