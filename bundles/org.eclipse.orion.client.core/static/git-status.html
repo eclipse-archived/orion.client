@@ -42,12 +42,12 @@
  	<script src="js/commands.js"></script>
  	<script src="js/preferences.js"></script>
 	<script src="js/searchClient.js"></script>
-    <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;" splitter="true">
+    <div id="eclipse.git-status" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;" splitter="true">
 		<div class="toolbar" id="toolbar" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
 		
 		<!-- status pane on left : start vvv-->
-		<div id = "gitStatusPane" class="auxpane"  dojoType="dijit.layout.ContentPane" region="leading"  style="margin-left: 44px; width: 40%;" splitter="true">				
+		<div id="gitStatusPane" class="auxpane"  dojoType="dijit.layout.ContentPane" region="leading"  style="margin-left: 44px; width: 40%;" splitter="true">				
 			<!-- unstaged zone : start vvv-->
 			<table width="100%">
 				<tr>
@@ -143,6 +143,9 @@
 			</div>
 		</div>
 		<!-- inline compare viewer : end ^^^-->
+		
+		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
+		</div>
 	</div>
 	
 	<!-- Glue -->

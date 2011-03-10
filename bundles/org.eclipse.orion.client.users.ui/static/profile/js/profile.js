@@ -12,6 +12,9 @@ dojo.addOnLoad(function() {
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var inputService = new eclipse.InputService(serviceRegistry);
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+	dojo.addOnUnload(function() {
+		pluginRegistry.shutdown();
+	});
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});

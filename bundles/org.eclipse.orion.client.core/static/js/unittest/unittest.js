@@ -128,6 +128,9 @@ dojo.addOnLoad(function(){
 	// create registry and instantiate needed services
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+	dojo.addOnUnload(function() {
+		pluginRegistry.shutdown();
+	});
 	var inputService = new eclipse.InputService(serviceRegistry);
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
@@ -200,7 +203,7 @@ dojo.addOnLoad(function(){
 				myTree.refresh(root, root.children);
 			});	
 			service.run().then(function(result) {
-				testPluginRegistry._shutdown();
+				testPluginRegistry.shutdown();
 			});
 		});
 	}
