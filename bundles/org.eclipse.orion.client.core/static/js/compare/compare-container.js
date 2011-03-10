@@ -24,7 +24,7 @@ orion.CompareContainer = (function() {
 			return delim;
 		},
 		
-		getFileDiffGit: function(diffURI , callBack){
+		getFileDiffGit: function(diffURI , callBack , errorCallBack){
 			var self = this;
 			if(diffURI === null || diffURI === undefined){
 				self.setEditor("" ,self.fileContent);
@@ -46,14 +46,15 @@ orion.CompareContainer = (function() {
 						callBack();
 				},
 				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
+					if(errorCallBack)
+						errorCallBack(response,ioArgs);
 					handleGetAuthenticationError(this, ioArgs);
 					return response;
 				}
 			});
 		},
 		
-		getFileContent: function(diffURI ,fileURI , callBack){
+		getFileContent: function(diffURI ,fileURI , callBack, errorCallBack){
 			var self = this;
 			dojo.xhrGet({
 				url: fileURI, 
@@ -64,10 +65,11 @@ orion.CompareContainer = (function() {
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
 					self.fileContent = jsonData;
-					self.getFileDiffGit(diffURI , callBack);
+					self.getFileDiffGit(diffURI , callBack , errorCallBack);
 				},
 				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
+					if(errorCallBack)
+						errorCallBack(response,ioArgs);
 					handleGetAuthenticationError(this, ioArgs);
 					return response;
 				}
@@ -84,8 +86,8 @@ orion.CompareContainer = (function() {
 			return {delim:delim , mapper:result.mapper , output:result.outPutFile ,diffArray:diffArray};
 		},
 		
-		resolveDiff: function(diffURI ,fileURI , callBack){
-			this.getFileContent(diffURI ,fileURI , callBack);
+		resolveDiff: function(diffURI ,fileURI , callBack , errorCallBack){
+			this.getFileContent(diffURI ,fileURI , callBack , errorCallBack);
 		},
 				
 		_initDiffPosition: function(editor){

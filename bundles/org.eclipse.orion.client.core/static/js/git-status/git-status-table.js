@@ -239,7 +239,7 @@ orion.GitStatusController = (function() {
 			var progressMessage = document.createElement('h2');
 			dojo.place(document.createTextNode(message), progressMessage, "only");
 			progressDiv.appendChild(progressMessage);
-			
+			return progressMessage;
 		},
 		
 		_createProgressDivCenter: function(progressParentId , progressId,message){
@@ -372,7 +372,11 @@ orion.GitStatusController = (function() {
 					                                function(){					
 														dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
 														self.cursorClear();
-													});
+													},
+													function(response, ioArgs){
+														self.handleServerErrors(response , ioArgs);
+													}
+			);
 		},
 		
 		openSBSViewer: function(itemModel){
@@ -387,6 +391,17 @@ orion.GitStatusController = (function() {
 			else
 				this.stage(eclipse.util.makeRelative(location));
 		},
+		
+		handleServerErrors: function(errorResponse , ioArgs){
+		  	this._inlineCompareContainer.destroyEditor();
+			dojo.place(document.createTextNode("Compare..."), "fileNameInViewer", "only");
+			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
+			var message = typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; 
+			var errorDiv = this.createProgressDiv("inline-compare-viewer"  , "compareIndicatorId" , message);
+			dojo.style(errorDiv, "color", "red");
+			this.cursorClear();
+		},
+		
 		
 		getGitStatus: function(url){
 			this.cursorWait();
@@ -403,7 +418,7 @@ orion.GitStatusController = (function() {
 					self.loadStatus(jsonData);
 				},
 				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
+					self.handleServerErrors(response, ioArgs);
 					handleGetAuthenticationError(this, ioArgs);
 					return response;
 				}
@@ -421,11 +436,10 @@ orion.GitStatusController = (function() {
 				handleAs: "json",
 				timeout: 5000,
 				load: function(jsonData, ioArgs) {
-					//console.log(JSON.stringify(jsonData));
-					self.getGitStatus(self._url);;
+					self.getGitStatus(self._url);
 				},
 				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
+					self.handleServerErrors(response, ioArgs);
 					handleGetAuthenticationError(this, ioArgs);
 					return response;
 				}
@@ -434,8 +448,13 @@ orion.GitStatusController = (function() {
 		
 		stageAll: function(){
 			var start = this._url.indexOf("/file/");
-			if(start != -1)
-				this.stage(this._url.substring(start));
+			if(start != -1){
+				var sub = this._url.substring(start);
+				var subSlitted = sub.split("/");
+				if(subSlitted.length > 2){
+					this.stage([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") );
+				}
+			}
 		},
 		
 		unstage: function(location){
@@ -454,7 +473,7 @@ orion.GitStatusController = (function() {
 					self.getGitStatus(self._url);;
 				},
 				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
+					self.handleServerErrors(response, ioArgs);
 					handleGetAuthenticationError(this, ioArgs);
 					return response;
 				}
@@ -479,11 +498,10 @@ orion.GitStatusController = (function() {
 				timeout: 5000,
 				postData: body,
 				load: function(jsonData, ioArgs) {
-					//console.log(JSON.stringify(jsonData));
 					self.getGitStatus(self._url);;
 				},
 				error: function(response, ioArgs) {
-					console.error("HTTP status code: ", ioArgs.xhr.status);
+					self.handleServerErrors(response, ioArgs);
 					handleGetAuthenticationError(this, ioArgs);
 					return response;
 				}
