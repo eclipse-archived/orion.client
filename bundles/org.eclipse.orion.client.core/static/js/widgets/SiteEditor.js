@@ -109,7 +109,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	// TODO implement as a Command
 	// TODO return deferred for when mapping is done being added so we can do focus tricks
 	_addMapping: function(source, target) {
-		source = typeof(source) === "string" ? source : "/virtualPath";
+		source = typeof(source) === "string" ? source : "/mountPoint";
 		target = typeof(target) === "string" ? target : "/";
 		this.get("store").newItem(this._createMappingObject(source, target));
 		this.get("store").save();
@@ -118,12 +118,12 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	postCreate: function() {
 		this.inherited(arguments);
 		var structure = [
-				{field: "Source", name: "Virtual Path", editable: true, commitOnBlur: true,
-					width: "16em", cellClasses: "pathCell"},
+		 		{field: "_item", name: "Workspace path", editable: false,
+					width: "16em", formatter: dojo.hitch(this, this._workspacePathFormatter)},
 				{field: "Target", name: "Target", editable: true, commitOnBlur: true,
 						width: "16em", cellClasses: "pathCell"},
-				{field: "_item", name: "Workspace path", editable: false,
-						width: "16em", formatter: dojo.hitch(this, this._workspacePathFormatter)},
+				{field: "Source", name: "Mount at", editable: true, commitOnBlur: true,
+						width: "16em", cellClasses: "pathCell"},
 				{field: "_item", name: " ", editable: false, cellClasses: "actionCell",
 						width: "32px", formatter: dojo.hitch(this, this._actionColumnFormatter)}
 			];
@@ -314,13 +314,13 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		 */
 		var editor = this;
 		var callback = function(item) {
-			editor.mappings._addMapping("/virtualPath", this.path);
+			editor.mappings._addMapping("/mountPoint", this.path);
 		};
 		var addOther = function() {
-			editor.mappings._addMapping("/virtualPath", "/FolderId/somepath");
+			editor.mappings._addMapping("/mountPoint", "/FolderId/somepath");
 		};
 		var addUrl = function() {
-			editor.mappings._addMapping("/virtualPath", "http://someurl");
+			editor.mappings._addMapping("/mountPoint", "http://someurl");
 		};
 		
 		var choices = [];
