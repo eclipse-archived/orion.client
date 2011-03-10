@@ -92,7 +92,7 @@ a:hover {
     padding-left: 32px;
     padding-top: 20px;
     background: #EDEDED;
-    overflow: auto;
+    overflow-x: hidden;
 }
 
 .soria .dijitSplitterV .dijitSplitterThumb {	
