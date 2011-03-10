@@ -14,17 +14,14 @@
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
 			provider.registerServiceProvider("editorAction", {
-				info : function() {
-					return {
-						name : "UPPERCASE",
-						img : "/images/gear.gif",
-						key : [ "u", true ]
-					};
-				},
 				run : function(text) {
 					return text.toUpperCase();
 				}
-			}, {name : "UPPERCASE", img : "/images/gear.gif"});
+			}, {
+				name : "UPPERCASE",
+				img : "/images/gear.gif",
+				key : [ "u", true ]
+			});
 			provider.connect();
 		};
 	</script>
