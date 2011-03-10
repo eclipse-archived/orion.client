@@ -1,7 +1,10 @@
 <div>
 	<style type="text/css">
 		.pathCell {
-			font-family: monospace;
+			/* font-family: monospace; */
+		}
+		.workspacePathError {
+			text-align: center;
 		}
 		.actionCell {
 			height: 20px !important;
@@ -32,7 +35,7 @@
 					<table dojoType="widgets.MappingsGrid" dojoAttachPoint="mappings"
 							autoHeight="true" singleClickEdit="true" selectionMode="none"
 							selectable="true"
-							style="width: 50em">
+							style="width: auto" autoWidth="true">
 					</table>
 					<div style="padding: 5px 0 0 5px;">
 						<div dojoAttachPoint="addMappingToolbar" id="${id}_addMappingToolbar"></div>

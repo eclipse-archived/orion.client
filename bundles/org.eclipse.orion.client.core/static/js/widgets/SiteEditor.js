@@ -23,7 +23,7 @@ dojo.require("dojo.data.ItemFileWriteStore");
 dojo.require("dojo.DeferredList");
 dojo.require("dojox.grid.DataGrid");
 dojo.require("dojox.grid.cells");
-// requires eclipse.util
+// requires eclipse.sites.util
 
 /**
  * Visualizes the Mappings array of a SiteConfiguration as a data grid.
@@ -66,6 +66,11 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		// Hang onto the variable; will be mutated as user makes changes to grid store
 		this._mappings = mappings;
 		this.setStore(this._createGridStore(mappings));
+	},
+	
+	// Sets reference to the outer SiteEditor
+	setEditor: function(editor) {
+		this._editor = editor;
 	},
 	
 	/**
@@ -114,11 +119,13 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		this.inherited(arguments);
 		var structure = [
 				{field: "Source", name: "Virtual Path", editable: true, commitOnBlur: true,
-					width: "23em", cellClasses: "pathCell"},
+					width: "16em", cellClasses: "pathCell"},
 				{field: "Target", name: "Target", editable: true, commitOnBlur: true,
-						width: "23em", cellClasses: "pathCell"},
-				{field: "_item", name: " ", editable: false, width: "auto", cellClasses: "actionCell", 
-						formatter: dojo.hitch(this, this._actionColumnFormatter)}
+						width: "16em", cellClasses: "pathCell"},
+				{field: "_item", name: "Workspace path", editable: false,
+						width: "16em", formatter: dojo.hitch(this, this._workspacePathFormatter)},
+				{field: "_item", name: " ", editable: false, cellClasses: "actionCell",
+						width: "32px", formatter: dojo.hitch(this, this._actionColumnFormatter)}
 			];
 		this.set("structure", structure);
 		
@@ -134,6 +141,38 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		});
 		
 		dojo.connect(this, "onStyleRow", this, this._renderCommands);
+	},
+	
+	/**
+	 * @returns String | dojo.Deferred (which will do the formatting as soon as 
+	 * workspace children are loaded)
+	 */
+	_workspacePathFormatter: function(item) {
+		var target =  this.store.getValue(item, "Target");
+		if (/^\//.test(target)) {
+			var deferred = new dojo.Deferred();
+			dojo.when(this._editor._workspaceToChildren, dojo.hitch(this, 
+				function(map) {
+					var workspaceId = this._editor.getSiteConfiguration().Workspace;
+					var children = map[workspaceId];
+					var matched = false;
+					for (var i=0; i < children.length; i++) {
+						var child = children[i];
+						var path = eclipse.sites.util.makeRelativeFilePath(child.Location);
+						if (target.indexOf(path) === 0) {
+							var rest = target.substring(path.length);
+							var result = "/" + child.Name + rest;
+							deferred.callback(result);
+							matched = true;
+						}
+					}
+					if (!matched) {
+						deferred.callback('<div class="workspacePathError">Not found</span>');
+					}
+				}));
+			return deferred;
+		}
+		return '<div class="workspacePathError">Not a workspace path</span>';
 	},
 	
 	_actionColumnFormatter: function(item) {
@@ -224,6 +263,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		
 		// Mappings grid
 		this.mappings.setServices(this._commandService);
+		this.mappings.setEditor(this);
 		
 		// dijit.form.Form doesn't work in dojoAttachPoint for some reason
 		dojo.connect(this.saveButton, "onClick", dijit.byId("siteForm"), function() { this.onSubmit(arguments); });;
@@ -254,16 +294,6 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	 * @returns {Array}
 	 */
 	_makeAddMenuChoices: function(workspaceToChildrenMap, items, userData) {
-		/**
-		 * @param projectLocation A Location URL
-		 * @returns {String} A server-relative version of the URL with no /file/ prefix
-		 * FIXME: this is URL manipulation, should be done by server
-		 */
-		function stripFilePrefix(projectLocation) {
-			var path = eclipse.util.makeRelative(projectLocation);
-			return "/" + path.split("/").filter(function(s){return s !== "";}).splice(1).join("/");
-		}
-		
 		items = dojo.isArray(items) ? items[0] : items;
 		var workspaceId = this.workspace.get("value");
 		var projects = workspaceToChildrenMap[workspaceId];
@@ -286,7 +316,10 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		var choices = [];
 		for (var i=0; i < projects.length; i++) {
 			var project = projects[i];
-			choices.push({name: "/" + project.Name, path: stripFilePrefix(project.Location), callback: callback});
+			choices.push({
+				name: "/" + project.Name,
+				path: eclipse.sites.util.makeRelativeFilePath(project.Location),
+				callback: callback});
 		}
 		if (projects.length > 0) {
 			choices.push({}); // Separator
