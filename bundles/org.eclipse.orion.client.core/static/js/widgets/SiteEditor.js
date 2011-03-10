@@ -153,7 +153,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		// Returns text node content
 		function makeSafe(text) {
 			var node = document.createTextNode(text);
-			return typeof(node.textContent) === "string" ? node.textContent : node.innerText; 
+			return typeof(node.textContent) === "string" ? node.textContent : node.nodeValue; 
 		}
 		
 		var target =  this.store.getValue(item, "Target");

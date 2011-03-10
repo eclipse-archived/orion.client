@@ -127,6 +127,8 @@ eclipse.sites.util = {
 	 */
 	makeRelativeFilePath: function(location) {
 		var path = eclipse.util.makeRelative(location);
-		return "/" + path.split("/").filter(function(s){return s !== "";}).splice(1).join("/");
+		var segments = path.split("/");
+		var filteredSegments = dojo.filter(segments, function(s){return s !== "";});
+		return "/" + filteredSegments.slice(1).join("/");
 	}
 };
