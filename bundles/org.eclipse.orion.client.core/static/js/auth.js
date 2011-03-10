@@ -66,7 +66,7 @@ function handlePutAuthenticationError(xhrArgs, ioArgs) {
  */
 function handleAuthenticationError(error, retry) {
 	if (error.status === 403) { 
-		if (forbiddenAccessDlg === null) {
+		if (forbiddenAccessDlg == null) {
 			forbiddenAccessDlg = new dijit.Dialog({
 		        title: "Forbidden access"
 		    });

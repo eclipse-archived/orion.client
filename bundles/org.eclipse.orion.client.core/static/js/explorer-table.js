@@ -352,6 +352,13 @@ eclipse.FileRenderer = (function() {
 					dojo.removeClass(node, "darkTreeTableRow");
 				}
 			});
+			// update the selections so that any checked rows that may no longer be around are not
+			// remembered.  This is a temporary solution, 
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339450
+			this.explorer.registry.getService("ISelectionService").then(dojo.hitch(this,
+				function(selService) {
+					selService._setSelection(this.getSelected());
+				}));
 		},
 		updateCommands: function(){
 			var registry = this.explorer.registry;
