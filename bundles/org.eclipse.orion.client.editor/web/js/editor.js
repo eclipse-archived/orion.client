@@ -119,7 +119,7 @@ eclipse.Editor = (function() {
 		}
 	}
 	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent);
-	var isFirefox = parseFloat(navigator.userAgent.split("Firefox/")[1] || navigator.userAgent.split("Minefield/")[1]) || undefined;
+	var isFirefox = parseFloat(navigator.userAgent.split("Firefox/")[1] || navigator.userAgent.split("Minefield/")[1]) || 0;
 	var isOpera = navigator.userAgent.indexOf("Opera") !== -1;
 	var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
 	var isSafari = navigator.userAgent.indexOf("Safari") !== -1;
@@ -1454,6 +1454,19 @@ eclipse.Editor = (function() {
 				this._columnX = -1;
 				this._setSelection(new Selection (0, 0, false), true);
 				this._showCaret();
+				
+				/*
+				* Bug in Firefox 4.  For some reason, the caret does not show after the
+				* editor is refreshed.  The fix is to toggle the contentEditable state and
+				* force the clientDiv to loose and receive focus.
+				*/
+				if (isFirefox >= 4) {
+					var clientDiv = this._clientDiv;
+					clientDiv.contentEditable = false;
+					clientDiv.contentEditable = true;
+					clientDiv.blur();
+					clientDiv.focus();
+				}
 			}
 		},
 		/**
