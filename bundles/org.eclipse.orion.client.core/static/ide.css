@@ -1,5 +1,5 @@
 html {
-  overflow-x: hidden; // workaround to get rid of horizontal scrollbar
+  overflow-x: hidden; /* workaround to get rid of horizontal scrollbar */
 }
 
 html, body {
@@ -130,7 +130,7 @@ a:hover {
 	border: 0px;
 	padding: 0px;
 	margin: 0px;
-	overflow: hidden; // works around a "mystery pixels" problem in IE, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339302
+	overflow: hidden; /* works around a "mystery pixels" problem in IE, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339302 */
 	cursor: pointer;
 	font-size: 0.9em;
 	color: #5a5a5a;
@@ -213,12 +213,12 @@ a:hover {
 
 .toolbarButton {
 	border: 0px;
-	padding: 0px
+	padding: 0px;
 	height: 20px;
 }
 
 .toolbarTest {
-//	background: #fff url("images/titleBarTest.png")  repeat-x top left;
+/*	background: #fff url("images/titleBarTest.png")  repeat-x top left; */
 	border:1px solid #bfbfbf;
 	cursor: default;
 	font-size: 0.9em;
@@ -247,11 +247,11 @@ a:hover {
 }
 
 #rightPane .dijitTitlePaneContentInner {
-	padding: 0px; // Remove the padding around the editor
+	padding: 0px; /* Remove the padding around the editor */
 }
 
 #codeTitle .dijitTitlePaneContentInner {
-	padding: 0px; // Remove the padding around the editor
+	padding: 0px; /* Remove the padding around the editor */
 }
 
 #tree {
@@ -331,12 +331,12 @@ a:hover {
 }
 
 .testNavTreetable {
-	cellspacing: 0px;
+	cellspacing: 0px; /* mistake? */
 	min-width: 150px;
 }
 
 .testResultTreetable {
-	cellspacing: 0px;
+	cellspacing: 0px; /* mistake? */
 	min-width: 600px;
 }
 
