@@ -144,10 +144,18 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	},
 	
 	/**
+	 * If the mapping Target looks like a workspace path, this checks that the folder
+	 * (first segment) exists, and puts a link (or an error message) in the column.
 	 * @returns String | dojo.Deferred (which will do the formatting as soon as 
 	 * workspace children are loaded)
 	 */
 	_workspacePathFormatter: function(item) {
+		// Returns text node content
+		function makeSafe(text) {
+			var node = document.createTextNode(text);
+			return typeof(node.textContent) === "string" ? node.textContent : node.innerText; 
+		}
+		
 		var target =  this.store.getValue(item, "Target");
 		if (/^\//.test(target)) {
 			var deferred = new dojo.Deferred();
@@ -155,18 +163,19 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 				function(map) {
 					var workspaceId = this._editor.getSiteConfiguration().Workspace;
 					var children = map[workspaceId];
-					var matched = false;
+					var folderExists = false;
 					for (var i=0; i < children.length; i++) {
 						var child = children[i];
 						var path = eclipse.sites.util.makeRelativeFilePath(child.Location);
-						if (target.indexOf(path) === 0) {
+						if (target.indexOf(path + "/") === 0) {
+							folderExists = true;
 							var rest = target.substring(path.length);
-							var result = "/" + child.Name + rest;
-							deferred.callback(result);
-							matched = true;
+							var linkText = "/" + child.Name + rest;
+							var href = child.Location + (rest === "" ? "" : rest.substring(1));
+							deferred.callback('<a href="' + makeSafe(href) + '">' + makeSafe(linkText) + '</a>');
 						}
 					}
-					if (!matched) {
+					if (!folderExists) {
 						deferred.callback('<div class="workspacePathError">Not found</span>');
 					}
 				}));
