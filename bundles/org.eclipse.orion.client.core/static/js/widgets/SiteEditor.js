@@ -335,7 +335,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 			choices.push({}); // Separator
 		}
 		choices.push({name: "URL&#8230;", callback: addUrl});
-		choices.push({name: "Other&#8230;", callback: addOther});
+//		choices.push({name: "Other&#8230;", callback: addOther});
 		return choices;
 	},
 	
