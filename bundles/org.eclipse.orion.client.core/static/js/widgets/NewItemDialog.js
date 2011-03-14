@@ -61,6 +61,8 @@ dojo.declare("widgets.NewItemDialog", [dijit.Dialog], {
 		this.refocus = false; // Dojo 10654
 	},
 	onHide: function() {
+		this.domNode.focus(); // Bug 339487
+		
 		// This assumes we don't reuse the dialog
 		this.inherited(arguments);
 		setTimeout(dojo.hitch(this, function() {
