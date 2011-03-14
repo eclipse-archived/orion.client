@@ -485,7 +485,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 			
 			var editor = this;
 			var siteConfig = editor._siteConfiguration;
-			this._siteService.updateSiteConfiguration(siteConfig.Id, siteConfig).then(
+			this._siteService.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
 					function(updatedSiteConfig) {
 						editor._setSiteConfiguration(updatedSiteConfig);
 						editor._done("Saved.");

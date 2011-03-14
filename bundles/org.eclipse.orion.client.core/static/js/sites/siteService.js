@@ -43,7 +43,7 @@ eclipse.sites.SiteService = (function() {
 		
 		/**
 		 * Loads an individual site configuration from the given location.
-		 * @param {String} Location URI of a site configuration resource.
+		 * @param {String} Location URL of a site configuration resource.
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
 		 * loaded {SiteConfiguration} on success.
 		 */
@@ -66,32 +66,32 @@ eclipse.sites.SiteService = (function() {
 		
 		/**
 		 * Performs a start or stop action on a site configuration.
-		 * @param {String} id
+		 * @param {String} locationUrl Location of a site configuration resource.
 		 * @param {String} action
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
 		 * changed {SiteConfiguration} on success.
 		 */
-		startStopSiteConfiguration: function(id, action) {
+		startStopSiteConfiguration: function(locationUrl, action) {
 			return this._doServiceCall("startStopSiteConfiguration", arguments);
 		},
 		
 		/**
 		 * Edits an existing site configuration.
-		 * @param id
+		 * @param {String} locationUrl Location of a site configuration resource.
 		 * @param updatedSiteConfig
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the updated
 		 * {SiteConfiguration} on success.
 		 */
-		updateSiteConfiguration: function(id, updatedSiteConfig) {
+		updateSiteConfiguration: function(locationUrl, updatedSiteConfig) {
 			return this._doServiceCall("updateSiteConfiguration", arguments);
 		},
 		
 		/**
 		 * Deletes a site configuration.
-		 * @param id
+		 * @param {String} locationUrl Location of a site configuration resource.
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with no argument on success.
 		 */
-		deleteSiteConfiguration: function(id) {
+		deleteSiteConfiguration: function(locationUrl) {
 			return this._doServiceCall("deleteSiteConfiguration", arguments);
 		},
 		
@@ -139,9 +139,9 @@ eclipse.sites.SiteService = (function() {
 					timeout: 15000
 				});
 			},
-			startStopSiteConfiguration: function(id, action) {
+			startStopSiteConfiguration: function(locationUrl, action) {
 				return dojo.xhrPost({
-					url: "/site/" + id,
+					url: locationUrl,
 					headers: {
 						"Content-Type": "application/json, charset=utf-8",
 						"Orion-Version": "1",
@@ -151,9 +151,9 @@ eclipse.sites.SiteService = (function() {
 					timeout: 15000
 				});
 			},
-			updateSiteConfiguration: function(id, updatedSiteConfig) {
+			updateSiteConfiguration: function(locationUrl, updatedSiteConfig) {
 				return dojo.xhrPut({
-					url: "/site/" + id,
+					url: locationUrl,
 					putData: dojo.toJson(updatedSiteConfig),
 					headers: {
 						"Content-Type": "application/json; charset=utf-8",
@@ -163,9 +163,9 @@ eclipse.sites.SiteService = (function() {
 					timeout: 15000
 				});
 			},
-			deleteSiteConfiguration: function(id) {
+			deleteSiteConfiguration: function(locationUrl) {
 				return dojo.xhrDelete({
-					url: "/site/" + id,
+					url: locationUrl,
 					headers: {
 						"Orion-Version": "1"
 					},

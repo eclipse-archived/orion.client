@@ -85,7 +85,7 @@ eclipse.sites.util = {
 			},
 			callback: function(item) {
 				statusService.setMessage("Starting...");
-				siteService.startStopSiteConfiguration(item.Id, "start").then(startCallback, errorCallback);
+				siteService.startStopSiteConfiguration(item.Location, "start").then(startCallback, errorCallback);
 			}});
 		commandService.addCommand(startCommand, "object");
 		
@@ -98,7 +98,7 @@ eclipse.sites.util = {
 			},
 			callback: function(item) {
 				statusService.setMessage("Stopping " + item.Name + "...");
-				siteService.startStopSiteConfiguration(item.Id, "stop").then(stopCallback, errorCallback);
+				siteService.startStopSiteConfiguration(item.Location, "stop").then(stopCallback, errorCallback);
 			}});
 		commandService.addCommand(stopCommand, "object");
 		
@@ -113,7 +113,7 @@ eclipse.sites.util = {
 				var msg = "Are you sure you want to delete the site configuration '" + item.Name + "'?";
 				dialogService.confirm(msg, function(confirmed) {
 						if (confirmed) {
-							siteService.deleteSiteConfiguration(item.Id).then(deleteCallback, errorCallback);
+							siteService.deleteSiteConfiguration(item.Location).then(deleteCallback, errorCallback);
 						}
 					});
 			}});
