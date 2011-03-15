@@ -46,7 +46,7 @@ var cloneGitRepositoryCommand = new eclipse.Command({
 			dialog.show();
 		},
 		visibleWhen : function(item) {
-			return false;
+			return true;
 		}
 	});
 
