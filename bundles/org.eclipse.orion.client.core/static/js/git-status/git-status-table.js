@@ -342,10 +342,11 @@ orion.GitStatusController = (function() {
 				if(!groupData)
 					break;
 				for(var j = 0 ; j < groupData.length ; j++){
-					renderer.renderRow({name:groupData[j].Name , 
-										type:groupName , 
+					renderer.renderRow({name:groupData[j].Name, 
+										type:groupName, 
 										location:groupData[j].Location,
 										commitURI:groupData[j].Git.CommitLocation,
+										indexURI:groupData[j].Git.IndexLocation,
 										diffURI:groupData[j].Git.DiffLocation
 					});
 				} 
@@ -356,7 +357,7 @@ orion.GitStatusController = (function() {
 			var untracked = (itemModel.type === "Untracked");
 			var added = (itemModel.type === "Added");
 			var diffURI =  (untracked || added) ? null : itemModel.diffURI;
-			var fileURI =  (untracked || added) ? itemModel.location : (this._model.isStaged(itemModel.type) ? itemModel.commitURI: "/git/index" + eclipse.util.makeRelative(itemModel.location));
+			var fileURI =  (untracked || added) ? itemModel.location : (this._model.isStaged(itemModel.type) ? itemModel.commitURI: itemMode.indexURI);
 			return {diffURI:diffURI , fileURI:fileURI };
 		},
 		

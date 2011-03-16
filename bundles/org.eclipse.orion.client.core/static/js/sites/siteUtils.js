@@ -24,7 +24,7 @@ eclipse.sites.util = {
 	 * @return The href for a link to the editing page of the given siteConfiguration.
 	 */
 	generateEditSiteHref: function(siteConfig) {
-		return "edit-site.html#site=" + eclipse.util.makeRelative(siteConfig.Location);
+		return "edit-site.html#" + eclipse.util.makeRelative(siteConfig.Location);
 	},
 	
 	/**
@@ -34,7 +34,18 @@ eclipse.sites.util = {
 	 * @return {site: String, [action: String], [actionDetails:String]}
 	 */
 	parseStateFromHash: function(hash) {
-		return dojo.queryToObject(hash);
+		var obj = dojo.queryToObject(hash);
+		var state = dojo.mixin({}, obj);
+		// Find the property name that represents the site
+		for (var prop in obj) {
+			if (obj.hasOwnProperty(prop)) {
+				if (obj[prop] === "" && prop !== "action" && prop !== "actionDetails") {
+					state.site = prop;
+					delete state[prop];
+				}
+			}
+		}
+		return state;
 	},
 	
 	/**
@@ -48,7 +59,7 @@ eclipse.sites.util = {
 	stateToHash: function(siteLocation, action, actionDetails) {
 		var obj = {};
 		if (siteLocation) {
-			obj.site = siteLocation;
+			obj[siteLocation] = "";
 		}
 		if (action) {
 			obj.action = action;
