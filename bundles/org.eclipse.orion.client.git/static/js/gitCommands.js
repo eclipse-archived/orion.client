@@ -25,6 +25,26 @@ eclipse.gitCommandUtils = eclipse.gitCommandUtils || {};
 
 dojo.require("widgets.CloneGitRepositoryDialog");
 
+
+eclipse.gitCommandUtils.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
+	// TODO this knowledge shouldn't be here...the fact that we know we are on a dark toolbar
+	var cssClass = "commandLinkLight";
+	var toolbar = dojo.byId(toolbarId);
+	if (toolbar) {
+		dojo.empty(toolbar);
+	} else {
+		throw "could not find toolbar " + toolbarId;
+	}
+	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
+		service.renderCommands(toolbar, "dom", item, explorer, "image", cssClass);
+		if (selectionToolbarId) {
+			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
+			service.renderCommands(selectionTools, "dom", null, explorer, "image", cssClass);
+		}
+	}));
+};
+
+
 eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 var cloneGitRepositoryCommand = new eclipse.Command({
 		name : "Clone Git Repository",
