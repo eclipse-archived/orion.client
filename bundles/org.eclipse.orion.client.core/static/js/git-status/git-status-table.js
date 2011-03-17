@@ -357,7 +357,7 @@ orion.GitStatusController = (function() {
 			var untracked = (itemModel.type === "Untracked");
 			var added = (itemModel.type === "Added");
 			var diffURI =  (untracked || added) ? null : itemModel.diffURI;
-			var fileURI =  (untracked || added) ? itemModel.location : (this._model.isStaged(itemModel.type) ? itemModel.commitURI: itemMode.indexURI);
+			var fileURI =  (untracked || added) ? itemModel.location : (this._model.isStaged(itemModel.type) ? itemModel.commitURI: itemModel.indexURI);
 			return {diffURI:diffURI , fileURI:fileURI };
 		},
 		
@@ -489,7 +489,7 @@ orion.GitStatusController = (function() {
 		
 		commitAll: function(location , message , body){
 			var self = this;
-			var url = "/git/commit" +  location;
+			var url = "/git/commit/HEAD" +  location;
 			dojo.xhrPost({
 				url: url , 
 				headers: {
