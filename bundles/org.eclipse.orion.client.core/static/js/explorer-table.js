@@ -207,7 +207,7 @@ eclipse.FileRenderer = (function() {
 			row.appendChild(actions);
 
 			th = document.createElement('th');
-			th.innerHTML = "<h2>Date</h2>";
+			th.innerHTML = "<h2>Date/Time</h2>";
 			dojo.addClass(th, "navColumn");
 			row.appendChild(th);
 
@@ -307,7 +307,14 @@ eclipse.FileRenderer = (function() {
 			var dateColumn = document.createElement('td');
 			tableRow.appendChild(dateColumn);
 			if (item.LocalTimeStamp) {
-				dateColumn.innerHTML = new Date(item.LocalTimeStamp).toLocaleDateString();
+				var fileDate = new Date(item.LocalTimeStamp);
+				var curDate = new Date();
+				var yesterday = new Date().setDate(curDate.getDate() - 1);
+				if (yesterday.valueOf() > fileDate.valueOf()) {
+					dateColumn.innerHTML = fileDate.toLocaleDateString();
+				} else {
+					dateColumn.innerHTML = fileDate.toLocaleTimeString();
+				}
 			}
 			dojo.addClass(dateColumn, 'secondaryColumn');
 			
