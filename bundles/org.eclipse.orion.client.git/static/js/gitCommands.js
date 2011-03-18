@@ -25,6 +25,7 @@ eclipse.gitCommandUtils = eclipse.gitCommandUtils || {};
 
 dojo.require("widgets.CloneGitRepositoryDialog");
 
+eclipse.doOnce = false;
 
 eclipse.gitCommandUtils.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
 	// TODO this knowledge shouldn't be here...the fact that we know we are on a dark toolbar
@@ -42,11 +43,27 @@ eclipse.gitCommandUtils.updateNavTools = function(registry, explorer, toolbarId,
 			service.renderCommands(selectionTools, "dom", null, explorer, "image", cssClass);
 		}
 	}));
+	
+	// Stuff we do only the first time
+	if (!eclipse.doOnce) {
+		eclipse.doOnce = true;
+		registry.getService("ISelectionService").then(function(service) {
+			service.addEventListener("selectionChanged", function(selections) {
+				var selectionTools = dojo.byId(selectionToolbarId);
+				if (selectionTools) {
+					dojo.empty(selectionTools);
+					registry.getService("ICommandService").then(function(commandService) {
+						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", cssClass);
+					});
+				}
+			});
+		});
+	}
 };
 
 
 eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
-var cloneGitRepositoryCommand = new eclipse.Command({
+	var cloneGitRepositoryCommand = new eclipse.Command({
 		name : "Clone Git Repository",
 		image : "images/git/cloneGit.gif",
 		id : "eclipse.cloneGitRepository",
@@ -71,4 +88,35 @@ var cloneGitRepositoryCommand = new eclipse.Command({
 	});
 
 	commandService.addCommand(cloneGitRepositoryCommand, "dom");
+	
+	var compareGitCommits = new eclipse.Command({
+		name : "Compare",
+		image : "images/git/compare-sbs.gif",
+		id : "eclipse.compareGitCommits",
+		callback : function(item) {
+			console.info("Commits compare not implemented yet");
+		},
+		visibleWhen : function(item) {
+			if (dojo.isArray(item) && item.length == 2) {
+					return true;
+			};
+			return false;
+		}
+	});
+
+	commandService.addCommand(compareGitCommits, "dom");
+	
+	var openGitCommit = new eclipse.Command({
+		name : "Open",
+		image : "images/find.gif",
+		id : "eclipse.openGitCommit",
+		hrefCallback: function(item) {
+			return "/coding.html#" + item.ContentLocation;
+		},
+		visibleWhen : function(item) {
+			return item.ContentLocation != null;
+		}
+	});
+
+	commandService.addCommand(openGitCommit, "object");
 };
