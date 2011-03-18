@@ -57,18 +57,13 @@ eclipse.LineNumberCompareRuler = (function() {
 		if (lineIndex === -1) {
 			return model.getLineCount();
 		} else {
-			if(model._lineFeeder && model._lineFeeder.getLineNumber){
-				var realIndex = model._lineFeeder.getLineNumber(lineIndex , this._mapperColumnIndex);
+			if( model.getLineNumber){
+				var realIndex = model.getLineNumber(lineIndex , this._mapperColumnIndex);
 				if(realIndex === -1){
 					return "";
 				}
 				return  realIndex + 1;
-			} else if(model.lookUpRealIndex){
-				var realIndex = model.lookUpRealIndex(lineIndex);
-				if(realIndex.lineIndex === -1)
-					return "";
-				return  realIndex.lineIndex + 1;
-			}
+			} 
 			return lineIndex + 1;;
 		}
 	};
@@ -94,8 +89,8 @@ eclipse.CompareOverviewRuler = (function() {
 	CompareOverviewRuler.prototype.getAnnotations = function() {
 		var model = this._editor.getModel();
 		var lines = [];
-		if(model._lineFeeder && model._lineFeeder.getAnnotations){
-			var annotations = model._lineFeeder.getAnnotations();
+		if(model.getAnnotations){
+			var annotations = model.getAnnotations();
 			for (var i = 0;i < annotations.length ; i++) {
 				if (annotations[i] !== undefined) {
 					lines.push(annotations[i][0]);
@@ -125,8 +120,8 @@ eclipse.CompareOverviewRuler = (function() {
 			style.left = "2px";
 			
 			var model = this._editor.getModel();
-			if(lineIndex >= 0 && model._lineFeeder && model._lineFeeder.getAnnotationH){
-				var anH = model._lineFeeder.getAnnotationH(lineIndex);
+			if(lineIndex >= 0 && model.getAnnotationH){
+				var anH = model.getAnnotationH(lineIndex);
 				var lC = model.getLineCount();
 				var clientArea = this._editor.getClientArea();
 				var height =  Math.floor(clientArea.height*anH/lC);
