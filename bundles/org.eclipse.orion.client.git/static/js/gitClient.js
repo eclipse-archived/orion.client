@@ -87,6 +87,33 @@ eclipse.GitService = (function() {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
+		},
+		doGitLog : function(gitDiffURI, onLoad) {
+			var service = this;
+			
+			console.info("doGitLog called");
+			
+			dojo.xhrGet({
+				url : gitDiffURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
 		}
 	};
 	return GitService;

@@ -7,6 +7,7 @@
 	<script>
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
+			
 			provider.registerServiceProvider("fileCommands", {
 				run: function(item) {
 					return "/git-status.html#" + item.Git.StatusLocation;
@@ -19,6 +20,20 @@
 				href: true,
 				forceSingleItem: true
 			});
+			
+			provider.registerServiceProvider("fileCommands", {
+				run: function(item) {
+					return "/git-log.html#" + item.Git.CommitLocation;
+				}
+			}, {
+				name: "Git Log",
+				id: "eclipse.git.log",
+				tooltip: "Go to Git Log",
+				validationProperties: {"Git":"*"},
+				href: true,
+				forceSingleItem: true
+			});
+			
 			provider.connect();
 		};
 	</script>
