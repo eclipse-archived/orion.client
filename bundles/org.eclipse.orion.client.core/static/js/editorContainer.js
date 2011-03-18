@@ -1209,9 +1209,9 @@ eclipse.EditorContainer = (function() {
 			this._annotationsRuler.onClick = function(lineIndex, e) {
 				if (lineIndex === undefined) { return; }
 				if (lineIndex === -1) { return; }
-				if (this._lines[lineIndex] === undefined) { return; }
 				var annotation = this.getAnnotation(lineIndex);
-				editorContainer(editorContainer.onGotoLine(annotation.line, annotation.column));
+				if (annotation === undefined) { return; }
+				editorContainer.onGotoLine(annotation.line, annotation.column);
 			};
 			
 			this._lineNumberRuler = this._lineNumberRulerFactory();
