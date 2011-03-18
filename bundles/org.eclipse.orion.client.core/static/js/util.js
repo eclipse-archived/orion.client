@@ -28,10 +28,14 @@ eclipse.util.getPositionInfo =
 		// most likely this is just the hash portion of a URL.  In case not...
 		var hashSegments = fileString.split('#');
 		var postHash = hashSegments[hashSegments.length - 1];
-		var querySegments = postHash.split('?');
+		// Split on "?" but only if it's part of "?line" or "?char"
+		var queryRegex = /\?(?=(?:line|char))/;
+		var querySegments = postHash.split(queryRegex);
 		filePath = eclipse.util.makeRelative(querySegments[0]);
 		if (querySegments.length > 1) {
-			var segments = querySegments[1].split('&');
+			// Split on "&" but only if it's part of "&line" or "&char"
+			var segmentsRegex = /\&(?=(?:line|char))/;
+			var segments = querySegments[1].split(segmentsRegex);
 			for (var i = 0; i < segments.length; i++) {
 				var subsegments = segments[i].split('=');
 				if (subsegments.length > 1) {
