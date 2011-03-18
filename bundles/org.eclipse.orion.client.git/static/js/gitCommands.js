@@ -110,11 +110,11 @@ eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandSe
 		name : "Open",
 		image : "images/find.gif",
 		id : "eclipse.openGitCommit",
-		callback : function(item) {
-			console.info("Open not implemented yet");
+		hrefCallback: function(item) {
+			return "/coding.html#" + item.ContentLocation;
 		},
 		visibleWhen : function(item) {
-			return true;
+			return item.ContentLocation != null;
 		}
 	});
 
