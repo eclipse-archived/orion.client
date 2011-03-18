@@ -120,3 +120,28 @@ eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandSe
 
 	commandService.addCommand(openGitCommit, "object");
 };
+
+eclipse.gitCommandUtils.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
+	var deleteCommand = new eclipse.Command({
+		name: "Delete Clone",
+		image: "images/remove.gif",
+		id: "eclipse.git.deleteClone",
+		visibleWhen: function(item) {
+			var items = dojo.isArray(item) ? item : [item];
+			if (items.length === 0) {
+				return false;
+			}
+			for (var i=0; i < items.length; i++) {
+				if (!items[i].Location) {
+					return false;
+				}
+			}
+			return true;
+		},
+		callback: function(item) {
+			alert("Cannot delete " + item.name + ", deleting is not implented yet!");
+		}});
+	commandService.addCommand(deleteCommand, "object");
+	commandService.addCommand(deleteCommand, "dom");
+	
+};
