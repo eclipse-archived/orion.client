@@ -62,6 +62,9 @@ eclipse.GitCommitNavigator = (function() {
 						for (var i  in jsonData) {
 							this.treeRoot[i] = jsonData[i];
 						};
+						
+						eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
+						
 						this.createTree();
 			
 						var pageTitle = dojo.byId(this.pageTitleId);
@@ -210,7 +213,7 @@ eclipse.FileRenderer = (function() {
 			tableRow.appendChild(col);
 				
 			var nameId =  tableRow.id + "__expand";
-			div = dojo.create("div", {style: "padding-left: 5px; padding-right: 5px"}, col, "only");
+			div = dojo.create("div", {style: "padding-left: 5px; padding-right: 5px; ; padding-top: 5px; padding-bottom: 5px"}, col, "only");
 //			var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
 			link = dojo.create("a", {className: "navlinkonpage", href: "/coding.html#" + item.ContentLocation}, div, "last");
 			dojo.place(document.createTextNode(item.Message), link, "only");

@@ -50,10 +50,10 @@ dojo.addOnLoad(function(){
 	commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
 	
 	// commands appearing directly in local actions column
-	// commandService.registerCommandContribution("eclipse.openCommit", 1);
+	commandService.registerCommandContribution("eclipse.openGitCommit", 1);
 
 	// selection based command contributions in nav toolbar
-	// commandService.registerCommandContribution("eclipse.comapreCommits", 1, "selectionTools", "eclipse.selectionGroup");
+	commandService.registerCommandContribution("eclipse.compareGitCommits", 1, "selectionTools", "eclipse.selectionGroup");
 	
 	// git contributions
 	// commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup.page");
