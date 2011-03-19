@@ -1265,7 +1265,7 @@ eclipse.EditorContainer = (function() {
 							this.showSelection(input.start, input.end, input.line, input.offset, input.length);
 						}),
 						dojo.hitch(this, function(error) {
-							this.onInputChange(fullPathName, "Sorry, an error ocurred: " + error.message, null);
+							this.onInputChange(fullPathName, "An error occurred: " + error.message, null);
 							console.error("HTTP status code: ", error.status);
 						})
 					);
