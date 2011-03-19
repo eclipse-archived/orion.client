@@ -14,7 +14,8 @@ dojo.addOnLoad(function(){
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
-	var compareMergeContainer = new orion.CompareMergeContainer("left-viewer" , "right-viewer");
+	var canvas = document.getElementById("diff-canvas");
+	var compareMergeContainer = new orion.CompareMergeContainer("left-viewer" , "right-viewer" , canvas);
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
 		var hash = splitted[1];
@@ -44,8 +45,7 @@ dojo.addOnLoad(function(){
 		);
 		
 		
-		var canvas = document.getElementById("diff-canvas");
-		
+		/*
 		//canvas.width = canvas.parentNode.clientWidth;
 		//canvas.height = canvas.parentNode.clientHeight;
 		
@@ -57,7 +57,8 @@ dojo.addOnLoad(function(){
 		context.moveTo(0 , 0);
 		//context.lineTo(canvas.width -2  ,canvas.height -2);
 		context.bezierCurveTo( canvas.parentNode.clientWidth/3, 2, canvas.parentNode.clientWidth -2- canvas.parentNode.clientWidth/3  ,100 -2 , canvas.parentNode.clientWidth -2  ,100 -2 );
-		context.stroke();		
+		context.stroke();	
+		*/	
 		
 	}
 	

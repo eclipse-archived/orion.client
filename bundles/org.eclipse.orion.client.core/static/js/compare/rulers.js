@@ -152,3 +152,79 @@ eclipse.CompareOverviewRuler = (function() {
 	};
 	return CompareOverviewRuler;
 }());
+
+
+eclipse.CompareMatchRenderer =  (function() {
+
+	function CompareMatchRenderer(canvasDiv) {
+		this._canvasDiv = canvasDiv;
+	}
+
+	CompareMatchRenderer.prototype =  {
+		
+		init: function(mapper , leftEditor , rightEditor ){
+			this._mapper = mapper;
+			this._leftEditor = leftEditor;
+			this._rightEditor = rightEditor;
+			this.render();
+		},
+		
+		_overlap: function(start1, end1 , start2 , end2){
+			if(end1 < start1)
+				end1 = start1;
+			if(end1 < start1)
+				end1 = start1;
+			if (end1 < start2 || end2 < start1){
+				return false;
+			}
+			return true; 
+		},
+	
+		render: function(){
+			var context=this._canvasDiv.getContext("2d");
+			context.clearRect(0,0,this._canvasDiv.width,this._canvasDiv.height);
+			context.fillStyle   = '#00f'; // blue
+			context.strokeStyle = '#00f'; // red
+			context.lineWidth   = 1;
+			context.beginPath();
+			
+			var leftTop = this._leftEditor.getTopIndex();
+			var leftBottom = this._leftEditor.getBottomIndex();
+			var rightTop = this._rightEditor.getTopIndex();
+			var rightBottom = this._rightEditor.getBottomIndex();
+			this._leftLineH = this._leftEditor.getLineHeight();
+			this._rightLineH = this._rightEditor.getLineHeight();
+		
+			var curLeftIndex = 0;
+			var curRightIndex = 0;
+			var rendering = false;
+			for (var i = 0 ; i < this._mapper.length ; i++){
+				if(this._mapper[i][2] !== 0){
+					if(this._overlap( curLeftIndex , curLeftIndex + this._mapper[i][0] -1,  leftTop ,leftBottom) ||
+					   this._overlap( curRightIndex , curRightIndex + this._mapper[i][1] -1,  rightTop ,rightBottom) ){
+						this._renderCurve(this._mapper[i], curLeftIndex , curRightIndex , this._canvasDiv , context , leftTop , leftBottom , rightTop , rightBottom);
+						rendering = true;
+					} else if (rendering) {
+						break;
+					}
+				}
+				curLeftIndex += this._mapper[i][0];
+				curRightIndex += this._mapper[i][1];
+			}
+			context.stroke();		
+		},
+		
+		_renderCurve: function (mapperItem , leftStart , rightStart , canvas , context , leftTop , leftBottom , rightTop , rightBottom){
+			var leftMiddle =  (leftStart + (mapperItem[0]/2) - leftTop) * this._leftLineH;
+			var rightMiddle = (rightStart + (mapperItem[1]/2) - rightTop) * this._rightLineH ;
+			var w =  canvas.parentNode.clientWidth;
+			
+			context.moveTo(0 , leftMiddle);
+			context.bezierCurveTo( w/3, leftMiddle, w*0.666  ,rightMiddle , w ,rightMiddle);
+		}
+		
+	};
+	
+	return CompareMatchRenderer;
+}()); 
+

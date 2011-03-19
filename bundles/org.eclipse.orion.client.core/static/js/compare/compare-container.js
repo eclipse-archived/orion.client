@@ -201,11 +201,12 @@ orion.SBSCompareContainer = (function() {
 
 orion.CompareMergeContainer = (function() {
 	/** @private */
-	function CompareMergeContainer(leftEditorDivId , rightEditorDivId) {
+	function CompareMergeContainer(leftEditorDivId , rightEditorDivId , canvas) {
 		this._editorLeft = null;
 		this._editorRight = null;
 		this._leftEditorDivId = leftEditorDivId;
 		this._rightEditorDivId = rightEditorDivId;
+		this._compareMatchRenderer = new eclipse.CompareMatchRenderer(canvas);
 	}
 	CompareMergeContainer.prototype = new orion.CompareContainer();
 	CompareMergeContainer.prototype.setEditor = function(input , diff){	
@@ -217,6 +218,7 @@ orion.CompareMergeContainer = (function() {
 				this._editorRight.getModel().init(result.mapper);
 				this._editorRight.setText(input);
 				this._initDiffPosition(this._editorLeft);
+				this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
 				return;
 			}
 		}
@@ -288,6 +290,7 @@ orion.CompareMergeContainer = (function() {
 				
 		this._initDiffPosition(this._editorLeft);
 		this._editorRight.redrawRange();
+		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
 	};
 	return CompareMergeContainer;
 }());

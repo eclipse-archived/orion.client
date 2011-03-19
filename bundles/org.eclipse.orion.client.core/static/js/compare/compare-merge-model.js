@@ -30,7 +30,7 @@ eclipse.CompareMergeModel = (function() {
 		
 		//To get the line type from a zero based line index  
 		getLineType: function(lineIndex){
-			var mapItem = this._lookUpMapper(lineIndex);
+			var mapItem = this.lookUpMapper(lineIndex);
 			if(mapItem.mapper){
 				if(mapItem.mapper[2] !== 0)
 					return "changed";
@@ -50,7 +50,7 @@ eclipse.CompareMergeModel = (function() {
 			return lineIndex;
 		},
 		
-		_lookUpMapper: function(lineIndex){
+		lookUpMapper: function(lineIndex){
 			var curLineindex = 0;//zero based
 			for (var i = 0 ; i < this._mapper.length ; i++){
 				var size = this._mapper[i][this._mapperColumnIndex];
