@@ -280,6 +280,7 @@ eclipse.FileRenderer = (function() {
 							case "html":
 							case "xml":
 							case "css":
+							case "php":
 							case "txt":
 								href = "/coding.html#" + item.Location;
 								break;
