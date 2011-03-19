@@ -47,6 +47,23 @@ dojo.addOnLoad(function() {
 		//var newHash = eclipse.sites.util.stateToHash()
 	};
 	
+	var updateTitle = function() {
+		var editor = dijit.byId("site-editor");
+		var site = editor && editor.getSiteConfiguration();
+		if (editor && site) {
+			var pageTitle = dojo.byId("pageTitle");
+			dojo.empty(pageTitle);
+			var back = dojo.create("span", {className: "breadcrumb"}, pageTitle, "last");
+			dojo.create("a", {href: "sites.html", innerHTML: "Sites"}, back);
+			var title = dojo.create("span", {className: "breadcrumb"}, pageTitle, "last");
+			dojo.place(document.createTextNode(site.Name), title);
+			dojo.place(back, "pageTitle");
+			dojo.place(document.createTextNode(" | "), "pageTitle");
+			dojo.place(title, "pageTitle");
+			window.document.title = site.Name + " - Edit Site";
+		}
+	};
+	
 	var onHashChange = function() {
 		var hash = dojo.hash();
 		var state = eclipse.sites.util.parseStateFromHash(hash);
@@ -55,7 +72,7 @@ dojo.addOnLoad(function() {
 			editor.load(state.site).then(
 				function() {
 					performPostLoadAction(state.action);
-					//window.document.title = "Edit Site Configuration - " + editor.getSiteConfiguration().Name;
+					updateTitle();
 				});
 		} else {
 			performPostLoadAction(state.action, state.actionDetails);
@@ -79,7 +96,7 @@ dojo.addOnLoad(function() {
 		});
 		dojo.connect(widget, "onMessage", function(message) {
 			statusService.setMessage(message, 3000);
-			// TODO fadeout after a few seconds?
+			updateTitle();
 		});
 		
 		onHashChange();

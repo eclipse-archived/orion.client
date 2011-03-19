@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2011 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2011 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -11,16 +11,16 @@
 /*jslint regexp:false browser:true forin:true*/
 
 var eclipse = eclipse || {};
-eclipse.Explorer = (function() {
+eclipse.GitCommitNavigator = (function() {
 	/**
-	 * @name eclipse.Explorer
-	 * @class A table-based explorer component
+	 * @name eclipse.GitCommitNavigator
+	 * @class A table-based git commit navigator
 	 */
-	function Explorer(serviceRegistry, treeRoot, searcher, fileClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
+	function GitCommitNavigator(serviceRegistry, treeRoot, searcher, gitClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
 		this.registry = serviceRegistry;
 		this.treeRoot = treeRoot;
 		this.searcher = searcher;
-		this.fileClient = fileClient;
+		this.gitClient = gitClient;
 		this.parentId = parentId;
 		this.pageTitleId = pageTitleId;
 		this.toolbarId = toolbarId;
@@ -28,17 +28,9 @@ eclipse.Explorer = (function() {
 		this.model = null;
 		this.myTree = null;
 	}
-	Explorer.prototype = /** @lends eclipse.Explorer.prototype */ {
-		// we have changed an item on the server at the specified parent node
-		changedItem: function(parent) {
-			var self = this;
-			this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
-				eclipse.util.processNavigatorParent(parent, children);
-				dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
-			});
-		},
-						
-		loadResourceList: function(path) {
+	GitCommitNavigator.prototype = /** @lends eclipse.GitCommitNavigator.prototype */ {
+			
+		loadCommitsList: function(path) {
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
 			path = eclipse.util.makeRelative(path);
 			if (path === this._lastHash) {
@@ -64,36 +56,24 @@ eclipse.Explorer = (function() {
 
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
-	
-			if (path !== this.treeRoot.Path) {
-				//the tree root object has changed so we need to load the new one
-				this.treeRoot.Path = path;
-				var self = this;
-				this.fileClient.loadWorkspace(path).then(
-					//do we really need hitch - could just refer to self rather than this
-					dojo.hitch(self, function(loadedWorkspace) {
-						//copy fields of resulting object into the tree root
-						for (var i  in loadedWorkspace) {
-							this.treeRoot[i] = loadedWorkspace[i];
-						}
-						eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
-						// erase any old page title
+			
+			this.gitClient.doGitLog(path, dojo.hitch(this, 
+					function(jsonData, secondArg){
+						for (var i  in jsonData) {
+							this.treeRoot[i] = jsonData[i];
+						};
+						
+						eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
+						
+						this.createTree();
+			
 						var pageTitle = dojo.byId(this.pageTitleId);
 						if (pageTitle) {
 							dojo.empty(pageTitle);
-							new eclipse.BreadCrumbs({container: pageTitle, resource: this.treeRoot});
+							new eclipse.BreadCrumbs({container: pageTitle, resource: this.treeRoot[0]});
 						}
-						eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
-						this.createTree();
-					}),
-					dojo.hitch(self, function(error) {
-						// Show an error message when a problem happens during getting the workspace
-						if (error.status !== null && error.status !== 401){
-							dojo.place(document.createTextNode("Sorry, an error occurred: " + error.message), progress, "only");
-						}
-					})
-				);
-			}
+					}
+			));
 		},
 
 		updateCommands: function(item){
@@ -109,7 +89,7 @@ eclipse.Explorer = (function() {
 				dojo.destroy(existing);
 			}
 			dojo.empty(this.parentId);
-			this.model = new eclipse.Model(this.registry, this.treeRoot, this.fileClient, treeId);
+			this.model = new eclipse.Model(this.registry, this.treeRoot, this.gitClient, treeId);
 			this.myTree = new eclipse.TableTree({
 				id: treeId,
 				model: this.model,
@@ -122,20 +102,20 @@ eclipse.Explorer = (function() {
 	    
 	    _lastHash: null
 	};
-	return Explorer;
+	return GitCommitNavigator;
 }());
 
 eclipse = eclipse || {};
 eclipse.Model = (function() {
 	/**
 	 * @name eclipse.Model
-	 * @class Tree model used by eclipse.Explorer.
+	 * @class Tree model used by eclipse.GitCommitNavigator.
 	 * TODO: Consolidate with eclipse.TreeModel.
 	 */
-	function Model(serviceRegistry, root, fileClient, treeId) {
+	function Model(serviceRegistry, root, gitClient, treeId) {
 		this.registry = serviceRegistry;
 		this.root = root;
-		this.fileClient = fileClient;
+		this.gitClient = gitClient;
 		this.treeId = treeId;
 	}
 	Model.prototype = {
@@ -145,30 +125,14 @@ eclipse.Model = (function() {
 			onItem(this.root);
 		},
 		getChildren: function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
-			// the parent already has the children fetched
-			if (parentItem.children) {
-				onComplete(parentItem.children);
-			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
-				onComplete([]);
-			} else if (parentItem.Location) {
-				this.fileClient.fetchChildren(parentItem.ChildrenLocation).then( 
-					dojo.hitch(this, function(children) {
-						eclipse.util.processNavigatorParent(parentItem, children);
-						onComplete(children);
-					})
-				);
-			} else {
-				onComplete([]);
-			}
+			onComplete(parentItem);
 		},
 		getId: function(/* item */ item){
 			var result;
 			if (item === this.root) {
 				result = this.treeId;
 			} else {
-				result = item.Location;
-				// remove all non valid chars to make a dom id. 
-				result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+				result = item.Name;
 			} 
 			return result;
 		}
@@ -191,36 +155,26 @@ eclipse.FileRenderer = (function() {
 			var thead = document.createElement('thead');
 			var row = document.createElement('tr');
 			dojo.addClass(thead, "navTableHeading");
-			var th, actions, size;
+			var th, authorName, date, actions;
 			if (this._useCheckboxSelection) {
 				th = document.createElement('th');
 				row.appendChild(th);
 			}
-			th = document.createElement('th');
-			th.innerHTML = "<h2>Name</h2>";
+			
+			th = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Message</h2>"}, row);
 			dojo.addClass(th, "navColumn");
-			row.appendChild(th);
-
-			actions= document.createElement('th');
-			actions.innerHTML = "<h2>Actions</h2>";
+			
+			authorName = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Author</h2>"}, row);
+			dojo.addClass(authorName, "navColumn");
+			
+			date = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Date</h2>"}, row);
+			dojo.addClass(date, "navColumn");
+			
+			actions = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Actions</h2>"}, row);
 			dojo.addClass(actions, "navColumn");
-			row.appendChild(actions);
-
-			th = document.createElement('th');
-			th.innerHTML = "<h2>Date/Time</h2>";
-			dojo.addClass(th, "navColumn");
-			row.appendChild(th);
-
-			size= document.createElement('th');
-			size.innerHTML = "<h2>Size</h2>";
-			dojo.addClass(size, "navColumn");
-			row.appendChild(size);
 			
 			thead.appendChild(row);
 			tableNode.appendChild(thead);
-			
-			dojo.style(size, "textAlign", "right");
-
 		},
 		
 		render: function(item, tableRow) {
@@ -253,46 +207,29 @@ eclipse.FileRenderer = (function() {
 				}));
 			}
 			var col, div, link;
-			if (item.Directory) {
-				col = document.createElement('td');
-				tableRow.appendChild(col);
-				var nameId =  tableRow.id + "__expand";
-				div = dojo.create("div", null, col, "only");
-				var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
-				dojo.create("img", {src: "/images/fldr_obj.gif"}, div, "last");
-				link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
-				dojo.place(document.createTextNode(item.Name), link, "only");
-				expandImg.onclick = dojo.hitch(this, function(evt) {
-					this.tableTree.toggle(tableRow.id, nameId, '/images/expanded-gray.png', '/images/collapsed-gray.png');
-				});
-			} else {
-				col = document.createElement('td');
-				tableRow.appendChild(col);
-				// only go to the coding page for things we know how to edit.  This way we can still view images, etc.
-				var splits = item.Location.split(".");
-				var href = item.Location;
-				if (splits.length > 0) {
-					var extension = splits.pop().toLowerCase();
-					// we should really start thinking about editor lookup
-					switch(extension) {
-							case "js":
-							case "java":
-							case "html":
-							case "xml":
-							case "css":
-							case "php":
-							case "txt":
-								href = "/coding.html#" + item.Location;
-								break;
-					}
-				}
-				div = dojo.create("div", null, col, "only");
-				dojo.create("img", {src: "/images/none.png"}, div, "last");
-				dojo.create("img", {src: "/images/file_obj.gif"}, div, "last");
-				link = dojo.create("a", {className: "navlink", href: href}, div, "last");
-				dojo.place(document.createTextNode(item.Name), link, "only");
-			}
 			
+
+			col = document.createElement('td');
+			tableRow.appendChild(col);
+				
+			var nameId =  tableRow.id + "__expand";
+			div = dojo.create("div", {style: "padding-left: 5px; padding-right: 5px; ; padding-top: 5px; padding-bottom: 5px"}, col, "only");
+//			var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
+			link = dojo.create("a", {className: "navlinkonpage", href: "/coding.html#" + item.ContentLocation}, div, "last");
+			dojo.place(document.createTextNode(item.Message), link, "only");
+//			expandImg.onclick = dojo.hitch(this, function(evt) {
+//				this.tableTree.toggle(tableRow.id, nameId, '/images/expanded-gray.png', '/images/collapsed-gray.png');
+//			});
+//			dojo.addClass(div, 'primaryColumn');
+			
+			var authorName = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tableRow);
+			authorName.innerHTML = item.AuthorName;
+			dojo.addClass(authorName, 'secondaryColumn');
+			
+			var commitTime = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tableRow);
+			commitTime.innerHTML = dojo.date.locale.format(new Date(item.Time), {formatLength: "short"});
+			dojo.addClass(commitTime, 'secondaryColumn');
+						
 			var actionsColumn = document.createElement('td');
 			actionsColumn.id = tableRow.id + "actions";
 			tableRow.appendChild(actionsColumn);
@@ -304,39 +241,6 @@ eclipse.FileRenderer = (function() {
 			this.explorer.registry.getService("ICommandService").then(function(service) {
 				service.renderCommands(actionsWrapper, "object", item, this.explorer, "image");
 			});
-
-			var dateColumn = document.createElement('td');
-			tableRow.appendChild(dateColumn);
-			if (item.LocalTimeStamp) {
-				var fileDate = new Date(item.LocalTimeStamp);
-				var curDate = new Date();
-				var yesterday = new Date().setDate(curDate.getDate() - 1);
-				if (yesterday.valueOf() > fileDate.valueOf()) {
-					dateColumn.innerHTML = fileDate.toLocaleDateString();
-				} else {
-					dateColumn.innerHTML = fileDate.toLocaleTimeString();
-				}
-			}
-			dojo.addClass(dateColumn, 'secondaryColumn');
-			
-			var sizeColumn = document.createElement('td');
-			tableRow.appendChild(sizeColumn);
-			if (!item.Directory && typeof item.Length === "number") {
-				var length = parseInt(item.Length, 10),
-					kb = length / 1024,
-					mb = length / 1048576,
-					label = "";
-				if (kb < 1) {
-					label = length + " bytes";
-				} else if (mb < 1) {
-					label = Math.floor(kb * 100)/100 + " KB";
-				} else {
-					label = Math.floor(mb * 100)/100 + " MB";
-				}
-				sizeColumn.innerHTML = label;
-			}
-			dojo.style(sizeColumn, "textAlign", "right");
-			dojo.addClass(sizeColumn, 'secondaryColumn');
 		},
 		
 		getSelected: function() {

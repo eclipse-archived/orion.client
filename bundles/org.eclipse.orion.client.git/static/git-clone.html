@@ -1,0 +1,94 @@
+<!doctype html>
+<html style="height: 100%" >
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+    	<title>Git Clones</title>    
+    
+    <script type="text/javascript">
+        var djConfig = {
+		isDebug: true,
+		modulePaths: {'widgets': '/js/widgets'},
+		parseOnLoad: true
+        };
+    </script>
+    <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<script type="text/javascript" src="/org.dojotoolkit/orion/orion.js.uncompressed.js"></script>
+    <script type="text/javascript">
+	dojo.require("dijit.Dialog");
+ 	</script> 
+ 	<style type="text/css">
+		@import "/org.dojotoolkit/dojo/resources/dojo.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
+		@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
+	    @import "/ide.css";
+	    @import "/breadcrumbs.css"; 
+	    @import "/commands.css";
+	</style>
+	
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	
+	
+	    <!-- Everything between START and END will be commented out and replaced with a closure compiled navigate-table.js
+         please update org.eclipse.orion.releng/builder/scripts/closure.xml when making changes here 
+      -->
+	<!-- START:navigate-table.js -->
+		<script type="text/javascript" src="js/auth.js" comment="required for handleAuthenticationError" ></script> 	
+		<script src="js/treetable.js"  comment="this was in the header"></script>
+	    <script type="text/javascript" comment="this and below was in the body" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	
+		<script src="js/serviceregistry.js"></script>
+		<script src="js/pluginregistry.js"></script>
+	
+		<script src="js/util.js"></script>
+	 	<script src="js/commands.js"></script>
+	 	<script src="js/dialogs.js"></script>
+	 	<script src="js/input.js"></script>
+	 	<script src="js/log.js"></script>
+	 	<script src="js/preferences.js"></script>
+	 	<script src="js/selection.js"></script>
+	 	<script src="js/status.js"></script>
+	 	<script src="js/users.js"></script>
+	 	
+	 	<script src="js/fileClient.js"></script>
+		<script src="js/favorites.js"></script>
+		<script src="js/searchClient.js"></script>
+		
+		<script src="js/globalCommands.js"></script>
+		<script src="js/breadcrumbs.js"></script>
+		
+		<script src="js/gitClient.js"></script>
+		<script src="js/gitCommands.js"></script>
+	 	
+	 	<script src="js/generic-explorer.js"></script>
+	 	<script src="js/git-clone/git-clones-explorer.js"></script>
+	 	<script src="js/git-clone/git-clone.js"></script>	 	
+	<!-- END:navigate-table.js -->
+ 	<!-- INSERT:navigate-table.js -->
+ 	
+</head>
+<body>
+    <body style="height: 100%" class="soria">
+    
+	<div id="eclipse.git-clones" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
+		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
+		</div>
+		<div class="auxpane" style="margin-left: 44px; " id="leftPane" dojoType="dijit.layout.ContentPane" region="leading" style="width: 20%" splitter="true">
+		</div>
+
+		<div class="mainpane" id="rightPane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
+			<div id="explorer-tree" class="mainpane">
+				<div id="clonesList" style="min-width: 500px">
+				<div  id="clonesProgress">Loading git clones...</div>
+				</div>
+			</div>
+		</div>
+		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
+		</div>
+	</div>
+</body>
+</html>
