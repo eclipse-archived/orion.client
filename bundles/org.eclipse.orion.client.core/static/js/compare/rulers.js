@@ -155,7 +155,8 @@ eclipse.CompareOverviewRuler = (function() {
 
 
 eclipse.CompareMergeOverviewRuler = (function() {
-	function CompareMergeOverviewRuler (rulerLocation, rulerStyle) {
+	function CompareMergeOverviewRuler (compareMatchRenderer , rulerLocation, rulerStyle) {
+		this._compareMatchRenderer = compareMatchRenderer;
 		eclipse.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
 	}
 	CompareMergeOverviewRuler.prototype = new eclipse.CompareRuler();
@@ -212,10 +213,13 @@ eclipse.CompareMergeOverviewRuler = (function() {
 	};
 	CompareMergeOverviewRuler.prototype.onClick = function(lineIndex, e) {
 		if (lineIndex === undefined) { return; }
+		this._compareMatchRenderer.matchPositionFromRight(lineIndex);
+		/*
 		var lineHeight = this._editor.getLineHeight();
 		var clientArea = this._editor.getClientArea();
 		var lines = Math.floor(clientArea.height / lineHeight/3);
 		this._editor.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
+		*/
 	};
 	CompareMergeOverviewRuler.prototype._onModelChanged = function(e) {
 		var model = this._editor.getModel();
@@ -251,6 +255,30 @@ eclipse.CompareMatchRenderer =  (function() {
 				return false;
 			}
 			return true; 
+		},
+		
+		_setEditorPosition: function (editor , lineIndex){
+			var lineHeight = editor.getLineHeight();
+			var clientArea = editor.getClientArea();
+			var lines = Math.floor(clientArea.height / lineHeight/3);
+			editor.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
+		},
+		
+		matchPositionFromRight: function(index){
+			var lineIndex = index;
+			var annotaionIndex = index;
+			if(index === -1){
+				var annotations = this._rightEditor.getModel().getAnnotations();
+				if(annotations.length === 0)
+					return;
+				lineIndex = annotations[0][0];
+				annotaionIndex = annotations[0][1];
+			} else {
+				annotaionIndex = this._rightEditor.getModel().getAnnotationIndex(lineIndex);
+			}
+			this._setEditorPosition(this._rightEditor , lineIndex);
+			var lineIndexL = this._leftEditor.getModel().getLineIndexFromMapper(annotaionIndex);
+			this._setEditorPosition(this._leftEditor , lineIndexL);
 		},
 	
 		render: function(){

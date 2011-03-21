@@ -52,15 +52,19 @@ eclipse.CompareMergeModel = (function() {
 		},
 		
 		getAnnotationH: function(lineIndex){
+			var annotationIndex = this.getAnnotationIndex(lineIndex);
+			return 	(annotationIndex === -1) ? 0 : Math.max(this._mapper[annotationIndex][0], this._mapper[annotationIndex][1]);
+		},
+		
+		getAnnotationIndex: function(lineIndex){
 			if(this._anotations === undefined)
 				this.getAnnotations();
 			for (var i = 0 ; i < this._annotations.length ; i++){
 				if(this._annotations[i][0] === lineIndex){
-					var index = this._annotations[i][1];
-					return Math.max(this._mapper[index][0], this._mapper[index][1]);
+					return this._annotations[i][1];
 				}
 			}
-			return 0;
+			return -1;
 		},
 		
 		getLineNumber: function(lineIndex , mapperColumnIndex){

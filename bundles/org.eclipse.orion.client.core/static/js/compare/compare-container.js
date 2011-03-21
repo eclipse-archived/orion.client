@@ -288,12 +288,12 @@ orion.CompareMergeContainer = (function() {
 			self._compareMatchRenderer.render();
 		}); 
 				
-		var overview  = new eclipse.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
+		var overview  = new eclipse.CompareMergeOverviewRuler(self._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
 		this._editorRight.addRuler(overview);
 				
 		this._editorRight.redrawRange();
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
-		this._initDiffPosition(this._editorRight);
+		this._compareMatchRenderer.matchPositionFromRight(-1);
 	};
 	return CompareMergeContainer;
 }());
