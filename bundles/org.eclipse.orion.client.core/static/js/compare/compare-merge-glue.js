@@ -43,23 +43,6 @@ dojo.addOnLoad(function(){
 					  dojo.style("right-viewer-title", "color", "red");
 				  }
 		);
-		
-		
-		/*
-		//canvas.width = canvas.parentNode.clientWidth;
-		//canvas.height = canvas.parentNode.clientHeight;
-		
-		var context = canvas.getContext("2d");
-		context.fillStyle   = '#00f'; // blue
-		context.strokeStyle = '#00f'; // red
-		context.lineWidth   = 1;
-		context.beginPath();
-		context.moveTo(0 , 0);
-		//context.lineTo(canvas.width -2  ,canvas.height -2);
-		context.bezierCurveTo( canvas.parentNode.clientWidth/3, 2, canvas.parentNode.clientWidth -2- canvas.parentNode.clientWidth/3  ,100 -2 , canvas.parentNode.clientWidth -2  ,100 -2 );
-		context.stroke();	
-		*/	
-		
 	}
 	
 });

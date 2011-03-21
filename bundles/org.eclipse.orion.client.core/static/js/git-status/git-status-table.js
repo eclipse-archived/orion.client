@@ -382,7 +382,7 @@ orion.GitStatusController = (function() {
 		
 		openSBSViewer: function(itemModel){
 			var result = this._resolveURI(itemModel);
-			var url = "/compare.html#" + (result.diffURI ?  result.diffURI+"?" : "")  + result.fileURI;
+			var url = "/compare-merge.html#" + (result.diffURI ?  result.diffURI+"?" : "")  + result.fileURI;
 			window.open(url,"");
 		},
 		

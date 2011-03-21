@@ -31,19 +31,36 @@ eclipse.CompareMergeModel = (function() {
 		//To get the line type from a zero based line index  
 		getLineType: function(lineIndex){
 			var mapItem = this.lookUpMapper(lineIndex);
-			if(mapItem.mapper){
-				if(mapItem.mapper[2] !== 0)
+			if(mapItem.mapperIndex > -1){
+				if(this._mapper[mapItem.mapperIndex][2] !== 0)
 					return "changed";
 			}
 			return "unchanged";
 		},
 			
 		getAnnotations: function(){
-			return [];//this._lineFeeder.getAnnotations();
+			if(this._annotations === undefined){
+				this._annotations = [];
+				var curLineindex = 0;//zero based
+				for (var i = 0 ; i < this._mapper.length ; i++){
+					if((this._mapper[i][2] !== 0))
+						this._annotations.push([curLineindex , i]);
+					curLineindex += this._mapper[i][this._mapperColumnIndex];
+				}
+			}
+			return this._annotations;
 		},
 		
 		getAnnotationH: function(lineIndex){
-			return 1;//this._lineFeeder.getAnnotationH(lineIndex);
+			if(this._anotations === undefined)
+				this.getAnnotations();
+			for (var i = 0 ; i < this._annotations.length ; i++){
+				if(this._annotations[i][0] === lineIndex){
+					var index = this._annotations[i][1];
+					return Math.max(this._mapper[index][0], this._mapper[index][1]);
+				}
+			}
+			return 0;
 		},
 		
 		getLineNumber: function(lineIndex , mapperColumnIndex){
@@ -57,11 +74,47 @@ eclipse.CompareMergeModel = (function() {
 				if(size === 0)
 					size = 1;
 				if(lineIndex >= curLineindex && lineIndex < (curLineindex + size)){
-					return {mapper:this._mapper[i] , startFrom:curLineindex};
+					return {mapperIndex:i , startFrom:curLineindex};
 				}
 				curLineindex += this._mapper[i][this._mapperColumnIndex];
 			}
-			return  {mapper:null , startFrom:-1};
+			return  {mapperIndex:-1 , startFrom:-1};
+		},
+		
+		getLineIndexFromMapper: function(mapperIndex){
+			if(mapperIndex === 0)
+				return 0;
+			var curLineindex = 0;//zero based
+			for (var i = 0 ; i < mapperIndex ; i++){
+				curLineindex += this._mapper[i][this._mapperColumnIndex];
+			}
+			return curLineindex;
+		},
+		
+		updateMapper: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount){
+			if(removedLineCount === addedLineCount)
+				return;
+			if(removedLineCount > 0 || addedLineCount > 0){
+				var lineIndex = this.getLineAtOffset(start);
+				var mapperItem = this.lookUpMapper(lineIndex);
+				if(removedLineCount > 0){
+					var linesLeft = removedLineCount;
+					var startInMapper = lineIndex - mapperItem.startFrom;
+					for(var i = mapperItem.mapperIndex ; i < this._mapper.length ; i++){
+						var wipeOutLines = this._mapper[i][this._mapperColumnIndex] - startInMapper;
+						if(linesLeft <= wipeOutLines){
+							this._mapper[i][this._mapperColumnIndex] -= linesLeft;
+							break;
+						}
+						this._mapper[i][this._mapperColumnIndex] -= wipeOutLines;
+						linesLeft -= wipeOutLines;
+						startInMapper = 0;
+					}
+				}
+				if(addedLineCount > 0){
+					this._mapper[mapperItem.mapperIndex][this._mapperColumnIndex] += addedLineCount;
+				}
+			}
 		},
 		
 		addListener: function(listener) {
@@ -129,6 +182,7 @@ eclipse.CompareMergeModel = (function() {
 			console.log("removedLineCount : " + removedLineCount);
 			console.log("addedLineCount : " + addedLineCount);
 			console.log("line number : " + this.getLineAtOffset(start));
+			this.updateMapper(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanged) { 

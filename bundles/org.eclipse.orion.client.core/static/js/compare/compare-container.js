@@ -90,8 +90,8 @@ orion.CompareContainer = (function() {
 				
 		_initDiffPosition: function(editor){
 			var model = editor.getModel();
-			if(model && model._lineFeeder && model._lineFeeder.getAnnotations){
-				var annotations = model._lineFeeder.getAnnotations();
+			if(model && model.getAnnotations){
+				var annotations = model.getAnnotations();
 				if(annotations.length > 0) {
 					var lineIndex = annotations[0][0];
 					var lineHeight = editor.getLineHeight();
@@ -217,8 +217,8 @@ orion.CompareMergeContainer = (function() {
 				this._editorLeft.setText(result.output);
 				this._editorRight.getModel().init(result.mapper);
 				this._editorRight.setText(input);
-				this._initDiffPosition(this._editorLeft);
 				this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
+				this._initDiffPosition(this._editorRight);
 				return;
 			}
 		}
@@ -262,8 +262,10 @@ orion.CompareMergeContainer = (function() {
 			} 
 		}); 
 
+		this._editorLeft.getModel().addListener(self._compareMatchRenderer);
 		this._editorLeft.addEventListener("Scroll", window, function(scrollEvent) {
-			self._editorRight.setTopPixel(self._editorLeft.getTopPixel());
+			//self._editorRight.setTopPixel(self._editorLeft.getTopPixel());
+			self._compareMatchRenderer.render();
 		}); 
 				
 		this._editorLeft.redrawRange();
@@ -282,15 +284,16 @@ orion.CompareMergeContainer = (function() {
 		}); 
 
 		this._editorRight.addEventListener("Scroll", window, function(scrollEvent) {
-			self._editorLeft.setTopPixel(self._editorRight.getTopPixel());
+			//self._editorLeft.setTopPixel(self._editorRight.getTopPixel());
+			self._compareMatchRenderer.render();
 		}); 
 				
 		var overview  = new eclipse.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
-		//this._editorRight.addRuler(overview);
+		this._editorRight.addRuler(overview);
 				
-		this._initDiffPosition(this._editorLeft);
 		this._editorRight.redrawRange();
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
+		this._initDiffPosition(this._editorRight);
 	};
 	return CompareMergeContainer;
 }());
