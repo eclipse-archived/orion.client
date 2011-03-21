@@ -19,8 +19,6 @@ orion.CompareContainer = (function() {
 	CompareContainer.prototype = {
 		_getLineDelim: function(input , diff){	
 			var delim = "\n";
-			//if(input.indexOf("\r\n") > -1 || diff.indexOf("\r\n") > -1)
-			//	delim = "\r\n";
 			return delim;
 		},
 		
@@ -92,8 +90,8 @@ orion.CompareContainer = (function() {
 				
 		_initDiffPosition: function(editor){
 			var model = editor.getModel();
-			if(model && model._lineFeeder && model._lineFeeder.getAnnotations){
-				var annotations = model._lineFeeder.getAnnotations();
+			if(model && model.getAnnotations){
+				var annotations = model.getAnnotations();
 				if(annotations.length > 0) {
 					var lineIndex = annotations[0][0];
 					var lineHeight = editor.getLineHeight();
@@ -199,6 +197,105 @@ orion.SBSCompareContainer = (function() {
 		this._editorRight.redrawRange();
 	};
 	return SBSCompareContainer;
+}());
+
+orion.CompareMergeContainer = (function() {
+	/** @private */
+	function CompareMergeContainer(leftEditorDivId , rightEditorDivId , canvas) {
+		this._editorLeft = null;
+		this._editorRight = null;
+		this._leftEditorDivId = leftEditorDivId;
+		this._rightEditorDivId = rightEditorDivId;
+		this._compareMatchRenderer = new eclipse.CompareMatchRenderer(canvas);
+	}
+	CompareMergeContainer.prototype = new orion.CompareContainer();
+	CompareMergeContainer.prototype.setEditor = function(input , diff){	
+		var result = this.parseMapper(input , diff);
+		if(this._editorLeft && this._editorRight){
+			if(result.delim === this._editorLeft.getModel().getLineDelimiter() ){
+				this._editorLeft.getModel().init(result.mapper);
+				this._editorLeft.setText(result.output);
+				this._editorRight.getModel().init(result.mapper);
+				this._editorRight.setText(input);
+				this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
+				this._initDiffPosition(this._editorRight);
+				return;
+			}
+		}
+				
+		var modelLeft = new eclipse.TextModel(result.output, result.delim);
+		var compareModelLeft = new eclipse.CompareMergeModel(modelLeft, {mapper:result.mapper , columnIndex:0} , new eclipse.GapLineFeeder( result.delim));
+		var modelRight = new eclipse.TextModel(input, result.delim);
+		var compareModelRight = new eclipse.CompareMergeModel(modelRight, {mapper:result.mapper , columnIndex:1} , new eclipse.GapLineFeeder( result.delim));
+		
+		var optionsRight = {
+			parent: this._rightEditorDivId,
+			model: compareModelRight,
+			readonly: true,
+			stylesheet: "/js/compare/editor.css" 
+		};
+		this._editorRight = new eclipse.Editor(optionsRight);
+		this._editorRight.addRuler(new eclipse.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+				
+		var optionsLeft = {
+			parent: this._leftEditorDivId,
+			model: compareModelLeft,
+			readonly: false,
+			stylesheet: "/js/compare/editor.css" 
+		};
+		this._editorLeft = new eclipse.Editor(optionsLeft);
+		this._editorLeft.addRuler(new eclipse.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		
+		var self = this;
+		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
+			var lineIndex = lineStyleEvent.lineIndex;
+			var lineStart = lineStyleEvent.lineStart;
+			var lineType =  self._editorLeft.getModel().getLineType(lineIndex);
+			//lineStyleEvent.ranges = [];
+			//lineStyleEvent.ranges.push ({start: lineStart, end: lineStart + 3, style: {style: {backgroundColor: "blue"} }});
+			if(lineType === "added") {
+				lineStyleEvent.style = {style: {backgroundColor: "#99EE99"}};
+			} else if (lineType === "changed"){
+				lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
+			} else if (lineType === "removed" || lineType === "changed_gap"){
+				lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
+			} 
+		}); 
+
+		this._editorLeft.getModel().addListener(self._compareMatchRenderer);
+		this._editorLeft.addEventListener("Scroll", window, function(scrollEvent) {
+			//self._editorRight.setTopPixel(self._editorLeft.getTopPixel());
+			self._compareMatchRenderer.render();
+		}); 
+				
+		this._editorLeft.redrawRange();
+		
+		this._editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
+			var lineIndex = lineStyleEvent.lineIndex;
+			var lineStart = lineStyleEvent.lineStart;
+			var lineType =  self._editorRight.getModel().getLineType(lineIndex);
+			if(lineType === "removed") {
+				lineStyleEvent.style = {style: {backgroundColor: "#EE9999"}};
+			} else if (lineType === "changed"){
+				lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
+			} else if (lineType === "added" || lineType === "changed_gap"){
+				lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
+			} 
+		}); 
+
+		this._editorRight.addEventListener("Scroll", window, function(scrollEvent) {
+			//self._editorLeft.setTopPixel(self._editorRight.getTopPixel());
+			self._compareMatchRenderer.render();
+		}); 
+				
+		var overview  = new eclipse.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
+		this._editorRight.addRuler(overview);
+				
+		this._editorRight.redrawRange();
+		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
+		this._initDiffPosition(this._editorRight);
+	};
+	return CompareMergeContainer;
 }());
 
 orion.InlineCompareContainer = (function() {

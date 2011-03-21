@@ -57,18 +57,13 @@ eclipse.LineNumberCompareRuler = (function() {
 		if (lineIndex === -1) {
 			return model.getLineCount();
 		} else {
-			if(model._lineFeeder && model._lineFeeder.getLineNumber){
-				var realIndex = model._lineFeeder.getLineNumber(lineIndex , this._mapperColumnIndex);
+			if( model.getLineNumber){
+				var realIndex = model.getLineNumber(lineIndex , this._mapperColumnIndex);
 				if(realIndex === -1){
 					return "";
 				}
 				return  realIndex + 1;
-			} else if(model.lookUpRealIndex){
-				var realIndex = model.lookUpRealIndex(lineIndex);
-				if(realIndex.lineIndex === -1)
-					return "";
-				return  realIndex.lineIndex + 1;
-			}
+			} 
 			return lineIndex + 1;;
 		}
 	};
@@ -94,8 +89,8 @@ eclipse.CompareOverviewRuler = (function() {
 	CompareOverviewRuler.prototype.getAnnotations = function() {
 		var model = this._editor.getModel();
 		var lines = [];
-		if(model._lineFeeder && model._lineFeeder.getAnnotations){
-			var annotations = model._lineFeeder.getAnnotations();
+		if(model.getAnnotations){
+			var annotations = model.getAnnotations();
 			for (var i = 0;i < annotations.length ; i++) {
 				if (annotations[i] !== undefined) {
 					lines.push(annotations[i][0]);
@@ -125,8 +120,8 @@ eclipse.CompareOverviewRuler = (function() {
 			style.left = "2px";
 			
 			var model = this._editor.getModel();
-			if(lineIndex >= 0 && model._lineFeeder && model._lineFeeder.getAnnotationH){
-				var anH = model._lineFeeder.getAnnotationH(lineIndex);
+			if(lineIndex >= 0 && model.getAnnotationH){
+				var anH = model.getAnnotationH(lineIndex);
 				var lC = model.getLineCount();
 				var clientArea = this._editor.getClientArea();
 				var height =  Math.floor(clientArea.height*anH/lC);
@@ -157,3 +152,160 @@ eclipse.CompareOverviewRuler = (function() {
 	};
 	return CompareOverviewRuler;
 }());
+
+
+eclipse.CompareMergeOverviewRuler = (function() {
+	function CompareMergeOverviewRuler (rulerLocation, rulerStyle) {
+		eclipse.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
+	}
+	CompareMergeOverviewRuler.prototype = new eclipse.CompareRuler();
+	CompareMergeOverviewRuler.prototype.getAnnotations = function() {
+		var model = this._editor.getModel();
+		var lines = [];
+		if(model.getAnnotations){
+			var annotations = model.getAnnotations();
+			for (var i = 0;i < annotations.length ; i++) {
+				if (annotations[i] !== undefined) {
+					lines.push(annotations[i][0]);
+				}
+			}
+		}
+		return lines;
+	};
+	CompareMergeOverviewRuler.prototype.getStyle = function(lineIndex) {
+		var result, style;
+		if (lineIndex === undefined) {
+			result = this._rulerStyle || {};
+			style = result.style || (result.style = {});
+			style.lineHeight = "1px";
+			style.fontSize = "1px";
+			style.width = "14px";
+		} else {
+			if (lineIndex !== -1) {
+				result = {styleClass: "ruler_annotation_breakpoint_overview"} || {};
+			} else {
+				result = {};
+			}
+			style = result.style || (result.style = {});
+			style.cursor = "pointer";
+			style.width = "8px";
+			//style.height = "3px";
+			style.left = "2px";
+			
+			var model = this._editor.getModel();
+			if(lineIndex >= 0 && model.getAnnotationH){
+				var anH = model.getAnnotationH(lineIndex);
+				var lC = model.getLineCount();
+				var clientArea = this._editor.getClientArea();
+				var height =  Math.floor(clientArea.height*anH/lC);
+				if (height < 2)
+					height = 2;
+				style.height = height +"px";
+			} else {
+				style.height = "3px";
+			}
+		}
+		return result;
+	};
+	CompareMergeOverviewRuler.prototype.getHTML = function(lineIndex) {
+		return "&nbsp;";
+	};
+	CompareMergeOverviewRuler.prototype.onClick = function(lineIndex, e) {
+		if (lineIndex === undefined) { return; }
+		var lineHeight = this._editor.getLineHeight();
+		var clientArea = this._editor.getClientArea();
+		var lines = Math.floor(clientArea.height / lineHeight/3);
+		this._editor.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
+	};
+	CompareMergeOverviewRuler.prototype._onModelChanged = function(e) {
+		var model = this._editor.getModel();
+		var lineCount = model.getLineCount();
+		if(lineCount > 0)
+			this._editor.redrawLines(0, 1, this);
+	};
+	return CompareMergeOverviewRuler;
+}());
+
+
+eclipse.CompareMatchRenderer =  (function() {
+
+	function CompareMatchRenderer(canvasDiv) {
+		this._canvasDiv = canvasDiv;
+	}
+
+	CompareMatchRenderer.prototype =  {
+		
+		init: function(mapper , leftEditor , rightEditor ){
+			this._mapper = mapper;
+			this._leftEditor = leftEditor;
+			this._rightEditor = rightEditor;
+			this.render();
+		},
+		
+		_overlap: function(start1, end1 , start2 , end2){
+			if(end1 < start1)
+				end1 = start1;
+			if(end1 < start1)
+				end1 = start1;
+			if (end1 < start2 || end2 < start1){
+				return false;
+			}
+			return true; 
+		},
+	
+		render: function(){
+			var context=this._canvasDiv.getContext("2d");
+			context.clearRect(0,0,this._canvasDiv.width,this._canvasDiv.height);
+			context.fillStyle   = '#00f'; // blue
+			context.strokeStyle = '#00f'; // red
+			context.lineWidth   = 1;
+			context.beginPath();
+			
+			var leftTop = this._leftEditor.getTopIndex();
+			var leftBottom = this._leftEditor.getBottomIndex();
+			var rightTop = this._rightEditor.getTopIndex();
+			var rightBottom = this._rightEditor.getBottomIndex();
+			this._leftLineH = this._leftEditor.getLineHeight();
+			this._rightLineH = this._rightEditor.getLineHeight();
+		
+			var curLeftIndex = 0;
+			var curRightIndex = 0;
+			var rendering = false;
+			for (var i = 0 ; i < this._mapper.length ; i++){
+				if(this._mapper[i][2] !== 0){
+					if(this._overlap( curLeftIndex , curLeftIndex + this._mapper[i][0] -1,  leftTop ,leftBottom) ||
+					   this._overlap( curRightIndex , curRightIndex + this._mapper[i][1] -1,  rightTop ,rightBottom) ){
+						this._renderCurve(this._mapper[i], curLeftIndex , curRightIndex , this._canvasDiv , context , leftTop , leftBottom , rightTop , rightBottom);
+						rendering = true;
+					} else if (rendering) {
+						break;
+					}
+				}
+				curLeftIndex += this._mapper[i][0];
+				curRightIndex += this._mapper[i][1];
+			}
+			context.stroke();		
+		},
+		
+		_renderCurve: function (mapperItem , leftStart , rightStart , canvas , context , leftTop , leftBottom , rightTop , rightBottom){
+			var leftMiddle =  (leftStart + (mapperItem[0]/2) - leftTop) * this._leftLineH;
+			var rightMiddle = (rightStart + (mapperItem[1]/2) - rightTop) * this._rightLineH ;
+			var w =  canvas.parentNode.clientWidth;
+			
+			context.moveTo(0 , leftMiddle);
+			context.bezierCurveTo( w/3, leftMiddle, w*0.666  ,rightMiddle , w ,rightMiddle);
+		},
+		
+		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+			if(removedLineCount === addedLineCount)
+				return;
+			if(removedLineCount > 0 || addedLineCount > 0)
+				this.render();
+			
+		}
+		
+	};
+	
+	return CompareMatchRenderer;
+}()); 
+

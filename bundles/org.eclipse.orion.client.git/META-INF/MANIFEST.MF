@@ -3,6 +3,5 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.orion.client.git
 Bundle-Version: 0.2.0.qualifier
-Require-Bundle: org.eclipse.core.runtime
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Bundle-Vendor

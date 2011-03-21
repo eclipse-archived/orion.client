@@ -4007,40 +4007,36 @@ eclipse.Editor = (function() {
 			clientDiv.style.width = (0x7FFFF).toString() + "px";
 
 			child = this._getLineNext();
+			var frag = document.createDocumentFragment();
 			for (lineIndex=lineStart; lineIndex<=lineEnd; lineIndex++) {
 				if (!child || child.lineIndex > lineIndex) {
-					child = this._createLine(clientDiv, child, document, lineIndex, model);
-					var rect = this._getLineBoundingClientRect(child);
-					lineWidth = rect.right - rect.left;
-					child.lineWidth = lineWidth; 
-					// when the maxLineIndex is known measure only the lines that have changed
-					if (this._maxLineIndex !== -1) {
-						if (lineWidth >= this._maxLineWidth) {
-							this._maxLineWidth = lineWidth;
-							this._maxLineIndex = lineIndex;
-						}
+					this._createLine(frag, null, document, lineIndex, model);
+				} else {
+					if (frag.firstChild) {
+						clientDiv.insertBefore(frag, child);
+						frag = document.createDocumentFragment();
 					}
-				}
-				if (lineIndex === topIndex) { this._topChild = child; }
-				if (lineIndex === bottomIndex) { this._bottomChild = child; }
-				if (child.lineIndex === lineIndex) {
 					child = this._getLineNext(child);
 				}
+			}
+			if (frag.firstChild) { clientDiv.insertBefore(frag, child); }
+
+			child = this._getLineNext();
+			while (child) {
+				lineWidth = child.lineWidth;
+				if (lineWidth === undefined) {
+					var rect = this._getLineBoundingClientRect(child);
+					lineWidth = child.lineWidth = rect.right - rect.left;
+				}
+				if (lineWidth >= this._maxLineWidth) {
+					this._maxLineWidth = lineWidth;
+					this._maxLineIndex = child.lineIndex;
+				}
+				if (child.lineIndex === topIndex) { this._topChild = child; }
+				if (child.lineIndex === bottomIndex) { this._bottomChild = child; }
+				child = this._getLineNext(child);
 			}
 
-			// when the maxLineIndex is not known all the visible lines need to be measured
-			if (this._maxLineIndex === -1) {
-				child = this._getLineNext();
-				while (child) {
-					lineWidth = child.lineWidth;
-					if (lineWidth >= this._maxLineWidth) {
-						this._maxLineWidth = lineWidth;
-						this._maxLineIndex = child.lineIndex;
-					}
-					child = this._getLineNext(child);
-				}
-			}
-			
 			// Update rulers
 			this._updateRuler(this._leftDiv, topIndex, bottomIndex);
 			this._updateRuler(this._rightDiv, topIndex, bottomIndex);
@@ -4152,7 +4148,7 @@ eclipse.Editor = (function() {
 					}
 				}
 
-				var overview = ruler.getOverview(), lineDiv;
+				var overview = ruler.getOverview(), lineDiv, frag;
 				if (overview === "page") {
 					while (child) {
 						lineIndex = child.lineIndex;
@@ -4163,6 +4159,7 @@ eclipse.Editor = (function() {
 						child = nextChild;
 					}
 					child = div.firstChild.nextSibling;
+					frag = document.createDocumentFragment();
 					for (lineIndex=topIndex; lineIndex<=bottomIndex; lineIndex++) {
 						if (!child || child.lineIndex > lineIndex) {
 							lineDiv = parentDocument.createElement("DIV");
@@ -4170,12 +4167,18 @@ eclipse.Editor = (function() {
 							lineDiv.innerHTML = ruler.getHTML(lineIndex);
 							lineDiv.lineIndex = lineIndex;
 							lineDiv.style.height = lineHeight + "px";
-							div.insertBefore(lineDiv, child);
-						}
-						if (child && child.lineIndex === lineIndex) {
-							child = child.nextSibling;
+							frag.appendChild(lineDiv);
+						} else {
+							if (frag.firstChild) {
+								div.insertBefore(frag, child);
+								frag = document.createDocumentFragment();
+							}
+							if (child) {
+								child = child.nextSibling;
+							}
 						}
 					}
+					if (frag.firstChild) { div.insertBefore(frag, child); }
 				} else {
 					var buttonHeight = 17;
 					var clientHeight = this._getClientHeight ();
@@ -4189,6 +4192,7 @@ eclipse.Editor = (function() {
 							count--;
 						}
 						var lines = ruler.getAnnotations ();
+						frag = document.createDocumentFragment();
 						for (var j = 0; j < lines.length; j++) {
 							lineIndex = lines[j];
 							lineDiv = parentDocument.createElement("DIV");
@@ -4197,8 +4201,9 @@ eclipse.Editor = (function() {
 							lineDiv.style.top = buttonHeight + lineHeight + Math.floor(lineIndex * divHeight) + "px";
 							lineDiv.innerHTML = ruler.getHTML(lineIndex);
 							lineDiv.lineIndex = lineIndex;
-							div.appendChild(lineDiv);
+							frag.appendChild(lineDiv);
 						}
+						div.appendChild(frag);
 					} else if (div._oldTrackHeight !== trackHeight) {
 						lineDiv = div.firstChild ? div.firstChild.nextSibling : null;
 						while (lineDiv) {

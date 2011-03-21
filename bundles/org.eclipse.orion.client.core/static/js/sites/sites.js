@@ -89,16 +89,13 @@ dojo.addOnLoad(function() {
 				dialogService, /*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
 		
 		// Register command contributions
-		commandService.addCommandGroup("eclipse.sitesGroup", 100);
-		commandService.registerCommandContribution("eclipse.sites.create", 1, "site-toolbar", "eclipse.sitesGroup");
+		commandService.registerCommandContribution("eclipse.sites.create", 1, "pageActions");
 		commandService.registerCommandContribution("eclipse.site.edit", 1);
 		commandService.registerCommandContribution("eclipse.site.start", 2);
 		commandService.registerCommandContribution("eclipse.site.stop", 3);
 		commandService.registerCommandContribution("eclipse.site.delete", 4);
-		 
-		// Render page-level commands
-		var toolbar = dojo.byId("site-toolbar");
-		commandService.renderCommands(toolbar, "dom", {}, {}, "image");
+		
+		eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {});
 	}());
 	
 });

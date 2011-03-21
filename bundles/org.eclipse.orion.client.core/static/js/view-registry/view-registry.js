@@ -14,6 +14,7 @@ dojo.addOnLoad(function() {
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	
 	var initTree = function() {
 		var tree = new widgets.RegistryTree({ registry: registry }, "registry-tree");
@@ -60,12 +61,14 @@ dojo.addOnLoad(function() {
 	var installHandler = function(evt) {
 		var pluginUrl = installUrlTextBox.value;
 		if (/^\S+$/.test(dojo.trim(pluginUrl))) {
-			registry.installPlugin(pluginUrl);
-			// FIXME: Add a callback for installPlugin() instead of using a timer
-			setTimeout(function() {
-				refreshButton.onClick();
-				installUrlTextBox.value="";
-			}, 500);
+			registry.installPlugin(pluginUrl).then(
+				function(plugin) {
+					refreshButton.onClick();
+					installUrlTextBox.value="";
+					statusService.setMessage("Installed " + plugin.getLocation(), 5000);
+				}, function(error) {
+					statusService.setErrorMessage(error);
+				});
 		}
 	};
 	dojo.connect(installUrlTextBox, "onkeypress", function(e) {

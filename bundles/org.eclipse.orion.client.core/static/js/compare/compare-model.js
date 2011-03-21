@@ -72,6 +72,21 @@ eclipse.CompareTextModel = (function() {
 			return this._lineFeeder.getLineType(lineIndex , this._mapperColumnIndex);
 		},
 			
+		getAnnotations: function(){
+			return this._lineFeeder.getAnnotations();
+		},
+		
+		getAnnotationH: function(lineIndex){
+			return this._lineFeeder.getAnnotationH(lineIndex);
+		},
+		
+		getLineNumber: function(lineIndex , mapperColumnIndex){
+			if(this._lineFeeder.getLineNumber)
+				return this._lineFeeder.getLineNumber(lineIndex , mapperColumnIndex);
+			var realIndex = this.lookUpRealIndex(lineIndex);
+			return realIndex.lineIndex;
+		},
+		
 		addListener: function(listener) {
 			this._listeners.push(listener);
 		},

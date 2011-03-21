@@ -17,7 +17,7 @@ eclipse.GapLineFeeder = (function() {
 	}
 
 	GapLineFeeder.prototype = /** @lends eclipse.TextModel.prototype */ {
-			generateGapBlocks: function( mapper, mapperColumnIndex , diffLinesArray ){
+		generateGapBlocks: function( mapper, mapperColumnIndex , diffLinesArray ){
 		    var gapBlocks = [];//Each item represents the start lineIndex and the line number of a gap block , and the string index of the dummyLineArray
 			this._mapper = mapper;
 			this._annotations = [];
