@@ -13,18 +13,16 @@
 var eclipse = eclipse || {};
 eclipse.GenericExplorer = (function() {
 	/**
-	 * @name eclipse.Explorer
-	 * @class A table-based explorer component
+	 * @name eclipse.GenericExplorer
+	 * @class A table-based explorer component.
+	 * 
+	 * @param serviceRegistry
+	 * @param parentId id of parent dom element
+	 * @param renderer
 	 */
-	function GenericExplorer(serviceRegistry, fileClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
+	function GenericExplorer(serviceRegistry, renderer) {
 		this.registry = serviceRegistry;
-		this.fileClient = fileClient;
-		this.parentId = parentId;
-		this.pageTitleId = pageTitleId;
-		this.toolbarId = toolbarId;
-		this.selectionToolsId = selectionToolsId;
-		this.model = null;
-		this.renderer = null;
+		this.renderer = renderer;
 		this.myTree = null;
 	}
 	GenericExplorer.prototype = /** @lends eclipse.GenericExplorer.prototype */ {
@@ -39,6 +37,13 @@ eclipse.GenericExplorer = (function() {
 				dojo.hitch(this.myTree._renderer, this.myTree._renderer.updateCommands(item));
 			}
 		},
+		
+		/**
+		 * Displays tree table containing filled with data provided by given model
+		 * 
+		 * @param parentId id of parent dom element
+		 * @param model providing data to display
+		 */
 		createTree: function (parentId, model){
 			var treeId = parentId + "innerTree";
 			var existing = dojo.byId(treeId);
@@ -69,11 +74,11 @@ eclipse.GenericExplorer = (function() {
 eclipse = eclipse || {};
 eclipse.SimpleTreeTableModel = (function() {
 	/**
-	 * @name eclipse.Model
-	 * @class Tree model used by eclipse.GenericExplorer.
-	 * TODO: Consolidate with eclipse.TreeModel.
+	 * @name eclipse.SimpleTreeTableModel
+	 * @class Simple tree model using Children and ChildrenLocation attributes to fetch children
+	 * and calculating id based on Location attribute.
 	 */
-	function SimpleTreeTableModel(rootPath, /* function */fetchItems) {
+	function SimpleTreeTableModel(rootPath, /* function returning promise */fetchItems) {
 		this.rootPath = rootPath;
 		this.fetchItems = fetchItems;
 	}
@@ -250,6 +255,12 @@ eclipse.GenericTableRenderer = (function() {
 	return GenericTableRenderer;
 }());
 
+/**
+ * @name eclipse.SimpleTreeTableRenderer
+ * @class Sample renderer that allows you to render a standard tree table.
+ * Override {@link eclipse.SimpleTreeTableRenderer#getCellHeaderElement}  and
+ * {@link eclipse.SimpleTreeTableRenderer#getCellElement} to generate table content.
+ */
 eclipse.SimpleTreeTableRenderer = (function(){
 	function SimpleTreeTableRenderer(options, explorer) {
 		this._init(options);
@@ -296,6 +307,22 @@ eclipse.SimpleTreeTableRenderer = (function(){
 		}
 		
 	};
+	
+	/**
+	 * Override to return a dom element containing table header, preferably <code>th</code>
+	 * @param col_no number of column
+	 */
+	SimpleTreeTableRenderer.prototype.getCellHeaderElement = function(col_no){};
+
+
+
+	/**
+	 * Override to return a dom element containing table cell, preferable <code>td</td>
+	 * @param col_no number of column
+	 * @param item item to be rendered
+	 * @param tableRow the current table row
+	 */
+	SimpleTreeTableRenderer.prototype.getCellElement = function(col_no, item, tableRow){};
 	
 	return SimpleTreeTableRenderer;
 }());
