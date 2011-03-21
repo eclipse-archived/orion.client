@@ -68,11 +68,14 @@ eclipse.CommandService = (function() {
 		/**
 		 * Registers a command group and specifies visual information about the group.
 		 * @param {String} the id of the group, must be unique.  Also used for dom node id
+		 * @param {Number} the relative position of the group within its parent, optional.
+		 * @param {String} the title of the group, optional
 		 * @param {String} the path of parent groups, separated by '/'.  For example,
 		 *  a path of "group1Id/group2Id" indicates that the group belongs as a child of 
 		 *  group2Id, which is itself a child of group1Id.  Optional.
-		 * @param {Number} the relative position of the group within its parent
-		 * @param {String} the title of the group, optional
+		 * @param {String} the id of a DOM element related to the command's scope.  Optional.
+		 *  For example, if the scope is "dom" level, the scopeId describes which dom id to which this
+		 *  command should be added
 		 */	
 		 
 		addCommandGroup: function(groupId, position, title, parentPath, scopeId) {
