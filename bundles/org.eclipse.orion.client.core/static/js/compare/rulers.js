@@ -154,6 +154,79 @@ eclipse.CompareOverviewRuler = (function() {
 }());
 
 
+eclipse.CompareMergeOverviewRuler = (function() {
+	function CompareMergeOverviewRuler (rulerLocation, rulerStyle) {
+		eclipse.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
+	}
+	CompareMergeOverviewRuler.prototype = new eclipse.CompareRuler();
+	CompareMergeOverviewRuler.prototype.getAnnotations = function() {
+		var model = this._editor.getModel();
+		var lines = [];
+		if(model.getAnnotations){
+			var annotations = model.getAnnotations();
+			for (var i = 0;i < annotations.length ; i++) {
+				if (annotations[i] !== undefined) {
+					lines.push(annotations[i][0]);
+				}
+			}
+		}
+		return lines;
+	};
+	CompareMergeOverviewRuler.prototype.getStyle = function(lineIndex) {
+		var result, style;
+		if (lineIndex === undefined) {
+			result = this._rulerStyle || {};
+			style = result.style || (result.style = {});
+			style.lineHeight = "1px";
+			style.fontSize = "1px";
+			style.width = "14px";
+		} else {
+			if (lineIndex !== -1) {
+				result = {styleClass: "ruler_annotation_breakpoint_overview"} || {};
+			} else {
+				result = {};
+			}
+			style = result.style || (result.style = {});
+			style.cursor = "pointer";
+			style.width = "8px";
+			//style.height = "3px";
+			style.left = "2px";
+			
+			var model = this._editor.getModel();
+			if(lineIndex >= 0 && model.getAnnotationH){
+				var anH = model.getAnnotationH(lineIndex);
+				var lC = model.getLineCount();
+				var clientArea = this._editor.getClientArea();
+				var height =  Math.floor(clientArea.height*anH/lC);
+				if (height < 2)
+					height = 2;
+				style.height = height +"px";
+			} else {
+				style.height = "3px";
+			}
+		}
+		return result;
+	};
+	CompareMergeOverviewRuler.prototype.getHTML = function(lineIndex) {
+		return "&nbsp;";
+	};
+	CompareMergeOverviewRuler.prototype.onClick = function(lineIndex, e) {
+		if (lineIndex === undefined) { return; }
+		var lineHeight = this._editor.getLineHeight();
+		var clientArea = this._editor.getClientArea();
+		var lines = Math.floor(clientArea.height / lineHeight/3);
+		this._editor.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
+	};
+	CompareMergeOverviewRuler.prototype._onModelChanged = function(e) {
+		var model = this._editor.getModel();
+		var lineCount = model.getLineCount();
+		if(lineCount > 0)
+			this._editor.redrawLines(0, 1, this);
+	};
+	return CompareMergeOverviewRuler;
+}());
+
+
 eclipse.CompareMatchRenderer =  (function() {
 
 	function CompareMatchRenderer(canvasDiv) {
@@ -221,6 +294,14 @@ eclipse.CompareMatchRenderer =  (function() {
 			
 			context.moveTo(0 , leftMiddle);
 			context.bezierCurveTo( w/3, leftMiddle, w*0.666  ,rightMiddle , w ,rightMiddle);
+		},
+		
+		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+			if(removedLineCount === addedLineCount)
+				return;
+			if(removedLineCount > 0 || addedLineCount > 0)
+				this.render();
+			
 		}
 		
 	};
