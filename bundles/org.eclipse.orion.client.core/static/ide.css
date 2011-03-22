@@ -95,15 +95,15 @@ a:hover {
     overflow-x: hidden;
 }
 
-.soria .dijitSplitterV .dijitSplitterThumb {	
+.nihilo .dijitSplitterV .dijitSplitterThumb {	
 	background: #c5c5c5;
 }
 
-.soria .dijitSplitterV {
+.nihilo .dijitSplitterV {
 	background: #c5c5c5;
 }
 
-.soria .dijitDialogTitleBar {
+.nihilo .dijitDialogTitleBar {
     background: #5c5c5c;
     color: white;
     outline: 0 none;
@@ -203,7 +203,7 @@ a:hover {
 	font-size: 0.9em;
 }
 
-.soria .dijitButtonNode {
+.nihilo .dijitButtonNode {
 	background-image: none;
 	background: none;
 	border: 0px;

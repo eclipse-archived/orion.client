@@ -54,28 +54,28 @@
 	text-decoration: underline;
 }
 
-.soria .dijitMenu, .soria .dijitMenuBar {
+.nihilo .dijitMenu, .nihilo .dijitMenuBar {
     background-color: #FFFFFF;
     border: 1px solid #888787;
     margin: 0;
     padding: 0;
 }
 
-.soria .dijitMenuItem {
+.nihilo .dijitMenuItem {
     color: black;
     font-family: sans-serif;
     margin: 0;
 }
 
-.soria .dijitMenuPassive .dijitMenuItemHover, .soria .dijitMenuItemSelected {
+.nihilo .dijitMenuPassive .dijitMenuItemHover, .nihilo .dijitMenuItemSelected {
     background-color: #fedda7;
     color: black;
 }
 
-.soria dijitButtonHover, .soria .dijitButtonHover .dijitButtonNode, .soria .dijitButtonNodeHover, .soria .dijitToggleButtonHover .dijitButtonNode, .soria .dijitDropDownButtonHover .dijitButtonNode, .soria .dijitButtonContentsHover, .soria .dijitUpArrowButtonHover, .soria .dijitDownArrowButtonHover {
+.nihilo dijitButtonHover, .nihilo .dijitButtonHover .dijitButtonNode, .nihilo .dijitButtonNodeHover, .nihilo .dijitToggleButtonHover .dijitButtonNode, .nihilo .dijitDropDownButtonHover .dijitButtonNode, .nihilo .dijitButtonContentsHover, .nihilo .dijitUpArrowButtonHover, .nihilo .dijitDownArrowButtonHover {
     background: #ededed;
     color: black;
 }
-.soria .dijitButtonActive, .soria .dijitButtonActive .dijitButtonNode, .soria .dijitToggleButtonActive .dijitButtonNode, .soria .dijitDropDownButtonActive .dijitButtonNode, .soria .dijitComboButtonActive .dijitButtonContents, .soria .dijitStackController .dijitToggleButtonChecked .dijitButtonNode {
+.nihilo .dijitButtonActive, .nihilo .dijitButtonActive .dijitButtonNode, .nihilo .dijitToggleButtonActive .dijitButtonNode, .nihilo .dijitDropDownButtonActive .dijitButtonNode, .nihilo .dijitComboButtonActive .dijitButtonContents, .nihilo .dijitStackController .dijitToggleButtonChecked .dijitButtonNode {
     background: #ededed;
 }
