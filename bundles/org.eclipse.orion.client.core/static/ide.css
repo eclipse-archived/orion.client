@@ -373,3 +373,9 @@ a:hover {
 #test-tree {
 	margin: 8px;
 }
+
+.compareCanvas {
+	background: #EEEEEE;
+	border: 0px;
+}
+

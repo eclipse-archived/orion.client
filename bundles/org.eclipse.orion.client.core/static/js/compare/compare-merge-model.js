@@ -32,8 +32,18 @@ eclipse.CompareMergeModel = (function() {
 		getLineType: function(lineIndex){
 			var mapItem = this.lookUpMapper(lineIndex);
 			if(mapItem.mapperIndex > -1){
-				if(this._mapper[mapItem.mapperIndex][2] !== 0)
-					return "changed";
+				if(this._mapper[mapItem.mapperIndex][2] !== 0){
+					var mapperLength = this._mapper[mapItem.mapperIndex][this._mapperColumnIndex];
+					if(mapperLength === 0)
+						return "top-only";
+					if(mapperLength === 1)
+						return "oneline";
+					if(lineIndex === mapItem.startFrom)
+						return "top";
+					if(lineIndex === mapItem.startFrom + mapperLength -1)
+						return "bottom";
+					return "middle";
+				}
 			}
 			return "unchanged";
 		},

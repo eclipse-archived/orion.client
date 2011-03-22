@@ -209,6 +209,20 @@ orion.CompareMergeContainer = (function() {
 		this._compareMatchRenderer = new eclipse.CompareMatchRenderer(canvas);
 	}
 	CompareMergeContainer.prototype = new orion.CompareContainer();
+	CompareMergeContainer.prototype.setStyle = function(lineStyleEvent , lineType){	
+		if(lineType === "top-only") {
+			lineStyleEvent.style = {style: { borderTop: "1px #AAAAAA solid" }};
+		} else if (lineType === "oneline"){
+			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , border: "1px #AAAAAA solid" }};
+		} else if (lineType === "top"){
+			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: "1px #AAAAAA solid" , borderLeft: "1px #AAAAAA solid" , borderRight: "1px #AAAAAA solid"}};
+		} else if (lineType === "bottom"){
+			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderBottom: "1px #AAAAAA solid" , borderLeft: "1px #AAAAAA solid" , borderRight: "1px #AAAAAA solid"}};
+		} else if (lineType === "middle"){
+			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderLeft: "1px #AAAAAA solid" , borderRight: "1px #AAAAAA solid"}};
+		} 
+	};
+	
 	CompareMergeContainer.prototype.setEditor = function(input , diff){	
 		var result = this.parseMapper(input , diff);
 		if(this._editorLeft && this._editorRight){
@@ -235,7 +249,7 @@ orion.CompareMergeContainer = (function() {
 			stylesheet: "/js/compare/editor.css" 
 		};
 		this._editorRight = new eclipse.Editor(optionsRight);
-		this._editorRight.addRuler(new eclipse.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		this._editorRight.addRuler(new eclipse.LineNumberCompareRuler(0,"right", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 				
 		var optionsLeft = {
 			parent: this._leftEditorDivId,
@@ -249,17 +263,8 @@ orion.CompareMergeContainer = (function() {
 		var self = this;
 		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
 			var lineIndex = lineStyleEvent.lineIndex;
-			var lineStart = lineStyleEvent.lineStart;
 			var lineType =  self._editorLeft.getModel().getLineType(lineIndex);
-			//lineStyleEvent.ranges = [];
-			//lineStyleEvent.ranges.push ({start: lineStart, end: lineStart + 3, style: {style: {backgroundColor: "blue"} }});
-			if(lineType === "added") {
-				lineStyleEvent.style = {style: {backgroundColor: "#99EE99"}};
-			} else if (lineType === "changed"){
-				lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
-			} else if (lineType === "removed" || lineType === "changed_gap"){
-				lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
-			} 
+			self.setStyle(lineStyleEvent , lineType);
 		}); 
 
 		this._editorLeft.getModel().addListener(self._compareMatchRenderer);
@@ -272,15 +277,8 @@ orion.CompareMergeContainer = (function() {
 		
 		this._editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
 			var lineIndex = lineStyleEvent.lineIndex;
-			var lineStart = lineStyleEvent.lineStart;
 			var lineType =  self._editorRight.getModel().getLineType(lineIndex);
-			if(lineType === "removed") {
-				lineStyleEvent.style = {style: {backgroundColor: "#EE9999"}};
-			} else if (lineType === "changed"){
-				lineStyleEvent.style = {style: {backgroundColor: "#FFDD88"}};
-			} else if (lineType === "added" || lineType === "changed_gap"){
-				lineStyleEvent.style = {style: {backgroundColor: "#DDDDDD"}};
-			} 
+			self.setStyle(lineStyleEvent , lineType);
 		}); 
 
 		this._editorRight.addEventListener("Scroll", window, function(scrollEvent) {

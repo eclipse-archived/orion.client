@@ -284,8 +284,8 @@ eclipse.CompareMatchRenderer =  (function() {
 		render: function(){
 			var context=this._canvasDiv.getContext("2d");
 			context.clearRect(0,0,this._canvasDiv.width,this._canvasDiv.height);
-			context.fillStyle   = '#00f'; // blue
-			context.strokeStyle = '#00f'; // red
+			context.fillStyle   = '#BBBBBB'; 
+			context.strokeStyle = '#AAAAAA'; 
 			context.lineWidth   = 1;
 			context.beginPath();
 			
