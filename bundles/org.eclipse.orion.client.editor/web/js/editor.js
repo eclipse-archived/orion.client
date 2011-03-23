@@ -3076,7 +3076,11 @@ eclipse.Editor = (function() {
 							var index = 0;
 							while (index < nodeLength) {
 								range.setStart(textNode, index);
-								range.setEnd(textNode, index + 1);
+								if (index === nodeLength - 1) {
+									range.setEnd(textNode, textNode.length);
+								} else {
+									range.setEnd(textNode, index + 1);
+								}
 								rect = range.getBoundingClientRect();
 								if (rect.left <= x && x < rect.right) {
 									//TODO test for character trailing (wrong for bidi)
