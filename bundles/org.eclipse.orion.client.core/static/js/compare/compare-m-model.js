@@ -30,7 +30,7 @@ orion.CompareMergeModel = (function() {
 		
 		//To get the line type from a zero based line index  
 		getLineType: function(lineIndex){
-			var mapItem = this.lookUpMapper(lineIndex);
+			var mapItem = orion.compareUtils.lookUpMapper(this._mapper , this._mapperColumnIndex , lineIndex);
 			if(mapItem.mapperIndex > -1){
 				if(this._mapper[mapItem.mapperIndex][2] !== 0){
 					var mapperLength = this._mapper[mapItem.mapperIndex][this._mapperColumnIndex];
@@ -81,56 +81,18 @@ orion.CompareMergeModel = (function() {
 			return lineIndex;
 		},
 		
-		lookUpMapper: function(lineIndex){
-			var curLineindex = 0;//zero based
-			for (var i = 0 ; i < this._mapper.length ; i++){
-				var size = this._mapper[i][this._mapperColumnIndex];
-				if(size === 0)
-					size = 1;
-				if(lineIndex >= curLineindex && lineIndex < (curLineindex + size)){
-					return {mapperIndex:i , startFrom:curLineindex};
-				}
-				if(i === (this._mapper.length - 1 ))
-					break;
-				curLineindex += this._mapper[i][this._mapperColumnIndex];
-			}
-			return  {mapperIndex:this._mapper.length-1 , startFrom:curLineindex};
+		getLineIndexFromMapper: function(mapperIndex){
+			return orion.compareUtils.lookUpLineIndex(this._mapper , this._mapperColumnIndex , mapperIndex);
 		},
 		
-		getLineIndexFromMapper: function(mapperIndex){
-			if(mapperIndex === 0)
-				return 0;
-			var curLineindex = 0;//zero based
-			for (var i = 0 ; i < mapperIndex ; i++){
-				curLineindex += this._mapper[i][this._mapperColumnIndex];
-			}
-			return curLineindex;
+		lookUpMapper: function(lineIndex){
+			return orion.compareUtils.lookUpMapper(this._mapper , this._mapperColumnIndex , lineIndex);
 		},
 		
 		updateMapper: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount){
 			if(removedLineCount === addedLineCount)
 				return;
-			if(removedLineCount > 0 || addedLineCount > 0){
-				var lineIndex = this.getLineAtOffset(start);
-				var mapperItem = this.lookUpMapper(lineIndex);
-				if(removedLineCount > 0){
-					var linesLeft = removedLineCount;
-					var startInMapper = lineIndex - mapperItem.startFrom;
-					for(var i = mapperItem.mapperIndex ; i < this._mapper.length ; i++){
-						var wipeOutLines = this._mapper[i][this._mapperColumnIndex] - startInMapper;
-						if(linesLeft <= wipeOutLines){
-							this._mapper[i][this._mapperColumnIndex] -= linesLeft;
-							break;
-						}
-						this._mapper[i][this._mapperColumnIndex] -= wipeOutLines;
-						linesLeft -= wipeOutLines;
-						startInMapper = 0;
-					}
-				}
-				if(addedLineCount > 0){
-					this._mapper[mapperItem.mapperIndex][this._mapperColumnIndex] += addedLineCount;
-				}
-			}
+			orion.compareUtils.updateMapper(this._mapper , this._mapperColumnIndex , this.getLineAtOffset(start) , removedLineCount, addedLineCount);
 		},
 		
 		addListener: function(listener) {
