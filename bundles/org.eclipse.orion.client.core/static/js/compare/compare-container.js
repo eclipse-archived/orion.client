@@ -12,7 +12,7 @@ var orion = orion || {};
 
 orion.CompareContainer = (function() {
 	function CompareContainer () {
-		this._diffParser = new eclipse.DiffParser();
+		this._diffParser = new orion.DiffParser();
 		this.fileContent = null;
 		this.diffURI = null;
 	}
@@ -129,9 +129,9 @@ orion.SBSCompareContainer = (function() {
 		}
 				
 		var modelLeft = new eclipse.TextModel(result.output, result.delim);
-		var compareModelLeft = new eclipse.CompareTextModel(modelLeft, {mapper:result.mapper , columnIndex:0} , new eclipse.GapLineFeeder( result.delim));
+		var compareModelLeft = new orion.CompareTextModel(modelLeft, {mapper:result.mapper , columnIndex:0} , new orion.GapLineFeeder( result.delim));
 		var modelRight = new eclipse.TextModel(input, result.delim);
-		var compareModelRight = new eclipse.CompareTextModel(modelRight, {mapper:result.mapper , columnIndex:1} , new eclipse.GapLineFeeder( result.delim));
+		var compareModelRight = new orion.CompareTextModel(modelRight, {mapper:result.mapper , columnIndex:1} , new orion.GapLineFeeder( result.delim));
 		
 		var optionsRight = {
 			parent: this._rightEditorDivId,
@@ -140,7 +140,7 @@ orion.SBSCompareContainer = (function() {
 			stylesheet: "/js/compare/editor.css" 
 		};
 		this._editorRight = new eclipse.Editor(optionsRight);
-		this._editorRight.addRuler(new eclipse.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		this._editorRight.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 				
 		var optionsLeft = {
 			parent: this._leftEditorDivId,
@@ -149,7 +149,7 @@ orion.SBSCompareContainer = (function() {
 			stylesheet: "/js/compare/editor.css" 
 		};
 		this._editorLeft = new eclipse.Editor(optionsLeft);
-		this._editorLeft.addRuler(new eclipse.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		this._editorLeft.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 		
 		var self = this;
 		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
@@ -190,7 +190,7 @@ orion.SBSCompareContainer = (function() {
 			self._editorLeft.setTopPixel(self._editorRight.getTopPixel());
 		}); 
 				
-		var overview  = new eclipse.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
+		var overview  = new orion.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
 		this._editorRight.addRuler(overview);
 				
 		this._initDiffPosition(this._editorLeft);
@@ -206,7 +206,7 @@ orion.CompareMergeContainer = (function() {
 		this._editorRight = null;
 		this._leftEditorDivId = leftEditorDivId;
 		this._rightEditorDivId = rightEditorDivId;
-		this._compareMatchRenderer = new eclipse.CompareMatchRenderer(canvas);
+		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
 	}
 	CompareMergeContainer.prototype = new orion.CompareContainer();
 	CompareMergeContainer.prototype.setStyle = function(lineStyleEvent , lineType){	
@@ -238,9 +238,9 @@ orion.CompareMergeContainer = (function() {
 		}
 				
 		var modelLeft = new eclipse.TextModel(result.output, result.delim);
-		var compareModelLeft = new eclipse.CompareMergeModel(modelLeft, {mapper:result.mapper , columnIndex:0} , new eclipse.GapLineFeeder( result.delim));
+		var compareModelLeft = new orion.CompareMergeModel(modelLeft, {mapper:result.mapper , columnIndex:0} );
 		var modelRight = new eclipse.TextModel(input, result.delim);
-		var compareModelRight = new eclipse.CompareMergeModel(modelRight, {mapper:result.mapper , columnIndex:1} , new eclipse.GapLineFeeder( result.delim));
+		var compareModelRight = new orion.CompareMergeModel(modelRight, {mapper:result.mapper , columnIndex:1} );
 		
 		var optionsRight = {
 			parent: this._rightEditorDivId,
@@ -249,7 +249,7 @@ orion.CompareMergeContainer = (function() {
 			stylesheet: "/js/compare/editor.css" 
 		};
 		this._editorRight = new eclipse.Editor(optionsRight);
-		this._editorRight.addRuler(new eclipse.LineNumberCompareRuler(0,"right", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		this._editorRight.addRuler(new orion.LineNumberCompareRuler(0,"right", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 				
 		var optionsLeft = {
 			parent: this._leftEditorDivId,
@@ -258,7 +258,7 @@ orion.CompareMergeContainer = (function() {
 			stylesheet: "/js/compare/editor.css" 
 		};
 		this._editorLeft = new eclipse.Editor(optionsLeft);
-		this._editorLeft.addRuler(new eclipse.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		this._editorLeft.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 		
 		var self = this;
 		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
@@ -269,8 +269,10 @@ orion.CompareMergeContainer = (function() {
 
 		this._editorLeft.getModel().addListener(self._compareMatchRenderer);
 		this._editorLeft.addEventListener("Scroll", window, function(scrollEvent) {
-			//self._editorRight.setTopPixel(self._editorLeft.getTopPixel());
-			self._compareMatchRenderer.render();
+			if(self._compareMatchRenderer){
+				//self._compareMatchRenderer.matchPositionFrom(true);
+				self._compareMatchRenderer.render();
+			}
 		}); 
 				
 		this._editorLeft.redrawRange();
@@ -282,16 +284,18 @@ orion.CompareMergeContainer = (function() {
 		}); 
 
 		this._editorRight.addEventListener("Scroll", window, function(scrollEvent) {
-			//self._editorLeft.setTopPixel(self._editorRight.getTopPixel());
-			self._compareMatchRenderer.render();
+			if(self._compareMatchRenderer){
+				//self._compareMatchRenderer.matchPositionFrom(false);
+				self._compareMatchRenderer.render();
+			}
 		}); 
 				
-		var overview  = new eclipse.CompareMergeOverviewRuler(self._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
+		var overview  = new orion.CompareMergeOverviewRuler(self._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
 		this._editorRight.addRuler(overview);
 				
 		this._editorRight.redrawRange();
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
-		this._compareMatchRenderer.matchPositionFromRight(-1);
+		this._compareMatchRenderer.matchPositionFromAnnotation(-1);
 	};
 	return CompareMergeContainer;
 }());
@@ -322,7 +326,7 @@ orion.InlineCompareContainer = (function() {
 		}
 				
 		var model = new eclipse.TextModel(input, result.delim);
-		var compareModel = new eclipse.CompareTextModel(model, {mapper:result.mapper , columnIndex:0} , new eclipse.DiffLineFeeder(result.diffArray ,result.delim));
+		var compareModel = new orion.CompareTextModel(model, {mapper:result.mapper , columnIndex:0} , new orion.DiffLineFeeder(result.diffArray ,result.delim));
 		
 		var options = {
 			parent: this._editorDivId,
@@ -331,11 +335,11 @@ orion.InlineCompareContainer = (function() {
 			stylesheet: "/js/compare/editor.css" 
 		};
 		this._editor = new eclipse.Editor(options);
-		var rulerOrigin = new eclipse.LineNumberCompareRuler(1,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
-		var rulerNew = new eclipse.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+		var rulerOrigin = new orion.LineNumberCompareRuler(1,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+		var rulerNew = new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
 		this._editor.addRuler(rulerOrigin);
 		this._editor.addRuler(rulerNew);
-		var overview  = new eclipse.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
+		var overview  = new orion.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
 		this._editor.addRuler(overview);
 		var self = this;
 		this._editor.addEventListener("LineStyle", window, function(lineStyleEvent) {

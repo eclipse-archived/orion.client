@@ -47,8 +47,3 @@ dojo.addOnLoad(function(){
 	
 });
 
-
-function onCanvasResize(evt){
-	console.log("resize end !!!!");
-}
-

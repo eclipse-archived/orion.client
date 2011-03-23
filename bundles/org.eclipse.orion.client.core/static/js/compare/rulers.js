@@ -7,9 +7,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-var eclipse = eclipse || {};
+var orion = orion || {};
 
-eclipse.CompareRuler = (function() {
+orion.CompareRuler = (function() {
 	function CompareRuler (rulerLocation, rulerOverview, rulerStyle) {
 		this._location = rulerLocation || "left";
 		this._overview = rulerOverview || "page";
@@ -36,15 +36,15 @@ eclipse.CompareRuler = (function() {
 	return CompareRuler;
 }());
 
-eclipse.LineNumberCompareRuler = (function() {
+orion.LineNumberCompareRuler = (function() {
 	function LineNumberCompareRuler (mapperColumnIndex , rulerLocation, rulerStyle, oddStyle, evenStyle) {
-		eclipse.CompareRuler.call(this, rulerLocation, "page", rulerStyle);
+		orion.CompareRuler.call(this, rulerLocation, "page", rulerStyle);
 		this._oddStyle = oddStyle || {style: {backgroundColor: "white"}};
 		this._evenStyle = evenStyle || {style: {backgroundColor: "white"}};
 		this._numOfDigits = 0;
 		this._mapperColumnIndex = mapperColumnIndex;
 	}
-	LineNumberCompareRuler.prototype = new eclipse.CompareRuler(); 
+	LineNumberCompareRuler.prototype = new orion.CompareRuler(); 
 	LineNumberCompareRuler.prototype.getStyle = function(lineIndex) {
 		if (lineIndex === undefined) {
 			return this._rulerStyle;
@@ -81,11 +81,11 @@ eclipse.LineNumberCompareRuler = (function() {
 	return LineNumberCompareRuler;
 }());
 
-eclipse.CompareOverviewRuler = (function() {
+orion.CompareOverviewRuler = (function() {
 	function CompareOverviewRuler (rulerLocation, rulerStyle) {
-		eclipse.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
+		orion.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
 	}
-	CompareOverviewRuler.prototype = new eclipse.CompareRuler();
+	CompareOverviewRuler.prototype = new orion.CompareRuler();
 	CompareOverviewRuler.prototype.getAnnotations = function() {
 		var model = this._editor.getModel();
 		var lines = [];
@@ -154,12 +154,12 @@ eclipse.CompareOverviewRuler = (function() {
 }());
 
 
-eclipse.CompareMergeOverviewRuler = (function() {
+orion.CompareMergeOverviewRuler = (function() {
 	function CompareMergeOverviewRuler (compareMatchRenderer , rulerLocation, rulerStyle) {
 		this._compareMatchRenderer = compareMatchRenderer;
-		eclipse.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
+		orion.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
 	}
-	CompareMergeOverviewRuler.prototype = new eclipse.CompareRuler();
+	CompareMergeOverviewRuler.prototype = new orion.CompareRuler();
 	CompareMergeOverviewRuler.prototype.getAnnotations = function() {
 		var model = this._editor.getModel();
 		var lines = [];
@@ -213,13 +213,7 @@ eclipse.CompareMergeOverviewRuler = (function() {
 	};
 	CompareMergeOverviewRuler.prototype.onClick = function(lineIndex, e) {
 		if (lineIndex === undefined) { return; }
-		this._compareMatchRenderer.matchPositionFromRight(lineIndex);
-		/*
-		var lineHeight = this._editor.getLineHeight();
-		var clientArea = this._editor.getClientArea();
-		var lines = Math.floor(clientArea.height / lineHeight/3);
-		this._editor.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
-		*/
+		this._compareMatchRenderer.matchPositionFromAnnotation(lineIndex);
 	};
 	CompareMergeOverviewRuler.prototype._onModelChanged = function(e) {
 		var model = this._editor.getModel();
@@ -231,7 +225,7 @@ eclipse.CompareMergeOverviewRuler = (function() {
 }());
 
 
-eclipse.CompareMatchRenderer =  (function() {
+orion.CompareMatchRenderer =  (function() {
 
 	function CompareMatchRenderer(canvasDiv) {
 		this._canvasDiv = canvasDiv;
@@ -264,7 +258,28 @@ eclipse.CompareMatchRenderer =  (function() {
 			editor.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
 		},
 		
-		matchPositionFromRight: function(index){
+		_findBaseLine: function(editor){
+			var lineHeight = editor.getLineHeight();
+			var clientArea = editor.getClientArea();
+			var lines = Math.floor(clientArea.height / lineHeight/3);
+			return editor.getTopIndex() + lines;
+		},
+		
+		matchPositionFrom: function(fromLeft){
+			if(this._matching ){
+				this._matching = false;
+				return;
+			}
+			this._matching = true;
+			var baseEditor = fromLeft ? this._leftEditor : this._rightEditor;
+			var matchEditor = fromLeft ? this._rightEditor : this._leftEditor;
+			var baseLine = this._findBaseLine(baseEditor);
+			var mapperItem = baseEditor.getModel().lookUpMapper(baseLine);
+			var lineIndex = matchEditor.getModel().getLineIndexFromMapper(mapperItem.mapperIndex);
+			this._setEditorPosition(matchEditor , lineIndex);
+		},
+		
+		matchPositionFromAnnotation: function(index){
 			var lineIndex = index;
 			var annotaionIndex = index;
 			if(index === -1){

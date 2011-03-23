@@ -6,14 +6,14 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-var eclipse = eclipse || {};
+var orion = orion || {};
 
-eclipse.CompareTextModel = (function() {
+orion.CompareTextModel = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 
 	/** @private */
 	function CompareTextModel(model, mapWrapper , lineFeeder) {
-	    this._model = model;//new eclipse.TextModel(text, lineDelimiter);
+	    this._model = model;
 	    this._mapperColumnIndex = mapWrapper.columnIndex;
 	    this._mapper = mapWrapper.mapper;
 		this._listeners = [];
@@ -22,7 +22,7 @@ eclipse.CompareTextModel = (function() {
 	    this.init();
 	}
 
-	CompareTextModel.prototype = /** @lends eclipse.TextModel.prototype */ {
+	CompareTextModel.prototype = {
 		//private functions
 		init: function(mapper , diffArray){
 			if(mapper)
@@ -208,3 +208,216 @@ eclipse.CompareTextModel = (function() {
 	
 	return CompareTextModel;
 }()); 
+
+orion.DiffLineFeeder = (function() {
+	var isWindows = navigator.platform.indexOf("Win") !== -1;
+
+	function DiffLineFeeder(diffLinesArray , lineDelimeter) {
+		if(diffLinesArray){
+			this._diffLinesArray = diffLinesArray.array;
+			this._diffLinesArrayIndex = diffLinesArray.index;
+		}
+		this._lineDelimeter = lineDelimeter;
+		this._annotations = [];
+	}
+
+	DiffLineFeeder.prototype =  {
+	
+		generateGapBlocks: function( mapper, mapperColumnIndex , diffLinesArray ){
+		    var gapBlocks = [];//Each item represents the start lineIndex and the line number of a gap block , and the string index of the dummyLineArray
+			this._mapper = mapper;
+			if(diffLinesArray){
+				this._diffLinesArray = diffLinesArray.array;
+				this._diffLinesArrayIndex = diffLinesArray.index;
+			}
+		    this._annotations = [];
+		    var gapNumber = 0;
+			var curLineindex = 0;//zero based
+			var mapperColumnIndexCompare = 1 - mapperColumnIndex;
+			var delta = 0;
+			for (var i = 0 ; i < this._mapper.length ; i++){
+				if(this._mapper[i][2] === 0)
+					delta = this._mapper[i][mapperColumnIndex];
+				else
+					delta = this._mapper[i][mapperColumnIndex] + this._mapper[i][mapperColumnIndexCompare];
+				if(this._mapper[i][2] > 0){
+					var gap =this._mapper[i][mapperColumnIndex];
+					gapNumber +=gap;
+					gapBlocks.push([curLineindex + this._mapper[i][mapperColumnIndexCompare] , gap , this._mapper[i][2]]);
+				}
+				if((this._mapper[i][2] !== 0))
+					this._annotations.push([curLineindex , delta]);
+				curLineindex += delta;
+			}
+			return {gapBlocks:gapBlocks , gapNumber:gapNumber};
+		},
+		
+		getLineAt: function(blocks , blockNumber , delta , includeDelimiter ){
+			var index = blocks[blockNumber][2];
+			index += (delta -1);
+			var lineText = this._diffLinesArray[index];
+			if(lineText === undefined){
+				console.log(blocks);
+			}
+			lineText = lineText.substring(this._diffLinesArrayIndex);
+			if (includeDelimiter) {
+				return lineText + this._lineDelimeter;
+			}
+			return lineText;
+		},
+	
+		//To get the line type from a zero based line index  
+		getLineType: function(lineIndex , mapperColumnIndex){
+			var curLineindex = 0;//zero based
+			var mapperColumnIndexCompare = 1 - mapperColumnIndex;
+			var delta = 0;
+			
+			for (var i = 0 ; i < this._mapper.length ; i++){
+				if(this._mapper[i][2] === 0)
+					delta = this._mapper[i][mapperColumnIndex];
+				else
+					delta = this._mapper[i][mapperColumnIndex] + this._mapper[i][mapperColumnIndexCompare];
+				if(lineIndex >= curLineindex && lineIndex < (curLineindex +delta)){
+					if(this._mapper[i][2] === 0){
+						return "unchnaged";
+					} else if(this._mapper[i][2] < 0){
+						return "removed";
+					} else if(this._mapper[i][1] === 0){
+						return "added";
+					} else if (lineIndex < this._mapper[i][mapperColumnIndexCompare] + curLineindex){
+						return "removed";
+					}	
+					return "added";
+				}
+				curLineindex += delta;
+			}
+			return "unchnaged";
+		},
+		
+		getLineNumber: function(lineIndex , mapperColumnIndex){
+			if(this._mapper.length === 0)
+				return lineIndex;
+			var curLineindex = 0;//zero based
+			var curMyLineindex = 0;//zero based
+			var mapperColumnIndexCompare = 1 - mapperColumnIndex;
+			var delta = 0;
+			
+			for (var i = 0 ; i < this._mapper.length ; i++){
+				if(this._mapper[i][2] === 0)
+					delta = this._mapper[i][mapperColumnIndex];
+				else
+					delta = this._mapper[i][mapperColumnIndex] + this._mapper[i][mapperColumnIndexCompare];
+				
+				if(lineIndex >= curLineindex && lineIndex < (curLineindex +delta)){
+					var curDelta = lineIndex - curLineindex;
+					if(this._mapper[i][2] === 0){
+						return curMyLineindex + curDelta;
+					} else if(this._mapper[i][2] < 0){
+						return mapperColumnIndex === 0 ? -1 : (curMyLineindex + curDelta);
+					} else if(this._mapper[i][1] === 0){
+						return mapperColumnIndex === 0 ? (curMyLineindex + curDelta) : -1;
+					} else if (lineIndex < this._mapper[i][1] + curLineindex){
+						return mapperColumnIndex === 0 ? -1 : (curMyLineindex + curDelta);
+					}	
+					return mapperColumnIndex === 0 ? (curMyLineindex + curDelta - this._mapper[i][1]) : -1;
+				}
+				curLineindex += delta;
+				curMyLineindex += this._mapper[i][mapperColumnIndex];
+			}
+			return lineIndex;
+		},
+		
+		getAnnotations: function(){
+			return this._annotations;
+		},
+		
+		getAnnotationH: function(lineIndex){
+			for (var i = 0 ; i < this._annotations.length ; i++){
+				if(this._annotations[i][0] === lineIndex)
+					return this._annotations[i][1];
+			}
+			return 0;
+		}
+		
+	};
+	
+	return DiffLineFeeder;
+}()); 
+
+orion.GapLineFeeder = (function() {
+	var isWindows = navigator.platform.indexOf("Win") !== -1;
+
+	function GapLineFeeder(lineDelimeter) {
+		this._lineDelimeter = lineDelimeter;
+		this._annotations = [];
+	}
+
+	GapLineFeeder.prototype = {
+		generateGapBlocks: function( mapper, mapperColumnIndex , diffLinesArray ){
+		    var gapBlocks = [];//Each item represents the start lineIndex and the line number of a gap block , and the string index of the dummyLineArray
+			this._mapper = mapper;
+			this._annotations = [];
+		    var gapNumber = 0;
+			var curLineindex = 0;//zero based
+			var mapperColumnIndexCompare = 1 - mapperColumnIndex;
+			for (var i = 0 ; i < this._mapper.length ; i++){
+				if(this._mapper[i][mapperColumnIndex] < this._mapper[i][mapperColumnIndexCompare]){
+					var gap = this._mapper[i][mapperColumnIndexCompare] - this._mapper[i][mapperColumnIndex];
+					gapNumber +=gap;
+					gapBlocks.push([curLineindex + this._mapper[i][mapperColumnIndex] , gap , 1]);
+				}
+				var delta = Math.max(this._mapper[i][mapperColumnIndexCompare], this._mapper[i][mapperColumnIndex]);
+				if((this._mapper[i][2] !== 0))
+					this._annotations.push([curLineindex , delta]);
+				curLineindex += delta;
+			}
+			return {gapBlocks:gapBlocks , gapNumber:gapNumber};
+		},
+		
+		getLineAt: function(blocks , blockNumber , delta , includeDelimiter ){
+			if (includeDelimiter) {
+				return this._lineDelimeter;
+			}
+			return "";
+		},
+	
+		//To get the line type from a zero based line index  
+		getLineType: function(lineIndex , mapperColumnIndex){
+			var curLineindex = 0;//zero based
+			var mapperColumnIndexCompare = 1 - mapperColumnIndex;
+			for (var i = 0 ; i < this._mapper.length ; i++){
+				var maxV = Math.max(this._mapper[i][mapperColumnIndex], this._mapper[i][mapperColumnIndexCompare]);
+				if(lineIndex >= curLineindex && lineIndex < (curLineindex + maxV)){
+					if(this._mapper[i][2] === 0){
+						return "unchnaged";
+					} else if(this._mapper[i][2] < 0){
+						return "removed";
+					} else if(this._mapper[i][1] === 0){
+						return "added";
+					} else if (lineIndex < this._mapper[i][mapperColumnIndex] + curLineindex){
+						return "changed";
+					}
+					return "changed_gap";
+				}
+				curLineindex += Math.max(this._mapper[i][mapperColumnIndex], this._mapper[i][mapperColumnIndexCompare]);
+			}
+			return "unchnaged";
+		},
+		
+		getAnnotations: function(){
+			return this._annotations;
+		},
+		
+		getAnnotationH: function(lineIndex){
+			for (var i = 0 ; i < this._annotations.length ; i++){
+				if(this._annotations[i][0] === lineIndex)
+					return this._annotations[i][1];
+			}
+			return 0;
+		}
+		
+	};
+	
+	return GapLineFeeder;
+}()); 
+

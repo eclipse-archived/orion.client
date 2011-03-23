@@ -6,9 +6,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-var eclipse = eclipse || {};
+var orion = orion || {};
 
-eclipse.CompareMergeModel = (function() {
+orion.CompareMergeModel = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 
 	/** @private */
@@ -21,7 +21,7 @@ eclipse.CompareMergeModel = (function() {
 	    this.init();
 	}
 
-	CompareMergeModel.prototype = /** @lends eclipse.TextModel.prototype */ {
+	CompareMergeModel.prototype =  {
 		//private functions
 		init: function(mapper){
 			if(mapper)
@@ -90,9 +90,11 @@ eclipse.CompareMergeModel = (function() {
 				if(lineIndex >= curLineindex && lineIndex < (curLineindex + size)){
 					return {mapperIndex:i , startFrom:curLineindex};
 				}
+				if(i === (this._mapper.length - 1 ))
+					break;
 				curLineindex += this._mapper[i][this._mapperColumnIndex];
 			}
-			return  {mapperIndex:-1 , startFrom:-1};
+			return  {mapperIndex:this._mapper.length-1 , startFrom:curLineindex};
 		},
 		
 		getLineIndexFromMapper: function(mapperIndex){
