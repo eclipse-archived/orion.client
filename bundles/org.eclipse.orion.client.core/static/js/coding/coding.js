@@ -54,7 +54,6 @@ dojo.addOnLoad(function(){
 		outlineDomNode = dojo.byId("outline"),
 		editorContainerDomNode = dojo.byId("editorContainer"),
 		searchFloat = dojo.byId("searchFloat"),
-		contentassist = dojo.byId("contentassist"),
 		leftPane = dojo.byId("leftPane");
 	
 	// File operations
@@ -70,14 +69,16 @@ dojo.addOnLoad(function(){
 		});
 	};
 
-	
+	var contentAssistFactory = function(editor) {
+		return new eclipse.ContentAssist(editor, "contentassist");
+	};
 	
 	var editorContainer = new eclipse.EditorContainer(serviceRegistry,
 			editorFactory, commandService, eclipse.editorFeatures.createEditorCommands, eclipse.editorFeatures.undoFactory,
 			eclipse.editorFeatures.annotationFactory, eclipse.editorFeatures.lineNumberRulerFactory, 
 			searcher, fileClient,
 			editorContainerDomNode, "pageTitle",
-			topContainerWidget, contentassist, leftPane, searchFloat, "pageActions");
+			topContainerWidget, contentAssistFactory, leftPane, searchFloat, "pageActions");
 	
 	// TODO search location needs to be gotten from somewhere
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, editorContainer, editorContainer);

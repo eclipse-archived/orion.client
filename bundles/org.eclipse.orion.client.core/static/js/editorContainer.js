@@ -25,7 +25,7 @@ eclipse.EditorContainer = (function() {
 			searcher,
 			fileClient,
 			domNode, /**DomNode|dijit._Widget*/ codeTitle,
-			/**widgets.eWebBorderContainer*/ topContainer, contentassist,
+			/**widgets.eWebBorderContainer*/ topContainer, contentAssistFactory,
 			leftPane, searchFloat, toolbarId) {
 		this._serviceRegistry = serviceRegistry;
 		this._editorFactory = editorFactory;
@@ -34,12 +34,12 @@ eclipse.EditorContainer = (function() {
 		this._undoStackFactory = undoStackFactory;
 		this._annotationFactory = annotationFactory;
 		this._lineNumberRulerFactory = lineNumberRulerFactory;
+		this._contentAssistFactory = contentAssistFactory;
 		this._searcher = searcher;
 		this._fileClient = fileClient;
 		this._domNode = domNode;
 		this._codeTitle = codeTitle;
 		this._topContainer = topContainer;
-		this._contentassist = contentassist;
 		this._leftPane = leftPane;
 		this._searchFloat = searchFloat;
 		this._toolbarId = toolbarId;
@@ -49,12 +49,10 @@ eclipse.EditorContainer = (function() {
 		this._fileMetadata = null;
 		this._dirty = false;
 		this._fileURI = null;
+		this._contentAssist = null;
 		
 		this._leftPaneWidth = "";
-		
-		this._contentAssistMode = false;
-		this._contentAssistPrefix = "";
-		
+				
 		this._incrementalFindMode = false;
 		this._incrementalFindSuccess = true;
 		this._incrementalFindIgnoreSelection = false;
@@ -226,79 +224,7 @@ eclipse.EditorContainer = (function() {
 				}
 			}
 		},
-		// Content assist
-		_contentAssistListener: {
-			/** @this {eclipse.EditorContainer} */
-			onVerify: function(event){
-				// What are these for?
-//				var c = this;
-//				var e = this._editor;
-//				var p = this._contentAssistPrefix;
-//				var t = this._editor.getText(event.start, event.end);
-				this._showContentAssist(false);
-			},
-			/** @this {eclipse.EditorContainer} */
-			onSelectionChanged: function() {
-				this._showContentAssist(false);
-			}
-		},
-		_showContentAssist: function(enable) {
-			var contentassist = this._contentassist;
-			if (!contentassist) {
-				return;
-			}
-			function createDiv(proposal, isSelected) {
-				var attributes = {innerHTML: proposal, onclick: function(){alert(proposal);}};
-				if (isSelected) {
-					attributes.className = "selected";
-				}
-				dojo.create("div", attributes, contentassist);
-			}
-			var e = this._editor;
-			if (!enable) {
-				e.removeEventListener("Verify", this, this._contentAssistListener.onVerify);
-				e.removeEventListener("Selection", this, this._contentAssistListener.onSelectionChanged);
-				this._contentAssistMode = false;
-				contentassist.style.display = "none";
-			} else {
-				var offset = e.getCaretOffset();
-				var index = offset;
-				var c;
-				while (index > 0 && ((97 <= (c = e.getText(index - 1, index).charCodeAt(0)) && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) { //LETTER OR UNDERSCORE OR NUMBER
-					index--;
-				}
-				if (index === offset) {
-					return;
-				}
-				this._contentAssistPrefix = e.getText(index, offset);
-				
-				var proposals = [];
-				for (var i = this._contentAssistKeywords.length - 1; i>=0; i--) {
-					var proposal = this._contentAssistKeywords[i];
-					if (proposal.substr(0, this._contentAssistPrefix.length) === this._contentAssistPrefix) {
-						proposals.push(proposal);
-					}
-				}
-				if (proposals.length === 0) {
-					return;
-				}
-				
-				var caretLocation = e.getLocationAtOffset(offset);
-				caretLocation.y += e.getLineHeight();
-				contentassist.innerHTML = "";
-				for (i = 0; i<proposals.length; i++) {
-					createDiv(proposals[i], i===0);
-				}
-				e.convert(caretLocation, "document", "page");
-				contentassist.style.left = caretLocation.x + "px";
-				contentassist.style.top = caretLocation.y + "px";
-				contentassist.style.display = "block";
-				e.addEventListener("Verify", this, this._contentAssistListener.onVerify);
-				e.addEventListener("Selection", this, this._contentAssistListener.onSelectionChanged);
-				this._contentAssistMode = true;
-			}
-		},
-		// end content assist
+
 		
 		// incremental find
 		_incrementalFindListener: {
@@ -511,6 +437,10 @@ eclipse.EditorContainer = (function() {
 				this._undoStack = this._undoStackFactory(registry, this._commandService, this, this._toolbarId);
 			}
 			
+			if (this._contentAssistFactory) {
+				this._contentAssist = this._contentAssistFactory(this);
+			}
+			
 			var editorContainer = this,
 				editor = this._editor,
 				KeyBinding = eclipse.KeyBinding,
@@ -656,9 +586,8 @@ eclipse.EditorContainer = (function() {
 				if (editorContainer._incrementalFindMode) {
 					editorContainer._toggleIncrementalFind();
 					return true;
-				} else if (editorContainer._contentAssistMode) {
-					editorContainer._showContentAssist(false);
-					return true;
+				} else if (editorContainer._contentAssist && editorContainer._contentAssist.isActive()) {
+					return editorContainer._contentAssist.cancel();
 				} else {
 					return false;
 				}
@@ -716,25 +645,8 @@ eclipse.EditorContainer = (function() {
 						editorContainer._incrementalFindSuccess = false;
 					}
 					return true;
-				} else if (editorContainer._contentAssistMode) {
-					var contentassist = this._contentassist;
-					if (contentassist) {
-						var nodes = dojo.query('> div', contentassist);
-						index = 0;
-						for (var i=0; i<nodes.length; i++) {
-							if (nodes[i].className === "selected") {
-								nodes[i].className = "";
-								index = i;
-								break;
-							}
-						}
-						if (index > 0) {
-							nodes[index-1].className = "selected";
-						} else {
-							nodes[nodes.length - 1].className = "selected";
-						}
-						return true;
-					}
+				} else if (editorContainer._contentAssist && editorContainer._contentAssist.isActive()) {
+					return editorContainer._contentAssist.lineUp();
 				}
 				return false;
 			});
@@ -766,25 +678,8 @@ eclipse.EditorContainer = (function() {
 						editorContainer._incrementalFindSuccess = false;
 					}
 					return true;
-				} else if (editorContainer._contentAssistMode) {
-					var contentassist = this._contentassist;
-					if (contentassist) {
-						var nodes = dojo.query('> div', contentassist);
-						index = 0;
-						for (var i=0; i<nodes.length; i++) {
-							if (nodes[i].className === "selected") {
-								nodes[i].className = "";
-								index = i;
-								break;
-							}
-						}
-						if (index < nodes.length - 1) {
-							nodes[index+1].className = "selected";
-						} else {
-							nodes[0].className = "selected";
-						}
-						return true;
-					}
+				} else if (editorContainer._contentAssist && editorContainer._contentAssist.isActive()) {
+					return editorContainer._contentAssist.lineDown();
 				}
 				return false;
 			});
@@ -1099,12 +994,8 @@ eclipse.EditorContainer = (function() {
 			
 			//Auto indent
 			editor.setAction("enter", function() {
-				if (editorContainer._contentAssistMode) {
-					var contentassist = this._contentassist;
-					var proposal = dojo.query("> .selected", contentassist);
-					editor.setText(proposal[0].innerHTML.substring(editorContainer._contentAssistPrefix.length), editor.getCaretOffset(), editor.getCaretOffset());
-					editorContainer._showContentAssist(false);
-					return true;
+				if (editorContainer._contentAssist && editorContainer._contentAssist.isActive()) {
+					return editorContainer._contentAssist.enter();
 				}
 				var selection = editor.getSelection();
 				if (selection.start === selection.end) {
@@ -1176,15 +1067,7 @@ eclipse.EditorContainer = (function() {
 					return true;
 			});
 						
-			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			
-			// Content assist
-			editor.setKeyBinding(isMac ? new KeyBinding(' ', false, false, false, true) : new KeyBinding(' ', true), "content assist");
-			editor.setAction("content assist", function() {
-				editorContainer._showContentAssist(true);
-				return true;
-			});
-			
+		
 			/**@this {eclipse.EditorContainer} */
 			function updateCursorStatus() {
 				var model = editor.getModel();
@@ -1314,7 +1197,6 @@ eclipse.EditorContainer = (function() {
 						var splits = fileName.split(".");
 						if (splits.length > 0) {
 							var extension = splits.pop().toLowerCase();
-							this._contentAssistKeywords = [];
 							switch(extension) {
 								case "js":
 									this.styler = new eclipse.TextStyler(this._editor, "js");
@@ -1329,26 +1211,6 @@ eclipse.EditorContainer = (function() {
 									//TODO
 									break;
 								case "css":
-									// sorry for hard-coding it here, this is temporary and only for testing content assist
-									this._contentAssistKeywords = ["color", "text-align", "text-indent", "text-decoration", 
-										 "font", "font-style", "font-family", "font-weight", "font-size", "font-variant", "line-height",
-										 "background", "background-color", "background-image", "background-position", "background-repeat", "background-attachment",
-										 "list-style", "list-style-image", "list-style-position", "list-style-type", 
-										 "outline", "outline-color", "outline-style", "outline-width",
-										 "border", "border-left", "border-top", "border-bottom", "border-right", "border-color", "border-width", "border-style",
-										 "border-bottom-color", "border-bottom-style", "border-bottom-width",
-										 "border-left-color", "border-left-style", "border-left-width",
-										 "border-top-color", "border-top-style", "border-top-width",
-										 "border-right-color", "border-right-style", "border-right-width",
-										 "padding", "padding-left", "padding-top", "padding-bottom", "padding-right",
-										 "margin", "margin-left", "margin-top", "margin-bottom", "margin-right",
-										 "width", "height", "left", "top", "right", "bottom",
-										 "min-width", "max-width", "min-height", "max-height",
-										 "display", "visibility",
-										 "clip", "cursor", "overflow", "overflow-x", "overflow-y", "position", "z-index",
-										 "vertical-align", "horizontal-align",
-										 "float", "clear"
-										];
 									this.styler = new eclipse.TextStyler(this._editor, "css");
 									break;
 							}

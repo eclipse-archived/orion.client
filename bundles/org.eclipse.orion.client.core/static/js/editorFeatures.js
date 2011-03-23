@@ -191,3 +191,4 @@ eclipse.editorFeatures.annotationFactory = function() {
 	var overviewRuler = new eclipse.OverviewRuler("right", rulerStyle, annotationRuler);
 	return {annotationRuler: annotationRuler, overviewRuler: overviewRuler};
 };
+
