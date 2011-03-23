@@ -180,3 +180,14 @@ eclipse.editorFeatures.undoFactory = function (serviceRegistry, commandService, 
 
 	return undoStack;
 };
+
+eclipse.editorFeatures.lineNumberRulerFactory = function() {
+	return new eclipse.LineNumberRuler("left", {style: {backgroundColor: "#ffffff", textAlign: "right", borderLeft:"1px solid #ddd", borderRight:"1px solid #ddd"}}, {style: { backgroundColor: "#ffffff" }}, {style: { backgroundColor: "#ffffff" }});
+};
+
+eclipse.editorFeatures.annotationFactory = function() {
+	var rulerStyle = {style: { backgroundColor: "#ffffff" }};
+	var annotationRuler = new eclipse.AnnotationRuler("left", rulerStyle, {html: "<img src='images/problem.gif'></img>"});
+	var overviewRuler = new eclipse.OverviewRuler("right", rulerStyle, annotationRuler);
+	return {annotationRuler: annotationRuler, overviewRuler: overviewRuler};
+};

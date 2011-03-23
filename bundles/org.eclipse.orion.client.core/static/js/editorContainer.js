@@ -20,9 +20,8 @@ eclipse.EditorContainer = (function() {
 			/**function():eclipse.Editor*/ editorFactory,
 			commandService, commandGenerator,
 			/**function(eclipse.Editor):eclipse.UndoStack*/ undoStackFactory,
-			/**function():eclipse.AnnotationRuler*/ annotationRulerFactory,
+			annotationFactory,
 			/**function():eclipse.LineNumberRuler*/ lineNumberRulerFactory,
-			/**function():eclipse.OverviewRuler*/ overviewRulerFactory,
 			searcher,
 			fileClient,
 			domNode, /**DomNode|dijit._Widget*/ codeTitle,
@@ -33,9 +32,8 @@ eclipse.EditorContainer = (function() {
 		this._commandService = commandService;
 		this._commandGenerator = commandGenerator;
 		this._undoStackFactory = undoStackFactory;
-		this._annotationRulerFactory = annotationRulerFactory;
+		this._annotationFactory = annotationFactory;
 		this._lineNumberRulerFactory = lineNumberRulerFactory;
-		this._overviewRulerFactory = overviewRulerFactory;
 		this._searcher = searcher;
 		this._fileClient = fileClient;
 		this._domNode = domNode;
@@ -173,6 +171,9 @@ eclipse.EditorContainer = (function() {
 				errors.pop();
 			}
 			var ruler = this.getAnnotationsRuler();
+			if (!ruler) {
+				return;
+			}
 			ruler.clearAnnotations();
 			var lastLine = -1;
 			for (k in errors) {
@@ -1205,26 +1206,32 @@ eclipse.EditorContainer = (function() {
 			editor.addEventListener("Selection", this, updateCursorStatus);
 			
 			// Create rulers
-			this._annotationsRuler = this._annotationRulerFactory();
-			this._annotationsRuler.onClick = function(lineIndex, e) {
-				if (lineIndex === undefined) { return; }
-				if (lineIndex === -1) { return; }
-				var annotation = this.getAnnotation(lineIndex);
-				if (annotation === undefined) { return; }
-				editorContainer.onGotoLine(annotation.line, annotation.column);
-			};
+			if (this._annotationFactory) {
+				var annotations = this._annotationFactory();
+				this._annotationsRuler = annotations.annotationRuler;
 			
-			this._lineNumberRuler = this._lineNumberRulerFactory();
+				this._annotationsRuler.onClick = function(lineIndex, e) {
+					if (lineIndex === undefined) { return; }
+					if (lineIndex === -1) { return; }
+					var annotation = this.getAnnotation(lineIndex);
+					if (annotation === undefined) { return; }
+					editorContainer.onGotoLine(annotation.line, annotation.column);
+				};
+				
+				this._overviewRuler = annotations.overviewRuler;
+				this._overviewRuler.onClick = function(lineIndex, e) {
+					if (lineIndex === undefined) { return; }
+					editorContainer.moveSelection(this._editor, this._editor.getModel().getLineStart(lineIndex));
+				};
 			
-			this._overviewRuler = this._overviewRulerFactory();
-			this._overviewRuler.onClick = function(lineIndex, e) {
-				if (lineIndex === undefined) { return; }
-				editorContainer.moveSelection(this._editor, this._editor.getModel().getLineStart(lineIndex));
-			};
+				editor.addRuler(this._annotationsRuler);
+				editor.addRuler(this._overviewRuler);
+			}
 			
-			editor.addRuler(this._annotationsRuler);
-			editor.addRuler(this._lineNumberRuler);
-			editor.addRuler(this._overviewRuler);
+			if (this._lineNumberRulerFactory) {
+				this._lineNumberRuler = this._lineNumberRulerFactory();
+				editor.addRuler(this._lineNumberRuler);
+			}
 		},
 		
 		showSelection : function(start, end, line, offset, length) {
