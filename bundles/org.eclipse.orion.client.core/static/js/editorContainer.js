@@ -7,42 +7,28 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*global window dojo dijit widgets eclipse:true handleGetAuthenticationError*/
+ /*global window dojo dijit widgets orion:true eclipse:true handleGetAuthenticationError*/
  /*jslint maxerr:150 browser:true devel:true regexp:false*/
   
 dojo.require("dijit.layout.ContentPane");
 dojo.require("dijit.TitlePane");
 
 var eclipse = eclipse || {};
-eclipse.EditorContainer = (function() {
-	function EditorContainer(
-			serviceRegistry,
-			/**function():eclipse.Editor*/ editorFactory,
-			commandService, commandGenerator,
-			/**function(eclipse.Editor):eclipse.UndoStack*/ undoStackFactory,
-			annotationFactory,
-			/**function():eclipse.LineNumberRuler*/ lineNumberRulerFactory,
-			searcher,
-			fileClient,
-			domNode, /**DomNode|dijit._Widget*/ codeTitle,
-			/**widgets.eWebBorderContainer*/ topContainer, contentAssistFactory,
-			leftPane, searchFloat, toolbarId) {
-		this._serviceRegistry = serviceRegistry;
-		this._editorFactory = editorFactory;
-		this._commandService = commandService;
-		this._commandGenerator = commandGenerator;
-		this._undoStackFactory = undoStackFactory;
-		this._annotationFactory = annotationFactory;
-		this._lineNumberRulerFactory = lineNumberRulerFactory;
-		this._contentAssistFactory = contentAssistFactory;
-		this._searcher = searcher;
-		this._fileClient = fileClient;
-		this._domNode = domNode;
-		this._codeTitle = codeTitle;
-		this._topContainer = topContainer;
-		this._leftPane = leftPane;
-		this._searchFloat = searchFloat;
-		this._toolbarId = toolbarId;
+var orion = orion || {};
+orion.EditorContainer = (function() {
+	function EditorContainer(options) {
+		this._editorFactory = options.editorFactory;
+		this._commandGenerator = options.commandGenerator;
+		this._undoStackFactory = options.undoStackFactory;
+		this._annotationFactory = options.annotationFactory;
+		this._lineNumberRulerFactory = options.lineNumberRulerFactory;
+		this._contentAssistFactory = options.contentAssistFactory;
+		this._keyBindingFactory = options.keyBindingFactory;
+		this._fileClient = options.fileClient;
+		this._inputService = options.inputService;
+		this._statusReporter = options.statusReporter;
+		this._domNode = options.domNode;
+		this._codeTitle = options.codeTitle;
 		
 		this._annotationsRuler = null;
 		this._overviewRuler = null;
@@ -50,44 +36,23 @@ eclipse.EditorContainer = (function() {
 		this._dirty = false;
 		this._fileURI = null;
 		this._contentAssist = null;
-		
-		this._leftPaneWidth = "";
-				
-		this._incrementalFindMode = false;
-		this._incrementalFindSuccess = true;
-		this._incrementalFindIgnoreSelection = false;
-		this._incrementalFindPrefix = "";
-		
-		this.registerServiceHandlers();
+		this._keyModes = [];		
 	}
 	EditorContainer.prototype = {
 		getEditorWidget: function() {
 			return this._editor;
 		},
 		
+		reportStatus: function(message, isError) {
+			if (this._statusReporter) {
+				this._statusReporter(message, isError);
+			} else {
+				window.alert(isError ? "ERROR: " + message : message);
+			}
+		},
+		
 		getFileURI: function() {
 			return this._fileURI;
-		},
-	
-		// This is legitimate editor client-side code...establishing dependencies on registered services
-		registerServiceHandlers: function() {
-			var editorContainer = this;
-			
-			// This is legitimate editor client-side code...establishing dependencies on registered services
-			this._serviceRegistry.getService("IProblemProvider").then(function(problemProvider) {
-				problemProvider.addEventListener("problemsChanged", function(problems) {
-					editorContainer.showProblems(problems);
-				});
-			});
-			
-			this._serviceRegistry.getService("IInputProvider").then(function(input) {
-				input.addEventListener("inputChanged", function(fileURI) {
-					editorContainer.setInput(fileURI);
-				});
-				input.getInput(function(fileURI) {
-					editorContainer.setInput(fileURI);
-				});
-			});
 		},
 		
 		/**
@@ -139,16 +104,16 @@ eclipse.EditorContainer = (function() {
 			}
 			var title = this.getTitle();
 			if (dirty && !this._dirty) {
-				this._serviceRegistry.getService("IInputProvider").then(function(service) {
-					service.setDirty(true);
-				});
+				if (this._inputService) {
+					this._inputService.setDirty(true);
+				}
 				if (title && title.charAt(0) !== '*') {
 					this.setTitle('*'+title);
 				}
 			} else if (!dirty && this._dirty) {
-				this._serviceRegistry.getService("IInputProvider").then(function(service) {
-					service.setDirty(false);
-				});
+				if (this._inputService) {
+					this._inputService.setDirty(false);
+				}
 				if (title && title.charAt(0) === '*') {
 					this.setTitle(title.substring(1));
 				}
@@ -206,12 +171,9 @@ eclipse.EditorContainer = (function() {
 				}
 			}
 			this._lastTitle = shortTitle;
-			this._serviceRegistry.getService("IInputProvider").then(function(myService) {
-				myService.setTitle(shortTitle);
-			});
-			// for now use the short title.  This could evolve into an
-			// eclipse desktop-style breadcrumb that one could use to actually
-			// navigate
+			if (this._inputService) {
+				this._inputService.setTitle(shortTitle);
+			}
 			if (this._editor) {
 				var titlePane = dojo.byId(this._codeTitle);
 				if (titlePane) {
@@ -225,125 +187,6 @@ eclipse.EditorContainer = (function() {
 			}
 		},
 
-		
-		// incremental find
-		_incrementalFindListener: {
-			/** @this {eclipse.EditorContainer} */
-			onVerify: function(event){
-				var prefix = this._incrementalFindPrefix,
-					txt = this._editor.getText(event.start, event.end),
-					match = prefix.match(new RegExp("^"+dojo.regexp.escapeString(txt), "i"));
-				if (match && match.length > 0) {
-					prefix = this._incrementalFindPrefix += event.text;
-					this._serviceRegistry.getService("IStatusReporter").then(function(service) {
-						service.setMessage("Incremental find: " + prefix);
-					});
-					var ignoreCase = prefix.toLowerCase() === prefix;
-					var result = this.doFind(prefix, this._editor.getSelection().start, ignoreCase);
-					if (result) {
-						this._incrementalFindSuccess = true;
-						this._incrementalFindIgnoreSelection = true;
-						this.moveSelection(this._editor, result.index, result.index+result.length);
-						this._incrementalFindIgnoreSelection = false;
-					} else {
-						// should turn message red
-						this._serviceRegistry.getService("IStatusReporter").then(function(service) {
-							service.setErrorMessage("Incremental find: " + prefix + " (not found)");
-						});
-						this._incrementalFindSuccess = false;
-					}
-					event.text = null;
-				} else {
-				}
-			},
-			/** @this {eclipse.EditorContainer} */
-			onSelection: function() {
-				if (!this._incrementalFindIgnoreSelection) {
-					this._toggleIncrementalFind();
-				}
-			}
-		},
-			
-		_toggleIncrementalFind: function() {
-			this._incrementalFindMode = !this._incrementalFindMode;
-			if (this._incrementalFindMode) {
-				var self = this;
-				this._serviceRegistry.getService("IStatusReporter").then(function(service) {
-					service.setMessage("Incremental find: " + self._incrementalFindPrefix);
-				});
-				this._editor.addEventListener("Verify", this, this._incrementalFindListener.onVerify);
-				this._editor.addEventListener("Selection", this, this._incrementalFindListener.onSelection);
-			} else {
-				this._incrementalFindPrefix = "";
-				this._serviceRegistry.getService("IStatusReporter").then(function(service) {
-					service.setMessage("");
-				});
-				this._editor.removeEventListener("Verify", this, this._incrementalFindListener.onVerify);
-				this._editor.removeEventListener("Selection", this, this._incrementalFindListener.onSelection);
-				this._editor.setCaretOffset(this._editor.getCaretOffset());
-			}
-		},
-		// end incremental find
-		
-		calcLeftPaneW: function(){
-			var leftPaneW = this._topContainer.getSizeCookie();
-			if(leftPaneW < 50){
-				var rightPane =  this._editor._editorDiv;
-				var originalW = rightPane.style.width;
-				var originalWint = parseInt(originalW.replace("px", ""), 10);
-				this._leftPaneWidth = originalWint*0.25 + "px";
-			} else {
-				this._leftPaneWidth =leftPaneW + "px";
-			}
-			return this._leftPaneWidth;
-		},
-		toggleLeftPane: function(){
-			var rightPane =  this._editor._editorDiv;
-			var rightPaneEditor =  this._editor;
-			var targetW = "";
-			var originalW = this._leftPane.style.width;
-			var originalWint = parseInt(originalW.replace("px", ""), 10);
-			var isLeftOpen = this._topContainer.isLeftPaneOpen();
-			if(isLeftOpen){
-				this._leftPaneWidth = originalW;
-				targetW = "0px";
-			} else {
-				this.calcLeftPaneW();
-				targetW = this._leftPaneWidth;
-			}
-			var targetWint = parseInt(targetW.replace("px", ""), 10);
-			
-			if(!isLeftOpen) {
-				this._topContainer.toggleLeftPaneState();
-			}
-			
-			var a = new dojo.Animation({
-				node: this._leftPane,
-				duration: 300,
-				curve: [1, 100],
-				onAnimate: dojo.hitch(this, function(x){
-					var deltaW = (targetWint - originalWint)*x/100;
-					var curWidth = originalWint + deltaW;
-					this._leftPane.style.width = curWidth + "px";
-					this._leftPane.style.overflow = "hidden";
-					rightPane.style.overflow = "hidden";
-					this._topContainer.layout();
-					//this._topContainer.resize();
-				}),
-				onEnd: dojo.hitch(this, function(){
-					rightPane.style.overflow = "auto";
-					rightPaneEditor.redrawLines();
-					if(isLeftOpen){
-						this._topContainer.toggleLeftPaneState();
-					} else {
-						this._leftPane.style.overflow = "auto";
-						this._topContainer.setSizeCookie(null);
-					}
-				})
-			});
-			a.play();
-		},
-		
 		/**
 		 * Helper for finding occurrences of str in the editor.
 		 * @param str {String}
@@ -425,661 +268,71 @@ eclipse.EditorContainer = (function() {
 		},
 		
 		installEditor : function(fileURI) {
-			var registry = this._serviceRegistry;
 			this._fileURI = fileURI;
 			
 			// Create editor and install optional features
 			this._editor = this._editorFactory();
 			if (this._commandGenerator) {
-				this._commandGenerator(registry, this._commandService, this._fileClient, this, this._toolbarId);
+				this._commandGenerator.generateEditorCommands(this);
 			}
 			if (this._undoStackFactory) {
-				this._undoStack = this._undoStackFactory(registry, this._commandService, this, this._toolbarId);
+				this._undoStack = this._undoStackFactory.createUndoStack(this);
 			}
-			
 			if (this._contentAssistFactory) {
 				this._contentAssist = this._contentAssistFactory(this);
+				this._keyModes.push(this._contentAssist);
 			}
 			
 			var editorContainer = this,
-				editor = this._editor,
-				KeyBinding = eclipse.KeyBinding,
-				undoStack = this._undoStack;
-			
-			// Collapse/Expand left pane 
-			editor.setKeyBinding(new KeyBinding("o", true), "toggle");
-			editor.setAction("toggle", function(){
-				editorContainer.toggleLeftPane();
-			});
-			
-			// Find actions
-			// These variables are used among the various find actions:
-			var searchString = "",
-			    pattern,
-			    flags;
-			editor.setKeyBinding(new KeyBinding("f", true), "find");
-			editor.setAction("find", function() {
-				setTimeout(function() {
-					var selection = editor.getSelection();
-					if (selection.end > selection.start) {
-						searchString = editor.getText().substring(selection.start, selection.end);
-					} else {
-						searchString = "";
-					}
-					searchString = prompt("Enter search term or /regex/:", searchString);
-					if (!searchString) {
-						return;
-					}
-					
-					var ignoreCase = searchString.toLowerCase() === searchString,
-					    regexp = editorContainer.parseRegExp(searchString),
-					    result;
-					if (regexp) {
-						pattern = regexp.pattern;
-						flags = regexp.flags;
-						flags = flags + (ignoreCase && flags.indexOf("i") === -1 ? "i" : "");
-						result = editorContainer.doFindRegExp(pattern, flags, editor.getCaretOffset());
-					} else {
-						pattern = null;
-						flags = null;
-						result = editorContainer.doFind(searchString, editor.getCaretOffset(), ignoreCase);
-					}
-					
-					if (result) {
-						editorContainer.moveSelection(editor, result.index, result.index+result.length);
-					} else {
-						registry.getService("IStatusReporter").then(function(service) {
-							service.setErrorMessage("not found");
-						});
-					}
-				}, 0);
-			});
-			editor.setKeyBinding(new KeyBinding("k", true), "find next");
-			editor.setAction("find next", function() {
-				var result, ignoreCase;
-				if (editorContainer._incrementalFindMode) {
-					var str = editorContainer._incrementalFindPrefix;
-					ignoreCase = str.toLowerCase() === str;
-					result = editorContainer.doFind(str, editor.getCaretOffset(), ignoreCase);
-				} else if (pattern) {
-					// RegExp search
-					result = editorContainer.doFindRegExp(pattern, flags, editor.getCaretOffset());
-				} else {
-					ignoreCase = searchString.toLowerCase() === searchString;
-					result = editorContainer.doFind(searchString, editor.getCaretOffset(), ignoreCase);
-				}
-				
-				if (result) {
-					editorContainer._incrementalFindIgnoreSelection = true;
-					editorContainer.moveSelection(editor, result.index, result.index+result.length);
-					editorContainer._incrementalFindIgnoreSelection = false;
-				} else {
-					registry.getService("IStatusReporter").then(function(service) {
-						service.setErrorMessage("not found");
-					});
-				}
-			});
-			editor.setKeyBinding(new KeyBinding("k", true, true), "find previous");
-			editor.setAction("find previous", function() {
-				var selection = editor.getSelection();
-				var selectionSize = (selection.end > selection.start) ? selection.end - selection.start : 0;
-				var result, ignoreCase;
-				if (editorContainer._incrementalFindMode) {
-					var str = editorContainer._incrementalFindPrefix;
-					ignoreCase = str.toLowerCase() === str;
-					result = editorContainer.doFind(str, editor.getCaretOffset() - selectionSize - 1, ignoreCase, true);
-				} else if (pattern) {
-					// RegExp search
-					result = editorContainer.doFindRegExp(pattern, flags, editor.getCaretOffset() - selectionSize - 1, true);
-				} else {
-					ignoreCase = searchString.toLowerCase() === searchString;
-					result = editorContainer.doFind(searchString, editor.getCaretOffset() - selectionSize - 1, ignoreCase, true);
-				}
-				
-				if (result) {
-					editorContainer._incrementalFindIgnoreSelection = true;
-					editorContainer.moveSelection(editor, result.index, result.index+result.length);
-					editorContainer._incrementalFindIgnoreSelection = false;
-				} else {
-					registry.getService("IStatusReporter").then(function(service) {
-						service.setErrorMessage("not found");
-					});
-				}
-			});
-			editor.setKeyBinding(new KeyBinding("j", true), "incremental find");
-			editor.setAction("incremental find", function() {
-				if (!editorContainer._incrementalFindMode) {
-					editor.setCaretOffset(editor.getCaretOffset());
-					editorContainer._toggleIncrementalFind();
-				} else {
-					var p = editorContainer._incrementalFindPrefix;
-					if (p.length === 0) {
-						return;
-					}
-					
-					var start = editorContainer._editor.getSelection().start + 1;
-					if (editorContainer._incrementalFindSuccess === false) {
-						start = 0;
-					}
-					
-					var caseInsensitive = p.toLowerCase() === p;
-					var result = editorContainer.doFind(p, start, caseInsensitive);
-					if (result) {
-						editorContainer._incrementalFindSuccess = true;
-						editorContainer._incrementalFindIgnoreSelection = true;
-						editorContainer.moveSelection(editorContainer._editor, result.index, result.index + result.length);
-						editorContainer._incrementalFindIgnoreSelection = false;
-						registry.getService("IStatusReporter").then(function(service) {
-							service.setMessage("Incremental find: " + p);
-						});
-					} else {
-						// should turn message red
-						registry.getService("IStatusReporter").then(function(service) {
-							service.setErrorMessage("Incremental find: " + p + " (not found)");
-						});
-						editorContainer._incrementalFindSuccess = false;
-					}
-				}
-			});
-			editor.setKeyBinding(new KeyBinding(27), "ESC");
-			editor.setAction("ESC", function() {
-				if (editorContainer._incrementalFindMode) {
-					editorContainer._toggleIncrementalFind();
-					return true;
-				} else if (editorContainer._contentAssist && editorContainer._contentAssist.isActive()) {
-					return editorContainer._contentAssist.cancel();
-				} else {
-					return false;
-				}
-			});
-			editor.setAction("deletePrevious", function() {
-				if (editorContainer._incrementalFindMode) {
-					var p = editorContainer._incrementalFindPrefix;
-					p = editorContainer._incrementalFindPrefix = p.substring(0, p.length-1);
-					if (p.length===0) {
-						editorContainer._incrementalFindSuccess = true;
-						editorContainer._incrementalFindIgnoreSelection = true;
-						editorContainer._editor.setCaretOffset(editorContainer._editor.getSelection().start);
-						editorContainer._incrementalFindIgnoreSelection = false;
-						editorContainer._toggleIncrementalFind();
-						return true;
-					}
-					registry.getService("IStatusReporter").then(function(service) {
-						service.setMessage("Incremental find: " + p);
-					});	
-					var index = editorContainer._editor.getText().lastIndexOf(p, editorContainer._editor.getCaretOffset() - p.length - 1);
-					if (index !== -1) {
-						editorContainer._incrementalFindSuccess = true;
-						editorContainer._incrementalFindIgnoreSelection = true;
-						editorContainer.moveSelection(editorContainer._editor, index,index+p.length);
-						editorContainer._incrementalFindIgnoreSelection = false;
-					} else {
-						registry.getService("IStatusReporter").then(function(service) {
-							service.setErrorMessage("Incremental find: " + p + " (not found)");
-						});
-					}
-					return true;
-				} else {
-					return false;
-				}
-			});
-			editor.setAction("lineUp", function() {
-				var index;
-				if (editorContainer._incrementalFindMode) {
-					var p = editorContainer._incrementalFindPrefix;
-					var start = editorContainer._editor.getCaretOffset() - p.length - 1;
-					if (editorContainer._incrementalFindSuccess === false) {
-						start = editorContainer._editor.getModel().getCharCount() - 1;
-					}
-					index = editorContainer._editor.getText().lastIndexOf(p, start);
-					if (index !== -1) {
-						editorContainer._incrementalFindSuccess = true;
-						editorContainer._incrementalFindIgnoreSelection = true;
-						editorContainer.moveSelection(editorContainer._editor, index,index+p.length);
-						editorContainer._incrementalFindIgnoreSelection = false;
-					} else {
-						// should turn message red
-						registry.getService("IStatusReporter").then(function(service) {
-							service.setErrorMessage("Incremental find: " + p + " (not found)");	
-						});
-						editorContainer._incrementalFindSuccess = false;
-					}
-					return true;
-				} else if (editorContainer._contentAssist && editorContainer._contentAssist.isActive()) {
-					return editorContainer._contentAssist.lineUp();
-				}
-				return false;
-			});
-			editor.setAction("lineDown", function() {
-				var index;
-				if (editorContainer._incrementalFindMode) {
-					var p = editorContainer._incrementalFindPrefix;
-					if (p.length===0) {
-						return;
-					}
-					var start = editorContainer._editor.getSelection().start + 1;
-					if (editorContainer._incrementalFindSuccess === false) {
-						start = 0;
-					}
-					index = editorContainer._editor.getText().indexOf(p, start);
-					if (index !== -1) {
-						editorContainer._incrementalFindSuccess = true;
-						editorContainer._incrementalFindIgnoreSelection = true;
-						editorContainer.moveSelection(editorContainer._editor, index, index+p.length);
-						editorContainer._incrementalFindIgnoreSelection = false;
-						registry.getService("IStatusReporter").then(function(service) {
-							service.setMessage("Incremental find: " + p);
-						});	
-					} else {
-						// should turn message red
-						registry.getService("IStatusReporter").then(function(service) {
-							service.setErrorMessage("Incremental find: " + p + " (not found)");
-						});	
-						editorContainer._incrementalFindSuccess = false;
-					}
-					return true;
-				} else if (editorContainer._contentAssist && editorContainer._contentAssist.isActive()) {
-					return editorContainer._contentAssist.lineDown();
-				}
-				return false;
-			});
-
-			// Tab actions
-			editor.setAction("tab", function() {
-				var selection = editor.getSelection();
-				var model = editor.getModel();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				if (firstLine !== lastLine) {
-					undoStack.startCompoundChange();
-					var lineStart = model.getLineStart(firstLine);
-					for (var i = firstLine; i <= lastLine; i++) {
-						lineStart = model.getLineStart(i);
-						editor.setText("\t", lineStart, lineStart);
-					}
-					editor.setSelection(lineStart===selection.start?lineStart:selection.start + 1, selection.end + (lastLine - firstLine + 1));
-					undoStack.endCompoundChange();
-					return true;
-				}
-				return false;
-			});
-			editor.setKeyBinding(new KeyBinding(9, false, true), "shift tab");
-			editor.setAction("shift tab", function() {
-				var selection = editor.getSelection();
-				var model = editor.getModel();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				var i, lineStart;
-				for (i = firstLine; i <= lastLine; i++) {
-					lineStart = model.getLineStart(i);
-					var lineEnd = model.getLineEnd(i);
-					if (lineStart === lineEnd) { return false; }
-					if (editor.getText(lineStart, lineStart + 1) !== "\t") { return false; }
-				}
-				undoStack.startCompoundChange();
-				lineStart = model.getLineStart(firstLine);
-				var lastLineStart = model.getLineStart(lastLine);
-				for (i = firstLine; i <= lastLine; i++) {
-					lineStart = model.getLineStart(i);
-					editor.setText("", lineStart, lineStart + 1);
-				}
-				editor.setSelection(lineStart===selection.start?lineStart:selection.start - 1, selection.end - (lastLine - firstLine + 1) + (selection.end===lastLineStart+1?1:0));
-				undoStack.endCompoundChange();
-				return true;
-			});
-			
-			editor.setKeyBinding(new KeyBinding(38, false, false, true), "move up selection");
-			editor.setAction("move up selection", function() {
-				var selection = editor.getSelection();
-				var model = editor.getModel();
-				var firstLine = model.getLineAtOffset(selection.start);
-				if (firstLine===0) {
-					return true;
-				}
-				undoStack.startCompoundChange();
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				var isMoveFromLastLine = model.getLineCount()-1===lastLine;
-				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = isMoveFromLastLine?model.getCharCount():model.getLineStart(lastLine+1);
-				if (isMoveFromLastLine) {
-					// Move delimiter preceding selection to end
-					var delimiterStart = model.getLineEnd(firstLine-1);
-					var delimiterEnd = model.getLineEnd(firstLine-1, true);
-					var delimiter = model.getText(delimiterStart, delimiterEnd);
-					lineStart = delimiterStart;
-					model.setText(model.getText(delimiterEnd, lineEnd)+delimiter, lineStart, lineEnd);
-				}
-				var text = model.getText(lineStart, lineEnd);
-				model.setText("", lineStart, lineEnd);
-				var insertPos = model.getLineStart(firstLine-1);
-				model.setText(text, insertPos, insertPos);
-				var selectionEnd = insertPos+text.length-(isMoveFromLastLine?model.getLineDelimiter().length:0);
-				editor.setSelection(insertPos, selectionEnd);
-				undoStack.endCompoundChange();
-			});
-			
-			editor.setKeyBinding(new KeyBinding(40, false, false, true), "move down selection");
-			editor.setAction("move down selection", function() {
-				var selection = editor.getSelection();
-				var model = editor.getModel();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				if (lastLine===model.getLineCount()-1) {
-					return true;
-				}
-				undoStack.startCompoundChange();
-				var isMoveIntoLastLine = lastLine===model.getLineCount()-2;
-				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = model.getLineStart(lastLine+1);
-				if (isMoveIntoLastLine) {
-					// Move delimiter following selection to front
-					var delimiterStart = model.getLineStart(lastLine+1)-model.getLineDelimiter().length;
-					var delimiterEnd = model.getLineStart(lastLine+1);
-					var delimiter = model.getText(delimiterStart, delimiterEnd);
-					model.setText(delimiter + model.getText(lineStart, delimiterStart), lineStart, lineEnd);
-				}
-				var text = model.getText(lineStart, lineEnd);
-				var insertPos = (isMoveIntoLastLine?model.getCharCount():model.getLineStart(lastLine+2))-(lineEnd-lineStart);
-				model.setText("", lineStart, lineEnd);
-				model.setText(text, insertPos, insertPos);
-				var selStart = insertPos+(isMoveIntoLastLine?model.getLineDelimiter().length:0);
-				var selEnd = insertPos+text.length;
-				editor.setSelection(selStart, selEnd);
-				undoStack.endCompoundChange();
-			});
-			
-			editor.setKeyBinding(new KeyBinding(38, true, false, true), "copy up selection");
-			editor.setAction("copy up selection", function() {
-				undoStack.startCompoundChange();
-				var selection = editor.getSelection();
-				var model = editor.getModel();
-				var delimiter = model.getLineDelimiter();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				var lineStart = model.getLineStart(firstLine);
-				var isCopyFromLastLine = model.getLineCount()-1===lastLine;
-				var lineEnd = isCopyFromLastLine?model.getCharCount():model.getLineStart(lastLine+1);
-				var text = model.getText(lineStart, lineEnd)+(isCopyFromLastLine?delimiter:""); //+ delimiter;
-				//var insertPos = model.getLineStart(firstLine - 1);
-				var insertPos = lineStart;
-				model.setText(text, insertPos, insertPos);
-				editor.setSelection(insertPos, insertPos+text.length-(isCopyFromLastLine?delimiter.length:0));
-				undoStack.endCompoundChange();
-			});
-			
-			editor.setKeyBinding(new KeyBinding(40, true, false, true), "copy down selection");
-			editor.setAction("copy down selection", function() {
-				undoStack.startCompoundChange();
-				var selection = editor.getSelection();
-				var model = editor.getModel();
-				var delimiter = model.getLineDelimiter();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				var lineStart = model.getLineStart(firstLine);
-				var isCopyFromLastLine = model.getLineCount()-1===lastLine;
-				var lineEnd = isCopyFromLastLine?model.getCharCount():model.getLineStart(lastLine+1);
-				var text = (isCopyFromLastLine?delimiter:"")+model.getText(lineStart, lineEnd);
-				//model.setText("", lineStart, lineEnd);
-				//var insertPos = model.getLineStart(firstLine - 1);
-				var insertPos = lineEnd;
-				model.setText(text, insertPos, insertPos);
-				editor.setSelection(insertPos+(isCopyFromLastLine?delimiter.length:0), insertPos+text.length);
-				undoStack.endCompoundChange();
-			});
-			
-			editor.setKeyBinding(new KeyBinding('d', true, false, false), "delete selected lines");
-			editor.setAction("delete selected lines", function() {
-				undoStack.startCompoundChange();
-				var selection = editor.getSelection();
-				var model = editor.getModel();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = model.getLineCount()-1===lastLine?model.getCharCount():model.getLineStart(lastLine+1);
-				model.setText("", lineStart, lineEnd);
-				undoStack.endCompoundChange();
-			});
-			
-			editor.setKeyBinding(new KeyBinding(191, true), "toggle comment");
-			editor.setAction("toggle comment", function() {
-				undoStack.startCompoundChange();
-				var selection = editor.getSelection();
-				var model = editor.getModel();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				var uncomment = true;
-				var lineText;
-				for (var i = firstLine; i <= lastLine && uncomment; i++) {
-					lineText = editor.getModel().getLine(i);
-					var index = lineText.indexOf("//");
-					if (index === -1) {
-						uncomment = false;
-					} else {
-						if (index !== 0) {
-							var j;
-							for (j=0; j<index; j++) {
-								var c = lineText.charCodeAt(j);
-								if (!(c === 32 || c === 9)) {
-									break;
-								}
-							}
-							uncomment = j === index;
-						}
-					}
-				}
-				var k, lineStart, lastLineStart, insertOffset;
-				if (uncomment) {
-					lineStart = model.getLineStart(firstLine);
-					lastLineStart = model.getLineStart(lastLine);
-					for (k = firstLine; k <= lastLine; k++) {
-						lineText = editor.getModel().getLine(k);
-						insertOffset = lineText.indexOf("//") + model.getLineStart(k);
-						editor.setText("", insertOffset, insertOffset + 2);
-					}
-					editor.setSelection(lineStart===selection.start?lineStart:selection.start - 2, selection.end - (2 * (lastLine - firstLine + 1)) + (selection.end===lastLineStart+1?2:0));
-				} else {
-					lineStart = model.getLineStart(firstLine);
-					lastLineStart = model.getLineStart(lastLine);
-					for (k = firstLine; k <= lastLine; k++) {
-						insertOffset = model.getLineStart(k);
-						editor.setText("//", insertOffset, insertOffset);
-					}
-					editor.setSelection(lineStart===selection.start?lineStart:selection.start + 2, selection.end + (2 * (lastLine - firstLine + 1)));
-				}
-				undoStack.endCompoundChange();
-				return true;
-			});
-			
-			function findEnclosingComment(model, start, end) {
-				var open = "/*", close = "*/";
-				var firstLine = model.getLineAtOffset(start);
-				var lastLine = model.getLineAtOffset(end);
-				var i, line, extent, openPos, closePos;
-				var commentStart, commentEnd;
-				for (i=firstLine; i >= 0; i--) {
-					line = model.getLine(i);
-					extent = (i === firstLine) ? start - model.getLineStart(firstLine) : line.length;
-					openPos = line.lastIndexOf(open, extent);
-					closePos = line.lastIndexOf(close, extent);
-					if (closePos > openPos) {
-						break; // not inside a comment
-					} else if (openPos !== -1) {
-						commentStart = model.getLineStart(i) + openPos;
-						break;
-					}
-				}
-				for (i=lastLine; i < model.getLineCount(); i++) {
-					line = model.getLine(i);
-					extent = (i === lastLine) ? end - model.getLineStart(lastLine) : 0;
-					openPos = line.indexOf(open, extent);
-					closePos = line.indexOf(close, extent);
-					if (openPos !== -1 && openPos < closePos) {
-						break;
-					} else if (closePos !== -1) {
-						commentEnd = model.getLineStart(i) + closePos;
-						break;
-					}
-				}
-				return {commentStart: commentStart, commentEnd: commentEnd};
+				editor = this._editor;
+						
+			// Set up keybindings
+			if (this._keyBindingFactory) {
+				this._keyBindingFactory(this, this._keyModes, this._undoStack, this._contentAssist, fileURI);
 			}
 			
-			editor.setKeyBinding(new KeyBinding(191, true, true), "add block comment");
-			editor.setAction("add block comment", function() {
-				var selection = editor.getSelection();
-				var model = editor.getModel();
-				var open = "/*", close = "*/", commentTags = new RegExp("/\\*" + "|" + "\\*/", "g");
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end);
-				
-				var result = findEnclosingComment(model, selection.start, selection.end);
-				if (result.commentStart !== undefined && result.commentEnd !== undefined) {
-					return true; // Already in a comment
-				}
-				
-				var text = model.getText(selection.start, selection.end);
-				if (text.length === 0) { return true; }
-				
-				var oldLength = text.length;
-				text = text.replace(commentTags, "");
-				var newLength = text.length;
-				
-				undoStack.startCompoundChange();
-				model.setText(open + text + close, selection.start, selection.end);
-				editor.setSelection(selection.start + open.length, selection.end + open.length + (newLength-oldLength));
-				undoStack.endCompoundChange();
-			});
-			
-			editor.setKeyBinding(new KeyBinding(220, true, true), "remove block comment");
-			editor.setAction("remove block comment", function() {
-				var selection = editor.getSelection();
-				var model = editor.getModel();
-				var open = "/*", close = "*/";
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end);
-				
-				// Try to shrink selection to a comment block
-				var selectedText = model.getText(selection.start, selection.end);
-				var newStart, newEnd;
-				var i;
-				for(i=0; i < selectedText.length; i++) {
-					if (selectedText.substring(i, i + open.length) === open) {
-						newStart = selection.start + i;
-						break;
-					}
-				}
-				for (; i < selectedText.length; i++) {
-					if (selectedText.substring(i, i + close.length) === close) {
-						newEnd = selection.start + i;
-						break;
-					}
-				}
-				
-				undoStack.startCompoundChange();
-				if (newStart !== undefined && newEnd !== undefined) {
-					model.setText(model.getText(newStart + open.length, newEnd), newStart, newEnd + close.length);
-					editor.setSelection(newStart, newEnd);
-				} else {
-					// Otherwise find enclosing comment block
-					var result = findEnclosingComment(model, selection.start, selection.end);
-					if (result.commentStart === undefined || result.commentEnd === undefined) {
-						return true;
-					}
-					
-					var text = model.getText(result.commentStart + open.length, result.commentEnd);
-					model.setText(text, result.commentStart, result.commentEnd + close.length);
-					editor.setSelection(selection.start - open.length, selection.end - close.length);
-				}
-				undoStack.endCompoundChange();
-			});
-			
-			//Auto indent
-			editor.setAction("enter", function() {
-				if (editorContainer._contentAssist && editorContainer._contentAssist.isActive()) {
-					return editorContainer._contentAssist.enter();
-				}
-				var selection = editor.getSelection();
-				if (selection.start === selection.end) {
-					var model = editor.getModel();
-					var lineIndex = model.getLineAtOffset(selection.start);
-					var lineText = model.getLine(lineIndex);
-					var index = 0, c;
-					while ((c = lineText.charCodeAt(index)) === 32 || c === 9) { index++; }
-					if (index > 0) {
-						editor.setText(model.getLineDelimiter() + lineText.substring(0, index), selection.start, selection.end);
-						return true;
+			// Set keybindings for keys that apply to different modes
+			editor.setKeyBinding(new eclipse.KeyBinding(27), "ESC");
+			editor.setAction("ESC", dojo.hitch(this, function() {
+				for (var i=0; i<this._keyModes.length; i++) {
+					if (this._keyModes[i].isActive()) {
+						return this._keyModes[i].cancel();
 					}
 				}
 				return false;
-			});
-			
-			// Global search action
-			editor.setKeyBinding(new KeyBinding("h", true), "search");
-			editor.setAction("search", function() {
-				setTimeout(function() {
-					var selection = editor.getSelection();
-					var searchPattern = "";
-					if (selection.end > selection.start) {
-						searchPattern = editor.getText().substring(selection.start, selection.end);
-					} if (searchPattern.length <= 0) {
-						searchPattern = prompt("Enter search term:", searchPattern);
-					} if (!searchPattern) {
-						return;
+			}));
+
+			editor.setAction("lineUp", dojo.hitch(this, function() {
+				for (var i=0; i<this._keyModes.length; i++) {
+					if (this._keyModes[i].isActive()) {
+						return this._keyModes[i].lineUp();
 					}
-					var searchFloat = editorContainer._searchFloat;
-					searchFloat.onclick = function() {
-						searchFloat.style.display = "none";
-					};
-					// TEMPORARY until we can better scope the search
-					var extensionFilter = "";
-					var fileName = editorContainer.getTitle();
-					
-					dojo.place(document.createTextNode("Searching for occurrences of "), searchFloat, "last");
-					var b = dojo.create("b", null, searchFloat, "last");
-					dojo.place(document.createTextNode("\"" + searchPattern + "\""), b, "only");
-					
-					if (fileName) {
-						var splits = fileName.split(".");
-						if (splits.length > 0) {
-							var extension = splits.pop().toLowerCase();
-							extensionFilter = "+Name:*." + extension + "+";
-							
-							dojo.place(document.createTextNode(" in *."), searchFloat, "last");
-							dojo.place(document.createTextNode(extension), searchFloat, "last");
-						}
+				}
+				return false;
+			}));
+			editor.setAction("lineDown", dojo.hitch(this, function() {
+				for (var i=0; i<this._keyModes.length; i++) {
+					if (this._keyModes[i].isActive()) {
+						return this._keyModes[i].lineDown();
 					}
-					dojo.place(document.createTextNode("..."), searchFloat, "last");
-					
-					searchFloat.style.display = "block";
-					var query = editorContainer.getFileMetadata().SearchLocation + searchPattern + extensionFilter;
-					editorContainer._searcher.search(searchFloat, query, fileURI);
-				}, 0);
-			});
-			
-			// Go To Line action
-			editor.setKeyBinding(new KeyBinding("l", true), "goto-line");
-			editor.setAction("goto-line", function() {
-					var line = editor.getModel().getLineAtOffset(editor.getCaretOffset());
-					line = prompt("Go to line:", line + 1);
-					if (line) {
-						line = parseInt(line, 10);
-						editorContainer.onGotoLine(line-1, 0);
-					}
-					return true;
-			});
+				}
+				return false;
+			}));
 						
-		
-			/**@this {eclipse.EditorContainer} */
+			/**@this {orion.EditorContainer} */
 			function updateCursorStatus() {
 				var model = editor.getModel();
 				var caretOffset = editor.getCaretOffset();
 				var lineIndex = model.getLineAtOffset(caretOffset);
 				var lineStart = model.getLineStart(lineIndex);
 				var offsetInLine = caretOffset - lineStart;
-				if (!editorContainer._incrementalFindMode) {
-					this._serviceRegistry.getService("IStatusReporter").then(function(service) {
-						service.setMessage("Line " + (lineIndex + 1) + " : Col " + offsetInLine);	
-					});
+				// If we are in a mode, we will bail out from reporting the cursor position.
+				for (var i=0; i<this._keyModes.length; i++) {
+					if (this._keyModes[i].isActive()) {
+						return;
+					}
 				}
+				this.reportStatus("Line " + (lineIndex + 1) + " : Col " + offsetInLine);
 			}
 			
 			// Listener for dirty state
@@ -1090,7 +343,7 @@ eclipse.EditorContainer = (function() {
 			
 			// Create rulers
 			if (this._annotationFactory) {
-				var annotations = this._annotationFactory();
+				var annotations = this._annotationFactory.createAnnotationRulers();
 				this._annotationsRuler = annotations.annotationRuler;
 			
 				this._annotationsRuler.onClick = function(lineIndex, e) {
@@ -1112,7 +365,7 @@ eclipse.EditorContainer = (function() {
 			}
 			
 			if (this._lineNumberRulerFactory) {
-				this._lineNumberRuler = this._lineNumberRulerFactory();
+				this._lineNumberRuler = this._lineNumberRulerFactory.createLineNumberRuler();
 				editor.addRuler(this._lineNumberRuler);
 			}
 		},

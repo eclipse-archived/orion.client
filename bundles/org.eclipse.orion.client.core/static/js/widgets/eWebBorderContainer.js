@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010,2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,20 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+ 
+ /*global dojo dijit*/
+ 
 dojo.provide("widgets.eWebBorderContainer");
 	 
 dojo.require("dijit.layout.BorderContainer");
 dojo.require("dojox.layout.ToggleSplitter");	 
 dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 	_splitterClass : "widgets.eWebSplitter",
-	_editorContainer: null,
 	
-	_setEditorContainerAttr: function(value) {
-		this._editorContainer = value;
-	},
-	_getEditorContainerAttr: function() {
-		return this._editorContainer;
-	},
 	isLeftPaneOpen: function(){
 		var splitter = this._splitters["left"];
 		if(splitter){
@@ -47,6 +43,9 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 		if(splitter){
 			dijit.byNode(splitter).toggleLeftPaneState();
 		}
+	},
+	setToggleLeftPane: function(toggleFunction) {
+		this.set("toggleFunction", toggleFunction);
 	}
 });
 
@@ -145,7 +144,10 @@ dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 	_onThumbMouseDown: function(evt){
 		evt.stopPropagation();
 		this._removeFocusVisual(evt);
-		this.container.get("editorContainer").toggleLeftPane();
+		var toggleFunction = this.container.get("toggleFunction");
+		if (toggleFunction) {
+			toggleFunction.call();
+		}
 	},
 	
 	_onThumbMouseOver: function(evt){
