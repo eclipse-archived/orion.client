@@ -7,7 +7,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*global window dojo dijit widgets orion:true eclipse:true handleGetAuthenticationError*/
+ /*global window dojo orion:true eclipse:true handleGetAuthenticationError*/
  /*jslint maxerr:150 browser:true devel:true regexp:false*/
   
 dojo.require("dijit.layout.ContentPane");
@@ -23,17 +23,12 @@ orion.EditorContainer = (function() {
 		this._lineNumberRulerFactory = options.lineNumberRulerFactory;
 		this._contentAssistFactory = options.contentAssistFactory;
 		this._keyBindingFactory = options.keyBindingFactory;
-		this._fileClient = options.fileClient;
-		this._inputService = options.inputService;
 		this._statusReporter = options.statusReporter;
 		this._domNode = options.domNode;
-		this._codeTitle = options.codeTitle;
 		
 		this._annotationsRuler = null;
 		this._overviewRuler = null;
-		this._fileMetadata = null;
 		this._dirty = false;
-		this._fileURI = null;
 		this._contentAssist = null;
 		this._keyModes = [];		
 	}
@@ -49,11 +44,7 @@ orion.EditorContainer = (function() {
 				window.alert(isError ? "ERROR: " + message : message);
 			}
 		},
-		
-		getFileURI: function() {
-			return this._fileURI;
-		},
-		
+				
 		/**
 		 * @static
 		 * @param editor
@@ -101,89 +92,11 @@ orion.EditorContainer = (function() {
 			if (this._dirty === dirty) {
 				return;
 			}
-			var title = this.getTitle();
-			if (dirty && !this._dirty) {
-				if (this._inputService) {
-					this._inputService.setDirty(true);
-				}
-				if (title && title.charAt(0) !== '*') {
-					this.setTitle('*'+title);
-				}
-			} else if (!dirty && this._dirty) {
-				if (this._inputService) {
-					this._inputService.setDirty(false);
-				}
-				if (title && title.charAt(0) === '*') {
-					this.setTitle(title.substring(1));
-				}
-			}
-			this._dirty = dirty;
+			this.onDirtyChange(dirty);
 		},
-		getTitle : function() {
-			return this._lastTitle;
-		},
+		
 		getAnnotationsRuler : function() {
 			return this._annotationsRuler;
-		},
-		showProblems : function(problems) {
-			var errors, i, k, escapedReason, functions;
-			errors = problems || [];
-			i = 0;
-			if (errors.length>0 && errors[errors.length - 1] === null) {
-				errors.pop();
-			}
-			var ruler = this.getAnnotationsRuler();
-			if (!ruler) {
-				return;
-			}
-			ruler.clearAnnotations();
-			var lastLine = -1;
-			for (k in errors) {
-				if (errors[k]) {
-					// escaping voodoo... we need to construct HTML that contains valid JavaScript.
-					escapedReason = errors[k].reason.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
-					// console.log(escapedReason);
-					var annotation = {
-						line: errors[k].line - 1,
-						column: errors[k].character,
-						html: "<img src='images/problem.gif' title='" + escapedReason + "' alt='" + escapedReason + "'></img>",
-						overviewStyle: {style: {"backgroundColor": "lightcoral", "border": "1px solid red"}}
-					};
-					
-					// only one error reported per line, unless we want to merge them.  
-					// For now, just show the first one, and the next one will show when the first is fixed...
-					if (lastLine !== errors[k].line) {
-						// console.log("adding annotation at line " + errors[k].line);
-						ruler.setAnnotation(errors[k].line - 1, annotation);
-						lastLine = errors[k].line;
-					}
-				}
-			}
-		},
-		setTitle : function(title) {
-			var indexOfSlash = title.lastIndexOf("/");
-			var shortTitle = title;
-			if (indexOfSlash !== -1) {
-				shortTitle = shortTitle.substring(indexOfSlash + 1);
-				if (title.charAt(0) === '*') {
-					shortTitle = '*' + shortTitle;
-				}
-			}
-			this._lastTitle = shortTitle;
-			if (this._inputService) {
-				this._inputService.setTitle(shortTitle);
-			}
-			if (this._editor) {
-				var titlePane = dojo.byId(this._codeTitle);
-				if (titlePane) {
-					dojo.empty(titlePane);
-					new eclipse.BreadCrumbs({container: this._codeTitle, resource: this._fileMetadata});
-					if (title.charAt(0) === '*') {
-						var dirty = dojo.create('b', null, titlePane, "last");
-						dirty.innerHTML = '*';
-					}
-				}
-			}
 		},
 
 		/**
@@ -266,9 +179,7 @@ orion.EditorContainer = (function() {
 			return null;
 		},
 		
-		installEditor : function(fileURI) {
-			this._fileURI = fileURI;
-			
+		installEditor : function() {
 			// Create editor and install optional features
 			this._editor = this._editorFactory();
 			if (this._undoStackFactory) {
@@ -284,7 +195,7 @@ orion.EditorContainer = (function() {
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
-				this._keyBindingFactory(this, this._keyModes, this._undoStack, this._contentAssist, fileURI);
+				this._keyBindingFactory(this, this._keyModes, this._undoStack, this._contentAssist);
 			}
 			
 			// Set keybindings for keys that apply to different modes
@@ -384,46 +295,7 @@ orion.EditorContainer = (function() {
 				this.moveSelection(this._editor, pos, pos+length);
 			}
 		},
-		setInput : function(location) {
-			var input = eclipse.util.getPositionInfo(location);
-			var fileURI = input.filePath;
-			this._fileURI = fileURI;
-			// populate editor
-			if (fileURI) {
-				if (fileURI === this._lastFilePath) {
-					this.showSelection(input.start, input.end, input.line, input.offset, input.length);
-				} else {
-					if (!this._editor) {
-						this.installEditor(fileURI);
-					}
-					var fullPathName = fileURI;
-					this.onInputChange(fullPathName, "Fetching " + fullPathName, null);
-					this._fileClient.read(fileURI).then(
-						dojo.hitch(this, function(contents) {
-							this.onInputChange(fileURI, null, contents);
-							this.showSelection(input.start, input.end, input.line, input.offset, input.length);
-						}),
-						dojo.hitch(this, function(error) {
-							this.onInputChange(fullPathName, "An error occurred: " + error.message, null);
-							console.error("HTTP status code: ", error.status);
-						})
-					);
-					this._fileClient.read(fileURI, true).then(
-						dojo.hitch(this, function(metadata) {
-							this.setFileMetadata(metadata);
-							this.setTitle(metadata.Location);
-						}),
-						dojo.hitch(this, function(error) {
-							console.error("Error loading file metadata: " + error.message);
-							this.setTitle(fileURI);
-						})
-					);
-				}
-				this._lastFilePath = fileURI;
-			} else {
-				this.onInputChange("No File Selected", "", null);
-			}
-		},
+		
 		
 		onInputChange : function (title, message, contents, contentsSaved) {
 			if (contentsSaved && this._editor) {
@@ -433,7 +305,6 @@ orion.EditorContainer = (function() {
 				return;
 			}
 			if (this._editor) {
-				this.setTitle(title);
 				if (message) {
 					this._editor.setText(message);
 				} else {
@@ -475,14 +346,6 @@ orion.EditorContainer = (function() {
 			}
 		},
 		
-		setFileMetadata : function(metadata) {
-			this._fileMetadata = metadata;
-		},
-		
-		getFileMetadata : function() {
-			return this._fileMetadata;
-		},
-		
 		onGotoLine : function (line, column, end) {
 			if (this._editor) {
 				var lineStart = this._editor.getModel().getLineStart(line);
@@ -502,6 +365,10 @@ orion.EditorContainer = (function() {
 				var offset = lineStart + col;
 				this.moveSelection(this._editor, offset, lineStart + end);
 			}
+		},
+		
+		onDirtyChange: function(isDirty) {
+			this._dirty = isDirty;
 		}
 	};
 	return EditorContainer;

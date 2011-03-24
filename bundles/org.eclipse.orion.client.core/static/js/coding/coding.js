@@ -136,9 +136,92 @@ dojo.addOnLoad(function(){
 		}
 	};
 	
-	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist, fileURI) {
+	var inputManager = {
+		lastFilePath: "",
+		
+		setInput: function(location, editorContainer) {
+			var input = eclipse.util.getPositionInfo(location);
+			var fileURI = input.filePath;
+			this._fileURI = fileURI;
+			// populate editor
+			if (fileURI) {
+				if (fileURI === this._lastFilePath) {
+					editorContainer.showSelection(input.start, input.end, input.line, input.offset, input.length);
+				} else {
+					if (!editorContainer.getEditorWidget()) {
+						editorContainer.installEditor();
+					}
+					var fullPathName = fileURI;
+					editorContainer.onInputChange(fullPathName, "Fetching " + fullPathName, null);
+					fileClient.read(fileURI).then(
+						dojo.hitch(this, function(contents) {
+							editorContainer.onInputChange(fileURI, null, contents);
+							editorContainer.showSelection(input.start, input.end, input.line, input.offset, input.length);
+						}),
+						dojo.hitch(this, function(error) {
+							editorContainer.onInputChange(fullPathName, "An error occurred: " + error.message, null);
+							console.error("HTTP status code: ", error.status);
+						})
+					);
+					fileClient.read(fileURI, true).then(
+						dojo.hitch(this, function(metadata) {
+							this._fileMetadata = metadata;
+							this.setTitle(metadata.Location);
+						}),
+						dojo.hitch(this, function(error) {
+							console.error("Error loading file metadata: " + error.message);
+							this.setTitle(fileURI);
+						})
+					);
+				}
+				this._lastFilePath = fileURI;
+			} else {
+				editorContainer.onInputChange("No File Selected", "", null);
+			}
+		},
+		
+		getInput: function() {
+			return this._lastFilePath;
+		},
+			
+		setTitle : function(title) {
+			var indexOfSlash = title.lastIndexOf("/");
+			var shortTitle = title;
+			if (indexOfSlash !== -1) {
+				shortTitle = shortTitle.substring(indexOfSlash + 1);
+				if (title.charAt(0) === '*') {
+					shortTitle = '*' + shortTitle;
+				}
+			}
+			this._lastTitle = shortTitle;
+			inputService.setTitle(shortTitle);
+			var titlePane = dojo.byId("pageTitle");
+			if (titlePane) {
+				dojo.empty(titlePane);
+				new eclipse.BreadCrumbs({container: "pageTitle", resource: this._fileMetadata});
+				if (title.charAt(0) === '*') {
+					var dirty = dojo.create('b', null, titlePane, "last");
+					dirty.innerHTML = '*';
+				}
+			}
+		},
+		
+		setDirty: function(dirty) {
+			if (dirty) {
+				if (this._lastTitle && this._lastTitle.charAt(0) !== '*') {
+					this.setTitle('*'+ this._lastTitle);
+				}
+			} else {
+				if (this._lastTitle && this._lastTitle.charAt(0) === '*') {
+					this.setTitle(this._lastTitle.substring(1));
+				}
+			}
+		}
+	};	
+	
+	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 		// Register commands that depend on external services, the registry, etc.
-		var commandGenerator = new orion.EditorCommandFactory(serviceRegistry, commandService, fileClient, "pageActions");
+		var commandGenerator = new orion.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions");
 		commandGenerator.generateEditorCommands(editor);
 		
 		// Create keybindings for generic editing, no dependency on the service model
@@ -189,7 +272,7 @@ dojo.addOnLoad(function(){
 				
 				searchFloat.style.display = "block";
 				var query = editor.getFileMetadata().SearchLocation + searchPattern + extensionFilter;
-				searcher.search(searchFloat, query, fileURI);
+				searcher.search(searchFloat, query, inputManager.getInput());
 			}, 0);
 		});
 			
@@ -200,7 +283,7 @@ dojo.addOnLoad(function(){
 				splitterMgr.toggleLeftPane(editor);
 		});
 		
-		// tell the top border container what to use for the splitter toggle function.
+		// Tell the top border container what to use for the splitter toggle function.
 		// We do this here because we have the editor handy
 		topContainerWidget.setToggleLeftPane(function() {
 			splitterMgr.toggleLeftPane(editor);
@@ -215,33 +298,34 @@ dojo.addOnLoad(function(){
 		}
 	};
 
+	var annotationFactory = new orion.AnnotationFactory();
 	
 	var editorContainer = new orion.EditorContainer({
 		editorFactory: editorFactory,
 		undoStackFactory: new orion.UndoFactory(serviceRegistry, commandService, "pageActions"),
-		annotationFactory: new orion.AnnotationFactory(),
+		annotationFactory: annotationFactory,
 		lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
 		contentAssistFactory: contentAssistFactory,
 		keyBindingFactory: keyBindingFactory, 
 		statusReporter: statusReporter,
-		fileClient: fileClient,
-		inputService: inputService, // will go away soon
-		domNode: editorContainerDomNode,
-		codeTitle: "pageTitle"
+		domNode: editorContainerDomNode
 	});
 	
 	// Establishing dependencies on registered services
 	serviceRegistry.getService("IProblemProvider").then(function(problemProvider) {
 		problemProvider.addEventListener("problemsChanged", function(problems) {
-			editorContainer.showProblems(problems);
+			annotationFactory.showProblems(problems);
 		});
 	});
+	
+	dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
+	
 	serviceRegistry.getService("IInputProvider").then(function(input) {
 		input.addEventListener("inputChanged", function(fileURI) {
-			editorContainer.setInput(fileURI);
+			inputManager.setInput(fileURI, editorContainer);
 		});
 		input.getInput(function(fileURI) {
-			editorContainer.setInput(fileURI);
+			inputManager.setInput(fileURI, editorContainer);
 		});
 	});
 	
