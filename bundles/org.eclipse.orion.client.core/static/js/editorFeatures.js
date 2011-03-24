@@ -36,6 +36,7 @@ orion.UndoFactory = (function() {
 				undoStack.redo();
 				return true;
 			});
+			return undoStack;
 		}
 	};
 	return UndoFactory;
@@ -59,7 +60,7 @@ orion.AnnotationFactory = (function() {
 	AnnotationFactory.prototype = {
 		createAnnotationRulers: function() {
 			var rulerStyle = {style: { backgroundColor: "#ffffff" }};
-			this.annotationRuler = new eclipse.AnnotationRuler("left", rulerStyle, {html: "<img src='images/problem.gif'></img>"});
+			this.annotationRuler = new eclipse.AnnotationRuler("left", rulerStyle, {html: "<img src='/images/problem.gif'></img>"});
 			this.overviewRuler = new eclipse.OverviewRuler("right", rulerStyle, this.annotationRuler);
 			return {annotationRuler: this.annotationRuler, overviewRuler: this.overviewRuler};
 		},
@@ -85,7 +86,7 @@ orion.AnnotationFactory = (function() {
 					var annotation = {
 						line: errors[k].line - 1,
 						column: errors[k].character,
-						html: "<img src='images/problem.gif' title='" + escapedReason + "' alt='" + escapedReason + "'></img>",
+						html: "<img src='/images/problem.gif' title='" + escapedReason + "' alt='" + escapedReason + "'></img>",
 						overviewStyle: {style: {"backgroundColor": "lightcoral", "border": "1px solid red"}}
 					};
 					
