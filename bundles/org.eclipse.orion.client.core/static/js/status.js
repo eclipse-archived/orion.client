@@ -14,8 +14,10 @@
 var eclipse = eclipse || {};
 
 /**
- * StatusReporting Service
+ * Service for reporting status
  * @class Service for reporting status
+ * @param {eclipse.ServiceRegistry} serviceRegistry
+ * @param {String} domId ID of the DOM node under which status will be displayed.
  */
 eclipse.StatusReportingService = function(serviceRegistry, domId) {
 	this._serviceRegistry = serviceRegistry;
@@ -25,8 +27,8 @@ eclipse.StatusReportingService = function(serviceRegistry, domId) {
  
 eclipse.StatusReportingService.prototype = {
 	/**
-	 * @param msg {String} Message to display.
-	 * @param timeout [Number] Optional time to display the message before hiding it.
+	 * @param {String} msg Message to display.
+	 * @param [Number] timeout Optional time to display the message before hiding it.
 	 */
 	setMessage : function(msg, timeout) {
 		dojo.place(document.createTextNode(msg), this.domId, "only");
@@ -42,6 +44,11 @@ eclipse.StatusReportingService.prototype = {
 		}
 	},
 
+	/**
+	 * @param {String|dojoError|orionError} st The error to display. Can be a simple String,
+	 * or an error object from a dojo XHR error callback, or the body of an error response 
+	 * from the Orion server.
+	 */
 	setErrorMessage : function(st) {
 		//could either be responseText from xhrGet or just a string
 		var status = st.responseText || st;
