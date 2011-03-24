@@ -196,7 +196,7 @@ orion.CompareMergeOverviewRuler = (function() {
 			var model = this._editor.getModel();
 			if(lineIndex >= 0 && model.getAnnotationH){
 				var anH = model.getAnnotationH(lineIndex);
-				var lC = model.getLineCount();
+				var lC = model.getAnnotationLineCount();
 				var clientArea = this._editor.getClientArea();
 				var height =  Math.floor(clientArea.height*anH/lC);
 				if (height < 2)
@@ -240,17 +240,6 @@ orion.CompareMatchRenderer =  (function() {
 			this.render();
 		},
 		
-		_overlap: function(start1, end1 , start2 , end2){
-			if(end1 < start1)
-				end1 = start1;
-			if(end1 < start1)
-				end1 = start1;
-			if (end1 < start2 || end2 < start1){
-				return false;
-			}
-			return true; 
-		},
-		
 		_setEditorPosition: function (editor , lineIndex){
 			var lineHeight = editor.getLineHeight();
 			var clientArea = editor.getClientArea();
@@ -266,17 +255,19 @@ orion.CompareMatchRenderer =  (function() {
 		},
 		
 		matchPositionFrom: function(fromLeft){
+			/*
 			if(this._matching ){
 				this._matching = false;
 				return;
 			}
 			this._matching = true;
+			*/
 			var baseEditor = fromLeft ? this._leftEditor : this._rightEditor;
 			var matchEditor = fromLeft ? this._rightEditor : this._leftEditor;
-			var baseLine = this._findBaseLine(baseEditor);
-			var mapperItem = baseEditor.getModel().lookUpMapper(baseLine);
-			var lineIndex = matchEditor.getModel().getLineIndexFromMapper(mapperItem.mapperIndex);
-			this._setEditorPosition(matchEditor , lineIndex);
+			var topLine = baseEditor.getTopIndex();
+			var bottomLine = baseEditor.getBottomIndex();
+			var matchLine = orion.compareUtils.matchMapper(this._mapper , fromLeft ? 0: 1 , topLine , bottomLine);
+			matchEditor.setTopIndex(matchLine);
 		},
 		
 		matchPositionFromAnnotation: function(index){
@@ -316,8 +307,8 @@ orion.CompareMatchRenderer =  (function() {
 			var rendering = false;
 			for (var i = 0 ; i < this._mapper.length ; i++){
 				if(this._mapper[i][2] !== 0){
-					if(this._overlap( curLeftIndex , curLeftIndex + this._mapper[i][0] -1,  leftTop ,leftBottom) ||
-					   this._overlap( curRightIndex , curRightIndex + this._mapper[i][1] -1,  rightTop ,rightBottom) ){
+					if(orion.compareUtils.overlapMapper( this._mapper[i] , 0 , curLeftIndex , leftTop ,leftBottom) ||
+					   orion.compareUtils.overlapMapper( this._mapper[i] , 1 , curLeftIndex , rightTop ,rightBottom) ){
 						this._renderCurve(this._mapper[i], curLeftIndex , curRightIndex , this._canvasDiv , context , leftTop , leftBottom , rightTop , rightBottom);
 						rendering = true;
 					} else if (rendering) {
