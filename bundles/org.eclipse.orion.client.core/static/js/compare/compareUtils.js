@@ -42,7 +42,6 @@ orion.compareUtils.lookUpMapper = function(mapper , mapperColumnIndex , lineInde
 	return  {mapperIndex:mapper.length-1 , startFrom:curLineindex};
 };
 
-
 orion.compareUtils.lookUpLineIndex = function(mapper , mapperColumnIndex , mapperIndex){
 	if(mapperIndex === 0)
 		return 0;
@@ -77,6 +76,74 @@ orion.compareUtils.updateMapper = function(mapper , mapperColumnIndex , startLin
 		}
 	}
 };
+
+orion.compareUtils.overlapMapper = function(mapperItem , mapperColumnIndex , startLineIndex, lineFrom , lineTo){
+	var endLineIndex = startLineIndex + mapperItem[mapperColumnIndex] - 1;
+	
+	if(endLineIndex < startLineIndex)
+		endLineIndex = startLineIndex;
+	if(lineTo < lineFrom)
+		lineTo = lineFrom;
+	if (endLineIndex < lineFrom || lineTo < startLineIndex){
+		return false;
+	}
+	return true; 
+};
+
+orion.compareUtils.findFirstDiff = function(mapper , mapperColumnIndex , lineFrom , lineTo){
+	var curLineIndex = 0;
+	var retValue = undefined;
+	for (var i = 0 ; i < mapper.length ; i++){
+		if(curLineIndex > lineTo)
+			break;
+		if(orion.compareUtils.overlapMapper( mapper[i] , mapperColumnIndex , curLineIndex , lineFrom , lineTo)){
+			retValue = {mapperIndex:i , startFrom:curLineIndex };
+			if( mapper[i][2] !== 0 )
+				break;
+		}
+		curLineIndex  +=  mapper[i][mapperColumnIndex];
+	}
+	return  retValue;
+};
+
+
+//returns the line index at the top of the other editor , when scroll happens on the eidotr
+orion.compareUtils.matchMapper = function(mapper , mapperColumnIndex , lineFrom , lineTo){
+	var baseLine = lineFrom + Math.round((lineTo -lineFrom)/3);
+	var first = orion.compareUtils.findFirstDiff(mapper , mapperColumnIndex , lineFrom , lineTo);
+	var mapperEndAt = mapper[first.mapperIndex][mapperColumnIndex] === 0 ? first.startFrom : first.startFrom + mapper[first.mapperIndex][mapperColumnIndex] -1;
+	
+	var startLineAtOther = orion.compareUtils.lookUpLineIndex(mapper , 1-mapperColumnIndex , first.mapperIndex);
+	var delta = first.startFrom - lineFrom;
+	
+	if( mapper[first.mapperIndex][2] === 0){
+		return (startLineAtOther -delta);
+	}
+	if(baseLine >= first.startFrom && baseLine <= mapperEndAt){
+		return startLineAtOther -  Math.round((lineTo -lineFrom)/3);
+	}	
+	if(baseLine < first.startFrom){
+		return (startLineAtOther -delta);
+	}
+	
+	var mapperEndAtOther = mapper[first.mapperIndex][1-mapperColumnIndex] === 0 ? startLineAtOther : startLineAtOther + mapper[first.mapperIndex][1-mapperColumnIndex] -1;
+	return ( mapperEndAtOther- (mapperEndAt - lineFrom));
+	
+};
+
+orion.compareUtils.getMapperLineCount = function(mapper){
+	var curLineindex = 0;//zero based
+	for (var i = 0 ; i < mapper.length ; i++){
+		curLineindex += Math.max(mapper[i][0] ,mapper[i][1]);
+	}
+	return curLineindex;
+};
+
+
+
+
+
+
 
 
 

@@ -270,7 +270,7 @@ orion.CompareMergeContainer = (function() {
 		this._editorLeft.getModel().addListener(self._compareMatchRenderer);
 		this._editorLeft.addEventListener("Scroll", window, function(scrollEvent) {
 			if(self._compareMatchRenderer){
-				//self._compareMatchRenderer.matchPositionFrom(true);
+				self._compareMatchRenderer.matchPositionFrom(true);
 				self._compareMatchRenderer.render();
 			}
 		}); 

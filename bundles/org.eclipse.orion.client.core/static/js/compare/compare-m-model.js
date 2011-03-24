@@ -66,6 +66,11 @@ orion.CompareMergeModel = (function() {
 			return 	(annotationIndex === -1) ? 0 : Math.max(this._mapper[annotationIndex][0], this._mapper[annotationIndex][1]);
 		},
 		
+		getAnnotationLineCount: function(){
+			//return 	orion.compareUtils.getMapperLineCount(this._mapper);
+			return 	this.getLineCount();
+		},
+		
 		getAnnotationIndex: function(lineIndex){
 			if(this._anotations === undefined)
 				this.getAnnotations();
@@ -154,12 +159,14 @@ orion.CompareMergeModel = (function() {
 		},
 		
 		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+			/*
 			console.log("start : " + start);
 			console.log("removedCharCount : " + removedCharCount);
 			console.log("addedCharCount : " + addedCharCount);
 			console.log("removedLineCount : " + removedLineCount);
 			console.log("addedLineCount : " + addedLineCount);
 			console.log("line number : " + this.getLineAtOffset(start));
+			*/
 			this.updateMapper(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
