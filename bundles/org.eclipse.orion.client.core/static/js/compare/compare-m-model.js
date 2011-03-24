@@ -62,7 +62,7 @@ orion.CompareMergeModel = (function() {
 		},
 		
 		getAnnotationH: function(lineIndex){
-			var annotationIndex = this.getAnnotationIndex(lineIndex);
+			var annotationIndex = this._annotations[this.getAnnotationIndex(lineIndex)][1];
 			return 	(annotationIndex === -1) ? 0 : Math.max(this._mapper[annotationIndex][0], this._mapper[annotationIndex][1]);
 		},
 		
@@ -72,11 +72,11 @@ orion.CompareMergeModel = (function() {
 		},
 		
 		getAnnotationIndex: function(lineIndex){
-			if(this._anotations === undefined)
+			if(this._annotations === undefined)
 				this.getAnnotations();
 			for (var i = 0 ; i < this._annotations.length ; i++){
 				if(this._annotations[i][0] === lineIndex){
-					return this._annotations[i][1];
+					return i;//this._annotations[i][1];
 				}
 			}
 			return -1;

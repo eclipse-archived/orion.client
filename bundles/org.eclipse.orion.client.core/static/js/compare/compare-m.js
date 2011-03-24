@@ -45,5 +45,31 @@ dojo.addOnLoad(function(){
 		);
 	}
 	
+		
+		var nextDiffCommand = new eclipse.Command({
+			name : "Next diff",
+			image : "/images/compare/next-diff.gif",
+			id: "orion.compare.nextDiff",
+			groupId: "orion.compareGroup",
+			callback : function() {
+				compareMergeContainer.nextDiff();
+			}});
+		var copyToLeftCommand = new eclipse.Command({
+			name : "Copy from right to left",
+			image : "/images/compare/copy-to-left.gif",
+			id: "orion.compare.copyToLeft",
+			groupId: "orion.compareGroup",
+			callback : function() {
+				alert("Copy to left");
+			}});
+		commandService.addCommand(nextDiffCommand, "dom");
+		commandService.addCommand(copyToLeftCommand, "dom");
+		
+		// Register command contributions
+		commandService.registerCommandContribution("orion.compare.nextDiff", 2, "pageActions");
+		commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
+		
+		eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {});
+	
 });
 

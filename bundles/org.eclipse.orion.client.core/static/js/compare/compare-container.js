@@ -223,6 +223,10 @@ orion.CompareMergeContainer = (function() {
 		} 
 	};
 	
+	CompareMergeContainer.prototype.nextDiff = function(){	
+		this._compareMatchRenderer.nextDiff();
+	};
+	
 	CompareMergeContainer.prototype.setEditor = function(input , diff){	
 		var result = this.parseMapper(input , diff);
 		if(this._editorLeft && this._editorRight){

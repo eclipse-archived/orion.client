@@ -139,6 +139,21 @@ orion.compareUtils.getMapperLineCount = function(mapper){
 	return curLineindex;
 };
 
+orion.compareUtils.findNextDiff = function(mapper , fromIndex){
+	var from = 0;
+	if(fromIndex >= 0 &&  fromIndex < mapper.length - 1)
+		from = fromIndex + 1;
+	for (var i = from ; i < mapper.length ; i++){
+		if(mapper[i][2] !== 0)
+			return i;
+	}
+	for (var i = 0 ; i < from ; i++){
+		if(mapper[i][2] !== 0)
+			return i;
+	}
+	return fromIndex;
+};
+
 
 
 

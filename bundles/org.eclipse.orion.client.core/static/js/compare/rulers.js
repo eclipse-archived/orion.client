@@ -237,6 +237,7 @@ orion.CompareMatchRenderer =  (function() {
 			this._mapper = mapper;
 			this._leftEditor = leftEditor;
 			this._rightEditor = rightEditor;
+			this._currentAnnotationIndex = 0;
 			this.render();
 		},
 		
@@ -269,7 +270,7 @@ orion.CompareMatchRenderer =  (function() {
 			var matchLine = orion.compareUtils.matchMapper(this._mapper , fromLeft ? 0: 1 , topLine , bottomLine);
 			matchEditor.setTopIndex(matchLine);
 		},
-		
+		/*
 		matchPositionFromAnnotation: function(index){
 			var lineIndex = index;
 			var annotaionIndex = index;
@@ -286,11 +287,40 @@ orion.CompareMatchRenderer =  (function() {
 			var lineIndexL = this._leftEditor.getModel().getLineIndexFromMapper(annotaionIndex);
 			this._setEditorPosition(this._leftEditor , lineIndexL);
 		},
+		*/
+		matchPositionFromAnnotation: function(index){
+			var annotaionIndex = index;
+			if(index === -1){
+				annotaionIndex = 0;
+			} else {
+				annotaionIndex = this._rightEditor.getModel().getAnnotationIndex(lineIndex);
+			}
+			this.positionAnnotation(annotaionIndex);
+		},
+		positionAnnotation: function(annotationIndex){
+			var annotations = this._rightEditor.getModel().getAnnotations();
+			if(annotations.length === 0)
+				return;
+			this._setEditorPosition(this._rightEditor , annotations[annotationIndex][0]);
+			var lineIndexL = this._leftEditor.getModel().getLineIndexFromMapper(annotations[annotationIndex][1]);
+			this._setEditorPosition(this._leftEditor , lineIndexL);
+		},
+		
+		nextDiff: function(){
+			var annotations = this._rightEditor.getModel().getAnnotations();
+			if(annotations.length !== 0 ){
+				if((annotations.length -1) === this._currentAnnotationIndex)
+					this._currentAnnotationIndex = 0;
+				else
+					this._currentAnnotationIndex += 1;
+			}
+			this.positionAnnotation(this._currentAnnotationIndex);
+			this.render();
+		},
 	
 		render: function(){
 			var context=this._canvasDiv.getContext("2d");
 			context.clearRect(0,0,this._canvasDiv.width,this._canvasDiv.height);
-			context.fillStyle   = '#BBBBBB'; 
 			context.strokeStyle = '#AAAAAA'; 
 			context.lineWidth   = 1;
 			context.beginPath();
@@ -308,8 +338,8 @@ orion.CompareMatchRenderer =  (function() {
 			for (var i = 0 ; i < this._mapper.length ; i++){
 				if(this._mapper[i][2] !== 0){
 					if(orion.compareUtils.overlapMapper( this._mapper[i] , 0 , curLeftIndex , leftTop ,leftBottom) ||
-					   orion.compareUtils.overlapMapper( this._mapper[i] , 1 , curLeftIndex , rightTop ,rightBottom) ){
-						this._renderCurve(this._mapper[i], curLeftIndex , curRightIndex , this._canvasDiv , context , leftTop , leftBottom , rightTop , rightBottom);
+					   orion.compareUtils.overlapMapper( this._mapper[i] , 1 , curRightIndex , rightTop ,rightBottom) ){
+						this._renderCurve(i, curLeftIndex , curRightIndex , this._canvasDiv , context , leftTop , leftBottom , rightTop , rightBottom);
 						rendering = true;
 					} else if (rendering) {
 						break;
@@ -321,13 +351,29 @@ orion.CompareMatchRenderer =  (function() {
 			context.stroke();		
 		},
 		
-		_renderCurve: function (mapperItem , leftStart , rightStart , canvas , context , leftTop , leftBottom , rightTop , rightBottom){
+		_renderCurve: function (mapperIndex , leftStart , rightStart , canvas , context , leftTop , leftBottom , rightTop , rightBottom){
+			var mapperItem = this._mapper[mapperIndex];
 			var leftMiddle =  (leftStart + (mapperItem[0]/2) - leftTop) * this._leftLineH;
 			var rightMiddle = (rightStart + (mapperItem[1]/2) - rightTop) * this._rightLineH ;
 			var w =  canvas.parentNode.clientWidth;
 			
+			var annotations = this._rightEditor.getModel().getAnnotations();
+			if(annotations.length !== 0 && annotations[this._currentAnnotationIndex][1] === mapperIndex){
+				context.stroke();
+				context.strokeStyle = '#000'; 
+				context.lineWidth   = 1;
+				context.beginPath();
+				context.moveTo(0 , leftMiddle);
+				context.bezierCurveTo( w/3, leftMiddle, w*0.666  ,rightMiddle , w ,rightMiddle);
+				context.stroke();
+				context.strokeStyle = '#AAAAAA'; 
+				context.lineWidth   = 1;
+				context.beginPath();
+				return;
+			}
 			context.moveTo(0 , leftMiddle);
 			context.bezierCurveTo( w/3, leftMiddle, w*0.666  ,rightMiddle , w ,rightMiddle);
+			context.stroke();
 		},
 		
 		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
