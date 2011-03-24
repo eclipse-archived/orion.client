@@ -18,7 +18,6 @@ var orion = orion || {};
 orion.EditorContainer = (function() {
 	function EditorContainer(options) {
 		this._editorFactory = options.editorFactory;
-		this._commandGenerator = options.commandGenerator;
 		this._undoStackFactory = options.undoStackFactory;
 		this._annotationFactory = options.annotationFactory;
 		this._lineNumberRulerFactory = options.lineNumberRulerFactory;
@@ -272,9 +271,6 @@ orion.EditorContainer = (function() {
 			
 			// Create editor and install optional features
 			this._editor = this._editorFactory();
-			if (this._commandGenerator) {
-				this._commandGenerator.generateEditorCommands(this);
-			}
 			if (this._undoStackFactory) {
 				this._undoStack = this._undoStackFactory.createUndoStack(this);
 			}

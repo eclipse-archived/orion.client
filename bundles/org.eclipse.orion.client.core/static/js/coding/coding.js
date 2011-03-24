@@ -137,7 +137,11 @@ dojo.addOnLoad(function(){
 	};
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist, fileURI) {
-		// create keybindings for generic editing
+		// Register commands that depend on external services, the registry, etc.
+		var commandGenerator = new orion.EditorCommandFactory(serviceRegistry, commandService, fileClient, "pageActions");
+		commandGenerator.generateEditorCommands(editor);
+		
+		// Create keybindings for generic editing, no dependency on the service model
 		var genericBindings = new orion.TextCommands(editor, undoStack);
 		keyModeStack.push(genericBindings);
 		
@@ -214,7 +218,6 @@ dojo.addOnLoad(function(){
 	
 	var editorContainer = new orion.EditorContainer({
 		editorFactory: editorFactory,
-		commandGenerator: new orion.EditorCommandFactory(serviceRegistry, commandService, fileClient, "pageActions"),
 		undoStackFactory: new orion.UndoFactory(serviceRegistry, commandService, "pageActions"),
 		annotationFactory: new orion.AnnotationFactory(),
 		lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
