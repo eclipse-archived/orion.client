@@ -225,12 +225,12 @@ dojo.addOnLoad(function(){
 		commandGenerator.generateEditorCommands(editor);
 		
 		// Create keybindings for generic editing, no dependency on the service model
-		var genericBindings = new orion.TextCommands(editor, undoStack);
+		var genericBindings = new orion.TextActions(editor, undoStack);
 		keyModeStack.push(genericBindings);
 		
 		// create keybindings for source editing
 		// TODO this should probably be something that happens more dynamically, when the editor changes input
-		var codeBindings = new orion.SourceCommands(editor, undoStack, contentAssist);
+		var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
 		keyModeStack.push(codeBindings);
 		
 		// global search
@@ -302,7 +302,7 @@ dojo.addOnLoad(function(){
 	
 	var editorContainer = new orion.EditorContainer({
 		editorFactory: editorFactory,
-		undoStackFactory: new orion.UndoFactory(serviceRegistry, commandService, "pageActions"),
+		undoStackFactory: new orion.UndoCommandFactory(serviceRegistry, commandService, "pageActions"),
 		annotationFactory: annotationFactory,
 		lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
 		contentAssistFactory: contentAssistFactory,

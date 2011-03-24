@@ -96,7 +96,10 @@ eclipse.sites.util = {
 			},
 			callback: function(item) {
 				statusService.setMessage("Starting...");
-				siteService.startStopSiteConfiguration(item.Location, "start").then(startCallback, errorCallback);
+				item.HostingStatus = {
+					Status: "started"
+				};
+				siteService.updateSiteConfiguration(item.Location, item).then(startCallback, errorCallback);
 			}});
 		commandService.addCommand(startCommand, "object");
 		
@@ -109,7 +112,10 @@ eclipse.sites.util = {
 			},
 			callback: function(item) {
 				statusService.setMessage("Stopping " + item.Name + "...");
-				siteService.startStopSiteConfiguration(item.Location, "stop").then(stopCallback, errorCallback);
+				item.HostingStatus = {
+						Status: "stopped"
+				};
+				siteService.updateSiteConfiguration(item.Location, item).then(stopCallback, errorCallback);
 			}});
 		commandService.addCommand(stopCommand, "object");
 		
