@@ -65,20 +65,9 @@ eclipse.sites.SiteService = (function() {
 		},
 		
 		/**
-		 * Performs a start or stop action on a site configuration.
-		 * @param {String} locationUrl Location of a site configuration resource.
-		 * @param {String} action
-		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
-		 * changed {SiteConfiguration} on success.
-		 */
-		startStopSiteConfiguration: function(locationUrl, action) {
-			return this._doServiceCall("startStopSiteConfiguration", arguments);
-		},
-		
-		/**
 		 * Edits an existing site configuration.
 		 * @param {String} locationUrl Location of a site configuration resource.
-		 * @param updatedSiteConfig
+		 * @param {SiteConfiguration} updatedSiteConfig
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the updated
 		 * {SiteConfiguration} on success.
 		 */
@@ -134,18 +123,6 @@ eclipse.sites.SiteService = (function() {
 					headers: {
 						"Content-Type": "application/json; charset=utf-8",
 						"Orion-Version": "1"
-					},
-					handleAs: "json",
-					timeout: 15000
-				});
-			},
-			startStopSiteConfiguration: function(locationUrl, action) {
-				return dojo.xhrPost({
-					url: locationUrl,
-					headers: {
-						"Content-Type": "application/json, charset=utf-8",
-						"Orion-Version": "1",
-						"X-Action": action
 					},
 					handleAs: "json",
 					timeout: 15000
