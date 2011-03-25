@@ -35,17 +35,17 @@ orion.CompareMergeModel = (function() {
 				if(this._mapper[mapItem.mapperIndex][2] !== 0){
 					var mapperLength = this._mapper[mapItem.mapperIndex][this._mapperColumnIndex];
 					if(mapperLength === 0)
-						return "top-only";
+						return {type:"top-only" , mapperIndex:mapItem.mapperIndex};
 					if(mapperLength === 1)
-						return "oneline";
+						return {type:"oneline" , mapperIndex:mapItem.mapperIndex};
 					if(lineIndex === mapItem.startFrom)
-						return "top";
+						return {type:"top" , mapperIndex:mapItem.mapperIndex};
 					if(lineIndex === mapItem.startFrom + mapperLength -1)
-						return "bottom";
-					return "middle";
+						return {type:"bottom" , mapperIndex:mapItem.mapperIndex};
+					return {type:"middle" , mapperIndex:mapItem.mapperIndex};
 				}
 			}
-			return "unchanged";
+			return {type:"unchanged" , mapperIndex:mapItem.mapperIndex};
 		},
 			
 		getAnnotations: function(){
@@ -63,7 +63,8 @@ orion.CompareMergeModel = (function() {
 		
 		getAnnotationH: function(lineIndex){
 			var annotationIndex = this._annotations[this.getAnnotationIndex(lineIndex)][1];
-			return 	(annotationIndex === -1) ? 0 : Math.max(this._mapper[annotationIndex][0], this._mapper[annotationIndex][1]);
+			return 	(annotationIndex === -1) ? 0 :this._mapper[annotationIndex][this._mapperColumnIndex];
+			//return 	(annotationIndex === -1) ? 0 : Math.max(this._mapper[annotationIndex][0], this._mapper[annotationIndex][1]);
 		},
 		
 		getAnnotationLineCount: function(){
@@ -77,6 +78,17 @@ orion.CompareMergeModel = (function() {
 			for (var i = 0 ; i < this._annotations.length ; i++){
 				if(this._annotations[i][0] === lineIndex){
 					return i;//this._annotations[i][1];
+				}
+			}
+			return -1;
+		},
+		
+		getAnnotationIndexByMapper: function(mapperIndex){
+			if(this._annotations === undefined)
+				this.getAnnotations();
+			for (var i = 0 ; i < this._annotations.length ; i++){
+				if(this._annotations[i][1] === mapperIndex){
+					return i;
 				}
 			}
 			return -1;

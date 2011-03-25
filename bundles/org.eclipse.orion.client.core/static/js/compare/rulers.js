@@ -241,6 +241,14 @@ orion.CompareMatchRenderer =  (function() {
 			this.render();
 		},
 		
+		getCurrentAnnotationIndex: function(){
+			return this._currentAnnotationIndex;
+		},
+		
+		setOverviewRuler: function(overview){
+			this._overviewRuler =  overview;
+		},
+
 		_setEditorPosition: function (editor , lineIndex){
 			var lineHeight = editor.getLineHeight();
 			var clientArea = editor.getClientArea();
@@ -256,13 +264,6 @@ orion.CompareMatchRenderer =  (function() {
 		},
 		
 		matchPositionFrom: function(fromLeft){
-			/*
-			if(this._matching ){
-				this._matching = false;
-				return;
-			}
-			this._matching = true;
-			*/
 			var baseEditor = fromLeft ? this._leftEditor : this._rightEditor;
 			var matchEditor = fromLeft ? this._rightEditor : this._leftEditor;
 			var topLine = baseEditor.getTopIndex();
@@ -270,31 +271,16 @@ orion.CompareMatchRenderer =  (function() {
 			var matchLine = orion.compareUtils.matchMapper(this._mapper , fromLeft ? 0: 1 , topLine , bottomLine);
 			matchEditor.setTopIndex(matchLine);
 		},
-		/*
-		matchPositionFromAnnotation: function(index){
-			var lineIndex = index;
-			var annotaionIndex = index;
-			if(index === -1){
-				var annotations = this._rightEditor.getModel().getAnnotations();
-				if(annotations.length === 0)
-					return;
-				lineIndex = annotations[0][0];
-				annotaionIndex = annotations[0][1];
-			} else {
-				annotaionIndex = this._rightEditor.getModel().getAnnotationIndex(lineIndex);
-			}
-			this._setEditorPosition(this._rightEditor , lineIndex);
-			var lineIndexL = this._leftEditor.getModel().getLineIndexFromMapper(annotaionIndex);
-			this._setEditorPosition(this._leftEditor , lineIndexL);
-		},
-		*/
+
 		matchPositionFromAnnotation: function(index){
 			var annotaionIndex = index;
 			if(index === -1){
 				annotaionIndex = 0;
 			} else {
-				annotaionIndex = this._rightEditor.getModel().getAnnotationIndex(lineIndex);
+				var model =  this._rightEditor.getModel();
+				annotaionIndex = model.getAnnotationIndex(index);
 			}
+			this._currentAnnotationIndex = annotaionIndex;
 			this.positionAnnotation(annotaionIndex);
 		},
 		positionAnnotation: function(annotationIndex){
@@ -304,6 +290,9 @@ orion.CompareMatchRenderer =  (function() {
 			this._setEditorPosition(this._rightEditor , annotations[annotationIndex][0]);
 			var lineIndexL = this._leftEditor.getModel().getLineIndexFromMapper(annotations[annotationIndex][1]);
 			this._setEditorPosition(this._leftEditor , lineIndexL);
+			this._leftEditor.redrawRange();
+			this._rightEditor.redrawRange();
+			//this._rightEditor.redrawLines(this._rightEditor.getTopIndex() , this._rightEditor.getBottomIndex() , this._overviewRuler);
 		},
 		
 		nextDiff: function(){

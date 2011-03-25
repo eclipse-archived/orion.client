@@ -209,17 +209,24 @@ orion.CompareMergeContainer = (function() {
 		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
 	}
 	CompareMergeContainer.prototype = new orion.CompareContainer();
-	CompareMergeContainer.prototype.setStyle = function(lineStyleEvent , lineType){	
+	CompareMergeContainer.prototype.setStyle = function(lineStyleEvent , editor){	
+		var lineIndex = lineStyleEvent.lineIndex;
+		var lineTypeWrapper =  editor.getModel().getLineType(lineIndex);
+		var lineType = lineTypeWrapper.type;
+		var annotationIndex = editor.getModel().getAnnotationIndexByMapper(lineTypeWrapper.mapperIndex);
+		var borderStyle = "1px #AAAAAA solid";
+		if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex())
+			borderStyle = "2px #000000 solid";
 		if(lineType === "top-only") {
-			lineStyleEvent.style = {style: { borderTop: "1px #AAAAAA solid" }};
+			lineStyleEvent.style = {style: { borderTop: borderStyle }};
 		} else if (lineType === "oneline"){
-			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , border: "1px #AAAAAA solid" }};
+			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , border: borderStyle }};
 		} else if (lineType === "top"){
-			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: "1px #AAAAAA solid" , borderLeft: "1px #AAAAAA solid" , borderRight: "1px #AAAAAA solid"}};
+			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: borderStyle , borderLeft: borderStyle , borderRight: borderStyle}};
 		} else if (lineType === "bottom"){
-			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderBottom: "1px #AAAAAA solid" , borderLeft: "1px #AAAAAA solid" , borderRight: "1px #AAAAAA solid"}};
+			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderBottom: borderStyle , borderLeft: borderStyle , borderRight: borderStyle}};
 		} else if (lineType === "middle"){
-			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderLeft: "1px #AAAAAA solid" , borderRight: "1px #AAAAAA solid"}};
+			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderLeft: borderStyle , borderRight: borderStyle}};
 		} 
 	};
 	
@@ -266,9 +273,7 @@ orion.CompareMergeContainer = (function() {
 		
 		var self = this;
 		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
-			var lineIndex = lineStyleEvent.lineIndex;
-			var lineType =  self._editorLeft.getModel().getLineType(lineIndex);
-			self.setStyle(lineStyleEvent , lineType);
+			self.setStyle(lineStyleEvent , self._editorLeft);
 		}); 
 
 		this._editorLeft.getModel().addListener(self._compareMatchRenderer);
@@ -282,9 +287,7 @@ orion.CompareMergeContainer = (function() {
 		this._editorLeft.redrawRange();
 		
 		this._editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
-			var lineIndex = lineStyleEvent.lineIndex;
-			var lineType =  self._editorRight.getModel().getLineType(lineIndex);
-			self.setStyle(lineStyleEvent , lineType);
+			self.setStyle(lineStyleEvent , self._editorRight);
 		}); 
 
 		this._editorRight.addEventListener("Scroll", window, function(scrollEvent) {
@@ -296,6 +299,7 @@ orion.CompareMergeContainer = (function() {
 				
 		var overview  = new orion.CompareMergeOverviewRuler(self._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
 		this._editorRight.addRuler(overview);
+		this._compareMatchRenderer.setOverviewRuler(overview);
 				
 		this._editorRight.redrawRange();
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);

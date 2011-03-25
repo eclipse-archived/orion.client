@@ -296,7 +296,6 @@ orion.EditorContainer = (function() {
 			}
 		},
 		
-		
 		onInputChange : function (title, message, contents, contentsSaved) {
 			if (contentsSaved && this._editor) {
 				// don't reset undo stack on save, just mark it clean so that we don't lose the undo past the save
