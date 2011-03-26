@@ -238,6 +238,114 @@ orion.CompareMergeContainer = (function() {
 		this._compareMatchRenderer.copyToLeft();
 	};
 	
+	CompareMergeContainer.prototype.createLeftEditor = function(diffResult){
+		var editorContainerDomNode = dojo.byId(this._leftEditorDivId);
+		
+		var modelLeft = new eclipse.TextModel(diffResult.output, diffResult.delim);
+		var compareModelLeft = new orion.CompareMergeModel(modelLeft, {mapper:diffResult.mapper , columnIndex:0} );
+		var editorFactory = function() {
+			return new eclipse.Editor({
+				parent: editorContainerDomNode,
+				model: compareModelLeft,
+				readonly: false,
+				stylesheet: "/js/compare/editor.css" ,
+				tabSize: 4
+			});
+		};
+	
+		
+		var contentAssistFactory = function(editor) {
+			return new eclipse.ContentAssist(editor, "contentassist");
+		};
+		
+		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
+			
+			// Create keybindings for generic editing
+			var genericBindings = new orion.TextActions(editor, undoStack);
+			keyModeStack.push(genericBindings);
+			
+			// create keybindings for source editing
+			var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
+			keyModeStack.push(codeBindings);
+			
+			// save binding
+			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
+			editor.getEditorWidget().setAction("save", function(){
+					editor.onInputChange(null, null, null, true);
+					var text = editor.getEditorWidget().getText();
+					var problems = [];
+					for (var i=0; i<text.length; i++) {
+						if (text.charAt(i) === 'z') {
+							var line = editor.getEditorWidget().getModel().getLineAtOffset(i) + 1;
+							var character = i - editor.getEditorWidget().getModel().getLineStart(line);
+							problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
+						}
+					}
+					annotationFactory.showProblems(problems);
+					return true;
+			});
+		};
+		
+		var dirtyIndicator = "";
+		var status = "";
+		
+		var statusReporter = function(message, isError) {
+			if (isError) {
+				status =  "ERROR: " + message;
+			} else {
+				status = message;
+			}
+			dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
+		};
+		
+		var editorContainer = new orion.EditorContainer({
+			editorFactory: editorFactory,
+			undoStackFactory: new orion.UndoFactory(),
+			//annotationFactory: annotationFactory,
+			//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
+			contentAssistFactory: contentAssistFactory,
+			keyBindingFactory: keyBindingFactory, 
+			statusReporter: statusReporter,
+			domNode: editorContainerDomNode
+		});
+			
+		dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
+			if (dirty) {
+				dirtyIndicator = "You have unsaved changes.  ";
+			} else {
+				dirtyIndicator = "";
+			}
+			dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
+		});
+		
+		editorContainer.installEditor();
+		
+		this._editorLeft = editorContainer.getEditorWidget();
+		this._editorLeft.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		
+		var self = this;
+		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
+			self.setStyle(lineStyleEvent , self._editorLeft);
+		}); 
+
+		this._editorLeft.getModel().addListener(self._compareMatchRenderer);
+		this._editorLeft.addEventListener("Scroll", window, function(scrollEvent) {
+			if(self._compareMatchRenderer){
+				self._compareMatchRenderer.matchPositionFrom(true);
+				self._compareMatchRenderer.render();
+			}
+		}); 
+				
+		
+		//editorContainer.onInputChange("Content.js");
+		
+		window.onbeforeunload = function() {
+			if (editorContainer.isDirty()) {
+				 return "There are unsaved changes.";
+			}
+		};
+	};
+
 	CompareMergeContainer.prototype.setEditor = function(input , diff){	
 		var result = this.parseMapper(input , diff);
 		if(this._editorLeft && this._editorRight){
@@ -252,8 +360,8 @@ orion.CompareMergeContainer = (function() {
 			}
 		}
 				
-		var modelLeft = new eclipse.TextModel(result.output, result.delim);
-		var compareModelLeft = new orion.CompareMergeModel(modelLeft, {mapper:result.mapper , columnIndex:0} );
+		//var modelLeft = new eclipse.TextModel(result.output, result.delim);
+		//var compareModelLeft = new orion.CompareMergeModel(modelLeft, {mapper:result.mapper , columnIndex:0} );
 		var modelRight = new eclipse.TextModel(input, result.delim);
 		var compareModelRight = new orion.CompareMergeModel(modelRight, {mapper:result.mapper , columnIndex:1} );
 		
@@ -265,7 +373,8 @@ orion.CompareMergeContainer = (function() {
 		};
 		this._editorRight = new eclipse.Editor(optionsRight);
 		this._editorRight.addRuler(new orion.LineNumberCompareRuler(0,"right", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
-				
+		this.createLeftEditor(result);
+		/*		
 		var optionsLeft = {
 			parent: this._leftEditorDivId,
 			model: compareModelLeft,
@@ -287,7 +396,8 @@ orion.CompareMergeContainer = (function() {
 				self._compareMatchRenderer.render();
 			}
 		}); 
-				
+		*/		
+		var self = this;
 		this._editorLeft.redrawRange();
 		
 		this._editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
