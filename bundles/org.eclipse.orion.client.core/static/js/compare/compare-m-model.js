@@ -61,9 +61,9 @@ orion.CompareMergeModel = (function() {
 			return this._annotations;
 		},
 		
-		getAnnotationH: function(lineIndex){
-			var annotationIndex = this._annotations[this.getAnnotationIndex(lineIndex)][1];
-			return 	(annotationIndex === -1) ? 0 :this._mapper[annotationIndex][this._mapperColumnIndex];
+		getAnnotationH: function(annotationIndex){
+			var mapperIndex = this._annotations[annotationIndex][1];
+			return 	(mapperIndex === -1) ? 0 :this._mapper[mapperIndex][this._mapperColumnIndex];
 			//return 	(annotationIndex === -1) ? 0 : Math.max(this._mapper[annotationIndex][0], this._mapper[annotationIndex][1]);
 		},
 		

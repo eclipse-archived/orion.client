@@ -216,7 +216,7 @@ orion.CompareMergeContainer = (function() {
 		var annotationIndex = editor.getModel().getAnnotationIndexByMapper(lineTypeWrapper.mapperIndex);
 		var borderStyle = "1px #AAAAAA solid";
 		if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex())
-			borderStyle = "2px #000000 solid";
+			borderStyle = "1px #000000 solid";
 		if(lineType === "top-only") {
 			lineStyleEvent.style = {style: { borderTop: borderStyle }};
 		} else if (lineType === "oneline"){
@@ -232,6 +232,10 @@ orion.CompareMergeContainer = (function() {
 	
 	CompareMergeContainer.prototype.nextDiff = function(){	
 		this._compareMatchRenderer.nextDiff();
+	};
+	
+	CompareMergeContainer.prototype.copyToLeft = function(){	
+		this._compareMatchRenderer.copyToLeft();
 	};
 	
 	CompareMergeContainer.prototype.setEditor = function(input , diff){	

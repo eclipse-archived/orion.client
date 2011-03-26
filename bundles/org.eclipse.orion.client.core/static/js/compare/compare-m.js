@@ -60,7 +60,7 @@ dojo.addOnLoad(function(){
 			id: "orion.compare.copyToLeft",
 			groupId: "orion.compareGroup",
 			callback : function() {
-				alert("Copy to left");
+				compareMergeContainer.copyToLeft();;
 			}});
 		commandService.addCommand(nextDiffCommand, "dom");
 		commandService.addCommand(copyToLeftCommand, "dom");

@@ -195,7 +195,10 @@ orion.CompareMergeOverviewRuler = (function() {
 			
 			var model = this._editor.getModel();
 			if(lineIndex >= 0 && model.getAnnotationH){
-				var anH = model.getAnnotationH(lineIndex);
+				var annotationIndex = model.getAnnotationIndex(lineIndex);
+				if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex())
+					style.backgroundColor = "blue";
+				var anH = model.getAnnotationH(annotationIndex);
 				var lC = model.getAnnotationLineCount();
 				var clientArea = this._editor.getClientArea();
 				var height =  Math.floor(clientArea.height*anH/lC);
@@ -245,6 +248,11 @@ orion.CompareMatchRenderer =  (function() {
 			return this._currentAnnotationIndex;
 		},
 		
+		getCurrentMapperIndex: function(){
+			var annotations = this._rightEditor.getModel().getAnnotations();
+			return annotations.length === 0 ? -1 : annotations[this._currentAnnotationIndex][1];
+		},
+		
 		setOverviewRuler: function(overview){
 			this._overviewRuler =  overview;
 		},
@@ -292,7 +300,8 @@ orion.CompareMatchRenderer =  (function() {
 			this._setEditorPosition(this._leftEditor , lineIndexL);
 			this._leftEditor.redrawRange();
 			this._rightEditor.redrawRange();
-			//this._rightEditor.redrawLines(this._rightEditor.getTopIndex() , this._rightEditor.getBottomIndex() , this._overviewRuler);
+			var drawLine = this._rightEditor.getTopIndex() ;
+			this._rightEditor.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
 		},
 		
 		nextDiff: function(){
@@ -305,6 +314,26 @@ orion.CompareMatchRenderer =  (function() {
 			}
 			this.positionAnnotation(this._currentAnnotationIndex);
 			this.render();
+		},
+		
+		getMapperTextRange: function(editor , mapperIndex , mapperColumnIndex){
+			var startLine = editor.getModel().getLineIndexFromMapper(mapperIndex);
+			var endLine = startLine + this._mapper[mapperIndex][mapperColumnIndex] - 1;
+			var start =  editor.getModel().getLineStart(startLine);
+			var end =  editor.getModel().getLineEnd(endLine,true);
+			return {start:start,end:end};
+		},
+	
+		copyToLeft: function(){
+			var mapperIndex = this.getCurrentMapperIndex();
+			if(this._mapper[mapperIndex][1] === 0)
+				return;
+			var textRangeR = this.getMapperTextRange(this._rightEditor , mapperIndex , 1);
+			var textRangeL = this.getMapperTextRange(this._leftEditor , mapperIndex , 0);
+			var textR = this._rightEditor.getText(textRangeR.start , textRangeR.end);
+			this._leftEditor.setText(textR , textRangeL.start , textRangeL.end);
+			this._leftEditor.redrawRange();
+			this._rightEditor.redrawRange();
 		},
 	
 		render: function(){
@@ -346,8 +375,7 @@ orion.CompareMatchRenderer =  (function() {
 			var rightMiddle = (rightStart + (mapperItem[1]/2) - rightTop) * this._rightLineH ;
 			var w =  canvas.parentNode.clientWidth;
 			
-			var annotations = this._rightEditor.getModel().getAnnotations();
-			if(annotations.length !== 0 && annotations[this._currentAnnotationIndex][1] === mapperIndex){
+			if(mapperIndex === this.getCurrentMapperIndex()){
 				context.stroke();
 				context.strokeStyle = '#000'; 
 				context.lineWidth   = 1;
