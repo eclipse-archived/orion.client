@@ -323,6 +323,7 @@ orion.CompareMergeContainer = (function() {
 		this._editorLeft = editorContainer.getEditorWidget();
 		this._editorLeft.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 		
+		editorContainer.onInputChange("Content.js");
 		var self = this;
 		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
 			self.setStyle(lineStyleEvent , self._editorLeft);
@@ -337,7 +338,6 @@ orion.CompareMergeContainer = (function() {
 		}); 
 				
 		
-		//editorContainer.onInputChange("Content.js");
 		
 		window.onbeforeunload = function() {
 			if (editorContainer.isDirty()) {
@@ -360,8 +360,6 @@ orion.CompareMergeContainer = (function() {
 			}
 		}
 				
-		//var modelLeft = new eclipse.TextModel(result.output, result.delim);
-		//var compareModelLeft = new orion.CompareMergeModel(modelLeft, {mapper:result.mapper , columnIndex:0} );
 		var modelRight = new eclipse.TextModel(input, result.delim);
 		var compareModelRight = new orion.CompareMergeModel(modelRight, {mapper:result.mapper , columnIndex:1} );
 		
@@ -374,29 +372,6 @@ orion.CompareMergeContainer = (function() {
 		this._editorRight = new eclipse.Editor(optionsRight);
 		this._editorRight.addRuler(new orion.LineNumberCompareRuler(0,"right", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 		this.createLeftEditor(result);
-		/*		
-		var optionsLeft = {
-			parent: this._leftEditorDivId,
-			model: compareModelLeft,
-			readonly: false,
-			stylesheet: "/js/compare/editor.css" 
-		};
-		this._editorLeft = new eclipse.Editor(optionsLeft);
-		this._editorLeft.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
-		
-		var self = this;
-		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
-			self.setStyle(lineStyleEvent , self._editorLeft);
-		}); 
-
-		this._editorLeft.getModel().addListener(self._compareMatchRenderer);
-		this._editorLeft.addEventListener("Scroll", window, function(scrollEvent) {
-			if(self._compareMatchRenderer){
-				self._compareMatchRenderer.matchPositionFrom(true);
-				self._compareMatchRenderer.render();
-			}
-		}); 
-		*/		
 		var self = this;
 		this._editorLeft.redrawRange();
 		
