@@ -7,7 +7,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global editor setTimeout log */
+/*global editor styler setTimeout log */
 
 function PerformanceTestCase() {
 }
@@ -80,5 +80,70 @@ PerformanceTestCase.prototype = {
 		}
 		editor.focus();
 		t();
+	},
+	test_getLocationAtOffset: function () {
+		if (!editor) checkEditor();
+		if (styler) {
+			styler.destroy();
+			styler = null;
+		}
+		var count = 10;
+		var buffer = "";
+		for (var i = 0; i < 10;i++) {
+			buffer += "var nada for nada function " + i + " ";
+		}
+		editor.setText(buffer);
+		editor.focus();
+		var length = buffer.length;
+		var start = new Date().getTime();
+		for (i = 0; i < count;i++) {
+			for (var j = 0; j < length;j++) {
+				editor.getLocationAtOffset(j);
+			}
+		}
+		log("time(getLocationAtOffset)=" + (new Date().getTime() - start));
+		
+		styler = new eclipse.TextStyler(editor, "js");
+		start = new Date().getTime();
+		for (i = 0; i < count;i++) {
+			for (j = 0; j < length;j++) {
+				editor.getLocationAtOffset(j);
+			}
+		}
+		log("time(getLocationAtOffset)[styled]=" + (new Date().getTime() - start));
+		
+	},
+	test_getOffsetAtLocation: function () {
+		if (!editor) checkEditor();
+		if (styler) {
+			styler.destroy();
+			styler = null;
+		}
+		var count = 2;
+		var buffer = "";
+		for (var i = 0; i < 6;i++) {
+			buffer += "var nada for nada function " + i + " ";
+		}
+		editor.setText(buffer);
+		editor.focus();
+		var length = buffer.length;
+		var location = editor.getLocationAtOffset(length);
+		var start = new Date().getTime();
+		for (i = 0; i < count;i++) {
+			for (var j = 0; j < location.x; j++) {
+				editor.getOffsetAtLocation(j, location.y);
+			}
+		}
+		log("time(getOffseAtLocation)=" + (new Date().getTime() - start));
+		
+		styler = new eclipse.TextStyler(editor, "js");
+		start = new Date().getTime();
+		for (i = 0; i < count;i++) {
+			for (var j = 0; j < location.x; j++) {
+				editor.getOffsetAtLocation(j, location.y);
+			}
+		}
+		log("time(getOffseAtLocation)[styled]=" + (new Date().getTime() - start));
+		
 	}
 };
