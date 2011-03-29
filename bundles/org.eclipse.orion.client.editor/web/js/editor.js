@@ -118,8 +118,8 @@ eclipse.Editor = (function() {
 			node.detachEvent("on" + type, handler);
 		}
 	}
-	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent);
-	var isFirefox = parseFloat(navigator.userAgent.split("Firefox/")[1] || navigator.userAgent.split("Minefield/")[1]) || 0;
+	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent) ? document.documentMode : undefined;
+	var isFirefox = parseFloat(navigator.userAgent.split("Firefox/")[1] || navigator.userAgent.split("Minefield/")[1]) || undefined;
 	var isOpera = navigator.userAgent.indexOf("Opera") !== -1;
 	var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
 	var isSafari = navigator.userAgent.indexOf("Safari") !== -1;
@@ -127,7 +127,7 @@ eclipse.Editor = (function() {
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 	var isW3CEvents = typeof window.document.documentElement.addEventListener === "function";
-	var isRangeRects = !isIE && typeof window.document.createRange().getBoundingClientRect === "function";
+	var isRangeRects = (!isIE || isIE >= 9) && typeof window.document.createRange().getBoundingClientRect === "function";
 
 	/** 
 	 * Constructs a new Selection object.
@@ -1561,12 +1561,12 @@ eclipse.Editor = (function() {
 		_handleBlur: function (e) {
 			if (!e) { e = window.event; }
 			this._hasFocus = false;
-			if (isIE) {
-				/*
-				* Bug in IE. For some reason when text is deselected the overflow
-				* selection at the end of some lines does not get redrawn.  The
-				* fix is to create a DOM element in the body to force a redraw.
-				*/
+			/*
+			* Bug in IE 8 and earlier. For some reason when text is deselected
+			* the overflow selection at the end of some lines does not get redrawn.
+			* The fix is to create a DOM element in the body to force a redraw.
+			*/
+			if (isIE < 9) {
 				if (!this._getSelection().isEmpty()) {
 					var document = this._frameDocument;
 					var child = document.createElement("DIV");
@@ -1620,6 +1620,12 @@ eclipse.Editor = (function() {
 		_handleFocus: function (e) {
 			if (!e) { e = window.event; }
 			this._hasFocus = true;
+			/*
+			* Feature in IE.  The selection is not restored when the
+			* editor gets focus and the caret is always placed at the
+			* beginning of the document.  The fix is to update the DOM
+			* selection during the focus event.
+			*/
 			if (isIE) {
 				this._updateDOMSelection();
 			}
@@ -1826,11 +1832,13 @@ eclipse.Editor = (function() {
 			} else {
 				this._endAutoScroll();
 				this._setSelectionTo(x, y, true);
-				// Feature in IE, IE does redraw the selection background right
-				// away after the selection changes because of mouse move events.
-				// The fix is to call getBoundingClientRect() on the
-				// body element to force the selection to be redraw. Some how
-				// calling this method forces a redraw.
+				/*
+				* Feature in IE. IE does redraw the selection background right
+				* away after the selection changes because of mouse move events.
+				* The fix is to call getBoundingClientRect() on the
+				* body element to force the selection to be redraw. Some how
+				* calling this method forces a redraw.
+				*/
 				if (isIE) {
 					var body = this._frameDocument.body;
 					body.getBoundingClientRect();
@@ -1951,7 +1959,7 @@ eclipse.Editor = (function() {
 		_handleResize: function (e) {
 			if (!e) { e = window.event; }
 			var document = this._frameDocument;
-			var element = isIE ? document.documentElement : document.body;
+			var element = isIE < 9 ? document.documentElement : document.body;
 			var newWidth = element.clientWidth;
 			var newHeight = element.clientHeight;
 			if (this._editorWidth !== newWidth || this._editorHeight !== newHeight) {
@@ -2511,7 +2519,7 @@ eclipse.Editor = (function() {
 			* line is fully selected. The fix is to add an extra space at the end of
 			* the line.
 			*/
-			var extendSelection = isFirefox || isOpera;
+			var extendSelection = isFirefox || isOpera || isIE >= 9;
 			if (lineText.length === 0) {
 				/*
 				* When the span is empty the height of the line div becomes zero.
@@ -2616,9 +2624,6 @@ eclipse.Editor = (function() {
 			this._autoScrollTimerID = undefined;
 		},
 		_getBoundsAtOffset: function (offset) {
-			return isIE ? this._getBoundsAtOffset_IE(offset) : this._getBoundsAtOffset_FF(offset);
-		},
-		_getBoundsAtOffset_FF: function (offset) {
 			var model = this._model;
 			var document = this._frameDocument;
 			var clientDiv = this._clientDiv;
@@ -2640,10 +2645,18 @@ eclipse.Editor = (function() {
 					}
 					if (lineOffset + nodeLength > offset) {
 						var index = offset - lineOffset;
+						var range;
 						if (isRangeRects) {
-							var range = document.createRange();
+							range = document.createRange();
 							range.setStart(textNode, index);
 							range.setEnd(textNode, index + 1);
+							result = range.getBoundingClientRect();
+						} else if (isIE) {
+							range = document.body.createTextRange();
+							range.moveToElementText(lineChild);
+							range.collapse();
+							range.moveEnd("character", index + 1);
+							range.moveStart("character", index);
 							result = range.getBoundingClientRect();
 						} else {
 							var text = textNode.data;
@@ -2668,6 +2681,12 @@ eclipse.Editor = (function() {
 								}
 							}
 						}
+						if (isIE) {
+							var logicalXDPI = window.screen.logicalXDPI;
+							var deviceXDPI = window.screen.deviceXDPI;
+							result.left = result.left * logicalXDPI / deviceXDPI;
+							result.right = result.right * logicalXDPI / deviceXDPI;
+						}
 						break;
 					}
 					lineOffset += nodeLength;
@@ -2681,56 +2700,14 @@ eclipse.Editor = (function() {
 			if (dummy) { clientDiv.removeChild(dummy); }
 			return result;
 		},
-		_getBoundsAtOffset_IE: function (offset) {
-			var document = this._frameDocument;
-			var clientDiv = this._clientDiv;
-			var model = this._model;
-			var lineIndex = model.getLineAtOffset(offset);
-			var dummy;
-			var child = this._getLineNode(lineIndex);
-			if (!child) {
-				child = dummy = this._createLine(clientDiv, null, document, lineIndex, model);
-			}
-			var result = {left: 0, right: 0};
-			if (offset === model.getLineEnd(lineIndex)) {
-				var rect = this._getLineBoundingClientRect(child);
-				result = {left: rect.right, right: rect.right};
-			} else {
-				var lineOffset = model.getLineStart(lineIndex);
-				var lineChild = child.firstChild;
-				while (lineChild) {
-					var textNode = lineChild.firstChild;
-					var nodeLength = textNode.length;
-					if (lineChild.ignoreChars) {
-						nodeLength -= lineChild.ignoreChars;
-					}
-					if (lineOffset + nodeLength > offset) {
-						var range = document.body.createTextRange();
-						range.moveToElementText(lineChild);
-						range.collapse();
-						range.moveEnd("character", offset - lineOffset + 1);
-						range.moveStart("character", offset - lineOffset);
-						result = range.getBoundingClientRect();
-						var logicalXDPI = window.screen.logicalXDPI;
-						var deviceXDPI = window.screen.deviceXDPI;
-						result.left = result.left * logicalXDPI / deviceXDPI;
-						result.right = result.right * logicalXDPI / deviceXDPI;
-						break;
-					}
-					lineOffset += nodeLength;
-					lineChild = lineChild.nextSibling;
-				}
-			}
-			if (dummy) { clientDiv.removeChild(dummy); }
-			return result;
-		},
 		_getBottomIndex: function (fullyVisible) {
 			var child = this._bottomChild;
 			if (fullyVisible && this._getClientHeight() > this._getLineHeight()) {
 				var rect = child.getBoundingClientRect();
 				var clientRect = this._clientDiv.getBoundingClientRect();
 				if (rect.bottom > clientRect.bottom) {
-					child = this._getLinePrevious(child) || child;				}
+					child = this._getLinePrevious(child) || child;
+				}
 			}
 			return child.lineIndex;
 		},
@@ -2851,11 +2828,8 @@ eclipse.Editor = (function() {
 			var rect = child.getBoundingClientRect();
 			var lastChild = child.lastChild;
 			//Remove any artificial trailing whitespace in the line
-			if (lastChild && lastChild.ignoreChars === 1) {
-				var textNode = lastChild.firstChild;
-				if (textNode.data === " ") {
-					lastChild = lastChild.previousSibling;
-				}
+			if (lastChild && lastChild.ignoreChars === lastChild.firstChild.length) {
+				lastChild = lastChild.previousSibling;
 			}
 			if (!lastChild) {
 				return {left: rect.left, top: rect.top, right: rect.left, bottom: rect.bottom};
@@ -2894,9 +2868,9 @@ eclipse.Editor = (function() {
 			return node;
 		},
 		_getOffset: function (offset, word, direction) {
-			return isIE ?  this._getOffset_IE(offset, word, direction) : this._getOffset_FF(offset, word, direction);
+			return isIE ? this._getOffset_IE(offset, word, direction) : this._getOffset_W3C(offset, word, direction);
 		},
-		_getOffset_FF: function (offset, word, direction) {
+		_getOffset_W3C: function (offset, word, direction) {
 			function _isPunctuation(c) {
 				return (33 <= c && c <= 47) || (58 <= c && c <= 64) || (91 <= c && c <= 94) || c === 96 || (123 <= c && c <= 126);
 			}
@@ -3044,9 +3018,6 @@ eclipse.Editor = (function() {
 			return child.lineIndex;
 		},
 		_getXToOffset: function (lineIndex, x) {
-			return isIE ? this._getXToOffset_IE(lineIndex, x) : this._getXToOffset_FF(lineIndex, x);
-		},
-		_getXToOffset_FF: function (lineIndex, x) {
 			var model = this._model;
 			var document = this._frameDocument;
 			var clientDiv = this._clientDiv;
@@ -3058,6 +3029,41 @@ eclipse.Editor = (function() {
 			var lineRect = this._getLineBoundingClientRect(child);
 			if (x < lineRect.left) { x = lineRect.left; }
 			if (x > lineRect.right) { x = lineRect.right; }
+			/*
+			* Bug in IE 8 and earlier. The coordinates of getClientRects() are relative to
+			* the browser window.  The fix is to convert to the frame window before using it. 
+			*/
+			var deltaX = 0, rects;
+			if (isIE < 9) {
+				rects = child.getClientRects();
+				var minLeft = rects[0].left;
+				for (var i=1; i<rects.length; i++) {
+					minLeft = Math.min(rects[i].left, minLeft);
+				}
+				deltaX = minLeft - lineRect.left;
+			}
+			var scrollX = this._getScroll().x;
+			function _getClientRects(element) {
+				var rects, newRects, i, r;
+				if (!element._rectsCache) {
+					rects = element.getClientRects();
+					newRects = [rects.length];
+					for (i = 0; i<rects.length; i++) {
+						r = rects[i];
+						newRects[i] = {left: r.left - deltaX + scrollX, top: r.top, right: r.right - deltaX + scrollX, bottom: r.bottom};
+					}
+					element._rectsCache = newRects; 
+				}
+				rects = element._rectsCache;
+				newRects = [rects.length];
+				for (i = 0; i<rects.length; i++) {
+					r = rects[i];
+					newRects[i] = {left: r.left - scrollX, top: r.top, right: r.right - scrollX, bottom: r.bottom};
+				}
+				return newRects;
+			}
+			var logicalXDPI = isIE ? window.screen.logicalXDPI : 1;
+			var deviceXDPI = isIE ? window.screen.deviceXDPI : 1;
 			var offset = model.getLineStart(lineIndex);
 			var lineChild = child.firstChild;
 			done:
@@ -3067,39 +3073,68 @@ eclipse.Editor = (function() {
 				if (lineChild.ignoreChars) {
 					nodeLength -= lineChild.ignoreChars;
 				}
-				var rects = lineChild.getClientRects();
-				for (var i = 0; i < rects.length; i++) {
-					var rect = rects[i];
+				rects = _getClientRects(lineChild);
+				for (var j = 0; j < rects.length; j++) {
+					var rect = rects[j];
 					if (rect.left <= x && x < rect.right) {
-						if (isRangeRects) {
-							var range = document.createRange();
-							var index = 0;
-							while (index < nodeLength) {
-								range.setStart(textNode, index);
-								if (index === nodeLength - 1) {
-									range.setEnd(textNode, textNode.length);
+						var range, start, end;
+						if (isIE || isRangeRects) {
+							range = isRangeRects ? document.createRange() : document.body.createTextRange();
+							var high = nodeLength;
+							var low = -1;
+							while ((high - low) > 1) {
+								var mid = Math.floor((high + low) / 2);
+								start = low + 1;
+								end = mid === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : mid + 1;
+								if (isRangeRects) {
+									range.setStart(textNode, start);
+									range.setEnd(textNode, end);
 								} else {
-									range.setEnd(textNode, index + 1);
+									range.moveToElementText(lineChild);
+									range.move("character", start);
+									range.moveEnd("character", end - start);
 								}
-								rect = range.getBoundingClientRect();
-								if (rect.left <= x && x < rect.right) {
-									//TODO test for character trailing (wrong for bidi)
-									if (x > rect.left + (rect.right - rect.left) / 2) {
-										index++;
+								rects = range.getClientRects();
+								var found = false;
+								for (var k = 0; k < rects.length; k++) {
+									rect = rects[k];
+									var rangeLeft = rect.left * logicalXDPI / deviceXDPI - deltaX;
+									var rangeRight = rect.right * logicalXDPI / deviceXDPI - deltaX;
+									if (rangeLeft <= x && x < rangeRight) {
+										found = true;
+										break;
 									}
-									break;
 								}
-								index++;						
+								if (found) {
+									high = mid;
+								} else {
+									low = mid;
+								}
 							}
-							offset += index;
+							offset += high;
+							start = high;
+							end = high === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : high + 1;
+							if (isRangeRects) {
+								range.setStart(textNode, start);
+								range.setEnd(textNode, end);
+							} else {
+								range.moveToElementText(lineChild);
+								range.move("character", start);
+								range.moveEnd("character", end - start);
+							}
+							rect = range.getClientRects()[0];
+							//TODO test for character trailing (wrong for bidi)
+							if (x > ((rect.left * logicalXDPI / deviceXDPI - deltaX) + ((rect.right - rect.left) * logicalXDPI / deviceXDPI / 2))) {
+								offset++;
+							}
 						} else {
 							var newText = [];
-							for (var j = 0; j < nodeLength; j++) {
+							for (var q = 0; q < nodeLength; q++) {
 								newText.push("<span>");
-								if (j === nodeLength - 1) {
-									newText.push(textNode.data.substring(j));
+								if (q === nodeLength - 1) {
+									newText.push(textNode.data.substring(q));
 								} else {
-									newText.push(textNode.data.substring(j, j + 1));
+									newText.push(textNode.data.substring(q, q + 1));
 								}
 								newText.push("</span>");
 							}
@@ -3140,114 +3175,6 @@ eclipse.Editor = (function() {
 			if (dummy) { clientDiv.removeChild(dummy); }
 			return offset;
 		},
-		_getXToOffset_IE: function (lineIndex, x) {
-			var model = this._model;
-			var document = this._frameDocument;
-			var clientDiv = this._clientDiv;
-			var dummy;
-			var child = this._getLineNode(lineIndex);
-			if (!child) {
-				child = dummy = this._createLine(clientDiv, null, document, lineIndex, model);
-			}
-			var lineRect = this._getLineBoundingClientRect(child);
-			if (x < lineRect.left) { x = lineRect.left; }
-			if (x > lineRect.right) { x = lineRect.right; }
-			/*
-			* Bug in IE. The coordinates of getClientRects() are relative to
-			* the browser window.  The fix is to convert to the frame window
-			* before using it. 
-			*/
-			var rects = child.getClientRects();
-			var minLeft = rects[0].left;
-			for (var i=1; i<rects.length; i++) {
-				minLeft = Math.min(rects[i].left, minLeft);
-			}
-			var deltaX = minLeft - lineRect.left;
-			var scrollX = this._getScroll().x;
-			function _getClientRects(element) {
-				var rects, newRects, i, r;
-				if (!element._rectsCache) {
-					rects = element.getClientRects();
-					newRects = [rects.length];
-					for (i = 0; i<rects.length; i++) {
-						r = rects[i];
-						newRects[i] = {left: r.left - deltaX + scrollX, top: r.top, right: r.right - deltaX + scrollX, bottom: r.bottom};
-					}
-					element._rectsCache = newRects; 
-				}
-				rects = element._rectsCache;
-				newRects = [rects.length];
-				for (i = 0; i<rects.length; i++) {
-					r = rects[i];
-					newRects[i] = {left: r.left - scrollX, top: r.top, right: r.right - scrollX, bottom: r.bottom};
-				}
-				return newRects;
-			}
-			var offset = model.getLineStart(lineIndex);
-			var lineChild = child.firstChild;
-			var logicalXDPI = window.screen.logicalXDPI;
-			var deviceXDPI = window.screen.deviceXDPI;
-			done:
-			while (lineChild) {
-				var textNode = lineChild.firstChild;
-				var nodeLength = textNode.length;
-				if (lineChild.ignoreChars) {
-					nodeLength -= lineChild.ignoreChars;
-				}
-				rects = _getClientRects(lineChild);
-				for (var j = 0; j < rects.length; j++) {
-					var rect = rects[j];
-					if (rect.left <= x && x < rect.right) {
-						var range = document.body.createTextRange();
-						var high = textNode.length;
-						var low = -1;
-						while ((high - low) > 1) {
-							var mid = Math.floor((high + low) / 2);
-							range.moveToElementText(lineChild);
-							range.move("character", low + 1);
-							range.moveEnd("character", mid - low);
-							rects = range.getClientRects();
-							var found = false;
-							for (var k = 0; k < rects.length; k++) {
-								rect = rects[k];
-								var rangeLeft = rect.left * logicalXDPI / deviceXDPI - deltaX;
-								var rangeRight = rect.right * logicalXDPI / deviceXDPI - deltaX;
-								if (rangeLeft <= x && x < rangeRight) {
-									found = true;
-									break;
-								}
-							}
-							if (found) {
-								high = mid;
-							} else {
-								low = mid;
-							}
-						}
-						if (lineChild.ignoreChars && high >= nodeLength) {
-							high = nodeLength - 1;
-						}
-						offset += high;
-						range.moveToElementText(lineChild);
-						range.move("character", high);
-						if (high === nodeLength - 1 && lineChild.ignoreChars) {
-							range.moveEnd("character", 1 + lineChild.ignoreChars);
-						} else {
-							range.moveEnd("character", 1);
-						}
-						rect = range.getClientRects()[0];
-						//TODO test for character trailing (wrong for bidi)
-						if (x > ((rect.left - deltaX) + ((rect.right - rect.left) / 2))) {
-							offset++;
-						}
-						break done;
-					}
-				}
-				offset += nodeLength;
-				lineChild = lineChild.nextSibling;
-			}
-			if (dummy) { clientDiv.removeChild(dummy); }
-			return offset;
-		},
 		_getYToLine: function (y) {
 			var editorPad = this._getEditorPadding();
 			var editorRect = this._editorDiv.getBoundingClientRect();
@@ -3278,7 +3205,7 @@ eclipse.Editor = (function() {
 			var editorDiv = this._editorDiv;
 			var topNode = this._overlayDiv || this._clientDiv;
 			var body = this._frameDocument.body; 
-			var resizeNode = isIE ? this._frame : this._frameWindow;
+			var resizeNode = isIE < 9 ? this._frame : this._frameWindow;
 			var focusNode = isIE ? this._clientDiv: this._frameWindow;
 			this._handlers = [
 				{target: editorDiv, type: "scroll", handler: function(e) { return self._handleScroll(e);}},
@@ -3380,7 +3307,9 @@ eclipse.Editor = (function() {
 			html.push("<!DOCTYPE html>");
 			html.push("<html>");
 			html.push("<head>");
-			html.push("<meta http-equiv='X-UA-Compatible' content='IE=EmulateIE7'/>");
+			if (isIE < 9) {
+				html.push("<meta http-equiv='X-UA-Compatible' content='IE=EmulateIE7'/>");
+			}
 			html.push("<style>");
 			html.push(".editorContainer {font-family: monospace; font-size: 10pt;}");
 			html.push(".editor {padding: 1px 2px;}");
@@ -3616,7 +3545,6 @@ eclipse.Editor = (function() {
 			var newY = editorDiv.scrollTop + pixelY;
 			if (pixelY) { editorDiv.scrollTop = newY; }
 			this._doScroll({x: newX, y: newY});
-//			this._handleScroll();
 //			if (isIE) {
 //				this._frameDocument.body.style.visibility = "visible";
 //				this.focus();
@@ -3714,7 +3642,7 @@ eclipse.Editor = (function() {
 			}
 			var range;
 			if (window.getSelection) {
-				//FF
+				//W3C
 				range = document.createRange();
 				range.setStart(startLineNode, startLineOffset);
 				range.setEnd(endLineNode, endLineOffset);
@@ -3724,7 +3652,7 @@ eclipse.Editor = (function() {
 				sel.addRange(range);
 				this._ignoreSelect = true;
 			} else if (document.selection) {
-				//IE
+				//IE < 9
 				var body = document.body;
 
 				/*
@@ -4059,11 +3987,12 @@ eclipse.Editor = (function() {
 			scrollDiv.style.height = scrollHeight + "px";
 			var clientWidth = this._getClientWidth();
 			var width = Math.max(this._maxLineWidth, clientWidth);
-			/* Except by IE, all other browsers are not allocating enough space for the right padding 
-			 * in the scrollbar. It is possible this a bug since all other paddings are considered.
-			 */
+			/*
+			* Except by IE 8 and earlier, all other browsers are not allocating enough space for the right padding 
+			* in the scrollbar. It is possible this a bug since all other paddings are considered.
+			*/
 			var scrollWidth = width;
-			if (!isIE) { width += editorPad.right; }
+			if (!isIE || isIE >= 9) { width += editorPad.right; }
 			scrollDiv.style.width = width + "px";
 
 			/*
