@@ -11,25 +11,30 @@
   handleDeleteAuthenticationError */
 /*jslint browser:true devel:true*/
 
-var sites = dojo.getObject("eclipse.sites", true);
+dojo.getObject("eclipse.sites", true);
 
-sites.SiteTreeModel = (function() {
+/**
+ * @name eclipse.sites
+ * @namespace Namespace for code related to creating, managing, and displaying site configurations.
+ */
+
+eclipse.sites.SiteTreeModel = (function() {
 	/**
 	 * @name eclipse.sites.SiteTreeModel
 	 * @class Tree model for powering a tree of site configurations.
+	 * @param {eclipse.sites.SiteService} siteService
 	 * @see eclipse.TableTree
-	 * @param siteService
 	 */
 	function SiteTreeModel(siteService, id) {
 		this._siteService = siteService;
 		this._root = {};
 		this._id = id;
 	}
-	SiteTreeModel.prototype = {
+	SiteTreeModel.prototype = /** @lends eclipse.sites.SiteTreeModel.prototype */{
 		getRoot: function(/**function*/ onItem) {
 			onItem(this._root);
 		},
-		getChildren: function(/**dojo.data.Item*/ parentItem, /**function(items)*/ onComplete) {
+		getChildren: function(/**dojo.data.Item*/ parentItem, /**Function(items)*/ onComplete) {
 			if (parentItem.children) {
 				// The parent already has the children fetched
 				onComplete(parentItem.children);
@@ -50,15 +55,17 @@ sites.SiteTreeModel = (function() {
 	return SiteTreeModel;
 }());
 
-sites.SiteRenderer = (function() {
+eclipse.sites.SiteRenderer = (function() {
 	/**
 	 * @name eclipse.sites.SiteRenderer
 	 * @class A renderer for the site configuration tree.
+	 * @see eclipse.TableTree
+	 * @param {eclipse.CommandService} commandService
 	 */
 	function SiteRenderer (commandService) {
 		this._commandService = commandService;
 	}
-	SiteRenderer.prototype = {
+	SiteRenderer.prototype = /** @lends eclipse.sites.SiteRenderer.prototype */{
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
 			
