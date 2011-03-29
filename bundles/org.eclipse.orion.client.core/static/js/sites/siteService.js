@@ -13,29 +13,79 @@
 dojo.getObject("eclipse.sites", true);
 
 /**
+ * @name eclipse.sites
+ * @namespace Namespace for code related to creating, managing, and displaying site configurations.
+ */
+
+/**
+ * Service id used for registering the site service with the service registry.
  * @name eclipse.sites.SITE_SERVICE_NAME
- * @property Constant used to identify the site service name.
+ * @constant
+ * @see eclipse.ServiceRegistry#registerService
  */
 eclipse.sites.SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 
-// requires: auth.js
-eclipse.sites.SiteService = (function() {
+/**
+ * @name eclipse.sites.SiteConfiguration
+ * @class Interface for an in-memory representation of a site configuration resource. Objects of
+ * this interface are used as parameters, and returned by, methods of the  {@link eclipse.sites.SiteService}
+ * API.
+ */
+	/**#@+
+		@fieldOf eclipse.sites.SiteConfiguration.prototype
+	*/
 	/**
-	 * Constructs a new SiteService.
-	 * 
-	 * @name eclipse.sites.SiteService
-	 * @class Defines and implements a service that provides access to the server API for managing site 
-	 * configurations.
-	 * @param serviceRegistry {eclipse.ServiceRegistry} The service registry to register ourself with.
+	 * The name of the site configuration.
+	 * @name Name
+	 * @type String
 	 */
+	/**
+	 * The workspace id that this site configuration is associated with.
+	 * @name Workspace
+	 * @type String
+	 */
+	/**
+	 * The mappings defined by this site configuration. Each element has the properties 
+	 * <code>Source</code> and <code>Target</code>, both of type {@link String}. 
+	 * @name Mappings
+	 * @type Array
+	 */
+	/**
+	 * Optional: A hint used to derive the domain name when the site is launched as a subdomain. 
+	 * @name HostHint
+	 * @type String
+	 */
+	/**
+	 * Gives information about the status of this site configuration. Has the following properties:<ul>
+	 * <li>{String} <code>Status</code> Status of this site. Value is either <code>"started"</code> or <code>"stopped"</code>.</li>
+	 * <li>{String} <code>URL</code> Optional, gives the URL where the running site can be accessed. Only present
+	 * if the <code>Status</code> is <code>"started"</code>.</li>
+	 * </ul>
+	 * @name HostingStatus
+	 * @type Object
+	 */
+	/**#@-*/
+
+/**
+ * Constructs a new SiteService.
+ * 
+ * @name eclipse.sites.SiteService
+ * @class Defines and implements a service that provides access to the server API for managing site 
+ * configurations.
+ * @requires auth.js
+ * @param {eclipse.ServiceRegistry} serviceRegistry The service registry to register ourself with.
+ */
+eclipse.sites.SiteService = (function() {
+	
 	function SiteService(serviceRegistry) {
 		this._serviceRegistration = serviceRegistry.registerService(eclipse.sites.SITE_SERVICE_NAME, this);
 	}
 	SiteService.prototype = /** @lends eclipse.sites.SiteService.prototype */ {
 		/**
-		 * Gets all site configurations defined by the logged-in user.
+		 * Retrieves all site configurations defined by the logged-in user.
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
-		 * argument {SiteConfiguration[]} on success.
+		 * argument {@link Array} on success, where each element of the array is a
+		 * {@link eclipse.sites.SiteConfiguration}.
 		 */
 		getSiteConfigurations: function() {
 			return this._doServiceCall("getSiteConfigurations", arguments);
@@ -45,7 +95,7 @@ eclipse.sites.SiteService = (function() {
 		 * Loads an individual site configuration from the given location.
 		 * @param {String} Location URL of a site configuration resource.
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
-		 * loaded {SiteConfiguration} on success.
+		 * loaded {@link eclipse.sites.SiteConfiguration} on success.
 		 */
 		loadSiteConfiguration: function(locationUrl) {
 			return this._doServiceCall("loadSiteConfiguration", arguments);
@@ -55,32 +105,22 @@ eclipse.sites.SiteService = (function() {
 		 * Creates a site configuration.
 		 * @param {String} name
 		 * @param {String} workspace
-		 * @param {Object} [mappings]
-		 * @param {String} [hostHint]
+		 * @param {Array} [mappings]
+		 * @param {String} [hostHint] 
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
-		 * created {SiteConfiguration} as argument on success.
+		 * created {@link eclipse.sites.SiteConfiguration} on success.
 		 */
 		createSiteConfiguration: function(name, workspace, mappings, hostHint) {
 			return this._doServiceCall("createSiteConfiguration", arguments);
 		},
 		
 		/**
-		 * Performs a start or stop action on a site configuration.
-		 * @param {String} locationUrl Location of a site configuration resource.
-		 * @param {String} action
-		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
-		 * changed {SiteConfiguration} on success.
-		 */
-		startStopSiteConfiguration: function(locationUrl, action) {
-			return this._doServiceCall("startStopSiteConfiguration", arguments);
-		},
-		
-		/**
 		 * Edits an existing site configuration.
-		 * @param {String} locationUrl Location of a site configuration resource.
-		 * @param updatedSiteConfig
+		 * @param {String} locationUrl Location of the site configuration resource to be updated.
+		 * @param {eclipse.sites.SiteConfiguration} updatedSiteConfig A representation of the updated site.
+		 * Properties that are not changing may be omitted.
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the updated
-		 * {SiteConfiguration} on success.
+		 * {@link eclipse.sites.SiteConfiguration} on success.
 		 */
 		updateSiteConfiguration: function(locationUrl, updatedSiteConfig) {
 			return this._doServiceCall("updateSiteConfiguration", arguments);
@@ -88,7 +128,7 @@ eclipse.sites.SiteService = (function() {
 		
 		/**
 		 * Deletes a site configuration.
-		 * @param {String} locationUrl Location of a site configuration resource.
+		 * @param {String} locationUrl Location of the site configuration resource to be deleted.
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with no argument on success.
 		 */
 		deleteSiteConfiguration: function(locationUrl) {
@@ -134,18 +174,6 @@ eclipse.sites.SiteService = (function() {
 					headers: {
 						"Content-Type": "application/json; charset=utf-8",
 						"Orion-Version": "1"
-					},
-					handleAs: "json",
-					timeout: 15000
-				});
-			},
-			startStopSiteConfiguration: function(locationUrl, action) {
-				return dojo.xhrPost({
-					url: locationUrl,
-					headers: {
-						"Content-Type": "application/json, charset=utf-8",
-						"Orion-Version": "1",
-						"X-Action": action
 					},
 					handleAs: "json",
 					timeout: 15000

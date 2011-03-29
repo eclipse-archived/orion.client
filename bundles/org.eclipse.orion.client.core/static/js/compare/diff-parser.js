@@ -8,9 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-var eclipse = eclipse || {};
+var orion = orion || {};
 
-eclipse.DiffParser = (function() {
+orion.DiffParser = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 	var NO_NEW_LINE = "\\ No newline at end of file";
 	/** @private */

@@ -6,9 +6,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-var eclipse = eclipse || {};
+var orion = orion || {};
 
-eclipse.CompareMergeModel = (function() {
+orion.CompareMergeModel = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 
 	/** @private */
@@ -21,7 +21,7 @@ eclipse.CompareMergeModel = (function() {
 	    this.init();
 	}
 
-	CompareMergeModel.prototype = /** @lends eclipse.TextModel.prototype */ {
+	CompareMergeModel.prototype =  {
 		//private functions
 		init: function(mapper){
 			if(mapper)
@@ -30,38 +30,86 @@ eclipse.CompareMergeModel = (function() {
 		
 		//To get the line type from a zero based line index  
 		getLineType: function(lineIndex){
-			var mapItem = this.lookUpMapper(lineIndex);
-			if(mapItem.mapper){
-				if(mapItem.mapper[2] !== 0)
-					return "changed";
+			var mapItem = orion.compareUtils.lookUpMapper(this._mapper , this._mapperColumnIndex , lineIndex);
+			if(mapItem.mapperIndex > -1){
+				if(this._mapper[mapItem.mapperIndex][2] !== 0){
+					var mapperLength = this._mapper[mapItem.mapperIndex][this._mapperColumnIndex];
+					if(mapperLength === 0)
+						return {type:"top-only" , mapperIndex:mapItem.mapperIndex};
+					if(mapperLength === 1)
+						return {type:"oneline" , mapperIndex:mapItem.mapperIndex};
+					if(lineIndex === mapItem.startFrom)
+						return {type:"top" , mapperIndex:mapItem.mapperIndex};
+					if(lineIndex === mapItem.startFrom + mapperLength -1)
+						return {type:"bottom" , mapperIndex:mapItem.mapperIndex};
+					return {type:"middle" , mapperIndex:mapItem.mapperIndex};
+				}
 			}
-			return "unchanged";
+			return {type:"unchanged" , mapperIndex:mapItem.mapperIndex};
 		},
 			
 		getAnnotations: function(){
-			return [];//this._lineFeeder.getAnnotations();
+			if(this._annotations === undefined){
+				this._annotations = [];
+				var curLineindex = 0;//zero based
+				for (var i = 0 ; i < this._mapper.length ; i++){
+					if((this._mapper[i][2] !== 0))
+						this._annotations.push([curLineindex , i]);
+					curLineindex += this._mapper[i][this._mapperColumnIndex];
+				}
+			}
+			return this._annotations;
 		},
 		
-		getAnnotationH: function(lineIndex){
-			return 1;//this._lineFeeder.getAnnotationH(lineIndex);
+		getAnnotationH: function(annotationIndex){
+			var mapperIndex = this._annotations[annotationIndex][1];
+			return 	(mapperIndex === -1) ? 0 :this._mapper[mapperIndex][this._mapperColumnIndex];
+			//return 	(annotationIndex === -1) ? 0 : Math.max(this._mapper[annotationIndex][0], this._mapper[annotationIndex][1]);
+		},
+		
+		getAnnotationLineCount: function(){
+			//return 	orion.compareUtils.getMapperLineCount(this._mapper);
+			return 	this.getLineCount();
+		},
+		
+		getAnnotationIndex: function(lineIndex){
+			if(this._annotations === undefined)
+				this.getAnnotations();
+			for (var i = 0 ; i < this._annotations.length ; i++){
+				if(this._annotations[i][0] === lineIndex){
+					return i;//this._annotations[i][1];
+				}
+			}
+			return -1;
+		},
+		
+		getAnnotationIndexByMapper: function(mapperIndex){
+			if(this._annotations === undefined)
+				this.getAnnotations();
+			for (var i = 0 ; i < this._annotations.length ; i++){
+				if(this._annotations[i][1] === mapperIndex){
+					return i;
+				}
+			}
+			return -1;
 		},
 		
 		getLineNumber: function(lineIndex , mapperColumnIndex){
 			return lineIndex;
 		},
 		
+		getLineIndexFromMapper: function(mapperIndex){
+			return orion.compareUtils.lookUpLineIndex(this._mapper , this._mapperColumnIndex , mapperIndex);
+		},
+		
 		lookUpMapper: function(lineIndex){
-			var curLineindex = 0;//zero based
-			for (var i = 0 ; i < this._mapper.length ; i++){
-				var size = this._mapper[i][this._mapperColumnIndex];
-				if(size === 0)
-					size = 1;
-				if(lineIndex >= curLineindex && lineIndex < (curLineindex + size)){
-					return {mapper:this._mapper[i] , startFrom:curLineindex};
-				}
-				curLineindex += this._mapper[i][this._mapperColumnIndex];
-			}
-			return  {mapper:null , startFrom:-1};
+			return orion.compareUtils.lookUpMapper(this._mapper , this._mapperColumnIndex , lineIndex);
+		},
+		
+		updateMapper: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount){
+			if(removedLineCount === addedLineCount)
+				return;
+			orion.compareUtils.updateMapper(this._mapper , this._mapperColumnIndex , this.getLineAtOffset(start) , removedLineCount, addedLineCount);
 		},
 		
 		addListener: function(listener) {
@@ -123,12 +171,15 @@ eclipse.CompareMergeModel = (function() {
 		},
 		
 		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+			/*
 			console.log("start : " + start);
 			console.log("removedCharCount : " + removedCharCount);
 			console.log("addedCharCount : " + addedCharCount);
 			console.log("removedLineCount : " + removedLineCount);
 			console.log("addedLineCount : " + addedLineCount);
 			console.log("line number : " + this.getLineAtOffset(start));
+			*/
+			this.updateMapper(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanged) { 

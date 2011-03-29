@@ -6,14 +6,14 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-var eclipse = eclipse || {};
+var orion = orion || {};
 
-eclipse.GapTextModel = (function() {
+orion.GapTextModel = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 
 	/** @private */
-	function GapTextModel(model/*text*/, isOriginal ,map/*, lineDelimiter*/) {
-	    this._model = model;//new eclipse.TextModel(text, lineDelimiter);
+	function GapTextModel(model, isOriginal ,map) {
+	    this._model = model;
 	    this._isOriginal = (isOriginal === undefined ? true : isOriginal);
 	    this._myIndex = this._isOriginal ? 1:0;
 	    this._reverseIndex = 1-this._myIndex;
@@ -23,7 +23,7 @@ eclipse.GapTextModel = (function() {
 	    this._init();
 	}
 
-	GapTextModel.prototype = /** @lends eclipse.TextModel.prototype */ {
+	GapTextModel.prototype = {
 		//private functions
 		_init: function(){
 			this._generateGapBlocks();

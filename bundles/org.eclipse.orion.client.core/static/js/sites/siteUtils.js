@@ -10,28 +10,29 @@
 /*global dojo eclipse:true */
 /*jslint devel:true*/
 
-// require utils.js
 dojo.getObject("eclipse.sites.util", true);
 
 /**
- * Utility methods
- * @namespace eclipse.sites.util holds stateless utility methods.
+ * @namespace Holds stateless utility methods for dealing with sites.
  */
 eclipse.sites.util = {
 	/**
-	 * @static
-	 * @param {SiteConfiguration} siteConfig
-	 * @return The href for a link to the editing page of the given siteConfiguration.
+	 * Returns a relative URL pointing to the editing page for the given site configuration. 
+	 * @param {eclipse.sites.SiteConfiguration} site
+	 * @return {String} The URL.
 	 */
-	generateEditSiteHref: function(siteConfig) {
-		return "edit-site.html#" + eclipse.util.makeRelative(siteConfig.Location);
+	generateEditSiteHref: function(site) {
+		return "edit-site.html#" + eclipse.util.makeRelative(site.Location);
 	},
 	
 	/**
 	 * Parses the state of the edit-site page from a hash value.
-	 * @static
-	 * @param {String} hash
-	 * @return {site: String, [action: String], [actionDetails:String]}
+	 * @param {String} hash The hash string.
+	 * @returns {Object} An object having the properties:<ul>
+	 * <li>{@link String} <code>site</code> The location URL of the site being edited.</li>
+	 * <li>{@link String} <code>action</code> Optional, currently unused</li>
+	 * <li>{@link String} <code>actionDetails</code> Optional, currently unused</li>
+	 * </ul>
 	 */
 	parseStateFromHash: function(hash) {
 		var obj = dojo.queryToObject(hash);
@@ -49,12 +50,11 @@ eclipse.sites.util = {
 	},
 	
 	/**
-	 * Turns the state of the edit-site page into a hash value.
-	 * @static
-	 * @param {String} siteLocation
-	 * @param {String} action
-	 * @param {String} actionDetails
-	 * @return {String} Hash string representing the new state.
+	 * Converts the state of the edit-site page into a hash string.
+	 * @param {String} siteLocation The location URL of the site configuration being edited.
+	 * @param [String] action Currently unused
+	 * @param [String] actionDetails Currently unused
+	 * @returns {String} Hash string representing the new state.
 	 */
 	stateToHash: function(siteLocation, action, actionDetails) {
 		var obj = {};
@@ -72,8 +72,14 @@ eclipse.sites.util = {
 	
 	/**
 	 * Creates & adds commands that act on an individual site configuration.
-	 * @static
-	 * @param errorCallback {Function} Called when a server request fails.
+	 * @param {eclipse.CommandService} commandService
+	 * @param {eclipse.sites.SiteService} siteService
+	 * @param {eclipse.StatusReportingService} statusService
+	 * @param {eclipse.DialogService} dialogService
+	 * @param {Function} startCallback
+	 * @param {Function} stopCallback
+	 * @param {Function} deleteCallback
+	 * @param {Function} errorCallback Called when a server request fails.
 	 */
 	createSiteConfigurationCommands: function(commandService, siteService, statusService, dialogService,
 			startCallback, stopCallback, deleteCallback, errorCallback) {
@@ -96,7 +102,10 @@ eclipse.sites.util = {
 			},
 			callback: function(item) {
 				statusService.setMessage("Starting...");
-				siteService.startStopSiteConfiguration(item.Location, "start").then(startCallback, errorCallback);
+				item.HostingStatus = {
+					Status: "started"
+				};
+				siteService.updateSiteConfiguration(item.Location, item).then(startCallback, errorCallback);
 			}});
 		commandService.addCommand(startCommand, "object");
 		
@@ -109,7 +118,10 @@ eclipse.sites.util = {
 			},
 			callback: function(item) {
 				statusService.setMessage("Stopping " + item.Name + "...");
-				siteService.startStopSiteConfiguration(item.Location, "stop").then(stopCallback, errorCallback);
+				item.HostingStatus = {
+						Status: "stopped"
+				};
+				siteService.updateSiteConfiguration(item.Location, item).then(stopCallback, errorCallback);
 			}});
 		commandService.addCommand(stopCommand, "object");
 		
@@ -132,9 +144,10 @@ eclipse.sites.util = {
 	},
 	
 	/**
-	 * @param projectLocation The Location URL of a file-resource
-	 * @returns {String} The path of the URL, relative to this server, with no /file/ prefix
-	 * FIXME: this is URL manipulation; it should be done by the server
+	 * @requires eclipse.util
+	 * @param projectLocation The absolute URL of a file resource.
+	 * @returns {String} The path of the URL, relative to this server, with no /file/ prefix.<br>
+	 * <b>FIXME:</b> this is URL manipulation; it should be done by the server
 	 */
 	makeRelativeFilePath: function(location) {
 		var path = eclipse.util.makeRelative(location);

@@ -17,10 +17,10 @@
     <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<style type="text/css">
 		@import "/org.dojotoolkit/dojo/resources/dojo.css";
-		@import "/org.dojotoolkit/dijit/themes/soria/soria.css";
-		@import "/org.dojotoolkit/dijit/themes/soria/layout/BorderContainer.css";
-		@import "/org.dojotoolkit/dijit/themes/soria/form/Common.css";
-		@import "/org.dojotoolkit/dijit/themes/soria/form/Button.css";
+		@import "/org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
+		@import "/org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
+		@import "/org.dojotoolkit/dijit/themes/nihilo/form/Common.css";
+		@import "/org.dojotoolkit/dijit/themes/nihilo/form/Button.css";
 	    @import "/ide.css";
 	    @import "/commands.css";
 	    @import "/js/compare/compare.css"; 
@@ -28,20 +28,25 @@
 	  	
 </head>
 
-<body style="height: 100%" class="soria">
+<body style="height: 100%" class="nihilo">
 	<script src="js/auth.js"></script>
 	<script src="/editor/js/editor.js"></script>
 	<script src="/editor/js/model.js"></script>
 	<script src="js/compare/diff-parser.js"></script>
 	<script src="js/compare/rulers.js"></script>
-	<script src="js/compare/compare-merge-model.js"></script>
+	<script src="js/compare/compare-m-model.js"></script>
 	<script src="js/compare/compare-container.js"></script>
-	<script src="js/compare/gap-line-feeder.js"></script>
+	<script src="js/compare/compareUtils.js"></script>
 	<script src="js/globalCommands.js"></script>
 	<script src="js/serviceregistry.js"></script>
  	<script src="js/commands.js"></script>
  	<script src="js/preferences.js"></script>
 	<script src="js/searchClient.js"></script>
+	<script src="/js/editorFeatures.js"></script>
+	<script src="/js/contentAssist.js"></script>
+	<script src="/js/editorContainer.js"></script>
+	<script src="/editor/samples/undoStack.js"></script>
+	<script src="/editor/samples/styler.js"></script>
 	
     <div id="eclipse.compare" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;" splitter="true">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
@@ -74,7 +79,8 @@
 			</div>
 			<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false" persist="false" gutters="false" region="center"  splitter="false">
 				<div class="paneScrolled" style="width:44px;height:100%;overflow: hidden;" dojoType="dijit.layout.ContentPane" region="leading"  splitter="false">				
-					<canvas id="diff-canvas" width=46 height=2000 "></canvas>
+					<canvas class = "compareCanvas" id="diff-canvas" width=46 height=2000 >
+					</canvas>
 				</div>
 				<div class="paneScrolled" id="right-viewer" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center"  style="width: 100%; height: 100%;" splitter="false">				
 				</div>
@@ -86,6 +92,6 @@
 	</div>
 	
 	<!-- Glue -->
-	<script src="js/compare/compare-merge-glue.js"></script>
+	<script src="js/compare/compare-m.js"></script>
 </body>
 </html>
