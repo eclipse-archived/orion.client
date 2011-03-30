@@ -59,15 +59,17 @@ var djConfig = {
 	
 	<script src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script type="text/javascript">
-dojo.require("dojo.date.locale");
-dojo.require("dijit.form.Button");
-dojo.require("dijit.form.Select");
-dojo.require("dijit.form.Textarea");
-dojo.require("dijit.form.TextBox");
-dojo.require("dijit.form.ValidationTextBox");
-dojo.require("dijit.layout.BorderContainer");
-dojo.require("dijit.layout.ContentPane");
-dojo.require("widgets.NewSiteDialog");
+		dojo.require("dojo.date.locale");
+		dojo.require("dijit.form.Button");
+		dojo.require("dijit.form.Select");
+		dojo.require("dijit.form.Textarea");
+		dojo.require("dijit.form.TextBox");
+		dojo.require("dijit.form.ValidationTextBox");
+		dojo.require("dijit.layout.BorderContainer");
+		dojo.require("dijit.layout.ContentPane");
+		dojo.require("widgets.NewSiteDialog");
+		<!-- The following required for header command - see bug 341350 -->
+		dojo.require("widgets.OpenResourceDialog");
 	</script>
 	
 	<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>

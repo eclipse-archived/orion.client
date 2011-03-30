@@ -14,6 +14,11 @@
         };
     </script>
     <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<script type="text/javascript">
+		<!-- The following required for header command - see bug 341350 -->
+		dojo.require("dijit.form.TextBox");
+		dojo.require("widgets.OpenResourceDialog");
+	</script>
 	<style type="text/css">
 		@import "/org.dojotoolkit/dojo/resources/dojo.css";
 		@import "/org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
