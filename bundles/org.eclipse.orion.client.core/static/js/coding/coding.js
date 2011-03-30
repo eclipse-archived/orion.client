@@ -206,6 +206,14 @@ dojo.addOnLoad(function(){
 			}
 		},
 		
+		getTitle: function() {
+			return this._lastTitle;
+		},
+		
+		getFileMetadata: function() {
+			return this._fileMetadata;
+		},
+		
 		setDirty: function(dirty) {
 			if (dirty) {
 				if (this._lastTitle && this._lastTitle.charAt(0) !== '*') {
@@ -252,7 +260,7 @@ dojo.addOnLoad(function(){
 				};
 				// TEMPORARY until we can better scope the search
 				var extensionFilter = "";
-				var fileName = editor.getTitle();
+				var fileName = inputManager.getTitle();
 				
 				dojo.place(document.createTextNode("Searching for occurrences of "), searchFloat, "last");
 				var b = dojo.create("b", null, searchFloat, "last");
@@ -271,7 +279,7 @@ dojo.addOnLoad(function(){
 				dojo.place(document.createTextNode("..."), searchFloat, "last");
 				
 				searchFloat.style.display = "block";
-				var query = editor.getFileMetadata().SearchLocation + searchPattern + extensionFilter;
+				var query = inputManager.getFileMetadata().SearchLocation + searchPattern + extensionFilter;
 				searcher.search(searchFloat, query, inputManager.getInput());
 			}, 0);
 		});
