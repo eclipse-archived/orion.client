@@ -8,7 +8,8 @@
  ******************************************************************************/
 dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
-	serviceRegistry = new eclipse.ServiceRegistry();
+	var serviceRegistry = new eclipse.ServiceRegistry();
+	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
@@ -45,31 +46,33 @@ dojo.addOnLoad(function(){
 		);
 	}
 	
+	// File operations
+	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 		
-		var nextDiffCommand = new eclipse.Command({
-			name : "Next diff",
-			image : "/images/compare/next-diff.gif",
-			id: "orion.compare.nextDiff",
-			groupId: "orion.compareGroup",
-			callback : function() {
-				compareMergeContainer.nextDiff();
-			}});
-		var copyToLeftCommand = new eclipse.Command({
-			name : "Copy from right to left",
-			image : "/images/compare/copy-to-left.gif",
-			id: "orion.compare.copyToLeft",
-			groupId: "orion.compareGroup",
-			callback : function() {
-				compareMergeContainer.copyToLeft();;
-			}});
-		commandService.addCommand(nextDiffCommand, "dom");
-		commandService.addCommand(copyToLeftCommand, "dom");
+	var nextDiffCommand = new eclipse.Command({
+		name : "Next diff",
+		image : "/images/compare/next-diff.gif",
+		id: "orion.compare.nextDiff",
+		groupId: "orion.compareGroup",
+		callback : function() {
+			compareMergeContainer.nextDiff();
+	}});
+	var copyToLeftCommand = new eclipse.Command({
+		name : "Copy from right to left",
+		image : "/images/compare/copy-to-left.gif",
+		id: "orion.compare.copyToLeft",
+		groupId: "orion.compareGroup",
+		callback : function() {
+			compareMergeContainer.copyToLeft();;
+		}});
+	commandService.addCommand(nextDiffCommand, "dom");
+	commandService.addCommand(copyToLeftCommand, "dom");
 		
-		// Register command contributions
-		commandService.registerCommandContribution("orion.compare.nextDiff", 2, "pageActions");
-		commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
+	// Register command contributions
+	commandService.registerCommandContribution("orion.compare.nextDiff", 2, "pageActions");
+	commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
 		
-		eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {});
+	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {});
 	
 });
 

@@ -202,6 +202,7 @@ orion.SBSCompareContainer = (function() {
 orion.CompareMergeContainer = (function() {
 	/** @private */
 	function CompareMergeContainer(leftEditorDivId , rightEditorDivId , canvas) {
+		//this._editorcontainerLeft = leftEditorContainer;
 		this._editorLeft = null;
 		this._editorRight = null;
 		this._leftEditorDivId = leftEditorDivId;
