@@ -118,7 +118,8 @@ eclipse.AnnotationRuler = (function() {
 		if (this._overviewRuler) {
 			this._editor.redrawLines(lineIndex, lineIndex + 1, this._overviewRuler);
 		}
-	};	AnnotationRuler.prototype._onModelChanged = function(e) {
+	};
+	AnnotationRuler.prototype._onModelChanged = function(e) {
 		var start = e.start;
 		var removedLineCount = e.removedLineCount;
 		var addedLineCount = e.addedLineCount;
@@ -134,7 +135,8 @@ eclipse.AnnotationRuler = (function() {
 					var newIndex = i;
 					if (i > startLine) {
 						newIndex += linesChanged;
-						changed = true;					}
+						changed = true;
+					}
 					newLines[newIndex] = lines[i];
 				} else {
 					changed = true;
