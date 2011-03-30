@@ -56,6 +56,23 @@ dojo.addOnLoad(function(){
 	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, fileClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 	
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+	
+	// set up the splitter bar and its key binding
+	var topContainer = dijit.byId("eclipse.navigate-table");
+			
+	// Ctrl+o handler for toggling outline 
+	window.document.onkeydown = function (evt){
+		evt = evt || window.event;
+		if(evt.ctrlKey && evt.keyCode  === 79){
+			topContainer.toggle();
+			if(window.document.all){ 
+				evt.keyCode = 0;
+			}else{ 
+				evt.preventDefault();
+				evt.stopPropagation();
+			}					
+		} 
+	};
 
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);

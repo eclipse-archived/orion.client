@@ -74,68 +74,7 @@ dojo.addOnLoad(function(){
 	var contentAssistFactory = function(editor) {
 		return new eclipse.ContentAssist(editor, "contentassist");
 	};
-	
-	var splitterMgr = {
-		leftPaneWidth: "",
-		toggleLeftPane: function(editor){
-			var rightPane =  editor.getEditorWidget()._editorDiv;
-			var rightPaneEditor =  editor.getEditorWidget();
-			var targetW = "";
-			var originalW = leftPane.style.width;
-			var originalWint = parseInt(originalW.replace("px", ""), 10);
-			var isLeftOpen = topContainerWidget.isLeftPaneOpen();
-			if(isLeftOpen){
-				this.leftPaneWidth = originalW;
-				targetW = "0px";
-			} else {
-				this.calcLeftPaneW(rightPane);
-				targetW = this.leftPaneWidth;
-			}
-			var targetWint = parseInt(targetW.replace("px", ""), 10);
-			
-			if(!isLeftOpen) {
-				topContainerWidget.toggleLeftPaneState();
-			}
-			
-			var a = new dojo.Animation({
-				node: leftPane,
-				duration: 300,
-				curve: [1, 100],
-				onAnimate: dojo.hitch(this, function(x){
-					var deltaW = (targetWint - originalWint)*x/100;
-					var curWidth = originalWint + deltaW;
-					leftPane.style.width = curWidth + "px";
-					leftPane.style.overflow = "hidden";
-					rightPane.style.overflow = "hidden";
-					topContainerWidget.layout();
-					//this._topContainer.resize();
-				}),
-				onEnd: dojo.hitch(this, function(){
-					rightPane.style.overflow = "auto";
-					rightPaneEditor.redrawLines();
-					if(isLeftOpen){
-						topContainerWidget.toggleLeftPaneState();
-					} else {
-						leftPane.style.overflow = "auto";
-						topContainerWidget.setSizeCookie(null);
-					}
-				})
-			});
-			a.play();
-		}, 
-		calcLeftPaneW: function(rightPane){
-			var leftPaneW = topContainerWidget.getSizeCookie();
-			if(leftPaneW < 50){
-				var originalW = rightPane.style.width;
-				var originalWint = parseInt(originalW.replace("px", ""), 10);
-				this.leftPaneWidth = originalWint*0.25 + "px";
-			} else {
-				this.leftPaneWidth =leftPaneW + "px";
-			}
-			return this.leftPaneWidth;
-		}
-	};
-	
+
 	var inputManager = {
 		lastFilePath: "",
 		
@@ -288,13 +227,7 @@ dojo.addOnLoad(function(){
 		// splitter binding
 		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("o", true), "toggle");
 		editor.getEditorWidget().setAction("toggle", function(){
-				splitterMgr.toggleLeftPane(editor);
-		});
-		
-		// Tell the top border container what to use for the splitter toggle function.
-		// We do this here because we have the editor handy
-		topContainerWidget.setToggleLeftPane(function() {
-			splitterMgr.toggleLeftPane(editor);
+				topContainerWidget.toggle();
 		});
 	};
 	
@@ -351,12 +284,17 @@ dojo.addOnLoad(function(){
 			 return "There are unsaved changes.";
 		}
 	};
+	
+	// Set up the border container
+	topContainerWidget.setToggleCallback(function() {
+		editorContainer.getEditorWidget().redrawLines();
+	});
 			
 	// Ctrl+o handler for toggling outline 
 	document.onkeydown = function (evt){
 		evt = evt || window.event;
 		if(evt.ctrlKey && evt.keyCode  === 79){
-			editorContainer.toggleLeftPane();
+			topContainerWidget.toggle();
 			if(document.all){ 
 				evt.keyCode = 0;
 			}else{ 
