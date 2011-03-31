@@ -369,14 +369,14 @@ orion.GitStatusController = (function() {
 			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS + itemModel.name;
 			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
 			this._inlineCompareContainer.resolveDiff(result.diffURI,
-													result.fileURI,
 					                                function(){					
 														dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
 														self.cursorClear();
 													},
 													function(response, ioArgs){
 														self.handleServerErrors(response , ioArgs);
-													}
+													},
+													result.fileURI
 			);
 		},
 		

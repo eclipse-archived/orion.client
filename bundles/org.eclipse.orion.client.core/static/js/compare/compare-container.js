@@ -13,8 +13,7 @@ var orion = orion || {};
 orion.CompareContainer = (function() {
 	function CompareContainer () {
 		this._diffParser = new orion.DiffParser();
-		this.fileContent = null;
-		this.diffURI = null;
+		this._diff = null;
 	}
 	CompareContainer.prototype = {
 		_getLineDelim: function(input , diff){	
@@ -22,12 +21,11 @@ orion.CompareContainer = (function() {
 			return delim;
 		},
 		
-		getFileDiffGit: function(diffURI , callBack , errorCallBack){
+		getFileDiffGit: function(diffURI , callBack , errorCallBack , fileURI){
 			var self = this;
 			if(diffURI === null || diffURI === undefined){
-				self.setEditor("" ,self.fileContent);
-				if(callBack)
-					callBack();
+				self._diff = "";
+				self.getFileContent(fileURI , callBack , errorCallBack);
 				return;
 			}
 			dojo.xhrGet({
@@ -38,10 +36,8 @@ orion.CompareContainer = (function() {
 				handleAs: "text",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					fileDiff = jsonData;
-					self.setEditor(self.fileContent , fileDiff );
-					if(callBack)
-						callBack();
+					self._diff = jsonData;
+					self.getFileContent(fileURI , callBack , errorCallBack);
 				},
 				error: function(response, ioArgs) {
 					if(errorCallBack)
@@ -52,7 +48,7 @@ orion.CompareContainer = (function() {
 			});
 		},
 		
-		getFileContent: function(diffURI ,fileURI , callBack, errorCallBack){
+		getFileContent: function(fileURI , callBack, errorCallBack ){
 			var self = this;
 			dojo.xhrGet({
 				url: fileURI, 
@@ -62,8 +58,9 @@ orion.CompareContainer = (function() {
 				handleAs: "text",
 				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					self.fileContent = jsonData;
-					self.getFileDiffGit(diffURI , callBack , errorCallBack);
+					self.setEditor(jsonData , self._diff );
+					if(callBack)
+						callBack();
 				},
 				error: function(response, ioArgs) {
 					if(errorCallBack)
@@ -84,8 +81,9 @@ orion.CompareContainer = (function() {
 			return {delim:delim , mapper:result.mapper , output:result.outPutFile ,diffArray:diffArray};
 		},
 		
-		resolveDiff: function(diffURI ,fileURI , callBack , errorCallBack){
-			this.getFileContent(diffURI ,fileURI , callBack , errorCallBack);
+		resolveDiff: function(diffURI , callBack , errorCallBack  ,fileURI){
+			this.getFileDiffGit(diffURI , callBack , errorCallBack  ,fileURI);
+			//this.getFileContent(diffURI ,fileURI , callBack , errorCallBack);
 		},
 				
 		_initDiffPosition: function(editor){

@@ -29,7 +29,6 @@ dojo.addOnLoad(function(){
 		}
 		
 		sBSCompareContainer.resolveDiff(diffURI, 
-											  fileURI,
 				  function(){
 					  dojo.place(document.createTextNode("File: " + fileURI), "left-viewer-title", "only");				  
 					  dojo.place(document.createTextNode("File On Git: " + fileURI), "right-viewer-title", "only");				  
@@ -40,7 +39,8 @@ dojo.addOnLoad(function(){
 					  dojo.place(document.createTextNode(message), "right-viewer-title", "only");				  
 					  dojo.style("left-viewer-title", "color", "red");
 					  dojo.style("right-viewer-title", "color", "red");
-				  }
+				  },
+				  fileURI
 		);
 	}
 	
