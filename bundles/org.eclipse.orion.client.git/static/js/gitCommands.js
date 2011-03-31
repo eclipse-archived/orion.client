@@ -90,11 +90,19 @@ eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandSe
 	commandService.addCommand(cloneGitRepositoryCommand, "dom");
 	
 	var compareGitCommits = new eclipse.Command({
-		name : "Compare",
+		name : "Compare With Each Other",
 		image : "images/git/compare-sbs.gif",
 		id : "eclipse.compareGitCommits",
-		callback : function(item) {
-			console.info("Commits compare not implemented yet");
+		hrefCallback : function(item) {
+			var clientDeferred = new dojo.Deferred();
+			serviceRegistry.getService("IGitService").then(
+					function(service) {
+						service.getDiff(item[0].DiffLocation, item[1].Name,
+							function(jsonData, secondArg) {
+								clientDeferred.callback("/compare-m.html#" + secondArg.xhr.getResponseHeader("Location"));
+							});
+					});
+			return clientDeferred;
 		},
 		visibleWhen : function(item) {
 			if (dojo.isArray(item) && item.length == 2) {
@@ -105,6 +113,20 @@ eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandSe
 	});
 
 	commandService.addCommand(compareGitCommits, "dom");
+	
+	var compareWithWorkingTree = new eclipse.Command({
+		name : "Compare With Working Tree",
+		image : "images/git/compare-sbs.gif",
+		id : "eclipse.compareWithWorkingTree",
+		hrefCallback : function(item) {
+			return "/compare-m.html#" + item.DiffLocation;
+		},
+		visibleWhen : function(item) {
+			return true;
+		}
+	});
+
+	commandService.addCommand(compareWithWorkingTree, "object");
 	
 	var openGitCommit = new eclipse.Command({
 		name : "Open",
