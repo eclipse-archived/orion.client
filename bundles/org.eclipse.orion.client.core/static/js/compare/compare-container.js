@@ -21,23 +21,43 @@ orion.CompareContainer = (function() {
 			return delim;
 		},
 		
-		getFileDiffGit: function(diffURI , callBack , errorCallBack , fileURI){
+		getFileDiffGit: function(diffURI , callBack , errorCallBack){
 			var self = this;
-			if(diffURI === null || diffURI === undefined){
-				self._diff = "";
-				self.getFileContent(fileURI , callBack , errorCallBack);
-				return;
-			}
 			dojo.xhrGet({
 				url: diffURI , 
 				headers: {
 					"Orion-Version": "1"
 				},
+				content: { "parts": "diff" },
 				handleAs: "text",
 				timeout: 15000,
+				load: function(textData, ioArgs) {
+					self._diff = textData;
+					self.getFileURI(diffURI , callBack , errorCallBack);
+				},
+				error: function(response, ioArgs) {
+					if(errorCallBack)
+						errorCallBack(response,ioArgs);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		getFileURI: function(diffURI , callBack , errorCallBack ){
+			var self = this;
+			dojo.xhrGet({
+				url: diffURI , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				content: { "parts": "uris" },
+				handleAs: "json",
+				timeout: 15000,
 				load: function(jsonData, ioArgs) {
-					self._diff = jsonData;
-					self.getFileContent(fileURI , callBack , errorCallBack);
+					self.getFileContent(jsonData.Git.Old , callBack , errorCallBack);
+					if(callBack)
+						callBack(jsonData.Git.New , jsonData.Git.Old);
 				},
 				error: function(response, ioArgs) {
 					if(errorCallBack)
@@ -57,10 +77,8 @@ orion.CompareContainer = (function() {
 				},
 				handleAs: "text",
 				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					self.setEditor(jsonData , self._diff );
-					if(callBack)
-						callBack();
+				load: function(textData, ioArgs) {
+					self.setEditor(textData , self._diff );
 				},
 				error: function(response, ioArgs) {
 					if(errorCallBack)
@@ -81,9 +99,17 @@ orion.CompareContainer = (function() {
 			return {delim:delim , mapper:result.mapper , output:result.outPutFile ,diffArray:diffArray};
 		},
 		
-		resolveDiff: function(diffURI , callBack , errorCallBack  ,fileURI){
-			this.getFileDiffGit(diffURI , callBack , errorCallBack  ,fileURI);
-			//this.getFileContent(diffURI ,fileURI , callBack , errorCallBack);
+		resolveDiff: function(hash , callBack , errorCallBack){
+			var diffURI = hash;
+			this._readOnly = false;
+			var params = hash.split("?");
+			if(params.length === 2){
+				diffURI = params[0];
+				var subParams = params[1].split("=");
+				if(subParams.length === 2 && subParams[0] === "readonly" && subParams[1] === "true" )
+					this._readOnly = true;
+			} 
+			this.getFileDiffGit(diffURI , callBack , errorCallBack);
 		},
 				
 		_initDiffPosition: function(editor){
@@ -239,91 +265,106 @@ orion.CompareMergeContainer = (function() {
 	
 	CompareMergeContainer.prototype.createLeftEditor = function(diffResult){
 		var editorContainerDomNode = dojo.byId(this._leftEditorDivId);
+		var self = this;
 		
 		var modelLeft = new eclipse.TextModel(diffResult.output, diffResult.delim);
 		var compareModelLeft = new orion.CompareMergeModel(modelLeft, {mapper:diffResult.mapper , columnIndex:0} );
-		var editorFactory = function() {
-			return new eclipse.Editor({
+		if(self._readOnly){
+			this._editorLeft = new eclipse.Editor({
 				parent: editorContainerDomNode,
 				model: compareModelLeft,
-				readonly: false,
+				readonly: true,
 				stylesheet: "/js/compare/editor.css" ,
 				tabSize: 4
 			});
-		};
-	
+		} else {
+			var editorFactory = function() {
+				return new eclipse.Editor({
+					parent: editorContainerDomNode,
+					model: compareModelLeft,
+					readonly: self._readOnly,
+					stylesheet: "/js/compare/editor.css" ,
+					tabSize: 4
+				});
+			};
 		
-		var contentAssistFactory = function(editor) {
-			return new eclipse.ContentAssist(editor, "contentassist");
-		};
-		
-		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 			
-			// Create keybindings for generic editing
-			var genericBindings = new orion.TextActions(editor, undoStack);
-			keyModeStack.push(genericBindings);
+			var contentAssistFactory = function(editor) {
+				return new eclipse.ContentAssist(editor, "contentassist");
+			};
 			
-			// create keybindings for source editing
-			var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
-			keyModeStack.push(codeBindings);
-			
-			// save binding
-			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
-			editor.getEditorWidget().setAction("save", function(){
-					editor.onInputChange(null, null, null, true);
-					var text = editor.getEditorWidget().getText();
-					var problems = [];
-					for (var i=0; i<text.length; i++) {
-						if (text.charAt(i) === 'z') {
-							var line = editor.getEditorWidget().getModel().getLineAtOffset(i) + 1;
-							var character = i - editor.getEditorWidget().getModel().getLineStart(line);
-							problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
+			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
+				
+				// Create keybindings for generic editing
+				var genericBindings = new orion.TextActions(editor, undoStack);
+				keyModeStack.push(genericBindings);
+				
+				// create keybindings for source editing
+				var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
+				keyModeStack.push(codeBindings);
+				
+				// save binding
+				editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
+				editor.getEditorWidget().setAction("save", function(){
+						editor.onInputChange(null, null, null, true);
+						var text = editor.getEditorWidget().getText();
+						var problems = [];
+						for (var i=0; i<text.length; i++) {
+							if (text.charAt(i) === 'z') {
+								var line = editor.getEditorWidget().getModel().getLineAtOffset(i) + 1;
+								var character = i - editor.getEditorWidget().getModel().getLineStart(line);
+								problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
+							}
 						}
-					}
-					annotationFactory.showProblems(problems);
-					return true;
-			});
-		};
-		
-		var dirtyIndicator = "";
-		var status = "";
-		
-		var statusReporter = function(message, isError) {
-			if (isError) {
-				status =  "ERROR: " + message;
-			} else {
-				status = message;
-			}
-			dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
-		};
-		
-		var editorContainer = new orion.EditorContainer({
-			editorFactory: editorFactory,
-			undoStackFactory: new orion.UndoFactory(),
-			//annotationFactory: annotationFactory,
-			//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
-			contentAssistFactory: contentAssistFactory,
-			keyBindingFactory: keyBindingFactory, 
-			statusReporter: statusReporter,
-			domNode: editorContainerDomNode
-		});
+						annotationFactory.showProblems(problems);
+						return true;
+				});
+			};
 			
-		dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
-			if (dirty) {
-				dirtyIndicator = "You have unsaved changes.  ";
-			} else {
-				dirtyIndicator = "";
-			}
-			dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
-		});
-		
-		editorContainer.installEditor();
-		
-		this._editorLeft = editorContainer.getEditorWidget();
+			var dirtyIndicator = "";
+			var status = "";
+			
+			var statusReporter = function(message, isError) {
+				if (isError) {
+					status =  "ERROR: " + message;
+				} else {
+					status = message;
+				}
+				dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
+			};
+			
+			var editorContainer = new orion.EditorContainer({
+				editorFactory: editorFactory,
+				undoStackFactory: new orion.UndoFactory(),
+				//annotationFactory: annotationFactory,
+				//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
+				contentAssistFactory: contentAssistFactory,
+				keyBindingFactory: keyBindingFactory, 
+				statusReporter: statusReporter,
+				domNode: editorContainerDomNode
+			});
+				
+			dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
+				if (dirty) {
+					dirtyIndicator = "You have unsaved changes.  ";
+				} else {
+					dirtyIndicator = "";
+				}
+				dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
+			});
+			
+			editorContainer.installEditor();
+			editorContainer.onInputChange("Content.js");
+			
+			this._editorLeft = editorContainer.getEditorWidget();
+			window.onbeforeunload = function() {
+				if (editorContainer.isDirty()) {
+					 return "There are unsaved changes.";
+				}
+			};
+		}
 		this._editorLeft.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 		
-		editorContainer.onInputChange("Content.js");
-		var self = this;
 		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
 			self.setStyle(lineStyleEvent , self._editorLeft);
 		}); 
@@ -335,14 +376,7 @@ orion.CompareMergeContainer = (function() {
 				self._compareMatchRenderer.render();
 			}
 		}); 
-				
 		
-		
-		window.onbeforeunload = function() {
-			if (editorContainer.isDirty()) {
-				 return "There are unsaved changes.";
-			}
-		};
 	};
 
 	CompareMergeContainer.prototype.setEditor = function(input , diff){	

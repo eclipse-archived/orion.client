@@ -354,8 +354,8 @@ orion.GitStatusController = (function() {
 		},
 		
 		_resolveURI: function(itemModel){
-			var untracked = (itemModel.type === "Untracked");
-			var added = (itemModel.type === "Added");
+			var untracked = false;//(itemModel.type === "Untracked");
+			var added = false;//(itemModel.type === "Added");
 			var diffURI =  (untracked || added) ? null : itemModel.diffURI;
 			var fileURI =  (untracked || added) ? itemModel.location : (this._model.isStaged(itemModel.type) ? itemModel.commitURI: itemModel.indexURI);
 			return {diffURI:diffURI , fileURI:fileURI };
@@ -369,20 +369,19 @@ orion.GitStatusController = (function() {
 			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS + itemModel.name;
 			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
 			this._inlineCompareContainer.resolveDiff(result.diffURI,
-					                                function(){					
+					                                function(newFile , OldFile){					
 														dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
 														self.cursorClear();
 													},
 													function(response, ioArgs){
 														self.handleServerErrors(response , ioArgs);
-													},
-													result.fileURI
+													}
 			);
 		},
 		
 		openSBSViewer: function(itemModel){
 			var result = this._resolveURI(itemModel);
-			var url = "/compare-m.html#" + (result.diffURI ?  result.diffURI+"?" : "")  + result.fileURI;
+			var url = "/compare-m.html#" + result.diffURI;
 			window.open(url,"");
 		},
 		
