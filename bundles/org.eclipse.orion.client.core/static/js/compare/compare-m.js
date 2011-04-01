@@ -20,29 +20,19 @@ dojo.addOnLoad(function(){
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
 		var hash = splitted[1];
-		var params = hash.split("?");
-		var diffURI = null;
-		var fileURI = null;
-		if(params.length === 1){
-			fileURI = params[0];
-		} else {
-			fileURI = params[1];
-			diffURI = params[0];
-		}
-		
-		compareMergeContainer.resolveDiff(diffURI, 
-				  function(){
-					  dojo.place(document.createTextNode("File: " + fileURI), "left-viewer-title", "only");				  
-					  dojo.place(document.createTextNode("File On Git: " + fileURI), "right-viewer-title", "only");				  
-				  },
+	
+		compareMergeContainer.resolveDiff(hash, 
+				  function(newFile , oldFile){
+			  		dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  
+			  			dojo.place(document.createTextNode("File On Git: " + oldFile), "right-viewer-title", "only");				  
+		  		  },
 				  function(errorResponse , ioArgs){
 					  var message = typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; 
 					  dojo.place(document.createTextNode(message), "left-viewer-title", "only");				  
 					  dojo.place(document.createTextNode(message), "right-viewer-title", "only");				  
 					  dojo.style("left-viewer-title", "color", "red");
 					  dojo.style("right-viewer-title", "color", "red");
-				  },
-				  fileURI
+				  }
 		);
 	}
 	
