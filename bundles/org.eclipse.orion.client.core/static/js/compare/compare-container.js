@@ -21,72 +21,43 @@ orion.CompareContainer = (function() {
 			return delim;
 		},
 		
-		getFileDiffGit: function(diffURI , callBack , errorCallBack){
+		getFileDiffGit: function(diffURI , uiCallBack , errorCallBack){
 			var self = this;
-			dojo.xhrGet({
-				url: diffURI , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				content: { "parts": "diff" },
-				handleAs: "text",
-				timeout: 15000,
-				load: function(textData, ioArgs) {
-					self._diff = textData;
-					self.getFileURI(diffURI , callBack , errorCallBack);
-				},
-				error: function(response, ioArgs) {
-					if(errorCallBack)
-						errorCallBack(response,ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+				function(service) {
+					service.getDiffContent(diffURI, 
+										   function(jsonData, secondArg) {
+										   	  self._diff = jsonData;
+										      self.getFileURI(diffURI , uiCallBack , errorCallBack);
+										   },
+										   errorCallBack);
+				});
 		},
 		
-		getFileURI: function(diffURI , callBack , errorCallBack ){
+		getFileURI: function(diffURI , uiCallBack , errorCallBack ){
 			var self = this;
-			dojo.xhrGet({
-				url: diffURI , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				content: { "parts": "uris" },
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					self.getFileContent(jsonData.Git.Old , callBack , errorCallBack);
-					if(callBack)
-						callBack(jsonData.Git.New , jsonData.Git.Old);
-				},
-				error: function(response, ioArgs) {
-					if(errorCallBack)
-						errorCallBack(response,ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+				function(service) {
+					service.getDiffFileURI(diffURI, 
+										   function(jsonData, secondArg) {
+											  self.getFileContent(jsonData.Git.Old , errorCallBack);
+											  if(uiCallBack)
+												  uiCallBack(jsonData.Git.New , jsonData.Git.Old);
+										   },
+										   errorCallBack);
+				});
 		},
 		
-		getFileContent: function(fileURI , callBack, errorCallBack ){
+		getFileContent: function(fileURI , errorCallBack ){
 			var self = this;
-			dojo.xhrGet({
-				url: fileURI, 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "text",
-				timeout: 15000,
-				load: function(textData, ioArgs) {
-					self.setEditor(textData , self._diff );
-				},
-				error: function(response, ioArgs) {
-					if(errorCallBack)
-						errorCallBack(response,ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+				function(service) {
+					service.getDiffFileContent(fileURI, 
+										   function(jsonData, secondArg) {
+											  self.setEditor(jsonData , self._diff );					  
+										   },
+										   errorCallBack);
+				});
 		},
 		
 		parseMapper: function(input , diff , doNotBuildNewFile){
@@ -132,9 +103,10 @@ orion.CompareContainer = (function() {
 
 orion.SBSCompareContainer = (function() {
 	/** @private */
-	function SBSCompareContainer(leftEditorDivId , rightEditorDivId) {
+	function SBSCompareContainer(resgistry ,leftEditorDivId , rightEditorDivId) {
 		this._editorLeft = null;
 		this._editorRight = null;
+		this._registry = resgistry;
 		this._leftEditorDivId = leftEditorDivId;
 		this._rightEditorDivId = rightEditorDivId;
 	}
@@ -225,10 +197,11 @@ orion.SBSCompareContainer = (function() {
 
 orion.CompareMergeContainer = (function() {
 	/** @private */
-	function CompareMergeContainer(leftEditorDivId , rightEditorDivId , canvas) {
+	function CompareMergeContainer(resgistry ,leftEditorDivId , rightEditorDivId , canvas) {
 		//this._editorcontainerLeft = leftEditorContainer;
 		this._editorLeft = null;
 		this._editorRight = null;
+		this._registry = resgistry;
 		this._leftEditorDivId = leftEditorDivId;
 		this._rightEditorDivId = rightEditorDivId;
 		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
@@ -432,8 +405,9 @@ orion.CompareMergeContainer = (function() {
 
 orion.InlineCompareContainer = (function() {
 	/** @private */
-	function InlineCompareContainer(editorDivId ) {
+	function InlineCompareContainer(resgistry , editorDivId ) {
 		this._editor = null;
+		this._registry = resgistry;
 		this._editorDivId = editorDivId;
 	}
 	InlineCompareContainer.prototype = new orion.CompareContainer();

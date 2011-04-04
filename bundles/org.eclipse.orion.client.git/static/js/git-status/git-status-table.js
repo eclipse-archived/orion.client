@@ -153,13 +153,12 @@ orion.GitStatusRenderer = (function() {
 }());
 
 orion.GitStatusController = (function() {
-	function GitStatusController(serviceRegistry , url , unstagedDivId , stagedDivId) {
-		this.registry = serviceRegistry;
-		this._url = url;
+	function GitStatusController(serviceRegistry , unstagedDivId , stagedDivId) {
+		this._registry = serviceRegistry;
 		this._model = new orion.GitStatusModel();
 		this._unstagedTableRenderer = new orion.GitStatusRenderer(unstagedDivId , this);
 		this._stagedTableRenderer = new orion.GitStatusRenderer(stagedDivId , this);
-		this._inlineCompareContainer = new orion.InlineCompareContainer("inline-compare-viewer");
+		this._inlineCompareContainer = new orion.InlineCompareContainer(serviceRegistry ,"inline-compare-viewer");
 	}
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
@@ -402,48 +401,36 @@ orion.GitStatusController = (function() {
 			this.cursorClear();
 		},
 		
-		
 		getGitStatus: function(url){
+			this._url = url;
 			this.cursorWait();
 			var self = this;
-			dojo.xhrGet({
-				url: url , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				timeout: 5000,
-				load: function(jsonData, ioArgs) {
-					//console.log(JSON.stringify(jsonData));
-					self.loadStatus(jsonData);
-				},
-				error: function(response, ioArgs) {
-					self.handleServerErrors(response, ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+				function(service) {
+					service.getGitStatus(url, 
+										 function(jsonData, secondArg) {
+										 	 self.loadStatus(jsonData);
+										 },
+										 function(response, ioArgs){
+											 self.handleServerErrors(response, ioArgs);
+										 }
+					);
+				});
 		},
 		
 		stage: function(location){
 			var self = this;
-			var url = "/git/index" + location;
-			dojo.xhrPut({
-				url: url , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				timeout: 5000,
-				load: function(jsonData, ioArgs) {
-					self.getGitStatus(self._url);
-				},
-				error: function(response, ioArgs) {
-					self.handleServerErrors(response, ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+					function(service) {
+						service.stage("/git/index" + location, 
+											 function(jsonData, secondArg) {
+											 	 self.getGitStatus(self._url);
+											 },
+											 function(response, ioArgs){
+												 self.handleServerErrors(response, ioArgs);
+											 }
+						);
+					});
 		},
 		
 		stageAll: function(){
@@ -459,25 +446,17 @@ orion.GitStatusController = (function() {
 		
 		unstage: function(location){
 			var self = this;
-			var url = "/git/index" +  location;
-			dojo.xhrPost({
-				url: url , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				timeout: 5000,
-				postData: dojo.toJson({"Reset":"MIXED"} ),
-				load: function(jsonData, ioArgs) {
-					//console.log(JSON.stringify(jsonData));
-					self.getGitStatus(self._url);;
-				},
-				error: function(response, ioArgs) {
-					self.handleServerErrors(response, ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+					function(service) {
+						service.unstage("/git/index" + location, 
+											 function(jsonData, secondArg) {
+											 	 self.getGitStatus(self._url);
+											 },
+											 function(response, ioArgs){
+												 self.handleServerErrors(response, ioArgs);
+											 }
+						);
+					});
 		},
 		
 		unstageAll: function(){
@@ -488,24 +467,17 @@ orion.GitStatusController = (function() {
 		
 		commitAll: function(location , message , body){
 			var self = this;
-			var url = "/git/commit/HEAD" +  location;
-			dojo.xhrPost({
-				url: url , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				timeout: 5000,
-				postData: body,
-				load: function(jsonData, ioArgs) {
-					self.getGitStatus(self._url);;
-				},
-				error: function(response, ioArgs) {
-					self.handleServerErrors(response, ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+					function(service) {
+						service.unstage("/git/commit/HEAD" + location, 
+											 function(jsonData, secondArg) {
+											 	 self.getGitStatus(self._url);
+											 },
+											 function(response, ioArgs){
+												 self.handleServerErrors(response, ioArgs);
+											 }
+						);
+					});
 		},
 		
 		commit: function(message , amend){

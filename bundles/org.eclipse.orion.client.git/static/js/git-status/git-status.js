@@ -12,17 +12,19 @@ dojo.addOnLoad(function(){
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	// Git operations
+	new eclipse.GitService(serviceRegistry);
 
-	var splitted = window.location.href.split('#');
-	var controller = null;
-	if(splitted.length > 1){
-		controller = new orion.GitStatusController(null , splitted[1] , "unstagedZone" , "stagedZone");
-		document.title =  controller.findFolderName();
-	}
+	var controller = new orion.GitStatusController(serviceRegistry , "unstagedZone" , "stagedZone");
+	var hash = dojo.hash();
+	controller.getGitStatus(dojo.hash());
+	document.title =  controller.findFolderName();
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
-	if(splitted.length > 1){
-		controller.getGitStatus(splitted[1]);
-	}
+	
+	//every time the user manually changes the hash, we need to load the git status
+	dojo.subscribe("/dojo/hashchange", controller, function() {
+		controller.getGitStatus(dojo.hash());
+	});
 	
 });

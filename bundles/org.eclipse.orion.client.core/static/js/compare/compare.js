@@ -12,9 +12,11 @@ dojo.addOnLoad(function(){
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	// Git operations
+	new eclipse.GitService(serviceRegistry);
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
-	var sBSCompareContainer = new orion.SBSCompareContainer("left-viewer" , "right-viewer");
+	var sBSCompareContainer = new orion.SBSCompareContainer(serviceRegistry ,"left-viewer" , "right-viewer");
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
 		var hash = splitted[1];

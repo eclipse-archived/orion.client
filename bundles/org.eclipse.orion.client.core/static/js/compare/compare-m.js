@@ -16,12 +16,29 @@ dojo.addOnLoad(function(){
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	var canvas = document.getElementById("diff-canvas");
-	var compareMergeContainer = new orion.CompareMergeContainer("left-viewer" , "right-viewer" , canvas);
-	var splitted = window.location.href.split('#');
-	if(splitted.length > 1){
-		var hash = splitted[1];
 	
-		compareMergeContainer.resolveDiff(hash, 
+	// Git operations
+	new eclipse.GitService(serviceRegistry);
+	
+	var splitted = window.location.href.split('#');
+	var hash = splitted[1];//dojo.hash();
+	var compareMergeContainer = new orion.CompareMergeContainer(serviceRegistry , "left-viewer" , "right-viewer" , canvas);
+	compareMergeContainer.resolveDiff(hash, 
+			  function(newFile , oldFile){
+		  		dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  
+		  			dojo.place(document.createTextNode("File On Git: " + oldFile), "right-viewer-title", "only");				  
+	  		  },
+			  function(errorResponse , ioArgs){
+				  var message = typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; 
+				  dojo.place(document.createTextNode(message), "left-viewer-title", "only");				  
+				  dojo.place(document.createTextNode(message), "right-viewer-title", "only");				  
+				  dojo.style("left-viewer-title", "color", "red");
+				  dojo.style("right-viewer-title", "color", "red");
+			  }
+	);
+	//every time the user manually changes the hash, we need to load the diff
+	dojo.subscribe("/dojo/hashchange", compareMergeContainer, function() {
+		compareMergeContainer.resolveDiff(dojo.hash(), 
 				  function(newFile , oldFile){
 			  		dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  
 			  			dojo.place(document.createTextNode("File On Git: " + oldFile), "right-viewer-title", "only");				  
@@ -32,9 +49,9 @@ dojo.addOnLoad(function(){
 					  dojo.place(document.createTextNode(message), "right-viewer-title", "only");				  
 					  dojo.style("left-viewer-title", "color", "red");
 					  dojo.style("right-viewer-title", "color", "red");
-				  }
-		);
-	}
+				  });
+	});
+	
 	
 	// File operations
 	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);

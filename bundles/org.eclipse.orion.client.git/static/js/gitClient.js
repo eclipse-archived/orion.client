@@ -70,20 +70,17 @@ eclipse.GitService = (function() {
 			});
 			
 		},
-		doGitDiff : function(gitDiffURI, onLoad) {
-			var service = this;
-			
-			// the place for Libing's diff method
-			console.info("doGitDiff called");
-			
+		
+		getDiffContent: function(diffURI , onLoad , onError){
 			dojo.xhrGet({
-				url : gitDiffURI,
-				headers : {
-					"Orion-Version" : "1"
+				url: diffURI , 
+				headers: {
+					"Orion-Version": "1"
 				},
-				handleAs : "text",
-				timeout : 5000,
-				load : function(jsonData, secondArg) {
+				content: { "parts": "diff" },
+				handleAs: "text",
+				timeout: 15000,
+				load: function(jsonData, secondArg) {
 					if (onLoad) {
 						if (typeof onLoad === "function")
 							onLoad(jsonData, secondArg);
@@ -92,12 +89,174 @@ eclipse.GitService = (function() {
 									jsonData);
 					}
 				},
-				error : function(error, ioArgs) {
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
 					handleGetAuthenticationError(this, ioArgs);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return response;
 				}
 			});
 		},
+		
+		getDiffFileURI: function(diffURI , onLoad , onError){
+			dojo.xhrGet({
+				url: diffURI , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				content: { "parts": "uris" },
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		getDiffFileContent: function(fileURI ,  onLoad , onError ){
+			dojo.xhrGet({
+				url: fileURI , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "text",
+				timeout: 15000,
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		getGitStatus: function(url , onLoad , onError){
+			dojo.xhrGet({
+				url: url , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		stage: function(location , onLoad , onError){
+			dojo.xhrPut({
+				url: location , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		unstage: function(location , onLoad , onError){
+			dojo.xhrPost({
+				url: location , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				postData: dojo.toJson({"Reset":"MIXED"} ),
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		commitAll: function(location , message , body ,  onLoad , onError){
+			dojo.xhrPost({
+				url: location , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				postData: body,
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
 		getGitClone : function(gitCloneURI, onLoad) {
 			var service = this;
 			
