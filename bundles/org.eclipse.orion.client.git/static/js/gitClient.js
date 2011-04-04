@@ -20,6 +20,10 @@ eclipse.GitService = (function() {
 			this._serviceRegistry = serviceRegistry;
 			this._serviceRegistration = serviceRegistry.registerService(
 					"IGitService", this);
+			var self = this;
+			serviceRegistry.getService("ISshService").then(function(sshService){
+				self._sshService = sshService;
+			});
 		}
 	}
 
@@ -31,34 +35,40 @@ eclipse.GitService = (function() {
 		},
 		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost, onLoad) {
 			var service = this;
-			dojo.xhrPost({
-				url : "/git/clone/",
-				headers : {
-					"Orion-Version" : "1"
-				},
-				postData : dojo.toJson({
-					"Name" : gitName,
-					"GitUrl" : gitRepoUrl,
-					"GitSshUsername" : gitSshUsername,
-					"GitSshPassword" : gitSshPassword,
-					"GitSshKnownHost" : gitSshKnownHost
-				}),
-				handleAs : "json",
-				timeout : 15000,
-				load : function(jsonData, secondArg) {
-					if (onLoad) {
-						if (typeof onLoad === "function")
-							onLoad(jsonData, secondArg);
-						else
-							service._serviceRegistration.dispatchEvent(onLoad,
-									jsonData);
+			if(gitSshKnownHost && gitSshKnownHost!=""){
+				this._sshService.addKnownHosts(gitSshKnownHost);
+			}
+			this._sshService.getKnownHosts().then(function(knownHosts){
+				dojo.xhrPost({
+					url : "/git/clone/",
+					headers : {
+						"Orion-Version" : "1"
+					},
+					postData : dojo.toJson({
+						"Name" : gitName,
+						"GitUrl" : gitRepoUrl,
+						"GitSshUsername" : gitSshUsername,
+						"GitSshPassword" : gitSshPassword,
+						"GitSshKnownHost" : knownHosts
+					}),
+					handleAs : "json",
+					timeout : 15000,
+					load : function(jsonData, secondArg) {
+						if (onLoad) {
+							if (typeof onLoad === "function")
+								onLoad(jsonData, secondArg);
+							else
+								service._serviceRegistration.dispatchEvent(onLoad,
+										jsonData);
+						}
+					},
+					error : function(error, ioArgs) {
+						handleGetAuthenticationError(this, ioArgs);
+						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
-				},
-				error : function(error, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-				}
+				});
 			});
+			
 		},
 		doGitDiff : function(gitDiffURI, onLoad) {
 			var service = this;
