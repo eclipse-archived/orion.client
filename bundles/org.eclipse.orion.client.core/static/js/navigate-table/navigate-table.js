@@ -24,6 +24,7 @@ dojo.addOnLoad(function(){
 	new eclipse.DialogService(serviceRegistry);
 	new eclipse.UserService(serviceRegistry);
 	new eclipse.SelectionService(serviceRegistry);
+	new eclipse.SshService(serviceRegistry);
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 
