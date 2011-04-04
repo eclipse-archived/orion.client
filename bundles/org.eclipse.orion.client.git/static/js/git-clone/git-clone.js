@@ -18,12 +18,11 @@ dojo.addOnLoad(function(){
 	dojo.addOnUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	new eclipse.InputService(serviceRegistry);		
 	new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	new eclipse.LogService(serviceRegistry);
 	new eclipse.DialogService(serviceRegistry);
 	new eclipse.UserService(serviceRegistry);
-	new eclipse.SelectionService(serviceRegistry);
+	var selection = new eclipse.SelectionService(serviceRegistry);
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 
@@ -36,7 +35,7 @@ dojo.addOnLoad(function(){
 	
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var explorer = new eclipse.git.GitClonesExplorer(serviceRegistry, "/git/clone/", "clonesList", "pageActions", "selectionTools");
+	var explorer = new eclipse.git.GitClonesExplorer(serviceRegistry, selection, "/git/clone/", "clonesList", "pageActions", "selectionTools");
 	
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
- /*global eclipse:true dojo document */
+ /*global eclipse:true dojo document console*/
 
 eclipse = eclipse || {};
 eclipse.Unittest = eclipse.Unittest || {};
@@ -131,7 +131,6 @@ dojo.addOnLoad(function(){
 	dojo.addOnUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	var inputService = new eclipse.InputService(serviceRegistry);
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
@@ -208,13 +207,8 @@ dojo.addOnLoad(function(){
 		});
 	}
 
-	serviceRegistry.getService("IInputProvider").then(function(input) {
-		input.addEventListener("inputChanged", function(fileURI) {
-			runTests(fileURI);
-		});
-		input.getInput(function(fileURI) {
-			runTests(fileURI);
-		});
+	dojo.subscribe("/dojo/hashchange", this, function() {
+			runTests(dojo.hash());
 	});
-
+	runTests(dojo.hash());
 });

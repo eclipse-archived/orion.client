@@ -17,7 +17,6 @@ dojo.addOnLoad(function(){
 	dojo.addOnUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	var inputService = new eclipse.InputService(serviceRegistry);		
 	new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	new eclipse.LogService(serviceRegistry);
 	new eclipse.DialogService(serviceRegistry);
@@ -88,30 +87,4 @@ dojo.addOnLoad(function(){
 	dojo.subscribe("/dojo/hashchange", explorer, function() {
 		explorer.loadResourceList(dojo.hash());
 	});
-	
-	// it's important to replace the implementation of setInput here, so that we get
-	// the event at the time it happens as opposed to using a stored event. Firefox
-	// would otherwise prevent opening a new tab ('window.open') - this is only
-	// allowed within an event handler.
-	inputService.setInput = function(uri, event) {
-	    // if there is no editor present, then use page management
-		// TODO: How could an editor ever be present? It's on a different page.
-		// And regardless, editorContainer is not global anymore so this block always executes.
-		if (true /*!window.editorContainer*/) {
-	   		var target = "coding.html#" + uri;
-	   		var isMac = window.navigator.platform.indexOf("Mac") !== -1;
-	    	if (event) {
-	    		if (isMac) {
-	    		  	if (event.metaKey) {
-						window.open(target);
-						return;
-					}
-				} else if (event.ctrlKey) {
-					window.open(target);
-					return;
-				}
-	    	}
-	    	window.location.href = target;
-	    }
-	};	
 });

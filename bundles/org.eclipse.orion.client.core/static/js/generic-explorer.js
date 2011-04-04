@@ -20,9 +20,10 @@ eclipse.GenericExplorer = (function() {
 	 * @param parentId id of parent dom element
 	 * @param renderer
 	 */
-	function GenericExplorer(serviceRegistry, renderer) {
+	function GenericExplorer(serviceRegistry, selection, renderer) {
 		this.registry = serviceRegistry;
 		this.renderer = renderer;
+		this.selection = selection;
 		this.myTree = null;
 	}
 	GenericExplorer.prototype = /** @lends eclipse.GenericExplorer.prototype */ {
@@ -180,9 +181,7 @@ eclipse.GenericTableRenderer = (function() {
 				
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
-					this.explorer.registry.getService("ISelectionService").then(dojo.hitch(this, function(service) {
-						service._setSelection(this.getSelected());
-					}));				
+					this.explorer.selection.setSelections(this.getSelected());		
 				}));
 				return checkColumn;
 			}
@@ -224,10 +223,7 @@ eclipse.GenericTableRenderer = (function() {
 			// update the selections so that any checked rows that may no longer be around are not
 			// remembered.  This is a temporary solution, 
 			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339450
-			this.explorer.registry.getService("ISelectionService").then(dojo.hitch(this,
-				function(selService) {
-					selService._setSelection(this.getSelected());
-				}));
+			this.explorer.selection.setSelections(this.getSelected());
 		},
 		updateCommands: function(){
 			var registry = this.explorer.registry;

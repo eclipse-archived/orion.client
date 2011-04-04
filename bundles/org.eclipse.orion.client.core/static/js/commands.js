@@ -39,6 +39,7 @@ eclipse.CommandService = (function() {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
 			this._serviceRegistration = this._registry.registerService("ICommandService", this);
+			this._selection = options.selection;
 		},
 		
 		/** 
@@ -167,14 +168,11 @@ eclipse.CommandService = (function() {
 		renderCommands: function(parent, scope, items, handler, renderType, cssClass, userData) {
 			if (!items) {
 				var cmdService = this;
-				this._registry.getService("ISelectionService").then(function(service) {
-					service.getSelection(function(selection) {
-						if (!selection) {
-							return;
-						}
-						cmdService.renderCommands(parent, scope, selection, handler, renderType, cssClass, userData);
+				if (this._selection) {
+					this._selection.getSelections(function(selections) {
+						cmdService.renderCommands(parent, scope, selections, handler, renderType, cssClass, userData);
 					});
-				});
+				}
 				return;
 			} 
 			var refCommands;

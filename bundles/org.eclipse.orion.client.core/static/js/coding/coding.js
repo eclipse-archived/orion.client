@@ -11,11 +11,13 @@
 /*global eclipse:true orion:true dojo dijit window*/
 /*jslint devel:true*/
 
+dojo.require("dojo.hash");
+
 dojo.addOnLoad(function(){
 	var pluginRegistry = null;
 	var serviceRegistry = null;
 	var document = window.document;
-	var inputService;
+	var selection;
 	var prefsService;
 	var commandService;
 	var statusReportingService;
@@ -36,15 +38,13 @@ dojo.addOnLoad(function(){
 //			pluginRegistry.installPlugin("/plugins/jslintPlugin.html");
 //		}
 
-		inputService = new eclipse.InputService(serviceRegistry);
-		inputService.initializeContext({"manageDocumentTitle": true});	
+		selection = new orion.Selection(serviceRegistry);
 		statusReportingService = new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 		new eclipse.LogService(serviceRegistry);
 		new eclipse.DialogService(serviceRegistry);
 		new eclipse.UserService(serviceRegistry);
-		new eclipse.SelectionService(serviceRegistry);
 		prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-		commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+		commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 
 		// Editor needs additional services besides EAS.
 		problemService = new eclipse.ProblemService(serviceRegistry);
@@ -81,10 +81,9 @@ dojo.addOnLoad(function(){
 		setInput: function(location, editorContainer) {
 			var input = eclipse.util.getPositionInfo(location);
 			var fileURI = input.filePath;
-			this._fileURI = fileURI;
 			// populate editor
 			if (fileURI) {
-				if (fileURI === this._lastFilePath) {
+				if (fileURI === this.lastFilePath) {
 					editorContainer.showSelection(input.start, input.end, input.line, input.offset, input.length);
 				} else {
 					if (!editorContainer.getEditorWidget()) {
@@ -113,14 +112,14 @@ dojo.addOnLoad(function(){
 						})
 					);
 				}
-				this._lastFilePath = fileURI;
+				this.lastFilePath = fileURI;
 			} else {
 				editorContainer.onInputChange("No File Selected", "", null);
 			}
 		},
 		
 		getInput: function() {
-			return this._lastFilePath;
+			return this.lastFilePath;
 		},
 			
 		setTitle : function(title) {
@@ -133,7 +132,7 @@ dojo.addOnLoad(function(){
 				}
 			}
 			this._lastTitle = shortTitle;
-			inputService.setTitle(shortTitle);
+			window.document.title = shortTitle;
 			var titlePane = dojo.byId("pageTitle");
 			if (titlePane) {
 				dojo.empty(titlePane);
@@ -162,6 +161,29 @@ dojo.addOnLoad(function(){
 				if (this._lastTitle && this._lastTitle.charAt(0) === '*') {
 					this.setTitle(this._lastTitle.substring(1));
 				}
+			}
+		},
+		
+		hashChanged: function(editorContainer) {	
+			// if it's a value we already know, ignore
+			if (dojo.hash() === this.lastFilePath) {
+				return;
+			}
+			if (editorContainer.isDirty()) {
+				var oldStripped = eclipse.util.getPositionInfo(this.lastFilePath).filePath;
+				var newStripped = eclipse.util.getPositionInfo(dojo.hash()).filePath;
+				if (oldStripped !== newStripped) {
+					var leave = window.confirm("There are unsaved changes.  Do you still want to navigate away?");
+					if (leave) {
+						this.lastFilePath = dojo.hash();
+						selection.setSelections(dojo.hash());
+					} 
+				} else {
+					// same uri, but different parameters (ie, lines, chars, etc.)
+					selection.setSelections(dojo.hash());
+				}
+			} else {
+				selection.setSelections(dojo.hash());
 			}
 		}
 	};	
@@ -261,14 +283,16 @@ dojo.addOnLoad(function(){
 	
 	dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
 	
-	serviceRegistry.getService("IInputProvider").then(function(input) {
-		input.addEventListener("inputChanged", function(fileURI) {
-			inputManager.setInput(fileURI, editorContainer);
-		});
-		input.getInput(function(fileURI) {
+	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
+	serviceRegistry.getService("Selection").then(function(service) {
+		service.addEventListener("selectionChanged", function(fileURI) {
 			inputManager.setInput(fileURI, editorContainer);
 		});
 	});
+
+	// In this page, the hash change drives selection.  In other scenarios, a file picker might drive selection
+	dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editorContainer);});
+	inputManager.setInput(dojo.hash(), editorContainer);
 	
 	// TODO search location needs to be gotten from somewhere
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, editorContainer, editorContainer);

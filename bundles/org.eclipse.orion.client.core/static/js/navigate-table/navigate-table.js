@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
+/*global dojo dijit window eclipse orion serviceRegistry:true widgets alert*/
 /*browser:true*/
 dojo.addOnLoad(function(){
 	
@@ -18,14 +18,13 @@ dojo.addOnLoad(function(){
 	dojo.addOnUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	new eclipse.InputService(serviceRegistry);		
+	var selection = new orion.Selection(serviceRegistry);		
 	new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	new eclipse.LogService(serviceRegistry);
 	new eclipse.DialogService(serviceRegistry);
 	new eclipse.UserService(serviceRegistry);
-	new eclipse.SelectionService(serviceRegistry);
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 
 	
 	// Favorites
@@ -53,7 +52,7 @@ dojo.addOnLoad(function(){
 	
 	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 	
-	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, searcher, fileClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, selection, searcher, fileClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 	
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	
