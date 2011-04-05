@@ -21,10 +21,10 @@ dojo.addOnLoad(function(){
 	new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	new eclipse.LogService(serviceRegistry);
 	new eclipse.DialogService(serviceRegistry);
-	new eclipse.SelectionService(serviceRegistry);
+	var selection = new orion.Selection(serviceRegistry);
 	new eclipse.SshService(serviceRegistry);
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 	
 	// Git operations
 	var gitClient = new eclipse.GitService(serviceRegistry);
@@ -36,7 +36,7 @@ dojo.addOnLoad(function(){
 	
 	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 	
-	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, treeRoot, searcher, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, treeRoot, selection, searcher, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, navigator);
