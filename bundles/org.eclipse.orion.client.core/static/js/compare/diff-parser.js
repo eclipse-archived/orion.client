@@ -51,7 +51,7 @@ orion.DiffParser = (function() {
 			this._init();
 			if(diffString === "")
 				return {outPutFile:oFileString ,mapper:[]};
-			this._oFileContents = oFileString.split(this._lineDelimiter);
+			this._oFileContents = oFileString === "" ? []:oFileString.split(this._lineDelimiter);
 			this._diffContents = diffString.split(this._lineDelimiter);
 			var lineNumber = this._diffContents.length;
 			this._hunkRanges = [];

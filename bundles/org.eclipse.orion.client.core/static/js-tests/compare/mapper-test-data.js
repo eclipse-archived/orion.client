@@ -51,7 +51,7 @@ var mapperTestCases = [
 	  //output file
 	  "line 1", 
 	  //mapper
-	  [[1,1,2]],
+	  [[1,0,2]],
 	  //description  
 	  "add 1 line without \\r  to empty file"]
 	, 
@@ -69,7 +69,7 @@ var mapperTestCases = [
 	  "line 1\r\n" + 
 	  "line 2", 
 	  //mapper
-	  [[2,1,2]],
+	  [[2,0,2]],
 	  //description  
 	  "add 2 lines without \\r  to empty file"]
 	, 
@@ -85,7 +85,7 @@ var mapperTestCases = [
 	  "line 1\r\n" + 
 	  "", 
 	  //mapper
-	  [[2,1,2]],
+	  [[2,0,2]],
 	  //description  
 	  "add 1 line to empty file"]
 	, 
@@ -103,7 +103,7 @@ var mapperTestCases = [
 	  "line 2\r\n" + 
 	  "", 
 	  //mapper
-	  [[3,1,2]],
+	  [[3,0,2]],
 	  //description  
 	  "add 2 lines to empty file"]
 	, 

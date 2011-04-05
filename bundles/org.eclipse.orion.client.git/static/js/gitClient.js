@@ -125,32 +125,6 @@ eclipse.GitService = (function() {
 			});
 		},
 		
-		getDiffFileContent: function(fileURI ,  onLoad , onError ){
-			dojo.xhrGet({
-				url: fileURI , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "text",
-				timeout: 15000,
-				load: function(jsonData, secondArg) {
-					if (onLoad) {
-						if (typeof onLoad === "function")
-							onLoad(jsonData, secondArg);
-						else
-							service._serviceRegistration.dispatchEvent(onLoad,
-									jsonData);
-					}
-				},
-				error: function(response, ioArgs) {
-					if(onError)
-						onError(response,ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
-		},
-		
 		getGitStatus: function(url , onLoad , onError){
 			dojo.xhrGet({
 				url: url , 
