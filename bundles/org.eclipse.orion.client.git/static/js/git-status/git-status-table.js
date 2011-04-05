@@ -145,7 +145,7 @@ orion.GitStatusRenderer = (function() {
 			row.appendChild(stageCol);
 			this._controller.createImgButton(true ,stageCol , orion.statusTypeMap[itemModel.type][2], orion.statusTypeMap[itemModel.type][3],
 					function(evt) {
-						self._controller.doAction(itemModel.location , itemModel.type);
+						self._controller.doAction(itemModel);
 					} );
 		}
 	};
@@ -352,22 +352,13 @@ orion.GitStatusController = (function() {
 			}
 		},
 		
-		_resolveURI: function(itemModel){
-			var untracked = false;//(itemModel.type === "Untracked");
-			var added = false;//(itemModel.type === "Added");
-			var diffURI =  (untracked || added) ? null : itemModel.diffURI;
-			var fileURI =  (untracked || added) ? itemModel.location : (this._model.isStaged(itemModel.type) ? itemModel.commitURI: itemModel.indexURI);
-			return {diffURI:diffURI , fileURI:fileURI };
-		},
-		
 		loadDiffContent: function(itemModel){
 			this.cursorWait();
 			var self = this;
-			var result = this._resolveURI(itemModel);
 			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) >>> " : "local VS index ) >>> " ;
 			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS + itemModel.name;
 			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
-			this._inlineCompareContainer.resolveDiff(result.diffURI,
+			this._inlineCompareContainer.resolveDiff(itemModel.diffURI,
 					                                function(newFile , OldFile){					
 														dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
 														self.cursorClear();
@@ -379,16 +370,16 @@ orion.GitStatusController = (function() {
 		},
 		
 		openSBSViewer: function(itemModel){
-			var result = this._resolveURI(itemModel);
-			var url = "/compare-m.html#" + result.diffURI;
+			var url = "/compare-m.html#" + itemModel.diffURI;
 			window.open(url,"");
 		},
 		
-		doAction: function(location  ,type){
-			if(this._model.isStaged(type))
-				this.unstage(eclipse.util.makeRelative(location));
+		doAction: function(itemModel){
+			if(this._model.isStaged(itemModel.type))
+				this.unstage(itemModel.indexURI);
+				//this.unstage(eclipse.util.makeRelative(location));
 			else
-				this.stage(eclipse.util.makeRelative(location));
+				this.stage(itemModel.indexURI);
 		},
 		
 		handleServerErrors: function(errorResponse , ioArgs){
@@ -422,7 +413,7 @@ orion.GitStatusController = (function() {
 			var self = this;
 			self._registry.getService("IGitService").then(
 					function(service) {
-						service.stage("/git/index" + location, 
+						service.stage(location, 
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
@@ -439,7 +430,7 @@ orion.GitStatusController = (function() {
 				var sub = this._url.substring(start);
 				var subSlitted = sub.split("/");
 				if(subSlitted.length > 2){
-					this.stage([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") );
+					this.stage("/git/index" + [subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") );
 				}
 			}
 		},
@@ -448,7 +439,7 @@ orion.GitStatusController = (function() {
 			var self = this;
 			self._registry.getService("IGitService").then(
 					function(service) {
-						service.unstage("/git/index" + location, 
+						service.unstage(location, 
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
@@ -462,14 +453,14 @@ orion.GitStatusController = (function() {
 		unstageAll: function(){
 			var start = this._url.indexOf("/file/");
 			if(start != -1)
-				this.unstage(this._url.substring(start));
+				this.unstage("/git/index" + this._url.substring(start));
 		},
 		
 		commitAll: function(location , message , body){
 			var self = this;
 			self._registry.getService("IGitService").then(
 					function(service) {
-						service.unstage("/git/commit/HEAD" + location, 
+						service.commitAll("/git/commit/HEAD" + location,  message , body,
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },

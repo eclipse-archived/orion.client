@@ -8,12 +8,15 @@
  ******************************************************************************/
 dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
-	serviceRegistry = new eclipse.ServiceRegistry();
+	var serviceRegistry = new eclipse.ServiceRegistry();
+	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
+	// File operations
+	new eclipse.FileClient(serviceRegistry, pluginRegistry);
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	var sBSCompareContainer = new orion.SBSCompareContainer(serviceRegistry ,"left-viewer" , "right-viewer");
