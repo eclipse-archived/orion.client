@@ -85,7 +85,7 @@ orion.EditorCommandFactory = (function() {
 			}
 		
 			for (var i=0; i<actionReferences.length; i++) {
-				serviceRegistry.getService(actionReferences[i]).then(function(service) {
+				this.serviceRegistry.getService(actionReferences[i]).then(dojo.hitch(this, function(service) {
 					var info = {};
 					var propertyNames = actionReferences[i].getPropertyNames();
 					for (var j = 0; j < propertyNames.length; j++) {
@@ -137,7 +137,7 @@ orion.EditorCommandFactory = (function() {
 						editorWidget.setKeyBinding(new KB(info.key), command.id);
 						editorWidget.setAction(command.id, command.callback);
 					}
-				});
+				}));
 			}
 		}
 	};

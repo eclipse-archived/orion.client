@@ -6,11 +6,13 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*global dojo dijit window eclipse:true*/
+
+dojo.require("dojo.hash");
 
 dojo.addOnLoad(function() {
 
 	var serviceRegistry = new eclipse.ServiceRegistry();
-	var inputService = new eclipse.InputService(serviceRegistry);
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	dojo.addOnUnload(function() {
 		pluginRegistry.shutdown();
@@ -45,7 +47,7 @@ var eclipse = eclipse || {};
 eclipse.DateLong = (function(){
 		function DateLong(options){
 			this._init(options);
-		};
+		}
 		DateLong.prototype = {
 			_init: function(options){
 				options.style = "display: none";
@@ -54,12 +56,13 @@ eclipse.DateLong = (function(){
 				this.contentText.set('ecliplseCustomValue',true);
 				this.dateP = dojo.create("p", {innerHTML: "&nbsp;", className: "userprofile"});
 				dojo.connect(this.contentText, "onChange", dojo.hitch(this, function(myDijit,p){
-						if(myDijit.get('value')!=""){
+						if(myDijit.get('value')!==""){
 							var value = parseInt(myDijit.get('value'));
 							p.innerHTML = dojo.date.locale.format(new Date(value), {formatLength: "short"});
 						}
-						if(p.innerHTML=="")
+						if(p.innerHTML==="") {
 							p.innerHTML="&nbsp";
+						}
 					}, this.contentText, this.dateP));
 				this.get = dojo.hitch(this.contentText,this.contentText.get);
 				this.set = dojo.hitch(this.contentText,this.contentText.set);
@@ -110,37 +113,34 @@ eclipse.Profile = (function() {
 			}
 	
 		},
-		addInputListener: function(){
-			var userProfile = this;
-			this.registry.getService("IInputProvider").then(function(input) {
-				input.addEventListener("inputChanged", function(uri) {
-					dojo.hitch(userProfile, userProfile.setUserToDisplay(uri));
-				});
-				input.getInput(function(uri) {
-					if(uri && uri!=null && uri!="")
-						dojo.hitch(userProfile, userProfile.setUserToDisplay(uri));
-					else{
+		addInputListener: function(){			
+			dojo.subscribe("/dojo/hashchange", this, function() {
+				this.setUserToDisplay(dojo.hash());
+			});
+			var uri = dojo.hash();
+			if(uri && uri!=="") {
+				this.setUserToDisplay(uri);
+			}
+			else{
 						
-						// TODO if no hash provided current user profile should be loaded - need a better way to find logged user URI
+				// TODO if no hash provided current user profile should be loaded - need a better way to find logged user URI
 						
-						dojo.xhrPost({
-							url : "/login",
-							headers : {
-								"Orion-Version" : "1"
-							},
-							handleAs : "json",
-							timeout : 15000,
-							load : function(jsonData, ioArgs) {
-								input.setInput("/users/"+jsonData.login);
-								return jsonData;
-							},
-							error : function(response, ioArgs) {
-								handleGetAuthenticationError(this, ioArgs);
-							}
-						});
+				dojo.xhrPost({
+					url : "/login",
+					headers : {
+						"Orion-Version" : "1"
+					},
+					handleAs : "json",
+					timeout : 15000,
+					load : function(jsonData, ioArgs) {
+						dojo.hash("/users/"+jsonData.login);
+						return jsonData;
+					},
+					error : function(response, ioArgs) {
+						handleGetAuthenticationError(this, ioArgs);
 					}
 				});
-			});
+			}
 		},
 		drawPlugins : function(pluginsList){
 			

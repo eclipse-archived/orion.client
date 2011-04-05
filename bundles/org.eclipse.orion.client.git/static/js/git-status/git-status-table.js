@@ -145,7 +145,7 @@ orion.GitStatusRenderer = (function() {
 			row.appendChild(stageCol);
 			this._controller.createImgButton(true ,stageCol , orion.statusTypeMap[itemModel.type][2], orion.statusTypeMap[itemModel.type][3],
 					function(evt) {
-						self._controller.doAction(itemModel.location , itemModel.type);
+						self._controller.doAction(itemModel);
 					} );
 		}
 	};
@@ -153,13 +153,12 @@ orion.GitStatusRenderer = (function() {
 }());
 
 orion.GitStatusController = (function() {
-	function GitStatusController(serviceRegistry , url , unstagedDivId , stagedDivId) {
-		this.registry = serviceRegistry;
-		this._url = url;
+	function GitStatusController(serviceRegistry , unstagedDivId , stagedDivId) {
+		this._registry = serviceRegistry;
 		this._model = new orion.GitStatusModel();
 		this._unstagedTableRenderer = new orion.GitStatusRenderer(unstagedDivId , this);
 		this._stagedTableRenderer = new orion.GitStatusRenderer(stagedDivId , this);
-		this._inlineCompareContainer = new orion.InlineCompareContainer("inline-compare-viewer");
+		this._inlineCompareContainer = new orion.InlineCompareContainer(serviceRegistry ,"inline-compare-viewer");
 	}
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
@@ -353,24 +352,14 @@ orion.GitStatusController = (function() {
 			}
 		},
 		
-		_resolveURI: function(itemModel){
-			var untracked = (itemModel.type === "Untracked");
-			var added = (itemModel.type === "Added");
-			var diffURI =  (untracked || added) ? null : itemModel.diffURI;
-			var fileURI =  (untracked || added) ? itemModel.location : (this._model.isStaged(itemModel.type) ? itemModel.commitURI: itemModel.indexURI);
-			return {diffURI:diffURI , fileURI:fileURI };
-		},
-		
 		loadDiffContent: function(itemModel){
 			this.cursorWait();
 			var self = this;
-			var result = this._resolveURI(itemModel);
 			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) >>> " : "local VS index ) >>> " ;
 			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS + itemModel.name;
 			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
-			this._inlineCompareContainer.resolveDiff(result.diffURI,
-													result.fileURI,
-					                                function(){					
+			this._inlineCompareContainer.resolveDiff(itemModel.diffURI,
+					                                function(newFile , OldFile){					
 														dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
 														self.cursorClear();
 													},
@@ -381,16 +370,16 @@ orion.GitStatusController = (function() {
 		},
 		
 		openSBSViewer: function(itemModel){
-			var result = this._resolveURI(itemModel);
-			var url = "/compare-m.html#" + (result.diffURI ?  result.diffURI+"?" : "")  + result.fileURI;
+			var url = "/compare-m.html#" + itemModel.diffURI;
 			window.open(url,"");
 		},
 		
-		doAction: function(location  ,type){
-			if(this._model.isStaged(type))
-				this.unstage(eclipse.util.makeRelative(location));
+		doAction: function(itemModel){
+			if(this._model.isStaged(itemModel.type))
+				this.unstage(itemModel.indexURI);
+				//this.unstage(eclipse.util.makeRelative(location));
 			else
-				this.stage(eclipse.util.makeRelative(location));
+				this.stage(itemModel.indexURI);
 		},
 		
 		handleServerErrors: function(errorResponse , ioArgs){
@@ -403,48 +392,36 @@ orion.GitStatusController = (function() {
 			this.cursorClear();
 		},
 		
-		
 		getGitStatus: function(url){
+			this._url = url;
 			this.cursorWait();
 			var self = this;
-			dojo.xhrGet({
-				url: url , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				timeout: 5000,
-				load: function(jsonData, ioArgs) {
-					//console.log(JSON.stringify(jsonData));
-					self.loadStatus(jsonData);
-				},
-				error: function(response, ioArgs) {
-					self.handleServerErrors(response, ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+				function(service) {
+					service.getGitStatus(url, 
+										 function(jsonData, secondArg) {
+										 	 self.loadStatus(jsonData);
+										 },
+										 function(response, ioArgs){
+											 self.handleServerErrors(response, ioArgs);
+										 }
+					);
+				});
 		},
 		
 		stage: function(location){
 			var self = this;
-			var url = "/git/index" + location;
-			dojo.xhrPut({
-				url: url , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				timeout: 5000,
-				load: function(jsonData, ioArgs) {
-					self.getGitStatus(self._url);
-				},
-				error: function(response, ioArgs) {
-					self.handleServerErrors(response, ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+					function(service) {
+						service.stage(location, 
+											 function(jsonData, secondArg) {
+											 	 self.getGitStatus(self._url);
+											 },
+											 function(response, ioArgs){
+												 self.handleServerErrors(response, ioArgs);
+											 }
+						);
+					});
 		},
 		
 		stageAll: function(){
@@ -453,60 +430,45 @@ orion.GitStatusController = (function() {
 				var sub = this._url.substring(start);
 				var subSlitted = sub.split("/");
 				if(subSlitted.length > 2){
-					this.stage([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") );
+					this.stage("/git/index" + [subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") );
 				}
 			}
 		},
 		
 		unstage: function(location){
 			var self = this;
-			var url = "/git/index" +  location;
-			dojo.xhrPost({
-				url: url , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				timeout: 5000,
-				postData: dojo.toJson({"Reset":"MIXED"} ),
-				load: function(jsonData, ioArgs) {
-					//console.log(JSON.stringify(jsonData));
-					self.getGitStatus(self._url);;
-				},
-				error: function(response, ioArgs) {
-					self.handleServerErrors(response, ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+					function(service) {
+						service.unstage(location, 
+											 function(jsonData, secondArg) {
+											 	 self.getGitStatus(self._url);
+											 },
+											 function(response, ioArgs){
+												 self.handleServerErrors(response, ioArgs);
+											 }
+						);
+					});
 		},
 		
 		unstageAll: function(){
 			var start = this._url.indexOf("/file/");
 			if(start != -1)
-				this.unstage(this._url.substring(start));
+				this.unstage("/git/index" + this._url.substring(start));
 		},
 		
 		commitAll: function(location , message , body){
 			var self = this;
-			var url = "/git/commit/HEAD" +  location;
-			dojo.xhrPost({
-				url: url , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				timeout: 5000,
-				postData: body,
-				load: function(jsonData, ioArgs) {
-					self.getGitStatus(self._url);;
-				},
-				error: function(response, ioArgs) {
-					self.handleServerErrors(response, ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+					function(service) {
+						service.commitAll("/git/commit/HEAD" + location,  message , body,
+											 function(jsonData, secondArg) {
+											 	 self.getGitStatus(self._url);
+											 },
+											 function(response, ioArgs){
+												 self.handleServerErrors(response, ioArgs);
+											 }
+						);
+					});
 		},
 		
 		commit: function(message , amend){

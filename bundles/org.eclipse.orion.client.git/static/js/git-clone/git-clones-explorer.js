@@ -65,9 +65,10 @@ eclipse.git.GitClonesRenderer = (function(){
 
 eclipse.git.GitClonesExplorer = (function() {
 	
-	function GitClonesExplorer(registry, defaultPath, parentId, toolbarId, selectionToolsId){
+	function GitClonesExplorer(registry, selection, defaultPath, parentId, toolbarId, selectionToolsId){
 		this.parentId = parentId;
 		this.registry = registry;
+		this.selection = selection;
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
 		this.defaultPath = defaultPath;

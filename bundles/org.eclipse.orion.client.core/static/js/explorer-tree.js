@@ -46,12 +46,12 @@ eclipse.ExplorerTree = (function() {
 		this._lastHash = null;
 	}
 	ExplorerTree.prototype = /**@lends eclipse.ExplorerTree.prototype*/ {
-		selected : function(item, treeNode, event) {
+		selected : function(item, treeNode) {
 			this._selectedItem = item;
 			this._selectedNode = treeNode;
 			if (item.Directory===false && item.Location) {
-				this.registry.getService("IInputProvider").then(function(service) {
-					service.setInput(item.Location, event);
+				this.registry.getService("Selection").then(function(service) {
+					service.setSelections(item.Location);
 				});
 			}
 			

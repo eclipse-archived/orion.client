@@ -11,11 +11,13 @@
 /*global eclipse:true orion:true dojo dijit window*/
 /*jslint devel:true*/
 
+dojo.require("dojo.hash");
+
 dojo.addOnLoad(function(){
 	var pluginRegistry = null;
 	var serviceRegistry = null;
 	var document = window.document;
-	var inputService;
+	var selection;
 	var prefsService;
 	var commandService;
 	var statusReportingService;
@@ -36,15 +38,13 @@ dojo.addOnLoad(function(){
 //			pluginRegistry.installPlugin("/plugins/jslintPlugin.html");
 //		}
 
-		inputService = new eclipse.InputService(serviceRegistry);
-		inputService.initializeContext({"manageDocumentTitle": true});	
+		selection = new orion.Selection(serviceRegistry);
 		statusReportingService = new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 		new eclipse.LogService(serviceRegistry);
 		new eclipse.DialogService(serviceRegistry);
 		new eclipse.UserService(serviceRegistry);
-		new eclipse.SelectionService(serviceRegistry);
 		prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-		commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+		commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 
 		// Editor needs additional services besides EAS.
 		problemService = new eclipse.ProblemService(serviceRegistry);
@@ -74,78 +74,16 @@ dojo.addOnLoad(function(){
 	var contentAssistFactory = function(editor) {
 		return new eclipse.ContentAssist(editor, "contentassist");
 	};
-	
-	var splitterMgr = {
-		leftPaneWidth: "",
-		toggleLeftPane: function(editor){
-			var rightPane =  editor.getEditorWidget()._editorDiv;
-			var rightPaneEditor =  editor.getEditorWidget();
-			var targetW = "";
-			var originalW = leftPane.style.width;
-			var originalWint = parseInt(originalW.replace("px", ""), 10);
-			var isLeftOpen = topContainerWidget.isLeftPaneOpen();
-			if(isLeftOpen){
-				this.leftPaneWidth = originalW;
-				targetW = "0px";
-			} else {
-				this.calcLeftPaneW(rightPane);
-				targetW = this.leftPaneWidth;
-			}
-			var targetWint = parseInt(targetW.replace("px", ""), 10);
-			
-			if(!isLeftOpen) {
-				topContainerWidget.toggleLeftPaneState();
-			}
-			
-			var a = new dojo.Animation({
-				node: leftPane,
-				duration: 300,
-				curve: [1, 100],
-				onAnimate: dojo.hitch(this, function(x){
-					var deltaW = (targetWint - originalWint)*x/100;
-					var curWidth = originalWint + deltaW;
-					leftPane.style.width = curWidth + "px";
-					leftPane.style.overflow = "hidden";
-					rightPane.style.overflow = "hidden";
-					topContainerWidget.layout();
-					//this._topContainer.resize();
-				}),
-				onEnd: dojo.hitch(this, function(){
-					rightPane.style.overflow = "auto";
-					rightPaneEditor.redrawLines();
-					if(isLeftOpen){
-						topContainerWidget.toggleLeftPaneState();
-					} else {
-						leftPane.style.overflow = "auto";
-						topContainerWidget.setSizeCookie(null);
-					}
-				})
-			});
-			a.play();
-		}, 
-		calcLeftPaneW: function(rightPane){
-			var leftPaneW = topContainerWidget.getSizeCookie();
-			if(leftPaneW < 50){
-				var originalW = rightPane.style.width;
-				var originalWint = parseInt(originalW.replace("px", ""), 10);
-				this.leftPaneWidth = originalWint*0.25 + "px";
-			} else {
-				this.leftPaneWidth =leftPaneW + "px";
-			}
-			return this.leftPaneWidth;
-		}
-	};
-	
+
 	var inputManager = {
 		lastFilePath: "",
 		
 		setInput: function(location, editorContainer) {
 			var input = eclipse.util.getPositionInfo(location);
 			var fileURI = input.filePath;
-			this._fileURI = fileURI;
 			// populate editor
 			if (fileURI) {
-				if (fileURI === this._lastFilePath) {
+				if (fileURI === this.lastFilePath) {
 					editorContainer.showSelection(input.start, input.end, input.line, input.offset, input.length);
 				} else {
 					if (!editorContainer.getEditorWidget()) {
@@ -174,14 +112,14 @@ dojo.addOnLoad(function(){
 						})
 					);
 				}
-				this._lastFilePath = fileURI;
+				this.lastFilePath = fileURI;
 			} else {
 				editorContainer.onInputChange("No File Selected", "", null);
 			}
 		},
 		
 		getInput: function() {
-			return this._lastFilePath;
+			return this.lastFilePath;
 		},
 			
 		setTitle : function(title) {
@@ -194,7 +132,7 @@ dojo.addOnLoad(function(){
 				}
 			}
 			this._lastTitle = shortTitle;
-			inputService.setTitle(shortTitle);
+			window.document.title = shortTitle;
 			var titlePane = dojo.byId("pageTitle");
 			if (titlePane) {
 				dojo.empty(titlePane);
@@ -206,6 +144,14 @@ dojo.addOnLoad(function(){
 			}
 		},
 		
+		getTitle: function() {
+			return this._lastTitle;
+		},
+		
+		getFileMetadata: function() {
+			return this._fileMetadata;
+		},
+		
 		setDirty: function(dirty) {
 			if (dirty) {
 				if (this._lastTitle && this._lastTitle.charAt(0) !== '*') {
@@ -215,6 +161,29 @@ dojo.addOnLoad(function(){
 				if (this._lastTitle && this._lastTitle.charAt(0) === '*') {
 					this.setTitle(this._lastTitle.substring(1));
 				}
+			}
+		},
+		
+		hashChanged: function(editorContainer) {	
+			// if it's a value we already know, ignore
+			if (dojo.hash() === this.lastFilePath) {
+				return;
+			}
+			if (editorContainer.isDirty()) {
+				var oldStripped = eclipse.util.getPositionInfo(this.lastFilePath).filePath;
+				var newStripped = eclipse.util.getPositionInfo(dojo.hash()).filePath;
+				if (oldStripped !== newStripped) {
+					var leave = window.confirm("There are unsaved changes.  Do you still want to navigate away?");
+					if (leave) {
+						this.lastFilePath = dojo.hash();
+						selection.setSelections(dojo.hash());
+					} 
+				} else {
+					// same uri, but different parameters (ie, lines, chars, etc.)
+					selection.setSelections(dojo.hash());
+				}
+			} else {
+				selection.setSelections(dojo.hash());
 			}
 		}
 	};	
@@ -252,7 +221,7 @@ dojo.addOnLoad(function(){
 				};
 				// TEMPORARY until we can better scope the search
 				var extensionFilter = "";
-				var fileName = editor.getTitle();
+				var fileName = inputManager.getTitle();
 				
 				dojo.place(document.createTextNode("Searching for occurrences of "), searchFloat, "last");
 				var b = dojo.create("b", null, searchFloat, "last");
@@ -271,7 +240,7 @@ dojo.addOnLoad(function(){
 				dojo.place(document.createTextNode("..."), searchFloat, "last");
 				
 				searchFloat.style.display = "block";
-				var query = editor.getFileMetadata().SearchLocation + searchPattern + extensionFilter;
+				var query = inputManager.getFileMetadata().SearchLocation + searchPattern + extensionFilter;
 				searcher.search(searchFloat, query, inputManager.getInput());
 			}, 0);
 		});
@@ -280,13 +249,7 @@ dojo.addOnLoad(function(){
 		// splitter binding
 		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("o", true), "toggle");
 		editor.getEditorWidget().setAction("toggle", function(){
-				splitterMgr.toggleLeftPane(editor);
-		});
-		
-		// Tell the top border container what to use for the splitter toggle function.
-		// We do this here because we have the editor handy
-		topContainerWidget.setToggleLeftPane(function() {
-			splitterMgr.toggleLeftPane(editor);
+				topContainerWidget.toggle();
 		});
 	};
 	
@@ -320,14 +283,16 @@ dojo.addOnLoad(function(){
 	
 	dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
 	
-	serviceRegistry.getService("IInputProvider").then(function(input) {
-		input.addEventListener("inputChanged", function(fileURI) {
-			inputManager.setInput(fileURI, editorContainer);
-		});
-		input.getInput(function(fileURI) {
+	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
+	serviceRegistry.getService("Selection").then(function(service) {
+		service.addEventListener("selectionChanged", function(fileURI) {
 			inputManager.setInput(fileURI, editorContainer);
 		});
 	});
+
+	// In this page, the hash change drives selection.  In other scenarios, a file picker might drive selection
+	dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editorContainer);});
+	inputManager.setInput(dojo.hash(), editorContainer);
 	
 	// TODO search location needs to be gotten from somewhere
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, editorContainer, editorContainer);
@@ -343,12 +308,17 @@ dojo.addOnLoad(function(){
 			 return "There are unsaved changes.";
 		}
 	};
+	
+	// Set up the border container
+	topContainerWidget.setToggleCallback(function() {
+		editorContainer.getEditorWidget().redrawLines();
+	});
 			
 	// Ctrl+o handler for toggling outline 
 	document.onkeydown = function (evt){
 		evt = evt || window.event;
 		if(evt.ctrlKey && evt.keyCode  === 79){
-			editorContainer.toggleLeftPane();
+			topContainerWidget.toggle();
 			if(document.all){ 
 				evt.keyCode = 0;
 			}else{ 

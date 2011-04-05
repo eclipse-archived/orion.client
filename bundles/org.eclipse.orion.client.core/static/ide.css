@@ -103,6 +103,14 @@ a:hover {
 	background: #c5c5c5;
 }
 
+.nihilo .dijitSplitterH .dijitSplitterThumb {	
+	background: #c5c5c5;
+}
+
+.nihilo .dijitSplitterH {
+	background: #c5c5c5;
+}
+
 .nihilo .dijitDialogTitleBar {
     background: #5c5c5c;
     color: white;

@@ -13,8 +13,7 @@ var orion = orion || {};
 orion.CompareContainer = (function() {
 	function CompareContainer () {
 		this._diffParser = new orion.DiffParser();
-		this.fileContent = null;
-		this.diffURI = null;
+		this._diff = null;
 	}
 	CompareContainer.prototype = {
 		_getLineDelim: function(input , diff){	
@@ -22,56 +21,49 @@ orion.CompareContainer = (function() {
 			return delim;
 		},
 		
-		getFileDiffGit: function(diffURI , callBack , errorCallBack){
+		getFileDiffGit: function(diffURI , uiCallBack , errorCallBack){
 			var self = this;
-			if(diffURI === null || diffURI === undefined){
-				self.setEditor("" ,self.fileContent);
-				if(callBack)
-					callBack();
-				return;
-			}
-			dojo.xhrGet({
-				url: diffURI , 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "text",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					fileDiff = jsonData;
-					self.setEditor(self.fileContent , fileDiff );
-					if(callBack)
-						callBack();
-				},
-				error: function(response, ioArgs) {
-					if(errorCallBack)
-						errorCallBack(response,ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+				function(service) {
+					service.getDiffContent(diffURI, 
+										   function(jsonData, secondArg) {
+										   	  self._diff = jsonData;
+										      self.getFileURI(diffURI , uiCallBack , errorCallBack);
+										   },
+										   errorCallBack);
+				});
 		},
 		
-		getFileContent: function(diffURI ,fileURI , callBack, errorCallBack){
+		getFileURI: function(diffURI , uiCallBack , errorCallBack ){
 			var self = this;
-			dojo.xhrGet({
-				url: fileURI, 
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "text",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					self.fileContent = jsonData;
-					self.getFileDiffGit(diffURI , callBack , errorCallBack);
-				},
-				error: function(response, ioArgs) {
-					if(errorCallBack)
-						errorCallBack(response,ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
-					return response;
-				}
-			});
+			self._registry.getService("IGitService").then(
+				function(service) {
+					service.getDiffFileURI(diffURI, 
+										   function(jsonData, secondArg) {
+											  self.getFileContent(jsonData.Git.Old , errorCallBack);
+											  if(uiCallBack)
+												  uiCallBack(jsonData.Git.New , jsonData.Git.Old);
+										   },
+										   errorCallBack);
+				});
+		},
+		
+		getFileContent: function(fileURI , errorCallBack ){
+			var self = this;
+			self._registry.getService("IFileService").then(
+					function(service) {
+						service.read(fileURI).then( 
+											  function(contents) {
+												  self.setEditor(contents , self._diff );					  
+											  },
+											  function(error ,ioArgs) {
+												  if(error.status === 404)
+													  self.setEditor("" , self._diff );	
+												  else if(errorCallBack)
+													  errorCallBack(error ,ioArgs);
+													  
+											  });
+					});
 		},
 		
 		parseMapper: function(input , diff , doNotBuildNewFile){
@@ -84,8 +76,17 @@ orion.CompareContainer = (function() {
 			return {delim:delim , mapper:result.mapper , output:result.outPutFile ,diffArray:diffArray};
 		},
 		
-		resolveDiff: function(diffURI ,fileURI , callBack , errorCallBack){
-			this.getFileContent(diffURI ,fileURI , callBack , errorCallBack);
+		resolveDiff: function(hash , callBack , errorCallBack){
+			var diffURI = hash;
+			this._readOnly = false;
+			var params = hash.split("?");
+			if(params.length === 2){
+				diffURI = params[0];
+				var subParams = params[1].split("=");
+				if(subParams.length === 2 && subParams[0] === "readonly" && subParams[1] === "true" )
+					this._readOnly = true;
+			} 
+			this.getFileDiffGit(diffURI , callBack , errorCallBack);
 		},
 				
 		_initDiffPosition: function(editor){
@@ -108,9 +109,10 @@ orion.CompareContainer = (function() {
 
 orion.SBSCompareContainer = (function() {
 	/** @private */
-	function SBSCompareContainer(leftEditorDivId , rightEditorDivId) {
+	function SBSCompareContainer(resgistry ,leftEditorDivId , rightEditorDivId) {
 		this._editorLeft = null;
 		this._editorRight = null;
+		this._registry = resgistry;
 		this._leftEditorDivId = leftEditorDivId;
 		this._rightEditorDivId = rightEditorDivId;
 	}
@@ -201,9 +203,11 @@ orion.SBSCompareContainer = (function() {
 
 orion.CompareMergeContainer = (function() {
 	/** @private */
-	function CompareMergeContainer(leftEditorDivId , rightEditorDivId , canvas) {
+	function CompareMergeContainer(resgistry ,leftEditorDivId , rightEditorDivId , canvas) {
+		//this._editorcontainerLeft = leftEditorContainer;
 		this._editorLeft = null;
 		this._editorRight = null;
+		this._registry = resgistry;
 		this._leftEditorDivId = leftEditorDivId;
 		this._rightEditorDivId = rightEditorDivId;
 		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
@@ -240,91 +244,106 @@ orion.CompareMergeContainer = (function() {
 	
 	CompareMergeContainer.prototype.createLeftEditor = function(diffResult){
 		var editorContainerDomNode = dojo.byId(this._leftEditorDivId);
+		var self = this;
 		
 		var modelLeft = new eclipse.TextModel(diffResult.output, diffResult.delim);
 		var compareModelLeft = new orion.CompareMergeModel(modelLeft, {mapper:diffResult.mapper , columnIndex:0} );
-		var editorFactory = function() {
-			return new eclipse.Editor({
+		if(self._readOnly){
+			this._editorLeft = new eclipse.Editor({
 				parent: editorContainerDomNode,
 				model: compareModelLeft,
-				readonly: false,
+				readonly: true,
 				stylesheet: "/js/compare/editor.css" ,
 				tabSize: 4
 			});
-		};
-	
+		} else {
+			var editorFactory = function() {
+				return new eclipse.Editor({
+					parent: editorContainerDomNode,
+					model: compareModelLeft,
+					readonly: self._readOnly,
+					stylesheet: "/js/compare/editor.css" ,
+					tabSize: 4
+				});
+			};
 		
-		var contentAssistFactory = function(editor) {
-			return new eclipse.ContentAssist(editor, "contentassist");
-		};
-		
-		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 			
-			// Create keybindings for generic editing
-			var genericBindings = new orion.TextActions(editor, undoStack);
-			keyModeStack.push(genericBindings);
+			var contentAssistFactory = function(editor) {
+				return new eclipse.ContentAssist(editor, "contentassist");
+			};
 			
-			// create keybindings for source editing
-			var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
-			keyModeStack.push(codeBindings);
-			
-			// save binding
-			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
-			editor.getEditorWidget().setAction("save", function(){
-					editor.onInputChange(null, null, null, true);
-					var text = editor.getEditorWidget().getText();
-					var problems = [];
-					for (var i=0; i<text.length; i++) {
-						if (text.charAt(i) === 'z') {
-							var line = editor.getEditorWidget().getModel().getLineAtOffset(i) + 1;
-							var character = i - editor.getEditorWidget().getModel().getLineStart(line);
-							problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
+			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
+				
+				// Create keybindings for generic editing
+				var genericBindings = new orion.TextActions(editor, undoStack);
+				keyModeStack.push(genericBindings);
+				
+				// create keybindings for source editing
+				var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
+				keyModeStack.push(codeBindings);
+				
+				// save binding
+				editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
+				editor.getEditorWidget().setAction("save", function(){
+						editor.onInputChange(null, null, null, true);
+						var text = editor.getEditorWidget().getText();
+						var problems = [];
+						for (var i=0; i<text.length; i++) {
+							if (text.charAt(i) === 'z') {
+								var line = editor.getEditorWidget().getModel().getLineAtOffset(i) + 1;
+								var character = i - editor.getEditorWidget().getModel().getLineStart(line);
+								problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
+							}
 						}
-					}
-					annotationFactory.showProblems(problems);
-					return true;
-			});
-		};
-		
-		var dirtyIndicator = "";
-		var status = "";
-		
-		var statusReporter = function(message, isError) {
-			if (isError) {
-				status =  "ERROR: " + message;
-			} else {
-				status = message;
-			}
-			dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
-		};
-		
-		var editorContainer = new orion.EditorContainer({
-			editorFactory: editorFactory,
-			undoStackFactory: new orion.UndoFactory(),
-			//annotationFactory: annotationFactory,
-			//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
-			contentAssistFactory: contentAssistFactory,
-			keyBindingFactory: keyBindingFactory, 
-			statusReporter: statusReporter,
-			domNode: editorContainerDomNode
-		});
+						annotationFactory.showProblems(problems);
+						return true;
+				});
+			};
 			
-		dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
-			if (dirty) {
-				dirtyIndicator = "You have unsaved changes.  ";
-			} else {
-				dirtyIndicator = "";
-			}
-			dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
-		});
-		
-		editorContainer.installEditor();
-		
-		this._editorLeft = editorContainer.getEditorWidget();
+			var dirtyIndicator = "";
+			var status = "";
+			
+			var statusReporter = function(message, isError) {
+				if (isError) {
+					status =  "ERROR: " + message;
+				} else {
+					status = message;
+				}
+				dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
+			};
+			
+			var editorContainer = new orion.EditorContainer({
+				editorFactory: editorFactory,
+				undoStackFactory: new orion.UndoFactory(),
+				//annotationFactory: annotationFactory,
+				//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
+				contentAssistFactory: contentAssistFactory,
+				keyBindingFactory: keyBindingFactory, 
+				statusReporter: statusReporter,
+				domNode: editorContainerDomNode
+			});
+				
+			dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
+				if (dirty) {
+					dirtyIndicator = "You have unsaved changes.  ";
+				} else {
+					dirtyIndicator = "";
+				}
+				dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
+			});
+			
+			editorContainer.installEditor();
+			editorContainer.onInputChange("Content.js");
+			
+			this._editorLeft = editorContainer.getEditorWidget();
+			window.onbeforeunload = function() {
+				if (editorContainer.isDirty()) {
+					 return "There are unsaved changes.";
+				}
+			};
+		}
 		this._editorLeft.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 		
-		editorContainer.onInputChange("Content.js");
-		var self = this;
 		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
 			self.setStyle(lineStyleEvent , self._editorLeft);
 		}); 
@@ -336,14 +355,7 @@ orion.CompareMergeContainer = (function() {
 				self._compareMatchRenderer.render();
 			}
 		}); 
-				
 		
-		
-		window.onbeforeunload = function() {
-			if (editorContainer.isDirty()) {
-				 return "There are unsaved changes.";
-			}
-		};
 	};
 
 	CompareMergeContainer.prototype.setEditor = function(input , diff){	
@@ -399,8 +411,9 @@ orion.CompareMergeContainer = (function() {
 
 orion.InlineCompareContainer = (function() {
 	/** @private */
-	function InlineCompareContainer(editorDivId ) {
+	function InlineCompareContainer(resgistry , editorDivId ) {
 		this._editor = null;
+		this._registry = resgistry;
 		this._editorDivId = editorDivId;
 	}
 	InlineCompareContainer.prototype = new orion.CompareContainer();

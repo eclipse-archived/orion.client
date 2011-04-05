@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
- /*global dojo dijit*/
+ /*global dojo dijit dojox*/
  
 dojo.provide("widgets.eWebBorderContainer");
 	 
@@ -18,34 +18,98 @@ dojo.require("dojox.layout.ToggleSplitter");
 dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 	_splitterClass : "widgets.eWebSplitter",
 	
+	_leftPaneWidth: 0,
+	
+	_calcLeftPaneW: function(rightPane){
+		var leftPaneW = this.getSizeCookie();
+		if(leftPaneW < 50){
+			var originalW = rightPane.style.width;
+			var originalWint = parseInt(originalW.replace("px", ""), 10);
+			this._leftPaneWidth = originalWint*0.25;
+		} else {
+			this._leftPaneWidth = leftPaneW;
+		}
+		return this._leftPaneWidth;
+	},
+	
 	isLeftPaneOpen: function(){
-		var splitter = this._splitters["left"];
+		var splitter = this._splitters.left;
 		if(splitter){
 			return dijit.byNode(splitter).open;
 		}
 		return false;
 	},
 	getSizeCookie: function(){
-		var splitter = this._splitters["left"];
+		var splitter = this._splitters.left;
 		if(splitter){
 			return dijit.byNode(splitter).getSizeCookie();
 		}
 		return 0;
 	},
 	setSizeCookie: function(value){
-		var splitter = this._splitters["left"];
+		var splitter = this._splitters.left;
 		if(splitter){
 			return dijit.byNode(splitter).setSizeCookie(value);
 		}
 	},
 	toggleLeftPaneState: function(){
-		var splitter = this._splitters["left"];
+		var splitter = this._splitters.left;
 		if(splitter){
 			dijit.byNode(splitter).toggleLeftPaneState();
 		}
 	},
-	setToggleLeftPane: function(toggleFunction) {
-		this.set("toggleFunction", toggleFunction);
+	
+	setToggleCallback: function(toggleCallback) {
+		this.toggleCallback = toggleCallback;
+	},
+	toggle: function() {
+		var targetW = "";
+		var leftPane = this._left;
+		var rightPane = this._center;
+		var originalW = leftPane.style.width;
+		var originalWint = parseInt(originalW.replace("px", ""), 10);
+		var isLeftOpen = this.isLeftPaneOpen();
+		var targetWint;
+		if(isLeftOpen){
+			this._leftPaneWidth = originalWint;
+			targetWint = 0;
+
+		} else {
+			this._calcLeftPaneW(rightPane);
+			targetWint = this._leftPaneWidth;
+		}
+				
+		if(!isLeftOpen) {
+			this.toggleLeftPaneState();
+		}
+				
+		var a = new dojo.Animation({
+			node: leftPane,
+			duration: 300,
+			curve: [1, 100],
+			onAnimate: dojo.hitch(this, function(x){
+				var deltaW = (targetWint - originalWint)*x/100;
+				var curWidth = originalWint + deltaW;
+				leftPane.style.width = curWidth + "px";
+				leftPane.style.overflow = "hidden";
+				this._center.style.overflow = "hidden";
+				this.layout();
+				//this.resize();
+			}),
+			onEnd: dojo.hitch(this, function(){
+				// this._center.style.overflow = "auto";
+				if (this.toggleCallback) {
+					this.toggleCallback.apply();
+				}
+				if(isLeftOpen){
+					this.toggleLeftPaneState();
+				} else {
+					leftPane.style.overflow = "auto";
+					this.setSizeCookie(null);
+				}
+			})
+		});
+		a.play();
 	}
 });
 
@@ -65,12 +129,12 @@ dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 		if(this.container.persist){
 			// restore old state
 			var persistOpenState = dojo.cookie(this._openStateCookieName);
-			if(!persistOpenState || persistOpenState == "false" ){
-				dojo.byId("leftPane").style.width = "0px";
+			if(!persistOpenState || persistOpenState === "false" ){
+				this.container._left.style.width = "0px";
 				this.set("open", false);
 				this._handleOnChange();
 			} else {
-				dojo.byId("leftPane").style.width = this.getSizeCookie() + "px";
+				this.container._left.style.width = this.getSizeCookie() + "px";
 			}
 		}
 		return this;
@@ -78,7 +142,7 @@ dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 	
 	_handleOnChange: function(){
 		// summary
-		// 	effect the state change with the new value of this.open
+		// effect the state change with the new value of this.open
 
 		// TODO: animate the open/close
 		
@@ -144,10 +208,7 @@ dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 	_onThumbMouseDown: function(evt){
 		evt.stopPropagation();
 		this._removeFocusVisual(evt);
-		var toggleFunction = this.container.get("toggleFunction");
-		if (toggleFunction) {
-			toggleFunction.call();
-		}
+		this.container.toggle();
 	},
 	
 	_onThumbMouseOver: function(evt){

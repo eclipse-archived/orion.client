@@ -8,31 +8,26 @@
  ******************************************************************************/
 dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
-	serviceRegistry = new eclipse.ServiceRegistry();
+	var serviceRegistry = new eclipse.ServiceRegistry();
+	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	// Git operations
+	new eclipse.GitService(serviceRegistry);
+	// File operations
+	new eclipse.FileClient(serviceRegistry, pluginRegistry);
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
-	var sBSCompareContainer = new orion.SBSCompareContainer("left-viewer" , "right-viewer");
+	var sBSCompareContainer = new orion.SBSCompareContainer(serviceRegistry ,"left-viewer" , "right-viewer");
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){
 		var hash = splitted[1];
-		var params = hash.split("?");
-		var diffURI = null;
-		var fileURI = null;
-		if(params.length === 1){
-			fileURI = params[0];
-		} else {
-			fileURI = params[1];
-			diffURI = params[0];
-		}
 		
-		sBSCompareContainer.resolveDiff(diffURI, 
-											  fileURI,
-				  function(){
-					  dojo.place(document.createTextNode("File: " + fileURI), "left-viewer-title", "only");				  
-					  dojo.place(document.createTextNode("File On Git: " + fileURI), "right-viewer-title", "only");				  
+		sBSCompareContainer.resolveDiff(hash, 
+				  function(newFile , oldFile){
+					  dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  
+					  dojo.place(document.createTextNode("File On Git: " + oldFile), "right-viewer-title", "only");				  
 				  },
 				  function(errorResponse , ioArgs){
 					  var message = typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; 

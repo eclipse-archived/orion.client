@@ -18,25 +18,20 @@ dojo.addOnLoad(function(){
 	dojo.addOnUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	new eclipse.InputService(serviceRegistry);		
 	new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	new eclipse.LogService(serviceRegistry);
 	new eclipse.DialogService(serviceRegistry);
 	new eclipse.UserService(serviceRegistry);
-	new eclipse.SelectionService(serviceRegistry);
+	var selection = new orion.Selection(serviceRegistry);
+	new eclipse.SshService(serviceRegistry);
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-
-	
-	// Favorites
-	new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
 	
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
 	
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-	
-	var explorer = new eclipse.git.GitClonesExplorer(serviceRegistry, "/git/clone/", "clonesList", "pageActions", "selectionTools");
+	var explorer = new eclipse.git.GitClonesExplorer(serviceRegistry, selection, "/git/clone/", "clonesList", "pageActions", "selectionTools");
 	
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
@@ -49,15 +44,10 @@ dojo.addOnLoad(function(){
 	// git contributions
 	commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup");
 	commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
-	
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 1);
-	
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 1, "selectionTools", "eclipse.selectionGroup");
 
-
 	eclipse.gitCommandUtils.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
-	
-	
 	
 	explorer.displayClonesList(dojo.hash());
 	

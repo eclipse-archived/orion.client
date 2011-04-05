@@ -18,13 +18,13 @@ dojo.addOnLoad(function(){
 	dojo.addOnUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	new eclipse.InputService(serviceRegistry);		
 	new eclipse.StatusReportingService(serviceRegistry, "statusPane");
 	new eclipse.LogService(serviceRegistry);
 	new eclipse.DialogService(serviceRegistry);
-	new eclipse.SelectionService(serviceRegistry);
+	var selection = new orion.Selection(serviceRegistry);
+	new eclipse.SshService(serviceRegistry);
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 	
 	// Git operations
 	var gitClient = new eclipse.GitService(serviceRegistry);
@@ -34,9 +34,7 @@ dojo.addOnLoad(function(){
 	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
-	
-	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, treeRoot, searcher, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, treeRoot, selection, searcher, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, navigator);
@@ -51,6 +49,7 @@ dojo.addOnLoad(function(){
 	
 	// commands appearing directly in local actions column
 	commandService.registerCommandContribution("eclipse.openGitCommit", 1);
+	commandService.registerCommandContribution("eclipse.compareWithWorkingTree", 2);
 
 	// selection based command contributions in nav toolbar
 	commandService.registerCommandContribution("eclipse.compareGitCommits", 1, "selectionTools", "eclipse.selectionGroup");
