@@ -50,14 +50,20 @@ orion.CompareContainer = (function() {
 		
 		getFileContent: function(fileURI , errorCallBack ){
 			var self = this;
-			self._registry.getService("IGitService").then(
-				function(service) {
-					service.getDiffFileContent(fileURI, 
-										   function(jsonData, secondArg) {
-											  self.setEditor(jsonData , self._diff );					  
-										   },
-										   errorCallBack);
-				});
+			self._registry.getService("IFileService").then(
+					function(service) {
+						service.read(fileURI).then( 
+											  function(contents) {
+												  self.setEditor(contents , self._diff );					  
+											  },
+											  function(error ,ioArgs) {
+												  if(error.status === 404)
+													  self.setEditor("" , self._diff );	
+												  else if(errorCallBack)
+													  errorCallBack(error ,ioArgs);
+													  
+											  });
+					});
 		},
 		
 		parseMapper: function(input , diff , doNotBuildNewFile){

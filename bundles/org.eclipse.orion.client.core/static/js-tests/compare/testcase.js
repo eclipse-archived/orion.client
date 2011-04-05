@@ -51,7 +51,7 @@ var testcase = function(assert) {
 		  "";
 		var expectedOutput = "\r\n" +
 		  "";
-		var expectedMapping = [[2, 1, 2]];
+		var expectedMapping = [[2, 0, 2]];
 
 		var diffParser = new orion.DiffParser();
 		var result = diffParser.parse(input, diff);
@@ -72,7 +72,7 @@ var testcase = function(assert) {
 		  "\r\n" + 
 		  "";
 		
-		var expectedMapping = [[3, 1, 2]];
+		var expectedMapping = [[3, 0, 2]];
 
 		var diffParser = new orion.DiffParser();
 		var result = diffParser.parse(input, diff);
@@ -80,22 +80,5 @@ var testcase = function(assert) {
 		assert.equal(result.outPutFile, expectedOutput);
 	};
 	
-	
-	
-	/*
-
-	tests["test "] = function() {
-		var input = ;
-		var diff = ;
-		var expectedOutput = ;
-		var expectedMapping = ;
-		
-		var diffParser = new orion.DiffParser();
-		var result = diffParser.parse(input, diff);
-		assert.deepEqual(result.mapper, expectedMapping);
-		assert.equal(result.outPutFile, expectedOutput);
-	}
-
-*/	
 	return tests;
 }(orion.Assert);
