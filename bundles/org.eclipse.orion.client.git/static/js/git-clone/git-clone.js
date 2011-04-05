@@ -26,16 +26,11 @@ dojo.addOnLoad(function(){
 	new eclipse.SshService(serviceRegistry);
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-
-	
-	// Favorites
-	new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
 	
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
 	
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-	
 	var explorer = new eclipse.git.GitClonesExplorer(serviceRegistry, selection, "/git/clone/", "clonesList", "pageActions", "selectionTools");
 	
 	// global commands
@@ -49,15 +44,10 @@ dojo.addOnLoad(function(){
 	// git contributions
 	commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup");
 	commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
-	
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 1);
-	
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 1, "selectionTools", "eclipse.selectionGroup");
 
-
 	eclipse.gitCommandUtils.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
-	
-	
 	
 	explorer.displayClonesList(dojo.hash());
 	

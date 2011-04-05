@@ -34,8 +34,6 @@ dojo.addOnLoad(function(){
 	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
-	
 	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, treeRoot, selection, searcher, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 
 	// global commands

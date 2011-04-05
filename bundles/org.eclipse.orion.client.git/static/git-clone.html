@@ -17,7 +17,8 @@
     <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script type="text/javascript" src="/org.dojotoolkit/orion/orion.js.uncompressed.js"></script>
     <script type="text/javascript">
-	dojo.require("dijit.Dialog");
+		dojo.require("dijit.Dialog");
+		dojo.require("widgets.OpenResourceDialog");
  	</script> 
  	<style type="text/css">
 		@import "/org.dojotoolkit/dojo/resources/dojo.css";
@@ -31,44 +32,28 @@
 	</style>
 	
 	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
-	
-	
-	    <!-- Everything between START and END will be commented out and replaced with a closure compiled navigate-table.js
-         please update org.eclipse.orion.releng/builder/scripts/closure.xml when making changes here 
-      -->
-	<!-- START:navigate-table.js -->
-		<script type="text/javascript" src="js/auth.js" comment="required for handleAuthenticationError" ></script> 	
-		<script src="js/treetable.js"  comment="this was in the header"></script>
-	    <script type="text/javascript" comment="this and below was in the body" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
-	
-		<script src="js/serviceregistry.js"></script>
-		<script src="js/pluginregistry.js"></script>
-	
-		<script src="js/util.js"></script>
-	 	<script src="js/commands.js"></script>
-	 	<script src="js/dialogs.js"></script>
-	 	<script src="js/log.js"></script>
-	 	<script src="js/preferences.js"></script>
-	 	<script src="js/selection.js"></script>
-	 	<script src="js/status.js"></script>
-	 	<script src="js/users.js"></script>
-	 	
-	 	<script src="js/fileClient.js"></script>
-		<script src="js/favorites.js"></script>
-		<script src="js/searchClient.js"></script>
-		
-		<script src="js/globalCommands.js"></script>
-		<script src="js/breadcrumbs.js"></script>
-		
-		<script src="js/ssh/sshTools.js"></script>
-		<script src="js/gitClient.js"></script>
-		<script src="js/gitCommands.js"></script>
-	 	
-	 	<script src="js/generic-explorer.js"></script>
-	 	<script src="js/git-clone/git-clones-explorer.js"></script>
-	 	<script src="js/git-clone/git-clone.js"></script>	 	
-	<!-- END:navigate-table.js -->
- 	<!-- INSERT:navigate-table.js -->
+	<script type="text/javascript" src="js/auth.js" comment="required for handleAuthenticationError" ></script> 	
+	<script src="js/treetable.js"  comment="this was in the header"></script>
+	<script src="js/serviceregistry.js"></script>
+	<script src="js/pluginregistry.js"></script>
+	<script src="js/util.js"></script>
+ 	<script src="js/commands.js"></script>
+ 	<script src="js/dialogs.js"></script>
+ 	<script src="js/log.js"></script>
+ 	<script src="js/preferences.js"></script>
+ 	<script src="js/selection.js"></script>
+ 	<script src="js/status.js"></script>
+ 	<script src="js/users.js"></script>
+	<script src="js/searchClient.js"></script>
+	<script src="js/globalCommands.js"></script>
+	<script src="js/breadcrumbs.js"></script>
+	<script src="js/ssh/sshTools.js"></script>
+	<script src="js/gitClient.js"></script>
+	<script src="js/gitCommands.js"></script>
+ 	
+ 	<script src="js/generic-explorer.js"></script>
+ 	<script src="js/git-clone/git-clones-explorer.js"></script>
+ 	<script src="js/git-clone/git-clone.js"></script>	 	
  	
 </head>
 <body>
