@@ -185,11 +185,10 @@ eclipse.ExplorerRenderer = (function() {
 				dojo.addClass(check, "selectionCheckmark");
 				check.itemId = tableRow.id;
 				checkColumn.appendChild(check);
-				var selections = this.getSelected();
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
 					this.storeSelections();
-					this.explorer.selection.setSelections(selections);		
+					this.explorer.selection.setSelections(this.getSelected());		
 				}));
 				return checkColumn;
 			}
@@ -225,6 +224,9 @@ eclipse.ExplorerRenderer = (function() {
 					}
 				}
 			}	
+			// notify the selection service of our new selections
+			var selectedItems = this.getSelected();
+			this.explorer.selection.setSelections(selectedItems);
 		},
 		
 		getUIStatePreferencePath: function() {
@@ -254,8 +256,6 @@ eclipse.ExplorerRenderer = (function() {
 							break;
 						}
 					}
-					// store selections again so that if any persisted selections have been collapsed, they will be forgotten.
-					this.storeSelections();
 				}
 				var prefPath = this.getUIStatePreferencePath();
 				if (prefPath) {
@@ -306,9 +306,9 @@ eclipse.ExplorerRenderer = (function() {
 					dojo.removeClass(node, "darkTreeTableRow");
 				}
 			});
-			// update the selections so that any checked rows that may no longer be around are not
-			// remembered.  This is a temporary solution, 
-			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339450
+			// persist the selections.  Rows that contained persisted items may have disappeared.
+			this.storeSelections();
+			// notify the selection service of the change in state.
 			this.explorer.selection.setSelections(this.getSelected());
 		},
 		updateCommands: function(){
@@ -353,7 +353,12 @@ eclipse.ExplorerRenderer = (function() {
 								var row= dojo.byId(expanded[i]);
 								if (row) {
 									this._expanded.push(expanded[i]);
-									this.tableTree.expand(expanded[i], dojo.hitch(this, function() {this.restoreSelections(prefs);}));
+									this.tableTree.expand(expanded[i], dojo.hitch(this, function() {
+										// set the check state for persisted selections
+										this.restoreSelections(prefs);
+										// notify the selection service of items that are checked
+										this.explorer.selection.setSelections(this.getSelected());
+									}));
 								}
 							}
 						} else {
