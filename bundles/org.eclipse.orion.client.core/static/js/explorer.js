@@ -51,7 +51,7 @@ eclipse.Explorer = (function() {
 			if (existing) {
 				dojo.destroy(existing);
 			}
-			if(model){
+			if (model){
 				model.rootId = treeId;
 			}
 			dojo.empty(parentId);
@@ -64,6 +64,14 @@ eclipse.Explorer = (function() {
 				labelColumnIndex: this.checkbox ? 1 : 0,  // 0 if no checkboxes
 				renderer: this.renderer
 			});
+			this.renderer._initializeUIState();
+		},
+		
+		getRootPath: function() {
+			if (this.model && this.model.root) {
+				return this.model.root.Location;
+			}
+			return null;
 		},
 	    
 	    _lastHash: null,
@@ -128,8 +136,8 @@ eclipse.ExplorerModel = (function() {
 eclipse = eclipse || {};
 eclipse.ExplorerRenderer = (function() {
 	function ExplorerRenderer (options, explorer) {
-		this._init(options);
 		this.explorer = explorer;
+		this._init(options);
 	}
 	ExplorerRenderer.prototype = {
 		initTable: function (tableNode, tableTree) {
@@ -164,7 +172,7 @@ eclipse.ExplorerRenderer = (function() {
 		},
 		initCheckboxColumn: function(tableNode){
 			if (this._useCheckboxSelection) {
-				th = document.createElement('th');
+				var th = document.createElement('th');
 				return th;
 			}
 		},
@@ -173,24 +181,65 @@ eclipse.ExplorerRenderer = (function() {
 				var checkColumn = document.createElement('td');
 				var check = document.createElement('input');
 				check.type = "checkbox";
-				check.id = tableRow+"selectedState";
+				check.id = tableRow.id+"selectedState";
 				dojo.addClass(check, "selectionCheckmark");
 				check.itemId = tableRow.id;
 				checkColumn.appendChild(check);
-				
-				
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
-					this.explorer.selection.setSelections(this.getSelected());		
+					var selections = this.getSelected();
+					var selectionIDs = this.getSelectedIds();
+					var prefPath = this.getUIStatePreferencePath();
+					if (prefPath) {
+						this.explorer.registry.getService("IPreferenceService").then(function(service) {
+							return service.getPreferences(prefPath);
+						}).then(function(prefs){
+							prefs.put("selection", selectionIDs);
+						}); 
+					}
+					this.explorer.selection.setSelections(selections);		
 				}));
 				return checkColumn;
 			}
 		},
+		
+		getUIStatePreferencePath: function() {
+			if (this.explorer) {
+				var rootPath = this.explorer.getRootPath();
+				if (this._cachePrefix && rootPath) {
+					var rootSegmentId = rootPath.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+					return this._cachePrefix + "/" + rootSegmentId + "/uiState";
+				}
+			}
+			return null;
+						
+		},
+		
 		getExpandImage: function(tableRow, placeHolder){
 			var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: tableRow.id + "__expand"}, placeHolder, "last");
 			dojo.create("img", {src: "/images/fldr_obj.gif"}, placeHolder, "last");
 			expandImg.onclick = dojo.hitch(this, function(evt) {
 				this.tableTree.toggle(tableRow.id, tableRow.id + "__expand", '/images/expanded-gray.png', '/images/collapsed-gray.png');
+				var expanded = this.tableTree.isExpanded(tableRow.id);
+				if (expanded) {
+					this._expanded.push(tableRow.id);
+				} else {
+					for (var i in this._expanded) {
+						if (this._expanded[i] === tableRow.id) {
+							this._expanded.splice(i, 1);
+							break;
+						}
+					}
+				}
+				var prefPath = this.getUIStatePreferencePath();
+				if (prefPath) {
+					this.explorer.registry.getService("IPreferenceService").then(function(service) {
+						return service.getPreferences(prefPath);
+					}).then(dojo.hitch(this, function(prefs){
+						prefs.put("expanded", this._expanded);
+					})); 
+				}
+				
 			});
 			return expandImg;
 		},
@@ -205,6 +254,17 @@ eclipse.ExplorerRenderer = (function() {
 				if (node.checked) {
 					var row = node.parentNode.parentNode;
 					selected.push(this.tableTree.getItem(row));
+				}
+			}));
+			return selected;
+		},
+		
+		getSelectedIds: function() {
+			var selected = [];
+			dojo.query(".selectionCheckmark").forEach(dojo.hitch(this, function(node) {
+				if (node.checked) {
+					var row = node.parentNode.parentNode;
+					selected.push(row.id);
 				}
 			}));
 			return selected;
@@ -244,7 +304,49 @@ eclipse.ExplorerRenderer = (function() {
 		_init: function(options) {
 			if (options) {
 				this._useCheckboxSelection = options.checkbox === undefined ? false : options.checkbox;
-				this._colums = options.colums === undefined ? [] : options.colums;
+				this._colums = options.colums || [];
+				this._cachePrefix = options.cachePrefix;
+			}
+		},
+		
+		_initializeUIState: function() {
+			this._expanded = [];
+			var prefsPath = this.getUIStatePreferencePath();
+			if (prefsPath) {
+				this.explorer.registry.getService("IPreferenceService").then(dojo.hitch(this, function(service) {
+					service.getPreferences(prefsPath).then(dojo.hitch(this, function(prefs) { 
+						var i;
+						var expanded = prefs.get("expanded");
+						if (typeof expanded === "string") {
+							expanded = JSON.parse(expanded);
+						}
+						if (expanded) {
+							for (i=0; i<expanded.length; i++) {
+								var row= dojo.byId(expanded[i]);
+								if (row) {
+									this._expanded.push(expanded[i]);
+									this.tableTree.expand(expanded[i]);
+								}
+							}
+						}
+						var selections = prefs.get("selection");
+						if (typeof selections === "string") {
+							selections = JSON.parse(selections);
+						}
+						if (selections) {
+							for (i=0; i<selections.length; i++) {
+								var tableRow = dojo.byId(selections[i]);
+								if (tableRow) {
+									dojo.addClass(tableRow, "checkedRow");
+									var check = dojo.byId(tableRow.id + "selectedState");
+									if (check) {
+										check.checked=true;
+									}
+								}
+							}
+						}				
+					}));
+				}));
 			}
 		}
 	};
@@ -290,8 +392,9 @@ eclipse.SelectionRenderer = (function(){
 		dojo.addClass(tableRow, "treeTableRow");
 
 		var checkColumn = this.getCheckboxColumn(item, tableRow);
-		if(checkColumn)
+		if(checkColumn) {
 			tableRow.appendChild(checkColumn);
+		}
 
 		var i = 0;
 		var cell = this.getCellElement(i, item, tableRow);

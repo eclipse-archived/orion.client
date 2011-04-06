@@ -28,7 +28,7 @@ eclipse.FileExplorer = (function() {
 		this.selectionToolsId = selectionToolsId;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new eclipse.FileRenderer({checkbox: true }, this);
+		this.renderer = new eclipse.FileRenderer({checkbox: true, cachePrefix: "Navigator" }, this);
 	}
 	
 	FileExplorer.prototype = eclipse.Explorer.prototype;
@@ -147,8 +147,8 @@ eclipse.Model = (function() {
 eclipse = eclipse || {};
 eclipse.FileRenderer = (function() {
 	function FileRenderer (options, explorer) {
-		this._init(options);
 		this.explorer = explorer;
+		this._init(options);
 	}
 	FileRenderer.prototype = eclipse.SelectionRenderer.prototype; 
 	
@@ -180,13 +180,10 @@ eclipse.FileRenderer = (function() {
 				col = document.createElement('td');
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
-				var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
-				dojo.create("img", {src: "/images/fldr_obj.gif"}, div, "last");
+				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
+				this.getExpandImage(tableRow, div);
 				link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				expandImg.onclick = dojo.hitch(this, function(evt) {
-					this.tableTree.toggle(tableRow.id, nameId, '/images/expanded-gray.png', '/images/collapsed-gray.png');
-				});
 			} else {
 				col = document.createElement('td');
 				// only go to the coding page for things we know how to edit.  This way we can still view images, etc.

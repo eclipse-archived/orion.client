@@ -181,6 +181,14 @@ eclipse.TableTree = (function() {
 			}
 		},
 		
+		isExpanded: function(id) {
+			var row = dojo.byId(id);
+			if (row) {
+				return row._expanded;
+			}
+			return false;
+		},
+		
 		expand: function(itemOrId , postExpandFunc , args) {
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId);
 			var row = dojo.byId(id);
