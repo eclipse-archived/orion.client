@@ -185,22 +185,46 @@ eclipse.ExplorerRenderer = (function() {
 				dojo.addClass(check, "selectionCheckmark");
 				check.itemId = tableRow.id;
 				checkColumn.appendChild(check);
+				var selections = this.getSelected();
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
-					var selections = this.getSelected();
-					var selectionIDs = this.getSelectedIds();
-					var prefPath = this.getUIStatePreferencePath();
-					if (prefPath) {
-						this.explorer.registry.getService("IPreferenceService").then(function(service) {
-							return service.getPreferences(prefPath);
-						}).then(function(prefs){
-							prefs.put("selection", selectionIDs);
-						}); 
-					}
+					this.storeSelections();
 					this.explorer.selection.setSelections(selections);		
 				}));
 				return checkColumn;
 			}
+		},
+		
+		storeSelections: function() {
+			var selectionIDs = this.getSelectedIds();
+			var prefPath = this.getUIStatePreferencePath();
+			if (prefPath) {
+				this.explorer.registry.getService("IPreferenceService").then(function(service) {
+					return service.getPreferences(prefPath);
+				}).then(function(prefs){
+					prefs.put("selection", selectionIDs);
+				}); 
+			}
+		},
+		
+		restoreSelections: function(prefs) {
+			var selections = prefs.get("selection");
+			if (typeof selections === "string") {
+				selections = JSON.parse(selections);
+			}
+			var i;
+			if (selections) {
+				for (i=0; i<selections.length; i++) {
+					var tableRow = dojo.byId(selections[i]);
+					if (tableRow) {
+						dojo.addClass(tableRow, "checkedRow");
+						var check = dojo.byId(tableRow.id + "selectedState");
+						if (check) {
+							check.checked = true;
+						}
+					}
+				}
+			}	
 		},
 		
 		getUIStatePreferencePath: function() {
@@ -208,7 +232,7 @@ eclipse.ExplorerRenderer = (function() {
 				var rootPath = this.explorer.getRootPath();
 				if (this._cachePrefix && rootPath) {
 					var rootSegmentId = rootPath.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
-					return this._cachePrefix + "/" + rootSegmentId + "/uiState";
+					return "/" + this._cachePrefix + "/" + rootSegmentId + "/uiState";
 				}
 			}
 			return null;
@@ -230,6 +254,8 @@ eclipse.ExplorerRenderer = (function() {
 							break;
 						}
 					}
+					// store selections again so that if any persisted selections have been collapsed, they will be forgotten.
+					this.storeSelections();
 				}
 				var prefPath = this.getUIStatePreferencePath();
 				if (prefPath) {
@@ -320,31 +346,19 @@ eclipse.ExplorerRenderer = (function() {
 						if (typeof expanded === "string") {
 							expanded = JSON.parse(expanded);
 						}
+						// if there is something to expand, restore the selections after expansion is done, to ensure that
+						// the dom node exists
 						if (expanded) {
 							for (i=0; i<expanded.length; i++) {
 								var row= dojo.byId(expanded[i]);
 								if (row) {
 									this._expanded.push(expanded[i]);
-									this.tableTree.expand(expanded[i]);
+									this.tableTree.expand(expanded[i], dojo.hitch(this, function() {this.restoreSelections(prefs);}));
 								}
 							}
-						}
-						var selections = prefs.get("selection");
-						if (typeof selections === "string") {
-							selections = JSON.parse(selections);
-						}
-						if (selections) {
-							for (i=0; i<selections.length; i++) {
-								var tableRow = dojo.byId(selections[i]);
-								if (tableRow) {
-									dojo.addClass(tableRow, "checkedRow");
-									var check = dojo.byId(tableRow.id + "selectedState");
-									if (check) {
-										check.checked=true;
-									}
-								}
-							}
-						}				
+						} else {
+							this.restoreSelections(prefs);
+						}		
 					}));
 				}));
 			}

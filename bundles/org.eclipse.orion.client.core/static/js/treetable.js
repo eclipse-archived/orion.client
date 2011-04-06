@@ -201,7 +201,10 @@ eclipse.TableTree = (function() {
 				var children = this._treeModel.getChildren(row._item, function(children) {
 					tree._generateChildren(children, row._depth+1, row, "after");
 					tree._rowsChanged();
-				} , postExpandFunc  ,args);
+					if (postExpandFunc) {
+						postExpandFunc.apply(this, args);
+					}
+				});
 			}
 		}, 
 		
