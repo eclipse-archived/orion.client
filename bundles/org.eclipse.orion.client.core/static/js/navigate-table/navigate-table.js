@@ -53,7 +53,7 @@ dojo.addOnLoad(function(){
 	
 	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 	
-	var explorer = new eclipse.Explorer(serviceRegistry, treeRoot, selection, searcher, fileClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+	var explorer = new eclipse.FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 	
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	

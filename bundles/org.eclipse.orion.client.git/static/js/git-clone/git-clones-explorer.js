@@ -19,7 +19,7 @@ eclipse.git.GitClonesRenderer = (function(){
 		this._init(options);
 		this.explorer = explorer;
 	}
-	GitClonesRenderer.prototype = eclipse.SimpleTreeTableRenderer.prototype;
+	GitClonesRenderer.prototype = eclipse.SelectionRenderer.prototype;
 	
 	GitClonesRenderer.prototype.getCellHeaderElement = function(col_no){
 		
@@ -75,7 +75,7 @@ eclipse.git.GitClonesExplorer = (function() {
 		this.renderer = new eclipse.git.GitClonesRenderer({checkbox: this.checkbox }, this);
 		
 	}
-	GitClonesExplorer.prototype = eclipse.GenericExplorer.prototype;
+	GitClonesExplorer.prototype = eclipse.Explorer.prototype;
 	GitClonesExplorer.prototype.displayClonesList = function(path){
 		
 			var self = this;
@@ -94,7 +94,7 @@ eclipse.git.GitClonesExplorer = (function() {
 			d.innerHTML = "Loading <b>" + path + "</b>...";
 			
 			this.registry.getService("IGitService").then(function(service){
-				dojo.hitch(self, self.createTree(self.parentId, new eclipse.SimpleTreeTableModel(path, service.getGitClone)));
+				dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerModel(path, service.getGitClone)));
 			});
 		};
 

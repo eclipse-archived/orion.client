@@ -11,22 +11,22 @@
 /*jslint regexp:false browser:true forin:true*/
 
 var eclipse = eclipse || {};
-eclipse.GenericExplorer = (function() {
+eclipse.Explorer = (function() {
 	/**
-	 * @name eclipse.GenericExplorer
+	 * @name eclipse.Explorer
 	 * @class A table-based explorer component.
 	 * 
 	 * @param serviceRegistry
 	 * @param parentId id of parent dom element
 	 * @param renderer
 	 */
-	function GenericExplorer(serviceRegistry, selection, renderer) {
+	function Explorer(serviceRegistry, selection, renderer) {
 		this.registry = serviceRegistry;
 		this.renderer = renderer;
 		this.selection = selection;
 		this.myTree = null;
 	}
-	GenericExplorer.prototype = /** @lends eclipse.GenericExplorer.prototype */ {
+	Explorer.prototype = /** @lends eclipse.Explorer.prototype */ {
 		
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, children) {
@@ -69,21 +69,21 @@ eclipse.GenericExplorer = (function() {
 	    _lastHash: null,
 	    checkbox: this.checkbox || true
 	};
-	return GenericExplorer;
+	return Explorer;
 }());
 
 eclipse = eclipse || {};
-eclipse.SimpleTreeTableModel = (function() {
+eclipse.ExplorerModel = (function() {
 	/**
-	 * @name eclipse.SimpleTreeTableModel
+	 * @name eclipse.ExplorerModel
 	 * @class Simple tree model using Children and ChildrenLocation attributes to fetch children
 	 * and calculating id based on Location attribute.
 	 */
-	function SimpleTreeTableModel(rootPath, /* function returning promise */fetchItems) {
+	function ExplorerModel(rootPath, /* function returning promise */fetchItems) {
 		this.rootPath = rootPath;
 		this.fetchItems = fetchItems;
 	}
-	SimpleTreeTableModel.prototype = {
+	ExplorerModel.prototype = {
 		destroy: function(){
 		},
 		getRoot: function(onItem){
@@ -121,17 +121,17 @@ eclipse.SimpleTreeTableModel = (function() {
 			return result;
 		}
 	};
-	return SimpleTreeTableModel;
+	return ExplorerModel;
 }());
 
 /********* Rendering json items into columns in the tree **************/
 eclipse = eclipse || {};
-eclipse.GenericTableRenderer = (function() {
-	function GenericTableRenderer (options, explorer) {
+eclipse.ExplorerRenderer = (function() {
+	function ExplorerRenderer (options, explorer) {
 		this._init(options);
 		this.explorer = explorer;
 	}
-	GenericTableRenderer.prototype = {
+	ExplorerRenderer.prototype = {
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
 			
@@ -248,23 +248,23 @@ eclipse.GenericTableRenderer = (function() {
 			}
 		}
 	};
-	return GenericTableRenderer;
+	return ExplorerRenderer;
 }());
 
 /**
- * @name eclipse.SimpleTreeTableRenderer
+ * @name eclipse.SelectionRenderer
  * @class Sample renderer that allows you to render a standard tree table.
- * Override {@link eclipse.SimpleTreeTableRenderer#getCellHeaderElement}  and
- * {@link eclipse.SimpleTreeTableRenderer#getCellElement} to generate table content.
+ * Override {@link eclipse.SelectionRenderer#getCellHeaderElement}  and
+ * {@link eclipse.SelectionRenderer#getCellElement} to generate table content.
  */
-eclipse.SimpleTreeTableRenderer = (function(){
-	function SimpleTreeTableRenderer(options, explorer) {
+eclipse.SelectionRenderer = (function(){
+	function SelectionRenderer(options, explorer) {
 		this._init(options);
 		this.explorer = explorer;
 	}
-	SimpleTreeTableRenderer.prototype = eclipse.GenericTableRenderer.prototype;
+	SelectionRenderer.prototype = eclipse.ExplorerRenderer.prototype;
 	
-	SimpleTreeTableRenderer.prototype.renderTableHeader = function(tableNode){
+	SelectionRenderer.prototype.renderTableHeader = function(tableNode){
 		var thead = document.createElement('thead');
 		var row = document.createElement('tr');
 		dojo.addClass(thead, "navTableHeading");
@@ -285,7 +285,7 @@ eclipse.SimpleTreeTableRenderer = (function(){
 		
 	};
 	
-	SimpleTreeTableRenderer.prototype.renderRow = function(item, tableRow) {
+	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
 		dojo.style(tableRow, "verticalAlign", "baseline");
 		dojo.addClass(tableRow, "treeTableRow");
 
@@ -308,7 +308,7 @@ eclipse.SimpleTreeTableRenderer = (function(){
 	 * Override to return a dom element containing table header, preferably <code>th</code>
 	 * @param col_no number of column
 	 */
-	SimpleTreeTableRenderer.prototype.getCellHeaderElement = function(col_no){};
+	SelectionRenderer.prototype.getCellHeaderElement = function(col_no){};
 
 
 
@@ -318,8 +318,8 @@ eclipse.SimpleTreeTableRenderer = (function(){
 	 * @param item item to be rendered
 	 * @param tableRow the current table row
 	 */
-	SimpleTreeTableRenderer.prototype.getCellElement = function(col_no, item, tableRow){};
+	SelectionRenderer.prototype.getCellElement = function(col_no, item, tableRow){};
 	
-	return SimpleTreeTableRenderer;
+	return SelectionRenderer;
 }());
 
