@@ -7,7 +7,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo eclipse:true widgets*/
+/*global dojo eclipse:true widgets window*/
 /*jslint regexp:false browser:true forin:true*/
 
 var eclipse = eclipse || {};
@@ -187,29 +187,29 @@ eclipse.ExplorerRenderer = (function() {
 				checkColumn.appendChild(check);
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
-					this.storeSelections();
+					this._storeSelections();
 					this.explorer.selection.setSelections(this.getSelected());		
 				}));
 				return checkColumn;
 			}
 		},
 		
-		storeSelections: function() {
+		_storeSelections: function() {
 			var selectionIDs = this.getSelectedIds();
-			var prefPath = this.getUIStatePreferencePath();
-			if (prefPath) {
-				this.explorer.registry.getService("IPreferenceService").then(function(service) {
-					return service.getPreferences(prefPath);
-				}).then(function(prefs){
-					prefs.put("selection", selectionIDs);
-				}); 
+			var prefPath = this._getUIStatePreferencePath();
+			if (prefPath && window.sessionStorage) {
+				window.sessionStorage[prefPath+"selection"] = JSON.stringify(selectionIDs);
 			}
 		},
 		
-		restoreSelections: function(prefs) {
-			var selections = prefs.get("selection");
+		_restoreSelections: function(prefPath) {
+			var selections = window.sessionStorage[prefPath+"selection"];
 			if (typeof selections === "string") {
-				selections = JSON.parse(selections);
+				if (selections.length > 0) {
+					selections = JSON.parse(selections);
+				} else {
+					selections = null;
+				}
 			}
 			var i;
 			if (selections) {
@@ -229,7 +229,39 @@ eclipse.ExplorerRenderer = (function() {
 			this.explorer.selection.setSelections(selectedItems);
 		},
 		
-		getUIStatePreferencePath: function() {
+		_storeExpansions: function(prefPath) {
+			window.sessionStorage[prefPath+"expanded"] = JSON.stringify(this._expanded);
+		},
+		
+		// returns true if the selections also need to be restored.
+		_restoreExpansions: function(prefPath) {
+			var didRestoreSelections = false;
+			var expanded = window.sessionStorage[prefPath+"expanded"];
+			if (typeof expanded=== "string") {
+				if (expanded.length > 0) {
+					expanded= JSON.parse(expanded);
+				} else {
+					expanded = null;
+				}
+			}
+			var i;
+			if (expanded) {
+				for (i=0; i<expanded.length; i++) {
+					var row= dojo.byId(expanded[i]);
+					if (row) {
+						this._expanded.push(expanded[i]);
+						// restore selections after expansion in case an expanded item was selected.
+						this.tableTree.expand(expanded[i], dojo.hitch(this, function() {
+							this._restoreSelections(prefPath);
+						}));
+						didRestoreSelections = true;
+					}
+				}
+			}
+			return !didRestoreSelections;
+		},
+		
+		_getUIStatePreferencePath: function() {
 			if (this.explorer) {
 				var rootPath = this.explorer.getRootPath();
 				if (this._cachePrefix && rootPath) {
@@ -257,13 +289,9 @@ eclipse.ExplorerRenderer = (function() {
 						}
 					}
 				}
-				var prefPath = this.getUIStatePreferencePath();
-				if (prefPath) {
-					this.explorer.registry.getService("IPreferenceService").then(function(service) {
-						return service.getPreferences(prefPath);
-					}).then(dojo.hitch(this, function(prefs){
-						prefs.put("expanded", this._expanded);
-					})); 
+				var prefPath = this._getUIStatePreferencePath();
+				if (prefPath && window.sessionStorage) {
+					this._storeExpansions(prefPath);
 				}
 				
 			});
@@ -306,8 +334,6 @@ eclipse.ExplorerRenderer = (function() {
 					dojo.removeClass(node, "darkTreeTableRow");
 				}
 			});
-			// persist the selections.  Rows that contained persisted items may have disappeared.
-			this.storeSelections();
 			// notify the selection service of the change in state.
 			this.explorer.selection.setSelections(this.getSelected());
 		},
@@ -337,35 +363,11 @@ eclipse.ExplorerRenderer = (function() {
 		
 		_initializeUIState: function() {
 			this._expanded = [];
-			var prefsPath = this.getUIStatePreferencePath();
-			if (prefsPath) {
-				this.explorer.registry.getService("IPreferenceService").then(dojo.hitch(this, function(service) {
-					service.getPreferences(prefsPath).then(dojo.hitch(this, function(prefs) { 
-						var i;
-						var expanded = prefs.get("expanded");
-						if (typeof expanded === "string") {
-							expanded = JSON.parse(expanded);
-						}
-						// if there is something to expand, restore the selections after expansion is done, to ensure that
-						// the dom node exists
-						if (expanded) {
-							for (i=0; i<expanded.length; i++) {
-								var row= dojo.byId(expanded[i]);
-								if (row) {
-									this._expanded.push(expanded[i]);
-									this.tableTree.expand(expanded[i], dojo.hitch(this, function() {
-										// set the check state for persisted selections
-										this.restoreSelections(prefs);
-										// notify the selection service of items that are checked
-										this.explorer.selection.setSelections(this.getSelected());
-									}));
-								}
-							}
-						} else {
-							this.restoreSelections(prefs);
-						}		
-					}));
-				}));
+			var prefsPath = this._getUIStatePreferencePath();
+			if (prefsPath && window.sessionStorage) {
+				if (this._restoreExpansions(prefsPath)) {
+					this._restoreSelections(prefsPath);
+				}
 			}
 		}
 	};
