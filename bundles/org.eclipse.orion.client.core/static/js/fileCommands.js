@@ -293,7 +293,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 						fileClient.moveFile(item.Location, item.parent.Location, newText).then(
 							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);})//refresh the root
 						);
-					})
+					}), 
+					null, null, "."
 				); 
 			})
 		});

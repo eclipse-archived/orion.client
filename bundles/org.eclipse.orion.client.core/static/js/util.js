@@ -22,7 +22,7 @@ var eclipse = eclipse || {};
  
 eclipse.util = eclipse.util || {};
 
-eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy) {
+eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy, promptMessage, selectTo) {
 	/** @return function(event) */
 	var handler = function(isKeyEvent) {
 		return function(event) {
@@ -49,7 +49,8 @@ eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText,
 	var editBox = new dijit.form.ValidationTextBox({
 		id: id,
 		required: true, // disallows empty string
-		value: initialText || ""
+		value: initialText || "",
+		promptMessage: promptMessage
 	});
 	dojo.place(editBox.domNode, refNode, "after");
 	if (shouldHideRefNode) {
@@ -57,7 +58,18 @@ eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText,
 	}				
 	dojo.connect(editBox, "onKeyDown", handler(true));
 	dojo.connect(editBox, "onBlur", handler(false));
-	window.setTimeout(function() { editBox.focus(); }, 0);
+	window.setTimeout(function() { 
+		editBox.focus(); 
+		if (initialText) {
+			var box = dojo.byId(id);
+			var end = selectTo ? initialText.indexOf(selectTo) : -1;
+			if (end > 0) {
+				dijit.selectInputText(box, 0, end);
+			} else {
+				box.select();
+			}
+		}
+	}, 0);
 };
 
 eclipse.util.getPositionInfo = 

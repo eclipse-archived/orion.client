@@ -243,7 +243,8 @@ eclipse.Favorites = (function() {
 					reg.getService("IFavorites").then(function(service) {
 						service.addFavoriteUrl(newText);
 					});
-				}
+				},
+				null, "Type or paste a URL"
 			);			
 		},
 		
