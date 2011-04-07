@@ -237,87 +237,41 @@ eclipse.Favorites = (function() {
 	Favorites.prototype = {
 		getUserURL: function(imageId) {
 			var reg = this._registry;
-			var addExternalUrlHandler = function(isKeyEvent) {
-				return (function (imageId) {
-					return function(event) {
-						var editBox = dijit.byId(imageId+ "EditBox");
-						var url = editBox.get("value");
-						if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
-							return;
-						} else if (!editBox.isValid()) {
-							// No change; restore the old link
-							dojo.style(dojo.byId(imageId), "display", "inline");
-						} else {
-							reg.getService("IFavorites").then(function(service) {
-								service.addFavoriteUrl(url);						
-							});		
-						}
-						editBox.destroyRecursive();															  
-					};
-				}(imageId));
-			};
-
-			var editBox = new dijit.form.ValidationTextBox({
-				id: imageId+ "EditBox",
-				required: true, // disallows empty string
-				value: ""
-			});
-			dojo.place(editBox.domNode, "faveTable", "after");							
-			dojo.connect(editBox, "onKeyDown", addExternalUrlHandler(true));
-			dojo.connect(editBox, "onBlur", addExternalUrlHandler(false));
-			setTimeout(function() { editBox.focus(); }, 0);					
+			var faveTable = dojo.byId("faveTable");
+			eclipse.util.getUserText(imageId+"EditBox", faveTable, false, "", 
+				function(newText) {
+					reg.getService("IFavorites").then(function(service) {
+						service.addFavoriteUrl(newText);
+					});
+				}
+			);			
 		},
 		
 		editFavoriteName: function(fave, commandId, imageId, faveIndex) {
 			var reg = this._registry;
-			var linkId = "fave"+faveIndex;
-			/** @return function(event) */
-			var makeRenameHandler = function(isKeyEvent) {
-				return (function (oldName, path, linkId, imageId) {
-					return function(event) {
-						var editBox = dijit.byId(imageId+ "EditBox"),
-							newName = editBox.get("value");
-						if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
-							return;
-						} else if (!editBox.isValid() || newName === oldName) {
-							// No change; restore the old link
-							dojo.style(dojo.byId(linkId), "display", "inline");
-						} else {
-							// Will update old link
-							reg.getService("IFavorites").then(function(service) {
-								service.renameFavorite(path, newName);
-							});
-						}
-						editBox.destroyRecursive();
-						// re-show the local commands
-						var commandParent = dojo.byId(imageId).parentNode;
-						var children = commandParent.childNodes;
-						for (var i = 0; i < children.length; i++) {
-							dojo.style(children[i], "display", "inline");
-						}
-					};
-				}(fave.name, fave.path, linkId, imageId));
-			};
-			// Swap in an editable text field
-			var editBox = new dijit.form.ValidationTextBox({
-				id: imageId+ "EditBox",
-				required: true, // disallows empty string
-				value: fave.name
-			});
-			var link = dojo.byId(linkId);
-			dojo.place(editBox.domNode, link, "before");
-			// hide link & buttons for reuse later
+			var link = dojo.byId("fave"+faveIndex);
+			
+			// hide command buttons while editor is up
 			var commandParent = dojo.byId(imageId).parentNode;
 			dojo.style(link, "display", "none");
 			var children = commandParent.childNodes;
 			for (var i = 0; i < children.length; i++) {
 				dojo.style(children[i], "display", "none");
 			}
-					
-			dojo.connect(editBox, "onKeyDown", makeRenameHandler(true));
-			dojo.connect(editBox, "onBlur", makeRenameHandler(false));
-			setTimeout(function() { editBox.focus(); }, 0);
-					
+			eclipse.util.getUserText(imageId+"EditBox", link, true, fave.Name, 
+				function(newText) {
+					reg.getService("IFavorites").then(function(service) {
+						service.renameFavorite(fave.path, newText);
+					});
+				}, 
+				function() {
+					// re-show the local commands
+					var commandParent = dojo.byId(imageId).parentNode;
+					var children = commandParent.childNodes;
+					for (var i = 0; i < children.length; i++) {
+						dojo.style(children[i], "display", "inline");
+					}
+				});				
 		},
 		// FIXME: it should really be up to the UI to organize favorites as being searches or not.
 		render: function(favorites, searches) {

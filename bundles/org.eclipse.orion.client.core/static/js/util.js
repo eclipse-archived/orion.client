@@ -7,7 +7,7 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global dojo window eclipse:true */
+/*global dojo window dijit eclipse:true */
 dojo.require("dojo.hash");
 
 /**
@@ -21,6 +21,44 @@ var eclipse = eclipse || {};
  */
  
 eclipse.util = eclipse.util || {};
+
+eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy) {
+	/** @return function(event) */
+	var handler = function(isKeyEvent) {
+		return function(event) {
+			var editBox = dijit.byId(id),
+				newValue = editBox.get("value");
+			if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
+				return;
+			} else if (!editBox.isValid() || newValue === initialText) {
+				// No change; restore the old refnode
+				if (shouldHideRefNode) {
+					dojo.style(refNode, "display", "inline");
+				}
+			} else {
+				onComplete(newValue);
+			}
+			editBox.destroyRecursive();
+			if (onEditDestroy) {
+				onEditDestroy();
+			}
+		};
+	};
+
+	// Swap in an editable text field
+	var editBox = new dijit.form.ValidationTextBox({
+		id: id,
+		required: true, // disallows empty string
+		value: initialText || ""
+	});
+	dojo.place(editBox.domNode, refNode, "after");
+	if (shouldHideRefNode) {
+		dojo.style(refNode, "display", "none");
+	}				
+	dojo.connect(editBox, "onKeyDown", handler(true));
+	dojo.connect(editBox, "onBlur", handler(false));
+	window.setTimeout(function() { editBox.focus(); }, 0);
+};
 
 eclipse.util.getPositionInfo = 
 	function(fileString) {
