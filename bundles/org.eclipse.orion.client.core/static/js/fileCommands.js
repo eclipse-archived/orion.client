@@ -272,6 +272,33 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			});
 		}});
 	commandService.addCommand(favoriteCommand, "object");
+	
+	var renameCommand = new eclipse.Command({
+			name: "Rename",
+			image: "images/editing_16.gif",
+			id: "eclipse.renameResource",
+			visibleWhen: function(item) {
+				item = forceSingleItem(item);
+				return item.Location;
+			},
+			callback: dojo.hitch(this, function(item, commandId, domId) {
+				// we want to popup the edit box over the name in the explorer.
+				// if we can't find it, we'll pop it up over the command dom element.
+				var refNode = explorer.getNameNode(item);
+				if (!refNode) {
+					refNode = dojo.byId(domId);
+				}
+				eclipse.util.getUserText(domId+"EditBox", refNode, true, item.Name, 
+					dojo.hitch(this, function(newText) {
+						fileClient.moveFile(item.Location, item.parent.Location, newText).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);})//refresh the root
+						);
+					})
+				); 
+			})
+		});
+	commandService.addCommand(renameCommand, "object");
+	
 	var deleteCommand = new eclipse.Command({
 		name: "Delete",
 		image: "images/remove.gif",
