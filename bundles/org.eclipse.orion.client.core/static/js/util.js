@@ -28,6 +28,17 @@ eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText,
 		return function(event) {
 			var editBox = dijit.byId(id),
 				newValue = editBox.get("value");
+			if (isKeyEvent && event.keyCode === dojo.keys.ESCAPE) {
+				if (shouldHideRefNode) {
+					dojo.style(refNode, "display", "inline");
+				}
+				editBox.getPromptMessage(false);  // to get rid of prompting tooltip
+				editBox.destroyRecursive();
+				if (onEditDestroy) {
+					onEditDestroy();
+				}
+				return;
+			}
 			if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
 				return;
 			} else if (!editBox.isValid() || newValue === initialText) {
@@ -38,6 +49,7 @@ eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText,
 			} else {
 				onComplete(newValue);
 			}
+			editBox.getPromptMessage(false); // to get rid of prompting tooltip
 			editBox.destroyRecursive();
 			if (onEditDestroy) {
 				onEditDestroy();
