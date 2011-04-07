@@ -258,7 +258,7 @@ eclipse.Favorites = (function() {
 			for (var i = 0; i < children.length; i++) {
 				dojo.style(children[i], "display", "none");
 			}
-			eclipse.util.getUserText(imageId+"EditBox", link, true, fave.Name, 
+			eclipse.util.getUserText(imageId+"EditBox", link, true, fave.name, 
 				function(newText) {
 					reg.getService("IFavorites").then(function(service) {
 						service.renameFavorite(fave.path, newText);
