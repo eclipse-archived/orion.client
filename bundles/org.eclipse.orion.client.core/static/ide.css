@@ -88,11 +88,26 @@ a:hover {
     background: #FFFFFF;
 }
 
+.paneHeading {
+	font-size: 1.1em;
+	font-weight: bold;
+	color: #6d6d6d;
+	vertical-align: middle;
+	height: 30px;
+}
+
+.paneHeadingToolbar {
+	padding-left: 24px;
+	height: 30px;
+	text-align: right;
+	vertical-align: middle;
+}
+
 .auxpane {
     padding-left: 32px;
     padding-top: 20px;
     background: #EDEDED;
-    overflow-x: hidden;
+    overflow-x: auto;
 }
 
 .nihilo .dijitSplitterV .dijitSplitterThumb {	
