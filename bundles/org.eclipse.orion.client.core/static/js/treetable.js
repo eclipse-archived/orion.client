@@ -79,6 +79,7 @@ eclipse.TableTree = (function() {
 		},
 		
 		_generate: function(children, indentLevel) {
+			dojo.empty(this._parent);
 			var table = document.createElement('table');
 			table.id = this._id;
 			this._renderer.initTable(table, this);

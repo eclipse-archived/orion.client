@@ -41,6 +41,14 @@ eclipse.FileExplorer = (function() {
 				dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
 			});
 		};
+		
+		FileExplorer.prototype.getNameNode = function(item) {
+			var rowId = this.model.getId(item);
+			if (rowId) {
+				// I know this from my renderer below.
+				return dojo.byId(rowId+"NameColumn");
+			}
+		};
 						
 		FileExplorer.prototype.loadResourceList = function(path) {
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
@@ -182,7 +190,7 @@ eclipse.FileRenderer = (function() {
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				this.getExpandImage(tableRow, div);
-				link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
+				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameColumn", href: "#" + item.ChildrenLocation}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			} else {
 				col = document.createElement('td');
@@ -207,7 +215,7 @@ eclipse.FileRenderer = (function() {
 				div = dojo.create("div", null, col, "only");
 				dojo.create("img", {src: "/images/none.png"}, div, "last");
 				dojo.create("img", {src: "/images/file_obj.gif"}, div, "last");
-				link = dojo.create("a", {className: "navlink", href: href}, div, "last");
+				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			}
 			return col;

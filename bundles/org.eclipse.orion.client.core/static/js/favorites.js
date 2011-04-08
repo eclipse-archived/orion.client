@@ -51,8 +51,14 @@ eclipse.FavoritesService = (function() {
 			this._notifyListeners();
 		},
 		
-		addFavorite: function(theName, thePath, isDirectory) {
-			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory, "isFavorite": true });
+		addFavoriteUrl: function(url) {
+			this.addFavorite(url, url, false, true);
+		},
+						
+		addFavorite: function(theName, thePath, isDirectory, isExternalResource) {
+			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory, "isFavorite": true, "isExternalResource": isExternalResource });
+			this._storeFavorites();
+			this._notifyListeners();
 		},
 		
 		removeFavorite: function(path) {
@@ -168,6 +174,16 @@ eclipse.Favorites = (function() {
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
 		var favorites = this;
+		
+		var addFaveURLCommand = new eclipse.Command({
+			name: "Add Favorite",
+			tooltip: "Add link as favorite",
+			image: "images/add_obj.gif",
+			id: "eclipse.addExternalFave",
+			callback: dojo.hitch(this, function(item, commandId, domId) {
+				this.getUserURL(domId);
+			})
+		});		
 		var deleteFaveCommand = new eclipse.Command({
 			name: "Delete",
 			image: "images/remove.gif",
@@ -178,7 +194,7 @@ eclipse.Favorites = (function() {
 					service.removeFavorite(item.path);
 				});
 			}
-		});
+		});		
 		var renameFaveCommand = new eclipse.Command({
 			name: "Rename",
 			image: "images/editing_16.gif",
@@ -203,11 +219,13 @@ eclipse.Favorites = (function() {
 			// register commands with object scope
 			commandService.addCommand(deleteFaveCommand, "object");
 			commandService.addCommand(renameFaveCommand, "object");
-			commandService.addCommand(deleteSearchCommand, "object");
+			commandService.addCommand(deleteSearchCommand, "object");	
+			commandService.addCommand(addFaveURLCommand, "dom");		
 			// declare the contribution to the ui
 			commandService.registerCommandContribution("eclipse.renameFave", 1);
 			commandService.registerCommandContribution("eclipse.deleteFave", 2);
-			commandService.registerCommandContribution("eclipse.deleteSearch", 1);
+			commandService.registerCommandContribution("eclipse.deleteSearch", 1);	
+			commandService.registerCommandContribution("eclipse.addExternalFave", 1, "faveCommands");		
 
 		});
 		this._registry.getService("IFavorites").then(function(service) {
@@ -217,68 +235,68 @@ eclipse.Favorites = (function() {
 		});
 	}
 	Favorites.prototype = {
+		getUserURL: function(imageId) {
+			var reg = this._registry;
+			var faveTable = dojo.byId("faveTable");
+			eclipse.util.getUserText(imageId+"EditBox", faveTable, false, "", 
+				function(newText) {
+					reg.getService("IFavorites").then(function(service) {
+						service.addFavoriteUrl(newText);
+					});
+				},
+				null, "Type or paste a URL"
+			);			
+		},
+		
 		editFavoriteName: function(fave, commandId, imageId, faveIndex) {
 			var reg = this._registry;
-			var linkId = "fave"+faveIndex;
-			/** @return function(event) */
-			var makeRenameHandler = function(isKeyEvent) {
-				return (function (oldName, path, linkId, imageId) {
-					return function(event) {
-						var editBox = dijit.byId(imageId+ "EditBox"),
-							newName = editBox.get("value");
-						if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
-							return;
-						} else if (!editBox.isValid() || newName === oldName) {
-							// No change; restore the old link
-							dojo.style(dojo.byId(linkId), "display", "inline");
-						} else {
-							// Will update old link
-							reg.getService("IFavorites").then(function(service) {
-								service.renameFavorite(path, newName);
-							});
-						}
-						editBox.destroyRecursive();
-						// re-show the local commands
-						var commandParent = dojo.byId(imageId).parentNode;
-						var children = commandParent.childNodes;
-						for (var i = 0; i < children.length; i++) {
-							dojo.style(children[i], "display", "inline");
-						}
-					};
-				}(fave.name, fave.path, linkId, imageId));
-			};
-			// Swap in an editable text field
-			var editBox = new dijit.form.ValidationTextBox({
-				id: imageId+ "EditBox",
-				required: true, // disallows empty string
-				value: fave.name
-			});
-			var link = dojo.byId(linkId);
-			dojo.place(editBox.domNode, link, "before");
-			// hide link & buttons for reuse later
+			var link = dojo.byId("fave"+faveIndex);
+			
+			// hide command buttons while editor is up
 			var commandParent = dojo.byId(imageId).parentNode;
 			dojo.style(link, "display", "none");
 			var children = commandParent.childNodes;
 			for (var i = 0; i < children.length; i++) {
 				dojo.style(children[i], "display", "none");
 			}
-					
-			dojo.connect(editBox, "onKeyDown", makeRenameHandler(true));
-			dojo.connect(editBox, "onBlur", makeRenameHandler(false));
-			setTimeout(function() { editBox.focus(); }, 0);
-					
+			eclipse.util.getUserText(imageId+"EditBox", link, true, fave.name, 
+				function(newText) {
+					reg.getService("IFavorites").then(function(service) {
+						service.renameFavorite(fave.path, newText);
+					});
+				}, 
+				function() {
+					// re-show the local commands
+					var commandParent = dojo.byId(imageId).parentNode;
+					var children = commandParent.childNodes;
+					for (var i = 0; i < children.length; i++) {
+						dojo.style(children[i], "display", "inline");
+					}
+				});				
 		},
 		// FIXME: it should really be up to the UI to organize favorites as being searches or not.
 		render: function(favorites, searches) {
-			var faveTable = dojo.create("table");
+			//heading and commands
+			dojo.place("<div><span class='paneHeading'>Favorites</span><span id='faveCommands' class='paneHeadingToolbar'></span></div>", this._parent, "only");
+			var commands = dojo.byId("faveCommands");
+			this._registry.getService("ICommandService").then(function(service) {
+				service.renderCommands(commands, "dom", this, this, "image");
+			});
+			
+			// favorites table
+			var faveTable = dojo.create("table", {id: "faveTable"});
 			dojo.addClass(faveTable, "favoritesTable");
 			var tr, col1, col2;
 			for (var j=0; j < favorites.length; j++) {
 				var fave = favorites[j];
-				// TODO we should be getting this value from the preferences (table or tree)
-				var href = fave.directory ? "navigate-table.html#" + fave.path : "coding.html#" + fave.path;
-				if (href==="#") {
-					href="";
+				var href;
+				if (fave.isExternalResource) {
+					href = fave.path;
+				} else {
+					href = fave.directory ? "navigate-table.html#" + fave.path : "coding.html#" + fave.path;
+					if (href==="#") {
+						href="";
+					}
 				}
 				var clazz = fave.directory ? "navlinkonpage" : "navlink";
 				var editable="";
@@ -308,7 +326,7 @@ eclipse.Favorites = (function() {
 					dojo.style(wrapper, "visibility", "hidden");
 				});
 			}
-			dojo.place(faveTable, this._parent, "only");
+			dojo.place(faveTable, this._parent, "last");
 			
 			if (searches.length > 0) {
 				dojo.place("<br><h2>Searches</h2>", this._parent, "last");

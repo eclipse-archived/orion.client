@@ -261,7 +261,7 @@ eclipse.GitService = (function() {
 			
 			console.info("doGitLog called");
 			
-			dojo.xhrGet({
+			return dojo.xhrGet({
 				url : gitDiffURI,
 				headers : {
 					"Orion-Version" : "1"

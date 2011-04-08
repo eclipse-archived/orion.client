@@ -54,7 +54,6 @@ eclipse.Explorer = (function() {
 			if (model){
 				model.rootId = treeId;
 			}
-			dojo.empty(parentId);
 			this.model = model;
 			this.myTree = new eclipse.TableTree({
 				id: treeId,
@@ -142,7 +141,7 @@ eclipse.ExplorerRenderer = (function() {
 	ExplorerRenderer.prototype = {
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
-			
+			dojo.empty(tableNode);
 			dojo.addClass(tableNode, 'treetable');
 			this.renderTableHeader(tableNode);
 
