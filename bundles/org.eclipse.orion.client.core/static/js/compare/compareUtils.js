@@ -109,6 +109,8 @@ orion.compareUtils.findFirstDiff = function(mapper , mapperColumnIndex , lineFro
 
 //returns the line index at the top of the other editor , when scroll happens on the eidotr
 orion.compareUtils.matchMapper = function(mapper , mapperColumnIndex , lineFrom , lineTo){
+	if(mapper.length === 0)
+		return lineFrom;
 	var baseLine = lineFrom + Math.round((lineTo -lineFrom)/3);
 	var first = orion.compareUtils.findFirstDiff(mapper , mapperColumnIndex , lineFrom , lineTo);
 	var mapperEndAt = mapper[first.mapperIndex][mapperColumnIndex] === 0 ? first.startFrom : first.startFrom + mapper[first.mapperIndex][mapperColumnIndex] -1;
