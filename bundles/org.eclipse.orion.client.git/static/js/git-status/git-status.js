@@ -6,6 +6,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+dojo.require("dojo.hash");
 dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
 	var serviceRegistry = new eclipse.ServiceRegistry();
@@ -19,7 +20,6 @@ dojo.addOnLoad(function(){
 	new eclipse.FileClient(serviceRegistry, pluginRegistry);
 
 	var controller = new orion.GitStatusController(serviceRegistry , "unstagedZone" , "stagedZone");
-	var hash = dojo.hash();
 	controller.getGitStatus(dojo.hash());
 	document.title =  controller.findFolderName();
 
