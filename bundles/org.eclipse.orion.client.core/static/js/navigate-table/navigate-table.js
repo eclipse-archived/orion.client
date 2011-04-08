@@ -91,7 +91,8 @@ dojo.addOnLoad(function(){
 	
 	// commands appearing directly in local actions column
 	commandService.registerCommandContribution("eclipse.makeFavorite", 1);
-	commandService.registerCommandContribution("eclipse.downloadFile", 2);
+	commandService.registerCommandContribution("eclipse.renameResource", 2);
+	commandService.registerCommandContribution("eclipse.downloadFile", 3);
 	// commands appearing in nav tool bar
 	commandService.registerCommandContribution("eclipse.openResource", 500, "pageActions");
 	// commands appearing in local actions "More"
