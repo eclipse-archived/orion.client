@@ -41,6 +41,7 @@ eclipse.UsersService = (function() {
 						else
 							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
 					}
+					return jsonData.users;
 				},
 				error : function(error, ioArgs) {
 					var xhrCall = this;
