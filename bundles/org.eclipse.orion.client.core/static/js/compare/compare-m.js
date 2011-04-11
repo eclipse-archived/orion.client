@@ -6,6 +6,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+dojo.require("dojo.hash");
 dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
 	var serviceRegistry = new eclipse.ServiceRegistry();
@@ -20,10 +21,8 @@ dojo.addOnLoad(function(){
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
 	
-	var splitted = window.location.href.split('#');
-	var hash = splitted[1];//dojo.hash();
 	var compareMergeContainer = new orion.CompareMergeContainer(serviceRegistry , "left-viewer" , "right-viewer" , canvas);
-	compareMergeContainer.resolveDiff(hash, 
+	compareMergeContainer.resolveDiff(dojo.hash(), 
 			  function(newFile , oldFile){
 		  		dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  
 		  			dojo.place(document.createTextNode("File On Git: " + oldFile), "right-viewer-title", "only");				  
