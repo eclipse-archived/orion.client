@@ -78,13 +78,12 @@ orion.CompareContainer = (function() {
 		
 		resolveDiff: function(hash , callBack , errorCallBack){
 			var diffURI = hash;
-			this._readOnly = false;
 			var params = hash.split("?");
 			if(params.length === 2){
 				diffURI = params[0];
-				var subParams = params[1].split("=");
-				if(subParams.length === 2 && subParams[0] === "readonly" && subParams[1] === "true" )
-					this._readOnly = true;
+				//var subParams = params[1].split("=");
+				//if(subParams.length === 2 && subParams[0] === "readonly" && subParams[1] === "true" )
+					//this._readOnly = true;
 			} 
 			this.getFileDiffGit(diffURI , callBack , errorCallBack);
 		},
@@ -203,14 +202,15 @@ orion.SBSCompareContainer = (function() {
 
 orion.CompareMergeContainer = (function() {
 	/** @private */
-	function CompareMergeContainer(resgistry ,leftEditorDivId , rightEditorDivId , canvas) {
+	function CompareMergeContainer(readonly , resgistry ,leftEditorDivId , rightEditorDivId , canvas) {
+		this.readonly = readonly;
 		this._registry = resgistry;
 		this._leftEditorDivId = leftEditorDivId;
 		this._rightEditorDivId = rightEditorDivId;
 		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
 		
-		this._editorLeft = this.createEditorContainer("" , "\n" ,[] , 0 , this._leftEditorDivId , "left-viewer-title" ,false);
-		this._editorRight = this.createEditorContainer("" , "\n" ,[] ,1 , this._rightEditorDivId , "right-viewer-title" ,true);
+		this._editorLeft = this.createEditorContainer("fetching..." , "\n" ,[] , 0 , this._leftEditorDivId , "left-viewer-title" ,this.readonly);
+		this._editorRight = this.createEditorContainer("fetching..." , "\n" ,[] ,1 , this._rightEditorDivId , "right-viewer-title" ,true);
 		var overview  = new orion.CompareMergeOverviewRuler(this._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
 		this._editorRight.addRuler(overview);
 		this._compareMatchRenderer.setOverviewRuler(overview);
@@ -253,7 +253,7 @@ orion.CompareMergeContainer = (function() {
 		var model = new eclipse.TextModel(content , delim);
 		var compareModel = new orion.CompareMergeModel(model, {mapper:mapper, columnIndex:columnIndex} );
 		var editor = null;
-		if(readOnly){
+		if(false){
 			editor = new eclipse.Editor({
 				parent: editorContainerDomNode,
 				model: compareModel,
@@ -278,6 +278,9 @@ orion.CompareMergeContainer = (function() {
 			
 			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 				// Create keybindings for generic editing
+				if(readOnly)
+					return;
+				
 				var genericBindings = new orion.TextActions(editor, undoStack);
 				keyModeStack.push(genericBindings);
 				
@@ -303,6 +306,7 @@ orion.CompareMergeContainer = (function() {
 				});
 			};
 			
+
 			var dirtyIndicator = "";
 			var status = "";
 			
@@ -314,7 +318,6 @@ orion.CompareMergeContainer = (function() {
 				}
 				dojo.byId(tiltleDivId).innerHTML = dirtyIndicator + status;
 			};
-			
 			var editorContainer = new orion.EditorContainer({
 				editorFactory: editorFactory,
 				undoStackFactory: new orion.UndoFactory(),
@@ -326,19 +329,22 @@ orion.CompareMergeContainer = (function() {
 				domNode: editorContainerDomNode
 			});
 				
-			dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
-				if (dirty) {
-					dirtyIndicator = "You have unsaved changes.  ";
-				} else {
-					dirtyIndicator = "";
-				}
-				dojo.byId(tiltleDivId).innerHTML = dirtyIndicator + status;
-			});
+			if(!readOnly){
+				dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
+					if (dirty) {
+						dirtyIndicator = "";//"You have unsaved changes.  ";
+					} else {
+						dirtyIndicator = "";
+					}
+					dojo.byId(tiltleDivId).innerHTML = dirtyIndicator + status;
+				});
+			}
 			
 			editorContainer.installEditor();
 			//temporary
 			editorContainer.onInputChange("Content.js");
 			editor = editorContainer.getEditorWidget();
+			
 			window.onbeforeunload = function() {
 				if (editorContainer.isDirty()) {
 					return "There are unsaved changes.";
