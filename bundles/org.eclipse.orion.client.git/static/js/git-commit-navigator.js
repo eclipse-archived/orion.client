@@ -57,39 +57,14 @@ eclipse.GitCommitNavigator = (function() {
 			
 			self = this;
 			
+			eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
+						
 			this.registry.getService("IGitService").then(function(service){
-				dojo.hitch(self, self.createTree(self.parentId, new eclipse.GitCommitsModel(path, service.doGitLog)));
+				dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerFlatModel(path, service.doGitLog)));
 			});
 			
 		};
 	return GitCommitNavigator;
-}());
-
-eclipse = eclipse || {};
-eclipse.GitCommitsModel = (function() {
-	/**
-	 * @name eclipse.Model
-	 * @class Tree model used by eclipse.GitCommitNavigator.
-	 * TODO: Consolidate with eclipse.TreeModel.
-	 */
-	function GitCommitsModel(rootPath, /* function returning promise */fetchItems) {
-		this.rootPath = rootPath;
-		this.fetchItems = fetchItems;
-	}
-	
-	GitCommitsModel.prototype = eclipse.ExplorerModel.prototype;
-	
-	GitCommitsModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
-		if(parentItem==this.root){
-			onComplete(parentItem);
-		}else{
-			dojo.hitch(this, eclipse.ExplorerModel.prototype.getChildren(parentItem, onComplete));
-		}
-		
-	};
-	
-	
-	return GitCommitsModel;
 }());
 
 /********* Rendering json items into columns in the tree **************/

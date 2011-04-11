@@ -131,6 +131,33 @@ eclipse.ExplorerModel = (function() {
 	return ExplorerModel;
 }());
 
+eclipse.ExplorerFlatModel = (function() {
+	/**
+	 * @name eclipse.Model
+	 * @class Tree model used by eclipse.Explorer for flat structures
+	 * 
+	 * @param rootPath path to load tree table root, response should contain a list of items
+	 */
+	function ExplorerFlatModel(rootPath, /* function returning promise */fetchItems) {
+		this.rootPath = rootPath;
+		this.fetchItems = fetchItems;
+	}
+	
+	ExplorerFlatModel.prototype = new eclipse.ExplorerModel();
+	
+	ExplorerFlatModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
+		if(parentItem==this.root){
+			onComplete(parentItem);
+		}else{
+			onComplete([]);
+		}
+		
+	};
+	
+	
+	return ExplorerFlatModel;
+}());
+
 /********* Rendering json items into columns in the tree **************/
 eclipse = eclipse || {};
 eclipse.ExplorerRenderer = (function() {
@@ -384,7 +411,7 @@ eclipse.SelectionRenderer = (function(){
 		this._init(options);
 		this.explorer = explorer;
 	}
-	SelectionRenderer.prototype = eclipse.ExplorerRenderer.prototype;
+	SelectionRenderer.prototype = new eclipse.ExplorerRenderer();
 	
 	SelectionRenderer.prototype.renderTableHeader = function(tableNode){
 		var thead = document.createElement('thead');
