@@ -143,7 +143,7 @@ eclipse.ExplorerFlatModel = (function() {
 		this.fetchItems = fetchItems;
 	}
 	
-	ExplorerFlatModel.prototype = eclipse.ExplorerModel.prototype;
+	ExplorerFlatModel.prototype = new eclipse.ExplorerModel();
 	
 	ExplorerFlatModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
 		if(parentItem==this.root){
@@ -411,7 +411,7 @@ eclipse.SelectionRenderer = (function(){
 		this._init(options);
 		this.explorer = explorer;
 	}
-	SelectionRenderer.prototype = eclipse.ExplorerRenderer.prototype;
+	SelectionRenderer.prototype = new eclipse.ExplorerRenderer();
 	
 	SelectionRenderer.prototype.renderTableHeader = function(tableNode){
 		var thead = document.createElement('thead');
