@@ -3560,6 +3560,7 @@ eclipse.Editor = (function() {
 				var document = this._frameDocument;
 				var textArea = this._textArea;
 				textArea.value = text;
+				textArea.focus();
 				textArea.select();
 				var result = false;
 				
