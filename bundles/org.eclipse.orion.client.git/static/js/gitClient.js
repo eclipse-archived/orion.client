@@ -6,6 +6,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*global dojo console handleGetAuthenticationError */
 
 /** @namespace The global container for eclipse APIs. */
 var eclipse = eclipse || {};
@@ -33,7 +34,7 @@ eclipse.GitService = (function() {
 			var service = this;
 			console.info("Git Service checked");
 		},
-		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost, onLoad) {
+		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
 			var service = this;
 			if(gitSshKnownHost && gitSshKnownHost!=""){
 				this._sshService.addKnownHosts(gitSshKnownHost);
@@ -54,13 +55,7 @@ eclipse.GitService = (function() {
 					handleAs : "json",
 					timeout : 15000,
 					load : function(jsonData, secondArg) {
-						if (onLoad) {
-							if (typeof onLoad === "function")
-								onLoad(jsonData, secondArg);
-							else
-								service._serviceRegistration.dispatchEvent(onLoad,
-										jsonData);
-						}
+						return jsonData;
 					},
 					error : function(error, ioArgs) {
 						handleGetAuthenticationError(this, ioArgs);
@@ -261,7 +256,7 @@ eclipse.GitService = (function() {
 			
 			console.info("doGitLog called");
 			
-			dojo.xhrGet({
+			return dojo.xhrGet({
 				url : gitDiffURI,
 				headers : {
 					"Orion-Version" : "1"

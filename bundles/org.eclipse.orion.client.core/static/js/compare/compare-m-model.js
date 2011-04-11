@@ -24,8 +24,11 @@ orion.CompareMergeModel = (function() {
 	CompareMergeModel.prototype =  {
 		//private functions
 		init: function(mapper){
-			if(mapper)
+			this._initing = true;
+			if(mapper){
 				this._mapper = mapper;
+				this._annotations = undefined;
+			}
 		},
 		
 		//To get the line type from a zero based line index  
@@ -179,7 +182,11 @@ orion.CompareMergeModel = (function() {
 			console.log("addedLineCount : " + addedLineCount);
 			console.log("line number : " + this.getLineAtOffset(start));
 			*/
-			this.updateMapper(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			if(!this._initing){
+				this.updateMapper(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			} else {
+				this._initing = false;
+			}
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanged) { 

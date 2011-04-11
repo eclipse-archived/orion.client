@@ -28,11 +28,12 @@ eclipse.GitCommitNavigator = (function() {
 		this.selectionToolsId = selectionToolsId;
 		this.model = null;
 		this.myTree = null;
+		this.renderer = new eclipse.FileRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
 	}
-	GitCommitNavigator.prototype = /** @lends eclipse.GitCommitNavigator.prototype */ {
-			
-		loadCommitsList: function(path) {
-			// console.log("loadResourceList old " + this._lastHash + " new " + path);
+	
+	GitCommitNavigator.prototype = eclipse.Explorer.prototype;
+	
+	GitCommitNavigator.prototype.loadCommitsList= function(path) {
 			path = eclipse.util.makeRelative(path);
 			if (path === this._lastHash) {
 				return;
@@ -54,244 +55,75 @@ eclipse.GitCommitNavigator = (function() {
 			dojo.place(b, progress, "last");
 			dojo.place(document.createTextNode("..."), progress, "last");
 			
-
-			// we are refetching everything so clean up the root
-			this.treeRoot = {};
+			self = this;
 			
-			this.gitClient.doGitLog(path, dojo.hitch(this, 
-					function(jsonData, secondArg){
-						for (var i  in jsonData) {
-							this.treeRoot[i] = jsonData[i];
-						};
+			eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
 						
-						eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
-						
-						this.createTree();
-			
-						var pageTitle = dojo.byId(this.pageTitleId);
-						if (pageTitle) {
-							dojo.empty(pageTitle);
-							new eclipse.BreadCrumbs({container: pageTitle, resource: this.treeRoot[0]});
-						}
-					}
-			));
-		},
-
-		updateCommands: function(item){
-			// update the commands in the tree if the tree exists.
-			if (this.myTree) {
-				dojo.hitch(this.myTree._renderer, this.myTree._renderer.updateCommands(item));
-			}
-		},
-		createTree: function (){
-			var treeId = this.parentId+"innerTree";
-			var existing = dojo.byId(treeId);
-			if (existing) {
-				dojo.destroy(existing);
-			}
-			dojo.empty(this.parentId);
-			this.model = new eclipse.Model(this.registry, this.treeRoot, this.gitClient, treeId);
-			this.myTree = new eclipse.TableTree({
-				id: treeId,
-				model: this.model,
-				showRoot: false,
-				parent: this.parentId,
-				labelColumnIndex: 1,  // 0 if no checkboxes
-				renderer: new eclipse.FileRenderer({checkbox: true }, this)
+			this.registry.getService("IGitService").then(function(service){
+				dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerFlatModel(path, service.doGitLog)));
 			});
-		},
-	    
-	    _lastHash: null
-	};
+			
+		};
 	return GitCommitNavigator;
 }());
 
-eclipse = eclipse || {};
-eclipse.Model = (function() {
-	/**
-	 * @name eclipse.Model
-	 * @class Tree model used by eclipse.GitCommitNavigator.
-	 * TODO: Consolidate with eclipse.TreeModel.
-	 */
-	function Model(serviceRegistry, root, gitClient, treeId) {
-		this.registry = serviceRegistry;
-		this.root = root;
-		this.gitClient = gitClient;
-		this.treeId = treeId;
-	}
-	Model.prototype = {
-		destroy: function(){
-		},
-		getRoot: function(onItem){
-			onItem(this.root);
-		},
-		getChildren: function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
-			onComplete(parentItem);
-		},
-		getId: function(/* item */ item){
-			var result;
-			if (item === this.root) {
-				result = this.treeId;
-			} else {
-				result = item.Name;
-			} 
-			return result;
-		}
-	};
-	return Model;
-}());
-
 /********* Rendering json items into columns in the tree **************/
+
 eclipse = eclipse || {};
 eclipse.FileRenderer = (function() {
 	function FileRenderer (options, explorer) {
 		this._init(options);
 		this.explorer = explorer;
 	}
-	FileRenderer.prototype = {
-		initTable: function (tableNode, tableTree) {
-			this.tableTree = tableTree;
-			
-			dojo.addClass(tableNode, 'treetable');
-			var thead = document.createElement('thead');
-			var row = document.createElement('tr');
-			dojo.addClass(thead, "navTableHeading");
-			var th, authorName, date, actions;
-			if (this._useCheckboxSelection) {
-				th = document.createElement('th');
-				row.appendChild(th);
-			}
-			
-			th = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Message</h2>"}, row);
-			dojo.addClass(th, "navColumn");
-			
-			authorName = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Author</h2>"}, row);
-			dojo.addClass(authorName, "navColumn");
-			
-			date = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Date</h2>"}, row);
-			dojo.addClass(date, "navColumn");
-			
-			actions = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Actions</h2>"}, row);
-			dojo.addClass(actions, "navColumn");
-			
-			thead.appendChild(row);
-			tableNode.appendChild(thead);
-		},
+	FileRenderer.prototype = eclipse.SelectionRenderer.prototype;
+	
+	FileRenderer.prototype.getCellHeaderElement = function(col_no){
 		
-		render: function(item, tableRow) {
-			tableRow.cellSpacing = "8px";
-			dojo.style(tableRow, "verticalAlign", "baseline");
-			dojo.addClass(tableRow, "treeTableRow");
-			dojo.connect(tableRow, "onmouseover", tableRow, function() {
-				var actionsColumn = dojo.byId(this.id+"actionswrapper");
-				dojo.style(actionsColumn, "visibility", "visible");
-			});
-			dojo.connect(tableRow, "onmouseout", tableRow, function() {
-				var actionsColumn = dojo.byId(this.id+"actionswrapper");
-				dojo.style(actionsColumn, "visibility", "hidden");
-			});
-			if (this._useCheckboxSelection) {
-				var checkColumn = document.createElement('td');
-				var check = document.createElement('input');
-				check.type = "checkbox";
-				check.id = tableRow+"selectedState";
-				dojo.addClass(check, "selectionCheckmark");
-				check.itemId = tableRow.id;
-				checkColumn.appendChild(check);
-				tableRow.appendChild(checkColumn);
-				
-				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
-					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
-					this.explorer.selection.setSelections(this.getSelected());			
-				}));
-			}
-			var col, div, link;
+		switch(col_no){
+		case 0: 
+			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Message</h2>"});
+			break;
+		case 1:
+			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Author</h2>"});
+			break;
+		case 2:
+			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Date</h2>"});
+			break;
+		case 3:
+			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Actions</h2>"});
+			break;
+		};
+		
+	};
+	
+	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		
+		switch(col_no){
+		case 0:
 			
+			var col, div, link;
 
 			col = document.createElement('td');
-			tableRow.appendChild(col);
-				
-			var nameId =  tableRow.id + "__expand";
 			div = dojo.create("div", {style: "padding-left: 5px; padding-right: 5px; ; padding-top: 5px; padding-bottom: 5px"}, col, "only");
-//			var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
 			link = dojo.create("a", {className: "navlinkonpage", href: "/coding.html#" + item.ContentLocation}, div, "last");
-			dojo.place(document.createTextNode(item.Message), link, "only");
-//			expandImg.onclick = dojo.hitch(this, function(evt) {
-//				this.tableTree.toggle(tableRow.id, nameId, '/images/expanded-gray.png', '/images/collapsed-gray.png');
-//			});
-//			dojo.addClass(div, 'primaryColumn');
-			
-			var authorName = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tableRow);
-			authorName.innerHTML = item.AuthorName;
-			dojo.addClass(authorName, 'secondaryColumn');
-			
-			var commitTime = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tableRow);
-			commitTime.innerHTML = dojo.date.locale.format(new Date(item.Time), {formatLength: "short"});
-			dojo.addClass(commitTime, 'secondaryColumn');
-						
-			var actionsColumn = document.createElement('td');
-			actionsColumn.id = tableRow.id + "actions";
-			tableRow.appendChild(actionsColumn);
-			var actionsWrapper = document.createElement('span');
-			actionsWrapper.id = tableRow.id + "actionswrapper";
-			actionsColumn.appendChild(actionsWrapper);
-			dojo.style(actionsWrapper, "visibility", "hidden");
-			// contact the command service to render appropriate commands here.
-			this.explorer.registry.getService("ICommandService").then(function(service) {
-				service.renderCommands(actionsWrapper, "object", item, this.explorer, "image");
-			});
-		},
+			dojo.place(document.createTextNode(item.Message), link, "only");			
+			return col;
+			break;
+		case 1:
+			return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.AuthorName});
+			break;
+		case 2:
+			return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: dojo.date.locale.format(new Date(item.Time), {formatLength: "short"})});
+			break;
+		case 3:
+			var actionsColumn = this.getActionsColumn(item, tableRow);
+			dojo.style(actionsColumn, "padding-left", "5px");
+			dojo.style(actionsColumn, "padding-right", "5px");
+			return actionsColumn;
+			break;
+		};
 		
-		getSelected: function() {
-			var selected = [];
-			dojo.query(".selectionCheckmark").forEach(dojo.hitch(this, function(node) {
-				if (node.checked) {
-					var row = node.parentNode.parentNode;
-					selected.push(this.tableTree.getItem(row));
-				}
-			}));
-			return selected;
-		},
-		
-		rowsChanged: function() {
-			dojo.query(".treeTableRow").forEach(function(node, i) {
-				if (i % 2) {
-					dojo.addClass(node, "darkTreeTableRow");
-					dojo.removeClass(node, "lightTreeTableRow");
-				} else {
-					dojo.addClass(node, "lightTreeTableRow");
-					dojo.removeClass(node, "darkTreeTableRow");
-				}
-			});
-			// update the selections so that any checked rows that may no longer be around are not
-			// remembered.  This is a temporary solution, 
-			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339450
-			this.explorer.selection.setSelections(this.getSelected());
-		},
-		updateCommands: function(){
-			var registry = this.explorer.registry;
-			dojo.query(".treeTableRow").forEach(function(node, i) {
-				
-				var actionsWrapperId = node.id + "actionswrapper";
-				var actionsWrapper = dojo.byId(actionsWrapperId);
-				
-				dojo.empty(actionsWrapper);
-				// contact the command service to render appropriate commands here.
-				registry.getService("ICommandService").then(function(service) {
-					service.renderCommands(actionsWrapper, "object", node._item, this.explorer, "image");
-				});
-
-			});
-		},
-		
-		_init: function(options) {
-			if (options) {
-				this._useCheckboxSelection = options.checkbox === undefined ? false : options.checkbox;
-			}
-		}
 	};
+	
 	return FileRenderer;
 }());
-
-
-

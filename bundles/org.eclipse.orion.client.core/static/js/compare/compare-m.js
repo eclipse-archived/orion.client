@@ -6,6 +6,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+dojo.require("dojo.hash");
 dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
 	var serviceRegistry = new eclipse.ServiceRegistry();
@@ -16,14 +17,11 @@ dojo.addOnLoad(function(){
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	var canvas = document.getElementById("diff-canvas");
-	
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
 	
-	var splitted = window.location.href.split('#');
-	var hash = splitted[1];//dojo.hash();
 	var compareMergeContainer = new orion.CompareMergeContainer(serviceRegistry , "left-viewer" , "right-viewer" , canvas);
-	compareMergeContainer.resolveDiff(hash, 
+	compareMergeContainer.resolveDiff(dojo.hash(), 
 			  function(newFile , oldFile){
 		  		dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  
 		  			dojo.place(document.createTextNode("File On Git: " + oldFile), "right-viewer-title", "only");				  
@@ -36,6 +34,7 @@ dojo.addOnLoad(function(){
 				  dojo.style("right-viewer-title", "color", "red");
 			  }
 	);
+	
 	//every time the user manually changes the hash, we need to load the diff
 	dojo.subscribe("/dojo/hashchange", compareMergeContainer, function() {
 		compareMergeContainer.resolveDiff(dojo.hash(), 
@@ -51,8 +50,6 @@ dojo.addOnLoad(function(){
 					  dojo.style("right-viewer-title", "color", "red");
 				  });
 	});
-	
-	
 	// File operations
 	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 		
@@ -80,6 +77,5 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
 		
 	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {});
-	
 });
 
