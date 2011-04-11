@@ -17,7 +17,6 @@ dojo.addOnLoad(function(){
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	var canvas = document.getElementById("diff-canvas");
-	
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
 	
@@ -35,6 +34,7 @@ dojo.addOnLoad(function(){
 				  dojo.style("right-viewer-title", "color", "red");
 			  }
 	);
+	
 	//every time the user manually changes the hash, we need to load the diff
 	dojo.subscribe("/dojo/hashchange", compareMergeContainer, function() {
 		compareMergeContainer.resolveDiff(dojo.hash(), 
@@ -50,8 +50,6 @@ dojo.addOnLoad(function(){
 					  dojo.style("right-viewer-title", "color", "red");
 				  });
 	});
-	
-	
 	// File operations
 	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 		
@@ -79,6 +77,5 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
 		
 	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {});
-	
 });
 

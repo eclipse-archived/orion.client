@@ -232,6 +232,7 @@ orion.CompareMatchRenderer =  (function() {
 
 	function CompareMatchRenderer(canvasDiv) {
 		this._canvasDiv = canvasDiv;
+		this._mapper = undefined;
 	}
 
 	CompareMatchRenderer.prototype =  {
@@ -337,6 +338,8 @@ orion.CompareMatchRenderer =  (function() {
 		},
 	
 		render: function(){
+			if(!this._mapper )
+				return;
 			var context=this._canvasDiv.getContext("2d");
 			context.clearRect(0,0,this._canvasDiv.width,this._canvasDiv.height);
 			context.strokeStyle = '#AAAAAA'; 

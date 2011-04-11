@@ -204,13 +204,17 @@ orion.SBSCompareContainer = (function() {
 orion.CompareMergeContainer = (function() {
 	/** @private */
 	function CompareMergeContainer(resgistry ,leftEditorDivId , rightEditorDivId , canvas) {
-		//this._editorcontainerLeft = leftEditorContainer;
-		this._editorLeft = null;
-		this._editorRight = null;
 		this._registry = resgistry;
 		this._leftEditorDivId = leftEditorDivId;
 		this._rightEditorDivId = rightEditorDivId;
 		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
+		
+		this._editorLeft = this.createEditorContainer("" , "\n" ,[] , 0 , this._leftEditorDivId , "left-viewer-title" ,false);
+		this._editorRight = this.createEditorContainer("" , "\n" ,[] ,1 , this._rightEditorDivId , "right-viewer-title" ,true);
+		var overview  = new orion.CompareMergeOverviewRuler(this._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
+		this._editorRight.addRuler(overview);
+		this._compareMatchRenderer.setOverviewRuler(overview);
+		
 	}
 	CompareMergeContainer.prototype = new orion.CompareContainer();
 	CompareMergeContainer.prototype.setStyle = function(lineStyleEvent , editor){	
@@ -242,16 +246,17 @@ orion.CompareMergeContainer = (function() {
 		this._compareMatchRenderer.copyToLeft();
 	};
 	
-	CompareMergeContainer.prototype.createLeftEditor = function(diffResult){
-		var editorContainerDomNode = dojo.byId(this._leftEditorDivId);
+	CompareMergeContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , tiltleDivId ,readOnly){
+		var editorContainerDomNode = dojo.byId(parentDivId);
 		var self = this;
 		
-		var modelLeft = new eclipse.TextModel(diffResult.output, diffResult.delim);
-		var compareModelLeft = new orion.CompareMergeModel(modelLeft, {mapper:diffResult.mapper , columnIndex:0} );
-		if(self._readOnly){
-			this._editorLeft = new eclipse.Editor({
+		var model = new eclipse.TextModel(content , delim);
+		var compareModel = new orion.CompareMergeModel(model, {mapper:mapper, columnIndex:columnIndex} );
+		var editor = null;
+		if(readOnly){
+			editor = new eclipse.Editor({
 				parent: editorContainerDomNode,
-				model: compareModelLeft,
+				model: compareModel,
 				readonly: true,
 				stylesheet: "/js/compare/editor.css" ,
 				tabSize: 4
@@ -260,20 +265,18 @@ orion.CompareMergeContainer = (function() {
 			var editorFactory = function() {
 				return new eclipse.Editor({
 					parent: editorContainerDomNode,
-					model: compareModelLeft,
-					readonly: self._readOnly,
+					model: compareModel,
+					readonly: readOnly,
 					stylesheet: "/js/compare/editor.css" ,
 					tabSize: 4
 				});
 			};
-		
 			
 			var contentAssistFactory = function(editor) {
 				return new eclipse.ContentAssist(editor, "contentassist");
 			};
 			
 			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
-				
 				// Create keybindings for generic editing
 				var genericBindings = new orion.TextActions(editor, undoStack);
 				keyModeStack.push(genericBindings);
@@ -309,7 +312,7 @@ orion.CompareMergeContainer = (function() {
 				} else {
 					status = message;
 				}
-				dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
+				dojo.byId(tiltleDivId).innerHTML = dirtyIndicator + status;
 			};
 			
 			var editorContainer = new orion.EditorContainer({
@@ -329,80 +332,58 @@ orion.CompareMergeContainer = (function() {
 				} else {
 					dirtyIndicator = "";
 				}
-				dojo.byId("left-viewer-title").innerHTML = dirtyIndicator + status;
+				dojo.byId(tiltleDivId).innerHTML = dirtyIndicator + status;
 			});
 			
 			editorContainer.installEditor();
+			//temporary
 			editorContainer.onInputChange("Content.js");
-			
-			this._editorLeft = editorContainer.getEditorWidget();
+			editor = editorContainer.getEditorWidget();
 			window.onbeforeunload = function() {
 				if (editorContainer.isDirty()) {
-					 return "There are unsaved changes.";
+					return "There are unsaved changes.";
 				}
 			};
 		}
-		this._editorLeft.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 		
-		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
-			self.setStyle(lineStyleEvent , self._editorLeft);
+		editor.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		
+		editor.addEventListener("LineStyle", window, function(lineStyleEvent) {
+			self.setStyle(lineStyleEvent , editor);
 		}); 
 
-		this._editorLeft.getModel().addListener(self._compareMatchRenderer);
-		this._editorLeft.addEventListener("Scroll", window, function(scrollEvent) {
-			if(self._compareMatchRenderer){
-				self._compareMatchRenderer.matchPositionFrom(true);
-				self._compareMatchRenderer.render();
-			}
-		}); 
-		
+		if(columnIndex === 0){
+			editor.getModel().addListener(self._compareMatchRenderer);
+			editor.addEventListener("Scroll", window, function(scrollEvent) {
+				if(self._compareMatchRenderer){
+					self._compareMatchRenderer.matchPositionFrom(true);
+					self._compareMatchRenderer.render();
+				}
+			}); 
+		} else {
+			editor.addEventListener("Scroll", window, function(scrollEvent) {
+				if(self._compareMatchRenderer){
+					self._compareMatchRenderer.render();
+				}
+			}); 
+		}
+		return editor;
 	};
 
 	CompareMergeContainer.prototype.setEditor = function(input , diff){	
 		var result = this.parseMapper(input , diff);
-		if(this._editorLeft && this._editorRight){
-			if(result.delim === this._editorLeft.getModel().getLineDelimiter() ){
-				this._editorLeft.getModel().init(result.mapper);
-				this._editorLeft.setText(result.output);
-				this._editorRight.getModel().init(result.mapper);
-				this._editorRight.setText(input);
-				this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
-				this._initDiffPosition(this._editorRight);
-				return;
-			}
+		if(!this._editorLeft){
+			this._editorLeft = this.createEditorContainer(result.output , result.delim , result.mapper , 0 , this._leftEditorDivId , "left-viewer-title" ,false);
+			this._editorRight = this.createEditorContainer(input , result.delim , result.mapper , 1 , this._rightEditorDivId , "left-viewer-title" ,true);
+			var overview  = new orion.CompareMergeOverviewRuler(this._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
+			this._editorRight.addRuler(overview);
+			this._compareMatchRenderer.setOverviewRuler(overview);
+		} else {
+			this._editorLeft.getModel().init(result.mapper);
+			this._editorRight.getModel().init(result.mapper);
+			this._editorLeft.setText(result.output);
+			this._editorRight.setText(input);
 		}
-				
-		var modelRight = new eclipse.TextModel(input, result.delim);
-		var compareModelRight = new orion.CompareMergeModel(modelRight, {mapper:result.mapper , columnIndex:1} );
-		
-		var optionsRight = {
-			parent: this._rightEditorDivId,
-			model: compareModelRight,
-			readonly: true,
-			stylesheet: "/js/compare/editor.css" 
-		};
-		this._editorRight = new eclipse.Editor(optionsRight);
-		this._editorRight.addRuler(new orion.LineNumberCompareRuler(0,"right", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
-		this.createLeftEditor(result);
-		var self = this;
-		this._editorLeft.redrawRange();
-		
-		this._editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
-			self.setStyle(lineStyleEvent , self._editorRight);
-		}); 
-
-		this._editorRight.addEventListener("Scroll", window, function(scrollEvent) {
-			if(self._compareMatchRenderer){
-				//self._compareMatchRenderer.matchPositionFrom(false);
-				self._compareMatchRenderer.render();
-			}
-		}); 
-				
-		var overview  = new orion.CompareMergeOverviewRuler(self._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
-		this._editorRight.addRuler(overview);
-		this._compareMatchRenderer.setOverviewRuler(overview);
-				
-		this._editorRight.redrawRange();
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
 		this._compareMatchRenderer.matchPositionFromAnnotation(-1);
 	};
