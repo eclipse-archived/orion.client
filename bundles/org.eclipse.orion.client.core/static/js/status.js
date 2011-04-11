@@ -60,16 +60,16 @@ eclipse.StatusReportingService.prototype = {
 		}
 		var message = status.message || status;
 		var color = "red";
-		if (status.severity) {
-			switch (status.severity) {
-			case "warning":
+		if (status.Severity) {
+			switch (status.Severity) {
+			case "Warning":
 				color = "#FFCC00";
 				break;
-			case "error":
+			case "Error":
 				color = "red";
 				break;
-			case "info":
-				case "ok":
+			case "Info":
+			case "Ok":
 				color = "green";
 				break;
 			}
