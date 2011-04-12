@@ -204,11 +204,20 @@ orion.SBSCompareContainer = (function() {
 
 orion.CompareMergeContainer = (function() {
 	/** @private */
-	function CompareMergeContainer(readonly , resgistry ,leftEditorDivId , rightEditorDivId , canvas) {
+	function CompareMergeContainer(readonly , resgistry , commandService , fileClient,leftEditorDivId , rightEditorDivId , canvas) {
 		this.readonly = readonly;
 		this._registry = resgistry;
+		this._commandService = commandService;
 		this._leftEditorDivId = leftEditorDivId;
+		this._fileClient = fileClient;
 		this._rightEditorDivId = rightEditorDivId;
+		this._inputManager = {
+			filePath: "",
+			getInput: function() {
+				return this.filePath;
+			}				
+		};
+		
 		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
 		this.initEditorContainers("\n" , "fetching..." , "fetching..." , []);
 	}
@@ -283,7 +292,9 @@ orion.CompareMergeContainer = (function() {
 			// Create keybindings for generic editing
 			if(readOnly)
 				return;
-				
+			
+			var commandGenerator = new orion.EditorCommandFactory(self._registry, self._commandService,self._fileClient , self._inputManager, "pageActionsLeft");
+			commandGenerator.generateEditorCommands(editor);
 			var genericBindings = new orion.TextActions(editor, undoStack);
 			keyModeStack.push(genericBindings);
 				
@@ -330,7 +341,9 @@ orion.CompareMergeContainer = (function() {
 			domNode: editorContainerDomNode
 		});
 				
+		editorContainer.installEditor();
 		if(!readOnly){
+			eclipse.globalCommandUtils.generateDomCommandsInBanner(this._commandService, editorContainer , "pageActionsLeft");
 			dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
 				if (dirty) {
 					dirtyIndicator = "You have unsaved changes.  ";
@@ -341,7 +354,6 @@ orion.CompareMergeContainer = (function() {
 			});
 		}
 			
-		editorContainer.installEditor();
 		if(createLineStyler && fileURI)
 			editorContainer.onInputChange(fileURI);
 		var editor = editorContainer.getEditorWidget();
@@ -376,6 +388,7 @@ orion.CompareMergeContainer = (function() {
 		if(!this._editorContainerLeft){
 			this.initEditorContainers(result.delim , result.output , input ,  result.mapper , true , this._newFileURI , this._oldFileURI);
 		} else {
+			this._inputManager.filePath = this._newFileURI;
 			this._editorLeft.getModel().init(result.mapper);
 			this._editorRight.getModel().init(result.mapper);
 			this._editorContainerLeft.onInputChange(this._newFileURI, null, result.output);
