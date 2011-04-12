@@ -41,7 +41,7 @@
 				run : function(item) {
 					var clientDeferred = new dojo.Deferred();					
 					gitService.getDefaultRemoteBranch(item.Git.RemoteLocation, function(defaultRemoteBranchJsonData, secondArg){
-						clientDeferred.callback("/git-log.html#" + defaultRemoteBranchJsonData.Location)
+						clientDeferred.callback("/git-log.html?remote#" + defaultRemoteBranchJsonData.Location)
 					});
 					return clientDeferred;
 				}
