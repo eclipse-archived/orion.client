@@ -32,7 +32,7 @@ eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText,
 				if (shouldHideRefNode) {
 					dojo.style(refNode, "display", "inline");
 				}
-				editBox.getPromptMessage(false);  // to get rid of prompting tooltip
+				// editBox.getPromptMessage(false);  // to get rid of prompting tooltip
 				editBox.destroyRecursive();
 				if (onEditDestroy) {
 					onEditDestroy();
@@ -49,7 +49,7 @@ eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText,
 			} else {
 				onComplete(newValue);
 			}
-			editBox.getPromptMessage(false); // to get rid of prompting tooltip
+			// editBox.getPromptMessage(false); // to get rid of prompting tooltip
 			editBox.destroyRecursive();
 			if (onEditDestroy) {
 				onEditDestroy();
@@ -61,8 +61,8 @@ eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText,
 	var editBox = new dijit.form.ValidationTextBox({
 		id: id,
 		required: true, // disallows empty string
-		value: initialText || "",
-		promptMessage: promptMessage
+		value: initialText || ""
+		// promptMessage: promptMessage  // ignore until we can reliably dismiss this on destroy
 	});
 	dojo.place(editBox.domNode, refNode, "after");
 	if (shouldHideRefNode) {

@@ -17,11 +17,10 @@ dojo.addOnLoad(function(){
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	var canvas = document.getElementById("diff-canvas");
-	
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
-	
-	var compareMergeContainer = new orion.CompareMergeContainer(serviceRegistry , "left-viewer" , "right-viewer" , canvas);
+	var readOnly = isHashReadOnly(dojo.hash());
+	compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , "left-viewer" , "right-viewer" , canvas);
 	compareMergeContainer.resolveDiff(dojo.hash(), 
 			  function(newFile , oldFile){
 		  		dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  
@@ -35,8 +34,10 @@ dojo.addOnLoad(function(){
 				  dojo.style("right-viewer-title", "color", "red");
 			  }
 	);
+	
 	//every time the user manually changes the hash, we need to load the diff
 	dojo.subscribe("/dojo/hashchange", compareMergeContainer, function() {
+		compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , "left-viewer" , "right-viewer" , canvas);
 		compareMergeContainer.resolveDiff(dojo.hash(), 
 				  function(newFile , oldFile){
 			  		dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  
@@ -50,8 +51,6 @@ dojo.addOnLoad(function(){
 					  dojo.style("right-viewer-title", "color", "red");
 				  });
 	});
-	
-	
 	// File operations
 	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 		
@@ -79,6 +78,15 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
 		
 	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {});
-	
 });
+
+function isHashReadOnly(hash){
+	var params = hash.split("?");
+	if(params.length === 2){
+		var subParams = params[1].split("=");
+		if(subParams.length === 2 && subParams[0] === "readonly" && subParams[1] === "true" )
+			return true;
+	} 
+	return false;
+}
 
