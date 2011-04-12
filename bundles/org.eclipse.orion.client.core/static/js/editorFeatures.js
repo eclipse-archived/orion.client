@@ -311,7 +311,7 @@ orion.TextActions = (function() {
 					}
 					this.startUndo();
 					var firstLineStart = model.getLineStart(firstLine);
-					this.editorWidget.setText(lines.join("\t"), model.getLineStart(firstLine), model.getLineEnd(lastLine, true));
+					this.editorWidget.setText(lines.join("\t"), firstLineStart, model.getLineEnd(lastLine, true));
 					this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start + 1, selection.end + (lastLine - firstLine + 1));
 					this.endUndo();
 					return true;
@@ -333,7 +333,7 @@ orion.TextActions = (function() {
 				this.startUndo();
 				var firstLineStart = model.getLineStart(firstLine);
 				var lastLineStart = model.getLineStart(lastLine);
-				this.editorWidget.setText(lines.join(""), model.getLineStart(firstLine), model.getLineEnd(lastLine, true));
+				this.editorWidget.setText(lines.join(""), firstLineStart, model.getLineEnd(lastLine, true));
 				this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start - 1, selection.end - (lastLine - firstLine + 1) + (selection.end===lastLineStart+1?1:0));
 				this.endUndo();
 				return true;
@@ -612,14 +612,14 @@ orion.SourceCodeActions = (function() {
 						var commentIndex = lineText.indexOf("//");
 						lines.push(line.substring(0, commentIndex) + line.substring(commentIndex + 2));
 					}
-					this.editorWidget.setText(lines.join(""), model.getLineStart(firstLine), model.getLineEnd(lastLine, true));
+					this.editorWidget.setText(lines.join(""), firstLineStart, model.getLineEnd(lastLine, true));
 					this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start - 2, selection.end - (2 * (lastLine - firstLine + 1)) + (selection.end===lastLineStart+1?2:0));
 				} else {
 					lines.push("");
 					for (k = firstLine; k <= lastLine; k++) {
 						lines.push(model.getLine(k, true));
 					}
-					this.editorWidget.setText(lines.join("//"), model.getLineStart(firstLine), model.getLineEnd(lastLine, true));
+					this.editorWidget.setText(lines.join("//"), firstLineStart, model.getLineEnd(lastLine, true));
 					this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start + 2, selection.end + (2 * (lastLine - firstLine + 1)));
 				}
 				this.endUndo();
