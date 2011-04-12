@@ -78,6 +78,44 @@ eclipse.StatusReportingService.prototype = {
 		var span = dojo.create("span", {style: {color: color}}); 
 		dojo.place(window.document.createTextNode(message), span);
 		dojo.place(span, this.domId, "only");
+	},
+	
+		/**
+	 * Shows a progress message until the given deferred is resolved. Returns a deferred that resolves when
+	 * the operation completes.
+	 */
+	showWhile: function(deferred, message) {
+		var that = this;
+		that.setMessage(message);
+		return deferred.then(function(result) {
+			//see if we are dealing with a progress resource
+			if (result && result.Location && result.Message && result.Running) {
+				return that._doProgressWhile(result);
+			}
+			//otherwise just return the result
+			that.setMessage("");
+			return result;
+		});
+	},
+	
+	_doProgressWhile: function(progress) {
+		var deferred = new dojo.Deferred();
+		//sleep for awhile before we get more progress
+		window.setTimeout(function() {
+			dojo.xhrGet({
+				url: progress.Location,
+				headers: { "Orion-Version" : "1"},
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, ioArgs) {
+					//jsonData is either the final result or a progress resource
+					deferred.callback(jsonData);
+				}
+			});
+		}, 2000);
+		//recurse until operation completes
+		return this.showWhile(deferred, progress.Message);
 	}
+
 };
 	
