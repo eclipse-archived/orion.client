@@ -304,13 +304,15 @@ orion.TextActions = (function() {
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
 				if (firstLine !== lastLine) {
-					this.startUndo();
-					var lineStart = model.getLineStart(firstLine);
+					var lines = [];
+					lines.push("");
 					for (var i = firstLine; i <= lastLine; i++) {
-						lineStart = model.getLineStart(i);
-						this.editorWidget.setText("\t", lineStart, lineStart);
+						lines.push(model.getLine(i, true));
 					}
-					this.editorWidget.setSelection(lineStart===selection.start?lineStart:selection.start + 1, selection.end + (lastLine - firstLine + 1));
+					this.startUndo();
+					var firstLineStart = model.getLineStart(firstLine);
+					this.editorWidget.setText(lines.join("\t"), firstLineStart, model.getLineEnd(lastLine, true));
+					this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start + 1, selection.end + (lastLine - firstLine + 1));
 					this.endUndo();
 					return true;
 				}
@@ -322,21 +324,17 @@ orion.TextActions = (function() {
 				var model = this.editorWidget.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				var i, lineStart;
-				for (i = firstLine; i <= lastLine; i++) {
-					lineStart = model.getLineStart(i);
-					var lineEnd = model.getLineEnd(i);
-					if (lineStart === lineEnd) { return false; }
-					if (this.editorWidget.getText(lineStart, lineStart + 1) !== "\t") { return false; }
+				var lines = [];
+				for (var i = firstLine; i <= lastLine; i++) {
+					var line = model.getLine(i, true);
+					if (line.indexOf("\t") !== 0) { return false; }
+					lines.push(line.substring(1));
 				}
 				this.startUndo();
-				lineStart = model.getLineStart(firstLine);
+				var firstLineStart = model.getLineStart(firstLine);
 				var lastLineStart = model.getLineStart(lastLine);
-				for (i = firstLine; i <= lastLine; i++) {
-					lineStart = model.getLineStart(i);
-					this.editorWidget.setText("", lineStart, lineStart + 1);
-				}
-				this.editorWidget.setSelection(lineStart===selection.start?lineStart:selection.start - 1, selection.end - (lastLine - firstLine + 1) + (selection.end===lastLineStart+1?1:0));
+				this.editorWidget.setText(lines.join(""), firstLineStart, model.getLineEnd(lastLine, true));
+				this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start - 1, selection.end - (lastLine - firstLine + 1) + (selection.end===lastLineStart+1?1:0));
 				this.endUndo();
 				return true;
 			}));
@@ -605,24 +603,24 @@ orion.SourceCodeActions = (function() {
 						}
 					}
 				}
-				var k, lineStart, lastLineStart, insertOffset;
+				var k, lines = [];
+				var firstLineStart = model.getLineStart(firstLine);
 				if (uncomment) {
-					lineStart = model.getLineStart(firstLine);
-					lastLineStart = model.getLineStart(lastLine);
+					var lastLineStart = model.getLineStart(lastLine);
 					for (k = firstLine; k <= lastLine; k++) {
-						lineText = this.editorWidget.getModel().getLine(k);
-						insertOffset = lineText.indexOf("//") + model.getLineStart(k);
-						this.editorWidget.setText("", insertOffset, insertOffset + 2);
+						var line = model.getLine(k, true);
+						var commentIndex = lineText.indexOf("//");
+						lines.push(line.substring(0, commentIndex) + line.substring(commentIndex + 2));
 					}
-					this.editorWidget.setSelection(lineStart===selection.start?lineStart:selection.start - 2, selection.end - (2 * (lastLine - firstLine + 1)) + (selection.end===lastLineStart+1?2:0));
+					this.editorWidget.setText(lines.join(""), firstLineStart, model.getLineEnd(lastLine, true));
+					this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start - 2, selection.end - (2 * (lastLine - firstLine + 1)) + (selection.end===lastLineStart+1?2:0));
 				} else {
-					lineStart = model.getLineStart(firstLine);
-					lastLineStart = model.getLineStart(lastLine);
+					lines.push("");
 					for (k = firstLine; k <= lastLine; k++) {
-						insertOffset = model.getLineStart(k);
-						this.editorWidget.setText("//", insertOffset, insertOffset);
+						lines.push(model.getLine(k, true));
 					}
-					this.editorWidget.setSelection(lineStart===selection.start?lineStart:selection.start + 2, selection.end + (2 * (lastLine - firstLine + 1)));
+					this.editorWidget.setText(lines.join("//"), firstLineStart, model.getLineEnd(lastLine, true));
+					this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start + 2, selection.end + (2 * (lastLine - firstLine + 1)));
 				}
 				this.endUndo();
 				return true;
@@ -740,10 +738,14 @@ orion.SourceCodeActions = (function() {
 					var model = this.editorWidget.getModel();
 					var lineIndex = model.getLineAtOffset(selection.start);
 					var lineText = model.getLine(lineIndex);
-					var index = 0, c;
-					while ((c = lineText.charCodeAt(index)) === 32 || c === 9) { index++; }
+					var lineStart = model.getLineStart(lineIndex);
+					var index = 0, end = selection.start - lineStart, c;
+					while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
 					if (index > 0) {
-						this.editorWidget.setText(model.getLineDelimiter() + lineText.substring(0, index), selection.start, selection.end);
+						var prefix = lineText.substring(0, index);
+						index = end;
+						while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
+						this.editorWidget.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
 						return true;
 					}
 				}

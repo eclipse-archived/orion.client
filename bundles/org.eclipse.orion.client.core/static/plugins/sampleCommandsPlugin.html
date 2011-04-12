@@ -20,6 +20,23 @@
 			});
 			provider.registerServiceProvider("fileCommands", {
 				run : function(item) {
+					var clientDeferred = new dojo.Deferred();
+					window.setTimeout(function () {
+						clientDeferred.callback(item.Location);
+					}, 500);
+					return clientDeferred;
+				}
+			}, {
+				image: "/images/gear.gif",
+				name: "Deferred href computation",
+				id: "sample.commands.sample11",
+				forceSingleItem: true,
+				href: true,
+				validationProperties: {"Name":"*.html"},
+				tooltip: "Generate an HTML link from a plugin using deferred"
+			});
+			provider.registerServiceProvider("fileCommands", {
+				run : function(item) {
 					return item.Location;
 				}
 			}, {
