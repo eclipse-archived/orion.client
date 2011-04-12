@@ -40,6 +40,8 @@ orion.CompareContainer = (function() {
 				function(service) {
 					service.getDiffFileURI(diffURI, 
 										   function(jsonData, secondArg) {
+											  self._oldFileURI = jsonData.Git.Old;
+											  self._newFileURI = jsonData.Git.New;
 											  self.getFileContent(jsonData.Git.Old , errorCallBack);
 											  if(uiCallBack)
 												  uiCallBack(jsonData.Git.New , jsonData.Git.Old);
@@ -208,15 +210,26 @@ orion.CompareMergeContainer = (function() {
 		this._leftEditorDivId = leftEditorDivId;
 		this._rightEditorDivId = rightEditorDivId;
 		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
-		
-		this._editorLeft = this.createEditorContainer("fetching..." , "\n" ,[] , 0 , this._leftEditorDivId , "left-viewer-title" ,this.readonly);
-		this._editorRight = this.createEditorContainer("fetching..." , "\n" ,[] ,1 , this._rightEditorDivId , "right-viewer-title" ,true);
+		this.initEditorContainers("\n" , "fetching..." , "fetching..." , []);
+	}
+	CompareMergeContainer.prototype = new orion.CompareContainer();
+	CompareMergeContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler , fileURILeft , fileURIRight){	
+		this._editorContainerLeft = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , "left-viewer-status" ,this.readonly ,createLineStyler , fileURILeft);
+		this._editorLeft = this._editorContainerLeft.getEditorWidget();
+		this._editorContainerRight = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , "right-viewer-status" ,true, createLineStyler , fileURIRight);
+		this._editorRight = this._editorContainerRight.getEditorWidget();
 		var overview  = new orion.CompareMergeOverviewRuler(this._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
 		this._editorRight.addRuler(overview);
 		this._compareMatchRenderer.setOverviewRuler(overview);
+		var self = this;
+		window.onbeforeunload = function() {
+			if (self._editorContainerLeft.isDirty()) {
+				return "There are unsaved changes.";
+			}
+		};
 		
-	}
-	CompareMergeContainer.prototype = new orion.CompareContainer();
+	};
+	
 	CompareMergeContainer.prototype.setStyle = function(lineStyleEvent , editor){	
 		var lineIndex = lineStyleEvent.lineIndex;
 		var lineTypeWrapper =  editor.getModel().getLineType(lineIndex);
@@ -246,117 +259,98 @@ orion.CompareMergeContainer = (function() {
 		this._compareMatchRenderer.copyToLeft();
 	};
 	
-	CompareMergeContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , tiltleDivId ,readOnly){
+	CompareMergeContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , tiltleDivId ,readOnly , createLineStyler , fileURI){
 		var editorContainerDomNode = dojo.byId(parentDivId);
 		var self = this;
 		
 		var model = new eclipse.TextModel(content , delim);
-		var compareModel = new orion.CompareMergeModel(model, {mapper:mapper, columnIndex:columnIndex} );
-		var editor = null;
-		if(false){
-			editor = new eclipse.Editor({
+		var compareModel = new orion.CompareMergeModel(model, {mapper:mapper, columnIndex:columnIndex } );
+		var editorFactory = function() {
+			return new eclipse.Editor({
 				parent: editorContainerDomNode,
 				model: compareModel,
-				readonly: true,
+				readonly: readOnly,
 				stylesheet: "/js/compare/editor.css" ,
 				tabSize: 4
 			});
-		} else {
-			var editorFactory = function() {
-				return new eclipse.Editor({
-					parent: editorContainerDomNode,
-					model: compareModel,
-					readonly: readOnly,
-					stylesheet: "/js/compare/editor.css" ,
-					tabSize: 4
-				});
-			};
+		};
 			
-			var contentAssistFactory = function(editor) {
-				return new eclipse.ContentAssist(editor, "contentassist");
-			};
+		var contentAssistFactory = function(editor) {
+			return new eclipse.ContentAssist(editor, "contentassist");
+		};
 			
-			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
-				// Create keybindings for generic editing
-				if(readOnly)
-					return;
+		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
+			// Create keybindings for generic editing
+			if(readOnly)
+				return;
 				
-				var genericBindings = new orion.TextActions(editor, undoStack);
-				keyModeStack.push(genericBindings);
+			var genericBindings = new orion.TextActions(editor, undoStack);
+			keyModeStack.push(genericBindings);
 				
-				// create keybindings for source editing
-				var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
-				keyModeStack.push(codeBindings);
+			// create keybindings for source editing
+			var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
+			keyModeStack.push(codeBindings);
 				
-				// save binding
-				editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
-				editor.getEditorWidget().setAction("save", function(){
-						editor.onInputChange(null, null, null, true);
-						var text = editor.getEditorWidget().getText();
-						var problems = [];
-						for (var i=0; i<text.length; i++) {
-							if (text.charAt(i) === 'z') {
-								var line = editor.getEditorWidget().getModel().getLineAtOffset(i) + 1;
-								var character = i - editor.getEditorWidget().getModel().getLineStart(line);
-								problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
-							}
-						}
-						annotationFactory.showProblems(problems);
-						return true;
-				});
-			};
-			
+			// save binding
+			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
+			editor.getEditorWidget().setAction("save", function(){
+				editor.onInputChange(null, null, null, true);
+				var text = editor.getEditorWidget().getText();
+				var problems = [];
+				for (var i=0; i<text.length; i++) {
+					if (text.charAt(i) === 'z') {
+						var line = editor.getEditorWidget().getModel().getLineAtOffset(i) + 1;
+						var character = i - editor.getEditorWidget().getModel().getLineStart(line);
+						problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
+					}
+				}
+				annotationFactory.showProblems(problems);
+				return true;
+			});
+		};
 
-			var dirtyIndicator = "";
-			var status = "";
-			
-			var statusReporter = function(message, isError) {
-				if (isError) {
-					status =  "ERROR: " + message;
+		var dirtyIndicator = "";
+		var status = "";
+		var statusReporter = function(message, isError) {
+			if (isError) {
+				status =  "ERROR: " + message;
+			} else {
+				status = message;
+			}
+			dojo.byId(tiltleDivId).innerHTML = dirtyIndicator +  status;
+		};
+		var editorContainer = new orion.EditorContainer({
+			editorFactory: editorFactory,
+			undoStackFactory: new orion.UndoFactory(),
+			//annotationFactory: annotationFactory,
+			//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
+			contentAssistFactory: contentAssistFactory,
+			keyBindingFactory: keyBindingFactory, 
+			statusReporter: statusReporter,
+			domNode: editorContainerDomNode
+		});
+				
+		if(!readOnly){
+			dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
+				if (dirty) {
+					dirtyIndicator = "You have unsaved changes.  ";
 				} else {
-					status = message;
+					dirtyIndicator = "";
 				}
 				dojo.byId(tiltleDivId).innerHTML = dirtyIndicator + status;
-			};
-			var editorContainer = new orion.EditorContainer({
-				editorFactory: editorFactory,
-				undoStackFactory: new orion.UndoFactory(),
-				//annotationFactory: annotationFactory,
-				//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
-				contentAssistFactory: contentAssistFactory,
-				keyBindingFactory: keyBindingFactory, 
-				statusReporter: statusReporter,
-				domNode: editorContainerDomNode
 			});
-				
-			if(!readOnly){
-				dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
-					if (dirty) {
-						dirtyIndicator = "";//"You have unsaved changes.  ";
-					} else {
-						dirtyIndicator = "";
-					}
-					dojo.byId(tiltleDivId).innerHTML = dirtyIndicator + status;
-				});
-			}
-			
-			editorContainer.installEditor();
-			//temporary
-			editorContainer.onInputChange("Content.js");
-			editor = editorContainer.getEditorWidget();
-			
-			window.onbeforeunload = function() {
-				if (editorContainer.isDirty()) {
-					return "There are unsaved changes.";
-				}
-			};
 		}
-		
+			
+		editorContainer.installEditor();
+		if(createLineStyler && fileURI)
+			editorContainer.onInputChange(fileURI);
+		var editor = editorContainer.getEditorWidget();
+			
 		editor.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
-		
-		editor.addEventListener("LineStyle", window, function(lineStyleEvent) {
-			self.setStyle(lineStyleEvent , editor);
-		}); 
+		if(createLineStyler && fileURI)
+			editor.addEventListener("LineStyle", window, function(lineStyleEvent) {
+				self.setStyle(lineStyleEvent , editor);
+			}); 
 
 		if(columnIndex === 0){
 			editor.getModel().addListener(self._compareMatchRenderer);
@@ -373,22 +367,25 @@ orion.CompareMergeContainer = (function() {
 				}
 			}); 
 		}
-		return editor;
+		return editorContainer;
 	};
 
 	CompareMergeContainer.prototype.setEditor = function(input , diff){	
 		var result = this.parseMapper(input , diff);
-		if(!this._editorLeft){
-			this._editorLeft = this.createEditorContainer(result.output , result.delim , result.mapper , 0 , this._leftEditorDivId , "left-viewer-title" ,false);
-			this._editorRight = this.createEditorContainer(input , result.delim , result.mapper , 1 , this._rightEditorDivId , "left-viewer-title" ,true);
-			var overview  = new orion.CompareMergeOverviewRuler(this._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
-			this._editorRight.addRuler(overview);
-			this._compareMatchRenderer.setOverviewRuler(overview);
+		var self = this;
+		if(!this._editorContainerLeft){
+			this.initEditorContainers(result.delim , result.output , input ,  result.mapper , true , this._newFileURI , this._oldFileURI);
 		} else {
 			this._editorLeft.getModel().init(result.mapper);
 			this._editorRight.getModel().init(result.mapper);
-			this._editorLeft.setText(result.output);
-			this._editorRight.setText(input);
+			this._editorContainerLeft.onInputChange(this._newFileURI, null, result.output);
+			self._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
+				self.setStyle(lineStyleEvent , self._editorLeft);
+			}); 
+			this._editorContainerRight.onInputChange(this._oldFileURI, null, input);
+			self._editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
+				self.setStyle(lineStyleEvent , self._editorRight);
+			}); 
 		}
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
 		this._compareMatchRenderer.matchPositionFromAnnotation(-1);
