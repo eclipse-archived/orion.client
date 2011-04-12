@@ -64,7 +64,7 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 	};
 	
 	
-	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
+	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId, gitClient) {
 		var cloneGitRepositoryCommand = new eclipse.Command({
 			name : "Clone Git Repository",
 			image : "images/git/cloneGit.gif",
@@ -143,6 +143,34 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 		});
 	
 		commandService.addCommand(openGitCommit, "object");
+		
+		var fetchCommand = new eclipse.Command({
+			name : "Fetch",
+			image : "images/gear.gif",
+			id : "eclipse.orion.git.fetch",
+			callback: function(item) {
+				gitClient.doFetch(dojo.hash());
+			},
+			visibleWhen : function(item) {
+				return true;
+			}
+		});
+	
+		commandService.addCommand(fetchCommand, "dom");
+		
+		var mergeCommand = new eclipse.Command({
+			name : "Merge",
+			image : "images/gear.gif",
+			id : "eclipse.orion.git.merge",
+			hrefCallback: function(item) {
+				// go to local branch page
+			},
+			visibleWhen : function(item) {
+				return false;
+			}
+		});
+	
+		commandService.addCommand(mergeCommand, "dom");
 	};
 	
 	eclipse.gitCommandUtils.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId) {

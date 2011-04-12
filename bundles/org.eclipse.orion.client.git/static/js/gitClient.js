@@ -308,6 +308,36 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
+		doFetch : function(gitRemoteBranchURI, onLoad) {
+			var service = this;
+			
+			console.info("doFetch called");
+			
+			dojo.xhrPost({
+				url : gitRemoteBranchURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson({
+					"Fetch" : "true"
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
 		getDefaultRemoteBranch : function(gitRemoteURI, onLoad) {
 			var service = this;
 			

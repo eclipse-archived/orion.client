@@ -40,7 +40,7 @@ eclipse.GitCommitNavigator = (function() {
 			}
 						
 			this._lastHash = path;
-			dojo.hash(path, true);
+			//dojo.hash(path, true);
 			var parent = dojo.byId(this.parentId);
 
 			// Progress indicator
