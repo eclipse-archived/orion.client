@@ -37,9 +37,7 @@ dojo.addOnLoad(function(){
 	
 	//every time the user manually changes the hash, we need to load the diff
 	dojo.subscribe("/dojo/hashchange", compareMergeContainer, function() {
-		readOnly = isHashReadOnly(dojo.hash());
-		if(readOnly !== compareMergeContainer.readonly)
-			compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , "left-viewer" , "right-viewer" , canvas);
+		compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , "left-viewer" , "right-viewer" , canvas);
 		compareMergeContainer.resolveDiff(dojo.hash(), 
 				  function(newFile , oldFile){
 			  		dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  

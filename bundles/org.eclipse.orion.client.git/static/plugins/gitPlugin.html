@@ -4,9 +4,12 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
 	<script type="text/javascript" src="/js/plugin.js"></script>
+	<script type="text/javascript" src="/js/gitClient.js"></script>
+	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script>
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
+			var gitService = new eclipse.GitService();
 			
 			provider.registerServiceProvider("fileCommands", {
 				run: function(item) {
@@ -32,6 +35,24 @@
 				validationProperties: {"Git":"*"},
 				href: true,
 				forceSingleItem: true
+			});
+			
+			provider.registerServiceProvider("fileCommands", {
+				run : function(item) {
+					var clientDeferred = new dojo.Deferred();					
+					gitService.getDefaultRemoteBranch(item.Git.RemoteLocation, function(defaultRemoteBranchJsonData, secondArg){
+						clientDeferred.callback("/git-log.html?remote#" + defaultRemoteBranchJsonData.Location)
+					});
+					return clientDeferred;
+				}
+			}, {
+				image: "/images/gear.gif",
+				name: "Git Remote",
+				id: "eclipse.git.remote",
+				validationProperties: {"Git":"*"},
+				forceSingleItem: true,
+				href: true,
+				tooltip: "Go to Git Remote"
 			});
 			
 			provider.connect();

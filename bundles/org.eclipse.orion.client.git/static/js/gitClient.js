@@ -39,8 +39,8 @@ eclipse.GitService = (function() {
 			if(gitSshKnownHost && gitSshKnownHost!=""){
 				this._sshService.addKnownHosts(gitSshKnownHost);
 			}
-			this._sshService.getKnownHosts().then(function(knownHosts){
-				dojo.xhrPost({
+			return this._sshService.getKnownHosts().then(function(knownHosts){
+				return dojo.xhrPost({
 					url : "/git/clone/",
 					headers : {
 						"Orion-Version" : "1"
@@ -307,6 +307,80 @@ eclipse.GitService = (function() {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
+		},
+		doFetch : function(gitRemoteBranchURI, onLoad) {
+			var service = this;
+			
+			console.info("doFetch called");
+			
+			dojo.xhrPost({
+				url : gitRemoteBranchURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson({
+					"Fetch" : "true"
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
+		getDefaultRemoteBranch : function(gitRemoteURI, onLoad) {
+			var service = this;
+			
+			console.info("getDefaultRemoteBranch called");
+			
+			dojo.xhrGet({
+				url : gitRemoteURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			}).then(function(remoteJsonData){
+				dojo.xhrGet({
+					url : remoteJsonData.Children[0].Location,
+					headers : {
+						"Orion-Version" : "1"
+					},
+					handleAs : "json",
+					timeout : 5000,
+					load : function(jsonData, secondArg) {
+						if (onLoad) {
+							if (typeof onLoad === "function")
+								onLoad(jsonData.Children[0], secondArg);
+							else
+								service._serviceRegistration.dispatchEvent(onLoad,
+										jsonData.Children[0]);
+						}
+						return jsonData;
+					},
+					error : function(error, ioArgs) {
+						handleGetAuthenticationError(this, ioArgs);
+						console.error("HTTP status code: ", ioArgs.xhr.status);
+					}
+				});
+			});	
 		}
 	};
 	return GitService;
