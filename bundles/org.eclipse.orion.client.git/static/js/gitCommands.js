@@ -63,7 +63,6 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 		}
 	};
 	
-	
 	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 		var cloneGitRepositoryCommand = new eclipse.Command({
 			name : "Clone Git Repository",
@@ -72,13 +71,15 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 			callback : function(item) {
 				var dialog = new widgets.CloneGitRepositoryDialog({
 					func : function(gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
-						serviceRegistry.getService("IGitService").then(
-								function(service) {
-									service.cloneGitRepository("", gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost).then(
-											function(jsonData, secondArg) {
-												window.alert("Repository cloned. You may now link to " + jsonData.ContentLocation);
-											});
-								});
+						serviceRegistry.getService("IGitService").then(function(gitService) {
+							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+								var deferred = gitService.cloneGitRepository("", gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost);
+								progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
+									function(jsonData, secondArg) {
+										window.alert(jsonData.Message);
+									});
+							});
+						});
 					}
 				});
 				dialog.startup();

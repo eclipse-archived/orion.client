@@ -39,8 +39,8 @@ eclipse.GitService = (function() {
 			if(gitSshKnownHost && gitSshKnownHost!=""){
 				this._sshService.addKnownHosts(gitSshKnownHost);
 			}
-			this._sshService.getKnownHosts().then(function(knownHosts){
-				dojo.xhrPost({
+			return this._sshService.getKnownHosts().then(function(knownHosts){
+				return dojo.xhrPost({
 					url : "/git/clone/",
 					headers : {
 						"Orion-Version" : "1"
