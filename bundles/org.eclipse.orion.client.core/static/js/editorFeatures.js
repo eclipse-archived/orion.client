@@ -738,10 +738,14 @@ orion.SourceCodeActions = (function() {
 					var model = this.editorWidget.getModel();
 					var lineIndex = model.getLineAtOffset(selection.start);
 					var lineText = model.getLine(lineIndex);
-					var index = 0, c;
-					while ((c = lineText.charCodeAt(index)) === 32 || c === 9) { index++; }
+					var lineStart = model.getLineStart(lineIndex);
+					var index = 0, end = selection.start - lineStart, c;
+					while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
 					if (index > 0) {
-						this.editorWidget.setText(model.getLineDelimiter() + lineText.substring(0, index), selection.start, selection.end);
+						var prefix = lineText.substring(0, index);
+						index = end;
+						while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
+						this.editorWidget.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
 						return true;
 					}
 				}
