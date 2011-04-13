@@ -370,7 +370,7 @@ orion.GitStatusController = (function() {
 		},
 		
 		openSBSViewer: function(itemModel){
-			var url = "/compare-m.html#" + itemModel.diffURI;
+			var url = "/compare-m.html#" + itemModel.diffURI + (this._model.isStaged(itemModel.type) ? "?readonly=true" :"");
 			window.open(url,"");
 		},
 		
