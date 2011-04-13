@@ -80,7 +80,7 @@ eclipse.StatusReportingService.prototype = {
 		dojo.place(span, this.domId, "only");
 	},
 	
-		/**
+	/**
 	 * Shows a progress message until the given deferred is resolved. Returns a deferred that resolves when
 	 * the operation completes.
 	 */
@@ -97,7 +97,10 @@ eclipse.StatusReportingService.prototype = {
 			return result;
 		});
 	},
-	
+
+	/**
+	 * Helper method used to implement showWhile.
+	 */	
 	_doProgressWhile: function(progress) {
 		var deferred = new dojo.Deferred();
 		//sleep for awhile before we get more progress
@@ -116,6 +119,5 @@ eclipse.StatusReportingService.prototype = {
 		//recurse until operation completes
 		return this.showWhile(deferred, progress.Message);
 	}
-
 };
 	
