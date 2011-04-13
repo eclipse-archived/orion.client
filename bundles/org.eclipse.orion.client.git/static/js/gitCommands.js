@@ -150,7 +150,30 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 			image : "images/gear.gif",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
-				gitClient.doFetch(dojo.hash());
+				var path = dojo.hash();
+				serviceRegistry.getService("IGitService").then(function(gitService) {
+					serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+						var deferred = gitService.doFetch(path);
+						progressService.showWhile(deferred, "Fetching remote: " + path).then(
+							function(jsonData, secondArg) {
+								dojo.xhrGet({
+									url : path,
+									headers : {
+										"Orion-Version" : "1"
+									},
+									handleAs : "json",
+									timeout : 5000,
+									load : function(jsonData, secondArg) {
+										explorer.loadCommitsList(jsonData.CommitLocation);
+									},
+									error : function(error, ioArgs) {
+										//handleGetAuthenticationError(this, ioArgs);
+										console.error("HTTP status code: ", ioArgs.xhr.status);
+									}
+								});
+							});
+					});
+				});
 			},
 			visibleWhen : function(item) {
 				return true;
