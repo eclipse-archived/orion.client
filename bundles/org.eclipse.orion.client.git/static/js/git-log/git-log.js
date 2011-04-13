@@ -56,9 +56,12 @@ dojo.addOnLoad(function(){
 	
 	// git contributions
 	// commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "pageActions", "eclipse.gitGroup.page");
-
+	
+	if (isRemote()){
+		commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "pageActions", "eclipse.gitGroup.page");
+		commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "pageActions", "eclipse.gitGroup.page");
+	};
+	
 	commandService.renderCommands(dojo.byId("pageActions"), "dom", {}, {}, "image");
 	
 	if (isRemote()) {

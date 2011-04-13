@@ -313,7 +313,7 @@ eclipse.GitService = (function() {
 			
 			console.info("doFetch called");
 			
-			dojo.xhrPost({
+			return dojo.xhrPost({
 				url : gitRemoteBranchURI,
 				headers : {
 					"Orion-Version" : "1"
