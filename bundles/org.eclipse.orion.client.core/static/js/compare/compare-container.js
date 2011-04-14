@@ -27,7 +27,11 @@ orion.CompareContainer = (function() {
 				function(service) {
 					service.getDiffContent(diffURI, 
 										   function(jsonData, secondArg) {
-										   	  self._diff = jsonData;
+											  if(self._conflict){
+												  self._diff = jsonData.split("diff --git")[1];
+											  }	else {
+												  self._diff = jsonData;
+											  }
 										      self.getFileURI(diffURI , uiCallBack , errorCallBack);
 										   },
 										   errorCallBack);
@@ -83,9 +87,9 @@ orion.CompareContainer = (function() {
 			var params = hash.split("?");
 			if(params.length === 2){
 				diffURI = params[0];
-				//var subParams = params[1].split("=");
-				//if(subParams.length === 2 && subParams[0] === "readonly" && subParams[1] === "true" )
-					//this._readOnly = true;
+				var subParams = params[1].split("=");
+				if(subParams.length === 2 && subParams[0] === "conflict" && subParams[1] === "true" )
+					this._conflict = true;
 			} 
 			this.getFileDiffGit(diffURI , callBack , errorCallBack);
 		},
@@ -355,7 +359,7 @@ orion.CompareMergeContainer = (function() {
 		}
 			
 		if(createLineStyler && fileURI)
-			editorContainer.onInputChange(fileURI);
+			editorContainer.onInputChange(fileURI.split("?")[0]);
 		var editor = editorContainer.getEditorWidget();
 			
 		editor.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
@@ -391,13 +395,13 @@ orion.CompareMergeContainer = (function() {
 			this._inputManager.filePath = this._newFileURI;
 			this._editorLeft.getModel().init(result.mapper);
 			this._editorRight.getModel().init(result.mapper);
-			this._editorContainerLeft.onInputChange(this._newFileURI, null, result.output);
-			self._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
-				self.setStyle(lineStyleEvent , self._editorLeft);
-			}); 
-			this._editorContainerRight.onInputChange(this._oldFileURI, null, input);
+			this._editorContainerRight.onInputChange(this._oldFileURI.split("?")[0], null, input);
 			self._editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
 				self.setStyle(lineStyleEvent , self._editorRight);
+			}); 
+			this._editorContainerLeft.onInputChange(this._newFileURI.split("?")[0], null, result.output);
+			self._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
+				self.setStyle(lineStyleEvent , self._editorLeft);
 			}); 
 		}
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
