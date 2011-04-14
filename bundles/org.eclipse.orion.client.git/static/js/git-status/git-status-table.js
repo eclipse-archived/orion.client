@@ -246,7 +246,7 @@ orion.GitStatusController = (function() {
 			this.modifyImageButton(true ,stageAllBtn , "Stage all", function(evt){self.stageAll();} , !this.hasUnstaged);
 			this.modifyImageButton(true ,unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
 			this.modifyImageButton(true ,commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value);} , !this.hasStaged , function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
-			this.modifyImageButton(false ,amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value , true);} , true , function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
+			this.modifyImageButton(false ,amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value , true);} , !this.hasStaged, function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
 			
 			this.cursorClear();
 		},
