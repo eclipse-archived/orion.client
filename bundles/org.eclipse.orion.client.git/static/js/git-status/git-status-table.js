@@ -495,6 +495,8 @@ orion.GitStatusController = (function() {
 		},
 		
 		stageAll: function(){
+			this.stage(this._model.items.IndexLocation);
+			/*
 			var start = this._url.indexOf("/file/");
 			if(start != -1){
 				var sub = this._url.substring(start);
@@ -503,6 +505,7 @@ orion.GitStatusController = (function() {
 					this.stage("/git/index" + [subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") );
 				}
 			}
+			*/
 		},
 		
 		unstage: function(location){
@@ -521,16 +524,19 @@ orion.GitStatusController = (function() {
 		},
 		
 		unstageAll: function(){
+			this.unstage(this._model.items.IndexLocation);
+			/*
 			var start = this._url.indexOf("/file/");
 			if(start != -1)
 				this.unstage("/git/index" + this._url.substring(start));
+			*/
 		},
 		
 		commitAll: function(location , message , body){
 			var self = this;
 			self._registry.getService("IGitService").then(
 					function(service) {
-						service.commitAll("/git/commit/HEAD" + location,  message , body,
+						service.commitAll(location,  message , body,
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
@@ -542,6 +548,8 @@ orion.GitStatusController = (function() {
 		},
 		
 		commit: function(message , amend){
+			this.commitAll(this._model.items.CommitLocation , message , amend ?dojo.toJson({"Message":message,"Amend":"true"}): dojo.toJson({"Message":message}));
+			/*
 			var start = this._url.indexOf("/file/");
 			if(start != -1){
 				var sub = this._url.substring(start);
@@ -550,6 +558,7 @@ orion.GitStatusController = (function() {
 					this.commitAll([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") , message , amend ?dojo.toJson({"Message":message,"Amend":"true"}): dojo.toJson({"Message":message}));
 				}
 			}
+			*/
 		},
 		
 		findFolderName: function(){
