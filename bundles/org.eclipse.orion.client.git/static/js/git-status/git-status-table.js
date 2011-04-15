@@ -61,12 +61,12 @@ orion.GitStatusModel = (function() {
 					if(item){
 						itemsInDetectGroup.push(item);
 					} else {
-						break;
+						continue;
 					}
 				}
 				
 				//we have the same file at "Modified" ,"Added", "Changed","Missing" groups
-				if(itemsInDetectGroup.length === this.conflictDetectGroup.length){
+				if(itemsInDetectGroup.length > 1){
 					modGroup[i].Conflicting = true;
 					for(var k = 0; k < itemsInDetectGroup.length ; k++){
 						itemsInDetectGroup[k].Conflicting = true;
