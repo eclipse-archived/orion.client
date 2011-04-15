@@ -66,7 +66,7 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId, gitClient) {
 		var cloneGitRepositoryCommand = new eclipse.Command({
 			name : "Clone Git Repository",
-			image : "images/git/cloneGit.gif",
+			image : "images/git-clone.gif",
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
 				var dialog = new widgets.CloneGitRepositoryDialog({
@@ -102,7 +102,7 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 						function(service) {
 							service.getDiff(item[0].DiffLocation, item[1].Name,
 								function(jsonData, secondArg) {
-									clientDeferred.callback("/compare-m.html#" + secondArg.xhr.getResponseHeader("Location"));
+									clientDeferred.callback("/compare-m.html?readonly#" + secondArg.xhr.getResponseHeader("Location"));
 								});
 						});
 				return clientDeferred;
@@ -147,7 +147,7 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 		
 		var fetchCommand = new eclipse.Command({
 			name : "Fetch",
-			image : "images/gear.gif",
+			image : "images/git-fetch.gif",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -184,13 +184,15 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 		
 		var mergeCommand = new eclipse.Command({
 			name : "Merge",
-			image : "images/gear.gif",
+			image : "images/git-merge.gif",
 			id : "eclipse.orion.git.merge",
-			hrefCallback: function(item) {
-				// go to local branch page
+			callback: function(item) {
+				serviceRegistry.getService("IGitService").then(function(gitService){
+					gitService.doMerge(item.HeadLocation, item.Id);
+				});
 			},
 			visibleWhen : function(item) {
-				return false;
+				return true;
 			}
 		});
 	
