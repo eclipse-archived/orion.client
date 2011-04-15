@@ -102,7 +102,7 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 						function(service) {
 							service.getDiff(item[0].DiffLocation, item[1].Name,
 								function(jsonData, secondArg) {
-									clientDeferred.callback("/compare-m.html#" + secondArg.xhr.getResponseHeader("Location") + "?readonly=true");
+									clientDeferred.callback("/compare-m.html?readonly#" + secondArg.xhr.getResponseHeader("Location"));
 								});
 						});
 				return clientDeferred;
@@ -122,7 +122,7 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 			image : "images/git/compare-sbs.gif",
 			id : "eclipse.compareWithWorkingTree",
 			hrefCallback : function(item) {
-				return "/compare-m.html#" + item.DiffLocation + "?readonly=true";
+				return "/compare-m.html#" + item.DiffLocation;
 			},
 			visibleWhen : function(item) {
 				return true;

@@ -436,12 +436,14 @@ orion.GitStatusController = (function() {
 		
 		openSBSViewer: function(itemModel){
 			var diffParam = "";
+			var baseUrl = "/compare-m.html#";
 			if(this._model.isConflict(itemModel.type)){
 				diffParam = "?conflict=true";
-			} else if (this._model.isStaged(itemModel.type)){
-				diffParam =  "?readonly=true";
 			}
-			var url = "/compare-m.html#" + itemModel.diffURI + diffParam;
+			if(this._model.isStaged(itemModel.type)){
+				baseUrl = "/compare-m.html?readonly#";
+			}
+			var url = baseUrl + itemModel.diffURI + diffParam;
 			window.open(url,"");
 		},
 		
