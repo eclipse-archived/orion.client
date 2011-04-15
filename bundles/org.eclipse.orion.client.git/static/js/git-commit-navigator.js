@@ -16,9 +16,8 @@ eclipse.GitCommitNavigator = (function() {
 	 * @name eclipse.GitCommitNavigator
 	 * @class A table-based git commit navigator
 	 */
-	function GitCommitNavigator(serviceRegistry, treeRoot, selection, searcher, gitClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
+	function GitCommitNavigator(serviceRegistry, selection, searcher, gitClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
 		this.registry = serviceRegistry;
-		this.treeRoot = treeRoot;
 		this.selection = selection;
 		this.searcher = searcher;
 		this.gitClient = gitClient;
@@ -33,7 +32,7 @@ eclipse.GitCommitNavigator = (function() {
 	
 	GitCommitNavigator.prototype = eclipse.Explorer.prototype;
 	
-	GitCommitNavigator.prototype.loadCommitsList= function(path) {
+	GitCommitNavigator.prototype.loadCommitsList= function(path, treeRoot) {
 			path = eclipse.util.makeRelative(path);
 			if (path === this._lastHash) {
 				return;
@@ -57,7 +56,7 @@ eclipse.GitCommitNavigator = (function() {
 			
 			self = this;
 			
-			eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
+			eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
 						
 			this.registry.getService("IGitService").then(function(service){
 				dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerFlatModel(path, service.doGitLog)));

@@ -186,11 +186,13 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 			name : "Merge",
 			image : "images/gear.gif",
 			id : "eclipse.orion.git.merge",
-			hrefCallback: function(item) {
-				// go to local branch page
+			callback: function(item) {
+				serviceRegistry.getService("IGitService").then(function(gitService){
+					gitService.doMerge(item.HeadLocation, item.Id);
+				});
 			},
 			visibleWhen : function(item) {
-				return false;
+				return true;
 			}
 		});
 	

@@ -29,12 +29,9 @@ dojo.addOnLoad(function(){
 	// Git operations
 	var gitClient = new eclipse.GitService(serviceRegistry);
 	
-	var treeRoot = {
-		children:[]
-	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, treeRoot, selection, searcher, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, selection, searcher, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, navigator);
@@ -75,7 +72,7 @@ dojo.addOnLoad(function(){
 			handleAs : "json",
 			timeout : 5000,
 			load : function(jsonData, secondArg) {
-				navigator.loadCommitsList(jsonData.CommitLocation);
+				navigator.loadCommitsList(jsonData.CommitLocation, jsonData);
 			},
 			error : function(error, ioArgs) {
 				//handleGetAuthenticationError(this, ioArgs);
@@ -99,7 +96,7 @@ dojo.addOnLoad(function(){
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, secondArg) {
-					navigator.loadCommitsList(jsonData.CommitLocation);
+					navigator.loadCommitsList(jsonData.CommitLocation, jsonData);
 				},
 				error : function(error, ioArgs) {
 					//handleGetAuthenticationError(this, ioArgs);
