@@ -66,7 +66,7 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId, gitClient) {
 		var cloneGitRepositoryCommand = new eclipse.Command({
 			name : "Clone Git Repository",
-			image : "images/git/cloneGit.gif",
+			image : "images/git-clone.gif",
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
 				var dialog = new widgets.CloneGitRepositoryDialog({
@@ -147,7 +147,7 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 		
 		var fetchCommand = new eclipse.Command({
 			name : "Fetch",
-			image : "images/gear.gif",
+			image : "images/git-fetch.gif",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -184,7 +184,7 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 		
 		var mergeCommand = new eclipse.Command({
 			name : "Merge",
-			image : "images/gear.gif",
+			image : "images/git-merge.gif",
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(function(gitService){
