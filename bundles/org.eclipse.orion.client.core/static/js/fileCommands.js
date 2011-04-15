@@ -135,12 +135,15 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	function makeMoveCopyTargetChoices(items, userData, isCopy) {
 		items = dojo.isArray(items) ? items : [items];
+		var refreshFunc = function() {
+			this.changedItem(this.treeRoot);
+		};
 		var callback = function(items) {
 			for (var i=0; i < items.length; i++) {
 				var item = items[i];
 				var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 				func.apply(fileClient, [item.Location, this.path]).then(
-					dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);})//refresh the root
+					dojo.hitch(explorer, refreshFunc)//refresh the root
 				);
 			}
 		};
@@ -434,7 +437,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(linkProjectCommand, "dom");
 				
 	var importCommand = new eclipse.Command({
-		name : "Import",
+		name : "Zip Import",
 		image : "images/zip_import.gif",
 		id: "eclipse.importCommand",
 		callback : function(item) {
@@ -451,6 +454,32 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(importCommand, "object");
 	commandService.addCommand(importCommand, "dom");
+
+	var importSFTPCommand = new eclipse.Command({
+		name : "SFTP Import",
+		image : "images/zip_import.gif",
+		id: "eclipse.importSFTPCommand",
+		callback : function(item) {
+			item = forceSingleItem(item);
+			var dialog = new widgets.SFTPImportDialog({
+				importLocation: item.SFTPImportLocation,
+				func:  function(host,path,user,password){
+					serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+						var importOptions = {"OptionHeader":"sftp","Host":host,"Path":path,"UserName":user,"Passphrase":password};
+						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
+						progressService.showWhile(deferred, "Importing from " + host).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+					});
+				}
+			});
+			dialog.startup();
+			dialog.show();
+		},
+		visibleWhen: function(item) {
+			item = forceSingleItem(item);
+			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+	commandService.addCommand(importSFTPCommand, "object");
+	commandService.addCommand(importSFTPCommand, "dom");
 	
 	var copyCommand = new eclipse.Command({
 		name : "Copy to",

@@ -59,7 +59,7 @@ eclipse.StatusReportingService.prototype = {
 		} catch(error) {
 			//it is not JSON, just continue;
 		}
-		var message = status.message || status;
+		var message = status.Message || status;
 		var color = "red";
 		if (status.Severity) {
 			switch (status.Severity) {
@@ -92,8 +92,13 @@ eclipse.StatusReportingService.prototype = {
 			if (result && result.Location && result.Message && result.Running) {
 				return that._doProgressWhile(result);
 			}
-			//otherwise just return the result
-			that.setMessage("");
+			//either set a result message, or clear the progress message
+			if (result.Result) {
+				that.setErrorMessage(result.Result);
+			} else {
+				that.setMessage("");
+			}
+			//return the final result so it is available to caller's deferred chain
 			return result;
 		});
 	},

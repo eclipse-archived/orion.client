@@ -76,7 +76,7 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 								var deferred = gitService.cloneGitRepository("", gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost);
 								progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
 									function(jsonData, secondArg) {
-										window.alert(jsonData.Message);
+										//TODO refresh the clone navigator
 									});
 							});
 						});
