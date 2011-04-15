@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others All rights reserved. This
+ * Copyright (c) 2010, 2011 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -15,15 +15,15 @@ if (window.AsyncTestCase) {
 	function PerformanceTest (editor) {
 		this.editor = editor;
 		this.FakeQueue = function() {
-		}
+		};
 		this.FakeQueue.prototype = { 
 		call: function (name, func) {
 				var callback = {
-					add: function(f) {return f} 
-				}
+					add: function(f) {return f;} 
+				};
 				func(callback);
 			}
-		}
+		};
 	}
 }
 
@@ -35,7 +35,7 @@ PerformanceTest.prototype = {
 			parent: "divParent",
 			model: new eclipse.TextModel(),
 			stylesheet: "/editor/samples/editor.css",
-			tabSize: 4,
+			tabSize: 4
 		};
 		window.top.moveTo(0,0);
 		window.top.resizeTo(screen.width,screen.height);
