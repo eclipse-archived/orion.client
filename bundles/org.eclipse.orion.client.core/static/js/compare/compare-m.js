@@ -21,7 +21,7 @@ dojo.addOnLoad(function(){
 	var canvas = document.getElementById("diff-canvas");
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
-	var readOnly = isHashReadOnly(dojo.hash());
+	var readOnly = isReadOnly();
 	compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , commandService, fileClient,"left-viewer" , "right-viewer" , canvas);
 	compareMergeContainer.resolveDiff(dojo.hash(), 
 			  function(newFile , oldFile){
@@ -80,13 +80,9 @@ dojo.addOnLoad(function(){
 	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {} );
 });
 
-function isHashReadOnly(hash){
-	var params = hash.split("?");
-	if(params.length === 2){
-		var subParams = params[1].split("=");
-		if(subParams.length === 2 && subParams[0] === "readonly" && subParams[1] === "true" )
-			return true;
-	} 
-	return false;
-}
+function isReadOnly(){
+	var queryParams = dojo.queryToObject(window.location.search.slice(1));
+	return queryParams["readonly"] != null;
+};
+
 
