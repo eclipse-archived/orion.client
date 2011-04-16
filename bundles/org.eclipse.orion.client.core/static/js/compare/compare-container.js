@@ -334,9 +334,10 @@ orion.CompareMergeContainer = (function() {
 			}
 			dojo.byId(tiltleDivId).innerHTML = dirtyIndicator +  status;
 		};
+		var undoStackFactory = readOnly ? new orion.UndoFactory() : new orion.UndoCommandFactory(self._registry, self._commandService, "pageActionsLeft");
 		var editorContainer = new orion.EditorContainer({
 			editorFactory: editorFactory,
-			undoStackFactory: new orion.UndoFactory(),
+			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,
 			//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
 			contentAssistFactory: contentAssistFactory,
