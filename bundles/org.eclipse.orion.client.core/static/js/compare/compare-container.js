@@ -14,6 +14,7 @@ orion.CompareContainer = (function() {
 	function CompareContainer () {
 		this._diffParser = new orion.DiffParser();
 		this._diff = null;
+		this._input = null;
 	}
 	CompareContainer.prototype = {
 		_getLineDelim: function(input , diff){	
@@ -21,7 +22,7 @@ orion.CompareContainer = (function() {
 			return delim;
 		},
 		
-		getFileDiffGit: function(diffURI , uiCallBack , errorCallBack){
+		getFileDiffGit: function(diffURI , uiCallBack , errorCallBack  ,onsave){
 			var self = this;
 			self._registry.getService("IGitService").then(
 				function(service) {
@@ -32,7 +33,10 @@ orion.CompareContainer = (function() {
 											  }	else {
 												  self._diff = jsonData;
 											  }
-										      self.getFileURI(diffURI , uiCallBack , errorCallBack);
+											  if(onsave)
+												  self.setEditor(this._input , self._diff ,onsave);
+											  else
+												  self.getFileURI(diffURI , uiCallBack , errorCallBack);
 										   },
 										   errorCallBack);
 				});
@@ -60,13 +64,16 @@ orion.CompareContainer = (function() {
 					function(service) {
 						service.read(fileURI).then( 
 											  function(contents) {
+												  this._input = contents;
 												  self.setEditor(contents , self._diff );					  
 											  },
 											  function(error ,ioArgs) {
-												  if(error.status === 404)
+												  if(error.status === 404){
+													  this._input = "";
 													  self.setEditor("" , self._diff );	
-												  else if(errorCallBack)
+												  } else if(errorCallBack){
 													  errorCallBack(error ,ioArgs);
+												  }
 													  
 											  });
 					});
@@ -82,7 +89,7 @@ orion.CompareContainer = (function() {
 			return {delim:delim , mapper:result.mapper , output:result.outPutFile ,diffArray:diffArray};
 		},
 		
-		resolveDiff: function(hash , callBack , errorCallBack){
+		resolveDiff: function(hash , callBack , errorCallBack , onsave){
 			var diffURI = hash;
 			var params = hash.split("?");
 			if(params.length === 2){
@@ -91,7 +98,12 @@ orion.CompareContainer = (function() {
 				if(subParams.length === 2 && subParams[0] === "conflict" && subParams[1] === "true" )
 					this._conflict = true;
 			} 
-			this.getFileDiffGit(diffURI , callBack , errorCallBack);
+			this._diffURI = diffURI;
+			this.getFileDiffGit(diffURI , callBack , errorCallBack , onsave );
+		},
+				
+		resolveDiffonSave: function(){
+			this.getFileDiffGit(this._diffURI , null , null , true );
 		},
 				
 		_initDiffPosition: function(editor){
@@ -215,11 +227,15 @@ orion.CompareMergeContainer = (function() {
 		this._leftEditorDivId = leftEditorDivId;
 		this._fileClient = fileClient;
 		this._rightEditorDivId = rightEditorDivId;
+		var self = this;
 		this._inputManager = {
 			filePath: "",
 			getInput: function() {
 				return this.filePath;
-			}				
+			},
+			afterSave: function(){
+				self.resolveDiffonSave();
+			}
 		};
 		
 		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
@@ -387,12 +403,15 @@ orion.CompareMergeContainer = (function() {
 		return editorContainer;
 	};
 
-	CompareMergeContainer.prototype.setEditor = function(input , diff){	
-		var result = this.parseMapper(input , diff);
+	CompareMergeContainer.prototype.setEditor = function(input , diff, onsave){	
+		var result = this.parseMapper(input , diff , onsave);
 		var self = this;
 		if(!this._editorContainerLeft){
 			this.initEditorContainers(result.delim , result.output , input ,  result.mapper , true , this._newFileURI , this._oldFileURI);
-		} else {
+		} else if (onsave) {
+			this._editorLeft.getModel().init(result.mapper);
+			this._editorRight.getModel().init(result.mapper);
+		}else {
 			this._inputManager.filePath = this._newFileURI;
 			this._editorLeft.getModel().init(result.mapper);
 			this._editorRight.getModel().init(result.mapper);
