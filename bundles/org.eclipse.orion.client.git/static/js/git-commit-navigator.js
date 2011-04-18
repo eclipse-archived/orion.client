@@ -70,7 +70,7 @@ eclipse.GitCommitNavigator = (function() {
 
 eclipse = eclipse || {};
 eclipse.FileRenderer = (function() {
-	
+ 	
 	function FileRenderer (options, explorer) {
 		this._init(options);
 		this.explorer = explorer;
@@ -104,8 +104,7 @@ eclipse.FileRenderer = (function() {
 		
 		var incomingCommit = false;
 		
-		if (this.scopedCommits != null && this.scopedCommits.length > 0)
-		this.scopedCommits.forEach(function(commit){
+		dojo.forEach(this.scopedCommits, function(commit, i){
 			if (item.Name === commit.Name){
 				incomingCommit = true;
 			}
