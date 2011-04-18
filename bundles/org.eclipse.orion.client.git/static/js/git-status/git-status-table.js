@@ -61,12 +61,12 @@ orion.GitStatusModel = (function() {
 					if(item){
 						itemsInDetectGroup.push(item);
 					} else {
-						break;
+						continue;
 					}
 				}
 				
 				//we have the same file at "Modified" ,"Added", "Changed","Missing" groups
-				if(itemsInDetectGroup.length === this.conflictDetectGroup.length){
+				if(itemsInDetectGroup.length > 1){
 					modGroup[i].Conflicting = true;
 					for(var k = 0; k < itemsInDetectGroup.length ; k++){
 						itemsInDetectGroup[k].Conflicting = true;
@@ -436,12 +436,14 @@ orion.GitStatusController = (function() {
 		
 		openSBSViewer: function(itemModel){
 			var diffParam = "";
+			var baseUrl = "/compare-m.html#";
 			if(this._model.isConflict(itemModel.type)){
 				diffParam = "?conflict=true";
-			} else if (this._model.isStaged(itemModel.type)){
-				diffParam =  "?readonly=true";
 			}
-			var url = "/compare-m.html#" + itemModel.diffURI + diffParam;
+			if(this._model.isStaged(itemModel.type)){
+				baseUrl = "/compare-m.html?readonly#";
+			}
+			var url = baseUrl + itemModel.diffURI + diffParam;
 			window.open(url,"");
 		},
 		
