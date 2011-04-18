@@ -54,7 +54,7 @@ eclipse.GitCommitNavigator = (function() {
 			dojo.place(b, progress, "last");
 			dojo.place(document.createTextNode("..."), progress, "last");
 			
-			self = this;
+			var self = this;
 			
 			eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
 						
@@ -104,7 +104,7 @@ eclipse.FileRenderer = (function() {
 		
 		var incomingCommit = false;
 		
-		if (this.scopedCommits)
+		if (this.scopedCommits != null && this.scopedCommits.length > 0)
 		this.scopedCommits.forEach(function(commit){
 			if (item.Name === commit.Name){
 				incomingCommit = true;
