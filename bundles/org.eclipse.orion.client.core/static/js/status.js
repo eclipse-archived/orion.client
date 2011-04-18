@@ -59,7 +59,7 @@ eclipse.StatusReportingService.prototype = {
 		} catch(error) {
 			//it is not JSON, just continue;
 		}
-		var message = status.message || status;
+		var message = status.Message || status;
 		var color = "red";
 		if (status.Severity) {
 			switch (status.Severity) {
@@ -80,7 +80,7 @@ eclipse.StatusReportingService.prototype = {
 		dojo.place(span, this.domId, "only");
 	},
 	
-		/**
+	/**
 	 * Shows a progress message until the given deferred is resolved. Returns a deferred that resolves when
 	 * the operation completes.
 	 */
@@ -92,12 +92,20 @@ eclipse.StatusReportingService.prototype = {
 			if (result && result.Location && result.Message && result.Running) {
 				return that._doProgressWhile(result);
 			}
-			//otherwise just return the result
-			that.setMessage("");
+			//either set a result message, or clear the progress message
+			if (result.Result) {
+				that.setErrorMessage(result.Result);
+			} else {
+				that.setMessage("");
+			}
+			//return the final result so it is available to caller's deferred chain
 			return result;
 		});
 	},
-	
+
+	/**
+	 * Helper method used to implement showWhile.
+	 */	
 	_doProgressWhile: function(progress) {
 		var deferred = new dojo.Deferred();
 		//sleep for awhile before we get more progress
@@ -116,6 +124,5 @@ eclipse.StatusReportingService.prototype = {
 		//recurse until operation completes
 		return this.showWhile(deferred, progress.Message);
 	}
-
 };
 	

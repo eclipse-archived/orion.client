@@ -37,7 +37,6 @@ dojo.addOnLoad(function(){
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
 	eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
 	eclipse.gitCommandUtils.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
-	
 
 	// define the command contributions - where things appear, first the groups
 	commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");

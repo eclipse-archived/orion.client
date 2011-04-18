@@ -39,7 +39,12 @@ var topHTMLFragment =
 		'</tr>' +
 	'<tr class="bottomRowBanner">' +
 		'<td colspan=2 id="pageToolbar" class="pageToolbar">' +
-			'<span id="pageActions"></span>' +
+			'<div style="float: left;">' +
+				'<span id="pageActionsLeft"></span>' +
+			'</div>' +
+			'<div style="float: right;">' +
+				'<span id="pageActions"></span>' +
+			'</div>' +
 		'</td>' +
 	'</tr>' +
 '</table>';
@@ -109,8 +114,10 @@ eclipse.globalCommandUtils.generateUserInfo = function(userName, userStatusText)
 	}
 };
 
-eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService, handler) {
+eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService, handler , pageActionDomId) {
 	var toolbar = dojo.byId("pageActions");
+	if(pageActionDomId)
+		toolbar = dojo.byId(pageActionDomId);
 	if (toolbar) {	
 		dojo.empty(toolbar);
 		commandService.renderCommands(toolbar, "dom", handler, handler, "image", "commandLinkLight");

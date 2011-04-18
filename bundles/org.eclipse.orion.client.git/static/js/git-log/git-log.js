@@ -29,12 +29,9 @@ dojo.addOnLoad(function(){
 	// Git operations
 	var gitClient = new eclipse.GitService(serviceRegistry);
 	
-	var treeRoot = {
-		children:[]
-	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, treeRoot, selection, searcher, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, selection, searcher, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, navigator);
@@ -56,9 +53,12 @@ dojo.addOnLoad(function(){
 	
 	// git contributions
 	// commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "pageActions", "eclipse.gitGroup.page");
-
+	
+	if (isRemote()){
+		commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "pageActions", "eclipse.gitGroup.page");
+		commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "pageActions", "eclipse.gitGroup.page");
+	};
+	
 	commandService.renderCommands(dojo.byId("pageActions"), "dom", {}, {}, "image");
 	
 	if (isRemote()) {
@@ -72,10 +72,15 @@ dojo.addOnLoad(function(){
 			handleAs : "json",
 			timeout : 5000,
 			load : function(jsonData, secondArg) {
-				navigator.loadCommitsList(jsonData.CommitLocation);
+				serviceRegistry.getService("IGitService").then(function(gitService){
+					gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
+						navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
+						navigator.loadCommitsList(jsonData.CommitLocation, jsonData);			
+					});
+				});
 			},
 			error : function(error, ioArgs) {
-				//handleGetAuthenticationError(this, ioArgs);
+				handleGetAuthenticationError(this, ioArgs);
 				console.error("HTTP status code: ", ioArgs.xhr.status);
 			}
 		});
@@ -96,10 +101,15 @@ dojo.addOnLoad(function(){
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, secondArg) {
-					navigator.loadCommitsList(jsonData.CommitLocation);
+					serviceRegistry.getService("IGitService").then(function(gitService){
+						gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
+							navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
+							navigator.loadCommitsList(jsonData.CommitLocation, jsonData);			
+						});
+					});
 				},
 				error : function(error, ioArgs) {
-					//handleGetAuthenticationError(this, ioArgs);
+					handleGetAuthenticationError(this, ioArgs);
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});

@@ -14,17 +14,19 @@ dojo.addOnLoad(function(){
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	// File operations
+	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 	var canvas = document.getElementById("diff-canvas");
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
-	var readOnly = isHashReadOnly(dojo.hash());
-	compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , "left-viewer" , "right-viewer" , canvas);
+	var readOnly = isReadOnly();
+	compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , commandService, fileClient,"left-viewer" , "right-viewer" , canvas);
 	compareMergeContainer.resolveDiff(dojo.hash(), 
 			  function(newFile , oldFile){
-		  		dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  
-		  			dojo.place(document.createTextNode("File On Git: " + oldFile), "right-viewer-title", "only");				  
+		  		dojo.place(document.createTextNode(newFile), "left-viewer-title", "only");				  
+		  			dojo.place(document.createTextNode(oldFile), "right-viewer-title", "only");				  
 	  		  },
 			  function(errorResponse , ioArgs){
 				  var message = typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; 
@@ -37,7 +39,7 @@ dojo.addOnLoad(function(){
 	
 	//every time the user manually changes the hash, we need to load the diff
 	dojo.subscribe("/dojo/hashchange", compareMergeContainer, function() {
-		compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , "left-viewer" , "right-viewer" , canvas);
+		compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , commandService , fileClient,"left-viewer" , "right-viewer" , canvas);
 		compareMergeContainer.resolveDiff(dojo.hash(), 
 				  function(newFile , oldFile){
 			  		dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  
@@ -51,8 +53,6 @@ dojo.addOnLoad(function(){
 					  dojo.style("right-viewer-title", "color", "red");
 				  });
 	});
-	// File operations
-	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 		
 	var nextDiffCommand = new eclipse.Command({
 		name : "Next diff",
@@ -77,16 +77,12 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("orion.compare.nextDiff", 2, "pageActions");
 	commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
 		
-	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {});
+	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {} );
 });
 
-function isHashReadOnly(hash){
-	var params = hash.split("?");
-	if(params.length === 2){
-		var subParams = params[1].split("=");
-		if(subParams.length === 2 && subParams[0] === "readonly" && subParams[1] === "true" )
-			return true;
-	} 
-	return false;
-}
+function isReadOnly(){
+	var queryParams = dojo.queryToObject(window.location.search.slice(1));
+	return queryParams["readonly"] != null;
+};
+
 

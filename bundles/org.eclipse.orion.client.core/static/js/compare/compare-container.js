@@ -14,6 +14,7 @@ orion.CompareContainer = (function() {
 	function CompareContainer () {
 		this._diffParser = new orion.DiffParser();
 		this._diff = null;
+		this._input = null;
 	}
 	CompareContainer.prototype = {
 		_getLineDelim: function(input , diff){	
@@ -21,14 +22,21 @@ orion.CompareContainer = (function() {
 			return delim;
 		},
 		
-		getFileDiffGit: function(diffURI , uiCallBack , errorCallBack){
+		getFileDiffGit: function(diffURI , uiCallBack , errorCallBack  ,onsave){
 			var self = this;
 			self._registry.getService("IGitService").then(
 				function(service) {
 					service.getDiffContent(diffURI, 
 										   function(jsonData, secondArg) {
-										   	  self._diff = jsonData;
-										      self.getFileURI(diffURI , uiCallBack , errorCallBack);
+											  if(self._conflict){
+												  self._diff = jsonData.split("diff --git")[1];
+											  }	else {
+												  self._diff = jsonData;
+											  }
+											  if(onsave)
+												  self.setEditor(this._input , self._diff ,onsave);
+											  else
+												  self.getFileURI(diffURI , uiCallBack , errorCallBack);
 										   },
 										   errorCallBack);
 				});
@@ -56,13 +64,16 @@ orion.CompareContainer = (function() {
 					function(service) {
 						service.read(fileURI).then( 
 											  function(contents) {
+												  this._input = contents;
 												  self.setEditor(contents , self._diff );					  
 											  },
 											  function(error ,ioArgs) {
-												  if(error.status === 404)
+												  if(error.status === 404){
+													  this._input = "";
 													  self.setEditor("" , self._diff );	
-												  else if(errorCallBack)
+												  } else if(errorCallBack){
 													  errorCallBack(error ,ioArgs);
+												  }
 													  
 											  });
 					});
@@ -78,16 +89,21 @@ orion.CompareContainer = (function() {
 			return {delim:delim , mapper:result.mapper , output:result.outPutFile ,diffArray:diffArray};
 		},
 		
-		resolveDiff: function(hash , callBack , errorCallBack){
+		resolveDiff: function(hash , callBack , errorCallBack , onsave){
 			var diffURI = hash;
 			var params = hash.split("?");
 			if(params.length === 2){
 				diffURI = params[0];
-				//var subParams = params[1].split("=");
-				//if(subParams.length === 2 && subParams[0] === "readonly" && subParams[1] === "true" )
-					//this._readOnly = true;
+				var subParams = params[1].split("=");
+				if(subParams.length === 2 && subParams[0] === "conflict" && subParams[1] === "true" )
+					this._conflict = true;
 			} 
-			this.getFileDiffGit(diffURI , callBack , errorCallBack);
+			this._diffURI = diffURI;
+			this.getFileDiffGit(diffURI , callBack , errorCallBack , onsave );
+		},
+				
+		resolveDiffonSave: function(){
+			this.getFileDiffGit(this._diffURI , null , null , true );
 		},
 				
 		_initDiffPosition: function(editor){
@@ -204,11 +220,24 @@ orion.SBSCompareContainer = (function() {
 
 orion.CompareMergeContainer = (function() {
 	/** @private */
-	function CompareMergeContainer(readonly , resgistry ,leftEditorDivId , rightEditorDivId , canvas) {
+	function CompareMergeContainer(readonly , resgistry , commandService , fileClient,leftEditorDivId , rightEditorDivId , canvas) {
 		this.readonly = readonly;
 		this._registry = resgistry;
+		this._commandService = commandService;
 		this._leftEditorDivId = leftEditorDivId;
+		this._fileClient = fileClient;
 		this._rightEditorDivId = rightEditorDivId;
+		var self = this;
+		this._inputManager = {
+			filePath: "",
+			getInput: function() {
+				return this.filePath;
+			},
+			afterSave: function(){
+				self.resolveDiffonSave();
+			}
+		};
+		
 		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
 		this.initEditorContainers("\n" , "fetching..." , "fetching..." , []);
 	}
@@ -283,7 +312,9 @@ orion.CompareMergeContainer = (function() {
 			// Create keybindings for generic editing
 			if(readOnly)
 				return;
-				
+			
+			var commandGenerator = new orion.EditorCommandFactory(self._registry, self._commandService,self._fileClient , self._inputManager, "pageActionsLeft");
+			commandGenerator.generateEditorCommands(editor);
 			var genericBindings = new orion.TextActions(editor, undoStack);
 			keyModeStack.push(genericBindings);
 				
@@ -319,9 +350,10 @@ orion.CompareMergeContainer = (function() {
 			}
 			dojo.byId(tiltleDivId).innerHTML = dirtyIndicator +  status;
 		};
+		var undoStackFactory = readOnly ? new orion.UndoFactory() : new orion.UndoCommandFactory(self._registry, self._commandService, "pageActionsLeft");
 		var editorContainer = new orion.EditorContainer({
 			editorFactory: editorFactory,
-			undoStackFactory: new orion.UndoFactory(),
+			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,
 			//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
 			contentAssistFactory: contentAssistFactory,
@@ -330,7 +362,9 @@ orion.CompareMergeContainer = (function() {
 			domNode: editorContainerDomNode
 		});
 				
+		editorContainer.installEditor();
 		if(!readOnly){
+			eclipse.globalCommandUtils.generateDomCommandsInBanner(this._commandService, editorContainer , "pageActionsLeft");
 			dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
 				if (dirty) {
 					dirtyIndicator = "You have unsaved changes.  ";
@@ -341,9 +375,8 @@ orion.CompareMergeContainer = (function() {
 			});
 		}
 			
-		editorContainer.installEditor();
 		if(createLineStyler && fileURI)
-			editorContainer.onInputChange(fileURI);
+			editorContainer.onInputChange(fileURI.split("?")[0]);
 		var editor = editorContainer.getEditorWidget();
 			
 		editor.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
@@ -370,21 +403,25 @@ orion.CompareMergeContainer = (function() {
 		return editorContainer;
 	};
 
-	CompareMergeContainer.prototype.setEditor = function(input , diff){	
-		var result = this.parseMapper(input , diff);
+	CompareMergeContainer.prototype.setEditor = function(input , diff, onsave){	
+		var result = this.parseMapper(input , diff , onsave);
 		var self = this;
 		if(!this._editorContainerLeft){
 			this.initEditorContainers(result.delim , result.output , input ,  result.mapper , true , this._newFileURI , this._oldFileURI);
-		} else {
+		} else if (onsave) {
 			this._editorLeft.getModel().init(result.mapper);
 			this._editorRight.getModel().init(result.mapper);
-			this._editorContainerLeft.onInputChange(this._newFileURI, null, result.output);
-			self._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
-				self.setStyle(lineStyleEvent , self._editorLeft);
-			}); 
-			this._editorContainerRight.onInputChange(this._oldFileURI, null, input);
+		}else {
+			this._inputManager.filePath = this._newFileURI;
+			this._editorLeft.getModel().init(result.mapper);
+			this._editorRight.getModel().init(result.mapper);
+			this._editorContainerRight.onInputChange(this._oldFileURI.split("?")[0], null, input);
 			self._editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
 				self.setStyle(lineStyleEvent , self._editorRight);
+			}); 
+			this._editorContainerLeft.onInputChange(this._newFileURI.split("?")[0], null, result.output);
+			self._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
+				self.setStyle(lineStyleEvent , self._editorLeft);
 			}); 
 		}
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
