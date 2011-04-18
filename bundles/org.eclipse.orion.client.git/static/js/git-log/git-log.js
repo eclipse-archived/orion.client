@@ -72,10 +72,15 @@ dojo.addOnLoad(function(){
 			handleAs : "json",
 			timeout : 5000,
 			load : function(jsonData, secondArg) {
-				navigator.loadCommitsList(jsonData.CommitLocation, jsonData);
+				serviceRegistry.getService("IGitService").then(function(gitService){
+					gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
+						navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
+						navigator.loadCommitsList(jsonData.CommitLocation, jsonData);			
+					});
+				});
 			},
 			error : function(error, ioArgs) {
-				//handleGetAuthenticationError(this, ioArgs);
+				handleGetAuthenticationError(this, ioArgs);
 				console.error("HTTP status code: ", ioArgs.xhr.status);
 			}
 		});
@@ -96,10 +101,15 @@ dojo.addOnLoad(function(){
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, secondArg) {
-					navigator.loadCommitsList(jsonData.CommitLocation, jsonData);
+					serviceRegistry.getService("IGitService").then(function(gitService){
+						gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
+							navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
+							navigator.loadCommitsList(jsonData.CommitLocation, jsonData);			
+						});
+					});
 				},
 				error : function(error, ioArgs) {
-					//handleGetAuthenticationError(this, ioArgs);
+					handleGetAuthenticationError(this, ioArgs);
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});

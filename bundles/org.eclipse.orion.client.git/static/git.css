@@ -1,0 +1,9 @@
+.incomingCommitsdRow {
+	font-weight: bold;
+}
+
+.incomingCommitsdRow div {
+	background: url(images/gear.gif);
+	background-repeat: no-repeat;
+	background-position: left top; 
+}

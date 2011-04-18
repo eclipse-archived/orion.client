@@ -32,9 +32,9 @@ eclipse.GitCommitNavigator = (function() {
 	
 	GitCommitNavigator.prototype = eclipse.Explorer.prototype;
 	
-	GitCommitNavigator.prototype.loadCommitsList= function(path, treeRoot) {
+	GitCommitNavigator.prototype.loadCommitsList= function(path, treeRoot, force) {
 			path = eclipse.util.makeRelative(path);
-			if (path === this._lastHash) {
+			if (path === this._lastHash && !force) {
 				return;
 			}
 						
@@ -70,6 +70,7 @@ eclipse.GitCommitNavigator = (function() {
 
 eclipse = eclipse || {};
 eclipse.FileRenderer = (function() {
+	
 	function FileRenderer (options, explorer) {
 		this._init(options);
 		this.explorer = explorer;
@@ -95,17 +96,34 @@ eclipse.FileRenderer = (function() {
 		
 	};
 	
+	FileRenderer.prototype.setIncomingCommits = function(scopedCommits){
+		this.scopedCommits = scopedCommits;
+	};
+	
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		
+		var incomingCommit = false;
+		
+		if (this.scopedCommits)
+		this.scopedCommits.forEach(function(commit){
+			if (item.Name === commit.Name){
+				incomingCommit = true;
+			}
+		});
+
 		switch(col_no){
 		case 0:
-			
 			var col, div, link;
 
 			col = document.createElement('td');
-			div = dojo.create("div", {style: "padding-left: 5px; padding-right: 5px; ; padding-top: 5px; padding-bottom: 5px"}, col, "only");
+			div = dojo.create("div", {style: "margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 20px;"}, col, "only");
+						
 			link = dojo.create("a", {className: "navlinkonpage", href: "/coding.html#" + item.ContentLocation}, div, "last");
-			dojo.place(document.createTextNode(item.Message), link, "only");			
+			dojo.place(document.createTextNode(item.Message), link, "only");	
+			
+			if (incomingCommit)
+				dojo.toggleClass(tableRow, "incomingCommitsdRow", true);
+			
 			return col;
 			break;
 		case 1:
@@ -121,7 +139,6 @@ eclipse.FileRenderer = (function() {
 			return actionsColumn;
 			break;
 		};
-		
 	};
 	
 	return FileRenderer;

@@ -368,6 +368,53 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
+		getLog : function(gitCommitURI, commitName, onLoad) {
+			var service = this;
+			
+			console.info("getLog called");
+			
+			dojo.xhrPost({
+				url : gitCommitURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson({
+					"New" : commitName
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return secondArg.xhr.getResponseHeader("Location");
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			}).then(function(scopedGitCommitURI){
+				dojo.xhrGet({
+					url : scopedGitCommitURI,
+					headers : {
+						"Orion-Version" : "1"
+					},
+					handleAs : "json",
+					timeout : 5000,
+					load : function(jsonData, secondArg) {
+						if (onLoad) {
+							if (typeof onLoad === "function")
+								onLoad(jsonData, secondArg);
+							else
+								service._serviceRegistration.dispatchEvent(onLoad,
+										jsonData);
+						}
+						return jsonData;
+					},
+					error : function(error, ioArgs) {
+						handleGetAuthenticationError(this, ioArgs);
+						console.error("HTTP status code: ", ioArgs.xhr.status);
+					}
+				});
+			});	
+		},
 		getDefaultRemoteBranch : function(gitRemoteURI, onLoad) {
 			var service = this;
 			

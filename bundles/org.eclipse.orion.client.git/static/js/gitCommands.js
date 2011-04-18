@@ -156,7 +156,7 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 						var deferred = gitService.doFetch(path);
 						progressService.showWhile(deferred, "Fetching remote: " + path).then(
 							function(jsonData, secondArg) {
-								dojo.xhrGet({
+								return dojo.xhrGet({
 									url : path,
 									headers : {
 										"Orion-Version" : "1"
@@ -164,12 +164,17 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 									handleAs : "json",
 									timeout : 5000,
 									load : function(jsonData, secondArg) {
-										explorer.loadCommitsList(jsonData.CommitLocation);
+										return jsonData;
 									},
 									error : function(error, ioArgs) {
 										//handleGetAuthenticationError(this, ioArgs);
 										console.error("HTTP status code: ", ioArgs.xhr.status);
 									}
+								});
+							}).then(function(remoteJsonData){
+								gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArd) {
+									explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
+									explorer.loadCommitsList(remoteJsonData.CommitLocation, remoteJsonData, true);			
 								});
 							});
 					});
@@ -188,7 +193,11 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(function(gitService){
-					gitService.doMerge(item.HeadLocation, item.Id);
+					gitService.doMerge(item.HeadLocation, item.Id, function() {
+						dojo.query(".treeTableRow").forEach(function(node, i) {
+							dojo.toggleClass(node, "incomingCommitsdRow", false);
+						});
+					});
 				});
 			},
 			visibleWhen : function(item) {
