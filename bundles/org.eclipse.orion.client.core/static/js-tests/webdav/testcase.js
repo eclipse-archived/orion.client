@@ -38,25 +38,6 @@ var testcase = (function(assert) {
 		return result;
 	}
 
-	function parseDAVResponse(response)  {
-		var result = {};
-		result.href = document.evaluate("D:href", response, nsr, XPathResult.STRING_TYPE).stringValue;
-		var props = document.evaluate("D:propstat/D:prop", response, nsr).iterateNext();
-		if (props !== null) {
-			result.displayname = document.evaluate("D:displayname", props, nsr, XPathResult.STRING_TYPE).stringValue;
-			result.creationdate = document.evaluate("D:creationdate", props, nsr, XPathResult.STRING_TYPE).stringValue;
-			result.collection = document.evaluate("D:resourcetype/D:collection", props, nsr, XPathResult.BOOLEAN_TYPE).booleanValue;
-		}
-		
-		if (! result.collection ) {
-			result.lastmodified = document.evaluate("D:getlastmodified ", props, nsr, XPathResult.STRING_TYPE).stringValue;
-			result.contentlength = document.evaluate("D:getcontentlength ", props, nsr, XPathResult.STRING_TYPE).stringValue;
-			result.contenttype = document.evaluate("D:getcontenttype ", props, nsr, XPathResult.STRING_TYPE).stringValue;
-			result.etag = document.evaluate("D:getetag ", props, nsr, XPathResult.STRING_TYPE).stringValue;
-		}
-		return result;
-	}
-
 	tests["test plugin GET call"] = function() {
 		var storage = {};
 		var serviceRegistry = new eclipse.ServiceRegistry();
