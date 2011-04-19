@@ -6,6 +6,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*global dojo console handleGetAuthenticationError */
 
 /** @namespace The global container for eclipse APIs. */
 var eclipse = eclipse || {};
@@ -33,13 +34,8 @@ eclipse.GitService = (function() {
 			var service = this;
 			console.info("Git Service checked");
 		},
-		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost, onLoad) {
-			var service = this;
-			if(gitSshKnownHost && gitSshKnownHost!=""){
-				this._sshService.addKnownHosts(gitSshKnownHost);
-			}
-			this._sshService.getKnownHosts().then(function(knownHosts){
-				dojo.xhrPost({
+		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
+				return dojo.xhrPost({
 					url : "/git/clone/",
 					headers : {
 						"Orion-Version" : "1"
@@ -49,29 +45,23 @@ eclipse.GitService = (function() {
 						"GitUrl" : gitRepoUrl,
 						"GitSshUsername" : gitSshUsername,
 						"GitSshPassword" : gitSshPassword,
-						"GitSshKnownHost" : knownHosts
+						"GitSshKnownHost" : gitSshKnownHost
 					}),
 					handleAs : "json",
 					timeout : 15000,
 					load : function(jsonData, secondArg) {
-						if (onLoad) {
-							if (typeof onLoad === "function")
-								onLoad(jsonData, secondArg);
-							else
-								service._serviceRegistration.dispatchEvent(onLoad,
-										jsonData);
-						}
+						return jsonData;
 					},
 					error : function(error, ioArgs) {
 						handleGetAuthenticationError(this, ioArgs);
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
 				});
-			});
 			
 		},
 		
 		getDiffContent: function(diffURI , onLoad , onError){
+			var service = this;
 			dojo.xhrGet({
 				url: diffURI , 
 				headers: {
@@ -256,13 +246,13 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		doGitLog : function(gitDiffURI, onLoad) {
+		doGitLog : function(gitLogURI, onLoad) {
 			var service = this;
 			
 			console.info("doGitLog called");
 			
 			return dojo.xhrGet({
-				url : gitDiffURI,
+				url : gitLogURI,
 				headers : {
 					"Orion-Version" : "1"
 				},
@@ -271,11 +261,13 @@ eclipse.GitService = (function() {
 				load : function(jsonData, secondArg) {
 					if (onLoad) {
 						if (typeof onLoad === "function")
-							onLoad(jsonData, secondArg);
+							onLoad(jsonData.Children, secondArg);
 						else
 							service._serviceRegistration.dispatchEvent(onLoad,
-									jsonData);
+									jsonData.Children);
 					}
+					
+					return jsonData.Children;
 				},
 				error : function(error, ioArgs) {
 					handleGetAuthenticationError(this, ioArgs);
@@ -312,6 +304,187 @@ eclipse.GitService = (function() {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
+		},
+		doFetch : function(gitRemoteBranchURI, onLoad) {
+			var service = this;
+			
+			console.info("doFetch called");
+			
+			return dojo.xhrPost({
+				url : gitRemoteBranchURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson({
+					"Fetch" : "true"
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
+		doMerge : function(gitHeadURI, commitName, onLoad) {
+			var service = this;
+			
+			console.info("doMerge called");
+			
+			return dojo.xhrPost({
+				url : gitHeadURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson({
+					"Merge" : commitName
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
+		doPush : function(gitBranchURI, srcRef, onLoad) {
+			var service = this;
+			
+			console.info("doPush called");
+			
+			return dojo.xhrPost({
+				url : gitBranchURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson({
+					"PushSrcRef" : srcRef
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
+		getLog : function(gitCommitURI, commitName, onLoad) {
+			var service = this;
+			
+			console.info("getLog called");
+			
+			return dojo.xhrPost({
+				url : gitCommitURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson({
+					"New" : commitName
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return secondArg.xhr.getResponseHeader("Location");
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			}).then(function(scopedGitCommitURI){
+				dojo.xhrGet({
+					url : scopedGitCommitURI,
+					headers : {
+						"Orion-Version" : "1"
+					},
+					handleAs : "json",
+					timeout : 5000,
+					load : function(jsonData, secondArg) {
+						if (onLoad) {
+							if (typeof onLoad === "function")
+								onLoad(jsonData.Children, secondArg);
+							else
+								service._serviceRegistration.dispatchEvent(onLoad,
+										jsonData.Children);
+						}
+						return jsonData.Children;
+					},
+					error : function(error, ioArgs) {
+						handleGetAuthenticationError(this, ioArgs);
+						console.error("HTTP status code: ", ioArgs.xhr.status);
+					}
+				});
+			});	
+		},
+		getDefaultRemoteBranch : function(gitRemoteURI, onLoad) {
+			var service = this;
+			
+			console.info("getDefaultRemoteBranch called");
+			
+			dojo.xhrGet({
+				url : gitRemoteURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			}).then(function(remoteJsonData){
+				dojo.xhrGet({
+					url : remoteJsonData.Children[0].Location,
+					headers : {
+						"Orion-Version" : "1"
+					},
+					handleAs : "json",
+					timeout : 5000,
+					load : function(jsonData, secondArg) {
+						if (onLoad) {
+							if (typeof onLoad === "function")
+								onLoad(jsonData.Children[0], secondArg);
+							else
+								service._serviceRegistration.dispatchEvent(onLoad,
+										jsonData.Children[0]);
+						}
+						return jsonData;
+					},
+					error : function(error, ioArgs) {
+						handleGetAuthenticationError(this, ioArgs);
+						console.error("HTTP status code: ", ioArgs.xhr.status);
+					}
+				});
+			});	
 		}
 	};
 	return GitService;

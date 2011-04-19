@@ -16,9 +16,8 @@ eclipse.GitCommitNavigator = (function() {
 	 * @name eclipse.GitCommitNavigator
 	 * @class A table-based git commit navigator
 	 */
-	function GitCommitNavigator(serviceRegistry, treeRoot, selection, searcher, gitClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
+	function GitCommitNavigator(serviceRegistry, selection, searcher, gitClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
 		this.registry = serviceRegistry;
-		this.treeRoot = treeRoot;
 		this.selection = selection;
 		this.searcher = searcher;
 		this.gitClient = gitClient;
@@ -33,14 +32,14 @@ eclipse.GitCommitNavigator = (function() {
 	
 	GitCommitNavigator.prototype = eclipse.Explorer.prototype;
 	
-	GitCommitNavigator.prototype.loadCommitsList= function(path) {
+	GitCommitNavigator.prototype.loadCommitsList= function(path, treeRoot, force) {
 			path = eclipse.util.makeRelative(path);
-			if (path === this._lastHash) {
+			if (path === this._lastHash && !force) {
 				return;
 			}
 						
 			this._lastHash = path;
-			dojo.hash(path, true);
+			//dojo.hash(path, true);
 			var parent = dojo.byId(this.parentId);
 
 			// Progress indicator
@@ -55,9 +54,9 @@ eclipse.GitCommitNavigator = (function() {
 			dojo.place(b, progress, "last");
 			dojo.place(document.createTextNode("..."), progress, "last");
 			
-			self = this;
+			var self = this;
 			
-			eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
+			eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
 						
 			this.registry.getService("IGitService").then(function(service){
 				dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerFlatModel(path, service.doGitLog)));
@@ -71,6 +70,7 @@ eclipse.GitCommitNavigator = (function() {
 
 eclipse = eclipse || {};
 eclipse.FileRenderer = (function() {
+ 	
 	function FileRenderer (options, explorer) {
 		this._init(options);
 		this.explorer = explorer;
@@ -96,17 +96,47 @@ eclipse.FileRenderer = (function() {
 		
 	};
 	
+	FileRenderer.prototype.setIncomingCommits = function(scopedCommits){
+		this.incomingCommits = scopedCommits;
+	};
+	
+	FileRenderer.prototype.setOutgoingCommits = function(scopedCommits){
+		this.outgoingCommits = scopedCommits;
+	};
+	
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		
+		var incomingCommit = false;
+		
+		dojo.forEach(this.incomingCommits, function(commit, i){
+			if (item.Name === commit.Name){
+				incomingCommit = true;
+			}
+		});
+		
+		var outgoingCommit = false;
+		
+		dojo.forEach(this.outgoingCommits, function(commit, i){
+			if (item.Name === commit.Name){
+				outgoingCommit = true;
+			}
+		});
+
 		switch(col_no){
 		case 0:
-			
 			var col, div, link;
 
 			col = document.createElement('td');
-			div = dojo.create("div", {style: "padding-left: 5px; padding-right: 5px; ; padding-top: 5px; padding-bottom: 5px"}, col, "only");
+			div = dojo.create("div", {style: "margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 20px;"}, col, "only");
+						
 			link = dojo.create("a", {className: "navlinkonpage", href: "/coding.html#" + item.ContentLocation}, div, "last");
-			dojo.place(document.createTextNode(item.Message), link, "only");			
+			dojo.place(document.createTextNode(item.Message), link, "only");	
+			
+			if (incomingCommit)
+				dojo.toggleClass(tableRow, "incomingCommitsdRow", true);
+			else if (outgoingCommit)
+				dojo.toggleClass(tableRow, "outgoingCommitsdRow", true);
+			
 			return col;
 			break;
 		case 1:
@@ -122,7 +152,6 @@ eclipse.FileRenderer = (function() {
 			return actionsColumn;
 			break;
 		};
-		
 	};
 	
 	return FileRenderer;

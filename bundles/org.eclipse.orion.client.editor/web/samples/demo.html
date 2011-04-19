@@ -5,6 +5,13 @@
 <meta http-equiv="PRAGMA" content="NO-CACHE"/>
 <meta http-equiv="Expires" content="-1"/>
 <title>Orion Editor Demo</title>
+<style>
+.button {
+  border: 2px dotted orange;
+  padding: 0 2 0 2
+}
+</style>
+
 <script language="javascript" type="text/javascript" src="console.js"></script>
 <script language="javascript" type="text/javascript" src="styler.js"></script>
 <script language="javascript" type="text/javascript" src="rulers.js"></script>
@@ -137,6 +144,18 @@ function createBidiTextSample() {
 function test() {
 }
 
+function performanceTest() {
+	checkEditor();
+	if (styler) {
+		styler.destroy();
+		styler = null;
+	}
+	var test = new PerformanceTest(editor);
+	var select = document.getElementById("test");
+	test[select.value]();
+}
+
+
 </script>
 </head>
 <body>
@@ -161,19 +180,23 @@ Create the editor by clicking one of the buttons at the bottom.
 </td>
 </tr>
 </table>
-<span onclick='createJavaSample()' style='border: 2px dotted orange; padding: 0 2 0 2'>Java file</span>
-<span onclick='createJavaScriptSample()' style='border: 2px dotted orange; padding: 0 2 0 2'>JavaScript file</span>
-<span onclick='createPlainTextSample()' style='border: 2px dotted orange; padding: 0 2 0 2'>Plain Text</span>
-<span onclick='createBidiTextSample()' style='border: 2px dotted orange; padding: 0 2 0 2'>Bidi Text</span> |
-<span onclick='clearLog()'>ClearConsole</span> |
-<span onclick='test()'>test</span>
-<span onclick='new PerformanceTestCase().test_pageDownScrolling()' style='border: 2px dotted orange; padding: 0 2 0 2'>PageDown Scroll</span>
-<span onclick='new PerformanceTestCase().test_pageUpScrolling()' style='border: 2px dotted orange; padding: 0 2 0 2'>PageUp Scroll</span>
-<span onclick='new PerformanceTestCase().test_lineDownScrolling()' style='border: 2px dotted orange; padding: 0 2 0 2'>LineDown Scroll</span>
-<span onclick='new PerformanceTestCase().test_lineUpScrolling()' style='border: 2px dotted orange; padding: 0 2 0 2'>LineUp Scroll</span>
-<span onclick='new PerformanceTestCase().test_getLocationAtOffset()' style='border: 2px dotted orange; padding: 0 2 0 2'>getLocationAtOffset</span>
-<span onclick='new PerformanceTestCase().test_getOffsetAtLocation()' style='border: 2px dotted orange; padding: 0 2 0 2'>getOffsetAtLocation</span>
-
-<br>
+<span onclick='createJavaSample()' class="button">Java file</span>
+<span onclick='createJavaScriptSample()' class="button">JavaScript file</span>
+<span onclick='createPlainTextSample()' class="button">Plain Text</span>
+<span onclick='createBidiTextSample()' class="button">Bidi Text</span>
+<span onclick='clearLog()' class="button">ClearConsole</span>
+<span onclick='test()' class="button">Test</span>
+Performance tests:
+<select id="test">
+  <option value="test_pageDown">Page Down</option>
+  <option value="test_pageUp">Page Up</option>
+  <option value="test_lineDown">Line Down</option>
+  <option value="test_lineUp">Line Up</option>
+  <option value="test_getLocationAtOffset">Location at Offset</option>
+  <option value="test_getOffsetAtLocation">Offset at Location</option>
+  <option value="test_getLocationAtOffsetStyled">Location at Offset[styles]</option>
+  <option value="test_getOffsetAtLocationStyled">Offset at Location[styles]</option>
+<select>
+<span onclick='performanceTest()' class="button">Run</span>
 </body>
 </html>

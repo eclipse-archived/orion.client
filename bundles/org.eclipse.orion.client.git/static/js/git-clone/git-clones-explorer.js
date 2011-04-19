@@ -97,6 +97,22 @@ eclipse.git.GitClonesExplorer = (function() {
 				dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerModel(path, service.getGitClone)));
 			});
 		};
+		
+	GitClonesExplorer.prototype.redisplayClonesList = function(){
+
+		if(!this._lastHash){
+			return;
+		}
+		
+		var self = this;	
+		var path = this._lastHash;		
+		var d = dojo.create("div", null, dojo.byId(this.parentId), "only");
+		d.innerHTML = "Loading <b>" + path + "</b>...";
+		
+		this.registry.getService("IGitService").then(function(service){
+			dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerModel(path, service.getGitClone)));
+		});
+	};
 
 return GitClonesExplorer;
 }());

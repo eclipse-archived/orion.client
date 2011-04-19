@@ -7,8 +7,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo window eclipse:true handleGetAuthenticationError handlePostAuthenticationError
-  handleDeleteAuthenticationError */
+/*global dojo window eclipse:true handleAuthenticationError */
 /*jslint forin:true devel:true*/
 
 /** @namespace The global container for eclipse APIs. */
@@ -158,6 +157,28 @@ eclipse.FileClient = (function() {
 		 */		
 		write: function(location, contents) {
 			return this._doServiceCall("write", arguments);
+		},
+
+		/**
+		 * Imports file and directory contents from another server
+		 *
+		 * @param {String} targetLocation The location of the folder to import into
+		 * @param {Object} options An object specifying the import parameters
+		 * @return A deferred for chaining events after the import completes
+		 */		
+		remoteImport: function(targetLocation, options) {
+			return this._doServiceCall("remoteImport", arguments);
+		},
+
+		/**
+		 * Exports file and directory contents to another server
+		 *
+		 * @param {String} sourceLocation The location of the folder to export from
+		 * @param {Object} options An object specifying the export parameters
+		 * @return A deferred for chaining events after the export completes
+		 */		
+		remoteExport: function(sourceLocation, options) {
+			return this._doServiceCall("remoteExport", arguments);
 		},
 
 		/**

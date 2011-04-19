@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others. All rights reserved. This
+ * Copyright (c) 2011 IBM Corporation and others. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -8,18 +8,24 @@
  ******************************************************************************/
 /*global dojo dijit*/
 /*jslint browser:true*/
-dojo.provide("widgets.CloneGitRepositoryDialog");
+dojo.provide("widgets.SFTPConnectionDialog");
 
 dojo.require("dijit.Dialog");
+dojo.require("dijit.form.CheckBox");
+dojo.require("dijit.form.ComboBox");
+dojo.require("dojo.data.ItemFileReadStore");
 
 /**
  * @param options {{ 
- *     func: function
+ *     title: string,
+ *     label: string,
+ *     func: function,
+ *     [advanced]: boolean  // Whether to show advanced controls. Default is false
  * }}
  */
-dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
+dojo.declare("widgets.SFTPConnectionDialog", [dijit.Dialog], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache("widgets", "templates/CloneGitRepositoryDialog.html"),
+	templateString: dojo.cache("widgets", "templates/SFTPConnectionDialog.html"),
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -27,10 +33,12 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = "Clone Git Repository";
-		this.gitUrlLabelText = "Repository URL:";
+		this.title = "Select an SFTP Connection";
+		this.sftpHostLabelText= "Source host name:";
+		this.sftpPathLabelText= "Source path:";
+		this.sftpUserLabelText= "User name:";
+		this.sftpPasswordLabelText= "Password:";
 		this.buttonCancel = "Cancel";
-
 	},
 	postCreate: function() {
 		this.inherited(arguments);
@@ -40,7 +48,7 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
 				this._onSubmit();
 			}
 		}));
-		this.refocus = false; // Dojo 10654
+		this.refocus = false; 
 	},
 	onHide: function() {
 		// This assumes we don't reuse the dialog
@@ -49,8 +57,7 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
 			this.destroyRecursive(); // TODO make sure this removes DOM elements
 		}), this.duration);
 	},
-	// Stuff from newItemDialog.js is below
 	execute: function() {
-		this.options.func(this.gitUrl.value);
+		this.options.func(this.sftpHost.value, this.sftpPath.value, this.sftpUser.value, this.sftpPassword.value);
 	}
 });

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*global dojo window */
  
 /**
  * @namespace The global container for eclipse APIs.
@@ -31,14 +32,14 @@ eclipse.StatusReportingService.prototype = {
 	 * @param [Number] timeout Optional time to display the message before hiding it.
 	 */
 	setMessage : function(msg, timeout) {
-		dojo.place(document.createTextNode(msg), this.domId, "only");
+		dojo.place(window.document.createTextNode(msg), this.domId, "only");
 		if (typeof(timeout) === "number") {
 			var that = this;
-			setTimeout(function() {
+			window.setTimeout(function() {
 				var node = dojo.byId(that.domId);
 				var text = typeof(node.textContent) === "string" ? node.textContent : node.innerText;
 				if (text === msg) {
-					dojo.place(document.createTextNode(""), that.domId, "only");
+					dojo.place(window.document.createTextNode(""), that.domId, "only");
 				}
 			}, timeout);
 		}
@@ -58,25 +59,70 @@ eclipse.StatusReportingService.prototype = {
 		} catch(error) {
 			//it is not JSON, just continue;
 		}
-		var message = status.message || status;
+		var message = status.Message || status;
 		var color = "red";
-		if (status.severity) {
-			switch (status.severity) {
-			case "warning":
+		if (status.Severity) {
+			switch (status.Severity) {
+			case "Warning":
 				color = "#FFCC00";
 				break;
-			case "error":
+			case "Error":
 				color = "red";
 				break;
-			case "info":
-				case "ok":
+			case "Info":
+			case "Ok":
 				color = "green";
 				break;
 			}
 		}
 		var span = dojo.create("span", {style: {color: color}}); 
-		dojo.place(document.createTextNode(message), span);
+		dojo.place(window.document.createTextNode(message), span);
 		dojo.place(span, this.domId, "only");
+	},
+	
+	/**
+	 * Shows a progress message until the given deferred is resolved. Returns a deferred that resolves when
+	 * the operation completes.
+	 */
+	showWhile: function(deferred, message) {
+		var that = this;
+		that.setMessage(message);
+		return deferred.then(function(result) {
+			//see if we are dealing with a progress resource
+			if (result && result.Location && result.Message && result.Running) {
+				return that._doProgressWhile(result);
+			}
+			//either set a result message, or clear the progress message
+			if (result.Result) {
+				that.setErrorMessage(result.Result);
+			} else {
+				that.setMessage("");
+			}
+			//return the final result so it is available to caller's deferred chain
+			return result;
+		});
+	},
+
+	/**
+	 * Helper method used to implement showWhile.
+	 */	
+	_doProgressWhile: function(progress) {
+		var deferred = new dojo.Deferred();
+		//sleep for awhile before we get more progress
+		window.setTimeout(function() {
+			dojo.xhrGet({
+				url: progress.Location,
+				headers: { "Orion-Version" : "1"},
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, ioArgs) {
+					//jsonData is either the final result or a progress resource
+					deferred.callback(jsonData);
+				}
+			});
+		}, 2000);
+		//recurse until operation completes
+		return this.showWhile(deferred, progress.Message);
 	}
 };
 	

@@ -38,6 +38,9 @@ orion.EditorCommandFactory = (function() {
 				var contents = editor.getEditorWidget().getText();
 				this.fileClient.write(this.inputManager.getInput(), contents).then(dojo.hitch(this, function() {
 					editor.onInputChange(this.inputManager.getInput(), null, contents, true);
+					if(this.inputManager.afterSave){
+						this.inputManager.afterSave();
+					}
 				}));
 			}));
 			var saveCommand = new eclipse.Command({

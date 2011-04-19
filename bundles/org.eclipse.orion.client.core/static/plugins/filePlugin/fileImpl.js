@@ -339,7 +339,58 @@ eclipse.FileServiceImpl= (function() {
 				xhrArgs.handleAs = "json";
 			}
 			return dojo.xhrPut(xhrArgs);
+		},
+		/**
+		 * Imports file and directory contents from another server
+		 *
+		 * @param {String} targetLocation The location of the folder to import into
+		 * @param {Object} options An object specifying the import parameters
+		 * @return A deferred for chaining events after the import completes
+		 */		
+		remoteImport: function(targetLocation, options) {
+			var headerData = {
+				"Orion-Version": "1"
+			};
+			if (options.OptionHeader) {
+				headerData["X-Xfer-Options"] = options.OptionHeader;
+			}
+			return dojo.xhrPost({
+				url: targetLocation,
+				headers: headerData,
+				postData: dojo.toJson(options),
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, ioArgs) {
+					return jsonData;
+				}
+			});
+		},
+		/**
+		 * Exports file and directory contents to another server
+		 *
+		 * @param {String} sourceLocation The location of the folder to export from
+		 * @param {Object} options An object specifying the export parameters
+		 * @return A deferred for chaining events after the export completes
+		 */		
+		remoteExport: function(sourceLocation, options) {
+			var headerData = {
+				"Orion-Version": "1"
+			};
+			if (options.OptionHeader) {
+				headerData["X-Xfer-Options"] = options.OptionHeader;
+			}
+			return dojo.xhrPost({
+				url: sourceLocation,
+				headers: headerData,
+				postData: dojo.toJson(options),
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, ioArgs) {
+					return jsonData;
+				}
+			});
 		}
+		
 	};
 	return FileServiceImpl;
 }());
