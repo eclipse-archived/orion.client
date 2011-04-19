@@ -206,6 +206,26 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 		});
 	
 		commandService.addCommand(mergeCommand, "dom");
+		
+		var pushCommand = new eclipse.Command({
+			name : "Push",
+			image : "images/git-push.gif",
+			id : "eclipse.orion.git.push",
+			callback: function(item) {
+				serviceRegistry.getService("IGitService").then(function(gitService){
+					gitService.doMerge(item.HeadLocation, item.Id, function() {
+						dojo.query(".treeTableRow").forEach(function(node, i) {
+							dojo.toggleClass(node, "incomingCommitsdRow", false);
+						});
+					});
+				});
+			},
+			visibleWhen : function(item) {
+				return false;
+			}
+		});
+	
+		commandService.addCommand(pushCommand, "dom");
 	};
 	
 	eclipse.gitCommandUtils.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
