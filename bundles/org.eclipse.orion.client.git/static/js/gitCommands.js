@@ -101,8 +101,7 @@ dojo.require("widgets.GitCredentialsDialog");
 						});
 						
 						credentialsDialog.startup();
-						credentialsDialog.show();
-						
+						credentialsDialog.show();	
 					}
 				});
 						
@@ -230,6 +229,26 @@ dojo.require("widgets.GitCredentialsDialog");
 		});
 	
 		commandService.addCommand(mergeCommand, "dom");
+		
+		var pushCommand = new eclipse.Command({
+			name : "Push",
+			image : "images/git-push.gif",
+			id : "eclipse.orion.git.push",
+			callback: function(item) {
+				serviceRegistry.getService("IGitService").then(function(gitService){
+					gitService.doPush(item.Location, "HEAD", function() {
+						dojo.query(".treeTableRow").forEach(function(node, i) {
+							dojo.toggleClass(node, "outgoingCommitsdRow", false);
+						});
+					});
+				});
+			},
+			visibleWhen : function(item) {
+				return true;
+			}
+		});
+	
+		commandService.addCommand(pushCommand, "dom");
 	};
 	
 	eclipse.gitCommandUtils.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId) {

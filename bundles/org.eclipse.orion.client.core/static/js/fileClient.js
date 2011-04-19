@@ -171,6 +171,17 @@ eclipse.FileClient = (function() {
 		},
 
 		/**
+		 * Exports file and directory contents to another server
+		 *
+		 * @param {String} sourceLocation The location of the folder to export from
+		 * @param {Object} options An object specifying the export parameters
+		 * @return A deferred for chaining events after the export completes
+		 */		
+		remoteExport: function(sourceLocation, options) {
+			return this._doServiceCall("remoteExport", arguments);
+		},
+
+		/**
 		 * This helper method implements invocation of the service call,
 		 * with retry on authentication error if needed.
 		 */

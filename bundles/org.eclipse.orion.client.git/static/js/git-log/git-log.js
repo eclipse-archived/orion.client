@@ -40,7 +40,7 @@ dojo.addOnLoad(function(){
 	eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, navigator, "pageActions", gitClient, "selectionTools");
 	
 	// define the command contributions - where things appear, first the groups
-	commandService.addCommandGroup("eclipse.gitGroup.nav", 100, "More");
+	commandService.addCommandGroup("eclipse.gitGroup.nav", 200, "More");
 	commandService.addCommandGroup("eclipse.gitGroup.page", 100, null, null, "pageActions");
 	commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
 	
@@ -57,9 +57,9 @@ dojo.addOnLoad(function(){
 	if (isRemote()){
 		commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "pageActions", "eclipse.gitGroup.page");
 		commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "pageActions", "eclipse.gitGroup.page");
+	} else {
+		commandService.registerCommandContribution("eclipse.orion.git.push", 100, "pageActions", "eclipse.gitGroup.page");
 	};
-	
-	commandService.renderCommands(dojo.byId("pageActions"), "dom", {}, {}, "image");
 	
 	if (isRemote()) {
 		// refresh the commit list for the remote
@@ -75,7 +75,7 @@ dojo.addOnLoad(function(){
 				serviceRegistry.getService("IGitService").then(function(gitService){
 					gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
 						navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
-						navigator.loadCommitsList(jsonData.CommitLocation, jsonData);			
+						navigator.loadCommitsList(jsonData.CommitLocation, jsonData);
 					});
 				});
 			},
@@ -85,8 +85,58 @@ dojo.addOnLoad(function(){
 			}
 		});
 	} else {
-		navigator.loadCommitsList(dojo.hash());
+		var path = dojo.hash();
+		dojo.xhrGet({
+			url : path,
+			headers : {
+				"Orion-Version" : "1"
+			},
+			handleAs : "json",
+			timeout : 5000,
+			load : function(jsonData, secondArg) {
+				return jsonData.RemoteLocation;
+			},
+			error : function(error, ioArgs) {
+				handleGetAuthenticationError(this, ioArgs);
+				console.error("HTTP status code: ", ioArgs.xhr.status);
+			}
+		}).then(function(remoteLocation){
+			return dojo.xhrGet({
+				url : remoteLocation,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					serviceRegistry.getService("IGitService").then(function(gitService){
+						gitService.getLog(jsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArd) {
+							navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
+							navigator.loadCommitsList(dojo.hash(), jsonData);
+						});
+					});
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		});
+//		.then(function(blah){
+//			serviceRegistry.getService("IGitService").then(function(gitService){
+//				gitService.getLog(blah.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArd) {
+//					navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
+//					navigator.loadCommitsList(dojo.hash(), {});
+//				});
+//			});
+//		});
+	
+		
+		
+		//navigator.loadCommitsList(dojo.hash(), {});
 	}
+	
+	
 
 	// every time the user manually changes the hash, we need to load the
 	// workspace with that name
@@ -114,7 +164,7 @@ dojo.addOnLoad(function(){
 				}
 			});
 		} else {
-			navigator.loadCommitsList(dojo.hash());
+			navigator.loadCommitsList(dojo.hash(), {});
 		}
 	});
 });
