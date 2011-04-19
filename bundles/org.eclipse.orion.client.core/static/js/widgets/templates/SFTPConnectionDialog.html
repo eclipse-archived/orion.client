@@ -1,4 +1,6 @@
 <div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="labelledby-${id}_title">
+	<div dojoType="dojo.data.ItemFileReadStore" data="sftpConnectionStoreData" jsId="sftpConnectionStore">
+	</div>
 	<div dojoAttachPoint="titleBar" class="dijitDialogTitleBar">
 		<span dojoAttachPoint="titleNode" class="dijitDialogTitle" id="${id}_title"></span>
 		<span dojoAttachPoint="closeButtonNode" class="dijitDialogCloseIcon" dojoAttachEvent="onclick: onCancel" title="${buttonCancel}">
@@ -10,28 +12,50 @@
 		<div style="display: table">
 			<div style="display: table-row">
 				<div style="display: table-cell; padding: 5">
-					<label dojoAttachPoint="sftpHostLabel" for="${id}_sftpHost" style="padding-right: 10">${sftpHostLabelText}</label>
+					<label dojoAttachPoint="locationLabel" for="${id}_sftpPath" style="padding-right: 10">${locationLabelText}</label>
 				</div>
 				<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
-					<input dojoAttachPoint="sftpHost" id="${id}_sftpHost" style="display: inline-block; width: 98%;" value="">
-				</div>
-			</div>
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5">
-					<label dojoAttachPoint="sftpPathLabel" for="${id}_sftpPath" style="padding-right: 10">${sftpPathLabelText}</label>
-				</div>
-				<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
-					<input dojoAttachPoint="sftpPath" id="${id}_sftpPath" style="display: inline-block; width: 98%;" value="">
-				</div>
-			</div>	
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5">
-					<label dojoAttachPoint="sftpUserLabel" for="${id}_sftpUser" style="padding-right: 10">${sftpUserLabelText}</label>
-				</div>
-				<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
-					<input dojoAttachPoint="sftpUser" id="${id}_sftpUser" style="display: inline-block; width: 98%;" value="">
-				</div>
-			</div>
+					<div dojoType="dijit.form.ComboBox" store="sftpConnectionStore" style="display: inline-block; width: 88%;" dojoAttachPoint="sftpConnectionList" searchAttr="name">
+					</div>
+					<div dojoType="dijit.form.DropDownButton">
+					    <span>New</span>
+			    		<div dojoType="dijit.TooltipDialog">
+							<div style="display: table">
+								<div style="display: table-row">
+									<div style="display: table-cell; padding: 5">
+										<label dojoAttachPoint="sftpHostLabel" for="${id}_sftpHost" style="padding-right: 10">${sftpHostLabelText}</label>
+									</div>
+									<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
+										<input dojoAttachPoint="sftpHost" id="${id}_sftpHost" style="display: inline-block; width: 98%;" value="">
+									</div>
+								</div>
+								<div style="display: table-row">
+									<div style="display: table-cell; padding: 5">
+										<label dojoAttachPoint="sftpPathLabel" for="${id}_sftpPath" style="padding-right: 10">${sftpPathLabelText}</label>
+									</div>
+									<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
+										<input dojoAttachPoint="sftpPath" id="${id}_sftpPath" style="display: inline-block; width: 98%;" value="">
+									</div>
+								</div>	
+								<div style="display: table-row">
+									<div style="display: table-cell; padding: 5">
+										<label dojoAttachPoint="sftpUserLabel" for="${id}_sftpUser" style="padding-right: 10">${sftpUserLabelText}</label>
+									</div>
+									<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
+										<input dojoAttachPoint="sftpUser" id="${id}_sftpUser" style="display: inline-block; width: 98%;" value="">
+									</div>
+								</div>
+								<div style="display: table-row">
+									<div style="display: table-cell; padding: 5"></div>
+									<div style="display: table-cell; padding: 5">
+										<button dojoAttachPoint="addSFTPConnection" type="submit" dojoType="dijit.form.Button" style="padding: 20 0 10 0; float: right; clear: both;">Add</button>
+									</div>
+								</div>
+							</div><!-- End inner table-->
+			    		</div><!-- End TooltipDialog -->
+			    	</div><!-- End DropDownButton -->
+				</div><!-- End table cell -->
+			</div><!-- End table row -->
 			<div style="display: table-row">
 				<div style="display: table-cell; padding: 5">
 					<label dojoAttachPoint="sftpPasswordLabel" for="${id}_sftpPassword" style="padding-right: 10">${sftpPasswordLabelText}</label>
@@ -43,10 +67,10 @@
 			<div style="display: table-row">
 				<div style="display: table-cell; padding: 5"></div>
 				<div style="display: table-cell; padding: 5">
-					<button dojoAttachPoint="sftpConnectionButton" dojoType="dijit.form.Button" type="submit" value="OK" style="padding: 20 0 10 0; float: right; clear: both;">Ok
+					<button dojoAttachPoint="sftpConnectionButton" dojoType="dijit.form.Button" type="submit" value="OK" style="padding: 20 0 10 0; float: right; clear: both;">${buttonOk}
 					</button>
 				</div>
-			</div>
-		</div>
-	</div>
+			</div><!-- End table row -->
+		</div><!-- End table -->
+	</div><!-- End dijitDialogPaneContent -->
 </div>
