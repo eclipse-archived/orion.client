@@ -101,6 +101,7 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.deleteFile", 3, null, "eclipse.fileGroup");
 	commandService.registerCommandContribution("eclipse.importCommand", 4, null, "eclipse.fileGroup");
 	commandService.registerCommandContribution("eclipse.importSFTPCommand", 5, null, "eclipse.fileGroup");
+	commandService.registerCommandContribution("eclipse.exportSFTPCommand", 6, null, "eclipse.fileGroup");
 	// new file and new folder in the actions column uses the labeled group
 	commandService.registerCommandContribution("eclipse.newFile", 1, null, "eclipse.fileGroup/eclipse.newResources");
 	commandService.registerCommandContribution("eclipse.newFolder", 2, null, "eclipse.fileGroup/eclipse.newResources");
