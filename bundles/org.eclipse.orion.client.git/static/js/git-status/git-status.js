@@ -17,7 +17,6 @@ dojo.addOnLoad(function(){
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
 	// File operations
-	new eclipse.FileClient(serviceRegistry, pluginRegistry);
 	fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 	
 	var controller = new orion.GitStatusController(serviceRegistry , "unstagedZone" , "stagedZone");
