@@ -35,11 +35,6 @@ eclipse.GitService = (function() {
 			console.info("Git Service checked");
 		},
 		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
-			var service = this;
-			if(gitSshKnownHost && gitSshKnownHost!=""){
-				this._sshService.addKnownHosts(gitSshKnownHost);
-			}
-			return this._sshService.getKnownHosts().then(function(knownHosts){
 				return dojo.xhrPost({
 					url : "/git/clone/",
 					headers : {
@@ -50,7 +45,7 @@ eclipse.GitService = (function() {
 						"GitUrl" : gitRepoUrl,
 						"GitSshUsername" : gitSshUsername,
 						"GitSshPassword" : gitSshPassword,
-						"GitSshKnownHost" : knownHosts
+						"GitSshKnownHost" : gitSshKnownHost
 					}),
 					handleAs : "json",
 					timeout : 15000,
@@ -62,11 +57,11 @@ eclipse.GitService = (function() {
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
 				});
-			});
 			
 		},
 		
 		getDiffContent: function(diffURI , onLoad , onError){
+			var service = this;
 			dojo.xhrGet({
 				url: diffURI , 
 				headers: {
@@ -251,13 +246,13 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		doGitLog : function(gitDiffURI, onLoad) {
+		doGitLog : function(gitLogURI, onLoad) {
 			var service = this;
 			
 			console.info("doGitLog called");
 			
 			return dojo.xhrGet({
-				url : gitDiffURI,
+				url : gitLogURI,
 				headers : {
 					"Orion-Version" : "1"
 				},
@@ -266,11 +261,13 @@ eclipse.GitService = (function() {
 				load : function(jsonData, secondArg) {
 					if (onLoad) {
 						if (typeof onLoad === "function")
-							onLoad(jsonData, secondArg);
+							onLoad(jsonData.Children, secondArg);
 						else
 							service._serviceRegistration.dispatchEvent(onLoad,
-									jsonData);
+									jsonData.Children);
 					}
+					
+					return jsonData.Children;
 				},
 				error : function(error, ioArgs) {
 					handleGetAuthenticationError(this, ioArgs);
@@ -373,7 +370,7 @@ eclipse.GitService = (function() {
 			
 			console.info("getLog called");
 			
-			dojo.xhrPost({
+			return dojo.xhrPost({
 				url : gitCommitURI,
 				headers : {
 					"Orion-Version" : "1"
@@ -401,12 +398,12 @@ eclipse.GitService = (function() {
 					load : function(jsonData, secondArg) {
 						if (onLoad) {
 							if (typeof onLoad === "function")
-								onLoad(jsonData, secondArg);
+								onLoad(jsonData.Children, secondArg);
 							else
 								service._serviceRegistration.dispatchEvent(onLoad,
-										jsonData);
+										jsonData.Children);
 						}
-						return jsonData;
+						return jsonData.Children;
 					},
 					error : function(error, ioArgs) {
 						handleGetAuthenticationError(this, ioArgs);

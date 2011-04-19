@@ -24,6 +24,7 @@ var eclipse = eclipse || {};
 eclipse.gitCommandUtils = eclipse.gitCommandUtils || {};
 
 dojo.require("widgets.CloneGitRepositoryDialog");
+dojo.require("widgets.GitCredentialsDialog");
 
 //this function is just a closure for the global "doOnce" flag
 (function() {
@@ -70,18 +71,31 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
 				var dialog = new widgets.CloneGitRepositoryDialog({
-					func : function(gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
-						serviceRegistry.getService("IGitService").then(function(gitService) {
-							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-								var deferred = gitService.cloneGitRepository("", gitUrl, gitSshUsername, gitSshPassword, gitSshKnownHost);
-								progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
-									function(jsonData, secondArg) {
-										//TODO refresh the clone navigator
+					func :function(gitUrl){
+						var credentialsDialog = new widgets.GitCredentialsDialog({
+								title: "Clone Git Repository",
+								url: gitUrl,
+								serviceRegistry: serviceRegistry,
+								func: function(options){
+									serviceRegistry.getService("IGitService").then(function(gitService) {
+										serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+											var deferred = gitService.cloneGitRepository("", gitUrl, options.gitSshUsername, options.gitSshPassword, options.knownHosts);
+											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
+												function(jsonData, secondArg) {
+													//TODO refresh the clone navigator
+												});
+										});
 									});
-							});
+								}
+								
 						});
+						
+						credentialsDialog.startup();
+						credentialsDialog.show();
+						
 					}
 				});
+						
 				dialog.startup();
 				dialog.show();
 			},
@@ -206,6 +220,26 @@ dojo.require("widgets.CloneGitRepositoryDialog");
 		});
 	
 		commandService.addCommand(mergeCommand, "dom");
+		
+		var pushCommand = new eclipse.Command({
+			name : "Push",
+			image : "images/git-push.gif",
+			id : "eclipse.orion.git.push",
+			callback: function(item) {
+				serviceRegistry.getService("IGitService").then(function(gitService){
+					gitService.doMerge(item.HeadLocation, item.Id, function() {
+						dojo.query(".treeTableRow").forEach(function(node, i) {
+							dojo.toggleClass(node, "incomingCommitsdRow", false);
+						});
+					});
+				});
+			},
+			visibleWhen : function(item) {
+				return false;
+			}
+		});
+	
+		commandService.addCommand(pushCommand, "dom");
 	};
 	
 	eclipse.gitCommandUtils.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
