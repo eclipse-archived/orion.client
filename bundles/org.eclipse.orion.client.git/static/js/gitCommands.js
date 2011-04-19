@@ -82,7 +82,17 @@ dojo.require("widgets.GitCredentialsDialog");
 											var deferred = gitService.cloneGitRepository("", gitUrl, options.gitSshUsername, options.gitSshPassword, options.knownHosts);
 											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
 												function(jsonData, secondArg) {
-													//TODO refresh the clone navigator
+													if(jsonData.Running==false){
+														if(jsonData.Result && jsonData.Result.HttpCode!=200){
+															console.error("error " + jsonData.Result.HttpCode + " while clonning");
+															return;
+														}
+														
+														if(explorer.redisplayClonesList){
+															dojo.hitch(explorer, explorer.redisplayClonesList)();
+														}
+														
+													}
 												});
 										});
 									});
@@ -91,8 +101,7 @@ dojo.require("widgets.GitCredentialsDialog");
 						});
 						
 						credentialsDialog.startup();
-						credentialsDialog.show();
-						
+						credentialsDialog.show();	
 					}
 				});
 						
@@ -227,15 +236,15 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(function(gitService){
-					gitService.doMerge(item.HeadLocation, item.Id, function() {
+					gitService.doPush(item.Location, "HEAD", function() {
 						dojo.query(".treeTableRow").forEach(function(node, i) {
-							dojo.toggleClass(node, "incomingCommitsdRow", false);
+							dojo.toggleClass(node, "outgoingCommitsdRow", false);
 						});
 					});
 				});
 			},
 			visibleWhen : function(item) {
-				return false;
+				return true;
 			}
 		});
 	

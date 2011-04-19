@@ -85,7 +85,55 @@ dojo.addOnLoad(function(){
 			}
 		});
 	} else {
-		navigator.loadCommitsList(dojo.hash(), {});
+		var path = dojo.hash();
+		dojo.xhrGet({
+			url : path,
+			headers : {
+				"Orion-Version" : "1"
+			},
+			handleAs : "json",
+			timeout : 5000,
+			load : function(jsonData, secondArg) {
+				return jsonData.RemoteLocation;
+			},
+			error : function(error, ioArgs) {
+				handleGetAuthenticationError(this, ioArgs);
+				console.error("HTTP status code: ", ioArgs.xhr.status);
+			}
+		}).then(function(remoteLocation){
+			return dojo.xhrGet({
+				url : remoteLocation,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					serviceRegistry.getService("IGitService").then(function(gitService){
+						gitService.getLog(jsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArd) {
+							navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
+							navigator.loadCommitsList(dojo.hash(), jsonData);
+						});
+					});
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		});
+//		.then(function(blah){
+//			serviceRegistry.getService("IGitService").then(function(gitService){
+//				gitService.getLog(blah.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArd) {
+//					navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
+//					navigator.loadCommitsList(dojo.hash(), {});
+//				});
+//			});
+//		});
+	
+		
+		
+		//navigator.loadCommitsList(dojo.hash(), {});
 	}
 	
 	
