@@ -237,8 +237,8 @@ eclipse.Favorites = (function() {
 	Favorites.prototype = {
 		getUserURL: function(imageId) {
 			var reg = this._registry;
-			var faveTable = dojo.byId("faveTable");
-			eclipse.util.getUserText(imageId+"EditBox", faveTable, false, "", 
+			var spacer= dojo.byId("spacer");
+			eclipse.util.getUserText(imageId+"EditBox", spacer, true, "", 
 				function(newText) {
 					reg.getService("IFavorites").then(function(service) {
 						service.addFavoriteUrl(newText);
@@ -276,17 +276,25 @@ eclipse.Favorites = (function() {
 		},
 		// FIXME: it should really be up to the UI to organize favorites as being searches or not.
 		render: function(favorites, searches) {
-			//heading and commands
-			dojo.place("<div><span class='paneHeading'>Favorites</span><span id='faveCommands' class='paneHeadingToolbar'></span></div>", this._parent, "only");
-			var commands = dojo.byId("faveCommands");
-			this._registry.getService("ICommandService").then(function(service) {
-				service.renderCommands(commands, "dom", this, this, "image");
-			});
-			
 			// favorites table
 			var faveTable = dojo.create("table", {id: "faveTable"});
 			dojo.addClass(faveTable, "favoritesTable");
+			
+			// heading and commands
+			var thead = dojo.create("thead", null, faveTable);
+			var row = dojo.create("tr", null, thead);
+			var headCol = dojo.create("td", null, row);
+			dojo.addClass(headCol, "paneHeadingContainer");
+			dojo.place("<span class='paneHeading'>Favorites</span>", headCol, "only");
+			var commandCol = dojo.create("td", null, row);
+			dojo.style(commandCol, "textAlign", "right");
+			dojo.addClass(commandCol, "paneHeadingContainer");
+			dojo.place("<span id='faveCommands' class='paneHeadingToolbar'></span>", commandCol, "only");
+			
+			// favorites
 			var tr, col1, col2;
+			var tbody = dojo.create("tbody", null, faveTable);
+
 			for (var j=0; j < favorites.length; j++) {
 				var fave = favorites[j];
 				var href;
@@ -307,6 +315,7 @@ eclipse.Favorites = (function() {
 				dojo.style(col1, "whiteSpace", "nowrap");
 				col2 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
 				dojo.style(col2, "whiteSpace", "nowrap");
+				dojo.style(col2, "textAlign", "right");
 				var link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
 				dojo.place(document.createTextNode(fave.name), link, "only");
 				var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
@@ -316,7 +325,7 @@ eclipse.Favorites = (function() {
 				this._registry.getService("ICommandService").then(function(service) {
 					service.renderCommands(actionsWrapper, "object", fave, this, "image", null, j);
 				});
-				dojo.place(tr, faveTable, "last");
+				dojo.place(tr, tbody, "last");
 				dojo.connect(tr, "onmouseover", tr, function() {
 					var wrapper = dojo.byId(this.id+"actionsWrapper");
 					dojo.style(wrapper, "visibility", "visible");
@@ -326,12 +335,30 @@ eclipse.Favorites = (function() {
 					dojo.style(wrapper, "visibility", "hidden");
 				});
 			}
-			dojo.place(faveTable, this._parent, "last");
+			dojo.place(faveTable, this._parent, "only");
+			// Now that the table is added to the dom, generate commands
+			var commands = dojo.byId("faveCommands");
+			this._registry.getService("ICommandService").then(function(service) {
+				service.renderCommands(commands, "dom", this, this, "image");
+			});
 			
+			// spacer, which also is a placeholder for newly added favorites
+			var spacer = dojo.create("tr", null, faveTable);
+			spacer = dojo.create("td", {colspan: 2}, spacer);
+			dojo.create("span", {id: "spacer"}, spacer);
+
 			if (searches.length > 0) {
-				dojo.place("<br><h2>Searches</h2>", this._parent, "last");
-				var searchTable = dojo.create("table");
-				dojo.addClass(searchTable, "favoritesTable");
+				// heading and commands
+				thead = dojo.create("thead", null, faveTable);
+				row = dojo.create("tr", null, thead);
+				headCol = dojo.create("td", null, row);
+				dojo.addClass(headCol, "paneHeadingContainer");
+				dojo.place("<span class='paneHeading'>Searches</span>", headCol, "only");
+				commandCol = dojo.create("td", null, row);
+				dojo.style(commandCol, "textAlign", "right");
+				dojo.addClass(commandCol, "paneHeadingContainer");
+
+				tbody = dojo.create("tbody", null, faveTable);
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
 					var href="searchResults.html#" + search.query;
@@ -339,6 +366,7 @@ eclipse.Favorites = (function() {
 					tr.id = "searchRow"+i;
 					col1 = dojo.create("td", null, tr, "last");
 					col2 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
+					dojo.style(col2, "textAlign", "right");
 					var link = dojo.create("a", {href: href}, col1, "only");
 					dojo.place(document.createTextNode(search.name), link, "only");
 					// render local commands
@@ -347,7 +375,7 @@ eclipse.Favorites = (function() {
 					this._registry.getService("ICommandService").then(function(service) {
 						service.renderCommands(actionsWrapper, "object", search, this, "image", null, i);
 					});
-					dojo.place(tr, searchTable, "last");
+					dojo.place(tr, tbody, "last");
 					dojo.connect(tr, "onmouseover", tr, function() {
 						var wrapper = dojo.byId(this.id+"actionsWrapper");
 						dojo.style(wrapper, "visibility", "visible");
@@ -357,7 +385,6 @@ eclipse.Favorites = (function() {
 						dojo.style(wrapper, "visibility", "hidden");
 					});
 				}
-				dojo.place(searchTable, this._parent, "last");
 			}
 		}
 	};
