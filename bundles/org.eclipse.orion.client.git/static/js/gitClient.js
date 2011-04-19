@@ -35,11 +35,6 @@ eclipse.GitService = (function() {
 			console.info("Git Service checked");
 		},
 		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
-			var service = this;
-			if(gitSshKnownHost && gitSshKnownHost!=""){
-				this._sshService.addKnownHosts(gitSshKnownHost);
-			}
-			return this._sshService.getKnownHosts().then(function(knownHosts){
 				return dojo.xhrPost({
 					url : "/git/clone/",
 					headers : {
@@ -50,7 +45,7 @@ eclipse.GitService = (function() {
 						"GitUrl" : gitRepoUrl,
 						"GitSshUsername" : gitSshUsername,
 						"GitSshPassword" : gitSshPassword,
-						"GitSshKnownHost" : knownHosts
+						"GitSshKnownHost" : gitSshKnownHost
 					}),
 					handleAs : "json",
 					timeout : 15000,
@@ -62,11 +57,11 @@ eclipse.GitService = (function() {
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
 				});
-			});
 			
 		},
 		
 		getDiffContent: function(diffURI , onLoad , onError){
+			var service = this;
 			dojo.xhrGet({
 				url: diffURI , 
 				headers: {

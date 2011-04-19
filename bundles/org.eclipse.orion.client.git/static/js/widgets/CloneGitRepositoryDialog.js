@@ -11,16 +11,10 @@
 dojo.provide("widgets.CloneGitRepositoryDialog");
 
 dojo.require("dijit.Dialog");
-dojo.require("dijit.form.CheckBox");
-dojo.require("dijit.form.ComboBox");
-dojo.require("dojo.data.ItemFileReadStore");
 
 /**
  * @param options {{ 
- *     title: string,
- *     label: string,
- *     func: function,
- *     [advanced]: boolean  // Whether to show advanced controls. Default is false
+ *     func: function
  * }}
  */
 dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
@@ -35,10 +29,8 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
 		this.inherited(arguments);
 		this.title = "Clone Git Repository";
 		this.gitUrlLabelText = "Repository URL:";
-		this.gitSshUsernameLabelText = "Ssh username:";
-		this.gitSshPasswordLabelText = "Ssh password:";
-		this.gitSshKnownHostsLabelText = "Ssh known hosts:";
 		this.buttonCancel = "Cancel";
+
 	},
 	postCreate: function() {
 		this.inherited(arguments);
@@ -59,6 +51,6 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
 	},
 	// Stuff from newItemDialog.js is below
 	execute: function() {
-		this.options.func(this.gitUrl.value, this.gitSshUsername.value, this.gitSshPassword.value, this.gitSshKnownHosts.value);
+		this.options.func(this.gitUrl.value);
 	}
 });
