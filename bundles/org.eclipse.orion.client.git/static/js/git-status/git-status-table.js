@@ -430,25 +430,6 @@ orion.GitStatusController = (function() {
 			for (var i = 0; i < retValue.length ; i++){
 				renderer.renderRow(retValue[i]);
 			}
-			/*
-			for (var i = 0; i < interedtedGroup.length ; i++){
-				var groupName = interedtedGroup[i];
-				var groupData = this._model.getGroupData(groupName);
-				if(!groupData)
-					break;
-				for(var j = 0 ; j < groupData.length ; j++){
-					var renderType = this._model.getModelType(groupData[j] , groupName);
-					if(renderType){
-						renderer.renderRow({name:groupData[j].Name, 
-											type:renderType, 
-											location:groupData[j].Location,
-											commitURI:groupData[j].Git.CommitLocation,
-											indexURI:groupData[j].Git.IndexLocation,
-											diffURI:groupData[j].Git.DiffLocation
-						});
-					}
-				} 
-			}*/
 		},
 		
 		loadDiffContent: function(itemModel){
