@@ -393,17 +393,17 @@ orion.GitStatusController = (function() {
 				dojo.place(document.createTextNode(""), progressParentId, "only");
 		},
 		
-		_loadBlock: function(renderer , interedtedGroup){
-			renderer.initTable();
+		_sortBlock: function(interedtedGroup){
+			var retValue = [];
 			for (var i = 0; i < interedtedGroup.length ; i++){
 				var groupName = interedtedGroup[i];
 				var groupData = this._model.getGroupData(groupName);
 				if(!groupData)
-					break;
+					continue;
 				for(var j = 0 ; j < groupData.length ; j++){
 					var renderType = this._model.getModelType(groupData[j] , groupName);
 					if(renderType){
-						renderer.renderRow({name:groupData[j].Name, 
+						retValue.push({name:groupData[j].Name, 
 											type:renderType, 
 											location:groupData[j].Location,
 											commitURI:groupData[j].Git.CommitLocation,
@@ -412,6 +412,23 @@ orion.GitStatusController = (function() {
 						});
 					}
 				} 
+			}
+			retValue.sort(function(a, b) {
+				var n1 = a.name && a.name.toLowerCase();
+				var n2 = b.name && b.name.toLowerCase();
+				if (n1 < n2) { return -1; }
+				if (n1 > n2) { return 1; }
+				return 0;
+			}); 
+			return retValue;
+		},
+			
+		
+		_loadBlock: function(renderer , interedtedGroup){
+			renderer.initTable();
+			var retValue = this._sortBlock(interedtedGroup);
+			for (var i = 0; i < retValue.length ; i++){
+				renderer.renderRow(retValue[i]);
 			}
 		},
 		

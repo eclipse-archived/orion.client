@@ -24,6 +24,7 @@ eclipse.BreadCrumbs = (function() {
 	 * @param {Object} options The options object which must specify the parent container
 	 * @param options.container The parent container for the bread crumb presentation
 	 * @param options.resource The current resource
+	 * @param options.makeHref The call back function to make the href on a bread crumb item. If not defined "navigate-table.html#" is used.
 	 */
 	function BreadCrumbs(options) {
 		this._init(options);		
@@ -38,6 +39,9 @@ eclipse.BreadCrumbs = (function() {
 			this._container = container;
 			this._id = options.id || "eclipse.breadcrumbs";
 			this._resource = options.resource|| null;
+			if(options.makeHref){
+				this._makeHref = options.makeHref;
+			} 
 			this.render();
 		},
 
@@ -59,7 +63,10 @@ eclipse.BreadCrumbs = (function() {
 					seg = document.createElement('a');
 					dojo.addClass(seg, "breadcrumb");
 					dojo.place(document.createTextNode(parents[i].Name), seg, "only");
-					seg.href = "navigate-table.html#" + parents[i].ChildrenLocation;
+					if(this._makeHref)
+						this._makeHref(seg , parents[i].ChildrenLocation);
+					else
+						seg.href = "navigate-table.html#" + parents[i].ChildrenLocation;
 					crumbs.appendChild(seg);
 					var slash = document.createElement('span');
 					dojo.place(document.createTextNode('/'), slash, "only");

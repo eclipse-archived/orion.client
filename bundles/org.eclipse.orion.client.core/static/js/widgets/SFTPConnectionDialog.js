@@ -8,7 +8,7 @@
  ******************************************************************************/
 /*global dojo dijit*/
 /*jslint browser:true*/
-dojo.provide("widgets.SFTPImportDialog");
+dojo.provide("widgets.SFTPConnectionDialog");
 
 dojo.require("dijit.Dialog");
 dojo.require("dijit.form.CheckBox");
@@ -23,9 +23,9 @@ dojo.require("dojo.data.ItemFileReadStore");
  *     [advanced]: boolean  // Whether to show advanced controls. Default is false
  * }}
  */
-dojo.declare("widgets.SFTPImportDialog", [dijit.Dialog], {
+dojo.declare("widgets.SFTPConnectionDialog", [dijit.Dialog], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache("widgets", "templates/SFTPImportDialog.html"),
+	templateString: dojo.cache("widgets", "templates/SFTPConnectionDialog.html"),
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -33,7 +33,7 @@ dojo.declare("widgets.SFTPImportDialog", [dijit.Dialog], {
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = "SFTP Import";
+		this.title = "Select an SFTP Connection";
 		this.sftpHostLabelText= "Source host name:";
 		this.sftpPathLabelText= "Source path:";
 		this.sftpUserLabelText= "User name:";

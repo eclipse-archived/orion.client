@@ -461,8 +461,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		id: "eclipse.importSFTPCommand",
 		callback : function(item) {
 			item = forceSingleItem(item);
-			var dialog = new widgets.SFTPImportDialog({
-				importLocation: item.SFTPImportLocation,
+			var dialog = new widgets.SFTPConnectionDialog({
 				func:  function(host,path,user,password){
 					serviceRegistry.getService("IStatusReporter").then(function(progressService) {
 						var importOptions = {"OptionHeader":"sftp","Host":host,"Path":path,"UserName":user,"Passphrase":password};
@@ -480,6 +479,31 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
 	commandService.addCommand(importSFTPCommand, "object");
 	commandService.addCommand(importSFTPCommand, "dom");
+
+	var exportSFTPCommand = new eclipse.Command({
+		name : "SFTP Export",
+		image : "images/down.gif",
+		id: "eclipse.exportSFTPCommand",
+		callback : function(item) {
+			item = forceSingleItem(item);
+			var dialog = new widgets.SFTPConnectionDialog({
+				func:  function(host,path,user,password){
+					serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+						var options = {"OptionHeader":"sftp","Host":host,"Path":path,"UserName":user,"Passphrase":password};
+						var deferred = fileClient.remoteExport(item.ExportLocation, options);
+						progressService.showWhile(deferred, "Exporting from " + host).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+					});
+				}
+			});
+			dialog.startup();
+			dialog.show();
+		},
+		visibleWhen: function(item) {
+			item = forceSingleItem(item);
+			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+	commandService.addCommand(exportSFTPCommand, "object");
+	commandService.addCommand(exportSFTPCommand, "dom");
 	
 	var copyCommand = new eclipse.Command({
 		name : "Copy to",
