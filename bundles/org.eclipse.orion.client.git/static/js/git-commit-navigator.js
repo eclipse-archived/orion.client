@@ -97,16 +97,28 @@ eclipse.FileRenderer = (function() {
 	};
 	
 	FileRenderer.prototype.setIncomingCommits = function(scopedCommits){
-		this.scopedCommits = scopedCommits;
+		this.incomingCommits = scopedCommits;
+	};
+	
+	FileRenderer.prototype.setOutgoingCommits = function(scopedCommits){
+		this.outgoingCommits = scopedCommits;
 	};
 	
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		
 		var incomingCommit = false;
 		
-		dojo.forEach(this.scopedCommits, function(commit, i){
+		dojo.forEach(this.incomingCommits, function(commit, i){
 			if (item.Name === commit.Name){
 				incomingCommit = true;
+			}
+		});
+		
+		var outgoingCommit = false;
+		
+		dojo.forEach(this.outgoingCommits, function(commit, i){
+			if (item.Name === commit.Name){
+				outgoingCommit = true;
 			}
 		});
 
@@ -122,6 +134,8 @@ eclipse.FileRenderer = (function() {
 			
 			if (incomingCommit)
 				dojo.toggleClass(tableRow, "incomingCommitsdRow", true);
+			else if (outgoingCommit)
+				dojo.toggleClass(tableRow, "outgoingCommitsdRow", true);
 			
 			return col;
 			break;

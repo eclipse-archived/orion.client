@@ -7,3 +7,9 @@
 	background-repeat: no-repeat;
 	background-position: left top; 
 }
+
+.outgoingCommitsdRow div {
+	background: url(images/git-outgoing.gif);
+	background-repeat: no-repeat;
+	background-position: left top; 
+}

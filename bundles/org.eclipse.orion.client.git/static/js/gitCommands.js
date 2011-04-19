@@ -91,8 +91,7 @@ dojo.require("widgets.GitCredentialsDialog");
 						});
 						
 						credentialsDialog.startup();
-						credentialsDialog.show();
-						
+						credentialsDialog.show();	
 					}
 				});
 						
@@ -227,15 +226,15 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(function(gitService){
-					gitService.doMerge(item.HeadLocation, item.Id, function() {
+					gitService.doPush(item.Location, "HEAD", function() {
 						dojo.query(".treeTableRow").forEach(function(node, i) {
-							dojo.toggleClass(node, "incomingCommitsdRow", false);
+							dojo.toggleClass(node, "outgoingCommitsdRow", false);
 						});
 					});
 				});
 			},
 			visibleWhen : function(item) {
-				return false;
+				return true;
 			}
 		});
 	

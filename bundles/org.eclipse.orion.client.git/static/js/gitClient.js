@@ -365,6 +365,36 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
+		doPush : function(gitBranchURI, srcRef, onLoad) {
+			var service = this;
+			
+			console.info("doPush called");
+			
+			return dojo.xhrPost({
+				url : gitBranchURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson({
+					"PushSrcRef" : srcRef
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
 		getLog : function(gitCommitURI, commitName, onLoad) {
 			var service = this;
 			
