@@ -40,10 +40,10 @@ var topHTMLFragment =
 	'<tr class="bottomRowBanner">' +
 		'<td colspan=2 id="pageToolbar" class="pageToolbar">' +
 			'<div style="float: left;">' +
-				'<span id="pageActionsLeft"></span>' +
+				'<span id="pageActionsLeft" class="pageActions"></span>' +
 			'</div>' +
 			'<div style="float: right;">' +
-				'<span id="pageActions"></span>' +
+				'<span id="pageActions" class="pageActions"></span>' +
 			'</div>' +
 		'</td>' +
 	'</tr>' +
@@ -120,7 +120,7 @@ eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService
 		toolbar = dojo.byId(pageActionDomId);
 	if (toolbar) {	
 		dojo.empty(toolbar);
-		commandService.renderCommands(toolbar, "dom", handler, handler, "image", "commandLinkLight");
+		commandService.renderCommands(toolbar, "dom", handler, handler, "image");
 	}
 };
 

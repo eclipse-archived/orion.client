@@ -7,7 +7,7 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global dojo window */
+/*global dojo window Image */
  
 /**
  * @namespace The global container for eclipse APIs.
@@ -19,11 +19,13 @@ var eclipse = eclipse || {};
  * @class Service for reporting status
  * @param {eclipse.ServiceRegistry} serviceRegistry
  * @param {String} domId ID of the DOM node under which status will be displayed.
+ * @param {String} progressDomId ID of the DOM node used to display progress messages.
  */
-eclipse.StatusReportingService = function(serviceRegistry, domId) {
+eclipse.StatusReportingService = function(serviceRegistry, domId, progressDomId) {
 	this._serviceRegistry = serviceRegistry;
 	this._serviceRegistration = serviceRegistry.registerService("IStatusReporter", this);
 	this.domId = domId;
+	this.progressDomId = progressDomId || domId;
 };
  
 eclipse.StatusReportingService.prototype = {
@@ -81,22 +83,80 @@ eclipse.StatusReportingService.prototype = {
 	},
 	
 	/**
+	 * Set a message that will be shown in the progress reporting area on the page.
+	 * @param {String} message The progress message to display. 
+	 */
+	setProgressMessage : function(message) {
+		dojo.place(window.document.createTextNode(message), this.progressDomId, "only");
+	},
+	
+	/**
+	 * Set a message that indicates that a long-running (progress) task is complete.
+	 * @param {String|dojoError|orionError} st The error to display. Can be a simple String,
+	 * or an error object from a dojo XHR error callback, or the body of an error response 
+	 * from the Orion server.
+	 */
+	setProgressResult : function(message) {
+		//could either be responseText from xhrGet or just a string
+		var status = message.responseText || message;
+		//accept either a string or a JSON representation of an IStatus
+		try {
+			status = JSON.parse(status);
+		} catch(error) {
+			//it is not JSON, just continue;
+		}
+		var msg = status.Message || status;
+		var src = "/images/info.gif";
+		var alt = "info";
+		if (status.Severity) {
+			switch (status.Severity) {
+			case "Warning":
+				src = "/images/warning.gif";
+				alt = "warning";
+				break;
+			case "Error":
+				src = "/images/error.gif";
+				alt = "error";
+				break;
+			}
+		}
+		var image = new Image();
+		image.alt = alt;
+		image.title = "Press to clear message";
+		image.name = alt;
+		image.src = src;
+		dojo.style(image, "opacity", "0.7");
+		dojo.connect(image, "onmouseover", this, function() {
+			dojo.style(image, "opacity", "1");
+		});
+		dojo.connect(image, "onmouseout", this, function() {
+			dojo.style(image, "opacity", "0.7");
+		});
+		dojo.connect(image, "onclick", this, function() {
+			this.setProgressMessage("");
+		});
+		dojo.place(image, this.progressDomId, "only");
+		var span = dojo.create("span", null, this.progressDomId);
+		dojo.place(window.document.createTextNode("   " + msg), span, "only");
+	},
+	
+	/**
 	 * Shows a progress message until the given deferred is resolved. Returns a deferred that resolves when
 	 * the operation completes.
 	 */
 	showWhile: function(deferred, message) {
 		var that = this;
-		that.setMessage(message);
+		that.setProgressMessage(message);
 		return deferred.then(function(result) {
 			//see if we are dealing with a progress resource
 			if (result && result.Location && result.Message && result.Running) {
 				return that._doProgressWhile(result);
 			}
-			//either set a result message, or clear the progress message
+			//clear the progress message
+			that.setProgressMessage("");
+			// if there is a result, show it.
 			if (result.Result) {
-				that.setErrorMessage(result.Result);
-			} else {
-				that.setMessage("");
+				that.setProgressResult(result.Result);
 			}
 			//return the final result so it is available to caller's deferred chain
 			return result;

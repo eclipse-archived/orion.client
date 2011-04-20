@@ -65,8 +65,6 @@ eclipse.FavoriteFoldersCache = (function() {
 }());
 
 eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
-	// TODO this knowledge shouldn't be here...the fact that we know we are on a dark toolbar
-	var cssClass = "commandLinkLight";
 	var toolbar = dojo.byId(toolbarId);
 	if (toolbar) {
 		dojo.empty(toolbar);
@@ -74,10 +72,10 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId
 		throw "could not find toolbar " + toolbarId;
 	}
 	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
-		service.renderCommands(toolbar, "dom", item, explorer, "image", cssClass);
+		service.renderCommands(toolbar, "dom", item, explorer, "image");
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			service.renderCommands(selectionTools, "dom", null, explorer, "image", cssClass);
+			service.renderCommands(selectionTools, "dom", null, explorer, "image");
 		}
 	}));
 	
@@ -90,7 +88,7 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId
 				if (selectionTools) {
 					dojo.empty(selectionTools);
 					registry.getService("ICommandService").then(function(commandService) {
-						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", cssClass);
+						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
 					});
 				}
 			});
@@ -462,9 +460,10 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		callback : function(item) {
 			item = forceSingleItem(item);
 			var dialog = new widgets.SFTPConnectionDialog({
-				func:  function(host,path,user,password){
+				func:  function(host,path,user,password, overwriteOptions){
 					serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-						var importOptions = {"OptionHeader":"sftp","Host":host,"Path":path,"UserName":user,"Passphrase":password};
+						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
+						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
 						progressService.showWhile(deferred, "Importing from " + host).then(
 							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
@@ -487,10 +486,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		callback : function(item) {
 			item = forceSingleItem(item);
 			var dialog = new widgets.SFTPConnectionDialog({
-				func:  function(host,path,user,password){
+				func:  function(host,path,user,password, overwriteOptions){
 					serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-						var options = {"OptionHeader":"sftp","Host":host,"Path":path,"UserName":user,"Passphrase":password};
-						var deferred = fileClient.remoteExport(item.ExportLocation, options);
+						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
+						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
+						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
 						progressService.showWhile(deferred, "Exporting from " + host).then(
 							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 					});

@@ -33,27 +33,6 @@
 	text-decoration: underline;
 }
 
-.commandLinkLight {
-	color: #ffffff;
-	cursor: pointer;
-}
-
-.commandLinkLight:visited {
-	color: #ffffff;
-	cursor: pointer;
-}
-
-.commandLinkLight:hover {
-	color: #ffffff;
-	cursor: hand;
-}
-
-.commandLinkLight a:hover {
-	color: #ffffff;
-	cursor: hand;
-	text-decoration: underline;
-}
-
 .nihilo .dijitMenu, .nihilo .dijitMenuBar {
     background-color: #FFFFFF;
     border: 1px solid #888787;
