@@ -24,6 +24,7 @@ dojo.addOnLoad(function(){
 	new eclipse.UserService(serviceRegistry);
 	var selection = new orion.Selection(serviceRegistry);
 	new eclipse.SshService(serviceRegistry);
+	new eclipse.FileClient(serviceRegistry, pluginRegistry);
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	
@@ -45,6 +46,10 @@ dojo.addOnLoad(function(){
 	commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 1);
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 1, "selectionTools", "eclipse.selectionGroup");
+	commandService.registerCommandContribution("eclipse.linkRepository", 2);
+
+
+	
 
 	eclipse.gitCommandUtils.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
 	
