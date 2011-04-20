@@ -76,11 +76,26 @@ dojo.declare("widgets.SFTPConnectionDialog", [dijit.Dialog], {
 	execute: function() {
 		var selected = this.sftpConnectionList.value;
 		var splits = selected.split("@");
+		if (splits.length != 2) {
+			return;
+		}
 		var user = splits[0];
 		var separator = splits[1].indexOf("/");
+		if (separator <= 0) {
+			return;
+		}
 		var host = splits[1].substring(0, separator);
 		var path = splits[1].substring(separator);
-		this.options.func(host, path, user, this.sftpPassword.value);
+		this.options.func(host, path, user, this.sftpPassword.value, this._computeOverwriteValue());
+	},
+	_computeOverwriteValue: function() {
+		if (this.overwriteCancel.checked) {
+			return "no-overwrite";
+		} else if (this.overwriteOlder.checked) {
+			return "overwrite-older";
+		}
+		//by default pass no options
+		return "";
 	},
 	onAddConnection: function() {
 		var newConnection = {name: this.sftpUser.value+"@"+this.sftpHost.value+this.sftpPath.value};

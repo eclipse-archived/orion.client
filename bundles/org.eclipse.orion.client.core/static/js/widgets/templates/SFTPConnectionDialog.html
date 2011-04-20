@@ -67,6 +67,20 @@
 			<div style="display: table-row">
 				<div style="display: table-cell; padding: 5"></div>
 				<div style="display: table-cell; padding: 5">
+					<p>If the same file exists in both the source and destination:</p>
+				    <input type="radio" dojoAttachPoint="overwriteCancel" dojoType="dijit.form.RadioButton" name="overwriteOption" id="overwriteCancel" checked value="overwriteCancel" />
+				    <label for="radioOne">Cancel the transfer</label>
+				    <br />
+				    <input type="radio" dojoAttachPoint="overwriteAll" dojoType="dijit.form.RadioButton" name="overwriteOption" id="overwriteAll"/>
+				    <label for="radioOne">Always overwrite destination</label>
+				    <br />
+				    <input type="radio" dojoAttachPoint="overwriteOlder" dojoType="dijit.form.RadioButton" name="overwriteOption" id="overwriteOlder"/>
+				    <label for="radioOne">Overwrite if source is newer</label>
+				</div>
+			</div><!-- End table row -->
+			<div style="display: table-row">
+				<div style="display: table-cell; padding: 5"></div>
+				<div style="display: table-cell; padding: 5">
 					<button dojoAttachPoint="sftpConnectionButton" dojoType="dijit.form.Button" type="submit" value="OK" style="padding: 20 0 10 0; float: right; clear: both;">${buttonOk}
 					</button>
 				</div>
