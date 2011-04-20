@@ -136,8 +136,7 @@ eclipse.StatusReportingService.prototype = {
 			this.setProgressMessage("");
 		});
 		dojo.place(image, this.progressDomId, "only");
-		var span = dojo.create("span", null, this.progressDomId);
-		dojo.place(window.document.createTextNode("   " + msg), span, "only");
+		dojo.place(window.document.createTextNode("   " + msg), this.progressDomId, "last");
 	},
 	
 	/**
