@@ -39,7 +39,6 @@ dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog], {
 		this.gitSshPasswordLabelText = "Ssh password:";
 		this.gitPrivateKeyLabelText = "Private key:";
 		this.gitPassphraseLabelText = "Passphrase:";
-		this.gitSshKnownHostsLabelText = "Ssh known hosts:";
 		this.buttonCancel = "Cancel";
 		if(!this.options.username && !this.options.password && !this.options.privatekey && !this.options.passphrase){
 			this.options.username=true;
@@ -90,9 +89,6 @@ dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog], {
 	// Stuff from newItemDialog.js is below
 	execute: function() {
 		
-		if(this._sshService && this.gitSshKnownHosts.value && this.gitSshKnownHosts.value!=""){
-			this._sshService.addKnownHosts(this.gitSshKnownHosts.value);
-		}
 		if(this._sshService){
 			var self = this;
 			this._sshService.getKnownHosts().then(function(knownHosts){
