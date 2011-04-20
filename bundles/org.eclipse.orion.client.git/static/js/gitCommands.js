@@ -143,8 +143,48 @@ dojo.require("widgets.GitCredentialsDialog");
 				return true;
 			}
 		});
-	
+		
 		commandService.addCommand(cloneGitRepositoryCommand, "dom");
+		
+		var linkRepoCommand = new eclipse.Command({
+			name: "Link Repository",
+			image: "images/link_obj.gif",
+			id: "eclipse.linkRepository",
+			callback: function(item) {
+				var dialog = new widgets.NewItemDialog({
+					title: "Link Repository",
+					label: "Folder name:",
+					func:  function(name, url, create){
+						serviceRegistry.getService("IFileService").then(function(service){
+							
+							service.loadWorkspace("").then(function(loadedWorkspace){
+								service.createProject(loadedWorkspace.Location, name, item.ContentLocation, false).then(
+										function(jsonResp){
+											alert("Repository was linked to " + jsonResp.Name);
+											service.read(jsonResp.ContentLocation, true).then(function(jsonData){
+												window.location.replace("navigate-table.html#"+jsonData.ChildrenLocation); //redirect to the workspace to see the linked resource
+											});
+										}
+									);
+							});
+							
+						});
+					},
+					advanced: false
+				});
+				dialog.startup();
+				dialog.show();
+			},
+			visibleWhen: function(item) {
+				if(item.ContentLocation){
+					return true;
+				}
+				return false;
+				}
+			});
+		commandService.addCommand(linkRepoCommand, "object");
+	
+
 		
 		var compareGitCommits = new eclipse.Command({
 			name : "Compare With Each Other",
