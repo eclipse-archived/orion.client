@@ -64,6 +64,41 @@ dojo.require("widgets.GitCredentialsDialog");
 		}
 	};
 	
+	eclipse.gitCommandUtils.handleKnownHostsError = function(serviceRegistry, errorData, options, func){
+		if(confirm("Would you like to add " + errorData.KeyType + " key for host " + errorData.Host
+				+ " to continue operation? Key fingerpt is " + errorData.HostFingerprint + ".")){
+			serviceRegistry.getService("ISshService").then(function(sshService){
+				sshService.addKnownHosts(errorData.Host + " " + errorData.KeyType + " " + errorData.HostKey).then(function(){
+					sshService.getKnownHosts().then(function(knownHosts){
+						options.knownHosts = knownHosts;
+						func(options);
+					});
+				});
+			});
+		}
+	};
+	
+	eclipse.gitCommandUtils.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee){
+		if(jsonData.Running==false){
+			if(jsonData.Result && jsonData.Result.HttpCode==403){
+				if(jsonData.Result.ErrorData && jsonData.Result.ErrorData.HostKey){
+					dojo.hitch(this, eclipse.gitCommandUtils.handleKnownHostsError)(serviceRegistry, jsonData.Result.ErrorData, options, callee);
+					return;
+				}
+			}
+			
+			if(jsonData.Result && jsonData.Result.HttpCode!=200){
+				console.error("error " + jsonData.Result.HttpCode + " while running opperation: " + jsonData.Result.DetailedMessage);
+				return;
+			}
+			
+			if(callback){
+				callback(jsonData);
+			}
+			
+		}
+	};
+	
 	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId, gitClient) {
 		var cloneGitRepositoryCommand = new eclipse.Command({
 			name : "Clone Git Repository",
@@ -77,22 +112,18 @@ dojo.require("widgets.GitCredentialsDialog");
 								url: gitUrl,
 								serviceRegistry: serviceRegistry,
 								func: function(options){
+									var func = arguments.callee;
 									serviceRegistry.getService("IGitService").then(function(gitService) {
 										serviceRegistry.getService("IStatusReporter").then(function(progressService) {
 											var deferred = gitService.cloneGitRepository("", gitUrl, options.gitSshUsername, options.gitSshPassword, options.knownHosts);
 											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
 												function(jsonData, secondArg) {
-													if(jsonData.Running==false){
-														if(jsonData.Result && jsonData.Result.HttpCode!=200){
-															console.error("error " + jsonData.Result.HttpCode + " while clonning");
-															return;
-														}
-														
-														if(explorer.redisplayClonesList){
-															dojo.hitch(explorer, explorer.redisplayClonesList)();
-														}
-														
-													}
+													eclipse.gitCommandUtils.handleProgressServiceResponse(jsonData, options, serviceRegistry,
+															function(jsonData){
+																if(explorer.redisplayClonesList){
+																	dojo.hitch(explorer, explorer.redisplayClonesList)();
+																}
+															}, func);
 												});
 										});
 									});
