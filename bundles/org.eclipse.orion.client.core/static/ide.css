@@ -93,14 +93,17 @@ a:hover {
 	font-weight: bold;
 	color: #6d6d6d;
 	vertical-align: middle;
-	height: 30px;
 }
 
 .paneHeadingToolbar {
-	padding-left: 24px;
-	height: 30px;
 	text-align: right;
 	vertical-align: middle;
+	height: 30px;
+}
+
+.paneHeadingContainer {
+	border-bottom: 1px solid #6d6d6d;
+	height: 30px;
 }
 
 .auxpane {
@@ -339,6 +342,7 @@ a:hover {
 
 .favoritesTable {
 	border-spacing: 0px;
+	overflow-x: hidden; // because it is placed inside a div with overflow scrollbars
 }
 
 .secondaryColumn {

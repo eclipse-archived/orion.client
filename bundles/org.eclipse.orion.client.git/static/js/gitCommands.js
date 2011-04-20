@@ -82,7 +82,17 @@ dojo.require("widgets.GitCredentialsDialog");
 											var deferred = gitService.cloneGitRepository("", gitUrl, options.gitSshUsername, options.gitSshPassword, options.knownHosts);
 											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
 												function(jsonData, secondArg) {
-													//TODO refresh the clone navigator
+													if(jsonData.Running==false){
+														if(jsonData.Result && jsonData.Result.HttpCode!=200){
+															console.error("error " + jsonData.Result.HttpCode + " while clonning");
+															return;
+														}
+														
+														if(explorer.redisplayClonesList){
+															dojo.hitch(explorer, explorer.redisplayClonesList)();
+														}
+														
+													}
 												});
 										});
 									});

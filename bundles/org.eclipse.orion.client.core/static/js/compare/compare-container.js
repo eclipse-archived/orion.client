@@ -433,9 +433,9 @@ orion.CompareMergeContainer = (function() {
 orion.InlineCompareContainer = (function() {
 	/** @private */
 	function InlineCompareContainer(resgistry , editorDivId ) {
-		this._editor = null;
 		this._registry = resgistry;
 		this._editorDivId = editorDivId;
+		//this.initEditorContainers("" , "\n" , [],[]);
 	}
 	InlineCompareContainer.prototype = new orion.CompareContainer();
 	
@@ -445,7 +445,101 @@ orion.InlineCompareContainer = (function() {
 		this._editor = null;
 	};
 
-	InlineCompareContainer.prototype.setEditor = function(input , diff){	
+	InlineCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , diffArray ,createLineStyler , fileURI){
+		var editorContainerDomNode = dojo.byId(this._editorDivId);
+		var self = this;
+		
+		var model = new eclipse.TextModel(content, delim);
+		var compareModel = new orion.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new orion.DiffLineFeeder(diffArray ,delim));
+
+		var editorFactory = function() {
+			return new eclipse.Editor({
+				parent: editorContainerDomNode,
+				model: compareModel,
+				readonly: true,
+				stylesheet: "/js/compare/editor.css" ,
+				tabSize: 4
+			});
+		};
+			
+		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
+				return;
+		};
+
+		var statusReporter = function(message, isError) {
+			return;
+		};
+		//var undoStackFactory =  new orion.UndoFactory();
+		var editorContainer = new orion.EditorContainer({
+			editorFactory: editorFactory,
+			//undoStackFactory: undoStackFactory,
+			//annotationFactory: annotationFactory,
+			//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
+			//contentAssistFactory: contentAssistFactory,
+			keyBindingFactory: keyBindingFactory, 
+			statusReporter: statusReporter,
+			domNode: editorContainerDomNode
+		});
+				
+		editorContainer.installEditor();
+		if(createLineStyler && fileURI)
+			editorContainer.onInputChange(fileURI.split("?")[0]);
+			
+		var editor = editorContainer.getEditorWidget();
+			
+		var rulerOrigin = new orion.LineNumberCompareRuler(1,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+		var rulerNew = new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+		editor.addRuler(rulerOrigin);
+		editor.addRuler(rulerNew);
+		var overview  = new orion.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
+		editor.addRuler(overview);
+		if(createLineStyler && fileURI){
+			editor.addEventListener("LineStyle", window, function(lineStyleEvent) {
+				var lineIndex = lineStyleEvent.lineIndex;
+				var lineStart = lineStyleEvent.lineStart;
+				var lineType = self._editor.getModel().getLineType(lineIndex);
+				if(lineType === "added") {
+					lineStyleEvent.style = {style: {backgroundColor: "#99EE99"}};
+				} else if (lineType === "removed"){
+					lineStyleEvent.style = {style: {backgroundColor: "#EE9999"}};
+				} 
+			}); 
+			
+		}
+		return editorContainer;
+	};
+
+	InlineCompareContainer.prototype.initEditorContainers = function(delim , content , mapper, createLineStyler , fileURI){	
+		this._editorContainer = this.createEditorContainer(content , delim , mapper, createLineStyler , fileURI);
+		this._editor = this._editorContainer.getEditorWidget();
+	};
+	
+	InlineCompareContainer.prototype.setEditor = function(input , diff){
+		/*
+		var result = this.parseMapper(input , diff , true);
+		var self = this;
+		if(!this._editor){
+			this.initEditorContainers(result.delim , input ,  result.mapper , result.diffArray , true , this._newFileURI);
+		}else {
+			this._editor.getModel().init(result.mapper , result.diffArray);
+			//this._editor.setText(input);
+			this._editorContainer.onInputChange(this._newFileURI.split("?")[0], null, input);
+			var self = this;
+			this._editor.addEventListener("LineStyle", window, function(lineStyleEvent) {
+				var lineIndex = lineStyleEvent.lineIndex;
+				var lineStart = lineStyleEvent.lineStart;
+				var lineType = self._editor.getModel().getLineType(lineIndex);
+				if(lineType === "added") {
+					lineStyleEvent.style = {style: {backgroundColor: "#99EE99"}};
+				} else if (lineType === "removed"){
+					lineStyleEvent.style = {style: {backgroundColor: "#EE9999"}};
+				} 
+			}); 
+		}
+		this._initDiffPosition(this._editor);
+		this._editor.redrawRange();
+		*/
+		
 		var result = this.parseMapper(input , diff , true);
 		if(this._editor){
 			if(result.delim === this._editor.getModel().getLineDelimiter() ){
@@ -486,6 +580,7 @@ orion.InlineCompareContainer = (function() {
 				
 		this._initDiffPosition(this._editor);
 		this._editor.redrawRange();
+		
 	};
 	return InlineCompareContainer;
 }());

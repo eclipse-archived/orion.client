@@ -4,6 +4,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
 	<script type="text/javascript" src="../js/plugin.js"></script>
+	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script>
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
@@ -23,17 +24,17 @@
 					var clientDeferred = new dojo.Deferred();
 					window.setTimeout(function () {
 						clientDeferred.callback(item.Location);
-					}, 500);
+					}, 5000);
 					return clientDeferred;
 				}
 			}, {
 				image: "/images/gear.gif",
-				name: "Deferred href computation",
+				name: "Open HTML in 5 seconds",
 				id: "sample.commands.sample11",
 				forceSingleItem: true,
 				href: true,
 				validationProperties: {"Name":"*.html"},
-				tooltip: "Generate an HTML link from a plugin using deferred"
+				tooltip: "Show how a deferred can be used to do asynchronous computation"
 			});
 			provider.registerServiceProvider("fileCommands", {
 				run : function(item) {

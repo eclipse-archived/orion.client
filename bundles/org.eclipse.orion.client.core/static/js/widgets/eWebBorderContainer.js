@@ -5,7 +5,7 @@
  *
  * Contributors:
  *     Dojo Foundation: _handleOnChange function, and cookie management code
- * 	IBM Corporation: Initial API and implementation of the remainder of the script
+ *     IBM Corporation: Initial API and implementation of the remainder of the script
  *******************************************************************************/
  
  /*global dojo dijit dojox*/
@@ -82,6 +82,8 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 			this.toggleLeftPaneState();
 		}
 				
+		var leftOverflow = leftPane.style.overflow;
+		var centerOverflow = this._center.style.overflow;
 		var a = new dojo.Animation({
 			node: leftPane,
 			duration: 300,
@@ -96,14 +98,15 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 				//this.resize();
 			}),
 			onEnd: dojo.hitch(this, function(){
-				// this._center.style.overflow = "auto";
+				this._center.style.overflow = centerOverflow;
+				leftPane.style.overflow = leftOverflow;
+
 				if (this.toggleCallback) {
 					this.toggleCallback.apply();
 				}
 				if(isLeftOpen){
 					this.toggleLeftPaneState();
 				} else {
-					leftPane.style.overflow = "auto";
 					this.setSizeCookie(null);
 				}
 			})
