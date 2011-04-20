@@ -124,6 +124,7 @@ eclipse.Editor = (function() {
 	var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
 	var isSafari = navigator.userAgent.indexOf("Safari") !== -1;
 	var isWebkit = navigator.userAgent.indexOf("WebKit") !== -1;
+	var isPad = navigator.userAgent.indexOf("iPad") !== -1;
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 	var isW3CEvents = typeof window.document.documentElement.addEventListener === "function";
@@ -572,8 +573,12 @@ eclipse.Editor = (function() {
 			* The fix is to call _updateDOMSelection() before calling focus().
 			*/
 			this._updateDOMSelection();
-			if (isOpera) { this._clientDiv.blur(); }
-			this._clientDiv.focus();
+			if (isPad) {
+				this._textArea.focus();
+			} else {
+				if (isOpera) { this._clientDiv.blur(); }
+				this._clientDiv.focus();
+			}
 			/*
 			* Feature in Safari. When focus is called the browser selects the clientDiv
 			* itself. The fix is to call _updateDOMSelection() after calling focus().
@@ -1632,6 +1637,13 @@ eclipse.Editor = (function() {
 		},
 		_handleKeyDown: function (e) {
 			if (!e) { e = window.event; }
+			if (isPad) {
+				if (e.keyCode === 8) {
+					this._doBackspace({});
+					e.preventDefault();
+				}
+				return;
+			}			
 			if (e.keyCode === 229) {
 				if (this.readonly) {
 					if (e.preventDefault) { e.preventDefault(); }
@@ -1981,6 +1993,15 @@ eclipse.Editor = (function() {
 				element = element.parentNode;
 			}
 			var ruler = element ? element._ruler : null;
+			if (isPad && lineIndex === undefined && ruler && ruler.getOverview() === "document") {
+				var buttonHeight = 17;
+				var clientHeight = this._getClientHeight ();
+				var lineHeight = this._getLineHeight ();
+				var editorPad = this._getEditorPadding();
+				var trackHeight = clientHeight + editorPad.top + editorPad.bottom - 2 * buttonHeight;
+				var pixels = this._model.getLineCount () * lineHeight;
+				this.setTopPixel(Math.floor((e.clientY - buttonHeight - lineHeight) * pixels / trackHeight));
+			}
 			if (ruler) {
 				switch (e.type) {
 					case "click":
@@ -2001,6 +2022,175 @@ eclipse.Editor = (function() {
 				if (e && e.preventDefault) { e.preventDefault(); }
 				return false;
 			}
+		},
+		_handleInput: function (e) {
+			var textArea = this._textArea;
+			this._doContent(textArea.value);
+			textArea.selectionStart = textArea.selectionEnd = 0;
+			textArea.value = "";
+			e.preventDefault();
+		},
+		_handleTextInput: function (e) {
+			this._doContent(e.data);
+			e.preventDefault();
+		},
+		_touchConvert: function (touch) {
+			var rect = this._frame.getBoundingClientRect();
+			var body = this._parentDocument.body;
+			return {left: touch.clientX - rect.left - body.scrollLeft, top: touch.clientY - rect.top - body.scrollTop};
+		},
+		_handleTouchStart: function (e) {
+			var touches = e.touches, touch, pt, sel;
+			this._touchMoved = false;
+			this._touchStartScroll = undefined;
+			if (touches.length === 1) {
+				touch = touches[0];
+				var pageX = touch.pageX;
+				var pageY = touch.pageY;
+				this._touchStartX = pageX;
+				this._touchStartY = pageY;
+				this._touchStartTime = e.timeStamp;
+				this._touchStartScroll = this._getScroll();
+				sel = this._getSelection();
+				pt = this._touchConvert(touches[0]);
+				this._touchGesture = "none";
+				if (!sel.isEmpty()) {
+					if (this._hitOffset(sel.end, pt.left, pt.top)) {
+						this._touchGesture = "extendEnd";
+					} else if (this._hitOffset(sel.start, pt.left, pt.top)) {
+						this._touchGesture = "extendStart";
+					}
+				}
+				if (this._touchGesture === "none") {
+					var textArea = this._textArea;
+					textArea.value = "";
+					textArea.style.left = "-1000px";
+					textArea.style.top = "-1000px";
+					textArea.style.width = "3000px";
+					textArea.style.height = "3000px";
+					var self = this;
+					var f = function() {
+						self._touchTimeout = null;
+						self._clickCount = 1;
+						self._setSelectionTo(pt.left, pt.top, false);
+					};
+					this._touchTimeout = setTimeout(f, 200);
+				}
+			} else if (touches.length === 2) {
+				this._touchGesture = "select";
+				if (this._touchTimeout) {
+					clearTimeout(this._touchTimeout);
+					this._touchTimeout = null;
+				}
+				pt = this._touchConvert(touches[0]);
+				var offset1 = this._getXToOffset(this._getYToLine(pt.top), pt.left);
+				pt = this._touchConvert(touches[1]);
+				var offset2 = this._getXToOffset(this._getYToLine(pt.top), pt.left);
+				sel = this._getSelection();
+				sel.setCaret(offset1);
+				sel.extend(offset2);
+				this._setSelection(sel, true, true);
+			}
+			//Cannot prevent to show maginifier
+//			e.preventDefault();
+		},
+		_handleTouchMove: function (e) {
+			this._touchMoved = true;
+			var touches = e.touches, pt, sel;
+			if (touches.length === 1) {
+				var touch = touches[0];
+				var pageX = touch.pageX;
+				var pageY = touch.pageY;
+				var deltaX = this._touchStartX - pageX;
+				var deltaY = this._touchStartY - pageY;
+				pt = this._touchConvert(touch);
+				sel = this._getSelection();
+				if (this._touchTimeout) {
+					clearTimeout(this._touchTimeout);
+					this._touchTimeout = null;
+				}
+				if (this._touchGesture === "none") {
+					if ((e.timeStamp - this._touchStartTime) < 200 && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
+						this._touchGesture = "scroll";
+					} else {
+						this._touchGesture = "caret";
+					}
+				}
+				if (this._touchGesture === "select") {
+					if (this._hitOffset(sel.end, pt.left, pt.top)) {
+						this._touchGesture = "extendEnd";
+					} else if (this._hitOffset(sel.start, pt.left, pt.top)) {
+						this._touchGesture = "extendStart";
+					} else {
+						this._touchGesture = "caret";
+					}
+				}
+				switch (this._touchGesture) {
+					case "scroll":
+						this._touchStartX = pageX;
+						this._touchStartY = pageY;
+						this._scrollView(deltaX, deltaY);
+						break;
+					case "extendStart":
+					case "extendEnd":
+						this._clickCount = 1;
+						var lineIndex = this._getYToLine(pt.top);
+						var offset = this._getXToOffset(lineIndex, pt.left);
+						sel.setCaret(this._touchGesture === "extendStart" ? sel.end : sel.start);
+						sel.extend(offset);
+						if (offset >= sel.end && this._touchGesture === "extendStart") {
+							this._touchGesture = "extendEnd";
+						}
+						if (offset <= sel.start && this._touchGesture === "extendEnd") {
+							this._touchGesture = "extendStart";
+						}
+						this._setSelection(sel, true, true);
+						break;
+					case "caret":
+						this._setSelectionTo(pt.left, pt.top, false);
+						break;
+				}
+			} else if (touches.length === 2) {
+				pt = this._touchConvert(touches[0]);
+				var offset1 = this._getXToOffset(this._getYToLine(pt.top), pt.left);
+				pt = this._touchConvert(touches[1]);
+				var offset2 = this._getXToOffset(this._getYToLine(pt.top), pt.left);
+				sel = this._getSelection();
+				sel.setCaret(offset1);
+				sel.extend(offset2);
+				this._setSelection(sel, true, true);
+			}
+			e.preventDefault();
+		},
+		_handleTouchEnd: function (e) {
+			if (!this._touchMoved) {
+				if (e.touches.length === 0 && e.changedTouches.length === 1 && this._touchTimeout) {
+					clearTimeout(this._touchTimeout);
+					this._touchTimeout = null;
+					var touch = e.changedTouches[0];
+					this._clickCount = 1;
+					var pt = this._touchConvert(touch);
+					this._setSelectionTo(pt.left, pt.top, false);
+				}
+			}
+			if (e.touches.length === 0) {
+				var self = this;
+				setTimeout(function() {
+					var selection = self._getSelection();
+					var text = self._model.getText(selection.start, selection.end);
+					var textArea = self._textArea;
+					textArea.value = text;
+					textArea.selectionStart = 0;
+					textArea.selectionEnd = text.length;
+					if (!selection.isEmpty()) {
+						var touchRect = self._touchDiv.getBoundingClientRect();
+						var bounds = self._getOffsetBounds(selection.start);
+						textArea.style.left = (touchRect.width / 2) + "px";
+						textArea.style.top = ((bounds.top > 40 ? bounds.top - 30 : bounds.top + 30)) + "px";
+					}
+				}, 0);
+			}
+			e.preventDefault();
 		},
 
 		/************************************ Actions ******************************************/
@@ -3184,6 +3374,33 @@ eclipse.Editor = (function() {
 			var lineCount = this._model.getLineCount();
 			return Math.max(0, Math.min(lineCount - 1, lineIndex));
 		},
+		_getOffsetBounds: function(offset) {
+			var model = this._model;
+			var lineIndex = model.getLineAtOffset(offset);
+			var lineHeight = this._getLineHeight();
+			var scroll = this._getScroll();
+			var editorPad = this._getEditorPadding();
+			var editorRect = this._editorDiv.getBoundingClientRect();
+			var bounds = this._getBoundsAtOffset(offset);
+			var left = bounds.left;
+			var right = bounds.right;
+			var top = (lineIndex * lineHeight) - scroll.y + editorRect.top + editorPad.top;
+			var bottom = top + lineHeight;
+			return {left: left, top: top, right: right, bottom: bottom};
+		},
+		_hitOffset: function (offset, x, y) {
+			var bounds = this._getOffsetBounds(offset);
+			var left = bounds.left;
+			var right = bounds.right;
+			var top = bounds.top;
+			var bottom = bounds.bottom;
+			var area = 20;
+			left -= area;
+			top -= area;
+			right += area;
+			bottom += area;
+			return (left <= x && x <= right && top <= y && y <= bottom);
+		},
 		_hookEvents: function() {
 			var self = this;
 			this._modelListener = {
@@ -3203,49 +3420,59 @@ eclipse.Editor = (function() {
 			
 			var clientDiv = this._clientDiv;
 			var editorDiv = this._editorDiv;
-			var topNode = this._overlayDiv || this._clientDiv;
+			var textArea = this._textArea;
 			var body = this._frameDocument.body; 
+			var handlers = this._handlers = [];
 			var resizeNode = isIE < 9 ? this._frame : this._frameWindow;
-			var focusNode = isIE ? this._clientDiv: this._frameWindow;
-			this._handlers = [
-				{target: editorDiv, type: "scroll", handler: function(e) { return self._handleScroll(e);}},
-				{target: clientDiv, type: "keydown", handler: function(e) { return self._handleKeyDown(e);}},
-				{target: clientDiv, type: "keypress", handler: function(e) { return self._handleKeyPress(e);}},
-				{target: clientDiv, type: "keyup", handler: function(e) { return self._handleKeyUp(e);}},
-				{target: clientDiv, type: "selectstart", handler: function(e) { return self._handleSelectStart(e);}},
-				{target: clientDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e);}},
-				{target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e);}},
-				{target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e);}},
-				{target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e);}},
-				{target: focusNode, type: "blur", handler: function(e) { return self._handleBlur(e);}},
-				{target: focusNode, type: "focus", handler: function(e) { return self._handleFocus(e);}},
-				{target: topNode, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}},
-				{target: body, type: "mousedown", handler: function(e) { return self._handleBodyMouseDown(e);}},
-				{target: topNode, type: "dragstart", handler: function(e) { return self._handleDragStart(e);}},
-				{target: resizeNode, type: "resize", handler: function(e) { return self._handleResize(e);}}
-			];
-			if (isIE) {
-				this._handlers.push({target: this._frameDocument, type: "activate", handler: function(e) { return self._handleDocFocus(e); }});
+			var focusNode = isPad ? textArea : (isIE ? this._clientDiv: this._frameWindow);
+			handlers.push({target: resizeNode, type: "resize", handler: function(e) { return self._handleResize(e);}});
+			handlers.push({target: focusNode, type: "blur", handler: function(e) { return self._handleBlur(e);}});
+			handlers.push({target: focusNode, type: "focus", handler: function(e) { return self._handleFocus(e);}});
+			if (isPad) {
+				var touchDiv = this._touchDiv;
+				handlers.push({target: textArea, type: "keydown", handler: function(e) { return self._handleKeyDown(e);}});
+				handlers.push({target: textArea, type: "input", handler: function(e) { return self._handleInput(e); }});
+				handlers.push({target: textArea, type: "textInput", handler: function(e) { return self._handleTextInput(e); }});
+				handlers.push({target: touchDiv, type: "touchstart", handler: function(e) { return self._handleTouchStart(e); }});
+				handlers.push({target: touchDiv, type: "touchmove", handler: function(e) { return self._handleTouchMove(e); }});
+				handlers.push({target: touchDiv, type: "touchend", handler: function(e) { return self._handleTouchEnd(e); }});
+			} else {
+				var topNode = this._overlayDiv || this._clientDiv;
+				handlers.push({target: editorDiv, type: "scroll", handler: function(e) { return self._handleScroll(e);}});
+				handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return self._handleKeyDown(e);}});
+				handlers.push({target: clientDiv, type: "keypress", handler: function(e) { return self._handleKeyPress(e);}});
+				handlers.push({target: clientDiv, type: "keyup", handler: function(e) { return self._handleKeyUp(e);}});
+				handlers.push({target: clientDiv, type: "selectstart", handler: function(e) { return self._handleSelectStart(e);}});
+				handlers.push({target: clientDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e);}});
+				handlers.push({target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e);}});
+				handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e);}});
+				handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e);}});
+				handlers.push({target: topNode, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}});
+				handlers.push({target: body, type: "mousedown", handler: function(e) { return self._handleBodyMouseDown(e);}});
+				handlers.push({target: topNode, type: "dragstart", handler: function(e) { return self._handleDragStart(e);}});
+				if (isIE) {
+					handlers.push({target: this._frameDocument, type: "activate", handler: function(e) { return self._handleDocFocus(e); }});
+				}
+				if (isFirefox) {
+					handlers.push({target: this._frameDocument, type: "focus", handler: function(e) { return self._handleDocFocus(e); }});
+				}
+				if (!isIE && !isOpera) {
+					var wheelEvent = isFirefox ? "DOMMouseScroll" : "mousewheel";
+					handlers.push({target: this._editorDiv, type: wheelEvent, handler: function(e) { return self._handleMouseWheel(e); }});
+				}
+				if (isFirefox && !isWindows) {
+					handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return self._handleDataModified(e); }});
+				}
+				if (this._overlayDiv) {
+					handlers.push({target: this._overlayDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e); }});
+				}
+				if (!isW3CEvents) {
+					handlers.push({target: this._clientDiv, type: "dblclick", handler: function(e) { return self._handleDblclick(e); }});
+				}
 			}
-			if (isFirefox) {
-				this._handlers.push({target: this._frameDocument, type: "focus", handler: function(e) { return self._handleDocFocus(e); }});
-			}
-			if (!isIE && !isOpera) {
-				var wheelEvent = isFirefox ? "DOMMouseScroll" : "mousewheel";
-				this._handlers.push({target: this._editorDiv, type: wheelEvent, handler: function(e) { return self._handleMouseWheel(e); }});
-			}
-			if (isFirefox && !isWindows) {
-				this._handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return self._handleDataModified(e); }});
-			}
-			if (this._overlayDiv) {
-				this._handlers.push({target: this._overlayDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e); }});
-			}
-			if (!isW3CEvents) {
-				this._handlers.push({target: this._clientDiv, type: "dblclick", handler: function(e) { return self._handleDblclick(e); }});
-			}
-			for (var i=0; i<this._handlers.length; i++) {
-				var h = this._handlers[i];
-				addHandler(h.target, h.type, h.handler);
+			for (var i=0; i<handlers.length; i++) {
+				var h = handlers[i];
+				addHandler(h.target, h.type, h.handler, h.capture);
 			}
 		},
 		_init: function(options) {
@@ -3351,16 +3578,50 @@ eclipse.Editor = (function() {
 			body.style.borderWidth = "0px";
 			body.style.padding = "0px";
 			
-			var textArea = document.createElement("TEXTAREA");
-			this._textArea = textArea;
-			textArea.id = "textArea";
-			textArea.tabIndex = -1;
-			textArea.style.position = "fixed";
-			textArea.style.whiteSpace = "pre";
-			textArea.style.top = "-1000px";
-			textArea.style.width = "100px";
-			textArea.style.height = "100px";
-			body.appendChild(textArea);
+			var textArea;
+			if (isPad) {
+				var touchDiv = parentDocument.createElement("DIV");
+				this._touchDiv = touchDiv;
+				touchDiv.style.position = "absolute";
+				touchDiv.style.border = "0px";
+				touchDiv.style.padding = "0px";
+				touchDiv.style.margin = "0px";
+				touchDiv.style.zIndex = "2";
+				touchDiv.style.overflow = "hidden";
+				touchDiv.style.background="transparent";
+//				touchDiv.style.background="green";
+//				touchDiv.style.opacity="0.5";
+				touchDiv.style.WebkitUserSelect = "none";
+				parent.appendChild(touchDiv);
+
+				textArea = parentDocument.createElement("TEXTAREA");
+				this._textArea = textArea;
+				textArea.style.position = "absolute";
+				textArea.style.whiteSpace = "pre";
+				textArea.style.left = "-1000px";
+				textArea.tabIndex = 1;
+				textArea.autocapitalize = false;
+				textArea.autocorrect = false;
+				textArea.className = "editorContainer";
+				textArea.style.background = "transparent";
+				textArea.style.color = "transparent";
+				textArea.style.border = "0px";
+				textArea.style.padding = "0px";
+				textArea.style.margin = "0px";
+				textArea.style.borderRadius = "0px";
+				textArea.style.WebkitAppearance = "none";
+				textArea.style.WebkitTapHighlightColor = "transparent";
+				touchDiv.appendChild(textArea);
+			} else {
+				textArea = document.createElement("TEXTAREA");
+				this._textArea = textArea;
+				textArea.id = "textArea";
+				textArea.style.position = "fixed";
+				textArea.style.whiteSpace = "pre";
+				textArea.style.left = "-1000px";
+				textArea.tabIndex = -1;
+				body.appendChild(textArea);
+			}
 
 			var editorDiv = document.createElement("DIV");
 			editorDiv.className = "editor";
@@ -3383,7 +3644,49 @@ eclipse.Editor = (function() {
 			scrollDiv.style.borderWidth = "0px";
 			scrollDiv.style.padding = "0px";
 			editorDiv.appendChild(scrollDiv);
-				
+
+			if (isPad) {
+				var selDiv1 = document.createElement("DIV");
+				this._selDiv1 = selDiv1;
+				selDiv1.id = "selDiv1";
+				selDiv1.style.position = "fixed";
+				selDiv1.style.borderWidth = "0px";
+				selDiv1.style.margin = "0px";
+				selDiv1.style.padding = "0px";
+				selDiv1.style.MozOutline = "none";
+				selDiv1.style.outline = "none";
+				selDiv1.style.background = "lightblue";
+				selDiv1.style.width="0px";
+				selDiv1.style.height="0px";
+				scrollDiv.appendChild(selDiv1);
+				var selDiv2 = document.createElement("DIV");
+				this._selDiv2 = selDiv2;
+				selDiv2.id = "selDiv2";
+				selDiv2.style.position = "fixed";
+				selDiv2.style.borderWidth = "0px";
+				selDiv2.style.margin = "0px";
+				selDiv2.style.padding = "0px";
+				selDiv2.style.MozOutline = "none";
+				selDiv2.style.outline = "none";
+				selDiv2.style.background = "lightblue";
+				selDiv2.style.width="0px";
+				selDiv2.style.height="0px";
+				scrollDiv.appendChild(selDiv2);
+				var selDiv3 = document.createElement("DIV");
+				this._selDiv3 = selDiv3;
+				selDiv3.id = "selDiv3";
+				selDiv3.style.position = "fixed";
+				selDiv3.style.borderWidth = "0px";
+				selDiv3.style.margin = "0px";
+				selDiv3.style.padding = "0px";
+				selDiv3.style.MozOutline = "none";
+				selDiv3.style.outline = "none";
+				selDiv3.style.background = "lightblue";
+				selDiv3.style.width="0px";
+				selDiv3.style.height="0px";
+				scrollDiv.appendChild(selDiv3);
+			}
+
 			var clientDiv = document.createElement("DIV");
 			clientDiv.className = "editorContent";
 			this._clientDiv = clientDiv;
@@ -3395,6 +3698,9 @@ eclipse.Editor = (function() {
 			clientDiv.style.padding = "0px";
 			clientDiv.style.MozOutline = "none";
 			clientDiv.style.outline = "none";
+			if (isPad) {
+				clientDiv.style.WebkitTapHighlightColor = "transparent";
+			}
 			scrollDiv.appendChild(clientDiv);
 
 			if (isFirefox) {
@@ -3409,7 +3715,9 @@ eclipse.Editor = (function() {
 				overlayDiv.style.zIndex = "1";
 				scrollDiv.appendChild(overlayDiv);
 			}
-			clientDiv.contentEditable = "true";
+			if (!isPad) {
+				clientDiv.contentEditable = "true";
+			}
 			body.style.lineHeight = this._calculateLineHeight() + "px";
 			if (options.tabSize) {
 				if (isOpera) {
@@ -3527,6 +3835,37 @@ eclipse.Editor = (function() {
 				self._updatePage();
 			}, 0);
 		},
+		_resizeTouchDiv: function() {
+			var editorRect = this._editorDiv.getBoundingClientRect();
+			var parentRect = this._frame.getBoundingClientRect();
+			var temp = this._frame;
+			while (temp) {
+				if (temp.style && temp.style.top) { break; }
+				temp = temp.parentNode;
+			}
+			var parentTop = parentRect.top;
+			if (temp) {
+				parentTop -= temp.getBoundingClientRect().top;
+			} else {
+				parentTop += this._parentDocument.body.scrollTop;
+			}
+			temp = this._frame;
+			while (temp) {
+				if (temp.style && temp.style.left) { break; }
+				temp = temp.parentNode;
+			}
+			var parentLeft = parentRect.left;
+			if (temp) {
+				parentLeft -= temp.getBoundingClientRect().left;
+			} else {
+				parentLeft += this._parentDocument.body.scrollLeft;
+			}
+			var touchDiv = this._touchDiv;
+			touchDiv.style.left = (parentLeft + editorRect.left) + "px";
+			touchDiv.style.top = (parentTop + editorRect.top) + "px";
+			touchDiv.style.width = editorRect.width + "px";
+			touchDiv.style.height = editorRect.height + "px";
+		},
 		_scrollView: function (pixelX, pixelY) {
 			/*
 			* IE redraws the page when scrollTop is changed. This redraw is not necessary
@@ -3602,15 +3941,15 @@ eclipse.Editor = (function() {
 			var startLineNode, startLineOffset, endLineNode, endLineOffset;
 			var offset = 0;
 			var lineChild = startNode.firstChild;
-			var node, nodeLength, lineEnd;
-			lineEnd = this._model.getLine(startNode.lineIndex).length;
+			var node, nodeLength, model = this._model;
+			var startLineEnd = model.getLine(startNode.lineIndex).length;
 			while (lineChild) {
 				node = lineChild.firstChild;
 				nodeLength = node.length;
 				if (lineChild.ignoreChars) {
 					nodeLength -= lineChild.ignoreChars;
 				}
-				if (offset + nodeLength > startOffset || offset + nodeLength >= lineEnd) {
+				if (offset + nodeLength > startOffset || offset + nodeLength >= startLineEnd) {
 					startLineNode = node;
 					startLineOffset = startOffset - offset;
 					if (lineChild.ignoreChars && nodeLength > 0 && startLineOffset === nodeLength) {
@@ -3622,15 +3961,15 @@ eclipse.Editor = (function() {
 				lineChild = lineChild.nextSibling;
 			}
 			offset = 0;
-			lineEnd = this._model.getLine(endNode.lineIndex).length;
 			lineChild = endNode.firstChild;
+			var endLineEnd = this._model.getLine(endNode.lineIndex).length;
 			while (lineChild) {
 				node = lineChild.firstChild;
 				nodeLength = node.length;
 				if (lineChild.ignoreChars) {
 					nodeLength -= lineChild.ignoreChars;
 				}
-				if (nodeLength + offset > endOffset || offset + nodeLength >= lineEnd) {
+				if (nodeLength + offset > endOffset || offset + nodeLength >= endLineEnd) {
 					endLineNode = node;
 					endLineOffset = endOffset - offset;
 					if (lineChild.ignoreChars && nodeLength > 0 && endLineOffset === nodeLength) {
@@ -3642,6 +3981,91 @@ eclipse.Editor = (function() {
 				lineChild = lineChild.nextSibling;
 			}
 			var range;
+			
+			if (isPad) {
+				var startLineBounds, l;
+				range = document.createRange();
+				startLineBounds = this._getLineBoundingClientRect(startNode);
+				if (startOffset === startLineEnd) {
+					l = startLineBounds.right;
+				} else {
+					range.setStart(startLineNode, startLineOffset);
+					range.setEnd(startLineNode, startLineOffset + 1);
+					l = range.getBoundingClientRect().left;
+				}
+				var textArea = this._textArea;
+				textArea.selectionStart = textArea.selectionEnd = 0;
+				var rect = this._frame.getBoundingClientRect();
+				var touchRect = this._touchDiv.getBoundingClientRect();
+				var editorBounds = this._editorDiv.getBoundingClientRect();
+				if (!(editorBounds.left <= l && l <= editorBounds.left + editorBounds.width &&
+					editorBounds.top <= startLineBounds.top && startLineBounds.top <= editorBounds.top + editorBounds.height) ||
+					!(startNode === endNode && startOffset === endOffset))
+				{
+					textArea.style.left = "-1000px";
+				} else {
+					textArea.style.left = (l - 4 + rect.left - touchRect.left) + "px";
+				}
+				textArea.style.top = (startLineBounds.top + rect.top - touchRect.top) + "px";
+				textArea.style.width = "6px";
+				textArea.style.height = (startLineBounds.bottom - startLineBounds.top) + "px";
+			
+				var selDiv = this._selDiv1;
+				selDiv.style.width = "0px";
+				selDiv.style.height = "0px";
+				selDiv = this._selDiv2;
+				selDiv.style.width = "0px";
+				selDiv.style.height = "0px";
+				selDiv = this._selDiv3;
+				selDiv.style.width = "0px";
+				selDiv.style.height = "0px";
+				if (!(startNode === endNode && startOffset === endOffset)) {
+					var handleWidth = 2;
+					var handleBorder = handleWidth + "px blue solid";
+					var clientBounds = this._clientDiv.getBoundingClientRect();
+					var left = clientBounds.left;
+					var right = clientBounds.right;
+					selDiv = this._selDiv1;
+					selDiv.style.left = l + "px";
+					selDiv.style.top = startLineBounds.top + "px";
+					selDiv.style.width = (right - l) + "px";
+					selDiv.style.height = (startLineBounds.bottom - startLineBounds.top + 1) + "px";
+					selDiv.style.borderLeft = handleBorder;
+					selDiv.style.borderRight = "0px";
+					var r;
+					var endLineBounds = this._getLineBoundingClientRect(endNode);
+					if (endOffset === 0) {
+						r = endLineBounds.left;
+					} else {
+						if (endLineOffset === 0) {
+							endLineNode = endLineNode.parentNode.previousSibling.firstChild;
+							endLineOffset = endLineNode.length;
+						}
+						range.setStart(endLineNode, endLineOffset - 1);
+						range.setEnd(endLineNode, endLineOffset);
+						r = range.getBoundingClientRect().right;
+					}
+					if (startNode === endNode) {
+						selDiv.style.width = (r - l - handleWidth * 2) + "px";
+						selDiv.style.borderRight = handleBorder;
+					} else {
+						selDiv = this._selDiv3;
+						selDiv.style.left = left + "px";
+						selDiv.style.top = endLineBounds.top + "px";
+						selDiv.style.width = (r - left - handleWidth) + "px";
+						selDiv.style.height = (endLineBounds.bottom - endLineBounds.top) + "px";
+						selDiv.style.borderRight = handleBorder;
+						if (endNode.lineIndex - startNode.lineIndex > 1) {
+							selDiv = this._selDiv2;
+							selDiv.style.left = startLineBounds.left + "px";
+							selDiv.style.top = startLineBounds.bottom + "px";
+							selDiv.style.width = (right - left) + "px";
+							selDiv.style.height = (endLineBounds.top - startLineBounds.bottom + 1) + "px";
+						}
+					}
+				}
+				return;
+			}
 			if (window.getSelection) {
 				//W3C
 				range = document.createRange();
@@ -4002,7 +4426,9 @@ eclipse.Editor = (function() {
 			* Note that updateDOMSelection() has to be called on IE before getting the new client height because it
 			* forces the client area to be recomputed.
 			*/
-			this._updateDOMSelection();
+			if (!isPad) {
+				this._updateDOMSelection();
+			}
 			if (clientHeight !== this._getClientHeight()) {
 				this._updatePage();
 				return;
@@ -4047,6 +4473,11 @@ eclipse.Editor = (function() {
 			}
 			_updateRulerSize(this._leftDiv);
 			_updateRulerSize(this._rightDiv);
+			if (isPad) {
+				this._updateDOMSelection();
+				var self = this;
+				setTimeout(function() {self._resizeTouchDiv();}, 0);
+			}
 		},
 		_updateRuler: function (divRuler, topIndex, bottomIndex) {
 			if (!divRuler) { return; }
