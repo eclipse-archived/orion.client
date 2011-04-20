@@ -31,8 +31,6 @@ dojo.require("widgets.GitCredentialsDialog");
 	var doOnce = false;
 
 	eclipse.gitCommandUtils.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
-		// TODO this knowledge shouldn't be here...the fact that we know we are on a dark toolbar
-		var cssClass = "commandLinkLight";
 		var toolbar = dojo.byId(toolbarId);
 		if (toolbar) {
 			dojo.empty(toolbar);
@@ -40,10 +38,10 @@ dojo.require("widgets.GitCredentialsDialog");
 			throw "could not find toolbar " + toolbarId;
 		}
 		registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
-			service.renderCommands(toolbar, "dom", item, explorer, "image", cssClass);
+			service.renderCommands(toolbar, "dom", item, explorer, "image");
 			if (selectionToolbarId) {
 				var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-				service.renderCommands(selectionTools, "dom", null, explorer, "image", cssClass);
+				service.renderCommands(selectionTools, "dom", null, explorer, "image");
 			}
 		}));
 		
@@ -56,7 +54,7 @@ dojo.require("widgets.GitCredentialsDialog");
 					if (selectionTools) {
 						dojo.empty(selectionTools);
 						registry.getService("ICommandService").then(function(commandService) {
-							commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", cssClass);
+							commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
 						});
 					}
 				});
