@@ -39,7 +39,7 @@ dojo.addOnLoad(function(){
 //		}
 
 		selection = new orion.Selection(serviceRegistry);
-		statusReportingService = new eclipse.StatusReportingService(serviceRegistry, "statusPane");
+		statusReportingService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "pageActionsLeft");
 		new eclipse.LogService(serviceRegistry);
 		new eclipse.DialogService(serviceRegistry);
 		new eclipse.UserService(serviceRegistry);

@@ -24,7 +24,7 @@ dojo.addOnLoad(function() {
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane");
+	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "pageActionsLeft");
 	
 	var initTree = function() {
 		var tree = new widgets.RegistryTree({ registry: registry }, "registry-tree");

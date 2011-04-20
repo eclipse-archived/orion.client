@@ -74,6 +74,27 @@ a:hover {
 	border-bottom: 1px dotted;
 }
 
+.pageActions {
+	color: #ffffff;
+	cursor: pointer;
+}
+
+.pageActions:visited {
+	color: #ffffff;
+	cursor: pointer;
+}
+
+.pageActions:hover {
+	color: #ffffff;
+	cursor: hand;
+}
+
+.pageActions a:hover {
+	color: #ffffff;
+	cursor: hand;
+	text-decoration: underline;
+}
+
 .navTableHeading {
 	border-bottom: 1px solid #404040;
 }
