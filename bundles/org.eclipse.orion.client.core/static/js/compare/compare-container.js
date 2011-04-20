@@ -79,10 +79,10 @@ orion.CompareContainer = (function() {
 					});
 		},
 		
-		parseMapper: function(input , diff , doNotBuildNewFile){
+		parseMapper: function(input , diff , detectConflicts ,doNotBuildNewFile){
 			var delim = this._getLineDelim(input , diff);
 			this._diffParser.setLineDelim(delim);
-			var result = this._diffParser.parse(input ,diff, doNotBuildNewFile);
+			var result = this._diffParser.parse(input ,diff, detectConflicts ,doNotBuildNewFile);
 			var output = result.outPutFile;
 			var mapper = result.mapper;
 			var diffArray = this._diffParser.getDiffArray();
@@ -265,8 +265,16 @@ orion.CompareMergeContainer = (function() {
 		var lineType = lineTypeWrapper.type;
 		var annotationIndex = editor.getModel().getAnnotationIndexByMapper(lineTypeWrapper.mapperIndex);
 		var borderStyle = "1px #AAAAAA solid";
-		if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex())
-			borderStyle = "1px #000000 solid";
+		
+		var conflict = editor.getModel().isMapperConflict(lineTypeWrapper.mapperIndex);
+		if( conflict)
+			borderStyle = "1px #FF0000 solid";
+		if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex()){
+			if( conflict)
+				borderStyle = "2px #FF0000 solid";
+			else
+				borderStyle = "1px #000000 solid";
+		}
 		if(lineType === "top-only") {
 			lineStyleEvent.style = {style: { borderTop: borderStyle }};
 		} else if (lineType === "oneline"){
@@ -404,7 +412,7 @@ orion.CompareMergeContainer = (function() {
 	};
 
 	CompareMergeContainer.prototype.setEditor = function(input , diff, onsave){	
-		var result = this.parseMapper(input , diff , onsave);
+		var result = this.parseMapper(input , diff , this._conflict, onsave);
 		var self = this;
 		if(!this._editorContainerLeft){
 			this.initEditorContainers(result.delim , result.output , input ,  result.mapper , true , this._newFileURI , this._oldFileURI);
@@ -531,7 +539,7 @@ orion.InlineCompareContainer = (function() {
 	};
 	
 	InlineCompareContainer.prototype.setEditor = function(input , diff){
-		var result = this.parseMapper(input , diff , true);
+		var result = this.parseMapper(input , diff , false , true);
 		var self = this;
 		if(!this._editor){
 			this.initEditorContainers(result.delim , input ,  result.mapper , result.diffArray , true , this._newFileURI);

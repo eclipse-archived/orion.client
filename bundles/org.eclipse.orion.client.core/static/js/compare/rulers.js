@@ -196,8 +196,12 @@ orion.CompareMergeOverviewRuler = (function() {
 			var model = this._editor.getModel();
 			if(lineIndex >= 0 && model.getAnnotationH){
 				var annotationIndex = model.getAnnotationIndex(lineIndex);
+				var mapperIndex = model.getAnnotationMapperIndex(annotationIndex);
+				var conflict = model.isMapperConflict(mapperIndex);
+				if(conflict)
+					style.border = "1px #FF0000 solid";
 				if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex())
-					style.backgroundColor = "blue";
+					style.backgroundColor = conflict ? "red" :"blue";
 				var anH = model.getAnnotationH(annotationIndex);
 				var lC = model.getAnnotationLineCount();
 				var clientArea = this._editor.getClientArea();
