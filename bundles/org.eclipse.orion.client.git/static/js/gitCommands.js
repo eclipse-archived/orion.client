@@ -164,34 +164,48 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = dojo.hash();
-				serviceRegistry.getService("IGitService").then(function(gitService) {
-					serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-						var deferred = gitService.doFetch(path);
-						progressService.showWhile(deferred, "Fetching remote: " + path).then(
-							function(jsonData, secondArg) {
-								return dojo.xhrGet({
-									url : path,
-									headers : {
-										"Orion-Version" : "1"
-									},
-									handleAs : "json",
-									timeout : 5000,
-									load : function(jsonData, secondArg) {
-										return jsonData;
-									},
-									error : function(error, ioArgs) {
-										//handleGetAuthenticationError(this, ioArgs);
-										console.error("HTTP status code: ", ioArgs.xhr.status);
-									}
-								});
-							}).then(function(remoteJsonData){
-								gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArd) {
-									explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
-									explorer.loadCommitsList(remoteJsonData.CommitLocation, remoteJsonData, true);			
-								});
+				var credentialsDialog = new widgets.GitCredentialsDialog({
+					title: "Clone Git Repository",
+					serviceRegistry: serviceRegistry,
+					func: function(options){
+						serviceRegistry.getService("IGitService").then(function(gitService) {
+							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+								var deferred = gitService.doFetch(path);
+								progressService.showWhile(deferred, "Fetching remote: " + path).then(
+									function(jsonData, secondArg) {
+										return dojo.xhrGet({
+											url : path,
+											headers : {
+												"Orion-Version" : "1"
+											},
+											postData : dojo.toJson({
+												"GitSshUsername" : options.gitSshUsername,
+												"GitSshPassword" : options.gitSshPassword,
+												"GitSshKnownHost" : options.knownHosts
+											}),
+											handleAs : "json",
+											timeout : 5000,
+											load : function(jsonData, secondArg) {
+												return jsonData;
+											},
+											error : function(error, ioArgs) {
+												//handleGetAuthenticationError(this, ioArgs);
+												console.error("HTTP status code: ", ioArgs.xhr.status);
+											}
+										});
+									}).then(function(remoteJsonData){
+										gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArd) {
+											explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
+											explorer.loadCommitsList(remoteJsonData.CommitLocation, remoteJsonData, true);			
+										});
+									});
 							});
-					});
+						});
+					}
 				});
+			
+				credentialsDialog.startup();
+				credentialsDialog.show();	
 			},
 			visibleWhen : function(item) {
 				return true;
