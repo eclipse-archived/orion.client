@@ -74,6 +74,41 @@ dojo.addOnLoad(function(){
 	var contentAssistFactory = function(editor) {
 		return new eclipse.ContentAssist(editor, "contentassist");
 	};
+	
+	// Temporary.  This will evolve into something pluggable.
+	var syntaxHighlighter = {
+		styler: null, 
+		
+		highlight: function(fileName, editorWidget) {
+			if (this.styler) {
+				this.styler.destroy();
+				this.styler = null;
+			}
+			if (fileName) {
+				var splits = fileName.split(".");
+				if (splits.length > 0) {
+					var extension = splits.pop().toLowerCase();
+					switch(extension) {
+						case "js":
+							this.styler = new eclipse.TextStyler(editorWidget, "js");
+							break;
+						case "java":
+							this.styler = new eclipse.TextStyler(editorWidget, "java");
+							break;
+						case "html":
+							//TODO
+							break;
+						case "xml":
+							//TODO
+							break;
+						case "css":
+							this.styler = new eclipse.TextStyler(editorWidget, "css");
+							break;
+					}
+				}
+			}
+		}
+	};
 
 	var inputManager = {
 		lastFilePath: "",
@@ -94,6 +129,8 @@ dojo.addOnLoad(function(){
 					fileClient.read(fileURI).then(
 						dojo.hitch(this, function(contents) {
 							editorContainer.onInputChange(fileURI, null, contents);
+							// in the long run we should be looking for plug-ins to call here for highlighting
+							syntaxHighlighter.highlight(fileURI, editorContainer.getEditorWidget());
 							editorContainer.showSelection(input.start, input.end, input.line, input.offset, input.length);
 						}),
 						dojo.hitch(this, function(error) {
