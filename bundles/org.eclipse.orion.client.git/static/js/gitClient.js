@@ -305,7 +305,7 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		doFetch : function(gitRemoteBranchURI, onLoad) {
+		doFetch : function(gitRemoteBranchURI, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost) {
 			var service = this;
 			
 			console.info("doFetch called");
@@ -316,7 +316,10 @@ eclipse.GitService = (function() {
 					"Orion-Version" : "1"
 				},
 				postData : dojo.toJson({
-					"Fetch" : "true"
+					"Fetch" : "true",
+					"GitSshUsername" : gitSshUsername,
+					"GitSshPassword" : gitSshPassword,
+					"GitSshKnownHost" : gitSshKnownHost
 				}),
 				handleAs : "json",
 				timeout : 5000,

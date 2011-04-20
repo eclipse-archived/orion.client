@@ -211,7 +211,7 @@ dojo.require("widgets.GitCredentialsDialog");
 					func: function(options){
 						serviceRegistry.getService("IGitService").then(function(gitService) {
 							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-								var deferred = gitService.doFetch(path);
+								var deferred = gitService.doFetch(path, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts);
 								progressService.showWhile(deferred, "Fetching remote: " + path).then(
 									function(jsonData, secondArg) {
 										return dojo.xhrGet({
