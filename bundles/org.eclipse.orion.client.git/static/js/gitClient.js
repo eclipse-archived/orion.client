@@ -35,18 +35,28 @@ eclipse.GitService = (function() {
 			console.info("Git Service checked");
 		},
 		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
+			var postData = {};
+			if(gitName){
+				postData.Name = gitName;
+			}
+			postData.GitUrl=gitRepoUrl;
+			if(gitSshUsername){
+				postData.GitSshUsername = gitSshUsername;
+			}
+			if(gitSshPassword){
+				postData.GitSshPassword = gitSshPassword;
+			}
+			if(gitSshKnownHost){
+				postData.GitSshKnownHost = gitSshKnownHost;
+			}
+			
+			
 				return dojo.xhrPost({
 					url : "/git/clone/",
 					headers : {
 						"Orion-Version" : "1"
 					},
-					postData : dojo.toJson({
-						"Name" : gitName,
-						"GitUrl" : gitRepoUrl,
-						"GitSshUsername" : gitSshUsername,
-						"GitSshPassword" : gitSshPassword,
-						"GitSshKnownHost" : gitSshKnownHost
-					}),
+					postData : dojo.toJson(postData),
 					handleAs : "json",
 					timeout : 15000,
 					load : function(jsonData, secondArg) {
