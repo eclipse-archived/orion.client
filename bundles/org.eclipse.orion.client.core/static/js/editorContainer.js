@@ -307,9 +307,9 @@ orion.EditorContainer = (function() {
 				if (message) {
 					this._editor.setText(message);
 				} else {
-					if (this._styler) {
-						this._styler.destroy();
-						this._styler = null;
+					if (this.styler) {
+						this.styler.destroy();
+						this.styler = null;
 					}
 					var fileName = title;
 					if (fileName) {
