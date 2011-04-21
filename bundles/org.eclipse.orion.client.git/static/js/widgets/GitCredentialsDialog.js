@@ -43,6 +43,8 @@ dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog], {
 		if(!this.options.username && !this.options.password && !this.options.privatekey && !this.options.passphrase){
 			this.options.username=true;
 			this.options.password=true;
+			this.options.privatekey=true;
+			this.options.passphrase=true;
 		}
 		if(this.options.serviceRegistry){
 			var self = this;

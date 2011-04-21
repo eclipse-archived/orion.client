@@ -34,7 +34,7 @@ eclipse.GitService = (function() {
 			var service = this;
 			console.info("Git Service checked");
 		},
-		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
+		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost, privateKey, passphrase) {
 			var postData = {};
 			if(gitName){
 				postData.Name = gitName;
@@ -49,7 +49,8 @@ eclipse.GitService = (function() {
 			if(gitSshKnownHost){
 				postData.GitSshKnownHost = gitSshKnownHost;
 			}
-			
+			if(privateKey) postData.GitSshPrivateKey=privateKey;
+			if(passphrase) postData.GitSshPassphrase=passphrase;			
 			
 				return dojo.xhrPost({
 					url : "/git/clone/",
