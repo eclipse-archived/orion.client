@@ -51,7 +51,13 @@ orion.CompareMergeModel = (function() {
 			return {type:"unchanged" , mapperIndex:mapItem.mapperIndex};
 		},
 			
+		isMapperEmpty: function(){
+			return this._mapper.length === 0;
+		},
+		
 		isMapperConflict: function(mapperIndex){
+			if(mapperIndex < 0)
+				return false;
 			if(!this._mapper[mapperIndex][3])
 				return false;
 			return this._mapper[mapperIndex][3] === 1;

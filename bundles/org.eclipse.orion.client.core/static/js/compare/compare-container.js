@@ -270,7 +270,7 @@ orion.DiffStyler = (function() {
 			}
 			if(editor)
 				this._editor = editor;
-			if(this._editor)
+			if(this._editor && !this._editor.getModel().isMapperEmpty())
 				this._editor.addEventListener("LineStyle", this, this._onLineStyle);
 		},
 		
