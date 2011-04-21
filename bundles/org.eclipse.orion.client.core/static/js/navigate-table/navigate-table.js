@@ -60,18 +60,51 @@ dojo.addOnLoad(function(){
 	// set up the splitter bar and its key binding
 	var topContainer = dijit.byId("eclipse.navigate-table");
 			
-	// Ctrl+o handler for toggling outline 
+	var bufferedSelection = [];
+	
 	window.document.onkeydown = function (evt){
 		evt = evt || window.event;
-		if(evt.ctrlKey && evt.keyCode  === 79){
+		var handled = false;
+		if(evt.ctrlKey && evt.keyCode  === 79){ // Ctrl+o handler for toggling outline 
 			topContainer.toggle();
-			if(window.document.all){ 
+			handled = true;			
+		} else if(evt.ctrlKey && evt.keyCode  === 67){ // Ctrl+c buffers selection
+			selection.getSelections(function(selections) {
+				bufferedSelection = selections;
+			});
+			handled = true;				
+		} else if(evt.ctrlKey && evt.keyCode  === 86){
+			if (bufferedSelection.length > 0) {
+				for (var i=0; i<bufferedSelection.length; i++) {
+					var location = bufferedSelection[i].Location;
+					var name = null;
+					if (location) {
+						if (bufferedSelection[i].parent && bufferedSelection[i].parent.Location === explorer.treeRoot.Location) {
+							name = "";
+							var indexOfSlash = location.lastIndexOf("/");
+							if (indexOfSlash !== -1) {
+								name = location.substring(indexOfSlash + 1);
+							}
+							name = window.prompt("Enter a new name for '" + name + "'", "Copy of " + name);
+						}
+						if (location) {
+							fileClient.copyFile(location, explorer.treeRoot.Location, name).then(dojo.hitch(explorer, function() {
+								this.changedItem(this.treeRoot);
+							}));
+						}
+					}
+				}
+			}
+			handled = true;				
+		} 
+		if (handled) {
+			if (window.document.all) { 
 				evt.keyCode = 0;
-			}else{ 
+			} else { 
 				evt.preventDefault();
 				evt.stopPropagation();
-			}					
-		} 
+			}		
+		}
 	};
 
 	// global commands

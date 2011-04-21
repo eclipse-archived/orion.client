@@ -33,7 +33,7 @@ orion.Selection.prototype = {
 	},
 	
 	getSelections: function(onDone) {
-		return this._selections;
+		onDone(this._selections);
 	},
 	
 	_getSingleSelection: function() {
