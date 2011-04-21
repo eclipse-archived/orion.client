@@ -34,7 +34,7 @@ eclipse.GitService = (function() {
 			var service = this;
 			console.info("Git Service checked");
 		},
-		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost) {
+		cloneGitRepository : function(gitName, gitRepoUrl, gitSshUsername, gitSshPassword, gitSshKnownHost, privateKey, passphrase) {
 			var postData = {};
 			if(gitName){
 				postData.Name = gitName;
@@ -49,7 +49,8 @@ eclipse.GitService = (function() {
 			if(gitSshKnownHost){
 				postData.GitSshKnownHost = gitSshKnownHost;
 			}
-			
+			if(privateKey) postData.GitSshPrivateKey=privateKey;
+			if(passphrase) postData.GitSshPassphrase=passphrase;			
 			
 				return dojo.xhrPost({
 					url : "/git/clone/",
@@ -315,7 +316,7 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		doFetch : function(gitRemoteBranchURI, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost) {
+		doFetch : function(gitRemoteBranchURI, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
 			var service = this;
 			
 			console.info("doFetch called");
@@ -329,7 +330,9 @@ eclipse.GitService = (function() {
 					"Fetch" : "true",
 					"GitSshUsername" : gitSshUsername,
 					"GitSshPassword" : gitSshPassword,
-					"GitSshKnownHost" : gitSshKnownHost
+					"GitSshKnownHost" : gitSshKnownHost,
+					"GitSshPrivateKey" : gitPrivateKey,
+					"GitSshPassphrase" : gitPassphrase
 				}),
 				handleAs : "json",
 				timeout : 5000,
@@ -378,7 +381,7 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		doPush : function(gitBranchURI, srcRef, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost) {
+		doPush : function(gitBranchURI, srcRef, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
 			var service = this;
 			
 			console.info("doPush called");
@@ -392,7 +395,9 @@ eclipse.GitService = (function() {
 					"PushSrcRef" : srcRef,
 					"GitSshUsername" : gitSshUsername,
 					"GitSshPassword" : gitSshPassword,
-					"GitSshKnownHost" : gitSshKnownHost
+					"GitSshKnownHost" : gitSshKnownHost,
+					"GitSshPrivateKey" : gitPrivateKey,
+					"GitSshPassphrase" : gitPassphrase
 				}),
 				handleAs : "json",
 				timeout : 5000,

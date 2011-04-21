@@ -113,7 +113,7 @@ dojo.require("widgets.GitCredentialsDialog");
 									var func = arguments.callee;
 									serviceRegistry.getService("IGitService").then(function(gitService) {
 										serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-											var deferred = gitService.cloneGitRepository(null, gitUrl, options.gitSshUsername, options.gitSshPassword, options.knownHosts);
+											var deferred = gitService.cloneGitRepository(null, gitUrl, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
 												function(jsonData, secondArg) {
 													eclipse.gitCommandUtils.handleProgressServiceResponse(jsonData, options, serviceRegistry,
@@ -247,31 +247,40 @@ dojo.require("widgets.GitCredentialsDialog");
 					title: "Fetch Git Repository",
 					serviceRegistry: serviceRegistry,
 					func: function(options){
+						var func = arguments.callee;
 						serviceRegistry.getService("IGitService").then(function(gitService) {
 							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-								var deferred = gitService.doFetch(path, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts);
+								var deferred = gitService.doFetch(path, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Fetching remote: " + path).then(
 									function(jsonData, secondArg) {
-										return dojo.xhrGet({
-											url : path,
-											headers : {
-												"Orion-Version" : "1"
-											},
-											handleAs : "json",
-											timeout : 5000,
-											load : function(jsonData, secondArg) {
-												return jsonData;
-											},
-											error : function(error, ioArgs) {
-												//handleGetAuthenticationError(this, ioArgs);
-												console.error("HTTP status code: ", ioArgs.xhr.status);
-											}
-										});
-									}).then(function(remoteJsonData){
-										gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArd) {
-											explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
-											explorer.loadCommitsList(remoteJsonData.CommitLocation, remoteJsonData, true);			
-										});
+										eclipse.gitCommandUtils.handleProgressServiceResponse(jsonData, options, serviceRegistry,
+												function(jsonData){
+													dojo.xhrGet({
+														url : path,
+														headers : {
+															"Orion-Version" : "1"
+														},
+														postData : dojo.toJson({
+															"GitSshUsername" : options.gitSshUsername,
+															"GitSshPassword" : options.gitSshPassword,
+															"GitSshKnownHost" : options.knownHosts
+														}),
+														handleAs : "json",
+														timeout : 5000,
+														load : function(jsonData, secondArg) {
+															return jsonData;
+														},
+														error : function(error, ioArgs) {
+															//handleGetAuthenticationError(this, ioArgs);
+															console.error("HTTP status code: ", ioArgs.xhr.status);
+														}
+													}).then(function(remoteJsonData){
+														gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArd) {
+															explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
+															explorer.loadCommitsList(remoteJsonData.CommitLocation, remoteJsonData, true);			
+														});
+													});
+												}, func);
 									});
 							});
 						});
@@ -320,7 +329,7 @@ dojo.require("widgets.GitCredentialsDialog");
 					func: function(options){
 						serviceRegistry.getService("IGitService").then(function(gitService) {
 							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-								var deferred = gitService.doPush(item.Location, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts);
+								var deferred = gitService.doPush(item.Location, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
 										dojo.query(".treeTableRow").forEach(function(node, i) {
 											dojo.toggleClass(node, "outgoingCommitsdRow", false);
