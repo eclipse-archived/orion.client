@@ -505,25 +505,45 @@ eclipse.Command = (function() {
 		},
 		_addMenuItem: function(parent, items, handler, userData, cssClass) {
 			var menuitem = new dijit.MenuItem({
+				labelType: this.hrefCallback ? "html" : "text",
 				label: this.name,
-				tooltip: this.tooltip,
-				onClick: dojo.hitch(this, function() {
-					if (this.callback) {
-						this.callback.call(handler, items, this.id, parent.id, userData);
-					} else if (this.hrefCallback) {
-						var href = this.hrefCallback.call(handler, items, this.id, parent.id, userData);
-						if (href) {
-							if (href.then) {
-								href.then(function(l) {
-									window.location = l;
-								});
-							} else {
-								window.location = href;
-							}
-						}
-					}
-				})
+				tooltip: this.tooltip
 			});
+			var followLink = function(href, event) {
+				var isMac = window.navigator.platform.indexOf("Mac") !== -1;
+				if (event) {
+					if (isMac) {
+						if (event.metaKey) {
+							window.open(href);
+						} else {
+							window.location = href;
+						}
+					} else if (event.ctrlKey) {
+						window.open(href);
+					} else {
+						window.location = href;
+					}
+				}
+			};
+			if (this.hrefCallback) {
+				var loc = this.hrefCallback.call(handler, items, this.id, parent.id, userData);
+				if (loc) {
+					if (loc.then) {
+						loc.then(dojo.hitch(this, function(l) { 
+							menuitem.set("label", "<a href='"+l+"'>"+this.name+"</a>");
+							menuitem.onClick = function(event) {followLink(l, event);};
+						}));
+					} else {
+						menuitem.set("label", "<a href='"+loc+"'>"+this.name+"</a>");
+						menuitem.onClick = function(event) {followLink(loc, event);};
+					}
+				}
+			} else if (this.callback) {
+				menuitem.onClick = dojo.hitch(this, function() {
+					this.callback.call(handler, items, this.id, parent.id, userData);
+				});
+			}
+			
 			// we may need to refer back to the command.  
 			menuitem.eclipseCommand = this;
 			parent.addChild(menuitem);
