@@ -154,7 +154,14 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		var sourceLocations = [];
 		var i;
 		for (i=0; i<items.length; i++) {
-			sourceLocations.push(stripPath(items[i].Location));
+			// moving or copying to the parent location is a no-op (we don't support rename or copy with rename from this menu)
+			if (items[i].parent && items[i].parent.Location) {
+				sourceLocations.push(stripPath(items[i].parent.Location));
+			}
+			// moving a directory into itself is not supported
+			if (items[i].Directory && !isCopy) {
+				sourceLocations.push(stripPath(items[i].Location));
+			}
 		}
 		var choices = [];
 		if (eclipse.favoritesCache) {
@@ -175,7 +182,8 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		for (i= 0; i<items.length; i++) {
 			var item = items[i];
 			var sibling = items[i];
-			// for the purposes of finding parents, if this is a file, consider its parent folder for finding targets, not itself.
+			// for the purposes of finding parents and siblings, if this is a file, consider its parent folder 
+			// for finding targets, not itself.
 			if (!item.Directory && item.parent) {
 				item = item.parent;
 			}
@@ -209,6 +217,17 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 						child.stripped = childPath;
 						proposedPaths.push(child);
 					}
+				}
+			}
+			// All children of the root that are folders should be available for choosing.
+			var topLevel = explorer.treeRoot.Children;
+			for (i=0; i<topLevel.length; i++) {
+				child = topLevel[i];
+				childPath = child.Directory ? stripPath(child.Location) : null;
+				if (childPath && !contains(alreadySeen, childPath) && !contains(sourceLocations, childPath)) {
+					alreadySeen.push(childPath);
+					child.stripped = childPath;
+					proposedPaths.push(child);
 				}
 			}
 		}
