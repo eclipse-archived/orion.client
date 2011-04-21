@@ -357,8 +357,7 @@ dojo.require("widgets.GitCredentialsDialog");
 						return false;
 					}
 				}
-				//return true;
-				return false //TODO enable this command when deleting clones is implemented
+				return false; //TODO enable this command when deleting clones is implemented
 			},
 			callback: function(item) {
 				window.alert("Cannot delete " + item.name + ", deleting is not implented yet!");
