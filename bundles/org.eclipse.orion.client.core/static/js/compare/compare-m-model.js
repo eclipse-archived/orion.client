@@ -51,6 +51,12 @@ orion.CompareMergeModel = (function() {
 			return {type:"unchanged" , mapperIndex:mapItem.mapperIndex};
 		},
 			
+		isMapperConflict: function(mapperIndex){
+			if(!this._mapper[mapperIndex][3])
+				return false;
+			return this._mapper[mapperIndex][3] === 1;
+		},
+		
 		getAnnotations: function(){
 			if(this._annotations === undefined){
 				this._annotations = [];
@@ -84,6 +90,12 @@ orion.CompareMergeModel = (function() {
 				}
 			}
 			return -1;
+		},
+		
+		getAnnotationMapperIndex: function(annotationIndex){
+			if(this._annotations === undefined)
+				this.getAnnotations();
+			return this._annotations[annotationIndex][1];
 		},
 		
 		getAnnotationIndexByMapper: function(mapperIndex){

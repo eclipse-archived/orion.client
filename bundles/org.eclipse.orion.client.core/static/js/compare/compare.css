@@ -4,13 +4,12 @@
 }
 
 .fileNameSelectedRow {
-	background-color: #00FF00 !important;
+	background-color: #6d6d6d !important;
 }
 
 .fileNameNormalRow {
 	color: #0000FF;
 }
-
 
 .compareCanvas {
 	background: #EEEEEE;

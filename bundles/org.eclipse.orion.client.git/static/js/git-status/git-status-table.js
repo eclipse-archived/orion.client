@@ -104,12 +104,12 @@ orion.GitStatusModel = (function() {
 	return GitStatusModel;
 }());
 
-orion.statusTypeMap = { "Missing":["/images/git/git-removed.gif", "Removed unstaged" , "/images/git/git-stage.gif", "Stage" ],
-						"Removed":["/images/git/git-removed.gif","Removed staged" ,"/images/git/git-unstage.gif", "Unstage" ],	
-						 "Modified":["/images/git/git-modify.gif","Modified unstaged" ,"/images/git/git-stage.gif", "Stage" ],	
-						 "Changed":["/images/git/git-modify.gif","Modified staged" ,"/images/git/git-unstage.gif", "Untage"],	
-					     "Untracked":["/images/git/git-added.gif","Added unstaged" ,"/images/git/git-stage.gif", "Stage"],	
-						 "Added":["/images/git/git-added.gif","Added staged" ,"/images/git/git-unstage.gif" , "Unstage"],	
+orion.statusTypeMap = { "Missing":["/images/git/git-removed.gif", "Unstaged removal" , "/images/git/git-stage.gif", "Stage" ],
+						"Removed":["/images/git/git-removed.gif","Staged removal" ,"/images/git/git-unstage.gif", "Unstage" ],	
+						 "Modified":["/images/git/git-modify.gif","Unstaged change" ,"/images/git/git-stage.gif", "Stage" ],	
+						 "Changed":["/images/git/git-modify.gif","Staged change" ,"/images/git/git-unstage.gif", "Untage"],	
+					     "Untracked":["/images/git/git-added.gif","Unstaged add" ,"/images/git/git-stage.gif", "Stage"],	
+						 "Added":["/images/git/git-added.gif","Staged add" ,"/images/git/git-unstage.gif" , "Unstage"],	
 						 "Conflicting":["/images/git/conflict-file.gif","Conflicting" ,"/images/git/git-stage.gif" , "Resolve Conflict"]	
 					  };
 
@@ -228,12 +228,6 @@ orion.GitStatusController = (function() {
 			this._loadBlock(this._unstagedTableRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedTableRenderer , this._model.interestedStagedGroup);
 			
-			//We do not want to reload the diff viewer when status is reloaded.
-			//if(this._model.selectedItem)
-			//	this.loadDiffContent(this._model.selectedItem);
-			//else
-			//	this._model.selectedFileId = null;
-			
 			var self = this;
 			var messageArea = document.getElementById("commitMessage");
 			messageArea.disabled = !this.hasStaged;
@@ -249,14 +243,6 @@ orion.GitStatusController = (function() {
 			this.modifyImageButton(false ,amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value , true);} , !this.hasStaged, function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
 			
 			this.cursorClear();
-		},
-		
-		_makeLocation: function(location , name){//temporary
-			var relative = eclipse.util.makeRelative(location);
-			var splitted = relative.split("/");
-			if(splitted.length > 2)
-				return "/" + splitted[1] + "/" + splitted[2] + "/" + name;
-			return name;
 		},
 		
 		cursorWait: function(currentDiv , remember){
@@ -277,63 +263,14 @@ orion.GitStatusController = (function() {
 		},
 		
 		initViewer: function () {
-		  	this._inlineCompareContainer.destroyEditor();//
+		  	this._inlineCompareContainer.destroyEditor();
 			this._model.selectedItem = null;
 			this.hasStaged = false;
 			this.hasUnstaged = false;
-			dojo.place(document.createTextNode("Compare..."), "fileNameInViewer", "only");
-			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
-			this.createProgressDiv("inline-compare-viewer"  , "compareIndicatorId" , "Select a file on the left to compare..");
+			dojo.place(document.createTextNode("Select a file on the left to compare..."), "fileNameInViewer", "only");
+			dojo.style("fileNameInViewer", "color", "#6d6d6d");
 		},
-		
-		createProgressDiv: function(progressParentId , progressId,message){
-			var tableParentDiv = dojo.byId(progressParentId);
-		
-			var progressDiv = document.createElement('DIV');
-			progressDiv.id = progressId;
-			tableParentDiv.appendChild(progressDiv);
-			progressDiv.width = "100%";
-			progressDiv.align="center";
-			
-			var progressMessage = document.createElement('h2');
-			dojo.place(document.createTextNode(message), progressMessage, "only");
-			progressDiv.appendChild(progressMessage);
-			return progressMessage;
-		},
-		
-		_createProgressDivCenter: function(progressParentId , progressId,message){
-			var tableParentDiv = dojo.byId(progressParentId);
-			
-			var table = document.createElement('table');
-			tableParentDiv.appendChild(table);
-			table.id = progressId;
-			table.width = "100%";
-			table.height = "100%";
-			table.style.backgroundColor = "#EEEEEE";
-			table.style.zIndex =100;
-			table.style.opacity =0.5;
-			
-			var row = document.createElement('tr');
-			table.appendChild(row);
 
-			var progressColumn = document.createElement('td');
-			row.appendChild(progressColumn);
-			progressColumn.width = "100%";
-			progressColumn.height =tableParentDiv.clientHeight;//"100%" ;
-			progressColumn.noWrap= true;
-			
-			var progressDiv = document.createElement('DIV');
-			progressColumn.appendChild(progressDiv);
-			progressDiv.width = "100%";
-			progressDiv.height = tableParentDiv.clientHeight;//"100%" ;
-			progressDiv.align="center";
-			
-			var progressMessage = document.createElement('h2');
-			dojo.place(document.createTextNode(message), progressMessage, "only");
-			progressDiv.appendChild(progressMessage);
-			
-		},
-	
 		createImgButton: function(enableWaitCursor ,imgParentDiv , imgSrc, imgTitle,onClick){
 			var imgBtn = document.createElement('img');
 			imgBtn.src = imgSrc;
@@ -388,11 +325,6 @@ orion.GitStatusController = (function() {
 			}
 		},
 		
-		removeProgressDiv: function(progressParentId , progressId){
-			if(dojo.byId(progressId))
-				dojo.place(document.createTextNode(""), progressParentId, "only");
-		},
-		
 		_sortBlock: function(interedtedGroup){
 			var retValue = [];
 			for (var i = 0; i < interedtedGroup.length ; i++){
@@ -435,14 +367,14 @@ orion.GitStatusController = (function() {
 		loadDiffContent: function(itemModel){
 			this.cursorWait();
 			var self = this;
-			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) >>> " : "local VS index ) >>> " ;
-			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS + itemModel.name;
-			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
+			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) " : "local VS index ) " ;
+			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS ;
 			
 			var diffURI = (this._model.isConflict(itemModel.type) ? itemModel.diffURI : itemModel.diffURI + "?conflict=true");
 			this._inlineCompareContainer.resolveDiff(diffURI + "?conflict=true",
 					                                function(newFile , OldFile){					
 														dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
+														dojo.style("fileNameInViewer", "color", "#6d6d6d");
 														self.cursorClear();
 													},
 													function(response, ioArgs){
@@ -472,12 +404,9 @@ orion.GitStatusController = (function() {
 		},
 		
 		handleServerErrors: function(errorResponse , ioArgs){
-		  	this._inlineCompareContainer.destroyEditor();
-			dojo.place(document.createTextNode("Compare..."), "fileNameInViewer", "only");
-			this.removeProgressDiv("inline-compare-viewer"  , "compareIndicatorId");
 			var message = typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; 
-			var errorDiv = this.createProgressDiv("inline-compare-viewer"  , "compareIndicatorId" , message);
-			dojo.style(errorDiv, "color", "red");
+			dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
+			dojo.style("fileNameInViewer", "color", "red");
 			this.cursorClear();
 		},
 		
@@ -515,16 +444,6 @@ orion.GitStatusController = (function() {
 		
 		stageAll: function(){
 			this.stage(this._model.items.IndexLocation);
-			/*
-			var start = this._url.indexOf("/file/");
-			if(start != -1){
-				var sub = this._url.substring(start);
-				var subSlitted = sub.split("/");
-				if(subSlitted.length > 2){
-					this.stage("/git/index" + [subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") );
-				}
-			}
-			*/
 		},
 		
 		unstage: function(location){
@@ -544,11 +463,6 @@ orion.GitStatusController = (function() {
 		
 		unstageAll: function(){
 			this.unstage(this._model.items.IndexLocation);
-			/*
-			var start = this._url.indexOf("/file/");
-			if(start != -1)
-				this.unstage("/git/index" + this._url.substring(start));
-			*/
 		},
 		
 		commitAll: function(location , message , body){
@@ -568,26 +482,8 @@ orion.GitStatusController = (function() {
 		
 		commit: function(message , amend){
 			this.commitAll(this._model.items.CommitLocation , message , amend ?dojo.toJson({"Message":message,"Amend":"true"}): dojo.toJson({"Message":message}));
-			/*
-			var start = this._url.indexOf("/file/");
-			if(start != -1){
-				var sub = this._url.substring(start);
-				var subSlitted = sub.split("/");
-				if(subSlitted.length > 2){
-					this.commitAll([subSlitted[0] , subSlitted[1] , subSlitted[2]].join("/") , message , amend ?dojo.toJson({"Message":message,"Amend":"true"}): dojo.toJson({"Message":message}));
-				}
-			}
-			*/
-		},
+		}
 		
-		findFolderName: function(){
-			var start = this._url.indexOf("/file/");
-			if(start != -1){
-				var sub = this._url.substring(start);
-				return sub;
-			}
-			return this._url;
-		}		
 	};
 	return GitStatusController;
 }());

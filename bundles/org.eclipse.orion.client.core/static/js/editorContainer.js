@@ -307,34 +307,6 @@ orion.EditorContainer = (function() {
 				if (message) {
 					this._editor.setText(message);
 				} else {
-					if (this._styler) {
-						this._styler.destroy();
-						this._styler = null;
-					}
-					var fileName = title;
-					if (fileName) {
-						var splits = fileName.split(".");
-						if (splits.length > 0) {
-							var extension = splits.pop().toLowerCase();
-							switch(extension) {
-								case "js":
-									this.styler = new eclipse.TextStyler(this._editor, "js");
-									break;
-								case "java":
-									this.styler = new eclipse.TextStyler(this._editor, "java");
-									break;
-								case "html":
-									//TODO
-									break;
-								case "xml":
-									//TODO
-									break;
-								case "css":
-									this.styler = new eclipse.TextStyler(this._editor, "css");
-									break;
-							}
-						}
-					}
 					if (contents !== null && contents !== undefined) {
 						this._editor.setText(contents);
 					}

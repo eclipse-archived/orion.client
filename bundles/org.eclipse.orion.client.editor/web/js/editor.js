@@ -1618,6 +1618,17 @@ eclipse.Editor = (function() {
 			if (e.preventDefault) { e.preventDefault(); }
 			return false;
 		},
+		_handleDragOver: function (e) {
+			if (!e) { e = window.event; }
+			e.dataTransfer.dropEffect = "none";
+			if (e.preventDefault) { e.preventDefault(); }
+			return false;
+		},
+		_handleDrop: function (e) {
+			if (!e) { e = window.event; }
+			if (e.preventDefault) { e.preventDefault(); }
+			return false;
+		},
 		_handleDocFocus: function (e) {
 			if (!e) { e = window.event; }
 			this._clientDiv.focus();
@@ -3450,6 +3461,8 @@ eclipse.Editor = (function() {
 				handlers.push({target: topNode, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}});
 				handlers.push({target: body, type: "mousedown", handler: function(e) { return self._handleBodyMouseDown(e);}});
 				handlers.push({target: topNode, type: "dragstart", handler: function(e) { return self._handleDragStart(e);}});
+				handlers.push({target: topNode, type: "dragover", handler: function(e) { return self._handleDragOver(e);}});
+				handlers.push({target: topNode, type: "drop", handler: function(e) { return self._handleDrop(e);}});
 				if (isIE) {
 					handlers.push({target: this._frameDocument, type: "activate", handler: function(e) { return self._handleDocFocus(e); }});
 				}

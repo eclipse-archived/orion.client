@@ -47,7 +47,7 @@ orion.DiffParser = (function() {
 			return {array:this._diffContents , index:this._diffContentIndex};
 		},
 		
-		parse: function(oFileString , diffString , doNotBuildNewFile){
+		parse: function(oFileString , diffString , detectConflicts ,doNotBuildNewFile){
 			this._init();
 			if(diffString === "")
 				return {outPutFile:oFileString ,mapper:[]};
@@ -74,7 +74,7 @@ orion.DiffParser = (function() {
 			}
 			//console.log(JSON.stringify(this._oBlocks));
 			//console.log(JSON.stringify(this._nBlocks));
-			this._buildMap();
+			this._buildMap(detectConflicts);
 			//this._logMap();
 			//console.log("Total line number in original file: " + this._oFileContents.length);
 			if(doNotBuildNewFile === undefined || !doNotBuildNewFile)
@@ -214,7 +214,20 @@ orion.DiffParser = (function() {
 			}
 		},
 		
-		_buildMap: function(){
+		_detectConflictes: function(startIndexInDiff , lines){
+			if(startIndexInDiff < 0)
+				return false;
+			var endIndex = startIndexInDiff + lines;
+			for(var i = startIndexInDiff ; i < endIndex ; i++){
+				var line = this._diffContents[i];
+				if(line.indexOf("<<<<<") > -1 || line.indexOf(">>>>>") > -1){
+					return true;
+				}
+			}
+			return false;
+		},
+		
+		_buildMap: function(detectConflicts){
 			var  blockLen = this._oBlocks.length;
 			var oFileLen = this._oFileContents.length;
 			var oFileLineCounter = 0;
@@ -226,7 +239,10 @@ orion.DiffParser = (function() {
 					this._deltaMap.push([delta , delta , 0]);
 					oFileLineCounter += delta;
 				}
-				this._deltaMap.push([this._nBlocks[i][1] , this._oBlocks[i][1] , this._nBlocks[i][2]+1]);
+				if(detectConflicts && this._detectConflictes(this._nBlocks[i][2] , this._nBlocks[i][1]))
+					this._deltaMap.push([this._nBlocks[i][1] , this._oBlocks[i][1] , this._nBlocks[i][2]+1 , 1]);
+				else	
+					this._deltaMap.push([this._nBlocks[i][1] , this._oBlocks[i][1] , this._nBlocks[i][2]+1]);
 				oFileLineCounter += this._oBlocks[i][1];
 				lastSamePos = this._oBlocks[i][0] + this._oBlocks[i][1];
 			}
