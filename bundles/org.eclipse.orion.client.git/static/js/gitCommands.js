@@ -244,7 +244,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			callback: function(item) {
 				var path = dojo.hash();
 				var credentialsDialog = new widgets.GitCredentialsDialog({
-					title: "Clone Git Repository",
+					title: "Fetch Git Repository",
 					serviceRegistry: serviceRegistry,
 					func: function(options){
 						var func = arguments.callee;
@@ -281,7 +281,6 @@ dojo.require("widgets.GitCredentialsDialog");
 														});
 													});
 												}, func);
-
 									});
 							});
 						});
@@ -323,13 +322,26 @@ dojo.require("widgets.GitCredentialsDialog");
 			image : "images/git-push.gif",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
-				serviceRegistry.getService("IGitService").then(function(gitService){
-					gitService.doPush(item.Location, "HEAD", function() {
-						dojo.query(".treeTableRow").forEach(function(node, i) {
-							dojo.toggleClass(node, "outgoingCommitsdRow", false);
-						});
-					});
+				var path = dojo.hash();
+				var credentialsDialog = new widgets.GitCredentialsDialog({
+					title: "Push Git Repository",
+					serviceRegistry: serviceRegistry,
+					func: function(options){
+						serviceRegistry.getService("IGitService").then(function(gitService) {
+							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+								var deferred = gitService.doPush(item.Location, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts);
+								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
+										dojo.query(".treeTableRow").forEach(function(node, i) {
+											dojo.toggleClass(node, "outgoingCommitsdRow", false);
+										});
+									});
+								});
+							});
+						}
 				});
+			
+				credentialsDialog.startup();
+				credentialsDialog.show();	
 			},
 			visibleWhen : function(item) {
 				return true;
@@ -354,8 +366,7 @@ dojo.require("widgets.GitCredentialsDialog");
 						return false;
 					}
 				}
-				//return true;
-				return false //TODO enable this command when deleting clones is implemented
+				return false; //TODO enable this command when deleting clones is implemented
 			},
 			callback: function(item) {
 				window.alert("Cannot delete " + item.name + ", deleting is not implented yet!");

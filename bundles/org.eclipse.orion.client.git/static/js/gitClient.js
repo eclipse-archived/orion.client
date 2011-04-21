@@ -379,7 +379,7 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		doPush : function(gitBranchURI, srcRef, onLoad) {
+		doPush : function(gitBranchURI, srcRef, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost) {
 			var service = this;
 			
 			console.info("doPush called");
@@ -390,7 +390,10 @@ eclipse.GitService = (function() {
 					"Orion-Version" : "1"
 				},
 				postData : dojo.toJson({
-					"PushSrcRef" : srcRef
+					"PushSrcRef" : srcRef,
+					"GitSshUsername" : gitSshUsername,
+					"GitSshPassword" : gitSshPassword,
+					"GitSshKnownHost" : gitSshKnownHost
 				}),
 				handleAs : "json",
 				timeout : 5000,
