@@ -250,7 +250,7 @@ dojo.require("widgets.GitCredentialsDialog");
 						var func = arguments.callee;
 						serviceRegistry.getService("IGitService").then(function(gitService) {
 							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-								var deferred = gitService.doFetch(path, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts);
+								var deferred = gitService.doFetch(path, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Fetching remote: " + path).then(
 									function(jsonData, secondArg) {
 										eclipse.gitCommandUtils.handleProgressServiceResponse(jsonData, options, serviceRegistry,
@@ -329,7 +329,7 @@ dojo.require("widgets.GitCredentialsDialog");
 					func: function(options){
 						serviceRegistry.getService("IGitService").then(function(gitService) {
 							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-								var deferred = gitService.doPush(item.Location, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts);
+								var deferred = gitService.doPush(item.Location, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
 										dojo.query(".treeTableRow").forEach(function(node, i) {
 											dojo.toggleClass(node, "outgoingCommitsdRow", false);
