@@ -2,4 +2,4 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Orion Dojo Layer
 Bundle-SymbolicName: org.eclipse.orion.dojo
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.5.0.qualifier

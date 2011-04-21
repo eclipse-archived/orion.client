@@ -218,6 +218,110 @@ orion.SBSCompareContainer = (function() {
 	return SBSCompareContainer;
 }());
 
+//temporary text ssyntax styler , we will need to change it later to some thing else
+orion.CompareSyntaxHighlighter = (function() {
+	function CompareSyntaxHighlighter(){
+		this.styler = null;
+	}	
+	CompareSyntaxHighlighter.prototype = {
+			highlight: function(fileName, editorWidget) {
+				if (this.styler) {
+					this.styler.destroy();
+					this.styler = null;
+				}
+				if (fileName) {
+					var splits = fileName.split(".");
+					if (splits.length > 0) {
+						var extension = splits.pop().toLowerCase();
+						switch(extension) {
+							case "js":
+								this.styler = new eclipse.TextStyler(editorWidget, "js");
+								break;
+							case "java":
+								this.styler = new eclipse.TextStyler(editorWidget, "java");
+								break;
+							case "html":
+								//TODO
+								break;
+							case "xml":
+								//TODO
+								break;
+							case "css":
+								this.styler = new eclipse.TextStyler(editorWidget, "css");
+								break;
+						}
+					}
+				}
+			}
+	};
+	return CompareSyntaxHighlighter;
+}());
+
+//Diff block styler , this will always be called after the text styler
+orion.DiffStyler = (function() {
+	function DiffStyler(compareMatchRenderer ,editor){
+		this._compareMatchRenderer = compareMatchRenderer;
+		this._editor = editor;
+	}	
+	DiffStyler.prototype = {
+		highlight: function(editor) {
+			if (this._editor) {
+				this._editor.removeEventListener("LineStyle", this, this._onLineStyle);
+			}
+			if(editor)
+				this._editor = editor;
+			if(this._editor && !this._editor.getModel().isMapperEmpty())
+				this._editor.addEventListener("LineStyle", this, this._onLineStyle);
+		},
+		
+		_onLineStyle: function(lineStyleEvent){
+			var editor = this._editor;
+			var lineIndex = lineStyleEvent.lineIndex;
+			var lineTypeWrapper =  editor.getModel().getLineType(lineIndex);
+			var lineType = lineTypeWrapper.type;
+			var annotationIndex = editor.getModel().getAnnotationIndexByMapper(lineTypeWrapper.mapperIndex);
+			var borderStyle = "1px #AAAAAA solid";
+			
+			var conflict = editor.getModel().isMapperConflict(lineTypeWrapper.mapperIndex);
+			if( conflict)
+				borderStyle = "1px #FF0000 solid";
+			if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex()){
+				if( conflict)
+					borderStyle = "2px #FF0000 solid";
+				else
+					borderStyle = "1px #000000 solid";
+			}
+			if(lineType === "top-only") {
+				lineStyleEvent.style = {style: { borderTop: borderStyle }};
+			} else if (lineType === "oneline"){
+				lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , border: borderStyle }};
+			} else if (lineType === "top"){
+				lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: borderStyle , borderLeft: borderStyle , borderRight: borderStyle}};
+			} else if (lineType === "bottom"){
+				lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderBottom: borderStyle , borderLeft: borderStyle , borderRight: borderStyle}};
+			} else if (lineType === "middle"){
+				lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderLeft: borderStyle , borderRight: borderStyle}};
+			} 
+		}
+	};
+	return DiffStyler;
+}());
+
+//the wrapper to order the text and diff styler so that we can always have diff highlighted on top of text syntax
+orion.CompareMergeStyler = (function() {
+	function CompareMergeStyler(compareMatchRenderer){
+		this._syntaxHighlither = new orion.CompareSyntaxHighlighter();
+		this._diffHighlither = new orion.DiffStyler(compareMatchRenderer);
+	}	
+	CompareMergeStyler.prototype = {
+		highlight: function(fileName, editorWidget) {
+			this._syntaxHighlither.highlight(fileName, editorWidget);
+			this._diffHighlither.highlight(editorWidget);
+		}
+	};
+	return CompareMergeStyler;
+}());
+
 orion.CompareMergeContainer = (function() {
 	/** @private */
 	function CompareMergeContainer(readonly , resgistry , commandService , fileClient,leftEditorDivId , rightEditorDivId , canvas) {
@@ -237,8 +341,10 @@ orion.CompareMergeContainer = (function() {
 				self.resolveDiffonSave();
 			}
 		};
-		
 		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
+		this._highlighter = [];
+		this._highlighter.push( new orion.CompareMergeStyler(this._compareMatchRenderer));//left side styler
+		this._highlighter.push( new orion.CompareMergeStyler(this._compareMatchRenderer));//right side styler
 		this.initEditorContainers("\n" , "fetching..." , "fetching..." , []);
 	}
 	CompareMergeContainer.prototype = new orion.CompareContainer();
@@ -257,35 +363,6 @@ orion.CompareMergeContainer = (function() {
 			}
 		};
 		
-	};
-	
-	CompareMergeContainer.prototype.setStyle = function(lineStyleEvent , editor){	
-		var lineIndex = lineStyleEvent.lineIndex;
-		var lineTypeWrapper =  editor.getModel().getLineType(lineIndex);
-		var lineType = lineTypeWrapper.type;
-		var annotationIndex = editor.getModel().getAnnotationIndexByMapper(lineTypeWrapper.mapperIndex);
-		var borderStyle = "1px #AAAAAA solid";
-		
-		var conflict = editor.getModel().isMapperConflict(lineTypeWrapper.mapperIndex);
-		if( conflict)
-			borderStyle = "1px #FF0000 solid";
-		if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex()){
-			if( conflict)
-				borderStyle = "2px #FF0000 solid";
-			else
-				borderStyle = "1px #000000 solid";
-		}
-		if(lineType === "top-only") {
-			lineStyleEvent.style = {style: { borderTop: borderStyle }};
-		} else if (lineType === "oneline"){
-			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , border: borderStyle }};
-		} else if (lineType === "top"){
-			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: borderStyle , borderLeft: borderStyle , borderRight: borderStyle}};
-		} else if (lineType === "bottom"){
-			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderBottom: borderStyle , borderLeft: borderStyle , borderRight: borderStyle}};
-		} else if (lineType === "middle"){
-			lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderLeft: borderStyle , borderRight: borderStyle}};
-		} 
 	};
 	
 	CompareMergeContainer.prototype.nextDiff = function(){	
@@ -330,22 +407,6 @@ orion.CompareMergeContainer = (function() {
 			var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
 			keyModeStack.push(codeBindings);
 				
-			// save binding
-			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
-			editor.getEditorWidget().setAction("save", function(){
-				editor.onInputChange(null, null, null, true);
-				var text = editor.getEditorWidget().getText();
-				var problems = [];
-				for (var i=0; i<text.length; i++) {
-					if (text.charAt(i) === 'z') {
-						var line = editor.getEditorWidget().getModel().getLineAtOffset(i) + 1;
-						var character = i - editor.getEditorWidget().getModel().getLineStart(line);
-						problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
-					}
-				}
-				annotationFactory.showProblems(problems);
-				return true;
-			});
 		};
 
 		var dirtyIndicator = "";
@@ -383,15 +444,14 @@ orion.CompareMergeContainer = (function() {
 			});
 		}
 			
-		if(createLineStyler && fileURI)
-			editorContainer.onInputChange(fileURI.split("?")[0]);
 		var editor = editorContainer.getEditorWidget();
+		if(createLineStyler && fileURI){
+			var fileName = fileURI.split("?")[0];
+			editorContainer.onInputChange(fileName);
+			this._highlighter[columnIndex].highlight(fileName , editor);
+		}
 			
 		editor.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
-		if(createLineStyler && fileURI)
-			editor.addEventListener("LineStyle", window, function(lineStyleEvent) {
-				self.setStyle(lineStyleEvent , editor);
-			}); 
 
 		if(columnIndex === 0){
 			editor.getModel().addListener(self._compareMatchRenderer);
@@ -423,14 +483,15 @@ orion.CompareMergeContainer = (function() {
 			this._inputManager.filePath = this._newFileURI;
 			this._editorLeft.getModel().init(result.mapper);
 			this._editorRight.getModel().init(result.mapper);
-			this._editorContainerRight.onInputChange(this._oldFileURI.split("?")[0], null, input);
-			self._editorRight.addEventListener("LineStyle", window, function(lineStyleEvent) {
-				self.setStyle(lineStyleEvent , self._editorRight);
-			}); 
-			this._editorContainerLeft.onInputChange(this._newFileURI.split("?")[0], null, result.output);
-			self._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
-				self.setStyle(lineStyleEvent , self._editorLeft);
-			}); 
+			
+			var fileNameR = this._oldFileURI.split("?")[0];
+			this._editorContainerRight.onInputChange(fileNameR, null, input);
+			this._highlighter[1].highlight(fileNameR , this._editorRight);
+			
+			var fileNameL = this._newFileURI.split("?")[0];
+			this._editorContainerLeft.onInputChange(fileNameL, null, result.output);
+			this._highlighter[0].highlight(fileNameL , this._editorLeft);
+			
 		}
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
 		this._compareMatchRenderer.matchPositionFromAnnotation(-1);
