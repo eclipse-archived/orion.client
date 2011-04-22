@@ -393,6 +393,7 @@ eclipse.GitService = (function() {
 				},
 				postData : dojo.toJson({
 					"PushSrcRef" : srcRef,
+					"PushTags" : true,
 					"GitSshUsername" : gitSshUsername,
 					"GitSshPassword" : gitSshPassword,
 					"GitSshKnownHost" : gitSshKnownHost,
@@ -506,6 +507,36 @@ eclipse.GitService = (function() {
 					}
 				});
 			});	
+		},
+		doAddTag : function(gitCommitURI, tagName, onLoad) {
+			var service = this;
+			
+			console.info("doAddTag called");
+			
+			return dojo.xhrPut({
+				url : gitCommitURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				putData : dojo.toJson({
+					"Name" : tagName
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
 		}
 	};
 	return GitService;

@@ -47,6 +47,9 @@ dojo.addOnLoad(function(){
 	// commands appearing directly in local actions column
 	commandService.registerCommandContribution("eclipse.openGitCommit", 1);
 	commandService.registerCommandContribution("eclipse.compareWithWorkingTree", 2);
+	if (!isRemote()){
+		commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
+	}
 
 	// selection based command contributions in nav toolbar
 	commandService.registerCommandContribution("eclipse.compareGitCommits", 1, "selectionTools", "eclipse.selectionGroup");

@@ -349,6 +349,29 @@ dojo.require("widgets.GitCredentialsDialog");
 		});
 	
 		commandService.addCommand(pushCommand, "dom");
+		
+		var addTagCommand = new eclipse.Command({
+			name : "Tag",
+			image : "images/git-tag.gif",
+			id : "eclipse.orion.git.addTag",
+			callback : function(item) {
+				var clientDeferred = new dojo.Deferred();
+				var tagName = prompt("Enter tage name");
+				serviceRegistry.getService("IGitService").then(
+						function(service) {
+							service.doAddTag(item.Location, tagName,
+								function(jsonData, secondArg) {
+									console.info(item.Location + "tagged using " + tagName);
+								});
+						});
+				return clientDeferred;
+			},
+			visibleWhen : function(item) {
+				return true;
+			}
+		});
+	
+		commandService.addCommand(addTagCommand, "object");
 	};
 	
 	eclipse.gitCommandUtils.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
