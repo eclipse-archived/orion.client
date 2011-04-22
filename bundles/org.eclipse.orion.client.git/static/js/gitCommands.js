@@ -263,6 +263,8 @@ dojo.require("widgets.GitCredentialsDialog");
 														postData : dojo.toJson({
 															"GitSshUsername" : options.gitSshUsername,
 															"GitSshPassword" : options.gitSshPassword,
+															"GitSshPrivateKey": options.gitPrivateKey,
+															"GitSshPassphrase": options.gitPassphrase,
 															"GitSshKnownHost" : options.knownHosts
 														}),
 														handleAs : "json",
@@ -327,13 +329,17 @@ dojo.require("widgets.GitCredentialsDialog");
 					title: "Push Git Repository",
 					serviceRegistry: serviceRegistry,
 					func: function(options){
+						var func = arguments.callee;
 						serviceRegistry.getService("IGitService").then(function(gitService) {
 							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
 								var deferred = gitService.doPush(item.Location, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
-										dojo.query(".treeTableRow").forEach(function(node, i) {
-											dojo.toggleClass(node, "outgoingCommitsdRow", false);
-										});
+									eclipse.gitCommandUtils.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
+											function(jsonData){
+												dojo.query(".treeTableRow").forEach(function(node, i) {
+													dojo.toggleClass(node, "outgoingCommitsdRow", false);
+												});
+											}, func);
 									});
 								});
 							});
