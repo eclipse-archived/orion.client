@@ -24,7 +24,10 @@ dojo.addOnLoad(function(){
 	};
 
 	var contentAssistFactory = function(editor) {
-		return new eclipse.ContentAssist(editor, "contentassist");
+		var contentAssist = new eclipse.ContentAssist(editor, "contentassist");
+		contentAssist.addProvider(new orion.contentAssist.CssContentAssistProvider());
+		contentAssist.addProvider(new orion.contentAssist.JavaScriptContentAssistProvider());
+		return contentAssist;
 	};
 	
 	var annotationFactory = new orion.AnnotationFactory();
