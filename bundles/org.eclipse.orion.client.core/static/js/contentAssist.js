@@ -159,14 +159,16 @@ eclipse.ContentAssist = (function() {
 				while (index > 0 && ((97 <= (c = this.editorWidget.getText(index - 1, index).charCodeAt(0)) && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) { //LETTER OR UNDERSCORE OR NUMBER
 					index--;
 				}
-				if (index === offset) {
-					return;
-				}
+				
+				// Show all proposals
+//				if (index === offset) {
+//					return;
+//				}
 				this.prefix = this.editorWidget.getText(index, offset);
 				
 				var proposals = [];
 				this.getKeywords().then(dojo.hitch(this, function(keywords) {
-					for (var i = keywords.length - 1; i>=0; i--) {
+					for (var i = 0; i < keywords.length; i++) {
 						var proposal = keywords[i];
 						if (proposal.substr(0, this.prefix.length) === this.prefix) {
 							proposals.push(proposal);
@@ -214,8 +216,10 @@ eclipse.ContentAssist = (function() {
 				return dl.then(function(results) {
 					for (var i=0; i < results.length; i++) {
 						var result = results[i];
-						var serviceKeywords = result[1];
-						keywords = keywords.concat(serviceKeywords);
+						if (result[0]) {
+							var serviceKeywords = result[1];
+							keywords = keywords.concat(serviceKeywords);
+						}
 					}
 					return keywords;
 				});
