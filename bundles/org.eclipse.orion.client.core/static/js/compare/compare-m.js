@@ -55,25 +55,35 @@ dojo.addOnLoad(function(){
 	});
 		
 	var nextDiffCommand = new eclipse.Command({
-		name : "Next diff",
+		name : "Next Difference",
 		image : "/images/compare/next-diff.gif",
 		id: "orion.compare.nextDiff",
 		groupId: "orion.compareGroup",
 		callback : function() {
 			compareMergeContainer.nextDiff();
 	}});
+	var prevDiffCommand = new eclipse.Command({
+		name : "Previous Difference",
+		image : "/images/compare/prev-diff.gif",
+		id: "orion.compare.prevDiff",
+		groupId: "orion.compareGroup",
+		callback : function() {
+			compareMergeContainer.prevDiff();
+	}});
 	var copyToLeftCommand = new eclipse.Command({
-		name : "Copy from right to left",
+		name : "Copy Current Change From Right to left",
 		image : "/images/compare/copy-to-left.gif",
 		id: "orion.compare.copyToLeft",
 		groupId: "orion.compareGroup",
 		callback : function() {
 			compareMergeContainer.copyToLeft();;
 		}});
+	commandService.addCommand(prevDiffCommand, "dom");
 	commandService.addCommand(nextDiffCommand, "dom");
 	commandService.addCommand(copyToLeftCommand, "dom");
 		
 	// Register command contributions
+	commandService.registerCommandContribution("orion.compare.prevDiff", 3, "pageActions");
 	commandService.registerCommandContribution("orion.compare.nextDiff", 2, "pageActions");
 	commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
 		

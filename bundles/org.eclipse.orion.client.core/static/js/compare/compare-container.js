@@ -337,6 +337,51 @@ orion.CompareMergeContainer = (function() {
 			getInput: function() {
 				return this.filePath;
 			},
+			setDirty: function(dirty) {
+				if (dirty) {
+					if (this._lastTitle && this._lastTitle.charAt(0) !== '*') {
+						this.setTitle('*'+ this._lastTitle);
+					}
+				} else {
+					if (this._lastTitle && this._lastTitle.charAt(0) === '*') {
+						this.setTitle(this._lastTitle.substring(1));
+					}
+				}
+			},
+			setInput: function(fileURI, editorContainer) {
+				fileClient.read(fileURI, true).then(
+					dojo.hitch(this, function(metadata) {
+						this._fileMetadata = metadata;
+						this.setTitle(metadata.Location);
+					}),
+					dojo.hitch(this, function(error) {
+						console.error("Error loading file metadata: " + error.message);
+						this.setTitle(fileURI);
+					})
+				);
+				this.lastFilePath = fileURI;
+			},
+			setTitle : function(title) {
+				var indexOfSlash = title.lastIndexOf("/");
+				var shortTitle = title;
+				if (indexOfSlash !== -1) {
+					shortTitle = "Compare " + shortTitle.substring(indexOfSlash + 1);
+					if (title.charAt(0) === '*') {
+						shortTitle = '*' + shortTitle;
+					}
+				}
+				this._lastTitle = shortTitle;
+				window.document.title = shortTitle;
+				var titlePane = dojo.byId("pageTitle");
+				if (titlePane) {
+					dojo.empty(titlePane);
+					new eclipse.BreadCrumbs({container: "pageTitle", resource: this._fileMetadata});
+					if (title.charAt(0) === '*') {
+						var dirty = dojo.create('b', null, titlePane, "last");
+						dirty.innerHTML = '*';
+					}
+				}
+			},
 			afterSave: function(){
 				self.resolveDiffonSave();
 			}
@@ -367,6 +412,10 @@ orion.CompareMergeContainer = (function() {
 	
 	CompareMergeContainer.prototype.nextDiff = function(){	
 		this._compareMatchRenderer.nextDiff();
+	};
+	
+	CompareMergeContainer.prototype.prevDiff = function(){	
+		this._compareMatchRenderer.prevDiff();
 	};
 	
 	CompareMergeContainer.prototype.copyToLeft = function(){	
@@ -434,14 +483,8 @@ orion.CompareMergeContainer = (function() {
 		editorContainer.installEditor();
 		if(!readOnly){
 			eclipse.globalCommandUtils.generateDomCommandsInBanner(this._commandService, editorContainer , "pageActionsLeft");
-			dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
-				if (dirty) {
-					dirtyIndicator = "You have unsaved changes.  ";
-				} else {
-					dirtyIndicator = "";
-				}
-				dojo.byId(tiltleDivId).innerHTML = dirtyIndicator + status;
-			});
+			inputManager = this._inputManager;
+			dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
 		}
 			
 		var editor = editorContainer.getEditorWidget();
@@ -491,6 +534,7 @@ orion.CompareMergeContainer = (function() {
 			var fileNameL = this._newFileURI.split("?")[0];
 			this._editorContainerLeft.onInputChange(fileNameL, null, result.output);
 			this._highlighter[0].highlight(fileNameL , this._editorLeft);
+			this._inputManager.setInput(fileNameL , this._editorContainerLeft);
 			
 		}
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
