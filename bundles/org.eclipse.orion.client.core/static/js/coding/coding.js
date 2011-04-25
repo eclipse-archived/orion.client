@@ -125,10 +125,6 @@ dojo.addOnLoad(function(){
 			});
 		};
 	
-		var contentAssistFactory = function(editor) {
-			return new eclipse.ContentAssist(editor, "contentassist");
-		};
-	
 		var inputManager = {
 			lastFilePath: "",
 			
