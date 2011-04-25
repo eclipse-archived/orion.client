@@ -22,7 +22,7 @@ var topHTMLFragment =
 // a table?!!?  Yes, you can't mix CSS float right and absolutes to pin the bottom.
 '<table style="border-spacing: 0px; border-collapse: collapse; width: 100%; height: 61px">' +
 	'<tr class="topRowBanner">' +
-		'<td width=93px rowspan=2><a id="home" href="/navigate-table.html"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
+		'<td width=93px rowspan=2><a id="home" href="/navigate-table.html#"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
 		'<td class="leftGlobalToolbar">' +
 			'<span class="bannerSeparator">|</span>' +
 			'<span id="pageTitle" class="statuspane"></span>' +
@@ -116,8 +116,9 @@ eclipse.globalCommandUtils.generateUserInfo = function(userName, userStatusText)
 
 eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService, handler , pageActionDomId) {
 	var toolbar = dojo.byId("pageActions");
-	if(pageActionDomId)
+	if(pageActionDomId) {
 		toolbar = dojo.byId(pageActionDomId);
+	}
 	if (toolbar) {	
 		dojo.empty(toolbar);
 		commandService.renderCommands(toolbar, "dom", handler, handler, "image");
@@ -127,6 +128,7 @@ eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService
 eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, prefsService, searcher, handler, editor) {
 	// this needs to come from somewhere but I'm not going to do a separate get for it
 	var searchLocation = "/search?q=";
+	var text;
 	var parent = dojo.byId(parentId);
 	if (!parent) {
 		throw "could not find banner parent, id was " + parentId;
@@ -140,14 +142,14 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 	if (primaryNav) {
 		var primaryLinks = [
 			// disabled for M6 since git-status needs a parameter.  For M7 should link to the clone page.	{name: "Git", url: "git-status.html"},
-			{name: "Navigator", url: "navigate-table.html"},
+			{name: "Navigator", url: "navigate-table.html#"},
 			{name: "Sites", url: "sites.html"},
 			{name: "Plugins", url: "view-registry.html"}
 		];
 		for (var i=0; i<primaryLinks.length; i++) {
 			var link = dojo.create("a", {href: primaryLinks[i].url}, primaryNav, "last");
 			dojo.addClass(link, "commandLink");
-			var text = document.createTextNode(primaryLinks[i].name);
+			text = document.createTextNode(primaryLinks[i].name);
 			dojo.place(text, link, "only");
 		}
 	}
@@ -170,21 +172,10 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 		}
 	});
 	
-	// Initialize link to home page
-	var homeNode = dojo.byId("home");
-	if (homeNode) {
-		prefsService.getPreferences("/window").then(function (prefs) {
-			var home = prefs.get("orientation");
-			home = home || "navigate-table.html";
-			prefs.put("orientation", home);
-			homeNode.href=home;
-		});
-	}
-	
 	// Put page title in title area.  This gets replaced by breadcrumbs, etc. in some pages.
 	var title = dojo.byId("pageTitle");
 	if (title) {
-		var text = document.createTextNode(document.title);
+		text = document.createTextNode(document.title);
 		dojo.place(text, title, "last");
 	}
 

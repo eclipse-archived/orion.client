@@ -55,7 +55,21 @@ eclipse.BreadCrumbs = (function() {
 				crumbs.id = this._id;
 				container.appendChild(crumbs);
 			}
-			var seg;
+			var seg, slash;
+			// create a segment that represents the navigator root
+			seg = document.createElement('a');
+			dojo.addClass(seg, "breadcrumb");
+			dojo.place(document.createTextNode("Orion Navigator"), seg, "only");
+			seg.href = "navigate-table.html#";
+			crumbs.appendChild(seg);
+			if (this._resource && this._resource.Parents) {
+				slash = document.createElement('span');
+				dojo.place(document.createTextNode('/'), slash, "only");
+				dojo.addClass(slash, "breadcrumb");
+				crumbs.appendChild(slash);
+			} else {
+				dojo.addClass(seg, "currentLocation");
+			}
 			// walk up the parent chain and insert a crumb for each parent
 			if (this._resource && this._resource.Parents) {
 				var parents = this._resource.Parents;
@@ -63,12 +77,14 @@ eclipse.BreadCrumbs = (function() {
 					seg = document.createElement('a');
 					dojo.addClass(seg, "breadcrumb");
 					dojo.place(document.createTextNode(parents[i].Name), seg, "only");
-					if(this._makeHref)
+					if(this._makeHref) {
 						this._makeHref(seg , parents[i].ChildrenLocation);
-					else
+					}
+					else {
 						seg.href = "navigate-table.html#" + parents[i].ChildrenLocation;
+					}
 					crumbs.appendChild(seg);
-					var slash = document.createElement('span');
+					slash = document.createElement('span');
 					dojo.place(document.createTextNode('/'), slash, "only");
 					dojo.addClass(slash, "breadcrumb");
 					crumbs.appendChild(slash);

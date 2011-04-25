@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011.">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+<script type="text/javascript" src="../js/plugin.js"></script>
+<script type="text/javascript" src="../js/contentAssist/coreContentAssist.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+	var provider = new eclipse.PluginProvider();
+	provider.registerServiceProvider("IContentAssistService",
+		new orion.contentAssist.CssContentAssistProvider(), 
+		{name: "CSS content assist", pattern: "\\.css$"});
+	provider.registerServiceProvider("IContentAssistService",
+		new orion.contentAssist.JavaScriptContentAssistProvider(),
+		{name: "JavaScript content assist", pattern: "\\.js$"});
+	provider.connect();
+};
+</script>
+</head>
+<body>
+</body>
+</html>

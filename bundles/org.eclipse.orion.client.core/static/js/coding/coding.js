@@ -72,7 +72,7 @@ dojo.addOnLoad(function(){
 	};
 
 	var contentAssistFactory = function(editor) {
-		return new eclipse.ContentAssist(editor, "contentassist");
+		return new eclipse.ContentAssist(editor, "contentassist", serviceRegistry);
 	};
 	
 	// Temporary.  This will evolve into something pluggable.

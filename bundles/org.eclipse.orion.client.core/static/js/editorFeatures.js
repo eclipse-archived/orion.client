@@ -192,7 +192,7 @@ orion.TextActions = (function() {
 			}));
 			this.editorWidget.setKeyBinding(new eclipse.KeyBinding("k", true), "find next");
 			this.editorWidget.setAction("find next", dojo.hitch(this, function() {
-				var result, ignoreCase;
+				var result, ignoreCase, selection;
 				if (this._incrementalFindActive) {
 					var str = this._incrementalFindPrefix;
 					ignoreCase = str.toLowerCase() === str;
@@ -201,6 +201,11 @@ orion.TextActions = (function() {
 					// RegExp search
 					result = this.editor.doFindRegExp(pattern, flags, this.editorWidget.getCaretOffset());
 				} else {
+					// use selection if there is one, otherwise use last stored string.
+					selection = this.editorWidget.getSelection();
+					if (selection.end > selection.start) {
+						searchString = this.editorWidget.getText().substring(selection.start, selection.end);
+					}
 					ignoreCase = searchString.toLowerCase() === searchString;
 					result = this.editor.doFind(searchString, this.editorWidget.getCaretOffset(), ignoreCase);
 				}
@@ -226,6 +231,9 @@ orion.TextActions = (function() {
 					// RegExp search
 					result = this.editor.doFindRegExp(pattern, flags, this.editorWidget.getCaretOffset() - selectionSize - 1, true);
 				} else {
+					if (selectionSize > 0) {
+						searchString = this.editorWidget.getText().substring(selection.start, selection.end);
+					}
 					ignoreCase = searchString.toLowerCase() === searchString;
 					result = this.editor.doFind(searchString, this.editorWidget.getCaretOffset() - selectionSize - 1, ignoreCase, true);
 				}
