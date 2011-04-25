@@ -6,6 +6,7 @@
 		"/plugins/gitPlugin.html":true,
 		"/profile/userservicePlugin.html":true,
 		"/plugins/user/userProfilePlugin.html":true,
-		"/plugins/git/userProfilePlugin.html":true
+		"/plugins/git/userProfilePlugin.html":true,
+		"/plugins/coreContentAssistPlugin.html":true
 	}
 }

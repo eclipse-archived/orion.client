@@ -8,42 +8,35 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window widgets eclipse:true serviceRegistry dojo dijit */
-/*jslint maxerr:150 browser:true devel:true regexp:false*/
+/*global eclipse:true dojo */
+/*jslint maxerr:150 browser:true devel:true */
 
+dojo.require("dojo.DeferredList");
 
 /**
  * @namespace The global container for eclipse APIs.
  */ 
 var eclipse = eclipse || {};
 
+/**
+ * A ContentAssist will look for content assist providers in the service registry (if provided).
+ * Alternately providers can be registered directly by calling {@link #addProvider}.
+ * @name eclipse.ContentAssist
+ * @param {eclipse.Editor} editor
+ * @param {String} contentAssistId
+ * @param {eclipse.ServiceRegistry} [serviceRegistry] If omitted, providers must be registered via {@link #addProvider}.
+ */
 eclipse.ContentAssist = (function() {
-	function ContentAssist(editor, contentAssistId) {
+	function ContentAssist(editor, contentAssistId, serviceRegistry) {
 		this.editor = editor;
 		this.editorWidget = editor.getEditorWidget();
 		this.contentAssistPanel = dojo.byId(contentAssistId);
 		this.active = false;
 		this.prefix = "";
-		this.keywords= [];
-		this.cssKeywords = ["color", "text-align", "text-indent", "text-decoration", 
-		 "font", "font-style", "font-family", "font-weight", "font-size", "font-variant", "line-height",
-		 "background", "background-color", "background-image", "background-position", "background-repeat", "background-attachment",
-		 "list-style", "list-style-image", "list-style-position", "list-style-type", 
-		 "outline", "outline-color", "outline-style", "outline-width",
-		 "border", "border-left", "border-top", "border-bottom", "border-right", "border-color", "border-width", "border-style",
-		 "border-bottom-color", "border-bottom-style", "border-bottom-width",
-		 "border-left-color", "border-left-style", "border-left-width",
-		 "border-top-color", "border-top-style", "border-top-width",
-		 "border-right-color", "border-right-style", "border-right-width",
-		 "padding", "padding-left", "padding-top", "padding-bottom", "padding-right",
-		 "margin", "margin-left", "margin-top", "margin-bottom", "margin-right",
-		 "width", "height", "left", "top", "right", "bottom",
-		 "min-width", "max-width", "min-height", "max-height",
-		 "display", "visibility",
-		 "clip", "cursor", "overflow", "overflow-x", "overflow-y", "position", "z-index",
-		 "vertical-align", "horizontal-align",
-		 "float", "clear"
-		];
+		this.serviceRegistry = serviceRegistry;
+		this.contentAssistProviders = [];
+		this.activeServiceReferences = [];
+		this.activeContentAssistProviders = [];
 		this.contentAssistListener = {
 			onVerify: function(event){
 				this.showContentAssist(false);
@@ -57,8 +50,8 @@ eclipse.ContentAssist = (function() {
 	ContentAssist.prototype = {
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			this.editorWidget.setKeyBinding(isMac ? new eclipse.KeyBinding(' ', false, false, false, true) : new eclipse.KeyBinding(' ', true), "content assist");
-			this.editorWidget.setAction("content assist", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(isMac ? new eclipse.KeyBinding(' ', false, false, false, true) : new eclipse.KeyBinding(' ', true), "contentAssist");
+			this.editorWidget.setAction("contentAssist", dojo.hitch(this, function() {
 				this.showContentAssist(true);
 				return true;
 			}));
@@ -66,23 +59,29 @@ eclipse.ContentAssist = (function() {
 		},
 	
 		inputChanged: function(fileName) {
-			if (fileName) {
-				var splits = fileName.split(".");
-				if (splits.length > 0) {
-					var extension = splits.pop().toLowerCase();
-					switch(extension) {
-						case "css":
-							this.keywords = this.cssKeywords;
-							break;
-						case "java":
-						case "html":
-						case "xml":
-						case "js":
-							this.keywords = [];
-							break;
+			if (this.serviceRegistry) {
+				// Filter the ServiceReferences
+				this.activeServiceReferences = [];
+				var serviceReferences = this.serviceRegistry.getServiceReferences("IContentAssistService");
+				var serviceReference;
+				dojo.forEach(serviceReferences, dojo.hitch(this, function(serviceReference) {
+					var info = {};
+					var propertyNames = serviceReference.getPropertyNames();
+					for (var i = 0; i < propertyNames.length; i++) {
+						info[propertyNames[i]] = serviceReference.getProperty(propertyNames[i]);
 					}
+					if (new RegExp(info.pattern).test(fileName)) {
+						this.activeServiceReferences.push(serviceReference);
+					}
+				}));
+			}
+			// Filter the registered providers
+			for (var i=0; i < this.contentAssistProviders.length; i++) {
+				var provider = this.contentAssistProviders[i];
+				if (new RegExp(provider.pattern).test(fileName)) {
+					this.activeContentAssistProviders.push(provider.provider);
 				}
-			}			
+			}
 		},
 		
 		cancel: function() {
@@ -166,30 +165,75 @@ eclipse.ContentAssist = (function() {
 				this.prefix = this.editorWidget.getText(index, offset);
 				
 				var proposals = [];
-				for (var i = this.keywords.length - 1; i>=0; i--) {
-					var proposal = this.keywords[i];
-					if (proposal.substr(0, this.prefix.length) === this.prefix) {
-						proposals.push(proposal);
+				this.getKeywords().then(dojo.hitch(this, function(keywords) {
+					for (var i = keywords.length - 1; i>=0; i--) {
+						var proposal = keywords[i];
+						if (proposal.substr(0, this.prefix.length) === this.prefix) {
+							proposals.push(proposal);
+						}
 					}
-				}
-				if (proposals.length === 0) {
-					return;
-				}
-				
-				var caretLocation = this.editorWidget.getLocationAtOffset(offset);
-				caretLocation.y += this.editorWidget.getLineHeight();
-				this.contentAssistPanel.innerHTML = "";
-				for (i = 0; i<proposals.length; i++) {
-					createDiv(proposals[i], i===0, this.contentAssistPanel);
-				}
-				this.editorWidget.convert(caretLocation, "document", "page");
-				this.contentAssistPanel.style.left = caretLocation.x + "px";
-				this.contentAssistPanel.style.top = caretLocation.y + "px";
-				this.contentAssistPanel.style.display = "block";
-				this.editorWidget.addEventListener("Verify", this, this.contentAssistListener.onVerify);
-				this.editorWidget.addEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
-				this.active = true;
+					if (proposals.length === 0) {
+						return;
+					}
+					
+					var caretLocation = this.editorWidget.getLocationAtOffset(offset);
+					caretLocation.y += this.editorWidget.getLineHeight();
+					this.contentAssistPanel.innerHTML = "";
+					for (i = 0; i<proposals.length; i++) {
+						createDiv(proposals[i], i===0, this.contentAssistPanel);
+					}
+					this.editorWidget.convert(caretLocation, "document", "page");
+					this.contentAssistPanel.style.left = caretLocation.x + "px";
+					this.contentAssistPanel.style.top = caretLocation.y + "px";
+					this.contentAssistPanel.style.display = "block";
+					this.editorWidget.addEventListener("Verify", this, this.contentAssistListener.onVerify);
+					this.editorWidget.addEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
+					this.active = true;
+				}));
 			}
+		},
+		/**
+		 * @returns {dojo.Deferred} A future that will provide the keywords.
+		 */
+		getKeywords: function() {
+			var keywords = [];
+			
+			// Add keywords from directly registered providers
+			dojo.forEach(this.activeContentAssistProviders, function(provider) {
+				keywords = keywords.concat(provider.getKeywords() || []);
+			});
+			
+			// Add keywords from providers registered through service registry
+			if (this.serviceRegistry) {
+				var keywordPromises = dojo.map(this.activeServiceReferences, dojo.hitch(this, function(serviceRef) {
+						return this.serviceRegistry.getService(serviceRef).then(function(service) {
+							return service.getKeywords();
+						});
+					}));
+				var dl = new dojo.DeferredList(keywordPromises);
+				return dl.then(function(results) {
+					for (var i=0; i < results.length; i++) {
+						var result = results[i];
+						var serviceKeywords = result[1];
+						keywords = keywords.concat(serviceKeywords);
+					}
+					return keywords;
+				});
+			} else {
+				var d = new dojo.Deferred();
+				d.callback(keywords);
+				return d;
+			}
+		},
+		/**
+		 * Adds a content assist provider.
+		 * @param {Object} provider The provider object. See {@link orion.contentAssist.CssContentAssistProvider} for an example.
+		 * @param {String} name 
+		 * @param {String} pattern The regex pattern matching filenames that provider can offer content assist for.
+		 */
+		addProvider: function(provider, name, pattern) {
+			this.contentAssistProviders = this.contentAssistProviders || [];
+			this.contentAssistProviders.push({name: name, pattern: pattern, provider: provider});
 		}
 	};
 	return ContentAssist;
