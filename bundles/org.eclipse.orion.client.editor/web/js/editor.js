@@ -541,6 +541,15 @@ eclipse.Editor = (function() {
 			var frame = this._frame;
 			parent.removeChild(frame);
 			
+			if (isPad) {
+				parent.removeChild(this._touchDiv);
+				this._touchDiv = null;
+				this._selDiv1 = null;
+				this._selDiv2 = null;
+				this._selDiv3 = null;
+				this._textArea = null;
+			}
+			
 			var e = {};
 			this.onDestroy(e);
 			
@@ -557,7 +566,6 @@ eclipse.Editor = (function() {
 			this._editorDiv = null;
 			this._clientDiv = null;
 			this._overlayDiv = null;
-			this._textArea = null;
 			this._keyBindings = null;
 			this._actions = null;
 		},
@@ -2932,64 +2940,83 @@ eclipse.Editor = (function() {
 				return this._frameWindow.clipboardData.getData("Text");
 			}
 			if (isFirefox) {
-				var textArea = this._textArea;
-				textArea.innerHTML = "";
-				textArea.focus();
+				var window = this._frameWindow;
+				var document = this._frameDocument;
+				var child = document.createElement("PRE");
+				child.style.position = "fixed";
+				child.style.left = "-1000px";
+				child.appendChild(document.createTextNode(" "));
+				this._clientDiv.appendChild(child);
+				var range = document.createRange();
+				range.selectNodeContents(child);
+				var sel = window.getSelection();
+				if (sel.rangeCount > 0) { sel.removeAllRanges(); }
+				sel.addRange(range);
+				var self = this;
+				var cleanup = function() {
+					self._updateDOMSelection();
+					self._clientDiv.removeChild(child);
+				};
 				var delimiter = this._model.getLineDelimiter();
 				var _getText = function() {
-					var text;
-					if (textArea.firstChild) {
-						text = "";
-						var child = textArea.firstChild;
-						while (child) {
-							if (child.nodeType === child.TEXT_NODE) {
-								text += child.data;
-							} else if (child.tagName === "BR") {
-								text += delimiter; 
-							} 
-							child = child.nextSibling;
-						}
-					} else {
-						text = textArea.value;
+					/*
+					* Use the selection anchor to determine the end of the pasted text as it is possible that
+					* some browsers (like Firefox) add extra elements (<BR>) after the pasted text.
+					*/
+					var endNode = null;
+					if (sel.anchorNode.nodeType !== child.TEXT_NODE) {
+						endNode = sel.anchorNode.childNodes[sel.anchorOffset];
 					}
-					return text;
+					var text = [];
+					var getNodeText = function(node) {
+						var nodeChild = node.firstChild;
+						while (nodeChild !== endNode) {
+							if (nodeChild.nodeType === child.TEXT_NODE) {
+								text.push(nodeChild !== sel.anchorNode ? nodeChild.data : nodeChild.data.substring(0, sel.anchorOffset));
+							} else if (nodeChild.tagName === "BR") {
+								text.push(delimiter); 
+							} else {
+								getNodeText(nodeChild);
+							}
+							nodeChild = nodeChild.nextSibling;
+						}
+					};
+					getNodeText(child);
+					cleanup();
+					return text.join("");
 				};
 				
-				//Try execCommand first. Works on firefox with clipboard permission,
+				/* Try execCommand first. Works on firefox with clipboard permission. */
 				var result = false;
 				this._ignorePaste = true;
 				try {
-					var document = this._frameDocument;
 					result = document.execCommand("paste", false, null);
-				} catch (ex) {
-				}
+				} catch (ex) {}
 				this._ignorePaste = false;
-				
 				if (!result) {
-					//Try native paste in the text area, works for firefox (asynchronously) 
-					//only works during the paste event
+					/*
+					* Try native paste in DOM, works for firefox during the paste event.
+					*/
 					if (event) {
-						var self = this;
 						setTimeout(function() {
-							self.focus();
 							var text = _getText();
 							if (text) { self._doContent(text); }
 						}, 0);
 						return null;
 					} else {
-						//no event and no clipboard permission, paste can't be performed
-						//suggest allow clipboard helper to the user
-						this.focus();
+						/* no event and no clipboard permission, paste can't be performed */
+						cleanup();
 						return "";
 					}
 				}
-				this.focus();
 				return _getText();
 			}
 			//webkit
 			if (event && event.clipboardData) {
-				// Webkit (Chrome/Safari) allows getData during the paste event
-				// Note: setData is not allowed, not even during copy/cut event
+				/*
+				* Webkit (Chrome/Safari) allows getData during the paste event
+				* Note: setData is not allowed, not even during copy/cut event
+				*/
 				return event.clipboardData.getData("text/plain");
 			} else {
 				//TODO try paste using extension (Chrome only)
@@ -3431,16 +3458,16 @@ eclipse.Editor = (function() {
 			
 			var clientDiv = this._clientDiv;
 			var editorDiv = this._editorDiv;
-			var textArea = this._textArea;
 			var body = this._frameDocument.body; 
 			var handlers = this._handlers = [];
 			var resizeNode = isIE < 9 ? this._frame : this._frameWindow;
-			var focusNode = isPad ? textArea : (isIE ? this._clientDiv: this._frameWindow);
+			var focusNode = isPad ? this._textArea : (isIE ? this._clientDiv: this._frameWindow);
 			handlers.push({target: resizeNode, type: "resize", handler: function(e) { return self._handleResize(e);}});
 			handlers.push({target: focusNode, type: "blur", handler: function(e) { return self._handleBlur(e);}});
 			handlers.push({target: focusNode, type: "focus", handler: function(e) { return self._handleFocus(e);}});
 			if (isPad) {
 				var touchDiv = this._touchDiv;
+				var textArea = this._textArea;
 				handlers.push({target: textArea, type: "keydown", handler: function(e) { return self._handleKeyDown(e);}});
 				handlers.push({target: textArea, type: "input", handler: function(e) { return self._handleInput(e); }});
 				handlers.push({target: textArea, type: "textInput", handler: function(e) { return self._handleTextInput(e); }});
@@ -3591,7 +3618,6 @@ eclipse.Editor = (function() {
 			body.style.borderWidth = "0px";
 			body.style.padding = "0px";
 			
-			var textArea;
 			if (isPad) {
 				var touchDiv = parentDocument.createElement("DIV");
 				this._touchDiv = touchDiv;
@@ -3607,7 +3633,7 @@ eclipse.Editor = (function() {
 				touchDiv.style.WebkitUserSelect = "none";
 				parent.appendChild(touchDiv);
 
-				textArea = parentDocument.createElement("TEXTAREA");
+				var textArea = parentDocument.createElement("TEXTAREA");
 				this._textArea = textArea;
 				textArea.style.position = "absolute";
 				textArea.style.whiteSpace = "pre";
@@ -3625,15 +3651,6 @@ eclipse.Editor = (function() {
 				textArea.style.WebkitAppearance = "none";
 				textArea.style.WebkitTapHighlightColor = "transparent";
 				touchDiv.appendChild(textArea);
-			} else {
-				textArea = document.createElement("TEXTAREA");
-				this._textArea = textArea;
-				textArea.id = "textArea";
-				textArea.style.position = "fixed";
-				textArea.style.whiteSpace = "pre";
-				textArea.style.left = "-1000px";
-				textArea.tabIndex = -1;
-				body.appendChild(textArea);
 			}
 
 			var editorDiv = document.createElement("DIV");
@@ -3907,17 +3924,58 @@ eclipse.Editor = (function() {
 				//IE
 				return this._frameWindow.clipboardData.setData("Text", text);
 			}
+			/* Feature in Chrome, clipboardData.setData is no-op on Chrome even though it returns true */
 			if (isChrome || isFirefox || !event) {
-				/* Feature in Chrome, clipboardData.setData is no-op on chrome, the fix is to use execCommand */
+				var window = this._frameWindow;
 				var document = this._frameDocument;
-				var textArea = this._textArea;
-				textArea.value = text;
-				textArea.focus();
-				textArea.select();
+				var child = document.createElement("PRE");
+				child.style.position = "fixed";
+				child.style.left = "-1000px";
+				var cr = 0, lf = 0, index = 0, length = text.length;
+				while (index < length) {
+					if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); }
+					if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); }
+					var start = index, end;
+					if (lf === -1 && cr === -1) {
+						child.appendChild(document.createTextNode(text.substring(index)));
+						break;
+					}
+					if (cr !== -1 && lf !== -1) {
+						if (cr + 1 === lf) {
+							end = cr;
+							index = lf + 1;
+						} else {
+							end = cr < lf ? cr : lf;
+							index = (cr < lf ? cr : lf) + 1;
+						}
+					} else if (cr !== -1) {
+						end = cr;
+						index = cr + 1;
+					} else {
+						end = lf;
+						index = lf + 1;
+					}
+					child.appendChild(document.createTextNode(text.substring(start, end)));
+					child.appendChild(document.createElement("BR"));
+				}
+				child.appendChild(document.createTextNode(" "));
+				this._clientDiv.appendChild(child);
+				var range = document.createRange();
+				range.setStart(child.firstChild, 0);
+				range.setEndBefore(child.lastChild);
+				var sel = window.getSelection();
+				if (sel.rangeCount > 0) { sel.removeAllRanges(); }
+				sel.addRange(range);
+				var self = this;
+				var cleanup = function() {
+					self._clientDiv.removeChild(child);
+					self._updateDOMSelection();
+				};
 				var result = false;
-				
-				//Try execCommand first, it works on firefox with clipboard permission,
-				// chrome 5, safari 4.
+				/* 
+				* Try execCommand first, it works on firefox with clipboard permission,
+				* chrome 5, safari 4.
+				*/
 				this._ignoreCopy = true;
 				try {
 					result = document.execCommand("copy", false, null);
@@ -3925,27 +3983,17 @@ eclipse.Editor = (function() {
 				this._ignoreCopy = false;
 				if (!result) {
 					if (event) {
-						if (event.type === "copy" && this._isDOMSelectionComplete()) {
-							this.focus();
-							return false;
-						}
-						var self = this;
-						setTimeout(function() {
-							self.focus();
-						}, 0);
+						setTimeout(cleanup, 0);
 						return false;
-					} else {
-						//no event and no permission, give up
-						this.focus();
-						return true;
 					}
 				}
-				this.focus();
-				return result;
+				/* no event and no permission, copy can not be done */
+				cleanup();
+				return true;
 			}
 			if (event && event.clipboardData) {
 				//webkit
-				return event.clipboardData.setData("text/plain", text);
+				return event.clipboardData.setData("text/plain", text); 
 			}
 		},
 		_setDOMSelection: function (startNode, startOffset, endNode, endOffset) {
