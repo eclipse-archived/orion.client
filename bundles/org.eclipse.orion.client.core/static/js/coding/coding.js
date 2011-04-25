@@ -52,7 +52,7 @@ dojo.addOnLoad(function(){
 		new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
 	}());
 	
-	var topContainerWidget = dijit.byId("topContainer"),
+	var splitArea = dijit.byId("orion.innerCoding"),
 		outlineDomNode = dojo.byId("outline"),
 		editorContainerDomNode = dojo.byId("editorContainer"),
 		searchFloat = dojo.byId("searchFloat"),
@@ -286,7 +286,7 @@ dojo.addOnLoad(function(){
 		// splitter binding
 		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("o", true), "toggle");
 		editor.getEditorWidget().setAction("toggle", function(){
-				topContainerWidget.toggle();
+				splitArea.toggle();
 		});
 	};
 	
@@ -347,7 +347,7 @@ dojo.addOnLoad(function(){
 	};
 	
 	// Set up the border container
-	topContainerWidget.setToggleCallback(function() {
+	splitArea.setToggleCallback(function() {
 		editorContainer.getEditorWidget().redrawLines();
 	});
 			
@@ -355,7 +355,7 @@ dojo.addOnLoad(function(){
 	document.onkeydown = function (evt){
 		evt = evt || window.event;
 		if(evt.ctrlKey && evt.keyCode  === 79){
-			topContainerWidget.toggle();
+			splitArea.toggle();
 			if(document.all){ 
 				evt.keyCode = 0;
 			}else{ 

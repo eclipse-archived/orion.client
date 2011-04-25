@@ -58,7 +58,7 @@ dojo.addOnLoad(function(){
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	
 	// set up the splitter bar and its key binding
-	var topContainer = dijit.byId("eclipse.navigate-table");
+	var splitArea = dijit.byId("orion.innerNavigator");
 			
 	var bufferedSelection = [];
 	
@@ -66,7 +66,7 @@ dojo.addOnLoad(function(){
 		evt = evt || window.event;
 		var handled = false;
 		if(evt.ctrlKey && evt.keyCode  === 79){ // Ctrl+o handler for toggling outline 
-			topContainer.toggle();
+			splitArea.toggle();
 			handled = true;			
 		} else if(evt.ctrlKey && evt.keyCode  === 67){ // Ctrl+c buffers selection
 			selection.getSelections(function(selections) {
