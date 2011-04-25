@@ -58,19 +58,6 @@ dojo.addOnLoad(function(){
 		searchFloat = dojo.byId("searchFloat"),
 		leftPane = dojo.byId("leftPane");
 
-	var fileServices = serviceRegistry.getServiceReferences("IFileService");
-	var fileServiceReference;
-	
-	for (var i=0; i<fileServices.length; i++) {
-		var info = {};
-		var propertyNames = fileServices[i].getPropertyNames();
-		for (var j = 0; j < propertyNames.length; j++) {
-			info[propertyNames[j]] = fileServices[i].getProperty(propertyNames[j]);
-		}
-		if (new RegExp(info.pattern).test(dojo.hash())) {
-			fileServiceReference = fileServices[i];
-		}
-	}
 
 	var contentAssistFactory = function(editor) {
 		return new eclipse.ContentAssist(editor, "contentassist", serviceRegistry);
@@ -110,6 +97,20 @@ dojo.addOnLoad(function(){
 			}
 		}
 	};
+
+	var fileServices = serviceRegistry.getServiceReferences("IFileService");
+	var fileServiceReference;
+	
+	for (var i=0; i<fileServices.length; i++) {
+		var info = {};
+		var propertyNames = fileServices[i].getPropertyNames();
+		for (var j = 0; j < propertyNames.length; j++) {
+			info[propertyNames[j]] = fileServices[i].getProperty(propertyNames[j]);
+		}
+		if (new RegExp(info.pattern).test(dojo.hash())) {
+			fileServiceReference = fileServices[i];
+		}
+	}
 
 	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
 		var fileClient = new eclipse.FileClient(fileService);

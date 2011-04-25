@@ -18,25 +18,39 @@ dojo.addOnLoad(function(){
 	new eclipse.GitService(serviceRegistry);
 	// File operations
 
-//commented out temporarily - Boris
-//	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
+	var fileServices = serviceRegistry.getServiceReferences("IFileService");
+	var fileServiceReference;
+	
+	for (var i=0; i<fileServices.length; i++) {
+		var info = {};
+		var propertyNames = fileServices[i].getPropertyNames();
+		for (var j = 0; j < propertyNames.length; j++) {
+			info[propertyNames[j]] = fileServices[i].getProperty(propertyNames[j]);
+		}
+		if (new RegExp(info.pattern).test(dojo.hash())) {
+			fileServiceReference = fileServices[i];
+		}
+	}
 
-	var controller = new orion.GitStatusController(serviceRegistry , "unstagedZone" , "stagedZone");
-	controller.getGitStatus(dojo.hash());
+	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
+		var fileClient = new eclipse.FileClient(fileService);
 
-	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
-//commented out temporarily - Boris
-//	initTitleBar(fileClient);
-	//every time the user manually changes the hash, we need to load the git status
-	dojo.subscribe("/dojo/hashchange", controller, function() {
+	
+		var controller = new orion.GitStatusController(serviceRegistry , "unstagedZone" , "stagedZone");
 		controller.getGitStatus(dojo.hash());
-//commented out temporarily - Boris
-//		initTitleBar(fileClient);
+	
+		eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
+		initTitleBar(fileClient);
+		//every time the user manually changes the hash, we need to load the git status
+		dojo.subscribe("/dojo/hashchange", controller, function() {
+			controller.getGitStatus(dojo.hash());
+			initTitleBar(fileClient);
+		});
 	});
 	
 });
 
-function initTitleBar(){
+function initTitleBar(fileClient){
 	var fileURI = null;
 	var folder = dojo.hash().split("git/status");
 	if(folder.length === 2)
