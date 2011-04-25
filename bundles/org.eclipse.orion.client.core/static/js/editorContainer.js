@@ -332,6 +332,10 @@ orion.EditorContainer = (function() {
 								case "css":
 									this.styler = new eclipse.TextStyler(this._editor, "css");
 									break;
+								case "json":
+									// FIXME mamacdon
+									this.styler = new orion.styler.JsonStyler(this._editor);
+									break;
 							}
 						}
 					}
