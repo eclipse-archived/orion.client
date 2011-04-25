@@ -32,12 +32,6 @@ dojo.addOnLoad(function(){
 			pluginRegistry.shutdown();
 		});
 		
-//		// this is temporary
-//		var jslintPlugin = pluginRegistry.getPlugin("/plugins/jslintPlugin.html");
-//		if (jslintPlugin === null) {
-//			pluginRegistry.installPlugin("/plugins/jslintPlugin.html");
-//		}
-
 		selection = new orion.Selection(serviceRegistry);
 		statusReportingService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "pageActionsLeft");
 		new eclipse.LogService(serviceRegistry);
