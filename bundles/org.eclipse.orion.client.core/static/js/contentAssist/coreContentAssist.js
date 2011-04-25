@@ -12,16 +12,21 @@
 
 /** @namespace */
 var orion = orion || {};
+
 orion.contentAssist = orion.contentAssist || {};
 
 /**
- * @name orion.contentAssist.CssContentAssistProvider
+ * @class orion.contentAssist.CssContentAssistProvider
  */
 orion.contentAssist.CssContentAssistProvider = (function() {
+	/** @private */
 	function CssContentAssistProvider() {
 	}
-	CssContentAssistProvider.prototype = {
-		getKeywords: function() /** @lends orion.contentAssist.CssContentAssistProvider.prototype */ {
+	CssContentAssistProvider.prototype = /** @lends orion.contentAssist.CssContentAssistProvider.prototype */ {
+		/**
+		 * @returns {String[]} The keywords to be offered for content assist in CSS code.
+		 */
+		getKeywords: function() {
 			return [ "background", "background-attachment", "background-color", "background-image",
 					"background-position", "background-repeat", "border", "border-bottom",
 					"border-bottom-color", "border-bottom-style", "border-bottom-width", "border-color",
@@ -43,12 +48,16 @@ orion.contentAssist.CssContentAssistProvider = (function() {
 }());
 
 /**
- * @name orion.contentAssist.JavaScriptContentAssistProvider
+ * @class orion.contentAssist.JavaScriptContentAssistProvider
  */
 orion.contentAssist.JavaScriptContentAssistProvider = (function() {
+	/** @private */
 	function JavaScriptContentAssistProvider() {
 	}
 	JavaScriptContentAssistProvider.prototype = /** @lends orion.contentAssist.JavaScriptContentAssistProvider.prototype */ {
+		/**
+		 * @returns {String[]} The keywords to be offered for content assist in JavaScript code.
+		 */
 		getKeywords: function() {
 			return [ "break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else",
 					"finally", "for", "function", "if", "in", "instanceof", "new", "return", "switch",
