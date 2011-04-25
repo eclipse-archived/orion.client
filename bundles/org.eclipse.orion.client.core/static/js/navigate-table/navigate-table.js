@@ -50,13 +50,78 @@ dojo.addOnLoad(function(){
 		children:[]
 	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+				
+	var fileServices = serviceRegistry.getServiceReferences("IFileService");
 	
-	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
+	function emptyArray() {
+		var d = new dojo.Deferred();
+		d.callback([]);
+		return d;
+	}
+	function emptyObject() {
+		var d = new dojo.Deferred();
+		d.callback({});
+		return d;
+	}
+	var topLevel = [];
+	var topLevelFileService = {
+		fetchChildren: emptyArray,
+		createWorkspace: emptyObject,
+		loadWorkspaces: emptyArray,
+		loadWorkspace: function(location) {
+			var d = new dojo.Deferred();
+			d.callback({Children: topLevel});
+			return d;
+		},
+		createProject: emptyObject,
+		removeProject: emptyObject,
+		createFolder: emptyObject,
+		createFile: emptyObject,
+		deleteFile: emptyObject,
+		moveFile: emptyObject,
+		copyFile: emptyObject,
+		read: emptyObject,
+		write: emptyObject
+	};
+
+	var fileClient = new eclipse.FileClient(topLevelFileService);
 	
 	var explorer = new eclipse.FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 	
+	function refresh() {
+		var fileServiceReference;
+		topLevel = [];
+		for (var i=0; i<fileServices.length; i++) {
+			var info = {Directory:true, Length: 0, LocalTimeStamp: 0};
+			var propertyNames = fileServices[i].getPropertyNames();
+			for (var j = 0; j < propertyNames.length; j++) {
+				info[propertyNames[j]] = fileServices[i].getProperty(propertyNames[j]);
+			}
+			info.ChildrenLocation = info.top;
+			info.Location = info.top;
+			topLevel.push(info);
+			if (new RegExp(info.pattern).test(dojo.hash())) {
+				fileServiceReference = fileServices[i];
+			}
+		}
+		if (topLevel.length === 1 && !fileServiceReference) {
+			dojo.hash(topLevel[0].top);
+			return;
+		}
+		var deferred;
+		if (fileServiceReference) {
+			deferred = serviceRegistry.getService(fileServiceReference);
+		} else {
+			deferred = { then: function(callback) { callback(topLevelFileService); } };
+		}
+		deferred.then(function(fileService) {
+			fileClient.setFileService(fileService);
+			explorer.loadResourceList(dojo.hash());
+		});
+	}
+
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
-	
+		
 	// set up the splitter bar and its key binding
 	var topContainer = dijit.byId("eclipse.navigate-table");
 			
@@ -106,7 +171,7 @@ dojo.addOnLoad(function(){
 			}		
 		}
 	};
-
+	
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
 	// commands shared by navigators
@@ -149,9 +214,15 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.deleteFile", 3, "selectionTools", "eclipse.selectionGroup");
 	// git contributions
 	commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup");
-
+	
 	eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "eclipse.fileGroup", "eclipse.selectionGroup");
 	
+	//every time the user manually changes the hash, we need to load the workspace with that name
+	dojo.subscribe("/dojo/hashchange", explorer, function() {
+		refresh();
+	});
+	refresh();
+
 	/*  For now I'm hiding the concept of switchable views. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=338608
 	var treeViewCommand = new eclipse.Command({
 		name : "Tree View",
@@ -169,11 +240,4 @@ dojo.addOnLoad(function(){
 	commandService.addCommandGroup("eclipse.viewGroup", 800);
 	commandService.registerCommandContribution("eclipse.treeViewCommand", 1, "navToolBar", "eclipse.viewGroup");
 	*/
-	explorer.loadResourceList(dojo.hash());
-	
-	//every time the user manually changes the hash, we need to load the workspace with that name
-	dojo.subscribe("/dojo/hashchange", explorer, function() {
-	   explorer.loadResourceList(dojo.hash());
-	});
-	
 });

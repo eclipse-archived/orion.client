@@ -93,6 +93,9 @@ eclipse.FileServiceImpl= (function() {
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location) {
+			if (location==="/file/") {
+				location = null;
+			}
 			return dojo.xhrGet({
 				url: location ? location : "/workspace",
 				headers: {
