@@ -1,3 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript">
+        var djConfig = {
+		isDebug: true,
+		modulePaths: {'widgets': '/js/widgets'},
+		parseOnLoad: true
+        };
+    </script>
+
+	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<script type="text/javascript" src="../js/plugin.js"></script>
+	<script type="text/javascript">
 /*******************************************************************************
  * Copyright (c) 2010, 2011 IBM Corporation and others All rights reserved. This
  * program and the accompanying materials are made available under the terms of
@@ -7,43 +24,56 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo window eclipse:true handleAuthenticationError */
-/*jslint forin:true devel:true*/
 
 /** @namespace The global container for eclipse APIs. */
 var eclipse = eclipse || {};
 
 /**
- * The file client provides a convenience API for interacting with a file service
- * provided by a plugin. This class handles authorization, and authentication-related
- * error handling.
+ * An implementation of the file service that understands the Orion 
+ * server file API. This implementation is suitable for invocation by a remote plugin.
  */
-eclipse.FileClient = (function() {
+eclipse.SampleFileServiceImpl= (function() {
 	/**
 	 * @class Provides operations on files, folders, and projects.
-	 * @name eclipse.FileClient
+	 * @name FileServiceImpl
 	 */
-	function FileClient(fileService) {
-		this.fileService = fileService;
+	function FileServiceImpl() {
 	}
 	
-	FileClient.prototype = /**@lends eclipse.FileClient.prototype */
+	FileServiceImpl.prototype = /**@lends eclipse.FileServiceImpl.prototype */
 	{
-		/**
-		 * Set the file service
-		 * @param fileService the file service object
-		 */
-		setFileService: function(fileService) {
-			this.fileService = fileService;
-		},
-		
 		/**
 		 * Obtains the children of a remote resource
 		 * @param location The location of the item to obtain children for
 		 * @return A deferred that will provide the array of child objects when complete
 		 */
 		fetchChildren: function(location) {
-			return this._doServiceCall("fetchChildren", arguments);
+			console.log("fetchChildren: " + location);
+			var d = new dojo.Deferred();
+			d.callback([
+			{
+				Directory: false,
+				Length: 12292,
+				LocalTimeStamp: 1300825902000,
+				Location: "/sample/four.js",
+				Name: "four.js"
+			},
+			{
+				Directory: false,
+				Length: 12292,
+				LocalTimeStamp: 1300826902000,
+				Location: "/sample/five.js",
+				Name: "five.js"
+			},
+			{
+				Directory: false,
+				Length: 12292,
+				LocalTimeStamp: 1300925902000,
+				Location: "/sample/six.js",
+				Name: "six.js"
+			}
+			]);
+			return d;
 		},
 
 		/**
@@ -52,7 +82,10 @@ eclipse.FileClient = (function() {
 		 * @param {String} name The name of the new workspace
 		 */
 		createWorkspace: function(name) {
-			return this._doServiceCall("createWorkspace", arguments);
+			console.log("createWorkspace: " + name);
+			var d = new dojo.Deferred();
+			d.callback({});
+			return d;
 		},
 
 		/**
@@ -60,7 +93,10 @@ eclipse.FileClient = (function() {
 		 * workspaces when ready.
 		 */
 		loadWorkspaces: function() {
-			return this._doServiceCall("loadWorkspaces", arguments);
+			console.log("loadWorkspaces");
+			var d = new dojo.Deferred();
+			d.callback([]);
+			return d;
 		},
 		
 		/**
@@ -70,9 +106,41 @@ eclipse.FileClient = (function() {
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location) {
-			return this._doServiceCall("loadWorkspace", arguments);
+			console.log("loadWorkspace: " + location);
+			var d = new dojo.Deferred();
+			d.callback({Children:[
+			{
+				Directory: true,
+				ChildrenLocation: "/sample/457634576354uuid",
+				Length: 12292,
+				LocalTimeStamp: 1300826902000,
+				Location: "/sample/457634576354uuid",
+				Name: "folder"
+			},
+			{
+				Directory: false,
+				Length: 12292,
+				LocalTimeStamp: 1300825902000,
+				Location: "/sample/one.js",
+				Name: "one.js"
+			},
+			{
+				Directory: false,
+				Length: 12292,
+				LocalTimeStamp: 1300826902000,
+				Location: "/sample/two.js",
+				Name: "two.js"
+			},
+			{
+				Directory: false,
+				Length: 12292,
+				LocalTimeStamp: 1300925902000,
+				Location: "/sample/three.js",
+				Name: "three.js"
+			}
+			]});
+			return d;
 		},
-		
 		/**
 		 * Adds a project to a workspace.
 		 * @param {String} url The workspace location
@@ -81,7 +149,15 @@ eclipse.FileClient = (function() {
 		 * @param {Boolean} create If true, the project is created on the server file system if it doesn't already exist
 		 */
 		createProject: function(url, projectName, serverPath, create) {
-			return this._doServiceCall("createProject", arguments);
+			if (!url) { // null, undefined, '' ...
+				// window.document.eas.status.setErrorMessage("<enter message here>");
+				console.error("url is undefined, make sure you're signed in before creating a project");
+				return;
+			}
+			console.log("createProject: " + url + ", name: " + projectName + ", path: " + serverPath + ", create: " + create);
+			var d = new dojo.Deferred();
+			d.callback({});
+			return d;
 		},
 		/**
 		 * Removes a project from a workspace. Note that project contents are not deleted.
@@ -90,7 +166,10 @@ eclipse.FileClient = (function() {
 		 * @return A deferred that can be used to chain events after the deletion completes
 		 */
 		removeProject: function(workspaceLocation, projectLocation) {
-			return this._doServiceCall("removeProject", arguments);
+			console.log("removeProject: " + workspaceLocation + ", projectLocation: " + projectLocation);
+			var d = new dojo.Deferred();
+			d.callback({});
+			return d;
 		},
 		/**
 		 * Creates a folder.
@@ -99,7 +178,10 @@ eclipse.FileClient = (function() {
 		 * @return {Object} JSON representation of the created folder
 		 */
 		createFolder: function(parentLocation, folderName) {
-			return this._doServiceCall("createFolder", arguments);
+			console.log("createFolder: " + parentLocation+ ", folderName: " + folderName);
+			var d = new dojo.Deferred();
+			d.callback({});
+			return d;
 		},
 		/**
 		 * Create a new file in a specified location. Returns a deferred that will provide
@@ -109,14 +191,20 @@ eclipse.FileClient = (function() {
 		 * @return {Object} A deferred that will provide the new file object
 		 */
 		createFile: function(parentLocation, fileName) {
-			return this._doServiceCall("createFile", arguments);
+			console.log("createFile: " + parentLocation+ ", fileName: " + fileName);
+			var d = new dojo.Deferred();
+			d.callback({});
+			return d;
 		},
 		/**
 		 * Deletes a file or directory.
 		 * @param {String} location The location of the file or directory to delete.
 		 */
 		deleteFile: function(location) {
-			return this._doServiceCall("deleteFile", arguments);
+			console.log("deleteFile: " + location);
+			var d = new dojo.Deferred();
+			d.callback({});
+			return d;
 		},
 		
 		/**
@@ -125,8 +213,8 @@ eclipse.FileClient = (function() {
 		 * @param {String} targetLocation The location of the target folder.
 		 * @param {String} [name] The name of the destination file or directory in the case of a rename
 		 */
-		moveFile: function(sourceLocation, targetLocation) {
-			return this._doServiceCall("moveFile", arguments);
+		moveFile: function(sourceLocation, targetLocation, name) {
+			this._doCopyMove(sourceLocation, targetLocation, true, name);
 		},
 		 
 		/**
@@ -135,10 +223,21 @@ eclipse.FileClient = (function() {
 		 * @param {String} targetLocation The location of the target folder.
 		 * @param {String} [name] The name of the destination file or directory in the case of a rename
 		 */
-		copyFile: function(sourceLocation, targetLocation) {
-			return this._doServiceCall("copyFile", arguments);
+		copyFile: function(sourceLocation, targetLocation, name) {
+			this._doCopyMove(sourceLocation, targetLocation, false, name);
 		},
-
+		
+		_doCopyMove: function(sourceLocation, targetLocation, isMove, name) {
+			if (!name) {
+				//take the last segment (trailing slash will product an empty segment)
+				var segments = sourceLocation.split("/");
+				name = segments.pop() || segments.pop();
+			}
+			console.log("docopymove: " + sourceLocation+ ", targetLocation: " + targetLocation+ ", isMove: " + isMove+ ", name: " + name);
+			var d = new dojo.Deferred();
+			d.callback({});
+			return d;
+		},
 		/**
 		 * Returns the contents or metadata of the file at the given location.
 		 *
@@ -148,9 +247,10 @@ eclipse.FileClient = (function() {
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
 		read: function(location, isMetadata) {
-			return this._doServiceCall("read", arguments);
+			var d = new dojo.Deferred();
+			d.callback("Hello World");
+			return d;
 		},
-
 		/**
 		 * Writes the contents or metadata of the file at the given location.
 		 *
@@ -159,65 +259,25 @@ eclipse.FileClient = (function() {
 		 * @return A deferred for chaining events after the write completes
 		 */		
 		write: function(location, contents) {
-			return this._doServiceCall("write", arguments);
-		},
-
-		/**
-		 * Imports file and directory contents from another server
-		 *
-		 * @param {String} targetLocation The location of the folder to import into
-		 * @param {Object} options An object specifying the import parameters
-		 * @return A deferred for chaining events after the import completes
-		 */		
-		remoteImport: function(targetLocation, options) {
-			return this._doServiceCall("remoteImport", arguments);
-		},
-
-		/**
-		 * Exports file and directory contents to another server
-		 *
-		 * @param {String} sourceLocation The location of the folder to export from
-		 * @param {Object} options An object specifying the export parameters
-		 * @return A deferred for chaining events after the export completes
-		 */		
-		remoteExport: function(sourceLocation, options) {
-			return this._doServiceCall("remoteExport", arguments);
-		},
-
-		/**
-		 * This helper method implements invocation of the service call,
-		 * with retry on authentication error if needed.
-		 */
-		_doServiceCall: function(funcName, funcArgs) {
-			var clientDeferred = new dojo.Deferred();
-			var fileService = this.fileService;
-			fileService[funcName].apply(fileService, funcArgs).then(
-				//on success, just forward the result to the client
-				function(result) {
-					clientDeferred.callback(result);
-				},
-				//on failure we might need to retry
-				function(error) {
-					if (error.status === 401 || error.status === 403) {
-						handleAuthenticationError(error, function(message) {
-							//try again
-							fileService[funcName].apply(fileService, funcArgs).then(
-								function(result) {
-									clientDeferred.callback(result);
-								},
-								function(error) {
-									clientDeferred.errback(error);
-								}
-							);
-						});
-					} else {
-						//forward other errors to client
-						clientDeferred.errback(error);
-					}
-				}
-			);
-			return clientDeferred;
+			console.log("writing at location: " + location + ", contents: " + contents);
+			var d = new dojo.Deferred();
+			d.callback({});
+			return d;
 		}
 	};
-	return FileClient;
+	return FileServiceImpl;
 }());
+	</script>
+	<script type="text/javascript">
+		window.onload = function() {
+			var service = new eclipse.SampleFileServiceImpl();
+			var provider = new eclipse.PluginProvider();
+			provider.registerServiceProvider("IFileService", service, {Name:'sample file service', top:'/sample/', pattern:'/sample/'});
+			service.dispatchEvent = provider.dispatchEvent;
+			provider.connect();
+		};
+	</script>
+</head>
+<body>
+</body>
+</html>

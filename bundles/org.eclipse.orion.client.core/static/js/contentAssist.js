@@ -166,38 +166,45 @@ eclipse.ContentAssist = (function() {
 //				}
 				this.prefix = this.editorWidget.getText(index, offset);
 				
-				var proposals = [];
-				this.getKeywords().then(dojo.hitch(this, function(keywords) {
-					for (var i = 0; i < keywords.length; i++) {
-						var proposal = keywords[i];
-						if (proposal.substr(0, this.prefix.length) === this.prefix) {
-							proposals.push(proposal);
+				var proposals = [],
+				    buffer = this.editorWidget.getText(),
+				    selection = this.editorWidget.getSelection();
+				this.getKeywords(this.prefix, buffer, selection).then(
+					dojo.hitch(this, function(keywords) {
+						for (var i = 0; i < keywords.length; i++) {
+							var proposal = keywords[i];
+							if (proposal.substr(0, this.prefix.length) === this.prefix) {
+								proposals.push(proposal);
+							}
 						}
-					}
-					if (proposals.length === 0) {
-						return;
-					}
-					
-					var caretLocation = this.editorWidget.getLocationAtOffset(offset);
-					caretLocation.y += this.editorWidget.getLineHeight();
-					this.contentAssistPanel.innerHTML = "";
-					for (i = 0; i<proposals.length; i++) {
-						createDiv(proposals[i], i===0, this.contentAssistPanel);
-					}
-					this.editorWidget.convert(caretLocation, "document", "page");
-					this.contentAssistPanel.style.left = caretLocation.x + "px";
-					this.contentAssistPanel.style.top = caretLocation.y + "px";
-					this.contentAssistPanel.style.display = "block";
-					this.editorWidget.addEventListener("Verify", this, this.contentAssistListener.onVerify);
-					this.editorWidget.addEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
-					this.active = true;
-				}));
+						if (proposals.length === 0) {
+							return;
+						}
+						
+						var caretLocation = this.editorWidget.getLocationAtOffset(offset);
+						caretLocation.y += this.editorWidget.getLineHeight();
+						this.contentAssistPanel.innerHTML = "";
+						for (i = 0; i<proposals.length; i++) {
+							createDiv(proposals[i], i===0, this.contentAssistPanel);
+						}
+						this.editorWidget.convert(caretLocation, "document", "page");
+						this.contentAssistPanel.style.left = caretLocation.x + "px";
+						this.contentAssistPanel.style.top = caretLocation.y + "px";
+						this.contentAssistPanel.style.display = "block";
+						this.editorWidget.addEventListener("Verify", this, this.contentAssistListener.onVerify);
+						this.editorWidget.addEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
+						this.active = true;
+					}));
 			}
 		},
 		/**
+		 * @param {String} The string buffer.substring(w+1, c) where c is the caret offset and w is the index of the 
+		 * rightmost whitespace character preceding c.
+		 * @param {String} buffer The entire buffer being edited
+		 * @param {eclipse.Selection} selection The current editor selection.
 		 * @returns {dojo.Deferred} A future that will provide the keywords.
 		 */
-		getKeywords: function() {
+		getKeywords: function(prefix, buffer, selection) {
 			var keywords = [];
 			
 			// Add keywords from directly registered providers
@@ -209,7 +216,7 @@ eclipse.ContentAssist = (function() {
 			if (this.serviceRegistry) {
 				var keywordPromises = dojo.map(this.activeServiceReferences, dojo.hitch(this, function(serviceRef) {
 						return this.serviceRegistry.getService(serviceRef).then(function(service) {
-							return service.getKeywords();
+							return service.getKeywords(prefix, buffer, selection);
 						});
 					}));
 				var dl = new dojo.DeferredList(keywordPromises);
@@ -232,7 +239,7 @@ eclipse.ContentAssist = (function() {
 		/**
 		 * Adds a content assist provider.
 		 * @param {Object} provider The provider object. See {@link orion.contentAssist.CssContentAssistProvider} for an example.
-		 * @param {String} name 
+		 * @param {String} name Name for this provider.
 		 * @param {String} pattern The regex pattern matching filenames that provider can offer content assist for.
 		 */
 		addProvider: function(provider, name, pattern) {

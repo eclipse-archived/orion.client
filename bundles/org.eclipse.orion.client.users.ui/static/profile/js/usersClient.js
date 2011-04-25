@@ -14,11 +14,6 @@ eclipse.UsersClient = (
 		function(){
 			function UsersClient(serviceRegistry, pluginRegistry) {
 				this.serviceRegistry = serviceRegistry;
-				//ensure the plugin is installed
-//				var usersPlugin = pluginRegistry.getPlugin("/profile/userservicePlugin.html");
-//				if (usersPlugin === null) {
-//					pluginRegistry.installPlugin("/profile/userservicePlugin.html");
-//				}
 			}
 			
 			UsersClient.prototype = /**@lends eclipse.UsersClient.prototype */
