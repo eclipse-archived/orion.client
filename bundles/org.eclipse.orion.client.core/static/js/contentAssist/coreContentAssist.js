@@ -24,9 +24,13 @@ orion.contentAssist.CssContentAssistProvider = (function() {
 	}
 	CssContentAssistProvider.prototype = /** @lends orion.contentAssist.CssContentAssistProvider.prototype */ {
 		/**
-		 * @returns {String[]} The keywords to be offered for content assist in CSS code.
+		 * @param {String} The string buffer.substring(w+1, c) where c is the caret offset and w is the index of the 
+		 * rightmost whitespace character preceding c.
+		 * @param {String} buffer The entire buffer being edited
+		 * @param {eclipse.Selection} selection The current editor selection.
+		 * @returns {dojo.Deferred} A future that will provide the keywords.
 		 */
-		getKeywords: function() {
+		getKeywords: function(prefix, buffer, selection) {
 			return [ "background", "background-attachment", "background-color", "background-image",
 					"background-position", "background-repeat", "border", "border-bottom",
 					"border-bottom-color", "border-bottom-style", "border-bottom-width", "border-color",
@@ -56,9 +60,13 @@ orion.contentAssist.JavaScriptContentAssistProvider = (function() {
 	}
 	JavaScriptContentAssistProvider.prototype = /** @lends orion.contentAssist.JavaScriptContentAssistProvider.prototype */ {
 		/**
-		 * @returns {String[]} The keywords to be offered for content assist in JavaScript code.
+		 * @param {String} The string buffer.substring(w+1, c) where c is the caret offset and w is the index of the 
+		 * rightmost whitespace character preceding c.
+		 * @param {String} buffer The entire buffer being edited
+		 * @param {eclipse.Selection} selection The current editor selection.
+		 * @returns {dojo.Deferred} A future that will provide the keywords.
 		 */
-		getKeywords: function() {
+		getKeywords: function(prefix, buffer, selection) {
 			return [ "break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else",
 					"finally", "for", "function", "if", "in", "instanceof", "new", "return", "switch",
 					"this", "throw", "try", "typeof", "var", "void", "while", "with" ];
