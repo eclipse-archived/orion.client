@@ -17,17 +17,21 @@ dojo.addOnLoad(function(){
 	// Git operations
 	new eclipse.GitService(serviceRegistry);
 	// File operations
-	fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
-	
+
+//commented out temporarily - Boris
+//	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
+
 	var controller = new orion.GitStatusController(serviceRegistry , "unstagedZone" , "stagedZone");
 	controller.getGitStatus(dojo.hash());
 
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
-	initTitleBar(fileClient);
+//commented out temporarily - Boris
+//	initTitleBar(fileClient);
 	//every time the user manually changes the hash, we need to load the git status
 	dojo.subscribe("/dojo/hashchange", controller, function() {
 		controller.getGitStatus(dojo.hash());
-		initTitleBar(fileClient);
+//commented out temporarily - Boris
+//		initTitleBar(fileClient);
 	});
 	
 });
