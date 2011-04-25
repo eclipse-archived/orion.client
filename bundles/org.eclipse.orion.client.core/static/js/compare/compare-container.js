@@ -522,6 +522,8 @@ orion.CompareMergeContainer = (function() {
 		} else if (onsave) {
 			this._editorLeft.getModel().init(result.mapper);
 			this._editorRight.getModel().init(result.mapper);
+			this._editorLeft.redrawRange();
+			this._editorRight.redrawRange();
 		}else {
 			this._inputManager.filePath = this._newFileURI;
 			this._editorLeft.getModel().init(result.mapper);
@@ -535,7 +537,6 @@ orion.CompareMergeContainer = (function() {
 			this._editorContainerLeft.onInputChange(fileNameL, null, result.output);
 			this._highlighter[0].highlight(fileNameL , this._editorLeft);
 			this._inputManager.setInput(fileNameL , this._editorContainerLeft);
-			
 		}
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
 		this._compareMatchRenderer.matchPositionFromAnnotation(-1);
