@@ -321,6 +321,18 @@ orion.CompareMatchRenderer =  (function() {
 			this.render();
 		},
 		
+		prevDiff: function(){
+			var annotations = this._rightEditor.getModel().getAnnotations();
+			if(annotations.length !== 0 ){
+				if(0 === this._currentAnnotationIndex)
+					this._currentAnnotationIndex = annotations.length -1;
+				else
+					this._currentAnnotationIndex -= 1;
+			}
+			this.positionAnnotation(this._currentAnnotationIndex);
+			this.render();
+		},
+		
 		getMapperTextRange: function(editor , mapperIndex , mapperColumnIndex){
 			var startLine = editor.getModel().getLineIndexFromMapper(mapperIndex);
 			var endLine = startLine + this._mapper[mapperIndex][mapperColumnIndex] - 1;

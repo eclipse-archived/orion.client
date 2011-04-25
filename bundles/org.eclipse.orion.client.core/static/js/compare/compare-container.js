@@ -414,6 +414,10 @@ orion.CompareMergeContainer = (function() {
 		this._compareMatchRenderer.nextDiff();
 	};
 	
+	CompareMergeContainer.prototype.prevDiff = function(){	
+		this._compareMatchRenderer.prevDiff();
+	};
+	
 	CompareMergeContainer.prototype.copyToLeft = function(){	
 		this._compareMatchRenderer.copyToLeft();
 	};
