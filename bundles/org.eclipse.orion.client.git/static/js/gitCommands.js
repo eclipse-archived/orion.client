@@ -279,7 +279,7 @@ dojo.require("widgets.GitCredentialsDialog");
 													}).then(function(remoteJsonData){
 														gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArd) {
 															explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
-															explorer.loadCommitsList(remoteJsonData.CommitLocation, remoteJsonData, true);			
+															explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);			
 														});
 													});
 												}, func);
@@ -367,7 +367,9 @@ dojo.require("widgets.GitCredentialsDialog");
 						function(service) {
 							service.doAddTag(item.Location, tagName,
 								function(jsonData, secondArg) {
-									console.info(item.Location + "tagged using " + tagName);
+									var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+									var tr = dojo.byId(trId);
+									dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[2] /* tags column */, "last"), "only");
 								});
 						});
 				return clientDeferred;

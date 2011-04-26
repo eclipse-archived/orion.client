@@ -78,7 +78,7 @@ dojo.addOnLoad(function(){
 				serviceRegistry.getService("IGitService").then(function(gitService){
 					gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
 						navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
-						navigator.loadCommitsList(jsonData.CommitLocation, jsonData);
+						navigator.loadCommitsList(jsonData.CommitLocation + "?" + new dojo._Url(path).query, jsonData);
 					});
 				});
 			},
@@ -157,7 +157,7 @@ dojo.addOnLoad(function(){
 					serviceRegistry.getService("IGitService").then(function(gitService){
 						gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
 							navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
-							navigator.loadCommitsList(jsonData.CommitLocation, jsonData);			
+							navigator.loadCommitsList(jsonData.CommitLocation + "?" + new dojo._Url(path).query, jsonData);			
 						});
 					});
 				},
