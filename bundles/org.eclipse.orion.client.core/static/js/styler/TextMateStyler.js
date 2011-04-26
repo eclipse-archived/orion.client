@@ -1,10 +1,11 @@
-/*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others All rights reserved. This
- * program and the accompanying materials are made available under the terms of
- * the Eclipse Public License v1.0 which accompanies this distribution, and is
- * available at http://www.eclipse.org/legal/epl-v10.html
+/******************************************************************************* 
+ * Copyright (c) 2011 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
- * Contributors: IBM Corporation - initial API and implementation
+ * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
 /*jslint devel:true regexp:false laxbreak:true*/
@@ -118,8 +119,8 @@ orion.styler.Util = {
 			throw new Error("Unsupported regex feature \"" + feature + "\": \"" + match[0] + "\" at index: "
 					+ match.index + " in " + match.input);
 		}
-		var match;
-		for (var i=0; i < this.unsupported.length; i++) {
+		var match, i;
+		for (i=0; i < this.unsupported.length; i++) {
 			if ((match = this.unsupported[i].regex.exec(str))) {
 				fail(this.unsupported[i].func(match));
 			}
@@ -130,7 +131,7 @@ orion.styler.Util = {
 		if ((match = /^\(\?x\)/.exec(str))) {
 			// Eat \s+ (whitespace) and #.* (comment up to EOL) if they occur outside []
 			var insideCharacterClass = false;
-			for (var i=0; i < str.length; ) {
+			for (i=0; i < str.length; ) {
 				var match2;
 				if ((match2 = /\s+|#.*/.exec(str)) && match2.index === i) {
 					i = match2.index + match2[0].length;
@@ -148,15 +149,10 @@ orion.styler.Util = {
 			}
 		}
 		str2 = str2 || str;
-		str2 = escapeJson(str2);
+		str2 = orion.styler.Util.escapeJson(str2);
 		// TODO: tolerate (?xexpr) -- eg. in JSON grammar
 		// TODO: tolerate (?i) -- eg. in PHP grammar
 		return new RegExp(str2);
-	},
-	
-	// XXX DEBUG XXX
-	assert: function(cond, message) {
-		if (!cond) { throw new Error(message); }
 	}
 };
 
@@ -261,7 +257,7 @@ orion.styler.TextMateStyler = (function() {
 				}
 			};
 			return ContainerRule;
-		})(),
+		}()),
 
 		/**
 		 * A rule with a "match" pattern.
@@ -278,14 +274,11 @@ orion.styler.TextMateStyler = (function() {
 				/** Completes application of this rule by assigning the appropriate tokens */
 				consume: function(/**Match*/ match, /**Position*/ startPosition, /**Position*/ endPosition) {
 					if (match) {
+						// FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
 						var name = this.rule.name;
 						var captures = this.rule.captures;
-						if (name) {
-							console.debug("X tok" + name + " to '" + range(startPosition.lines, 
-									startPosition.lineNum, startPosition.index, endPosition.lineNum, endPosition.index) + "'");
-						}
 						if (captures) {
-							_applyCaptures(captures, match);
+							this._applyCaptures(captures, match);
 						}
 					}
 				}
@@ -311,6 +304,10 @@ orion.styler.TextMateStyler = (function() {
 		 * Resolves a rule from the grammar (which may be an include) into the real rule that it points to.
 		 */
 		_resolve: function(rule) {
+			function assert(cond, message) {
+				if (!cond) { throw new Error(message); }
+			}
+			
 			var resolved = rule;
 			if (rule.include) {
 				assert(!(rule.begin || rule.end || rule.match), "Unexpected patterns in include rule");

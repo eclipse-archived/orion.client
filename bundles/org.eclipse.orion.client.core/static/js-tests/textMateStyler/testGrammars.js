@@ -1,18 +1,19 @@
-/*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others. All rights reserved. This
- * program and the accompanying materials are made available under the terms of
- * the Eclipse Public License v1.0 which accompanies this distribution, and is
- * available at http://www.eclipse.org/legal/epl-v10.html
+/******************************************************************************* 
+ * Copyright (c) 2011 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
- * Contributors: IBM Corporation - initial API and implementation
+ * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
-
+ 
 /*global orion:true*/
 var orion = orion || {};
 orion.styler = orion.styler || {};
 orion.styler.test = orion.styler.test || {};
 
-orion.styler.test.testGrammar = {
+orion.styler.test.SampleGrammar = {
 	"comment": "Dummy grammar for testing",
 	"name": "My great language",
 	"fileTypes": [ "foo", "bar" ],
@@ -52,10 +53,9 @@ orion.styler.test.testGrammar = {
 				"include": "#badZ"
 			} ],
 	"repository": {
-		// TODO repo here
 		"badZ": {
 			"match": "z",
-			"name": "invalid.illegal.idontlikez"
+			"name": "invalid.illegal.idontlikez.mylang"
 		}
 	}
 };

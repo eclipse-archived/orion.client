@@ -1,29 +1,37 @@
-/*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others. All rights reserved. This
- * program and the accompanying materials are made available under the terms of
- * the Eclipse Public License v1.0 which accompanies this distribution, and is
- * available at http://www.eclipse.org/legal/epl-v10.html
+/******************************************************************************* 
+ * Copyright (c) 2011 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
- * Contributors: IBM Corporation - initial API and implementation
+ * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
-/*global orion*/
-
-//You don't need to extend TextMateStyler -- just use it
+/*global eclipse orion*/
 
 // create editor
 // create TextMateStyler
 // change editor contents
 // check styled regions
 
-var testcase = function(assert) {
+var testcase = (function(assert) {
 	var tests = {};
 	
-	tests.createStyler = function() {
-		// do whatever
-		var expected = "fizz";
-		var actual = "fizz";
-		assert.equal(actual, expected);
+	function createEditor() {
+		var options = {parent: "editorDiv"};
+		return new eclipse.Editor(options);
+	}
+	
+	tests["test create styler"] = function() {
+		try {
+			var editor = createEditor();
+			var grammar = orion.styler.test.SampleGrammar;
+			var styler = new orion.styler.TextMateStyler(editor, grammar);
+			assert.ok(true, "true is false");
+		} catch (e) {
+			assert.ok(false, "Exception creating editor");
+		}
 	};
 	
 	tests["test style single keyword"] = function() {
@@ -43,4 +51,4 @@ var testcase = function(assert) {
 	};
 	
 	return tests;
-}(orion.Assert);
+}(orion.Assert));
