@@ -367,7 +367,9 @@ dojo.require("widgets.GitCredentialsDialog");
 						function(service) {
 							service.doAddTag(item.Location, tagName,
 								function(jsonData, secondArg) {
-									console.info(item.Location + "tagged using " + tagName);
+									var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+									var tr = dojo.byId(trId);
+									dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[2] /* tags column */, "last"), "only");
 								});
 						});
 				return clientDeferred;
