@@ -32,29 +32,43 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 	},
 	
 	isLeftPaneOpen: function(){
-		var splitter = this._splitters.left;
+		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
 		if(splitter){
-			return dijit.byNode(splitter).open;
+			return splitter.open;
 		}
 		return false;
 	},
+	
+	getLeftPane: function() {
+		if (this._left) {
+			return this._left;
+		}
+		var children = this.getChildren();
+		for (var i=0; i<children.length; i++) {
+			if (children[i].region && children[i].region === "leading") {
+				this._left = children[i].domNode;
+				return this._left;
+			}
+		}
+	},
+	
 	getSizeCookie: function(){
-		var splitter = this._splitters.left;
+		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
 		if(splitter){
-			return dijit.byNode(splitter).getSizeCookie();
+			return splitter.getSizeCookie();
 		}
 		return 0;
 	},
 	setSizeCookie: function(value){
-		var splitter = this._splitters.left;
+		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
 		if(splitter){
-			return dijit.byNode(splitter).setSizeCookie(value);
+			return splitter.setSizeCookie(value);
 		}
 	},
 	toggleLeftPaneState: function(){
-		var splitter = this._splitters.left;
+		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
 		if(splitter){
-			dijit.byNode(splitter).toggleLeftPaneState();
+			splitter.toggleLeftPaneState();
 		}
 	},
 	
@@ -63,9 +77,20 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 	},
 	toggle: function() {
 		var targetW = "";
+		// find left and center and store so we only do this once.
+		if (!this._left || !this._center) {
+			var children = this.getChildren();
+			for (var i=0; i<children.length; i++) {
+				if (children[i].region && children[i].region === "center") {
+					this._center = children[i].domNode;
+				} else if (children[i].region && children[i].region === "leading") {
+					this._left = children[i].domNode;
+				}
+			}
+		}
 		var leftPane = this._left;
 		var rightPane = this._center;
-		var originalW = leftPane.style.width;
+		var originalW = leftPane.style.width || "";
 		var originalWint = parseInt(originalW.replace("px", ""), 10);
 		var isLeftOpen = this.isLeftPaneOpen();
 		var targetWint;
@@ -83,7 +108,7 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 		}
 				
 		var leftOverflow = leftPane.style.overflow;
-		var centerOverflow = this._center.style.overflow;
+		var rightOverflow = rightPane.style.overflow;
 		var a = new dojo.Animation({
 			node: leftPane,
 			duration: 300,
@@ -93,12 +118,12 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 				var curWidth = originalWint + deltaW;
 				leftPane.style.width = curWidth + "px";
 				leftPane.style.overflow = "hidden";
-				this._center.style.overflow = "hidden";
+				rightPane.style.overflow = "hidden";
 				this.layout();
 				//this.resize();
 			}),
 			onEnd: dojo.hitch(this, function(){
-				this._center.style.overflow = centerOverflow;
+				rightPane.style.overflow = rightOverflow;
 				leftPane.style.overflow = leftOverflow;
 
 				if (this.toggleCallback) {
@@ -132,11 +157,11 @@ dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 			// restore old state
 			var persistOpenState = dojo.cookie(this._openStateCookieName);
 			if(!persistOpenState || persistOpenState === "false" ){
-				this.container._left.style.width = "0px";
+				this.container.getLeftPane().style.width = "0px";
 				this.set("open", false);
 				this._handleOnChange();
 			} else {
-				this.container._left.style.width = this.getSizeCookie() + "px";
+				this.container.getLeftPane().style.width = this.getSizeCookie() + "px";
 			}
 		}
 		return this;
@@ -244,7 +269,7 @@ dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 	
 	toggleLeftPaneState: function(){
 		this.set("open", !this.open);
-		dojo.byId("leftPane").style.visibility = this.open ? "visible" : "hidden";	
+		this.container.getLeftPane().style.visibility = this.open ? "visible" : "hidden";	
 		if(this.container.persist){
 			dojo.cookie(this._openStateCookieName, this.open ? "true" : "false", {expires:365});
 		}
