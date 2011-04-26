@@ -196,7 +196,7 @@ orion.GitStatusRenderer = (function() {
 			row.appendChild(sbsViewerCol);
 			this._controller.createImgButton(false ,sbsViewerCol , "/images/git/compare-sbs.gif", "Side by side compare",
 					function(evt) {
-						self._controller.openSBSViewer(itemModel);
+						self._controller.openCompareEditor(itemModel);
 					} );
 			
 			//render the stage / unstage action  icon
@@ -224,6 +224,7 @@ orion.GitStatusController = (function() {
 		this._unstagedTableRenderer = new orion.GitStatusRenderer(unstagedDivId , this);
 		this._stagedTableRenderer = new orion.GitStatusRenderer(stagedDivId , this);
 		this._inlineCompareContainer = new orion.InlineCompareContainer(serviceRegistry ,"inline-compare-viewer");
+		self._stagingConflict = false;
 	}
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
@@ -246,6 +247,13 @@ orion.GitStatusController = (function() {
 			this.modifyImageButton(true ,unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
 			this.modifyImageButton(true ,commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value);} , !this.hasStaged , function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
 			this.modifyImageButton(false ,amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value , true);} , !this.hasStaged, function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
+			
+			if(this._stagingConflict){
+				this._stagingConflict = false;
+				if(!this.hasStaged){
+					this.commit("Resolved Deletion Conflicts" , false);
+				}
+			}
 			
 			this.cursorClear();
 		},
@@ -345,7 +353,8 @@ orion.GitStatusController = (function() {
 											location:groupData[j].Location,
 											commitURI:groupData[j].Git.CommitLocation,
 											indexURI:groupData[j].Git.IndexLocation,
-											diffURI:groupData[j].Git.DiffLocation
+											diffURI:groupData[j].Git.DiffLocation,
+											conflicting:groupData[j].Conflicting 
 						});
 					}
 				} 
@@ -388,7 +397,7 @@ orion.GitStatusController = (function() {
 			);
 		},
 		
-		openSBSViewer: function(itemModel){
+		openCompareEditor: function(itemModel){
 			var diffParam = "";
 			var baseUrl = "/compare-m.html#";
 			if(this._model.isConflict(itemModel.type)){
@@ -405,7 +414,7 @@ orion.GitStatusController = (function() {
 			if(this._model.isStaged(itemModel.type))
 				this.unstage(itemModel.indexURI);
 			else
-				this.stage(itemModel.indexURI);
+				this.stage(itemModel.indexURI , itemModel.conflicting);
 		},
 		
 		handleServerErrors: function(errorResponse , ioArgs){
@@ -432,8 +441,12 @@ orion.GitStatusController = (function() {
 				});
 		},
 		
-		stage: function(location){
+		stage: function(location , stagingConflict){
 			var self = this;
+			if(stagingConflict)
+				self._stagingConflict = true;
+			else
+				self._stagingConflict = false;
 			self._registry.getService("IGitService").then(
 					function(service) {
 						service.stage(location, 
