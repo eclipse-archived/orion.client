@@ -106,7 +106,7 @@ eclipse.Unittest.Renderer = (function() {
 //				link = dojo.create("a", {className: "navlink", href: "/"}, div, "last");
 				dojo.place(document.createTextNode(item.Name + " (" + (item.millis / 1000) + "s)"), div, "last");
 				if (!item.result && !item.logged) {
-					console.log("[FAILURE][" + item.Name + "][" + item.message + "]\n" + item.stack ? item.stack : "");
+					console.log("[FAILURE][" + item.Name + "][" + item.message + "]\n" + ((item.stack !== undefined && item.stack) ? item.stack : ""));
 					item.logged =true;
 				}
 			}
