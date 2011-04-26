@@ -10,19 +10,15 @@
 	<script type="text/javascript" src="../../js/plugin.js"></script>
 
 <!-- JavaScript files containing the tests and their dependencies -->
-	<script type="text/javascript" src="testcase.js"></script>
 	<script type="text/javascript" src="/editor/js/editor.js"></script>
 	<script type="text/javascript" src="../../js/styler/TextMateStyler.js"></script>
-	<script type="text/javascript" src="../../js/styler/JsonStyler.js"></script>
-	<script type="text/javascript" src="textMateStyler-test-data.js"></script>
+	<script type="text/javascript" src="testGrammar.js"></script>
+	<script type="text/javascript" src="testcase.js"></script>
 
 <!-- tests to be run -->
 	<script type="text/javascript">
 	window.onload = function() {
-		orion.Test.run({
-			"test 1": testcase1, 
-			"test 2": testcase2
-		});
+		orion.Test.run(testcase);
 	};
 	</script>
 </head>

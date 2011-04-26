@@ -10,27 +10,23 @@
 /*jslint devel:true regexp:false laxbreak:true*/
 /*global dojo orion:true*/
 
-/**
- * @namespace The top-level Orion namespace.
- */
 orion = orion || {};
 
-/**
- * @namespace The namespace for stylers.
- */
 orion.styler = orion.styler || {};
 
 /**
- * Can be used as the prototype for concrete stylers. Extenders can provide their own _onSelection,
- * _onModelChanged, _onDestroy and _onLineStyle methods.
+ * Can be used as the prototype for concrete stylers. Extenders can call {@link orion.styler.AbstractStyler.extend}
+ * and provider their own _onSelection, _onModelChanged, _onDestroy and _onLineStyle methods. 
  * @class orion.styler.AbstractStyler
  */
 orion.styler.AbstractStyler = (function() {
+	/** @inner */
 	function AbstractStyler() {
 	}
 	AbstractStyler.prototype = /** @lends orion.styler.AbstractStyler.prototype */ {
 		/**
-		 * Initializes this styler with an editor. Extenders should call this from their constructor.
+		 * Initializes this styler with an editor. Extenders must call this from their constructor.
+		 * @param {eclipse.Editor} editor
 		 */
 		initialize: function(editor) {
 			this.editor = editor;
@@ -40,6 +36,7 @@ orion.styler.AbstractStyler = (function() {
 			editor.addEventListener("Destroy", this, this._onDestroy);
 			editor.addEventListener("LineStyle", this, this._onLineStyle);
 		},
+		
 		/**
 		 * Destroys this styler and removes all listeners. Called by the editor.
 		 */
@@ -52,31 +49,48 @@ orion.styler.AbstractStyler = (function() {
 				this.editor = null;
 			}
 		},
-		_onSelection: function(e) {},
-		_onModelChanged: function(e) {},
-		_onDestroy: function(e) {},
-		_onLineStyle: function(e) {}
-	};
-	
-	/**
-	 * Helper for extending AbstractStyler.
-	 * @methodOf orion.styler.AbstractStyler
-	 * @static
-	 * @param {Function} ctor The constructor function for the subclass.
-	 * @param {Object} proto Object to be mixed into the subclass's prototype. If you're overriding
-	 * _onSelection, _onModelChanged, etc, this object should contain your implementation of those methods.
-	 */
-	AbstractStyler.extend = function(ctor, proto) {
-		if (typeof(ctor) !== "function") { throw new Error("Function expected"); }
-		ctor.prototype = new orion.styler.AbstractStyler();
-		ctor.constructor = ctor;
-		for (var p in proto) {
-			if (proto.hasOwnProperty(p)) { ctor.prototype[p] = proto[p]; }
-		}
+		
+		/** To be overridden by subclasses.
+		 * @public
+		 */
+		_onSelection: function(/**eclipse.SelectionEvent*/ e) {},
+		
+		/** To be overridden by subclasses.
+		 * @public
+		 */
+		_onModelChanged: function(/**eclipse.ModelChangingEvent*/ e) {},
+		
+		/** To be overridden by subclasses.
+		 * @public
+		 */
+		_onDestroy: function(/**eclipse.DestroyEvent*/ e) {},
+		
+		/** To be overridden by subclasses.
+		 * @public
+		 */
+		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {}
 	};
 	
 	return AbstractStyler;
 }());
+
+/**
+ * Helper for extending AbstractStyler.
+ * @methodOf orion.styler.AbstractStyler
+ * @static
+ * @param {Function} subCtor The constructor function for the subclass.
+ * @param {Object} [proto] Object to be mixed into the subclass's prototype. This object can contain your 
+ * implementation of _onSelection, _onModelChanged, etc.
+ * @see orion.styler.TextMateStyler for example usage.
+ */
+orion.styler.AbstractStyler.extend = function(subCtor, proto) {
+	if (typeof(subCtor) !== "function") { throw new Error("Function expected"); }
+	subCtor.prototype = new orion.styler.AbstractStyler();
+	subCtor.constructor = subCtor;
+	for (var p in proto) {
+		if (proto.hasOwnProperty(p)) { subCtor.prototype[p] = proto[p]; }
+	}
+};
 
 orion.styler.Util = {
 	/**
@@ -88,54 +102,56 @@ orion.styler.Util = {
 			.replace(new RegExp("\\\\t", "g"), "\t");
 	},
 	
+	// Rules to detect some unsupported Oniguruma features
+	unsupported: [
+		{regex: /\(\?[ims\-]:/, func: function(match) { return "option on/off for subexp"; }},
+		{regex: /\(\?<([=!])/, func: function(match) { return (match[1] === "=") ? "lookbehind" : "negative lookbehind"; }},
+		{regex: /\(\?>/, func: function(match) { return "atomic group"; }}
+	],
+	
 	/**
-	 * @param {String} str String giving a regular expression pattern.
+	 * @param {String} str String giving a regular expression pattern from a TextMate JSON grammar.
 	 * @returns {RegExp}
 	 */
-	toRegExp: function(/**String*/ str) {
-		var unsupported = [];
-		
-		// Add rules to detect some unsupported Oniguruma features
+	toRegExp: function(str) {
 		function fail(feature, match) {
-			return "Unsupported regex feature \"" + feature + "\": \"" + match[0] + "\" at index: " + match.index + " in " + match.input;
+			throw new Error("Unsupported regex feature \"" + feature + "\": \"" + match[0] + "\" at index: "
+					+ match.index + " in " + match.input);
 		}
-		unsupported.addToken(/\(\?[ims\-]:/,
-			function(match) {
-				fail("option on/off for subexp", match);
-			},
-			XRegExp.OUTSIDE_CLASS);
-		unsupported.addToken(/\(\?<([=!])/,
-			function(match) {
-				fail(match[1] === "=" ? "lookbehind" : "negative lookbehind", match);
-			},
-			XRegExp.OUTSIDE_CLASS);
-		unsupported.addToken(/\(\?>/,
-			function(match) {
-				fail("atomic group", match);
-			},
-			XRegExp.OUTSIDE_CLASS);
+		var match;
+		for (var i=0; i < this.unsupported.length; i++) {
+			if ((match = this.unsupported[i].regex.exec(str))) {
+				fail(this.unsupported[i].func(match));
+			}
+		}
 		
-		// TODO: Subpattern Definition (Oniguruma-Style)
-		// See http://xregexp.com/api/token_examples/
-		
-		// TODO: Named capture in single quotes (?'name' ...)
-		// See http://xregexp.com/syntax/named_capture_comparison/
-		
-		// Workaround to tolerate a regex enclosed by (?x) -- eg. JSON bundle
-		// TODO: should reject (?xsubExpr1)(subExpr2) but doesn't
-//		var xFlagMatch = /^\(\?x(:?)([\s\S]*)\)/.exec(str);
-//		if (xFlagMatch) {
-//			var inner = xFlagMatch[2];
-//			if (xFlagMatch[1] === ":") {
-//				// non-capturing (?x: X) -- eat ( )
-//				return new RegExp(escapeJson(inner), "x");
-//			} else {
-//				// capturing (?x X) -- preserve ( )
-//				return new RegExp(escapeJson("(" + inner + ")"), "x");
-//			}
-//		} else {
-//			return new RegExp(escapeJson(str));
-//		}
+		// Handle (?x)expr ("x" flag that applies to entire regex)
+		var str2 = "";
+		if ((match = /^\(\?x\)/.exec(str))) {
+			// Eat \s+ (whitespace) and #.* (comment up to EOL) if they occur outside []
+			var insideCharacterClass = false;
+			for (var i=0; i < str.length; ) {
+				var match2;
+				if ((match2 = /\s+|#.*/.exec(str)) && match2.index === i) {
+					i = match2.index + match2[0].length;
+					console.debug("Ate " + match2[0]);
+				} else {
+					var char = str.charAt(i);
+					if (char === "[") {
+						insideCharacterClass = true;
+					} else if (char === "]") {
+						insideCharacterClass = false;
+					}
+					str2 += char;
+					i++;
+				}
+			}
+		}
+		str2 = str2 || str;
+		str2 = escapeJson(str2);
+		// TODO: tolerate (?xexpr) -- eg. in JSON grammar
+		// TODO: tolerate (?i) -- eg. in PHP grammar
+		return new RegExp(str2);
 	},
 	
 	// XXX DEBUG XXX
@@ -145,72 +161,95 @@ orion.styler.Util = {
 };
 
 /**
- * A styler that knows how to apply TextMate grammars.
- * 
- * TODO extend orion.styler.AbstractStyler
+ * A styler that knows how to apply a limited subset of the TextMate grammar format to style a line.
  * 
  * @class orion.styler.TextMateStyler
- * @param {Object} grammar The TextMate grammar as a JSON object. You can use a PList-to-JSON conversion 
- * tool to produce this object.
+ * @extends orion.styler.AbstractStyler
+ * @param {eclipse.Editor} editor
+ * @param {Object} grammar The TextMate grammar as a JSON object. You can use a plist-to-JSON conversion 
+ * tool to produce this object. Note that not all features of TextMate grammars are supported.
  */
 orion.styler.TextMateStyler = (function() {
-	function TextMateStyler(grammar) {
+	/** @inner */
+	function TextMateStyler(editor, grammar) {
+		this.initialize(editor);
 		this.grammar = grammar;
-		this.preprocess(grammar);
+		this._preprocess();
 	}
-	
-	/**
-	 * An absolute position in the input lines.
-	 * @param {String[]} lines All lines we're processing.
-	 * @param {Number} lineNum Index of the current line being processed, 0 <= lineNum < lines.length
-	 * @param {Number} index Our current position in the line, 0 <= index < lines[lineNum].length
-	 * @param {String} text The unconsumed portion of the current line, equal to lines[lineNum].substring(index)
-	 */
-	function Position(lines, lineNum, index, text) {
-		this.lines = lines;
-		this.lineNum = lineNum;
-		this.index = index;
-		this.text = text;
-	}
-	/**
-	 * @param {RegExp.match|null} match The regex match from searching in this Position's <code>text</code>.
-	 * @returns {Position} The new Position after advancing past match, or null if we're at the end of input.
-	 */
-	Position.prototype.advance = function(match) {
-		if (!match) { return this; }
-		var endIndex = this.index + match.index + match[0].length,
-		    newLineNum = (endIndex < this.lines[this.lineNum].length) ? this.lineNum : this.lineNum + 1,
-		    newIndex = (this.lineNum === newLineNum) ? endIndex + 1 : 0;
-		if (newLineNum < this.lines.length) {
-			var text = this.lines[newLineNum].substring(newIndex);
-			return new Position(this.lines, newLineNum, newIndex, text);
-		} else {
-			return null; // EOF
-		}
-	};
-	// XXX debug
-	Position.prototype.toString = function() {
-		return "line#: " + this.lineNum + ", index: " + this.index + ", " + " text: " + this.text.substring(0,2);
-	};
-	
-	/**
-	 * The absolute position of a regex match in the input.
-	 * @param {Number} lineNum The line number that the match occurred in.
-	 * @param {Number} index The position within the line that the match begins at.
-//	 * FIXME @param {RegExp.match} match The underlying RegExp match
-	 * @param {Position} pos The input position that immediately follows this Match.
-	 */
-	function Match(lineNum, index, /*match, */pos) {
-		this.lineNum = lineNum;
-		this.index = index;
-//		this.match = match;
-		this.position = pos;
-	}
-
-	TextMateStyler.prototype = {
+	orion.styler.AbstractStyler.extend(TextMateStyler, /** @lends orion.styler.TextMateStyler.prototype */ {
+		_preprocess: function() {
+			// Look up "include"d rules, create Rule instances
+			var stack = [this.grammar];
+			for (; stack.length !== 0; ) {
+				var rule = stack.pop();
+				if (rule.__resolvedRule && rule.__cachedTypedRule) {
+					continue;
+				}
+				
+				rule.__resolvedRule = this._resolve(rule);
+				rule.__cachedTypedRule = this._createTypedRule(rule);
+				if (rule.patterns) {
+					for (var i=0; i < rule.patterns.length; i++) {
+						stack.push(rule.patterns[i]);
+					}
+				}
+			}
+		},
+		
+		/**
+		 * An absolute position in the input lines.
+		 * @param {String[]} lines All lines we're processing.
+		 * @param {Number} lineNum Index of the current line being processed, 0 <= lineNum < lines.length
+		 * @param {Number} index Our current position in the line, 0 <= index < lines[lineNum].length
+		 * @param {String} text The unconsumed portion of the current line, equal to lines[lineNum].substring(index)
+		 * @private
+		 */
+		Position: (function() {
+			function Position(lines, lineNum, index, text) {
+				this.lines = lines;
+				this.lineNum = lineNum;
+				this.index = index;
+				this.text = text;
+			}
+			/**
+			 * @param {RegExp.match|null} match The regex match from searching in this Position's <code>text</code>.
+			 * @returns {Position} The new Position after advancing past match, or null if we're at the end of input.
+			 */
+			Position.prototype.advance = function(match) {
+				if (!match) { return this; }
+				var endIndex = this.index + match.index + match[0].length,
+				    newLineNum = (endIndex < this.lines[this.lineNum].length) ? this.lineNum : this.lineNum + 1,
+				    newIndex = (this.lineNum === newLineNum) ? endIndex + 1 : 0;
+				if (newLineNum < this.lines.length) {
+					var text = this.lines[newLineNum].substring(newIndex);
+					return new Position(this.lines, newLineNum, newIndex, text);
+				} else {
+					return null; // EOF
+				}
+			};
+			// XXX debug
+			Position.prototype.toString = function() {
+				return "line#: " + this.lineNum + ", index: " + this.index + ", " + " text: " + this.text.substring(0,2);
+			};
+			return Position;
+		}()),
+		
+		Match: (function() {
+			/**
+			 * FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME 
+			 */
+			function Match(lineNum, index, pos) {
+				this.lineNum = lineNum;
+				this.index = index;
+				this.position = pos;
+			}
+			return Match;
+		}()),
+		
 		/**
 		 * A rule that contains subrules ("patterns" in TextMate parlance) but has no "begin" or "end".
 		 * Also handles top level of grammar.
+		 * @private
 		 */
 		ContainerRule: (function() {
 			function ContainerRule(rule) {
@@ -224,14 +263,16 @@ orion.styler.TextMateStyler = (function() {
 			return ContainerRule;
 		})(),
 
-		/** A rule with a "match" pattern. */
+		/**
+		 * A rule with a "match" pattern.
+		 * @private
+		 */
 		MatchRule: (function() {
 			function MatchRule(/**Object*/ rule) {
 				this.rule = rule;
-				this.matchRegex = toRegExp(rule.match);
+				this.matchRegex = orion.styler.Util.toRegExp(rule.match);
 			}
 			MatchRule.prototype = {
-				/** @returns {Match|null} */
 				match: function(pos) {
 				},
 				/** Completes application of this rule by assigning the appropriate tokens */
@@ -244,7 +285,7 @@ orion.styler.TextMateStyler = (function() {
 									startPosition.lineNum, startPosition.index, endPosition.lineNum, endPosition.index) + "'");
 						}
 						if (captures) {
-							applyCaptures(captures, match);
+							_applyCaptures(captures, match);
 						}
 					}
 				}
@@ -252,57 +293,53 @@ orion.styler.TextMateStyler = (function() {
 			return MatchRule;
 		}()),
 		
-		ruleFactory: function(rule) {
+		/**
+		 * @param {Object} rule A rule from the JSON grammar.
+		 * @returns {MatchRule|ContainerRule|null} Returns null if rule is a begin/end rule (= not supported).
+		 */
+		_createTypedRule: function(rule) {
 			if (rule.match) {
-				return new MatchRule(rule);
+				return new this.MatchRule(rule);
 			} else if (rule.begin) {
 				return null; // Ignore begin/end rules; unsupported
 			} else {
-				return new ContainerRule(rule);
+				return new this.ContainerRule(rule);
 			}
 		},
 		
 		/**
-		 * Resolves a rule from the grammar into a MatchRule, ContainerRule, or BeginEndRule.
-		 * @param rule {Object} A rule from the grammar.
-		 * @returns {MatchRule|ContainerRule|BeginEndRule} An instance of one of our *Rules. If the 
-		 * rule is a reference to another rule, then the instance for the real, resolved rule is returned.
-		 * Returns null if __________
+		 * Resolves a rule from the grammar (which may be an include) into the real rule that it points to.
 		 */
-		resolve: function(rule) {
+		_resolve: function(rule) {
 			var resolved = rule;
 			if (rule.include) {
-				assert(!rule.begin && !rule.end && !rule.match); // sanity check
+				assert(!(rule.begin || rule.end || rule.match), "Unexpected patterns in include rule");
 				var name = rule.include;
 				if (name.charAt(0) === "#") {
-					resolved = this.grammar.repository[name.substring(1)];
+					resolved = this.grammar.repository && this.grammar.repository[name.substring(1)];
+					if (!resolved) { throw new Error("Couldn't find included rule " + name + " in grammar repository"); }
 				} else if (name === "$self") {
 					resolved = this.grammar;
+				} else if (name === "$base") {
+					// $base is only relevant when including rules from foreign grammars
+					throw new Error("include $base not supported"); 
 				} else {
-					throw new Error("External rule " + name + " not supported");
+					throw new Error("Include external rule " + name + " not supported");
 				}
-				if (!resolved) { throw new Error("Couldn't find rule " + name + " in grammar"); }
 			}
-			// Cache the (Match|Container|BeginEnd)Rule in the resolved rule from grammar. These objects are reused each
-			// time the rule is called via an include, so they must not have any per-rule-application state.
-			resolved._cachedRule = resolved._cachedRule || this.makeRule(resolved);
-			return resolved._cachedRule;
+			return resolved;
 		},
 		
+		/**
+		 * TODO
+		 * @param {String[]} lines
+		 */
 		parse: function(lines) {
-			// No end tokens; BeginEndRule handles each of its subrules
-			// Concern: backtracking? we need to be able to back up the pos if nothing matches?
-			//		Just throw away the result returned from match()
-			//		And unroll all the tokens we applied
-			// TODO cache RegExp
-			
-			// main
-			var pos = new Position(lines, 0, 0, lines[0]);
-			var startRule = this.makeRule(this.grammar);
-			startRule.match(pos);
+			var position = new Position(lines, 0, 0, lines[0]);
+			// startRule.match(position)
 		},
 		
-		applyCaptures: function(/**Object*/ captures, /**Match*/ match) {
+		_applyCaptures: function(/**Object*/ captures, /**Match*/ match) {
 			var regexMatch = match.match;
 			for (var groupNum in captures) {
 				if (captures.hasOwnProperty(groupNum)) {
@@ -311,8 +348,20 @@ orion.styler.TextMateStyler = (function() {
 					console.debug("X apply " + value.name + " to " + matchedGroup);
 				}
 			}
+		},
+		
+		_onSelection: function(e) {
+		},
+		_onModelChanged: function(/**eclipse.ModelChangingEvent*/ e) {
+			// Re-style the changed lines?
+			
+		},
+		_onDestroy: function(/**eclipse.DestroyEvent*/ e) {
+		},
+		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {
+			// When is this called? eg. while scrolling?
 		}
-	};
+	});
 	return TextMateStyler;
 }());
 	

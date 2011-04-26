@@ -17,5 +17,6 @@ orion.JSTestAdapter.runTests("All Tests", [
 	"http://localhost:8080/js-tests/serviceRegistry/test.html",
 	"http://localhost:8080/js-tests/preferences/test.html",
 	"http://localhost:8080/js-tests/pluginRegistry/test.html",
-	"http://localhost:8080/js-tests/testRunAsynch/test.html"
+	"http://localhost:8080/js-tests/testRunAsynch/test.html",
+	"http://localhost:8080/js-tests/textMateStyler/test.html"
 ]);
