@@ -26,7 +26,7 @@
 			
 			provider.registerServiceProvider("fileCommands", {
 				run: function(item) {
-					return "/git-log.html#" + item.Git.CommitLocation;
+					return "/git-log.html#" + item.Git.CommitLocation + "?page=1";
 				}
 			}, {
 				name: "Git Log",
@@ -41,7 +41,7 @@
 				run : function(item) {
 					var clientDeferred = new dojo.Deferred();					
 					gitService.getDefaultRemoteBranch(item.Git.RemoteLocation, function(defaultRemoteBranchJsonData, secondArg){
-						clientDeferred.callback("/git-log.html?remote#" + defaultRemoteBranchJsonData.Location)
+						clientDeferred.callback("/git-log.html?remote#" + defaultRemoteBranchJsonData.Location + "?page=1")
 					});
 					return clientDeferred;
 				}

@@ -279,7 +279,7 @@ dojo.require("widgets.GitCredentialsDialog");
 													}).then(function(remoteJsonData){
 														gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArd) {
 															explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
-															explorer.loadCommitsList(remoteJsonData.CommitLocation, remoteJsonData, true);			
+															explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);			
 														});
 													});
 												}, func);
