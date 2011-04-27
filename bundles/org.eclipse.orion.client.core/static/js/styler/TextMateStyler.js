@@ -168,16 +168,38 @@ orion.styler.Util = {
  * <pre>keyword, keyword-control, keyword-control-php</pre>
  *
  * A CSS file can give rules matching any of these class names to provide generic or more specific styling.
- * For example, <pre>.keyword { font-color: blue; }</pre> will color all constants blue, while
- * <pre>.keyword-control-php { font-decoration: underline; }</pre> will underline only PHP control keywords.
+ * For example, <pre>.keyword { font-color: blue; }</pre> colors all keywords blue, while
+ * <pre>.keyword-control-php { font-decoration: underline; }</pre> underlines only PHP control keywords.
  *
  * This is useful when using grammars that adhere to TextMate's
  * <a href="http://manual.macromates.com/en/language_grammars.html#naming_conventions">scope name conventions</a>,
- * as a single CSS rule can provide consistent styling to similar constructs across many different languages.<p>
+ * as a single CSS rule can provide consistent styling to similar constructs across different languages.<p>
  * 
- * <h4>Limitations:</h4>
- * TODO
- * 
+ * <h4>Supported top-level grammar features:</h4>
+ * <ul><li><tt>scopeName, fileTypes, patterns, repository</tt> (but see below) are supported.</li>
+ * <li><tt>firstLineMatch, foldingStartMarker, foldingStopMarker</tt> are not supported.</li>
+ * </ul>
+ *
+ * <h4>Supported grammar rule features:</h4>
+ * <ul><li><tt>match</tt> patterns are supported.</li>
+ * <li><tt>name</tt> scope is supported.</li>
+ * <li><tt>begin/end</tt> patterns are not supported and are ignored, along with their subrules. Consequently, 
+ *   matched constructs may <b>not</b> span multiple lines.</li>
+ * <li><tt>contentName, beginCaptures, endCaptures, applyEndPatternLast</tt> are not supported.</li>
+ * <li><tt>captures</tt> is not supported.</li>
+ * <li><tt>include</tt> is supported, but only when referencing a rule in the current grammar's <tt>repository</tt>.
+ *   Including <tt>$self</tt>, <tt>$base</tt>, or <tt>rule.from.another.grammar</tt> is not supported.</li>
+ * <li>The <tt>(?x)</tt> option is supported only when it appears at the beginning of a regex pattern.</li>
+ * <li>Matching is done using native JavaScript {@link RegExp}s. As a result, many Oniguruma features are not supported.
+ *   Unsupported features include:
+ *   <ul><li>The "s" flag</li>
+ *   <li>Named captures</li>
+ *   <li>Setting flags inside groups (eg. <tt>a(?i:b)c</tt>)</li> *   <li>Lookbehind and negative lookbehind</li>
+ *   <li>etc.</li>
+ *   </ul>
+ * </li>
+ * </ul>
+ *
  * @class orion.styler.TextMateStyler
  * @extends orion.styler.AbstractStyler
  * @param {eclipse.Editor} editor The editor.
