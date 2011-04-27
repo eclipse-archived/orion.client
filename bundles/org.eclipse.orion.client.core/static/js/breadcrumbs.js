@@ -43,6 +43,7 @@ eclipse.BreadCrumbs = (function() {
 			if(options.makeHref){
 				this._makeHref = options.makeHref;
 			} 
+			this.path = "";
 			this.render();
 		},
 
@@ -66,6 +67,7 @@ eclipse.BreadCrumbs = (function() {
 			if (this._resource && this._resource.Parents) {
 				slash = document.createElement('span');
 				dojo.place(document.createTextNode('/'), slash, "only");
+				this.path+="/";
 				dojo.addClass(slash, "breadcrumb");
 				crumbs.appendChild(slash);
 			} else {
@@ -78,6 +80,7 @@ eclipse.BreadCrumbs = (function() {
 					seg = document.createElement('a');
 					dojo.addClass(seg, "breadcrumb");
 					dojo.place(document.createTextNode(parents[i].Name), seg, "only");
+					this.path += parents[i].Name; 
 					if(this._makeHref) {
 						this._makeHref(seg , parents[i].ChildrenLocation);
 					}
@@ -87,6 +90,7 @@ eclipse.BreadCrumbs = (function() {
 					crumbs.appendChild(seg);
 					slash = document.createElement('span');
 					dojo.place(document.createTextNode('/'), slash, "only");
+					this.path += '/';
 					dojo.addClass(slash, "breadcrumb");
 					crumbs.appendChild(slash);
 				}
@@ -96,6 +100,7 @@ eclipse.BreadCrumbs = (function() {
 					dojo.place(document.createTextNode(this._resource.Name), seg, "only");
 					dojo.addClass(seg, "breadcrumb");
 					dojo.addClass(seg, "currentLocation");
+					this.path+=this._resource.Name;
 					crumbs.appendChild(seg);
 				}
 			} 

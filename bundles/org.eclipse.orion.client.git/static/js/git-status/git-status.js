@@ -63,8 +63,11 @@ function initTitleBar(fileClient){
 					var titlePane = dojo.byId("pageTitle");
 					if (titlePane) {
 						dojo.empty(titlePane);
-						new eclipse.BreadCrumbs({container: "pageTitle", resource: metadata , makeHref:makeHref});
+						var breadcrumb = new eclipse.BreadCrumbs({container: "pageTitle", resource: metadata , makeHref:function(seg,location){makeHref(fileClient, seg,location);}});
+						if(breadcrumb.path && breadcrumb.path!="")
+							document.title = "Git Status - " + breadcrumb.path;
 					}
+					
 				}),
 				dojo.hitch(this, function(error) {
 					console.error("Error loading file metadata: " + error.message);
@@ -74,7 +77,7 @@ function initTitleBar(fileClient){
 	
 };
 
-function makeHref(seg,location){
+function makeHref(fileClient, seg, location){
 	fileClient.read(location, true).then(
 			dojo.hitch(this, function(metadata) {
 				seg.href = "/git-status.html#" + metadata.Git.StatusLocation;
