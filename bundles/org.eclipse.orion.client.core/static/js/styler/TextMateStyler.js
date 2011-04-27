@@ -16,8 +16,9 @@ orion = orion || {};
 orion.styler = orion.styler || {};
 
 /**
- * Can be used as the prototype for concrete stylers. Extenders can call {@link orion.styler.AbstractStyler.extend}
- * and provider their own _onSelection, _onModelChanged, _onDestroy and _onLineStyle methods. 
+ * A styler that does nothing, but can be extended by concrete stylers. Extenders can call 
+ * {@link orion.styler.AbstractStyler.extend} and provide their own {@link #_onSelection}, 
+ * {@link #_onModelChanged}, {@link #_onDestroy} and {@link #_onLineStyle} methods.
  * @class orion.styler.AbstractStyler
  */
 orion.styler.AbstractStyler = (function() {
@@ -26,7 +27,7 @@ orion.styler.AbstractStyler = (function() {
 	}
 	AbstractStyler.prototype = /** @lends orion.styler.AbstractStyler.prototype */ {
 		/**
-		 * Initializes this styler with an editor. Extenders must call this from their constructor.
+		 * Initializes this styler with an editor. Extenders <b>must</b> call this from their constructor.
 		 * @param {eclipse.Editor} editor
 		 */
 		initialize: function(editor) {
@@ -51,22 +52,22 @@ orion.styler.AbstractStyler = (function() {
 			}
 		},
 		
-		/** To be overridden by subclasses.
+		/** To be overridden by subclass.
 		 * @public
 		 */
 		_onSelection: function(/**eclipse.SelectionEvent*/ e) {},
 		
-		/** To be overridden by subclasses.
+		/** To be overridden by subclass.
 		 * @public
 		 */
 		_onModelChanged: function(/**eclipse.ModelChangingEvent*/ e) {},
 		
-		/** To be overridden by subclasses.
+		/** To be overridden by subclass.
 		 * @public
 		 */
 		_onDestroy: function(/**eclipse.DestroyEvent*/ e) {},
 		
-		/** To be overridden by subclasses.
+		/** To be overridden by subclass.
 		 * @public
 		 */
 		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {}
@@ -112,9 +113,11 @@ orion.styler.Util = {
 	
 	/**
 	 * @param {String} str String giving a regular expression pattern from a TextMate JSON grammar.
+	 * @param {String} [flags] [ismg]+
 	 * @returns {RegExp}
 	 */
-	toRegExp: function(str) {
+	toRegExp: function(str, flags) {
+		flags = flags || "";
 		function fail(feature, match) {
 			throw new Error("Unsupported regex feature \"" + feature + "\": \"" + match[0] + "\" at index: "
 					+ match.index + " in " + match.input);
@@ -150,31 +153,48 @@ orion.styler.Util = {
 		}
 		str2 = str2 || str;
 		str2 = orion.styler.Util.escapeJson(str2);
-		// TODO: tolerate (?xexpr) -- eg. in JSON grammar
-		// TODO: tolerate (?i) -- eg. in PHP grammar
-		return new RegExp(str2);
+		// TODO: tolerate /(?xExpr)/ -- eg. in JSON grammar
+		// TODO: tolerate /(?iSubExp)/ -- eg. in PHP grammar (trickier)
+		return new RegExp(str2, flags);
 	}
 };
 
 /**
- * A styler that knows how to apply a limited subset of the TextMate grammar format to style a line.
+ * A styler that knows how to apply a limited subset of the TextMate grammar format to style a line.<p>
+ *
+ * <h4>Styling from a grammar:</h4>
+ * Each scope name given in the grammar is converted to an array of CSS class names. For example 
+ * a region of text with scope <tt>keyword.control.php</tt> will be assigned the CSS classes 
+ * <pre>keyword, keyword-control, keyword-control-php</pre>
+ *
+ * A CSS file can give rules matching any of these class names to provide generic or more specific styling.
+ * For example, <pre>.keyword { font-color: blue; }</pre> will color all constants blue, while
+ * <pre>.keyword-control-php { font-decoration: underline; }</pre> will underline only PHP control keywords.
+ *
+ * This is useful when using grammars that adhere to TextMate's
+ * <a href="http://manual.macromates.com/en/language_grammars.html#naming_conventions">scope name conventions</a>,
+ * as a single CSS rule can provide consistent styling to similar constructs across many different languages.<p>
+ * 
+ * <h4>Limitations:</h4>
+ * TODO
  * 
  * @class orion.styler.TextMateStyler
  * @extends orion.styler.AbstractStyler
- * @param {eclipse.Editor} editor
- * @param {Object} grammar The TextMate grammar as a JSON object. You can use a plist-to-JSON conversion 
- * tool to produce this object. Note that not all features of TextMate grammars are supported.
+ * @param {eclipse.Editor} editor The editor.
+ * @param {Object} grammar The TextMate grammar as a JSON object. You can use a plist-to-JSON conversion tool
+ * to produce this object. Note that not all features of TextMate grammars are supported.
  */
 orion.styler.TextMateStyler = (function() {
 	/** @inner */
 	function TextMateStyler(editor, grammar) {
 		this.initialize(editor);
-		this.grammar = grammar;
+		this.grammar = grammar; // TODO: use deep copy since we mutate this?
+		// key: {String} scopeName, value: {eclipse.Style[]} styles
+		this._styles = {};
 		this._preprocess();
 	}
 	orion.styler.AbstractStyler.extend(TextMateStyler, /** @lends orion.styler.TextMateStyler.prototype */ {
 		_preprocess: function() {
-			// Look up "include"d rules, create Rule instances
 			var stack = [this.grammar];
 			for (; stack.length !== 0; ) {
 				var rule = stack.pop();
@@ -182,8 +202,15 @@ orion.styler.TextMateStyler = (function() {
 					continue;
 				}
 				
+				// Look up include'd rule, create typed *Rule instance
 				rule.__resolvedRule = this._resolve(rule);
 				rule.__cachedTypedRule = this._createTypedRule(rule);
+				
+				// Convert the scope names to styles and cache them for later
+				this._addStyles(rule.name);
+				this._addStyles(rule.captures);
+				// TODO future: _addStyles for contentName, beginCaptures, endCaptures
+				
 				if (rule.patterns) {
 					for (var i=0; i < rule.patterns.length; i++) {
 						stack.push(rule.patterns[i]);
@@ -193,54 +220,17 @@ orion.styler.TextMateStyler = (function() {
 		},
 		
 		/**
-		 * An absolute position in the input lines.
-		 * @param {String[]} lines All lines we're processing.
-		 * @param {Number} lineNum Index of the current line being processed, 0 <= lineNum < lines.length
-		 * @param {Number} index Our current position in the line, 0 <= index < lines[lineNum].length
-		 * @param {String} text The unconsumed portion of the current line, equal to lines[lineNum].substring(index)
-		 * @private
+		 * Adds eclipse.Style objects for scope to our _styles cache.
+		 * @param {String} scope A scope name, like "constant.character.php".
 		 */
-		Position: (function() {
-			function Position(lines, lineNum, index, text) {
-				this.lines = lines;
-				this.lineNum = lineNum;
-				this.index = index;
-				this.text = text;
+		_addStyles: function(scope) {
+			if (scope && !this._styles[scope]) {
+				this._styles[scope] = scope.split(".").map(
+						function(segment, i, segments) {
+							return {style: {styleClass: segments.slice(0, i+1).join("-") }};
+						});
 			}
-			/**
-			 * @param {RegExp.match|null} match The regex match from searching in this Position's <code>text</code>.
-			 * @returns {Position} The new Position after advancing past match, or null if we're at the end of input.
-			 */
-			Position.prototype.advance = function(match) {
-				if (!match) { return this; }
-				var endIndex = this.index + match.index + match[0].length,
-				    newLineNum = (endIndex < this.lines[this.lineNum].length) ? this.lineNum : this.lineNum + 1,
-				    newIndex = (this.lineNum === newLineNum) ? endIndex + 1 : 0;
-				if (newLineNum < this.lines.length) {
-					var text = this.lines[newLineNum].substring(newIndex);
-					return new Position(this.lines, newLineNum, newIndex, text);
-				} else {
-					return null; // EOF
-				}
-			};
-			// XXX debug
-			Position.prototype.toString = function() {
-				return "line#: " + this.lineNum + ", index: " + this.index + ", " + " text: " + this.text.substring(0,2);
-			};
-			return Position;
-		}()),
-		
-		Match: (function() {
-			/**
-			 * FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME 
-			 */
-			function Match(lineNum, index, pos) {
-				this.lineNum = lineNum;
-				this.index = index;
-				this.position = pos;
-			}
-			return Match;
-		}()),
+		},
 		
 		/**
 		 * A rule that contains subrules ("patterns" in TextMate parlance) but has no "begin" or "end".
@@ -251,11 +241,6 @@ orion.styler.TextMateStyler = (function() {
 			function ContainerRule(rule) {
 				this.rule = rule;
 			}
-			ContainerRule.prototype = {
-				/** @returns {Match|null} */
-				match: function(pos) {
-				}
-			};
 			return ContainerRule;
 		}()),
 
@@ -266,23 +251,9 @@ orion.styler.TextMateStyler = (function() {
 		MatchRule: (function() {
 			function MatchRule(/**Object*/ rule) {
 				this.rule = rule;
-				this.matchRegex = orion.styler.Util.toRegExp(rule.match);
+				// To use lastIndex for starting search from non-0 index, need global flag here
+				this.matchRegex = orion.styler.Util.toRegExp(rule.match, "g");
 			}
-			MatchRule.prototype = {
-				match: function(pos) {
-				},
-				/** Completes application of this rule by assigning the appropriate tokens */
-				consume: function(/**Match*/ match, /**Position*/ startPosition, /**Position*/ endPosition) {
-					if (match) {
-						// FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
-						var name = this.rule.name;
-						var captures = this.rule.captures;
-						if (captures) {
-							this._applyCaptures(captures, match);
-						}
-					}
-				}
-			};
 			return MatchRule;
 		}()),
 		
@@ -304,13 +275,11 @@ orion.styler.TextMateStyler = (function() {
 		 * Resolves a rule from the grammar (which may be an include) into the real rule that it points to.
 		 */
 		_resolve: function(rule) {
-			function assert(cond, message) {
-				if (!cond) { throw new Error(message); }
-			}
-			
 			var resolved = rule;
 			if (rule.include) {
-				assert(!(rule.begin || rule.end || rule.match), "Unexpected patterns in include rule");
+				if (rule.begin || rule.end || rule.match) {
+					throw new Error("Unexpected patterns in include rule");
+				}
 				var name = rule.include;
 				if (name.charAt(0) === "#") {
 					resolved = this.grammar.repository && this.grammar.repository[name.substring(1)];
@@ -328,37 +297,107 @@ orion.styler.TextMateStyler = (function() {
 		},
 		
 		/**
-		 * TODO
-		 * @param {String[]} lines
+		 * @class ScopeRange Represents a range in the input that a scope name applies to.
+		 * @property {Number} start
+		 * @property {Number} end
+		 * @property {String} scope
 		 */
-		parse: function(lines) {
-			var position = new Position(lines, 0, 0, lines[0]);
-			// startRule.match(position)
-		},
-		
-		_applyCaptures: function(/**Object*/ captures, /**Match*/ match) {
-			var regexMatch = match.match;
+		/**
+		 * Adds the scopes given in rule to the ranges array.
+		 */
+		_applyScopes: function(/**ScopeRange[]*/ ranges, /**Object*/ rule, /**Match*/ match, /**RegExp*/ regex) {
+			var start = match[0].index,
+			    end = start + match[0].length - 1;
+			if (rule.name) {
+				// apply name to the whole matching region
+				console.debug("X apply " + rule.name + " to " + match[0]);
+				ranges.push({start: start, end: end, scope: rule.name});
+			}
+			// Apply captures to individual matching groups
+			var captures = rule.captures;
 			for (var groupNum in captures) {
 				if (captures.hasOwnProperty(groupNum)) {
-					var value = captures[groupNum];
-					var matchedGroup = regexMatch[groupNum];
-					console.debug("X apply " + value.name + " to " + matchedGroup);
+					var scope = captures[groupNum].name;
+					var groupText = match[groupNum];
+					console.debug("TODO apply " + scope + " to " + groupText);
+					/* TODO: workaround for JS having no API for getting matching group start index
+					var newRegex = parse regex, wrap every un-matching-paren'd term with matching parens
+					var old2New = map matching group #s in regex to #s in newRegex
+					// Match again against newRegex. Note that newMatch[0] is guaranteed to be start..end
+					newRegex.lastIndex = start;
+					var newMatch = newRegex.exec(match.input.substring(0, end+1));
+					newRegex.lastIndex = 0;
+					var groupRanges = sum up lengths of newMatch[1], newMatch[2], ... to get matching group ranges
+					for (var groupNum = 1; newMatch[groupNum]; groupNum++) {
+						var oldGroupNum = old2New[groupNum];
+						if (typeof(oldGroupNum) !== "undefined") {
+							var scope = captures[oldGroupNum].name;
+							ranges.push({start: groupStart, end: groupEnd, scope: scope});
+						}
+					}
+					*/
 				}
 			}
+		},
+		
+		/**
+		 * TODO
+		 * @param {String} line
+		 * @return {ScopeRange[]}
+		 */
+		_run: function(line) {
+			var scopeRanges = [];
+			var pos = 0;
+			var len = line.length;
+			var stack = [].concat(this.grammar.patterns);
+			while (stack.length && pos < len) {
+				var rule = stack.pop().__cachedTypedRule;
+				if (!rule) {
+					continue;
+				} else if (rule instanceof this.MatchRule) {
+					var regex = rule.matchRegex;
+					// use lastIndex to start searching from pos
+					regex.lastIndex = pos;
+					var match = regex.exec(line);
+					regex.lastIndex = 0; // just for safety
+					if (match) {
+						// consume the match
+						pos += match[0].length;
+						this._applyScopes(scopeRanges, match, regex);
+					}
+				} else if (rule instanceof this.ContainerRule) {
+					var subrules = rule.patterns;
+					for (var i=subrules.length-1; i; i--) {
+						stack.push(subrules[i]);
+					}
+				}
+			}
+			// TODO: does it matter *why* we stopped (EOL vs. empty stack?)
+			return scopeRanges;
 		},
 		
 		_onSelection: function(e) {
 		},
 		_onModelChanged: function(/**eclipse.ModelChangingEvent*/ e) {
 			// Re-style the changed lines?
-			
 		},
 		_onDestroy: function(/**eclipse.DestroyEvent*/ e) {
+			this.grammar = null;
 		},
 		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {
-			// When is this called? eg. while scrolling?
+			console.debug("_onLineStyle lineIndex:" + e.lineIndex + ", lineStart:" + e.lineStart + ", " + "lineText:" + e.lineText);
+			
+			var scopeRanges = this._run(e.lineText);
+			var styleRanges = /**eclipse.StyleRange[]*/ [];
+//			for (var i=0; i < scopeRanges.length; i++) {
+//				var scopeRange = scopeRanges[i];
+//				var classNames = this.grammar.__styles[scopeRange.scope];
+//				for (var j=0; j < classNames.length; j++) {
+//					styleRanges.push({start: scopeRange.start, end: scopeRange.end, style: classNames[j]});
+//				}
+//			}
+//			e.ranges = styleRanges;
 		}
 	});
 	return TextMateStyler;
 }());
-	
