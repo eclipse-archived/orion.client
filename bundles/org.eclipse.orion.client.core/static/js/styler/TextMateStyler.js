@@ -183,17 +183,18 @@ orion.styler.Util = {
  * <h4>Supported grammar rule features:</h4>
  * <ul><li><tt>match</tt> patterns are supported.</li>
  * <li><tt>name</tt> scope is supported.</li>
+ * <li><tt>captures</tt> is not supported. Any scopes given inside a <tt>captures</tt> rule are not applied.</li>
  * <li><tt>begin/end</tt> patterns are not supported and are ignored, along with their subrules. Consequently, 
  *   matched constructs may <b>not</b> span multiple lines.</li>
  * <li><tt>contentName, beginCaptures, endCaptures, applyEndPatternLast</tt> are not supported.</li>
- * <li><tt>captures</tt> is not supported.</li>
- * <li><tt>include</tt> is supported, but only when referencing a rule in the current grammar's <tt>repository</tt>.
+ * <li><tt>include</tt> is supported, but only when it references a rule in the current grammar's <tt>repository</tt>.
  *   Including <tt>$self</tt>, <tt>$base</tt>, or <tt>rule.from.another.grammar</tt> is not supported.</li>
- * <li>The <tt>(?x)</tt> option is supported only when it appears at the beginning of a regex pattern.</li>
+ * <li>The <tt>(?x)</tt> option ("extended" regex format), but only when it appears at the beginning of a regex pattern.</li>
  * <li>Matching is done using native JavaScript {@link RegExp}s. As a result, many Oniguruma features are not supported.
  *   Unsupported features include:
  *   <ul><li>Named captures</li>
- *   <li>Setting flags inside groups (eg. <tt>a(?i:b)c</tt>)</li> *   <li>Lookbehind and negative lookbehind</li>
+ *   <li>Setting flags inside groups (eg. <tt>(?i:a)b</tt>)</li>
+ *   <li>Lookbehind and negative lookbehind</li>
  *   <li>Subexpression call</li>
  *   <li>etc.</li>
  *   </ul>
@@ -353,7 +354,7 @@ orion.styler.TextMateStyler = (function() {
 			    name = rule.rule.name;
 			if (name) {
 				// apply name to the whole matching region
-				console.debug("X apply " + name + " to " + match[0]);
+//				console.debug("X apply " + name + " to " + match[0] + " at " + start + ".." + end);
 				ranges.push({start: start, end: end, scope: name});
 			}
 			// Apply captures to individual matching groups
@@ -388,11 +389,25 @@ orion.styler.TextMateStyler = (function() {
 		 * @return {ScopeRange[]}
 		 */
 		_getScopesForLine: function(line) {
+			var startRules = this.grammar.patterns.reverse() || [];
 			var scopeRanges = [];
 			var pos = 0;
 			var len = line.length;
-			var stack = [].concat(this.grammar.patterns || []);
-			while (stack.length && pos < len) {
+			var stack = [];
+			var lastResetPos = -1;
+			var i;
+			while (pos < len) {
+				if (!stack.length) {
+					// Input remains, but stack is empty => reset to starting rules
+					if (lastResetPos === pos) {
+//						console.debug("Broke out at pos: " + pos);
+						break; // escape infinite loop
+					}
+					lastResetPos = pos;
+//					console.debug("pos: " + pos + " lastResetPos: " + lastResetPos);
+					stack = startRules.slice();
+				}
+				
 				var top = stack.pop();
 				var rule = top.__resolvedRule.__cachedTypedRule;
 				if (!rule) {
@@ -403,19 +418,20 @@ orion.styler.TextMateStyler = (function() {
 					// use lastIndex to start searching from pos
 					regex.lastIndex = pos;
 					var match = regex.exec(line);
-					regex.lastIndex = 0; // reset for safety since regex is reused
+					regex.lastIndex = 0; // just to be safe, since regex is reused
 					if (match) {
 						// consume the match
-						pos += match[0].length;
+						pos = match.index + match[0].length;
 						this._applyScopes(scopeRanges, rule, match, regex);
 					}
 				} else if (rule instanceof this.ContainerRule) {
 					var subrules = rule.rule.patterns;
-					for (var i=subrules.length-1; i; i--) {
+					for (i = subrules.length-1; i; i--) {
 						stack.push(subrules[i]);
 					}
 				}
 			}
+			// FIXME: if stack is empty 
 			// TODO: does it matter *why* we stopped (EOL vs. empty stack?)
 			return scopeRanges;
 		},
