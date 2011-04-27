@@ -15,8 +15,7 @@ orion.GitStatusModel = (function() {
 		this.selectedItem = undefined;
 		this.interestedUnstagedGroup = ["Missing","Modified","Untracked"];
 		this.interestedStagedGroup = ["Added", "Changed","Removed"];
-		this.conflictDetectGroup = ["Added", "Changed","Missing"];
-		this.conflictRenderGroup = ["Modified"];
+		this.conflictPatterns = [["Both","Modified","Added", "Changed","Missing"],["RemoteDelete","Untracked","Removed"],["LocalDelete","Modified","Added", "Missing"]];
 		this.conflictType = "Conflicting";
 	}
 	GitStatusModel.prototype = {
@@ -29,34 +28,38 @@ orion.GitStatusModel = (function() {
 		
 		init: function(jsonData){
 			this.items = jsonData;
-			this._markConflict();
+			for(var i = 0; i < this.conflictPatterns.length ; i++ ){
+				this._markConflict(this.conflictPatterns[i]);
+			}
 		},
 		
 		getModelType: function(groupItem , groupName){
 			if(groupItem.Conflicting){
-				if(groupName === this.conflictRenderGroup[0])
-					return this.conflictType;
-				else
+				if(groupItem.Conflicting === "Hide")
 					return undefined;
+				else
+					return this.conflictType;
 			}
 			return groupName;
 		},
 		
-		_markConflict:function(){
+		_markConflict:function(conflictPattern){
 			//if git status server API response a file with "Modified" ,"Added", "Changed","Missing" states , we treat it as a conflicting file
 			//And we add additional attribute to that groupItem : groupItem.Conflicting = true;
-			var modGroup = this.getGroupData(this.conflictRenderGroup[0]);
-			if(!modGroup)
+			var baseGroup = this.getGroupData(conflictPattern[1]);
+			if(!baseGroup)
 				return;
-			for(var i = 0 ; i < modGroup.length ; i++){
-				var fileLocation = modGroup[i].Location;
+			for(var i = 0 ; i < baseGroup.length ; i++){
+				if(baseGroup[i].Conflicting)
+					continue;
+				var fileLocation = baseGroup[i].Location;
 				var itemsInDetectGroup = [];
 				
-				for (var j = 0; j < this.conflictDetectGroup.length ; j++){
-					var groupName = this.conflictDetectGroup[j];
+				for (var j = 2; j < conflictPattern.length ; j++){
+					var groupName = conflictPattern[j];
 					var groupData = this.getGroupData(groupName);
 					if(!groupData)
-						break;
+						continue;
 					var item = this._findSameFile(fileLocation , groupData);
 					if(item){
 						itemsInDetectGroup.push(item);
@@ -66,10 +69,10 @@ orion.GitStatusModel = (function() {
 				}
 				
 				//we have the same file at "Modified" ,"Added", "Changed","Missing" groups
-				if(itemsInDetectGroup.length > 1){
-					modGroup[i].Conflicting = true;
+				if(itemsInDetectGroup.length === (conflictPattern.length - 2) ){
+					baseGroup[i].Conflicting = conflictPattern[0];
 					for(var k = 0; k < itemsInDetectGroup.length ; k++){
-						itemsInDetectGroup[k].Conflicting = true;
+						itemsInDetectGroup[k].Conflicting = "Hide";
 					}
 				}
 			}
@@ -77,6 +80,8 @@ orion.GitStatusModel = (function() {
 		
 		_findSameFile: function(fileLocation , groupData){
 			for(var j = 0 ; j < groupData.length ; j++){
+				if(groupData[j].Conflicting)
+					continue;
 				if(fileLocation === groupData[j].Location)
 					return groupData[j];
 			}
@@ -191,7 +196,7 @@ orion.GitStatusRenderer = (function() {
 			row.appendChild(sbsViewerCol);
 			this._controller.createImgButton(false ,sbsViewerCol , "/images/git/compare-sbs.gif", "Side by side compare",
 					function(evt) {
-						self._controller.openSBSViewer(itemModel);
+						self._controller.openCompareEditor(itemModel);
 					} );
 			
 			//render the stage / unstage action  icon
@@ -219,6 +224,7 @@ orion.GitStatusController = (function() {
 		this._unstagedTableRenderer = new orion.GitStatusRenderer(unstagedDivId , this);
 		this._stagedTableRenderer = new orion.GitStatusRenderer(stagedDivId , this);
 		this._inlineCompareContainer = new orion.InlineCompareContainer(serviceRegistry ,"inline-compare-viewer");
+		self._stagingConflict = false;
 	}
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
@@ -241,6 +247,13 @@ orion.GitStatusController = (function() {
 			this.modifyImageButton(true ,unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
 			this.modifyImageButton(true ,commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value);} , !this.hasStaged , function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
 			this.modifyImageButton(false ,amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value , true);} , !this.hasStaged, function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
+			
+			if(this._stagingConflict){
+				this._stagingConflict = false;
+				if(!this.hasStaged){
+					this.commit("Resolved Deletion Conflicts" , false);
+				}
+			}
 			
 			this.cursorClear();
 		},
@@ -340,7 +353,8 @@ orion.GitStatusController = (function() {
 											location:groupData[j].Location,
 											commitURI:groupData[j].Git.CommitLocation,
 											indexURI:groupData[j].Git.IndexLocation,
-											diffURI:groupData[j].Git.DiffLocation
+											diffURI:groupData[j].Git.DiffLocation,
+											conflicting:groupData[j].Conflicting 
 						});
 					}
 				} 
@@ -383,7 +397,7 @@ orion.GitStatusController = (function() {
 			);
 		},
 		
-		openSBSViewer: function(itemModel){
+		openCompareEditor: function(itemModel){
 			var diffParam = "";
 			var baseUrl = "/compare-m.html#";
 			if(this._model.isConflict(itemModel.type)){
@@ -400,7 +414,7 @@ orion.GitStatusController = (function() {
 			if(this._model.isStaged(itemModel.type))
 				this.unstage(itemModel.indexURI);
 			else
-				this.stage(itemModel.indexURI);
+				this.stage(itemModel.indexURI , itemModel.conflicting);
 		},
 		
 		handleServerErrors: function(errorResponse , ioArgs){
@@ -427,8 +441,12 @@ orion.GitStatusController = (function() {
 				});
 		},
 		
-		stage: function(location){
+		stage: function(location , stagingConflict){
 			var self = this;
+			if(stagingConflict)
+				self._stagingConflict = true;
+			else
+				self._stagingConflict = false;
 			self._registry.getService("IGitService").then(
 					function(service) {
 						service.stage(location, 

@@ -84,12 +84,15 @@ eclipse.FileRenderer = (function() {
 			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Message</h2>"});
 			break;
 		case 1:
-			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Author</h2>"});
+			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Tags</h2>"});
 			break;
 		case 2:
-			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Date</h2>"});
+			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Author</h2>"});
 			break;
 		case 3:
+			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Date</h2>"});
+			break;
+		case 4:
 			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Actions</h2>"});
 			break;
 		};
@@ -140,12 +143,21 @@ eclipse.FileRenderer = (function() {
 			return col;
 			break;
 		case 1:
-			return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.AuthorName});
+			var td = document.createElement("td", {style: "padding-left: 5px; padding-right: 5px"});
+
+			dojo.forEach(item.Children, function(tag, i){
+				dojo.place(document.createTextNode(tag), dojo.create("p", {style: "margin: 5px"}, td, "last"), "only");
+			});
+			
+			return td;
 			break;
 		case 2:
-			return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: dojo.date.locale.format(new Date(item.Time), {formatLength: "short"})});
+			return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.AuthorName});
 			break;
 		case 3:
+			return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: dojo.date.locale.format(new Date(item.Time), {formatLength: "short"})});
+			break;
+		case 4:
 			var actionsColumn = this.getActionsColumn(item, tableRow);
 			dojo.style(actionsColumn, "padding-left", "5px");
 			dojo.style(actionsColumn, "padding-right", "5px");
