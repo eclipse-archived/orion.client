@@ -486,6 +486,9 @@ eclipse.GitService = (function() {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			}).then(function(remoteJsonData){
+				if (remoteJsonData.Children[0] == null)
+					return null;
+				
 				dojo.xhrGet({
 					url : remoteJsonData.Children[0].Location,
 					headers : {
