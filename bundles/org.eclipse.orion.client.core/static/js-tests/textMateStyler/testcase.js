@@ -32,47 +32,48 @@ var testcase = (function(assert) {
 		styler = null;
 	}
 	
-	function makeTest(testBody) {
+	function makeTest(testBody, doTearDown) {
+		doTearDown = typeof(doTearDown) === "undefined" ? true : doTearDown;
 		if (typeof(testBody) !== "function") { throw new Error("testBody should be a function"); }
 		return function() {
 			try {
 				setUp();
 				testBody();
 			} finally {
-//				tearDown();
+				if (doTearDown) {
+					tearDown();
+				}
 			}
 		};
 	}
 	
-//	tests["test create styler"] = makeTest(function() {
-//		try {
-//			styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
-//			assert.ok(true, "true is false");
-//		} catch (e) {
-//			assert.ok(false, "Exception creating editor");
-//		}
-//	});
+	tests["test create styler"] = makeTest(function() {
+		try {
+			styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+			assert.ok(true, "true is false");
+		} catch (e) {
+			assert.ok(false, "Exception creating editor");
+		}
+	});
 	
 	tests["test style matching 1 char"] = makeTest(function() {
 		styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
 		editor.setText("fizz");
-		// TEST: The z's should get "invalid.illegal.idontlikez.mylang"
-		
-		var x;
-		debugger;
-	});
+		// TEST: The z's should get "invalid-illegal-idontlikez-mylang"
+		// grab style from editor -- how?
+	}, false /* TEMP: don't teardown, so i can observe editor */);
 	
-//	tests["test style updater after model change"] = function() {
+//	tests["test style updater after model change"] = makeTest(function() {
 //		// do whatever
-//	};
+//	});
 //	
-//	tests["test grammar with unsupported regex feature"] = function() {
+//	tests["test grammar with unsupported regex feature"] = makeTest(function() {
 //		// expect Error
-//	};
+//	});
 //	
-//	tests["test grammar with other unsupported feature"] = function() {
+//	tests["test grammar with other unsupported feature"] = makeTest(function() {
 //		// expect Error
-//	};
+//	});
 	
 	return tests;
 }(orion.Assert));

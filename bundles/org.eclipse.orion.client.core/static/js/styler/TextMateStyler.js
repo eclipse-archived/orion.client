@@ -431,8 +431,6 @@ orion.styler.TextMateStyler = (function() {
 					}
 				}
 			}
-			// FIXME: if stack is empty 
-			// TODO: does it matter *why* we stopped (EOL vs. empty stack?)
 			return scopeRanges;
 		},
 		
@@ -464,7 +462,7 @@ orion.styler.TextMateStyler = (function() {
 			this._styles = null;
 		},
 		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {
-			console.debug("_onLineStyle lineIndex:" + e.lineIndex + ", lineStart:" + e.lineStart + ", " + "lineText:" + e.lineText);
+//			console.debug("_onLineStyle lineIndex:" + e.lineIndex + ", lineStart:" + e.lineStart + ", " + "lineText:" + e.lineText);
 			e.ranges = this.getStyleRangesForLine(e.lineText);
 		}
 	});
