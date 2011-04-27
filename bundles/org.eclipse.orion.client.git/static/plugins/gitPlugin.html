@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
 	<script type="text/javascript" src="/js/plugin.js"></script>
@@ -41,6 +42,8 @@
 				run : function(item) {
 					var clientDeferred = new dojo.Deferred();					
 					gitService.getDefaultRemoteBranch(item.Git.RemoteLocation, function(defaultRemoteBranchJsonData, secondArg){
+						if (defaultRemoteBranchJsonData == null)
+							clientDeferred.callback(defaultRemoteBranchJsonData);
 						clientDeferred.callback("/git-log.html?remote#" + defaultRemoteBranchJsonData.Location + "?page=1")
 					});
 					return clientDeferred;

@@ -1,11 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others. All rights reserved. This
- * program and the accompanying materials are made available under the terms of
- * the Eclipse Public License v1.0 which accompanies this distribution, and is
- * available at http://www.eclipse.org/legal/epl-v10.html
+/******************************************************************************* 
+ * Copyright (c) 2011 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+
 dojo.require("dojo.hash");
 dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
@@ -61,8 +63,11 @@ function initTitleBar(fileClient){
 					var titlePane = dojo.byId("pageTitle");
 					if (titlePane) {
 						dojo.empty(titlePane);
-						new eclipse.BreadCrumbs({container: "pageTitle", resource: metadata , makeHref:makeHref});
+						var breadcrumb = new eclipse.BreadCrumbs({container: "pageTitle", resource: metadata , makeHref:function(seg,location){makeHref(fileClient, seg,location);}});
+						if(breadcrumb.path && breadcrumb.path!="")
+							document.title = "Git Status - " + breadcrumb.path;
 					}
+					
 				}),
 				dojo.hitch(this, function(error) {
 					console.error("Error loading file metadata: " + error.message);
@@ -72,7 +77,7 @@ function initTitleBar(fileClient){
 	
 };
 
-function makeHref(seg,location){
+function makeHref(fileClient, seg, location){
 	fileClient.read(location, true).then(
 			dojo.hitch(this, function(metadata) {
 				seg.href = "/git-status.html#" + metadata.Git.StatusLocation;

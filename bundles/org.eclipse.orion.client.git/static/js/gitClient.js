@@ -1,11 +1,13 @@
-/*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others All rights reserved. This
- * program and the accompanying materials are made available under the terms of
- * the Eclipse Public License v1.0 which accompanies this distribution, and is
- * available at http://www.eclipse.org/legal/epl-v10.html
+/******************************************************************************* 
+ * Copyright (c) 2011 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+
 /*global dojo console handleGetAuthenticationError */
 
 /** @namespace The global container for eclipse APIs. */
@@ -484,6 +486,9 @@ eclipse.GitService = (function() {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			}).then(function(remoteJsonData){
+				if (remoteJsonData.Children[0] == null)
+					return null;
+				
 				dojo.xhrGet({
 					url : remoteJsonData.Children[0].Location,
 					headers : {
