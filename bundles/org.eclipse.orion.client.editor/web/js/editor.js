@@ -1990,14 +1990,12 @@ eclipse.Editor = (function() {
 		},
 		_handleResize: function (e) {
 			if (!e) { e = window.event; }
-			var document = this._frameDocument;
-			var element = isIE < 9 ? document.documentElement : document.body;
+			var element = this._frameDocument.documentElement;
 			var newWidth = element.clientWidth;
 			var newHeight = element.clientHeight;
-			if (this._editorWidth !== newWidth || this._editorHeight !== newHeight) {
-				this._editorWidth = newWidth;
-				this._editorHeight = newHeight;
-//				this._queueUpdatePage();
+			if (this._frameWidth !== newWidth || this._frameHeight !== newHeight) {
+				this._frameWidth = newWidth;
+				this._frameHeight = newHeight;
 				this._updatePage();
 			}
 		},
