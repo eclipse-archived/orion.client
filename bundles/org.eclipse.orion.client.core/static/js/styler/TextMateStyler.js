@@ -169,7 +169,7 @@ orion.styler.Util = {
  *
  * A CSS file can give rules matching any of these class names to provide generic or more specific styling.
  * For example, <pre>.keyword { font-color: blue; }</pre> colors all keywords blue, while
- * <pre>.keyword-control-php { font-decoration: underline; }</pre> underlines only PHP control keywords.
+ * <pre>.keyword-control-php { font-weight: bold; }</pre> bolds only PHP control keywords.
  *
  * This is useful when using grammars that adhere to TextMate's
  * <a href="http://manual.macromates.com/en/language_grammars.html#naming_conventions">scope name conventions</a>,
@@ -192,9 +192,9 @@ orion.styler.Util = {
  * <li>The <tt>(?x)</tt> option is supported only when it appears at the beginning of a regex pattern.</li>
  * <li>Matching is done using native JavaScript {@link RegExp}s. As a result, many Oniguruma features are not supported.
  *   Unsupported features include:
- *   <ul><li>The "s" flag</li>
- *   <li>Named captures</li>
+ *   <ul><li>Named captures</li>
  *   <li>Setting flags inside groups (eg. <tt>a(?i:b)c</tt>)</li> *   <li>Lookbehind and negative lookbehind</li>
+ *   <li>Subexpression call</li>
  *   <li>etc.</li>
  *   </ul>
  * </li>
@@ -210,12 +210,16 @@ orion.styler.TextMateStyler = (function() {
 	/** @inner */
 	function TextMateStyler(editor, grammar) {
 		this.initialize(editor);
-		this.grammar = grammar; // TODO: use deep copy since we mutate this?
+		this.grammar = this._copy(grammar);
 		// key: {String} scopeName, value: {eclipse.Style[]} styles
 		this._styles = {};
 		this._preprocess();
 	}
 	orion.styler.AbstractStyler.extend(TextMateStyler, /** @lends orion.styler.TextMateStyler.prototype */ {
+		_copy: function(grammar) {
+			// Use a copy of the grammar object, since we'll mutate it
+			return JSON.parse(JSON.stringify(grammar));
+		},
 		_preprocess: function() {
 			var stack = [this.grammar];
 			for (; stack.length !== 0; ) {
@@ -223,6 +227,7 @@ orion.styler.TextMateStyler = (function() {
 				if (rule.__resolvedRule && rule.__cachedTypedRule) {
 					continue;
 				}
+//				console.debug("Process " + (rule.include || rule.name));
 				
 				// Look up include'd rule, create typed *Rule instance
 				rule.__resolvedRule = this._resolve(rule);
@@ -230,10 +235,15 @@ orion.styler.TextMateStyler = (function() {
 				
 				// Convert the scope names to styles and cache them for later
 				this._addStyles(rule.name);
-				this._addStyles(rule.captures);
-				// TODO future: _addStyles for contentName, beginCaptures, endCaptures
+				this._addStylesForCaptures(rule.captures);
+				// TODO future: this._addStyles(rule.contentName);
 				
+				if (rule.__resolvedRule !== rule) {
+					// Add include target
+					stack.push(rule.__resolvedRule);
+				}
 				if (rule.patterns) {
+					// Add subrules
 					for (var i=0; i < rule.patterns.length; i++) {
 						stack.push(rule.patterns[i]);
 					}
@@ -247,10 +257,20 @@ orion.styler.TextMateStyler = (function() {
 		 */
 		_addStyles: function(scope) {
 			if (scope && !this._styles[scope]) {
-				this._styles[scope] = scope.split(".").map(
+				this._styles[scope] = dojo.map(scope.split("."),
 						function(segment, i, segments) {
-							return {style: {styleClass: segments.slice(0, i+1).join("-") }};
+							return { styleClass: segments.slice(0, i+1).join("-") };
 						});
+//				console.debug("add style for " + scope + " = " + this._styles[scope]);
+			}
+		},
+		
+		_addStylesForCaptures: function(/**Object*/ captures) {
+			for (var prop in captures) {
+				if (captures.hasOwnProperty(prop)) {
+					var scope = captures[prop].name;
+					this._addStyles(scope);
+				}
 			}
 		},
 		
@@ -265,7 +285,7 @@ orion.styler.TextMateStyler = (function() {
 			}
 			return ContainerRule;
 		}()),
-
+		
 		/**
 		 * A rule with a "match" pattern.
 		 * @private
@@ -325,18 +345,19 @@ orion.styler.TextMateStyler = (function() {
 		 * @property {String} scope
 		 */
 		/**
-		 * Adds the scopes given in rule to the ranges array.
+		 * Adds the scopes in rule to the ranges array.
 		 */
 		_applyScopes: function(/**ScopeRange[]*/ ranges, /**Object*/ rule, /**Match*/ match, /**RegExp*/ regex) {
-			var start = match[0].index,
-			    end = start + match[0].length - 1;
-			if (rule.name) {
+			var start = match.index,
+			    end = start + match[0].length,
+			    name = rule.rule.name;
+			if (name) {
 				// apply name to the whole matching region
-				console.debug("X apply " + rule.name + " to " + match[0]);
-				ranges.push({start: start, end: end, scope: rule.name});
+				console.debug("X apply " + name + " to " + match[0]);
+				ranges.push({start: start, end: end, scope: name});
 			}
 			// Apply captures to individual matching groups
-			var captures = rule.captures;
+			var captures = rule.rule.captures;
 			for (var groupNum in captures) {
 				if (captures.hasOwnProperty(groupNum)) {
 					var scope = captures[groupNum].name;
@@ -363,32 +384,33 @@ orion.styler.TextMateStyler = (function() {
 		},
 		
 		/**
-		 * TODO
 		 * @param {String} line
 		 * @return {ScopeRange[]}
 		 */
-		_run: function(line) {
+		_getScopesForLine: function(line) {
 			var scopeRanges = [];
 			var pos = 0;
 			var len = line.length;
-			var stack = [].concat(this.grammar.patterns);
+			var stack = [].concat(this.grammar.patterns || []);
 			while (stack.length && pos < len) {
-				var rule = stack.pop().__cachedTypedRule;
+				var top = stack.pop();
+				var rule = top.__resolvedRule.__cachedTypedRule;
 				if (!rule) {
 					continue;
 				} else if (rule instanceof this.MatchRule) {
 					var regex = rule.matchRegex;
+//					console.debug("Matching " + rule.matchRegex + " against " + line.substring(pos));
 					// use lastIndex to start searching from pos
 					regex.lastIndex = pos;
 					var match = regex.exec(line);
-					regex.lastIndex = 0; // just for safety
+					regex.lastIndex = 0; // reset for safety since regex is reused
 					if (match) {
 						// consume the match
 						pos += match[0].length;
-						this._applyScopes(scopeRanges, match, regex);
+						this._applyScopes(scopeRanges, rule, match, regex);
 					}
 				} else if (rule instanceof this.ContainerRule) {
-					var subrules = rule.patterns;
+					var subrules = rule.rule.patterns;
 					for (var i=subrules.length-1; i; i--) {
 						stack.push(subrules[i]);
 					}
@@ -398,6 +420,24 @@ orion.styler.TextMateStyler = (function() {
 			return scopeRanges;
 		},
 		
+		/**
+		 * Applies the grammar to obtain the {@link eclipse.StyleRange[]} for the given line.
+		 * @return eclipse.StyleRange[]
+		 */
+		getStyleRangesForLine: function(/**String*/ line) {
+			var scopeRanges = this._getScopesForLine(line);
+			var styleRanges = [];
+			for (var i=0; i < scopeRanges.length; i++) {
+				var scopeRange = scopeRanges[i];
+				var classNames = this._styles[scopeRange.scope];
+				if (!classNames) { throw new Error("styles not found for " + scopeRange.scope); }
+				for (var j=0; j < classNames.length; j++) {
+					styleRanges.push({start: scopeRange.start, end: scopeRange.end, style: classNames[j]});
+				}
+			}
+			return styleRanges;
+		},
+		
 		_onSelection: function(e) {
 		},
 		_onModelChanged: function(/**eclipse.ModelChangingEvent*/ e) {
@@ -405,20 +445,11 @@ orion.styler.TextMateStyler = (function() {
 		},
 		_onDestroy: function(/**eclipse.DestroyEvent*/ e) {
 			this.grammar = null;
+			this._styles = null;
 		},
 		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {
 			console.debug("_onLineStyle lineIndex:" + e.lineIndex + ", lineStart:" + e.lineStart + ", " + "lineText:" + e.lineText);
-			
-			var scopeRanges = this._run(e.lineText);
-			var styleRanges = /**eclipse.StyleRange[]*/ [];
-//			for (var i=0; i < scopeRanges.length; i++) {
-//				var scopeRange = scopeRanges[i];
-//				var classNames = this.grammar.__styles[scopeRange.scope];
-//				for (var j=0; j < classNames.length; j++) {
-//					styleRanges.push({start: scopeRange.start, end: scopeRange.end, style: classNames[j]});
-//				}
-//			}
-//			e.ranges = styleRanges;
+			e.ranges = this.getStyleRangesForLine(e.lineText);
 		}
 	});
 	return TextMateStyler;

@@ -18,37 +18,61 @@
 var testcase = (function(assert) {
 	var tests = {};
 	
-	function createEditor() {
+	// All tests use these variables
+	var editor, styler;
+	
+	function setUp() {
 		var options = {parent: "editorDiv"};
-		return new eclipse.Editor(options);
+		editor = new eclipse.Editor(options);
 	}
 	
-	tests["test create styler"] = function() {
-		try {
-			var editor = createEditor();
-			var grammar = orion.styler.test.SampleGrammar;
-			var styler = new orion.styler.TextMateStyler(editor, grammar);
-			assert.ok(true, "true is false");
-		} catch (e) {
-			assert.ok(false, "Exception creating editor");
-		}
-	};
+	function tearDown() {
+		editor.destroy();
+		editor = null;
+		styler = null;
+	}
 	
-	tests["test style single keyword"] = function() {
-		// do whatever
-	};
+	function makeTest(testBody) {
+		if (typeof(testBody) !== "function") { throw new Error("testBody should be a function"); }
+		return function() {
+			try {
+				setUp();
+				testBody();
+			} finally {
+//				tearDown();
+			}
+		};
+	}
 	
-	tests["test style after changing model"] = function() {
-		// do whatever
-	};
+//	tests["test create styler"] = makeTest(function() {
+//		try {
+//			styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+//			assert.ok(true, "true is false");
+//		} catch (e) {
+//			assert.ok(false, "Exception creating editor");
+//		}
+//	});
 	
-	tests["test grammar with unsupported regex feature"] = function() {
-		// expect Error
-	};
+	tests["test style matching 1 char"] = makeTest(function() {
+		styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+		editor.setText("fizz");
+		// TEST: The z's should get "invalid.illegal.idontlikez.mylang"
+		
+		var x;
+		debugger;
+	});
 	
-	tests["test grammar with other unsupported feature"] = function() {
-		// expect Error
-	};
+//	tests["test style updater after model change"] = function() {
+//		// do whatever
+//	};
+//	
+//	tests["test grammar with unsupported regex feature"] = function() {
+//		// expect Error
+//	};
+//	
+//	tests["test grammar with other unsupported feature"] = function() {
+//		// expect Error
+//	};
 	
 	return tests;
 }(orion.Assert));
