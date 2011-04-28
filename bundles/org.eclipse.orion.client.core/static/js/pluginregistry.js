@@ -92,7 +92,19 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 					if (!data) {
 						data = message.params[0];
 						_parseData();
+					} else if (JSON.stringify(data) != JSON.stringify(message.params[0])) {
+						// check if the data has been updated
+						for (var serviceId in _serviceRegistrations) {
+							if (_serviceRegistrations.hasOwnProperty(serviceId)) {
+								_serviceRegistrations[serviceId].unregister();
+								delete _serviceRegistrations[serviceId];
+							}
+						}
+						data = message.params[0];
+						_parseData();
+						internalRegistry.updatePlugin(_self);						
 					}
+					
 					if (!_loaded) {
 						_loaded = true;
 						_deferredLoad.resolve(_self);
@@ -330,6 +342,10 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 						break;
 					}
 				}
+			},
+			updatePlugin: function(plugin) {
+				_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
+				_pluginEventTarget.dispatchEvent("pluginUpdated", plugin);
 			},
 			publish: function(topic, message) {
 				_managedHub.publish(topic, message);
