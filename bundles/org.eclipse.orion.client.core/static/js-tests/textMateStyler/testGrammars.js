@@ -43,7 +43,7 @@ orion.styler.test.SampleGrammar = {
 				"match": "\\b(?:\\d+)\\b",
 				"name": "constant.numeric.mylang"
 			}, {
-				"match": "\\b(&&|\\|\\|)\\b",
+				"match": "(&&|\\|\\|)",
 				"name": "keyword.operator.logical.mylang"
 			}, {
 				"match": "\\b(null|true|false)\\b",

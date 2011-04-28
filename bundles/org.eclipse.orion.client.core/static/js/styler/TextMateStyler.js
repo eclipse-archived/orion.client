@@ -340,22 +340,27 @@ orion.styler.TextMateStyler = (function() {
 		},
 		
 		/**
-		 * @class ScopeRange Represents a range in the input that a scope name applies to.
-		 * @property {Number} start
-		 * @property {Number} end
+		 * @class ScopeRange Represents a range in the editor that a scope name applies to.
+		 * @property {Number} start The editor position the range begins at.
+		 * @property {Number} end The editor position the range ends at.
 		 * @property {String} scope
 		 */
 		/**
 		 * Adds the scopes in rule to the ranges array.
+		 * @param {ScopeRange[]} ranges
+		 * @param {Object} rule
+		 * @param {RegExp.match} match
+		 * @param {RegExp} regex
+		 * @param {Number} lineStart
 		 */
-		_applyScopes: function(/**ScopeRange[]*/ ranges, /**Object*/ rule, /**Match*/ match, /**RegExp*/ regex) {
+		_applyScopes: function(ranges, rule, match, regex, lineStart) {
 			var start = match.index,
 			    end = start + match[0].length,
 			    name = rule.rule.name;
 			if (name) {
 				// apply name to the whole matching region
 //				console.debug("X apply " + name + " to " + match[0] + " at " + start + ".." + end);
-				ranges.push({start: start, end: end, scope: name});
+				ranges.push({start: lineStart + start, end: lineStart + end, scope: name});
 			}
 			// Apply captures to individual matching groups
 			var captures = rule.rule.captures;
@@ -386,9 +391,10 @@ orion.styler.TextMateStyler = (function() {
 		
 		/**
 		 * @param {String} line
+		 * @param {Number} lineStart The index into editor buffer at which line begins.
 		 * @return {ScopeRange[]}
 		 */
-		_getScopesForLine: function(line) {
+		_getScopesForLine: function(line, lineStart) {
 			var startRules = this.grammar.patterns.reverse() || [];
 			var scopeRanges = [];
 			var pos = 0;
@@ -422,7 +428,7 @@ orion.styler.TextMateStyler = (function() {
 					if (match) {
 						// consume the match
 						pos = match.index + match[0].length;
-						this._applyScopes(scopeRanges, rule, match, regex);
+						this._applyScopes(scopeRanges, rule, match, regex, lineStart);
 					}
 				} else if (rule instanceof this.ContainerRule) {
 					var subrules = rule.rule.patterns;
@@ -438,8 +444,8 @@ orion.styler.TextMateStyler = (function() {
 		 * Applies the grammar to obtain the {@link eclipse.StyleRange[]} for the given line.
 		 * @return eclipse.StyleRange[]
 		 */
-		getStyleRangesForLine: function(/**String*/ line) {
-			var scopeRanges = this._getScopesForLine(line);
+		getStyleRangesForLine: function(/**String*/ line, /**Number*/ lineStart) {
+			var scopeRanges = this._getScopesForLine(line, lineStart);
 			var styleRanges = [];
 			for (var i=0; i < scopeRanges.length; i++) {
 				var scopeRange = scopeRanges[i];
@@ -447,7 +453,7 @@ orion.styler.TextMateStyler = (function() {
 				if (!classNames) { throw new Error("styles not found for " + scopeRange.scope); }
 				var classNamesString = classNames.join(" ");
 				styleRanges.push({start: scopeRange.start, end: scopeRange.end, style: {styleClass: classNamesString}});
-				console.debug("{start " + styleRanges[i].start + ", end " + styleRanges[i].end + ", style: " + styleRanges[i].style.styleClass + "}");
+//				console.debug("{start " + styleRanges[i].start + ", end " + styleRanges[i].end + ", style: " + styleRanges[i].style.styleClass + "}");
 			}
 			return styleRanges;
 		},
@@ -461,8 +467,8 @@ orion.styler.TextMateStyler = (function() {
 			this._styles = null;
 		},
 		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {
-			console.debug("_onLineStyle lineIndex:" + e.lineIndex + ", lineStart:" + e.lineStart + ", " + "lineText:" + e.lineText);
-			e.ranges = this.getStyleRangesForLine(e.lineText);
+//			console.debug("_onLineStyle lineIndex:" + e.lineIndex + ", lineStart:" + e.lineStart + ", " + "lineText:" + e.lineText);
+			e.ranges = this.getStyleRangesForLine(e.lineText, e.lineStart);
 		}
 	});
 	return TextMateStyler;
