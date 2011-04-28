@@ -136,7 +136,10 @@ eclipse.FileRenderer = (function() {
 			col = document.createElement('td');
 			div = dojo.create("div", {style: "margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 20px;"}, col, "only");
 						
-			link = dojo.create("a", {className: "navlinkonpage", href: "/coding.html#" + item.ContentLocation}, div, "last");
+			link = dojo.create("a", {className: "navlinkonpage"}, div, "last");
+			if(this.explorer.isRoot==null || this.explorer.isDirectory==false){
+				link.href = "/coding.html#" + item.ContentLocation;
+			}
 			dojo.place(document.createTextNode(item.Message), link, "only");	
 			
 			if (incomingCommit)
