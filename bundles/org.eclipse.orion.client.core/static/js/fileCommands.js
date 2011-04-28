@@ -586,26 +586,42 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
         return new RegExp(pattern);
 	}
 	
-	function validateSingleItem(item, validationProperties){
-		for(var keyWildCard in validationProperties){
-			var keyPattern = getPattern(keyWildCard);
-			var matchFound = false;
+	function matchSinglePattern(item, keyWildCard, valueWildCard){
+		
+		if(keyWildCard.indexOf(":")>=0){
+			var keyPattern = getPattern(keyWildCard.substring(0, keyWildCard.indexOf(":")));
+			var keyLastSegments = keyWildCard.substring(keyWildCard.indexOf(":")+1);
 			for(var key in item){
 				if(keyPattern.test(key)){
-					if(typeof(validationProperties[keyWildCard])==='string'){
-						var valuePattern = getPattern(validationProperties[keyWildCard]);
-						if(valuePattern.test(item[key])){
-							matchFound = true;
-							break;
-						}
-					}else{
-						if(validationProperties[keyWildCard]===item[key]){
-							matchFound = true;
-							break;
-						}
+					if(matchSinglePattern(item[key], keyLastSegments, valueWildCard)){
+						return true;
 					}
 				}
 			}
+		}
+		
+		
+		var keyPattern = getPattern(keyWildCard);
+		for(var key in item){
+			if(keyPattern.test(key)){
+				if(typeof(valueWildCard)==='string'){
+					var valuePattern = getPattern(valueWildCard);
+					if(valuePattern.test(item[key])){
+						return true;
+					}
+				}else{
+					if(valueWildCard===item[key]){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	function validateSingleItem(item, validationProperties){
+		for(var keyWildCard in validationProperties){
+			var matchFound = matchSinglePattern(item, keyWildCard, validationProperties[keyWildCard]);
 			if(!matchFound){
 				return false;
 			}
