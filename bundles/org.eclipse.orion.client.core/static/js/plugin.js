@@ -24,7 +24,8 @@ eclipse.ServiceProvider = function(serviceId, internalProvider) {
 	};
 };
 
-eclipse.PluginProvider = function() {
+eclipse.PluginProvider = function(metadata) {
+	var _metadata = metadata;
 	var _hubClient = null;
 	
 	var _services = [];
@@ -62,7 +63,7 @@ eclipse.PluginProvider = function() {
 				services.push({serviceId: i, type: _services[i].type, methods: _services[i].methods, properties: _services[i].properties });
 			}
 		}
-		return {services: services};		
+		return {services: services, metadata: _metadata || {}};		
 	}
 	
 	function _handleRequest(topic, message) {

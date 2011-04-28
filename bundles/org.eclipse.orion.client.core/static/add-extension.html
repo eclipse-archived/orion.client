@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+		<title>Add Extension</title>
+<script type="text/javascript">
+	var djConfig = {
+		isDebug : true,
+		modulePaths : {
+			'widgets' : '/js/widgets'
+		},
+		parseOnLoad : true
+	};
+</script>
+<script src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+<script type="text/javascript">
+	dojo.require("dijit.form.Button");
+	dojo.require("dijit.form.TextBox");
+	dojo.require("dijit.layout.BorderContainer");
+	dojo.require("dijit.layout.ContentPane");
+	<!-- The following required for header command - see bug 341350 -->
+	dojo.require("widgets.OpenResourceDialog");
+</script>
+<style type="text/css">
+	@import "/org.dojotoolkit/dojo/resources/dojo.css";
+	@import "/org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
+	@import "/org.dojotoolkit/dijit/themes/nihilo/Tree.css";
+	@import "/org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
+	@import "/org.dojotoolkit/dijit/themes/nihilo/form/Common.css";
+	@import "/org.dojotoolkit/dijit/themes/nihilo/form/Button.css";
+	@import "/ide.css";
+	@import "/commands.css";
+</style>
+</head>
+	<body style="height: 100%" class="nihilo">
+	<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<script src="js/serviceregistry.js"></script>
+	<script src="js/pluginregistry.js"></script>
+	<script type="text/javascript" src="js/auth.js"></script>
+	<script src="js/util.js"></script>
+ 	<script src="js/commands.js"></script>
+	<script src="js/globalCommands.js"></script>
+ 	<script src="js/preferences.js"></script>
+	<script src="js/searchClient.js"></script>
+	
+	<!-- TODO: scripts below are only for testing, remove later -->
+ 	<script src="js/dialogs.js"></script>
+ 	<script src="js/log.js"></script>
+ 	<script src="js/selection.js"></script>
+ 	<script src="js/status.js"></script>
+ 	<script src="js/users.js"></script>
+  	<script src="js/fileClient.js"></script>
+  	<script src="js/breadcrumbs.js"></script>
+	<script src="js/favorites.js"></script>
+	
+	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
+		<div dojoType="dijit.layout.ContentPane" id="toolbar" region="top" class="toolbar">
+		</div>
+		<div dojoType="dijit.layout.ContentPane" id="content" class="mainpane" style="margin-left: 44px" region="center">
+			<div id="valid-hash" style="display:none;">
+				<h2>Adding an extension</h2>
+				<div>Please confirm that you would like to add the following extension:</div>
+				<div id="extension-location">
+				</div>
+				<input id="install" type="button" value="Install">
+			</div>
+			<div id="wait" style="display:none;">
+				<h2>Please wait</h2>
+				<div>Please ang on a minute while the extension is being installed.</div>
+			</div>
+			<div id="success" style="display:none;">
+				<h2>Success!</h2>
+				<div>The extension has been installed successfully.</div>
+				<div><a href="view-registry.html">Manage extensions</a></div>
+			</div>
+			<div id="failure" style="display:none;">
+				<h2>Failed</h2>
+				<div>There was a problem installing the extension:</div>
+				<div id="problem"></div>
+				<div><a href="view-registry.html">Manage extensions</a></div>
+			</div>
+			<div id="invalid-hash" style="display:none;">
+				<h2>Cannot add extension</h2>
+				<div>
+				This page exists so that other web pages can request that new extensions be added to Orion. For it to work, the other web page needs to pass the URL of the extension in the hash part of this page's URL.
+				</div>
+			</div>
+		</div>
+		
+		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
+		</div>
+
+	</div>
+	
+	<!-- Glue -->
+	<script src="js/add-extension/add-extension.js"></script>
+	</body>
+</html>

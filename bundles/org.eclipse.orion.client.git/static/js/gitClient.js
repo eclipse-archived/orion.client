@@ -371,7 +371,7 @@ eclipse.GitService = (function() {
 				load : function(jsonData, secondArg) {
 					if (onLoad) {
 						if (typeof onLoad === "function")
-							onLoad(jsonData, secondArg, secondArg);
+							onLoad(jsonData, secondArg);
 						else
 							service._serviceRegistration.dispatchEvent(onLoad,
 									jsonData);
@@ -486,6 +486,9 @@ eclipse.GitService = (function() {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			}).then(function(remoteJsonData){
+				if (remoteJsonData.Children[0] == null)
+					return null;
+				
 				dojo.xhrGet({
 					url : remoteJsonData.Children[0].Location,
 					headers : {

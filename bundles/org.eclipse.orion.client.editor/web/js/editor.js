@@ -1990,14 +1990,12 @@ eclipse.Editor = (function() {
 		},
 		_handleResize: function (e) {
 			if (!e) { e = window.event; }
-			var document = this._frameDocument;
-			var element = isIE < 9 ? document.documentElement : document.body;
+			var element = this._frameDocument.documentElement;
 			var newWidth = element.clientWidth;
 			var newHeight = element.clientHeight;
-			if (this._editorWidth !== newWidth || this._editorHeight !== newHeight) {
-				this._editorWidth = newWidth;
-				this._editorHeight = newHeight;
-//				this._queueUpdatePage();
+			if (this._frameWidth !== newWidth || this._frameHeight !== newHeight) {
+				this._frameWidth = newWidth;
+				this._frameHeight = newHeight;
 				this._updatePage();
 			}
 		},
@@ -4422,8 +4420,6 @@ eclipse.Editor = (function() {
 				}
 				child = nextChild;
 			}
-			// Webkit still wraps even if pre is used
-			clientDiv.style.width = (0x7FFFF).toString() + "px";
 
 			child = this._getLineNext();
 			var frag = document.createDocumentFragment();
@@ -4439,6 +4435,18 @@ eclipse.Editor = (function() {
 				}
 			}
 			if (frag.firstChild) { clientDiv.insertBefore(frag, child); }
+
+			/*
+			* Feature in WekKit. Webkit limits the width of the lines
+			* computed below to the width of the client div.  This causes
+			* the lines to be wrapped even though "pre" is set.  The fix
+			* is to set the width of the client div to a larger number
+			* before computing the lines width.  Note that this value is
+			* reset to the appropriate value further down.
+			*/ 
+			if (isWebkit) {
+				clientDiv.style.width = (0x7FFFF).toString() + "px";
+			}
 
 			child = this._getLineNext();
 			while (child) {

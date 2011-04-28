@@ -305,10 +305,25 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(function(gitService){
-					gitService.doMerge(item.HeadLocation, item.Id, function() {
-						dojo.query(".treeTableRow").forEach(function(node, i) {
-							dojo.toggleClass(node, "incomingCommitsdRow", false);
-						});
+					gitService.doMerge(item.HeadLocation, item.Id, function(jsonData) {
+						if (jsonData.Result != 'FAILED'){
+							dojo.query(".treeTableRow").forEach(function(node, i) {
+								dojo.toggleClass(node, "incomingCommitsdRow", false);
+							});
+							serviceRegistry.getService("IStatusReporter").then(function(progressService){
+								var result = [];
+								result.Severity = "Ok";
+								result.Message = "OK";
+								progressService.setProgressResult(result);
+							});
+						} else {
+							serviceRegistry.getService("IStatusReporter").then(function(progressService){
+								var result = [];
+								result.Severity = "Warning";
+								result.Message = "Go to Git Status page to merge unresolved conflicts";
+								progressService.setProgressResult(result);
+							});
+						}
 					});
 				});
 			},
@@ -336,9 +351,10 @@ dojo.require("widgets.GitCredentialsDialog");
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
 									eclipse.gitCommandUtils.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
 											function(jsonData){
-												dojo.query(".treeTableRow").forEach(function(node, i) {
-													dojo.toggleClass(node, "outgoingCommitsdRow", false);
-												});
+												if (jsonData.Result.Severity == "Ok")
+													dojo.query(".treeTableRow").forEach(function(node, i) {
+														dojo.toggleClass(node, "outgoingCommitsdRow", false);
+													});
 											}, func);
 									});
 								});
@@ -350,7 +366,7 @@ dojo.require("widgets.GitCredentialsDialog");
 				credentialsDialog.show();	
 			},
 			visibleWhen : function(item) {
-				return true;
+				return explorer.isRoot;
 			}
 		});
 	

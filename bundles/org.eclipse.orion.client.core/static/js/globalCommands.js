@@ -144,7 +144,8 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 			// disabled for M6 since git-status needs a parameter.  For M7 should link to the clone page.	{name: "Git", url: "git-status.html"},
 			{name: "Navigator", url: "navigate-table.html#"},
 			{name: "Sites", url: "sites.html"},
-			{name: "Plugins", url: "view-registry.html"}
+			{name: "Plugins", url: "view-registry.html"},
+			{name: "Repositories", url: "git-clone.html"}
 		];
 		for (var i=0; i<primaryLinks.length; i++) {
 			var link = dojo.create("a", {href: primaryLinks[i].url}, primaryNav, "last");
