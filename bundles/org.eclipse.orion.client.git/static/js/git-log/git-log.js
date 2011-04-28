@@ -250,12 +250,16 @@ function initTitleBar(fileClient, navigator){
 						if(breadcrumb.path && breadcrumb.path!="")
 							document.title = "Git Log - " + breadcrumb.path;
 					}
-					if(!metadata.Parents || metadata.Parents.length==0){
-						navigator.isRoot=true;
-					}
+					navigator.isRoot=!metadata.Parents || metadata.Parents.length==0;
 					navigator.isDirectory = metadata.Directory;
 					eclipse.gitCommandUtils.updateNavTools(serviceRegistry, navigator, "pageActions", "selectionTools", navigator._lastTreeRoot);
 					navigator.updateCommands();
+					if(metadata.Directory){
+						//remove links to commit
+						dojo.query(".navlinkonpage").forEach(function(node, i) {
+							node.removeAttr("href");
+						});
+					}
 				}),
 				dojo.hitch(this, function(error) {
 					console.error("Error loading file metadata: " + error.message);
