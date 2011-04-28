@@ -138,7 +138,7 @@ orion.styler.Util = {
 				var match2;
 				if ((match2 = /\s+|#.*/.exec(str)) && match2.index === i) {
 					i = match2.index + match2[0].length;
-					console.debug("Ate " + match2[0]);
+//					console.debug("Ate " + match2[0]);
 				} else {
 					var char = str.charAt(i);
 					if (char === "[") {
@@ -204,7 +204,7 @@ orion.styler.Util = {
  * @class orion.styler.TextMateStyler
  * @extends orion.styler.AbstractStyler
  * @param {eclipse.Editor} editor The editor.
- * @param {Object} grammar The TextMate grammar as a JSON object. You can use a plist-to-JSON conversion tool
+ * @param {JSONObject} grammar The TextMate grammar as a JSON object. You can use a plist-to-JSON conversion tool
  * to produce this object. Note that not all features of TextMate grammars are supported.
  */
 orion.styler.TextMateStyler = (function() {
@@ -212,7 +212,7 @@ orion.styler.TextMateStyler = (function() {
 	function TextMateStyler(editor, grammar) {
 		this.initialize(editor);
 		this.grammar = this._copy(grammar);
-		// key: {String} scopeName, value: {eclipse.Style[]} styles
+		// key: {String} scopeName, value: {String[]} cssClassNames
 		this._styles = {};
 		this._preprocess();
 	}
@@ -260,9 +260,9 @@ orion.styler.TextMateStyler = (function() {
 			if (scope && !this._styles[scope]) {
 				this._styles[scope] = dojo.map(scope.split("."),
 						function(segment, i, segments) {
-							return { styleClass: segments.slice(0, i+1).join("-") };
+							return segments.slice(0, i+1).join("-");
 						});
-//				console.debug("add style for " + scope + " = " + this._styles[scope]);
+//				console.debug("add style for " + scope + " = [" + this._styles[scope].join(", ") + "]");
 			}
 		},
 		
@@ -445,9 +445,8 @@ orion.styler.TextMateStyler = (function() {
 				var scopeRange = scopeRanges[i];
 				var classNames = this._styles[scopeRange.scope];
 				if (!classNames) { throw new Error("styles not found for " + scopeRange.scope); }
-				for (var j=0; j < classNames.length; j++) {
-					styleRanges.push({start: scopeRange.start, end: scopeRange.end, style: classNames[j]});
-				}
+				var classNamesString = classNames.join(" ");				styleRanges.push({start: scopeRange.start, end: scopeRange.end, style: {styleClass: classNamesString}});
+//				console.debug("{start " + styleRanges[i].start + ", end " + styleRanges[i].end + ", style: " + styleRanges[i].style.styleClass + "}");
 			}
 			return styleRanges;
 		},
@@ -455,7 +454,6 @@ orion.styler.TextMateStyler = (function() {
 		_onSelection: function(e) {
 		},
 		_onModelChanged: function(/**eclipse.ModelChangingEvent*/ e) {
-			// Re-style the changed lines?
 		},
 		_onDestroy: function(/**eclipse.DestroyEvent*/ e) {
 			this.grammar = null;
