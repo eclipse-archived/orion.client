@@ -253,7 +253,9 @@ function initTitleBar(fileClient, navigator){
 					if(!metadata.Parents || metadata.Parents.length==0){
 						navigator.isRoot=true;
 					}
+					navigator.isDirectory = metadata.Directory;
 					eclipse.gitCommandUtils.updateNavTools(serviceRegistry, navigator, "pageActions", "selectionTools", navigator._lastTreeRoot);
+					navigator.updateCommands();
 				}),
 				dojo.hitch(this, function(error) {
 					console.error("Error loading file metadata: " + error.message);

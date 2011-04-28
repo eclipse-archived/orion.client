@@ -200,6 +200,7 @@ dojo.require("widgets.GitCredentialsDialog");
 				return clientDeferred;
 			},
 			visibleWhen : function(item) {
+				if(explorer.isDirectory) return false;
 				if (dojo.isArray(item) && item.length === 2) {
 						return true;
 				}
@@ -217,7 +218,7 @@ dojo.require("widgets.GitCredentialsDialog");
 				return "/compare-m.html#" + item.DiffLocation;
 			},
 			visibleWhen : function(item) {
-				return true;
+				return !explorer.isDirectory;
 			}
 		});
 	
@@ -231,7 +232,7 @@ dojo.require("widgets.GitCredentialsDialog");
 				return "/coding.html#" + item.ContentLocation;
 			},
 			visibleWhen : function(item) {
-				return item.ContentLocation != null;
+				return item.ContentLocation != null && !explorer.isDirectory;
 			}
 		});
 	
