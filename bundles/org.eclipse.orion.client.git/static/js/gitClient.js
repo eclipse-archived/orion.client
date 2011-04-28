@@ -371,7 +371,7 @@ eclipse.GitService = (function() {
 				load : function(jsonData, secondArg) {
 					if (onLoad) {
 						if (typeof onLoad === "function")
-							onLoad(jsonData, secondArg, secondArg);
+							onLoad(jsonData, secondArg);
 						else
 							service._serviceRegistration.dispatchEvent(onLoad,
 									jsonData);
