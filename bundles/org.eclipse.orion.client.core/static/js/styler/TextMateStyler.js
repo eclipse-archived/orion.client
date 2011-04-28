@@ -321,7 +321,7 @@ orion.styler.TextMateStyler = (function() {
 			var resolved = rule;
 			if (rule.include) {
 				if (rule.begin || rule.end || rule.match) {
-					throw new Error("Unexpected patterns in include rule");
+					throw new Error("Unexpected regex pattern in \"include\" rule " + rule.include);
 				}
 				var name = rule.include;
 				if (name.charAt(0) === "#") {
@@ -331,9 +331,9 @@ orion.styler.TextMateStyler = (function() {
 					resolved = this.grammar;
 				} else if (name === "$base") {
 					// $base is only relevant when including rules from foreign grammars
-					throw new Error("include $base not supported"); 
+					throw new Error("include $base is not supported"); 
 				} else {
-					throw new Error("Include external rule " + name + " not supported");
+					throw new Error("Include external rule \"" + name + "\" is not supported");
 				}
 			}
 			return resolved;
@@ -368,7 +368,10 @@ orion.styler.TextMateStyler = (function() {
 				if (captures.hasOwnProperty(groupNum)) {
 					var scope = captures[groupNum].name;
 					var groupText = match[groupNum];
-					console.debug("TODO apply " + scope + " to " + groupText);
+					if (!scope || typeof(groupText) !== "string") {
+						continue;
+					}
+//					console.debug("TODO apply " + scope + " to '" + groupText + "'");
 					/* TODO: workaround for JS having no API for getting matching group start index
 					var newRegex = parse regex, wrap every un-matching-paren'd term with matching parens
 					var old2New = map matching group #s in regex to #s in newRegex
