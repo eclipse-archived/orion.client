@@ -177,20 +177,20 @@ orion.styler.Util = {
  * 
  * <h4>Supported top-level grammar features:</h4>
  * <ul><li><tt>scopeName, fileTypes, patterns, repository</tt> (but see below) are supported.</li>
- * <li><tt>firstLineMatch, foldingStartMarker, foldingStopMarker</tt> are not supported.</li>
+ * <li><tt>firstLineMatch, foldingStartMarker, foldingStopMarker</tt> are <b>not</b> supported.</li>
  * </ul>
  *
  * <h4>Supported grammar rule features:</h4>
  * <ul><li><tt>match</tt> patterns are supported.</li>
  * <li><tt>name</tt> scope is supported.</li>
- * <li><tt>captures</tt> is not supported. Any scopes given inside a <tt>captures</tt> rule are not applied.</li>
- * <li><tt>begin/end</tt> patterns are not supported and are ignored, along with their subrules. Consequently, 
+ * <li><tt>captures</tt> is <b>not</b> supported. Any scopes given inside a <tt>captures</tt> rule are not applied.</li>
+ * <li><tt>begin/end</tt> patterns are <b>not</b> supported and are ignored, along with their subrules. Consequently, 
  *   matched constructs may <b>not</b> span multiple lines.</li>
- * <li><tt>contentName, beginCaptures, endCaptures, applyEndPatternLast</tt> are not supported.</li>
+ * <li><tt>contentName, beginCaptures, endCaptures, applyEndPatternLast</tt> are <b>not</b> supported.</li>
  * <li><tt>include</tt> is supported, but only when it references a rule in the current grammar's <tt>repository</tt>.
- *   Including <tt>$self</tt>, <tt>$base</tt>, or <tt>rule.from.another.grammar</tt> is not supported.</li>
+ *   Including <tt>$self</tt>, <tt>$base</tt>, or <tt>rule.from.another.grammar</tt> is <b>not</b> supported.</li>
  * <li>The <tt>(?x)</tt> option ("extended" regex format), but only when it appears at the beginning of a regex pattern.</li>
- * <li>Matching is done using native JavaScript {@link RegExp}s. As a result, many Oniguruma features are not supported.
+ * <li>Matching is done using native JavaScript {@link RegExp}s. As a result, many Oniguruma features are <b>not</b> supported.
  *   Unsupported features include:
  *   <ul><li>Named captures</li>
  *   <li>Setting flags inside groups (eg. <tt>(?i:a)b</tt>)</li>
@@ -205,7 +205,7 @@ orion.styler.Util = {
  * @extends orion.styler.AbstractStyler
  * @param {eclipse.Editor} editor The editor.
  * @param {JSONObject} grammar The TextMate grammar as a JSON object. You can use a plist-to-JSON conversion tool
- * to produce this object. Note that not all features of TextMate grammars are supported.
+ * to produce this object. Note that some features of TextMate grammars are not supported.
  */
 orion.styler.TextMateStyler = (function() {
 	/** @inner */
