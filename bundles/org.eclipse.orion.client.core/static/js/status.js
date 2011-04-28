@@ -136,7 +136,11 @@ eclipse.StatusReportingService.prototype = {
 			this.setProgressMessage("");
 		});
 		dojo.place(image, this.progressDomId, "only");
-		dojo.place(window.document.createTextNode("   " + msg), this.progressDomId, "last");
+		if (status.HTML) { // msg is HTML to be inserted directly
+			dojo.place(msg, this.progressDomId, "last");
+		} else {  // msg is plain text
+			dojo.place(window.document.createTextNode("   " + msg), this.progressDomId, "last");
+		}
 	},
 	
 	/**
