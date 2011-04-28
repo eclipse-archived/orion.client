@@ -81,7 +81,7 @@ dojo.addOnLoad(function(){
 	
 	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
 		var fileClient = new eclipse.FileClient(fileService);
-		initTitleBar(fileClient);
+		initTitleBar(fileClient, navigator);
 	});
 	
 	if (isRemote()) {
@@ -166,7 +166,7 @@ dojo.addOnLoad(function(){
 	dojo.subscribe("/dojo/hashchange", navigator, function() {
 		serviceRegistry.getService(fileServiceReference).then(function(fileService) {
 			var fileClient = new eclipse.FileClient(fileService);
-			initTitleBar(fileClient);
+			initTitleBar(fileClient, navigator);
 		});
 		if (isRemote()) {
 			var path = dojo.hash();
@@ -235,7 +235,7 @@ function getRemoteFileURI(){
 	return fileURI;
 }
 
-function initTitleBar(fileClient){
+function initTitleBar(fileClient, navigator){
 	//TODO we are calculating file path from the URL, it should be returned by git API
 	var fileURI = isRemote() ? getRemoteFileURI() : getHeadFileUri();
 	
@@ -250,7 +250,10 @@ function initTitleBar(fileClient){
 						if(breadcrumb.path && breadcrumb.path!="")
 							document.title = "Git Log - " + breadcrumb.path;
 					}
-					
+					if(!metadata.Parents || metadata.Parents.length==0){
+						navigator.isRoot=true;
+					}
+					eclipse.gitCommandUtils.updateNavTools(serviceRegistry, navigator, "pageActions", "selectionTools", navigator._lastTreeRoot);
 				}),
 				dojo.hitch(this, function(error) {
 					console.error("Error loading file metadata: " + error.message);

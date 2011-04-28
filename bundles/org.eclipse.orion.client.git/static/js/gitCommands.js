@@ -366,7 +366,7 @@ dojo.require("widgets.GitCredentialsDialog");
 				credentialsDialog.show();	
 			},
 			visibleWhen : function(item) {
-				return true;
+				return explorer.isRoot;
 			}
 		});
 	

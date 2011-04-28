@@ -26,6 +26,7 @@ eclipse.GitCommitNavigator = (function() {
 		this.pageTitleId = pageTitleId;
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
+		this.isRoot = null;
 		this.model = null;
 		this.myTree = null;
 		this.renderer = new eclipse.FileRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
