@@ -7,7 +7,7 @@
 	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script>
 		window.onload = function() {
-			var provider = new eclipse.PluginProvider();
+			var provider = new eclipse.PluginProvider({postInstallUrl:"/view-registry.html"});
 			provider.registerServiceProvider("fileCommands", {
 				run : function(item) {
 					window.alert("Running code on: " + item.Location);
