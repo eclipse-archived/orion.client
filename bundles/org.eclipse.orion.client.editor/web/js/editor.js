@@ -2551,6 +2551,33 @@ eclipse.Editor = (function() {
 			parent.removeChild(line2);
 			return Math.ceil(lineHeight); 
 		},
+		_calculatePadding: function() {
+			var document = this._frameDocument;
+			var parent = this._clientDiv;
+			var pad = this._getPadding(this._editorDiv);
+			var div1 = document.createElement("DIV");
+			div1.style.paddingLeft = pad.left + "px";
+			div1.style.paddingTop = pad.top + "px";
+			div1.style.paddingRight = pad.right + "px";
+			div1.style.paddingBottom = pad.bottom + "px";
+			div1.style.width = "100px";
+			div1.style.height = "100px";
+			var div2 = document.createElement("DIV");
+			div2.style.width = "100%";
+			div2.style.height = "100%";
+			div1.appendChild(div2);
+			parent.appendChild(div1);
+			var rect1 = div1.getBoundingClientRect();
+			var rect2 = div2.getBoundingClientRect();
+			parent.removeChild(div1);
+			pad = {
+				left: rect2.left - rect1.left,
+				top: rect2.top - rect1.top,
+				right: rect1.right - rect2.right,
+				bottom: rect1.bottom - rect2.bottom
+			};
+			return pad;
+		},
 		_clearSelection: function (direction) {
 			var selection = this._getSelection();
 			if (selection.isEmpty()) { return false; }
@@ -3043,9 +3070,6 @@ eclipse.Editor = (function() {
 			return text;
 		},
 		_getEditorPadding: function() {
-			if (!this._editorPadding) {
-				this._editorPadding = this._getPadding(this._editorDiv);
-			}
 			return this._editorPadding;
 		},
 		_getLineBoundingClientRect: function (child) {
@@ -3745,6 +3769,7 @@ eclipse.Editor = (function() {
 				clientDiv.contentEditable = "true";
 			}
 			body.style.lineHeight = this._calculateLineHeight() + "px";
+			this._editorPadding = this._calculatePadding();
 			if (options.tabSize) {
 				if (isOpera) {
 					clientDiv.style.OTabSize = options.tabSize+"";
