@@ -42,6 +42,7 @@ eclipse.GitCommitNavigator = (function() {
 			}
 						
 			this._lastHash = path;
+			this._lastTreeRoot = treeRoot;
 			//dojo.hash(path, true);
 			var parent = dojo.byId(this.parentId);
 
