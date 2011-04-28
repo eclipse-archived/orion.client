@@ -252,7 +252,7 @@ orion.GitStatusController = (function() {
 			if(this._stagingConflict){
 				this._stagingConflict = false;
 				if(!this.hasStaged){
-					this.commit("Resolved Deletion Conflicts" , false);
+					this.commit("Resolved deletion conflicts on file " + this._stagingName, false);
 				}
 			}
 			
@@ -415,7 +415,7 @@ orion.GitStatusController = (function() {
 			if(this._model.isStaged(itemModel.type))
 				this.unstage(itemModel.indexURI);
 			else
-				this.stage(itemModel.indexURI , itemModel.conflicting);
+				this.stage(itemModel.indexURI , itemModel);
 		},
 		
 		handleServerErrors: function(errorResponse , ioArgs){
@@ -442,10 +442,12 @@ orion.GitStatusController = (function() {
 				});
 		},
 		
-		stage: function(location , stagingConflict){
+		stage: function(location , itemModel){
 			var self = this;
-			if(stagingConflict)
+			if(itemModel && itemModel.conflicting){
 				self._stagingConflict = true;
+				self._stagingName = itemModel.name;
+			}
 			else
 				self._stagingConflict = false;
 			self._registry.getService("IGitService").then(
