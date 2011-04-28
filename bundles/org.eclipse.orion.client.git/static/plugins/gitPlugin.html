@@ -40,13 +40,7 @@
 			
 			provider.registerServiceProvider("fileCommands", {
 				run : function(item) {
-					var clientDeferred = new dojo.Deferred();					
-					gitService.getDefaultRemoteBranch(item.Git.RemoteLocation, function(defaultRemoteBranchJsonData, secondArg){
-						if (defaultRemoteBranchJsonData == null)
-							clientDeferred.callback(defaultRemoteBranchJsonData);
-						clientDeferred.callback("/git-log.html?remote#" + defaultRemoteBranchJsonData.Location + "?page=1")
-					});
-					return clientDeferred;
+					return "/git-log.html?remote#" + item.Git.DefaultRemoteBranchLocation + "?page=1";
 				}
 			}, {
 				name: "Git Remote",
