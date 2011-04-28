@@ -25,7 +25,7 @@ var testcase = (function(assert) {
 	var editor, styler;
 	
 	function setUp() {
-		var options = {parent: "editorDiv", readonly: true};
+		var options = {parent: "editorDiv", readonly: true, stylesheet: ["test.css"]};
 		editor = new eclipse.Editor(options);
 	}
 	

@@ -28,17 +28,8 @@ orion.styler.test.SampleGrammar = {
 				"match": "\\b(case|catch|debugger|default|delete|else|finally|function|in|instanceof|new|this|try|typeof|var|void|with)\\b",
 				"name": "keyword.other.mylang"
 			}, {
-				"match": "(')[^'](')",
-				"name": "constant.character.mylang",
-				"captures": {
-					// this is ignored because captures aren't supported
-					"1": {
-						"name": "punctuation.definition.constant.mylang"
-					},
-					"2": {
-						"name": "punctuation.definition.constant.mylang"
-					}
-				}
+				"match": "(\")[^\"](\")",
+				"name": "constant.character.mylang"
 			}, {
 				"match": "\\b(?:\\d+)\\b",
 				"name": "constant.numeric.mylang"
@@ -59,3 +50,15 @@ orion.styler.test.SampleGrammar = {
 		}
 	}
 };
+
+/* TODO add to the constant.character.mylang rule once we support "captures":
+
+				"captures": {
+					"1": {
+						"name": "punctuation.definition.constant.mylang"
+					},
+					"2": {
+						"name": "punctuation.definition.constant.mylang"
+					}
+				}
+*/
