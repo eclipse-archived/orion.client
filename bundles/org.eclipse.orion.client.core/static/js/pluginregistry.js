@@ -18,7 +18,7 @@
  * @namespace The global container for eclipse APIs.
  */ 
 var eclipse = eclipse || {};
-
+dojo.require("dojo.DeferredList");
 eclipse.Plugin = function(url, data, internalRegistry) {
 	var _self = this;
 	
@@ -169,6 +169,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	var _storage = opt_storage || localStorage || {};
 	var _plugins = [];
 	var _pluginEventTarget = new eclipse.EventTarget();
+	var _loaded;
 	
 	// storage
 	var _defaultPlugins = {};
@@ -198,7 +199,8 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 			pluginURL,
 			pluginData,
 			key,
-			defaults;
+			defaults,
+			installList = [];
 		
 		//default
 		defaults = _storage["/orion/preferences/default"] ? JSON.parse(_storage["/orion/preferences/default"]) : null;
@@ -213,7 +215,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 						plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
 						_plugins.push(plugin);
 					} else {
-						_self.installPlugin(pluginURL);
+						installList.push(_self.installPlugin(pluginURL));
 					}
 				}
 			}
@@ -233,22 +235,11 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 					plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
 					_plugins.push(plugin);
 				} else {
-					_self.installPlugin(pluginURL);
+					installList.push(_self.installPlugin(pluginURL));
 				}
 			}
 		}
-		
-		
-		
-//		for (var i = 0; i < _storage.length; i++) {
-//			var key = _storage.key(i);
-//			if (key.indexOf("plugin.") === 0) {
-//				var pluginURL = key.substring("plugin.".length);
-//				var pluginData = JSON.parse(_storage[key]);
-//				var plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
-//				_plugins.push(plugin);
-//			}
-//		}	
+		_loaded = new dojo.DeferredList(installList);
 	}
 	
 	function _persist(plugin) {
@@ -343,6 +334,10 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 			publish: function(topic, message) {
 				_managedHub.publish(topic, message);
 			}
+	};
+	
+	this.startup = function() {
+		return _loaded.promise;
 	};
 	
 	this.shutdown = function() {
