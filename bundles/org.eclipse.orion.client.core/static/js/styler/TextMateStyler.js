@@ -183,13 +183,13 @@ orion.styler.Util = {
  * <h4>Supported grammar rule features:</h4>
  * <ul><li><tt>match</tt> patterns are supported.</li>
  * <li><tt>name</tt> scope is supported.</li>
- * <li><tt>captures</tt> is <b>not</b> supported. Any scopes given inside a <tt>captures</tt> rule are not applied.</li>
+ * <li><tt>captures</tt> is <b>not</b> supported. Any scopes given inside a <tt>captures</tt> object are not applied.</li>
  * <li><tt>begin/end</tt> patterns are <b>not</b> supported and are ignored, along with their subrules. Consequently, 
  *   matched constructs may <b>not</b> span multiple lines.</li>
  * <li><tt>contentName, beginCaptures, endCaptures, applyEndPatternLast</tt> are <b>not</b> supported.</li>
  * <li><tt>include</tt> is supported, but only when it references a rule in the current grammar's <tt>repository</tt>.
  *   Including <tt>$self</tt>, <tt>$base</tt>, or <tt>rule.from.another.grammar</tt> is <b>not</b> supported.</li>
- * <li>The <tt>(?x)</tt> option ("extended" regex format), but only when it appears at the beginning of a regex pattern.</li>
+ * <li>The <tt>(?x)</tt> option ("extended" regex format) is supported, but only when it appears at the beginning of a regex pattern.</li>
  * <li>Matching is done using native JavaScript {@link RegExp}s. As a result, many Oniguruma features are <b>not</b> supported.
  *   Unsupported features include:
  *   <ul><li>Named captures</li>
@@ -395,7 +395,7 @@ orion.styler.TextMateStyler = (function() {
 		 * @return {ScopeRange[]}
 		 */
 		_getScopesForLine: function(line, lineStart) {
-			var startRules = this.grammar.patterns.reverse() || [];
+			var startRules = this.grammar.patterns.slice().reverse() || [];
 			var scopeRanges = [];
 			var pos = 0;
 			var len = line.length;
