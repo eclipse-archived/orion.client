@@ -8,13 +8,16 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
-/*global eclipse orion*/
+/*global eclipse orion dojo*/
 
 // create editor
 // create TextMateStyler
 // change editor contents
 // check styled regions
 
+/**
+ * These tests require dojo
+ */
 var testcase = (function(assert) {
 	var tests = {};
 	
@@ -22,7 +25,7 @@ var testcase = (function(assert) {
 	var editor, styler;
 	
 	function setUp() {
-		var options = {parent: "editorDiv"};
+		var options = {parent: "editorDiv", readonly: true};
 		editor = new eclipse.Editor(options);
 	}
 	
@@ -47,14 +50,16 @@ var testcase = (function(assert) {
 		};
 	}
 	
-	/** Fails if node does not have one of the expectedClasses. */
+	/** Fails if node's CSS classes do not exactly match expectedClasses. */
 	function assertHasClasses(/**DomNode*/ node, /**String[]*/ expectedClasses, /**String*/ msg_opt) {
 		var actualClasses = node.className.split(/\s+/);
 		var lastClass;
-		var fail = expectedClasses.some(function(clazz) {
-				lastClass = clazz;
-				return actualClasses.indexOf(clazz) === -1;
-			});
+		var fail = false;
+		fail = fail || (actualClasses.length !== expectedClasses.length);
+		fail = fail || expectedClasses.some(function(clazz) {
+							lastClass = clazz;
+							return actualClasses.indexOf(clazz) === -1;
+						});
 		if (fail) {
 			msg_opt = msg_opt || ("Node " + node.textContent + " has class '" + lastClass + "' among '" + node.className + "'");
 			assert.ok(false, msg_opt);
@@ -68,7 +73,23 @@ var testcase = (function(assert) {
 					return segs.slice(0, i+1).join("-");
 				}),  msg_opt);
 	}
-
+	
+	/** Sets the given lines as the editor text */
+	function setLines(editor, /**String[] or varargs*/ lines) {
+		if (typeof(lines) === "string") {
+			lines = Array.prototype.slice.call(arguments, 1);
+		}
+		editor.setText(lines.join("\n"));
+	}
+	
+	/** @returns {Number} Number of styled regions in the line */
+	function numRegions(/**DomNode*/ lineNode) {
+		// get the number of child <span>s but in IE & FF there's a bogus <span> </span> at the end of every line
+		// FIXME this is brittle
+		var childRegions = dojo.query("span", lineNode);
+		return (dojo.isIE || dojo.isFF) ? childRegions.length-1 : childRegions.length;
+	}
+	
 	// Tests
 	tests["test create styler"] = makeTest(function() {
 		try {
@@ -79,12 +100,13 @@ var testcase = (function(assert) {
 		}
 	});
 	
-	tests["test style 2 z's"] = makeTest(function() {
+	tests["test style one line"] = makeTest(function() {
 		styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
 		editor.setText("fizzer");
 		
+		// FIXME: IE adds 1 extra node to each line??
 		var lineNode = editor._getLineNode(0);
-		assert.equal(lineNode.childElementCount, 4, "4 regions"); // [fi][z][z][er]
+		assert.equal(numRegions(lineNode), 4, "4 regions"); // [fi][z][z][er]
 		var z1 = lineNode.childNodes[1],
 		    z2 = lineNode.childNodes[2];
 		assert.equal(z1.textContent, "z", "child[1] text is z");
@@ -94,6 +116,37 @@ var testcase = (function(assert) {
 		assertHasScope(z1, invalidScopeName, "1st z has the expected scope");
 		assertHasScope(z2, invalidScopeName, "2nd z has the expected scope");
 	});
+	
+	tests["test style multiple lines"] = makeTest(function() {
+		styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+		var line0Text = "no_important_stuff_here",
+		    line1Text = "this xxx && yyy var";
+		setLines(editor, [line0Text, line1Text]);
+		
+		var line0 = editor._getLineNode(0),
+		    line1 = editor._getLineNode(1);
+		assert.equal(numRegions(line0), 1, "line0 has 1 region"); // [no_important_stuff_here]
+		assert.equal(numRegions(line1), 5, "line1 has 5 regions"); // [this][ xxx ][void][ yyy ][var]
+		
+		var span00 = line0.childNodes[0];
+		assertHasScope(span00, "", "No style in line0");
+		
+		var span10 = line1.childNodes[0],
+		    span11 = line1.childNodes[1],
+		    span12 = line1.childNodes[2],
+		    span13 = line1.childNodes[3],
+		    span14 = line1.childNodes[4];
+		assert.equal(span10.textContent, "this",  "line1's region 0 is 'this'");
+		assert.equal(span11.textContent, " xxx ", "line1's region 1 is ' xxx '");
+		assert.equal(span12.textContent, "&&",  "line1's region 2 is '&&'");
+		assert.equal(span13.textContent, " yyy ", "line1's region 3 is ' yyy '");
+		assert.equal(span14.textContent, "var",   "line1's region 4 is 'var'");
+		assertHasScope(span10, "keyword.other.mylang", "'this' has correct scope");
+		assertHasScope(span11, "", "' xxx ' has correct scope");
+		assertHasScope(span12, "keyword.operator.logical.mylang", "'&&' has correct scope");
+		assertHasScope(span13, "", "' yyy ' has correct scope");
+		assertHasScope(span14, "keyword.other.mylang", "'var' has correct scope");
+	}, false);
 	
 //	tests["test style update after model change"] = makeTest(function() {
 //		// do whatever

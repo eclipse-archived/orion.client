@@ -445,8 +445,9 @@ orion.styler.TextMateStyler = (function() {
 				var scopeRange = scopeRanges[i];
 				var classNames = this._styles[scopeRange.scope];
 				if (!classNames) { throw new Error("styles not found for " + scopeRange.scope); }
-				var classNamesString = classNames.join(" ");				styleRanges.push({start: scopeRange.start, end: scopeRange.end, style: {styleClass: classNamesString}});
-//				console.debug("{start " + styleRanges[i].start + ", end " + styleRanges[i].end + ", style: " + styleRanges[i].style.styleClass + "}");
+				var classNamesString = classNames.join(" ");
+				styleRanges.push({start: scopeRange.start, end: scopeRange.end, style: {styleClass: classNamesString}});
+				console.debug("{start " + styleRanges[i].start + ", end " + styleRanges[i].end + ", style: " + styleRanges[i].style.styleClass + "}");
 			}
 			return styleRanges;
 		},
@@ -460,7 +461,7 @@ orion.styler.TextMateStyler = (function() {
 			this._styles = null;
 		},
 		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {
-//			console.debug("_onLineStyle lineIndex:" + e.lineIndex + ", lineStart:" + e.lineStart + ", " + "lineText:" + e.lineText);
+			console.debug("_onLineStyle lineIndex:" + e.lineIndex + ", lineStart:" + e.lineStart + ", " + "lineText:" + e.lineText);
 			e.ranges = this.getStyleRangesForLine(e.lineText);
 		}
 	});
