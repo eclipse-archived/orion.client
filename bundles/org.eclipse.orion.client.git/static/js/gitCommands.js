@@ -307,24 +307,19 @@ dojo.require("widgets.GitCredentialsDialog");
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(function(gitService){
 					gitService.doMerge(item.HeadLocation, item.Id, function(jsonData) {
-						if (jsonData.Result != 'FAILED'){
-							dojo.query(".treeTableRow").forEach(function(node, i) {
-								dojo.toggleClass(node, "incomingCommitsdRow", false);
-							});
-							serviceRegistry.getService("IStatusReporter").then(function(progressService){
-								var result = [];
+						serviceRegistry.getService("IStatusReporter").then(function(progressService){
+							var result = [];
+							if (jsonData.Result == "FAST_FORWARD" || jsonData.Result == "ALREADY_UP_TO_DATE"){
+								dojo.query(".treeTableRow").forEach(function(node, i) {
+									dojo.toggleClass(node, "incomingCommitsdRow", false);
+								});
 								result.Severity = "Ok";
-								result.Message = "OK";
-								progressService.setProgressResult(result);
-							});
-						} else {
-							serviceRegistry.getService("IStatusReporter").then(function(progressService){
-								var result = [];
+							}
+							else
 								result.Severity = "Warning";
-								result.Message = "Go to Git Status page to merge unresolved conflicts";
-								progressService.setProgressResult(result);
-							});
-						}
+							result.Message = jsonData.Result;
+							progressService.setProgressResult(result);
+						});
 					});
 				});
 			},
