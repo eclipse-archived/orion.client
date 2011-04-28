@@ -27,6 +27,7 @@ eclipse.GitCommitNavigator = (function() {
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
 		this.isRoot = null;
+		this.isDirectory = true;
 		this.model = null;
 		this.myTree = null;
 		this.renderer = new eclipse.FileRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
@@ -41,6 +42,7 @@ eclipse.GitCommitNavigator = (function() {
 			}
 						
 			this._lastHash = path;
+			this._lastTreeRoot = treeRoot;
 			//dojo.hash(path, true);
 			var parent = dojo.byId(this.parentId);
 
