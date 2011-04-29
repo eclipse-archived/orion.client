@@ -141,13 +141,13 @@ orion.styler.Util = {
 					i = match2.index + match2[0].length;
 //					console.debug("Ate " + match2[0]);
 				} else {
-					var char = str.charAt(i);
-					if (char === "[") {
+					var chr = str.charAt(i);
+					if (chr === "[") {
 						insideCharacterClass = true;
-					} else if (char === "]") {
+					} else if (chr === "]") {
 						insideCharacterClass = false;
 					}
-					str2 += char;
+					str2 += chr;
 					i++;
 				}
 			}
