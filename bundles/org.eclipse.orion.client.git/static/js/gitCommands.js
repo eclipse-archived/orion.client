@@ -319,12 +319,13 @@ dojo.require("widgets.GitCredentialsDialog");
 								display.Message = result.jsonData.Result;
 							}
 							else{
+								var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
+								
 								display.Severity = "Warning";
-								display.HTML = false;
-								display.Message = result.jsonData.Result;
-//									+ ". Go to <a class=\"pageActions\" href=\"/git-status.html#" 
-//									+ item.HeadLocation
-//									+"\">Git Status page</a>";
+								display.HTML = true;
+								display.Message = "<span>" + result.jsonData.Result
+									+ ". Go to <a class=\"pageActions\" href=\"/git-status.html#" 
+									+ statusLocation +"\">Git Status page</a>.<span>";
 							}
 								
 							progressService.setProgressResult(display);
@@ -333,12 +334,13 @@ dojo.require("widgets.GitCredentialsDialog");
 						serviceRegistry.getService("IStatusReporter").then(function(progressService){
 							var display = [];
 							
+							var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
+							
 							display.Severity = "Error";
-							display.HTML = false;
-							display.Message = dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage;
-//								+ ". Go to <a class=\"pageActions\" href=\"/git-status.html#" 
-//								+ item.HeadLocation
-//								+"\">Git Status page</a>";
+							display.HTML = true;
+							display.Message = "<span>" + dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage
+							+ ". Go to <a class=\"pageActions\" href=\"/git-status.html#" 
+							+ statusLocation +"\">Git Status page</a>.<span>";
 							
 							progressService.setProgressResult(display);
 						});
