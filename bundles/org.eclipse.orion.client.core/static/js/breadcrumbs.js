@@ -26,6 +26,7 @@ eclipse.BreadCrumbs = (function() {
 	 * @param options.container The parent container for the bread crumb presentation
 	 * @param options.resource The current resource
 	 * @param options.makeHref The call back function to make the href on a bread crumb item. If not defined "navigate-table.html#" is used.
+	 * @param option.getFirstSegment The call back function to make DOM node for the first segment in breadcrumb. If not defined "Orion Navigator" is used. 
 	 */
 	function BreadCrumbs(options) {
 		this._init(options);		
@@ -43,8 +44,17 @@ eclipse.BreadCrumbs = (function() {
 			if(options.makeHref){
 				this._makeHref = options.makeHref;
 			} 
+			if(options.getFirstSegment){
+				this._getFirstSegment = options.getFirstSegment;
+			}
 			this.path = "";
 			this.render();
+		},
+		getDefaultFirstSegment: function(){
+			var seg = document.createElement('a');
+			dojo.place(document.createTextNode("Orion Navigator"), seg, "only");
+			seg.href = "navigate-table.html#";
+			return seg;
 		},
 
 		render: function() {
@@ -59,10 +69,8 @@ eclipse.BreadCrumbs = (function() {
 			}
 			var seg, slash;
 			// create a segment that represents the navigator root
-			seg = document.createElement('a');
+			seg = this._getFirstSegment ? this._getFirstSegment() : this.getDefaultFirstSegment();
 			dojo.addClass(seg, "breadcrumb");
-			dojo.place(document.createTextNode("Orion Navigator"), seg, "only");
-			seg.href = "navigate-table.html#";
 			crumbs.appendChild(seg);
 			if (this._resource && this._resource.Parents) {
 				slash = document.createElement('span');
