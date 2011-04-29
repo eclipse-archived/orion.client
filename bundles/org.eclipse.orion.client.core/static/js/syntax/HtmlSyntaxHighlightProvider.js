@@ -31,27 +31,22 @@ orion.syntax.HtmlSyntaxHighlightProvider = (function() {
 			"uuid": "3B5C76FB-EBB5-D930-F40C-047D082CE99B",
 			"patterns": [
 				// TODO unicode?
-				{ // startDelimiter + tagName + endDelimiter
-					"match": "<[A-Za-z0-9_\\-:]+ ?",
+				{
+					"match": "<!(doctype|DOCTYPE)[^>]+>",
+					"name": "entity.name.tag.doctype.html"
+				},
+				{ // startDelimiter + tagName
+					"match": "<[A-Za-z0-9_\\-:]+(?= ?)",
 					"name": "entity.name.tag.html"
 				},
 				{
 					"match": "<!--|-->",
 					"name": "punctuation.definition.comment.html"
 				},
-				{ // attribute name
-					"match": "[A-Za-z\\-:]+(?=\\s*=\\s*['\"])",
-					"name": "entity.other.attribute.name.html"
-				},
-				{ // double quoted string
-					"match": "(\")[^\"]+(\")",
-					"name": "string.quoted.double.html"
-				},
-				{ // single quoted string
-					"match": "(')[^']+(\')",
-					"name": "string.quoted.single.html"
-				},
-				// TODO need a way to return to "inside-tag" state here
+				{ "include": "#attrName" },
+				{ "include": "#qString" },
+				{ "include": "#qqString" },
+				// TODO 3 rules above should get first crack at matching before the tag-delimiter >
 				{ // startDelimiter + slash + tagName + endDelimiter
 					"match": "</[A-Za-z0-9_\\-:]+>",
 					"name": "entity.name.tag.html"
@@ -61,9 +56,18 @@ orion.syntax.HtmlSyntaxHighlightProvider = (function() {
 					"name": "entity.name.tag.html"
 				} ],
 			"repository": {
-//				"insideTag": {
-//					
-//				}
+				"attrName": { // attribute name
+					"match": "[A-Za-z\\-:]+(?=\\s*=\\s*['\"])",
+					"name": "entity.other.attribute.name.html"
+				},
+				"qqString": { // double quoted string
+					"match": "(\")[^\"]+(\")",
+					"name": "string.quoted.double.html"
+				},
+				"qString": { // single quoted string
+					"match": "(')[^']+(\')",
+					"name": "string.quoted.single.html"
+				}
 			}
 		}
 	};
