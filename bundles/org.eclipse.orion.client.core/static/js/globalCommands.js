@@ -64,6 +64,8 @@ var bottomHTMLFragment =
  
 eclipse.globalCommandUtils = eclipse.globalCommandUtils || {};
 
+eclipse.globalCommandUtils.userDataToSet = null;
+
 eclipse.globalCommandUtils.generateUserInfo = function(userName, userStatusText) {
 	// add the logout button to the toolbar if available
 	var userInfo = dojo.byId("userInfo");
@@ -111,6 +113,10 @@ eclipse.globalCommandUtils.generateUserInfo = function(userName, userStatusText)
 			userInfo.appendChild(signout);
 			dojo.addClass(signout, "commandLink");
 		}
+		
+		eclipse.globalCommandUtils.userDataToSet = null;
+	}else{
+		eclipse.globalCommandUtils.userDataToSet = {userName : userName, userStatusText : userStatusText};
 	}
 };
 
@@ -219,7 +225,13 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 		// need to have some item, for global scoped commands it won't matter
 		var item = handler || {};
 		commandService.renderCommands(toolbar, "global", item, handler, "image");
-	}	
+	}
+	
+	if (eclipse.globalCommandUtils.userDataToSet) {
+		//if last time we couldn't set the user name try again after creating the banner
+		eclipse.globalCommandUtils.generateUserInfo(eclipse.globalCommandUtils.userDataToSet.userName,
+				eclipse.globalCommandUtils.userDataToSet.userStatusText);
+	}
 	
 	// generate the footer. The footer div id should not be assumed here, but that will be
 	// fixed post M6.  
