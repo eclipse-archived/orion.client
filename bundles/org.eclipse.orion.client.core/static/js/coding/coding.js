@@ -156,13 +156,19 @@ dojo.addOnLoad(function(){
 							editorContainer.installEditor();
 						}
 						var fullPathName = fileURI;
-						editorContainer.onInputChange(fullPathName, "Fetching " + fullPathName, null);
+						var progressTimeout = setTimeout(function() {
+							editorContainer.onInputChange(fullPathName, "Fetching " + fullPathName, null);
+						}, 800); // wait 800ms before displaying
 						fileClient.read(fileURI).then(
 							dojo.hitch(this, function(contents) {
+								clearTimeout(progressTimeout);
 								editorContainer.onInputChange(fileURI, null, contents);
+								// in the long run we should be looking for plug-ins to call here for highlighting
+								syntaxHighlighter.highlight(fileURI, editorContainer.getEditorWidget());
 								editorContainer.showSelection(input.start, input.end, input.line, input.offset, input.length);
 							}),
 							dojo.hitch(this, function(error) {
+								clearTimeout(progressTimeout);
 								editorContainer.onInputChange(fullPathName, "An error occurred: " + error.message, null);
 								console.error("HTTP status code: ", error.status);
 							})
@@ -178,30 +184,6 @@ dojo.addOnLoad(function(){
 							})
 						);
 					}
-					var fullPathName = fileURI;
-					editorContainer.onInputChange(fullPathName, "Fetching " + fullPathName, null);
-					fileClient.read(fileURI).then(
-						dojo.hitch(this, function(contents) {
-							editorContainer.onInputChange(fileURI, null, contents);
-							// in the long run we should be looking for plug-ins to call here for highlighting
-							syntaxHighlighter.highlight(fileURI, editorContainer.getEditorWidget());
-							editorContainer.showSelection(input.start, input.end, input.line, input.offset, input.length);
-						}),
-						dojo.hitch(this, function(error) {
-							editorContainer.onInputChange(fullPathName, "An error occurred: " + error.message, null);
-							console.error("HTTP status code: ", error.status);
-						})
-					);
-					fileClient.read(fileURI, true).then(
-						dojo.hitch(this, function(metadata) {
-							this._fileMetadata = metadata;
-							this.setTitle(metadata.Location);
-						}),
-						dojo.hitch(this, function(error) {
-							console.error("Error loading file metadata: " + error.message);
-							this.setTitle(fileURI);
-						})
-					);
 					this.lastFilePath = fileURI;
 				} else {
 					editorContainer.onInputChange("No File Selected", "", null);
