@@ -23,7 +23,7 @@ dojo.addOnLoad(function() {
 	var pluginRegistry;
 	preferenceService.getPreferences("/plugins").then(function() {
 		pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
-		dojo.addOnUnload(function() {
+		dojo.addOnWindowUnload(function() {
 			pluginRegistry.shutdown();
 		});
 		return pluginRegistry.startup();

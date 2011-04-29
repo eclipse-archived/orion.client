@@ -128,7 +128,7 @@ dojo.addOnLoad(function(){
 	// create registry and instantiate needed services
 	var serviceRegistry = new eclipse.ServiceRegistry();
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
-	dojo.addOnUnload(function() {
+	dojo.addOnWindowUnload(function() {
 		pluginRegistry.shutdown();
 	});
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");

@@ -28,7 +28,7 @@ dojo.addOnLoad(function(){
 		// This is the new service registry.  All services should be registered and obtained here.
 		serviceRegistry = new eclipse.ServiceRegistry();
 		pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
-		dojo.addOnUnload(function() {
+		dojo.addOnWindowUnload(function() {
 			pluginRegistry.shutdown();
 		});
 		
