@@ -336,7 +336,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 					}
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
-						if (item.parent.Path === "") {
+						if (item.parent.Path === "" || item.parent.Path === "/file/") {
 							fileClient.removeProject(item.parent.Location, item.Location).then(
 								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
 						} else {
