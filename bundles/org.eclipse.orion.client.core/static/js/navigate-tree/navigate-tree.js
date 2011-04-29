@@ -14,7 +14,7 @@ dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
 	serviceRegistry = new eclipse.ServiceRegistry();
 	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
-	dojo.addOnUnload(function() {
+	dojo.addOnWindowUnload(function() {
 		pluginRegistry.shutdown();
 	});
 	new eclipse.StatusReportingService(serviceRegistry, "statusPane", "pageActionsLeft");
