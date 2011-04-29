@@ -1,0 +1,44 @@
+/* Simple theme that handles our HTML styling. 
+ * A real theme would be more comprehensive
+ */
+
+.entity-name-tag /*tag name*/ {
+	color: #3f7f7f;
+}
+
+.entity-other-attribute-name {
+	color: #7f007f;
+	/*text-decoration: underline;*/
+}
+
+.punctuation-definition-comment {
+	color: #3f5fbf;
+}
+
+.string-quoted {
+	color: #2a00ff;
+	font-style: italic; /*todo only for attribute values.. if we can separate them out*/
+}
+
+/*
+.comment {
+}
+.constant {
+}
+.invalid {
+}
+.keyword {
+}
+.markup {
+}
+.meta {
+}
+.storage {
+}
+.string {
+}
+.support {
+}
+.variable {
+}
+*/

@@ -26,6 +26,7 @@ orion.EditorContainer = (function() {
 		this._keyBindingFactory = options.keyBindingFactory;
 		this._statusReporter = options.statusReporter;
 		this._domNode = options.domNode;
+		this._syntaxHighlightProviders = options.syntaxHighlightProviders;
 		
 		this._annotationsRuler = null;
 		this._overviewRuler = null;

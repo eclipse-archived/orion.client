@@ -58,6 +58,7 @@ dojo.addOnLoad(function(){
 	};
 	
 	// Temporary.  This will evolve into something pluggable.
+	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("ISyntaxHighlight");
 	var syntaxHighlighter = {
 		styler: null, 
 		
@@ -68,8 +69,8 @@ dojo.addOnLoad(function(){
 			}
 			if (fileName) {
 				var splits = fileName.split(".");
+				var extension = splits.pop().toLowerCase();
 				if (splits.length > 0) {
-					var extension = splits.pop().toLowerCase();
 					switch(extension) {
 						case "js":
 							this.styler = new eclipse.TextStyler(editorWidget, "js");
@@ -77,15 +78,36 @@ dojo.addOnLoad(function(){
 						case "java":
 							this.styler = new eclipse.TextStyler(editorWidget, "java");
 							break;
-						case "html":
-							//TODO
-							break;
-						case "xml":
-							//TODO
-							break;
 						case "css":
 							this.styler = new eclipse.TextStyler(editorWidget, "css");
 							break;
+					}
+					
+					if (!this.styler && syntaxHighlightProviders) {
+						// Check our syntax highlight providers
+						var providerToUse;
+						dojo.some(syntaxHighlightProviders, function(provider) {
+							var fileTypes = provider.getProperty("fileTypes");
+							if (fileTypes) {
+								for (var i=0; i < fileTypes.length; i++) {
+									if (fileTypes[i] === extension) {
+										providerToUse = provider;
+										return true;
+									}
+								}
+							}
+						});
+						
+						if (providerToUse) {
+							var providerType = providerToUse.getProperty("type");
+							if (providerType === "grammar") {
+								// TextMate styler
+								var grammar = providerToUse.getProperty("grammar");
+								this.styler = new orion.styler.TextMateStyler(editorWidget, grammar);
+							} else if (providerType === "parser") {
+								console.debug("TODO implement support for parser-based syntax highlight provider");
+							}
+						}
 					}
 				}
 			}
@@ -114,7 +136,7 @@ dojo.addOnLoad(function(){
 		var editorFactory = function() {
 			return new eclipse.Editor({
 				parent: editorContainerDomNode,
-				stylesheet: "/editor/samples/editor.css",
+				stylesheet: ["/editor/samples/editor.css", "/default-theme.css"],
 				tabSize: 4
 			});
 		};

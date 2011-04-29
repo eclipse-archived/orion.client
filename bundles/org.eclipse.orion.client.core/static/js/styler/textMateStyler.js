@@ -37,6 +37,7 @@ orion.styler.AbstractStyler = (function() {
 			editor.addEventListener("ModelChanged", this, this._onModelChanged);
 			editor.addEventListener("Destroy", this, this._onDestroy);
 			editor.addEventListener("LineStyle", this, this._onLineStyle);
+			editor.redrawLines();
 		},
 		
 		/**
@@ -176,8 +177,8 @@ orion.styler.Util = {
  * as a single CSS rule can provide consistent styling to similar constructs across different languages.<p>
  * 
  * <h4>Supported top-level grammar features:</h4>
- * <ul><li><tt>scopeName, fileTypes, patterns, repository</tt> (but see below) are supported.</li>
- * <li><tt>firstLineMatch, foldingStartMarker, foldingStopMarker</tt> are <b>not</b> supported.</li>
+ * <ul><li><tt>fileTypes, patterns, repository</tt> (but see below) are supported.</li>
+ * <li><tt>scopeName, firstLineMatch, foldingStartMarker, foldingStopMarker</tt> are <b>not</b> supported.</li>
  * </ul>
  *
  * <h4>Supported grammar rule features:</h4>
