@@ -16,17 +16,35 @@ var orion = orion || {};
 orion.syntax = orion.syntax || {};
 
 /**
- * Gives the syntax rules for highlighting HTML.
+ * Uses a grammar to provide some very rough syntax highlighting for HTML.<p>
+ * @class orion.syntax.HtmlSyntaxHighlight
  */
-orion.syntax.HtmlSyntaxHighlightProvider = (function() {
-	/** @private */
-	function HtmlSyntaxHighlightProvider() {
-	}
-	HtmlSyntaxHighlightProvider.prototype = /** @lends orion.syntax.HtmlSyntaxHighlightProvider.prototype */ {
+orion.syntax.HtmlSyntaxHighlight = (function() {
+	var _fileTypes = [ "html", "htm" ];
+	return {
+		/**
+		 * What kind of highlight provider we are.
+		 * @public
+		 * @type "grammar"|"parser"
+		 */
+		type: "grammar",
+		
+		/**
+		 * The file extensions that we provide rules for.
+		 * @public
+		 * @type String[]
+		 */
+		fileTypes: _fileTypes,
+		
+		/**
+		 * Object containing the grammar rules.
+		 * @public
+		 * @type JSONObject
+		 */
 		grammar: {
 			"comment": "HTML syntax rules",
 			"name": "HTML",
-			"fileTypes": [ "html", "htm" ],
+			"fileTypes": _fileTypes,
 			"scopeName": "source.html",
 			"uuid": "3B5C76FB-EBB5-D930-F40C-047D082CE99B",
 			"patterns": [
@@ -46,7 +64,7 @@ orion.syntax.HtmlSyntaxHighlightProvider = (function() {
 				{ "include": "#attrName" },
 				{ "include": "#qString" },
 				{ "include": "#qqString" },
-				// TODO 3 rules above should get first crack at matching before the tag-delimiter >
+				// TODO attrName, qString, qqString should be applied first while inside a tag
 				{ // startDelimiter + slash + tagName + endDelimiter
 					"match": "</[A-Za-z0-9_\\-:]+>",
 					"name": "entity.name.tag.html"
@@ -71,5 +89,4 @@ orion.syntax.HtmlSyntaxHighlightProvider = (function() {
 			}
 		}
 	};
-	return HtmlSyntaxHighlightProvider;
 }());

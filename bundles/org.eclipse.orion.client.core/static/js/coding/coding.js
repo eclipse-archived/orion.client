@@ -264,6 +264,8 @@ dojo.addOnLoad(function(){
 
 	var annotationFactory = new orion.AnnotationFactory();
 	
+	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("ISyntaxHighlight");
+	
 	var editorContainer = new orion.EditorContainer({
 		editorFactory: editorFactory,
 		undoStackFactory: new orion.UndoCommandFactory(serviceRegistry, commandService, "pageActions"),
@@ -272,7 +274,8 @@ dojo.addOnLoad(function(){
 		contentAssistFactory: contentAssistFactory,
 		keyBindingFactory: keyBindingFactory, 
 		statusReporter: statusReporter,
-		domNode: editorContainerDomNode
+		domNode: editorContainerDomNode,
+		syntaxHighlightProviders: syntaxHighlightProviders
 	});
 	
 	// Establishing dependencies on registered services
