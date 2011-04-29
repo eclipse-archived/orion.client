@@ -306,19 +306,41 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(function(gitService){
-					gitService.doMerge(item.HeadLocation, item.Id, function(jsonData) {
+					gitService.doMerge(item.HeadLocation, item.Id).then(function(result){
 						serviceRegistry.getService("IStatusReporter").then(function(progressService){
-							var result = [];
-							if (jsonData.Result == "FAST_FORWARD" || jsonData.Result == "ALREADY_UP_TO_DATE"){
+							var display = [];
+							
+							if (result.jsonData.Result == "FAST_FORWARD" || result.jsonData.Result == "ALREADY_UP_TO_DATE"){
 								dojo.query(".treeTableRow").forEach(function(node, i) {
 									dojo.toggleClass(node, "incomingCommitsdRow", false);
 								});
-								result.Severity = "Ok";
+								display.Severity = "Ok";
+								display.HTML = false;
+								display.Message = result.jsonData.Result;
 							}
-							else
-								result.Severity = "Warning";
-							result.Message = jsonData.Result;
-							progressService.setProgressResult(result);
+							else{
+								display.Severity = "Warning";
+								display.HTML = false;
+								display.Message = result.jsonData.Result;
+//									+ ". Go to <a class=\"pageActions\" href=\"/git-status.html#" 
+//									+ item.HeadLocation
+//									+"\">Git Status page</a>";
+							}
+								
+							progressService.setProgressResult(display);
+						});
+					}, function (error) {
+						serviceRegistry.getService("IStatusReporter").then(function(progressService){
+							var display = [];
+							
+							display.Severity = "Error";
+							display.HTML = false;
+							display.Message = dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage;
+//								+ ". Go to <a class=\"pageActions\" href=\"/git-status.html#" 
+//								+ item.HeadLocation
+//								+"\">Git Status page</a>";
+							
+							progressService.setProgressResult(display);
 						});
 					});
 				});
