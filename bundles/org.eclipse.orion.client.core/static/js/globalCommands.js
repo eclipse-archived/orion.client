@@ -52,9 +52,14 @@ var topHTMLFragment =
 
 // BEGIN BOTTOM BANNER FRAGMENT
 // styling of the surrounding div (text-align, etc) is in ide.css "footer"
-var bottomHTMLFragment = 
-'<a style="margin-right: 8px;" href="http://wiki.eclipse.org/Orion/FAQ">Orion FAQ</a>' +
-'<a style="margin-left: 8px;" href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=e4&component=Orion&version=0.2">Report a bug</a>';
+var bottomHTMLFragment = '<img src="http://dev.eclipse.org/small_icons/emblems/emblem-important.png"/> ' + 
+	'This is a Beta build of Orion.  You can use it, play with it and explore the ' +
+	'capabilities but BEWARE your data may be lost. &nbsp;| '+ 
+	'<a href="http://wiki.eclipse.org/Orion/FAQ">FAQ</a> | ' + 
+	'<a href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=e4&component=Orion&version=0.2">Report a Bug</a> | ' +
+	'<a href="http://www.eclipse.org/legal/privacy.php">Privacy Policy</a> | ' + 
+	'<a href="http://www.eclipse.org/legal/termsofuse.php">Terms of Use</a> | '+ 
+	'<a href="http://www.eclipse.org/legal/copyright.php">Copyright Agent</a>'; 
 // END BOTTOM BANNER FRAGEMENT
 
 /**
