@@ -59,31 +59,37 @@ eclipse.FileExplorer = (function() {
 			}
 						
 			this._lastHash = path;
-			var parent = dojo.byId(this.parentId);
-
-			// Progress indicator
-			var progress = dojo.byId("progress"); 
-			if(!progress){
-				progress = dojo.create("div", {id: "progress"}, parent, "only");
-			}
-			dojo.empty(progress);
-			var b = dojo.create("b");
-			dojo.place(document.createTextNode("Loading "), progress, "last");
-			dojo.place(document.createTextNode(path), b, "last");
-			dojo.place(b, progress, "last");
-			dojo.place(document.createTextNode("..."), progress, "last");
-			
+			var parent = dojo.byId(this.parentId);			
 
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
 	
 			if (path !== this.treeRoot.Path) {
 				//the tree root object has changed so we need to load the new one
+				
+				// Progress indicator
+				var progress = dojo.byId("progress"); 
+				if(!progress){
+					progress = dojo.create("div", {id: "progress"}, parent, "only");
+				}
+				dojo.empty(progress);
+				
+				var progressTimeout = setTimeout(function() {
+					dojo.empty(progress);
+					var b = dojo.create("b");
+					dojo.place(document.createTextNode("Loading "), progress, "last");
+					dojo.place(document.createTextNode(path), b, "last");
+					dojo.place(b, progress, "last");
+					dojo.place(document.createTextNode("..."), progress, "last");
+				}, 500); // wait 500ms before displaying
+				
 				this.treeRoot.Path = path;
 				var self = this;
+				
 				this.fileClient.loadWorkspace(path).then(
 					//do we really need hitch - could just refer to self rather than this
 					dojo.hitch(self, function(loadedWorkspace) {
+						clearTimeout(progressTimeout);
 						//copy fields of resulting object into the tree root
 						for (var i  in loadedWorkspace) {
 							this.treeRoot[i] = loadedWorkspace[i];
@@ -100,6 +106,7 @@ eclipse.FileExplorer = (function() {
 						this.createTree(this.parentId, this.model);
 					}),
 					dojo.hitch(self, function(error) {
+						clearTimeout(progressTimeout);
 						// Show an error message when a problem happens during getting the workspace
 						if (error.status !== null && error.status !== 401){
 							dojo.place(document.createTextNode("Sorry, an error occurred: " + error.message), progress, "only");

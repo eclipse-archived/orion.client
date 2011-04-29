@@ -104,25 +104,32 @@ eclipse.ExplorerTree = (function() {
 			
 			var container = dojo.byId(this.parentId);
 			// Progress indicator
-			var progress = document.createElement('div');
-			
-			dojo.place(document.createTextNode("Loading "), progress);
-			var b = dojo.create("b", null, progress);
-			dojo.place(document.createTextNode(path), b);
-			dojo.place(document.createTextNode("..."), progress);
-			
-			progress.id = "myTree";
-			this.removeResourceList();
-			dojo.place(progress, container, "only");
+
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
 			
-			if (path != this.treeRoot.Path) {
+			if (path !== this.treeRoot.Path) {
 				//the tree root object has changed so we need to load the new one
+				
+				// Progress indicator
+				var progressTimeout = setTimeout(function() {
+					var progress = document.createElement('div');
+					
+					dojo.place(document.createTextNode("Loading "), progress);
+					var b = dojo.create("b", null, progress);
+					dojo.place(document.createTextNode(path), b);
+					dojo.place(document.createTextNode("..."), progress);
+					
+					progress.id = "myTree";
+					this.removeResourceList();
+					dojo.place(progress, container, "only");
+				}, 500); // wait 500ms before displaying
+				
 				this.treeRoot.Path = path;
 				var self = this;
 				this.fileClient.loadWorkspace(path).then(
 					dojo.hitch(self, function(loadedWorkspace) {
+						clearTimeout(progressTimeout);
 						//copy fields of resulting object into the tree root
 						for (var i in loadedWorkspace) {
 							this.treeRoot[i] = loadedWorkspace[i];
@@ -131,7 +138,12 @@ eclipse.ExplorerTree = (function() {
 						new eclipse.BreadCrumbs({container: this.parentId, resource: this.treeRoot});
 						eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.parentId, this.toolbarId, this.treeRoot);
 						this.createTree();
-					}));
+					}),
+					dojo.hitch(self, function(error) {
+						clearTimeout(progressTimeout);
+						// TODO: Show an error message when a problem happens during getting the workspace
+					})
+				);
 			}
 		},
 		createTree: function(){
