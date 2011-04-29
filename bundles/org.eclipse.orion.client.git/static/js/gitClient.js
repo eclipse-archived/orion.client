@@ -353,7 +353,7 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		doMerge : function(gitHeadURI, commitName, onLoad) {
+		doMerge : function(gitHeadURI, commitName) {
 			var service = this;
 			
 			console.info("doMerge called");
@@ -369,17 +369,12 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, secondArg) {
-					if (onLoad) {
-						if (typeof onLoad === "function")
-							onLoad(jsonData, secondArg);
-						else
-							service._serviceRegistration.dispatchEvent(onLoad,
-									jsonData);
-					}
+					return {jsonData: jsonData, secondArg: secondArg};
 				},
 				error : function(error, ioArgs) {
 					handleGetAuthenticationError(this, ioArgs);
 					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return {error: error, ioArgs: ioArgs};
 				}
 			});
 		},
