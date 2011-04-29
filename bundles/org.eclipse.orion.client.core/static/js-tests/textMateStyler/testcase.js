@@ -10,41 +10,37 @@
 
 /*global eclipse orion dojo*/
 
-// create editor
-// create TextMateStyler
-// change editor contents
-// check styled regions
-
 /**
  * These tests require dojo
  */
 var testcase = (function(assert) {
 	var tests = {};
 	
-	// All tests use these variables
-	var editor, styler;
-	
-	function setUp() {
-		var options = {parent: "editorDiv", readonly: true, stylesheet: ["test.css"]};
-		editor = new eclipse.Editor(options);
-	}
-	
-	function tearDown() {
-		editor.destroy();
-		editor = null;
-		styler = null;
-	}
-	
+	/**
+	 * @param {Function(editor)} testBody
+	 * @param {Boolean} [doTearDown]
+	 */
 	function makeTest(testBody, doTearDown) {
+		function createEditor() {
+			var options = {parent: "editorDiv", readonly: true, stylesheet: ["test.css"]};
+			return new eclipse.Editor(options);
+		}
+		
+		/** Must be called after each test to remove editor from DOM */
+		function tearDown(editor) {
+			if (editor) { editor.destroy(); }
+		}
+		
 		doTearDown = typeof(doTearDown) === "undefined" ? true : doTearDown;
 		if (typeof(testBody) !== "function") { throw new Error("testBody must be a function"); }
 		return function() {
+			var editor;
 			try {
-				setUp();
-				testBody();
+				editor = createEditor();
+				testBody(editor);
 			} finally {
 				if (doTearDown) {
-					tearDown();
+					tearDown(editor);
 				}
 			}
 		};
@@ -91,17 +87,17 @@ var testcase = (function(assert) {
 	}
 	
 	// Tests
-	tests["test create styler"] = makeTest(function() {
+	tests["test TextMateStyler create TextMateStyler"] = makeTest(function(editor) {
 		try {
-			styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+			var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
 			assert.ok(true, "true is false");
 		} catch (e) {
 			assert.ok(false, "Exception creating editor");
 		}
 	});
 	
-	tests["test style one line"] = makeTest(function() {
-		styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+	tests["test TextMateStyler style one line"] = makeTest(function(editor) {
+		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
 		editor.setText("fizzer");
 		
 		// FIXME: IE adds 1 extra node to each line??
@@ -117,8 +113,8 @@ var testcase = (function(assert) {
 		assertHasScope(z2, invalidScopeName, "2nd z has the expected scope");
 	});
 	
-	tests["test style multiple lines"] = makeTest(function() {
-		styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+	tests["test TextMateStyler style multiple lines"] = makeTest(function(editor) {
+		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
 		var line0Text = "no_important_stuff_here",
 		    line1Text = "a this xxx && yyy var";
 		setLines(editor, [line0Text, line1Text]);
@@ -151,15 +147,15 @@ var testcase = (function(assert) {
 		assertHasScope(span15, "keyword.other.mylang", "'var' has correct scope");
 	});
 	
-//	tests["test style update after model change"] = makeTest(function() {
+//	tests["test TextMateStyler styles updated after model change"] = makeTest(function(editor) {
 //		// do whatever
 //	});
 //	
-//	tests["test grammar with unsupported regex feature"] = makeTest(function() {
+//	tests["test TextMateStyler grammar with unsupported regex feature"] = makeTest(function(editor) {
 //		// expect Error
 //	});
 //	
-//	tests["test grammar with other unsupported feature"] = makeTest(function() {
+//	tests["test TextMateStyler grammar with other unsupported feature"] = makeTest(function(editor) {
 //		// expect Error
 //	});
 	
