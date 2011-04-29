@@ -246,9 +246,15 @@ function initTitleBar(fileClient, navigator){
 					var titlePane = dojo.byId("pageTitle");
 					if (titlePane) {
 						dojo.empty(titlePane);
-						var breadcrumb = new eclipse.BreadCrumbs({container: "pageTitle", resource: metadata , makeHref:function(seg,location){makeHref(fileClient, seg,location);}});
+						var breadcrumb = new eclipse.BreadCrumbs({
+							container: "pageTitle",
+							resource: metadata ,
+							getFirstSegment: function(){ return dojo.create("a", {innerHTML: getPageTitle()});},
+							makeHref:function(seg,location){makeHref(fileClient, seg,location);
+							}
+						});
 						if(breadcrumb.path && breadcrumb.path!="")
-							document.title = "Git Log - " + breadcrumb.path;
+							document.title = getPageTitle() + " - " + breadcrumb.path;
 					}
 					navigator.isRoot=!metadata.Parents || metadata.Parents.length==0;
 					navigator.isDirectory = metadata.Directory;
@@ -257,7 +263,7 @@ function initTitleBar(fileClient, navigator){
 					if(metadata.Directory){
 						//remove links to commit
 						dojo.query(".navlinkonpage").forEach(function(node, i) {
-							node.removeAttr("href");
+							node.removeAttribute("href");
 						});
 					}
 				}),
@@ -293,3 +299,7 @@ function makeHref(fileClient, seg, location){
 			})
 	);
 };
+
+function getPageTitle(){
+	return isRemote() ? "Orion Git Remote" : "Orion Git Log";
+}

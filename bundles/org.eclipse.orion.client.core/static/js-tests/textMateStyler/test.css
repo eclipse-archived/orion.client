@@ -1,0 +1,28 @@
+/* this is just for visual inspection, not required for tests to pass */
+.invalid {
+	background-color: red;
+	color: white;
+}
+
+.keyword {
+	background-color: #eee;
+}
+
+.constant {
+	color: blue;
+}
+
+.keyword-control {
+	font-weight: bold;
+	font-color: #7f074;
+}
+
+.keyword-other {
+	font-weight: bold;
+	font-color: darkred;
+	text-decoration: underline;
+}
+
+.keyword-operator-logical {
+	font-family: sans-serif;
+}
