@@ -313,27 +313,7 @@ orion.EditorContainer = (function() {
 					}
 					var fileName = title;
 					if (fileName) {
-						var splits = fileName.split(".");
-						if (splits.length > 0) {
-							var extension = splits.pop().toLowerCase();
-							switch(extension) {
-								case "js":
-									this.styler = new eclipse.TextStyler(this._editor, "js");
-									break;
-								case "java":
-									this.styler = new eclipse.TextStyler(this._editor, "java");
-									break;
-								case "html":
-									//TODO
-									break;
-								case "xml":
-									//TODO
-									break;
-								case "css":
-									this.styler = new eclipse.TextStyler(this._editor, "css");
-									break;
-							}
-						}
+						this._styler = this.getStyler(fileName);
 					}
 					if (contents !== null && contents !== undefined) {
 						this._editor.setText(contents);
@@ -342,6 +322,54 @@ orion.EditorContainer = (function() {
 				this._undoStack.reset();
 				this.checkDirty();
 				this._editor.focus();
+			}
+		},
+		
+		/**
+		 * @retuns {eclipse.Styler|null}
+		 */
+		getStyler : function(fileName) {
+			var styler;
+			// Hardcoded styling for some extensions
+			var splits = fileName.split(".");
+			if (splits.length > 0) {
+				var extension = splits.pop().toLowerCase();
+				switch(extension) {
+					case "js":
+						styler = new eclipse.TextStyler(this._editor, "js");
+						break;
+					case "java":
+						styler = new eclipse.TextStyler(this._editor, "java");
+						break;
+					case "css":
+						styler = new eclipse.TextStyler(this._editor, "css");
+						break;
+				}
+			}
+			
+			if (!styler) {
+				var provider = new orion.syntax.HtmlSyntaxHighlightProvider();
+				var grammar = provider.grammar;
+				styler = new orion.styler.TextMateStyler(this._editor, grammar);
+				
+				// Problem 1: no serviceRegistry
+				// Problem 2: loading service, etc is async
+				/* TODO check defined services for a styler
+				It's not necessarily a TextMate styler.
+				However, this file still depends on textMateStyler.js directly for now,
+				since we want to initialize TextMateStylers declaratively without getService() overhead
+				
+				var serviceRefs = serviceRegistry.getServiceReferences("ISyntaxHighlight");
+				var stylerType = serviceRef.getProperty("stylerType");
+				if (stylerType === "grammar") {
+					var grammar = serviceRef.getProperty("grammar");
+					styler = new orion.styler.TextMateStyler(this._editor, grammar);
+				} else if (stylerType === "javascript") {
+					serviceRegistry.getService(serviceRef).then(dojo.hitch(this, function(service) {
+						this.styler = service.getStyler();
+					}));
+				}
+				*/
 			}
 		},
 		
