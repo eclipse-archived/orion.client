@@ -536,7 +536,8 @@ orion.CompareMergeContainer = (function() {
 			var fileNameL = this._newFileURI.split("?")[0];
 			this._editorContainerLeft.onInputChange(fileNameL, null, result.output);
 			this._highlighter[0].highlight(fileNameL , this._editorLeft);
-			this._inputManager.setInput(fileNameL , this._editorContainerLeft);
+			if(!this.readonly)
+				this._inputManager.setInput(fileNameL , this._editorContainerLeft);
 		}
 		this._compareMatchRenderer.init(result.mapper ,this._editorLeft , this._editorRight);
 		this._compareMatchRenderer.matchPositionFromAnnotation(-1);

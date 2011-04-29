@@ -2538,21 +2538,45 @@ eclipse.Editor = (function() {
 		_calculateLineHeight: function() {
 			var document = this._frameDocument;
 			var parent = this._clientDiv;
-			var span1 = document.createElement("SPAN");
-			span1.appendChild(document.createTextNode("W"));
-			parent.appendChild(span1);
-			var br = document.createElement("BR");
-			parent.appendChild(br);
-			var span2 = document.createElement("SPAN");
-			span2.appendChild(document.createTextNode("W"));
-			parent.appendChild(span2);
-			var rect1 = span1.getBoundingClientRect();
-			var rect2 = span2.getBoundingClientRect();
+			var line1 = document.createElement("DIV");
+			line1.appendChild(document.createTextNode("W"));
+			parent.appendChild(line1);
+			var line2 = document.createElement("DIV");
+			line2.appendChild(document.createTextNode("W"));
+			parent.appendChild(line2);
+			var rect1 = line1.getBoundingClientRect();
+			var rect2 = line2.getBoundingClientRect();
 			var lineHeight = rect2.top - rect1.top;
-			parent.removeChild(span1);
-			parent.removeChild(br);
-			parent.removeChild(span2);
-			return lineHeight; 
+			parent.removeChild(line1);
+			parent.removeChild(line2);
+			return Math.ceil(lineHeight); 
+		},
+		_calculatePadding: function() {
+			var document = this._frameDocument;
+			var parent = this._clientDiv;
+			var pad = this._getPadding(this._editorDiv);
+			var div1 = document.createElement("DIV");
+			div1.style.paddingLeft = pad.left + "px";
+			div1.style.paddingTop = pad.top + "px";
+			div1.style.paddingRight = pad.right + "px";
+			div1.style.paddingBottom = pad.bottom + "px";
+			div1.style.width = "100px";
+			div1.style.height = "100px";
+			var div2 = document.createElement("DIV");
+			div2.style.width = "100%";
+			div2.style.height = "100%";
+			div1.appendChild(div2);
+			parent.appendChild(div1);
+			var rect1 = div1.getBoundingClientRect();
+			var rect2 = div2.getBoundingClientRect();
+			parent.removeChild(div1);
+			pad = {
+				left: rect2.left - rect1.left,
+				top: rect2.top - rect1.top,
+				right: rect1.right - rect2.right,
+				bottom: rect1.bottom - rect2.bottom
+			};
+			return pad;
 		},
 		_clearSelection: function (direction) {
 			var selection = this._getSelection();
@@ -3046,9 +3070,6 @@ eclipse.Editor = (function() {
 			return text;
 		},
 		_getEditorPadding: function() {
-			if (!this._editorPadding) {
-				this._editorPadding = this._getPadding(this._editorDiv);
-			}
 			return this._editorPadding;
 		},
 		_getLineBoundingClientRect: function (child) {
@@ -3748,6 +3769,7 @@ eclipse.Editor = (function() {
 				clientDiv.contentEditable = "true";
 			}
 			body.style.lineHeight = this._calculateLineHeight() + "px";
+			this._editorPadding = this._calculatePadding();
 			if (options.tabSize) {
 				if (isOpera) {
 					clientDiv.style.OTabSize = options.tabSize+"";
@@ -3759,27 +3781,6 @@ eclipse.Editor = (function() {
 			}
 			this._createActions();
 			this._hookEvents();
-		},
-		_isDOMSelectionComplete: function() {
-			var selection = this._getSelection();
-			var topIndex = this._getTopIndex();
-			var bottomIndex = this._getBottomIndex();
-			var model = this._model;
-			var firstLine = model.getLineAtOffset(selection.start);
-			var lastLine = model.getLineAtOffset(selection.start !== selection.end ? selection.end - 1 : selection.end);
-			if (topIndex <= firstLine && firstLine <= bottomIndex && topIndex <= lastLine && lastLine <= bottomIndex) {
-				var child = this._getLineNode(firstLine);
-				while (child && child.lineIndex <= lastLine) {
-					var lineChild = child.firstChild;
-					while (lineChild) {
-						if (lineChild.ignoreChars) { return false; }
-						lineChild = lineChild.nextSibling;
-					}
-					child = this._getLineNext(child);
-				}
-				return true;
-			}
-			return false;
 		},
 		_modifyContent: function(e, updateCaret) {
 			if (this.readonly && !e._code) {

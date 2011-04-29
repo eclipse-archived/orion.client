@@ -306,25 +306,44 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(function(gitService){
-					gitService.doMerge(item.HeadLocation, item.Id, function(jsonData) {
-						if (jsonData.Result != 'FAILED'){
-							dojo.query(".treeTableRow").forEach(function(node, i) {
-								dojo.toggleClass(node, "incomingCommitsdRow", false);
-							});
-							serviceRegistry.getService("IStatusReporter").then(function(progressService){
-								var result = [];
-								result.Severity = "Ok";
-								result.Message = "OK";
-								progressService.setProgressResult(result);
-							});
-						} else {
-							serviceRegistry.getService("IStatusReporter").then(function(progressService){
-								var result = [];
-								result.Severity = "Warning";
-								result.Message = "Go to Git Status page to merge unresolved conflicts";
-								progressService.setProgressResult(result);
-							});
-						}
+					gitService.doMerge(item.HeadLocation, item.Id).then(function(result){
+						serviceRegistry.getService("IStatusReporter").then(function(progressService){
+							var display = [];
+							
+							if (result.jsonData.Result == "FAST_FORWARD" || result.jsonData.Result == "ALREADY_UP_TO_DATE"){
+								dojo.query(".treeTableRow").forEach(function(node, i) {
+									dojo.toggleClass(node, "incomingCommitsdRow", false);
+								});
+								display.Severity = "Ok";
+								display.HTML = false;
+								display.Message = result.jsonData.Result;
+							}
+							else{
+								var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
+								
+								display.Severity = "Warning";
+								display.HTML = true;
+								display.Message = "<span>" + result.jsonData.Result
+									+ ". Go to <a class=\"pageActions\" href=\"/git-status.html#" 
+									+ statusLocation +"\">Git Status page</a>.<span>";
+							}
+								
+							progressService.setProgressResult(display);
+						});
+					}, function (error) {
+						serviceRegistry.getService("IStatusReporter").then(function(progressService){
+							var display = [];
+							
+							var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
+							
+							display.Severity = "Error";
+							display.HTML = true;
+							display.Message = "<span>" + dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage
+							+ ". Go to <a class=\"pageActions\" href=\"/git-status.html#" 
+							+ statusLocation +"\">Git Status page</a>.<span>";
+							
+							progressService.setProgressResult(display);
+						});
 					});
 				});
 			},

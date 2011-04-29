@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- standard scripts -->
+	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<!-- ^temporary^ - will remove this dependency for the test framework-->
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>	
+	<script type="text/javascript" src="../../js/assert.js"></script>
+	<script type="text/javascript" src="../../js/test.js"></script>
+	<script type="text/javascript" src="../../js/plugin.js"></script>
+
+<!-- JavaScript files containing the tests and their dependencies -->
+	<script type="text/javascript" src="/editor/js/model.js"></script>
+	<script type="text/javascript" src="/editor/js/editor.js"></script>
+	<script type="text/javascript" src="../../js/styler/TextMateStyler.js"></script>
+	<script type="text/javascript" src="testGrammars.js"></script>
+	<script type="text/javascript" src="testcase.js"></script>
+
+<!-- tests to be run -->
+	<script type="text/javascript">
+	window.onload = function() {
+		orion.Test.run(testcase);
+	};
+	</script>
+	<title>TEST: TextMateStyler</title>
+</head>
+<body>
+	<div style="padding-bottom:1em;">This file runs tests for the TextMate styler.</div>
+	
+	<div id="editorDiv"></div>
+</body>
+</html>
