@@ -2682,13 +2682,14 @@ eclipse.Editor = (function() {
 			}
 				
 			/*
-			* Feature in IE/Chrome: prevent ctrl+'u' and ctrl+'i' from applying styles to the text.
+			* Feature in IE/Chrome: prevent ctrl+'u', ctrl+'i', and ctrl+'b' from applying styles to the text.
 			*
 			* Note that Chrome applies the styles on the Mac with Ctrl instead of Cmd.
 			*/
 			var isMacChrome = isMac && isChrome;
 			bindings.push({name: null, keyBinding: new KeyBinding('u', !isMacChrome, false, false, isMacChrome), predefined: true});
 			bindings.push({name: null, keyBinding: new KeyBinding('i', !isMacChrome, false, false, isMacChrome), predefined: true});
+			bindings.push({name: null, keyBinding: new KeyBinding('b', !isMacChrome, false, false, isMacChrome), predefined: true});
 
 			if (isFirefox) {
 				bindings.push({name: "copy", keyBinding: new KeyBinding(45, true), predefined: true});
