@@ -158,7 +158,7 @@ eclipse.StatusReportingService.prototype = {
 			//clear the progress message
 			that.setProgressMessage("");
 			// if there is a result, show it.
-			if (result.Result) {
+			if (result && result.Result) {
 				that.setProgressResult(result.Result);
 			}
 			//return the final result so it is available to caller's deferred chain
