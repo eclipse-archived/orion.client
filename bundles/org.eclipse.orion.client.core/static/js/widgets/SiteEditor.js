@@ -65,7 +65,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	 * @param {Array} mappings The Mappings field of a site configuration
 	 */
 	setMappings: function(mappings) {
-		// Hang onto the variable; will be mutated as user makes changes to grid store
+		// Hang onto mappings object; will be mutated as user makes changes to grid store
 		this._mappings = mappings;
 		this.setStore(this._createGridStore(mappings));
 	},
@@ -88,7 +88,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 			}
 		});
 		dojo.connect(store, "setValue", store, function() {
-			// Save whenever user edits an attribute
+			// Save store whenever user edits an attribute
 			this.save();
 		});
 		store._saveEverything = dojo.hitch(this, function(saveCompleteCallback, saveFailedCallback, updatedContentString) {
@@ -255,7 +255,6 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.siteConfigNameLabelText = "Name:";
 		this.mappingsLabelText = "Mappings:";
 		this.hostHintLabelText = "Hostname hint:";
-		this.workspaceLabelText = "Workspace:";
 		this.addMappingButtonText = "Add&#8230;";
 	},
 	
@@ -300,7 +299,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	},
 	
 	/**
-	 * this._workspaceToChildren must be resolved before this is called
+	 * this._workspaceToChildren must be resolved before this is called, and site must be loaded.
 	 * @param workspaceToChildrenMap Maps {String} workspaceId to {Array} children
 	 * @param items {Array|Object}
 	 * @param userData
@@ -308,7 +307,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	 */
 	_makeAddMenuChoices: function(workspaceToChildrenMap, items, userData) {
 		items = dojo.isArray(items) ? items[0] : items;
-		var workspaceId = this.workspace.get("value");
+		var workspaceId = this.getSiteConfiguration().Workspace;
 		var projects = workspaceToChildrenMap[workspaceId];
 		
 		/**
@@ -326,14 +325,14 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 			editor.mappings._addMapping("/mountPoint", "http://someurl");
 		};
 		
-		var choices = [];
-		for (var i=0; i < projects.length; i++) {
-			var project = projects[i];
-			choices.push({
-				name: "/" + project.Name,
-				path: eclipse.sites.util.makeRelativeFilePath(project.Location),
-				callback: callback});
-		}
+		var choices = dojo.map(projects, function(project) {
+				return {
+					name: "/" + project.Name,
+					path: eclipse.sites.util.makeRelativeFilePath(project.Location),
+					callback: callback
+				};
+			});
+		
 		if (projects.length > 0) {
 			choices.push({}); // Separator
 		}
@@ -375,18 +374,6 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.mappings.setMappings(this._siteConfiguration.Mappings);
 		this.mappings.startup();
 		
-		var editor = this;
-		dojo.when(editor._workspaces, function(workspaces) {
-			// Workspaces are available so refresh that widget
-			var options = dojo.map(workspaces, function(workspace) {
-				return {
-					label: workspace.Name,
-					value: workspace.Id,
-					selected: workspace.Id === editor._siteConfiguration.Workspace };});
-			editor.workspace.set("options", options);
-			editor.workspace._loadChildren();
-		});
-		
 		this._attachListeners(this._siteConfiguration);
 	},
 	
@@ -411,7 +398,6 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		
 		bindText(this.name, "Name");
 		bindText(this.hostHint, "HostHint");
-		bindText(this.workspace, "Workspace");
 	},
 	
 	_detachListeners: function() {
