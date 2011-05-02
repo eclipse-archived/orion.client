@@ -14,21 +14,18 @@
 .commandLink {
 	margin-left: 4px;
 	margin-right: 4px;
-	color: #6d6d6d;
 	cursor: pointer;
 }
 
 .commandLink:visited {
 	margin-left: 4px;
 	margin-right: 4px;
-	color: #6d6d6d;
 	cursor: pointer;
 }
 
 .commandLink:hover {
 	margin-left: 4px;
 	margin-right: 4px;
-	color: #6d6d6d;
 	cursor: hand;
 	text-decoration: underline;
 }

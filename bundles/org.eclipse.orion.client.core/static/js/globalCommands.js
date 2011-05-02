@@ -30,8 +30,8 @@ var topHTMLFragment =
 			'<span class="statuspane" id="statusPane"></span>' +
 		'</td>' + 
 		'<td class="rightGlobalToolbar">' +
-			'<span id="primaryNav"></span>' +
-			'<span id="globalActions"></span>' +
+			'<span id="primaryNav" class="globalActions"></span>' +
+			'<span id="globalActions" class="globalActions"></span>' +
 			'<input type="search" id="search" class="searchbox">' +
 			'<span class="bannerSeparator">|</span>' +
 			'<span id="userInfo" class="statuspane"></span>' +
@@ -75,6 +75,7 @@ eclipse.globalCommandUtils.generateUserInfo = function(userName, userStatusText)
 	// add the logout button to the toolbar if available
 	var userInfo = dojo.byId("userInfo");
 	if (userInfo) {
+		dojo.addClass(userInfo, "globalActions");
 		var userMenu = dijit.byId("userMenu");
 		if (userMenu) {
 			userMenu.destroy();

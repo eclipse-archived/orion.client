@@ -74,6 +74,21 @@ a:hover {
 	border-bottom: 1px dotted;
 }
 
+.globalActions {
+	color: #6d6d6d;
+	cursor: pointer;
+}
+
+.globalActions a {
+	color: #6d6d6d;
+}
+
+.globalActions a:hover {
+	color: #6d6d6d;
+	cursor: hand;
+	text-decoration: underline;
+}
+
 .pageActions {
 	color: #ffffff;
 	cursor: pointer;
@@ -87,6 +102,10 @@ a:hover {
 .pageActions:hover {
 	color: #ffffff;
 	cursor: hand;
+}
+
+.pageActions a {
+	color: #ffffff;
 }
 
 .pageActions a:hover {
