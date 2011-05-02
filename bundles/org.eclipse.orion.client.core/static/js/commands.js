@@ -449,32 +449,36 @@ eclipse.Command = (function() {
 					});
 				}
 			}
-			if (this._deviceSupportsHover) {
-				image.src = "/images/none.png";
-				dojo.connect(image, "onmouseover", this, function() {
-					image.src = this.image;
-				});
-				dojo.connect(image, "onmouseout", this, function() {
+			if (this.hasImage()) {
+				if (this._deviceSupportsHover) {
 					image.src = "/images/none.png";
-				});	
-			} else {
-				image.src = this.image;	
-				dojo.style(image, "opacity", "0.7");
-				dojo.connect(image, "onmouseover", this, function() {
-					dojo.style(image, "opacity", "1");
-				});
-				dojo.connect(image, "onmouseout", this, function() {
-					image.src = this.image;
+					dojo.connect(image, "onmouseover", this, function() {
+						image.src = this.image;
+					});
+					dojo.connect(image, "onmouseout", this, function() {
+						image.src = "/images/none.png";
+					});	
+				} else {
+					image.src = this.image;	
 					dojo.style(image, "opacity", "0.7");
-				});
+					dojo.connect(image, "onmouseover", this, function() {
+						dojo.style(image, "opacity", "1");
+					});
+					dojo.connect(image, "onmouseout", this, function() {
+						image.src = this.image;
+						dojo.style(image, "opacity", "0.7");
+					});
+				}
+				dojo.addClass(image, 'commandImage');
+				if (cssClass) {
+					dojo.addClass(image, cssClass);
+				}			
+				dojo.place(image, link, "last");
 			}
-			dojo.addClass(image, 'commandImage');
 			dojo.addClass(link, 'commandLink');
 			if (cssClass) {
-				dojo.addClass(image, cssClass);
 				dojo.addClass(link, cssClass);
-			}			
-			dojo.place(image, link, "last");
+			}
 			return link;
 		},
 		_asLink: function(items, handler, cssClass) {
