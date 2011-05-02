@@ -33,8 +33,7 @@ eclipse.Searcher = (function() {
 		 * @param {DOMNode} resultsNode Node under which results will be added.
 		 * @param {String} query URI of the query to run.
 		 * @param {String} [excludeFile] URI of a file to exclude from the result listing.
-		 * @param {Boolean} [generateHeadingAndSaveLink] Include a "Save Search" link that will 
-		 *    save the query to the favorites.
+		 * @param {Boolean} [generateHeading] generate a heading for the results
 		 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
 		 * @param {Boolean} [hideSummaries] Don't show the summary of what matched beside each result.
 		 */
@@ -96,7 +95,7 @@ eclipse.Searcher = (function() {
 			}
 			return div;
 		},
-		showSearchResult: function(resultsNode, query, excludeFile, generateHeadingAndSaveLink, onResultReady, hideSummaries, jsonData) {
+		showSearchResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
 			// WORKAROUND - window.location.hostname is returning "http://localhost:8080/localhost" in FF 3.6.10 
 			// surely there is a better way
 			var nonhash= window.location.href.split('#')[0];
@@ -115,25 +114,11 @@ eclipse.Searcher = (function() {
 						var col;
 						if (!foundValidHit) {
 							foundValidHit = true;
-							if (generateHeadingAndSaveLink) {
-								dojo.style(table, "width", "600px");
-								
+							if (generateHeading) {
 								var favoriteName = token || query;
 								var heading = table.insertRow(0);
 								col = heading.insertCell(0);
 								col.innerHTML = "<h2>Search Results</h2>";
-								col = heading.insertCell(1);
-								col.align="right";
-								var saveLink = document.createElement('a');
-								saveLink.href = window.location;
-								saveLink.onclick = (function(faveName) {
-									return function(event) {
-										that.saveSearch(faveName, query);
-										return false;
-									};
-								})(favoriteName);
-								saveLink.innerHTML = "Save Search";
-								col.appendChild(saveLink);
 							}
 						}
 						var row = table.insertRow(-1);

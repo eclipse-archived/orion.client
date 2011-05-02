@@ -28,12 +28,12 @@ dojo.addOnLoad(function(){
 		children:[]
 	};
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-	var searchResultsGenerator = new eclipse.SearchResultsGenerator(serviceRegistry, searcher, "results");
+	var searchResultsGenerator = new eclipse.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, searcher);
-
 	searchResultsGenerator.loadResults(dojo.hash());
-	
+	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, searcher, "pageActions");
+
 	//every time the user manually changes the hash, we need to load the workspace with that name
 	dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
 	   searchResultsGenerator.loadResults(dojo.hash());
