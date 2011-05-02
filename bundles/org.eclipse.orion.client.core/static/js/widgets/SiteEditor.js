@@ -32,7 +32,7 @@ dojo.require("dojox.grid.cells");
 dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	
 	/**
-	 * {Array} of Mappings. The model object being edited by this grid.
+	 * @type {Array} The model object being edited by this grid.
 	 */
 	_mappings: null,
 	
@@ -51,7 +51,8 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 			visibleWhen: function(item) {
 				return true;
 			},
-			callback: /** @this {widgets.MappingsGrid} */ function(item) {
+			callback: function(item) {
+				// "this" is {widgets.MappingsGrid}
 				this.get("store").deleteItem(item);
 				this.get("store").save();
 				this.render();
@@ -61,7 +62,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	},
 	
 	/**
-	 * @param mappings The Mappings field of a site configuration
+	 * @param {Array} mappings The Mappings field of a site configuration
 	 */
 	setMappings: function(mappings) {
 		// Hang onto the variable; will be mutated as user makes changes to grid store
@@ -75,7 +76,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	},
 	
 	/**
-	 * @param mappings {Array}
+	 * @param {Array} mappings
 	 * @returns {dojo.data.ItemFileWriteStore} A store which will power the grid.
 	 */
 	_createGridStore: function(mappings) {
@@ -97,7 +98,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 			dojo.forEach(content.items, dojo.hitch(this, function(item) {
 				this._mappings.push(this._createMappingObject(item.Source, item.Target));
 			}));
-			console.debug("Set Mappings to " + dojo.toJson(this._mappings));
+//			console.debug("Set Mappings to " + dojo.toJson(this._mappings));
 			saveCompleteCallback();
 		});
 		return store;
@@ -119,8 +120,8 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	postCreate: function() {
 		this.inherited(arguments);
 		var structure = [
-		 		{field: "_item", name: "Workspace path", editable: false,
-					width: "16em", formatter: dojo.hitch(this, this._workspacePathFormatter)},
+				{field: "_item", name: "Workspace path", editable: false,
+						width: "16em", formatter: dojo.hitch(this, this._workspacePathFormatter)},
 				{field: "Target", name: "Target", editable: true, commitOnBlur: true,
 						width: "16em", cellClasses: "pathCell"},
 				{field: "Source", name: "Mount at", editable: true, commitOnBlur: true,
@@ -145,10 +146,9 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	},
 	
 	/**
-	 * If the mapping Target looks like a workspace path, this checks that the folder
-	 * (first segment) exists, and puts a link (or an error message) in the column.
-	 * @returns String | dojo.Deferred (which will do the formatting as soon as 
-	 * workspace children are loaded)
+	 * If the mapping Target looks like a workspace path, this checks that the folder (first segment)
+	 * exists, and puts a link (or an error message) in the column.
+	 * @returns {String | dojo.Deferred}
 	 */
 	_workspacePathFormatter: function(item) {
 		// Returns text node content
@@ -206,8 +206,8 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
  * @param {eclipse.FileClient} options.fileClient
  * @param {eclipse.SiteService} options.siteService
  * @param {eclipse.CommandService} options.commandService
- * @param {String} [options.location] Optional URL of a site configuration to load & edit 
- * immediately after widget is created.
+ * @param {String} [options.location] Optional URL of a site configuration to load in editor
+ * upon creation.
  */
 dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, dijit._Templated], {
 	widgetsInTemplate: true,
@@ -234,9 +234,11 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		if (!this.options.fileClient) { throw new Error("options.fileClient is required"); }
 		if (!this.options.siteService) { throw new Error("options.siteService is required"); }
 		if (!this.options.commandService) { throw new Error("options.commandService is required"); }
+		if (!this.options.commandService) { throw new Error("options.statusService is required"); }
 		this._fileClient = this.options.fileClient;
 		this._siteService = this.options.siteService;
 		this._commandService = this.options.commandService;
+		this._statusService = this.options.statusService;
 		
 		// Start loading workspaces right away
 		this._workspaces = new dojo.Deferred();
@@ -277,7 +279,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.mappings.setEditor(this);
 		
 		// dijit.form.Form doesn't work in dojoAttachPoint for some reason
-		dojo.connect(this.saveButton, "onClick", dijit.byId("siteForm"), function() { this.onSubmit(arguments); });;
+		dojo.connect(this.saveButton, "onClick", dijit.byId("siteForm"), function() { this.onSubmit(arguments); });
 		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.onSubmit);
 		
 		dojo.when(this._workspaceToChildren, dojo.hitch(this, function(workspaceToChildrenMap) {
@@ -310,16 +312,16 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		var projects = workspaceToChildrenMap[workspaceId];
 		
 		/**
-		 * @this An object from the choices array: {name, path, callback}
+		 * @this An object from the choices array with shape {name:String, path:String, callback:Function}
 		 * @param item
 		 */
 		var editor = this;
 		var callback = function(item) {
 			editor.mappings._addMapping("/mountPoint", this.path);
 		};
-		var addOther = function() {
-			editor.mappings._addMapping("/mountPoint", "/FolderId/somepath");
-		};
+//		var addOther = function() {
+//			editor.mappings._addMapping("/mountPoint", "/FolderId/somepath");
+//		};
 		var addUrl = function() {
 			editor.mappings._addMapping("/mountPoint", "http://someurl");
 		};
@@ -350,13 +352,11 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	 * @return {dojo.Deferred} A deferred, resolved when the editor has loaded & refreshed itself.
 	 */
 	load: function(location) {
-		this._busy("Loading...");
 		var deferred = new dojo.Deferred();
-		// TODO errback for the deferred(s)
+		this._busyWhile(deferred, "Loading...");
 		this._siteService.loadSiteConfiguration(location).then(
 			dojo.hitch(this, function(siteConfig) {
 				this._setSiteConfiguration(siteConfig);
-				this._done("");
 				deferred.callback(siteConfig);
 			}),
 			function(error) {
@@ -404,7 +404,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 				var value = widget.get("value");
 				site[modelField] = value;
 				
-				console.debug("Change " + modelField + " to " + value);
+//				console.debug("Change " + modelField + " to " + value);
 			});
 			editor._modelListeners.push(handle);
 		}
@@ -420,7 +420,6 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 				dojo.disconnect(this._modelListeners[i]);
 			}
 		}
-		
 		// Detach grid
 	},
 	
@@ -482,48 +481,52 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	onSubmit: function(/** Event */ e) {
 		var form = dijit.byId("siteForm");
 		if (form.isValid()) {
-			this._busy("Saving...");
-			
 			var editor = this;
 			var siteConfig = editor._siteConfiguration;
-			this._siteService.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
+			var deferred = this._siteService.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
 					function(updatedSiteConfig) {
 						editor._setSiteConfiguration(updatedSiteConfig);
-						editor._done("Saved.");
+						return { Result: "Saved " + updatedSiteConfig.Name + "." };
 					});
+			this._busyWhile(deferred, "Saving...");
 			return true;
 		} else {
-			//alert("invalid");
 			return false;
 		}
 	},
 	
-	_busy: function(msg) {
+	_busyWhile: function(deferred, msg) {
 		dojo.forEach(this.getDescendants(), function(widget) {
 			widget.set("disabled", true);
 		});
-		this.onMessage(msg);
+		deferred.then(dojo.hitch(this, this._onSuccess), dojo.hitch(this, this._onError));
+		this._statusService.showWhile(deferred, msg);
 	},
 	
-	_done: function(msg) {
+	_onSuccess: function(deferred) {
 		dojo.forEach(this.getDescendants(), function(widget) {
 			widget.set("disabled", false);
 		});
-		this.onMessage(msg);
+		this.onSuccess(deferred);
+	},
+	
+	_onError: function(deferred) {
+		this.saveButton.set("disabled", false);
+		this._statusService.setErrorMessage(deferred);
+		this.onError(deferred);
 	},
 	
 	/**
-	 * Clients can override or dojo.connect() to this function to receive notifications about 
-	 * server calls that failed.
-	 * TODO
+	 * Clients can dojo.connect() to this function to receive notifications about server calls that succeeded.
+	 * @param {dojo.Deferred} deferred The deferred that succeeded.
 	 */
-	onError: function(error) {
+	onSuccess: function(deferred) {
 	},
-	
+		
 	/**
-	 * Clients can override or dojo.connect() to this function to receive notifications about
-	 * server calls that succeeded.
+	 * Clients can dojo.connect() to this function to receive notifications about server called that failed.
+	 * @param {dojo.Deferred} deferred The deferred that errback'd.
 	 */
-	onMessage: function(message) {
+	onError: function(deferred) {
 	}
 });
