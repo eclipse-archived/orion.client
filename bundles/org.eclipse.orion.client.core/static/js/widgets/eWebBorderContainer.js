@@ -16,19 +16,18 @@ dojo.require("dijit.layout.BorderContainer");
 dojo.require("dojox.layout.ToggleSplitter");	 
 dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 	_splitterClass : "widgets.eWebSplitter",
-	
-	_leftPaneWidth: 0,
-	
-	_calcLeftPaneW: function(rightPane){
+		
+	getPreferredLeftPaneWidth: function(){
+		// if we haven't remembered a width in the past, compute one that is 1/4 of the right pane width.
 		var leftPaneW = this.getSizeCookie();
-		if(leftPaneW < 50){
-			var originalW = rightPane.style.width;
-			var originalWint = parseInt(originalW.replace("px", ""), 10);
-			this._leftPaneWidth = originalWint*0.25;
+		var prefWidth;
+		if(leftPaneW <= 0){
+			var rightWidth = dojo.position(this.getRightPane()).w;
+			prefWidth = rightWidth * 0.25;
 		} else {
-			this._leftPaneWidth = leftPaneW;
+			prefWidth = leftPaneW;
 		}
-		return this._leftPaneWidth;
+		return prefWidth;
 	},
 	
 	isLeftPaneOpen: function(){
@@ -52,22 +51,39 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 		}
 	},
 	
+	getRightPane: function() {
+		if (this._center) {
+			return this._center;
+		}
+		var children = this.getChildren();
+		for (var i=0; i<children.length; i++) {
+			if (children[i].region && children[i].region === "center") {
+				this._center = children[i].domNode;
+				return this._center;
+			}
+		}
+	},
+	
+	
+	
 	getSizeCookie: function(){
 		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
-		if(splitter){
+		if (splitter){
 			return splitter.getSizeCookie();
 		}
 		return 0;
 	},
+	
 	setSizeCookie: function(value){
 		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
-		if(splitter){
+		if (splitter){
 			return splitter.setSizeCookie(value);
 		}
 	},
+	
 	toggleLeftPaneState: function(){
 		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
-		if(splitter){
+		if (splitter){
 			splitter.toggleLeftPaneState();
 		}
 	},
@@ -75,8 +91,8 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 	setToggleCallback: function(toggleCallback) {
 		this.toggleCallback = toggleCallback;
 	},
+	
 	toggle: function() {
-		var targetW = "";
 		// find left and center and store so we only do this once.
 		if (!this._left || !this._center) {
 			var children = this.getChildren();
@@ -90,17 +106,13 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 		}
 		var leftPane = this._left;
 		var rightPane = this._center;
-		var originalW = leftPane.style.width || "";
-		var originalWint = parseInt(originalW.replace("px", ""), 10);
+		var originalW = dojo.position(leftPane).w;
 		var isLeftOpen = this.isLeftPaneOpen();
 		var targetWint;
 		if(isLeftOpen){
-			this._leftPaneWidth = originalWint;
 			targetWint = 0;
-
 		} else {
-			this._calcLeftPaneW(rightPane);
-			targetWint = this._leftPaneWidth;
+			targetWint = this.getPreferredLeftPaneWidth();
 		}
 				
 		if(!isLeftOpen) {
@@ -114,8 +126,8 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 			duration: 300,
 			curve: [1, 100],
 			onAnimate: dojo.hitch(this, function(x){
-				var deltaW = (targetWint - originalWint)*x/100;
-				var curWidth = originalWint + deltaW;
+				var deltaW = (targetWint - originalW)*x/100;
+				var curWidth = originalW + deltaW;
 				leftPane.style.width = curWidth + "px";
 				leftPane.style.overflow = "hidden";
 				rightPane.style.overflow = "hidden";
@@ -153,16 +165,19 @@ dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 
 	startup: function(){
 		this.inherited(arguments);
-		if(this.container.persist){
+		if (this.container.persist){ 
 			// restore old state
 			var persistOpenState = dojo.cookie(this._openStateCookieName);
-			if(!persistOpenState || persistOpenState === "false" ){
-				this.container.getLeftPane().style.width = "0px";
-				this.set("open", false);
-				this._handleOnChange();
-			} else {
+			if (persistOpenState) {
 				this.container.getLeftPane().style.width = this.getSizeCookie() + "px";
-			}
+			} else {
+				this.set("open", true);
+				this._handleOnChange();
+			} 
+		} else {
+			// start out in an open state
+			this.set("open", true);
+			this._handleOnChange();		
 		}
 		return this;
 	},
