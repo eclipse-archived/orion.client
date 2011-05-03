@@ -373,6 +373,15 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.hostHint.set("value", this._siteConfiguration.HostHint);
 		this.mappings.setMappings(this._siteConfiguration.Mappings);
 		this.mappings.startup();
+		var hostStatus = this._siteConfiguration.HostingStatus;
+		if (hostStatus && hostStatus.Status === "started") {
+			dojo.style(this.siteStartedWarning, {display: "table-row"});
+			var warnName = this.siteStartedWarning_siteName;
+			var textProperty = typeof(warnName.innerText) === "undefined" ? "textContent" : "innerText";
+			warnName[textProperty] = this._siteConfiguration.Name;
+		} else {
+			dojo.style(this.siteStartedWarning, {display: "none"});
+		}
 		
 		this._attachListeners(this._siteConfiguration);
 	},
@@ -469,10 +478,13 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		if (form.isValid()) {
 			var editor = this;
 			var siteConfig = editor._siteConfiguration;
+			// Omit the HostingStatus field before save since it's likely to be updated from
+			// the sites page, and we don't want to overwrite
+			delete siteConfig.HostingStatus;
 			var deferred = this._siteService.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
 					function(updatedSiteConfig) {
 						editor._setSiteConfiguration(updatedSiteConfig);
-						return { Result: "Saved " + updatedSiteConfig.Name + "." };
+						return { Result: "Saved \"" + updatedSiteConfig.Name + "\"." };
 					});
 			this._busyWhile(deferred, "Saving...");
 			return true;
