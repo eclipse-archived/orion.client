@@ -141,12 +141,11 @@ dojo.addOnLoad(function(){
 						var name = null;
 						if (location) {
 							if (bufferedSelection[i].parent && bufferedSelection[i].parent.Location === explorer.treeRoot.Location) {
-								name = "";
-								var indexOfSlash = location.lastIndexOf("/");
-								if (indexOfSlash !== -1) {
-									name = location.substring(indexOfSlash + 1);
+								name = window.prompt("Enter a new name for '" + bufferedSelection[i].Name+ "'", "Copy of " + bufferedSelection[i].Name);
+								// user cancelled?  don't copy this one
+								if (!name) {
+									location = null;
 								}
-								name = window.prompt("Enter a new name for '" + name + "'", "Copy of " + name);
 							}
 							if (location) {
 								fileClient.copyFile(location, explorer.treeRoot.Location, name).then(dojo.hitch(explorer, function() {
