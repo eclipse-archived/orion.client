@@ -237,22 +237,23 @@ dojo.addOnLoad(function(){
 			},
 			
 			hashChanged: function(editorContainer) {	
+				if (this.shouldGoToURI(editorContainer, dojo.hash())) {
+					selection.setSelections(dojo.hash());
+				} else {
+					// we are staying at our previous location
+					dojo.hash(this.lastFilePath);
+				}
+			},
+			
+			shouldGoToURI: function(editorContainer, fileURI) {
 				if (editorContainer.isDirty()) {
 					var oldStripped = eclipse.util.getPositionInfo(this.lastFilePath).filePath;
-					var newStripped = eclipse.util.getPositionInfo(dojo.hash()).filePath;
+					var newStripped = eclipse.util.getPositionInfo(fileURI).filePath;
 					if (oldStripped !== newStripped) {
-						var leave = window.confirm("There are unsaved changes.  Do you still want to navigate away?");
-						if (leave) {
-							this.lastFilePath = dojo.hash();
-							selection.setSelections(dojo.hash());
-						} 
-					} else {
-						// same uri, but different parameters (ie, lines, chars, etc.)
-						selection.setSelections(dojo.hash());
+						return window.confirm("There are unsaved changes.  Do you still want to navigate away?");
 					}
-				} else {
-					selection.setSelections(dojo.hash());
 				}
+				return true;
 			}
 		};	
 		
@@ -354,7 +355,9 @@ dojo.addOnLoad(function(){
 		// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
 		serviceRegistry.getService("Selection").then(function(service) {
 			service.addEventListener("selectionChanged", function(fileURI) {
-				inputManager.setInput(fileURI, editorContainer);
+				if (inputManager.shouldGoToURI(editorContainer, fileURI)) {
+					inputManager.setInput(fileURI, editorContainer);
+				} 
 			});
 		});
 	
@@ -369,7 +372,7 @@ dojo.addOnLoad(function(){
 		var syntaxChecker = new eclipse.SyntaxChecker(serviceRegistry, editorContainer);
 		
 		// Create outliner "gadget"
-		new eclipse.Outliner({parent: outlineDomNode, serviceRegistry: serviceRegistry});	
+		new eclipse.Outliner({parent: outlineDomNode, serviceRegistry: serviceRegistry, selectionService: selection});	
 		
 		window.onbeforeunload = function() {
 			if (editorContainer.isDirty()) {

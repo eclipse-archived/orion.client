@@ -7,7 +7,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- /*global eclipse*/
+ /*global eclipse:true dojo document window*/
  var eclipse = eclipse || {};
  
  /**
@@ -15,7 +15,9 @@
  * @name eclipse.Outliner
  * @class An Outliner provides an itemized overview of a resource and acts as a selection
  * provider on that resource.
- * @param {Object} options The options object which must specify the parent and serviceRegistry
+ * @param {Object} options The options object which must specify the parent, serviceRegistry, and an optional selectionService.
+ *	specifying a selectionService indicates that the selection service should be notified on outline selection rather than using
+ *	anchor tag hrefs.
  */
 eclipse.Outliner = function(options) {
 	this._init(options);	
@@ -30,6 +32,7 @@ eclipse.Outliner.prototype = {
 		if (!parent) { throw "no parent"; }
 		if (!options.serviceRegistry) {throw "no service registry"; }
 		this._parent = parent;
+		this._selectionService = options.selectionService;
 		var outliner = this;
 		options.serviceRegistry.getService("IOutlineProvider").then(function(service) {
 			service.addEventListener("resourceChanged", function(resource) {
@@ -38,16 +41,42 @@ eclipse.Outliner.prototype = {
 		});
 		
 	},
+	
+	_createLink: function(name, href, parentNode) {
+		var link = dojo.create("a", null, parentNode, "last");
+		// if there is no selection service, we rely on normal link following
+		if (!this._selectionService) {
+			link.href = href;
+		} else {
+			dojo.style(link, "cursor", "pointer");
+		}
+		dojo.addClass(link, "navlinkonpage");
+		dojo.place(document.createTextNode(name), link);
+		dojo.create("br", null, parentNode, "last");
+		// if a selection service has been specified, we will use it for link selection.
+		// Otherwise we assume following the href in the anchor tag is enough.
+		if (this._selectionService) {
+			var selectionService = this._selectionService;
+			var url = href;
+			dojo.connect(link, "onclick", link, function(event) {
+				if (eclipse.util.openInNewWindow(event)) {
+					eclipse.util.followLink(url, event);
+				} else {
+					selectionService.setSelections(url);
+				}
+			});
+		}
+	},
 	// this is closely tied to the jslint format right now
 	render: function(resource) {
 		if (resource.title && resource.title.indexOf(".js") === resource.title.length - 3) {
 			var items = dojo.create("div");
-			functions = resource.data.functions;
-			for (k in functions) {
+			var functions = resource.data.functions;
+			for (var k in functions) {
 				var f = functions[k];
 				var pLength = f.param ? f.param.length : 0;
 				var name = f.name;
-			var isAnonymousFunction = false;
+				var isAnonymousFunction = false;
 				if (name[0]==='"') {
 					isAnonymousFunction = true;
 					f.name = name = name.substring(1, name.length-1);
@@ -72,10 +101,7 @@ eclipse.Outliner.prototype = {
 				}
 				var nonHash = window.location.href.split('#')[0];
 				var href = nonHash +  eclipse.util.hashFromPosition(resource.title, null, null, f.line, null, null, f.name);
-				var link = dojo.create("a", {href: href}, items, "last");
-				dojo.addClass(link, "navlinkonpage");
-				dojo.place(document.createTextNode(name), link);
-				dojo.create("br", null, items, "last");
+				this._createLink(name, href, items);
 			}
 			dojo.place(items, this._parent, "only");
 		} else if (resource.title.indexOf(".html") === resource.title.length - 5) {
@@ -97,10 +123,7 @@ eclipse.Outliner.prototype = {
 				}
 				var nonHash = window.location.href.split('#')[0];
 				var href = nonHash +  eclipse.util.hashFromPosition(resource.title, start, end);
-				var link = dojo.create("a", {href: href}, items, "last");
-				dojo.addClass(link, "navlinkonpage");
-				dojo.place(document.createTextNode(name), link);
-				dojo.create("br", null, items, "last");
+				this._createLink(name, href, items);
 			}
 			dojo.place(items, this._parent, "only");
 		}
