@@ -11,6 +11,8 @@
 /*global dojo eclipse:true widgets*/
 /*jslint regexp:false browser:true forin:true*/
 
+dojo.require("dojo.date.locale");
+
 var eclipse = eclipse || {};
 eclipse.FileExplorer = (function() {
 	/**
@@ -174,16 +176,14 @@ eclipse.FileRenderer = (function() {
 		switch(col_no){
 		case 0: 
 			return dojo.create("th", {innerHTML: "<h2>Name</h2>"});
-			break;
 		case 1:
 			return dojo.create("th", {innerHTML: "<h2>Actions</h2>"});
-			break;
 		case 2:
 			return dojo.create("th", {innerHTML: "<h2>Date/Time</h2>"});
-			break;
 		case 3:
-			return dojo.create("th", {innerHTML: "<h2>Size</h2>"});
-			break;
+			var th = dojo.create("th", {innerHTML: "<h2>Size</h2>"});
+			dojo.style(th, "textAlign", "right");
+			return th;
 		};
 	};
 		
@@ -235,13 +235,7 @@ eclipse.FileRenderer = (function() {
 			var dateColumn = document.createElement('td');
 			if (item.LocalTimeStamp) {
 				var fileDate = new Date(item.LocalTimeStamp);
-				var curDate = new Date();
-				var yesterday = new Date().setDate(curDate.getDate() - 1);
-				if (yesterday.valueOf() > fileDate.valueOf()) {
-					dateColumn.innerHTML = fileDate.toLocaleDateString();
-				} else {
-					dateColumn.innerHTML = fileDate.toLocaleTimeString();
-				}
+				dateColumn.innerHTML = dojo.date.locale.format(fileDate);
 			}
 
 			return dateColumn;
@@ -250,17 +244,8 @@ eclipse.FileRenderer = (function() {
 			var sizeColumn = document.createElement('td');
 			if (!item.Directory && typeof item.Length === "number") {
 				var length = parseInt(item.Length, 10),
-					kb = length / 1024,
-					mb = length / 1048576,
-					label = "";
-				if (kb < 1) {
-					label = length + " bytes";
-				} else if (mb < 1) {
-					label = Math.floor(kb * 100)/100 + " KB";
-				} else {
-					label = Math.floor(mb * 100)/100 + " MB";
-				}
-				sizeColumn.innerHTML = label;
+					kb = length / 1024;
+				sizeColumn.innerHTML = dojo.number.format(Math.ceil(kb)) + " KB";
 			}
 			dojo.style(sizeColumn, "textAlign", "right");
 			return sizeColumn;
