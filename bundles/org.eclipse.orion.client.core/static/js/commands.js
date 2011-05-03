@@ -514,33 +514,17 @@ eclipse.Command = (function() {
 				label: this.name,
 				tooltip: this.tooltip
 			});
-			var followLink = function(href, event) {
-				var isMac = window.navigator.platform.indexOf("Mac") !== -1;
-				if (event) {
-					if (isMac) {
-						if (event.metaKey) {
-							window.open(href);
-						} else {
-							window.location = href;
-						}
-					} else if (event.ctrlKey) {
-						window.open(href);
-					} else {
-						window.location = href;
-					}
-				}
-			};
 			if (this.hrefCallback) {
 				var loc = this.hrefCallback.call(handler, items, this.id, parent.id, userData);
 				if (loc) {
 					if (loc.then) {
 						loc.then(dojo.hitch(this, function(l) { 
 							menuitem.set("label", "<a href='"+l+"'>"+this.name+"</a>");
-							menuitem.onClick = function(event) {followLink(l, event);};
+							menuitem.onClick = function(event) {eclipse.util.followLink(l, event);};
 						}));
 					} else {
 						menuitem.set("label", "<a href='"+loc+"'>"+this.name+"</a>");
-						menuitem.onClick = function(event) {followLink(loc, event);};
+						menuitem.onClick = function(event) {eclipse.util.followLink(loc, event);};
 					}
 				}
 			} else if (this.callback) {

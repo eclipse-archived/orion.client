@@ -84,6 +84,19 @@ eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText,
 	}, 0);
 };
 
+eclipse.util.openInNewWindow = function(event) {
+	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
+	return (isMac && event.metaKey) || (!isMac && event.ctrlKey);
+};
+
+eclipse.util.followLink = function(href, event) {
+	if (event && eclipse.util.openInNewWindow(event)) {
+		window.open(href);
+	} else {
+		window.location = href;
+	}
+};
+
 eclipse.util.getPositionInfo = 
 	function(fileString) {
 		var filePath, start, end, line, offset, length;
