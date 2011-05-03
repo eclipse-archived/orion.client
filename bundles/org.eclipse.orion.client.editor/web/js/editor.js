@@ -128,6 +128,7 @@ eclipse.Editor = (function() {
 	var isPad = navigator.userAgent.indexOf("iPad") !== -1;
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
+	var isLinux = navigator.platform.indexOf("Linux") !== -1;
 	var isW3CEvents = typeof window.document.documentElement.addEventListener === "function";
 	var isRangeRects = (!isIE || isIE >= 9) && typeof window.document.createRange().getBoundingClientRect === "function";
 
@@ -1679,12 +1680,12 @@ eclipse.Editor = (function() {
 			* unexpected and causes the editor to only execute an action
 			* just one time. The fix is to ignore the keydown event and 
 			* execute the actions from the keypress handler.
-			* Note: This only happens on the Mac (Firefox).
+			* Note: This only happens on the Mac and Linux (Firefox 3.6).
 			*
 			* Feature in Opera.  Opera sends keypress events even for non-printable
 			* keys.  The fix is to handle actions in keypress instead of keydown.
 			*/
-			if ((isMac && isFirefox) || isOpera) {
+			if (((isMac || isLinux) && isFirefox < 4) || isOpera) {
 				this._keyDownEvent = e;
 				return true;
 			}
@@ -1702,7 +1703,7 @@ eclipse.Editor = (function() {
 		},
 		_handleKeyPress: function (e) {
 			if (!e) { e = window.event; }
-			if ((isMac && isFirefox) || isOpera) {
+			if (((isMac || isLinux) && isFirefox < 4) || isOpera) {
 				if (this._doAction(this._keyDownEvent)) {
 					if (e.preventDefault) { e.preventDefault(); }
 					return false;
@@ -3486,6 +3487,7 @@ eclipse.Editor = (function() {
 			handlers.push({target: resizeNode, type: "resize", handler: function(e) { return self._handleResize(e);}});
 			handlers.push({target: focusNode, type: "blur", handler: function(e) { return self._handleBlur(e);}});
 			handlers.push({target: focusNode, type: "focus", handler: function(e) { return self._handleFocus(e);}});
+			handlers.push({target: editorDiv, type: "scroll", handler: function(e) { return self._handleScroll(e);}});
 			if (isPad) {
 				var touchDiv = this._touchDiv;
 				var textArea = this._textArea;
@@ -3497,7 +3499,6 @@ eclipse.Editor = (function() {
 				handlers.push({target: touchDiv, type: "touchend", handler: function(e) { return self._handleTouchEnd(e); }});
 			} else {
 				var topNode = this._overlayDiv || this._clientDiv;
-				handlers.push({target: editorDiv, type: "scroll", handler: function(e) { return self._handleScroll(e);}});
 				handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return self._handleKeyDown(e);}});
 				handlers.push({target: clientDiv, type: "keypress", handler: function(e) { return self._handleKeyPress(e);}});
 				handlers.push({target: clientDiv, type: "keyup", handler: function(e) { return self._handleKeyUp(e);}});
@@ -3899,26 +3900,23 @@ eclipse.Editor = (function() {
 		},
 		_scrollView: function (pixelX, pixelY) {
 			/*
-			* IE redraws the page when scrollTop is changed. This redraw is not necessary
-			* while scrolling since updatePage() will be called in _handleScroll(). In order
-			* to improve performance, the page is hidden during scroll causing only on redraw
-			* to happen. Note that this approach causes flashing on Firefox.
-			*
-			* This code is intentionally commented. It causes editor to loose focus.
+			* Always set _ensureCaretVisible to false so that the editor does not scroll
+			* to show the caret when scrollView is not called from showCaret().
 			*/
-//			if (isIE) {
-//				this._frameDocument.body.style.visibility = "hidden";
-//			}
+			this._ensureCaretVisible = false;
+			
+			/*
+			* Scrolling is done only by setting the scrollLeft and scrollTop fields in the
+			* editor div. This causes an updatePage from the scroll event. In some browsers 
+			* this event is asynchromous and forcing update page to run synchronously
+			* (by calling doScroll) leads to redraw problems. On Chrome 11 for 
+			* Windows, the editor stops redrawing at times when holding PageDown/PageUp key.
+			* On Firefox 4 for Linux, the editor redraws the first page when holding 
+			* PageDown/PageUp key, but it will not redraw again until the key is released.
+			*/
 			var editorDiv = this._editorDiv;
-			var newX = editorDiv.scrollLeft + pixelX;
-			if (pixelX) { editorDiv.scrollLeft = newX; }
-			var newY = editorDiv.scrollTop + pixelY;
-			if (pixelY) { editorDiv.scrollTop = newY; }
-			this._doScroll({x: newX, y: newY});
-//			if (isIE) {
-//				this._frameDocument.body.style.visibility = "visible";
-//				this.focus();
-//			}
+			if (pixelX) { editorDiv.scrollLeft += pixelX; }
+			if (pixelY) { editorDiv.scrollTop += pixelY; }
 		},
 		_setClipboardText: function (text, event) {
 			if (this._frameWindow.clipboardData) {
@@ -4308,8 +4306,16 @@ eclipse.Editor = (function() {
 
 			if (pixelX !== 0 || pixelY !== 0) {
 				this._scrollView (pixelX, pixelY);
+				/*
+				* When the editor scrolls it is possible that one of the scrollbars can show over the caret.
+				* Depending on the browser scrolling can be synchronous (Safari), in which case the change 
+				* can be detected before showCaret() returns. When scrolling is asynchronous (most browsers), 
+				* the detection is done during the next update page.
+				*/
 				if (clientHeight !== this._getClientHeight() || clientWidth !== this._getClientWidth()) {
 					this._showCaret();
+				} else {
+					this._ensureCaretVisible = true;
 				}
 				return true;
 			}
@@ -4492,19 +4498,15 @@ eclipse.Editor = (function() {
 			if (!isIE || isIE >= 9) { width += editorPad.right; }
 			scrollDiv.style.width = width + "px";
 
-			/*
-			* Get client height after both scrollbars are visible and updatePage again to recalculate top and bottom indices.
-			* 
-			* Note that updateDOMSelection() has to be called on IE before getting the new client height because it
-			* forces the client area to be recomputed.
-			*/
-			if (!isPad) {
-				this._updateDOMSelection();
-			}
-			if (clientHeight !== this._getClientHeight()) {
-				this._updatePage();
-				return;
-			}
+//			/*
+//			* Get client height after both scrollbars are visible and updatePage again to recalculate top and bottom indices.
+//			* 
+//			* Note that updateDOMSelection() has to be called on IE before getting the new client height because it
+//			* forces the client area to be recomputed.
+//			*/
+//			if (!isPad) {
+//				this._updateDOMSelection();
+//			}
 			// Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset.
 			var scroll = this._getScroll();
 			var left = scroll.x;
@@ -4546,9 +4548,25 @@ eclipse.Editor = (function() {
 			_updateRulerSize(this._leftDiv);
 			_updateRulerSize(this._rightDiv);
 			if (isPad) {
-				this._updateDOMSelection();
 				var self = this;
 				setTimeout(function() {self._resizeTouchDiv();}, 0);
+			}
+			this._updateDOMSelection();
+
+			/*
+			* If the client height changed during the update page it means that scrollbar has either been shown or hidden.
+			* When this happens update page has to run again to ensure that the top and bottom lines div are correct.
+			* 
+			* Note: On IE, updateDOMSelection() has to be called before getting the new client height because it
+			* forces the client area to be recomputed.
+			*/
+			var ensureCaretVisible = this._ensureCaretVisible;
+			this._ensureCaretVisible = false;
+			if (clientHeight !== this._getClientHeight()) {
+				this._updatePage();
+				if (ensureCaretVisible) {
+					this._showCaret();
+				}
 			}
 		},
 		_updateRuler: function (divRuler, topIndex, bottomIndex) {
