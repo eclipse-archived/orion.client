@@ -168,12 +168,16 @@ dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 		if (this.container.persist){ 
 			// restore old state
 			var persistOpenState = dojo.cookie(this._openStateCookieName);
-			if (persistOpenState) {
+			if (persistOpenState === "true") {
 				this.container.getLeftPane().style.width = this.getSizeCookie() + "px";
+			} else if (persistOpenState === "false") {
+				this.set("open", false);
+				this._handleOnChange();
 			} else {
+				// unrecognized value, assume open
 				this.set("open", true);
 				this._handleOnChange();
-			} 
+			}
 		} else {
 			// start out in an open state
 			this.set("open", true);
