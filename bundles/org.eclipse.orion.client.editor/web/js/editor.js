@@ -3909,8 +3909,8 @@ eclipse.Editor = (function() {
 			* Scrolling is done only by setting the scrollLeft and scrollTop fields in the
 			* editor div. This causes an updatePage from the scroll event. In some browsers 
 			* this event is asynchromous and forcing update page to run synchronously
-			* (by calling doScroll) leads to redraw problems. On Chrome 11 for 
-			* Windows, the editor stops redrawing at times when holding PageDown/PageUp key.
+			* (by calling doScroll) leads to redraw problems. On Chrome 11, the editor 
+			* stops redrawing at times when holding PageDown/PageUp key.
 			* On Firefox 4 for Linux, the editor redraws the first page when holding 
 			* PageDown/PageUp key, but it will not redraw again until the key is released.
 			*/
