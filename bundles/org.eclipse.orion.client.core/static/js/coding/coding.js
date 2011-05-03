@@ -237,10 +237,6 @@ dojo.addOnLoad(function(){
 			},
 			
 			hashChanged: function(editorContainer) {	
-				// if it's a value we already know, ignore
-				if (dojo.hash() === this.lastFilePath) {
-					return;
-				}
 				if (editorContainer.isDirty()) {
 					var oldStripped = eclipse.util.getPositionInfo(this.lastFilePath).filePath;
 					var newStripped = eclipse.util.getPositionInfo(dojo.hash()).filePath;
