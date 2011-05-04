@@ -1,0 +1,14 @@
+.contentassist {
+	display: none;
+	background-color: #ffffff;
+	padding: 2px;
+	position: fixed;
+	top: 100px;
+	left: 100px;
+	border: 1px solid #cccccc;
+	z-index:10;
+}
+
+.contentassist .selected {
+	background-color: #DDDDDD;
+}
