@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global dojo dijit dojox eclipse*/
-/*jslint browser:true*/
+/*jslint browser:true devel:true*/
 dojo.provide("widgets.SiteEditor");
 
 dojo.require("dijit.form.DropDownButton");
@@ -19,6 +19,7 @@ dojo.require("dijit.form.Textarea");
 dojo.require("dijit.form.ValidationTextBox");
 dojo.require("dijit.Menu");
 dojo.require("dijit.layout.ContentPane");
+dojo.require("dijit.Tooltip");
 dojo.require("dijit._Templated");
 dojo.require("dojo.data.ItemFileWriteStore");
 dojo.require("dojo.DeferredList");
@@ -53,6 +54,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 			},
 			callback: function(item) {
 				// "this" is {widgets.MappingsGrid}
+				this._hideTooltip();
 				this.get("store").deleteItem(item);
 				this.get("store").save();
 				this.render();
@@ -108,30 +110,65 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		return {Source: source, Target: target};
 	},
 	
-	// TODO implement as a Command
-	// TODO return deferred for when mapping is done being added so we can do focus tricks
+	_getRowNodeForItem: function(/** dojo.data.Item */ item) {
+		var rowIdx = this.getItemIndex(item);
+		return this.getRowNode(rowIdx);
+	},
+	
+	_hideTooltip: function() {
+		dijit.hideTooltip(dijit._masterTT && dijit._masterTT.aroundNode);
+	},
+	
 	_addMapping: function(source, target) {
 		source = typeof(source) === "string" ? source : "/mountPoint";
 		target = typeof(target) === "string" ? target : "/";
-		this.get("store").newItem(this._createMappingObject(source, target));
-		this.get("store").save();
+		var store = this.get("store");
+		var newItem = store.newItem(this._createMappingObject(source, target));
+		var that = this;
+		store.save({
+			onComplete: function() {
+				// This is probably not the best way to wait until the table has updated
+				setTimeout(function() {
+					var rowNode = that._getRowNodeForItem(newItem);
+					if (rowNode) {
+						var cols = dojo.query("td", rowNode);
+						var mountAtCol = cols[2];
+						var thePath = that._toReadablePath(rowNode);
+						var message = "Click to set the server path where <b>" + thePath + "</b> will be accessible";
+						dijit.showTooltip(message, mountAtCol, "above");
+					}
+				}, 1);
+			}});
+	},
+	
+	_toReadablePath: function(/**DomNode*/ rowNode) {
+		var cols = dojo.query("td", rowNode);
+		if (cols.length === 4) {
+			var target = eclipse.util.getText(cols[1]);
+			if (this._isWorkspacePath(target)) {
+				return eclipse.util.getText(cols[0]);
+			}
+			return target;
+		}
 	},
 	
 	postCreate: function() {
 		this.inherited(arguments);
 		var structure = [
 				{field: "_item", name: "Workspace path", editable: false,
-						width: "16em", formatter: dojo.hitch(this, this._workspacePathFormatter)},
+						width: "16em", cellClasses: "workspacePathCell",
+						formatter: dojo.hitch(this, this._workspacePathFormatter)},
 				{field: "Target", name: "Target", editable: true, commitOnBlur: true,
-						width: "16em", cellClasses: "pathCell"},
+						width: "16em", cellClasses: "editablePathCell"},
 				{field: "Source", name: "Mount at", editable: true, commitOnBlur: true,
-						width: "16em", cellClasses: "pathCell"},
-				{field: "_item", name: " ", editable: false, cellClasses: "actionCell",
-						width: "32px", formatter: dojo.hitch(this, this._actionColumnFormatter)}
+						width: "16em", cellClasses: "editablePathCell"},
+				{field: "_item", name: " ", editable: false, 
+						cellClasses: "actionCell", width: "32px",
+						formatter: dojo.hitch(this, this._actionColumnFormatter)}
 			];
 		this.set("structure", structure);
 		
-		// Workaround for commitOnBlur not being handled correctly by dojox.grid.cells._Base 
+		// Workaround for commitOnBlur not working right see dojox/grid/cells/_base.js
 		dojo.connect(this, "onStartEdit", this, function(inCell, inRowIndex) {
 			var handle = dojo.connect(inCell, "registerOnBlur", inCell, function(inNode, inRowIndex) {
 				var handle2 = dojo.connect(inNode, "onblur", function(e) {
@@ -141,8 +178,18 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 				});
 			});
 		});
-		
+		dojo.connect(this, "onStartEdit", this, this._hideTooltip);
+		dojo.connect(this, "onResizeColumn", this, this._hideTooltip);
 		dojo.connect(this, "onStyleRow", this, this._renderCommands);
+	},
+	
+	/** Returns text node content */
+	_makeSafe: function(/**String*/ text) {
+		return eclipse.util.getText(document.createTextNode(text));
+	},
+	
+	_isWorkspacePath: function(/**String*/ target) {
+		return new RegExp("^/").test(target);
 	},
 	
 	/**
@@ -151,14 +198,8 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	 * @returns {String | dojo.Deferred}
 	 */
 	_workspacePathFormatter: function(item) {
-		// Returns text node content
-		function makeSafe(text) {
-			var node = document.createTextNode(text);
-			return typeof(node.textContent) === "string" ? node.textContent : node.nodeValue; 
-		}
-		
 		var target =  this.store.getValue(item, "Target");
-		if (/^\//.test(target)) {
+		if (this._isWorkspacePath(target)) {
 			var deferred = new dojo.Deferred();
 			dojo.when(this._editor._workspaceToChildren, dojo.hitch(this, 
 				function(map) {
@@ -174,7 +215,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 							var rest = target.substring(path.length);
 							var linkText = "/" + child.Name + rest;
 							var href = child.Location + (rest === "" ? "" : rest.substring(1));
-							deferred.callback('<a href="' + makeSafe(href) + '">' + makeSafe(linkText) + '</a>');
+							deferred.callback('<a href="' + this._makeSafe(href) + '">' + this._makeSafe(linkText) + '</a>');
 						}
 					}
 					if (!folderExists) {
@@ -327,7 +368,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		
 		var choices = dojo.map(projects, function(project) {
 				return {
-					name: "/" + project.Name,
+					name: "Folder: /" + project.Name,
 					path: eclipse.sites.util.makeRelativeFilePath(project.Location),
 					callback: callback
 				};
@@ -336,8 +377,8 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		if (projects.length > 0) {
 			choices.push({}); // Separator
 		}
-		choices.push({name: "URL&#8230;", callback: addUrl});
-//		choices.push({name: "Other&#8230;", callback: addOther});
+		choices.push({name: "URL", callback: addUrl});
+//		choices.push({name: "Other", callback: addOther});
 		return choices;
 	},
 	
@@ -376,9 +417,8 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		var hostStatus = this._siteConfiguration.HostingStatus;
 		if (hostStatus && hostStatus.Status === "started") {
 			dojo.style(this.siteStartedWarning, {display: "table-row"});
-			var warnName = this.siteStartedWarning_siteName;
-			var textProperty = typeof(warnName.innerText) === "undefined" ? "textContent" : "innerText";
-			warnName[textProperty] = this._siteConfiguration.Name;
+			var warnNameNode = this.siteStartedWarning_siteName;
+			eclipse.util.setText(warnNameNode, this._siteConfiguration.Name);
 		} else {
 			dojo.style(this.siteStartedWarning, {display: "none"});
 		}

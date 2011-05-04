@@ -1,6 +1,6 @@
 <div>
 	<style type="text/css">
-		.pathCell {
+		.editablePathCell {
 			/* font-family: monospace; */
 		}
 		.workspacePathError {
@@ -9,9 +9,15 @@
 		.actionCell {
 			height: 20px !important;
 		}
-		td.dojoxGridCellFocus,th.dojoxGridCellFocus {
+		.dojoxGridRow .workspacePathCell, .dojoxGridRowOdd .workspacePathCell {
+			background-color: #eee;
+		}
+		td.dojoxGridCellFocus, th.dojoxGridCellFocus {
 			/* Remove annoying dashed border */
 			border: none !important;
+		}
+		.mappingsGridTable {
+			font-size: 10pt !important;
 		}
 		.saveIcon {
 			background-image: url('/images/save_edit.gif');
@@ -24,10 +30,10 @@
 		<div dojoType="dijit.form.Form" id="siteForm">
 			<table>
 				<tr>
-					<td style="padding: 5px 5px 15px 5px; text-align: left;">
+					<td style="padding: 5px; text-align: left;">
 						<label dojoAttachPoint="siteConfigNameLabel" for="${id}_name">${siteConfigNameLabelText}</label>
 					</td>
-					<td style="padding: 5px 5px 15px 5px; text-align: left;">
+					<td style="padding: 10px 5px 10px 5px; text-align: left;">
 						<input dojoType="dijit.form.ValidationTextBox" dojoAttachPoint="name" id="${id}_name"
 							required="true" value=""
 							style="display: inline-block; width: 15em;">
@@ -38,8 +44,9 @@
 					<td style="padding: 5px; vertical-align: top">
 						<label dojoAttachPoint="mappingsLabel" for="${id}_mappings">${mappingsLabelText}</label>
 					</td>
-					<td style="padding: 5px 5px 15px 5px; text-align: left; width: 800px;">
+					<td style="padding: 10px 5px 10px 5px; text-align: left; width: 800px;">
 						<table dojoType="widgets.MappingsGrid" dojoAttachPoint="mappings"
+								class="mappingsGridTable"
 								autoHeight="true" singleClickEdit="true" selectionMode="none"
 								selectable="true"
 								style="width: auto" autoWidth="true">
@@ -54,7 +61,7 @@
 					<td style="padding: 5px;">
 						<label dojoAttachPoint="hostHintLabel" for="${id}_hostHint" style="text-align: left;">${hostHintLabelText}</label>
 					</td>
-					<td style="padding: 5px 5px 15px 5px; text-align: left;">
+					<td style="padding: 10px 5px 10px 5px; text-align: left;">
 						<input dojoType="dijit.form.ValidationTextBox" dojoAttachPoint="hostHint" id="${id}_hostHint"
 							required="false" value=""
 							style="display: inline-block; width: 12em;">
