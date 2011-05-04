@@ -30,6 +30,35 @@ dojo.addOnLoad(function(){
 		return contentAssist;
 	};
 	
+	// Canned highlighters for js, java, and css
+	var syntaxHighlighter = {
+		styler: null, 
+		
+		highlight: function(fileName, editorWidget) {
+			if (this.styler) {
+				this.styler.destroy();
+				this.styler = null;
+			}
+			if (fileName) {
+				var splits = fileName.split(".");
+				var extension = splits.pop().toLowerCase();
+				if (splits.length > 0) {
+					switch(extension) {
+						case "js":
+							this.styler = new eclipse.TextStyler(editorWidget, "js");
+							break;
+						case "java":
+							this.styler = new eclipse.TextStyler(editorWidget, "java");
+							break;
+						case "css":
+							this.styler = new eclipse.TextStyler(editorWidget, "css");
+							break;
+					}
+				}
+			}
+		}
+	};
+	
 	var annotationFactory = new orion.AnnotationFactory();
 
 	
@@ -47,16 +76,7 @@ dojo.addOnLoad(function(){
 		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
 		editor.getEditorWidget().setAction("save", function(){
 				editor.onInputChange(null, null, null, true);
-				var text = editor.getEditorWidget().getText();
-				var problems = [];
-				for (var i=0; i<text.length; i++) {
-					if (text.charAt(i) === 'z') {
-						var line = editor.getEditorWidget().getModel().getLineAtOffset(i) + 1;
-						var character = i - editor.getEditorWidget().getModel().getLineStart(line);
-						problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
-					}
-				}
-				annotationFactory.showProblems(problems);
+				window.alert("Save hook.");
 				return true;
 		});
 	};
@@ -86,7 +106,7 @@ dojo.addOnLoad(function(){
 		
 	dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
 		if (dirty) {
-			dirtyIndicator = "You have unsaved changes.  ";
+			dirtyIndicator = "*";
 		} else {
 			dirtyIndicator = "";
 		}
@@ -94,7 +114,12 @@ dojo.addOnLoad(function(){
 	});
 	
 	editorContainer.installEditor();
-	editorContainer.onInputChange("Content", null, "This is the initial editor contentz.  Type some text and press Ctrl-S to save.");
+	// if there is a mechanism to change which file is being viewed, this code would be run each time it changed.
+	var contentName = "sample.js";  // for example, a file name, something the user recognizes as the content.
+	var initialContent = "window.alert('this is some javascript code');  // try pasting in some real code";
+	editorContainer.onInputChange(contentName, null, initialContent);
+	syntaxHighlighter.highlight(contentName, editorContainer.getEditorWidget());
+	// end of code to run when content changes.
 	
 	window.onbeforeunload = function() {
 		if (editorContainer.isDirty()) {

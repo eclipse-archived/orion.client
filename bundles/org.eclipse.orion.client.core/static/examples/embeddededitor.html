@@ -1,0 +1,46 @@
+<!doctype html>
+<html style="height: 100%">
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+    	<title>Embedded Orion Editor</title>
+		
+		<script type="text/javascript">
+			var djConfig = {
+				isDebug:false,
+				parseOnLoad:true
+			};
+		</script>
+	    <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	    <script type="text/javascript" src="/org.dojotoolkit/orion/orion.js.uncompressed.js"></script>
+		<style type="text/css">
+			@import "/org.dojotoolkit/dojo/resources/dojo.css";
+			@import "/org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
+		</style>
+	
+		<!-- Web Editor -->
+			<script src="/editor/samples/styler.js"></script>
+			<script src="/editor/samples/rulers.js"></script>
+			<script src="/editor/samples/undoStack.js"></script>
+			<script src="/editor/js/model.js"></script>
+			<script src="/editor/js/editor.js"></script>	
+
+		 	<script src="/js/editorFeatures.js"></script>
+		 	<script src="/js/contentAssist.js"></script>
+		 	<script src="/js/contentAssist/coreContentAssist.js"></script>
+		 	<script src="/js/editorContainer.js"></script>
+			<script src="/examples/embeddededitor.js"></script>
+   </head>
+
+    <body class="nihilo" style="width: 100%; height: 100%">
+	<div id="logo" style="height: 28px; background: #404040; text-align: left;">
+		<img src="/images/skinnyheaderlogo.png" alt="Orion">
+		<span id="status" style="height: 28px; vertical-align: top; color: #FFFFFF"></span>
+	</div>
+    <div id="editorContainer" style="width: 100%; height: 100%; overflow: hidden">
+	</div>
+	<div id="contentassist" class="contentassist"></div>
+</body>
+</html>
