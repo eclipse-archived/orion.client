@@ -61,6 +61,10 @@ dojo.addOnLoad(function(){
 	
 	var annotationFactory = new orion.AnnotationFactory();
 
+	function save(editor) {
+		editor.onInputChange(null, null, null, true);
+		window.alert("Save hook.");
+	}
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 		
@@ -75,12 +79,15 @@ dojo.addOnLoad(function(){
 		// save binding
 		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
 		editor.getEditorWidget().setAction("save", function(){
-				editor.onInputChange(null, null, null, true);
-				window.alert("Save hook.");
+				save(editor);
 				return true;
 		});
+		
+		// speaking of save...
+		dojo.byId("save").onclick = function() {save(editor);};
+
 	};
-	
+		
 	var dirtyIndicator = "";
 	var status = "";
 	
