@@ -188,6 +188,7 @@ eclipse.ContentAssist = (function() {
 							createDiv(proposals[i], i===0, this.contentAssistPanel);
 						}
 						this.editorWidget.convert(caretLocation, "document", "page");
+						this.contentAssistPanel.style.position = "absolute";
 						this.contentAssistPanel.style.left = caretLocation.x + "px";
 						this.contentAssistPanel.style.top = caretLocation.y + "px";
 						this.contentAssistPanel.style.display = "block";
