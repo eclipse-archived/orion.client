@@ -22,13 +22,6 @@ dojo.addOnLoad(function(){
 			tabSize: 4
 		});
 	};
-
-	var contentAssistFactory = function(editor) {
-		var contentAssist = new eclipse.ContentAssist(editor, "contentassist");
-		contentAssist.addProvider(new orion.contentAssist.CssContentAssistProvider(), "css", "\\.css$");
-		contentAssist.addProvider(new orion.contentAssist.JavaScriptContentAssistProvider(), "js", "\\.js$");
-		return contentAssist;
-	};
 	
 	var annotationFactory = new orion.AnnotationFactory();
 
