@@ -22,7 +22,7 @@ var topHTMLFragment =
 // a table?!!?  Yes, you can't mix CSS float right and absolutes to pin the bottom.
 '<table style="border-spacing: 0px; border-collapse: collapse; width: 100%; height: 61px">' +
 	'<tr class="topRowBanner">' +
-		'<td width=93px rowspan=2><a id="home" href="/navigate-table.html#"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
+		'<td width=93px rowspan=2><a id="home" href="/index.html"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
 		'<td class="leftGlobalToolbar">' +
 			'<span class="bannerSeparator">|</span>' +
 			'<span id="pageTitle" class="statuspane"></span>' +

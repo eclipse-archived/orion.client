@@ -1,51 +1,77 @@
-<!doctype html>
-<html>
-    <head>
-		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2011." >
-		<meta http-equiv="Content-Language" content="en-us">
-		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   		<title>Orion Navigator</title>  
-   		<script type="text/javascript">
-			var djConfig = {
-				isDebug:false,
-			    parseOnLoad:true
-	        };
-    	</script>
-	    <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-		<!--Authentication -->
-		<script type="text/javascript" src="js/auth.js"></script>
-		
-	    <!-- Eclipse Application Services and Service Registry -->
-   		<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
-		<script src="js/serviceregistry.js"></script>
-	 	<script src="js/util.js"></script>
-		<script src="js/preferences.js"></script>
-    	<script type="text/javascript">
-    		dojo.addOnLoad(function() {
-				var serviceRegistry = new eclipse.ServiceRegistry();
-				var prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-				prefsService.getPreferences("/window").then(function(prefs) {
-					var home = prefs.get("orientation")
-					switch (home) {
-						case "navigate.html":
-						case "navigate-tree.html":
-							home = "navigate-tree.html";
-							break;
-						default:
-							home = "navigate-table.html";
-							break;
-					}
-					window.location.replace(home);
-				}, function(status) {
-					if (status === 401) {
-						return;
-					} else {
-						window.location.replace("navigate-table.html");
-					}
-				});
-			});
-		</script>     
- 	</head>
-	<body>
+<!DOCTYPE html>
+<html style="height: 100%">
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+		<title>Welcome to Orion</title>
+<script type="text/javascript">
+	var djConfig = {
+		isDebug : true,
+		modulePaths : {
+			'widgets' : '/js/widgets'
+		},
+		parseOnLoad : true
+	};
+</script>
+<script src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+<script type="text/javascript">
+	dojo.require("dijit.form.Button");
+	dojo.require("dijit.form.TextBox");
+	dojo.require("dijit.layout.BorderContainer");
+	dojo.require("dijit.layout.ContentPane");
+	dojo.require("dojox.widget.Portlet");
+    dojo.require("dojox.widget.FeedPortlet");
+	<!-- The following required for header command - see bug 341350 -->
+	dojo.require("widgets.OpenResourceDialog");
+</script>
+<style type="text/css">
+	@import "/org.dojotoolkit/dojo/resources/dojo.css";
+	@import "/org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
+	@import "/org.dojotoolkit/dijit/themes/nihilo/Tree.css";
+	@import "/org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
+	@import "/org.dojotoolkit/dijit/themes/nihilo/form/Common.css";
+	@import "/org.dojotoolkit/dijit/themes/nihilo/form/Button.css";
+	@import "/ide.css";
+	@import "/commands.css";
+</style>
+</head>
+	<body style="height: 100%" class="nihilo">
+	<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
+	<script src="js/serviceregistry.js"></script>
+	<script src="js/pluginregistry.js"></script>
+	<script type="text/javascript" src="js/auth.js"></script>
+	<script src="js/util.js"></script>
+ 	<script src="js/commands.js"></script>
+	<script src="js/globalCommands.js"></script>
+ 	<script src="js/preferences.js"></script>
+	<script src="js/searchClient.js"></script>
+	
+	<!-- TODO: scripts below are only for testing, remove later -->
+ 	<script src="js/dialogs.js"></script>
+ 	<script src="js/log.js"></script>
+ 	<script src="js/selection.js"></script>
+ 	<script src="js/status.js"></script>
+ 	<script src="js/users.js"></script>
+  	<script src="js/fileClient.js"></script>
+  	<script src="js/breadcrumbs.js"></script>
+	<script src="js/favorites.js"></script>
+	
+	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
+		<div dojoType="dijit.layout.ContentPane" id="toolbar" region="top" class="toolbar">
+		</div>
+		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false" persist="false" gutters="false" region="center" splitter="false" style="margin-left: 44px">
+			<div dojoType="dijit.layout.ContentPane" id="feed" region="top" class="mainpane" style="height: 33%">
+				<div dojoType="dojox.widget.FeedPortlet" title="Orion News" id="orionfeed" url="http://planetorion.org/news/feed/" maxResults="5">
+				</div>			
+			</div>
+			<div dojoType="dijit.layout.ContentPane" id="bottom" region="center" class="auxpane">TBD.  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=343290">Bug 343290</a>
+			</div>
+		</div>
+		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
+		</div>
+
+	</div>
+	
+	<!-- Glue -->
+	<script src="js/landing/landing.js"></script>
 	</body>
-</html>	
+</html>
