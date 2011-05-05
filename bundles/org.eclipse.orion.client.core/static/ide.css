@@ -92,6 +92,7 @@ a:hover {
 .pageActions {
 	color: #ffffff;
 	cursor: pointer;
+	padding-left: 24px;
 }
 
 .pageActions:visited {
