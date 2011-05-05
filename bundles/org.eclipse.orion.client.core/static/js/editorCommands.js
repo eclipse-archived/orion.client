@@ -186,8 +186,9 @@ orion.UndoCommandFactory = (function() {
 				}});
 			this.commandService.addCommand(redoCommand, "dom");
 	
-			this.commandService.registerCommandContribution("orion.undo", 400, this.toolbarId, "orion.editorActions.unlabeled");
-			this.commandService.registerCommandContribution("orion.redo", 401, this.toolbarId, "orion.editorActions.unlabeled");
+			// we don't add these to the toolbar anymore.
+			// this.commandService.registerCommandContribution("orion.undo", 400, this.toolbarId, "orion.editorActions.unlabeled");
+			// this.commandService.registerCommandContribution("orion.redo", 401, this.toolbarId, "orion.editorActions.unlabeled");
 
 			return undoStack;
 		}
