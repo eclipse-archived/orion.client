@@ -72,10 +72,10 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId
 		throw "could not find toolbar " + toolbarId;
 	}
 	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
-		service.renderCommands(toolbar, "dom", item, explorer, "image", null, null, false);  // true for force icons to text
+		service.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  // true for force icons to text
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			service.renderCommands(selectionTools, "dom", null, explorer, "image", null, null, false); // true would force icons to text
+			service.renderCommands(selectionTools, "dom", null, explorer, "image", null, null, true); // true would force icons to text
 		}
 	}));
 	
@@ -88,7 +88,7 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId
 				if (selectionTools) {
 					dojo.empty(selectionTools);
 					registry.getService("ICommandService").then(function(commandService) {
-						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", null, null, false);
+						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", null, null, true);
 					});
 				}
 			});

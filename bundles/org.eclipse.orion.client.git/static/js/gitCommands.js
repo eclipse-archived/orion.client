@@ -38,10 +38,10 @@ dojo.require("widgets.GitCredentialsDialog");
 			throw "could not find toolbar " + toolbarId;
 		}
 		registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
-			service.renderCommands(toolbar, "dom", item, explorer, "image", null, null, false);  // true would force text links
+			service.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  // true would force text links
 			if (selectionToolbarId) {
 				var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-				service.renderCommands(selectionTools, "dom", null, explorer, "image", null, null, false);  // true would force text links
+				service.renderCommands(selectionTools, "dom", null, explorer, "image", null, null, true);  // true would force text links
 			}
 		}));
 		
@@ -54,7 +54,7 @@ dojo.require("widgets.GitCredentialsDialog");
 					if (selectionTools) {
 						dojo.empty(selectionTools);
 						registry.getService("ICommandService").then(function(commandService) {
-							commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", null, null, false); // true would force text links
+							commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", null, null, true); // true would force text links
 						});
 					}
 				});
@@ -99,7 +99,8 @@ dojo.require("widgets.GitCredentialsDialog");
 	
 	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId, gitClient) {
 		var cloneGitRepositoryCommand = new eclipse.Command({
-			name : "Clone Git Repository",
+			name : "Clone",
+			tooltip : "Clone Git Repository",
 			image : "images/git-clone.gif",
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
