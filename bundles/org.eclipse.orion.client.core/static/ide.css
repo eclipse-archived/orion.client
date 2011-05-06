@@ -89,27 +89,38 @@ a:hover {
 	text-decoration: underline;
 }
 
+.pageActionSeparator {
+	color: #dddddd;
+	cursor: pointer;
+	padding-left: 24px;
+	margin-left: 2px;
+	margin-right: 2px;
+	font-size: 1.1em;
+}
+
 .pageActions {
-	color: #ffffff;
+	color: #dddddd;
 	cursor: pointer;
 }
 
 .pageActions:visited {
-	color: #ffffff;
+	color: #dddddd;
 	cursor: pointer;
 }
 
 .pageActions:hover {
-	color: #ffffff;
+	color: #dddddd;
 	cursor: hand;
 }
 
 .pageActions a {
-	color: #ffffff;
+	color: #dddddd;
+	cursor: pointer;
+	text-decoration: none;
 }
 
 .pageActions a:hover {
-	color: #ffffff;
+	color: #cccccc;
 	cursor: hand;
 	text-decoration: underline;
 }

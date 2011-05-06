@@ -164,14 +164,15 @@ eclipse.CommandService = (function() {
 		 *  only "image" is implemented, but this should involve into something like "button,"
 		 *  "menu," "link," etc.
 		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
+		 * @param {Boolean} forceText Always use text and not the icon when showing the command, regardless of style.
 		 */	
 		
-		renderCommands: function(parent, scope, items, handler, renderType, cssClass, userData) {
+		renderCommands: function(parent, scope, items, handler, renderType, cssClass, userData, forceText) {
 			if (!items) {
 				var cmdService = this;
 				if (this._selection) {
 					this._selection.getSelections(function(selections) {
-						cmdService.renderCommands(parent, scope, selections, handler, renderType, cssClass, userData);
+						cmdService.renderCommands(parent, scope, selections, handler, renderType, cssClass, userData, forceText);
 					});
 				}
 				return;
@@ -186,7 +187,7 @@ eclipse.CommandService = (function() {
 			} else {
 				throw "Unrecognized command scope " + scope;
 			}
-			this._render(this._namedGroups, parent, scope, items, handler, renderType, cssClass, userData, refCommands);
+			this._render(this._namedGroups, parent, scope, items, handler, renderType, cssClass, userData, refCommands, forceText);
 			// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
 			if (renderType === "image") {
 				if (this._isLastChildSeparator(parent, renderType)) {
@@ -201,7 +202,7 @@ eclipse.CommandService = (function() {
 			}
 		},
 		
-		_render: function(commandItems, parent, scope, items, handler, renderType, cssClass, userData, commandList) {
+		_render: function(commandItems, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText) {
 			// sort the items
 			var positionOrder = commandItems.sortedCommands;
 			if (!positionOrder) {
@@ -236,7 +237,7 @@ eclipse.CommandService = (function() {
 							// if commands are scoped to the dom, we'll need to identify a menu with the dom id of its original parent
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children
-							this._render(positionOrder[i].children, newMenu, scope, items, handler, "menu", cssClass, userData, commandList); 
+							this._render(positionOrder[i].children, newMenu, scope, items, handler, "menu", cssClass, userData, commandList, forceText); 
 							// special post-processing when we've created a menu in an image bar.
 							// we want to get rid of a trailing separator in the menu first, and then decide if a menu is necessary
 							children = newMenu.getChildren();
@@ -266,7 +267,7 @@ eclipse.CommandService = (function() {
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-									image = menuCommand._asImage(id, items, handler, userData);
+									image = menuCommand._asImage(id, items, handler, userData, forceText);
 									dojo.place(image, parent, "last");
 								}
 							}
@@ -277,7 +278,7 @@ eclipse.CommandService = (function() {
 								sep = this.generateSeparatorImage();
 								dojo.place(sep, parent, "last");
 							}
-							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList); 
+							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText); 
 
 							// make sure that more than just the separator got rendered before rendering a trailing separator
 							if (parent.childNodes.length > 0) {
@@ -292,7 +293,7 @@ eclipse.CommandService = (function() {
 						// group within a menu
 						if (group.title) {
 							var subMenu = new dijit.Menu();
-							this._render(positionOrder[i].children, subMenu, scope, items, handler, renderType, cssClass, userData, commandList); 
+							this._render(positionOrder[i].children, subMenu, scope, items, handler, renderType, cssClass, userData, commandList, forceText); 
 							if (subMenu.getChildren().length > 0) {
 								parent.addChild(new dijit.PopupMenuItem({
 									label: group.title,
@@ -306,7 +307,7 @@ eclipse.CommandService = (function() {
 								menuSep = new dijit.MenuSeparator();
 								parent.addChild(menuSep);
 							}
-							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList); 
+							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText); 
 							// Add a trailing separator if children rendered.
 							var menuChildren = parent.getChildren();
 							if (menuChildren[menuChildren.length - 1] !== menuSep) {
@@ -365,7 +366,7 @@ eclipse.CommandService = (function() {
 						} else {
 							if (renderType === "image") {
 								id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								image = command._asImage(id, items, handler, userData, cssClass);
+								image = command._asImage(id, items, handler, userData, cssClass, forceText);
 								dojo.place(image, parent, "last");
 							} else if (renderType === "menu") {
 								command._addMenuItem(parent, items, handler, userData, cssClass);
@@ -417,7 +418,7 @@ eclipse.Command = (function() {
 			//how will we know this?
 			this._deviceSupportsHover = false;  
 		},
-		_asImage: function(name, items, handler, userData, cssClass) {
+		_asImage: function(name, items, handler, userData, cssClass, forceText) {
 			handler = handler || this;
 			var image = new Image();
 			var link = dojo.create("a");
@@ -425,7 +426,7 @@ eclipse.Command = (function() {
 			image.title = this.name;
 			image.name = name;
 			image.id = name;
-			if (!this.hasImage()) {
+			if (forceText || !this.hasImage()) {
 				var text = document.createTextNode(this.name);
 				dojo.place(text, link, "last");
 			}
@@ -439,7 +440,7 @@ eclipse.Command = (function() {
 					link.href = href; 
 				}
 			} else if (this.callback) {
-				if (this.hasImage()) {
+				if (!forceText && this.hasImage()) {
 					dojo.connect(image, "onclick", this, function() {
 						this.callback.call(handler, items, this.id, image.id, userData);
 					});
@@ -449,7 +450,7 @@ eclipse.Command = (function() {
 					});
 				}
 			}
-			if (this.hasImage()) {
+			if (!forceText && this.hasImage()) {
 				if (this._deviceSupportsHover) {
 					image.src = "/images/none.png";
 					dojo.connect(image, "onmouseover", this, function() {

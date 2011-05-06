@@ -22,7 +22,7 @@ dojo.addOnLoad(function() {
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "pageActionsLeft");
+	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);

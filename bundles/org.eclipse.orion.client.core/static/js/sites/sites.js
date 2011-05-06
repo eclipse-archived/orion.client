@@ -22,7 +22,7 @@ dojo.addOnLoad(function() {
 		pluginRegistry.shutdown();
 	});
 	var dialogService = new eclipse.DialogService(serviceRegistry);
-	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "pageActionsLeft");
+	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	serviceRegistry.getService("IFileService").then(function(fileService) {
 		var fileClient = new eclipse.FileClient(fileService);

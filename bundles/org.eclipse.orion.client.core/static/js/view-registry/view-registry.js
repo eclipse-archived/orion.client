@@ -30,7 +30,7 @@ dojo.addOnLoad(function() {
 	}).then(function() {
 		var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 		var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-		var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "pageActionsLeft");
+		var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		
 		var initTree = function() {
 			var tree = new widgets.RegistryTree({ registry: pluginRegistry }, "registry-tree");

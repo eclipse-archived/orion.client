@@ -14,7 +14,7 @@ dojo.addOnLoad(function(){
 	
 	// initialize service registry and EAS services
 	serviceRegistry = new eclipse.ServiceRegistry();
-	new eclipse.StatusReportingService(serviceRegistry, "statusPane", "pageActionsLeft");
+	new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 	new eclipse.LogService(serviceRegistry);
 	new eclipse.DialogService(serviceRegistry);
 	new eclipse.UserService(serviceRegistry);

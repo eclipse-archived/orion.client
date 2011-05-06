@@ -1962,7 +1962,9 @@ eclipse.Editor = (function() {
 			*/
 			if (isSafari) {
 				var lineDiv = e.target;
-				while (lineDiv.lineIndex === undefined) { lineDiv = lineDiv.parentNode; }
+				while (lineDiv && lineDiv.lineIndex === undefined) {
+					lineDiv = lineDiv.parentNode;
+				}
 				this._mouseWheelLine = lineDiv;
 			}
 			var oldScroll = this._getScroll();

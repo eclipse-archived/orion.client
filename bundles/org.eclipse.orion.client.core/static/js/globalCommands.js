@@ -40,10 +40,11 @@ var topHTMLFragment =
 	'<tr class="bottomRowBanner">' +
 		'<td colspan=2 id="pageToolbar" class="pageToolbar">' +
 			'<div style="float: left;">' +
-				'<span id="pageActionsLeft" class="pageActions"></span>' +
+				'<span id="pageActionHolder" class="pageActionSeparator">|</span>' +
+				'<span id="pageActions" class="pageActions"></span>' +
 			'</div>' +
 			'<div style="float: right;">' +
-				'<span id="pageActions" class="pageActions"></span>' +
+				'<span id="notifications" class="pageActions"></span>' +
 			'</div>' +
 		'</td>' +
 	'</tr>' +
@@ -133,7 +134,7 @@ eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService
 	}
 	if (toolbar) {	
 		dojo.empty(toolbar);
-		commandService.renderCommands(toolbar, "dom", handler, handler, "image");
+		commandService.renderCommands(toolbar, "dom", handler, handler, "image", null, null, true);  // use true when we want to force toolbar items to text
 	}
 };
 
