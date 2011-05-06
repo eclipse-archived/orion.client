@@ -79,17 +79,33 @@ PerformanceTest.prototype = {
 		if (!queue) var queue = new this.FakeQueue();
 		this.doPage(queue, "pageDown");
 	},
+	test_selectPageDown: function (queue) {
+		if (!queue) var queue = new this.FakeQueue();
+		this.doPage(queue, "selectPageDown");
+	},
 	test_pageUp: function (queue) {
 		if (!queue) var queue = new this.FakeQueue();
 		this.doPage(queue, "pageUp");
+	},
+	test_selectPageUp: function (queue) {
+		if (!queue) var queue = new this.FakeQueue();
+		this.doPage(queue, "selectPageUp");
 	},
 	test_lineDown: function (queue) {
 		if (!queue) var queue = new this.FakeQueue();
 		this.doPage(queue, "lineDown", 300);
 	},
+	test_selectLineDown: function (queue) {
+		if (!queue) var queue = new this.FakeQueue();
+		this.doPage(queue, "selectLineDown", 300);
+	},
 	test_lineUp: function (queue) {
 		if (!queue) var queue = new this.FakeQueue();
 		this.doPage(queue, "lineUp", 300);
+	},
+	test_selectLineUp: function (queue) {
+		if (!queue) var queue = new this.FakeQueue();
+		this.doPage(queue, "selectLineUp", 300);
 	},
 	test_getLocationAtOffset: function (queue) {
 		if (!queue) var queue = new this.FakeQueue();
