@@ -95,6 +95,7 @@ eclipse.KeyBinding = (function() {
  * @param {String|DOMElement} options.parent the parent element for the editor, it can be either a DOM element or an ID for a DOM element.
  * @param {eclipse.TextModel} [options.model] the text model for the editor. If this options is not set the editor creates an empty {@link eclipse.TextModel}.
  * @param {Boolean} [options.readonly=false] whether or not the editor is read-only.
+ * @param {Boolean} [options.fullSelection=true] whether or not the editor is in full selection mode.
  * @param {String|String[]} [options.stylesheet] one or more stylesheet URIs for the editor.
  * @param {Number} [options.tabSize] The number of spaces in a tab.
  * 
@@ -1590,6 +1591,14 @@ eclipse.Editor = (function() {
 					body.removeChild(child);
 				}
 			}
+			if (isFirefox || isIE) {
+				if (this._selDiv1) {
+					var color = isIE ? "transparent" : "#AFAFAF";
+					this._selDiv1.style.background = color;
+					this._selDiv2.style.background = color;
+					this._selDiv3.style.background = color;
+				}
+			}
 		},
 		_handleContextMenu: function (e) {
 			if (!e) { e = window.event; }
@@ -1654,6 +1663,14 @@ eclipse.Editor = (function() {
 			*/
 			if (isIE) {
 				this._updateDOMSelection();
+			}
+			if (isFirefox || isIE) {
+				if (this._selDiv1) {
+					var color = "Highlight";
+					this._selDiv1.style.background = color;
+					this._selDiv2.style.background = color;
+					this._selDiv3.style.background = color;
+				}
 			}
 		},
 		_handleKeyDown: function (e) {
@@ -2475,7 +2492,7 @@ eclipse.Editor = (function() {
 		_doScroll: function (scroll) {
 			var oldX = this._hScroll;
 			var oldY = this._vScroll;
-			if (oldX !== scroll.x || (oldY !== scroll.y)) {
+			if (oldX !== scroll.x || oldY !== scroll.y) {
 				this._hScroll = scroll.x;
 				this._vScroll = scroll.y;
 				this._commitIME();
@@ -2539,26 +2556,62 @@ eclipse.Editor = (function() {
 			this._autoScrollTimerID = setTimeout(function () {self._autoScrollTimer();}, this._AUTO_SCROLL_RATE);
 		},
 		_calculateLineHeight: function() {
-			var document = this._frameDocument;
 			var parent = this._clientDiv;
-			var line1 = document.createElement("DIV");
-			line1.appendChild(document.createTextNode("W"));
-			parent.appendChild(line1);
-			var line2 = document.createElement("DIV");
-			line2.appendChild(document.createTextNode("W"));
-			parent.appendChild(line2);
-			var rect1 = line1.getBoundingClientRect();
-			var rect2 = line2.getBoundingClientRect();
-			var lineHeight = rect2.top - rect1.top;
-			parent.removeChild(line1);
-			parent.removeChild(line2);
-			return Math.ceil(lineHeight); 
+			var document = this._frameDocument;
+			var c = " ";
+			var line = document.createElement("DIV");
+			line.style.position = "fixed";
+			line.style.left = "-1000px";
+			var span1 = document.createElement("SPAN");
+			span1.appendChild(document.createTextNode(c));
+			line.appendChild(span1);
+			var span2 = document.createElement("SPAN");
+			span2.style.fontStyle = "italic";
+			span2.appendChild(document.createTextNode(c));
+			line.appendChild(span2);
+			var span3 = document.createElement("SPAN");
+			span3.style.fontWeight = "bold";
+			span3.appendChild(document.createTextNode(c));
+			line.appendChild(span3);
+			var span4 = document.createElement("SPAN");
+			span4.style.fontWeight = "bold";
+			span4.style.fontStyle = "italic";
+			span4.appendChild(document.createTextNode(c));
+			line.appendChild(span4);
+			parent.appendChild(line);
+			var spanRect1 = span1.getBoundingClientRect();
+			var spanRect2 = span2.getBoundingClientRect();
+			var spanRect3 = span3.getBoundingClientRect();
+			var spanRect4 = span4.getBoundingClientRect();
+			var h1 = spanRect1.bottom - spanRect1.top;
+			var h2 = spanRect2.bottom - spanRect2.top;
+			var h3 = spanRect3.bottom - spanRect3.top;
+			var h4 = spanRect4.bottom - spanRect4.top;
+			var fontStyle = 0;
+			var lineHeight = h1;
+			if (h2 > h1) {
+				lineHeight = h2;
+				fontStyle = 1;
+			}
+			if (h3 > h2) {
+				lineHeight = h3;
+				fontStyle = 2;
+			}
+			if (h4 > h3) {
+				lineHeight = h4;
+				fontStyle = 3;
+			}
+			this._largestFontStyle = fontStyle;
+			parent.removeChild(line);
+			return lineHeight;
 		},
 		_calculatePadding: function() {
 			var document = this._frameDocument;
 			var parent = this._clientDiv;
 			var pad = this._getPadding(this._editorDiv);
 			var div1 = document.createElement("DIV");
+			div1.style.position = "fixed";
+			div1.style.left = "-1000px";
 			div1.style.paddingLeft = pad.left + "px";
 			div1.style.paddingTop = pad.top + "px";
 			div1.style.paddingRight = pad.right + "px";
@@ -2749,28 +2802,7 @@ eclipse.Editor = (function() {
 			var child = document.createElement("DIV");
 			child.lineIndex = lineIndex;
 			this._applyStyle(e.style, child);
-
-			/*
-			* Firefox does not extend the selection at the end of the line when the
-			* line is fully selected. The fix is to add an extra space at the end of
-			* the line.
-			*/
-			var extendSelection = isFirefox || isOpera || isIE >= 9;
-			if (lineText.length === 0) {
-				/*
-				* When the span is empty the height of the line div becomes zero.
-				* The fix is use a zero-width non-break space to preserve the default
-				* height in the line div. Note that in Chrome this character shows
-				* a glyph, for this reason the zero-width non-joiner character is
-				* used instead.
-				*/
-				if (!extendSelection) {
-					var span = document.createElement("SPAN");
-					span.ignoreChars = 1;
-					span.appendChild(document.createTextNode(isWebkit ? "\u200C" : "\uFEFF"));
-					child.appendChild(span);
-				}
-			} else {
+			if (lineText.length !== 0) {
 				var start = 0;
 				var tabSize = this._tabSize;
 				if (tabSize && tabSize !== 8) {
@@ -2805,12 +2837,35 @@ eclipse.Editor = (function() {
 				}
 				this._createRange(child, document, e.ranges, start, lineText.length, lineText, lineStart);
 			}
-			if (extendSelection) {
-				var ext = document.createElement("SPAN");
-				ext.ignoreChars = 1;
-				ext.appendChild(document.createTextNode(" "));
-				child.appendChild(ext);
+			
+			/*
+			* Firefox, Opera and IE9 do not extend the selection at the end of the line
+			* when the line is fully selected. The fix is to add an extra space at the end
+			* of the line.
+			*
+			* Note: the height of a div with only an empty span is zero.  The fix is
+			* the add a extra zero-width non-break space to preserve the default
+			* height in the line div. In Chrome this character shows a glyph, so the
+			* zero-width non-joiner character is used instead.
+			*
+			* Note: in order to support bold and italic fonts with fixed line
+			* height all lines need to have at least one span with the largest
+			* font.
+			*/
+			var span = document.createElement("SPAN");
+			span.ignoreChars = 1;
+			if ((this._largestFontStyle & 1) !== 0) {
+				span.style.fontStyle = "italic";
 			}
+			if ((this._largestFontStyle & 2) !== 0) {
+				span.style.fontWeight = "bold";
+			}
+			var fullSelection = this._fullSelection;
+			var extendSelection = !fullSelection && (isFirefox || isOpera || isIE >= 9);
+			var c = extendSelection ? " " : (isWebkit || isFirefox ? "\u200C" : "\uFEFF");
+			span.appendChild(document.createTextNode(c));
+			child.appendChild(span);
+			
 			parent.insertBefore(child, sibling);
 			return child;
 		},
@@ -3080,7 +3135,7 @@ eclipse.Editor = (function() {
 			var rect = child.getBoundingClientRect();
 			var lastChild = child.lastChild;
 			//Remove any artificial trailing whitespace in the line
-			if (lastChild && lastChild.ignoreChars === lastChild.firstChild.length) {
+			while (lastChild && lastChild.ignoreChars === lastChild.firstChild.length) {
 				lastChild = lastChild.previousSibling;
 			}
 			if (!lastChild) {
@@ -3090,9 +3145,7 @@ eclipse.Editor = (function() {
 			return {left: rect.left, top: rect.top, right: lastRect.right, bottom: rect.bottom};
 		},
 		_getLineHeight: function() {
-			var document = this._frameDocument;
-			var body = document.body;
-			return parseInt(body.style.lineHeight, 10);
+			return this._lineHeight;
 		},
 		_getLineNode: function (lineIndex) {
 			var clientDiv = this._clientDiv;
@@ -3271,6 +3324,11 @@ eclipse.Editor = (function() {
 		},
 		_getXToOffset: function (lineIndex, x) {
 			var model = this._model;
+			var lineStart = model.getLineStart(lineIndex);
+			var lineEnd = model.getLineEnd(lineIndex);
+			if (lineStart === lineEnd) {
+				return lineStart;
+			}
 			var document = this._frameDocument;
 			var clientDiv = this._clientDiv;
 			var dummy;
@@ -3316,7 +3374,7 @@ eclipse.Editor = (function() {
 			}
 			var logicalXDPI = isIE ? window.screen.logicalXDPI : 1;
 			var deviceXDPI = isIE ? window.screen.deviceXDPI : 1;
-			var offset = model.getLineStart(lineIndex);
+			var offset = lineStart;
 			var lineChild = child.firstChild;
 			done:
 			while (lineChild) {
@@ -3425,7 +3483,7 @@ eclipse.Editor = (function() {
 				lineChild = lineChild.nextSibling;
 			}
 			if (dummy) { clientDiv.removeChild(dummy); }
-			return offset;
+			return Math.min(lineEnd, Math.max(lineStart, offset));
 		},
 		_getYToLine: function (y) {
 			var editorPad = this._getEditorPadding();
@@ -3485,7 +3543,7 @@ eclipse.Editor = (function() {
 			var body = this._frameDocument.body; 
 			var handlers = this._handlers = [];
 			var resizeNode = isIE < 9 ? this._frame : this._frameWindow;
-			var focusNode = isPad ? this._textArea : (isIE ? this._clientDiv: this._frameWindow);
+			var focusNode = isPad ? this._textArea : (isIE ||  isFirefox ? this._clientDiv: this._frameWindow);
 			handlers.push({target: resizeNode, type: "resize", handler: function(e) { return self._handleResize(e);}});
 			handlers.push({target: focusNode, type: "blur", handler: function(e) { return self._handleBlur(e);}});
 			handlers.push({target: focusNode, type: "focus", handler: function(e) { return self._handleFocus(e);}});
@@ -3699,7 +3757,8 @@ eclipse.Editor = (function() {
 			scrollDiv.style.padding = "0px";
 			editorDiv.appendChild(scrollDiv);
 
-			if (isPad) {
+			this._fullSelection = options.fullSelection === undefined || options.fullSelection;
+			if (isPad || (this._fullSelection && !isWebkit)) {
 				var selDiv1 = document.createElement("DIV");
 				this._selDiv1 = selDiv1;
 				selDiv1.id = "selDiv1";
@@ -3709,7 +3768,7 @@ eclipse.Editor = (function() {
 				selDiv1.style.padding = "0px";
 				selDiv1.style.MozOutline = "none";
 				selDiv1.style.outline = "none";
-				selDiv1.style.background = "lightblue";
+				selDiv1.style.background = "Highlight";
 				selDiv1.style.width="0px";
 				selDiv1.style.height="0px";
 				scrollDiv.appendChild(selDiv1);
@@ -3722,7 +3781,7 @@ eclipse.Editor = (function() {
 				selDiv2.style.padding = "0px";
 				selDiv2.style.MozOutline = "none";
 				selDiv2.style.outline = "none";
-				selDiv2.style.background = "lightblue";
+				selDiv2.style.background = "Highlight";
 				selDiv2.style.width="0px";
 				selDiv2.style.height="0px";
 				scrollDiv.appendChild(selDiv2);
@@ -3735,7 +3794,7 @@ eclipse.Editor = (function() {
 				selDiv3.style.padding = "0px";
 				selDiv3.style.MozOutline = "none";
 				selDiv3.style.outline = "none";
-				selDiv3.style.background = "lightblue";
+				selDiv3.style.background = "Highlight";
 				selDiv3.style.width="0px";
 				selDiv3.style.height="0px";
 				scrollDiv.appendChild(selDiv3);
@@ -3772,8 +3831,11 @@ eclipse.Editor = (function() {
 			if (!isPad) {
 				clientDiv.contentEditable = "true";
 			}
-			body.style.lineHeight = this._calculateLineHeight() + "px";
+			this._lineHeight = this._calculateLineHeight();
 			this._editorPadding = this._calculatePadding();
+			if (isIE) {
+				body.style.lineHeight = this._lineHeight + "px";
+			}
 			if (options.tabSize) {
 				if (isOpera) {
 					clientDiv.style.OTabSize = options.tabSize+"";
@@ -4042,35 +4104,39 @@ eclipse.Editor = (function() {
 				offset += nodeLength;
 				lineChild = lineChild.nextSibling;
 			}
-			var range;
 			
-			if (isPad) {
+			if (this._selDiv1) {
 				var startLineBounds, l;
-				range = document.createRange();
 				startLineBounds = this._getLineBoundingClientRect(startNode);
-				if (startOffset === startLineEnd) {
-					l = startLineBounds.right;
+				if (startOffset === 0) {
+					l = startLineBounds.left;
 				} else {
-					range.setStart(startLineNode, startLineOffset);
-					range.setEnd(startLineNode, startLineOffset + 1);
-					l = range.getBoundingClientRect().left;
+					if (startOffset >= startLineEnd) {
+						l = startLineBounds.right;
+					} else {
+						this._ignoreDOMSelection = true;
+						l = this._getBoundsAtOffset(model.getLineStart(startNode.lineIndex) + startOffset).left;
+						this._ignoreDOMSelection = false;
+					}
 				}
 				var textArea = this._textArea;
-				textArea.selectionStart = textArea.selectionEnd = 0;
-				var rect = this._frame.getBoundingClientRect();
-				var touchRect = this._touchDiv.getBoundingClientRect();
-				var editorBounds = this._editorDiv.getBoundingClientRect();
-				if (!(editorBounds.left <= l && l <= editorBounds.left + editorBounds.width &&
-					editorBounds.top <= startLineBounds.top && startLineBounds.top <= editorBounds.top + editorBounds.height) ||
-					!(startNode === endNode && startOffset === endOffset))
-				{
-					textArea.style.left = "-1000px";
-				} else {
-					textArea.style.left = (l - 4 + rect.left - touchRect.left) + "px";
+				if (textArea) {
+					textArea.selectionStart = textArea.selectionEnd = 0;
+					var rect = this._frame.getBoundingClientRect();
+					var touchRect = this._touchDiv.getBoundingClientRect();
+					var editorBounds = this._editorDiv.getBoundingClientRect();
+					if (!(editorBounds.left <= l && l <= editorBounds.left + editorBounds.width &&
+						editorBounds.top <= startLineBounds.top && startLineBounds.top <= editorBounds.top + editorBounds.height) ||
+						!(startNode === endNode && startOffset === endOffset))
+					{
+						textArea.style.left = "-1000px";
+					} else {
+						textArea.style.left = (l - 4 + rect.left - touchRect.left) + "px";
+					}
+					textArea.style.top = (startLineBounds.top + rect.top - touchRect.top) + "px";
+					textArea.style.width = "6px";
+					textArea.style.height = (startLineBounds.bottom - startLineBounds.top) + "px";
 				}
-				textArea.style.top = (startLineBounds.top + rect.top - touchRect.top) + "px";
-				textArea.style.width = "6px";
-				textArea.style.height = (startLineBounds.bottom - startLineBounds.top) + "px";
 			
 				var selDiv = this._selDiv1;
 				selDiv.style.width = "0px";
@@ -4082,52 +4148,72 @@ eclipse.Editor = (function() {
 				selDiv.style.width = "0px";
 				selDiv.style.height = "0px";
 				if (!(startNode === endNode && startOffset === endOffset)) {
-					var handleWidth = 2;
+					var handleWidth = isPad ? 2 : 0;
 					var handleBorder = handleWidth + "px blue solid";
-					var clientBounds = this._clientDiv.getBoundingClientRect();
-					var left = clientBounds.left;
-					var right = clientBounds.right;
-					selDiv = this._selDiv1;
-					selDiv.style.left = l + "px";
-					selDiv.style.top = startLineBounds.top + "px";
-					selDiv.style.width = (right - l) + "px";
-					selDiv.style.height = (startLineBounds.bottom - startLineBounds.top + 1) + "px";
-					selDiv.style.borderLeft = handleBorder;
-					selDiv.style.borderRight = "0px";
+					var editorPad = this._getEditorPadding();
+					var clientRect = this._clientDiv.getBoundingClientRect();
+					var editorRect = this._editorDiv.getBoundingClientRect();
+					var left = editorRect.left + editorPad.left;
+					var right = clientRect.right;
+					var top = editorRect.top + editorPad.top;
+					var bottom = clientRect.bottom;
 					var r;
 					var endLineBounds = this._getLineBoundingClientRect(endNode);
 					if (endOffset === 0) {
 						r = endLineBounds.left;
 					} else {
-						if (endLineOffset === 0) {
-							endLineNode = endLineNode.parentNode.previousSibling.firstChild;
-							endLineOffset = endLineNode.length;
+						if (endOffset >= endLineEnd) {
+							r = endLineBounds.right;
+						} else {
+							this._ignoreDOMSelection = true;
+							r = this._getBoundsAtOffset(model.getLineStart(endNode.lineIndex) + endOffset).left;
+							this._ignoreDOMSelection = false;
 						}
-						range.setStart(endLineNode, endLineOffset - 1);
-						range.setEnd(endLineNode, endLineOffset);
-						r = range.getBoundingClientRect().right;
+					}
+					var sel1Div = this._selDiv1;
+					var sel1Left = Math.min(right, Math.max(left, l));
+					var sel1Top = Math.min(bottom, Math.max(top, startLineBounds.top));
+					var sel1Right = right;
+					var sel1Bottom = Math.min(bottom, Math.max(top, startLineBounds.bottom));
+					sel1Div.style.left = sel1Left + "px";
+					sel1Div.style.top = sel1Top + "px";
+					sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px";
+					sel1Div.style.height = Math.max(0, sel1Bottom - sel1Top) + (isPad ? 1 : 0) + "px";
+					if (isPad) {
+						sel1Div.style.borderLeft = handleBorder;
+						sel1Div.style.borderRight = "0px";
 					}
 					if (startNode === endNode) {
-						selDiv.style.width = (r - l - handleWidth * 2) + "px";
-						selDiv.style.borderRight = handleBorder;
+						sel1Right = Math.min(r, right);
+						sel1Div.style.width = Math.max(0, sel1Right - sel1Left - handleWidth * 2) + "px";
+						if (isPad) {
+							sel1Div.style.borderRight = handleBorder;
+						}
 					} else {
-						selDiv = this._selDiv3;
-						selDiv.style.left = left + "px";
-						selDiv.style.top = endLineBounds.top + "px";
-						selDiv.style.width = (r - left - handleWidth) + "px";
-						selDiv.style.height = (endLineBounds.bottom - endLineBounds.top) + "px";
-						selDiv.style.borderRight = handleBorder;
-						if (endNode.lineIndex - startNode.lineIndex > 1) {
-							selDiv = this._selDiv2;
-							selDiv.style.left = startLineBounds.left + "px";
-							selDiv.style.top = startLineBounds.bottom + "px";
-							selDiv.style.width = (right - left) + "px";
-							selDiv.style.height = (endLineBounds.top - startLineBounds.bottom + 1) + "px";
+						var sel3Left = left;
+						var sel3Top = Math.min(bottom, Math.max(top, endLineBounds.top));
+						var sel3Right = Math.min(right, Math.max(left, r));
+						var sel3Bottom = Math.min(bottom, Math.max(top, endLineBounds.bottom));
+						var sel3Div = this._selDiv3;
+						sel3Div.style.left = sel3Left + "px";
+						sel3Div.style.top = sel3Top + "px";
+						sel3Div.style.width = Math.max(0, sel3Right - sel3Left - handleWidth) + "px";
+						sel3Div.style.height = Math.max(0, sel3Bottom - sel3Top) + "px";
+						if (isPad) {
+							sel3Div.style.borderRight = handleBorder;
+						}
+						if (sel3Top - sel1Bottom > 0) {
+							var sel2Div = this._selDiv2;
+							sel2Div.style.left = left + "px";
+							sel2Div.style.top = sel1Bottom + "px";
+							sel2Div.style.width = Math.max(0, right - left) + "px";
+							sel2Div.style.height = Math.max(0, sel3Top - sel1Bottom) + (isPad ? 1 : 0) + "px";
 						}
 					}
 				}
-				return;
+				if (isPad) { return; }
 			}
+			var range;
 			if (window.getSelection) {
 				//W3C
 				range = document.createRange();

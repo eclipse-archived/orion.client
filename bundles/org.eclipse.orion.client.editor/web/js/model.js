@@ -216,7 +216,7 @@ eclipse.TextModel = (function() {
 				if (includeDelimiter) {
 					return end;
 				}
-				var text = this.getText(Math.max(0, end - 2), end);
+				var text = this.getText(Math.max(this._lineOffsets[lineIndex], end - 2), end);
 				var i = text.length, c;
 				while (((c = text.charCodeAt(i - 1)) === 10) || (c === 13)) {
 					i--;
