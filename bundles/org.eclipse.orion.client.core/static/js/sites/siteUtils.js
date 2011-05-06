@@ -102,14 +102,14 @@ eclipse.sites.util = {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
 			callback: function(item) {
-				statusService.setMessage("Starting...");
 				// Just update the HostingStatus
 				var newItem = {
 					HostingStatus: {
 						Status: "started"
 					}
 				};
-				siteService.updateSiteConfiguration(item.Location, newItem).then(startCallback, errorCallback);
+				var deferred = siteService.updateSiteConfiguration(item.Location, newItem).then(startCallback, errorCallback);
+				statusService.showWhile(deferred, "Starting...");
 			}});
 		commandService.addCommand(startCommand, "object");
 		
@@ -121,13 +121,13 @@ eclipse.sites.util = {
 				return item.HostingStatus && item.HostingStatus.Status === "started";
 			},
 			callback: function(item) {
-				statusService.setMessage("Stopping " + item.Name + "...");
 				var newItem = {
 					HostingStatus: {
 						Status: "stopped"
 					}
 				};
-				siteService.updateSiteConfiguration(item.Location, newItem).then(stopCallback, errorCallback);
+				var deferred = siteService.updateSiteConfiguration(item.Location, newItem).then(stopCallback, errorCallback);
+				statusService.showWhile(deferred, "Stopping " + item.Name + "...");
 			}});
 		commandService.addCommand(stopCommand, "object");
 		
