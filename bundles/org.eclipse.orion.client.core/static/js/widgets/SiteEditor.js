@@ -55,8 +55,8 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 			callback: function(item) {
 				// "this" is {widgets.MappingsGrid}
 				this._hideTooltip();
-				this.get("store").deleteItem(item);
-				this.get("store").save();
+				this.store.deleteItem(item);
+				this.store.save();
 				this.render();
 			}});
 		this._commandService.addCommand(deleteMappingCommand, "object");
@@ -85,7 +85,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		var store = new dojo.data.ItemFileWriteStore({
 			data: {
 				items: dojo.map(mappings, dojo.hitch(this, function(mapping) {
-					return this._createMappingObject(mapping.Source, mapping.Target);
+					return this._createStoreObject(mapping.Source, mapping.Target);
 				}))
 			}
 		});
@@ -104,6 +104,10 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 			saveCompleteCallback();
 		});
 		return store;
+	},
+	
+	_createStoreObject: function(source, target) {
+		return {Source: source, Target: target, _friendlyPath: null /*see _friendlyPathFormatter*/};
 	},
 	
 	_createMappingObject: function(source, target) {
@@ -132,10 +136,11 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 					var rowNode = that._getRowNodeForItem(newItem);
 					if (rowNode) {
 						var cols = dojo.query("td", rowNode);
-						var mountAtCol = cols[2];
+						var mountAtCol = cols[1];
 						var thePath = that._toReadablePath(rowNode);
-						var message = "Click to set the server path where <b>" + thePath + "</b> will be accessible";
+						var message = "Click to set the remote path where <b>" + thePath + "</b> will be accessible.";
 						dijit.showTooltip(message, mountAtCol, "above");
+						dojo.connect("onclick", dojo.hitch(dijit._masterTT, dijit._masterTT.hide, dijit._masterTT.aroundNode));
 					}
 				}, 1);
 			}});
@@ -143,23 +148,16 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	
 	_toReadablePath: function(/**DomNode*/ rowNode) {
 		var cols = dojo.query("td", rowNode);
-		if (cols.length === 4) {
-			var target = eclipse.util.getText(cols[1]);
-			if (this._isWorkspacePath(target)) {
-				return eclipse.util.getText(cols[0]);
-			}
-			return target;
-		}
+		return eclipse.util.getText(cols[0]);
 	},
 	
 	postCreate: function() {
 		this.inherited(arguments);
 		var structure = [
-				{field: "_item", name: "Workspace path", editable: false,
-						width: "16em", cellClasses: "workspacePathCell",
-						formatter: dojo.hitch(this, this._workspacePathFormatter)},
-				{field: "Target", name: "Target", editable: true, commitOnBlur: true,
-						width: "16em", cellClasses: "editablePathCell"},
+				// TODO add "valid?" column here
+				{field: "_friendlyPath", name: "Path", editable: true, commitOnBlur: true,
+						width: "16em", cellClasses: "pathCell",
+						formatter: dojo.hitch(this, this._friendlyPathFormatter)},
 				{field: "Source", name: "Mount at", editable: true, commitOnBlur: true,
 						width: "16em", cellClasses: "editablePathCell"},
 				{field: "_item", name: " ", editable: false, 
@@ -188,18 +186,34 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		return eclipse.util.getText(document.createTextNode(text));
 	},
 	
-	_isWorkspacePath: function(/**String*/ target) {
-		return new RegExp("^/").test(target);
+	_isWorkspacePath: function(/**String*/ path) {
+		return new RegExp("^/").test(path);
 	},
 	
 	/**
-	 * If the mapping Target looks like a workspace path, this checks that the folder (first segment)
-	 * exists, and puts a link (or an error message) in the column.
+	 * Returns the _friendlyPath field value. This is a virtual field -- kept in the store for display but not
+	 * saved to SiteConfig model. _friendlyPath's value is the same as Target except when Target is a workspace
+	 * path: in this case _friendlyPath refers to the project by its user-visible Name rather than the cryptic 
+	 * project UUID. Changes made by user to _friendlyPath are pushed into the Target field, which is persisted.
+	 * 
 	 * @returns {String | dojo.Deferred}
 	 */
-	_workspacePathFormatter: function(item) {
-		var target =  this.store.getValue(item, "Target");
-		if (this._isWorkspacePath(target)) {
+	_friendlyPathFormatter: function(/**String*/ friendlyPath, /**Number*/ rowIndex, /**Object*/ inCell) {
+		var item = this.getItem(rowIndex);
+		var target = this.store.getValue(item, "Target");
+		
+		var setFriendlyPath, fieldToUse;
+		if (!(friendlyPath)) {
+			// Friendly path needs to be set
+			setFriendlyPath = true;
+			fieldToUse = target;
+		} else {
+			// Target needs to be set
+			setFriendlyPath = false;
+			fieldToUse = friendlyPath;
+		}
+		
+		if (this._isWorkspacePath(fieldToUse)) {
 			var deferred = new dojo.Deferred();
 			dojo.when(this._editor._workspaceToChildren, dojo.hitch(this, 
 				function(map) {
@@ -208,23 +222,60 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 					var folderExists = false;
 					for (var i=0; i < children.length; i++) {
 						var child = children[i];
-						var path = eclipse.sites.util.makeRelativeFilePath(child.Location);
-						// Match if target is "/path/something" or just "/path"
-						if (target.indexOf(path + "/") === 0 || target === path) {
-							folderExists = true;
-							var rest = target.substring(path.length);
-							var linkText = "/" + child.Name + rest;
-							var href = child.Location + (rest === "" ? "" : rest.substring(1));
-							deferred.callback('<a href="' + this._makeSafe(href) + '">' + this._makeSafe(linkText) + '</a>');
+						var childLoc = eclipse.sites.util.makeRelativeFilePath(child.Location);
+						if (setFriendlyPath) {
+							if (this._pathMatch(target, childLoc)) {
+								folderExists = true;
+								// Change Target to friendly format, then save to _friendlyPath
+								var newFriendlyPath = "/" + child.Name + target.substring(childLoc.length);
+								this.store.setValue(item, "_friendlyPath", newFriendlyPath);
+								deferred.callback(this._makeSafe(newFriendlyPath));
+//								console.debug("Resolving to " + newFriendlyPath);
+								break;
+							}
+						} else {
+							var childName = "/" + child.Name;
+							if (this._pathMatch(friendlyPath, childName)) {
+								folderExists = true;
+								// Change friendly path back to internal format, then save to Target
+								var rest = friendlyPath.substring(childName.length);
+								var newTarget = childLoc + rest;
+								this.store.setValue(item, "Target", newTarget);
+								deferred.callback(this._makeSafe(friendlyPath));
+//								console.debug("Resolving to " + friendlyPath);
+								break;
+							}
 						}
 					}
+					
 					if (!folderExists) {
-						deferred.callback('<div class="workspacePathError">Not found</span>');
+						var result;
+						if (setFriendlyPath) {
+							result = target;
+							this.store.setValue(item, "_friendlyPath", target);
+						} else {
+							// Friendly path points to something nonexistent, but need to update the Target anyway
+							result = friendlyPath;
+							this.store.setValue(item, "Target", friendlyPath);
+						}
+//						console.debug("resolving to " + result);
+						deferred.callback(this._makeSafe(result));
 					}
 				}));
 			return deferred;
 		}
-		return '<div class="workspacePathError">Not a workspace path</span>';
+		// Not workspace path
+		if (setFriendlyPath) {
+			this.store.setValue(item, "_friendlyPath", fieldToUse);
+		} else {
+			this.store.setValue(item, "Target", fieldToUse);
+		}
+		return fieldToUse;
+	},
+	
+	/** @returns true if b is a sub-path of a */
+	_pathMatch: function(a, b) {
+		return a === b || a.indexOf(b + "/") === 0;
 	},
 	
 	_actionColumnFormatter: function(item) {
