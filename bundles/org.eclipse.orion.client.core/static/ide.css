@@ -181,8 +181,9 @@ a:hover {
 }
 
 .nihilo .dijitDialogTitleBar {
-    background: #5c5c5c;
-    color: white;
+    background: #white;
+    color: #black;
+    font: 8px;
     outline: 0 none;
     padding: 5px 6px 3px;
 }
