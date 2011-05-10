@@ -115,7 +115,7 @@ eclipse.globalCommandUtils.generateUserInfo = function(userName, userStatusText)
 		} else {
 			var signout = document.createElement('span');
 			signout.appendChild(document.createTextNode("Sign in"));
-			signout.onclick = login;
+			signout.onclick = function(){login();};
 			signout.id = "signOutUser";
 			userInfo.appendChild(signout);
 			dojo.addClass(signout, "commandLink");
