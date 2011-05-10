@@ -17,14 +17,12 @@
 }
 
 .commandLink:visited {
-	margin-left: 4px;
-	margin-right: 4px;
+	margin-right: 12px;
 	cursor: pointer;
 }
 
 .commandLink:hover {
-	margin-left: 4px;
-	margin-right: 4px;
+	margin-right: 12px;
 	cursor: hand;
 	text-decoration: underline;
 }
