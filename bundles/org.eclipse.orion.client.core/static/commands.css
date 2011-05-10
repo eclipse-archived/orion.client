@@ -12,20 +12,17 @@
 }
 
 .commandLink {
-	margin-left: 4px;
-	margin-right: 4px;
+	margin-right: 12px;
 	cursor: pointer;
 }
 
 .commandLink:visited {
-	margin-left: 4px;
-	margin-right: 4px;
+	margin-right: 12px;
 	cursor: pointer;
 }
 
 .commandLink:hover {
-	margin-left: 4px;
-	margin-right: 4px;
+	margin-right: 12px;
 	cursor: hand;
 	text-decoration: underline;
 }
@@ -41,6 +38,11 @@
     color: black;
     font-family: sans-serif;
     margin: 0;
+}
+
+.nihilo .dijitDropDownButton, .nihilo .dijitComboButton {
+	vertical-align: baseline;
+	margin: 0;
 }
 
 .nihilo .dijitMenuPassive .dijitMenuItemHover, .nihilo .dijitMenuItemSelected {

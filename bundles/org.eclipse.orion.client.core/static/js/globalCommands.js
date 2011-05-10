@@ -24,7 +24,7 @@ var topHTMLFragment =
 	'<tr class="topRowBanner">' +
 		'<td width=93px rowspan=2><a id="home" href="/index.html"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
 		'<td class="leftGlobalToolbar">' +
-			'<span class="bannerSeparator">|</span>' +
+			'<span class="bannerSeparator"></span>' +
 			'<span id="pageTitle" class="statuspane"></span>' +
 			'<span class="bannerSeparator">  </span>' +  // empty space between title and status
 			'<span class="statuspane" id="statusPane"></span>' +
@@ -40,7 +40,7 @@ var topHTMLFragment =
 	'<tr class="bottomRowBanner">' +
 		'<td colspan=2 id="pageToolbar" class="pageToolbar">' +
 			'<div style="float: left;">' +
-				'<span id="pageActionHolder" class="pageActionSeparator">|</span>' +
+				'<span id="pageActionHolder" class="pageActionSeparator"></span>' +
 				'<span id="pageActions" class="pageActions"></span>' +
 			'</div>' +
 			'<div style="float: right;">' +
@@ -115,7 +115,7 @@ eclipse.globalCommandUtils.generateUserInfo = function(userName, userStatusText)
 		} else {
 			var signout = document.createElement('span');
 			signout.appendChild(document.createTextNode("Sign in"));
-			signout.onclick = login;
+			signout.onclick = function(){login();};
 			signout.id = "signOutUser";
 			userInfo.appendChild(signout);
 			dojo.addClass(signout, "commandLink");
@@ -214,6 +214,16 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 			openResourceDialog(searchLocation, searcher, editor);
 		}});
 		
+	dojo.connect(window.document, "onkeydown", function (evt){
+		evt = evt || window.event;
+		// HACK!  Fix when doing https://bugs.eclipse.org/bugs/show_bug.cgi?id=334200
+		if (evt.target.nodeName.toLowerCase() === 'input') {
+			return;
+		}
+		if (evt.keyCode  === 84){ // "t" handler for open resource
+			openResourceDialog(searchLocation, searcher, editor);
+		}
+	});
 		
 	if (editor) {
 		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("r", true, true, false), openResourceCommand.id);
@@ -223,7 +233,8 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 			});
 	}
 	commandService.addCommand(openResourceCommand, "global");
-	commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions");
+	// don't show this on the main toolbar anymore
+	// commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions");
 	
 	// generate global commands
 	var toolbar = dojo.byId("globalActions");

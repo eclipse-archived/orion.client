@@ -260,7 +260,7 @@ eclipse.CommandService = (function() {
 										label: group.title,
 										dropDown: newMenu
 								        });
-									dojo.addClass(menuButton.domNode, "commandImage");
+									dojo.addClass(menuButton.domNode, "commandLink");
 							        if (cssClass) {
 										dojo.addClass(menuButton.domNode, cssClass);
 							        } 
@@ -422,6 +422,7 @@ eclipse.Command = (function() {
 			handler = handler || this;
 			var image = new Image();
 			var link = dojo.create("a");
+			link.id = this.name+"link";
 			image.alt = this.name;
 			image.title = this.name;
 			image.name = name;
@@ -446,7 +447,7 @@ eclipse.Command = (function() {
 					});
 				} else {
 					dojo.connect(link, "onclick", this, function() {
-						this.callback.call(handler, items, this.id, image.id, userData);
+						this.callback.call(handler, items, this.id, link.id, userData);
 					});
 				}
 			}
@@ -487,9 +488,10 @@ eclipse.Command = (function() {
 			var anchor = document.createElement('a');
 			dojo.place(document.createTextNode(this.name), anchor, "only");
 			anchor.href="";
+			anchor.id = this.id+"link";
 			if (this.callback) {
 				dojo.connect(anchor, "onclick", this, function() {
-					this.callback.call(handler, items);
+					this.callback.call(handler, items, this.id, anchor.id);
 				});
 			} else if (this.hrefCallback) {
 				var href = this.hrefCallback.call(handler, items, this.id);
@@ -530,7 +532,7 @@ eclipse.Command = (function() {
 				}
 			} else if (this.callback) {
 				menuitem.onClick = dojo.hitch(this, function() {
-					this.callback.call(handler, items, this.id, parent.id, userData);
+					this.callback.call(handler, items, this.id, null, userData);
 				});
 			}
 			
