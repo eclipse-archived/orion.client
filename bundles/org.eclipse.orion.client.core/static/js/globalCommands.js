@@ -214,6 +214,16 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 			openResourceDialog(searchLocation, searcher, editor);
 		}});
 		
+	dojo.connect(window.document, "onkeydown", function (evt){
+		evt = evt || window.event;
+		// HACK!  Fix when doing https://bugs.eclipse.org/bugs/show_bug.cgi?id=334200
+		if (evt.target.nodeName.toLowerCase() === 'input') {
+			return;
+		}
+		if (evt.keyCode  === 84){ // "t" handler for open resource
+			openResourceDialog(searchLocation, searcher, editor);
+		}
+	});
 		
 	if (editor) {
 		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("r", true, true, false), openResourceCommand.id);
@@ -223,7 +233,8 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 			});
 	}
 	commandService.addCommand(openResourceCommand, "global");
-	commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions");
+	// don't show this on the main toolbar anymore
+	// commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions");
 	
 	// generate global commands
 	var toolbar = dojo.byId("globalActions");
