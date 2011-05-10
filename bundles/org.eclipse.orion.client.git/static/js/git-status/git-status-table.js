@@ -357,7 +357,7 @@ orion.GitStatusController = (function() {
 											commitURI:groupData[j].Git.CommitLocation,
 											indexURI:groupData[j].Git.IndexLocation,
 											diffURI:groupData[j].Git.DiffLocation,
-											conflicting:groupData[j].Conflicting 
+											conflicting:this._model.isConflict(renderType)
 						});
 					}
 				} 
