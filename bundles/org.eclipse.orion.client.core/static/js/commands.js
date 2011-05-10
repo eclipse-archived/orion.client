@@ -260,7 +260,7 @@ eclipse.CommandService = (function() {
 										label: group.title,
 										dropDown: newMenu
 								        });
-									dojo.addClass(menuButton.domNode, "commandImage");
+									dojo.addClass(menuButton.domNode, "commandLink");
 							        if (cssClass) {
 										dojo.addClass(menuButton.domNode, cssClass);
 							        } 

@@ -40,6 +40,11 @@
     margin: 0;
 }
 
+.nihilo .dijitDropDownButton, .nihilo .dijitComboButton {
+	vertical-align: baseline;
+	margin: 0;
+}
+
 .nihilo .dijitMenuPassive .dijitMenuItemHover, .nihilo .dijitMenuItemSelected {
     background-color: #fedda7;
     color: black;
