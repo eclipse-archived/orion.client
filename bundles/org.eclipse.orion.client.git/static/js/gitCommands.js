@@ -75,14 +75,43 @@ dojo.require("widgets.GitCredentialsDialog");
 			});
 		}
 	};
+	eclipse.gitCommandUtils.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title, gitUrl){
+					var credentialsDialog = new widgets.GitCredentialsDialog({
+								title: title,
+								url: gitUrl,
+								serviceRegistry: serviceRegistry,
+								func: func
+							});		
+					credentialsDialog.startup();
+					credentialsDialog.show();
+	};
 	
-	eclipse.gitCommandUtils.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee){
+	eclipse.gitCommandUtils.getDefaultSshOptions = function(serviceRegistry){
+		var def = new dojo.Deferred();
+		serviceRegistry.getService("ISshService").then(function(sshService) {
+			sshService.getKnownHosts().then(function(knownHosts){
+				def.callback({
+							knownHosts: knownHosts,
+							gitSshUsername: "",
+							gitSshPassword: "",
+							gitPrivateKey: "",
+							gitPassphrase: ""
+				});
+			});
+		});
+		return def;
+	};
+	
+	eclipse.gitCommandUtils.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee, title, gitUrl){
 		if(jsonData.Running==false){
 			if(jsonData.Result && jsonData.Result.HttpCode==403){
 				if(jsonData.Result.ErrorData && jsonData.Result.ErrorData.HostKey){
 					dojo.hitch(this, eclipse.gitCommandUtils.handleKnownHostsError)(serviceRegistry, jsonData.Result.ErrorData, options, callee);
 					return;
 				}
+			} else if (jsonData.Result && jsonData.Result.HttpCode==401){
+				dojo.hitch(this, eclipse.gitCommandUtils.handleSshAuthenticationError)(serviceRegistry, jsonData.Result.ErrorData, options, callee, title, gitUrl);
+				return;
 			}
 			
 			if(jsonData.Result && jsonData.Result.HttpCode!=200){
@@ -105,12 +134,8 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
 				var dialog = new widgets.CloneGitRepositoryDialog({
-					func :function(gitUrl){
-						var credentialsDialog = new widgets.GitCredentialsDialog({
-								title: "Clone Git Repository",
-								url: gitUrl,
-								serviceRegistry: serviceRegistry,
-								func: function(options){
+					func : function(gitUrl){
+						eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 									var func = arguments.callee;
 									serviceRegistry.getService("IGitService").then(function(gitService) {
 										serviceRegistry.getService("IStatusReporter").then(function(progressService) {
@@ -122,17 +147,12 @@ dojo.require("widgets.GitCredentialsDialog");
 																if(explorer.redisplayClonesList){
 																	dojo.hitch(explorer, explorer.redisplayClonesList)();
 																}
-															}, func);
+															}, func, "Clone Git Repository", gitUrl);
 												});
 										});
 									});
-								}
-								
-						});
-						
-						credentialsDialog.startup();
-						credentialsDialog.show();	
-					}
+								});
+							}
 				});
 						
 				dialog.startup();
@@ -245,10 +265,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = dojo.hash();
-				var credentialsDialog = new widgets.GitCredentialsDialog({
-					title: "Fetch Git Repository",
-					serviceRegistry: serviceRegistry,
-					func: function(options){
+				eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
 						serviceRegistry.getService("IGitService").then(function(gitService) {
 							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
@@ -284,15 +301,11 @@ dojo.require("widgets.GitCredentialsDialog");
 															explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);			
 														});
 													});
-												}, func);
+												}, func, "Fetch Git Repository");
 									});
 							});
 						});
-					}
-				});
-			
-				credentialsDialog.startup();
-				credentialsDialog.show();	
+					});	
 			},
 			visibleWhen : function(item) {
 				return true;
@@ -361,10 +374,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				var path = dojo.hash();
-				var credentialsDialog = new widgets.GitCredentialsDialog({
-					title: "Push Git Repository",
-					serviceRegistry: serviceRegistry,
-					func: function(options){
+				eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
 						serviceRegistry.getService("IGitService").then(function(gitService) {
 							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
@@ -376,15 +386,11 @@ dojo.require("widgets.GitCredentialsDialog");
 													dojo.query(".treeTableRow").forEach(function(node, i) {
 														dojo.toggleClass(node, "outgoingCommitsdRow", false);
 													});
-											}, func);
+											}, func, "Push Git Repository");
 									});
 								});
 							});
-						}
 				});
-			
-				credentialsDialog.startup();
-				credentialsDialog.show();	
 			},
 			visibleWhen : function(item) {
 				return explorer.isRoot;
