@@ -22,6 +22,31 @@ var eclipse = eclipse || {};
  
 eclipse.util = eclipse.util || {};
 
+eclipse.util.openDialog = function(dialog, refNode) {
+	dialog.startup();
+	if (typeof refNode === "string") {
+		var node = dojo.byId(refNode);
+		if (!node) {
+			node = dijit.byId(refNode);
+			if (node) {
+				node = node.domNode;
+			}
+		}
+		if (node) {
+			refNode = node;
+		} else {
+			refNode = null;
+		}
+	}
+	if (refNode) {
+		var pos= dojo.position(refNode); 
+		// reaching into internal methods.  It seems there is not a public way.
+		dialog._setStyleAttr("left:" + (pos.x + 16) + "px !important;");
+		dialog._setStyleAttr("top:" + (pos.y + 16) + "px !important;");
+	}
+	dialog.show();
+};
+
 eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy, promptMessage, selectTo) {
 	/** @return function(event) */
 	var handler = function(isKeyEvent) {

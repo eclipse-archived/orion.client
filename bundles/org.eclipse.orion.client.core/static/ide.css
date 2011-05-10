@@ -5,7 +5,7 @@ html {
 html, body {
 	margin: 0;
 	padding: 0;
-	font-size: 12px;
+	font: 12px Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
 }
 
 h1 {
@@ -126,6 +126,7 @@ a:hover {
 }
 
 .navTableHeading {
+	color: #404040;
 	border-bottom: 1px solid #404040;
 }
 
@@ -140,9 +141,9 @@ a:hover {
 }
 
 .paneHeading {
-	font-size: 1.1em;
+	font-size: 1.2em;
 	font-weight: bold;
-	color: #6d6d6d;
+	color: #404040;;
 	vertical-align: middle;
 }
 
@@ -153,7 +154,7 @@ a:hover {
 }
 
 .paneHeadingContainer {
-	border-bottom: 1px solid #6d6d6d;
+	border-bottom: 1px dotted #6d6d6d;
 	height: 30px;
 }
 
@@ -181,8 +182,9 @@ a:hover {
 }
 
 .nihilo .dijitDialogTitleBar {
-    background: #5c5c5c;
-    color: white;
+    background: #white;
+    color: #black;
+    font: 8px;
     outline: 0 none;
     padding: 5px 6px 3px;
 }
