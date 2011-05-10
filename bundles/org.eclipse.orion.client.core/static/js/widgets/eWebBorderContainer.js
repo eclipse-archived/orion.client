@@ -44,7 +44,7 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 		}
 		var children = this.getChildren();
 		for (var i=0; i<children.length; i++) {
-			if (children[i].region && children[i].region === "leading") {
+			if (children[i].region && (children[i].region === "leading" || children[i].region === "left")) {
 				this._left = children[i].domNode;
 				return this._left;
 			}
@@ -99,7 +99,7 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 			for (var i=0; i<children.length; i++) {
 				if (children[i].region && children[i].region === "center") {
 					this._center = children[i].domNode;
-				} else if (children[i].region && children[i].region === "leading") {
+				} else if (children[i].region && (children[i].region === "leading" || children[i].region === "left")) {
 					this._left = children[i].domNode;
 				}
 			}
