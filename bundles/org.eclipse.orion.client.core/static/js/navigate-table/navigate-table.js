@@ -70,7 +70,6 @@ dojo.addOnLoad(function(){
 				return d;
 			},
 			createProject: emptyObject,
-			removeProject: emptyObject,
 			createFolder: emptyObject,
 			createFile: emptyObject,
 			deleteFile: emptyObject,

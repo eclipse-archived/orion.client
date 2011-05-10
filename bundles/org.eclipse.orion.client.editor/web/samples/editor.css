@@ -37,13 +37,13 @@
 }
 
 .token_space {
-	background-image: url('/editor/samples/space.png');
+	background-image: url('/editor/samples/white_space.png');
 	background-repeat: no-repeat;
  	background-position: center center;
 }
 
 .token_tab {
-	background-image: url('/editor/samples/tab.png');
+	background-image: url('/editor/samples/white_tab.png');
 	background-repeat: no-repeat;
  	background-position: left center;
 }

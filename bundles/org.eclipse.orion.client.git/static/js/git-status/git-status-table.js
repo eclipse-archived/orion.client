@@ -14,7 +14,7 @@ orion.GitStatusModel = (function() {
 	function GitStatusModel() {
 		this.selectedFileId = undefined;
 		this.selectedItem = undefined;
-		this.interestedUnstagedGroup = ["Missing","Modified","Untracked"];
+		this.interestedUnstagedGroup = ["Missing","Modified","Untracked","Conflicting"];
 		this.interestedStagedGroup = ["Added", "Changed","Removed"];
 		this.conflictPatterns = [["Both","Modified","Added", "Changed","Missing"],["RemoteDelete","Untracked","Removed"],["LocalDelete","Modified","Added", "Missing"]];
 		this.conflictType = "Conflicting";
@@ -29,18 +29,20 @@ orion.GitStatusModel = (function() {
 		
 		init: function(jsonData){
 			this.items = jsonData;
+			/*
 			for(var i = 0; i < this.conflictPatterns.length ; i++ ){
 				this._markConflict(this.conflictPatterns[i]);
-			}
+			}*/
 		},
 		
 		getModelType: function(groupItem , groupName){
+			/*
 			if(groupItem.Conflicting){
 				if(groupItem.Conflicting === "Hide")
 					return undefined;
 				else
 					return this.conflictType;
-			}
+			}*/
 			return groupName;
 		},
 		

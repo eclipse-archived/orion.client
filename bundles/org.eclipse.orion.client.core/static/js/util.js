@@ -258,3 +258,35 @@ eclipse.util.processNavigatorParent = function(parent, children) {
 		return 0;
 	}); 
 };
+
+/**
+ * @param {DomNode} node
+ * @returns {String} The text contained by node. Note that treatment of whitespace 
+ * and child nodes is not consistent across browsers.
+ */
+eclipse.util.getText = function(node) {
+	return typeof(node.textContent) !== "undefined" ? node.textContent : node.innerText;
+};
+
+/**
+ * Escapes HTML in string. Use this to sanitize user input that is destined for innerHTML.
+ * @param {String} string
+ * @returns {String} The string with HTML safely escaped.
+ */
+eclipse.util.safeText = function(string) {
+	return eclipse.util.getText(document.createTextNode(text));
+};
+
+/**
+ * Removes all children of node and replaces them with a single text node containing text.
+ * HTML is safely escaped.
+ * @param {DomNode} node
+ * @param {String} text
+ */
+eclipse.util.setText = function(node, text) {
+	if (typeof(node.textContent) !== "undefined") {
+		node.textContent = text;
+	} else {
+		node.innerText = text;
+	}
+};

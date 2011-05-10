@@ -163,27 +163,6 @@ eclipse.FileServiceImpl= (function() {
 			});
 		},
 		/**
-		 * Removes a project from a workspace. Note that project contents are not deleted.
-		 * @param {String} workspaceLocation The workspace URL
-		 * @param {String} projectLocation The location of the project to be removed
-		 * @return A deferred that can be used to chain events after the deletion completes
-		 */
-		removeProject: function(workspaceLocation, projectLocation) {
-			return dojo.xhrPost({
-				url: workspaceLocation,
-				headers: {
-					"Orion-Version": "1",
-					"Content-Type": "application/json"
-				},
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					return jsonData;
-				},
-				postData: dojo.toJson({ProjectURL: projectLocation, Remove: true})
-			});
-		},
-		/**
 		 * Creates a folder.
 		 * @param {String} parentLocation The location of the parent folder
 		 * @param {String} folderName The name of the folder to create
@@ -237,7 +216,7 @@ eclipse.FileServiceImpl= (function() {
 			});
 		},
 		/**
-		 * Deletes a file or directory.
+		 * Deletes a file, directory, or project.
 		 * @param {String} location The location of the file or directory to delete.
 		 */
 		deleteFile: function(location) {

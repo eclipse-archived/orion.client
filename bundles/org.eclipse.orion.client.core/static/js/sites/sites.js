@@ -73,7 +73,9 @@ dojo.addOnLoad(function() {
 						title: "Create Site Configuration",
 						serviceRegistry: serviceRegistry,
 						func: function(name, workspace) {
-							siteService.createSiteConfiguration(name, workspace).then(refresher);
+							siteService.createSiteConfiguration(name, workspace).then(function(site) {
+								window.location = eclipse.sites.util.generateEditSiteHref(site);
+							}, errorHandler);
 						}});
 					dialog.startup();
 					dialog.show();

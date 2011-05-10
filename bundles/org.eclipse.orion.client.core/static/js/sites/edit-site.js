@@ -83,15 +83,14 @@ dojo.addOnLoad(function() {
 				fileClient: fileClient,
 				siteService: siteService,
 				commandService: commandService,
+				statusService: statusService,
 				id: "site-editor"});
 			dojo.place(widget.domNode, dojo.byId("site"), "only");
 			widget.startup();
 			
-			dojo.connect(widget, "onError", function(error) {
-				statusService.setMessage(JSON.stringify(error));
-			});
-			dojo.connect(widget, "onMessage", function(message) {
-				statusService.setMessage(message, 3000);
+//			dojo.connect(widget, "onError", function(error) {
+//			});
+			dojo.connect(widget, "onSuccess", function(message) {
 				updateTitle();
 			});
 			

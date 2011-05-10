@@ -1751,7 +1751,6 @@ var demoData = [
 	 "		<meta name=\"copyright\" content=\"Copyright (c) IBM Corporation and others 2010.\" >\r\n" + 
 	 "		<meta http-equiv=\"Content-Language\" content=\"en-us\">\r\n" + 
 	 "		<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">\r\n" + 
-	 "		<meta http-equiv=\"X-UA-Compatible\" content=\"IE=8\">\r\n" + 
 	 "    	<title>Orion Navigator</title>    \r\n" + 
 	 "    \r\n" + 
 	 "    <script type=\"text/javascript\">\r\n" + 
@@ -1849,7 +1848,6 @@ var demoData = [
 	 "@@ -5,24 +5,21 @@\r\n" + 
 	 " 		<meta http-equiv=\"Content-Language\" content=\"en-us\">\r\n" + 
 	 " 		<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">\r\n" + 
-	 " 		<meta http-equiv=\"X-UA-Compatible\" content=\"IE=8\">\r\n" + 
 	 "-    	<title>Orion Navigator</title>    \r\n" + 
 	 "+    	<title>Git Status</title>    \r\n" + 
 	 "     \r\n" + 

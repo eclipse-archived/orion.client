@@ -336,12 +336,25 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 					}
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
-						if (item.parent.Path === "" || item.parent.Path === "/file/") {
-							fileClient.removeProject(item.parent.Location, item.Location).then(
-								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
-						} else {
-							fileClient.deleteFile(item.Location).then(
-								dojo.hitch(explorer, function() {explorer.changedItem(item.parent);}));//refresh the parent
+						var deleteLocation = item.Location;
+						var refreshItem = item.parent;
+						if (item.parent.Projects) {
+							//special case for deleting a project. We want to remove the 
+							//project rather than delete the project's content
+							refreshItem = this.treeRoot;
+							deleteLocation = null;
+							for (var p=0; p < item.parent.Projects.length; p++) {
+								var project = item.parent.Projects[p];
+								if (project.Id === item.Id) {
+									deleteLocation = project.Location;
+									break;
+								}
+							}
+						}
+						if (deleteLocation) {
+							fileClient.deleteFile(deleteLocation).then(function() {
+								explorer.changedItem(refreshItem);
+							});
 						}
 					}
 				}));

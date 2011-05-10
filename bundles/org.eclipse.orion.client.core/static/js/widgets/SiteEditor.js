@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global dojo dijit dojox eclipse*/
-/*jslint browser:true*/
+/*jslint browser:true devel:true*/
 dojo.provide("widgets.SiteEditor");
 
 dojo.require("dijit.form.DropDownButton");
@@ -19,6 +19,7 @@ dojo.require("dijit.form.Textarea");
 dojo.require("dijit.form.ValidationTextBox");
 dojo.require("dijit.Menu");
 dojo.require("dijit.layout.ContentPane");
+dojo.require("dijit.Tooltip");
 dojo.require("dijit._Templated");
 dojo.require("dojo.data.ItemFileWriteStore");
 dojo.require("dojo.DeferredList");
@@ -32,7 +33,7 @@ dojo.require("dojox.grid.cells");
 dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	
 	/**
-	 * {Array} of Mappings. The model object being edited by this grid.
+	 * @type {Array} The model object being edited by this grid.
 	 */
 	_mappings: null,
 	
@@ -51,9 +52,11 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 			visibleWhen: function(item) {
 				return true;
 			},
-			callback: /** @this {widgets.MappingsGrid} */ function(item) {
-				this.get("store").deleteItem(item);
-				this.get("store").save();
+			callback: function(item) {
+				// "this" is {widgets.MappingsGrid}
+				this._hideTooltip();
+				this.store.deleteItem(item);
+				this.store.save();
 				this.render();
 			}});
 		this._commandService.addCommand(deleteMappingCommand, "object");
@@ -61,10 +64,10 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	},
 	
 	/**
-	 * @param mappings The Mappings field of a site configuration
+	 * @param {Array} mappings The Mappings field of a site configuration
 	 */
 	setMappings: function(mappings) {
-		// Hang onto the variable; will be mutated as user makes changes to grid store
+		// Hang onto mappings object; will be mutated as user makes changes to grid store
 		this._mappings = mappings;
 		this.setStore(this._createGridStore(mappings));
 	},
@@ -75,19 +78,19 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	},
 	
 	/**
-	 * @param mappings {Array}
+	 * @param {Array} mappings
 	 * @returns {dojo.data.ItemFileWriteStore} A store which will power the grid.
 	 */
 	_createGridStore: function(mappings) {
 		var store = new dojo.data.ItemFileWriteStore({
 			data: {
 				items: dojo.map(mappings, dojo.hitch(this, function(mapping) {
-					return this._createMappingObject(mapping.Source, mapping.Target);
+					return this._createStoreObject(mapping.Source, mapping.Target);
 				}))
 			}
 		});
 		dojo.connect(store, "setValue", store, function() {
-			// Save whenever user edits an attribute
+			// Save store whenever user edits an attribute
 			this.save();
 		});
 		store._saveEverything = dojo.hitch(this, function(saveCompleteCallback, saveFailedCallback, updatedContentString) {
@@ -97,40 +100,73 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 			dojo.forEach(content.items, dojo.hitch(this, function(item) {
 				this._mappings.push(this._createMappingObject(item.Source, item.Target));
 			}));
-			console.debug("Set Mappings to " + dojo.toJson(this._mappings));
+//			console.debug("Set Mappings to " + dojo.toJson(this._mappings));
 			saveCompleteCallback();
 		});
 		return store;
+	},
+	
+	_createStoreObject: function(source, target) {
+		return {Source: source, Target: target, _friendlyPath: null /*see _friendlyPathFormatter*/};
 	},
 	
 	_createMappingObject: function(source, target) {
 		return {Source: source, Target: target};
 	},
 	
-	// TODO implement as a Command
-	// TODO return deferred for when mapping is done being added so we can do focus tricks
+	_getRowNodeForItem: function(/** dojo.data.Item */ item) {
+		var rowIdx = this.getItemIndex(item);
+		return this.getRowNode(rowIdx);
+	},
+	
+	_hideTooltip: function() {
+		dijit.hideTooltip(dijit._masterTT && dijit._masterTT.aroundNode);
+	},
+	
 	_addMapping: function(source, target) {
 		source = typeof(source) === "string" ? source : "/mountPoint";
 		target = typeof(target) === "string" ? target : "/";
-		this.get("store").newItem(this._createMappingObject(source, target));
-		this.get("store").save();
+		var store = this.get("store");
+		var newItem = store.newItem(this._createMappingObject(source, target));
+		var that = this;
+		store.save({
+			onComplete: function() {
+				// This is probably not the best way to wait until the table has updated
+				setTimeout(function() {
+					var rowNode = that._getRowNodeForItem(newItem);
+					if (rowNode) {
+						var cols = dojo.query("td", rowNode);
+						var mountAtCol = cols[1];
+						var thePath = that._toReadablePath(rowNode);
+						var message = "Click to set the remote path where <b>" + thePath + "</b> will be accessible.";
+						dijit.showTooltip(message, mountAtCol, "above");
+						dojo.connect("onclick", dojo.hitch(dijit._masterTT, dijit._masterTT.hide, dijit._masterTT.aroundNode));
+					}
+				}, 1);
+			}});
+	},
+	
+	_toReadablePath: function(/**DomNode*/ rowNode) {
+		var cols = dojo.query("td", rowNode);
+		return eclipse.util.getText(cols[0]);
 	},
 	
 	postCreate: function() {
 		this.inherited(arguments);
 		var structure = [
-		 		{field: "_item", name: "Workspace path", editable: false,
-					width: "16em", formatter: dojo.hitch(this, this._workspacePathFormatter)},
-				{field: "Target", name: "Target", editable: true, commitOnBlur: true,
-						width: "16em", cellClasses: "pathCell"},
+				// TODO add "valid?" column here
+				{field: "_friendlyPath", name: "Path", editable: true, commitOnBlur: true,
+						width: "16em", cellClasses: "pathCell",
+						formatter: dojo.hitch(this, this._friendlyPathFormatter)},
 				{field: "Source", name: "Mount at", editable: true, commitOnBlur: true,
-						width: "16em", cellClasses: "pathCell"},
-				{field: "_item", name: " ", editable: false, cellClasses: "actionCell",
-						width: "32px", formatter: dojo.hitch(this, this._actionColumnFormatter)}
+						width: "16em", cellClasses: "editablePathCell"},
+				{field: "_item", name: " ", editable: false, 
+						cellClasses: "actionCell", width: "32px",
+						formatter: dojo.hitch(this, this._actionColumnFormatter)}
 			];
 		this.set("structure", structure);
 		
-		// Workaround for commitOnBlur not being handled correctly by dojox.grid.cells._Base 
+		// Workaround for commitOnBlur not working right see dojox/grid/cells/_base.js
 		dojo.connect(this, "onStartEdit", this, function(inCell, inRowIndex) {
 			var handle = dojo.connect(inCell, "registerOnBlur", inCell, function(inNode, inRowIndex) {
 				var handle2 = dojo.connect(inNode, "onblur", function(e) {
@@ -140,25 +176,44 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 				});
 			});
 		});
-		
+		dojo.connect(this, "onStartEdit", this, this._hideTooltip);
+		dojo.connect(this, "onResizeColumn", this, this._hideTooltip);
 		dojo.connect(this, "onStyleRow", this, this._renderCommands);
 	},
 	
+	/** Returns text node content */
+	_makeSafe: function(/**String*/ text) {
+		return eclipse.util.getText(document.createTextNode(text));
+	},
+	
+	_isWorkspacePath: function(/**String*/ path) {
+		return new RegExp("^/").test(path);
+	},
+	
 	/**
-	 * If the mapping Target looks like a workspace path, this checks that the folder
-	 * (first segment) exists, and puts a link (or an error message) in the column.
-	 * @returns String | dojo.Deferred (which will do the formatting as soon as 
-	 * workspace children are loaded)
+	 * Returns the _friendlyPath field value. This is a virtual field -- kept in the store for display but not
+	 * saved to SiteConfig model. _friendlyPath's value is the same as Target except when Target is a workspace
+	 * path: in this case _friendlyPath refers to the project by its user-visible Name rather than the cryptic 
+	 * project UUID. Changes made by user to _friendlyPath are pushed into the Target field, which is persisted.
+	 * 
+	 * @returns {String | dojo.Deferred}
 	 */
-	_workspacePathFormatter: function(item) {
-		// Returns text node content
-		function makeSafe(text) {
-			var node = document.createTextNode(text);
-			return typeof(node.textContent) === "string" ? node.textContent : node.nodeValue; 
+	_friendlyPathFormatter: function(/**String*/ friendlyPath, /**Number*/ rowIndex, /**Object*/ inCell) {
+		var item = this.getItem(rowIndex);
+		var target = this.store.getValue(item, "Target");
+		
+		var setFriendlyPath, fieldToUse;
+		if (!(friendlyPath)) {
+			// Friendly path needs to be set
+			setFriendlyPath = true;
+			fieldToUse = target;
+		} else {
+			// Target needs to be set
+			setFriendlyPath = false;
+			fieldToUse = friendlyPath;
 		}
 		
-		var target =  this.store.getValue(item, "Target");
-		if (/^\//.test(target)) {
+		if (this._isWorkspacePath(fieldToUse)) {
 			var deferred = new dojo.Deferred();
 			dojo.when(this._editor._workspaceToChildren, dojo.hitch(this, 
 				function(map) {
@@ -167,23 +222,60 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 					var folderExists = false;
 					for (var i=0; i < children.length; i++) {
 						var child = children[i];
-						var path = eclipse.sites.util.makeRelativeFilePath(child.Location);
-						// Match if target is "/path/something" or just "/path"
-						if (target.indexOf(path + "/") === 0 || target === path) {
-							folderExists = true;
-							var rest = target.substring(path.length);
-							var linkText = "/" + child.Name + rest;
-							var href = child.Location + (rest === "" ? "" : rest.substring(1));
-							deferred.callback('<a href="' + makeSafe(href) + '">' + makeSafe(linkText) + '</a>');
+						var childLoc = eclipse.sites.util.makeRelativeFilePath(child.Location);
+						if (setFriendlyPath) {
+							if (this._pathMatch(target, childLoc)) {
+								folderExists = true;
+								// Change Target to friendly format, then save to _friendlyPath
+								var newFriendlyPath = "/" + child.Name + target.substring(childLoc.length);
+								this.store.setValue(item, "_friendlyPath", newFriendlyPath);
+								deferred.callback(this._makeSafe(newFriendlyPath));
+//								console.debug("Resolving to " + newFriendlyPath);
+								break;
+							}
+						} else {
+							var childName = "/" + child.Name;
+							if (this._pathMatch(friendlyPath, childName)) {
+								folderExists = true;
+								// Change friendly path back to internal format, then save to Target
+								var rest = friendlyPath.substring(childName.length);
+								var newTarget = childLoc + rest;
+								this.store.setValue(item, "Target", newTarget);
+								deferred.callback(this._makeSafe(friendlyPath));
+//								console.debug("Resolving to " + friendlyPath);
+								break;
+							}
 						}
 					}
+					
 					if (!folderExists) {
-						deferred.callback('<div class="workspacePathError">Not found</span>');
+						var result;
+						if (setFriendlyPath) {
+							result = target;
+							this.store.setValue(item, "_friendlyPath", target);
+						} else {
+							// Friendly path points to something nonexistent, but need to update the Target anyway
+							result = friendlyPath;
+							this.store.setValue(item, "Target", friendlyPath);
+						}
+//						console.debug("resolving to " + result);
+						deferred.callback(this._makeSafe(result));
 					}
 				}));
 			return deferred;
 		}
-		return '<div class="workspacePathError">Not a workspace path</span>';
+		// Not workspace path
+		if (setFriendlyPath) {
+			this.store.setValue(item, "_friendlyPath", fieldToUse);
+		} else {
+			this.store.setValue(item, "Target", fieldToUse);
+		}
+		return fieldToUse;
+	},
+	
+	/** @returns true if b is a sub-path of a */
+	_pathMatch: function(a, b) {
+		return a === b || a.indexOf(b + "/") === 0;
 	},
 	
 	_actionColumnFormatter: function(item) {
@@ -206,8 +298,8 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
  * @param {eclipse.FileClient} options.fileClient
  * @param {eclipse.SiteService} options.siteService
  * @param {eclipse.CommandService} options.commandService
- * @param {String} [options.location] Optional URL of a site configuration to load & edit 
- * immediately after widget is created.
+ * @param {String} [options.location] Optional URL of a site configuration to load in editor
+ * upon creation.
  */
 dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, dijit._Templated], {
 	widgetsInTemplate: true,
@@ -234,9 +326,11 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		if (!this.options.fileClient) { throw new Error("options.fileClient is required"); }
 		if (!this.options.siteService) { throw new Error("options.siteService is required"); }
 		if (!this.options.commandService) { throw new Error("options.commandService is required"); }
+		if (!this.options.commandService) { throw new Error("options.statusService is required"); }
 		this._fileClient = this.options.fileClient;
 		this._siteService = this.options.siteService;
 		this._commandService = this.options.commandService;
+		this._statusService = this.options.statusService;
 		
 		// Start loading workspaces right away
 		this._workspaces = new dojo.Deferred();
@@ -253,7 +347,6 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.siteConfigNameLabelText = "Name:";
 		this.mappingsLabelText = "Mappings:";
 		this.hostHintLabelText = "Hostname hint:";
-		this.workspaceLabelText = "Workspace:";
 		this.addMappingButtonText = "Add&#8230;";
 	},
 	
@@ -277,7 +370,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.mappings.setEditor(this);
 		
 		// dijit.form.Form doesn't work in dojoAttachPoint for some reason
-		dojo.connect(this.saveButton, "onClick", dijit.byId("siteForm"), function() { this.onSubmit(arguments); });;
+		dojo.connect(this.saveButton, "onClick", dijit.byId("siteForm"), function() { this.onSubmit(arguments); });
 		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.onSubmit);
 		
 		dojo.when(this._workspaceToChildren, dojo.hitch(this, function(workspaceToChildrenMap) {
@@ -298,7 +391,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	},
 	
 	/**
-	 * this._workspaceToChildren must be resolved before this is called
+	 * this._workspaceToChildren must be resolved before this is called, and site must be loaded.
 	 * @param workspaceToChildrenMap Maps {String} workspaceId to {Array} children
 	 * @param items {Array|Object}
 	 * @param userData
@@ -306,37 +399,37 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	 */
 	_makeAddMenuChoices: function(workspaceToChildrenMap, items, userData) {
 		items = dojo.isArray(items) ? items[0] : items;
-		var workspaceId = this.workspace.get("value");
+		var workspaceId = this.getSiteConfiguration().Workspace;
 		var projects = workspaceToChildrenMap[workspaceId];
 		
 		/**
-		 * @this An object from the choices array: {name, path, callback}
+		 * @this An object from the choices array with shape {name:String, path:String, callback:Function}
 		 * @param item
 		 */
 		var editor = this;
 		var callback = function(item) {
 			editor.mappings._addMapping("/mountPoint", this.path);
 		};
-		var addOther = function() {
-			editor.mappings._addMapping("/mountPoint", "/FolderId/somepath");
-		};
+//		var addOther = function() {
+//			editor.mappings._addMapping("/mountPoint", "/FolderId/somepath");
+//		};
 		var addUrl = function() {
 			editor.mappings._addMapping("/mountPoint", "http://someurl");
 		};
 		
-		var choices = [];
-		for (var i=0; i < projects.length; i++) {
-			var project = projects[i];
-			choices.push({
-				name: "/" + project.Name,
-				path: eclipse.sites.util.makeRelativeFilePath(project.Location),
-				callback: callback});
-		}
+		var choices = dojo.map(projects, function(project) {
+				return {
+					name: "Folder: /" + project.Name,
+					path: eclipse.sites.util.makeRelativeFilePath(project.Location),
+					callback: callback
+				};
+			});
+		
 		if (projects.length > 0) {
 			choices.push({}); // Separator
 		}
-		choices.push({name: "URL&#8230;", callback: addUrl});
-//		choices.push({name: "Other&#8230;", callback: addOther});
+		choices.push({name: "URL", callback: addUrl});
+//		choices.push({name: "Other", callback: addOther});
 		return choices;
 	},
 	
@@ -350,13 +443,11 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	 * @return {dojo.Deferred} A deferred, resolved when the editor has loaded & refreshed itself.
 	 */
 	load: function(location) {
-		this._busy("Loading...");
 		var deferred = new dojo.Deferred();
-		// TODO errback for the deferred(s)
+		this._busyWhile(deferred, "Loading...");
 		this._siteService.loadSiteConfiguration(location).then(
 			dojo.hitch(this, function(siteConfig) {
 				this._setSiteConfiguration(siteConfig);
-				this._done("");
 				deferred.callback(siteConfig);
 			}),
 			function(error) {
@@ -374,18 +465,14 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.hostHint.set("value", this._siteConfiguration.HostHint);
 		this.mappings.setMappings(this._siteConfiguration.Mappings);
 		this.mappings.startup();
-		
-		var editor = this;
-		dojo.when(editor._workspaces, function(workspaces) {
-			// Workspaces are available so refresh that widget
-			var options = dojo.map(workspaces, function(workspace) {
-				return {
-					label: workspace.Name,
-					value: workspace.Id,
-					selected: workspace.Id === editor._siteConfiguration.Workspace };});
-			editor.workspace.set("options", options);
-			editor.workspace._loadChildren();
-		});
+		var hostStatus = this._siteConfiguration.HostingStatus;
+		if (hostStatus && hostStatus.Status === "started") {
+			dojo.style(this.siteStartedWarning, {display: "table-row"});
+			var warnNameNode = this.siteStartedWarning_siteName;
+			eclipse.util.setText(warnNameNode, this._siteConfiguration.Name);
+		} else {
+			dojo.style(this.siteStartedWarning, {display: "none"});
+		}
 		
 		this._attachListeners(this._siteConfiguration);
 	},
@@ -404,14 +491,13 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 				var value = widget.get("value");
 				site[modelField] = value;
 				
-				console.debug("Change " + modelField + " to " + value);
+//				console.debug("Change " + modelField + " to " + value);
 			});
 			editor._modelListeners.push(handle);
 		}
 		
 		bindText(this.name, "Name");
 		bindText(this.hostHint, "HostHint");
-		bindText(this.workspace, "Workspace");
 	},
 	
 	_detachListeners: function() {
@@ -420,7 +506,6 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 				dojo.disconnect(this._modelListeners[i]);
 			}
 		}
-		
 		// Detach grid
 	},
 	
@@ -482,48 +567,55 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	onSubmit: function(/** Event */ e) {
 		var form = dijit.byId("siteForm");
 		if (form.isValid()) {
-			this._busy("Saving...");
-			
 			var editor = this;
 			var siteConfig = editor._siteConfiguration;
-			this._siteService.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
+			// Omit the HostingStatus field before save since it's likely to be updated from
+			// the sites page, and we don't want to overwrite
+			delete siteConfig.HostingStatus;
+			var deferred = this._siteService.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
 					function(updatedSiteConfig) {
 						editor._setSiteConfiguration(updatedSiteConfig);
-						editor._done("Saved.");
+						return { Result: "Saved \"" + updatedSiteConfig.Name + "\"." };
 					});
+			this._busyWhile(deferred, "Saving...");
 			return true;
 		} else {
-			//alert("invalid");
 			return false;
 		}
 	},
 	
-	_busy: function(msg) {
+	_busyWhile: function(deferred, msg) {
 		dojo.forEach(this.getDescendants(), function(widget) {
 			widget.set("disabled", true);
 		});
-		this.onMessage(msg);
+		deferred.then(dojo.hitch(this, this._onSuccess), dojo.hitch(this, this._onError));
+		this._statusService.showWhile(deferred, msg);
 	},
 	
-	_done: function(msg) {
+	_onSuccess: function(deferred) {
 		dojo.forEach(this.getDescendants(), function(widget) {
 			widget.set("disabled", false);
 		});
-		this.onMessage(msg);
+		this.onSuccess(deferred);
+	},
+	
+	_onError: function(deferred) {
+		this.saveButton.set("disabled", false);
+		this._statusService.setErrorMessage(deferred);
+		this.onError(deferred);
 	},
 	
 	/**
-	 * Clients can override or dojo.connect() to this function to receive notifications about 
-	 * server calls that failed.
-	 * TODO
+	 * Clients can dojo.connect() to this function to receive notifications about server calls that succeeded.
+	 * @param {dojo.Deferred} deferred The deferred that succeeded.
 	 */
-	onError: function(error) {
+	onSuccess: function(deferred) {
 	},
-	
+		
 	/**
-	 * Clients can override or dojo.connect() to this function to receive notifications about
-	 * server calls that succeeded.
+	 * Clients can dojo.connect() to this function to receive notifications about server called that failed.
+	 * @param {dojo.Deferred} deferred The deferred that errback'd.
 	 */
-	onMessage: function(message) {
+	onError: function(deferred) {
 	}
 });

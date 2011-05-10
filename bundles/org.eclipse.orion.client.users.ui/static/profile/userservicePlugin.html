@@ -43,7 +43,7 @@
   usersService.fire = function(action, url, jsonData){
 	  switch(action){
 	  	case "saveProfile":
-	  		this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url) {alert("Profile saved!"); this.getUserInfo(url, "userInfoChanged")}, url));
+	  		this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url) {alert("Profile saved!"); this.getUserInfo(url, "userInfoChanged")}, url)).then(function(){}, function(error){if(error.status === 401) alert("Invalid old password")});
 	  		break;
 	  	case "resetProfile":
 	  		this.getUserInfo(url, "userInfoChanged");
@@ -57,7 +57,7 @@
 			}
 			break;
 		default:
-			this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url) {alert("Profile saved!"); this.getUserInfo(url, "userInfoChanged")}, url));
+			this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url) {alert("Profile saved!"); this.getUserInfo(url, "userInfoChanged")}, url)).then(function(){}, function(error){if(error.status === 401) alert("Invalid old password")});
   			break;
 	  }
   };

@@ -8,6 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
+/*jslint laxbreak:true*/
 /*global eclipse orion dojo*/
 
 /**
@@ -46,30 +47,6 @@ var testcase = (function(assert) {
 		};
 	}
 	
-	/** Fails if node's CSS classes do not exactly match expectedClasses. */
-	function assertHasClasses(/**DomNode*/ node, /**String[]*/ expectedClasses, /**String*/ msg_opt) {
-		var actualClasses = node.className.split(/\s+/);
-		var lastClass;
-		var fail = false;
-		fail = fail || (actualClasses.length !== expectedClasses.length);
-		fail = fail || expectedClasses.some(function(clazz) {
-							lastClass = clazz;
-							return actualClasses.indexOf(clazz) === -1;
-						});
-		if (fail) {
-			msg_opt = msg_opt || ("Node " + node.textContent + " has class '" + lastClass + "' among '" + node.className + "'");
-			assert.ok(false, msg_opt);
-		}
-	}
-	
-	/** Fails if node's CSS classes don't correspond exactly to the given scope. */
-	function assertHasScope(/**DomNode*/ node, /**String*/ scope, /**String*/ msg_opt) {
-		assertHasClasses(node, scope.split(".").map(
-				function(seg, i, segs) {
-					return segs.slice(0, i+1).join("-");
-				}),  msg_opt);
-	}
-	
 	/** Sets the given lines as the editor text */
 	function setLines(editor, /**String[] or varargs*/ lines) {
 		if (typeof(lines) === "string") {
@@ -78,74 +55,93 @@ var testcase = (function(assert) {
 		editor.setText(lines.join("\n"));
 	}
 	
-	/** @returns {Number} Number of styled regions in the line */
-	function numRegions(/**DomNode*/ lineNode) {
-		// get the number of child <span>s but in IE & FF there's a bogus <span> </span> at the end of every line
-		// FIXME this is brittle
-		var childRegions = dojo.query("span", lineNode);
-		return (dojo.isIE || dojo.isFF) ? childRegions.length-1 : childRegions.length;
+	function arraysEqual(a, b, sameOrder) {
+		if (a.length !== b.length) { return false; }
+		for (var i=0; i < a.length; i++) {
+			var item = a[i];
+			var j = b.indexOf(item);
+			if (j === -1 || (sameOrder && i !== j)) { return false; }		}
+		return true;	}
+	
+	function scope2Classes(/**String*/ scope) {
+		return scope.split(".").map(function(seg, i, segs) {
+				return segs.slice(0, i+1).join("-");
+			});	}
+
+	/** @returns true if style corresponds exactly to the given scope. */
+	function styleMatchesScope(/**eclipse.Style*/ style, /**String*/ scope) {
+		var classes = style.styleClass.split(/\s+/);
+		return arraysEqual(classes, scope2Classes(scope)); 
+	}
+	
+	/**
+	 * Fails if the {@link eclipse.StyleRange[]} returned by running the styler on the line number
+	 * <tt>lineIndex</tt> do not exactly match the expected result given in <tt>scopeRegions</tt>.
+	 * @param {Array} scopeRegions Each element is an Array with 3 elements:
+	 *   [{Number} start, {Number} end, {String} scope] where start and end are line-relative indices.
+	 */
+	function assertLineScope(editor, styler, lineIndex, scopeRegions) {
+		var lineText = editor.getModel().getLine(lineIndex);
+		var lineStart = editor.getModel().getLineStart(lineIndex);
+		var lineEnd = editor.getModel().getLineEnd(lineIndex);
+		var lineStyleEvent = {lineIndex: lineIndex, lineText: lineText, lineStart: lineStart, lineEnd: lineEnd};
+		editor.onLineStyle(lineStyleEvent);
+		
+		var styleRanges = lineStyleEvent.ranges;
+		assert.ok(styleRanges !== null && styleRanges !== undefined, true, "lineStyleEvent.ranges exists");
+		assert.equal(styleRanges.length, scopeRegions.length, "Number of styled regions matches");
+		var ok, last;
+		ok = dojo.every(scopeRegions, function(scopeRegion) {
+				return dojo.some(styleRanges, function(styleRange) {
+					last = "start: " + scopeRegion[0] + ", end: " + scopeRegion[1] + ", scope: " + scopeRegion[2];
+					return (styleRange.start === lineStart + scopeRegion[0]
+						&& styleRange.end === lineStart + scopeRegion[1]
+						&& styleMatchesScope(styleRange.style, scopeRegion[2]));				});
+			});
+		
+		var rangeStrs = dojo.map(lineStyleEvent.ranges, function(styleRange) {
+				var start = styleRange.start - lineStart,
+				    end = styleRange.end - lineStart;
+				return "{start:" + start + ", end:" + end + ", className:" + styleRange.style.styleClass + "}";
+			});
+		assert.ok(ok, "No StyleRange in line matched expected {" + last + "}. StyleRanges were [" + rangeStrs.join(",") + "]");
 	}
 	
 	// Tests
-	tests["test TextMateStyler create TextMateStyler"] = makeTest(function(editor) {
-		try {
-			var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
-			assert.ok(true, "true is false");
-		} catch (e) {
-			assert.ok(false, "Exception creating editor");
-		}
-	});
-	
-	tests["test TextMateStyler style one line"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
-		editor.setText("fizzer");
-		
-		// FIXME: IE adds 1 extra node to each line??
-		var lineNode = editor._getLineNode(0);
-		assert.equal(numRegions(lineNode), 4, "4 regions"); // [fi][z][z][er]
-		var z1 = lineNode.childNodes[1],
-		    z2 = lineNode.childNodes[2];
-		assert.equal(z1.textContent, "z", "child[1] text is z");
-		assert.equal(z2.textContent, "z", "child[2] text is z");
-		
-		var invalidScopeName = orion.styler.test.SampleGrammar.repository.badZ.name;
-		assertHasScope(z1, invalidScopeName, "1st z has the expected scope");
-		assertHasScope(z2, invalidScopeName, "2nd z has the expected scope");
-	});
-	
-	tests["test TextMateStyler style multiple lines"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
-		var line0Text = "no_important_stuff_here",
-		    line1Text = "a this xxx && yyy var";
-		setLines(editor, [line0Text, line1Text]);
-		
-		var line0 = editor._getLineNode(0),
-		    line1 = editor._getLineNode(1);
-		assert.equal(numRegions(line0), 1, "line0 has 1 region"); // [no_important_stuff_here]
-		assert.equal(numRegions(line1), 6, "line1 has 6 regions"); // [a ][this][ xxx ][void][ yyy ][var]
-		
-		var span00 = line0.childNodes[0];
-		assertHasScope(span00, "", "No style in line0");
-		
-		var span10 = line1.childNodes[0],
-		    span11 = line1.childNodes[1],
-		    span12 = line1.childNodes[2],
-		    span13 = line1.childNodes[3],
-		    span14 = line1.childNodes[4],
-		    span15 = line1.childNodes[5];
-	    assert.equal(span10.textContent, "a ",  "line1's region 0 is 'a '");
-		assert.equal(span11.textContent, "this",  "line1's region 0 is 'this'");
-		assert.equal(span12.textContent, " xxx ", "line1's region 1 is ' xxx '");
-		assert.equal(span13.textContent, "&&",  "line1's region 2 is '&&'");
-		assert.equal(span14.textContent, " yyy ", "line1's region 3 is ' yyy '");
-		assert.equal(span15.textContent, "var",   "line1's region 4 is 'var'");
-		assertHasScope(span10, "", "'a ' has correct scope");
-		assertHasScope(span11, "keyword.other.mylang", "'this' has correct scope");
-		assertHasScope(span12, "", "' xxx ' has correct scope");
-		assertHasScope(span13, "keyword.operator.logical.mylang", "'&&' has correct scope");
-		assertHasScope(span14, "", "' yyy ' has correct scope");
-		assertHasScope(span15, "keyword.other.mylang", "'var' has correct scope");
-	});
+//	tests["test TextMateStyler create TextMateStyler"] = makeTest(function(editor) {
+//		try {
+//			var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+//			assert.ok(true, "true is false");
+//		} catch (e) {
+//			assert.ok(false, "Exception creating editor");
+//		}
+//	});
+//	
+//	tests["test TextMateStyler style one line"] = makeTest(function(editor) {
+//		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+//		editor.setText("fizzer");
+//		
+//		// expect fi[z][z]er
+//		var invalidScopeName = orion.styler.test.SampleGrammar.repository.badZ.name;
+//		assertLineScope(editor, styler, 0, [
+//				[2, 3, invalidScopeName], // z
+//				[3, 4, invalidScopeName]  // z
+//			]);
+//	});
+//	
+//	tests["test TextMateStyler style multiple lines"] = makeTest(function(editor) {
+//		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+//		var line0Text = "no_important_stuff_here",
+//		    line1Text = "a this xxx && yyy var";
+//		setLines(editor, [line0Text, line1Text]);
+//		
+//		assertLineScope(editor, styler, 0, []);
+//		assertLineScope(editor, styler, 1, [
+//			[2, 6, "keyword.other.mylang"],					// this
+//			[11, 13, "keyword.operator.logical.mylang"],	// &&
+//			[18, 21, "keyword.other.mylang"]				// var
+//		]);
+//	});
 	
 //	tests["test TextMateStyler styles updated after model change"] = makeTest(function(editor) {
 //		// do whatever

@@ -160,18 +160,6 @@ eclipse.SampleFileServiceImpl= (function() {
 			return d;
 		},
 		/**
-		 * Removes a project from a workspace. Note that project contents are not deleted.
-		 * @param {String} workspaceLocation The workspace URL
-		 * @param {String} projectLocation The location of the project to be removed
-		 * @return A deferred that can be used to chain events after the deletion completes
-		 */
-		removeProject: function(workspaceLocation, projectLocation) {
-			console.log("removeProject: " + workspaceLocation + ", projectLocation: " + projectLocation);
-			var d = new dojo.Deferred();
-			d.callback({});
-			return d;
-		},
-		/**
 		 * Creates a folder.
 		 * @param {String} parentLocation The location of the parent folder
 		 * @param {String} folderName The name of the folder to create
