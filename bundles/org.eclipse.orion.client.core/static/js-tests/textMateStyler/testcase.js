@@ -108,40 +108,40 @@ var testcase = (function(assert) {
 	}
 	
 	// Tests
-	tests["test TextMateStyler create TextMateStyler"] = makeTest(function(editor) {
-		try {
-			var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
-			assert.ok(true, "true is false");
-		} catch (e) {
-			assert.ok(false, "Exception creating editor");
-		}
-	});
-	
-	tests["test TextMateStyler style one line"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
-		editor.setText("fizzer");
-		
-		// expect fi[z][z]er
-		var invalidScopeName = orion.styler.test.SampleGrammar.repository.badZ.name;
-		assertLineScope(editor, styler, 0, [
-				[2, 3, invalidScopeName], // z
-				[3, 4, invalidScopeName]  // z
-			]);
-	});
-	
-	tests["test TextMateStyler style multiple lines"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
-		var line0Text = "no_important_stuff_here",
-		    line1Text = "a this xxx && yyy var";
-		setLines(editor, [line0Text, line1Text]);
-		
-		assertLineScope(editor, styler, 0, []);
-		assertLineScope(editor, styler, 1, [
-			[2, 6, "keyword.other.mylang"],					// this
-			[11, 13, "keyword.operator.logical.mylang"],	// &&
-			[18, 21, "keyword.other.mylang"]				// var
-		]);
-	});
+//	tests["test TextMateStyler create TextMateStyler"] = makeTest(function(editor) {
+//		try {
+//			var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+//			assert.ok(true, "true is false");
+//		} catch (e) {
+//			assert.ok(false, "Exception creating editor");
+//		}
+//	});
+//	
+//	tests["test TextMateStyler style one line"] = makeTest(function(editor) {
+//		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+//		editor.setText("fizzer");
+//		
+//		// expect fi[z][z]er
+//		var invalidScopeName = orion.styler.test.SampleGrammar.repository.badZ.name;
+//		assertLineScope(editor, styler, 0, [
+//				[2, 3, invalidScopeName], // z
+//				[3, 4, invalidScopeName]  // z
+//			]);
+//	});
+//	
+//	tests["test TextMateStyler style multiple lines"] = makeTest(function(editor) {
+//		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+//		var line0Text = "no_important_stuff_here",
+//		    line1Text = "a this xxx && yyy var";
+//		setLines(editor, [line0Text, line1Text]);
+//		
+//		assertLineScope(editor, styler, 0, []);
+//		assertLineScope(editor, styler, 1, [
+//			[2, 6, "keyword.other.mylang"],					// this
+//			[11, 13, "keyword.operator.logical.mylang"],	// &&
+//			[18, 21, "keyword.other.mylang"]				// var
+//		]);
+//	});
 	
 //	tests["test TextMateStyler styles updated after model change"] = makeTest(function(editor) {
 //		// do whatever
