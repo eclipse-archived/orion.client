@@ -24,7 +24,7 @@ var topHTMLFragment =
 	'<tr class="topRowBanner">' +
 		'<td width=93px rowspan=2><a id="home" href="/index.html"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
 		'<td class="leftGlobalToolbar">' +
-			'<span class="bannerSeparator">|</span>' +
+			'<span class="bannerSeparator"></span>' +
 			'<span id="pageTitle" class="statuspane"></span>' +
 			'<span class="bannerSeparator">  </span>' +  // empty space between title and status
 			'<span class="statuspane" id="statusPane"></span>' +
@@ -40,7 +40,7 @@ var topHTMLFragment =
 	'<tr class="bottomRowBanner">' +
 		'<td colspan=2 id="pageToolbar" class="pageToolbar">' +
 			'<div style="float: left;">' +
-				'<span id="pageActionHolder" class="pageActionSeparator">|</span>' +
+				'<span id="pageActionHolder" class="pageActionSeparator"></span>' +
 				'<span id="pageActions" class="pageActions"></span>' +
 			'</div>' +
 			'<div style="float: right;">' +
