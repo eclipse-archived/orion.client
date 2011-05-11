@@ -1,0 +1,59 @@
+.commandImage {
+	margin-left: 2px;
+	margin-right: 2px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	vertical-align: middle;
+	padding: 0px;
+	cursor: pointer;
+}
+
+.commandSeparator {
+}
+
+.commandLink {
+	margin-right: 12px;
+	cursor: pointer;
+}
+
+.commandLink:visited {
+	margin-right: 12px;
+	cursor: pointer;
+}
+
+.commandLink:hover {
+	margin-right: 12px;
+	cursor: hand;
+	text-decoration: underline;
+}
+
+.nihilo .dijitMenu, .nihilo .dijitMenuBar {
+    background-color: #FFFFFF;
+    border: 1px solid #888787;
+    margin: 0;
+    padding: 0;
+}
+
+.nihilo .dijitMenuItem {
+    color: black;
+    font-family: sans-serif;
+    margin: 0;
+}
+
+.nihilo .dijitDropDownButton, .nihilo .dijitComboButton {
+	vertical-align: baseline;
+	margin: 0;
+}
+
+.nihilo .dijitMenuPassive .dijitMenuItemHover, .nihilo .dijitMenuItemSelected {
+    background-color: #fedda7;
+    color: black;
+}
+
+.nihilo dijitButtonHover, .nihilo .dijitButtonHover .dijitButtonNode, .nihilo .dijitButtonNodeHover, .nihilo .dijitToggleButtonHover .dijitButtonNode, .nihilo .dijitDropDownButtonHover .dijitButtonNode, .nihilo .dijitButtonContentsHover, .nihilo .dijitUpArrowButtonHover, .nihilo .dijitDownArrowButtonHover {
+    background: #ededed;
+    color: black;
+}
+.nihilo .dijitButtonActive, .nihilo .dijitButtonActive .dijitButtonNode, .nihilo .dijitToggleButtonActive .dijitButtonNode, .nihilo .dijitDropDownButtonActive .dijitButtonNode, .nihilo .dijitComboButtonActive .dijitButtonContents, .nihilo .dijitStackController .dijitToggleButtonChecked .dijitButtonNode {
+    background: #ededed;
+}
