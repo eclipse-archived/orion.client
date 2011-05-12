@@ -74,6 +74,10 @@ a:hover {
 	border-bottom: 1px dotted;
 }
 
+.selectionCheckmark {
+	background: url(images/gear.gif);
+}
+
 .globalActions {
 	color: #6d6d6d;
 	cursor: pointer;
@@ -156,6 +160,45 @@ a:hover {
 .paneHeadingContainer {
 	border-bottom: 1px dotted #6d6d6d;
 	height: 30px;
+}
+
+.landingHeading {
+	font-size: 2.0em;
+	color: #404040;
+	padding-bottom: 8px;
+}
+
+.landingDescription {
+	font-size: 1.6em;
+	color: #404040;
+}
+
+.landingImage {
+	border: 1px solid #6d6d6d;
+}
+
+.landingLink {
+	font-size: 1.2em;
+	color: #404040;
+	padding-left: 24px;
+	padding-bottom: 8px;
+}
+
+.landingPanelContainer {
+	background: #EDEDED;
+	padding: 0px;
+	margin: 0px;
+	border-top: 1px solid #cccccc;
+}
+
+.landingPanel {
+	background: #EDEDED;
+	border-left: 1px solid white;
+	border-right: 1px solid #cccccc;
+	border-top: 1px solid white;
+	border-bottom: 1px solid #cccccc;
+	padding: 0px;
+	margin: 0px;
 }
 
 .auxpane {

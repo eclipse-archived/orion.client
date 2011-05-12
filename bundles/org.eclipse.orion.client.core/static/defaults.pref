@@ -8,6 +8,7 @@
 		"/plugins/user/userProfilePlugin.html":true,
 		"/plugins/git/userProfilePlugin.html":true,
 		"/plugins/coreContentAssistPlugin.html":true,
-		"/plugins/htmlSyntaxHighlightPlugin.html":true
+		"/plugins/htmlSyntaxHighlightPlugin.html":true,
+		"/plugins/landingPageTasks.html":true
 	}
 }
