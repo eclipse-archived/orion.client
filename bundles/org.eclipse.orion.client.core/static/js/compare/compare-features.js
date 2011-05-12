@@ -10,8 +10,10 @@
  *******************************************************************************/
 var orion = orion || {};
 orion.CompareMergeUIFactory = (function() {
-	function CompareMergeUIFactory(containerDivId){
-		this._containerDivId = containerDivId;
+	function CompareMergeUIFactory(option){
+		this._parentDivID = option.parentDivID;
+		this._showTitle = option.showTitle;
+		this._showLineStatus = option.showLineStatus;
 	}	
 	CompareMergeUIFactory.prototype = {
 		_createNoWrapTextDiv:function(textDivId , defaultText , align){
@@ -62,7 +64,7 @@ orion.CompareMergeUIFactory = (function() {
 			}
 		},
 			
-		createTileDiv: function(titleDivId ,containerDivId) {
+		_createTileDiv: function(titleDivId ,containerDivId) {
 			var table = this._createNoWrapTextDiv(titleDivId , "Compare...");
 			var titleContainer = new dijit.layout.ContentPane({region: "top", style:"width:100%;height:30px;overflow: hidden;"});
 			titleContainer.attr('content', table);
@@ -70,7 +72,7 @@ orion.CompareMergeUIFactory = (function() {
 			return titleContainer;
 		},
 		
-		createStatusDiv: function(statusDivId , containerDivId) {
+		_createStatusDiv: function(statusDivId , containerDivId) {
 			var table = this._createNoWrapTextDiv(statusDivId , "Line Status" , "center");
 			var statusContainer = new dijit.layout.ContentPane({region: "bottom", style:"width:100%;height:30px;overflow: hidden;"});
 			statusContainer.attr('content', table);
@@ -78,11 +80,11 @@ orion.CompareMergeUIFactory = (function() {
 			return statusContainer;
 		},
 		
-		createLeftEditorParentDiv: function(editorParentDivId ,containerDivId) {
+		_createLeftEditorParentDiv: function(editorParentDivId ,containerDivId) {
 			return this._createEditorParentDiv(editorParentDivId ,containerDivId);
 		},
 		
-		createRightEditorParentDiv: function(editorParentDivId ,canvasId , containerDivId) {
+		_createRightEditorParentDiv: function(editorParentDivId ,canvasId , containerDivId) {
 			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false});
 			bc.addChild(this._createCompareCanvasDiv(canvasId));
 			bc.addChild(this._createEditorParentDiv(editorParentDivId));
@@ -91,30 +93,68 @@ orion.CompareMergeUIFactory = (function() {
 			return bc;
 		},
 		
-		createLeftBorder:function(containerDivId){
+		_createLeftBorder:function(containerDivId){
 			var bc = new dijit.layout.BorderContainer({region:"leading" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true , style:"width: 50%;"});
-			bc.addChild(this.createTileDiv("left-viewer-title"));
-			bc.addChild(this.createLeftEditorParentDiv("left-viewer"));
-			bc.addChild(this.createStatusDiv("left-viewer-status"));
+			if(this._showTitle){
+				this._leftTitleDivId = this._parentDivID + "_left_title_id";
+				bc.addChild(this._createTileDiv(this._leftTitleDivId));
+			}
+			this._leftEditorParentDivId = this._parentDivID + "_left_editor_id";
+			bc.addChild(this._createLeftEditorParentDiv(this._leftEditorParentDivId));
+
+			if(this._showLineStatus){
+				this._leftStatusDivId = this._parentDivID + "_left_status_id";
+				bc.addChild(this._createStatusDiv(this._leftStatusDivId));
+			}
+
 			bc.startup();
 			this._addToContainer(bc , containerDivId);
 			return bc;
 		},
 		
-		createRightBorder:function(containerDivId){
+		_createRightBorder:function(containerDivId){
 			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false});
-			bc.addChild(this.createTileDiv("right-viewer-title"));
-			bc.addChild(this.createRightEditorParentDiv("right-viewer","diff-canvas"));
-			bc.addChild(this.createStatusDiv("right-viewer-status"));
+			
+			if(this._showTitle){
+				this._rightTitleDivId = this._parentDivID + "_right_title_id";
+				bc.addChild(this._createTileDiv(this._rightTitleDivId));
+			}
+			
+			this._rightEditorParentDivId = this._parentDivID + "_right_editor_id";
+			this._diffCanvasDivId = this._parentDivID + "_diff_canvas_id";
+			bc.addChild(this._createRightEditorParentDiv(this._rightEditorParentDivId , this._diffCanvasDivId));
+
+			if(this._showLineStatus){
+				this._rightStatusDivId = this._parentDivID + "_right_status_id";
+				bc.addChild(this._createStatusDiv(this._rightStatusDivId));
+			}
+
 			bc.startup();
 			this._addToContainer(bc , containerDivId);
 			return bc;
 		},
 		
 		buildUI:function(){
-			this.createLeftBorder(this._containerDivId);
-			this.createRightBorder(this._containerDivId);
+			this._createLeftBorder(this._parentDivID);
+			this._createRightBorder(this._parentDivID);
+		},
+		
+		getEditorParentDivId: function(left){
+			return (left ? this._leftEditorParentDivId : this._rightEditorParentDivId);
+		},
+		
+		getTitleDivId: function(left){
+			return (left ? this._leftTitleDivId : this._rightTitleDivId);
+		},
+		
+		getStatusDivId: function(left){
+			return (left ? this._leftStatusDivId : this._rightStatusDivId);
+		},
+		
+		getDiffCanvasDivId: function(){
+			return this._diffCanvasDivId;
 		}
+
 	};
 	return CompareMergeUIFactory;
 }());
