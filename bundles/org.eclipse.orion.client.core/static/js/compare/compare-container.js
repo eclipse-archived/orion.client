@@ -324,13 +324,14 @@ orion.CompareMergeStyler = (function() {
 
 orion.CompareMergeContainer = (function() {
 	/** @private */
-	function CompareMergeContainer(readonly , resgistry , commandService , fileClient,leftEditorDivId , rightEditorDivId , canvas) {
+	function CompareMergeContainer(readonly , resgistry , commandService , fileClient,uiFactory) {
+		this._uiFactory = uiFactory;
 		this.readonly = readonly;
 		this._registry = resgistry;
 		this._commandService = commandService;
-		this._leftEditorDivId = leftEditorDivId;
+		this._leftEditorDivId = this._uiFactory.getEditorParentDivId(true);
 		this._fileClient = fileClient;
-		this._rightEditorDivId = rightEditorDivId;
+		this._rightEditorDivId = this._uiFactory.getEditorParentDivId(false);
 		var self = this;
 		this._inputManager = {
 			filePath: "",
@@ -386,7 +387,7 @@ orion.CompareMergeContainer = (function() {
 				self.resolveDiffonSave();
 			}
 		};
-		this._compareMatchRenderer = new orion.CompareMatchRenderer(canvas);
+		this._compareMatchRenderer = new orion.CompareMatchRenderer(document.getElementById(this._uiFactory.getDiffCanvasDivId()));
 		this._highlighter = [];
 		this._highlighter.push( new orion.CompareMergeStyler(this._compareMatchRenderer));//left side styler
 		this._highlighter.push( new orion.CompareMergeStyler(this._compareMatchRenderer));//right side styler
@@ -394,9 +395,9 @@ orion.CompareMergeContainer = (function() {
 	}
 	CompareMergeContainer.prototype = new orion.CompareContainer();
 	CompareMergeContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler , fileURILeft , fileURIRight){	
-		this._editorContainerLeft = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , "left-viewer-status" ,this.readonly ,createLineStyler , fileURILeft);
+		this._editorContainerLeft = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this.readonly ,createLineStyler , fileURILeft);
 		this._editorLeft = this._editorContainerLeft.getEditorWidget();
-		this._editorContainerRight = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , "right-viewer-status" ,true, createLineStyler , fileURIRight);
+		this._editorContainerRight = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , fileURIRight);
 		this._editorRight = this._editorContainerRight.getEditorWidget();
 		var overview  = new orion.CompareMergeOverviewRuler(this._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
 		this._editorRight.addRuler(overview);
