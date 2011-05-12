@@ -45,7 +45,9 @@ eclipse.git.GitClonesRenderer = (function(){
 		
 		switch(col_no){
 		case 0:
-			return dojo.create("td", {innerHTML: item.Name});
+			var td =  dojo.create("td");
+			dojo.create("div", {innerHTML: item.Name, style: "margin: 5px;"}, td);
+			return td;
 			break;
 		case 1:
 			return this.getActionsColumn(item, tableRow);

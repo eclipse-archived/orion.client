@@ -143,6 +143,7 @@ eclipse.sites.SiteService = (function() {
 			getSiteConfigurations: function() {
 				return dojo.xhrGet({
 					url: "/site",
+					preventCache: true,
 					headers: {
 						"Orion-Version": "1"
 					},
