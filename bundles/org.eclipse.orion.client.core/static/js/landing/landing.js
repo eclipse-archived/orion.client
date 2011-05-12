@@ -37,7 +37,9 @@ dojo.addOnLoad(function() {
 			dojo.empty(recent);
 			if (projects && projects.length && projects.length > 0) {
 				for (var i=projects.length-1; i>=0; i--) {
-					dojo.place("<a class='landingLink' href='navigate-table.html#"+projects[i].location+"'>"+projects[i].name+"</a><br>", recent, "last");
+					if (projects[i].location && projects[i].name) {
+						dojo.place("<a class='landingLink' href='navigate-table.html#"+projects[i].location+"'>"+projects[i].name+"</a><br>", recent, "last");
+					}
 				}
 			} else {
 				dojo.place("Go to the <a href='navigate-table.html#'>Navigator</a> to create or view your projects.", recent, "only");
