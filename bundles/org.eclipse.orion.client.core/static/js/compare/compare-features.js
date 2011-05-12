@@ -38,7 +38,8 @@ orion.CompareMergeUIFactory = (function() {
 		},
 		
 		_createCompareCanvasDiv: function(canvasDivId ,containerDivId){
-			var canvasContainer = new dijit.layout.ContentPane({class:"paneScrolled" , region: "leading", splitter: false ,style:"width:44px;height:100%;overflow: hidden;"});
+			var canvasContainer = new dijit.layout.ContentPane({ region: "leading", splitter: false ,style:"width:44px;height:100%;overflow: hidden;"});
+			
 			var canvas = document.createElement('canvas');
 			canvas.id = canvasDivId;
 			canvas.width = 46;
@@ -56,7 +57,7 @@ orion.CompareMergeUIFactory = (function() {
 				node.addChild(div);
 				if(doLayout){
 					//node.startup();
-					//node.layout();
+					node.layout();
 				}
 			}
 		},
@@ -66,6 +67,7 @@ orion.CompareMergeUIFactory = (function() {
 			var titleContainer = new dijit.layout.ContentPane({region: "top", style:"width:100%;height:30px;overflow: hidden;"});
 			titleContainer.attr('content', table);
 			this._addToContainer(titleContainer , containerDivId);
+			return titleContainer;
 		},
 		
 		createStatusDiv: function(statusDivId , containerDivId) {
@@ -73,6 +75,7 @@ orion.CompareMergeUIFactory = (function() {
 			var statusContainer = new dijit.layout.ContentPane({region: "bottom", style:"width:100%;height:30px;overflow: hidden;"});
 			statusContainer.attr('content', table);
 			this._addToContainer(statusContainer , containerDivId);
+			return statusContainer;
 		},
 		
 		createLeftEditorParentDiv: function(editorParentDivId ,containerDivId) {
@@ -80,15 +83,38 @@ orion.CompareMergeUIFactory = (function() {
 		},
 		
 		createRightEditorParentDiv: function(editorParentDivId ,canvasId , containerDivId) {
-			var bc = new dijit.layout.BorderContainer({region:"center" ,design:"headline", liveSplitters:false, persist:false , splitter:false});
-			bc.attr('gutters', false);
+			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false});
 			bc.addChild(this._createCompareCanvasDiv(canvasId));
 			bc.addChild(this._createEditorParentDiv(editorParentDivId));
 			bc.startup();
-			//bc.layout();
-			this._addToContainer(bc , containerDivId,true);
-		}
+			this._addToContainer(bc , containerDivId);
+			return bc;
+		},
 		
+		createLeftBorder:function(containerDivId){
+			var bc = new dijit.layout.BorderContainer({region:"leading" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true , style:"width: 50%;"});
+			bc.addChild(this.createTileDiv("left-viewer-title"));
+			bc.addChild(this.createLeftEditorParentDiv("left-viewer"));
+			bc.addChild(this.createStatusDiv("left-viewer-status"));
+			bc.startup();
+			this._addToContainer(bc , containerDivId);
+			return bc;
+		},
+		
+		createRightBorder:function(containerDivId){
+			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false});
+			bc.addChild(this.createTileDiv("right-viewer-title"));
+			bc.addChild(this.createRightEditorParentDiv("right-viewer","diff-canvas"));
+			bc.addChild(this.createStatusDiv("right-viewer-status"));
+			bc.startup();
+			this._addToContainer(bc , containerDivId);
+			return bc;
+		},
+		
+		buildUI:function(){
+			this.createLeftBorder(this._containerDivId);
+			this.createRightBorder(this._containerDivId);
+		}
 	};
 	return CompareMergeUIFactory;
 }());

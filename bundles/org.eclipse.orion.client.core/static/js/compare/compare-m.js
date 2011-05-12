@@ -38,14 +38,7 @@ dojo.addOnLoad(function(){
 		eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
 		
 		var factory = new orion.CompareMergeUIFactory("compareCon");
-		factory.createTileDiv("left-viewer-title","left-con");
-		factory.createLeftEditorParentDiv("left-viewer","left-con");
-		factory.createStatusDiv("left-viewer-status","left-con");
-		
-		factory.createTileDiv("right-viewer-title","right-con");
-		factory.createRightEditorParentDiv("right-viewer","diff-canvas","right-con");
-		factory.createStatusDiv("right-viewer-status","right-con");
-	
+		factory.buildUI();
 		
 		var canvas = document.getElementById("diff-canvas");
 		// Git operations

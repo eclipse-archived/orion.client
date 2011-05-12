@@ -578,7 +578,124 @@ eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){
 };
 
 eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, fileGroup, selectionGroup) {
+	function makeOpenWithRunner(href) {
+		return function(item) {
+			// String substitution: replace ${foo} with item.foo, ${foo.bar} with item.foo.bar, etc.
+			return href.replace(/\$\{([\d\w-_$.]+)\}/g, function(str, properties) {
+				// getObject handles property chains
+				return dojo.getObject(properties, false, item);
+			});
+		};
+	}
+
+	// Note that the shape of the "fileCommands" extension is not in any shape or form that could be considered final.
+	// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 	
+	// The shape of the contributed commands is (for now):
+	// info - information about the command (object).
+	//		required attribute: name - the name of the command
+	//		required attribute: id - the id of the command
+	//		optional attribute: tooltip - the tooltip to use for the command
+	//        optional attribute: image - a URL to an image for the command
+	//        optional attribute: href - if true, then the service returns an href when it runs
+	//        optional attribute: forceSingleItem - if true, then the service is only invoked when a single item is selected
+	//			and the item parameter to the run method is guaranteed to be a single item vs. an array.  When this is not true, 
+	//			the item parameter to the run method may be an array of items.
+	// run - the implementation of the command (function).
+	//        arguments passed to run: (itemOrItems)
+	//          itemOrItems (object or array) - an array of items to which the item applies, or a single item if the info.forceSingleItem is true
+	//        the return value of the run function will be used as follows:
+	//          if info.href is true, the return value should be an href and the window location will be replaced with the href
+	//			if info.href is not true, the run function is assumed to perform all necessary action and the return is not used.
+	var commandsReferences = serviceRegistry.getServiceReferences("fileCommands");
+	
+	// Contributions to the openWith service type also get mapped to fileCommands
+	var openWithReferences = serviceRegistry.getServiceReferences("openWith");
+
+	var fileCommands = [];
+	var i;
+	for (i=0; i<commandsReferences.length; i++) {
+		serviceRegistry.getService(commandsReferences[i]).then(function(service) {
+			var info = {};
+			var propertyNames = commandsReferences[i].getPropertyNames();
+			for (var j = 0; j < propertyNames.length; j++) {
+				info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
+			}
+			fileCommands.push({properties: info, service: service});
+		});
+	}
+	
+	// Convert "openWith" contributions into fileCommands that open the appropriate editors
+	for (i=0; i < openWithReferences.length; i++) {
+		var openWithServiceRef = openWithReferences[i];
+		var name = openWithServiceRef.getProperty("name"),
+		    href = openWithServiceRef.getProperty("href"),
+		    validationProperties = openWithServiceRef.getProperty("validationProperties");
+		if (href && validationProperties && name) {
+			var properties = {
+					name: name,
+					id: "eclipse.editor." + i,
+					tooltip: name,
+					validationProperties: validationProperties,
+					href: true,
+					forceSingleItem: true,
+					isEditor: true // Distinguishes from a normal fileCommand
+				};			// Pretend that this is a real service
+			var fakeService = {
+					run: makeOpenWithRunner(href)
+				};
+			fileCommands.push({properties: properties, service: fakeService});
+		}
+	}
+
+	for (i=0; i < fileCommands.length; i++) {
+		var info = fileCommands[i].properties;
+		var service = fileCommands[i].service;
+		
+		var commandOptions = eclipse.fileCommandUtils._createFileCommandOptions(info, service);
+		var command = new eclipse.Command(commandOptions);
+		if (info.isEditor) {
+			command.isEditor = true;
+		}
+		
+		var extensionGroupCreated = false;
+		var selectionGroupCreated = false;
+		var openWithGroupCreated = false;
+		if (info.forceSingleItem || info.href) {
+			// single items go in the local actions column, grouped in their own unnamed group to get a separator
+			commandService.addCommand(command, "object");
+			if (!extensionGroupCreated) {
+				extensionGroupCreated = true;
+				commandService.addCommandGroup("eclipse.fileCommandExtensions", 1000, null, fileGroup);
+			}
+			if (!openWithGroupCreated) {
+				openWithGroupCreated = true;
+				commandService.addCommandGroup("eclipse.openWith", 1000, "Open With", fileGroup + "/eclipse.fileCommandExtensions");
+			}
+			
+			if (info.isEditor) {
+				commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions/eclipse.openWith");
+			} else {
+				commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions");
+			}
+		} else {  
+			// items based on selection are added to the selections toolbar, grouped in their own unnamed group to get a separator
+			// TODO would we also want to add these to the menu above so that they are available for single selections?  
+			// For now we do not do this to reduce clutter, but we may revisit this.
+			commandService.addCommand(command, "dom");
+			if (!selectionGroupCreated) {
+				selectionGroupCreated = true;
+				commandService.addCommandGroup("eclipse.bulkFileCommandExtensions", 1000, null, selectionGroup);
+			}
+			commandService.registerCommandContribution(command.id, i, selectionToolbarId, selectionGroup + "/eclipse.bulkFileCommandExtensions");
+		}
+		eclipse.fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
+		explorer.updateCommands();
+	}
+};
+
+// Turns an info object containing the service properties and the service into Command options.
+eclipse.fileCommandUtils._createFileCommandOptions = function(/**Object*/ info, /**Service*/ service) {
 	function getPattern(wildCard){
 		var pattern = '^';
         for (var i = 0; i < wildCard.length; i++ ) {
@@ -600,7 +717,6 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 	}
 	
 	function matchSinglePattern(item, keyWildCard, valueWildCard){
-		
 		if(keyWildCard.indexOf(":")>=0){
 			var keyPattern = getPattern(keyWildCard.substring(0, keyWildCard.indexOf(":")));
 			var keyLastSegments = keyWildCard.substring(keyWildCard.indexOf(":")+1);
@@ -612,7 +728,6 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 				}
 			}
 		}
-		
 		
 		var keyPattern = getPattern(keyWildCard);
 		for(var key in item){
@@ -642,118 +757,75 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 		return true;
 	}
 	
-	// Note that the shape of the "fileCommands" extension is not in any shape or form that could be considered final.
-	// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
-	
-	// The shape of the contributed commands is (for now):
-	// info - information about the command (object).
-	//		required attribute: name - the name of the command
-	//		required attribute: id - the id of the command
-	//		optional attribute: tooltip - the tooltip to use for the command
-	//        optional attribute: image - a URL to an image for the command
-	//        optional attribute: href - if true, then the service returns an href when it runs
-	//        optional attribute: forceSingleItem - if true, then the service is only invoked when a single item is selected
-	//			and the item parameter to the run method is guaranteed to be a single item vs. an array.  When this is not true, 
-	//			the item parameter to the run method may be an array of items.
-	// run - the implementation of the command (function).
-	//        arguments passed to run: (itemOrItems)
-	//          itemOrItems (object or array) - an array of items to which the item applies, or a single item if the info.forceSingleItem is true
-	//        the return value of the run function will be used as follows:
-	//          if info.href is true, the return value should be an href and the window location will be replaced with the href
-	//			if info.href is not true, the run function is assumed to perform all necessary action and the return is not used.
-	var commandsReferences = serviceRegistry.getServiceReferences("fileCommands");
-
-	for (var i=0; i<commandsReferences.length; i++) {
-		serviceRegistry.getService(commandsReferences[i]).then(function(service) {
-			var info = {};
-			var propertyNames = commandsReferences[i].getPropertyNames();
-			for (var j = 0; j < propertyNames.length; j++) {
-				info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
+	var commandOptions = {
+		name: info.name,
+		image: info.image,
+		id: info.id,
+		tooltip: info.tooltip,
+		visibleWhen: dojo.hitch(info, function(items){
+			if(dojo.isArray(items)){
+				if ((this.forceSingleItem || this.href) && items.length !== 1) {
+					return false;
+				}
+				if(!this.forceSingleItem && items.length < 1){
+					return false;
+				}
+			} else{
+				items = [items];
 			}
-
-			var commandOptions = {
-				name: info.name,
-				image: info.image,
-				id: info.id,
-				tooltip: info.tooltip,
-				visibleWhen: dojo.hitch(info, function(items){
-					if(dojo.isArray(items)){
-						if ((this.forceSingleItem || this.href) && items.length !== 1) {
-							return false;
-						}
-						if(!this.forceSingleItem && items.length < 1){
-							return false;
-						}
-					} else{
-						items = [items];
-					}
-					
-					if(!this.validationProperties){
-						return true;
-					}
-					
-					for(var i in items){
-						if(!validateSingleItem(items[i], this.validationProperties)){
-							return false;
-						}
-					}
-					return true;
-					
-				})
-			};
-			if (info.href) {
-				commandOptions.hrefCallback = dojo.hitch(info, function(items){
-					var item = dojo.isArray(items) ? items[0] : items;
-					var shallowItemClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(item);
-					if(service.run) {
-						return service.run(shallowItemClone);
-					}
-				});
+			
+			if(!this.validationProperties){
+				return true;
+			}
+			
+			for(var i in items){
+				if(!validateSingleItem(items[i], this.validationProperties)){
+					return false;
+				}
+			}
+			return true;
+			
+		}),
+		isEditor: info.isEditor
+	};
+	if (info.href) {
+		commandOptions.hrefCallback = dojo.hitch(info, function(items){
+			var item = dojo.isArray(items) ? items[0] : items;
+			var shallowItemClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(item);
+			if(service.run) {
+				return service.run(shallowItemClone);
+			}
+		});
+	} else {
+		commandOptions.callback = dojo.hitch(info, function(items){
+			var shallowItemsClone;
+			if (this.forceSingleItem) {
+				var item = dojo.isArray() ? items[0] : items;
+				shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(item);
 			} else {
-				commandOptions.callback = dojo.hitch(info, function(items){
-					var shallowItemsClone;
-					if (this.forceSingleItem) {
-						var item = dojo.isArray() ? items[0] : items;
-						shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(item);
-					} else {
-						if (dojo.isArray(items)) {
-							shallowItemsClone = [];
-							for (var j = 0; j<items.length; j++) {
-								shallowItemsClone.push(eclipse.fileCommandUtils._cloneItemWithoutChildren(items[j]));
-							}
-						} else {
-							shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
-						}
+				if (dojo.isArray(items)) {
+					shallowItemsClone = [];
+					for (var j = 0; j<items.length; j++) {
+						shallowItemsClone.push(eclipse.fileCommandUtils._cloneItemWithoutChildren(items[j]));
 					}
-					if(service.run) {
-						service.run(shallowItemsClone);
-					}
-				});
-			}
-			var command = new eclipse.Command(commandOptions);
-			var extensionGroupCreated = false;
-			var selectionGroupCreated = false;
-			if (info.forceSingleItem || info.href) {
-				// single items go in the local actions column, grouped in their own unnamed group to get a separator
-				commandService.addCommand(command, "object");
-				if (!extensionGroupCreated) {
-					extensionGroupCreated = true;
-					commandService.addCommandGroup("eclipse.fileCommandExtensions", 1000, null, fileGroup);
+				} else {
+					shallowItemsClone = eclipse.fileCommandUtils._cloneItemWithoutChildren(items);
 				}
-				commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions");
-			} else {  
-				// items based on selection are added to the selections toolbar, grouped in their own unnamed group to get a separator
-				// TODO would we also want to add these to the menu above so that they are available for single selections?  
-				// For now we do not do this to reduce clutter, but we may revisit this.
-				commandService.addCommand(command, "dom");
-				if (!selectionGroupCreated) {
-					selectionGroupCreated = true;
-					commandService.addCommandGroup("eclipse.bulkFileCommandExtensions", 1000, null, selectionGroup);
-				}
-				commandService.registerCommandContribution(command.id, i, selectionToolbarId, selectionGroup + "/eclipse.bulkFileCommandExtensions");
 			}
-			eclipse.fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
-			explorer.updateCommands();
+			if(service.run) {
+				service.run(shallowItemsClone);
+			}
 		});
 	}
+	return commandOptions;};
+
+eclipse.fileCommandUtils.getOpenWithCommands = function(commandService) {
+	var openWithCommands = [];
+	for (var commandId in commandService._objectScope) {
+		var command = commandService._objectScope[commandId];
+		if (command.isEditor) {
+			openWithCommands.push(command);
+		}
+	}
+	return openWithCommands;
 };
