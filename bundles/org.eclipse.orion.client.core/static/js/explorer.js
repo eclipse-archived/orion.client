@@ -206,6 +206,7 @@ eclipse.ExplorerRenderer = (function() {
 		getCheckboxColumn: function(item, tableRow){
 			if (this._useCheckboxSelection) {
 				var checkColumn = document.createElement('td');
+				dojo.addClass(checkColumn, "secondaryColumn");
 				var check = document.createElement('input');
 				check.type = "checkbox";
 				check.id = tableRow.id+"selectedState";
