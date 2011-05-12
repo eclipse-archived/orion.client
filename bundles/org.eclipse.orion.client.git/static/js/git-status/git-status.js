@@ -41,7 +41,7 @@ dojo.addOnLoad(function(){
 		var controller = new orion.GitStatusController(serviceRegistry , "unstagedZone" , "stagedZone");
 		controller.getGitStatus(dojo.hash());
 	
-		eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
+		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 		initTitleBar(fileClient);
 		//every time the user manually changes the hash, we need to load the git status
 		dojo.subscribe("/dojo/hashchange", controller, function() {

@@ -19,7 +19,7 @@ dojo.addOnLoad(function(){
 	// File operations
 	new eclipse.FileClient(serviceRegistry, pluginRegistry);
 
-	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
+	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 	var sBSCompareContainer = new orion.SBSCompareContainer(serviceRegistry ,"left-viewer" , "right-viewer");
 	var splitted = window.location.href.split('#');
 	if(splitted.length > 1){

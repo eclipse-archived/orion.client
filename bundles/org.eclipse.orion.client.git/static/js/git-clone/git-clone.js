@@ -35,7 +35,7 @@ dojo.addOnLoad(function(){
 	var explorer = new eclipse.git.GitClonesExplorer(serviceRegistry, selection, "/git/clone/", "clonesList", "pageActions", "selectionTools");
 	
 	// global commands
-	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
+	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
 	eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
 	eclipse.gitCommandUtils.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
 

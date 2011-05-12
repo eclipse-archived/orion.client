@@ -16,7 +16,7 @@ dojo.addOnLoad(function() {
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	var selection = new orion.Selection(serviceRegistry);
 
-	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, usersList, usersList);
+	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, usersList, usersList);
 	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, usersList);
 
 	var usersList = new eclipse.UsersList(serviceRegistry, selection, searcher, "usersList", "pageActions", "selectionTools");

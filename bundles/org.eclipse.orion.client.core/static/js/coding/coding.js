@@ -366,7 +366,7 @@ dojo.addOnLoad(function(){
 		inputManager.setInput(dojo.hash(), editorContainer);
 		
 		// TODO search location needs to be gotten from somewhere
-		eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, editorContainer, editorContainer);
+		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, editorContainer, editorContainer);
 		eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, editorContainer);
 			
 		var syntaxChecker = new eclipse.SyntaxChecker(serviceRegistry, editorContainer);

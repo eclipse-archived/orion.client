@@ -9,7 +9,7 @@
 		var serviceImpl = { /* All data is in properties */ };
 
 		var provider = new eclipse.PluginProvider();
-		provider.registerServiceProvider("landingTasks", {run: function() {}}, {
+		provider.registerServiceProvider("landingTasks", serviceImpl, {
 			image: "http://sfmccourt.github.com/Orion/github.png", 
 			name: "Clone a github repository",
 			id: "orion.clonegit",
@@ -20,7 +20,7 @@
 				{href: "http://wiki.eclipse.org/Orion/How_Tos/Cloning_repository_from_github", linkName: "Orion/GitHub How-To", description: "The how-to provides further information about setting up credentials."}
 			]
 		});
-		provider.registerServiceProvider("landingTasks", {run: function() {}}, {
+		provider.registerServiceProvider("landingTasks", serviceImpl, {
 			image: "/plugins/images/upload.png",
 			name: "Upload some code!",
 			id: "orion.upload",
@@ -29,7 +29,7 @@
 				{href: "navigate-table.html", linkName: "Navigator", description: "Go the Orion navigator.  Create a new folder and then choose import from the 'More' menu."}
 			]
 		});
-		provider.registerServiceProvider("landingTasks", {run: function() {}}, {
+		provider.registerServiceProvider("landingTasks", serviceImpl, {
 			image: "http://sfmccourt.github.com/Orion/initializr.png",
 			name: "Generate a web site",
 			id: "orion.generate",
@@ -38,6 +38,26 @@
 				{href: "http://www.initializr.com", linkName: "Initializr", description: "Go to the initializr site, choose the options that you would like, and download the template to your computer."},
 				{href: "navigate-table.html", linkName: "Navigator", description: "Go to the Orion navigator.  Create a new folder and then choose import from the 'More' menu.  Select the zip file you just generated."}
 			]
+		});
+		provider.registerServiceProvider("primaryNavigation", serviceImpl, {
+			name: "Navigator",
+			id: "orion.navigator",
+			href: "navigate-table.html#"
+		});
+		provider.registerServiceProvider("primaryNavigation", serviceImpl, {
+			name: "Sites",
+			id: "orion.sites",
+			href: "sites.html"
+		});
+		provider.registerServiceProvider("primaryNavigation", serviceImpl, {
+			name: "Plugins",
+			id: "orion.plugins",
+			href: "view-registry.html"
+		});
+		provider.registerServiceProvider("primaryNavigation", serviceImpl, {
+			name: "Repositories",
+			id: "orion.repositories",
+			href: "git-clone.html"
 		});
 		provider.connect();
 	};

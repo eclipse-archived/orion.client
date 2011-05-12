@@ -31,7 +31,7 @@ dojo.addOnLoad(function() {
 		var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 		var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 		
-		eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
+		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 		
 		// Create the visuals
 		var model;

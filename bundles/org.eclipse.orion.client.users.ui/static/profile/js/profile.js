@@ -32,7 +32,7 @@ dojo.addOnLoad(function() {
 		usersClient: usersClient
 	});
 	
-	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, prefsService, searcher, profile);
+	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, profile);
 	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, profile);
 });
 

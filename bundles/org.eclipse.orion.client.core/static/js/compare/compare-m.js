@@ -35,7 +35,7 @@ dojo.addOnLoad(function(){
 	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
 		var fileClient = new eclipse.FileClient(fileService);
 		
-		eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
+		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 		
 		var factory = new orion.CompareMergeUIFactory("compareCon");
 		factory.buildUI();

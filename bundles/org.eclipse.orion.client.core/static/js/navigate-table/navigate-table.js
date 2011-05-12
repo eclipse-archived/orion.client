@@ -167,7 +167,7 @@ dojo.addOnLoad(function(){
 		};
 		
 		// global commands
-		eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
+		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
 		// commands shared by navigators
 		eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools");
 		
