@@ -8,6 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 dojo.require("dojo.hash");
+dojo.require("dijit.layout.BorderContainer");
+dojo.require("dijit.layout.ContentPane");
 dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
 	var serviceRegistry = new eclipse.ServiceRegistry();
@@ -34,6 +36,17 @@ dojo.addOnLoad(function(){
 		var fileClient = new eclipse.FileClient(fileService);
 		
 		eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
+		
+		var factory = new orion.CompareMergeUIFactory("compareCon");
+		factory.createTileDiv("left-viewer-title","left-con");
+		factory.createLeftEditorParentDiv("left-viewer","left-con");
+		factory.createStatusDiv("left-viewer-status","left-con");
+		
+		factory.createTileDiv("right-viewer-title","right-con");
+		factory.createRightEditorParentDiv("right-viewer","diff-canvas","right-con");
+		factory.createStatusDiv("right-viewer-status","right-con");
+	
+		
 		var canvas = document.getElementById("diff-canvas");
 		// Git operations
 		new eclipse.GitService(serviceRegistry);

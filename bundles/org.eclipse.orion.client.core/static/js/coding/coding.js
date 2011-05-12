@@ -136,7 +136,7 @@ dojo.addOnLoad(function(){
 		var editorFactory = function() {
 			return new eclipse.Editor({
 				parent: editorContainerDomNode,
-				stylesheet: ["/editor/samples/editor.css", "/default-theme.css"],
+				stylesheet: ["/editor/samples/editor.css", "/css/default-theme.css"],
 				tabSize: 4
 			});
 		};

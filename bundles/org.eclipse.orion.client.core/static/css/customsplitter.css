@@ -1,0 +1,29 @@
+.dijitBorderContainer .dojoxToggleSplitterLeft,
+.dijitBorderContainer .dojoxToggleSplitterRight {
+	width:16px;
+}
+
+.nihilo .dijitSplitterV  {
+	background: #DDDDDD;
+	width: 8px;
+}
+
+.nihilo .dijitSplitterV .dijitSplitterThumb {
+	width: 8px;
+	left: 0px;
+	height: 28px;
+	cursor: pointer;
+	//background-color: #AAAAAA;
+}
+
+.nihilo .dojoxToggleSplitterLeft .dojoxToggleSplitterIconOpen, 
+.nihilo .dojoxToggleSplitterRight .dojoxToggleSplitterIconClosed 
+{
+background:  url(/images/splitter2.png) no-repeat 0px 50%;
+}
+
+.nihilo .dojoxToggleSplitterRight .dojoxToggleSplitterIconOpen, 
+.nihilo .dojoxToggleSplitterLeft .dojoxToggleSplitterIconClosed 
+{
+background:  url(/images/splitter1.png) no-repeat 0px 50%;
+} 
