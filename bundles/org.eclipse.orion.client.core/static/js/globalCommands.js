@@ -217,7 +217,8 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 	dojo.connect(window.document, "onkeydown", function (evt){
 		evt = evt || window.event;
 		// HACK!  Fix when doing https://bugs.eclipse.org/bugs/show_bug.cgi?id=334200
-		if (evt.target.nodeName.toLowerCase() === 'input') {
+		var type = evt.target.nodeName.toLowerCase();
+		if (type === 'input' || type === 'textarea') {
 			return;
 		}
 		if (evt.keyCode  === 84){ // "t" handler for open resource

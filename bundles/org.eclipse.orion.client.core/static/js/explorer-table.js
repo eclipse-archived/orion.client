@@ -93,10 +93,11 @@ eclipse.FileExplorer = (function() {
 					dojo.hitch(self, function(loadedWorkspace) {
 						clearTimeout(progressTimeout);
 						//copy fields of resulting object into the tree root
-						for (var i  in loadedWorkspace) {
+						for (var i in loadedWorkspace) {
 							this.treeRoot[i] = loadedWorkspace[i];
 						}
-						eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
+						eclipse.util.rememberSuccessfulTraversal(this.treeRoot, this.registry);
+						eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);					
 						// erase any old page title
 						var pageTitle = dojo.byId(this.pageTitleId);
 						if (pageTitle) {

@@ -259,6 +259,35 @@ eclipse.util.processNavigatorParent = function(parent, children) {
 	}); 
 };
 
+eclipse.util.rememberSuccessfulTraversal = function(item, registry) {
+	if (item.Parents && item.Parents.length === 0) {
+		registry.getService("IPreferenceService").then(function(service) {
+			return service.getPreferences("/window/recent");
+		}).then(function(prefs){
+			return prefs.get("projects");}).then(function(projects) {
+				var storedProjects = [];
+				if (projects && projects.length && projects.length > 0) {
+					for (var k=0; k<projects.length; k++) {
+						if (projects[k].location !== item.ChildrenLocation && projects[k].name !== item.Name) {
+							storedProjects.push(projects[k]);
+						}
+					}
+					storedProjects.push({name: item.Name, location: item.ChildrenLocation});
+				} else {
+					storedProjects.push({name: item.Name, location: item.ChildrenLocation});
+				}
+				if (storedProjects.length > 5) {
+					storedProjects= storedProjects.slice(-5, storedProjects.length);
+				}
+				registry.getService("IPreferenceService").then(function(service) {
+					return service.getPreferences("/window/recent");
+				}).then(function(prefs){
+					prefs.put("projects", storedProjects);
+				});
+			});
+		}
+};
+
 /**
  * @param {DomNode} node
  * @returns {String} The text contained by node. Note that treatment of whitespace 
