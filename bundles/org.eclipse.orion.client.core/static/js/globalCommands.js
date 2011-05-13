@@ -138,7 +138,7 @@ eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService
 	}
 };
 
-eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, prefsService, searcher, handler, editor) {
+eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, commandService, prefsService, searcher, handler, editor) {
 	// this needs to come from somewhere but I'm not going to do a separate get for it
 	var searchLocation = "/filesearch?q=";
 	var text;
@@ -150,21 +150,33 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 	// place the HTML fragment from above.
 	dojo.place(topHTMLFragment, parent, "only");
 	
-	// generate primary nav links.  This needs to come from some place (extension?  registry?)
+	// generate primary nav links. 
 	var primaryNav = dojo.byId("primaryNav");
 	if (primaryNav) {
-		var primaryLinks = [
-			// disabled for M6 since git-status needs a parameter.  For M7 should link to the clone page.	{name: "Git", url: "git-status.html"},
-			{name: "Navigator", url: "navigate-table.html#"},
-			{name: "Sites", url: "sites.html"},
-			{name: "Plugins", url: "view-registry.html"},
-			{name: "Repositories", url: "git-clone.html"}
-		];
-		for (var i=0; i<primaryLinks.length; i++) {
-			var link = dojo.create("a", {href: primaryLinks[i].url}, primaryNav, "last");
-			dojo.addClass(link, "commandLink");
-			text = document.createTextNode(primaryLinks[i].name);
-			dojo.place(text, link, "only");
+		// Note that the shape of the "primaryNavigation" extension is not in any shape or form that could be considered final.
+		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
+		
+		// The shape of a contributed navigation link is (for now):
+		// info - information about the navigation link (object).
+		//     required attribute: name - the name of the navigation link
+		//     required attribute: id - the id of the navigation link
+		//     required attribute: href - the URL for the navigation link
+		//     optional attribute: image - a URL to an icon representing the link (currently not used, may use in future)
+		var navLinks= serviceRegistry.getServiceReferences("primaryNavigation");
+		for (var i=0; i<navLinks.length; i++) {
+			serviceRegistry.getService(navLinks[i]).then(function(service) {
+				var info = {};
+				var propertyNames = navLinks[i].getPropertyNames();
+				for (var j = 0; j < propertyNames.length; j++) {
+					info[propertyNames[j]] = navLinks[i].getProperty(propertyNames[j]);
+				}
+				if (info.href && info.name) {
+					var link = dojo.create("a", {href: info.href}, primaryNav, "last");
+					dojo.addClass(link, "commandLink");
+					text = document.createTextNode(info.name);
+					dojo.place(text, link, "only");
+				}
+			});
 		}
 	}
 	
@@ -217,7 +229,8 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, p
 	dojo.connect(window.document, "onkeydown", function (evt){
 		evt = evt || window.event;
 		// HACK!  Fix when doing https://bugs.eclipse.org/bugs/show_bug.cgi?id=334200
-		if (evt.target.nodeName.toLowerCase() === 'input') {
+		var type = evt.target.nodeName.toLowerCase();
+		if (type === 'input' || type === 'textarea') {
 			return;
 		}
 		if (evt.keyCode  === 84){ // "t" handler for open resource

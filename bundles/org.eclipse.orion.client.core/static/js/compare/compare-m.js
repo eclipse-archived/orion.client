@@ -8,6 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 dojo.require("dojo.hash");
+dojo.require("dijit.layout.BorderContainer");
+dojo.require("dijit.layout.ContentPane");
 dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
 	var serviceRegistry = new eclipse.ServiceRegistry();
@@ -33,40 +35,33 @@ dojo.addOnLoad(function(){
 	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
 		var fileClient = new eclipse.FileClient(fileService);
 		
-		eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
-		var canvas = document.getElementById("diff-canvas");
+		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+		
+		var uiFactory = new orion.CompareMergeUIFactory({parentDivID : "compareContainer" , showTitle : true , showLineStatus : true});
+		uiFactory.buildUI();
+		
 		// Git operations
 		new eclipse.GitService(serviceRegistry);
 		var readOnly = isReadOnly();
-		compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , commandService, fileClient,"left-viewer" , "right-viewer" , canvas);
+		compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , commandService, fileClient,uiFactory);
 		compareMergeContainer.resolveDiff(dojo.hash(), 
 				  function(newFile , oldFile){
-			  		dojo.place(document.createTextNode(newFile), "left-viewer-title", "only");				  
-			  			dojo.place(document.createTextNode(oldFile), "right-viewer-title", "only");				  
+				     handleTile(newFile , oldFile , uiFactory);
 		  		  },
 				  function(errorResponse , ioArgs){
-					  var message = typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; 
-					  dojo.place(document.createTextNode(message), "left-viewer-title", "only");				  
-					  dojo.place(document.createTextNode(message), "right-viewer-title", "only");				  
-					  dojo.style("left-viewer-title", "color", "red");
-					  dojo.style("right-viewer-title", "color", "red");
+		  			 handleErrorTile(errorResponse , ioArgs , uiFactory);
 				  }
 		);
 		
 		//every time the user manually changes the hash, we need to load the diff
 		dojo.subscribe("/dojo/hashchange", compareMergeContainer, function() {
-			compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , commandService , fileClient,"left-viewer" , "right-viewer" , canvas);
+			compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , commandService , fileClient,uiFactory);
 			compareMergeContainer.resolveDiff(dojo.hash(), 
 					  function(newFile , oldFile){
-				  		dojo.place(document.createTextNode("File: " + newFile), "left-viewer-title", "only");				  
-				  			dojo.place(document.createTextNode("File On Git: " + oldFile), "right-viewer-title", "only");				  
-			  		  },
+						 handleTile(newFile , oldFile , uiFactory);
+					  },
 					  function(errorResponse , ioArgs){
-						  var message = typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; 
-						  dojo.place(document.createTextNode(message), "left-viewer-title", "only");				  
-						  dojo.place(document.createTextNode(message), "right-viewer-title", "only");				  
-						  dojo.style("left-viewer-title", "color", "red");
-						  dojo.style("right-viewer-title", "color", "red");
+						  handleErrorTile(errorResponse , ioArgs , uiFactory);
 					  });
 		});
 			
@@ -110,6 +105,23 @@ dojo.addOnLoad(function(){
 function isReadOnly(){
 	var queryParams = dojo.queryToObject(window.location.search.slice(1));
 	return queryParams["readonly"] != null;
+};
+
+function handleTile(newFile , oldFile , uiFactory){
+	if(uiFactory.getTitleDivId(true) && uiFactory.getTitleDivId(false)){
+		dojo.place(document.createTextNode(newFile), uiFactory.getTitleDivId(true), "only");				  
+		dojo.place(document.createTextNode(oldFile), uiFactory.getTitleDivId(false), "only");	
+	}
+};
+
+function handleErrorTile(errorResponse , ioArgs , uiFactory){
+	if(uiFactory.getTitleDivId(true) && uiFactory.getTitleDivId(false)){
+		  var message = typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; 
+		  dojo.place(document.createTextNode(message), uiFactory.getTitleDivId(true), "only");				  
+		  dojo.place(document.createTextNode(message), uiFactory.getTitleDivId(false), "only");				  
+		  dojo.style(uiFactory.getTitleDivId(true), "color", "red");
+		  dojo.style(uiFactory.getTitleDivId(false), "color", "red");
+	}
 };
 
 

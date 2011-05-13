@@ -38,7 +38,7 @@ dojo.addOnLoad(function() {
 		};
 		
 		// global commands
-		eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
+		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 	
 		// add install stuff to page actions toolbar
 		var pageActions = dojo.byId("pageActions");

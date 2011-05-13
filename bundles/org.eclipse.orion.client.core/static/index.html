@@ -2,6 +2,7 @@
 <html style="height: 100%">
 	<head>
 		<title>Welcome to Orion</title>
+		<link rel="stylesheet" type="text/css" href="index.css" />
 <script type="text/javascript">
 	var djConfig = {
 		isDebug : true,
@@ -22,16 +23,6 @@
 	<!-- The following required for header command - see bug 341350 -->
 	dojo.require("widgets.OpenResourceDialog");
 </script>
-<style type="text/css">
-	@import "/org.dojotoolkit/dojo/resources/dojo.css";
-	@import "/org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
-	@import "/org.dojotoolkit/dijit/themes/nihilo/Tree.css";
-	@import "/org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
-	@import "/org.dojotoolkit/dijit/themes/nihilo/form/Common.css";
-	@import "/org.dojotoolkit/dijit/themes/nihilo/form/Button.css";
-	@import "/ide.css";
-	@import "/commands.css";
-</style>
 </head>
 	<body style="height: 100%" class="nihilo">
 	<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
@@ -50,19 +41,30 @@
  	<script src="js/selection.js"></script>
  	<script src="js/status.js"></script>
  	<script src="js/users.js"></script>
-  	<script src="js/fileClient.js"></script>
-  	<script src="js/breadcrumbs.js"></script>
-	<script src="js/favorites.js"></script>
 	
 	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
 		<div dojoType="dijit.layout.ContentPane" id="toolbar" region="top" class="toolbar">
 		</div>
-		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false" persist="false" gutters="false" region="center" splitter="false" style="margin-left: 44px">
+		<div dojoType="dijit.layout.BorderContainer" design="headline" persist="false" gutters="false" region="center" splitter="false" style="margin-left: 44px">
 			<div dojoType="dijit.layout.ContentPane" id="feed" region="top" class="mainpane" style="height: 33%">
 				<div dojoType="dojox.widget.FeedPortlet" title="Orion News" id="orionfeed" url="http://planetorion.org/news/feed/" maxResults="5" openNew="false" showFeedTitle="false">
 				</div>			
 			</div>
-			<div dojoType="dijit.layout.ContentPane" id="bottom" region="center" class="auxpane">TBD.  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=343290">Bug 343290</a>
+			<div dojoType="dijit.layout.BorderContainer" id="bottom" splitter="false" persist="false" gutters="false" region="center" class="landingPanelContainer">
+				<div dojoType="dijit.layout.ContentPane" id="left" region="left" class="landingPanel" style="width: 33%">
+					<div style="padding: 8px;">
+						<h2 class="landingHeading">Recent Projects</h2>
+						<div id="recent">Go to the <a href="navigate-table.html">Navigator</a> to create and view projects.
+						</div>
+					</div>
+				</div>		
+				<div dojoType="dijit.layout.ContentPane" id="right" region="center" class="landingPanel">
+					<div style="padding: 8px;">
+						<h2 class="landingHeading">Get Started</h2>
+						<div id="tasks"></div>
+					</div>
+				</div>			
+
 			</div>
 		</div>
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">

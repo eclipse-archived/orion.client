@@ -1,0 +1,9 @@
+@import "org.dojotoolkit/dojo/resources/dojo.css";
+
+@import "org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
+
+@import "org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
+
+@import "css/ide.css";
+
+@import "css/commands.css";

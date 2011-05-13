@@ -19,7 +19,7 @@ eclipse.FileExplorer = (function() {
 	 * @name eclipse.FileExplorer
 	 * @class A table-based explorer component
 	 */
-	function FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
+	function FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, parentId, pageTitleId, toolbarId, selectionToolsId) {
 		this.registry = serviceRegistry;
 		this.treeRoot = treeRoot;
 		this.selection = selection;
@@ -31,7 +31,7 @@ eclipse.FileExplorer = (function() {
 		this.selectionToolsId = selectionToolsId;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new eclipse.FileRenderer({checkbox: true, cachePrefix: "Navigator" }, this);
+		this.renderer = new eclipse.FileRenderer({checkbox: true, cachePrefix: "Navigator"}, this, commandService);
 	}
 	
 	FileExplorer.prototype = eclipse.Explorer.prototype;
@@ -93,10 +93,11 @@ eclipse.FileExplorer = (function() {
 					dojo.hitch(self, function(loadedWorkspace) {
 						clearTimeout(progressTimeout);
 						//copy fields of resulting object into the tree root
-						for (var i  in loadedWorkspace) {
+						for (var i in loadedWorkspace) {
 							this.treeRoot[i] = loadedWorkspace[i];
 						}
-						eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
+						eclipse.util.rememberSuccessfulTraversal(this.treeRoot, this.registry);
+						eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);					
 						// erase any old page title
 						var pageTitle = dojo.byId(this.pageTitleId);
 						if (pageTitle) {
@@ -164,8 +165,10 @@ eclipse.Model = (function() {
 /********* Rendering json items into columns in the tree **************/
 eclipse = eclipse || {};
 eclipse.FileRenderer = (function() {
-	function FileRenderer (options, explorer) {
+	function FileRenderer (options, explorer, commandService) {
 		this.explorer = explorer;
+		this.commandService = commandService;
+		this.openWithCommands = null;
 		this._init(options);
 	}
 	FileRenderer.prototype = eclipse.SelectionRenderer.prototype; 
@@ -202,24 +205,21 @@ eclipse.FileRenderer = (function() {
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			} else {
 				col = document.createElement('td');
-				// only go to the coding page for things we know how to edit.  This way we can still view images, etc.
-				var splits = item.Location.split(".");
+				
+				// Only generate an "open with" href if there's a matching openWith handler.
+				// This way we can still view images, etc.
+				if (!this.openWithCommands) {
+					this.openWithCommands = eclipse.fileCommandUtils.getOpenWithCommands(this.commandService);
+				}
 				var href = item.Location;
-				if (splits.length > 0) {
-					var extension = splits.pop().toLowerCase();
-					// we should really start thinking about editor lookup
-					switch(extension) {
-							case "js":
-							case "java":
-							case "html":
-							case "xml":
-							case "css":
-							case "php":
-							case "txt":
-								href = "/coding.html#" + item.Location;
-								break;
+				for (var i=0; i < this.openWithCommands.length; i++) {
+					var openWithCommand = this.openWithCommands[i];
+					if (openWithCommand.visibleWhen(item)) {
+						href = openWithCommand.hrefCallback(item);
+						break; // use the first one
 					}
 				}
+				
 				div = dojo.create("div", null, col, "only");
 				dojo.create("img", {src: "/images/none.png"}, div, "last");
 				dojo.create("img", {src: "/images/file_obj.gif"}, div, "last");

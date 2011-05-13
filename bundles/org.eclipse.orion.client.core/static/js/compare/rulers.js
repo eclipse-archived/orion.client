@@ -391,8 +391,13 @@ orion.CompareMatchRenderer =  (function() {
 		
 		_renderCurve: function (mapperIndex , leftStart , rightStart , canvas , context , leftTop , leftBottom , rightTop , rightBottom){
 			var mapperItem = this._mapper[mapperIndex];
+			/*
 			var leftMiddle =  (leftStart + (mapperItem[0]/2) - leftTop) * this._leftLineH;
 			var rightMiddle = (rightStart + (mapperItem[1]/2) - rightTop) * this._rightLineH ;
+			*/
+			var leftMiddle =  this._leftEditor.getLinePixel(leftStart + (mapperItem[0]/2)) + (mapperItem[0]%2)*this._leftLineH/3 - this._leftEditor.getTopPixel();
+			var rightMiddle =  this._rightEditor.getLinePixel(rightStart + (mapperItem[1]/2)) + (mapperItem[1]%2)*this._rightLineH/3- this._rightEditor.getTopPixel();
+			
 			var w =  canvas.parentNode.clientWidth;
 			
 			if(mapperIndex === this.getCurrentMapperIndex()){

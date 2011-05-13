@@ -1,0 +1,52 @@
+@import "org.dojotoolkit/dojo/resources/dojo.css";
+
+@import "org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
+
+@import "org.dojotoolkit/dijit/themes/nihilo/Tree.css";
+
+@import "org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
+
+@import "org.dojotoolkit/dijit/themes/nihilo/form/Common.css";
+
+@import "org.dojotoolkit/dijit/themes/nihilo/form/Button.css";
+
+@import "css/ide.css";
+
+@import "css/commands.css";
+
+html,body {
+	height: 100%;
+}
+
+h1 {
+	position: relative;
+	margin-top: 18px;
+}
+
+.statusPane {
+	font-weight: bold;
+}
+
+.domCommandToolbar {
+	padding-left: 8px;
+}
+
+tr.treeTableRow td:first-child {
+	padding-left: 16px !important;
+}
+
+.treetable th {
+	font-weight: bold;
+}
+
+.treetable td {
+	padding: 16px 0 16px 16px;
+}
+
+.treetable th {
+	padding: 16px 0 0 16px;
+}
+
+.siteConfigDetails {
+	padding-left: 16px;
+}

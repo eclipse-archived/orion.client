@@ -81,7 +81,7 @@ dojo.addOnLoad(function(){
 	
 		var fileClient = new eclipse.FileClient(topLevelFileService);
 		
-		var explorer = new eclipse.FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+		var explorer = new eclipse.FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 		
 		function refresh() {
 			var fileServiceReference;
@@ -167,7 +167,7 @@ dojo.addOnLoad(function(){
 		};
 		
 		// global commands
-		eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, explorer);
+		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
 		// commands shared by navigators
 		eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools");
 		
@@ -178,6 +178,7 @@ dojo.addOnLoad(function(){
 		commandService.addCommandGroup("eclipse.fileGroup", 100, "More");
 		commandService.addCommandGroup("eclipse.newResources", 100, null, "eclipse.fileGroup");
 		commandService.addCommandGroup("eclipse.fileGroup.unlabeled", 100, null, null, "pageActions");
+		commandService.addCommandGroup("eclipse.fileGroup.openWith", 100, "Open With", "eclipse.fileGroup");
 		commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
 		commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
 		

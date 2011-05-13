@@ -30,7 +30,7 @@ dojo.addOnLoad(function(){
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	var searchResultsGenerator = new eclipse.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
 	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
-	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher, searcher);
+	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, searcher);
 	searchResultsGenerator.loadResults(dojo.hash());
 	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, searcher, "pageActions");
 

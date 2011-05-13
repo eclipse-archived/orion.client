@@ -4,7 +4,8 @@
 		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2011." >
 		<meta http-equiv="Content-Language" content="en-us">
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    	<title>Git Status</title>    
+    	<title>Git Status</title>
+    	<link rel="stylesheet" type="text/css" href="git-status.css" />    
     <script type="text/javascript">
         var djConfig = {
 		    isDebug:false,
@@ -19,17 +20,6 @@
 		dojo.require("dijit.form.TextBox");
 		dojo.require("widgets.OpenResourceDialog");
 	</script>
-	<style type="text/css">
-		@import "/org.dojotoolkit/dojo/resources/dojo.css";
-		@import "/org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
-		@import "/org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
-		@import "/org.dojotoolkit/dijit/themes/nihilo/form/Common.css";
-		@import "/org.dojotoolkit/dijit/themes/nihilo/form/Button.css";
-	    @import "/ide.css";
-	    @import "/breadcrumbs.css";
-	    @import "/commands.css";
-	    @import "/js/compare/compare.css"; 
-	</style>
 	
 </head>
 <body style="height: 100%" class="nihilo">
@@ -60,7 +50,7 @@
 		</div>
 		
 		<!-- status pane on left : start vvv-->
-		<div id="gitStatusPane" class="auxpane" dojoType="dijit.layout.ContentPane" region="leading"  style="margin-left: 44px; width: 40%; overflow-x: auto" splitter="true">				
+		<div id="gitStatusPane" class="auxpane" dojoType="dijit.layout.ContentPane" region="leading"  style="margin-left: 44px; width: 40%; overflow: auto" splitter="true">				
 			<!-- unstaged zone : start vvv-->
 			<table width="100%">
 				<tr>

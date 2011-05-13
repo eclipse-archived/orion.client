@@ -1666,7 +1666,7 @@ eclipse.Editor = (function() {
 			}
 			if (isFirefox || isIE) {
 				if (this._selDiv1) {
-					var color = "Highlight";
+					var color = this._hightlightRGB;
 					this._selDiv1.style.background = color;
 					this._selDiv2.style.background = color;
 					this._selDiv3.style.background = color;
@@ -3759,6 +3759,7 @@ eclipse.Editor = (function() {
 
 			this._fullSelection = options.fullSelection === undefined || options.fullSelection;
 			if (isPad || (this._fullSelection && !isWebkit)) {
+				this._hightlightRGB = "Highlight";
 				var selDiv1 = document.createElement("DIV");
 				this._selDiv1 = selDiv1;
 				selDiv1.id = "selDiv1";
@@ -3768,7 +3769,7 @@ eclipse.Editor = (function() {
 				selDiv1.style.padding = "0px";
 				selDiv1.style.MozOutline = "none";
 				selDiv1.style.outline = "none";
-				selDiv1.style.background = "Highlight";
+				selDiv1.style.background = this._hightlightRGB;
 				selDiv1.style.width="0px";
 				selDiv1.style.height="0px";
 				scrollDiv.appendChild(selDiv1);
@@ -3781,7 +3782,7 @@ eclipse.Editor = (function() {
 				selDiv2.style.padding = "0px";
 				selDiv2.style.MozOutline = "none";
 				selDiv2.style.outline = "none";
-				selDiv2.style.background = "Highlight";
+				selDiv2.style.background = this._hightlightRGB;
 				selDiv2.style.width="0px";
 				selDiv2.style.height="0px";
 				scrollDiv.appendChild(selDiv2);
@@ -3794,10 +3795,36 @@ eclipse.Editor = (function() {
 				selDiv3.style.padding = "0px";
 				selDiv3.style.MozOutline = "none";
 				selDiv3.style.outline = "none";
-				selDiv3.style.background = "Highlight";
+				selDiv3.style.background = this._hightlightRGB;
 				selDiv3.style.width="0px";
 				selDiv3.style.height="0px";
 				scrollDiv.appendChild(selDiv3);
+				
+				/*
+				* Bug in Firefox. The Highlight color is mapped to list selection
+				* background instead of the text selection background.  The fix
+				* is to map known colors using a table or fallback to light blue.
+				*/
+				if (isFirefox && isMac) {
+					var style = frameWindow.getComputedStyle(selDiv3, null);
+					var rgb = style.getPropertyValue("background-color");
+					switch (rgb) {
+						case "rgb(119, 141, 168)": rgb = "rgb(199, 208, 218)"; break;
+						case "rgb(127, 127, 127)": rgb = "rgb(198, 198, 198)"; break;
+						case "rgb(255, 193, 31)": rgb = "rgb(250, 236, 115)"; break;
+						case "rgb(243, 70, 72)": rgb = "rgb(255, 176, 139)"; break;
+						case "rgb(255, 138, 34)": rgb = "rgb(255, 209, 129)"; break;
+						case "rgb(102, 197, 71)": rgb = "rgb(194, 249, 144)"; break;
+						case "rgb(140, 78, 184)": rgb = "rgb(232, 184, 255)"; break;
+						default: rgb = "rgb(180, 213, 255)"; break;
+					}
+					this._hightlightRGB = rgb;
+					selDiv1.style.background = rgb;
+					selDiv2.style.background = rgb;
+					selDiv3.style.background = rgb;
+					var styleSheet = document.styleSheets[0];
+					styleSheet.insertRule("::-moz-selection {background: " + rgb + "; }", 0);
+				}
 			}
 
 			var clientDiv = document.createElement("DIV");

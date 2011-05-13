@@ -25,7 +25,7 @@ dojo.addOnLoad(function() {
 	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		
 	// global commands
-	eclipse.globalCommandUtils.generateBanner("toolbar", commandService, preferenceService, searcher);
+	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 
 	var installHandler = function(evt) {
 		var pluginUrl = installUrlTextBox.value;
