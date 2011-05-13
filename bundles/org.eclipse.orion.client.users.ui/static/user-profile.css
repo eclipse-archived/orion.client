@@ -8,10 +8,10 @@
 
 @import "org.dojotoolkit/dijit/themes/nihilo/form/Button.css";
 
-@import "css/ide.css";
+@import "ide.css";
 
-@import "css/breadcrumbs.css";
+@import "profile/css/userprofile.css";
 
-@import "css/commands.css";
+@import "commands.css";
 
-@import "js/compare/compare.css";
+@import "breadcrumbs.css";
