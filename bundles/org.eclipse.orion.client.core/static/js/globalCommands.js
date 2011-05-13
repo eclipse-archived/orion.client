@@ -140,7 +140,7 @@ eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService
 
 eclipse.globalCommandUtils.generateBanner = function(parentId, commandService, prefsService, searcher, handler, editor) {
 	// this needs to come from somewhere but I'm not going to do a separate get for it
-	var searchLocation = "/search?q=";
+	var searchLocation = "/filesearch?q=";
 	var text;
 	var parent = dojo.byId(parentId);
 	if (!parent) {
