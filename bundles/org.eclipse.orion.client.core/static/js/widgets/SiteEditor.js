@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global dojo dijit dojox eclipse*/
-/*jslint browser:true devel:true*/
+/*jslint browser:true */
 dojo.provide("widgets.SiteEditor");
 
 dojo.require("dijit.form.DropDownButton");
@@ -26,6 +26,7 @@ dojo.require("dojo.DeferredList");
 dojo.require("dojox.grid.DataGrid");
 dojo.require("dojox.grid.cells");
 // requires eclipse.sites.util
+// requires eclipse.util
 
 /**
  * Visualizes the Mappings array of a SiteConfiguration as a data grid.
@@ -37,12 +38,15 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	 */
 	_mappings: null,
 	
+	_workspaceToChildren: null,
+	
 	constructor: function() {
 		this.inherited(arguments);
 	},
 	
-	setServices: function(commandService) {
+	setServices: function(commandService, fileClient) {
 		this._commandService = commandService;
+		this._fileClient = fileClient;
 		
 		// Register commands used for editing mappings
 		var deleteMappingCommand = new eclipse.Command({
@@ -69,7 +73,13 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	setMappings: function(mappings) {
 		// Hang onto mappings object; will be mutated as user makes changes to grid store
 		this._mappings = mappings;
-		this.setStore(this._createGridStore(mappings));
+		
+		// Wait until workspace children are loaded; we need them for making friendlyPaths field
+		dojo.when(this._editor._workspaceToChildren, dojo.hitch(this, 
+			function(map) {
+				this._workspaceToChildren = map;
+				this.setStore(this._createGridStore(mappings));
+			}));
 	},
 	
 	// Sets reference to the outer SiteEditor
@@ -85,7 +95,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		var store = new dojo.data.ItemFileWriteStore({
 			data: {
 				items: dojo.map(mappings, dojo.hitch(this, function(mapping) {
-					return this._createStoreObject(mapping.Source, mapping.Target);
+					return this._createMappingObject(mapping.Source, mapping.Target);
 				}))
 			}
 		});
@@ -98,7 +108,10 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 			var content = dojo.fromJson(updatedContentString);
 			while (this._mappings.length > 0) { this._mappings.pop(); }
 			dojo.forEach(content.items, dojo.hitch(this, function(item) {
-				this._mappings.push(this._createMappingObject(item.Source, item.Target));
+				var mapping = {};
+				mapping.Source = item.Source;
+				mapping.Target = item.Target;
+				this._mappings.push(mapping);
 			}));
 //			console.debug("Set Mappings to " + dojo.toJson(this._mappings));
 			saveCompleteCallback();
@@ -106,12 +119,8 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		return store;
 	},
 	
-	_createStoreObject: function(source, target) {
-		return {Source: source, Target: target, _friendlyPath: null /*see _friendlyPathFormatter*/};
-	},
-	
 	_createMappingObject: function(source, target) {
-		return {Source: source, Target: target};
+		return {Source: source, Target: target, _friendlyPath: this._toFriendlyPath(target)};
 	},
 	
 	_getRowNodeForItem: function(/** dojo.data.Item */ item) {
@@ -127,7 +136,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		source = typeof(source) === "string" ? source : "/mountPoint";
 		target = typeof(target) === "string" ? target : "/";
 		var store = this.get("store");
-		var newItem = store.newItem(this._createMappingObject(source, target));
+		var newItem = this.store.newItem(this._createMappingObject(source, target));
 		var that = this;
 		store.save({
 			onComplete: function() {
@@ -136,7 +145,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 					var rowNode = that._getRowNodeForItem(newItem);
 					if (rowNode) {
 						var cols = dojo.query("td", rowNode);
-						var mountAtCol = cols[1];
+						var mountAtCol = cols[that.MOUNT_AT_COL];
 						var thePath = that._toReadablePath(rowNode);
 						var message = "Click to set the remote path where <b>" + thePath + "</b> will be accessible.";
 						dijit.showTooltip(message, mountAtCol, "above");
@@ -148,31 +157,49 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	
 	_toReadablePath: function(/**DomNode*/ rowNode) {
 		var cols = dojo.query("td", rowNode);
-		return eclipse.util.getText(cols[0]);
+		return eclipse.util.getText(cols[this.PATH_COL]);
 	},
 	
 	postCreate: function() {
 		this.inherited(arguments);
+		// These constants must be kept up to date with structure
+		this.PATH_COL = 1;
+		this.MOUNT_AT_COL = 2;
 		var structure = [
-				// TODO add "valid?" column here
+				{field: "Target", name: " ", editable: false,
+						width: "32px",
+						cellClasses: "isValidCell",
+						formatter: dojo.hitch(this, this._isValidFormatter)},
 				{field: "_friendlyPath", name: "Path", editable: true, commitOnBlur: true,
-						width: "16em", cellClasses: "pathCell",
+						cellClasses: "pathCell",
+						width: "auto",
 						formatter: dojo.hitch(this, this._friendlyPathFormatter)},
 				{field: "Source", name: "Mount at", editable: true, commitOnBlur: true,
-						width: "16em", cellClasses: "editablePathCell"},
+						width: "30%",
+						cellClasses: "editablePathCell"},
 				{field: "_item", name: " ", editable: false, 
-						cellClasses: "actionCell", width: "32px",
+						cellClasses: "actionCell",
+						width: "32px",
 						formatter: dojo.hitch(this, this._actionColumnFormatter)}
 			];
 		this.set("structure", structure);
 		
 		// Workaround for commitOnBlur not working right see dojox/grid/cells/_base.js
 		dojo.connect(this, "onStartEdit", this, function(inCell, inRowIndex) {
+			var grid = this;
 			var handle = dojo.connect(inCell, "registerOnBlur", inCell, function(inNode, inRowIndex) {
 				var handle2 = dojo.connect(inNode, "onblur", function(e) {
 					setTimeout(dojo.hitch(inCell, "_onEditBlur", inRowIndex), 250);
 					dojo.disconnect(handle2);
 					dojo.disconnect(handle);
+				});
+				var handle3 = dojo.connect(inNode, "onblur", inCell, function(inNode) {
+					// Propagate change to the _friendlyPath column into the Target column
+					if (inCell.index === grid.PATH_COL) {
+						var item = grid.getItem(inRowIndex);
+						grid._propagate(item);
+					}
+					dojo.disconnect(handle3);
 				});
 			});
 		});
@@ -181,13 +208,105 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		dojo.connect(this, "onStyleRow", this, this._renderCommands);
 	},
 	
-	/** Returns text node content */
-	_makeSafe: function(/**String*/ text) {
-		return eclipse.util.getText(document.createTextNode(text));
-	},
-	
 	_isWorkspacePath: function(/**String*/ path) {
 		return new RegExp("^/").test(path);
+	},
+	
+	/**
+	 * Formats the "is valid?" column. If the Target looks like a workspace path, we try a GET on it
+	 * to see if it exists.
+	 * @returns {dojo.Deferred}
+	 */
+	_isValidFormatter: function(/**String*/ target, i, inCell) {
+		if (inCell.lastTarget && inCell.lastTarget === target) {
+			// Re-use value from last time
+			return inCell.lastResult;
+		}
+		inCell.lastTarget = target;
+		
+		var result;
+		var href;
+		if (this._isWorkspacePath(target)) {
+			var location = eclipse.sites.util.makeFullFilePath(target);
+			var deferred = new dojo.Deferred();
+			href = eclipse.util.safeText(location);
+			// TODO: should use fileClient here, but we don't want its retrying or error dialog
+			//this._fileClient.fetchChildren(location)
+			dojo.xhrGet({
+				url: location,
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json"
+			}).then(
+				function(children) {
+					deferred.callback('<a href="' + href + '" target="_new"><img src="/images/fldr_obj.gif" title="Workspace folder ' + href + '"/></a>');
+				}, function(error) {
+					deferred.callback('<a href="' + href + '" target="_new"><img src="/images/error.gif" title="Workspace folder  not found: ' + href + '"/></a>');
+				});
+			result = deferred;
+		} else {
+			href = eclipse.util.safeText(target);
+			result = '<a href="' + href + '" target="_blank"><img src="/images/link_obj.gif" title="External link to ' + href + '"/></a>';
+		}
+		inCell.lastResult = result;
+		return result;
+	},
+	
+	// Propagate value of _friendlyPath field to the Target field
+	_propagate: function(item) {
+		var friendlyPath = this.store.getValue(item, "_friendlyPath");
+		var newTarget;
+		var found = false;
+		if (this._isWorkspacePath(friendlyPath)) {
+			this._everyTopLevelFolder(dojo.hitch(this, 
+				function(child, childLoc, childName) {
+					if (this._pathMatch(friendlyPath, childName)) {
+						found = true;
+						// Change friendly path back to internal format
+						var rest = friendlyPath.substring(childName.length);
+						newTarget = childLoc + rest;
+						return false;
+					}
+				}));
+		}
+		if (!found) {
+			newTarget = friendlyPath;
+		}
+		this.store.setValue(item, "Target", newTarget);
+	},
+	
+	_toFriendlyPath: function(target) {
+		var result;
+		var found;
+		this._everyTopLevelFolder(dojo.hitch(this, 
+			function(child, childLoc, childName) {
+				if (this._pathMatch(target, childLoc)) {
+					found = true;
+					var newFriendlyPath = childName + target.substring(childLoc.length);
+					//console.debug("Resolving to " + newFriendlyPath);
+					result = newFriendlyPath;
+					return false;
+				}
+			}));
+		
+		if (!found) {
+			result = target;
+		}
+		return result;
+	},
+	
+	_everyTopLevelFolder: function(callback) {
+		var workspaceId = this._editor.getSiteConfiguration().Workspace;
+		var children = this._workspaceToChildren[workspaceId];
+		for (var i=0; i < children.length; i++) {
+			var child = children[i];
+			var childLoc = eclipse.sites.util.makeRelativeFilePath(child.Location);
+			var childName = "/" + child.Name;
+			if (callback(child, childLoc, childName) === false) {
+				break;
+			}
+		}
 	},
 	
 	/**
@@ -198,79 +317,8 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	 * 
 	 * @returns {String | dojo.Deferred}
 	 */
-	_friendlyPathFormatter: function(/**String*/ friendlyPath, /**Number*/ rowIndex, /**Object*/ inCell) {
-		var item = this.getItem(rowIndex);
-		var target = this.store.getValue(item, "Target");
-		
-		var setFriendlyPath, fieldToUse;
-		if (!(friendlyPath)) {
-			// Friendly path needs to be set
-			setFriendlyPath = true;
-			fieldToUse = target;
-		} else {
-			// Target needs to be set
-			setFriendlyPath = false;
-			fieldToUse = friendlyPath;
-		}
-		
-		if (this._isWorkspacePath(fieldToUse)) {
-			var deferred = new dojo.Deferred();
-			dojo.when(this._editor._workspaceToChildren, dojo.hitch(this, 
-				function(map) {
-					var workspaceId = this._editor.getSiteConfiguration().Workspace;
-					var children = map[workspaceId];
-					var folderExists = false;
-					for (var i=0; i < children.length; i++) {
-						var child = children[i];
-						var childLoc = eclipse.sites.util.makeRelativeFilePath(child.Location);
-						if (setFriendlyPath) {
-							if (this._pathMatch(target, childLoc)) {
-								folderExists = true;
-								// Change Target to friendly format, then save to _friendlyPath
-								var newFriendlyPath = "/" + child.Name + target.substring(childLoc.length);
-								this.store.setValue(item, "_friendlyPath", newFriendlyPath);
-								deferred.callback(this._makeSafe(newFriendlyPath));
-//								console.debug("Resolving to " + newFriendlyPath);
-								break;
-							}
-						} else {
-							var childName = "/" + child.Name;
-							if (this._pathMatch(friendlyPath, childName)) {
-								folderExists = true;
-								// Change friendly path back to internal format, then save to Target
-								var rest = friendlyPath.substring(childName.length);
-								var newTarget = childLoc + rest;
-								this.store.setValue(item, "Target", newTarget);
-								deferred.callback(this._makeSafe(friendlyPath));
-//								console.debug("Resolving to " + friendlyPath);
-								break;
-							}
-						}
-					}
-					
-					if (!folderExists) {
-						var result;
-						if (setFriendlyPath) {
-							result = target;
-							this.store.setValue(item, "_friendlyPath", target);
-						} else {
-							// Friendly path points to something nonexistent, but need to update the Target anyway
-							result = friendlyPath;
-							this.store.setValue(item, "Target", friendlyPath);
-						}
-//						console.debug("resolving to " + result);
-						deferred.callback(this._makeSafe(result));
-					}
-				}));
-			return deferred;
-		}
-		// Not workspace path
-		if (setFriendlyPath) {
-			this.store.setValue(item, "_friendlyPath", fieldToUse);
-		} else {
-			this.store.setValue(item, "Target", fieldToUse);
-		}
-		return fieldToUse;
+	_friendlyPathFormatter: function(/**String*/ friendlyPath, /*Number*/ rowIndex, /**Object*/ inCell) {
+		return eclipse.util.safeText(friendlyPath);
 	},
 	
 	/** @returns true if b is a sub-path of a */
@@ -279,6 +327,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	},
 	
 	_actionColumnFormatter: function(item) {
+		// Empty cell; command service will render in here later
 		return " ";
 	},
 	
@@ -366,7 +415,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		}));
 		
 		// Mappings grid
-		this.mappings.setServices(this._commandService);
+		this.mappings.setServices(this._commandService, this._fileClient);
 		this.mappings.setEditor(this);
 		
 		// dijit.form.Form doesn't work in dojoAttachPoint for some reason

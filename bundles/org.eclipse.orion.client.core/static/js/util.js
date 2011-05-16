@@ -303,7 +303,7 @@ eclipse.util.getText = function(node) {
  * @returns {String} The string with HTML safely escaped.
  */
 eclipse.util.safeText = function(string) {
-	return eclipse.util.getText(document.createTextNode(text));
+	return eclipse.util.getText(document.createTextNode(string));
 };
 
 /**
