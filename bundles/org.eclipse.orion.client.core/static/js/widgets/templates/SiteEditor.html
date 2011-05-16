@@ -4,17 +4,26 @@
 			text-align: center;
 		}
 		.editablePathCell {
-			/* font-family: monospace; */
 		}
 		.actionCell {
-			height: 20px !important;
+			height: 22px !important;
+			padding: 1px 1px 4px 1px;
+		}
+		.actionCell .commandLink {
+			margin-right: 4px;
+		}
+		.actionCellCommand[name*="moveUp"] {
+			-webkit-transform: rotate(180deg);
+			-moz-transform: rotate(180deg);
+			-ms-transform: rotate(180deg);
+			transform: rotate(180deg);
 		}
 		.dojoxGridRow .workspacePathCell, .dojoxGridRowOdd .workspacePathCell {
 			background-color: #eee;
 		}
 		td.dojoxGridCellFocus, th.dojoxGridCellFocus {
-			/* Remove annoying dashed border */
-			border: none !important;
+			/* Remove annoying dashed border, but keep the width to avoid jiggling */
+			border: 1px solid transparent !important;
 		}
 		.mappingsGridTable {
 			font-size: 9pt !important;

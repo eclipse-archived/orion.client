@@ -65,8 +65,74 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 				this.store.save();
 				this.render();
 			}});
-		this._commandService.addCommand(deleteMappingCommand, "object");
-		this._commandService.registerCommandContribution("eclipse.site.mappings.remove", 1);
+		this._commandService.addCommand(deleteMappingCommand , "object");
+		this._commandService.registerCommandContribution("eclipse.site.mappings.remove", 0);
+		
+		var moveUpCommand = new eclipse.Command({
+			name: "Move Up",
+			image: "images/down.gif",
+			id: "eclipse.site.mappings.moveUp",
+			visibleWhen: dojo.hitch(this, function(item) {
+				return item.Source && item.Target;
+			}),
+			callback: function(itemToMove) {
+				this._hideTooltip();
+				
+				var index = this.getItemIndex(itemToMove);
+				if (index === 0) { return; }
+				
+				// There must be a better way than this
+				var newOrder = this._deleteAll();
+				// swap index-1 with index
+				newOrder.splice(index-1, 2, newOrder[index], newOrder[index-1]);
+				for (var i=0; i < newOrder.length; i++) {
+					this.store.newItem(newOrder[i]);
+				}
+				
+				this.store.save();
+				this.render();
+			}});
+		this._commandService.addCommand(moveUpCommand, "object");
+		this._commandService.registerCommandContribution("eclipse.site.mappings.moveUp", 1);
+		
+		var moveDownCommand = new eclipse.Command({
+			name: "Move Down",
+			image: "images/down.gif",
+			id: "eclipse.site.mappings.moveDown",
+			visibleWhen: dojo.hitch(this, function(item) {
+				return item.Source && item.Target;
+			}),
+			callback: function(itemToMove) {
+				this._hideTooltip();
+				
+				var index = this.getItemIndex(itemToMove);
+				if (index === this.get("rowCount")-1) { return; }
+				
+				var newOrder = this._deleteAll();
+				// swap index+1 with index
+				newOrder.splice(index, 2, newOrder[index+1], newOrder[index]);
+				for (var i=0; i < newOrder.length; i++) {
+					this.store.newItem(newOrder[i]);
+				}
+
+				this.store.save();
+				this.render();
+			}});
+		this._commandService.addCommand(moveDownCommand, "object");
+		this._commandService.registerCommandContribution("eclipse.site.mappings.moveDown", 2);
+	},
+	
+	/** @returns {Mappings[]} An array representing what used to be in the store. */
+	_deleteAll: function() {
+		var result = [],
+		    store = this.store,
+		    item;
+		while (this.get("rowCount") > 0) {
+			item = this.getItem(0);
+			result.push(this._createMappingObject(store.getValue(item, "Source"), store.getValue(item, "Target")));
+			store.deleteItem(item);
+		}
+		return result;
 	},
 	
 	/**
@@ -181,7 +247,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 						cellClasses: "editablePathCell"},
 				{field: "_item", name: " ", editable: false, 
 						cellClasses: "actionCell",
-						width: "32px",
+						width: "80px",
 						formatter: dojo.hitch(this, this._actionColumnFormatter)}
 			];
 		this.set("structure", structure);
@@ -338,7 +404,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		var item = this.getItem(rowInfo.index);
 		var actionCell = dojo.query("td.actionCell", rowInfo.node)[0];
 		if (actionCell && dojo.query("a", actionCell).length === 0) {
-			this._commandService.renderCommands(actionCell, "object", item, this, "image", "deleteMappingCell");
+			this._commandService.renderCommands(actionCell, "object", item, this, "image", "actionCellCommand");
 		}
 	}
 });
