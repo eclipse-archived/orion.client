@@ -152,7 +152,7 @@ eclipse.sites.util = {
 	/**
 	 * @requires eclipse.util
 	 * @param projectLocation The absolute URL of a file resource.
-	 * @returns {String} The path of the URL, relative to this server, with no /file/ prefix.<br>
+	 * @returns {String} The path of the URL, relative to this server, with no /file/ prefix.<br/>
 	 * <b>FIXME:</b> this is URL manipulation; it should be done by the server
 	 */
 	makeRelativeFilePath: function(location) {

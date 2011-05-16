@@ -29,8 +29,8 @@ var eclipse = eclipse || {};
  * editor interacts with its text model in order to access and update the text that is being
  * displayed and edited in the editor. This is the default implementation.
  * <p>
- * <b>See:</b><br>
- * {@link eclipse.Editor}<br>
+ * <b>See:</b><br/>
+ * {@link eclipse.Editor}<br/>
  * {@link eclipse.Editor#setModel}
  * </p>
  */

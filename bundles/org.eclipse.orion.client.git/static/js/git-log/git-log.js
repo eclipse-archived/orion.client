@@ -46,13 +46,17 @@ dojo.addOnLoad(function(){
 	
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, selection, searcher, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+	// Commit details
+	var commitDetails = new eclipse.CommitDetails({parent: "commitDetailsPane", serviceRegistry: serviceRegistry});
+	
+	// Commit navigator
+	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, selection, commitDetails, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, navigator);
 	
 	//TODO this should be removed and contributed by a plug-in
-	eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, navigator, "pageActions", gitClient, "selectionTools");
+	eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, navigator, "pageActions", "selectionTools");
 	
 	// define the command contributions - where things appear, first the groups
 	commandService.addCommandGroup("eclipse.gitGroup.nav", 200, "More");

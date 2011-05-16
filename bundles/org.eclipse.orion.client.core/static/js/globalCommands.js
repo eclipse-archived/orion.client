@@ -35,6 +35,7 @@ var topHTMLFragment =
 			'<input type="search" id="search" class="searchbox">' +
 			'<span class="bannerSeparator">|</span>' +
 			'<span id="userInfo" class="statuspane"></span>' +
+			'<span id="help" class="statuspane"><a id="help" href="/index.jsp"><img class="toolbarLabel" src="/images/help.gif" alt="Help Logo" align="top"></a></span>' +
 		'</td>' + 
 		'</tr>' +
 	'<tr class="bottomRowBanner">' +
@@ -140,7 +141,7 @@ eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService
 
 eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, commandService, prefsService, searcher, handler, editor) {
 	// this needs to come from somewhere but I'm not going to do a separate get for it
-	var searchLocation = "/search?q=";
+	var searchLocation = "/filesearch?q=";
 	var text;
 	var parent = dojo.byId(parentId);
 	if (!parent) {

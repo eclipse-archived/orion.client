@@ -126,7 +126,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		}
 	};
 	
-	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId, gitClient) {
+	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 		var cloneGitRepositoryCommand = new eclipse.Command({
 			name : "Clone",
 			tooltip : "Clone Git Repository",
@@ -134,12 +134,12 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
 				var dialog = new widgets.CloneGitRepositoryDialog({
-					func : function(gitUrl){
+					func : function(gitUrl, location){
 						eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 									var func = arguments.callee;
 									serviceRegistry.getService("IGitService").then(function(gitService) {
 										serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-											var deferred = gitService.cloneGitRepository(null, gitUrl, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+											var deferred = gitService.cloneGitRepository(null, gitUrl, location, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
 												function(jsonData, secondArg) {
 													eclipse.gitCommandUtils.handleProgressServiceResponse(jsonData, options, serviceRegistry,

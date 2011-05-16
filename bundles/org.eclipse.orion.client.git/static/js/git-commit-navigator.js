@@ -17,11 +17,9 @@ eclipse.GitCommitNavigator = (function() {
 	 * @name eclipse.GitCommitNavigator
 	 * @class A table-based git commit navigator
 	 */
-	function GitCommitNavigator(serviceRegistry, selection, searcher, gitClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
+	function GitCommitNavigator(serviceRegistry, selection, commitDetails, parentId, pageTitleId, toolbarId, selectionToolsId) {
 		this.registry = serviceRegistry;
 		this.selection = selection;
-		this.searcher = searcher;
-		this.gitClient = gitClient;
 		this.parentId = parentId;
 		this.pageTitleId = pageTitleId;
 		this.toolbarId = toolbarId;
@@ -30,12 +28,13 @@ eclipse.GitCommitNavigator = (function() {
 		this.isDirectory = true;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new eclipse.FileRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
+		this.commitDetails = commitDetails;
+		this.renderer = new eclipse.GitCommitRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
 	}
 	
-	GitCommitNavigator.prototype = eclipse.Explorer.prototype;
+	GitCommitNavigator.prototype = new eclipse.Explorer();
 	
-	GitCommitNavigator.prototype.loadCommitsList= function(path, treeRoot, force) {
+	GitCommitNavigator.prototype.loadCommitsList = function(path, treeRoot, force) {
 			path = eclipse.util.makeRelative(path);
 			if (path === this._lastHash && !force) {
 				return;
@@ -67,21 +66,26 @@ eclipse.GitCommitNavigator = (function() {
 			});
 			
 		};
+		
+	GitCommitNavigator.prototype.loadCommitDetails = function(commitDetails) {
+		this.commitDetails.loadCommitDetails(commitDetails);
+	};
+		
 	return GitCommitNavigator;
 }());
 
 /********* Rendering json items into columns in the tree **************/
 
 eclipse = eclipse || {};
-eclipse.FileRenderer = (function() {
+eclipse.GitCommitRenderer = (function() {
  	
-	function FileRenderer (options, explorer) {
+	function GitCommitRenderer (options, explorer) {
 		this._init(options);
 		this.explorer = explorer;
 	}
-	FileRenderer.prototype = eclipse.SelectionRenderer.prototype;
+	GitCommitRenderer.prototype = eclipse.SelectionRenderer.prototype;
 	
-	FileRenderer.prototype.getCellHeaderElement = function(col_no){
+	GitCommitRenderer.prototype.getCellHeaderElement = function(col_no){
 		
 		switch(col_no){
 		case 0: 
@@ -103,15 +107,15 @@ eclipse.FileRenderer = (function() {
 		
 	};
 	
-	FileRenderer.prototype.setIncomingCommits = function(scopedCommits){
+	GitCommitRenderer.prototype.setIncomingCommits = function(scopedCommits){
 		this.incomingCommits = scopedCommits;
 	};
 	
-	FileRenderer.prototype.setOutgoingCommits = function(scopedCommits){
+	GitCommitRenderer.prototype.setOutgoingCommits = function(scopedCommits){
 		this.outgoingCommits = scopedCommits;
 	};
 	
-	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+	GitCommitRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		
 		var incomingCommit = false;
 		
@@ -135,11 +139,19 @@ eclipse.FileRenderer = (function() {
 
 			col = document.createElement('td');
 			div = dojo.create("div", {style: "margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 20px;"}, col, "only");
-						
+				
+			// clicking the link should update the comiit details pane
 			link = dojo.create("a", {className: "navlinkonpage"}, div, "last");
-			if(this.explorer.isRoot==null || this.explorer.isDirectory==false){
-				link.href = "/coding.html#" + item.ContentLocation;
-			}
+			dojo.connect(link, "onclick", link, dojo.hitch(this, function() {
+				this.explorer.loadCommitDetails(item);	
+			}));			
+			dojo.connect(link, "onmouseover", link, function() {
+				link.style.cursor = /*self._controller.loading ? 'wait' :*/"pointer";
+			});
+			dojo.connect(link, "onmouseout", link, function() {
+				link.style.cursor = /*self._controller.loading ? 'wait' :*/"default";
+			});
+			
 			dojo.place(document.createTextNode(item.Message), link, "only");	
 			
 			if (incomingCommit)
@@ -173,5 +185,5 @@ eclipse.FileRenderer = (function() {
 		};
 	};
 	
-	return FileRenderer;
+	return GitCommitRenderer;
 }());

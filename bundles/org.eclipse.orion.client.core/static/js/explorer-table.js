@@ -52,11 +52,17 @@ eclipse.FileExplorer = (function() {
 				return dojo.byId(rowId+"NameColumn");
 			}
 		};
-						
-		FileExplorer.prototype.loadResourceList = function(path) {
+
+		/**
+		 * Load the resource at the given path.
+		 * @param path The path of the resource to load
+		 * @param [force] If true, force reload even if the path is unchanged. Useful
+		 * when the client knows the resource underlying the current path has changed.
+		 */
+		FileExplorer.prototype.loadResourceList = function(path, force) {
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
 			path = eclipse.util.makeRelative(path);
-			if (path === this._lastHash) {
+			if (!force && path === this._lastHash) {
 				return;
 			}
 						
@@ -66,7 +72,7 @@ eclipse.FileExplorer = (function() {
 			// we are refetching everything so clean up the root
 			this.treeRoot = {};
 	
-			if (path !== this.treeRoot.Path) {
+			if (force || (path !== this.treeRoot.Path)) {
 				//the tree root object has changed so we need to load the new one
 				
 				// Progress indicator
@@ -187,7 +193,7 @@ eclipse.FileRenderer = (function() {
 			var th = dojo.create("th", {innerHTML: "<h2>Size</h2>"});
 			dojo.style(th, "textAlign", "right");
 			return th;
-		};
+		}
 	};
 		
 		FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -227,10 +233,8 @@ eclipse.FileRenderer = (function() {
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			}
 			return col;
-			break;
 		case 1:
 			return this.getActionsColumn(item, tableRow);
-			break;
 		case 2:
 			var dateColumn = document.createElement('td');
 			if (item.LocalTimeStamp) {
@@ -239,7 +243,6 @@ eclipse.FileRenderer = (function() {
 			}
 
 			return dateColumn;
-			break;
 		case 3:
 			var sizeColumn = document.createElement('td');
 			if (!item.Directory && typeof item.Length === "number") {
@@ -249,13 +252,7 @@ eclipse.FileRenderer = (function() {
 			}
 			dojo.style(sizeColumn, "textAlign", "right");
 			return sizeColumn;
-			break;
-		};
-		
+		}
 	};
-	
-
 	return FileRenderer;
 }());
-
-

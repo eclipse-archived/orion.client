@@ -304,8 +304,8 @@ eclipse.Editor = (function() {
 		 * There are two types of rulers: page and document. A page ruler only shows the content for the lines that are
 		 * visible, while a document ruler always shows the whole content.
 		 * </p>
-		 * <b>See:</b><br>
-		 * {@link eclipse.Editor}<br>
+		 * <b>See:</b><br/>
+		 * {@link eclipse.Editor}<br/>
 		 * {@link eclipse.Editor#addRuler}
 		 * </p>		 
 		 * @name eclipse.Ruler
@@ -955,8 +955,8 @@ eclipse.Editor = (function() {
 		/**
 		 * @class This is the event sent when the editor is destroyed.
 		 * <p>
-		 * <b>See:</b><br>
-		 * {@link eclipse.Editor}<br>
+		 * <b>See:</b><br/>
+		 * {@link eclipse.Editor}<br/>
 		 * {@link eclipse.Editor#event:onDestroy}
 		 * </p>
 		 * @name eclipse.DestroyEvent
@@ -975,8 +975,8 @@ eclipse.Editor = (function() {
 		/**
 		 * @class This object is used to define style information for the editor.
 		 * <p>
-		 * <b>See:</b><br>
-		 * {@link eclipse.Editor}<br>
+		 * <b>See:</b><br/>
+		 * {@link eclipse.Editor}<br/>
 		 * {@link eclipse.Editor#event:onLineStyle}
 		 * </p>		 
 		 * @name eclipse.Style
@@ -987,8 +987,8 @@ eclipse.Editor = (function() {
 		/**
 		 * @class This object is used to style range.
 		 * <p>
-		 * <b>See:</b><br>
-		 * {@link eclipse.Editor}<br>
+		 * <b>See:</b><br/>
+		 * {@link eclipse.Editor}<br/>
 		 * {@link eclipse.Editor#event:onLineStyle}
 		 * </p>		 
 		 * @name eclipse.StyleRange
@@ -1000,8 +1000,8 @@ eclipse.Editor = (function() {
 		/**
 		 * @class This is the event sent when the editor needs the style information for a line.
 		 * <p>
-		 * <b>See:</b><br>
-		 * {@link eclipse.Editor}<br>
+		 * <b>See:</b><br/>
+		 * {@link eclipse.Editor}<br/>
 		 * {@link eclipse.Editor#event:onLineStyle}
 		 * </p>		 
 		 * @name eclipse.LineStyleEvent
@@ -1024,9 +1024,9 @@ eclipse.Editor = (function() {
 		/**
 		 * @class This is the event sent when the text in the model has changed.
 		 * <p>
-		 * <b>See:</b><br>
-		 * {@link eclipse.Editor}<br>
-		 * {@link eclipse.Editor#event:onModelChanged}<br>
+		 * <b>See:</b><br/>
+		 * {@link eclipse.Editor}<br/>
+		 * {@link eclipse.Editor#event:onModelChanged}<br/>
 		 * {@link eclipse.TextModel#onChanged}
 		 * </p>
 		 * @name eclipse.ModelChangedEvent
@@ -1049,9 +1049,9 @@ eclipse.Editor = (function() {
 		/**
 		 * @class This is the event sent when the text in the model is about to change.
 		 * <p>
-		 * <b>See:</b><br>
-		 * {@link eclipse.Editor}<br>
-		 * {@link eclipse.Editor#event:onModelChanging}<br>
+		 * <b>See:</b><br/>
+		 * {@link eclipse.Editor}<br/>
+		 * {@link eclipse.Editor#event:onModelChanging}<br/>
 		 * {@link eclipse.TextModel#onChanging}
 		 * </p>
 		 * @name eclipse.ModelChangingEvent
@@ -1075,8 +1075,8 @@ eclipse.Editor = (function() {
 		/**
 		 * @class This is the event sent when the text is modified by the editor.
 		 * <p>
-		 * <b>See:</b><br>
-		 * {@link eclipse.Editor}<br>
+		 * <b>See:</b><br/>
+		 * {@link eclipse.Editor}<br/>
 		 * {@link eclipse.Editor#event:onModify}
 		 * </p>
 		 * @name eclipse.ModifyEvent
@@ -1097,8 +1097,8 @@ eclipse.Editor = (function() {
 		/**
 		 * @class This is the event sent when the selection changes in the editor.
 		 * <p>
-		 * <b>See:</b><br>
-		 * {@link eclipse.Editor}<br>
+		 * <b>See:</b><br/>
+		 * {@link eclipse.Editor}<br/>
 		 * {@link eclipse.Editor#event:onSelection}
 		 * </p>		 
 		 * @name eclipse.SelectionEvent
@@ -1118,8 +1118,8 @@ eclipse.Editor = (function() {
 		/**
 		 * @class This is the event sent when the editor scrolls.
 		 * <p>
-		 * <b>See:</b><br>
-		 * {@link eclipse.Editor}<br>
+		 * <b>See:</b><br/>
+		 * {@link eclipse.Editor}<br/>
 		 * {@link eclipse.Editor#event:onScroll}
 		 * </p>		 
 		 * @name eclipse.ScrollEvent
@@ -1139,8 +1139,8 @@ eclipse.Editor = (function() {
 		/**
 		 * @class This is the event sent when the text is about to be modified by the editor.
 		 * <p>
-		 * <b>See:</b><br>
-		 * {@link eclipse.Editor}<br>
+		 * <b>See:</b><br/>
+		 * {@link eclipse.Editor}<br/>
 		 * {@link eclipse.Editor#event:onVerify}
 		 * </p>
 		 * @name eclipse.VerifyEvent
