@@ -1,10 +1,10 @@
 <div>
 	<style type="text/css">
+		.isValidCell {
+			text-align: center;
+		}
 		.editablePathCell {
 			/* font-family: monospace; */
-		}
-		.pathError {
-			text-align: center;
 		}
 		.actionCell {
 			height: 20px !important;
@@ -17,7 +17,7 @@
 			border: none !important;
 		}
 		.mappingsGridTable {
-			font-size: 10pt !important;
+			font-size: 9pt !important;
 		}
 	</style>
 	<div dojoAttachPoint="containerNode">
@@ -38,13 +38,12 @@
 					<td style="padding: 5px; vertical-align: top">
 						<label dojoAttachPoint="mappingsLabel" for="${id}_mappings">${mappingsLabelText}</label>
 					</td>
-					<td style="padding: 10px 5px 10px 5px; text-align: left; width: 800px;">
-						<table dojoType="widgets.MappingsGrid" dojoAttachPoint="mappings"
+					<td style="padding: 10px 25px 10px 5px; text-align: left; width:100%;">
+						<div dojoType="widgets.MappingsGrid" dojoAttachPoint="mappings"
 								class="mappingsGridTable"
 								autoHeight="true" singleClickEdit="true" selectionMode="none"
-								selectable="true"
-								style="width: auto" autoWidth="true">
-						</table>
+								selectable="true">
+						</div>
 						<div style="padding: 5px 0 0 5px;">
 							<div dojoAttachPoint="addMappingToolbar" id="${id}_addMappingToolbar"></div>
 						</div>
