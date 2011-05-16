@@ -432,7 +432,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				label: "Folder name:",
 				func:  function(name, serverPath, create){
 					fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, serverPath, create).then(
-						dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+						dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}));//refresh the root
 				}
 			});
 			dialog.startup();
@@ -454,7 +454,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				label: "Folder name:",
 				func:  function(name, url, create){
 					fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, create).then(
-						dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+						dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}));//refresh the root
 				},
 				advanced: true
 			});
