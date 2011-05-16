@@ -423,7 +423,6 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.mappings.setEditor(this);
 		
 		// dijit.form.Form doesn't work in dojoAttachPoint for some reason
-		dojo.connect(this.saveButton, "onClick", dijit.byId("siteForm"), function() { this.onSubmit(arguments); });
 		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.onSubmit);
 		
 		dojo.when(this._workspaceToChildren, dojo.hitch(this, function(workspaceToChildrenMap) {
@@ -441,6 +440,18 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 			this._commandService.registerCommandContribution("eclipse.site.mappings.add", 1, toolbarId);
 			this._commandService.renderCommands(this.addMappingToolbar, "dom", this.mappings, this, "image");
 		}));
+		
+		// Save command
+		var saveCommand = new eclipse.Command({
+				name: "Save",
+				image: "images/save.gif",
+				id: "eclipse.site.save",
+				visibleWhen: function(item) {
+					return item.Location /*looks like a site config*/;
+				},
+				callback: dojo.hitch(this, this.onSubmit)});
+		this._commandService.addCommand(saveCommand, "object");
+		this._commandService.registerCommandContribution("eclipse.site.save", 0);
 	},
 	
 	/**
