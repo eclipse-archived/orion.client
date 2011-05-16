@@ -17,11 +17,9 @@ eclipse.GitCommitNavigator = (function() {
 	 * @name eclipse.GitCommitNavigator
 	 * @class A table-based git commit navigator
 	 */
-	function GitCommitNavigator(serviceRegistry, selection, searcher, commitDetails, gitClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
+	function GitCommitNavigator(serviceRegistry, selection, commitDetails, parentId, pageTitleId, toolbarId, selectionToolsId) {
 		this.registry = serviceRegistry;
 		this.selection = selection;
-		this.searcher = searcher;
-		this.gitClient = gitClient;
 		this.parentId = parentId;
 		this.pageTitleId = pageTitleId;
 		this.toolbarId = toolbarId;
@@ -31,7 +29,7 @@ eclipse.GitCommitNavigator = (function() {
 		this.model = null;
 		this.myTree = null;
 		this.commitDetails = commitDetails;
-		this.renderer = new eclipse.FileRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
+		this.renderer = new eclipse.GitCommitRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
 	}
 	
 	GitCommitNavigator.prototype = new eclipse.Explorer();
@@ -79,15 +77,15 @@ eclipse.GitCommitNavigator = (function() {
 /********* Rendering json items into columns in the tree **************/
 
 eclipse = eclipse || {};
-eclipse.FileRenderer = (function() {
+eclipse.GitCommitRenderer = (function() {
  	
-	function FileRenderer (options, explorer) {
+	function GitCommitRenderer (options, explorer) {
 		this._init(options);
 		this.explorer = explorer;
 	}
-	FileRenderer.prototype = eclipse.SelectionRenderer.prototype;
+	GitCommitRenderer.prototype = eclipse.SelectionRenderer.prototype;
 	
-	FileRenderer.prototype.getCellHeaderElement = function(col_no){
+	GitCommitRenderer.prototype.getCellHeaderElement = function(col_no){
 		
 		switch(col_no){
 		case 0: 
@@ -109,15 +107,15 @@ eclipse.FileRenderer = (function() {
 		
 	};
 	
-	FileRenderer.prototype.setIncomingCommits = function(scopedCommits){
+	GitCommitRenderer.prototype.setIncomingCommits = function(scopedCommits){
 		this.incomingCommits = scopedCommits;
 	};
 	
-	FileRenderer.prototype.setOutgoingCommits = function(scopedCommits){
+	GitCommitRenderer.prototype.setOutgoingCommits = function(scopedCommits){
 		this.outgoingCommits = scopedCommits;
 	};
 	
-	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+	GitCommitRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		
 		var incomingCommit = false;
 		
@@ -187,5 +185,5 @@ eclipse.FileRenderer = (function() {
 		};
 	};
 	
-	return FileRenderer;
+	return GitCommitRenderer;
 }());

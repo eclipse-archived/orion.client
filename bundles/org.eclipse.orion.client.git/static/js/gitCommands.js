@@ -126,7 +126,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		}
 	};
 	
-	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId, gitClient) {
+	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 		var cloneGitRepositoryCommand = new eclipse.Command({
 			name : "Clone",
 			tooltip : "Clone Git Repository",
