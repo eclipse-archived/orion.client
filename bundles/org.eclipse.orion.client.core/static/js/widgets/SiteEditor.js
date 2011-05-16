@@ -16,6 +16,7 @@ dojo.require("dijit.form.ComboBox");
 dojo.require("dijit.form.Form");
 dojo.require("dijit.form.Select");
 dojo.require("dijit.form.Textarea");
+dojo.require("dijit.form.TextBox");
 dojo.require("dijit.form.ValidationTextBox");
 dojo.require("dijit.Menu");
 dojo.require("dijit.layout.ContentPane");
@@ -54,7 +55,8 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 			image: "images/remove.gif",
 			id: "eclipse.site.mappings.remove",
 			visibleWhen: function(item) {
-				return true;
+				// Only show on a Mappings object
+				return item.Source && item.Target;
 			},
 			callback: function(item) {
 				// "this" is {widgets.MappingsGrid}
@@ -375,11 +377,12 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		if (!this.options.fileClient) { throw new Error("options.fileClient is required"); }
 		if (!this.options.siteService) { throw new Error("options.siteService is required"); }
 		if (!this.options.commandService) { throw new Error("options.commandService is required"); }
-		if (!this.options.commandService) { throw new Error("options.statusService is required"); }
+		if (!this.options.statusService) { throw new Error("options.statusService is required"); }
 		this._fileClient = this.options.fileClient;
 		this._siteService = this.options.siteService;
 		this._commandService = this.options.commandService;
 		this._statusService = this.options.statusService;
+		this._commandsContainer = this.options.commandsContainer;
 		
 		// Start loading workspaces right away
 		this._workspaces = new dojo.Deferred();
@@ -397,6 +400,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.mappingsLabelText = "Mappings:";
 		this.hostHintLabelText = "Hostname hint:";
 		this.addMappingButtonText = "Add&#8230;";
+		this.hostingStatusLabelText = "Status:";
 	},
 	
 	postCreate: function() {
@@ -599,22 +603,31 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	_setSiteConfiguration: function(siteConfiguration) {
 		this._detachListeners(this._siteConfiguration);
 		this._siteConfiguration = siteConfiguration;
-		
-		// Refresh fields
+		this._refreshFields();
+		this._attachListeners(this._siteConfiguration);
+	},
+	
+	_refreshFields: function() {
 		this.name.set("value", this._siteConfiguration.Name);
 		this.hostHint.set("value", this._siteConfiguration.HostHint);
 		this.mappings.setMappings(this._siteConfiguration.Mappings);
 		this.mappings.startup();
+		
 		var hostStatus = this._siteConfiguration.HostingStatus;
+		var status;
 		if (hostStatus && hostStatus.Status === "started") {
-			dojo.style(this.siteStartedWarning, {display: "table-row"});
-			var warnNameNode = this.siteStartedWarning_siteName;
-			eclipse.util.setText(warnNameNode, this._siteConfiguration.Name);
+			dojo.style(this.siteStartedWarning, {display: "block"});
+			this.hostingStatus.innerHTML = eclipse.util.safeText(hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1) + " at ");
+			var url = eclipse.util.safeText(hostStatus.URL);
+			dojo.create("a", {href: hostStatus.URL, innerHTML: eclipse.util.safeText(hostStatus.URL), target: "_new"}, this.hostingStatus, "last");
 		} else {
 			dojo.style(this.siteStartedWarning, {display: "none"});
+			eclipse.util.setText(this.hostingStatus, hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1));
 		}
 		
-		this._attachListeners(this._siteConfiguration);
+		dojo.empty(this._commandsContainer);
+		this._commandService.renderCommands(this._commandsContainer, "object", this._siteConfiguration, {},
+			"image", null, this._siteConfiguration /*userData*/, true /*forceText*/);
 	},
 	
 	/**

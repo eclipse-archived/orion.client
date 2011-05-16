@@ -62,6 +62,18 @@
 				</tr>
 				
 				<tr>
+					<td style="padding: 5px;">
+						<label dojoAttachPoint="hostingStatusLabel" style="text-align: left;">${hostingStatusLabelText}</label>
+					</td>
+					<td style="padding: 10px 5px 10px 5px; text-align: left;">
+						<p dojoAttachPoint="hostingStatus"></p>
+						<p dojoAttachPoint="siteStartedWarning" style="display: none;">
+						(Changes you make here won't affect the running copy.)
+						</p>
+					</td>
+				</tr>
+				
+				<tr>
 					<td style="padding: 5px;"></td>
 					<td style="padding: 5px; text-align: left;">
 						<button dojoAttachPoint="saveButton" dojoType="dijit.form.Button" 
@@ -70,12 +82,6 @@
 					</td>
 				</tr>
 				
-				<tr dojoAttachPoint="siteStartedWarning" style="display: none;">
-					<td colspan="2" style="padding: 5px; text-align:center;">
-						<img src="/images/info.gif" style="vertical-align: middle;">
-						Changes you make here will take effect the next time "<span dojoAttachPoint="siteStartedWarning_siteName"></span>" is started.
-					</td>
-				</tr>
 			</table>
 		</div>
 	</div>
