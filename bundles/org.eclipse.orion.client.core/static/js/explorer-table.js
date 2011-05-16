@@ -193,7 +193,7 @@ eclipse.FileRenderer = (function() {
 			var th = dojo.create("th", {innerHTML: "<h2>Size</h2>"});
 			dojo.style(th, "textAlign", "right");
 			return th;
-		};
+		}
 	};
 		
 		FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -233,10 +233,8 @@ eclipse.FileRenderer = (function() {
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			}
 			return col;
-			break;
 		case 1:
 			return this.getActionsColumn(item, tableRow);
-			break;
 		case 2:
 			var dateColumn = document.createElement('td');
 			if (item.LocalTimeStamp) {
@@ -245,7 +243,6 @@ eclipse.FileRenderer = (function() {
 			}
 
 			return dateColumn;
-			break;
 		case 3:
 			var sizeColumn = document.createElement('td');
 			if (!item.Directory && typeof item.Length === "number") {
@@ -255,13 +252,7 @@ eclipse.FileRenderer = (function() {
 			}
 			dojo.style(sizeColumn, "textAlign", "right");
 			return sizeColumn;
-			break;
-		};
-		
+		}
 	};
-	
-
 	return FileRenderer;
 }());
-
-
