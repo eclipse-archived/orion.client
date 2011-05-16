@@ -450,14 +450,105 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		items = dojo.isArray(items) ? items[0] : items;
 		var workspaceId = this.getSiteConfiguration().Workspace;
 		var projects = workspaceToChildrenMap[workspaceId];
+		var self = this;
 		
 		/**
 		 * @this An object from the choices array with shape {name:String, path:String, callback:Function}
 		 * @param item
 		 */
 		var editor = this;
-		var callback = function(item) {
-			editor.mappings._addMapping("/mountPoint", this.path);
+		var callback = function(item, event) {
+			if (event.shiftKey) {
+				// special feature for setting up self-hosting
+				var mappings = [
+				    {
+				      "Source": "/",
+				      "Target": this.path + "/bundles/org.eclipse.orion.client.core/static"
+				    },
+				    {
+				      "Source": "/editor",
+				      "Target": this.path + "/bundles/org.eclipse.orion.client.editor/web"
+				    },
+				    {
+				      "Source": "/file",
+				      "Target": "http://localhost:8080/file"
+				    },
+				    {
+				      "Source": "/openajax",
+				      "Target": "http://localhost:8080/openajax"
+				    },
+				    {
+				      "Source": "/prefs",
+				      "Target": "http://localhost:8080/prefs"
+				    },
+				    {
+				      "Source": "/profile",
+				      "Target": "http://localhost:8080/profile"
+				    },
+				    {
+				      "Source": "/workspace",
+				      "Target": "http://localhost:8080/workspace"
+				    },
+				    {
+				      "Source": "/org.dojotoolkit",
+				      "Target": "http://localhost:8080/org.dojotoolkit"
+				    },
+				    {
+				      "Source": "/users",
+				      "Target": "http://localhost:8080/users"
+				    },
+				    {
+				      "Source": "/auth2",
+				      "Target": "http://localhost:8080/auth2"
+				    },
+				    {
+				      "Source": "/login",
+				      "Target": "http://localhost:8080/login"
+				    },
+				    {
+				      "Source": "/loginstatic",
+				      "Target": "http://localhost:8080/loginstatic"
+				    },
+				    {
+				      "Source": "/site",
+				      "Target": "http://localhost:8080/site"
+				    },
+				    {
+				      "Source": "/",
+				      "Target": this.path + "/bundles/org.eclipse.orion.client.git/static"
+				    },
+				    {
+				      "Source": "/git",
+				      "Target": "http://localhost:8080/git"
+				    },
+				    {
+				      "Source": "/",
+				      "Target": this.path + "/bundles/org.eclipse.orion.client.users.ui/static"
+				    },
+				    {
+				      "Source": "/xfer",
+				      "Target": "http://localhost:8080/xfer"
+				    },
+				    {
+				      "Source": "/filesearch",
+				      "Target": "http://localhost:8080/filesearch"
+				    },
+				    {
+				      "Source": "/index.jsp",
+				      "Target": "http://localhost:8080/index.jsp"
+				    },
+				    {
+				      "Source": "/logout",
+				      "Target": "http://localhost:8080/logout"
+				    }
+				];
+				for (var i = 0; i<mappings.length; i++) {
+					editor.mappings._addMapping(mappings[i].Source, mappings[i].Target);
+				}
+				self.onSubmit();
+			} else {
+				editor.mappings._addMapping("/mountPoint", this.path);
+			}
 		};
 //		var addOther = function() {
 //			editor.mappings._addMapping("/mountPoint", "/FolderId/somepath");
