@@ -31,6 +31,7 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
 		this.inherited(arguments);
 		this.title = "Clone Git Repository";
 		this.gitUrlLabelText = "Repository URL:";
+		this.gitLocationLabelText = "Clone to:";
 		this.buttonCancel = "Cancel";
 
 	},
@@ -53,6 +54,6 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
 	},
 	// Stuff from newItemDialog.js is below
 	execute: function() {
-		this.options.func(this.gitUrl.value);
+		this.options.func(this.gitUrl.value, this.gitLocation.value);
 	}
 });

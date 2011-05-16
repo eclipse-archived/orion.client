@@ -79,6 +79,11 @@ eclipse.git.GitClonesExplorer = (function() {
 		
 	}
 	GitClonesExplorer.prototype = eclipse.Explorer.prototype;
+	
+	GitClonesExplorer.prototype.getGitLocation = function(path){
+		return "/git/clone/"+eclipse.util.makeRelative(path);
+	};
+	
 	GitClonesExplorer.prototype.displayClonesList = function(path){
 		
 			var self = this;
@@ -93,11 +98,13 @@ eclipse.git.GitClonesExplorer = (function() {
 			this._lastHash = path;
 			dojo.hash(path, true);
 			
+			var gitPath = this.getGitLocation(path);
+			
 			var d = dojo.create("div", null, dojo.byId(this.parentId), "only");
-			d.innerHTML = "Loading <b>" + path + "</b>...";
+			d.innerHTML = "Loading <b>" + gitPath + "</b>...";
 			
 			this.registry.getService("IGitService").then(function(service){
-				dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerModel(path, service.getGitClone)));
+				dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerModel(gitPath, service.getGitClone)));
 			});
 		};
 		
@@ -108,12 +115,12 @@ eclipse.git.GitClonesExplorer = (function() {
 		}
 		
 		var self = this;	
-		var path = this._lastHash;		
+		var gitPath = this.getGitLocation(this._lastHash);		
 		var d = dojo.create("div", null, dojo.byId(this.parentId), "only");
-		d.innerHTML = "Loading <b>" + path + "</b>...";
+		d.innerHTML = "Loading <b>" + gitPath + "</b>...";
 		
 		this.registry.getService("IGitService").then(function(service){
-			dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerModel(path, service.getGitClone)));
+			dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerModel(gitPath, service.getGitClone)));
 		});
 	};
 
