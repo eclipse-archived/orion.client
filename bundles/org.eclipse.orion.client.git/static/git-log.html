@@ -50,8 +50,9 @@
 	<script src="js/globalCommands.js"></script>
   	<script src="js/breadcrumbs.js"></script>
 	<script src="js/git-commit-navigator.js"></script>
+	<script src="js/git-commit-details.js"></script>
 	<script src="js/git-log/git-log.js"></script>
- 	
+
    </head>
 
     <body style="height: 100%" class="nihilo">
@@ -67,10 +68,15 @@
 		</div>
 
 		<div class="auxpane" style="margin-left: 44px; " id="rightPane" dojoType="dijit.layout.ContentPane" region="leading" style="width: 20%" splitter="true">
-				<!-- <div id="details" class="auxpane" style="min-width: 200px">
+			<!-- <div id="git-commit-details" class="auxpane" style="min-width: 200px">
 				<h2>Details</h2>
-				<div  id="detailsProgress">Loading content...</div>
-				</div> -->
+				<div  id="detailsProgress">Choose commit</div>
+			</div> -->
+			<div class="auxpane" dojoType="dijit.layout.ContentPane" region="leading" style="width: 20%" splitter="true">
+					<div id="commitDetails" style="margin-left: 16px; min-width: 200px">
+						<div id="commitDetailsPane">Choose commit...</div>
+					</div>
+			</div>
 		</div>
 		
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">

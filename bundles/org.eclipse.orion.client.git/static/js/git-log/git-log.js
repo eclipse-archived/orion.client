@@ -46,7 +46,11 @@ dojo.addOnLoad(function(){
 	
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
-	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, selection, searcher, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+	// Commit details
+	var commitDetails = new eclipse.CommitDetails({parent: "commitDetailsPane", serviceRegistry: serviceRegistry});
+	
+	// Commit navigator
+	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, selection, searcher, commitDetails, gitClient, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, navigator);

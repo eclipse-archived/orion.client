@@ -17,7 +17,7 @@ eclipse.GitCommitNavigator = (function() {
 	 * @name eclipse.GitCommitNavigator
 	 * @class A table-based git commit navigator
 	 */
-	function GitCommitNavigator(serviceRegistry, selection, searcher, gitClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
+	function GitCommitNavigator(serviceRegistry, selection, searcher, commitDetails, gitClient, parentId, pageTitleId, toolbarId, selectionToolsId) {
 		this.registry = serviceRegistry;
 		this.selection = selection;
 		this.searcher = searcher;
@@ -30,12 +30,13 @@ eclipse.GitCommitNavigator = (function() {
 		this.isDirectory = true;
 		this.model = null;
 		this.myTree = null;
+		this.commitDetails = commitDetails;
 		this.renderer = new eclipse.FileRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
 	}
 	
-	GitCommitNavigator.prototype = eclipse.Explorer.prototype;
+	GitCommitNavigator.prototype = new eclipse.Explorer();
 	
-	GitCommitNavigator.prototype.loadCommitsList= function(path, treeRoot, force) {
+	GitCommitNavigator.prototype.loadCommitsList = function(path, treeRoot, force) {
 			path = eclipse.util.makeRelative(path);
 			if (path === this._lastHash && !force) {
 				return;
@@ -67,6 +68,11 @@ eclipse.GitCommitNavigator = (function() {
 			});
 			
 		};
+		
+	GitCommitNavigator.prototype.loadCommitDetails = function(commitDetails) {
+		this.commitDetails.loadCommitDetails(commitDetails);
+	};
+		
 	return GitCommitNavigator;
 }());
 
@@ -135,11 +141,19 @@ eclipse.FileRenderer = (function() {
 
 			col = document.createElement('td');
 			div = dojo.create("div", {style: "margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 20px;"}, col, "only");
-						
+				
+			// clicking the link should update the comiit details pane
 			link = dojo.create("a", {className: "navlinkonpage"}, div, "last");
-			if(this.explorer.isRoot==null || this.explorer.isDirectory==false){
-				link.href = "/coding.html#" + item.ContentLocation;
-			}
+			dojo.connect(link, "onclick", link, dojo.hitch(this, function() {
+				this.explorer.loadCommitDetails(item);	
+			}));			
+			dojo.connect(link, "onmouseover", link, function() {
+				link.style.cursor = /*self._controller.loading ? 'wait' :*/"pointer";
+			});
+			dojo.connect(link, "onmouseout", link, function() {
+				link.style.cursor = /*self._controller.loading ? 'wait' :*/"default";
+			});
+			
 			dojo.place(document.createTextNode(item.Message), link, "only");	
 			
 			if (incomingCommit)
