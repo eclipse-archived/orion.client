@@ -35,7 +35,6 @@ orion.CompareMergeUIFactory = (function() {
 		
 		_createEditorParentDiv: function(editorParentDivId ,containerDivId) {
 			var editorParentDiv = new dijit.layout.ContentPane({class:"paneScrolled" ,id :editorParentDivId ,region: "center", style:"width:100%;height: 100%;overflow: hidden;"});
-			this._addToContainer(editorParentDiv , containerDivId);
 			return editorParentDiv;
 		},
 		
@@ -49,34 +48,24 @@ orion.CompareMergeUIFactory = (function() {
 			dojo.toggleClass(canvas, "compareCanvas", true);
 			canvasContainer.attr('content', canvas);
 			canvasContainer.startup();
-			this._addToContainer(canvasContainer , containerDivId);
 			return canvasContainer;
 		},
 		
-		_addToContainer:function(div,containerDivId ,doLayout){
-			if(containerDivId){
-				var node = dijit.byId(containerDivId);
-				node.addChild(div);
-				if(doLayout){
-					//node.startup();
-					node.layout();
-				}
-			}
+		_appendDomNode:function(parent,child){
+			child.placeAt(parent);
 		},
-			
-		_createTileDiv: function(titleDivId ,containerDivId) {
+		
+		_createTileDiv: function(titleDivId) {
 			var table = this._createNoWrapTextDiv(titleDivId , "Compare...");
 			var titleContainer = new dijit.layout.ContentPane({region: "top", style:"width:100%;height:30px;overflow: hidden;"});
 			titleContainer.attr('content', table);
-			this._addToContainer(titleContainer , containerDivId);
 			return titleContainer;
 		},
 		
-		_createStatusDiv: function(statusDivId , containerDivId) {
+		_createStatusDiv: function(statusDivId) {
 			var table = this._createNoWrapTextDiv(statusDivId , "Line Status" , "center");
 			var statusContainer = new dijit.layout.ContentPane({region: "bottom", style:"width:100%;height:30px;overflow: hidden;"});
 			statusContainer.attr('content', table);
-			this._addToContainer(statusContainer , containerDivId);
 			return statusContainer;
 		},
 		
@@ -84,59 +73,67 @@ orion.CompareMergeUIFactory = (function() {
 			return this._createEditorParentDiv(editorParentDivId ,containerDivId);
 		},
 		
-		_createRightEditorParentDiv: function(editorParentDivId ,canvasId , containerDivId) {
-			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false});
-			bc.addChild(this._createCompareCanvasDiv(canvasId));
-			bc.addChild(this._createEditorParentDiv(editorParentDivId));
+		_createRightEditorParentDiv: function(editorParentDivId ,canvasId) {
+			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", style:"width:100%;height: 100%;" ,liveSplitters:false, persist:false , splitter:false});
+			this._appendDomNode(bc,this._createCompareCanvasDiv(canvasId));
+			this._appendDomNode(bc,this._createEditorParentDiv(editorParentDivId));
 			bc.startup();
-			this._addToContainer(bc , containerDivId);
 			return bc;
 		},
 		
-		_createLeftBorder:function(containerDivId){
-			var bc = new dijit.layout.BorderContainer({region:"leading" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true , style:"width: 50%;"});
+		_createLeftBorder:function(){
+			var bc = new dijit.layout.BorderContainer({region:"leading" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true , style:"width: 50%;height:100%;"});
+			
 			if(this._showTitle){
 				this._leftTitleDivId = this._parentDivID + "_left_title_id";
-				bc.addChild(this._createTileDiv(this._leftTitleDivId));
+				this._appendDomNode(bc , this._createTileDiv(this._leftTitleDivId));
 			}
 			this._leftEditorParentDivId = this._parentDivID + "_left_editor_id";
-			bc.addChild(this._createLeftEditorParentDiv(this._leftEditorParentDivId));
+			this._appendDomNode(bc , this._createLeftEditorParentDiv(this._leftEditorParentDivId));
 
 			if(this._showLineStatus){
 				this._leftStatusDivId = this._parentDivID + "_left_status_id";
-				bc.addChild(this._createStatusDiv(this._leftStatusDivId));
+				this._appendDomNode(bc , this._createStatusDiv(this._leftStatusDivId));
 			}
-
+			
 			bc.startup();
-			this._addToContainer(bc , containerDivId);
 			return bc;
 		},
 		
-		_createRightBorder:function(containerDivId){
-			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false});
+		_createRightBorder:function(){
+			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", style:"height:100%;" ,liveSplitters:false, persist:false , splitter:false});
 			
 			if(this._showTitle){
 				this._rightTitleDivId = this._parentDivID + "_right_title_id";
-				bc.addChild(this._createTileDiv(this._rightTitleDivId));
+				this._appendDomNode(bc ,this._createTileDiv(this._rightTitleDivId));
 			}
 			
 			this._rightEditorParentDivId = this._parentDivID + "_right_editor_id";
 			this._diffCanvasDivId = this._parentDivID + "_diff_canvas_id";
-			bc.addChild(this._createRightEditorParentDiv(this._rightEditorParentDivId , this._diffCanvasDivId));
+			this._appendDomNode(bc , this._createRightEditorParentDiv(this._rightEditorParentDivId , this._diffCanvasDivId));
 
 			if(this._showLineStatus){
 				this._rightStatusDivId = this._parentDivID + "_right_status_id";
-				bc.addChild(this._createStatusDiv(this._rightStatusDivId));
+				this._appendDomNode(bc , this._createStatusDiv(this._rightStatusDivId));
 			}
-
+			
 			bc.startup();
-			this._addToContainer(bc , containerDivId);
 			return bc;
 		},
 		
 		buildUI:function(){
-			this._createLeftBorder(this._parentDivID);
-			this._createRightBorder(this._parentDivID);
+			var leftB = this._createLeftBorder();
+			var rightB = this._createRightBorder();
+			/*
+			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", style:"background: #ffffff;width:100%;height: 100%;" , liveSplitters:false, persist:false , splitter:false});
+			bc.addChild(leftB);
+			bc.addChild(rightB);
+			bc.startup();
+			this._appendDomNode(this._parentDivID , bc);
+			*/
+			var parent = dijit.byId(this._parentDivID);
+			parent.addChild(leftB);
+			parent.addChild(rightB);
 		},
 		
 		getEditorParentDivId: function(left){

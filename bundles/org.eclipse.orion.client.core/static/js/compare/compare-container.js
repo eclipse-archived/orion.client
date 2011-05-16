@@ -423,7 +423,7 @@ orion.CompareMergeContainer = (function() {
 		this._compareMatchRenderer.copyToLeft();
 	};
 	
-	CompareMergeContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , tiltleDivId ,readOnly , createLineStyler , fileURI){
+	CompareMergeContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , statusDivId ,readOnly , createLineStyler , fileURI){
 		var editorContainerDomNode = dojo.byId(parentDivId);
 		var self = this;
 		
@@ -462,12 +462,14 @@ orion.CompareMergeContainer = (function() {
 		var dirtyIndicator = "";
 		var status = "";
 		var statusReporter = function(message, isError) {
+			if(!statusDivId)
+				return;
 			if (isError) {
 				status =  "ERROR: " + message;
 			} else {
 				status = message;
 			}
-			dojo.byId(tiltleDivId).innerHTML = dirtyIndicator +  status;
+			dojo.byId(statusDivId).innerHTML = dirtyIndicator +  status;
 		};
 		var undoStackFactory = readOnly ? new orion.UndoFactory() : new orion.UndoCommandFactory(self._registry, self._commandService, "notifications");
 		var editorContainer = new orion.EditorContainer({
