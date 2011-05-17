@@ -50,7 +50,7 @@ dojo.addOnLoad(function(){
 	var commitDetails = new eclipse.CommitDetails({parent: "commitDetailsPane", serviceRegistry: serviceRegistry});
 	
 	// Commit navigator
-	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, selection, commitDetails, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, selection,commitDetails, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 
 	// global commands
 	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, navigator);
@@ -113,6 +113,7 @@ dojo.addOnLoad(function(){
 		});
 	} else {
 		var path = dojo.hash();
+		
 		dojo.xhrGet({
 			url : path,
 			headers : {
@@ -121,33 +122,36 @@ dojo.addOnLoad(function(){
 			handleAs : "json",
 			timeout : 5000,
 			load : function(jsonData, secondArg) {
-				return jsonData.RemoteLocation;
+				return jsonData;
 			},
 			error : function(error, ioArgs) {
 				handleGetAuthenticationError(this, ioArgs);
 				console.error("HTTP status code: ", ioArgs.xhr.status);
 			}
-		}).then(function(remoteLocation){
-			return dojo.xhrGet({
-				url : remoteLocation,
-				headers : {
-					"Orion-Version" : "1"
-				},
-				handleAs : "json",
-				timeout : 5000,
-				load : function(jsonData, secondArg) {
-					serviceRegistry.getService("IGitService").then(function(gitService){
-						gitService.getLog(jsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArd) {
-							navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
-							navigator.loadCommitsList(dojo.hash(), jsonData);
+		}).then(function(commitLogJsonData){
+			if (commitLogJsonData.RemoteLocation == null)
+				navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
+			else
+				dojo.xhrGet({
+					url : commitLogJsonData.RemoteLocation,
+					headers : {
+						"Orion-Version" : "1"
+					},
+					handleAs : "json",
+					timeout : 5000,
+					load : function(remoteJsonData, secondArg) {
+						serviceRegistry.getService("IGitService").then(function(gitService){
+							gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
+								navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
+								navigator.loadCommitsList(dojo.hash(), remoteJsonData);
+							});
 						});
-					});
-				},
-				error : function(error, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
-				}
-			});
+					},
+					error : function(error, ioArgs) {
+						handleGetAuthenticationError(this, ioArgs);
+						console.error("HTTP status code: ", ioArgs.xhr.status);
+					}
+				});
 		});
 //		.then(function(blah){
 //			serviceRegistry.getService("IGitService").then(function(gitService){
