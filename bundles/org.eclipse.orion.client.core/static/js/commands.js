@@ -379,7 +379,7 @@ eclipse.CommandService = (function() {
 		generateSeparatorImage: function() {
 			var sep = new Image();
 			// TODO should get this from CSS
-			sep.src = "images/sep.gif";
+			sep.src = "/images/sep.gif";
 			dojo.addClass(sep, "commandImage");
 			dojo.addClass(sep, "commandSeparator");
 			return sep;

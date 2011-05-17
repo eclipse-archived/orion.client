@@ -95,7 +95,7 @@ eclipse.globalCommandUtils.generateUserInfo = function(userName, userStatusText)
 				label: "Profile",
 				onClick: 
 					dojo.hitch(this, 
-							function(){window.location = "/user-profile.html#/users/" + userName;})	
+							function(){window.location = "/profile/user-profile.html#/users/" + userName;})	
 			});
 			newMenu.addChild(menuitem2);
 			

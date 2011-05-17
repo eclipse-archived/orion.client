@@ -89,7 +89,7 @@ eclipse.UsersRenderer = (function() {
 
 			col = document.createElement('td');
 			div = dojo.create("div", {style: "padding-left: 5px; padding-right: 5px; ; padding-top: 5px; padding-bottom: 5px"}, col, "only");
-			link = dojo.create("a", {className: "navlinkonpage", href: "/user-profile.html#" + item.Location}, div, "last");
+			link = dojo.create("a", {className: "navlinkonpage", href: "/profile/user-profile.html#" + item.Location}, div, "last");
 			dojo.place(document.createTextNode(item.login), link, "only");			
 			return col;
 			break;
@@ -198,7 +198,7 @@ eclipse._UsersList = (function() {
 
 		},
 		getUserTab : function(userName) {
-			return tab = "<a class=\"navlinkonpage\" href=\"/user-profile.html#/users/" + userName
+			return tab = "<a class=\"navlinkonpage\" href=\"/profile/user-profile.html#/users/" + userName
 					+ "\">" + userName + "</a>";
 		},
 		reloadUsers : function() {
