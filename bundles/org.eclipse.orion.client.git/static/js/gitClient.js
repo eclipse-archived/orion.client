@@ -74,6 +74,10 @@ eclipse.GitService = (function() {
 			
 		},
 		
+		initGitRepository : function(targetLocation){
+			console.error("Not implemented yet");
+		},
+		
 		getDiffContent: function(diffURI , onLoad , onError){
 			var service = this;
 			dojo.xhrGet({

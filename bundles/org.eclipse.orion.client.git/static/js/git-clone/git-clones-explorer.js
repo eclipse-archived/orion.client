@@ -31,12 +31,6 @@ eclipse.git.GitClonesRenderer = (function(){
 		case 1:
 			return dojo.create("th", {innerHTML: "<h2>Actions</h2>"});
 			break;
-		case 2:
-			return dojo.create("th", {innerHTML: "<h2>Id</h2>"});
-			break;
-		case 3:
-			return dojo.create("th", {innerHTML: "<h2>Content Location</h2>"});
-			break;
 		};
 		
 	};
@@ -46,17 +40,12 @@ eclipse.git.GitClonesRenderer = (function(){
 		switch(col_no){
 		case 0:
 			var td =  dojo.create("td");
-			dojo.create("div", {innerHTML: item.Name, style: "margin: 5px;"}, td);
+			var div = dojo.create("div", {style: "margin: 5px;"}, td);
+			var link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage", href: "/navigate-table.html#" + item.ContentLocation+"?depth=1"}, div, "last");
 			return td;
 			break;
 		case 1:
 			return this.getActionsColumn(item, tableRow);
-			break;
-		case 2:
-			return dojo.create("td", {innerHTML: item.Id});
-			break;
-		case 3:
-			return dojo.create("td", {innerHTML: item.ContentLocation});
 			break;
 		};
 		
