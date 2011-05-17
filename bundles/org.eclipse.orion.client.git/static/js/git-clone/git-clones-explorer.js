@@ -31,12 +31,6 @@ eclipse.git.GitClonesRenderer = (function(){
 		case 1:
 			return dojo.create("th", {innerHTML: "<h2>Actions</h2>"});
 			break;
-		case 2:
-			return dojo.create("th", {innerHTML: "<h2>Id</h2>"});
-			break;
-		case 3:
-			return dojo.create("th", {innerHTML: "<h2>Content Location</h2>"});
-			break;
 		};
 		
 	};
@@ -51,12 +45,6 @@ eclipse.git.GitClonesRenderer = (function(){
 			break;
 		case 1:
 			return this.getActionsColumn(item, tableRow);
-			break;
-		case 2:
-			return dojo.create("td", {innerHTML: item.Id});
-			break;
-		case 3:
-			return dojo.create("td", {innerHTML: item.ContentLocation});
 			break;
 		};
 		
