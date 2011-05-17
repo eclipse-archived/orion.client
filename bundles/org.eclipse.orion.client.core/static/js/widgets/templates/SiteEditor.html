@@ -12,18 +12,15 @@
 		.actionCell .commandLink {
 			margin-right: 4px;
 		}
-		.actionCellCommand[name*="moveUp"] {
-			-webkit-transform: rotate(180deg);
-			-moz-transform: rotate(180deg);
-			-ms-transform: rotate(180deg);
-			transform: rotate(180deg);
-		}
 		.dojoxGridRow .workspacePathCell, .dojoxGridRowOdd .workspacePathCell {
 			background-color: #eee;
 		}
 		td.dojoxGridCellFocus, th.dojoxGridCellFocus {
 			/* Remove annoying dashed border, but keep the width to avoid jiggling */
 			border: 1px solid transparent !important;
+		}
+		.dojoxGridRowOver .dojoxGridCell, .dojoxGridRowEditing .dojoxGridCell {
+			background-color: inherit !important;
 		}
 		.mappingsGridTable {
 			font-size: 9pt !important;

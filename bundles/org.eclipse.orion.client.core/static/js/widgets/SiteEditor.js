@@ -70,7 +70,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		
 		var moveUpCommand = new eclipse.Command({
 			name: "Move Up",
-			image: "/images/down.gif",
+			image: "/images/prev_nav.gif",
 			id: "eclipse.site.mappings.moveUp",
 			visibleWhen: dojo.hitch(this, function(item) {
 				return item.Source && item.Target;
@@ -97,7 +97,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		
 		var moveDownCommand = new eclipse.Command({
 			name: "Move Down",
-			image: "/images/down.gif",
+			image: "/images/next_nav.gif",
 			id: "eclipse.site.mappings.moveDown",
 			visibleWhen: dojo.hitch(this, function(item) {
 				return item.Source && item.Target;
