@@ -1681,7 +1681,7 @@ eclipse.Editor = (function() {
 					e.preventDefault();
 				}
 				return;
-			}			
+			}
 			if (e.keyCode === 229) {
 				if (this.readonly) {
 					if (e.preventDefault) { e.preventDefault(); }
@@ -2271,7 +2271,7 @@ eclipse.Editor = (function() {
 						selection.extend(model.getLineEnd(lineIndex - 1));
 					}
 				} else {
-					selection.extend(this._getOffset(caret, args.word, -1));
+					selection.extend(this._getOffset(caret, args.unit, -1));
 				}
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
@@ -2302,7 +2302,7 @@ eclipse.Editor = (function() {
 					selection.extend(model.getLineStart(lineIndex + 1));
 				}
 			} else {
-				selection.extend(this._getOffset(caret, args.word, 1));
+				selection.extend(this._getOffset(caret, args.unit, 1));
 			}
 			if (!args.select) { selection.collapse(); }
 			this._setSelection(selection, true);
@@ -2321,7 +2321,7 @@ eclipse.Editor = (function() {
 					selection.extend(model.getLineEnd(lineIndex - 1));
 				}
 			} else {
-				selection.extend(this._getOffset(caret, args.word, -1));
+				selection.extend(this._getOffset(caret, args.unit, -1));
 			}
 			if (!args.select) { selection.collapse(); }
 			this._setSelection(selection, true);
@@ -2347,7 +2347,7 @@ eclipse.Editor = (function() {
 						selection.extend(model.getLineStart(lineIndex + 1));
 					}
 				} else {
-					selection.extend(this._getOffset(caret, args.word, 1));
+					selection.extend(this._getOffset(caret, args.unit, 1));
 				}
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
@@ -2760,12 +2760,12 @@ eclipse.Editor = (function() {
 				{name: "lineDown",		defaultHandler: function() {return self._doLineDown({select: false});}},
 				{name: "lineStart",		defaultHandler: function() {return self._doHome({select: false, ctrl:false});}},
 				{name: "lineEnd",		defaultHandler: function() {return self._doEnd({select: false, ctrl:false});}},
-				{name: "charPrevious",		defaultHandler: function() {return self._doCursorPrevious({select: false, word:false});}},
-				{name: "charNext",		defaultHandler: function() {return self._doCursorNext({select: false, word:false});}},
+				{name: "charPrevious",		defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"character"});}},
+				{name: "charNext",		defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}},
 				{name: "pageUp",		defaultHandler: function() {return self._doPageUp({select: false});}},
 				{name: "pageDown",		defaultHandler: function() {return self._doPageDown({select: false});}},
-				{name: "wordPrevious",		defaultHandler: function() {return self._doCursorPrevious({select: false, word:true});}},
-				{name: "wordNext",		defaultHandler: function() {return self._doCursorNext({select: false, word:true});}},
+				{name: "wordPrevious",		defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"word"});}},
+				{name: "wordNext",		defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}},
 				{name: "textStart",		defaultHandler: function() {return self._doHome({select: false, ctrl:true});}},
 				{name: "textEnd",		defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}},
 				
@@ -2773,19 +2773,19 @@ eclipse.Editor = (function() {
 				{name: "selectLineDown",	defaultHandler: function() {return self._doLineDown({select: true});}},
 				{name: "selectLineStart",	defaultHandler: function() {return self._doHome({select: true, ctrl:false});}},
 				{name: "selectLineEnd",		defaultHandler: function() {return self._doEnd({select: true, ctrl:false});}},
-				{name: "selectCharPrevious",	defaultHandler: function() {return self._doCursorPrevious({select: true, word:false});}},
-				{name: "selectCharNext",	defaultHandler: function() {return self._doCursorNext({select: true, word:false});}},
+				{name: "selectCharPrevious",	defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"character"});}},
+				{name: "selectCharNext",	defaultHandler: function() {return self._doCursorNext({select: true, unit:"character"});}},
 				{name: "selectPageUp",		defaultHandler: function() {return self._doPageUp({select: true});}},
 				{name: "selectPageDown",	defaultHandler: function() {return self._doPageDown({select: true});}},
-				{name: "selectWordPrevious",	defaultHandler: function() {return self._doCursorPrevious({select: true, word:true});}},
-				{name: "selectWordNext",	defaultHandler: function() {return self._doCursorNext({select: true, word:true});}},
+				{name: "selectWordPrevious",	defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"word"});}},
+				{name: "selectWordNext",	defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}},
 				{name: "selectTextStart",	defaultHandler: function() {return self._doHome({select: true, ctrl:true});}},
 				{name: "selectTextEnd",		defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}},
 				
-				{name: "deletePrevious",	defaultHandler: function() {return self._doBackspace({word:false});}},
-				{name: "deleteNext",		defaultHandler: function() {return self._doDelete({word:false});}},
-				{name: "deleteWordPrevious",	defaultHandler: function() {return self._doBackspace({word:true});}},
-				{name: "deleteWordNext",	defaultHandler: function() {return self._doDelete({word:true});}},
+				{name: "deletePrevious",	defaultHandler: function() {return self._doBackspace({unit:"character"});}},
+				{name: "deleteNext",		defaultHandler: function() {return self._doDelete({unit:"character"});}},
+				{name: "deleteWordPrevious",	defaultHandler: function() {return self._doBackspace({unit:"word"});}},
+				{name: "deleteWordNext",	defaultHandler: function() {return self._doDelete({unit:"word"});}},
 				{name: "tab",			defaultHandler: function() {return self._doTab();}},
 				{name: "enter",			defaultHandler: function() {return self._doEnter();}},
 				{name: "selectAll",		defaultHandler: function() {return self._doSelectAll();}},
@@ -3172,17 +3172,20 @@ eclipse.Editor = (function() {
 			}
 			return node;
 		},
-		_getOffset: function (offset, word, direction) {
-			return isIE ? this._getOffset_IE(offset, word, direction) : this._getOffset_W3C(offset, word, direction);
+		_getOffset: function (offset, unit, direction) {
+			if (unit === "wordend") {
+				return this._getOffset_W3C(offset, unit, direction);
+			}
+			return isIE ? this._getOffset_IE(offset, unit, direction) : this._getOffset_W3C(offset, unit, direction);
 		},
-		_getOffset_W3C: function (offset, word, direction) {
+		_getOffset_W3C: function (offset, unit, direction) {
 			function _isPunctuation(c) {
 				return (33 <= c && c <= 47) || (58 <= c && c <= 64) || (91 <= c && c <= 94) || c === 96 || (123 <= c && c <= 126);
 			}
 			function _isWhitespace(c) {
 				return c === 32 || c === 9;
 			}
-			if (word) {
+			if (unit === "word" || unit === "wordend") {
 				var model = this._model;
 				var lineIndex = model.getLineAtOffset(offset);
 				var lineText = model.getLine(lineIndex);
@@ -3202,9 +3205,17 @@ eclipse.Editor = (function() {
 					while (offsetInLine < lineLength) {
 						c = lineText.charCodeAt(offsetInLine);
 						punctuation = _isPunctuation(c);
-						if (punctuation && !previousPunctuation) { break; }
+						if (unit === "wordend") {
+							if (!punctuation && previousPunctuation) { break; }
+						} else {
+							if (punctuation && !previousPunctuation) { break; }
+						}
 						letterOrDigit  = !punctuation && !_isWhitespace(c);
-						if (letterOrDigit && !previousLetterOrDigit) { break; }
+						if (unit === "wordend") {
+							if (!letterOrDigit && previousLetterOrDigit) { break; }
+						} else {
+							if (letterOrDigit && !previousLetterOrDigit) { break; }
+						}
 						previousLetterOrDigit = letterOrDigit;
 						previousPunctuation = punctuation;
 						offsetInLine++;
@@ -3218,9 +3229,17 @@ eclipse.Editor = (function() {
 					while (0 < offsetInLine) {
 						c = lineText.charCodeAt(offsetInLine - 1);
 						punctuation = _isPunctuation(c);
-						if (!punctuation && previousPunctuation) { break; }
+						if (unit === "wordend") {
+							if (punctuation && !previousPunctuation) { break; }
+						} else {
+							if (!punctuation && previousPunctuation) { break; }
+						}
 						letterOrDigit  = !punctuation && !_isWhitespace(c);
-						if (!letterOrDigit && previousLetterOrDigit) { break; }
+						if (unit === "wordend") {
+							if (letterOrDigit && !previousLetterOrDigit) { break; }
+						} else {
+							if (!letterOrDigit && previousLetterOrDigit) { break; }
+						}
 						previousLetterOrDigit = letterOrDigit;
 						previousPunctuation = punctuation;
 						offsetInLine--;
@@ -3230,7 +3249,7 @@ eclipse.Editor = (function() {
 			}
 			return offset + direction;
 		},
-		_getOffset_IE: function (offset, word, direction) {
+		_getOffset_IE: function (offset, unit, direction) {
 			var document = this._frameDocument;
 			var model = this._model;
 			var lineIndex = model.getLineAtOffset(offset);
@@ -3246,7 +3265,7 @@ eclipse.Editor = (function() {
 				range = document.body.createTextRange();
 				range.moveToElementText(child.lastChild);
 				length = range.text.length;
-				range.moveEnd(word ? "word" : "character", direction);
+				range.moveEnd(unit, direction);
 				result = offset + range.text.length - length;
 			} else if (offset === lineOffset && direction < 0) {
 				result = lineOffset;
@@ -3268,7 +3287,7 @@ eclipse.Editor = (function() {
 							range.moveEnd("character", offset - lineOffset);
 						}
 						length = range.text.length;
-						range.moveEnd(word ? "word" : "character", direction);
+						range.moveEnd(unit, direction);
 						result = offset + range.text.length - length;
 						break;
 					}
@@ -4329,14 +4348,14 @@ eclipse.Editor = (function() {
 					if (this._doubleClickSelection) {
 						if (offset >= this._doubleClickSelection.start) {
 							start = this._doubleClickSelection.start;
-							end = this._getOffset(offset, true, +1);
+							end = this._getOffset(offset, "wordend", +1);
 						} else {
-							start = this._getOffset(offset, true, -1);
+							start = this._getOffset(offset, "word", -1);
 							end = this._doubleClickSelection.end;
 						}
 					} else {
-						start = this._getOffset(offset, true, -1);
-						end = this._getOffset(start, true, +1);
+						start = this._getOffset(offset, "word", -1);
+						end = this._getOffset(start, "wordend", +1);
 					}
 				} else {
 					if (this._doubleClickSelection) {

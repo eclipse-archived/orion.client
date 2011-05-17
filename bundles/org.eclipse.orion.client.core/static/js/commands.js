@@ -583,9 +583,9 @@ eclipse.Command = (function() {
 		},
 		
 		makeChoiceCallback: function(choice, items) {
-			return function() {
+			return function(event) {
 				if (choice.callback) {
-					choice.callback.call(choice, items);
+					choice.callback.call(choice, items, event);
 				}
 			};
 		},

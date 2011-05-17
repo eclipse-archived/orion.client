@@ -158,7 +158,26 @@ eclipse.sites.util = {
 	makeRelativeFilePath: function(location) {
 		var path = eclipse.util.makeRelative(location);
 		var segments = path.split("/");
-		var filteredSegments = dojo.filter(segments, function(s){return s !== "";});
+		var filteredSegments = eclipse.sites.util._removeEmptyElements(segments);
 		return "/" + filteredSegments.slice(1).join("/");
+	},
+	
+	_removeEmptyElements: function(array) {
+		return dojo.filter(array, function(s){return s !== "";});
+	},
+	
+	/**
+	 * @requires eclipse.util
+	 * @param target The "Target" field from a site configuration
+	 * @returns {String} The URL that the target points to.<br/>
+	 * <b>FIXME:</b> this is URL manipulation; it should be done by the server
+	 */
+	makeFullFilePath: function(target) {
+		var relativePath = "/file" + target;
+		var segments = target.split("/");
+		if (eclipse.sites.util._removeEmptyElements(segments).length === 1) {
+			relativePath += "/";
+		}
+		return eclipse.util.makeFullPath(relativePath);
 	}
 };
