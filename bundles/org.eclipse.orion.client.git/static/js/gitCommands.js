@@ -24,6 +24,7 @@ var eclipse = eclipse || {};
 eclipse.gitCommandUtils = eclipse.gitCommandUtils || {};
 
 dojo.require("widgets.CloneGitRepositoryDialog");
+dojo.require("widgets.InitGitRepositoryDialog");
 dojo.require("widgets.GitCredentialsDialog");
 
 //this function is just a closure for the global "doOnce" flag
@@ -164,6 +165,34 @@ dojo.require("widgets.GitCredentialsDialog");
 		});
 		
 		commandService.addCommand(cloneGitRepositoryCommand, "dom");
+		
+		var initGitRepositoryCommand = new eclipse.Command({
+			name : "Init Repository",
+			tooltip : "Init Git Repository in a Folder",
+			id : "eclipse.initGitRepository",
+			callback : function(item) {
+				var dialog = new widgets.InitGitRepositoryDialog({
+					func : function(target){
+								serviceRegistry.getService("IGitService").then(function(gitService) {
+									gitService.initGitRepository(target).then(function(){
+											if(explorer.redisplayClonesList){
+												dojo.hitch(explorer, explorer.redisplayClonesList)();
+											}
+									});
+								});
+
+							}
+				});
+						
+				dialog.startup();
+				dialog.show();
+			},
+			visibleWhen : function(item) {
+				return true;
+			}
+		});
+		
+		commandService.addCommand(initGitRepositoryCommand, "dom");
 		
 		var linkRepoCommand = new eclipse.Command({
 			name: "Link Repository",
