@@ -70,7 +70,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		
 		var moveUpCommand = new eclipse.Command({
 			name: "Move Up",
-			image: "images/down.gif",
+			image: "/images/down.gif",
 			id: "eclipse.site.mappings.moveUp",
 			visibleWhen: dojo.hitch(this, function(item) {
 				return item.Source && item.Target;
@@ -97,7 +97,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		
 		var moveDownCommand = new eclipse.Command({
 			name: "Move Down",
-			image: "images/down.gif",
+			image: "/images/down.gif",
 			id: "eclipse.site.mappings.moveDown",
 			visibleWhen: dojo.hitch(this, function(item) {
 				return item.Source && item.Target;
@@ -510,7 +510,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		// Save command
 		var saveCommand = new eclipse.Command({
 				name: "Save",
-				image: "images/save.gif",
+				image: "/images/save.gif",
 				id: "eclipse.site.save",
 				visibleWhen: function(item) {
 					return item.Location /*looks like a site config*/;
