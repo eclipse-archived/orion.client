@@ -9,7 +9,7 @@
 			var provider = new eclipse.PluginProvider();
 			provider.registerServiceProvider("fileCommands", {
 				run: function(item) {
-					return "/unittest.html#" + item.Location;
+					return "/test/unittest.html#" + item.Location;
 				}
 			}, {
 				name: "Run as Unit Test",
