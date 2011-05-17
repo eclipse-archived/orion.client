@@ -221,14 +221,14 @@ dojo.addOnLoad(function(){
 	/*  For now I'm hiding the concept of switchable views. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=338608
 	var treeViewCommand = new eclipse.Command({
 		name : "Tree View",
-		image : "images/hierarchicalLayout.gif",
+		image : "/images/hierarchicalLayout.gif",
 		id: "eclipse.treeViewCommand",
 		groupId: "eclipse.viewGroup",
 		callback : function() {
 			serviceRegistry.getService("IPreferencesService").then(function(service) {
-				service.put("window/orientation", "navigate-tree.html");
+				service.put("window/orientation", "/nav/tree.html");
 			});
-			window.location.replace("/navigate-tree.html#" + dojo.hash());
+			window.location.replace("/nav/tree.html#" + dojo.hash());
 		}});
 		
 	commandService.addCommand(treeViewCommand, "dom");

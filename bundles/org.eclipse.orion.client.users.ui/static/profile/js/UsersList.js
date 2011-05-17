@@ -168,7 +168,7 @@ eclipse._UsersList = (function() {
 						var actions = dojo.create("span",{id: "usersActions"+i, style: "visibility: hidden"}, actionsTd);
 						var deleteAction = dojo.create("img", {
 							id: "deleteAction"+i,
-							src : "images/silk/cross.png",
+							src : "/images/silk/cross.png",
 							alt : "Delete",
 							title : "Delete user " + jsonData.users[i].login,
 							className: "commandImage"

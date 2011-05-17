@@ -178,7 +178,7 @@ eclipse.Favorites = (function() {
 		var addFaveURLCommand = new eclipse.Command({
 			name: "Add Favorite",
 			tooltip: "Add link as favorite",
-			image: "images/add_obj.gif",
+			image: "/images/add_obj.gif",
 			id: "eclipse.addExternalFave",
 			callback: dojo.hitch(this, function(item, commandId, domId) {
 				this.getUserURL(domId);
@@ -186,7 +186,7 @@ eclipse.Favorites = (function() {
 		});		
 		var deleteFaveCommand = new eclipse.Command({
 			name: "Delete",
-			image: "images/remove.gif",
+			image: "/images/remove.gif",
 			id: "eclipse.deleteFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: function(item) {
@@ -197,7 +197,7 @@ eclipse.Favorites = (function() {
 		});		
 		var renameFaveCommand = new eclipse.Command({
 			name: "Rename",
-			image: "images/editing_16.gif",
+			image: "/images/editing_16.gif",
 			id: "eclipse.renameFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: dojo.hitch(this, function(item, commandId, domId, faveIndex) {
@@ -206,7 +206,7 @@ eclipse.Favorites = (function() {
 		});
 		var deleteSearchCommand = new eclipse.Command({
 			name: "Delete",
-			image: "images/remove.gif",
+			image: "/images/remove.gif",
 			id: "eclipse.deleteSearch",
 			visibleWhen: function(item) {return item.isSearch;},
 			callback: function(item) {
@@ -301,7 +301,7 @@ eclipse.Favorites = (function() {
 				if (fave.isExternalResource) {
 					href = fave.path;
 				} else {
-					href = fave.directory ? "navigate-table.html#" + fave.path : "coding.html#" + fave.path;
+					href = fave.directory ? "/nav/table.html#" + fave.path : "coding.html#" + fave.path;
 					if (href==="#") {
 						href="";
 					}

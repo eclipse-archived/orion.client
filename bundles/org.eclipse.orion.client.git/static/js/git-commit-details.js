@@ -28,14 +28,14 @@ eclipse.CommitDetails = (function() {
 		var doSomething1 = new eclipse.Command({
 			name: "Do Something 1",
 			tooltip: "Do Something 1",
-			image: "images/add_obj.gif",
+			image: "/images/add_obj.gif",
 			id: "eclipse.doSomething1",
 			callback: function(item) {console.info("clicked");}
 		});		
 		var doSomething2 = new eclipse.Command({
 			name: "Do Something 2",
 			tooltip: "Do Something 2",
-			image: "images/add_obj.gif",
+			image: "/images/add_obj.gif",
 			id: "eclipse.doSomething2",
 			callback: function(item) {console.info("clicked");}
 		});		

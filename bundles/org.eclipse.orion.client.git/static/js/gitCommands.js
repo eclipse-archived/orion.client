@@ -131,7 +131,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		var cloneGitRepositoryCommand = new eclipse.Command({
 			name : "Clone",
 			tooltip : "Clone Git Repository",
-			image : "images/git-clone.gif",
+			image : "/images/git-clone.gif",
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
 				var dialog = new widgets.CloneGitRepositoryDialog({
@@ -196,7 +196,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		var linkRepoCommand = new eclipse.Command({
 			name: "Link Repository",
-			image: "images/link_obj.gif",
+			image: "/images/link_obj.gif",
 			id: "eclipse.linkRepository",
 			callback: function(item) {
 				var dialog = new widgets.NewItemDialog({
@@ -210,7 +210,7 @@ dojo.require("widgets.GitCredentialsDialog");
 										function(jsonResp){
 											alert("Repository was linked to " + jsonResp.Name);
 											service.read(jsonResp.ContentLocation, true).then(function(jsonData){
-												window.location.replace("navigate-table.html#"+jsonData.ChildrenLocation); //redirect to the workspace to see the linked resource
+												window.location.replace("/nav/table.html#"+jsonData.ChildrenLocation); //redirect to the workspace to see the linked resource
 											});
 										}
 									);
@@ -236,7 +236,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		var compareGitCommits = new eclipse.Command({
 			name : "Compare With Each Other",
-			image : "images/git/compare-sbs.gif",
+			image : "/images/git/compare-sbs.gif",
 			id : "eclipse.compareGitCommits",
 			hrefCallback : function(item) {
 				var clientDeferred = new dojo.Deferred();
@@ -262,7 +262,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		var compareWithWorkingTree = new eclipse.Command({
 			name : "Compare With Working Tree",
-			image : "images/git/compare-sbs.gif",
+			image : "/images/git/compare-sbs.gif",
 			id : "eclipse.compareWithWorkingTree",
 			hrefCallback : function(item) {
 				return "/compare-m.html#" + item.DiffLocation;
@@ -276,7 +276,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		var openGitCommit = new eclipse.Command({
 			name : "Open",
-			image : "images/find.gif",
+			image : "/images/find.gif",
 			id : "eclipse.openGitCommit",
 			hrefCallback: function(item) {
 				return "/coding.html#" + item.ContentLocation;
@@ -290,7 +290,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		var fetchCommand = new eclipse.Command({
 			name : "Fetch",
-			image : "images/git-fetch.gif",
+			image : "/images/git-fetch.gif",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -345,7 +345,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		var mergeCommand = new eclipse.Command({
 			name : "Merge",
-			image : "images/git-merge.gif",
+			image : "/images/git-merge.gif",
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(function(gitService){
@@ -399,7 +399,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		var pushCommand = new eclipse.Command({
 			name : "Push",
-			image : "images/git-push.gif",
+			image : "/images/git-push.gif",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -430,7 +430,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		var addTagCommand = new eclipse.Command({
 			name : "Tag",
-			image : "images/git-tag.gif",
+			image : "/images/git-tag.gif",
 			id : "eclipse.orion.git.addTag",
 			callback : function(item) {
 				var clientDeferred = new dojo.Deferred();
@@ -457,7 +457,7 @@ dojo.require("widgets.GitCredentialsDialog");
 	eclipse.gitCommandUtils.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 		var deleteCommand = new eclipse.Command({
 			name: "Delete Clone",
-			image: "images/remove.gif",
+			image: "/images/remove.gif",
 			id: "eclipse.git.deleteClone",
 			visibleWhen: function(item) {
 				var items = dojo.isArray(item) ? item : [item];

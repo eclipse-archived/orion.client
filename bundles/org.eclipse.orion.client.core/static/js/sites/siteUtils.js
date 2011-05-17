@@ -86,7 +86,7 @@ eclipse.sites.util = {
 			startCallback, stopCallback, deleteCallback, errorCallback) {
 		var editCommand = new eclipse.Command({
 			name: "Edit",
-			image: "images/editing_16.gif",
+			image: "/images/editing_16.gif",
 			id: "eclipse.site.edit",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
@@ -96,7 +96,7 @@ eclipse.sites.util = {
 		
 		var startCommand = new eclipse.Command({
 			name: "Start",
-			image: "images/lrun_obj.gif",
+			image: "/images/lrun_obj.gif",
 			id: "eclipse.site.start",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
@@ -115,7 +115,7 @@ eclipse.sites.util = {
 		
 		var stopCommand = new eclipse.Command({
 			name: "Stop",
-			image: "images/stop.gif",
+			image: "/images/stop.gif",
 			id: "eclipse.site.stop",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "started";
@@ -133,7 +133,7 @@ eclipse.sites.util = {
 		
 		var deleteCommand = new eclipse.Command({
 			name: "Delete",
-			image: "images/remove.gif",
+			image: "/images/remove.gif",
 			id: "eclipse.site.delete",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";

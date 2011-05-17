@@ -41,7 +41,7 @@ eclipse.git.GitClonesRenderer = (function(){
 		case 0:
 			var td =  dojo.create("td");
 			var div = dojo.create("div", {style: "margin: 5px;"}, td);
-			var link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage", href: "/navigate-table.html#" + item.ContentLocation+"?depth=1"}, div, "last");
+			var link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage", href: "/nav/table.html#" + item.ContentLocation+"?depth=1"}, div, "last");
 			return td;
 			break;
 		case 1:

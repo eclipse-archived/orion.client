@@ -51,7 +51,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		// Register commands used for editing mappings
 		var deleteMappingCommand = new eclipse.Command({
 			name: "Delete",
-			image: "images/remove.gif",
+			image: "/images/remove.gif",
 			id: "eclipse.site.mappings.remove",
 			visibleWhen: function(item) {
 				return true;
@@ -426,7 +426,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 			// Register command used for adding mapping
 			var addMappingCommand = new eclipse.Command({
 				name: "Add&#8230;",
-				image: "images/add_obj.gif",
+				image: "/images/add_obj.gif",
 				id: "eclipse.site.mappings.add",
 				visibleWhen: function(item) {
 					return true;

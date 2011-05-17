@@ -336,7 +336,7 @@ a:hover {
 }
 
 .toolbarTest {
-/*	background: #fff url("images/titleBarTest.png")  repeat-x top left; */
+/*	background: #fff url("/images/titleBarTest.png")  repeat-x top left; */
 	border:1px solid #bfbfbf;
 	cursor: default;
 	font-size: 0.9em;
@@ -349,7 +349,7 @@ a:hover {
 	cursor: pointer;
 	font-size: 0.9em;
 	font-weight: bold;
-	background: #fff url("images/titleBar.png") repeat-x top left;
+	background: #fff url("/images/titleBar.png") repeat-x top left;
 	min-width: 600px;
 }
 
@@ -405,26 +405,26 @@ a:hover {
 }
 
 .launchItemGo {
-	background: url(images/silk/server_go.png);
+	background: url(/images/silk/server_go.png);
 }
 .launchItemStop {
-	background: url(images/silk/server_stop.png);
+	background: url(/images/silk/server_stop.png);
 }
 
 .projectItem {
-	background: url(images/prj_obj.gif);
+	background: url(/images/prj_obj.gif);
 }
 
 .folderItem {
-	background: url(images/fldr_obj.gif);
+	background: url(/images/fldr_obj.gif);
 }
 
 .fileItem {
-	background: url(images/file_obj.gif);
+	background: url(/images/file_obj.gif);
 }
 
 .newItem {
-	background: url(images/add_obj.gif);
+	background: url(/images/add_obj.gif);
 }
 
 .treetable {
@@ -460,7 +460,7 @@ a:hover {
 }
 
 .followFile {
-	background: url(images/silk/page_go.png);
+	background: url(/images/silk/page_go.png);
 }
 
 .contentassist {

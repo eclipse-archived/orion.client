@@ -45,7 +45,7 @@ orion.EditorCommandFactory = (function() {
 			}));
 			var saveCommand = new eclipse.Command({
 				name: "Save",
-				image: "images/save_edit.gif",
+				image: "/images/save_edit.gif",
 				id: "orion.save",
 				callback: function(editor) {
 					editor.getEditorWidget().invokeAction("orion.save");
@@ -163,7 +163,7 @@ orion.UndoCommandFactory = (function() {
 			});
 			var undoCommand = new eclipse.Command({
 				name: "Undo",
-				image: "images/undo_edit.gif",
+				image: "/images/undo_edit.gif",
 				id: "orion.undo",
 				callback: function(editor) {
 					editor.getEditorWidget().invokeAction("orion.undo");
@@ -179,7 +179,7 @@ orion.UndoCommandFactory = (function() {
 	
 			var redoCommand = new eclipse.Command({
 				name: "Redo",
-				image: "images/redo_edit.gif",
+				image: "/images/redo_edit.gif",
 				id: "orion.redo",
 				callback: function(editor) {
 					editor.getEditorWidget().invokeAction("orion.redo");

@@ -71,13 +71,13 @@ dojo.addOnLoad(function(){
 	// commands specific to this page
 	var tableViewCommand = new eclipse.Command({
 		name : "Table View",
-		image : "images/flatLayout.gif",
+		image : "/images/flatLayout.gif",
 		id: "eclipse.tableViewCommand",
 		callback : function() {
 			serviceRegistry.getService("IPreferencesService").then(function(service) {
-				service.put("window/orientation", "navigate-table.html");
+				service.put("window/orientation", "/nav/table.html");
 			});
-			window.location.replace("/navigate-table.html#" + dojo.hash());
+			window.location.replace("/nav/table.html#" + dojo.hash());
 		}});
 	commandService.addCommand(tableViewCommand, "dom");
 	commandService.addCommandGroup("eclipse.viewGroup", 800);

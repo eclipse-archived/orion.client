@@ -221,7 +221,7 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 		
 	var openResourceCommand = new eclipse.Command({
 		name: "Open Resource",
-		image: "images/find.gif",
+		image: "/images/find.gif",
 		id: "eclipse.openResource",
 		callback: function(item) {
 			openResourceDialog(searchLocation, searcher, editor);

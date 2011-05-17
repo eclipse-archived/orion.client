@@ -169,7 +169,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			for (i=0; i<favorites.length; i++) {
 				var path = stripPath(favorites[i].path);
 				if (!contains(sourceLocations, path)) {
-					choices.push({name: favorites[i].name, image: "images/silk/star.gif", path: path, callback: callback});
+					choices.push({name: favorites[i].name, image: "/images/silk/star.gif", path: path, callback: callback});
 				}
 			}
 		}
@@ -276,7 +276,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 
 	var favoriteCommand = new eclipse.Command({
 		name: "Make Favorite",
-		image: "images/silk/star.gif",
+		image: "/images/silk/star.gif",
 		id: "eclipse.makeFavorite",
 		visibleWhen: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
@@ -295,7 +295,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var renameCommand = new eclipse.Command({
 			name: "Rename",
-			image: "images/editing_16.gif",
+			image: "/images/editing_16.gif",
 			id: "eclipse.renameResource",
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -322,7 +322,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var deleteCommand = new eclipse.Command({
 		name: "Delete",
-		image: "images/remove.gif",
+		image: "/images/remove.gif",
 		id: "eclipse.deleteFile",
 		visibleWhen: oneOrMoreFilesOrFolders,
 		callback: function(item) {
@@ -365,7 +365,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 
 	var downloadCommand = new eclipse.Command({
 		name: "Download as Zip",
-		image: "images/down.gif",
+		image: "/images/down.gif",
 		id: "eclipse.downloadFile",
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
@@ -377,7 +377,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var newFileCommand=  new eclipse.Command({
 		name: "New File",
-		image: "images/newfile_wiz.gif",
+		image: "/images/newfile_wiz.gif",
 		id: "eclipse.newFile",
 		callback: function(item) {
 			item = forceSingleItem(item);
@@ -400,7 +400,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var newFolderCommand = new eclipse.Command({
 		name: "New Folder",
-		image: "images/newfolder_wiz.gif",
+		image: "/images/newfolder_wiz.gif",
 		id: "eclipse.newFolder",
 		callback: function(item) {
 			item = forceSingleItem(item);
@@ -424,7 +424,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var newProjectCommand = new eclipse.Command({
 		name: "New Folder",
-		image: "images/newfolder_wiz.gif",
+		image: "/images/newfolder_wiz.gif",
 		id: "eclipse.newProject",
 		callback: function(item) {
 			var dialog = new widgets.NewItemDialog({
@@ -446,7 +446,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	
 	var linkProjectCommand = new eclipse.Command({
 		name: "Link Folder",
-		image: "images/link_obj.gif",
+		image: "/images/link_obj.gif",
 		id: "eclipse.linkProject",
 		callback: function(item) {
 			var dialog = new widgets.NewItemDialog({
@@ -468,7 +468,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				
 	var importCommand = new eclipse.Command({
 		name : "Zip Import",
-		image : "images/zip_import.gif",
+		image : "/images/zip_import.gif",
 		id: "eclipse.importCommand",
 		callback : function(item) {
 			item = forceSingleItem(item);
@@ -487,7 +487,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 
 	var importSFTPCommand = new eclipse.Command({
 		name : "SFTP Import",
-		image : "images/zip_import.gif",
+		image : "/images/zip_import.gif",
 		id: "eclipse.importSFTPCommand",
 		callback : function(item) {
 			item = forceSingleItem(item);
@@ -513,7 +513,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 
 	var exportSFTPCommand = new eclipse.Command({
 		name : "SFTP Export",
-		image : "images/down.gif",
+		image : "/images/down.gif",
 		id: "eclipse.exportSFTPCommand",
 		callback : function(item) {
 			item = forceSingleItem(item);

@@ -44,7 +44,7 @@ dojo.addOnLoad(function() {
 		
 	var deleteCommand = new eclipse.Command({
 		name: "Delete User",
-		image: "images/remove.gif",
+		image: "/images/remove.gif",
 		id: "eclipse.deleteUser",
 		visibleWhen: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
