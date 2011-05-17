@@ -191,7 +191,7 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 			if (searchLocation) {
 				if (searchField.value.length > 0) {
 					var query = searchLocation + searchField.value;
-					window.location = "/searchResults.html#"+query;
+					window.location = "/search/search.html#"+query;
 				}
 			} else {
 				window.alert("Can't search: SearchLocation not available");
