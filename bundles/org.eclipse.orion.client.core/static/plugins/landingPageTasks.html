@@ -16,7 +16,7 @@
 			description: "Clone a repository from github",
 			steps:[
 				{href: "http://www.github.com", linkName: "github", description: "Go to github and copy the repository URL for the repository you want to clone."},
-				{href: "git-clone.html", linkName: "Orion Repositories", description: "Go to the Orion repositories page and select the 'Clone' link at the top left of the page"},
+				{href: "/git-clone.html", linkName: "Orion Repositories", description: "Go to the Orion repositories page and select the 'Clone' link at the top left of the page"},
 				{href: "http://wiki.eclipse.org/Orion/How_Tos/Cloning_repository_from_github", linkName: "Orion/GitHub How-To", description: "The how-to provides further information about setting up credentials."}
 			]
 		});
@@ -26,7 +26,7 @@
 			id: "orion.upload",
 			description: "Upload a zip file from your computer.",
 			steps:[
-				{href: "/nav/table.html", linkName: "Navigator", description: "Go the Orion navigator.  Create a new folder and then choose import from the 'More' menu."}
+				{href: "/navigate/table.html", linkName: "Navigator", description: "Go the Orion navigator.  Create a new folder and then choose import from the 'More' menu."}
 			]
 		});
 		provider.registerServiceProvider("landingTasks", serviceImpl, {
@@ -36,13 +36,13 @@
 			description: "Generate an HTML 5 Website Template using initializr.com",
 			steps:[
 				{href: "http://www.initializr.com", linkName: "Initializr", description: "Go to the initializr site, choose the options that you would like, and download the template to your computer."},
-				{href: "/nav/table.html", linkName: "Navigator", description: "Go to the Orion navigator.  Create a new folder and then choose import from the 'More' menu.  Select the zip file you just generated."}
+				{href: "/navigate/table.html", linkName: "Navigator", description: "Go to the Orion navigator.  Create a new folder and then choose import from the 'More' menu.  Select the zip file you just generated."}
 			]
 		});
 		provider.registerServiceProvider("primaryNavigation", serviceImpl, {
 			name: "Navigator",
 			id: "orion.navigator",
-			href: "/nav/table.html#"
+			href: "/navigate/table.html#"
 		});
 		provider.registerServiceProvider("primaryNavigation", serviceImpl, {
 			name: "Sites",
@@ -52,12 +52,12 @@
 		provider.registerServiceProvider("primaryNavigation", serviceImpl, {
 			name: "Plugins",
 			id: "orion.plugins",
-			href: "view-registry.html"
+			href: "/plugin/list.html"
 		});
 		provider.registerServiceProvider("primaryNavigation", serviceImpl, {
 			name: "Repositories",
 			id: "orion.repositories",
-			href: "git-clone.html"
+			href: "/git-clone.html"
 		});
 		provider.connect();
 	};

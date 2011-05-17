@@ -402,12 +402,12 @@ orion.GitStatusController = (function() {
 		
 		openCompareEditor: function(itemModel){
 			var diffParam = "";
-			var baseUrl = "/compare-m.html#";
+			var baseUrl = "/compare/compare.html#";
 			if(this._model.isConflict(itemModel.type)){
 				diffParam = "?conflict=true";
 			}
 			if(this._model.isStaged(itemModel.type)){
-				baseUrl = "/compare-m.html?readonly#";
+				baseUrl = "/compare/compare.html?readonly#";
 			}
 			var url = baseUrl + itemModel.diffURI + diffParam;
 			window.open(url,"");

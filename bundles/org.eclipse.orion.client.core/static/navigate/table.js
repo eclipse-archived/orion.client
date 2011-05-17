@@ -226,9 +226,9 @@ dojo.addOnLoad(function(){
 		groupId: "eclipse.viewGroup",
 		callback : function() {
 			serviceRegistry.getService("IPreferencesService").then(function(service) {
-				service.put("window/orientation", "/nav/tree.html");
+				service.put("window/orientation", "/navigate/tree.html");
 			});
-			window.location.replace("/nav/tree.html#" + dojo.hash());
+			window.location.replace("/navigate/tree.html#" + dojo.hash());
 		}});
 		
 	commandService.addCommand(treeViewCommand, "dom");

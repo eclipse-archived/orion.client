@@ -210,7 +210,7 @@ dojo.require("widgets.GitCredentialsDialog");
 										function(jsonResp){
 											alert("Repository was linked to " + jsonResp.Name);
 											service.read(jsonResp.ContentLocation, true).then(function(jsonData){
-												window.location.replace("/nav/table.html#"+jsonData.ChildrenLocation); //redirect to the workspace to see the linked resource
+												window.location.replace("/navigate/table.html#"+jsonData.ChildrenLocation); //redirect to the workspace to see the linked resource
 											});
 										}
 									);
@@ -244,7 +244,7 @@ dojo.require("widgets.GitCredentialsDialog");
 						function(service) {
 							service.getDiff(item[0].DiffLocation, item[1].Name,
 								function(jsonData, secondArg) {
-									clientDeferred.callback("/compare-m.html?readonly#" + secondArg.xhr.getResponseHeader("Location"));
+									clientDeferred.callback("/compare/compare.html?readonly#" + secondArg.xhr.getResponseHeader("Location"));
 								});
 						});
 				return clientDeferred;
@@ -265,7 +265,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			image : "/images/git/compare-sbs.gif",
 			id : "eclipse.compareWithWorkingTree",
 			hrefCallback : function(item) {
-				return "/compare-m.html#" + item.DiffLocation;
+				return "/compare/compare.html#" + item.DiffLocation;
 			},
 			visibleWhen : function(item) {
 				return !explorer.isDirectory;

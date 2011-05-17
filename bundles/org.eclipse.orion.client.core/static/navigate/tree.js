@@ -75,9 +75,9 @@ dojo.addOnLoad(function(){
 		id: "eclipse.tableViewCommand",
 		callback : function() {
 			serviceRegistry.getService("IPreferencesService").then(function(service) {
-				service.put("window/orientation", "/nav/table.html");
+				service.put("window/orientation", "/navigate/table.html");
 			});
-			window.location.replace("/nav/table.html#" + dojo.hash());
+			window.location.replace("/navigate/table.html#" + dojo.hash());
 		}});
 	commandService.addCommand(tableViewCommand, "dom");
 	commandService.addCommandGroup("eclipse.viewGroup", 800);

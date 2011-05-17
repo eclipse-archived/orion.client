@@ -301,7 +301,7 @@ eclipse.Favorites = (function() {
 				if (fave.isExternalResource) {
 					href = fave.path;
 				} else {
-					href = fave.directory ? "/nav/table.html#" + fave.path : "/edit/edit.html#" + fave.path;
+					href = fave.directory ? "/navigate/table.html#" + fave.path : "/edit/edit.html#" + fave.path;
 					if (href==="#") {
 						href="";
 					}
