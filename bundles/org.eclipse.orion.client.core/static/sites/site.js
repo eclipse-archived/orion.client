@@ -12,7 +12,7 @@
 /*jslint devel:true browser:true*/
 
 /*
- * Glue code for edit-site.html
+ * Glue code for site.html
  */
 dojo.addOnLoad(function() {
 	// Register services

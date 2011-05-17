@@ -23,11 +23,11 @@ eclipse.sites.util = {
 	 * @return {String} The URL.
 	 */
 	generateEditSiteHref: function(site) {
-		return "edit-site.html#" + eclipse.util.makeRelative(site.Location);
+		return "site.html#" + eclipse.util.makeRelative(site.Location);
 	},
 	
 	/**
-	 * Parses the state of the edit-site page from a hash value.
+	 * Parses the state of the site page from a hash value.
 	 * @param {String} hash The hash string.
 	 * @returns {Object} An object having the properties:<ul>
 	 * <li>{@link String} <code>site</code> The location URL of the site being edited.</li>
@@ -51,7 +51,7 @@ eclipse.sites.util = {
 	},
 	
 	/**
-	 * Converts the state of the edit-site page into a hash string.
+	 * Converts the state of the site page into a hash string.
 	 * @param {String} siteLocation The location URL of the site configuration being edited.
 	 * @param [String] action Currently unused
 	 * @param [String] actionDetails Currently unused
