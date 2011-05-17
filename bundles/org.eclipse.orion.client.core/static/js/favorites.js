@@ -301,7 +301,7 @@ eclipse.Favorites = (function() {
 				if (fave.isExternalResource) {
 					href = fave.path;
 				} else {
-					href = fave.directory ? "/nav/table.html#" + fave.path : "coding.html#" + fave.path;
+					href = fave.directory ? "/nav/table.html#" + fave.path : "/edit/edit.html#" + fave.path;
 					if (href==="#") {
 						href="";
 					}
@@ -361,7 +361,7 @@ eclipse.Favorites = (function() {
 				tbody = dojo.create("tbody", null, faveTable);
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
-					var href="searchResults.html#" + search.query;
+					var href="/searchResults.html#" + search.query;
 					tr = dojo.create("tr");
 					tr.id = "searchRow"+i;
 					col1 = dojo.create("td", null, tr, "last");

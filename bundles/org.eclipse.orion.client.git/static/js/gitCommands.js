@@ -279,7 +279,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			image : "/images/find.gif",
 			id : "eclipse.openGitCommit",
 			hrefCallback: function(item) {
-				return "/coding.html#" + item.ContentLocation;
+				return "/edit/edit.html#" + item.ContentLocation;
 			},
 			visibleWhen : function(item) {
 				return item.ContentLocation != null && !explorer.isDirectory;

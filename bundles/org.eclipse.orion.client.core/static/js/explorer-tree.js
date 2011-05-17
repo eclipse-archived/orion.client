@@ -173,7 +173,7 @@ eclipse.ExplorerTree = (function() {
 					}
 				},
 				updateFollowLink: function(/*dojo.data.Item*/ item, /*HTMLLinkElement*/ link) {
-					link.href = "/coding.html#" + item.Location;
+					link.href = "/edit/edit.html#" + item.Location;
 				}
 //				onFollowClick: function(/* dojo.data */ item, /*TreeNode*/ node, /*Event*/ evt) {
 //					this.selected(item, node, event);

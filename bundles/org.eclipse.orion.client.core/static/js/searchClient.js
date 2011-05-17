@@ -132,9 +132,9 @@ eclipse.Searcher = (function() {
 						var loc;
 						// if we know what to highlight...
 						if (token && hit.LineNumber) {
-							loc = hostname + "/coding.html#" + eclipse.util.hashFromPosition(hit.Location, /* start */ null, /* end */ null, hit.LineNumber, hit.Offset, token.length);
+							loc = hostname + "/edit/edit.html#" + eclipse.util.hashFromPosition(hit.Location, /* start */ null, /* end */ null, hit.LineNumber, hit.Offset, token.length);
 						} else {
-							loc = hostname + "/coding.html#" + hit.Location;
+							loc = hostname + "/edit/edit.html#" + hit.Location;
 						}
 						hitLink.setAttribute('href', loc);
 						col.appendChild(hitLink);

@@ -142,7 +142,7 @@ dojo.addOnLoad(function(){
 		//console.log("installing non-persistent plugin: " + fileURI);
 		var testOverview = dojo.byId("test-overview");
 		dojo.place(document.createTextNode("Running tests from: "), testOverview, "last");
-		var link = dojo.create("a", {className: "navlink", href: "/coding.html#"+fileURI}, testOverview, "last");
+		var link = dojo.create("a", {className: "navlink", href: "/edit/edit.html#"+fileURI}, testOverview, "last");
 		dojo.place(document.createTextNode(fileURI), link, "last");
 		
 		// these are isolated from the regular service and plugin registry
