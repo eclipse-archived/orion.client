@@ -16,6 +16,7 @@ dojo.require("dijit.form.ComboBox");
 dojo.require("dijit.form.Form");
 dojo.require("dijit.form.Select");
 dojo.require("dijit.form.Textarea");
+dojo.require("dijit.form.TextBox");
 dojo.require("dijit.form.ValidationTextBox");
 dojo.require("dijit.Menu");
 dojo.require("dijit.layout.ContentPane");
@@ -54,7 +55,8 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 			image: "/images/remove.gif",
 			id: "eclipse.site.mappings.remove",
 			visibleWhen: function(item) {
-				return true;
+				// Only show on a Mappings object
+				return item.Source && item.Target;
 			},
 			callback: function(item) {
 				// "this" is {widgets.MappingsGrid}
@@ -63,8 +65,74 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 				this.store.save();
 				this.render();
 			}});
-		this._commandService.addCommand(deleteMappingCommand, "object");
-		this._commandService.registerCommandContribution("eclipse.site.mappings.remove", 1);
+		this._commandService.addCommand(deleteMappingCommand , "object");
+		this._commandService.registerCommandContribution("eclipse.site.mappings.remove", 0);
+		
+		var moveUpCommand = new eclipse.Command({
+			name: "Move Up",
+			image: "images/down.gif",
+			id: "eclipse.site.mappings.moveUp",
+			visibleWhen: dojo.hitch(this, function(item) {
+				return item.Source && item.Target;
+			}),
+			callback: function(itemToMove) {
+				this._hideTooltip();
+				
+				var index = this.getItemIndex(itemToMove);
+				if (index === 0) { return; }
+				
+				// There must be a better way than this
+				var newOrder = this._deleteAll();
+				// swap index-1 with index
+				newOrder.splice(index-1, 2, newOrder[index], newOrder[index-1]);
+				for (var i=0; i < newOrder.length; i++) {
+					this.store.newItem(newOrder[i]);
+				}
+				
+				this.store.save();
+				this.render();
+			}});
+		this._commandService.addCommand(moveUpCommand, "object");
+		this._commandService.registerCommandContribution("eclipse.site.mappings.moveUp", 1);
+		
+		var moveDownCommand = new eclipse.Command({
+			name: "Move Down",
+			image: "images/down.gif",
+			id: "eclipse.site.mappings.moveDown",
+			visibleWhen: dojo.hitch(this, function(item) {
+				return item.Source && item.Target;
+			}),
+			callback: function(itemToMove) {
+				this._hideTooltip();
+				
+				var index = this.getItemIndex(itemToMove);
+				if (index === this.get("rowCount")-1) { return; }
+				
+				var newOrder = this._deleteAll();
+				// swap index+1 with index
+				newOrder.splice(index, 2, newOrder[index+1], newOrder[index]);
+				for (var i=0; i < newOrder.length; i++) {
+					this.store.newItem(newOrder[i]);
+				}
+
+				this.store.save();
+				this.render();
+			}});
+		this._commandService.addCommand(moveDownCommand, "object");
+		this._commandService.registerCommandContribution("eclipse.site.mappings.moveDown", 2);
+	},
+	
+	/** @returns {Mappings[]} An array representing what used to be in the store. */
+	_deleteAll: function() {
+		var result = [],
+		    store = this.store,
+		    item;
+		while (this.get("rowCount") > 0) {
+			item = this.getItem(0);
+			result.push(this._createMappingObject(store.getValue(item, "Source"), store.getValue(item, "Target")));
+			store.deleteItem(item);
+		}
+		return result;
 	},
 	
 	/**
@@ -179,7 +247,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 						cellClasses: "editablePathCell"},
 				{field: "_item", name: " ", editable: false, 
 						cellClasses: "actionCell",
-						width: "32px",
+						width: "80px",
 						formatter: dojo.hitch(this, this._actionColumnFormatter)}
 			];
 		this.set("structure", structure);
@@ -336,7 +404,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		var item = this.getItem(rowInfo.index);
 		var actionCell = dojo.query("td.actionCell", rowInfo.node)[0];
 		if (actionCell && dojo.query("a", actionCell).length === 0) {
-			this._commandService.renderCommands(actionCell, "object", item, this, "image", "deleteMappingCell");
+			this._commandService.renderCommands(actionCell, "object", item, this, "image", "actionCellCommand");
 		}
 	}
 });
@@ -375,11 +443,12 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		if (!this.options.fileClient) { throw new Error("options.fileClient is required"); }
 		if (!this.options.siteService) { throw new Error("options.siteService is required"); }
 		if (!this.options.commandService) { throw new Error("options.commandService is required"); }
-		if (!this.options.commandService) { throw new Error("options.statusService is required"); }
+		if (!this.options.statusService) { throw new Error("options.statusService is required"); }
 		this._fileClient = this.options.fileClient;
 		this._siteService = this.options.siteService;
 		this._commandService = this.options.commandService;
 		this._statusService = this.options.statusService;
+		this._commandsContainer = this.options.commandsContainer;
 		
 		// Start loading workspaces right away
 		this._workspaces = new dojo.Deferred();
@@ -397,6 +466,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.mappingsLabelText = "Mappings:";
 		this.hostHintLabelText = "Hostname hint:";
 		this.addMappingButtonText = "Add&#8230;";
+		this.hostingStatusLabelText = "Status:";
 	},
 	
 	postCreate: function() {
@@ -419,7 +489,6 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		this.mappings.setEditor(this);
 		
 		// dijit.form.Form doesn't work in dojoAttachPoint for some reason
-		dojo.connect(this.saveButton, "onClick", dijit.byId("siteForm"), function() { this.onSubmit(arguments); });
 		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.onSubmit);
 		
 		dojo.when(this._workspaceToChildren, dojo.hitch(this, function(workspaceToChildrenMap) {
@@ -437,6 +506,18 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 			this._commandService.registerCommandContribution("eclipse.site.mappings.add", 1, toolbarId);
 			this._commandService.renderCommands(this.addMappingToolbar, "dom", this.mappings, this, "image");
 		}));
+		
+		// Save command
+		var saveCommand = new eclipse.Command({
+				name: "Save",
+				image: "images/save.gif",
+				id: "eclipse.site.save",
+				visibleWhen: function(item) {
+					return item.Location /*looks like a site config*/;
+				},
+				callback: dojo.hitch(this, this.onSubmit)});
+		this._commandService.addCommand(saveCommand, "object");
+		this._commandService.registerCommandContribution("eclipse.site.save", 0);
 	},
 	
 	/**
@@ -599,22 +680,31 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	_setSiteConfiguration: function(siteConfiguration) {
 		this._detachListeners(this._siteConfiguration);
 		this._siteConfiguration = siteConfiguration;
-		
-		// Refresh fields
+		this._refreshFields();
+		this._attachListeners(this._siteConfiguration);
+	},
+	
+	_refreshFields: function() {
 		this.name.set("value", this._siteConfiguration.Name);
 		this.hostHint.set("value", this._siteConfiguration.HostHint);
 		this.mappings.setMappings(this._siteConfiguration.Mappings);
 		this.mappings.startup();
+		
 		var hostStatus = this._siteConfiguration.HostingStatus;
+		var status;
 		if (hostStatus && hostStatus.Status === "started") {
-			dojo.style(this.siteStartedWarning, {display: "table-row"});
-			var warnNameNode = this.siteStartedWarning_siteName;
-			eclipse.util.setText(warnNameNode, this._siteConfiguration.Name);
+			dojo.style(this.siteStartedWarning, {display: "block"});
+			this.hostingStatus.innerHTML = eclipse.util.safeText(hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1) + " at ");
+			var url = eclipse.util.safeText(hostStatus.URL);
+			dojo.create("a", {href: hostStatus.URL, innerHTML: eclipse.util.safeText(hostStatus.URL), target: "_new"}, this.hostingStatus, "last");
 		} else {
 			dojo.style(this.siteStartedWarning, {display: "none"});
+			eclipse.util.setText(this.hostingStatus, hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1));
 		}
 		
-		this._attachListeners(this._siteConfiguration);
+		dojo.empty(this._commandsContainer);
+		this._commandService.renderCommands(this._commandsContainer, "object", this._siteConfiguration, {},
+			"image", null, this._siteConfiguration /*userData*/, true /*forceText*/);
 	},
 	
 	/**

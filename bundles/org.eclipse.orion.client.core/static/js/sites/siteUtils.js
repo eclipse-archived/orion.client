@@ -82,7 +82,7 @@ eclipse.sites.util = {
 	 * @param {Function} deleteCallback
 	 * @param {Function} errorCallback Called when a server request fails.
 	 */
-	createSiteConfigurationCommands: function(commandService, siteService, statusService, dialogService,
+	createSiteCommands: function(commandService, siteService, statusService, dialogService,
 			startCallback, stopCallback, deleteCallback, errorCallback) {
 		var editCommand = new eclipse.Command({
 			name: "Edit",
@@ -101,13 +101,11 @@ eclipse.sites.util = {
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
-			callback: function(item) {
-				// Just update the HostingStatus
-				var newItem = {
-					HostingStatus: {
-						Status: "started"
-					}
-				};
+			/** @param {SiteConfiguration} [userData] If passed, we'll mutate this site config. */
+			callback: function(item, cmdId, imageId, userData) {
+				var newItem = userData || {} /* just update the HostingStatus */;
+				newItem.HostingStatus = { Status: "started" };
+				
 				var deferred = siteService.updateSiteConfiguration(item.Location, newItem).then(startCallback, errorCallback);
 				statusService.showWhile(deferred, "Starting...");
 			}});
@@ -120,12 +118,11 @@ eclipse.sites.util = {
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "started";
 			},
-			callback: function(item) {
-				var newItem = {
-					HostingStatus: {
-						Status: "stopped"
-					}
-				};
+			/** @param {SiteConfiguration} [userData] If passed, we'll mutate this site config. */
+			callback: function(item, cmdId, imageId, userData) {
+				var newItem = userData || {} /* just update the HostingStatus */;
+				newItem.HostingStatus = { Status: "stopped" };
+				
 				var deferred = siteService.updateSiteConfiguration(item.Location, newItem).then(stopCallback, errorCallback);
 				statusService.showWhile(deferred, "Stopping " + item.Name + "...");
 			}});

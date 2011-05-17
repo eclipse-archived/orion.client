@@ -63,7 +63,7 @@ eclipse.CommitDetails = (function() {
 			// heading and commands
 			var thead = dojo.create("thead", null, commitDetailsTable);
 			var row = dojo.create("tr", null, thead);
-			var headCol = dojo.create("td", null, row);
+			var headCol = dojo.create("td",  {colspan: 3}, row);
 			dojo.addClass(headCol, "paneHeadingContainer");
 			dojo.place("<span class='paneHeading'>Commit details</span>", headCol, "only");
 			var commandCol = dojo.create("td", null, row);
@@ -76,7 +76,7 @@ eclipse.CommitDetails = (function() {
 			var tbody = dojo.create("tbody", null, commitDetailsTable);
 			
 			var tr = dojo.create("tr");
-			var col1 = dojo.create("td", null, tr, "last");
+			var col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 			dojo.place(document.createTextNode("Author"), col1, "only");		
 			var col2 = dojo.create("td", null, tr, "last");
 			dojo.place(document.createTextNode(commitDetails.AuthorName + " (" + commitDetails.AuthorEmail + ")"), col2, "only");
@@ -86,7 +86,7 @@ eclipse.CommitDetails = (function() {
 			dojo.style(col3, "textAlign", "right");
 			
 			tr = dojo.create("tr");
-			col1 = dojo.create("td", null, tr, "last");
+			col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 			dojo.place(document.createTextNode("Committer"), col1, "only");		
 			col2 = dojo.create("td", null, tr, "last");
 			dojo.place(document.createTextNode(commitDetails.CommitterName + " (" + commitDetails.CommitterEmail + ")"), col2, "only");
@@ -96,7 +96,7 @@ eclipse.CommitDetails = (function() {
 			dojo.style(col3, "textAlign", "right");
 			
 			tr = dojo.create("tr");
-			col1 = dojo.create("td", null, tr, "last");
+			col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 			dojo.place(document.createTextNode("Message"), col1, "only");		
 			col2 = dojo.create("td", null, tr, "last");
 			dojo.place(document.createTextNode(commitDetails.Message), col2, "only");
@@ -106,7 +106,7 @@ eclipse.CommitDetails = (function() {
 			dojo.style(col3, "textAlign", "right");
 			
 			tr = dojo.create("tr");
-			col1 = dojo.create("td", null, tr, "last");
+			col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 			dojo.place(document.createTextNode("Name"), col1, "only");		
 			col2 = dojo.create("td", null, tr, "last");
 			dojo.place(document.createTextNode(commitDetails.Name), col2, "only");
@@ -147,7 +147,7 @@ eclipse.CommitDetails = (function() {
 			// heading and commands
 			thead = dojo.create("thead", null, commitDiffsTable);
 			row = dojo.create("tr", null, thead);
-			headCol = dojo.create("td", null, row);
+			headCol = dojo.create("td", {colspan: 3}, row);
 			dojo.addClass(headCol, "paneHeadingContainer");
 			dojo.place("<span class='paneHeading'>Commit diffs</span>", headCol, "only");
 			commandCol = dojo.create("td", null, row);
@@ -167,7 +167,7 @@ eclipse.CommitDetails = (function() {
 					tr = dojo.create("tr");
 					tr.id = "row"+id;
 					
-					col1 = dojo.create("td", null, tr, "last");
+					col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 					
 					if (diff.ChangeType === "ADD")
 						img = dojo.create("img", {src: "/images/git/git-added.gif"}, col1);

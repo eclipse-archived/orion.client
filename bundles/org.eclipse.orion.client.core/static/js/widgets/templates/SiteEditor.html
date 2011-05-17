@@ -4,17 +4,26 @@
 			text-align: center;
 		}
 		.editablePathCell {
-			/* font-family: monospace; */
 		}
 		.actionCell {
-			height: 20px !important;
+			height: 22px !important;
+			padding: 1px 1px 4px 1px;
+		}
+		.actionCell .commandLink {
+			margin-right: 4px;
+		}
+		.actionCellCommand[name*="moveUp"] {
+			-webkit-transform: rotate(180deg);
+			-moz-transform: rotate(180deg);
+			-ms-transform: rotate(180deg);
+			transform: rotate(180deg);
 		}
 		.dojoxGridRow .workspacePathCell, .dojoxGridRowOdd .workspacePathCell {
 			background-color: #eee;
 		}
 		td.dojoxGridCellFocus, th.dojoxGridCellFocus {
-			/* Remove annoying dashed border */
-			border: none !important;
+			/* Remove annoying dashed border, but keep the width to avoid jiggling */
+			border: 1px solid transparent !important;
 		}
 		.mappingsGridTable {
 			font-size: 9pt !important;
@@ -62,20 +71,17 @@
 				</tr>
 				
 				<tr>
-					<td style="padding: 5px;"></td>
-					<td style="padding: 5px; text-align: left;">
-						<button dojoAttachPoint="saveButton" dojoType="dijit.form.Button" 
-							type="button" value="Save" 
-							style="padding: 10px 0 10px 0; float: left; clear: both; font-weight: bold; !important">Save</button>
+					<td style="padding: 5px;">
+						<label dojoAttachPoint="hostingStatusLabel" style="text-align: left;">${hostingStatusLabelText}</label>
+					</td>
+					<td style="padding: 10px 5px 10px 5px; text-align: left;">
+						<p dojoAttachPoint="hostingStatus"></p>
+						<p dojoAttachPoint="siteStartedWarning" style="display: none;">
+						(Changes you make here won't affect the running copy.)
+						</p>
 					</td>
 				</tr>
 				
-				<tr dojoAttachPoint="siteStartedWarning" style="display: none;">
-					<td colspan="2" style="padding: 5px; text-align:center;">
-						<img src="/images/info.gif" style="vertical-align: middle;">
-						Changes you make here will take effect the next time "<span dojoAttachPoint="siteStartedWarning_siteName"></span>" is started.
-					</td>
-				</tr>
 			</table>
 		</div>
 	</div>

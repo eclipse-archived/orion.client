@@ -33,16 +33,6 @@ dojo.addOnLoad(function() {
 		
 		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 		
-		/**
-		 * TODO move into SiteEditor
-		 * Does something after the site has been loaded into the editor, for example adds a new mapping entry.
-		 * @return {dojo.Deferred}
-		 */
-		var performPostLoadAction = function(action) {
-			// After doing the action, we should rewrite the hash so it just has #site=
-			//var newHash = eclipse.sites.util.stateToHash()
-		};
-		
 		var updateTitle = function() {
 			var editor = dijit.byId("site-editor");
 			var site = editor && editor.getSiteConfiguration();
@@ -67,34 +57,37 @@ dojo.addOnLoad(function() {
 			if (state.site /* && site is not already loaded */) {
 				editor.load(state.site).then(
 					function() {
-						performPostLoadAction(state.action);
 						updateTitle();
 					});
-			} else {
-				performPostLoadAction(state.action, state.actionDetails);
 			}
 		};
-		
 		dojo.subscribe("/dojo/hashchange", null, onHashChange);
 		
 		// Initialize the widget
+		var widget;
 		(function() {
-			var widget = new widgets.SiteEditor({
+			widget = new widgets.SiteEditor({
 				fileClient: fileClient,
 				siteService: siteService,
 				commandService: commandService,
 				statusService: statusService,
+				commandsContainer: dojo.byId("pageActions"),
 				id: "site-editor"});
 			dojo.place(widget.domNode, dojo.byId("site"), "only");
 			widget.startup();
 			
-//			dojo.connect(widget, "onError", function(error) {
-//			});
-			dojo.connect(widget, "onSuccess", function(message) {
-				updateTitle();
-			});
+			dojo.connect(widget, "onSuccess", updateTitle);
 			
 			onHashChange();
 		}());
+		
+		// Hook up commands stuff
+		var refresher = dojo.hitch(widget, widget._setSiteConfiguration);
+		var errorHandler = statusService;
+		
+		eclipse.sites.util.createSiteCommands(commandService, siteService, statusService, dialogService, 
+				/*start*/ refresher, /*stop*/ refresher, /*delete*/ null, errorHandler);
+		commandService.registerCommandContribution("eclipse.site.start", 1);
+		commandService.registerCommandContribution("eclipse.site.stop", 2);
 	});
 });

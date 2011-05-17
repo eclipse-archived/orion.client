@@ -83,7 +83,7 @@ dojo.addOnLoad(function() {
 			commandService.addCommand(createCommand, "dom");
 			
 			// Add commands that deal with individual site configuration (edit, start, stop..)
-			eclipse.sites.util.createSiteConfigurationCommands(commandService, siteService, statusService,
+			eclipse.sites.util.createSiteCommands(commandService, siteService, statusService,
 					dialogService, /*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
 			
 			// Register command contributions
