@@ -28,24 +28,29 @@ eclipse.CommitDetails = (function() {
 		var doSomething1 = new eclipse.Command({
 			name: "Do Something 1",
 			tooltip: "Do Something 1",
-			image: "/images/add_obj.gif",
+			image: "images/add_obj.gif",
 			id: "eclipse.doSomething1",
 			callback: function(item) {console.info("clicked");}
 		});		
-		var doSomething2 = new eclipse.Command({
-			name: "Do Something 2",
-			tooltip: "Do Something 2",
-			image: "/images/add_obj.gif",
-			id: "eclipse.doSomething2",
-			callback: function(item) {console.info("clicked");}
+		var showDiffCommand = new eclipse.Command({
+			name: "Show diff",
+			tooltip: "Show the diff",
+			image: "images/git/compare-sbs.gif",
+			id: "eclipse.showDiff",
+			hrefCallback: function(item) {
+				return "/compare/compare.html?readonly#" + item.DiffLocation;
+			},
+			visibleWhen: function(item) {
+				return item.ChangeType != null;
+			}
 		});		
 
 		this._registry.getService("ICommandService").then(function(commandService) {
 			// register commands with object scope
-			commandService.addCommand(doSomething2, "object");	
+			commandService.addCommand(showDiffCommand, "object");	
 			//commandService.addCommand(doSomething1, "dom");		
 			// declare the contribution to the ui
-			commandService.registerCommandContribution("eclipse.doSomething2", 1);	
+			commandService.registerCommandContribution("eclipse.showDiff", 1);	
 			//commandService.registerCommandContribution("eclipse.doSomething1", 1, "commitDetailsCommands");		
 		});
 	}
@@ -179,27 +184,27 @@ eclipse.CommitDetails = (function() {
 					col2 = dojo.create("td", null, tr, "last");
 					dojo.place(document.createTextNode(diff.ChangeType === "DELETE" ? diff.OldPath : diff.NewPath), col2, "only");		
 	
-					col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
+					col3 = dojo.create("td", {id: tr.id+"actions", style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 					dojo.style(col3, "whiteSpace", "nowrap");
 					dojo.style(col3, "textAlign", "right");
 					
-//					var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col3, "only");
-//					// we must hide/show the span rather than the column.  IE and Chrome will not consider
-//					// the mouse as being over the table row if it's in a hidden column
-//					dojo.style(actionsWrapper, "visibility", "hidden");
-//					this._registry.getService("ICommandService").then(function(service) {
-//						service.renderCommands(actionsWrapper, "object", commitDetails.Diffs[j], this, "image", null, j);
-//					});
-//					
-//					dojo.connect(tr, "onmouseover", tr, function() {
-//						var wrapper = dojo.byId(this.id+"actionsWrapper");
-//						dojo.style(wrapper, "visibility", "visible");
-//					});
-//					
-//					dojo.connect(tr, "onmouseout", tr, function() {
-//						var wrapper = dojo.byId(this.id+"actionsWrapper");
-//						dojo.style(wrapper, "visibility", "hidden");
-//					});
+					var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col3, "only");
+					// we must hide/show the span rather than the column.  IE and Chrome will not consider
+					// the mouse as being over the table row if it's in a hidden column
+					dojo.style(actionsWrapper, "visibility", "hidden");
+					this._registry.getService("ICommandService").then(function(service) {
+						service.renderCommands(actionsWrapper, "object", commitDetails.Diffs[j], this, "image", null, j);
+					});
+					
+					dojo.connect(tr, "onmouseover", tr, function() {
+						var wrapper = dojo.byId(this.id+"actionsWrapper");
+						dojo.style(wrapper, "visibility", "visible");
+					});
+					
+					dojo.connect(tr, "onmouseout", tr, function() {
+						var wrapper = dojo.byId(this.id+"actionsWrapper");
+						dojo.style(wrapper, "visibility", "hidden");
+					});
 					
 					dojo.place(tr, tbody, "last");
 				}
