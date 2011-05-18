@@ -133,12 +133,19 @@ orion.CompareTextModel = (function() {
 				if (realIndex.lineIndex < 0) {
 					lineOffset += this._lineFeeder.getLineAt(this._dummyLBlock ,realIndex.lastGapInfo.blockNumber , realIndex.lastGapInfo.stopAtDelta , true ).length; 
 				} else {
-					lineOffset += this._model.getLine (realIndex.lineIndex, true).length;
+					var line = this._model.getLine (realIndex.lineIndex, true);
+					if(line){
+						lineOffset += line.length;
+					} else {
+						lineOffset += 0;
+					}
 				}
 				lineIndex++;
 				if (lineOffset > offset) 
 					break;
 			}
+			if(lineIndex > lineCount)
+				return (lineCount -1 );
 			return lineIndex-1;
 		},
 		
@@ -181,10 +188,34 @@ orion.CompareTextModel = (function() {
 		
 		//TODO : for editting mode
 		getText: function(start, end) {
-			return this._model.getText(start, end);
+			if(start === end)
+				return this._model.getText(start,end);
+			if (start === undefined) { start = 0; }
+			if (end === undefined) { end = this.getCharCount(); }
+			var startLine = this.getLineAtOffset(start);
+			var endLine = this.getLineAtOffset(end);
+			var lineStart = this.getLineStart(startLine);
+			var lineEnd = this.getLineEnd(endLine,true);
+			var firstLine = this.getLine(startLine,true);
+			if(!firstLine)
+				return this._model.getText(start,end);
+			if(startLine === endLine){
+				return firstLine.substring(start - lineStart , firstLine.length - lineEnd + end);
+			}
+			var beforeText =  firstLine.substring(start - lineStart);
+			var lastLine = this.getLine(endLine,true);
+			if(!lastLine)
+				return this._model.getText(start,end);
+			var afterText =  lastLine.substring(0, lastLine.length - lineEnd + end);
+			var middleText = "";
+			for(var i = startLine +1 ; i < endLine ;i++){
+				middleText = middleText +  this.getLine(i,true);
+			}
+			return (beforeText + middleText + afterText);
 		},
 		
 		onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+			
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanging) { 
@@ -194,6 +225,7 @@ orion.CompareTextModel = (function() {
 		},
 		
 		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+			
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanged) { 
