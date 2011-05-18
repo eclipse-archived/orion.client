@@ -129,8 +129,8 @@ dojo.require("widgets.GitCredentialsDialog");
 	
 	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 		var cloneGitRepositoryCommand = new eclipse.Command({
-			name : "Clone",
-			tooltip : "Clone Git Repository",
+			name : "Clone Repository",
+			tooltip : "Clone Git Repository to Workspace",
 			image : "/images/git-clone.gif",
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
@@ -168,7 +168,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		var initGitRepositoryCommand = new eclipse.Command({
 			name : "Init Repository",
-			tooltip : "Init Git Repository in a Folder",
+			tooltip : "Init Git Repository in Workspace",
 			id : "eclipse.initGitRepository",
 			callback : function(item) {
 				var dialog = new widgets.InitGitRepositoryDialog({
