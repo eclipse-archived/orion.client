@@ -23,6 +23,7 @@ eclipse.CommitDetails = (function() {
 		if (!options.serviceRegistry) {throw "no service registry"; }
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
+		this._detailsPane = options.detailsPane;
 		var commitDetails = this;
 	
 		var doSomething1 = new eclipse.Command({
@@ -51,6 +52,13 @@ eclipse.CommitDetails = (function() {
 	}
 	CommitDetails.prototype = {
 		loadCommitDetails: function(commitDetails){
+		
+			if(this._detailsPane){ //open details pane each time loading new details
+				if(!this._detailsPane.isRightPaneOpen()){
+					this._detailsPane.toggle();
+				}
+				this._detailsPane.style.overflow = "hidden";
+			}
 			this.render(commitDetails);
 		},
 

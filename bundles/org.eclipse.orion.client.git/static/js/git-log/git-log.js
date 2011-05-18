@@ -30,6 +30,7 @@ dojo.addOnLoad(function(){
 	var fileServiceReference;
 	var branch;
 	
+	
 	for (var i=0; i<fileServices.length; i++) {
 		var info = {};
 		var propertyNames = fileServices[i].getPropertyNames();
@@ -47,7 +48,7 @@ dojo.addOnLoad(function(){
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	
 	// Commit details
-	var commitDetails = new eclipse.CommitDetails({parent: "commitDetailsPane", serviceRegistry: serviceRegistry});
+	var commitDetails = new eclipse.CommitDetails({parent: "commitDetailsPane", serviceRegistry: serviceRegistry, detailsPane: dijit.byId("orion.innerNavigator")});
 	
 	// Commit navigator
 	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, selection,commitDetails, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
@@ -167,7 +168,7 @@ dojo.addOnLoad(function(){
 		//navigator.loadCommitsList(dojo.hash(), {});
 	}
 	
-	
+	makeRightPane(navigator);
 
 	// every time the user manually changes the hash, we need to load the
 	// workspace with that name
@@ -282,6 +283,35 @@ function initTitleBar(fileClient, navigator){
 	}
 	
 };
+
+function makeRightPane(explorer){
+		// set up the splitter bar and its key binding
+		var splitArea = dijit.byId("orion.innerNavigator");
+		
+		//by default the pane should be closed
+		if(splitArea.isRightPaneOpen()){
+			splitArea.toggle();
+		}
+				
+		var bufferedSelection = [];
+		
+		window.document.onkeydown = function (evt){
+			evt = evt || window.event;
+			var handled = false;
+			if(evt.ctrlKey && evt.keyCode  === 79){ // Ctrl+o handler for toggling outline 
+				splitArea.toggle();
+				handled = true;			
+			} 
+			if (handled) {
+				if (window.document.all) { 
+					evt.keyCode = 0;
+				} else { 
+					evt.preventDefault();
+					evt.stopPropagation();
+				}		
+			}
+		};
+}
 
 function makeHref(fileClient, seg, location){
 	fileClient.read(location, true).then(
