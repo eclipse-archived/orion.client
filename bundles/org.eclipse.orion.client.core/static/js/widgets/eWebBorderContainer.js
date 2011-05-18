@@ -11,6 +11,7 @@
  /*global dojo dijit dojox*/
  
 dojo.provide("widgets.eWebBorderContainer");
+dojo.provide("widgets.eWebBorderContainerReverse");
 	 
 dojo.require("dijit.layout.BorderContainer");
 dojo.require("dojox.layout.ToggleSplitter");	 
@@ -51,6 +52,10 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 		}
 	},
 	
+	getHidingPane: function(){
+		return this.getLeftPane();
+	},
+		
 	getRightPane: function() {
 		if (this._center) {
 			return this._center;
@@ -84,7 +89,7 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 	toggleLeftPaneState: function(){
 		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
 		if (splitter){
-			splitter.toggleLeftPaneState();
+			splitter.toggleHidingPaneState();
 		}
 	},
 	
@@ -169,7 +174,7 @@ dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 			// restore old state
 			var persistOpenState = dojo.cookie(this._openStateCookieName);
 			if (persistOpenState === "true") {
-				this.container.getLeftPane().style.width = this.getSizeCookie() + "px";
+				this.container.getHidingPane().style.width = this.getSizeCookie() + "px";
 			} else if (persistOpenState === "false") {
 				this.set("open", false);
 				this._handleOnChange();
@@ -286,11 +291,153 @@ dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 		}
 	},
 	
-	toggleLeftPaneState: function(){
+	toggleHidingPaneState: function(){
 		this.set("open", !this.open);
-		this.container.getLeftPane().style.visibility = this.open ? "visible" : "hidden";	
+		this.container.getHidingPane().style.visibility = this.open ? "visible" : "hidden";	
 		if(this.container.persist){
 			dojo.cookie(this._openStateCookieName, this.open ? "true" : "false", {expires:365});
 		}
+	}
+});
+
+dojo.declare("widgets.eWebBorderContainerReverse", dijit.layout.BorderContainer, {
+	_splitterClass : "widgets.eWebSplitter",
+		
+	getPreferredRightPaneWidth: function(){
+		// if we haven't remembered a width in the past, compute one that is 1/4 of the left pane width.
+		var rightPaneW = this.getSizeCookie();
+		var prefWidth;
+		if(rightPaneW <= 0){
+			var leftWidth = dojo.position(this.getLeftPane()).w;
+			prefWidth = leftWidth * 0.25;
+		} else {
+			prefWidth = rightPaneW;
+		}
+		return prefWidth;
+	},
+	
+	isRightPaneOpen: function(){
+		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0
+		if(splitter){
+			return splitter.open;
+		}
+		return false;
+	},
+	
+	getRightPane: function() {
+		if (this._right) {
+			return this._right;
+		}
+		var children = this.getChildren();
+		for (var i=0; i<children.length; i++) {
+			if (children[i].region && (children[i].region === "trailing" || children[i].region === "right")) {
+				this._right = children[i].domNode;
+				return this._right;
+			}
+		}
+	},
+	
+	getHidingPane: function(){
+		return this.getRightPane();
+	},
+		
+	getLeftPane: function() {
+		if (this._center) {
+			return this._center;
+		}
+		var children = this.getChildren();
+		for (var i=0; i<children.length; i++) {
+			if (children[i].region && children[i].region === "center") {
+				this._center = children[i].domNode;
+				return this._center;
+			}
+		}
+	},
+	
+	
+	
+	getSizeCookie: function(){
+		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0
+		if (splitter){
+			return splitter.getSizeCookie();
+		}
+		return 0;
+	},
+	
+	setSizeCookie: function(value){
+		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0
+		if (splitter){
+			return splitter.setSizeCookie(value);
+		}
+	},
+	
+	toggleRightPaneState: function(){
+		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0
+		if (splitter){
+			splitter.toggleHidingPaneState();
+		}
+	},
+	
+	setToggleCallback: function(toggleCallback) {
+		this.toggleCallback = toggleCallback;
+	},
+	
+	toggle: function() {
+		// find right and center and store so we only do this once.
+		if (!this._right || !this._center) {
+			var children = this.getChildren();
+			for (var i=0; i<children.length; i++) {
+				if (children[i].region && children[i].region === "center") {
+					this._center = children[i].domNode;
+				} else if (children[i].region && (children[i].region === "trailing" || children[i].region === "right")) {
+					this._right = children[i].domNode;
+				}
+			}
+		}
+		var rightPane = this._right;
+		var leftPane = this._center;
+		var originalW = dojo.position(rightPane).w;
+		var isRightOpen = this.isRightPaneOpen();
+		var targetWint;
+		if(isRightOpen){
+			targetWint = 0;
+		} else {
+			targetWint = this.getPreferredRightPaneWidth();
+		}
+				
+		if(!isRightOpen) {
+			this.toggleRightPaneState();
+		}
+				
+		var rightOverflow = rightPane.style.overflow;
+		var leftOverflow = leftPane.style.overflow;
+		var a = new dojo.Animation({
+			node: rightPane,
+			duration: 300,
+			curve: [1, 100],
+			onAnimate: dojo.hitch(this, function(x){
+				var deltaW = (targetWint - originalW)*x/100;
+				var curWidth = originalW + deltaW;
+				rightPane.style.width = curWidth + "px";
+				rightPane.style.overflow = "hidden";
+				leftPane.style.overflow = "hidden";
+				this.layout();
+				//this.resize();
+			}),
+			onEnd: dojo.hitch(this, function(){
+				leftPane.style.overflow = leftOverflow;
+				rightPane.style.overflow = rightOverflow;
+
+				if (this.toggleCallback) {
+					this.toggleCallback.apply();
+				}
+				if(isRightOpen){
+					this.toggleRightPaneState();
+				} else {
+					this.setSizeCookie(null);
+				}
+			})
+		});
+		a.play();
 	}
 });

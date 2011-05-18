@@ -6,6 +6,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     	<title>Orion Git Log</title>
     	<link rel="stylesheet" type="text/css" href="git-log.css" />
+    	
     <script type="text/javascript">
         var djConfig = {
 		isDebug: true,
@@ -13,14 +14,19 @@
 		parseOnLoad: true
         };
     </script>
+    
+    
     <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script type="text/javascript" src="/org.dojotoolkit/orion/orion.js.uncompressed.js"></script>
     <script type="text/javascript">
 	dojo.require("dijit.Dialog");
+    dojo.require("dijit.layout.BorderContainer");
+    dojo.require("dijit.layout.ContentPane");
 	dojo.require("dijit.form.TextBox"); 
 	dojo.require("dijit.form.ComboBox");
 	dojo.require("dijit.form.CheckBox");
 	dojo.require("widgets.OpenResourceDialog");
+ 	dojo.require("widgets.eWebBorderContainer");
  	</script>    	
 	
     <script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
@@ -46,6 +52,7 @@
 	<script src="js/gitClient.js"></script>
 	<script src="js/gitCommands.js"></script>
 
+
 	<script src="js/explorer.js"></script>
 	<script src="js/globalCommands.js"></script>
   	<script src="js/breadcrumbs.js"></script>
@@ -60,25 +67,18 @@
 	<div id="eclipse.navigate-table" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-		
-		<div class="mainpane" id="leftPane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-			<div id="explorer-tree" class="mainpane">
-				<!-- Breadcrumbs, commit navigator content go here -->
-			</div>
-		</div>
-
-		<div class="auxpane" style="margin-left: 44px; " id="rightPane" dojoType="dijit.layout.ContentPane" region="leading" style="width: 20%" splitter="true">
-			<!-- <div id="git-commit-details" class="auxpane" style="min-width: 200px">
-				<h2>Details</h2>
-				<div  id="detailsProgress">Choose commit</div>
-			</div> -->
-			<div class="auxpane" dojoType="dijit.layout.ContentPane" region="leading" style="width: 20%" splitter="true">
+		<div id="orion.innerNavigator" dojoType="widgets.eWebBorderContainerReverse" region="center" design="headline" liveSplitters="true" persist="true" gutters="false" style="overflow: hidden; margin-left: 44px; background: #c5c5c5;">
+			<div class="auxpane" id="detailsPane" dojoType="dijit.layout.ContentPane" region="trailing" style="width: 20%; overflow: auto" splitter="true">
 					<div id="commitDetails" style="margin-left: 16px; min-width: 200px">
 						<div id="commitDetailsPane">Choose commit...</div>
 					</div>
 			</div>
+			<div class="mainpane" id="centerPane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
+				<div id="explorer-tree" class="mainpane">
+					<!-- Breadcrumbs, commit navigator content go here -->
+				</div>
+			</div>
 		</div>
-		
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
 		</div>
 	</div>
