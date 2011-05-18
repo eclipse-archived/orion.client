@@ -268,7 +268,8 @@ dojo.require("widgets.GitCredentialsDialog");
 				return "/compare/compare.html#" + item.DiffLocation;
 			},
 			visibleWhen : function(item) {
-				return !explorer.isDirectory;
+				// show only for commits in the git log list
+				return item.CommitterName != null && !explorer.isDirectory;
 			}
 		});
 	
@@ -282,7 +283,8 @@ dojo.require("widgets.GitCredentialsDialog");
 				return "/edit/edit.html#" + item.ContentLocation;
 			},
 			visibleWhen : function(item) {
-				return item.ContentLocation != null && !explorer.isDirectory;
+				// show only for commits in the git log list
+				return item.CommitterName != null && item.ContentLocation != null && !explorer.isDirectory;
 			}
 		});
 	
@@ -447,7 +449,8 @@ dojo.require("widgets.GitCredentialsDialog");
 				return clientDeferred;
 			},
 			visibleWhen : function(item) {
-				return true;
+				// show only for commits in the git log list
+				return item.CommitterName != null;
 			}
 		});
 	
