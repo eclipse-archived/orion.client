@@ -23,7 +23,7 @@ dojo.addOnLoad(function() {
 	
 	var createUserCommand = new eclipse.Command({
 		name: "Create User",
-		image: "profile/images/create_user.gif",
+		image: "/profile/images/create_user.gif",
 		id: "eclipse.createUser",
 		callback: function() {
 			var dialog = new profile.widgets.NewUserDialog({
