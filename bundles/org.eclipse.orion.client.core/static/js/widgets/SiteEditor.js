@@ -563,10 +563,6 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 				      "Target": "http://localhost:8080/prefs"
 				    },
 				    {
-				      "Source": "/profile",
-				      "Target": "http://localhost:8080/profile"
-				    },
-				    {
 				      "Source": "/workspace",
 				      "Target": "http://localhost:8080/workspace"
 				    },
