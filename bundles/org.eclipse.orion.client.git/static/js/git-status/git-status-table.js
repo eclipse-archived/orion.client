@@ -112,13 +112,13 @@ orion.GitStatusModel = (function() {
 	return GitStatusModel;
 }());
 
-orion.statusTypeMap = { "Missing":["/images/git/git-removed.gif", "Unstaged removal" , "/images/git/git-stage.gif", "Stage" ],
-						"Removed":["/images/git/git-removed.gif","Staged removal" ,"/images/git/git-unstage.gif", "Unstage" ],	
-						 "Modified":["/images/git/git-modify.gif","Unstaged change" ,"/images/git/git-stage.gif", "Stage" ],	
-						 "Changed":["/images/git/git-modify.gif","Staged change" ,"/images/git/git-unstage.gif", "Untage"],	
-					     "Untracked":["/images/git/git-added.gif","Unstaged add" ,"/images/git/git-stage.gif", "Stage"],	
-						 "Added":["/images/git/git-added.gif","Staged add" ,"/images/git/git-unstage.gif" , "Unstage"],	
-						 "Conflicting":["/images/git/conflict-file.gif","Conflicting" ,"/images/git/git-stage.gif" , "Resolve Conflict"]	
+orion.statusTypeMap = { "Missing":["/images/git-removed.gif", "Unstaged removal" , "/images/git-stage.gif", "Stage" ],
+						"Removed":["/images/git-removed.gif","Staged removal" ,"/images/git-unstage.gif", "Unstage" ],	
+						 "Modified":["/images/git-modify.gif","Unstaged change" ,"/images/git-stage.gif", "Stage" ],	
+						 "Changed":["/images/git-modify.gif","Staged change" ,"/images/git-unstage.gif", "Untage"],	
+					     "Untracked":["/images/git-added.gif","Unstaged add" ,"/images/git-stage.gif", "Stage"],	
+						 "Added":["/images/git-added.gif","Staged add" ,"/images/git-unstage.gif" , "Unstage"],	
+						 "Conflicting":["/images/conflict-file.gif","Conflicting" ,"/images/git-stage.gif" , "Resolve Conflict"]	
 					  };
 
 
@@ -197,7 +197,7 @@ orion.GitStatusRenderer = (function() {
 			//render the side by side viewer icon
 			sbsViewerCol = document.createElement('td');
 			row.appendChild(sbsViewerCol);
-			this._controller.createImgButton(false ,sbsViewerCol , "/images/git/compare-sbs.gif", "Side by side compare",
+			this._controller.createImgButton(false ,sbsViewerCol , "/images/compare-sbs.gif", "Side by side compare",
 					function(evt) {
 						self._controller.openCompareEditor(itemModel);
 					} );
