@@ -90,6 +90,7 @@ eclipse.util.getUserText = function(id, refNode, shouldHideRefNode, initialText,
 		// promptMessage: promptMessage  // ignore until we can reliably dismiss this on destroy
 	});
 	dojo.place(editBox.domNode, refNode, "after");
+	dojo.addClass(editBox.domNode, "userEditBoxPrompt");
 	if (shouldHideRefNode) {
 		dojo.style(refNode, "display", "none");
 	}				
