@@ -14,9 +14,9 @@
 <stringAttribute key="featureDefaultLocation" value="workspace"/>
 <stringAttribute key="featurePluginResolution" value="workspace"/>
 <booleanAttribute key="includeOptional" value="false"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console&#13;&#10;-data ${workspace_loc}/../foo -clean"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console&#13;&#10;-data ${workspace_loc}/../foo -clean -application org.eclipse.orion.application"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true &#13;&#10;-Dosgi.noShutdown=true&#13;&#10;-Dorg.eclipse.equinox.http.jetty.http.port=8080 &#10;&#13;&#10;-Dorg.eclipse.equinox.http.jetty.autostart=false&#13;&#10;&#10;-Dorg.eclipse.orion.server.core.allowedPathPrefixes=${workspace_loc}&#13;&#10;-Dorg.eclipse.orion.server.core.projectsWorldReadable=false&#13;&#10;-Dorion.core.configFile=${project_loc:org.eclipse.orion.client.core}/web-ide.conf"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dorg.eclipse.equinox.http.jetty.http.port=8080 &#13;&#10;-Dorg.eclipse.equinox.http.jetty.autostart=false&#13;&#13;&#10;-Dorion.core.configFile=${project_loc:org.eclipse.orion.client.core}/web-ide.conf"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <setAttribute key="selected_features">
 <setEntry value="org.eclipse.orion.base.feature:default"/>
