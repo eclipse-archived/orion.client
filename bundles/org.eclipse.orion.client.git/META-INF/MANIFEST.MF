@@ -5,3 +5,4 @@ Bundle-SymbolicName: org.eclipse.orion.client.git
 Bundle-Version: 0.2.0.qualifier
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Bundle-Vendor
+Bundle-Localization: bundle
