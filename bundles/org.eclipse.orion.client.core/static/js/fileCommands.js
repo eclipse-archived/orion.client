@@ -150,26 +150,47 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			window.alert("Directory prompter appears here.");
 		};
 		
-		// gather up source paths so we do not propose to move/copy a source to its own location
+		// We really only care about directories, and for file items, only the parent.
+		// Our first pass through the items is to 
+		// 1) remember all source paths so we do not propose to move/copy a source to its own location
+		// 2) filter the items list so that all directories are remembered, but only one file per folder
 		var sourceLocations = [];
+		var filteredItems = [];
 		var i;
 		for (i=0; i<items.length; i++) {
 			// moving or copying to the parent location is a no-op (we don't support rename or copy with rename from this menu)
-			if (items[i].parent && items[i].parent.Location) {
-				sourceLocations.push(stripPath(items[i].parent.Location));
+			if (items[i].parent && items[i].parent.Location ) {
+				items[i].parent.stripped = items[i].parent.stripped || stripPath(items[i].parent.Location);
+				if (!contains(sourceLocations, items[i].parent.stripped)) {
+					sourceLocations.push(items[i].parent.stripped);
+					// only remember the first file item whose parent we hadn't already seen.
+					if (!items[i].Directory) {
+						filteredItems.push(items[i]);
+					}
+				}
+				// remember all directories because their location is unique 
+				if (items[i].Directory) {
+					filteredItems.push(items[i]);
+				}
 			}
 			// moving a directory into itself is not supported
 			if (items[i].Directory && !isCopy) {
-				sourceLocations.push(stripPath(items[i].Location));
+				items[i].stripped = items[i].stripped || stripPath(items[i].Location);
+				sourceLocations.push(items[i].stripped);
 			}
+		}
+		// reset items so we only ever go through 5 unique choices.  Otherwise the "shortcut" of proposing common cases is not useful.
+		items = filteredItems;
+		if (items.length > 5) {
+			items.length = 5;
 		}
 		var choices = [];
 		if (eclipse.favoritesCache) {
 			var favorites = eclipse.favoritesCache.favorites;
 			for (i=0; i<favorites.length; i++) {
-				var path = stripPath(favorites[i].path);
-				if (!contains(sourceLocations, path)) {
-					choices.push({name: favorites[i].name, image: "/images/silk/star.gif", path: path, callback: callback});
+				var stripped = stripPath(favorites[i].path);
+				if (!contains(sourceLocations, stripped)) {
+					choices.push({name: favorites[i].name, image: "/images/silk/star.gif", path: stripped, callback: callback});
 				}
 			}
 		}
@@ -187,48 +208,46 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			if (!item.Directory && item.parent) {
 				item = item.parent;
 			}
+			item.stripped = item.stripped || stripPath(item.Location);
 			if (item.Parents) {
 				for (j=0; j<item.Parents.length; j++) {
 					child = item.Parents[j];
-					childPath = stripPath(child.Location);
-					if (child.Directory && !contains(alreadySeen, childPath) && !contains(sourceLocations, childPath)) {
-						alreadySeen.push(childPath);
-						child.stripped = childPath;
+					child.stripped = child.stripped || stripPath(child.Location);
+					if (child.Directory && !contains(alreadySeen, child.stripped) && !contains(sourceLocations, child.stripped)) {
+						alreadySeen.push(child.stripped);
 						proposedPaths.push(child);
 					}
-				}			}
-			if (item.parent) {
-				var parentPath = item.parent.Location;
-				if (parentPath) {
-					var stripped = stripPath(parentPath);
-					if (!contains(alreadySeen, stripped) && !contains(sourceLocations, stripped)) {
-						alreadySeen.push(stripped);
+				}
+			} else if (item.parent) {
+				if (item.parent.Location) {
+					item.parent.stripped = item.parent.stripped || stripPath(item.parent.Location);
+					if (!contains(alreadySeen, item.parent.stripped) && !contains(sourceLocations, item.parent.stripped)) {
+						alreadySeen.push(item.parent.stripped);
 						proposedPaths.push(item.parent);
-						item.parent.stripped = stripped;
 					}
 				}
 			}
 			if (sibling.parent && sibling.parent.children) {	// siblings
 				for (j=0; j<sibling.parent.children.length; j++) {
 					child = sibling.parent.children[j];
-					childPath = stripPath(child.Location);
-					if (child.Directory && !contains(alreadySeen, childPath) && !contains(sourceLocations, childPath)) {
-						alreadySeen.push(childPath);
-						child.stripped = childPath;
-						proposedPaths.push(child);
+					if (child.Directory) {
+						child.stripped = child.stripped || stripPath(child.Location);
+						if (!contains(alreadySeen, child.stripped) && !contains(sourceLocations, child.stripped)) {
+							alreadySeen.push(child.stripped);
+							proposedPaths.push(child);
+						}
 					}
 				}
 			}
-			// All children of the root that are folders should be available for choosing.
-			var topLevel = explorer.treeRoot.Children;
-			for (i=0; i<topLevel.length; i++) {
-				child = topLevel[i];
-				childPath = child.Directory ? stripPath(child.Location) : null;
-				if (childPath && !contains(alreadySeen, childPath) && !contains(sourceLocations, childPath)) {
-					alreadySeen.push(childPath);
-					child.stripped = childPath;
-					proposedPaths.push(child);
-				}
+		}
+		// All children of the root that are folders should be available for choosing.
+		var topLevel = explorer.treeRoot.Children;
+		for (i=0; i<topLevel.length; i++) {
+			child = topLevel[i];
+			child.stripped = child.stripped || (child.Directory ? stripPath(child.Location) : null);
+			if (child.stripped && !contains(alreadySeen, child.stripped) && !contains(sourceLocations, child.stripped)) {
+				alreadySeen.push(child.stripped);
+				proposedPaths.push(child);
 			}
 		}
 		// sort the choices

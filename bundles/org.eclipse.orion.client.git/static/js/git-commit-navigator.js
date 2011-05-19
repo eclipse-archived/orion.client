@@ -92,16 +92,16 @@ eclipse.GitCommitRenderer = (function() {
 			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Message</h2>"});
 			break;
 		case 1:
-			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Tags</h2>"});
-			break;
-		case 2:
 			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Author</h2>"});
 			break;
-		case 3:
+		case 2:
 			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Date</h2>"});
 			break;
-		case 4:
+		case 3:
 			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Actions</h2>"});
+			break;
+		case 4:
+			return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Tags</h2>"});
 			break;
 		};
 		
@@ -140,7 +140,7 @@ eclipse.GitCommitRenderer = (function() {
 			col = document.createElement('td');
 			div = dojo.create("div", {style: "margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 20px;"}, col, "only");
 				
-			// clicking the link should update the comiit details pane
+			// clicking the link should update the commit details pane
 			link = dojo.create("a", {className: "navlinkonpage"}, div, "last");
 			dojo.connect(link, "onclick", link, dojo.hitch(this, function() {
 				this.explorer.loadCommitDetails(item);	
@@ -162,25 +162,23 @@ eclipse.GitCommitRenderer = (function() {
 			return col;
 			break;
 		case 1:
-			var td = document.createElement("td", {style: "padding-left: 5px; padding-right: 5px"});
-
-			dojo.forEach(item.Children, function(tag, i){
-				dojo.place(document.createTextNode(tag), dojo.create("p", {style: "margin: 5px"}, td, "last"), "only");
-			});
-			
-			return td;
-			break;
-		case 2:
 			return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.AuthorName + " (" + item.AuthorEmail + ")"});
 			break;
-		case 3:
+		case 2:
 			return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: dojo.date.locale.format(new Date(item.Time), {formatLength: "short"})});
 			break;
-		case 4:
-			var actionsColumn = this.getActionsColumn(item, tableRow);
+		case 3:
+			var actionsColumn = this.getActionsColumn({dom: "explorer-tree", object: item}, tableRow);
 			dojo.style(actionsColumn, "padding-left", "5px");
 			dojo.style(actionsColumn, "padding-right", "5px");
 			return actionsColumn;
+			break;
+		case 4:
+			var td = document.createElement("td", {style: "padding-left: 5px; padding-right: 5px"});
+			dojo.forEach(item.Children, function(tag, i){
+				dojo.place(document.createTextNode(tag), dojo.create("p", {style: "margin: 5px"}, td, "last"), "only");
+			});
+			return td;
 			break;
 		};
 	};
