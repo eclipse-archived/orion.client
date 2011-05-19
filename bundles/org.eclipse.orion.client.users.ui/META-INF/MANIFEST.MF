@@ -1,6 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
+Bundle-Vendor: %Bundle-Vendor
+Bundle-Localization: bundle
 Bundle-SymbolicName: org.eclipse.orion.client.users.ui
 Bundle-Version: 0.2.0.qualifier
 Import-Package: org.json,
@@ -8,5 +10,3 @@ Import-Package: org.json,
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.orion.client.core;bundle-version="0.1.0",
  org.openajax;bundle-version="2.0.3"
-Bundle-Vendor: %Bundle-Vendor
-Bundle-Localization: bundle
