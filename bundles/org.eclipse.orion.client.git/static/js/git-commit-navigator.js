@@ -140,7 +140,7 @@ eclipse.GitCommitRenderer = (function() {
 			col = document.createElement('td');
 			div = dojo.create("div", {style: "margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 20px;"}, col, "only");
 				
-			// clicking the link should update the comiit details pane
+			// clicking the link should update the commit details pane
 			link = dojo.create("a", {className: "navlinkonpage"}, div, "last");
 			dojo.connect(link, "onclick", link, dojo.hitch(this, function() {
 				this.explorer.loadCommitDetails(item);	
@@ -177,7 +177,7 @@ eclipse.GitCommitRenderer = (function() {
 			return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: dojo.date.locale.format(new Date(item.Time), {formatLength: "short"})});
 			break;
 		case 4:
-			var actionsColumn = this.getActionsColumn(item, tableRow);
+			var actionsColumn = this.getActionsColumn({dom: "explorer-tree", object: item}, tableRow);
 			dojo.style(actionsColumn, "padding-left", "5px");
 			dojo.style(actionsColumn, "padding-right", "5px");
 			return actionsColumn;

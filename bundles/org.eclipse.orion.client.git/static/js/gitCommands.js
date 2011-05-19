@@ -265,11 +265,11 @@ dojo.require("widgets.GitCredentialsDialog");
 			image : "/images/git/compare-sbs.gif",
 			id : "eclipse.compareWithWorkingTree",
 			hrefCallback : function(item) {
-				return "/compare/compare.html#" + item.DiffLocation;
+				return "/compare/compare.html#" + item.object.DiffLocation;
 			},
 			visibleWhen : function(item) {
 				// show only for commits in the git log list
-				return item.CommitterName != null && !explorer.isDirectory;
+				return item.dom === "explorer-tree" && !explorer.isDirectory;
 			}
 		});
 	
@@ -280,11 +280,11 @@ dojo.require("widgets.GitCredentialsDialog");
 			image : "/images/find.gif",
 			id : "eclipse.openGitCommit",
 			hrefCallback: function(item) {
-				return "/edit/edit.html#" + item.ContentLocation;
+				return "/edit/edit.html#" + item.object.ContentLocation;
 			},
 			visibleWhen : function(item) {
 				// show only for commits in the git log list
-				return item.CommitterName != null && item.ContentLocation != null && !explorer.isDirectory;
+				return item.dom === "explorer-tree" && item.object.ContentLocation != null && !explorer.isDirectory;
 			}
 		});
 	
@@ -439,7 +439,7 @@ dojo.require("widgets.GitCredentialsDialog");
 				var tagName = prompt("Enter tage name");
 				serviceRegistry.getService("IGitService").then(
 						function(service) {
-							service.doAddTag(item.Location, tagName,
+							service.doAddTag(item.object.Location, tagName,
 								function(jsonData, secondArg) {
 									var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
 									var tr = dojo.byId(trId);
@@ -450,7 +450,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			},
 			visibleWhen : function(item) {
 				// show only for commits in the git log list
-				return item.CommitterName != null;
+				return item.dom === "explorer-tree";
 			}
 		});
 	
