@@ -108,20 +108,19 @@
 							<textarea  id = "commitMessage" COLS=40 ROWS=6></textarea>
 						</td>
 						<td  nowrap="nowrap">
-							<div style="float: top;" align="top">
-								<table>
-									<tr>
-										<td nowrap="nowrap">
-											<img src="/images/git/git-commit.gif"  id = "commit" >							
-										</td>
-									</tr>
-									<tr>
-										<td  nowrap="nowrap">
-											<img src="/images/git/git-amend.gif"  id = "amend" >							
-										</td>
-									</tr>
-								</table>
-							</div>
+							<table style='width:100%;height:100%;'>
+								<tr>
+									<td nowrap="nowrap">
+										<button  id = "commit" >Commit</button>	
+									</td>
+								</tr>
+								<tr style='width:100%;height:20px;'></tr>
+								<tr>
+									<td  nowrap="nowrap">
+										<input type = "checkbox"  id = "amend" > Amend</input>							
+									</td>
+								</tr>
+							</table>
 						</td>
 					</tr>
 				</table>
