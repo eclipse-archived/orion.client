@@ -165,6 +165,8 @@ eclipse.ExplorerRenderer = (function() {
 	function ExplorerRenderer (options, explorer) {
 		this.explorer = explorer;
 		this._init(options);
+		this._expandImgSrc = '/images/expanded-gray.png';
+		this._collapseImgSrc = '/images/collapsed-gray.png';
 	}
 	ExplorerRenderer.prototype = {
 		initTable: function (tableNode, tableTree) {
@@ -301,11 +303,15 @@ eclipse.ExplorerRenderer = (function() {
 						
 		},
 		
+		expandCollapseImageId: function(rowId) {
+			return rowId+"__expand";
+		},
+		
 		getExpandImage: function(tableRow, placeHolder){
-			var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: tableRow.id + "__expand"}, placeHolder, "last");
+			var expandImg = dojo.create("img", {src: this._collapseImgSrc, name: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
 			dojo.create("img", {src: "/images/fldr_obj.gif"}, placeHolder, "last");
 			expandImg.onclick = dojo.hitch(this, function(evt) {
-				this.tableTree.toggle(tableRow.id, tableRow.id + "__expand", '/images/expanded-gray.png', '/images/collapsed-gray.png');
+				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImgSrc, this._collapseImgSrc);
 				var expanded = this.tableTree.isExpanded(tableRow.id);
 				if (expanded) {
 					this._expanded.push(tableRow.id);
