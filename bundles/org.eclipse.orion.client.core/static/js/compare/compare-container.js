@@ -655,11 +655,11 @@ orion.InlineCompareContainer = (function() {
 			this.initEditorContainers(result.delim , input ,  result.mapper , result.diffArray , true , this._newFileURI);
 		}else {
 			this.addRulers();
+			this._editor.getModel().init([],[]);
+			this._editor.setText("");
+			
 			this._editor.getModel().init(result.mapper , result.diffArray);
-
-			//this._editorContainer.onInputChange(this._newFileURI.split("?")[0]);
 			this._editor.setText(input);
-
 		}
 		this._initDiffPosition(this._editor);
 	};

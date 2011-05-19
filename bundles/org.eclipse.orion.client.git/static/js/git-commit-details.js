@@ -39,10 +39,10 @@ eclipse.CommitDetails = (function() {
 			image: "images/git/compare-sbs.gif",
 			id: "eclipse.showDiff",
 			hrefCallback: function(item) {
-				return "/compare/compare.html?readonly#" + item.DiffLocation;
+				return "/compare/compare.html?readonly#" + item.object.DiffLocation;
 			},
 			visibleWhen: function(item) {
-				return item.ChangeType != null;
+				return item.dom == "commitDiffsTable";
 			}
 		});		
 
@@ -52,7 +52,7 @@ eclipse.CommitDetails = (function() {
 			//commandService.addCommand(doSomething1, "dom");		
 			// declare the contribution to the ui
 			commandService.registerCommandContribution("eclipse.showDiff", 1);	
-			//commandService.registerCommandContribution("eclipse.doSomething1", 1, "commitDetailsCommands");		
+			//commandService.registerCommandContribution("eclipse.doSomething1", 1, "commitMetaCommands");		
 		});
 	}
 	CommitDetails.prototype = {
@@ -70,11 +70,11 @@ eclipse.CommitDetails = (function() {
 		render: function(commitDetails) {
 						
 			// commit details table
-			var commitDetailsTable = dojo.create("table", {id: "commitDetailsTable"});
-			dojo.addClass(commitDetailsTable, "commitDetailsTable");
+			var commitMetaTable = dojo.create("table", {id: "commitMetaTable"});
+			dojo.addClass(commitMetaTable, "commitMetaTable");
 			
 			// heading and commands
-			var thead = dojo.create("thead", null, commitDetailsTable);
+			var thead = dojo.create("thead", null, commitMetaTable);
 			var row = dojo.create("tr", null, thead);
 			var headCol = dojo.create("td",  {colspan: 3}, row);
 			dojo.addClass(headCol, "paneHeadingContainer");
@@ -82,11 +82,11 @@ eclipse.CommitDetails = (function() {
 			var commandCol = dojo.create("td", null, row);
 			dojo.style(commandCol, "textAlign", "right");
 			dojo.addClass(commandCol, "paneHeadingContainer");
-			dojo.place("<span id='commitDetailsCommands' class='paneHeadingToolbar'></span>", commandCol, "only");
+			dojo.place("<span id='commitMetaCommands' class='paneHeadingToolbar'></span>", commandCol, "only");
 			
 			// commit details
 			var tr, col1, col2;
-			var tbody = dojo.create("tbody", null, commitDetailsTable);
+			var tbody = dojo.create("tbody", null, commitMetaTable);
 			
 			var tr = dojo.create("tr");
 			var col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
@@ -146,9 +146,10 @@ eclipse.CommitDetails = (function() {
 //				dojo.style(wrapper, "visibility", "hidden");
 //			});
 
-			dojo.place(commitDetailsTable, this._parent, "only");
+			dojo.place(commitMetaTable, this._parent, "only");
+			
 			// Now that the table is added to the dom, generate commands
-			var commands = dojo.byId("commitDetailsCommands");
+			var commands = dojo.byId("commitMetaCommands");
 			this._registry.getService("ICommandService").then(function(service) {
 				service.renderCommands(commands, "dom", this, this, "image");
 			});
@@ -183,11 +184,11 @@ eclipse.CommitDetails = (function() {
 					col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 					
 					if (diff.ChangeType === "ADD")
-						img = dojo.create("img", {src: "/images/git/git-added.gif"}, col1);
+						img = dojo.create("img", {src: "/images/git-added.gif"}, col1);
 					else if (diff.ChangeType === "DELETE")
-						img = dojo.create("img", {src: "/images/git/git-removed.gif"}, col1);
+						img = dojo.create("img", {src: "/images/git-removed.gif"}, col1);
 					else if (diff.ChangeType === "MODIFY")
-						img = dojo.create("img", {src: "/images/git/git-modify.gif"}, col1);
+						img = dojo.create("img", {src: "/images/git-modify.gif"}, col1);
 					
 					col2 = dojo.create("td", null, tr, "last");
 					dojo.place(document.createTextNode(diff.ChangeType === "DELETE" ? diff.OldPath : diff.NewPath), col2, "only");		
@@ -201,7 +202,7 @@ eclipse.CommitDetails = (function() {
 					// the mouse as being over the table row if it's in a hidden column
 					dojo.style(actionsWrapper, "visibility", "hidden");
 					this._registry.getService("ICommandService").then(function(service) {
-						service.renderCommands(actionsWrapper, "object", commitDetails.Diffs[j], this, "image", null, j);
+						service.renderCommands(actionsWrapper, "object", {dom: "commitDiffsTable", object: commitDetails.Diffs[j]}, this, "image", null, j);
 					});
 					
 					dojo.connect(tr, "onmouseover", tr, function() {
