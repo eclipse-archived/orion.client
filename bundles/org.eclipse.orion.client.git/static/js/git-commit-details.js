@@ -184,11 +184,11 @@ eclipse.CommitDetails = (function() {
 					col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 					
 					if (diff.ChangeType === "ADD")
-						img = dojo.create("img", {src: "/images/git/git-added.gif"}, col1);
+						img = dojo.create("img", {src: "/images/git-added.gif"}, col1);
 					else if (diff.ChangeType === "DELETE")
-						img = dojo.create("img", {src: "/images/git/git-removed.gif"}, col1);
+						img = dojo.create("img", {src: "/images/git-removed.gif"}, col1);
 					else if (diff.ChangeType === "MODIFY")
-						img = dojo.create("img", {src: "/images/git/git-modify.gif"}, col1);
+						img = dojo.create("img", {src: "/images/git-modify.gif"}, col1);
 					
 					col2 = dojo.create("td", null, tr, "last");
 					dojo.place(document.createTextNode(diff.ChangeType === "DELETE" ? diff.OldPath : diff.NewPath), col2, "only");		

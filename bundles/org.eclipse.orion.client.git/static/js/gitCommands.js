@@ -236,7 +236,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		var compareGitCommits = new eclipse.Command({
 			name : "Compare With Each Other",
-			image : "/images/git/compare-sbs.gif",
+			image : "/images/compare-sbs.gif",
 			id : "eclipse.compareGitCommits",
 			hrefCallback : function(item) {
 				var clientDeferred = new dojo.Deferred();
@@ -262,7 +262,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		var compareWithWorkingTree = new eclipse.Command({
 			name : "Compare With Working Tree",
-			image : "/images/git/compare-sbs.gif",
+			image : "/images/compare-sbs.gif",
 			id : "eclipse.compareWithWorkingTree",
 			hrefCallback : function(item) {
 				return "/compare/compare.html#" + item.object.DiffLocation;
