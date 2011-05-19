@@ -619,6 +619,14 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 				      "Target": "http://localhost:8080/index.jsp"
 				    },
 				    {
+				      "Source": "/plugins/git",
+				      "Target": "http://localhost:8080/plugins/git"
+				    },
+				    {
+				      "Source": "/plugins/user",
+				      "Target": "http://localhost:8080/plugins/user"
+				    },
+				    {
 				      "Source": "/logout",
 				      "Target": "http://localhost:8080/logout"
 				    }
