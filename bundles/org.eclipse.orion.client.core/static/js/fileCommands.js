@@ -394,22 +394,49 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		}});
 	commandService.addCommand(downloadCommand, "object");
 	
-	var newFileCommand=  new eclipse.Command({
+	function getNewItemName(item, domId, defaultName, onDone) {
+		var refNode, name, tempNode;
+		if (item.Location === explorer.treeRoot.Location) {
+			refNode = dojo.byId(domId);
+		} else {
+			var nodes = explorer.makeNewItemPlaceHolder(item, domId);
+			if (nodes) {
+				refNode = nodes.refNode;
+				tempNode = nodes.tempNode;
+			} else {
+				refNode = dojo.byId(domId);
+			}
+		}
+		if (refNode) {
+			eclipse.util.getUserText(domId+"EditBox", refNode, false, defaultName, 
+				dojo.hitch(this, function(name) {
+					if (name) {
+						if (tempNode) {
+							tempNode.parentNode.removeChild(tempNode);
+						}
+						onDone(name);
+					}
+				})); 
+		} else {
+			name = window.prompt(defaultName);
+			if (name) {
+				onDone(name);
+			}
+		}
+	}
+	
+	var newFileCommand =  new eclipse.Command({
 		name: "New File",
 		image: "/images/newfile_wiz.gif",
 		id: "eclipse.newFile",
-		callback: function(item) {
+		callback: function(item, commandId, domId) {
 			item = forceSingleItem(item);
-			var dialog = new widgets.NewItemDialog({
-				title: "Create File",
-				label: "File name:",
-				func:  function(name){
+			getNewItemName(item, domId, "New File", function(name) {
+				if (name) {
 					fileClient.createFile(item.Location, name).then(
-					dojo.hitch(explorer, function() {this.changedItem(item);})); //refresh the parent
+						dojo.hitch(explorer, function() {this.changedItem(item);}));
 				}
 			});
-			dialog.startup();
-			dialog.show();
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
@@ -421,18 +448,14 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		name: "New Folder",
 		image: "/images/newfolder_wiz.gif",
 		id: "eclipse.newFolder",
-		callback: function(item) {
+		callback: function(item, commandId, domId) {
 			item = forceSingleItem(item);
-			var dialog = new widgets.NewItemDialog({
-				title: "Create Folder",
-				label: "Folder name:",
-				func:  function(name){
+			getNewItemName(item, domId, "New Folder", function(name) {
+				if (name) {
 					fileClient.createFolder(item.Location, name).then(
-						dojo.hitch(explorer, function() {this.changedItem(item);}));//refresh the parent
+						dojo.hitch(explorer, function() {this.changedItem(item);}));
 				}
 			});
-			dialog.startup();
-			dialog.show();
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
@@ -445,17 +468,13 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		name: "New Folder",
 		image: "/images/newfolder_wiz.gif",
 		id: "eclipse.newProject",
-		callback: function(item) {
-			var dialog = new widgets.NewItemDialog({
-				title: "Create Folder",
-				label: "Folder name:",
-				func:  function(name, serverPath, create){
-					fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, serverPath, create).then(
-						dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}));//refresh the root
+		callback: function(item, commandId, domId) {
+			getNewItemName(item, domId, "New Folder", function(name) {
+				if (name) {
+					fileClient.createProject(explorer.treeRoot.ChildrenLocation, name).then(
+						dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);})); // refresh the root
 				}
 			});
-			dialog.startup();
-			dialog.show();
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
