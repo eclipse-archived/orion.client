@@ -224,10 +224,16 @@ orion.GitStatusController = (function() {
 	function GitStatusController(serviceRegistry , unstagedDivId , stagedDivId) {
 		this._registry = serviceRegistry;
 		this._model = new orion.GitStatusModel();
+		this._timerOn = false;
 		this._unstagedTableRenderer = new orion.GitStatusRenderer(unstagedDivId , this);
 		this._stagedTableRenderer = new orion.GitStatusRenderer(stagedDivId , this);
 		this._inlineCompareContainer = new orion.InlineCompareContainer(serviceRegistry ,"inline-compare-viewer");
+		var self = this;
 		self._stagingConflict = false;
+		var commitBtn = document.getElementById("commit");
+		commitBtn.onclick = function(evt){
+			self.commit();
+		};
 	}
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
@@ -248,8 +254,16 @@ orion.GitStatusController = (function() {
 			
 			this.modifyImageButton(true ,stageAllBtn , "Stage all", function(evt){self.stageAll();} , !this.hasUnstaged);
 			this.modifyImageButton(true ,unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
-			this.modifyImageButton(true ,commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value);} , !this.hasStaged , function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
-			this.modifyImageButton(false ,amendBtn , "Amend last commit", function(evt){self.commit(messageArea.value , true);} , !this.hasStaged, function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
+			commitBtn.disabled = !this.hasStaged;
+			amendBtn.disabled = !this.hasStaged;
+			amendBtn.checked = false;
+			messageArea.value = "";
+			if(this.hasStaged)
+				this.startTimer();
+			else 
+				this.stopTimer();
+			//this.modifyImageButton(true ,commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value , amendBtn.checked);} , !this.hasStaged , function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
+			//this.modifyImageButton(false ,amendBtn , "Amend last commit", function(evt){} , !this.hasStaged, function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
 			
 			if(this._stagingConflict){
 				this._stagingConflict = false;
@@ -259,6 +273,29 @@ orion.GitStatusController = (function() {
 			}
 			
 			this.cursorClear();
+		},
+		
+		startTimer: function(){
+			if(!this.timerOn){
+				this.timerOn = true;
+				this.doTimer();
+			}
+		},
+		
+		stopTimer: function(){
+			if(this.timerOn && this._timerId){
+				this.timerOn = false;
+				clearTimeout(this._timerId);
+			}
+		},
+		
+		doTimer: function(){
+			var messageArea = document.getElementById("commitMessage");
+			var commitBtn = document.getElementById("commit");
+			commitBtn.disabled = (messageArea.value === "");
+			this._timerId = setTimeout(dojo.hitch(this, function() {
+				this.doTimer(); 
+			}), 150);
 		},
 		
 		cursorWait: function(currentDiv , remember){
@@ -504,6 +541,14 @@ orion.GitStatusController = (function() {
 		},
 		
 		commit: function(message , amend){
+			if(!message){
+				var messageArea = document.getElementById("commitMessage");
+				message = messageArea.value;
+				if(message === "")
+					return;
+				var amendBtn = document.getElementById("amend");
+				amend = amendBtn.checked;
+			}
 			this.commitAll(this._model.items.CommitLocation , message , amend ?dojo.toJson({"Message":message,"Amend":"true"}): dojo.toJson({"Message":message}));
 		}
 		
