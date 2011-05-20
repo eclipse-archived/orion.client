@@ -169,9 +169,10 @@ eclipse.git.GitClonesRenderer = (function(){
 				div = dojo.create("div", null, col, "only");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
+				if (item.Current)
+					link.style.fontWeight = "bold";
 				dojo.place(document.createTextNode(item.Name), link, "only");
-			}
-			
+			}			
 			return col;
 		case 1:
 			return this.getActionsColumn(item, tableRow);

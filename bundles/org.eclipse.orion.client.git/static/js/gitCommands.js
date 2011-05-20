@@ -241,6 +241,8 @@ dojo.require("widgets.GitCredentialsDialog");
 				serviceRegistry.getService("IGitService").then(
 					function(service) {
 						service.checkoutBranch(item.CloneLocation, item.Name);
+						// TODO: we need a nicer way to refresh clones' list and show the new active branch
+						explorer.redisplayClonesList();
 					}
 				);
 			},
