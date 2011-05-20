@@ -4,7 +4,7 @@
 		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
 		<meta http-equiv="Content-Language" content="en-us">
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    	<title>Coding</title>
+    	<title>View File</title>
     	<link rel="stylesheet" type="text/css" href="edit.css" />
 		
 		<script type="text/javascript">
@@ -28,11 +28,7 @@
 		<!-- TODO: use sample styler, ruler, and undo stack (until the real one is ready) -->
         <script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
         
-        <!-- Everything between START and END will be commented out and replaced with a closure compiled coding-editor.js
-        	 please update org.eclipse.orion.releng/builder/scripts/closure.xml when making changes here 
-      	-->
-		<!-- START:coding-editor.js -->
-			<script src="/editor/samples/styler.js"></script>
+ 			<script src="/editor/samples/styler.js"></script>
 			<script src="/editor/samples/rulers.js"></script>
 			<script src="/editor/samples/undoStack.js"></script>
 			<script src="/editor/js/model.js"></script>
@@ -61,7 +57,6 @@
 			
 		 	<script src="/js/editorFeatures.js"></script>
 		 	<script src="/js/editorCommands.js"></script>
-		 	<script src="/js/contentAssist.js"></script>
 		 	<script src="/js/outliner.js"></script>
 		 	<script src="/js/problems.js"></script>
 		 	<script src="/js/editorContainer.js"></script>
@@ -70,13 +65,12 @@
 			<script src="/js/styler/textMateStyler.js"></script>
 
 			<script src="edit.js"></script>
-		<!-- END:coding-editor.js -->
-		<!-- INSERT:coding-editor.js -->	
-		<script>
-			dojo.addOnLoad(function(){
-				eclipse.setUpEditor(false);  // not read only
-			});
-		</script>
+			<script>
+				dojo.addOnLoad(function(){
+					eclipse.setUpEditor(true);  // read only
+				});
+			</script>;
+
     </head>
 
     <body class="nihilo" style="height: 100%">
@@ -98,7 +92,5 @@
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
 		</div>
 	</div>
-	
-	<div id="contentassist" class="contentassist"></div>
 </body>
 </html>
