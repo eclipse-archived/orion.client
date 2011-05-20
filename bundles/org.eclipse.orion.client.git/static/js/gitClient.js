@@ -290,7 +290,7 @@ eclipse.GitService = (function() {
 					"Orion-Version" : "1"
 				},
 				putData : dojo.toJson({
-					"BranchLocation" : branchName
+					"Branch" : branchName
 				}),
 				handleAs : "json",
 				timeout : 5000,
