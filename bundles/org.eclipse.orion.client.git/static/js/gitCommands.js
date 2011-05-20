@@ -240,12 +240,12 @@ dojo.require("widgets.GitCredentialsDialog");
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(
 					function(service) {
-						service.checkoutBranch(item.CloneLocation, item.Branch);
+						service.checkoutBranch(item.CloneLocation, item.Name);
 					}
 				);
 			},
 			visibleWhen: function(item) {
-				return item.Branch != null;
+				return item.Type === "Branch";
 			}}
 		);
 		commandService.addCommand(checkoutBranchCommand, "object");
