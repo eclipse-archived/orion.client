@@ -65,9 +65,4 @@ dojo.addOnLoad(function(){
 		}
 	);
 	});
-	
-
-
-	
-	
 });

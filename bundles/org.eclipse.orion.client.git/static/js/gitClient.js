@@ -264,6 +264,24 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
+		getGitBranch : function(gitBranchURI) {
+			var service = this;
+			return dojo.xhrGet({
+				url : gitBranchURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
 		doGitLog : function(gitLogURI, onLoad) {
 			var service = this;
 			
