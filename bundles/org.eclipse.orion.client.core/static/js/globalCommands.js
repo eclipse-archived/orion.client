@@ -35,7 +35,7 @@ var topHTMLFragment =
 			'<input type="search" id="search" class="searchbox">' +
 			'<span class="bannerSeparator">|</span>' +
 			'<span id="userInfo" class="statuspane"></span>' +
-			'<span id="help" class="statuspane"><a id="help" href="/index.jsp"><img class="toolbarLabel" src="/images/help.gif" alt="Help Logo" align="top"></a></span>' +
+			'<span id="help" class="statuspane"><a id="help" href="/help/index.jsp"><img class="toolbarLabel" src="/images/help.gif" alt="Help Logo" align="top"></a></span>' +
 		'</td>' + 
 		'</tr>' +
 	'<tr class="bottomRowBanner">' +

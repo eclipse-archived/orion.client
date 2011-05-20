@@ -1720,6 +1720,17 @@ eclipse.Editor = (function() {
 		},
 		_handleKeyPress: function (e) {
 			if (!e) { e = window.event; }
+			/*
+			* Feature in Embedded WebKit.  Embedded WekKit on Mac runs in compatibility mode and
+			* generates key press events for these Unicode values (Function keys).  This does not
+			* happen in Safari or Chrome.  The fix is to ignore these key events.
+			*/
+			if (isMac && isWebkit) {
+				if ((0xF700 <= e.keyCode && e.keyCode <= 0xF7FF) || e.keyCode === 13 || e.keyCode === 8) {
+					if (e.preventDefault) { e.preventDefault(); }
+					return false;
+				}
+			}
 			if (((isMac || isLinux) && isFirefox < 4) || isOpera) {
 				if (this._doAction(this._keyDownEvent)) {
 					if (e.preventDefault) { e.preventDefault(); }

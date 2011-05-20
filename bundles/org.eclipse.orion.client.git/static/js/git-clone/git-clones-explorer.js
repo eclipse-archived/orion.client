@@ -164,14 +164,15 @@ eclipse.git.GitClonesRenderer = (function(){
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
-			}else if (item.Branch){
+			} else if (item.Type === "Branch" || item.Type === "Remote"){
 				col = document.createElement('td');
 				div = dojo.create("div", null, col, "only");
 				
-				link = dojo.create("a", {innerHTML: item.Branch, className: "navlinkonpage"}, div, "last");
-				dojo.place(document.createTextNode(item.Branch), link, "only");
-			}
-			
+				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
+				if (item.Current)
+					link.style.fontWeight = "bold";
+				dojo.place(document.createTextNode(item.Name), link, "only");
+			}			
 			return col;
 		case 1:
 			return this.getActionsColumn(item, tableRow);
