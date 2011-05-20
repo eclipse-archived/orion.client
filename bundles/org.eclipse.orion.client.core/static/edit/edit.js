@@ -13,7 +13,7 @@
 
 dojo.require("dojo.hash");
 
-dojo.addOnLoad(function(){
+eclipse.setUpEditor = function(isReadOnly){
 	var pluginRegistry = null;
 	var serviceRegistry = null;
 	var document = window.document;
@@ -52,10 +52,12 @@ dojo.addOnLoad(function(){
 		searchFloat = dojo.byId("searchFloat"),
 		leftPane = dojo.byId("leftPane");
 
-
-	var contentAssistFactory = function(editor) {
-		return new eclipse.ContentAssist(editor, "contentassist", serviceRegistry);
-	};
+	var contentAssistFactory = null;
+	if (!isReadOnly) {
+		contentAssistFactory = function(editor) {
+			return new eclipse.ContentAssist(editor, "contentassist", serviceRegistry);
+		};
+	}
 	
 	// Temporary.  This will evolve into something pluggable.
 	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("ISyntaxHighlight");
@@ -137,7 +139,8 @@ dojo.addOnLoad(function(){
 			return new eclipse.Editor({
 				parent: editorContainerDomNode,
 				stylesheet: ["/editor/samples/editor.css", "/css/default-theme.css"],
-				tabSize: 4
+				tabSize: 4,
+				readonly: isReadOnly
 			});
 		};
 	
@@ -259,7 +262,7 @@ dojo.addOnLoad(function(){
 		
 		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 			// Register commands that depend on external services, the registry, etc.
-			var commandGenerator = new orion.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions");
+			var commandGenerator = new orion.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly);
 			commandGenerator.generateEditorCommands(editor);
 			
 			// Create keybindings for generic editing, no dependency on the service model
@@ -399,4 +402,4 @@ dojo.addOnLoad(function(){
 			} 
 		};
 	});
-});
+};

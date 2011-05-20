@@ -201,13 +201,14 @@ orion.TextActions = (function() {
 					// RegExp search
 					result = this.editor.doFindRegExp(pattern, flags, this.editorWidget.getCaretOffset());
 				} else {
-					// use selection if there is one, otherwise use last stored string.
+					// use selection if there is one, otherwise use last stored string.  
+					// Since we aren't sure how/why text is highlighted, we will always ignore case.
+					// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=342334
 					selection = this.editorWidget.getSelection();
 					if (selection.end > selection.start) {
 						searchString = this.editorWidget.getText().substring(selection.start, selection.end);
 					}
-					ignoreCase = searchString.toLowerCase() === searchString;
-					result = this.editor.doFind(searchString, this.editorWidget.getCaretOffset(), ignoreCase);
+					result = this.editor.doFind(searchString, this.editorWidget.getCaretOffset(), true);
 				}
 				
 				if (result) {
@@ -234,8 +235,7 @@ orion.TextActions = (function() {
 					if (selectionSize > 0) {
 						searchString = this.editorWidget.getText().substring(selection.start, selection.end);
 					}
-					ignoreCase = searchString.toLowerCase() === searchString;
-					result = this.editor.doFind(searchString, this.editorWidget.getCaretOffset() - selectionSize - 1, ignoreCase, true);
+					result = this.editor.doFind(searchString, this.editorWidget.getCaretOffset() - selectionSize - 1, true, true);
 				}
 				
 				if (result) {

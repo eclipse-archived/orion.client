@@ -41,7 +41,7 @@ dojo.addOnLoad(function(){
 	commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 1);
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 1, "selectionTools", "eclipse.selectionGroup");
-	commandService.registerCommandContribution("eclipse.linkRepository", 2);
+	commandService.registerCommandContribution("eclipse.checkoutBranch", 2);
 
 	serviceRegistry.getService("IFileService").then(function(fileSerivce){
 	fileSerivce.loadWorkspace().then(
@@ -65,9 +65,4 @@ dojo.addOnLoad(function(){
 		}
 	);
 	});
-	
-
-
-	
-	
 });

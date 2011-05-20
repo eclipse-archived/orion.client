@@ -123,22 +123,26 @@ eclipse.TableTree = (function() {
 			return this._renderer.getSelected();
 		},
 		
-		refresh: function(item, children, /* optional */ forceExpand) {
+		refresh: function(item, children, /* optional */ forceExpand, /* optional */ imgName, /*optional */ imageSrc) {
 			var parentId = this._treeModel.getId(item);
-			if (parentId === this._id) {
+			if (parentId === this._id) {  // root of tree
 				this._removeChildRows(parentId);
 				this._generateChildren(children, 0, dojo.byId(parentId+"tbody"), "last");
 				this._rowsChanged();
-			} else {
+			} else {  // node in the tree
 				var row = dojo.byId(parentId);
 				if (row) {
 					// if it is showing children, refresh what is showing
 					row._item = item;
 					// If the row should be expanded
 					if (row && (forceExpand || row._expanded)) {
+						row._expanded = true;
 						this._removeChildRows(parentId);
 						this._generateChildren(children, row._depth+1, row, "after");
 						this._rowsChanged();
+						if (imgName && imageSrc) {
+							document.images[imgName].src=imageSrc;
+						}
 					}
 				} else {
 					// the item wasn't found.  We could refresh the root here, but for now
@@ -148,8 +152,8 @@ eclipse.TableTree = (function() {
 			}
 		},
 		
-		refreshAndExpand: function(item, children) {
-			this.refresh(item, children, true);
+		refreshAndExpand: function(item, children, imgName, image) {
+			this.refresh(item, children, true, imgName, image);
 		},
 		
 		getItem: function(itemOrId) {  // a dom node, a dom id, or the item

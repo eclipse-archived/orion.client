@@ -41,7 +41,7 @@ eclipse.FileExplorer = (function() {
 			var self = this;
 			this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
 				eclipse.util.processNavigatorParent(parent, children);
-				dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
+				dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children, self.renderer.expandCollapseImageId(self.model.getId(parent)), self.renderer._expandImgSrc);
 			});
 		};
 		
@@ -50,6 +50,29 @@ eclipse.FileExplorer = (function() {
 			if (rowId) {
 				// I know this from my renderer below.
 				return dojo.byId(rowId+"NameColumn");
+			}
+		};
+		
+		FileExplorer.prototype.makeNewItemPlaceHolder = function(item, domId) {
+			// we want to popup the name prompt underneath the parent item.
+			var refNode = this.getRow(item);
+			var tempNode;
+			if (refNode) {
+				// make a row and empty column so that the new name appears after checkmarks/expansions
+				dojo.place("<tr id='"+domId+"placeHolderRow'><td id='"+domId+"placeHolderCol'></td>", refNode, "after");
+				tempNode = dojo.byId(domId+"placeHolderRow");
+				refNode = dojo.byId(domId+"placeHolderCol");
+				if (tempNode && refNode) {
+					return {tempNode: tempNode, refNode: refNode};
+				}
+			}
+			return null;
+		};
+		
+		FileExplorer.prototype.getRow = function(item) {
+			var rowId = this.model.getId(item);
+			if (rowId) {
+				return dojo.byId(rowId);
 			}
 		};
 

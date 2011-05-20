@@ -36,7 +36,7 @@ eclipse.CommitDetails = (function() {
 		var showDiffCommand = new eclipse.Command({
 			name: "Show diff",
 			tooltip: "Show the diff",
-			image: "images/git/compare-sbs.gif",
+			image: "images/compare-sbs.gif",
 			id: "eclipse.showDiff",
 			hrefCallback: function(item) {
 				return "/compare/compare.html?readonly#" + item.object.DiffLocation;

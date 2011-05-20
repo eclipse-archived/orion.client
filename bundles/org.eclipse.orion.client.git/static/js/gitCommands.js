@@ -194,6 +194,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		commandService.addCommand(initGitRepositoryCommand, "dom");
 		
+		// TODO: not used by the git clone navigator, could be removed
 		var linkRepoCommand = new eclipse.Command({
 			name: "Link Repository",
 			image: "/images/link_obj.gif",
@@ -231,8 +232,25 @@ dojo.require("widgets.GitCredentialsDialog");
 				}
 			});
 		commandService.addCommand(linkRepoCommand, "object");
-	
-
+		
+		var checkoutBranchCommand = new eclipse.Command({
+			name: "Checkout",
+			image: "/images/git-checkout.gif",
+			id: "eclipse.checkoutBranch",
+			callback: function(item) {
+				serviceRegistry.getService("IGitService").then(
+					function(service) {
+						service.checkoutBranch(item.CloneLocation, item.Name);
+						// TODO: we need a nicer way to refresh clones' list and show the new active branch
+						explorer.redisplayClonesList();
+					}
+				);
+			},
+			visibleWhen: function(item) {
+				return item.Type === "Branch";
+			}}
+		);
+		commandService.addCommand(checkoutBranchCommand, "object");
 		
 		var compareGitCommits = new eclipse.Command({
 			name : "Compare With Each Other",

@@ -158,6 +158,11 @@ a:hover {
 	height: 30px;
 }
 
+.userEditBoxPrompt {
+	background: white;
+	color: black;
+}
+
 .landingHeading {
 	font-size: 2.0em;
 	color: #404040;
