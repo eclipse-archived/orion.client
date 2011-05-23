@@ -306,6 +306,45 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
+		addBranch : function(gitBranchParentURI, branchName) {
+			var service = this;
+			return dojo.xhrPost({
+				url : gitBranchParentURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				putData : dojo.toJson({
+					"Branch" : branchName
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
+		removeBranch : function(gitBranchURI) {
+			var service = this;
+			return dojo.xhrDelete({
+				url : gitBranchURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
 		doGitLog : function(gitLogURI, onLoad) {
 			var service = this;
 			

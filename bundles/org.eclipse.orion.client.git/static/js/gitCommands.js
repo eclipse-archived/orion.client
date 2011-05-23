@@ -252,6 +252,45 @@ dojo.require("widgets.GitCredentialsDialog");
 		);
 		commandService.addCommand(checkoutBranchCommand, "object");
 		
+		var addBranchCommand = new eclipse.Command({
+			name: "Add Branch",
+			image: "/images/add_obj.gif",
+			id: "eclipse.addBranch",
+			callback: function(item) {
+				var branchName = prompt("Enter branch name");
+				serviceRegistry.getService("IGitService").then(
+					function(service) {
+						service.addBranch(item.Location, branchName);
+						// TODO: we need a nicer way to refresh clones' list and show the new active branch
+						explorer.redisplayClonesList();
+					}
+				);
+			},
+			visibleWhen: function(item) {
+				return item.GroupNode && item.Name === "Branch";
+			}}
+		);
+		commandService.addCommand(addBranchCommand, "object");
+		
+		var removeBranchCommand = new eclipse.Command({
+			name: "Remove Branch",
+			image: "/images/remove.gif",
+			id: "eclipse.removeBranch",
+			callback: function(item) {
+				serviceRegistry.getService("IGitService").then(
+					function(service) {
+						service.removeBranch(item.Location);
+						// TODO: we need a nicer way to refresh clones' list and show the new active branch
+						explorer.redisplayClonesList();
+					}
+				);
+			},
+			visibleWhen: function(item) {
+				return item.Type === "Branch";
+			}}
+		);
+		commandService.addCommand(removeBranchCommand, "object");
+		
 		var compareGitCommits = new eclipse.Command({
 			name : "Compare With Each Other",
 			image : "/images/compare-sbs.gif",
