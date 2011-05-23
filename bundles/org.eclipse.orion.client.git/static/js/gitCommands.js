@@ -291,6 +291,19 @@ dojo.require("widgets.GitCredentialsDialog");
 		);
 		commandService.addCommand(removeBranchCommand, "object");
 		
+		var openGitLog = new eclipse.Command({
+			name : "Show Git Log",
+			id : "eclipse.openGitLog",
+			hrefCallback : function(item) {
+				return "/git-log.html#" + item.CommitLocation + "?page=1";
+			},
+			visibleWhen : function(item) {
+				return item.Type === "Branch";
+			}
+		});
+	
+		commandService.addCommand(openGitLog, "object");
+		
 		var compareGitCommits = new eclipse.Command({
 			name : "Compare With Each Other",
 			image : "/images/compare-sbs.gif",
