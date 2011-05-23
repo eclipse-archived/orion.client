@@ -44,7 +44,8 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.checkoutBranch", 2);
 	commandService.registerCommandContribution("eclipse.addBranch", 2);
 	commandService.registerCommandContribution("eclipse.removeBranch", 2);
-
+	commandService.registerCommandContribution("eclipse.openGitLog", 2);
+	
 	serviceRegistry.getService("IFileService").then(function(fileSerivce){
 	fileSerivce.loadWorkspace().then(
 		function(workspace){
