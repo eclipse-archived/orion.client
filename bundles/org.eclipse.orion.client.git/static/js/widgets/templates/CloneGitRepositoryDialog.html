@@ -18,11 +18,19 @@
 			</div>
 			<div style="display: table-row">
 				<div style="display: table-cell; padding: 5">
-					<label dojoAttachPoint="gitLocationLabel" for="${id}_gitLocation" style="padding-right: 10">${gitLocationLabelText}</label>
+					<label dojoAttachPoint="gitPathLabel" for="${id}_gitPath" style="padding-right: 10">${gitPathLabelText}</label>
 				</div>
 				<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
-					<input dojoAttachPoint="gitLocation" id="${id}_gitLocation" style="display: inline-block; width: 98%;" value="">
+					<input dojoAttachPoint="gitPath" id="${id}_gitPath" style="display: inline-block; width: 98%;" value="">
 					<br><i>This is to be replaced with directory picker dialog</i>
+				</div>
+			</div>
+			<div style="display: table-row">
+				<div style="display: table-cell; padding: 5">
+					<label dojoAttachPoint="gitNameLabel" for="${id}_gitName" style="padding-right: 10">${gitNameLabelText}</label>
+				</div>
+				<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
+					<input dojoAttachPoint="gitName" id="${id}_gitName" style="display: inline-block; width: 98%;" value="">
 				</div>
 			</div>
 			<div style="display: table-row">

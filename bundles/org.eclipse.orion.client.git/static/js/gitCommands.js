@@ -135,12 +135,12 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
 				var dialog = new widgets.CloneGitRepositoryDialog({
-					func : function(gitUrl, location){
+					func : function(gitUrl, path, name){
 						eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 									var func = arguments.callee;
 									serviceRegistry.getService("IGitService").then(function(gitService) {
 										serviceRegistry.getService("IStatusReporter").then(function(progressService) {
-											var deferred = gitService.cloneGitRepository(null, gitUrl, location, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+											var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
 												function(jsonData, secondArg) {
 													eclipse.gitCommandUtils.handleProgressServiceResponse(jsonData, options, serviceRegistry,

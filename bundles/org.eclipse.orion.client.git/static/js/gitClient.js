@@ -36,13 +36,16 @@ eclipse.GitService = (function() {
 			var service = this;
 			console.info("Git Service checked");
 		},
-		cloneGitRepository : function(gitName, gitRepoUrl, repoLocation, gitSshUsername, gitSshPassword, gitSshKnownHost, privateKey, passphrase) {
+		cloneGitRepository : function(gitName, gitRepoUrl, targetPath, repoLocation, gitSshUsername, gitSshPassword, gitSshKnownHost, privateKey, passphrase) {
 			var postData = {};
 			if(gitName){
 				postData.Name = gitName;
 			}
+			if(targetPath){
+				postData.Path = targetPath;
+			}
 			postData.GitUrl=gitRepoUrl;
-			postData.Path = repoLocation;
+			postData.Location = repoLocation;
 			if(gitSshUsername){
 				postData.GitSshUsername = gitSshUsername;
 			}
