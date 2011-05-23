@@ -525,14 +525,40 @@ dojo.require("widgets.GitCredentialsDialog");
 					return false;
 				}
 				for (var i=0; i < items.length; i++) {
-					if (!items[i].Location) {
+					if (!items[i].ContentLocation) {
 						return false;
 					}
 				}
-				return false; //TODO enable this command when deleting clones is implemented
+				return true;
 			},
 			callback: function(item) {
-				window.alert("Cannot delete " + item.name + ", deleting is not implented yet!");
+				if(dojo.isArray(item)){
+					if(confirm("Are you sure you want do delete " + item.length + " repositories?")){
+						var alreadyDeleted = 0;
+						for(var i=0; i<item.length; i++){
+							serviceRegistry.getService("IGitService").then(function(gitService) {
+								gitService.removeGitRepository(item[i].Location).then(
+										function(jsonData){
+											alreadyDeleted++;
+											if(alreadyDeleted >= item.length && explorer.redisplayClonesList){
+												dojo.hitch(explorer, explorer.redisplayClonesList)();
+											}
+										});
+							});
+						}
+					}
+				} else {
+					if(confirm("Are you sure you want to delete " + item.Name + "?"))
+					serviceRegistry.getService("IGitService").then(function(gitService) {
+						gitService.removeGitRepository(item.Location).then(
+								function(jsonData){
+									if(explorer.redisplayClonesList){
+										dojo.hitch(explorer, explorer.redisplayClonesList)();
+									}
+								});
+					});
+				}
+				
 			}});
 		commandService.addCommand(deleteCommand, "object");
 		commandService.addCommand(deleteCommand, "dom");

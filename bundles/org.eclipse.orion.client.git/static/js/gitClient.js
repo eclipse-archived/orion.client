@@ -81,6 +81,24 @@ eclipse.GitService = (function() {
 			console.error("Not implemented yet");
 		},
 		
+		removeGitRepository : function(repositoryLocation){
+			return dojo.xhrDelete({
+				url : repositoryLocation,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
+		
 		getDiffContent: function(diffURI , onLoad , onError){
 			var service = this;
 			dojo.xhrGet({
