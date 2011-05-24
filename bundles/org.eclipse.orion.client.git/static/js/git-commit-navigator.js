@@ -61,7 +61,7 @@ eclipse.GitCommitNavigator = (function() {
 			
 			eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
 						
-			this.registry.getService("IGitService").then(function(service){
+			this.registry.getService("orion.git.provider").then(function(service){
 				dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerFlatModel(path, service.doGitLog)));
 			});
 			

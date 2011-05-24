@@ -100,7 +100,7 @@ dojo.addOnLoad(function(){
 			handleAs : "json",
 			timeout : 5000,
 			load : function(jsonData, secondArg) {
-				serviceRegistry.getService("IGitService").then(function(gitService){
+				serviceRegistry.getService("orion.git.provider").then(function(gitService){
 					gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
 						navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
 						navigator.loadCommitsList(jsonData.CommitLocation + "?" + new dojo._Url(path).query, jsonData);
@@ -141,7 +141,7 @@ dojo.addOnLoad(function(){
 					handleAs : "json",
 					timeout : 5000,
 					load : function(remoteJsonData, secondArg) {
-						serviceRegistry.getService("IGitService").then(function(gitService){
+						serviceRegistry.getService("orion.git.provider").then(function(gitService){
 							gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
 								navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
 								navigator.loadCommitsList(dojo.hash(), remoteJsonData);
@@ -155,7 +155,7 @@ dojo.addOnLoad(function(){
 				});
 		});
 //		.then(function(blah){
-//			serviceRegistry.getService("IGitService").then(function(gitService){
+//			serviceRegistry.getService("orion.git.provider").then(function(gitService){
 //				gitService.getLog(blah.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArd) {
 //					navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
 //					navigator.loadCommitsList(dojo.hash(), {});
@@ -187,7 +187,7 @@ dojo.addOnLoad(function(){
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, secondArg) {
-					serviceRegistry.getService("IGitService").then(function(gitService){
+					serviceRegistry.getService("orion.git.provider").then(function(gitService){
 						gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
 							navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
 							navigator.loadCommitsList(jsonData.CommitLocation + "?" + new dojo._Url(path).query, jsonData);			
@@ -317,7 +317,7 @@ function makeHref(fileClient, seg, location){
 	fileClient.read(location, true).then(
 			dojo.hitch(this, function(metadata) {
 				if (isRemote()) {
-					serviceRegistry.getService("IGitService").then(function(gitService){
+					serviceRegistry.getService("orion.git.provider").then(function(gitService){
 						gitService.getDefaultRemoteBranch(
 								metadata.Git.RemoteLocation, function(
 										defaultRemoteBranchJsonData, secondArg) {

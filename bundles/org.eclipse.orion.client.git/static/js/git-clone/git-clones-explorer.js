@@ -50,7 +50,7 @@ eclipse.git.GitClonesExplorer = (function() {
 			var d = dojo.create("div", null, dojo.byId(this.parentId), "only");
 			d.innerHTML = "Loading <b>" + gitPath + "</b>...";
 			
-			this.registry.getService("IGitService").then(function(service){
+			this.registry.getService("orion.git.provider").then(function(service){
 				dojo.hitch(self, self.createTree(self.parentId, new eclipse.GitClonesModel(service, gitPath, service.getGitClone)));
 			});
 		};
@@ -66,7 +66,7 @@ eclipse.git.GitClonesExplorer = (function() {
 		var d = dojo.create("div", null, dojo.byId(this.parentId), "only");
 		d.innerHTML = "Loading <b>" + gitPath + "</b>...";
 		
-		this.registry.getService("IGitService").then(function(service){
+		this.registry.getService("orion.git.provider").then(function(service){
 			dojo.hitch(self, self.createTree(self.parentId, new eclipse.GitClonesModel(service, gitPath, service.getGitClone)));
 		});
 	};

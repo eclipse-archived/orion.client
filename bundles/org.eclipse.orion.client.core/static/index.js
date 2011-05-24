@@ -55,7 +55,7 @@ dojo.addOnLoad(function() {
 		
 		// Populate the "get started" tasks
 		
-		// Note that the shape of the "landingTasks" extension is not in any shape or form that could be considered final.
+		// Note that the shape of the "orion.help.task" extension is not in any shape or form that could be considered final.
 		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 		
 		// The shape of the contributed tasks is (for now):
@@ -67,7 +67,7 @@ dojo.addOnLoad(function() {
 		//	    required attribute: steps - an array of steps (array).
 		//             optional attribute: href.  An href that takes the user to the page described in the step
 		//             required attribute: description of the step.  May be manual instructions for the user.  Appears after the href.
-		var taskReferences = serviceRegistry.getServiceReferences("landingTasks");
+		var taskReferences = serviceRegistry.getServiceReferences("orion.help.task");
 		var taskParent = dojo.byId("tasks");
 		var taskTable = dojo.create("table", null, taskParent, "only");
 		for (var i=0; i<taskReferences.length; i++) {

@@ -66,7 +66,7 @@ dojo.require("widgets.GitCredentialsDialog");
 	eclipse.gitCommandUtils.handleKnownHostsError = function(serviceRegistry, errorData, options, func){
 		if(confirm("Would you like to add " + errorData.KeyType + " key for host " + errorData.Host
 				+ " to continue operation? Key fingerpt is " + errorData.HostFingerprint + ".")){
-			serviceRegistry.getService("ISshService").then(function(sshService){
+			serviceRegistry.getService("orion.net.ssh").then(function(sshService){
 				sshService.addKnownHosts(errorData.Host + " " + errorData.KeyType + " " + errorData.HostKey).then(function(){
 					sshService.getKnownHosts().then(function(knownHosts){
 						options.knownHosts = knownHosts;
@@ -89,7 +89,7 @@ dojo.require("widgets.GitCredentialsDialog");
 	
 	eclipse.gitCommandUtils.getDefaultSshOptions = function(serviceRegistry){
 		var def = new dojo.Deferred();
-		serviceRegistry.getService("ISshService").then(function(sshService) {
+		serviceRegistry.getService("orion.net.ssh").then(function(sshService) {
 			sshService.getKnownHosts().then(function(knownHosts){
 				def.callback({
 							knownHosts: knownHosts,
@@ -138,7 +138,7 @@ dojo.require("widgets.GitCredentialsDialog");
 					func : function(gitUrl, path, name){
 						eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 									var func = arguments.callee;
-									serviceRegistry.getService("IGitService").then(function(gitService) {
+									serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 										serviceRegistry.getService("orion.page.message").then(function(progressService) {
 											var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
@@ -173,7 +173,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			callback : function(item) {
 				var dialog = new widgets.InitGitRepositoryDialog({
 					func : function(target){
-								serviceRegistry.getService("IGitService").then(function(gitService) {
+								serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 									gitService.initGitRepository(target).then(function(){
 											if(explorer.redisplayClonesList){
 												dojo.hitch(explorer, explorer.redisplayClonesList)();
@@ -238,7 +238,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			image: "/images/git-checkout.gif",
 			id: "eclipse.checkoutBranch",
 			callback: function(item) {
-				serviceRegistry.getService("IGitService").then(
+				serviceRegistry.getService("orion.git.provider").then(
 					function(service) {
 						service.checkoutBranch(item.CloneLocation, item.Name);
 						// TODO: we need a nicer way to refresh clones' list and show the new active branch
@@ -258,7 +258,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			id: "eclipse.addBranch",
 			callback: function(item) {
 				var branchName = prompt("Enter branch name");
-				serviceRegistry.getService("IGitService").then(
+				serviceRegistry.getService("orion.git.provider").then(
 					function(service) {
 						service.addBranch(item.Location, branchName);
 						// TODO: we need a nicer way to refresh clones' list and show the new active branch
@@ -277,7 +277,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			image: "/images/remove.gif",
 			id: "eclipse.removeBranch",
 			callback: function(item) {
-				serviceRegistry.getService("IGitService").then(
+				serviceRegistry.getService("orion.git.provider").then(
 					function(service) {
 						service.removeBranch(item.Location);
 						// TODO: we need a nicer way to refresh clones' list and show the new active branch
@@ -310,7 +310,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.compareGitCommits",
 			hrefCallback : function(item) {
 				var clientDeferred = new dojo.Deferred();
-				serviceRegistry.getService("IGitService").then(
+				serviceRegistry.getService("orion.git.provider").then(
 						function(service) {
 							service.getDiff(item[0].DiffLocation, item[1].Name,
 								function(jsonData, secondArg) {
@@ -368,7 +368,7 @@ dojo.require("widgets.GitCredentialsDialog");
 				var path = dojo.hash();
 				eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
-						serviceRegistry.getService("IGitService").then(function(gitService) {
+						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 							serviceRegistry.getService("orion.page.message").then(function(progressService) {
 								var deferred = gitService.doFetch(path, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Fetching remote: " + path).then(
@@ -420,7 +420,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			image : "/images/git-merge.gif",
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
-				serviceRegistry.getService("IGitService").then(function(gitService){
+				serviceRegistry.getService("orion.git.provider").then(function(gitService){
 					gitService.doMerge(item.HeadLocation, item.Id).then(function(result){
 						serviceRegistry.getService("orion.page.message").then(function(progressService){
 							var display = [];
@@ -477,7 +477,7 @@ dojo.require("widgets.GitCredentialsDialog");
 				var path = dojo.hash();
 				eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
-						serviceRegistry.getService("IGitService").then(function(gitService) {
+						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 							serviceRegistry.getService("orion.page.message").then(function(progressService) {
 								var deferred = gitService.doPush(item.Location, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
@@ -507,7 +507,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			callback : function(item) {
 				var clientDeferred = new dojo.Deferred();
 				var tagName = prompt("Enter tage name");
-				serviceRegistry.getService("IGitService").then(
+				serviceRegistry.getService("orion.git.provider").then(
 						function(service) {
 							service.doAddTag(item.object.Location, tagName,
 								function(jsonData, secondArg) {
@@ -549,7 +549,7 @@ dojo.require("widgets.GitCredentialsDialog");
 					if(confirm("Are you sure you want do delete " + item.length + " repositories?")){
 						var alreadyDeleted = 0;
 						for(var i=0; i<item.length; i++){
-							serviceRegistry.getService("IGitService").then(function(gitService) {
+							serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 								gitService.removeGitRepository(item[i].Location).then(
 										function(jsonData){
 											alreadyDeleted++;
@@ -562,7 +562,7 @@ dojo.require("widgets.GitCredentialsDialog");
 					}
 				} else {
 					if(confirm("Are you sure you want to delete " + item.Name + "?"))
-					serviceRegistry.getService("IGitService").then(function(gitService) {
+					serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 						gitService.removeGitRepository(item.Location).then(
 								function(jsonData){
 									if(explorer.redisplayClonesList){

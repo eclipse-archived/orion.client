@@ -9,7 +9,7 @@
 		var serviceImpl = { /* All data is in properties */ };
 
 		var provider = new eclipse.PluginProvider();
-		provider.registerServiceProvider("landingTasks", serviceImpl, {
+		provider.registerServiceProvider("orion.help.task", serviceImpl, {
 			image: "http://sfmccourt.github.com/Orion/github.png", 
 			name: "Clone a github repository",
 			id: "orion.clonegit",
@@ -20,7 +20,7 @@
 				{href: "http://wiki.eclipse.org/Orion/How_Tos/Cloning_repository_from_github", linkName: "Orion/GitHub How-To", description: "The how-to provides further information about setting up credentials."}
 			]
 		});
-		provider.registerServiceProvider("landingTasks", serviceImpl, {
+		provider.registerServiceProvider("orion.help.task", serviceImpl, {
 			image: "/plugins/images/upload.png",
 			name: "Upload some code!",
 			id: "orion.upload",
@@ -29,7 +29,7 @@
 				{href: "/navigate/table.html", linkName: "Navigator", description: "Go the Orion navigator.  Create a new folder and then choose import from the 'More' menu."}
 			]
 		});
-		provider.registerServiceProvider("landingTasks", serviceImpl, {
+		provider.registerServiceProvider("orion.help.task", serviceImpl, {
 			image: "http://sfmccourt.github.com/Orion/initializr.png",
 			name: "Generate a web site",
 			id: "orion.generate",

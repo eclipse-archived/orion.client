@@ -151,7 +151,7 @@ dojo.addOnLoad(function(){
 		
 		
 		testPluginRegistry.installPlugin(fileURI).then(function() {
-			return testServiceRegistry.getService("testRunner");
+			return testServiceRegistry.getService("orion.test.runner");
 		}).then(function(service) {
 			//console.log("got service: " + service);
 
