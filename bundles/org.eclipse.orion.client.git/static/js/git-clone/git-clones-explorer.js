@@ -114,6 +114,13 @@ eclipse.GitClonesModel = (function() {
 					})
 				);
 			}
+			else if (parentItem.Type === "Remote"){
+				this.gitClient.getGitBranch(parentItem.Location).then( 
+					dojo.hitch(this, function(children) {
+						onComplete(children.Children);
+					})
+				);
+			}
 		};
 		
 	return GitClonesModel;
@@ -164,7 +171,7 @@ eclipse.git.GitClonesRenderer = (function(){
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
-			} else if (item.Type === "Branch" || item.Type === "Remote"){
+			} else if (item.Type === "Branch"){
 				col = document.createElement('td');
 				div = dojo.create("div", null, col, "only");
 				
@@ -172,7 +179,22 @@ eclipse.git.GitClonesRenderer = (function(){
 				if (item.Current)
 					link.style.fontWeight = "bold";
 				dojo.place(document.createTextNode(item.Name), link, "only");
-			}			
+			} else if (item.Type === "Remote"){
+				col = document.createElement('td');
+				var nameId =  tableRow.id + "__expand";
+				div = dojo.create("div", null, col, "only");
+				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
+				this.getExpandImage(tableRow, div);
+				
+				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
+				dojo.place(document.createTextNode(item.Name), link, "only");
+			} else if (item.Type === "RemoteTrackingBranch"){
+				col = document.createElement('td');
+				div = dojo.create("div", null, col, "only");
+				
+				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
+				dojo.place(document.createTextNode(item.Name), link, "only");
+			}	
 			return col;
 		case 1:
 			return this.getActionsColumn(item, tableRow);
