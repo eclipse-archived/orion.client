@@ -8,18 +8,19 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo dijit*/
+/*global dojo dijit widgets*/
 /*jslint browser:true*/
 dojo.provide("widgets.CloneGitRepositoryDialog");
 
 dojo.require("dijit.Dialog");
+dojo.require("widgets._OrionDialogMixin");
 
 /**
  * @param options {{ 
  *     func: function
  * }}
  */
-dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
+dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache("widgets", "templates/CloneGitRepositoryDialog.html"),
 	
@@ -33,25 +34,6 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog], {
 		this.gitUrlLabelText = "Repository URL:";
 		this.gitPathLabelText = "Existing directory:";
 		this.gitNameLabelText = "New project:";
-		this.buttonCancel = "Cancel";
-
-	},
-	postCreate: function() {
-		this.inherited(arguments);
-		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) {
-			if (evt.keyCode === dojo.keys.ENTER) {
-				this.domNode.focus(); // FF throws DOM error if textfield is focused after dialog closes
-				this._onSubmit();
-			}
-		}));
-		this.refocus = false; // Dojo 10654
-	},
-	onHide: function() {
-		// This assumes we don't reuse the dialog
-		this.inherited(arguments);
-		setTimeout(dojo.hitch(this, function() {
-			this.destroyRecursive(); // TODO make sure this removes DOM elements
-		}), this.duration);
 	},
 	// Stuff from newItemDialog.js is below
 	execute: function() {

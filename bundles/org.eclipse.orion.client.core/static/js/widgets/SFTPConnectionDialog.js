@@ -7,7 +7,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit localStorage */
+/*global dojo dijit localStorage widgets */
 /*jslint browser:true*/
 dojo.provide("widgets.SFTPConnectionDialog");
 
@@ -15,6 +15,7 @@ dojo.require("dijit.Dialog");
 dojo.require("dijit.form.CheckBox");
 dojo.require("dijit.form.ComboBox");
 dojo.require("dojo.data.ItemFileReadStore");
+dojo.require("widgets._OrionDialogMixin");
 
 if (!localStorage.getItem("orion.sftpConnections")) {
 	var defaultItems = { 
@@ -35,7 +36,7 @@ var sftpConnectionStoreData= JSON.parse(localStorage.getItem("orion.sftpConnecti
  *     [advanced]: boolean  // Whether to show advanced controls. Default is false
  * }}
  */
-dojo.declare("widgets.SFTPConnectionDialog", [dijit.Dialog], {
+dojo.declare("widgets.SFTPConnectionDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache("widgets", "templates/SFTPConnectionDialog.html"),
 	
@@ -50,34 +51,18 @@ dojo.declare("widgets.SFTPConnectionDialog", [dijit.Dialog], {
 		this.sftpPathLabelText= "Remote path:";
 		this.sftpUserLabelText= "User name:";
 		this.sftpPasswordLabelText= "Password:";
-		this.buttonCancel = "Cancel";
 		this.buttonOk = "Start Transfer";
 		this.locationLabelText = "Location:";
 		sftpConnectionStoreData= JSON.parse(localStorage.getItem("orion.sftpConnections"));
 	},
 	postCreate: function() {
 		this.inherited(arguments);
-		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) {
-			if (evt.keyCode === dojo.keys.ENTER) {
-				this.domNode.focus(); // FF throws DOM error if textfield is focused after dialog closes
-				this._onSubmit();
-			}
-		}));
 		dojo.connect(this.addSFTPConnection, "onClick", null, dojo.hitch(this, this.onAddConnection));
-
-		this.refocus = false; 
-	},
-    onHide: function() {
-		// This assumes we don't reuse the dialog
-		this.inherited(arguments);
-		setTimeout(dojo.hitch(this, function() {
-			this.destroyRecursive(); // TODO make sure this removes DOM elements
-		}), this.duration);
 	},
 	execute: function() {
 		var selected = this.sftpConnectionList.value;
 		var splits = selected.split("@");
-		if (splits.length != 2) {
+		if (splits.length !== 2) {
 			return;
 		}
 		var user = splits[0];
@@ -104,7 +89,7 @@ dojo.declare("widgets.SFTPConnectionDialog", [dijit.Dialog], {
 		//make sure we don't already have an entry with this name
 		var found = false;
 		for (var i = 0; i < connections.items.length; i++) {
-			if (connections.items[i].name == newConnection.name) {
+			if (connections.items[i].name === newConnection.name) {
 				found = true;
 				break;
 			}
