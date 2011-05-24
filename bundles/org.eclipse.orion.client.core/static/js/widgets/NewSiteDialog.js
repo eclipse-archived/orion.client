@@ -7,7 +7,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit*/
+/*global dojo dijit widgets*/
 /*jslint browser:true*/
 dojo.provide("widgets.NewSiteDialog");
 
@@ -15,6 +15,7 @@ dojo.require("dijit.Dialog");
 dojo.require("dijit.form.CheckBox");
 dojo.require("dijit.form.ComboBox");
 dojo.require("widgets.NewItemDialog");
+dojo.require("widgets._OrionDialogMixin");
 
 /**
  * Requires file service to get the user's workspace, which is in turn required to create a
@@ -70,13 +71,6 @@ dojo.declare("widgets.NewSiteDialog", [widgets.NewItemDialog], {
 		if (this.itemName.isValid() && this.workspaceId !== null) {
 			this.inherited(arguments);
 		}
-	},
-	
-	onHide: function() {
-		this.inherited(arguments);
-		setTimeout(dojo.hitch(this, function() {
-			this.destroyRecursive();
-		}), this.duration);
 	},
 	
 	execute: function() {

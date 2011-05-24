@@ -7,8 +7,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/* global dojo dijit */
-/* jslint browser:true */
+/*global dojo dijit dojox widgets*/
+/*jslint browser:true */
 dojo.provide("widgets.ImportDialog");
 
 dojo.require("dijit.Dialog");
@@ -17,10 +17,11 @@ dojo.require("dojo.io.iframe");
 dojo.require("dojox.form.FileUploader");
 dojo.require("dijit.form.Button");
 dojo.require("dijit.ProgressBar");
+dojo.require("widgets._OrionDialogMixin");
 
 /**
  */
-dojo.declare("widgets.ImportDialog", [ dijit.Dialog ], {
+dojo.declare("widgets.ImportDialog", [ dijit.Dialog, widgets._OrionDialogMixin ], {
 	widgetsInTemplate : true,
 	templateString : dojo.cache("widgets", "templates/ImportDialog.html"),
 
@@ -31,20 +32,9 @@ dojo.declare("widgets.ImportDialog", [ dijit.Dialog ], {
 	postMixInProperties : function() {
 		this.inherited(arguments);
 		this.title = "Import from zip";
-		this.buttonCancel = "Cancel";
 	},
 	postCreate : function() {
 		this.inherited(arguments);
-		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) {
-			if (evt.keyCode === dojo.keys.ENTER) {
-				this.domNode.focus(); // FF throws DOM error if textfield is
-										// focused after dialog closes
-				this._onSubmit();
-			}
-		}));
-
-		this.refocus = false; // Dojo 10654
-
 		var h = new dojox.form.FileUploader({
 			isDebug : false,
 			hoverClass : "uploadHover",
@@ -73,15 +63,6 @@ dojo.declare("widgets.ImportDialog", [ dijit.Dialog ], {
 			this.options.func();
 		}));
 	},
-	onHide : function() {
-		// This assumes we don't reuse the dialog
-		this.inherited(arguments);
-		setTimeout(dojo.hitch(this, function() {
-			this.destroyRecursive(); // TODO make sure this removes DOM
-										// elements
-		}), this.duration);
-	},
-	// Stuff from ImportDialog.js is below
 	execute : function() {
 
 	}

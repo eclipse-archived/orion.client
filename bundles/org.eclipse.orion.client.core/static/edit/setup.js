@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -60,7 +60,7 @@ eclipse.setUpEditor = function(isReadOnly){
 	}
 	
 	// Temporary.  This will evolve into something pluggable.
-	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("orion.edit.highlighter");
+	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("ISyntaxHighlight");
 	var syntaxHighlighter = {
 		styler: null, 
 		
@@ -116,7 +116,7 @@ eclipse.setUpEditor = function(isReadOnly){
 		}
 	};
 
-	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
+	var fileServices = serviceRegistry.getServiceReferences("IFileService");
 	var fileServiceReference;
 	
 	for (var i=0; i<fileServices.length; i++) {
@@ -347,7 +347,7 @@ eclipse.setUpEditor = function(isReadOnly){
 		});
 		
 		// Establishing dependencies on registered services
-		serviceRegistry.getService("orion.core.marker").then(function(problemProvider) {
+		serviceRegistry.getService("IProblemProvider").then(function(problemProvider) {
 			problemProvider.addEventListener("problemsChanged", function(problems) {
 				annotationFactory.showProblems(problems);
 			});
@@ -356,7 +356,7 @@ eclipse.setUpEditor = function(isReadOnly){
 		dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
 		
 		// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
-		serviceRegistry.getService("orion.page.selection").then(function(service) {
+		serviceRegistry.getService("Selection").then(function(service) {
 			service.addEventListener("selectionChanged", function(fileURI) {
 				if (inputManager.shouldGoToURI(editorContainer, fileURI)) {
 					inputManager.setInput(fileURI, editorContainer);
@@ -403,8 +403,3 @@ eclipse.setUpEditor = function(isReadOnly){
 		};
 	});
 };
-
-dojo.addOnLoad(function(){
-	eclipse.setUpEditor(false);  // not read only
-});
-

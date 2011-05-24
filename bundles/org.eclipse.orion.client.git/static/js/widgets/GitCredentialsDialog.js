@@ -8,11 +8,12 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo dijit*/
+/*global dojo dijit widgets*/
 /*jslint browser:true*/
 dojo.provide("widgets.GitCredentialsDialog");
 
 dojo.require("dijit.Dialog");
+dojo.require("widgets._OrionDialogMixin");
 
 /**
  * @param options {{ 
@@ -25,7 +26,7 @@ dojo.require("dijit.Dialog");
  *     passphrase: boolean					//ask for passphrase
  * }}
  */
-dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog], {
+dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache("widgets", "templates/GitCredentialsDialog.html"),
 	
@@ -41,7 +42,6 @@ dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog], {
 		this.gitSshPasswordLabelText = "Ssh password:";
 		this.gitPrivateKeyLabelText = "Private key:";
 		this.gitPassphraseLabelText = "Passphrase:";
-		this.buttonCancel = "Cancel";
 		if(!this.options.username && !this.options.password && !this.options.privatekey && !this.options.passphrase){
 			this.options.username=true;
 			this.options.password=true;
@@ -74,23 +74,7 @@ dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog], {
 			dojo.style(this.gitCredentialsLabel, "display", "block");
 			this.url.innerHTML = this.options.url;
 		}
-		
-		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) {
-			if (evt.keyCode === dojo.keys.ENTER) {
-				this.domNode.focus(); // FF throws DOM error if textfield is focused after dialog closes
-				this._onSubmit();
-			}
-		}));
-		this.refocus = false; // Dojo 10654
 	},
-	onHide: function() {
-		// This assumes we don't reuse the dialog
-		this.inherited(arguments);
-		setTimeout(dojo.hitch(this, function() {
-			this.destroyRecursive(); // TODO make sure this removes DOM elements
-		}), this.duration);
-	},
-	// Stuff from newItemDialog.js is below
 	execute: function() {
 		
 		if(this._sshService){
