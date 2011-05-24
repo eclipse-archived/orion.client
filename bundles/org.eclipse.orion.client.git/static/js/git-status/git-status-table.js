@@ -252,7 +252,7 @@ orion.GitStatusController = (function() {
 			var commitBtn = document.getElementById("commit");
 			var amendBtn = document.getElementById("amend");
 			
-			this.modifyImageButton(true ,stageAllBtn , "Stage all", function(evt){self.stageAll();} , !this.hasUnstaged);
+			this.modifyImageButton(true ,stageAllBtn , "Stage all here", function(evt){self.stageAll();} , !this.hasUnstaged);
 			this.modifyImageButton(true ,unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
 			commitBtn.disabled = !this.hasStaged;
 			amendBtn.disabled = !this.hasStaged;
