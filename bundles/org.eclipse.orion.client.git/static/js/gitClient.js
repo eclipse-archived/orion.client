@@ -303,6 +303,24 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
+		getGitRemote : function(gitRemoteURI) {
+			var service = this;
+			return dojo.xhrGet({
+				url : gitRemoteURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
 		checkoutBranch : function(gitCloneURI, branchName) {
 			var service = this;
 			return dojo.xhrPut({
