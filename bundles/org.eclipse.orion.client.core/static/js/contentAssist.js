@@ -62,7 +62,7 @@ eclipse.ContentAssist = (function() {
 			if (this.serviceRegistry) {
 				// Filter the ServiceReferences
 				this.activeServiceReferences = [];
-				var serviceReferences = this.serviceRegistry.getServiceReferences("IContentAssistService");
+				var serviceReferences = this.serviceRegistry.getServiceReferences("orion.edit.contentAssist");
 				var serviceReference;
 				dojo.forEach(serviceReferences, dojo.hitch(this, function(serviceReference) {
 					var info = {};

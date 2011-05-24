@@ -60,7 +60,7 @@ eclipse.setUpEditor = function(isReadOnly){
 	}
 	
 	// Temporary.  This will evolve into something pluggable.
-	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("ISyntaxHighlight");
+	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("orion.edit.highlighter");
 	var syntaxHighlighter = {
 		styler: null, 
 		

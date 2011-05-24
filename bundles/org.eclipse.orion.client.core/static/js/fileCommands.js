@@ -626,7 +626,7 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 		};
 	}
 
-	// Note that the shape of the "fileCommands" extension is not in any shape or form that could be considered final.
+	// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
 	// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 	
 	// The shape of the contributed commands is (for now):
@@ -645,10 +645,10 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 	//        the return value of the run function will be used as follows:
 	//          if info.href is true, the return value should be an href and the window location will be replaced with the href
 	//			if info.href is not true, the run function is assumed to perform all necessary action and the return is not used.
-	var commandsReferences = serviceRegistry.getServiceReferences("fileCommands");
+	var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
 	
-	// Contributions to the openWith service type also get mapped to fileCommands
-	var openWithReferences = serviceRegistry.getServiceReferences("openWith");
+	// Contributions to the orion.navigate.openWith service type also get mapped to orion.navigate.command
+	var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith");
 
 	var fileCommands = [];
 	var i;
@@ -663,7 +663,7 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 		});
 	}
 	
-	// Convert "openWith" contributions into fileCommands that open the appropriate editors
+	// Convert "orion.navigate.openWith" contributions into orion.navigate.command that open the appropriate editors
 	for (i=0; i < openWithReferences.length; i++) {
 		var openWithServiceRef = openWithReferences[i];
 		var name = openWithServiceRef.getProperty("name"),

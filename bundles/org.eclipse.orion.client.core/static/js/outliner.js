@@ -34,7 +34,7 @@ eclipse.Outliner.prototype = {
 		this._parent = parent;
 		this._selectionService = options.selectionService;
 		var outliner = this;
-		options.serviceRegistry.getService("IOutlineProvider").then(function(service) {
+		options.serviceRegistry.getService("orion.edit.outline").then(function(service) {
 			service.addEventListener("resourceChanged", function(resource) {
 				outliner.render(resource);
 			});
@@ -132,7 +132,7 @@ eclipse.Outliner.prototype = {
 
 eclipse.OutlineService = function(serviceRegistry) {
 	this._serviceRegistry = serviceRegistry;
-	this._serviceRegistration = serviceRegistry.registerService("IOutlineProvider", this);
+	this._serviceRegistration = serviceRegistry.registerService("orion.edit.outline", this);
 };
 
 eclipse.OutlineService.prototype = {

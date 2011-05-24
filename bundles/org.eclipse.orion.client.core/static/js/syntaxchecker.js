@@ -30,17 +30,17 @@ eclipse.SyntaxChecker = (function () {
 						this.registry.getService("orion.core.marker").then(function(service) {
 							service._setProblems(data.errors);
 						});
-						this.registry.getService("IOutlineProvider").then(function(service) {
+						this.registry.getService("orion.edit.outline").then(function(service) {
 							service._setItems({"title": t, "contents": c, "data": data});
 						});
 					});
-						this.registry.getService("IEditorSyntaxChecker")
+						this.registry.getService("orion.edit.validator")
 							.then(function(service) {
 								return service.checkSyntax(title, contents);
 							})
 							.then(syntaxCheckerCallback);
 				} else {
-					this.registry.getService("IOutlineProvider").then(function(service) {
+					this.registry.getService("orion.edit.outline").then(function(service) {
 						service._setItems({title: t, contents: c});
 					});
 				}
