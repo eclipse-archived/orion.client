@@ -62,7 +62,7 @@
 	  }
   };
    
-  usersService._serviceRegistration = provider.registerServiceProvider("IUsersService", usersService);
+  usersService._serviceRegistration = provider.registerServiceProvider("orion.core.user", usersService);
   usersService.dispatchEvent = provider.dispatchEvent;
    provider.connect();
   };

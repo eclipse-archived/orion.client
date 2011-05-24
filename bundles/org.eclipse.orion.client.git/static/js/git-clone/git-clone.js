@@ -46,8 +46,8 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.removeBranch", 2);
 	commandService.registerCommandContribution("eclipse.openGitLog", 2);
 	
-	serviceRegistry.getService("IFileService").then(function(fileSerivce){
-	fileSerivce.loadWorkspace().then(
+	serviceRegistry.getService("orion.core.file").then(function(fileService){
+	fileService.loadWorkspace().then(
 		function(workspace){
 			var explorer = new eclipse.git.GitClonesExplorer(serviceRegistry, selection, workspace.Location, "clonesList", "pageActions", "selectionTools");
 	

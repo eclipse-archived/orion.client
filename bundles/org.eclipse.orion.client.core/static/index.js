@@ -35,7 +35,7 @@ dojo.addOnLoad(function() {
 		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 		
 		// Populate recent projects
-		serviceRegistry.getService("IPreferenceService").then(function(service) {
+		serviceRegistry.getService("orion.core.preference").then(function(service) {
 				return service.getPreferences("/window/recent");
 			}).then(function(prefs){
 				return prefs.get("projects");

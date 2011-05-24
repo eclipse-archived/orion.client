@@ -60,7 +60,7 @@ dojo.declare("profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 		
 		var dialog = this;
 		
-		this.registry.getService("IUsersService").then(function(service) {
+		this.registry.getService("orion.core.user").then(function(service) {
 			  service.createUser(dialog.userName.value, dialog.password.value, dialog.func, function(response, ioArgs) {
 					if (ioArgs.xhr.responseText) {
 

@@ -40,7 +40,7 @@ eclipse.UsersList = (function(){
 		
 		eclipse.usersCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, {});
 					
-		this.registry.getService("IUsersService").then(function(service){
+		this.registry.getService("orion.core.user").then(function(service){
 			dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerFlatModel("/users", service.getUsersList)));
 		});
 	};
@@ -123,7 +123,7 @@ eclipse._UsersList = (function() {
 		},
 		loadUsers : function() {
 			var userList = this;
-			this.registry.getService("IUsersService").then(function(service) {
+			this.registry.getService("orion.core.user").then(function(service) {
 			  service.getUsersList(dojo.hitch(userList, function(jsonData, secondArg) {
 
 					var table = dojo.create("table", {
@@ -208,7 +208,7 @@ eclipse._UsersList = (function() {
 		deleteUser : function(userName) {
 			if (confirm("Do you want to delete user " + userName + "?")) {
 				var userList = this;
-				this.registry.getService("IUsersService").then(function(service) {
+				this.registry.getService("orion.core.user").then(function(service) {
 				  service.deleteUser("/users/" + userName, dojo.hitch(userList, function(jsonData, secondArg) {
 					  this.reloadUsers();
 				  }));

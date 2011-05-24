@@ -204,7 +204,7 @@ dojo.require("widgets.GitCredentialsDialog");
 					title: "Link Repository",
 					label: "Folder name:",
 					func:  function(name, url, create){
-						serviceRegistry.getService("IFileService").then(function(service){
+						serviceRegistry.getService("orion.core.file").then(function(service){
 							
 							service.loadWorkspace("").then(function(loadedWorkspace){
 								service.createProject(loadedWorkspace.Location, name, item.ContentLocation, false).then(

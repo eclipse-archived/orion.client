@@ -26,7 +26,7 @@ dojo.addOnLoad(function(){
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 	
-	var fileServices = serviceRegistry.getServiceReferences("IFileService");
+	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 	var fileServiceReference;
 	var branch;
 	

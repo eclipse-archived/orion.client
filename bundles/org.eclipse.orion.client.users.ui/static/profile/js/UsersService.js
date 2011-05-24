@@ -20,7 +20,7 @@ eclipse.UsersService = (function() {
 		if(serviceRegistry){
 			this._serviceRegistry = serviceRegistry;
 			this._serviceRegistration = serviceRegistry.registerService(
-					"IUsersService", this);
+					"orion.core.user", this);
 		}
 	}
 

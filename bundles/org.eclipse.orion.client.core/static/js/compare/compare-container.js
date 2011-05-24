@@ -60,7 +60,7 @@ orion.CompareContainer = (function() {
 		
 		getFileContent: function(fileURI , errorCallBack ){
 			var self = this;
-			self._registry.getService("IFileService").then(
+			self._registry.getService("orion.core.file").then(
 					function(service) {
 						service.read(fileURI).then( 
 											  function(contents) {

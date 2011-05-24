@@ -33,7 +33,7 @@ eclipse.FavoriteFoldersCache = (function() {
 		this.registry = registry;
 		this.favorites = [];
 		var self = this;
-		this.registry.getService("IFavorites").then(function(service) {
+		this.registry.getService("orion.core.favorite").then(function(service) {
 			service.getFavorites(function(faves) {
 				self.cacheFavorites(faves);
 			});
@@ -306,7 +306,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			}
 			return true;},
 		callback: function(item) {
-			serviceRegistry.getService("IFavorites").then(function(service) {
+			serviceRegistry.getService("orion.core.favorite").then(function(service) {
 				service.makeFavorites(item);
 			});
 		}});

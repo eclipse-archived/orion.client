@@ -51,7 +51,7 @@ eclipse.UsersClient = (
 				 */
 				_doServiceCall: function(funcName, funcArgs) {
 					var clientDeferred = new dojo.Deferred();
-					this.serviceRegistry.getService("IUsersService").then(
+					this.serviceRegistry.getService("orion.core.user").then(
 						function(usersService) {
 							usersService[funcName].apply(usersService, funcArgs).then(
 								//on success, just forward the result to the client

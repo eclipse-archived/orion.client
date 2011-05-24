@@ -116,7 +116,7 @@ eclipse.setUpEditor = function(isReadOnly){
 		}
 	};
 
-	var fileServices = serviceRegistry.getServiceReferences("IFileService");
+	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 	var fileServiceReference;
 	
 	for (var i=0; i<fileServices.length; i++) {
@@ -347,7 +347,7 @@ eclipse.setUpEditor = function(isReadOnly){
 		});
 		
 		// Establishing dependencies on registered services
-		serviceRegistry.getService("IProblemProvider").then(function(problemProvider) {
+		serviceRegistry.getService("orion.core.marker").then(function(problemProvider) {
 			problemProvider.addEventListener("problemsChanged", function(problems) {
 				annotationFactory.showProblems(problems);
 			});
