@@ -8,17 +8,18 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo dijit*/
+/*global dojo dijit widgets*/
 dojo.provide("widgets.InitGitRepositoryDialog");
 
 dojo.require("dijit.Dialog");
+dojo.require("widgets._OrionDialogMixin");
 
 /**
  * @param options {{ 
  *     func: function
  * }}
  */
-dojo.declare("widgets.InitGitRepositoryDialog", [dijit.Dialog], {
+dojo.declare("widgets.InitGitRepositoryDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache("widgets", "templates/InitGitRepositoryDialog.html"),
 	
@@ -30,27 +31,7 @@ dojo.declare("widgets.InitGitRepositoryDialog", [dijit.Dialog], {
 		this.inherited(arguments);
 		this.title = "Init Git Repository";
 		this.gitTargetLabelText = "Target:";
-		this.buttonCancel = "Cancel";
-
 	},
-	postCreate: function() {
-		this.inherited(arguments);
-		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) {
-			if (evt.keyCode === dojo.keys.ENTER) {
-				this.domNode.focus(); // FF throws DOM error if textfield is focused after dialog closes
-				this._onSubmit();
-			}
-		}));
-		this.refocus = false; // Dojo 10654
-	},
-	onHide: function() {
-		// This assumes we don't reuse the dialog
-		this.inherited(arguments);
-		setTimeout(dojo.hitch(this, function() {
-			this.destroyRecursive(); // TODO make sure this removes DOM elements
-		}), this.duration);
-	},
-	// Stuff from newItemDialog.js is below
 	execute: function() {
 		this.options.func(this.gitTarget.value);
 	}
