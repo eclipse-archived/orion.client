@@ -82,7 +82,7 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId
 	// Stuff we do only the first time
 	if (!eclipse.favoritesCache) {
 		eclipse.favoritesCache = new eclipse.FavoriteFoldersCache(registry);
-		registry.getService("Selection").then(function(service) {
+		registry.getService("orion.page.selection").then(function(service) {
 			service.addEventListener("selectionChanged", function(singleSelection, selections) {
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {

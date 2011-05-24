@@ -356,7 +356,7 @@ eclipse.setUpEditor = function(isReadOnly){
 		dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
 		
 		// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
-		serviceRegistry.getService("Selection").then(function(service) {
+		serviceRegistry.getService("orion.page.selection").then(function(service) {
 			service.addEventListener("selectionChanged", function(fileURI) {
 				if (inputManager.shouldGoToURI(editorContainer, fileURI)) {
 					inputManager.setInput(fileURI, editorContainer);

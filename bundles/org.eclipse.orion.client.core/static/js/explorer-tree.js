@@ -51,7 +51,7 @@ eclipse.ExplorerTree = (function() {
 			this._selectedItem = item;
 			this._selectedNode = treeNode;
 			if (item.Directory===false && item.Location) {
-				this.registry.getService("Selection").then(function(service) {
+				this.registry.getService("orion.page.selection").then(function(service) {
 					service.setSelections(item.Location);
 				});
 			}

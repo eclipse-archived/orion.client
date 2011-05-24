@@ -49,7 +49,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		// Stuff we do only the first time
 		if (!doOnce) {
 			doOnce = true;
-			registry.getService("Selection").then(function(service) {
+			registry.getService("orion.page.selection").then(function(service) {
 				service.addEventListener("selectionChanged", function(singleSelection, selections) {
 					var selectionTools = dojo.byId(selectionToolbarId);
 					if (selectionTools) {

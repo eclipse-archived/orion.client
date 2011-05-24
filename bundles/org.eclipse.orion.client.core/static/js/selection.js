@@ -22,7 +22,7 @@ var orion = orion || {};
  */
 orion.Selection = function(serviceRegistry) {
 	this._serviceRegistry = serviceRegistry;
-	this._serviceRegistration = serviceRegistry.registerService("Selection", this);
+	this._serviceRegistration = serviceRegistry.registerService("orion.page.selection", this);
 	this._selections = [];
 };
  
