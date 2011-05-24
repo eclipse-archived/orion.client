@@ -60,7 +60,7 @@ eclipse.setUpEditor = function(isReadOnly){
 	}
 	
 	// Temporary.  This will evolve into something pluggable.
-	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("ISyntaxHighlight");
+	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("orion.edit.highlighter");
 	var syntaxHighlighter = {
 		styler: null, 
 		
@@ -116,7 +116,7 @@ eclipse.setUpEditor = function(isReadOnly){
 		}
 	};
 
-	var fileServices = serviceRegistry.getServiceReferences("IFileService");
+	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 	var fileServiceReference;
 	
 	for (var i=0; i<fileServices.length; i++) {
@@ -347,7 +347,7 @@ eclipse.setUpEditor = function(isReadOnly){
 		});
 		
 		// Establishing dependencies on registered services
-		serviceRegistry.getService("IProblemProvider").then(function(problemProvider) {
+		serviceRegistry.getService("orion.core.marker").then(function(problemProvider) {
 			problemProvider.addEventListener("problemsChanged", function(problems) {
 				annotationFactory.showProblems(problems);
 			});
@@ -356,7 +356,7 @@ eclipse.setUpEditor = function(isReadOnly){
 		dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
 		
 		// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
-		serviceRegistry.getService("Selection").then(function(service) {
+		serviceRegistry.getService("orion.page.selection").then(function(service) {
 			service.addEventListener("selectionChanged", function(fileURI) {
 				if (inputManager.shouldGoToURI(editorContainer, fileURI)) {
 					inputManager.setInput(fileURI, editorContainer);
