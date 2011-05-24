@@ -71,7 +71,7 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId
 	} else {
 		throw "could not find toolbar " + toolbarId;
 	}
-	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
+	registry.getService("orion.page.command").then(dojo.hitch(explorer, function(service) {
 		service.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  // true for force icons to text
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
@@ -87,7 +87,7 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					registry.getService("ICommandService").then(function(commandService) {
+					registry.getService("orion.page.command").then(function(commandService) {
 						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", null, null, true);
 					});
 				}
@@ -347,7 +347,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		callback: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
 			var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
-			serviceRegistry.getService("IDialogService").then(function(service) {
+			serviceRegistry.getService("orion.page.dialog").then(function(service) {
 				service.confirm(confirmMessage, 
 				dojo.hitch(explorer, function(doit) {
 					if (!doit) {
@@ -531,7 +531,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			var dialog = new widgets.SFTPConnectionDialog({
 				func:  function(host,path,user,password, overwriteOptions){
-					serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+					serviceRegistry.getService("orion.page.message").then(function(progressService) {
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
 						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
@@ -557,7 +557,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			var dialog = new widgets.SFTPConnectionDialog({
 				func:  function(host,path,user,password, overwriteOptions){
-					serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+					serviceRegistry.getService("orion.page.message").then(function(progressService) {
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
 						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
 						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);

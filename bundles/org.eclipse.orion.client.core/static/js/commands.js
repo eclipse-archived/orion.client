@@ -39,7 +39,7 @@ eclipse.CommandService = (function() {
 	CommandService.prototype = /** @lends eclipse.CommandService.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-			this._serviceRegistration = this._registry.registerService("ICommandService", this);
+			this._serviceRegistration = this._registry.registerService("orion.page.command", this);
 			this._selection = options.selection;
 		},
 		

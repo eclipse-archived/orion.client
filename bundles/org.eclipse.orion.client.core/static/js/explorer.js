@@ -194,7 +194,7 @@ eclipse.ExplorerRenderer = (function() {
 			actionsColumn.appendChild(actionsWrapper);
 			dojo.style(actionsWrapper, "visibility", "hidden");
 			// contact the command service to render appropriate commands here.
-			this.explorer.registry.getService("ICommandService").then(function(service) {
+			this.explorer.registry.getService("orion.page.command").then(function(service) {
 				service.renderCommands(actionsWrapper, "object", item, this.explorer, "image");
 			});
 			return actionsColumn;
@@ -380,7 +380,7 @@ eclipse.ExplorerRenderer = (function() {
 				
 				dojo.empty(actionsWrapper);
 				// contact the command service to render appropriate commands here.
-				registry.getService("ICommandService").then(function(service) {
+				registry.getService("orion.page.command").then(function(service) {
 					service.renderCommands(actionsWrapper, "object", node._item, this.explorer, "image");
 				});
 

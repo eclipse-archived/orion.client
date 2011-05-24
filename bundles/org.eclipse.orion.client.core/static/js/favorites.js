@@ -215,7 +215,7 @@ eclipse.Favorites = (function() {
 				});
 			}
 		});
-		this._registry.getService("ICommandService").then(function(commandService) {
+		this._registry.getService("orion.page.command").then(function(commandService) {
 			// register commands with object scope
 			commandService.addCommand(deleteFaveCommand, "object");
 			commandService.addCommand(renameFaveCommand, "object");
@@ -322,7 +322,7 @@ eclipse.Favorites = (function() {
 				// we must hide/show the span rather than the column.  IE and Chrome will not consider
 				// the mouse as being over the table row if it's in a hidden column
 				dojo.style(actionsWrapper, "visibility", "hidden");
-				this._registry.getService("ICommandService").then(function(service) {
+				this._registry.getService("orion.page.command").then(function(service) {
 					service.renderCommands(actionsWrapper, "object", fave, this, "image", null, j);
 				});
 				dojo.place(tr, tbody, "last");
@@ -338,7 +338,7 @@ eclipse.Favorites = (function() {
 			dojo.place(faveTable, this._parent, "only");
 			// Now that the table is added to the dom, generate commands
 			var commands = dojo.byId("faveCommands");
-			this._registry.getService("ICommandService").then(function(service) {
+			this._registry.getService("orion.page.command").then(function(service) {
 				service.renderCommands(commands, "dom", this, this, "image");
 			});
 			
@@ -372,7 +372,7 @@ eclipse.Favorites = (function() {
 					// render local commands
 					var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
 					dojo.style(actionsWrapper, "visibility", "hidden");
-					this._registry.getService("ICommandService").then(function(service) {
+					this._registry.getService("orion.page.command").then(function(service) {
 						service.renderCommands(actionsWrapper, "object", search, this, "image", null, i);
 					});
 					dojo.place(tr, tbody, "last");

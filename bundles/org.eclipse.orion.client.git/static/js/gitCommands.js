@@ -38,7 +38,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		} else {
 			throw "could not find toolbar " + toolbarId;
 		}
-		registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
+		registry.getService("orion.page.command").then(dojo.hitch(explorer, function(service) {
 			service.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  // true would force text links
 			if (selectionToolbarId) {
 				var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
@@ -54,7 +54,7 @@ dojo.require("widgets.GitCredentialsDialog");
 					var selectionTools = dojo.byId(selectionToolbarId);
 					if (selectionTools) {
 						dojo.empty(selectionTools);
-						registry.getService("ICommandService").then(function(commandService) {
+						registry.getService("orion.page.command").then(function(commandService) {
 							commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", null, null, true); // true would force text links
 						});
 					}
@@ -139,7 +139,7 @@ dojo.require("widgets.GitCredentialsDialog");
 						eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 									var func = arguments.callee;
 									serviceRegistry.getService("IGitService").then(function(gitService) {
-										serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+										serviceRegistry.getService("orion.page.message").then(function(progressService) {
 											var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
 												function(jsonData, secondArg) {
@@ -369,7 +369,7 @@ dojo.require("widgets.GitCredentialsDialog");
 				eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
 						serviceRegistry.getService("IGitService").then(function(gitService) {
-							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+							serviceRegistry.getService("orion.page.message").then(function(progressService) {
 								var deferred = gitService.doFetch(path, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Fetching remote: " + path).then(
 									function(jsonData, secondArg) {
@@ -422,7 +422,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(function(gitService){
 					gitService.doMerge(item.HeadLocation, item.Id).then(function(result){
-						serviceRegistry.getService("IStatusReporter").then(function(progressService){
+						serviceRegistry.getService("orion.page.message").then(function(progressService){
 							var display = [];
 							
 							if (result.jsonData.Result == "FAST_FORWARD" || result.jsonData.Result == "ALREADY_UP_TO_DATE"){
@@ -446,7 +446,7 @@ dojo.require("widgets.GitCredentialsDialog");
 							progressService.setProgressResult(display);
 						});
 					}, function (error) {
-						serviceRegistry.getService("IStatusReporter").then(function(progressService){
+						serviceRegistry.getService("orion.page.message").then(function(progressService){
 							var display = [];
 							
 							var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
@@ -478,7 +478,7 @@ dojo.require("widgets.GitCredentialsDialog");
 				eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
 						serviceRegistry.getService("IGitService").then(function(gitService) {
-							serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+							serviceRegistry.getService("orion.page.message").then(function(progressService) {
 								var deferred = gitService.doPush(item.Location, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
 									eclipse.gitCommandUtils.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,

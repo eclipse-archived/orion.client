@@ -113,7 +113,7 @@ eclipse.usersCommandUtils.updateNavTools = function(registry, explorer, toolbarI
 	} else {
 		throw "could not find toolbar " + toolbarId;
 	}
-	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
+	registry.getService("orion.page.command").then(dojo.hitch(explorer, function(service) {
 		service.renderCommands(toolbar, "dom", item, explorer, "image");
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
@@ -129,7 +129,7 @@ eclipse.usersCommandUtils.updateNavTools = function(registry, explorer, toolbarI
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					registry.getService("ICommandService").then(function(commandService) {
+					registry.getService("orion.page.command").then(function(commandService) {
 						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
 					});
 				}
