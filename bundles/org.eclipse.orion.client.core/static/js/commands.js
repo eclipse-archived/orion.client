@@ -339,9 +339,6 @@ eclipse.CommandService = (function() {
 							var choicesMenu = new dijit.Menu({
 								style: "display: none;"
 							});
-							// TODO should populate this on the fly
-							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=338887
-							command.populateChoicesMenu(choicesMenu, items, handler, userData);
 							if (renderType === "image") {
 								var menuButton = new dijit.form.DropDownButton({
 										label: command.name,
@@ -355,6 +352,11 @@ eclipse.CommandService = (function() {
 									menuButton.iconNode.src = command.image;
 								}
 								dojo.place(menuButton.domNode, parent, "last");
+								menuButton.eclipseCommand = command;
+								menuButton.eclipseChoices = choicesMenu;
+								dojo.connect(menuButton, "onClick", menuButton, function(event) {
+									this.eclipseCommand.populateChoicesMenu(this.eclipseChoices, items, handler, userData);
+								});
 							} else if (renderType === "menu") {
 								// parent is already a menu
 								var popup = new dijit.PopupMenuItem({
@@ -362,6 +364,12 @@ eclipse.CommandService = (function() {
 									popup: choicesMenu
 								});
 								parent.addChild(popup);
+								popup.eclipseCommand = command;
+								popup.eclipseChoices = choicesMenu;
+								// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=338887
+								dojo.connect(parent, "_openPopup", popup, function(event) {
+									this.eclipseCommand.populateChoicesMenu(this.eclipseChoices, items, handler, userData);
+								});
 							}
 						} else {
 							if (renderType === "image") {
