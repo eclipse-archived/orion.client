@@ -46,7 +46,7 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.removeBranch", 2);
 	commandService.registerCommandContribution("eclipse.openGitLog", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.fetch", 2);
-	// commandService.registerCommandContribution("eclipse.orion.git.merge", 2);
+	commandService.registerCommandContribution("eclipse.orion.git.merge", 2);
 	
 	serviceRegistry.getService("IFileService").then(function(fileSerivce){
 	fileSerivce.loadWorkspace().then(
