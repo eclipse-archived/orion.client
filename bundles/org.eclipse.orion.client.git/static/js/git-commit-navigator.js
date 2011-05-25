@@ -30,6 +30,7 @@ eclipse.GitCommitNavigator = (function() {
 		this.myTree = null;
 		this.commitDetails = commitDetails;
 		this.renderer = new eclipse.GitCommitRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
+		this.commitDetails.render(null);
 	}
 	
 	GitCommitNavigator.prototype = new eclipse.Explorer();
