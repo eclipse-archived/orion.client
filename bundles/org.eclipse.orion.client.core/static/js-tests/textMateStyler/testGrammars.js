@@ -25,7 +25,7 @@ orion.styler.test.SampleGrammar = {
 				"name": "keyword.control.mylang"
 			},
 			{
-				"match": "\\b(case|catch|debugger|default|delete|else|finally|function|in|instanceof|new|this|try|typeof|var|void|with)\\b",
+				"match": "\\b(this|var|void)\\b",
 				"name": "keyword.other.mylang"
 			}, {
 				"match": "(\")[^\"](\")",
@@ -49,6 +49,39 @@ orion.styler.test.SampleGrammar = {
 			"name": "invalid.illegal.idontlikez.mylang"
 		}
 	}
+};
+
+// A grammar that uses begin/end rules
+orion.styler.test.SampleBeginEndGrammar = {
+	"comment": "Dummy grammar for testing",
+	"name": "My great language",
+	"fileTypes": [ "foo", "bar" ],
+	"scopeName": "source.mylang",
+	"uuid": "BA5758BD-B671-40BF-F234-22AF369537E8",
+	"patterns": [
+			{
+				// SGML-style comments for testing begin/end
+				"begin": "<!--",
+				"end": "-->",
+				"contentName": "comment.block.mylang",
+				"beginCaptures": {
+					"0": { "name": "punctuation.definition.comment.mylang" }
+				},
+				"endCaptures": {
+					"0": { "name" : "punctuation.definition.comment.mylang" }
+				},
+				"patterns": [
+					{
+						// For testing nested subpatterns
+						"match": "--",
+						"name": "invalid.illegal.badcomment.mylang"
+					}
+				]
+			},
+			{
+				"match": "char|int",
+				"name": "storage.type.mylang"
+			} ]
 };
 
 /* TODO add to the constant.character.mylang rule once we support "captures":
