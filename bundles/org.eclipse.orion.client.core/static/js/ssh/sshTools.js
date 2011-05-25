@@ -17,7 +17,7 @@ eclipse.SshService = (function() {
 		if (serviceRegistry) {
 			this._serviceRegistry = serviceRegistry;
 			this._serviceRegistration = serviceRegistry.registerService(
-					"ISshService", this);
+					"orion.net.ssh", this);
 		}
 	}
 

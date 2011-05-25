@@ -50,7 +50,7 @@ eclipse.git.GitClonesExplorer = (function() {
 			var d = dojo.create("div", null, dojo.byId(this.parentId), "only");
 			d.innerHTML = "Loading <b>" + gitPath + "</b>...";
 			
-			this.registry.getService("IGitService").then(function(service){
+			this.registry.getService("orion.git.provider").then(function(service){
 				dojo.hitch(self, self.createTree(self.parentId, new eclipse.GitClonesModel(service, gitPath, service.getGitClone)));
 			});
 		};
@@ -66,7 +66,7 @@ eclipse.git.GitClonesExplorer = (function() {
 		var d = dojo.create("div", null, dojo.byId(this.parentId), "only");
 		d.innerHTML = "Loading <b>" + gitPath + "</b>...";
 		
-		this.registry.getService("IGitService").then(function(service){
+		this.registry.getService("orion.git.provider").then(function(service){
 			dojo.hitch(self, self.createTree(self.parentId, new eclipse.GitClonesModel(service, gitPath, service.getGitClone)));
 		});
 	};
@@ -102,6 +102,9 @@ eclipse.GitClonesModel = (function() {
 	GitClonesModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
 			// the parent already has the children fetched
 			if (parentItem.Children) {
+				for(var i=0; i<parentItem.Children.length; i++){
+					parentItem.Children[i].parent = parentItem;
+				}
 				onComplete(parentItem.Children);
 			}
 			else if (parentItem.BranchLocation || parentItem.RemoteLocation){
@@ -110,6 +113,9 @@ eclipse.GitClonesModel = (function() {
 			else if (parentItem.GroupNode){
 				this.gitClient.getGitBranch(parentItem.Location).then( 
 					dojo.hitch(this, function(children) {
+						for(var i=0; i<children.Children.length; i++){
+							children.Children[i].parent = parentItem;
+						}
 						onComplete(children.Children);
 					})
 				);
@@ -117,6 +123,9 @@ eclipse.GitClonesModel = (function() {
 			else if (parentItem.Type === "Remote"){
 				this.gitClient.getGitBranch(parentItem.Location).then( 
 					dojo.hitch(this, function(children) {
+						for(var i=0; i<children.Children.length; i++){
+							children.Children[i].parent = parentItem;
+						}
 						onComplete(children.Children);
 					})
 				);

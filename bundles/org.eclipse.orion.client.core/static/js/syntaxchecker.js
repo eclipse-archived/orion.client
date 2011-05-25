@@ -27,20 +27,20 @@ eclipse.SyntaxChecker = (function () {
 				// FIXME this doesn't belong here, seems like we should get the right service for the given title
 				if (title.indexOf(".js") === title.length - 3) {
 					var syntaxCheckerCallback = dojo.hitch(this, function (data) {
-						this.registry.getService("IProblemProvider").then(function(service) {
+						this.registry.getService("orion.core.marker").then(function(service) {
 							service._setProblems(data.errors);
 						});
-						this.registry.getService("IOutlineProvider").then(function(service) {
+						this.registry.getService("orion.edit.outline").then(function(service) {
 							service._setItems({"title": t, "contents": c, "data": data});
 						});
 					});
-						this.registry.getService("IEditorSyntaxChecker")
+						this.registry.getService("orion.edit.validator")
 							.then(function(service) {
 								return service.checkSyntax(title, contents);
 							})
 							.then(syntaxCheckerCallback);
 				} else {
-					this.registry.getService("IOutlineProvider").then(function(service) {
+					this.registry.getService("orion.edit.outline").then(function(service) {
 						service._setItems({title: t, contents: c});
 					});
 				}

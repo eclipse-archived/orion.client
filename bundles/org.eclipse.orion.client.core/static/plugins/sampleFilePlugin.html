@@ -260,7 +260,7 @@ eclipse.SampleFileServiceImpl= (function() {
 		window.onload = function() {
 			var service = new eclipse.SampleFileServiceImpl();
 			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("IFileService", service, {Name:'sample file service', top:'/sample/', pattern:'/sample/'});
+			provider.registerServiceProvider("orion.core.file", service, {Name:'sample file service', top:'/sample/', pattern:'/sample/'});
 			service.dispatchEvent = provider.dispatchEvent;
 			provider.connect();
 		};

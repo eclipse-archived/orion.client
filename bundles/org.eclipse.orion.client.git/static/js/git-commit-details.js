@@ -46,7 +46,7 @@ eclipse.CommitDetails = (function() {
 			}
 		});		
 
-		this._registry.getService("ICommandService").then(function(commandService) {
+		this._registry.getService("orion.page.command").then(function(commandService) {
 			// register commands with object scope
 			commandService.addCommand(showDiffCommand, "object");	
 			//commandService.addCommand(doSomething1, "dom");		
@@ -134,7 +134,7 @@ eclipse.CommitDetails = (function() {
 //			// we must hide/show the span rather than the column.  IE and Chrome will not consider
 //			// the mouse as being over the table row if it's in a hidden column
 //			dojo.style(actionsWrapper, "visibility", "hidden");
-//			this._registry.getService("ICommandService").then(function(service) {
+//			this._registry.getService("orion.page.command").then(function(service) {
 //				service.renderCommands(actionsWrapper, "object", commitDetails, this, "image", null, 0);
 //			});
 //			
@@ -156,7 +156,7 @@ eclipse.CommitDetails = (function() {
 			
 			// Now that the table is added to the dom, generate commands
 			var commands = dojo.byId("commitMetaCommands");
-			this._registry.getService("ICommandService").then(function(service) {
+			this._registry.getService("orion.page.command").then(function(service) {
 				service.renderCommands(commands, "dom", this, this, "image");
 			});
 			
@@ -207,7 +207,7 @@ eclipse.CommitDetails = (function() {
 					// we must hide/show the span rather than the column.  IE and Chrome will not consider
 					// the mouse as being over the table row if it's in a hidden column
 					dojo.style(actionsWrapper, "visibility", "hidden");
-					this._registry.getService("ICommandService").then(function(service) {
+					this._registry.getService("orion.page.command").then(function(service) {
 						service.renderCommands(actionsWrapper, "object", {dom: "commitDiffsTable", object: commitDetails.Diffs[j]}, this, "image", null, j);
 					});
 					
@@ -228,7 +228,7 @@ eclipse.CommitDetails = (function() {
 			
 			// Now that the table is added to the dom, generate commands
 			var commands = dojo.byId("commitDiffsCommands");
-			this._registry.getService("ICommandService").then(function(service) {
+			this._registry.getService("orion.page.command").then(function(service) {
 				service.renderCommands(commands, "dom", this, this, "image");
 			});
 		}

@@ -95,7 +95,7 @@ eclipse.Profile = (function() {
 			
 			var userProfile = this;
 			
-			this.usersService = this.registry.getService("IUsersService");
+			this.usersService = this.registry.getService("orion.core.user");
 			
 			if(this.usersService!==null){
 				this.usersService.then(function(service) {

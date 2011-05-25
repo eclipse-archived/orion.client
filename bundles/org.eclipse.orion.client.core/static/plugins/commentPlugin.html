@@ -14,7 +14,7 @@
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
 			// testing that command service handles image-less actions properly
-			provider.registerServiceProvider("editorAction", {
+			provider.registerServiceProvider("orion.edit.command", {
 				run : function(selectedText, text, selection) { 
 					return {text: text.substring(0,selection.start) + "/*" + text.substring(selection.start,selection.end) + "*/" + text.substring(selection.end),
 					selection: {start:selection.start,end:selection.end+4}}; 

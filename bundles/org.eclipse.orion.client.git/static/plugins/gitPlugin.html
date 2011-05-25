@@ -12,7 +12,7 @@
 			var provider = new eclipse.PluginProvider();
 			var gitService = new eclipse.GitService();
 			
-			provider.registerServiceProvider("fileCommands", {
+			provider.registerServiceProvider("orion.navigate.command", {
 				run: function(item) {
 					return "/git-status.html#" + item.Git.StatusLocation;
 				}
@@ -25,7 +25,7 @@
 				forceSingleItem: true
 			});
 			
-			provider.registerServiceProvider("fileCommands", {
+			provider.registerServiceProvider("orion.navigate.command", {
 				run: function(item) {
 					return "/git-log.html#" + item.Git.CommitLocation + "?page=1";
 				}
@@ -38,7 +38,7 @@
 				forceSingleItem: true
 			});
 			
-			provider.registerServiceProvider("fileCommands", {
+			provider.registerServiceProvider("orion.navigate.command", {
 				run : function(item) {
 					return "/git-log.html?remote#" + item.Git.DefaultRemoteBranchLocation + "?page=1";
 				}

@@ -24,7 +24,7 @@ dojo.addOnLoad(function() {
 	var dialogService = new eclipse.DialogService(serviceRegistry);
 	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	serviceRegistry.getService("IFileService").then(function(fileService) {
+	serviceRegistry.getService("orion.core.file").then(function(fileService) {
 		var fileClient = new eclipse.FileClient(fileService);
 
 		var siteService = new eclipse.sites.SiteService(serviceRegistry);

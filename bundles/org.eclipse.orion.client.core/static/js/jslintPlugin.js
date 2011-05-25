@@ -19,7 +19,7 @@ window.onload = function() {
 	};
 	
 	var provider = new eclipse.PluginProvider();
-	var serviceProvider = provider.registerServiceProvider("IEditorSyntaxChecker", jsLintService);
+	var serviceProvider = provider.registerServiceProvider("orion.edit.validator", jsLintService);
 	jsLintService.dispatchEvent = serviceProvider.dispatchEvent;
 	provider.connect();
 };

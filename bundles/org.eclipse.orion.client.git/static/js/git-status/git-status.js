@@ -20,7 +20,7 @@ dojo.addOnLoad(function(){
 	new eclipse.GitService(serviceRegistry);
 	// File operations
 
-	var fileServices = serviceRegistry.getServiceReferences("IFileService");
+	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 	var fileServiceReference;
 	
 	for (var i=0; i<fileServices.length; i++) {

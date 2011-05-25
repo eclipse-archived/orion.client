@@ -22,7 +22,7 @@ eclipse.FavoritesService = (function() {
 	FavoritesService.prototype = {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-			this._serviceRegistration = this._registry.registerService("IFavorites", this);
+			this._serviceRegistration = this._registry.registerService("orion.core.favorite", this);
 		},
 		
 		_notifyListeners: function() {
@@ -110,7 +110,7 @@ eclipse.FavoritesService = (function() {
 		_initializeFavorites: function () {
 			var favorites = this;
 			var favesDone, searchesDone;
-			this._registry.getService("IPreferenceService").then(function(service) {
+			this._registry.getService("orion.core.preference").then(function(service) {
 				service.getPreferences("/window/favorites").then(function(prefs) { 
 					var i;
 					var navigate = prefs.get("navigate");
@@ -140,7 +140,7 @@ eclipse.FavoritesService = (function() {
 		
 		_storeFavorites: function() {
 			var storedFavorites = this._favorites;
-			this._registry.getService("IPreferenceService").then(function(service) {
+			this._registry.getService("orion.core.preference").then(function(service) {
 				return service.getPreferences("/window/favorites");
 			}).then(function(prefs){
 				prefs.put("navigate", storedFavorites);
@@ -149,7 +149,7 @@ eclipse.FavoritesService = (function() {
 		
 		_storeSearches: function() {
 			var storedSearches = this._searches;
-			this._registry.getService("IPreferenceService").then(function(service) {
+			this._registry.getService("orion.core.preference").then(function(service) {
 				return service.getPreferences("/window/favorites");
 			}).then(function(prefs){
 				prefs.put("search", storedSearches);
@@ -190,7 +190,7 @@ eclipse.Favorites = (function() {
 			id: "eclipse.deleteFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: function(item) {
-				options.serviceRegistry.getService("IFavorites").then(function(service) {
+				options.serviceRegistry.getService("orion.core.favorite").then(function(service) {
 					service.removeFavorite(item.path);
 				});
 			}
@@ -210,12 +210,12 @@ eclipse.Favorites = (function() {
 			id: "eclipse.deleteSearch",
 			visibleWhen: function(item) {return item.isSearch;},
 			callback: function(item) {
-				options.serviceRegistry.getService("IFavorites").then(function(service) {
+				options.serviceRegistry.getService("orion.core.favorite").then(function(service) {
 					service.removeSearch(item.query);
 				});
 			}
 		});
-		this._registry.getService("ICommandService").then(function(commandService) {
+		this._registry.getService("orion.page.command").then(function(commandService) {
 			// register commands with object scope
 			commandService.addCommand(deleteFaveCommand, "object");
 			commandService.addCommand(renameFaveCommand, "object");
@@ -228,7 +228,7 @@ eclipse.Favorites = (function() {
 			commandService.registerCommandContribution("eclipse.addExternalFave", 1, "faveCommands");		
 
 		});
-		this._registry.getService("IFavorites").then(function(service) {
+		this._registry.getService("orion.core.favorite").then(function(service) {
 			service.addEventListener("favoritesChanged", function(favs, searches) {
 				favorites.render(favs, searches);
 			});
@@ -240,7 +240,7 @@ eclipse.Favorites = (function() {
 			var spacer= dojo.byId("spacer");
 			eclipse.util.getUserText(imageId+"EditBox", spacer, true, "", 
 				function(newText) {
-					reg.getService("IFavorites").then(function(service) {
+					reg.getService("orion.core.favorite").then(function(service) {
 						service.addFavoriteUrl(newText);
 					});
 				},
@@ -261,7 +261,7 @@ eclipse.Favorites = (function() {
 			}
 			eclipse.util.getUserText(imageId+"EditBox", link, true, fave.name, 
 				function(newText) {
-					reg.getService("IFavorites").then(function(service) {
+					reg.getService("orion.core.favorite").then(function(service) {
 						service.renameFavorite(fave.path, newText);
 					});
 				}, 
@@ -322,7 +322,7 @@ eclipse.Favorites = (function() {
 				// we must hide/show the span rather than the column.  IE and Chrome will not consider
 				// the mouse as being over the table row if it's in a hidden column
 				dojo.style(actionsWrapper, "visibility", "hidden");
-				this._registry.getService("ICommandService").then(function(service) {
+				this._registry.getService("orion.page.command").then(function(service) {
 					service.renderCommands(actionsWrapper, "object", fave, this, "image", null, j);
 				});
 				dojo.place(tr, tbody, "last");
@@ -338,7 +338,7 @@ eclipse.Favorites = (function() {
 			dojo.place(faveTable, this._parent, "only");
 			// Now that the table is added to the dom, generate commands
 			var commands = dojo.byId("faveCommands");
-			this._registry.getService("ICommandService").then(function(service) {
+			this._registry.getService("orion.page.command").then(function(service) {
 				service.renderCommands(commands, "dom", this, this, "image");
 			});
 			
@@ -372,7 +372,7 @@ eclipse.Favorites = (function() {
 					// render local commands
 					var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
 					dojo.style(actionsWrapper, "visibility", "hidden");
-					this._registry.getService("ICommandService").then(function(service) {
+					this._registry.getService("orion.page.command").then(function(service) {
 						service.renderCommands(actionsWrapper, "object", search, this, "image", null, i);
 					});
 					dojo.place(tr, tbody, "last");

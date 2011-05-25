@@ -11,7 +11,7 @@ var eclipse = eclipse || {};
 
 eclipse.ProblemService = function(serviceRegistry) {
 	this._serviceRegistry = serviceRegistry;
-	this._serviceRegistration = serviceRegistry.registerService("IProblemProvider", this);
+	this._serviceRegistration = serviceRegistry.registerService("orion.core.marker", this);
 
 };
 

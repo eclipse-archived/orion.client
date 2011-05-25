@@ -18,7 +18,7 @@ dojo.addOnLoad(function(){
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 	// File operations
-	var fileServices = serviceRegistry.getServiceReferences("IFileService");
+	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 	var fileServiceReference;
 	
 	for (var i=0; i<fileServices.length; i++) {

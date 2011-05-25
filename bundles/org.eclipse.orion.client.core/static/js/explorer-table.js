@@ -235,7 +235,7 @@ eclipse.FileRenderer = (function() {
 			} else {
 				col = document.createElement('td');
 				
-				// Only generate an "open with" href if there's a matching openWith handler.
+				// Only generate an "open with" href if there's a matching orion.navigate.openWith handler.
 				// This way we can still view images, etc.
 				if (!this.openWithCommands) {
 					this.openWithCommands = eclipse.fileCommandUtils.getOpenWithCommands(this.commandService);

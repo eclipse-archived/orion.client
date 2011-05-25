@@ -22,9 +22,9 @@ eclipse.GitService = (function() {
 		if (serviceRegistry) {
 			this._serviceRegistry = serviceRegistry;
 			this._serviceRegistration = serviceRegistry.registerService(
-					"IGitService", this);
+					"orion.git.provider", this);
 			var self = this;
-			serviceRegistry.getService("ISshService").then(function(sshService){
+			serviceRegistry.getService("orion.net.ssh").then(function(sshService){
 				self._sshService = sshService;
 			});
 		}

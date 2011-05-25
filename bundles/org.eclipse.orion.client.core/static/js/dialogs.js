@@ -19,7 +19,7 @@ var eclipse = eclipse || {};
  */
 eclipse.DialogService = function(serviceRegistry) {
 	this._serviceRegistry = serviceRegistry;
-	this._serviceRegistration = serviceRegistry.registerService("IDialogService", this);
+	this._serviceRegistration = serviceRegistry.registerService("orion.page.dialog", this);
 };
  
 eclipse.DialogService.prototype = {

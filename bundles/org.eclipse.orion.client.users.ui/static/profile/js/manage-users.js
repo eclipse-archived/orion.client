@@ -61,7 +61,7 @@ dojo.addOnLoad(function() {
 		callback: function(item) {
 			if(dojo.isArray(item)){
 				if(confirm("Do you want do delete " + item.length + " users?")){
-					serviceRegistry.getService("IUsersService").then(function(service) {
+					serviceRegistry.getService("orion.core.user").then(function(service) {
 						var usersProcessed = 0;
 						for(var i=0; i<item.length; i++){
 							  service.deleteUser(item[i].Location, dojo.hitch(usersList, function(jsonData, secondArg) {
@@ -75,7 +75,7 @@ dojo.addOnLoad(function() {
 				
 			}else{
 				if (confirm("Do you want to delete user " + item.login + "?")) {
-					serviceRegistry.getService("IUsersService").then(function(service) {
+					serviceRegistry.getService("orion.core.user").then(function(service) {
 					  service.deleteUser(item.Location, dojo.hitch(usersList, function(jsonData, secondArg) {
 						  this.reloadUsers();
 					  }));
@@ -113,7 +113,7 @@ eclipse.usersCommandUtils.updateNavTools = function(registry, explorer, toolbarI
 	} else {
 		throw "could not find toolbar " + toolbarId;
 	}
-	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
+	registry.getService("orion.page.command").then(dojo.hitch(explorer, function(service) {
 		service.renderCommands(toolbar, "dom", item, explorer, "image");
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
@@ -124,12 +124,12 @@ eclipse.usersCommandUtils.updateNavTools = function(registry, explorer, toolbarI
 	// Stuff we do only the first time
 	if (!eclipse.doOnce) {
 		eclipse.doOnce = true;
-		registry.getService("Selection").then(function(service) {
+		registry.getService("orion.page.selection").then(function(service) {
 			service.addEventListener("selectionChanged", function(singleSelection, selections) {
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					registry.getService("ICommandService").then(function(commandService) {
+					registry.getService("orion.page.command").then(function(commandService) {
 						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
 					});
 				}

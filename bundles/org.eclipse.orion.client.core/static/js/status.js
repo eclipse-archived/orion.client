@@ -23,7 +23,7 @@ var eclipse = eclipse || {};
  */
 eclipse.StatusReportingService = function(serviceRegistry, domId, progressDomId) {
 	this._serviceRegistry = serviceRegistry;
-	this._serviceRegistration = serviceRegistry.registerService("IStatusReporter", this);
+	this._serviceRegistration = serviceRegistry.registerService("orion.page.message", this);
 	this.domId = domId;
 	this.progressDomId = progressDomId || domId;
 };

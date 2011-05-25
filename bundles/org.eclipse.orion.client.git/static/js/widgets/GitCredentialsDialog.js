@@ -50,7 +50,7 @@ dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog, widgets._OrionDialog
 		}
 		if(this.options.serviceRegistry){
 			var self = this;
-			this.options.serviceRegistry.getService("ISshService").then(function(sshService){
+			this.options.serviceRegistry.getService("orion.net.ssh").then(function(sshService){
 				self._sshService = sshService;
 			});
 		}

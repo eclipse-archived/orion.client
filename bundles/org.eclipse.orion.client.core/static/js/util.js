@@ -19,7 +19,6 @@ var eclipse = eclipse || {};
  * Utility methods
  * @namespace eclipse.util holds stateless utility methods.
  */
- 
 eclipse.util = eclipse.util || {};
 
 eclipse.util.openDialog = function(dialog, refNode) {
@@ -262,7 +261,7 @@ eclipse.util.processNavigatorParent = function(parent, children) {
 
 eclipse.util.rememberSuccessfulTraversal = function(item, registry) {
 	if (item.Parents && item.Parents.length === 0) {
-		registry.getService("IPreferenceService").then(function(service) {
+		registry.getService("orion.core.preference").then(function(service) {
 			return service.getPreferences("/window/recent");
 		}).then(function(prefs){
 			return prefs.get("projects");}).then(function(projects) {
@@ -280,7 +279,7 @@ eclipse.util.rememberSuccessfulTraversal = function(item, registry) {
 				if (storedProjects.length > 5) {
 					storedProjects= storedProjects.slice(-5, storedProjects.length);
 				}
-				registry.getService("IPreferenceService").then(function(service) {
+				registry.getService("orion.core.preference").then(function(service) {
 					return service.getPreferences("/window/recent");
 				}).then(function(prefs){
 					prefs.put("projects", storedProjects);

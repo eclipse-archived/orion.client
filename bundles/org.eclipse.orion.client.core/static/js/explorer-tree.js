@@ -51,7 +51,7 @@ eclipse.ExplorerTree = (function() {
 			this._selectedItem = item;
 			this._selectedNode = treeNode;
 			if (item.Directory===false && item.Location) {
-				this.registry.getService("Selection").then(function(service) {
+				this.registry.getService("orion.page.selection").then(function(service) {
 					service.setSelections(item.Location);
 				});
 			}
@@ -201,7 +201,7 @@ eclipse.ExplorerTree = (function() {
 						tree._selectNode(treeNode);
 					}
 					// contact the command service to render appropriate commands here.
-					this.registry.getService("ICommandService").then(function(service) {
+					this.registry.getService("orion.page.command").then(function(service) {
 						service.renderCommands(contextMenu, "object", tree.getSelectedItems(), this, "menu");
 					});
 				});

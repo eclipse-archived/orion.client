@@ -51,7 +51,7 @@ orion.JSTestAdapter = (function() {
 			var loaderPluginRegistry = new eclipse.PluginRegistry(loaderServiceRegistry, {});
 			loaderPluginRegistry.installPlugin(test).then(
 				function() {
-					return loaderServiceRegistry.getService("testRunner");
+					return loaderServiceRegistry.getService("orion.test.runner");
 				}
 			).then(
 				function(service) {
@@ -164,7 +164,7 @@ orion.JSTestAdapter = (function() {
 		/* Install the test plugin and get the list of tests it contains */
 		testPluginRegistry.installPlugin(fileURI).then(
 			function() {
-				return testServiceRegistry.getService("testRunner");
+				return testServiceRegistry.getService("orion.test.runner");
 			}, 
 			function(e) {
 				console.log(fileURI + " : error installing plugin : " + e);
@@ -191,7 +191,7 @@ orion.JSTestAdapter = (function() {
 				});
 			}, 
 			function(e) {
-				console.log(fileURI + " : error gettting testRunner service " + e);
+				console.log(fileURI + " : error gettting orion.test.runner service " + e);
 				loader.error(e);
 			}
 		);

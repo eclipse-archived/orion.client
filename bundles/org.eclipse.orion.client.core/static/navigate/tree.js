@@ -74,7 +74,7 @@ dojo.addOnLoad(function(){
 		image : "/images/flatLayout.gif",
 		id: "eclipse.tableViewCommand",
 		callback : function() {
-			serviceRegistry.getService("IPreferencesService").then(function(service) {
+			serviceRegistry.getService("orion.core.preference").then(function(service) {
 				service.put("window/orientation", "/navigate/table.html");
 			});
 			window.location.replace("/navigate/table.html#" + dojo.hash());
