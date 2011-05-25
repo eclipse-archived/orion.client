@@ -295,10 +295,12 @@ dojo.require("widgets.GitCredentialsDialog");
 			name : "Show Git Log",
 			id : "eclipse.openGitLog",
 			hrefCallback : function(item) {
+				if (item.Type === "RemoteTrackingBranch")
+					return "/git-log.html?remote#" + item.Location + "?page=1";
 				return "/git-log.html#" + item.CommitLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
-				return item.Type === "Branch";
+				return item.Type === "Branch" || item.Type === "RemoteTrackingBranch";
 			}
 		});
 	
@@ -365,7 +367,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			image : "/images/git-fetch.gif",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
-				var path = dojo.hash();
+				var path = item.Location;
 				eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
 						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
@@ -397,10 +399,11 @@ dojo.require("widgets.GitCredentialsDialog");
 															console.error("HTTP status code: ", ioArgs.xhr.status);
 														}
 													}).then(function(remoteJsonData){
-														gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArd) {
-															explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
-															explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);			
-														});
+														if (explorer.parentId === "explorer-tree")
+															gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArd) {
+																explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
+																explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);			
+															});
 													});
 												}, func, "Fetch Git Repository");
 									});
@@ -409,11 +412,12 @@ dojo.require("widgets.GitCredentialsDialog");
 					});	
 			},
 			visibleWhen : function(item) {
-				return true;
+				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
 			}
 		});
 	
 		commandService.addCommand(fetchCommand, "dom");
+		commandService.addCommand(fetchCommand, "object");
 		
 		var mergeCommand = new eclipse.Command({
 			name : "Merge",
@@ -463,11 +467,12 @@ dojo.require("widgets.GitCredentialsDialog");
 				});
 			},
 			visibleWhen : function(item) {
-				return true;
+				return item.Type === "RemoteTrackingBranch";
 			}
 		});
 	
 		commandService.addCommand(mergeCommand, "dom");
+		commandService.addCommand(mergeCommand, "object");
 		
 		var pushCommand = new eclipse.Command({
 			name : "Push",
