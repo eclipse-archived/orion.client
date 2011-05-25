@@ -138,10 +138,18 @@ eclipse.TableTree = (function() {
 					if (row && (forceExpand || row._expanded)) {
 						row._expanded = true;
 						this._removeChildRows(parentId);
-						this._generateChildren(children, row._depth+1, row, "after");
-						this._rowsChanged();
-						if (imgName && imageSrc) {
-							document.images[imgName].src=imageSrc;
+						if(children){
+							this._generateChildren(children, row._depth+1, row, "after");
+							this._rowsChanged();
+							if (imgName && imageSrc) {
+								document.images[imgName].src=imageSrc;
+							}
+						} else {
+							tree = this;
+							children = this._treeModel.getChildren(row._item, function(children) {
+								tree._generateChildren(children, row._depth+1, row, "after");
+								tree._rowsChanged();
+							});
 						}
 					}
 				} else {

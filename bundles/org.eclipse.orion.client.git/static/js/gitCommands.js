@@ -240,14 +240,15 @@ dojo.require("widgets.GitCredentialsDialog");
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(
 					function(service) {
-						service.checkoutBranch(item.CloneLocation, item.Name);
-						// TODO: we need a nicer way to refresh clones' list and show the new active branch
-						explorer.redisplayClonesList();
+						service.checkoutBranch(item.CloneLocation, item.Name).then(
+								function(){
+									dojo.hitch(explorer, explorer.changedItem)(item.parent);
+								});
 					}
 				);
 			},
 			visibleWhen: function(item) {
-				return item.Type === "Branch";
+				return item.Type === "Branch" && !item.Current;
 			}}
 		);
 		commandService.addCommand(checkoutBranchCommand, "object");
@@ -260,9 +261,9 @@ dojo.require("widgets.GitCredentialsDialog");
 				var branchName = prompt("Enter branch name");
 				serviceRegistry.getService("IGitService").then(
 					function(service) {
-						service.addBranch(item.Location, branchName);
-						// TODO: we need a nicer way to refresh clones' list and show the new active branch
-						explorer.redisplayClonesList();
+						service.addBranch(item.Location, branchName).then(function(){
+							dojo.hitch(explorer, explorer.changedItem)(item);
+						});
 					}
 				);
 			},
@@ -279,14 +280,15 @@ dojo.require("widgets.GitCredentialsDialog");
 			callback: function(item) {
 				serviceRegistry.getService("IGitService").then(
 					function(service) {
-						service.removeBranch(item.Location);
-						// TODO: we need a nicer way to refresh clones' list and show the new active branch
-						explorer.redisplayClonesList();
+						service.removeBranch(item.Location).then(
+								function(){
+									dojo.hitch(explorer, explorer.changedItem)(item.parent);
+								});
 					}
 				);
 			},
 			visibleWhen: function(item) {
-				return item.Type === "Branch";
+				return item.Type === "Branch" && !item.Current;
 			}}
 		);
 		commandService.addCommand(removeBranchCommand, "object");
