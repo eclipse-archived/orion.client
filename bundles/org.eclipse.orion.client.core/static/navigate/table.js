@@ -180,7 +180,7 @@ dojo.addOnLoad(function(){
 		commandService.addCommandGroup("eclipse.fileGroup.unlabeled", 100, null, null, "pageActions");
 		commandService.addCommandGroup("eclipse.fileGroup.openWith", 100, "Open With", "eclipse.fileGroup");
 		commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
-		commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
+		commandService.addCommandGroup("eclipse.selectionGroup", 500, "More", null, "selectionTools");
 		
 		// commands appearing directly in local actions column
 		commandService.registerCommandContribution("eclipse.makeFavorite", 1);
