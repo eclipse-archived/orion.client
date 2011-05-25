@@ -7,7 +7,7 @@
 	<script>
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("fileCommands", {
+			provider.registerServiceProvider("orion.navigate.command", {
 				run: function(item) {
 					return "/test/unittest.html#" + item.Location;
 				}

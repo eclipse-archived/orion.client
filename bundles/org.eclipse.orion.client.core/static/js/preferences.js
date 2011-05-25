@@ -247,5 +247,5 @@ eclipse.PreferencesService = function(serviceRegistry, userPreferencesLocation, 
 		return promise;
 	};
 	
-	var _serviceRegistration = serviceRegistry.registerService("IPreferenceService", this);
+	var _serviceRegistration = serviceRegistry.registerService("orion.core.preference", this);
 };

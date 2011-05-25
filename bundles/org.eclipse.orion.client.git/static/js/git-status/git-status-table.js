@@ -468,7 +468,7 @@ orion.GitStatusController = (function() {
 			this._url = url;
 			this.cursorWait();
 			var self = this;
-			self._registry.getService("IGitService").then(
+			self._registry.getService("orion.git.provider").then(
 				function(service) {
 					service.getGitStatus(url, 
 										 function(jsonData, secondArg) {
@@ -489,7 +489,7 @@ orion.GitStatusController = (function() {
 			}
 			else
 				self._stagingConflict = false;
-			self._registry.getService("IGitService").then(
+			self._registry.getService("orion.git.provider").then(
 					function(service) {
 						service.stage(location, 
 											 function(jsonData, secondArg) {
@@ -508,7 +508,7 @@ orion.GitStatusController = (function() {
 		
 		unstage: function(location){
 			var self = this;
-			self._registry.getService("IGitService").then(
+			self._registry.getService("orion.git.provider").then(
 					function(service) {
 						service.unstage(location, 
 											 function(jsonData, secondArg) {
@@ -527,7 +527,7 @@ orion.GitStatusController = (function() {
 		
 		commitAll: function(location , message , body){
 			var self = this;
-			self._registry.getService("IGitService").then(
+			self._registry.getService("orion.git.provider").then(
 					function(service) {
 						service.commitAll(location,  message , body,
 											 function(jsonData, secondArg) {

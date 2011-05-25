@@ -18,7 +18,7 @@ dojo.require("widgets.NewItemDialog");
 dojo.require("widgets._OrionDialogMixin");
 
 /**
- * Requires IFileService to get the user's workspace, which is in turn required to create a
+ * Requires file service to get the user's workspace, which is in turn required to create a
  * site configuration.
  * 
  * @param options.serviceRegistry {eclipse.ServiceRegistry}
@@ -57,7 +57,7 @@ dojo.declare("widgets.NewSiteDialog", [widgets.NewItemDialog], {
 		
 		// Load workspaces
 		var widget = this;
-		this.options.serviceRegistry.getService("IFileService").then(function(service) {
+		this.options.serviceRegistry.getService("orion.core.file").then(function(service) {
 			service.loadWorkspaces().then(dojo.hitch(widget, function(workspaces) {
 				this.workspaceIds = dojo.map(workspaces, function(workspace) {
 					return workspace.Id;

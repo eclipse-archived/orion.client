@@ -47,7 +47,7 @@ dojo.addOnLoad(function(){
 		};
 		var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
 					
-		var fileServices = serviceRegistry.getServiceReferences("IFileService");
+		var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 		
 		function emptyArray() {
 			var d = new dojo.Deferred();
@@ -225,7 +225,7 @@ dojo.addOnLoad(function(){
 		id: "eclipse.treeViewCommand",
 		groupId: "eclipse.viewGroup",
 		callback : function() {
-			serviceRegistry.getService("IPreferencesService").then(function(service) {
+			serviceRegistry.getService("orion.core.preference").then(function(service) {
 				service.put("window/orientation", "/navigate/tree.html");
 			});
 			window.location.replace("/navigate/tree.html#" + dojo.hash());

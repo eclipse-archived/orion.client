@@ -33,7 +33,7 @@ eclipse.FavoriteFoldersCache = (function() {
 		this.registry = registry;
 		this.favorites = [];
 		var self = this;
-		this.registry.getService("IFavorites").then(function(service) {
+		this.registry.getService("orion.core.favorite").then(function(service) {
 			service.getFavorites(function(faves) {
 				self.cacheFavorites(faves);
 			});
@@ -71,7 +71,7 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId
 	} else {
 		throw "could not find toolbar " + toolbarId;
 	}
-	registry.getService("ICommandService").then(dojo.hitch(explorer, function(service) {
+	registry.getService("orion.page.command").then(dojo.hitch(explorer, function(service) {
 		service.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  // true for force icons to text
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
@@ -82,12 +82,12 @@ eclipse.fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId
 	// Stuff we do only the first time
 	if (!eclipse.favoritesCache) {
 		eclipse.favoritesCache = new eclipse.FavoriteFoldersCache(registry);
-		registry.getService("Selection").then(function(service) {
+		registry.getService("orion.page.selection").then(function(service) {
 			service.addEventListener("selectionChanged", function(singleSelection, selections) {
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					registry.getService("ICommandService").then(function(commandService) {
+					registry.getService("orion.page.command").then(function(commandService) {
 						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", null, null, true);
 					});
 				}
@@ -306,7 +306,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			}
 			return true;},
 		callback: function(item) {
-			serviceRegistry.getService("IFavorites").then(function(service) {
+			serviceRegistry.getService("orion.core.favorite").then(function(service) {
 				service.makeFavorites(item);
 			});
 		}});
@@ -347,7 +347,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		callback: function(item) {
 			var items = dojo.isArray(item) ? item : [item];
 			var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
-			serviceRegistry.getService("IDialogService").then(function(service) {
+			serviceRegistry.getService("orion.page.dialog").then(function(service) {
 				service.confirm(confirmMessage, 
 				dojo.hitch(explorer, function(doit) {
 					if (!doit) {
@@ -531,7 +531,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			var dialog = new widgets.SFTPConnectionDialog({
 				func:  function(host,path,user,password, overwriteOptions){
-					serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+					serviceRegistry.getService("orion.page.message").then(function(progressService) {
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
 						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
@@ -557,7 +557,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			item = forceSingleItem(item);
 			var dialog = new widgets.SFTPConnectionDialog({
 				func:  function(host,path,user,password, overwriteOptions){
-					serviceRegistry.getService("IStatusReporter").then(function(progressService) {
+					serviceRegistry.getService("orion.page.message").then(function(progressService) {
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
 						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
 						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
@@ -626,7 +626,7 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 		};
 	}
 
-	// Note that the shape of the "fileCommands" extension is not in any shape or form that could be considered final.
+	// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
 	// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 	
 	// The shape of the contributed commands is (for now):
@@ -645,10 +645,10 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 	//        the return value of the run function will be used as follows:
 	//          if info.href is true, the return value should be an href and the window location will be replaced with the href
 	//			if info.href is not true, the run function is assumed to perform all necessary action and the return is not used.
-	var commandsReferences = serviceRegistry.getServiceReferences("fileCommands");
+	var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
 	
-	// Contributions to the openWith service type also get mapped to fileCommands
-	var openWithReferences = serviceRegistry.getServiceReferences("openWith");
+	// Contributions to the orion.navigate.openWith service type also get mapped to orion.navigate.command
+	var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith");
 
 	var fileCommands = [];
 	var i;
@@ -663,7 +663,7 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 		});
 	}
 	
-	// Convert "openWith" contributions into fileCommands that open the appropriate editors
+	// Convert "orion.navigate.openWith" contributions into orion.navigate.command that open the appropriate editors
 	for (i=0; i < openWithReferences.length; i++) {
 		var openWithServiceRef = openWithReferences[i];
 		var name = openWithServiceRef.getProperty("name"),

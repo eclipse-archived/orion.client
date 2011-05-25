@@ -46,7 +46,7 @@ eclipse.CommitDetails = (function() {
 			}
 		});		
 
-		this._registry.getService("ICommandService").then(function(commandService) {
+		this._registry.getService("orion.page.command").then(function(commandService) {
 			// register commands with object scope
 			commandService.addCommand(showDiffCommand, "object");	
 			//commandService.addCommand(doSomething1, "dom");		
@@ -84,55 +84,57 @@ eclipse.CommitDetails = (function() {
 			dojo.addClass(commandCol, "paneHeadingContainer");
 			dojo.place("<span id='commitMetaCommands' class='paneHeadingToolbar'></span>", commandCol, "only");
 			
-			// commit details
-			var tr, col1, col2;
-			var tbody = dojo.create("tbody", null, commitMetaTable);
-			
-			var tr = dojo.create("tr");
-			var col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
-			dojo.place(document.createTextNode("Author"), col1, "only");		
-			var col2 = dojo.create("td", null, tr, "last");
-			dojo.place(document.createTextNode(commitDetails.AuthorName + " (" + commitDetails.AuthorEmail + ")"), col2, "only");
-			dojo.place(tr, tbody, "last");
-			var col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
-			dojo.style(col3, "whiteSpace", "nowrap");
-			dojo.style(col3, "textAlign", "right");
-			
-			tr = dojo.create("tr");
-			col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
-			dojo.place(document.createTextNode("Committer"), col1, "only");		
-			col2 = dojo.create("td", null, tr, "last");
-			dojo.place(document.createTextNode(commitDetails.CommitterName + " (" + commitDetails.CommitterEmail + ")"), col2, "only");
-			dojo.place(tr, tbody, "last");
-			col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
-			dojo.style(col3, "whiteSpace", "nowrap");
-			dojo.style(col3, "textAlign", "right");
-			
-			tr = dojo.create("tr");
-			col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
-			dojo.place(document.createTextNode("Message"), col1, "only");		
-			col2 = dojo.create("td", null, tr, "last");
-			dojo.place(document.createTextNode(commitDetails.Message), col2, "only");
-			dojo.place(tr, tbody, "last");
-			col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
-			dojo.style(col3, "whiteSpace", "nowrap");
-			dojo.style(col3, "textAlign", "right");
-			
-			tr = dojo.create("tr");
-			col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
-			dojo.place(document.createTextNode("Name"), col1, "only");		
-			col2 = dojo.create("td", null, tr, "last");
-			dojo.place(document.createTextNode(commitDetails.Name), col2, "only");
-			dojo.place(tr, tbody, "last");
-			col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
-			dojo.style(col3, "whiteSpace", "nowrap");
-			dojo.style(col3, "textAlign", "right");
+			if (commitDetails != null){
+				
+				// commit details
+				var tr, col1, col2;
+				var tbody = dojo.create("tbody", null, commitMetaTable);
+				
+				var tr = dojo.create("tr");
+				var col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
+				dojo.place(document.createTextNode("Author"), col1, "only");		
+				var col2 = dojo.create("td", null, tr, "last");
+				dojo.place(document.createTextNode(commitDetails.AuthorName + " (" + commitDetails.AuthorEmail + ")"), col2, "only");
+				dojo.place(tr, tbody, "last");
+				var col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
+				dojo.style(col3, "whiteSpace", "nowrap");
+				dojo.style(col3, "textAlign", "right");
+				
+				tr = dojo.create("tr");
+				col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
+				dojo.place(document.createTextNode("Committer"), col1, "only");		
+				col2 = dojo.create("td", null, tr, "last");
+				dojo.place(document.createTextNode(commitDetails.CommitterName + " (" + commitDetails.CommitterEmail + ")"), col2, "only");
+				dojo.place(tr, tbody, "last");
+				col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
+				dojo.style(col3, "whiteSpace", "nowrap");
+				dojo.style(col3, "textAlign", "right");
+				
+				tr = dojo.create("tr");
+				col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
+				dojo.place(document.createTextNode("Message"), col1, "only");		
+				col2 = dojo.create("td", null, tr, "last");
+				dojo.place(document.createTextNode(commitDetails.Message), col2, "only");
+				dojo.place(tr, tbody, "last");
+				col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
+				dojo.style(col3, "whiteSpace", "nowrap");
+				dojo.style(col3, "textAlign", "right");
+				
+				tr = dojo.create("tr");
+				col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
+				dojo.place(document.createTextNode("Name"), col1, "only");		
+				col2 = dojo.create("td", null, tr, "last");
+				dojo.place(document.createTextNode(commitDetails.Name), col2, "only");
+				dojo.place(tr, tbody, "last");
+				col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
+				dojo.style(col3, "whiteSpace", "nowrap");
+				dojo.style(col3, "textAlign", "right");
 			
 //			var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col3, "only");
 //			// we must hide/show the span rather than the column.  IE and Chrome will not consider
 //			// the mouse as being over the table row if it's in a hidden column
 //			dojo.style(actionsWrapper, "visibility", "hidden");
-//			this._registry.getService("ICommandService").then(function(service) {
+//			this._registry.getService("orion.page.command").then(function(service) {
 //				service.renderCommands(actionsWrapper, "object", commitDetails, this, "image", null, 0);
 //			});
 //			
@@ -145,12 +147,16 @@ eclipse.CommitDetails = (function() {
 //				var wrapper = dojo.byId(this.id+"actionsWrapper");
 //				dojo.style(wrapper, "visibility", "hidden");
 //			});
-
+			}
+			
 			dojo.place(commitMetaTable, this._parent, "only");
+			
+			if (commitDetails == null)
+				return;
 			
 			// Now that the table is added to the dom, generate commands
 			var commands = dojo.byId("commitMetaCommands");
-			this._registry.getService("ICommandService").then(function(service) {
+			this._registry.getService("orion.page.command").then(function(service) {
 				service.renderCommands(commands, "dom", this, this, "image");
 			});
 			
@@ -201,7 +207,7 @@ eclipse.CommitDetails = (function() {
 					// we must hide/show the span rather than the column.  IE and Chrome will not consider
 					// the mouse as being over the table row if it's in a hidden column
 					dojo.style(actionsWrapper, "visibility", "hidden");
-					this._registry.getService("ICommandService").then(function(service) {
+					this._registry.getService("orion.page.command").then(function(service) {
 						service.renderCommands(actionsWrapper, "object", {dom: "commitDiffsTable", object: commitDetails.Diffs[j]}, this, "image", null, j);
 					});
 					
@@ -222,7 +228,7 @@ eclipse.CommitDetails = (function() {
 			
 			// Now that the table is added to the dom, generate commands
 			var commands = dojo.byId("commitDiffsCommands");
-			this._registry.getService("ICommandService").then(function(service) {
+			this._registry.getService("orion.page.command").then(function(service) {
 				service.renderCommands(commands, "dom", this, this, "image");
 			});
 		}

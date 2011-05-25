@@ -24,7 +24,7 @@ orion.CompareContainer = (function() {
 		
 		getFileDiffGit: function(diffURI , uiCallBack , errorCallBack  ,onsave){
 			var self = this;
-			self._registry.getService("IGitService").then(
+			self._registry.getService("orion.git.provider").then(
 				function(service) {
 					service.getDiffContent(diffURI, 
 										   function(jsonData, secondArg) {
@@ -44,7 +44,7 @@ orion.CompareContainer = (function() {
 		
 		getFileURI: function(diffURI , uiCallBack , errorCallBack ){
 			var self = this;
-			self._registry.getService("IGitService").then(
+			self._registry.getService("orion.git.provider").then(
 				function(service) {
 					service.getDiffFileURI(diffURI, 
 										   function(jsonData, secondArg) {
@@ -60,7 +60,7 @@ orion.CompareContainer = (function() {
 		
 		getFileContent: function(fileURI , errorCallBack ){
 			var self = this;
-			self._registry.getService("IFileService").then(
+			self._registry.getService("orion.core.file").then(
 					function(service) {
 						service.read(fileURI).then( 
 											  function(contents) {

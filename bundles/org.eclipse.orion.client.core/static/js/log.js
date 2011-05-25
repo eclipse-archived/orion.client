@@ -26,7 +26,7 @@ eclipse.LogService.prototype = {
 	info : function(msg) {
 		// TODO temporary implementation uses status line
 		// obviously not the real answer
-		this._serviceRegistry.getService("IStatusReporter").then(function(service) {
+		this._serviceRegistry.getService("orion.page.message").then(function(service) {
 			service.setMessage("LOG: " + msg);
 		});
 	}

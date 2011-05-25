@@ -14,10 +14,10 @@ window.onload = function() {
 	
 	// Content assist for CSS, JavaScript
 	(function() {
-		provider.registerServiceProvider("IContentAssistService",
+		provider.registerServiceProvider("orion.edit.contentAssist",
 			new orion.contentAssist.CssContentAssistProvider(), 
 			{name: "CSS content assist", pattern: "\\.css$"});
-		provider.registerServiceProvider("IContentAssistService",
+		provider.registerServiceProvider("orion.edit.contentAssist",
 			new orion.contentAssist.JavaScriptContentAssistProvider(),
 			{name: "JavaScript content assist", pattern: "\\.js$"});
 	}());
@@ -26,7 +26,7 @@ window.onload = function() {
 	(function() {
 		var serviceImpl = { /* Grammar-based, so no service impl. All data is in properties */ };
 		var serviceProperties = orion.syntax.HtmlSyntaxHighlight;
-		provider.registerServiceProvider("ISyntaxHighlight", serviceImpl, serviceProperties);
+		provider.registerServiceProvider("orion.edit.highlighter", serviceImpl, serviceProperties);
 	}());
 	
 	// Register our editor for html, js, css, xml
@@ -37,7 +37,7 @@ window.onload = function() {
 			href: "/edit/edit.html#${Location}",
 			validationProperties: {Name: "*.(css|js|html|txt|xml)"}
 		};
-		provider.registerServiceProvider("openWith", serviceImpl, serviceProperties);
+		provider.registerServiceProvider("orion.navigate.openWith", serviceImpl, serviceProperties);
 	}());
 	
 	provider.connect();

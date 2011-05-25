@@ -154,7 +154,7 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 	// generate primary nav links. 
 	var primaryNav = dojo.byId("primaryNav");
 	if (primaryNav) {
-		// Note that the shape of the "primaryNavigation" extension is not in any shape or form that could be considered final.
+		// Note that the shape of the "orion.page.link" extension is not in any shape or form that could be considered final.
 		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 		
 		// The shape of a contributed navigation link is (for now):
@@ -163,7 +163,7 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 		//     required attribute: id - the id of the navigation link
 		//     required attribute: href - the URL for the navigation link
 		//     optional attribute: image - a URL to an icon representing the link (currently not used, may use in future)
-		var navLinks= serviceRegistry.getServiceReferences("primaryNavigation");
+		var navLinks= serviceRegistry.getServiceReferences("orion.page.link");
 		for (var i=0; i<navLinks.length; i++) {
 			serviceRegistry.getService(navLinks[i]).then(function(service) {
 				var info = {};

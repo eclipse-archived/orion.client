@@ -68,7 +68,7 @@ eclipse.Searcher = (function() {
 			return response;
 		},
 		saveSearch: function(favoriteName, query) {
-			this.registry.getService("IFavorites").then(function(favorites) {
+			this.registry.getService("orion.core.favorite").then(function(favorites) {
 				favorites.addFavoriteSearch(favoriteName, query);
 			});
 		},

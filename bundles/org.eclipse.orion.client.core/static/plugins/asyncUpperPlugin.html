@@ -8,7 +8,7 @@
 	<script>
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("editorAction", {
+			provider.registerServiceProvider("orion.edit.command", {
 				run : function(text) {
 					// return text.toUpperCase(); <-- original call
 					
