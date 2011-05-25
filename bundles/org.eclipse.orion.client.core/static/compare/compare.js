@@ -36,14 +36,26 @@ dojo.addOnLoad(function(){
 		var fileClient = new eclipse.FileClient(fileService);
 		
 		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
-		
+		/*
+		var fileClient1 = new eclipse.FileClient(fileService);
+		var uiFactory1 = new orion.CompareMergeUIFactory({parentDivID : "compareContainer1" , showTitle : false , showLineStatus : false});
+		uiFactory1.buildUI();
+		var compareMergeContainer1 = new orion.CompareMergeContainer(readOnly ,new orion.DiffProvider(serviceRegistry),serviceRegistry , commandService, fileClient1,uiFactory1);
+		compareMergeContainer1.resolveDiff(dojo.hash(), 
+				  function(newFile , oldFile){
+				     handleTile(newFile , oldFile , uiFactory);
+		  		  },
+				  function(errorResponse , ioArgs){
+		  			 handleErrorTile(errorResponse , ioArgs , uiFactory);
+				  }
+		);
+		*/
 		var uiFactory = new orion.CompareMergeUIFactory({parentDivID : "compareContainer" , showTitle : true , showLineStatus : true});
 		uiFactory.buildUI();
 		
-		// Git operations
-		new eclipse.GitService(serviceRegistry);
+		// Diff operations
 		var readOnly = isReadOnly();
-		compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , commandService, fileClient,uiFactory);
+		compareMergeContainer = new orion.CompareMergeContainer(readOnly ,new orion.DiffProvider(serviceRegistry),serviceRegistry , commandService, fileClient,uiFactory);
 		compareMergeContainer.resolveDiff(dojo.hash(), 
 				  function(newFile , oldFile){
 				     handleTile(newFile , oldFile , uiFactory);
@@ -55,7 +67,7 @@ dojo.addOnLoad(function(){
 		
 		//every time the user manually changes the hash, we need to load the diff
 		dojo.subscribe("/dojo/hashchange", compareMergeContainer, function() {
-			compareMergeContainer = new orion.CompareMergeContainer(readOnly ,serviceRegistry , commandService , fileClient,uiFactory);
+			compareMergeContainer = new orion.CompareMergeContainer(readOnly ,new orion.DiffProvider(serviceRegistry),serviceRegistry , commandService , fileClient,uiFactory);
 			compareMergeContainer.resolveDiff(dojo.hash(), 
 					  function(newFile , oldFile){
 						 handleTile(newFile , oldFile , uiFactory);

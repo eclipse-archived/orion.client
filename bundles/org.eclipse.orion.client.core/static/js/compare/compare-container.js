@@ -11,7 +11,7 @@
 var orion = orion || {};
 
 orion.CompareContainer = (function() {
-	function CompareContainer () {
+	function CompareContainer (diffProvider) {
 		this._diffParser = new orion.DiffParser();
 		this._diff = null;
 		this._input = null;
@@ -22,7 +22,11 @@ orion.CompareContainer = (function() {
 			return delim;
 		},
 		
-		getFileDiffGit: function(diffURI , uiCallBack , errorCallBack  ,onsave){
+		setDiffProvider: function(diffProvider){
+			this._diffProvider = diffProvider;
+		},
+		/*
+		getFileDiff: function(diffURI , uiCallBack , errorCallBack  ,onsave){
 			var self = this;
 			self._registry.getService("IGitService").then(
 				function(service) {
@@ -56,6 +60,36 @@ orion.CompareContainer = (function() {
 										   },
 										   errorCallBack);
 				});
+		},
+		*/
+		getFileDiff: function(diffURI , uiCallBack , errorCallBack  ,onsave){
+			var self = this;
+			this._diffProvider.getDiffContent(diffURI, 
+										   function(jsonData, secondArg) {
+											  if(self._conflict){
+												  self._diff = jsonData.split("diff --git")[1];
+											  }	else {
+												  self._diff = jsonData;
+											  }
+											  if(onsave)
+												  self.setEditor(this._input , self._diff ,onsave);
+											  else
+												  self.getFileURI(diffURI , uiCallBack , errorCallBack);
+										   },
+										   errorCallBack);
+		},
+		
+		getFileURI: function(diffURI , uiCallBack , errorCallBack ){
+			var self = this;
+			this._diffProvider.getDiffFileURI(diffURI, 
+										   function(jsonData, secondArg) {
+											  self._oldFileURI = jsonData.Git.Old;
+											  self._newFileURI = jsonData.Git.New;
+											  self.getFileContent(jsonData.Git.Old , errorCallBack);
+											  if(uiCallBack)
+												  uiCallBack(jsonData.Git.New , jsonData.Git.Old);
+										   },
+										   errorCallBack);
 		},
 		
 		getFileContent: function(fileURI , errorCallBack ){
@@ -99,11 +133,11 @@ orion.CompareContainer = (function() {
 					this._conflict = true;
 			} 
 			this._diffURI = diffURI;
-			this.getFileDiffGit(diffURI , callBack , errorCallBack , onsave );
+			this.getFileDiff(diffURI , callBack , errorCallBack , onsave );
 		},
 				
 		resolveDiffonSave: function(){
-			this.getFileDiffGit(this._diffURI , null , null , true );
+			this.getFileDiff(this._diffURI , null , null , true );
 		},
 				
 		_initDiffPosition: function(editor){
@@ -324,7 +358,8 @@ orion.CompareMergeStyler = (function() {
 
 orion.CompareMergeContainer = (function() {
 	/** @private */
-	function CompareMergeContainer(readonly , resgistry , commandService , fileClient,uiFactory) {
+	function CompareMergeContainer(readonly , diffProvider , resgistry , commandService , fileClient,uiFactory) {
+		this.setDiffProvider(diffProvider);
 		this._uiFactory = uiFactory;
 		this.readonly = readonly;
 		this._registry = resgistry;
@@ -550,7 +585,8 @@ orion.CompareMergeContainer = (function() {
 
 orion.InlineCompareContainer = (function() {
 	/** @private */
-	function InlineCompareContainer(resgistry , editorDivId ) {
+	function InlineCompareContainer(diffProvider ,resgistry , editorDivId ) {
+		this.setDiffProvider(diffProvider);
 		this._registry = resgistry;
 		this._editorDivId = editorDivId;
 		this.initEditorContainers("" , "\n" , [],[]);
