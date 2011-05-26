@@ -10,14 +10,13 @@
  *******************************************************************************/
 /*global dijit dojo widgets*/
 /*jslint devel:true*/
-dojo.provide("widgets.ExplorerTree");
-dojo.require("dijit.Tree");
+define(['dojo', 'dijit', 'dijit/Tree'], function(dojo, dijit) {
 
 dojo.declare(
 	"widgets._ExplorerTreeNode",
 	[dijit._TreeNode],
 {
-	templateString : dojo.cache("widgets", "templates/_ExplorerTreeNode.html"),
+	templateString : dojo.cache(new dojo._Url("/js/widgets/templates/_ExplorerTreeNode.html")),
 	
 	/**
 	 * @override
@@ -287,4 +286,5 @@ dojo.declare(
 			}
 		}
 	}
+});
 });
