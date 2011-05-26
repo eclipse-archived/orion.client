@@ -15,13 +15,12 @@ eclipse.git = eclipse.git || {};
 
 eclipse.git.GitClonesExplorer = (function() {
 	
-	function GitClonesExplorer(registry, selection, defaultPath, parentId, toolbarId, selectionToolsId){
+	function GitClonesExplorer(registry, selection, parentId, toolbarId, selectionToolsId){
 		this.parentId = parentId;
 		this.registry = registry;
 		this.selection = selection;
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
-		this.defaultPath = defaultPath;
 		this.renderer = new eclipse.git.GitClonesRenderer({checkbox: this.checkbox}, this);
 		
 	}
@@ -29,6 +28,10 @@ eclipse.git.GitClonesExplorer = (function() {
 	
 	GitClonesExplorer.prototype.getGitLocation = function(path){
 		return "/git/clone/"+eclipse.util.makeRelative(path);
+	};
+	
+	GitClonesExplorer.prototype.setDefaultPath = function(defaultPath){
+		this.defaultPath = defaultPath;
 	};
 	
 	GitClonesExplorer.prototype.displayClonesList = function(path){
@@ -182,7 +185,7 @@ eclipse.git.GitClonesRenderer = (function(){
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			} else if (item.Type === "Branch"){
 				col = document.createElement('td');
-				div = dojo.create("div", null, col, "only");
+				div = dojo.create("div", {style: "margin-left: 10px"}, col, "only");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				if (item.Current)
@@ -201,7 +204,7 @@ eclipse.git.GitClonesRenderer = (function(){
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			} else if (item.Type === "RemoteTrackingBranch"){
 				col = document.createElement('td');
-				div = dojo.create("div", null, col, "only");
+				div = dojo.create("div", {style: "margin-left: 10px"}, col, "only");
 								
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 								

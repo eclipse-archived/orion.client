@@ -24,7 +24,6 @@ dojo.addOnLoad(function(){
 	new eclipse.UserService(serviceRegistry);
 	var selection = new orion.Selection(serviceRegistry);
 	new eclipse.SshService(serviceRegistry);
-	var fileClient = new eclipse.FileClient(serviceRegistry, pluginRegistry);
 	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
 	
@@ -51,26 +50,72 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.orion.git.merge", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.push", 2);
 	
-	serviceRegistry.getService("orion.core.file").then(function(fileService){
-	fileService.loadWorkspace().then(
-		function(workspace){
-			var explorer = new eclipse.git.GitClonesExplorer(serviceRegistry, selection, workspace.Location, "clonesList", "pageActions", "selectionTools");
+	var explorer = new eclipse.git.GitClonesExplorer(serviceRegistry, selection, "clonesList", "pageActions", "selectionTools");
+	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
 	
-			// global commands
-			eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
-			eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
-			eclipse.gitCommandUtils.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
 	
-			eclipse.gitCommandUtils.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
+	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 	
-			explorer.displayClonesList(dojo.hash());
-				
-			//every time the user manually changes the hash, we need to load the workspace with that name
-			dojo.subscribe("/dojo/hashchange", explorer, function() {
-			   explorer.displayClonesList(dojo.hash());
-			});
+	function emptyArray() {
+		var d = new dojo.Deferred();
+		d.callback([]);
+		return d;
+	}
+	function emptyObject() {
+		var d = new dojo.Deferred();
+		d.callback({});
+		return d;
+	}
+	var topLevelFileService = {
+		fetchChildren: emptyArray,
+		createWorkspace: emptyObject,
+		loadWorkspaces: emptyArray,
+		loadWorkspace: function(location) {
+			var d = new dojo.Deferred();
+			d.callback({Children: topLevel});
+			return d;
+		},
+		createProject: emptyObject,
+		createFolder: emptyObject,
+		createFile: emptyObject,
+		deleteFile: emptyObject,
+		moveFile: emptyObject,
+		copyFile: emptyObject,
+		read: emptyObject,
+		write: emptyObject
+	};
 
-		}
-	);
+	var fileClient = new eclipse.FileClient(topLevelFileService);
+	
+	var deferred;
+	if (fileServices[0]) {
+		deferred = serviceRegistry.getService(fileServices[0]);
+	} else {
+		deferred = { then: function(callback) { callback(topLevelFileService); } };
+	}
+	deferred.then(function(fileService) {
+		fileClient.setFileService(fileService);
+		fileClient.loadWorkspace().then(
+				function(workspace){
+					explorer.setDefaultPath(workspace.Location);
+			
+					// global commands
+					eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
+					eclipse.gitCommandUtils.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
+			
+					eclipse.gitCommandUtils.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
+			
+					explorer.displayClonesList(dojo.hash());
+						
+					//every time the user manually changes the hash, we need to load the workspace with that name
+					dojo.subscribe("/dojo/hashchange", explorer, function() {
+					   explorer.displayClonesList(dojo.hash());
+					});
+
+				}
+			);
+		
 	});
+	
+	
 });

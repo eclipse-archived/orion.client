@@ -392,7 +392,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			image : "/images/compare-sbs.gif",
 			id : "eclipse.compareWithWorkingTree",
 			hrefCallback : function(item) {
-				return "/compare/compare.html#" + item.object.DiffLocation;
+				return "/compare/compare.html#" + item.DiffLocation;
 			},
 			visibleWhen : function(item) {
 				// show only for commits in the git log list
@@ -407,11 +407,11 @@ dojo.require("widgets.GitCredentialsDialog");
 			image : "/images/find.gif",
 			id : "eclipse.openGitCommit",
 			hrefCallback: function(item) {
-				return "/edit/edit.html#" + item.object.ContentLocation;
+				return "/edit/edit.html#" + item.ContentLocation;
 			},
 			visibleWhen : function(item) {
 				// show only for commits in the git log list
-				return item.dom === "explorer-tree" && item.object.ContentLocation != null && !explorer.isDirectory;
+				return item.dom === "explorer-tree" && item.ContentLocation != null && !explorer.isDirectory;
 			}
 		});
 	
@@ -567,17 +567,28 @@ dojo.require("widgets.GitCredentialsDialog");
 			id : "eclipse.orion.git.addTag",
 			callback : function(item) {
 				var clientDeferred = new dojo.Deferred();
-				var tagName = prompt("Enter tage name");
-				serviceRegistry.getService("orion.git.provider").then(
-						function(service) {
-							service.doAddTag(item.object.Location, tagName,
-								function(jsonData, secondArg) {
-									var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
-									var tr = dojo.byId(trId);
-									dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[2] /* tags column */, "last"), "only");
+				
+				var dialog = new widgets.NewItemDialog({
+					title: "Tag",
+					label: "Tag name:",
+					func:  function(tagName){
+						serviceRegistry.getService("orion.git.provider").then(
+								function(service) {
+									service.doAddTag(item.Location, tagName,
+										function(jsonData, secondArg) {
+											var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+											var tr = dojo.byId(trId);
+											dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[5] /* tags column */, "last"), "only");
+										});
 								});
-						});
-				return clientDeferred;
+						return clientDeferred;
+					},
+					advanced: false
+				});
+				dialog.startup();
+				dialog.show();
+				
+
 			},
 			visibleWhen : function(item) {
 				// show only for commits in the git log list
