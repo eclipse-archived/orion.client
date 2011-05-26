@@ -233,6 +233,10 @@ a:hover {
     padding: 5px 6px 3px;
 }
 
+.nihilo .dijitTreeRowSelected .dijitTreeLabel {
+	background-color: #fedda7;   // same color used for command menu hover
+}
+
 .mainpane {
     margin: 0px;
     padding-left: 8px;

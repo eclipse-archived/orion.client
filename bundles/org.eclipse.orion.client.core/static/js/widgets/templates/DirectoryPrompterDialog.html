@@ -1,0 +1,38 @@
+<div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="labelledby-${id}_title">
+	<div dojoAttachPoint="titleBar" class="dijitDialogTitleBar">
+		<span dojoAttachPoint="titleNode" class="dijitDialogTitle" id="${id}_title"></span>
+		<span dojoAttachPoint="closeButtonNode" class="dijitDialogCloseIcon" dojoAttachEvent="onclick: onCancel" title="${buttonCancel}">
+			<span dojoAttachPoint="closeText" class="closeText" title="${buttonCancel}">x</span>
+		</span>
+	</div>
+	<div dojoAttachPoint="containerNode" class="dijitDialogPaneContent">
+		<!-- Actual content here -->
+			<div style="display: table">
+				<div style="display: table-row"> 
+
+					<div style="display: table-cell; padding: 1px; vertical-align: bottom;">
+						<div dojoAttachPoint="treeContainerNode" id="${id}_treeContainerNode" dojoType="dijit.layout.BorderContainer" style="width:25em; height:25em; overflow:auto;" design="sidebar" gutters="true">
+							<div dojoAttachPoint="treeContentPane" class="dijitDialogPaneContent" id="${id}_treeContentPane dojoType="dijit.layout.ContentPane" region="center" gutters="true">
+								<div dojoAttachPoint="browseDirectoryExplorerTree" class="explorerTreeClass" id="${id}_browseDirectoryExplorerTree" style="margin-top: -3px;"></div> 
+							</div>
+						</div>
+					</div>
+					<div style="display: table-cell; padding: 1px; vertical-align: bottom;">
+					</div>
+					<div style="display: table-cell; padding: 1px; vertical-align: bottom;">
+					</div>
+				</div> 
+				<div style="display: table-row">
+					<div style="display: table-cell; padding: 1px;">
+					</div>
+					<div style="display: table-cell; padding: 1px;">
+					</div>
+					<div style="display: table-cell; padding: 1px;">
+					
+						<button dojoAttachPoint="directoryBrowserButton" dojoType="dijit.form.Button" type="submit" value="OK" style="padding: 20 0 10 0; float: right; clear: both;">${buttonOk}
+						</button>
+					</div>
+				</div>
+			</div> <!-- end table -->
+	</div> <!-- content pane -->
+</div>
