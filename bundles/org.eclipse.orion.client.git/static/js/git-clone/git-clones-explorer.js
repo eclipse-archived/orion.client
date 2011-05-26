@@ -185,7 +185,7 @@ eclipse.git.GitClonesRenderer = (function(){
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			} else if (item.Type === "Branch"){
 				col = document.createElement('td');
-				div = dojo.create("div", null, col, "only");
+				div = dojo.create("div", {style: "margin-left: 10px"}, col, "only");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				if (item.Current)
@@ -204,7 +204,7 @@ eclipse.git.GitClonesRenderer = (function(){
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			} else if (item.Type === "RemoteTrackingBranch"){
 				col = document.createElement('td');
-				div = dojo.create("div", null, col, "only");
+				div = dojo.create("div", {style: "margin-left: 10px"}, col, "only");
 								
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 								
