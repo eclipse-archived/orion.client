@@ -25,6 +25,7 @@ eclipse.gitCommandUtils = eclipse.gitCommandUtils || {};
 
 dojo.require("widgets.CloneGitRepositoryDialog");
 dojo.require("widgets.InitGitRepositoryDialog");
+dojo.require("widgets.AddRemoteDialog");
 dojo.require("widgets.GitCredentialsDialog");
 
 //this function is just a closure for the global "doOnce" flag
@@ -292,6 +293,50 @@ dojo.require("widgets.GitCredentialsDialog");
 			}}
 		);
 		commandService.addCommand(removeBranchCommand, "object");
+		
+		var addRemoteCommand = new eclipse.Command({
+			name: "Add Remote",
+			image: "/images/add_obj.gif",
+			id: "eclipse.addRemote",
+			callback : function(item) {
+				var dialog = new widgets.AddRemoteDialog({
+					func : function(remote, remoteURI){
+								serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+									gitService.addRemote(item.Location, remote, remoteURI).then(
+											function() {
+												dojo.hitch(explorer, explorer.changedItem)(item);
+											});
+								});
+							}
+				});
+				dialog.startup();
+				dialog.show();
+			},
+			visibleWhen: function(item) {
+				return item.GroupNode && item.Name === "Remote";
+			}}
+		);
+		commandService.addCommand(addRemoteCommand, "object");
+		
+		var removeRemoteCommand = new eclipse.Command({
+			name: "Remove Remote",
+			image: "/images/remove.gif",
+			id: "eclipse.removeRemote",
+			callback: function(item) {
+				serviceRegistry.getService("orion.git.provider").then(
+					function(service) {
+						service.removeRemote(item.Location).then(
+								function(){
+									dojo.hitch(explorer, explorer.changedItem)(item.parent);
+								});
+					}
+				);
+			},
+			visibleWhen: function(item) {
+				return item.Type === "Remote";
+			}}
+		);
+		commandService.addCommand(removeRemoteCommand, "object");
 		
 		var openGitLog = new eclipse.Command({
 			name : "Show Git Log",
