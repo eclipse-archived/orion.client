@@ -15,7 +15,7 @@
  * @namespace The global container for eclipse APIs.
  */ 
 
-define(["dojo", "orion/util", "orion/commands"], function(dojo, mUtil, mCommands){
+define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog"], function(dojo, mUtil, mCommands){
 
 var eclipse = eclipse || {};
 
@@ -139,9 +139,9 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		var refreshFunc = function() {
 			this.changedItem(this.treeRoot);
 		};
-		var callback = function(items) {
-			for (var i=0; i < items.length; i++) {
-				var item = items[i];
+		var callback = function(selectedItems) {
+			for (var i=0; i < selectedItems.length; i++) {
+				var item = selectedItems[i];
 				var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 				func.apply(fileClient, [item.Location, this.path]).then(
 					dojo.hitch(explorer, refreshFunc)//refresh the root
@@ -149,31 +149,46 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			}
 		};
 		
-		var prompt = function() {
-			window.alert("Directory prompter appears here.");
+		var prompt = function(selectedItems) {
+			var dialog = new widgets.DirectoryPrompterDialog({
+				title: "Choose a Folder",
+				serviceRegistry: serviceRegistry,
+				fileClient: fileClient,				
+				func: function(targetFolder) { 
+					if (targetFolder && targetFolder.Location) {
+						for (var i=0; i < selectedItems.length; i++) {
+							var location = targetFolder.Location;
+							var newName; // intentionally undefined.  Only use if we need.
+							var item = selectedItems[i];
+							var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
+							if (isCopy && item.parent && item.parent.Location === location) {
+								newName = window.prompt("Enter a new name for '" + item.Name+ "'", "Copy of " + item.Name);
+								// user cancelled?  don't copy this one
+								if (!newName) {
+									location = null;
+								}
+							}
+							if (location) {
+								func.apply(fileClient, [item.Location, targetFolder.Location, newName]).then(
+									dojo.hitch(explorer, refreshFunc)//refresh the root
+								);
+							}
+						}
+					}
+				}
+			});
+			dialog.startup();
+			dialog.show();
 		};
 		
-		// We really only care about directories, and for file items, only the parent.
-		// Our first pass through the items is to 
-		// 1) remember all source paths so we do not propose to move/copy a source to its own location
-		// 2) filter the items list so that all directories are remembered, but only one file per folder
+		// Remember all source paths so we do not propose to move/copy a source to its own location
 		var sourceLocations = [];
-		var filteredItems = [];
-		var i;
-		for (i=0; i<items.length; i++) {
+		for (var i=0; i<items.length; i++) {
 			// moving or copying to the parent location is a no-op (we don't support rename or copy with rename from this menu)
 			if (items[i].parent && items[i].parent.Location ) {
 				items[i].parent.stripped = items[i].parent.stripped || stripPath(items[i].parent.Location);
 				if (!contains(sourceLocations, items[i].parent.stripped)) {
 					sourceLocations.push(items[i].parent.stripped);
-					// only remember the first file item whose parent we hadn't already seen.
-					if (!items[i].Directory) {
-						filteredItems.push(items[i]);
-					}
-				}
-				// remember all directories because their location is unique 
-				if (items[i].Directory) {
-					filteredItems.push(items[i]);
 				}
 			}
 			// moving a directory into itself is not supported
@@ -182,12 +197,9 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				sourceLocations.push(items[i].stripped);
 			}
 		}
-		// reset items so we only ever go through 5 unique choices.  Otherwise the "shortcut" of proposing common cases is not useful.
-		items = filteredItems;
-		if (items.length > 5) {
-			items.length = 5;
-		}
+
 		var choices = [];
+		// Propose any favorite that is not already a sourceLocation
 		if (eclipse.favoritesCache) {
 			var favorites = eclipse.favoritesCache.favorites;
 			for (i=0; i<favorites.length; i++) {
@@ -198,58 +210,13 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			}
 		}
 		choices.push({});  //separator
-		// Now we propose the most common cases.  Parent, siblings, and visible child folders of items (no fetch required)
-		// Don't propose a target if it's a source
 		var proposedPaths = [];
-		var alreadySeen = [];
-		var j, child, childPath;
-		for (i= 0; i<items.length; i++) {
-			var item = items[i];
-			var sibling = items[i];
-			// for the purposes of finding parents and siblings, if this is a file, consider its parent folder 
-			// for finding targets, not itself.
-			if (!item.Directory && item.parent) {
-				item = item.parent;
-			}
-			item.stripped = item.stripped || stripPath(item.Location);
-			if (item.Parents) {
-				for (j=0; j<item.Parents.length; j++) {
-					child = item.Parents[j];
-					child.stripped = child.stripped || stripPath(child.Location);
-					if (child.Directory && !contains(alreadySeen, child.stripped) && !contains(sourceLocations, child.stripped)) {
-						alreadySeen.push(child.stripped);
-						proposedPaths.push(child);
-					}
-				}
-			} else if (item.parent) {
-				if (item.parent.Location) {
-					item.parent.stripped = item.parent.stripped || stripPath(item.parent.Location);
-					if (!contains(alreadySeen, item.parent.stripped) && !contains(sourceLocations, item.parent.stripped)) {
-						alreadySeen.push(item.parent.stripped);
-						proposedPaths.push(item.parent);
-					}
-				}
-			}
-			if (sibling.parent && sibling.parent.children) {	// siblings
-				for (j=0; j<sibling.parent.children.length; j++) {
-					child = sibling.parent.children[j];
-					if (child.Directory) {
-						child.stripped = child.stripped || stripPath(child.Location);
-						if (!contains(alreadySeen, child.stripped) && !contains(sourceLocations, child.stripped)) {
-							alreadySeen.push(child.stripped);
-							proposedPaths.push(child);
-						}
-					}
-				}
-			}
-		}
 		// All children of the root that are folders should be available for choosing.
 		var topLevel = explorer.treeRoot.Children;
 		for (i=0; i<topLevel.length; i++) {
-			child = topLevel[i];
+			var child = topLevel[i];
 			child.stripped = child.stripped || (child.Directory ? stripPath(child.Location) : null);
-			if (child.stripped && !contains(alreadySeen, child.stripped) && !contains(sourceLocations, child.stripped)) {
-				alreadySeen.push(child.stripped);
+			if (child.stripped && !contains(sourceLocations, child.stripped)) {
 				proposedPaths.push(child);
 			}
 		}
@@ -271,7 +238,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			var slashes = item.stripped.split('/').length + 1;
 			// but don't indent for leading or trailing slash
 			// TODO is there a smarter way to do this?
-			for (j=0; j<slashes-2; j++) {
+			for (var j=0; j<slashes-2; j++) {
 				displayPath = "  " + displayPath;
 			}
 			choices.push({name: displayPath, path: item.stripped, callback: callback});
@@ -279,7 +246,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		if (proposedPaths.length > 0) {
 			choices.push({});  //separator
 		}
-		choices.push({name: "Choose target...", callback: prompt});
+		choices.push({name: "Choose folder...", callback: prompt});
 		return choices;
 	}
 	
