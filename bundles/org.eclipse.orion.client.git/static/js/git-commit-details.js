@@ -39,7 +39,7 @@ eclipse.CommitDetails = (function() {
 			image: "images/compare-sbs.gif",
 			id: "eclipse.showDiff",
 			hrefCallback: function(item) {
-				return "/compare/compare.html?readonly#" + item.object.DiffLocation;
+				return "/compare/compare.html?readonly#" + item.DiffLocation;
 			},
 			visibleWhen: function(item) {
 				return item.dom == "commitDiffsTable";

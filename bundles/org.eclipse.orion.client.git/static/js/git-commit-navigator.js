@@ -169,7 +169,8 @@ eclipse.GitCommitRenderer = (function() {
 			return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: dojo.date.locale.format(new Date(item.Time), {formatLength: "short"})});
 			break;
 		case 3:
-			var actionsColumn = this.getActionsColumn({dom: "explorer-tree", object: item}, tableRow);
+			item.dom = "explorer-tree";
+			var actionsColumn = this.getActionsColumn(item, tableRow);
 			dojo.style(actionsColumn, "padding-left", "5px");
 			dojo.style(actionsColumn, "padding-right", "5px");
 			return actionsColumn;
