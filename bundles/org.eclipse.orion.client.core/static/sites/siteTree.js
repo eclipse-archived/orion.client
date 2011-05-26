@@ -12,7 +12,10 @@
   handleDeleteAuthenticationError */
 /*jslint browser:true devel:true*/
 
-dojo.getObject("eclipse.sites", true);
+define(['dojo', 'siteUtils'], function(dojo, mSiteUtils) {
+
+var eclipse = {};
+eclipse.sites = {};
 
 /**
  * @name eclipse.sites
@@ -86,7 +89,7 @@ eclipse.sites.SiteRenderer = (function() {
 			var actionCol = dojo.create("td", {id: tableRow.id + "col3"});
 			
 			// Site config column
-			var href = eclipse.sites.util.generateEditSiteHref(item);
+			var href = mSiteUtils.generateEditSiteHref(item);
 			var imgLink = dojo.create("a", {href: href}, siteConfigCol, "last");
 			var icon = dojo.create("img",
 					{src: "/images/config_obj.gif", style: {verticalAlign: "bottom", paddingRight: "3px"}},
@@ -142,3 +145,7 @@ eclipse.sites.SiteRenderer = (function() {
 	};
 	return SiteRenderer;
 }());
+
+return eclipse.sites;
+});
+

@@ -8,8 +8,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global dojo window dijit eclipse:true */
-dojo.require("dojo.hash");
 
+define(['dojo','dojo/hash'], function(dojo) {
+                
 /**
  * @namespace The global container for eclipse APIs.
  */ 
@@ -319,3 +320,7 @@ eclipse.util.setText = function(node, text) {
 		node.innerText = text;
 	}
 };
+
+
+return eclipse.util;
+});

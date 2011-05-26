@@ -9,6 +9,9 @@
  ******************************************************************************/
 
 /** @namespace The global container for eclipse APIs. */
+
+define([], function(){
+
 var eclipse = eclipse || {};
 
 eclipse.SshService = (function() {
@@ -53,3 +56,5 @@ eclipse.SshService = (function() {
 	};
 return SshService;
 }());
+return eclipse;
+});

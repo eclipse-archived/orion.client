@@ -11,7 +11,7 @@
 /*global dojo eclipse:true widgets*/
 /*jslint regexp:false browser:true forin:true*/
 
-dojo.require("dojo.date.locale");
+define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/fileCommands', 'dojo/number'], function(dojo, mUtil, mExplorer, mBreadcrumbs, mFileCommands){
 
 var eclipse = eclipse || {};
 eclipse.FileExplorer = (function() {
@@ -34,13 +34,13 @@ eclipse.FileExplorer = (function() {
 		this.renderer = new eclipse.FileRenderer({checkbox: true, cachePrefix: "Navigator"}, this, commandService);
 	}
 	
-	FileExplorer.prototype = eclipse.Explorer.prototype;
+	FileExplorer.prototype = mExplorer.Explorer.prototype;
 	
 		// we have changed an item on the server at the specified parent node
 		FileExplorer.prototype.changedItem = function(parent) {
 			var self = this;
 			this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
-				eclipse.util.processNavigatorParent(parent, children);
+				mUtil.processNavigatorParent(parent, children);
 				dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children, self.renderer.expandCollapseImageId(self.model.getId(parent)), self.renderer._expandImgSrc);
 			});
 		};
@@ -84,7 +84,7 @@ eclipse.FileExplorer = (function() {
 		 */
 		FileExplorer.prototype.loadResourceList = function(path, force) {
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
-			path = eclipse.util.makeRelative(path);
+			path = mUtil.makeRelative(path);
 			if (!force && path === this._lastHash) {
 				return;
 			}
@@ -125,15 +125,15 @@ eclipse.FileExplorer = (function() {
 						for (var i in loadedWorkspace) {
 							this.treeRoot[i] = loadedWorkspace[i];
 						}
-						eclipse.util.rememberSuccessfulTraversal(this.treeRoot, this.registry);
-						eclipse.util.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);					
+						mUtil.rememberSuccessfulTraversal(this.treeRoot, this.registry);
+						mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);					
 						// erase any old page title
 						var pageTitle = dojo.byId(this.pageTitleId);
 						if (pageTitle) {
 							dojo.empty(pageTitle);
-							new eclipse.BreadCrumbs({container: pageTitle, resource: this.treeRoot});
+							new mBreadcrumbs.BreadCrumbs({container: pageTitle, resource: this.treeRoot});
 						}
-						eclipse.fileCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
+						mFileCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
 						this.model = new eclipse.Model(this.registry, this.treeRoot, this.fileClient);
 						this.createTree(this.parentId, this.model);
 					}),
@@ -164,7 +164,7 @@ eclipse.Model = (function() {
 		this.fileClient = fileClient;
 		this.treeId = treeId;
 	}
-	Model.prototype = eclipse.ExplorerModel.prototype; 
+	Model.prototype = mExplorer.ExplorerModel.prototype; 
 	
 	
 	Model.prototype.getRoot = function(onItem){
@@ -180,7 +180,7 @@ eclipse.Model = (function() {
 			} else if (parentItem.Location) {
 				this.fileClient.fetchChildren(parentItem.ChildrenLocation).then( 
 					dojo.hitch(this, function(children) {
-						eclipse.util.processNavigatorParent(parentItem, children);
+						mUtil.processNavigatorParent(parentItem, children);
 						onComplete(children);
 					})
 				);
@@ -200,7 +200,7 @@ eclipse.FileRenderer = (function() {
 		this.openWithCommands = null;
 		this._init(options);
 	}
-	FileRenderer.prototype = eclipse.SelectionRenderer.prototype; 
+	FileRenderer.prototype = mExplorer.SelectionRenderer.prototype; 
 	
 	
 	FileRenderer.prototype.getCellHeaderElement = function(col_no){
@@ -238,7 +238,7 @@ eclipse.FileRenderer = (function() {
 				// Only generate an "open with" href if there's a matching orion.navigate.openWith handler.
 				// This way we can still view images, etc.
 				if (!this.openWithCommands) {
-					this.openWithCommands = eclipse.fileCommandUtils.getOpenWithCommands(this.commandService);
+					this.openWithCommands = mFileCommands.getOpenWithCommands(this.commandService);
 				}
 				var href = item.Location;
 				for (var i=0; i < this.openWithCommands.length; i++) {
@@ -279,3 +279,5 @@ eclipse.FileRenderer = (function() {
 	};
 	return FileRenderer;
 }());
+return eclipse;
+});

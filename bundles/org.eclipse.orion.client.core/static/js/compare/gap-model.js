@@ -7,6 +7,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+
+define([], function(){
+
 var orion = orion || {};
 
 orion.GapTextModel = (function() {
@@ -226,3 +229,6 @@ orion.GapTextModel = (function() {
 	
 	return GapTextModel;
 }()); 
+
+return orion;	
+});

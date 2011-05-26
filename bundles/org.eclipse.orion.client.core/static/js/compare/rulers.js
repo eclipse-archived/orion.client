@@ -8,6 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+define(['orion/compare/compareUtils'], function(mCompareUtils) {
 var orion = orion || {};
 
 orion.CompareRuler = (function() {
@@ -282,7 +283,7 @@ orion.CompareMatchRenderer =  (function() {
 			var matchEditor = fromLeft ? this._rightEditor : this._leftEditor;
 			var topLine = baseEditor.getTopIndex();
 			var bottomLine = baseEditor.getBottomIndex();
-			var matchLine = orion.compareUtils.matchMapper(this._mapper , fromLeft ? 0: 1 , topLine , bottomLine);
+			var matchLine = mCompareUtils.matchMapper(this._mapper , fromLeft ? 0: 1 , topLine , bottomLine);
 			matchEditor.setTopIndex(matchLine);
 		},
 
@@ -375,8 +376,8 @@ orion.CompareMatchRenderer =  (function() {
 			var rendering = false;
 			for (var i = 0 ; i < this._mapper.length ; i++){
 				if(this._mapper[i][2] !== 0){
-					if(orion.compareUtils.overlapMapper( this._mapper[i] , 0 , curLeftIndex , leftTop ,leftBottom) ||
-					   orion.compareUtils.overlapMapper( this._mapper[i] , 1 , curRightIndex , rightTop ,rightBottom) ){
+					if(mCompareUtils.overlapMapper( this._mapper[i] , 0 , curLeftIndex , leftTop ,leftBottom) ||
+							mCompareUtils.overlapMapper( this._mapper[i] , 1 , curRightIndex , rightTop ,rightBottom) ){
 						this._renderCurve(i, curLeftIndex , curRightIndex , this._canvasDiv , context , leftTop , leftBottom , rightTop , rightBottom);
 						rendering = true;
 					} else if (rendering) {
@@ -430,4 +431,5 @@ orion.CompareMatchRenderer =  (function() {
 	
 	return CompareMatchRenderer;
 }()); 
-
+return orion;
+});

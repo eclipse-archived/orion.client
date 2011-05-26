@@ -10,42 +10,54 @@
  *******************************************************************************/
 /*global dojo dijit window eclipse orion serviceRegistry:true widgets alert*/
 /*browser:true*/
+
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/log','orion/dialogs',
+        'orion/users', 'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands',
+        'orion/fileCommands', 'orion/explorer-table',
+        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mLog, mDialogs, mUsers, mSsh, mCommands, mFavorites, 
+				mSearchClient, mFileClient, mGlobalCommands, mFileCommands, mExplorerTable) {
+
+
+
 dojo.addOnLoad(function(){
 	
+	dojo.parser.parse();
+	
 	// initialize service registry and EAS services
-	serviceRegistry = new eclipse.ServiceRegistry();
+	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 
 	// This is code to ensure the first visit to orion works
 	// we read settings and wait for the plugin registry to fully startup before continuing
-	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
 	var pluginRegistry;
 	preferenceService.getPreferences("/plugins").then(function() {
-		pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 		dojo.addOnWindowUnload(function() {
 			pluginRegistry.shutdown();
 		});
 		return pluginRegistry.startup();
 	}).then(function() {
-		var selection = new orion.Selection(serviceRegistry);		
-		new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-		new eclipse.LogService(serviceRegistry);
-		new eclipse.DialogService(serviceRegistry);
-		new eclipse.UserService(serviceRegistry);
-		new eclipse.SshService(serviceRegistry);
+		var selection = new mSelection.Selection(serviceRegistry);		
+		new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+		new mLog.LogService(serviceRegistry);
+		new mDialogs.DialogService(serviceRegistry);
+		new mUsers.UserService(serviceRegistry);
+		new mSsh.SshService(serviceRegistry);
 		
-		var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 	
 		
 		// Favorites
-		new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
+		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		
 		// Git operations
-		new eclipse.GitService(serviceRegistry);
+		//new eclipse.GitService(serviceRegistry);
 		
 		var treeRoot = {
 			children:[]
 		};
-		var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 					
 		var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 		
@@ -79,9 +91,9 @@ dojo.addOnLoad(function(){
 			write: emptyObject
 		};
 	
-		var fileClient = new eclipse.FileClient(topLevelFileService);
+		var fileClient = new mFileClient.FileClient(topLevelFileService);
 		
-		var explorer = new eclipse.FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+		var explorer = new mExplorerTable.FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 		
 		function refresh() {
 			var fileServiceReference;
@@ -115,21 +127,21 @@ dojo.addOnLoad(function(){
 			});
 		}
 	
-		var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+		var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 			
 		// set up the splitter bar and its key binding
 		var splitArea = dijit.byId("orion.innerNavigator");
 				
 		// global commands
-		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
 		// commands shared by navigators
-		eclipse.fileCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools");
+		mFileCommands.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools");
 		
 		//TODO this should be removed and contributed by a plug-in
-		eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
+		//eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
 		
 		// navigator-specific commands
-		var toggleOutlineCommand = new eclipse.Command({
+		var toggleOutlineCommand = new mCommands.Command({
 			name: "Toggle Left Pane",
 			id: "eclipse.toggleSplitter",
 			callback: function() {splitArea.toggle();}
@@ -144,9 +156,9 @@ dojo.addOnLoad(function(){
 		commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
 		commandService.addCommandGroup("eclipse.selectionGroup", 500, "More", null, "selectionTools");
 		// commands that don't appear but have keybindings
-		commandService.registerCommandContribution("eclipse.toggleSplitter", 1, "eclipse.navigate-table", null, new eclipse.CommandKeyBinding('Ctrl+O', 'o', true),  true);
-		commandService.registerCommandContribution("eclipse.copySelections", 1, "eclipse.navigate-table", null, new eclipse.CommandKeyBinding('Ctrl+C', 'c', true),  true);
-		commandService.registerCommandContribution("eclipse.pasteSelections", 1, "eclipse.navigate-table", null, new eclipse.CommandKeyBinding('Ctrl+V', 'v', true),  true);
+		commandService.registerCommandContribution("eclipse.toggleSplitter", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('Ctrl+O', 'o', true),  true);
+		commandService.registerCommandContribution("eclipse.copySelections", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('Ctrl+C', 'c', true),  true);
+		commandService.registerCommandContribution("eclipse.pasteSelections", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('Ctrl+V', 'v', true),  true);
 		
 		// commands appearing directly in local actions column
 		commandService.registerCommandContribution("eclipse.makeFavorite", 1);
@@ -176,7 +188,7 @@ dojo.addOnLoad(function(){
 		// git contributions
 		// commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup");
 			
-		eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "eclipse.fileGroup", "eclipse.selectionGroup");
+		mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "eclipse.fileGroup", "eclipse.selectionGroup");
 		
 		//every time the user manually changes the hash, we need to load the workspace with that name
 		dojo.subscribe("/dojo/hashchange", explorer, function() {
@@ -184,4 +196,6 @@ dojo.addOnLoad(function(){
 		});
 		refresh();
 	});
+});
+
 });

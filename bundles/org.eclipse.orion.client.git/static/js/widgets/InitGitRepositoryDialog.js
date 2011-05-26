@@ -9,10 +9,8 @@
  ******************************************************************************/
 
 /*global dojo dijit widgets*/
-dojo.provide("widgets.InitGitRepositoryDialog");
+define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin'], function(dojo, dijit) {
 
-dojo.require("dijit.Dialog");
-dojo.require("widgets._OrionDialogMixin");
 
 /**
  * @param options {{ 
@@ -21,7 +19,7 @@ dojo.require("widgets._OrionDialogMixin");
  */
 dojo.declare("widgets.InitGitRepositoryDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache("widgets", "templates/InitGitRepositoryDialog.html"),
+	templateString: dojo.cache(new dojo._Url("/js/widgets/templates/InitGitRepositoryDialog.html")),
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -35,4 +33,5 @@ dojo.declare("widgets.InitGitRepositoryDialog", [dijit.Dialog, widgets._OrionDia
 	execute: function() {
 		this.options.func(this.gitTarget.value);
 	}
+});
 });

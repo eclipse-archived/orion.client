@@ -10,11 +10,8 @@
  
  /*global dojo dijit dojox*/
  
-dojo.provide("widgets.eWebBorderContainer");
-dojo.provide("widgets.eWebBorderContainerReverse");
-	 
-dojo.require("dijit.layout.BorderContainer");
-dojo.require("dojox.layout.ToggleSplitter");	 
+define(['dojo', 'dijit', 'dijit/layout/BorderContainer', 'dojox/layout/ToggleSplitter'], function(dojo, dijit) {
+
 dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 	_splitterClass : "widgets.eWebSplitter",
 		
@@ -440,4 +437,6 @@ dojo.declare("widgets.eWebBorderContainerReverse", dijit.layout.BorderContainer,
 		});
 		a.play();
 	}
+});
+
 });

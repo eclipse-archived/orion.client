@@ -7,30 +7,39 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
+var eclipse;
 /*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
 /*browser:true*/
-dojo.addOnLoad(function(){
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/log', 'orion/commands',
+        'orion/auth', 'orion/dialogs', 'orion/users', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/gitClient',
+        'orion/ssh/sshTools', 'orion/git-clones-explorer', 'orion/gitCommands',
+	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mLog, mCommands, mAuth, mDialogs, mUsers, mSelection, mFileClient,
+					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitClonesExplorer, mGitCommands) {
+
+dojo.addOnLoad(function() {
+	
+	dojo.parser.parse();
 	
 	// initialize service registry and EAS services
-	serviceRegistry = new eclipse.ServiceRegistry();
-	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+	serviceRegistry = new mServiceregistry.ServiceRegistry();
+	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 	dojo.addOnUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	new eclipse.LogService(serviceRegistry);
-	new eclipse.DialogService(serviceRegistry);
-	new eclipse.UserService(serviceRegistry);
-	var selection = new orion.Selection(serviceRegistry);
-	new eclipse.SshService(serviceRegistry);
-	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+	new mLog.LogService(serviceRegistry);
+	new mDialogs.DialogService(serviceRegistry);
+	new mUsers.UserService(serviceRegistry);
+	var selection = new mSelection.Selection(serviceRegistry);
+	new mSshTools.SshService(serviceRegistry);
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
 	// Git operations
-	new eclipse.GitService(serviceRegistry);
+	new mGitClient.GitService(serviceRegistry);
 	
-	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 
 	// define the command contributions - where things appear, first the groups
 	commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
@@ -50,8 +59,8 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.orion.git.merge", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.push", 2);
 	
-	var explorer = new eclipse.git.GitClonesExplorer(serviceRegistry, selection, "clonesList", "pageActions", "selectionTools");
-	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
+	var explorer = new mGitClonesExplorer.GitClonesExplorer(serviceRegistry, selection, "clonesList", "pageActions", "selectionTools");
+	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
 	
 	
 	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
@@ -85,7 +94,7 @@ dojo.addOnLoad(function(){
 		write: emptyObject
 	};
 
-	var fileClient = new eclipse.FileClient(topLevelFileService);
+	var fileClient = new mFileClient.FileClient(topLevelFileService);
 	
 	var deferred;
 	if (fileServices[0]) {
@@ -100,10 +109,10 @@ dojo.addOnLoad(function(){
 					explorer.setDefaultPath(workspace.Location);
 			
 					// global commands
-					eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
-					eclipse.gitCommandUtils.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
+					mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
+					mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
 			
-					eclipse.gitCommandUtils.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
+					mGitCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
 			
 					explorer.displayClonesList(dojo.hash());
 						
@@ -118,4 +127,5 @@ dojo.addOnLoad(function(){
 	});
 	
 	
+});
 });

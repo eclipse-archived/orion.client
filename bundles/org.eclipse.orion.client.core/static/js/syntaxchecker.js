@@ -10,7 +10,7 @@
 
  /*global window dojo*/
 
-dojo.require("dojo._base.json");
+define(['dojo'], function(dojo) {
 
 var eclipse = eclipse || {};
 eclipse.SyntaxChecker = (function () {
@@ -49,3 +49,5 @@ eclipse.SyntaxChecker = (function () {
 	};
 	return SyntaxChecker;
 })();
+return eclipse;	
+});

@@ -12,6 +12,10 @@
 /*jslint forin:true devel:true*/
 
 /** @namespace The global container for eclipse APIs. */
+
+define(["dojo", "orion/auth"], function(dojo, mAuth){
+
+
 var eclipse = eclipse || {};
 
 /**
@@ -191,7 +195,7 @@ eclipse.FileClient = (function() {
 				//on failure we might need to retry
 				function(error) {
 					if (error.status === 401 || error.status === 403) {
-						handleAuthenticationError(error, function(message) {
+						mAuth.handleAuthenticationError(error, function(message) {
 							//try again
 							fileService[funcName].apply(fileService, funcArgs).then(
 								function(result) {
@@ -213,3 +217,6 @@ eclipse.FileClient = (function() {
 	};
 	return FileClient;
 }());
+return eclipse;
+});
+

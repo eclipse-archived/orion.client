@@ -13,6 +13,9 @@
 /**
  * @namespace The global container for eclipse APIs.
  */
+
+define(['dojo', 'orion/auth'], function(dojo, mAuth){
+
 var eclipse = eclipse || {};
 
 eclipse.Preferences = function(_name, _userProvider, _defaultsProvider) {
@@ -144,7 +147,7 @@ eclipse.UserPreferencesProvider = function(location) {
 				error: function(response, ioArgs) {
 					response.log=false;
 					if (ioArgs.xhr.status === 401) {
-						handleGetAuthenticationError(this, ioArgs);
+						mAuth.handleGetAuthenticationError(this, ioArgs);
 					} else {
 						_currentPromise = null;
 						d.resolve({});
@@ -215,7 +218,7 @@ eclipse.DefaultPreferencesProvider = function(location) {
 				},
 				error: function(response, ioArgs) {
 					if (ioArgs.xhr.status === 401) {
-						handleGetAuthenticationError(ioArgs.xhr, ioArgs);
+						mAuth.handleGetAuthenticationError(ioArgs.xhr, ioArgs);
 					} else {
 						_currentPromise = null;
 						d.resolve({});
@@ -249,3 +252,6 @@ eclipse.PreferencesService = function(serviceRegistry, userPreferencesLocation, 
 	
 	var _serviceRegistration = serviceRegistry.registerService("orion.core.preference", this);
 };
+
+return eclipse;
+});

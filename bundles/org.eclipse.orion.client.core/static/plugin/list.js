@@ -11,26 +11,31 @@
 /*jslint browser:true devel:true*/
 /*global dijit dojo eclipse widgets serviceRegistry:true*/
 
-dojo.require("dijit.tree.ForestStoreModel");
-dojo.require("widgets.RegistryTree");
+
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 
+	        'orion/searchClient', 'orion/globalCommands',
+	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/RegistryTree'], 
+			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSearchClient, mGlobalCommands) {
 
 dojo.addOnLoad(function() {
+	
+	dojo.parser.parse();
 
-	serviceRegistry = new eclipse.ServiceRegistry();
+	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 	// This is code to ensure the first visit to orion works
 	// we read settings and wait for the plugin registry to fully startup before continuing
-	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
 	var pluginRegistry;
 	preferenceService.getPreferences("/plugins").then(function() {
-		pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 		dojo.addOnWindowUnload(function() {
 			pluginRegistry.shutdown();
 		});
 		return pluginRegistry.startup();
 	}).then(function() {
-		var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-		var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-		var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+		var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		
 		var initTree = function() {
 			var tree = new widgets.RegistryTree({ registry: pluginRegistry }, "registry-tree");
@@ -38,7 +43,7 @@ dojo.addOnLoad(function() {
 		};
 		
 		// global commands
-		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 	
 		// add install stuff to page actions toolbar
 		var pageActions = dojo.byId("pageActions");
@@ -101,4 +106,5 @@ dojo.addOnLoad(function() {
 			installUrlTextBox.select();
 		}, 500);
 	});
+});
 });

@@ -11,6 +11,9 @@
 /*global dojo eclipse:true widgets window*/
 /*jslint regexp:false browser:true forin:true*/
 
+define(['dojo', 'orion/treetable'], function(dojo, mTreeTable){
+
+
 var eclipse = eclipse || {};
 eclipse.Explorer = (function() {
 	/**
@@ -56,7 +59,7 @@ eclipse.Explorer = (function() {
 				model.rootId = treeId;
 			}
 			this.model = model;
-			this.myTree = new eclipse.TableTree({
+			this.myTree = new mTreeTable.TableTree({
 				id: treeId,
 				model: model,
 				showRoot: false,
@@ -480,4 +483,6 @@ eclipse.SelectionRenderer = (function(){
 	
 	return SelectionRenderer;
 }());
+return eclipse;
+});
 

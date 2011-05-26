@@ -10,10 +10,10 @@
 
 /*global dojo eclipse:true widgets*/
 
-var eclipse = eclipse || {};
-eclipse.git = eclipse.git || {};
+define(['dojo', 'orion/explorer', 'orion/util'], function(dojo, mExplorer, mUtil) {
+var exports = {};
 
-eclipse.git.GitClonesExplorer = (function() {
+exports.GitClonesExplorer = (function() {
 	
 	function GitClonesExplorer(registry, selection, parentId, toolbarId, selectionToolsId){
 		this.parentId = parentId;
@@ -21,13 +21,13 @@ eclipse.git.GitClonesExplorer = (function() {
 		this.selection = selection;
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
-		this.renderer = new eclipse.git.GitClonesRenderer({checkbox: this.checkbox}, this);
+		this.renderer = new exports.GitClonesRenderer({checkbox: this.checkbox}, this);
 		
 	}
-	GitClonesExplorer.prototype = eclipse.Explorer.prototype;
+	GitClonesExplorer.prototype = mExplorer.Explorer.prototype;
 	
 	GitClonesExplorer.prototype.getGitLocation = function(path){
-		return "/git/clone/"+eclipse.util.makeRelative(path);
+		return "/git/clone/"+ mUtil.makeRelative(path);
 	};
 	
 	GitClonesExplorer.prototype.setDefaultPath = function(defaultPath){
@@ -40,7 +40,7 @@ eclipse.git.GitClonesExplorer = (function() {
 			
 			path = path || this.defaultPath;
 			
-			path = eclipse.util.makeRelative(path);
+			path = mUtil.makeRelative(path);
 			if (path === this._lastHash) {
 				return;
 			}
@@ -54,7 +54,7 @@ eclipse.git.GitClonesExplorer = (function() {
 			d.innerHTML = "Loading <b>" + gitPath + "</b>...";
 			
 			this.registry.getService("orion.git.provider").then(function(service){
-				dojo.hitch(self, self.createTree(self.parentId, new eclipse.GitClonesModel(service, gitPath, service.getGitClone)));
+				dojo.hitch(self, self.createTree(self.parentId, new exports.GitClonesModel(service, gitPath, service.getGitClone)));
 			});
 		};
 		
@@ -70,15 +70,14 @@ eclipse.git.GitClonesExplorer = (function() {
 		d.innerHTML = "Loading <b>" + gitPath + "</b>...";
 		
 		this.registry.getService("orion.git.provider").then(function(service){
-			dojo.hitch(self, self.createTree(self.parentId, new eclipse.GitClonesModel(service, gitPath, service.getGitClone)));
+			dojo.hitch(self, self.createTree(self.parentId, new exports.GitClonesModel(service, gitPath, service.getGitClone)));
 		});
 	};
 
 	return GitClonesExplorer;
 }());
 
-var eclipse = eclipse || {};
-eclipse.GitClonesModel = (function() {
+exports.GitClonesModel = (function() {
 	/**
 	 * @name eclipse.Model
 	 * @class Tree model used by eclipse.FileExplorer.
@@ -90,7 +89,7 @@ eclipse.GitClonesModel = (function() {
 		this.fetchItems = fetchItems;
 		this.root = null;
 	}
-	GitClonesModel.prototype = eclipse.ExplorerModel.prototype; 
+	GitClonesModel.prototype = mExplorer.ExplorerModel.prototype; 
 	
 	
 	GitClonesModel.prototype.getRoot = function(onItem){
@@ -138,14 +137,13 @@ eclipse.GitClonesModel = (function() {
 	return GitClonesModel;
 }());
 
-var eclipse = eclipse || {};
-eclipse.git.GitClonesRenderer = (function(){
+exports.GitClonesRenderer = (function(){
 	
 	function GitClonesRenderer(options, explorer){
 		this._init(options);
 		this.explorer = explorer;
 	}
-	GitClonesRenderer.prototype = eclipse.SelectionRenderer.prototype;
+	GitClonesRenderer.prototype = mExplorer.SelectionRenderer.prototype;
 	
 	GitClonesRenderer.prototype.getCellHeaderElement = function(col_no){
 		
@@ -219,3 +217,5 @@ eclipse.git.GitClonesRenderer = (function(){
 
 	return GitClonesRenderer;
 }());
+return exports;
+});

@@ -11,7 +11,10 @@
 /*global dojo eclipse:true */
 /*jslint devel:true*/
 
-dojo.getObject("eclipse.sites.util", true);
+define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil) {
+
+var eclipse = {};
+eclipse.sites = {};
 
 /**
  * @namespace Holds stateless utility methods for dealing with sites.
@@ -23,7 +26,7 @@ eclipse.sites.util = {
 	 * @return {String} The URL.
 	 */
 	generateEditSiteHref: function(site) {
-		return "site.html#" + eclipse.util.makeRelative(site.Location);
+		return "site.html#" + mUtil.makeRelative(site.Location);
 	},
 	
 	/**
@@ -84,7 +87,7 @@ eclipse.sites.util = {
 	 */
 	createSiteCommands: function(commandService, siteService, statusService, dialogService,
 			startCallback, stopCallback, deleteCallback, errorCallback) {
-		var editCommand = new eclipse.Command({
+		var editCommand = new mCommands.Command({
 			name: "Edit",
 			image: "/images/editing_16.gif",
 			id: "eclipse.site.edit",
@@ -94,7 +97,7 @@ eclipse.sites.util = {
 			hrefCallback: eclipse.sites.util.generateEditSiteHref});
 		commandService.addCommand(editCommand, "object");
 		
-		var startCommand = new eclipse.Command({
+		var startCommand = new mCommands.Command({
 			name: "Start",
 			image: "/images/lrun_obj.gif",
 			id: "eclipse.site.start",
@@ -111,7 +114,7 @@ eclipse.sites.util = {
 			}});
 		commandService.addCommand(startCommand, "object");
 		
-		var stopCommand = new eclipse.Command({
+		var stopCommand = new mCommands.Command({
 			name: "Stop",
 			image: "/images/stop.gif",
 			id: "eclipse.site.stop",
@@ -128,7 +131,7 @@ eclipse.sites.util = {
 			}});
 		commandService.addCommand(stopCommand, "object");
 		
-		var deleteCommand = new eclipse.Command({
+		var deleteCommand = new mCommands.Command({
 			name: "Delete",
 			image: "/images/remove.gif",
 			id: "eclipse.site.delete",
@@ -153,7 +156,7 @@ eclipse.sites.util = {
 	 * <b>FIXME:</b> this is URL manipulation; it should be done by the server
 	 */
 	makeRelativeFilePath: function(location) {
-		var path = eclipse.util.makeRelative(location);
+		var path = mUtil.makeRelative(location);
 		var segments = path.split("/");
 		var filteredSegments = eclipse.sites.util._removeEmptyElements(segments);
 		return "/" + filteredSegments.slice(1).join("/");
@@ -175,6 +178,9 @@ eclipse.sites.util = {
 		if (eclipse.sites.util._removeEmptyElements(segments).length === 1) {
 			relativePath += "/";
 		}
-		return eclipse.util.makeFullPath(relativePath);
+		return mUtil.makeFullPath(relativePath);
 	}
 };
+
+return eclipse.sites.util;
+});

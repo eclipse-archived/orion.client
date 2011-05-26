@@ -9,13 +9,8 @@
  ******************************************************************************/
 /*global dojo dijit localStorage widgets */
 /*jslint browser:true*/
-dojo.provide("widgets.SFTPConnectionDialog");
 
-dojo.require("dijit.Dialog");
-dojo.require("dijit.form.CheckBox");
-dojo.require("dijit.form.ComboBox");
-dojo.require("dojo.data.ItemFileReadStore");
-dojo.require("widgets._OrionDialogMixin");
+define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/ComboBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin'], function(dojo, dijit) {
 
 if (!localStorage.getItem("orion.sftpConnections")) {
 	var defaultItems = { 
@@ -26,7 +21,8 @@ if (!localStorage.getItem("orion.sftpConnections")) {
 	localStorage.setItem("orion.sftpConnections", JSON.stringify(defaultItems));
 }
 
-var sftpConnectionStoreData= JSON.parse(localStorage.getItem("orion.sftpConnections"));
+// have to make this a global for now
+ window.sftpConnectionStoreData= JSON.parse(localStorage.getItem("orion.sftpConnections"));
 
 /**
  * @param options {{ 
@@ -38,7 +34,7 @@ var sftpConnectionStoreData= JSON.parse(localStorage.getItem("orion.sftpConnecti
  */
 dojo.declare("widgets.SFTPConnectionDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache("widgets", "templates/SFTPConnectionDialog.html"),
+	templateString: dojo.cache(new dojo._Url("/js/widgets/templates/SFTPConnectionDialog.html")),
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -101,4 +97,5 @@ dojo.declare("widgets.SFTPConnectionDialog", [dijit.Dialog, widgets._OrionDialog
 			this.sftpConnectionList.set("value", newConnection.name);
 		}
 	}
+});
 });

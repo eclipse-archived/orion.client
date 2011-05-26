@@ -7,7 +7,10 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
- 
+
+define([], function(){
+
+	var eclipse = {};
 /**
  * User Service
  * @class Service for keeping track of the user
@@ -27,3 +30,5 @@ eclipse.UserService.prototype = {
    		onDone(this._user);
 	}
 };
+return eclipse;
+});

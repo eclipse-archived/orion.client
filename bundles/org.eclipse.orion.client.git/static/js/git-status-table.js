@@ -8,6 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+define(['dojo', 'orion/compare/diff-provider', 'orion/compare/compare-container'], function(dojo, mDiffProvider, mCompareContainer) {
+
 var orion = orion || {};
 
 orion.GitStatusModel = (function() {
@@ -227,7 +229,7 @@ orion.GitStatusController = (function() {
 		this._timerOn = false;
 		this._unstagedTableRenderer = new orion.GitStatusRenderer(unstagedDivId , this);
 		this._stagedTableRenderer = new orion.GitStatusRenderer(stagedDivId , this);
-		this._inlineCompareContainer = new orion.InlineCompareContainer(new orion.DiffProvider(serviceRegistry),serviceRegistry ,"inline-compare-viewer");
+		this._inlineCompareContainer = new mCompareContainer.InlineCompareContainer(new mDiffProvider.DiffProvider(serviceRegistry),serviceRegistry ,"inline-compare-viewer");
 		var self = this;
 		self._stagingConflict = false;
 		var commitBtn = document.getElementById("commit");
@@ -556,3 +558,5 @@ orion.GitStatusController = (function() {
 	return GitStatusController;
 }());
 
+return orion;	
+});

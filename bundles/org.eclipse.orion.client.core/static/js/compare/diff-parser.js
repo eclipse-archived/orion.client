@@ -8,6 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
+define([], function() {
+
 var orion = orion || {};
 
 orion.DiffParser = (function() {
@@ -338,3 +341,5 @@ orion.DiffParser = (function() {
 	};
 	return DiffParser;
 }());
+return orion;
+});

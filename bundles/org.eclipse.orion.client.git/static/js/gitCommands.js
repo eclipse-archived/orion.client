@@ -10,29 +10,19 @@
 
 /*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
+define(['dojo', 'orion/commands',
+        'orion/widgets/CloneGitRepositoryDialog', 'orion/widgets/InitGitRepositoryDialog', 'orion/widgets/AddRemoteDialog', 'orion/widgets/GitCredentialsDialog'], 
+        function(dojo, mCommands) {
 
 /**
  * @namespace The global container for eclipse APIs.
  */ 
-var eclipse = eclipse || {};
-
-/**
- * Utility methods
- * @namespace eclipse.gitCommandUtils generates commands
- */
- 
-eclipse.gitCommandUtils = eclipse.gitCommandUtils || {};
-
-dojo.require("widgets.CloneGitRepositoryDialog");
-dojo.require("widgets.InitGitRepositoryDialog");
-dojo.require("widgets.AddRemoteDialog");
-dojo.require("widgets.GitCredentialsDialog");
-
+var exports = {};
 //this function is just a closure for the global "doOnce" flag
 (function() {
 	var doOnce = false;
 
-	eclipse.gitCommandUtils.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
+	exports.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
 		var toolbar = dojo.byId(toolbarId);
 		if (toolbar) {
 			dojo.empty(toolbar);
@@ -64,7 +54,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		}
 	};
 	
-	eclipse.gitCommandUtils.handleKnownHostsError = function(serviceRegistry, errorData, options, func){
+	exports.handleKnownHostsError = function(serviceRegistry, errorData, options, func){
 		if(confirm("Would you like to add " + errorData.KeyType + " key for host " + errorData.Host
 				+ " to continue operation? Key fingerpt is " + errorData.HostFingerprint + ".")){
 			serviceRegistry.getService("orion.net.ssh").then(function(sshService){
@@ -77,7 +67,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			});
 		}
 	};
-	eclipse.gitCommandUtils.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title, gitUrl){
+	exports.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title, gitUrl){
 					var credentialsDialog = new widgets.GitCredentialsDialog({
 								title: title,
 								url: gitUrl,
@@ -88,7 +78,7 @@ dojo.require("widgets.GitCredentialsDialog");
 					credentialsDialog.show();
 	};
 	
-	eclipse.gitCommandUtils.getDefaultSshOptions = function(serviceRegistry){
+	exports.getDefaultSshOptions = function(serviceRegistry){
 		var def = new dojo.Deferred();
 		serviceRegistry.getService("orion.net.ssh").then(function(sshService) {
 			sshService.getKnownHosts().then(function(knownHosts){
@@ -104,15 +94,15 @@ dojo.require("widgets.GitCredentialsDialog");
 		return def;
 	};
 	
-	eclipse.gitCommandUtils.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee, title, gitUrl){
+	exports.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee, title, gitUrl){
 		if(jsonData.Running==false){
 			if(jsonData.Result && jsonData.Result.HttpCode==403){
 				if(jsonData.Result.ErrorData && jsonData.Result.ErrorData.HostKey){
-					dojo.hitch(this, eclipse.gitCommandUtils.handleKnownHostsError)(serviceRegistry, jsonData.Result.ErrorData, options, callee);
+					dojo.hitch(this, exports.handleKnownHostsError)(serviceRegistry, jsonData.Result.ErrorData, options, callee);
 					return;
 				}
 			} else if (jsonData.Result && jsonData.Result.HttpCode==401){
-				dojo.hitch(this, eclipse.gitCommandUtils.handleSshAuthenticationError)(serviceRegistry, jsonData.Result.ErrorData, options, callee, title, gitUrl);
+				dojo.hitch(this, exports.handleSshAuthenticationError)(serviceRegistry, jsonData.Result.ErrorData, options, callee, title, gitUrl);
 				return;
 			}
 			
@@ -128,8 +118,8 @@ dojo.require("widgets.GitCredentialsDialog");
 		}
 	};
 	
-	eclipse.gitCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
-		var cloneGitRepositoryCommand = new eclipse.Command({
+	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
+		var cloneGitRepositoryCommand = new mCommands.Command({
 			name : "Clone Repository",
 			tooltip : "Clone Git Repository to Workspace",
 			image : "/images/git-clone.gif",
@@ -137,14 +127,14 @@ dojo.require("widgets.GitCredentialsDialog");
 			callback : function(item) {
 				var dialog = new widgets.CloneGitRepositoryDialog({
 					func : function(gitUrl, path, name){
-						eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
+						exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 									var func = arguments.callee;
 									serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 										serviceRegistry.getService("orion.page.message").then(function(progressService) {
 											var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
 												function(jsonData, secondArg) {
-													eclipse.gitCommandUtils.handleProgressServiceResponse(jsonData, options, serviceRegistry,
+													exports.handleProgressServiceResponse(jsonData, options, serviceRegistry,
 															function(jsonData){
 																if(explorer.redisplayClonesList){
 																	dojo.hitch(explorer, explorer.redisplayClonesList)();
@@ -167,7 +157,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 		commandService.addCommand(cloneGitRepositoryCommand, "dom");
 		
-		var initGitRepositoryCommand = new eclipse.Command({
+		var initGitRepositoryCommand = new mCommands.Command({
 			name : "Init Repository",
 			tooltip : "Init Git Repository in Workspace",
 			id : "eclipse.initGitRepository",
@@ -196,7 +186,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		commandService.addCommand(initGitRepositoryCommand, "dom");
 		
 		// TODO: not used by the git clone navigator, could be removed
-		var linkRepoCommand = new eclipse.Command({
+		var linkRepoCommand = new mCommands.Command({
 			name: "Link Repository",
 			image: "/images/link_obj.gif",
 			id: "eclipse.linkRepository",
@@ -234,7 +224,7 @@ dojo.require("widgets.GitCredentialsDialog");
 			});
 		commandService.addCommand(linkRepoCommand, "object");
 		
-		var checkoutBranchCommand = new eclipse.Command({
+		var checkoutBranchCommand = new mCommands.Command({
 			name: "Checkout",
 			image: "/images/git-checkout.gif",
 			id: "eclipse.checkoutBranch",
@@ -254,7 +244,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		);
 		commandService.addCommand(checkoutBranchCommand, "object");
 		
-		var addBranchCommand = new eclipse.Command({
+		var addBranchCommand = new mCommands.Command({
 			name: "Add Branch",
 			image: "/images/add_obj.gif",
 			id: "eclipse.addBranch",
@@ -282,7 +272,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		);
 		commandService.addCommand(addBranchCommand, "object");
 		
-		var removeBranchCommand = new eclipse.Command({
+		var removeBranchCommand = new mCommands.Command({
 			name: "Remove Branch",
 			image: "/images/remove.gif",
 			id: "eclipse.removeBranch",
@@ -302,7 +292,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		);
 		commandService.addCommand(removeBranchCommand, "object");
 		
-		var addRemoteCommand = new eclipse.Command({
+		var addRemoteCommand = new mCommands.Command({
 			name: "Add Remote",
 			image: "/images/add_obj.gif",
 			id: "eclipse.addRemote",
@@ -326,7 +316,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		);
 		commandService.addCommand(addRemoteCommand, "object");
 		
-		var removeRemoteCommand = new eclipse.Command({
+		var removeRemoteCommand = new mCommands.Command({
 			name: "Remove Remote",
 			image: "/images/remove.gif",
 			id: "eclipse.removeRemote",
@@ -346,7 +336,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		);
 		commandService.addCommand(removeRemoteCommand, "object");
 		
-		var openGitLog = new eclipse.Command({
+		var openGitLog = new mCommands.Command({
 			name : "Show Git Log",
 			id : "eclipse.openGitLog",
 			hrefCallback : function(item) {
@@ -361,7 +351,7 @@ dojo.require("widgets.GitCredentialsDialog");
 	
 		commandService.addCommand(openGitLog, "object");
 		
-		var compareGitCommits = new eclipse.Command({
+		var compareGitCommits = new mCommands.Command({
 			name : "Compare With Each Other",
 			image : "/images/compare-sbs.gif",
 			id : "eclipse.compareGitCommits",
@@ -387,7 +377,7 @@ dojo.require("widgets.GitCredentialsDialog");
 	
 		commandService.addCommand(compareGitCommits, "dom");
 		
-		var compareWithWorkingTree = new eclipse.Command({
+		var compareWithWorkingTree = new mCommands.Command({
 			name : "Compare With Working Tree",
 			image : "/images/compare-sbs.gif",
 			id : "eclipse.compareWithWorkingTree",
@@ -402,7 +392,7 @@ dojo.require("widgets.GitCredentialsDialog");
 	
 		commandService.addCommand(compareWithWorkingTree, "object");
 		
-		var openGitCommit = new eclipse.Command({
+		var openGitCommit = new mCommands.Command({
 			name : "Open",
 			image : "/images/find.gif",
 			id : "eclipse.openGitCommit",
@@ -417,20 +407,20 @@ dojo.require("widgets.GitCredentialsDialog");
 	
 		commandService.addCommand(openGitCommit, "object");
 		
-		var fetchCommand = new eclipse.Command({
+		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
 			image : "/images/git-fetch.gif",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = item.Location;
-				eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
+				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
 						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 							serviceRegistry.getService("orion.page.message").then(function(progressService) {
 								var deferred = gitService.doFetch(path, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Fetching remote: " + path).then(
 									function(jsonData, secondArg) {
-										eclipse.gitCommandUtils.handleProgressServiceResponse(jsonData, options, serviceRegistry,
+										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry,
 												function(jsonData){
 													dojo.xhrGet({
 														url : path,
@@ -474,7 +464,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		commandService.addCommand(fetchCommand, "dom");
 		commandService.addCommand(fetchCommand, "object");
 		
-		var mergeCommand = new eclipse.Command({
+		var mergeCommand = new mCommands.Command({
 			name : "Merge",
 			image : "/images/git-merge.gif",
 			id : "eclipse.orion.git.merge",
@@ -529,19 +519,19 @@ dojo.require("widgets.GitCredentialsDialog");
 		commandService.addCommand(mergeCommand, "dom");
 		commandService.addCommand(mergeCommand, "object");
 		
-		var pushCommand = new eclipse.Command({
+		var pushCommand = new mCommands.Command({
 			name : "Push",
 			image : "/images/git-push.gif",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				var path = dojo.hash();
-				eclipse.gitCommandUtils.getDefaultSshOptions(serviceRegistry).then(function(options){
+				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
 						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 							serviceRegistry.getService("orion.page.message").then(function(progressService) {
 								var deferred = gitService.doPush(item.RemoteLocation, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
-									eclipse.gitCommandUtils.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
+									exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
 											function(jsonData){
 												if (jsonData.Result.Severity == "Ok")
 													dojo.query(".treeTableRow").forEach(function(node, i) {
@@ -561,7 +551,7 @@ dojo.require("widgets.GitCredentialsDialog");
 		commandService.addCommand(pushCommand, "dom");
 		commandService.addCommand(pushCommand, "object");
 		
-		var addTagCommand = new eclipse.Command({
+		var addTagCommand = new mCommands.Command({
 			name : "Tag",
 			image : "/images/git-tag.gif",
 			id : "eclipse.orion.git.addTag",
@@ -599,8 +589,8 @@ dojo.require("widgets.GitCredentialsDialog");
 		commandService.addCommand(addTagCommand, "object");
 	};
 	
-	eclipse.gitCommandUtils.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
-		var deleteCommand = new eclipse.Command({
+	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
+		var deleteCommand = new mCommands.Command({
 			name: "Delete Clone",
 			image: "/images/remove.gif",
 			id: "eclipse.git.deleteClone",
@@ -650,3 +640,5 @@ dojo.require("widgets.GitCredentialsDialog");
 		
 	};
 }());
+return exports;	
+});

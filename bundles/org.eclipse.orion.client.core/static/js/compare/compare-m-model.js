@@ -7,6 +7,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+define(['orion/compare/compareUtils'], function(mCompareUtils) {
+
+
 var orion = orion || {};
 
 orion.CompareMergeModel = (function() {
@@ -34,7 +37,7 @@ orion.CompareMergeModel = (function() {
 		
 		//To get the line type from a zero based line index  
 		getLineType: function(lineIndex){
-			var mapItem = orion.compareUtils.lookUpMapper(this._mapper , this._mapperColumnIndex , lineIndex);
+			var mapItem = mCompareUtils.lookUpMapper(this._mapper , this._mapperColumnIndex , lineIndex);
 			if(mapItem.mapperIndex > -1){
 				if(this._mapper[mapItem.mapperIndex][2] !== 0){
 					var mapperLength = this._mapper[mapItem.mapperIndex][this._mapperColumnIndex];
@@ -121,17 +124,17 @@ orion.CompareMergeModel = (function() {
 		},
 		
 		getLineIndexFromMapper: function(mapperIndex){
-			return orion.compareUtils.lookUpLineIndex(this._mapper , this._mapperColumnIndex , mapperIndex);
+			return mCompareUtils.lookUpLineIndex(this._mapper , this._mapperColumnIndex , mapperIndex);
 		},
 		
 		lookUpMapper: function(lineIndex){
-			return orion.compareUtils.lookUpMapper(this._mapper , this._mapperColumnIndex , lineIndex);
+			return mCompareUtils.lookUpMapper(this._mapper , this._mapperColumnIndex , lineIndex);
 		},
 		
 		updateMapper: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount){
 			if(removedLineCount === addedLineCount)
 				return;
-			orion.compareUtils.updateMapper(this._mapper , this._mapperColumnIndex , this.getLineAtOffset(start) , removedLineCount, addedLineCount);
+			mCompareUtils.updateMapper(this._mapper , this._mapperColumnIndex , this.getLineAtOffset(start) , removedLineCount, addedLineCount);
 		},
 		
 		addListener: function(listener) {
@@ -218,3 +221,5 @@ orion.CompareMergeModel = (function() {
 	
 	return CompareMergeModel;
 }()); 
+return orion;
+});

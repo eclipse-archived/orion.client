@@ -12,6 +12,9 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
+
+define(["dojo"], function(dojo){
+
 var orion = orion || {};
 
 /**
@@ -55,3 +58,6 @@ orion.Selection.prototype = {
 		this._serviceRegistration.dispatchEvent("selectionChanged", this._getSingleSelection(), this._selections);
 	}
 };
+
+return orion;
+});

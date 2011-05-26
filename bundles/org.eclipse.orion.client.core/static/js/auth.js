@@ -18,11 +18,22 @@
 
  */
  
+
+
+define(['dojo', 'orion/globalCommands', 'dojo/date/locale'], function(dojo, mGlobalCommands) {
+
 var authenticationInProgress = false;
 
 var forbiddenAccessDlg;
 
+
 dojo.addOnLoad(function () {
+	
+	// work around global problems in auth2 -- FIXME!!!
+	window.dojo = dojo;
+	window.eclipse = window.eclipse || {};
+	eclipse.globalCommandUtils = mGlobalCommands; 
+
 	dojo.xhrGet({
 		url: "/auth2",
 		handleAs: 'javascript',
@@ -88,3 +99,12 @@ function handleAuthenticationError(error, retry) {
 		}
 	}
 }
+return {
+	handleGetAuthenticationError : handleGetAuthenticationError,
+	handlePostAuthenticationError : handlePostAuthenticationError,
+	handleDeleteAuthenticationError : handleDeleteAuthenticationError,
+	handlePutAuthenticationError : handlePutAuthenticationError,
+	handleAuthenticationError : handleAuthenticationError
+};
+
+});

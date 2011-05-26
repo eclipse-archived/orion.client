@@ -10,10 +10,7 @@
 
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
-dojo.provide("widgets.CloneGitRepositoryDialog");
-
-dojo.require("dijit.Dialog");
-dojo.require("widgets._OrionDialogMixin");
+define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin'], function(dojo, dijit) {
 
 /**
  * @param options {{ 
@@ -22,7 +19,7 @@ dojo.require("widgets._OrionDialogMixin");
  */
 dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache("widgets", "templates/CloneGitRepositoryDialog.html"),
+	templateString: dojo.cache(new dojo._Url("/js/widgets/templates/CloneGitRepositoryDialog.html")),
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -39,4 +36,5 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog, widgets._OrionDi
 	execute: function() {
 		this.options.func(this.gitUrl.value, this.gitPath.value, this.gitName.value);
 	}
+});
 });

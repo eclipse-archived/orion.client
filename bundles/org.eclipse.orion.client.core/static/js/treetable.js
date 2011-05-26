@@ -10,8 +10,9 @@
 
 /*jslint forin:true devel:true*/
 /*global dojo, document*/
- 
-/** @namespace */
+define(['dojo'], function(dojo) {
+
+	/** @namespace */
 var eclipse = eclipse || {};
 
 eclipse.TableTree = (function() {
@@ -270,3 +271,5 @@ eclipse.TableTree = (function() {
 	return TableTree;
 }());
 
+return eclipse;	
+});

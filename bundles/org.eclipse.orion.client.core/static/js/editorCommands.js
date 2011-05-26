@@ -15,7 +15,8 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-var eclipse = eclipse || {};
+define(['dojo', 'orion/commands', 'orion/globalCommands'], function(dojo, mCommands, mGlobalCommands) {
+
 var orion = orion || {};
 
 orion.EditorCommandFactory = (function() {
@@ -51,7 +52,7 @@ orion.EditorCommandFactory = (function() {
 						}
 					}));
 				}));
-				var saveCommand = new eclipse.Command({
+				var saveCommand = new mCommands.Command({
 					name: "Save",
 					image: "/images/save_edit.gif",
 					id: "orion.save",
@@ -98,7 +99,7 @@ orion.EditorCommandFactory = (function() {
 							info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
 						}
 						var editorWidget = editor.getEditorWidget();
-						var command = new eclipse.Command({
+						var command = new mCommands.Command({
 							name: info.name,
 							image: info.img,
 							id: info.name,
@@ -135,7 +136,7 @@ orion.EditorCommandFactory = (function() {
 						// We must regenerate the command toolbar everytime we process an extension because
 						// this is asynchronous and we probably have already populated the toolbar.
 						// In the editor, we generate page level commands to the banner.
-						eclipse.globalCommandUtils.generateDomCommandsInBanner(this.commandService, editor);
+						mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
 			
 						if (info.key) {
 							// add it to the editor as a keybinding
@@ -165,7 +166,7 @@ orion.UndoCommandFactory = (function() {
 				undoStack.undo();
 				return true;
 			});
-			var undoCommand = new eclipse.Command({
+			var undoCommand = new mCommands.Command({
 				name: "Undo",
 				image: "/images/undo_edit.gif",
 				id: "orion.undo",
@@ -181,7 +182,7 @@ orion.UndoCommandFactory = (function() {
 				return true;
 			});
 	
-			var redoCommand = new eclipse.Command({
+			var redoCommand = new mCommands.Command({
 				name: "Redo",
 				image: "/images/redo_edit.gif",
 				id: "orion.redo",
@@ -200,3 +201,5 @@ orion.UndoCommandFactory = (function() {
 	return UndoCommandFactory;
 }());
 
+return orion;	
+});

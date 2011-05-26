@@ -14,6 +14,9 @@
 /**
  * @namespace The global container for eclipse APIs.
  */ 
+
+define(["dojo", "orion/util", "orion/commands"], function(dojo, mUtil, mCommands){
+
 var eclipse = eclipse || {};
 
 /**
@@ -119,7 +122,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	}
 	
 	function stripPath(location) {
-		location = eclipse.util.makeRelative(location);
+		location = mUtil.makeRelative(location);
 		// get hash part and strip query off
 		var splits = location.split('#');
 		var path = splits[splits.length-1];
@@ -293,7 +296,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		return true;
 	};
 
-	var favoriteCommand = new eclipse.Command({
+	var favoriteCommand = new mCommands.Command({
 		name: "Make Favorite",
 		image: "/images/silk/star.gif",
 		id: "eclipse.makeFavorite",
@@ -312,7 +315,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		}});
 	commandService.addCommand(favoriteCommand, "object");
 	
-	var renameCommand = new eclipse.Command({
+	var renameCommand = new mCommands.Command({
 			name: "Rename",
 			image: "/images/editing_16.gif",
 			id: "eclipse.renameResource",
@@ -327,7 +330,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				if (!refNode) {
 					refNode = dojo.byId(domId);
 				}
-				eclipse.util.getUserText(domId+"EditBox", refNode, true, item.Name, 
+				mUtil.getUserText(domId+"EditBox", refNode, true, item.Name, 
 					dojo.hitch(this, function(newText) {
 						fileClient.moveFile(item.Location, item.parent.Location, newText).then(
 							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);})//refresh the root
@@ -339,7 +342,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		});
 	commandService.addCommand(renameCommand, "object");
 	
-	var deleteCommand = new eclipse.Command({
+	var deleteCommand = new mCommands.Command({
 		name: "Delete",
 		image: "/images/remove.gif",
 		id: "eclipse.deleteFile",
@@ -382,7 +385,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(deleteCommand, "object");
 	commandService.addCommand(deleteCommand, "dom");
 
-	var downloadCommand = new eclipse.Command({
+	var downloadCommand = new mCommands.Command({
 		name: "Download as Zip",
 		image: "/images/down.gif",
 		id: "eclipse.downloadFile",
@@ -408,7 +411,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			}
 		}
 		if (refNode) {
-			eclipse.util.getUserText(domId+"EditBox", refNode, false, defaultName, 
+			mUtil.getUserText(domId+"EditBox", refNode, false, defaultName, 
 				dojo.hitch(this, function(name) {
 					if (name) {
 						if (tempNode) {
@@ -425,7 +428,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		}
 	}
 	
-	var newFileCommand =  new eclipse.Command({
+	var newFileCommand =  new mCommands.Command({
 		name: "New File",
 		image: "/images/newfile_wiz.gif",
 		id: "eclipse.newFile",
@@ -440,11 +443,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+			return item.Directory && !mUtil.isAtRoot(item.Location);}});
 	commandService.addCommand(newFileCommand, "dom");
 	commandService.addCommand(newFileCommand, "object");
 	
-	var newFolderCommand = new eclipse.Command({
+	var newFolderCommand = new mCommands.Command({
 		name: "New Folder",
 		image: "/images/newfolder_wiz.gif",
 		id: "eclipse.newFolder",
@@ -459,12 +462,12 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+			return item.Directory && !mUtil.isAtRoot(item.Location);}});
 
 	commandService.addCommand(newFolderCommand, "dom");
 	commandService.addCommand(newFolderCommand, "object");
 	
-	var newProjectCommand = new eclipse.Command({
+	var newProjectCommand = new mCommands.Command({
 		name: "New Folder",
 		image: "/images/newfolder_wiz.gif",
 		id: "eclipse.newProject",
@@ -478,11 +481,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Location && eclipse.util.isAtRoot(item.Location);}});
+			return item.Location && mUtil.isAtRoot(item.Location);}});
 
 	commandService.addCommand(newProjectCommand, "dom");
 	
-	var linkProjectCommand = new eclipse.Command({
+	var linkProjectCommand = new mCommands.Command({
 		name: "Link Folder",
 		image: "/images/link_obj.gif",
 		id: "eclipse.linkProject",
@@ -501,10 +504,10 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Location && eclipse.util.isAtRoot(item.Location);}});
+			return item.Location && mUtil.isAtRoot(item.Location);}});
 	commandService.addCommand(linkProjectCommand, "dom");
 				
-	var importCommand = new eclipse.Command({
+	var importCommand = new mCommands.Command({
 		name : "Zip Import",
 		image : "/images/zip_import.gif",
 		id: "eclipse.importCommand",
@@ -519,11 +522,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+			return item.Directory && !mUtil.isAtRoot(item.Location);}});
 	commandService.addCommand(importCommand, "object");
 	commandService.addCommand(importCommand, "dom");
 
-	var importSFTPCommand = new eclipse.Command({
+	var importSFTPCommand = new mCommands.Command({
 		name : "SFTP Import",
 		image : "/images/zip_import.gif",
 		id: "eclipse.importSFTPCommand",
@@ -545,11 +548,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+			return item.Directory && !mUtil.isAtRoot(item.Location);}});
 	commandService.addCommand(importSFTPCommand, "object");
 	commandService.addCommand(importSFTPCommand, "dom");
 
-	var exportSFTPCommand = new eclipse.Command({
+	var exportSFTPCommand = new mCommands.Command({
 		name : "SFTP Export",
 		image : "/images/down.gif",
 		id: "eclipse.exportSFTPCommand",
@@ -571,11 +574,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+			return item.Directory && !mUtil.isAtRoot(item.Location);}});
 	commandService.addCommand(exportSFTPCommand, "object");
 	commandService.addCommand(exportSFTPCommand, "dom");
 	
-	var copyCommand = new eclipse.Command({
+	var copyCommand = new mCommands.Command({
 		name : "Copy to",
 		id: "eclipse.copyFile",
 		choiceCallback: function(items, userData) {
@@ -587,7 +590,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	// don't do this at the row-level until we figure out bug 338888
 	// commandService.addCommand(copyCommand, "object");
 	
-	var moveCommand = new eclipse.Command({
+	var moveCommand = new mCommands.Command({
 		name : "Move to",
 		id: "eclipse.moveFile",
 		choiceCallback: function(items, userData) {
@@ -600,7 +603,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	// commandService.addCommand(moveCommand, "object");
 	
 	var bufferedSelection = [];
-	var copyToBufferCommand = new eclipse.Command({
+	var copyToBufferCommand = new mCommands.Command({
 			name: "Copy Items",
 			id: "eclipse.copySelections",
 			callback: function() {
@@ -611,7 +614,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		});
 	commandService.addCommand(copyToBufferCommand, "dom");
 		
-	var pasteFromBufferCommand = new eclipse.Command({
+	var pasteFromBufferCommand = new mCommands.Command({
 			name: "Paste Items",
 			id: "eclipse.pasteSelections",
 			callback: function() {
@@ -732,7 +735,7 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 		var service = fileCommands[i].service;
 		
 		var commandOptions = eclipse.fileCommandUtils._createFileCommandOptions(info, service);
-		var command = new eclipse.Command(commandOptions);
+		var command = new mCommands.Command(commandOptions);
 		if (info.isEditor) {
 			command.isEditor = true;
 		}
@@ -908,3 +911,5 @@ eclipse.fileCommandUtils.getOpenWithCommands = function(commandService) {
 	}
 	return openWithCommands;
 };
+return eclipse.fileCommandUtils;
+});

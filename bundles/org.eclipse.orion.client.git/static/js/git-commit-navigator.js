@@ -11,8 +11,10 @@
 /*global dojo eclipse:true widgets*/
 /*jslint regexp:false browser:true forin:true*/
 
-var eclipse = eclipse || {};
-eclipse.GitCommitNavigator = (function() {
+define(['dojo', 'orion/explorer', 'orion/util', 'orion/gitCommands'], function(dojo, mExplorer, mUtil, mGitCommands) {
+
+var exports =  {};
+exports.GitCommitNavigator = (function() {
 	/**
 	 * @name eclipse.GitCommitNavigator
 	 * @class A table-based git commit navigator
@@ -29,14 +31,14 @@ eclipse.GitCommitNavigator = (function() {
 		this.model = null;
 		this.myTree = null;
 		this.commitDetails = commitDetails;
-		this.renderer = new eclipse.GitCommitRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
+		this.renderer = new exports.GitCommitRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
 		this.commitDetails.render(null);
 	}
 	
-	GitCommitNavigator.prototype = new eclipse.Explorer();
+	GitCommitNavigator.prototype = new mExplorer.Explorer();
 	
 	GitCommitNavigator.prototype.loadCommitsList = function(path, treeRoot, force) {
-			path = eclipse.util.makeRelative(path);
+			path = mUtil.makeRelative(path);
 			if (path === this._lastHash && !force) {
 				return;
 			}
@@ -60,10 +62,10 @@ eclipse.GitCommitNavigator = (function() {
 			
 			var self = this;
 			
-			eclipse.gitCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
+			mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
 						
 			this.registry.getService("orion.git.provider").then(function(service){
-				dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerFlatModel(path, service.doGitLog)));
+				dojo.hitch(self, self.createTree(self.parentId, new mExplorer.ExplorerFlatModel(path, service.doGitLog)));
 			});
 			
 		};
@@ -77,14 +79,14 @@ eclipse.GitCommitNavigator = (function() {
 
 /********* Rendering json items into columns in the tree **************/
 
-eclipse = eclipse || {};
-eclipse.GitCommitRenderer = (function() {
+
+exports.GitCommitRenderer = (function() {
  	
 	function GitCommitRenderer (options, explorer) {
 		this._init(options);
 		this.explorer = explorer;
 	}
-	GitCommitRenderer.prototype = eclipse.SelectionRenderer.prototype;
+	GitCommitRenderer.prototype = mExplorer.SelectionRenderer.prototype;
 	
 	GitCommitRenderer.prototype.getCellHeaderElement = function(col_no){
 		
@@ -187,3 +189,6 @@ eclipse.GitCommitRenderer = (function() {
 	
 	return GitCommitRenderer;
 }());
+return exports;
+});
+

@@ -10,8 +10,8 @@
 
  /*global dojo, dijit, document, window, navigator, eclipse:true, alert, Image */
  
-dojo.require("dijit.Menu");
-dojo.require("dijit.form.DropDownButton");
+define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton' ], function(dojo, dijit, mUtil){
+
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -619,11 +619,11 @@ eclipse.Command = (function() {
 					if (loc.then) {
 						loc.then(dojo.hitch(this, function(l) { 
 							menuitem.set("label", "<a href='"+l+"'>"+this.name+"</a>");
-							menuitem.onClick = function(event) {eclipse.util.followLink(l, event);};
+							menuitem.onClick = function(event) {mUtil.followLink(l, event);};
 						}));
 					} else {
 						menuitem.set("label", "<a href='"+loc+"'>"+this.name+"</a>");
-						menuitem.onClick = function(event) {eclipse.util.followLink(loc, event);};
+						menuitem.onClick = function(event) {mUtil.followLink(loc, event);};
 					}
 				}
 			} else if (this.callback) {
@@ -763,3 +763,5 @@ eclipse.CommandKeyBinding = (function() {
 	return CommandKeyBinding;
 }());
 
+return eclipse;
+});

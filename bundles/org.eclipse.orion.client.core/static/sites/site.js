@@ -14,24 +14,32 @@
 /*
  * Glue code for site.html
  */
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 
+	        'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'siteService', 'siteUtils', 'siteTree', 'orion/treetable', 
+	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/SiteEditor'], 
+			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
+
 dojo.addOnLoad(function() {
+	
+	dojo.parser.parse();
+	
 	// Register services
-	var serviceRegistry = new eclipse.ServiceRegistry();
-	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+	var serviceRegistry = new mServiceregistry.ServiceRegistry();
+	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 	dojo.addOnWindowUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	var dialogService = new eclipse.DialogService(serviceRegistry);
-	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	var dialogService = new mDialogs.DialogService(serviceRegistry);
+	var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
 	serviceRegistry.getService("orion.core.file").then(function(fileService) {
-		var fileClient = new eclipse.FileClient(fileService);
-		var siteService = new eclipse.sites.SiteService(serviceRegistry);
-		var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-		var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+		var fileClient = new mFileClient.FileClient(fileService);
+		var siteService = new mSiteService.SiteService(serviceRegistry);
+		var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 		
-		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 		
 		var updateTitle = function() {
 			var editor = dijit.byId("site-editor");
@@ -52,7 +60,7 @@ dojo.addOnLoad(function() {
 		
 		var onHashChange = function() {
 			var hash = dojo.hash();
-			var state = eclipse.sites.util.parseStateFromHash(hash);
+			var state = mSiteUtils.parseStateFromHash(hash);
 			var editor = dijit.byId("site-editor");
 			if (state.site /* && site is not already loaded */) {
 				editor.load(state.site).then(
@@ -85,9 +93,11 @@ dojo.addOnLoad(function() {
 		var refresher = dojo.hitch(widget, widget._setSiteConfiguration);
 		var errorHandler = statusService;
 		
-		eclipse.sites.util.createSiteCommands(commandService, siteService, statusService, dialogService, 
+		mSiteUtils.createSiteCommands(commandService, siteService, statusService, dialogService, 
 				/*start*/ refresher, /*stop*/ refresher, /*delete*/ null, errorHandler);
 		commandService.registerCommandContribution("eclipse.site.start", 1);
 		commandService.registerCommandContribution("eclipse.site.stop", 2);
 	});
+});
+
 });

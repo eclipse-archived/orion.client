@@ -10,32 +10,41 @@
  *******************************************************************************/
 /*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
 /*browser:true*/
+
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/log','orion/dialogs',
+        'orion/users', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/searchResults', 'orion/globalCommands',
+        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mLog, mDialogs, mUsers, mCommands, mFavorites, 
+				mSearchClient, mSearchResults, mGlobalCommands) {
+
 dojo.addOnLoad(function(){
+	dojo.parser.parse();
 	
 	// initialize service registry and EAS services
-	serviceRegistry = new eclipse.ServiceRegistry();
-	new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	new eclipse.LogService(serviceRegistry);
-	new eclipse.DialogService(serviceRegistry);
-	new eclipse.UserService(serviceRegistry);
-	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	serviceRegistry = new mServiceregistry.ServiceRegistry();
+	new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+	new mLog.LogService(serviceRegistry);
+	new mDialogs.DialogService(serviceRegistry);
+	new mUsers.UserService(serviceRegistry);
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 
 	// Favorites
-	new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
+	new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 	
 	var treeRoot = {
 		children:[]
 	};
-	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-	var searchResultsGenerator = new eclipse.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
-	var favorites = new eclipse.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
-	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, searcher);
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+	var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
+	var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, searcher);
 	searchResultsGenerator.loadResults(dojo.hash());
-	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, searcher, "pageActions");
+	mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");
 
 	//every time the user manually changes the hash, we need to load the workspace with that name
 	dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
 	   searchResultsGenerator.loadResults(dojo.hash());
 	});
+});
 });

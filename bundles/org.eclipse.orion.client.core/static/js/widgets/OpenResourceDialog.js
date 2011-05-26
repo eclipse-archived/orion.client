@@ -10,11 +10,13 @@
  *******************************************************************************/
 /*jslint browser:true*/
 /*global window dojo dijit*/
-dojo.provide("widgets.OpenResourceDialog");
 
-dojo.require("dijit.Dialog");
-dojo.require("dijit._Widget");
-dojo.require("dijit._Templated");
+
+define(['dojo', 'dijit', 'dijit/Dialog'], function(dojo, dijit) {
+
+//dojo.require("dijit.Dialog");
+//dojo.require("dijit._Widget");
+//dojo.require("dijit._Templated");
 
 /**
  * Usage: new widgets.OpenResourceDialog(options).show();
@@ -22,9 +24,9 @@ dojo.require("dijit._Templated");
  * @param options {{ SearchLocation: string,
  *                   searcher: {eclipse.Searcher} }}
  */
-dojo.declare("widgets.OpenResourceDialog", [dijit._Widget, dijit._Templated], {
+var OpenResourceDialog = dojo.declare("widgets.OpenResourceDialog", [dijit._Widget, dijit._Templated], {
 	widgetsInTemplate : true,
-	templateString : dojo.cache("widgets", "templates/OpenResourceDialog.html"),
+	templateString : dojo.cache(new dojo._Url("/js/widgets/templates/OpenResourceDialog.html")),
 	
 	SEARCH_DELAY: 500,
 	timeoutId: null,
@@ -129,4 +131,6 @@ dojo.declare("widgets.OpenResourceDialog", [dijit._Widget, dijit._Templated], {
 		}), this.dialog.duration);
 	}
 	
+});
+return OpenResourceDialog;
 });

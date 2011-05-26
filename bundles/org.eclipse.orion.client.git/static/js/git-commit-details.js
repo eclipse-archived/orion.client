@@ -11,9 +11,11 @@
 /*global dijit dojo window document eclipse:true setTimeout */
 /*jslint forin:true*/
 
-var eclipse = eclipse || {};
+define(['dojo', 'orion/commands'], function(dojo, mCommands) {
 
-eclipse.CommitDetails = (function() {
+var exports = {};
+
+exports.CommitDetails = (function() {
 	function CommitDetails(options) {
 		var parent = options.parent;
 		if (typeof(parent) === "string") {
@@ -26,14 +28,14 @@ eclipse.CommitDetails = (function() {
 		this._detailsPane = options.detailsPane;
 		var commitDetails = this;
 	
-		var doSomething1 = new eclipse.Command({
+		var doSomething1 = new mCommands.Command({
 			name: "Do Something 1",
 			tooltip: "Do Something 1",
 			image: "images/add_obj.gif",
 			id: "eclipse.doSomething1",
 			callback: function(item) {console.info("clicked");}
 		});		
-		var showDiffCommand = new eclipse.Command({
+		var showDiffCommand = new mCommands.Command({
 			name: "Show diff",
 			tooltip: "Show the diff",
 			image: "images/compare-sbs.gif",
@@ -235,3 +237,5 @@ eclipse.CommitDetails = (function() {
 	};
 	return CommitDetails;
 })();
+return exports;
+});

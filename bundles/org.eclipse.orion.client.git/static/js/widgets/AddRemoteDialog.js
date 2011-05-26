@@ -9,10 +9,8 @@
  ******************************************************************************/
 
 /*global dojo dijit widgets*/
-dojo.provide("widgets.AddRemoteDialog");
 
-dojo.require("dijit.Dialog");
-dojo.require("widgets._OrionDialogMixin");
+define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin'], function(dojo, dijit) {
 
 /**
  * @param options {{ 
@@ -21,7 +19,7 @@ dojo.require("widgets._OrionDialogMixin");
  */
 dojo.declare("widgets.AddRemoteDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache("widgets", "templates/AddRemoteDialog.html"),
+	templateString: dojo.cache(new dojo._Url("/js/widgets/templates/AddRemoteDialog.html")),
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -36,4 +34,6 @@ dojo.declare("widgets.AddRemoteDialog", [dijit.Dialog, widgets._OrionDialogMixin
 	execute: function() {
 		this.options.func(this.gitRemote.value, this.gitRemoteURI.value);
 	}
+});
+
 });

@@ -9,15 +9,9 @@
  ******************************************************************************/
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
-dojo.provide("widgets.NewItemDialog");
 
-dojo.require("dijit.Dialog");
-dojo.require("dijit.form.CheckBox");
-dojo.require("dijit.form.ComboBox");
-dojo.require("dijit.form.Form");
-dojo.require("dijit.form.ValidationTextBox");
-dojo.require("dojo.data.ItemFileReadStore");
-dojo.require("widgets._OrionDialogMixin");
+
+define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/CheckBox', 'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin'], function(dojo, dijit) {
 
 /**
  * @param options {{ 
@@ -29,7 +23,7 @@ dojo.require("widgets._OrionDialogMixin");
  */
 dojo.declare("widgets.NewItemDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache("widgets", "templates/NewItemDialog.html"),
+	templateString: dojo.cache(new dojo._Url("/js/widgets/templates/NewItemDialog.html")),
 	
 	constructor : function() {
 		//this.inherited(arguments);
@@ -82,4 +76,6 @@ dojo.declare("widgets.NewItemDialog", [dijit.Dialog, widgets._OrionDialogMixin],
 			return;
 		}
 	}
+});
+
 });

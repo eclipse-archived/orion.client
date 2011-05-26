@@ -5,12 +5,10 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
 	<script type="text/javascript" src="/js/plugin.js"></script>
-	<script type="text/javascript" src="/js/gitClient.js"></script>
 	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script>
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
-			var gitService = new eclipse.GitService();
 			
 			provider.registerServiceProvider("orion.navigate.command", {
 				run: function(item) {

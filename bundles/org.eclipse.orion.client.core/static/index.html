@@ -3,53 +3,47 @@
 	<head>
 		<title>Welcome to Orion</title>
 		<link rel="stylesheet" type="text/css" href="index.css" />
-<script type="text/javascript">
-	var djConfig = {
-		isDebug : true,
-		modulePaths : {
-			'widgets' : '/js/widgets'
-		},
-		parseOnLoad : true
-	};
-</script>
-<script src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-<script type="text/javascript">
-	dojo.require("dijit.form.Button");
-	dojo.require("dijit.form.TextBox");
-	dojo.require("dijit.layout.BorderContainer");
-	dojo.require("dijit.layout.ContentPane");
-	dojo.require("dojox.widget.Portlet");
-    dojo.require("dojox.widget.FeedPortlet");
-	<!-- The following required for header command - see bug 341350 -->
-	dojo.require("widgets.OpenResourceDialog");
-</script>
+		<script type="text/javascript" src="/requirejs/require.js"></script>
+		<script type="text/javascript">
+		require({
+		  baseUrl: '',
+		
+		  // set the paths to our library packages
+		  packages: [
+		    {
+		      name: 'dojo',
+		      location: '/org.dojotoolkit/dojo',
+		      main: 'lib/main-browser',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dijit',
+		      location: '/org.dojotoolkit/dijit',
+		      main: 'lib/main',
+		      lib: '.'
+		    }
+		  ],
+		
+		  paths: {
+		    orion: '/js',
+		    text: '/requirejs/text',
+		    i18n: '/requirejs/i18n'
+		  }
+		});
+		
+		require(["index"]);
+		</script>
 </head>
 	<body style="height: 100%" class="nihilo">
-	<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
-	<script src="/js/serviceregistry.js"></script>
-	<script src="/js/pluginregistry.js"></script>
-	<script src="/js/auth.js"></script>
-	<script src="/js/util.js"></script>
- 	<script src="/js/commands.js"></script>
-	<script src="/js/globalCommands.js"></script>
- 	<script src="/js/preferences.js"></script>
-	<script src="/js/searchClient.js"></script>
-	
-	<!-- TODO: scripts below are only for testing, remove later -->
- 	<script src="/js/dialogs.js"></script>
- 	<script src="/js/log.js"></script>
- 	<script src="/js/selection.js"></script>
- 	<script src="/js/status.js"></script>
- 	<script src="/js/users.js"></script>
 	
 	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
 		<div dojoType="dijit.layout.ContentPane" id="toolbar" region="top" class="toolbar">
 		</div>
 		<div dojoType="dijit.layout.BorderContainer" design="headline" persist="false" gutters="false" region="center" splitter="false" style="margin-left: 44px">
-			<div dojoType="dijit.layout.ContentPane" id="feed" region="top" class="mainpane" style="height: 33%">
+			<!--<div dojoType="dijit.layout.ContentPane" id="feed" region="top" class="mainpane" style="height: 33%">
 				<div dojoType="dojox.widget.FeedPortlet" title="Orion News" id="orionfeed" url="http://planetorion.org/news/feed/" maxResults="5" openNew="false" showFeedTitle="false">
-				</div>			
-			</div>
+				</div>		
+			</div>-->
 			<div dojoType="dijit.layout.BorderContainer" id="bottom" splitter="false" persist="false" gutters="false" region="center" class="landingPanelContainer">
 				<div dojoType="dijit.layout.ContentPane" id="left" region="left" class="landingPanel" style="width: 33%">
 					<div style="padding: 8px;">
@@ -71,8 +65,5 @@
 		</div>
 
 	</div>
-	
-	<!-- Glue -->
-	<script src="index.js"></script>
 	</body>
 </html>

@@ -12,6 +12,9 @@
 /**
  * @namespace The global container for eclipse APIs.
  */ 
+
+define(['dojo'], function(dojo) {
+	
 var eclipse = eclipse || {};
 
 /**
@@ -188,4 +191,5 @@ eclipse.StatusReportingService.prototype = {
 		return this.showWhile(deferred, progress.Message);
 	}
 };
-	
+return eclipse;
+});

@@ -10,21 +10,30 @@
 
 /*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
 /*browser:true*/
-dojo.addOnLoad(function(){
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/log', 'orion/commands',
+        'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/gitClient',
+        'orion/breadcrumbs', 'orion/ssh/sshTools', 'orion/git-commit-details', 'orion/git-commit-navigator', 'orion/gitCommands',
+	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mLog, mCommands, mAuth, mDialogs, mSelection, mFileClient,
+					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitDetails, mGitCommitNavigator, mGitCommands) {
+
+dojo.addOnLoad(function() {
+	
+	dojo.parser.parse();
 	
 	// initialize service registry and EAS services
-	serviceRegistry = new eclipse.ServiceRegistry();
-	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+	serviceRegistry = new mServiceregistry.ServiceRegistry();
+	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 	dojo.addOnUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	new eclipse.LogService(serviceRegistry);
-	new eclipse.DialogService(serviceRegistry);
-	var selection = new orion.Selection(serviceRegistry);
-	new eclipse.SshService(serviceRegistry);
-	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+	new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+	new mLog.LogService(serviceRegistry);
+	new mDialogs.DialogService(serviceRegistry);
+	var selection = new mSelection.Selection(serviceRegistry);
+	new mSshTools.SshService(serviceRegistry);
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 	
 	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 	var fileServiceReference;
@@ -43,21 +52,21 @@ dojo.addOnLoad(function(){
 	}	
 	
 	// Git operations
-	var gitClient = new eclipse.GitService(serviceRegistry);
+	var gitClient = new mGitClient.GitService(serviceRegistry);
 	
-	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 	
 	// Commit details
-	var commitDetails = new eclipse.CommitDetails({parent: "commitDetailsPane", serviceRegistry: serviceRegistry, detailsPane: dijit.byId("orion.innerNavigator")});
+	var commitDetails = new mGitCommitDetails.CommitDetails({parent: "commitDetailsPane", serviceRegistry: serviceRegistry, detailsPane: dijit.byId("orion.innerNavigator")});
 	
 	// Commit navigator
-	var navigator = new eclipse.GitCommitNavigator(serviceRegistry, selection,commitDetails, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+	var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection,commitDetails, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 
 	// global commands
-	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, navigator);
+	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, navigator);
 	
 	//TODO this should be removed and contributed by a plug-in
-	eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, navigator, "pageActions", "selectionTools");
+	mGitCommands.createFileCommands(serviceRegistry, commandService, navigator, "pageActions", "selectionTools");
 	
 	// define the command contributions - where things appear, first the groups
 	commandService.addCommandGroup("eclipse.gitGroup.nav", 200, "More");
@@ -85,7 +94,7 @@ dojo.addOnLoad(function(){
 	};
 	
 	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-		var fileClient = new eclipse.FileClient(fileService);
+		var fileClient = new mFileClient.FileClient(fileService);
 		initTitleBar(fileClient, navigator);
 	});
 	
@@ -108,7 +117,7 @@ dojo.addOnLoad(function(){
 				});
 			},
 			error : function(error, ioArgs) {
-				handleGetAuthenticationError(this, ioArgs);
+				mAuth.handleGetAuthenticationError(this, ioArgs);
 				console.error("HTTP status code: ", ioArgs.xhr.status);
 			}
 		});
@@ -126,7 +135,7 @@ dojo.addOnLoad(function(){
 				return jsonData;
 			},
 			error : function(error, ioArgs) {
-				handleGetAuthenticationError(this, ioArgs);
+				mAuth.handleGetAuthenticationError(this, ioArgs);
 				console.error("HTTP status code: ", ioArgs.xhr.status);
 			}
 		}).then(function(commitLogJsonData){
@@ -151,7 +160,7 @@ dojo.addOnLoad(function(){
 						});
 					},
 					error : function(error, ioArgs) {
-						handleGetAuthenticationError(this, ioArgs);
+						mAuth.handleGetAuthenticationError(this, ioArgs);
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 						navigator.loadCommitsList(dojo.hash(), {RemoteLocation: commitLogJsonData.RemoteLocation});
 					}
@@ -177,7 +186,7 @@ dojo.addOnLoad(function(){
 	// workspace with that name
 	dojo.subscribe("/dojo/hashchange", navigator, function() {
 		serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-			var fileClient = new eclipse.FileClient(fileService);
+			var fileClient = new mFileClient.FileClient(fileService);
 			initTitleBar(fileClient, navigator);
 		});
 		if (isRemote()) {
@@ -258,7 +267,7 @@ function initTitleBar(fileClient, navigator){
 					var titlePane = dojo.byId("pageTitle");
 					if (titlePane) {
 						dojo.empty(titlePane);
-						var breadcrumb = new eclipse.BreadCrumbs({
+						var breadcrumb = new mBreadcrumbs.BreadCrumbs({
 							container: "pageTitle",
 							resource: metadata ,
 							getFirstSegment: function(){ return dojo.create("a", {innerHTML: getPageTitle()});},
@@ -270,7 +279,7 @@ function initTitleBar(fileClient, navigator){
 					}
 					navigator.isRoot=!metadata.Parents || metadata.Parents.length==0;
 					navigator.isDirectory = metadata.Directory;
-					eclipse.gitCommandUtils.updateNavTools(serviceRegistry, navigator, "pageActions", "selectionTools", navigator._lastTreeRoot);
+					mGitCommands.updateNavTools(serviceRegistry, navigator, "pageActions", "selectionTools", navigator._lastTreeRoot);
 					navigator.updateCommands();
 					if(metadata.Directory){
 						//remove links to commit
@@ -344,3 +353,5 @@ function makeHref(fileClient, seg, location){
 function getPageTitle(){
 	return isRemote() ? "Orion Git Remote" : "Orion Git Log";
 }
+
+});

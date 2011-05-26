@@ -11,6 +11,10 @@
 /**
  * @namespace The global container for eclipse APIs.
  */ 
+
+define([], function(){
+
+
 var eclipse = eclipse || {};
 
 /**
@@ -30,5 +34,7 @@ eclipse.DialogService.prototype = {
 		// TODO
 	}
 };
+return eclipse;
+});
 	
 		
