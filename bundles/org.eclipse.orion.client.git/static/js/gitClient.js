@@ -381,6 +381,46 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
+		addRemote : function(gitRemoteParentURI, remoteName, remoteURI) {
+			var service = this;
+			return dojo.xhrPost({
+				url : gitRemoteParentURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				putData : dojo.toJson({
+					"Remote" : remoteName,
+					"RemoteURI" : remoteURI
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
+		removeRemote : function(gitRemoteURI) {
+			var service = this;
+			return dojo.xhrDelete({
+				url : gitRemoteURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
 		doGitLog : function(gitLogURI, onLoad) {
 			var service = this;
 			
