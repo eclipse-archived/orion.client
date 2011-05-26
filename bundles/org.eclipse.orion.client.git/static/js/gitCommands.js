@@ -539,7 +539,7 @@ dojo.require("widgets.GitCredentialsDialog");
 						var func = arguments.callee;
 						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 							serviceRegistry.getService("orion.page.message").then(function(progressService) {
-								var deferred = gitService.doPush(item.Location, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+								var deferred = gitService.doPush(item.RemoteLocation, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
 									eclipse.gitCommandUtils.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
 											function(jsonData){
@@ -554,11 +554,12 @@ dojo.require("widgets.GitCredentialsDialog");
 				});
 			},
 			visibleWhen : function(item) {
-				return explorer.isRoot;
+				return explorer.isRoot || (item.Type === "Branch" && item.Current);
 			}
 		});
 	
 		commandService.addCommand(pushCommand, "dom");
+		commandService.addCommand(pushCommand, "object");
 		
 		var addTagCommand = new eclipse.Command({
 			name : "Tag",

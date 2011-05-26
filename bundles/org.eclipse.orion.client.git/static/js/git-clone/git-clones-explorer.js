@@ -107,7 +107,7 @@ eclipse.GitClonesModel = (function() {
 				}
 				onComplete(parentItem.Children);
 			}
-			else if (parentItem.BranchLocation || parentItem.RemoteLocation){
+			else if (parentItem.BranchLocation && parentItem.RemoteLocation){
 				onComplete([{GroupNode : "true", Location : parentItem.BranchLocation, Name : "Branch"}, {GroupNode : "true", Location : parentItem.RemoteLocation, Name : "Remote"}]);
 			}
 			else if (parentItem.GroupNode){
@@ -162,7 +162,7 @@ eclipse.git.GitClonesRenderer = (function(){
 		switch(col_no){
 		case 0:
 			var col, div, link;
-			if (item.BranchLocation || item.RemoteLocation) {
+			if (item.BranchLocation && item.RemoteLocation) {
 				col = document.createElement('td');
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");

@@ -130,9 +130,10 @@ dojo.addOnLoad(function(){
 				console.error("HTTP status code: ", ioArgs.xhr.status);
 			}
 		}).then(function(commitLogJsonData){
-			if (commitLogJsonData.RemoteLocation == null)
-				navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
-			else
+//			if (commitLogJsonData.RemoteLocation == null)
+//				navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
+//			else
+			
 				dojo.xhrGet({
 					url : commitLogJsonData.RemoteLocation,
 					headers : {
@@ -144,13 +145,15 @@ dojo.addOnLoad(function(){
 						serviceRegistry.getService("orion.git.provider").then(function(gitService){
 							gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
 								navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
-								navigator.loadCommitsList(dojo.hash(), remoteJsonData);
+								//navigator.loadCommitsList(dojo.hash(), remoteJsonData);
+								navigator.loadCommitsList(dojo.hash(), {RemoteLocation: commitLogJsonData.RemoteLocation});
 							});
 						});
 					},
 					error : function(error, ioArgs) {
 						handleGetAuthenticationError(this, ioArgs);
 						console.error("HTTP status code: ", ioArgs.xhr.status);
+						navigator.loadCommitsList(dojo.hash(), {RemoteLocation: commitLogJsonData.RemoteLocation});
 					}
 				});
 		});

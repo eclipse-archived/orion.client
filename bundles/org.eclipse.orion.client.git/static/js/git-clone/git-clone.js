@@ -49,6 +49,7 @@ dojo.addOnLoad(function(){
 	commandService.registerCommandContribution("eclipse.openGitLog", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.fetch", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.merge", 2);
+	commandService.registerCommandContribution("eclipse.orion.git.push", 2);
 	
 	serviceRegistry.getService("orion.core.file").then(function(fileService){
 	fileService.loadWorkspace().then(
