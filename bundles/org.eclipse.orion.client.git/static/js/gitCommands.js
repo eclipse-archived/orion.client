@@ -259,14 +259,22 @@ dojo.require("widgets.GitCredentialsDialog");
 			image: "/images/add_obj.gif",
 			id: "eclipse.addBranch",
 			callback: function(item) {
-				var branchName = prompt("Enter branch name");
-				serviceRegistry.getService("orion.git.provider").then(
-					function(service) {
-						service.addBranch(item.Location, branchName).then(function(){
-							dojo.hitch(explorer, explorer.changedItem)(item);
-						});
-					}
-				);
+				var dialog = new widgets.NewItemDialog({
+					title: "Add Branch",
+					label: "Branch name:",
+					func:  function(name, url, create){
+						serviceRegistry.getService("orion.git.provider").then(
+								function(service) {
+									service.addBranch(item.Location, name).then(function(){
+										dojo.hitch(explorer, explorer.changedItem)(item);
+									});
+								}
+							);
+					},
+					advanced: false
+				});
+				dialog.startup();
+				dialog.show();
 			},
 			visibleWhen: function(item) {
 				return item.GroupNode && item.Name === "Branch";
