@@ -56,6 +56,7 @@ dojo.declare("widgets.NewItemDialog", [dijit.Dialog, widgets._OrionDialogMixin],
 	// Stuff from newItemDialog.js is below
 	execute: function() {
 		var url, create;
+		this.newItemButton.focus();
 		if (this.options.advanced) {
 			url = this.itemURL.value.replace(/^\s+|\s+$/g, '');
 			if (this.createCheckbox.get('disabled')) {
