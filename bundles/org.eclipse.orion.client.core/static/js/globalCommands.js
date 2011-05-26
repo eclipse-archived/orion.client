@@ -151,6 +151,9 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 	// place the HTML fragment from above.
 	dojo.place(topHTMLFragment, parent, "only");
 	
+	// place an empty div for keyAssist
+	dojo.place('<div id="keyAssist" class="keyAssistFloat"></div>', document.body, "last");
+	
 	// generate primary nav links. 
 	var primaryNav = dojo.byId("primaryNav");
 	if (primaryNav) {
@@ -227,18 +230,7 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 			openResourceDialog(searchLocation, searcher, editor);
 		}});
 		
-	dojo.connect(window.document, "onkeydown", function (evt){
-		evt = evt || window.event;
-		// HACK!  Fix when doing https://bugs.eclipse.org/bugs/show_bug.cgi?id=334200
-		var type = evt.target.nodeName.toLowerCase();
-		if (type === 'input' || type === 'textarea') {
-			return;
-		}
-		if (evt.keyCode  === 84){ // "t" handler for open resource
-			openResourceDialog(searchLocation, searcher, editor);
-		}
-	});
-		
+	// We need a mod key binding in the editor, for now use the old one (ctrl-shift-r)
 	if (editor) {
 		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("r", true, true, false), openResourceCommand.id);
 		editor.getEditorWidget().setAction(openResourceCommand.id, function() {
@@ -246,10 +238,30 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 				return true;
 			});
 	}
-	commandService.addCommand(openResourceCommand, "global");
-	// don't show this on the main toolbar anymore
-	// commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions");
 	
+	// We are using 't' for the non-editor binding because of git-hub's use of t for similar function
+	commandService.addCommand(openResourceCommand, "global");
+	commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions", null, new eclipse.CommandKeyBinding('T', 't'), true);
+	
+	var keyAssistNode = dojo.byId("keyAssist");
+	dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){ 
+		if (e.charOrCode === dojo.keys.ESCAPE) {
+			keyAssistNode.style.display = "none";
+		}
+	}));
+	var keyAssistCommand = new eclipse.Command({
+		name: "Show Key bindings",
+		id: "eclipse.keyAssist",
+		callback: function() {
+			dojo.empty(keyAssistNode);
+			commandService.showKeyBindings(keyAssistNode);
+			keyAssistNode.style.display = "block";
+			
+		}});
+	commandService.addCommand(keyAssistCommand, "global");
+	commandService.registerCommandContribution("eclipse.keyAssist", 1, "globalActions", null, new eclipse.CommandKeyBinding('?', 191, false, true), true);
+	
+		
 	// generate global commands
 	var toolbar = dojo.byId("globalActions");
 	if (toolbar) {	

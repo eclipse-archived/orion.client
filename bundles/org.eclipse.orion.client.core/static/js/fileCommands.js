@@ -598,6 +598,47 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(moveCommand, "dom");
 	// don't do this at the row-level until we figure out bug 338888
 	// commandService.addCommand(moveCommand, "object");
+	
+	var bufferedSelection = [];
+	var copyToBufferCommand = new eclipse.Command({
+			name: "Copy Items",
+			id: "eclipse.copySelections",
+			callback: function() {
+				commandService.getSelectionService().getSelections(function(selections) {
+					bufferedSelection = selections;
+				});
+			}
+		});
+	commandService.addCommand(copyToBufferCommand, "dom");
+		
+	var pasteFromBufferCommand = new eclipse.Command({
+			name: "Paste Items",
+			id: "eclipse.pasteSelections",
+			callback: function() {
+				if (bufferedSelection.length > 0) {
+					for (var i=0; i<bufferedSelection.length; i++) {
+						var location = bufferedSelection[i].Location;
+						var name = null;
+						if (location) {
+							if (bufferedSelection[i].parent && bufferedSelection[i].parent.Location === explorer.treeRoot.Location) {
+								name = window.prompt("Enter a new name for '" + bufferedSelection[i].Name+ "'", "Copy of " + bufferedSelection[i].Name);
+								// user cancelled?  don't copy this one
+								if (!name) {
+									location = null;
+								}
+							}
+							if (location) {
+								fileClient.copyFile(location, explorer.treeRoot.Location, name).then(dojo.hitch(explorer, function() {
+									this.changedItem(this.treeRoot);
+								}));
+							}
+						}
+					}
+				}
+			}
+		});
+	commandService.addCommand(pasteFromBufferCommand, "dom");
+	
 };
 
 eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){

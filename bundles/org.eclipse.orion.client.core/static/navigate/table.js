@@ -120,52 +120,6 @@ dojo.addOnLoad(function(){
 		// set up the splitter bar and its key binding
 		var splitArea = dijit.byId("orion.innerNavigator");
 				
-		var bufferedSelection = [];
-		
-		window.document.onkeydown = function (evt){
-			evt = evt || window.event;
-			var handled = false;
-			if(evt.ctrlKey && evt.keyCode  === 79){ // Ctrl+o handler for toggling outline 
-				splitArea.toggle();
-				handled = true;			
-			} else if(evt.ctrlKey && evt.keyCode  === 67){ // Ctrl+c buffers selection
-				selection.getSelections(function(selections) {
-					bufferedSelection = selections;
-				});
-				handled = true;				
-			} else if(evt.ctrlKey && evt.keyCode  === 86){
-				if (bufferedSelection.length > 0) {
-					for (var i=0; i<bufferedSelection.length; i++) {
-						var location = bufferedSelection[i].Location;
-						var name = null;
-						if (location) {
-							if (bufferedSelection[i].parent && bufferedSelection[i].parent.Location === explorer.treeRoot.Location) {
-								name = window.prompt("Enter a new name for '" + bufferedSelection[i].Name+ "'", "Copy of " + bufferedSelection[i].Name);
-								// user cancelled?  don't copy this one
-								if (!name) {
-									location = null;
-								}
-							}
-							if (location) {
-								fileClient.copyFile(location, explorer.treeRoot.Location, name).then(dojo.hitch(explorer, function() {
-									this.changedItem(this.treeRoot);
-								}));
-							}
-						}
-					}
-				}
-				handled = true;				
-			} 
-			if (handled) {
-				if (window.document.all) { 
-					evt.keyCode = 0;
-				} else { 
-					evt.preventDefault();
-					evt.stopPropagation();
-				}		
-			}
-		};
-		
 		// global commands
 		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
 		// commands shared by navigators
@@ -174,6 +128,14 @@ dojo.addOnLoad(function(){
 		//TODO this should be removed and contributed by a plug-in
 		eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
 		
+		// navigator-specific commands
+		var toggleOutlineCommand = new eclipse.Command({
+			name: "Toggle Left Pane",
+			id: "eclipse.toggleSplitter",
+			callback: function() {splitArea.toggle();}
+		});
+		commandService.addCommand(toggleOutlineCommand, "dom");
+				
 		// define the command contributions - where things appear, first the groups
 		commandService.addCommandGroup("eclipse.fileGroup", 100, "More");
 		commandService.addCommandGroup("eclipse.newResources", 100, null, "eclipse.fileGroup");
@@ -181,6 +143,10 @@ dojo.addOnLoad(function(){
 		commandService.addCommandGroup("eclipse.fileGroup.openWith", 100, "Open With", "eclipse.fileGroup");
 		commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
 		commandService.addCommandGroup("eclipse.selectionGroup", 500, "More", null, "selectionTools");
+		// commands that don't appear but have keybindings
+		commandService.registerCommandContribution("eclipse.toggleSplitter", 1, "eclipse.navigate-table", null, new eclipse.CommandKeyBinding('Ctrl+O', 'o', true),  true);
+		commandService.registerCommandContribution("eclipse.copySelections", 1, "eclipse.navigate-table", null, new eclipse.CommandKeyBinding('Ctrl+C', 'c', true),  true);
+		commandService.registerCommandContribution("eclipse.pasteSelections", 1, "eclipse.navigate-table", null, new eclipse.CommandKeyBinding('Ctrl+V', 'v', true),  true);
 		
 		// commands appearing directly in local actions column
 		commandService.registerCommandContribution("eclipse.makeFavorite", 1);
@@ -209,7 +175,7 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("eclipse.deleteFile", 3, "selectionTools", "eclipse.selectionGroup");
 		// git contributions
 		// commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup");
-		
+			
 		eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "eclipse.fileGroup", "eclipse.selectionGroup");
 		
 		//every time the user manually changes the hash, we need to load the workspace with that name
@@ -218,21 +184,4 @@ dojo.addOnLoad(function(){
 		});
 		refresh();
 	});
-	/*  For now I'm hiding the concept of switchable views. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=338608
-	var treeViewCommand = new eclipse.Command({
-		name : "Tree View",
-		image : "/images/hierarchicalLayout.gif",
-		id: "eclipse.treeViewCommand",
-		groupId: "eclipse.viewGroup",
-		callback : function() {
-			serviceRegistry.getService("orion.core.preference").then(function(service) {
-				service.put("window/orientation", "/navigate/tree.html");
-			});
-			window.location.replace("/navigate/tree.html#" + dojo.hash());
-		}});
-		
-	commandService.addCommand(treeViewCommand, "dom");
-	commandService.addCommandGroup("eclipse.viewGroup", 800);
-	commandService.registerCommandContribution("eclipse.treeViewCommand", 1, "navToolBar", "eclipse.viewGroup");
-	*/
 });
