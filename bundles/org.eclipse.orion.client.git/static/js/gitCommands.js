@@ -11,7 +11,7 @@
 /*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
 define(['dojo', 'orion/commands',
-        'orion/widgets/CloneGitRepositoryDialog', 'orion/widgets/InitGitRepositoryDialog', 'orion/widgets/AddRemoteDialog', 'orion/widgets/GitCredentialsDialog'], 
+        'orion/widgets/CloneGitRepositoryDialog', 'orion/widgets/InitGitRepositoryDialog', 'orion/widgets/AddRemoteDialog', 'orion/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog'], 
         function(dojo, mCommands) {
 
 /**
