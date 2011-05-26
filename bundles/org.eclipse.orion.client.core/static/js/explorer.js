@@ -307,9 +307,9 @@ eclipse.ExplorerRenderer = (function() {
 			return rowId+"__expand";
 		},
 		
-		getExpandImage: function(tableRow, placeHolder){
+		getExpandImage: function(tableRow, placeHolder, decorateImage){
 			var expandImg = dojo.create("img", {src: this._collapseImgSrc, name: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
-			dojo.create("img", {src: "/images/fldr_obj.gif"}, placeHolder, "last");
+			dojo.create("img", {src: decorateImage ? decorateImage : "/images/fldr_obj.gif"}, placeHolder, "last");
 			expandImg.onclick = dojo.hitch(this, function(evt) {
 				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImgSrc, this._collapseImgSrc);
 				var expanded = this.tableTree.isExpanded(tableRow.id);
