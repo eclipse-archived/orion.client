@@ -239,7 +239,7 @@ var exports = {};
 				);
 			},
 			visibleWhen: function(item) {
-				return item.Type === "Branch" && !item.Current;
+				return item.Type === "Branch";
 			}}
 		);
 		commandService.addCommand(checkoutBranchCommand, "object");
