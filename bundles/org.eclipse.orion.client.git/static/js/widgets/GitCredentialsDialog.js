@@ -10,10 +10,8 @@
 
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
-dojo.provide("widgets.GitCredentialsDialog");
+define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin'], function(dojo, dijit) {
 
-dojo.require("dijit.Dialog");
-dojo.require("widgets._OrionDialogMixin");
 
 /**
  * @param options {{ 
@@ -28,7 +26,7 @@ dojo.require("widgets._OrionDialogMixin");
  */
 dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache("widgets", "templates/GitCredentialsDialog.html"),
+	templateString: dojo.cache(new dojo._Url("/js/widgets/templates/GitCredentialsDialog.html")),
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -91,4 +89,5 @@ dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog, widgets._OrionDialog
 				knownHosts: this.gitSshKnownHosts.value});
 		}
 	}
+});
 });

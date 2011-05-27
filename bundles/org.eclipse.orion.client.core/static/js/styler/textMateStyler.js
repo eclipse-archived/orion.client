@@ -10,8 +10,9 @@
 
 /*jslint devel:true regexp:false laxbreak:true*/
 /*global dojo orion:true*/
+define(['dojo'], function(dojo) {
 
-orion = orion || {};
+var orion = orion || {};
 
 orion.styler = orion.styler || {};
 
@@ -477,3 +478,6 @@ orion.styler.TextMateStyler = (function() {
 	});
 	return TextMateStyler;
 }());
+
+return orion.styler;	
+});

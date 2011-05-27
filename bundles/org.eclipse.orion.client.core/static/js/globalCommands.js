@@ -14,7 +14,10 @@
 /**
  * @namespace The global container for eclipse APIs.
  */ 
-var eclipse = eclipse || {};
+
+define(['dojo', 'dijit', 'orion/widgets/OpenResourceDialog', 'orion/commands'], function(dojo, dijit, OpenResourceDialog, mCommands ){
+
+var exports = {};
 
 
 // BEGIN TOP BANNER FRAGMENT
@@ -69,11 +72,9 @@ var bottomHTMLFragment = '<img src="http://dev.eclipse.org/small_icons/emblems/e
  * @namespace eclipse.fileCommandUtils generates commands
  */
  
-eclipse.globalCommandUtils = eclipse.globalCommandUtils || {};
+exports.userDataToSet = null;
 
-eclipse.globalCommandUtils.userDataToSet = null;
-
-eclipse.globalCommandUtils.generateUserInfo = function(userName, userStatusText) {
+exports.generateUserInfo = function(userName, userStatusText) {
 	// add the logout button to the toolbar if available
 	var userInfo = dojo.byId("userInfo");
 	if (userInfo) {
@@ -122,13 +123,13 @@ eclipse.globalCommandUtils.generateUserInfo = function(userName, userStatusText)
 			dojo.addClass(signout, "commandLink");
 		}
 		
-		eclipse.globalCommandUtils.userDataToSet = null;
+		exports.userDataToSet = null;
 	}else{
-		eclipse.globalCommandUtils.userDataToSet = {userName : userName, userStatusText : userStatusText};
+		exports.userDataToSet = {userName : userName, userStatusText : userStatusText};
 	}
 };
 
-eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService, handler , pageActionDomId) {
+exports.generateDomCommandsInBanner = function(commandService, handler , pageActionDomId) {
 	var toolbar = dojo.byId("pageActions");
 	if(pageActionDomId) {
 		toolbar = dojo.byId(pageActionDomId);
@@ -139,7 +140,7 @@ eclipse.globalCommandUtils.generateDomCommandsInBanner = function(commandService
 	}
 };
 
-eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, commandService, prefsService, searcher, handler, editor) {
+exports.generateBanner = function(parentId, serviceRegistry, commandService, prefsService, searcher, handler, editor) {
 	// this needs to come from somewhere but I'm not going to do a separate get for it
 	var searchLocation = "/filesearch?q=";
 	var text;
@@ -150,6 +151,9 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 	
 	// place the HTML fragment from above.
 	dojo.place(topHTMLFragment, parent, "only");
+	
+	// place an empty div for keyAssist
+	dojo.place('<div id="keyAssist" class="keyAssistFloat"></div>', document.body, "last");
 	
 	// generate primary nav links. 
 	var primaryNav = dojo.byId("primaryNav");
@@ -207,7 +211,7 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 	}
 
 	var openResourceDialog = function(searchLocation, searcher, /* optional */ editor) {
-		var dialog = new widgets.OpenResourceDialog({
+		var dialog = new OpenResourceDialog({
 			SearchLocation: searchLocation,
 			searcher: searcher
 		});
@@ -219,7 +223,7 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 		window.setTimeout(function() {dialog.show();}, 0);
 	};
 		
-	var openResourceCommand = new eclipse.Command({
+	var openResourceCommand = new mCommands.Command({
 		name: "Open Resource",
 		image: "/images/find.gif",
 		id: "eclipse.openResource",
@@ -227,18 +231,7 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 			openResourceDialog(searchLocation, searcher, editor);
 		}});
 		
-	dojo.connect(window.document, "onkeydown", function (evt){
-		evt = evt || window.event;
-		// HACK!  Fix when doing https://bugs.eclipse.org/bugs/show_bug.cgi?id=334200
-		var type = evt.target.nodeName.toLowerCase();
-		if (type === 'input' || type === 'textarea') {
-			return;
-		}
-		if (evt.keyCode  === 84){ // "t" handler for open resource
-			openResourceDialog(searchLocation, searcher, editor);
-		}
-	});
-		
+	// We need a mod key binding in the editor, for now use the old one (ctrl-shift-r)
 	if (editor) {
 		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("r", true, true, false), openResourceCommand.id);
 		editor.getEditorWidget().setAction(openResourceCommand.id, function() {
@@ -246,10 +239,30 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 				return true;
 			});
 	}
-	commandService.addCommand(openResourceCommand, "global");
-	// don't show this on the main toolbar anymore
-	// commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions");
 	
+	// We are using 't' for the non-editor binding because of git-hub's use of t for similar function
+	commandService.addCommand(openResourceCommand, "global");
+	commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions", null, new mCommands.CommandKeyBinding('T', 't'), true);
+	
+	var keyAssistNode = dojo.byId("keyAssist");
+	dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){ 
+		if (e.charOrCode === dojo.keys.ESCAPE) {
+			keyAssistNode.style.display = "none";
+		}
+	}));
+	var keyAssistCommand = new mCommands.Command({
+		name: "Show Key bindings",
+		id: "eclipse.keyAssist",
+		callback: function() {
+			dojo.empty(keyAssistNode);
+			commandService.showKeyBindings(keyAssistNode);
+			keyAssistNode.style.display = "block";
+			
+		}});
+	commandService.addCommand(keyAssistCommand, "global");
+	commandService.registerCommandContribution("eclipse.keyAssist", 1, "globalActions", null, new mCommands.CommandKeyBinding('?', 191, false, true), true);
+	
+		
 	// generate global commands
 	var toolbar = dojo.byId("globalActions");
 	if (toolbar) {	
@@ -259,10 +272,10 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 		commandService.renderCommands(toolbar, "global", item, handler, "image");
 	}
 	
-	if (eclipse.globalCommandUtils.userDataToSet) {
+	if (exports.userDataToSet) {
 		//if last time we couldn't set the user name try again after creating the banner
-		eclipse.globalCommandUtils.generateUserInfo(eclipse.globalCommandUtils.userDataToSet.userName,
-				eclipse.globalCommandUtils.userDataToSet.userStatusText);
+		exports.generateUserInfo(exports.userDataToSet.userName,
+				exports.userDataToSet.userStatusText);
 	}
 	
 	// generate the footer. The footer div id should not be assumed here, but that will be
@@ -275,3 +288,5 @@ eclipse.globalCommandUtils.generateBanner = function(parentId, serviceRegistry, 
 	}
 
 };
+return exports;
+});

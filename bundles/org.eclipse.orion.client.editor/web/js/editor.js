@@ -1469,7 +1469,6 @@ eclipse.Editor = (function() {
 			if (reset) {
 				this._columnX = -1;
 				this._setSelection(new Selection (0, 0, false), true);
-				this._showCaret();
 				
 				/*
 				* Bug in Firefox 4.  For some reason, the caret does not show after the
@@ -3923,7 +3922,6 @@ eclipse.Editor = (function() {
 				var selection = this._getSelection ();
 				selection.setCaret(e.start + e.text.length);
 				this._setSelection(selection, true);
-				this._showCaret();
 			}
 			this.onModify({});
 		},
@@ -4332,14 +4330,21 @@ eclipse.Editor = (function() {
 						newValue: {start:selection.start, end:selection.end}
 					};
 					this.onSelection(e);
-					if (scroll) { update = !this._showCaret(); }
 				}
+				/* 
+				* Always showCaret(), even when the selection is not changing, to ensure the
+				* caret is visible. Note that some editors do not scroll to show the caret during
+				* keyboard navigation when the selection does not chanage. For example, line down
+				* when the caret is already at the last line.
+				*/
+				if (scroll) { update = !this._showCaret(); }
 				
-				/* Sometimes the browser changes the selection 
-				 * as result of method calls or "leaked" events. 
-				 * The fix is to set the visual selection even
-				 * when the logical selection is not changed.
-				 */
+				/* 
+				* Sometimes the browser changes the selection 
+				* as result of method calls or "leaked" events. 
+				* The fix is to set the visual selection even
+				* when the logical selection is not changed.
+				*/
 				if (update) { this._updateDOMSelection(); }
 			}
 		},

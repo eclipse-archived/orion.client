@@ -6,61 +6,46 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     	<title>Orion Search Results</title>
     	<link rel="stylesheet" type="text/css" href="search.css" /> 
-    
-    <script type="text/javascript">
-        var djConfig = {
-		isDebug: true,
-		modulePaths: {'widgets': '/js/widgets'},
-		parseOnLoad: true
-        };
-    </script>
-    <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-    <script type="text/javascript">
-		dojo.require("dijit.Menu");
-		dojo.require("dijit.MenuItem");
-		dojo.require("dijit.Dialog");
-		dojo.require("dijit.form.CheckBox");
-		dojo.require("dijit.Dialog");
-		<!-- The following required for header command - see bug 341350 -->
-		dojo.require("dijit.form.TextBox");
-		dojo.require("widgets.OpenResourceDialog");
- 		dojo.require("widgets.eWebBorderContainer");
- 	</script>    	
-	<!-- Authentication (required for handleAuthenticationError) -->
-	<script src="/js/auth.js"></script>
+    	<script type="text/javascript" src="/requirejs/require.js"></script>
+		<script type="text/javascript">
+		require({
+		  baseUrl: '',
+		
+		  // set the paths to our library packages
+		  packages: [
+		    {
+		      name: 'dojo',
+		      location: '/org.dojotoolkit/dojo',
+		      main: 'lib/main-browser',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dijit',
+		      location: '/org.dojotoolkit/dijit',
+		      main: 'lib/main',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dojox',
+		      location: '/org.dojotoolkit/dojox',
+		      main: 'lib/main',
+		      lib: '.'
+		    }		    
+		  ],
+		
+		  paths: {
+		    orion: '/js',
+		    text: '/requirejs/text',
+		    i18n: '/requirejs/i18n'
+		  }
+		});
+		
+		require(["search"]);
+		</script>
 	  	 	
    </head>
 
     <body style="height: 100%" class="nihilo">
-    
-    <script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
-    
-    <!-- Extension Registry -->
-	<script src="/js/serviceregistry.js"></script>
-        
-    <!-- Eclipse Application Services -->
-    <!-- START:eas.js -->
- 	<script src="/js/util.js"></script>
- 	<script src="/js/commands.js"></script>
- 	<script src="/js/dialogs.js"></script>
- 	<script src="/js/log.js"></script>
- 	<script src="/js/preferences.js"></script>
- 	<script src="/js/status.js"></script>
- 	<script src="/js/users.js"></script>
-
-	<script src="/js/favorites.js"></script>
-	<script src="/js/fileClient.js"></script>
-	<script src="/js/searchClient.js"></script>
-	<!-- END:eas.js -->
-	<!-- INSERT:eas.js -->
- 	
-	<!-- START:searchResults.js -->
-	<script src="/js/globalCommands.js"></script>
-	<script src="/js/searchResults.js"></script>
-	<script src="search.js"></script>
-	<!-- END:searchResults.js -->
- 	<!-- INSERT:searchResults.js -->
-	
 	<div id="orion.searchResults" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
 		</div>

@@ -8,7 +8,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  /*global eclipse:true dojo document window*/
- var eclipse = eclipse || {};
+define(['dojo', 'orion/util'], function(dojo, mUtil) {
+
+var eclipse = eclipse || {};
  
  /**
  * Constructs a new Outliner with the given options.
@@ -59,8 +61,8 @@ eclipse.Outliner.prototype = {
 			var selectionService = this._selectionService;
 			var url = href;
 			dojo.connect(link, "onclick", link, function(event) {
-				if (eclipse.util.openInNewWindow(event)) {
-					eclipse.util.followLink(url, event);
+				if (mUtil.openInNewWindow(event)) {
+					mUtil.followLink(url, event);
 				} else {
 					selectionService.setSelections(url);
 				}
@@ -100,7 +102,7 @@ eclipse.Outliner.prototype = {
 					// name += "</i>";
 				}
 				var nonHash = window.location.href.split('#')[0];
-				var href = nonHash +  eclipse.util.hashFromPosition(resource.title, null, null, f.line, null, null, f.name);
+				var href = nonHash +  mUtil.hashFromPosition(resource.title, null, null, f.line, null, null, f.name);
 				this._createLink(name, href, items);
 			}
 			dojo.place(items, this._parent, "only");
@@ -122,7 +124,7 @@ eclipse.Outliner.prototype = {
 					end = start+name.length;
 				}
 				var nonHash = window.location.href.split('#')[0];
-				var href = nonHash +  eclipse.util.hashFromPosition(resource.title, start, end);
+				var href = nonHash +  mUtil.hashFromPosition(resource.title, start, end);
 				this._createLink(name, href, items);
 			}
 			dojo.place(items, this._parent, "only");
@@ -144,4 +146,6 @@ eclipse.OutlineService.prototype = {
 	}      
 };
  
+return eclipse;
+});
 

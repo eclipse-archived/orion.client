@@ -14,38 +14,47 @@
 /*
  * Glue code for sites.html
  */
+
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 
+	        'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'siteService', 'siteUtils', 'siteTree', 'orion/treetable', 
+	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/NewSiteDialog'], 
+			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
+
 dojo.addOnLoad(function() {
+	
+	dojo.parser.parse();
+
 	// Register services
-	var serviceRegistry = new eclipse.ServiceRegistry();
-	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+	var serviceRegistry = new mServiceregistry.ServiceRegistry();
+	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 	dojo.addOnWindowUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	var dialogService = new eclipse.DialogService(serviceRegistry);
-	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
+	var dialogService = new mDialogs.DialogService(serviceRegistry);
+	var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	serviceRegistry.getService("orion.core.file").then(function(fileService) {
-		var fileClient = new eclipse.FileClient(fileService);
+		var fileClient = new mFileClient.FileClient(fileService);
 
-		var siteService = new eclipse.sites.SiteService(serviceRegistry);
-		var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-		var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+		var siteService = new mSiteService.SiteService(serviceRegistry);
+		var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 		
-		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 		
 		// Create the visuals
 		var model;
 		var treeWidget;
 		(function() {
 			statusService.setMessage("Loading...");
-			var renderer = new eclipse.sites.SiteRenderer(commandService);
+			var renderer = new mSiteTree.SiteRenderer(commandService);
 			dojo.connect(renderer, "rowsChanged", null, function() {
 				statusService.setMessage("");
 			});
-			treeWidget = new eclipse.TableTree({
+			treeWidget = new mTreeTable.TableTree({
 				id: "site-table-tree",
 				parent: dojo.byId("site-table"),
-				model: new eclipse.sites.SiteTreeModel(siteService, "site-table-tree"),
+				model: new mSiteTree.SiteTreeModel(siteService, "site-table-tree"),
 				showRoot: false,
 				renderer: renderer
 			});
@@ -63,7 +72,7 @@ dojo.addOnLoad(function() {
 				statusService.setErrorMessage(error);
 			};
 			
-			var createCommand = new eclipse.Command({
+			var createCommand = new mCommands.Command({
 				name : "Create Site Configuration",
 				image : "/images/add_obj.gif",
 				id: "eclipse.sites.create",
@@ -74,7 +83,7 @@ dojo.addOnLoad(function() {
 						serviceRegistry: serviceRegistry,
 						func: function(name, workspace) {
 							siteService.createSiteConfiguration(name, workspace).then(function(site) {
-								window.location = eclipse.sites.util.generateEditSiteHref(site);
+								window.location = mSiteUtils.generateEditSiteHref(site);
 							}, errorHandler);
 						}});
 					dialog.startup();
@@ -83,7 +92,7 @@ dojo.addOnLoad(function() {
 			commandService.addCommand(createCommand, "dom");
 			
 			// Add commands that deal with individual site configuration (edit, start, stop..)
-			eclipse.sites.util.createSiteCommands(commandService, siteService, statusService,
+			mSiteUtils.createSiteCommands(commandService, siteService, statusService,
 					dialogService, /*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
 			
 			// Register command contributions
@@ -93,7 +102,9 @@ dojo.addOnLoad(function() {
 			commandService.registerCommandContribution("eclipse.site.stop", 3);
 			commandService.registerCommandContribution("eclipse.site.delete", 4);
 			
-			eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {});
+			mGlobalCommands.generateDomCommandsInBanner(commandService, {});
 		}());
 	});
+});
+
 });

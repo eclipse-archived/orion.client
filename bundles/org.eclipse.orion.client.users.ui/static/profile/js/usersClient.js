@@ -9,6 +9,9 @@
  ******************************************************************************/
 
 /** @namespace The global container for eclipse APIs. */
+
+define(['dojo'], function(dojo) {
+
 var eclipse = eclipse || {};
 
 eclipse.UsersClient = (
@@ -86,3 +89,5 @@ eclipse.UsersClient = (
 			
 			return UsersClient;
 		}());
+return eclipse;	
+});

@@ -14,6 +14,9 @@
 /**
  * @namespace The global container for eclipse APIs.
  */ 
+
+define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog"], function(dojo, mUtil, mCommands){
+
 var eclipse = eclipse || {};
 
 /**
@@ -119,7 +122,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	}
 	
 	function stripPath(location) {
-		location = eclipse.util.makeRelative(location);
+		location = mUtil.makeRelative(location);
 		// get hash part and strip query off
 		var splits = location.split('#');
 		var path = splits[splits.length-1];
@@ -136,9 +139,9 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		var refreshFunc = function() {
 			this.changedItem(this.treeRoot);
 		};
-		var callback = function(items) {
-			for (var i=0; i < items.length; i++) {
-				var item = items[i];
+		var callback = function(selectedItems) {
+			for (var i=0; i < selectedItems.length; i++) {
+				var item = selectedItems[i];
 				var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 				func.apply(fileClient, [item.Location, this.path]).then(
 					dojo.hitch(explorer, refreshFunc)//refresh the root
@@ -146,31 +149,46 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			}
 		};
 		
-		var prompt = function() {
-			window.alert("Directory prompter appears here.");
+		var prompt = function(selectedItems) {
+			var dialog = new widgets.DirectoryPrompterDialog({
+				title: "Choose a Folder",
+				serviceRegistry: serviceRegistry,
+				fileClient: fileClient,				
+				func: function(targetFolder) { 
+					if (targetFolder && targetFolder.Location) {
+						for (var i=0; i < selectedItems.length; i++) {
+							var location = targetFolder.Location;
+							var newName; // intentionally undefined.  Only use if we need.
+							var item = selectedItems[i];
+							var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
+							if (isCopy && item.parent && item.parent.Location === location) {
+								newName = window.prompt("Enter a new name for '" + item.Name+ "'", "Copy of " + item.Name);
+								// user cancelled?  don't copy this one
+								if (!newName) {
+									location = null;
+								}
+							}
+							if (location) {
+								func.apply(fileClient, [item.Location, targetFolder.Location, newName]).then(
+									dojo.hitch(explorer, refreshFunc)//refresh the root
+								);
+							}
+						}
+					}
+				}
+			});
+			dialog.startup();
+			dialog.show();
 		};
 		
-		// We really only care about directories, and for file items, only the parent.
-		// Our first pass through the items is to 
-		// 1) remember all source paths so we do not propose to move/copy a source to its own location
-		// 2) filter the items list so that all directories are remembered, but only one file per folder
+		// Remember all source paths so we do not propose to move/copy a source to its own location
 		var sourceLocations = [];
-		var filteredItems = [];
-		var i;
-		for (i=0; i<items.length; i++) {
+		for (var i=0; i<items.length; i++) {
 			// moving or copying to the parent location is a no-op (we don't support rename or copy with rename from this menu)
 			if (items[i].parent && items[i].parent.Location ) {
 				items[i].parent.stripped = items[i].parent.stripped || stripPath(items[i].parent.Location);
 				if (!contains(sourceLocations, items[i].parent.stripped)) {
 					sourceLocations.push(items[i].parent.stripped);
-					// only remember the first file item whose parent we hadn't already seen.
-					if (!items[i].Directory) {
-						filteredItems.push(items[i]);
-					}
-				}
-				// remember all directories because their location is unique 
-				if (items[i].Directory) {
-					filteredItems.push(items[i]);
 				}
 			}
 			// moving a directory into itself is not supported
@@ -179,12 +197,9 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				sourceLocations.push(items[i].stripped);
 			}
 		}
-		// reset items so we only ever go through 5 unique choices.  Otherwise the "shortcut" of proposing common cases is not useful.
-		items = filteredItems;
-		if (items.length > 5) {
-			items.length = 5;
-		}
+
 		var choices = [];
+		// Propose any favorite that is not already a sourceLocation
 		if (eclipse.favoritesCache) {
 			var favorites = eclipse.favoritesCache.favorites;
 			for (i=0; i<favorites.length; i++) {
@@ -195,58 +210,13 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			}
 		}
 		choices.push({});  //separator
-		// Now we propose the most common cases.  Parent, siblings, and visible child folders of items (no fetch required)
-		// Don't propose a target if it's a source
 		var proposedPaths = [];
-		var alreadySeen = [];
-		var j, child, childPath;
-		for (i= 0; i<items.length; i++) {
-			var item = items[i];
-			var sibling = items[i];
-			// for the purposes of finding parents and siblings, if this is a file, consider its parent folder 
-			// for finding targets, not itself.
-			if (!item.Directory && item.parent) {
-				item = item.parent;
-			}
-			item.stripped = item.stripped || stripPath(item.Location);
-			if (item.Parents) {
-				for (j=0; j<item.Parents.length; j++) {
-					child = item.Parents[j];
-					child.stripped = child.stripped || stripPath(child.Location);
-					if (child.Directory && !contains(alreadySeen, child.stripped) && !contains(sourceLocations, child.stripped)) {
-						alreadySeen.push(child.stripped);
-						proposedPaths.push(child);
-					}
-				}
-			} else if (item.parent) {
-				if (item.parent.Location) {
-					item.parent.stripped = item.parent.stripped || stripPath(item.parent.Location);
-					if (!contains(alreadySeen, item.parent.stripped) && !contains(sourceLocations, item.parent.stripped)) {
-						alreadySeen.push(item.parent.stripped);
-						proposedPaths.push(item.parent);
-					}
-				}
-			}
-			if (sibling.parent && sibling.parent.children) {	// siblings
-				for (j=0; j<sibling.parent.children.length; j++) {
-					child = sibling.parent.children[j];
-					if (child.Directory) {
-						child.stripped = child.stripped || stripPath(child.Location);
-						if (!contains(alreadySeen, child.stripped) && !contains(sourceLocations, child.stripped)) {
-							alreadySeen.push(child.stripped);
-							proposedPaths.push(child);
-						}
-					}
-				}
-			}
-		}
 		// All children of the root that are folders should be available for choosing.
 		var topLevel = explorer.treeRoot.Children;
 		for (i=0; i<topLevel.length; i++) {
-			child = topLevel[i];
+			var child = topLevel[i];
 			child.stripped = child.stripped || (child.Directory ? stripPath(child.Location) : null);
-			if (child.stripped && !contains(alreadySeen, child.stripped) && !contains(sourceLocations, child.stripped)) {
-				alreadySeen.push(child.stripped);
+			if (child.stripped && !contains(sourceLocations, child.stripped)) {
 				proposedPaths.push(child);
 			}
 		}
@@ -268,7 +238,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			var slashes = item.stripped.split('/').length + 1;
 			// but don't indent for leading or trailing slash
 			// TODO is there a smarter way to do this?
-			for (j=0; j<slashes-2; j++) {
+			for (var j=0; j<slashes-2; j++) {
 				displayPath = "  " + displayPath;
 			}
 			choices.push({name: displayPath, path: item.stripped, callback: callback});
@@ -276,7 +246,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		if (proposedPaths.length > 0) {
 			choices.push({});  //separator
 		}
-		choices.push({name: "Choose target...", callback: prompt});
+		choices.push({name: "Choose folder...", callback: prompt});
 		return choices;
 	}
 	
@@ -293,7 +263,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		return true;
 	};
 
-	var favoriteCommand = new eclipse.Command({
+	var favoriteCommand = new mCommands.Command({
 		name: "Make Favorite",
 		image: "/images/silk/star.gif",
 		id: "eclipse.makeFavorite",
@@ -312,7 +282,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		}});
 	commandService.addCommand(favoriteCommand, "object");
 	
-	var renameCommand = new eclipse.Command({
+	var renameCommand = new mCommands.Command({
 			name: "Rename",
 			image: "/images/editing_16.gif",
 			id: "eclipse.renameResource",
@@ -327,7 +297,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 				if (!refNode) {
 					refNode = dojo.byId(domId);
 				}
-				eclipse.util.getUserText(domId+"EditBox", refNode, true, item.Name, 
+				mUtil.getUserText(domId+"EditBox", refNode, true, item.Name, 
 					dojo.hitch(this, function(newText) {
 						fileClient.moveFile(item.Location, item.parent.Location, newText).then(
 							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);})//refresh the root
@@ -339,7 +309,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		});
 	commandService.addCommand(renameCommand, "object");
 	
-	var deleteCommand = new eclipse.Command({
+	var deleteCommand = new mCommands.Command({
 		name: "Delete",
 		image: "/images/remove.gif",
 		id: "eclipse.deleteFile",
@@ -382,7 +352,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(deleteCommand, "object");
 	commandService.addCommand(deleteCommand, "dom");
 
-	var downloadCommand = new eclipse.Command({
+	var downloadCommand = new mCommands.Command({
 		name: "Download as Zip",
 		image: "/images/down.gif",
 		id: "eclipse.downloadFile",
@@ -408,7 +378,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 			}
 		}
 		if (refNode) {
-			eclipse.util.getUserText(domId+"EditBox", refNode, false, defaultName, 
+			mUtil.getUserText(domId+"EditBox", refNode, false, defaultName, 
 				dojo.hitch(this, function(name) {
 					if (name) {
 						if (tempNode) {
@@ -425,7 +395,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		}
 	}
 	
-	var newFileCommand =  new eclipse.Command({
+	var newFileCommand =  new mCommands.Command({
 		name: "New File",
 		image: "/images/newfile_wiz.gif",
 		id: "eclipse.newFile",
@@ -440,11 +410,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+			return item.Directory && !mUtil.isAtRoot(item.Location);}});
 	commandService.addCommand(newFileCommand, "dom");
 	commandService.addCommand(newFileCommand, "object");
 	
-	var newFolderCommand = new eclipse.Command({
+	var newFolderCommand = new mCommands.Command({
 		name: "New Folder",
 		image: "/images/newfolder_wiz.gif",
 		id: "eclipse.newFolder",
@@ -459,12 +429,12 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+			return item.Directory && !mUtil.isAtRoot(item.Location);}});
 
 	commandService.addCommand(newFolderCommand, "dom");
 	commandService.addCommand(newFolderCommand, "object");
 	
-	var newProjectCommand = new eclipse.Command({
+	var newProjectCommand = new mCommands.Command({
 		name: "New Folder",
 		image: "/images/newfolder_wiz.gif",
 		id: "eclipse.newProject",
@@ -478,11 +448,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Location && eclipse.util.isAtRoot(item.Location);}});
+			return item.Location && mUtil.isAtRoot(item.Location);}});
 
 	commandService.addCommand(newProjectCommand, "dom");
 	
-	var linkProjectCommand = new eclipse.Command({
+	var linkProjectCommand = new mCommands.Command({
 		name: "Link Folder",
 		image: "/images/link_obj.gif",
 		id: "eclipse.linkProject",
@@ -501,10 +471,10 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Location && eclipse.util.isAtRoot(item.Location);}});
+			return item.Location && mUtil.isAtRoot(item.Location);}});
 	commandService.addCommand(linkProjectCommand, "dom");
 				
-	var importCommand = new eclipse.Command({
+	var importCommand = new mCommands.Command({
 		name : "Zip Import",
 		image : "/images/zip_import.gif",
 		id: "eclipse.importCommand",
@@ -519,11 +489,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+			return item.Directory && !mUtil.isAtRoot(item.Location);}});
 	commandService.addCommand(importCommand, "object");
 	commandService.addCommand(importCommand, "dom");
 
-	var importSFTPCommand = new eclipse.Command({
+	var importSFTPCommand = new mCommands.Command({
 		name : "SFTP Import",
 		image : "/images/zip_import.gif",
 		id: "eclipse.importSFTPCommand",
@@ -545,11 +515,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+			return item.Directory && !mUtil.isAtRoot(item.Location);}});
 	commandService.addCommand(importSFTPCommand, "object");
 	commandService.addCommand(importSFTPCommand, "dom");
 
-	var exportSFTPCommand = new eclipse.Command({
+	var exportSFTPCommand = new mCommands.Command({
 		name : "SFTP Export",
 		image : "/images/down.gif",
 		id: "eclipse.exportSFTPCommand",
@@ -571,11 +541,11 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		},
 		visibleWhen: function(item) {
 			item = forceSingleItem(item);
-			return item.Directory && !eclipse.util.isAtRoot(item.Location);}});
+			return item.Directory && !mUtil.isAtRoot(item.Location);}});
 	commandService.addCommand(exportSFTPCommand, "object");
 	commandService.addCommand(exportSFTPCommand, "dom");
 	
-	var copyCommand = new eclipse.Command({
+	var copyCommand = new mCommands.Command({
 		name : "Copy to",
 		id: "eclipse.copyFile",
 		choiceCallback: function(items, userData) {
@@ -587,7 +557,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	// don't do this at the row-level until we figure out bug 338888
 	// commandService.addCommand(copyCommand, "object");
 	
-	var moveCommand = new eclipse.Command({
+	var moveCommand = new mCommands.Command({
 		name : "Move to",
 		id: "eclipse.moveFile",
 		choiceCallback: function(items, userData) {
@@ -598,6 +568,47 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 	commandService.addCommand(moveCommand, "dom");
 	// don't do this at the row-level until we figure out bug 338888
 	// commandService.addCommand(moveCommand, "object");
+	
+	var bufferedSelection = [];
+	var copyToBufferCommand = new mCommands.Command({
+			name: "Copy Items",
+			id: "eclipse.copySelections",
+			callback: function() {
+				commandService.getSelectionService().getSelections(function(selections) {
+					bufferedSelection = selections;
+				});
+			}
+		});
+	commandService.addCommand(copyToBufferCommand, "dom");
+		
+	var pasteFromBufferCommand = new mCommands.Command({
+			name: "Paste Items",
+			id: "eclipse.pasteSelections",
+			callback: function() {
+				if (bufferedSelection.length > 0) {
+					for (var i=0; i<bufferedSelection.length; i++) {
+						var location = bufferedSelection[i].Location;
+						var name = null;
+						if (location) {
+							if (bufferedSelection[i].parent && bufferedSelection[i].parent.Location === explorer.treeRoot.Location) {
+								name = window.prompt("Enter a new name for '" + bufferedSelection[i].Name+ "'", "Copy of " + bufferedSelection[i].Name);
+								// user cancelled?  don't copy this one
+								if (!name) {
+									location = null;
+								}
+							}
+							if (location) {
+								fileClient.copyFile(location, explorer.treeRoot.Location, name).then(dojo.hitch(explorer, function() {
+									this.changedItem(this.treeRoot);
+								}));
+							}
+						}
+					}
+				}
+			}
+		});
+	commandService.addCommand(pasteFromBufferCommand, "dom");
+	
 };
 
 eclipse.fileCommandUtils._cloneItemWithoutChildren = function clone(item){
@@ -691,7 +702,7 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 		var service = fileCommands[i].service;
 		
 		var commandOptions = eclipse.fileCommandUtils._createFileCommandOptions(info, service);
-		var command = new eclipse.Command(commandOptions);
+		var command = new mCommands.Command(commandOptions);
 		if (info.isEditor) {
 			command.isEditor = true;
 		}
@@ -867,3 +878,5 @@ eclipse.fileCommandUtils.getOpenWithCommands = function(commandService) {
 	}
 	return openWithCommands;
 };
+return eclipse.fileCommandUtils;
+});

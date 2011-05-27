@@ -8,10 +8,14 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+define(['dojo', 'orion/auth'], function(dojo, mAuth) {
+
+
 /*global dojo eclipse handleAuthenticationError */
 /*jslint devel:true*/
 
-dojo.getObject("eclipse.sites", true);
+var eclipse = {};
+eclipse.sites = {};
 
 /**
  * @name eclipse.sites
@@ -223,7 +227,7 @@ eclipse.sites.SiteService = (function() {
 			// On failure we might need to retry
 			var onError = function(error) {
 				if (error.status === 401 || error.status === 403) {
-					handleAuthenticationError(error, function(message) {
+					mAuth.handleAuthenticationError(error, function(message) {
 						// Try again
 						serviceMethod.apply(service, args).then(
 							function(result) {
@@ -246,3 +250,6 @@ eclipse.sites.SiteService = (function() {
 	};
 	return SiteService;
 }());
+
+return eclipse.sites;
+});

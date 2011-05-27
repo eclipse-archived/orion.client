@@ -11,6 +11,9 @@
 /*global dojo console handleGetAuthenticationError */
 
 /** @namespace The global container for eclipse APIs. */
+
+define(['dojo', 'orion/auth'], function(dojo, mAuth) {
+
 var orion = orion || {};
 
 orion.DiffProvider = (function() {
@@ -75,7 +78,7 @@ orion.DiffProvider = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleGetAuthenticationError(this, ioArgs);
 					return response;
 				}
 			});
@@ -84,3 +87,6 @@ orion.DiffProvider = (function() {
 	};
 	return DiffProvider;
 }());
+
+return orion;
+});

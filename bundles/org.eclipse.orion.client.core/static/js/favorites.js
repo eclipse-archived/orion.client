@@ -11,6 +11,8 @@
 /*global dijit dojo window document eclipse:true setTimeout */
 /*jslint forin:true*/
 
+define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands){
+
 var eclipse = eclipse || {};
 eclipse.FavoritesService = (function() {
 	function FavoritesService(options) {
@@ -44,7 +46,7 @@ eclipse.FavoritesService = (function() {
 				var location = item.ChildrenLocation ? item.ChildrenLocation : item.Location;
 				// it would be cool if the location were a real document location
 				// for now I'll assume it's from the same host in order to get the pathname
-				location = eclipse.util.makeRelative(location);
+				location = mUtil.makeRelative(location);
 				this.addFavorite(item.Name, location, item.Directory);
 			}
 			this._storeFavorites();
@@ -175,7 +177,7 @@ eclipse.Favorites = (function() {
 		this._registry = options.serviceRegistry;
 		var favorites = this;
 		
-		var addFaveURLCommand = new eclipse.Command({
+		var addFaveURLCommand = new mCommands.Command({
 			name: "Add Favorite",
 			tooltip: "Add link as favorite",
 			image: "/images/add_obj.gif",
@@ -184,7 +186,7 @@ eclipse.Favorites = (function() {
 				this.getUserURL(domId);
 			})
 		});		
-		var deleteFaveCommand = new eclipse.Command({
+		var deleteFaveCommand = new mCommands.Command({
 			name: "Delete",
 			image: "/images/remove.gif",
 			id: "eclipse.deleteFave",
@@ -195,7 +197,7 @@ eclipse.Favorites = (function() {
 				});
 			}
 		});		
-		var renameFaveCommand = new eclipse.Command({
+		var renameFaveCommand = new mCommands.Command({
 			name: "Rename",
 			image: "/images/editing_16.gif",
 			id: "eclipse.renameFave",
@@ -204,7 +206,7 @@ eclipse.Favorites = (function() {
 				this.editFavoriteName(item, commandId, domId, faveIndex);
 			})
 		});
-		var deleteSearchCommand = new eclipse.Command({
+		var deleteSearchCommand = new mCommands.Command({
 			name: "Delete",
 			image: "/images/remove.gif",
 			id: "eclipse.deleteSearch",
@@ -238,7 +240,7 @@ eclipse.Favorites = (function() {
 		getUserURL: function(imageId) {
 			var reg = this._registry;
 			var spacer= dojo.byId("spacer");
-			eclipse.util.getUserText(imageId+"EditBox", spacer, true, "", 
+			mUtil.getUserText(imageId+"EditBox", spacer, true, "", 
 				function(newText) {
 					reg.getService("orion.core.favorite").then(function(service) {
 						service.addFavoriteUrl(newText);
@@ -259,7 +261,7 @@ eclipse.Favorites = (function() {
 			for (var i = 0; i < children.length; i++) {
 				dojo.style(children[i], "display", "none");
 			}
-			eclipse.util.getUserText(imageId+"EditBox", link, true, fave.name, 
+			mUtil.getUserText(imageId+"EditBox", link, true, fave.name, 
 				function(newText) {
 					reg.getService("orion.core.favorite").then(function(service) {
 						service.renameFavorite(fave.path, newText);
@@ -390,3 +392,5 @@ eclipse.Favorites = (function() {
 	};
 	return Favorites;
 })();
+return eclipse;
+});

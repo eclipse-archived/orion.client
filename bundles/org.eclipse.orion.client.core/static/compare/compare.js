@@ -7,16 +7,20 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-dojo.require("dojo.hash");
-dojo.require("dijit.layout.BorderContainer");
-dojo.require("dijit.layout.ContentPane");
-dojo.addOnLoad(function(){
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 
+	        'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/compare/compare-features', 'orion/compare/diff-provider', 'orion/compare/compare-container',
+	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
+			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mDiffProvider, mCompareContainer) {
+
+dojo.addOnLoad(function() {
+	
+	dojo.parser.parse();
 	// initialize service registry and EAS services
-	var serviceRegistry = new eclipse.ServiceRegistry();
-	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	var serviceRegistry = new mServiceregistry.ServiceRegistry();
+	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
+	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 	// File operations
 	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 	var fileServiceReference;
@@ -33,9 +37,9 @@ dojo.addOnLoad(function(){
 	}
 
 	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-		var fileClient = new eclipse.FileClient(fileService);
+		var fileClient = new mFileClient.FileClient(fileService);
 		
-		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 		/*
 		var fileClient1 = new eclipse.FileClient(fileService);
 		var uiFactory1 = new orion.CompareMergeUIFactory({parentDivID : "compareContainer1" , showTitle : false , showLineStatus : false});
@@ -50,12 +54,12 @@ dojo.addOnLoad(function(){
 				  }
 		);
 		*/
-		var uiFactory = new orion.CompareMergeUIFactory({parentDivID : "compareContainer" , showTitle : true , showLineStatus : true});
+		var uiFactory = new mCompareFeatures.CompareMergeUIFactory({parentDivID : "compareContainer" , showTitle : true , showLineStatus : true});
 		uiFactory.buildUI();
 		
 		// Diff operations
 		var readOnly = isReadOnly();
-		compareMergeContainer = new orion.CompareMergeContainer(readOnly ,new orion.DiffProvider(serviceRegistry),serviceRegistry , commandService, fileClient,uiFactory);
+		compareMergeContainer = new mCompareContainer.CompareMergeContainer(readOnly, new mDiffProvider.DiffProvider(serviceRegistry),serviceRegistry , commandService, fileClient,uiFactory);
 		compareMergeContainer.resolveDiff(dojo.hash(), 
 				  function(newFile , oldFile){
 				     handleTile(newFile , oldFile , uiFactory);
@@ -67,7 +71,7 @@ dojo.addOnLoad(function(){
 		
 		//every time the user manually changes the hash, we need to load the diff
 		dojo.subscribe("/dojo/hashchange", compareMergeContainer, function() {
-			compareMergeContainer = new orion.CompareMergeContainer(readOnly ,new orion.DiffProvider(serviceRegistry),serviceRegistry , commandService , fileClient,uiFactory);
+			compareMergeContainer = new mCompareContainer.CompareMergeContainer(readOnly, new mDiffProvider.DiffProvider(serviceRegistry),serviceRegistry , commandService , fileClient,uiFactory);
 			compareMergeContainer.resolveDiff(dojo.hash(), 
 					  function(newFile , oldFile){
 						 handleTile(newFile , oldFile , uiFactory);
@@ -77,7 +81,7 @@ dojo.addOnLoad(function(){
 					  });
 		});
 			
-		var nextDiffCommand = new eclipse.Command({
+		var nextDiffCommand = new mCommands.Command({
 			name : "Next Difference",
 			image : "/images/compare/next-diff.gif",
 			id: "orion.compare.nextDiff",
@@ -85,7 +89,7 @@ dojo.addOnLoad(function(){
 			callback : function() {
 				compareMergeContainer.nextDiff();
 		}});
-		var prevDiffCommand = new eclipse.Command({
+		var prevDiffCommand = new mCommands.Command({
 			name : "Previous Difference",
 			image : "/images/compare/prev-diff.gif",
 			id: "orion.compare.prevDiff",
@@ -93,7 +97,7 @@ dojo.addOnLoad(function(){
 			callback : function() {
 				compareMergeContainer.prevDiff();
 		}});
-		var copyToLeftCommand = new eclipse.Command({
+		var copyToLeftCommand = new mCommands.Command({
 			name : "Copy Current Change From Right to left",
 			image : "/images/compare/copy-to-left.gif",
 			id: "orion.compare.copyToLeft",
@@ -110,7 +114,7 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("orion.compare.nextDiff", 2, "pageActions");
 		commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
 			
-		eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, {} );
+		mGlobalCommands.generateDomCommandsInBanner(commandService, {} );
 	});
 });
 
@@ -136,4 +140,4 @@ function handleErrorTile(errorResponse , ioArgs , uiFactory){
 	}
 };
 
-
+});

@@ -9,13 +9,9 @@
  ******************************************************************************/
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
-dojo.provide("widgets.NewSiteDialog");
 
-dojo.require("dijit.Dialog");
-dojo.require("dijit.form.CheckBox");
-dojo.require("dijit.form.ComboBox");
-dojo.require("widgets.NewItemDialog");
-dojo.require("widgets._OrionDialogMixin");
+
+define(['dojo', 'orion/widgets/NewItemDialog'], function(dojo, dijit) {
 
 /**
  * Requires file service to get the user's workspace, which is in turn required to create a
@@ -78,4 +74,6 @@ dojo.declare("widgets.NewSiteDialog", [widgets.NewItemDialog], {
 			this.options.func(this.itemName.value, this.workspaceId);
 		}
 	}
+});
+
 });

@@ -8,11 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
+define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/contentAssist',
+        'orion/editorCommands','orion/editorContainer','orion/editorFeatures','orion/globalCommands', 'orion/breadcrumbs'], 
+		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditorContainer, mEditorFeatures, mGlobalCommands, mBreadcrumbs) {
+
 var orion = orion || {};
 
 orion.CompareContainer = (function() {
 	function CompareContainer (diffProvider) {
-		this._diffParser = new orion.DiffParser();
+		this._diffParser = new mDiffParser.DiffParser();
 		this._diff = null;
 		this._input = null;
 	}
@@ -182,9 +187,9 @@ orion.SBSCompareContainer = (function() {
 		}
 				
 		var modelLeft = new eclipse.TextModel(result.output, result.delim);
-		var compareModelLeft = new orion.CompareTextModel(modelLeft, {mapper:result.mapper , columnIndex:0} , new orion.GapLineFeeder( result.delim));
+		var compareModelLeft = new mCompareModel.CompareTextModel(modelLeft, {mapper:result.mapper , columnIndex:0} , new orion.GapLineFeeder( result.delim));
 		var modelRight = new eclipse.TextModel(input, result.delim);
-		var compareModelRight = new orion.CompareTextModel(modelRight, {mapper:result.mapper , columnIndex:1} , new orion.GapLineFeeder( result.delim));
+		var compareModelRight = new mCompareModel.CompareTextModel(modelRight, {mapper:result.mapper , columnIndex:1} , new orion.GapLineFeeder( result.delim));
 		
 		var optionsRight = {
 			parent: this._rightEditorDivId,
@@ -193,7 +198,7 @@ orion.SBSCompareContainer = (function() {
 			stylesheet: "/js/compare/editor.css" 
 		};
 		this._editorRight = new eclipse.Editor(optionsRight);
-		this._editorRight.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		this._editorRight.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 				
 		var optionsLeft = {
 			parent: this._leftEditorDivId,
@@ -202,7 +207,7 @@ orion.SBSCompareContainer = (function() {
 			stylesheet: "/js/compare/editor.css" 
 		};
 		this._editorLeft = new eclipse.Editor(optionsLeft);
-		this._editorLeft.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		this._editorLeft.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 		
 		var self = this;
 		this._editorLeft.addEventListener("LineStyle", window, function(lineStyleEvent) {
@@ -411,7 +416,7 @@ orion.CompareMergeContainer = (function() {
 				var titlePane = dojo.byId("pageTitle");
 				if (titlePane) {
 					dojo.empty(titlePane);
-					new eclipse.BreadCrumbs({container: "pageTitle", resource: this._fileMetadata});
+					new mBreadcrumbs.BreadCrumbs({container: "pageTitle", resource: this._fileMetadata});
 					if (title.charAt(0) === '*') {
 						var dirty = dojo.create('b', null, titlePane, "last");
 						dirty.innerHTML = '*';
@@ -422,7 +427,7 @@ orion.CompareMergeContainer = (function() {
 				self.resolveDiffonSave();
 			}
 		};
-		this._compareMatchRenderer = new orion.CompareMatchRenderer(document.getElementById(this._uiFactory.getDiffCanvasDivId()));
+		this._compareMatchRenderer = new mRulers.CompareMatchRenderer(document.getElementById(this._uiFactory.getDiffCanvasDivId()));
 		this._highlighter = [];
 		this._highlighter.push( new orion.CompareMergeStyler(this._compareMatchRenderer));//left side styler
 		this._highlighter.push( new orion.CompareMergeStyler(this._compareMatchRenderer));//right side styler
@@ -434,7 +439,7 @@ orion.CompareMergeContainer = (function() {
 		this._editorLeft = this._editorContainerLeft.getEditorWidget();
 		this._editorContainerRight = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , fileURIRight);
 		this._editorRight = this._editorContainerRight.getEditorWidget();
-		var overview  = new orion.CompareMergeOverviewRuler(this._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
+		var overview  = new mRulers.CompareMergeOverviewRuler(this._compareMatchRenderer ,"right", {styleClass: "ruler_overview"});
 		this._editorRight.addRuler(overview);
 		this._compareMatchRenderer.setOverviewRuler(overview);
 		var self = this;
@@ -463,7 +468,7 @@ orion.CompareMergeContainer = (function() {
 		var self = this;
 		
 		var model = new eclipse.TextModel(content , delim);
-		var compareModel = new orion.CompareMergeModel(model, {mapper:mapper, columnIndex:columnIndex } );
+		var compareModel = new mCompareMergeModel.CompareMergeModel(model, {mapper:mapper, columnIndex:columnIndex } );
 		var editorFactory = function() {
 			return new eclipse.Editor({
 				parent: editorContainerDomNode,
@@ -475,7 +480,7 @@ orion.CompareMergeContainer = (function() {
 		};
 			
 		var contentAssistFactory = function(editor) {
-			return new eclipse.ContentAssist(editor, "contentassist");
+			return new mContentAssist.ContentAssist(editor, "contentassist");
 		};
 			
 		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
@@ -483,13 +488,13 @@ orion.CompareMergeContainer = (function() {
 			if(readOnly)
 				return;
 			
-			var commandGenerator = new orion.EditorCommandFactory(self._registry, self._commandService,self._fileClient , self._inputManager, "notifications");
+			var commandGenerator = new mEditorCommands.EditorCommandFactory(self._registry, self._commandService,self._fileClient , self._inputManager, "notifications");
 			commandGenerator.generateEditorCommands(editor);
-			var genericBindings = new orion.TextActions(editor, undoStack);
+			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
 			keyModeStack.push(genericBindings);
 				
 			// create keybindings for source editing
-			var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
+			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
 			keyModeStack.push(codeBindings);
 				
 		};
@@ -506,8 +511,8 @@ orion.CompareMergeContainer = (function() {
 			}
 			dojo.byId(statusDivId).innerHTML = dirtyIndicator +  status;
 		};
-		var undoStackFactory = readOnly ? new orion.UndoFactory() : new orion.UndoCommandFactory(self._registry, self._commandService, "notifications");
-		var editorContainer = new orion.EditorContainer({
+		var undoStackFactory = readOnly ? new mEditorFeatures.UndoFactory() : new mEditorCommands.UndoCommandFactory(self._registry, self._commandService, "notifications");
+		var editorContainer = new mEditorContainer.EditorContainer({
 			editorFactory: editorFactory,
 			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,
@@ -520,7 +525,7 @@ orion.CompareMergeContainer = (function() {
 				
 		editorContainer.installEditor();
 		if(!readOnly){
-			eclipse.globalCommandUtils.generateDomCommandsInBanner(this._commandService, editorContainer , "notifications");
+			mGlobalCommands.generateDomCommandsInBanner(this._commandService, editorContainer , "notifications");
 			inputManager = this._inputManager;
 			dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
 		}
@@ -532,7 +537,7 @@ orion.CompareMergeContainer = (function() {
 			this._highlighter[columnIndex].highlight(fileName , editor);
 		}
 			
-		editor.addRuler(new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		editor.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 
 		if(columnIndex === 0){
 			editor.getModel().addListener(self._compareMatchRenderer);
@@ -624,7 +629,7 @@ orion.InlineCompareContainer = (function() {
 		var self = this;
 		
 		var model = new eclipse.TextModel(content, delim);
-		var compareModel = new orion.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new orion.DiffLineFeeder(diffArray ,delim));
+		var compareModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.DiffLineFeeder(diffArray ,delim));
 
 		var editorFactory = function() {
 			return new eclipse.Editor({
@@ -643,8 +648,8 @@ orion.InlineCompareContainer = (function() {
 		var statusReporter = function(message, isError) {
 			return;
 		};
-		var undoStackFactory =  new orion.UndoFactory();
-		var editorContainer = new orion.EditorContainer({
+		var undoStackFactory =  new mEditorFeatures.UndoFactory();
+		var editorContainer = new mEditorContainer.EditorContainer({
 			editorFactory: editorFactory,
 			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,
@@ -661,9 +666,9 @@ orion.InlineCompareContainer = (function() {
 			
 		var editor = editorContainer.getEditorWidget();
 			
-		this._rulerOrigin = new orion.LineNumberCompareRuler(1,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
-		this._rulerNew = new orion.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
-		this._overview  = new orion.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
+		this._rulerOrigin = new mRulers.LineNumberCompareRuler(1,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+		this._rulerNew = new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+		this._overview  = new mRulers.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
 		editor.addEventListener("LineStyle", this, this._onLineStyle);
 		return editorContainer;
 	};
@@ -702,3 +707,5 @@ orion.InlineCompareContainer = (function() {
 	return InlineCompareContainer;
 }());
 
+return orion;
+});

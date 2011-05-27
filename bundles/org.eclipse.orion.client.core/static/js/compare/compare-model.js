@@ -7,6 +7,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+
+define([], function() {
+
 var orion = orion || {};
 
 orion.CompareTextModel = (function() {
@@ -453,4 +456,7 @@ orion.GapLineFeeder = (function() {
 	
 	return GapLineFeeder;
 }()); 
+
+return orion;
+});
 

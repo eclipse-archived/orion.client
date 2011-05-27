@@ -11,9 +11,20 @@
 /*global eclipse:true orion:true dojo dijit window*/
 /*jslint devel:true*/
 
-dojo.require("dojo.hash");
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/log','orion/dialogs',
+        'orion/users', 'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
+        'orion/problems', 'orion/contentAssist', 'orion/editorCommands', 'orion/editorFeatures', 'orion/editorContainer', 'orion/syntaxchecker',
+        'orion/styler/textMateStyler', 'orion/breadcrumbs',
+        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mLog, mDialogs, mUsers, mCommands, mUtil, mFavorites,
+				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditorContainer,
+				mSyntaxchecker, mTextMateStyler, mBreadcrumbs) {
 
-eclipse.setUpEditor = function(isReadOnly){
+	dojo.parser.parse();
+	
+var exports = exports || {};
+	
+exports.setUpEditor = function(isReadOnly){
 	var pluginRegistry = null;
 	var serviceRegistry = null;
 	var document = window.document;
@@ -26,24 +37,24 @@ eclipse.setUpEditor = function(isReadOnly){
 	// Initialize the plugin registry
 	(function() {
 		// This is the new service registry.  All services should be registered and obtained here.
-		serviceRegistry = new eclipse.ServiceRegistry();
-		pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+		serviceRegistry = new mServiceregistry.ServiceRegistry();
+		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 		dojo.addOnWindowUnload(function() {
 			pluginRegistry.shutdown();
 		});
 		
-		selection = new orion.Selection(serviceRegistry);
-		statusReportingService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-		new eclipse.LogService(serviceRegistry);
-		new eclipse.DialogService(serviceRegistry);
-		new eclipse.UserService(serviceRegistry);
-		prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-		commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+		selection = new mSelection.Selection(serviceRegistry);
+		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+		new mLog.LogService(serviceRegistry);
+		new mDialogs.DialogService(serviceRegistry);
+		new mUsers.UserService(serviceRegistry);
+		prefsService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+		commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 
 		// Editor needs additional services besides EAS.
-		problemService = new eclipse.ProblemService(serviceRegistry);
-		new eclipse.OutlineService(serviceRegistry);
-		new eclipse.FavoritesService({serviceRegistry: serviceRegistry});
+		problemService = new mProblems.ProblemService(serviceRegistry);
+		new mOutliner.OutlineService(serviceRegistry);
+		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 	}());
 	
 	var splitArea = dijit.byId("orion.innerCoding"),
@@ -55,7 +66,7 @@ eclipse.setUpEditor = function(isReadOnly){
 	var contentAssistFactory = null;
 	if (!isReadOnly) {
 		contentAssistFactory = function(editor) {
-			return new eclipse.ContentAssist(editor, "contentassist", serviceRegistry);
+			return new mContentAssist.ContentAssist(editor, "contentassist", serviceRegistry);
 		};
 	}
 	
@@ -105,7 +116,7 @@ eclipse.setUpEditor = function(isReadOnly){
 							if (providerType === "grammar") {
 								// TextMate styler
 								var grammar = providerToUse.getProperty("grammar");
-								this.styler = new orion.styler.TextMateStyler(editorWidget, grammar);
+								this.styler = new mTextMateStyler.TextMateStyler(editorWidget, grammar);
 							} else if (providerType === "parser") {
 								console.debug("TODO implement support for parser-based syntax highlight provider");
 							}
@@ -131,9 +142,9 @@ eclipse.setUpEditor = function(isReadOnly){
 	}
 
 	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-		var fileClient = new eclipse.FileClient(fileService);
+		var fileClient = new mFileClient.FileClient(fileService);
 
-		var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 		
 		var editorFactory = function() {
 			return new eclipse.Editor({
@@ -148,7 +159,7 @@ eclipse.setUpEditor = function(isReadOnly){
 			lastFilePath: "",
 			
 			setInput: function(location, editorContainer) {
-				var input = eclipse.util.getPositionInfo(location);
+				var input = mUtil.getPositionInfo(location);
 				var fileURI = input.filePath;
 				// populate editor
 				if (fileURI) {
@@ -211,7 +222,7 @@ eclipse.setUpEditor = function(isReadOnly){
 				var titlePane = dojo.byId("pageTitle");
 				if (titlePane) {
 					dojo.empty(titlePane);
-					new eclipse.BreadCrumbs({container: "pageTitle", resource: this._fileMetadata});
+					new mBreadcrumbs.BreadCrumbs({container: "pageTitle", resource: this._fileMetadata});
 					if (title.charAt(0) === '*') {
 						var dirty = dojo.create('b', null, titlePane, "last");
 						dirty.innerHTML = '*';
@@ -250,8 +261,8 @@ eclipse.setUpEditor = function(isReadOnly){
 			
 			shouldGoToURI: function(editorContainer, fileURI) {
 				if (editorContainer.isDirty()) {
-					var oldStripped = eclipse.util.getPositionInfo(this.lastFilePath).filePath;
-					var newStripped = eclipse.util.getPositionInfo(fileURI).filePath;
+					var oldStripped = mUtil.getPositionInfo(this.lastFilePath).filePath;
+					var newStripped = mUtil.getPositionInfo(fileURI).filePath;
 					if (oldStripped !== newStripped) {
 						return window.confirm("There are unsaved changes.  Do you still want to navigate away?");
 					}
@@ -262,16 +273,16 @@ eclipse.setUpEditor = function(isReadOnly){
 		
 		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 			// Register commands that depend on external services, the registry, etc.
-			var commandGenerator = new orion.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly);
+			var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly);
 			commandGenerator.generateEditorCommands(editor);
 			
 			// Create keybindings for generic editing, no dependency on the service model
-			var genericBindings = new orion.TextActions(editor, undoStack);
+			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
 			keyModeStack.push(genericBindings);
 			
 			// create keybindings for source editing
 			// TODO this should probably be something that happens more dynamically, when the editor changes input
-			var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
+			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
 			keyModeStack.push(codeBindings);
 			
 			// global search
@@ -333,13 +344,13 @@ eclipse.setUpEditor = function(isReadOnly){
 			}
 		};
 	
-		var annotationFactory = new orion.AnnotationFactory();
+		var annotationFactory = new mEditorFeatures.AnnotationFactory();
 		
-		var editorContainer = new orion.EditorContainer({
+		var editorContainer = new mEditorContainer.EditorContainer({
 			editorFactory: editorFactory,
-			undoStackFactory: new orion.UndoCommandFactory(serviceRegistry, commandService, "pageActions"),
+			undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandService, "pageActions"),
 			annotationFactory: annotationFactory,
-			lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
+			lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
 			contentAssistFactory: contentAssistFactory,
 			keyBindingFactory: keyBindingFactory, 
 			statusReporter: statusReporter,
@@ -369,13 +380,13 @@ eclipse.setUpEditor = function(isReadOnly){
 		inputManager.setInput(dojo.hash(), editorContainer);
 		
 		// TODO search location needs to be gotten from somewhere
-		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, editorContainer, editorContainer);
-		eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, editorContainer);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, editorContainer, editorContainer);
+		mGlobalCommands.generateDomCommandsInBanner(commandService, editorContainer);
 			
-		var syntaxChecker = new eclipse.SyntaxChecker(serviceRegistry, editorContainer);
+		var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editorContainer);
 		
 		// Create outliner "gadget"
-		new eclipse.Outliner({parent: outlineDomNode, serviceRegistry: serviceRegistry, selectionService: selection});	
+		new mOutliner.Outliner({parent: outlineDomNode, serviceRegistry: serviceRegistry, selectionService: selection});	
 		
 		window.onbeforeunload = function() {
 			if (editorContainer.isDirty()) {
@@ -403,3 +414,5 @@ eclipse.setUpEditor = function(isReadOnly){
 		};
 	});
 };
+return exports;
+});

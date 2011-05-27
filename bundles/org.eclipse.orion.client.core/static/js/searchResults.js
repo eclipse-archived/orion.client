@@ -11,6 +11,9 @@
 /*global dojo eclipse:true widgets*/
 /*jslint regexp:false browser:true forin:true*/
 
+define(['dojo', 'orion/commands'], function(dojo, mCommands){
+
+
 var eclipse = eclipse || {};
 
 eclipse.SearchResultsGenerator = (function() {
@@ -28,7 +31,7 @@ eclipse.SearchResultsGenerator = (function() {
 	SearchResultsGenerator.prototype = /** @lends eclipse.SearchResultsGenerator.prototype */ {
 		loadResults: function(query) {
 			// define command for saving the results
-			var saveresultsCommand = new eclipse.Command({
+			var saveresultsCommand = new mCommands.Command({
 				name: "Save Search",
 				tooltip: "Save query to search favorites",
 				id: "orion.saveSearchResults",
@@ -51,3 +54,5 @@ eclipse.SearchResultsGenerator = (function() {
 
 	return SearchResultsGenerator;
 }());
+return eclipse;
+});

@@ -7,6 +7,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+
+define([], function() {
+
 var eclipse = eclipse || {};
 
 eclipse.ProblemService = function(serviceRegistry) {
@@ -24,4 +27,6 @@ eclipse.ProblemService.prototype = {
 	}	    
 };
 
+return eclipse;	
+});
 

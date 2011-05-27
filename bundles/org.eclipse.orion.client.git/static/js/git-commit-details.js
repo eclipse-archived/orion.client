@@ -11,9 +11,11 @@
 /*global dijit dojo window document eclipse:true setTimeout */
 /*jslint forin:true*/
 
-var eclipse = eclipse || {};
+define(['dojo', 'orion/commands'], function(dojo, mCommands) {
 
-eclipse.CommitDetails = (function() {
+var exports = {};
+
+exports.CommitDetails = (function() {
 	function CommitDetails(options) {
 		var parent = options.parent;
 		if (typeof(parent) === "string") {
@@ -26,23 +28,23 @@ eclipse.CommitDetails = (function() {
 		this._detailsPane = options.detailsPane;
 		var commitDetails = this;
 	
-		var doSomething1 = new eclipse.Command({
+		var doSomething1 = new mCommands.Command({
 			name: "Do Something 1",
 			tooltip: "Do Something 1",
 			image: "images/add_obj.gif",
 			id: "eclipse.doSomething1",
 			callback: function(item) {console.info("clicked");}
 		});		
-		var showDiffCommand = new eclipse.Command({
+		var showDiffCommand = new mCommands.Command({
 			name: "Show diff",
 			tooltip: "Show the diff",
 			image: "images/compare-sbs.gif",
 			id: "eclipse.showDiff",
 			hrefCallback: function(item) {
-				return "/compare/compare.html?readonly#" + item.object.DiffLocation;
+				return "/compare/compare.html?readonly#" + item.DiffLocation;
 			},
 			visibleWhen: function(item) {
-				return item.dom == "commitDiffsTable";
+				return item.Type === "Diff";
 			}
 		});		
 
@@ -208,7 +210,7 @@ eclipse.CommitDetails = (function() {
 					// the mouse as being over the table row if it's in a hidden column
 					dojo.style(actionsWrapper, "visibility", "hidden");
 					this._registry.getService("orion.page.command").then(function(service) {
-						service.renderCommands(actionsWrapper, "object", {dom: "commitDiffsTable", object: commitDetails.Diffs[j]}, this, "image", null, j);
+						service.renderCommands(actionsWrapper, "object", commitDetails.Diffs[j], this, "image", null, j);
 					});
 					
 					dojo.connect(tr, "onmouseover", tr, function() {
@@ -235,3 +237,5 @@ eclipse.CommitDetails = (function() {
 	};
 	return CommitDetails;
 })();
+return exports;
+});

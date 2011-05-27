@@ -17,8 +17,10 @@
 /**
  * @namespace The global container for eclipse APIs.
  */ 
+
+
+define(["dojo", "orion/serviceregistry", "dojo/DeferredList", "/openajax/release/all/OpenAjaxManagedHub-all.js" ], function(dojo, mServiceregistry){
 var eclipse = eclipse || {};
-dojo.require("dojo.DeferredList");
 eclipse.Plugin = function(url, data, internalRegistry) {
 	var _self = this;
 	
@@ -180,7 +182,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	var _self = this;
 	var _storage = opt_storage || localStorage || {};
 	var _plugins = [];
-	var _pluginEventTarget = new eclipse.EventTarget();
+	var _pluginEventTarget = new mServiceregistry.EventTarget();
 	var _loaded;
 	
 	// storage
@@ -433,3 +435,5 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	
 	_loadFromStorage();
 };
+return eclipse;
+});

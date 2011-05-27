@@ -12,6 +12,10 @@
 /**
  * @namespace The global container for eclipse APIs.
  */ 
+
+
+define(['dojo'], function(dojo) {
+
 var eclipse = eclipse || {};
 
  /**
@@ -124,3 +128,5 @@ eclipse.BreadCrumbs = (function() {
 	};
 	return BreadCrumbs;
 }());
+return eclipse;
+});

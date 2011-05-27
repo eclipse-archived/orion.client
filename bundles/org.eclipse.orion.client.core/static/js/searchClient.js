@@ -12,9 +12,7 @@
 /*global dojo window document handleGetAuthenticationError */
 /*jslint devel:true*/
 
-dojo.require("dijit.form.Button");
-dojo.require("dijit.layout.BorderContainer");
-dojo.require("dijit.layout.ContentPane");
+define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(dojo, dijit, mAuth, mUtil){
 
 var eclipse = eclipse || {};
 eclipse.Searcher = (function() {
@@ -50,7 +48,7 @@ eclipse.Searcher = (function() {
 				// need to use inline errback to get ioArgs
 				error: dojo.hitch(this, function(response, ioArgs) {
 					this.handleError(response, resultsNode);
-					handleGetAuthenticationError(this, ioArgs, 
+					mAuth.handleGetAuthenticationError(this, ioArgs, 
 						dojo.hitch(this, this.showSearchResult),
 						dojo.hitch(this,function(response) { this.handleError(response, resultsNode); }));
 					return response;
@@ -132,7 +130,7 @@ eclipse.Searcher = (function() {
 						var loc;
 						// if we know what to highlight...
 						if (token && hit.LineNumber) {
-							loc = hostname + "/edit/edit.html#" + eclipse.util.hashFromPosition(hit.Location, /* start */ null, /* end */ null, hit.LineNumber, hit.Offset, token.length);
+							loc = hostname + "/edit/edit.html#" + mUtil.hashFromPosition(hit.Location, /* start */ null, /* end */ null, hit.LineNumber, hit.Offset, token.length);
 						} else {
 							loc = hostname + "/edit/edit.html#" + hit.Location;
 						}
@@ -161,3 +159,5 @@ eclipse.Searcher = (function() {
 	};
 	return Searcher;
 })();
+return eclipse;
+});

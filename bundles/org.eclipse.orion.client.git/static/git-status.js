@@ -8,16 +8,22 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-dojo.require("dojo.hash");
-dojo.addOnLoad(function(){
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status',  'orion/commands',
+	        'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/gitClient', 'orion/git-status-table', 'orion/breadcrumbs',
+	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
+			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs) {
+
+dojo.addOnLoad(function() {
+	
+	dojo.parser.parse();
 	// initialize service registry and EAS services
-	var serviceRegistry = new eclipse.ServiceRegistry();
-	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	var serviceRegistry = new mServiceregistry.ServiceRegistry();
+	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
+	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 	// Git operations
-	new eclipse.GitService(serviceRegistry);
+	new mGitClient.GitService(serviceRegistry);
 	// File operations
 
 	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
@@ -35,13 +41,13 @@ dojo.addOnLoad(function(){
 	}
 
 	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-		var fileClient = new eclipse.FileClient(fileService);
+		var fileClient = new mFileClient.FileClient(fileService);
 
 	
-		var controller = new orion.GitStatusController(serviceRegistry , "unstagedZone" , "stagedZone");
+		var controller = new mGitStatusTable.GitStatusController(serviceRegistry , "unstagedZone" , "stagedZone");
 		controller.getGitStatus(dojo.hash());
 	
-		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 		initTitleBar(fileClient);
 		//every time the user manually changes the hash, we need to load the git status
 		dojo.subscribe("/dojo/hashchange", controller, function() {
@@ -63,7 +69,7 @@ function initTitleBar(fileClient){
 					var titlePane = dojo.byId("pageTitle");
 					if (titlePane) {
 						dojo.empty(titlePane);
-						var breadcrumb = new eclipse.BreadCrumbs({container: "pageTitle", resource: metadata , makeHref:function(seg,location){makeHref(fileClient, seg,location);}});
+						var breadcrumb = new mBreadcrumbs.BreadCrumbs({container: "pageTitle", resource: metadata , makeHref:function(seg,location){makeHref(fileClient, seg,location);}});
 						if(breadcrumb.path && breadcrumb.path!="")
 							document.title = "Git Status - " + breadcrumb.path;
 					}
@@ -87,5 +93,6 @@ function makeHref(fileClient, seg, location){
 			})
 	);
 };
+});
 
 

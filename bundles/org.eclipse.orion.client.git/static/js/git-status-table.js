@@ -8,6 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+define(['dojo', 'orion/compare/diff-provider', 'orion/compare/compare-container','orion/commands'], function(dojo, mDiffProvider, mCompareContainer,mCommands) {
+
 var orion = orion || {};
 
 orion.GitStatusModel = (function() {
@@ -254,14 +256,14 @@ orion.GitStatusController = (function() {
 		this._timerOn = false;
 		this._unstagedTableRenderer = new orion.GitStatusRenderer(serviceRegistry ,unstagedDivId , this);
 		this._stagedTableRenderer = new orion.GitStatusRenderer(serviceRegistry ,stagedDivId , this);
-		this._inlineCompareContainer = new orion.InlineCompareContainer(new orion.DiffProvider(serviceRegistry),serviceRegistry ,"inline-compare-viewer");
+		this._inlineCompareContainer = new mCompareContainer.InlineCompareContainer(new mDiffProvider.DiffProvider(serviceRegistry),serviceRegistry ,"inline-compare-viewer");
 		var self = this;
 		self._stagingConflict = false;
 		var commitBtn = document.getElementById("commit");
 		commitBtn.onclick = function(evt){
 			self.commit();
 		};
-		var sbsCompareCommand = new eclipse.Command({
+		var sbsCompareCommand = new mCommands.Command({
 			name: "Side by side compare",
 			tooltip: "Side by side compare",
 			image: "images/compare-sbs.gif",
@@ -274,7 +276,7 @@ orion.GitStatusController = (function() {
 			}
 		});		
 
-		var stageCommand = new eclipse.Command({
+		var stageCommand = new mCommands.Command({
 			name: "stage",
 			tooltip: "stage",
 			image: "images/git-stage.gif",
@@ -287,7 +289,7 @@ orion.GitStatusController = (function() {
 			}
 		});		
 
-		var checkoutCommand = new eclipse.Command({
+		var checkoutCommand = new mCommands.Command({
 			name: "checkout",
 			tooltip: "checkout",
 			image: "images/git-stage.gif",
@@ -300,7 +302,7 @@ orion.GitStatusController = (function() {
 			}
 		});		
 
-		var stageAllCommand = new eclipse.Command({
+		var stageAllCommand = new mCommands.Command({
 			name: "stageAll",
 			tooltip: "Stage all",
 			image: "/images/git-stage-all.gif",
@@ -313,7 +315,7 @@ orion.GitStatusController = (function() {
 			}
 		});		
 
-		var unstageAllCommand = new eclipse.Command({
+		var unstageAllCommand = new mCommands.Command({
 			name: "unstageAll",
 			tooltip: "Unstage all",
 			image: "/images/git-unstage-all.gif",
@@ -700,3 +702,5 @@ orion.GitStatusController = (function() {
 	return GitStatusController;
 }());
 
+return orion;	
+});

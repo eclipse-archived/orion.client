@@ -9,21 +9,16 @@
  ******************************************************************************/
 /*global dojo dijit dojox widgets*/
 /*jslint browser:true */
-dojo.provide("widgets.ImportDialog");
 
-dojo.require("dijit.Dialog");
-dojo.require("dojo.data.ItemFileReadStore");
-dojo.require("dojo.io.iframe");
-dojo.require("dojox.form.FileUploader");
-dojo.require("dijit.form.Button");
-dojo.require("dijit.ProgressBar");
-dojo.require("widgets._OrionDialogMixin");
+
+
+define(['dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojo/io/iframe', 'dojox/form/FileUploader', 'dijit/form/Button', 'dijit/ProgressBar', 'orion/widgets/_OrionDialogMixin'], function(dojo, dijit, dojox) {
 
 /**
  */
 dojo.declare("widgets.ImportDialog", [ dijit.Dialog, widgets._OrionDialogMixin ], {
 	widgetsInTemplate : true,
-	templateString : dojo.cache("widgets", "templates/ImportDialog.html"),
+	templateString : dojo.cache(new dojo._Url("/js/widgets/templates/ImportDialog.html")),
 
 	constructor : function() {
 		this.inherited(arguments);
@@ -66,4 +61,6 @@ dojo.declare("widgets.ImportDialog", [ dijit.Dialog, widgets._OrionDialogMixin ]
 	execute : function() {
 
 	}
+});
+
 });

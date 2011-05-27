@@ -8,10 +8,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
- /*global dojo, dijit, document, window, eclipse:true, alert, Image */
+ /*global dojo, dijit, document, window, navigator, eclipse:true, alert, Image */
  
-dojo.require("dijit.Menu");
-dojo.require("dijit.form.DropDownButton");
+define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton' ], function(dojo, dijit, mUtil){
+
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -34,6 +34,7 @@ eclipse.CommandService = (function() {
 		this._objectScope = {};
 		this._globalScope = {};
 		this._namedGroups = {};
+		this._activeBindings = {};
 		this._init(options);
 	}
 	CommandService.prototype = /** @lends eclipse.CommandService.prototype */ {
@@ -41,6 +42,70 @@ eclipse.CommandService = (function() {
 			this._registry = options.serviceRegistry;
 			this._serviceRegistration = this._registry.registerService("orion.page.command", this);
 			this._selection = options.selection;
+			dojo.connect(window.document, "onkeydown", dojo.hitch(this, function (evt){
+				evt = evt || window.event;
+				// bindings are always ignored if we are in a text field.
+				// TODO are there dojo text fields that wouldn't meet these criteria?
+				var tagType = evt.target.nodeName.toLowerCase();
+				if ((tagType === 'input' && evt.target.type.toLowerCase() === "text") || tagType === 'textarea') {
+					return;
+				}
+				this._processKey(evt);
+			}));
+		},
+		
+		_processKey: function(event) {
+			function stop(event) {
+				if (window.document.all) { 
+					event.keyCode = 0;
+				} else { 
+					event.preventDefault();
+					event.stopPropagation();
+				}
+			}
+			for (var id in this._activeBindings) {
+				if (this._activeBindings[id] && this._activeBindings[id].keyBinding && this._activeBindings[id].command) {
+					if (this._activeBindings[id].keyBinding.match(event)) {
+						var activeBinding = this._activeBindings[id];
+						var command = activeBinding.command;
+						if (command.hrefCallback) {
+							stop(event);
+							var href = command.hrefCallback.call(activeBinding.handler || window, activeBinding.items, id, activeBinding.userData);
+							if (href.then){
+								href.then(function(l){
+									window.open(l);
+								});
+							} else {
+								// We assume window open since there's no link gesture to tell us what to do.
+								window.open(href);
+							}
+							return;
+						} else if (command.callback) {
+							stop(event);
+							window.setTimeout(function() {
+								command.callback.call(activeBinding.handler || window, activeBinding.items, id, null, activeBinding.userData);
+							}, 0);
+							return;
+						}
+					}
+				}
+			}
+		},
+
+		
+		/**
+		 * Return the selection service that is being used when commands should apply against a selection.
+		 */
+		getSelectionService: function() {
+			return this._selection;
+		},
+		
+		showKeyBindings: function(targetNode) {
+			for (var binding in this._activeBindings) {
+				if (this._activeBindings[binding] && this._activeBindings[binding].keyBinding && this._activeBindings[binding].command) {
+					dojo.place("<br>"+this._activeBindings[binding].keyBinding.userString+" = "+this._activeBindings[binding].command.name, targetNode, "last");
+				}
+			}
 		},
 		
 		/** 
@@ -128,13 +193,24 @@ eclipse.CommandService = (function() {
 		 *  this might be the id of the page or of a dom element.
 		 * @param {String} the path on which the command is located.  Optional.
 		 * @param {Number} the relative position of the command within its parent
-		 * @param {Array} an array of values to pass to eclipse.KeyBinding constructor.  Optional.
-
+		 * @param {eclipse.CommandKeyBinding} a keyBinding for the command.  Optional.
+		 * @param {boolean} if true, then the command is never rendered, but the keybinding is hooked.
 		 */
-		registerCommandContribution: function(commandId, position, scopeId, parentPath, keys) {
+		registerCommandContribution: function(commandId, position, scopeId, parentPath, keyBinding, keyOnly) {
 			// first ensure the parentPath is represented
 			var parentTable = this._createEntryForPath(parentPath);
-			parentTable[commandId] = {scopeId: scopeId, position: position, keys: keys};
+			
+			// store the contribution
+			parentTable[commandId] = {scopeId: scopeId, position: position};
+			
+			// add to the bindings table now
+			if (keyBinding) {
+				var command = this._domScope[commandId] || this._globalScope[commandId];
+				if (command) {
+					this._activeBindings[commandId] = {command: command, keyBinding: keyBinding, keyOnly: keyOnly};
+				}
+			}
+			
 			// get rid of sort cache because we have a new contribution
 			parentTable.sortedCommands = null;
 		},
@@ -317,6 +393,7 @@ eclipse.CommandService = (function() {
 						}
 					}
 				} else {
+					// processing atomic commands
 					var command = commandList[positionOrder[i].id];
 					var render = command ? true : false;
 					if (command) {
@@ -329,6 +406,17 @@ eclipse.CommandService = (function() {
 								render = false;
 							}
 						} 
+						// ensure that keybindings are bound to the current handler, items, and user data
+						if (this._activeBindings[command.id] && this._activeBindings[command.id].keyBinding) {
+							var binding = this._activeBindings[command.id];
+							binding.items = items;
+							binding.userData = userData;
+							binding.handler = handler;
+							// if the binding is keyOnly, don't render the command.
+							if (binding.keyOnly) {
+								render = false;
+							}
+						}
 						if (render && command.visibleWhen) {
 							render = command.visibleWhen(items);
 						}
@@ -531,11 +619,11 @@ eclipse.Command = (function() {
 					if (loc.then) {
 						loc.then(dojo.hitch(this, function(l) { 
 							menuitem.set("label", "<a href='"+l+"'>"+this.name+"</a>");
-							menuitem.onClick = function(event) {eclipse.util.followLink(l, event);};
+							menuitem.onClick = function(event) {mUtil.followLink(l, event);};
 						}));
 					} else {
 						menuitem.set("label", "<a href='"+loc+"'>"+this.name+"</a>");
-						menuitem.onClick = function(event) {eclipse.util.followLink(loc, event);};
+						menuitem.onClick = function(event) {mUtil.followLink(loc, event);};
 					}
 				}
 			} else if (this.callback) {
@@ -604,3 +692,76 @@ eclipse.Command = (function() {
 	return Command;
 }());
 
+/**
+ * Constructs a new key binding with the given key code and modifiers.
+ * 
+ * @param {String|Number} keyCode the key code.
+ * @param {Boolean} mod1 the primary modifier (usually Command on Mac and Control on other platforms).
+ * @param {Boolean} mod2 the secondary modifier (usually Shift).
+ * @param {Boolean} mod3 the third modifier (usually Alt).
+ * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
+ * 
+ * @class A CommandKeyBinding represents of a key code and a modifier state that can be triggered by the user using the keyboard.
+ * @name eclipse.CommandKeyBinding
+ * 
+ * @property {String} userString The user representation for the string (to show in key assist dialog)
+ * @property {String|Number} keyCode The key code.
+ * @property {Boolean} mod1 The primary modifier (usually Command on Mac and Control on other platforms).
+ * @property {Boolean} mod2 The secondary modifier (usually Shift).
+ * @property {Boolean} mod3 The third modifier (usually Alt).
+ * @property {Boolean} mod4 The fourth modifier (usually Control on the Mac).
+ */
+eclipse.CommandKeyBinding = (function() {
+	var isMac = navigator.platform.indexOf("Mac") !== -1;
+	/** @private */
+	function CommandKeyBinding (userString, keyCode, mod1, mod2, mod3, mod4) {
+		if (typeof(keyCode) === "string") {
+			this.keyCode = keyCode.toUpperCase().charCodeAt(0);
+		} else {
+			this.keyCode = keyCode;
+		}
+		this.userString = userString;
+		this.mod1 = mod1 !== undefined && mod1 !== null ? mod1 : false;
+		this.mod2 = mod2 !== undefined && mod2 !== null ? mod2 : false;
+		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;
+		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
+	}
+	CommandKeyBinding.prototype = /** @lends eclipse.CommandKeyBinding.prototype */ {
+		/**
+		 * Returns whether this key binding matches the given key event.
+		 * 
+		 * @param e the key event.
+		 * @returns {Boolean} <code>true</code> whether the key binding matches the key event.
+		 */
+		match: function (e) {
+			if (this.keyCode === e.keyCode) {
+				var mod1 = isMac ? e.metaKey : e.ctrlKey;
+				if (this.mod1 !== mod1) { return false; }
+				if (this.mod2 !== e.shiftKey) { return false; }
+				if (this.mod3 !== e.altKey) { return false; }
+				if (isMac && this.mod4 !== e.ctrlKey) { return false; }
+				return true;
+			}
+			return false;
+		},
+		/**
+		 * Returns whether this key binding is the same as the given parameter.
+		 * 
+		 * @param {eclipse.CommandKeyBinding} kb the key binding to compare with.
+		 * @returns {Boolean} whether or not the parameter and the receiver describe the same key binding.
+		 */
+		equals: function(kb) {
+			if (!kb) { return false; }
+			if (this.keyCode !== kb.keyCode) { return false; }
+			if (this.mod1 !== kb.mod1) { return false; }
+			if (this.mod2 !== kb.mod2) { return false; }
+			if (this.mod3 !== kb.mod3) { return false; }
+			if (this.mod4 !== kb.mod4) { return false; }
+			return true;
+		}
+	};
+	return CommandKeyBinding;
+}());
+
+return eclipse;
+});

@@ -11,34 +11,43 @@
 /*jslint browser:true devel:true*/
 /*global dijit dojo eclipse widgets serviceRegistry:true*/
 
+
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/commands', 'orion/searchClient', 'orion/status', 'orion/globalCommands',
+        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'/*, 'dojox/widget/Portlet', 'dojox/widget/FeedPortlet'*/], 
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mCommands, mSearchClient, mStatus, mGlobalCommands) {
+
 dojo.addOnLoad(function() {
 	
+	dojo.parser.parse();
+	
+	
 	// initialize service registry and EAS services
-	serviceRegistry = new eclipse.ServiceRegistry();
+	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 
 	// This is code to ensure the first visit to orion works
 	// we read settings and wait for the plugin registry to fully startup before continuing
-	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
 	var pluginRegistry;
 	preferenceService.getPreferences("/plugins").then(function() {
-		pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 		dojo.addOnWindowUnload(function() {
 			pluginRegistry.shutdown();
 		});
 		return pluginRegistry.startup();
 	}).then(function() {
-		var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-		var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-		var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+		var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 			
 		// global commands
-		eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 		
 		// Populate recent projects
 		serviceRegistry.getService("orion.core.preference").then(function(service) {
 				return service.getPreferences("/window/recent");
 			}).then(function(prefs){
-				return prefs.get("projects");
+				var projectsPref = prefs.get("projects");
+				return projectsPref ? JSON.parse(projectsPref) : null;
 			}).then(function(projects) {
 				var recent = dojo.byId("recent");
 				dojo.empty(recent);
@@ -105,4 +114,6 @@ dojo.addOnLoad(function() {
 			});
 		}
 	});
+});
+
 });

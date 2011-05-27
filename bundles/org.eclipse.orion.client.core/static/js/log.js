@@ -11,6 +11,9 @@
 /**
  * @namespace The global container for eclipse APIs.
  */ 
+
+define(["dojo"], function(dojo){
+
 var eclipse = eclipse || {};
 
 /**
@@ -31,3 +34,6 @@ eclipse.LogService.prototype = {
 		});
 	}
 };
+
+return eclipse;
+});

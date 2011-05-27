@@ -8,6 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
+define(['dojo'], function(dojo) {
+
+
 var orion = orion || {};
 orion.CompareMergeUIFactory = (function() {
 	function CompareMergeUIFactory(option){
@@ -156,3 +160,5 @@ orion.CompareMergeUIFactory = (function() {
 	return CompareMergeUIFactory;
 }());
 
+return orion;
+});

@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
+define([], function() {
+
 var orion = orion || {};
 
 /**
@@ -155,7 +157,8 @@ orion.compareUtils.findNextDiff = function(mapper , fromIndex){
 	}
 	return fromIndex;
 };
-
+return orion.compareUtils;
+});
 
 
 

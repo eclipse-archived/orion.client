@@ -10,25 +10,28 @@
 
 /*global dojo eclipse:true widgets*/
 
-var eclipse = eclipse || {};
-eclipse.git = eclipse.git || {};
+define(['dojo', 'orion/explorer', 'orion/util'], function(dojo, mExplorer, mUtil) {
+var exports = {};
 
-eclipse.git.GitClonesExplorer = (function() {
+exports.GitClonesExplorer = (function() {
 	
-	function GitClonesExplorer(registry, selection, defaultPath, parentId, toolbarId, selectionToolsId){
+	function GitClonesExplorer(registry, selection, parentId, toolbarId, selectionToolsId){
 		this.parentId = parentId;
 		this.registry = registry;
 		this.selection = selection;
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
-		this.defaultPath = defaultPath;
-		this.renderer = new eclipse.git.GitClonesRenderer({checkbox: this.checkbox}, this);
+		this.renderer = new exports.GitClonesRenderer({checkbox: this.checkbox}, this);
 		
 	}
-	GitClonesExplorer.prototype = eclipse.Explorer.prototype;
+	GitClonesExplorer.prototype = mExplorer.Explorer.prototype;
 	
 	GitClonesExplorer.prototype.getGitLocation = function(path){
-		return "/git/clone/"+eclipse.util.makeRelative(path);
+		return "/git/clone/"+ mUtil.makeRelative(path);
+	};
+	
+	GitClonesExplorer.prototype.setDefaultPath = function(defaultPath){
+		this.defaultPath = defaultPath;
 	};
 	
 	GitClonesExplorer.prototype.displayClonesList = function(path){
@@ -37,7 +40,7 @@ eclipse.git.GitClonesExplorer = (function() {
 			
 			path = path || this.defaultPath;
 			
-			path = eclipse.util.makeRelative(path);
+			path = mUtil.makeRelative(path);
 			if (path === this._lastHash) {
 				return;
 			}
@@ -51,7 +54,7 @@ eclipse.git.GitClonesExplorer = (function() {
 			d.innerHTML = "Loading <b>" + gitPath + "</b>...";
 			
 			this.registry.getService("orion.git.provider").then(function(service){
-				dojo.hitch(self, self.createTree(self.parentId, new eclipse.GitClonesModel(service, gitPath, service.getGitClone)));
+				dojo.hitch(self, self.createTree(self.parentId, new exports.GitClonesModel(service, gitPath, service.getGitClone)));
 			});
 		};
 		
@@ -67,15 +70,14 @@ eclipse.git.GitClonesExplorer = (function() {
 		d.innerHTML = "Loading <b>" + gitPath + "</b>...";
 		
 		this.registry.getService("orion.git.provider").then(function(service){
-			dojo.hitch(self, self.createTree(self.parentId, new eclipse.GitClonesModel(service, gitPath, service.getGitClone)));
+			dojo.hitch(self, self.createTree(self.parentId, new exports.GitClonesModel(service, gitPath, service.getGitClone)));
 		});
 	};
 
 	return GitClonesExplorer;
 }());
 
-var eclipse = eclipse || {};
-eclipse.GitClonesModel = (function() {
+exports.GitClonesModel = (function() {
 	/**
 	 * @name eclipse.Model
 	 * @class Tree model used by eclipse.FileExplorer.
@@ -87,7 +89,7 @@ eclipse.GitClonesModel = (function() {
 		this.fetchItems = fetchItems;
 		this.root = null;
 	}
-	GitClonesModel.prototype = eclipse.ExplorerModel.prototype; 
+	GitClonesModel.prototype = mExplorer.ExplorerModel.prototype; 
 	
 	
 	GitClonesModel.prototype.getRoot = function(onItem){
@@ -107,7 +109,7 @@ eclipse.GitClonesModel = (function() {
 				}
 				onComplete(parentItem.Children);
 			}
-			else if (parentItem.BranchLocation || parentItem.RemoteLocation){
+			else if (parentItem.BranchLocation && parentItem.RemoteLocation){
 				onComplete([{GroupNode : "true", Location : parentItem.BranchLocation, Name : "Branch"}, {GroupNode : "true", Location : parentItem.RemoteLocation, Name : "Remote"}]);
 			}
 			else if (parentItem.GroupNode){
@@ -135,14 +137,13 @@ eclipse.GitClonesModel = (function() {
 	return GitClonesModel;
 }());
 
-var eclipse = eclipse || {};
-eclipse.git.GitClonesRenderer = (function(){
+exports.GitClonesRenderer = (function(){
 	
 	function GitClonesRenderer(options, explorer){
 		this._init(options);
 		this.explorer = explorer;
 	}
-	GitClonesRenderer.prototype = eclipse.SelectionRenderer.prototype;
+	GitClonesRenderer.prototype = mExplorer.SelectionRenderer.prototype;
 	
 	GitClonesRenderer.prototype.getCellHeaderElement = function(col_no){
 		
@@ -162,12 +163,12 @@ eclipse.git.GitClonesRenderer = (function(){
 		switch(col_no){
 		case 0:
 			var col, div, link;
-			if (item.BranchLocation || item.RemoteLocation) {
+			if (item.BranchLocation && item.RemoteLocation) {
 				col = document.createElement('td');
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div);
+				this.getExpandImage(tableRow, div, "/images/git-repository.gif");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage", href: "/navigate/table.html#" + item.ContentLocation+"?depth=1"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
@@ -176,33 +177,37 @@ eclipse.git.GitClonesRenderer = (function(){
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div);
+				this.getExpandImage(tableRow, div, item.Name==="Branch" ? "/images/git-branches.gif" : "/images/git-remotes.gif");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			} else if (item.Type === "Branch"){
 				col = document.createElement('td');
-				div = dojo.create("div", null, col, "only");
+				div = dojo.create("div", {style: "margin-left: 10px"}, col, "only");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				if (item.Current)
 					link.style.fontWeight = "bold";
 				dojo.place(document.createTextNode(item.Name), link, "only");
+				dojo.create("img", {src: "/images/git-branch.gif"}, link, "first");
+				
 			} else if (item.Type === "Remote"){
 				col = document.createElement('td');
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div);
+				this.getExpandImage(tableRow, div, "/images/git-remote.gif");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			} else if (item.Type === "RemoteTrackingBranch"){
 				col = document.createElement('td');
-				div = dojo.create("div", null, col, "only");
-				
+				div = dojo.create("div", {style: "margin-left: 10px"}, col, "only");
+								
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
+								
 				dojo.place(document.createTextNode(item.Name), link, "only");
+				dojo.create("img", {src: "/images/git-branch.gif"}, link, "first");
 			}	
 			return col;
 		case 1:
@@ -212,3 +217,5 @@ eclipse.git.GitClonesRenderer = (function(){
 
 	return GitClonesRenderer;
 }());
+return exports;
+});

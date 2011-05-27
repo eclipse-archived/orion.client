@@ -233,7 +233,11 @@ a:hover {
     padding: 5px 6px 3px;
 }
 
-.mainpane{
+.nihilo .dijitTreeRowSelected .dijitTreeLabel {
+	background-color: #fedda7;   // same color used for command menu hover
+}
+
+.mainpane {
     margin: 0px;
     padding-left: 8px;
     padding-top: 20px;
@@ -367,6 +371,18 @@ a:hover {
 	width: 300px;
 	border: 1px solid #bfbfbf;
 	padding: 4px;
+}
+
+.keyAssistFloat {
+	display: none;
+	background: #404040;
+	color: #FFD900;
+	position: fixed;
+	left: 44px;
+	top: 60px;
+	padding: 4px;
+	float: left;
+	z-index:10;
 }
 
 #rightPane .dijitTitlePaneContentInner {

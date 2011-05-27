@@ -11,6 +11,10 @@
 /*global eclipse */
 /*global console */
 /*global dojo */
+
+define(["dojo"], function(dojo){
+
+
 var eclipse = eclipse || {};
 eclipse.ServiceReference = function(serviceId, name, properties) {
 	this.getServiceId = function() {
@@ -234,3 +238,6 @@ eclipse.ServiceRegistry = function() {
 		_serviceEventTarget.removeEventListener(eventName, listener);
 	};	
 };
+
+return eclipse;
+});

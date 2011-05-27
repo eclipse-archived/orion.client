@@ -9,13 +9,16 @@
  ******************************************************************************/
 /*global dojo dijit*/
 /*jslint browser:true*/
-dojo.provide("widgets._OrionDialogMixin");
 
-dojo.require("dijit.Dialog");
+
 
 /**
  * Provides common functions (dojo bug workarounds) for Orion dialogs.
  */
+
+define(['dojo', 'dijit'], function(dojo, dijit) {
+
+
 dojo.declare("widgets._OrionDialogMixin", null, {
 	postMixInProperties : function() {
 		this.inherited(arguments);
@@ -46,4 +49,6 @@ dojo.declare("widgets._OrionDialogMixin", null, {
 			this.destroyRecursive(); 
 		}), this.duration);   
 	}
+});
+
 });

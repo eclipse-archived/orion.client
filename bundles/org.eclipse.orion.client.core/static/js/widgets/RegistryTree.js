@@ -10,11 +10,8 @@
 
 /*jslint forin:true*/
 /*global dijit dojo eclipse widgets*/
-dojo.provide("widgets.RegistryTree");
 
-dojo.require("dijit.Tree");
-dojo.require("dojo.data.ItemFileReadStore");
-dojo.require("dijit.tree.TreeStoreModel");
+define(['dojo', 'dijit', 'dojo/data/ItemFileReadStore', 'dijit/Tree', 'dijit/tree/TreeStoreModel'], function(dojo, dijit) {
 
 // TODO re-implement mayHaveChildren so leaves never have expando icons
 dojo.declare("widgets.RegistryTree", [dijit.Tree], {
@@ -30,7 +27,7 @@ dojo.declare("widgets.RegistryTree", [dijit.Tree], {
 				items: registryData
 			}
 		});
-		console.debug(JSON.stringify(registryData));
+		//console.debug(JSON.stringify(registryData));
 		var model = new dijit.tree.TreeStoreModel({ store: store });
 		this.model = model;
 	},
@@ -151,6 +148,6 @@ dojo.declare("widgets.RegistryTree", [dijit.Tree], {
 		}
 	}
 });
-
+});
 
 

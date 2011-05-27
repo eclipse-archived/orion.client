@@ -15,7 +15,9 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-var eclipse = eclipse || {};
+
+define(['dojo'], function(dojo) {
+
 var orion = orion || {};
 
 orion.UndoFactory = (function() {
@@ -780,3 +782,5 @@ orion.SourceCodeActions = (function() {
 	return SourceCodeActions;
 }());
 
+return orion;	
+});

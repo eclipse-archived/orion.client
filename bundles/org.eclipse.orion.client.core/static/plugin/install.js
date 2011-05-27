@@ -11,21 +11,28 @@
 /*jslint browser:true devel:true*/
 /*global dijit dojo eclipse widgets serviceRegistry:true*/
 
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 
+	        'orion/searchClient', 'orion/globalCommands',
+	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
+			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSearchClient, mGlobalCommands) {
+
 dojo.addOnLoad(function() {
 	
+	dojo.parser.parse();
+	
 	// TODO get the registry from somewhere else
-	serviceRegistry = new eclipse.ServiceRegistry();
-	var registry = new eclipse.PluginRegistry(serviceRegistry);
+	var serviceRegistry = new mServiceregistry.ServiceRegistry();
+	var registry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 	dojo.addOnWindowUnload(function() {
 		registry.shutdown();
 	});
-	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-	var statusService = new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+	var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		
 	// global commands
-	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 
 	var installHandler = function(evt) {
 		var pluginUrl = installUrlTextBox.value;
@@ -70,4 +77,6 @@ dojo.addOnLoad(function() {
 	} else {
 		dojo.byId("invalid-hash").style.display = "block";
 	}
+});
+
 });

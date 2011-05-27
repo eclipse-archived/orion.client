@@ -11,6 +11,9 @@
 /*global dojo eclipse:true widgets window*/
 /*jslint regexp:false browser:true forin:true*/
 
+define(['dojo', 'orion/treetable'], function(dojo, mTreeTable){
+
+
 var eclipse = eclipse || {};
 eclipse.Explorer = (function() {
 	/**
@@ -56,7 +59,7 @@ eclipse.Explorer = (function() {
 				model.rootId = treeId;
 			}
 			this.model = model;
-			this.myTree = new eclipse.TableTree({
+			this.myTree = new mTreeTable.TableTree({
 				id: treeId,
 				model: model,
 				showRoot: false,
@@ -307,9 +310,9 @@ eclipse.ExplorerRenderer = (function() {
 			return rowId+"__expand";
 		},
 		
-		getExpandImage: function(tableRow, placeHolder){
+		getExpandImage: function(tableRow, placeHolder, decorateImage){
 			var expandImg = dojo.create("img", {src: this._collapseImgSrc, name: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
-			dojo.create("img", {src: "/images/fldr_obj.gif"}, placeHolder, "last");
+			dojo.create("img", {src: decorateImage ? decorateImage : "/images/fldr_obj.gif"}, placeHolder, "last");
 			expandImg.onclick = dojo.hitch(this, function(evt) {
 				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImgSrc, this._collapseImgSrc);
 				var expanded = this.tableTree.isExpanded(tableRow.id);
@@ -480,4 +483,6 @@ eclipse.SelectionRenderer = (function(){
 	
 	return SelectionRenderer;
 }());
+return eclipse;
+});
 
