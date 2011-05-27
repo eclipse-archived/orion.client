@@ -44,7 +44,7 @@ exports.CommitDetails = (function() {
 				return "/compare/compare.html?readonly#" + item.DiffLocation;
 			},
 			visibleWhen: function(item) {
-				return item.dom == "commitDiffsTable";
+				return item.Type === "Diff";
 			}
 		});		
 
@@ -210,7 +210,7 @@ exports.CommitDetails = (function() {
 					// the mouse as being over the table row if it's in a hidden column
 					dojo.style(actionsWrapper, "visibility", "hidden");
 					this._registry.getService("orion.page.command").then(function(service) {
-						service.renderCommands(actionsWrapper, "object", {dom: "commitDiffsTable", object: commitDetails.Diffs[j]}, this, "image", null, j);
+						service.renderCommands(actionsWrapper, "object", commitDetails.Diffs[j], this, "image", null, j);
 					});
 					
 					dojo.connect(tr, "onmouseover", tr, function() {

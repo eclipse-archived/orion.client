@@ -368,7 +368,7 @@ var exports = {};
 			},
 			visibleWhen : function(item) {
 				if(explorer.isDirectory) return false;
-				if (dojo.isArray(item) && item.length === 2) {
+				if (dojo.isArray(item) && item.length === 2 && item[0].Type === "Commit" && item[1].Type === "Commit") {
 						return true;
 				}
 				return false;
@@ -385,8 +385,7 @@ var exports = {};
 				return "/compare/compare.html#" + item.DiffLocation;
 			},
 			visibleWhen : function(item) {
-				// show only for commits in the git log list
-				return item.dom === "explorer-tree" && !explorer.isDirectory;
+				return item.Type === "Commit" && !explorer.isDirectory;
 			}
 		});
 	
@@ -400,8 +399,7 @@ var exports = {};
 				return "/edit/edit.html#" + item.ContentLocation;
 			},
 			visibleWhen : function(item) {
-				// show only for commits in the git log list
-				return item.dom === "explorer-tree" && item.ContentLocation != null && !explorer.isDirectory;
+				return item.Type === "Commit" && item.ContentLocation != null && !explorer.isDirectory;
 			}
 		});
 	
@@ -470,7 +468,7 @@ var exports = {};
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
-					gitService.doMerge(item.HeadLocation, item.Id).then(function(result){
+					gitService.doMerge(item.HeadLocation, item.Name).then(function(result){
 						serviceRegistry.getService("orion.page.message").then(function(progressService){
 							var display = [];
 							
@@ -512,7 +510,7 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				return item.Type === "RemoteTrackingBranch";
+				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
 			}
 		});
 	
@@ -581,8 +579,7 @@ var exports = {};
 
 			},
 			visibleWhen : function(item) {
-				// show only for commits in the git log list
-				return item.dom === "explorer-tree";
+				return item.Type === "Commit";
 			}
 		});
 	
