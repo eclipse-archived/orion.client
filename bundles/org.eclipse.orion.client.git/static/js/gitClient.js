@@ -233,6 +233,33 @@ eclipse.GitService = (function() {
 			});
 		},
 		
+		checkout: function(location , onLoad , onError){
+			dojo.xhrPost({
+				url: location , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				postData: dojo.toJson({ "Branch" : "{branch}" } ),
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
 		commitAll: function(location , message , body ,  onLoad , onError){
 			dojo.xhrPost({
 				url: location , 
