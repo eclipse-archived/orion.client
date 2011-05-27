@@ -119,71 +119,6 @@ var exports = {};
 	};
 	
 	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
-		var cloneGitRepositoryCommand = new mCommands.Command({
-			name : "Clone Repository",
-			tooltip : "Clone Git Repository to Workspace",
-			image : "/images/git-clone.gif",
-			id : "eclipse.cloneGitRepository",
-			callback : function(item) {
-				var dialog = new widgets.CloneGitRepositoryDialog({
-					func : function(gitUrl, path, name){
-						exports.getDefaultSshOptions(serviceRegistry).then(function(options){
-									var func = arguments.callee;
-									serviceRegistry.getService("orion.git.provider").then(function(gitService) {
-										serviceRegistry.getService("orion.page.message").then(function(progressService) {
-											var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
-											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
-												function(jsonData, secondArg) {
-													exports.handleProgressServiceResponse(jsonData, options, serviceRegistry,
-															function(jsonData){
-																if(explorer.redisplayClonesList){
-																	dojo.hitch(explorer, explorer.redisplayClonesList)();
-																}
-															}, func, "Clone Git Repository", gitUrl);
-												});
-										});
-									});
-								});
-							}
-				});
-						
-				dialog.startup();
-				dialog.show();
-			},
-			visibleWhen : function(item) {
-				return true;
-			}
-		});
-		
-		commandService.addCommand(cloneGitRepositoryCommand, "dom");
-		
-		var initGitRepositoryCommand = new mCommands.Command({
-			name : "Init Repository",
-			tooltip : "Init Git Repository in Workspace",
-			id : "eclipse.initGitRepository",
-			callback : function(item) {
-				var dialog = new widgets.InitGitRepositoryDialog({
-					func : function(target){
-								serviceRegistry.getService("orion.git.provider").then(function(gitService) {
-									gitService.initGitRepository(target).then(function(){
-											if(explorer.redisplayClonesList){
-												dojo.hitch(explorer, explorer.redisplayClonesList)();
-											}
-									});
-								});
-
-							}
-				});
-						
-				dialog.startup();
-				dialog.show();
-			},
-			visibleWhen : function(item) {
-				return true;
-			}
-		});
-		
-		commandService.addCommand(initGitRepositoryCommand, "dom");
 		
 		// TODO: not used by the git clone navigator, could be removed
 		var linkRepoCommand = new mCommands.Command({
@@ -589,7 +524,76 @@ var exports = {};
 		commandService.addCommand(addTagCommand, "object");
 	};
 	
-	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
+	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
+		
+		var cloneGitRepositoryCommand = new mCommands.Command({
+			name : "Clone Repository",
+			tooltip : "Clone Git Repository to Workspace",
+			image : "/images/git-clone.gif",
+			id : "eclipse.cloneGitRepository",
+			callback : function(item) {
+				var dialog = new widgets.CloneGitRepositoryDialog({
+					serviceRegistry: serviceRegistry,
+					fileClient: fileClient,
+					func : function(gitUrl, path, name){
+						exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+									var func = arguments.callee;
+									serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+										serviceRegistry.getService("orion.page.message").then(function(progressService) {
+											var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+											progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(
+												function(jsonData, secondArg) {
+													exports.handleProgressServiceResponse(jsonData, options, serviceRegistry,
+															function(jsonData){
+																if(explorer.redisplayClonesList){
+																	dojo.hitch(explorer, explorer.redisplayClonesList)();
+																}
+															}, func, "Clone Git Repository", gitUrl);
+												});
+										});
+									});
+								});
+							}
+				});
+						
+				dialog.startup();
+				dialog.show();
+			},
+			visibleWhen : function(item) {
+				return true;
+			}
+		});
+		
+		commandService.addCommand(cloneGitRepositoryCommand, "dom");
+		
+		var initGitRepositoryCommand = new mCommands.Command({
+			name : "Init Repository",
+			tooltip : "Init Git Repository in Workspace",
+			id : "eclipse.initGitRepository",
+			callback : function(item) {
+				var dialog = new widgets.InitGitRepositoryDialog({
+					func : function(target){
+								serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+									gitService.initGitRepository(target).then(function(){
+											if(explorer.redisplayClonesList){
+												dojo.hitch(explorer, explorer.redisplayClonesList)();
+											}
+									});
+								});
+
+							}
+				});
+						
+				dialog.startup();
+				dialog.show();
+			},
+			visibleWhen : function(item) {
+				return true;
+			}
+		});
+		
+		commandService.addCommand(initGitRepositoryCommand, "dom");
+		
 		var deleteCommand = new mCommands.Command({
 			name: "Delete Clone",
 			image: "/images/remove.gif",

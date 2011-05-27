@@ -110,7 +110,7 @@ dojo.addOnLoad(function() {
 			
 					// global commands
 					mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
-					mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
+					mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient);
 			
 					mGitCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
 			
