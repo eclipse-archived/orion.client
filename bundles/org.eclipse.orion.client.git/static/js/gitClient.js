@@ -238,15 +238,17 @@ eclipse.GitService = (function() {
 			});
 		},
 		
-		checkout: function(location , onLoad , onError){
-			dojo.xhrPost({
-				url: location , 
-				headers: {
-					"Orion-Version": "1"
+		checkoutPath: function(gitCloneURI, paths , onLoad , onError){
+			return dojo.xhrPut({
+				url : gitCloneURI,
+				headers : {
+					"Orion-Version" : "1"
 				},
+				putData : dojo.toJson({
+					"Path" : paths
+				}),
 				handleAs: "json",
 				timeout: 15000,
-				postData: dojo.toJson({ "Branch" : "{branch}" } ),
 				load: function(jsonData, secondArg) {
 					if (onLoad) {
 						if (typeof onLoad === "function")

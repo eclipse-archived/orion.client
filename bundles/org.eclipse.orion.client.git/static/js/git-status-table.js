@@ -292,7 +292,7 @@ orion.GitStatusController = (function() {
 		var checkoutCommand = new mCommands.Command({
 			name: "checkout",
 			tooltip: "checkout",
-			image: "images/git-stage.gif",
+			image: "/images/git-checkout.gif",
 			id: "orion.gitCheckout",
 			callback: function(item) {
 				return self.checkout(item.object);
@@ -626,7 +626,7 @@ orion.GitStatusController = (function() {
 		
 		checkout: function(itemModel){
 			var self = this;
-			var location = itemModel.indexURI.split("/git/index/").join("/git/clone/");
+			var location = this._model.items.CloneLocation;
 			/*
 			if(itemModel && itemModel.conflicting){
 				self._stagingConflict = true;
@@ -637,7 +637,7 @@ orion.GitStatusController = (function() {
 			*/
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
-						service.checkoutBranch(location, "master",
+						service.checkoutPath(location, [itemModel.location],
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
