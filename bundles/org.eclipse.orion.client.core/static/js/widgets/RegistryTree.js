@@ -27,7 +27,7 @@ dojo.declare("widgets.RegistryTree", [dijit.Tree], {
 				items: registryData
 			}
 		});
-		console.debug(JSON.stringify(registryData));
+		//console.debug(JSON.stringify(registryData));
 		var model = new dijit.tree.TreeStoreModel({ store: store });
 		this.model = model;
 	},
