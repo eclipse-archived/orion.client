@@ -8,8 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
-/*jslint devel:true regexp:false laxbreak:true*/
-/*global dojo orion:true*/
+/*jslint regexp:false laxbreak:true*/
+/*global define dojo orion:true*/
 define(['dojo'], function(dojo) {
 
 var orion = orion || {};
@@ -291,6 +291,7 @@ orion.styler.TextMateStyler = (function() {
 				this.rule = rule;
 				this.subrules = rule.patterns;
 			}
+			ContainerRule.prototype.valueOf = function() { return "aa"; };
 			return ContainerRule;
 		}()),
 		/**
@@ -309,6 +310,7 @@ orion.styler.TextMateStyler = (function() {
 				// TODO: if rule.beginCaptures, make a group-ified regex from beginRegex
 				// TODO: if rule.endCaptures, make a group-ified regex from endRegex
 			}
+			BeginEndRule.prototype.valueOf = function() { return this.beginRegex; };
 			return BeginEndRule;
 		}()),
 		
@@ -323,6 +325,7 @@ orion.styler.TextMateStyler = (function() {
 				
 				// TODO if rule.captures, make a group-ified regex from matchRegex
 			}
+			MatchRule.prototype.valueOf = function() { return this.matchRegex; };
 			return MatchRule;
 		}()),
 		/**
@@ -362,36 +365,25 @@ orion.styler.TextMateStyler = (function() {
 			}
 			return resolved;
 		},
-		// Parse the file, beginning from "start", and stopping when startNode's "end" pattern 
-		// has been matched, or the end of buffer is reached.
-		// TODO revamp this for recovery parsing
+		// Parse the file, beginning from "start", and stopping when the end of buffer is reached.
 		parse: function(startNode, start) {
-			if (startNode.children.length > 0) {
-				throw new Error("Can we get here?");
-//				// we're reparsing a node so reset it
-//				startNode.children.splice(0);
-			}
-			
 			var model = this.editor.getModel();
-			var lastLine = model.getLineCount() - 1;
+			var lastLineStart = model.getLineStart(model.getLineCount() - 1);
+			var eof = model.getCharCount();
+			
 			var pos = start;
-			var last = model.getCharCount();
 			var lastResetPos = -1;
+			var ruleStack = [];
 			var node = startNode;
 			var ruleNumber = 0;
-			while (pos < last) {
-				var lineIndex = model.getLineAtOffset(pos);
-				
-				// Build stack of subrules to try. ruleNumber tells us which subrule to start from.
-				var ruleStack = [];
-				var subrules = node.rule.subrules;
-				if (ruleNumber === subrules.length) {
+			while (node) {
+				// Make stack of subrules to try. ruleNumber tells us which subrule to start from.
+				ruleStack.length = 0;
+				if (ruleNumber === node.rule.subrules.length) {
 					ruleNumber = 0;
 					if (lastResetPos === pos) {
 						// Already tried all rules, and didn't advance any further => this line is done.
-						// Go to next line, or end.
-						pos = (lineIndex === lastLine) ? last : model.getLineStart(lineIndex+1);
-						continue;
+						pos = (pos >= lastLineStart) ? eof : model.getLineStart(model.getLineAtOffset(pos) + 1);
 					}
 					lastResetPos = pos;
 				}
@@ -407,72 +399,54 @@ orion.styler.TextMateStyler = (function() {
 //					var subContainerNode = new this.ContainerNode(node, rule);
 //					node.addChild(subContainerNode);
 //					node = subContainerNode; // descend
-//					console.debug("Descend into " + subContainerNode);
-				} else if (rule instanceof this.MatchRule || this.BeginEndRule || !rule) {
-					// Match the subrule (if there is one), and see if we can end the begin/end node 
-					// we're inside (if we are inside one)
+				} else {
+					// We have !rule || rule instanceof BeginEndRule || rule instanceof MatchRule
+					// Match rule (if nonnull), and try to end the begin/end node we're inside (if we are inside one)
+					var lineIndex = model.getLineAtOffset(pos);
 					var lineStart = model.getLineStart(lineIndex);
-					var lineEnd = Math.min(model.getLineEnd(lineIndex), last);
+					var lineEnd = model.getLineEnd(lineIndex);
 					var line = model.getText(pos, lineEnd); // remaining suffix of line
 					
-					var offset = pos;
 					var subRegex = null, subMatch = null;
 					if (rule) {
 						subRegex = rule.matchRegex || rule.beginRegex;
-						subMatch = this.exec(subRegex, line, offset);
+						subMatch = this.exec(subRegex, line, pos);
 					}
-					var endMatch = this.tryEnd(node.rule, line, offset);
+					var endMatch = this.tryEnd(node, line, pos);
 					var winner = this.getWinner(rule, subMatch, endMatch);
 					if (subMatch && subMatch === winner) {
 						// Subrule consumes match
 						pos = this.afterMatch(subMatch);
-						ruleNumber = 0; // subrule matched; start over again from 0
 						if (rule instanceof this.BeginEndRule) {
-							var subNode = new this.BeginEndNode(node, rule, subMatch.index, subMatch);
+							var subNode = new this.BeginEndNode(node, rule, subMatch);
 							node.addChild(subNode);
 							node = subNode; // descend
-//							console.debug("  BEGIN: " + regex + " at " + subMatch.index + "; descend into " + subNode);
 						} else {
 							// MatchRule, advance past it. Apply subrules starting over from 0
-							var endsAt = pos;
-//							console.debug("  matched " + subMatch[0] + " at " + subMatch.index + ".." + endsAt + ", name: " + rule.rule.name + " txt: "
-//								+ model.getText(subMatch.index, endsAt));
+							//var endsAt = pos;
 						}
-					} else if (endMatch && endMatch === winner) {
-						// End consumes match. The BeginEndRule that node represents is finished.
-						pos = this.afterMatch(endMatch);
-						node.setEnd(endMatch);
-						// are we done?
-						if (node === startNode) {
-							break;
+						ruleNumber = 0; // subrule matched; start over again from 0
+					} else if ((endMatch && endMatch === winner) || pos === eof) {
+						// End consumes match, or we hit the EOF with no endMatch. Either way, node
+						// now has an "end" index, and we're done with it.
+						if (node instanceof this.BeginEndNode) {
+							if (endMatch) {
+								pos = this.afterMatch(endMatch);
+								node.setEnd(endMatch);
+							} else {
+								node.setEnd(eof);
+							}
 						}
 						node = node.parent; // ascend
 						ruleNumber = 0; // start in the parent node from rule #0
-//						console.debug("  END " + endMatch + " at " + offset + ", ascend to " + node);
 					} else {
 						// Neither sub nor end matched; try the next rule
 						ruleNumber++;
 					}
 				}
 			} // end loop
-			// Terminate any BeginEndNodes that never matched their "end"s
-			this.closeBeginEndNodes(startNode);
-		},
-		closeBeginEndNodes: function(startFrom) {
-			// An unterminated BeginEndNode will be the last element of a children array, but may be nested 
-			// arbitrarily deeply.
-			var lastChar = this.editor.getModel().getCharCount();
-			var node = startFrom;
-			while (node) {
-				var child = node.children[node.children.length-1];
-				if (child instanceof this.BeginEndNode && !child.end) {
-					console.debug("Force set end: " + child + " to " + lastChar);
-					child.setNoEnd(lastChar);
-					node = child;
-				} else {
-					node = null;
-				}
-			}
+			// At this point all BeginEndNodes have been closed, either by matching their endMatches
+			// or by hitting pos === eof
 		},
 		ContainerNode: (function() {
 			function ContainerNode(parent, rule) {
@@ -493,25 +467,45 @@ orion.styler.TextMateStyler = (function() {
 			return ContainerNode;
 		}()),
 		BeginEndNode: (function() {
-			function BeginEndNode(parent, rule, start, beginMatch) {
+			function BeginEndNode(parent, rule, beginMatch) {
 				this.parent = parent;
 				this.rule = rule;
 				this.children = [];
 				
-				this.start = start;
-				this.beginMatch = beginMatch;
-				this.end = null; // not known yet, but will be set eventually (may be EOF)
-				this.endMatch = null; // not known yet, will be null if we never match our "end" pattern
+				this.setStart(beginMatch);
+				this.end = null; // will be set eventually during parsing (may be EOF)
+				this.endMatch = null; // may remain null if we never match our "end" pattern
 			}
 			BeginEndNode.prototype.addChild = function(child) {
 				this.children.push(child);
 			};
-			BeginEndNode.prototype.setEnd = function(endMatch) {
-				this.endMatch = endMatch;
-				this.end = endMatch.index + endMatch[0].length;
+			/** @return {Number} This node's index in its parent's "children" list */
+			BeginEndNode.prototype.getIndexInParent = function(node) {
+				return this.parent ? this.parent.children.indexOf(this) : -1;
 			};
-			BeginEndNode.prototype.setNoEnd = function(lastChar) {
-				this.end = lastChar;
+			/** @param {RegExp.match} beginMatch */
+			BeginEndNode.prototype.setStart = function(beginMatch) {
+				this.start = beginMatch.index;
+				this.beginMatch = beginMatch;
+			};
+			/** @param {RegExp.match|Number} endMatchOrLastChar */
+			BeginEndNode.prototype.setEnd = function(endMatchOrLastChar) {
+				if (endMatchOrLastChar && typeof(endMatchOrLastChar) === "object") {
+					var endMatch = endMatchOrLastChar;
+					this.endMatch = endMatch;
+					this.end = endMatch.index + endMatch[0].length;
+				} else {
+					var lastChar = endMatchOrLastChar;
+					this.endMatch = null;
+					this.end = lastChar;
+				}
+			};
+			BeginEndNode.prototype.shiftStart = function(amount) {
+				this.start += amount;
+				this.beginMatch.index += amount;			};
+			BeginEndNode.prototype.shiftEnd = function(amount) {
+				this.end += amount;
+				if (this.endMatch) { this.endMatch.index += amount; }
 			};
 			BeginEndNode.prototype.valueOf = function() {
 				return "{" + this.rule.beginRegex + " range=" + this.start + ".." + this.end + "}";
@@ -536,12 +530,16 @@ orion.styler.TextMateStyler = (function() {
 		afterMatch: function(/**RegExp.match*/ match) {
 			return match.index + match[0].length;
 		},
-		/** @returns {RegExp.match} If rule is a BeginEndRule and its "end" pattern matches the text. */
-		tryEnd: function(/**BeginEndRule|MatchRule*/ rule, /**String*/ text, /**Number*/ offset) {
-			if (!rule.endRegex) { return null; }
-			// TODO: Support backreferences in endRegex that refer to matched groups of the beginMatch
-			var endRegex = rule.endRegex;
-			return this.exec(endRegex, text, offset);
+		/** @returns {RegExp.match} If node is a BeginEndNode and its rule's "end" pattern matches the text. */
+		tryEnd: function(/**Node*/ node, /**String*/ text, /**Number*/ offset) {
+			if (node instanceof this.BeginEndNode) {
+				var rule = node.rule;
+				if (!rule.endRegex) { return null; }
+				// TODO: Support backreferences in endRegex that refer to matched groups of node's beginMatch
+				var endRegex = rule.endRegex;
+				return this.exec(endRegex, text, offset);
+			}
+			return null;
 		},
 		/** Given match from a subrule and match from parent rule's "end" regex, returns the match that wins. */
 		getWinner: function(/**(BeginEnd|Match)Rule*/ rule, /**RegExp.match*/ sub, /**RegExp.match*/ end) {
@@ -556,7 +554,7 @@ orion.styler.TextMateStyler = (function() {
 		/** Called once when file is first loaded to build the parse tree. Tree is updated incrementally thereafter as buffer is modified */
 		initialParse: function() {
 			var last = this.editor.getModel().getCharCount();
-			console.debug("initialParse" + 0 + " .. " + last + " " + this.editor.getText(0, last));
+//			console.debug("initialParse" + 0 + " .. " + last + " " + this.editor.getText(0, last));
 			// First time; make parse tree for whole buffer
 			var root = new this.ContainerNode(null, this.grammar._typedRule);
 			this.parse(root, 0);
@@ -571,109 +569,45 @@ orion.styler.TextMateStyler = (function() {
 			if (!this._tree) {
 				this.initialParse();
 			} else {
-				console.debug("\nstart=" + start + " add=" + addedCharCount + " rem=" + removedCharCount
-						+ " addl=" + addedLineCount + " reml=" + removedLineCount);
+//				console.debug("\nstart=" + start + " add=" + addedCharCount + " rem=" + removedCharCount
+//						+ " addl=" + addedLineCount + " reml=" + removedLineCount);
 				var model = this.editor.getModel();
 				var end = start + removedCharCount;
+				var charCount = model.getCharCount();
 				
-				var sls = model.getLineStart(model.getLineAtOffset(start));
-				var ele = model.getLineEnd(model.getLineAtOffset(end));
-				var fdl = this.getFirstDamagedLeaf(sls, sls); // maybe +1?
-				if (fdl) {
-					console.debug("fdl=" + fdl + " sls=" + sls + " ele=" + ele);
-					var t = this.editor.getText(sls, ele);
-					console.debug(" t='" + t.replace(/\n/g,"\\n") + "'");
-					// [sls..ele] is the region we need to verify. If we find the structure of the tree
+				// For rs, we must rewind to the line preceding the line 'start' is on. We can't rely on start's
+				// line since it may've been changed in a way that would cause a new beginMatch at its lineStart.
+				var rs = model.getLineEnd(model.getLineAtOffset(start) - 1); // may be < 0
+				var fd = this.getFirstDamaged(rs, rs);
+				var re = model.getLineEnd(model.getLineAtOffset(end));
+				rs = rs === -1 ? 0 : rs;
+				re = re === -1 ? charCount : re;
+				var stoppedAt;
+				if (fd) {
+//					console.debug("fd=" + fd + " rs=" + rs + " re=" + re);
+					// [sls, ele] is the region we need to verify. If we find the structure of the tree
 					// has changed in that area, then we may need to reparse the rest of the file.
-					
-					var stoppedAt = this.repair(fdl, sls, ele);
+					stoppedAt = this.repair(fd, rs, re, start, addedCharCount, removedCharCount);
 				} else {
-					// TODO: fdl == null, we didn't hit any b/e nodes but may still have added a node
-					// need to parse [sls..ele]
-					console.debug("TODO fdl is null");
+					// FIXME: fd == null, we didn't hit any b/e nodes but may still have added a node
+					// need to parse [sls..ele]?
+//					console.debug("TODO fdl is null");
+					stoppedAt = charCount;
 				}
-				
 				// TODO: call editor.redrawRange() on [sls, stoppedAt]
+				this.editor.redrawRange(rs, stoppedAt);
 			}
 		},
-		/**
-		 * TODOC
-		 * @param {Number} end The best-case stopping point. If we detect a structure change to tree,
-		 * then we'll go past end and in worst case parse until EOF.
+		/** @returns {BeginEndNode|ContainerNode} The result of taking the first (smallest "start" value) 
+		 * node overlapping [start,end] and drilling down to get its deepest damaged descendant (if any).
 		 */
-		repair: function(origNode, sls, ele) {
-			/*
-			node = origNode
-			pos = sls
-			// This is the only time we rely on the positions being correct. Everything else
-			// is relative to previous nodes and we re-set the start/end positions as we find
-			// them. Using sls is safe since sls <= modelChangedEvent.start
-			expected = the initial expected node, based on sls
+		getFirstDamaged: function(start, end) {
+			// If start === 0 we actually have to start from the root because there is no position
+			// we can rely on. (First index is damaged)
+			if (start < 0) {
+				return this._tree;
+			}
 			
-			// do we 
-			ruleStack = []
-			ruleNumber = ?? whichever ruleNumber derived the expected node?
-			while (???) {
-				put rules on ruleStack
-				get the expected rule for next match
-				sub = get the next subrule to try
-				try matching sub
-				if (subMatch && winner === subMatch) {
-					if (subrule instanceof this.BeginEndRule) {
-						if (expected the same child) {
-							// found an expected child
-							// ie. subrule = expected rule
-							updateStart(node, newStart)
-							node = node.children[index of the expected child] // go into it
-						} else {
-							// found an unexpected child
-							trash(node, )
-							trashed = true
-						}
-					} else {
-						// MatchRule; ignore and continue
-					}
-				} else if (endMatch && winner == endMatch) {
-					if (expected node to end) {
-						// found an expected end
-						updateEnd(node, newStart)
-						node = node.parent
-					} else {
-						// found an unexpected end
-						trash(node, )
-						trashed = true
-					}
-				} else {
-					// Nothing matched; keep going until something does
-				}
-				
-				done = !trashed ? (pos < end) : (pos < lastChar);
-			}
-			if (!trashed) {
-				// update successors that we didn't parse
-			}
-			// return where we stopped parsing
-			return pos;
-						function updateStart(node, newStart) {
-				node.start = subMatch.start
-				node.beginMatch = subMatch.beginMatch
-				node.end = null
-			}
-			function trash() {
-				if (expected a child) {
-					// delete remaining children
-					node.children.length = index of whatever the expected child was supposed to be
-				} else if (expected an end) {
-					node.endMatch = node.end = null
-				}
-				delete all successors of node
-				ruleNumber = 0; // start over parsing node again from 0??
-			}
-			*/
-		},
-		/** @returns {BeginEndNode} The first (smallest "start" value) leaf node damaged by the edit.
-		 */
-		getFirstDamagedLeaf: function(start, end) {
 			var nodes = [this._tree];
 			var result, lastUndamaged;
 			while (nodes.length) {
@@ -696,6 +630,252 @@ orion.styler.TextMateStyler = (function() {
 		/** @returns true If n overlaps the interval [start,end] */
 		isDamaged: function(/**BeginEndNode*/ n, start, end) {
 			return (n.start <= end && n.end >= start);
+		},
+		/**
+		 * Applied after onModelChange() to compare the pre-change tree structure with the post-change
+		 * buffer contents.
+		 * 
+		 * @param {BeginEndNode|ContainerNode} origNode The deepest node that overlaps [rs,rs], or the root.
+		 * @param {Number} rs See _onModelChanged()
+		 * @param {Number} re The lineEnd of the line where the edit stops. This is our best-case stopping 
+		 * point. If we detect a structure change to tree, then we must continue past ele, and in worst case until EOF.
+		 */
+		repair: function(origNode, rs, re, start, addedCharCount, removedCharCount) {
+			var model = this.editor.getModel();
+			var lastLineStart = model.getLineStart(model.getLineCount() - 1);
+			var eof = model.getCharCount();
+			
+			var node = origNode;
+			var expected = this.getInitialExpected(origNode, rs);
+			
+			var pos = rs;
+			var lastResetPos = -1;
+			var ruleStack = [];
+			var ruleNumber = 0;
+			var repairing = true;
+			while (node && (!repairing || (pos < re))) {
+				// Populate stack with subrules
+				ruleStack.length = 0;
+				if (ruleNumber === node.rule.subrules.length) {
+					ruleNumber = 0;
+					if (lastResetPos === pos) {
+						// Already tried all rules, and didn't advance any further => this line is done.
+						pos = (pos >= lastLineStart) ? eof : model.getLineStart(model.getLineAtOffset(pos) + 1);
+					}
+					lastResetPos = pos;
+				}
+				this.push(ruleStack, node.rule.subrules, ruleNumber);
+				
+				// Get the next subrule to try
+				var next = ruleStack.length ? ruleStack.pop() : null;
+				var rule = next && next._resolvedRule._typedRule;
+				if (rule instanceof this.ContainerRule) {
+					throw new Error("FIXME ContainerNode in repair()");
+				} else {
+					var lineIndex = model.getLineAtOffset(pos);
+					var lineStart = model.getLineStart(lineIndex);
+					var lineEnd = model.getLineEnd(lineIndex);
+					var line = model.getText(pos, lineEnd);
+					
+					var subRegex = null, subMatch = null;
+					if (rule) {
+						subRegex = rule.matchRegex || rule.beginRegex;
+						subMatch = this.exec(subRegex, line, pos);
+					}
+					var endMatch = this.tryEnd(node, line, pos);
+					var winner = this.getWinner(rule, subMatch, endMatch);
+					if (subMatch && subMatch === winner) {
+						pos = this.afterMatch(subMatch);
+						if (rule instanceof this.BeginEndRule) {
+							// Matched a child. Did we expect that?
+							if (repairing && rule === expected.rule && node === expected.parent) {
+								// Yes: matched expected child
+								var foundChild = expected;
+								foundChild.setStart(subMatch);
+								// Note: the 'end' position for this node will either be matched, or fixed up by us post-loop
+								foundChild.repaired = true;
+								foundChild.endNeedsUpdate = true;
+								node = foundChild; // go into it
+								expected = this.getNextExpected(expected, "begin");
+							} else {
+								if (repairing) {
+//								console.debug("Found unexpected child " + rule.valueOf() + "; expected " + expected);
+									// No: matched unexpected child.
+									this.prune(node, expected);
+									repairing = false;
+								}
+								
+								// Add the new child (will replace 'expected' in node's children list)
+								var subNode = new this.BeginEndNode(node, rule, subMatch);
+								node.addChild(subNode);
+								node = subNode; // descend
+							}
+						} else {
+							// Matched a MatchRule; ignore and continue. If the user just modified some text
+							// that gets picked up by a MatchRule, it doesn't change the tree structure.
+							// Only an unexpected child or end node implies a tree-structure change.
+						}
+						ruleNumber = 0;
+					} else if ((endMatch && endMatch === winner) || pos === eof) {
+						if (node instanceof this.BeginEndNode) {
+							if (endMatch) {
+								node.setEnd(endMatch);
+								pos = this.afterMatch(endMatch);
+								// Matched node's end. Did we expect that?
+								if (repairing && node === expected && node.parent === expected.parent) {
+									// Yes: found the expected end of node
+									node.repaired = true;
+									delete node.endNeedsUpdate;
+									expected = this.getNextExpected(expected, "end");
+								} else {
+									if (repairing) {
+//									console.debug("Found unexpected end of " + node + "; expected " + expected);
+										// No: found an unexpected end
+										this.prune(node, expected);
+										repairing = false;
+									}
+									ruleNumber = 0; // start over parsing node again from 0
+								}
+							} else {
+								// Force-ending a BeginEndNode that runs until eof
+								node.setEnd(eof);
+							}
+						}
+						node = node.parent; // ascend
+						ruleNumber = 0;
+					} else {
+						// Neither sub nor end matched; keep going until something does
+						ruleNumber++;
+					}
+				}
+			} // end loop
+			
+			if (repairing) {
+				// The repair succeeded, so update stale begin/end indices by simple translation.
+				var delta = addedCharCount - removedCharCount;
+				
+				// A repaired node's end can't exceed re, but it may exceed re-delta+1.
+				// TODO: find a way to guarantee disjoint intervals for repaired vs unrepaired, then
+				// stop using the 'repaired' flag.
+				var maybeUnrepairedNodes = this.getIntersecting(re-delta+1, eof);
+				var maybeRepairedNodes = this.getIntersecting(rs, re);
+				
+				// Handle the unrepaired nodes. They are those intersecting [re-delta+1, eof] that don't have
+				// the 'repaired' flag.
+				for (var i=0; i < maybeUnrepairedNodes.length; i++) {
+					node = maybeUnrepairedNodes[i];
+					if (!node.repaired && node instanceof this.BeginEndNode) {
+//						console.debug("shiftEnd " + node + " by " + delta);
+						node.shiftEnd(delta);
+						
+//						console.debug("shiftStart " + node + " by " + delta);
+						node.shiftStart(delta);
+					}
+				}
+				
+				// Translate the 'end' index of any repaired node whose 'end' index lies beyond re, and so was
+				// not matched during repair
+				for (i=0; i < maybeRepairedNodes.length; i++) {
+					node = maybeRepairedNodes[i];
+					if (node.repaired && node.endNeedsUpdate) {
+						node.shiftEnd(delta);
+					}
+					// Clean up after repair()
+					delete node.endNeedsUpdate;
+					delete node.repaired;
+				}
+			}
+			return pos; // where we stopped repairing/reparsing
+		},
+		/**
+		 * Gets the node corresponding to the first match we expect to see in the repair.
+		 * @param {BeginEndNode|ContainerNode} node The node returned via getFirstDamaged(rs,rs) -- may be the root.
+		 * @param {Number} rs See _onModelChanged()
+		 * Note that because rs is a line end (or 0, a line start), it will intersect a beginMatch or 
+		 * endMatch either at their 0th character, or not at all. (begin/endMatches can't cross lines).
+		 * This is the only time we rely on the start/end values from the pre-change tree. After this 
+		 * we only look at node ordering, never use the old indices.
+		 * @returns {Node}
+		 */
+		getInitialExpected: function(node, rs) {
+			// TODO: Kind of weird.. maybe ContainerNodes should have start & end set, like BeginEndNodes
+			var i, child;
+			if (node === this._tree) {
+				// get whichever of our children comes after rs
+				for (i=0; i < node.children.length; i++) {
+					child = node.children[i]; // BeginEndNode
+					if (child.start >= rs) {
+						return child;
+					}				}
+			} else if (node instanceof this.BeginEndNode) {
+				if (node.endMatch) {
+					// Which comes next after rs: our nodeEnd or one of our children?
+					var nodeEnd = node.endMatch.index;
+					for (i=0; i < node.children.length; i++) {
+						child = node.children[i]; // BeginEndNode
+						if (child.start >= rs) {
+							break;
+						}
+					}
+					if (child && child.start < nodeEnd) {
+						return child; // Expect child as the next match
+					}
+				} else {
+					// No endMatch => node goes until eof => it end should be the next match
+				}
+			}
+			return node; // We expect node to end, so it should be the next match
+		},
+		/**
+		 * Helper for repair() to tell us what kind of event we expect next.
+		 * @param {Node} expected Last value returned by this method.
+		 * @param {String} event "begin" if the last value of expected was matched as "begin",
+		 *  or "end" if it was matched as an end.
+		 * @returns {Node} The next expected node to match, or null.
+		 */
+		getNextExpected: function(/**Node*/ expected, event) {
+			// if we are begin
+			//   and have a child, return begin: child
+			//   otherwise return end: ourself
+			// if we are end
+			//   and have a next sibling, return begin: next sibling
+			//   otherwise return end: parent
+			var node = expected;
+			if (event === "begin") {
+				var child = node.children[0];
+				if (child) {
+					return child;
+				} else {
+					return node;
+				}
+			} else if (event === "end") {
+				var parent = node.parent;
+				if (parent) {
+					var nextSibling = parent.children[parent.children.indexOf(node) + 1];
+					if (nextSibling) {
+						return nextSibling;
+					} else {
+						return parent;
+					}
+				}
+			}
+			return null;
+		},
+		/** Helper for repair(). Prunes out the unmatched nodes from the tree so we can continue parsing. */
+		prune: function(/**BeginEndNode|ContainerNode*/ node, /**Node*/ expected) {
+			var expectedAChild = expected.parent === node;
+			if (expectedAChild) {
+				// Expected child wasn't matched; prune it and all siblings after it
+				node.children.length = expected.getIndexInParent();
+			} else if (node instanceof this.BeginEndNode) {
+				// Expected node to end but it didn't; set its end unknown and we'll match it eventually
+				node.endMatch = null;
+				node.end = null;
+			}
+			// Reparsing from node, so prune the successors outside of node's subtree
+			if (node.parent) {
+				node.parent.children.length = node.getIndexInParent() + 1;
+			}
 		},
 		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {
 			function byStart(r1, r2) { return r1.start - r2.start; }

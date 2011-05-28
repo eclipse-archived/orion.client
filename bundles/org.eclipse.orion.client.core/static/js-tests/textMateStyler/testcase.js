@@ -132,6 +132,9 @@ var testcase = (function(assert) {
 		}
 	});
 	
+	// ************************************************************************************************
+	// Test initial styling of buffer
+	
 	tests["test TextMateStyler - style one line"] = makeTest(function(editor) {
 		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
 		editor.setText("fizzer");
@@ -217,7 +220,8 @@ var testcase = (function(assert) {
 		assertLineScope(editor, styler, 0, [ [0, 4, "punctuation.definition.comment.mylang"] ]); // <!--
 		assertLineScope(editor, styler, 1, [ [0, 3, "punctuation.definition.comment.mylang"] ]); // -->
 	});
-		
+	
+	
 	tests["test TextMateStyler - begin/end 2 lines - with content"] = makeTest(function(editor) {
 		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
 		var lines;
@@ -258,6 +262,8 @@ var testcase = (function(assert) {
 		]);
 	});
 	
+	// TODO nested regions
+	
 	// ************************************************************************************************
 	// Styling after edits
 	
@@ -286,9 +292,9 @@ var testcase = (function(assert) {
 		assertLineScope(editor, styler, 2, [
 			[0, 3, "punctuation.definition.comment.mylang"] // -->
 		]);
-	});
+	}, false);
 	
-	tests["test TextMateStyler - change that follows region"] = makeTest(function(editor) {
+	tests["test TextMateStyler - change - add non-region text that follows region"] = makeTest(function(editor) {
 		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
 		var lines;
 		lines = [
@@ -315,13 +321,13 @@ var testcase = (function(assert) {
 		]);
 	});
 	
-	tests["test TextMateStyler - change that precedes region"] = makeTest(function(editor) {
+	tests["test TextMateStyler - change - add non-region text that precedes region"] = makeTest(function(editor) {
 		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
 		var lines;
 		lines = [
 			"<!--",
 			"a",
-			"-->"
+			"-->int"
 		];
 		setLines(editor, lines);
 		
@@ -336,10 +342,11 @@ var testcase = (function(assert) {
 			[4, 8, "punctuation.definition.comment.mylang", "<!--"]
 		]);
 		assertLineScope(editor, styler, 1, [
-			[0, 1, "comment.block.mylang", "a"] // a
+			[0, 1, "comment.block.mylang", "a"]
 		]);
 		assertLineScope(editor, styler, 2, [
-			[0, 3, "punctuation.definition.comment.mylang", "-->"] // -->
+			[0, 3, "punctuation.definition.comment.mylang", "-->"],
+			[3, 6, "storage.type.mylang", "int"]
 		]);
 	});
 	
@@ -364,7 +371,78 @@ var testcase = (function(assert) {
 		assertLineScope(editor, styler, 1, [
 			[0, 3, "punctuation.definition.comment.mylang", "-->"]
 		]);
-		// how to test that redrawLines() is called? ack
+	});
+	
+	// add non-region text between regions
+	tests["test TextMateStyler - change - add non-region text between regions"] = makeTest(function(editor) {
+		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		setLines(editor, [
+			"<!--aaa-->",
+			"<!--bbb-->"
+		]);
+		changeLine(editor, "int xxx char", 0, 10, 10);
+		/*
+		<!--aaa-->int xxx char
+		<!--bbb-->
+		*/
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 7, "comment.block.mylang", "aaa"],
+			[7, 10, "punctuation.definition.comment.mylang", "-->"],
+			[10, 13, "storage.type.mylang", "int"],
+			// xxx is ignored: doesn't match anything
+			[18, 22, "storage.type.mylang", "char"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 7, "comment.block.mylang", "bbb"],
+			[7, 10, "punctuation.definition.comment.mylang", "-->"]
+		]);
+	});
+	
+	// Creates a new region at eof. New region never matches its end (ie. extends until eof)
+	tests["test TextMateStyler - change - add 'start' at eof - no 'end'"] = makeTest(function(editor) {
+		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		setLines(editor, [
+			"<!--a-->"
+		]);
+		
+		/*
+		<!--a--><!--
+		*/
+		changeLine(editor, "<!--", 0, 8, 8);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "a"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"],
+			[8, 12, "punctuation.definition.comment.mylang", "<!--"]
+		]);
+		
+		/*
+		<!--a--><!--b
+		*/
+		changeLine(editor, "b", 0, 12, 12);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "a"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"],
+			[8, 12, "punctuation.definition.comment.mylang", "<!--"],
+			[12, 13, "comment.block.mylang", "b"]
+		]);
+		
+		/*
+		<!--a--><!--b-->x
+		*/
+		changeLine(editor, "-->x", 0, 13, 13);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "a"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"],
+			[8, 12, "punctuation.definition.comment.mylang", "<!--"],
+			[12, 13, "comment.block.mylang", "b"],
+			[13, 16, "punctuation.definition.comment.mylang", "-->"]
+			// x is ignored
+		]);
 	}, false);
 	
 //	tests["test TextMateStyler - change - add 'end'"] = makeTest(function(editor) {
@@ -381,6 +459,8 @@ var testcase = (function(assert) {
 //		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
 //		var lines;
 //	});
+
+// TEST: nested region onModelChanges
 	
 //	tests["test TextMateStyler - grammar with unsupported regex feature"] = makeTest(function(editor) {
 //		// expect Error
