@@ -9,12 +9,10 @@
  ******************************************************************************/
 
 /*jslint laxbreak:true*/
-/*global eclipse orion dojo*/
+/*global define eclipse */
 
-/**
- * These tests require dojo
- */
-var testcase = (function(assert) {
+define("testcase", ["dojo", "orion/assert", "orionJs/styler/textMateStyler", "testGrammars"],
+		function(dojo, assert, mTextMateStyler, mTestGrammars) {
 	var tests = {};
 	
 	/**
@@ -125,7 +123,7 @@ var testcase = (function(assert) {
 	// Tests
 	tests["test TextMateStyler - create TextMateStyler"] = makeTest(function(editor) {
 		try {
-			var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+			var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleGrammar);
 			assert.ok(true, "true is false");
 		} catch (e) {
 			assert.ok(false, "Exception creating editor");
@@ -136,11 +134,11 @@ var testcase = (function(assert) {
 	// Test initial styling of buffer
 	
 	tests["test TextMateStyler - style one line"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleGrammar);
 		editor.setText("fizzer");
 		
 		// expect fi[z][z]er
-		var invalidScopeName = orion.styler.test.SampleGrammar.repository.badZ.name;
+		var invalidScopeName = mTestGrammars.SampleGrammar.repository.badZ.name;
 		assertLineScope(editor, styler, 0, [
 				[2, 3, invalidScopeName], // z
 				[3, 4, invalidScopeName]  // z
@@ -148,7 +146,7 @@ var testcase = (function(assert) {
 	});
 	
 	tests["test TextMateStyler - style multiple lines"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleGrammar);
 		var line0Text = "no_important_stuff_here",
 		    line1Text = "    this    var    &&";
 		setLines(editor, [line0Text, line1Text]);
@@ -163,7 +161,7 @@ var testcase = (function(assert) {
 	
 	// test begin/end on single input line
 	tests["test TextMateStyler - begin/end single line - subrule"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		
 		// test subrule invalid.illegal.badcomment.mylang applied to "--"
@@ -179,7 +177,7 @@ var testcase = (function(assert) {
 	});
 	
 	tests["test TextMateStyler - begin/end 1 line - subrule exited"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		
 		// Test that the rule assigning -- to "invalid.illegal.badcomment.mylang" only takes effect
@@ -196,7 +194,7 @@ var testcase = (function(assert) {
 	});
 	
 	tests["test TextMateStyler - begin/end single line - name"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		
 		// test that "name" of begin/end rule is applied to text between the delimiters
@@ -210,7 +208,7 @@ var testcase = (function(assert) {
 	});
 	
 	tests["test TextMateStyler - begin/end 2 lines - just delimiters"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		lines = [
 			"<!--",
@@ -223,7 +221,7 @@ var testcase = (function(assert) {
 	
 	
 	tests["test TextMateStyler - begin/end 2 lines - with content"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		lines = [
 			"<!--a",
@@ -241,7 +239,7 @@ var testcase = (function(assert) {
 	});
 
 	tests["test TextMateStyler - begin/end 3 lines - with leading/trailing content"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		lines = [
 			"a<!--c",
@@ -268,7 +266,7 @@ var testcase = (function(assert) {
 	// Styling after edits
 	
 	tests["test TextMateStyler - change inside region"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		lines = [
 			"<!--",
@@ -295,7 +293,7 @@ var testcase = (function(assert) {
 	}, false);
 	
 	tests["test TextMateStyler - change - add non-region text that follows region"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		lines = [
 			"<!--",
@@ -322,7 +320,7 @@ var testcase = (function(assert) {
 	});
 	
 	tests["test TextMateStyler - change - add non-region text that precedes region"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		lines = [
 			"<!--",
@@ -352,7 +350,7 @@ var testcase = (function(assert) {
 	
 	// creates a new region by adding the start block
 	tests["test TextMateStyler - change - add 'start'"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		setLines(editor, [
 			"a",
 			"-->"
@@ -375,7 +373,7 @@ var testcase = (function(assert) {
 	
 	// add non-region text between regions
 	tests["test TextMateStyler - change - add non-region text between regions"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		setLines(editor, [
 			"<!--aaa-->",
 			"<!--bbb-->"
@@ -402,7 +400,7 @@ var testcase = (function(assert) {
 	
 	// Creates a new region at eof. New region never matches its end (ie. extends until eof)
 	tests["test TextMateStyler - change - add 'start' at eof - no 'end'"] = makeTest(function(editor) {
-		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		setLines(editor, [
 			"<!--a-->"
 		]);
@@ -446,17 +444,17 @@ var testcase = (function(assert) {
 	}, false);
 	
 //	tests["test TextMateStyler - change - add 'end'"] = makeTest(function(editor) {
-//		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+//		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 //		var lines;
 //	});
 //	
 //	tests["test TextMateStyler - change - remove 'start'"] = makeTest(function(editor) {
-//		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+//		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 //		var lines;
 //	});
 //	
 //	tests["test TextMateStyler - change - remove 'end'"] = makeTest(function(editor) {
-//		var styler = new orion.styler.TextMateStyler(editor, orion.styler.test.SampleBeginEndGrammar);
+//		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 //		var lines;
 //	});
 
@@ -471,4 +469,4 @@ var testcase = (function(assert) {
 //	});
 	
 	return tests;
-}(orion.Assert));
+});

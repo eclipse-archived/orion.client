@@ -7,7 +7,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
- 
+
+define("testGrammars", [], function() {
+
 /*global orion:true*/
 var orion = orion || {};
 orion.styler = orion.styler || {};
@@ -95,3 +97,6 @@ orion.styler.test.SampleBeginEndGrammar = {
 					}
 				}
 */
+
+	return orion.styler.test;
+});
