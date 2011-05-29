@@ -298,6 +298,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth',
 		}
 	};
 	// this has to be a global for now
+	window.eclipse = window.eclipse || {};
 	window.eclipse.DateLong = DateLong;
 	return {
 		Profile:Profile,
