@@ -10,7 +10,13 @@
  *******************************************************************************/
  /*global eclipse:true dojo document console*/
 
-eclipse = eclipse || {};
+
+define(['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/preferences', 'orion/commands', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable',
+        'dojo/hash', 'dojo/parser'],
+        function(dojo, mServiceRegistry, mPluginRegistry, mPreferences, mCommands, mSearchClient, mGlobalCommands, mTreetable) {
+	
+
+var eclipse = eclipse || {};
 eclipse.Unittest = eclipse.Unittest || {};
 eclipse.Unittest.Model = (function() {
 	/**
@@ -125,18 +131,20 @@ eclipse.Unittest.Renderer = (function() {
 var root = {children:[]};
 
 dojo.addOnLoad(function(){
+	
+	dojo.parser.parse();
 	// create registry and instantiate needed services
-	var serviceRegistry = new eclipse.ServiceRegistry();
-	var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry);
+	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
+	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 	dojo.addOnWindowUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	var preferenceService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 	
 	// global banner
-	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 	
 	function runTests(fileURI) {
 		//console.log("installing non-persistent plugin: " + fileURI);
@@ -146,8 +154,8 @@ dojo.addOnLoad(function(){
 		dojo.place(document.createTextNode(fileURI), link, "last");
 		
 		// these are isolated from the regular service and plugin registry
-		var testServiceRegistry = new eclipse.ServiceRegistry();
-		var testPluginRegistry = new eclipse.PluginRegistry(testServiceRegistry, {});
+		var testServiceRegistry = new mServiceRegistry.ServiceRegistry();
+		var testPluginRegistry = new mPluginRegistry.PluginRegistry(testServiceRegistry, {});
 		
 		
 		testPluginRegistry.installPlugin(fileURI).then(function() {
@@ -155,7 +163,7 @@ dojo.addOnLoad(function(){
 		}).then(function(service) {
 			//console.log("got service: " + service);
 
-			var myTree = new eclipse.TableTree({
+			var myTree = new mTreetable.TableTree({
 				model: new eclipse.Unittest.Model(root),
 				showRoot: false,
 				parent: "test-tree",
@@ -211,4 +219,6 @@ dojo.addOnLoad(function(){
 			runTests(dojo.hash());
 	});
 	runTests(dojo.hash());
+});
+
 });

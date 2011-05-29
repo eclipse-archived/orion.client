@@ -185,7 +185,7 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 				var result = new dojo.Deferred();
 				try {
 					var provider = new eclipse.PluginProvider();
-					var serviceProvider = provider.registerServiceProvider("testRunner", {
+					var serviceProvider = provider.registerServiceProvider("orion.test.runner", {
 						run: function() {
 							dojo.when(_run(name, obj), dojo.hitch(result, "resolve"));
 							return result;
