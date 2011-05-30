@@ -60,10 +60,6 @@ exports.SampleBeginEndGrammar = {
 	"uuid": "BA5758BD-B671-40BF-F234-22AF369537E8",
 	"patterns": [
 			{
-				"match": "char|int",
-				"name": "storage.type.mylang"
-			},
-			{
 				// SGML-style comments for testing begin/end
 				"begin": "<!--",
 				"end": "-->",
@@ -98,6 +94,10 @@ exports.SampleBeginEndGrammar = {
 						"name": "invalid.illegal.badcomment.mylang"
 					}
 				]
+			},
+			{
+				"match": "char|int",
+				"name": "storage.type.mylang"
 			} ]
 };
 
