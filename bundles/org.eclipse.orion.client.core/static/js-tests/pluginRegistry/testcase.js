@@ -10,7 +10,7 @@
 /*global define */
 
 
-define("testcase", ["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], function(assert, mServiceregistry, mPluginregistry) {
+define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], function(assert, mServiceregistry, mPluginregistry) {
 	var tests = {};
 	
 	tests["test empty registry"] = function() {

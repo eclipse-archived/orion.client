@@ -9,11 +9,9 @@
  ******************************************************************************/
  
 /*global orion:true*/
-var orion = orion || {};
-orion.styler = orion.styler || {};
-orion.styler.test = orion.styler.test || {};
-
-orion.styler.test.SampleGrammar = {
+define([], function() {
+var exports = {};
+exports.SampleGrammar = {
 	"comment": "Dummy grammar for testing",
 	"name": "My great language",
 	"fileTypes": [ "foo", "bar" ],
@@ -62,3 +60,6 @@ orion.styler.test.SampleGrammar = {
 					}
 				}
 */
+
+return exports;
+});
