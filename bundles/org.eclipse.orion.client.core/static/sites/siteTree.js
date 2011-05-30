@@ -12,7 +12,7 @@
   handleDeleteAuthenticationError */
 /*jslint browser:true devel:true*/
 
-define(['dojo', 'siteUtils'], function(dojo, mSiteUtils) {
+define(['dojo', 'orion/siteUtils'], function(dojo, mSiteUtils) {
 
 var eclipse = {};
 eclipse.sites = {};
