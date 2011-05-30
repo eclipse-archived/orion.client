@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 /*jslint regexp:false laxbreak:true*/
-/*global define orion:true*/
+/*global define*/
 define(['dojo'], function(dojo) {
 
 var orion = orion || {};

@@ -121,7 +121,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 	}
 	
 	// Tests
-	tests["test TextMateStyler - create TextMateStyler"] = makeTest(function(editor) {
+	tests["test TextMateStyler - create"] = makeTest(function(editor) {
 		try {
 			var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleGrammar);
 			assert.ok(true, "true is false");
@@ -133,7 +133,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 	// ************************************************************************************************
 	// Test initial styling of buffer
 	
-	tests["test TextMateStyler - style one line"] = makeTest(function(editor) {
+	tests["test TextMateStyler - initial - style one line"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleGrammar);
 		editor.setText("fizzer");
 		
@@ -145,7 +145,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 			]);
 	});
 	
-	tests["test TextMateStyler - style multiple lines"] = makeTest(function(editor) {
+	tests["test TextMateStyler - initial - style multiple lines"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleGrammar);
 		var line0Text = "no_important_stuff_here",
 		    line1Text = "    this    var    &&";
@@ -160,7 +160,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 	});
 	
 	// test begin/end on single input line
-	tests["test TextMateStyler - begin/end single line - subrule"] = makeTest(function(editor) {
+	tests["test TextMateStyler - initial - begin/end single line - subrule"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		
@@ -176,7 +176,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		]);
 	});
 	
-	tests["test TextMateStyler - begin/end 1 line - subrule exited"] = makeTest(function(editor) {
+	tests["test TextMateStyler - initial - begin/end 1 line - subrule exited"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		
@@ -193,7 +193,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		]);
 	});
 	
-	tests["test TextMateStyler - begin/end single line - name"] = makeTest(function(editor) {
+	tests["test TextMateStyler - initial - begin/end single line - name"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		
@@ -207,7 +207,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		]);
 	});
 	
-	tests["test TextMateStyler - begin/end 2 lines - just delimiters"] = makeTest(function(editor) {
+	tests["test TextMateStyler - initial - begin/end 2 lines - just delimiters"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		lines = [
@@ -220,7 +220,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 	});
 	
 	
-	tests["test TextMateStyler - begin/end 2 lines - with content"] = makeTest(function(editor) {
+	tests["test TextMateStyler - initial - begin/end 2 lines - with content"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		lines = [
@@ -238,7 +238,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		]);
 	});
 
-	tests["test TextMateStyler - begin/end 3 lines - with leading/trailing content"] = makeTest(function(editor) {
+	tests["test TextMateStyler - initial - begin/end 3 lines - with leading/trailing content"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		lines = [
@@ -260,12 +260,55 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		]);
 	});
 	
-	// TODO nested regions
+	tests["test TextMateStyler - initial - b/e region inside b/e region"] = makeTest(function(editor) {
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
+		var lines;
+		lines = [
+			"<!--[]-->",
+			"<!--[  ]-->",
+			"<!--[ a ]-->",
+			"<!--[   ",
+			"b b"
+		];
+		setLines(editor, lines);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "meta.brace.square.open.mylang", "["],
+			[5, 6, "meta.brace.square.close.mylang", "]"],
+			[6, 9, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "meta.brace.square.open.mylang", "["],
+			[5, 7, "invalid.illegal.whitespace.mylang", "  "],
+			[7, 8, "meta.brace.square.close.mylang", "]"],
+			[8, 11, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 2, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "meta.brace.square.open.mylang", "["],
+			[5, 6, "invalid.illegal.whitespace.mylang", " "],
+			[6, 7, "meta.insquare.mylang", "a"],
+			[7, 8, "invalid.illegal.whitespace.mylang", " "],
+			[8, 9, "meta.brace.square.close.mylang", "]"],
+			[9, 12, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 3, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "meta.brace.square.open.mylang", "["],
+			[5, 8, "invalid.illegal.whitespace.mylang", "   "]
+		]);
+		assertLineScope(editor, styler, 4, [
+			[0, 1, "meta.insquare.mylang", "b"],
+			[1, 2, "invalid.illegal.whitespace.mylang", " "],
+			[2, 3, "meta.insquare.mylang", "b"]
+		]);
+	});
 	
 	// ************************************************************************************************
-	// Styling after edits
+	// Test damage/repair styling
 	
-	tests["test TextMateStyler - change inside region"] = makeTest(function(editor) {
+	tests["test TextMateStyler - change - inside region"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		var lines;
 		lines = [
@@ -460,10 +503,10 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 			[14, 17, "punctuation.definition.comment.mylang", "-->"]
 		]);
 	});
-//	
-//	tests["test TextMateStyler - change - remove 'start'"] = makeTest(function(editor) {
-//		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
-//	});
+	
+	tests["test TextMateStyler - change - remove 'start'"] = makeTest(function(editor) {
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
+	});
 //	
 //	tests["test TextMateStyler - change - remove 'end'"] = makeTest(function(editor) {
 //		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);

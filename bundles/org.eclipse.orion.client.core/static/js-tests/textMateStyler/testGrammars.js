@@ -8,9 +8,9 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
+/*global define*/
 define([], function() {
 
-/*global orion:true*/
 var exports =  {};
 
 exports.SampleGrammar = {
@@ -76,7 +76,24 @@ exports.SampleBeginEndGrammar = {
 				},
 				"patterns": [
 					{
-						// For testing nested subpatterns
+						// Nested begin/end rule
+						"begin": "\\[",
+						"end": "\\]",
+						"beginCaptures": {
+							"0": { "name": "meta.brace.square.open.mylang" }
+						},
+						"endCaptures": {
+							"0": { "name": "meta.brace.square.close.mylang" }
+						},
+						"contentName": "meta.insquare.mylang",
+						"patterns": [
+							{
+								"match": "\\s+",
+								"name": "invalid.illegal.whitespace.mylang"
+							}
+						]
+					},
+					{
 						"match": "--",
 						"name": "invalid.illegal.badcomment.mylang"
 					}
