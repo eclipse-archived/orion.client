@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-var testcaseModel = function(assert) {
+define(["orion/assert", "orion/compare/compare-model", "mapper-test-data"], function(assert, mCompareModel, mMapperTestData) {
 	var tests = {};
 		
 	tests["test model : empty file"] = function() {
@@ -16,7 +16,7 @@ var testcaseModel = function(assert) {
 		var mapper = [] ;
 		var model = new eclipse.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
-		var gapModel = new orion.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new orion.GapLineFeeder( "\r\n"));
+		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder( "\r\n"));
 		
 		assert.strictEqual(gapModel.getCharCount() , 0);
 		assert.strictEqual(gapModel.getLine(0,true) , "");
@@ -32,7 +32,7 @@ var testcaseModel = function(assert) {
 		var mapper = [] ;
 		var model = new eclipse.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
-		var gapModel = new orion.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new orion.GapLineFeeder( "\r\n"));
+		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder( "\r\n"));
 		
 		assert.strictEqual(gapModel.getCharCount() , 2);
 		assert.strictEqual(gapModel.getLine(0,true) , "\r\n");
@@ -51,7 +51,7 @@ var testcaseModel = function(assert) {
 		var mapper = [] ;
 		var model = new eclipse.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
-		var gapModel = new orion.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new orion.GapLineFeeder("\r\n"));
+		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder("\r\n"));
 		
 		assert.strictEqual(gapModel.getCharCount() , 5);
 		assert.strictEqual(gapModel.getLine(0,true) , "line1");
@@ -69,7 +69,7 @@ var testcaseModel = function(assert) {
 		var mapper = [] ;
 		var model = new eclipse.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
-		var gapModel = new orion.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new orion.GapLineFeeder("\r\n"));
+		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder("\r\n"));
 		
 		assert.strictEqual(gapModel.getCharCount() , 7);
 		assert.strictEqual(gapModel.getLine(0,true) , "line1\r\n");
@@ -94,7 +94,7 @@ var testcaseModel = function(assert) {
 		var mapper = [[0,2,-1],[3,3,0]] ;
 		var model = new eclipse.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
-		var gapModel = new orion.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new orion.GapLineFeeder("\r\n"));
+		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder("\r\n"));
 		
 		assert.strictEqual(gapModel.getCharCount() , 18 , "getCharCount()");
 		assert.strictEqual(gapModel.getLineCount() , 5 , "getLineCount()");
@@ -144,7 +144,7 @@ var testcaseModel = function(assert) {
 		var mapper = [[1,1,0],[0,2,-1],[2,2,0]] ;
 		var model = new eclipse.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
-		var gapModel = new orion.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new orion.GapLineFeeder("\r\n"));
+		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder("\r\n"));
 		
 		assert.strictEqual(gapModel.getCharCount() , 18 , "getCharCount()");
 		assert.strictEqual(gapModel.getLineCount() , 5 , "getLineCount()");
@@ -201,7 +201,7 @@ var testcaseModel = function(assert) {
 		var mapper = [[2,2,0],[0,2,-1],[1,1,0]] ;
 		var model = new eclipse.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
-		var gapModel = new orion.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new orion.GapLineFeeder("\r\n"));
+		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder("\r\n"));
 		
 		assert.strictEqual(gapModel.getCharCount() , 18 , "getCharCount()");
 		assert.strictEqual(gapModel.getLineCount() , 5 , "getLineCount()");
@@ -252,4 +252,4 @@ var testcaseModel = function(assert) {
 	};
 	
 	return tests;
-}(orion.Assert);
+});

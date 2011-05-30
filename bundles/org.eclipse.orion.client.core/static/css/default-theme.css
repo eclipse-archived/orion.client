@@ -20,10 +20,15 @@
 	font-style: italic;
 }
 
-/*
 .comment {
+	color: green;
 }
-.constant {
+
+.invalid {
+	color: white;
+	background-color: red;
+}
+/*.constant {
 }
 .invalid {
 }

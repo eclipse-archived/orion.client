@@ -7,14 +7,16 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global eclipse orion*/
-var testcase = (function(assert) {
+/*global define */
+
+
+define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], function(assert, mServiceregistry, mPluginregistry) {
 	var tests = {};
 	
 	tests["test empty registry"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
 		
 		assert.equal(pluginRegistry.getPlugins().length, 0);
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
@@ -22,8 +24,8 @@ var testcase = (function(assert) {
 
 	tests["test install plugin"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
 		
 		assert.equal(pluginRegistry.getPlugins().length, 0);
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
@@ -43,8 +45,8 @@ var testcase = (function(assert) {
 	
 	tests["test reload installed plugin"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
 
 		assert.equal(pluginRegistry.getPlugins().length, 0);
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);
@@ -82,8 +84,8 @@ var testcase = (function(assert) {
 	
 	tests["test plugin service call"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
 		
 		assert.equal(pluginRegistry.getPlugins().length, 0);
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
@@ -101,8 +103,8 @@ var testcase = (function(assert) {
 	
 	tests["test plugin event"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
 		
 		assert.equal(pluginRegistry.getPlugins().length, 0);
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);
@@ -133,8 +135,8 @@ var testcase = (function(assert) {
 	
 	tests["test 404 plugin"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
 		
 		var plugins = pluginRegistry.getPlugins();
 		assert.equal(plugins.length, 0);
@@ -152,4 +154,4 @@ var testcase = (function(assert) {
 	
 	
 	return tests;
-}(orion.Assert));
+});

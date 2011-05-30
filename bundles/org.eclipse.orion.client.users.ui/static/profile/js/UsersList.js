@@ -7,6 +7,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+
+define(['dojo', 'orion/explorer', 'js/usersUtil'], function(dojo, mExplorer, mUsersUtil) {
+
+
 var eclipse = eclipse || {};
 
 eclipse.UsersList = (function(){
@@ -22,7 +26,7 @@ eclipse.UsersList = (function(){
 		this.myTree = null;
 		this.renderer = new eclipse.UsersRenderer({checkbox: this.checkbox, cachePrefix: "UsersNavigator"}, this);
 	};
-	UsersList.prototype = eclipse.Explorer.prototype;
+	UsersList.prototype = mExplorer.Explorer.prototype;
 	
 	UsersList.prototype.loadUsers = function(){
 		var parent = dojo.byId(this.parentId);
@@ -38,10 +42,10 @@ eclipse.UsersList = (function(){
 		
 		self = this;
 		
-		eclipse.usersCommandUtils.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, {});
+		mUsersUtil.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, {});
 					
 		this.registry.getService("orion.core.user").then(function(service){
-			dojo.hitch(self, self.createTree(self.parentId, new eclipse.ExplorerFlatModel("/users", service.getUsersList)));
+			dojo.hitch(self, self.createTree(self.parentId, new mExplorer.ExplorerFlatModel("/users", service.getUsersList)));
 		});
 	};
 	
@@ -59,7 +63,7 @@ eclipse.UsersRenderer = (function() {
 		this._init(options);
 		this.explorer = explorer;
 	}
-	UsersRenderer.prototype = eclipse.SelectionRenderer.prototype;
+	UsersRenderer.prototype = mExplorer.SelectionRenderer.prototype;
 	
 	UsersRenderer.prototype.getCellHeaderElement = function(col_no){
 		
@@ -218,3 +222,6 @@ eclipse._UsersList = (function() {
 	};
 	return UsersList;
 }());
+
+return eclipse;	
+});

@@ -1,25 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- standard scripts -->
-	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-	<!-- ^temporary^ - will remove this dependency for the test framework-->
-	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>	
-	<script type="text/javascript" src="../../js/assert.js"></script>
-	<script type="text/javascript" src="../../js/test.js"></script>
-	<script type="text/javascript" src="../../js/plugin.js"></script>
-
-<!-- JavaScript files containing the tests and their dependencies -->
 	<script type="text/javascript" src="/editor/js/model.js"></script>
 	<script type="text/javascript" src="/editor/js/editor.js"></script>
-	<script type="text/javascript" src="../../js/styler/textMateStyler.js"></script>
-	<script type="text/javascript" src="testGrammars.js"></script>
-	<script type="text/javascript" src="testcase.js"></script>
+<!-- standard scripts -->
+	<script type="text/javascript" src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>	
+	<script type="text/javascript" src="../../js/plugin.js"></script>
 
-<!-- tests to be run -->
+	<script type="text/javascript" src="/requirejs/require.js"></script>
 	<script type="text/javascript">
+	require({
+	  baseUrl: '',
+	
+	  // set the paths to our library packages
+	  packages: [
+	    {
+	      name: 'dojo',
+	      location: '/org.dojotoolkit/dojo',
+	      main: 'lib/main-browser',
+	      lib: '.'
+	    },
+	    {
+	      name: 'dijit',
+	      location: '/org.dojotoolkit/dijit',
+	      main: 'lib/main',
+	      lib: '.'
+	    }
+	  ],
+	
+	  paths: {
+	    orion: '/js',
+	    text: '/requirejs/text',
+	    i18n: '/requirejs/i18n'
+	  }
+	});
+	
 	window.onload = function() {
-		orion.Test.run(testcase);
+		require(["orion/test","testcase"], function(test, testcase) {
+			test.run(testcase);			
+		});
 	};
 	</script>
 	<title>TEST: TextMateStyler</title>

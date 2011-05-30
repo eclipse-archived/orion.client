@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-var testcase = function(assert) {
+define(["orion/assert","dojo", "orion/test"], function(assert, dojo, mTest) {
 	
 var tests = {};
 // dummy change
@@ -43,7 +43,7 @@ tests["test expected asynch failure"] = function() {
 			return d;
 		}
 	};
-	var newTest = orion.Test.newTest();
+	var newTest = mTest.newTest();
 	// by adding a dummy listener we avoid the error from useConsole() which is added if there are no listeners
 	newTest.addEventListener("testDone", function() {});	
 	
@@ -63,7 +63,7 @@ tests["test basic list"] = function() {
 		}
 		
 	};
-	assert.deepEqual(orion.Test.list(listTests), ["test 1", "test obj.test2"]);
+	assert.deepEqual(mTest.list(listTests), ["test 1", "test obj.test2"]);
 };
 return tests;
-}(orion.Assert);
+});

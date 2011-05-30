@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['dojo', 'orion/compare/diff-provider', 'orion/compare/compare-container'], function(dojo, mDiffProvider, mCompareContainer) {
+define(['dojo', 'orion/compare/diff-provider', 'orion/compare/compare-container','orion/commands'], function(dojo, mDiffProvider, mCompareContainer,mCommands) {
 
 var orion = orion || {};
 
@@ -125,7 +125,8 @@ orion.statusTypeMap = { "Missing":["/images/git-removed.gif", "Unstaged removal"
 
 
 orion.GitStatusRenderer = (function() {
-	function GitStatusRenderer(tableDivId , model) {
+	function GitStatusRenderer(serviceRegistry ,tableDivId , model) {
+		this._registry = serviceRegistry;
 		this._tableParentDivId = tableDivId;
 		this._controller = model;
 	}
@@ -145,7 +146,7 @@ orion.GitStatusRenderer = (function() {
 		renderRow: function(itemModel) {
 			var self = this;
 			var row = document.createElement('tr');
-			row.id = itemModel.name +"_row";
+			row.id = itemModel.name + "_" + itemModel.type + "_row";
 			row._item = itemModel;
 			this._table.appendChild(row);
 
@@ -196,6 +197,31 @@ orion.GitStatusRenderer = (function() {
 				}
 			});
 			
+			var actionCol = dojo.create("td", {id: row.id+"actions" ,style: "padding-left: 5px"}, row, "last");
+			actionCol.noWrap= true;
+			var actionsWrapper = dojo.create("span", {id: row.id+"actionsWrapper"}, actionCol, "only");
+			// we must hide/show the span rather than the column.  IE and Chrome will not consider
+			// the mouse as being over the table row if it's in a hidden column
+			dojo.style(actionsWrapper, "visibility", "hidden");
+			this._registry.getService("orion.page.command").then(function(service) {
+				service.renderCommands(actionsWrapper, "object", {type: "fileItem", object: itemModel}, this, "image", null);
+			});
+			
+			dojo.connect(row, "onmouseover", row, function() {
+				var wrapper = dojo.byId(this.id+"actionsWrapper");
+				dojo.style(wrapper, "visibility", "visible");
+			});
+			
+			dojo.connect(row, "onmouseout", row, function() {
+				var wrapper = dojo.byId(this.id+"actionsWrapper");
+				dojo.style(wrapper, "visibility", "hidden");
+			});
+			if(this._controller._model.isStaged(itemModel.type)){
+				this._controller.hasStaged = true;
+			} else {
+				this._controller.hasUnstaged = true;
+			}
+			/*
 			//render the side by side viewer icon
 			sbsViewerCol = document.createElement('td');
 			row.appendChild(sbsViewerCol);
@@ -217,6 +243,7 @@ orion.GitStatusRenderer = (function() {
 					function(evt) {
 						self._controller.doAction(itemModel);
 					} );
+			*/
 		}
 	};
 	return GitStatusRenderer;
@@ -227,8 +254,8 @@ orion.GitStatusController = (function() {
 		this._registry = serviceRegistry;
 		this._model = new orion.GitStatusModel();
 		this._timerOn = false;
-		this._unstagedTableRenderer = new orion.GitStatusRenderer(unstagedDivId , this);
-		this._stagedTableRenderer = new orion.GitStatusRenderer(stagedDivId , this);
+		this._unstagedTableRenderer = new orion.GitStatusRenderer(serviceRegistry ,unstagedDivId , this);
+		this._stagedTableRenderer = new orion.GitStatusRenderer(serviceRegistry ,stagedDivId , this);
 		this._inlineCompareContainer = new mCompareContainer.InlineCompareContainer(new mDiffProvider.DiffProvider(serviceRegistry),serviceRegistry ,"inline-compare-viewer");
 		var self = this;
 		self._stagingConflict = false;
@@ -236,6 +263,85 @@ orion.GitStatusController = (function() {
 		commitBtn.onclick = function(evt){
 			self.commit();
 		};
+		var sbsCompareCommand = new mCommands.Command({
+			name: "Side by side compare",
+			tooltip: "Side by side compare",
+			image: "images/compare-sbs.gif",
+			id: "orion.sbsCompare",
+			hrefCallback: function(item) {
+				return self.openCompareEditor(item.object);
+			},
+			visibleWhen: function(item) {
+				return item.type === "fileItem";
+			}
+		});		
+
+		var stageCommand = new mCommands.Command({
+			name: "stage",
+			tooltip: "stage",
+			image: "images/git-stage.gif",
+			id: "orion.gitStage",
+			callback: function(item) {
+				return self.stage(item.object.indexURI , item.object);
+			},
+			visibleWhen: function(item) {
+				return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
+			}
+		});		
+
+		var checkoutCommand = new mCommands.Command({
+			name: "checkout",
+			tooltip: "checkout",
+			image: "/images/git-checkout.gif",
+			id: "orion.gitCheckout",
+			callback: function(item) {
+				return self.checkout(item.object);
+			},
+			visibleWhen: function(item) {
+				return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
+			}
+		});		
+
+		var stageAllCommand = new mCommands.Command({
+			name: "stageAll",
+			tooltip: "Stage all",
+			image: "/images/git-stage-all.gif",
+			id: "orion.gitStageAll",
+			callback: function(item) {
+				return self.stageAll();
+			},
+			visibleWhen: function(item) {
+				return (item.type === "unstagedItems" && self.hasUnstaged);
+			}
+		});		
+
+		var unstageAllCommand = new mCommands.Command({
+			name: "unstageAll",
+			tooltip: "Unstage all",
+			image: "/images/git-unstage-all.gif",
+			id: "orion.gitUnstageAll",
+			callback: function(item) {
+				return self.unstageAll();
+			},
+			visibleWhen: function(item) {
+				return (item.type === "stagedItems" && self.hasStaged);
+			}
+		});		
+
+		this._registry.getService("orion.page.command").then(function(commandService) {
+			// register commands with object scope
+			commandService.addCommand(sbsCompareCommand, "object");	
+			commandService.addCommand(stageCommand, "object");	
+			commandService.addCommand(checkoutCommand, "object");	
+			commandService.addCommand(stageAllCommand, "object");	
+			commandService.addCommand(unstageAllCommand, "object");	
+			commandService.registerCommandContribution("orion.gitStage", 1);	
+			commandService.registerCommandContribution("orion.gitCheckout", 2);	
+			commandService.registerCommandContribution("orion.sbsCompare", 3);	
+			commandService.registerCommandContribution("orion.gitStageAll", 4);	
+			commandService.registerCommandContribution("orion.gitUnstageAll", 5);	
+		});
+		
 	}
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
@@ -244,18 +350,19 @@ orion.GitStatusController = (function() {
 			this._model.selectedFileId = null;
 			this._loadBlock(this._unstagedTableRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedTableRenderer , this._model.interestedStagedGroup);
+			this.initLocalCommands();
 			
 			var self = this;
 			var messageArea = document.getElementById("commitMessage");
 			messageArea.disabled = !this.hasStaged;
 			
-			var stageAllBtn = document.getElementById("stageAll");
-			var unstageAllBtn = document.getElementById("unstageAll");
+			//var stageAllBtn = document.getElementById("stageAll");
+			//var unstageAllBtn = document.getElementById("unstageAll");
 			var commitBtn = document.getElementById("commit");
 			var amendBtn = document.getElementById("amend");
 			
-			this.modifyImageButton(true ,stageAllBtn , "Stage all here", function(evt){self.stageAll();} , !this.hasUnstaged);
-			this.modifyImageButton(true ,unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
+			//this.modifyImageButton(true ,stageAllBtn , "Stage all", function(evt){self.stageAll();} , !this.hasUnstaged);
+			//this.modifyImageButton(true ,unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
 			commitBtn.disabled = !this.hasStaged;
 			amendBtn.disabled = !this.hasStaged;
 			amendBtn.checked = false;
@@ -275,6 +382,18 @@ orion.GitStatusController = (function() {
 			}
 			
 			this.cursorClear();
+		},
+		
+		initLocalCommands: function(){
+			var stageAllSpan = document.getElementById("stageAll");
+			var unstageAllSpan = document.getElementById("unstageAll");
+			dojo.place(document.createTextNode(""), stageAllSpan, "only");
+			dojo.place(document.createTextNode(""), unstageAllSpan, "only");
+			this._registry.getService("orion.page.command").then(function(service) {
+				service.renderCommands(stageAllSpan, "object", {type: "unstagedItems"}, this, "image", null);
+				service.renderCommands(unstageAllSpan, "object", {type: "stagedItems"}, this, "image", null);
+			});
+			
 		},
 		
 		startTimer: function(){
@@ -449,7 +568,8 @@ orion.GitStatusController = (function() {
 				baseUrl = "/compare/compare.html?readonly#";
 			}
 			var url = baseUrl + itemModel.diffURI + diffParam;
-			window.open(url,"");
+			return url;
+			//window.open(url,"");
 		},
 		
 		doAction: function(itemModel){
@@ -494,6 +614,30 @@ orion.GitStatusController = (function() {
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
 						service.stage(location, 
+											 function(jsonData, secondArg) {
+											 	 self.getGitStatus(self._url);
+											 },
+											 function(response, ioArgs){
+												 self.handleServerErrors(response, ioArgs);
+											 }
+						);
+					});
+		},
+		
+		checkout: function(itemModel){
+			var self = this;
+			var location = this._model.items.CloneLocation;
+			/*
+			if(itemModel && itemModel.conflicting){
+				self._stagingConflict = true;
+				self._stagingName = itemModel.name;
+			}
+			else
+				self._stagingConflict = false;
+			*/
+			self._registry.getService("orion.git.provider").then(
+					function(service) {
+						service.checkoutPath(location, [itemModel.location],
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },

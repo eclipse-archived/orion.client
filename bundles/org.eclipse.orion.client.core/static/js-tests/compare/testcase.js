@@ -8,9 +8,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-var testcase = function(assert) {
-	var tests = {};
 
+define(["orion/assert", "orion/compare/diff-parser", "mapper-test-data"], function(assert, mDiffParser, mMapperTestData) {
+	var tests = {};
+	var mapperTestCases = mMapperTestData.mapperTestCases;
 
 	for ( var i = 0; i < mapperTestCases.length; i++) {
 		var testCase = mapperTestCases[i];
@@ -24,7 +25,7 @@ var testcase = function(assert) {
 		// Note: This is not a great way to do tests. Each test should be separate
 		tests["test " + j + ": " + description] = function(input, diff, expectedOutput, expectedMapping) {
 			return function() {
-				var diffParser = new orion.DiffParser("\r\n");
+				var diffParser = new mDiffParser.DiffParser("\r\n");
 				var result = diffParser.parse(input, diff);
 				assert.deepEqual(result.mapper, expectedMapping);
 				assert.equal(result.outPutFile, expectedOutput);
@@ -38,7 +39,7 @@ var testcase = function(assert) {
 		var expectedOutput = "";
 		var expectedMapping = [];
 
-		var diffParser = new orion.DiffParser();
+		var diffParser = new mDiffParser.DiffParser();
 		var result = diffParser.parse(input, diff);
 		assert.deepEqual(result.mapper, expectedMapping);
 		assert.equal(result.outPutFile, expectedOutput);
@@ -54,7 +55,7 @@ var testcase = function(assert) {
 		  "";
 		var expectedMapping = [[2, 0, 2]];
 
-		var diffParser = new orion.DiffParser();
+		var diffParser = new mDiffParser.DiffParser();
 		var result = diffParser.parse(input, diff);
 		assert.deepEqual(result.mapper, expectedMapping);
 		assert.equal(result.outPutFile, expectedOutput);
@@ -75,11 +76,11 @@ var testcase = function(assert) {
 		
 		var expectedMapping = [[3, 0, 2]];
 
-		var diffParser = new orion.DiffParser();
+		var diffParser = new mDiffParser.DiffParser();
 		var result = diffParser.parse(input, diff);
 		assert.deepEqual(result.mapper, expectedMapping);
 		assert.equal(result.outPutFile, expectedOutput);
 	};
 	
 	return tests;
-}(orion.Assert);
+});

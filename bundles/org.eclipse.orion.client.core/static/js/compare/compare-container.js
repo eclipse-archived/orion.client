@@ -488,7 +488,7 @@ orion.CompareMergeContainer = (function() {
 			if(readOnly)
 				return;
 			
-			var commandGenerator = new mEditorCommands.EditorCommandFactory(self._registry, self._commandService,self._fileClient , self._inputManager, "notifications");
+			var commandGenerator = new mEditorCommands.EditorCommandFactory(self._registry, self._commandService,self._fileClient , self._inputManager, "pageActions");
 			commandGenerator.generateEditorCommands(editor);
 			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
 			keyModeStack.push(genericBindings);
@@ -511,7 +511,7 @@ orion.CompareMergeContainer = (function() {
 			}
 			dojo.byId(statusDivId).innerHTML = dirtyIndicator +  status;
 		};
-		var undoStackFactory = readOnly ? new mEditorFeatures.UndoFactory() : new mEditorCommands.UndoCommandFactory(self._registry, self._commandService, "notifications");
+		var undoStackFactory = readOnly ? new mEditorFeatures.UndoFactory() : new mEditorCommands.UndoCommandFactory(self._registry, self._commandService, "pageActions");
 		var editorContainer = new mEditorContainer.EditorContainer({
 			editorFactory: editorFactory,
 			undoStackFactory: undoStackFactory,
@@ -525,7 +525,7 @@ orion.CompareMergeContainer = (function() {
 				
 		editorContainer.installEditor();
 		if(!readOnly){
-			mGlobalCommands.generateDomCommandsInBanner(this._commandService, editorContainer , "notifications");
+			mGlobalCommands.generateDomCommandsInBanner(this._commandService, editorContainer , "pageActions");
 			inputManager = this._inputManager;
 			dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
 		}

@@ -9,25 +9,12 @@
  ******************************************************************************/
 /*global dojo dijit dojox eclipse*/
 /*jslint browser:true */
-dojo.provide("widgets.SiteEditor");
 
-dojo.require("dijit.form.DropDownButton");
-dojo.require("dijit.form.ComboBox");
-dojo.require("dijit.form.Form");
-dojo.require("dijit.form.Select");
-dojo.require("dijit.form.Textarea");
-dojo.require("dijit.form.TextBox");
-dojo.require("dijit.form.ValidationTextBox");
-dojo.require("dijit.Menu");
-dojo.require("dijit.layout.ContentPane");
-dojo.require("dijit.Tooltip");
-dojo.require("dijit._Templated");
-dojo.require("dojo.data.ItemFileWriteStore");
-dojo.require("dojo.DeferredList");
-dojo.require("dojox.grid.DataGrid");
-dojo.require("dojox.grid.cells");
-// requires eclipse.sites.util
-// requires eclipse.util
+define(['dojo', 'dijit', 'dojox', 'orion/util', 'orion/siteUtils','orion/commands',
+		'dijit/form/DropDownButton', 'dijit/form/ComboBox', 'dijit/form/Form', 'dijit/form/Select', 'dijit/form/Textarea', 'dijit/form/TextBox', 
+		'dijit/form/ValidationTextBox', 'dijit/Menu', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated', 'dojo/data/ItemFileWriteStore', 
+		'dojo/DeferredList', 'dojox/grid/DataGrid', 'dojox/grid/cells'], 
+        function(dojo, dijit, dojox, mUtil, mSiteUtils, mCommands) {
 
 /**
  * Visualizes the Mappings array of a SiteConfiguration as a data grid.
@@ -50,7 +37,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		this._fileClient = fileClient;
 		
 		// Register commands used for editing mappings
-		var deleteMappingCommand = new eclipse.Command({
+		var deleteMappingCommand = new mCommands.Command({
 			name: "Delete",
 			image: "/images/remove.gif",
 			id: "eclipse.site.mappings.remove",
@@ -68,7 +55,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		this._commandService.addCommand(deleteMappingCommand , "object");
 		this._commandService.registerCommandContribution("eclipse.site.mappings.remove", 0);
 		
-		var moveUpCommand = new eclipse.Command({
+		var moveUpCommand = new mCommands.Command({
 			name: "Move Up",
 			image: "/images/prev_nav.gif",
 			id: "eclipse.site.mappings.moveUp",
@@ -95,7 +82,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		this._commandService.addCommand(moveUpCommand, "object");
 		this._commandService.registerCommandContribution("eclipse.site.mappings.moveUp", 1);
 		
-		var moveDownCommand = new eclipse.Command({
+		var moveDownCommand = new mCommands.Command({
 			name: "Move Down",
 			image: "/images/next_nav.gif",
 			id: "eclipse.site.mappings.moveDown",
@@ -225,7 +212,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	
 	_toReadablePath: function(/**DomNode*/ rowNode) {
 		var cols = dojo.query("td", rowNode);
-		return eclipse.util.getText(cols[this.PATH_COL]);
+		return mUtil.getText(cols[this.PATH_COL]);
 	},
 	
 	postCreate: function() {
@@ -295,9 +282,9 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		var result;
 		var href;
 		if (this._isWorkspacePath(target)) {
-			var location = eclipse.sites.util.makeFullFilePath(target);
+			var location = mSiteUtils.makeFullFilePath(target);
 			var deferred = new dojo.Deferred();
-			href = eclipse.util.safeText(location);
+			href = mUtil.safeText(location);
 			// TODO: should use fileClient here, but we don't want its retrying or error dialog
 			//this._fileClient.fetchChildren(location)
 			dojo.xhrGet({
@@ -314,7 +301,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 				});
 			result = deferred;
 		} else {
-			href = eclipse.util.safeText(target);
+			href = mUtil.safeText(target);
 			result = '<a href="' + href + '" target="_blank"><img src="/images/link_obj.gif" title="External link to ' + href + '"/></a>';
 		}
 		inCell.lastResult = result;
@@ -369,7 +356,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 		var children = this._workspaceToChildren[workspaceId];
 		for (var i=0; i < children.length; i++) {
 			var child = children[i];
-			var childLoc = eclipse.sites.util.makeRelativeFilePath(child.Location);
+			var childLoc = mSiteUtils.makeRelativeFilePath(child.Location);
 			var childName = "/" + child.Name;
 			if (callback(child, childLoc, childName) === false) {
 				break;
@@ -386,7 +373,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
 	 * @returns {String | dojo.Deferred}
 	 */
 	_friendlyPathFormatter: function(/**String*/ friendlyPath, /*Number*/ rowIndex, /**Object*/ inCell) {
-		return eclipse.util.safeText(friendlyPath);
+		return mUtil.safeText(friendlyPath);
 	},
 	
 	/** @returns true if b is a sub-path of a */
@@ -414,13 +401,13 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
  * @param {Object} options Options bag for creating the widget.
  * @param {eclipse.FileClient} options.fileClient
  * @param {eclipse.SiteService} options.siteService
- * @param {eclipse.CommandService} options.commandService
+ * @param {mCommands.CommandService} options.commandService
  * @param {String} [options.location] Optional URL of a site configuration to load in editor
  * upon creation.
  */
 dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, dijit._Templated], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache("widgets", "templates/SiteEditor.html"),
+	templateString: dojo.cache(new dojo._Url("/js/widgets/templates/SiteEditor.html")),
 	
 	/** dojo.Deferred */
 	_workspaces: null,
@@ -493,7 +480,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		
 		dojo.when(this._workspaceToChildren, dojo.hitch(this, function(workspaceToChildrenMap) {
 			// Register command used for adding mapping
-			var addMappingCommand = new eclipse.Command({
+			var addMappingCommand = new mCommands.Command({
 				name: "Add&#8230;",
 				image: "/images/add_obj.gif",
 				id: "eclipse.site.mappings.add",
@@ -508,7 +495,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		}));
 		
 		// Save command
-		var saveCommand = new eclipse.Command({
+		var saveCommand = new mCommands.Command({
 				name: "Save",
 				image: "/images/save.gif",
 				id: "eclipse.site.save",
@@ -645,7 +632,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		var choices = dojo.map(projects, function(project) {
 				return {
 					name: "Folder: /" + project.Name,
-					path: eclipse.sites.util.makeRelativeFilePath(project.Location),
+					path: mSiteUtils.makeRelativeFilePath(project.Location),
 					callback: callback
 				};
 			});
@@ -698,12 +685,12 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 		var status;
 		if (hostStatus && hostStatus.Status === "started") {
 			dojo.style(this.siteStartedWarning, {display: "block"});
-			this.hostingStatus.innerHTML = eclipse.util.safeText(hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1) + " at ");
-			var url = eclipse.util.safeText(hostStatus.URL);
-			dojo.create("a", {href: hostStatus.URL, innerHTML: eclipse.util.safeText(hostStatus.URL), target: "_new"}, this.hostingStatus, "last");
+			this.hostingStatus.innerHTML = mUtil.safeText(hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1) + " at ");
+			var url = mUtil.safeText(hostStatus.URL);
+			dojo.create("a", {href: hostStatus.URL, innerHTML: mUtil.safeText(hostStatus.URL), target: "_new"}, this.hostingStatus, "last");
 		} else {
 			dojo.style(this.siteStartedWarning, {display: "none"});
-			eclipse.util.setText(this.hostingStatus, hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1));
+			mUtil.setText(this.hostingStatus, hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1));
 		}
 		
 		dojo.empty(this._commandsContainer);
@@ -852,4 +839,5 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 	 */
 	onError: function(deferred) {
 	}
+});
 });

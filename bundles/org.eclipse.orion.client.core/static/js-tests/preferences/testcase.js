@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global eclipse orion console localStorage document window dojo*/
-var testcase = (function(assert) {
+define(["orion/assert","dojo"], function(assert, dojo) {
 	var tests = {};
 	
 	function saveStorage(storage) {
@@ -88,4 +88,4 @@ var testcase = (function(assert) {
 
 	
 	return tests;
-}(orion.Assert));
+});

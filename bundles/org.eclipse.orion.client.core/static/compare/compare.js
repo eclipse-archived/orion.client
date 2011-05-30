@@ -82,7 +82,7 @@ dojo.addOnLoad(function() {
 		});
 			
 		var nextDiffCommand = new mCommands.Command({
-			name : "Next Difference",
+			name : "Next Diff",
 			image : "/images/compare/next-diff.gif",
 			id: "orion.compare.nextDiff",
 			groupId: "orion.compareGroup",
@@ -90,7 +90,7 @@ dojo.addOnLoad(function() {
 				compareMergeContainer.nextDiff();
 		}});
 		var prevDiffCommand = new mCommands.Command({
-			name : "Previous Difference",
+			name : "Previous Diff",
 			image : "/images/compare/prev-diff.gif",
 			id: "orion.compare.prevDiff",
 			groupId: "orion.compareGroup",
@@ -112,7 +112,8 @@ dojo.addOnLoad(function() {
 		// Register command contributions
 		commandService.registerCommandContribution("orion.compare.prevDiff", 3, "pageActions");
 		commandService.registerCommandContribution("orion.compare.nextDiff", 2, "pageActions");
-		commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
+		if(!readOnly)
+			commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
 			
 		mGlobalCommands.generateDomCommandsInBanner(commandService, {} );
 	});

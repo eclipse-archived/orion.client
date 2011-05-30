@@ -10,8 +10,11 @@
  *******************************************************************************/
  
 /*global jstestdriver AsyncTestCase fail*/
-/*global eclipse console dojo*/
+/*global eclipse console dojo define*/
 
+
+
+define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry'], function(dojo, mServiceregistry, mPluginregistry){
 var orion = orion || {};
 
 orion.JSTestAdapter = (function() {
@@ -47,8 +50,8 @@ orion.JSTestAdapter = (function() {
 				shutdown.resolve(callbacks.noop());
 			});
 			
-			var loaderServiceRegistry = new eclipse.ServiceRegistry();
-			var loaderPluginRegistry = new eclipse.PluginRegistry(loaderServiceRegistry, {});
+			var loaderServiceRegistry = new mServiceregistry.ServiceRegistry();
+			var loaderPluginRegistry = new mPluginregistry.PluginRegistry(loaderServiceRegistry, {});
 			loaderPluginRegistry.installPlugin(test).then(
 				function() {
 					return loaderServiceRegistry.getService("orion.test.runner");
@@ -158,8 +161,8 @@ orion.JSTestAdapter = (function() {
 	
 	function _loadTests(fileURI) {	 
 		var loader = testLoader(fileURI);
-		var testServiceRegistry = new eclipse.ServiceRegistry();
-		var testPluginRegistry = new eclipse.PluginRegistry(testServiceRegistry, {});
+		var testServiceRegistry = new mServiceregistry.ServiceRegistry();
+		var testPluginRegistry = new mPluginregistry.PluginRegistry(testServiceRegistry, {});
 		
 		/* Install the test plugin and get the list of tests it contains */
 		testPluginRegistry.installPlugin(fileURI).then(
@@ -207,6 +210,10 @@ orion.JSTestAdapter = (function() {
 		for (var i = 0; i < testURIs.length; i++) {
 			suite.prototype["testLoader " + testURIs[i]] = _loadTests(testURIs[i]);
 		}
+		return suite;
 	}
 	return { runTests: runTests };
 }());
+
+return orion;
+});

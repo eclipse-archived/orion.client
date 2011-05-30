@@ -7,43 +7,42 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Manage Users</title>
 <link rel="stylesheet" type="text/css" href="manage-users.css" />
-<script src="/openajax/release/all/OpenAjaxManagedHub-all.js"></script>
-<script type="text/javascript">
-	var djConfig = {
-		isDebug : true,
-		modulePaths : {'profile.widgets': '/profile/widgets'},
-		parseOnLoad : true
-	};
-</script>
-
-
-<script src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-<script type="text/javascript">
-	dojo.require("dijit.Dialog");
-	dojo.require("dijit.layout.BorderContainer");
-	dojo.require("dijit.layout.ContentPane");
-	dojo.require("dijit.form.TextBox");
-	dojo.require("dijit.form.Button");
-	dojo.require("profile.widgets.NewUserDialog");
-</script>
-
-<!--Authentication -->
-<script src="/js/globalCommands.js"></script>
-<script src="/js/searchClient.js"></script>
-<script src="/js/preferences.js"></script>
-<script src="/js/auth.js"></script>
-<!-- Extension Registry -->
-<script src="/js/serviceregistry.js"></script>
-<!-- Eclipse Application Services -->
-<script src="/js/treetable.js"></script>
-<script src="/js/selection.js"></script>
-<script src="/js/commands.js"></script>
-<script src="/js/explorer.js"></script>
-<!--Profile logic -->
-<script src="js/UsersService.js"></script>
-<script src="js/UsersList.js"></script>
-<script src="js/manage-users.js"></script>
-<script src="widgets/NewUserDialog.js"></script>
+<script type="text/javascript" src="/requirejs/require.js"></script>
+		<script type="text/javascript">
+		require({
+		  baseUrl: '',
+		
+		  // set the paths to our library packages
+		  packages: [
+		    {
+		      name: 'dojo',
+		      location: '/org.dojotoolkit/dojo',
+		      main: 'lib/main-browser',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dijit',
+		      location: '/org.dojotoolkit/dijit',
+		      main: 'lib/main',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dojox',
+		      location: '/org.dojotoolkit/dojox',
+		      main: 'lib/main',
+		      lib: '.'
+		    }		    
+		  ],
+		
+		  paths: {
+		    orion: '/js',
+		    text: '/requirejs/text',
+		    i18n: '/requirejs/i18n'
+		  }
+		});
+		
+		require(["manage-users"]);
+		</script>
 </head>
 <body style="height: 100%" class="nihilo">
 	<div dojoType="dijit.layout.BorderContainer" design="headline"
