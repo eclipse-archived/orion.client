@@ -7,10 +7,12 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
- 
+
+define("testGrammars", [], function() {
+
 /*global orion:true*/
-define([], function() {
-var exports = {};
+var exports =  {};
+
 exports.SampleGrammar = {
 	"comment": "Dummy grammar for testing",
 	"name": "My great language",
@@ -23,7 +25,7 @@ exports.SampleGrammar = {
 				"name": "keyword.control.mylang"
 			},
 			{
-				"match": "\\b(case|catch|debugger|default|delete|else|finally|function|in|instanceof|new|this|try|typeof|var|void|with)\\b",
+				"match": "\\b(this|var|void)\\b",
 				"name": "keyword.other.mylang"
 			}, {
 				"match": "(\")[^\"](\")",
@@ -49,6 +51,39 @@ exports.SampleGrammar = {
 	}
 };
 
+// A grammar that uses begin/end rules
+exports.SampleBeginEndGrammar = {
+	"comment": "Dummy grammar for testing",
+	"name": "My great language",
+	"fileTypes": [ "foo", "bar" ],
+	"scopeName": "source.mylang",
+	"uuid": "BA5758BD-B671-40BF-F234-22AF369537E8",
+	"patterns": [
+			{
+				"match": "char|int",
+				"name": "storage.type.mylang"
+			},
+			{
+				// SGML-style comments for testing begin/end
+				"begin": "<!--",
+				"end": "-->",
+				"contentName": "comment.block.mylang",
+				"beginCaptures": {
+					"0": { "name": "punctuation.definition.comment.mylang" }
+				},
+				"endCaptures": {
+					"0": { "name" : "punctuation.definition.comment.mylang" }
+				},
+				"patterns": [
+					{
+						// For testing nested subpatterns
+						"match": "--",
+						"name": "invalid.illegal.badcomment.mylang"
+					}
+				]
+			} ]
+};
+
 /* TODO add to the constant.character.mylang rule once we support "captures":
 
 				"captures": {
@@ -61,5 +96,5 @@ exports.SampleGrammar = {
 				}
 */
 
-return exports;
+	return exports;
 });

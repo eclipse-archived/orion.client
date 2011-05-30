@@ -41,8 +41,7 @@ BootstrapTest.prototype.testBootstrap = function(queue) {
 				"http://localhost:8080/js-tests/serviceRegistry/test.html",
 				"http://localhost:8080/js-tests/preferences/test.html",
 				"http://localhost:8080/js-tests/pluginRegistry/test.html",
-				"http://localhost:8080/js-tests/testRunAsynch/test.html",
-				"http://localhost:8080/js-tests/textMateStyler/test.html"
+				"http://localhost:8080/js-tests/testRunAsynch/test.html"
 			]);
 		
 			var testCaseInfo = new jstestdriver.TestCaseInfo("Bootstrap", loaderSuite, jstestdriver.TestCaseInfo.ASYNC_TYPE);		

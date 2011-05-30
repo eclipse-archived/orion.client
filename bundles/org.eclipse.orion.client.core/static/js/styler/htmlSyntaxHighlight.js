@@ -53,13 +53,27 @@ orion.syntax.HtmlSyntaxHighlight = (function() {
 					"match": "<!(doctype|DOCTYPE)[^>]+>",
 					"name": "entity.name.tag.doctype.html"
 				},
+				{
+					"begin": "<!--",
+					"end": "-->",
+					"beginCaptures": {
+						"0": { "name": "punctuation.definition.comment.html" }
+					},
+					"endCaptures": {
+						"0": { "name": "punctuation.definition.comment.html" }
+					},
+					"patterns": [
+						{
+							// For testing nested subpatterns
+							"match": "--",
+							"name": "invalid.illegal.badcomment.html"
+						}
+					],
+					"contentName": "comment.block.html"
+				},
 				{ // startDelimiter + tagName
 					"match": "<[A-Za-z0-9_\\-:]+(?= ?)",
 					"name": "entity.name.tag.html"
-				},
-				{
-					"match": "<!--|-->",
-					"name": "punctuation.definition.comment.html"
 				},
 				{ "include": "#attrName" },
 				{ "include": "#qString" },
