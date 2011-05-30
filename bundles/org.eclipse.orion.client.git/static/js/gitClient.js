@@ -376,16 +376,19 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		addBranch : function(gitBranchParentURI, branchName) {
+		addBranch : function(gitBranchParentURI, branchName, startPoint) {
 			var service = this;
+			
+			var postData = {};
+			if (branchName) postData.Name = branchName;
+			if (startPoint) postData.Branch = startPoint;
+			
 			return dojo.xhrPost({
 				url : gitBranchParentURI,
 				headers : {
 					"Orion-Version" : "1"
 				},
-				putData : dojo.toJson({
-					"Branch" : branchName
-				}),
+				postData : dojo.toJson(postData),
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, secondArg) {
