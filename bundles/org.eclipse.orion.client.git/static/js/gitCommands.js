@@ -197,15 +197,27 @@ var exports = {};
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(
 					function(service) {
-						service.checkoutBranch(item.CloneLocation, item.Name).then(
+						if (item.Type === "Branch") {
+							service.checkoutBranch(item.CloneLocation, item.Name).then(
 								function(){
 									dojo.hitch(explorer, explorer.changedItem)(item.parent);
 								});
+						} else {
+							service.addBranch(item.BranchLocation, null, item.Name).then(
+								function(branch){
+									service.checkoutBranch(branch.CloneLocation, branch.Name).then(
+										function(){
+											dojo.hitch(explorer, explorer.changedItem)(item.parent.parent.parent);
+										}
+									);
+								}
+							);
+						}
 					}
 				);
 			},
 			visibleWhen: function(item) {
-				return item.Type === "Branch";
+				return item.Type === "Branch" || item.Type === "RemoteTrackingBranch";
 			}}
 		);
 		commandService.addCommand(checkoutBranchCommand, "object");

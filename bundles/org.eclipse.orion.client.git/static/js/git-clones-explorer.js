@@ -110,7 +110,7 @@ exports.GitClonesModel = (function() {
 				onComplete(parentItem.Children);
 			}
 			else if (parentItem.BranchLocation && parentItem.RemoteLocation){
-				onComplete([{GroupNode : "true", Location : parentItem.BranchLocation, Name : "Branch"}, {GroupNode : "true", Location : parentItem.RemoteLocation, Name : "Remote"}]);
+				onComplete([{GroupNode : "true", Location : parentItem.BranchLocation, Name : "Branch", parent : parentItem}, {GroupNode : "true", Location : parentItem.RemoteLocation, Name : "Remote", parent : parentItem}]);
 			}
 			else if (parentItem.GroupNode){
 				this.gitClient.getGitBranch(parentItem.Location).then( 
