@@ -9,7 +9,7 @@
  ******************************************************************************/
 /* global dojo dijit */
 /* jslint browser:true */
-dojo.provide("profile.widgets.NewUserDialog");
+define(['dojo', 'dijit', 'dijit/Dialog'], function(dojo, dijit) {
 
 dojo.require("dijit.Dialog");
 
@@ -18,8 +18,7 @@ dojo.require("dijit.Dialog");
  */
 dojo.declare("profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 	widgetsInTemplate : true,
-	templateString : dojo.cache("widgets",
-			"/profile/widgets/templates/NewUserDialog.html"),
+	templateString : dojo.cache(new dojo._Url("/profile/widgets/templates/NewUserDialog.html")),
 	title : "Create New User",
 
 	constructor : function() {
@@ -79,4 +78,5 @@ dojo.declare("profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 		});
 		
 	}
+});
 });
