@@ -7,57 +7,40 @@
 	</div>
 	<div dojoAttachPoint="containerNode" class="dijitDialogPaneContent">
 		<!-- Actual content here -->
-		<div style="display: table">
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5; min-width: 100px">
-					<label dojoAttachPoint="gitUrlLabel" for="${id}_gitUrl" style="padding-right: 10">${gitUrlLabelText}</label>
-				</div>
-				<div style="display: table-cell; padding: 5; width: 40em; text-align: right;">
-					<input dojoAttachPoint="gitUrl" id="${id}_gitUrl" style="display: inline-block; width: 100%;" value="">
-				</div>
-			</div>
-			<div style="display: table-row" dojoAttachPoint="newProjectSection">
-				<div style="display: table-cell; padding: 5; min-width: 100px">
-					<label dojoAttachPoint="gitNameLabel" for="${id}_gitName" style="padding-right: 10">${gitNameLabelText}</label>
-				</div>
-				<div style="display: table-cell; padding: 5; width: 40em; text-align: right;">
-					<input dojoAttachPoint="gitName" id="${id}_gitName" style="display: inline-block; width: 100%;" value="">
-				</div>
-			</div>
-			<div style="display: table-row" dojoAttachPoint="newProjectSection_1">
-				<div style="display: table-cell; padding: 5; min-width: 100px">
-					&nbsp;
-				</div>
-				<div style="display: table-cell; padding: 5; width: 40em; text-align: right;">
-					<a href="javascript:"  dojoAttachPoint="existingDirectoryLink">Choose existing directory</a>
-				</div>
-			</div>
-			<div style="display: none" dojoAttachPoint="existingProjectSection">
-				<div style="display: table-cell; padding: 5; min-width: 100px">
-					<label dojoAttachPoint="gitPathLabel" for="${id}_gitPath" style="padding-right: 10">${gitPathLabelText}</label>
-				</div>
-				<div style="display: table-cell; padding: 5; width: 40em; text-align: left;">
-					<input dojoAttachPoint="gitPath" id="${id}_gitPath" type="hidden" value="">
-					<span dojoAttachPoint="shownGitPath"></span>
-				</div>
-			</div>
-			<div style="display: none" dojoAttachPoint="existingProjectSection_1">
-				<div style="display: table-cell; padding: 5">
-					&nbsp;
-				</div>
-				<div style="display: table-cell; padding: 5; width: 40em; text-align: right;">
-					<a href="javascript:" dojoAttachPoint="openDirectoryPickerLink" style="margin-right: 0.5em">Change directory</a>
-					<a href="javascript:"  dojoAttachPoint="newProjectLink">Create new project</a>
-				</div>
-			</div>
-			
-			<div style="display: table-row">
-				<div style="display: table-cell; padding: 5"></div>
-				<div style="display: table-cell; padding: 5">
-					<button dojoAttachPoint="cloneItemButton" dojoType="dijit.form.Button" type="submit" value="OK" style="padding: 20 0 10 0; float: right; clear: both;">OK
+				<span dojoAttachPoint="Basic">
+					<div style="display: block; padding: 5; min-width: 120px; clear: both; float: left;">
+						<label dojoAttachPoint="gitUrlLabel" for="${id}_gitUrl" style="padding-right: 10">${gitUrlLabelText}</label>
+					</div>
+					<div style="display: block; padding: 5; width: 40em; text-align: right; float: right">
+						<input dojoAttachPoint="gitUrl" id="${id}_gitUrl" style="display: inline-block; width: 100%;" value="">
+					</div>
+					<div style="display: block; padding: 5; clear: both; text-align: right;">
+						<a dojoAttachPoint="advancedLink" href="javascript:">Choose target location</a>
+						<a dojoAttachPoint="advancedLinkHide" href="javascript:" style="display: none">Default target location</a>
+					</div>
+				</span>
+				<span dojoAttachPoint="Advanced" style="display: none;">
+					<div style="display: block; padding: 5; min-width: 120px; clear: both; float: left;">
+						<input dojoAttachPoint="isNewProject" type="radio" name="${id}_newExisting" checked value="new"/>
+						<label dojoAttachPoint="gitNameLabel" for="${id}_gitName" style="padding-right: 10">${gitNameLabelText}</label>
+					</div>
+					<div style="display: block; padding: 5; width: 40em; text-align: right; float: right">
+						<input dojoAttachPoint="gitName" id="${id}_gitName" style="display: inline-block; width: 100%;" value="">
+					</div>
+					
+					<div style="display: block; padding: 5; min-width: 120px; clear: both; float: left;">
+						<input dojoAttachPoint="isExistingProject" type="radio" name="${id}_newExisting" value="existing"/>
+						<label dojoAttachPoint="gitPathLabel" for="${id}_gitPath" style="padding-right: 10">${gitPathLabelText}</label>
+					</div>
+					<div style="display: block; padding: 5; width: 40em; text-align: left; float: right;">
+							<input dojoAttachPoint="gitPath" id="${id}_gitPath" type="hidden" value="">
+							<div style="width: 30em; float: left" float="left" dojoAttachPoint="shownGitPath"></div>
+							<div style="width: 10em; float: right; text-align: right"><a dojoAttachPoint="changeGitPath" href="javascript:">Change...</a></div>
+					</div>
+				</span>
+				<div style="display: block; padding: 5; clear: both; text-align: right">
+					<button dojoAttachPoint="cloneItemButton" dojoType="dijit.form.Button" type="submit" value="OK" style="padding: 20 0 10 0;">OK
 					</button>
 				</div>
-			</div>
-		</div>
 	</div>
 </div>
