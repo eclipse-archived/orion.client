@@ -188,7 +188,7 @@ eclipse.GitService = (function() {
 		},
 		
 		stage: function(location , onLoad , onError){
-			dojo.xhrPut({
+			return dojo.xhrPut({
 				url: location , 
 				headers: {
 					"Orion-Version": "1"
@@ -214,7 +214,7 @@ eclipse.GitService = (function() {
 		},
 		
 		unstage: function(location , onLoad , onError){
-			dojo.xhrPost({
+			return dojo.xhrPost({
 				url: location , 
 				headers: {
 					"Orion-Version": "1"

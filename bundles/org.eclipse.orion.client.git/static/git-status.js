@@ -27,6 +27,7 @@ dojo.addOnLoad(function() {
 	// File operations
 
 	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
+	var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 	var fileServiceReference;
 	
 	for (var i=0; i<fileServices.length; i++) {
@@ -43,15 +44,15 @@ dojo.addOnLoad(function() {
 	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
 		var fileClient = new mFileClient.FileClient(fileService);
 
-	
-		var controller = new mGitStatusTable.GitStatusController(serviceRegistry , "unstagedZone" , "stagedZone");
-		controller.getGitStatus(dojo.hash());
-	
 		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+	
+		var controller = new mGitStatusTable.GitStatusController(serviceRegistry , statusService,"unstagedZone" , "stagedZone");
+		controller.getGitStatus(dojo.hash(),true);
+	
 		initTitleBar(fileClient);
 		//every time the user manually changes the hash, we need to load the git status
 		dojo.subscribe("/dojo/hashchange", controller, function() {
-			controller.getGitStatus(dojo.hash());
+			controller.getGitStatus(dojo.hash(),true);
 			initTitleBar(fileClient);
 		});
 	});
