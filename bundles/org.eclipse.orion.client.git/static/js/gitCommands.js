@@ -603,16 +603,23 @@ var exports = {};
 			tooltip : "Init Git Repository in Workspace",
 			id : "eclipse.initGitRepository",
 			callback : function(item) {
-				var dialog = new widgets.InitGitRepositoryDialog({
-					func : function(target){
-								serviceRegistry.getService("orion.git.provider").then(function(gitService) {
-									gitService.initGitRepository(target).then(function(){
-											if(explorer.redisplayClonesList){
-												dojo.hitch(explorer, explorer.redisplayClonesList)();
-											}
+				
+				var dialog = new widgets.CloneGitRepositoryDialog({
+					serviceRegistry: serviceRegistry,
+					title: "Init Repository",
+					fileClient: fileClient,
+					advancedOnly: true,
+					func : function(gitUrl, path, name){
+						exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+									serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+											gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath).then(
+													function(jsonData){
+														if(explorer.redisplayClonesList){
+															dojo.hitch(explorer, explorer.redisplayClonesList)();
+														}
+													});
 									});
 								});
-
 							}
 				});
 						

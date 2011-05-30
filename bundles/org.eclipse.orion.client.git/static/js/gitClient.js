@@ -49,7 +49,9 @@ eclipse.GitService = (function() {
 			if(targetPath){
 				postData.Path = targetPath;
 			}
-			postData.GitUrl=gitRepoUrl;
+			if(gitRepoUrl){
+				postData.GitUrl=gitRepoUrl;
+			}
 			postData.Location = repoLocation;
 			if(gitSshUsername){
 				postData.GitSshUsername = gitSshUsername;

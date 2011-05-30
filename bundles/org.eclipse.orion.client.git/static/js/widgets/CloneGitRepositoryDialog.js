@@ -27,7 +27,7 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog, widgets._OrionDi
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = "Clone Git Repository";
+		this.title = this.options.title ? this.options.title : "Clone Git Repository";
 		this.gitUrlLabelText = "Repository URL:";
 		this.gitPathLabelText = "Existing directory:";
 		this.gitNameLabelText = "New project:";
@@ -38,6 +38,7 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog, widgets._OrionDi
 		if(this.options.advancedOnly){
 			this.Basic.style.display="none";
 			this.Advanced.style.display="";
+			this.gitName.focus();
 		}
 		
 		dojo.connect(this.changeGitPath, "onclick", null, dojo.hitch(this, this.openDirectoryPickerDialog));
