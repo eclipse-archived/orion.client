@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
-define("testGrammars", [], function() {
+define([], function() {
 
 /*global orion:true*/
 var exports =  {};
