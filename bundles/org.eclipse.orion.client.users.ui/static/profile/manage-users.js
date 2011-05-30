@@ -18,6 +18,10 @@ dojo.addOnLoad(function() {
 	dojo.parser.parse();
 
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
+	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
+	dojo.addOnUnload(function() {
+		pluginRegistry.shutdown();
+	});
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	var prefsService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
