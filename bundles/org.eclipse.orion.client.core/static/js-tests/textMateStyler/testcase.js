@@ -441,21 +441,32 @@ define("testcase", ["dojo", "orion/assert", "orionJs/styler/textMateStyler", "te
 			[13, 16, "punctuation.definition.comment.mylang", "-->"]
 			// x is ignored
 		]);
-	}, false);
+	});
 	
-//	tests["test TextMateStyler - change - add 'end'"] = makeTest(function(editor) {
-//		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
-//		var lines;
-//	});
+	// Complete region by adding its "end"
+	tests["test TextMateStyler - change - add 'end'"] = makeTest(function(editor) {
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
+		setLines(editor, [
+			"<!--has no end"
+		]);
+		
+		/*
+		<!--has an end-->
+		*/
+		changeLine(editor, "an end-->", 0, 8, 14);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 14, "comment.block.mylang", "has an end"],
+			[14, 17, "punctuation.definition.comment.mylang", "-->"]
+		]);
+	});
 //	
 //	tests["test TextMateStyler - change - remove 'start'"] = makeTest(function(editor) {
 //		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
-//		var lines;
 //	});
 //	
 //	tests["test TextMateStyler - change - remove 'end'"] = makeTest(function(editor) {
 //		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
-//		var lines;
 //	});
 
 // TEST: nested region onModelChanges
