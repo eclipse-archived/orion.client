@@ -10,9 +10,9 @@
 
 /*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
-define(['dojo', 'orion/commands',
+define(['dojo', 'orion/commands', 'orion/util',
         'orion/widgets/CloneGitRepositoryDialog', 'orion/widgets/InitGitRepositoryDialog', 'orion/widgets/AddRemoteDialog', 'orion/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog'], 
-        function(dojo, mCommands) {
+        function(dojo, mCommands, mUtil) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -53,6 +53,37 @@ var exports = {};
 			});
 		}
 	};
+	
+	exports.getNewItemName = function(item, explorer, onRoot, domId, defaultName, onDone, column_no) {
+		var refNode, name, tempNode;
+		if (onRoot) {
+			refNode = dojo.byId(domId);
+		} else {
+			var nodes = explorer.makeNewItemPlaceHolder(item, domId, column_no);
+			if (nodes) {
+				refNode = nodes.refNode;
+				tempNode = nodes.tempNode;
+			} else {
+				refNode = dojo.byId(domId);
+			}
+		}
+		if (refNode) {
+			mUtil.getUserText(domId+"EditBox", refNode, false, defaultName, 
+				dojo.hitch(this, function(name) {
+					if (name) {
+						if (tempNode) {
+							tempNode.parentNode.removeChild(tempNode);
+						}
+						onDone(name);
+					}
+				})); 
+		} else {
+			name = window.prompt(defaultName);
+			if (name) {
+				onDone(name);
+			}
+		}
+	}
 	
 	exports.handleKnownHostsError = function(serviceRegistry, errorData, options, func){
 		if(confirm("Would you like to add " + errorData.KeyType + " key for host " + errorData.Host
@@ -195,23 +226,20 @@ var exports = {};
 			name: "Add Branch",
 			image: "/images/add_obj.gif",
 			id: "eclipse.addBranch",
-			callback: function(item) {
-				var dialog = new widgets.NewItemDialog({
-					title: "Add Branch",
-					label: "Branch name:",
-					func:  function(name, url, create){
-						serviceRegistry.getService("orion.git.provider").then(
-								function(service) {
-									service.addBranch(item.Location, name).then(function(){
-										dojo.hitch(explorer, explorer.changedItem)(item);
-									});
-								}
-							);
-					},
-					advanced: false
+			callback: function(item, commandId, domId) {
+				exports.getNewItemName(item, explorer, false, domId, "Branch name", function(name){
+					if(!name && name==""){
+						return;
+					}
+					serviceRegistry.getService("orion.git.provider").then(
+							function(service) {
+								service.addBranch(item.Location, name).then(function(){
+									dojo.hitch(explorer, explorer.changedItem)(item);
+								});
+							}
+						);
 				});
-				dialog.startup();
-				dialog.show();
+				
 			},
 			visibleWhen: function(item) {
 				return item.GroupNode && item.Name === "Branch";
@@ -500,30 +528,25 @@ var exports = {};
 			name : "Tag",
 			image : "/images/git-tag.gif",
 			id : "eclipse.orion.git.addTag",
-			callback : function(item) {
+			
+			callback: function(item, commandId, domId) {
 				var clientDeferred = new dojo.Deferred();
+				exports.getNewItemName(item, explorer, false, domId, "Tag name", function(tagName){
+					if(!tagName || tagName===""){
+						return;
+					}
+					serviceRegistry.getService("orion.git.provider").then(
+							function(service) {
+								service.doAddTag(item.Location, tagName,
+									function(jsonData, secondArg) {
+										var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+										var tr = dojo.byId(trId);
+										dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[5] /* tags column */, "last"), "only");
+									});
+							});
+					return clientDeferred;
+				}, 4);
 				
-				var dialog = new widgets.NewItemDialog({
-					title: "Tag",
-					label: "Tag name:",
-					func:  function(tagName){
-						serviceRegistry.getService("orion.git.provider").then(
-								function(service) {
-									service.doAddTag(item.Location, tagName,
-										function(jsonData, secondArg) {
-											var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
-											var tr = dojo.byId(trId);
-											dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[5] /* tags column */, "last"), "only");
-										});
-								});
-						return clientDeferred;
-					},
-					advanced: false
-				});
-				dialog.startup();
-				dialog.show();
-				
-
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit";
