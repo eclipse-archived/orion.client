@@ -292,7 +292,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		        iframe.style.visibility = "hidden";
 		        iframe.src = url;
 		        document.body.appendChild(iframe);
-		        _channels[url] = {target: iframe.contentWindow, handler: handler};
+		        _channels[url] = {iframe: iframe, target: iframe.contentWindow, handler: handler };
 			},
 			disconnect: function(url) {
 				if (_channels[url]) {
@@ -329,7 +329,11 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	this.shutdown = function() {
 		for(var url in _channels) {
 			if (_channels.hasOwnProperty(url)) {
-				document.removeChild(_channels[url].target.frameElement);
+				try {
+					document.body.removeChild(_channels[url].iframe);
+				} catch(e) {
+					// best effort
+				}
 				delete _channels[url];
 			}
 		}
