@@ -8,9 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
-/*global console */
-
 /**
  * @namespace The global container for eclipse APIs.
  */ 
@@ -127,34 +124,6 @@ eclipse.PluginProvider = function(metadata) {
 			}
 			return;
 		}
-<<<<<<< HEAD
-		
-		_hubClient = new OpenAjax.hub.IframeHubClient({
-			HubClient: {
-				onSecurityAlert: function(source, alertType) {
-					console.log(source + ":" + alertType );
-				}
-	        }
-		});
-		_hubClient.connect(function(hubClient, success, error) {
-			if (success) {
-				_hubClient.subscribe("request["+_hubClient.getClientID()+"]", _handleRequest);
-				var message = {
-					method: "plugin",
-					params: [_getPluginData()]
-				};
-				_publish(message);
-				_connected = true;
-				if (callback) {
-					callback();
-				}
-			} else {
-				if (errback) {
-					errback(error);
-				}
-			}
-		});
-=======
 
 		if (!window) {
 			_target = self;
@@ -173,7 +142,6 @@ eclipse.PluginProvider = function(metadata) {
 		};
 		_publish(message);
 		_connected = true;
->>>>>>> e82393dbe79d9060d9b062ad510c8635aaf3935c
 	};
 	
 	this.disconnect = function() {
