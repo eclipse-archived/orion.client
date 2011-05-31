@@ -10,7 +10,6 @@
  *******************************************************************************/
 
 /*global dojo*/
-/*global OpenAjax*/
 /*global document*/
 /*global window*/
 
@@ -19,12 +18,12 @@
  */ 
 
 
-define(["dojo", "orion/serviceregistry", "dojo/DeferredList", "/openajax/release/all/OpenAjaxManagedHub-all.js" ], function(dojo, mServiceregistry){
+define(["dojo", "orion/serviceregistry", "dojo/DeferredList"], function(dojo, mServiceregistry){
 var eclipse = eclipse || {};
 eclipse.Plugin = function(url, data, internalRegistry) {
 	var _self = this;
 	
-	var _container;
+	var _connected = false;
 	var _deferredLoad = new dojo.Deferred();
 	var _loaded = false;
 	
@@ -33,8 +32,8 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	var _serviceRegistrations = {};
 		
 	function _callService(serviceId, method, params, deferred) {
-		if (!_container) {
-			throw new Error("service container not ready");
+		if (!_connected) {
+			throw new Error("plugin not connected");
 		}
 		var requestId = _currentMessageId++;
 		_deferredResponses[String(requestId)] = deferred;
@@ -44,7 +43,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 			method: method,
 			params: params
 		};
-		internalRegistry.publish("request["+url+"]", message);
+		internalRegistry.postMessage(message, url);
 	}
 
 	function _createServiceProxy(service) {
@@ -78,17 +77,8 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 		}	
 	}
 	
-	function _responseHandler(topic, message) {
+	function _responseHandler(message) {
 		try {
-			if (topic === "onSecurityAlert") {
-				if (message === "OpenAjax.hub.SecurityAlert.LoadTimeout") {
-					_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
-				} else {
-					console.log("Security Alert [" + url +"]: " + message);
-				}
-				return;
-			}
-			
 			if (message.method) {
 				if ("plugin" === message.method) {
 					if (!data) {
@@ -145,8 +135,8 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 				delete _serviceRegistrations[serviceId];
 			}
 		}
-		if (_container) {
-			internalRegistry.disconnect(_container);
+		if (_connected) {
+			internalRegistry.disconnect(url);
 		}
 		internalRegistry.uninstallPlugin(this);
 	};
@@ -163,8 +153,9 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	};
 	
 	this._load = function() {
-		if (!_container) {
-			_container = internalRegistry.connect(url, _responseHandler);
+		if (!_connected) {
+			internalRegistry.connect(url, _responseHandler);
+			_connected = true;
 		}
 		return _deferredLoad.promise;
 	};
@@ -182,32 +173,21 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	var _self = this;
 	var _storage = opt_storage || localStorage || {};
 	var _plugins = [];
+	var _channels = {};
 	var _pluginEventTarget = new mServiceregistry.EventTarget();
 	var _loaded;
-	
+		
 	// storage
 	var _defaultPlugins = {};
 	var _userPlugins;
-	
-	
-	var _managedHub = new OpenAjax.hub.ManagedHub({
-		log : function(message) {
-			console.log(message);
-		},
-		onPublish : function(topic, data, publishContainer, subscribeContainer) {
-			return true;
-		},
-		onSubscribe : function(topic, container) {
-			return true;
-		},
-		onUnsubscribe : function(topic, container) {
-			return true;
-		},
-		onSecurityAlert : function(source, alertType) {
-			console.log(source + ":" + alertType );
-		}
-	});
 
+	window.addEventListener("message", function(event) {
+		var url = event.source.location.toString();
+		if (_channels[url]) {
+			_channels[url].handler(JSON.parse(event.data));	
+		}
+	}, false);
+	
 	function _loadFromStorage() {
 		var plugin,
 			pluginURL,
@@ -303,37 +283,23 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	
 	var internalRegistry = {
 			registerService: dojo.hitch(serviceRegistry, serviceRegistry.registerService),
-			connect: function(url, responseHandler) {
-				return new OpenAjax.hub.IframeContainer(_managedHub, url, {
-					Container : {
-						log : function(message) {
-							console.log(message);
-						},
-						onSecurityAlert : function(source, alertType) {
-							responseHandler("onSecurityAlert", alertType);
-						},
-						onConnect : function(container) {
-							_managedHub.subscribe("response[" + url + "]", responseHandler);
-						},
-						onDisconnect : function(container) {
-							_managedHub.unsubscribe("response[" + url + "]");
-						}
-					},
-					IframeContainer : {
-						parent : document.body,
-						iframeAttrs : {
-							style : {
-								display : "none"
-							}
-						},
-						uri : url,
-						tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/release/all/tunnel.html"
-//						tunnelURI : window.location.protocol + "//" + window.location.host + "/openajax/src/containers/iframe/tunnel.html"					
-					}
-				});
+			connect: function(url, handler) {
+
+				var iframe = document.createElement("iframe");
+		        iframe.id = url;
+		        iframe.name = url;
+		        iframe.style.display = "none";
+		        iframe.style.visibility = "hidden";
+		        iframe.src = url;
+		        document.body.appendChild(iframe);
+		        _channels[url] = {target: iframe.contentWindow, handler: handler};
 			},
-			disconnect: function(container) {
-				_managedHub.removeContainer(container);
+			disconnect: function(url) {
+				if (_channels[url]) {
+					document.removeChild(_channels[url].target.frameElement);
+					delete _channels[url];
+				}
+				
 			},
 			uninstallPlugin: function(plugin) {
 				_clear(plugin);
@@ -349,8 +315,10 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
 				_pluginEventTarget.dispatchEvent("pluginUpdated", plugin);
 			},
-			publish: function(topic, message) {
-				_managedHub.publish(topic, message);
+			postMessage: function(message, url) {
+				if (_channels[url]) {
+					_channels[url].target.postMessage(JSON.stringify(message), url);
+				}
 			}
 	};
 	
@@ -359,7 +327,12 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	};
 	
 	this.shutdown = function() {
-		_managedHub.disconnect();
+		for(var url in _channels) {
+			if (_channels.hasOwnProperty(url)) {
+				document.removeChild(_channels[url].target.frameElement);
+				delete _channels[url];
+			}
+		}
 	};
 	
 	this.installPlugin = function(url, opt_data) {

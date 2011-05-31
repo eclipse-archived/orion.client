@@ -14,7 +14,7 @@
 
 
 
-define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry'], function(dojo, mServiceregistry, mPluginregistry){
+define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/DeferredList' ], function(dojo, mServiceregistry, mPluginregistry){
 var orion = orion || {};
 
 orion.JSTestAdapter = (function() {
@@ -123,6 +123,9 @@ orion.JSTestAdapter = (function() {
 				errback(msg);
 			}(e));
 		};
+		
+		exports.testName = test;
+		
 		return exports;
 	};
 	
@@ -163,15 +166,12 @@ orion.JSTestAdapter = (function() {
 		var loader = testLoader(fileURI);
 		var testServiceRegistry = new mServiceregistry.ServiceRegistry();
 		var testPluginRegistry = new mPluginregistry.PluginRegistry(testServiceRegistry, {});
+		var deferred = new dojo.Deferred();
 		
 		/* Install the test plugin and get the list of tests it contains */
 		testPluginRegistry.installPlugin(fileURI).then(
 			function() {
 				return testServiceRegistry.getService("orion.test.runner");
-			}, 
-			function(e) {
-				console.log(fileURI + " : error installing plugin : " + e);
-				loader.error(e);
 			}
 		).then(
 			function(service) {
@@ -191,26 +191,50 @@ orion.JSTestAdapter = (function() {
 					testPluginRegistry.shutdown();
 					
 					loader.ready(testSuite);
+					deferred.resolve(loader);
 				});
 			}, 
 			function(e) {
-				console.log(fileURI + " : error gettting orion.test.runner service " + e);
+				console.log(fileURI + " : error getting orion.test.runner service " + e);
 				loader.error(e);
+				deferred.resolve( { 
+					testName: fileURI, 
+					loadMethod: function() { 
+						throw e; 
+					} 
+				});
+				return e;
 			}
 		);
 		
-		return loader.loadMethod;
+		return deferred.promise;
 	}
 
 	
 	function runTests(suiteName, testURIs) {
-		//This is a "loader" suite that is intended to block until the
-		//tests have been loaded and are ready to run
-		var suite = AsyncTestCase(suiteName);
+		var ready = new dojo.Deferred();
+
+		var loaders = [];
 		for (var i = 0; i < testURIs.length; i++) {
-			suite.prototype["testLoader " + testURIs[i]] = _loadTests(testURIs[i]);
+			loaders.push(_loadTests(testURIs[i]));
 		}
-		return suite;
+		
+		new dojo.DeferredList(loaders, false, false, true).then(function(results) {
+			var suite = AsyncTestCase(suiteName);
+			for(var i = 0; i < results.length; i++) {
+				var test = results[i][1];		
+				if (typeof test.testName !== "undefined") {
+					suite.prototype["testLoader " + test.testName] = test.loadMethod;
+				}
+			}
+
+			var testCaseInfo = new jstestdriver.TestCaseInfo(suiteName, suite, jstestdriver.TestCaseInfo.ASYNC_TYPE);		
+			jstestdriver.testRunner.testRunsConfiguration_.push(testCaseInfo.getDefaultTestRunConfiguration());
+
+			ready.resolve();
+		});
+		
+		return ready.promise;
 	}
 	return { runTests: runTests };
 }());

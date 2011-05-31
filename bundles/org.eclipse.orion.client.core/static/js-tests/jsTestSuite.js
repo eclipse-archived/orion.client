@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global orion require*/
+/*global orion require jstestdriver AsyncTestCase*/
 
 require({
 	baseUrl: '',
@@ -33,21 +33,16 @@ var BootstrapTest = AsyncTestCase("bootstrap");
 BootstrapTest.prototype.testBootstrap = function(queue) {
 	queue.call("Bootstrapping asyncTestWrapper ", function(callbacks) {
 		var noop = callbacks.noop();
-	
+		var errback = callbacks.addErrback("Failed bootstrapping tests.");
 		require(['orion/asyncTestWrapper'], function(orion) {
-			var loaderSuite = orion.JSTestAdapter.runTests("All Tests", [
-				"http://localhost:8080/js-tests/commonjs-unittesting/test.html",
-				"http://localhost:8080/js-tests/compare/test.html",
-				"http://localhost:8080/js-tests/serviceRegistry/test.html",
-				"http://localhost:8080/js-tests/preferences/test.html",
-				"http://localhost:8080/js-tests/pluginRegistry/test.html",
-				"http://localhost:8080/js-tests/testRunAsynch/test.html"
-			]);
-		
-			var testCaseInfo = new jstestdriver.TestCaseInfo("Bootstrap", loaderSuite, jstestdriver.TestCaseInfo.ASYNC_TYPE);		
-			jstestdriver.testRunner.testRunsConfiguration_.push(testCaseInfo.getDefaultTestRunConfiguration());
-			
-			noop();
+			orion.JSTestAdapter.runTests("All Tests", [
+				"/js-tests/commonjs-unittesting/test.html",
+				"/js-tests/compare/test.html",
+				"/js-tests/serviceRegistry/test.html",
+				"/js-tests/preferences/test.html",
+				"/js-tests/pluginRegistry/test.html",
+				"/js-tests/testRunAsynch/test.html"
+			]).then(noop, errback);
 		});
 	});
 };

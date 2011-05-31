@@ -124,13 +124,13 @@ orion.statusTypeMap = { "Missing":["/images/git-removed.gif", "Unstaged removal"
 					  };
 
 
-orion.GitStatusRenderer = (function() {
-	function GitStatusRenderer(serviceRegistry ,tableDivId , model) {
+orion.GitStatusContentRenderer = (function() {
+	function GitStatusContentRenderer(serviceRegistry ,tableDivId , model) {
 		this._registry = serviceRegistry;
 		this._tableParentDivId = tableDivId;
 		this._controller = model;
 	}
-	GitStatusRenderer.prototype = {
+	GitStatusContentRenderer.prototype = {
 		initTable: function () {
 			tableId = this._tableParentDivId + "_table";
 		  	var tableParentDomNode = dojo.byId( this._tableParentDivId);
@@ -222,7 +222,111 @@ orion.GitStatusRenderer = (function() {
 			}
 		}
 	};
-	return GitStatusRenderer;
+	return GitStatusContentRenderer;
+}());
+
+orion.GitStatusTableRenderer = (function() {
+	function GitStatusTableRenderer(serviceRegistry ,parentId , header , type) {
+		this._registry = serviceRegistry;
+		this._parentId = parentId;
+		this._header = header;
+		this._type = type;
+	}
+	GitStatusTableRenderer.prototype = {
+		render: function (renderSeparator) {
+			var headerTable = dojo.create("table", {width:"100%"},this._parentId);
+			var row = dojo.create("tr", null, headerTable);
+			var titleCol = dojo.create("td", {width:"50%" ,height:"100%"}, row, "last");
+			var title = dojo.create("h2", {innerHTML: this._header}, titleCol, "last");
+			
+			var actionCol = dojo.create("td", {width:"50%" ,height:"100%" ,nowrap :true}, row, "last");
+			var actionDiv = dojo.create("div", {style:"float: right;", align:"right"}, actionCol, "last");
+			this._cmdSpan = dojo.create("span", null, actionDiv, "last");
+			
+			dojo.create("hr", null,this._parentId);
+			
+			this._statusContentId = this._parentId + "_" + this._type;
+			dojo.create("div", {id:this._statusContentId}, this._parentId, "last");
+			if(	renderSeparator)
+				dojo.create("table", {width:"100%", height:"10px"},this._parentId);
+		},
+		
+		getStatusContentId: function(){
+			return this._statusContentId;
+		},
+		
+		renderAction:function(){
+			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
+			var self = this;
+			this._registry.getService("orion.page.command").then(function(service) {
+				service.renderCommands(self._cmdSpan, "object", {type: self._type}, this, "image", null);
+			});
+		}
+	};
+	return GitStatusTableRenderer;
+}());
+
+orion.GitCommitZoneRenderer = (function() {
+	function GitCommitZoneRenderer(serviceRegistry ,parentId) {
+		this._registry = serviceRegistry;
+		this._parentId = parentId;
+	}
+	GitCommitZoneRenderer.prototype = {
+		render: function (renderSeparator) {
+			var headerTable = dojo.create("table", {width:"100%"},this._parentId);
+			var row = dojo.create("tr", null, headerTable);
+			var titleCol = dojo.create("td", {nowrap :true}, row, "last");
+			var title = dojo.create("h2", {innerHTML: "Commit message:"}, titleCol, "last");
+			
+			var commitTable = dojo.create("table", null,this._parentId);
+			var commitRow = dojo.create("tr", null, commitTable);
+			var messageCol = dojo.create("td", {nowrap :true}, commitRow, "last");
+			dojo.create("textarea", {id:"commitMessage", COLS:40, ROWS:6}, messageCol, "last");
+			
+			var actionCol = dojo.create("td", {nowrap :true}, commitRow, "last");
+			var actionDiv = dojo.create("div", {style:"float: left;", align:"left"}, actionCol, "last");
+			var actionTable = dojo.create("table", null,actionDiv);
+			var actionRow1 = dojo.create("tr", null, actionTable);
+			var actionCol1 = dojo.create("td", {nowrap :true}, actionRow1, "last");
+			dojo.create("button", {id:"commit", innerHTML: "Commit"}, actionCol1, "last");
+			
+			dojo.create("tr", {width:"100%" ,height:"20px"}, actionTable);
+
+			var actionRow2 = dojo.create("tr", null, actionTable);
+			var actionCol2 = dojo.create("td", {nowrap :true}, actionRow2, "last");
+			dojo.create("input", {id:"amend", type:"checkbox" ,value: "Amend"}, actionCol2, "last");
+			actionCol2.appendChild(document.createTextNode(" Amend"));
+			if(	renderSeparator)
+				dojo.create("table", {width:"100%", height:"10px"},this._parentId);
+		}
+		
+	};
+	return GitCommitZoneRenderer;
+}());
+
+orion.InlineCompareRenderer = (function() {
+	function InlineCompareRenderer(serviceRegistry ,parentId) {
+		this._registry = serviceRegistry;
+		this._parentId = parentId;
+	}
+	InlineCompareRenderer.prototype = {
+		render: function () {
+			var titleTable = dojo.create("table" , {width:"100%"});
+			var row = dojo.create("tr", null, titleTable);
+			var titleCol = dojo.create("td", {nowrap :true}, row, "last");
+			var title = dojo.create("h2", {id :"fileNameInViewer" ,innerHTML: "Select a file on the left to compare..."}, titleCol, "last");
+			var titleDiv = new dijit.layout.ContentPane({class:"auxpane" ,region: "top", style:"width:100%;height:30px;overflow: hidden;"});
+			titleDiv.attr('content', titleTable);
+			
+			var viewerDiv = new dijit.layout.ContentPane({class:"mainpane" ,id : "inline-compare-viewer" ,splitter:false ,region: "center", style:"width:100%;height:100%;overflow: hidden;"});
+			
+			var parent = dijit.byId(this._parentId);
+			parent.addChild(titleDiv);
+			parent.addChild(viewerDiv);
+		}
+		
+	};
+	return InlineCompareRenderer;
 }());
 
 orion.GitStatusController = (function() {
@@ -231,8 +335,18 @@ orion.GitStatusController = (function() {
 		this._statusService = statusService;
 		this._model = new orion.GitStatusModel();
 		this._timerOn = false;
-		this._unstagedTableRenderer = new orion.GitStatusRenderer(serviceRegistry ,unstagedDivId , this);
-		this._stagedTableRenderer = new orion.GitStatusRenderer(serviceRegistry ,stagedDivId , this);
+		this._generateCommands();
+		
+		this._unstagedTableRenderer = new orion.GitStatusTableRenderer(serviceRegistry ,"statusZone" , "Unstaged" , "unstagedItems");
+		this._unstagedTableRenderer.render(true);
+		this._stagedTableRenderer = new orion.GitStatusTableRenderer(serviceRegistry ,"statusZone" , "Staged" , "stagedItems");
+		this._stagedTableRenderer.render();
+		this._commitZoneRenderer = new orion.GitCommitZoneRenderer(serviceRegistry ,"statusZone");
+		this._commitZoneRenderer.render();
+		(new orion.InlineCompareRenderer(serviceRegistry ,"viewerZone")).render();
+		
+		this._unstagedContentRenderer = new orion.GitStatusContentRenderer(serviceRegistry ,this._unstagedTableRenderer.getStatusContentId(), this);
+		this._stagedContentRenderer = new orion.GitStatusContentRenderer(serviceRegistry ,this._stagedTableRenderer.getStatusContentId() , this);
 		this._inlineCompareContainer = new mCompareContainer.InlineCompareContainer(new mDiffProvider.DiffProvider(serviceRegistry),serviceRegistry ,"inline-compare-viewer");
 		var self = this;
 		self._stagingConflict = false;
@@ -240,104 +354,6 @@ orion.GitStatusController = (function() {
 		commitBtn.onclick = function(evt){
 			self.commit();
 		};
-		var sbsCompareCommand = new mCommands.Command({
-			name: "Side by side compare",
-			tooltip: "Side by side compare",
-			image: "images/compare-sbs.gif",
-			id: "orion.sbsCompare",
-			hrefCallback: function(item) {
-				return self.openCompareEditor(item.object);
-			},
-			visibleWhen: function(item) {
-				return item.type === "fileItem";
-			}
-		});		
-
-		var checkoutCommand = new mCommands.Command({
-			name: "checkout",
-			tooltip: "checkout",
-			image: "/images/git-checkout.gif",
-			id: "orion.gitCheckout",
-			callback: function(item) {
-				self._statusService.setProgressMessage("Checking out...");
-				return self.checkout(item.object);
-			},
-			visibleWhen: function(item) {
-				return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
-			}
-		});		
-
-		var stageCommand = new mCommands.Command({
-			name: "stage",
-			tooltip: "stage",
-			image: "images/git-stage.gif",
-			id: "orion.gitStage",
-			callback: function(item) {
-				self._statusService.setProgressMessage("Staging...");
-				return self.stage(item.object.indexURI , item.object);
-			},
-			visibleWhen: function(item) {
-				return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
-			}
-		});		
-
-		var stageAllCommand = new mCommands.Command({
-			name: "stageAll",
-			tooltip: "Stage all",
-			image: "/images/git-stage-all.gif",
-			id: "orion.gitStageAll",
-			callback: function(item) {
-				self._statusService.setProgressMessage("Staging...");
-				return self.stageAll();
-			},
-			visibleWhen: function(item) {
-				return (item.type === "unstagedItems" && self.hasUnstaged);
-			}
-		});		
-
-		var unstageCommand = new mCommands.Command({
-			name: "unstage",
-			tooltip: "Unstage",
-			image: "/images/git-unstage.gif",
-			id: "orion.gitUnstage",
-			callback: function(item) {
-				self._statusService.setProgressMessage("Unstaging...");
-				return self.unstage(item.object);
-			},
-			visibleWhen: function(item) {
-				return (item.type === "fileItem" && self._model.isStaged(item.object.type));
-			}
-		});		
-
-		var unstageAllCommand = new mCommands.Command({
-			name: "unstageAll",
-			tooltip: "Unstage all",
-			image: "/images/git-unstage-all.gif",
-			id: "orion.gitUnstageAll",
-			callback: function(item) {
-				self._statusService.setProgressMessage("Unstaging...");
-				return self.unstageAll();
-			},
-			visibleWhen: function(item) {
-				return (item.type === "stagedItems" && self.hasStaged);
-			}
-		});		
-
-		this._registry.getService("orion.page.command").then(function(commandService) {
-			// register commands with object scope
-			commandService.addCommand(sbsCompareCommand, "object");	
-			commandService.addCommand(stageCommand, "object");	
-			commandService.addCommand(checkoutCommand, "object");	
-			commandService.addCommand(stageAllCommand, "object");	
-			commandService.addCommand(unstageAllCommand, "object");	
-			commandService.addCommand(unstageCommand, "object");	
-			commandService.registerCommandContribution("orion.gitStage", 1);	
-			commandService.registerCommandContribution("orion.gitCheckout", 2);	
-			commandService.registerCommandContribution("orion.gitUnstage", 3);	
-			commandService.registerCommandContribution("orion.sbsCompare", 4);	
-			commandService.registerCommandContribution("orion.gitStageAll", 5);	
-			commandService.registerCommandContribution("orion.gitUnstageAll", 6);	
-		});
 		
 	}
 	GitStatusController.prototype = {
@@ -345,9 +361,10 @@ orion.GitStatusController = (function() {
 			this._model.init(jsonData);
 			this.initViewer();
 			this._model.selectedFileId = null;
-			this._loadBlock(this._unstagedTableRenderer , this._model.interestedUnstagedGroup);
-			this._loadBlock(this._stagedTableRenderer , this._model.interestedStagedGroup);
-			this.initLocalCommands();
+			this._loadBlock(this._unstagedContentRenderer , this._model.interestedUnstagedGroup);
+			this._loadBlock(this._stagedContentRenderer , this._model.interestedStagedGroup);
+			this._unstagedTableRenderer.renderAction();
+			this._stagedTableRenderer.renderAction();
 			
 			var self = this;
 			var messageArea = document.getElementById("commitMessage");
@@ -375,18 +392,108 @@ orion.GitStatusController = (function() {
 			this._statusService.setProgressMessage("");
 		},
 		
-		initLocalCommands: function(){
-			var stageAllSpan = document.getElementById("stageAll");
-			var unstageAllSpan = document.getElementById("unstageAll");
-			dojo.place(document.createTextNode(""), stageAllSpan, "only");
-			dojo.place(document.createTextNode(""), unstageAllSpan, "only");
-			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(stageAllSpan, "object", {type: "unstagedItems"}, this, "image", null);
-				service.renderCommands(unstageAllSpan, "object", {type: "stagedItems"}, this, "image", null);
+		_generateCommands: function(){
+			var self = this;
+			var sbsCompareCommand = new mCommands.Command({
+				name: "Side by side compare",
+				tooltip: "Side by side compare",
+				image: "images/compare-sbs.gif",
+				id: "orion.sbsCompare",
+				hrefCallback: function(item) {
+					return self.openCompareEditor(item.object);
+				},
+				visibleWhen: function(item) {
+					return item.type === "fileItem";
+				}
+			});		
+
+			var checkoutCommand = new mCommands.Command({
+				name: "checkout",
+				tooltip: "checkout",
+				image: "/images/git-checkout.gif",
+				id: "orion.gitCheckout",
+				callback: function(item) {
+					self._statusService.setProgressMessage("Checking out...");
+					return self.checkout(item.object);
+				},
+				visibleWhen: function(item) {
+					return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
+				}
+			});		
+
+			var stageCommand = new mCommands.Command({
+				name: "stage",
+				tooltip: "stage",
+				image: "images/git-stage.gif",
+				id: "orion.gitStage",
+				callback: function(item) {
+					self._statusService.setProgressMessage("Staging...");
+					return self.stage(item.object.indexURI , item.object);
+				},
+				visibleWhen: function(item) {
+					return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
+				}
+			});		
+
+			var stageAllCommand = new mCommands.Command({
+				name: "stageAll",
+				tooltip: "Stage all",
+				image: "/images/git-stage-all.gif",
+				id: "orion.gitStageAll",
+				callback: function(item) {
+					self._statusService.setProgressMessage("Staging...");
+					return self.stageAll();
+				},
+				visibleWhen: function(item) {
+					return (item.type === "unstagedItems" && self.hasUnstaged);
+				}
+			});		
+
+			var unstageCommand = new mCommands.Command({
+				name: "unstage",
+				tooltip: "Unstage",
+				image: "/images/git-unstage.gif",
+				id: "orion.gitUnstage",
+				callback: function(item) {
+					self._statusService.setProgressMessage("Unstaging...");
+					return self.unstage(item.object);
+				},
+				visibleWhen: function(item) {
+					return (item.type === "fileItem" && self._model.isStaged(item.object.type));
+				}
+			});		
+
+			var unstageAllCommand = new mCommands.Command({
+				name: "unstageAll",
+				tooltip: "Unstage all",
+				image: "/images/git-unstage-all.gif",
+				id: "orion.gitUnstageAll",
+				callback: function(item) {
+					self._statusService.setProgressMessage("Unstaging...");
+					return self.unstageAll();
+				},
+				visibleWhen: function(item) {
+					return (item.type === "stagedItems" && self.hasStaged);
+				}
+			});		
+
+			this._registry.getService("orion.page.command").then(function(commandService) {
+				// register commands with object scope
+				commandService.addCommand(sbsCompareCommand, "object");	
+				commandService.addCommand(stageCommand, "object");	
+				commandService.addCommand(checkoutCommand, "object");	
+				commandService.addCommand(stageAllCommand, "object");	
+				commandService.addCommand(unstageAllCommand, "object");	
+				commandService.addCommand(unstageCommand, "object");	
+				commandService.registerCommandContribution("orion.gitStage", 1);	
+				commandService.registerCommandContribution("orion.gitCheckout", 2);	
+				commandService.registerCommandContribution("orion.gitUnstage", 3);	
+				commandService.registerCommandContribution("orion.sbsCompare", 4);	
+				commandService.registerCommandContribution("orion.gitStageAll", 5);	
+				commandService.registerCommandContribution("orion.gitUnstageAll", 6);	
 			});
-			
 		},
-		
+
 		startTimer: function(){
 			if(!this.timerOn){
 				this.timerOn = true;

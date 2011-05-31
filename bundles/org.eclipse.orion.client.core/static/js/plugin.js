@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global console OpenAjax */
+/*global console */
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -29,13 +29,15 @@ eclipse.ServiceProvider = function(serviceId, internalProvider) {
 
 eclipse.PluginProvider = function(metadata) {
 	var _metadata = metadata;
-	var _hubClient = null;
 	
 	var _services = [];
 	var _connected = false;
+	var _target = null;
 
 	function _publish(message) {
-		_hubClient.publish("response["+_hubClient.getClientID()+"]", message);
+		if (_target) {
+			_target.postMessage(JSON.stringify(message), "*");
+		}
 	}
 	
 	var _internalProvider = {
@@ -69,11 +71,17 @@ eclipse.PluginProvider = function(metadata) {
 		return {services: services, metadata: _metadata || {}};		
 	}
 	
-	function _handleRequest(topic, message) {
+	function _handleRequest(event) {
+		
+		if (event.source !== _target ) {
+			return;
+		}
+		var message = JSON.parse(event.data);
 		var serviceId = message.serviceId;
 		var service = _services[serviceId].implementation;
 		var method = service[message.method];
-		var response = {id: message.id, result: null, error: null};
+		
+		var response = {id: message.id, result: null, error: null};		
 		try {
 			var promiseOrResult = method.apply(service, message.params);
 			if(promiseOrResult && typeof promiseOrResult.then === "function"){
@@ -99,7 +107,7 @@ eclipse.PluginProvider = function(metadata) {
 			throw new Error("Cannot register. Plugin Provider is connected");
 		}
 		
-		var method;
+		var method = null;;
 		var methods = [];
 		for (method in implementation) {
 			if (typeof implementation[method] === 'function') {
@@ -113,12 +121,13 @@ eclipse.PluginProvider = function(metadata) {
 	};
 	
 	this.connect = function(callback, errback) {
-		if (_hubClient) {
+		if (_connected) {
 			if (callback) {
 				callback();
 			}
 			return;
 		}
+<<<<<<< HEAD
 		
 		_hubClient = new OpenAjax.hub.IframeHubClient({
 			HubClient: {
@@ -145,15 +154,33 @@ eclipse.PluginProvider = function(metadata) {
 				}
 			}
 		});
+=======
+
+		if (!window) {
+			_target = self;
+		} else if (window !== window.parent) {
+			_target = window.parent;
+		} else if (window.opener !== null) {
+			_target = window.opener;
+		} else {
+			errback("No valid plugin target");
+			return;
+		}
+		addEventListener("message", _handleRequest, false);
+		var message = {
+			method: "plugin",
+			params: [_getPluginData()]
+		};
+		_publish(message);
+		_connected = true;
+>>>>>>> e82393dbe79d9060d9b062ad510c8635aaf3935c
 	};
 	
 	this.disconnect = function() {
-		if (_hubClient) { 
-			var doomed = _hubClient; 
-			_hubClient = null;
-			doomed.disconnect( function() {
-				_connected = false;
-			});
+		if (_connected) { 
+			removeEventListener("message", _handleRequest);
+			_target = null;
+			_connected = false;
 		}
 	};
 };
