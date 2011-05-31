@@ -139,10 +139,9 @@ dojo.addOnLoad(function() {
 				console.error("HTTP status code: ", ioArgs.xhr.status);
 			}
 		}).then(function(commitLogJsonData){
-//			if (commitLogJsonData.RemoteLocation == null)
-//				navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
-//			else
-			
+			if (commitLogJsonData.RemoteLocation == null)
+				navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
+			else
 				dojo.xhrGet({
 					url : commitLogJsonData.RemoteLocation,
 					headers : {
