@@ -465,7 +465,7 @@ orion.styler.TextMateStyler = (function() {
 			// First time; make parse tree for whole buffer
 			var root = new this.ContainerNode(null, this.grammar._typedRule);
 			this._tree = root;
-			this.parse(this._tree, false, 0, last, 0, 0);
+			this.parse(this._tree, false, 0, last);
 		},
 		_onModelChanged: function(/**eclipse.ModelChangedEvent*/ e) {
 			var addedCharCount = e.addedCharCount,
@@ -494,7 +494,7 @@ orion.styler.TextMateStyler = (function() {
 //					console.debug("fd=" + fd + " rs=" + rs + " re=" + re);
 					// [rs, re] is the region we need to verify. If we find the structure of the tree
 					// has changed in that area, then we may need to reparse the rest of the file.
-					stoppedAt = this.parse(fd, true, rs, re, start, addedCharCount, removedCharCount);
+					stoppedAt = this.parse(fd, true, rs, re, addedCharCount, removedCharCount);
 				} else {
 					// FIXME: fd == null, we didn't hit any b/e nodes but may still have added a node
 					// need to parse [rs..re]?
@@ -539,24 +539,28 @@ orion.styler.TextMateStyler = (function() {
 		},
 		/**
 		 * Builds tree from some of the buffer content
-		 * @param {Boolean} repairing 
+		 *
+		 * TODO cleanup params
 		 * @param {BeginEndNode|ContainerNode} origNode The deepest node that overlaps [rs,rs], or the root.
+		 * @param {Boolean} repairing 
 		 * @param {Number} rs See _onModelChanged()
 		 * @param {Number} re The lineEnd of the line where the edit stops. This is our best-case stopping 
 		 * point. If we detect a structure change to tree, then we must continue past re, and in worst case until EOF.
+		 * @param {Number} [addedCharCount] Only used for repairing === true
+		 * @param {Number} [removedCharCount] Only used for repairing === true
 		 */
-		parse: function(origNode, repairing, rs, re, start, addedCharCount, removedCharCount) {
+		parse: function(origNode, repairing, rs, re, addedCharCount, removedCharCount) {
 			var model = this.editor.getModel();
 			var lastLineStart = model.getLineStart(model.getLineCount() - 1);
 			var eof = model.getCharCount();
-
-			var node = origNode;
+			var initialExpected = this.getInitialExpected(origNode, rs);
 			if (repairing) {
 				origNode.repaired = true;
 				origNode.endNeedsUpdate = true;
 			}
-			var expected = this.getInitialExpected(origNode, rs);
-
+			var expected = initialExpected;
+			var node = origNode;
+			var matchedChildOrEnd = false;
 			var pos = rs;
 			var lastResetPos = -1;
 			while (node && (!repairing || (pos < re))) {
@@ -572,6 +576,7 @@ orion.styler.TextMateStyler = (function() {
 				if (isSub) {
 					pos = this.afterMatch(match);
 					if (rule instanceof this.BeginEndRule) {
+						matchedChildOrEnd = true;
 						// Matched a child. Did we expect that?
 						if (repairing && rule === expected.rule && node === expected.parent) {
 							// Yes: matched expected child
@@ -580,11 +585,10 @@ orion.styler.TextMateStyler = (function() {
 							// Note: the 'end' position for this node will either be matched, or fixed up by us post-loop
 							foundChild.repaired = true;
 							foundChild.endNeedsUpdate = true;
-							node = foundChild; // go into it
+							node = foundChild; // descend
 							expected = this.getNextExpected(expected, "begin");
 						} else {
 							if (repairing) {
-							//console.debug("Found unexpected child " + rule.valueOf() + "; expected " + expected);
 								// No: matched unexpected child.
 								this.prune(node, expected);
 								repairing = false;
@@ -596,13 +600,12 @@ orion.styler.TextMateStyler = (function() {
 							node = subNode; // descend
 						}
 					} else {
-						// Matched a MatchRule; ignore and continue. If the user just modified some text
-						// that gets picked up by a MatchRule, it doesn't change the tree structure.
-						// Only an unexpected child or end node implies a tree-structure change.
+						// Matched a MatchRule; no changes to tree required
 					}
 				} else if (isEnd || pos === eof) {
 					if (node instanceof this.BeginEndNode) {
 						if (match) {
+							matchedChildOrEnd = true;
 							node.setEnd(match);
 							pos = this.afterMatch(match);
 							// Matched node's end. Did we expect that?
@@ -613,7 +616,6 @@ orion.styler.TextMateStyler = (function() {
 								expected = this.getNextExpected(expected, "end");
 							} else {
 								if (repairing) {
-								//console.debug("Found unexpected end of " + node + "; expected " + expected);
 									// No: found an unexpected end
 									this.prune(node, expected);
 									repairing = false;
@@ -626,43 +628,51 @@ orion.styler.TextMateStyler = (function() {
 					}
 					node = node.parent; // ascend
 				}
+				
+				if (repairing && pos >= re && !matchedChildOrEnd) {
+					// Reached re without matching any begin/end => initialExpected was removed => repair fail
+					this.prune(origNode, initialExpected);
+					repairing = false;
+				}
 			} // end loop
 			
+			this.cleanup(repairing, origNode, rs, re, eof, addedCharCount, removedCharCount);
+			return pos; // where we stopped repairing/reparsing
+		},
+		/** Helper for parse() */
+		cleanup: function(repairing, origNode, rs, re, eof, addedCharCount, removedCharCount) {
+			var i, node, maybeRepairedNodes;
 			if (repairing) {
 				// The repair succeeded, so update stale begin/end indices by simple translation.
 				var delta = addedCharCount - removedCharCount;
-				
 				// A repaired node's end can't exceed re, but it may exceed re-delta+1.
-				// TODO: find a way to guarantee disjoint intervals for repaired vs unrepaired, then
-				// stop using the 'repaired' flag.
+				// TODO: find a way to guarantee disjoint intervals for repaired vs unrepaired, then stop using flag
 				var maybeUnrepairedNodes = this.getIntersecting(re-delta+1, eof);
-				var maybeRepairedNodes = this.getIntersecting(rs, re);
-				
-				// Handle the unrepaired nodes. They are those intersecting [re-delta+1, eof] that don't have
-				// the 'repaired' flag.
-				for (var i=0; i < maybeUnrepairedNodes.length; i++) {
+				maybeRepairedNodes = this.getIntersecting(rs, re);
+				// Handle unrepaired nodes. They are those intersecting [re-delta+1, eof] that don't have the flag
+				for (i=0; i < maybeUnrepairedNodes.length; i++) {
 					node = maybeUnrepairedNodes[i];
 					if (!node.repaired && node instanceof this.BeginEndNode) {
-//						console.debug("shiftEnd " + node + " by " + delta);
-//						console.debug("shiftStart " + node + " by " + delta);
 						node.shiftEnd(delta);
 						node.shiftStart(delta);
 					}
 				}
-				
-				// Translate the 'end' index of any repaired node whose 'end' index lies beyond re, and so was
-				// not matched during repair
+				// Translate 'end' index of repaired node whose 'end' was not matched in loop (>= re)
 				for (i=0; i < maybeRepairedNodes.length; i++) {
 					node = maybeRepairedNodes[i];
 					if (node.repaired && node.endNeedsUpdate) {
 						node.shiftEnd(delta);
 					}
-					// Clean up after repair()
 					delete node.endNeedsUpdate;
-					delete node.repaired;
+					delete origNode.repaired;
+				}
+			} else {
+				// Clean up after ourself
+				maybeRepairedNodes = this.getIntersecting(rs, re);
+				for (i=0; i < maybeRepairedNodes.length; i++) {
+					delete maybeRepairedNodes[i].repaired;
 				}
 			}
-			return pos; // where we stopped repairing/reparsing
 		},
 		/**
 		 * @param model {eclipse.TextModel}
@@ -677,7 +687,6 @@ orion.styler.TextMateStyler = (function() {
 		 */
 		getNextMatch: function(model, node, pos, matchRulesOnly) {
 			var lineIndex = model.getLineAtOffset(pos);
-			//var lineStart = model.getLineStart(lineIndex);
 			var lineEnd = model.getLineEnd(lineIndex);
 			var line = model.getText(pos, lineEnd);
 
@@ -744,7 +753,8 @@ orion.styler.TextMateStyler = (function() {
 					child = node.children[i]; // BeginEndNode
 					if (child.start >= rs) {
 						return child;
-					}				}
+					}
+				}
 			} else if (node instanceof this.BeginEndNode) {
 				if (node.endMatch) {
 					// Which comes next after rs: our nodeEnd or one of our children?
