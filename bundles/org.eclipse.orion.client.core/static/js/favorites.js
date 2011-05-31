@@ -11,10 +11,24 @@
 /*global dijit dojo window document eclipse:true setTimeout */
 /*jslint forin:true*/
 
+
 define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands){
 
-var eclipse = eclipse || {};
-eclipse.FavoritesService = (function() {
+
+/**
+* @namespace orion
+* @type Object
+*/
+
+/**
+* @namespace orion.core
+* @type Object
+*/
+var exports;
+/**
+ * @name orion.core.favorite
+ */
+exports.favorite= (function() {
 	function FavoritesService(options) {
 		this._favorites = [];
 		this._searches = [];
@@ -35,7 +49,9 @@ eclipse.FavoritesService = (function() {
 		},
 	
 		/**
-		 * @param items One or more file or directory objects
+		 * Adds an item or array of items to the favorites list.
+    	 * @param items One or more file or directory objects
+    	 * @name orion.core.favorite#makeFavorites
 		 */
 		makeFavorites: function(items) {
 			items = dojo.isArray(items) ? items : [items];
@@ -165,7 +181,7 @@ eclipse.FavoritesService = (function() {
 	return FavoritesService;
 }());
 
-eclipse.Favorites = (function() {
+exports.Favorites = (function() {
 	function Favorites(options) {
 		var parent = options.parent;
 		if (typeof(parent) === "string") {
@@ -392,5 +408,5 @@ eclipse.Favorites = (function() {
 	};
 	return Favorites;
 })();
-return eclipse;
+return exports;
 });

@@ -13,8 +13,11 @@
 
 define(['dojo', 'orion/treetable'], function(dojo, mTreeTable){
 
-
+/**
+ * @namespace The global container for Orion APIs.
+ */ 
 var eclipse = eclipse || {};
+
 eclipse.Explorer = (function() {
 	/**
 	 * @name eclipse.Explorer
@@ -83,7 +86,6 @@ eclipse.Explorer = (function() {
 	return Explorer;
 }());
 
-eclipse = eclipse || {};
 eclipse.ExplorerModel = (function() {
 	/**
 	 * @name eclipse.ExplorerModel
@@ -163,7 +165,6 @@ eclipse.ExplorerFlatModel = (function() {
 }());
 
 /********* Rendering json items into columns in the tree **************/
-eclipse = eclipse || {};
 eclipse.ExplorerRenderer = (function() {
 	function ExplorerRenderer (options, explorer) {
 		this.explorer = explorer;
@@ -471,8 +472,6 @@ eclipse.SelectionRenderer = (function(){
 	 */
 	SelectionRenderer.prototype.getCellHeaderElement = function(col_no){};
 
-
-
 	/**
 	 * Override to return a dom element containing table cell, preferable <code>td</td>
 	 * @param col_no number of column
@@ -485,4 +484,3 @@ eclipse.SelectionRenderer = (function(){
 }());
 return eclipse;
 });
-

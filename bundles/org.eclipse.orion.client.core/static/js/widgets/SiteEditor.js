@@ -32,7 +32,7 @@ dojo.require("dojox.grid.cells");
 /**
  * Visualizes the Mappings array of a SiteConfiguration as a data grid.
  */
-dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], {
+dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], /** @lends widgets.MappingsGrid */ {
 	
 	/**
 	 * @type {Array} The model object being edited by this grid.

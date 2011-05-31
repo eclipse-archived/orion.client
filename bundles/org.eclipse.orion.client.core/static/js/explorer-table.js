@@ -13,6 +13,9 @@
 
 define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/fileCommands', 'dojo/number'], function(dojo, mUtil, mExplorer, mBreadcrumbs, mFileCommands){
 
+/**
+ * @namespace The global container for eclipse APIs.
+ */ 
 var eclipse = eclipse || {};
 eclipse.FileExplorer = (function() {
 	/**
@@ -151,7 +154,6 @@ eclipse.FileExplorer = (function() {
 	return FileExplorer;
 }());
 
-eclipse = eclipse || {};
 eclipse.Model = (function() {
 	/**
 	 * @name eclipse.Model
@@ -192,7 +194,6 @@ eclipse.Model = (function() {
 }());
 
 /********* Rendering json items into columns in the tree **************/
-eclipse = eclipse || {};
 eclipse.FileRenderer = (function() {
 	function FileRenderer (options, explorer, commandService) {
 		this.explorer = explorer;

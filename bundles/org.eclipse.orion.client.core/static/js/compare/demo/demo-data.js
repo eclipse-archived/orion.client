@@ -8,6 +8,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/**
+ * @private Don't document this
+ */
 var demoData = [
     /* Test data format ******************************************
     [ "",                 //string of input file 
