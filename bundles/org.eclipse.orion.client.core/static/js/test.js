@@ -7,8 +7,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-var orion = orion || {};
-orion.Test = (function(assert) {
+/*global define console*/
+define(['dojo', 'orion/assert'], function(dojo, assert) {
 
 	var Test = function() {	
 		var exports = {};
@@ -269,4 +269,4 @@ orion.Test = (function(assert) {
 		return exports;
 	};
 	return Test();
-}(orion.Assert));
+});

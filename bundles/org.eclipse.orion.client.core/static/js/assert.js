@@ -7,11 +7,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/**
- * @namespace The global container for Orion APIs.
- */ 
 var orion = orion || {};
-
 orion.Assert = (function() {
 	var exports = {};
 	function AssertionError(options) {

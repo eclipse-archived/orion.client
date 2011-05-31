@@ -14,21 +14,8 @@
 
 define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands){
 
-
-/**
-* @namespace orion
-* @type Object
-*/
-
-/**
-* @namespace orion.core
-* @type Object
-*/
-var exports;
-/**
- * @name orion.core.favorite
- */
-exports.favorite= (function() {
+var exports = {};
+exports.FavoritesService= (function() {
 	function FavoritesService(options) {
 		this._favorites = [];
 		this._searches = [];
@@ -50,8 +37,7 @@ exports.favorite= (function() {
 	
 		/**
 		 * Adds an item or array of items to the favorites list.
-    	 * @param items One or more file or directory objects
-    	 * @name orion.core.favorite#makeFavorites
+		 * @param items One or more file or directory objects
 		 */
 		makeFavorites: function(items) {
 			items = dojo.isArray(items) ? items : [items];
@@ -407,6 +393,6 @@ exports.Favorites = (function() {
 		}
 	};
 	return Favorites;
-})();
+}());
 return exports;
 });

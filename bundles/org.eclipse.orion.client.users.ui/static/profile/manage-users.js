@@ -7,21 +7,32 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 'orion/selection',
+	        'orion/searchClient', 'orion/globalCommands', 'js/UsersList', 'js/usersUtil',
+	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'widgets/NewUserDialog'], 
+			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSelection, mSearchClient, mGlobalCommands, mUsersList, mUsersUtil) {
+
 dojo.addOnLoad(function() {
-
-	var serviceRegistry = new eclipse.ServiceRegistry();
-	var usersService = new eclipse.UsersService(serviceRegistry);
-	var commandService = new eclipse.CommandService({serviceRegistry: serviceRegistry});
-	var prefsService = new eclipse.PreferencesService(serviceRegistry, "/prefs/user");
-	var searcher = new eclipse.Searcher({serviceRegistry: serviceRegistry});
-	var selection = new orion.Selection(serviceRegistry);
-
-	eclipse.globalCommandUtils.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, usersList, usersList);
-	eclipse.globalCommandUtils.generateDomCommandsInBanner(commandService, usersList);
-
-	var usersList = new eclipse.UsersList(serviceRegistry, selection, searcher, "usersList", "pageActions", "selectionTools");
 	
-	var createUserCommand = new eclipse.Command({
+	dojo.parser.parse();
+
+	var serviceRegistry = new mServiceregistry.ServiceRegistry();
+	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
+	dojo.addOnUnload(function() {
+		pluginRegistry.shutdown();
+	});
+	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+	var prefsService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+	var selection = new mSelection.Selection(serviceRegistry);
+
+	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, usersList, usersList);
+	mGlobalCommands.generateDomCommandsInBanner(commandService, usersList);
+
+	var usersList = new mUsersList.UsersList(serviceRegistry, selection, searcher, "usersList", "pageActions", "selectionTools");
+	
+	var createUserCommand = new mCommands.Command({
 		name: "Create User",
 		image: "/profile/images/create_user.gif",
 		id: "eclipse.createUser",
@@ -42,7 +53,7 @@ dojo.addOnLoad(function() {
 	
 	commandService.addCommand(createUserCommand, "dom");
 		
-	var deleteCommand = new eclipse.Command({
+	var deleteCommand = new mCommands.Command({
 		name: "Delete User",
 		image: "/images/remove.gif",
 		id: "eclipse.deleteUser",
@@ -102,38 +113,7 @@ dojo.addOnLoad(function() {
 	
 
 	usersList.loadUsers();
-	eclipse.usersCommandUtils.updateNavTools(serviceRegistry, usersList, "pageActions", "selectionTools", {});	
+	mUsersUtil.updateNavTools(serviceRegistry, usersList, "pageActions", "selectionTools", {});	
 });
 
-eclipse.usersCommandUtils = eclipse.usersCommandUtils || {};
-eclipse.usersCommandUtils.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
-	var toolbar = dojo.byId(toolbarId);
-	if (toolbar) {
-		dojo.empty(toolbar);
-	} else {
-		throw "could not find toolbar " + toolbarId;
-	}
-	registry.getService("orion.page.command").then(dojo.hitch(explorer, function(service) {
-		service.renderCommands(toolbar, "dom", item, explorer, "image");
-		if (selectionToolbarId) {
-			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			service.renderCommands(selectionTools, "dom", null, explorer, "image");
-		}
-	}));
-	
-	// Stuff we do only the first time
-	if (!eclipse.doOnce) {
-		eclipse.doOnce = true;
-		registry.getService("orion.page.selection").then(function(service) {
-			service.addEventListener("selectionChanged", function(singleSelection, selections) {
-				var selectionTools = dojo.byId(selectionToolbarId);
-				if (selectionTools) {
-					dojo.empty(selectionTools);
-					registry.getService("orion.page.command").then(function(commandService) {
-						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
-					});
-				}
-			});
-		});
-	}
-};
+});

@@ -190,7 +190,6 @@ orion.GitStatusRenderer = (function() {
 						if(selected)
 							dojo.toggleClass(selected, "fileNameSelectedRow", false);
 					}
-					self._controller.cursorWait(nameSpan , true);
 					dojo.toggleClass(nameSpan, "fileNameSelectedRow", true);
 					self._controller._model.selectedFileId = nameSpan.id;
 					self._controller.loadDiffContent(itemModel);
@@ -221,37 +220,15 @@ orion.GitStatusRenderer = (function() {
 			} else {
 				this._controller.hasUnstaged = true;
 			}
-			/*
-			//render the side by side viewer icon
-			sbsViewerCol = document.createElement('td');
-			row.appendChild(sbsViewerCol);
-			this._controller.createImgButton(false ,sbsViewerCol , "/images/compare-sbs.gif", "Side by side compare",
-					function(evt) {
-						self._controller.openCompareEditor(itemModel);
-					} );
-			
-			//render the stage / unstage action  icon
-			if(this._controller._model.isStaged(itemModel.type)){
-				this._controller.hasStaged = true;
-				return;
-			} else {
-				this._controller.hasUnstaged = true;
-			}
-			stageCol = document.createElement('td');
-			row.appendChild(stageCol);
-			this._controller.createImgButton(true ,stageCol , orion.statusTypeMap[itemModel.type][2], orion.statusTypeMap[itemModel.type][3],
-					function(evt) {
-						self._controller.doAction(itemModel);
-					} );
-			*/
 		}
 	};
 	return GitStatusRenderer;
 }());
 
 orion.GitStatusController = (function() {
-	function GitStatusController(serviceRegistry , unstagedDivId , stagedDivId) {
+	function GitStatusController(serviceRegistry , statusService, unstagedDivId , stagedDivId) {
 		this._registry = serviceRegistry;
+		this._statusService = statusService;
 		this._model = new orion.GitStatusModel();
 		this._timerOn = false;
 		this._unstagedTableRenderer = new orion.GitStatusRenderer(serviceRegistry ,unstagedDivId , this);
@@ -276,26 +253,28 @@ orion.GitStatusController = (function() {
 			}
 		});		
 
-		var stageCommand = new mCommands.Command({
-			name: "stage",
-			tooltip: "stage",
-			image: "images/git-stage.gif",
-			id: "orion.gitStage",
-			callback: function(item) {
-				return self.stage(item.object.indexURI , item.object);
-			},
-			visibleWhen: function(item) {
-				return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
-			}
-		});		
-
 		var checkoutCommand = new mCommands.Command({
 			name: "checkout",
 			tooltip: "checkout",
 			image: "/images/git-checkout.gif",
 			id: "orion.gitCheckout",
 			callback: function(item) {
+				self._statusService.setProgressMessage("Checking out...");
 				return self.checkout(item.object);
+			},
+			visibleWhen: function(item) {
+				return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
+			}
+		});		
+
+		var stageCommand = new mCommands.Command({
+			name: "stage",
+			tooltip: "stage",
+			image: "images/git-stage.gif",
+			id: "orion.gitStage",
+			callback: function(item) {
+				self._statusService.setProgressMessage("Staging...");
+				return self.stage(item.object.indexURI , item.object);
 			},
 			visibleWhen: function(item) {
 				return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
@@ -308,10 +287,25 @@ orion.GitStatusController = (function() {
 			image: "/images/git-stage-all.gif",
 			id: "orion.gitStageAll",
 			callback: function(item) {
+				self._statusService.setProgressMessage("Staging...");
 				return self.stageAll();
 			},
 			visibleWhen: function(item) {
 				return (item.type === "unstagedItems" && self.hasUnstaged);
+			}
+		});		
+
+		var unstageCommand = new mCommands.Command({
+			name: "unstage",
+			tooltip: "Unstage",
+			image: "/images/git-unstage.gif",
+			id: "orion.gitUnstage",
+			callback: function(item) {
+				self._statusService.setProgressMessage("Unstaging...");
+				return self.unstage(item.object);
+			},
+			visibleWhen: function(item) {
+				return (item.type === "fileItem" && self._model.isStaged(item.object.type));
 			}
 		});		
 
@@ -321,6 +315,7 @@ orion.GitStatusController = (function() {
 			image: "/images/git-unstage-all.gif",
 			id: "orion.gitUnstageAll",
 			callback: function(item) {
+				self._statusService.setProgressMessage("Unstaging...");
 				return self.unstageAll();
 			},
 			visibleWhen: function(item) {
@@ -335,11 +330,13 @@ orion.GitStatusController = (function() {
 			commandService.addCommand(checkoutCommand, "object");	
 			commandService.addCommand(stageAllCommand, "object");	
 			commandService.addCommand(unstageAllCommand, "object");	
+			commandService.addCommand(unstageCommand, "object");	
 			commandService.registerCommandContribution("orion.gitStage", 1);	
 			commandService.registerCommandContribution("orion.gitCheckout", 2);	
-			commandService.registerCommandContribution("orion.sbsCompare", 3);	
-			commandService.registerCommandContribution("orion.gitStageAll", 4);	
-			commandService.registerCommandContribution("orion.gitUnstageAll", 5);	
+			commandService.registerCommandContribution("orion.gitUnstage", 3);	
+			commandService.registerCommandContribution("orion.sbsCompare", 4);	
+			commandService.registerCommandContribution("orion.gitStageAll", 5);	
+			commandService.registerCommandContribution("orion.gitUnstageAll", 6);	
 		});
 		
 	}
@@ -356,13 +353,9 @@ orion.GitStatusController = (function() {
 			var messageArea = document.getElementById("commitMessage");
 			messageArea.disabled = !this.hasStaged;
 			
-			//var stageAllBtn = document.getElementById("stageAll");
-			//var unstageAllBtn = document.getElementById("unstageAll");
 			var commitBtn = document.getElementById("commit");
 			var amendBtn = document.getElementById("amend");
 			
-			//this.modifyImageButton(true ,stageAllBtn , "Stage all", function(evt){self.stageAll();} , !this.hasUnstaged);
-			//this.modifyImageButton(true ,unstageAllBtn , "Unstage all", function(evt){self.unstageAll();} , !this.hasStaged);
 			commitBtn.disabled = !this.hasStaged;
 			amendBtn.disabled = !this.hasStaged;
 			amendBtn.checked = false;
@@ -371,8 +364,6 @@ orion.GitStatusController = (function() {
 				this.startTimer();
 			else 
 				this.stopTimer();
-			//this.modifyImageButton(true ,commitBtn , "Commit staged files", function(evt){self.commit(messageArea.value , amendBtn.checked);} , !this.hasStaged , function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
-			//this.modifyImageButton(false ,amendBtn , "Amend last commit", function(evt){} , !this.hasStaged, function(){return (messageArea.value === undefined || messageArea.value === null || messageArea.value === "");});
 			
 			if(this._stagingConflict){
 				this._stagingConflict = false;
@@ -381,7 +372,7 @@ orion.GitStatusController = (function() {
 				}
 			}
 			
-			this.cursorClear();
+			this._statusService.setProgressMessage("");
 		},
 		
 		initLocalCommands: function(){
@@ -419,23 +410,6 @@ orion.GitStatusController = (function() {
 			}), 150);
 		},
 		
-		cursorWait: function(currentDiv , remember){
-			this.loading = true;
-			document.body.style.cursor = 'wait';
-			if(currentDiv)
-				currentDiv.style.cursor = 'wait';
-			if(remember)
-				this.currentDiv = currentDiv;
-		},
-		
-		cursorClear: function() {
-			this.loading = false;
-			document.body.style.cursor = 'default';
-			if(this.currentDiv)
-				this.currentDiv.style.cursor = 'default';
-			this.currentDiv = undefined;
-		},
-		
 		initViewer: function () {
 		  	this._inlineCompareContainer.destroyEditor();
 			this._model.selectedItem = null;
@@ -445,21 +419,20 @@ orion.GitStatusController = (function() {
 			dojo.style("fileNameInViewer", "color", "#6d6d6d");
 		},
 
-		createImgButton: function(enableWaitCursor ,imgParentDiv , imgSrc, imgTitle,onClick){
+		_createImgButton: function(enableWaitCursor ,imgParentDiv , imgSrc, imgTitle,onClick){
 			var imgBtn = document.createElement('img');
 			imgBtn.src = imgSrc;
 			imgParentDiv.appendChild(imgBtn);
 			this.modifyImageButton(enableWaitCursor ,imgBtn , imgTitle,onClick);
 		},
 		
-		modifyImageButton: function(enableWaitCursor , imgBtnDiv , imgTitle, onClick , disabled , onHoverCallBack){
+		_modifyImageButton: function(enableWaitCursor , imgBtnDiv , imgTitle, onClick , disabled , onHoverCallBack){
 			var self = this;
 			if(disabled === undefined || !disabled){
 				imgBtnDiv.title= imgTitle;
 				
 				dojo.style(imgBtnDiv, "opacity", "0.4");
 				dojo.connect(imgBtnDiv, "onmouseover", imgBtnDiv, function() {
-					//console.log( "onmouseover : " + self.loading );
 					var disableOnHover = false;
 					if(onHoverCallBack)
 						disableOnHover = onHoverCallBack();
@@ -470,7 +443,6 @@ orion.GitStatusController = (function() {
 						dojo.style(imgBtnDiv, "opacity", "1");
 				});
 				dojo.connect(imgBtnDiv, "onmouseout", imgBtnDiv , function() {
-					//console.log( "onmouseout : " + self.loading );
 					imgBtnDiv.style.cursor = self.loading ? 'wait' : "default";
 					dojo.style(imgBtnDiv, "opacity", "0.4");
 				});
@@ -479,7 +451,7 @@ orion.GitStatusController = (function() {
 					if(onHoverCallBack)
 						disableOnHover = onHoverCallBack();
 					if(enableWaitCursor && !disableOnHover)
-						self.cursorWait(imgBtnDiv , true) ;
+						//self.cursorWait(imgBtnDiv , true) ;
 					if(!disableOnHover)
 						onClick(evt);
 				};
@@ -512,6 +484,7 @@ orion.GitStatusController = (function() {
 						retValue.push({name:groupData[j].Name, 
 											type:renderType, 
 											location:groupData[j].Location,
+											path:groupData[j].Path,
 											commitURI:groupData[j].Git.CommitLocation,
 											indexURI:groupData[j].Git.IndexLocation,
 											diffURI:groupData[j].Git.DiffLocation,
@@ -540,7 +513,7 @@ orion.GitStatusController = (function() {
 		},
 		
 		loadDiffContent: function(itemModel){
-			this.cursorWait();
+			this._statusService.setProgressMessage("Loading diff...");
 			var self = this;
 			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) " : "local VS index ) " ;
 			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS ;
@@ -550,7 +523,7 @@ orion.GitStatusController = (function() {
 					                                function(newFile , OldFile){					
 														dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
 														dojo.style("fileNameInViewer", "color", "#6d6d6d");
-														self.cursorClear();
+														self._statusService.setProgressMessage("");
 													},
 													function(response, ioArgs){
 														self.handleServerErrors(response , ioArgs);
@@ -572,23 +545,19 @@ orion.GitStatusController = (function() {
 			//window.open(url,"");
 		},
 		
-		doAction: function(itemModel){
-			if(this._model.isStaged(itemModel.type))
-				this.unstage(itemModel.indexURI);
-			else
-				this.stage(itemModel.indexURI , itemModel);
-		},
-		
 		handleServerErrors: function(errorResponse , ioArgs){
-			var message = typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; 
-			dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
-			dojo.style("fileNameInViewer", "color", "red");
-			this.cursorClear();
+			var display = [];
+			display.Severity = "Error";
+			display.HTML = false;
+			display.Message =  typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;//dojo.fromJson(ioArgs.xhr.responseText).DetailedMessage;
+			
+			this._statusService.setProgressResult(display);
 		},
 		
-		getGitStatus: function(url){
+		getGitStatus: function(url , initializing){
 			this._url = url;
-			this.cursorWait();
+			if(initializing)
+				this._statusService.setProgressMessage("Loading status...");
 			var self = this;
 			self._registry.getService("orion.git.provider").then(
 				function(service) {
@@ -627,17 +596,9 @@ orion.GitStatusController = (function() {
 		checkout: function(itemModel){
 			var self = this;
 			var location = this._model.items.CloneLocation;
-			/*
-			if(itemModel && itemModel.conflicting){
-				self._stagingConflict = true;
-				self._stagingName = itemModel.name;
-			}
-			else
-				self._stagingConflict = false;
-			*/
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
-						service.checkoutPath(location, [itemModel.location],
+						service.checkoutPath(location, [itemModel.path],
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
@@ -652,11 +613,11 @@ orion.GitStatusController = (function() {
 			this.stage(this._model.items.IndexLocation);
 		},
 		
-		unstage: function(location){
+		unstage: function(itemModel){
 			var self = this;
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
-						service.unstage(location, 
+						service.unstage(self._model.items.IndexLocation, [itemModel.path],
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
@@ -668,11 +629,23 @@ orion.GitStatusController = (function() {
 		},
 		
 		unstageAll: function(){
-			this.unstage(this._model.items.IndexLocation);
+			var self = this;
+			self._registry.getService("orion.git.provider").then(
+					function(service) {
+						service.unstageAll(self._model.items.IndexLocation, 
+											 function(jsonData, secondArg) {
+											 	 self.getGitStatus(self._url);
+											 },
+											 function(response, ioArgs){
+												 self.handleServerErrors(response, ioArgs);
+											 }
+						);
+					});
 		},
 		
 		commitAll: function(location , message , body){
 			var self = this;
+			self._statusService.setProgressMessage("Committing...");
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
 						service.commitAll(location,  message , body,

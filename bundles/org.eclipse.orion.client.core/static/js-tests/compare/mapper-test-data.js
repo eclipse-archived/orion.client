@@ -7,8 +7,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+define([], function() {
 
-var mapperTestCases = [
+var exports = {};
+exports.mapperTestCases = [
     /* Test data format ******************************************
     [ "",                 //string of input file 
       "",                 //string of diff 
@@ -1269,3 +1271,6 @@ var mapperTestCases = [
 	  //description  
 	  "input file has new line at end --> remove line 1,2 ;change 4,5 ; add 6-1,6-2"]
 ];
+
+return exports;	
+});

@@ -24,44 +24,61 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog, widgets._OrionDi
 	constructor : function() {
 		this.inherited(arguments);
 		this.options = arguments[0] || {};
-		this.createProject = true;
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = "Clone Git Repository";
+		this.title = this.options.title ? this.options.title : "Clone Git Repository";
 		this.gitUrlLabelText = "Repository URL:";
 		this.gitPathLabelText = "Existing directory:";
 		this.gitNameLabelText = "New project:";
+		this.advancedShown = false;
 	},
 	postCreate : function(){
 		this.inherited(arguments);
-		dojo.connect(this.existingDirectoryLink, "onclick", null, dojo.hitch(this, this.showExistingFolder));
-		dojo.connect(this.newProjectLink, "onclick", null, dojo.hitch(this, this.showNewProject));
-		dojo.connect(this.openDirectoryPickerLink, "onclick", null, dojo.hitch(this, this.openDirectoryPickerDialog));
+		if(this.options.advancedOnly){
+			this.Basic.style.display="none";
+			this.Advanced.style.display="";
+			this.gitName.focus();
+		}
+		
+		dojo.connect(this.changeGitPath, "onclick", null, dojo.hitch(this, this.openDirectoryPickerDialog));
+		dojo.connect(this.isExistingProject, "onchange", null, dojo.hitch(this, this.showExistingFolder));
+		dojo.connect(this.gitName, "onfocus", null, dojo.hitch(this, this.showNewProject));
+		dojo.connect(this.advancedLink, "onclick", null, dojo.hitch(this, this.showAdvanced));
+		dojo.connect(this.advancedLinkHide, "onclick", null, dojo.hitch(this, this.hideAdvanced));
 	},
 	execute: function() {
 		this.options.func(
-				this.gitUrl.value,
-				this.createProject ? undefined : this.gitPath.value,
-				this.createProject ? this.gitName.value : undefined
+				this.options.advancedOnly ? undefined : this.gitUrl.value,
+				(this.advancedShown && this.isNewProject.checked) ? undefined : this.gitPath.value,
+				(this.advancedShown && !this.isNewProject.checked) ? undefined : this.gitName.value
 				);
 	},
+	showAdvanced: function(){
+		this.advancedShown = true;
+		this.Advanced.style.display="";
+		this.advancedLink.style.display="none";
+		this.advancedLinkHide.style.display="";
+	},
+	hideAdvanced: function(){
+		this.advancedShown = false;
+		this.Advanced.style.display="none";
+		this.advancedLink.style.display="";
+		this.advancedLinkHide.style.display="none";
+		
+	},
 	showExistingFolder: function(){
-		this.createProject = false;
-		this.newProjectSection.style.display = "none";
-		this.newProjectSection_1.style.display = "none";
-		this.existingProjectSection.style.display = "table-row";
-		this.existingProjectSection_1.style.display = "table-row";
-		this.openDirectoryPickerDialog();
+		if(this.isExistingProject.checked){
+			this.openDirectoryPickerDialog();
+		}else{
+			this.gitName.focus();
+		}
 	},
 	showNewProject: function(){
-		this.createProject = true;
-		this.newProjectSection.style.display = "table-row";
-		this.newProjectSection_1.style.display = "table-row";
-		this.existingProjectSection.style.display = "none";
-		this.existingProjectSection_1.style.display = "none";
+		this.isNewProject.checked = true;
 	},
 	openDirectoryPickerDialog: function(){
+		this.isExistingProject.checked = true; 
 		var self = this;
 		var dialog = new widgets.DirectoryPrompterDialog({
 				title: "Choose a Folder",

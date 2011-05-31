@@ -46,6 +46,38 @@ eclipse.Explorer = (function() {
 			}
 		},
 		
+		makeNewItemPlaceHolder: function(item, domId, column_no) {
+			// we want to popup the name prompt underneath the parent item.
+			var refNode = this.getRow(item);
+			if(column_no){
+				refNode = refNode.childNodes[column_no];
+				// make a row and empty column so that the new name appears after checkmarks/expansions
+				dojo.place("<br><span id='"+domId+"placeHolderRow'></span>", refNode, "last");
+				tempNode = dojo.byId(domId+"placeHolderRow");
+				if (tempNode) {
+					return {tempNode: tempNode, refNode: tempNode};
+				}
+			}
+			var tempNode;
+			if (refNode) {
+				// make a row and empty column so that the new name appears after checkmarks/expansions
+				dojo.place("<tr id='"+domId+"placeHolderRow'><td id='"+domId+"placeHolderCol'></td>", refNode, "after");
+				tempNode = dojo.byId(domId+"placeHolderRow");
+				refNode = dojo.byId(domId+"placeHolderCol");
+				if (tempNode && refNode) {
+					return {tempNode: tempNode, refNode: refNode};
+				}
+			}
+			return null;
+		},
+		
+		getRow: function(item) {
+			var rowId = this.model.getId(item);
+			if (rowId) {
+				return dojo.byId(rowId);
+			}
+		},
+		
 		/**
 		 * Displays tree table containing filled with data provided by given model
 		 * 

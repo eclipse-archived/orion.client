@@ -7,13 +7,15 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*global define */
 
-var testcase = function(assert) {
+
+define(["orion/assert", "orion/serviceregistry"], function(assert, mServiceRegistry) {
 	var tests = {};
 	tests.testRegisterAndGetService = function() {
 		var count = 0;
 
-		var registry = new eclipse.ServiceRegistry();
+		var registry = new mServiceRegistry.ServiceRegistry();
 		var registration = registry.registerService("testRegister", {
 			test : function() {
 				return count + 1;
@@ -58,7 +60,7 @@ var testcase = function(assert) {
 	
 	tests.testRegisterUnregisterMultipleServices = function() {
 		
-		var serviceRegistry = new eclipse.ServiceRegistry();
+		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);	
 		var registration1 = serviceRegistry.registerService("testRegister", {
@@ -110,7 +112,7 @@ var testcase = function(assert) {
 
 	tests.testGetServiceDelayed = function() {
 		var count = 0;
-		var registry = new eclipse.ServiceRegistry();
+		var registry = new mServiceRegistry.ServiceRegistry();
 		registry.getService("testGetServiceDelayed", 0).then(null, function(e) {
 			count++;
 		});
@@ -135,7 +137,7 @@ var testcase = function(assert) {
 		var serviceRemovedCount = 0;
 		var eventResult;
 
-		var registry = new eclipse.ServiceRegistry();
+		var registry = new mServiceRegistry.ServiceRegistry();
 		var sahandler = function() {
 			serviceAddedCount++;
 		};
@@ -176,4 +178,4 @@ var testcase = function(assert) {
 	};
 
 	return tests;
-}(orion.Assert);
+});

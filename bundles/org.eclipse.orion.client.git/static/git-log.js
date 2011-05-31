@@ -139,10 +139,9 @@ dojo.addOnLoad(function() {
 				console.error("HTTP status code: ", ioArgs.xhr.status);
 			}
 		}).then(function(commitLogJsonData){
-//			if (commitLogJsonData.RemoteLocation == null)
-//				navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
-//			else
-			
+			if (commitLogJsonData.RemoteLocation == null)
+				navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
+			else
 				dojo.xhrGet({
 					url : commitLogJsonData.RemoteLocation,
 					headers : {
@@ -330,6 +329,7 @@ function makeHref(fileClient, seg, location){
 			dojo.hitch(this, function(metadata) {
 				if (isRemote()) {
 					serviceRegistry.getService("orion.git.provider").then(function(gitService){
+						if(metadata.Git)
 						gitService.getDefaultRemoteBranch(
 								metadata.Git.RemoteLocation, function(
 										defaultRemoteBranchJsonData, secondArg) {
@@ -340,6 +340,7 @@ function makeHref(fileClient, seg, location){
 					});
 
 				} else {
+					if(metadata.Git)
 					seg.href = "/git-log.html#" + metadata.Git.CommitLocation
 							+ "?page=1";
 				}

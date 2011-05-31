@@ -49,7 +49,9 @@ eclipse.GitService = (function() {
 			if(targetPath){
 				postData.Path = targetPath;
 			}
-			postData.GitUrl=gitRepoUrl;
+			if(gitRepoUrl){
+				postData.GitUrl=gitRepoUrl;
+			}
 			postData.Location = repoLocation;
 			if(gitSshUsername){
 				postData.GitSshUsername = gitSshUsername;
@@ -186,7 +188,7 @@ eclipse.GitService = (function() {
 		},
 		
 		stage: function(location , onLoad , onError){
-			dojo.xhrPut({
+			return dojo.xhrPut({
 				url: location , 
 				headers: {
 					"Orion-Version": "1"
@@ -211,8 +213,8 @@ eclipse.GitService = (function() {
 			});
 		},
 		
-		unstage: function(location , onLoad , onError){
-			dojo.xhrPost({
+		unstageAll: function(location , onLoad , onError){
+			return dojo.xhrPost({
 				url: location , 
 				headers: {
 					"Orion-Version": "1"
@@ -220,6 +222,33 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				postData: dojo.toJson({"Reset":"MIXED"} ),
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					mAuth.handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		unstage: function(location , paths ,onLoad , onError){
+			return dojo.xhrPost({
+				url: location , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				postData: dojo.toJson({"Path" : paths} ),
 				load: function(jsonData, secondArg) {
 					if (onLoad) {
 						if (typeof onLoad === "function")
@@ -376,16 +405,19 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		addBranch : function(gitBranchParentURI, branchName) {
+		addBranch : function(gitBranchParentURI, branchName, startPoint) {
 			var service = this;
+			
+			var postData = {};
+			if (branchName) postData.Name = branchName;
+			if (startPoint) postData.Branch = startPoint;
+			
 			return dojo.xhrPost({
 				url : gitBranchParentURI,
 				headers : {
 					"Orion-Version" : "1"
 				},
-				putData : dojo.toJson({
-					"Branch" : branchName
-				}),
+				postData : dojo.toJson(postData),
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, secondArg) {
