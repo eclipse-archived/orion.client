@@ -382,7 +382,8 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		<!--
 		a
 		-->char
-		*/		assertLineScope(editor, styler, 0, [
+		*/
+		assertLineScope(editor, styler, 0, [
 			[0, 4, "punctuation.definition.comment.mylang"] // <!--
 		]);
 		assertLineScope(editor, styler, 1, [
@@ -596,7 +597,8 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		
 		/*
 		xxx int-->
-		*/		changeLine(editor, "", 0, 0, 4);
+		*/
+		changeLine(editor, "", 0, 0, 4);
 		assertLineScope(editor, styler, 0, [
 			[4, 7, "storage.type.mylang", "int"]
 		]);
