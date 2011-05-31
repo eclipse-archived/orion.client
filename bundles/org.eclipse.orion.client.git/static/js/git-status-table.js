@@ -253,20 +253,6 @@ orion.GitStatusController = (function() {
 			}
 		});		
 
-		var stageCommand = new mCommands.Command({
-			name: "stage",
-			tooltip: "stage",
-			image: "images/git-stage.gif",
-			id: "orion.gitStage",
-			callback: function(item) {
-				self._statusService.setProgressMessage("Staging...");
-				return self.stage(item.object.indexURI , item.object);
-			},
-			visibleWhen: function(item) {
-				return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
-			}
-		});		
-
 		var checkoutCommand = new mCommands.Command({
 			name: "checkout",
 			tooltip: "checkout",
@@ -275,6 +261,20 @@ orion.GitStatusController = (function() {
 			callback: function(item) {
 				self._statusService.setProgressMessage("Checking out...");
 				return self.checkout(item.object);
+			},
+			visibleWhen: function(item) {
+				return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
+			}
+		});		
+
+		var stageCommand = new mCommands.Command({
+			name: "stage",
+			tooltip: "stage",
+			image: "images/git-stage.gif",
+			id: "orion.gitStage",
+			callback: function(item) {
+				self._statusService.setProgressMessage("Staging...");
+				return self.stage(item.object.indexURI , item.object);
 			},
 			visibleWhen: function(item) {
 				return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
@@ -292,6 +292,20 @@ orion.GitStatusController = (function() {
 			},
 			visibleWhen: function(item) {
 				return (item.type === "unstagedItems" && self.hasUnstaged);
+			}
+		});		
+
+		var unstageCommand = new mCommands.Command({
+			name: "unstage",
+			tooltip: "Unstage",
+			image: "/images/git-unstage.gif",
+			id: "orion.gitUnstage",
+			callback: function(item) {
+				self._statusService.setProgressMessage("Unstaging...");
+				return self.unstage(item.object);
+			},
+			visibleWhen: function(item) {
+				return (item.type === "fileItem" && self._model.isStaged(item.object.type));
 			}
 		});		
 
@@ -316,11 +330,13 @@ orion.GitStatusController = (function() {
 			commandService.addCommand(checkoutCommand, "object");	
 			commandService.addCommand(stageAllCommand, "object");	
 			commandService.addCommand(unstageAllCommand, "object");	
+			commandService.addCommand(unstageCommand, "object");	
 			commandService.registerCommandContribution("orion.gitStage", 1);	
 			commandService.registerCommandContribution("orion.gitCheckout", 2);	
-			commandService.registerCommandContribution("orion.sbsCompare", 3);	
-			commandService.registerCommandContribution("orion.gitStageAll", 4);	
-			commandService.registerCommandContribution("orion.gitUnstageAll", 5);	
+			commandService.registerCommandContribution("orion.gitUnstage", 3);	
+			commandService.registerCommandContribution("orion.sbsCompare", 4);	
+			commandService.registerCommandContribution("orion.gitStageAll", 5);	
+			commandService.registerCommandContribution("orion.gitUnstageAll", 6);	
 		});
 		
 	}
@@ -529,13 +545,6 @@ orion.GitStatusController = (function() {
 			//window.open(url,"");
 		},
 		
-		doAction: function(itemModel){
-			if(this._model.isStaged(itemModel.type))
-				this.unstage(itemModel.indexURI);
-			else
-				this.stage(itemModel.indexURI , itemModel);
-		},
-		
 		handleServerErrors: function(errorResponse , ioArgs){
 			var display = [];
 			display.Severity = "Error";
@@ -604,11 +613,11 @@ orion.GitStatusController = (function() {
 			this.stage(this._model.items.IndexLocation);
 		},
 		
-		unstage: function(location){
+		unstage: function(itemModel){
 			var self = this;
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
-						service.unstage(location, 
+						service.unstage(self._model.items.IndexLocation, [itemModel.path],
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
@@ -620,7 +629,18 @@ orion.GitStatusController = (function() {
 		},
 		
 		unstageAll: function(){
-			this.unstage(this._model.items.IndexLocation);
+			var self = this;
+			self._registry.getService("orion.git.provider").then(
+					function(service) {
+						service.unstageAll(self._model.items.IndexLocation, 
+											 function(jsonData, secondArg) {
+											 	 self.getGitStatus(self._url);
+											 },
+											 function(response, ioArgs){
+												 self.handleServerErrors(response, ioArgs);
+											 }
+						);
+					});
 		},
 		
 		commitAll: function(location , message , body){

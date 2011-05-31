@@ -213,7 +213,7 @@ eclipse.GitService = (function() {
 			});
 		},
 		
-		unstage: function(location , onLoad , onError){
+		unstageAll: function(location , onLoad , onError){
 			return dojo.xhrPost({
 				url: location , 
 				headers: {
@@ -222,6 +222,33 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				postData: dojo.toJson({"Reset":"MIXED"} ),
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					mAuth.handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
+		unstage: function(location , paths ,onLoad , onError){
+			return dojo.xhrPost({
+				url: location , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				postData: dojo.toJson({"Path" : paths} ),
 				load: function(jsonData, secondArg) {
 					if (onLoad) {
 						if (typeof onLoad === "function")
