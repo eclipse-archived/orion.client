@@ -8,23 +8,22 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo eclipse:true widgets window*/
+/*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
 define(['dojo', 'orion/treetable'], function(dojo, mTreeTable){
 
-/**
- * @namespace The global container for Orion APIs.
- */ 
-var eclipse = eclipse || {};
+var exports = {};
 
-eclipse.Explorer = (function() {
+exports.Explorer = (function() {
 	/**
-	 * @name eclipse.Explorer
+	 * Creates a new explorer.
+	 *
+	 * @name orion.explorer.Explorer
 	 * @class A table-based explorer component.
-	 * 
-	 * @param serviceRegistry
-	 * @param parentId id of parent dom element
+	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to
+	 * use for any services required by the explorer
+	 * @param {orion.selection.Selection} selection The initial selection
 	 * @param renderer
 	 */
 	function Explorer(serviceRegistry, selection, renderer) {
@@ -33,7 +32,7 @@ eclipse.Explorer = (function() {
 		this.selection = selection;
 		this.myTree = null;
 	}
-	Explorer.prototype = /** @lends eclipse.Explorer.prototype */ {
+	Explorer.prototype = /** @lends orion.explorer.Explorer.prototype */ {
 		
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, children) {
@@ -118,9 +117,10 @@ eclipse.Explorer = (function() {
 	return Explorer;
 }());
 
-eclipse.ExplorerModel = (function() {
+exports.ExplorerModel = (function() {
 	/**
-	 * @name eclipse.ExplorerModel
+	 * Creates a new explorer model instance.
+	 * @name orion.explorer.ExplorerModel
 	 * @class Simple tree model using Children and ChildrenLocation attributes to fetch children
 	 * and calculating id based on Location attribute.
 	 */
@@ -128,7 +128,7 @@ eclipse.ExplorerModel = (function() {
 		this.rootPath = rootPath;
 		this.fetchItems = fetchItems;
 	}
-	ExplorerModel.prototype = {
+	ExplorerModel.prototype = /** @lends orion.explorer.ExplorerModel.prototype */{
 		destroy: function(){
 		},
 		getRoot: function(onItem){
@@ -169,19 +169,21 @@ eclipse.ExplorerModel = (function() {
 	return ExplorerModel;
 }());
 
-eclipse.ExplorerFlatModel = (function() {
+exports.ExplorerFlatModel = (function() {
 	/**
-	 * @name eclipse.Model
-	 * @class Tree model used by eclipse.Explorer for flat structures
-	 * 
-	 * @param rootPath path to load tree table root, response should contain a list of items
+	 * Creates a new flat explorer model.
+	 * @name orion.explorer.ExplorerFlatModel
+	 * @class Tree model used by orion.explorer.Explorer for flat structures
+	 * @param {String} rootPath path to load tree table root, response should contain a list of items
+	 * @param {Function} fetchItems A function that returns a promise that resolves to the
+	 * items at the provided location.
 	 */
-	function ExplorerFlatModel(rootPath, /* function returning promise */fetchItems) {
+	function ExplorerFlatModel(rootPath, fetchItems) {
 		this.rootPath = rootPath;
 		this.fetchItems = fetchItems;
 	}
 	
-	ExplorerFlatModel.prototype = new eclipse.ExplorerModel();
+	ExplorerFlatModel.prototype = new exports.ExplorerModel();
 	
 	ExplorerFlatModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
 		if(parentItem==this.root){
@@ -189,15 +191,13 @@ eclipse.ExplorerFlatModel = (function() {
 		}else{
 			onComplete([]);
 		}
-		
 	};
-	
 	
 	return ExplorerFlatModel;
 }());
 
 /********* Rendering json items into columns in the tree **************/
-eclipse.ExplorerRenderer = (function() {
+exports.ExplorerRenderer = (function() {
 	function ExplorerRenderer (options, explorer) {
 		this.explorer = explorer;
 		this._init(options);
@@ -445,17 +445,17 @@ eclipse.ExplorerRenderer = (function() {
 }());
 
 /**
- * @name eclipse.SelectionRenderer
+ * @name orion.explorer.SelectionRenderer
  * @class Sample renderer that allows you to render a standard tree table.
- * Override {@link eclipse.SelectionRenderer#getCellHeaderElement}  and
- * {@link eclipse.SelectionRenderer#getCellElement} to generate table content.
+ * Override {@link orion.explorer.SelectionRenderer#getCellHeaderElement}  and
+ * {@link orion.explorer.SelectionRenderer#getCellElement} to generate table content.
  */
-eclipse.SelectionRenderer = (function(){
+exports.SelectionRenderer = (function(){
 	function SelectionRenderer(options, explorer) {
 		this._init(options);
 		this.explorer = explorer;
 	}
-	SelectionRenderer.prototype = new eclipse.ExplorerRenderer();
+	SelectionRenderer.prototype = new exports.ExplorerRenderer();
 	
 	SelectionRenderer.prototype.renderTableHeader = function(tableNode){
 		var thead = document.createElement('thead');
@@ -514,5 +514,5 @@ eclipse.SelectionRenderer = (function(){
 	
 	return SelectionRenderer;
 }());
-return eclipse;
+return exports;
 });
