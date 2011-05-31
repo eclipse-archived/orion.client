@@ -11,12 +11,12 @@
 /*global eclipse:true orion:true dojo dijit window*/
 /*jslint devel:true*/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/log','orion/dialogs',
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/users', 'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/contentAssist', 'orion/editorCommands', 'orion/editorFeatures', 'orion/editorContainer', 'orion/syntaxchecker',
         'orion/styler/textMateStyler', 'orion/breadcrumbs',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mLog, mDialogs, mUsers, mCommands, mUtil, mFavorites,
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mUsers, mCommands, mUtil, mFavorites,
 				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditorContainer,
 				mSyntaxchecker, mTextMateStyler, mBreadcrumbs) {
 
@@ -45,7 +45,6 @@ exports.setUpEditor = function(isReadOnly){
 		
 		selection = new mSelection.Selection(serviceRegistry);
 		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-		new mLog.LogService(serviceRegistry);
 		new mDialogs.DialogService(serviceRegistry);
 		new mUsers.UserService(serviceRegistry);
 		prefsService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");

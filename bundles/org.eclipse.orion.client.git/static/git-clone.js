@@ -10,11 +10,11 @@
 var eclipse;
 /*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
 /*browser:true*/
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/log', 'orion/commands',
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands',
         'orion/auth', 'orion/dialogs', 'orion/users', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/gitClient',
         'orion/ssh/sshTools', 'orion/git-clones-explorer', 'orion/gitCommands',
 	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mLog, mCommands, mAuth, mDialogs, mUsers, mSelection, mFileClient,
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mAuth, mDialogs, mUsers, mSelection, mFileClient,
 					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitClonesExplorer, mGitCommands) {
 
 dojo.addOnLoad(function() {
@@ -28,7 +28,6 @@ dojo.addOnLoad(function() {
 		pluginRegistry.shutdown();
 	});
 	new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	new mLog.LogService(serviceRegistry);
 	new mDialogs.DialogService(serviceRegistry);
 	new mUsers.UserService(serviceRegistry);
 	var selection = new mSelection.Selection(serviceRegistry);

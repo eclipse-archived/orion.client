@@ -18,7 +18,6 @@ dojo.addOnLoad(function(){
 		pluginRegistry.shutdown();
 	});
 	new eclipse.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	new eclipse.LogService(serviceRegistry);
 	new eclipse.DialogService(serviceRegistry);
 	new eclipse.UserService(serviceRegistry);
 	new eclipse.SelectionService(serviceRegistry);

@@ -11,10 +11,10 @@
 /*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
 /*browser:true*/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/log','orion/dialogs',
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status','orion/dialogs',
         'orion/users', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/searchResults', 'orion/globalCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mLog, mDialogs, mUsers, mCommands, mFavorites, 
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mDialogs, mUsers, mCommands, mFavorites, 
 				mSearchClient, mSearchResults, mGlobalCommands) {
 
 dojo.addOnLoad(function(){
@@ -23,7 +23,6 @@ dojo.addOnLoad(function(){
 	// initialize service registry and EAS services
 	serviceRegistry = new mServiceregistry.ServiceRegistry();
 	new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	new mLog.LogService(serviceRegistry);
 	new mDialogs.DialogService(serviceRegistry);
 	new mUsers.UserService(serviceRegistry);
 	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
