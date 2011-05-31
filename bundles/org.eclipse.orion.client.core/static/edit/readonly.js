@@ -11,6 +11,10 @@
 /*global eclipse dojo*/
 /*jslint devel:true*/
 
+define(['dojo','setup'], function(dojo, mSetup) {
+	
 dojo.addOnLoad(function(){
-	eclipse.setUpEditor(true);  // read only
+	mSetup.setUpEditor(true);  // not read only
+});
+
 });
