@@ -28,7 +28,7 @@ exports.SampleGrammar = {
 				"match": "\\b(this|var|void)\\b",
 				"name": "keyword.other.mylang"
 			}, {
-				"match": "(\")[^\"](\")",
+				"match": "(\")[^\"]+(\")",
 				"name": "constant.character.mylang"
 			}, {
 				"match": "\\b(?:\\d+)\\b",

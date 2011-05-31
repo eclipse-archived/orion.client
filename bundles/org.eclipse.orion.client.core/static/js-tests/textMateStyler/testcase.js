@@ -120,6 +120,12 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		assert.ok(ok, "No StyleRange in Line " + lineIndex + " matched expected {" + last + "}. StyleRanges were [" + rangeStrs.join(",") + "]");
 	}
 	
+	
+	
+	
+	
+	
+	
 	// ************************************************************************************************
 	// Test creation
 	
@@ -307,6 +313,27 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		]);
 	});
 	
+	// Test for Bug 347486, ensure we try all subrules on each line
+	tests["test TextMateStyler - initial - all subrules are tried"] = makeTest(function(editor) {
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleGrammar);
+		var lines = [
+			'break var "foo" null 123',
+			"z if"
+		];
+		setLines(editor, lines);
+		assertLineScope(editor, styler, 0, [
+			[0, 5, "keyword.control.mylang", "break"],
+			[6, 9, "keyword.other.mylang", "var"],
+			[10, 15, "constant.character.mylang", '"foo"'],
+			[16, 20, "constant.language.mylang", "null"],
+			[21, 24, "constant.numeric.mylang", "123"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 1, "invalid.illegal.idontlikez.mylang", "z"],
+			[2, 4, "keyword.control.mylang", "if"]
+		]);
+	}, false);
+	
 	// ************************************************************************************************
 	// Test damage/repair styling
 	
@@ -319,13 +346,16 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 			"-->"
 		];
 		setLines(editor, lines);
+		assertLineScope(editor, styler, 0, [ [0, 4, "punctuation.definition.comment.mylang", "<!--"] ]);
+		assertLineScope(editor, styler, 1, [ [0, 1, "comment.block.mylang", "a"] ]);
+		assertLineScope(editor, styler, 2, [ [0, 3, "punctuation.definition.comment.mylang", "-->"] ]);
 		
-		changeLine(editor, "xxxx", 1, 1, 1); // insert xxxx after a on line 1
 		/*
 		<!--
 		axxxx
 		-->
 		*/
+		changeLine(editor, "xxxx", 1, 1, 1); // insert xxxx after a on line 1
 		assertLineScope(editor, styler, 0, [
 			[0, 4, "punctuation.definition.comment.mylang"] // <!--
 		]);
@@ -335,7 +365,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		assertLineScope(editor, styler, 2, [
 			[0, 3, "punctuation.definition.comment.mylang"] // -->
 		]);
-	});
+	}, false);
 	
 	tests["test TextMateStyler - change - add non-region text that follows region"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
@@ -561,9 +591,6 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 	tests["test TextMateStyler - change - remove 'start'"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		setLines(editor, [
-			"int <!-- char <!-- aaa bb--> char"
-		]);
-		setLines(editor, [
 			"<!--xxx int-->"
 		]);
 		
@@ -573,7 +600,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		assertLineScope(editor, styler, 0, [
 			[4, 7, "storage.type.mylang", "int"]
 		]);
-	});
+	}, false);
 	
 //	tests["test TextMateStyler - change - remove 'end'"] = makeTest(function(editor) {
 //		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
