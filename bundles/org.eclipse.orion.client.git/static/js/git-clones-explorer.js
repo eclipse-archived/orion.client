@@ -27,7 +27,7 @@ exports.GitClonesExplorer = (function() {
 	GitClonesExplorer.prototype = mExplorer.Explorer.prototype;
 	
 	GitClonesExplorer.prototype.getGitLocation = function(path){
-		return "/git/clone/"+ mUtil.makeRelative(path);
+		return "/gitapi/clone/"+ mUtil.makeRelative(path);
 	};
 	
 	GitClonesExplorer.prototype.setDefaultPath = function(defaultPath){

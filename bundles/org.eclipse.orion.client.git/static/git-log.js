@@ -221,7 +221,7 @@ function isRemote(){
 };
 
 function getHeadFileUri(){
-	var path = dojo.hash().split("git/commit/");
+	var path = dojo.hash().split("gitapi/commit/");
 	if(path.length === 2){
 		path = path[1].split("/");
 		if(path.length > 1){
@@ -238,7 +238,7 @@ function getHeadFileUri(){
 }
 
 function getRemoteFileURI(){
-	var path = dojo.hash().split("git/remote/");
+	var path = dojo.hash().split("gitapi/remote/");
 	if(path.length === 2){
 		path = path[1].split("/");
 		if(path.length > 2){

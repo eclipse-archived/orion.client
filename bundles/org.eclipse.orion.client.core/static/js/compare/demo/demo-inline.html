@@ -46,9 +46,9 @@ var fileContent ;
 var fileDiff;
 function getFileContentGit(hashValue){
 
-	var url = "/git/index" + hashValue;
+	var url = "/gitapi/index" + hashValue;
 	dojo.xhrGet({
-		url: url, //"/git/index" + hashValue;//file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.html"
+		url: url, //"/gitapi/index" + hashValue;//file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.html"
 		//adding some thing 
 		headers: {
 			"Orion-Version": "1"

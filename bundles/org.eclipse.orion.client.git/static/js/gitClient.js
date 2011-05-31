@@ -66,7 +66,7 @@ eclipse.GitService = (function() {
 			if(passphrase) postData.GitSshPassphrase=passphrase;			
 			
 				return dojo.xhrPost({
-					url : "/git/clone/",
+					url : "/gitapi/clone/",
 					headers : {
 						"Orion-Version" : "1"
 					},
