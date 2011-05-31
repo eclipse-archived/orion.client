@@ -15,7 +15,7 @@
  * @namespace The global container for eclipse APIs.
  */ 
 
-define(['dojo', 'dijit', 'orion/widgets/OpenResourceDialog', 'orion/commands'], function(dojo, dijit, OpenResourceDialog, mCommands ){
+define(['dojo', 'dijit', 'orion/widgets/OpenResourceDialog', 'orion/commands', 'orion/util'], function(dojo, dijit, OpenResourceDialog, mCommands, mUtil ){
 
 var exports = {};
 
@@ -224,7 +224,7 @@ exports.generateBanner = function(parentId, serviceRegistry, commandService, pre
 	};
 		
 	var openResourceCommand = new mCommands.Command({
-		name: "Open Resource",
+		name: "Find File Named...",
 		image: "/images/find.gif",
 		id: "eclipse.openResource",
 		callback: function(item) {
@@ -233,8 +233,8 @@ exports.generateBanner = function(parentId, serviceRegistry, commandService, pre
 		
 	// We need a mod key binding in the editor, for now use the old one (ctrl-shift-r)
 	if (editor) {
-		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("r", true, true, false), openResourceCommand.id);
-		editor.getEditorWidget().setAction(openResourceCommand.id, function() {
+		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("r", true, true, false), "Find File Named...");
+		editor.getEditorWidget().setAction("Find File Named...", function() {
 				openResourceDialog(searchLocation, searcher, editor);
 				return true;
 			});
@@ -242,7 +242,7 @@ exports.generateBanner = function(parentId, serviceRegistry, commandService, pre
 	
 	// We are using 't' for the non-editor binding because of git-hub's use of t for similar function
 	commandService.addCommand(openResourceCommand, "global");
-	commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions", null, new mCommands.CommandKeyBinding('T', 't'), true);
+	commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions", null, new mCommands.CommandKeyBinding('t'), true);
 	
 	var keyAssistNode = dojo.byId("keyAssist");
 	dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){ 
@@ -250,18 +250,34 @@ exports.generateBanner = function(parentId, serviceRegistry, commandService, pre
 			keyAssistNode.style.display = "none";
 		}
 	}));
+	
 	var keyAssistCommand = new mCommands.Command({
-		name: "Show Key bindings",
+		name: "Show Keys",
 		id: "eclipse.keyAssist",
 		callback: function() {
 			dojo.empty(keyAssistNode);
+			if (editor) {
+				dojo.place("<h2>Editor</h2>", keyAssistNode, "last");
+				var editorActions = editor.getEditorWidget().getActions(false);
+				for(var i=0; i<editorActions.length; i++) {
+					var actionName = editorActions[i];
+					var bindings = editor.getEditorWidget().getKeyBindings(actionName);
+					for (var j=0; j<bindings.length; j++) {
+						dojo.place("<span>"+mUtil.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last");
+					}
+				}
+			}
+			dojo.place("<h2>Global</h2>", keyAssistNode, "last");
 			commandService.showKeyBindings(keyAssistNode);
 			keyAssistNode.style.display = "block";
 			
 		}});
 	commandService.addCommand(keyAssistCommand, "global");
-	commandService.registerCommandContribution("eclipse.keyAssist", 1, "globalActions", null, new mCommands.CommandKeyBinding('?', 191, false, true), true);
-	
+	commandService.registerCommandContribution("eclipse.keyAssist", 1, "globalActions", null, new mCommands.CommandKeyBinding(191, false, true), true);
+	if (editor) {
+		editor.getEditorWidget().setKeyBinding(new mCommands.CommandKeyBinding(191, true, true), "Show Keys");
+		editor.getEditorWidget().setAction("Show Keys", keyAssistCommand.callback);
+	}
 		
 	// generate global commands
 	var toolbar = dojo.byId("globalActions");

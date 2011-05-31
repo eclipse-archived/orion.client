@@ -50,8 +50,8 @@ exports.ContentAssist = (function() {
 	ContentAssist.prototype = {
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			this.editorWidget.setKeyBinding(isMac ? new eclipse.KeyBinding(' ', false, false, false, true) : new eclipse.KeyBinding(' ', true), "contentAssist");
-			this.editorWidget.setAction("contentAssist", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(isMac ? new eclipse.KeyBinding(' ', false, false, false, true) : new eclipse.KeyBinding(' ', true), "Content Assist");
+			this.editorWidget.setAction("Content Assist", dojo.hitch(this, function() {
 				this.showContentAssist(true);
 				return true;
 			}));

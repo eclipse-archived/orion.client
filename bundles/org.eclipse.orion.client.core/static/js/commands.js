@@ -103,7 +103,7 @@ eclipse.CommandService = (function() {
 		showKeyBindings: function(targetNode) {
 			for (var binding in this._activeBindings) {
 				if (this._activeBindings[binding] && this._activeBindings[binding].keyBinding && this._activeBindings[binding].command) {
-					dojo.place("<br>"+this._activeBindings[binding].keyBinding.userString+" = "+this._activeBindings[binding].command.name, targetNode, "last");
+					dojo.place("<span>"+mUtil.getUserKeyString(this._activeBindings[binding].keyBinding)+" = "+this._activeBindings[binding].command.name+"<br></span>", targetNode, "last");
 				}
 			}
 		},
@@ -704,8 +704,7 @@ eclipse.Command = (function() {
  * @class A CommandKeyBinding represents of a key code and a modifier state that can be triggered by the user using the keyboard.
  * @name eclipse.CommandKeyBinding
  * 
- * @property {String} userString The user representation for the string (to show in key assist dialog)
- * @property {String|Number} keyCode The key code.
+ * @property {Object|String|Number} keyCode An eclipse.KeyBinding or key code.
  * @property {Boolean} mod1 The primary modifier (usually Command on Mac and Control on other platforms).
  * @property {Boolean} mod2 The secondary modifier (usually Shift).
  * @property {Boolean} mod3 The third modifier (usually Alt).
@@ -714,13 +713,12 @@ eclipse.Command = (function() {
 eclipse.CommandKeyBinding = (function() {
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	/** @private */
-	function CommandKeyBinding (userString, keyCode, mod1, mod2, mod3, mod4) {
+	function CommandKeyBinding (keyCode, mod1, mod2, mod3, mod4) {
 		if (typeof(keyCode) === "string") {
 			this.keyCode = keyCode.toUpperCase().charCodeAt(0);
 		} else {
 			this.keyCode = keyCode;
 		}
-		this.userString = userString;
 		this.mod1 = mod1 !== undefined && mod1 !== null ? mod1 : false;
 		this.mod2 = mod2 !== undefined && mod2 !== null ? mod2 : false;
 		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;

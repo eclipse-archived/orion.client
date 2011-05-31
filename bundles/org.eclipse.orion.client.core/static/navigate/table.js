@@ -155,9 +155,9 @@ dojo.addOnLoad(function(){
 		commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
 		commandService.addCommandGroup("eclipse.selectionGroup", 500, "More", null, "selectionTools");
 		// commands that don't appear but have keybindings
-		commandService.registerCommandContribution("eclipse.toggleSplitter", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('Ctrl+O', 'o', true),  true);
-		commandService.registerCommandContribution("eclipse.copySelections", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('Ctrl+C', 'c', true),  true);
-		commandService.registerCommandContribution("eclipse.pasteSelections", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('Ctrl+V', 'v', true),  true);
+		commandService.registerCommandContribution("eclipse.toggleSplitter", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('o', true),  true);
+		commandService.registerCommandContribution("eclipse.copySelections", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('c', true),  true);
+		commandService.registerCommandContribution("eclipse.pasteSelections", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('v', true),  true);
 		
 		// commands appearing directly in local actions column
 		commandService.registerCommandContribution("eclipse.makeFavorite", 1);

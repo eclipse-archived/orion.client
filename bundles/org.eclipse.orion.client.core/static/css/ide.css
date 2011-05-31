@@ -385,6 +385,10 @@ a:hover {
 	z-index:10;
 }
 
+.keyAssistFloat h2 {
+	color: #FFD900;
+}
+
 #rightPane .dijitTitlePaneContentInner {
 	padding: 0px; /* Remove the padding around the editor */
 }

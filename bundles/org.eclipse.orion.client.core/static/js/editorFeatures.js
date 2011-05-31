@@ -26,15 +26,15 @@ orion.UndoFactory = (function() {
 	UndoFactory.prototype = {
 		createUndoStack: function(editor) {
 			var undoStack =  new eclipse.UndoStack(editor.getEditorWidget(), 200);
-			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding('z', true), "orion.undo");
-			editor.getEditorWidget().setAction("orion.undo", function() {
+			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding('z', true), "Undo");
+			editor.getEditorWidget().setAction("Undo", function() {
 				undoStack.undo();
 				return true;
 			});
 			
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			editor.getEditorWidget().setKeyBinding(isMac ? new eclipse.KeyBinding('z', true, true) : new eclipse.KeyBinding('y', true), "orion.redo");
-			editor.getEditorWidget().setAction("orion.redo", function() {
+			editor.getEditorWidget().setKeyBinding(isMac ? new eclipse.KeyBinding('z', true, true) : new eclipse.KeyBinding('y', true), "Redo");
+			editor.getEditorWidget().setAction("Redo", function() {
 				undoStack.redo();
 				return true;
 			});
@@ -157,8 +157,8 @@ orion.TextActions = (function() {
 			var searchString = "",
 			    pattern,
 			    flags;
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding("f", true), "find");
-			this.editorWidget.setAction("find", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding("f", true), "Find...");
+			this.editorWidget.setAction("Find...", dojo.hitch(this, function() {
 				setTimeout(dojo.hitch(this, function() {
 					var selection = this.editorWidget.getSelection();
 					if (selection.end > selection.start) {
@@ -192,8 +192,8 @@ orion.TextActions = (function() {
 					}
 				}), 0);
 			}));
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding("k", true), "find next");
-			this.editorWidget.setAction("find next", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding("k", true), "Find Next Occurrence");
+			this.editorWidget.setAction("Find Next Occurrence", dojo.hitch(this, function() {
 				var result, ignoreCase, selection;
 				if (this._incrementalFindActive) {
 					var str = this._incrementalFindPrefix;
@@ -221,8 +221,8 @@ orion.TextActions = (function() {
 					this.editor.reportStatus("not found", true);
 				}
 			}));
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding("k", true, true), "find previous");
-			this.editorWidget.setAction("find previous", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding("k", true, true), "Find Previous Occurrence");
+			this.editorWidget.setAction("Find Previous Occurrence", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var selectionSize = (selection.end > selection.start) ? selection.end - selection.start : 0;
 				var result, ignoreCase;
@@ -248,8 +248,8 @@ orion.TextActions = (function() {
 					this.editor.reportStatus("not found", true);
 				}
 			}));
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding("j", true), "incremental find");
-			this.editorWidget.setAction("incremental find", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding("j", true), "Incremental Find");
+			this.editorWidget.setAction("Incremental Find", dojo.hitch(this, function() {
 				if (!this._incrementalFindActive) {
 					this.editorWidget.setCaretOffset(this.editorWidget.getCaretOffset());
 					this.toggleIncrementalFind();
@@ -328,8 +328,8 @@ orion.TextActions = (function() {
 				}
 				return false;
 			}));
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(9, false, true), "shift tab");
-			this.editorWidget.setAction("shift tab", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(9, false, true), "Unindent Lines");
+			this.editorWidget.setAction("Unindent Lines", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
@@ -349,8 +349,8 @@ orion.TextActions = (function() {
 				return true;
 			}));
 			
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(38, false, false, true), "move up selection");
-			this.editorWidget.setAction("move up selection", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(38, false, false, true), "Move Lines Up");
+			this.editorWidget.setAction("Move Lines Up", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
@@ -379,8 +379,8 @@ orion.TextActions = (function() {
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(40, false, false, true), "move down selection");
-			this.editorWidget.setAction("move down selection", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(40, false, false, true), "Move Lines Down");
+			this.editorWidget.setAction("Move Lines Down", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
@@ -409,8 +409,8 @@ orion.TextActions = (function() {
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(38, true, false, true), "copy up selection");
-			this.editorWidget.setAction("copy up selection", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(38, true, false, true), "Copy Lines Up");
+			this.editorWidget.setAction("Copy Lines Up", dojo.hitch(this, function() {
 				this.startUndo();
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
@@ -428,8 +428,8 @@ orion.TextActions = (function() {
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(40, true, false, true), "copy down selection");
-			this.editorWidget.setAction("copy down selection", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(40, true, false, true), "Copy Lines Down");
+			this.editorWidget.setAction("Copy Lines Down", dojo.hitch(this, function() {
 				this.startUndo();
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
@@ -448,8 +448,8 @@ orion.TextActions = (function() {
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding('d', true, false, false), "delete selected lines");
-			this.editorWidget.setAction("delete selected lines", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding('d', true, false, false), "Delete Selected Lines");
+			this.editorWidget.setAction("Delete Selected Lines", dojo.hitch(this, function() {
 				this.startUndo();
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
@@ -462,8 +462,8 @@ orion.TextActions = (function() {
 			}));
 			
 			// Go To Line action
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding("l", true), "goto-line");
-			this.editorWidget.setAction("goto-line", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding("l", true), "Goto Line...");
+			this.editorWidget.setAction("Goto Line...", dojo.hitch(this, function() {
 					var line = this.editorWidget.getModel().getLineAtOffset(this.editorWidget.getCaretOffset());
 					line = prompt("Go to line:", line + 1);
 					if (line) {
@@ -586,8 +586,8 @@ orion.SourceCodeActions = (function() {
 		init: function() {
 		
 			// Block comment operations
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(191, true), "toggle comment");
-			this.editorWidget.setAction("toggle comment", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(191, true), "Toggle Line Comment");
+			this.editorWidget.setAction("Toggle Line Comment", dojo.hitch(this, function() {
 				this.startUndo();
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
@@ -669,8 +669,8 @@ orion.SourceCodeActions = (function() {
 				return {commentStart: commentStart, commentEnd: commentEnd};
 			}
 			
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(191, true, true), "add block comment");
-			this.editorWidget.setAction("add block comment", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(191, true, true), "Add Block Comment");
+			this.editorWidget.setAction("Add Block Comment", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
 				var open = "/*", close = "*/", commentTags = new RegExp("/\\*" + "|" + "\\*/", "g");
@@ -695,8 +695,8 @@ orion.SourceCodeActions = (function() {
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(220, true, true), "remove block comment");
-			this.editorWidget.setAction("remove block comment", dojo.hitch(this, function() {
+			this.editorWidget.setKeyBinding(new eclipse.KeyBinding(220, true, true), "Remove Block Comment");
+			this.editorWidget.setAction("Remove Block Comment", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
 				var open = "/*", close = "*/";
