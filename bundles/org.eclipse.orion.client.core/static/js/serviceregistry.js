@@ -227,11 +227,11 @@ exports.ServiceRegistry = (function() {
 					var entry = that._entries[serviceId];
 					if (entry) {
 						var reference = entry.reference;
-						var namedReferences = this._namedReferences[reference.getName()];
+						var namedReferences = that._namedReferences[reference.getName()];
 						for (var i = 0; i < namedReferences.length; i++) {
 							if (namedReferences[i] === reference) {
 								if(namedReferences.length === 1) {
-									delete this._namedReferences[reference.getName()];
+									delete that._namedReferences[reference.getName()];
 								} else {
 									namedReferences.splice(i,1);
 								}
@@ -243,19 +243,19 @@ exports.ServiceRegistry = (function() {
 					}				
 				},
 				dispatchEvent: function(serviceId, eventName) {
-					var entry = this._entries[serviceId];
+					var entry = that._entries[serviceId];
 					if (entry) {
 						entry.eventTarget.dispatchEvent.apply(entry.eventTarget, [eventName].concat(Array.prototype.slice.call(arguments, 2)));
 					}				
 				},
 				addEventListener: function(serviceId, eventName, listener) {
-					var entry = this._entries[serviceId];
+					var entry = that._entries[serviceId];
 					if (entry) {
 						entry.eventTarget.addEventListener(eventName, listener);
 					}		
 				},
 				removeEventListener: function(serviceId, eventName, listener) {
-					var entry = this._entries[serviceId];
+					var entry = that._entries[serviceId];
 					if (entry) {
 						entry.eventTarget.removeEventListener(eventName, listener);
 					}		
