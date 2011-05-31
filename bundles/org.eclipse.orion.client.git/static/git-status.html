@@ -56,100 +56,12 @@
 		
 		<!-- status pane on left : start vvv-->
 		<div id="gitStatusPane" class="auxpane" dojoType="dijit.layout.ContentPane" region="leading"  style="margin-left: 44px; width: 40%; overflow: auto" splitter="true">				
-			<!-- unstaged zone : start vvv-->
-			<table width="100%">
-				<tr>
-					<td width="50%" height="100%">
-						<h2>Unstaged</h2>
-					</td>
-					<td width="50%" height="100%" nowrap="nowrap">
-						<div style="float: right;" align="right">
-							<span  id = "stageAll" ></span>							
-						</div>
-					</td>
-				</tr>
-			</table>
-			<hr>
-			<div id = "unstagedZone">
-			</div>
-			<!-- unstaged zone : end ^^^-->
-			
-			<!-- separator space -->
-			<table width="100%" height = "10px">
-			</table>
-
-			<!-- staged zone : start vvv-->
-			<table width="100%">
-				<tr>
-					<td width="50%" height="100%">
-						<h2>Staged</h2>
-					</td>
-					<td width="50%" height="100%" nowrap="nowrap">
-						<div style="float: right;" align="right">
-							<span  id = "unstageAll" ></span>							
-						</div>
-					</td>
-				</tr>
-			</table>
-			<hr>
-			<div id = "stagedZone">
-			</div>
-			<table width="100%" height = "10px">
-			</table>
-			<!-- staged zone : end ^^^-->
-
-			<!-- commit zone : start vvv-->
-			<div id = "commitZone">
-				<table width="100%">
-					<tr>
-						<td  nowrap="nowrap">
-							<h2 >Commit message:</h2>
-						</td>
-					</tr>
-				</table>
-				<table >
-					<tr>
-						<td nowrap="nowrap">
-							<textarea  id = "commitMessage" COLS=40 ROWS=6></textarea>
-						</td>
-						<td  nowrap="nowrap">
-							<table style='width:100%;height:100%;'>
-								<tr>
-									<td nowrap="nowrap">
-										<button  id = "commit" >Commit</button>	
-									</td>
-								</tr>
-								<tr style='width:100%;height:20px;'></tr>
-								<tr>
-									<td  nowrap="nowrap">
-										<input type = "checkbox"  id = "amend" > Amend</input>							
-									</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-				</table>
-			</div>
-			<!-- commit zone : end ^^^-->
+			<div id = "statusZone"></div>
 		</div>
-		<!-- status pane on left : end ^^^-->
 		
 		<!-- inline compare viewer : start vvv-->
-		<div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false" persist="false" gutters="false" region="center"  splitter="false">
-			<div  class="auxpane" style='width:100%;height:30px;overflow: hidden;' dojoType="dijit.layout.ContentPane" region="top">
-				<table width="100%">
-					<tr>
-						<td  nowrap="nowrap">
-							<h2 id = "fileNameInViewer">Select a file on the left to compare..</h2>
-						</td>
-					</tr>
-				</table>
-				<hr>
-			</div>
-			<div class="mainpane" id="inline-compare-viewer" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="center"  style="width: 100%; height: 100%;" splitter="false">				
-			</div>
+		<div id = "viewerZone" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false" persist="false" gutters="false" region="center"  splitter="false">
 		</div>
-		<!-- inline compare viewer : end ^^^-->
 		
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
 		</div>
