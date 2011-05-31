@@ -8,32 +8,33 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/**
- * @namespace The global container for eclipse APIs.
- */ 
-
 define(["dojo"], function(dojo){
 
-var eclipse = eclipse || {};
+var exports = {};
 
 /**
- * Log Service
- * @class Services for logging
+ * Creates an instance of the log service using the provided service registry.
+ * @class The log service provides services for logging information messages
+ * @name orion.log.LogService
  */
-eclipse.LogService = function(serviceRegistry) {
+exports.LogService = function(serviceRegistry) {
 	this._serviceRegistry = serviceRegistry;
-	this._serviceRegistration = serviceRegistry.registerService("ILogService", this);
+	this._serviceRegistration = serviceRegistry.registerService("orion.core.log", this);
 };
  
-eclipse.LogService.prototype = {
-	info : function(msg) {
+exports.LogService.prototype = /** @lends orion.log.LogService.prototype */ {
+	/**
+	 * Prints an information message to the log.
+	 * @param {String} msg The message to be logged
+	 */
+	info : function(message) {
 		// TODO temporary implementation uses status line
 		// obviously not the real answer
 		this._serviceRegistry.getService("orion.page.message").then(function(service) {
-			service.setMessage("LOG: " + msg);
+			service.setMessage("LOG: " + message);
 		});
 	}
 };
 
-return eclipse;
+return exports;
 });

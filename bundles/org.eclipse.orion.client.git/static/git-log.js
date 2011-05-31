@@ -10,11 +10,11 @@
 
 /*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
 /*browser:true*/
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/log', 'orion/commands',
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands',
         'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/gitClient',
         'orion/breadcrumbs', 'orion/ssh/sshTools', 'orion/git-commit-details', 'orion/git-commit-navigator', 'orion/gitCommands',
 	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mLog, mCommands, mAuth, mDialogs, mSelection, mFileClient,
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mAuth, mDialogs, mSelection, mFileClient,
 					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitDetails, mGitCommitNavigator, mGitCommands) {
 
 dojo.addOnLoad(function() {
@@ -28,7 +28,6 @@ dojo.addOnLoad(function() {
 		pluginRegistry.shutdown();
 	});
 	new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	new mLog.LogService(serviceRegistry);
 	new mDialogs.DialogService(serviceRegistry);
 	var selection = new mSelection.Selection(serviceRegistry);
 	new mSshTools.SshService(serviceRegistry);
@@ -139,10 +138,9 @@ dojo.addOnLoad(function() {
 				console.error("HTTP status code: ", ioArgs.xhr.status);
 			}
 		}).then(function(commitLogJsonData){
-//			if (commitLogJsonData.RemoteLocation == null)
-//				navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
-//			else
-			
+			if (commitLogJsonData.RemoteLocation == null)
+				navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
+			else
 				dojo.xhrGet({
 					url : commitLogJsonData.RemoteLocation,
 					headers : {

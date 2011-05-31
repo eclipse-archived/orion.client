@@ -13,8 +13,11 @@
 
 define(['dojo', 'orion/treetable'], function(dojo, mTreeTable){
 
-
+/**
+ * @namespace The global container for Orion APIs.
+ */ 
 var eclipse = eclipse || {};
+
 eclipse.Explorer = (function() {
 	/**
 	 * @name eclipse.Explorer
@@ -40,6 +43,38 @@ eclipse.Explorer = (function() {
 			// update the commands in the tree if the tree exists.
 			if (this.myTree) {
 				dojo.hitch(this.myTree._renderer, this.myTree._renderer.updateCommands(item));
+			}
+		},
+		
+		makeNewItemPlaceHolder: function(item, domId, column_no) {
+			// we want to popup the name prompt underneath the parent item.
+			var refNode = this.getRow(item);
+			if(column_no){
+				refNode = refNode.childNodes[column_no];
+				// make a row and empty column so that the new name appears after checkmarks/expansions
+				dojo.place("<br><span id='"+domId+"placeHolderRow'></span>", refNode, "last");
+				tempNode = dojo.byId(domId+"placeHolderRow");
+				if (tempNode) {
+					return {tempNode: tempNode, refNode: tempNode};
+				}
+			}
+			var tempNode;
+			if (refNode) {
+				// make a row and empty column so that the new name appears after checkmarks/expansions
+				dojo.place("<tr id='"+domId+"placeHolderRow'><td id='"+domId+"placeHolderCol'></td>", refNode, "after");
+				tempNode = dojo.byId(domId+"placeHolderRow");
+				refNode = dojo.byId(domId+"placeHolderCol");
+				if (tempNode && refNode) {
+					return {tempNode: tempNode, refNode: refNode};
+				}
+			}
+			return null;
+		},
+		
+		getRow: function(item) {
+			var rowId = this.model.getId(item);
+			if (rowId) {
+				return dojo.byId(rowId);
 			}
 		},
 		
@@ -115,7 +150,6 @@ eclipse.Explorer = (function() {
 	return Explorer;
 }());
 
-eclipse = eclipse || {};
 eclipse.ExplorerModel = (function() {
 	/**
 	 * @name eclipse.ExplorerModel
@@ -195,7 +229,6 @@ eclipse.ExplorerFlatModel = (function() {
 }());
 
 /********* Rendering json items into columns in the tree **************/
-eclipse = eclipse || {};
 eclipse.ExplorerRenderer = (function() {
 	function ExplorerRenderer (options, explorer) {
 		this.explorer = explorer;
@@ -503,8 +536,6 @@ eclipse.SelectionRenderer = (function(){
 	 */
 	SelectionRenderer.prototype.getCellHeaderElement = function(col_no){};
 
-
-
 	/**
 	 * Override to return a dom element containing table cell, preferable <code>td</td>
 	 * @param col_no number of column
@@ -517,4 +548,3 @@ eclipse.SelectionRenderer = (function(){
 }());
 return eclipse;
 });
-

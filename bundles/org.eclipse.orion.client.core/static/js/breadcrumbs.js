@@ -9,13 +9,11 @@
  ******************************************************************************/
 /*global dojo window eclipse:true document*/
 
+define(['dojo'], function(dojo) {
+
 /**
  * @namespace The global container for eclipse APIs.
  */ 
-
-
-define(['dojo'], function(dojo) {
-
 var eclipse = eclipse || {};
 
  /**
