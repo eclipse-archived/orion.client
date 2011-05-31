@@ -218,12 +218,13 @@ exports.ServiceRegistry = (function() {
 		this._entries = [];
 		this._namedReferences = {};
 		this._serviceEventTarget = new exports.EventTarget();
+		var that = this;
 		this.internalRegistry = {
 				isRegistered: function(serviceId) {
-					return this._entries[serviceId] ? true: false;
+					return that._entries[serviceId] ? true: false;
 				},
 				unregisterService: function(serviceId) {
-					var entry = this._entries[serviceId];
+					var entry = that._entries[serviceId];
 					if (entry) {
 						var reference = entry.reference;
 						var namedReferences = this._namedReferences[reference.getName()];
@@ -237,8 +238,8 @@ exports.ServiceRegistry = (function() {
 								break;
 							}
 						}
-						this._entries[serviceId] = null;
-						this._serviceEventTarget.dispatchEvent("serviceRemoved", reference, entry.service);
+						that._entries[serviceId] = null;
+						that._serviceEventTarget.dispatchEvent("serviceRemoved", reference, entry.service);
 					}				
 				},
 				dispatchEvent: function(serviceId, eventName) {
