@@ -542,10 +542,6 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 				      "Target": "http://localhost:8080/file"
 				    },
 				    {
-				      "Source": "/openajax",
-				      "Target": "http://localhost:8080/openajax"
-				    },
-				    {
 				      "Source": "/prefs",
 				      "Target": "http://localhost:8080/prefs"
 				    },
