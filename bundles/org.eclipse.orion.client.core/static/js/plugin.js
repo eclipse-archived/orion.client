@@ -8,6 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
+/*global console OpenAjax */
+
 /**
  * @namespace The global container for eclipse APIs.
  */ 
@@ -67,12 +70,11 @@ eclipse.PluginProvider = function(metadata) {
 	}
 	
 	function _handleRequest(topic, message) {
+		var serviceId = message.serviceId;
+		var service = _services[serviceId].implementation;
+		var method = service[message.method];
+		var response = {id: message.id, result: null, error: null};
 		try {
-			var serviceId = message.serviceId;
-			var service = _services[serviceId].implementation;
-			var method = service[message.method];
-			
-			var response = {id: message.id, result: null, error: null};
 			var promiseOrResult = method.apply(service, message.params);
 			if(promiseOrResult && typeof promiseOrResult.then === "function"){
 				promiseOrResult.then(function(result) {
@@ -119,10 +121,10 @@ eclipse.PluginProvider = function(metadata) {
 		}
 		
 		_hubClient = new OpenAjax.hub.IframeHubClient({
-	        HubClient: {
-	          onSecurityAlert: function(source, alertType) {
-	        	  console.log(source + ":" + alertType );
-	          }
+			HubClient: {
+				onSecurityAlert: function(source, alertType) {
+					console.log(source + ":" + alertType );
+				}
 	        }
 		});
 		_hubClient.connect(function(hubClient, success, error) {
