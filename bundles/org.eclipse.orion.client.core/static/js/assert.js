@@ -7,8 +7,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-var orion = orion || {};
-orion.Assert = (function() {
+
+/*global define*/
+define(function() {
 	var exports = {};
 	function AssertionError(options) {
 		if (options) {
@@ -33,7 +34,8 @@ orion.Assert = (function() {
 		}
 	}
 
-	function F() {};
+	function F() {
+	}
 	F.prototype = Error.prototype;
 	AssertionError.prototype = new F();
 	AssertionError.prototype.constructor = AssertionError;
