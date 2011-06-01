@@ -12,13 +12,6 @@
  
 define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton' ], function(dojo, dijit, mUtil){
 
-var exports = {};
-
-/**
- * The command service manages the available commands.
- * @class The command service manages the available commands.
- */
-exports.CommandService = (function() {
 	/**
 	 * Constructs a new command service with the given options.
 	 * @param {Object} options The command options object which includes the service registry.
@@ -29,18 +22,8 @@ exports.CommandService = (function() {
 		this._domScope = {};
 		this._objectScope = {};
 		this._globalScope = {};
-<<<<<<< HEAD
-<<<<<<< HEAD
 		this._namedGroups = {};
 		this._activeBindings = {};
-=======
-		this._namedGroups = {};
-		this._activeBindings = {};
->>>>>>> 2bb365a2a0e7549e187c7fbefa846a2b43056ecb
-=======
-		this._namedGroups = {};
-		this._activeBindings = {};
->>>>>>> 2bb365a2a0e7549e187c7fbefa846a2b43056ecb
 		this._init(options);
 	}
 	CommandService.prototype = /** @lends orion.commands.CommandService.prototype */ {
@@ -58,62 +41,6 @@ exports.CommandService = (function() {
 				}
 				this._processKey(evt);
 			}));
-<<<<<<< HEAD
-		},
-		
-		_processKey: function(event) {
-			function stop(event) {
-				if (window.document.all) { 
-					event.keyCode = 0;
-				} else { 
-					event.preventDefault();
-					event.stopPropagation();
-				}
-			}
-			for (var id in this._activeBindings) {
-				if (this._activeBindings[id] && this._activeBindings[id].keyBinding && this._activeBindings[id].command) {
-					if (this._activeBindings[id].keyBinding.match(event)) {
-						var activeBinding = this._activeBindings[id];
-						var command = activeBinding.command;
-						if (command.hrefCallback) {
-							stop(event);
-							var href = command.hrefCallback.call(activeBinding.handler || window, activeBinding.items, id, activeBinding.userData);
-							if (href.then){
-								href.then(function(l){
-									window.open(l);
-								});
-							} else {
-								// We assume window open since there's no link gesture to tell us what to do.
-								window.open(href);
-							}
-							return;
-						} else if (command.callback) {
-							stop(event);
-							window.setTimeout(function() {
-								command.callback.call(activeBinding.handler || window, activeBinding.items, id, null, activeBinding.userData);
-							}, 0);
-							return;
-						}
-					}
-				}
-			}
-		},
-
-		
-		/**
-		 * Return the selection service that is being used when commands should apply against a selection.
-		 */
-		getSelectionService: function() {
-			return this._selection;
-		},
-		
-		showKeyBindings: function(targetNode) {
-			for (var binding in this._activeBindings) {
-				if (this._activeBindings[binding] && this._activeBindings[binding].keyBinding && this._activeBindings[binding].command) {
-					dojo.place("<br>"+this._activeBindings[binding].keyBinding.userString+" = "+this._activeBindings[binding].command.name, targetNode, "last");
-				}
-			}
-=======
 		},
 		
 		_processKey: function(event) {
@@ -168,7 +95,6 @@ exports.CommandService = (function() {
 					dojo.place("<span>"+mUtil.getUserKeyString(this._activeBindings[binding].keyBinding)+" = "+this._activeBindings[binding].command.name+"<br></span>", targetNode, "last");
 				}
 			}
->>>>>>> 2bb365a2a0e7549e187c7fbefa846a2b43056ecb
 		},
 		
 		/** 
@@ -542,12 +468,9 @@ exports.CommandService = (function() {
 			return sep;
 		}
 
-	};  // end prototype
-	return CommandService;
-}());
+	};  // end command service prototype
+	CommandService.prototype.constructor = CommandService;
 
-
-exports.Command = (function() {
 	/**
 	 * Constructs a new command with the given options.
 	 * @param {Object} options The command options object
@@ -749,112 +672,35 @@ exports.Command = (function() {
 		hasImage: function() {
 			return this.image !== "/images/none.png";
 		}
-	};  // end prototype
-	return Command;
-<<<<<<< HEAD
-=======
-}());
+	};  // end Command prototype
+	Command.prototype.constructor = Command;
 
-/**
- * Constructs a new key binding with the given key code and modifiers.
- * 
- * @param {String|Number} keyCode the key code.
- * @param {Boolean} mod1 the primary modifier (usually Command on Mac and Control on other platforms).
- * @param {Boolean} mod2 the secondary modifier (usually Shift).
- * @param {Boolean} mod3 the third modifier (usually Alt).
- * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
- * 
- * @class A CommandKeyBinding represents of a key code and a modifier state that can be triggered by the user using the keyboard.
- * @name eclipse.CommandKeyBinding
- * 
- * @property {Object|String|Number} keyCode An eclipse.KeyBinding or key code.
- * @property {Boolean} mod1 The primary modifier (usually Command on Mac and Control on other platforms).
- * @property {Boolean} mod2 The secondary modifier (usually Shift).
- * @property {Boolean} mod3 The third modifier (usually Alt).
- * @property {Boolean} mod4 The fourth modifier (usually Control on the Mac).
- */
-eclipse.CommandKeyBinding = (function() {
-	var isMac = navigator.platform.indexOf("Mac") !== -1;
-	/** @private */
+	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
+	/**
+	 * Constructs a new key binding with the given key code and modifiers.
+	 * 
+	 * @param {String|Number} keyCode the key code.
+	 * @param {Boolean} mod1 the primary modifier (usually Command on Mac and Control on other platforms).
+	 * @param {Boolean} mod2 the secondary modifier (usually Shift).
+	 * @param {Boolean} mod3 the third modifier (usually Alt).
+	 * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
+	 * 
+	 * @class A CommandKeyBinding represents of a key code and a modifier state that can be triggered by the user using the keyboard.
+	 * @name orion.commands.CommandKeyBinding
+	 * 
+	 * @property {String} userString The user representation for the string (to show in key assist dialog)
+	 * @property {String|Number} keyCode The key code.
+	 * @property {Boolean} mod1 The primary modifier (usually Command on Mac and Control on other platforms).
+	 * @property {Boolean} mod2 The secondary modifier (usually Shift).
+	 * @property {Boolean} mod3 The third modifier (usually Alt).
+	 * @property {Boolean} mod4 The fourth modifier (usually Control on the Mac).
+	 */
 	function CommandKeyBinding (keyCode, mod1, mod2, mod3, mod4) {
 		if (typeof(keyCode) === "string") {
 			this.keyCode = keyCode.toUpperCase().charCodeAt(0);
 		} else {
 			this.keyCode = keyCode;
 		}
-		this.mod1 = mod1 !== undefined && mod1 !== null ? mod1 : false;
-		this.mod2 = mod2 !== undefined && mod2 !== null ? mod2 : false;
-		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;
-		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
-	}
-	CommandKeyBinding.prototype = /** @lends eclipse.CommandKeyBinding.prototype */ {
-		/**
-		 * Returns whether this key binding matches the given key event.
-		 * 
-		 * @param e the key event.
-		 * @returns {Boolean} <code>true</code> whether the key binding matches the key event.
-		 */
-		match: function (e) {
-			if (this.keyCode === e.keyCode) {
-				var mod1 = isMac ? e.metaKey : e.ctrlKey;
-				if (this.mod1 !== mod1) { return false; }
-				if (this.mod2 !== e.shiftKey) { return false; }
-				if (this.mod3 !== e.altKey) { return false; }
-				if (isMac && this.mod4 !== e.ctrlKey) { return false; }
-				return true;
-			}
-			return false;
-		},
-		/**
-		 * Returns whether this key binding is the same as the given parameter.
-		 * 
-		 * @param {eclipse.CommandKeyBinding} kb the key binding to compare with.
-		 * @returns {Boolean} whether or not the parameter and the receiver describe the same key binding.
-		 */
-		equals: function(kb) {
-			if (!kb) { return false; }
-			if (this.keyCode !== kb.keyCode) { return false; }
-			if (this.mod1 !== kb.mod1) { return false; }
-			if (this.mod2 !== kb.mod2) { return false; }
-			if (this.mod3 !== kb.mod3) { return false; }
-			if (this.mod4 !== kb.mod4) { return false; }
-			return true;
-		}
-	};
-	return CommandKeyBinding;
->>>>>>> 2bb365a2a0e7549e187c7fbefa846a2b43056ecb
-}());
-
-<<<<<<< HEAD
-/**
- * Constructs a new key binding with the given key code and modifiers.
- * 
- * @param {String|Number} keyCode the key code.
- * @param {Boolean} mod1 the primary modifier (usually Command on Mac and Control on other platforms).
- * @param {Boolean} mod2 the secondary modifier (usually Shift).
- * @param {Boolean} mod3 the third modifier (usually Alt).
- * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
- * 
- * @class A CommandKeyBinding represents of a key code and a modifier state that can be triggered by the user using the keyboard.
- * @name orion.commands.CommandKeyBinding
- * 
- * @property {String} userString The user representation for the string (to show in key assist dialog)
- * @property {String|Number} keyCode The key code.
- * @property {Boolean} mod1 The primary modifier (usually Command on Mac and Control on other platforms).
- * @property {Boolean} mod2 The secondary modifier (usually Shift).
- * @property {Boolean} mod3 The third modifier (usually Alt).
- * @property {Boolean} mod4 The fourth modifier (usually Control on the Mac).
- */
-exports.CommandKeyBinding = (function() {
-	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
-	/** @private */
-	function CommandKeyBinding (userString, keyCode, mod1, mod2, mod3, mod4) {
-		if (typeof(keyCode) === "string") {
-			this.keyCode = keyCode.toUpperCase().charCodeAt(0);
-		} else {
-			this.keyCode = keyCode;
-		}
-		this.userString = userString;
 		this.mod1 = mod1 !== undefined && mod1 !== null ? mod1 : false;
 		this.mod2 = mod2 !== undefined && mod2 !== null ? mod2 : false;
 		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;
@@ -894,16 +740,12 @@ exports.CommandKeyBinding = (function() {
 			return true;
 		}
 	};
-	return CommandKeyBinding;
-}());
+	CommandKeyBinding.prototype.constructor = CommandKeyBinding;
 
-return exports;
+	//return the module exports
+	return {
+		CommandService: CommandService,
+		CommandKeyBinding: CommandKeyBinding,
+		Command: Command
+	};
 });
-=======
-return eclipse;
-<<<<<<< HEAD
-});
->>>>>>> 2bb365a2a0e7549e187c7fbefa846a2b43056ecb
-=======
-});
->>>>>>> 2bb365a2a0e7549e187c7fbefa846a2b43056ecb
