@@ -11,8 +11,8 @@
 /*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
 /*browser:true*/
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands',
-        'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/gitClient',
-        'orion/breadcrumbs', 'orion/ssh/sshTools', 'orion/git-commit-details', 'orion/git-commit-navigator', 'orion/gitCommands',
+        'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'js/gitClient',
+        'orion/breadcrumbs', 'orion/ssh/sshTools', 'js/git-commit-details', 'js/git-commit-navigator', 'js/gitCommands',
 	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mAuth, mDialogs, mSelection, mFileClient,
 					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitDetails, mGitCommitNavigator, mGitCommands) {
@@ -332,7 +332,7 @@ function makeHref(fileClient, seg, location){
 						gitService.getDefaultRemoteBranch(
 								metadata.Git.RemoteLocation, function(
 										defaultRemoteBranchJsonData, secondArg) {
-									seg.href = "/git-log.html?remote#"
+									seg.href = "/git/git-log.html?remote#"
 											+ defaultRemoteBranchJsonData.Location
 											+ "?page=1";
 								});
@@ -340,7 +340,7 @@ function makeHref(fileClient, seg, location){
 
 				} else {
 					if(metadata.Git)
-					seg.href = "/git-log.html#" + metadata.Git.CommitLocation
+					seg.href = "/git/git-log.html#" + metadata.Git.CommitLocation
 							+ "?page=1";
 				}
 			}),

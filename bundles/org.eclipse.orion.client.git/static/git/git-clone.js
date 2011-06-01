@@ -11,8 +11,8 @@ var eclipse;
 /*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
 /*browser:true*/
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands',
-        'orion/auth', 'orion/dialogs', 'orion/users', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/gitClient',
-        'orion/ssh/sshTools', 'orion/git-clones-explorer', 'orion/gitCommands',
+        'orion/auth', 'orion/dialogs', 'orion/users', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'js/gitClient',
+        'orion/ssh/sshTools', 'js/git-clones-explorer', 'js/gitCommands',
 	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mAuth, mDialogs, mUsers, mSelection, mFileClient,
 					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitClonesExplorer, mGitCommands) {
@@ -74,6 +74,7 @@ dojo.addOnLoad(function() {
 		d.callback({});
 		return d;
 	}
+	var topLevel = [];
 	var topLevelFileService = {
 		fetchChildren: emptyArray,
 		createWorkspace: emptyObject,

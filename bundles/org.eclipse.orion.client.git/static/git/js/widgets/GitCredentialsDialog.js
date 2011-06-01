@@ -26,7 +26,7 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin'], fun
  */
 dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache(new dojo._Url("/js/widgets/templates/GitCredentialsDialog.html")),
+	templateString: dojo.cache(new dojo._Url("/git/js/widgets/templates/GitCredentialsDialog.html")),
 	
 	constructor : function() {
 		this.inherited(arguments);
