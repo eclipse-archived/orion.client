@@ -33,6 +33,21 @@
 	<script type="text/javascript">
 	exports = {};
 	module = {};
+	
+	// needed for FF 3.6
+	if (!Object.keys) {
+		Object.keys = function(obj) {
+			var key,
+				keys = [];
+		    for (key in obj) {
+		        if (obj.hasOwnProperty(key)) {
+		            keys.push(key);
+		        }
+		    }
+		    return keys;
+		}
+	}
+	
 	define("assert", ["orion/assert"], function(assert) {
 		return assert
 	});
