@@ -12,10 +12,6 @@
 
 define(["dojo"], function(dojo){
 
-var exports = {};
-
-exports.ServiceReference = (function() {
-
 	/**
 	 * Creates a new service reference.
 	 *
@@ -24,7 +20,7 @@ exports.ServiceReference = (function() {
 	 * @param {String} serviceId The symbolic id of this service instance
 	 * @param {String} name The service name
 	 * @param {Object} properties A JSON object containing the service's declarative properties
-	 */
+ 	 */
 	function ServiceReference(serviceId, name, properties) {
 		this.serviceId = serviceId;
 		this.name = name;
@@ -66,10 +62,8 @@ exports.ServiceReference = (function() {
 			return this.properties[propertyName];
 		}
 	};
-	return ServiceReference;
-}());
+	ServiceReference.prototype.constructor = ServiceReference;
 
-exports.ServiceRegistration = (function() {
 	/**
 	 * Creates a new service registration
 	 *
@@ -107,10 +101,8 @@ exports.ServiceRegistration = (function() {
 			return this.serviceReference;
 		}
 	};
-	return ServiceRegistration;
-}());
+	ServiceRegistration.prototype.constructor = ServiceRegistration;
 
-exports.Service = (function() {
 	/**
 	 * Creates a new service instance.
 	 *
@@ -145,6 +137,7 @@ exports.Service = (function() {
 			}
 		}
 	}
+	
 	Service.prototype = /** @lends orion.serviceregistry.Service.prototype */ {
 
 		/**
@@ -157,7 +150,7 @@ exports.Service = (function() {
 		},
 		
 		/**
-		 * Stops a listener from listening to a particular efvent on this service.
+		 * Stops a listener from listening to a particular event on this service.
 		 * @param {String} eventName The name of the event to listen for
 		 * @param {Object} listener The event listener
 		 */
@@ -165,59 +158,84 @@ exports.Service = (function() {
 			this.internalRegistry.removeEventListener(this.serviceId, eventName, listener);
 		}
 	};
-	return Service;
-}());
+	Service.prototype.constructor = Service;
+	
 
-exports.EventTarget = function() {
-	var _namedlisteners = {};
-	
-	this.dispatchEvent = function(eventName) {
-		var listeners = _namedlisteners[eventName];
-		if (listeners) {
-			for (var i = 0; i < listeners.length; i++) {
-				try {
-					var args = Array.prototype.slice.call(arguments, 1);
-					listeners[i].apply(null, args);
-				} catch (e) {
-					console.log(e); // for now, probably should dispatch an ("error", e)
-				}
-			}
-		}
-	};
-	
-	this.addEventListener = function(eventName, listener) {
-		_namedlisteners[eventName] = _namedlisteners[eventName] || [];
-		_namedlisteners[eventName].push(listener);
-	};
-	
-	this.removeEventListener = function(eventName, listener) {
-		var listeners = _namedlisteners[eventName];
-		if (listeners) {
-			for (var i = 0; i < listeners.length; i++) {
-				if (listeners[i] === listener) {
-					if(listeners.length === 1) {
-						delete _namedlisteners[eventName];
-					} else {
-						listeners.splice(i,1);
+	/**
+	 * Creates an Event Target
+	 *
+	 * @name orion.serviceregistry.EventTarget
+	 * @class Base for creating an Orion event target
+	 */
+	function EventTarget() {
+		this._namedlisteners = {};
+	}	
+
+	EventTarget.prototype = /** @lends orion.serviceregistry.EventTarget.prototype */{
+		/**
+		 * Dispatches a named event along with an arbitrarary set of parameters
+		 * @param {String} eventName The event name
+		 */
+		dispatchEvent: function(eventName) {
+			var listeners = this._namedlisteners[eventName];
+			if (listeners) {
+				for ( var i = 0; i < listeners.length; i++) {
+					try {
+						var args = Array.prototype.slice.call(arguments, 1);
+						listeners[i].apply(null, args);
+					} catch (e) {
+						console.log(e); // for now, probably should dispatch an
+										// ("error", e)
 					}
-					break;
+				}
+			}
+		},
+
+		/**
+		 * Adds an event listener for a named event
+		 * @param {String} eventName The event name
+		 * @param {Function} listener The function called when an event occurs
+		 */
+		addEventListener: function(eventName, listener) {
+			this._namedlisteners[eventName] = this._namedlisteners[eventName] || [];
+			this._namedlisteners[eventName].push(listener);
+		},
+
+		/**
+		 * Removes an event listener for a named event
+		 * @param {String} eventName The event name
+		 * @param {Function} listener The function called when an event occurs
+		 */
+		removeEventListener: function(eventName, listener) {
+			var listeners = this._namedlisteners[eventName];
+			if (listeners) {
+				for ( var i = 0; i < listeners.length; i++) {
+					if (listeners[i] === listener) {
+						if (listeners.length === 1) {
+							delete this._namedlisteners[eventName];
+						} else {
+							listeners.splice(i, 1);
+						}
+						break;
+					}
 				}
 			}
 		}
-	};	
-};
 
-exports.ServiceRegistry = (function() {
+	};
+	EventTarget.prototype.constructor = EventTarget;
+
+
 	/**
 	 * Creates a new service registry
-	 *
+	 * 
 	 * @name orion.serviceregistry.ServiceRegistry
 	 * @class The Orion service registry
 	 */
 	function ServiceRegistry() {
 		this._entries = [];
 		this._namedReferences = {};
-		this._serviceEventTarget = new exports.EventTarget();
+		this._serviceEventTarget = new EventTarget();
 		var that = this;
 		this.internalRegistry = {
 				isRegistered: function(serviceId) {
@@ -326,14 +344,14 @@ exports.ServiceRegistry = (function() {
 		 */
 		registerService: function(name, implementation, properties) {
 			var serviceId = this._entries.length;
-			var reference = new exports.ServiceReference(serviceId, name, properties);
-			var service = new exports.Service(serviceId, implementation, this.internalRegistry);
+			var reference = new ServiceReference(serviceId, name, properties);
+			var service = new Service(serviceId, implementation, this.internalRegistry);
 			
 			this._namedReferences[name] = this._namedReferences[name] || [];
 			this._namedReferences[name].push(reference);
-			this._entries.push({reference: reference, service: service, eventTarget: new exports.EventTarget()});
+			this._entries.push({reference: reference, service: service, eventTarget: new EventTarget()});
 			this._serviceEventTarget.dispatchEvent("serviceAdded", reference, service);
-			return new exports.ServiceRegistration(serviceId, reference, this.internalRegistry);
+			return new ServiceRegistration(serviceId, reference, this.internalRegistry);
 		},
 
 		/**
@@ -354,8 +372,13 @@ exports.ServiceRegistry = (function() {
 			this._serviceEventTarget.removeEventListener(eventName, listener);
 		}	
 	};
-	return ServiceRegistry;
-}());
+	ServiceRegistry.prototype.constructor = ServiceRegistry;
 
-return exports;
+	return {
+		ServiceReference: ServiceReference,
+		ServiceRegistration: ServiceRegistration,
+		Service: Service,
+		EventTarget: EventTarget,
+		ServiceRegistry: ServiceRegistry
+	};
 });
