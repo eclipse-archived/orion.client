@@ -12,7 +12,7 @@
 /*global window dojo dijit*/
 
 
-define(['dojo', 'dijit', 'dijit/Dialog'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox'], function(dojo, dijit) {
 
 //dojo.require("dijit.Dialog");
 //dojo.require("dijit._Widget");
