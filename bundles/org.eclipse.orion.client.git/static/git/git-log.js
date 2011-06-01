@@ -11,8 +11,8 @@
 /*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
 /*browser:true*/
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands',
-        'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/gitClient',
-        'orion/breadcrumbs', 'orion/ssh/sshTools', 'orion/git-commit-details', 'orion/git-commit-navigator', 'orion/gitCommands',
+        'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'js/gitClient',
+        'orion/breadcrumbs', 'orion/ssh/sshTools', 'js/git-commit-details', 'js/git-commit-navigator', 'js/gitCommands',
 	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mAuth, mDialogs, mSelection, mFileClient,
 					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitDetails, mGitCommitNavigator, mGitCommands) {
@@ -92,10 +92,7 @@ dojo.addOnLoad(function() {
 		commandService.registerCommandContribution("eclipse.orion.git.push", 100, "pageActions", "eclipse.gitGroup.page");
 	};
 	
-	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-		var fileClient = new mFileClient.FileClient(fileService);
-		initTitleBar(fileClient, navigator);
-	});
+
 	
 	if (isRemote()) {
 		// refresh the commit list for the remote
@@ -108,6 +105,12 @@ dojo.addOnLoad(function() {
 			handleAs : "json",
 			timeout : 5000,
 			load : function(jsonData, secondArg) {
+				
+				serviceRegistry.getService(fileServiceReference).then(function(fileService) {
+					var fileClient = new mFileClient.FileClient(fileService);
+					initTitleBar(fileClient, navigator, jsonData);
+				});
+				
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
 					gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
 						navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
@@ -122,6 +125,11 @@ dojo.addOnLoad(function() {
 		});
 	} else {
 		var path = dojo.hash();
+		
+		serviceRegistry.getService(fileServiceReference).then(function(fileService) {
+			var fileClient = new mFileClient.FileClient(fileService);
+			initTitleBar(fileClient, navigator);
+		});
 		
 		dojo.xhrGet({
 			url : path,
@@ -183,10 +191,7 @@ dojo.addOnLoad(function() {
 	// every time the user manually changes the hash, we need to load the
 	// workspace with that name
 	dojo.subscribe("/dojo/hashchange", navigator, function() {
-		serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-			var fileClient = new mFileClient.FileClient(fileService);
-			initTitleBar(fileClient, navigator);
-		});
+
 		if (isRemote()) {
 			var path = dojo.hash();
 			dojo.xhrGet({
@@ -197,6 +202,10 @@ dojo.addOnLoad(function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, secondArg) {
+					serviceRegistry.getService(fileServiceReference).then(function(fileService) {
+						var fileClient = new mFileClient.FileClient(fileService);
+						initTitleBar(fileClient, navigator, jsonData);
+					});
 					serviceRegistry.getService("orion.git.provider").then(function(gitService){
 						gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
 							navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
@@ -210,6 +219,10 @@ dojo.addOnLoad(function() {
 				}
 			});
 		} else {
+			serviceRegistry.getService(fileServiceReference).then(function(fileService) {
+				var fileClient = new mFileClient.FileClient(fileService);
+				initTitleBar(fileClient, navigator);
+			});
 			navigator.loadCommitsList(dojo.hash(), {});
 		}
 	});
@@ -254,7 +267,7 @@ function getRemoteFileURI(){
 	return fileURI;
 }
 
-function initTitleBar(fileClient, navigator){
+function initTitleBar(fileClient, navigator, item){
 	//TODO we are calculating file path from the URL, it should be returned by git API
 	var fileURI = isRemote() ? getRemoteFileURI() : getHeadFileUri();
 	
@@ -262,6 +275,13 @@ function initTitleBar(fileClient, navigator){
 	if(fileURI){
 		fileClient.read(fileURI, true).then(
 				dojo.hitch(this, function(metadata) {
+					if(item && item.Name){
+						if(metadata.Parents){
+							metadata.Parents.push({Name: item.Name});
+						}else{
+							metadata.Parents = [{Name: item.Name}];
+						}
+					}
 					var titlePane = dojo.byId("pageTitle");
 					if (titlePane) {
 						dojo.empty(titlePane);
@@ -324,6 +344,9 @@ function makeRightPane(explorer){
 }
 
 function makeHref(fileClient, seg, location){
+	if(!location){
+		return;
+	}
 	fileClient.read(location, true).then(
 			dojo.hitch(this, function(metadata) {
 				if (isRemote()) {
@@ -332,7 +355,7 @@ function makeHref(fileClient, seg, location){
 						gitService.getDefaultRemoteBranch(
 								metadata.Git.RemoteLocation, function(
 										defaultRemoteBranchJsonData, secondArg) {
-									seg.href = "/git-log.html?remote#"
+									seg.href = "/git/git-log.html?remote#"
 											+ defaultRemoteBranchJsonData.Location
 											+ "?page=1";
 								});
@@ -340,7 +363,7 @@ function makeHref(fileClient, seg, location){
 
 				} else {
 					if(metadata.Git)
-					seg.href = "/git-log.html#" + metadata.Git.CommitLocation
+					seg.href = "/git/git-log.html#" + metadata.Git.CommitLocation
 							+ "?page=1";
 				}
 			}),

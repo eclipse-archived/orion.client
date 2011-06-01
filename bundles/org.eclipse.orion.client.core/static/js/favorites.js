@@ -194,6 +194,7 @@ exports.Favorites = (function() {
 			id: "eclipse.deleteFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: function(item) {
+				if(confirm("Do you want to remove " + item.name + " from favorites?"))
 				options.serviceRegistry.getService("orion.core.favorite").then(function(service) {
 					service.removeFavorite(item.path);
 				});
@@ -214,6 +215,7 @@ exports.Favorites = (function() {
 			id: "eclipse.deleteSearch",
 			visibleWhen: function(item) {return item.isSearch;},
 			callback: function(item) {
+				if(confirm("Do you want to remove " + item.name + " from favorites?"))
 				options.serviceRegistry.getService("orion.core.favorite").then(function(service) {
 					service.removeSearch(item.query);
 				});

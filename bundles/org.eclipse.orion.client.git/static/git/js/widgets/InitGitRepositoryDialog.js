@@ -9,17 +9,17 @@
  ******************************************************************************/
 
 /*global dojo dijit widgets*/
-
 define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin'], function(dojo, dijit) {
+
 
 /**
  * @param options {{ 
  *     func: function
  * }}
  */
-dojo.declare("widgets.AddRemoteDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
+dojo.declare("widgets.InitGitRepositoryDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache(new dojo._Url("/js/widgets/templates/AddRemoteDialog.html")),
+	templateString: dojo.cache(new dojo._Url("/git/js/widgets/templates/InitGitRepositoryDialog.html")),
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -27,13 +27,11 @@ dojo.declare("widgets.AddRemoteDialog", [dijit.Dialog, widgets._OrionDialogMixin
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = "Add Remote";
-		this.gitRemoteLabelText = "Remote Name:";
-		this.gitRemoteURILabelText = "Remote URI:";
+		this.title = "Init Git Repository";
+		this.gitTargetLabelText = "Target:";
 	},
 	execute: function() {
-		this.options.func(this.gitRemote.value, this.gitRemoteURI.value);
+		this.options.func(this.gitTarget.value);
 	}
 });
-
 });

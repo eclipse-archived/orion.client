@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status',  'orion/commands',
-	        'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/gitClient', 'orion/git-status-table', 'orion/breadcrumbs',
+	        'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'js/gitClient', 'js/git-status-table', 'orion/breadcrumbs',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
 			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs) {
 
@@ -87,7 +87,7 @@ function initTitleBar(fileClient){
 function makeHref(fileClient, seg, location){
 	fileClient.read(location, true).then(
 			dojo.hitch(this, function(metadata) {
-				seg.href = "/git-status.html#" + metadata.Git.StatusLocation;
+				seg.href = "/git/git-status.html#" + metadata.Git.StatusLocation;
 			}),
 			dojo.hitch(this, function(error) {
 				console.error("Error loading file metadata: " + error.message);
