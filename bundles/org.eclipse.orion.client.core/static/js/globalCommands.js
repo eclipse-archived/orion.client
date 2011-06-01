@@ -129,14 +129,14 @@ exports.generateUserInfo = function(userName, userStatusText) {
 	}
 };
 
-exports.generateDomCommandsInBanner = function(commandService, handler , pageActionDomId) {
+exports.generateDomCommandsInBanner = function(commandService, handler , pageActionDomId , useImage) {
 	var toolbar = dojo.byId("pageActions");
 	if(pageActionDomId) {
 		toolbar = dojo.byId(pageActionDomId);
 	}
 	if (toolbar) {	
 		dojo.empty(toolbar);
-		commandService.renderCommands(toolbar, "dom", handler, handler, "image", null, null, true);  // use true when we want to force toolbar items to text
+		commandService.renderCommands(toolbar, "dom", handler, handler, "image", null, null, !useImage);  // use true when we want to force toolbar items to text
 	}
 };
 
