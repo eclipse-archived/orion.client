@@ -37,26 +37,20 @@ dojo.declare("widgets.RegistryTree", [dijit.Tree], {
 	 */
 	buildRegistry: function(registry) {
 		var plugins =  { id: "plugins", label: "Plug-ins", children: this.buildPlugins("plugins", registry) };
-		var root = {
-			id: "root",
-			label: "Plug-in registry",
-			children: [plugins]
-		};
-		return [ root ];
+		return [ plugins ];
 	},
 	buildPlugins: function(prefix, registry) {
-		var nodes = [],
-		    plugins = registry.getPlugins();
-		this.forEach(registry.getPlugins(), dojo.hitch(this, function(name, value) {
-			var plugin = value,
-			    newPrefix = prefix + "|" + plugin.getLocation(),
-			    services = this.buildServices(newPrefix, plugin.getServiceReferences());
+		var nodes = [];
+		var plugins = registry.getPlugins();
+		for (var i=0; i < plugins.length; i++) {
+			var newPrefix = prefix + "|" + plugins[i].getLocation();
 			nodes.push({
+				plugin: plugins[i],
 				id: newPrefix,
-				label: plugin.getLocation(),
-				children: [services]
+				label: plugins[i].getLocation(),
+				children: [this.buildServices(newPrefix, plugins[i].getServiceReferences())]
 			});
-		}));
+		}
 		return nodes;
 	},
 	buildProperties: function(prefix, /** Object */ reference) {
@@ -101,51 +95,19 @@ dojo.declare("widgets.RegistryTree", [dijit.Tree], {
 			children: data
 		};
 	},
-	/** @return {Array} */
-//	buildLocalServices: function(prefix, registry) {
-//		var data = [];
-//		this.forEach(registry._localServices, dojo.hitch(this, function(name, localService) {
-//			var newPrefix = prefix + "|" + name;
-//			data.push({
-//				id: newPrefix,
-//				label: name,
-//				children: this.buildLocalService(newPrefix, localService)
-//			});
-//		}));
-//		return data;
-//	},
-	/** @return {Array} */
-//	buildLocalService: function(prefix, localService) {
-//		// NOTE: localService.instances is an Array which uses noninteger keys
-//		var data = [];
-//		this.forEach(localService.instances, dojo.hitch(this, function(name, instance) {
-//			var newPrefix = prefix + "|" + name;
-//			data.push({
-//				id: newPrefix,
-//				label: "Instance " + name,
-//				children: this.buildLocalServiceInstance(newPrefix, instance)
-//			});//		}));
-//		return data;
-//	},
-	/** @return {Array} */
-//	buildLocalServiceInstance: function(prefix, instance) {
-//		var newPrefix = prefix + "|" + instance.id,
-//		    data = [];
-//		data.push(this.buildProperties(newPrefix, instance.properties));
-//		data.push({
-//			id: newPrefix + "|serviceImpl",
-//			label: "serviceImpl: " + instance.serviceImpl
-//		});
-//		return data;
-//	},
-	/**
-	 * Invokes callback(key, value) for each key-value pair in object
-	 */
-	forEach: function(obj, /**function(propertyName, value, ?obj):void*/callback) {
-		if(!obj) { return; }
-		for (var prop in obj) {
-			callback(prop, obj[prop], obj);
+	getSelectedPlugins: function() {
+		if (this.selectedNodes.length === 0) {
+			return [];
 		}
+		var plugins = [];
+		for (var i=0; i<this.selectedNodes.length; i++) {
+			if (this.selectedNodes[i].item.plugin) {
+				// each item node's properties are actually kept in a single item array.
+				// I have no idea why, something with the TreeStoreModel????
+				plugins.push(this.selectedNodes[i].item.plugin[0]);
+			}
+		}
+		return plugins;
 	}
 });
 });
