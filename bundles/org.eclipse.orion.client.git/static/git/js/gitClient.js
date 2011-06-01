@@ -213,7 +213,7 @@ eclipse.GitService = (function() {
 			});
 		},
 		
-		unstageAll: function(location , onLoad , onError){
+		unstageAll: function(location , resetParam ,onLoad , onError){
 			return dojo.xhrPost({
 				url: location , 
 				headers: {
@@ -221,7 +221,7 @@ eclipse.GitService = (function() {
 				},
 				handleAs: "json",
 				timeout: 15000,
-				postData: dojo.toJson({"Reset":"MIXED"} ),
+				postData: dojo.toJson({"Reset":resetParam} ),
 				load: function(jsonData, secondArg) {
 					if (onLoad) {
 						if (typeof onLoad === "function")

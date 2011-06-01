@@ -470,7 +470,7 @@ orion.GitStatusController = (function() {
 				id: "orion.gitUnstageAll",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Unstaging...");
-					return self.unstageAll();
+					return self.unstageAll("MIXED");
 				},
 				visibleWhen: function(item) {
 					return (item.type === "stagedItems" && self.hasStaged);
@@ -705,7 +705,7 @@ orion.GitStatusController = (function() {
 			var location = this._model.items.CloneLocation;
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
-						service.checkoutPath(location, [itemModel.path],
+						service.checkoutPath(location, [itemModel.name],
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
@@ -735,11 +735,11 @@ orion.GitStatusController = (function() {
 					});
 		},
 		
-		unstageAll: function(){
+		unstageAll: function(resetParam){
 			var self = this;
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
-						service.unstageAll(self._model.items.IndexLocation, 
+						service.unstageAll(self._model.items.IndexLocation, resetParam,
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
