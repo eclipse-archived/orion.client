@@ -252,6 +252,7 @@ var exports = {};
 			image: "/images/remove.gif",
 			id: "eclipse.removeBranch",
 			callback: function(item) {
+				if(confirm("Are you sure you want to remove branch " + item.Name+"?"))
 				serviceRegistry.getService("orion.git.provider").then(
 					function(service) {
 						service.removeBranch(item.Location).then(
@@ -296,6 +297,7 @@ var exports = {};
 			image: "/images/remove.gif",
 			id: "eclipse.removeRemote",
 			callback: function(item) {
+				if(confirm("Are you sure you want to remove remote " + item.Name+"?"))
 				serviceRegistry.getService("orion.git.provider").then(
 					function(service) {
 						service.removeRemote(item.Location).then(
