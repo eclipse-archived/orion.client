@@ -157,6 +157,11 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 		if (!_connected) {
 			internalRegistry.connect(url, _responseHandler);
 			_connected = true;
+			setTimeout(function() {
+				if (!_loaded) {
+					_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
+				}
+			}, 15000);
 		}
 		return _deferredLoad.promise;
 	};
@@ -183,7 +188,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	var _userPlugins;
 
 	window.addEventListener("message", function(event) {
-		if (!event.source.location) {
+		if (!event.source || !event.source.location) {
 			return;
 		}
 		var url = event.source.location.toString();
