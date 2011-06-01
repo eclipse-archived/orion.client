@@ -531,7 +531,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 				var mappings = [
 				    {
 				      "Source": "/",
-				      "Target": this.path + "/bundles/org.eclipse.orion.client.core/static"
+				      "Target": this.path + "/bundles/org.eclipse.orion.client.core/web"
 				    },
 				    {
 				      "Source": "/editor",
