@@ -142,6 +142,9 @@ eclipse.PluginProvider = function(metadata) {
 		};
 		_publish(message);
 		_connected = true;
+		if (callback) {
+			callback();
+		}
 	};
 	
 	this.disconnect = function() {

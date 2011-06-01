@@ -102,7 +102,8 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 						_deferredLoad.resolve(_self);
 					}
 				} else if ("dispatchEvent" === message.method){
-					_serviceRegistrations[message.serviceId].dispatchEvent.apply(null, message.params);		
+					var serviceRegistration = _serviceRegistrations[message.serviceId];
+					serviceRegistration.dispatchEvent.apply(serviceRegistration, message.params);		
 				} else {
 					throw new Error("Bad response method: " + message.method);
 				}		
@@ -182,6 +183,9 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	var _userPlugins;
 
 	window.addEventListener("message", function(event) {
+		if (!event.source.location) {
+			return;
+		}
 		var url = event.source.location.toString();
 		if (_channels[url]) {
 			_channels[url].handler(JSON.parse(event.data));	
@@ -296,7 +300,11 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 			},
 			disconnect: function(url) {
 				if (_channels[url]) {
-					document.removeChild(_channels[url].target.frameElement);
+					try {
+						document.body.removeChild(_channels[url].iframe);
+					} catch(e) {
+						// best effort
+					}
 					delete _channels[url];
 				}
 				

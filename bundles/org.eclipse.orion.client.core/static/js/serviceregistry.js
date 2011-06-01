@@ -289,10 +289,11 @@ exports.ServiceRegistry = (function() {
 			} else if (timeout === 0) {
 				d.reject(new Error("timeout: getService"));
 			} else {
+				var that = this;
 				var serviceTracker = function(reference, service) {
 					if (nameOrServiceReference === reference || nameOrServiceReference === reference.getName()) {
 						d.resolve(service);
-						this._serviceEventTarget.removeEventListener("serviceAdded", serviceTracker);
+						that._serviceEventTarget.removeEventListener("serviceAdded", serviceTracker);
 					}
 				};
 				this._serviceEventTarget.addEventListener("serviceAdded", serviceTracker);
