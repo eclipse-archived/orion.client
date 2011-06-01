@@ -285,8 +285,8 @@ exports.setUpEditor = function(isReadOnly){
 			keyModeStack.push(codeBindings);
 			
 			// global search
-			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("h", true), "search");
-			editor.getEditorWidget().setAction("search", function() {
+			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("h", true), "Search Files");
+			editor.getEditorWidget().setAction("Search Files", function() {
 				window.setTimeout(function() {
 					var e = editor.getEditorWidget();
 					var selection = e.getSelection();
@@ -329,8 +329,8 @@ exports.setUpEditor = function(isReadOnly){
 				
 			
 			// splitter binding
-			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("o", true), "toggle");
-			editor.getEditorWidget().setAction("toggle", function(){
+			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("o", true), "Toggle Outliner");
+			editor.getEditorWidget().setAction("Toggle Outliner", function(){
 					splitArea.toggle();
 			});
 		};

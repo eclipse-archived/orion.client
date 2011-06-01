@@ -27,7 +27,8 @@ exports.GitClonesExplorer = (function() {
 	GitClonesExplorer.prototype = mExplorer.Explorer.prototype;
 	
 	GitClonesExplorer.prototype.getGitLocation = function(path){
-		return "/gitapi/clone/"+ mUtil.makeRelative(path);
+		var relativePath = mUtil.makeRelative(path);
+		return relativePath[0]==="/" ? "/gitapi/clone" + relativePath : "/gitapi/clone/" + relativePath;
 	};
 	
 	GitClonesExplorer.prototype.setDefaultPath = function(defaultPath){
@@ -83,16 +84,20 @@ exports.GitClonesModel = (function() {
 	 * @class Tree model used by eclipse.FileExplorer.
 	 * TODO: Consolidate with eclipse.TreeModel.
 	 */
-	function GitClonesModel(gitClient, rootPath, fetchItems) {
+	function GitClonesModel(gitClient, rootPath, fetchItems, root) {
 		this.gitClient = gitClient;
 		this.rootPath = rootPath;
 		this.fetchItems = fetchItems;
-		this.root = null;
+		this.root = root ? root : null;
 	}
 	GitClonesModel.prototype = mExplorer.ExplorerModel.prototype; 
 	
 	
 	GitClonesModel.prototype.getRoot = function(onItem){
+		if(this.root){
+			onItem(this.root);
+			return;
+		}
 		this.fetchItems(this.rootPath).then(
 			dojo.hitch(this, function(item){
 				this.root = item;
@@ -100,21 +105,52 @@ exports.GitClonesModel = (function() {
 			})
 		);
 	};
-		
+	
+	GitClonesModel.prototype.mayHaveChildren = function (item){
+		if (item.children || item.Children) {
+			return true;
+		}
+		else if (item.BranchLocation && item.RemoteLocation){
+			return true;
+		}
+		else if (item.GroupNode){
+			return true;
+		}
+		else if (item.Type === "Remote"){
+			return true;
+		}
+		return false;
+	};
+	GitClonesModel.prototype.getIdentity = function(/* item */ item){
+		var result;
+		if(item.Location){
+			result = item.Location;
+			// remove all non valid chars to make a dom id. 
+			result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+		} else {
+			result = "ROOT";
+		}
+		return result;
+	};
+	
 	GitClonesModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
 			// the parent already has the children fetched
+		parentItem.children = [];
 			if (parentItem.Children) {
 				for(var i=0; i<parentItem.Children.length; i++){
 					parentItem.Children[i].parent = parentItem;
+					parentItem.children[i] = parentItem.Children[i];
 				}
 				onComplete(parentItem.Children);
 			}
 			else if (parentItem.BranchLocation && parentItem.RemoteLocation){
-				onComplete([{GroupNode : "true", Location : parentItem.BranchLocation, Name : "Branch", parent : parentItem}, {GroupNode : "true", Location : parentItem.RemoteLocation, Name : "Remote", parent : parentItem}]);
+				parentItem.children = [{GroupNode : "true", Location : parentItem.BranchLocation, Name : "Branch", parent : parentItem}, {GroupNode : "true", Location : parentItem.RemoteLocation, Name : "Remote", parent : parentItem}]; 
+				onComplete(parentItem.children);
 			}
 			else if (parentItem.GroupNode){
 				this.gitClient.getGitBranch(parentItem.Location).then( 
 					dojo.hitch(this, function(children) {
+						parentItem.children = children.Children;
 						for(var i=0; i<children.Children.length; i++){
 							children.Children[i].parent = parentItem;
 						}
@@ -125,6 +161,7 @@ exports.GitClonesModel = (function() {
 			else if (parentItem.Type === "Remote"){
 				this.gitClient.getGitBranch(parentItem.Location).then( 
 					dojo.hitch(this, function(children) {
+						parentItem.children = children.Children;
 						for(var i=0; i<children.Children.length; i++){
 							children.Children[i].parent = parentItem;
 						}
@@ -168,7 +205,7 @@ exports.GitClonesRenderer = (function(){
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, "/images/git-repository.gif");
+				this.getExpandImage(tableRow, div, "/git/images/git-repository.gif");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage", href: "/navigate/table.html#" + item.ContentLocation+"?depth=1"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
@@ -177,7 +214,7 @@ exports.GitClonesRenderer = (function(){
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, item.Name==="Branch" ? "/images/git-branches.gif" : "/images/git-remotes.gif");
+				this.getExpandImage(tableRow, div, item.Name==="Branch" ? "/git/images/git-branches.gif" : "/git/images/git-remotes.gif");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
@@ -189,14 +226,14 @@ exports.GitClonesRenderer = (function(){
 				if (item.Current)
 					link.style.fontWeight = "bold";
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				dojo.create("img", {src: "/images/git-branch.gif"}, link, "first");
+				dojo.create("img", {src: "/git/images/git-branch.gif"}, link, "first");
 				
 			} else if (item.Type === "Remote"){
 				col = document.createElement('td');
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, "/images/git-remote.gif");
+				this.getExpandImage(tableRow, div, "/git/images/git-remote.gif");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
@@ -207,7 +244,7 @@ exports.GitClonesRenderer = (function(){
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 								
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				dojo.create("img", {src: "/images/git-branch.gif"}, link, "first");
+				dojo.create("img", {src: "/git/images/git-branch.gif"}, link, "first");
 			}	
 			return col;
 		case 1:

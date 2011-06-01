@@ -115,7 +115,7 @@ dojo.addOnLoad(function() {
 		if(!readOnly)
 			commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
 			
-		mGlobalCommands.generateDomCommandsInBanner(commandService, {} );
+		mGlobalCommands.generateDomCommandsInBanner(commandService, {},"pageActions",true );
 	});
 });
 

@@ -8,9 +8,9 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
+/*global define*/
 define([], function() {
 
-/*global orion:true*/
 var exports =  {};
 
 exports.SampleGrammar = {
@@ -28,7 +28,7 @@ exports.SampleGrammar = {
 				"match": "\\b(this|var|void)\\b",
 				"name": "keyword.other.mylang"
 			}, {
-				"match": "(\")[^\"](\")",
+				"match": "(\")[^\"]+(\")",
 				"name": "constant.character.mylang"
 			}, {
 				"match": "\\b(?:\\d+)\\b",
@@ -60,10 +60,6 @@ exports.SampleBeginEndGrammar = {
 	"uuid": "BA5758BD-B671-40BF-F234-22AF369537E8",
 	"patterns": [
 			{
-				"match": "char|int",
-				"name": "storage.type.mylang"
-			},
-			{
 				// SGML-style comments for testing begin/end
 				"begin": "<!--",
 				"end": "-->",
@@ -76,11 +72,32 @@ exports.SampleBeginEndGrammar = {
 				},
 				"patterns": [
 					{
-						// For testing nested subpatterns
+						// Nested begin/end rule
+						"begin": "\\[",
+						"end": "\\]",
+						"beginCaptures": {
+							"0": { "name": "meta.brace.square.open.mylang" }
+						},
+						"endCaptures": {
+							"0": { "name": "meta.brace.square.close.mylang" }
+						},
+						"contentName": "meta.insquare.mylang",
+						"patterns": [
+							{
+								"match": "\\s+",
+								"name": "invalid.illegal.whitespace.mylang"
+							}
+						]
+					},
+					{
 						"match": "--",
 						"name": "invalid.illegal.badcomment.mylang"
 					}
 				]
+			},
+			{
+				"match": "char|int",
+				"name": "storage.type.mylang"
 			} ]
 };
 

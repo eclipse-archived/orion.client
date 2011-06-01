@@ -199,8 +199,8 @@ orion.EditorContainer = (function() {
 			}
 			
 			// Set keybindings for keys that apply to different modes
-			editor.setKeyBinding(new eclipse.KeyBinding(27), "ESC");
-			editor.setAction("ESC", dojo.hitch(this, function() {
+			editor.setKeyBinding(new eclipse.KeyBinding(27), "Cancel Current Mode");
+			editor.setAction("Cancel Current Mode", dojo.hitch(this, function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].cancel();

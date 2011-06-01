@@ -1,0 +1,38 @@
+.incomingCommitsdRow {
+	font-weight: bold;
+}
+
+.incomingCommitsdRow div {
+	background: url(/git/images/git-incoming.gif);
+	background-repeat: no-repeat;
+	background-position: left top; 
+}
+
+.outgoingCommitsdRow div {
+	background: url(/git/images/git-outgoing.gif);
+	background-repeat: no-repeat;
+	background-position: left top; 
+}
+
+.gitRepoItem {
+	background: url(/git/images/git-repository.gif);
+}
+
+.gitRemotesItem {
+	background: url(/git/images/git-remotes.gif);
+}
+
+.gitBranchesItem {
+	background: url(/git/images/git-branches.gif);
+}
+
+.gitBranchItem {
+	background: url(/git/images/git-branch.gif);
+}
+
+.gitRemoteItem {
+	background: url(/git/images/git-remote.gif);
+}
+
+.gitDefaultItem {
+}

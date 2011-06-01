@@ -7,7 +7,7 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global dojo window dijit eclipse:true */
+/*global dojo window dijit eclipse:true navigator*/
 
 define(['dojo','dojo/hash'], function(dojo) {
                 
@@ -21,6 +21,72 @@ var eclipse = eclipse || {};
  * @namespace eclipse.util holds stateless utility methods.
  */
 eclipse.util = eclipse.util || {};
+
+eclipse.util.getUserKeyString = function(binding) {
+	var userString = "";
+	var isMac = navigator.platform.indexOf("Mac") !== -1;
+
+	if (binding.mod1) {
+		if (isMac) {
+			userString+="Cmd+";
+		} else {
+			userString+="Ctrl+";
+		}
+	}
+	if (binding.mod2) {
+		userString += "Shift+";
+	}
+	if (binding.mod3) {
+		userString += "Alt+";
+	}
+	if (binding.alphaKey) {
+		return userString+binding.alphaKey;
+	}
+	for (var keyName in dojo.keys) {
+		if (typeof(dojo.keys[keyName] === "number")) {
+			if (dojo.keys[keyName] === binding.keyCode) {
+				return userString+keyName;
+			}
+		}
+	}
+	var character;
+	switch (binding.keyCode) {
+		case 59:
+			character = binding.mod2 ? ":" : ";";
+			break;
+		case 61:
+			character = binding.mod2 ? "+" : "=";
+			break;
+		case 188:
+			character = binding.mod2 ? "<" : ",";
+			break;
+		case 190:
+			character = binding.mod2 ? ">" : ".";
+			break;
+		case 191:
+			character = binding.mod2 ? "?" : "/";
+			break;
+		case 192:
+			character = binding.mod2 ? "~" : "`";
+			break;
+		case 219:
+			character = binding.mod2 ? "{" : "[";
+			break;
+		case 220:
+			character = binding.mod2 ? "|" : "\\";
+			break;
+		case 221:
+			character = binding.mod2 ? "}" : "]";
+			break;
+		case 222:
+			character = binding.mod2 ? '"' : "'";
+			break;
+		}
+	if (character) {
+		return userString+character;
+	}
+	return userString+String.fromCharCode(binding.keyCode);
+};
 
 eclipse.util.openDialog = function(dialog, refNode) {
 	dialog.startup();

@@ -114,13 +114,13 @@ orion.GitStatusModel = (function() {
 	return GitStatusModel;
 }());
 
-orion.statusTypeMap = { "Missing":["/images/git-removed.gif", "Unstaged removal" , "/images/git-stage.gif", "Stage" ],
-						"Removed":["/images/git-removed.gif","Staged removal" ,"/images/git-unstage.gif", "Unstage" ],	
-						 "Modified":["/images/git-modify.gif","Unstaged change" ,"/images/git-stage.gif", "Stage" ],	
-						 "Changed":["/images/git-modify.gif","Staged change" ,"/images/git-unstage.gif", "Untage"],	
-					     "Untracked":["/images/git-added.gif","Unstaged add" ,"/images/git-stage.gif", "Stage"],	
-						 "Added":["/images/git-added.gif","Staged add" ,"/images/git-unstage.gif" , "Unstage"],	
-						 "Conflicting":["/images/conflict-file.gif","Conflicting" ,"/images/git-stage.gif" , "Resolve Conflict"]	
+orion.statusTypeMap = { "Missing":["/git/images/git-removed.gif", "Unstaged removal" , "/git/images/git-stage.gif", "Stage" ],
+						"Removed":["/git/images/git-removed.gif","Staged removal" ,"/git/images/git-unstage.gif", "Unstage" ],	
+						 "Modified":["/git/images/git-modify.gif","Unstaged change" ,"/git/images/git-stage.gif", "Stage" ],	
+						 "Changed":["/git/images/git-modify.gif","Staged change" ,"/git/images/git-unstage.gif", "Untage"],	
+					     "Untracked":["/git/images/git-added.gif","Unstaged add" ,"/git/images/git-stage.gif", "Stage"],	
+						 "Added":["/git/images/git-added.gif","Staged add" ,"/git/images/git-unstage.gif" , "Unstage"],	
+						 "Conflicting":["/git/images/conflict-file.gif","Conflicting" ,"/git/images/git-stage.gif" , "Resolve Conflict"]	
 					  };
 
 
@@ -365,6 +365,7 @@ orion.GitStatusController = (function() {
 			this._loadBlock(this._stagedContentRenderer , this._model.interestedStagedGroup);
 			this._unstagedTableRenderer.renderAction();
 			this._stagedTableRenderer.renderAction();
+			this._renderGlobalActions();
 			
 			var self = this;
 			var messageArea = document.getElementById("commitMessage");
@@ -392,12 +393,21 @@ orion.GitStatusController = (function() {
 			this._statusService.setProgressMessage("");
 		},
 		
+		_renderGlobalActions:function(){
+			var toolbar = dojo.byId( "pageActions");
+			dojo.place(document.createTextNode(""), toolbar, "only");
+			var self = this;
+			this._registry.getService("orion.page.command").then(function(service) {
+				service.renderCommands(toolbar, "dom", {type: "global"}, this, "image", null);
+			});
+		},
+		
 		_generateCommands: function(){
 			var self = this;
 			var sbsCompareCommand = new mCommands.Command({
 				name: "Side by side compare",
 				tooltip: "Side by side compare",
-				image: "images/compare-sbs.gif",
+				image: "/git/images/compare-sbs.gif",
 				id: "orion.sbsCompare",
 				hrefCallback: function(item) {
 					return self.openCompareEditor(item.object);
@@ -410,7 +420,7 @@ orion.GitStatusController = (function() {
 			var checkoutCommand = new mCommands.Command({
 				name: "checkout",
 				tooltip: "checkout",
-				image: "/images/git-checkout.gif",
+				image: "/git/images/git-checkout.gif",
 				id: "orion.gitCheckout",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Checking out...");
@@ -424,7 +434,7 @@ orion.GitStatusController = (function() {
 			var stageCommand = new mCommands.Command({
 				name: "stage",
 				tooltip: "stage",
-				image: "images/git-stage.gif",
+				image: "/git/images/git-stage.gif",
 				id: "orion.gitStage",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Staging...");
@@ -438,7 +448,7 @@ orion.GitStatusController = (function() {
 			var stageAllCommand = new mCommands.Command({
 				name: "stageAll",
 				tooltip: "Stage all",
-				image: "/images/git-stage-all.gif",
+				image: "/git/images/git-stage-all.gif",
 				id: "orion.gitStageAll",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Staging...");
@@ -452,7 +462,7 @@ orion.GitStatusController = (function() {
 			var unstageCommand = new mCommands.Command({
 				name: "unstage",
 				tooltip: "Unstage",
-				image: "/images/git-unstage.gif",
+				image: "/git/images/git-unstage.gif",
 				id: "orion.gitUnstage",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Unstaging...");
@@ -466,14 +476,28 @@ orion.GitStatusController = (function() {
 			var unstageAllCommand = new mCommands.Command({
 				name: "unstageAll",
 				tooltip: "Unstage all",
-				image: "/images/git-unstage-all.gif",
+				image: "/git/images/git-unstage-all.gif",
 				id: "orion.gitUnstageAll",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Unstaging...");
-					return self.unstageAll();
+					return self.unstageAll("MIXED");
 				},
 				visibleWhen: function(item) {
 					return (item.type === "stagedItems" && self.hasStaged);
+				}
+			});		
+
+			var undoLocalChangesCommand = new mCommands.Command({
+				name: "Undo local Changes",
+				tooltip: "Undo local Changes",
+				image: "/git/images/git-undo-changes.gif",
+				id: "orion.gitUndoLocalChanges",
+				callback: function(item) {
+					self._statusService.setProgressMessage("Undoing...");
+					return self.unstageAll("HARD");
+				},
+				visibleWhen: function(item) {
+					return (self.hasStaged || self.hasUnstaged);
 				}
 			});		
 
@@ -485,12 +509,14 @@ orion.GitStatusController = (function() {
 				commandService.addCommand(stageAllCommand, "object");	
 				commandService.addCommand(unstageAllCommand, "object");	
 				commandService.addCommand(unstageCommand, "object");	
+				commandService.addCommand(undoLocalChangesCommand, "dom");	
 				commandService.registerCommandContribution("orion.gitStage", 1);	
 				commandService.registerCommandContribution("orion.gitCheckout", 2);	
 				commandService.registerCommandContribution("orion.gitUnstage", 3);	
 				commandService.registerCommandContribution("orion.sbsCompare", 4);	
 				commandService.registerCommandContribution("orion.gitStageAll", 5);	
 				commandService.registerCommandContribution("orion.gitUnstageAll", 6);	
+				commandService.registerCommandContribution("orion.gitUndoLocalChanges", 7 , "pageActions");	
 			});
 		},
 
@@ -705,7 +731,7 @@ orion.GitStatusController = (function() {
 			var location = this._model.items.CloneLocation;
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
-						service.checkoutPath(location, [itemModel.path],
+						service.checkoutPath(location, [itemModel.name],
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
@@ -735,11 +761,11 @@ orion.GitStatusController = (function() {
 					});
 		},
 		
-		unstageAll: function(){
+		unstageAll: function(resetParam){
 			var self = this;
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
-						service.unstageAll(self._model.items.IndexLocation, 
+						service.unstageAll(self._model.items.IndexLocation, resetParam,
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
