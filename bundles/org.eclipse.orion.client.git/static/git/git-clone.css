@@ -10,6 +10,8 @@
 
 @import "../css/ide.css";
 
+@import "/git/css/git.css";
+
 @import "../css/breadcrumbs.css";
 
 @import "../css/commands.css";

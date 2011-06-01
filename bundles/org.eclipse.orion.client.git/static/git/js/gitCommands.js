@@ -11,7 +11,7 @@
 /*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
 define(['dojo', 'orion/commands', 'orion/util',
-        'js/widgets/CloneGitRepositoryDialog', 'js/widgets/InitGitRepositoryDialog', 'js/widgets/AddRemoteDialog', 'js/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog'], 
+        'js/widgets/CloneGitRepositoryDialog', 'js/widgets/InitGitRepositoryDialog', 'js/widgets/AddRemoteDialog', 'js/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 'js/widgets/RemotePrompterDialog',], 
         function(dojo, mCommands, mUtil) {
 
 /**
@@ -523,6 +523,44 @@ var exports = {};
 	
 		commandService.addCommand(pushCommand, "dom");
 		commandService.addCommand(pushCommand, "object");
+		
+		var pushToCommand = new mCommands.Command({
+			name : "Push to...",
+			image : "/git/images/git-push.gif",
+			id : "eclipse.orion.git.pushto",
+			callback: function(item) {
+				
+				var remotes = {};
+				for(var child_no in item.parent.parent.children){
+					if(item.parent.parent.children[child_no].Name === "Remote"){
+						remotes = item.parent.parent.children[child_no];
+					}
+				}
+				
+				serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+					var dialog = new widgets.RemotePrompterDialog({
+						title: "Choose Branch",
+						serviceRegistry: serviceRegistry,
+						gitClient: gitService,
+						treeRoot: remotes,
+						//hideNewBranch: true,
+						func: dojo.hitch(this, function(targetBranch, remote, newBranch) {
+							//TODO perform push here
+							console.info("Branch " + targetBranch + " remote " + remote + " new branch " + newBranch);
+						})
+					});
+					dialog.startup();
+					dialog.show();
+					
+				});
+			},
+			visibleWhen : function(item) {
+				return false && item.Type === "Branch" && item.Current; //TODO when committing to anothe branch is ready remofe "false &&"
+			}
+		});
+	
+		commandService.addCommand(pushToCommand, "dom");
+		commandService.addCommand(pushToCommand, "object");
 		
 		var addTagCommand = new mCommands.Command({
 			name : "Tag",
