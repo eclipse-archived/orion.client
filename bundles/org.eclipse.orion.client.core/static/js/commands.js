@@ -8,26 +8,22 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
- /*global dojo, dijit, document, window, navigator, eclipse:true, alert, Image */
+ /*global define window Image */
  
 define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton' ], function(dojo, dijit, mUtil){
 
-
-/**
- * @namespace The global container for eclipse APIs.
- */ 
-var eclipse = eclipse || {};
+var exports = {};
 
 /**
  * The command service manages the available commands.
  * @class The command service manages the available commands.
  */
-eclipse.CommandService = (function() {
+exports.CommandService = (function() {
 	/**
 	 * Constructs a new command service with the given options.
 	 * @param {Object} options The command options object which includes the service registry.
 	 * @class CommandService can render commands appropriate for a particular scope and DOM element.
-	 * @name eclipse.CommandService
+	 * @name orion.commands.CommandService
 	 */
 	function CommandService(options) {
 		this._domScope = {};
@@ -37,7 +33,7 @@ eclipse.CommandService = (function() {
 		this._activeBindings = {};
 		this._init(options);
 	}
-	CommandService.prototype = /** @lends eclipse.CommandService.prototype */ {
+	CommandService.prototype = /** @lends orion.commands.CommandService.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
 			this._serviceRegistration = this._registry.registerService("orion.page.command", this);
@@ -193,7 +189,7 @@ eclipse.CommandService = (function() {
 		 *  this might be the id of the page or of a dom element.
 		 * @param {String} the path on which the command is located.  Optional.
 		 * @param {Number} the relative position of the command within its parent
-		 * @param {eclipse.CommandKeyBinding} a keyBinding for the command.  Optional.
+		 * @param {orion.commands.CommandKeyBinding} a keyBinding for the command.  Optional.
 		 * @param {boolean} if true, then the command is never rendered, but the keybinding is hooked.
 		 */
 		registerCommandContribution: function(commandId, position, scopeId, parentPath, keyBinding, keyOnly) {
@@ -226,7 +222,6 @@ eclipse.CommandService = (function() {
 			return false;
 		},
 
-		
 		/**
 		 * Render the commands that are appropriate for the given scope.
 		 * @param {DOMElement} parent The element in which commands should be rendered.
@@ -242,7 +237,6 @@ eclipse.CommandService = (function() {
 		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
 		 * @param {Boolean} forceText Always use text and not the icon when showing the command, regardless of style.
 		 */	
-		
 		renderCommands: function(parent, scope, items, handler, renderType, cssClass, userData, forceText) {
 			if (!items) {
 				var cmdService = this;
@@ -297,7 +291,7 @@ eclipse.CommandService = (function() {
 			}
 			// now traverse the command items and render as we go
 			for (var i = 0; i < positionOrder.length; i++) {
-				var image, id;
+				var image, id, menuButton;
 				if (positionOrder[i].children) {
 					var group = positionOrder[i];
 					if (group.scopeId && parent.id !== group.scopeId) {
@@ -332,7 +326,7 @@ eclipse.CommandService = (function() {
 									needMenu = !(menuCommand && menuCommand.hasImage());
 								}
 								if (needMenu) {
-									var menuButton = new dijit.form.DropDownButton({
+									menuButton = new dijit.form.DropDownButton({
 										label: group.title,
 										dropDown: newMenu
 								        });
@@ -428,7 +422,7 @@ eclipse.CommandService = (function() {
 								style: "display: none;"
 							});
 							if (renderType === "image") {
-								var menuButton = new dijit.form.DropDownButton({
+								menuButton = new dijit.form.DropDownButton({
 										label: command.name,
 										dropDown: choicesMenu
 								        });
@@ -486,19 +480,19 @@ eclipse.CommandService = (function() {
 }());
 
 
-eclipse.Command = (function() {
+exports.Command = (function() {
 	/**
 	 * Constructs a new command with the given options.
 	 * @param {Object} options The command options object
 	 * @class A command is an object that describes an action a user can perform, as well as when and
 	 *  what it should look like when presented in various contexts.  Commands are identified by a
 	 *  unique id.
-	 * @name eclipse.Command
+	 * @name orion.commands.Command
 	 */
 	function Command (options) {
 		this._init(options);
 	}
-	Command.prototype = /** @lends eclipse.Command.prototype */ {
+	Command.prototype = /** @lends orion.commands.Command.prototype */ {
 		_init: function(options) {
 			this.id = options.id;  // unique id
 			this.name = options.name || "Empty Command";
@@ -524,7 +518,7 @@ eclipse.Command = (function() {
 			image.name = name;
 			image.id = name;
 			if (forceText || !this.hasImage()) {
-				var text = document.createTextNode(this.name);
+				var text = window.document.createTextNode(this.name);
 				dojo.place(text, link, "last");
 			}
 			if (this.hrefCallback) {
@@ -581,8 +575,8 @@ eclipse.Command = (function() {
 		},
 		_asLink: function(items, handler, cssClass) {
 			handler =  handler || this;
-			var anchor = document.createElement('a');
-			dojo.place(document.createTextNode(this.name), anchor, "only");
+			var anchor = window.document.createElement('a');
+			dojo.place(window.document.createTextNode(this.name), anchor, "only");
 			anchor.href="";
 			anchor.id = this.id+"link";
 			if (this.callback) {
@@ -702,7 +696,7 @@ eclipse.Command = (function() {
  * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
  * 
  * @class A CommandKeyBinding represents of a key code and a modifier state that can be triggered by the user using the keyboard.
- * @name eclipse.CommandKeyBinding
+ * @name orion.commands.CommandKeyBinding
  * 
  * @property {String} userString The user representation for the string (to show in key assist dialog)
  * @property {String|Number} keyCode The key code.
@@ -711,8 +705,8 @@ eclipse.Command = (function() {
  * @property {Boolean} mod3 The third modifier (usually Alt).
  * @property {Boolean} mod4 The fourth modifier (usually Control on the Mac).
  */
-eclipse.CommandKeyBinding = (function() {
-	var isMac = navigator.platform.indexOf("Mac") !== -1;
+exports.CommandKeyBinding = (function() {
+	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	/** @private */
 	function CommandKeyBinding (userString, keyCode, mod1, mod2, mod3, mod4) {
 		if (typeof(keyCode) === "string") {
@@ -726,7 +720,7 @@ eclipse.CommandKeyBinding = (function() {
 		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;
 		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
 	}
-	CommandKeyBinding.prototype = /** @lends eclipse.CommandKeyBinding.prototype */ {
+	CommandKeyBinding.prototype = /** @lends orion.commands.CommandKeyBinding.prototype */ {
 		/**
 		 * Returns whether this key binding matches the given key event.
 		 * 
@@ -747,7 +741,7 @@ eclipse.CommandKeyBinding = (function() {
 		/**
 		 * Returns whether this key binding is the same as the given parameter.
 		 * 
-		 * @param {eclipse.CommandKeyBinding} kb the key binding to compare with.
+		 * @param {orion.commands.CommandKeyBinding} kb the key binding to compare with.
 		 * @returns {Boolean} whether or not the parameter and the receiver describe the same key binding.
 		 */
 		equals: function(kb) {
@@ -763,5 +757,5 @@ eclipse.CommandKeyBinding = (function() {
 	return CommandKeyBinding;
 }());
 
-return eclipse;
+return exports;
 });
