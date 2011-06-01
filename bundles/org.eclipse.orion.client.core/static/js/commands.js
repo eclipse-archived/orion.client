@@ -44,10 +44,30 @@ eclipse.CommandService = (function() {
 			this._selection = options.selection;
 			dojo.connect(window.document, "onkeydown", dojo.hitch(this, function (evt){
 				evt = evt || window.event;
-				// bindings are always ignored if we are in a text field.
-				// TODO are there dojo text fields that wouldn't meet these criteria?
+				// bindings are ignored if we are in a text field.
 				var tagType = evt.target.nodeName.toLowerCase();
-				if ((tagType === 'input' && evt.target.type.toLowerCase() === "text") || tagType === 'textarea') {
+				if (tagType === 'input') {
+					var inputType = evt.target.type.toLowerCase();
+					// Any HTML5 input type that involves typing text should be ignored
+					switch (inputType) {
+						case "text":
+						case "password":
+						case "search":
+						case "color":
+						case "date":
+						case "datetime":
+						case "datetime-local":
+						case "email":
+						case "month":
+						case "number":
+						case "range":
+						case "tel":
+						case "time":
+						case "url":
+						case "week":
+							return;
+					}
+				} else if (tagType === 'textarea') {
 					return;
 				}
 				this._processKey(evt);
