@@ -195,7 +195,7 @@ orion.SBSCompareContainer = (function() {
 			parent: this._rightEditorDivId,
 			model: compareModelRight,
 			readonly: true,
-			stylesheet: "/js/compare/editor.css" 
+			stylesheet: "/orion/compare/editor.css" 
 		};
 		this._editorRight = new eclipse.Editor(optionsRight);
 		this._editorRight.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
@@ -204,7 +204,7 @@ orion.SBSCompareContainer = (function() {
 			parent: this._leftEditorDivId,
 			model: compareModelLeft,
 			readonly: true,
-			stylesheet: "/js/compare/editor.css" 
+			stylesheet: "/orion/compare/editor.css" 
 		};
 		this._editorLeft = new eclipse.Editor(optionsLeft);
 		this._editorLeft.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
@@ -474,7 +474,7 @@ orion.CompareMergeContainer = (function() {
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: readOnly,
-				stylesheet: "/js/compare/editor.css" ,
+				stylesheet: "/orion/compare/editor.css" ,
 				tabSize: 4
 			});
 		};
@@ -636,7 +636,7 @@ orion.InlineCompareContainer = (function() {
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: true,
-				stylesheet: "/js/compare/editor.css" ,
+				stylesheet: "/orion/compare/editor.css" ,
 				tabSize: 4
 			});
 		};

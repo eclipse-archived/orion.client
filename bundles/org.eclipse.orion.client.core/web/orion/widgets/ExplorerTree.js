@@ -16,7 +16,7 @@ dojo.declare(
 	"widgets._ExplorerTreeNode",
 	[dijit._TreeNode],
 {
-	templateString : dojo.cache(new dojo._Url("/js/widgets/templates/_ExplorerTreeNode.html")),
+	templateString : dojo.cache(new dojo._Url("/orion/widgets/templates/_ExplorerTreeNode.html")),
 	
 	/**
 	 * @override

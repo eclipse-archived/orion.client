@@ -18,7 +18,7 @@ define(['dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore',
  */
 dojo.declare("widgets.ImportDialog", [ dijit.Dialog, widgets._OrionDialogMixin ], {
 	widgetsInTemplate : true,
-	templateString : dojo.cache(new dojo._Url("/js/widgets/templates/ImportDialog.html")),
+	templateString : dojo.cache(new dojo._Url("/orion/widgets/templates/ImportDialog.html")),
 
 	constructor : function() {
 		this.inherited(arguments);

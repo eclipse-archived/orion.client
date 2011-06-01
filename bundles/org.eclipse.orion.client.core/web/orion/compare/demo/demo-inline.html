@@ -48,7 +48,7 @@ function getFileContentGit(hashValue){
 
 	var url = "/gitapi/index" + hashValue;
 	dojo.xhrGet({
-		url: url, //"/gitapi/index" + hashValue;//file/K/bundles/org.eclipse.orion.client.core/web/js/compare/demo/demo.html"
+		url: url, //"/gitapi/index" + hashValue;//file/K/bundles/org.eclipse.orion.client.core/web/orion/compare/demo/demo.html"
 		//adding some thing 
 		headers: {
 			"Orion-Version": "1"
@@ -79,7 +79,7 @@ function getFileDiffGit(hashValue){
 	
 	var url = "/git/diff" + hashValue;
 	dojo.xhrGet({
-		url: url , //"/git/diff" + hashValue;///file/K/bundles/org.eclipse.orion.client.core/web/js/compare/demo/demo.htmlsfasf"
+		url: url , //"/git/diff" + hashValue;///file/K/bundles/org.eclipse.orion.client.core/web/orion/compare/demo/demo.htmlsfasf"
 		//changing some thing
 		headers: {
 			"Orion-Version": "1"

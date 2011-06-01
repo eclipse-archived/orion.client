@@ -23,7 +23,7 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/Chec
  */
 dojo.declare("widgets.NewItemDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache(new dojo._Url("/js/widgets/templates/NewItemDialog.html")),
+	templateString: dojo.cache(new dojo._Url("/orion/widgets/templates/NewItemDialog.html")),
 	
 	constructor : function() {
 		//this.inherited(arguments);

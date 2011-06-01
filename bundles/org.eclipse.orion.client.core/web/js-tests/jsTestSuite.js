@@ -22,7 +22,7 @@ require({
 	    }
 	],
 	paths: {
-		orion: '/js',
+		orion: '/orion',
 		text: '/requirejs/text',
 		i18n: '/requirejs/i18n'
 	}

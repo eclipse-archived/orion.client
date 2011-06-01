@@ -22,7 +22,7 @@ dojo.declare("widgets.DirectoryPrompterDialog", [ dijit.Dialog, widgets._OrionDi
 	treeWidget : null,
 	treeRoot : {},
 	widgetsInTemplate : true,
-	templateString : dojo.cache(new dojo._Url("/js/widgets/templates/DirectoryPrompterDialog.html")),
+	templateString : dojo.cache(new dojo._Url("/orion/widgets/templates/DirectoryPrompterDialog.html")),
 	constructor : function() {
 		this.inherited(arguments);
 		this.options = arguments[0] || {};

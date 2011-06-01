@@ -1759,7 +1759,7 @@ var demoData = [
 	 "    <script type=\"text/javascript\">\r\n" + 
 	 "        var djConfig = {\r\n" + 
 	 "		isDebug: true,\r\n" + 
-	 "		modulePaths: {\'widgets\': \'/js/widgets\'},\r\n" + 
+	 "		modulePaths: {\'widgets\': \'/orion/widgets\'},\r\n" + 
 	 "		parseOnLoad: true\r\n" + 
 	 "        };\r\n" + 
 	 "    </script>\r\n" + 
@@ -1857,10 +1857,10 @@ var demoData = [
 	 "     <script type=\"text/javascript\">\r\n" + 
 	 "         var djConfig = {\r\n" + 
 	 "-		isDebug: true,\r\n" + 
-	 "-		modulePaths: {\'widgets\': \'/js/widgets\'},\r\n" + 
+	 "-		modulePaths: {\'widgets\': \'/orion/widgets\'},\r\n" + 
 	 "-		parseOnLoad: true\r\n" + 
 	 "+		    isDebug:false,\r\n" + 
-	 "+			modulePaths: {\'widgets\': \'/js/widgets\'},\r\n" + 
+	 "+			modulePaths: {\'widgets\': \'/orion/widgets\'},\r\n" + 
 	 "+		    parseOnLoad:true\r\n" + 
 	 "         };\r\n" + 
 	 "     </script>\r\n" + 
@@ -1902,8 +1902,8 @@ var demoData = [
 	 "+	<script src=\"js/commands.js\"></script>\r\n" + 
 	 "+	  	\r\n" + 
 	 "+ 	\r\n" + 
-	 "+ <script language=\"javascript\" type=\"text/javascript\" src=\"/editor/js/editor.js\"></script>\r\n" + 
-	 "+<script language=\"javascript\" type=\"text/javascript\" src=\"/editor/js/model.js\"></script>\r\n" + 
+	 "+ <script language=\"javascript\" type=\"text/javascript\" src=\"/editor/orion/editor.js\"></script>\r\n" + 
+	 "+<script language=\"javascript\" type=\"text/javascript\" src=\"/editor/orion/model.js\"></script>\r\n" + 
 	 "+<script language=\"javascript\" type=\"text/javascript\" src=\"js/compare/diff-parser.js\"></script>\r\n" + 
 	 "+<script language=\"javascript\" type=\"text/javascript\" src=\"js/compare/rulers-inline.js\"></script>\r\n" + 
 	 "+<script language=\"javascript\" type=\"text/javascript\" src=\"js/compare/compare-model.js\"></script>\r\n" + 
@@ -1962,7 +1962,7 @@ var demoData = [
 	 "+	\r\n" + 
 	 "+	var url = \"/git/index\" + hashValue;\r\n" + 
 	 "+	dojo.xhrGet({\r\n" + 
-	 "+		url: url, //\"/git/index\" + hashValue;//file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.html\"\r\n" + 
+	 "+		url: url, //\"/git/index\" + hashValue;//file/K/bundles/org.eclipse.orion.client.core/static/orion/compare/demo/demo.html\"\r\n" + 
 	 "+		//adding some thing \r\n" + 
 	 "+		headers: {\r\n" + 
 	 "+			\"Orion-Version\": \"1\"\r\n" + 
@@ -1993,7 +1993,7 @@ var demoData = [
 	 "+	\r\n" + 
 	 "+	var url = \"/git/diff\" + hashValue;\r\n" + 
 	 "+	dojo.xhrGet({\r\n" + 
-	 "+		url: url , //\"/git/diff\" + hashValue;///file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo.htmlsfasf\"\r\n" + 
+	 "+		url: url , //\"/git/diff\" + hashValue;///file/K/bundles/org.eclipse.orion.client.core/static/orion/compare/demo/demo.htmlsfasf\"\r\n" + 
 	 "+		//changing some thing\r\n" + 
 	 "+		headers: {\r\n" + 
 	 "+			\"Orion-Version\": \"1\"\r\n" + 
@@ -2089,7 +2089,7 @@ var demoData = [
 	 "+				<table width=\"100%\" >\r\n" + 
 	 "+					<tr>\r\n" + 
 	 "+						<td width=\"100%\" nowrap=\"nowrap\">\r\n" + 
-	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo-inline.html</a>\r\n" + 
+	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/orion/compare/demo/demo-inline.html</a>\r\n" + 
 	 "+						</td>\r\n" + 
 	 "+						<td nowrap=\"nowrap\">\r\n" + 
 	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
@@ -2104,7 +2104,7 @@ var demoData = [
 	 "+					</tr>\r\n" + 
 	 "+					<tr>\r\n" + 
 	 "+						<td width=\"100%\" nowrap=\"nowrap\">\r\n" + 
-	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/compare-model.js</a>\r\n" + 
+	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/orion/compare/compare-model.js</a>\r\n" + 
 	 "+						</td>\r\n" + 
 	 "+						<td nowrap=\"nowrap\">\r\n" + 
 	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
@@ -2146,7 +2146,7 @@ var demoData = [
 	 "+				<table width=\"100%\" >\r\n" + 
 	 "+					<tr>\r\n" + 
 	 "+						<td width=\"100%\" nowrap=\"nowrap\">\r\n" + 
-	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/diff-line-feeder.js</a>\r\n" + 
+	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/orion/compare/diff-line-feeder.js</a>\r\n" + 
 	 "+						</td>\r\n" + 
 	 "+						<td nowrap=\"nowrap\">\r\n" + 
 	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
@@ -2161,7 +2161,7 @@ var demoData = [
 	 "+					</tr>\r\n" + 
 	 "+					<tr>\r\n" + 
 	 "+						<td width=\"100%\" nowrap=\"nowrap\">\r\n" + 
-	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/gap-line-feeder.js</a>\r\n" + 
+	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/orion/compare/gap-line-feeder.js</a>\r\n" + 
 	 "+						</td>\r\n" + 
 	 "+						<td nowrap=\"nowrap\">\r\n" + 
 	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
@@ -2176,7 +2176,7 @@ var demoData = [
 	 "+					</tr>\r\n" + 
 	 "+					<tr>\r\n" + 
 	 "+						<td width=\"100%\" nowrap=\"nowrap\">\r\n" + 
-	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/diff-parser.js</a>\r\n" + 
+	 "+							<a href=\"http://www.ibm.com\">/file/K/bundles/org.eclipse.orion.client.core/static/orion/compare/diff-parser.js</a>\r\n" + 
 	 "+						</td>\r\n" + 
 	 "+						<td nowrap=\"nowrap\">\r\n" + 
 	 "+							<div style=\"float: right;\" align=\"center\">\r\n" + 
@@ -2232,7 +2232,7 @@ var demoData = [
 	 "-				<!-- Breadcrumbs, tree content go here -->\r\n" + 
 	 "+		<div id = \"rightPane\" style=\"overflow: hidden;\" dojoType=\"dijit.layout.ContentPane\" region=\"center\">\r\n" + 
 	 "+			<div >\r\n" + 
-	 "+				<h2>/file/K/bundles/org.eclipse.orion.client.core/static/js/compare/demo/demo-inline.html</h2>\r\n" + 
+	 "+				<h2>/file/K/bundles/org.eclipse.orion.client.core/static/orion/compare/demo/demo-inline.html</h2>\r\n" + 
 	 "+			</div>\r\n" + 
 	 "+			<hr>\r\n" + 
 	 "+			<div id=\"inline-compare-viewer\" style=\"width: 100%; height: 100%;\">\r\n" + 
