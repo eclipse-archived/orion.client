@@ -11,7 +11,7 @@
  /*global window dojo orion:true eclipse:true handleGetAuthenticationError*/
  /*jslint maxerr:150 browser:true devel:true regexp:false*/
 
-define(['dojo', 'dijit', 'orion/util', 'dijit/TitlePane', 'dijit/layout/ContentPane' ], function(dojo, dijit, mUtil){
+define(['dojo', 'dijit', 'dijit/TitlePane', 'dijit/layout/ContentPane' ], function(dojo, dijit){
 
 var orion = orion || {};
 orion.EditorContainer = (function() {
