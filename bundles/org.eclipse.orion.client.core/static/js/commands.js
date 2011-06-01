@@ -30,8 +30,13 @@ exports.CommandService = (function() {
 		this._objectScope = {};
 		this._globalScope = {};
 <<<<<<< HEAD
+<<<<<<< HEAD
 		this._namedGroups = {};
 		this._activeBindings = {};
+=======
+		this._namedGroups = {};
+		this._activeBindings = {};
+>>>>>>> 2bb365a2a0e7549e187c7fbefa846a2b43056ecb
 =======
 		this._namedGroups = {};
 		this._activeBindings = {};
@@ -896,5 +901,9 @@ return exports;
 });
 =======
 return eclipse;
+<<<<<<< HEAD
+});
+>>>>>>> 2bb365a2a0e7549e187c7fbefa846a2b43056ecb
+=======
 });
 >>>>>>> 2bb365a2a0e7549e187c7fbefa846a2b43056ecb
