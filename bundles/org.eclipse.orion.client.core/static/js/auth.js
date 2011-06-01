@@ -37,7 +37,7 @@ dojo.addOnLoad(function () {
 	dojo.xhrGet({
 		url: "/auth2",
 		handleAs: 'javascript',
-        sync:true,
+        //sync:true, the javascript load is asynchronous already so not sure this would work -- we should also avoid sync calls!
         headers: {
 			"Orion-Version" : "1"
 		}
