@@ -11,8 +11,6 @@
 /* jslint browser:true */
 define(['dojo', 'dijit', 'dijit/Dialog'], function(dojo, dijit) {
 
-dojo.require("dijit.Dialog");
-
 /**
  * @param func
  */
