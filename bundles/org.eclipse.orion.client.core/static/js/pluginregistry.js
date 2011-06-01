@@ -191,9 +191,9 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		if (!event.source || !event.source.location) {
 			return;
 		}
-		var url = event.source.location.toString();
-		if (_channels[url]) {
-			_channels[url].handler(JSON.parse(event.data));	
+		var channel = _channels[event.source.location.toString()];
+		if (channel && channel.target === event.source) {
+			channel.handler(JSON.parse(event.data));	
 		}
 	}, false);
 	
