@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+ <script type="text/javascript" src="/orion/plugin.js"></script>
+ <script type="text/javascript" src="UsersService.js"></script>
+ <script type="text/javascript"
+	src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<!--Authentication -->
+ <script>
+  window.onload = function() {
+	var usersService = new eclipse.UsersService();
+   var provider = new eclipse.PluginProvider();
+   
+   usersService.info = function() {
+	     return {
+		      name : "User profile"
+		     };
+		    };
+   
+   
+	usersService.getDivContent = function() {
+  	var content = { "actions": [
+ 	                          	{"id": "saveProfileButton", "name": "Save Profile", "tooltip": "Save Profile", "image": "/images/save_edit.gif", "action": "saveProfile"},
+  	                        	{"id": "resetProfileButton", "name": "Reset", "tooltip": "Reset Profile Information", "image": "/images/undo_edit.gif", "action": "resetProfile"},
+  	                        	{"id": "deleteProfileButton", "name": "Delete Profile", "tooltip": "Delete Profile", "image":"/images/remove.gif", "action": "deleteProfile"}
+  	                          ]
+  	};
+  	    	
+	return content;
+  };
+  
+  usersService.initProfile = function(userURI, pluginsEventName, dataEventName){
+	  var userService = this._serviceRegistration;
+	  return this.getUserInfo(userURI, function(json){
+	  		userService.dispatchEvent(pluginsEventName, {"plugins": json.Plugins});
+	  		userService.dispatchEvent(dataEventName, json);
+	  });
+  },
+  
+  usersService.fire = function(action, url, jsonData){
+	  switch(action){
+	  	case "saveProfile":
+	  		this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url) {alert("Profile saved!"); this.getUserInfo(url, "userInfoChanged")}, url)).then(function(){}, function(error){if(error.status === 401) alert("Invalid old password")});
+	  		break;
+	  	case "resetProfile":
+	  		this.getUserInfo(url, "userInfoChanged");
+	  		break;
+	  	case "deleteProfile":
+			var login = jsonData.login ? jsonData.login
+					: url;
+			if (confirm("Do you really want to delete user "
+					+ login + "?")) {
+				this.deleteUser(url, "userDeleted");
+			}
+			break;
+		default:
+			this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url) {alert("Profile saved!"); this.getUserInfo(url, "userInfoChanged")}, url)).then(function(){}, function(error){if(error.status === 401) alert("Invalid old password")});
+  			break;
+	  }
+  };
+   
+  usersService._serviceRegistration = provider.registerServiceProvider("orion.core.user", usersService);
+  usersService.dispatchEvent = provider.dispatchEvent;
+   provider.connect();
+  };
+ </script>
+</head>
+<body></body>
+</html>

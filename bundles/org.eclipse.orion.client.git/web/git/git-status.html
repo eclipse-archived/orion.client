@@ -1,0 +1,70 @@
+<!doctype html>
+<html style="height: 100%" >
+<head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2011." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    	<title>Git Status</title>
+    	<link rel="stylesheet" type="text/css" href="git-status.css" />
+    	<script src="/editor/samples/styler.js"></script>
+		<script src="/editor/samples/rulers.js"></script>
+		<script src="/editor/samples/undoStack.js"></script>
+		<script src="/editor/js/model.js"></script>
+		<script src="/editor/js/editor.js"></script>	
+    	<script type="text/javascript" src="/requirejs/require.js"></script>
+		<script type="text/javascript">
+		require({
+		  baseUrl: '',
+		
+		  // set the paths to our library packages
+		  packages: [
+		    {
+		      name: 'dojo',
+		      location: '/org.dojotoolkit/dojo',
+		      main: 'lib/main-browser',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dijit',
+		      location: '/org.dojotoolkit/dijit',
+		      main: 'lib/main',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dojox',
+		      location: '/org.dojotoolkit/dojox',
+		      main: 'lib/main',
+		      lib: '.'
+		    }		    
+		  ],
+		
+		  paths: {
+		    orion: '/orion',
+		    text: '/requirejs/text',
+		    i18n: '/requirejs/i18n'
+		  }
+		});
+		
+		require(["git-status"]);
+		</script> 
+</head>
+<body style="height: 100%" class="nihilo">
+
+    <div id="eclipse.git-status" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;" splitter="true">
+		<div class="toolbar" id="toolbar" style="overflow: hidden;" dojoType="dijit.layout.ContentPane" region="top">
+		</div>
+		
+		<!-- status pane on left : start vvv-->
+		<div id="gitStatusPane" class="auxpane" dojoType="dijit.layout.ContentPane" region="leading"  style="margin-left: 44px; width: 40%; overflow: auto" splitter="true">				
+			<div id = "statusZone"></div>
+		</div>
+		
+		<!-- inline compare viewer : start vvv-->
+		<div id = "viewerZone" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false" persist="false" gutters="false" region="center"  splitter="false">
+		</div>
+		
+		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
+		</div>
+	</div>
+</body>
+</html>
