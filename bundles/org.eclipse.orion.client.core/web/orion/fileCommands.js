@@ -170,7 +170,12 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 							}
 							if (location) {
 								func.apply(fileClient, [item.Location, targetFolder.Location, newName]).then(
-									dojo.hitch(explorer, refreshFunc)//refresh the root
+									dojo.hitch(explorer, refreshFunc), //refresh the root
+									function(error) {
+										serviceRegistry.getService("orion.page.message").then(function(statusService) {
+											statusService.setErrorMessage(error);
+										});
+									}
 								);
 							}
 						}
