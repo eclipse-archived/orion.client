@@ -10,7 +10,7 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(['dojo'], function(dojo) {
+define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 
 var eclipse = eclipse || {};
 
@@ -64,7 +64,7 @@ eclipse.UsersClient = (
 								//on failure we might need to retry
 								function(error) {
 									if (error.status === 401 || error.status===403) {
-										handleAuthenticationError(error, function(message) {
+										mAuth.handleAuthenticationError(error, function(message) {
 											//try again
 											usersService[funcName].apply(usersService, funcArgs).then(
 												function(result) {
