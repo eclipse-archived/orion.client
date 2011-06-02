@@ -12,7 +12,7 @@
 
 
 
-define(['dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojo/io/iframe', 'dojox/form/FileUploader', 'dijit/form/Button', 'dijit/ProgressBar', 'orion/widgets/_OrionDialogMixin'], function(dojo, dijit, dojox) {
+define(['dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojo/io/iframe', 'dojox/form/FileUploader', 'dijit/form/Button', 'dijit/ProgressBar', 'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/ImportDialog.html'], function(dojo, dijit, dojox) {
 
 /**
  */

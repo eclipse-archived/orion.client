@@ -13,7 +13,7 @@
 define(['dojo', 'dijit', 'dojox', 'orion/util', 'orion/siteUtils','orion/commands',
 		'dijit/form/DropDownButton', 'dijit/form/ComboBox', 'dijit/form/Form', 'dijit/form/Select', 'dijit/form/Textarea', 'dijit/form/TextBox', 
 		'dijit/form/ValidationTextBox', 'dijit/Menu', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated', 'dojo/data/ItemFileWriteStore', 
-		'dojo/DeferredList', 'dojox/grid/DataGrid', 'dojox/grid/cells'], 
+		'dojo/DeferredList', 'dojox/grid/DataGrid', 'dojox/grid/cells', 'text!orion/widgets/templates/SiteEditor.html'], 
         function(dojo, dijit, dojox, mUtil, mSiteUtils, mCommands) {
 
 /**

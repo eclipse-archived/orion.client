@@ -10,7 +10,7 @@
 
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
-define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'orion/widgets/DirectoryPrompterDialog'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'orion/widgets/DirectoryPrompterDialog', 'text!orion/git/widgets/templates/CloneGitRepositoryDialog.html'], function(dojo, dijit) {
 
 /**
  * @param options {{ 

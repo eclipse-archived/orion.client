@@ -10,7 +10,7 @@
 /*global dojo dijit localStorage widgets */
 /*jslint browser:true*/
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/ComboBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/ComboBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/SFTPConnectionDialog.html'], function(dojo, dijit) {
 
 if (!localStorage.getItem("orion.sftpConnections")) {
 	var defaultItems = { 

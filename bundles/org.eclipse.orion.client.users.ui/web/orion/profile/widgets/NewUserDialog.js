@@ -9,7 +9,7 @@
  ******************************************************************************/
 /* global dojo dijit */
 /* jslint browser:true */
-define(['dojo', 'dijit', 'dijit/Dialog'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'dijit/Dialog', 'text!orion/profile/widgets/templates/NewUserDialog.html'], function(dojo, dijit) {
 
 /**
  * @param func

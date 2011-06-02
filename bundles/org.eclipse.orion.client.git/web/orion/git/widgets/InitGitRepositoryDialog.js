@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 /*global dojo dijit widgets*/
-define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/InitGitRepositoryDialog.html'], function(dojo, dijit) {
 
 
 /**

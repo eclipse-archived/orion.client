@@ -10,7 +10,7 @@
 
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
-define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/GitCredentialsDialog.html'], function(dojo, dijit) {
 
 
 /**
