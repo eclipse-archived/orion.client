@@ -1,11 +1,11 @@
-.editor {
+.view {
 	background-color: white;
 }
 
-.editorContainer {
+.viewContainer {
 	font-family: monospace;
 	font-size: 10pt;
 }
 
-.editorContent {
+.viewContent {
 }

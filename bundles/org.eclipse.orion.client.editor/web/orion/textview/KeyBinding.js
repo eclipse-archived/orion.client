@@ -13,9 +13,10 @@
 /*global window document navigator setTimeout clearTimeout alert XMLHttpRequest */
 
 /**
- * @namespace The global container for Eclipse APIs.
+ * @namespace The global container for Orion APIs.
  */ 
-var eclipse = eclipse || {};
+var orion = orion || {};
+orion.textview = orion.textview || {};
 
 /**
  * Constructs a new key binding with the given key code and modifiers.
@@ -27,7 +28,7 @@ var eclipse = eclipse || {};
  * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
  * 
  * @class A KeyBinding represents of a key code and a modifier state that can be triggered by the user using the keyboard.
- * @name eclipse.KeyBinding
+ * @name orion.textview.KeyBinding
  * 
  * @property {String|Number} keyCode The key code.
  * @property {Boolean} mod1 The primary modifier (usually Command on Mac and Control on other platforms).
@@ -35,9 +36,9 @@ var eclipse = eclipse || {};
  * @property {Boolean} mod3 The third modifier (usually Alt).
  * @property {Boolean} mod4 The fourth modifier (usually Control on the Mac).
  *
- * @see eclipse.Editor#setKeyBinding
+ * @see orion.textview.TextView#setKeyBinding
  */
-eclipse.KeyBinding = (function() {
+orion.textview.KeyBinding = (function() {
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	/** @private */
 	function KeyBinding (keyCode, mod1, mod2, mod3, mod4) {
@@ -51,7 +52,7 @@ eclipse.KeyBinding = (function() {
 		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;
 		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
 	}
-	KeyBinding.prototype = /** @lends eclipse.KeyBinding.prototype */ {
+	KeyBinding.prototype = /** @lends orion.textview.KeyBinding.prototype */ {
 		/**
 		 * Returns whether this key binding matches the given key event.
 		 * 
@@ -72,7 +73,7 @@ eclipse.KeyBinding = (function() {
 		/**
 		 * Returns whether this key binding is the same as the given parameter.
 		 * 
-		 * @param {eclipse.KeyBinding} kb the key binding to compare with.
+		 * @param {orion.textview.KeyBinding} kb the key binding to compare with.
 		 * @returns {Boolean} whether or not the parameter and the receiver describe the same key binding.
 		 */
 		equals: function(kb) {

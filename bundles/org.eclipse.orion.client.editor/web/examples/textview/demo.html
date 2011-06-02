@@ -4,7 +4,7 @@
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2010."/>
 <meta http-equiv="PRAGMA" content="NO-CACHE"/>
 <meta http-equiv="Expires" content="-1"/>
-<title>Orion Editor Demo</title>
+<title>Orion TextView Demo</title>
 <style>
 .button {
   border: 2px dotted orange;
@@ -12,20 +12,19 @@
 }
 </style>
 
-<script language="javascript" type="text/javascript" src="console.js"></script>
-<script language="javascript" type="text/javascript" src="styler.js"></script>
-<script language="javascript" type="text/javascript" src="rulers.js"></script>
-<script language="javascript" type="text/javascript" src="undoStack.js"></script>
-<script language="javascript" type="text/javascript" src="../js/editor.js"></script>
-<script language="javascript" type="text/javascript" src="../js/model.js"></script>
-<script language="javascript" type="text/javascript" src="../js-tests/test-performance.js"></script>
+<script language="javascript" type="text/javascript" src="/orion/textview/KeyBinding.js"></script>
+<script language="javascript" type="text/javascript" src="/orion/textview/TextModel.js"></script>
+<script language="javascript" type="text/javascript" src="/orion/textview/TextView.js"></script>
+<script language="javascript" type="text/javascript" src="/orion/textview/Rulers.js"></script>
+<script language="javascript" type="text/javascript" src="/orion/textview/UndoStack.js"></script>
+<script language="javascript" type="text/javascript" src="/examples/textview/TextStyler.js"></script>
+<script language="javascript" type="text/javascript" src="/js-tests/test-performance.js"></script>
 
 <script language="javascript" type="text/javascript">
-var editor = null;
+var view = null;
 var styler = null;
 
 var isMac = navigator.platform.indexOf("Mac") !== -1;
-
 
 function log (text) {
 	var console = window.document.getElementById('console');
@@ -71,87 +70,92 @@ function getFile(file) {
 	}
 }
 
-function checkEditor() {
-	if (editor) return;
+function checkView() {
+	if (view) return;
+	var stylesheets = [
+		"/orion/textview/textview.css",
+		"/orion/textview/rulers.css",
+		"/examples/textview/textstyler.css",
+	];
 	var options = {
 		parent: "divParent",
-		model: new eclipse.TextModel(),
-		stylesheet: "editor.css",
+		model: new orion.textview.TextModel(),
+		stylesheet: stylesheets,
 		tabSize: 4,
 	};
-	editor = new eclipse.Editor(options);
+	view = new orion.textview.TextView(options);
 	
 	/* Undo stack */
-	var undoStack = new eclipse.UndoStack(editor, 200);
-	editor.setKeyBinding(new eclipse.KeyBinding('z', true), "undo");
-	editor.setAction("undo", function() {
+	var undoStack = new orion.textview.UndoStack(view, 200);
+	view.setKeyBinding(new orion.textview.KeyBinding('z', true), "undo");
+	view.setAction("undo", function() {
 		undoStack.undo();
 		return true;
 	});
-	editor.setKeyBinding(isMac ? new eclipse.KeyBinding('z', true, true) : new eclipse.KeyBinding('y', true), "redo");
-	editor.setAction("redo", function() {
+	view.setKeyBinding(isMac ? new orion.textview.KeyBinding('z', true, true) : new orion.textview.KeyBinding('y', true), "redo");
+	view.setAction("redo", function() {
 		undoStack.redo();
 		return true;
 	});
 	
-	editor.setKeyBinding(new eclipse.KeyBinding('s', true), "save");
-	editor.setAction("save", function() {
+	view.setKeyBinding(new orion.textview.KeyBinding('s', true), "save");
+	view.setAction("save", function() {
 		log("*****************SAVE");
 		return true;
 	});
-	editor.setKeyBinding(new eclipse.KeyBinding('f', true), "find");
-	editor.setAction("find", function() {
+	view.setKeyBinding(new orion.textview.KeyBinding('f', true), "find");
+	view.setAction("find", function() {
 		log("*****************FIND");
 		return true;
 	});
 	
 	var breakpoint = {
-		html: "<img src='brkp_obj.gif'></img>",
+		html: "<img src='images/brkp_obj.gif'></img>",
 		style: {styleClass: "ruler_annotation_breakpoint"},
 		overviewStyle: {styleClass: "ruler_annotation_breakpoint_overview"}
 	};
 	var todo = {
-		html: "<img src='todo.gif'></img>",
+		html: "<img src='images/todo.gif'></img>",
 		style: {styleClass: "ruler_annotation_todo"},
 		overviewStyle: {styleClass: "ruler_annotation_todo_overview"}
 	};
-	var annotation = new eclipse.AnnotationRuler("left", {styleClass: "ruler_annotation"}, breakpoint);
+	var annotation = new orion.textview.AnnotationRuler("left", {styleClass: "ruler_annotation"}, breakpoint);
 	annotation.onDblClick =  function(lineIndex, e) {
 		if (lineIndex === undefined) return;
 		annotation.setAnnotation(lineIndex, annotation.getAnnotation(lineIndex) !== undefined ? undefined : e.ctrlKey ? todo : breakpoint);
 	};
-	var lines = new eclipse.LineNumberRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+	var lines = new orion.textview.LineNumberRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
 	lines.onDblClick = annotation.onDblClick;
-	var overview = new eclipse.OverviewRuler("right", {styleClass: "ruler_overview"}, annotation);
-	editor.addRuler(annotation);
-	editor.addRuler(lines);
-	editor.addRuler(overview);
+	var overview = new orion.textview.OverviewRuler("right", {styleClass: "ruler_overview"}, annotation);
+	view.addRuler(annotation);
+	view.addRuler(lines);
+	view.addRuler(overview);
 }
 
 function createJavaSample() {
-	checkEditor();
+	checkView();
 	var file =  getFile("text.txt");
 	if (styler) {
 		styler.destroy();
 		styler = null;
 	}
-	styler = new eclipse.TextStyler(editor, "java");
-	editor.setText(file);
+	styler = new examples.textview.TextStyler(view, "java");
+	view.setText(file);
 }
 
 function createJavaScriptSample() {
-	checkEditor();
-	var file =  getFile("../js/editor.js");
+	checkView();
+	var file =  getFile("/orion/textview/textview.js");
 	if (styler) {
 		styler.destroy();
 		styler = null;
 	}
-	styler = new eclipse.TextStyler(editor, "js");
-	editor.setText(file);
+	styler = new examples.textview.TextStyler(view, "js");
+	view.setText(file);
 }
 
 function createPlainTextSample() {
-	checkEditor();
+	checkView();
 	var lineCount = 50000;
 	var lines = [];
 	for(var i = 0; i < lineCount; i++) {
@@ -161,30 +165,30 @@ function createPlainTextSample() {
 		styler.destroy();
 		styler = null;
 	}
-	editor.setText(lines.join("\r\n"));
+	view.setText(lines.join("\r\n"));
 }
 
 function createBidiTextSample() {
-	checkEditor();
+	checkView();
 	var lines = [];
 	lines.push("Hello \u0644\u0645\u0646\u0647");
 	if (styler) {
 		styler.destroy();
 		styler = null;
 	}
-	editor.setText(lines.join("\r\n"));
+	view.setText(lines.join("\r\n"));
 }
 
 function test() {
 }
 
 function performanceTest() {
-	checkEditor();
+	checkView();
 	if (styler) {
 		styler.destroy();
 		styler = null;
 	}
-	var test = new PerformanceTest(editor);
+	var test = new PerformanceTest(view);
 	var select = document.getElementById("test");
 	test[select.value]();
 }
@@ -194,17 +198,17 @@ function performanceTest() {
 </head>
 <body>
 
-<h1>Orion Editor Demo</h1>
+<h1>Orion Text View Demo</h1>
 
 <table width="100%">
 <tr>
-<th>Editor</th>
+<th>View</th>
 <th>Console</th>
 </tr>
 <tr>
 <td width="100%">
 <div id='divParent' style='border: 1px solid teal;width:100%;height:650px;'>
-Create the editor by clicking one of the buttons at the bottom.
+Create the view by clicking one of the buttons at the bottom.
 </div>
 </td>
 <td>

@@ -13,25 +13,26 @@
 /*global window document navigator setTimeout clearTimeout alert XMLHttpRequest */
 
 /**
- * @namespace The global container for Eclipse APIs.
+ * @namespace The global container for Orion APIs.
  */ 
-var eclipse = eclipse || {};
+var orion = orion || {};
+orion.textview = orion.textview || {};
 
 /**
- * Constructs a new editor.
+ * Constructs a new text view.
  * 
- * @param options the editor options.
- * @param {String|DOMElement} options.parent the parent element for the editor, it can be either a DOM element or an ID for a DOM element.
- * @param {eclipse.TextModel} [options.model] the text model for the editor. If this options is not set the editor creates an empty {@link eclipse.TextModel}.
- * @param {Boolean} [options.readonly=false] whether or not the editor is read-only.
- * @param {Boolean} [options.fullSelection=true] whether or not the editor is in full selection mode.
- * @param {String|String[]} [options.stylesheet] one or more stylesheet URIs for the editor.
+ * @param options the view options.
+ * @param {String|DOMElement} options.parent the parent element for the view, it can be either a DOM element or an ID for a DOM element.
+ * @param {orion.textview.TextModel} [options.model] the text model for the view. If this options is not set the view creates an empty {@link orion.textview.TextModel}.
+ * @param {Boolean} [options.readonly=false] whether or not the view is read-only.
+ * @param {Boolean} [options.fullSelection=true] whether or not the view is in full selection mode.
+ * @param {String|String[]} [options.stylesheet] one or more stylesheet URIs for the view.
  * @param {Number} [options.tabSize] The number of spaces in a tab.
  * 
- * @class A Editor is a user interface for editing text.
- * @name eclipse.Editor
+ * @class A TextView is a user interface for editing text.
+ * @name orion.textview.TextView
  */
-eclipse.Editor = (function() {
+orion.textview.TextView = (function() {
 
 	/** @private */
 	function addHandler(node, type, handler, capture) {
@@ -65,8 +66,8 @@ eclipse.Editor = (function() {
 	/** 
 	 * Constructs a new Selection object.
 	 * 
-	 * @class A Selection represents a range of selected text in the editor.
-	 * @name eclipse.Selection
+	 * @class A Selection represents a range of selected text in the view.
+	 * @name orion.textview.Selection
 	 */
 	var Selection = (function() {
 		/** @private */
@@ -74,19 +75,19 @@ eclipse.Editor = (function() {
 			/**
 			 * The selection start offset.
 			 *
-			 * @name eclipse.Selection#start
+			 * @name orion.textview.Selection#start
 			 */
 			this.start = start;
 			/**
 			 * The selection end offset.
 			 *
-			 * @name eclipse.Selection#end
+			 * @name orion.textview.Selection#end
 			 */
 			this.end = end;
 			/** @private */
 			this.caret = caret; //true if the start, false if the caret is at end
 		}
-		Selection.prototype = /** @lends eclipse.Selection.prototype */ {
+		Selection.prototype = /** @lends orion.textview.Selection.prototype */ {
 			/** @private */
 			clone: function() {
 				return new Selection(this.start, this.end, this.caret);
@@ -143,7 +144,7 @@ eclipse.Editor = (function() {
 	 * Constructs a new EventTable object.
 	 * 
 	 * @class 
-	 * @name eclipse.EventTable
+	 * @name orion.textview.EventTable
 	 * @private
 	 */
 	var EventTable = (function() {
@@ -194,13 +195,13 @@ eclipse.Editor = (function() {
 	}());
 	
 	/** @private */
-	function Editor (options) {
+	function TextView (options) {
 		this._init(options);
 	}
 	
-	Editor.prototype = /** @lends eclipse.Editor.prototype */ {
+	TextView.prototype = /** @lends orion.textview.TextView.prototype */ {
 		/**
-		 * Adds an event listener to the editor.
+		 * Adds an event listener to the text view.
 		 * 
 		 * @param {String} type the event type. The supported events are:
 		 * <ul>
@@ -224,27 +225,27 @@ eclipse.Editor = (function() {
 			this._eventTable.addEventListener(type, context, func, data);
 		},
 		/**
-		 * @class This interface represents a ruler for the editor.
+		 * @class This interface represents a ruler for the text view.
 		 * <p>
 		 * A Ruler is a graphical element that is placed either on the left or on the right side of 
-		 * the editor. It can be used to provide the editor with per line decoration such as line numbering,
+		 * the view. It can be used to provide the view with per line decoration such as line numbering,
 		 * bookmarks, breakpoints, folding disclosures, etc. 
 		 * </p><p>
 		 * There are two types of rulers: page and document. A page ruler only shows the content for the lines that are
 		 * visible, while a document ruler always shows the whole content.
 		 * </p>
 		 * <b>See:</b><br/>
-		 * {@link eclipse.Editor}<br/>
-		 * {@link eclipse.Editor#addRuler}
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#addRuler}
 		 * </p>		 
-		 * @name eclipse.Ruler
+		 * @name orion.textview.Ruler
 		 * 
 		 */
 		/**
 		 * Returns the ruler overview type.
 		 *
 		 * @name getOverview
-		 * @methodOf eclipse.Ruler#
+		 * @methodOf orion.textview.Ruler#
 		 * @returns {String} the overview type, which is either "page" or "document".
 		 *
 		 * @see #getLocation
@@ -253,7 +254,7 @@ eclipse.Editor = (function() {
 		 * Returns the ruler location.
 		 *
 		 * @name getLocation
-		 * @methodOf eclipse.Ruler#
+		 * @methodOf orion.textview.Ruler#
 		 * @returns {String} the ruler location, which is either "left" or "right".
 		 */
 		/**
@@ -264,7 +265,7 @@ eclipse.Editor = (function() {
 		 * </p>
 		 *
 		 * @name getHTML
-		 * @methodOf eclipse.Ruler#
+		 * @methodOf orion.textview.Ruler#
 		 * @param {Number} lineIndex
 		 * @returns {String} the HTML content for a given line, or generic line.
 		 *
@@ -279,9 +280,9 @@ eclipse.Editor = (function() {
 		 * </p>
 		 *
 		 * @name getStyle
-		 * @methodOf eclipse.Ruler#
+		 * @methodOf orion.textview.Ruler#
 		 * @param {Number} lineIndex
-		 * @returns {eclipse.Style} the CSS styling for ruler, given line, or generic line.
+		 * @returns {orion.textview.Style} the CSS styling for ruler, given line, or generic line.
 		 *
 		 * @see #getHTML
 		 */
@@ -291,7 +292,7 @@ eclipse.Editor = (function() {
 		 * This function is only called for rulers with "document" overview type.
 		 * </p>
 		 * @name getAnnotations
-		 * @methodOf eclipse.Ruler#
+		 * @methodOf orion.textview.Ruler#
 		 * @returns {Number[]} an array of line indices.
 		 */
 		/**
@@ -299,7 +300,7 @@ eclipse.Editor = (function() {
 		 *
 		 * @name onClick
 		 * @event
-		 * @methodOf eclipse.Ruler#
+		 * @methodOf orion.textview.Ruler#
 		 * @param {Number} lineIndex the line index of the clicked decoration
 		 * @param {DOMEvent} e the click event
 		 */
@@ -308,14 +309,14 @@ eclipse.Editor = (function() {
 		 *
 		 * @name onDblClick
 		 * @event
-		 * @methodOf eclipse.Ruler#
+		 * @methodOf orion.textview.Ruler#
 		 * @param {Number} lineIndex the line index of the double clicked decoration
 		 * @param {DOMEvent} e the double click event
 		 */
 		/**
-		 * Adds a ruler to the editor.
+		 * Adds a ruler to the text view.
 		 *
-		 * @param {eclipse.Ruler} ruler the ruler.
+		 * @param {orion.textview.Ruler} ruler the ruler.
 		 */
 		addRuler: function (ruler) {
 			var document = this._frameDocument;
@@ -336,10 +337,10 @@ eclipse.Editor = (function() {
 				body.appendChild(rulerParent);
 				if (side === "left") {
 					this._leftDiv = rulerParent;
-					rulerParent.className = "editorLeftRuler";
+					rulerParent.className = "viewLeftRuler";
 				} else {
 					this._rightDiv = rulerParent;
-					rulerParent.className = "editorRightRuler";
+					rulerParent.className = "viewRightRuler";
 				}
 				var table = document.createElement("TABLE");
 				rulerParent.appendChild(table);
@@ -360,7 +361,7 @@ eclipse.Editor = (function() {
 			var cell = row.insertCell(index);
 			cell.vAlign = "top";
 			cell.appendChild(div);
-			ruler.setEditor(this);
+			ruler.setView(this);
 			this._updatePage();
 		},
 		/**
@@ -368,11 +369,11 @@ eclipse.Editor = (function() {
 		 * <p>The supported coordinate spaces are:
 		 * <ul>
 		 *   <li>"document" - relative to document, the origin is the top-left corner of first line</li>
-		 *   <li>"page" - relative to html page that contains the editor</li>
-		 *   <li>"editor" - relative to editor, the origin is the top-left corner of the editor container</li>
+		 *   <li>"page" - relative to html page that contains the text view</li>
+		 *   <li>"view" - relative to text view, the origin is the top-left corner of the view container</li>
 		 * </ul>
 		 * </p>
-		 * <p>All methods in the editor that take or return a position are in the document coordinate space.</p>
+		 * <p>All methods in the view that take or return a position are in the document coordinate space.</p>
 		 *
 		 * @param rect the rectangle to convert.
 		 * @param rect.x the x of the rectangle.
@@ -389,16 +390,16 @@ eclipse.Editor = (function() {
 		 */
 		convert: function(rect, from, to) {
 			var scroll = this._getScroll();
-			var editorPad = this._getEditorPadding();
+			var viewPad = this._getViewPadding();
 			var frame = this._frame.getBoundingClientRect();
-			var editorRect = this._editorDiv.getBoundingClientRect();
+			var viewRect = this._viewDiv.getBoundingClientRect();
 			switch(from) {
 				case "document":
 					if (rect.x !== undefined) {
-						rect.x += - scroll.x + editorRect.left + editorPad.left;
+						rect.x += - scroll.x + viewRect.left + viewPad.left;
 					}
 					if (rect.y !== undefined) {
-						rect.y += - scroll.y + editorRect.top + editorPad.top;
+						rect.y += - scroll.y + viewRect.top + viewPad.top;
 					}
 					break;
 				case "page":
@@ -414,10 +415,10 @@ eclipse.Editor = (function() {
 			switch (to) {
 				case "document":
 					if (rect.x !== undefined) {
-						rect.x += scroll.x - editorRect.left - editorPad.left;
+						rect.x += scroll.x - viewRect.left - viewPad.left;
 					}
 					if (rect.y !== undefined) {
-						rect.y += scroll.y - editorRect.top - editorPad.top;
+						rect.y += scroll.y - viewRect.top - viewPad.top;
 					}
 					break;
 				case "page":
@@ -431,11 +432,11 @@ eclipse.Editor = (function() {
 			}
 		},
 		/**
-		 * Destroys the editor. 
+		 * Destroys the text view. 
 		 * <p>
-		 * Removes the editor from the page and frees all resources created by the editor.
+		 * Removes the view from the page and frees all resources created by the view.
 		 * Calling this function causes the "Destroy" event to be fire so that all components
-		 * attached to editor can release their references.
+		 * attached to view can release their references.
 		 * </p>
 		 *
 		 * @see #onDestroy
@@ -452,7 +453,7 @@ eclipse.Editor = (function() {
 				var cells = rulerDiv.firstChild.rows[0].cells;
 				for (var i = 0; i < cells.length; i++) {
 					var div = cells[i].firstChild;
-					div._ruler.setEditor(null);
+					div._ruler.setView(null);
 				}
 			};
 			destroyRulers (this._leftDiv);
@@ -495,14 +496,14 @@ eclipse.Editor = (function() {
 			this._frameDocument = null;
 			this._frameWindow = null;
 			this._scrollDiv = null;
-			this._editorDiv = null;
+			this._viewDiv = null;
 			this._clientDiv = null;
 			this._overlayDiv = null;
 			this._keyBindings = null;
 			this._actions = null;
 		},
 		/**
-		 * Gives focus to the editor.
+		 * Gives focus to the text view.
 		 */
 		focus: function() {
 			/*
@@ -526,9 +527,9 @@ eclipse.Editor = (function() {
 			this._updateDOMSelection();
 		},
 		/**
-		 * Returns all action names defined in the editor.
+		 * Returns all action names defined in the text view.
 		 * <p>
-		 * There are two types of actions, the predefined actions of the editor 
+		 * There are two types of actions, the predefined actions of the view 
 		 * and the actions added by application code.
 		 * </p>
 		 * <p>
@@ -565,7 +566,7 @@ eclipse.Editor = (function() {
 		 *       <li>"selectTextEnd" - moves the caret to the end of the document</li>
 		 *       <li>"selectAll" - selects the entire document</li>
 		 *     </ul>
-		 *   <li>Edit actions. These actions modify the editor text</li>
+		 *   <li>Edit actions. These actions modify the text view text</li>
 		 *     <ul>
 		 *       <li>"deletePrevious" - deletes the character preceding the caret</li>
 		 *       <li>"deleteNext" - deletes the charecter following the caret</li>
@@ -584,7 +585,7 @@ eclipse.Editor = (function() {
 		 * </p>
 		 *
 		 * @param {Boolean} [defaultAction=false] whether or not the predefined actions are included.
-		 * @returns {String[]} an array of action names defined in the editor.
+		 * @returns {String[]} an array of action names defined in the text view.
 		 *
 		 * @see #invokeAction
 		 * @see #setAction
@@ -603,13 +604,13 @@ eclipse.Editor = (function() {
 		/**
 		 * Returns the bottom index.
 		 * <p>
-		 * The bottom index is the line that is currently at the bottom of the editor.  This
-		 * line may be partially visible depending on the vertical scroll of the editor. The parameter
+		 * The bottom index is the line that is currently at the bottom of the view.  This
+		 * line may be partially visible depending on the vertical scroll of the view. The parameter
 		 * <code>fullyVisible</code> determines whether to return only fully visible lines. 
 		 * </p>
 		 *
 		 * @param {Boolean} [fullyVisible=false] if <code>true</code>, returns the index of the last fully visible line. This
-		 *    parameter is ignored if the editor is not big enough to show one line.
+		 *    parameter is ignored if the view is not big enough to show one line.
 		 * @returns {Number} the index of the bottom line.
 		 *
 		 * @see #getTopIndex
@@ -622,7 +623,7 @@ eclipse.Editor = (function() {
 		 * Returns the bottom pixel.
 		 * <p>
 		 * The bottom pixel is the pixel position that is currently at
-		 * the bottom edge of the editor.  This position is relative to the
+		 * the bottom edge of the view.  This position is relative to the
 		 * beginning of the document.
 		 * </p>
 		 *
@@ -670,7 +671,7 @@ eclipse.Editor = (function() {
 		 * Returns the horizontal pixel.
 		 * <p>
 		 * The horizontal pixel is the pixel position that is currently at
-		 * the left edge of the editor.  This position is relative to the
+		 * the left edge of the view.  This position is relative to the
 		 * beginning of the document.
 		 * </p>
 		 *
@@ -686,7 +687,7 @@ eclipse.Editor = (function() {
 		 * Returns all the key bindings associated to the given action name.
 		 *
 		 * @param {String} name the action name.
-		 * @returns {eclipse.KeyBinding[]} the array of key bindings associated to the given action name.
+		 * @returns {orion.textview.KeyBinding[]} the array of key bindings associated to the given action name.
 		 *
 		 * @see #setKeyBinding
 		 * @see #setAction
@@ -750,16 +751,16 @@ eclipse.Editor = (function() {
 			offset = Math.min(Math.max(0, offset), model.getCharCount());
 			var lineIndex = model.getLineAtOffset(offset);
 			var scroll = this._getScroll();
-			var editorRect = this._editorDiv.getBoundingClientRect();
-			var editorPad = this._getEditorPadding();
-			var x = this._getOffsetToX(offset) + scroll.x - editorRect.left - editorPad.left;
+			var viewRect = this._viewDiv.getBoundingClientRect();
+			var viewPad = this._getViewPadding();
+			var x = this._getOffsetToX(offset) + scroll.x - viewRect.left - viewPad.left;
 			var y = this.getLinePixel(lineIndex);
 			return {x: x, y: y};
 		},
 		/**
-		 * Returns the text model of the editor.
+		 * Returns the text model of the text view.
 		 *
-		 * @returns {eclipse.TextModel} the text model of the editor.
+		 * @returns {orion.textview.TextModel} the text model of the view.
 		 */
 		getModel: function() {
 			return this._model;
@@ -777,21 +778,21 @@ eclipse.Editor = (function() {
 		getOffsetAtLocation: function(x, y) {
 			var model = this._model;
 			var scroll = this._getScroll();
-			var editorRect = this._editorDiv.getBoundingClientRect();
-			var editorPad = this._getEditorPadding();
+			var viewRect = this._viewDiv.getBoundingClientRect();
+			var viewPad = this._getViewPadding();
 			var lineIndex = this._getYToLine(y - scroll.y);
-			x += -scroll.x + editorRect.left + editorPad.left;
+			x += -scroll.x + viewRect.left + viewPad.left;
 			var offset = this._getXToOffset(lineIndex, x);
 			return offset;
 		},
 		/**
-		 * Returns the editor selection.
+		 * Returns the text view selection.
 		 * <p>
 		 * The selection is defined by a start and end character offset relative to the
 		 * document. The character at end offset is not included in the selection.
 		 * </p>
 		 * 
-		 * @returns {eclipse.Selection} the editor selection
+		 * @returns {orion.textview.Selection} the view selection
 		 *
 		 * @see #setSelection
 		 */
@@ -817,13 +818,13 @@ eclipse.Editor = (function() {
 		/**
 		 * Returns the top index.
 		 * <p>
-		 * The top index is the line that is currently at the top of the editor.  This
-		 * line may be partially visible depending on the vertical scroll of the editor. The parameter
+		 * The top index is the line that is currently at the top of the view.  This
+		 * line may be partially visible depending on the vertical scroll of the view. The parameter
 		 * <code>fullyVisible</code> determines whether to return only fully visible lines. 
 		 * </p>
 		 *
 		 * @param {Boolean} [fullyVisible=false] if <code>true</code>, returns the index of the first fully visible line. This
-		 *    parameter is ignored if the editor is not big enough to show one line.
+		 *    parameter is ignored if the view is not big enough to show one line.
 		 * @returns {Number} the index of the top line.
 		 *
 		 * @see #getBottomIndex
@@ -836,7 +837,7 @@ eclipse.Editor = (function() {
 		 * Returns the top pixel.
 		 * <p>
 		 * The top pixel is the pixel position that is currently at
-		 * the top edge of the editor.  This position is relative to the
+		 * the top edge of the view.  This position is relative to the
 		 * beginning of the document.
 		 * </p>
 		 *
@@ -856,7 +857,7 @@ eclipse.Editor = (function() {
 		 * the <code>defaultAction</code> paramater is <code>true</code>.
 		 * </p>
 		 * <p>
-		 * If the application defined action returns <code>false</code>, the editor predefined
+		 * If the application defined action returns <code>false</code>, the text view predefined
 		 * action is executed if present.
 		 * </p>
 		 *
@@ -882,19 +883,19 @@ eclipse.Editor = (function() {
 			return false;
 		},
 		/**
-		 * @class This is the event sent when the editor is destroyed.
+		 * @class This is the event sent when the text view is destroyed.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link eclipse.Editor}<br/>
-		 * {@link eclipse.Editor#event:onDestroy}
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onDestroy}
 		 * </p>
-		 * @name eclipse.DestroyEvent
+		 * @name orion.textview.DestroyEvent
 		 */
 		/**
-		 * This event is sent when the editor has been destroyed.
+		 * This event is sent when the text view has been destroyed.
 		 *
 		 * @event
-		 * @param {eclipse.DestroyEvent} destroyEvent the event
+		 * @param {orion.textview.DestroyEvent} destroyEvent the event
 		 *
 		 * @see #destroy
 		 */
@@ -902,13 +903,13 @@ eclipse.Editor = (function() {
 			this._eventTable.sendEvent("Destroy", destroyEvent);
 		},
 		/**
-		 * @class This object is used to define style information for the editor.
+		 * @class This object is used to define style information for the text view.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link eclipse.Editor}<br/>
-		 * {@link eclipse.Editor#event:onLineStyle}
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onLineStyle}
 		 * </p>		 
-		 * @name eclipse.Style
+		 * @name orion.textview.Style
 		 * 
 		 * @property {String} styleClass A CSS class name.
 		 * @property {Object} style An object with CSS properties.
@@ -917,35 +918,35 @@ eclipse.Editor = (function() {
 		 * @class This object is used to style range.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link eclipse.Editor}<br/>
-		 * {@link eclipse.Editor#event:onLineStyle}
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onLineStyle}
 		 * </p>		 
-		 * @name eclipse.StyleRange
+		 * @name orion.textview.StyleRange
 		 * 
 		 * @property {Number} start The start character offset, relative to the document, where the style should be applied.
 		 * @property {Number} end The end character offset (exclusive), relative to the document, where the style should be applied.
-		 * @property {eclipse.Style} style The style for the range.
+		 * @property {orion.textview.Style} style The style for the range.
 		 */
 		/**
-		 * @class This is the event sent when the editor needs the style information for a line.
+		 * @class This is the event sent when the text view needs the style information for a line.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link eclipse.Editor}<br/>
-		 * {@link eclipse.Editor#event:onLineStyle}
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onLineStyle}
 		 * </p>		 
-		 * @name eclipse.LineStyleEvent
+		 * @name orion.textview.LineStyleEvent
 		 * 
 		 * @property {Number} lineIndex The line index.
 		 * @property {String} lineText The line text.
 		 * @property {Number} lineStart The character offset, relative to document, of the first character in the line.
-		 * @property {eclipse.Style} style The style for the entire line (output argument).
-		 * @property {eclipse.StyleRange[]} ranges An array of style ranges for the line (output argument).		 
+		 * @property {orion.textview.Style} style The style for the entire line (output argument).
+		 * @property {orion.textview.StyleRange[]} ranges An array of style ranges for the line (output argument).		 
 		 */
 		/**
-		 * This event is sent when the editor needs the style information for a line.
+		 * This event is sent when the text view needs the style information for a line.
 		 *
 		 * @event
-		 * @param {eclipse.LineStyleEvent} lineStyleEvent the event
+		 * @param {orion.textview.LineStyleEvent} lineStyleEvent the event
 		 */
 		onLineStyle: function(lineStyleEvent) {
 			this._eventTable.sendEvent("LineStyle", lineStyleEvent);
@@ -954,11 +955,11 @@ eclipse.Editor = (function() {
 		 * @class This is the event sent when the text in the model has changed.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link eclipse.Editor}<br/>
-		 * {@link eclipse.Editor#event:onModelChanged}<br/>
-		 * {@link eclipse.TextModel#onChanged}
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onModelChanged}<br/>
+		 * {@link orion.textview.TextModel#onChanged}
 		 * </p>
-		 * @name eclipse.ModelChangedEvent
+		 * @name orion.textview.ModelChangedEvent
 		 * 
 		 * @property {Number} start The character offset in the model where the change has occurred.
 		 * @property {Number} removedCharCount The number of characters removed from the model.
@@ -970,7 +971,7 @@ eclipse.Editor = (function() {
 		 * This event is sent when the text in the model has changed.
 		 *
 		 * @event
-		 * @param {eclipse.ModelChangingEvent} modelChangingEvent the event
+		 * @param {orion.textview.ModelChangingEvent} modelChangingEvent the event
 		 */
 		onModelChanged: function(modelChangedEvent) {
 			this._eventTable.sendEvent("ModelChanged", modelChangedEvent);
@@ -979,11 +980,11 @@ eclipse.Editor = (function() {
 		 * @class This is the event sent when the text in the model is about to change.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link eclipse.Editor}<br/>
-		 * {@link eclipse.Editor#event:onModelChanging}<br/>
-		 * {@link eclipse.TextModel#onChanging}
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onModelChanging}<br/>
+		 * {@link orion.textview.TextModel#onChanging}
 		 * </p>
-		 * @name eclipse.ModelChangingEvent
+		 * @name orion.textview.ModelChangingEvent
 		 * 
 		 * @property {String} text The text that is about to be inserted in the model.
 		 * @property {Number} start The character offset in the model where the change will occur.
@@ -996,90 +997,90 @@ eclipse.Editor = (function() {
 		 * This event is sent when the text in the model is about to change.
 		 *
 		 * @event
-		 * @param {eclipse.ModelChangingEvent} modelChangingEvent the event
+		 * @param {orion.textview.ModelChangingEvent} modelChangingEvent the event
 		 */
 		onModelChanging: function(modelChangingEvent) {
 			this._eventTable.sendEvent("ModelChanging", modelChangingEvent);
 		},
 		/**
-		 * @class This is the event sent when the text is modified by the editor.
+		 * @class This is the event sent when the text is modified by the text view.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link eclipse.Editor}<br/>
-		 * {@link eclipse.Editor#event:onModify}
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onModify}
 		 * </p>
-		 * @name eclipse.ModifyEvent
+		 * @name orion.textview.ModifyEvent
 		 */
 		/**
-		 * This event is sent when the editor has changed text in the model.
+		 * This event is sent when the text view has changed text in the model.
 		 * <p>
 		 * If the text is changed directly through the model API, this event
 		 * is not sent.
 		 * </p>
 		 *
 		 * @event
-		 * @param {eclipse.ModifyEvent} modifyEvent the event
+		 * @param {orion.textview.ModifyEvent} modifyEvent the event
 		 */
 		onModify: function(modifyEvent) {
 			this._eventTable.sendEvent("Modify", modifyEvent);
 		},
 		/**
-		 * @class This is the event sent when the selection changes in the editor.
+		 * @class This is the event sent when the selection changes in the text view.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link eclipse.Editor}<br/>
-		 * {@link eclipse.Editor#event:onSelection}
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onSelection}
 		 * </p>		 
-		 * @name eclipse.SelectionEvent
+		 * @name orion.textview.SelectionEvent
 		 * 
-		 * @property {eclipse.Selection} oldValue The old selection.
-		 * @property {eclipse.Selection} newValue The new selection.
+		 * @property {orion.textview.Selection} oldValue The old selection.
+		 * @property {orion.textview.Selection} newValue The new selection.
 		 */
 		/**
-		 * This event is sent when the editor selection has changed.
+		 * This event is sent when the text view selection has changed.
 		 *
 		 * @event
-		 * @param {eclipse.SelectionEvent} selectionEvent the event
+		 * @param {orion.textview.SelectionEvent} selectionEvent the event
 		 */
 		onSelection: function(selectionEvent) {
 			this._eventTable.sendEvent("Selection", selectionEvent);
 		},
 		/**
-		 * @class This is the event sent when the editor scrolls.
+		 * @class This is the event sent when the text view scrolls.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link eclipse.Editor}<br/>
-		 * {@link eclipse.Editor#event:onScroll}
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onScroll}
 		 * </p>		 
-		 * @name eclipse.ScrollEvent
+		 * @name orion.textview.ScrollEvent
 		 * 
 		 * @property oldValue The old scroll {x,y}.
 		 * @property newValue The new scroll {x,y}.
 		 */
 		/**
-		 * This event is sent when the editor scrolls vertically or horizontally.
+		 * This event is sent when the text view scrolls vertically or horizontally.
 		 *
 		 * @event
-		 * @param {eclipse.ScrollEvent} scrollEvent the event
+		 * @param {orion.textview.ScrollEvent} scrollEvent the event
 		 */
 		onScroll: function(scrollEvent) {
 			this._eventTable.sendEvent("Scroll", scrollEvent);
 		},
 		/**
-		 * @class This is the event sent when the text is about to be modified by the editor.
+		 * @class This is the event sent when the text is about to be modified by the text view.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link eclipse.Editor}<br/>
-		 * {@link eclipse.Editor#event:onVerify}
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onVerify}
 		 * </p>
-		 * @name eclipse.VerifyEvent
+		 * @name orion.textview.VerifyEvent
 		 * 
 		 * @property {String} text The text being inserted.
 		 * @property {Number} start The start offset of the text range to be replaced.
 		 * @property {Number} end The end offset (exclusive) of the text range to be replaced.
 		 */
 		/**
-		 * This event is sent when the editor is about to change text in the model.
+		 * This event is sent when the text view is about to change text in the model.
 		 * <p>
 		 * If the text is changed directly through the model API, this event
 		 * is not sent.
@@ -1090,7 +1091,7 @@ eclipse.Editor = (function() {
 		 * </p>
 		 *
 		 * @event
-		 * @param {eclipse.VerifyEvent} verifyEvent the event
+		 * @param {orion.textview.VerifyEvent} verifyEvent the event
 		 */
 		onVerify: function(verifyEvent) {
 			this._eventTable.sendEvent("Verify", verifyEvent);
@@ -1160,7 +1161,7 @@ eclipse.Editor = (function() {
 			this.redrawLines(startLine, endLine);
 		},
 		/**
-		 * Removes an event listener from the editor.
+		 * Removes an event listener from the text view.
 		 * <p>
 		 * All the parameters must be the same ones used to add the listener.
 		 * </p>
@@ -1176,12 +1177,12 @@ eclipse.Editor = (function() {
 			this._eventTable.removeEventListener(type, context, func, data);
 		},
 		/**
-		 * Removes a ruler from the editor.
+		 * Removes a ruler from the text view.
 		 *
-		 * @param {eclipse.Ruler} ruler the ruler.
+		 * @param {orion.textview.Ruler} ruler the ruler.
 		 */
 		removeRuler: function (ruler) {
-			ruler.setEditor(null);
+			ruler.setView(null);
 			var side = ruler.getLocation();
 			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv;
 			var row = rulerParent.firstChild.rows[0];
@@ -1226,7 +1227,7 @@ eclipse.Editor = (function() {
 		 * association with the specified key binding is overwriten. If the
 		 * action name is <code>null</code>, the association is removed.
 		 * 
-		 * @param {eclipse.KeyBinding} keyBinding the key binding
+		 * @param {orion.textview.KeyBinding} keyBinding the key binding
 		 * @param {String} name the action
 		 */
 		setKeyBinding: function(keyBinding, name) {
@@ -1249,7 +1250,7 @@ eclipse.Editor = (function() {
 							if (index === keyBindings.length) {
 								/* <p>
 								 * Removing all the key bindings associated to an user action will cause
-								 * the user action to be removed. Editor predefined actions are never
+								 * the user action to be removed. TextView predefined actions are never
 								 * removed (so they can be reinstalled in the future). 
 								 * </p>
 								 */
@@ -1275,7 +1276,7 @@ eclipse.Editor = (function() {
 		 * Sets the caret offset relative to the start of the document.
 		 *
 		 * @param {Number} caret the caret offset relative to the start of the document.
-		 * @param {Boolean} [show=true] if <code>true</coce>, the editor will scroll if needed to show the caret location.
+		 * @param {Boolean} [show=true] if <code>true</coce>, the view will scroll if needed to show the caret location.
 		 *
 		 * @see #getCaretOffset
 		 * @see #setSelection
@@ -1291,7 +1292,7 @@ eclipse.Editor = (function() {
 		 * Sets the horizontal pixel.
 		 * <p>
 		 * The horizontal pixel is the pixel position that is currently at
-		 * the left edge of the editor.  This position is relative to the
+		 * the left edge of the view.  This position is relative to the
 		 * beginning of the document.
 		 * </p>
 		 *
@@ -1305,9 +1306,9 @@ eclipse.Editor = (function() {
 			this._scrollView(pixel - this._getScroll().x, 0);
 		},
 		/**
-		 * Sets the text model of the editor.
+		 * Sets the text model of the text view.
 		 *
-		 * @param {eclipse.TextModel} model the text model of the editor.
+		 * @param {orion.textview.TextModel} model the text model of the view.
 		 */
 		setModel: function(model) {
 			if (!model) { return; }
@@ -1340,7 +1341,7 @@ eclipse.Editor = (function() {
 			this.redrawRange();
 		},
 		/**
-		 * Sets the editor selection.
+		 * Sets the text view selection.
 		 * <p>
 		 * The selection is defined by a start and end character offset relative to the
 		 * document. The character at end offset is not included in the selection.
@@ -1356,7 +1357,7 @@ eclipse.Editor = (function() {
 		 * 
 		 * @param {Number} start the start offset of the selection
 		 * @param {Number} end the end offset of the selection
-		 * @param {Boolean} [show=true] if <code>true</coce>, the editor will scroll if needed to show the caret location.
+		 * @param {Boolean} [show=true] if <code>true</coce>, the view will scroll if needed to show the caret location.
 		 *
 		 * @see #getSelection
 		 */
@@ -1380,7 +1381,7 @@ eclipse.Editor = (function() {
 		 * </p>
 		 * <p>
 		 * When both <code>start</code> and <code>end</code> parameters
-		 * are not specified, the editor places the caret at the beginning
+		 * are not specified, the text view places the caret at the beginning
 		 * of the document and scrolls to make it visible.
 		 * </p>
 		 *
@@ -1401,7 +1402,7 @@ eclipse.Editor = (function() {
 				
 				/*
 				* Bug in Firefox 4.  For some reason, the caret does not show after the
-				* editor is refreshed.  The fix is to toggle the contentEditable state and
+				* view is refreshed.  The fix is to toggle the contentEditable state and
 				* force the clientDiv to loose and receive focus.
 				*/
 				if (isFirefox >= 4) {
@@ -1416,8 +1417,8 @@ eclipse.Editor = (function() {
 		/**
 		 * Sets the top index.
 		 * <p>
-		 * The top index is the line that is currently at the top of the editor.  This
-		 * line may be partially visible depending on the vertical scroll of the editor.
+		 * The top index is the line that is currently at the top of the text view.  This
+		 * line may be partially visible depending on the vertical scroll of the view.
 		 * </p>
 		 *
 		 * @param {Number} topIndex the index of the top line.
@@ -1445,7 +1446,7 @@ eclipse.Editor = (function() {
 		 * Sets the top pixel.
 		 * <p>
 		 * The top pixel is the pixel position that is currently at
-		 * the top edge of the editor.  This position is relative to the
+		 * the top edge of the view.  This position is relative to the
 		 * beginning of the document.
 		 * </p>
 		 *
@@ -1476,13 +1477,13 @@ eclipse.Editor = (function() {
 		_handleBodyMouseDown: function (e) {
 			if (!e) { e = window.event; }
 			/*
-			 * Prevent clicks outside of the editor from taking focus 
-			 * away the editor. Note that in Firefox and Opera clicking on the 
-			 * scrollbar also take focus from the editor. Other browsers
+			 * Prevent clicks outside of the view from taking focus 
+			 * away the view. Note that in Firefox and Opera clicking on the 
+			 * scrollbar also take focus from the view. Other browsers
 			 * do not have this problem and stopping the click over the 
 			 * scrollbar for them causes mouse capture problems.
 			 */
-			var topNode = isOpera ? this._clientDiv : this._overlayDiv || this._editorDiv;
+			var topNode = isOpera ? this._clientDiv : this._overlayDiv || this._viewDiv;
 			
 			var temp = e.target ? e.target : e.srcElement;
 			while (temp) {
@@ -1585,7 +1586,7 @@ eclipse.Editor = (function() {
 			this._hasFocus = true;
 			/*
 			* Feature in IE.  The selection is not restored when the
-			* editor gets focus and the caret is always placed at the
+			* view gets focus and the caret is always placed at the
 			* beginning of the document.  The fix is to update the DOM
 			* selection during the focus event.
 			*/
@@ -1622,7 +1623,7 @@ eclipse.Editor = (function() {
 			/*
 			* Feature in Firefox. When a key is held down the browser sends 
 			* right number of keypress events but only one keydown. This is
-			* unexpected and causes the editor to only execute an action
+			* unexpected and causes the view to only execute an action
 			* just one time. The fix is to ignore the keydown event and 
 			* execute the actions from the keypress handler.
 			* Note: This only happens on the Mac and Linux (Firefox 3.6).
@@ -1801,13 +1802,13 @@ eclipse.Editor = (function() {
 			
 			var x = e.clientX;
 			var y = e.clientY;
-			var editorPad = this._getEditorPadding();
-			var editorRect = this._editorDiv.getBoundingClientRect();
+			var viewPad = this._getViewPadding();
+			var viewRect = this._viewDiv.getBoundingClientRect();
 			var width = this._getClientWidth (), height = this._getClientHeight();
-			var leftEdge = editorRect.left + editorPad.left;
-			var topEdge = editorRect.top + editorPad.top;
-			var rightEdge = editorRect.left + editorPad.left + width;
-			var bottomEdge = editorRect.top + editorPad.top + height;
+			var leftEdge = viewRect.left + viewPad.left;
+			var topEdge = viewRect.top + viewPad.top;
+			var rightEdge = viewRect.left + viewPad.left + width;
+			var bottomEdge = viewRect.top + viewPad.top + height;
 			var model = this._model;
 			var caretLine = model.getLineAtOffset(this._getSelection().getCaret());
 			if (y < topEdge && caretLine !== 0) {
@@ -1974,8 +1975,8 @@ eclipse.Editor = (function() {
 				var buttonHeight = 17;
 				var clientHeight = this._getClientHeight ();
 				var lineHeight = this._getLineHeight ();
-				var editorPad = this._getEditorPadding();
-				var trackHeight = clientHeight + editorPad.top + editorPad.bottom - 2 * buttonHeight;
+				var viewPad = this._getViewPadding();
+				var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * buttonHeight;
 				var pixels = this._model.getLineCount () * lineHeight;
 				this.setTopPixel(Math.floor((e.clientY - buttonHeight - lineHeight) * pixels / trackHeight));
 			}
@@ -2547,7 +2548,7 @@ eclipse.Editor = (function() {
 		_calculatePadding: function() {
 			var document = this._frameDocument;
 			var parent = this._clientDiv;
-			var pad = this._getPadding(this._editorDiv);
+			var pad = this._getPadding(this._viewDiv);
 			var div1 = document.createElement("DIV");
 			div1.style.position = "fixed";
 			div1.style.left = "-1000px";
@@ -2586,8 +2587,8 @@ eclipse.Editor = (function() {
 		},
 		_commitIME: function () {
 			if (this._imeOffset === -1) { return; }
-			// make the state of the IME match the state the editor expects it be in
-			// when the editor commits the text and IME also need to be committed
+			// make the state of the IME match the state the view expects it be in
+			// when the view commits the text and IME also need to be committed
 			// this can be accomplished by changing the focus around
 			this._scrollDiv.focus();
 			this._clientDiv.focus();
@@ -2606,7 +2607,7 @@ eclipse.Editor = (function() {
 			this._imeOffset = -1;
 		},
 		_createActions: function () {
-			var KeyBinding = eclipse.KeyBinding;
+			var KeyBinding = orion.textview.KeyBinding;
 			//no duplicate keybindings
 			var bindings = this._keyBindings = [];
 
@@ -2948,12 +2949,12 @@ eclipse.Editor = (function() {
 			return this._frameDocument.documentElement.clientWidth;
 		},
 		_getClientHeight: function() {
-			var editorPad = this._getEditorPadding();
-			return Math.max(0, this._editorDiv.clientHeight - editorPad.top - editorPad.bottom);
+			var viewPad = this._getViewPadding();
+			return Math.max(0, this._viewDiv.clientHeight - viewPad.top - viewPad.bottom);
 		},
 		_getClientWidth: function() {
-			var editorPad = this._getEditorPadding();
-			return Math.max(0, this._editorDiv.clientWidth - editorPad.left - editorPad.right);
+			var viewPad = this._getViewPadding();
+			return Math.max(0, this._viewDiv.clientWidth - viewPad.left - viewPad.right);
 		},
 		_getClipboardText: function (event) {
 			if (this._frameWindow.clipboardData) {
@@ -3067,8 +3068,8 @@ eclipse.Editor = (function() {
 			}
 			return text;
 		},
-		_getEditorPadding: function() {
-			return this._editorPadding;
+		_getViewPadding: function() {
+			return this._viewPadding;
 		},
 		_getLineBoundingClientRect: function (child) {
 			var rect = child.getBoundingClientRect();
@@ -3262,8 +3263,8 @@ eclipse.Editor = (function() {
 			};
 		},
 		_getScroll: function() {
-			var editorDiv = this._editorDiv;
-			return {x: editorDiv.scrollLeft, y: editorDiv.scrollTop};
+			var viewDiv = this._viewDiv;
+			return {x: viewDiv.scrollLeft, y: viewDiv.scrollTop};
 		},
 		_getSelection: function () {
 			return this._selection.clone();
@@ -3272,9 +3273,9 @@ eclipse.Editor = (function() {
 			var child = this._topChild;
 			if (fullyVisible && this._getClientHeight() > this._getLineHeight()) {
 				var rect = child.getBoundingClientRect();
-				var editorPad = this._getEditorPadding();
-				var editorRect = this._editorDiv.getBoundingClientRect();
-				if (rect.top < editorRect.top + editorPad.top) {
+				var viewPad = this._getViewPadding();
+				var viewRect = this._viewDiv.getBoundingClientRect();
+				if (rect.top < viewRect.top + viewPad.top) {
 					child = this._getLineNext(child) || child;
 				}
 			}
@@ -3444,9 +3445,9 @@ eclipse.Editor = (function() {
 			return Math.min(lineEnd, Math.max(lineStart, offset));
 		},
 		_getYToLine: function (y) {
-			var editorPad = this._getEditorPadding();
-			var editorRect = this._editorDiv.getBoundingClientRect();
-			y -= editorRect.top + editorPad.top;
+			var viewPad = this._getViewPadding();
+			var viewRect = this._viewDiv.getBoundingClientRect();
+			y -= viewRect.top + viewPad.top;
 			var lineHeight = this._getLineHeight();
 			var lineIndex = Math.floor((y + this._getScroll().y) / lineHeight);
 			var lineCount = this._model.getLineCount();
@@ -3457,12 +3458,12 @@ eclipse.Editor = (function() {
 			var lineIndex = model.getLineAtOffset(offset);
 			var lineHeight = this._getLineHeight();
 			var scroll = this._getScroll();
-			var editorPad = this._getEditorPadding();
-			var editorRect = this._editorDiv.getBoundingClientRect();
+			var viewPad = this._getViewPadding();
+			var viewRect = this._viewDiv.getBoundingClientRect();
 			var bounds = this._getBoundsAtOffset(offset);
 			var left = bounds.left;
 			var right = bounds.right;
-			var top = (lineIndex * lineHeight) - scroll.y + editorRect.top + editorPad.top;
+			var top = (lineIndex * lineHeight) - scroll.y + viewRect.top + viewPad.top;
 			var bottom = top + lineHeight;
 			return {left: left, top: top, right: right, bottom: bottom};
 		},
@@ -3497,7 +3498,7 @@ eclipse.Editor = (function() {
 			this._mouseUpClosure = function(e) { return self._handleMouseUp(e);};
 			
 			var clientDiv = this._clientDiv;
-			var editorDiv = this._editorDiv;
+			var viewDiv = this._viewDiv;
 			var body = this._frameDocument.body; 
 			var handlers = this._handlers = [];
 			var resizeNode = isIE < 9 ? this._frame : this._frameWindow;
@@ -3505,7 +3506,7 @@ eclipse.Editor = (function() {
 			handlers.push({target: resizeNode, type: "resize", handler: function(e) { return self._handleResize(e);}});
 			handlers.push({target: focusNode, type: "blur", handler: function(e) { return self._handleBlur(e);}});
 			handlers.push({target: focusNode, type: "focus", handler: function(e) { return self._handleFocus(e);}});
-			handlers.push({target: editorDiv, type: "scroll", handler: function(e) { return self._handleScroll(e);}});
+			handlers.push({target: viewDiv, type: "scroll", handler: function(e) { return self._handleScroll(e);}});
 			if (isPad) {
 				var touchDiv = this._touchDiv;
 				var textArea = this._textArea;
@@ -3538,7 +3539,7 @@ eclipse.Editor = (function() {
 				}
 				if (!isIE && !isOpera) {
 					var wheelEvent = isFirefox ? "DOMMouseScroll" : "mousewheel";
-					handlers.push({target: this._editorDiv, type: wheelEvent, handler: function(e) { return self._handleMouseWheel(e); }});
+					handlers.push({target: this._viewDiv, type: wheelEvent, handler: function(e) { return self._handleMouseWheel(e); }});
 				}
 				if (isFirefox && !isWindows) {
 					handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return self._handleDataModified(e); }});
@@ -3562,7 +3563,7 @@ eclipse.Editor = (function() {
 			}
 			if (!parent) { throw "no parent"; }
 			this._parent = parent;
-			this._model = options.model ? options.model : new eclipse.TextModel();
+			this._model = options.model ? options.model : new orion.textview.TextModel();
 			this.readonly = options.readonly === true;
 			this._selection = new Selection (0, 0, false);
 			this._eventTable = new EventTable();
@@ -3618,9 +3619,9 @@ eclipse.Editor = (function() {
 				html.push("<meta http-equiv='X-UA-Compatible' content='IE=EmulateIE7'/>");
 			}
 			html.push("<style>");
-			html.push(".editorContainer {font-family: monospace; font-size: 10pt;}");
-			html.push(".editor {padding: 1px 2px;}");
-			html.push(".editorContent {}");
+			html.push(".viewContainer {font-family: monospace; font-size: 10pt;}");
+			html.push(".view {padding: 1px 2px;}");
+			html.push(".viewContent {}");
 			html.push("</style>");
 			if (options.stylesheet) {
 				var stylesheet = typeof(options.stylesheet) === "string" ? [options.stylesheet] : options.stylesheet;
@@ -3653,7 +3654,7 @@ eclipse.Editor = (function() {
 			document.close();
 			
 			var body = document.body;
-			body.className = "editorContainer";
+			body.className = "viewContainer";
 			body.style.margin = "0px";
 			body.style.borderWidth = "0px";
 			body.style.padding = "0px";
@@ -3681,7 +3682,7 @@ eclipse.Editor = (function() {
 				textArea.tabIndex = 1;
 				textArea.autocapitalize = false;
 				textArea.autocorrect = false;
-				textArea.className = "editorContainer";
+				textArea.className = "viewContainer";
 				textArea.style.background = "transparent";
 				textArea.style.color = "transparent";
 				textArea.style.border = "0px";
@@ -3693,19 +3694,19 @@ eclipse.Editor = (function() {
 				touchDiv.appendChild(textArea);
 			}
 
-			var editorDiv = document.createElement("DIV");
-			editorDiv.className = "editor";
-			this._editorDiv = editorDiv;
-			editorDiv.id = "editorDiv";
-			editorDiv.tabIndex = -1;
-			editorDiv.style.overflow = "auto";
-			editorDiv.style.position = "absolute";
-			editorDiv.style.top = "0px";
-			editorDiv.style.borderWidth = "0px";
-			editorDiv.style.margin = "0px";
-			editorDiv.style.MozOutline = "none";
-			editorDiv.style.outline = "none";
-			body.appendChild(editorDiv);
+			var viewDiv = document.createElement("DIV");
+			viewDiv.className = "view";
+			this._viewDiv = viewDiv;
+			viewDiv.id = "viewDiv";
+			viewDiv.tabIndex = -1;
+			viewDiv.style.overflow = "auto";
+			viewDiv.style.position = "absolute";
+			viewDiv.style.top = "0px";
+			viewDiv.style.borderWidth = "0px";
+			viewDiv.style.margin = "0px";
+			viewDiv.style.MozOutline = "none";
+			viewDiv.style.outline = "none";
+			body.appendChild(viewDiv);
 				
 			var scrollDiv = document.createElement("DIV");
 			this._scrollDiv = scrollDiv;
@@ -3713,7 +3714,7 @@ eclipse.Editor = (function() {
 			scrollDiv.style.margin = "0px";
 			scrollDiv.style.borderWidth = "0px";
 			scrollDiv.style.padding = "0px";
-			editorDiv.appendChild(scrollDiv);
+			viewDiv.appendChild(scrollDiv);
 
 			this._fullSelection = options.fullSelection === undefined || options.fullSelection;
 			if (isPad || (this._fullSelection && !isWebkit)) {
@@ -3786,7 +3787,7 @@ eclipse.Editor = (function() {
 			}
 
 			var clientDiv = document.createElement("DIV");
-			clientDiv.className = "editorContent";
+			clientDiv.className = "viewContent";
 			this._clientDiv = clientDiv;
 			clientDiv.id = "clientDiv";
 			clientDiv.style.whiteSpace = "pre";
@@ -3817,7 +3818,7 @@ eclipse.Editor = (function() {
 				clientDiv.contentEditable = "true";
 			}
 			this._lineHeight = this._calculateLineHeight();
-			this._editorPadding = this._calculatePadding();
+			this._viewPadding = this._calculatePadding();
 			if (isIE) {
 				body.style.lineHeight = this._lineHeight + "px";
 			}
@@ -3916,7 +3917,7 @@ eclipse.Editor = (function() {
 			}, 0);
 		},
 		_resizeTouchDiv: function() {
-			var editorRect = this._editorDiv.getBoundingClientRect();
+			var viewRect = this._viewDiv.getBoundingClientRect();
 			var parentRect = this._frame.getBoundingClientRect();
 			var temp = this._frame;
 			while (temp) {
@@ -3941,30 +3942,30 @@ eclipse.Editor = (function() {
 				parentLeft += this._parentDocument.body.scrollLeft;
 			}
 			var touchDiv = this._touchDiv;
-			touchDiv.style.left = (parentLeft + editorRect.left) + "px";
-			touchDiv.style.top = (parentTop + editorRect.top) + "px";
-			touchDiv.style.width = editorRect.width + "px";
-			touchDiv.style.height = editorRect.height + "px";
+			touchDiv.style.left = (parentLeft + viewRect.left) + "px";
+			touchDiv.style.top = (parentTop + viewRect.top) + "px";
+			touchDiv.style.width = viewRect.width + "px";
+			touchDiv.style.height = viewRect.height + "px";
 		},
 		_scrollView: function (pixelX, pixelY) {
 			/*
-			* Always set _ensureCaretVisible to false so that the editor does not scroll
+			* Always set _ensureCaretVisible to false so that the view does not scroll
 			* to show the caret when scrollView is not called from showCaret().
 			*/
 			this._ensureCaretVisible = false;
 			
 			/*
 			* Scrolling is done only by setting the scrollLeft and scrollTop fields in the
-			* editor div. This causes an updatePage from the scroll event. In some browsers 
+			* view div. This causes an updatePage from the scroll event. In some browsers 
 			* this event is asynchromous and forcing update page to run synchronously
-			* (by calling doScroll) leads to redraw problems. On Chrome 11, the editor 
+			* (by calling doScroll) leads to redraw problems. On Chrome 11, the view 
 			* stops redrawing at times when holding PageDown/PageUp key.
-			* On Firefox 4 for Linux, the editor redraws the first page when holding 
+			* On Firefox 4 for Linux, the view redraws the first page when holding 
 			* PageDown/PageUp key, but it will not redraw again until the key is released.
 			*/
-			var editorDiv = this._editorDiv;
-			if (pixelX) { editorDiv.scrollLeft += pixelX; }
-			if (pixelY) { editorDiv.scrollTop += pixelY; }
+			var viewDiv = this._viewDiv;
+			if (pixelX) { viewDiv.scrollLeft += pixelX; }
+			if (pixelY) { viewDiv.scrollTop += pixelY; }
 		},
 		_setClipboardText: function (text, event) {
 			if (this._frameWindow.clipboardData) {
@@ -4108,9 +4109,9 @@ eclipse.Editor = (function() {
 					textArea.selectionStart = textArea.selectionEnd = 0;
 					var rect = this._frame.getBoundingClientRect();
 					var touchRect = this._touchDiv.getBoundingClientRect();
-					var editorBounds = this._editorDiv.getBoundingClientRect();
-					if (!(editorBounds.left <= l && l <= editorBounds.left + editorBounds.width &&
-						editorBounds.top <= startLineBounds.top && startLineBounds.top <= editorBounds.top + editorBounds.height) ||
+					var viewBounds = this._viewDiv.getBoundingClientRect();
+					if (!(viewBounds.left <= l && l <= viewBounds.left + viewBounds.width &&
+						viewBounds.top <= startLineBounds.top && startLineBounds.top <= viewBounds.top + viewBounds.height) ||
 						!(startNode === endNode && startOffset === endOffset))
 					{
 						textArea.style.left = "-1000px";
@@ -4134,12 +4135,12 @@ eclipse.Editor = (function() {
 				if (!(startNode === endNode && startOffset === endOffset)) {
 					var handleWidth = isPad ? 2 : 0;
 					var handleBorder = handleWidth + "px blue solid";
-					var editorPad = this._getEditorPadding();
+					var viewPad = this._getViewPadding();
 					var clientRect = this._clientDiv.getBoundingClientRect();
-					var editorRect = this._editorDiv.getBoundingClientRect();
-					var left = editorRect.left + editorPad.left;
+					var viewRect = this._viewDiv.getBoundingClientRect();
+					var left = viewRect.left + viewPad.left;
 					var right = clientRect.right;
-					var top = editorRect.top + editorPad.top;
+					var top = viewRect.top + viewPad.top;
 					var bottom = clientRect.bottom;
 					var r;
 					var endLineBounds = this._getLineBoundingClientRect(endNode);
@@ -4262,7 +4263,7 @@ eclipse.Editor = (function() {
 				}
 				/* 
 				* Always showCaret(), even when the selection is not changing, to ensure the
-				* caret is visible. Note that some editors do not scroll to show the caret during
+				* caret is visible. Note that some views do not scroll to show the caret during
 				* keyboard navigation when the selection does not chanage. For example, line down
 				* when the caret is already at the last line.
 				*/
@@ -4332,11 +4333,11 @@ eclipse.Editor = (function() {
 			var startLine = model.getLineAtOffset(start); 
 			var endLine = model.getLineAtOffset(end);
 			var endInclusive = Math.max(Math.max(start, model.getLineStart(endLine)), end - 1);
-			var editorPad = this._getEditorPadding();
+			var viewPad = this._getViewPadding();
 			
 			var clientWidth = this._getClientWidth();
-			var leftEdge = editorPad.left;
-			var rightEdge = editorPad.left + clientWidth;
+			var leftEdge = viewPad.left;
+			var rightEdge = viewPad.left + clientWidth;
 			var bounds = this._getBoundsAtOffset(caret === start ? start : endInclusive);
 			var left = bounds.left;
 			var right = bounds.right;
@@ -4349,9 +4350,9 @@ eclipse.Editor = (function() {
 					if (right < bounds.right) { right = bounds.right; }
 				}
 			}
-			var editorRect = this._editorDiv.getBoundingClientRect(); 
-			left -= editorRect.left;
-			right -= editorRect.left;
+			var viewRect = this._viewDiv.getBoundingClientRect(); 
+			left -= viewRect.left;
+			right -= viewRect.left;
 			var pixelX = 0;
 			if (left < leftEdge) {
 				pixelX = Math.min(left - leftEdge, -minScroll);
@@ -4386,7 +4387,7 @@ eclipse.Editor = (function() {
 			if (pixelX !== 0 || pixelY !== 0) {
 				this._scrollView (pixelX, pixelY);
 				/*
-				* When the editor scrolls it is possible that one of the scrollbars can show over the caret.
+				* When the view scrolls it is possible that one of the scrollbars can show over the caret.
 				* Depending on the browser scrolling can be synchronous (Safari), in which case the change 
 				* can be detected before showCaret() returns. When scrolling is asynchronous (most browsers), 
 				* the detection is done during the next update page.
@@ -4470,12 +4471,12 @@ eclipse.Editor = (function() {
 			document.body.style.width = frameWidth + "px";
 			document.body.style.height = frameHeight + "px";
 			
-			var editorDiv = this._editorDiv;
+			var viewDiv = this._viewDiv;
 			var clientDiv = this._clientDiv;
-			var editorPad = this._getEditorPadding();
+			var viewPad = this._getViewPadding();
 			
-			/* Update editor height in order to have client height computed */
-			editorDiv.style.height = Math.max(0, (frameHeight - editorPad.top - editorPad.bottom)) + "px";
+			/* Update view height in order to have client height computed */
+			viewDiv.style.height = Math.max(0, (frameHeight - viewPad.top - viewPad.bottom)) + "px";
 			
 			var model = this._model;
 			var lineHeight = this._getLineHeight();
@@ -4557,8 +4558,8 @@ eclipse.Editor = (function() {
 			
 			var leftWidth = this._leftDiv ? this._leftDiv.scrollWidth : 0;
 			var rightWidth = this._rightDiv ? this._rightDiv.scrollWidth : 0;
-			editorDiv.style.left = leftWidth + "px";
-			editorDiv.style.width = Math.max(0, frameWidth - leftWidth - rightWidth - editorPad.left - editorPad.right) + "px";
+			viewDiv.style.left = leftWidth + "px";
+			viewDiv.style.width = Math.max(0, frameWidth - leftWidth - rightWidth - viewPad.left - viewPad.right) + "px";
 			if (this._rightDiv) {
 				this._rightDiv.style.left = (frameWidth - rightWidth) + "px"; 
 			}
@@ -4574,7 +4575,7 @@ eclipse.Editor = (function() {
 			* in the scrollbar. It is possible this a bug since all other paddings are considered.
 			*/
 			var scrollWidth = width;
-			if (!isIE || isIE >= 9) { width += editorPad.right; }
+			if (!isIE || isIE >= 9) { width += viewPad.right; }
 			scrollDiv.style.width = width + "px";
 
 //			/*
@@ -4593,13 +4594,13 @@ eclipse.Editor = (function() {
 			var clipTop = top;
 			var clipRight = left + clientWidth;
 			var clipBottom = top + clientHeight;
-			if (clipLeft === 0) { clipLeft -= editorPad.left; }
-			if (clipTop === 0) { clipTop -= editorPad.top; }
-			if (clipRight === scrollWidth) { clipRight += editorPad.right; }
-			if (scroll.y + clientHeight === scrollHeight) { clipBottom += editorPad.bottom; }
+			if (clipLeft === 0) { clipLeft -= viewPad.left; }
+			if (clipTop === 0) { clipTop -= viewPad.top; }
+			if (clipRight === scrollWidth) { clipRight += viewPad.right; }
+			if (scroll.y + clientHeight === scrollHeight) { clipBottom += viewPad.bottom; }
 			clientDiv.style.clip = "rect(" + clipTop + "px," + clipRight + "px," + clipBottom + "px," + clipLeft + "px)";
-			clientDiv.style.left = (-left + leftWidth + editorPad.left) + "px";
-			clientDiv.style.top = (-top + editorPad.top) + "px";
+			clientDiv.style.left = (-left + leftWidth + viewPad.left) + "px";
+			clientDiv.style.top = (-top + viewPad.top) + "px";
 			clientDiv.style.width = (isWebkit ? scrollWidth : clientWidth + left) + "px";
 			clientDiv.style.height = (clientHeight + top) + "px";
 			var overlayDiv = this._overlayDiv;
@@ -4612,7 +4613,7 @@ eclipse.Editor = (function() {
 			}
 			function _updateRulerSize(divRuler) {
 				if (!divRuler) { return; }
-				var rulerHeight = clientHeight + editorPad.top + editorPad.bottom;
+				var rulerHeight = clientHeight + viewPad.top + viewPad.bottom;
 				var cells = divRuler.firstChild.rows[0].cells;
 				for (var i = 0; i < cells.length; i++) {
 					var div = cells[i].firstChild;
@@ -4653,7 +4654,7 @@ eclipse.Editor = (function() {
 			var cells = divRuler.firstChild.rows[0].cells;
 			var lineHeight = this._getLineHeight();
 			var parentDocument = this._frameDocument;
-			var editorPad = this._getEditorPadding();
+			var viewPad = this._getViewPadding();
 			for (var i = 0; i < cells.length; i++) {
 				var div = cells[i].firstChild;
 				var ruler = div._ruler, style;
@@ -4678,7 +4679,7 @@ eclipse.Editor = (function() {
 						this._applyStyle(ruler.getStyle(lineIndex), widthDiv);
 						widthDiv.innerHTML = ruler.getHTML(lineIndex);
 						widthDiv.lineIndex = lineIndex;
-						widthDiv.style.height = (lineHeight + editorPad.top) + "px";
+						widthDiv.style.height = (lineHeight + viewPad.top) + "px";
 					}
 				}
 
@@ -4716,7 +4717,7 @@ eclipse.Editor = (function() {
 				} else {
 					var buttonHeight = 17;
 					var clientHeight = this._getClientHeight ();
-					var trackHeight = clientHeight + editorPad.top + editorPad.bottom - 2 * buttonHeight;
+					var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * buttonHeight;
 					var lineCount = this._model.getLineCount ();
 					var divHeight = trackHeight / lineCount;
 					if (div.rulerChanged) {
@@ -4753,5 +4754,5 @@ eclipse.Editor = (function() {
 		}
 	};//end prototype
 	
-	return Editor;
+	return TextView;
 }());
