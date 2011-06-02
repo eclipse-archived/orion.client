@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status',  'orion/commands',
-	        'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'js/gitClient', 'js/git-status-table', 'orion/breadcrumbs',
+	        'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient', 'orion/git/git-status-table', 'orion/breadcrumbs',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
 			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs) {
 

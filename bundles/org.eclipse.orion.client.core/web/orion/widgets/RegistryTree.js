@@ -14,7 +14,7 @@
 define(['dojo', 'dijit', 'dojo/data/ItemFileReadStore', 'dijit/Tree', 'dijit/tree/TreeStoreModel'], function(dojo, dijit) {
 
 // TODO re-implement mayHaveChildren so leaves never have expando icons
-dojo.declare("widgets.RegistryTree", [dijit.Tree], {
+dojo.declare("orion.widgets.RegistryTree", [dijit.Tree], {
 	constructor: function(options) {
 		this.inherited(arguments);
 		this.registry = options && options.registry;

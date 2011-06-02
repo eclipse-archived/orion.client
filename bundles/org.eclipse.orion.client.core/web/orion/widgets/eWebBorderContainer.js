@@ -12,8 +12,8 @@
  
 define(['dojo', 'dijit', 'dijit/layout/BorderContainer', 'dojox/layout/ToggleSplitter'], function(dojo, dijit) {
 
-dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
-	_splitterClass : "widgets.eWebSplitter",
+dojo.declare("orion.widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
+	_splitterClass : "orion.widgets.eWebSplitter",
 		
 	getPreferredLeftPaneWidth: function(){
 		// if we haven't remembered a width in the past, compute one that is 1/4 of the right pane width.
@@ -154,7 +154,7 @@ dojo.declare("widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
 	}
 });
 
-dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
+dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 {
 	postCreate: function(){
 		this.inherited(arguments);
@@ -297,8 +297,8 @@ dojo.declare("widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 	}
 });
 
-dojo.declare("widgets.eWebBorderContainerReverse", dijit.layout.BorderContainer, {
-	_splitterClass : "widgets.eWebSplitter",
+dojo.declare("orion.widgets.eWebBorderContainerReverse", dijit.layout.BorderContainer, {
+	_splitterClass : "orion.widgets.eWebSplitter",
 		
 	getPreferredRightPaneWidth: function(){
 		// if we haven't remembered a width in the past, compute one that is 1/4 of the left pane width.

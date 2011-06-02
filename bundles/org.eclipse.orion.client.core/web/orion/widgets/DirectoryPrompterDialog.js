@@ -18,7 +18,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Dialog', 'dijit/form/Button', 'ori
 	}}
  */
  
-dojo.declare("widgets.DirectoryPrompterDialog", [ dijit.Dialog, widgets._OrionDialogMixin ], {
+dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], {
 	treeWidget : null,
 	treeRoot : {},
 	widgetsInTemplate : true,
@@ -55,8 +55,8 @@ dojo.declare("widgets.DirectoryPrompterDialog", [ dijit.Dialog, widgets._OrionDi
 	},
 	
 	createTree : function(){
-		var myTreeModel = new widgets.DirectoryTreeModel(this.options.serviceRegistry, this.treeRoot , this.options.fileClient);
-		this.treeWidget = new widgets.ExplorerTree({
+		var myTreeModel = new orion.widgets.DirectoryTreeModel(this.options.serviceRegistry, this.treeRoot , this.options.fileClient);
+		this.treeWidget = new orion.widgets.ExplorerTree({
 			id: "treeWidget",
 			style: "width:100%; height:100%",
 			model: myTreeModel,
@@ -82,10 +82,10 @@ dojo.declare("widgets.DirectoryPrompterDialog", [ dijit.Dialog, widgets._OrionDi
 	}
 });
 
-widgets.DirectoryTreeModel = (function() {
+orion.widgets.DirectoryTreeModel = (function() {
 	/**
-	 * @name widgets.DirectoryTreeModel
-	 * @class Tree model used by widgets.DirectoryPrompterDialog
+	 * @name orion.widgets.DirectoryTreeModel
+	 * @class Tree model used by orion.widgets.DirectoryPrompterDialog
 	 */
 	function DirectoryTreeModel(serviceRegistry, root, fileClient) {
 		this.registry = serviceRegistry;

@@ -40,7 +40,7 @@ dojo.addOnLoad(function() {
 		var tree;
 		
 		var initTree = function() {
-			tree = new widgets.RegistryTree({ registry: pluginRegistry, showRoot: false }, "registry-tree");
+			tree = new orion.widgets.RegistryTree({ registry: pluginRegistry, showRoot: false }, "registry-tree");
 			tree.startup();
 		};
 		

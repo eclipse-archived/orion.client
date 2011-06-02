@@ -32,7 +32,7 @@ if (!localStorage.getItem("orion.sftpConnections")) {
  *     [advanced]: boolean  // Whether to show advanced controls. Default is false
  * }}
  */
-dojo.declare("widgets.SFTPConnectionDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
+dojo.declare("orion.widgets.SFTPConnectionDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache(new dojo._Url("/orion/widgets/templates/SFTPConnectionDialog.html")),
 	

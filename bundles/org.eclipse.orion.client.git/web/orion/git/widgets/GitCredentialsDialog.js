@@ -24,9 +24,9 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin'], fun
  *     passphrase: boolean					//ask for passphrase
  * }}
  */
-dojo.declare("widgets.GitCredentialsDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
+dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache(new dojo._Url("/git/js/widgets/templates/GitCredentialsDialog.html")),
+	templateString: dojo.cache(new dojo._Url("/orion/git/widgets/templates/GitCredentialsDialog.html")),
 	
 	constructor : function() {
 		this.inherited(arguments);

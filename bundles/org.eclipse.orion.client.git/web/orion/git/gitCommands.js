@@ -11,7 +11,7 @@
 /*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
 define(['dojo', 'orion/commands', 'orion/util',
-        'js/widgets/CloneGitRepositoryDialog', 'js/widgets/InitGitRepositoryDialog', 'js/widgets/AddRemoteDialog', 'js/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 'js/widgets/RemotePrompterDialog',], 
+        'orion/git/widgets/CloneGitRepositoryDialog', 'orion/git/widgets/InitGitRepositoryDialog', 'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 'orion/git/widgets/RemotePrompterDialog',], 
         function(dojo, mCommands, mUtil) {
 
 /**
@@ -99,7 +99,7 @@ var exports = {};
 		}
 	};
 	exports.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title, gitUrl){
-					var credentialsDialog = new widgets.GitCredentialsDialog({
+					var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
 								title: title,
 								url: gitUrl,
 								serviceRegistry: serviceRegistry,
@@ -157,7 +157,7 @@ var exports = {};
 			image: "/images/link_obj.gif",
 			id: "eclipse.linkRepository",
 			callback: function(item) {
-				var dialog = new widgets.NewItemDialog({
+				var dialog = new orion.widgets.NewItemDialog({
 					title: "Link Repository",
 					label: "Folder name:",
 					func:  function(name, url, create){
@@ -273,7 +273,7 @@ var exports = {};
 			image: "/images/add_obj.gif",
 			id: "eclipse.addRemote",
 			callback : function(item) {
-				var dialog = new widgets.AddRemoteDialog({
+				var dialog = new orion.git.widgets.AddRemoteDialog({
 					func : function(remote, remoteURI){
 								serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 									gitService.addRemote(item.Location, remote, remoteURI).then(
@@ -540,7 +540,7 @@ var exports = {};
 				}
 				
 				serviceRegistry.getService("orion.git.provider").then(function(gitService) {
-					var dialog = new widgets.RemotePrompterDialog({
+					var dialog = new orion.git.widgets.RemotePrompterDialog({
 						title: "Choose Branch",
 						serviceRegistry: serviceRegistry,
 						gitClient: gitService,
@@ -604,7 +604,7 @@ var exports = {};
 			image : "/git/images/git-clone.gif",
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
-				var dialog = new widgets.CloneGitRepositoryDialog({
+				var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
 					serviceRegistry: serviceRegistry,
 					fileClient: fileClient,
 					func : function(gitUrl, path, name){
@@ -644,7 +644,7 @@ var exports = {};
 			id : "eclipse.initGitRepository",
 			callback : function(item) {
 				
-				var dialog = new widgets.CloneGitRepositoryDialog({
+				var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
 					serviceRegistry: serviceRegistry,
 					title: "Init Repository",
 					fileClient: fileClient,

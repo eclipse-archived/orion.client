@@ -150,7 +150,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		};
 		
 		var prompt = function(selectedItems) {
-			var dialog = new widgets.DirectoryPrompterDialog({
+			var dialog = new orion.widgets.DirectoryPrompterDialog({
 				title: "Choose a Folder",
 				serviceRegistry: serviceRegistry,
 				fileClient: fileClient,				
@@ -457,7 +457,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		image: "/images/link_obj.gif",
 		id: "eclipse.linkProject",
 		callback: function(item) {
-			var dialog = new widgets.NewItemDialog({
+			var dialog = new orion.widgets.NewItemDialog({
 				title: "Link Folder",
 				label: "Folder name:",
 				func:  function(name, url, create){
@@ -480,7 +480,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		id: "eclipse.importCommand",
 		callback : function(item) {
 			item = forceSingleItem(item);
-			var dialog = new widgets.ImportDialog({
+			var dialog = new orion.widgets.ImportDialog({
 				importLocation: item.ImportLocation,
 				func: dojo.hitch(explorer, function() { this.changedItem(item); })
 			});
@@ -499,7 +499,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		id: "eclipse.importSFTPCommand",
 		callback : function(item) {
 			item = forceSingleItem(item);
-			var dialog = new widgets.SFTPConnectionDialog({
+			var dialog = new orion.widgets.SFTPConnectionDialog({
 				func:  function(host,path,user,password, overwriteOptions){
 					serviceRegistry.getService("orion.page.message").then(function(progressService) {
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
@@ -525,7 +525,7 @@ eclipse.fileCommandUtils.createFileCommands = function(serviceRegistry, commandS
 		id: "eclipse.exportSFTPCommand",
 		callback : function(item) {
 			item = forceSingleItem(item);
-			var dialog = new widgets.SFTPConnectionDialog({
+			var dialog = new orion.widgets.SFTPConnectionDialog({
 				func:  function(host,path,user,password, overwriteOptions){
 					serviceRegistry.getService("orion.page.message").then(function(progressService) {
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";

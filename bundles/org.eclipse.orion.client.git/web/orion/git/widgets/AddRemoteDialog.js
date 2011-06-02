@@ -17,9 +17,9 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin'], fun
  *     func: function
  * }}
  */
-dojo.declare("widgets.AddRemoteDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
+dojo.declare("orion.git.widgets.AddRemoteDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache(new dojo._Url("/git/js/widgets/templates/AddRemoteDialog.html")),
+	templateString: dojo.cache(new dojo._Url("/orion/git/widgets/templates/AddRemoteDialog.html")),
 	
 	constructor : function() {
 		this.inherited(arguments);

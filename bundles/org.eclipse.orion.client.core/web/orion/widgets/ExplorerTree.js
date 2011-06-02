@@ -13,7 +13,7 @@
 define(['dojo', 'dijit', 'dijit/Tree'], function(dojo, dijit) {
 
 dojo.declare(
-	"widgets._ExplorerTreeNode",
+	"orion.widgets._ExplorerTreeNode",
 	[dijit._TreeNode],
 {
 	templateString : dojo.cache(new dojo._Url("/orion/widgets/templates/_ExplorerTreeNode.html")),
@@ -39,7 +39,7 @@ dojo.declare(
  * - The selectedNode property (see dijit.Tree) stores the most-recently-selected node.
  */
 dojo.declare(
-	"widgets.ExplorerTree",
+	"orion.widgets.ExplorerTree",
 	[dijit.Tree],
 {
 	selectedNodes: {}, /* key:dijit Id of TreeNode, value:TreeNode */
@@ -110,7 +110,7 @@ dojo.declare(
 	},
 	
 	_createTreeNode: function(args) {
-		return new widgets._ExplorerTreeNode(args);
+		return new orion.widgets._ExplorerTreeNode(args);
 	},
 	
 	_eatSelectionEvent: function(/**Event*/ e) {

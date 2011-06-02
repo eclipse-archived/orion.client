@@ -9,8 +9,8 @@
  ******************************************************************************/
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 'orion/selection',
-	        'orion/searchClient', 'orion/globalCommands', 'js/UsersList', 'js/usersUtil',
-	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'widgets/NewUserDialog'], 
+	        'orion/searchClient', 'orion/globalCommands', 'orion/profile/UsersList', 'orion/profile/usersUtil',
+	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/profile/widgets/NewUserDialog'], 
 			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSelection, mSearchClient, mGlobalCommands, mUsersList, mUsersUtil) {
 
 dojo.addOnLoad(function() {
@@ -37,7 +37,7 @@ dojo.addOnLoad(function() {
 		image: "/profile/images/create_user.gif",
 		id: "eclipse.createUser",
 		callback: function() {
-			var dialog = new profile.widgets.NewUserDialog({
+			var dialog = new orion.profile.widgets.NewUserDialog({
 				func : dojo.hitch(usersList, function() {
 					this.reloadUsers();
 				}),

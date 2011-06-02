@@ -14,9 +14,9 @@ define(['dojo', 'dijit', 'dijit/Dialog'], function(dojo, dijit) {
 /**
  * @param func
  */
-dojo.declare("profile.widgets.NewUserDialog", [ dijit.Dialog ], {
+dojo.declare("orion.profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 	widgetsInTemplate : true,
-	templateString : dojo.cache(new dojo._Url("/profile/widgets/templates/NewUserDialog.html")),
+	templateString : dojo.cache(new dojo._Url("/orion/profile/widgets/templates/NewUserDialog.html")),
 	title : "Create New User",
 
 	constructor : function() {

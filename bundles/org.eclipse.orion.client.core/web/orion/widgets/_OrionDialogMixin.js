@@ -19,7 +19,7 @@
 define(['dojo', 'dijit'], function(dojo, dijit) {
 
 
-dojo.declare("widgets._OrionDialogMixin", null, {
+dojo.declare("orion.widgets._OrionDialogMixin", null, {
 	postMixInProperties : function() {
 		this.inherited(arguments);
 		this.title = this.options.title || "Information Needed";

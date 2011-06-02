@@ -9,7 +9,7 @@
  ******************************************************************************/
 /*global dojo dijit window eclipse:true*/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/commands', './js/usersClient', './js/profile',
+define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/commands', 'orion/profile/usersClient', 'orion/profile/profile',
 	        'orion/searchClient', 'orion/globalCommands',
 	        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
 			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mCommands, mUsersClient, mProfile, mSearchClient, mGlobalCommands) {

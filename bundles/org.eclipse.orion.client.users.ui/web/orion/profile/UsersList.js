@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['dojo', 'orion/explorer', 'js/usersUtil'], function(dojo, mExplorer, mUsersUtil) {
+define(['dojo', 'orion/explorer', 'orion/profile/usersUtil'], function(dojo, mExplorer, mUsersUtil) {
 
 
 var eclipse = eclipse || {};

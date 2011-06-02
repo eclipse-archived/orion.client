@@ -21,7 +21,7 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/Chec
  *     [advanced]: boolean  // Whether to show advanced controls. Default is false
  * }}
  */
-dojo.declare("widgets.NewItemDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
+dojo.declare("orion.widgets.NewItemDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache(new dojo._Url("/orion/widgets/templates/NewItemDialog.html")),
 	

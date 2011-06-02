@@ -15,7 +15,7 @@
  * @namespace The global container for eclipse APIs.
  */ 
 
-define(['dojo', 'dijit', 'orion/widgets/OpenResourceDialog', 'orion/commands', 'orion/util'], function(dojo, dijit, OpenResourceDialog, mCommands, mUtil ){
+define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/widgets/OpenResourceDialog'], function(dojo, dijit, mCommands, mUtil ){
 
 var exports = {};
 
@@ -211,7 +211,7 @@ exports.generateBanner = function(parentId, serviceRegistry, commandService, pre
 	}
 
 	var openResourceDialog = function(searchLocation, searcher, /* optional */ editor) {
-		var dialog = new OpenResourceDialog({
+		var dialog = new orion.widgets.OpenResourceDialog({
 			SearchLocation: searchLocation,
 			searcher: searcher
 		});

@@ -17,9 +17,9 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'ori
  *     func: function
  * }}
  */
-dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog, widgets._OrionDialogMixin], {
+dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache(new dojo._Url("/git/js/widgets/templates/CloneGitRepositoryDialog.html")),
+	templateString: dojo.cache(new dojo._Url("/orion/git/widgets/templates/CloneGitRepositoryDialog.html")),
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -80,7 +80,7 @@ dojo.declare("widgets.CloneGitRepositoryDialog", [dijit.Dialog, widgets._OrionDi
 	openDirectoryPickerDialog: function(){
 		this.isExistingProject.checked = true; 
 		var self = this;
-		var dialog = new widgets.DirectoryPrompterDialog({
+		var dialog = new orion.widgets.DirectoryPrompterDialog({
 				title: "Choose a Folder",
 				serviceRegistry: this.options.serviceRegistry,
 				fileClient: this.options.fileClient,	

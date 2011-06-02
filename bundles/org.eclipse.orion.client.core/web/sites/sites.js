@@ -78,7 +78,7 @@ dojo.addOnLoad(function() {
 				id: "eclipse.sites.create",
 				groupId: "eclipse.sitesGroup",
 				callback : function() {
-					var dialog = new widgets.NewSiteDialog({
+					var dialog = new orion.widgets.NewSiteDialog({
 						title: "Create Site Configuration",
 						serviceRegistry: serviceRegistry,
 						func: function(name, workspace) {

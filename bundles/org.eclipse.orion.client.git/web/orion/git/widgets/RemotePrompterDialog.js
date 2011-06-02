@@ -10,7 +10,7 @@
 /*global dojo dijit eclipse widgets */
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'orion/util', 'js/git-clones-explorer', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin'], function(dojo, dijit, mUtil, mGitClonesExplorer) {
+define(['dojo', 'dijit', 'orion/util', 'orion/git/git-clones-explorer', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin'], function(dojo, dijit, mUtil, mGitClonesExplorer) {
 
 /**
 * @param options {{
@@ -18,11 +18,11 @@ define(['dojo', 'dijit', 'orion/util', 'js/git-clones-explorer', 'dijit/Dialog',
 	}}
  */
  
-dojo.declare("widgets.RemotePrompterDialog", [ dijit.Dialog, widgets._OrionDialogMixin ], {
+dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], {
 	treeWidget : null,
 	treeRoot : {},
 	widgetsInTemplate : true,
-	templateString : dojo.cache(new dojo._Url("/git/js/widgets/templates/RemotePrompterDialog.html")),
+	templateString : dojo.cache(new dojo._Url("/orion/git/widgets/templates/RemotePrompterDialog.html")),
 	constructor : function() {
 		this.inherited(arguments);
 		this.options = arguments[0] || {};
@@ -54,7 +54,7 @@ dojo.declare("widgets.RemotePrompterDialog", [ dijit.Dialog, widgets._OrionDialo
 	
 	createTree : function(myTreeModel){
 		
-		this.treeWidget = new widgets.ExplorerTree({
+		this.treeWidget = new orion.widgets.ExplorerTree({
 			id: "treeWidget",
 			style: "width:100%; height:100%",
 			model: myTreeModel,

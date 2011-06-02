@@ -74,7 +74,7 @@ dojo.addOnLoad(function() {
 		// Initialize the widget
 		var widget;
 		(function() {
-			widget = new widgets.SiteEditor({
+			widget = new orion.widgets.SiteEditor({
 				fileClient: fileClient,
 				siteService: siteService,
 				commandService: commandService,

@@ -19,7 +19,7 @@ define(['dojo', 'dijit', 'dojox', 'orion/util', 'orion/siteUtils','orion/command
 /**
  * Visualizes the Mappings array of a SiteConfiguration as a data grid.
  */
-dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], /** @lends widgets.MappingsGrid */ {
+dojo.declare("orion.widgets.MappingsGrid", [dojox.grid.DataGrid], /** @lends orion.widgets.MappingsGrid */ {
 	
 	/**
 	 * @type {Array} The model object being edited by this grid.
@@ -46,7 +46,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], /** @lends widgets.M
 				return item.Source && item.Target;
 			},
 			callback: function(item) {
-				// "this" is {widgets.MappingsGrid}
+				// "this" is {orion.widgets.MappingsGrid}
 				this._hideTooltip();
 				this.store.deleteItem(item);
 				this.store.save();
@@ -405,7 +405,7 @@ dojo.declare("widgets.MappingsGrid", [dojox.grid.DataGrid], /** @lends widgets.M
  * @param {String} [options.location] Optional URL of a site configuration to load in editor
  * upon creation.
  */
-dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, dijit._Templated], {
+dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, dijit._Templated], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache(new dojo._Url("/orion/widgets/templates/SiteEditor.html")),
 	

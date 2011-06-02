@@ -20,7 +20,7 @@ define(['dojo', 'orion/widgets/NewItemDialog'], function(dojo, dijit) {
  * @param options.serviceRegistry {eclipse.ServiceRegistry}
  * @param options.func {Function} Invoked on OK with (name, workspace) as parameters
  */
-dojo.declare("widgets.NewSiteDialog", [widgets.NewItemDialog], {
+dojo.declare("orion.widgets.NewSiteDialog", [orion.widgets.NewItemDialog], {
 	/** Array */
 	workspaceIds: null,
 	

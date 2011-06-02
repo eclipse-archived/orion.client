@@ -11,7 +11,7 @@
 /*global dojo eclipse:true widgets*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['dojo', 'orion/explorer', 'orion/util', 'js/gitCommands'], function(dojo, mExplorer, mUtil, mGitCommands) {
+define(['dojo', 'orion/explorer', 'orion/util', 'orion/git/gitCommands'], function(dojo, mExplorer, mUtil, mGitCommands) {
 
 var exports =  {};
 exports.GitCommitNavigator = (function() {
