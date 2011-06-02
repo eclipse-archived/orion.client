@@ -575,7 +575,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 				    },
 				    {
 				      "Source": "/",
-				      "Target": this.path + "/bundles/org.eclipse.orion.client.git/static"
+				      "Target": this.path + "/bundles/org.eclipse.orion.client.git/web"
 				    },
 				    {
 					  "Source": "/git",
@@ -587,7 +587,7 @@ dojo.declare("widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, d
 				    },
 				    {
 				      "Source": "/",
-				      "Target": this.path + "/bundles/org.eclipse.orion.client.users.ui/static"
+				      "Target": this.path + "/bundles/org.eclipse.orion.client.users.ui/web"
 				    },
 				    {
 				      "Source": "/xfer",
