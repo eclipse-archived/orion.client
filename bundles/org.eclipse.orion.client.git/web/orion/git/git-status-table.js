@@ -315,10 +315,12 @@ orion.InlineCompareRenderer = (function() {
 			var row = dojo.create("tr", null, titleTable);
 			var titleCol = dojo.create("td", {nowrap :true}, row, "last");
 			var title = dojo.create("h2", {id :"fileNameInViewer" ,innerHTML: "Select a file on the left to compare..."}, titleCol, "last");
-			var titleDiv = new dijit.layout.ContentPane({class:"auxpane" ,region: "top", style:"width:100%;height:30px;overflow: hidden;"});
+			var titleDiv = new dijit.layout.ContentPane({region: "top", style:"width:100%;height:30px;overflow: hidden;"});
+			dojo.addClass(titleDiv, 'auxpane');
 			titleDiv.attr('content', titleTable);
 			
 			var viewerDiv = new dijit.layout.ContentPane({class:"mainpane" ,id : "inline-compare-viewer" ,splitter:false ,region: "center", style:"width:100%;height:100%;overflow: hidden;"});
+			dojo.addClass(viewerDiv, 'mainpane');
 			
 			var parent = dijit.byId(this._parentId);
 			parent.addChild(titleDiv);
@@ -469,7 +471,7 @@ orion.GitStatusController = (function() {
 					return self.unstage(item.object);
 				},
 				visibleWhen: function(item) {
-					return (item.type === "fileItem" && self._model.isStaged(item.object.type));
+					return false;//(item.type === "fileItem" && self._model.isStaged(item.object.type));
 				}
 			});		
 
