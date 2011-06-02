@@ -928,7 +928,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		<!--a-->
 		<!--b
 		*/
-		changeLine(editor, "", 1, 5, 8);			// FIXME
+		changeLine(editor, "", 1, 5, 8);
 		assertLineScope(editor, styler, 0, [
 			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
 			[4, 5, "comment.block.mylang", "a"],

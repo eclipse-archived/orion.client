@@ -621,6 +621,7 @@ orion.styler.TextMateStyler = (function() {
 						} else {
 							// Force-ending a BeginEndNode that runs until eof
 							node.setEnd(eof);
+							delete node.endNeedsUpdate;
 						}
 					}
 					node = node.parent; // ascend
