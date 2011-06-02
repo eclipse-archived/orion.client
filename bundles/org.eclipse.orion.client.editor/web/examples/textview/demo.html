@@ -26,6 +26,40 @@ var styler = null;
 
 var isMac = navigator.platform.indexOf("Mac") !== -1;
 
+
+function log (text) {
+	var console = window.document.getElementById('console');
+	if (!console) { return; }
+	for (var n = 1; n < arguments.length; n++) {
+		text += " ";
+		text += arguments[n];
+	}
+	
+	var document = console.contentWindow.document;
+	var t = document.createTextNode(text);
+	document.body.appendChild(t);
+	var br = document.createElement("br");
+	document.body.appendChild(br);
+	if (!console.scroll) {
+		console.scroll = true;
+		setTimeout(function() {
+			document.body.lastChild.scrollIntoView(false);
+			console.scroll = false;
+		}, 0);
+	}
+	
+	//IE (causes all kinds of weird behaviour)
+//	console.log(text);
+}
+
+function clearLog () {
+	var console = window.document.getElementById('console');
+	if (!console) { return; }
+	var document = console.contentWindow.document;
+	var body = document.body;
+	while (body.hasChildNodes()) { body.removeChild(body.lastChild); }
+}
+
 function getFile(file) {
 	try {
 		var objXml = new XMLHttpRequest();
