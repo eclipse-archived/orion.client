@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 /*jslint browser:true devel:true*/
-/*global dijit dojo eclipse widgets serviceRegistry:true window*/
+/*global dijit dojo orion widgets serviceRegistry:true window*/
 
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 
@@ -55,8 +55,11 @@ dojo.addOnLoad(function() {
 				pageActions, "last");
 			dojo.place('<a id="installButton">Install</a>',
 				pageActions, "last");
-			dojo.place('<a id="uninstallButton">Uninstall Selected</a>',
+			dojo.place('<a id="uninstallButton">Uninstall</a>',
 				pageActions, "last");
+			dojo.place('<a id="copyButton">Copy Location</a>',
+				pageActions, "last");
+
 
 		}	
 		// Hook up event handlers
@@ -66,10 +69,13 @@ dojo.addOnLoad(function() {
 		dojo.addClass(installButton, "commandLink");
 		var uninstallButton = dojo.byId("uninstallButton");
 		dojo.addClass(uninstallButton, "commandLink");
+		var copyButton = dojo.byId("copyButton");
+		dojo.addClass(copyButton, "commandLink");
 		
 		var installHandler = function(evt) {
 			var pluginUrl = installUrlTextBox.value;
 			if (/^\S+$/.test(dojo.trim(pluginUrl))) {
+				statusService.setMessage("Installing " + pluginUrl + "...");
 				pluginRegistry.installPlugin(pluginUrl).then(
 					function(plugin) {
 						var old = dijit.byId("registry-tree");
@@ -78,17 +84,25 @@ dojo.addOnLoad(function() {
 						}
 						initTree();
 						installUrlTextBox.value="";
-						statusService.setMessage("Installed " + plugin.getLocation(), 5000);
+						statusService.setMessage("Installed " + plugin.getLocation());
 					}, function(error) {
 						statusService.setErrorMessage(error);
 					});
 			}
 		};
+		
+		// enter is same as pushing install button
 		dojo.connect(installUrlTextBox, "onkeypress", function(e) {
 			if (dojo.keys.ENTER === e.keyCode) {
 				installHandler(e);
 			}
 		});
+		
+		// select everything when focus first gets to install box
+		dojo.connect(installUrlTextBox, "onfocus", function(e) {
+			installUrlTextBox.select();
+		});
+		
 		dojo.connect(installButton, "onclick", installHandler);
 		dojo.connect(uninstallButton, "onclick", function() {
 			var plugins = tree.getSelectedPlugins();
@@ -101,22 +115,36 @@ dojo.addOnLoad(function() {
 				if (!doit) {
 					return;
 				}
+				var pluginList = "";
 				for (var i=0; i<plugins.length; i++) {
 					plugins[i].uninstall();
+					pluginList += plugins[i].getLocation();
+					if (i < plugins.length - 1) {
+						pluginList += ", ";
+					}
 				}
 				var old = dijit.byId("registry-tree");
 				if (old) {
 					dijit.registry.remove("registry-tree");
 				}
 				initTree();
+				// report what we uninstalled so it's easy for user to copy/paste a plugin that they want back
+				statusService.setMessage("Uninstalled " + pluginList);
 			});
+		});
+		
+		dojo.connect(copyButton, "onclick", function() {
+			var plugins = tree.getSelectedPlugins();
+			if (plugins.length > 0) {
+				installUrlTextBox.value = plugins[0].getLocation();
+				installUrlTextBox.focus();
+			}
 		});
 			
 		// Wait until the JSLint plugin has (hopefully) loaded, then draw the tree
-		setTimeout(function() {
+		window.setTimeout(function() {
 			initTree();
 			installUrlTextBox.focus();
-			installUrlTextBox.select();
 		}, 500);
 	});
 });
