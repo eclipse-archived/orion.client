@@ -8,9 +8,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-var eclipse = eclipse || {};
+/**
+ * @namespace The global container for Orion APIs.
+ */ 
+var orion = orion || {};
+orion.textview = orion.textview || {};
 
-eclipse.UndoStack = (function() {
+orion.textview.UndoStack = (function() {
 	var Change = (function() {
 		function Change(offset, text, previousText) {
 			this.offset = offset;
@@ -18,16 +22,16 @@ eclipse.UndoStack = (function() {
 			this.previousText = previousText;
 		}
 		Change.prototype = {
-			undo: function (editor, select) {
-				this._doUndoRedo(this.offset, this.previousText, this.text, editor, select);
+			undo: function (view, select) {
+				this._doUndoRedo(this.offset, this.previousText, this.text, view, select);
 			},
-			redo: function (editor, select) {
-				this._doUndoRedo(this.offset, this.text, this.previousText, editor, select);
+			redo: function (view, select) {
+				this._doUndoRedo(this.offset, this.text, this.previousText, view, select);
 			},
-			_doUndoRedo: function(offset, text, previousText, editor, select) {
-				editor.setText(text, offset, offset + previousText.length);
+			_doUndoRedo: function(offset, text, previousText, view, select) {
+				view.setText(text, offset, offset + previousText.length);
 				if (select) {
-					editor.setSelection(offset, offset + text.length);
+					view.setSelection(offset, offset + text.length);
 				}
 			}
 		};
@@ -44,36 +48,36 @@ eclipse.UndoStack = (function() {
 			add: function (change) {
 				this.changes.push(change);
 			},
-			undo: function (editor, select) {
+			undo: function (view, select) {
 				for (var i=this.changes.length - 1; i >= 0; i--) {
-					this.changes[i].undo(editor, false);
+					this.changes[i].undo(view, false);
 				}
 				if (select) {
 					var start = this.selection.start;
 					var end = this.selection.end;
-					editor.setSelection(this.caret ? start : end, this.caret ? end : start);
+					view.setSelection(this.caret ? start : end, this.caret ? end : start);
 				}
 			},
-			redo: function (editor, select) {
+			redo: function (view, select) {
 				for (var i = 0; i < this.changes.length; i++) {
-					this.changes[i].redo(editor, false);
+					this.changes[i].redo(view, false);
 				}
 				if (select) {
 					var start = this.selection.start;
 					var end = this.selection.end;
-					editor.setSelection(this.caret ? start : end, this.caret ? end : start);
+					view.setSelection(this.caret ? start : end, this.caret ? end : start);
 				}
 			}
 		};
 		return CompoundChange;
 	}());
 
-	function UndoStack (editor, size) {
-		this.editor = editor;
+	function UndoStack (view, size) {
+		this.view = view;
 		this.size = size !== undefined ? size : 100;
 		this.reset();
-		editor.addEventListener("ModelChanging", this, this._onModelChanging);
-		editor.addEventListener("Destroy", this, this._onDestroy);
+		view.addEventListener("ModelChanging", this, this._onModelChanging);
+		view.addEventListener("Destroy", this, this._onDestroy);
 	}
 	UndoStack.prototype = {
 		add: function (change) {
@@ -122,7 +126,7 @@ eclipse.UndoStack = (function() {
 			}
 			var change = this.stack[--this.index];
 			this._ignoreUndo = true;
-			change.undo(this.editor, true);
+			change.undo(this.view, true);
 			this._ignoreUndo = false;
 			return true;
 		},
@@ -133,7 +137,7 @@ eclipse.UndoStack = (function() {
 			}
 			var change = this.stack[this.index++];
 			this._ignoreUndo = true;
-			change.redo(this.editor, true);
+			change.redo(this.view, true);
 			this._ignoreUndo = false;
 			return true;
 		},
@@ -146,7 +150,7 @@ eclipse.UndoStack = (function() {
 			this._compoundChange = undefined;
 		},
 		startCompoundChange: function() {
-			var change = new CompoundChange(this.editor.getSelection(), this.editor.getCaretOffset());
+			var change = new CompoundChange(this.view.getSelection(), this.view.getCaretOffset());
 			this.add(change);
 			this.compoundChange = change;
 		},
@@ -162,8 +166,8 @@ eclipse.UndoStack = (function() {
 			}
 		},
 		_onDestroy: function() {
-			this.editor.removeEventListener("ModelChanging", this, this._onModelChanging);
-			this.editor.removeEventListener("Destroy", this, this._onDestroy);
+			this.view.removeEventListener("ModelChanging", this, this._onModelChanging);
+			this.view.removeEventListener("Destroy", this, this._onDestroy);
 		},
 		_onModelChanging: function(e) {
 			var newText = e.text;
@@ -190,14 +194,14 @@ eclipse.UndoStack = (function() {
 					var deleting = this._undoText.length > 0 && -this._undoStart === start;
 					this._undoStart = -start;
 					if (deleting) {
-						this._undoText = this._undoText + this.editor.getText(start, start + removedCharCount);
+						this._undoText = this._undoText + this.view.getText(start, start + removedCharCount);
 					} else {
-						this._undoText = this.editor.getText(start, start + removedCharCount) + this._undoText;
+						this._undoText = this.view.getText(start, start + removedCharCount) + this._undoText;
 					}
 					return;
 				}
 			}
-			this.add(new Change(start, newText, this.editor.getText(start, start + removedCharCount)));
+			this.add(new Change(start, newText, this.view.getText(start, start + removedCharCount)));
 		}
 	};
 	return UndoStack;

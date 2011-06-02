@@ -20,7 +20,7 @@ define(["dojo"], function(dojo){
 	 * @param {String} serviceId The symbolic id of this service instance
 	 * @param {String} name The service name
 	 * @param {Object} properties A JSON object containing the service's declarative properties
- 	 */
+	 */
 	function ServiceReference(serviceId, name, properties) {
 		this.serviceId = serviceId;
 		this.name = name;
@@ -374,6 +374,7 @@ define(["dojo"], function(dojo){
 	};
 	ServiceRegistry.prototype.constructor = ServiceRegistry;
 
+	//return the module exports
 	return {
 		ServiceReference: ServiceReference,
 		ServiceRegistration: ServiceRegistration,

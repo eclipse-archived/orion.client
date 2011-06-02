@@ -16,9 +16,9 @@ dojo.addOnLoad(function(){
 	var editorContainerDomNode = dojo.byId("editorContainer");
 	
 	var editorFactory = function() {
-		return new eclipse.Editor({
+		return new orion.textview.TextView({
 			parent: editorContainerDomNode,
-			stylesheet: "/editor/samples/editor.css",
+			stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css"],
 			tabSize: 4
 		});
 	};
@@ -45,13 +45,13 @@ dojo.addOnLoad(function(){
 				if (splits.length > 0) {
 					switch(extension) {
 						case "js":
-							this.styler = new eclipse.TextStyler(editorWidget, "js");
+							this.styler = new examples.textview.TextStyler(editorWidget, "js");
 							break;
 						case "java":
-							this.styler = new eclipse.TextStyler(editorWidget, "java");
+							this.styler = new examples.textview.TextStyler(editorWidget, "java");
 							break;
 						case "css":
-							this.styler = new eclipse.TextStyler(editorWidget, "css");
+							this.styler = new examples.textview.TextStyler(editorWidget, "css");
 							break;
 					}
 				}
@@ -77,7 +77,7 @@ dojo.addOnLoad(function(){
 		keyModeStack.push(codeBindings);
 		
 		// save binding
-		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
+		editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding("s", true), "save");
 		editor.getEditorWidget().setAction("save", function(){
 				save(editor);
 				return true;
