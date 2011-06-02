@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- standard scripts -->
+	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<!-- ^temporary^ - will remove this dependency for the test framework-->
+	<script type="text/javascript" src="../../orion/assert.js"></script>
+	<script type="text/javascript" src="../../orion/test.js"></script>
+	<script type="text/javascript" src="../../orion/plugin.js"></script>
+
+<!-- JavaScript files containing the tests and their dependencies -->
+	<script type="text/javascript" src="../../orion/serviceregistry.js"></script>
+	<script type="text/javascript" src="../../orion/pluginregistry.js"></script>
+	<script type="text/javascript" src = "testcase.js"></script>
+
+<!-- tests to be run -->
+	<script type="text/javascript">
+	window.onload = function() {
+		orion.Test.run(testcase);
+	};
+	</script>
+</head>
+<body>
+</body>
+</html>

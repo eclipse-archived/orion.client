@@ -1,12 +1,12 @@
 <!doctype html>
 <html style="height: 100%" >
     <head>
-		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2011." >
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
 		<meta http-equiv="Content-Language" content="en-us">
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    	<title>Git Clones</title>
-    	<link rel="stylesheet" type="text/css" href="git-clone.css" />
-    	<script type="text/javascript" src="/requirejs/require.js"></script>
+    	<title>JS Unit Test</title>
+    	<link rel="stylesheet" type="text/css" href="unittest.css" />
+    			<script type="text/javascript" src="/requirejs/require.js"></script>
 		<script type="text/javascript">
 		require({
 		  baseUrl: '',
@@ -40,26 +40,26 @@
 		  }
 		});
 		
-		require(["git-clone"]);
-		</script>	 	
- 	
-</head>
-<body>
+		require(["unittest"]);
+		</script>
+   </head>
+
     <body style="height: 100%" class="nihilo">
-    
-	<div id="eclipse.git-clones" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
+	<div id="eclipse.unittest" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
 		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-
-		<div class="mainpane" style="margin-left: 44px; " id="rightPane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-			<div id="explorer-tree" class="navigator" style="margin-left: 16px">
-				<div id="clonesList" style="min-width: 500px">
-				<div  id="clonesProgress">Loading git clones...</div>
-				</div>
+		<div class="mainpane" id="rightPane" dojoType="dijit.layout.ContentPane" region="center" style="margin-left: 44px; width: 80%; height: 100%;" splitter="false">
+			<div id="test-overview">
+				<!-- info about test goes here -->
+			</div>
+			<div id="test-tree">
+				<!-- tree content goes here -->
 			</div>
 		</div>
+		
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
 		</div>
+
 	</div>
 </body>
 </html>

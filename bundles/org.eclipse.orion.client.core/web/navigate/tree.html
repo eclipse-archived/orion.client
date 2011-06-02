@@ -1,0 +1,89 @@
+<!doctype html>
+<html style="height: 100%" >
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    	<title>Orion Navigator</title>
+    	<link rel="stylesheet" type="text/css" href="tree.css" />  
+    
+    <script type="text/javascript">
+        var djConfig = {
+		isDebug: true,
+		modulePaths: {'widgets': '/orion/widgets'},
+		parseOnLoad: true
+        };
+    </script>
+    <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+    <script type="text/javascript" src="/org.dojotoolkit/orion/orion.js.uncompressed.js"></script>
+    <script type="text/javascript">
+	dojo.require("dijit.Dialog");
+	dojo.require("dijit.form.TextBox"); dojo.require("dijit.form.ComboBox");
+	dojo.require("dijit.form.CheckBox");
+	dojo.require("dojo.data.ItemFileReadStore");
+	dojo.require("widgets.NewItemDialog");
+	dojo.require("widgets.OpenResourceDialog");
+	dojo.require("widgets.ImportDialog");
+ 	</script>    	
+	
+	<!-- Authentication (required for handleAuthenticationError) -->
+	<script type="text/javascript" src="js/auth.js"></script>
+   </head>
+
+    <body style="height: 100%" class="nihilo">
+    
+	
+    <!-- Extension Registry -->
+	<script src="/orion/serviceregistry.js"></script>
+	<script src="/orion/pluginregistry.js"></script>
+	
+    <!-- Eclipse Application Services -->
+    <!-- START:eas.js -->
+ 	<script src="/orion/util.js"></script>
+ 	<script src="/orion/commands.js"></script>
+ 	<script src="/orion/dialogs.js"></script>
+ 	<script src="/orion/log.js"></script>
+ 	<script src="/orion/preferences.js"></script>
+ 	<script src="/orion/selection.js"></script>
+ 	<script src="/orion/status.js"></script>
+ 	<script src="/orion/users.js"></script>
+     
+ 	<script src="/orion/fileClient.js"></script>
+	<script src="/orion/favorites.js"></script>
+	<script src="/orion/searchClient.js"></script>
+	<script src="/orion/ssh/sshTools.js"></script>
+	<!-- END:eas.js -->
+	<!-- INSERT:eas.js -->
+      
+ 	<!-- Breadcrumbs, Tree -->
+ 	<!-- START:navigate-tree.js -->
+ 	<script src="/orion/globalCommands.js"></script>
+  	<script src="/orion/breadcrumbs.js"></script> 
+	<script src="/orion/explorer-tree.js"></script>
+	<script src="/orion/fileCommands.js"></script>
+	<script src="tree.js"></script>
+	<!-- END:navigate-tree.js -->
+	<!-- INSERT:navigate-tree.js -->
+	
+    <div dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="true" persist="true" gutters="false" style="width: 100%; height: 100%;">
+		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
+		</div>
+		
+		<div class="paneScrolled" style="margin-left: 8px; width: 20%" id="leftPane" dojoType="dijit.layout.ContentPane" region="leading" splitter="true">
+				<div id="favorites">
+				<h2>Favorites</h2>
+				<div  id="favoriteProgress">Loading favorites...</div>
+				</div>
+		</div>
+
+		<div class="paneScrolled" style="margin-left: 8px;" id="rightPane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
+			<div id="explorer-tree" class="navigator">
+				<!-- Breadcrumbs, tree content go here -->
+			</div>
+			<ul dojoType="dijit.Menu" id="treeContextMenu" style="display: none;">
+			</ul>
+		</div>
+	</div>
+
+</body>
+</html>

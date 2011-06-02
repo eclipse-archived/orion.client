@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="/editor/js/model.js"></script>
+	<script type="text/javascript" src="/editor/js/editor.js"></script>
+<!-- standard scripts -->
+	<script type="text/javascript" src="../../orion/plugin.js"></script>
+
+	<script type="text/javascript" src="/requirejs/require.js"></script>
+	<script type="text/javascript">
+	require({
+	  baseUrl: '',
+	
+	  // set the paths to our library packages
+	  packages: [
+	    {
+	      name: 'dojo',
+	      location: '/org.dojotoolkit/dojo',
+	      main: 'lib/main-browser',
+	      lib: '.'
+	    },
+	    {
+	      name: 'dijit',
+	      location: '/org.dojotoolkit/dijit',
+	      main: 'lib/main',
+	      lib: '.'
+	    }
+	  ],
+	
+	  paths: {
+	    orion: '/orion',
+	    text: '/requirejs/text',
+	    i18n: '/requirejs/i18n'
+	  }
+	});
+	
+	window.onload = function() {
+		require(["orion/test","testcase"], function(test, testcase) {
+			test.run(testcase);			
+		});
+	};
+	</script>
+	<title>TEST: TextMateStyler</title>
+</head>
+<body>
+	<div style="padding-bottom:1em;">This file runs tests for the TextMate styler.</div>
+	
+	<div id="editorDiv"></div>
+</body>
+</html>
