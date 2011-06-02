@@ -13,9 +13,10 @@
 /*global navigator */
 
 /**
- * @namespace The global container for eclipse APIs.
+ * @namespace The global container for Orion APIs.
  */ 
-var eclipse = eclipse || {};
+var orion = orion || {};
+orion.textview = orion.textview || {};
 
 /**
  * Constructs a new TextModel with the given text and default line delimiter.
@@ -23,18 +24,18 @@ var eclipse = eclipse || {};
  * @param {String} [text=""] the text that the model will store
  * @param {String} [lineDelimiter=platform delimiter] the line delimiter used when inserting new lines to the model.
  *
- * @name eclipse.TextModel
- * @class The TextModel is an interface that provides text for the editor. Applications may
- * implement the TextModel interface to provide a custom store for the editor content. The
- * editor interacts with its text model in order to access and update the text that is being
- * displayed and edited in the editor. This is the default implementation.
+ * @name orion.textview.TextModel
+ * @class The TextModel is an interface that provides text for the view. Applications may
+ * implement the TextModel interface to provide a custom store for the view content. The
+ * view interacts with its text model in order to access and update the text that is being
+ * displayed and edited in the view. This is the default implementation.
  * <p>
  * <b>See:</b><br/>
- * {@link eclipse.Editor}<br/>
- * {@link eclipse.Editor#setModel}
+ * {@link orion.textview.TextView}<br/>
+ * {@link orion.textview.TextView#setModel}
  * </p>
  */
-eclipse.TextModel = (function() {
+orion.textview.TextModel = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 
 	/** @private */
@@ -47,7 +48,7 @@ eclipse.TextModel = (function() {
 		this.setText(text);
 	}
 
-	TextModel.prototype = /** @lends eclipse.TextModel.prototype */ {
+	TextModel.prototype = /** @lends orion.textview.TextModel.prototype */ {
 		/**
 		 * Adds a listener to the model.
 		 * 
@@ -179,11 +180,11 @@ eclipse.TextModel = (function() {
 			return this._lineOffsets.length;
 		},
 		/**
-		 * Returns the line delimiter that is used by the editor
+		 * Returns the line delimiter that is used by the view
 		 * when inserting new lines. New lines entered using key strokes 
 		 * and paste operations use this line delimiter.
 		 *
-		 * @return {String} the line delimiter that is used by the editor when inserting new lines.
+		 * @return {String} the line delimiter that is used by the view when inserting new lines.
 		 */
 		getLineDelimiter: function() {
 			return this._lineDelimiter;
@@ -286,8 +287,8 @@ eclipse.TextModel = (function() {
 		/**
 		 * Notifies all listeners that the text is about to change.
 		 * <p>
-		 * This notification is intended to be used only by the editor. Application clients should
-		 * use {@link eclipse.Editor#event:onModelChanging}.
+		 * This notification is intended to be used only by the view. Application clients should
+		 * use {@link orion.textview.TextView#event:onModelChanging}.
 		 * </p>
 		 * <p>
 		 * NOTE: This method is not meant to called directly by application code. It is called internally by the TextModel
@@ -313,8 +314,8 @@ eclipse.TextModel = (function() {
 		/**
 		 * Notifies all listeners that the text has changed.
 		 * <p>
-		 * This notification is intended to be used only by the editor. Application clients should
-		 * use {@link eclipse.Editor#event:onModelChanged}.
+		 * This notification is intended to be used only by the view. Application clients should
+		 * use {@link orion.textview.TextView#event:onModelChanged}.
 		 * </p>
 		 * <p>
 		 * NOTE: This method is not meant to called directly by application code. It is called internally by the TextModel

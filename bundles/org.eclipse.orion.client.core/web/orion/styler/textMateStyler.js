@@ -29,7 +29,7 @@ orion.styler.AbstractStyler = (function() {
 	AbstractStyler.prototype = /** @lends orion.styler.AbstractStyler.prototype */ {
 		/**
 		 * Initializes this styler with an editor. Extenders <b>must</b> call this from their constructor.
-		 * @param {eclipse.Editor} editor
+		 * @param {orion.textview.TextView} editor
 		 */
 		initialize: function(editor) {
 			this.editor = editor;
@@ -208,7 +208,7 @@ orion.styler.Util = {
  *
  * @class orion.styler.TextMateStyler
  * @extends orion.styler.AbstractStyler
- * @param {eclipse.Editor} editor The editor.
+ * @param {orion.textview.TextView} editor The editor.
  * @param {JSONObject} grammar The TextMate grammar as a JSON object. You can use a plist-to-JSON conversion tool
  * to produce this object. Note that some features of TextMate grammars are not supported.
  */
@@ -461,11 +461,10 @@ orion.styler.TextMateStyler = (function() {
 		/** Called once when file is first loaded to build the parse tree. Tree is updated incrementally thereafter as buffer is modified */
 		initialParse: function() {
 			var last = this.editor.getModel().getCharCount();
-//			console.debug("initialParse" + 0 + " .. " + last + " " + this.editor.getText(0, last));
 			// First time; make parse tree for whole buffer
 			var root = new this.ContainerNode(null, this.grammar._typedRule);
 			this._tree = root;
-			this.parse(this._tree, false, 0, last);
+			this.parse(this._tree, false, 0);
 		},
 		_onModelChanged: function(/**eclipse.ModelChangedEvent*/ e) {
 			var addedCharCount = e.addedCharCount,
@@ -476,29 +475,21 @@ orion.styler.TextMateStyler = (function() {
 			if (!this._tree) {
 				this.initialParse();
 			} else {
-//				console.debug("\nstart=" + start + " add=" + addedCharCount + " rem=" + removedCharCount
-//						+ " addl=" + addedLineCount + " reml=" + removedLineCount);
 				var model = this.editor.getModel();
-				var end = start + removedCharCount;
 				var charCount = model.getCharCount();
 				
 				// For rs, we must rewind to the line preceding the line 'start' is on. We can't rely on start's
 				// line since it may've been changed in a way that would cause a new beginMatch at its lineStart.
 				var rs = model.getLineEnd(model.getLineAtOffset(start) - 1); // may be < 0
 				var fd = this.getFirstDamaged(rs, rs);
-				var re = model.getLineEnd(model.getLineAtOffset(end));
 				rs = rs === -1 ? 0 : rs;
-				re = re === -1 ? charCount : re;
 				var stoppedAt;
 				if (fd) {
-//					console.debug("fd=" + fd + " rs=" + rs + " re=" + re);
 					// [rs, re] is the region we need to verify. If we find the structure of the tree
 					// has changed in that area, then we may need to reparse the rest of the file.
-					stoppedAt = this.parse(fd, true, rs, re, addedCharCount, removedCharCount);
+					stoppedAt = this.parse(fd, true, rs, addedCharCount, removedCharCount);
 				} else {
-					// FIXME: fd == null, we didn't hit any b/e nodes but may still have added a node
-					// need to parse [rs..re]?
-//					console.debug("TODO fdl is null");
+					// FIXME: fd == null ?
 					stoppedAt = charCount;
 				}
 				this.editor.redrawRange(rs, stoppedAt);
@@ -515,7 +506,7 @@ orion.styler.TextMateStyler = (function() {
 			}
 			
 			var nodes = [this._tree];
-			var result, lastUndamaged;
+			var result = null;
 			while (nodes.length) {
 				var n = nodes.pop();
 				if (!n.parent /*n is root*/ || this.isDamaged(n, start, end)) {
@@ -531,11 +522,12 @@ orion.styler.TextMateStyler = (function() {
 					}
 				}
 			}
-			return result;
+			return result || this._tree;
 		},
 		/** @returns true If n overlaps the interval [start,end] */
 		isDamaged: function(/**BeginEndNode*/ n, start, end) {
-			return (n.start <= end && n.end >= start);
+			// Note strict > since [2,5] doesn't overlap [5,7]
+			return (n.start <= end && n.end > start);
 		},
 		/**
 		 * Builds tree from some of the buffer content
@@ -544,25 +536,30 @@ orion.styler.TextMateStyler = (function() {
 		 * @param {BeginEndNode|ContainerNode} origNode The deepest node that overlaps [rs,rs], or the root.
 		 * @param {Boolean} repairing 
 		 * @param {Number} rs See _onModelChanged()
-		 * @param {Number} re The lineEnd of the line where the edit stops. This is our best-case stopping 
-		 * point. If we detect a structure change to tree, then we must continue past re, and in worst case until EOF.
 		 * @param {Number} [addedCharCount] Only used for repairing === true
 		 * @param {Number} [removedCharCount] Only used for repairing === true
 		 */
-		parse: function(origNode, repairing, rs, re, addedCharCount, removedCharCount) {
+		parse: function(origNode, repairing, rs, addedCharCount, removedCharCount) {
 			var model = this.editor.getModel();
 			var lastLineStart = model.getLineStart(model.getLineCount() - 1);
 			var eof = model.getCharCount();
 			var initialExpected = this.getInitialExpected(origNode, rs);
+			
+			// re is best-case stopping point; if we detect change to tree, we must continue past it
+			var re = -1;
 			if (repairing) {
 				origNode.repaired = true;
 				origNode.endNeedsUpdate = true;
+				var lastChild = origNode.children[origNode.children.length-1];
+				var delta = addedCharCount - removedCharCount;
+				re = lastChild ? model.getLineEnd(model.getLineAtOffset(lastChild.end + delta)) : -1;
 			}
+			re = (re === -1) ? eof : re;
+			
 			var expected = initialExpected;
 			var node = origNode;
 			var matchedChildOrEnd = false;
 			var pos = rs;
-			var lastResetPos = -1;
 			while (node && (!repairing || (pos < re))) {
 				var matchInfo = this.getNextMatch(model, node, pos);
 				if (!matchInfo) {
@@ -624,22 +621,48 @@ orion.styler.TextMateStyler = (function() {
 						} else {
 							// Force-ending a BeginEndNode that runs until eof
 							node.setEnd(eof);
+							delete node.endNeedsUpdate;
 						}
 					}
 					node = node.parent; // ascend
 				}
 				
-				if (repairing && pos >= re && !matchedChildOrEnd) {
-					// Reached re without matching any begin/end => initialExpected was removed => repair fail
-					this.prune(origNode, initialExpected);
-					repairing = false;
-				}
+//				if (repairing && pos >= re && !matchedChildOrEnd) {
+//					// Reached re without matching any begin/end => initialExpected itself was removed => repair fail
+//					this.prune(origNode, initialExpected);
+//					repairing = false;
+//				}
 			} // end loop
+			// TODO: do this for every node we end?
+			this.removeUnrepairedChildren(origNode, repairing);
 			
+			//console.debug("parsed " + (pos - rs) + " of " + model.getCharCount + "buf");
 			this.cleanup(repairing, origNode, rs, re, eof, addedCharCount, removedCharCount);
 			return pos; // where we stopped repairing/reparsing
 		},
-		/** Helper for parse() */
+		/** Helper for parse() in the repair case
+		 * Removes any children of node that are unrepaired (implies they were deleted) */
+		removeUnrepairedChildren: function(node, repairing) {
+			function getLastRepairedChildIndex(n) {
+				var children = n.children;
+				for (var i=children.length-1; i >= 0; i--) {
+					if (children[i].repaired) {
+						return i;
+					}
+				}
+				return -1;
+			}
+		
+			if (repairing) {
+				// If we're ending node w/o having found its remaining children, remove them
+				var lastRepairedChildIndex = getLastRepairedChildIndex(node);
+				if (lastRepairedChildIndex + 1 !== node.children.length) {
+					//console.debug("blowaway to " + (lastRepairedChildIndex + 1));
+					node.children.length = lastRepairedChildIndex + 1;
+				}
+			}
+		},
+		/** Helper for parse() in the repair case */
 		cleanup: function(repairing, origNode, rs, re, eof, addedCharCount, removedCharCount) {
 			var i, node, maybeRepairedNodes;
 			if (repairing) {
@@ -675,7 +698,7 @@ orion.styler.TextMateStyler = (function() {
 			}
 		},
 		/**
-		 * @param model {eclipse.TextModel}
+		 * @param model {orion.textview.TextModel}
 		 * @param node {Node}
 		 * @param pos {Number}
 		 * @param [matchRulesOnly] {Boolean} Optional, if true only "match" subrules will be considered.

@@ -10,12 +10,12 @@
  *******************************************************************************/
 
 define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/contentAssist',
-        'orion/editorCommands','orion/editorContainer','orion/editorFeatures','orion/globalCommands', 'orion/breadcrumbs'], 
-		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditorContainer, mEditorFeatures, mGlobalCommands, mBreadcrumbs) {
+        'orion/editorCommands','orion/editorContainer','orion/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model], 
+		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditorContainer, mEditorFeatures, mGlobalCommands, mBreadcrumbs, mGapModel) {
 
-var orion = orion || {};
+var exports = {};
 
-orion.CompareContainer = (function() {
+exports.CompareContainer = (function() {
 	function CompareContainer (diffProvider) {
 		this._diffParser = new mDiffParser.DiffParser();
 		this._diff = null;
@@ -163,7 +163,7 @@ orion.CompareContainer = (function() {
 	return CompareContainer;
 }());
 
-orion.SBSCompareContainer = (function() {
+exports.SBSCompareContainer = (function() {
 	/** @private */
 	function SBSCompareContainer(resgistry ,leftEditorDivId , rightEditorDivId) {
 		this._editorLeft = null;
@@ -172,7 +172,7 @@ orion.SBSCompareContainer = (function() {
 		this._leftEditorDivId = leftEditorDivId;
 		this._rightEditorDivId = rightEditorDivId;
 	}
-	SBSCompareContainer.prototype = new orion.CompareContainer();
+	SBSCompareContainer.prototype = new exports.CompareContainer();
 	SBSCompareContainer.prototype.setEditor = function(input , diff){	
 		var result = this.parseMapper(input , diff);
 		if(this._editorLeft && this._editorRight){
@@ -186,10 +186,10 @@ orion.SBSCompareContainer = (function() {
 			}
 		}
 				
-		var modelLeft = new eclipse.TextModel(result.output, result.delim);
-		var compareModelLeft = new mCompareModel.CompareTextModel(modelLeft, {mapper:result.mapper , columnIndex:0} , new orion.GapLineFeeder( result.delim));
-		var modelRight = new eclipse.TextModel(input, result.delim);
-		var compareModelRight = new mCompareModel.CompareTextModel(modelRight, {mapper:result.mapper , columnIndex:1} , new orion.GapLineFeeder( result.delim));
+		var modelLeft = new orion.textview.TextModel(result.output, result.delim);
+		var compareModelLeft = new mCompareModel.CompareTextModel(modelLeft, {mapper:result.mapper , columnIndex:0} , new mGapModel.GapLineFeeder( result.delim));
+		var modelRight = new orion.textview.TextModel(input, result.delim);
+		var compareModelRight = new mCompareModel.CompareTextModel(modelRight, {mapper:result.mapper , columnIndex:1} , new mGapModel.GapLineFeeder( result.delim));
 		
 		var optionsRight = {
 			parent: this._rightEditorDivId,
@@ -197,7 +197,7 @@ orion.SBSCompareContainer = (function() {
 			readonly: true,
 			stylesheet: "/orion/compare/editor.css" 
 		};
-		this._editorRight = new eclipse.Editor(optionsRight);
+		this._editorRight = new orion.textview.TextView(optionsRight);
 		this._editorRight.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 				
 		var optionsLeft = {
@@ -206,7 +206,7 @@ orion.SBSCompareContainer = (function() {
 			readonly: true,
 			stylesheet: "/orion/compare/editor.css" 
 		};
-		this._editorLeft = new eclipse.Editor(optionsLeft);
+		this._editorLeft = new orion.textview.TextView(optionsLeft);
 		this._editorLeft.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 		
 		var self = this;
@@ -248,7 +248,7 @@ orion.SBSCompareContainer = (function() {
 			self._editorLeft.setTopPixel(self._editorRight.getTopPixel());
 		}); 
 				
-		var overview  = new orion.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
+		var overview  = new exports.CompareOverviewRuler("right", {styleClass: "ruler_overview"});
 		this._editorRight.addRuler(overview);
 				
 		this._initDiffPosition(this._editorLeft);
@@ -258,7 +258,7 @@ orion.SBSCompareContainer = (function() {
 }());
 
 //temporary text ssyntax styler , we will need to change it later to some thing else
-orion.CompareSyntaxHighlighter = (function() {
+exports.CompareSyntaxHighlighter = (function() {
 	function CompareSyntaxHighlighter(){
 		this.styler = null;
 	}	
@@ -274,10 +274,10 @@ orion.CompareSyntaxHighlighter = (function() {
 						var extension = splits.pop().toLowerCase();
 						switch(extension) {
 							case "js":
-								this.styler = new eclipse.TextStyler(editorWidget, "js");
+								this.styler = new examples.textview.TextStyler(editorWidget, "js");
 								break;
 							case "java":
-								this.styler = new eclipse.TextStyler(editorWidget, "java");
+								this.styler = new examples.textview.TextStyler(editorWidget, "java");
 								break;
 							case "html":
 								//TODO
@@ -286,7 +286,7 @@ orion.CompareSyntaxHighlighter = (function() {
 								//TODO
 								break;
 							case "css":
-								this.styler = new eclipse.TextStyler(editorWidget, "css");
+								this.styler = new examples.textview.TextStyler(editorWidget, "css");
 								break;
 						}
 					}
@@ -297,7 +297,7 @@ orion.CompareSyntaxHighlighter = (function() {
 }());
 
 //Diff block styler , this will always be called after the text styler
-orion.DiffStyler = (function() {
+exports.DiffStyler = (function() {
 	function DiffStyler(compareMatchRenderer ,editor){
 		this._compareMatchRenderer = compareMatchRenderer;
 		this._editor = editor;
@@ -347,10 +347,10 @@ orion.DiffStyler = (function() {
 }());
 
 //the wrapper to order the text and diff styler so that we can always have diff highlighted on top of text syntax
-orion.CompareMergeStyler = (function() {
+exports.CompareMergeStyler = (function() {
 	function CompareMergeStyler(compareMatchRenderer){
-		this._syntaxHighlither = new orion.CompareSyntaxHighlighter();
-		this._diffHighlither = new orion.DiffStyler(compareMatchRenderer);
+		this._syntaxHighlither = new exports.CompareSyntaxHighlighter();
+		this._diffHighlither = new exports.DiffStyler(compareMatchRenderer);
 	}	
 	CompareMergeStyler.prototype = {
 		highlight: function(fileName, editorWidget) {
@@ -361,7 +361,7 @@ orion.CompareMergeStyler = (function() {
 	return CompareMergeStyler;
 }());
 
-orion.CompareMergeContainer = (function() {
+exports.CompareMergeContainer = (function() {
 	/** @private */
 	function CompareMergeContainer(readonly , diffProvider , resgistry , commandService , fileClient,uiFactory) {
 		this.setDiffProvider(diffProvider);
@@ -429,11 +429,11 @@ orion.CompareMergeContainer = (function() {
 		};
 		this._compareMatchRenderer = new mRulers.CompareMatchRenderer(document.getElementById(this._uiFactory.getDiffCanvasDivId()));
 		this._highlighter = [];
-		this._highlighter.push( new orion.CompareMergeStyler(this._compareMatchRenderer));//left side styler
-		this._highlighter.push( new orion.CompareMergeStyler(this._compareMatchRenderer));//right side styler
+		this._highlighter.push( new exports.CompareMergeStyler(this._compareMatchRenderer));//left side styler
+		this._highlighter.push( new exports.CompareMergeStyler(this._compareMatchRenderer));//right side styler
 		this.initEditorContainers("\n" , "fetching..." , "fetching..." , []);
 	}
-	CompareMergeContainer.prototype = new orion.CompareContainer();
+	CompareMergeContainer.prototype = new exports.CompareContainer();
 	CompareMergeContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler , fileURILeft , fileURIRight){	
 		this._editorContainerLeft = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this.readonly ,createLineStyler , fileURILeft);
 		this._editorLeft = this._editorContainerLeft.getEditorWidget();
@@ -467,10 +467,10 @@ orion.CompareMergeContainer = (function() {
 		var editorContainerDomNode = dojo.byId(parentDivId);
 		var self = this;
 		
-		var model = new eclipse.TextModel(content , delim);
+		var model = new orion.textview.TextModel(content , delim);
 		var compareModel = new mCompareMergeModel.CompareMergeModel(model, {mapper:mapper, columnIndex:columnIndex } );
 		var editorFactory = function() {
-			return new eclipse.Editor({
+			return new orion.textview.TextView({
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: readOnly,
@@ -516,7 +516,7 @@ orion.CompareMergeContainer = (function() {
 			editorFactory: editorFactory,
 			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,
-			//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
+			//lineNumberRulerFactory: new exports.LineNumberRulerFactory(),
 			contentAssistFactory: contentAssistFactory,
 			keyBindingFactory: keyBindingFactory, 
 			statusReporter: statusReporter,
@@ -588,7 +588,7 @@ orion.CompareMergeContainer = (function() {
 	return CompareMergeContainer;
 }());
 
-orion.InlineCompareContainer = (function() {
+exports.InlineCompareContainer = (function() {
 	/** @private */
 	function InlineCompareContainer(diffProvider ,resgistry , editorDivId ) {
 		this.setDiffProvider(diffProvider);
@@ -596,7 +596,7 @@ orion.InlineCompareContainer = (function() {
 		this._editorDivId = editorDivId;
 		this.initEditorContainers("" , "\n" , [],[]);
 	}
-	InlineCompareContainer.prototype = new orion.CompareContainer();
+	InlineCompareContainer.prototype = new exports.CompareContainer();
 	
 	InlineCompareContainer.prototype.addRulers = function(){
 		if(this._editor && !this._hasRuler){
@@ -628,11 +628,11 @@ orion.InlineCompareContainer = (function() {
 		var editorContainerDomNode = dojo.byId(this._editorDivId);
 		var self = this;
 		
-		var model = new eclipse.TextModel(content, delim);
+		var model = new orion.textview.TextModel(content, delim);
 		var compareModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.DiffLineFeeder(diffArray ,delim));
 
 		var editorFactory = function() {
-			return new eclipse.Editor({
+			return new orion.textview.TextView({
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: true,
@@ -653,7 +653,7 @@ orion.InlineCompareContainer = (function() {
 			editorFactory: editorFactory,
 			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,
-			//lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
+			//lineNumberRulerFactory: new exports.LineNumberRulerFactory(),
 			//contentAssistFactory: contentAssistFactory,
 			keyBindingFactory: keyBindingFactory, 
 			statusReporter: statusReporter,
@@ -707,5 +707,5 @@ orion.InlineCompareContainer = (function() {
 	return InlineCompareContainer;
 }());
 
-return orion;
+return exports;
 });

@@ -243,7 +243,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/widgets/OpenReso
 			
 		// We need a mod key binding in the editor, for now use the old one (ctrl-shift-r)
 		if (editor) {
-			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("r", true, true, false), "Find File Named...");
+			editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding("r", true, true, false), "Find File Named...");
 			editor.getEditorWidget().setAction("Find File Named...", function() {
 					openResourceDialog(searchLocation, searcher, editor);
 					return true;

@@ -370,7 +370,7 @@ var exports = {};
 		
 		var openGitCommit = new mCommands.Command({
 			name : "Open",
-			image : "/git/images/find.gif",
+			image : "/images/find.gif",
 			id : "eclipse.openGitCommit",
 			hrefCallback: function(item) {
 				return "/edit/edit.html#" + item.ContentLocation;
