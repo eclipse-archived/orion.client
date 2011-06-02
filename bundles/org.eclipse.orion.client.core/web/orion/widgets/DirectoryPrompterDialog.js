@@ -10,7 +10,7 @@
 /*global dojo dijit eclipse widgets */
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'orion/util', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin'], function(dojo, dijit, mUtil) {
+define(['dojo', 'dijit', 'orion/util', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/DirectoryPrompterDialog.html'], function(dojo, dijit, mUtil) {
 
 /**
 * @param options {{

@@ -10,7 +10,7 @@
 /*global dojo dijit eclipse widgets */
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'orion/util', 'orion/git/git-clones-explorer', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin'], function(dojo, dijit, mUtil, mGitClonesExplorer) {
+define(['dojo', 'dijit', 'orion/util', 'orion/git/git-clones-explorer', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/RemotePrompterDialog.html'], function(dojo, dijit, mUtil, mGitClonesExplorer) {
 
 /**
 * @param options {{

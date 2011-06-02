@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*global dijit dojo widgets*/
 /*jslint devel:true*/
-define(['dojo', 'dijit', 'dijit/Tree'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'dijit/Tree', 'text!orion/widgets/templates/_ExplorerTreeNode.html'], function(dojo, dijit) {
 
 dojo.declare(
 	"orion.widgets._ExplorerTreeNode",
