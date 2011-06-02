@@ -571,8 +571,83 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		]);
 	});
 	
-	// Complete region by adding its "end"
-	tests["test TextMateStyler - change - add 'end'"] = makeTest(function(editor) {
+	tests["test TextMateStyler - change - add 'start' at eof on new line incr"] = makeTest(function(editor) {
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
+		setLines(editor, [
+			"<!--a-->"
+		]);
+		// Helper since line 0's scope doesn't change in this test
+		function assertLine0Scope() {
+			assertLineScope(editor, styler, 0, [
+				[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+				[4, 5, "comment.block.mylang", "a"],
+				[5, 8, "punctuation.definition.comment.mylang", "-->"]
+			]);
+		}
+		
+		// Add the newline first
+		/*
+		<!--a-->
+		
+		*/
+		changeLine(editor, "\r\n", 0, 8, 8);
+		assertLine0Scope();
+		assertLineScope(editor, styler, 1, [
+			// empty line
+		]);
+		
+		// Now add the start INCREMENTALLY
+		/*
+		<!--a-->
+		<
+		*/
+		changeLine(editor, "<", 1, 0, 0);
+		assertLine0Scope();
+		assertLineScope(editor, styler, 1, [ /* no scope on line 1 */ ]);
+		
+		/*
+		<!--a-->
+		<!
+		*/
+		changeLine(editor, "!", 1, 1, 1);
+		assertLine0Scope();
+		assertLineScope(editor, styler, 1, [ /* no scope on line 1 */ ]);
+		
+		/*
+		<!--a-->
+		<!-
+		*/
+		changeLine(editor, "-", 1, 2, 2);
+		assertLine0Scope();
+		assertLineScope(editor, styler, 1, [ /* no scope on line 1 */ ]);
+				/*
+		<!--a-->
+		<!--
+		*/
+		changeLine(editor, "-", 1, 3, 3);	// FIXME
+		assertLine0Scope();
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"]
+		]);
+		
+		// Add something inside the new start, make sure it gets the right style
+		/*
+		<!--a-->
+		<!--b
+		*/
+		changeLine(editor, "b", 1, 4, 4);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "a"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "b"]
+		]);
+	});
+	
+	tests["test TextMateStyler - change - add 'end' 1"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		setLines(editor, [
 			"<!--has no end"
@@ -589,6 +664,138 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		]);
 	});
 	
+	// Add an end when there are multiple regions
+	tests["test TextMateStyler - change - add 'end' 2"] = makeTest(function(editor) {
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
+		setLines(editor, [
+			"<!--fizz-->",
+			"<!--buzz"
+		]);
+		
+		// complete buzz's end token incrementally
+		/*
+		<!--fizz-->
+		<!--buzz-
+		*/
+		changeLine(editor, "-", 1, 8, 8);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 8, "comment.block.mylang", "fizz"],
+			[8, 11, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 9, "comment.block.mylang", "buzz-"]
+		]);
+		
+		/*
+		<!--fizz-->
+		<!--buzz--
+		*/
+		changeLine(editor, "-", 1, 9, 9);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 8, "comment.block.mylang", "fizz"],
+			[8, 11, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 8, "comment.block.mylang", "buzz"],
+			[8, 10, "invalid.illegal.badcomment.mylang", "--"]
+		]);
+		
+		/*
+		<!--fizz-->
+		<!--buzz-->
+		*/
+		changeLine(editor, ">", 1, 10, 10);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 8, "comment.block.mylang", "fizz"],
+			[8, 11, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 8, "comment.block.mylang", "buzz"],
+			[8, 11, "punctuation.definition.comment.mylang", "-->"]
+		]);
+	}, false);
+	
+
+	// Add "end" where a following region exists
+	tests["test TextMateStyler - change - add 'end' 3"] = makeTest(function(editor) {
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
+		setLines(editor, [
+			"<!--b",
+			"<!--c-->" // here <!-- is <! (comment) and -- (invalid) not <!-- (punctuation)
+		]);
+		
+		/*
+		<!--b-->
+		<!--c-->
+		*/
+		changeLine(editor, "-->", 0, 5, 5);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "b"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "c"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+	});
+
+	// Add and "end" when there exist preceding and following regions
+	tests["test TextMateStyler - change - add 'end' 4"] = makeTest(function(editor) {
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
+		setLines(editor, [
+			"<!--a-->",
+			"<!--b",
+			"<!--c-->" // here <!-- is <! (comment) and -- (invalid) not <!-- (punctuation)
+		]);
+		// check initial styles for sanity
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "a"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "b"]
+		]);
+		assertLineScope(editor, styler, 2, [
+			[0, 2, "comment.block.mylang", "<!"],
+			[2, 4, "invalid.illegal.badcomment.mylang", "--"],
+			[4, 5, "comment.block.mylang", "c"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		
+		// Add end on line 1. Should affect line2
+		/*
+		<!--a-->
+		<!--b-->
+		<!--c-->
+		*/
+		changeLine(editor, "-->", 1, 5, 5);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "a"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "b"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 2, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "c"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+	});
+	
 	tests["test TextMateStyler - change - remove 'start'"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		setLines(editor, [
@@ -602,23 +809,138 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		assertLineScope(editor, styler, 0, [
 			[4, 7, "storage.type.mylang", "int"]
 		]);
+	});
+	
+	tests["test TextMateStyler - change - remove 'end' 1"] = makeTest(function(editor) {
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
+		setLines(editor, [
+			"<!--a-->",
+			"<!--b-->",
+			"<!--c-->"
+		]);
+		// Remove end on line1, affects line2 also
+		/*
+		<!--a-->
+		<!--b
+		<!--c-->x
+		*/
+		changeLine(editor, "", 1, 5, 8);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "a"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "b"]
+		]);
+		assertLineScope(editor, styler, 2, [
+			[0, 2, "comment.block.mylang", "<!"],
+			[2, 4, "invalid.illegal.badcomment.mylang", "--"],
+			[4, 5, "comment.block.mylang", "c"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+	});
+	
+	// Remove end of a nested region that has sibling regions before and after it
+	tests["test TextMateStyler - change - remove 'end' 2"] = makeTest(function(editor) {
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
+		setLines(editor, [
+			"<!--a",
+			"[a1]",
+			"[a2]", // We'll remove this one's end ]
+			"[a3]",
+			"-->",
+			"<!--b-->"
+		]);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "a"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 1, "meta.brace.square.open.mylang", "["],
+			[1, 3, "meta.insquare.mylang", "a1"],
+			[3, 4, "meta.brace.square.close.mylang", "]"]
+		]);
+		assertLineScope(editor, styler, 2, [
+			[0, 1, "meta.brace.square.open.mylang", "["],
+			[1, 3, "meta.insquare.mylang", "a2"],
+			[3, 4, "meta.brace.square.close.mylang", "]"]
+		]);
+		assertLineScope(editor, styler, 3, [
+			[0, 1, "meta.brace.square.open.mylang", "["],
+			[1, 3, "meta.insquare.mylang", "a3"],
+			[3, 4, "meta.brace.square.close.mylang", "]"]
+		]);
+		assertLineScope(editor, styler, 4, [
+			[0, 3, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 5, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "b"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		
+		// Remove end on line2, which makes a2 region extend onto next line
+		/*
+		<!--a
+		[a1]
+		[a2
+		[a3]
+		-->
+		<!--b-->
+		*/
+		changeLine(editor, "", 2, 3, 4);				// FIXME
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "a"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 1, "meta.brace.square.open.mylang", "["],
+			[1, 3, "meta.insquare.mylang", "a1"],
+			[3, 4, "meta.brace.square.close.mylang", "]"]
+		]);
+		assertLineScope(editor, styler, 2, [
+			[0, 1, "meta.brace.square.open.mylang", "["],
+			[1, 3, "meta.insquare.mylang", "a2"]
+		]);
+		assertLineScope(editor, styler, 3, [
+			[0, 3, "meta.insquare.mylang", "[a3"],
+			[3, 4, "meta.brace.square.close.mylang", "]"]
+		]);
+		assertLineScope(editor, styler, 4, [
+			[0, 3, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 5, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "b"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+	});
+	
+	tests["test TextMateStyler - change - remove 'end' at eof"] = makeTest(function(editor) {
+		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
+		setLines(editor, [
+			"<!--a-->",
+			"<!--b-->"
+		]);
+		/*
+		<!--a-->
+		<!--b
+		*/
+		changeLine(editor, "", 1, 5, 8);
+		assertLineScope(editor, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "a"],
+			[5, 8, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(editor, styler, 1, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 5, "comment.block.mylang", "b"]
+		]);
 	}, false);
-	
-//	tests["test TextMateStyler - change - remove 'end'"] = makeTest(function(editor) {
-//		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
-//		// IMPORTANT!!! DO THIS NOW
-//	});
-//
-//	// ************************************************************************************************
-//	// Test: damage/repair of nested regions
+
+//	// TODO: more damage/repair of nested regions
 //	
-//	tests["test TextMateStyler - grammar with unsupported regex feature"] = makeTest(function(editor) {
-//		// expect Error
-//	});
-//	
-//	tests["test TextMateStyler - grammar with other unsupported feature"] = makeTest(function(editor) {
-//		// expect Error
-//	});
-	
 	return tests;
 });
