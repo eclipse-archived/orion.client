@@ -38,7 +38,8 @@ orion.CompareMergeUIFactory = (function() {
 		},
 		
 		_createEditorParentDiv: function(editorParentDivId ,containerDivId) {
-			var editorParentDiv = new dijit.layout.ContentPane({class:"paneScrolled" ,id :editorParentDivId ,region: "center", style:"width:100%;height: 100%;overflow: hidden;"});
+			var editorParentDiv = new dijit.layout.ContentPane({id :editorParentDivId ,region: "center", style:"width:100%;height: 100%;overflow: hidden;"});
+			dojo.addClass(editorParentDiv, 'paneScrolled');
 			return editorParentDiv;
 		},
 		
