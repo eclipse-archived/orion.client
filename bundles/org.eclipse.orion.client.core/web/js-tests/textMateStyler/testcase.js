@@ -735,7 +735,6 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 		]);
 	});
 	
-	// This fails too:
 	tests["test TextMateStyler - change - remove 'end' 1"] = makeTest(function(editor) {
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		setLines(editor, [
@@ -760,7 +759,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 			[4, 5, "comment.block.mylang", "b"]
 		]);
 		assertLineScope(editor, styler, 2, [
-			[0, 2, "punctuation.definition.comment.mylang", "<!"],
+			[0, 2, "comment.block.mylang", "<!"],
 			[2, 4, "invalid.illegal.badcomment.mylang", "--"],
 			[4, 5, "comment.block.mylang", "c"],
 			[5, 8, "punctuation.definition.comment.mylang", "-->"]

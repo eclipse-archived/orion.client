@@ -551,7 +551,8 @@ orion.styler.TextMateStyler = (function() {
 				origNode.repaired = true;
 				origNode.endNeedsUpdate = true;
 				var lastChild = origNode.children[origNode.children.length-1];
-				re = lastChild ? model.getLineEnd(model.getLineAtOffset(lastChild.end)) : -1;
+				var delta = addedCharCount - removedCharCount;
+				re = lastChild ? model.getLineEnd(model.getLineAtOffset(lastChild.end + delta)) : -1;
 			}
 			re = (re === -1) ? eof : re;
 			
@@ -625,17 +626,42 @@ orion.styler.TextMateStyler = (function() {
 					node = node.parent; // ascend
 				}
 				
-				if (repairing && pos >= re && !matchedChildOrEnd) {
-					// Reached re without matching any begin/end => initialExpected was removed => repair fail
-					this.prune(origNode, initialExpected);
-					repairing = false;
-				}
+//				if (repairing && pos >= re && !matchedChildOrEnd) {
+//					// Reached re without matching any begin/end => initialExpected itself was removed => repair fail
+//					this.prune(origNode, initialExpected);
+//					repairing = false;
+//				}
 			} // end loop
+			// TODO: do this for every node we end?
+			this.removeUnrepairedChildren(origNode, repairing);
+			
 			//console.debug("parsed " + (pos - rs) + " of " + model.getCharCount + "buf");
 			this.cleanup(repairing, origNode, rs, re, eof, addedCharCount, removedCharCount);
 			return pos; // where we stopped repairing/reparsing
 		},
-		/** Helper for parse() */
+		/** Helper for parse() in the repair case
+		 * Removes any children of node that are unrepaired (implies they were deleted) */
+		removeUnrepairedChildren: function(node, repairing) {
+			function getLastRepairedChildIndex(n) {
+				var children = n.children;
+				for (var i=children.length-1; i >= 0; i--) {
+					if (children[i].repaired) {
+						return i;
+					}
+				}
+				return -1;
+			}
+		
+			if (repairing) {
+				// If we're ending node w/o having found its remaining children, remove them
+				var lastRepairedChildIndex = getLastRepairedChildIndex(node);
+				if (lastRepairedChildIndex + 1 !== node.children.length) {
+					//console.debug("blowaway to " + (lastRepairedChildIndex + 1));
+					node.children.length = lastRepairedChildIndex + 1;
+				}
+			}
+		},
+		/** Helper for parse() in the repair case */
 		cleanup: function(repairing, origNode, rs, re, eof, addedCharCount, removedCharCount) {
 			var i, node, maybeRepairedNodes;
 			if (repairing) {
