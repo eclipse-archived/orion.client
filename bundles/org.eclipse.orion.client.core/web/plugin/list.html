@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+	<head>
+		<title>Installed Plugins</title>
+		<link rel="stylesheet" type="text/css" href="list.css" />
+		<script type="text/javascript" src="/requirejs/require.js"></script>
+		<script type="text/javascript">
+		require({
+		  baseUrl: '',
+		
+		  // set the paths to our library packages
+		  packages: [
+		    {
+		      name: 'dojo',
+		      location: '/org.dojotoolkit/dojo',
+		      main: 'lib/main-browser',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dijit',
+		      location: '/org.dojotoolkit/dijit',
+		      main: 'lib/main',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dojox',
+		      location: '/org.dojotoolkit/dojox',
+		      main: 'lib/main',
+		      lib: '.'
+		    }		    
+		  ],
+		
+		  paths: {
+		    orion: '/orion',
+		    text: '/org.dojotoolkit/dojo/lib/plugins/text',
+		    i18n: '/org.dojotoolkit/dojo/lib/plugins/i18n'
+		  }
+		});
+		
+		require(["list"]);
+		</script>
+	</head>
+	<body style="height: 100%" class="nihilo">
+
+	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
+		<div dojoType="dijit.layout.ContentPane" id="toolbar" region="top" class="toolbar">
+		</div>
+		<div dojoType="dijit.layout.ContentPane" class="mainpane" style="margin-left: 44px; padding: 8px" region="center">
+			<div id="registry-tree">Loading&#8230;</div>
+		</div>
+		
+		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
+		</div>
+
+	</div>
+	</body>
+</html>
