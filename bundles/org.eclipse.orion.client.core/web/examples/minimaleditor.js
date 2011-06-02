@@ -16,9 +16,9 @@ dojo.addOnLoad(function(){
 	var editorContainerDomNode = dojo.byId("editorContainer");
 	
 	var editorFactory = function() {
-		return new eclipse.Editor({
+		return new orion.textview.TextView({
 			parent: editorContainerDomNode,
-			stylesheet: "/editor/samples/editor.css",
+			stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css"],
 			tabSize: 4
 		});
 	};
@@ -37,7 +37,7 @@ dojo.addOnLoad(function(){
 		keyModeStack.push(codeBindings);
 		
 		// save binding
-		editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("s", true), "save");
+		editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding("s", true), "save");
 		editor.getEditorWidget().setAction("save", function(){
 				editor.onInputChange(null, null, null, true);
 				var text = editor.getEditorWidget().getText();

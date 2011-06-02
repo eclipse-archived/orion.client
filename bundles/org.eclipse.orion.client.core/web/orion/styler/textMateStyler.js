@@ -29,7 +29,7 @@ orion.styler.AbstractStyler = (function() {
 	AbstractStyler.prototype = /** @lends orion.styler.AbstractStyler.prototype */ {
 		/**
 		 * Initializes this styler with an editor. Extenders <b>must</b> call this from their constructor.
-		 * @param {eclipse.Editor} editor
+		 * @param {orion.textview.TextView} editor
 		 */
 		initialize: function(editor) {
 			this.editor = editor;
@@ -208,7 +208,7 @@ orion.styler.Util = {
  *
  * @class orion.styler.TextMateStyler
  * @extends orion.styler.AbstractStyler
- * @param {eclipse.Editor} editor The editor.
+ * @param {orion.textview.TextView} editor The editor.
  * @param {JSONObject} grammar The TextMate grammar as a JSON object. You can use a plist-to-JSON conversion tool
  * to produce this object. Note that some features of TextMate grammars are not supported.
  */
@@ -675,7 +675,7 @@ orion.styler.TextMateStyler = (function() {
 			}
 		},
 		/**
-		 * @param model {eclipse.TextModel}
+		 * @param model {orion.textview.TextModel}
 		 * @param node {Node}
 		 * @param pos {Number}
 		 * @param [matchRulesOnly] {Boolean} Optional, if true only "match" subrules will be considered.

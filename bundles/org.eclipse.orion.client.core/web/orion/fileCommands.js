@@ -683,7 +683,7 @@ eclipse.fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceR
 		if (href && validationProperties && name) {
 			var properties = {
 					name: name,
-					id: "eclipse.editor." + i,
+					id: "orion.textview.TextView." + i,
 					tooltip: name,
 					validationProperties: validationProperties,
 					href: true,

@@ -22,7 +22,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 	function makeTest(testBody, doTearDown) {
 		function createEditor() {
 			var options = {parent: "editorDiv", readonly: true, stylesheet: ["test.css"]};
-			return new eclipse.Editor(options);
+			return new orion.textview.TextView(options);
 		}
 		
 		/** Must be called after each test to remove editor from DOM */
