@@ -51,7 +51,7 @@ orion.DiffProvider = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleGetAuthenticationError(this, ioArgs);
 					return response;
 				}
 			});
