@@ -23,7 +23,7 @@ var eclipse = eclipse || {};
 eclipse.Plugin = function(url, data, internalRegistry) {
 	var _self = this;
 	
-	var _connected = false;
+	var _channel = null;
 	var _deferredLoad = new dojo.Deferred();
 	var _loaded = false;
 	
@@ -32,7 +32,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	var _serviceRegistrations = {};
 		
 	function _callService(serviceId, method, params, deferred) {
-		if (!_connected) {
+		if (!_channel) {
 			throw new Error("plugin not connected");
 		}
 		var requestId = _currentMessageId++;
@@ -43,7 +43,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 			method: method,
 			params: params
 		};
-		internalRegistry.postMessage(message, url);
+		internalRegistry.postMessage(message, _channel);
 	}
 
 	function _createServiceProxy(service) {
@@ -136,8 +136,9 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 				delete _serviceRegistrations[serviceId];
 			}
 		}
-		if (_connected) {
-			internalRegistry.disconnect(url);
+		if (_channel) {
+			internalRegistry.disconnect(_channel);
+			_channel = null;
 		}
 		internalRegistry.uninstallPlugin(this);
 	};
@@ -154,9 +155,8 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	};
 	
 	this._load = function() {
-		if (!_connected) {
-			internalRegistry.connect(url, _responseHandler);
-			_connected = true;
+		if (!_channel) {
+			_channel = internalRegistry.connect(url, _responseHandler);
 			setTimeout(function() {
 				if (!_loaded) {
 					_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
@@ -179,7 +179,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	var _self = this;
 	var _storage = opt_storage || localStorage || {};
 	var _plugins = [];
-	var _channels = {};
+	var _channels = [];
 	var _pluginEventTarget = new mServiceregistry.EventTarget();
 	var _loaded;
 		
@@ -188,12 +188,11 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	var _userPlugins;
 
 	window.addEventListener("message", function(event) {
-		if (!event.source || !event.source.location) {
-			return;
-		}
-		var channel = _channels[event.source.location.toString()];
-		if (channel && channel.target === event.source) {
-			channel.handler(JSON.parse(event.data));	
+		for (var i = 0, source = event.source; i < _channels.length; i++) {
+			if (source === _channels[i].target) {
+				_channels[i].handler(JSON.parse(event.data));
+				break;
+			}
 		}
 	}, false);
 	
@@ -301,18 +300,22 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		        iframe.style.visibility = "hidden";
 		        iframe.src = url;
 		        document.body.appendChild(iframe);
-		        _channels[url] = {iframe: iframe, target: iframe.contentWindow, handler: handler };
+		        var channel = {iframe: iframe, target: iframe.contentWindow, handler: handler, url: url};
+		        _channels.push(channel);
+		        return channel;
 			},
-			disconnect: function(url) {
-				if (_channels[url]) {
-					try {
-						document.body.removeChild(_channels[url].iframe);
-					} catch(e) {
-						// best effort
+			disconnect: function(channel) {
+				for (var i = 0; i < _channels.length; i++) {
+					if (channel === _channels[i]) {
+						_channels.splice(i,1);
+						try {
+							document.body.removeChild(channel.iframe);
+						} catch(e) {
+							// best effort
+						}
+						break;
 					}
-					delete _channels[url];
 				}
-				
 			},
 			uninstallPlugin: function(plugin) {
 				_clear(plugin);
@@ -328,10 +331,8 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
 				_pluginEventTarget.dispatchEvent("pluginUpdated", plugin);
 			},
-			postMessage: function(message, url) {
-				if (_channels[url]) {
-					_channels[url].target.postMessage(JSON.stringify(message), url);
-				}
+			postMessage: function(message, channel) {
+				channel.target.postMessage(JSON.stringify(message), channel.url);
 			}
 	};
 	
@@ -340,14 +341,11 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	};
 	
 	this.shutdown = function() {
-		for(var url in _channels) {
-			if (_channels.hasOwnProperty(url)) {
-				try {
-					document.body.removeChild(_channels[url].iframe);
-				} catch(e) {
-					// best effort
-				}
-				delete _channels[url];
+		for (var i = 0; i < _channels.length; i++) {
+			try {
+				document.body.removeChild(_channels[i].iframe);
+			} catch(e) {
+				// best effort
 			}
 		}
 	};

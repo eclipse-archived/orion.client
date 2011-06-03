@@ -12,13 +12,12 @@
 
 /** @namespace */
 var orion = orion || {};
-
-orion.contentAssist = orion.contentAssist || {};
+orion.editor = orion.editor || {};
 
 /**
  * @class orion.contentAssist.CssContentAssistProvider
  */
-orion.contentAssist.CssContentAssistProvider = (function() {
+orion.editor.CssContentAssistProvider = (function() {
 	/** @private */
 	function CssContentAssistProvider() {
 	}
@@ -54,7 +53,7 @@ orion.contentAssist.CssContentAssistProvider = (function() {
 /**
  * @class orion.contentAssist.JavaScriptContentAssistProvider
  */
-orion.contentAssist.JavaScriptContentAssistProvider = (function() {
+orion.editor.JavaScriptContentAssistProvider = (function() {
 	/** @private */
 	function JavaScriptContentAssistProvider() {
 	}
@@ -74,3 +73,10 @@ orion.contentAssist.JavaScriptContentAssistProvider = (function() {
 	};
 	return JavaScriptContentAssistProvider;
 }());
+
+if (typeof window !== "undefined" && typeof window.define !== "undefined") {
+	define([], function() {
+		return orion.editor;
+	});
+}
+

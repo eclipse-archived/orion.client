@@ -10,23 +10,21 @@
 
 /*jslint regexp:false laxbreak:true*/
 /*global define*/
-define(['dojo'], function(dojo) {
 
 var orion = orion || {};
-
-orion.styler = orion.styler || {};
+orion.editor = orion.editor || {};
 
 /**
  * A styler that does nothing, but can be extended by concrete stylers. Extenders can call 
- * {@link orion.styler.AbstractStyler.extend} and provide their own {@link #_onSelection}, 
+ * {@link orion.editor.AbstractStyler.extend} and provide their own {@link #_onSelection}, 
  * {@link #_onModelChanged}, {@link #_onDestroy} and {@link #_onLineStyle} methods.
- * @class orion.styler.AbstractStyler
+ * @class orion.editor.AbstractStyler
  */
-orion.styler.AbstractStyler = (function() {
+orion.editor.AbstractStyler = (function() {
 	/** @inner */
 	function AbstractStyler() {
 	}
-	AbstractStyler.prototype = /** @lends orion.styler.AbstractStyler.prototype */ {
+	AbstractStyler.prototype = /** @lends orion.editor.AbstractStyler.prototype */ {
 		/**
 		 * Initializes this styler with an editor. Extenders <b>must</b> call this from their constructor.
 		 * @param {orion.textview.TextView} editor
@@ -80,23 +78,23 @@ orion.styler.AbstractStyler = (function() {
 
 /**
  * Helper for extending AbstractStyler.
- * @methodOf orion.styler.AbstractStyler
+ * @methodOf orion.editor.AbstractStyler
  * @static
  * @param {Function} subCtor The constructor function for the subclass.
  * @param {Object} [proto] Object to be mixed into the subclass's prototype. This object can contain your 
  * implementation of _onSelection, _onModelChanged, etc.
- * @see orion.styler.TextMateStyler for example usage.
+ * @see orion.editor.TextMateStyler for example usage.
  */
-orion.styler.AbstractStyler.extend = function(subCtor, proto) {
+orion.editor.AbstractStyler.extend = function(subCtor, proto) {
 	if (typeof(subCtor) !== "function") { throw new Error("Function expected"); }
-	subCtor.prototype = new orion.styler.AbstractStyler();
+	subCtor.prototype = new orion.editor.AbstractStyler();
 	subCtor.constructor = subCtor;
 	for (var p in proto) {
 		if (proto.hasOwnProperty(p)) { subCtor.prototype[p] = proto[p]; }
 	}
 };
 
-orion.styler.Util = {
+orion.editor.Util = {
 	/**
 	 * @returns {String} str with JSON-escaped control character sequences converted to real control characters.
 	 */
@@ -154,7 +152,7 @@ orion.styler.Util = {
 			}
 		}
 		str2 = str2 || str;
-		str2 = orion.styler.Util.escapeJson(str2);
+		str2 = orion.editor.Util.escapeJson(str2);
 		// TODO: tolerate /(?xExpr)/ -- eg. in JSON grammar
 		// TODO: tolerate /(?iSubExp)/ -- eg. in PHP grammar (trickier)
 		return new RegExp(str2, flags);
@@ -206,13 +204,13 @@ orion.styler.Util = {
  * </ul>
  * </del>
  *
- * @class orion.styler.TextMateStyler
- * @extends orion.styler.AbstractStyler
+ * @class orion.editor.TextMateStyler
+ * @extends orion.editor.AbstractStyler
  * @param {orion.textview.TextView} editor The editor.
  * @param {JSONObject} grammar The TextMate grammar as a JSON object. You can use a plist-to-JSON conversion tool
  * to produce this object. Note that some features of TextMate grammars are not supported.
  */
-orion.styler.TextMateStyler = (function() {
+orion.editor.TextMateStyler = (function() {
 	/** @inner */
 	function TextMateStyler(editor, grammar) {
 		this.initialize(editor);
@@ -222,7 +220,7 @@ orion.styler.TextMateStyler = (function() {
 		
 		this.preprocess();
 	}
-	orion.styler.AbstractStyler.extend(TextMateStyler, /** @lends orion.styler.TextMateStyler.prototype */ {
+	orion.editor.AbstractStyler.extend(TextMateStyler, /** @lends orion.editor.TextMateStyler.prototype */ {
 		copy: function(grammar) {
 			// Use a copy of the grammar object, since we'll mutate it
 			return JSON.parse(JSON.stringify(grammar));
@@ -303,8 +301,8 @@ orion.styler.TextMateStyler = (function() {
 			function BeginEndRule(/**Object*/ rule) {
 				this.rule = rule;
 				// TODO: the TextMate blog claims that "end" is optional.
-				this.beginRegex = orion.styler.Util.toRegExp(rule.begin);
-				this.endRegex = orion.styler.Util.toRegExp(rule.end);
+				this.beginRegex = orion.editor.Util.toRegExp(rule.begin);
+				this.endRegex = orion.editor.Util.toRegExp(rule.end);
 				this.subrules = rule.patterns || [];
 				
 				// TODO: if rule.beginCaptures, make a group-ified regex from beginRegex
@@ -321,7 +319,7 @@ orion.styler.TextMateStyler = (function() {
 		MatchRule: (function() {
 			function MatchRule(/**Object*/ rule) {
 				this.rule = rule;
-				this.matchRegex = orion.styler.Util.toRegExp(rule.match);
+				this.matchRegex = orion.editor.Util.toRegExp(rule.match);
 				
 				// TODO if rule.captures, make a group-ified regex from matchRegex
 			}
@@ -487,7 +485,7 @@ orion.styler.TextMateStyler = (function() {
 				if (fd) {
 					// [rs, re] is the region we need to verify. If we find the structure of the tree
 					// has changed in that area, then we may need to reparse the rest of the file.
-					stoppedAt = this.parse(fd, true, rs, addedCharCount, removedCharCount);
+					stoppedAt = this.parse(fd, true, rs, start, addedCharCount, removedCharCount);
 				} else {
 					// FIXME: fd == null ?
 					stoppedAt = charCount;
@@ -536,10 +534,11 @@ orion.styler.TextMateStyler = (function() {
 		 * @param {BeginEndNode|ContainerNode} origNode The deepest node that overlaps [rs,rs], or the root.
 		 * @param {Boolean} repairing 
 		 * @param {Number} rs See _onModelChanged()
+		 * @param {Number} [editStart] Only used for repairing === true
 		 * @param {Number} [addedCharCount] Only used for repairing === true
 		 * @param {Number} [removedCharCount] Only used for repairing === true
 		 */
-		parse: function(origNode, repairing, rs, addedCharCount, removedCharCount) {
+		parse: function(origNode, repairing, rs, editStart, addedCharCount, removedCharCount) {
 			var model = this.editor.getModel();
 			var lastLineStart = model.getLineStart(model.getLineCount() - 1);
 			var eof = model.getCharCount();
@@ -552,7 +551,9 @@ orion.styler.TextMateStyler = (function() {
 				origNode.endNeedsUpdate = true;
 				var lastChild = origNode.children[origNode.children.length-1];
 				var delta = addedCharCount - removedCharCount;
-				re = lastChild ? model.getLineEnd(model.getLineAtOffset(lastChild.end + delta)) : -1;
+				var lastChildLineEnd = lastChild ? model.getLineEnd(model.getLineAtOffset(lastChild.end + delta)) : -1;
+				var editLineEnd = model.getLineEnd(model.getLineAtOffset(editStart + removedCharCount));
+				re = Math.max(lastChildLineEnd, editLineEnd);
 			}
 			re = (re === -1) ? eof : re;
 			
@@ -634,31 +635,28 @@ orion.styler.TextMateStyler = (function() {
 //				}
 			} // end loop
 			// TODO: do this for every node we end?
-			this.removeUnrepairedChildren(origNode, repairing);
+			this.removeUnrepairedChildren(origNode, repairing, rs);
 			
 			//console.debug("parsed " + (pos - rs) + " of " + model.getCharCount + "buf");
 			this.cleanup(repairing, origNode, rs, re, eof, addedCharCount, removedCharCount);
 			return pos; // where we stopped repairing/reparsing
 		},
-		/** Helper for parse() in the repair case
-		 * Removes any children of node that are unrepaired (implies they were deleted) */
-		removeUnrepairedChildren: function(node, repairing) {
-			function getLastRepairedChildIndex(n) {
-				var children = n.children;
-				for (var i=children.length-1; i >= 0; i--) {
-					if (children[i].repaired) {
-						return i;
+		/** Helper for parse() in the repair case. To be called when ending a node, as any children that
+		 * lie in [rs,node.end] and were not repaired must've been deleted.
+		 */
+		removeUnrepairedChildren: function(node, repairing, start) {
+			if (repairing) {
+				var children = node.children;
+				var removeFrom = -1;
+				for (var i=0; i < children.length; i++) {
+					var child = children[i];
+					if (!child.repaired && this.isDamaged(child, start, Number.MAX_VALUE /*end doesn't matter*/)) {
+						removeFrom = i;
+						break;
 					}
 				}
-				return -1;
-			}
-		
-			if (repairing) {
-				// If we're ending node w/o having found its remaining children, remove them
-				var lastRepairedChildIndex = getLastRepairedChildIndex(node);
-				if (lastRepairedChildIndex + 1 !== node.children.length) {
-					//console.debug("blowaway to " + (lastRepairedChildIndex + 1));
-					node.children.length = lastRepairedChildIndex + 1;
+				if (removeFrom !== -1) {
+					node.children.length = removeFrom;
 				}
 			}
 		},
@@ -687,7 +685,7 @@ orion.styler.TextMateStyler = (function() {
 						node.shiftEnd(delta);
 					}
 					delete node.endNeedsUpdate;
-					delete origNode.repaired;
+					delete node.repaired;
 				}
 			} else {
 				// Clean up after ourself
@@ -1106,5 +1104,9 @@ orion.styler.TextMateStyler = (function() {
 	return TextMateStyler;
 }());
 
-return orion.styler;	
-});
+if (typeof window !== "undefined" && typeof window.define !== "undefined") {
+	define(['dojo'], function() {
+		return orion.editor;
+	});
+}
+

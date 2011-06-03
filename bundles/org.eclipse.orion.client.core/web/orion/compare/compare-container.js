@@ -9,9 +9,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/contentAssist',
-        'orion/editorCommands','orion/editorContainer','orion/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model'], 
-		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditorContainer, mEditorFeatures, mGlobalCommands, mBreadcrumbs, mGapModel) {
+define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/editor/contentAssist',
+        'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands',
+        'orion/textview/textModel','orion/textview/textView','examples/textview/textStyler'], 
+		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
+				mGapModel , mCommands, mTextModel, mTextView, mTextStyler) {
 
 var exports = {};
 
@@ -30,43 +32,7 @@ exports.CompareContainer = (function() {
 		setDiffProvider: function(diffProvider){
 			this._diffProvider = diffProvider;
 		},
-		/*
-		getFileDiff: function(diffURI , uiCallBack , errorCallBack  ,onsave){
-			var self = this;
-			self._registry.getService("orion.git.provider").then(
-				function(service) {
-					service.getDiffContent(diffURI, 
-										   function(jsonData, secondArg) {
-											  if(self._conflict){
-												  self._diff = jsonData.split("diff --git")[1];
-											  }	else {
-												  self._diff = jsonData;
-											  }
-											  if(onsave)
-												  self.setEditor(this._input , self._diff ,onsave);
-											  else
-												  self.getFileURI(diffURI , uiCallBack , errorCallBack);
-										   },
-										   errorCallBack);
-				});
-		},
 		
-		getFileURI: function(diffURI , uiCallBack , errorCallBack ){
-			var self = this;
-			self._registry.getService("orion.git.provider").then(
-				function(service) {
-					service.getDiffFileURI(diffURI, 
-										   function(jsonData, secondArg) {
-											  self._oldFileURI = jsonData.Git.Old;
-											  self._newFileURI = jsonData.Git.New;
-											  self.getFileContent(jsonData.Git.Old , errorCallBack);
-											  if(uiCallBack)
-												  uiCallBack(jsonData.Git.New , jsonData.Git.Old);
-										   },
-										   errorCallBack);
-				});
-		},
-		*/
 		getFileDiff: function(diffURI , uiCallBack , errorCallBack  ,onsave){
 			var self = this;
 			this._diffProvider.getDiffContent(diffURI, 
@@ -186,9 +152,9 @@ exports.SBSCompareContainer = (function() {
 			}
 		}
 				
-		var modelLeft = new orion.textview.TextModel(result.output, result.delim);
+		var modelLeft = new mTextModel.TextModel(result.output, result.delim);
 		var compareModelLeft = new mCompareModel.CompareTextModel(modelLeft, {mapper:result.mapper , columnIndex:0} , new mGapModel.GapLineFeeder( result.delim));
-		var modelRight = new orion.textview.TextModel(input, result.delim);
+		var modelRight = new mTextModel.TextModel(input, result.delim);
 		var compareModelRight = new mCompareModel.CompareTextModel(modelRight, {mapper:result.mapper , columnIndex:1} , new mGapModel.GapLineFeeder( result.delim));
 		
 		var optionsRight = {
@@ -197,7 +163,7 @@ exports.SBSCompareContainer = (function() {
 			readonly: true,
 			stylesheet: "/orion/compare/editor.css" 
 		};
-		this._editorRight = new orion.textview.TextView(optionsRight);
+		this._editorRight = new mTextView.TextView(optionsRight);
 		this._editorRight.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 				
 		var optionsLeft = {
@@ -206,7 +172,7 @@ exports.SBSCompareContainer = (function() {
 			readonly: true,
 			stylesheet: "/orion/compare/editor.css" 
 		};
-		this._editorLeft = new orion.textview.TextView(optionsLeft);
+		this._editorLeft = new mTextView.TextView(optionsLeft);
 		this._editorLeft.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 		
 		var self = this;
@@ -274,10 +240,10 @@ exports.CompareSyntaxHighlighter = (function() {
 						var extension = splits.pop().toLowerCase();
 						switch(extension) {
 							case "js":
-								this.styler = new examples.textview.TextStyler(editorWidget, "js");
+								this.styler = new mTextStyler.TextStyler(editorWidget, "js");
 								break;
 							case "java":
-								this.styler = new examples.textview.TextStyler(editorWidget, "java");
+								this.styler = new mTextStyler.TextStyler(editorWidget, "java");
 								break;
 							case "html":
 								//TODO
@@ -286,7 +252,7 @@ exports.CompareSyntaxHighlighter = (function() {
 								//TODO
 								break;
 							case "css":
-								this.styler = new examples.textview.TextStyler(editorWidget, "css");
+								this.styler = new mTextStyler.TextStyler(editorWidget, "css");
 								break;
 						}
 					}
@@ -372,6 +338,7 @@ exports.CompareMergeContainer = (function() {
 		this._leftEditorDivId = this._uiFactory.getEditorParentDivId(true);
 		this._fileClient = fileClient;
 		this._rightEditorDivId = this._uiFactory.getEditorParentDivId(false);
+		this.initCommands();
 		var self = this;
 		this._inputManager = {
 			filePath: "",
@@ -436,6 +403,7 @@ exports.CompareMergeContainer = (function() {
 	CompareMergeContainer.prototype = new exports.CompareContainer();
 	CompareMergeContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler , fileURILeft , fileURIRight){	
 		this._editorContainerLeft = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this.readonly ,createLineStyler , fileURILeft);
+		mGlobalCommands.generateDomCommandsInBanner(this._commandService, this._editorContainerLeft , "pageActions",true);
 		this._editorLeft = this._editorContainerLeft.getEditorWidget();
 		this._editorContainerRight = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , fileURIRight);
 		this._editorRight = this._editorContainerRight.getEditorWidget();
@@ -449,6 +417,43 @@ exports.CompareMergeContainer = (function() {
 			}
 		};
 		
+	};
+	
+	CompareMergeContainer.prototype.initCommands = function(){	
+		var self = this;
+		var nextDiffCommand = new mCommands.Command({
+			name : "Next Diff",
+			image : "/images/compare/next-diff.gif",
+			id: "orion.compare.nextDiff",
+			groupId: "orion.compareGroup",
+			callback : function() {
+				self.nextDiff();
+		}});
+		var prevDiffCommand = new mCommands.Command({
+			name : "Previous Diff",
+			image : "/images/compare/prev-diff.gif",
+			id: "orion.compare.prevDiff",
+			groupId: "orion.compareGroup",
+			callback : function() {
+				self.prevDiff();
+		}});
+		var copyToLeftCommand = new mCommands.Command({
+			name : "Copy Current Change From Right to left",
+			image : "/images/compare/copy-to-left.gif",
+			id: "orion.compare.copyToLeft",
+			groupId: "orion.compareGroup",
+			callback : function() {
+				self.copyToLeft();;
+			}});
+		this._commandService.addCommand(prevDiffCommand, "dom");
+		this._commandService.addCommand(nextDiffCommand, "dom");
+		this._commandService.addCommand(copyToLeftCommand, "dom");
+			
+		// Register command contributions
+		this._commandService.registerCommandContribution("orion.compare.prevDiff", 3, "pageActions");
+		this._commandService.registerCommandContribution("orion.compare.nextDiff", 2, "pageActions");
+		if(!this.readonly)
+			this._commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
 	};
 	
 	CompareMergeContainer.prototype.nextDiff = function(){	
@@ -467,10 +472,10 @@ exports.CompareMergeContainer = (function() {
 		var editorContainerDomNode = dojo.byId(parentDivId);
 		var self = this;
 		
-		var model = new orion.textview.TextModel(content , delim);
+		var model = new mTextModel.TextModel(content , delim);
 		var compareModel = new mCompareMergeModel.CompareMergeModel(model, {mapper:mapper, columnIndex:columnIndex } );
 		var editorFactory = function() {
-			return new orion.textview.TextView({
+			return new mTextView.TextView({
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: readOnly,
@@ -512,7 +517,7 @@ exports.CompareMergeContainer = (function() {
 			dojo.byId(statusDivId).innerHTML = dirtyIndicator +  status;
 		};
 		var undoStackFactory = readOnly ? new mEditorFeatures.UndoFactory() : new mEditorCommands.UndoCommandFactory(self._registry, self._commandService, "pageActions");
-		var editorContainer = new mEditorContainer.EditorContainer({
+		var editorContainer = new mEditor.Editor({
 			editorFactory: editorFactory,
 			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,
@@ -525,7 +530,6 @@ exports.CompareMergeContainer = (function() {
 				
 		editorContainer.installEditor();
 		if(!readOnly){
-			mGlobalCommands.generateDomCommandsInBanner(this._commandService, editorContainer , "pageActions");
 			inputManager = this._inputManager;
 			dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
 		}
@@ -628,11 +632,11 @@ exports.InlineCompareContainer = (function() {
 		var editorContainerDomNode = dojo.byId(this._editorDivId);
 		var self = this;
 		
-		var model = new orion.textview.TextModel(content, delim);
+		var model = new mTextModel.TextModel(content, delim);
 		var compareModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.DiffLineFeeder(diffArray ,delim));
 
 		var editorFactory = function() {
-			return new orion.textview.TextView({
+			return new mTextView.TextView({
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: true,
@@ -649,7 +653,7 @@ exports.InlineCompareContainer = (function() {
 			return;
 		};
 		var undoStackFactory =  new mEditorFeatures.UndoFactory();
-		var editorContainer = new mEditorContainer.EditorContainer({
+		var editorContainer = new mEditor.Editor({
 			editorFactory: editorFactory,
 			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,

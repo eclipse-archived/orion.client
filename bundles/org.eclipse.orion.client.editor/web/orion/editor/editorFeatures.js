@@ -16,11 +16,10 @@
  * @namespace The global container for orion APIs.
  */ 
 
-define(['dojo'], function(dojo) {
+var orion = orion || {};
+orion.editor = orion.editor || {};	
 
-orion = orion || {};
-
-orion.UndoFactory = (function() {
+orion.editor.UndoFactory = (function() {
 	function UndoFactory() {
 	}
 	UndoFactory.prototype = {
@@ -44,7 +43,7 @@ orion.UndoFactory = (function() {
 	return UndoFactory;
 }());
 
-orion.LineNumberRulerFactory = (function() {
+orion.editor.LineNumberRulerFactory = (function() {
 	function LineNumberRulerFactory() {
 	}
 	LineNumberRulerFactory.prototype = {
@@ -56,7 +55,7 @@ orion.LineNumberRulerFactory = (function() {
 }());
 
 
-orion.AnnotationFactory = (function() {
+orion.editor.AnnotationFactory = (function() {
 	function AnnotationFactory() {
 	}
 	AnnotationFactory.prototype = {
@@ -109,7 +108,7 @@ orion.AnnotationFactory = (function() {
 /**
  * TextCommands connects common text editing keybindings onto an editor.
  */
-orion.TextActions = (function() {
+orion.editor.TextActions = (function() {
 	function TextActions(editor, undoStack) {
 		this.editor = editor;
 		this.editorWidget = editor.getEditorWidget();
@@ -563,7 +562,7 @@ orion.TextActions = (function() {
 	return TextActions;
 }());
 
-orion.SourceCodeActions = (function() {
+orion.editor.SourceCodeActions = (function() {
 	function SourceCodeActions(editor, undoStack, contentAssist) {
 		this.editor = editor;
 		this.editorWidget = editor.getEditorWidget();
@@ -782,5 +781,8 @@ orion.SourceCodeActions = (function() {
 	return SourceCodeActions;
 }());
 
-return orion;	
-});
+if (typeof window !== "undefined" && typeof window.define !== "undefined") {
+	define(['dojo', 'orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers'], function() {
+		return orion.editor;
+	});
+}

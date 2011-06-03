@@ -40,7 +40,7 @@ dojo.addOnLoad(function() {
 		var fileClient = new mFileClient.FileClient(fileService);
 		
 		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
-		/*
+		/* experiment for multiple compare containers
 		var fileClient1 = new eclipse.FileClient(fileService);
 		var uiFactory1 = new orion.CompareMergeUIFactory({parentDivID : "compareContainer1" , showTitle : false , showLineStatus : false});
 		uiFactory1.buildUI();
@@ -80,42 +80,6 @@ dojo.addOnLoad(function() {
 						  handleErrorTile(errorResponse , ioArgs , uiFactory);
 					  });
 		});
-			
-		var nextDiffCommand = new mCommands.Command({
-			name : "Next Diff",
-			image : "/images/compare/next-diff.gif",
-			id: "orion.compare.nextDiff",
-			groupId: "orion.compareGroup",
-			callback : function() {
-				compareMergeContainer.nextDiff();
-		}});
-		var prevDiffCommand = new mCommands.Command({
-			name : "Previous Diff",
-			image : "/images/compare/prev-diff.gif",
-			id: "orion.compare.prevDiff",
-			groupId: "orion.compareGroup",
-			callback : function() {
-				compareMergeContainer.prevDiff();
-		}});
-		var copyToLeftCommand = new mCommands.Command({
-			name : "Copy Current Change From Right to left",
-			image : "/images/compare/copy-to-left.gif",
-			id: "orion.compare.copyToLeft",
-			groupId: "orion.compareGroup",
-			callback : function() {
-				compareMergeContainer.copyToLeft();;
-			}});
-		commandService.addCommand(prevDiffCommand, "dom");
-		commandService.addCommand(nextDiffCommand, "dom");
-		commandService.addCommand(copyToLeftCommand, "dom");
-			
-		// Register command contributions
-		commandService.registerCommandContribution("orion.compare.prevDiff", 3, "pageActions");
-		commandService.registerCommandContribution("orion.compare.nextDiff", 2, "pageActions");
-		if(!readOnly)
-			commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
-			
-		mGlobalCommands.generateDomCommandsInBanner(commandService, {},"pageActions",true );
 	});
 });
 

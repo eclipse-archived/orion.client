@@ -449,4 +449,10 @@ orion.textview.TextModel = (function() {
 	};
 	
 	return TextModel;
-}()); 
+}());
+
+if (typeof window !== "undefined" && typeof window.define !== "undefined") {
+	define([], function() {
+		return orion.textview;
+	});
+}

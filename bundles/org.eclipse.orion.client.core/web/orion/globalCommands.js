@@ -11,7 +11,8 @@
 /*global window document define login logout orion eclipse */
 /*browser:true*/
 
-define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/widgets/OpenResourceDialog'], function(dojo, dijit, mCommands, mUtil ){
+define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBinding', 
+        'orion/widgets/OpenResourceDialog'], function(dojo, dijit, mCommands, mUtil, mKeyBinding ){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -243,7 +244,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/widgets/OpenReso
 			
 		// We need a mod key binding in the editor, for now use the old one (ctrl-shift-r)
 		if (editor) {
-			editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding("r", true, true, false), "Find File Named...");
+			editor.getEditorWidget().setKeyBinding(new mKeyBinding.KeyBinding("r", true, true, false), "Find File Named...");
 			editor.getEditorWidget().setAction("Find File Named...", function() {
 					openResourceDialog(searchLocation, searcher, editor);
 					return true;
