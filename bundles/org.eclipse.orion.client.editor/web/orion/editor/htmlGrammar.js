@@ -13,13 +13,13 @@
 
 var orion = orion || {};
 
-orion.syntax = orion.syntax || {};
+orion.editor = orion.editor || {};
 
 /**
  * Uses a grammar to provide some very rough syntax highlighting for HTML.<p>
  * @class orion.syntax.HtmlGrammar
  */
-orion.syntax.HtmlGrammar = (function() {
+orion.editor.HtmlGrammar = (function() {
 	var _fileTypes = [ "html", "htm" ];
 	return {
 		/**
@@ -104,3 +104,9 @@ orion.syntax.HtmlGrammar = (function() {
 		}
 	};
 }());
+
+if (typeof window !== "undefined" && typeof window.define !== "undefined") {
+	define([], function() {
+		return orion.editor;
+	});
+}

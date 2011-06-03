@@ -11,10 +11,10 @@
  /*global window dojo orion:true eclipse:true handleGetAuthenticationError*/
  /*jslint maxerr:150 browser:true devel:true regexp:false*/
 
-define(['dojo', 'dijit', 'orion/textview/keyBinding', 'dijit/TitlePane', 'dijit/layout/ContentPane' ], function(dojo, dijit, mKeyBinding){
-
-orion = orion || {};
-orion.Editor = (function() {
+var orion = orion || {};
+orion.editor = orion.editor || {};	
+	
+orion.editor.Editor = (function() {
 	function Editor(options) {
 		this._editorFactory = options.editorFactory;
 		this._undoStackFactory = options.undoStackFactory;
@@ -199,7 +199,7 @@ orion.Editor = (function() {
 			}
 			
 			// Set keybindings for keys that apply to different modes
-			editor.setKeyBinding(new mKeyBinding.KeyBinding(27), "Cancel Current Mode");
+			editor.setKeyBinding(new orion.textview.KeyBinding(27), "Cancel Current Mode");
 			editor.setAction("Cancel Current Mode", dojo.hitch(this, function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
@@ -344,5 +344,9 @@ orion.Editor = (function() {
 	};
 	return Editor;
 }());
-return orion;
-});
+
+if (typeof window !== "undefined" && typeof window.define !== "undefined") {
+	define(['dojo', 'dijit', 'orion/textview/keyBinding', 'dijit/TitlePane', 'dijit/layout/ContentPane' ], function(){
+		return orion.editor;
+	});
+}

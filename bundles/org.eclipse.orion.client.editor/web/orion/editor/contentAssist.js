@@ -11,12 +11,12 @@
 /*global eclipse:true dojo */
 /*jslint maxerr:150 browser:true devel:true */
 
-define(['dojo', 'orion/textview/keyBinding', 'dojo/DeferredList'], function(dojo, mKeyBinding) {
 
 /**
  * @namespace The global container for eclipse APIs.
  */ 
-var exports = {};
+	var orion = orion || {};
+	orion.editor = orion.editor || {};
 
 /**
  * A ContentAssist will look for content assist providers in the service registry (if provided).
@@ -26,7 +26,7 @@ var exports = {};
  * @param {String} contentAssistId
  * @param {eclipse.ServiceRegistry} [serviceRegistry] If omitted, providers must be registered via {@link #addProvider}.
  */
-exports.ContentAssist = (function() {
+orion.editor.ContentAssist = (function() {
 	function ContentAssist(editor, contentAssistId, serviceRegistry) {
 		this.editor = editor;
 		this.editorWidget = editor.getEditorWidget();
@@ -50,7 +50,7 @@ exports.ContentAssist = (function() {
 	ContentAssist.prototype = {
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			this.editorWidget.setKeyBinding(isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "Content Assist");
+			this.editorWidget.setKeyBinding(isMac ? new orion.textview.KeyBinding(' ', false, false, false, true) : new orion.textview.KeyBinding(' ', true), "Content Assist");
 			this.editorWidget.setAction("Content Assist", dojo.hitch(this, function() {
 				this.showContentAssist(true);
 				return true;
@@ -250,5 +250,9 @@ exports.ContentAssist = (function() {
 	};
 	return ContentAssist;
 }());
-return exports;	
-});
+
+if (typeof window !== "undefined" && typeof window.define !== "undefined") {
+	define(['dojo', 'orion/textview/keyBinding', 'dojo/DeferredList'], function() {
+		return orion.editor;	
+	});
+}

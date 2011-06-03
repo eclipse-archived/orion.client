@@ -14,17 +14,17 @@ window.onload = function() {
 	// Content assist for CSS, JavaScript
 	(function() {
 		provider.registerServiceProvider("orion.edit.contentAssist",
-			new orion.contentAssist.CssContentAssistProvider(), 
+			new orion.editor.CssContentAssistProvider(), 
 			{name: "CSS content assist", pattern: "\\.css$"});
 		provider.registerServiceProvider("orion.edit.contentAssist",
-			new orion.contentAssist.JavaScriptContentAssistProvider(),
+			new orion.editor.JavaScriptContentAssistProvider(),
 			{name: "JavaScript content assist", pattern: "\\.js$"});
 	}());
 	
 	// Syntax highlighting for HTML
 	(function() {
 		var serviceImpl = { /* Grammar-based, so no service impl. All data is in properties */ };
-		var serviceProperties = orion.syntax.HtmlGrammar;
+		var serviceProperties = orion.editor.HtmlGrammar;
 		provider.registerServiceProvider("orion.edit.highlighter", serviceImpl, serviceProperties);
 	}());
 	
