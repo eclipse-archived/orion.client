@@ -24,9 +24,9 @@ dojo.addOnLoad(function(){
 	};
 
 	var contentAssistFactory = function(editor) {
-		var contentAssist = new eclipse.ContentAssist(editor, "contentassist");
-		contentAssist.addProvider(new orion.contentAssist.CssContentAssistProvider(), "css", "\\.css$");
-		contentAssist.addProvider(new orion.contentAssist.JavaScriptContentAssistProvider(), "js", "\\.js$");
+		var contentAssist = new orion.editor.ContentAssist(editor, "contentassist");
+		contentAssist.addProvider(new orion.editor.CssContentAssistProvider(), "css", "\\.css$");
+		contentAssist.addProvider(new orion.editor.JavaScriptContentAssistProvider(), "js", "\\.js$");
 		return contentAssist;
 	};
 	
@@ -59,7 +59,7 @@ dojo.addOnLoad(function(){
 		}
 	};
 	
-	var annotationFactory = new orion.AnnotationFactory();
+	var annotationFactory = new orion.editor.AnnotationFactory();
 
 	function save(editor) {
 		editor.onInputChange(null, null, null, true);
@@ -69,11 +69,11 @@ dojo.addOnLoad(function(){
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 		
 		// Create keybindings for generic editing
-		var genericBindings = new orion.TextActions(editor, undoStack);
+		var genericBindings = new orion.editor.TextActions(editor, undoStack);
 		keyModeStack.push(genericBindings);
 		
 		// create keybindings for source editing
-		var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
+		var codeBindings = new orion.editor.SourceCodeActions(editor, undoStack, contentAssist);
 		keyModeStack.push(codeBindings);
 		
 		// save binding
@@ -102,9 +102,9 @@ dojo.addOnLoad(function(){
 	
 	var editorContainer = new orion.editor.Editor({
 		editorFactory: editorFactory,
-		undoStackFactory: new orion.UndoFactory(),
+		undoStackFactory: new orion.editor.UndoFactory(),
 		annotationFactory: annotationFactory,
-		lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
+		lineNumberRulerFactory: new orion.editor.LineNumberRulerFactory(),
 		contentAssistFactory: contentAssistFactory,
 		keyBindingFactory: keyBindingFactory, 
 		statusReporter: statusReporter,
