@@ -17,9 +17,9 @@ orion.syntax = orion.syntax || {};
 
 /**
  * Uses a grammar to provide some very rough syntax highlighting for HTML.<p>
- * @class orion.syntax.HtmlSyntaxHighlight
+ * @class orion.syntax.HtmlGrammar
  */
-orion.syntax.HtmlSyntaxHighlight = (function() {
+orion.syntax.HtmlGrammar = (function() {
 	var _fileTypes = [ "html", "htm" ];
 	return {
 		/**
