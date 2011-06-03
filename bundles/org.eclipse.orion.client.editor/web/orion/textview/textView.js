@@ -4756,3 +4756,9 @@ orion.textview.TextView = (function() {
 	
 	return TextView;
 }());
+
+if (typeof window !== "undefined" && typeof window.define !== "undefined") {
+	define(['orion/textview/textModel', 'orion/textview/keyBinding'], function() {
+		return orion.textview;
+	});
+}

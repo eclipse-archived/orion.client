@@ -11,11 +11,11 @@
  /*global window dojo orion:true eclipse:true handleGetAuthenticationError*/
  /*jslint maxerr:150 browser:true devel:true regexp:false*/
 
-define(['dojo', 'dijit', 'dijit/TitlePane', 'dijit/layout/ContentPane' ], function(dojo, dijit){
+define(['dojo', 'dijit', 'orion/textview/keyBinding', 'dijit/TitlePane', 'dijit/layout/ContentPane' ], function(dojo, dijit, mKeyBinding){
 
 orion = orion || {};
-orion.EditorContainer = (function() {
-	function EditorContainer(options) {
+orion.Editor = (function() {
+	function Editor(options) {
 		this._editorFactory = options.editorFactory;
 		this._undoStackFactory = options.undoStackFactory;
 		this._annotationFactory = options.annotationFactory;
@@ -32,7 +32,7 @@ orion.EditorContainer = (function() {
 		this._contentAssist = null;
 		this._keyModes = [];		
 	}
-	EditorContainer.prototype = {
+	Editor.prototype = {
 		getEditorWidget: function() {
 			return this._editor;
 		},
@@ -199,7 +199,7 @@ orion.EditorContainer = (function() {
 			}
 			
 			// Set keybindings for keys that apply to different modes
-			editor.setKeyBinding(new orion.textview.KeyBinding(27), "Cancel Current Mode");
+			editor.setKeyBinding(new mKeyBinding.KeyBinding(27), "Cancel Current Mode");
 			editor.setAction("Cancel Current Mode", dojo.hitch(this, function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
@@ -226,7 +226,7 @@ orion.EditorContainer = (function() {
 				return false;
 			}));
 						
-			/**@this {orion.EditorContainer} */
+			/**@this {orion.editor.Editor} */
 			function updateCursorStatus() {
 				var model = editor.getModel();
 				var caretOffset = editor.getCaretOffset();
@@ -342,7 +342,7 @@ orion.EditorContainer = (function() {
 			this._dirty = isDirty;
 		}
 	};
-	return EditorContainer;
+	return Editor;
 }());
 return orion;
 });

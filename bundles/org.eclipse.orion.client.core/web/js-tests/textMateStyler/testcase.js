@@ -11,7 +11,7 @@
 /*jslint laxbreak:true*/
 /*global define eclipse */
 
-define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
+define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
 		function(dojo, assert, mTextMateStyler, mTestGrammars) {
 	var tests = {};
 	
@@ -22,7 +22,7 @@ define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
 	function makeTest(testBody, doTearDown) {
 		function createEditor() {
 			var options = {parent: "editorDiv", readonly: true, stylesheet: ["test.css"]};
-			return new orion.textview.TextView(options);
+			return new mTextView.TextView(options);
 		}
 		
 		/** Must be called after each test to remove editor from DOM */

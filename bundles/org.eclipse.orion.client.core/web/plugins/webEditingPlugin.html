@@ -5,8 +5,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <script type="text/javascript" src="../orion/plugin.js"></script>
-<script type="text/javascript" src="../orion/contentAssist/webContentAssist.js"></script>
-<script type="text/javascript" src="../orion/styler/htmlSyntaxHighlight.js"></script>
+<script type="text/javascript" src="../orion/editor/webContentAssist.js"></script>
+<script type="text/javascript" src="../orion/editor/htmlGrammar.js"></script>
 <script type="text/javascript">
 window.onload = function() {
 	var provider = new eclipse.PluginProvider();
@@ -24,7 +24,7 @@ window.onload = function() {
 	// Syntax highlighting for HTML
 	(function() {
 		var serviceImpl = { /* Grammar-based, so no service impl. All data is in properties */ };
-		var serviceProperties = orion.syntax.HtmlSyntaxHighlight;
+		var serviceProperties = orion.syntax.HtmlGrammar;
 		provider.registerServiceProvider("orion.edit.highlighter", serviceImpl, serviceProperties);
 	}());
 	

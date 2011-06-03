@@ -88,3 +88,10 @@ orion.textview.KeyBinding = (function() {
 	};
 	return KeyBinding;
 }());
+
+if (typeof window !== "undefined" && typeof window.define !== "undefined") {
+	define([], function() {
+		return orion.textview;
+	});
+}
+

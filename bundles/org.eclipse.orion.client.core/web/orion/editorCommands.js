@@ -15,7 +15,7 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['dojo', 'orion/commands', 'orion/globalCommands'], function(dojo, mCommands, mGlobalCommands) {
+define(['dojo', 'orion/commands', 'orion/globalCommands', 'orion/textview/keyBinding', 'orion/textview/undoStack'], function(dojo, mCommands, mGlobalCommands, mKeyBinding, mUndoStack) {
 
 var exports = {};
 
@@ -37,12 +37,12 @@ exports.EditorCommandFactory = (function() {
 		
 			// KB exists so that we can pass an array (from info.key) rather than actual arguments
 			function KB(args) {
-				return orion.textview.KeyBinding.apply(this, args);
+				return mKeyBinding.KeyBinding.apply(this, args);
 			}
 	
 			// create commands common to all editors
 			if (!this.isReadOnly) {
-				editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding('s', true), "Save");
+				editor.getEditorWidget().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "Save");
 				editor.getEditorWidget().setAction("Save", dojo.hitch(this, function () {
 					var contents = editor.getEditorWidget().getText();
 					this.fileClient.write(this.inputManager.getInput(), contents).then(dojo.hitch(this, function() {
@@ -139,7 +139,7 @@ exports.EditorCommandFactory = (function() {
 						mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
 						if (info.key) {
 							// add it to the editor as a keybinding
-							KB.prototype = orion.textview.KeyBinding.prototype;
+							KB.prototype = mKeyBinding.KeyBinding.prototype;
 							editorWidget.setKeyBinding(new KB(info.key), command.id);
 							editorWidget.setAction(command.id, command.callback);
 						}
@@ -159,8 +159,8 @@ exports.UndoCommandFactory = (function() {
 	}
 	UndoCommandFactory.prototype = {
 		createUndoStack: function(editor) {
-			var undoStack =  new orion.textview.UndoStack(editor.getEditorWidget(), 200);
-			editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding('z', true), "Undo");
+			var undoStack =  new mUndoStack.UndoStack(editor.getEditorWidget(), 200);
+			editor.getEditorWidget().setKeyBinding(new mKeyBinding.KeyBinding('z', true), "Undo");
 			editor.getEditorWidget().setAction("Undo", function() {
 				undoStack.undo();
 				return true;
@@ -175,7 +175,7 @@ exports.UndoCommandFactory = (function() {
 			this.commandService.addCommand(undoCommand, "dom");
 			
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			var binding = isMac ? new orion.textview.KeyBinding('z', true, true) : new orion.textview.KeyBinding('y', true);
+			var binding = isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true);
 			editor.getEditorWidget().setKeyBinding(binding, "Redo");
 			
 			editor.getEditorWidget().setAction("Redo", function() {

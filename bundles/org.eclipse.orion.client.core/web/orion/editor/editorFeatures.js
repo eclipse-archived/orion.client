@@ -16,7 +16,7 @@
  * @namespace The global container for orion APIs.
  */ 
 
-define(['dojo'], function(dojo) {
+define(['dojo', 'orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers'], function(dojo, mUndoStack, mKeyBinding, mRulers) {
 
 orion = orion || {};
 
@@ -25,15 +25,15 @@ orion.UndoFactory = (function() {
 	}
 	UndoFactory.prototype = {
 		createUndoStack: function(editor) {
-			var undoStack =  new orion.textview.UndoStack(editor.getEditorWidget(), 200);
-			editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding('z', true), "Undo");
+			var undoStack =  new mUndoStack.UndoStack(editor.getEditorWidget(), 200);
+			editor.getEditorWidget().setKeyBinding(new mKeyBinding.KeyBinding('z', true), "Undo");
 			editor.getEditorWidget().setAction("Undo", function() {
 				undoStack.undo();
 				return true;
 			});
 			
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			editor.getEditorWidget().setKeyBinding(isMac ? new orion.textview.KeyBinding('z', true, true) : new orion.textview.KeyBinding('y', true), "Redo");
+			editor.getEditorWidget().setKeyBinding(isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "Redo");
 			editor.getEditorWidget().setAction("Redo", function() {
 				undoStack.redo();
 				return true;
@@ -49,7 +49,7 @@ orion.LineNumberRulerFactory = (function() {
 	}
 	LineNumberRulerFactory.prototype = {
 		createLineNumberRuler: function() {
-			return new orion.textview.LineNumberRuler("left", {style: {backgroundColor: "#ffffff", textAlign: "right", borderLeft:"1px solid #ddd", borderRight:"1px solid #ddd"}}, {style: { backgroundColor: "#ffffff" }}, {style: { backgroundColor: "#ffffff" }});
+			return new mRulers.LineNumberRuler("left", {style: {backgroundColor: "#ffffff", textAlign: "right", borderLeft:"1px solid #ddd", borderRight:"1px solid #ddd"}}, {style: { backgroundColor: "#ffffff" }}, {style: { backgroundColor: "#ffffff" }});
 		}
 	};
 	return LineNumberRulerFactory;
@@ -62,8 +62,8 @@ orion.AnnotationFactory = (function() {
 	AnnotationFactory.prototype = {
 		createAnnotationRulers: function() {
 			var rulerStyle = {style: { backgroundColor: "#ffffff" }};
-			this.annotationRuler = new orion.textview.AnnotationRuler("left", rulerStyle, {html: "<img src='/images/problem.gif'></img>"});
-			this.overviewRuler = new orion.textview.OverviewRuler("right", rulerStyle, this.annotationRuler);
+			this.annotationRuler = new mRulers.AnnotationRuler("left", rulerStyle, {html: "<img src='/images/problem.gif'></img>"});
+			this.overviewRuler = new mRulers.OverviewRuler("right", rulerStyle, this.annotationRuler);
 			return {annotationRuler: this.annotationRuler, overviewRuler: this.overviewRuler};
 		},
 		
@@ -157,7 +157,7 @@ orion.TextActions = (function() {
 			var searchString = "",
 			    pattern,
 			    flags;
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding("f", true), "Find...");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding("f", true), "Find...");
 			this.editorWidget.setAction("Find...", dojo.hitch(this, function() {
 				setTimeout(dojo.hitch(this, function() {
 					var selection = this.editorWidget.getSelection();
@@ -192,7 +192,7 @@ orion.TextActions = (function() {
 					}
 				}), 0);
 			}));
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding("k", true), "Find Next Occurrence");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding("k", true), "Find Next Occurrence");
 			this.editorWidget.setAction("Find Next Occurrence", dojo.hitch(this, function() {
 				var result, ignoreCase, selection;
 				if (this._incrementalFindActive) {
@@ -221,7 +221,7 @@ orion.TextActions = (function() {
 					this.editor.reportStatus("not found", true);
 				}
 			}));
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding("k", true, true), "Find Previous Occurrence");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding("k", true, true), "Find Previous Occurrence");
 			this.editorWidget.setAction("Find Previous Occurrence", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var selectionSize = (selection.end > selection.start) ? selection.end - selection.start : 0;
@@ -248,7 +248,7 @@ orion.TextActions = (function() {
 					this.editor.reportStatus("not found", true);
 				}
 			}));
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding("j", true), "Incremental Find");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding("j", true), "Incremental Find");
 			this.editorWidget.setAction("Incremental Find", dojo.hitch(this, function() {
 				if (!this._incrementalFindActive) {
 					this.editorWidget.setCaretOffset(this.editorWidget.getCaretOffset());
@@ -328,7 +328,7 @@ orion.TextActions = (function() {
 				}
 				return false;
 			}));
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(9, false, true), "Unindent Lines");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "Unindent Lines");
 			this.editorWidget.setAction("Unindent Lines", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
@@ -349,7 +349,7 @@ orion.TextActions = (function() {
 				return true;
 			}));
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(38, false, false, true), "Move Lines Up");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding(38, false, false, true), "Move Lines Up");
 			this.editorWidget.setAction("Move Lines Up", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
@@ -379,7 +379,7 @@ orion.TextActions = (function() {
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(40, false, false, true), "Move Lines Down");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding(40, false, false, true), "Move Lines Down");
 			this.editorWidget.setAction("Move Lines Down", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
@@ -409,7 +409,7 @@ orion.TextActions = (function() {
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(38, true, false, true), "Copy Lines Up");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding(38, true, false, true), "Copy Lines Up");
 			this.editorWidget.setAction("Copy Lines Up", dojo.hitch(this, function() {
 				this.startUndo();
 				var selection = this.editorWidget.getSelection();
@@ -428,7 +428,7 @@ orion.TextActions = (function() {
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(40, true, false, true), "Copy Lines Down");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding(40, true, false, true), "Copy Lines Down");
 			this.editorWidget.setAction("Copy Lines Down", dojo.hitch(this, function() {
 				this.startUndo();
 				var selection = this.editorWidget.getSelection();
@@ -462,7 +462,7 @@ orion.TextActions = (function() {
 			}));
 			
 			// Go To Line action
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding("l", true), "Goto Line...");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding("l", true), "Goto Line...");
 			this.editorWidget.setAction("Goto Line...", dojo.hitch(this, function() {
 					var line = this.editorWidget.getModel().getLineAtOffset(this.editorWidget.getCaretOffset());
 					line = prompt("Go to line:", line + 1);
@@ -586,7 +586,7 @@ orion.SourceCodeActions = (function() {
 		init: function() {
 		
 			// Block comment operations
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(191, true), "Toggle Line Comment");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding(191, true), "Toggle Line Comment");
 			this.editorWidget.setAction("Toggle Line Comment", dojo.hitch(this, function() {
 				this.startUndo();
 				var selection = this.editorWidget.getSelection();
@@ -669,7 +669,7 @@ orion.SourceCodeActions = (function() {
 				return {commentStart: commentStart, commentEnd: commentEnd};
 			}
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(191, true, true), "Add Block Comment");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding(191, true, true), "Add Block Comment");
 			this.editorWidget.setAction("Add Block Comment", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
@@ -695,7 +695,7 @@ orion.SourceCodeActions = (function() {
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(220, true, true), "Remove Block Comment");
+			this.editorWidget.setKeyBinding(new mKeyBinding.KeyBinding(220, true, true), "Remove Block Comment");
 			this.editorWidget.setAction("Remove Block Comment", dojo.hitch(this, function() {
 				var selection = this.editorWidget.getSelection();
 				var model = this.editorWidget.getModel();
