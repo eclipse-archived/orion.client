@@ -11,7 +11,7 @@
  /*global window dojo orion:true eclipse:true handleGetAuthenticationError*/
  /*jslint maxerr:150 browser:true devel:true regexp:false*/
 
-define(['dojo', 'dijit', 'dijit/TitlePane', 'dijit/layout/ContentPane' ], function(dojo, dijit){
+define(['dojo', 'dijit', 'orion/textview/keyBinding', 'dijit/TitlePane', 'dijit/layout/ContentPane' ], function(dojo, dijit, mKeyBinding){
 
 orion = orion || {};
 orion.Editor = (function() {
@@ -199,7 +199,7 @@ orion.Editor = (function() {
 			}
 			
 			// Set keybindings for keys that apply to different modes
-			editor.setKeyBinding(new orion.textview.KeyBinding(27), "Cancel Current Mode");
+			editor.setKeyBinding(new mKeyBinding.KeyBinding(27), "Cancel Current Mode");
 			editor.setAction("Cancel Current Mode", dojo.hitch(this, function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {

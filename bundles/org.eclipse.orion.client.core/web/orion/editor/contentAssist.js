@@ -11,7 +11,7 @@
 /*global eclipse:true dojo */
 /*jslint maxerr:150 browser:true devel:true */
 
-define(['dojo', 'dojo/DeferredList'], function(dojo) {
+define(['dojo', 'orion/textview/keyBinding', 'dojo/DeferredList'], function(dojo, mKeyBinding) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -50,7 +50,7 @@ exports.ContentAssist = (function() {
 	ContentAssist.prototype = {
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			this.editorWidget.setKeyBinding(isMac ? new orion.textview.KeyBinding(' ', false, false, false, true) : new orion.textview.KeyBinding(' ', true), "Content Assist");
+			this.editorWidget.setKeyBinding(isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "Content Assist");
 			this.editorWidget.setAction("Content Assist", dojo.hitch(this, function() {
 				this.showContentAssist(true);
 				return true;
