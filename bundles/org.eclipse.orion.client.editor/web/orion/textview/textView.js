@@ -8,6 +8,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug 334583
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout alert XMLHttpRequest */
@@ -882,6 +883,30 @@ orion.textview.TextView = (function() {
 			}
 			return false;
 		},
+		/** 
+		 * @class This is the event sent when the user right clicks or otherwise invokes the context menu of the view. 
+		 * <p> 
+		 * <b>See:</b><br/> 
+		 * {@link orion.textview.TextView}<br/> 
+		 * {@link orion.textview.TextView#event:onContextMenu} 
+		 * </p> 
+		 * 
+		 * @name orion.textview.ContextMenuEvent 
+		 * 
+		 * @property {Number} x The pointer location on the x axis, relative to the document the user is editing. 
+		 * @property {Number} y The pointer location on the y axis, relative to the document the user is editing. 
+		 * @property {Number} screenX The pointer location on the x axis, relative to the screen. This is copied from the DOM contextmenu event.screenX property. 
+		 * @property {Number} screenY The pointer location on the y axis, relative to the screen. This is copied from the DOM contextmenu event.screenY property. 
+		 */ 
+		/** 
+		 * This event is sent when the user invokes the view context menu. 
+		 * 
+		 * @event 
+		 * @param {orion.textview.ContextMenuEvent} contextMenuEvent the event 
+		 */ 
+		onContextMenu: function(contextMenuEvent) { 
+		  this._eventTable.sendEvent("ContextMenu", contextMenuEvent); 
+		}, 
 		/**
 		 * @class This is the event sent when the text view is destroyed.
 		 * <p>
@@ -1531,6 +1556,12 @@ orion.textview.TextView = (function() {
 		},
 		_handleContextMenu: function (e) {
 			if (!e) { e = window.event; }
+			var scroll = this._getScroll(); 
+			var viewRect = this._viewDiv.getBoundingClientRect(); 
+			var viewPad = this._getViewPadding(); 
+			var x = e.clientX + scroll.x - viewRect.left - viewPad.left; 
+			var y = e.clientY + scroll.y - viewRect.top - viewPad.top; 
+			this.onContextMenu({x: x, y: y, screenX: e.screenX, screenY: e.screenY}); 
 			if (e.preventDefault) { e.preventDefault(); }
 			return false;
 		},
