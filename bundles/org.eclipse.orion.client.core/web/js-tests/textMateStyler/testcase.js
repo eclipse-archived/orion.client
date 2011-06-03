@@ -11,8 +11,8 @@
 /*jslint laxbreak:true*/
 /*global define eclipse */
 
-define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
-		function(dojo, assert, mTextMateStyler, mTestGrammars) {
+define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMateStyler", "testGrammars"],
+		function(dojo, assert, mTextView, mTextMateStyler, mTestGrammars) {
 	var tests = {};
 	
 	// TODO: run tests with both Windows and Linux delimiters since a few cases have failed with
