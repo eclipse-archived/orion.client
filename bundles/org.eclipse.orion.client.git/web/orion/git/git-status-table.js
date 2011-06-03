@@ -425,8 +425,16 @@ orion.GitStatusController = (function() {
 				image: "/git/images/git-checkout.gif",
 				id: "orion.gitCheckout",
 				callback: function(item) {
-					self._statusService.setProgressMessage("Checking out...");
-					return self.checkout(item.object);
+					self._registry.getService("orion.page.dialog").then(function(service) {
+						service.confirm("The change of the file will lose. Are you sure you want to checkout ?",
+						function(doit) {
+							if (!doit) {
+								return;
+							}
+							self._statusService.setProgressMessage("Checking out...");
+							self.checkout(item.object);
+						});
+					});
 				},
 				visibleWhen: function(item) {
 					return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
