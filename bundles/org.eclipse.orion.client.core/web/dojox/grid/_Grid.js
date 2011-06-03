@@ -1,11 +1,8 @@
 define(["dojo", "dijit", "dojox", 'dijit/dijit','dijit/Menu','dojox/html/metrics','dojox/grid/util','dojox/grid/_Scroller','dojox/grid/_Layout','dojox/grid/_View',
-        'dojox/grid/_ViewManager', 'dojox/grid/_RowManager','dojox/grid/_FocusManager','dojox/grid/_EditManager','dojox/grid/Selection','dojox/grid/_RowSelector', 'dojox/grid/_Events'], 
+        'dojox/grid/_ViewManager', 'dojox/grid/_RowManager','dojox/grid/_FocusManager','dojox/grid/_EditManager','dojox/grid/Selection','dojox/grid/_RowSelector', 'dojox/grid/_Events','i18n!dijit/nls/loading'], 
         function(dojo, dijit, dojox) {
 
 	dojox.grid = dojox.grid || {};
-
-
-dojo.requireLocalization("dijit", "loading");
 
 (function(){
 	// NOTE: this is for backwards compatibility with Dojo 1.3
