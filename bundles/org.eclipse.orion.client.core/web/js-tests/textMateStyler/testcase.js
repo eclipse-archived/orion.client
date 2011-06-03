@@ -11,7 +11,7 @@
 /*jslint laxbreak:true*/
 /*global define eclipse */
 
-define(["dojo", "orion/assert", "orion/styler/textMateStyler", "testGrammars"],
+define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
 		function(dojo, assert, mTextMateStyler, mTestGrammars) {
 	var tests = {};
 	

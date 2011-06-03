@@ -9,9 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/contentAssist',
-        'orion/editorCommands','orion/editorContainer','orion/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands'], 
-		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditorContainer, mEditorFeatures, mGlobalCommands, mBreadcrumbs, mGapModel , mCommands) {
+define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/editor/contentAssist',
+        'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands'], 
+		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs, mGapModel , mCommands) {
 
 var exports = {};
 
@@ -515,7 +515,7 @@ exports.CompareMergeContainer = (function() {
 			dojo.byId(statusDivId).innerHTML = dirtyIndicator +  status;
 		};
 		var undoStackFactory = readOnly ? new mEditorFeatures.UndoFactory() : new mEditorCommands.UndoCommandFactory(self._registry, self._commandService, "pageActions");
-		var editorContainer = new mEditorContainer.EditorContainer({
+		var editorContainer = new mEditor.Editor({
 			editorFactory: editorFactory,
 			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,
@@ -651,7 +651,7 @@ exports.InlineCompareContainer = (function() {
 			return;
 		};
 		var undoStackFactory =  new mEditorFeatures.UndoFactory();
-		var editorContainer = new mEditorContainer.EditorContainer({
+		var editorContainer = new mEditor.Editor({
 			editorFactory: editorFactory,
 			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,

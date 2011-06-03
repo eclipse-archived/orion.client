@@ -13,11 +13,11 @@
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/users', 'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
-        'orion/problems', 'orion/contentAssist', 'orion/editorCommands', 'orion/editorFeatures', 'orion/editorContainer', 'orion/syntaxchecker',
-        'orion/styler/textMateStyler', 'orion/breadcrumbs',
+        'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
+        'orion/editor/textMateStyler', 'orion/breadcrumbs',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mUsers, mCommands, mUtil, mFavorites,
-				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditorContainer,
+				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextMateStyler, mBreadcrumbs) {
 
 	dojo.parser.parse();
@@ -345,7 +345,7 @@ exports.setUpEditor = function(isReadOnly){
 	
 		var annotationFactory = new mEditorFeatures.AnnotationFactory();
 		
-		var editorContainer = new mEditorContainer.EditorContainer({
+		var editorContainer = new mEditor.Editor({
 			editorFactory: editorFactory,
 			undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandService, "pageActions"),
 			annotationFactory: annotationFactory,

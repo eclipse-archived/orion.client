@@ -14,8 +14,8 @@
 define(['dojo', 'dijit', 'dijit/TitlePane', 'dijit/layout/ContentPane' ], function(dojo, dijit){
 
 orion = orion || {};
-orion.EditorContainer = (function() {
-	function EditorContainer(options) {
+orion.Editor = (function() {
+	function Editor(options) {
 		this._editorFactory = options.editorFactory;
 		this._undoStackFactory = options.undoStackFactory;
 		this._annotationFactory = options.annotationFactory;
@@ -32,7 +32,7 @@ orion.EditorContainer = (function() {
 		this._contentAssist = null;
 		this._keyModes = [];		
 	}
-	EditorContainer.prototype = {
+	Editor.prototype = {
 		getEditorWidget: function() {
 			return this._editor;
 		},
@@ -226,7 +226,7 @@ orion.EditorContainer = (function() {
 				return false;
 			}));
 						
-			/**@this {orion.EditorContainer} */
+			/**@this {orion.editor.Editor} */
 			function updateCursorStatus() {
 				var model = editor.getModel();
 				var caretOffset = editor.getCaretOffset();
@@ -342,7 +342,7 @@ orion.EditorContainer = (function() {
 			this._dirty = isDirty;
 		}
 	};
-	return EditorContainer;
+	return Editor;
 }());
 return orion;
 });

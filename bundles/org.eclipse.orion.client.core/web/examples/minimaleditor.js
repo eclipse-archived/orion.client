@@ -66,7 +66,7 @@ dojo.addOnLoad(function(){
 		dojo.byId("status").innerHTML = dirtyIndicator + status;
 	};
 	
-	var editorContainer = new orion.EditorContainer({
+	var editorContainer = new orion.editor.Editor({
 		editorFactory: editorFactory,
 		undoStackFactory: new orion.UndoFactory(),
 		annotationFactory: annotationFactory,
