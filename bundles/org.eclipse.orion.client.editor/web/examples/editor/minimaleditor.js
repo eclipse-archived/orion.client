@@ -65,13 +65,13 @@ dojo.addOnLoad(function(){
 		}
 		dojo.byId("status").innerHTML = dirtyIndicator + status;
 	};
-	
+		
 	var editorContainer = new orion.editor.Editor({
 		editorFactory: editorFactory,
 		undoStackFactory: new orion.editor.UndoFactory(),
 		annotationFactory: annotationFactory,
 		lineNumberRulerFactory: new orion.editor.LineNumberRulerFactory(),
-		contentAssistFactory: contentAssistFactory,
+		contentAssistFactory: null,
 		keyBindingFactory: keyBindingFactory, 
 		statusReporter: statusReporter,
 		domNode: editorContainerDomNode
