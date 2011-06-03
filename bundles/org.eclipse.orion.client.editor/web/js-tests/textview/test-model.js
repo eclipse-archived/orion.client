@@ -8,13 +8,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global assertEquals eclipse */
+/*global assertEquals orion */
 
 TextModelTestCase = TestCase("TextModelTestCase"); 
 
 TextModelTestCase.prototype = {
 	test_Empty: function () {
-		var content = new eclipse.TextModel();
+		var content = new orion.textview.TextModel();
 		assertEquals(":1a:", content.getLineCount(), 1);
 		assertEquals(":1b:", content.getLine(0), "");
 
@@ -24,7 +24,7 @@ TextModelTestCase.prototype = {
 		assertEquals(":2b:", content.getLine(0), "");
 	},
 	test_Insert: function () {
-		var content = new eclipse.TextModel();
+		var content = new orion.textview.TextModel();
 		var newText;
 		
 		content.setText("This\nis a test\r");
