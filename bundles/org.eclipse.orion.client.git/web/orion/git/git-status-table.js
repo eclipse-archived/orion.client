@@ -400,7 +400,7 @@ orion.GitStatusController = (function() {
 			dojo.place(document.createTextNode(""), toolbar, "only");
 			var self = this;
 			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(toolbar, "dom", {type: "global"}, this, "image", null);
+				service.renderCommands(toolbar, "dom", {type: "global"}, this, "image",  null, null, true);
 			});
 		},
 		
@@ -497,15 +497,26 @@ orion.GitStatusController = (function() {
 				}
 			});		
 
-			var undoLocalChangesCommand = new mCommands.Command({
-				name: "Undo local Changes",
-				tooltip: "Undo local Changes",
+			var resetChangesCommand = new mCommands.Command({
+				name: "Reset",
+				tooltip: "Reset all changes",
 				image: "/git/images/git-undo-changes.gif",
-				id: "orion.gitUndoLocalChanges",
+				id: "orion.gitResetChanges",
 				callback: function(item) {
-					self._statusService.setProgressMessage("Undoing...");
-					return self.unstageAll("HARD");
+					self._registry.getService("orion.page.dialog").then(function(service) {
+						service.confirm("The content of the working directory will be reset to content on the index.\n" + 
+								"All unstaged and staged changes in the working directory will be discarded and cannot be recovered.\n" +
+								"Are you sure you want to continue?",
+						function(doit) {
+							if (!doit) {
+								return;
+							}
+							self._statusService.setProgressMessage("Resetting local changes...");
+							return self.unstageAll("HARD");
+						});
+					});
 				},
+				
 				visibleWhen: function(item) {
 					return (self.hasStaged || self.hasUnstaged);
 				}
@@ -519,14 +530,14 @@ orion.GitStatusController = (function() {
 				commandService.addCommand(stageAllCommand, "object");	
 				commandService.addCommand(unstageAllCommand, "object");	
 				commandService.addCommand(unstageCommand, "object");	
-				commandService.addCommand(undoLocalChangesCommand, "dom");	
+				commandService.addCommand(resetChangesCommand, "dom");	
 				commandService.registerCommandContribution("orion.gitStage", 1);	
 				commandService.registerCommandContribution("orion.gitCheckout", 2);	
 				commandService.registerCommandContribution("orion.gitUnstage", 3);	
 				commandService.registerCommandContribution("orion.sbsCompare", 4);	
 				commandService.registerCommandContribution("orion.gitStageAll", 5);	
 				commandService.registerCommandContribution("orion.gitUnstageAll", 6);	
-				commandService.registerCommandContribution("orion.gitUndoLocalChanges", 7 , "pageActions");	
+				commandService.registerCommandContribution("orion.gitResetChanges", 7 , "pageActions");	
 			});
 		},
 
