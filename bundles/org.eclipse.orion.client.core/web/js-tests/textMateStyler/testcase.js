@@ -11,9 +11,13 @@
 /*jslint laxbreak:true*/
 /*global define eclipse */
 
-define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
-		function(dojo, assert, mTextMateStyler, mTestGrammars) {
+define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMateStyler", "testGrammars"],
+		function(dojo, assert, mTextView, mTextMateStyler, mTestGrammars) {
 	var tests = {};
+	
+	// TODO: run tests with both Windows and Linux delimiters since a few cases have failed with
+	// one but not the other
+	var NL = "\r\n";//new eclipse.TextModel().getLineDelimiter();
 	
 	/**
 	 * @param {Function(editor)} testBody
@@ -50,7 +54,7 @@ define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
 		if (typeof(lines) === "string") {
 			lines = Array.prototype.slice.call(arguments, 1);
 		}
-		editor.setText(lines.join("\n"));
+		editor.setText(lines.join(NL));
 	}
 	
 	/** Does a setText() on the range [col1,col2) in the given line. */
@@ -108,7 +112,8 @@ define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
 					return (styleRange.start === lineStart + start
 						&& styleRange.end === lineStart + end
 						&& styleMatchesScope(styleRange.style, scope)
-						&& (typeof(text) !== "string" || text === editor.getText(styleRange.start, styleRange.end)));				});
+						&& (typeof(text) !== "string" || text === editor.getText(styleRange.start, styleRange.end)));
+				});
 			});
 		
 		var rangeStrs = dojo.map(lineStyleEvent.ranges, function(styleRange) {
@@ -511,7 +516,7 @@ define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
 		b
 		-->
 		*/
-		changeLine(editor, "\nb", 0, 13, 13);
+		changeLine(editor, NL + "b", 0, 13, 13);
 		assertLineScope(editor, styler, 0, [
 			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
 			[4, 10, "comment.block.mylang", "xxxx<!"],
@@ -575,7 +580,7 @@ define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
 		var styler = new mTextMateStyler.TextMateStyler(editor, mTestGrammars.SampleBeginEndGrammar);
 		setLines(editor, [
 			"<!--a-->"
-		]);
+		], NL);
 		// Helper since line 0's scope doesn't change in this test
 		function assertLine0Scope() {
 			assertLineScope(editor, styler, 0, [
@@ -590,7 +595,7 @@ define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
 		<!--a-->
 		
 		*/
-		changeLine(editor, "\r\n", 0, 8, 8);
+		changeLine(editor, NL, 0, 8, 8);
 		assertLine0Scope();
 		assertLineScope(editor, styler, 1, [
 			// empty line
@@ -624,7 +629,7 @@ define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
 		<!--a-->
 		<!--
 		*/
-		changeLine(editor, "-", 1, 3, 3);	// FIXME
+		changeLine(editor, "-", 1, 3, 3);
 		assertLine0Scope();
 		assertLineScope(editor, styler, 1, [
 			[0, 4, "punctuation.definition.comment.mylang", "<!--"]
@@ -890,7 +895,7 @@ define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
 		-->
 		<!--b-->
 		*/
-		changeLine(editor, "", 2, 3, 4);				// FIXME
+		changeLine(editor, "", 2, 3, 4);
 		assertLineScope(editor, styler, 0, [
 			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
 			[4, 5, "comment.block.mylang", "a"]
@@ -938,7 +943,7 @@ define(["dojo", "orion/assert", "orion/editor/textMateStyler", "testGrammars"],
 			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
 			[4, 5, "comment.block.mylang", "b"]
 		]);
-	}, false);
+	});
 
 //	// TODO: more damage/repair of nested regions
 //	
