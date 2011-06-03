@@ -59,6 +59,8 @@ orion.compareUtils.updateMapper = function(mapper , mapperColumnIndex , startLin
 		return;
 	if(removedLineCount > 0 || addedLineCount > 0){
 		var mapperItem = orion.compareUtils.lookUpMapper(mapper , mapperColumnIndex ,startLineIndex);
+		if(mapperItem.mapperIndex < 0)
+			return;
 		if(removedLineCount > 0){
 			var linesLeft = removedLineCount;
 			var startInMapper = startLineIndex - mapperItem.startFrom;

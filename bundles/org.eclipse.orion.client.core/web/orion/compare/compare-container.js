@@ -10,8 +10,8 @@
  *******************************************************************************/
 
 define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/contentAssist',
-        'orion/editorCommands','orion/editorContainer','orion/editorFeatures','orion/globalCommands', 'orion/breadcrumbs'], 
-		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditorContainer, mEditorFeatures, mGlobalCommands, mBreadcrumbs) {
+        'orion/editorCommands','orion/editorContainer','orion/editorFeatures','orion/globalCommands', 'orion/breadcrumbs','orion/commands'], 
+		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditorContainer, mEditorFeatures, mGlobalCommands, mBreadcrumbs,mCommands) {
 
 var orion = orion || {};
 
@@ -30,43 +30,7 @@ orion.CompareContainer = (function() {
 		setDiffProvider: function(diffProvider){
 			this._diffProvider = diffProvider;
 		},
-		/*
-		getFileDiff: function(diffURI , uiCallBack , errorCallBack  ,onsave){
-			var self = this;
-			self._registry.getService("orion.git.provider").then(
-				function(service) {
-					service.getDiffContent(diffURI, 
-										   function(jsonData, secondArg) {
-											  if(self._conflict){
-												  self._diff = jsonData.split("diff --git")[1];
-											  }	else {
-												  self._diff = jsonData;
-											  }
-											  if(onsave)
-												  self.setEditor(this._input , self._diff ,onsave);
-											  else
-												  self.getFileURI(diffURI , uiCallBack , errorCallBack);
-										   },
-										   errorCallBack);
-				});
-		},
 		
-		getFileURI: function(diffURI , uiCallBack , errorCallBack ){
-			var self = this;
-			self._registry.getService("orion.git.provider").then(
-				function(service) {
-					service.getDiffFileURI(diffURI, 
-										   function(jsonData, secondArg) {
-											  self._oldFileURI = jsonData.Git.Old;
-											  self._newFileURI = jsonData.Git.New;
-											  self.getFileContent(jsonData.Git.Old , errorCallBack);
-											  if(uiCallBack)
-												  uiCallBack(jsonData.Git.New , jsonData.Git.Old);
-										   },
-										   errorCallBack);
-				});
-		},
-		*/
 		getFileDiff: function(diffURI , uiCallBack , errorCallBack  ,onsave){
 			var self = this;
 			this._diffProvider.getDiffContent(diffURI, 
@@ -372,6 +336,7 @@ orion.CompareMergeContainer = (function() {
 		this._leftEditorDivId = this._uiFactory.getEditorParentDivId(true);
 		this._fileClient = fileClient;
 		this._rightEditorDivId = this._uiFactory.getEditorParentDivId(false);
+		this.initCommands();
 		var self = this;
 		this._inputManager = {
 			filePath: "",
@@ -436,6 +401,7 @@ orion.CompareMergeContainer = (function() {
 	CompareMergeContainer.prototype = new orion.CompareContainer();
 	CompareMergeContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler , fileURILeft , fileURIRight){	
 		this._editorContainerLeft = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this.readonly ,createLineStyler , fileURILeft);
+		mGlobalCommands.generateDomCommandsInBanner(this._commandService, this._editorContainerLeft , "pageActions",true);
 		this._editorLeft = this._editorContainerLeft.getEditorWidget();
 		this._editorContainerRight = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , fileURIRight);
 		this._editorRight = this._editorContainerRight.getEditorWidget();
@@ -449,6 +415,43 @@ orion.CompareMergeContainer = (function() {
 			}
 		};
 		
+	};
+	
+	CompareMergeContainer.prototype.initCommands = function(){	
+		var self = this;
+		var nextDiffCommand = new mCommands.Command({
+			name : "Next Diff",
+			image : "/images/compare/next-diff.gif",
+			id: "orion.compare.nextDiff",
+			groupId: "orion.compareGroup",
+			callback : function() {
+				self.nextDiff();
+		}});
+		var prevDiffCommand = new mCommands.Command({
+			name : "Previous Diff",
+			image : "/images/compare/prev-diff.gif",
+			id: "orion.compare.prevDiff",
+			groupId: "orion.compareGroup",
+			callback : function() {
+				self.prevDiff();
+		}});
+		var copyToLeftCommand = new mCommands.Command({
+			name : "Copy Current Change From Right to left",
+			image : "/images/compare/copy-to-left.gif",
+			id: "orion.compare.copyToLeft",
+			groupId: "orion.compareGroup",
+			callback : function() {
+				self.copyToLeft();;
+			}});
+		this._commandService.addCommand(prevDiffCommand, "dom");
+		this._commandService.addCommand(nextDiffCommand, "dom");
+		this._commandService.addCommand(copyToLeftCommand, "dom");
+			
+		// Register command contributions
+		this._commandService.registerCommandContribution("orion.compare.prevDiff", 3, "pageActions");
+		this._commandService.registerCommandContribution("orion.compare.nextDiff", 2, "pageActions");
+		if(!this.readonly)
+			this._commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
 	};
 	
 	CompareMergeContainer.prototype.nextDiff = function(){	
@@ -525,7 +528,6 @@ orion.CompareMergeContainer = (function() {
 				
 		editorContainer.installEditor();
 		if(!readOnly){
-			mGlobalCommands.generateDomCommandsInBanner(this._commandService, editorContainer , "pageActions");
 			inputManager = this._inputManager;
 			dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
 		}
