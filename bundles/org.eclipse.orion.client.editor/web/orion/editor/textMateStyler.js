@@ -485,7 +485,7 @@ orion.editor.TextMateStyler = (function() {
 				if (fd) {
 					// [rs, re] is the region we need to verify. If we find the structure of the tree
 					// has changed in that area, then we may need to reparse the rest of the file.
-					stoppedAt = this.parse(fd, true, rs, addedCharCount, removedCharCount);
+					stoppedAt = this.parse(fd, true, rs, start, addedCharCount, removedCharCount);
 				} else {
 					// FIXME: fd == null ?
 					stoppedAt = charCount;
@@ -534,10 +534,11 @@ orion.editor.TextMateStyler = (function() {
 		 * @param {BeginEndNode|ContainerNode} origNode The deepest node that overlaps [rs,rs], or the root.
 		 * @param {Boolean} repairing 
 		 * @param {Number} rs See _onModelChanged()
+		 * @param {Number} [editStart] Only used for repairing === true
 		 * @param {Number} [addedCharCount] Only used for repairing === true
 		 * @param {Number} [removedCharCount] Only used for repairing === true
 		 */
-		parse: function(origNode, repairing, rs, addedCharCount, removedCharCount) {
+		parse: function(origNode, repairing, rs, editStart, addedCharCount, removedCharCount) {
 			var model = this.editor.getModel();
 			var lastLineStart = model.getLineStart(model.getLineCount() - 1);
 			var eof = model.getCharCount();
@@ -550,7 +551,9 @@ orion.editor.TextMateStyler = (function() {
 				origNode.endNeedsUpdate = true;
 				var lastChild = origNode.children[origNode.children.length-1];
 				var delta = addedCharCount - removedCharCount;
-				re = lastChild ? model.getLineEnd(model.getLineAtOffset(lastChild.end + delta)) : -1;
+				var lastChildLineEnd = lastChild ? model.getLineEnd(model.getLineAtOffset(lastChild.end + delta)) : -1;
+				var editLineEnd = model.getLineEnd(model.getLineAtOffset(editStart + removedCharCount));
+				re = Math.max(lastChildLineEnd, editLineEnd);
 			}
 			re = (re === -1) ? eof : re;
 			
@@ -632,31 +635,28 @@ orion.editor.TextMateStyler = (function() {
 //				}
 			} // end loop
 			// TODO: do this for every node we end?
-			this.removeUnrepairedChildren(origNode, repairing);
+			this.removeUnrepairedChildren(origNode, repairing, rs);
 			
 			//console.debug("parsed " + (pos - rs) + " of " + model.getCharCount + "buf");
 			this.cleanup(repairing, origNode, rs, re, eof, addedCharCount, removedCharCount);
 			return pos; // where we stopped repairing/reparsing
 		},
-		/** Helper for parse() in the repair case
-		 * Removes any children of node that are unrepaired (implies they were deleted) */
-		removeUnrepairedChildren: function(node, repairing) {
-			function getLastRepairedChildIndex(n) {
-				var children = n.children;
-				for (var i=children.length-1; i >= 0; i--) {
-					if (children[i].repaired) {
-						return i;
+		/** Helper for parse() in the repair case. To be called when ending a node, as any children that
+		 * lie in [rs,node.end] and were not repaired must've been deleted.
+		 */
+		removeUnrepairedChildren: function(node, repairing, start) {
+			if (repairing) {
+				var children = node.children;
+				var removeFrom = -1;
+				for (var i=0; i < children.length; i++) {
+					var child = children[i];
+					if (!child.repaired && this.isDamaged(child, start, Number.MAX_VALUE /*end doesn't matter*/)) {
+						removeFrom = i;
+						break;
 					}
 				}
-				return -1;
-			}
-		
-			if (repairing) {
-				// If we're ending node w/o having found its remaining children, remove them
-				var lastRepairedChildIndex = getLastRepairedChildIndex(node);
-				if (lastRepairedChildIndex + 1 !== node.children.length) {
-					//console.debug("blowaway to " + (lastRepairedChildIndex + 1));
-					node.children.length = lastRepairedChildIndex + 1;
+				if (removeFrom !== -1) {
+					node.children.length = removeFrom;
 				}
 			}
 		},
@@ -685,7 +685,7 @@ orion.editor.TextMateStyler = (function() {
 						node.shiftEnd(delta);
 					}
 					delete node.endNeedsUpdate;
-					delete origNode.repaired;
+					delete node.repaired;
 				}
 			} else {
 				// Clean up after ourself
