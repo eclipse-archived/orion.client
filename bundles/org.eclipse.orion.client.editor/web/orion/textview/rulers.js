@@ -213,3 +213,9 @@ orion.textview.OverviewRuler = (function() {
 	};
 	return OverviewRuler;
 }());
+
+if (typeof window != "undefined" && typeof window.define == "undefined") {
+	define([], function() {
+		return orion.textview;
+	});
+}

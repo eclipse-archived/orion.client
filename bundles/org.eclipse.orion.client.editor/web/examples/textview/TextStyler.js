@@ -705,3 +705,9 @@ examples.textview.TextStyler = (function() {
 	};
 	return TextStyler;
 }());
+
+if (typeof window != "undefined" && typeof window.define == "undefined") {
+	define([], function() {
+		return examples.textview;
+	});
+}
