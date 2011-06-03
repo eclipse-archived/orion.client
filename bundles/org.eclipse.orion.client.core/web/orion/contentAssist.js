@@ -16,13 +16,13 @@ define(['dojo', 'dojo/DeferredList'], function(dojo) {
 /**
  * @namespace The global container for eclipse APIs.
  */ 
-var exports = exports || {};
+var exports = {};
 
 /**
  * A ContentAssist will look for content assist providers in the service registry (if provided).
  * Alternately providers can be registered directly by calling {@link #addProvider}.
  * @name eclipse.ContentAssist
- * @param {eclipse.Editor} editor
+ * @param {orion.textview.TextView} editor
  * @param {String} contentAssistId
  * @param {eclipse.ServiceRegistry} [serviceRegistry] If omitted, providers must be registered via {@link #addProvider}.
  */
@@ -50,7 +50,7 @@ exports.ContentAssist = (function() {
 	ContentAssist.prototype = {
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			this.editorWidget.setKeyBinding(isMac ? new eclipse.KeyBinding(' ', false, false, false, true) : new eclipse.KeyBinding(' ', true), "Content Assist");
+			this.editorWidget.setKeyBinding(isMac ? new orion.textview.KeyBinding(' ', false, false, false, true) : new orion.textview.KeyBinding(' ', true), "Content Assist");
 			this.editorWidget.setAction("Content Assist", dojo.hitch(this, function() {
 				this.showContentAssist(true);
 				return true;

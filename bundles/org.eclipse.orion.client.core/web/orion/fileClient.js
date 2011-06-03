@@ -8,32 +8,25 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo window eclipse:true handleAuthenticationError */
+/*global window define */
 /*jslint forin:true devel:true*/
 
 /** @namespace The global container for eclipse APIs. */
 
 define(["dojo", "orion/auth"], function(dojo, mAuth){
 
-
-var eclipse = eclipse || {};
-
-/**
- * The file client provides a convenience API for interacting with a file service
- * provided by a plugin. This class handles authorization, and authentication-related
- * error handling.
- */
-eclipse.FileClient = (function() {
 	/**
-	 * @class Provides operations on files, folders, and projects.
-	 * @name eclipse.FileClient
+	 * Creates a new file client.
+	 * @class The file client provides a convenience API for interacting with a file service
+	 * provided by a plugin. This class handles authorization, and authentication-related
+	 * error handling.
+	 * @name orion.fileClient.FileClient
 	 */
 	function FileClient(fileService) {
 		this.fileService = fileService;
 	}
 	
-	FileClient.prototype = /**@lends eclipse.FileClient.prototype */
-	{
+	FileClient.prototype = /**@lends orion.fileClient.FileClient.prototype */ {
 		/**
 		 * Set the file service
 		 * @param fileService the file service object
@@ -183,6 +176,7 @@ eclipse.FileClient = (function() {
 		/**
 		 * This helper method implements invocation of the service call,
 		 * with retry on authentication error if needed.
+		 * @private
 		 */
 		_doServiceCall: function(funcName, funcArgs) {
 			var clientDeferred = new dojo.Deferred();
@@ -214,9 +208,10 @@ eclipse.FileClient = (function() {
 			);
 			return clientDeferred;
 		}
-	};
-	return FileClient;
-}());
-return eclipse;
+	};//end FileClient prototype
+	FileClient.prototype.constructor = FileClient;
+
+	//return the module exports
+	return {FileClient: FileClient};
 });
 

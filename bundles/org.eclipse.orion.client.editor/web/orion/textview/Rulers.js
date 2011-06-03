@@ -8,43 +8,47 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-var eclipse = eclipse || {};
+/**
+ * @namespace The global container for Orion APIs.
+ */ 
+var orion = orion || {};
+orion.textview = orion.textview || {};
 
-eclipse.Ruler = (function() {
+orion.textview.Ruler = (function() {
 	function Ruler (rulerLocation, rulerOverview, rulerStyle) {
 		this._location = rulerLocation || "left";
 		this._overview = rulerOverview || "page";
 		this._rulerStyle = rulerStyle;
-		this._editor = null;
+		this._view = null;
 	}
 	Ruler.prototype = {
-		setEditor: function (editor) {
-			if (this._onModelChanged && this._editor) {
-				this._editor.removeEventListener("ModelChanged", this, this._onModelChanged); 
+		setView: function (view) {
+			if (this._onModelChanged && this._view) {
+				this._view.removeEventListener("ModelChanged", this, this._onModelChanged); 
 			}
-			this._editor = editor;
-			if (this._onModelChanged && this._editor) {
-				this._editor.addEventListener("ModelChanged", this, this._onModelChanged);
+			this._view = view;
+			if (this._onModelChanged && this._view) {
+				this._view.addEventListener("ModelChanged", this, this._onModelChanged);
 			}
 		},
 		getLocation: function() {
 			return this._location;
 		},
-		getOverview: function(editor) {
+		getOverview: function(view) {
 			return this._overview;
 		}
 	};
 	return Ruler;
 }());
 
-eclipse.LineNumberRuler = (function() {
+orion.textview.LineNumberRuler = (function() {
 	function LineNumberRuler (rulerLocation, rulerStyle, oddStyle, evenStyle) {
-		eclipse.Ruler.call(this, rulerLocation, "page", rulerStyle);
+		orion.textview.Ruler.call(this, rulerLocation, "page", rulerStyle);
 		this._oddStyle = oddStyle || {style: {backgroundColor: "white"}};
 		this._evenStyle = evenStyle || {style: {backgroundColor: "white"}};
 		this._numOfDigits = 0;
 	}
-	LineNumberRuler.prototype = new eclipse.Ruler(); 
+	LineNumberRuler.prototype = new orion.textview.Ruler(); 
 	LineNumberRuler.prototype.getStyle = function(lineIndex) {
 		if (lineIndex === undefined) {
 			return this._rulerStyle;
@@ -54,7 +58,7 @@ eclipse.LineNumberRuler = (function() {
 	};
 	LineNumberRuler.prototype.getHTML = function(lineIndex) {
 		if (lineIndex === -1) {
-			var model = this._editor.getModel();
+			var model = this._view.getModel();
 			return model.getLineCount();
 		} else {
 			return lineIndex + 1;
@@ -62,31 +66,31 @@ eclipse.LineNumberRuler = (function() {
 	};
 	LineNumberRuler.prototype._onModelChanged = function(e) {
 		var start = e.start;
-		var model = this._editor.getModel();
+		var model = this._view.getModel();
 		var lineCount = model.getLineCount();
 		var numOfDigits = (lineCount+"").length;
 		if (this._numOfDigits !== numOfDigits) {
 			this._numOfDigits = numOfDigits;
 			var startLine = model.getLineAtOffset(start);
-			this._editor.redrawLines(startLine, lineCount, this);
+			this._view.redrawLines(startLine, lineCount, this);
 		}
 	};
 	return LineNumberRuler;
 }());
 
-eclipse.AnnotationRuler = (function() {
+orion.textview.AnnotationRuler = (function() {
 	function AnnotationRuler (rulerLocation, rulerStyle, defaultAnnotation) {
-		eclipse.Ruler.call(this, rulerLocation, "page", rulerStyle);
+		orion.textview.Ruler.call(this, rulerLocation, "page", rulerStyle);
 		this._defaultAnnotation = defaultAnnotation;
 		this._annotations = [];
 	}
-	AnnotationRuler.prototype = new eclipse.Ruler();
+	AnnotationRuler.prototype = new orion.textview.Ruler();
 	AnnotationRuler.prototype.clearAnnotations = function() {
 		this._annotations = [];
-		var lineCount = this._editor.getModel().getLineCount();
-		this._editor.redrawLines(0, lineCount, this);
+		var lineCount = this._view.getModel().getLineCount();
+		this._view.redrawLines(0, lineCount, this);
 		if (this._overviewRuler) {
-			this._editor.redrawLines(0, lineCount, this._overviewRuler);
+			this._view.redrawLines(0, lineCount, this._overviewRuler);
 		}
 	};
 	AnnotationRuler.prototype.getAnnotation = function(lineIndex) {
@@ -115,9 +119,9 @@ eclipse.AnnotationRuler = (function() {
 	AnnotationRuler.prototype.setAnnotation = function(lineIndex, annotation) {
 		if (lineIndex === undefined) { return; }
 		this._annotations[lineIndex] = annotation;
-		this._editor.redrawLines(lineIndex, lineIndex + 1, this);
+		this._view.redrawLines(lineIndex, lineIndex + 1, this);
 		if (this._overviewRuler) {
-			this._editor.redrawLines(lineIndex, lineIndex + 1, this._overviewRuler);
+			this._view.redrawLines(lineIndex, lineIndex + 1, this._overviewRuler);
 		}
 	};
 	AnnotationRuler.prototype._onModelChanged = function(e) {
@@ -126,7 +130,7 @@ eclipse.AnnotationRuler = (function() {
 		var addedLineCount = e.addedLineCount;
 		var linesChanged = addedLineCount - removedLineCount;
 		if (linesChanged) {
-			var model = this._editor.getModel();
+			var model = this._view.getModel();
 			var startLine = model.getLineAtOffset(start);
 			var newLines = [], lines = this._annotations;
 			var changed = false;
@@ -146,10 +150,10 @@ eclipse.AnnotationRuler = (function() {
 			this._annotations = newLines;
 			if (changed) {
 				var lineCount = model.getLineCount();
-				this._editor.redrawLines(startLine, lineCount, this);
+				this._view.redrawLines(startLine, lineCount, this);
 				//TODO redraw overview (batch it for performance)
 				if (this._overviewRuler) {
-					this._editor.redrawLines(0, lineCount, this._overviewRuler);
+					this._view.redrawLines(0, lineCount, this._overviewRuler);
 				}
 			}
 		}
@@ -157,15 +161,15 @@ eclipse.AnnotationRuler = (function() {
 	return AnnotationRuler;
 }());
 
-eclipse.OverviewRuler = (function() {
+orion.textview.OverviewRuler = (function() {
 	function OverviewRuler (rulerLocation, rulerStyle, annotationRuler) {
-		eclipse.Ruler.call(this, rulerLocation, "document", rulerStyle);
+		orion.textview.Ruler.call(this, rulerLocation, "document", rulerStyle);
 		this._annotationRuler = annotationRuler;
 		if (annotationRuler) {
 			annotationRuler._overviewRuler = this;
 		}
 	}
-	OverviewRuler.prototype = new eclipse.Ruler();
+	OverviewRuler.prototype = new orion.textview.Ruler();
 	OverviewRuler.prototype.getAnnotations = function() {
 		var annotations = this._annotationRuler.getAnnotations();
 		var lines = [];
@@ -205,7 +209,7 @@ eclipse.OverviewRuler = (function() {
 	};
 	OverviewRuler.prototype.onClick = function(lineIndex, e) {
 		if (lineIndex === undefined) { return; }
-		this._editor.setTopIndex(lineIndex);
+		this._view.setTopIndex(lineIndex);
 	};
 	return OverviewRuler;
 }());

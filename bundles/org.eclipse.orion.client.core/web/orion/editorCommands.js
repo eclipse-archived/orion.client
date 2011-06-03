@@ -17,9 +17,9 @@
  */ 
 define(['dojo', 'orion/commands', 'orion/globalCommands'], function(dojo, mCommands, mGlobalCommands) {
 
-var orion = orion || {};
+var exports = {};
 
-orion.EditorCommandFactory = (function() {
+exports.EditorCommandFactory = (function() {
 	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly) {
 		this.serviceRegistry = serviceRegistry;
 		this.commandService = commandService;
@@ -37,12 +37,12 @@ orion.EditorCommandFactory = (function() {
 		
 			// KB exists so that we can pass an array (from info.key) rather than actual arguments
 			function KB(args) {
-				return eclipse.KeyBinding.apply(this, args);
+				return orion.textview.KeyBinding.apply(this, args);
 			}
 	
 			// create commands common to all editors
 			if (!this.isReadOnly) {
-				editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding('s', true), "Save");
+				editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding('s', true), "Save");
 				editor.getEditorWidget().setAction("Save", dojo.hitch(this, function () {
 					var contents = editor.getEditorWidget().getText();
 					this.fileClient.write(this.inputManager.getInput(), contents).then(dojo.hitch(this, function() {
@@ -76,7 +76,7 @@ orion.EditorCommandFactory = (function() {
 				// The shape of the contributed actions is (for now):
 				// info - information about the action (object).
 				//        required attribute: name - the name of the action
-				//        optional attribute: key - an array with values to pass to the eclipse.KeyBinding constructor
+				//        optional attribute: key - an array with values to pass to the orion.textview.KeyBinding constructor
 				//        optional attribute: img - a URL to an image for the action
 				// run - the implementation of the action (function).
 				//        arguments passed to run: (selectedText, fullText, selection)
@@ -139,7 +139,7 @@ orion.EditorCommandFactory = (function() {
 						mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
 						if (info.key) {
 							// add it to the editor as a keybinding
-							KB.prototype = eclipse.KeyBinding.prototype;
+							KB.prototype = orion.textview.KeyBinding.prototype;
 							editorWidget.setKeyBinding(new KB(info.key), command.id);
 							editorWidget.setAction(command.id, command.callback);
 						}
@@ -151,7 +151,7 @@ orion.EditorCommandFactory = (function() {
 	return EditorCommandFactory;
 }());
 
-orion.UndoCommandFactory = (function() {
+exports.UndoCommandFactory = (function() {
 	function UndoCommandFactory(serviceRegistry, commandService, toolbarId) {
 		this.serviceRegistry = serviceRegistry;
 		this.commandService = commandService;
@@ -159,8 +159,8 @@ orion.UndoCommandFactory = (function() {
 	}
 	UndoCommandFactory.prototype = {
 		createUndoStack: function(editor) {
-			var undoStack =  new eclipse.UndoStack(editor.getEditorWidget(), 200);
-			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding('z', true), "Undo");
+			var undoStack =  new orion.textview.UndoStack(editor.getEditorWidget(), 200);
+			editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding('z', true), "Undo");
 			editor.getEditorWidget().setAction("Undo", function() {
 				undoStack.undo();
 				return true;
@@ -175,7 +175,7 @@ orion.UndoCommandFactory = (function() {
 			this.commandService.addCommand(undoCommand, "dom");
 			
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			var binding = isMac ? new eclipse.KeyBinding('z', true, true) : new eclipse.KeyBinding('y', true);
+			var binding = isMac ? new orion.textview.KeyBinding('z', true, true) : new orion.textview.KeyBinding('y', true);
 			editor.getEditorWidget().setKeyBinding(binding, "Redo");
 			
 			editor.getEditorWidget().setAction("Redo", function() {
@@ -201,5 +201,5 @@ orion.UndoCommandFactory = (function() {
 	return UndoCommandFactory;
 }());
 
-return orion;	
+return exports;	
 });

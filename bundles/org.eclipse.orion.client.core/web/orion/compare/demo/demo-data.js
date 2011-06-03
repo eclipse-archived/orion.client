@@ -1314,7 +1314,7 @@ var demoData = [
 	  //input file 
 	  "var eclipse = eclipse || {};\r\n" + 
 	  "\r\n" + 
-	  "eclipse.Ruler = (function() {\r\n" + 
+	  "orion.textview.Ruler = (function() {\r\n" + 
 	  "	function Ruler (rulerLocation, rulerOverview, rulerStyle) {\r\n" + 
 	  "		this._location = rulerLocation || \"left\";\r\n" + 
 	  "		this._overview = rulerOverview || \"page\";\r\n" + 
@@ -1341,14 +1341,14 @@ var demoData = [
 	  "	return Ruler;\r\n" + 
 	  "}());\r\n" + 
 	  "\r\n" + 
-	  "eclipse.LineNumberRuler = (function() {\r\n" + 
+	  "orion.textview.LineNumberRuler = (function() {\r\n" + 
 	  "	function LineNumberRuler (rulerLocation, rulerStyle, oddStyle, evenStyle) {\r\n" + 
-	  "		eclipse.Ruler.call(this, rulerLocation, \"page\", rulerStyle);\r\n" + 
+	  "		orion.textview.Ruler.call(this, rulerLocation, \"page\", rulerStyle);\r\n" + 
 	  "		this._oddStyle = oddStyle || {style: {backgroundColor: \"white\"}};\r\n" + 
 	  "		this._evenStyle = evenStyle || {style: {backgroundColor: \"white\"}};\r\n" + 
 	  "		this._numOfDigits = 0;\r\n" + 
 	  "	}\r\n" + 
-	  "	LineNumberRuler.prototype = new eclipse.Ruler(); \r\n" + 
+	  "	LineNumberRuler.prototype = new orion.textview.Ruler(); \r\n" + 
 	  "	LineNumberRuler.prototype.getStyle = function(lineIndex) {\r\n" + 
 	  "		if (lineIndex === undefined) {\r\n" + 
 	  "			return this._rulerStyle;\r\n" + 
@@ -1393,14 +1393,14 @@ var demoData = [
 	  " 			}\r\n" + 
 	  " 		},\r\n" + 
 	  "@@ -30,9 +26,6 @@\r\n" + 
-	  " eclipse.LineNumberRuler = (function() {\r\n" + 
+	  " orion.textview.LineNumberRuler = (function() {\r\n" + 
 	  " 	function LineNumberRuler (rulerLocation, rulerStyle, oddStyle, evenStyle) {\r\n" + 
-	  " 		eclipse.Ruler.call(this, rulerLocation, \"page\", rulerStyle);\r\n" + 
+	  " 		orion.textview.Ruler.call(this, rulerLocation, \"page\", rulerStyle);\r\n" + 
 	  "-		this._oddStyle = oddStyle || {style: {backgroundColor: \"white\"}};\r\n" + 
 	  "-		this._evenStyle = evenStyle || {style: {backgroundColor: \"white\"}};\r\n" + 
 	  "-		this._numOfDigits = 0;\r\n" + 
 	  " 	}\r\n" + 
-	  " 	LineNumberRuler.prototype = new eclipse.Ruler(); \r\n" + 
+	  " 	LineNumberRuler.prototype = new orion.textview.Ruler(); \r\n" + 
 	  " 	LineNumberRuler.prototype.getStyle = function(lineIndex) {\r\n" + 
 	  "@@ -43,9 +36,6 @@\r\n" + 
 	  " 		}\r\n" + 
@@ -1437,7 +1437,7 @@ var demoData = [
 			"\r\n" + 
 			"var eclipse = eclipse || {};\r\n" + 
 			"\r\n" + 
-			"eclipse.Ruler = (function() {\r\n" + 
+			"orion.textview.Ruler = (function() {\r\n" + 
 			"	function Ruler (rulerLocation, rulerOverview, rulerStyle) {\r\n" + 
 			"		this._location = rulerLocation || \"left\";\r\n" + 
 			"		this._overview = rulerOverview || \"page\";\r\n" + 
@@ -1464,14 +1464,14 @@ var demoData = [
 			"	return Ruler;\r\n" + 
 			"}());\r\n" + 
 			"\r\n" + 
-			"eclipse.LineNumberRuler = (function() {\r\n" + 
+			"orion.textview.LineNumberRuler = (function() {\r\n" + 
 			"	function LineNumberRuler (rulerLocation, rulerStyle, oddStyle, evenStyle) {\r\n" + 
-			"		eclipse.Ruler.call(this, rulerLocation, \"page\", rulerStyle);\r\n" + 
+			"		orion.textview.Ruler.call(this, rulerLocation, \"page\", rulerStyle);\r\n" + 
 			"		this._oddStyle = oddStyle || {style: {backgroundColor: \"white\"}};\r\n" + 
 			"		this._evenStyle = evenStyle || {style: {backgroundColor: \"white\"}};\r\n" + 
 			"		this._numOfDigits = 0;\r\n" + 
 			"	}\r\n" + 
-			"	LineNumberRuler.prototype = new eclipse.Ruler(); \r\n" + 
+			"	LineNumberRuler.prototype = new orion.textview.Ruler(); \r\n" + 
 			"	LineNumberRuler.prototype.getStyle = function(lineIndex) {\r\n" + 
 			"		if (lineIndex === undefined) {\r\n" + 
 			"			return this._rulerStyle;\r\n" + 
@@ -1501,13 +1501,13 @@ var demoData = [
 			"	return LineNumberRuler;\r\n" + 
 			"}());\r\n" + 
 			"\r\n" + 
-			"eclipse.AnnotationRuler = (function() {\r\n" + 
+			"orion.textview.AnnotationRuler = (function() {\r\n" + 
 			"	function AnnotationRuler (rulerLocation, rulerStyle, defaultAnnotation) {\r\n" + 
-			"		eclipse.Ruler.call(this, rulerLocation, \"page\", rulerStyle);\r\n" + 
+			"		orion.textview.Ruler.call(this, rulerLocation, \"page\", rulerStyle);\r\n" + 
 			"		this._defaultAnnotation = defaultAnnotation;\r\n" + 
 			"		this._annotations = [];\r\n" + 
 			"	}\r\n" + 
-			"	AnnotationRuler.prototype = new eclipse.Ruler();\r\n" + 
+			"	AnnotationRuler.prototype = new orion.textview.Ruler();\r\n" + 
 			"	AnnotationRuler.prototype.clearAnnotations = function() {\r\n" + 
 			"		this._annotations = [];\r\n" + 
 			"		var lineCount = this._editor.getModel().getLineCount();\r\n" + 
@@ -1584,15 +1584,15 @@ var demoData = [
 			"	return AnnotationRuler;\r\n" + 
 			"}());\r\n" + 
 			"\r\n" + 
-			"eclipse.OverviewRuler = (function() {\r\n" + 
+			"orion.textview.OverviewRuler = (function() {\r\n" + 
 			"	function OverviewRuler (rulerLocation, rulerStyle, annotationRuler) {\r\n" + 
-			"		eclipse.Ruler.call(this, rulerLocation, \"document\", rulerStyle);\r\n" + 
+			"		orion.textview.Ruler.call(this, rulerLocation, \"document\", rulerStyle);\r\n" + 
 			"		this._annotationRuler = annotationRuler;\r\n" + 
 			"		if (annotationRuler) {\r\n" + 
 			"			annotationRuler._overviewRuler = this;\r\n" + 
 			"		}\r\n" + 
 			"	}\r\n" + 
-			"	OverviewRuler.prototype = new eclipse.Ruler();\r\n" + 
+			"	OverviewRuler.prototype = new orion.textview.Ruler();\r\n" + 
 			"	OverviewRuler.prototype.getAnnotations = function() {\r\n" + 
 			"		var annotations = this._annotationRuler.getAnnotations();\r\n" + 
 			"		var lines = [];\r\n" + 
@@ -1652,9 +1652,9 @@ var demoData = [
 	  " \r\n" + 
 	  " var eclipse = eclipse || {};\r\n" + 
 	  " \r\n" + 
-	  "-eclipse.Ruler = (function() {\r\n" + 
+	  "-orion.textview.Ruler = (function() {\r\n" + 
 	  "-	function Ruler (rulerLocation, rulerOverview, rulerStyle) {\r\n" + 
-	  "+eclipse.Ruler11111111 = (function() {\r\n" + 
+	  "+orion.textview.Ruler11111111 = (function() {\r\n" + 
 	  "+	function Ruler (rulerLocation111111111, rulerOverview, rulerStyle) {\r\n" + 
 	  "+		sfsaf\r\n" + 
 	  "+		asdfasfas\r\n" + 
@@ -1666,16 +1666,16 @@ var demoData = [
 	  "@@ -37,10 +47,8 @@\r\n" + 
 	  " }());\r\n" + 
 	  " \r\n" + 
-	  " eclipse.LineNumberRuler = (function() {\r\n" + 
+	  " orion.textview.LineNumberRuler = (function() {\r\n" + 
 	  "-	function LineNumberRuler (rulerLocation, rulerStyle, oddStyle, evenStyle) {\r\n" + 
-	  "-		eclipse.Ruler.call(this, rulerLocation, \"page\", rulerStyle);\r\n" + 
+	  "-		orion.textview.Ruler.call(this, rulerLocation, \"page\", rulerStyle);\r\n" + 
 	  "-		this._oddStyle = oddStyle || {style: {backgroundColor: \"white\"}};\r\n" + 
 	  "-		this._evenStyle = evenStyle || {style: {backgroundColor: \"white\"}};\r\n" + 
 	  "+		this._oddStyle11111 = oddStyle || {style: {backgroundColor: \"white\"}};\r\n" + 
 	  "+		this._evenStyle1111 = evenStyle || {style: {backgroundColor: \"white\"}};\r\n" + 
 	  " 		this._numOfDigits = 0;\r\n" + 
 	  " 	}\r\n" + 
-	  " 	LineNumberRuler.prototype = new eclipse.Ruler(); \r\n" + 
+	  " 	LineNumberRuler.prototype = new orion.textview.Ruler(); \r\n" + 
 	  "@@ -59,6 +67,38 @@\r\n" + 
 	  " 			return lineIndex + 1;\r\n" + 
 	  " 		}\r\n" + 
@@ -1928,7 +1928,7 @@ var demoData = [
 	 "+	var output = result.outPutFile;\r\n" + 
 	 "+	var mapper = result.mapper;\r\n" + 
 	 "+	\r\n" + 
-	 "+	var model = new eclipse.TextModel(input, delim);\r\n" + 
+	 "+	var model = new orion.textview.TextModel(input, delim);\r\n" + 
 	 "+	//var compareModelRight = new eclipse.GapTextModel(modelRight, true , mapper);\r\n" + 
 	 "+	var compareModel = new eclipse.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new eclipse.DiffLineFeeder(mapper , diffParser.getDiffArray() , delim));\r\n" + 
 	 "+	\r\n" + 
@@ -1938,7 +1938,7 @@ var demoData = [
 	 "+		readonly: editorReadOnly,\r\n" + 
 	 "+		stylesheet: \"js/compare/demo/editor.css\" \r\n" + 
 	 "+	};\r\n" + 
-	 "+	editor = new eclipse.Editor(options);\r\n" + 
+	 "+	editor = new orion.textview.TextView(options);\r\n" + 
 	 "+	initEditor(editor);\r\n" + 
 	 "+	editor.addEventListener(\"LineStyle\", window, function(lineStyleEvent) {\r\n" + 
 	 "+		var lineIndex = lineStyleEvent.lineIndex;\r\n" + 

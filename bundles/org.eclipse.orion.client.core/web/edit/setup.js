@@ -85,13 +85,13 @@ exports.setUpEditor = function(isReadOnly){
 				if (splits.length > 0) {
 					switch(extension) {
 						case "js":
-							this.styler = new eclipse.TextStyler(editorWidget, "js");
+							this.styler = new examples.textview.TextStyler(editorWidget, "js");
 							break;
 						case "java":
-							this.styler = new eclipse.TextStyler(editorWidget, "java");
+							this.styler = new examples.textview.TextStyler(editorWidget, "java");
 							break;
 						case "css":
-							this.styler = new eclipse.TextStyler(editorWidget, "css");
+							this.styler = new examples.textview.TextStyler(editorWidget, "css");
 							break;
 					}
 					
@@ -146,9 +146,9 @@ exports.setUpEditor = function(isReadOnly){
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 		
 		var editorFactory = function() {
-			return new eclipse.Editor({
+			return new orion.textview.TextView({
 				parent: editorContainerDomNode,
-				stylesheet: ["/editor/samples/editor.css", "/css/default-theme.css"],
+				stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css", "/css/default-theme.css"],
 				tabSize: 4,
 				readonly: isReadOnly
 			});
@@ -285,7 +285,7 @@ exports.setUpEditor = function(isReadOnly){
 			keyModeStack.push(codeBindings);
 			
 			// global search
-			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("h", true), "Search Files");
+			editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding("h", true), "Search Files");
 			editor.getEditorWidget().setAction("Search Files", function() {
 				window.setTimeout(function() {
 					var e = editor.getEditorWidget();
@@ -329,7 +329,7 @@ exports.setUpEditor = function(isReadOnly){
 				
 			
 			// splitter binding
-			editor.getEditorWidget().setKeyBinding(new eclipse.KeyBinding("o", true), "Toggle Outliner");
+			editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding("o", true), "Toggle Outliner");
 			editor.getEditorWidget().setAction("Toggle Outliner", function(){
 					splitArea.toggle();
 			});

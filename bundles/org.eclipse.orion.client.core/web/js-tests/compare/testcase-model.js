@@ -14,7 +14,7 @@ define(["orion/assert", "orion/compare/compare-model", "mapper-test-data"], func
 	tests["test model : empty file"] = function() {
 		var fileText = "";
 		var mapper = [] ;
-		var model = new eclipse.TextModel(fileText, "\r\n");
+		var model = new orion.textview.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
 		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder( "\r\n"));
 		
@@ -30,7 +30,7 @@ define(["orion/assert", "orion/compare/compare-model", "mapper-test-data"], func
 	tests["test model : 1 empty line"] = function() {
 		var fileText = "\r\n";
 		var mapper = [] ;
-		var model = new eclipse.TextModel(fileText, "\r\n");
+		var model = new orion.textview.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
 		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder( "\r\n"));
 		
@@ -49,7 +49,7 @@ define(["orion/assert", "orion/compare/compare-model", "mapper-test-data"], func
 	tests["test model : 1 line no CR"] = function() {
 		var fileText = "line1";
 		var mapper = [] ;
-		var model = new eclipse.TextModel(fileText, "\r\n");
+		var model = new orion.textview.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
 		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder("\r\n"));
 		
@@ -67,7 +67,7 @@ define(["orion/assert", "orion/compare/compare-model", "mapper-test-data"], func
 	tests["test model : 1 line with CR"] = function() {
 		var fileText = "line1\r\n";
 		var mapper = [] ;
-		var model = new eclipse.TextModel(fileText, "\r\n");
+		var model = new orion.textview.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
 		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder("\r\n"));
 		
@@ -92,7 +92,7 @@ define(["orion/assert", "orion/compare/compare-model", "mapper-test-data"], func
 					   "line2\r\n" + 
 					   "";
 		var mapper = [[0,2,-1],[3,3,0]] ;
-		var model = new eclipse.TextModel(fileText, "\r\n");
+		var model = new orion.textview.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
 		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder("\r\n"));
 		
@@ -142,7 +142,7 @@ define(["orion/assert", "orion/compare/compare-model", "mapper-test-data"], func
 					   "line2\r\n" + 
 					   "";
 		var mapper = [[1,1,0],[0,2,-1],[2,2,0]] ;
-		var model = new eclipse.TextModel(fileText, "\r\n");
+		var model = new orion.textview.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
 		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder("\r\n"));
 		
@@ -199,7 +199,7 @@ define(["orion/assert", "orion/compare/compare-model", "mapper-test-data"], func
 					   "line2\r\n" + 
 					   "";
 		var mapper = [[2,2,0],[0,2,-1],[1,1,0]] ;
-		var model = new eclipse.TextModel(fileText, "\r\n");
+		var model = new orion.textview.TextModel(fileText, "\r\n");
 		//var gapModel = new orion.GapTextModel(model, false , mapper);
 		var gapModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.GapLineFeeder("\r\n"));
 		

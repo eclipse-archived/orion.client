@@ -11,7 +11,7 @@
 /*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
 define(['dojo', 'orion/commands', 'orion/util',
-        'orion/git/widgets/CloneGitRepositoryDialog', 'orion/git/widgets/InitGitRepositoryDialog', 'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 'orion/git/widgets/RemotePrompterDialog',], 
+        'orion/git/widgets/CloneGitRepositoryDialog', 'orion/git/widgets/InitGitRepositoryDialog', 'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 'orion/git/widgets/RemotePrompterDialog'], 
         function(dojo, mCommands, mUtil) {
 
 /**
@@ -370,7 +370,7 @@ var exports = {};
 		
 		var openGitCommit = new mCommands.Command({
 			name : "Open",
-			image : "/git/images/find.gif",
+			image : "/images/find.gif",
 			id : "eclipse.openGitCommit",
 			hrefCallback: function(item) {
 				return "/edit/edit.html#" + item.ContentLocation;

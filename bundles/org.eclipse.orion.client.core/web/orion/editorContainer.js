@@ -13,7 +13,7 @@
 
 define(['dojo', 'dijit', 'dijit/TitlePane', 'dijit/layout/ContentPane' ], function(dojo, dijit){
 
-var orion = orion || {};
+orion = orion || {};
 orion.EditorContainer = (function() {
 	function EditorContainer(options) {
 		this._editorFactory = options.editorFactory;
@@ -199,7 +199,7 @@ orion.EditorContainer = (function() {
 			}
 			
 			// Set keybindings for keys that apply to different modes
-			editor.setKeyBinding(new eclipse.KeyBinding(27), "Cancel Current Mode");
+			editor.setKeyBinding(new orion.textview.KeyBinding(27), "Cancel Current Mode");
 			editor.setAction("Cancel Current Mode", dojo.hitch(this, function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {

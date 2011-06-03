@@ -8,21 +8,29 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*global dijit dojo window document eclipse:true setTimeout */
+/*global window define setTimeout */
 /*jslint forin:true*/
-
 
 define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands){
 
-var exports = {};
-exports.FavoritesService= (function() {
+	/**
+	 * Instantiates the favorites service. Clients should obtain the 
+	 * <tt>orion.core.favorite</tt> service from the service registry rather
+	 * than instantiating this service directly. This constructor is intended
+	 * for use by page initialization code that is initializing the service registry.
+	 *
+	 * @name orion.favorites.FavoritesService
+	 * @class A service for creating and managing links that the user has identified
+	 * as favorites.
+	 * @param {Object} options The service options
+	 */
 	function FavoritesService(options) {
 		this._favorites = [];
 		this._searches = [];
 		this._init(options);
 		this._initializeFavorites();
 	}
-	FavoritesService.prototype = {
+	FavoritesService.prototype = /** @lends orion.favorites.FavoritesService.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
 			this._serviceRegistration = this._registry.registerService("orion.core.favorite", this);
@@ -164,10 +172,17 @@ exports.FavoritesService= (function() {
 			onDone(this._favorites);
 		}
 	};
-	return FavoritesService;
-}());
+	FavoritesService.prototype.constructor = FavoritesService;
 
-exports.Favorites = (function() {
+	/**
+	 * Creates a new user interface element showing a list of favorites.
+	 *
+	 * @name orion.favorites.Favorites
+	 * @class A user interface element showing a list of favorites that can be browsed and manipulated.
+	 * @param {Object} options The service options
+	 * @param {Object} options.parent The parent of this favorites widget
+	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry The service registry
+	 */
 	function Favorites(options) {
 		var parent = options.parent;
 		if (typeof(parent) === "string") {
@@ -194,10 +209,11 @@ exports.Favorites = (function() {
 			id: "eclipse.deleteFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: function(item) {
-				if(confirm("Do you want to remove " + item.name + " from favorites?"))
-				options.serviceRegistry.getService("orion.core.favorite").then(function(service) {
-					service.removeFavorite(item.path);
-				});
+				if(window.confirm("Do you want to remove " + item.name + " from favorites?")) {
+					options.serviceRegistry.getService("orion.core.favorite").then(function(service) {
+						service.removeFavorite(item.path);
+					});
+				}
 			}
 		});		
 		var renameFaveCommand = new mCommands.Command({
@@ -215,10 +231,11 @@ exports.Favorites = (function() {
 			id: "eclipse.deleteSearch",
 			visibleWhen: function(item) {return item.isSearch;},
 			callback: function(item) {
-				if(confirm("Do you want to remove " + item.name + " from favorites?"))
-				options.serviceRegistry.getService("orion.core.favorite").then(function(service) {
-					service.removeSearch(item.query);
-				});
+				if(window.confirm("Do you want to remove " + item.name + " from favorites?")) {
+					options.serviceRegistry.getService("orion.core.favorite").then(function(service) {
+						service.removeSearch(item.query);
+					});
+				}
 			}
 		});
 		this._registry.getService("orion.page.command").then(function(commandService) {
@@ -240,7 +257,8 @@ exports.Favorites = (function() {
 			});
 		});
 	}
-	Favorites.prototype = {
+	Favorites.prototype = /** @lends orion.favorites.Favorites.prototype */ {
+	
 		getUserURL: function(imageId) {
 			var reg = this._registry;
 			var spacer= dojo.byId("spacer");
@@ -298,12 +316,11 @@ exports.Favorites = (function() {
 			dojo.place("<span id='faveCommands' class='paneHeadingToolbar'></span>", commandCol, "only");
 			
 			// favorites
-			var tr, col1, col2;
+			var tr, col1, col2, href, link, actionsWrapper;
 			var tbody = dojo.create("tbody", null, faveTable);
 
 			for (var j=0; j < favorites.length; j++) {
 				var fave = favorites[j];
-				var href;
 				if (fave.isExternalResource) {
 					href = fave.path;
 				} else {
@@ -322,9 +339,9 @@ exports.Favorites = (function() {
 				col2 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
 				dojo.style(col2, "whiteSpace", "nowrap");
 				dojo.style(col2, "textAlign", "right");
-				var link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
-				dojo.place(document.createTextNode(fave.name), link, "only");
-				var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
+				link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
+				dojo.place(window.document.createTextNode(fave.name), link, "only");
+				actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
 				// we must hide/show the span rather than the column.  IE and Chrome will not consider
 				// the mouse as being over the table row if it's in a hidden column
 				dojo.style(actionsWrapper, "visibility", "hidden");
@@ -367,16 +384,16 @@ exports.Favorites = (function() {
 				tbody = dojo.create("tbody", null, faveTable);
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
-					var href="/search/search.html#" + search.query;
+					href="/search/search.html#" + search.query;
 					tr = dojo.create("tr");
 					tr.id = "searchRow"+i;
 					col1 = dojo.create("td", null, tr, "last");
 					col2 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
 					dojo.style(col2, "textAlign", "right");
-					var link = dojo.create("a", {href: href}, col1, "only");
-					dojo.place(document.createTextNode(search.name), link, "only");
+					link = dojo.create("a", {href: href}, col1, "only");
+					dojo.place(window.document.createTextNode(search.name), link, "only");
 					// render local commands
-					var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
+					actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
 					dojo.style(actionsWrapper, "visibility", "hidden");
 					this._registry.getService("orion.page.command").then(function(service) {
 						service.renderCommands(actionsWrapper, "object", search, this, "image", null, i);
@@ -393,8 +410,12 @@ exports.Favorites = (function() {
 				}
 			}
 		}
+	};//end Favorites prototype
+	Favorites.prototype.constructor = Favorites;
+
+	//return module exports
+	return {
+		FavoritesService: FavoritesService,
+		Favorites: Favorites
 	};
-	return Favorites;
-}());
-return exports;
 });

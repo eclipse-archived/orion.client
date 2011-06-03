@@ -1,4 +1,4 @@
-/* this is just for visual inspection, not required for tests to pass */
+/* this is just to aid visual inspection, not required for tests to pass */
 .invalid {
 	background-color: red;
 	color: white;
@@ -25,4 +25,21 @@
 
 .keyword-operator-logical {
 	font-family: sans-serif;
+}
+
+.punctuation {
+	color: #3f5fbf;
+}
+
+.meta {
+	background-color: #ccc;
+	color: black;
+}
+
+.comment {
+	color: green;
+}
+
+.storage {
+	font-weight: bold;
 }
