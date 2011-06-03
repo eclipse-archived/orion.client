@@ -10,7 +10,7 @@
  *******************************************************************************/
 
 define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/contentAssist',
-        'orion/editorCommands','orion/editorContainer','orion/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model], 
+        'orion/editorCommands','orion/editorContainer','orion/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model'], 
 		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditorContainer, mEditorFeatures, mGlobalCommands, mBreadcrumbs, mGapModel) {
 
 var exports = {};

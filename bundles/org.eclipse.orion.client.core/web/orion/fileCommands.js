@@ -178,7 +178,12 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 								}
 								if (location) {
 									func.apply(fileClient, [item.Location, targetFolder.Location, newName]).then(
-										dojo.hitch(explorer, refreshFunc)//refresh the root
+										dojo.hitch(explorer, refreshFunc), //refresh the root
+										function(error) {
+											serviceRegistry.getService("orion.page.message").then(function(statusService) {
+												statusService.setErrorMessage(error);
+											});
+										}
 									);
 								}
 							}
@@ -697,7 +702,8 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 						href: true,
 						forceSingleItem: true,
 						isEditor: true // Distinguishes from a normal fileCommand
-					};				// Pretend that this is a real service
+					};
+				// Pretend that this is a real service
 				var fakeService = {
 						run: makeOpenWithRunner(href)
 					};
@@ -875,7 +881,8 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 				}
 			});
 		}
-		return commandOptions;	};
+		return commandOptions;
+	};
 	
 	fileCommandUtils.getOpenWithCommands = function(commandService) {
 		var openWithCommands = [];
