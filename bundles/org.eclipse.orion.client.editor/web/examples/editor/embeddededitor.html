@@ -13,7 +13,15 @@
 				parseOnLoad:true
 			};
 		</script>
+		<script>
+			// temporary
+	    	var __originalDefine = window.define;
+	    </script>
 	    <script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+		<script>
+			// temporary
+	    	window.define = __originalDefine;
+	    </script>
 	
 		<!-- Web Editor -->
 		<script src="/orion/textview/keyBinding.js"></script>
