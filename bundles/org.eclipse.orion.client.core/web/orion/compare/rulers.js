@@ -19,7 +19,7 @@ orion.CompareRuler = (function() {
 		this._editor = null;
 	}
 	CompareRuler.prototype = {
-		setEditor: function (editor) {
+		setView: function (editor) {
 			if (this._onModelChanged && this._editor) {
 				this._editor.removeEventListener("ModelChanged", this, this._onModelChanged); 
 			}

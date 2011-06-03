@@ -22,72 +22,38 @@ dojo.addOnLoad(function(){
 			tabSize: 4
 		});
 	};
-
-	var contentAssistFactory = function(editor) {
-		var contentAssist = new eclipse.ContentAssist(editor, "contentassist");
-		contentAssist.addProvider(new orion.contentAssist.CssContentAssistProvider(), "css", "\\.css$");
-		contentAssist.addProvider(new orion.contentAssist.JavaScriptContentAssistProvider(), "js", "\\.js$");
-		return contentAssist;
-	};
 	
-	// Canned highlighters for js, java, and css
-	var syntaxHighlighter = {
-		styler: null, 
-		
-		highlight: function(fileName, editorWidget) {
-			if (this.styler) {
-				this.styler.destroy();
-				this.styler = null;
-			}
-			if (fileName) {
-				var splits = fileName.split(".");
-				var extension = splits.pop().toLowerCase();
-				if (splits.length > 0) {
-					switch(extension) {
-						case "js":
-							this.styler = new examples.textview.TextStyler(editorWidget, "js");
-							break;
-						case "java":
-							this.styler = new examples.textview.TextStyler(editorWidget, "java");
-							break;
-						case "css":
-							this.styler = new examples.textview.TextStyler(editorWidget, "css");
-							break;
-					}
-				}
-			}
-		}
-	};
-	
-	var annotationFactory = new orion.AnnotationFactory();
+	var annotationFactory = new orion.editor.AnnotationFactory();
 
-	function save(editor) {
-		editor.onInputChange(null, null, null, true);
-		window.alert("Save hook.");
-	}
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 		
 		// Create keybindings for generic editing
-		var genericBindings = new orion.TextActions(editor, undoStack);
+		var genericBindings = new orion.editor.TextActions(editor, undoStack);
 		keyModeStack.push(genericBindings);
 		
 		// create keybindings for source editing
-		var codeBindings = new orion.SourceCodeActions(editor, undoStack, contentAssist);
+		var codeBindings = new orion.editor.SourceCodeActions(editor, undoStack, contentAssist);
 		keyModeStack.push(codeBindings);
 		
 		// save binding
 		editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding("s", true), "save");
 		editor.getEditorWidget().setAction("save", function(){
-				save(editor);
+				editor.onInputChange(null, null, null, true);
+				var text = editor.getEditorWidget().getText();
+				var problems = [];
+				for (var i=0; i<text.length; i++) {
+					if (text.charAt(i) === 'z') {
+						var line = editor.getEditorWidget().getModel().getLineAtOffset(i) + 1;
+						var character = i - editor.getEditorWidget().getModel().getLineStart(line);
+						problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
+					}
+				}
+				annotationFactory.showProblems(problems);
 				return true;
 		});
-		
-		// speaking of save...
-		dojo.byId("save").onclick = function() {save(editor);};
-
 	};
-		
+	
 	var dirtyIndicator = "";
 	var status = "";
 	
@@ -100,11 +66,11 @@ dojo.addOnLoad(function(){
 		dojo.byId("status").innerHTML = dirtyIndicator + status;
 	};
 	
-	var editorContainer = new orion.EditorContainer({
+	var editorContainer = new orion.editor.Editor({
 		editorFactory: editorFactory,
-		undoStackFactory: new orion.UndoFactory(),
+		undoStackFactory: new orion.editor.UndoFactory(),
 		annotationFactory: annotationFactory,
-		lineNumberRulerFactory: new orion.LineNumberRulerFactory(),
+		lineNumberRulerFactory: new orion.editor.LineNumberRulerFactory(),
 		contentAssistFactory: contentAssistFactory,
 		keyBindingFactory: keyBindingFactory, 
 		statusReporter: statusReporter,
@@ -113,7 +79,7 @@ dojo.addOnLoad(function(){
 		
 	dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
 		if (dirty) {
-			dirtyIndicator = "*";
+			dirtyIndicator = "You have unsaved changes.  ";
 		} else {
 			dirtyIndicator = "";
 		}
@@ -121,12 +87,7 @@ dojo.addOnLoad(function(){
 	});
 	
 	editorContainer.installEditor();
-	// if there is a mechanism to change which file is being viewed, this code would be run each time it changed.
-	var contentName = "sample.js";  // for example, a file name, something the user recognizes as the content.
-	var initialContent = "window.alert('this is some javascript code');  // try pasting in some real code";
-	editorContainer.onInputChange(contentName, null, initialContent);
-	syntaxHighlighter.highlight(contentName, editorContainer.getEditorWidget());
-	// end of code to run when content changes.
+	editorContainer.onInputChange("Content", null, "This is the initial editor contentz.  Type some text and press Ctrl-S to save.");
 	
 	window.onbeforeunload = function() {
 		if (editorContainer.isDirty()) {

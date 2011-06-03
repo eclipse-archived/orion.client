@@ -9,9 +9,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/contentAssist',
-        'orion/editorCommands','orion/editorContainer','orion/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands'], 
-		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditorContainer, mEditorFeatures, mGlobalCommands, mBreadcrumbs, mGapModel , mCommands) {
+define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/editor/contentAssist',
+        'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands',
+        'orion/textview/textModel','orion/textview/textView','examples/textview/textStyler'], 
+		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
+				mGapModel , mCommands, mTextModel, mTextView, mTextStyler) {
 
 var exports = {};
 
@@ -150,9 +152,9 @@ exports.SBSCompareContainer = (function() {
 			}
 		}
 				
-		var modelLeft = new orion.textview.TextModel(result.output, result.delim);
+		var modelLeft = new mTextModel.TextModel(result.output, result.delim);
 		var compareModelLeft = new mCompareModel.CompareTextModel(modelLeft, {mapper:result.mapper , columnIndex:0} , new mGapModel.GapLineFeeder( result.delim));
-		var modelRight = new orion.textview.TextModel(input, result.delim);
+		var modelRight = new mTextModel.TextModel(input, result.delim);
 		var compareModelRight = new mCompareModel.CompareTextModel(modelRight, {mapper:result.mapper , columnIndex:1} , new mGapModel.GapLineFeeder( result.delim));
 		
 		var optionsRight = {
@@ -161,7 +163,7 @@ exports.SBSCompareContainer = (function() {
 			readonly: true,
 			stylesheet: "/orion/compare/editor.css" 
 		};
-		this._editorRight = new orion.textview.TextView(optionsRight);
+		this._editorRight = new mTextView.TextView(optionsRight);
 		this._editorRight.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 				
 		var optionsLeft = {
@@ -170,7 +172,7 @@ exports.SBSCompareContainer = (function() {
 			readonly: true,
 			stylesheet: "/orion/compare/editor.css" 
 		};
-		this._editorLeft = new orion.textview.TextView(optionsLeft);
+		this._editorLeft = new mTextView.TextView(optionsLeft);
 		this._editorLeft.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 		
 		var self = this;
@@ -238,10 +240,10 @@ exports.CompareSyntaxHighlighter = (function() {
 						var extension = splits.pop().toLowerCase();
 						switch(extension) {
 							case "js":
-								this.styler = new examples.textview.TextStyler(editorWidget, "js");
+								this.styler = new mTextStyler.TextStyler(editorWidget, "js");
 								break;
 							case "java":
-								this.styler = new examples.textview.TextStyler(editorWidget, "java");
+								this.styler = new mTextStyler.TextStyler(editorWidget, "java");
 								break;
 							case "html":
 								//TODO
@@ -250,7 +252,7 @@ exports.CompareSyntaxHighlighter = (function() {
 								//TODO
 								break;
 							case "css":
-								this.styler = new examples.textview.TextStyler(editorWidget, "css");
+								this.styler = new mTextStyler.TextStyler(editorWidget, "css");
 								break;
 						}
 					}
@@ -470,10 +472,10 @@ exports.CompareMergeContainer = (function() {
 		var editorContainerDomNode = dojo.byId(parentDivId);
 		var self = this;
 		
-		var model = new orion.textview.TextModel(content , delim);
+		var model = new mTextModel.TextModel(content , delim);
 		var compareModel = new mCompareMergeModel.CompareMergeModel(model, {mapper:mapper, columnIndex:columnIndex } );
 		var editorFactory = function() {
-			return new orion.textview.TextView({
+			return new mTextView.TextView({
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: readOnly,
@@ -515,7 +517,7 @@ exports.CompareMergeContainer = (function() {
 			dojo.byId(statusDivId).innerHTML = dirtyIndicator +  status;
 		};
 		var undoStackFactory = readOnly ? new mEditorFeatures.UndoFactory() : new mEditorCommands.UndoCommandFactory(self._registry, self._commandService, "pageActions");
-		var editorContainer = new mEditorContainer.EditorContainer({
+		var editorContainer = new mEditor.Editor({
 			editorFactory: editorFactory,
 			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,
@@ -630,11 +632,11 @@ exports.InlineCompareContainer = (function() {
 		var editorContainerDomNode = dojo.byId(this._editorDivId);
 		var self = this;
 		
-		var model = new orion.textview.TextModel(content, delim);
+		var model = new mTextModel.TextModel(content, delim);
 		var compareModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.DiffLineFeeder(diffArray ,delim));
 
 		var editorFactory = function() {
-			return new orion.textview.TextView({
+			return new mTextView.TextView({
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: true,
@@ -651,7 +653,7 @@ exports.InlineCompareContainer = (function() {
 			return;
 		};
 		var undoStackFactory =  new mEditorFeatures.UndoFactory();
-		var editorContainer = new mEditorContainer.EditorContainer({
+		var editorContainer = new mEditor.Editor({
 			editorFactory: editorFactory,
 			undoStackFactory: undoStackFactory,
 			//annotationFactory: annotationFactory,

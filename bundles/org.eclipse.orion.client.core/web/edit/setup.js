@@ -13,12 +13,12 @@
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/users', 'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
-        'orion/problems', 'orion/contentAssist', 'orion/editorCommands', 'orion/editorFeatures', 'orion/editorContainer', 'orion/syntaxchecker',
-        'orion/styler/textMateStyler', 'orion/breadcrumbs',
+        'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
+        'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textview', 'orion/textview/keyBinding',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mUsers, mCommands, mUtil, mFavorites,
-				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditorContainer,
-				mSyntaxchecker, mTextMateStyler, mBreadcrumbs) {
+				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
+				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mKeyBinding) {
 
 	dojo.parser.parse();
 	
@@ -85,13 +85,13 @@ exports.setUpEditor = function(isReadOnly){
 				if (splits.length > 0) {
 					switch(extension) {
 						case "js":
-							this.styler = new examples.textview.TextStyler(editorWidget, "js");
+							this.styler = new mTextStyler.TextStyler(editorWidget, "js");
 							break;
 						case "java":
-							this.styler = new examples.textview.TextStyler(editorWidget, "java");
+							this.styler = new mTextStyler.TextStyler(editorWidget, "java");
 							break;
 						case "css":
-							this.styler = new examples.textview.TextStyler(editorWidget, "css");
+							this.styler = new mTextStyler.TextStyler(editorWidget, "css");
 							break;
 					}
 					
@@ -146,7 +146,7 @@ exports.setUpEditor = function(isReadOnly){
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 		
 		var editorFactory = function() {
-			return new orion.textview.TextView({
+			return new mTextView.TextView({
 				parent: editorContainerDomNode,
 				stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css", "/css/default-theme.css"],
 				tabSize: 4,
@@ -285,7 +285,7 @@ exports.setUpEditor = function(isReadOnly){
 			keyModeStack.push(codeBindings);
 			
 			// global search
-			editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding("h", true), "Search Files");
+			editor.getEditorWidget().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "Search Files");
 			editor.getEditorWidget().setAction("Search Files", function() {
 				window.setTimeout(function() {
 					var e = editor.getEditorWidget();
@@ -329,7 +329,7 @@ exports.setUpEditor = function(isReadOnly){
 				
 			
 			// splitter binding
-			editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding("o", true), "Toggle Outliner");
+			editor.getEditorWidget().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "Toggle Outliner");
 			editor.getEditorWidget().setAction("Toggle Outliner", function(){
 					splitArea.toggle();
 			});
@@ -345,7 +345,7 @@ exports.setUpEditor = function(isReadOnly){
 	
 		var annotationFactory = new mEditorFeatures.AnnotationFactory();
 		
-		var editorContainer = new mEditorContainer.EditorContainer({
+		var editorContainer = new mEditor.Editor({
 			editorFactory: editorFactory,
 			undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandService, "pageActions"),
 			annotationFactory: annotationFactory,
