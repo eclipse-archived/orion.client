@@ -11,7 +11,7 @@
 /*global window define orion */
 /*browser:true*/
 
-define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog"], function(dojo, mUtil, mCommands){
+define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'], function(dojo, mUtil, mCommands){
 
 	/**
 	 * Utility methods
