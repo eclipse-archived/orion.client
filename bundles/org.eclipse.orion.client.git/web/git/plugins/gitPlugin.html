@@ -24,7 +24,7 @@
 			
 			provider.registerServiceProvider("orion.navigate.command", {
 				run: function(item) {
-					return "/git/git-log.html#" + item.Git.HeadLocation + "?page=1";
+					return "/git/git-log.html#" + item.Git.CommitLocation + "?page=1";
 				}
 			}, {
 				name: "Git Log",
