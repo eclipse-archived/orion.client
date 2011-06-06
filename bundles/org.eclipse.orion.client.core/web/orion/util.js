@@ -7,9 +7,9 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global dojo window dijit eclipse:true navigator*/
+/*global define window document navigator*/
 
-define(['dojo','dojo/hash'], function(dojo) {
+define(['dojo', 'dijit', 'dojo/hash'], function(dojo, dijit) {
                 
 /**
  * @namespace The global container for eclipse APIs.
@@ -331,28 +331,27 @@ eclipse.util.rememberSuccessfulTraversal = function(item, registry) {
 		registry.getService("orion.core.preference").then(function(service) {
 			return service.getPreferences("/window/recent");
 		}).then(function(prefs){
-			return prefs.get("projects");}).then(function(projects) {
-				var storedProjects = [];
-				if (projects && projects.length && projects.length > 0) {
-					for (var k=0; k<projects.length; k++) {
-						if (projects[k].location !== item.ChildrenLocation && projects[k].name !== item.Name) {
-							storedProjects.push(projects[k]);
-						}
+			var projects = prefs.get("projects");
+			if (typeof projects === "string") {
+				projects = JSON.parse(projects);
+			}
+			var storedProjects = [];
+			if (projects && projects.length && projects.length > 0) {
+				for (var k=0; k<projects.length; k++) {
+					if (projects[k].location !== item.ChildrenLocation && projects[k].name !== item.Name) {
+						storedProjects.push(projects[k]);
 					}
-					storedProjects.push({name: item.Name, location: item.ChildrenLocation});
-				} else {
-					storedProjects.push({name: item.Name, location: item.ChildrenLocation});
 				}
-				if (storedProjects.length > 5) {
-					storedProjects= storedProjects.slice(-5, storedProjects.length);
-				}
-				registry.getService("orion.core.preference").then(function(service) {
-					return service.getPreferences("/window/recent");
-				}).then(function(prefs){
-					prefs.put("projects", storedProjects);
-				});
-			});
-		}
+				storedProjects.push({name: item.Name, location: item.ChildrenLocation});
+			} else {
+				storedProjects.push({name: item.Name, location: item.ChildrenLocation});
+			}
+			if (storedProjects.length > 5) {
+				storedProjects= storedProjects.slice(-5, storedProjects.length);
+			}
+			prefs.put("projects", storedProjects);
+		});
+	}
 };
 
 /**
@@ -386,7 +385,6 @@ eclipse.util.setText = function(node, text) {
 		node.innerText = text;
 	}
 };
-
 
 return eclipse.util;
 });
