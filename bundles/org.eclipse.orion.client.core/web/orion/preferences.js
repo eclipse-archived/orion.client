@@ -134,13 +134,12 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 				this._flushPending = false;
 				return this._flush();
 			}
-			
-			return this._defaultsProvider.get(this._name).then(function(defaults) {
+			return this._defaultsProvider.get(this._name).then(dojo.hitch(this, function(defaults) {
 				this._defaults = defaults;
-				return this._userProvider.get(this._name).then(function(store) {
+				return this._userProvider.get(this._name).then(dojo.hitch(this, function(store) {
 					this._store = store;
-				});		
-			});
+				}));
+			}));
 		},
 		/**
 		 * Flushes all preference changes in this node to its backing storage.
