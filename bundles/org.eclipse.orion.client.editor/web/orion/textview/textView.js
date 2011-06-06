@@ -1,3 +1,4 @@
+// vim:set noet:
 /*******************************************************************************
  * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
@@ -3660,6 +3661,9 @@ orion.textview.TextView = (function() {
 					try {
 						//Force CSS to be loaded synchronously so lineHeight can be calculated
 						var objXml = new XMLHttpRequest();
+						if (objXml.overrideMimeType) {
+							objXml.overrideMimeType("text/css");
+						}
 						objXml.open("GET", stylesheet[i], false);
 						objXml.send(null);
 						html.push("<style>");
