@@ -18,7 +18,7 @@ dojo.addOnLoad(function(){
 	var editorFactory = function() {
 		return new orion.textview.TextView({
 			parent: editorContainerDomNode,
-			stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css"],
+			stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css", "/examples/editor/htmlStyles.css"],
 			tabSize: 4
 		});
 	};
@@ -30,7 +30,7 @@ dojo.addOnLoad(function(){
 		return contentAssist;
 	};
 	
-	// Canned highlighters for js, java, and css
+	// Canned highlighters for js, java, and css. Grammar-based highlighter for html
 	var syntaxHighlighter = {
 		styler: null, 
 		
@@ -52,6 +52,9 @@ dojo.addOnLoad(function(){
 							break;
 						case "css":
 							this.styler = new examples.textview.TextStyler(editorWidget, "css");
+							break;
+						case "html":
+							this.styler = new orion.editor.TextMateStyler(editorWidget, orion.editor.HtmlGrammar.grammar);
 							break;
 					}
 				}
