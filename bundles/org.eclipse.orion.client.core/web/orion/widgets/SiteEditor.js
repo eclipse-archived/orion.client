@@ -407,7 +407,7 @@ dojo.declare("orion.widgets.MappingsGrid", [dojox.grid.DataGrid], /** @lends ori
  */
 dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widget*/, dijit._Templated], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache(new dojo._Url("/orion/widgets/templates/SiteEditor.html")),
+	templateString: dojo.cache('orion', 'widgets/templates/SiteEditor.html'),
 	
 	/** dojo.Deferred */
 	_workspaces: null,

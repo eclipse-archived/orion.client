@@ -26,7 +26,7 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 'text!orion/widge
  */
 var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit._Widget, dijit._Templated], {
 	widgetsInTemplate : true,
-	templateString : dojo.cache(new dojo._Url("/orion/widgets/templates/OpenResourceDialog.html")),
+	templateString : dojo.cache('orion', 'widgets/templates/OpenResourceDialog.html'),
 	
 	SEARCH_DELAY: 500,
 	timeoutId: null,

@@ -19,7 +19,7 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'ori
  */
 dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache(new dojo._Url("/orion/git/widgets/templates/CloneGitRepositoryDialog.html")),
+	templateString: dojo.cache('orion', 'git/widgets/templates/CloneGitRepositoryDialog.html'),
 	
 	constructor : function() {
 		this.inherited(arguments);
