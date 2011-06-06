@@ -39,12 +39,12 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 				return;
 			}
 			this._flushPending = true;
-			window.setTimeout( function() {
+			window.setTimeout(dojo.hitch(this, function() {
 				if (this._flushPending) {
 					this._flushPending = false;
 					this._flush();
 				}
-			},0);
+			}),0);
 		},
 
 		/**
@@ -167,6 +167,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 				},0);
 			} else {
 				this._currentPromise = d;
+				var that = this;
 				dojo.xhrGet({
 					url: this.location + name,
 					headers: {
@@ -176,7 +177,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 					timeout: 15000,
 					load: function(jsonData, ioArgs) {
 						localStorage.setItem(key, JSON.stringify(jsonData));
-						this._currentPromise = null;
+						that._currentPromise = null;
 						d.resolve(jsonData);
 					},
 					error: function(response, ioArgs) {
@@ -184,7 +185,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 						if (ioArgs.xhr.status === 401) {
 							mAuth.handleGetAuthenticationError(this, ioArgs);
 						} else {
-							this._currentPromise = null;
+							that._currentPromise = null;
 							d.resolve({});
 						}
 					},
@@ -241,6 +242,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 				},0);
 			} else {
 				this._currentPromise = d;
+				var that = this;
 				dojo.xhrGet({
 					url: this.location,
 					headers: {
@@ -250,14 +252,14 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 					timeout: 15000,
 					load: function(jsonData, ioArgs) {
 						localStorage.setItem("/orion/preferences/default", JSON.stringify(jsonData));
-						this._currentPromise = null;
+						that._currentPromise = null;
 						d.resolve(jsonData[name]|| {});
 					},
 					error: function(response, ioArgs) {
 						if (ioArgs.xhr.status === 401) {
 							mAuth.handleGetAuthenticationError(ioArgs.xhr, ioArgs);
 						} else {
-							this._currentPromise = null;
+							that._currentPromise = null;
 							d.resolve({});
 						}
 					}
