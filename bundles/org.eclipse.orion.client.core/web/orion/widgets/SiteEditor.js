@@ -534,7 +534,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widge
 				      "Target": this.path + "/bundles/org.eclipse.orion.client.core/web"
 				    },
 				    {
-				      "Source": "/editor",
+				      "Source": "/",
 				      "Target": this.path + "/bundles/org.eclipse.orion.client.editor/web"
 				    },
 				    {
