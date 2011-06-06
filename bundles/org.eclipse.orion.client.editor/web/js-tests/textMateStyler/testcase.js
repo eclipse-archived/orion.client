@@ -946,6 +946,36 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 	});
 	
 //	// TODO: more damage/repair of nested regions
+
+	tests["test TextMateStyler - end-to-begin backreferences"] = makeTest(function(view) {
+		var styler = new mTextMateStyler.TextMateStyler(view, mTestGrammars.BackrefTestGrammar);
+		setLines(view, [
+			"This is [b]ENTERPRISE[/b] quality",
+			"[del]",
+			"i'm line 2",
+			"[/del]",
+			"[one]aaa[two]bbb[/two]ccc[/one]", // make sure [/two] don't end [one]
+			"[a.b]xx[/axb]xx[/a.b]" // make sure [/axb] doesn't end [a.b] (ie. captured period is ecaped)
+		]);
+		assertLineScope(view, styler, 0, [
+			[8, 11, "punctuation.definition.tag.blah", "[b]"],
+			[11, 21, "entity.name.tag.blah", "ENTERPRISE"],
+			[21, 25, "punctuation.definition.tag.blah", "[/b]"]
+		]);
+		assertLineScope(view, styler, 1, [ [0, 5, "punctuation.definition.tag.blah", "[del]"] ]);
+		assertLineScope(view, styler, 2, [ [0, 10, "entity.name.tag.blah", "i'm line 2"] ]);
+		assertLineScope(view, styler, 3, [ [0, 6, "punctuation.definition.tag.blah", "[/del]"] ]);
+		assertLineScope(view, styler, 4, [
+			[0, 5, "punctuation.definition.tag.blah", "[one]"],
+			[5, 25, "entity.name.tag.blah", "aaa[two]bbb[/two]ccc"],
+			[25, 31, "punctuation.definition.tag.blah", "[/one]"]
+		]);
+		assertLineScope(view, styler, 5, [
+			[0, 5, "punctuation.definition.tag.blah", "[a.b]"],
+			[5, 15, "entity.name.tag.blah", "xx[/axb]xx"],
+			[15, 21, "punctuation.definition.tag.blah", "[/a.b]"]
+		]);
+	}, false);
 	
 	return tests;
 });
