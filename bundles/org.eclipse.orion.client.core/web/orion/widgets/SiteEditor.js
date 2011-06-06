@@ -612,6 +612,14 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widge
 				    {
 				      "Source": "/logout",
 				      "Target": "http://localhost:8080/logout"
+				    },
+				    {
+				      "Source": "/mixloginstatic",
+				      "Target": "http://localhost:8080/mixloginstatic"
+				    },
+				    {
+				      "Source": "/openids",
+				      "Target": "http://localhost:8080/openids"
 				    }
 				];
 				for (var i = 0; i<mappings.length; i++) {
