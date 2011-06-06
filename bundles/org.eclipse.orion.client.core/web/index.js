@@ -46,8 +46,7 @@ dojo.addOnLoad(function() {
 		serviceRegistry.getService("orion.core.preference").then(function(service) {
 				return service.getPreferences("/window/recent");
 			}).then(function(prefs){
-				var projectsPref = prefs.get("projects");
-				return projectsPref ? JSON.parse(projectsPref) : null;
+				return prefs.get("projects");
 			}).then(function(projects) {
 				var recent = dojo.byId("recent");
 				dojo.empty(recent);

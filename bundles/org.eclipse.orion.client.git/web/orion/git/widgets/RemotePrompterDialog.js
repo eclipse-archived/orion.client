@@ -22,7 +22,7 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 	treeWidget : null,
 	treeRoot : {},
 	widgetsInTemplate : true,
-	templateString : dojo.cache(new dojo._Url("/orion/git/widgets/templates/RemotePrompterDialog.html")),
+	templateString : dojo.cache('orion', 'git/widgets/templates/RemotePrompterDialog.html'),
 	constructor : function() {
 		this.inherited(arguments);
 		this.options = arguments[0] || {};

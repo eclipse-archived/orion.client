@@ -178,7 +178,7 @@ eclipse.UserPreferencesProvider = function(location) {
 			},
 			error: function(response, ioArgs) {
 				if (ioArgs.xhr.status === 401) {
-					handlePutAuthenticationError(this, ioArgs);
+					mAuth.handlePutAuthenticationError(this, ioArgs);
 				} else {
 					d.resolve(); // consider throwing here
 				}

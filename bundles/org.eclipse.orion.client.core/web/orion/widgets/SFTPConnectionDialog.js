@@ -34,7 +34,7 @@ if (!localStorage.getItem("orion.sftpConnections")) {
  */
 dojo.declare("orion.widgets.SFTPConnectionDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
-	templateString: dojo.cache(new dojo._Url("/orion/widgets/templates/SFTPConnectionDialog.html")),
+	templateString: dojo.cache('orion', 'widgets/templates/SFTPConnectionDialog.html'),
 	
 	constructor : function() {
 		this.inherited(arguments);
