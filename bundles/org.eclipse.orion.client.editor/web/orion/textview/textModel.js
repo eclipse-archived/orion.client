@@ -10,7 +10,7 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
  
-/*global navigator */
+/*global window define */
 
 /**
  * @namespace The global container for Orion APIs.
@@ -36,7 +36,7 @@ orion.textview = orion.textview || {};
  * </p>
  */
 orion.textview.TextModel = (function() {
-	var isWindows = navigator.platform.indexOf("Win") !== -1;
+	var isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
 	/** @private */
 	function TextModel(text, lineDelimiter) {

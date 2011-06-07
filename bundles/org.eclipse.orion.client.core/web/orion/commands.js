@@ -10,7 +10,7 @@
 
  /*global define window Image */
  
-define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton' ], function(dojo, dijit, mUtil){
+define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator' ], function(dojo, dijit, mUtil){
 
 	/**
 	 * Constructs a new command service with the given options.

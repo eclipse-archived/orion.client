@@ -16,10 +16,7 @@
  * Provides common functions (dojo bug workarounds) for Orion dialogs.
  */
 
-define(['dojo', 'dijit', 'text!dijit/templates/Tooltip.html'], function(dojo, dijit) {
-	// the dependency on 'text!dijit/templates/Tooltip.html' was added to allow our Dialogs to be optimized
-	// dijit/tooltip should include this dependency in dojo 1.7
-
+define(['dojo', 'dijit'], function(dojo, dijit) {
 
 dojo.declare("orion.widgets._OrionDialogMixin", null, {
 	postMixInProperties : function() {

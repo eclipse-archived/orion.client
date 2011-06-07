@@ -16,10 +16,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mCommands, mSearchClient, mStatus, mGlobalCommands) {
 
 dojo.addOnLoad(function() {
-	
-	dojo.parser.parse();
-	
-	
+
 	// initialize service registry and EAS services
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 
@@ -45,8 +42,7 @@ dojo.addOnLoad(function() {
 		serviceRegistry.getService("orion.core.preference").then(function(service) {
 				return service.getPreferences("/window/recent");
 			}).then(function(prefs){
-				return prefs.get("projects");
-			}).then(function(projects) {
+				var projects =  prefs.get("projects");
 				var recent = dojo.byId("recent");
 				dojo.empty(recent);
 				if (projects && projects.length && projects.length > 0) {
@@ -111,6 +107,8 @@ dojo.addOnLoad(function() {
 				}
 			});
 		}
+		document.body.style.visibility = "visible";
+		dojo.parser.parse();
 	});
 });
 
