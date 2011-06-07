@@ -10,7 +10,7 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
 
-/*global window document navigator setTimeout clearTimeout alert XMLHttpRequest */
+/*global window define */
 
 /**
  * @namespace The global container for Orion APIs.
@@ -39,7 +39,7 @@ orion.textview = orion.textview || {};
  * @see orion.textview.TextView#setKeyBinding
  */
 orion.textview.KeyBinding = (function() {
-	var isMac = navigator.platform.indexOf("Mac") !== -1;
+	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	/** @private */
 	function KeyBinding (keyCode, mod1, mod2, mod3, mod4) {
 		if (typeof(keyCode) === "string") {

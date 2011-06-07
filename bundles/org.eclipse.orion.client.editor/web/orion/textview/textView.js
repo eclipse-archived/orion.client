@@ -11,7 +11,7 @@
  *		Mihai Sucan (Mozilla Foundation) - fix for Bugs 334583, 348471
  ******************************************************************************/
 
-/*global window document navigator setTimeout clearTimeout alert XMLHttpRequest */
+/*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
 
 /**
  * @namespace The global container for Orion APIs.
