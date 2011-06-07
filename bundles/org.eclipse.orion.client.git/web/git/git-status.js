@@ -48,7 +48,7 @@ dojo.addOnLoad(function() {
 
 		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 	
-		var controller = new mGitStatusTable.GitStatusController(serviceRegistry , statusService,"unstagedZone" , "stagedZone");
+		var controller = new mGitStatusTable.GitStatusController({renderLog :false},serviceRegistry , statusService,"unstagedZone" , "stagedZone");
 		controller.getGitStatus(dojo.hash(),true);
 	
 		initTitleBar(fileClient);
