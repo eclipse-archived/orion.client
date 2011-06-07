@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 /*jslint browser:true devel:true*/
-/*global dijit dojo eclipse widgets serviceRegistry:true*/
+/*global define*/
 
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/commands', 'orion/searchClient', 'orion/status', 'orion/globalCommands',
@@ -46,8 +46,10 @@ dojo.addOnLoad(function() {
 		serviceRegistry.getService("orion.core.preference").then(function(service) {
 				return service.getPreferences("/window/recent");
 			}).then(function(prefs){
-				return prefs.get("projects");
-			}).then(function(projects) {
+				var projects =  prefs.get("projects");
+				if (typeof projects === "string") {
+					projects = JSON.parse(projects);
+				}
 				var recent = dojo.byId("recent");
 				dojo.empty(recent);
 				if (projects && projects.length && projects.length > 0) {

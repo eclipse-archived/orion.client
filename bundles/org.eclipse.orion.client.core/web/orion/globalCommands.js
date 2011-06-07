@@ -12,7 +12,7 @@
 /*browser:true*/
 
 define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBinding', 
-        'orion/widgets/OpenResourceDialog'], function(dojo, dijit, mCommands, mUtil, mKeyBinding ){
+        'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog'], function(dojo, dijit, mCommands, mUtil, mKeyBinding ){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
