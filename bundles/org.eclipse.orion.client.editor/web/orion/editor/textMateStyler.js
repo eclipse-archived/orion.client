@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 /*jslint regexp:false laxbreak:true*/
-/*global define*/
+/*global define dojo window*/
 
 var orion = orion || {};
 orion.editor = orion.editor || {};
@@ -156,6 +156,33 @@ orion.editor.Util = {
 		// TODO: tolerate /(?xExpr)/ -- eg. in JSON grammar
 		// TODO: tolerate /(?iSubExp)/ -- eg. in PHP grammar (trickier)
 		return new RegExp(str2, flags);
+	},
+	
+	hasBackReference: function(/**RegExp*/ regex) {
+		return (/\\\d+/).test(regex.source);
+	},
+	
+	/** @returns {RegExp} A regex made by substituting any backreferences in regex for the corresponding
+	 * matched group text from match. */
+	getSubstitutedRegex: function(/**RegExp*/ regex, /**RegExp.match*/ match) {
+		var exploded = regex.source.split(/(\\\d+)/g);
+		var array = [];
+		for (var i=0; i < exploded.length; i++) {
+			var term = exploded[i];
+			var backrefMatch = /\\(\d+)/.exec(term);
+			if (backrefMatch) {
+				var matchedText = match[backrefMatch[1]] || "";
+				array.push(orion.editor.Util.escapeRegex(matchedText));
+			} else {
+				array.push(term);
+			}
+		}
+		return new RegExp(array.join(""));
+	},
+	
+	/** @returns {String} The input string with regex special characters escaped. */
+	escapeRegex: function(/**String*/ str) {
+		return str.replace(/([\\$\^*\/+?\.\(\)|{}\[\]])/g, "\\$&");
 	}
 };
 
@@ -305,6 +332,8 @@ orion.editor.TextMateStyler = (function() {
 				this.endRegex = orion.editor.Util.toRegExp(rule.end);
 				this.subrules = rule.patterns || [];
 				
+				this.endRegexHasBackRef = orion.editor.Util.hasBackReference(this.endRegex);
+				
 				// TODO: if rule.beginCaptures, make a group-ified regex from beginRegex
 				// TODO: if rule.endCaptures, make a group-ified regex from endRegex
 			}
@@ -390,6 +419,13 @@ orion.editor.TextMateStyler = (function() {
 				this.setStart(beginMatch);
 				this.end = null; // will be set eventually during parsing (may be EOF)
 				this.endMatch = null; // may remain null if we never match our "end" pattern
+				
+				// Build a new regex if the "end" regex has backrefs that refer to matched groups of beginMatch
+				if (rule.endRegexHasBackRef) {
+					this.endRegexSubstituted = orion.editor.Util.getSubstitutedRegex(rule.endRegex, beginMatch);
+				} else {
+					this.endRegexSubstituted = null;
+				}
 			}
 			BeginEndNode.prototype.addChild = function(child) {
 				this.children.push(child);
@@ -449,9 +485,8 @@ orion.editor.TextMateStyler = (function() {
 		getEndMatch: function(/**Node*/ node, /**String*/ text, /**Number*/ offset) {
 			if (node instanceof this.BeginEndNode) {
 				var rule = node.rule;
-				if (!rule.endRegex) { return null; }
-				// TODO: Support backreferences in endRegex that refer to matched groups of node's beginMatch
-				var endRegex = rule.endRegex;
+				var endRegex = node.endRegexSubstituted || rule.endRegex;
+				if (!endRegex) { return null; }
 				return this.exec(endRegex, text, offset);
 			}
 			return null;

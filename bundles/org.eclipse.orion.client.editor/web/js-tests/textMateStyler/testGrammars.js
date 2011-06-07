@@ -101,6 +101,32 @@ exports.SampleBeginEndGrammar = {
 			} ]
 };
 
+exports.BackrefTestGrammar = {
+	"comment": "For testing begin/end backrefs",
+	"name": "My begin/end test language",
+	"fileTypes": [ "fizz", "buzz" ],
+	"scopeName": "source.blah",
+	"uuid": "FC0F03C8-96FC-9B8A-2F35A13126FEB2F1",
+	"patterns": [
+			{
+				// BBCode-esque [foo][/foo]
+				"begin": "\\[((?:\\w|\\.)+)\\]", // the "tag" is any number of word or period characters
+				"end": "\\[/\\1\\]", // backreferences group 1 of "begin"
+				"contentName": "entity.name.tag.blah",
+				"beginCaptures": {
+					"0": { "name": "punctuation.definition.tag.blah" }
+				},
+				"endCaptures": {
+					"0": { "name" : "punctuation.definition.tag.blah" }
+				}/*,
+				"patterns": [
+					{
+						// TODO put some nested rules in here
+					}
+				]*/
+			}]
+};
+
 /* TODO add to the constant.character.mylang rule once we support "captures":
 
 				"captures": {
