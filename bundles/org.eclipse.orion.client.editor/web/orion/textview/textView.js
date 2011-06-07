@@ -8,7 +8,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bug 334583
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bugs 334583, 348471
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout alert XMLHttpRequest */
@@ -3660,6 +3660,9 @@ orion.textview.TextView = (function() {
 					try {
 						//Force CSS to be loaded synchronously so lineHeight can be calculated
 						var objXml = new XMLHttpRequest();
+						if (objXml.overrideMimeType) {
+							objXml.overrideMimeType("text/css");
+						}
 						objXml.open("GET", stylesheet[i], false);
 						objXml.send(null);
 						html.push("<style>");

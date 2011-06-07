@@ -254,7 +254,8 @@ exports.ExplorerRenderer = (function() {
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
 					this._storeSelections();
-					this.explorer.selection.setSelections(this.getSelected());		
+					if(this.explorer.selection)
+						this.explorer.selection.setSelections(this.getSelected());		
 				}));
 				return checkColumn;
 			}
@@ -292,7 +293,8 @@ exports.ExplorerRenderer = (function() {
 			}	
 			// notify the selection service of our new selections
 			var selectedItems = this.getSelected();
-			this.explorer.selection.setSelections(selectedItems);
+			if(this.explorer.selection)
+				this.explorer.selection.setSelections(selectedItems);
 		},
 		
 		_storeExpansions: function(prefPath) {
@@ -405,7 +407,8 @@ exports.ExplorerRenderer = (function() {
 				}
 			});
 			// notify the selection service of the change in state.
-			this.explorer.selection.setSelections(this.getSelected());
+			if(this.explorer.selection)
+				this.explorer.selection.setSelections(this.getSelected());
 		},
 		updateCommands: function(){
 			var registry = this.explorer.registry;

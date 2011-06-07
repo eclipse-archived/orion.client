@@ -74,7 +74,7 @@ function(mKeyBinding, mTextModel, mTextView, mRulers, mUndoStack, mTextStyler) {
 			parent: "divParent",
 			model: new mTextModel.TextModel(),
 			stylesheet: stylesheets,
-			tabSize: 4,
+			tabSize: 4
 		};
 		view = new mTextView.TextView(options);
 		
