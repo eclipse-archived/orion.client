@@ -1,4 +1,3 @@
-// vim:set noet:
 /*******************************************************************************
  * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
@@ -9,7 +8,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bug 334583
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bugs 334583, 348471
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout alert XMLHttpRequest */
