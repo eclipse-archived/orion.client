@@ -16,7 +16,7 @@ orion.editor = orion.editor || {};
 	
 orion.editor.Editor = (function() {
 	function Editor(options) {
-		this._editorFactory = options.editorFactory;
+		this._textViewFactory = options.textViewFactory;
 		this._undoStackFactory = options.undoStackFactory;
 		this._annotationFactory = options.annotationFactory;
 		this._lineNumberRulerFactory = options.lineNumberRulerFactory;
@@ -33,8 +33,8 @@ orion.editor.Editor = (function() {
 		this._keyModes = [];		
 	}
 	Editor.prototype = {
-		getEditorWidget: function() {
-			return this._editor;
+		getTextView: function() {
+			return this._textView;
 		},
 		
 		reportStatus: function(message, isError) {
@@ -47,41 +47,41 @@ orion.editor.Editor = (function() {
 				
 		/**
 		 * @static
-		 * @param editor
+		 * @param textView
 		 * @param start
 		 * @param end
 		 */
-		moveSelection: function(editor, start, end) {
+		moveSelection: function(textView, start, end) {
 			end = end || start;
-			editor.setSelection(start, end, false);
-			var topPixel = editor.getTopPixel();
-			var bottomPixel = editor.getBottomPixel();
-			var line = editor.getModel().getLineAtOffset(start);
-			var linePixel = editor.getLinePixel(line);
+			textView.setSelection(start, end, false);
+			var topPixel = textView.getTopPixel();
+			var bottomPixel = textView.getBottomPixel();
+			var line = textView.getModel().getLineAtOffset(start);
+			var linePixel = textView.getLinePixel(line);
 			if (linePixel < topPixel || linePixel > bottomPixel) {
 				var height = bottomPixel - topPixel;
 				var target = Math.max(0, linePixel- Math.floor((linePixel<topPixel?3:1)*height / 4));
 				var a = new dojo.Animation({
-					node: editor,
+					node: textView,
 					duration: 300,
 					curve: [topPixel, target],
 					onAnimate: function(x){
-						editor.setTopPixel(Math.floor(x));
+						textView.setTopPixel(Math.floor(x));
 					},
 					onEnd: function() {
-						editor.showSelection();
-						editor.focus();
+						textView.showSelection();
+						textView.focus();
 					}
 				});
 				a.play();
 			} else {
-				editor.showSelection();
-				editor.focus();
+				textView.showSelection();
+				textView.focus();
 			}
 		},
 		getContents : function() {
-			if (this._editor) {
-				return this._editor.getText();
+			if (this._textView) {
+				return this._textView.getText();
 			}
 		},
 		isDirty : function() {
@@ -100,7 +100,7 @@ orion.editor.Editor = (function() {
 		},
 
 		/**
-		 * Helper for finding occurrences of str in the editor.
+		 * Helper for finding occurrences of str in the textView.
 		 * @param str {String}
 		 * @param startIndex {number}
 		 * @param [ignoreCase] {boolean} Default is false
@@ -108,7 +108,7 @@ orion.editor.Editor = (function() {
 		 * @return {index: number, length: number} giving the match details, or null if no match found.
 		 */
 		doFind: function(str, startIndex, ignoreCase, reverse) {
-			var text = this._editor.getText();
+			var text = this._textView.getText();
 			if (ignoreCase) {
 				str = str.toLowerCase();
 				text = text.toLowerCase();
@@ -133,7 +133,7 @@ orion.editor.Editor = (function() {
 		},
 		
 		/**
-		 * Helper for finding regexp matches in the editor. Use doFind() for simple string searches.
+		 * Helper for finding regexp matches in the textView. Use doFind() for simple string searches.
 		 * @param pattern {String} A valid regexp pattern
 		 * @param flags {String} Valid regexp flags: [is]
 		 * @param [startIndex] {number} Default is false
@@ -149,7 +149,7 @@ orion.editor.Editor = (function() {
 			// 'g' makes exec() iterate all matches, 'm' makes ^$ work linewise
 			flags += (flags.indexOf("g") === -1 ? "g" : "") + (flags.indexOf("m") === -1 ? "m" : "");
 			var regexp = new RegExp(pattern, flags);
-			var text = this._editor.getText();
+			var text = this._textView.getText();
 			var result = null,
 			    match = null;
 			if (reverse) {
@@ -179,9 +179,9 @@ orion.editor.Editor = (function() {
 			return null;
 		},
 		
-		installEditor : function() {
-			// Create editor and install optional features
-			this._editor = this._editorFactory();
+		installTextView : function() {
+			// Create textView and install optional features
+			this._textView = this._textViewFactory();
 			if (this._undoStackFactory) {
 				this._undoStack = this._undoStackFactory.createUndoStack(this);
 			}
@@ -190,8 +190,8 @@ orion.editor.Editor = (function() {
 				this._keyModes.push(this._contentAssist);
 			}
 			
-			var editorContainer = this,
-				editor = this._editor;
+			var editor = this,
+				textView = this._textView;
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
@@ -199,8 +199,8 @@ orion.editor.Editor = (function() {
 			}
 			
 			// Set keybindings for keys that apply to different modes
-			editor.setKeyBinding(new orion.textview.KeyBinding(27), "Cancel Current Mode");
-			editor.setAction("Cancel Current Mode", dojo.hitch(this, function() {
+			textView.setKeyBinding(new orion.textview.KeyBinding(27), "Cancel Current Mode");
+			textView.setAction("Cancel Current Mode", dojo.hitch(this, function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].cancel();
@@ -209,7 +209,7 @@ orion.editor.Editor = (function() {
 				return false;
 			}));
 
-			editor.setAction("lineUp", dojo.hitch(this, function() {
+			textView.setAction("lineUp", dojo.hitch(this, function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].lineUp();
@@ -217,7 +217,7 @@ orion.editor.Editor = (function() {
 				}
 				return false;
 			}));
-			editor.setAction("lineDown", dojo.hitch(this, function() {
+			textView.setAction("lineDown", dojo.hitch(this, function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].lineDown();
@@ -228,8 +228,8 @@ orion.editor.Editor = (function() {
 						
 			/**@this {orion.editor.Editor} */
 			function updateCursorStatus() {
-				var model = editor.getModel();
-				var caretOffset = editor.getCaretOffset();
+				var model = textView.getModel();
+				var caretOffset = textView.getCaretOffset();
 				var lineIndex = model.getLineAtOffset(caretOffset);
 				var lineStart = model.getLineStart(lineIndex);
 				var offsetInLine = caretOffset - lineStart;
@@ -243,10 +243,10 @@ orion.editor.Editor = (function() {
 			}
 			
 			// Listener for dirty state
-			editor.addEventListener("ModelChanged", this, this.checkDirty);
+			textView.addEventListener("ModelChanged", this, this.checkDirty);
 					
 			//Adding selection changed listener
-			editor.addEventListener("Selection", this, updateCursorStatus);
+			textView.addEventListener("Selection", this, updateCursorStatus);
 			
 			// Create rulers
 			if (this._annotationFactory) {
@@ -258,22 +258,22 @@ orion.editor.Editor = (function() {
 					if (lineIndex === -1) { return; }
 					var annotation = this.getAnnotation(lineIndex);
 					if (annotation === undefined) { return; }
-					editorContainer.onGotoLine(annotation.line, annotation.column);
+					editor.onGotoLine(annotation.line, annotation.column);
 				};
 				
 				this._overviewRuler = annotations.overviewRuler;
 				this._overviewRuler.onClick = function(lineIndex, e) {
 					if (lineIndex === undefined) { return; }
-					editorContainer.moveSelection(this._editor, this._editor.getModel().getLineStart(lineIndex));
+					editor.moveSelection(this._textView, this._textView.getModel().getLineStart(lineIndex));
 				};
 			
-				editor.addRuler(this._annotationsRuler);
-				editor.addRuler(this._overviewRuler);
+				textView.addRuler(this._annotationsRuler);
+				textView.addRuler(this._overviewRuler);
 			}
 			
 			if (this._lineNumberRulerFactory) {
 				this._lineNumberRuler = this._lineNumberRulerFactory.createLineNumberRuler();
-				editor.addRuler(this._lineNumberRuler);
+				textView.addRuler(this._lineNumberRuler);
 			}
 		},
 		
@@ -283,45 +283,45 @@ orion.editor.Editor = (function() {
 				if (typeof(end) !== "number") {
 					end = start;
 				}
-				this.moveSelection(this._editor, start, end);
+				this.moveSelection(this._textView, start, end);
 			} else if (typeof(line) === "number") {
-				var pos = this._editor.getModel().getLineStart(line-1);
+				var pos = this._textView.getModel().getLineStart(line-1);
 				if (typeof(offset) === "number") {
 					pos = pos + offset;
 				}
 				if (typeof(length) !== "number") {
 					length = 0;
 				}
-				this.moveSelection(this._editor, pos, pos+length);
+				this.moveSelection(this._textView, pos, pos+length);
 			}
 		},
 		
 		onInputChange : function (title, message, contents, contentsSaved) {
-			if (contentsSaved && this._editor) {
+			if (contentsSaved && this._textView) {
 				// don't reset undo stack on save, just mark it clean so that we don't lose the undo past the save
 				this._undoStack.markClean();
 				this.checkDirty();
 				return;
 			}
-			if (this._editor) {
+			if (this._textView) {
 				if (message) {
-					this._editor.setText(message);
+					this._textView.setText(message);
 				} else {
 					if (contents !== null && contents !== undefined) {
-						this._editor.setText(contents);
+						this._textView.setText(contents);
 					}
 				}
 				this._undoStack.reset();
 				this.checkDirty();
-				this._editor.focus();
+				this._textView.focus();
 			}
 		},
 		
 		onGotoLine : function (line, column, end) {
-			if (this._editor) {
-				var lineStart = this._editor.getModel().getLineStart(line);
+			if (this._textView) {
+				var lineStart = this._textView.getModel().getLineStart(line);
 				if (typeof column === "string") {
-					var index = this._editor.getModel().getLine(line).indexOf(column);
+					var index = this._textView.getModel().getLine(line).indexOf(column);
 					if (index !== -1) {
 						end = index + column.length;
 						column = index;
@@ -329,12 +329,12 @@ orion.editor.Editor = (function() {
 						column = 0;
 					}
 				}
-				var col = Math.min(this._editor.getModel().getLineEnd(line), column);
+				var col = Math.min(this._textView.getModel().getLineEnd(line), column);
 				if (end===undefined) {
 					end = col;
 				}
 				var offset = lineStart + col;
-				this.moveSelection(this._editor, offset, lineStart + end);
+				this.moveSelection(this._textView, offset, lineStart + end);
 			}
 		},
 		

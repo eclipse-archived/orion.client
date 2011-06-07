@@ -42,9 +42,9 @@ exports.EditorCommandFactory = (function() {
 	
 			// create commands common to all editors
 			if (!this.isReadOnly) {
-				editor.getEditorWidget().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "Save");
-				editor.getEditorWidget().setAction("Save", dojo.hitch(this, function () {
-					var contents = editor.getEditorWidget().getText();
+				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "Save");
+				editor.getTextView().setAction("Save", dojo.hitch(this, function () {
+					var contents = editor.getTextView().getText();
 					this.fileClient.write(this.inputManager.getInput(), contents).then(dojo.hitch(this, function() {
 						editor.onInputChange(this.inputManager.getInput(), null, contents, true);
 						if(this.inputManager.afterSave){
@@ -57,7 +57,7 @@ exports.EditorCommandFactory = (function() {
 					image: "/images/save_edit.gif",
 					id: "orion.save",
 					callback: function(editor) {
-						editor.getEditorWidget().invokeAction("Save");
+						editor.getTextView().invokeAction("Save");
 					}});
 				this.commandService.addCommand(saveCommand, "dom");
 				this.commandService.addCommandGroup("orion.editorActions.unlabeled", 200, null, null, this.toolbarId);
@@ -98,14 +98,14 @@ exports.EditorCommandFactory = (function() {
 						for (var j = 0; j < propertyNames.length; j++) {
 							info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
 						}
-						var editorWidget = editor.getEditorWidget();
+						var editorWidget = editor.getTextView();
 						var command = new mCommands.Command({
 							name: info.name,
 							image: info.img,
 							id: info.name,
 							callback: dojo.hitch(editor, function(editor) {
 								// command service will provide editor parameter but editor widget callback will not
-								var editorWidget = editor ? editor.getEditorWidget() : this.getEditorWidget();
+								var editorWidget = editor ? editor.getTextView() : this.getTextView();
 								var text = editorWidget.getText();
 								var selection = editorWidget.getSelection();
 								service.run(editorWidget.getText(selection.start,selection.end),text,selection).then(function(result){
@@ -159,9 +159,9 @@ exports.UndoCommandFactory = (function() {
 	}
 	UndoCommandFactory.prototype = {
 		createUndoStack: function(editor) {
-			var undoStack =  new mUndoStack.UndoStack(editor.getEditorWidget(), 200);
-			editor.getEditorWidget().setKeyBinding(new mKeyBinding.KeyBinding('z', true), "Undo");
-			editor.getEditorWidget().setAction("Undo", function() {
+			var undoStack =  new mUndoStack.UndoStack(editor.getTextView(), 200);
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('z', true), "Undo");
+			editor.getTextView().setAction("Undo", function() {
 				undoStack.undo();
 				return true;
 			});
@@ -170,15 +170,15 @@ exports.UndoCommandFactory = (function() {
 				image: "/images/undo_edit.gif",
 				id: "orion.undo",
 				callback: function(editor) {
-					editor.getEditorWidget().invokeAction("Undo");
+					editor.getTextView().invokeAction("Undo");
 				}});
 			this.commandService.addCommand(undoCommand, "dom");
 			
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
 			var binding = isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true);
-			editor.getEditorWidget().setKeyBinding(binding, "Redo");
+			editor.getTextView().setKeyBinding(binding, "Redo");
 			
-			editor.getEditorWidget().setAction("Redo", function() {
+			editor.getTextView().setAction("Redo", function() {
 				undoStack.redo();
 				return true;
 			});
@@ -188,7 +188,7 @@ exports.UndoCommandFactory = (function() {
 				image: "/images/redo_edit.gif",
 				id: "orion.redo",
 				callback: function(editor) {
-					editor.getEditorWidget().invokeAction("Redo");
+					editor.getTextView().invokeAction("Redo");
 				}});
 			this.commandService.addCommand(redoCommand, "dom");
 	

@@ -26,7 +26,7 @@ orion.editor.CssContentAssistProvider = (function() {
 		 * @param {String} The string buffer.substring(w+1, c) where c is the caret offset and w is the index of the 
 		 * rightmost whitespace character preceding c.
 		 * @param {String} buffer The entire buffer being edited
-		 * @param {eclipse.Selection} selection The current editor selection.
+		 * @param {orion.editor.Selection} selection The current textView selection.
 		 * @returns {dojo.Deferred} A future that will provide the keywords.
 		 */
 		getKeywords: function(prefix, buffer, selection) {
@@ -62,7 +62,7 @@ orion.editor.JavaScriptContentAssistProvider = (function() {
 		 * @param {String} The string buffer.substring(w+1, c) where c is the caret offset and w is the index of the 
 		 * rightmost whitespace character preceding c.
 		 * @param {String} buffer The entire buffer being edited
-		 * @param {eclipse.Selection} selection The current editor selection.
+		 * @param {orion.editor.Selection} selection The current textView selection.
 		 * @returns {dojo.Deferred} A future that will provide the keywords.
 		 */
 		getKeywords: function(prefix, buffer, selection) {

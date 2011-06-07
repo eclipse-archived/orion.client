@@ -22,14 +22,14 @@
  * A ContentAssist will look for content assist providers in the service registry (if provided).
  * Alternately providers can be registered directly by calling {@link #addProvider}.
  * @name eclipse.ContentAssist
- * @param {orion.textview.TextView} editor
+ * @param {orion.editor.Editor} editor
  * @param {String} contentAssistId
  * @param {eclipse.ServiceRegistry} [serviceRegistry] If omitted, providers must be registered via {@link #addProvider}.
  */
 orion.editor.ContentAssist = (function() {
 	function ContentAssist(editor, contentAssistId, serviceRegistry) {
 		this.editor = editor;
-		this.editorWidget = editor.getEditorWidget();
+		this.textView = editor.getTextView();
 		this.contentAssistPanel = dojo.byId(contentAssistId);
 		this.active = false;
 		this.prefix = "";
@@ -50,8 +50,8 @@ orion.editor.ContentAssist = (function() {
 	ContentAssist.prototype = {
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			this.editorWidget.setKeyBinding(isMac ? new orion.textview.KeyBinding(' ', false, false, false, true) : new orion.textview.KeyBinding(' ', true), "Content Assist");
-			this.editorWidget.setAction("Content Assist", dojo.hitch(this, function() {
+			this.textView.setKeyBinding(isMac ? new orion.textview.KeyBinding(' ', false, false, false, true) : new orion.textview.KeyBinding(' ', true), "Content Assist");
+			this.textView.setAction("Content Assist", dojo.hitch(this, function() {
 				this.showContentAssist(true);
 				return true;
 			}));
@@ -131,7 +131,7 @@ orion.editor.ContentAssist = (function() {
 		enter: function() {
 			if (this.contentAssistPanel) {
 				var proposal = dojo.query("> .selected", this.contentAssistPanel);
-				this.editorWidget.setText(proposal[0].innerHTML.substring(this.prefix.length), this.editorWidget.getCaretOffset(), this.editorWidget.getCaretOffset());
+				this.textView.setText(proposal[0].innerHTML.substring(this.prefix.length), this.textView.getCaretOffset(), this.textView.getCaretOffset());
 				this.showContentAssist(false);
 				return true;
 			}
@@ -148,15 +148,15 @@ orion.editor.ContentAssist = (function() {
 				dojo.create("div", attributes, parent, this);
 			}
 			if (!enable) {
-				this.editorWidget.removeEventListener("Verify", this, this.contentAssistListener.onVerify);
-				this.editorWidget.removeEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
+				this.textView.removeEventListener("Verify", this, this.contentAssistListener.onVerify);
+				this.textView.removeEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
 				this.active = false;
 				this.contentAssistPanel.style.display = "none";
 			} else {
-				var offset = this.editorWidget.getCaretOffset();
+				var offset = this.textView.getCaretOffset();
 				var index = offset;
 				var c;
-				while (index > 0 && ((97 <= (c = this.editorWidget.getText(index - 1, index).charCodeAt(0)) && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) { //LETTER OR UNDERSCORE OR NUMBER
+				while (index > 0 && ((97 <= (c = this.textView.getText(index - 1, index).charCodeAt(0)) && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) { //LETTER OR UNDERSCORE OR NUMBER
 					index--;
 				}
 				
@@ -164,11 +164,11 @@ orion.editor.ContentAssist = (function() {
 //				if (index === offset) {
 //					return;
 //				}
-				this.prefix = this.editorWidget.getText(index, offset);
+				this.prefix = this.textView.getText(index, offset);
 				
 				var proposals = [],
-				    buffer = this.editorWidget.getText(),
-				    selection = this.editorWidget.getSelection();
+				    buffer = this.textView.getText(),
+				    selection = this.textView.getSelection();
 				this.getKeywords(this.prefix, buffer, selection).then(
 					dojo.hitch(this, function(keywords) {
 						for (var i = 0; i < keywords.length; i++) {
@@ -181,19 +181,19 @@ orion.editor.ContentAssist = (function() {
 							return;
 						}
 						
-						var caretLocation = this.editorWidget.getLocationAtOffset(offset);
-						caretLocation.y += this.editorWidget.getLineHeight();
+						var caretLocation = this.textView.getLocationAtOffset(offset);
+						caretLocation.y += this.textView.getLineHeight();
 						this.contentAssistPanel.innerHTML = "";
 						for (i = 0; i<proposals.length; i++) {
 							createDiv(proposals[i], i===0, this.contentAssistPanel);
 						}
-						this.editorWidget.convert(caretLocation, "document", "page");
+						this.textView.convert(caretLocation, "document", "page");
 						this.contentAssistPanel.style.position = "absolute";
 						this.contentAssistPanel.style.left = caretLocation.x + "px";
 						this.contentAssistPanel.style.top = caretLocation.y + "px";
 						this.contentAssistPanel.style.display = "block";
-						this.editorWidget.addEventListener("Verify", this, this.contentAssistListener.onVerify);
-						this.editorWidget.addEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
+						this.textView.addEventListener("Verify", this, this.contentAssistListener.onVerify);
+						this.textView.addEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
 						this.active = true;
 					}));
 			}
@@ -202,7 +202,7 @@ orion.editor.ContentAssist = (function() {
 		 * @param {String} The string buffer.substring(w+1, c) where c is the caret offset and w is the index of the 
 		 * rightmost whitespace character preceding c.
 		 * @param {String} buffer The entire buffer being edited
-		 * @param {eclipse.Selection} selection The current editor selection.
+		 * @param {eclipse.Selection} selection The current textView selection.
 		 * @returns {dojo.Deferred} A future that will provide the keywords.
 		 */
 		getKeywords: function(prefix, buffer, selection) {
