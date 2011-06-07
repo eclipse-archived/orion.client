@@ -43,6 +43,9 @@ dojo.addOnLoad(function() {
 				return service.getPreferences("/window/recent");
 			}).then(function(prefs){
 				var projects =  prefs.get("projects");
+				if (typeof projects === "string") {
+					projects = JSON.parse(projects);
+				}
 				var recent = dojo.byId("recent");
 				dojo.empty(recent);
 				if (projects && projects.length && projects.length > 0) {
