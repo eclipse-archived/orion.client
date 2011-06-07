@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define */
+/*global window define */
 
 /**
  * @namespace The global container for Orion APIs.
