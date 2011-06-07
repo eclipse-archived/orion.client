@@ -975,6 +975,53 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 			[5, 15, "entity.name.tag.blah", "xx[/axb]xx"],
 			[15, 21, "punctuation.definition.tag.blah", "[/a.b]"]
 		]);
+	});
+	
+	tests["test TextMateStyler - recursive includes"] = makeTest(function(view) {
+		var styler = new mTextMateStyler.TextMateStyler(view, mTestGrammars.RecursiveIncludeGrammar);
+		setLines(view, [
+			'aa"foo"bb',
+			"[]",
+			'["aa"]',
+			'["aa", "bb"]',
+			"[[], []]"
+		]);
+		assertLineScope(view, styler, 0, [
+			[2, 3, "punctuation.definition.string.delimiter", "\""],
+			[3, 6, "string.quoted.double", "foo"],
+			[6, 7, "punctuation.definition.string.delimiter", "\""]
+		]);
+		assertLineScope(view, styler, 1, [
+			[0, 1, "punctuation.definition.array.begin", "["],
+			[1, 2, "punctuation.definition.array.end", "]"]
+		]);
+		assertLineScope(view, styler, 2, [
+			[0, 1, "punctuation.definition.array.begin", "["],
+			[1, 2, "punctuation.definition.string.delimiter", "\""],
+			[2, 4, "string.quoted.double", "aa"],
+			[4, 5, "punctuation.definition.string.delimiter", "\""],
+			[5, 6, "punctuation.definition.array.end", "]"]
+		]);
+		assertLineScope(view, styler, 3, [
+			[0, 1, "punctuation.definition.array.begin", "["],
+			[1, 2, "punctuation.definition.string.delimiter", "\""],
+			[2, 4, "string.quoted.double", "aa"],
+			[4, 5, "punctuation.definition.string.delimiter", "\""],
+			[5, 6, "punctuation.array.separator", ","],
+			[7, 8, "punctuation.definition.string.delimiter", "\""],
+			[8, 10, "string.quoted.double", "bb"],
+			[10, 11, "punctuation.definition.string.delimiter", "\""],
+			[11, 12, "punctuation.definition.array.end", "]"]
+		]);
+		assertLineScope(view, styler, 4, [
+			[0, 1, "punctuation.definition.array.begin", "["],
+			[1, 2, "punctuation.definition.array.begin", "["],
+			[2, 3, "punctuation.definition.array.end", "]"],
+			[3, 4, "punctuation.array.separator", ","],
+			[5, 6, "punctuation.definition.array.begin", "["],
+			[6, 7, "punctuation.definition.array.end", "]"],
+			[7, 8, "punctuation.definition.array.end", "]"]
+		]);
 	}, false);
 	
 	return tests;

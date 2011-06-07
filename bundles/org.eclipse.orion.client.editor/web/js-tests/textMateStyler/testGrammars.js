@@ -127,6 +127,44 @@ exports.BackrefTestGrammar = {
 			}]
 };
 
+// A JSON-like grammar
+exports.RecursiveIncludeGrammar = {
+		//"name": "RecursiveIncludeGrammar",
+		"patterns": [
+				{	"include": "#value"
+				}],
+		"repository": {
+			"value": {
+				"patterns": [
+					{	"include": "#array"
+					},
+					{	"include": "#string"
+					}]
+			},
+			"array": {
+				"begin": "\\[",
+				"end": "\\]",
+				"beginCaptures": { "0": { "name": "punctuation.definition.array.begin"} },
+				"endCaptures": { "0": { "name": "punctuation.definition.array.end"} },
+				"patterns": [
+					{	"include": "#value"
+					},
+					{	"match": ",",
+						"name": "punctuation.array.separator"
+					}
+				]
+			},
+			"string": {
+				"begin": "\"",
+				"end": "\"",
+				"contentName": "string.quoted.double",
+				"captures": {
+					"0": { "name": "punctuation.definition.string.delimiter" }
+				}
+			}
+		}
+	};
+
 /* TODO add to the constant.character.mylang rule once we support "captures":
 
 				"captures": {
