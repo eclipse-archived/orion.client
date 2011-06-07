@@ -179,7 +179,7 @@ exports.GitCommitRenderer = (function() {
 		case 4:
 			var td = document.createElement("td", {style: "padding-left: 5px; padding-right: 5px"});
 			dojo.forEach(item.Children, function(tag, i){
-				dojo.place(document.createTextNode(tag), dojo.create("p", {style: "margin: 5px"}, td, "last"), "only");
+				dojo.place(document.createTextNode(tag.Name), dojo.create("p", {style: "margin: 5px"}, td, "last"), "only");
 			});
 			return td;
 			break;
