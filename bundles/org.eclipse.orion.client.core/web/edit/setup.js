@@ -19,8 +19,6 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mUsers, mCommands, mUtil, mFavorites,
 				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mKeyBinding) {
-
-	dojo.parser.parse();
 	
 var exports = exports || {};
 	
@@ -33,6 +31,9 @@ exports.setUpEditor = function(isReadOnly){
 	var commandService;
 	var statusReportingService;
 	var problemService;
+	
+	document.body.style.visibility = "visible";
+	dojo.parser.parse();
 	
 	// Initialize the plugin registry
 	(function() {

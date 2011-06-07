@@ -17,10 +17,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mCommands, mSearchClient, mStatus, mGlobalCommands) {
 
 dojo.addOnLoad(function() {
-	
-	dojo.parser.parse();
-	
-	
+
 	// initialize service registry and EAS services
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 
@@ -114,6 +111,8 @@ dojo.addOnLoad(function() {
 				}
 			});
 		}
+		document.body.style.visibility = "visible";
+		dojo.parser.parse();
 	});
 });
 
