@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['dojo', 'orion/compare/diff-provider', 'orion/compare/compare-container','orion/commands'], function(dojo, mDiffProvider, mCompareContainer,mCommands) {
+define(['dojo', 'dijit', 'orion/compare/diff-provider', 'orion/compare/compare-container','orion/commands', 'dijit/layout/ContentPane'], function(dojo, dijit, mDiffProvider, mCompareContainer,mCommands) {
 
 var orion = orion || {};
 
