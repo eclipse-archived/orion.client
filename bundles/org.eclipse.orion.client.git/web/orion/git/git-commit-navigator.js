@@ -32,7 +32,8 @@ exports.GitCommitNavigator = (function() {
 		this.myTree = null;
 		this.commitDetails = commitDetails;
 		this.renderer = new exports.GitCommitRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator"}, this);
-		this.commitDetails.render(null);
+		if(this.commitDetails)
+			this.commitDetails.render(null);
 	}
 	
 	GitCommitNavigator.prototype = new mExplorer.Explorer();
@@ -61,8 +62,9 @@ exports.GitCommitNavigator = (function() {
 			dojo.place(document.createTextNode("..."), progress, "last");
 			
 			var self = this;
-			
-			mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
+
+			if(this.toolbarId && this.selectionToolsId)
+				mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
 						
 			this.registry.getService("orion.git.provider").then(function(service){
 				dojo.hitch(self, self.createTree(self.parentId, new mExplorer.ExplorerFlatModel(path, service.doGitLog)));
@@ -71,7 +73,8 @@ exports.GitCommitNavigator = (function() {
 		};
 		
 	GitCommitNavigator.prototype.loadCommitDetails = function(commitDetails) {
-		this.commitDetails.loadCommitDetails(commitDetails);
+		if(this.commitDetails)
+			this.commitDetails.loadCommitDetails(commitDetails);
 	};
 		
 	return GitCommitNavigator;
