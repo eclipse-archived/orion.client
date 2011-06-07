@@ -9,40 +9,43 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
+ /*globals window define document navigator setTimeout XMLHttpRequest PerformanceTest */
+ 
+ 
+ function log (text) {
+	var console = window.document.getElementById('console');
+	if (!console) { return; }
+	for (var n = 1; n < arguments.length; n++) {
+		text += " ";
+		text += arguments[n];
+	}
+	
+	var document = console.contentWindow.document;
+	var t = document.createTextNode(text);
+	document.body.appendChild(t);
+	var br = document.createElement("br");
+	document.body.appendChild(br);
+	if (!console.scroll) {
+		console.scroll = true;
+		setTimeout(function() {
+			document.body.lastChild.scrollIntoView(false);
+			console.scroll = false;
+		}, 0);
+	}
+}
+ 
  define(["orion/textview/keyBinding",
- 		 "orion/textview/textModel", 
- 		 "orion/textview/textView", 
- 		 "orion/textview/rulers",
- 		 "orion/textview/undoStack",
- 		 "examples/textview/textStyler",
- 		 "tests/textview/test-performance"],   
+		"orion/textview/textModel", 
+		"orion/textview/textView", 
+		"orion/textview/rulers",
+		"orion/textview/undoStack",
+		"examples/textview/textStyler",
+		"tests/textview/test-performance"],   
  
 function(mKeyBinding, mTextModel, mTextView, mRulers, mUndoStack, mTextStyler) {
 	var view = null;
 	var styler = null;
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
-	
-	window.log = function (text) {
-		var console = window.document.getElementById('console');
-		if (!console) { return; }
-		for (var n = 1; n < arguments.length; n++) {
-			text += " ";
-			text += arguments[n];
-		}
-		
-		var document = console.contentWindow.document;
-		var t = document.createTextNode(text);
-		document.body.appendChild(t);
-		var br = document.createElement("br");
-		document.body.appendChild(br);
-		if (!console.scroll) {
-			console.scroll = true;
-			setTimeout(function() {
-				document.body.lastChild.scrollIntoView(false);
-				console.scroll = false;
-			}, 0);
-		}
-	}
 	
 	function clearLog () {
 		var console = window.document.getElementById('console');
@@ -64,11 +67,11 @@ function(mKeyBinding, mTextModel, mTextView, mRulers, mUndoStack, mTextStyler) {
 	}
 	
 	function checkView() {
-		if (view) return;
+		if (view) { return; }
 		var stylesheets = [
 			"/orion/textview/textview.css",
 			"/orion/textview/rulers.css",
-			"/examples/textview/textstyler.css",
+			"/examples/textview/textstyler.css"
 		];
 		var options = {
 			parent: "divParent",
@@ -111,7 +114,7 @@ function(mKeyBinding, mTextModel, mTextView, mRulers, mUndoStack, mTextStyler) {
 		};
 		var annotation = new mRulers.AnnotationRuler("left", {styleClass: "ruler_annotation"}, breakpoint);
 		annotation.onDblClick =  function(lineIndex, e) {
-			if (lineIndex === undefined) return;
+			if (lineIndex === undefined) { return; }
 			annotation.setAnnotation(lineIndex, annotation.getAnnotation(lineIndex) !== undefined ? undefined : e.ctrlKey ? todo : breakpoint);
 		};
 		var lines = new mRulers.LineNumberRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
