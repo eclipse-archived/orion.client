@@ -9,7 +9,7 @@
  *******************************************************************************/
 /*global define window document navigator*/
 
-define(['dojo', 'dijit', 'dojo/hash'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(dojo, dijit) {
                 
 /**
  * @namespace The global container for eclipse APIs.
