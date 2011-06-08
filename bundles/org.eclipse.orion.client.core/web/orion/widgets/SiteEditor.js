@@ -578,10 +578,6 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widge
 				      "Target": this.path + "/bundles/org.eclipse.orion.client.git/web"
 				    },
 				    {
-					  "Source": "/git",
-					  "Target": "http://localhost:8080/git"
-					},
-				    {
 				      "Source": "/gitapi",
 				      "Target": "http://localhost:8080/gitapi"
 				    },
