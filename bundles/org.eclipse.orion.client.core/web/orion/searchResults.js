@@ -8,18 +8,15 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo eclipse:true widgets*/
+/*global define */
 /*jslint regexp:false browser:true forin:true*/
 
 define(['dojo', 'orion/commands'], function(dojo, mCommands){
 
-
-var eclipse = eclipse || {};
-
-eclipse.SearchResultsGenerator = (function() {
 	/**
-	 * @name eclipse.SearchResultsGenerator
-	 * @class A search results generator
+	 * Creates a new search results generator.
+	 * @name orion.searchResults.SearchResultsGenerator
+	 * @class A search results generator for display search results to an end user
 	 */
 	function SearchResultsGenerator(serviceRegistry, searcher, resultsId, commandService, toolbarId) {
 		this.registry = serviceRegistry;
@@ -28,7 +25,12 @@ eclipse.SearchResultsGenerator = (function() {
 		this.commandService = commandService;
 		this.toolbarId = toolbarId;
 	}
-	SearchResultsGenerator.prototype = /** @lends eclipse.SearchResultsGenerator.prototype */ {
+	SearchResultsGenerator.prototype = /** @lends orion.searchResults.SearchResultsGenerator.prototype */ {
+		/**
+		 * Performs the given query and generates the user interface 
+		 * representation of the search results.
+		 * @param {String} query The search query
+		 */
 		loadResults: function(query) {
 			// define command for saving the results
 			var saveresultsCommand = new mCommands.Command({
@@ -51,8 +53,7 @@ eclipse.SearchResultsGenerator = (function() {
 			dojo.place(results, parent, "only");
 		}
 	};
-
-	return SearchResultsGenerator;
-}());
-return eclipse;
+	SearchResultsGenerator.prototype.constructor = SearchResultsGenerator;
+	//return module exports
+	return {SearchResultsGenerator:SearchResultsGenerator};
 });

@@ -26,9 +26,6 @@ dojo.require("widgets.NewItemDialog");
 
 var eclipse = eclipse || {};
 eclipse.ExplorerTree = (function() {
-	/**
-	 * @name eclipse.ExplorerTree
-	 */
 	function ExplorerTree(serviceRegistry, treeRoot, searcher, fileClient, parentId, toolbarId,
 			/**dijit.Menu*/ contextMenu) {
 		this.registry = serviceRegistry;
@@ -46,7 +43,7 @@ eclipse.ExplorerTree = (function() {
 		this._selectedNode = null;
 		this._lastHash = null;
 	}
-	ExplorerTree.prototype = /**@lends eclipse.ExplorerTree.prototype*/ {
+	ExplorerTree.prototype = {
 		selected : function(item, treeNode) {
 			this._selectedItem = item;
 			this._selectedNode = treeNode;
@@ -212,11 +209,10 @@ eclipse.ExplorerTree = (function() {
 		}
 	};
 	return ExplorerTree;
-})();
+}());
 
 eclipse.TreeModel = (function() {
 	/**
-	 * @name eclipse.TreeModel
 	 * @class Tree model used by eclipse.ExplorerTree.
 	 * TODO Consolidate with eclipse.Model.
 	 */
@@ -268,5 +264,5 @@ eclipse.TreeModel = (function() {
 		}
 	};
 	return TreeModel;
-})();
+}());
 

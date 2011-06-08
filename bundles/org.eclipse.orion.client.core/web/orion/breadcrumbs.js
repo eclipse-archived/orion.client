@@ -7,33 +7,26 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo window eclipse:true document*/
+/*global window define document */
 
 define(['dojo'], function(dojo) {
 
-/**
- * @namespace The global container for eclipse APIs.
- */ 
-var eclipse = eclipse || {};
-
- /**
- * BreadCrumbs show the current position within a resource tree and allow navigation
- * to different places in the tree.
- * @name eclipse.BreadCrumbs
- */
-eclipse.BreadCrumbs = (function() {
 	/**
 	 * Constructs a new BreadCrumb with the given options.
 	 * @param {Object} options The options object which must specify the parent container
 	 * @param options.container The parent container for the bread crumb presentation
 	 * @param options.resource The current resource
-	 * @param options.makeHref The call back function to make the href on a bread crumb item. If not defined "/navigate/table.html#" is used.
-	 * @param option.getFirstSegment The call back function to make DOM node for the first segment in breadcrumb. If not defined "Orion Navigator" is used. 
+	 * @param [options.makeHref] The call back function to make the href on a bread crumb item. If not defined "/navigate/table.html#" is used.
+	 * @param [option.getFirstSegment] The call back function to make DOM node for the first segment in breadcrumb. If not defined "Orion Navigator" is used. 
+	 * @class Bread crumbs show the current position within a resource tree and allow navigation
+	 * to different places in the tree. Unlike the fairy tale, bread crumbs typically don't lead
+	 * to a cottage made of gingerbread. Sorry!
+	 * @name orion.breadcrumbs.BreadCrumbs
 	 */
 	function BreadCrumbs(options) {
 		this._init(options);		
 	}
-	BreadCrumbs.prototype = /** @lends eclipse.BreadCrumbs.prototype */ {
+	BreadCrumbs.prototype = /** @lends orion.breadcrumbs.BreadCrumbs.prototype */ {
 		_init: function(options) {
 			var container = options.container;
 			if (typeof(container) === "string") {
@@ -124,7 +117,7 @@ eclipse.BreadCrumbs = (function() {
 			}
 		}
 	};
-	return BreadCrumbs;
-}());
-return eclipse;
+	BreadCrumbs.prototype.constructor = BreadCrumbs;
+	//return the module exports
+	return {BreadCrumbs: BreadCrumbs};
 });

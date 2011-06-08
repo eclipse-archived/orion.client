@@ -22,7 +22,7 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 'text!orion/widge
  * Usage: new widgets.OpenResourceDialog(options).show();
  * 
  * @param options {{ SearchLocation: string,
- *                   searcher: {eclipse.Searcher} }}
+ *                   searcher: {orion.searchClient.Searcher} }}
  */
 var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit._Widget, dijit._Templated], {
 	widgetsInTemplate : true,
