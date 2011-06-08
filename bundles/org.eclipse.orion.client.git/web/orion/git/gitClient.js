@@ -405,6 +405,28 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
+		resetIndex : function(gitIndexURI, refId) {
+			var service = this;
+			return dojo.xhrPost({
+				url : gitIndexURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson({
+					"Commit" : refId,
+					"Reset" : "HARD"
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					mAuth.handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
 		addBranch : function(gitBranchParentURI, branchName, startPoint) {
 			var service = this;
 			

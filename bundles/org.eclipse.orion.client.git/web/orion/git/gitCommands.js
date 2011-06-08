@@ -564,6 +564,44 @@ var exports = {};
 		commandService.addCommand(pushToCommand, "dom");
 		commandService.addCommand(pushToCommand, "object");
 		
+		var resetIndexCommand = new mCommands.Command({
+			name : "Reset Index",
+			image : "/git/images/git-reset.gif",
+			id : "eclipse.orion.git.resetIndex",
+			callback: function(item) {
+				if(confirm("The content of you active branch witll be replaced with " + item.Name + ". Are you sure?")){
+					serviceRegistry.getService("orion.git.provider").then(
+						function(service) {
+							service.resetIndex(item.IndexLocation, item.Name).then(
+								function(result){
+									serviceRegistry.getService("orion.page.message").then(function(progressService){
+										var display = [];
+										display.Severity = "Info";
+										display.HTML = false;
+										display.Message = "Ok";
+										progressService.setProgressResult(display);
+									});
+								}, function (error){
+									serviceRegistry.getService("orion.page.message").then(function(progressService){
+										var display = [];
+										display.Severity = "Error";
+										display.HTML = false;
+										display.Message = error.message;
+										progressService.setProgressResult(display);
+									});
+								}
+							);
+						}
+					);
+				}
+			},
+			visibleWhen : function(item) {
+				return item.Type === "RemoteTrackingBranch";
+			}
+		});
+
+		commandService.addCommand(resetIndexCommand, "object");
+		
 		var addTagCommand = new mCommands.Command({
 			name : "Tag",
 			image : "/git/images/git-tag.gif",
