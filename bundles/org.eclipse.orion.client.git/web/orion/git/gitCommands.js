@@ -328,6 +328,21 @@ var exports = {};
 	
 		commandService.addCommand(openGitLog, "object");
 		
+		var openCloneContent = new mCommands.Command({
+			name : "Show in Navigator",
+			id : "eclipse.openCloneContent",
+			hrefCallback : function(item) {
+					return "/navigate/table.html#" + item.ContentLocation+"?depth=1";
+			},
+			visibleWhen : function(item) {
+				if (!item.ContentLocation)
+					return false;
+				return true;
+			}
+		});
+	
+		commandService.addCommand(openCloneContent, "object");
+		
 		var compareGitCommits = new mCommands.Command({
 			name : "Compare With Each Other",
 			image : "/git/images/compare-sbs.gif",

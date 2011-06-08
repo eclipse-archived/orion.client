@@ -12,10 +12,10 @@ var eclipse;
 /*browser:true*/
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands',
         'orion/auth', 'orion/dialogs', 'orion/users', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
-        'orion/ssh/sshTools', 'orion/git/git-clones-explorer', 'orion/git/gitCommands',
-	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
+        'orion/ssh/sshTools', 'orion/git/git-clone-details', 'orion/git/git-clones-explorer', 'orion/git/gitCommands',
+	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mAuth, mDialogs, mUsers, mSelection, mFileClient,
-					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitClonesExplorer, mGitCommands) {
+					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitCloneDetails, mGitClonesExplorer, mGitCommands) {
 
 dojo.addOnLoad(function() {
 	document.body.style.visibility = "visible";
@@ -54,13 +54,17 @@ dojo.addOnLoad(function() {
 	commandService.registerCommandContribution("eclipse.addRemote", 2);
 	commandService.registerCommandContribution("eclipse.removeRemote", 2);
 	commandService.registerCommandContribution("eclipse.openGitLog", 2);
+	commandService.registerCommandContribution("eclipse.openCloneContent", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.fetch", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.merge", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.push", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.pushto", 3);
 	commandService.registerCommandContribution("eclipse.orion.git.resetIndex", 4);
 	
-	var explorer = new mGitClonesExplorer.GitClonesExplorer(serviceRegistry, selection, "clonesList", "pageActions", "selectionTools");
+	// Clone details
+	var cloneDetails = new mGitCloneDetails.CloneDetails({parent: "cloneDetailsPane", serviceRegistry: serviceRegistry, detailsPane: dijit.byId("orion.innerNavigator")});
+	
+	var explorer = new mGitClonesExplorer.GitClonesExplorer(serviceRegistry, selection, cloneDetails, "clonesList", "pageActions", "selectionTools");
 	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
 	
 	
@@ -128,6 +132,36 @@ dojo.addOnLoad(function() {
 		
 	});
 	
-	
+	makeRightPane(navigator);
 });
+
+function makeRightPane(explorer){
+	// set up the splitter bar and its key binding
+	var splitArea = dijit.byId("orion.innerNavigator");
+	
+	//by default the pane should be closed
+	if(splitArea.isRightPaneOpen()){
+		splitArea.toggle();
+	}
+			
+	var bufferedSelection = [];
+	
+	window.document.onkeydown = function (evt){
+		evt = evt || window.event;
+		var handled = false;
+		if(evt.ctrlKey && evt.keyCode  === 79){ // Ctrl+o handler for toggling outline 
+			splitArea.toggle();
+			handled = true;			
+		} 
+		if (handled) {
+			if (window.document.all) { 
+				evt.keyCode = 0;
+			} else { 
+				evt.preventDefault();
+				evt.stopPropagation();
+			}		
+		}
+	};
+}
+
 });

@@ -348,6 +348,24 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
+		getGitCloneConfig : function(gitCloneConfigURI) {
+			var service = this;
+			return dojo.xhrGet({
+				url : gitCloneConfigURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					mAuth.handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
 		getGitBranch : function(gitBranchURI) {
 			var service = this;
 			return dojo.xhrGet({
