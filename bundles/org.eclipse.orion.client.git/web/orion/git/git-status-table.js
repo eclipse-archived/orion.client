@@ -314,16 +314,16 @@ orion.GitLogTableRenderer = (function() {
 	}
 	GitLogTableRenderer.prototype = {
 		render: function (renderSeparator) {
-			var headerTable = dojo.create("table", {width:"100%"},this._parentId);
+			var headerTable = dojo.create("table", null,this._parentId);
 			var row = dojo.create("tr", null, headerTable);
-			var titleCol = dojo.create("td", {width:"50%" ,height:"100%"}, row, "last");
-			var title = dojo.create("h2", {innerHTML: this._header}, titleCol, "last");
+			var titleCol = dojo.create("td", null, row, "last");
+			dojo.create("h2", {innerHTML: this._header}, titleCol, "last");
+			var cmdCol = dojo.create("td", null, row, "last");
+			this._cmdSpan = dojo.create("span", null, cmdCol, "last");
 			dojo.create("hr", null,this._parentId);
 			this._logContentId = this._parentId + "_" + this._type;
 			//dojo.create("div", {id:this._logContentId , style: "border:1px solid grey ;margin-left: 5px; margin-right: 30px; width: 95%; height: 200px; overflow: auto"}, this._parentId, "last");
-			dojo.create("div", {id:this._logContentId , style: "margin-left: 5px; margin-right: 5px; width: 98%; height: 200px; overflow: auto"}, this._parentId, "last");
-			dojo.create("table", {width:"100%", height:"6px"},this._parentId);
-			this._cmdSpan = dojo.create("span", null, this._parentId, "last");
+			dojo.create("div", {id:this._logContentId , style: "margin-left: 5px; margin-right: 5px; width: 98%; overflow: false"}, this._parentId, "last");
 			if(	renderSeparator)
 				dojo.create("table", {width:"100%", height:"10px"},this._parentId);
 		},
@@ -386,14 +386,14 @@ orion.GitStatusController = (function() {
 		this._commitZoneRenderer = new orion.GitCommitZoneRenderer(serviceRegistry ,"statusZone");
 		this._commitZoneRenderer.render(true);
 		if(this._renderLog){
-			this._logTableRenderer = new orion.GitLogTableRenderer(this ,serviceRegistry ,"logZone" , "Outgoing changes" , "gitLog");
+			this._logTableRenderer = new orion.GitLogTableRenderer(this ,serviceRegistry ,"logZone" , "Recent commits on" , "gitLog");
 			this._logTableRenderer.render(true);
 			
-			this._remoteTableRenderer = new orion.GitLogTableRenderer(this,serviceRegistry ,"logZone" , "Incoming changes" , "gitRemote");
+			this._remoteTableRenderer = new orion.GitLogTableRenderer(this,serviceRegistry ,"logZone" , "Recent commits on" , "gitRemote");
 			this._remoteTableRenderer.render(true);
 			
-	        this._gitCommitNavigatorLog = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, null, null,this._logTableRenderer.getLogContentId());    
-	        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, null, null,this._remoteTableRenderer.getLogContentId());
+	        //this._gitCommitNavigatorLog = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, null, null,this._logTableRenderer.getLogContentId());    
+	        //this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, null, null,this._remoteTableRenderer.getLogContentId());
 		}
 		
 		(new orion.InlineCompareRenderer(serviceRegistry ,"viewerZone")).render();
@@ -412,15 +412,19 @@ orion.GitStatusController = (function() {
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
 			this._model.init(jsonData);
+			this._getCloneInfo();
+		},
+		
+		_processStatus: function(){
 			this.initViewer();
 			this._model.selectedFileId = null;
 			this._loadBlock(this._unstagedContentRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedContentRenderer , this._model.interestedStagedGroup);
-			if(this._renderLog){
-				//this._renderLogs(false);
-				//this._renderLogs(true);
-				this._gitCommitNavigatorLog.loadCommitsList(this._model.items.CommitLocation + "?page=1");
-				this._gitCommitNavigatorRem.loadCommitsList(this._model.items.CommitLocation + "?page=1");
+			if(this._renderLog && this._initializing){
+				this._renderLogs(false);
+				this._renderLogs(true);
+				//this._gitCommitNavigatorLog.loadCommitsList(this._model.items.CommitLocation + "?page=1&pageSize=5");
+				//this._gitCommitNavigatorRem.loadCommitsList(this._model.items.CommitLocation + "?page=1&pageSize=5");
 			}
 			
 			this._unstagedTableRenderer.renderAction();
@@ -467,21 +471,86 @@ orion.GitStatusController = (function() {
 			});
 		},
 		
-		_getRemoteLocation:function(model){
-			//temporary
-			return model.items.CloneLocation.split("clone").join("remote/origin/master");
+		_processCloneInfo:function(){
+			dojo.byId("logZone").style.display = "block";
+			this._curBranch = undefined;
+			for(var i=0; i<this._branchInfo.Children.length; i++){
+				if(this._branchInfo.Children[i].Current)
+					this._curBranch = this._branchInfo.Children[i];
+			}
+			this._curRemote = this._remoteInfo.Children[0];
+			this._curClone = this._cloneInfo.Children[0];
+			
+			var that = this;
+			var openGitLog = new mCommands.Command({
+				name : that._curBranch.Name,
+				id : "orion.openGitLog",
+				hrefCallback : function(item) {
+					return "/git/git-log.html#" + that._curBranch.CommitLocation + "?page=1";
+				},
+				visibleWhen : function(item) {
+					return item.type === "gitLog";
+				}
+			});
+		
+			var openGitRemote = new mCommands.Command({
+				name : that._curRemote.Name + "/" + that._curBranch.Name,
+				id : "orion.openGitRemote",
+				hrefCallback : function(item) {
+					return "/git/git-log.html?remote#" + that._curBranch.RemoteLocation + "?page=1";
+				},
+				visibleWhen : function(item) {
+					return item.type === "gitRemote";
+				}
+			});
+		
+			this._registry.getService("orion.page.command").then(function(commandService) {
+				commandService.addCommand(openGitLog, "object");	
+				commandService.addCommand(openGitRemote, "object");	
+				commandService.registerCommandContribution("orion.openGitLog", 8);	
+				commandService.registerCommandContribution("orion.openGitRemote", 9);	
+			});
 		},
 		
-		_getLogLocation:function(model){
-			//temporary
-			return model.items.CloneLocation.split("clone").join("commit/master");
+		_getCloneInfo:function(){
+			var that = this;
+			if (that._initializing) {
+				var path = that._model.items.CloneLocation;
+				that._registry.getService("orion.git.provider").then(function(gitService){
+					gitService.getGitClone(path, function(cloneJsonData, secondArd) {
+						that._cloneInfo = cloneJsonData;
+						if(that._cloneInfo.Children.length === 0){
+							that._renderLog = false;
+							that._processStatus();
+							return;
+						}
+							
+						that._registry.getService("orion.git.provider").then(function(gitService){
+							gitService.getGitBranch(that._cloneInfo.Children[0].BranchLocation).then(function(children){
+								that._branchInfo = children;
+								gitService.getGitRemote(that._cloneInfo.Children[0].RemoteLocation).then(function(children){
+									that._remoteInfo = children;
+									that._processCloneInfo();
+									that._processStatus();
+								});
+							});
+						});
+					});
+				});
+			} else {
+				that._processStatus();
+			}
 		},
 		
 		_renderLogs:function(isRemote){
-			var self = this;
+			var that = this;
+			if(!this._renderLog)
+				return;
 			if (isRemote) {
+		        this._gitCommitNavigatorLog = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null,this._logTableRenderer.getLogContentId());    
+				dojo.place(document.createTextNode(""), this._remoteTableRenderer.getLogContentId(), "only");
 				// refresh the commit list for the remote
-				var path = this._getRemoteLocation(this._model) + "?page=1";
+				var path = that._curBranch.RemoteLocation + "?page=1";;
 				dojo.xhrGet({
 					url : path,
 					headers : {
@@ -490,10 +559,10 @@ orion.GitStatusController = (function() {
 					handleAs : "json",
 					timeout : 5000,
 					load : function(jsonData, secondArg) {
-						self._registry.getService("orion.git.provider").then(function(gitService){
+						that._registry.getService("orion.git.provider").then(function(gitService){
 							gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
-								self._gitCommitNavigatorRem.renderer.setIncomingCommits(scopedCommitsJsonData);
-								self._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?" + new dojo._Url(path).query, jsonData);
+								that._gitCommitNavigatorRem.renderer.setIncomingCommits(scopedCommitsJsonData);
+								that._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?" + new dojo._Url(path).query, jsonData);
 							});
 						});
 					},
@@ -503,9 +572,9 @@ orion.GitStatusController = (function() {
 					}
 				});
 			} else {
-				var path = this._getLogLocation(this._model) + "?page=1";
-				
-				
+		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null,this._remoteTableRenderer.getLogContentId());
+				dojo.place(document.createTextNode(""), this._logTableRenderer.getLogContentId(), "only");
+				var path = that._curBranch.CommitLocation + "?page=1";
 				dojo.xhrGet({
 					url : path,
 					headers : {
@@ -522,7 +591,7 @@ orion.GitStatusController = (function() {
 					}
 				}).then(function(commitLogJsonData){
 					if (commitLogJsonData.RemoteLocation == null){
-						self._gitCommitNavigatorLog.loadCommitsList(path, commitLogJsonData);
+						that._gitCommitNavigatorLog.loadCommitsList(that._curBranch.CommitLocation +"?page=1&pageSize=5", commitLogJsonData);
 					}
 					else {
 						dojo.xhrGet({
@@ -533,17 +602,17 @@ orion.GitStatusController = (function() {
 							handleAs : "json",
 							timeout : 5000,
 							load : function(remoteJsonData, secondArg) {
-								self._registry.getService("orion.git.provider").then(function(gitService){
+								that._registry.getService("orion.git.provider").then(function(gitService){
 									gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
-										self._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData);
-										self._gitCommitNavigatorLog.loadCommitsList(dojo.hash(), {RemoteLocation: commitLogJsonData.RemoteLocation});
+										that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData);
+										that._gitCommitNavigatorLog.loadCommitsList(that._curBranch.CommitLocation +"?page=1&pageSize=5" );
 									});
 								});
 							},
 							error : function(error, ioArgs) {
 								//mAuth.handleGetAuthenticationError(this, ioArgs);
 								console.error("HTTP status code: ", ioArgs.xhr.status);
-								self._gitCommitNavigatorLog.loadCommitsList(path, {RemoteLocation: commitLogJsonData.RemoteLocation});
+								//self._gitCommitNavigatorLog.loadCommitsList(path, {RemoteLocation: commitLogJsonData.RemoteLocation});
 							}
 						});
 					}
@@ -670,28 +739,6 @@ orion.GitStatusController = (function() {
 				}
 			});		
 
-			var openGitLog = new mCommands.Command({
-				name : "Complete Log for master",
-				id : "orion.openGitLog",
-				hrefCallback : function(item) {
-					return "/git/git-log.html#" + self._getLogLocation(item.object._model) + "?page=1";
-				},
-				visibleWhen : function(item) {
-					return item.type === "gitLog";
-				}
-			});
-		
-			var openGitRemote = new mCommands.Command({
-				name : "Go to remote for /origin/master",
-				id : "orion.openGitRemote",
-				hrefCallback : function(item) {
-					return "/git/git-log.html?remote#" + self._getRemoteLocation(item.object._model) + "?page=1";
-				},
-				visibleWhen : function(item) {
-					return item.type === "gitRemote";
-				}
-			});
-		
 			this._registry.getService("orion.page.command").then(function(commandService) {
 				// register commands with object scope
 				commandService.addCommand(sbsCompareCommand, "object");	
@@ -701,8 +748,8 @@ orion.GitStatusController = (function() {
 				commandService.addCommand(unstageAllCommand, "object");	
 				commandService.addCommand(unstageCommand, "object");	
 				commandService.addCommand(resetChangesCommand, "dom");	
-				commandService.addCommand(openGitLog, "object");	
-				commandService.addCommand(openGitRemote, "object");	
+				//commandService.addCommand(openGitLog, "object");	
+				//commandService.addCommand(openGitRemote, "object");	
 				commandService.registerCommandContribution("orion.gitStage", 1);	
 				commandService.registerCommandContribution("orion.gitCheckout", 2);	
 				commandService.registerCommandContribution("orion.gitUnstage", 3);	
@@ -710,8 +757,8 @@ orion.GitStatusController = (function() {
 				commandService.registerCommandContribution("orion.gitStageAll", 5);	
 				commandService.registerCommandContribution("orion.gitUnstageAll", 6);	
 				commandService.registerCommandContribution("orion.gitResetChanges", 7 , "pageActions");	
-				commandService.registerCommandContribution("orion.openGitLog", 8);	
-				commandService.registerCommandContribution("orion.openGitRemote", 9);	
+				//commandService.registerCommandContribution("orion.openGitLog", 8);	
+				//commandService.registerCommandContribution("orion.openGitRemote", 9);	
 			});
 		},
 
@@ -884,8 +931,11 @@ orion.GitStatusController = (function() {
 		
 		getGitStatus: function(url , initializing){
 			this._url = url;
-			if(initializing)
+			this._initializing = (initializing ? true:false);
+			if(this._initializing){
+				this._cloneInfo = undefined;
 				this._statusService.setProgressMessage("Loading status...");
+			}
 			var self = this;
 			self._registry.getService("orion.git.provider").then(
 				function(service) {
@@ -978,7 +1028,7 @@ orion.GitStatusController = (function() {
 					function(service) {
 						service.commitAll(location,  message , body,
 											 function(jsonData, secondArg) {
-											 	 self.getGitStatus(self._url);
+											 	 self.getGitStatus(self._url,true);
 											 },
 											 function(response, ioArgs){
 												 self.handleServerErrors(response, ioArgs);
