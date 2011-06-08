@@ -281,7 +281,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				dojo.place("<h2>Global</h2>", keyAssistNode, "last");
 				commandService.showKeyBindings(keyAssistNode);
 				keyAssistNode.style.display = "block";
-				
+				return true;
 			}});
 		commandService.addCommand(keyAssistCommand, "global");
 		commandService.registerCommandContribution("eclipse.keyAssist", 1, "globalActions", null, new mCommands.CommandKeyBinding(191, false, true), true);

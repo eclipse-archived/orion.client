@@ -535,6 +535,7 @@ orion.editor.TextActions = (function() {
 				}
 				return true;
 			}
+			return false;
 		},
 		lineDown: function() {	
 			var index;
@@ -560,6 +561,7 @@ orion.editor.TextActions = (function() {
 				}
 				return true;
 			}
+			return false;
 		},
 		enter: function() {
 			return false;

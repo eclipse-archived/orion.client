@@ -51,6 +51,7 @@ exports.EditorCommandFactory = (function() {
 							this.inputManager.afterSave();
 						}
 					}));
+					return true;
 				}));
 				var saveCommand = new mCommands.Command({
 					name: "Save",
@@ -123,7 +124,7 @@ exports.EditorCommandFactory = (function() {
 										}
 									}
 								});
-								
+								return true;
 							})});
 						this.commandService.addCommand(command, "dom");
 						if (info.img) {
