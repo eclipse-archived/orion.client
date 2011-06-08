@@ -15,12 +15,13 @@ var exports = {};
 
 exports.GitClonesExplorer = (function() {
 	
-	function GitClonesExplorer(registry, selection, parentId, toolbarId, selectionToolsId){
+	function GitClonesExplorer(registry, selection, cloneDetails, parentId, toolbarId, selectionToolsId){
 		this.parentId = parentId;
 		this.registry = registry;
 		this.selection = selection;
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
+		this.cloneDetails = cloneDetails;
 		this.renderer = new exports.GitClonesRenderer({checkbox: this.checkbox}, this);
 		
 	}
@@ -73,6 +74,10 @@ exports.GitClonesExplorer = (function() {
 		this.registry.getService("orion.git.provider").then(function(service){
 			dojo.hitch(self, self.createTree(self.parentId, new exports.GitClonesModel(service, gitPath, service.getGitClone)));
 		});
+	};
+	
+	GitClonesExplorer.prototype.loadCloneDetails = function(clone) {
+		this.cloneDetails.loadCloneDetails(clone.ConfigLocation);
 	};
 
 	return GitClonesExplorer;
@@ -207,7 +212,17 @@ exports.GitClonesRenderer = (function(){
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				this.getExpandImage(tableRow, div, "/git/images/git-repository.gif");
 				
-				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage", href: "/navigate/table.html#" + item.ContentLocation+"?depth=1"}, div, "last");
+				//link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage", href: "/navigate/table.html#" + item.ContentLocation+"?depth=1"}, div, "last");
+				link = dojo.create("a", {className: "navlinkonpage"}, div, "last");
+				dojo.connect(link, "onclick", link, dojo.hitch(this, function() {
+					this.explorer.loadCloneDetails(item);	
+				}));		
+				dojo.connect(link, "onmouseover", link, function() {
+					link.style.cursor = /*self._controller.loading ? 'wait' :*/"pointer";
+				});
+				dojo.connect(link, "onmouseout", link, function() {
+					link.style.cursor = /*self._controller.loading ? 'wait' :*/"default";
+				});
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			} else if (item.GroupNode){
 				col = document.createElement('td');
