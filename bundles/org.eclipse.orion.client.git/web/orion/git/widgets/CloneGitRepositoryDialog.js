@@ -30,7 +30,7 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 		this.title = this.options.title ? this.options.title : "Clone Git Repository";
 		this.gitUrlLabelText = "Repository URL:";
 		this.gitPathLabelText = "Existing directory:";
-		this.gitNameLabelText = "New project:";
+		this.gitNameLabelText = "New folder:";
 		this.advancedShown = false;
 	},
 	postCreate : function(){

@@ -11,7 +11,6 @@
 /*jslint browser:true devel:true*/
 /*global define*/
 
-
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/commands', 'orion/searchClient', 'orion/status', 'orion/globalCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'/*, 'dojox/widget/Portlet', 'dojox/widget/FeedPortlet'*/], 
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mCommands, mSearchClient, mStatus, mGlobalCommands) {

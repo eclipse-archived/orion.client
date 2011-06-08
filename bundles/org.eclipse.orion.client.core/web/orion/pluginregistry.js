@@ -229,7 +229,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 			_userPlugins = {};
 		}
 		for(pluginURL in _userPlugins) {
-			if (_userPlugins.hasOwnProperty(pluginURL)) {
+			if (_userPlugins.hasOwnProperty(pluginURL) && pluginURL !== "_expires") {
 				pluginURL = _normalizeURL(pluginURL);
 				key = "plugin." + pluginURL;
 				if (_storage[key]) {
