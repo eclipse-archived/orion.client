@@ -190,6 +190,7 @@ orion.editor.TextActions = (function() {
 						this.editor.reportStatus("not found", true);
 					}
 				}), 0);
+				return true;
 			}));
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true), "Find Next Occurrence");
 			this.textView.setAction("Find Next Occurrence", dojo.hitch(this, function() {
@@ -219,6 +220,7 @@ orion.editor.TextActions = (function() {
 				} else {
 					this.editor.reportStatus("not found", true);
 				}
+				return true;
 			}));
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true, true), "Find Previous Occurrence");
 			this.textView.setAction("Find Previous Occurrence", dojo.hitch(this, function() {
@@ -246,6 +248,7 @@ orion.editor.TextActions = (function() {
 				} else {
 					this.editor.reportStatus("not found", true);
 				}
+				return true;
 			}));
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("j", true), "Incremental Find");
 			this.textView.setAction("Incremental Find", dojo.hitch(this, function() {
@@ -254,26 +257,24 @@ orion.editor.TextActions = (function() {
 					this.toggleIncrementalFind();
 				} else {
 					var p = this._incrementalFindPrefix;
-					if (p.length === 0) {
-						return;
-					}
-					
-					var start = this.textView.getSelection().start + 1;
-					if (this._incrementalFindSuccess === false) {
-						start = 0;
-					}
-					
-					var caseInsensitive = p.toLowerCase() === p;
-					var result = this.editor.doFind(p, start, caseInsensitive);
-					if (result) {
-						this._incrementalFindSuccess = true;
-						this._incrementalFindIgnoreSelection = true;
-						this.editor.moveSelection(this.textView, result.index, result.index + result.length);
-						this._incrementalFindIgnoreSelection = false;
-						this.editor.reportStatus("Incremental find: " + p);
-					} else {
-						this.editor.reportStatus("Incremental find: " + p + " (not found)", true);
-						this._incrementalFindSuccess = false;
+					if (p.length !== 0) {
+						var start = this.textView.getSelection().start + 1;
+						if (this._incrementalFindSuccess === false) {
+							start = 0;
+						}
+						
+						var caseInsensitive = p.toLowerCase() === p;
+						var result = this.editor.doFind(p, start, caseInsensitive);
+						if (result) {
+							this._incrementalFindSuccess = true;
+							this._incrementalFindIgnoreSelection = true;
+							this.editor.moveSelection(this.textView, result.index, result.index + result.length);
+							this._incrementalFindIgnoreSelection = false;
+							this.editor.reportStatus("Incremental find: " + p);
+						} else {
+							this.editor.reportStatus("Incremental find: " + p + " (not found)", true);
+							this._incrementalFindSuccess = false;
+						}
 					}
 				}
 				return true;
@@ -376,6 +377,7 @@ orion.editor.TextActions = (function() {
 				var selectionEnd = insertPos+text.length-(isMoveFromLastLine?model.getLineDelimiter().length:0);
 				this.textView.setSelection(insertPos, selectionEnd);
 				this.endUndo();
+				return true;
 			}));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(40, false, false, true), "Move Lines Down");
@@ -406,6 +408,7 @@ orion.editor.TextActions = (function() {
 				var selEnd = insertPos+text.length;
 				this.textView.setSelection(selStart, selEnd);
 				this.endUndo();
+				return true;
 			}));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(38, true, false, true), "Copy Lines Up");
@@ -425,6 +428,7 @@ orion.editor.TextActions = (function() {
 				model.setText(text, insertPos, insertPos);
 				this.textView.setSelection(insertPos, insertPos+text.length-(isCopyFromLastLine?delimiter.length:0));
 				this.endUndo();
+				return true;
 			}));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(40, true, false, true), "Copy Lines Down");
@@ -445,6 +449,7 @@ orion.editor.TextActions = (function() {
 				model.setText(text, insertPos, insertPos);
 				this.textView.setSelection(insertPos+(isCopyFromLastLine?delimiter.length:0), insertPos+text.length);
 				this.endUndo();
+				return true;
 			}));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding('d', true, false, false), "Delete Selected Lines");
@@ -458,18 +463,19 @@ orion.editor.TextActions = (function() {
 				var lineEnd = model.getLineCount()-1===lastLine?model.getCharCount():model.getLineStart(lastLine+1);
 				model.setText("", lineStart, lineEnd);
 				this.endUndo();
+				return true;
 			}));
 			
 			// Go To Line action
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("l", true), "Goto Line...");
 			this.textView.setAction("Goto Line...", dojo.hitch(this, function() {
-					var line = this.textView.getModel().getLineAtOffset(this.textView.getCaretOffset());
-					line = prompt("Go to line:", line + 1);
-					if (line) {
-						line = parseInt(line, 10);
-						this.editor.onGotoLine(line-1, 0);
-					}
-					return true;
+				var line = this.textView.getModel().getLineAtOffset(this.textView.getCaretOffset());
+				line = prompt("Go to line:", line + 1);
+				if (line) {
+					line = parseInt(line, 10);
+					this.editor.onGotoLine(line-1, 0);
+				}
+				return true;
 			}));
 			
 		},
@@ -692,6 +698,7 @@ orion.editor.SourceCodeActions = (function() {
 				model.setText(open + text + close, selection.start, selection.end);
 				this.textView.setSelection(selection.start + open.length, selection.end + open.length + (newLength-oldLength));
 				this.endUndo();
+				return true;
 			}));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(220, true, true), "Remove Block Comment");
@@ -735,6 +742,7 @@ orion.editor.SourceCodeActions = (function() {
 					this.textView.setSelection(selection.start - open.length, selection.end - close.length);
 				}
 				this.endUndo();
+				return true;
 			}));
 			
 			//Auto indent
