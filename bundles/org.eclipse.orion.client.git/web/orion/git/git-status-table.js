@@ -562,7 +562,7 @@ orion.GitStatusController = (function() {
 						that._registry.getService("orion.git.provider").then(function(gitService){
 							gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
 								that._gitCommitNavigatorRem.renderer.setIncomingCommits(scopedCommitsJsonData);
-								that._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?" + new dojo._Url(path).query, jsonData);
+								that._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?page=1&pageSize=5", jsonData);
 							});
 						});
 					},
