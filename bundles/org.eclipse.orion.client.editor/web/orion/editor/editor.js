@@ -264,7 +264,7 @@ orion.editor.Editor = (function() {
 				this._overviewRuler = annotations.overviewRuler;
 				this._overviewRuler.onClick = function(lineIndex, e) {
 					if (lineIndex === undefined) { return; }
-					editor.moveSelection(this._textView, this._textView.getModel().getLineStart(lineIndex));
+					editor.moveSelection(textView, textView.getModel().getLineStart(lineIndex));
 				};
 			
 				textView.addRuler(this._annotationsRuler);
