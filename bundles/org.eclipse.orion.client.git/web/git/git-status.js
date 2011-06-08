@@ -51,11 +51,9 @@ dojo.addOnLoad(function() {
 		var controller = new mGitStatusTable.GitStatusController({renderLog :true},serviceRegistry , statusService,"unstagedZone" , "stagedZone");
 		controller.getGitStatus(dojo.hash(),true);
 	
-		initTitleBar(fileClient);
 		//every time the user manually changes the hash, we need to load the git status
 		dojo.subscribe("/dojo/hashchange", controller, function() {
 			controller.getGitStatus(dojo.hash(),true);
-			initTitleBar(fileClient);
 		});
 	});
 	

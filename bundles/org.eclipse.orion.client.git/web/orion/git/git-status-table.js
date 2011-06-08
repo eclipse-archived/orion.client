@@ -481,6 +481,7 @@ orion.GitStatusController = (function() {
 			this._curRemote = this._remoteInfo.Children[0];
 			this._curClone = this._cloneInfo.Children[0];
 			
+			this._initTitleBar(true);
 			var that = this;
 			var openGitLog = new mCommands.Command({
 				name : that._curBranch.Name,
@@ -512,6 +513,17 @@ orion.GitStatusController = (function() {
 			});
 		},
 		
+		_initTitleBar:function(withBranchName){
+			var title = "Git Status";
+			var repoAndBranch = "Git Status";
+			if(withBranchName) {
+				repoAndBranch = this._curClone.Name + " on " + this._curBranch.Name;
+				title = "Git Status for " + repoAndBranch;
+			}
+			document.title = repoAndBranch;
+			dojo.place(document.createTextNode(title), "pageTitle", "only");
+		},
+		
 		_getCloneInfo:function(){
 			var that = this;
 			if (that._initializing) {
@@ -521,6 +533,7 @@ orion.GitStatusController = (function() {
 						that._cloneInfo = cloneJsonData;
 						if(that._cloneInfo.Children.length === 0){
 							that._renderLog = false;
+							that._initTitleBar();
 							that._processStatus();
 							return;
 						}
