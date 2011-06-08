@@ -2217,6 +2217,8 @@ orion.textview.TextView = (function() {
 									if (!a.userHandler()) {
 										if (a.defaultHandler) {
 											a.defaultHandler();
+										} else {
+											return false;
 										}
 									}
 								} else if (a.defaultHandler) {
