@@ -155,7 +155,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 					return null;
 				}
 				var cached = JSON.parse(item);
-				if (ignoreExpires || (cached._expires && cached._expires < new Date().getTime())) {
+				if (ignoreExpires || (cached._expires && cached._expires > new Date().getTime())) {
 					delete cached._expires;
 					return cached;
 				}
