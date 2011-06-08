@@ -45,10 +45,10 @@ dojo.declare("orion.widgets.NewSiteDialog", [orion.widgets.NewItemDialog], {
 		// Hook up the validation and OK-button-enabling
 		this.itemName.set("required", true);
 		this.itemName.set("isValid", dojo.hitch(this, function(focused) {
-			return focused || dojo.trim(this.itemName.value) !== "";
+			return focused || dojo.trim(this.itemName.get("value")) !== "";
 		}));
 		dojo.connect(this.itemName, "onChange", this, function() {
-			this.newItemButton.set("disabled", dojo.trim(this.itemName.value) === "");
+			this.newItemButton.set("disabled", dojo.trim(this.itemName.get("value")) === "");
 		});
 		
 		// Load workspaces
@@ -71,7 +71,7 @@ dojo.declare("orion.widgets.NewSiteDialog", [orion.widgets.NewItemDialog], {
 	
 	execute: function() {
 		if (this.options.func) {
-			this.options.func(this.itemName.value, this.workspaceId);
+			this.options.func(this.itemName.get("value"), this.workspaceId);
 		}
 	}
 });
