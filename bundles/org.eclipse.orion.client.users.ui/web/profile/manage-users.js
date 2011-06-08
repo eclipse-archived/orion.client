@@ -14,7 +14,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSelection, mSearchClient, mGlobalCommands, mUsersList, mUsersUtil) {
 
 dojo.addOnLoad(function() {
-	
+	document.body.style.visibility = "visible";
 	dojo.parser.parse();
 
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();

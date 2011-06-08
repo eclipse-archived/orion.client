@@ -18,6 +18,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 				mSearchClient, mSearchResults, mGlobalCommands) {
 
 dojo.addOnLoad(function(){
+	document.body.style.visibility = "visible";
 	dojo.parser.parse();
 	
 	// initialize service registry and EAS services
