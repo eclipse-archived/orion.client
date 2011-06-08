@@ -26,29 +26,29 @@ orion.editor.AbstractStyler = (function() {
 	}
 	AbstractStyler.prototype = /** @lends orion.editor.AbstractStyler.prototype */ {
 		/**
-		 * Initializes this styler with an editor. Extenders <b>must</b> call this from their constructor.
-		 * @param {orion.textview.TextView} editor
+		 * Initializes this styler with a textView. Extenders <b>must</b> call this from their constructor.
+		 * @param {orion.textview.TextView} textView
 		 */
-		initialize: function(editor) {
-			this.editor = editor;
+		initialize: function(textView) {
+			this.textView = textView;
 			
-			editor.addEventListener("Selection", this, this._onSelection);
-			editor.addEventListener("ModelChanged", this, this._onModelChanged);
-			editor.addEventListener("Destroy", this, this._onDestroy);
-			editor.addEventListener("LineStyle", this, this._onLineStyle);
-			editor.redrawLines();
+			textView.addEventListener("Selection", this, this._onSelection);
+			textView.addEventListener("ModelChanged", this, this._onModelChanged);
+			textView.addEventListener("Destroy", this, this._onDestroy);
+			textView.addEventListener("LineStyle", this, this._onLineStyle);
+			textView.redrawLines();
 		},
 		
 		/**
 		 * Destroys this styler and removes all listeners. Called by the editor.
 		 */
 		destroy: function() {
-			if (this.editor) {
-				this.editor.removeEventListener("Selection", this, this._onSelection);
-				this.editor.removeEventListener("ModelChanged", this, this._onModelChanged);
-				this.editor.removeEventListener("Destroy", this, this._onDestroy);
-				this.editor.removeEventListener("LineStyle", this, this._onLineStyle);
-				this.editor = null;
+			if (this.textView) {
+				this.textView.removeEventListener("Selection", this, this._onSelection);
+				this.textView.removeEventListener("ModelChanged", this, this._onModelChanged);
+				this.textView.removeEventListener("Destroy", this, this._onDestroy);
+				this.textView.removeEventListener("LineStyle", this, this._onLineStyle);
+				this.textView = null;
 			}
 		},
 		
@@ -233,14 +233,14 @@ orion.editor.Util = {
  *
  * @class orion.editor.TextMateStyler
  * @extends orion.editor.AbstractStyler
- * @param {orion.textview.TextView} editor The editor.
+ * @param {orion.textview.TextView} textView The textView.
  * @param {JSONObject} grammar The TextMate grammar as a JSON object. You can use a plist-to-JSON conversion tool
  * to produce this object. Note that some features of TextMate grammars are not supported.
  */
 orion.editor.TextMateStyler = (function() {
 	/** @inner */
-	function TextMateStyler(editor, grammar) {
-		this.initialize(editor);
+	function TextMateStyler(textView, grammar) {
+		this.initialize(textView);
 		this.grammar = this.copy(grammar);
 		this._styles = {}; /* key: {String} scopeName, value: {String[]} cssClassNames */
 		this._tree = null;
@@ -493,7 +493,7 @@ orion.editor.TextMateStyler = (function() {
 		},
 		/** Called once when file is first loaded to build the parse tree. Tree is updated incrementally thereafter as buffer is modified */
 		initialParse: function() {
-			var last = this.editor.getModel().getCharCount();
+			var last = this.textView.getModel().getCharCount();
 			// First time; make parse tree for whole buffer
 			var root = new this.ContainerNode(null, this.grammar._typedRule);
 			this._tree = root;
@@ -508,7 +508,7 @@ orion.editor.TextMateStyler = (function() {
 			if (!this._tree) {
 				this.initialParse();
 			} else {
-				var model = this.editor.getModel();
+				var model = this.textView.getModel();
 				var charCount = model.getCharCount();
 				
 				// For rs, we must rewind to the line preceding the line 'start' is on. We can't rely on start's
@@ -525,7 +525,7 @@ orion.editor.TextMateStyler = (function() {
 					// FIXME: fd == null ?
 					stoppedAt = charCount;
 				}
-				this.editor.redrawRange(rs, stoppedAt);
+				this.textView.redrawRange(rs, stoppedAt);
 			}
 		},
 		/** @returns {BeginEndNode|ContainerNode} The result of taking the first (smallest "start" value) 
@@ -574,7 +574,7 @@ orion.editor.TextMateStyler = (function() {
 		 * @param {Number} [removedCharCount] Only used for repairing === true
 		 */
 		parse: function(origNode, repairing, rs, editStart, addedCharCount, removedCharCount) {
-			var model = this.editor.getModel();
+			var model = this.textView.getModel();
 			var lastLineStart = model.getLineStart(model.getLineCount() - 1);
 			var eof = model.getCharCount();
 			var initialExpected = this.getInitialExpected(origNode, rs);
@@ -915,7 +915,7 @@ orion.editor.TextMateStyler = (function() {
 			}
 			
 			var lineStart = e.lineStart;
-			var model = this.editor.getModel();
+			var model = this.textView.getModel();
 			var lineEnd = model.getLineEnd(e.lineIndex);
 			var nodes = this.getIntersecting(e.lineStart, lineEnd);
 			
@@ -963,7 +963,7 @@ orion.editor.TextMateStyler = (function() {
 			// Editor requires StyleRanges must be in ascending order by 'start', or else some will be ignored
 			e.ranges.sort(byStart);
 			
-//			console.debug("  text: " + this.editor.getText(lineStart, lineEnd));
+//			console.debug("  text: " + this.textView.getText(lineStart, lineEnd));
 //			console.debug("  scopes: " + scopes.map(function(sc){return sc.scope;}).join(", "));
 			//console.debug("  intersects " + nodes.length + ": [" + nodes.map(function(r){return r.valueOf();}).join(", ") + "]");
 		},
@@ -1034,7 +1034,7 @@ orion.editor.TextMateStyler = (function() {
 		},
 		/** Styles the region start..end by applying any "match"-subrules of node */
 		styleFromMatchRules: function(/**Array*/ scopes, /**BeginEndNode|ContainerNode*/node, start, end) {
-			var model = this.editor.getModel(),
+			var model = this.textView.getModel(),
 			    pos = start;
 			while (true) {
 				var matchInfo = this.getNextMatch(model, node, pos, true);

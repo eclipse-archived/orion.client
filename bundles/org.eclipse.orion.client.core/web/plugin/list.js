@@ -18,7 +18,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSearchClient, mGlobalCommands, mDialogs) {
 
 dojo.addOnLoad(function() {
-	
+	document.body.style.visibility = "visible";
 	dojo.parser.parse();
 
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
@@ -115,13 +115,12 @@ dojo.addOnLoad(function() {
 				if (!doit) {
 					return;
 				}
-				var pluginList = "";
+				var message = plugins[0].getLocation();
+				if (plugins.length > 1) {
+					message += ", " + (plugins.length - 1) + " more";
+				}
 				for (var i=0; i<plugins.length; i++) {
 					plugins[i].uninstall();
-					pluginList += plugins[i].getLocation();
-					if (i < plugins.length - 1) {
-						pluginList += ", ";
-					}
 				}
 				var old = dijit.byId("registry-tree");
 				if (old) {
@@ -129,7 +128,7 @@ dojo.addOnLoad(function() {
 				}
 				initTree();
 				// report what we uninstalled so it's easy for user to copy/paste a plugin that they want back
-				statusService.setMessage("Uninstalled " + pluginList);
+				statusService.setMessage("Uninstalled " + message);
 			});
 		});
 		

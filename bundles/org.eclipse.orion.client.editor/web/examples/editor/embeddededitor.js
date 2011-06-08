@@ -13,11 +13,11 @@
 
 dojo.addOnLoad(function(){
 	
-	var editorContainerDomNode = dojo.byId("editorContainer");
+	var editorDomNode = dojo.byId("editor");
 	
-	var editorFactory = function() {
+	var textViewFactory = function() {
 		return new orion.textview.TextView({
-			parent: editorContainerDomNode,
+			parent: editorDomNode,
 			stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css", "/examples/editor/htmlStyles.css"],
 			tabSize: 4
 		});
@@ -34,7 +34,7 @@ dojo.addOnLoad(function(){
 	var syntaxHighlighter = {
 		styler: null, 
 		
-		highlight: function(fileName, editorWidget) {
+		highlight: function(fileName, textView) {
 			if (this.styler) {
 				this.styler.destroy();
 				this.styler = null;
@@ -45,16 +45,16 @@ dojo.addOnLoad(function(){
 				if (splits.length > 0) {
 					switch(extension) {
 						case "js":
-							this.styler = new examples.textview.TextStyler(editorWidget, "js");
+							this.styler = new examples.textview.TextStyler(textView, "js");
 							break;
 						case "java":
-							this.styler = new examples.textview.TextStyler(editorWidget, "java");
+							this.styler = new examples.textview.TextStyler(textView, "java");
 							break;
 						case "css":
-							this.styler = new examples.textview.TextStyler(editorWidget, "css");
+							this.styler = new examples.textview.TextStyler(textView, "css");
 							break;
 						case "html":
-							this.styler = new orion.editor.TextMateStyler(editorWidget, orion.editor.HtmlGrammar.grammar);
+							this.styler = new orion.editor.TextMateStyler(textView, orion.editor.HtmlGrammar.grammar);
 							break;
 					}
 				}
@@ -80,8 +80,8 @@ dojo.addOnLoad(function(){
 		keyModeStack.push(codeBindings);
 		
 		// save binding
-		editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding("s", true), "save");
-		editor.getEditorWidget().setAction("save", function(){
+		editor.getTextView().setKeyBinding(new orion.textview.KeyBinding("s", true), "save");
+		editor.getTextView().setAction("save", function(){
 				save(editor);
 				return true;
 		});
@@ -103,18 +103,18 @@ dojo.addOnLoad(function(){
 		dojo.byId("status").innerHTML = dirtyIndicator + status;
 	};
 	
-	var editorContainer = new orion.editor.Editor({
-		editorFactory: editorFactory,
+	var editor = new orion.editor.Editor({
+		textViewFactory: textViewFactory,
 		undoStackFactory: new orion.editor.UndoFactory(),
 		annotationFactory: annotationFactory,
 		lineNumberRulerFactory: new orion.editor.LineNumberRulerFactory(),
 		contentAssistFactory: contentAssistFactory,
 		keyBindingFactory: keyBindingFactory, 
 		statusReporter: statusReporter,
-		domNode: editorContainerDomNode
+		domNode: editorDomNode
 	});
 		
-	dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
+	dojo.connect(editor, "onDirtyChange", this, function(dirty) {
 		if (dirty) {
 			dirtyIndicator = "*";
 		} else {
@@ -123,16 +123,16 @@ dojo.addOnLoad(function(){
 		dojo.byId("status").innerHTML = dirtyIndicator + status;
 	});
 	
-	editorContainer.installEditor();
+	editor.installTextView();
 	// if there is a mechanism to change which file is being viewed, this code would be run each time it changed.
 	var contentName = "sample.js";  // for example, a file name, something the user recognizes as the content.
 	var initialContent = "window.alert('this is some javascript code');  // try pasting in some real code";
-	editorContainer.onInputChange(contentName, null, initialContent);
-	syntaxHighlighter.highlight(contentName, editorContainer.getEditorWidget());
+	editor.onInputChange(contentName, null, initialContent);
+	syntaxHighlighter.highlight(contentName, editor.getTextView());
 	// end of code to run when content changes.
 	
 	window.onbeforeunload = function() {
-		if (editorContainer.isDirty()) {
+		if (editor.isDirty()) {
 			 return "There are unsaved changes.";
 		}
 	};

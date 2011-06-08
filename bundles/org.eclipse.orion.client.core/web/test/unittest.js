@@ -131,7 +131,7 @@ eclipse.Unittest.Renderer = (function() {
 var root = {children:[]};
 
 dojo.addOnLoad(function(){
-	
+	document.body.style.visibility = "visible";
 	dojo.parser.parse();
 	// create registry and instantiate needed services
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();

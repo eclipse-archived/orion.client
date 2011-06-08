@@ -13,7 +13,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mDiffProvider, mCompareContainer) {
 
 dojo.addOnLoad(function() {
-	
+	document.body.style.visibility = "visible";
 	dojo.parser.parse();
 	// initialize service registry and EAS services
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();

@@ -17,7 +17,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSearchClient, mGlobalCommands) {
 
 dojo.addOnLoad(function() {
-	
+	document.body.style.visibility = "visible";
 	dojo.parser.parse();
 	
 	// TODO get the registry from somewhere else

@@ -18,7 +18,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitClonesExplorer, mGitCommands) {
 
 dojo.addOnLoad(function() {
-	
+	document.body.style.visibility = "visible";
 	dojo.parser.parse();
 	
 	// initialize service registry and EAS services
@@ -58,6 +58,7 @@ dojo.addOnLoad(function() {
 	commandService.registerCommandContribution("eclipse.orion.git.merge", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.push", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.pushto", 3);
+	commandService.registerCommandContribution("eclipse.orion.git.resetIndex", 4);
 	
 	var explorer = new mGitClonesExplorer.GitClonesExplorer(serviceRegistry, selection, "clonesList", "pageActions", "selectionTools");
 	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);

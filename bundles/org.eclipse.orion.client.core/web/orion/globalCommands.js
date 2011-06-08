@@ -228,7 +228,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			});
 			if (editor) {
 				dojo.connect(dialog, "onHide", function() {
-					editor.getEditorWidget().focus(); // Focus editor after dialog close, Dojo's doesn't work
+					editor.getTextView().focus(); // Focus editor after dialog close, Dojo's doesn't work
 				});
 			}
 			window.setTimeout(function() {dialog.show();}, 0);
@@ -244,8 +244,8 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			
 		// We need a mod key binding in the editor, for now use the old one (ctrl-shift-r)
 		if (editor) {
-			editor.getEditorWidget().setKeyBinding(new mKeyBinding.KeyBinding("r", true, true, false), "Find File Named...");
-			editor.getEditorWidget().setAction("Find File Named...", function() {
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("r", true, true, false), "Find File Named...");
+			editor.getTextView().setAction("Find File Named...", function() {
 					openResourceDialog(searchLocation, searcher, editor);
 					return true;
 				});
@@ -269,10 +269,10 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				dojo.empty(keyAssistNode);
 				if (editor) {
 					dojo.place("<h2>Editor</h2>", keyAssistNode, "last");
-					var editorActions = editor.getEditorWidget().getActions(false);
+					var editorActions = editor.getTextView().getActions(false);
 					for(var i=0; i<editorActions.length; i++) {
 						var actionName = editorActions[i];
-						var bindings = editor.getEditorWidget().getKeyBindings(actionName);
+						var bindings = editor.getTextView().getKeyBindings(actionName);
 						for (var j=0; j<bindings.length; j++) {
 							dojo.place("<span>"+mUtil.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last");
 						}
@@ -286,8 +286,8 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		commandService.addCommand(keyAssistCommand, "global");
 		commandService.registerCommandContribution("eclipse.keyAssist", 1, "globalActions", null, new mCommands.CommandKeyBinding(191, false, true), true);
 		if (editor) {
-			editor.getEditorWidget().setKeyBinding(new mCommands.CommandKeyBinding(191, true, true), "Show Keys");
-			editor.getEditorWidget().setAction("Show Keys", keyAssistCommand.callback);
+			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, true, true), "Show Keys");
+			editor.getTextView().setAction("Show Keys", keyAssistCommand.callback);
 		}
 			
 		// generate global commands

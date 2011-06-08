@@ -59,7 +59,7 @@ exports.setUpEditor = function(isReadOnly){
 	
 	var splitArea = dijit.byId("orion.innerCoding"),
 		outlineDomNode = dojo.byId("outline"),
-		editorContainerDomNode = dojo.byId("editorContainer"),
+		editorDomNode = dojo.byId("editor"),
 		searchFloat = dojo.byId("searchFloat"),
 		leftPane = dojo.byId("leftPane");
 
@@ -75,7 +75,7 @@ exports.setUpEditor = function(isReadOnly){
 	var syntaxHighlighter = {
 		styler: null, 
 		
-		highlight: function(fileName, editorWidget) {
+		highlight: function(fileName, textView) {
 			if (this.styler) {
 				this.styler.destroy();
 				this.styler = null;
@@ -86,13 +86,13 @@ exports.setUpEditor = function(isReadOnly){
 				if (splits.length > 0) {
 					switch(extension) {
 						case "js":
-							this.styler = new mTextStyler.TextStyler(editorWidget, "js");
+							this.styler = new mTextStyler.TextStyler(textView, "js");
 							break;
 						case "java":
-							this.styler = new mTextStyler.TextStyler(editorWidget, "java");
+							this.styler = new mTextStyler.TextStyler(textView, "java");
 							break;
 						case "css":
-							this.styler = new mTextStyler.TextStyler(editorWidget, "css");
+							this.styler = new mTextStyler.TextStyler(textView, "css");
 							break;
 					}
 					
@@ -116,7 +116,7 @@ exports.setUpEditor = function(isReadOnly){
 							if (providerType === "grammar") {
 								// TextMate styler
 								var grammar = providerToUse.getProperty("grammar");
-								this.styler = new mTextMateStyler.TextMateStyler(editorWidget, grammar);
+								this.styler = new mTextMateStyler.TextMateStyler(textView, grammar);
 							} else if (providerType === "parser") {
 								console.debug("TODO implement support for parser-based syntax highlight provider");
 							}
@@ -146,9 +146,9 @@ exports.setUpEditor = function(isReadOnly){
 
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 		
-		var editorFactory = function() {
+		var textViewFactory = function() {
 			return new mTextView.TextView({
-				parent: editorContainerDomNode,
+				parent: editorDomNode,
 				stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css", "/css/default-theme.css"],
 				tabSize: 4,
 				readonly: isReadOnly
@@ -158,32 +158,32 @@ exports.setUpEditor = function(isReadOnly){
 		var inputManager = {
 			lastFilePath: "",
 			
-			setInput: function(location, editorContainer) {
+			setInput: function(location, editor) {
 				var input = mUtil.getPositionInfo(location);
 				var fileURI = input.filePath;
 				// populate editor
 				if (fileURI) {
 					if (fileURI === this.lastFilePath) {
-						editorContainer.showSelection(input.start, input.end, input.line, input.offset, input.length);
+						editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 					} else {
-						if (!editorContainer.getEditorWidget()) {
-							editorContainer.installEditor();
+						if (!editor.getTextView()) {
+							editor.installTextView();
 						}
 						var fullPathName = fileURI;
 						var progressTimeout = setTimeout(function() {
-							editorContainer.onInputChange(fullPathName, "Fetching " + fullPathName, null);
+							editor.onInputChange(fullPathName, "Fetching " + fullPathName, null);
 						}, 800); // wait 800ms before displaying
 						fileClient.read(fileURI).then(
 							dojo.hitch(this, function(contents) {
 								clearTimeout(progressTimeout);
-								editorContainer.onInputChange(fileURI, null, contents);
+								editor.onInputChange(fileURI, null, contents);
 								// in the long run we should be looking for plug-ins to call here for highlighting
-								syntaxHighlighter.highlight(fileURI, editorContainer.getEditorWidget());
-								editorContainer.showSelection(input.start, input.end, input.line, input.offset, input.length);
+								syntaxHighlighter.highlight(fileURI, editor.getTextView());
+								editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 							}),
 							dojo.hitch(this, function(error) {
 								clearTimeout(progressTimeout);
-								editorContainer.onInputChange(fullPathName, "An error occurred: " + error.message, null);
+								editor.onInputChange(fullPathName, "An error occurred: " + error.message, null);
 								console.error("HTTP status code: ", error.status);
 							})
 						);
@@ -200,7 +200,7 @@ exports.setUpEditor = function(isReadOnly){
 					}
 					this.lastFilePath = fileURI;
 				} else {
-					editorContainer.onInputChange("No File Selected", "", null);
+					editor.onInputChange("No File Selected", "", null);
 				}
 			},
 			
@@ -250,8 +250,8 @@ exports.setUpEditor = function(isReadOnly){
 				}
 			},
 			
-			hashChanged: function(editorContainer) {	
-				if (this.shouldGoToURI(editorContainer, dojo.hash())) {
+			hashChanged: function(editor) {	
+				if (this.shouldGoToURI(editor, dojo.hash())) {
 					selection.setSelections(dojo.hash());
 				} else {
 					// we are staying at our previous location
@@ -259,8 +259,8 @@ exports.setUpEditor = function(isReadOnly){
 				}
 			},
 			
-			shouldGoToURI: function(editorContainer, fileURI) {
-				if (editorContainer.isDirty()) {
+			shouldGoToURI: function(editor, fileURI) {
+				if (editor.isDirty()) {
 					var oldStripped = mUtil.getPositionInfo(this.lastFilePath).filePath;
 					var newStripped = mUtil.getPositionInfo(fileURI).filePath;
 					if (oldStripped !== newStripped) {
@@ -286,10 +286,10 @@ exports.setUpEditor = function(isReadOnly){
 			keyModeStack.push(codeBindings);
 			
 			// global search
-			editor.getEditorWidget().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "Search Files");
-			editor.getEditorWidget().setAction("Search Files", function() {
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "Search Files");
+			editor.getTextView().setAction("Search Files", function() {
 				window.setTimeout(function() {
-					var e = editor.getEditorWidget();
+					var e = editor.getTextView();
 					var selection = e.getSelection();
 					var searchPattern = "";
 					if (selection.end > selection.start) {
@@ -330,8 +330,8 @@ exports.setUpEditor = function(isReadOnly){
 				
 			
 			// splitter binding
-			editor.getEditorWidget().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "Toggle Outliner");
-			editor.getEditorWidget().setAction("Toggle Outliner", function(){
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "Toggle Outliner");
+			editor.getTextView().setAction("Toggle Outliner", function(){
 					splitArea.toggle();
 			});
 		};
@@ -346,15 +346,15 @@ exports.setUpEditor = function(isReadOnly){
 	
 		var annotationFactory = new mEditorFeatures.AnnotationFactory();
 		
-		var editorContainer = new mEditor.Editor({
-			editorFactory: editorFactory,
+		var editor = new mEditor.Editor({
+			textViewFactory: textViewFactory,
 			undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandService, "pageActions"),
 			annotationFactory: annotationFactory,
 			lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
 			contentAssistFactory: contentAssistFactory,
 			keyBindingFactory: keyBindingFactory, 
 			statusReporter: statusReporter,
-			domNode: editorContainerDomNode
+			domNode: editorDomNode
 		});
 		
 		// Establishing dependencies on registered services
@@ -364,39 +364,39 @@ exports.setUpEditor = function(isReadOnly){
 			});
 		});
 		
-		dojo.connect(editorContainer, "onDirtyChange", inputManager, inputManager.setDirty);
+		dojo.connect(editor, "onDirtyChange", inputManager, inputManager.setDirty);
 		
 		// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
 		serviceRegistry.getService("orion.page.selection").then(function(service) {
 			service.addEventListener("selectionChanged", function(fileURI) {
-				if (inputManager.shouldGoToURI(editorContainer, fileURI)) {
-					inputManager.setInput(fileURI, editorContainer);
+				if (inputManager.shouldGoToURI(editor, fileURI)) {
+					inputManager.setInput(fileURI, editor);
 				} 
 			});
 		});
 	
 		// In this page, the hash change drives selection.  In other scenarios, a file picker might drive selection
-		dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editorContainer);});
-		inputManager.setInput(dojo.hash(), editorContainer);
+		dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editor);});
+		inputManager.setInput(dojo.hash(), editor);
 		
 		// TODO search location needs to be gotten from somewhere
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, editorContainer, editorContainer);
-		mGlobalCommands.generateDomCommandsInBanner(commandService, editorContainer);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, editor, editor);
+		mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 			
-		var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editorContainer);
+		var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 		
 		// Create outliner "gadget"
 		new mOutliner.Outliner({parent: outlineDomNode, serviceRegistry: serviceRegistry, selectionService: selection});	
 		
 		window.onbeforeunload = function() {
-			if (editorContainer.isDirty()) {
+			if (editor.isDirty()) {
 				 return "There are unsaved changes.";
 			}
 		};
 		
 		// Set up the border container
 		splitArea.setToggleCallback(function() {
-			editorContainer.getEditorWidget().redrawLines();
+			editor.getTextView().redrawLines();
 		});
 				
 		// Ctrl+o handler for toggling outline 

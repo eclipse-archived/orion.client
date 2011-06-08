@@ -13,11 +13,11 @@
 
 dojo.addOnLoad(function(){
 	
-	var editorContainerDomNode = dojo.byId("editorContainer");
+	var editorDomNode = dojo.byId("editor");
 	
-	var editorFactory = function() {
+	var textViewFactory = function() {
 		return new orion.textview.TextView({
-			parent: editorContainerDomNode,
+			parent: editorDomNode,
 			stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css"],
 			tabSize: 4
 		});
@@ -37,15 +37,15 @@ dojo.addOnLoad(function(){
 		keyModeStack.push(codeBindings);
 		
 		// save binding
-		editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding("s", true), "save");
-		editor.getEditorWidget().setAction("save", function(){
+		editor.getTextView().setKeyBinding(new orion.textview.KeyBinding("s", true), "save");
+		editor.getTextView().setAction("save", function(){
 				editor.onInputChange(null, null, null, true);
-				var text = editor.getEditorWidget().getText();
+				var text = editor.getTextView().getText();
 				var problems = [];
 				for (var i=0; i<text.length; i++) {
 					if (text.charAt(i) === 'z') {
-						var line = editor.getEditorWidget().getModel().getLineAtOffset(i) + 1;
-						var character = i - editor.getEditorWidget().getModel().getLineStart(line);
+						var line = editor.getTextView().getModel().getLineAtOffset(i) + 1;
+						var character = i - editor.getTextView().getModel().getLineStart(line);
 						problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
 					}
 				}
@@ -66,18 +66,18 @@ dojo.addOnLoad(function(){
 		dojo.byId("status").innerHTML = dirtyIndicator + status;
 	};
 		
-	var editorContainer = new orion.editor.Editor({
-		editorFactory: editorFactory,
+	var editor = new orion.editor.Editor({
+		textViewFactory: textViewFactory,
 		undoStackFactory: new orion.editor.UndoFactory(),
 		annotationFactory: annotationFactory,
 		lineNumberRulerFactory: new orion.editor.LineNumberRulerFactory(),
 		contentAssistFactory: null,
 		keyBindingFactory: keyBindingFactory, 
 		statusReporter: statusReporter,
-		domNode: editorContainerDomNode
+		domNode: editorDomNode
 	});
 		
-	dojo.connect(editorContainer, "onDirtyChange", this, function(dirty) {
+	dojo.connect(editor, "onDirtyChange", this, function(dirty) {
 		if (dirty) {
 			dirtyIndicator = "You have unsaved changes.  ";
 		} else {
@@ -86,11 +86,11 @@ dojo.addOnLoad(function(){
 		dojo.byId("status").innerHTML = dirtyIndicator + status;
 	});
 	
-	editorContainer.installEditor();
-	editorContainer.onInputChange("Content", null, "This is the initial editor contentz.  Type some text and press Ctrl-S to save.");
+	editor.installTextView();
+	editor.onInputChange("Content", null, "This is the initial editor contentz.  Type some text and press Ctrl-S to save.");
 	
 	window.onbeforeunload = function() {
-		if (editorContainer.isDirty()) {
+		if (editor.isDirty()) {
 			 return "There are unsaved changes.";
 		}
 	};

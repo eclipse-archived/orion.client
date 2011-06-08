@@ -24,16 +24,16 @@ orion.editor.UndoFactory = (function() {
 	}
 	UndoFactory.prototype = {
 		createUndoStack: function(editor) {
-			var undoStack =  new orion.textview.UndoStack(editor.getEditorWidget(), 200);
-			editor.getEditorWidget().setKeyBinding(new orion.textview.KeyBinding('z', true), "Undo");
-			editor.getEditorWidget().setAction("Undo", function() {
+			var undoStack =  new orion.textview.UndoStack(editor.getTextView(), 200);
+			editor.getTextView().setKeyBinding(new orion.textview.KeyBinding('z', true), "Undo");
+			editor.getTextView().setAction("Undo", function() {
 				undoStack.undo();
 				return true;
 			});
 			
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			editor.getEditorWidget().setKeyBinding(isMac ? new orion.textview.KeyBinding('z', true, true) : new orion.textview.KeyBinding('y', true), "Redo");
-			editor.getEditorWidget().setAction("Redo", function() {
+			editor.getTextView().setKeyBinding(isMac ? new orion.textview.KeyBinding('z', true, true) : new orion.textview.KeyBinding('y', true), "Redo");
+			editor.getTextView().setAction("Redo", function() {
 				undoStack.redo();
 				return true;
 			});
@@ -111,7 +111,7 @@ orion.editor.AnnotationFactory = (function() {
 orion.editor.TextActions = (function() {
 	function TextActions(editor, undoStack) {
 		this.editor = editor;
-		this.editorWidget = editor.getEditorWidget();
+		this.textView = editor.getTextView();
 		this.undoStack = undoStack;
 		this._incrementalFindActive = false;
 		this._incrementalFindSuccess = true;
@@ -125,17 +125,17 @@ orion.editor.TextActions = (function() {
 			this._incrementalFindListener = {
 				onVerify: dojo.hitch(this, function(event){
 					var prefix = this._incrementalFindPrefix,
-						txt = this.editorWidget.getText(event.start, event.end),
+						txt = this.textView.getText(event.start, event.end),
 						match = prefix.match(new RegExp("^"+dojo.regexp.escapeString(txt), "i"));
 					if (match && match.length > 0) {
 						prefix = this._incrementalFindPrefix += event.text;
 						this.editor.reportStatus("Incremental find: " + prefix);
 						var ignoreCase = prefix.toLowerCase() === prefix;
-						var result = this.editor.doFind(prefix, this.editorWidget.getSelection().start, ignoreCase);
+						var result = this.editor.doFind(prefix, this.textView.getSelection().start, ignoreCase);
 						if (result) {
 							this._incrementalFindSuccess = true;
 							this._incrementalFindIgnoreSelection = true;
-							this.editor.moveSelection(this.editorWidget, result.index, result.index+result.length);
+							this.editor.moveSelection(this.textView, result.index, result.index+result.length);
 							this._incrementalFindIgnoreSelection = false;
 						} else {
 							this.editor.reportStatus("Incremental find: " + prefix + " (not found)", true);
@@ -156,12 +156,12 @@ orion.editor.TextActions = (function() {
 			var searchString = "",
 			    pattern,
 			    flags;
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding("f", true), "Find...");
-			this.editorWidget.setAction("Find...", dojo.hitch(this, function() {
+			this.textView.setKeyBinding(new orion.textview.KeyBinding("f", true), "Find...");
+			this.textView.setAction("Find...", dojo.hitch(this, function() {
 				setTimeout(dojo.hitch(this, function() {
-					var selection = this.editorWidget.getSelection();
+					var selection = this.textView.getSelection();
 					if (selection.end > selection.start) {
-						searchString = this.editorWidget.getText().substring(selection.start, selection.end);
+						searchString = this.textView.getText().substring(selection.start, selection.end);
 					} else {
 						searchString = "";
 					}
@@ -177,80 +177,80 @@ orion.editor.TextActions = (function() {
 						pattern = regexp.pattern;
 						flags = regexp.flags;
 						flags = flags + (ignoreCase && flags.indexOf("i") === -1 ? "i" : "");
-						result = this.editor.doFindRegExp(pattern, flags, this.editorWidget.getCaretOffset());
+						result = this.editor.doFindRegExp(pattern, flags, this.textView.getCaretOffset());
 					} else {
 						pattern = null;
 						flags = null;
-						result = this.editor.doFind(searchString, this.editorWidget.getCaretOffset(), ignoreCase);
+						result = this.editor.doFind(searchString, this.textView.getCaretOffset(), ignoreCase);
 					}
 					
 					if (result) {
-						this.editor.moveSelection(this.editorWidget, result.index, result.index+result.length);
+						this.editor.moveSelection(this.textView, result.index, result.index+result.length);
 					} else {
 						this.editor.reportStatus("not found", true);
 					}
 				}), 0);
 			}));
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding("k", true), "Find Next Occurrence");
-			this.editorWidget.setAction("Find Next Occurrence", dojo.hitch(this, function() {
+			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true), "Find Next Occurrence");
+			this.textView.setAction("Find Next Occurrence", dojo.hitch(this, function() {
 				var result, ignoreCase, selection;
 				if (this._incrementalFindActive) {
 					var str = this._incrementalFindPrefix;
 					ignoreCase = str.toLowerCase() === str;
-					result = this.editor.doFind(str, this.editorWidget.getCaretOffset(), ignoreCase);
+					result = this.editor.doFind(str, this.textView.getCaretOffset(), ignoreCase);
 				} else if (pattern) {
 					// RegExp search
-					result = this.editor.doFindRegExp(pattern, flags, this.editorWidget.getCaretOffset());
+					result = this.editor.doFindRegExp(pattern, flags, this.textView.getCaretOffset());
 				} else {
 					// use selection if there is one, otherwise use last stored string.  
 					// Since we aren't sure how/why text is highlighted, we will always ignore case.
 					// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=342334
-					selection = this.editorWidget.getSelection();
+					selection = this.textView.getSelection();
 					if (selection.end > selection.start) {
-						searchString = this.editorWidget.getText().substring(selection.start, selection.end);
+						searchString = this.textView.getText().substring(selection.start, selection.end);
 					}
-					result = this.editor.doFind(searchString, this.editorWidget.getCaretOffset(), true);
+					result = this.editor.doFind(searchString, this.textView.getCaretOffset(), true);
 				}
 				
 				if (result) {
 					this._incrementalFindIgnoreSelection = true;
-					this.editor.moveSelection(this.editorWidget, result.index, result.index+result.length);
+					this.editor.moveSelection(this.textView, result.index, result.index+result.length);
 					this._incrementalFindIgnoreSelection = false;
 				} else {
 					this.editor.reportStatus("not found", true);
 				}
 			}));
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding("k", true, true), "Find Previous Occurrence");
-			this.editorWidget.setAction("Find Previous Occurrence", dojo.hitch(this, function() {
-				var selection = this.editorWidget.getSelection();
+			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true, true), "Find Previous Occurrence");
+			this.textView.setAction("Find Previous Occurrence", dojo.hitch(this, function() {
+				var selection = this.textView.getSelection();
 				var selectionSize = (selection.end > selection.start) ? selection.end - selection.start : 0;
 				var result, ignoreCase;
 				if (this._incrementalFindActive) {
 					var str = this._incrementalFindPrefix;
 					ignoreCase = str.toLowerCase() === str;
-					result = this.editor.doFind(str, this.editorWidget.getCaretOffset() - selectionSize - 1, ignoreCase, true);
+					result = this.editor.doFind(str, this.textView.getCaretOffset() - selectionSize - 1, ignoreCase, true);
 				} else if (pattern) {
 					// RegExp search
-					result = this.editor.doFindRegExp(pattern, flags, this.editorWidget.getCaretOffset() - selectionSize - 1, true);
+					result = this.editor.doFindRegExp(pattern, flags, this.textView.getCaretOffset() - selectionSize - 1, true);
 				} else {
 					if (selectionSize > 0) {
-						searchString = this.editorWidget.getText().substring(selection.start, selection.end);
+						searchString = this.textView.getText().substring(selection.start, selection.end);
 					}
-					result = this.editor.doFind(searchString, this.editorWidget.getCaretOffset() - selectionSize - 1, true, true);
+					result = this.editor.doFind(searchString, this.textView.getCaretOffset() - selectionSize - 1, true, true);
 				}
 				
 				if (result) {
 					this._incrementalFindIgnoreSelection = true;
-					this.editor.moveSelection(this.editorWidget, result.index, result.index+result.length);
+					this.editor.moveSelection(this.textView, result.index, result.index+result.length);
 					this._incrementalFindIgnoreSelection = false;
 				} else {
 					this.editor.reportStatus("not found", true);
 				}
 			}));
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding("j", true), "Incremental Find");
-			this.editorWidget.setAction("Incremental Find", dojo.hitch(this, function() {
+			this.textView.setKeyBinding(new orion.textview.KeyBinding("j", true), "Incremental Find");
+			this.textView.setAction("Incremental Find", dojo.hitch(this, function() {
 				if (!this._incrementalFindActive) {
-					this.editorWidget.setCaretOffset(this.editorWidget.getCaretOffset());
+					this.textView.setCaretOffset(this.textView.getCaretOffset());
 					this.toggleIncrementalFind();
 				} else {
 					var p = this._incrementalFindPrefix;
@@ -258,7 +258,7 @@ orion.editor.TextActions = (function() {
 						return;
 					}
 					
-					var start = this.editorWidget.getSelection().start + 1;
+					var start = this.textView.getSelection().start + 1;
 					if (this._incrementalFindSuccess === false) {
 						start = 0;
 					}
@@ -268,7 +268,7 @@ orion.editor.TextActions = (function() {
 					if (result) {
 						this._incrementalFindSuccess = true;
 						this._incrementalFindIgnoreSelection = true;
-						this.editor.moveSelection(this.editorWidget, result.index, result.index + result.length);
+						this.editor.moveSelection(this.textView, result.index, result.index + result.length);
 						this._incrementalFindIgnoreSelection = false;
 						this.editor.reportStatus("Incremental find: " + p);
 					} else {
@@ -278,24 +278,24 @@ orion.editor.TextActions = (function() {
 				}
 				return true;
 			}));
-			this.editorWidget.setAction("deletePrevious", dojo.hitch(this, function() {
+			this.textView.setAction("deletePrevious", dojo.hitch(this, function() {
 				if (this._incrementalFindActive) {
 					var p = this._incrementalFindPrefix;
 					p = this._incrementalFindPrefix = p.substring(0, p.length-1);
 					if (p.length===0) {
 						this._incrementalFindSuccess = true;
 						this._incrementalFindIgnoreSelection = true;
-						this.editorWidget.setCaretOffset(this.editorWidget.getSelection().start);
+						this.textView.setCaretOffset(this.textView.getSelection().start);
 						this._incrementalFindIgnoreSelection = false;
 						this.toggleIncrementalFind();
 						return true;
 					}
 					this.editor.reportStatus("Incremental find: " + p);
-					var index = this.editorWidget.getText().lastIndexOf(p, this.editorWidget.getCaretOffset() - p.length - 1);
+					var index = this.textView.getText().lastIndexOf(p, this.textView.getCaretOffset() - p.length - 1);
 					if (index !== -1) {
 						this._incrementalFindSuccess = true;
 						this._incrementalFindIgnoreSelection = true;
-						this.editor.moveSelection(this.editorWidget, index,index+p.length);
+						this.editor.moveSelection(this.textView, index,index+p.length);
 						this._incrementalFindIgnoreSelection = false;
 					} else {
 						this.editor.reportStatus("Incremental find: " + p + " (not found)", true);
@@ -307,9 +307,9 @@ orion.editor.TextActions = (function() {
 			}));
 			
 			// Tab actions
-			this.editorWidget.setAction("tab", dojo.hitch(this, function() {
-				var selection = this.editorWidget.getSelection();
-				var model = this.editorWidget.getModel();
+			this.textView.setAction("tab", dojo.hitch(this, function() {
+				var selection = this.textView.getSelection();
+				var model = this.textView.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
 				if (firstLine !== lastLine) {
@@ -320,17 +320,17 @@ orion.editor.TextActions = (function() {
 					}
 					this.startUndo();
 					var firstLineStart = model.getLineStart(firstLine);
-					this.editorWidget.setText(lines.join("\t"), firstLineStart, model.getLineEnd(lastLine, true));
-					this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start + 1, selection.end + (lastLine - firstLine + 1));
+					this.textView.setText(lines.join("\t"), firstLineStart, model.getLineEnd(lastLine, true));
+					this.textView.setSelection(firstLineStart===selection.start?selection.start:selection.start + 1, selection.end + (lastLine - firstLine + 1));
 					this.endUndo();
 					return true;
 				}
 				return false;
 			}));
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(9, false, true), "Unindent Lines");
-			this.editorWidget.setAction("Unindent Lines", dojo.hitch(this, function() {
-				var selection = this.editorWidget.getSelection();
-				var model = this.editorWidget.getModel();
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(9, false, true), "Unindent Lines");
+			this.textView.setAction("Unindent Lines", dojo.hitch(this, function() {
+				var selection = this.textView.getSelection();
+				var model = this.textView.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
 				var lines = [];
@@ -342,16 +342,16 @@ orion.editor.TextActions = (function() {
 				this.startUndo();
 				var firstLineStart = model.getLineStart(firstLine);
 				var lastLineStart = model.getLineStart(lastLine);
-				this.editorWidget.setText(lines.join(""), firstLineStart, model.getLineEnd(lastLine, true));
-				this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start - 1, selection.end - (lastLine - firstLine + 1) + (selection.end===lastLineStart+1?1:0));
+				this.textView.setText(lines.join(""), firstLineStart, model.getLineEnd(lastLine, true));
+				this.textView.setSelection(firstLineStart===selection.start?selection.start:selection.start - 1, selection.end - (lastLine - firstLine + 1) + (selection.end===lastLineStart+1?1:0));
 				this.endUndo();
 				return true;
 			}));
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(38, false, false, true), "Move Lines Up");
-			this.editorWidget.setAction("Move Lines Up", dojo.hitch(this, function() {
-				var selection = this.editorWidget.getSelection();
-				var model = this.editorWidget.getModel();
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(38, false, false, true), "Move Lines Up");
+			this.textView.setAction("Move Lines Up", dojo.hitch(this, function() {
+				var selection = this.textView.getSelection();
+				var model = this.textView.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
 				if (firstLine===0) {
 					return true;
@@ -374,14 +374,14 @@ orion.editor.TextActions = (function() {
 				var insertPos = model.getLineStart(firstLine-1);
 				model.setText(text, insertPos, insertPos);
 				var selectionEnd = insertPos+text.length-(isMoveFromLastLine?model.getLineDelimiter().length:0);
-				this.editorWidget.setSelection(insertPos, selectionEnd);
+				this.textView.setSelection(insertPos, selectionEnd);
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(40, false, false, true), "Move Lines Down");
-			this.editorWidget.setAction("Move Lines Down", dojo.hitch(this, function() {
-				var selection = this.editorWidget.getSelection();
-				var model = this.editorWidget.getModel();
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(40, false, false, true), "Move Lines Down");
+			this.textView.setAction("Move Lines Down", dojo.hitch(this, function() {
+				var selection = this.textView.getSelection();
+				var model = this.textView.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
 				if (lastLine===model.getLineCount()-1) {
@@ -404,15 +404,15 @@ orion.editor.TextActions = (function() {
 				model.setText(text, insertPos, insertPos);
 				var selStart = insertPos+(isMoveIntoLastLine?model.getLineDelimiter().length:0);
 				var selEnd = insertPos+text.length;
-				this.editorWidget.setSelection(selStart, selEnd);
+				this.textView.setSelection(selStart, selEnd);
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(38, true, false, true), "Copy Lines Up");
-			this.editorWidget.setAction("Copy Lines Up", dojo.hitch(this, function() {
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(38, true, false, true), "Copy Lines Up");
+			this.textView.setAction("Copy Lines Up", dojo.hitch(this, function() {
 				this.startUndo();
-				var selection = this.editorWidget.getSelection();
-				var model = this.editorWidget.getModel();
+				var selection = this.textView.getSelection();
+				var model = this.textView.getModel();
 				var delimiter = model.getLineDelimiter();
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
@@ -423,15 +423,15 @@ orion.editor.TextActions = (function() {
 				//var insertPos = model.getLineStart(firstLine - 1);
 				var insertPos = lineStart;
 				model.setText(text, insertPos, insertPos);
-				this.editorWidget.setSelection(insertPos, insertPos+text.length-(isCopyFromLastLine?delimiter.length:0));
+				this.textView.setSelection(insertPos, insertPos+text.length-(isCopyFromLastLine?delimiter.length:0));
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(40, true, false, true), "Copy Lines Down");
-			this.editorWidget.setAction("Copy Lines Down", dojo.hitch(this, function() {
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(40, true, false, true), "Copy Lines Down");
+			this.textView.setAction("Copy Lines Down", dojo.hitch(this, function() {
 				this.startUndo();
-				var selection = this.editorWidget.getSelection();
-				var model = this.editorWidget.getModel();
+				var selection = this.textView.getSelection();
+				var model = this.textView.getModel();
 				var delimiter = model.getLineDelimiter();
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
@@ -443,15 +443,15 @@ orion.editor.TextActions = (function() {
 				//var insertPos = model.getLineStart(firstLine - 1);
 				var insertPos = lineEnd;
 				model.setText(text, insertPos, insertPos);
-				this.editorWidget.setSelection(insertPos+(isCopyFromLastLine?delimiter.length:0), insertPos+text.length);
+				this.textView.setSelection(insertPos+(isCopyFromLastLine?delimiter.length:0), insertPos+text.length);
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding('d', true, false, false), "Delete Selected Lines");
-			this.editorWidget.setAction("Delete Selected Lines", dojo.hitch(this, function() {
+			this.textView.setKeyBinding(new orion.textview.KeyBinding('d', true, false, false), "Delete Selected Lines");
+			this.textView.setAction("Delete Selected Lines", dojo.hitch(this, function() {
 				this.startUndo();
-				var selection = this.editorWidget.getSelection();
-				var model = this.editorWidget.getModel();
+				var selection = this.textView.getSelection();
+				var model = this.textView.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
 				var lineStart = model.getLineStart(firstLine);
@@ -461,9 +461,9 @@ orion.editor.TextActions = (function() {
 			}));
 			
 			// Go To Line action
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding("l", true), "Goto Line...");
-			this.editorWidget.setAction("Goto Line...", dojo.hitch(this, function() {
-					var line = this.editorWidget.getModel().getLineAtOffset(this.editorWidget.getCaretOffset());
+			this.textView.setKeyBinding(new orion.textview.KeyBinding("l", true), "Goto Line...");
+			this.textView.setAction("Goto Line...", dojo.hitch(this, function() {
+					var line = this.textView.getModel().getLineAtOffset(this.textView.getCaretOffset());
 					line = prompt("Go to line:", line + 1);
 					if (line) {
 						line = parseInt(line, 10);
@@ -478,14 +478,14 @@ orion.editor.TextActions = (function() {
 			this._incrementalFindActive = !this._incrementalFindActive;
 			if (this._incrementalFindActive) {
 				this.editor.reportStatus("Incremental find: " + this._incrementalFindPrefix);
-				this.editorWidget.addEventListener("Verify", this, this._incrementalFindListener.onVerify);
-				this.editorWidget.addEventListener("Selection", this, this._incrementalFindListener.onSelection);
+				this.textView.addEventListener("Verify", this, this._incrementalFindListener.onVerify);
+				this.textView.addEventListener("Selection", this, this._incrementalFindListener.onSelection);
 			} else {
 				this._incrementalFindPrefix = "";
 				this.editor.reportStatus("");
-				this.editorWidget.removeEventListener("Verify", this, this._incrementalFindListener.onVerify);
-				this.editorWidget.removeEventListener("Selection", this, this._incrementalFindListener.onSelection);
-				this.editorWidget.setCaretOffset(this.editorWidget.getCaretOffset());
+				this.textView.removeEventListener("Verify", this, this._incrementalFindListener.onVerify);
+				this.textView.removeEventListener("Selection", this, this._incrementalFindListener.onSelection);
+				this.textView.setCaretOffset(this.textView.getCaretOffset());
 			}
 		},
 		
@@ -513,15 +513,15 @@ orion.editor.TextActions = (function() {
 			var index;
 			if (this._incrementalFindActive) {
 				var p = this._incrementalFindPrefix;
-				var start = this.editorWidget.getCaretOffset() - p.length - 1;
+				var start = this.textView.getCaretOffset() - p.length - 1;
 				if (this._incrementalFindSuccess === false) {
-					start = this.editorWidget.getModel().getCharCount() - 1;
+					start = this.textView.getModel().getCharCount() - 1;
 				}
-				index = this.editorWidget.getText().lastIndexOf(p, start);
+				index = this.textView.getText().lastIndexOf(p, start);
 				if (index !== -1) {
 					this._incrementalFindSuccess = true;
 					this._incrementalFindIgnoreSelection = true;
-					this.editor.moveSelection(this.editorWidget, index,index+p.length);
+					this.editor.moveSelection(this.textView, index,index+p.length);
 					this._incrementalFindIgnoreSelection = false;
 				} else {
 					this.editor.reportStatus("Incremental find: " + p + " (not found)", true);	
@@ -537,15 +537,15 @@ orion.editor.TextActions = (function() {
 				if (p.length===0) {
 					return;
 				}
-				var start = this.editorWidget.getSelection().start + 1;
+				var start = this.textView.getSelection().start + 1;
 				if (this._incrementalFindSuccess === false) {
 					start = 0;
 				}
-				index = this.editorWidget.getText().indexOf(p, start);
+				index = this.textView.getText().indexOf(p, start);
 				if (index !== -1) {
 					this._incrementalFindSuccess = true;
 					this._incrementalFindIgnoreSelection = true;
-					this.editor.moveSelection(this.editorWidget, index, index+p.length);
+					this.editor.moveSelection(this.textView, index, index+p.length);
 					this._incrementalFindIgnoreSelection = false;
 					this.editor.reportStatus("Incremental find: " + p);
 				} else {
@@ -565,7 +565,7 @@ orion.editor.TextActions = (function() {
 orion.editor.SourceCodeActions = (function() {
 	function SourceCodeActions(editor, undoStack, contentAssist) {
 		this.editor = editor;
-		this.editorWidget = editor.getEditorWidget();
+		this.textView = editor.getTextView();
 		this.undoStack = undoStack;
 		this.contentAssist = contentAssist;
 		this.init();
@@ -585,17 +585,17 @@ orion.editor.SourceCodeActions = (function() {
 		init: function() {
 		
 			// Block comment operations
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(191, true), "Toggle Line Comment");
-			this.editorWidget.setAction("Toggle Line Comment", dojo.hitch(this, function() {
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(191, true), "Toggle Line Comment");
+			this.textView.setAction("Toggle Line Comment", dojo.hitch(this, function() {
 				this.startUndo();
-				var selection = this.editorWidget.getSelection();
-				var model = this.editorWidget.getModel();
+				var selection = this.textView.getSelection();
+				var model = this.textView.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
 				var uncomment = true;
 				var lineText;
 				for (var i = firstLine; i <= lastLine && uncomment; i++) {
-					lineText = this.editorWidget.getModel().getLine(i);
+					lineText = this.textView.getModel().getLine(i);
 					var index = lineText.indexOf("//");
 					if (index === -1) {
 						uncomment = false;
@@ -621,15 +621,15 @@ orion.editor.SourceCodeActions = (function() {
 						var commentIndex = lineText.indexOf("//");
 						lines.push(line.substring(0, commentIndex) + line.substring(commentIndex + 2));
 					}
-					this.editorWidget.setText(lines.join(""), firstLineStart, model.getLineEnd(lastLine, true));
-					this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start - 2, selection.end - (2 * (lastLine - firstLine + 1)) + (selection.end===lastLineStart+1?2:0));
+					this.textView.setText(lines.join(""), firstLineStart, model.getLineEnd(lastLine, true));
+					this.textView.setSelection(firstLineStart===selection.start?selection.start:selection.start - 2, selection.end - (2 * (lastLine - firstLine + 1)) + (selection.end===lastLineStart+1?2:0));
 				} else {
 					lines.push("");
 					for (k = firstLine; k <= lastLine; k++) {
 						lines.push(model.getLine(k, true));
 					}
-					this.editorWidget.setText(lines.join("//"), firstLineStart, model.getLineEnd(lastLine, true));
-					this.editorWidget.setSelection(firstLineStart===selection.start?selection.start:selection.start + 2, selection.end + (2 * (lastLine - firstLine + 1)));
+					this.textView.setText(lines.join("//"), firstLineStart, model.getLineEnd(lastLine, true));
+					this.textView.setSelection(firstLineStart===selection.start?selection.start:selection.start + 2, selection.end + (2 * (lastLine - firstLine + 1)));
 				}
 				this.endUndo();
 				return true;
@@ -668,10 +668,10 @@ orion.editor.SourceCodeActions = (function() {
 				return {commentStart: commentStart, commentEnd: commentEnd};
 			}
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(191, true, true), "Add Block Comment");
-			this.editorWidget.setAction("Add Block Comment", dojo.hitch(this, function() {
-				var selection = this.editorWidget.getSelection();
-				var model = this.editorWidget.getModel();
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(191, true, true), "Add Block Comment");
+			this.textView.setAction("Add Block Comment", dojo.hitch(this, function() {
+				var selection = this.textView.getSelection();
+				var model = this.textView.getModel();
 				var open = "/*", close = "*/", commentTags = new RegExp("/\\*" + "|" + "\\*/", "g");
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end);
@@ -690,14 +690,14 @@ orion.editor.SourceCodeActions = (function() {
 				
 				this.startUndo();
 				model.setText(open + text + close, selection.start, selection.end);
-				this.editorWidget.setSelection(selection.start + open.length, selection.end + open.length + (newLength-oldLength));
+				this.textView.setSelection(selection.start + open.length, selection.end + open.length + (newLength-oldLength));
 				this.endUndo();
 			}));
 			
-			this.editorWidget.setKeyBinding(new orion.textview.KeyBinding(220, true, true), "Remove Block Comment");
-			this.editorWidget.setAction("Remove Block Comment", dojo.hitch(this, function() {
-				var selection = this.editorWidget.getSelection();
-				var model = this.editorWidget.getModel();
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(220, true, true), "Remove Block Comment");
+			this.textView.setAction("Remove Block Comment", dojo.hitch(this, function() {
+				var selection = this.textView.getSelection();
+				var model = this.textView.getModel();
 				var open = "/*", close = "*/";
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end);
@@ -722,7 +722,7 @@ orion.editor.SourceCodeActions = (function() {
 				this.startUndo();
 				if (newStart !== undefined && newEnd !== undefined) {
 					model.setText(model.getText(newStart + open.length, newEnd), newStart, newEnd + close.length);
-					this.editorWidget.setSelection(newStart, newEnd);
+					this.textView.setSelection(newStart, newEnd);
 				} else {
 					// Otherwise find enclosing comment block
 					var result = findEnclosingComment(model, selection.start, selection.end);
@@ -732,19 +732,19 @@ orion.editor.SourceCodeActions = (function() {
 					
 					var text = model.getText(result.commentStart + open.length, result.commentEnd);
 					model.setText(text, result.commentStart, result.commentEnd + close.length);
-					this.editorWidget.setSelection(selection.start - open.length, selection.end - close.length);
+					this.textView.setSelection(selection.start - open.length, selection.end - close.length);
 				}
 				this.endUndo();
 			}));
 			
 			//Auto indent
-			this.editorWidget.setAction("enter", dojo.hitch(this, function() {
+			this.textView.setAction("enter", dojo.hitch(this, function() {
 				if (this.contentAssist && this.contentAssist.isActive()) {
 					return this.contentAssist.enter();
 				}
-				var selection = this.editorWidget.getSelection();
+				var selection = this.textView.getSelection();
 				if (selection.start === selection.end) {
-					var model = this.editorWidget.getModel();
+					var model = this.textView.getModel();
 					var lineIndex = model.getLineAtOffset(selection.start);
 					var lineText = model.getLine(lineIndex);
 					var lineStart = model.getLineStart(lineIndex);
@@ -754,7 +754,7 @@ orion.editor.SourceCodeActions = (function() {
 						var prefix = lineText.substring(0, index);
 						index = end;
 						while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
-						this.editorWidget.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
+						this.textView.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
 						return true;
 					}
 				}

@@ -18,7 +18,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitDetails, mGitCommitNavigator, mGitCommands) {
 
 dojo.addOnLoad(function() {
-	
+	document.body.style.visibility = "visible";
 	dojo.parser.parse();
 	
 	// initialize service registry and EAS services
