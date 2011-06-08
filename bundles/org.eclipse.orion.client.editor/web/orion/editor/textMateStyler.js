@@ -162,17 +162,18 @@ orion.editor.Util = {
 		return (/\\\d+/).test(regex.source);
 	},
 	
-	/** @returns {RegExp} A regex made by substituting any backreferences in regex for the corresponding
-	 * matched group text from match. */
-	getSubstitutedRegex: function(/**RegExp*/ regex, /**RegExp.match*/ match) {
+	/** @returns {RegExp} A regex made by substituting any backreferences in <tt>regex</tt> for the value of the property
+	 * in <tt>sub</tt> with the same name as the backreferenced group number. */
+	getSubstitutedRegex: function(/**RegExp*/ regex, /**Object*/ sub, /**Boolean*/ escape) {
+		escape = (typeof escape === "undefined") ? true : false;
 		var exploded = regex.source.split(/(\\\d+)/g);
 		var array = [];
 		for (var i=0; i < exploded.length; i++) {
 			var term = exploded[i];
 			var backrefMatch = /\\(\d+)/.exec(term);
 			if (backrefMatch) {
-				var matchedText = match[backrefMatch[1]] || "";
-				array.push(orion.editor.Util.escapeRegex(matchedText));
+				var text = sub[backrefMatch[1]] || "";
+				array.push(escape ? orion.editor.Util.escapeRegex(text) : text);
 			} else {
 				array.push(term);
 			}
@@ -183,6 +184,134 @@ orion.editor.Util = {
 	/** @returns {String} The input string with regex special characters escaped. */
 	escapeRegex: function(/**String*/ str) {
 		return str.replace(/([\\$\^*\/+?\.\(\)|{}\[\]])/g, "\\$&");
+	},
+	
+	/**
+	 * Builds a version of <tt>regex</tt> with every non-capturing term converted into a capturing group. This is a workaround
+	 * for JavaScript's lack of API to get the index at which a matched group begins in the input string.<p>
+	 * Using the "groupified" regex, we can sum the lengths of matches from <i>consuming groups</i> 1..n-1 to obtain the 
+	 * starting index of group n. (A consuming group is a capturing group that is not inside a lookahead assertion).</p>
+	 * Example: groupify(/(a+)x+(b+)/) === /(a+)(x+)(b+)/<br />
+	 * Example: groupify(/(?:x+(a+))b+/) === /(?:(x+)(a+))(b+)/
+	 * @param {RegExp} regex The regex to groupify.
+	 * @param {Boolean} [updateBackRefs] Optional, default is true. If false, we won't update backreferences in regex to refer
+	 * to the new group numbers of the returned regex.
+	 * @returns {Array} An array with 3 elements:
+	 * <ul><li>[0] {RegExp} The groupified version of the input regex.</li>
+	 * <li>[1] {Object} A map containing old-group to new-group info. Each property is a capturing group number of <tt>regex</tt>
+	 * and its value is the corresponding capturing group number of [0].</li>
+	 * <li>[2] {Object} A map indicating which capturing groups of [0] are also consuming groups. If a group number is found
+	 * as a property in this object, then it's a consuming group.</li></ul>
+	 */
+	groupify: function(regex, updateBackRefs) {
+		updateBackRefs = typeof updateBackRefs === "boolean" ? updateBackRefs : true;
+		var NON_CAPTURING = 1,
+		    CAPTURING = 2,
+		    LOOKAHEAD = 3,
+		    NEW_CAPTURING = 4;
+		var src = regex.source,
+		    len = src.length;
+		var groups = [],
+		    lookaheadDepth = 0,
+		    oldGroupNumber = 1,
+		    newGroupNumber = 1;
+		var result = [],
+		    old2New = {},
+		    consuming = {};
+		for (var i=0; i < len; i++) {
+			var curGroup = groups[groups.length-1];
+			var chr = src[i];
+			switch (chr) {
+				case "(":
+					// If we're in new capturing group, close it since ( signals end-of-term
+					if (curGroup === NEW_CAPTURING) {
+						groups.pop();
+						result.push(")");
+					}
+					var peek2 = (i + 2 < len) ? (src[i+1] + "" + src[i+2]) : null;
+					if (peek2 === "?:" || peek2 === "?=" || peek2 === "?!") {
+						// Found non-capturing group or lookahead assertion. Note that we preserve non-capturing groups
+						// as such, but any term inside them will become a new capturing group (unless it happens to
+						// also be inside a lookahead).
+						var groupType;
+						if (peek2 === "?:") {
+							groupType = NON_CAPTURING;
+						} else {
+							groupType = LOOKAHEAD;
+							lookaheadDepth++;
+						}
+						groups.push(groupType);
+						result.push(chr);
+						result.push(peek2);
+						i += peek2.length;
+					} else {
+						groups.push(CAPTURING);
+						result.push(chr);
+						if (lookaheadDepth === 0) {
+							consuming[newGroupNumber] = null;
+						}
+						old2New[oldGroupNumber++] = newGroupNumber++;
+					}
+					break;
+				case ")":
+					var group = groups.pop();
+					if (group === LOOKAHEAD) { lookaheadDepth--; }
+					result.push(chr);
+					break;
+				default:
+					if (curGroup !== CAPTURING && curGroup !== NEW_CAPTURING) {
+						// Not in a capturing group, so make a new one to hold this term.
+						// Perf improvement: don't create the new group if we're inside a lookahead, since we don't 
+						// care about them (nothing inside a lookahead actually consumes input so we don't need it)
+						if (lookaheadDepth === 0) {
+							groups.push(NEW_CAPTURING);
+							result.push("(");
+							consuming[newGroupNumber] = null;
+							newGroupNumber++;
+						}
+					}
+					result.push(chr);
+					if (chr === "\\") {
+						var peek = src[i+1];
+						if (peek === "\\" || peek === "(" || peek === ")") {
+							// Eat next so following iteration doesn't think it's a real slash/lparen/rparen
+							result.push(peek);
+							i += 1;
+						}
+					}
+					break;
+			}
+		}
+		while (groups.length) {	
+			// Close any remaining new capturing groups
+			groups.pop();
+			result.push(")");
+		}
+		var newRegex = new RegExp(result.join(""));
+		if (updateBackRefs) {
+			// Update backreferences so they refer to the new group numbers
+			var backrefSubstitution = {};
+			for (var prop in old2New) {
+				if (old2New.hasOwnProperty(prop)) {
+					backrefSubstitution[prop] = "\\" + old2New[prop];
+				}
+			}
+			newRegex = this.getSubstitutedRegex(newRegex, backrefSubstitution, false);
+		}
+		return [newRegex, old2New, consuming];
+	},
+	
+	/** @returns {Boolean} True if the captures object assigns scope to a matching group other than "0". */
+	complexCaptures: function(capturesObj) {
+		if (!capturesObj) { return false; }
+		for (var prop in capturesObj) {
+			if (capturesObj.hasOwnProperty(prop)) {
+				if (prop !== "0") {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 };
 
@@ -334,13 +463,18 @@ orion.editor.TextMateStyler = (function() {
 				
 				this.endRegexHasBackRef = orion.editor.Util.hasBackReference(this.endRegex);
 				
-				// TODO: if rule.beginCaptures, make a group-ified regex from beginRegex
-				// TODO: if rule.endCaptures, make a group-ified regex from endRegex
+				var complexCaptures = orion.editor.Util.complexCaptures(rule.captures);
+				this.complexBeginEnd = complexCaptures || orion.editor.Util.complexCaptures(rule.beginCaptures) || orion.editor.Util.complexCaptures(rule.endCaptures);
+				if (complexCaptures || this.complexBeginEnd) {
+					this.beginRegexGroupified = orion.editor.Util.groupify(this.beginRegex);
+				}
+				if (complexCaptures || this.complexBeginEnd) {
+					this.endRegexGroupified = orion.editor.Util.groupify(this.endRegex, false /*don't touch backrefs*/);
+				}
 			}
 			BeginEndRule.prototype.valueOf = function() { return this.beginRegex; };
 			return BeginEndRule;
 		}()),
-		
 		/**
 		 * A rule with a "match" pattern.
 		 * @private
@@ -349,8 +483,10 @@ orion.editor.TextMateStyler = (function() {
 			function MatchRule(/**Object*/ rule) {
 				this.rule = rule;
 				this.matchRegex = orion.editor.Util.toRegExp(rule.match);
-				
-				// TODO if rule.captures, make a group-ified regex from matchRegex
+				this.complexCaptures = orion.editor.Util.complexCaptures(rule.captures);
+				if (this.complexCaptures) {
+					this.matchRegexGroupified = orion.editor.Util.groupify(this.matchRegex);
+				}
 			}
 			MatchRule.prototype.valueOf = function() { return this.matchRegex; };
 			return MatchRule;
@@ -420,9 +556,21 @@ orion.editor.TextMateStyler = (function() {
 				this.end = null; // will be set eventually during parsing (may be EOF)
 				this.endMatch = null; // may remain null if we never match our "end" pattern
 				
-				// Build a new regex if the "end" regex has backrefs that refer to matched groups of beginMatch
+				// Build a new regex if the "end" regex has backrefs since they refer to matched groups of beginMatch
 				if (rule.endRegexHasBackRef) {
-					this.endRegexSubstituted = orion.editor.Util.getSubstitutedRegex(rule.endRegex, beginMatch);
+					if (rule.complexBeginEnd) {
+						// begin regex has been groupified, so we need to substitute using its new group numbers
+						var old2New = this.rule.beginRegexGroupified[1];
+						var newSub = {};
+						for (var groupNum = 1; beginMatch[groupNum] !== undefined; groupNum++) {
+							var value = beginMatch[groupNum];
+							var newGroupNum = old2New[groupNum];
+							newSub[newGroupNum] = value;
+						}
+						this.endRegexSubstituted = orion.editor.Util.getSubstitutedRegex(rule.endRegexGroupified[0], newSub);
+					} else {
+						this.endRegexSubstituted = orion.editor.Util.getSubstitutedRegex(rule.endRegex, beginMatch);
+					}
 				} else {
 					this.endRegexSubstituted = null;
 				}
@@ -992,10 +1140,12 @@ orion.editor.TextMateStyler = (function() {
 		styleDirect: function(/**Array*/ scopes, /**Array*/ claimedRegions, /**BeginEndNode*/ node, lineStart, lineEnd) {
 			var claimedRegion;
 			var matchRuleStart, matchRuleEnd;
+			var isComplex, groupified;
 			if (node instanceof this.BeginEndNode) {
 				// if we start on this line, apply our beginCaptures
 				// if we end on this line, apply our endCaptures
-				var rule = node.rule.rule;
+				var typedRule = node.rule;
+				var rule = typedRule.rule;
 				var start0 = node.start,
 				    start1 = node.start + node.beginMatch[0].length,
 				    end0 = (node.endMatch && node.endMatch.index) || node.end,
@@ -1009,13 +1159,17 @@ orion.editor.TextMateStyler = (function() {
 					claimedRegion = {start: start0, end: Math.min(end1, lineEnd)};
 					matchRuleStart = start1;
 					matchRuleEnd = Math.min(end0, lineEnd);
-					this.addScopeForCaptures(scopes, node, start0, start1, node.beginMatch, beginCaptures || captures);
+					isComplex = typedRule.complexBeginEnd;
+					groupified = isComplex && typedRule.beginRegexGroupified;
+					this.addScopeForCaptures(scopes, node, start0, start1, node.beginMatch, beginCaptures || captures, isComplex, groupified);
 				}
 				if (endsOnLine) {
 					claimedRegion = {start: Math.max(start0, lineStart), end: end1};
 					matchRuleStart = Math.max(start1, lineStart);
 					matchRuleEnd = end0;
-					this.addScopeForCaptures(scopes, node, end0, end1, node.endMatch, endCaptures || captures);
+					isComplex = typedRule.complexBeginEnd;
+					groupified = isComplex && [node.endRegexSubstituted, typedRule.endRegexGroupified[1], typedRule.endRegexGroupified[2]];
+					this.addScopeForCaptures(scopes, node, end0, end1, node.endMatch, endCaptures || captures, isComplex, groupified);
 				}
 				if (!beginsOnLine && !endsOnLine) {
 					claimedRegion = {start: lineStart, end: lineEnd};
@@ -1043,11 +1197,17 @@ orion.editor.TextMateStyler = (function() {
 				var matchInfo = this.getNextMatch(model, node, pos, true);
 				if (matchInfo) {
 					var match = matchInfo.match,
-					    rule = matchInfo.rule;
+					    typedRule = matchInfo.rule,
+					    captures = typedRule.rule.captures;
 					pos = this.afterMatch(match);
 					// Is it in our range?
 					if (match.index + match[0].length <= end) {
-						this.addScope(scopes, node, match.index, pos, rule.rule.name);
+						if (captures) {
+							// captures scope (takes priority over name)
+							this.addScopeForCaptures(scopes, node, match.index, pos, match, captures, typedRule.complexCaptures, typedRule.matchRegexGroupified);
+						} else {
+							this.addScope(scopes, node, match.index, pos, typedRule.rule.name);
+						}
 						continue;
 					}
 				}
@@ -1059,36 +1219,36 @@ orion.editor.TextMateStyler = (function() {
 			if (!scope || start === end) { return; }
 			scopes.push({start: start, end: end, scope: scope, from: fromNode});
 		},
-		addScopeForCaptures: function(scopes, fromNode, start, end, match, captures /*,newRegex, old2New*/) {
+		addScopeForCaptures: function(scopes, fromNode, start, end, match, captures, isComplex, groupified, isEnd) {
 			if (!captures) { return; }
 			this.addScope(scopes, fromNode, start, end, captures[0] && captures[0].name);
-			// TODO: apply scopes captures[1..n] to matching groups [1]..[n] of match
-//			for (var groupNum in captures) {
-//				if (captures.hasOwnProperty(groupNum)) {
-//					var scope = captures[groupNum].name;
-//					var groupText = match[groupNum];
-//					if (!scope || typeof(groupText) !== "string") {
-//						continue;
-//					}
-//					//console.debug("TODO apply " + scope + " to '" + groupText + "'");
-//					/* TODO: workaround for JS having no API for getting matching group start index
-//					var newMatchRegex = parse regex, wrap every un-matching-paren'd term with matching parens
-//					var old2New = object mapping group #s in regex to #s in newMatchRegex
-//					// Match again against newRegex. Note that newMatch[0] is guaranteed to be start..end
-//					newRegex.lastIndex = start;
-//					var newMatch = newRegex.exec(match.input.substring(0, end+1));
-//					newRegex.lastIndex = 0;
-//					var groupRanges = sum up lengths of newMatch[1], newMatch[2], ... to get matching group ranges
-//					for (var groupNum = 1; newMatch[groupNum]; groupNum++) {
-//						var oldGroupNum = old2New[groupNum];
-//						if (typeof(oldGroupNum) !== "undefined") {
-//							var scope = captures[oldGroupNum].name;
-//							ranges.push({start: groupStart, end: groupEnd, scope: scope});
-//						}
-//					}
-//					*/
-//				}
-//			}
+			
+			// apply scopes captures[1..n] to matching groups [1]..[n] of match
+			if (isComplex) {
+				var newRegex = groupified[0],
+				    old2New = groupified[1],
+				    consuming = groupified[2];
+				// Match again, this time against the groupifiedRegex on start..end (note newMatch guaranteed to be from start..end)
+				var newMatch = this.exec(newRegex, this.textView.getText(start,end), start);
+				// Now sum up the lengths of preceding consuming groups to get the start offset for each group.
+				var newGroupStarts = {1: 0};
+				var sum = 0;
+				for (var num = 1; newMatch[num] !== undefined; num++) {
+					if (consuming[num] !== undefined) {
+						sum += newMatch[num].length;
+					}
+					if (newMatch[num+1] !== undefined) {
+						newGroupStarts[num + 1] = sum;
+					}
+				}
+				for (var oldGroupNum = 1; captures[oldGroupNum]; oldGroupNum++) {
+					var scope = captures[oldGroupNum].name;
+					var newGroupNum = old2New[oldGroupNum];
+					var groupStart = start + newGroupStarts[newGroupNum];
+					var groupEnd = groupStart + newMatch[newGroupNum].length;
+					this.addScope(scopes, fromNode, groupStart, groupEnd, scope);
+				}
+			}
 		},
 		/** @returns {Node[]} In depth-first order */
 		getIntersecting: function(start, end) {
