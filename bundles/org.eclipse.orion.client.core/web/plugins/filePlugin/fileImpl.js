@@ -240,7 +240,7 @@ eclipse.FileServiceImpl= (function() {
 		 * @param {String} [name] The name of the destination file or directory in the case of a rename
 		 */
 		moveFile: function(sourceLocation, targetLocation, name) {
-			this._doCopyMove(sourceLocation, targetLocation, true, name);
+			return this._doCopyMove(sourceLocation, targetLocation, true, name);
 		},
 		 
 		/**
@@ -250,7 +250,7 @@ eclipse.FileServiceImpl= (function() {
 		 * @param {String} [name] The name of the destination file or directory in the case of a rename
 		 */
 		copyFile: function(sourceLocation, targetLocation, name) {
-			this._doCopyMove(sourceLocation, targetLocation, false, name);
+			return this._doCopyMove(sourceLocation, targetLocation, false, name);
 		},
 		
 		_doCopyMove: function(sourceLocation, targetLocation, isMove, name) {
