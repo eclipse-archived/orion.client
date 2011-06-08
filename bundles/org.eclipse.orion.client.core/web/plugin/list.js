@@ -138,13 +138,10 @@ dojo.addOnLoad(function() {
 				installUrlTextBox.value = plugins[0].getLocation();
 				installUrlTextBox.focus();
 			}
-		});
-			
-		// Wait until the JSLint plugin has (hopefully) loaded, then draw the tree
-		window.setTimeout(function() {
-			initTree();
-			installUrlTextBox.focus();
-		}, 500);
+		});			
+
+		initTree();
+		installUrlTextBox.focus();
 	});
 });
 });
