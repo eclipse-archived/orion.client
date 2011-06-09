@@ -40,7 +40,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 			// FIXME: it is bogus that we separate favorites and searches
 			// we need a general representation and let the UI (and user) sort out
 			// how it is filtered or organized
-			this._serviceRegistration.dispatchEvent("favoritesChanged", this._favorites, this._searches);
+			this._serviceRegistration.dispatchEvent("favoritesChanged", {navigator: this._favorites, search: this._searches});
 		},
 	
 		/**
@@ -121,7 +121,6 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 					
 		_initializeFavorites: function () {
 			var favorites = this;
-			var favesDone, searchesDone;
 			this._registry.getService("orion.core.preference").then(function(service) {
 				service.getPreferences("/window/favorites").then(function(prefs) { 
 					var i;
@@ -168,8 +167,8 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 			}); 
 		},
 		
-		getFavorites: function(onDone) {
-			onDone(this._favorites);
+		getFavorites: function() {
+			return {navigator: this._favorites, search: this._searches};
 		}
 	};
 	FavoritesService.prototype.constructor = FavoritesService;
@@ -252,8 +251,11 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 
 		});
 		this._registry.getService("orion.core.favorite").then(function(service) {
-			service.addEventListener("favoritesChanged", function(favs, searches) {
-				favorites.render(favs, searches);
+			service.getFavorites().then(function(favs) {
+				favorites.render(favs.navigator, favs.search);
+			});
+			service.addEventListener("favoritesChanged", function(favs) {
+				favorites.render(favs.navigator, favs.search);
 			});
 		});
 	}

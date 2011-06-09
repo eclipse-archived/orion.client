@@ -9,18 +9,15 @@
  ******************************************************************************/
 
 /*jslint forin:true devel:true*/
-/*global dojo, document*/
+/*global define dojo document*/
+
 define(['dojo'], function(dojo) {
 
-	/** @namespace */
-var eclipse = eclipse || {};
-
-eclipse.TableTree = (function() {
 	/**
 	 * Constructs a new TableTree with the given options.
 	 * 
 	 * @param options 
-	 * @name eclipse.TableTree 
+	 * @name orion.treetable.TableTree 
 	 * @class Generates an HTML table where one of the columns is indented according to depth of children.
 	 * Clients must supply a model that generates children items, and a renderer can be supplied which
 	 * generates the HTML table row for each child. Custom rendering allows clients to use checkboxes,
@@ -48,7 +45,7 @@ eclipse.TableTree = (function() {
 	function TableTree (options) {
 		this._init(options);
 	}
-	TableTree.prototype = /** @lends eclipse.TableTree.prototype */ {
+	TableTree.prototype = /** @lends orion.treetable.TableTree.prototype */ {
 		_init: function(options) {
 			var parent = options.parent;
 			var tree = this;
@@ -268,8 +265,7 @@ eclipse.TableTree = (function() {
 			}
 		}
 	};  // end prototype
-	return TableTree;
-}());
-
-return eclipse;	
+	TableTree.prototype.constructor = TableTree;
+	//return module exports
+	return {TableTree: TableTree};
 });

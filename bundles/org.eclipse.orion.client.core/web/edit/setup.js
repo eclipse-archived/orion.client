@@ -326,6 +326,7 @@ exports.setUpEditor = function(isReadOnly){
 					var query = inputManager.getFileMetadata().SearchLocation + searchPattern + extensionFilter;
 					searcher.search(searchFloat, query, inputManager.getInput());
 				}, 0);
+				return true;
 			});
 				
 			
@@ -333,6 +334,7 @@ exports.setUpEditor = function(isReadOnly){
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "Toggle Outliner");
 			editor.getTextView().setAction("Toggle Outliner", function(){
 					splitArea.toggle();
+					return true;
 			});
 		};
 		

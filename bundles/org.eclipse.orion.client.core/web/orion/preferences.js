@@ -148,25 +148,44 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 		flush: this._flush
 	};
 	
+	var _cache = {
+			get: function(key, ignoreExpires) {
+				var item = localStorage.getItem(key);
+				if (item == null) {
+					return null;
+				}
+				var cached = JSON.parse(item);
+				if (ignoreExpires || (cached._expires && cached._expires > new Date().getTime())) {
+					delete cached._expires;
+					return cached;
+				}
+				return null;
+			},
+			set: function(key, data) {
+				data._expires = new Date().getTime() + (1000*60*60); // expire every hour
+				var jsonData = JSON.stringify(data);
+				localStorage.setItem(key, jsonData);
+				delete data._expires;
+			}
+	};
+	
 	function UserPreferencesProvider(location) {
 		this.location = location;
-		this._currentPromise = null;
+		this._currentPromises = {};
 	}
 	UserPreferencesProvider.prototype = {
 		
 		get: function(name) {
-			if (this._currentPromise) {
-				return this._currentPromise;
+			if (this._currentPromises[name]) {
+				return this._currentPromises[name];
 			}
 			var d = new dojo.Deferred();
 			var key = "/orion/preferences/user" + name;
-			var data = localStorage.getItem(key);
-			if (data !== null) {
-				window.setTimeout(function() {
-					d.resolve(JSON.parse(data));
-				},0);
+			var cached = _cache.get(key);
+			if (cached !== null) {
+				d.resolve(cached);
 			} else {
-				this._currentPromise = d;
+				this._currentPromises[name] = d;
 				var that = this;
 				dojo.xhrGet({
 					url: this.location + name,
@@ -175,18 +194,23 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 					},
 					handleAs: "json",
 					timeout: 15000,
-					load: function(jsonData, ioArgs) {
-						localStorage.setItem(key, JSON.stringify(jsonData));
-						that._currentPromise = null;
-						d.resolve(jsonData);
+					load: function(data, ioArgs) {
+						_cache.set(key, data);
+						delete that._currentPromises[name];
+						d.resolve(data);
 					},
 					error: function(response, ioArgs) {
 						response.log=false;
 						if (ioArgs.xhr.status === 401) {
 							mAuth.handleGetAuthenticationError(this, ioArgs);
-						} else {
-							that._currentPromise = null;
-							d.resolve({});
+						} else if (ioArgs.xhr.status === 404) {
+							var data = {};
+							_cache.set(key, data);
+							delete that._currentPromises[name];
+							d.resolve(data);
+						} else  {
+							delete that._currentPromises[name];
+							d.resolve(_cache.get(key, true) || {});
 						}
 					},
 					failOk: true
@@ -198,11 +222,10 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 		put: function(name, data) {
 			var d = new dojo.Deferred();
 			var key = "/orion/preferences/user" + name;
-			var jsonData = JSON.stringify(data);
-			localStorage.setItem(key, jsonData);
+			_cache.set(key, data);
 			dojo.xhrPut({
 				url: this.location + name,
-				putData: jsonData,
+				putData: JSON.stringify(data),
 				headers: {
 					"Orion-Version": "1"
 				},
@@ -234,12 +257,11 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 			if (this._currentPromise) {
 				return this._currentPromise;
 			}
+			var key = "/orion/preferences/default";
 			var d = new dojo.Deferred();
-			var data = localStorage.getItem("/orion/preferences/default");
-			if (data !== null) {
-				window.setTimeout(function() {
-					d.resolve(JSON.parse(data)[name] || {});
-				},0);
+			var cached = _cache.get(key);
+			if (cached !== null) {
+				d.resolve(cached[name] || {});
 			} else {
 				this._currentPromise = d;
 				var that = this;
@@ -250,17 +272,26 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 					},
 					handleAs: "json",
 					timeout: 15000,
-					load: function(jsonData, ioArgs) {
-						localStorage.setItem("/orion/preferences/default", JSON.stringify(jsonData));
+					load: function(data, ioArgs) {
+						_cache.set(key, data);
 						that._currentPromise = null;
-						d.resolve(jsonData[name]|| {});
+						d.resolve(data[name]|| {});
 					},
 					error: function(response, ioArgs) {
 						if (ioArgs.xhr.status === 401) {
 							mAuth.handleGetAuthenticationError(ioArgs.xhr, ioArgs);
-						} else {
+						} else if (ioArgs.xhr.status === 404) {
+							_cache.set(key, {});
 							that._currentPromise = null;
 							d.resolve({});
+						} else {
+							that._currentPromise = null;
+							var data = _cache.get(key, true);
+							if (data !== null) {
+								d.resolve(data[name] || {});
+							} else {
+								d.resolve({});
+							}
 						}
 					}
 				});
@@ -275,7 +306,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 	 * This service constructor is only intended to be used by page service registry
 	 * initialization code.
 	 * @class The preferences service manages a hierarchical set of preference
-	 * nodes. Each node consistents of preference key/value pairs. 
+	 * nodes. Each node consists of preference key/value pairs. 
 	 * @name orion.preferences.PreferencesService
 	 * @see orion.preferences.Preferences
 	 */

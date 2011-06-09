@@ -453,7 +453,8 @@ orion.editor.TextMateStyler = (function() {
 			};
 			BeginEndNode.prototype.shiftStart = function(amount) {
 				this.start += amount;
-				this.beginMatch.index += amount;			};
+				this.beginMatch.index += amount;
+			};
 			BeginEndNode.prototype.shiftEnd = function(amount) {
 				this.end += amount;
 				if (this.endMatch) { this.endMatch.index += amount; }
@@ -739,7 +740,7 @@ orion.editor.TextMateStyler = (function() {
 		 * {Boolean} isEnd
 		 * {Boolean} isSub
 		 * {RegExp.match} match
-		 * {(Container|Match|BeginEnd)Rule} rule
+		 * {(Match|BeginEnd)Rule} rule
 		 */
 		getNextMatch: function(model, node, pos, matchRulesOnly) {
 			var lineIndex = model.getLineAtOffset(pos);
@@ -754,7 +755,9 @@ orion.editor.TextMateStyler = (function() {
 				var next = stack.length ? stack.pop() : null;
 				var subrule = next && next._resolvedRule._typedRule;
 				if (subrule instanceof this.ContainerRule) {
-					throw new Error("FIXME ContainerNode in getNextMatch()");
+					// Expand ContainerRule by pushing its subrules on
+					this.push(stack, subrule.subrules);
+					continue;
 				}
 				if (subrule && matchRulesOnly && !(subrule.matchRegex)) {
 					continue;

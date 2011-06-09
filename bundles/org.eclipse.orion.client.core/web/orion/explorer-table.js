@@ -8,137 +8,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo eclipse:true widgets*/
+/*global define */
 /*jslint regexp:false browser:true forin:true*/
 
 define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/fileCommands', 'dojo/number'], function(dojo, mUtil, mExplorer, mBreadcrumbs, mFileCommands){
 
-/**
- * @namespace The global container for eclipse APIs.
- */ 
-var eclipse = eclipse || {};
-eclipse.FileExplorer = (function() {
 	/**
-	 * @name eclipse.FileExplorer
-	 * @class A table-based explorer component
-	 */
-	function FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, parentId, pageTitleId, toolbarId, selectionToolsId) {
-		this.registry = serviceRegistry;
-		this.treeRoot = treeRoot;
-		this.selection = selection;
-		this.searcher = searcher;
-		this.fileClient = fileClient;
-		this.parentId = parentId;
-		this.pageTitleId = pageTitleId;
-		this.toolbarId = toolbarId;
-		this.selectionToolsId = selectionToolsId;
-		this.model = null;
-		this.myTree = null;
-		this.renderer = new eclipse.FileRenderer({checkbox: true, cachePrefix: "Navigator"}, this, commandService);
-	}
-	
-	FileExplorer.prototype = mExplorer.Explorer.prototype;
-	
-		// we have changed an item on the server at the specified parent node
-		FileExplorer.prototype.changedItem = function(parent) {
-			var self = this;
-			this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
-				mUtil.processNavigatorParent(parent, children);
-				dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children, self.renderer.expandCollapseImageId(self.model.getId(parent)), self.renderer._expandImgSrc);
-			});
-		};
-		
-		FileExplorer.prototype.getNameNode = function(item) {
-			var rowId = this.model.getId(item);
-			if (rowId) {
-				// I know this from my renderer below.
-				return dojo.byId(rowId+"NameColumn");
-			}
-		};
-		
-		
-		
-
-
-		/**
-		 * Load the resource at the given path.
-		 * @param path The path of the resource to load
-		 * @param [force] If true, force reload even if the path is unchanged. Useful
-		 * when the client knows the resource underlying the current path has changed.
-		 */
-		FileExplorer.prototype.loadResourceList = function(path, force) {
-			// console.log("loadResourceList old " + this._lastHash + " new " + path);
-			path = mUtil.makeRelative(path);
-			if (!force && path === this._lastHash) {
-				return;
-			}
-						
-			this._lastHash = path;
-			var parent = dojo.byId(this.parentId);			
-
-			// we are refetching everything so clean up the root
-			this.treeRoot = {};
-	
-			if (force || (path !== this.treeRoot.Path)) {
-				//the tree root object has changed so we need to load the new one
-				
-				// Progress indicator
-				var progress = dojo.byId("progress"); 
-				if(!progress){
-					progress = dojo.create("div", {id: "progress"}, parent, "only");
-				}
-				dojo.empty(progress);
-				
-				var progressTimeout = setTimeout(function() {
-					dojo.empty(progress);
-					var b = dojo.create("b");
-					dojo.place(document.createTextNode("Loading "), progress, "last");
-					dojo.place(document.createTextNode(path), b, "last");
-					dojo.place(b, progress, "last");
-					dojo.place(document.createTextNode("..."), progress, "last");
-				}, 500); // wait 500ms before displaying
-				
-				this.treeRoot.Path = path;
-				var self = this;
-				
-				this.fileClient.loadWorkspace(path).then(
-					//do we really need hitch - could just refer to self rather than this
-					dojo.hitch(self, function(loadedWorkspace) {
-						clearTimeout(progressTimeout);
-						//copy fields of resulting object into the tree root
-						for (var i in loadedWorkspace) {
-							this.treeRoot[i] = loadedWorkspace[i];
-						}
-						mUtil.rememberSuccessfulTraversal(this.treeRoot, this.registry);
-						mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);					
-						// erase any old page title
-						var pageTitle = dojo.byId(this.pageTitleId);
-						if (pageTitle) {
-							dojo.empty(pageTitle);
-							new mBreadcrumbs.BreadCrumbs({container: pageTitle, resource: this.treeRoot});
-						}
-						mFileCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
-						this.model = new eclipse.Model(this.registry, this.treeRoot, this.fileClient);
-						this.createTree(this.parentId, this.model);
-					}),
-					dojo.hitch(self, function(error) {
-						clearTimeout(progressTimeout);
-						// Show an error message when a problem happens during getting the workspace
-						if (error.status !== null && error.status !== 401){
-							dojo.place(document.createTextNode("Sorry, an error occurred: " + error.message), progress, "only");
-						}
-					})
-				);
-			}
-		};
-		
-	return FileExplorer;
-}());
-
-eclipse.Model = (function() {
-	/**
-	 * @name eclipse.Model
-	 * @class Tree model used by eclipse.FileExplorer.
+	 * Tree model used by the FileExplorer
 	 * TODO: Consolidate with eclipse.TreeModel.
 	 */
 	function Model(serviceRegistry, root, fileClient, treeId) {
@@ -149,33 +25,32 @@ eclipse.Model = (function() {
 	}
 	Model.prototype = mExplorer.ExplorerModel.prototype; 
 	
-	
 	Model.prototype.getRoot = function(onItem){
-			onItem(this.root);
-		};
+		onItem(this.root);
+	};
 		
 	Model.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
-			// the parent already has the children fetched
-			if (parentItem.children) {
-				onComplete(parentItem.children);
-			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
-				onComplete([]);
-			} else if (parentItem.Location) {
-				this.fileClient.fetchChildren(parentItem.ChildrenLocation).then( 
-					dojo.hitch(this, function(children) {
-						mUtil.processNavigatorParent(parentItem, children);
-						onComplete(children);
-					})
-				);
-			} else {
-				onComplete([]);
-			}
-		};
-	return Model;
-}());
+		// the parent already has the children fetched
+		if (parentItem.children) {
+			onComplete(parentItem.children);
+		} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
+			onComplete([]);
+		} else if (parentItem.Location) {
+			this.fileClient.fetchChildren(parentItem.ChildrenLocation).then( 
+				dojo.hitch(this, function(children) {
+					mUtil.processNavigatorParent(parentItem, children);
+					onComplete(children);
+				})
+			);
+		} else {
+			onComplete([]);
+		}
+	};
+	Model.prototype.constructor = Model;
 
-/********* Rendering json items into columns in the tree **************/
-eclipse.FileRenderer = (function() {
+	/**
+	 * Renders json items into columns in the tree
+	 */
 	function FileRenderer (options, explorer, commandService) {
 		this.explorer = explorer;
 		this.commandService = commandService;
@@ -183,8 +58,6 @@ eclipse.FileRenderer = (function() {
 		this._init(options);
 	}
 	FileRenderer.prototype = mExplorer.SelectionRenderer.prototype; 
-	
-	
 	FileRenderer.prototype.getCellHeaderElement = function(col_no){
 		
 		switch(col_no){
@@ -201,8 +74,7 @@ eclipse.FileRenderer = (function() {
 		}
 	};
 		
-		FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		
+	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		switch(col_no){
 		case 0:
 			var col, div, link;
@@ -259,7 +131,122 @@ eclipse.FileRenderer = (function() {
 			return sizeColumn;
 		}
 	};
-	return FileRenderer;
-}());
-return eclipse;
+	FileRenderer.prototype.constructor = FileRenderer;
+
+	/**
+	 * Creates a new file explorer.
+	 * @name orion.explorer-table.FileExplorer
+	 * @class A user interface component that displays a table-oriented file explorer
+	 */
+	function FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, parentId, pageTitleId, toolbarId, selectionToolsId) {
+		this.registry = serviceRegistry;
+		this.treeRoot = treeRoot;
+		this.selection = selection;
+		this.searcher = searcher;
+		this.fileClient = fileClient;
+		this.parentId = parentId;
+		this.pageTitleId = pageTitleId;
+		this.toolbarId = toolbarId;
+		this.selectionToolsId = selectionToolsId;
+		this.model = null;
+		this.myTree = null;
+		this.renderer = new FileRenderer({checkbox: true, cachePrefix: "Navigator"}, this, commandService);
+	}
+	
+	FileExplorer.prototype = mExplorer.Explorer.prototype;
+	
+	// we have changed an item on the server at the specified parent node
+	FileExplorer.prototype.changedItem = function(parent) {
+		var self = this;
+		this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
+			mUtil.processNavigatorParent(parent, children);
+			dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children, self.renderer.expandCollapseImageId(self.model.getId(parent)), self.renderer._expandImgSrc);
+		});
+	};
+		
+	FileExplorer.prototype.getNameNode = function(item) {
+		var rowId = this.model.getId(item);
+		if (rowId) {
+			// I know this from my renderer below.
+			return dojo.byId(rowId+"NameColumn");
+		}
+	};
+		
+	/**
+	 * Load the resource at the given path.
+	 * @param path The path of the resource to load
+	 * @param [force] If true, force reload even if the path is unchanged. Useful
+	 * when the client knows the resource underlying the current path has changed.
+	 */
+	FileExplorer.prototype.loadResourceList = function(path, force) {
+		// console.log("loadResourceList old " + this._lastHash + " new " + path);
+		path = mUtil.makeRelative(path);
+		if (!force && path === this._lastHash) {
+			return;
+		}
+					
+		this._lastHash = path;
+		var parent = dojo.byId(this.parentId);			
+
+		// we are refetching everything so clean up the root
+		this.treeRoot = {};
+
+		if (force || (path !== this.treeRoot.Path)) {
+			//the tree root object has changed so we need to load the new one
+			
+			// Progress indicator
+			var progress = dojo.byId("progress"); 
+			if(!progress){
+				progress = dojo.create("div", {id: "progress"}, parent, "only");
+			}
+			dojo.empty(progress);
+			
+			var progressTimeout = setTimeout(function() {
+				dojo.empty(progress);
+				var b = dojo.create("b");
+				dojo.place(document.createTextNode("Loading "), progress, "last");
+				dojo.place(document.createTextNode(path), b, "last");
+				dojo.place(b, progress, "last");
+				dojo.place(document.createTextNode("..."), progress, "last");
+			}, 500); // wait 500ms before displaying
+				
+			this.treeRoot.Path = path;
+			var self = this;
+			
+			this.fileClient.loadWorkspace(path).then(
+				//do we really need hitch - could just refer to self rather than this
+				dojo.hitch(self, function(loadedWorkspace) {
+					clearTimeout(progressTimeout);
+					//copy fields of resulting object into the tree root
+					for (var i in loadedWorkspace) {
+						this.treeRoot[i] = loadedWorkspace[i];
+					}
+					mUtil.rememberSuccessfulTraversal(this.treeRoot, this.registry);
+					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);					
+					// erase any old page title
+					var pageTitle = dojo.byId(this.pageTitleId);
+					if (pageTitle) {
+						dojo.empty(pageTitle);
+						new mBreadcrumbs.BreadCrumbs({container: pageTitle, resource: this.treeRoot});
+					}
+					mFileCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
+					this.model = new Model(this.registry, this.treeRoot, this.fileClient);
+					this.createTree(this.parentId, this.model);
+				}),
+				dojo.hitch(self, function(error) {
+					clearTimeout(progressTimeout);
+					// Show an error message when a problem happens during getting the workspace
+					if (error.status !== null && error.status !== 401){
+						dojo.place(document.createTextNode("Sorry, an error occurred: " + error.message), progress, "only");
+					}
+				})
+			);
+		}
+	};
+	FileExplorer.prototype.constructor = FileExplorer;
+
+	//return module exports
+	return {
+		FileExplorer: FileExplorer
+	};
 });

@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/**
- * @namespace The global container for eclipse APIs.
- */ 
+
 var eclipse = eclipse || {};
 
 eclipse.ServiceProvider = function(serviceId, internalProvider) {

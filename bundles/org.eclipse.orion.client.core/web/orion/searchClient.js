@@ -9,22 +9,22 @@
  * IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*global dojo window document handleGetAuthenticationError */
+/*global define window document */
 /*jslint devel:true*/
 
 define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(dojo, dijit, mAuth, mUtil){
 
-var eclipse = eclipse || {};
-eclipse.Searcher = (function() {
 	/**
-	 * @param options The options object containing the service registry
-	 * @name eclipse.Searcher
+	 * Creates a new search client.
+	 * @param {Object} options The options object
+	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry The service registry
+	 * @name orion.searchClient.Searcher
 	 * @class Provides API for searching the workspace.
 	 */
 	function Searcher(options) {
 		this.registry= options.serviceRegistry;
 	}
-	Searcher.prototype = /**@lends eclipse.Searcher.prototype*/ {
+	Searcher.prototype = /**@lends orion.searchClient.Searcher.prototype*/ {
 		/**
 		 * Runs a search and displays the results under the given DOM node.
 		 * @public
@@ -71,8 +71,10 @@ eclipse.Searcher = (function() {
 			});
 		},
 		/**
+		 * Creates a div representing the highlight snippet of a search result.
 		 * @param {String} str The highlight string we got from the server
 		 * @return {DomNode}
+		 * @private
 		 */
 		formatHighlight: function(str) {
 			var start = "##match",
@@ -157,7 +159,7 @@ eclipse.Searcher = (function() {
 			}
 		}
 	};
-	return Searcher;
-})();
-return eclipse;
+	Searcher.prototype.constructor = Searcher;
+	//return module exports
+	return {Searcher:Searcher};
 });

@@ -31,11 +31,11 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		this.favorites = [];
 		var self = this;
 		this.registry.getService("orion.core.favorite").then(function(service) {
-			service.getFavorites(function(faves) {
-				self.cacheFavorites(faves);
+			service.getFavorites().then(function(favs) {
+				self.cacheFavorites(favs.navigator);
 			});
-			service.addEventListener("favoritesChanged", function(faves) {
-				self.cacheFavorites(faves);
+			service.addEventListener("favoritesChanged", function(favs) {
+				self.cacheFavorites(favs.navigator);
 			});
 		});
 	}
