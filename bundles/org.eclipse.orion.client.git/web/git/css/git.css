@@ -2,6 +2,10 @@
 	font-weight: bold;
 }
 
+.outgoingCommitsdRow {
+	font-weight: bold;
+}
+
 .incomingCommitsdRow div {
 	background: url(/git/images/git-incoming.gif);
 	background-repeat: no-repeat;
