@@ -271,6 +271,43 @@ exports.setUpEditor = function(isReadOnly){
 			}
 		};	
 		
+		var escHandler = {
+			handlers: [],
+			
+			addHandler: function(handler) {
+				this.handlers.push(handler);
+			},
+			
+			cancel: function() {
+				var handled = false;
+				// To be safe, we give all our handlers a chance, not just the first one.
+				// In case the user has left multiple modal popups open (such as key assist and search)
+				for (var i=0; i<this.handlers.length; i++) {
+					handled = this.handlers[i].cancel() || handled;
+				}
+				return handled;
+			},
+		
+			isActive: function() {
+				for (var i=0; i<this.handlers.length; i++) {
+					if (this.handlers[i].isActive()) {
+						return true;
+					}
+				}
+				return false;
+			},
+		
+			lineUp: function() {
+				return false;
+			},
+			lineDown: function() {
+				return false;
+			},
+			enter: function() {
+				return false;
+			}
+		};
+		
 		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 			// Register commands that depend on external services, the registry, etc.
 			var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly);
@@ -284,6 +321,9 @@ exports.setUpEditor = function(isReadOnly){
 			// TODO this should probably be something that happens more dynamically, when the editor changes input
 			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
 			keyModeStack.push(codeBindings);
+			
+			// give our external escape handler a shot at handling escape
+			keyModeStack.push(escHandler);
 			
 			// global search
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "Search Files");
@@ -299,9 +339,27 @@ exports.setUpEditor = function(isReadOnly){
 					} if (!searchPattern) {
 						return;
 					}
-					searchFloat.onclick = function() {
-						searchFloat.style.display = "none";
+					dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){ 
+						if (e.charOrCode === dojo.keys.ESCAPE) {
+							searchFloat.style.display = "none";
+						}
+					}));
+					
+					var searchFloatEscHandler = {
+						isActive: function() {
+							return searchFloat.style.display === "block";
+						},
+						
+						cancel: function() {
+							if (this.isActive()) {
+								searchFloat.style.display = "none";
+								return true;
+							}
+							return false;   // not handled
+						}
 					};
+					escHandler.addHandler(searchFloatEscHandler);
+					
 					// TEMPORARY until we can better scope the search
 					var extensionFilter = "";
 					var fileName = inputManager.getTitle();
@@ -382,7 +440,7 @@ exports.setUpEditor = function(isReadOnly){
 		inputManager.setInput(dojo.hash(), editor);
 		
 		// TODO search location needs to be gotten from somewhere
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, editor, editor);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, editor, editor, escHandler);
 		mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 			
 		var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
