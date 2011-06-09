@@ -151,7 +151,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	 * @name orion.globalCommands#generateBanner
 	 * @function
 	 */
-	function generateBanner(parentId, serviceRegistry, commandService, prefsService, searcher, handler, editor) {
+	function generateBanner(parentId, serviceRegistry, commandService, prefsService, searcher, handler, /* optional */ editor, /* optional */ escapeProvider) {
 		// this needs to come from somewhere but I'm not going to do a separate get for it
 		var searchLocation = "/filesearch?q=";
 		var text;
@@ -261,6 +261,23 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				keyAssistNode.style.display = "none";
 			}
 		}));
+		
+		if (escapeProvider) {
+			var keyAssistEscHandler = {
+				isActive: function() {
+					return keyAssistNode.style.display === "block";
+				},
+				
+				cancel: function() {
+					if (this.isActive()) {
+						keyAssistNode.style.display = "none";
+						return true;
+					}
+					return false;   // not handled
+				}
+			};
+			escapeProvider.addHandler(keyAssistEscHandler);
+		}
 		
 		var keyAssistCommand = new mCommands.Command({
 			name: "Show Keys",
