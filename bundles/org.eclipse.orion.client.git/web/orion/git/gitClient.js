@@ -805,8 +805,93 @@ eclipse.GitService = (function() {
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
+		},
+		addCloneConfigurationProperty: function(location, newKey, newValue, onLoad , onError){
+			return dojo.xhrPost({
+				url: location , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				postData : dojo.toJson({
+					"Key" : newKey,
+					"Value" : newValue
+				}),
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					mAuth.handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+	
+		editCloneConfigurationProperty: function(location, newValue, onLoad , onError){
+			return dojo.xhrPut({
+				url: location , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				putData : dojo.toJson({
+					"Value" : newValue
+				}),
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					mAuth.handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+	
+		deleteCloneConfigurationProperty: function(location, onLoad , onError){
+			return dojo.xhrDelete({
+				url: location , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					mAuth.handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
 		}
 	};
+	
 	return GitService;
 }());
 
