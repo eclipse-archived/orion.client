@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
+/*global dojo dijit window define document serviceRegistry:true widgets alert*/
 /*browser:true*/
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status','orion/dialogs',
@@ -20,31 +20,39 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 dojo.addOnLoad(function(){
 	document.body.style.visibility = "visible";
 	dojo.parser.parse();
-	
-	// initialize service registry and EAS services
-	serviceRegistry = new mServiceregistry.ServiceRegistry();
-	new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	new mDialogs.DialogService(serviceRegistry);
-	new mUsers.UserService(serviceRegistry);
+
+	var serviceRegistry = new mServiceregistry.ServiceRegistry();
+	// This is code to ensure the first visit to orion works
+	// we read settings and wait for the plugin registry to fully startup before continuing
 	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
-	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+	var dialogService = new mDialogs.DialogService(serviceRegistry);
+	var pluginRegistry;
+	preferenceService.getPreferences("/plugins").then(function() {
+		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
+		dojo.addOnWindowUnload(function() {
+			pluginRegistry.shutdown();
+		});
+		return pluginRegistry.startup();
+	}).then(function() {
+		new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+		new mUsers.UserService(serviceRegistry);
+		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 
-	// Favorites
-	new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+		// Favorites
+		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 	
-	var treeRoot = {
-		children:[]
-	};
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
-	var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
-	var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
-	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, searcher);
-	searchResultsGenerator.loadResults(dojo.hash());
-	mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");
-
-	//every time the user manually changes the hash, we need to load the workspace with that name
-	dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
-	   searchResultsGenerator.loadResults(dojo.hash());
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+		var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
+		var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, searcher);
+		searchResultsGenerator.loadResults(dojo.hash());
+		mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");
+	
+		//every time the user manually changes the hash, we need to load the results with that name
+		dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
+		   searchResultsGenerator.loadResults(dojo.hash());
+			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");   
+		});
 	});
 });
 });
