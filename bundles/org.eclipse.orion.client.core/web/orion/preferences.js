@@ -183,9 +183,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 			var key = "/orion/preferences/user" + name;
 			var cached = _cache.get(key);
 			if (cached !== null) {
-				window.setTimeout(function() {
-					d.resolve(cached);
-				},0);
+				d.resolve(cached);
 			} else {
 				this._currentPromises[name] = d;
 				var that = this;
@@ -263,9 +261,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 			var d = new dojo.Deferred();
 			var cached = _cache.get(key);
 			if (cached !== null) {
-				window.setTimeout(function() {
-					d.resolve(cached[name] || {});
-				},0);
+				d.resolve(cached[name] || {});
 			} else {
 				this._currentPromise = d;
 				var that = this;
