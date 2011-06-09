@@ -1426,16 +1426,17 @@ orion.textview.TextView = (function() {
 				this._setSelection(new Selection (0, 0, false), true);
 				
 				/*
-				* Bug in Firefox 4.  For some reason, the caret does not show after the
+				* Bug in Firefox.  For some reason, the caret does not show after the
 				* view is refreshed.  The fix is to toggle the contentEditable state and
-				* force the clientDiv to loose and receive focus.
+				* force the clientDiv to loose and receive focus if the it is focused.
 				*/
-				if (isFirefox >= 4) {
+				if (isFirefox) {
+					var hasFocus = this._hasFocus;
 					var clientDiv = this._clientDiv;
+					if (hasFocus) { clientDiv.blur(); }
 					clientDiv.contentEditable = false;
 					clientDiv.contentEditable = true;
-					clientDiv.blur();
-					clientDiv.focus();
+					if (hasFocus) { clientDiv.focus(); }
 				}
 			}
 		},
