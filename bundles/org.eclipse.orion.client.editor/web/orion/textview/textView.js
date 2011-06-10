@@ -3707,8 +3707,6 @@ orion.textview.TextView = (function() {
 				touchDiv.style.zIndex = "2";
 				touchDiv.style.overflow = "hidden";
 				touchDiv.style.background="transparent";
-//				touchDiv.style.background="green";
-//				touchDiv.style.opacity="0.5";
 				touchDiv.style.WebkitUserSelect = "none";
 				parent.appendChild(touchDiv);
 
@@ -3755,6 +3753,14 @@ orion.textview.TextView = (function() {
 			viewDiv.appendChild(scrollDiv);
 
 			this._fullSelection = options.fullSelection === undefined || options.fullSelection;
+			/* 
+			* Bug in IE 8. For some reason, during scrolling IE does not reflow the elements
+			* that are used to compute the location for the selection divs. This causes the
+			* divs to be placed at the wrong location. The fix is to disabled full selection for IE8.
+			*/
+			if (isIE < 9) {
+				this._fullSelection = false;
+			}
 			if (isPad || (this._fullSelection && !isWebkit)) {
 				this._hightlightRGB = "Highlight";
 				var selDiv1 = document.createElement("DIV");
@@ -4128,6 +4134,47 @@ orion.textview.TextView = (function() {
 				lineChild = lineChild.nextSibling;
 			}
 			
+			this._setDOMFullSelection(startNode, startOffset, startLineEnd, endNode, endOffset, endLineEnd);
+			if (isPad) { return; }
+
+			var range;
+			if (window.getSelection) {
+				//W3C
+				range = document.createRange();
+				range.setStart(startLineNode, startLineOffset);
+				range.setEnd(endLineNode, endLineOffset);
+				var sel = window.getSelection();
+				this._ignoreSelect = false;
+				if (sel.rangeCount > 0) { sel.removeAllRanges(); }
+				sel.addRange(range);
+				this._ignoreSelect = true;
+			} else if (document.selection) {
+				//IE < 9
+				var body = document.body;
+
+				/*
+				* Bug in IE. For some reason when text is deselected the overflow
+				* selection at the end of some lines does not get redrawn.  The
+				* fix is to create a DOM element in the body to force a redraw.
+				*/
+				var child = document.createElement("DIV");
+				body.appendChild(child);
+				body.removeChild(child);
+				
+				range = body.createTextRange();
+				range.moveToElementText(startLineNode.parentNode);
+				range.moveStart("character", startLineOffset);
+				var endRange = body.createTextRange();
+				endRange.moveToElementText(endLineNode.parentNode);
+				endRange.moveStart("character", endLineOffset);
+				range.setEndPoint("EndToStart", endRange);
+				this._ignoreSelect = false;
+				range.select();
+				this._ignoreSelect = true;
+			}
+		},
+		_setDOMFullSelection: function(startNode, startOffset, startLineEnd, endNode, endOffset, endLineEnd) {
+			var model = this._model;
 			if (this._selDiv1) {
 				var startLineBounds, l;
 				startLineBounds = this._getLineBoundingClientRect(startNode);
@@ -4234,42 +4281,6 @@ orion.textview.TextView = (function() {
 						}
 					}
 				}
-				if (isPad) { return; }
-			}
-			var range;
-			if (window.getSelection) {
-				//W3C
-				range = document.createRange();
-				range.setStart(startLineNode, startLineOffset);
-				range.setEnd(endLineNode, endLineOffset);
-				var sel = window.getSelection();
-				this._ignoreSelect = false;
-				if (sel.rangeCount > 0) { sel.removeAllRanges(); }
-				sel.addRange(range);
-				this._ignoreSelect = true;
-			} else if (document.selection) {
-				//IE < 9
-				var body = document.body;
-
-				/*
-				* Bug in IE. For some reason when text is deselected the overflow
-				* selection at the end of some lines does not get redrawn.  The
-				* fix is to create a DOM element in the body to force a redraw.
-				*/
-				var child = document.createElement("DIV");
-				body.appendChild(child);
-				body.removeChild(child);
-				
-				range = body.createTextRange();
-				range.moveToElementText(startLineNode.parentNode);
-				range.moveStart("character", startLineOffset);
-				var endRange = body.createTextRange();
-				endRange.moveToElementText(endLineNode.parentNode);
-				endRange.moveStart("character", endLineOffset);
-				range.setEndPoint("EndToStart", endRange);
-				this._ignoreSelect = false;
-				range.select();
-				this._ignoreSelect = true;
 			}
 		},
 		_setGrab: function (target) {
@@ -4616,15 +4627,6 @@ orion.textview.TextView = (function() {
 			if (!isIE || isIE >= 9) { width += viewPad.right; }
 			scrollDiv.style.width = width + "px";
 
-//			/*
-//			* Get client height after both scrollbars are visible and updatePage again to recalculate top and bottom indices.
-//			* 
-//			* Note that updateDOMSelection() has to be called on IE before getting the new client height because it
-//			* forces the client area to be recomputed.
-//			*/
-//			if (!isPad) {
-//				this._updateDOMSelection();
-//			}
 			// Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset.
 			var scroll = this._getScroll();
 			var left = scroll.x;
