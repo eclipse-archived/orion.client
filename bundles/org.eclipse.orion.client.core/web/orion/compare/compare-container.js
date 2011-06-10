@@ -383,7 +383,7 @@ exports.CompareMergeContainer = (function() {
 				var location = dojo.byId("location");
 				if (location) {
 					dojo.empty(location);
-					new mBreadcrumbs.BreadCrumbs({container: location, resource: this._fileMetadata});
+					new mBreadcrumbs.BreadCrumbs({container: "location", resource: this._fileMetadata});
 					if (title.charAt(0) === '*') {
 						var dirty = dojo.create('b', null, titlePane, "last");
 						dirty.innerHTML = '*';
