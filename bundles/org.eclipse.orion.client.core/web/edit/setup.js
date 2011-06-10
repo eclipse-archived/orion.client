@@ -219,10 +219,15 @@ exports.setUpEditor = function(isReadOnly){
 				}
 				this._lastTitle = shortTitle;
 				window.document.title = shortTitle;
-				var titlePane = dojo.byId("pageTitle");
+				var titlePane = dojo.byId("location");
 				if (titlePane) {
 					dojo.empty(titlePane);
-					new mBreadcrumbs.BreadCrumbs({container: "pageTitle", resource: this._fileMetadata});
+					var root = mUtil.userName || "Navigator Root";
+					new mBreadcrumbs.BreadCrumbs({
+						container: "location", 
+						resource: this._fileMetadata,
+						firstSegmentName: root
+					});
 					if (title.charAt(0) === '*') {
 						var dirty = dojo.create('b', null, titlePane, "last");
 						dirty.innerHTML = '*';
@@ -386,7 +391,6 @@ exports.setUpEditor = function(isReadOnly){
 				}, 0);
 				return true;
 			});
-				
 			
 			// splitter binding
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "Toggle Outliner");

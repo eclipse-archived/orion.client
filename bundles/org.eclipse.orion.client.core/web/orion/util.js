@@ -22,6 +22,12 @@ var eclipse = eclipse || {};
  */
 eclipse.util = eclipse.util || {};
 
+eclipse.util.userName = null;
+
+eclipse.util.setUserName = function(userName) {
+	eclipse.util.userName = userName;
+};
+
 eclipse.util.getUserKeyString = function(binding) {
 	var userString = "";
 	var isMac = navigator.platform.indexOf("Mac") !== -1;

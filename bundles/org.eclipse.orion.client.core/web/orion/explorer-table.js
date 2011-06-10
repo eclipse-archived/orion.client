@@ -138,14 +138,14 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 	 * @name orion.explorer-table.FileExplorer
 	 * @class A user interface component that displays a table-oriented file explorer
 	 */
-	function FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, parentId, pageTitleId, toolbarId, selectionToolsId) {
+	function FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, parentId, breadcrumbId, toolbarId, selectionToolsId) {
 		this.registry = serviceRegistry;
 		this.treeRoot = treeRoot;
 		this.selection = selection;
 		this.searcher = searcher;
 		this.fileClient = fileClient;
 		this.parentId = parentId;
-		this.pageTitleId = pageTitleId;
+		this.breadcrumbId = breadcrumbId;
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
 		this.model = null;
@@ -224,10 +224,15 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 					mUtil.rememberSuccessfulTraversal(this.treeRoot, this.registry);
 					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);					
 					// erase any old page title
-					var pageTitle = dojo.byId(this.pageTitleId);
-					if (pageTitle) {
-						dojo.empty(pageTitle);
-						new mBreadcrumbs.BreadCrumbs({container: pageTitle, resource: this.treeRoot});
+					var breadcrumb = dojo.byId(this.breadcrumbId);
+					var root = mUtil.userName || "Navigator Root";
+					if (breadcrumb) {
+						dojo.empty(breadcrumb);
+						new mBreadcrumbs.BreadCrumbs({
+							container: breadcrumb, 
+							resource: this.treeRoot,
+							firstSegmentName: root
+						});
 					}
 					mFileCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
 					this.model = new Model(this.registry, this.treeRoot, this.fileClient);

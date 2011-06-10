@@ -91,7 +91,7 @@ dojo.addOnLoad(function(){
 	
 		var fileClient = new mFileClient.FileClient(topLevelFileService);
 		
-		var explorer = new mExplorerTable.FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+		var explorer = new mExplorerTable.FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, "explorer-tree", "location", "pageActions", "selectionTools");
 		
 		function refresh() {
 			var fileServiceReference;
