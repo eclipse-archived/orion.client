@@ -24,6 +24,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 	 * @param {orion.siteService.SiteConfiguration} site The site configuration
 	 * @return {String} The URL.
 	 * @name orion.siteUtils#generateEditSiteHref
+	 * @function
 	 */
 	function generateEditSiteHref(site) {
 		return "site.html#" + mUtil.makeRelative(site.Location);
@@ -38,6 +39,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 	 * <li>{@link String} <code>actionDetails</code> Optional, currently unused</li>
 	 * </ul>
 	 * @name orion.siteUtils#parseStateFromHash
+	 * @function
 	 */
 	function parseStateFromHash(hash) {
 		var obj = dojo.queryToObject(hash);
@@ -61,6 +63,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 	 * @param [String] actionDetails Currently unused
 	 * @returns {String} Hash string representing the new state.
 	 * @name orion.siteUtils#stateToHash
+	 * @function
 	 */
 	function stateToHash(siteLocation, action, actionDetails) {
 		var obj = {};
@@ -87,6 +90,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 	 * @param {Function} deleteCallback
 	 * @param {Function} errorCallback Called when a server request fails.
 	 * @name orion.siteUtils#createSiteCommands
+	 * @function
 	 */
 	function createSiteCommands(commandService, siteService, statusService, dialogService,
 			startCallback, stopCallback, deleteCallback, errorCallback) {
@@ -161,6 +165,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 	 * @returns {String} The path of the URL, relative to this server, with no /file/ prefix.<br/>
 	 * <b>FIXME:</b> this is URL manipulation; it should be done by the server
 	 * @name orion.siteUtils#makeRelativeFilePath
+	 * @function
 	 */
 	function makeRelativeFilePath(location) {
 		var path = mUtil.makeRelative(location);
@@ -173,6 +178,8 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 	 * @param target The "Target" field from a site configuration
 	 * @returns {String} The URL that the target points to.<br/>
 	 * <b>FIXME:</b> this is URL manipulation; it should be done by the server
+	 * @name orion.siteUtils#makeFullFilePath
+	 * @function
 	 */
 	function makeFullFilePath(target) {
 		var relativePath = "/file" + target;
