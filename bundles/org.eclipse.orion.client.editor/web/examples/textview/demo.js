@@ -12,7 +12,7 @@
  /*globals window define document navigator setTimeout XMLHttpRequest PerformanceTest */
  
  
- function log (text) {
+function log (text) {
 	var console = window.document.getElementById('console');
 	if (!console) { return; }
 	for (var n = 1; n < arguments.length; n++) {
