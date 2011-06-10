@@ -261,7 +261,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth',
 				var bannerPane = dojo.byId('pageTitle');
 				
 				dojo.empty(bannerPane);
-				dojo.create("a", {id:"profileBanner", className: "breadcrumb currentLocation", innerHTML: profile.lastJSON ? "Profile Information for <b style='color: #000'>" + profile.lastJSON.login + "</b>" : ""}, bannerPane);
+				dojo.create("a", {id:"profileBanner", innerHTML: profile.lastJSON ? "Profile Information for <b style='color: #000'>" + profile.lastJSON.login + "</b>" : ""}, bannerPane);
 	
 				dojo.empty(this.pageActionsPlaceholder);
 				this.commandService.addCommandGroup("eclipse.profileActionsGroup", 100, null, null, this.pageActionsPlaceholder.id);

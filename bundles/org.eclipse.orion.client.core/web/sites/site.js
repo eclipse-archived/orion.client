@@ -45,15 +45,8 @@ dojo.addOnLoad(function() {
 			var editor = dijit.byId("site-editor");
 			var site = editor && editor.getSiteConfiguration();
 			if (editor && site) {
-				var pageTitle = dojo.byId("pageTitle");
-				dojo.empty(pageTitle);
-				var back = dojo.create("span", {className: "breadcrumb"}, pageTitle, "last");
-				dojo.create("a", {href: "sites.html", innerHTML: "Sites"}, back);
-				var title = dojo.create("span", {className: "breadcrumb"}, pageTitle, "last");
-				dojo.place(document.createTextNode(site.Name), title);
-				dojo.place(back, "pageTitle");
-				dojo.place(document.createTextNode(" | "), "pageTitle");
-				dojo.place(title, "pageTitle");
+				var location = dojo.byId("location");
+				dojo.place(document.createTextNode(site.Name), location, "only");
 				window.document.title = site.Name + " - Edit Site";
 			}
 		};

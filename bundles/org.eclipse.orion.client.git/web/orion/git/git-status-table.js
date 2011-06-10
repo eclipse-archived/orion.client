@@ -515,13 +515,14 @@ orion.GitStatusController = (function() {
 		
 		_initTitleBar:function(withBranchName){
 			var title = "Git Status";
-			var repoAndBranch = "Git Status";
+			var location = "";
 			if(withBranchName) {
-				repoAndBranch = this._curClone.Name + " on " + this._curBranch.Name;
-				title = "Git Status for " + repoAndBranch;
+				location = this._curClone.Name + " on " + this._curBranch.Name;
 			}
-			document.title = repoAndBranch;
+			document.title = location;
+			// not good that these dom id's are known way down here
 			dojo.place(document.createTextNode(title), "pageTitle", "only");
+			dojo.place(document.createTextNode(location), "location", "only");
 		},
 		
 		_getCloneInfo:function(){
