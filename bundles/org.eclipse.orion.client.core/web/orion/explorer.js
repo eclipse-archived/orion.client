@@ -465,8 +465,8 @@ exports.SelectionRenderer = (function(){
 		var row = document.createElement('tr');
 		dojo.addClass(thead, "navTableHeading");
 		var th, actions, size;
-		
-		row.appendChild(this.initCheckboxColumn(tableNode));
+		if (this._useCheckboxSelection)
+			row.appendChild(this.initCheckboxColumn(tableNode));
 		
 		var i = 0;
 		var cell = this.getCellHeaderElement(i);
