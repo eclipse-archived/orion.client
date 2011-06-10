@@ -64,7 +64,7 @@ dojo.addOnLoad(function() {
 	// Clone details
 	var cloneDetails = new mGitCloneDetails.CloneDetails({parent: "cloneDetailsPane", serviceRegistry: serviceRegistry, detailsPane: dijit.byId("orion.innerNavigator")});
 	
-	var explorer = new mGitClonesExplorer.GitClonesExplorer(serviceRegistry, selection, cloneDetails, "clonesList", "pageActions", "selectionTools");
+	var explorer = new mGitClonesExplorer.GitClonesExplorer(serviceRegistry, /* selection */ null, cloneDetails, "clonesList", "pageActions"/*, "selectionTools"*/);
 	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
 	
 	

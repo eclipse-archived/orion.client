@@ -22,7 +22,8 @@ exports.GitClonesExplorer = (function() {
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
 		this.cloneDetails = cloneDetails;
-		this.renderer = new exports.GitClonesRenderer({checkbox: this.checkbox}, this);
+		this.checkbox = false;
+		this.renderer = new exports.GitClonesRenderer({checkbox: false}, this);
 		
 	}
 	GitClonesExplorer.prototype = mExplorer.Explorer.prototype;
