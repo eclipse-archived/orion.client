@@ -2704,6 +2704,7 @@ orion.textview.TextView = (function() {
 			bindings.push({name: "deleteWordNext",		keyBinding: new KeyBinding(46, true), predefined: true});
 			bindings.push({name: "tab",			keyBinding: new KeyBinding(9), predefined: true});
 			bindings.push({name: "enter",			keyBinding: new KeyBinding(13), predefined: true});
+			bindings.push({name: "enter",			keyBinding: new KeyBinding(13, null, true), predefined: true});
 			bindings.push({name: "selectAll",		keyBinding: new KeyBinding('a', true), predefined: true});
 			if (isMac) {
 				bindings.push({name: "deleteNext",		keyBinding: new KeyBinding(46, null, true), predefined: true});
