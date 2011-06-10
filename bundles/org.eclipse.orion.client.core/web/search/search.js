@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global dojo dijit window define document serviceRegistry:true widgets alert*/
+/*global window define */
 /*browser:true*/
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status','orion/dialogs',
@@ -18,7 +18,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 				mSearchClient, mSearchResults, mGlobalCommands) {
 
 dojo.addOnLoad(function(){
-	document.body.style.visibility = "visible";
+	window.document.body.style.visibility = "visible";
 	dojo.parser.parse();
 
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
