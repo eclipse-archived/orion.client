@@ -24,36 +24,49 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	// BEGIN TOP BANNER FRAGMENT
 	var topHTMLFragment =
 	// a table?!!?  Yes, you can't mix CSS float right and absolutes to pin the bottom.
-	'<table style="border-spacing: 0px; border-collapse: collapse; width: 100%; height: 61px">' +
-		'<tr class="topRowBanner">' +
-			'<td width=93px rowspan=2><a id="home" href="/index.html"><img class="toolbarLabel" src="/images/headerlogo.gif" alt="Orion Logo" align="top"></a></td>' +
-			'<td class="leftGlobalToolbar">' +
-				'<span class="bannerSeparator"></span>' +
-				'<span id="pageTitle" class="statuspane"></span>' +
-				'<span class="bannerSeparator">  </span>' +  // empty space between title and status
-				'<span class="statuspane" id="statusPane"></span>' +
+	'<table style="border-spacing: 0px; margin: 0; padding: 0; border-collapse: collapse; width: 100%;">' +
+	// Row 1:  Logo + page title + primary nav links
+		'<tr class="topRowBanner" id="bannerRow1">' +
+			'<td rowspan=3 style="padding-top: 12px; padding-bottom: 12px; padding-left: 16px; width: 124px"><a id="home" href="/index.html"><img class="toolbarLabel" src="/images/orion.png" alt="Orion Logo" align="top"></a></td>' +
+			'<td class="leftGlobalToolbar" style="padding-top: 12px">' +
+				'<span id="pageTitle" class="pageTitle"></span>' +
 			'</td>' + 
-			'<td class="rightGlobalToolbar">' +
+			'<td class="rightGlobalToolbar" style="padding-top: 12px">' +
 				'<span id="primaryNav" class="globalActions"></span>' +
+			'</td>' + 
+		'</tr>' +
+	// Row 2:  Location (optional breadcrumb + current page resource)
+		'<tr class="topRowBanner" id="bannerRow2">' +
+			'<td>' +
+				'<span id="location" class="currentLocation"></span>' +
+			'</td>' + 
+			'<td>' +
+				'<span></span>' +
+			'</td>' + 
+		'</tr>' +
+	// Row 3:  Status on left, global commands, search, user, etc. on right
+		'<tr class="topRowBanner" id="bannerRow3">' +
+			'<td style="text-align: left">' +
+				'<span id="statusPane"></span>' +
+				'<span id="notifications"></span>' +
+			'</td>' +
+			'<td style="text-align: right">' +
 				'<span id="globalActions" class="globalActions"></span>' +
 				'<input type="search" id="search" class="searchbox">' +
-				'<span class="bannerSeparator">|</span>' +
-				'<span id="userInfo" class="statuspane"></span>' +
-				'<span id="help" class="statuspane"><a id="help" href="/help/index.jsp"><img class="toolbarLabel" src="/images/help.gif" alt="Help Logo" align="top"></a></span>' +
+				'<span id="userInfo"></span>' +
+				'<span id="help" class="help"><a id="help" href="/help/index.jsp">?</a></span>' +
 			'</td>' + 
-			'</tr>' +
-		'<tr class="bottomRowBanner">' +
-			'<td colspan=2 id="pageToolbar" class="pageToolbar">' +
-				'<div style="float: left;">' +
-					'<span id="pageActionHolder" class="pageActionSeparator"></span>' +
-					'<span id="pageActions" class="pageActions"></span>' +
-				'</div>' +
-				'<div style="float: right;">' +
-					'<span id="notifications" class="pageActions"></span>' +
-				'</div>' +
+		'</tr>' +
+		
+	// Row 4: Page Toolbar
+		'<tr class="pageToolbar">' +
+			'<td colspan=3 style="padding-left: 16px;" id="pageToolbar" class="pageToolbar">' +
+				'<span id="pageActions" class="pageActions"></span>' +
 			'</td>' +
 		'</tr>' +
 	'</table>';
+	
+
 	// END TOP BANNER FRAGMENT
 	
 	// BEGIN BOTTOM BANNER FRAGMENT
@@ -86,6 +99,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			}
 			dojo.empty(userInfo);
 			if (userName) {
+				mUtil.setUserName(userName);
 				// user menu
 				var newMenu= new dijit.Menu({
 					style: "display: none;",
@@ -306,7 +320,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, true, true), "Show Keys");
 			editor.getTextView().setAction("Show Keys", keyAssistCommand.callback);
 		}
-			
+
 		// generate global commands
 		var toolbar = dojo.byId("globalActions");
 		if (toolbar) {	

@@ -1,33 +1,48 @@
 .breadcrumb {
+	font-size: 10pt;
 	text-decoration: none;
 	margin-left: 1px;
 	margin-right: 1px;
-	color: #5a5a5a;
+	color: #666666;
+}
+
+.breadcrumb .a {
+	font-size: 10pt;
+	text-decoration: none;
+	margin-left: 1px;
+	margin-right: 1px;
+	color: #0058b8;
 }
 
 .breadcrumb:hover {
+	font-size: 10pt;
 	text-decoration: none;
 	margin-left: 1px;
 	margin-right: 1px;
 	border-bottom: 1px dotted;
-	color: #5a5a5a;
+	color: #0058b8;
 }
 
 .breadcrumb:visited {
+	font-size: 10pt;
 	margin-left:1px;
 	text-decoration: none;
 	margin-right: 1px;
-	color: #5a5a5a;
+	color: #0058b8;
 }
 
 .currentLocation {
 	font-weight: bold;
+	font-size: 12pt;
+	color: #666666;
 	text-decoration: none;
 	cursor: pointer;
 }
 
 .currentLocation:hover {
 	font-weight: bold;
+	font-size: 12pt;
+	color: #666666;
 	text-decoration: none;
 	border-bottom: 0px;
 	cursor: pointer;

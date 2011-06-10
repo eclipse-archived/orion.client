@@ -5,12 +5,12 @@ html {
 html, body {
 	margin: 0;
 	padding: 0;
-	font: 12px Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
+	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
 }
 
 h1 {
 	font-size:1.5em;
-	font-weight:bold;
+	font-weight: bold;
 	color: #6d6d6d;
 	line-height: 36px;
 	position:absolute;
@@ -80,22 +80,13 @@ a:hover {
 }
 
 .globalActions a {
-	color: #6d6d6d;
+	color: #0058b8;
 }
 
 .globalActions a:hover {
-	color: #6d6d6d;
+	color: #0058b8;
 	cursor: hand;
 	text-decoration: underline;
-}
-
-.pageActionSeparator {
-	color: #dddddd;
-	cursor: pointer;
-	padding-left: 24px;
-	margin-left: 2px;
-	margin-right: 2px;
-	font-size: 1.1em;
 }
 
 .pageActions {
@@ -245,11 +236,19 @@ a:hover {
 	overflow: auto;
 }
 
+// not used currently but keep it just in case
 .statuspane {
 	text-decoration: none;
-	margin-right: 2px;
-	margin-left: 2px;
 	cursor: pointer;
+	background: #ebebeb;
+	height: 2em;
+	border-top: 1px solid #dbdbdb
+}
+
+.help {
+	font-weight: bold;
+	padding-left: 8px;
+	padding-right: 8px;
 }
 
 .toolbar {
@@ -261,21 +260,26 @@ a:hover {
 	cursor: pointer;
 	font-size: 0.9em;
 	color: #5a5a5a;
-	height: 68px;
+	border-bottom: 1px solid #dbdbdb;
+	height: 108px; // temporary.  BorderContainer needs a height reserved
+}
+
+.pageTitle {
+	font-size: 12pt;
+	vertical-align: top;
 }
 
 .footer {
 	text-align: center;
 	width: 100%;
-	height: 24px;
-	background: #c5c5c5;
+	background: #ebebeb;
 	border: 0px;
 	padding: 0px;
-	margin-top: 4px;
-	margin-left: 44px;
 	cursor: pointer;
 	font-size: 0.9em;
 	color: #05386B;
+	height: 2.5em;
+	border-top: 1px solid #dbdbdb
 }
 
 .toolbarLabel {
@@ -286,6 +290,7 @@ a:hover {
 	margin: 0px;
 	border: 0px;
 	padding: 0px;
+	background: #f5f5f5;
 }
 
 .bottomRowBanner {
@@ -295,38 +300,26 @@ a:hover {
 }
 
 .leftGlobalToolbar {
-	height: 40px;
-	padding-left: 24px;
-	background: #c5c5c5;
+	background: #f5f5f5;
 	text-align: left;
 }
 
 .rightGlobalToolbar {
-	height: 40px;
-	padding-right: 8px;
-	background: #c5c5c5;
+	background: #f5f5f5;
 	text-align: right;
-}
-
-.bannerSeparator {
-	margin-left: 2px;
-	margin-right: 2px;
-	font-size: 1.1em;
 }
 
 .pageToolbar {
 	background: #404040;
-	padding-right: 24px;
-	text-align: right;
 	vertical-align: middle;
-	height: 28px;
+	height: 2.5em;
 }
 
 .searchbox {
 	margin-left: 12px;
 	margin-right: 8px;
-	background: #c5c5c5;
-	border: 1px solid #7a7979;
+	background: #f5f5f6;
+	border: 1px solid #a6a6a6;
 	font-size: 0.9em;
 }
 
