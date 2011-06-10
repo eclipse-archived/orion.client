@@ -380,10 +380,10 @@ exports.CompareMergeContainer = (function() {
 				}
 				this._lastTitle = shortTitle;
 				window.document.title = shortTitle;
-				var titlePane = dojo.byId("pageTitle");
-				if (titlePane) {
-					dojo.empty(titlePane);
-					new mBreadcrumbs.BreadCrumbs({container: "pageTitle", resource: this._fileMetadata});
+				var location = dojo.byId("location");
+				if (location) {
+					dojo.empty(location);
+					new mBreadcrumbs.BreadCrumbs({container: "location", resource: this._fileMetadata});
 					if (title.charAt(0) === '*') {
 						var dirty = dojo.create('b', null, titlePane, "last");
 						dirty.innerHTML = '*';

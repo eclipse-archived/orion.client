@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
-/*jslint laxbreak:true*/
+/*jslint laxbreak:true regexp:false*/
 /*global define eclipse */
 
 define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMateStyler", "testGrammars"],
@@ -125,11 +125,124 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assert.ok(ok, "No StyleRange in Line " + lineIndex + " matched expected {" + last + "}. StyleRanges were [" + rangeStrs.join(",") + "]");
 	}
 	
+	function assertDoesntHaveProps(obj /*, propNames..*/) {
+		var propNames = Array.prototype.slice.call(arguments, 1);
+		for (var i=0; i < propNames.length; i++) {
+			assert.ok(!obj.hasOwnProperty(propNames[i]));
+		}
+	}
+	
+	function assertHasProps(obj /*, propNames..*/) {
+		var propNames = Array.prototype.slice.call(arguments, 1);
+		for (var i=0; i < propNames.length; i++) {
+			assert.ok(obj.hasOwnProperty(propNames[i]));
+		}
+	}
 	
 	
 	
 	
 	
+	
+	// ************************************************************************************************
+	// Test supporting util methods
+	
+	tests["test TextMateStyler - Util.groupify()"] = function() {
+		var result1 = mTextMateStyler.Util.groupify(new RegExp("")),
+		    regex1 = result1[0];
+		assert.equal(regex1.source, "");
+		
+		var result2 = mTextMateStyler.Util.groupify(/()/),
+		    regex2 = result2[0], 
+		    map2 = result2[1],
+		    con2 = result2[2];
+		assert.equal(regex2.source, "()");
+		assert.equal(map2[1], 1);
+		assertHasProps(con2, "1");
+		
+		var result3 = mTextMateStyler.Util.groupify(/a+/),
+		    regex3 = result3[0],
+		    map3 = result3[1],
+		    con3 = result3[2];
+		assert.equal(regex3.source, "(a+)");
+		assertDoesntHaveProps(map3, "1");
+		assertHasProps(con3, "1");
+		
+		var result4 = mTextMateStyler.Util.groupify(/x(a+)b?/),
+		    regex4 = result4[0],
+		    map4 = result4[1],
+		    con4 = result4[2];
+		assert.equal(regex4.source, "(x)(a+)(b?)");
+		assert.equal(map4[1], 2);
+		assertDoesntHaveProps(map4, "2");
+		assertHasProps(con4, "1");
+		
+		var result5 = mTextMateStyler.Util.groupify(/a+(?=b)c+(?!d*x?y)e+/),
+		    regex5 = result5[0],
+		    map5 = result5[1],
+		    con5 = result5[2];
+		assert.equal(regex5.source, "(a+)(?=b)(c+)(?!d*x?y)(e+)");
+		assertDoesntHaveProps(map5, "1");
+		assertHasProps(con5, "1", "2", "3");
+		
+		// Non-capturing group
+		var result6 = mTextMateStyler.Util.groupify(/(?:x+(a+)(b+))(c+)/),
+		    regex6 = result6[0],
+		    map6 = result6[1],
+		    con6 = result6[2];
+		assert.equal(regex6.source, "(?:(x+)(a+)(b+))(c+)");
+		assert.equal(map6[1], 2);
+		assert.equal(map6[2], 3);
+		assert.equal(map6[3], 4);
+		assertHasProps(con6, "1", "2", "3", "4");
+		
+		// Capturing group inside a lookahead
+		var result7 = mTextMateStyler.Util.groupify(/x+(?=aa(b+))z{2,}/),
+		    regex7 = result7[0],
+		    map7 = result7[1],
+		    con7= result7[2];
+		assert.equal(regex7.source, "(x+)(?=aa(b+))(z{2,})");
+		assert.equal(map7[1], "2"); // (b+)
+		assertHasProps(con7, "1", "3"); // (b+) is group 2, and it's NOT consuming
+		
+		// Escaping \( and \)
+		var result8 = mTextMateStyler.Util.groupify(new RegExp(/aa(\(x\))bb|[^cd]/)),
+		    regex8 = result8[0],
+		    map8 = result8[1],
+		    con8 = result8[2];
+		assert.equal(regex8.source, "(aa)(\\(x\\))(bb|[^cd])");
+		assert.equal(map8[1], "2"); // (\(x\))
+		assertHasProps(con8, "1", "2", "3");
+		
+		// Escaping \
+		var result9 = mTextMateStyler.Util.groupify(/C:\\(\w+)\\/),
+		    regex9 = result9[0],
+		    map9 = result9[1],
+		    con9 = result9[2];
+		assert.equal(regex9.source, /(C:\\)(\w+)(\\)/.source);
+		assert.equal(map9[1], "2"); // (\w+)
+		assertHasProps(con9, "1", "2", "3");
+		
+		// Backrefs
+		var result10 = mTextMateStyler.Util.groupify(/x?(a+)x\1x?/),
+		    regex10 = result10[0],
+		    map10 = result10[1],
+		    con10 = result10[2];
+		assert.equal(regex10.source, "(x?)(a+)(x\\2x?)");
+		assert.equal(map10[1], "2");
+		assertHasProps(con10, "1", "2", "3");
+		
+		// Backrefs with the false parameter (should not be touched)
+		var result11 = mTextMateStyler.Util.groupify(/(x+)(y+)(z+)\2/),
+		    regex11 = result11[0],
+		    map11 = result11[1],
+		    con11 = result11[2];
+		assert.equal(regex11.source, "(x+)(y+)(z+)(\\2)");
+		assert.equal(map11[1], "1");
+		assert.equal(map11[2], "2");
+		assert.equal(map11[3], "3");
+		assertHasProps(con11, "1", "2", "3");
+	};
 	
 	// ************************************************************************************************
 	// Test creation
@@ -337,7 +450,73 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 			[0, 1, "invalid.illegal.idontlikez.mylang", "z"],
 			[2, 4, "keyword.control.mylang", "if"]
 		]);
-	}, false);
+	});
+	
+	tests["test TextMateStyler - scope to non-0 capturing groups"] = makeTest(function(view) {
+		var styler = new mTextMateStyler.TextMateStyler(view, mTestGrammars.ComplexCaptures);
+		setLines(view, [
+			"function (arg1, arg2)",
+			"aafunction () bb",
+			"nothinghere"
+		]);
+		assertLineScope(view, styler, 0, [
+			[0, 8, "keyword.function", "function"],
+			[9, 21, "meta.arglist.function", "(arg1, arg2)"]
+		]);
+		assertLineScope(view, styler, 1, [
+			[2, 10, "keyword.function", "function"],
+			[11, 13, "meta.arglist.function", "()"]
+		]);
+		assertLineScope(view, styler, 2, [
+		]);
+	});
+	
+	tests["test TextMateStyler - scope to non-0 capturing groups with end-to-begin backrefs"] = makeTest(function(view) {
+		var styler = new mTextMateStyler.TextMateStyler(view, mTestGrammars.ComplexCaptures);
+		setLines(view, [
+			"[foo]bar[/foo]",
+			"[a][b][/b][/a]"
+		]);
+		assertLineScope(view, styler, 0, [
+			// [foo]
+			[0, 1, "punctuation.definition.tag.opener", "["],
+			[1, 4, "entity.tag.open.name", "foo"],
+			[4, 5, "punctuation.definition.tag.closer", "]"],
+			// [/foo]
+			[8, 9, "punctuation.definition.tag.opener", "["],
+			[10, 13, "entity.tag.close.name", "foo"],
+			[13, 14, "punctuation.definition.tag.closer", "]"]
+		]);
+		assertLineScope(view, styler, 1, [
+			// [a]
+			[0, 1, "punctuation.definition.tag.opener", "["],
+			[1, 2, "entity.tag.open.name", "a"],
+			[2, 3, "punctuation.definition.tag.closer", "]"],
+			// [b]
+			[3, 4, "punctuation.definition.tag.opener", "["],
+			[4, 5, "entity.tag.open.name", "b"],
+			[5, 6, "punctuation.definition.tag.closer", "]"],
+			[6, 7, "punctuation.definition.tag.opener", "["],
+			// [/b]
+			[8, 9, "entity.tag.close.name", "b"],
+			[9, 10, "punctuation.definition.tag.closer", "]"],
+			[10, 11, "punctuation.definition.tag.opener", "["],
+			// [/a]
+			[12, 13, "entity.tag.close.name", "a"],
+			[13, 14, "punctuation.definition.tag.closer", "]"]
+		]);
+	});
+	
+	tests["test TextMateStyler - scope to non-0 capturing groups with gaps between them"] = makeTest(function(view) {
+		var styler = new mTextMateStyler.TextMateStyler(view, mTestGrammars.ComplexCaptures);
+		setLines(view, [
+			"xxxaaxxxbbb"
+		]);
+		assertLineScope(view, styler, 0, [
+			[3, 5, "meta.a", "aa"],
+			[8, 11, "keyword.b", "bbb"]
+		]);
+	});
 	
 	// ************************************************************************************************
 	// Test damage/repair styling
@@ -1022,7 +1201,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 			[6, 7, "punctuation.definition.array.end", "]"],
 			[7, 8, "punctuation.definition.array.end", "]"]
 		]);
-	}, false);
+	});
 	
 	return tests;
 });

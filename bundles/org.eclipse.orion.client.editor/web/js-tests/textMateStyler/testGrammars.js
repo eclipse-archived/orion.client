@@ -164,6 +164,45 @@ exports.RecursiveIncludeGrammar = {
 			}
 		}
 	};
+	
+// A grammar that assigns scope to regex matching groups other than "0"
+exports.ComplexCaptures = {
+	"patterns": [
+		{	"include": "#tag" },
+		{	"match": "(function)\\s*(\\([^)]*?\\))",
+			"captures": {
+				"1": { "name": "keyword.function"},
+				"2": { "name": "meta.arglist.function"}
+			}
+		},
+		{	"match": "x+(a+)x+(b+)",
+			"captures": {
+				"1": { "name": "meta.a" },
+				"2": { "name": "keyword.b" }
+			}
+		}
+	],
+	"repository": {
+		"tag": {
+			"begin": "(\\[)(\\w+)(\\])",        // (lsquare)(tagname)(rsquare)
+			"end": "(\\[)/(\\2)(\\])",          // (lsquare)slash(tagname)(rsquare)
+			"beginCaptures": {
+				"1": { "name": "punctuation.definition.tag.opener" },
+				"2": { "name": "entity.tag.open.name" },
+				"3": { "name": "punctuation.definition.tag.closer" }
+			},
+			"endCaptures": {
+				"1": { "name": "punctuation.definition.tag.opener" },
+				"2": { "name": "entity.tag.close.name" },
+				"3": { "name": "punctuation.definition.tag.closer" }
+			},
+			"patterns": [
+				{"include": "#tag"} // tags inside tags
+			]
+		}
+	}
+};
+
 
 /* TODO add to the constant.character.mylang rule once we support "captures":
 

@@ -39,7 +39,6 @@ eclipse.GitService = (function() {
 	{
 		checkGitService : function() {
 			var service = this;
-			console.info("Git Service checked");
 		},
 		cloneGitRepository : function(gitName, gitRepoUrl, targetPath, repoLocation, gitSshUsername, gitSshPassword, gitSshKnownHost, privateKey, passphrase) {
 			var postData = {};
@@ -529,9 +528,7 @@ eclipse.GitService = (function() {
 		},
 		doGitLog : function(gitLogURI, onLoad) {
 			var service = this;
-			
-			console.info("doGitLog called");
-			
+						
 			return dojo.xhrGet({
 				url : gitLogURI,
 				headers : {
@@ -558,8 +555,6 @@ eclipse.GitService = (function() {
 		},
 		getDiff : function(gitDiffURI, commitName, onLoad) {
 			var service = this;
-			
-			console.info("getDiff called");
 			
 			dojo.xhrPost({
 				url : gitDiffURI,
@@ -588,8 +583,6 @@ eclipse.GitService = (function() {
 		},
 		doFetch : function(gitRemoteBranchURI, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
 			var service = this;
-			
-			console.info("doFetch called");
 			
 			return dojo.xhrPost({
 				url : gitRemoteBranchURI,
@@ -624,8 +617,6 @@ eclipse.GitService = (function() {
 		doMerge : function(gitHeadURI, commitName) {
 			var service = this;
 			
-			console.info("doMerge called");
-			
 			return dojo.xhrPost({
 				url : gitHeadURI,
 				headers : {
@@ -648,8 +639,6 @@ eclipse.GitService = (function() {
 		},
 		doPush : function(gitBranchURI, srcRef, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
 			var service = this;
-			
-			console.info("doPush called");
 			
 			return dojo.xhrPost({
 				url : gitBranchURI,
@@ -684,8 +673,6 @@ eclipse.GitService = (function() {
 		},
 		getLog : function(gitCommitURI, commitName, onLoad) {
 			var service = this;
-			
-			console.info("getLog called");
 			
 			return dojo.xhrPost({
 				url : gitCommitURI,
@@ -732,8 +719,6 @@ eclipse.GitService = (function() {
 		getDefaultRemoteBranch : function(gitRemoteURI, onLoad) {
 			var service = this;
 			
-			console.info("getDefaultRemoteBranch called");
-			
 			dojo.xhrGet({
 				url : gitRemoteURI,
 				headers : {
@@ -778,8 +763,6 @@ eclipse.GitService = (function() {
 		},
 		doAddTag : function(gitCommitURI, tagName, onLoad) {
 			var service = this;
-			
-			console.info("doAddTag called");
 			
 			return dojo.xhrPut({
 				url : gitCommitURI,

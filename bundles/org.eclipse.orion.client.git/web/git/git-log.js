@@ -282,13 +282,12 @@ function initTitleBar(fileClient, navigator, item){
 							metadata.Parents = [{Name: item.Name}];
 						}
 					}
-					var titlePane = dojo.byId("pageTitle");
-					if (titlePane) {
-						dojo.empty(titlePane);
+					var location = dojo.byId("location");
+					if (location) {
+						dojo.empty(location);
 						var breadcrumb = new mBreadcrumbs.BreadCrumbs({
-							container: "pageTitle",
+							container: "location",
 							resource: metadata ,
-							getFirstSegment: function(){ return dojo.create("a", {innerHTML: getPageTitle()});},
 							makeHref:function(seg,location){makeHref(fileClient, seg,location);
 							}
 						});

@@ -59,41 +59,6 @@ dojo.addOnLoad(function() {
 	
 });
 
-function initTitleBar(fileClient){
-	var fileURI = null;
-	var folder = dojo.hash().split("git/status");
-	if(folder.length === 2)
-		fileURI = folder[1];
-	if(fileURI){
-		fileClient.read(fileURI, true).then(
-				dojo.hitch(this, function(metadata) {
-					var titlePane = dojo.byId("pageTitle");
-					if (titlePane) {
-						dojo.empty(titlePane);
-						var breadcrumb = new mBreadcrumbs.BreadCrumbs({container: "pageTitle", resource: metadata , makeHref:function(seg,location){makeHref(fileClient, seg,location);}});
-						if(breadcrumb.path && breadcrumb.path!="")
-							document.title = "Git Status - " + breadcrumb.path;
-					}
-					
-				}),
-				dojo.hitch(this, function(error) {
-					console.error("Error loading file metadata: " + error.message);
-				})
-		);
-	}
-	
-};
-
-function makeHref(fileClient, seg, location){
-	fileClient.read(location, true).then(
-			dojo.hitch(this, function(metadata) {
-				seg.href = "/git/git-status.html#" + metadata.Git.StatusLocation;
-			}),
-			dojo.hitch(this, function(error) {
-				console.error("Error loading file metadata: " + error.message);
-			})
-	);
-};
 });
 
 
