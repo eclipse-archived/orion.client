@@ -27,14 +27,7 @@ exports.CommitDetails = (function() {
 		this._registry = options.serviceRegistry;
 		this._detailsPane = options.detailsPane;
 		var commitDetails = this;
-	
-		var doSomething1 = new mCommands.Command({
-			name: "Do Something 1",
-			tooltip: "Do Something 1",
-			image: "images/add_obj.gif",
-			id: "eclipse.doSomething1",
-			callback: function(item) {console.info("clicked");}
-		});		
+
 		var showDiffCommand = new mCommands.Command({
 			name: "Show diff",
 			tooltip: "Show the diff",
