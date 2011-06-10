@@ -464,7 +464,7 @@ var exports = {};
 						serviceRegistry.getService("orion.page.message").then(function(progressService){
 							var display = [];
 							
-							if (result.jsonData.Result == "FAST_FORWARD" || result.jsonData.Result == "ALREADY_UP_TO_DATE"){
+							if (result.jsonData && (result.jsonData.Result == "FAST_FORWARD" || result.jsonData.Result == "ALREADY_UP_TO_DATE")){
 								dojo.query(".treeTableRow").forEach(function(node, i) {
 									dojo.toggleClass(node, "incomingCommitsdRow", false);
 								});
@@ -472,7 +472,7 @@ var exports = {};
 								display.HTML = false;
 								display.Message = result.jsonData.Result;
 							}
-							else{
+							else if(result.jsonData){
 								var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
 								
 								display.Severity = "Warning";
@@ -480,6 +480,17 @@ var exports = {};
 								display.Message = "<span>" + result.jsonData.Result
 									+ ". Go to <a class=\"pageActions\" href=\"/git/git-status.html#" 
 									+ statusLocation +"\">Git Status page</a>.<span>";
+							} else if(result.error) {
+								display.Severity = "Error";
+								if(result.error.responseText && JSON.parse(result.error.responseText)){
+									var resp = JSON.parse(result.error.responseText);
+									display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+								}else{
+									display.Message = result.error.message;
+								}
+								display.HTML = true;
+								display.Message ="<span>" + display.Message + " Go to <a class=\"pageActions\" href=\"/git/git-status.html#" 
+									+ statusLocation + "\">Git Status page</a>.<span>";
 							}
 								
 							progressService.setProgressResult(display);
