@@ -9,6 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
+/**
+ * @private Don't jsdoc this.
+ */
 var eclipse = eclipse || {};
 
 eclipse.ServiceProvider = function(serviceId, internalProvider) {
