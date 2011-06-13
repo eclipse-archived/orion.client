@@ -153,35 +153,35 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 	
 	// "Extended" regex syntax with whitespace and comments.
 	tests["test TextMateStyler - Util.toRegex() - (?x)X and (?x:X)"] = function() {
-		var regex1 = mTextMateStyler.Util.toRegExp("", false);
+		var regex1 = mTextMateStyler.RegexUtil.toRegExp("", false);
 		assert.equal(regex1.source, "");
 		
-		var regex2 = mTextMateStyler.Util.toRegExp("(?x)(a+  #fizz  \r\n     b)?", false);
+		var regex2 = mTextMateStyler.RegexUtil.toRegExp("(?x)(a+  #fizz  \r\n     b)?", false);
 		assert.equal(regex2.source, "(a+b)?");
 		
-		var regex3 = mTextMateStyler.Util.toRegExp("(?x:(a+  #foo\n       b  #bar  \n  )?)", false);
+		var regex3 = mTextMateStyler.RegexUtil.toRegExp("(?x:(a+  #foo\n       b  #bar  \n  )?)", false);
 		assert.equal(regex2.source, "(a+b)?");
 		
-		var regex5 = mTextMateStyler.Util.toRegExp("(?x)(aa[ bc]d)", false);
+		var regex5 = mTextMateStyler.RegexUtil.toRegExp("(?x)(aa[ bc]d)", false);
 		assert.equal(regex5.source, "(aa[ bc]d)");
 		
-		var regex6 = mTextMateStyler.Util.toRegExp("(?x:aa\\[ bc)", false);
+		var regex6 = mTextMateStyler.RegexUtil.toRegExp("(?x:aa\\[ bc)", false);
 		assert.equal(regex6.source, "aa\\[bc");
 		
-		var regex7 = mTextMateStyler.Util.toRegExp("(?x: \n \\\\ b)", false); // (literal backslash)b
+		var regex7 = mTextMateStyler.RegexUtil.toRegExp("(?x: \n \\\\ b)", false); // (literal backslash)b
 		assert.equal(regex7.source, "\\\\b");
 		
 		var str4 = '(?x:                # turn on extended mode\n                     \\\\                # a literal backslash\n                     (?:               # ...followed by...\n                       ["\\\\/bfnrt]     # one of these characters\n                       |               # ...or...\n                       u               # a u\n                       [0-9a-fA-F]{4}  # and four hex digits\n                     )\n                   )';
-		var regex4 = mTextMateStyler.Util.toRegExp(str4, false);
+		var regex4 = mTextMateStyler.RegexUtil.toRegExp(str4, false);
 		assert.equal(regex4.source, '\\\\(?:["\\\\/bfnrt]|u[0-9a-fA-F]{4})');
 	};
 	
 	tests["test TextMateStyler - Util.groupify()"] = function() {
-		var result1 = mTextMateStyler.Util.groupify(new RegExp("")),
+		var result1 = mTextMateStyler.RegexUtil.groupify(new RegExp("")),
 		    regex1 = result1[0];
 		assert.equal(regex1.source, "");
 		
-		var result2 = mTextMateStyler.Util.groupify(/()/),
+		var result2 = mTextMateStyler.RegexUtil.groupify(/()/),
 		    regex2 = result2[0], 
 		    map2 = result2[1],
 		    con2 = result2[2];
@@ -189,7 +189,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assert.equal(map2[1], 1);
 		assertHasProps(con2, "1");
 		
-		var result3 = mTextMateStyler.Util.groupify(/a+/),
+		var result3 = mTextMateStyler.RegexUtil.groupify(/a+/),
 		    regex3 = result3[0],
 		    map3 = result3[1],
 		    con3 = result3[2];
@@ -197,7 +197,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertDoesntHaveProps(map3, "1");
 		assertHasProps(con3, "1");
 		
-		var result4 = mTextMateStyler.Util.groupify(/x(a+)b?/),
+		var result4 = mTextMateStyler.RegexUtil.groupify(/x(a+)b?/),
 		    regex4 = result4[0],
 		    map4 = result4[1],
 		    con4 = result4[2];
@@ -206,7 +206,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertDoesntHaveProps(map4, "2");
 		assertHasProps(con4, "1");
 		
-		var result5 = mTextMateStyler.Util.groupify(/a+(?=b)c+(?!d*x?y)e+/),
+		var result5 = mTextMateStyler.RegexUtil.groupify(/a+(?=b)c+(?!d*x?y)e+/),
 		    regex5 = result5[0],
 		    map5 = result5[1],
 		    con5 = result5[2];
@@ -215,7 +215,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertHasProps(con5, "1", "2", "3");
 		
 		// Non-capturing group
-		var result6 = mTextMateStyler.Util.groupify(/(?:x+(a+)(b+))(c+)/),
+		var result6 = mTextMateStyler.RegexUtil.groupify(/(?:x+(a+)(b+))(c+)/),
 		    regex6 = result6[0],
 		    map6 = result6[1],
 		    con6 = result6[2];
@@ -226,7 +226,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertHasProps(con6, "1", "2", "3", "4");
 		
 		// Capturing group inside a lookahead
-		var result7 = mTextMateStyler.Util.groupify(/x+(?=aa(b+))z{2,}/),
+		var result7 = mTextMateStyler.RegexUtil.groupify(/x+(?=aa(b+))z{2,}/),
 		    regex7 = result7[0],
 		    map7 = result7[1],
 		    con7= result7[2];
@@ -235,7 +235,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertHasProps(con7, "1", "3"); // (b+) is group 2, and it's NOT consuming
 		
 		// Escaping \( and \)
-		var result8 = mTextMateStyler.Util.groupify(new RegExp(/aa(\(x\))bb|[^cd]/)),
+		var result8 = mTextMateStyler.RegexUtil.groupify(new RegExp(/aa(\(x\))bb|[^cd]/)),
 		    regex8 = result8[0],
 		    map8 = result8[1],
 		    con8 = result8[2];
@@ -244,7 +244,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertHasProps(con8, "1", "2", "3");
 		
 		// Escaping \
-		var result9 = mTextMateStyler.Util.groupify(/C:\\(\w+)\\/),
+		var result9 = mTextMateStyler.RegexUtil.groupify(/C:\\(\w+)\\/),
 		    regex9 = result9[0],
 		    map9 = result9[1],
 		    con9 = result9[2];
@@ -253,7 +253,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertHasProps(con9, "1", "2", "3");
 		
 		// Backrefs
-		var result10 = mTextMateStyler.Util.groupify(/x?(a+)x\1x?/),
+		var result10 = mTextMateStyler.RegexUtil.groupify(/x?(a+)x\1x?/),
 		    regex10 = result10[0],
 		    map10 = result10[1],
 		    con10 = result10[2];
@@ -262,7 +262,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertHasProps(con10, "1", "2", "3");
 		
 		// Backrefs with the false parameter (should not be touched)
-		var result11 = mTextMateStyler.Util.groupify(/(x+)(y+)(z+)\2/),
+		var result11 = mTextMateStyler.RegexUtil.groupify(/(x+)(y+)(z+)\2/),
 		    regex11 = result11[0],
 		    map11 = result11[1],
 		    con11 = result11[2];
@@ -273,7 +273,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertHasProps(con11, "1", "2", "3");
 		
 		// Operators between groups
-		var result12 = mTextMateStyler.Util.groupify(/(ab)+|(cd)/),
+		var result12 = mTextMateStyler.RegexUtil.groupify(/(ab)+|(cd)/),
 		    regex12 = result12[0],
 		    map12 = result12[1],
 		    con12 = result12[2];
@@ -282,7 +282,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assert.equal(map12[2], 3); // (cd) is now 3
 		assertHasProps(con12, "1");
 		
-		var result13 = mTextMateStyler.Util.groupify(/(,)|(?=\})/),
+		var result13 = mTextMateStyler.RegexUtil.groupify(/(,)|(?=\})/),
 		    regex13 = result13[0],
 		    map13 = result13[1],
 		    con13 = result13[2];

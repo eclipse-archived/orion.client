@@ -94,7 +94,7 @@ orion.editor.AbstractStyler.extend = function(subCtor, proto) {
 	}
 };
 
-orion.editor.Util = {
+orion.editor.RegexUtil = {
 	// Rules to detect some unsupported Oniguruma features
 	unsupported: [
 		{regex: /\(\?[ims\-]:/, func: function(match) { return "option on/off for subexp"; }},
@@ -216,7 +216,7 @@ orion.editor.Util = {
 			var backrefMatch = /\\(\d+)/.exec(term);
 			if (backrefMatch) {
 				var text = sub[backrefMatch[1]] || "";
-				array.push(escape ? orion.editor.Util.escapeRegex(text) : text);
+				array.push(escape ? orion.editor.RegexUtil.escapeRegex(text) : text);
 			} else {
 				array.push(term);
 			}
@@ -546,23 +546,23 @@ orion.editor.TextMateStyler = (function() {
 			function BeginEndRule(/**Object*/ rule) {
 				this.rule = rule;
 				// TODO: the TextMate blog claims that "end" is optional.
-				this.beginRegex = orion.editor.Util.toRegExp(rule.begin);
-				this.endRegex = orion.editor.Util.toRegExp(rule.end);
+				this.beginRegex = orion.editor.RegexUtil.toRegExp(rule.begin);
+				this.endRegex = orion.editor.RegexUtil.toRegExp(rule.end);
 				this.subrules = rule.patterns || [];
 				
-				this.endRegexHasBackRef = orion.editor.Util.hasBackReference(this.endRegex);
+				this.endRegexHasBackRef = orion.editor.RegexUtil.hasBackReference(this.endRegex);
 				
 				// Deal with non-0 captures
-				var complexCaptures = orion.editor.Util.complexCaptures(rule.captures);
-				var complexBeginEnd = orion.editor.Util.complexCaptures(rule.beginCaptures) || orion.editor.Util.complexCaptures(rule.endCaptures);
+				var complexCaptures = orion.editor.RegexUtil.complexCaptures(rule.captures);
+				var complexBeginEnd = orion.editor.RegexUtil.complexCaptures(rule.beginCaptures) || orion.editor.RegexUtil.complexCaptures(rule.endCaptures);
 				this.isComplex = complexCaptures || complexBeginEnd;
 				if (this.isComplex) {
-					var bg = orion.editor.Util.groupify(this.beginRegex);
+					var bg = orion.editor.RegexUtil.groupify(this.beginRegex);
 					this.beginRegex = bg[0];
 					this.beginOld2New = bg[1];
 					this.beginConsuming = bg[2];
 					
-					var eg = orion.editor.Util.groupify(this.endRegex, this.beginOld2New /*Update end's backrefs to begin's new group #s*/);
+					var eg = orion.editor.RegexUtil.groupify(this.endRegex, this.beginOld2New /*Update end's backrefs to begin's new group #s*/);
 					this.endRegex = eg[0];
 					this.endOld2New = eg[1];
 					this.endConsuming = eg[2];
@@ -578,10 +578,10 @@ orion.editor.TextMateStyler = (function() {
 		MatchRule: (function() {
 			function MatchRule(/**Object*/ rule) {
 				this.rule = rule;
-				this.matchRegex = orion.editor.Util.toRegExp(rule.match);
-				this.isComplex = orion.editor.Util.complexCaptures(rule.captures);
+				this.matchRegex = orion.editor.RegexUtil.toRegExp(rule.match);
+				this.isComplex = orion.editor.RegexUtil.complexCaptures(rule.captures);
 				if (this.isComplex) {
-					var mg = orion.editor.Util.groupify(this.matchRegex);
+					var mg = orion.editor.RegexUtil.groupify(this.matchRegex);
 					this.matchRegex = mg[0];
 					this.matchOld2New = mg[1];
 					this.matchConsuming = mg[2];
@@ -657,7 +657,7 @@ orion.editor.TextMateStyler = (function() {
 				
 				// Build a new regex if the "end" regex has backrefs since they refer to matched groups of beginMatch
 				if (rule.endRegexHasBackRef) {
-					this.endRegexSubstituted = orion.editor.Util.getSubstitutedRegex(rule.endRegex, beginMatch);
+					this.endRegexSubstituted = orion.editor.RegexUtil.getSubstitutedRegex(rule.endRegex, beginMatch);
 				} else {
 					this.endRegexSubstituted = null;
 				}
