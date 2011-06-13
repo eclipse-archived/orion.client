@@ -15,21 +15,28 @@
 	color: #3f5fbf;
 }
 
+.punctuation-definition-string {
+	color: blue;
+}
+
 .string-quoted {
 	color: #2a00ff;
-	font-style: italic;
 }
 
 .comment {
 	color: green;
 }
 
+.constant {
+	font-weight: bold;
+}
+
 .invalid {
 	color: white;
 	background-color: red;
 }
-/*.constant {
-}
+
+/*
 .invalid {
 }
 .keyword {

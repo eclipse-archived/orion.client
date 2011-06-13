@@ -59,8 +59,8 @@ dojo.addOnLoad(function() {
 	var commitDetails = new mGitCommitDetails.CommitDetails({parent: "commitDetailsPane", serviceRegistry: serviceRegistry, detailsPane: dijit.byId("orion.innerNavigator")});
 	
 	// Commit navigator
-	var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection,commitDetails, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
-
+	var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, commitDetails, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+	
 	// global commands
 	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, navigator);
 	

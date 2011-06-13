@@ -3027,7 +3027,7 @@ orion.textview.TextView = (function() {
 					var text = [];
 					var getNodeText = function(node) {
 						var nodeChild = node.firstChild;
-						while (nodeChild !== endNode) {
+						while (nodeChild && nodeChild !== endNode) {
 							if (nodeChild.nodeType === child.TEXT_NODE) {
 								text.push(nodeChild !== sel.anchorNode ? nodeChild.data : nodeChild.data.substring(0, sel.anchorOffset));
 							} else if (nodeChild.tagName === "BR") {

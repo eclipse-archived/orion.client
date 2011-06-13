@@ -521,7 +521,7 @@ var exports = {};
 		commandService.addCommand(mergeCommand, "object");
 		
 		var pushCommand = new mCommands.Command({
-			name : "Push",
+			name : "Push All Outgoing Commits",
 			image : "/git/images/git-push.gif",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
