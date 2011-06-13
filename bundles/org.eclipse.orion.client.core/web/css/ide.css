@@ -30,45 +30,45 @@ h2 {
 a {
 	cursor: hand;
 	text-decoration: none;
-	color: #05386B;
+	color: #024892;
 }
 
 a:visited {
 	text-decoration: none;
-	color: #05386B;
+	color: #024892;
 }
 
 a:active {
 	text-decoration: none;
-	color: #05386B;
+	color: #024892;
 }
 
 a:hover {
 	cursor: hand;
 	text-decoration: underline;
-	color: #05386B;
+	color: #024892;
 }
 
 .navlinkonpage {
-	color: #05386B;
+	color: #024892;
 	cursor: hand;
 	text-decoration: none;
 }
 
 .navlinkonpage:visited {
-	color: #05386B;
+	color: #024892;
 	cursor: hand;
 	text-decoration: none;
 }
 
 .navlinkonpage:active {
-	color: #05386B;
+	color: #024892;
 	cursor: hand;
 	text-decoration: none;
 }
 
 .navlinkonpage:hover {
-	color: #05386B;
+	color: #024892;
 	cursor: hand;
 	text-decoration: none;
 	border-bottom: 1px dotted;
@@ -261,7 +261,7 @@ a:hover {
 	font-size: 0.9em;
 	color: #5a5a5a;
 	border-bottom: 1px solid #dbdbdb;
-	height: 108px; // temporary.  BorderContainer needs a height reserved
+	min-height: 108px; 
 }
 
 .pageTitle {
@@ -278,7 +278,7 @@ a:hover {
 	cursor: pointer;
 	font-size: 0.9em;
 	color: #05386B;
-	height: 2.5em;
+	min-height: 2.5em; 
 	border-top: 1px solid #dbdbdb
 }
 

@@ -69,7 +69,7 @@ define(['dojo'], function(dojo) {
 				crumbs.appendChild(seg);
 				if (this._resource && this._resource.Parents) {
 					slash = document.createElement('span');
-					dojo.place(document.createTextNode('/'), slash, "only");
+					dojo.place(document.createTextNode(' / '), slash, "only");
 					this.path+="/";
 					dojo.addClass(slash, "breadcrumb");
 					crumbs.appendChild(slash);
@@ -97,7 +97,7 @@ define(['dojo'], function(dojo) {
 					}
 					crumbs.appendChild(seg);
 					slash = document.createElement('span');
-					dojo.place(document.createTextNode('/'), slash, "only");
+					dojo.place(document.createTextNode(' / '), slash, "only");
 					this.path += '/';
 					dojo.addClass(slash, "breadcrumb");
 					crumbs.appendChild(slash);
