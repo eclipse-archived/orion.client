@@ -561,7 +561,7 @@ orion.GitStatusController = (function() {
 			if(!this._renderLog)
 				return;
 			if (isRemote) {
-		        this._gitCommitNavigatorLog = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null,this._logTableRenderer.getLogContentId());    
+		        this._gitCommitNavigatorLog = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null, {checkbox: false, minimal: true}, this._logTableRenderer.getLogContentId());    
 				dojo.place(document.createTextNode(""), this._remoteTableRenderer.getLogContentId(), "only");
 				// refresh the commit list for the remote
 				var path = that._curBranch.RemoteLocation + "?page=1";;
@@ -586,7 +586,7 @@ orion.GitStatusController = (function() {
 					}
 				});
 			} else {
-		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null,this._remoteTableRenderer.getLogContentId());
+		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null, {checkbox: false, minimal: true},this._remoteTableRenderer.getLogContentId());
 				dojo.place(document.createTextNode(""), this._logTableRenderer.getLogContentId(), "only");
 				var path = that._curBranch.CommitLocation + "?page=1";
 				dojo.xhrGet({
