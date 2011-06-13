@@ -996,7 +996,7 @@ orion.textview.TextView = (function() {
 		 * This event is sent when the text in the model has changed.
 		 *
 		 * @event
-		 * @param {orion.textview.ModelChangedEvent} modelChangedEvent the event
+		 * @param {orion.textview.ModelChangingEvent} modelChangingEvent the event
 		 */
 		onModelChanged: function(modelChangedEvent) {
 			this._eventTable.sendEvent("ModelChanged", modelChangedEvent);
@@ -3027,7 +3027,7 @@ orion.textview.TextView = (function() {
 					var text = [];
 					var getNodeText = function(node) {
 						var nodeChild = node.firstChild;
-						while (nodeChild !== endNode) {
+						while (nodeChild && nodeChild !== endNode) {
 							if (nodeChild.nodeType === child.TEXT_NODE) {
 								text.push(nodeChild !== sel.anchorNode ? nodeChild.data : nodeChild.data.substring(0, sel.anchorOffset));
 							} else if (nodeChild.tagName === "BR") {

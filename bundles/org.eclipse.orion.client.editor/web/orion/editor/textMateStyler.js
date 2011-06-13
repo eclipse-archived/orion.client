@@ -94,16 +94,7 @@ orion.editor.AbstractStyler.extend = function(subCtor, proto) {
 	}
 };
 
-orion.editor.Util = {
-	/**
-	 * @returns {String} str with JSON-escaped control character sequences converted to real control characters.
-	 */
-	escapeJson: function(/**String*/ str) {
-		return str.replace(new RegExp("\\\\n", "g"), "\n")
-			.replace(new RegExp("\\\\t", "g"), "\b")
-			.replace(new RegExp("\\\\t", "g"), "\t");
-	},
-	
+orion.editor.RegexUtil = {
 	// Rules to detect some unsupported Oniguruma features
 	unsupported: [
 		{regex: /\(\?[ims\-]:/, func: function(match) { return "option on/off for subexp"; }},
@@ -112,50 +103,102 @@ orion.editor.Util = {
 	],
 	
 	/**
-	 * @param {String} str String giving a regular expression pattern from a TextMate JSON grammar.
+	 * @param {String} str String giving a regular expression pattern from a TextMate grammar.
 	 * @param {String} [flags] [ismg]+
 	 * @returns {RegExp}
 	 */
 	toRegExp: function(str) {
-		var flags = "";
 		function fail(feature, match) {
 			throw new Error("Unsupported regex feature \"" + feature + "\": \"" + match[0] + "\" at index: "
 					+ match.index + " in " + match.input);
 		}
-		var match, i;
+		function getMatchingCloseParen(str, start) {
+			var depth = 0,
+			    len = str.length,
+			    xStop = -1;
+			for (var i=start; i < len && xStop === -1; i++) {
+				switch (str[i]) {
+					case "\\":
+						i += 1; // skip next char
+						break;
+					case "(":
+						depth++;
+						break;
+					case ")":
+						depth--;
+						if (depth === 0) {
+							xStop = i;
+						}
+						break;
+				}
+			}
+			return xStop;
+		}
+		// Turns an extended regex into a normal one
+		function normalize(/**String*/ str) {
+			var result = "";
+			var insideCharacterClass = false;
+			var len = str.length;
+			for (var i=0; i < len; ) {
+				var chr = str[i];
+				if (!insideCharacterClass && chr === "#") {
+					// skip to eol
+					while (i < len && chr !== "\r" && chr !== "\n") {
+						chr = str[++i];
+					}
+				} else if (!insideCharacterClass && /\s/.test(chr)) {
+					// skip whitespace
+					while (i < len && /\s/.test(chr)) { 
+						chr = str[++i];
+					}
+				} else if (chr === "\\") {
+					result += chr;
+					if (!/\s/.test(str[i+1])) {
+						result += str[i+1];
+						i += 1;
+					}
+					i += 1;
+				} else if (chr === "[") {
+					insideCharacterClass = true;
+					result += chr;
+					i += 1;
+				} else if (chr === "]") {
+					insideCharacterClass = false;
+					result += chr;
+					i += 1;
+				} else {
+					result += chr;
+					i += 1;
+				}
+			}
+			return result;
+		}
+		
+		var flags = "";
+		var i;
+		
+		// Check for unsupported syntax
 		for (i=0; i < this.unsupported.length; i++) {
+			var match;
 			if ((match = this.unsupported[i].regex.exec(str))) {
 				fail(this.unsupported[i].func(match));
 			}
 		}
 		
-		// Handle (?x)expr ("x" flag that applies to entire regex)
-		var str2 = "";
-		if ((match = /^\(\?x\)/.exec(str))) {
-			// Eat \s+ (whitespace) and #.* (comment up to EOL) if they occur outside []
-			var insideCharacterClass = false;
-			for (i=0; i < str.length; ) {
-				var match2;
-				if ((match2 = /\s+|#.*/.exec(str)) && match2.index === i) {
-					i = match2.index + match2[0].length;
-//					console.debug("Ate " + match2[0]);
-				} else {
-					var chr = str.charAt(i);
-					if (chr === "[") {
-						insideCharacterClass = true;
-					} else if (chr === "]") {
-						insideCharacterClass = false;
-					}
-					str2 += chr;
-					i++;
-				}
+		// Deal with "x" flag (whitespace/comments)
+		if (str.substring(0, 4) === "(?x)") {
+			// Leading (?x) term (means "x" flag applies to entire regex)
+			str = normalize(str.substring(4));
+		} else if (str.substring(0, 4) === "(?x:") {
+			// Regex wrapped in a (?x: ...) -- again "x" applies to entire regex
+			var xStop = getMatchingCloseParen(str, 0);
+			if (xStop < str.length-1) {
+				throw new Error("Only a (?x:) group that encloses the entire regex is supported: " + str);
 			}
+			str = normalize(str.substring(4, xStop));
 		}
-		str2 = str2 || str;
-		str2 = orion.editor.Util.escapeJson(str2);
-		// TODO: tolerate /(?xExpr)/ -- eg. in JSON grammar
 		// TODO: tolerate /(?iSubExp)/ -- eg. in PHP grammar (trickier)
-		return new RegExp(str2, flags);
+		return new RegExp(str, flags);
 	},
 	
 	hasBackReference: function(/**RegExp*/ regex) {
@@ -173,7 +216,7 @@ orion.editor.Util = {
 			var backrefMatch = /\\(\d+)/.exec(term);
 			if (backrefMatch) {
 				var text = sub[backrefMatch[1]] || "";
-				array.push(escape ? orion.editor.Util.escapeRegex(text) : text);
+				array.push(escape ? orion.editor.RegexUtil.escapeRegex(text) : text);
 			} else {
 				array.push(term);
 			}
@@ -194,17 +237,15 @@ orion.editor.Util = {
 	 * Example: groupify(/(a+)x+(b+)/) === /(a+)(x+)(b+)/<br />
 	 * Example: groupify(/(?:x+(a+))b+/) === /(?:(x+)(a+))(b+)/
 	 * @param {RegExp} regex The regex to groupify.
-	 * @param {Boolean} [updateBackRefs] Optional, default is true. If false, we won't update backreferences in regex to refer
-	 * to the new group numbers of the returned regex.
-	 * @returns {Array} An array with 3 elements:
+	 * @param {Object} [backRefOld2NewMap] Optional. If provided, the backreference numbers in regex will be updated using the 
+	 * properties of this object rather than the new group numbers of regex itself.
 	 * <ul><li>[0] {RegExp} The groupified version of the input regex.</li>
 	 * <li>[1] {Object} A map containing old-group to new-group info. Each property is a capturing group number of <tt>regex</tt>
 	 * and its value is the corresponding capturing group number of [0].</li>
 	 * <li>[2] {Object} A map indicating which capturing groups of [0] are also consuming groups. If a group number is found
 	 * as a property in this object, then it's a consuming group.</li></ul>
 	 */
-	groupify: function(regex, updateBackRefs) {
-		updateBackRefs = typeof updateBackRefs === "boolean" ? updateBackRefs : true;
+	groupify: function(regex, backRefOld2NewMap) {
 		var NON_CAPTURING = 1,
 		    CAPTURING = 2,
 		    LOOKAHEAD = 3,
@@ -213,6 +254,7 @@ orion.editor.Util = {
 		    len = src.length;
 		var groups = [],
 		    lookaheadDepth = 0,
+		    newGroups = [],
 		    oldGroupNumber = 1,
 		    newGroupNumber = 1;
 		var result = [],
@@ -227,6 +269,7 @@ orion.editor.Util = {
 					if (curGroup === NEW_CAPTURING) {
 						groups.pop();
 						result.push(")");
+						newGroups[newGroups.length-1].end = i;
 					}
 					var peek2 = (i + 2 < len) ? (src[i+1] + "" + src[i+2]) : null;
 					if (peek2 === "?:" || peek2 === "?=" || peek2 === "?!") {
@@ -241,30 +284,77 @@ orion.editor.Util = {
 							lookaheadDepth++;
 						}
 						groups.push(groupType);
+						newGroups.push({ start: i, end: -1, type: groupType /*non capturing*/ });
 						result.push(chr);
 						result.push(peek2);
 						i += peek2.length;
 					} else {
 						groups.push(CAPTURING);
+						newGroups.push({ start: i, end: -1, type: CAPTURING, oldNum: oldGroupNumber, num: newGroupNumber });
 						result.push(chr);
 						if (lookaheadDepth === 0) {
 							consuming[newGroupNumber] = null;
 						}
-						old2New[oldGroupNumber++] = newGroupNumber++;
+						old2New[oldGroupNumber] = newGroupNumber;
+						oldGroupNumber++;
+						newGroupNumber++;
 					}
 					break;
 				case ")":
 					var group = groups.pop();
 					if (group === LOOKAHEAD) { lookaheadDepth--; }
+					newGroups[newGroups.length-1].end = i;
 					result.push(chr);
 					break;
+				case "*":
+				case "+":
+				case "?":
+				case "}":
+					// Unary operator. If it's being applied to a capturing group, we need to add a new capturing group
+					// enclosing the pair
+					var op = chr;
+					var prev = src[i-1],
+					    prevIndex = i-1;
+					if (chr === "}") {
+						for (var j=i-1; src[j] !== "{" && j >= 0; j--) {}
+						prev = src[j-1];
+						prevIndex = j-1;
+						op = src.substring(j, i+1);
+					}
+					var lastGroup = newGroups[newGroups.length-1];
+					if (prev === ")" && (lastGroup.type === CAPTURING || lastGroup.type === NEW_CAPTURING)) {
+						// Shove in the new group's (, increment num/start in from [lastGroup.start .. end]
+						result.splice(lastGroup.start, 0, "(");
+						result.push(op);
+						result.push(")");
+						var newGroup = { start: lastGroup.start, end: result.length-1, type: NEW_CAPTURING, num: lastGroup.num };
+						for (var k=0; k < newGroups.length; k++) {
+							group = newGroups[k];
+							if (group.type === CAPTURING || group.type === NEW_CAPTURING) {
+								if (group.start >= lastGroup.start && group.end <= prevIndex) {
+									group.start += 1;
+									group.end += 1;
+									group.num = group.num + 1;
+									if (group.type === CAPTURING) {
+										old2New[group.oldNum] = group.num;
+									}
+								}
+							}
+						}
+						newGroups.push(newGroup);
+						newGroupNumber++;
+						break;
+					} else {
+						// Fallthrough to default
+					}
 				default:
-					if (curGroup !== CAPTURING && curGroup !== NEW_CAPTURING) {
+					if (chr !== "|" && curGroup !== CAPTURING && curGroup !== NEW_CAPTURING) {
 						// Not in a capturing group, so make a new one to hold this term.
 						// Perf improvement: don't create the new group if we're inside a lookahead, since we don't 
 						// care about them (nothing inside a lookahead actually consumes input so we don't need it)
 						if (lookaheadDepth === 0) {
 							groups.push(NEW_CAPTURING);
+							newGroups.push({ start: i, end: -1, type: NEW_CAPTURING, num: newGroupNumber });
 							result.push("(");
 							consuming[newGroupNumber] = null;
 							newGroupNumber++;
@@ -273,11 +363,9 @@ orion.editor.Util = {
 					result.push(chr);
 					if (chr === "\\") {
 						var peek = src[i+1];
-						if (peek === "\\" || peek === "(" || peek === ")") {
-							// Eat next so following iteration doesn't think it's a real slash/lparen/rparen
-							result.push(peek);
-							i += 1;
-						}
+						// Eat next so following iteration doesn't think it's a real special character
+						result.push(peek);
+						i += 1;
 					}
 					break;
 			}
@@ -288,16 +376,17 @@ orion.editor.Util = {
 			result.push(")");
 		}
 		var newRegex = new RegExp(result.join(""));
-		if (updateBackRefs) {
-			// Update backreferences so they refer to the new group numbers
-			var backrefSubstitution = {};
-			for (var prop in old2New) {
-				if (old2New.hasOwnProperty(prop)) {
-					backrefSubstitution[prop] = "\\" + old2New[prop];
-				}
+		
+		// Update backreferences so they refer to the new group numbers. Use backRefOld2NewMap if provided
+		var subst = {};
+		backRefOld2NewMap = backRefOld2NewMap || old2New;
+		for (var prop in backRefOld2NewMap) {
+			if (backRefOld2NewMap.hasOwnProperty(prop)) {
+				subst[prop] = "\\" + backRefOld2NewMap[prop];
 			}
-			newRegex = this.getSubstitutedRegex(newRegex, backrefSubstitution, false);
 		}
+		newRegex = this.getSubstitutedRegex(newRegex, subst, false);
+		
 		return [newRegex, old2New, consuming];
 	},
 	
@@ -363,13 +452,14 @@ orion.editor.Util = {
  * @class orion.editor.TextMateStyler
  * @extends orion.editor.AbstractStyler
  * @param {orion.textview.TextView} textView The textView.
- * @param {JSONObject} grammar The TextMate grammar as a JSON object. You can use a plist-to-JSON conversion tool
+ * @param {Object} grammar The TextMate grammar as a JavaScript object. You can use a plist-to-JavaScript conversion tool 
  * to produce this object. Note that some features of TextMate grammars are not supported.
  */
 orion.editor.TextMateStyler = (function() {
 	/** @inner */
 	function TextMateStyler(textView, grammar) {
 		this.initialize(textView);
+		// Copy the grammar since we'll mutate it
 		this.grammar = this.copy(grammar);
 		this._styles = {}; /* key: {String} scopeName, value: {String[]} cssClassNames */
 		this._tree = null;
@@ -377,9 +467,8 @@ orion.editor.TextMateStyler = (function() {
 		this.preprocess();
 	}
 	orion.editor.AbstractStyler.extend(TextMateStyler, /** @lends orion.editor.TextMateStyler.prototype */ {
-		copy: function(grammar) {
-			// Use a copy of the grammar object, since we'll mutate it
-			return JSON.parse(JSON.stringify(grammar));
+		copy: function(obj) {
+			return JSON.parse(JSON.stringify(obj));
 		},
 		preprocess: function() {
 			var stack = [this.grammar];
@@ -457,19 +546,26 @@ orion.editor.TextMateStyler = (function() {
 			function BeginEndRule(/**Object*/ rule) {
 				this.rule = rule;
 				// TODO: the TextMate blog claims that "end" is optional.
-				this.beginRegex = orion.editor.Util.toRegExp(rule.begin);
-				this.endRegex = orion.editor.Util.toRegExp(rule.end);
+				this.beginRegex = orion.editor.RegexUtil.toRegExp(rule.begin);
+				this.endRegex = orion.editor.RegexUtil.toRegExp(rule.end);
 				this.subrules = rule.patterns || [];
 				
-				this.endRegexHasBackRef = orion.editor.Util.hasBackReference(this.endRegex);
+				this.endRegexHasBackRef = orion.editor.RegexUtil.hasBackReference(this.endRegex);
 				
-				var complexCaptures = orion.editor.Util.complexCaptures(rule.captures);
-				this.complexBeginEnd = complexCaptures || orion.editor.Util.complexCaptures(rule.beginCaptures) || orion.editor.Util.complexCaptures(rule.endCaptures);
-				if (complexCaptures || this.complexBeginEnd) {
-					this.beginRegexGroupified = orion.editor.Util.groupify(this.beginRegex);
-				}
-				if (complexCaptures || this.complexBeginEnd) {
-					this.endRegexGroupified = orion.editor.Util.groupify(this.endRegex, false /*don't touch backrefs*/);
+				// Deal with non-0 captures
+				var complexCaptures = orion.editor.RegexUtil.complexCaptures(rule.captures);
+				var complexBeginEnd = orion.editor.RegexUtil.complexCaptures(rule.beginCaptures) || orion.editor.RegexUtil.complexCaptures(rule.endCaptures);
+				this.isComplex = complexCaptures || complexBeginEnd;
+				if (this.isComplex) {
+					var bg = orion.editor.RegexUtil.groupify(this.beginRegex);
+					this.beginRegex = bg[0];
+					this.beginOld2New = bg[1];
+					this.beginConsuming = bg[2];
+					
+					var eg = orion.editor.RegexUtil.groupify(this.endRegex, this.beginOld2New /*Update end's backrefs to begin's new group #s*/);
+					this.endRegex = eg[0];
+					this.endOld2New = eg[1];
+					this.endConsuming = eg[2];
 				}
 			}
 			BeginEndRule.prototype.valueOf = function() { return this.beginRegex; };
@@ -482,17 +578,20 @@ orion.editor.TextMateStyler = (function() {
 		MatchRule: (function() {
 			function MatchRule(/**Object*/ rule) {
 				this.rule = rule;
-				this.matchRegex = orion.editor.Util.toRegExp(rule.match);
-				this.complexCaptures = orion.editor.Util.complexCaptures(rule.captures);
-				if (this.complexCaptures) {
-					this.matchRegexGroupified = orion.editor.Util.groupify(this.matchRegex);
+				this.matchRegex = orion.editor.RegexUtil.toRegExp(rule.match);
+				this.isComplex = orion.editor.RegexUtil.complexCaptures(rule.captures);
+				if (this.isComplex) {
+					var mg = orion.editor.RegexUtil.groupify(this.matchRegex);
+					this.matchRegex = mg[0];
+					this.matchOld2New = mg[1];
+					this.matchConsuming = mg[2];
 				}
 			}
 			MatchRule.prototype.valueOf = function() { return this.matchRegex; };
 			return MatchRule;
 		}()),
 		/**
-		 * @param {Object} rule A rule from the JSON grammar.
+		 * @param {Object} rule A rule from the grammar.
 		 * @returns {MatchRule|BeginEndRule|ContainerRule}
 		 */
 		_createTypedRule: function(rule) {
@@ -558,19 +657,7 @@ orion.editor.TextMateStyler = (function() {
 				
 				// Build a new regex if the "end" regex has backrefs since they refer to matched groups of beginMatch
 				if (rule.endRegexHasBackRef) {
-					if (rule.complexBeginEnd) {
-						// begin regex has been groupified, so we need to substitute using its new group numbers
-						var old2New = this.rule.beginRegexGroupified[1];
-						var newSub = {};
-						for (var groupNum = 1; beginMatch[groupNum] !== undefined; groupNum++) {
-							var value = beginMatch[groupNum];
-							var newGroupNum = old2New[groupNum];
-							newSub[newGroupNum] = value;
-						}
-						this.endRegexSubstituted = orion.editor.Util.getSubstitutedRegex(rule.endRegexGroupified[0], newSub);
-					} else {
-						this.endRegexSubstituted = orion.editor.Util.getSubstitutedRegex(rule.endRegex, beginMatch);
-					}
+					this.endRegexSubstituted = orion.editor.RegexUtil.getSubstitutedRegex(rule.endRegex, beginMatch);
 				} else {
 					this.endRegexSubstituted = null;
 				}
@@ -896,14 +983,16 @@ orion.editor.TextMateStyler = (function() {
 			var line = model.getText(pos, lineEnd);
 
 			var stack = [],
+			    expandedContainers = [],
 			    subMatches = [],
 			    subrules = [];
 			this.push(stack, node.rule.subrules);
 			while (stack.length) {
 				var next = stack.length ? stack.pop() : null;
 				var subrule = next && next._resolvedRule._typedRule;
-				if (subrule instanceof this.ContainerRule) {
+				if (subrule instanceof this.ContainerRule && expandedContainers.indexOf(subrule) === -1) {
 					// Expand ContainerRule by pushing its subrules on
+					expandedContainers.push(subrule);
 					this.push(stack, subrule.subrules);
 					continue;
 				}
@@ -936,7 +1025,8 @@ orion.editor.TextMateStyler = (function() {
 					var doEndLast = activeBENode.rule.applyEndPatternLast;
 					var endWins = bestSubIndex === -1 || (endMatch.index < bestSub) || (!doEndLast && endMatch.index === bestSub);
 					if (endWins) {
-						return {isEnd: true, rule: activeBENode.rule, match: endMatch};					}
+						return {isEnd: true, rule: activeBENode.rule, match: endMatch};
+					}
 				}
 			}
 			return bestSubIndex === -1 ? null : {isSub: true, rule: subrules[bestSubIndex], match: subMatches[bestSubIndex]};
@@ -1027,226 +1117,148 @@ orion.editor.TextMateStyler = (function() {
 			}
 		},
 		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {
-			function byStart(r1, r2) { return r1.start - r2.start; }
-			function getClaimedBy(claimedRegions, start, end) {
-				// claimedRegions is guaranteed to be a set of nonoverlapping intervals
-				var len = claimedRegions.length;
-				for (var i=0; i < len; i++) {
-					var r = claimedRegions[i];
-					if (r.start <= start && end <= r.end) {
-						return r.node;
-					}
-				}
-				return null;
-			}
-			// directRegions must be nonoverlapping intervals and sorted in ascending order by "start"
-			function getGaps(directRegions, lineStart, lineEnd) {
-				var gaps = [];
-				var expect = e.lineStart;
-				for (var i=0; i < directRegions.length; i++) {
-					var scope = directRegions[i],
-					    ss = scope.start,
-					    se = scope.end;
-					if (ss !== expect) {
-						// gap region [expect, ss]
-						gaps.push({start: expect, end:ss});
-					}
-					expect = se;
-				}
-				if (expect !== lineEnd) {
-					gaps.push({start: expect, end: lineEnd});
-				}
-				return gaps;
+			function byStart(r1, r2) {
+				return r1.start - r2.start;
 			}
 			
-//			console.debug("lineIndex=" + e.lineIndex + " lineStart=" + e.lineStart + "" /*+ "lineText:" + e.lineText*/ + " ");
 			if (!this._tree) {
 				// In some cases it seems onLineStyle is called before onModelChanged, so we need to parse here
 				this.initialParse();
 			}
+			var lineStart = e.lineStart,
+			    model = this.textView.getModel(),
+			    lineEnd = model.getLineEnd(e.lineIndex);
 			
-			var lineStart = e.lineStart;
-			var model = this.textView.getModel();
-			var lineEnd = model.getLineEnd(e.lineIndex);
-			var nodes = this.getIntersecting(e.lineStart, lineEnd);
+			var rs = model.getLineEnd(model.getLineAtOffset(lineStart) - 1); // may be < 0
+			var node = this.getFirstDamaged(rs, rs);
 			
-			var i, node;
-			// Apply "dirct" scopes: ie MatchRule-matches and beginCaptures/endCaptures of the BeginEndRules that intersect this line
-			var directScopes = [];
-			var claimedRegions = [];
-			if (nodes.length > 0 && nodes.length[nodes.length-1] === this._tree) {
-				// Intersects multiple nodes, including toplevel node. Remove toplevel node since
-				// it's dealth with below
-				nodes.splice(nodes.length-1, 1);
-			}
-			for (i=0; i < nodes.length; i++) {
-				node = nodes[i];
-				this.styleDirect(directScopes, claimedRegions, node, lineStart, lineEnd);
-			}
-			
-			// begin inherited
-			// For each gap remaining in line that wasn't assigned a match/beginCaptures/endCaptures
-			// scope above, assign the nearest inherited name/contentName scope to it (if any), or give 
-			// the toplevel rules a chance to match it.
-			var directSorted = directScopes.slice(0).sort(byStart); // TODO: are these already sorted?
-			var gaps = getGaps(directSorted, e.lineStart, lineEnd);
-//			console.debug("  gaps: " + gaps.map(function(g){return "["+g.start+","+g.end+" '"+model.getText(g.start,g.end)+"']";}).join(" "));
-			
-			var inheritedScopes = [];
-			for (i=0; i < gaps.length; i++) {
-				var gap = gaps[i];
-				// find out who owns this gap
-				node = getClaimedBy(claimedRegions, gap.start, gap.end);
-				if (!node) {
-					// Not claimed by anybody--use toplevel "match"-rules
-					this.styleFromMatchRules(inheritedScopes, this._tree, gap.start, gap.end);
-				} else {
-					// Get the nearest inherited name/contentName scope and assign it to the gap
-					this.styleInherited(inheritedScopes, node, gap.start, gap.end);
-				}
-			}
-			// end inherited
-			
-			// directScopes, inheritedScopes are disjoint
-			var scopes = directScopes.concat(inheritedScopes);
+			var scopes = this.getLineScope(model, node, lineStart, lineEnd);
 			e.ranges = this.toStyleRanges(scopes);
-			
-			// Editor requires StyleRanges must be in ascending order by 'start', or else some will be ignored
+//			// Editor requires StyleRanges must be in ascending order by 'start', or else some will be ignored
 			e.ranges.sort(byStart);
-			
-//			console.debug("  text: " + this.textView.getText(lineStart, lineEnd));
-//			console.debug("  scopes: " + scopes.map(function(sc){return sc.scope;}).join(", "));
-			//console.debug("  intersects " + nodes.length + ": [" + nodes.map(function(r){return r.valueOf();}).join(", ") + "]");
 		},
-		// Find the nearest inherited name/contentName and apply it to [start..end]
-		styleInherited: function(/**Array*/ scopes, /**BeginEndNode*/ node, start, end) {
-			while (node) {
-				// if node defines a contentName or name, apply it
-				var rule = node.rule.rule;
-				var name = rule.name,
-				    contentName = rule.contentName;
-				// TODO: if both, we don't resolve the conflict. contentName always wins
-				var scope = contentName || name;
-				if (scope) {
-					this.addScope(scopes, node, start, end, contentName || name);
-					break;
+		// Run parse algorithm on [start, end] in the context of node, assigning scope as we find matches
+		getLineScope: function(model, node, start, end) {
+			var pos = start;
+			var expected = this.getInitialExpected(node, start);
+			var scopes = [],
+			    gaps = [];
+			while (node && (pos < end)) {
+				var matchInfo = this.getNextMatch(model, node, pos);
+				if (!matchInfo) { 
+					break; // line is over
 				}
-				node = node.parent;
-			}
-		},
-		// We know node intersects line somehow. Figure out how and apply the relevant styles
-		// only for begin/endCaptures, and match rules.
-		// claimedRegions records what portion of line this rule applies to
-		styleDirect: function(/**Array*/ scopes, /**Array*/ claimedRegions, /**BeginEndNode*/ node, lineStart, lineEnd) {
-			var claimedRegion;
-			var matchRuleStart, matchRuleEnd;
-			var isComplex, groupified;
-			if (node instanceof this.BeginEndNode) {
-				// if we start on this line, apply our beginCaptures
-				// if we end on this line, apply our endCaptures
-				var typedRule = node.rule;
-				var rule = typedRule.rule;
-				var start0 = node.start,
-				    start1 = node.start + node.beginMatch[0].length,
-				    end0 = (node.endMatch && node.endMatch.index) || node.end,
-				    end1 = node.end;
-				var beginCaptures = rule.beginCaptures,
-				    endCaptures = rule.endCaptures,
-				    captures = rule.captures;
-				var beginsOnLine = lineStart <= start0 && start1 <= lineEnd,
-				   endsOnLine = lineStart <= end0 && end1 <= lineEnd;
-				if (beginsOnLine) {
-					claimedRegion = {start: start0, end: Math.min(end1, lineEnd)};
-					matchRuleStart = start1;
-					matchRuleEnd = Math.min(end0, lineEnd);
-					isComplex = typedRule.complexBeginEnd;
-					groupified = isComplex && typedRule.beginRegexGroupified;
-					this.addScopeForCaptures(scopes, node, start0, start1, node.beginMatch, beginCaptures || captures, isComplex, groupified);
+				var match = matchInfo && matchInfo.match,
+				    rule = matchInfo && matchInfo.rule,
+				    isSub = matchInfo && matchInfo.isSub,
+				    isEnd = matchInfo && matchInfo.isEnd;
+				if (match.index !== pos) {
+					// gap [pos..match.index]
+					gaps.push({ start: pos, end: match.index, node: node});
 				}
-				if (endsOnLine) {
-					claimedRegion = {start: Math.max(start0, lineStart), end: end1};
-					matchRuleStart = Math.max(start1, lineStart);
-					matchRuleEnd = end0;
-					isComplex = typedRule.complexBeginEnd;
-					groupified = isComplex && [node.endRegexSubstituted, typedRule.endRegexGroupified[1], typedRule.endRegexGroupified[2]];
-					this.addScopeForCaptures(scopes, node, end0, end1, node.endMatch, endCaptures || captures, isComplex, groupified);
-				}
-				if (!beginsOnLine && !endsOnLine) {
-					claimedRegion = {start: lineStart, end: lineEnd};
-					matchRuleStart = lineStart;
-					matchRuleEnd = lineEnd;
-				}
-			} else {
-				matchRuleStart = lineStart;
-				matchRuleEnd = lineEnd;
-				throw new Error("Shouldn't get here--toplevel handled elsewhere");
-			}
-			// This begin/end rule claims a region of the line
-			claimedRegion.node = node;
-			claimedRegions.push(claimedRegion);
-			
-			// Now apply our "match" rules to the available area on this line.
-			// TODO: this is probably wrong if we don't end on this line but another Begin/End node does.. oh well.
-			this.styleFromMatchRules(scopes, node, matchRuleStart, matchRuleEnd);
-		},
-		/** Styles the region start..end by applying any "match"-subrules of node */
-		styleFromMatchRules: function(/**Array*/ scopes, /**BeginEndNode|ContainerNode*/node, start, end) {
-			var model = this.textView.getModel(),
-			    pos = start;
-			while (true) {
-				var matchInfo = this.getNextMatch(model, node, pos, true);
-				if (matchInfo) {
-					var match = matchInfo.match,
-					    typedRule = matchInfo.rule,
-					    captures = typedRule.rule.captures;
+				if (isSub) {
 					pos = this.afterMatch(match);
-					// Is it in our range?
-					if (match.index + match[0].length <= end) {
-						if (captures) {
-							// captures scope (takes priority over name)
-							this.addScopeForCaptures(scopes, node, match.index, pos, match, captures, typedRule.complexCaptures, typedRule.matchRegexGroupified);
-						} else {
-							this.addScope(scopes, node, match.index, pos, typedRule.rule.name);
-						}
-						continue;
+					if (rule instanceof this.BeginEndRule) {
+						// Matched a "begin", assign its scope and descend into it
+						this.addBeginScope(scopes, match, rule);
+						node = expected; // descend
+						expected = this.getNextExpected(expected, "begin");
+					} else {
+						// Matched a child MatchRule;
+						this.addMatchScope(scopes, match, rule);
 					}
+				} else if (isEnd) {
+					pos = this.afterMatch(match);
+					// Matched and "end", assign its end scope and go up
+					this.addEndScope(scopes, match, rule);
+					expected = this.getNextExpected(expected, "end");
+					node = node.parent; // ascend
 				}
-				break;
+			}
+			if (pos < end) {
+				gaps.push({ start: pos, end: end, node: node });
+			}
+			var inherited = this.getInheritedLineScope(gaps, start, end);
+			return scopes.concat(inherited);
+		},
+		getInheritedLineScope: function(gaps, start, end) {
+			var scopes = [];
+			for (var i=0; i < gaps.length; i++) {
+				var gap = gaps[i];
+				var node = gap.node;
+				while (node) {
+					// if node defines a contentName or name, apply it
+					var rule = node.rule.rule;
+					var name = rule.name,
+					    contentName = rule.contentName;
+					// TODO: if both are given, we don't resolve the conflict. contentName always wins
+					var scope = contentName || name;
+					if (scope) {
+						this.addScopeRange(scopes, gap.start, gap.end, scope);
+						break;
+					}
+					node = node.parent;
+				}
+			}
+			return scopes;
+		},
+		addBeginScope: function(scopes, match, typedRule) {
+			var rule = typedRule.rule;
+			this.addCapturesScope(scopes, match, (rule.beginCaptures || rule.captures), typedRule.isComplex, typedRule.beginOld2New, typedRule.beginConsuming);
+		},
+		addEndScope: function(scopes, match, typedRule) {
+			var rule = typedRule.rule;
+			this.addCapturesScope(scopes, match, (rule.endCaptures || rule.captures), typedRule.isComplex, typedRule.endOld2New, typedRule.endConsuming);
+		},
+		addMatchScope: function(scopes, match, typedRule) {
+			var rule = typedRule.rule,
+			    name = rule.name,
+			    captures = rule.captures;
+			if (captures) {	
+				// captures takes priority over name
+				this.addCapturesScope(scopes, match, captures, typedRule.isComplex, typedRule.matchOld2New, typedRule.matchConsuming);
+			} else {
+				this.addScope(scopes, match, name);
 			}
 		},
-		// fromNode: The BeginEndNode that contributed this scope region
-		addScope: function(scopes, fromNode, start, end, scope) {
-			if (!scope || start === end) { return; }
-			scopes.push({start: start, end: end, scope: scope, from: fromNode});
+		addScope: function(scopes, match, name) {
+			if (!name) { return; }
+			scopes.push({start: match.index, end: this.afterMatch(match), scope: name });
 		},
-		addScopeForCaptures: function(scopes, fromNode, start, end, match, captures, isComplex, groupified, isEnd) {
+		addScopeRange: function(scopes, start, end, name) {
+			if (!name) { return; }
+			scopes.push({start: start, end: end, scope: name });
+		},
+		addCapturesScope: function(/**Array*/scopes, /*RegExp.match*/ match, /**Object*/captures, /**Boolean*/isComplex, /**Object*/old2New, /**Object*/consuming) {
 			if (!captures) { return; }
-			this.addScope(scopes, fromNode, start, end, captures[0] && captures[0].name);
-			
-			// apply scopes captures[1..n] to matching groups [1]..[n] of match
-			if (isComplex) {
-				var newRegex = groupified[0],
-				    old2New = groupified[1],
-				    consuming = groupified[2];
-				// Match again, this time against the groupifiedRegex on start..end (note newMatch guaranteed to be from start..end)
-				var newMatch = this.exec(newRegex, this.textView.getText(start,end), start);
-				// Now sum up the lengths of preceding consuming groups to get the start offset for each group.
+			if (!isComplex) {
+				this.addScope(scopes, match, captures[0] && captures[0].name);
+			} else {
+				// apply scopes captures[1..n] to matching groups [1]..[n] of match
+				
+				// Sum up the lengths of preceding consuming groups to get the start offset for each matched group.
 				var newGroupStarts = {1: 0};
 				var sum = 0;
-				for (var num = 1; newMatch[num] !== undefined; num++) {
+				for (var num = 1; match[num] !== undefined; num++) {
 					if (consuming[num] !== undefined) {
-						sum += newMatch[num].length;
+						sum += match[num].length;
 					}
-					if (newMatch[num+1] !== undefined) {
+					if (match[num+1] !== undefined) {
 						newGroupStarts[num + 1] = sum;
 					}
 				}
+				// Map the group numbers referred to in captures object to the new group numbers, and get the actual matched range.
+				var start = match.index;
 				for (var oldGroupNum = 1; captures[oldGroupNum]; oldGroupNum++) {
 					var scope = captures[oldGroupNum].name;
 					var newGroupNum = old2New[oldGroupNum];
 					var groupStart = start + newGroupStarts[newGroupNum];
-					var groupEnd = groupStart + newMatch[newGroupNum].length;
-					this.addScope(scopes, fromNode, groupStart, groupEnd, scope);
+					// Not every capturing group defined in regex need match every time the regex is run.
+					// eg. (a)|b matches "b" but group 1 is undefined
+					if (typeof match[newGroupNum] !== "undefined") {
+						var groupEnd = groupStart + match[newGroupNum].length;
+						this.addScopeRange(scopes, groupStart, groupEnd, scope);
+					}
 				}
 			}
 		},

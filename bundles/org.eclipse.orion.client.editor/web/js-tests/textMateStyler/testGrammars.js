@@ -15,7 +15,7 @@ var exports =  {};
 
 exports.SampleGrammar = {
 	"comment": "Dummy grammar for testing",
-	"name": "My great language",
+	//"name": "My great language",
 	"fileTypes": [ "foo", "bar" ],
 	"scopeName": "source.mylang",
 	"uuid": "BA5758BD-B671-40BF-F234-22AF369537E8",
@@ -54,9 +54,9 @@ exports.SampleGrammar = {
 // A grammar that uses begin/end rules
 exports.SampleBeginEndGrammar = {
 	"comment": "Dummy grammar for testing",
-	"name": "My great language",
+//	"name": "My great language",
 	"fileTypes": [ "foo", "bar" ],
-	"scopeName": "source.mylang",
+//	"scopeName": "source.mylang",
 	"uuid": "BA5758BD-B671-40BF-F234-22AF369537E8",
 	"patterns": [
 			{
@@ -103,9 +103,9 @@ exports.SampleBeginEndGrammar = {
 
 exports.BackrefTestGrammar = {
 	"comment": "For testing begin/end backrefs",
-	"name": "My begin/end test language",
+//	"name": "My begin/end test language",
 	"fileTypes": [ "fizz", "buzz" ],
-	"scopeName": "source.blah",
+//	"scopeName": "source.blah",
 	"uuid": "FC0F03C8-96FC-9B8A-2F35A13126FEB2F1",
 	"patterns": [
 			{

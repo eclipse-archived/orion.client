@@ -8,27 +8,32 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
 
+/*global define */
+
 define([], function(){
 
-	var eclipse = {};
-/**
- * User Service
- * @class Service for keeping track of the user
- */
-eclipse.UserService = function(serviceRegistry) {
-	this._serviceRegistry = serviceRegistry;
-	this._serviceRegistration = serviceRegistry.registerService("IUsers", this);
-	this._user = null;
-};
- 
-eclipse.UserService.prototype = {
-    setUser: function(user) {
-   		this._user = user;
-	},
-    
-	getUser: function(onDone) {
-   		onDone(this._user);
+	/**
+	 * Creates a new user service. A user service should be obtained from
+	 * the service registry rather than calling this constructor. This constructor
+	 * is intended for service registry initialization code.
+	 * @class The user service keeps track of the current Orion user.
+	 * @name orion.users.UserService
+	 */
+	function UserService(serviceRegistry) {
+		this._serviceRegistry = serviceRegistry;
+		this._serviceRegistration = serviceRegistry.registerService("IUsers", this);
+		this._user = null;
 	}
-};
-return eclipse;
+ 
+	UserService.prototype = /** @lends orion.users.UserService */ {
+	    setUser: function(user) {
+			this._user = user;
+		},
+	    
+		getUser: function(onDone) {
+			onDone(this._user);
+		}
+	};
+	//return module exports
+	return {UserService: UserService};
 });
