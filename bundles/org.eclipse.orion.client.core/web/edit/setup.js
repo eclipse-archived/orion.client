@@ -222,7 +222,7 @@ exports.setUpEditor = function(isReadOnly){
 				var titlePane = dojo.byId("location");
 				if (titlePane) {
 					dojo.empty(titlePane);
-					var root = mUtil.userName || "Navigator Root";
+					var root = mUtil.getUserName() || "Navigator Root";
 					new mBreadcrumbs.BreadCrumbs({
 						container: "location", 
 						resource: this._fileMetadata,
