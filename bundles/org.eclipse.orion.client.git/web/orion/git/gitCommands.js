@@ -660,6 +660,166 @@ var exports = {};
 		commandService.addCommand(addTagCommand, "object");
 	};
 	
+	exports.createStatusCommands = function(serviceRegistry, commandService, statusCallBack , statusURL, cmdBaseNumber ,logNavigator, remoteNavigator, logPath) {
+		var fetchCommand = new mCommands.Command({
+			name : "Fetch",
+			image : "/git/images/git-fetch.gif",
+			id : "eclipse.orion.git.fetch",
+			callback: function(item) {
+				var path = item.Location;
+				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+						var func = arguments.callee;
+						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+							serviceRegistry.getService("orion.page.message").then(function(progressService) {
+								var deferred = gitService.doFetch(path, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+								progressService.showWhile(deferred, "Fetching remote: " + path).then(
+									function(jsonData, secondArg) {
+										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry,
+												function(jsonData){
+													dojo.xhrGet({
+														url : path,
+														headers : {
+															"Orion-Version" : "1"
+														},
+														postData : dojo.toJson({
+															"GitSshUsername" : options.gitSshUsername,
+															"GitSshPassword" : options.gitSshPassword,
+															"GitSshPrivateKey": options.gitPrivateKey,
+															"GitSshPassphrase": options.gitPassphrase,
+															"GitSshKnownHost" : options.knownHosts
+														}),
+														handleAs : "json",
+														timeout : 5000,
+														load : function(jsonData, secondArg) {
+															return jsonData;
+														},
+														error : function(error, ioArgs) {
+															//handleGetAuthenticationError(this, ioArgs);
+															console.error("HTTP status code: ", ioArgs.xhr.status);
+														}
+													}).then(function(remoteJsonData){
+														if (true/*explorer.parentId === "explorer-tree"*/)
+															gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArd) {
+																remoteNavigator.renderer.setIncomingCommits(scopedCommitsJsonData);
+																remoteNavigator.loadCommitsList(remoteJsonData.CommitLocation + "?page=1&pageSize=5", remoteJsonData, true);			
+															});
+													});
+												}, func, "Fetch Git Repository");
+									});
+							});
+						});
+					});	
+			},
+			visibleWhen : function(item) {
+				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
+			}
+		});
+	
+		commandService.addCommand(fetchCommand, "object");
+		commandService.registerCommandContribution("eclipse.orion.git.fetch", cmdBaseNumber+1);	
+		
+		var mergeCommand = new mCommands.Command({
+			name : "Merge",
+			image : "/git/images/git-merge.gif",
+			id : "eclipse.orion.git.merge",
+			callback: function(item) {
+				serviceRegistry.getService("orion.git.provider").then(function(gitService){
+					gitService.doMerge(item.HeadLocation, item.Name).then(function(result){
+						serviceRegistry.getService("orion.page.message").then(function(progressService){
+							var display = [];
+							
+							if (result.jsonData && (result.jsonData.Result == "FAST_FORWARD" || result.jsonData.Result == "ALREADY_UP_TO_DATE")){
+								dojo.query(".treeTableRow").forEach(function(node, i) {
+									dojo.toggleClass(node, "incomingCommitsdRow", false);
+								});
+								display.Severity = "Ok";
+								display.HTML = false;
+								display.Message = result.jsonData.Result;
+							}
+							else if(result.jsonData){
+								var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
+								
+								display.Severity = "Warning";
+								display.HTML = true;
+								display.Message = "<span>" + result.jsonData.Result
+									+ ". Go to <a class=\"pageActions\" href=\"/git/git-status.html#" 
+									+ statusLocation +"\">Git Status page</a>.<span>";
+							} else if(result.error) {
+								display.Severity = "Error";
+								if(result.error.responseText && JSON.parse(result.error.responseText)){
+									var resp = JSON.parse(result.error.responseText);
+									display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+								}else{
+									display.Message = result.error.message;
+								}
+								display.HTML = true;
+								display.Message ="<span>" + display.Message + " Go to <a class=\"pageActions\" href=\"/git/git-status.html#" 
+									+ statusLocation + "\">Git Status page</a>.<span>";
+							}
+								
+							progressService.setProgressResult(display);
+							//statusCallBack(statusURL , true);
+						});
+					}, function (error) {
+						serviceRegistry.getService("orion.page.message").then(function(progressService){
+							var display = [];
+							
+							var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
+							
+							display.Severity = "Error";
+							display.HTML = true;
+							display.Message = "<span>" + dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage
+							+ ". Go to <a class=\"pageActions\" href=\"/git/git-status.html#" 
+							+ statusLocation +"\">Git Status page</a>.<span>";
+							
+							progressService.setProgressResult(display);
+						});
+					});
+				});
+			},
+			visibleWhen : function(item) {
+				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
+			}
+		});
+	
+		commandService.addCommand(mergeCommand, "object");
+		commandService.registerCommandContribution("eclipse.orion.git.merge", cmdBaseNumber+2);	
+		
+		var pushCommand = new mCommands.Command({
+			name : "Push",
+			image : "/git/images/git-push.gif",
+			id : "eclipse.orion.git.push",
+			callback: function(item) {
+				var path = dojo.hash();
+				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+						var func = arguments.callee;
+						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+							serviceRegistry.getService("orion.page.message").then(function(progressService) {
+								var deferred = gitService.doPush(item.RemoteLocation, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
+									exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
+											function(jsonData){
+												if (jsonData.Result.Severity == "Ok")
+													dojo.query(".treeTableRow").forEach(function(node, i) {
+														dojo.toggleClass(node, "outgoingCommitsdRow", false);
+														//statusCallBack(statusURL , true);
+													});
+											}, func, "Push Git Repository");
+									});
+								});
+							});
+				});
+			},
+			visibleWhen : function(item) {
+				return item.Type === "LocalBranch" ;
+			}
+		});
+	
+		commandService.addCommand(pushCommand, "object");
+		commandService.registerCommandContribution("eclipse.orion.git.push", cmdBaseNumber+3);	
+		
+	};
+	
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
 		
 		var cloneGitRepositoryCommand = new mCommands.Command({

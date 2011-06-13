@@ -9,9 +9,9 @@
  ******************************************************************************/
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status',  'orion/commands',
-	        'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient', 'orion/git/git-status-table', 'orion/breadcrumbs','orion/dialogs',
+	        'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient', 'orion/git/git-status-table', 'orion/breadcrumbs','orion/dialogs','orion/ssh/sshTools',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs,mDialogs) {
+			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs,mDialogs,mSshTools) {
 
 dojo.addOnLoad(function() {
 	document.body.style.visibility = "visible";
@@ -24,6 +24,7 @@ dojo.addOnLoad(function() {
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 	// Git operations
 	new mGitClient.GitService(serviceRegistry);
+	new mSshTools.SshService(serviceRegistry);
 	// File operations
 
 	new mDialogs.DialogService(serviceRegistry);
