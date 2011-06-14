@@ -378,7 +378,7 @@ exports.CompareMergeContainer = (function() {
 					dojo.empty(location);
 					new mBreadcrumbs.BreadCrumbs({container: "location", resource: this._fileMetadata});
 					if (title.charAt(0) === '*') {
-						var dirty = dojo.create('b', null, titlePane, "last");
+						var dirty = dojo.create('b', null, location, "last");
 						dirty.innerHTML = '*';
 					}
 				}
