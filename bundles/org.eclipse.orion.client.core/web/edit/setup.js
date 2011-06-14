@@ -176,6 +176,21 @@ exports.setUpEditor = function(isReadOnly){
 						fileClient.read(fileURI).then(
 							dojo.hitch(this, function(contents) {
 								clearTimeout(progressTimeout);
+								var delimiter;
+								var lf = contents.indexOf("\n");
+								var cr = contents.indexOf("\r");
+								if (cr !== -1 && lf !== -1) {
+									if (lf === cr + 1) {
+										delimiter = "\r\n";
+									} else {
+										delimiter = cr < lf ? "\r" : "\n";
+									}
+								} else if (lf !== -1) {
+									delimiter = "\n";
+								} else if (cr !== -1) {
+									delimiter = "\r";
+								}
+								editor.getTextView().setModel(new orion.textview.TextModel("", delimiter));
 								editor.onInputChange(fileURI, null, contents);
 								// in the long run we should be looking for plug-ins to call here for highlighting
 								syntaxHighlighter.highlight(fileURI, editor.getTextView());
