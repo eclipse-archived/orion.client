@@ -673,7 +673,7 @@ orion.GitStatusController = (function() {
 				id: "orion.gitCheckout",
 				callback: function(item) {
 					self._registry.getService("orion.page.dialog").then(function(service) {
-						service.confirm("The change of the file will lose. Are you sure you want to checkout ?",
+						service.confirm("Your changes to the file will be lost. Are you sure you want to checkout?",
 						function(doit) {
 							if (!doit) {
 								return;
