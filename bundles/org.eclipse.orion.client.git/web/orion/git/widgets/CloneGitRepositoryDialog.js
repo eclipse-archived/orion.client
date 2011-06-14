@@ -87,7 +87,13 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 				func: dojo.hitch(this, function(targetFolder) {
 					if (targetFolder && targetFolder.Location) {
 						this.gitPath.value = targetFolder.Location;
-						this.shownGitPath.innerHTML = "<a href='/navigate/table.html#"+targetFolder.ChildrenLocation+"'>"+targetFolder.Name+"</a>";
+						this.shownGitPath.innerHTML = "<a href='/navigate/table.html#"+targetFolder.ChildrenLocation+"'>" + targetFolder.Name + "</a>";
+						var currentFolder = targetFolder;
+						
+						while(currentFolder.parent && !currentFolder.parent.Projects){
+							this.shownGitPath.innerHTML = "<a href='/navigate/table.html#"+currentFolder.parent.ChildrenLocation+"'>" + currentFolder.parent.Name + "</a>/" + this.shownGitPath.innerHTML;
+							currentFolder = currentFolder.parent;
+						}
 					}
 				})
 			});
