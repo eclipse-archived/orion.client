@@ -63,6 +63,19 @@
 				id: "sample.commands.sample3",
 				tooltip: "Bulk command operates on selections"
 			});
+
+			provider.registerServiceProvider("orion.navigate.command", {
+				run : function(item) {
+					return "http://www.google.com/#q=" + item.Name;
+				}
+			}, {
+				image: "http://www.google.com/favicon.ico",
+				name: "Google Search",
+				id: "sample.commands.sample4",
+				forceSingleItem: true,
+				href: true,
+				tooltip: "Link to google search for this file name"
+			});
 				
 			provider.connect();
 		};
