@@ -660,7 +660,7 @@ var exports = {};
 		commandService.addCommand(addTagCommand, "object");
 	};
 	
-	exports.createStatusCommands = function(serviceRegistry, commandService, statusCallBack , statusURL, cmdBaseNumber ,logNavigator, remoteNavigator, logPath) {
+	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack , cmdBaseNumber ,logNavigator, remoteNavigator, logPath) {
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
 			image : "/git/images/git-fetch.gif",
@@ -758,7 +758,7 @@ var exports = {};
 							}
 								
 							progressService.setProgressResult(display);
-							//statusCallBack(statusURL , true);
+							refreshStatusCallBack();
 						});
 					}, function (error) {
 						serviceRegistry.getService("orion.page.message").then(function(progressService){
@@ -802,7 +802,7 @@ var exports = {};
 												if (jsonData.Result.Severity == "Ok")
 													dojo.query(".treeTableRow").forEach(function(node, i) {
 														dojo.toggleClass(node, "outgoingCommitsdRow", false);
-														//statusCallBack(statusURL , true);
+														refreshStatusCallBack();
 													});
 											}, func, "Push Git Repository");
 									});

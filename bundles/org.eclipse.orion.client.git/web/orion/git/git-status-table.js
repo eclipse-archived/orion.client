@@ -435,7 +435,7 @@ orion.GitStatusController = (function() {
 				this._renderLogs(true);
 				var that = this;
 				this._registry.getService("orion.page.command").then(function(commandService) {
-					mGitCommands.createStatusCommands(that._registry , commandService , that.getGitStatus , that._url, 9 , that._gitCommitNavigatorLog , that._gitCommitNavigatorRem);
+					mGitCommands.createStatusCommands(that._registry , commandService , function(){that.getGitStatus(that._url ,true);} , 9 , that._gitCommitNavigatorLog , that._gitCommitNavigatorRem);
 				});
 			}
 			
