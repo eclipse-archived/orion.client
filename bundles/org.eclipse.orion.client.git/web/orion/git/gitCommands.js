@@ -478,7 +478,7 @@ var exports = {};
 								display.Severity = "Warning";
 								display.HTML = true;
 								display.Message = "<span>" + result.jsonData.Result
-									+ ". Go to <a class=\"pageActions\" href=\"/git/git-status.html#" 
+									+ ". Go to <a href=\"/git/git-status.html#" 
 									+ statusLocation +"\">Git Status page</a>.<span>";
 							} else if(result.error) {
 								display.Severity = "Error";
@@ -489,7 +489,7 @@ var exports = {};
 									display.Message = result.error.message;
 								}
 								display.HTML = true;
-								display.Message ="<span>" + display.Message + " Go to <a class=\"pageActions\" href=\"/git/git-status.html#" 
+								display.Message ="<span>" + display.Message + " Go to <a href=\"/git/git-status.html#" 
 									+ statusLocation + "\">Git Status page</a>.<span>";
 							}
 								
@@ -504,7 +504,7 @@ var exports = {};
 							display.Severity = "Error";
 							display.HTML = true;
 							display.Message = "<span>" + dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage
-							+ ". Go to <a class=\"pageActions\" href=\"/git/git-status.html#" 
+							+ ". Go to <a href=\"/git/git-status.html#" 
 							+ statusLocation +"\">Git Status page</a>.<span>";
 							
 							progressService.setProgressResult(display);
@@ -742,7 +742,7 @@ var exports = {};
 								display.Severity = "Warning";
 								display.HTML = true;
 								display.Message = "<span>" + result.jsonData.Result
-									+ ". Go to <a class=\"pageActions\" href=\"/git/git-status.html#" 
+									+ ". Go to <a href=\"/git/git-status.html#" 
 									+ statusLocation +"\">Git Status page</a>.<span>";
 							} else if(result.error) {
 								display.Severity = "Error";
@@ -753,7 +753,7 @@ var exports = {};
 									display.Message = result.error.message;
 								}
 								display.HTML = true;
-								display.Message ="<span>" + display.Message + " Go to <a class=\"pageActions\" href=\"/git/git-status.html#" 
+								display.Message ="<span>" + display.Message + " Go to <a href=\"/git/git-status.html#" 
 									+ statusLocation + "\">Git Status page</a>.<span>";
 							}
 								
@@ -769,7 +769,7 @@ var exports = {};
 							display.Severity = "Error";
 							display.HTML = true;
 							display.Message = "<span>" + dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage
-							+ ". Go to <a class=\"pageActions\" href=\"/git/git-status.html#" 
+							+ ". Go to <a href=\"/git/git-status.html#" 
 							+ statusLocation +"\">Git Status page</a>.<span>";
 							
 							progressService.setProgressResult(display);
