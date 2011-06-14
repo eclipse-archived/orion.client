@@ -38,7 +38,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	// Row 2:  Location (optional breadcrumb + current page resource)
 		'<tr class="topRowBanner" id="bannerRow2">' +
 			'<td colspan=2 style="text-wrap: normal">' +
-				'<span id="location" style="text-wrap: normal"></span>' +
+				'<span id="location" class="currentLocation" style="text-wrap: normal"></span>' +
 			'</td>' + 
 		'</tr>' +
 	// Row 3:  Status on left, global commands, search, user, etc. on right

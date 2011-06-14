@@ -34,6 +34,7 @@ define(['dojo'], function(dojo) {
 			}
 			if (!container) { throw "no parent container"; }
 			this._container = container;
+			dojo.removeClass(container, "currentLocation");
 			this._id = options.id || "eclipse.breadcrumbs";
 			this._resource = options.resource|| null;
 			this._firstSegmentName = options.firstSegmentName;
