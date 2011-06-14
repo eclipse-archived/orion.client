@@ -595,7 +595,7 @@ var exports = {};
 			image : "/git/images/git-reset.gif",
 			id : "eclipse.orion.git.resetIndex",
 			callback: function(item) {
-				if(confirm("The content of you active branch witll be replaced with " + item.Name + ". Are you sure?")){
+				if(confirm("The content of your active branch witll be replaced with " + item.Name + ". Are you sure?")){
 					serviceRegistry.getService("orion.git.provider").then(
 						function(service) {
 							service.resetIndex(item.IndexLocation, item.Name).then(
