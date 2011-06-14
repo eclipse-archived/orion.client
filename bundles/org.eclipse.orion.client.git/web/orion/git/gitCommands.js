@@ -545,7 +545,7 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				return explorer.isRoot || (item.Type === "Branch" && item.Current);
+				return item.RepositoryPath==="" || (item.Type === "Branch" && item.Current);
 			}
 		});
 	

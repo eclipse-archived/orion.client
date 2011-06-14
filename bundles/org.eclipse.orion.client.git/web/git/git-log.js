@@ -161,15 +161,14 @@ dojo.addOnLoad(function() {
 						serviceRegistry.getService("orion.git.provider").then(function(gitService){
 							gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
 								navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
-								//navigator.loadCommitsList(dojo.hash(), remoteJsonData);
-								navigator.loadCommitsList(dojo.hash(), {RemoteLocation: commitLogJsonData.RemoteLocation});
+								navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
 							});
 						});
 					},
 					error : function(error, ioArgs) {
 						mAuth.handleGetAuthenticationError(this, ioArgs);
 						console.error("HTTP status code: ", ioArgs.xhr.status);
-						navigator.loadCommitsList(dojo.hash(), {RemoteLocation: commitLogJsonData.RemoteLocation});
+						navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
 					}
 				});
 		});
@@ -302,16 +301,6 @@ function initTitleBar(fileClient, navigator, item){
 							resource: metadata ,
 							makeHref:function(seg,location){makeHref(fileClient, seg,location);
 							}
-						});
-					}
-					navigator.isRoot=!metadata.Parents || metadata.Parents.length==0;
-					navigator.isDirectory = metadata.Directory;
-					mGitCommands.updateNavTools(serviceRegistry, navigator, "pageActions", "selectionTools", navigator._lastTreeRoot);
-					navigator.updateCommands();
-					if(metadata.Directory){
-						//remove links to commit
-						dojo.query(".navlinkonpage").forEach(function(node, i) {
-							node.removeAttribute("href");
 						});
 					}
 				}),
