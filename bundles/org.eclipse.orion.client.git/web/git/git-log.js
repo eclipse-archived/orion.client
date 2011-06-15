@@ -117,6 +117,7 @@ function loadResource(fileServiceReference, navigator){
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
 					gitService.getLog(resource.HeadLocation, resource.Id, function(scopedCommitsJsonData, secondArg) {
 						navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
+						navigator.renderer.setOutgoingCommits([]);
 						navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);	
 					});
 				});
@@ -136,6 +137,7 @@ function loadResource(fileServiceReference, navigator){
 					load : function(remoteJsonData, secondArg) {
 						serviceRegistry.getService("orion.git.provider").then(function(gitService){
 							gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
+								navigator.renderer.setIncomingCommits([]);
 								navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
 								navigator.loadCommitsList(dojo.hash(), resource);
 							});
