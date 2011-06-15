@@ -714,7 +714,8 @@ var exports = {};
 	
 	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack , cmdBaseNumber ,logNavigator, remoteNavigator, logPath) {
 		var fetchCommand = new mCommands.Command({
-			name : "Fetch",
+			name : "Fetch latest commits",
+			tooltip : "Fetch latest commits",
 			image : "/git/images/fetch.gif",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
@@ -771,7 +772,7 @@ var exports = {};
 		commandService.registerCommandContribution("eclipse.orion.git.fetch", cmdBaseNumber+1);	
 		
 		var mergeCommand = new mCommands.Command({
-			name : "Merge",
+			name : "Merge into local",
 			image : "/git/images/merge.gif",
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
@@ -838,7 +839,7 @@ var exports = {};
 		commandService.registerCommandContribution("eclipse.orion.git.merge", cmdBaseNumber+2);	
 		
 		var pushCommand = new mCommands.Command({
-			name : "Push",
+			name : "Push into remote",
 			image : "/git/images/push.gif",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {

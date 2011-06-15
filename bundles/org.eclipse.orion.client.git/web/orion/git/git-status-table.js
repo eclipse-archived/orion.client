@@ -317,11 +317,11 @@ orion.GitLogTableRenderer = (function() {
 			var headerTable = dojo.create("table", null,this._parentId);
 			var row = dojo.create("tr", null, headerTable);
 			var titleCol = dojo.create("td", null, row, "last");
-			dojo.create("h2", {innerHTML: this._header}, titleCol, "last");
-			var cmdCol = dojo.create("td", null, row, "last");
-			this._cmdSpan = dojo.create("span", null, cmdCol, "last");
+			dojo.create("h2", {id : this._type + "_header" ,innerHTML: this._header}, titleCol, "last");
 			var cmdColAdditional = dojo.create("td", null, row, "last");
-			this._cmdSpanAdditional = dojo.create("span", null, cmdColAdditional, "last");
+			this._cmdSpanAdditional = dojo.create("span", {style: "margin-left: 5px;"}, cmdColAdditional, "last");
+			var cmdCol = dojo.create("td", null, row, "last");
+			this._cmdSpan = dojo.create("span", {style: "margin-left: 5px;"}, cmdCol, "last");
 			dojo.create("hr", null,this._parentId);
 			this._logContentId = this._parentId + "_" + this._type;
 			//dojo.create("div", {id:this._logContentId , style: "border:1px solid grey ;margin-left: 5px; margin-right: 30px; width: 95%; height: 200px; overflow: auto"}, this._parentId, "last");
@@ -332,6 +332,10 @@ orion.GitLogTableRenderer = (function() {
 		
 		getLogContentId: function(){
 			return this._logContentId;
+		},
+		
+		modifyHeader: function(location){
+			dojo.place(document.createTextNode("Recent commits on " + location), this._type + "_header", "only");
 		},
 		
 		renderAction:function(){
@@ -346,7 +350,7 @@ orion.GitLogTableRenderer = (function() {
 			dojo.place(document.createTextNode(""), this._cmdSpanAdditional, "only");
 			var self = this;
 			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(self._cmdSpanAdditional, "object", item, this, "image", null,null, true);
+				service.renderCommands(self._cmdSpanAdditional, "object", item, this, "image", null,null);
 			});
 		}
 	};
@@ -365,7 +369,7 @@ orion.InlineCompareRenderer = (function() {
 			var titleCol = dojo.create("td", {nowrap :true}, row, "last");
 			var title = dojo.create("h2", {id :"fileNameInViewer" ,innerHTML: "Select a file on the left to compare..."}, titleCol, "last");
 			var titleDiv = new dijit.layout.ContentPane({region: "top", style:"width:100%;height:30px;overflow: hidden;"});
-			dojo.addClass(titleDiv, 'auxpane');
+			//dojo.addClass(titleDiv, 'auxpane');
 			titleDiv.attr('content', titleTable);
 			
 			var viewerDiv = new dijit.layout.ContentPane({class:"mainpane" ,id : "inline-compare-viewer" ,splitter:false ,region: "center", style:"width:100%;height:100%;overflow: hidden;"});
@@ -496,7 +500,8 @@ orion.GitStatusController = (function() {
 			this._initTitleBar(true);
 			var that = this;
 			var openGitLog = new mCommands.Command({
-				name : that._curBranch.Name,
+				name : "Complete log",
+				//name : that._curBranch.Name,
 				id : "orion.openGitLog",
 				hrefCallback : function(item) {
 					return "/git/git-log.html#" + that._curBranch.CommitLocation + "?page=1";
@@ -507,7 +512,8 @@ orion.GitStatusController = (function() {
 			});
 		
 			var openGitRemote = new mCommands.Command({
-				name : (that._curRemote ? that._curRemote.Name : "") + "/" + that._curBranch.Name,
+				name : "Complete log",
+				//name : (that._curRemote ? that._curRemote.Name : "") + "/" + that._curBranch.Name,
 				id : "orion.openGitRemote",
 				hrefCallback : function(item) {
 					return "/git/git-log.html#" + that._curBranch.RemoteLocation + "?page=1";
@@ -534,6 +540,11 @@ orion.GitStatusController = (function() {
 			// not good that these dom id's are known way down here
 			dojo.place(document.createTextNode(title), "pageTitle", "only");
 			dojo.place(document.createTextNode(location), "location", "only");
+			if(withBranchName) {
+				this._logTableRenderer.modifyHeader(this._curBranch.Name);
+				this._remoteTableRenderer.modifyHeader((this._curRemote ? this._curRemote.Name : "") + "/" + this._curBranch.Name);
+			}
+				
 		},
 		
 		_getCloneInfo:function(){
