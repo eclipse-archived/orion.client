@@ -74,7 +74,7 @@ dojo.addOnLoad(function() {
 			
 			var createCommand = new mCommands.Command({
 				name : "Create Site Configuration",
-				image : "/images/add_obj.gif",
+				image : "/images/add.gif",
 				id: "eclipse.sites.create",
 				groupId: "eclipse.sitesGroup",
 				callback : function() {

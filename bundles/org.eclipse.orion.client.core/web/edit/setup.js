@@ -176,6 +176,21 @@ exports.setUpEditor = function(isReadOnly){
 						fileClient.read(fileURI).then(
 							dojo.hitch(this, function(contents) {
 								clearTimeout(progressTimeout);
+								var delimiter;
+								var lf = contents.indexOf("\n");
+								var cr = contents.indexOf("\r");
+								if (cr !== -1 && lf !== -1) {
+									if (lf === cr + 1) {
+										delimiter = "\r\n";
+									} else {
+										delimiter = cr < lf ? "\r" : "\n";
+									}
+								} else if (lf !== -1) {
+									delimiter = "\n";
+								} else if (cr !== -1) {
+									delimiter = "\r";
+								}
+								editor.getTextView().setModel(new orion.textview.TextModel("", delimiter));
 								editor.onInputChange(fileURI, null, contents);
 								// in the long run we should be looking for plug-ins to call here for highlighting
 								syntaxHighlighter.highlight(fileURI, editor.getTextView());
@@ -364,29 +379,12 @@ exports.setUpEditor = function(isReadOnly){
 						}
 					};
 					escHandler.addHandler(searchFloatEscHandler);
-					
-					// TEMPORARY until we can better scope the search
-					var extensionFilter = "";
-					var fileName = inputManager.getTitle();
-					
+										
 					dojo.place(document.createTextNode("Searching for occurrences of "), searchFloat, "last");
 					var b = dojo.create("b", null, searchFloat, "last");
-					dojo.place(document.createTextNode("\"" + searchPattern + "\""), b, "only");
-					
-					if (fileName) {
-						var splits = fileName.split(".");
-						if (splits.length > 0) {
-							var extension = splits.pop().toLowerCase();
-							extensionFilter = "+Name:*." + extension + "+";
-							
-							dojo.place(document.createTextNode(" in *."), searchFloat, "last");
-							dojo.place(document.createTextNode(extension), searchFloat, "last");
-						}
-					}
-					dojo.place(document.createTextNode("..."), searchFloat, "last");
-					
+					dojo.place(document.createTextNode("\"" + searchPattern + "\"..."), b, "only");
 					searchFloat.style.display = "block";
-					var query = inputManager.getFileMetadata().SearchLocation + searchPattern + extensionFilter;
+					var query = inputManager.getFileMetadata().SearchLocation + searchPattern;
 					searcher.search(searchFloat, query, inputManager.getInput());
 				}, 0);
 				return true;

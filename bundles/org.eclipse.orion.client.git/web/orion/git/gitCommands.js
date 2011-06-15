@@ -154,7 +154,7 @@ var exports = {};
 		// TODO: not used by the git clone navigator, could be removed
 		var linkRepoCommand = new mCommands.Command({
 			name: "Link Repository",
-			image: "/images/link_obj.gif",
+			image: "/images/link.gif",
 			id: "eclipse.linkRepository",
 			callback: function(item) {
 				var dialog = new orion.widgets.NewItemDialog({
@@ -192,7 +192,7 @@ var exports = {};
 		
 		var checkoutBranchCommand = new mCommands.Command({
 			name: "Checkout",
-			image: "/git/images/git-checkout.gif",
+			image: "/git/images/checkout.gif",
 			id: "eclipse.checkoutBranch",
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(
@@ -224,7 +224,7 @@ var exports = {};
 		
 		var addBranchCommand = new mCommands.Command({
 			name: "Add Branch",
-			image: "/images/add_obj.gif",
+			image: "/images/add.gif",
 			id: "eclipse.addBranch",
 			callback: function(item, commandId, domId) {
 				exports.getNewItemName(item, explorer, false, domId, "Branch name", function(name){
@@ -249,7 +249,7 @@ var exports = {};
 		
 		var removeBranchCommand = new mCommands.Command({
 			name: "Remove Branch",
-			image: "/images/remove.gif",
+			image: "/images/delete.gif",
 			id: "eclipse.removeBranch",
 			callback: function(item) {
 				if(confirm("Are you sure you want to remove branch " + item.Name+"?"))
@@ -270,7 +270,7 @@ var exports = {};
 		
 		var addRemoteCommand = new mCommands.Command({
 			name: "Add Remote",
-			image: "/images/add_obj.gif",
+			image: "/images/add.gif",
 			id: "eclipse.addRemote",
 			callback : function(item) {
 				var dialog = new orion.git.widgets.AddRemoteDialog({
@@ -294,7 +294,7 @@ var exports = {};
 		
 		var removeRemoteCommand = new mCommands.Command({
 			name: "Remove Remote",
-			image: "/images/remove.gif",
+			image: "/images/delete.gif",
 			id: "eclipse.removeRemote",
 			callback: function(item) {
 				if(confirm("Are you sure you want to remove remote " + item.Name+"?"))
@@ -345,7 +345,7 @@ var exports = {};
 		
 		var compareGitCommits = new mCommands.Command({
 			name : "Compare With Each Other",
-			image : "/git/images/compare-sbs.gif",
+			image : "/git/images/open_compare.gif",
 			id : "eclipse.compareGitCommits",
 			hrefCallback : function(item) {
 				var clientDeferred = new dojo.Deferred();
@@ -371,7 +371,7 @@ var exports = {};
 		
 		var compareWithWorkingTree = new mCommands.Command({
 			name : "Compare With Working Tree",
-			image : "/git/images/compare-sbs.gif",
+			image : "/git/images/open_compare.gif",
 			id : "eclipse.compareWithWorkingTree",
 			hrefCallback : function(item) {
 				return "/compare/compare.html#" + item.DiffLocation;
@@ -385,7 +385,6 @@ var exports = {};
 		
 		var openGitCommit = new mCommands.Command({
 			name : "Open",
-			image : "/images/find.gif",
 			id : "eclipse.openGitCommit",
 			hrefCallback: function(item) {
 				return "/edit/edit.html#" + item.ContentLocation;
@@ -399,7 +398,7 @@ var exports = {};
 		
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
-			image : "/git/images/git-fetch.gif",
+			image : "/git/images/fetch.gif",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = item.Location;
@@ -456,7 +455,7 @@ var exports = {};
 		
 		var mergeCommand = new mCommands.Command({
 			name : "Merge",
-			image : "/git/images/git-merge.gif",
+			image : "/git/images/merge.gif",
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
@@ -522,7 +521,7 @@ var exports = {};
 		
 		var pushCommand = new mCommands.Command({
 			name : "Push All Outgoing Commits",
-			image : "/git/images/git-push.gif",
+			image : "/git/images/push.gif",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -554,7 +553,7 @@ var exports = {};
 		
 		var pushToCommand = new mCommands.Command({
 			name : "Push to...",
-			image : "/git/images/git-push.gif",
+			image : "/git/images/push.gif",
 			id : "eclipse.orion.git.pushto",
 			callback: function(item) {
 				
@@ -592,7 +591,7 @@ var exports = {};
 		
 		var resetIndexCommand = new mCommands.Command({
 			name : "Reset Index",
-			image : "/git/images/git-reset.gif",
+			image : "/git/images/refresh.gif",
 			id : "eclipse.orion.git.resetIndex",
 			callback: function(item) {
 				if(confirm("The content of your active branch witll be replaced with " + item.Name + ". Are you sure?")){
@@ -630,7 +629,7 @@ var exports = {};
 		
 		var addTagCommand = new mCommands.Command({
 			name : "Tag",
-			image : "/git/images/git-tag.gif",
+			image : "/git/images/tag.gif",
 			id : "eclipse.orion.git.addTag",
 			
 			callback: function(item, commandId, domId) {
@@ -660,10 +659,10 @@ var exports = {};
 		commandService.addCommand(addTagCommand, "object");
 	};
 	
-	exports.createStatusCommands = function(serviceRegistry, commandService, statusCallBack , statusURL, cmdBaseNumber ,logNavigator, remoteNavigator, logPath) {
+	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack , cmdBaseNumber ,logNavigator, remoteNavigator, logPath) {
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
-			image : "/git/images/git-fetch.gif",
+			image : "/git/images/fetch.gif",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = item.Location;
@@ -720,7 +719,7 @@ var exports = {};
 		
 		var mergeCommand = new mCommands.Command({
 			name : "Merge",
-			image : "/git/images/git-merge.gif",
+			image : "/git/images/merge.gif",
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
@@ -758,7 +757,7 @@ var exports = {};
 							}
 								
 							progressService.setProgressResult(display);
-							//statusCallBack(statusURL , true);
+							refreshStatusCallBack();
 						});
 					}, function (error) {
 						serviceRegistry.getService("orion.page.message").then(function(progressService){
@@ -787,7 +786,7 @@ var exports = {};
 		
 		var pushCommand = new mCommands.Command({
 			name : "Push",
-			image : "/git/images/git-push.gif",
+			image : "/git/images/push.gif",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -802,7 +801,7 @@ var exports = {};
 												if (jsonData.Result.Severity == "Ok")
 													dojo.query(".treeTableRow").forEach(function(node, i) {
 														dojo.toggleClass(node, "outgoingCommitsdRow", false);
-														//statusCallBack(statusURL , true);
+														refreshStatusCallBack();
 													});
 											}, func, "Push Git Repository");
 									});
@@ -824,8 +823,7 @@ var exports = {};
 		
 		var cloneGitRepositoryCommand = new mCommands.Command({
 			name : "Clone Repository",
-			tooltip : "Clone Git Repository to Workspace",
-			image : "/git/images/git-clone.gif",
+			tooltip : "Clone Git Repository",
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
 				var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
@@ -899,7 +897,7 @@ var exports = {};
 		
 		var deleteCommand = new mCommands.Command({
 			name: "Delete Clone",
-			image: "/images/remove.gif",
+			image: "/images/delete.gif",
 			id: "eclipse.git.deleteClone",
 			visibleWhen: function(item) {
 				var items = dojo.isArray(item) ? item : [item];

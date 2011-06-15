@@ -105,7 +105,7 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 				
 				div = dojo.create("div", null, col, "only");
 				dojo.create("img", {src: "/images/none.png"}, div, "last");
-				dojo.create("img", {src: "/images/file_obj.gif"}, div, "last");
+				dojo.create("img", {src: "/images/file.gif"}, div, "last");
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			}

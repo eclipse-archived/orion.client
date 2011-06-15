@@ -285,28 +285,21 @@ exports.DiffStyler = (function() {
 			var lineTypeWrapper =  textView.getModel().getLineType(lineIndex);
 			var lineType = lineTypeWrapper.type;
 			var annotationIndex = textView.getModel().getAnnotationIndexByMapper(lineTypeWrapper.mapperIndex);
-			var borderStyle = "1px #AAAAAA solid";
-			
 			var conflict = textView.getModel().isMapperConflict(lineTypeWrapper.mapperIndex);
-			if( conflict)
-				borderStyle = "1px #FF0000 solid";
+			//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349227 : we were using border style as the line below.Changing to back ground color and image.
+			//lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: "1px #AAAAAA solid" , borderLeft: borderStyle , borderRight: borderStyle}};
+			var backgroundColor = conflict ? "#EEB4B4" : "#DDDDDD";
+			var backgroundImg = "url('/images/compare/diff-border.png')";
+			
 			if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex()){
-				if( conflict)
-					borderStyle = "2px #FF0000 solid";
-				else
-					borderStyle = "1px #000000 solid";
+				backgroundColor = conflict ? "#F08080" : "#BBBBBB";
+				backgroundImg = "url('/images/compare/diff-border-sel.png')";
 			}
 			if(lineType === "top-only") {
-				lineStyleEvent.style = {style: { borderTop: borderStyle }};
-			} else if (lineType === "oneline"){
-				lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , border: borderStyle }};
-			} else if (lineType === "top"){
-				lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: borderStyle , borderLeft: borderStyle , borderRight: borderStyle}};
-			} else if (lineType === "bottom"){
-				lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderBottom: borderStyle , borderLeft: borderStyle , borderRight: borderStyle}};
-			} else if (lineType === "middle"){
-				lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderLeft: borderStyle , borderRight: borderStyle}};
-			} 
+				lineStyleEvent.style = {style: {backgroundImage: backgroundImg, backgroundRepeat:"repeat-x"}};
+			} else if (lineType !== "unchanged"){
+				lineStyleEvent.style = {style: {backgroundColor: backgroundColor }};
+			}
 		}
 	};
 	return DiffStyler;
@@ -385,7 +378,7 @@ exports.CompareMergeContainer = (function() {
 					dojo.empty(location);
 					new mBreadcrumbs.BreadCrumbs({container: "location", resource: this._fileMetadata});
 					if (title.charAt(0) === '*') {
-						var dirty = dojo.create('b', null, titlePane, "last");
+						var dirty = dojo.create('b', null, location, "last");
 						dirty.innerHTML = '*';
 					}
 				}

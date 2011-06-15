@@ -31,7 +31,7 @@ exports.CommitDetails = (function() {
 		var showDiffCommand = new mCommands.Command({
 			name: "Show diff",
 			tooltip: "Show the diff",
-			image: "images/compare-sbs.gif",
+			image: "images/open_compare.gif",
 			id: "eclipse.showDiff",
 			hrefCallback: function(item) {
 				return "/compare/compare.html?readonly#" + item.DiffLocation;
@@ -185,11 +185,11 @@ exports.CommitDetails = (function() {
 					col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 					
 					if (diff.ChangeType === "ADD")
-						img = dojo.create("img", {src: "/git/images/git-added.gif"}, col1);
+						img = dojo.create("img", {src: "/git/images/addition.gif"}, col1);
 					else if (diff.ChangeType === "DELETE")
-						img = dojo.create("img", {src: "/git/images/git-removed.gif"}, col1);
+						img = dojo.create("img", {src: "/git/images/removal.gif"}, col1);
 					else if (diff.ChangeType === "MODIFY")
-						img = dojo.create("img", {src: "/git/images/git-modify.gif"}, col1);
+						img = dojo.create("img", {src: "/git/images/modification.gif"}, col1);
 					
 					col2 = dojo.create("td", null, tr, "last");
 					dojo.place(document.createTextNode(diff.ChangeType === "DELETE" ? diff.OldPath : diff.NewPath), col2, "only");		

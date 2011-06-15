@@ -562,13 +562,12 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 					});	
 				} else {
 					image.src = this.image;	
-					dojo.style(image, "opacity", "0.7");
 					dojo.connect(image, "onmouseover", this, function() {
-						dojo.style(image, "opacity", "1");
+						dojo.addClass(image, "commandOver");
 					});
 					dojo.connect(image, "onmouseout", this, function() {
 						image.src = this.image;
-						dojo.style(image, "opacity", "0.7");
+						dojo.removeClass(image, "commandOver");
 					});
 				}
 				dojo.addClass(image, 'commandImage');

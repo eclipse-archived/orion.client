@@ -63,7 +63,8 @@ orion.textview.TextView = (function() {
 	var isLinux = navigator.platform.indexOf("Linux") !== -1;
 	var isW3CEvents = typeof window.document.documentElement.addEventListener === "function";
 	var isRangeRects = (!isIE || isIE >= 9) && typeof window.document.createRange().getBoundingClientRect === "function";
-
+	var platformDelimiter = isWindows ? "\r\n" : "\n";
+	
 	/** 
 	 * Constructs a new Selection object.
 	 * 
@@ -2640,6 +2641,35 @@ orion.textview.TextView = (function() {
 			}
 			this._imeOffset = -1;
 		},
+		_convertDelimiter: function (text, addTextFunc, addDelimiterFunc) {
+				var cr = 0, lf = 0, index = 0, length = text.length;
+				while (index < length) {
+					if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); }
+					if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); }
+					var start = index, end;
+					if (lf === -1 && cr === -1) {
+						addTextFunc(text.substring(index));
+						break;
+					}
+					if (cr !== -1 && lf !== -1) {
+						if (cr + 1 === lf) {
+							end = cr;
+							index = lf + 1;
+						} else {
+							end = cr < lf ? cr : lf;
+							index = (cr < lf ? cr : lf) + 1;
+						}
+					} else if (cr !== -1) {
+						end = cr;
+						index = cr + 1;
+					} else {
+						end = lf;
+						index = lf + 1;
+					}
+					addTextFunc(text.substring(start, end));
+					addDelimiterFunc();
+				}
+		},
 		_createActions: function () {
 			var KeyBinding = orion.textview.KeyBinding;
 			//no duplicate keybindings
@@ -2992,9 +3022,14 @@ orion.textview.TextView = (function() {
 			return Math.max(0, this._viewDiv.clientWidth - viewPad.left - viewPad.right);
 		},
 		_getClipboardText: function (event) {
+			var delimiter = this._model.getLineDelimiter();
+			var clipboadText, text;
 			if (this._frameWindow.clipboardData) {
 				//IE
-				return this._frameWindow.clipboardData.getData("Text");
+				clipboadText = [];
+				text = this._frameWindow.clipboardData.getData("Text");
+				this._convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
+				return clipboadText.join("");
 			}
 			if (isFirefox) {
 				var window = this._frameWindow;
@@ -3014,7 +3049,6 @@ orion.textview.TextView = (function() {
 					self._updateDOMSelection();
 					self._clientDiv.removeChild(child);
 				};
-				var delimiter = this._model.getLineDelimiter();
 				var _getText = function() {
 					/*
 					* Use the selection anchor to determine the end of the pasted text as it is possible that
@@ -3074,7 +3108,10 @@ orion.textview.TextView = (function() {
 				* Webkit (Chrome/Safari) allows getData during the paste event
 				* Note: setData is not allowed, not even during copy/cut event
 				*/
-				return event.clipboardData.getData("text/plain");
+				clipboadText = [];
+				text = event.clipboardData.getData("text/plain");
+				this._convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
+				return clipboadText.join("");
 			} else {
 				//TODO try paste using extension (Chrome only)
 			}
@@ -4012,9 +4049,12 @@ orion.textview.TextView = (function() {
 			if (pixelY) { viewDiv.scrollTop += pixelY; }
 		},
 		_setClipboardText: function (text, event) {
+			var clipboardText;
 			if (this._frameWindow.clipboardData) {
 				//IE
-				return this._frameWindow.clipboardData.setData("Text", text);
+				clipboardText = [];
+				this._convertDelimiter(text, function(t) {clipboardText.push(t);}, function() {clipboardText.push(platformDelimiter);});
+				return this._frameWindow.clipboardData.setData("Text", clipboardText.join(""));
 			}
 			/* Feature in Chrome, clipboardData.setData is no-op on Chrome even though it returns true */
 			if (isChrome || isFirefox || !event) {
@@ -4023,33 +4063,14 @@ orion.textview.TextView = (function() {
 				var child = document.createElement("PRE");
 				child.style.position = "fixed";
 				child.style.left = "-1000px";
-				var cr = 0, lf = 0, index = 0, length = text.length;
-				while (index < length) {
-					if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); }
-					if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); }
-					var start = index, end;
-					if (lf === -1 && cr === -1) {
-						child.appendChild(document.createTextNode(text.substring(index)));
-						break;
+				this._convertDelimiter(text, 
+					function(t) {
+						child.appendChild(document.createTextNode(t));
+					}, 
+					function() {
+						child.appendChild(document.createElement("BR"));
 					}
-					if (cr !== -1 && lf !== -1) {
-						if (cr + 1 === lf) {
-							end = cr;
-							index = lf + 1;
-						} else {
-							end = cr < lf ? cr : lf;
-							index = (cr < lf ? cr : lf) + 1;
-						}
-					} else if (cr !== -1) {
-						end = cr;
-						index = cr + 1;
-					} else {
-						end = lf;
-						index = lf + 1;
-					}
-					child.appendChild(document.createTextNode(text.substring(start, end)));
-					child.appendChild(document.createElement("BR"));
-				}
+				);
 				child.appendChild(document.createTextNode(" "));
 				this._clientDiv.appendChild(child);
 				var range = document.createRange();
@@ -4085,7 +4106,9 @@ orion.textview.TextView = (function() {
 			}
 			if (event && event.clipboardData) {
 				//webkit
-				return event.clipboardData.setData("text/plain", text); 
+				clipboardText = [];
+				this._convertDelimiter(text, function(t) {clipboardText.push(t);}, function() {clipboardText.push(platformDelimiter);});
+				return event.clipboardData.setData("text/plain", clipboardText.join("")); 
 			}
 		},
 		_setDOMSelection: function (startNode, startOffset, endNode, endOffset) {
