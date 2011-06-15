@@ -565,10 +565,37 @@ var exports = {};
 		commandService.addCommand(switchToRemote, "dom");
 		
 		var switchToCurrentLocal = new mCommands.Command({
-			name : "Switch to HEAD",
+			name : "Switch to Current Local",
 			id : "eclipse.orion.git.switchToCurrentLocal",
 			hrefCallback : function(item) {
-				return "/git/git-log.html#" + item.HeadLocation + "?page=1";
+				var clientDeferred = new dojo.Deferred();
+				dojo.xhrGet({
+					url : item.CloneLocation,
+					headers : {
+						"Orion-Version" : "1"
+					},
+					handleAs : "json",
+					timeout : 5000,
+					load : function(clone, secondArg) {
+						dojo.xhrGet({
+							url : clone.Children[0].BranchLocation,
+							headers : {
+								"Orion-Version" : "1"
+							},
+							handleAs : "json",
+							timeout : 5000,
+							load : function(branches, secondArg) {
+								dojo.forEach(branches.Children, function(branch, i) {
+									if (branch.Current == true){
+										clientDeferred.callback("/git/git-log.html#" + branch.CommitLocation + "?page=1");
+										return;
+									}
+								});
+							}
+						});
+					}
+				});
+				return clientDeferred;
 			},
 			visibleWhen : function(item) {
 				return item.Type === "RemoteTrackingBranch";
