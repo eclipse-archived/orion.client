@@ -25,7 +25,7 @@ dojo.addOnLoad(function(){
 		});
 	};
 	
-	var annotationFactory = new orion.editor.AnnotationFactory();
+	var annotationFactory = new orion.editor.AnnotationFactory("images/problem.gif");
 
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {

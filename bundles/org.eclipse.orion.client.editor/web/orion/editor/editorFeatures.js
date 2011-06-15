@@ -56,12 +56,13 @@ orion.editor.LineNumberRulerFactory = (function() {
 
 
 orion.editor.AnnotationFactory = (function() {
-	function AnnotationFactory() {
+	function AnnotationFactory(problemImageUrl) {
+		this.problemImageUrl = problemImageUrl;
 	}
 	AnnotationFactory.prototype = {
 		createAnnotationRulers: function() {
 			var rulerStyle = {style: { backgroundColor: "#ffffff" }};
-			this.annotationRuler = new orion.textview.AnnotationRuler("left", rulerStyle, {html: "<img src='/images/problem.gif'></img>"});
+			this.annotationRuler = new orion.textview.AnnotationRuler("left", rulerStyle, {html: "<img src='" + this.problemImageUrl + "'></img>"});
 			this.overviewRuler = new orion.textview.OverviewRuler("right", rulerStyle, this.annotationRuler);
 			return {annotationRuler: this.annotationRuler, overviewRuler: this.overviewRuler};
 		},
@@ -87,7 +88,7 @@ orion.editor.AnnotationFactory = (function() {
 					var annotation = {
 						line: errors[k].line - 1,
 						column: errors[k].character,
-						html: "<img src='/images/problem.gif' title='" + escapedReason + "' alt='" + escapedReason + "'></img>",
+						html: "<img src='" + this.problemImageUrl + "' title='" + escapedReason + "' alt='" + escapedReason + "'></img>",
 						overviewStyle: {style: {"backgroundColor": "lightcoral", "border": "1px solid red"}}
 					};
 					

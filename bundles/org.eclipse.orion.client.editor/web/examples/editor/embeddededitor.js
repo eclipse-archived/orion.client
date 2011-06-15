@@ -65,7 +65,7 @@ dojo.addOnLoad(function(){
 		}
 	};
 	
-	var annotationFactory = new orion.editor.AnnotationFactory();
+	var annotationFactory = new orion.editor.AnnotationFactory("images/problem.gif");
 
 	function save(editor) {
 		editor.onInputChange(null, null, null, true);
