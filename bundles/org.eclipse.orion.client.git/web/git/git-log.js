@@ -75,83 +75,47 @@ dojo.addOnLoad(function() {
 	// commands appearing directly in local actions column
 	commandService.registerCommandContribution("eclipse.openGitCommit", 1);
 	commandService.registerCommandContribution("eclipse.compareWithWorkingTree", 2);
-	if (!isRemote()){
-		commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
-	}
 
 	// selection based command contributions in nav toolbar
 	commandService.registerCommandContribution("eclipse.compareGitCommits", 1, "selectionTools", "eclipse.selectionGroup");
 	
 	// git contributions
-	// commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup.page");
+	commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "pageActions", "eclipse.gitGroup.page");
+	commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "pageActions", "eclipse.gitGroup.page");
+	commandService.registerCommandContribution("eclipse.orion.git.switchToCurrentLocal", 100, "pageActions", "eclipse.gitGroup.page");	
+	commandService.registerCommandContribution("eclipse.orion.git.push", 100, "pageActions", "eclipse.gitGroup.page");
+	commandService.registerCommandContribution("eclipse.orion.git.switchToRemote", 100, "pageActions", "eclipse.gitGroup.page");
+	commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
 	
-	if (isRemote()){
-		commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "pageActions", "eclipse.gitGroup.page");
-		commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "pageActions", "eclipse.gitGroup.page");
-	} else {
-		commandService.registerCommandContribution("eclipse.orion.git.push", 100, "pageActions", "eclipse.gitGroup.page");
-	};
-	
-
-	
-	if (isRemote()) {
-		// refresh the commit list for the remote
-		var path = dojo.hash();
-		dojo.xhrGet({
-			url : path,
-			headers : {
-				"Orion-Version" : "1"
-			},
-			handleAs : "json",
-			timeout : 5000,
-			load : function(jsonData, secondArg) {
-				
+	var path = dojo.hash();
+	dojo.xhrGet({
+		url : path,
+		headers : {
+			"Orion-Version" : "1"
+		},
+		handleAs : "json",
+		timeout : 5000,
+		load : function(resource, secondArg) {
+			if (resource.Type === "RemoteTrackingBranch"){
 				serviceRegistry.getService(fileServiceReference).then(function(fileService) {
 					var fileClient = new mFileClient.FileClient(fileService);
-					initTitleBar(fileClient, navigator, jsonData);
+					initTitleBar(fileClient, navigator, resource);
 				});
-				
+		
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
-					gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
+					gitService.getLog(resource.HeadLocation, resource.Id, function(scopedCommitsJsonData, secondArg) {
 						navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
-						navigator.loadCommitsList(jsonData.CommitLocation + "?" + new dojo._Url(path).query, jsonData);
+						navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);	
 					});
 				});
-			},
-			error : function(error, ioArgs) {
-				mAuth.handleGetAuthenticationError(this, ioArgs);
-				console.error("HTTP status code: ", ioArgs.xhr.status);
-			}
-		});
-	} else {
-		var path = dojo.hash();
-		
-		dojo.xhrGet({
-			url : path,
-			headers : {
-				"Orion-Version" : "1"
-			},
-			handleAs : "json",
-			timeout : 5000,
-			load : function(jsonData, secondArg) {
-				return jsonData;
-			},
-			error : function(error, ioArgs) {
-				mAuth.handleGetAuthenticationError(this, ioArgs);
-				console.error("HTTP status code: ", ioArgs.xhr.status);
-			}
-		}).then(function(commitLogJsonData){
-		
-			serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-				var fileClient = new mFileClient.FileClient(fileService);
-				initTitleBar(fileClient, navigator, commitLogJsonData);
-			});
-		
-			if (commitLogJsonData.RemoteLocation == null)
-				navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
-			else
+			} else if (resource.toRef){
+				serviceRegistry.getService(fileServiceReference).then(function(fileService) {
+					var fileClient = new mFileClient.FileClient(fileService);
+					initTitleBar(fileClient, navigator, resource);
+				});
+
 				dojo.xhrGet({
-					url : commitLogJsonData.RemoteLocation,
+					url : resource.RemoteLocation,
 					headers : {
 						"Orion-Version" : "1"
 					},
@@ -161,77 +125,80 @@ dojo.addOnLoad(function() {
 						serviceRegistry.getService("orion.git.provider").then(function(gitService){
 							gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
 								navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
-								navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
+								navigator.loadCommitsList(dojo.hash(), resource);
 							});
 						});
-					},
-					error : function(error, ioArgs) {
-						mAuth.handleGetAuthenticationError(this, ioArgs);
-						console.error("HTTP status code: ", ioArgs.xhr.status);
-						navigator.loadCommitsList(dojo.hash(), commitLogJsonData);
 					}
 				});
-		});
-//		.then(function(blah){
-//			serviceRegistry.getService("orion.git.provider").then(function(gitService){
-//				gitService.getLog(blah.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArd) {
-//					navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
-//					navigator.loadCommitsList(dojo.hash(), {});
-//				});
-//			});
-//		});
-	
-		
-		
-		//navigator.loadCommitsList(dojo.hash(), {});
-	}
+			} else {
+				navigator.loadCommitsList(dojo.hash(), {});
+			}
+		},
+		error : function(error, ioArgs) {
+			mAuth.handleGetAuthenticationError(this, ioArgs);
+			console.error("HTTP status code: ", ioArgs.xhr.status);
+		}
+	});
 	
 	makeRightPane(navigator);
 
 	// every time the user manually changes the hash, we need to load the
 	// workspace with that name
 	dojo.subscribe("/dojo/hashchange", navigator, function() {
-
-		if (isRemote()) {
-			var path = dojo.hash();
-			dojo.xhrGet({
-				url : path,
-				headers : {
-					"Orion-Version" : "1"
-				},
-				handleAs : "json",
-				timeout : 5000,
-				load : function(jsonData, secondArg) {
+		var path = dojo.hash();
+		dojo.xhrGet({
+			url : path,
+			headers : {
+				"Orion-Version" : "1"
+			},
+			handleAs : "json",
+			timeout : 5000,
+			load : function(resource, secondArg) {
+				if (resource.Type === "RemoteTrackingBranch"){
 					serviceRegistry.getService(fileServiceReference).then(function(fileService) {
 						var fileClient = new mFileClient.FileClient(fileService);
-						initTitleBar(fileClient, navigator, jsonData);
+						initTitleBar(fileClient, navigator, resource);
 					});
+			
 					serviceRegistry.getService("orion.git.provider").then(function(gitService){
-						gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
+						gitService.getLog(resource.HeadLocation, resource.Id, function(scopedCommitsJsonData, secondArg) {
 							navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
-							navigator.loadCommitsList(jsonData.CommitLocation + "?" + new dojo._Url(path).query, jsonData);			
+							navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);	
 						});
 					});
-				},
-				error : function(error, ioArgs) {
-					handleGetAuthenticationError(this, ioArgs);
-					console.error("HTTP status code: ", ioArgs.xhr.status);
+				} else if (resource.toRef){
+					serviceRegistry.getService(fileServiceReference).then(function(fileService) {
+						var fileClient = new mFileClient.FileClient(fileService);
+						initTitleBar(fileClient, navigator, resource);
+					});
+
+					dojo.xhrGet({
+						url : resource.RemoteLocation,
+						headers : {
+							"Orion-Version" : "1"
+						},
+						handleAs : "json",
+						timeout : 5000,
+						load : function(remoteJsonData, secondArg) {
+							serviceRegistry.getService("orion.git.provider").then(function(gitService){
+								gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
+									navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
+									navigator.loadCommitsList(dojo.hash(), resource);
+								});
+							});
+						}
+					});
+				} else {
+					navigator.loadCommitsList(dojo.hash(), {});
 				}
-			});
-		} else {
-			serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-				var fileClient = new mFileClient.FileClient(fileService);
-				initTitleBar(fileClient, navigator);
-			});
-			navigator.loadCommitsList(dojo.hash(), {});
-		}
+			},
+			error : function(error, ioArgs) {
+				mAuth.handleGetAuthenticationError(this, ioArgs);
+				console.error("HTTP status code: ", ioArgs.xhr.status);
+			}
+		});
 	});
 });
-
-function isRemote(){
-	var queryParams = dojo.queryToObject(window.location.search.slice(1));
-	return queryParams["remote"] != null;
-};
 
 function getHeadFileUri(){
 	var path = dojo.hash().split("gitapi/commit/");
@@ -268,26 +235,29 @@ function getRemoteFileURI(){
 }
 
 function initTitleBar(fileClient, navigator, item){
+	
+	var isRemote = (item.Type === "RemoteTrackingBranch");
+	
 	//TODO we are calculating file path from the URL, it should be returned by git API
-	var fileURI = isRemote() ? getRemoteFileURI() : getHeadFileUri();
+	var fileURI = isRemote ? getRemoteFileURI() : getHeadFileUri();
 	
 	
 	if(fileURI){
 		fileClient.read(fileURI, true).then(
 				dojo.hitch(this, function(metadata) {
 				var branchName, cloneName;
-					if(item && (isRemote() ? item.Name : item.toRef)){
-						branchName = isRemote() ? item.Name : item.toRef.Name;
+					if(item && (isRemote ? item.Name : item.toRef)){
+						branchName = isRemote ? item.Name : item.toRef.Name;
 					}
-					if(item && (isRemote() ? item.CloneLocation : item.toRef)){
-						var cloneURI = isRemote() ? item.CloneLocation : item.toRef.CloneLocation;
+					if(item && (isRemote ? item.CloneLocation : item.toRef)){
+						var cloneURI = isRemote ? item.CloneLocation : item.toRef.CloneLocation;
 						
 						serviceRegistry.getService("orion.git.provider").then(function(gitService){
 							gitService.getGitClone(cloneURI).then(function(jsonData){
 							if(jsonData.Children && jsonData.Children.length>0)
-								setPageTitle(branchName, jsonData.Children[0].Name, jsonData.Children[0].ContentLocation);
+								setPageTitle(branchName, jsonData.Children[0].Name, jsonData.Children[0].ContentLocation, isRemote);
 							else
-								setPageTitle(branchName, jsonData.Name, jsonData.ContentLocation);
+								setPageTitle(branchName, jsonData.Name, jsonData.ContentLocation, isRemote);
 							});
 						});
 					}else{
@@ -299,7 +269,7 @@ function initTitleBar(fileClient, navigator, item){
 						var breadcrumb = new mBreadcrumbs.BreadCrumbs({
 							container: "location",
 							resource: metadata ,
-							makeHref:function(seg,location){makeHref(fileClient, seg,location);
+							makeHref:function(seg,location){makeHref(fileClient, seg,location, isRemote);
 							}
 						});
 					}
@@ -341,19 +311,19 @@ function makeRightPane(explorer){
 		};
 }
 
-function makeHref(fileClient, seg, location){
+function makeHref(fileClient, seg, location, isRemote){
 	if(!location){
 		return;
 	}
 	fileClient.read(location, true).then(
 			dojo.hitch(this, function(metadata) {
-				if (isRemote()) {
+				if (isRemote) {
 					serviceRegistry.getService("orion.git.provider").then(function(gitService){
 						if(metadata.Git)
 						gitService.getDefaultRemoteBranch(
 								metadata.Git.RemoteLocation, function(
 										defaultRemoteBranchJsonData, secondArg) {
-									seg.href = "/git/git-log.html?remote#"
+									seg.href = "/git/git-log.html#"
 											+ defaultRemoteBranchJsonData.Location
 											+ "?page=1";
 								});
@@ -371,9 +341,9 @@ function makeHref(fileClient, seg, location){
 	);
 };
 
-function setPageTitle(branchName, cloneName, cloneLocation){
+function setPageTitle(branchName, cloneName, cloneLocation, isRemote){
 	var pageTitle = dojo.byId("pageTitle");
-	var title = "Git Log for " + (isRemote() ? "remote branch <b>" : "local branch <b>") + branchName + "</b>";
+	var title = "Git Log for " + (isRemote ? "remote branch <b>" : "local branch <b>") + branchName + "</b>";
 	if(cloneLocation){
 		title = title + " on <a href='/git/git-clone.html#" + cloneLocation + "'>" + cloneName + "</a>";
 	}

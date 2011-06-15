@@ -520,7 +520,7 @@ var exports = {};
 		commandService.addCommand(mergeCommand, "object");
 		
 		var pushCommand = new mCommands.Command({
-			name : "Push All Outgoing Commits",
+			name : "Push All",
 			image : "/git/images/push.gif",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
@@ -544,12 +544,38 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				return item.RepositoryPath==="" || (item.Type === "Branch" && item.Current);
+				return explorer.isRoot || (item.Type === "Branch" && item.Current);
 			}
 		});
 	
 		commandService.addCommand(pushCommand, "dom");
 		commandService.addCommand(pushCommand, "object");
+		
+		var switchToRemote = new mCommands.Command({
+			name : "Switch to Remote",
+			id : "eclipse.orion.git.switchToRemote",
+			hrefCallback : function(item) {
+				return "/git/git-log.html#" + item.toRef.RemoteLocation + "?page=1";
+			},
+			visibleWhen : function(item) {
+				return item.toRef != null && item.toRef.Type === "Branch" && item.toRef.Current;
+			}
+		});
+	
+		commandService.addCommand(switchToRemote, "dom");
+		
+		var switchToCurrentLocal = new mCommands.Command({
+			name : "Switch to HEAD",
+			id : "eclipse.orion.git.switchToCurrentLocal",
+			hrefCallback : function(item) {
+				return "/git/git-log.html#" + item.HeadLocation + "?page=1";
+			},
+			visibleWhen : function(item) {
+				return item.Type === "RemoteTrackingBranch";
+			}
+		});
+	
+		commandService.addCommand(switchToCurrentLocal, "dom");
 		
 		var pushToCommand = new mCommands.Command({
 			name : "Push to...",
