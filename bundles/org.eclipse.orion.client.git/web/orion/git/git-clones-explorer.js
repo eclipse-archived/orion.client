@@ -211,7 +211,7 @@ exports.GitClonesRenderer = (function(){
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, "/git/images/git-repository.gif");
+				this.getExpandImage(tableRow, div, "/git/images/repository.gif");
 				
 				//link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage", href: "/navigate/table.html#" + item.ContentLocation+"?depth=1"}, div, "last");
 				link = dojo.create("a", {className: "navlinkonpage"}, div, "last");
@@ -230,7 +230,7 @@ exports.GitClonesRenderer = (function(){
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, item.Name==="Branch" ? "/git/images/git-branches.gif" : "/git/images/git-remotes.gif");
+				this.getExpandImage(tableRow, div, item.Name==="Branch" ? "/git/images/branches.gif" : "/git/images/remotes.gif");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
@@ -242,14 +242,14 @@ exports.GitClonesRenderer = (function(){
 				if (item.Current)
 					link.style.fontWeight = "bold";
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				dojo.create("img", {src: "/git/images/git-branch.gif"}, link, "first");
+				dojo.create("img", {src: "/git/images/branch.gif"}, link, "first");
 				
 			} else if (item.Type === "Remote"){
 				col = document.createElement('td');
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, "/git/images/git-remote.gif");
+				this.getExpandImage(tableRow, div, "/git/images/remote.gif");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
@@ -260,7 +260,7 @@ exports.GitClonesRenderer = (function(){
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 								
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				dojo.create("img", {src: "/git/images/git-branch.gif"}, link, "first");
+				dojo.create("img", {src: "/git/images/branch.gif"}, link, "first");
 			}	
 			return col;
 		case 1:

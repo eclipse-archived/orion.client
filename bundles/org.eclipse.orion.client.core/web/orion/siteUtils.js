@@ -140,7 +140,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 		
 		var deleteCommand = new mCommands.Command({
 			name: "Delete",
-			image: "/images/remove.gif",
+			image: "/images/delete.gif",
 			id: "eclipse.site.delete",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";

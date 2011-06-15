@@ -27,12 +27,16 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	'<table style="border-spacing: 0px; margin: 0; padding: 0; border-collapse: collapse; width: 100%;">' +
 	// Row 1:  Logo + page title + primary nav links
 		'<tr class="topRowBanner" id="bannerRow1">' +
-			'<td rowspan=3 style="padding-top: 12px; padding-bottom: 12px; padding-left: 16px; width: 124px"><a id="home" href="/index.html"><img class="toolbarLabel" src="/images/orion.png" alt="Orion Logo" align="top"></a></td>' +
-			'<td class="leftGlobalToolbar" style="padding-top: 12px">' +
+			'<td rowspan=3 style="padding-top: 12px; padding-bottom: 12px; padding-left: 8px; width: 124px"><a id="home" href="/index.html"><img class="toolbarLabel" src="/images/orion.png" alt="Orion Logo" align="top"></a></td>' +
+			'<td class="leftGlobalToolbar" style="padding-top: 16px">' +
 				'<span id="pageTitle" class="pageTitle"></span>' +
 			'</td>' + 
-			'<td class="rightGlobalToolbar" style="padding-top: 12px">' +
+			'<td class="rightGlobalToolbar" style="padding-top: 16px">' +
 				'<span id="primaryNav" class="globalActions"></span>' +
+				'<span id="globalActions" class="globalActions"></span>' +
+				'<input type="search" id="search" class="searchbox">' +
+				'<span id="userInfo"></span>' +
+				'<span id="help" class="help"><a id="help" href="/help/index.jsp"><img href="images/help.gif" class="commandImage"></img></a></span>' +
 			'</td>' + 
 		'</tr>' +
 	// Row 2:  Location (optional breadcrumb + current page resource)
@@ -43,16 +47,10 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		'</tr>' +
 	// Row 3:  Status on left, global commands, search, user, etc. on right
 		'<tr class="topRowBanner" id="bannerRow3">' +
-			'<td style="text-align: left">' +
+			'<td colspan=2 style="height: 16px; text-align: left">' +
 				'<span id="statusPane"></span>' +
 				'<span id="notifications"></span>' +
 			'</td>' +
-			'<td style="text-align: right">' +
-				'<span id="globalActions" class="globalActions"></span>' +
-				'<input type="search" id="search" class="searchbox">' +
-				'<span id="userInfo"></span>' +
-				'<span id="help" class="help"><a id="help" href="/help/index.jsp">?</a></span>' +
-			'</td>' + 
 		'</tr>' +
 		
 	// Row 4: Page Toolbar
@@ -247,7 +245,6 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			
 		var openResourceCommand = new mCommands.Command({
 			name: "Find File Named...",
-			image: "/images/find.gif",
 			id: "eclipse.openResource",
 			callback: function(item) {
 				openResourceDialog(searchLocation, searcher, editor);

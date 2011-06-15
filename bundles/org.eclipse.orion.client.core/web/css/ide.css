@@ -422,27 +422,16 @@ a:hover {
 	color: white;
 }
 
-.launchItemGo {
-	background: url(/images/silk/server_go.png);
-}
-.launchItemStop {
-	background: url(/images/silk/server_stop.png);
-}
-
-.projectItem {
-	background: url(/images/prj_obj.gif);
-}
-
 .folderItem {
-	background: url(/images/fldr_obj.gif);
+	background: url(/images/folder.gif);
 }
 
 .fileItem {
-	background: url(/images/file_obj.gif);
+	background: url(/images/file.gif);
 }
 
 .newItem {
-	background: url(/images/add_obj.gif);
+	background: url(/images/add.gif);
 }
 
 .treetable {

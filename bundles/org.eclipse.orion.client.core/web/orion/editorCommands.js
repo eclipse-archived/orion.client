@@ -55,7 +55,6 @@ exports.EditorCommandFactory = (function() {
 				}));
 				var saveCommand = new mCommands.Command({
 					name: "Save",
-					image: "/images/save_edit.gif",
 					id: "orion.save",
 					callback: function(editor) {
 						editor.getTextView().invokeAction("Save");
@@ -168,7 +167,6 @@ exports.UndoCommandFactory = (function() {
 			});
 			var undoCommand = new mCommands.Command({
 				name: "Undo",
-				image: "/images/undo_edit.gif",
 				id: "orion.undo",
 				callback: function(editor) {
 					editor.getTextView().invokeAction("Undo");
@@ -186,7 +184,6 @@ exports.UndoCommandFactory = (function() {
 	
 			var redoCommand = new mCommands.Command({
 				name: "Redo",
-				image: "/images/redo_edit.gif",
 				id: "orion.redo",
 				callback: function(editor) {
 					editor.getTextView().invokeAction("Redo");

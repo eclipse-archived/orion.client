@@ -97,7 +97,7 @@ eclipse.Unittest.Renderer = (function() {
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
-				dojo.create("img", {src: "/images/silk/folder.png"}, div, "last");
+				dojo.create("img", {src: "/images/folder.gif"}, div, "last");
 				link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 				expandImg.onclick = dojo.hitch(this, function(evt) {

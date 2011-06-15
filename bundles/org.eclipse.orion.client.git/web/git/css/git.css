@@ -7,35 +7,35 @@
 }
 
 .incomingCommitsdRow div {
-	background: url(/git/images/git-incoming.gif);
+	background: url(/git/images/incoming.gif);
 	background-repeat: no-repeat;
 	background-position: left top; 
 }
 
 .outgoingCommitsdRow div {
-	background: url(/git/images/git-outgoing.gif);
+	background: url(/git/images/outgoing.gif);
 	background-repeat: no-repeat;
 	background-position: left top; 
 }
 
 .gitRepoItem {
-	background: url(/git/images/git-repository.gif);
+	background: url(/git/images/repository.gif);
 }
 
 .gitRemotesItem {
-	background: url(/git/images/git-remotes.gif);
+	background: url(/git/images/remotes.gif);
 }
 
 .gitBranchesItem {
-	background: url(/git/images/git-branches.gif);
+	background: url(/git/images/branches.gif);
 }
 
 .gitBranchItem {
-	background: url(/git/images/git-branch.gif);
+	background: url(/git/images/branch.gif);
 }
 
 .gitRemoteItem {
-	background: url(/git/images/git-remote.gif);
+	background: url(/git/images/remote.gif);
 }
 
 .gitDefaultItem {

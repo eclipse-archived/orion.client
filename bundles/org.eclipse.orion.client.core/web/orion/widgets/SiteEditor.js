@@ -39,7 +39,7 @@ dojo.declare("orion.widgets.MappingsGrid", [dojox.grid.DataGrid], /** @lends ori
 		// Register commands used for editing mappings
 		var deleteMappingCommand = new mCommands.Command({
 			name: "Delete",
-			image: "/images/remove.gif",
+			image: "/images/delete.gif",
 			id: "eclipse.site.mappings.remove",
 			visibleWhen: function(item) {
 				// Only show on a Mappings object
@@ -57,7 +57,7 @@ dojo.declare("orion.widgets.MappingsGrid", [dojox.grid.DataGrid], /** @lends ori
 		
 		var moveUpCommand = new mCommands.Command({
 			name: "Move Up",
-			image: "/images/prev_nav.gif",
+			image: "/images/move_up.gif",
 			id: "eclipse.site.mappings.moveUp",
 			visibleWhen: dojo.hitch(this, function(item) {
 				return item.Source && item.Target;
@@ -84,7 +84,7 @@ dojo.declare("orion.widgets.MappingsGrid", [dojox.grid.DataGrid], /** @lends ori
 		
 		var moveDownCommand = new mCommands.Command({
 			name: "Move Down",
-			image: "/images/next_nav.gif",
+			image: "/images/move_down.gif",
 			id: "eclipse.site.mappings.moveDown",
 			visibleWhen: dojo.hitch(this, function(item) {
 				return item.Source && item.Target;
@@ -295,14 +295,14 @@ dojo.declare("orion.widgets.MappingsGrid", [dojox.grid.DataGrid], /** @lends ori
 				handleAs: "json"
 			}).then(
 				function(children) {
-					deferred.callback('<a href="' + href + '" target="_new"><img src="/images/fldr_obj.gif" title="Workspace folder ' + href + '"/></a>');
+					deferred.callback('<a href="' + href + '" target="_new"><img src="/images/folder.gif" title="Workspace folder ' + href + '"/></a>');
 				}, function(error) {
 					deferred.callback('<a href="' + href + '" target="_new"><img src="/images/error.gif" title="Workspace folder  not found: ' + href + '"/></a>');
 				});
 			result = deferred;
 		} else {
 			href = mUtil.safeText(target);
-			result = '<a href="' + href + '" target="_blank"><img src="/images/link_obj.gif" title="External link to ' + href + '"/></a>';
+			result = '<a href="' + href + '" target="_blank"><img src="/images/link.gif" title="External link to ' + href + '"/></a>';
 		}
 		inCell.lastResult = result;
 		return result;
@@ -482,7 +482,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane/*dijit._Widge
 			// Register command used for adding mapping
 			var addMappingCommand = new mCommands.Command({
 				name: "Add&#8230;",
-				image: "/images/add_obj.gif",
+				image: "/images/add.gif",
 				id: "eclipse.site.mappings.add",
 				visibleWhen: function(item) {
 					return true;

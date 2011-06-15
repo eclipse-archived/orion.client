@@ -114,13 +114,13 @@ orion.GitStatusModel = (function() {
 	return GitStatusModel;
 }());
 
-orion.statusTypeMap = { "Missing":["/git/images/git-removed.gif", "Unstaged removal" , "/git/images/git-stage.gif", "Stage" ],
-						"Removed":["/git/images/git-removed.gif","Staged removal" ,"/git/images/git-unstage.gif", "Unstage" ],	
-						 "Modified":["/git/images/git-modify.gif","Unstaged change" ,"/git/images/git-stage.gif", "Stage" ],	
-						 "Changed":["/git/images/git-modify.gif","Staged change" ,"/git/images/git-unstage.gif", "Untage"],	
-					     "Untracked":["/git/images/git-added.gif","Unstaged add" ,"/git/images/git-stage.gif", "Stage"],	
-						 "Added":["/git/images/git-added.gif","Staged add" ,"/git/images/git-unstage.gif" , "Unstage"],	
-						 "Conflicting":["/git/images/conflict-file.gif","Conflicting" ,"/git/images/git-stage.gif" , "Resolve Conflict"]	
+orion.statusTypeMap = { "Missing":["/git/images/removal.gif", "Unstaged removal" , "/git/images/stage.gif", "Stage" ],
+						"Removed":["/git/images/removal.gif","Staged removal" ,"/git/images/unstage.gif", "Unstage" ],	
+						 "Modified":["/git/images/modification.gif","Unstaged change" ,"/git/images/stage.gif", "Stage" ],	
+						 "Changed":["/git/images/modification.gif","Staged change" ,"/git/images/unstage.gif", "Untage"],	
+					     "Untracked":["/git/images/addition.gif","Unstaged add" ,"/git/images/stage.gif", "Stage"],	
+						 "Added":["/git/images/addition.gif","Staged add" ,"/git/images/unstage.gif" , "Unstage"],	
+						 "Conflicting":["/git/images/conflict-file.gif","Conflicting" ,"/git/images/stage.gif" , "Resolve Conflict"]	
 					  };
 
 
@@ -656,7 +656,7 @@ orion.GitStatusController = (function() {
 			var sbsCompareCommand = new mCommands.Command({
 				name: "Side by side compare",
 				tooltip: "Side by side compare",
-				image: "/git/images/compare-sbs.gif",
+				image: "/git/images/open_compare.gif",
 				id: "orion.sbsCompare",
 				hrefCallback: function(item) {
 					return self.openCompareEditor(item.object);
@@ -669,7 +669,7 @@ orion.GitStatusController = (function() {
 			var checkoutCommand = new mCommands.Command({
 				name: "checkout",
 				tooltip: "checkout",
-				image: "/git/images/git-checkout.gif",
+				image: "/git/images/checkout.gif",
 				id: "orion.gitCheckout",
 				callback: function(item) {
 					self._registry.getService("orion.page.dialog").then(function(service) {
@@ -691,7 +691,7 @@ orion.GitStatusController = (function() {
 			var stageCommand = new mCommands.Command({
 				name: "stage",
 				tooltip: "stage",
-				image: "/git/images/git-stage.gif",
+				image: "/git/images/stage.gif",
 				id: "orion.gitStage",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Staging...");
@@ -705,7 +705,7 @@ orion.GitStatusController = (function() {
 			var stageAllCommand = new mCommands.Command({
 				name: "stageAll",
 				tooltip: "Stage all",
-				image: "/git/images/git-stage-all.gif",
+				image: "/git/images/stage_all.gif",
 				id: "orion.gitStageAll",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Staging...");
@@ -719,7 +719,7 @@ orion.GitStatusController = (function() {
 			var unstageCommand = new mCommands.Command({
 				name: "unstage",
 				tooltip: "Unstage",
-				image: "/git/images/git-unstage.gif",
+				image: "/git/images/unstage.gif",
 				id: "orion.gitUnstage",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Unstaging...");
@@ -733,7 +733,7 @@ orion.GitStatusController = (function() {
 			var unstageAllCommand = new mCommands.Command({
 				name: "unstageAll",
 				tooltip: "Unstage all",
-				image: "/git/images/git-unstage-all.gif",
+				image: "/git/images/unstage_all.gif",
 				id: "orion.gitUnstageAll",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Unstaging...");
@@ -747,7 +747,7 @@ orion.GitStatusController = (function() {
 			var resetChangesCommand = new mCommands.Command({
 				name: "Reset",
 				tooltip: "Reset all changes",
-				image: "/git/images/git-undo-changes.gif",
+				image: "/git/images/refresh.gif",
 				id: "orion.gitResetChanges",
 				callback: function(item) {
 					self._registry.getService("orion.page.dialog").then(function(service) {
