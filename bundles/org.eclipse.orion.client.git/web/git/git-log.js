@@ -273,6 +273,15 @@ function initTitleBar(fileClient, navigator, item){
 							}
 						});
 					}
+					navigator.isDirectory = metadata.Directory;
+					mGitCommands.updateNavTools(serviceRegistry, navigator, "pageActions", "selectionTools", navigator._lastTreeRoot);
+					navigator.updateCommands();
+					if(metadata.Directory){
+						//remove links to commit
+						dojo.query(".navlinkonpage").forEach(function(node, i) {
+							node.removeAttribute("href");
+						});
+					}
 				}),
 				dojo.hitch(this, function(error) {
 					console.error("Error loading file metadata: " + error.message);

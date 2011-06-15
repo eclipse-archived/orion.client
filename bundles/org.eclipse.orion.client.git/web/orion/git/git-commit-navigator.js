@@ -28,6 +28,7 @@ exports.GitCommitNavigator = (function() {
 		this.pageTitleId = pageTitleId;
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
+		this.isDirectory = true;
 		this.model = null;
 		this.myTree = null;
 		this.commitDetails = commitDetails;
