@@ -251,6 +251,9 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 		 * @param {Boolean} forceText Always use text and not the icon when showing the command, regardless of style.
 		 */	
 		renderCommands: function(parent, scope, items, handler, renderType, cssClass, userData, forceText) {
+			if (typeof(parent) === "string") {
+				parent = dojo.byId(parent);
+			}
 			if (!items) {
 				var cmdService = this;
 				if (this._selection) {
