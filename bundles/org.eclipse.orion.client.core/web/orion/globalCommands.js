@@ -36,7 +36,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				'<span id="globalActions" class="globalActions"></span>' +
 				'<input type="search" id="search" class="searchbox">' +
 				'<span id="userInfo"></span>' +
-				'<span id="help" class="help"><a id="help" href="/help/index.jsp"><img href="images/help.gif" class="commandImage"></img></a></span>' +
+				'<span id="help" class="help"><a id="help" href="/help/index.jsp">?</a></span>' +
 			'</td>' + 
 		'</tr>' +
 	// Row 2:  Location (optional breadcrumb + current page resource)
