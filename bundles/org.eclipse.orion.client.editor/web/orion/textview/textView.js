@@ -8,7 +8,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bugs 334583, 348471
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bugs 334583, 348471, 349485
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -2747,10 +2747,12 @@ orion.textview.TextView = (function() {
 			*
 			* Note that Chrome applies the styles on the Mac with Ctrl instead of Cmd.
 			*/
-			var isMacChrome = isMac && isChrome;
-			bindings.push({name: null, keyBinding: new KeyBinding('u', !isMacChrome, false, false, isMacChrome), predefined: true});
-			bindings.push({name: null, keyBinding: new KeyBinding('i', !isMacChrome, false, false, isMacChrome), predefined: true});
-			bindings.push({name: null, keyBinding: new KeyBinding('b', !isMacChrome, false, false, isMacChrome), predefined: true});
+			if (!isFirefox) {
+				var isMacChrome = isMac && isChrome;
+				bindings.push({name: null, keyBinding: new KeyBinding('u', !isMacChrome, false, false, isMacChrome), predefined: true});
+				bindings.push({name: null, keyBinding: new KeyBinding('i', !isMacChrome, false, false, isMacChrome), predefined: true});
+				bindings.push({name: null, keyBinding: new KeyBinding('b', !isMacChrome, false, false, isMacChrome), predefined: true});
+			}
 
 			if (isFirefox) {
 				bindings.push({name: "copy", keyBinding: new KeyBinding(45, true), predefined: true});
