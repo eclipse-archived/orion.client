@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define dojo window*/
+/*global define orion:true window*/
 /*jslint maxerr:150 browser:true devel:true */
 
 /**
@@ -34,7 +34,7 @@ orion.editor.ContentAssist = (function() {
 	function ContentAssist(editor, contentAssistId, serviceRegistry) {
 		this.editor = editor;
 		this.textView = editor.getTextView();
-		this.contentAssistPanel = dojo.byId(contentAssistId);
+		this.contentAssistPanel = document.getElementById(contentAssistId);
 		this.active = false;
 		this.prefix = "";
 		this.serviceRegistry = serviceRegistry;
@@ -60,11 +60,11 @@ orion.editor.ContentAssist = (function() {
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
 			this.textView.setKeyBinding(isMac ? new orion.textview.KeyBinding(' ', false, false, false, true) : new orion.textview.KeyBinding(' ', true), "Content Assist");
-			this.textView.setAction("Content Assist", dojo.hitch(this, function() {
+			this.textView.setAction("Content Assist", orion.editor.util.hitch(this, function() {
 				this.showContentAssist(true);
 				return true;
 			}));
-			dojo.connect(this.editor, "onInputChange", this, this.inputChanged);
+			orion.editor.util.connect(this.editor, "onInputChange", this, this.inputChanged);
 		},
 		/** Registers a listener with this <code>ContentAssist</code>. */
 		addEventListener: function(/** String */ type, /** Function */ listener) {
@@ -89,20 +89,20 @@ orion.editor.ContentAssist = (function() {
 				// Filter the ServiceReferences
 				this.activeServiceReferences = [];
 				var serviceReferences = this.serviceRegistry.getServiceReferences("orion.edit.contentAssist");
-				var serviceReference;
-				dojo.forEach(serviceReferences, dojo.hitch(this, function(serviceReference) {
+				for (var i=0; i < serviceReferences.length; i++) {
+					var serviceReference = serviceReferences[i];
 					var info = {};
 					var propertyNames = serviceReference.getPropertyNames();
-					for (var i = 0; i < propertyNames.length; i++) {
-						info[propertyNames[i]] = serviceReference.getProperty(propertyNames[i]);
+					for (var j=0; j < propertyNames.length; j++) {
+						info[propertyNames[j]] = serviceReference.getProperty(propertyNames[j]);
 					}
 					if (new RegExp(info.pattern).test(fileName)) {
 						this.activeServiceReferences.push(serviceReference);
 					}
-				}));
+				};
 			}
 			// Filter the registered providers
-			for (var i=0; i < this.contentAssistProviders.length; i++) {
+			for (i=0; i < this.contentAssistProviders.length; i++) {
 				var provider = this.contentAssistProviders[i];
 				if (new RegExp(provider.pattern).test(fileName)) {
 					this.activeContentAssistProviders.push(provider.provider);
@@ -215,11 +215,12 @@ orion.editor.ContentAssist = (function() {
 				return;
 			}
 			function createDiv(proposal, isSelected, parent) {
-				var attributes = {innerHTML: proposal};
+				var div = document.createElement("div");
 				if (isSelected) {
-					attributes.className = "selected";
+					div.className = "selected";
 				}
-				dojo.create("div", attributes, parent, this);
+				div.innerHTML = proposal;
+				parent.appendChild(div);
 			}
 			if (!enable) {
 				if (this.listenerAdded) {
@@ -265,7 +266,7 @@ orion.editor.ContentAssist = (function() {
 				 * can trigger linked mode behavior in the editor.
 				 */
 				this.getKeywords(this.prefix, buffer, selection).then(
-					dojo.hitch(this, function(keywords) {
+					orion.editor.util.hitch(this, function(keywords) {
 						this.proposals = [];
 						for (var i = 0; i < keywords.length; i++) {
 							var proposal = keywords[i];
@@ -309,7 +310,7 @@ orion.editor.ContentAssist = (function() {
 							this.textView.addEventListener("Scroll", this, this.contentAssistListener.onScroll);
 						}
 						this.listenerAdded = true;
-						this.contentAssistPanel.onclick = dojo.hitch(this, this.click);
+						this.contentAssistPanel.onclick = orion.editor.util.hitch(this, this.click);
 						this.active = true;
 						this.finishing = false;
 					}));
@@ -325,26 +326,31 @@ orion.editor.ContentAssist = (function() {
 		 * @param {String} prefix A prefix against which content assist proposals should be evaluated.
 		 * @param {String} buffer The entire buffer being edited.
 		 * @param {orion.textview.Selection} selection The current selection from the Editor.
-		 * @returns {dojo.Deferred} A future that will provide the keywords.
+		 * @returns {Object} An promise that will provide the keywords.
 		 */
 		getKeywords: function(prefix, buffer, selection) {
 			var keywords = [];
 			
 			// Add keywords from directly registered providers
-			dojo.forEach(this.activeContentAssistProviders, function(provider) {
+			for (var i=0; i < this.activeContentAssistProviders.length; i++) {
+				var provider = this.activeContentAssistProviders[i];
 				keywords = keywords.concat(provider.getKeywords() || []);
-			});
+			}
 			
 			// Add keywords from providers registered through service registry
-			var d = new dojo.Deferred();
+			// FIXME: should just avoid Deferred entirely
 			if (this.serviceRegistry) {
-				var keywordPromises = dojo.map(this.activeServiceReferences, dojo.hitch(this, function(serviceRef) {
-					return this.serviceRegistry.getService(serviceRef).then(function(service) {
-						return service.getKeywords(prefix, buffer, selection);
+				var d = new dojo.Deferred();
+				var keywordPromises = [];
+				for (i=0; i < this.activeServiceReferences.length; i++) {
+					var serviceRef = this.activeServiceReferences[i];
+					this.serviceRegistry.getService(serviceRef).then(function(service) {
+						keywordPromises.push(service.getKeywords(prefix, buffer, selection));
 					});
-				}));
+				}
+				
 				var keywordCount = 0;
-				for (var i=0; i < keywordPromises.length; i++) {
+				for (i=0; i < keywordPromises.length; i++) {
 					keywordPromises[i].then(function(result) {
 						keywordCount++;
 						keywords = keywords.concat(result);
@@ -356,10 +362,10 @@ orion.editor.ContentAssist = (function() {
 						d.reject(e); 
 					});
 				}
+				return d;
 			} else {
-				d.resolve(keywords);
+				return { then: function() { return keywords; } };
 			}
-			return d;
 		},
 		/**
 		 * Adds a content assist provider.
@@ -376,7 +382,7 @@ orion.editor.ContentAssist = (function() {
 }());
 
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define(['dojo', 'orion/textview/keyBinding'], function() {
+	define(['orion/textview/keyBinding'], function() {
 		return orion.editor;	
 	});
 }

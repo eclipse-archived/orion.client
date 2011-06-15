@@ -8,12 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global eclipse:true orion:true dojo window*/
+/*global eclipse:true orion:true window*/
 /*jslint devel:true*/
 
-dojo.addOnLoad(function(){
+window.onload = function(){
 	
-	var editorDomNode = dojo.byId("editor");
+	var editorDomNode = document.getElementById("editor");
 	
 	var textViewFactory = function() {
 		return new orion.textview.TextView({
@@ -90,7 +90,7 @@ dojo.addOnLoad(function(){
 		});
 		
 		// speaking of save...
-		dojo.byId("save").onclick = function() {save(editor);};
+		document.getElementById("save").onclick = function() {save(editor);};
 
 	};
 		
@@ -103,7 +103,7 @@ dojo.addOnLoad(function(){
 		} else {
 			status = message;
 		}
-		dojo.byId("status").innerHTML = dirtyIndicator + status;
+		document.getElementById("status").innerHTML = dirtyIndicator + status;
 	};
 	
 	var editor = new orion.editor.Editor({
@@ -117,13 +117,13 @@ dojo.addOnLoad(function(){
 		domNode: editorDomNode
 	});
 		
-	dojo.connect(editor, "onDirtyChange", this, function(dirty) {
+	orion.editor.util.connect(editor, "onDirtyChange", this, function(dirty) {
 		if (dirty) {
 			dirtyIndicator = "*";
 		} else {
 			dirtyIndicator = "";
 		}
-		dojo.byId("status").innerHTML = dirtyIndicator + status;
+		document.getElementById("status").innerHTML = dirtyIndicator + status;
 	});
 	
 	editor.installTextView();
@@ -139,4 +139,4 @@ dojo.addOnLoad(function(){
 			 return "There are unsaved changes.";
 		}
 	};
-});
+};
