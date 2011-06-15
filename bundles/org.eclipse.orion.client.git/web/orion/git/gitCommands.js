@@ -318,7 +318,7 @@ var exports = {};
 			id : "eclipse.openGitLog",
 			hrefCallback : function(item) {
 				if (item.Type === "RemoteTrackingBranch")
-					return "/git/git-log.html?remote#" + item.Location + "?page=1";
+					return "/git/git-log.html#" + item.Location + "?page=1";
 				return "/git/git-log.html#" + item.CommitLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
