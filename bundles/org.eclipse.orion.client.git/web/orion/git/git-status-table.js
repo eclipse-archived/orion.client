@@ -510,7 +510,7 @@ orion.GitStatusController = (function() {
 				name : (that._curRemote ? that._curRemote.Name : "") + "/" + that._curBranch.Name,
 				id : "orion.openGitRemote",
 				hrefCallback : function(item) {
-					return "/git/git-log.html?remote#" + that._curBranch.RemoteLocation + "?page=1";
+					return "/git/git-log.html#" + that._curBranch.RemoteLocation + "?page=1";
 				},
 				visibleWhen : function(item) {
 					return item.type === "gitRemote";

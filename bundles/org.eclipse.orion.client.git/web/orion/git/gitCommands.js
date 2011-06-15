@@ -318,7 +318,7 @@ var exports = {};
 			id : "eclipse.openGitLog",
 			hrefCallback : function(item) {
 				if (item.Type === "RemoteTrackingBranch")
-					return "/git/git-log.html?remote#" + item.Location + "?page=1";
+					return "/git/git-log.html#" + item.Location + "?page=1";
 				return "/git/git-log.html#" + item.CommitLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
@@ -520,7 +520,7 @@ var exports = {};
 		commandService.addCommand(mergeCommand, "object");
 		
 		var pushCommand = new mCommands.Command({
-			name : "Push All Outgoing Commits",
+			name : "Push All",
 			image : "/git/images/push.gif",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
@@ -544,12 +544,65 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				return explorer.isRoot || (item.Type === "Branch" && item.Current);
+				return item.RepositoryPath==="" || (item.Type === "Branch" && item.Current);
 			}
 		});
 	
 		commandService.addCommand(pushCommand, "dom");
 		commandService.addCommand(pushCommand, "object");
+		
+		var switchToRemote = new mCommands.Command({
+			name : "Switch to Remote",
+			id : "eclipse.orion.git.switchToRemote",
+			hrefCallback : function(item) {
+				return "/git/git-log.html#" + item.toRef.RemoteLocation + "?page=1";
+			},
+			visibleWhen : function(item) {
+				return item.toRef != null && item.toRef.Type === "Branch" && item.toRef.Current;
+			}
+		});
+	
+		commandService.addCommand(switchToRemote, "dom");
+		
+		var switchToCurrentLocal = new mCommands.Command({
+			name : "Switch to Current Local",
+			id : "eclipse.orion.git.switchToCurrentLocal",
+			hrefCallback : function(item) {
+				var clientDeferred = new dojo.Deferred();
+				dojo.xhrGet({
+					url : item.CloneLocation,
+					headers : {
+						"Orion-Version" : "1"
+					},
+					handleAs : "json",
+					timeout : 5000,
+					load : function(clone, secondArg) {
+						dojo.xhrGet({
+							url : clone.Children[0].BranchLocation,
+							headers : {
+								"Orion-Version" : "1"
+							},
+							handleAs : "json",
+							timeout : 5000,
+							load : function(branches, secondArg) {
+								dojo.forEach(branches.Children, function(branch, i) {
+									if (branch.Current == true){
+										clientDeferred.callback("/git/git-log.html#" + branch.CommitLocation + "?page=1");
+										return;
+									}
+								});
+							}
+						});
+					}
+				});
+				return clientDeferred;
+			},
+			visibleWhen : function(item) {
+				return item.Type === "RemoteTrackingBranch";
+			}
+		});
+	
+		commandService.addCommand(switchToCurrentLocal, "dom");
 		
 		var pushToCommand = new mCommands.Command({
 			name : "Push to...",
