@@ -18,6 +18,7 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'tex
  *     title: string,						//title of window ("Git Credentials" used if not provided)
  *     func: function,						//callback function
  *     serviceRegistry: serviceRegistry,	//to obtain ssh service that provides known hosts
+ *     errordata: json						//detailed information about failure returned by the server
  *     username: boolean,					//ask for username (enabled by default if nothing is enabled)
  *     password: boolean,					//ask for password (enabled by default if nothing is enabled)
  *     privatekey: boolean,					//ask for private key
@@ -55,6 +56,7 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 	},
 	postCreate: function() {
 		this.inherited(arguments);
+		var self = this;
 		
 		if(!this.options.username){
 			dojo.style(this.gitSshUsernameRow, "display", "none");
@@ -68,9 +70,13 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 		if(!this.options.passphrase){
 			dojo.style(this.gitPassphraseRow, "display", "none");
 		}
-		if(this.options.url){
+		if(this.options.errordata && this.options.errordata.Url){
 			dojo.style(this.gitCredentialsLabel, "display", "block");
-			this.url.innerHTML = this.options.url;
+			this.url.innerHTML = this.options.errordata.Url;
+		}
+		if(this.options.errordata && this.options.errordata.User){
+			 this.gitSshUsername.value = this.options.errordata.User;
+			 setTimeout(function () { self.gitSshPassword.focus(); }, 400);
 		}
 	},
 	execute: function() {

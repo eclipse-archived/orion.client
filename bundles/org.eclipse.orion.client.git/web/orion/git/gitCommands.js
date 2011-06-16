@@ -98,12 +98,12 @@ var exports = {};
 			});
 		}
 	};
-	exports.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title, gitUrl){
+	exports.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title){
 					var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
 								title: title,
-								url: gitUrl,
 								serviceRegistry: serviceRegistry,
-								func: func
+								func: func,
+								errordata: options.errordata
 							});		
 					credentialsDialog.startup();
 					credentialsDialog.show();
@@ -125,7 +125,7 @@ var exports = {};
 		return def;
 	};
 	
-	exports.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee, title, gitUrl){
+	exports.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee, title){
 		if(jsonData.Running==false){
 			if(jsonData.Result && jsonData.Result.HttpCode==403){
 				if(jsonData.Result.ErrorData && jsonData.Result.ErrorData.HostKey){
@@ -133,7 +133,10 @@ var exports = {};
 					return;
 				}
 			} else if (jsonData.Result && jsonData.Result.HttpCode==401){
-				dojo.hitch(this, exports.handleSshAuthenticationError)(serviceRegistry, jsonData.Result.ErrorData, options, callee, title, gitUrl);
+				if(jsonData.Result.ErrorData){
+					options.errordata = jsonData.Result.ErrorData;
+				}
+				dojo.hitch(this, exports.handleSshAuthenticationError)(serviceRegistry, jsonData.Result.ErrorData, options, callee, title);
 				return;
 			}
 			
@@ -868,7 +871,7 @@ var exports = {};
 																if(explorer.redisplayClonesList){
 																	dojo.hitch(explorer, explorer.redisplayClonesList)();
 																}
-															}, func, "Clone Git Repository", gitUrl);
+															}, func, "Clone Git Repository");
 												});
 										});
 									});
