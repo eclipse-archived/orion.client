@@ -242,7 +242,7 @@ exports.GitClonesRenderer = (function(){
 				if (item.Current)
 					link.style.fontWeight = "bold";
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				dojo.create("img", {src: "/git/images/branch.gif"}, link, "first");
+				dojo.create("img", {src: "/git/images/branch.gif", style: "vertical-align: middle; margin-right: 4px"}, link, "first");
 				
 			} else if (item.Type === "Remote"){
 				col = document.createElement('td');
@@ -260,7 +260,7 @@ exports.GitClonesRenderer = (function(){
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 								
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				dojo.create("img", {src: "/git/images/branch.gif"}, link, "first");
+				dojo.create("img", {src: "/git/images/branch.gif", style: "vertical-align: middle; margin-right: 4px"}, link, "first");
 			}	
 			return col;
 		case 1:
