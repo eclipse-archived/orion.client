@@ -275,6 +275,7 @@ orion.textview.UndoStack = (function() {
 		 * @see #endCompoundChange
 		 */
 		startCompoundChange: function() {
+			this._commitUndo();
 			var change = new CompoundChange(this.view.getSelection(), this.view.getCaretOffset());
 			this.add(change);
 			this.compoundChange = change;

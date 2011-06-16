@@ -24,10 +24,10 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	// BEGIN TOP BANNER FRAGMENT
 	var topHTMLFragment =
 	// a table?!!?  Yes, you can't mix CSS float right and absolutes to pin the bottom.
-	'<table style="border-spacing: 0px; margin: 0; padding: 0; border-collapse: collapse; width: 100%;">' +
+	'<table style="border: 2px solid white; margin: 0; padding: 0; border-collapse: collapse; width: 100%;">' +
 	// Row 1:  Logo + page title + primary nav links
 		'<tr class="topRowBanner" id="bannerRow1">' +
-			'<td rowspan=3 style="padding-top: 12px; padding-bottom: 12px; padding-left: 8px; width: 124px"><a id="home" href="/index.html"><img class="toolbarLabel" src="/images/orion.png" alt="Orion Logo" align="top"></a></td>' +
+			'<td rowspan=3 style="padding-top: 12px; padding-bottom: 12px; padding-left: 8px; width: 124px"><a id="home" href="/index.html"><img class="toolbarLabel" src="/images/orion.gif" alt="Orion Logo" align="top"></a></td>' +
 			'<td class="leftGlobalToolbar" style="padding-top: 16px">' +
 				'<span id="pageTitle" class="pageTitle"></span>' +
 			'</td>' + 
@@ -48,7 +48,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	// Row 3:  Status on left, global commands, search, user, etc. on right
 		'<tr class="topRowBanner" id="bannerRow3">' +
 			'<td colspan=2 style="height: 16px; text-align: left">' +
-				'<span id="statusPane"></span>' +
+				'<span id="statusPane" style="color: #5a5a5a;"></span>' +
 				'<span id="notifications"></span>' +
 			'</td>' +
 		'</tr>' +

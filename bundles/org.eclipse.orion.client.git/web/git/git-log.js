@@ -142,6 +142,9 @@ function loadResource(fileServiceReference, navigator){
 								navigator.loadCommitsList(dojo.hash(), resource);
 							});
 						});
+					},
+					error : function(error, ioArgs){
+						navigator.loadCommitsList(dojo.hash(), resource);
 					}
 				});
 			} else {

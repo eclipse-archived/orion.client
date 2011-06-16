@@ -321,7 +321,7 @@ var exports = {};
 			id : "eclipse.openGitLog",
 			hrefCallback : function(item) {
 				if (item.Type === "RemoteTrackingBranch")
-					return "/git/git-log.html?remote#" + item.Location + "?page=1";
+					return "/git/git-log.html#" + item.Location + "?page=1";
 				return "/git/git-log.html#" + item.CommitLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
@@ -568,10 +568,37 @@ var exports = {};
 		commandService.addCommand(switchToRemote, "dom");
 		
 		var switchToCurrentLocal = new mCommands.Command({
-			name : "Switch to HEAD",
+			name : "Switch to Current Local",
 			id : "eclipse.orion.git.switchToCurrentLocal",
 			hrefCallback : function(item) {
-				return "/git/git-log.html#" + item.HeadLocation + "?page=1";
+				var clientDeferred = new dojo.Deferred();
+				dojo.xhrGet({
+					url : item.CloneLocation,
+					headers : {
+						"Orion-Version" : "1"
+					},
+					handleAs : "json",
+					timeout : 5000,
+					load : function(clone, secondArg) {
+						dojo.xhrGet({
+							url : clone.Children[0].BranchLocation,
+							headers : {
+								"Orion-Version" : "1"
+							},
+							handleAs : "json",
+							timeout : 5000,
+							load : function(branches, secondArg) {
+								dojo.forEach(branches.Children, function(branch, i) {
+									if (branch.Current == true){
+										clientDeferred.callback("/git/git-log.html#" + branch.CommitLocation + "?page=1");
+										return;
+									}
+								});
+							}
+						});
+					}
+				});
+				return clientDeferred;
 			},
 			visibleWhen : function(item) {
 				return item.Type === "RemoteTrackingBranch";
@@ -690,7 +717,8 @@ var exports = {};
 	
 	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack , cmdBaseNumber ,logNavigator, remoteNavigator, logPath) {
 		var fetchCommand = new mCommands.Command({
-			name : "Fetch",
+			name : "Fetch latest commits",
+			tooltip : "Fetch latest commits",
 			image : "/git/images/fetch.gif",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
@@ -747,7 +775,7 @@ var exports = {};
 		commandService.registerCommandContribution("eclipse.orion.git.fetch", cmdBaseNumber+1);	
 		
 		var mergeCommand = new mCommands.Command({
-			name : "Merge",
+			name : "Merge into local",
 			image : "/git/images/merge.gif",
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
@@ -814,7 +842,7 @@ var exports = {};
 		commandService.registerCommandContribution("eclipse.orion.git.merge", cmdBaseNumber+2);	
 		
 		var pushCommand = new mCommands.Command({
-			name : "Push",
+			name : "Push into remote",
 			image : "/git/images/push.gif",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {

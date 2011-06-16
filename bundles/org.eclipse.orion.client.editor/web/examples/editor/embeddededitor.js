@@ -18,7 +18,10 @@ dojo.addOnLoad(function(){
 	var textViewFactory = function() {
 		return new orion.textview.TextView({
 			parent: editorDomNode,
-			stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css", "/examples/editor/htmlStyles.css"],
+			stylesheet: [ "../../orion/textview/textview.css",
+							"../../orion/textview/rulers.css", 
+							"../textview/textstyler.css",
+							"htmlStyles.css" ],
 			tabSize: 4
 		});
 	};
@@ -62,7 +65,7 @@ dojo.addOnLoad(function(){
 		}
 	};
 	
-	var annotationFactory = new orion.editor.AnnotationFactory();
+	var annotationFactory = new orion.editor.AnnotationFactory("images/problem.gif");
 
 	function save(editor) {
 		editor.onInputChange(null, null, null, true);

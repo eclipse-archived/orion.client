@@ -406,7 +406,7 @@ exports.setUpEditor = function(isReadOnly){
 			}
 		};
 	
-		var annotationFactory = new mEditorFeatures.AnnotationFactory();
+		var annotationFactory = new mEditorFeatures.AnnotationFactory("/images/problem.gif");
 		
 		var editor = new mEditor.Editor({
 			textViewFactory: textViewFactory,

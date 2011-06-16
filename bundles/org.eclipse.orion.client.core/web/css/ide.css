@@ -156,7 +156,7 @@ a:hover {
 
 .landingHeading {
 	font-size: 2.0em;
-	color: #404040;
+	color: #666666;
 	padding-bottom: 8px;
 }
 
@@ -194,26 +194,28 @@ a:hover {
 }
 
 .auxpane {
+	border-left: 2px solid white;
     padding-left: 32px;
     padding-top: 20px;
-    background: #EDEDED;
+    background: #ededed;
     overflow-x: auto;
 }
 
 .nihilo .dijitSplitterV .dijitSplitterThumb {	
-	background: #c5c5c5;
+	background: #dddddd;
 }
 
 .nihilo .dijitSplitterV {
-	background: #c5c5c5;
+	background: #dddddd;
+	border-right: 1px solid #bfbfbf;
 }
 
 .nihilo .dijitSplitterH .dijitSplitterThumb {	
-	background: #c5c5c5;
+	background: #dddddd;
 }
 
 .nihilo .dijitSplitterH {
-	background: #c5c5c5;
+	background: #dddddd;
 }
 
 .nihilo .dijitDialogTitleBar {
@@ -242,7 +244,6 @@ a:hover {
 	cursor: pointer;
 	background: #ebebeb;
 	height: 2em;
-	border-top: 1px solid #dbdbdb
 }
 
 .help {
@@ -253,32 +254,30 @@ a:hover {
 }
 
 .toolbar {
-	background: #c5c5c5;
 	border: 0px;
 	padding: 0px;
 	margin: 0px;
 	overflow: hidden; /* works around a "mystery pixels" problem in IE, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339302 */
 	cursor: pointer;
 	font-size: 0.9em;
-	color: #5a5a5a;
-	border-bottom: 1px solid #dbdbdb;
-	min-height: 108px; 
+	min-height: 112px; 
 }
 
 .pageTitle {
 	font-size: 12pt;
 	vertical-align: top;
+	color: #666666;
 }
 
 .footer {
 	text-align: center;
 	width: 100%;
-	background: #ebebeb;
+	background: #f5f5f5;
 	border: 0px;
 	padding: 0px;
 	cursor: pointer;
 	font-size: 0.9em;
-	color: #05386B;
+	color: #333333;
 	min-height: 2.5em; 
 	border-top: 1px solid #dbdbdb
 }
@@ -415,7 +414,7 @@ a:hover {
 }
 
 .checkedRow {
-	background-color: #FFFFCC !important;
+	background-color: #faf3c7 !important;
 }
 
 .testResult {
@@ -454,7 +453,7 @@ a:hover {
 }
 
 .darkTreeTableRow {
-	background-color: #f8f8ff;
+	background-color: #f7f7f7;
 }
 
 .testNavTreetable {
