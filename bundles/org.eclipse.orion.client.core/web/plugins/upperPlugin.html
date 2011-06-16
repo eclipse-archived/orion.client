@@ -6,15 +6,17 @@
 	<script>
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("orion.edit.command", {
+			var serviceImpl = {
 				run : function(text) {
 					return text.toUpperCase();
 				}
-			}, {
+			};
+			var serviceProps = {
 				name : "UPPERCASE",
 				img : "/images/gear.gif",
 				key : [ "u", true ]
-			});
+			};
+			provider.registerServiceProvider("orion.edit.command", serviceImpl, serviceProps);
 			provider.connect();
 		};
 	</script>
