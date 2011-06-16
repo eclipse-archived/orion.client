@@ -65,7 +65,6 @@
 
 .nihilo dijitButtonHover, .nihilo .dijitButtonHover .dijitButtonNode, .nihilo .dijitButtonNodeHover, .nihilo .dijitToggleButtonHover .dijitButtonNode, .nihilo .dijitDropDownButtonHover .dijitButtonNode, .nihilo .dijitButtonContentsHover, .nihilo .dijitUpArrowButtonHover, .nihilo .dijitDownArrowButtonHover {
     background: #e3e3e3;
-    border: 1px solid #9a9a9a;
     color: black;
 }
 .nihilo .dijitButtonActive, .nihilo .dijitButtonActive .dijitButtonNode, .nihilo .dijitToggleButtonActive .dijitButtonNode, .nihilo .dijitDropDownButtonActive .dijitButtonNode, .nihilo .dijitComboButtonActive .dijitButtonContents, .nihilo .dijitStackController .dijitToggleButtonChecked .dijitButtonNode {
