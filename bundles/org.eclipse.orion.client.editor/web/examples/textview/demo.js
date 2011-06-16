@@ -138,7 +138,7 @@ function(mKeyBinding, mTextModel, mTextView, mRulers, mUndoStack, mTextStyler) {
 	
 	function createJavaScriptSample() {
 		checkView();
-		var file =  getFile("/orion/textview/textview.js");
+		var file =  getFile("/orion/textview/textView.js");
 		if (styler) {
 			styler.destroy();
 			styler = null;
