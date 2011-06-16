@@ -134,7 +134,7 @@ a:hover {
 .paneHeading {
 	font-size: 1.2em;
 	font-weight: bold;
-	color: #404040;;
+	color: #666666;
 	vertical-align: middle;
 }
 
@@ -145,7 +145,7 @@ a:hover {
 }
 
 .paneHeadingContainer {
-	border-bottom: 1px dotted #6d6d6d;
+	border-bottom: 1px dotted #bfbfbf;
 	height: 30px;
 }
 
