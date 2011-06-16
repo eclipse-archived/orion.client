@@ -16,8 +16,8 @@
 	vertical-align: middle;
 	padding: 2px;
 	cursor: pointer;
-    background-color: #ffe99d;
-    border: 1px solid #eba600;
+    background-color: #ffeecc;
+    border: 1px solid #ffcc66;
     border-radius: 3px;
 }
 
@@ -59,16 +59,16 @@
 }
 
 .nihilo .dijitMenuPassive .dijitMenuItemHover, .nihilo .dijitMenuItemSelected {
-    background-color: #ffe99d;
+    background-color: #e3e3e3;
     color: black;
 }
 
 .nihilo dijitButtonHover, .nihilo .dijitButtonHover .dijitButtonNode, .nihilo .dijitButtonNodeHover, .nihilo .dijitToggleButtonHover .dijitButtonNode, .nihilo .dijitDropDownButtonHover .dijitButtonNode, .nihilo .dijitButtonContentsHover, .nihilo .dijitUpArrowButtonHover, .nihilo .dijitDownArrowButtonHover {
-    background: #ffe99d;
-    border: 1px solid #eba600;
+    background: #e3e3e3;
+    border: 1px solid #9a9a9a;
     color: black;
 }
 .nihilo .dijitButtonActive, .nihilo .dijitButtonActive .dijitButtonNode, .nihilo .dijitToggleButtonActive .dijitButtonNode, .nihilo .dijitDropDownButtonActive .dijitButtonNode, .nihilo .dijitComboButtonActive .dijitButtonContents, .nihilo .dijitStackController .dijitToggleButtonChecked .dijitButtonNode {
     border: 1px solid #eba600;
-    background: #ffe99d;
+    background: #e3e3e3;
 }
