@@ -246,6 +246,7 @@ exports.ExplorerRenderer = (function() {
 				var checkColumn = document.createElement('td');
 				dojo.addClass(checkColumn, "secondaryColumn");
 				var check = document.createElement('input');
+				dojo.style(check, "verticalAlign", "middle");
 				check.type = "checkbox";
 				check.id = tableRow.id+"selectedState";
 				dojo.addClass(check, "selectionCheckmark");
@@ -254,7 +255,7 @@ exports.ExplorerRenderer = (function() {
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
 					this._storeSelections();
-					if(this.explorer.selection)
+					if (this.explorer.selection)
 						this.explorer.selection.setSelections(this.getSelected());		
 				}));
 				return checkColumn;
@@ -346,8 +347,8 @@ exports.ExplorerRenderer = (function() {
 		},
 		
 		getExpandImage: function(tableRow, placeHolder, decorateImage){
-			var expandImg = dojo.create("img", {src: this._collapseImgSrc, name: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
-			dojo.create("img", {src: decorateImage ? decorateImage : "/images/folder.gif"}, placeHolder, "last");
+			var expandImg = dojo.create("img", {style: "vertical-align: middle;", src: this._collapseImgSrc, name: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
+			dojo.create("img", {style: "vertical-align: middle; margin-right: 4px", src: decorateImage ? decorateImage : "/images/folder.gif"}, placeHolder, "last");
 			expandImg.onclick = dojo.hitch(this, function(evt) {
 				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImgSrc, this._collapseImgSrc);
 				var expanded = this.tableTree.isExpanded(tableRow.id);

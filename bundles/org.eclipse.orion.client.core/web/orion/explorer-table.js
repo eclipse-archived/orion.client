@@ -77,14 +77,14 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		switch(col_no){
 		case 0:
-			var col, div, link;
+			var col, span, link;
 			if (item.Directory) {
 				col = document.createElement('td');
 				var nameId =  tableRow.id + "__expand";
-				div = dojo.create("div", null, col, "only");
+				span = dojo.create("span", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div);
-				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameColumn", href: "#" + item.ChildrenLocation}, div, "last");
+				this.getExpandImage(tableRow, span);
+				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameColumn", href: "#" + item.ChildrenLocation}, span, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			} else {
 				col = document.createElement('td');
@@ -103,10 +103,10 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 					}
 				}
 				
-				div = dojo.create("div", null, col, "only");
-				dojo.create("img", {src: "/images/none.png"}, div, "last");
-				dojo.create("img", {src: "/images/file.gif"}, div, "last");
-				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, div, "last");
+				span = dojo.create("span", null, col, "only");
+				dojo.create("img", {src: "/images/none.png", style: "vertical-align: middle"}, span, "last");
+				dojo.create("img", {src: "/images/file.gif", style: "vertical-align: middle; margin-right: 4px"}, span, "last");
+				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			}
 			return col;
