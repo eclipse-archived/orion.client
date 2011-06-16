@@ -127,26 +127,29 @@ function loadResource(fileServiceReference, navigator){
 					initTitleBar(fileClient, navigator, resource);
 				});
 
-				dojo.xhrGet({
-					url : resource.RemoteLocation,
-					headers : {
-						"Orion-Version" : "1"
-					},
-					handleAs : "json",
-					timeout : 5000,
-					load : function(remoteJsonData, secondArg) {
-						serviceRegistry.getService("orion.git.provider").then(function(gitService){
-							gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
-								navigator.renderer.setIncomingCommits([]);
-								navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
-								navigator.loadCommitsList(dojo.hash(), resource);
+				if (resource.RemoteLocation)
+					dojo.xhrGet({
+						url : resource.RemoteLocation,
+						headers : {
+							"Orion-Version" : "1"
+						},
+						handleAs : "json",
+						timeout : 5000,
+						load : function(remoteJsonData, secondArg) {
+							serviceRegistry.getService("orion.git.provider").then(function(gitService){
+								gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
+									navigator.renderer.setIncomingCommits([]);
+									navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
+									navigator.loadCommitsList(dojo.hash(), resource);
+								});
 							});
-						});
-					},
-					error : function(error, ioArgs){
-						navigator.loadCommitsList(dojo.hash(), resource);
-					}
-				});
+						},
+						error : function(error, ioArgs){
+							navigator.loadCommitsList(dojo.hash(), resource);
+						}
+					});
+				else
+					navigator.loadCommitsList(dojo.hash(), resource);
 			} else {
 				navigator.loadCommitsList(dojo.hash(), {});
 			}
