@@ -588,7 +588,7 @@ orion.GitStatusController = (function() {
 		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null, {checkbox: false, minimal: true}, this._remoteTableRenderer.getLogContentId());    
 				dojo.place(document.createTextNode(""), this._remoteTableRenderer.getLogContentId(), "only");
 				// refresh the commit list for the remote
-				var path = this._curBranch.RemoteLocation + "?page=1";
+				var path = this._curBranch.RemoteLocation + "?page=1&pageSize=5";
 				dojo.xhrGet({
 					url : path,
 					headers : {
@@ -613,7 +613,7 @@ orion.GitStatusController = (function() {
 			} else {
 		        this._gitCommitNavigatorLog = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null, {checkbox: false, minimal: true},this._logTableRenderer.getLogContentId());
 		        dojo.place(document.createTextNode(""), this._logTableRenderer.getLogContentId(), "only");
-				var path = that._curBranch.CommitLocation + "?page=1";
+				var path = that._curBranch.CommitLocation + "?page=1&pageSize=5";
 				dojo.xhrGet({
 					url : path,
 					headers : {
