@@ -155,8 +155,11 @@ function loadResource(fileServiceReference, navigator){
 			}
 		},
 		error : function(error, ioArgs) {
-			mAuth.handleGetAuthenticationError(this, ioArgs);
-			navigator.loadCommitsList(dojo.hash(), error);
+			if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
+				mAuth.handleGetAuthenticationError(this, ioArgs);
+			}else{
+				navigator.loadCommitsList(dojo.hash(), error);	
+			}
 		}
 	});
 }
