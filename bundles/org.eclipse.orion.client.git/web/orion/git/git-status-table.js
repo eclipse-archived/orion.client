@@ -606,8 +606,11 @@ orion.GitStatusController = (function() {
 						});
 					},
 					error : function(error, ioArgs) {
-						that._gitCommitNavigatorRem.loadCommitsList(path, error);
-						//mAuth.handleGetAuthenticationError(this, ioArgs);
+						if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
+							mAuth.handleGetAuthenticationError(this, ioArgs);
+						}else{
+							that._gitCommitNavigatorRem.loadCommitsList(path, error);	
+						}
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
 				});
@@ -652,9 +655,12 @@ orion.GitStatusController = (function() {
 								});
 							},
 							error : function(error, ioArgs) {
-								//mAuth.handleGetAuthenticationError(this, ioArgs);
 								console.error("HTTP status code: ", ioArgs.xhr.status);
-								that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
+								if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
+									mAuth.handleGetAuthenticationError(this, ioArgs);
+								}else{
+									that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
+								}
 							}
 						});
 					}
