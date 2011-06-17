@@ -109,7 +109,8 @@ define(['dojo', 'orion/util'], function(dojo, mUtil) {
 					this._createLink(name, href, items);
 				}
 				dojo.place(items, this._parent, "only");
-			} else if (resource.title.indexOf(".html") === resource.title.length - 5) {
+			} else if (resource.title.indexOf(".html") === resource.title.length - 5 ||
+				resource.title.indexOf(".htm") === resource.title.length - 4) {
 				items = dojo.create("div");
 				var pattern = /id=['"]\S*["']/gi; // experimental: |<head[^>]*|<body[^>]*|<script[^>]*/gi;
 				var result;

@@ -372,7 +372,7 @@ orion.InlineCompareRenderer = (function() {
 			//dojo.addClass(titleDiv, 'auxpane');
 			titleDiv.attr('content', titleTable);
 			
-			var viewerDiv = new dijit.layout.ContentPane({class:"mainpane" ,id : "inline-compare-viewer" ,splitter:false ,region: "center", style:"width:100%;height:100%;overflow: hidden;"});
+			var viewerDiv = new dijit.layout.ContentPane({"class":"mainpane" ,id : "inline-compare-viewer" ,splitter:false ,region: "center", style:"width:100%;height:100%;overflow: hidden;"});
 			dojo.addClass(viewerDiv, 'mainpane');
 			
 			var parent = dijit.byId(this._parentId);

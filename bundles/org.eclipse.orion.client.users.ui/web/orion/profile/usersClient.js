@@ -8,86 +8,89 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/** @namespace The global container for eclipse APIs. */
+/*global define */
 
 define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 
-var eclipse = eclipse || {};
-
-eclipse.UsersClient = (
-		function(){
-			function UsersClient(serviceRegistry, pluginRegistry) {
-				this.serviceRegistry = serviceRegistry;
-			}
+	/**
+	 * Creates a new user service. A user service should be obtained by getting
+	 * the <tt>orion.core.users</tt> service from the service registry rather than 
+	 * calling this constructor. This constructor is intended for service registry 
+	 * initialization code.
+	 * @class The user service keeps track of the current Orion user.
+	 * @name orion.profile.usersClient.UsersClient
+	 */
+	function UsersClient(serviceRegistry, pluginRegistry) {
+		this.serviceRegistry = serviceRegistry;
+	}
 			
-			UsersClient.prototype = /**@lends eclipse.UsersClient.prototype */
-			{
-					getUserInfo: function(userURI, onLoad){
-						return this._doServiceCall("getUserInfo", arguments);
-					},
-					getUsersList : function(onLoad) {
-						return this._doServiceCall("getUsersList", arguments);
-					},
-					deleteUser : function(userURI, onLoad) {
-						return this._doServiceCall("deleteUser", arguments);
-					},
-					createUser : function(userName, password, onLoad, onError) {
-						return this._doServiceCall("createUser", arguments);
-					},
-					updateUserInfo: function(userUri, data, onLoad){
-						return this._doServiceCall("updateUserInfo", arguments);
-					},
-					initProfile: function(userURI, pluginsEventName, dataEventName){
-						return this._doServiceCall("initProfile", arguments);
-					},
-					fire: function(action, url, jsonData){
-						return this._doServiceCall("fire", arguments);
-					},
-					getDivContent: function() {
-						return this._doServiceCall("getDivContent", arguments);
-					},
-
+	UsersClient.prototype = /**@lends orion.profile.usersClient.UsersClient.prototype */ {
+		getUserInfo: function(userURI, onLoad){
+			return this._doServiceCall("getUserInfo", arguments);
+		},
+		getUsersList : function(onLoad) {
+			return this._doServiceCall("getUsersList", arguments);
+		},
+		deleteUser : function(userURI, onLoad) {
+			return this._doServiceCall("deleteUser", arguments);
+		},
+		createUser : function(userName, password, onLoad, onError) {
+			return this._doServiceCall("createUser", arguments);
+		},
+		updateUserInfo: function(userUri, data, onLoad){
+			return this._doServiceCall("updateUserInfo", arguments);
+		},
+		initProfile: function(userURI, pluginsEventName, dataEventName){
+			return this._doServiceCall("initProfile", arguments);
+		},
+		fire: function(action, url, jsonData){
+			return this._doServiceCall("fire", arguments);
+		},
+		getDivContent: function() {
+			return this._doServiceCall("getDivContent", arguments);
+		},
 			
-				/**
-				 * This helper method implements invocation of the service call,
-				 * with retry on authentication error if needed.
-				 */
-				_doServiceCall: function(funcName, funcArgs) {
-					var clientDeferred = new dojo.Deferred();
-					this.serviceRegistry.getService("orion.core.user").then(
-						function(usersService) {
-							usersService[funcName].apply(usersService, funcArgs).then(
-								//on success, just forward the result to the client
-								function(result) {
-									clientDeferred.callback(result);
-								},
-								//on failure we might need to retry
-								function(error) {
-									if (error.status === 401 || error.status===403) {
-										mAuth.handleAuthenticationError(error, function(message) {
-											//try again
-											usersService[funcName].apply(usersService, funcArgs).then(
-												function(result) {
-													clientDeferred.callback(result);
-												},
-												function(error) {
-													clientDeferred.errback(error);
-												}
-											);
-										});
-									} else {
-										//forward other errors to client
-										clientDeferred.errback(error);
-									}
-								}
-							);
+		/**
+		 * This helper method implements invocation of the service call,
+		 * with retry on authentication error if needed.
+		 * @private
+		 */
+		_doServiceCall: function(funcName, funcArgs) {
+			var clientDeferred = new dojo.Deferred();
+			this.serviceRegistry.getService("orion.core.user").then(
+				function(usersService) {
+					usersService[funcName].apply(usersService, funcArgs).then(
+						//on success, just forward the result to the client
+						function(result) {
+							clientDeferred.callback(result);
+						},
+						//on failure we might need to retry
+						function(error) {
+							if (error.status === 401 || error.status===403) {
+								mAuth.handleAuthenticationError(error, function(message) {
+									//try again
+									usersService[funcName].apply(usersService, funcArgs).then(
+										function(result) {
+											clientDeferred.callback(result);
+										},
+										function(error) {
+											clientDeferred.errback(error);
+										}
+									);
+								});
+							} else {
+								//forward other errors to client
+								clientDeferred.errback(error);
+							}
 						}
 					);
-					return clientDeferred;
 				}
-			};
+			);
+			return clientDeferred;
+		}
+	};
+	UsersClient.prototype.constructor = UsersClient;
 			
-			return UsersClient;
-		}());
-return eclipse;	
+	//return module exports
+	return {UsersClient: UsersClient};
 });

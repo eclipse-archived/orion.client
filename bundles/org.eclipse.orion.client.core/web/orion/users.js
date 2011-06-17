@@ -12,13 +12,7 @@
 
 define([], function(){
 
-	/**
-	 * Creates a new user service. A user service should be obtained from
-	 * the service registry rather than calling this constructor. This constructor
-	 * is intended for service registry initialization code.
-	 * @class The user service keeps track of the current Orion user.
-	 * @name orion.users.UserService
-	 */
+	// TODO this is obsolete and should be removed. See bug 349080
 	function UserService(serviceRegistry) {
 		this._serviceRegistry = serviceRegistry;
 		this._serviceRegistration = serviceRegistry.registerService("IUsers", this);

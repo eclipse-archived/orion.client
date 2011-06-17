@@ -34,7 +34,7 @@ window.onload = function() {
 		var serviceProperties = {
 			name: "Orion web editor",
 			href: "/edit/edit.html#${Location}",
-			validationProperties: {Name: "*.(css|js|html|txt|xml|java)"}
+			validationProperties: {Name: "*.(css|js|htm|html|txt|xml|java)"}
 		};
 		provider.registerServiceProvider("orion.navigate.openWith", serviceImpl, serviceProperties);
 	}());
