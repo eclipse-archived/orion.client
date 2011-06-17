@@ -8,17 +8,24 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/*global define */
+
 define(['orion/compare/compareUtils'], function(mCompareUtils) {
 var orion = orion || {};
 
 orion.CompareRuler = (function() {
+	/**
+	 * Creates a new ruler for the compare editor.
+	 * @class The compare ruler is used by the compare editor to render trim around the editor.
+	 * @name orion.compare.rulers.CompareRuler
+	 */
 	function CompareRuler (rulerLocation, rulerOverview, rulerStyle) {
 		this._location = rulerLocation || "left";
 		this._overview = rulerOverview || "page";
 		this._rulerStyle = rulerStyle;
 		this._editor = null;
 	}
-	CompareRuler.prototype = {
+	CompareRuler.prototype = /** @lends orion.compare.rulers.CompareRuler.prototype */ {
 		setView: function (editor) {
 			if (this._onModelChanged && this._editor) {
 				this._editor.removeEventListener("ModelChanged", this, this._onModelChanged); 
@@ -39,6 +46,11 @@ orion.CompareRuler = (function() {
 }());
 
 orion.LineNumberCompareRuler = (function() {
+	/**
+	 * Creates a new line number ruler for the compare editor.
+	 * @class The line number ruler is used by the compare editor to render line numbers next to the editor
+	 * @name orion.compare.rulers.LineNumberCompareRuler
+	 */
 	function LineNumberCompareRuler (mapperColumnIndex , rulerLocation, rulerStyle, oddStyle, evenStyle) {
 		orion.CompareRuler.call(this, rulerLocation, "page", rulerStyle);
 		this._oddStyle = oddStyle || {style: {backgroundColor: "white"}};
@@ -66,7 +78,7 @@ orion.LineNumberCompareRuler = (function() {
 				}
 				return  realIndex + 1;
 			} 
-			return lineIndex + 1;;
+			return lineIndex + 1;
 		}
 	};
 	LineNumberCompareRuler.prototype._onModelChanged = function(e) {
