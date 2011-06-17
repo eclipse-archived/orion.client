@@ -89,20 +89,15 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 	}
 	
 	/**
-	 * Fails if the {@link eclipse.StyleRange[]} ranges returned by running the styler on the line number
-	 * <tt>lineIndex</tt> do not exactly match the expected result given in <tt>scopeRegions</tt>.
-	 * @param {Array} scopeRegions Each element of scopeRegions is an Array with the elements:
-	 *   [{Number} start, {Number} end, {String} scope, {String} text?]
-	 *  where start and end are line-relative indices, and the last element (text) is optional.
+	 * Helper
+	 * @param {orion.textview.StyleRange[]} styleRanges
+	 * @param {Array} scopeRegions
 	 */
-	function assertLineScope(view, styler, lineIndex, scopeRegions) {
+	function assertStylesMatchScopes(view, styler, lineIndex, styleRanges, /**Array*/ scopeRegions) {
 		var lineText = view.getModel().getLine(lineIndex);
 		var lineStart = view.getModel().getLineStart(lineIndex);
 		var lineEnd = view.getModel().getLineEnd(lineIndex);
-		var lineStyleEvent = {lineIndex: lineIndex, lineText: lineText, lineStart: lineStart, lineEnd: lineEnd};
-		view.onLineStyle(lineStyleEvent);
 		
-		var styleRanges = lineStyleEvent.ranges;
 		assert.ok(styleRanges !== null && styleRanges !== undefined, true, "lineStyleEvent.ranges exists");
 		assert.equal(styleRanges.length, scopeRegions.length, "Line " + lineIndex + ": Number of styled regions matches");
 		var ok, last;
@@ -120,13 +115,59 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 				});
 			});
 		
-		var rangeStrs = dojo.map(lineStyleEvent.ranges, function(styleRange) {
+		var rangeStrs = dojo.map(styleRanges, function(styleRange) {
 				var start = styleRange.start - lineStart,
 				    end = styleRange.end - lineStart,
 				    nicerScope = styleRange.style.styleClass.split(" ").pop().replace(/-/g, "."); // make easier to read
 				return "{start:" + start + ", end:" + end + ", scope:" + nicerScope + "}";
 			});
 		assert.ok(ok, "No StyleRange in Line " + lineIndex + " matched expected {" + last + "}. StyleRanges were [" + rangeStrs.join(",") + "]");
+	}
+	
+//	/**
+//	 * Fails if the {@link orion.textview.StyleRange[]} ranges returned by running the styler on the line number
+//	 * <tt>lineIndex</tt> do not exactly match the expected result given in <tt>scopeRegions</tt>.
+//	 * @see #assertDisplayedLineScope
+//	 */
+//	function assertLineScopeByOnLineStyle(view, styler, lineIndex, scopeRegions) {
+//		var lineText = view.getModel().getLine(lineIndex);
+//		var lineStart = view.getModel().getLineStart(lineIndex);
+//		var lineEnd = view.getModel().getLineEnd(lineIndex);
+//		var lineStyleEvent = {lineIndex: lineIndex, lineText: lineText, lineStart: lineStart, lineEnd: lineEnd};
+//		view.onLineStyle(lineStyleEvent);
+//		assertStylesMatchScopes(view, styler, lineIndex, lineStyleEvent.ranges, scopeRegions);
+//	}
+	
+	/**
+	 * Fails if the currently-displayed styles for the line at <tt>lineIndex</tt> don't match the expected <tt>scopeRegions</tt>.
+	 * WARNING: uses internal methods of TextView, may break
+	 * @param {Array} scopeRegions Each element of scopeRegions is an Array with the elements:
+	 *   [0] {Number} start Line-relative index
+	 *   [1] {Number} end Line-relative index
+	 *   [2] {String} scope
+	 *   [3] {String} text? Optional, if provided we assert that it equals the text in this region.
+	 */
+	function assertLineScope(view, styler, lineIndex, scopeRegions) {
+		var lineStart = view.getModel().getLineStart(lineIndex);
+		var lineNode = view._getLineNode(lineIndex),
+		    spans = lineNode.childNodes,
+		    charNum = 0,
+		    styleRanges = [];
+		for (var i=0; i < spans.length; i++) {
+			var child = spans[i];
+			var ignoreChars = typeof child.ignoreChars === "number" ? child.ignoreChars : 0;
+			var length = child.textContent.length - ignoreChars;
+			var styleClass = child.className;
+			if (length > 0 /*omit ignored*/ && styleClass !== "" /*omit unstyled*/) {
+				styleRanges.push({
+					start: lineStart + charNum,
+					end: lineStart + charNum + length,
+					style: { styleClass: styleClass }
+				});
+			}
+			charNum += length;
+		}
+		assertStylesMatchScopes(view, styler, lineIndex, styleRanges, scopeRegions);
 	}
 	
 	function assertDoesntHaveProps(obj /*, propNames..*/) {
@@ -1205,6 +1246,44 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		]);
 		assertLineScope(view, styler, 1, [ [0, 3, "comment.block.mylang", "bar"] ]);
 		assertLineScope(view, styler, 2, [ [0, 3, "comment.block.mylang", "baz"] ]);
+	});
+	
+	tests["test TextMateStyler - add final 'end', check redraw - Bug 349642"] = makeTest(function(view) {
+		var styler = makeStyler(view, mTestGrammars.SampleBeginEndGrammar);
+		setLines(view, [
+			"<!-- foo",
+			"bar--",
+			"baz"
+		]);
+		assertLineScope(view, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 8, "comment.block.mylang", " foo"]
+		]);
+		assertLineScope(view, styler, 1, [
+			[0, 3, "comment.block.mylang", "bar"],
+			[3, 5, "invalid.illegal.badcomment.mylang", "--"]
+		]);
+		assertLineScope(view, styler, 2, [
+			[0, 3, "comment.block.mylang", "baz"]
+		]);
+		
+		// now complete the -->
+		/*
+		<!-- foo
+		bar-->
+		baz
+		*/
+		changeLine(view, ">", 1, 5, 5);
+		// Note assertDisplayedLineScope() so we can verify redrawRange()
+		assertLineScope(view, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 8, "comment.block.mylang", " foo"]
+		]);
+		assertLineScope(view, styler, 1, [
+			[0, 3, "comment.block.mylang", "bar"],
+			[3, 6, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(view, styler, 2, []);
 	});
 	
 //	// TODO: more damage/repair of nested regions
