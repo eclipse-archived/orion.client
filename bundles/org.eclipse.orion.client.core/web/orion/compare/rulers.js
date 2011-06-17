@@ -95,6 +95,12 @@ orion.LineNumberCompareRuler = (function() {
 	return LineNumberCompareRuler;
 }());
 
+/**
+ * Creates a new compare overview ruler for the compare editor.
+ * @class The compare overview ruler is used by the compare editor to 
+ * render lines matching differences between two editors
+ * @name orion.compare.rulers.CompareOverviewRuler
+ */
 orion.CompareOverviewRuler = (function() {
 	function CompareOverviewRuler (rulerLocation, rulerStyle) {
 		orion.CompareRuler.call(this, rulerLocation, "document", rulerStyle);

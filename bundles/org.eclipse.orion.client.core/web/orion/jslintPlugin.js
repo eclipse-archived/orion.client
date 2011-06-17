@@ -19,7 +19,9 @@ window.onload = function() {
 	};
 	
 	var provider = new eclipse.PluginProvider();
-	var serviceProvider = provider.registerServiceProvider("orion.edit.validator", jsLintService);
+	var serviceProvider = provider.registerServiceProvider("orion.edit.validator", jsLintService, {
+		pattern: "\\.js$"
+	});
 	jsLintService.dispatchEvent = serviceProvider.dispatchEvent;
 	provider.connect();
 };

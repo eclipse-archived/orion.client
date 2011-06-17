@@ -808,6 +808,7 @@ orion.editor.TextMateStyler = (function() {
 		 * @param {Number} [editStart] Only used for repairing === true
 		 * @param {Number} [addedCharCount] Only used for repairing === true
 		 * @param {Number} [removedCharCount] Only used for repairing === true
+		 * @returns {Number} The end position that redrawRange should be called for.
 		 */
 		parse: function(origNode, repairing, rs, editStart, addedCharCount, removedCharCount) {
 			var model = this.textView.getModel();
@@ -832,6 +833,7 @@ orion.editor.TextMateStyler = (function() {
 			var node = origNode;
 			var matchedChildOrEnd = false;
 			var pos = rs;
+			var redrawEnd = -1;
 			while (node && (!repairing || (pos < re))) {
 				var matchInfo = this.getNextMatch(model, node, pos);
 				if (!matchInfo) {
@@ -875,6 +877,7 @@ orion.editor.TextMateStyler = (function() {
 					if (node instanceof this.BeginEndNode) {
 						if (match) {
 							matchedChildOrEnd = true;
+							redrawEnd = Math.max(redrawEnd, node.end); // if end moved up, must still redraw to its old value
 							node.setEnd(match);
 							pos = this.afterMatch(match);
 							// Matched node's end. Did we expect that?
@@ -899,18 +902,22 @@ orion.editor.TextMateStyler = (function() {
 					node = node.parent; // ascend
 				}
 				
-//				if (repairing && pos >= re && !matchedChildOrEnd) {
-//					// Reached re without matching any begin/end => initialExpected itself was removed => repair fail
-//					this.prune(origNode, initialExpected);
-//					repairing = false;
-//				}
+				if (repairing && pos >= re && !matchedChildOrEnd) {
+					// Reached re without matching any begin/end => initialExpected itself was removed => repair fail
+					this.prune(origNode, initialExpected);
+					repairing = false;
+				}
 			} // end loop
 			// TODO: do this for every node we end?
 			this.removeUnrepairedChildren(origNode, repairing, rs);
 			
 			//console.debug("parsed " + (pos - rs) + " of " + model.getCharCount + "buf");
 			this.cleanup(repairing, origNode, rs, re, eof, addedCharCount, removedCharCount);
-			return pos; // where we stopped repairing/reparsing
+			if (repairing) {
+				return Math.max(redrawEnd, pos);
+			} else {
+				return pos; // where we stopped reparsing
+			}
 		},
 		/** Helper for parse() in the repair case. To be called when ending a node, as any children that
 		 * lie in [rs,node.end] and were not repaired must've been deleted.

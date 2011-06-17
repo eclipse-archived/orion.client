@@ -3916,6 +3916,7 @@ orion.textview.TextView = (function() {
 			}
 			this._createActions();
 			this._hookEvents();
+			this._updatePage();
 		},
 		_modifyContent: function(e, updateCaret) {
 			if (this.readonly && !e._code) {
