@@ -59,12 +59,12 @@ exports.GitCommitNavigator = (function() {
 			dojo.empty(progress);
 			
 			if(treeRoot.status && treeRoot.status!=200){
-				var response = treeRoot.responseText;
+				var response = treeRoot.message;
 				try {
-					var obj = JSON.parse(response);
+					var obj = JSON.parse(treeRoot.responseText);
 					if(obj.Message){
 						response = obj.Message;
-					}
+					} 
 				} catch(error) {
 					//it is not JSON, just continue;
 				}
