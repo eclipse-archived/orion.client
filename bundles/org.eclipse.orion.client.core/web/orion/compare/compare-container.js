@@ -289,11 +289,11 @@ exports.DiffStyler = (function() {
 			//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349227 : we were using border style as the line below.Changing to back ground color and image.
 			//lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: "1px #AAAAAA solid" , borderLeft: borderStyle , borderRight: borderStyle}};
 			var backgroundColor = conflict ? "#EEB4B4" : "#DDDDDD";
-			var backgroundImg = "url('/images/compare/diff-border.png')";
+			var backgroundImg = "url('/images/diff-border.png')";
 			
 			if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex()){
 				backgroundColor = conflict ? "#F08080" : "#BBBBBB";
-				backgroundImg = "url('/images/compare/diff-border-sel.png')";
+				backgroundImg = "url('/images/diff-border-sel.png')";
 			}
 			if(lineType === "top-only") {
 				lineStyleEvent.style = {style: {backgroundImage: backgroundImg, backgroundRepeat:"repeat-x"}};
@@ -416,7 +416,7 @@ exports.CompareMergeContainer = (function() {
 		var self = this;
 		var nextDiffCommand = new mCommands.Command({
 			name : "Next Diff",
-			image : "/images/compare/next-diff.gif",
+			image : "/images/move_down.gif",
 			id: "orion.compare.nextDiff",
 			groupId: "orion.compareGroup",
 			callback : function() {
@@ -424,7 +424,7 @@ exports.CompareMergeContainer = (function() {
 		}});
 		var prevDiffCommand = new mCommands.Command({
 			name : "Previous Diff",
-			image : "/images/compare/prev-diff.gif",
+			image : "/images/move_up.gif",
 			id: "orion.compare.prevDiff",
 			groupId: "orion.compareGroup",
 			callback : function() {
@@ -432,7 +432,7 @@ exports.CompareMergeContainer = (function() {
 		}});
 		var copyToLeftCommand = new mCommands.Command({
 			name : "Copy Current Change From Right to left",
-			image : "/images/compare/copy-to-left.gif",
+			image : "/images/leftarrow.gif",
 			id: "orion.compare.copyToLeft",
 			groupId: "orion.compareGroup",
 			callback : function() {
@@ -443,10 +443,12 @@ exports.CompareMergeContainer = (function() {
 		this._commandService.addCommand(copyToLeftCommand, "dom");
 			
 		// Register command contributions
-		this._commandService.registerCommandContribution("orion.compare.prevDiff", 3, "pageActions");
-		this._commandService.registerCommandContribution("orion.compare.nextDiff", 2, "pageActions");
-		if(!this.readonly)
-			this._commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "pageActions");
+		this._commandService.registerCommandContribution("orion.compare.prevDiff", 3, "rightContainerCommands");
+		this._commandService.registerCommandContribution("orion.compare.nextDiff", 2, "rightContainerCommands");
+		if (!this.readonly) {
+			this._commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "rightContainerCommands");
+		}
+		this._commandService.renderCommands("rightContainerCommands", "dom", self, self, "image");
 	};
 	
 	CompareMergeContainer.prototype.nextDiff = function(){	

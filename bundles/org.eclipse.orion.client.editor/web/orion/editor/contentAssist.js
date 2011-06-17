@@ -214,28 +214,30 @@ orion.editor.ContentAssist = (function() {
 			});
 			
 			// Add keywords from providers registered through service registry
+			var d = new dojo.Deferred();
 			if (this.serviceRegistry) {
 				var keywordPromises = dojo.map(this.activeServiceReferences, dojo.hitch(this, function(serviceRef) {
-						return this.serviceRegistry.getService(serviceRef).then(function(service) {
-							return service.getKeywords(prefix, buffer, selection);
-						});
-					}));
-				var dl = new dojo.DeferredList(keywordPromises);
-				return dl.then(function(results) {
-					for (var i=0; i < results.length; i++) {
-						var result = results[i];
-						if (result[0]) {
-							var serviceKeywords = result[1];
-							keywords = keywords.concat(serviceKeywords);
+					return this.serviceRegistry.getService(serviceRef).then(function(service) {
+						return service.getKeywords(prefix, buffer, selection);
+					});
+				}));
+				var keywordCount = 0;
+				for (var i=0; i < keywordPromises.length; i++) {
+					keywordPromises[i].then(function(result) {
+						keywordCount++;
+						keywords = keywords.concat(result);
+						if (keywordCount === keywordPromises.length) {
+							d.resolve(keywords);
 						}
-					}
-					return keywords;
-				});
+					}, function(e) {
+						keywordCount = -1;
+						d.reject(e); 
+					});
+				}
 			} else {
-				var d = new dojo.Deferred();
-				d.callback(keywords);
-				return d;
+				d.resolve(keywords);
 			}
+			return d;
 		},
 		/**
 		 * Adds a content assist provider.
@@ -252,7 +254,7 @@ orion.editor.ContentAssist = (function() {
 }());
 
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define(['dojo', 'orion/textview/keyBinding', 'dojo/DeferredList'], function() {
+	define(['dojo', 'orion/textview/keyBinding'], function() {
 		return orion.editor;	
 	});
 }
