@@ -346,7 +346,7 @@ orion.editor.Editor = (function() {
 }());
 
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define(['dojo', 'dijit', 'orion/textview/keyBinding', 'dijit/TitlePane', 'dijit/layout/ContentPane' ], function(){
+	define(['dojo', 'orion/textview/keyBinding'], function(){
 		return orion.editor;
 	});
 }
