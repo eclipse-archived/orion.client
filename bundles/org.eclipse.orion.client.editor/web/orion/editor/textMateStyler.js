@@ -899,11 +899,11 @@ orion.editor.TextMateStyler = (function() {
 					node = node.parent; // ascend
 				}
 				
-//				if (repairing && pos >= re && !matchedChildOrEnd) {
-//					// Reached re without matching any begin/end => initialExpected itself was removed => repair fail
-//					this.prune(origNode, initialExpected);
-//					repairing = false;
-//				}
+				if (repairing && pos >= re && !matchedChildOrEnd) {
+					// Reached re without matching any begin/end => initialExpected itself was removed => repair fail
+					this.prune(origNode, initialExpected);
+					repairing = false;
+				}
 			} // end loop
 			// TODO: do this for every node we end?
 			this.removeUnrepairedChildren(origNode, repairing, rs);

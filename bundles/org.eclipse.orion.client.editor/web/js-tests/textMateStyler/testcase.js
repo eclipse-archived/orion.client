@@ -1171,6 +1171,42 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		]);
 	});
 	
+	// remove "end" token of last region incrementally -- Bug 349506
+	tests["test TextMateStyler - remove final 'end' - Bug 349506"] = makeTest(function(view) {
+		var styler = makeStyler(view, mTestGrammars.SampleBeginEndGrammar);
+		setLines(view, [
+			"<!-- foo",
+			"bar-->",
+			"baz"
+		]);
+		// sanity check
+		assertLineScope(view, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 8, "comment.block.mylang", " foo"]
+		]);
+		assertLineScope(view, styler, 1, [
+			[0, 3, "comment.block.mylang", "bar"],
+			[3, 6, "punctuation.definition.comment.mylang", "-->"]
+		]);
+		assertLineScope(view, styler, 2, []);
+		
+		// incrementally remove end token
+		/*
+		<!-- foo
+		bar
+		baz
+		*/
+		changeLine(view, "", 1, 5, 6); // bar--
+		changeLine(view, "", 1, 4, 5); // bar-
+		changeLine(view, "", 1, 3, 4); // bar
+		assertLineScope(view, styler, 0, [
+			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
+			[4, 8, "comment.block.mylang", " foo"]
+		]);
+		assertLineScope(view, styler, 1, [ [0, 3, "comment.block.mylang", "bar"] ]);
+		assertLineScope(view, styler, 2, [ [0, 3, "comment.block.mylang", "baz"] ]);
+	});
+	
 //	// TODO: more damage/repair of nested regions
 
 	tests["test TextMateStyler - end-to-begin backreferences"] = makeTest(function(view) {
