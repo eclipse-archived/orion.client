@@ -606,6 +606,7 @@ orion.GitStatusController = (function() {
 						});
 					},
 					error : function(error, ioArgs) {
+						that._gitCommitNavigatorRem.loadCommitsList(path, error);
 						//mAuth.handleGetAuthenticationError(this, ioArgs);
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}

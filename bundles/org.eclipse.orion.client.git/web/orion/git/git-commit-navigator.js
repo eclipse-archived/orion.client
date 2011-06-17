@@ -40,6 +40,7 @@ exports.GitCommitNavigator = (function() {
 	GitCommitNavigator.prototype = new mExplorer.Explorer();
 	
 	GitCommitNavigator.prototype.loadCommitsList = function(path, treeRoot, force) {
+
 			path = mUtil.makeRelative(path);
 			if (path === this._lastHash && !force) {
 				return;
@@ -51,11 +52,28 @@ exports.GitCommitNavigator = (function() {
 			var parent = dojo.byId(this.parentId);
 
 			// Progress indicator
-			var progress = dojo.byId("progress"); 
+			var progress = dojo.byId(parent.id + "progress"); 
 			if(!progress){
-				progress = dojo.create("div", {id: "progress"}, parent, "only");
+				progress = dojo.create("div", {id: parent.id + "progress"}, parent, "only");
 			}
 			dojo.empty(progress);
+			
+			if(treeRoot.status && treeRoot.status!=200){
+				var response = treeRoot.responseText;
+				try {
+					var obj = JSON.parse(response);
+					if(obj.Message){
+						response = obj.Message;
+					}
+				} catch(error) {
+					//it is not JSON, just continue;
+				}
+				if(treeRoot.status!=404 && response!=="")
+					dojo.create("b", {innerHTML: "Error " + treeRoot.status + ": "}, progress, "only");
+				dojo.place(document.createTextNode(response), progress, "last");
+				return;
+			}
+			
 			b = dojo.create("b");
 			dojo.place(document.createTextNode("Loading "), progress, "last");
 			dojo.place(document.createTextNode(path), b, "last");

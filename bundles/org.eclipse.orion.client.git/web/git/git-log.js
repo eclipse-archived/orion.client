@@ -156,7 +156,7 @@ function loadResource(fileServiceReference, navigator){
 		},
 		error : function(error, ioArgs) {
 			mAuth.handleGetAuthenticationError(this, ioArgs);
-			console.error("HTTP status code: ", ioArgs.xhr.status);
+			navigator.loadCommitsList(dojo.hash(), error);
 		}
 	});
 }
