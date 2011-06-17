@@ -180,15 +180,14 @@ a:hover {
 	background: #EDEDED;
 	padding: 0px;
 	margin: 0px;
-	border-top: 1px solid #cccccc;
+	border-left: 1px solid white;
+	border-right: 2px solid white;
 }
 
 .landingPanel {
 	background: #EDEDED;
 	border-left: 1px solid white;
 	border-right: 1px solid #cccccc;
-	border-top: 1px solid white;
-	border-bottom: 1px solid #cccccc;
 	padding: 0px;
 	margin: 0px;
 }
