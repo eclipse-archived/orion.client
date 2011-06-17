@@ -14,7 +14,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 
 	/**
 	 * Constructs a new command service with the given options.
-	 * @param {Object} options The command options object which includes the service registry.
+	 * @param {Object} options The command options object which includes the service registry and optional selection service.
 	 * @class CommandService can render commands appropriate for a particular scope and DOM element.
 	 * @name orion.commands.CommandService
 	 */
@@ -109,6 +109,10 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 			return this._selection;
 		},
 		
+		/**
+		 * Show the keybindings that are registered with the command service inside the specified domNode.
+		 * @param {DOMElement} the dom node where the key bindings should be shown.
+		 */
 		showKeyBindings: function(targetNode) {
 			for (var binding in this._activeBindings) {
 				if (this._activeBindings[binding] && this._activeBindings[binding].keyBinding && this._activeBindings[binding].command) {
@@ -198,10 +202,12 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 		 * Register a command contribution, which identifies how a command appears
 		 * on a page and how it is invoked.
 		 * @param {String} the id of the command
+		 * @param {Number} the relative position of the command within its parent
 		 * @param {String} scopeId The id related to the scope.  Depending on the scope,
 		 *  this might be the id of the page or of a dom element.
-		 * @param {String} the path on which the command is located.  Optional.
-		 * @param {Number} the relative position of the command within its parent
+		 * @param {String} the path of any parent groups, separated by '/'.  For example,
+		 *  a path of "group1Id/group2Id/command" indicates that the command belongs as a child of 
+		 *  group2Id, which is itself a child of group1Id.  Optional.
 		 * @param {orion.commands.CommandKeyBinding} a keyBinding for the command.  Optional.
 		 * @param {boolean} if true, then the command is never rendered, but the keybinding is hooked.
 		 */
@@ -241,14 +247,18 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 		 * @param {String} scope The scope to which the command applies.  "dom" level 
 		 *  commands apply only when a specified dom element is rendering commands.
 		 *  "object" scope applies to particular objects/items displayed in widgets
-		 *  such as list or trees.
-		 * @param {Object} items An item or array of items to which the command applies.
-		 * @param {Object} handler The object that will perform the command
-		 * @param {String} style The style in which the command should be rendered.  Currently
-		 *  only "image" is implemented, but this should involve into something like "button,"
-		 *  "menu," "link," etc.
+		 *  such as list or trees.  "global" commands always apply.
+		 * @param {Object} items An item or array of items to which the command applies.  Optional.  If not
+		 *  items are specified and a selection service was specified at creation time, then the selection
+		 *  service will be used to determine which items are involved. 
+		 * @param {Object} handler The object that should perform the command
+		 * @param {String} renderType The style in which the command should be rendered.  "image" will render
+		 *  a button-like image element in the dom.  "menu" will render a push button menu containing
+		 *  the commands.
+		 * @param {String} cssClass Optional name of a CSS class that should be added to any rendered commands.
 		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
-		 * @param {Boolean} forceText Always use text and not the icon when showing the command, regardless of style.
+		 * @param {Boolean} forceText When true, always use text and not the icon when showing the command, regardless of the
+		 *  specified renderType.  
 		 */	
 		renderCommands: function(parent, scope, items, handler, renderType, cssClass, userData, forceText) {
 			if (!items) {
@@ -479,6 +489,13 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 				}
 			}
 		},
+		
+		/**
+		 * Return an image object that is appropriate for using a separator between different groups
+		 * of commands.  This function is useful when a page is precisely arranging groups of commands
+		 * (in a table or contiguous spans) and needs to use the same separator that the command service
+		 * would use when rendering different groups of commands.
+		 */
 		generateSeparatorImage: function() {
 			var sep = new Image();
 			// TODO should get this from CSS
@@ -493,7 +510,25 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 
 	/**
 	 * Constructs a new command with the given options.
-	 * @param {Object} options The command options object
+	 * @param {Object} options The command options object.
+	 * @param {String} options.id the unique id to be used when referring to the command in the command service.
+	 * @param {String} options.name the name to be used when showing the command as text.
+	 * @param {String} options.tooltip the tooltip description to use when explaining the purpose of the command.
+	 * @param {Function} options.callback the callback to call when the command is activated.  The callback should either 
+	 *  perform the command or return a deferred that represents the asynchronous performance of the command.  Optional.
+	 * @param {Function} options.hrefcallback when options.callback is not specfied, this callback is used to retrieve
+	 *  a URL that can be used as the location for a command represented as a hyperlink.  The callback should return 
+	 *  the URL.  In this release, the callback may also return a deferred that will eventually return the URL, but this 
+	 *  functionality may not be supported in the future.  See https://bugs.eclipse.org/bugs/show_bug.cgi?id=341540.
+	 *  Optional.
+	 * @param {Function} options.choicecallback a callback which retrieves choices that should be shown in a secondary
+	 *  menu from the command itself.  Returns a list of choices that supply the name and image to show, and the callback
+	 *  to call when the choice is made.  Optional.
+	 * @param {Image} options.image the image that may be used to represent the callback.  A text link will be shown in lieu
+	 *  of an image if no image is supplied.  Optional.
+	 * @param {Function} options.visibleWhen A callback that returns a boolean to indicate whether the command should be visible
+	 *  given a particular set of items that are selected.
+	 *
 	 * @class A command is an object that describes an action a user can perform, as well as when and
 	 *  what it should look like when presented in various contexts.  Commands are identified by a
 	 *  unique id.
@@ -647,7 +682,12 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 				menuitem.iconNode.src = this.image;
 			}
 		},
-		populateChoicesMenu: function(menu, items, handler, userData) {
+		/**
+		 * Populate the specified menu with choices using the choiceCallback.
+		 * Used internally by the command service.  Not intended to be overridden or called
+		 * externally.
+		 */
+		 populateChoicesMenu: function(menu, items, handler, userData) {
 			// see http://bugs.dojotoolkit.org/ticket/10296
 			menu.focusedChild = null;
 			dojo.forEach(menu.getChildren(), function(child) {
@@ -674,6 +714,12 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 				menu.addChild(menuitem);
 			}
 		},
+		
+		/**
+		 * Get the appropriate choices using the choiceCallback.
+		 * Used internally by the command service.  Not intended to be overridden or called
+		 * externally.
+		 */
 		getChoices: function(items, handler, userData) {
 			if (this.choiceCallback) {
 				return this.choiceCallback.call(handler, items, userData);
@@ -681,6 +727,11 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 			return null;
 		},
 		
+		/**
+		 * Make a choice callback appropriate for the given choice and items.
+		 * Used internally by the command service.  Not intended to be overridden or called
+		 * externally.
+		 */
 		makeChoiceCallback: function(choice, items) {
 			return function(event) {
 				if (choice.callback) {
@@ -688,6 +739,12 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 				}
 			};
 		},
+		
+		/**
+		 * Return a boolean indicating whether this command has a specific image associated
+		 * with it. Used internally by the command service.  Not intended to be overridden or called
+		 * externally.
+		 */
 		hasImage: function() {
 			return this.image !== "/images/none.png";
 		}
@@ -696,23 +753,15 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	/**
-	 * Constructs a new key binding with the given key code and modifiers.
-	 * 
+	 * Temporary copy of editor key binding.  Will be removed in the next released.
 	 * @param {String|Number} keyCode the key code.
 	 * @param {Boolean} mod1 the primary modifier (usually Command on Mac and Control on other platforms).
 	 * @param {Boolean} mod2 the secondary modifier (usually Shift).
 	 * @param {Boolean} mod3 the third modifier (usually Alt).
 	 * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
 	 * 
-	 * @class A CommandKeyBinding represents of a key code and a modifier state that can be triggered by the user using the keyboard.
 	 * @name orion.commands.CommandKeyBinding
 	 * 
-	 * @property {String} userString The user representation for the string (to show in key assist dialog)
-	 * @property {String|Number} keyCode The key code.
-	 * @property {Boolean} mod1 The primary modifier (usually Command on Mac and Control on other platforms).
-	 * @property {Boolean} mod2 The secondary modifier (usually Shift).
-	 * @property {Boolean} mod3 The third modifier (usually Alt).
-	 * @property {Boolean} mod4 The fourth modifier (usually Control on the Mac).
 	 */
 	function CommandKeyBinding (keyCode, mod1, mod2, mod3, mod4) {
 		if (typeof(keyCode) === "string") {
