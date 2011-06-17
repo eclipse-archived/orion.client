@@ -289,11 +289,11 @@ exports.DiffStyler = (function() {
 			//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349227 : we were using border style as the line below.Changing to back ground color and image.
 			//lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: "1px #AAAAAA solid" , borderLeft: borderStyle , borderRight: borderStyle}};
 			var backgroundColor = conflict ? "#EEB4B4" : "#DDDDDD";
-			var backgroundImg = "url('/images/compare/diff-border.png')";
+			var backgroundImg = "url('/images/diff-border.png')";
 			
 			if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex()){
 				backgroundColor = conflict ? "#F08080" : "#BBBBBB";
-				backgroundImg = "url('/images/compare/diff-border-sel.png')";
+				backgroundImg = "url('/images/diff-border-sel.png')";
 			}
 			if(lineType === "top-only") {
 				lineStyleEvent.style = {style: {backgroundImage: backgroundImg, backgroundRepeat:"repeat-x"}};
