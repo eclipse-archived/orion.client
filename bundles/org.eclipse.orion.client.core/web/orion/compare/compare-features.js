@@ -20,7 +20,7 @@ orion.CompareMergeUIFactory = (function() {
 		this._showLineStatus = option.showLineStatus;
 	}	
 	CompareMergeUIFactory.prototype = {
-		_createNoWrapTextDiv:function(textDivId , defaultText , align){
+		_createNoWrapTextDiv:function(textDivId , defaultText , align, createCommandSpan){
 			var table = document.createElement('table');
 			table.width = "100%";
 			var row = document.createElement('tr');
@@ -34,6 +34,14 @@ orion.CompareMergeUIFactory = (function() {
 			textDiv.id = textDivId;
 			dojo.place(document.createTextNode(defaultText), textDiv, "only");
 			td.appendChild(textDiv);
+			if (createCommandSpan) {
+				td = document.createElement('td');
+				td.id = "rightContainerCommands"; // this id should not be known here.  It is decided in compare-container.js
+				row.appendChild(td);
+				td.noWrap = true;
+				row.align = "right";
+				table.align = "right";
+			}
 			return table;
 		},
 		
@@ -60,8 +68,8 @@ orion.CompareMergeUIFactory = (function() {
 			child.placeAt(parent);
 		},
 		
-		_createTileDiv: function(titleDivId) {
-			var table = this._createNoWrapTextDiv(titleDivId , "Compare...");
+		_createTileDiv: function(titleDivId, createCommandArea) {
+			var table = this._createNoWrapTextDiv(titleDivId , "Compare...", null, createCommandArea);
 			var titleContainer = new dijit.layout.ContentPane({region: "top", style:"width:100%;height:30px;overflow: hidden;"});
 			titleContainer.attr('content', table);
 			return titleContainer;
@@ -110,7 +118,7 @@ orion.CompareMergeUIFactory = (function() {
 			
 			if(this._showTitle){
 				this._rightTitleDivId = this._parentDivID + "_right_title_id";
-				this._appendDomNode(bc ,this._createTileDiv(this._rightTitleDivId));
+				this._appendDomNode(bc ,this._createTileDiv(this._rightTitleDivId, true));
 			}
 			
 			this._rightEditorParentDivId = this._parentDivID + "_right_editor_id";

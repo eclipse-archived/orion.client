@@ -261,6 +261,9 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 		 *  specified renderType.  
 		 */	
 		renderCommands: function(parent, scope, items, handler, renderType, cssClass, userData, forceText) {
+			if (typeof(parent) === "string") {
+				parent = dojo.byId(parent);
+			}
 			if (!items) {
 				var cmdService = this;
 				if (this._selection) {
