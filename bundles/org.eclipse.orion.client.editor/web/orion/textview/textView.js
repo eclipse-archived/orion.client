@@ -1302,7 +1302,7 @@ orion.textview.TextView = (function() {
 		 * Sets the caret offset relative to the start of the document.
 		 *
 		 * @param {Number} caret the caret offset relative to the start of the document.
-		 * @param {Boolean} [show=true] if <code>true</coce>, the view will scroll if needed to show the caret location.
+		 * @param {Boolean} [show=true] if <code>true</code>, the view will scroll if needed to show the caret location.
 		 *
 		 * @see #getCaretOffset
 		 * @see #setSelection
