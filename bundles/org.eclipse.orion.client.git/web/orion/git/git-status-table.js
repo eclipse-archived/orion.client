@@ -635,6 +635,8 @@ orion.GitStatusController = (function() {
 				}).then(function(commitLogJsonData){
 					if (commitLogJsonData.RemoteLocation == null){
 						that._gitCommitNavigatorLog.loadCommitsList(that._curBranch.CommitLocation +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
+						if(that._curRemote)
+							that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 					}
 					else {
 						dojo.xhrGet({
@@ -649,7 +651,7 @@ orion.GitStatusController = (function() {
 									gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
 										that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData);
 										that._gitCommitNavigatorLog.loadCommitsList(that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
-										if(that._curRemote && scopedCommitsJsonData.length > 0)
+										if(that._curRemote)
 											that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 									});
 								});
@@ -660,6 +662,8 @@ orion.GitStatusController = (function() {
 									mAuth.handleGetAuthenticationError(this, ioArgs);
 								}else{
 									that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
+									if(that._curRemote)
+										that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 								}
 							}
 						});

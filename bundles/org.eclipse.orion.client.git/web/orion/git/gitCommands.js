@@ -855,11 +855,12 @@ var exports = {};
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
 									exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
 											function(jsonData){
-												if (jsonData.Result.Severity == "Ok")
+												if (jsonData.Result.Severity == "Ok"){
 													dojo.query(".treeTableRow").forEach(function(node, i) {
 														dojo.toggleClass(node, "outgoingCommitsdRow", false);
-														refreshStatusCallBack();
 													});
+													refreshStatusCallBack();
+												}
 											}, func, "Push Git Repository");
 									});
 								});
