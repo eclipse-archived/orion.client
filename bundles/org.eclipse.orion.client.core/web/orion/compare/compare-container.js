@@ -447,8 +447,8 @@ exports.CompareMergeContainer = (function() {
 		this._commandService.registerCommandContribution("orion.compare.nextDiff", 2, "rightContainerCommands");
 		if (!this.readonly) {
 			this._commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "rightContainerCommands");
-			this._commandService.renderCommands("rightContainerCommands", "dom", self, self, "image");
 		}
+		this._commandService.renderCommands("rightContainerCommands", "dom", self, self, "image");
 	};
 	
 	CompareMergeContainer.prototype.nextDiff = function(){	
