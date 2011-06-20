@@ -15,6 +15,11 @@ var exports = {};
 
 exports.GitClonesExplorer = (function() {
 	
+	/**
+	 * Creates a new git clone explorer.
+	 * @name orion.git.GitClonesExplorer
+	 * @class A Git clone explorer view
+	 */
 	function GitClonesExplorer(registry, selection, cloneDetails, parentId, toolbarId, selectionToolsId){
 		this.parentId = parentId;
 		this.registry = registry;
@@ -86,18 +91,18 @@ exports.GitClonesExplorer = (function() {
 
 exports.GitClonesModel = (function() {
 	/**
-	 * @name eclipse.Model
-	 * @class Tree model used by eclipse.FileExplorer.
-	 * TODO: Consolidate with eclipse.TreeModel.
+	 * Creates a new git clone model.
+	 * @name orion.git.GitClonesModel
+	 * @class Tree model used by orion.git.GitClonesExplorer.
 	 */
 	function GitClonesModel(gitClient, rootPath, fetchItems, root) {
+		//TODO: Consolidate with eclipse.TreeModel
 		this.gitClient = gitClient;
 		this.rootPath = rootPath;
 		this.fetchItems = fetchItems;
 		this.root = root ? root : null;
 	}
 	GitClonesModel.prototype = mExplorer.ExplorerModel.prototype; 
-	
 	
 	GitClonesModel.prototype.getRoot = function(onItem){
 		if(this.root){

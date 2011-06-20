@@ -16,7 +16,8 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/git/gitCommands'], functi
 var exports =  {};
 exports.GitCommitNavigator = (function() {
 	/**
-	 * @name eclipse.GitCommitNavigator
+	 * Creates a new Git commit navigator.
+	 * @name orion.git.GitCommitNavigator
 	 * @class A table-based git commit navigator
 	 */
 	function GitCommitNavigator(serviceRegistry, selection, commitDetails, options, parentId, pageTitleId, toolbarId, selectionToolsId) {
