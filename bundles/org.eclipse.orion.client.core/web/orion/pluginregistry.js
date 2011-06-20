@@ -9,17 +9,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global dojo*/
-/*global document*/
-/*global window*/
-
-/**
- * @namespace The global container for eclipse APIs.
- */ 
-
+/*global define window document console localStorage */
 
 define(["dojo", "orion/serviceregistry", "dojo/DeferredList"], function(dojo, mServiceregistry){
 var eclipse = eclipse || {};
+
+/**
+ * Creates a new plugin
+ * @class Represents a single plugin in the plugin registry
+ * @name orion.pluginregistry.Plugin
+ */
 eclipse.Plugin = function(url, data, internalRegistry) {
 	var _self = this;
 	
@@ -120,15 +119,32 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 			console.log(e);
 		}
 	}
-	
+
+	/**
+	 * Returns the URL location of this plugin
+	 * @name orion.pluginregistry.Plugin#getLocation
+	 * @return {String} The URL of this plugin
+	 * @function
+	 */
 	this.getLocation = function() {
 		return url;
 	};
 	
+	/**
+	 * Returns the declarative properties of this plugin
+	 * @name orion.pluginregistry.Plugin#getData
+	 * @return {Object} the service properties
+	 * @function
+	 */
 	this.getData = function() {
 		return data;
 	};
 	
+	/**
+	 * Uninstalls this plugin
+	 * @name orion.pluginregistry.Plugin#uninstall
+	 * @function
+	 */
 	this.uninstall = function() {
 		for (var serviceId in _serviceRegistrations) {
 			if (_serviceRegistrations.hasOwnProperty(serviceId)) {
@@ -143,6 +159,13 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 		internalRegistry.uninstallPlugin(this);
 	};
 	
+	/**
+	 * Returns the service references provided by this plugin
+	 * @name orion.pluginregistry.Plugin#getServiceReferences
+	 * @return {orion.serviceregistry.ServiceReference} The service references provided
+	 * by this plugin.
+	 * @function 
+	 */
 	this.getServiceReferences = function() {
 		var result = [];
 		var serviceId;
@@ -157,7 +180,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	this._load = function() {
 		if (!_channel) {
 			_channel = internalRegistry.connect(url, _responseHandler);
-			setTimeout(function() {
+			window.setTimeout(function() {
 				if (!_loaded) {
 					_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
 				}
@@ -175,6 +198,11 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	}
 };
 
+/**
+ * Creates a new plugin registry.
+ * @class The Orion plugin registry
+ * @name orion.pluginregistry.PluginRegistry
+ */
 eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	var _self = this;
 	var _storage = opt_storage || localStorage || {};
@@ -336,10 +364,21 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 			}
 	};
 	
+	/**
+	 * Starts the plugin registry
+	 * @name orion.pluginregistry.PluginRegistry#startup
+	 * @return A promise that will resolve when the registry has been fully started
+	 * @function 
+	 */
 	this.startup = function() {
 		return _loaded.promise;
 	};
 	
+	/**
+	 * Shuts down the plugin registry
+	 * @name orion.pluginregistry.PluginRegistry#shutdown
+	 * @function 
+	 */
 	this.shutdown = function() {
 		for (var i = 0; i < _channels.length; i++) {
 			try {
@@ -350,6 +389,13 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		}
 	};
 	
+	/**
+	 * Installs the plugin at the given location into the plugin registry
+	 * @name orion.pluginregistry.PluginRegistry#installPlugin
+	 * @param {String} url The location of the plugin
+	 * @param {Object} opt_data The plugin metadata
+	 * @function 
+	 */
 	this.installPlugin = function(url, opt_data) {
 		url = _normalizeURL(url);
 		var d = new dojo.Deferred();
@@ -392,6 +438,12 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		return d.promise;	
 	};
 	
+	/**
+	 * Returns all installed plugins
+	 * @name orion.pluginregistry.PluginRegistry#getPlugins
+	 * @return {Array} An array of all installed plugins.
+	 * @function 
+	 */
 	this.getPlugins = function() {
 		var result =[];
 		for (var i = 0; i < _plugins.length; i++) {
@@ -402,6 +454,13 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		return result;
 	};
 
+	/**
+	 * Returns the installed plugin with the given URL, or null
+	 * if no such plugin is installed.
+	 * @name orion.pluginregistry.PluginRegistry#getPlugin
+	 * @return {orion.pluginregistry.Plugin} The installed plugin matching the given URL.
+	 * @function 
+	 */
 	this.getPlugin = function(url) {
 		url = _normalizeURL(url);
 		for (var i = 0; i < _plugins.length; i++) {
