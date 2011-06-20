@@ -145,7 +145,9 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 		 * Flushes all preference changes in this node to its backing storage.
 		 * @function
 		 */
-		flush: this._flush
+		flush: function() {
+			this._flush();
+		}
 	};
 	
 	var _cache = {

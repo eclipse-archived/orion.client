@@ -8,20 +8,19 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo console handleGetAuthenticationError */
+/*global define console */
 
 /** @namespace The global container for eclipse APIs. */
 
 define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 
-
-
 var eclipse = eclipse || {};
 
 eclipse.GitService = (function() {
 	/**
-	 * @class Provides operations on Git.
-	 * @name eclipse.GitService
+	 * Creates a new Git service.
+	 * @class Provides operations for browsing and manipulating Git repositories.
+	 * @name orion.git.GitService
 	 */
 	function GitService(serviceRegistry) {
 		if (serviceRegistry) {
