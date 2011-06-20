@@ -37,7 +37,7 @@ dojo.addOnLoad(function() {
 	var pluginUrl = dojo.hash();
 	if(pluginUrl) {
 		dojo.byId("valid-hash").style.display = "block";
-		dojo.place(window.document.createTextNode(pluginUrl), "extension-location", "only");
+		dojo.place(window.document.createTextNode(pluginUrl), "plugin-location", "only");
 		
 		dojo.connect(dojo.byId("install"), "click", function(evt) {
 			dojo.byId("valid-hash").style.display = "none";
