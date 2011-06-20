@@ -1,3 +1,5 @@
-@import "/org.dojotoolkit/dojo/resources/dojo.css";
-@import "/org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
-
+body {
+	margin: 0;
+	padding: 0;
+	font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
+}
