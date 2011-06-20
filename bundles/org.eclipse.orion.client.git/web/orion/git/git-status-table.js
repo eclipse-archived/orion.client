@@ -501,10 +501,9 @@ orion.GitStatusController = (function() {
 			var that = this;
 			var openGitLog = new mCommands.Command({
 				name : "Complete log",
-				//name : that._curBranch.Name,
 				id : "orion.openGitLog",
 				hrefCallback : function(item) {
-					return "/git/git-log.html#" + that._curBranch.CommitLocation + "?page=1";
+					return "/git/git-log.html#" + (that._curBranch ? that._curBranch.CommitLocation : that._model.items.CommitLocation) + "?page=1";
 				},
 				visibleWhen : function(item) {
 					return item.type === "gitLog";
@@ -513,13 +512,12 @@ orion.GitStatusController = (function() {
 		
 			var openGitRemote = new mCommands.Command({
 				name : "Complete log",
-				//name : (that._curRemote ? that._curRemote.Name : "") + "/" + that._curBranch.Name,
 				id : "orion.openGitRemote",
 				hrefCallback : function(item) {
 					return "/git/git-log.html#" + that._curBranch.RemoteLocation + "?page=1";
 				},
 				visibleWhen : function(item) {
-					return item.type === "gitRemote";
+					return (item.type === "gitRemote" && that._curBranch);
 				}
 			});
 			this._registry.getService("orion.page.command").then(function(commandService) {
@@ -534,15 +532,17 @@ orion.GitStatusController = (function() {
 			var title = "Git Status";
 			var location = "";
 			if(withBranchName) {
-				location = this._curClone.Name + " on " + this._curBranch.Name;
+				var name =  this._curBranch ? this._curBranch.Name : "detached";
+				location = this._curClone.Name + " on " + name;
 			}
 			document.title = location;
 			// not good that these dom id's are known way down here
 			dojo.place(document.createTextNode(title), "pageTitle", "only");
 			dojo.place(document.createTextNode(location), "location", "only");
 			if(withBranchName) {
-				this._logTableRenderer.modifyHeader(this._curBranch.Name);
-				this._remoteTableRenderer.modifyHeader((this._curRemote ? this._curRemote.Name : "") + "/" + this._curBranch.Name);
+				this._logTableRenderer.modifyHeader(this._curBranch ? this._curBranch.Name : "detached");
+				if(this._curBranch)
+					this._remoteTableRenderer.modifyHeader((this._curRemote ? this._curRemote.Name : "") + "/" + this._curBranch.Name);
 			}
 				
 		},
@@ -583,7 +583,7 @@ orion.GitStatusController = (function() {
 			if(!this._renderLog)
 				return;
 			if (isRemote) {
-				if(!this._curRemote)
+				if(!this._curRemote || !this._curBranch)
 					return;
 		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null, {checkbox: false, minimal: true}, this._remoteTableRenderer.getLogContentId());    
 				dojo.place(document.createTextNode(""), this._remoteTableRenderer.getLogContentId(), "only");
@@ -617,7 +617,7 @@ orion.GitStatusController = (function() {
 			} else {
 		        this._gitCommitNavigatorLog = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null, {checkbox: false, minimal: true},this._logTableRenderer.getLogContentId());
 		        dojo.place(document.createTextNode(""), this._logTableRenderer.getLogContentId(), "only");
-				var path = that._curBranch.CommitLocation + "?page=1&pageSize=5";
+				var path = (that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) + "?page=1&pageSize=5";
 				dojo.xhrGet({
 					url : path,
 					headers : {
@@ -633,9 +633,9 @@ orion.GitStatusController = (function() {
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
 				}).then(function(commitLogJsonData){
-					if (commitLogJsonData.RemoteLocation == null){
-						that._gitCommitNavigatorLog.loadCommitsList(that._curBranch.CommitLocation +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
-						if(that._curRemote)
+					if (commitLogJsonData.RemoteLocation == null || !that._curBranch){
+						that._gitCommitNavigatorLog.loadCommitsList((that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
+						if(that._curRemote && that._curBranch)
 							that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 					}
 					else {
@@ -650,7 +650,7 @@ orion.GitStatusController = (function() {
 								that._registry.getService("orion.git.provider").then(function(gitService){
 									gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
 										that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData);
-										that._gitCommitNavigatorLog.loadCommitsList(that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
+										that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
 										if(that._curRemote)
 											that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 									});
@@ -662,7 +662,7 @@ orion.GitStatusController = (function() {
 									mAuth.handleGetAuthenticationError(this, ioArgs);
 								}else{
 									that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
-									if(that._curRemote)
+									if(that._curRemote && that._curBranch)
 										that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 								}
 							}
