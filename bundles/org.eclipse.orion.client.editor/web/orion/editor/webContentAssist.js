@@ -10,25 +10,18 @@
  *******************************************************************************/
 /*global orion:true*/
 
-/** @namespace */
 var orion = orion || {};
 orion.editor = orion.editor || {};
 
 /**
- * @class orion.contentAssist.CssContentAssistProvider
+ * @name orion.contentAssist.CssContentAssistProvider
+ * @class Provides content assist for CSS keywords.
  */
 orion.editor.CssContentAssistProvider = (function() {
 	/** @private */
 	function CssContentAssistProvider() {
 	}
-	CssContentAssistProvider.prototype = /** @lends orion.contentAssist.CssContentAssistProvider.prototype */ {
-		/**
-		 * @param {String} The string buffer.substring(w+1, c) where c is the caret offset and w is the index of the 
-		 * rightmost whitespace character preceding c.
-		 * @param {String} buffer The entire buffer being edited
-		 * @param {orion.editor.Selection} selection The current textView selection.
-		 * @returns {dojo.Deferred} A future that will provide the keywords.
-		 */
+	CssContentAssistProvider.prototype = /** @lends orion.editor.CssContentAssistProvider.prototype */ {
 		getKeywords: function(prefix, buffer, selection) {
 			return [ "background", "background-attachment", "background-color", "background-image",
 					"background-position", "background-repeat", "border", "border-bottom",
@@ -51,20 +44,14 @@ orion.editor.CssContentAssistProvider = (function() {
 }());
 
 /**
- * @class orion.contentAssist.JavaScriptContentAssistProvider
+ * @name orion.editor.JavaScriptContentAssistProvider
+ * @class Provides content assist for JavaScript keywords.
  */
 orion.editor.JavaScriptContentAssistProvider = (function() {
 	/** @private */
 	function JavaScriptContentAssistProvider() {
 	}
-	JavaScriptContentAssistProvider.prototype = /** @lends orion.contentAssist.JavaScriptContentAssistProvider.prototype */ {
-		/**
-		 * @param {String} The string buffer.substring(w+1, c) where c is the caret offset and w is the index of the 
-		 * rightmost whitespace character preceding c.
-		 * @param {String} buffer The entire buffer being edited
-		 * @param {orion.editor.Selection} selection The current textView selection.
-		 * @returns {dojo.Deferred} A future that will provide the keywords.
-		 */
+	JavaScriptContentAssistProvider.prototype = /** @lends orion.editor.JavaScriptContentAssistProvider.prototype */ {
 		getKeywords: function(prefix, buffer, selection) {
 			return [ "break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else",
 					"finally", "for", "function", "if", "in", "instanceof", "new", "return", "switch",
