@@ -57,6 +57,8 @@ dojo.addOnLoad(function() {
 				pageActions, "last");
 			dojo.place('<a id="uninstallButton">Uninstall</a>',
 				pageActions, "last");
+			dojo.place('<a id="reloadButton">Reload</a>',
+				pageActions, "last");
 			dojo.place('<a id="copyButton">Copy Location</a>',
 				pageActions, "last");
 
@@ -69,6 +71,8 @@ dojo.addOnLoad(function() {
 		dojo.addClass(installButton, "commandLink");
 		var uninstallButton = dojo.byId("uninstallButton");
 		dojo.addClass(uninstallButton, "commandLink");
+		var reloadButton = dojo.byId("reloadButton");
+		dojo.addClass(reloadButton, "commandLink");
 		var copyButton = dojo.byId("copyButton");
 		dojo.addClass(copyButton, "commandLink");
 		
@@ -84,7 +88,7 @@ dojo.addOnLoad(function() {
 						}
 						initTree();
 						installUrlTextBox.value="";
-						statusService.setMessage("Installed " + plugin.getLocation());
+						statusService.setMessage("Installed " + plugin.getLocation(), 5000);
 						preferenceService.getPreferences("/plugins").then(function(plugins) {
 							plugins.flush();
 						}); // this will force a sync
@@ -131,12 +135,37 @@ dojo.addOnLoad(function() {
 				}
 				initTree();
 				// report what we uninstalled so it's easy for user to copy/paste a plugin that they want back
-				statusService.setMessage("Uninstalled " + message);
+				statusService.setMessage("Uninstalled " + message, 5000);
 				preferenceService.getPreferences("/plugins").then(function(plugins) {
 					plugins.flush();
 				}); // this will force a sync
 			});
 		});
+		
+		dojo.connect(reloadButton, "onclick", function() {
+			var plugins = tree.getSelectedPlugins();
+			if (plugins.length === 0) {
+				plugins = pluginRegistry.getPlugins();
+			}
+			var count = 0;
+			var d = new dojo.Deferred();
+			for (var i = 0; i < plugins.length; i++) {
+				plugins[i]._load().then(function() {
+					count++;
+					if (count === plugins.length) {
+						d.resolve();
+					}
+				});
+			}
+			d.then(function() {
+				statusService.setMessage("Reloaded " + plugins.length + " plugin" + (plugins.length===1 ? "": "s") + ".", 5000);
+				var old = dijit.byId("registry-tree");
+				if (old) {
+					dijit.registry.remove("registry-tree");
+				}
+				initTree();
+			});
+		});	
 		
 		dojo.connect(copyButton, "onclick", function() {
 			var plugins = tree.getSelectedPlugins();
