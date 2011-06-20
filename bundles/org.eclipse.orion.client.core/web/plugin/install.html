@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html style="height: 100%">
 <head>
-<title>Add Extension</title>
+<title>Add Plugin</title>
 <link rel="stylesheet" type="text/css" href="install.css" />
 		<script type="text/javascript" src="/requirejs/require.js"></script>
 		<script type="text/javascript">
@@ -48,31 +48,31 @@
 		<div dojoType="dijit.layout.ContentPane" id="content" class="mainpane" region="center">
 		<div style="margin-left: 16px">
 			<div id="valid-hash" style="display:none;">
-				<h2>Adding an extension</h2>
-				<div>Please confirm that you would like to add the following extension:</div>
-				<div id="extension-location">
+				<h2>Adding a plugin</h2>
+				<div>Please confirm that you would like to add the following plugin:</div>
+				<div id="plugin-location">
 				</div>
 				<input id="install" type="button" value="Install">
 			</div>
 			<div id="wait" style="display:none;">
 				<h2>Installing</h2>
-				<div>Please wait while the extension is being installed.</div>
+				<div>Please wait while the plugin is being installed.</div>
 			</div>
 			<div id="success" style="display:none;">
 				<h2>Success!</h2>
-				<div>The extension has been installed successfully.</div>
-				<div><a href="/plugin/list.html">Manage extensions</a></div>
+				<div>The plugin has been installed successfully.</div>
+				<div><a href="/plugin/list.html">Manage plugins</a></div>
 			</div>
 			<div id="failure" style="display:none;">
 				<h2>Failed</h2>
-				<div>There was a problem installing the extension:</div>
+				<div>There was a problem installing the plugin:</div>
 				<div id="problem"></div>
-				<div><a href="/plugin/list.html">Manage extensions</a></div>
+				<div><a href="/plugin/list.html">Manage plugins</a></div>
 			</div>
 			<div id="invalid-hash" style="display:none;">
-				<h2>Cannot add extension</h2>
+				<h2>Cannot add plugin</h2>
 				<div>
-				This page exists so that other web pages can request that new extensions be added to Orion. For it to work, the other web page needs to pass the URL of the extension in the hash part of this page's URL.
+				This page exists so that other web pages can request that new plugins be added to Orion. For it to work, the other web page needs to pass the URL of the plugin in the hash part of this page's URL.
 				</div>
 			</div>
 		</div>
