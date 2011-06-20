@@ -85,6 +85,9 @@ dojo.addOnLoad(function() {
 						initTree();
 						installUrlTextBox.value="";
 						statusService.setMessage("Installed " + plugin.getLocation());
+						preferenceService.getPreferences("/plugins").then(function(plugins) {
+							plugins.flush();
+						}); // this will force a sync
 					}, function(error) {
 						statusService.setErrorMessage(error);
 					});
@@ -129,6 +132,9 @@ dojo.addOnLoad(function() {
 				initTree();
 				// report what we uninstalled so it's easy for user to copy/paste a plugin that they want back
 				statusService.setMessage("Uninstalled " + message);
+				preferenceService.getPreferences("/plugins").then(function(plugins) {
+					plugins.flush();
+				}); // this will force a sync
 			});
 		});
 		

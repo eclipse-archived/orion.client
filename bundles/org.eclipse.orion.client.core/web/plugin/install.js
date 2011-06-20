@@ -34,20 +34,6 @@ dojo.addOnLoad(function() {
 	// global commands
 	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 
-	var installHandler = function(evt) {
-		var pluginUrl = installUrlTextBox.value;
-		if (/^\S+$/.test(dojo.trim(pluginUrl))) {
-			registry.installPlugin(pluginUrl).then(
-				function(plugin) {
-					refreshButton.onClick();
-					installUrlTextBox.value="";
-					statusService.setMessage("Installed " + plugin.getLocation(), 5000);
-				}, function(error) {
-					statusService.setErrorMessage(error);
-				});
-		}
-	};
-		
 	var pluginUrl = dojo.hash();
 	if(pluginUrl) {
 		dojo.byId("valid-hash").style.display = "block";
@@ -61,6 +47,9 @@ dojo.addOnLoad(function() {
 					dojo.byId("wait").style.display = "none";
 					dojo.byId("success").style.display = "block";
 					statusService.setMessage("Installed " + plugin.getLocation(), 5000);
+					preferenceService.getPreferences("/plugins").then(function(plugins) {
+						plugins.flush();
+					}); // this will force a sync 
 					var metadata = plugin.getData().metadata;
 					if (metadata) {
 						if (metadata.postInstallUrl) {
