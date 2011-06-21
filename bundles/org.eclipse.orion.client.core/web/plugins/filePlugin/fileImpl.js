@@ -173,6 +173,7 @@ eclipse.FileServiceImpl= (function() {
 				url: parentLocation,
 				headers: {
 					"Orion-Version": "1",
+					"X-Create-Options" : "no-overwrite",
 					"Slug": folderName,
 					"Content-Type": "application/json"
 				},
@@ -200,6 +201,7 @@ eclipse.FileServiceImpl= (function() {
 				url: parentLocation,
 				headers: {
 					"Orion-Version": "1",
+					"X-Create-Options" : "no-overwrite",
 					"Slug": fileName,
 					"Content-Type": "application/json"
 				},

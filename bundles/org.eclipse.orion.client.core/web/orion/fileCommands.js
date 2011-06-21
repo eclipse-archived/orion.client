@@ -417,7 +417,13 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 				getNewItemName(item, domId, "New File", function(name) {
 					if (name) {
 						fileClient.createFile(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}));
+							dojo.hitch(explorer, function() {this.changedItem(item);}),
+								function(error) {
+									serviceRegistry.getService("orion.page.message").then(function(statusService) {
+										statusService.setErrorMessage(error);
+									});
+								}
+							);
 					}
 				});
 			},
@@ -436,7 +442,12 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 				getNewItemName(item, domId, "New Folder", function(name) {
 					if (name) {
 						fileClient.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}));
+							dojo.hitch(explorer, function() {this.changedItem(item);}),
+								function(error) {
+									serviceRegistry.getService("orion.page.message").then(function(statusService) {
+										statusService.setErrorMessage(error);
+									});
+								});
 					}
 				});
 			},
