@@ -15,10 +15,10 @@ var orion = orion || {};
 orion.editor = orion.editor || {};
 
 /**
- * A styler that does nothing, but can be extended by concrete stylers. Extenders can call 
- * {@link orion.editor.AbstractStyler.extend} and provide their own {@link #_onSelection}, 
- * {@link #_onModelChanged}, {@link #_onDestroy} and {@link #_onLineStyle} methods.
- * @class orion.editor.AbstractStyler
+ * @class A styler that does nothing, but can be extended by concrete stylers. To extend, call 
+ * {@link orion.editor.AbstractStyler.extend} and provide implementations of one or more of
+ * the {@link #_onSelection}, {@link #_onModelChanged}, {@link #_onDestroy} and {@link #_onLineStyle} methods.
+ * @name orion.editor.AbstractStyler
  */
 orion.editor.AbstractStyler = (function() {
 	/** @inner */
@@ -26,8 +26,9 @@ orion.editor.AbstractStyler = (function() {
 	}
 	AbstractStyler.prototype = /** @lends orion.editor.AbstractStyler.prototype */ {
 		/**
-		 * Initializes this styler with a textView. Extenders <b>must</b> call this from their constructor.
-		 * @param {orion.textview.TextView} textView
+		 * Initializes this styler with a TextView. If you are extending AbstractStyler,
+		 * you <b>must</b> call this from your subclass's constructor function.
+		 * @param {orion.textview.TextView} textView The TextView to provide styling for.
 		 */
 		initialize: function(textView) {
 			this.textView = textView;
@@ -38,10 +39,7 @@ orion.editor.AbstractStyler = (function() {
 			textView.addEventListener("LineStyle", this, this._onLineStyle);
 			textView.redrawLines();
 		},
-		
-		/**
-		 * Destroys this styler and removes all listeners. Called by the editor.
-		 */
+		/** Destroys this styler and removes all listeners. Called by the editor. */
 		destroy: function() {
 			if (this.textView) {
 				this.textView.removeEventListener("Selection", this, this._onSelection);
@@ -51,39 +49,34 @@ orion.editor.AbstractStyler = (function() {
 				this.textView = null;
 			}
 		},
-		
 		/** To be overridden by subclass.
 		 * @public
 		 */
-		_onSelection: function(/**eclipse.SelectionEvent*/ e) {},
-		
+		_onSelection: function(/**eclipse.SelectionEvent*/ selectionEvent) {},
 		/** To be overridden by subclass.
 		 * @public
 		 */
-		_onModelChanged: function(/**eclipse.ModelChangedEvent*/ e) {},
-		
+		_onModelChanged: function(/**eclipse.ModelChangedEvent*/ modelChangedEvent) {},
 		/** To be overridden by subclass.
 		 * @public
 		 */
-		_onDestroy: function(/**eclipse.DestroyEvent*/ e) {},
-		
+		_onDestroy: function(/**eclipse.DestroyEvent*/ destroyEvent) {},
 		/** To be overridden by subclass.
 		 * @public
 		 */
-		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {}
+		_onLineStyle: function(/**eclipse.LineStyleEvent*/ lineStyleEvent) {}
 	};
 	
 	return AbstractStyler;
 }());
 
 /**
- * Helper for extending AbstractStyler.
+ * Helper for extending {@link orion.editor.AbstractStyler}.
  * @methodOf orion.editor.AbstractStyler
  * @static
  * @param {Function} subCtor The constructor function for the subclass.
- * @param {Object} [proto] Object to be mixed into the subclass's prototype. This object can contain your 
- * implementation of _onSelection, _onModelChanged, etc.
- * @see orion.editor.TextMateStyler for example usage.
+ * @param {Object} [proto] Object to be mixed into the subclass's prototype. This object should 
+ * contain your implementation of _onSelection, _onModelChanged, etc.
  */
 orion.editor.AbstractStyler.extend = function(subCtor, proto) {
 	if (typeof(subCtor) !== "function") { throw new Error("Function expected"); }
@@ -205,8 +198,8 @@ orion.editor.RegexUtil = {
 		return (/\\\d+/).test(regex.source);
 	},
 	
-	/** @returns {RegExp} A regex made by substituting any backreferences in <tt>regex</tt> for the value of the property
-	 * in <tt>sub</tt> with the same name as the backreferenced group number. */
+	/** @returns {RegExp} A regex made by substituting any backreferences in <code>regex</code> for the value of the property
+	 * in <code>sub</code> with the same name as the backreferenced group number. */
 	getSubstitutedRegex: function(/**RegExp*/ regex, /**Object*/ sub, /**Boolean*/ escape) {
 		escape = (typeof escape === "undefined") ? true : false;
 		var exploded = regex.source.split(/(\\\d+)/g);
@@ -230,7 +223,7 @@ orion.editor.RegexUtil = {
 	},
 	
 	/**
-	 * Builds a version of <tt>regex</tt> with every non-capturing term converted into a capturing group. This is a workaround
+	 * Builds a version of <code>regex</code> with every non-capturing term converted into a capturing group. This is a workaround
 	 * for JavaScript's lack of API to get the index at which a matched group begins in the input string.<p>
 	 * Using the "groupified" regex, we can sum the lengths of matches from <i>consuming groups</i> 1..n-1 to obtain the 
 	 * starting index of group n. (A consuming group is a capturing group that is not inside a lookahead assertion).</p>
@@ -240,7 +233,7 @@ orion.editor.RegexUtil = {
 	 * @param {Object} [backRefOld2NewMap] Optional. If provided, the backreference numbers in regex will be updated using the 
 	 * properties of this object rather than the new group numbers of regex itself.
 	 * <ul><li>[0] {RegExp} The groupified version of the input regex.</li>
-	 * <li>[1] {Object} A map containing old-group to new-group info. Each property is a capturing group number of <tt>regex</tt>
+	 * <li>[1] {Object} A map containing old-group to new-group info. Each property is a capturing group number of <code>regex</code>
 	 * and its value is the corresponding capturing group number of [0].</li>
 	 * <li>[2] {Object} A map indicating which capturing groups of [0] are also consuming groups. If a group number is found
 	 * as a property in this object, then it's a consuming group.</li></ul>
@@ -405,55 +398,65 @@ orion.editor.RegexUtil = {
 };
 
 /**
- * A styler that knows how to apply a limited subset of the TextMate grammar format to style a line.<p>
+ * @name orion.editor.TextMateStyler
+ * @class A styler that knows how to apply a subset of the TextMate grammar format to style a line.<p>
  *
  * <h4>Styling from a grammar:</h4>
  * Each scope name given in the grammar is converted to an array of CSS class names. For example 
- * a region of text with scope <tt>keyword.control.php</tt> will be assigned the CSS classes 
- * <pre>keyword, keyword-control, keyword-control-php</pre>
+ * a region of text with scope <code>keyword.control.php</code> will be assigned the CSS classes<br />
+ * <code>keyword, keyword-control, keyword-control-php</code>
  *
  * A CSS file can give rules matching any of these class names to provide generic or more specific styling.
- * For example, <pre>.keyword { font-color: blue; }</pre> colors all keywords blue, while
- * <pre>.keyword-control-php { font-weight: bold; }</pre> bolds only PHP control keywords.
+ * For example, <br /><code>.keyword { font-color: blue; }</code> colors all keywords blue, while<br />
+ * <code>.keyword-control-php { font-weight: bold; }</code> bolds only PHP control keywords.<p>
  *
  * This is useful when using grammars that adhere to TextMate's
  * <a href="http://manual.macromates.com/en/language_grammars.html#naming_conventions">scope name conventions</a>,
  * as a single CSS rule can provide consistent styling to similar constructs across different languages.<p>
  * 
- * <h4>Supported top-level grammar features:</h4>
- * <ul><li><tt>fileTypes, patterns, repository</tt> (but see below) are supported.</li>
- * <li><tt>scopeName, firstLineMatch, foldingStartMarker, foldingStopMarker</tt> are <b>not</b> supported.</li>
+ * <h4>Top-level grammar constructs:</h4>
+ * <ul><li><code>patterns, repository</code> (with limitations, see "Other Features") are supported.</li>
+ * <li><code>scopeName, firstLineMatch, foldingStartMarker, foldingStopMarker</code> are <b>not</b> supported.</li>
+ * <li><code>fileTypes</code> is <b>not</b> supported. When using the Orion service registry, the "orion.edit.highlighter"
+ * service serves a similar purpose.
  * </ul>
  *
- * <p>TODO update this section</p>
- * <del>
- * <h4>Supported grammar rule features:</h4>
- * <ul><li><tt>match</tt> patterns are supported.</li>
- * <li><tt>name</tt> scope is supported.</li>
- * <li><tt>captures</tt> is <b>not</b> supported. Any scopes given inside a <tt>captures</tt> object are not applied.</li>
- * <li><tt>begin/end</tt> patterns are <b>not</b> supported and are ignored, along with their subrules. Consequently, 
- *   matched constructs may <b>not</b> span multiple lines.</li>
- * <li><tt>contentName, beginCaptures, endCaptures, applyEndPatternLast</tt> are <b>not</b> supported.</li>
- * <li><tt>include</tt> is supported, but only when it references a rule in the current grammar's <tt>repository</tt>.
- *   Including <tt>$self</tt>, <tt>$base</tt>, or <tt>rule.from.another.grammar</tt> is <b>not</b> supported.</li>
- * <li>The <tt>(?x)</tt> option ("extended" regex format) is supported, but only when it appears at the beginning of a regex pattern.</li>
- * <li>Matching is done using native JavaScript {@link RegExp}s. As a result, many Oniguruma features are <b>not</b> supported.
- *   Unsupported features include:
+ * <h4>Regular expression constructs:</h4>
+ * <ul>
+ * <li><code>match</code> patterns are supported.</li>
+ * <li><code>begin .. end</code> patterns are supported.</li>
+ * <li>The "extended" regex forms <code>(?x)</code> and <code>(?x:...)</code> are supported, but <b>only</b> when they 
+ * apply to the entire regex pattern.</li>
+ * <li>Matching is done using native JavaScript <code>RegExp</code>s. As a result, many features of the Oniguruma regex
+ * engine used by TextMate are <b>not</b> supported.
+ * Unsupported features include:
  *   <ul><li>Named captures</li>
- *   <li>Setting flags inside groups (eg. <tt>(?i:a)b</tt>)</li>
+ *   <li>Setting flags inside subgroups (eg. <code>(?i:a)b</code>)</li>
  *   <li>Lookbehind and negative lookbehind</li>
  *   <li>Subexpression call</li>
  *   <li>etc.</li>
  *   </ul>
  * </li>
  * </ul>
+ * 
+ * <h4>Scope-assignment constructs:</h4>
+ * <ul>
+ * <li><code>captures, beginCaptures, endCaptures</code> are supported.</li>
+ * <li><code>name</code> and <code>contentName</code> are supported.</li>
+ * </ul>
+ * 
+ * <h4>Other features:</h4>
+ * <ul>
+ * <li><code>applyEndPatternLast</code> is supported.</li>
+ * <li><code>include</code> is supported, but only when it references a rule in the current grammar's <code>repository</code>.
+ * Including <code>$self</code>, <code>$base</code>, or <code>rule.from.another.grammar</code> is <b>not</b> supported.</li>
+ * </ul>
  * </del>
- *
- * @class orion.editor.TextMateStyler
+ * @description Creates a new TextMateStyler.
  * @extends orion.editor.AbstractStyler
- * @param {orion.textview.TextView} textView The textView.
- * @param {Object} grammar The TextMate grammar as a JavaScript object. You can use a plist-to-JavaScript conversion tool 
- * to produce this object. Note that some features of TextMate grammars are not supported.
+ * @param {orion.textview.TextView} textView The TextView to provide styling for.
+ * @param {Object} grammar The TextMate grammar as a JavaScript object. You can produce this object by running a 
+ * PList-to-JavaScript conversion tool on a <code>.tmLanguage</code> file.
  */
 orion.editor.TextMateStyler = (function() {
 	/** @inner */
@@ -467,9 +470,11 @@ orion.editor.TextMateStyler = (function() {
 		this.preprocess();
 	}
 	orion.editor.AbstractStyler.extend(TextMateStyler, /** @lends orion.editor.TextMateStyler.prototype */ {
+		/** @private */
 		copy: function(obj) {
 			return JSON.parse(JSON.stringify(obj));
 		},
+		/** @private */
 		preprocess: function() {
 			var stack = [this.grammar];
 			for (; stack.length !== 0; ) {
@@ -504,6 +509,7 @@ orion.editor.TextMateStyler = (function() {
 		},
 		
 		/**
+		 * @private
 		 * Adds eclipse.Style objects for scope to our _styles cache.
 		 * @param {String} scope A scope name, like "constant.character.php".
 		 */
@@ -516,6 +522,7 @@ orion.editor.TextMateStyler = (function() {
 //				console.debug("add style for " + scope + " = [" + this._styles[scope].join(", ") + "]");
 			}
 		},
+		/** @private */
 		addStylesForCaptures: function(/**Object*/ captures) {
 			for (var prop in captures) {
 				if (captures.hasOwnProperty(prop)) {
@@ -593,6 +600,7 @@ orion.editor.TextMateStyler = (function() {
 		/**
 		 * @param {Object} rule A rule from the grammar.
 		 * @returns {MatchRule|BeginEndRule|ContainerRule}
+		 * @private
 		 */
 		_createTypedRule: function(rule) {
 			if (rule.match) {
@@ -605,6 +613,7 @@ orion.editor.TextMateStyler = (function() {
 		},
 		/**
 		 * Resolves a rule from the grammar (which may be an include) into the real rule that it points to.
+		 * @private
 		 */
 		_resolve: function(rule) {
 			var resolved = rule;
@@ -627,6 +636,7 @@ orion.editor.TextMateStyler = (function() {
 			}
 			return resolved;
 		},
+		/** @private */
 		ContainerNode: (function() {
 			function ContainerNode(parent, rule) {
 				this.parent = parent;
@@ -645,6 +655,7 @@ orion.editor.TextMateStyler = (function() {
 			};
 			return ContainerNode;
 		}()),
+		/** @private */
 		BeginEndNode: (function() {
 			function BeginEndNode(parent, rule, beginMatch) {
 				this.parent = parent;
@@ -699,25 +710,36 @@ orion.editor.TextMateStyler = (function() {
 			};
 			return BeginEndNode;
 		}()),
-		/** Pushes rules onto stack so that rules[startFrom] is on top */
+		/** Pushes rules onto stack such that rules[startFrom] is on top
+		 * @private
+		 */
 		push: function(/**Array*/ stack, /**Array*/ rules) {
 			if (!rules) { return; }
 			for (var i = rules.length; i > 0; ) {
 				stack.push(rules[--i]);
 			}
 		},
-		/** Execs regex on text, and returns the match object with its index offset by the given amount. */
+		/** Executes <code>regex</code> on <code>text</code>, and returns the match object with its index 
+		 * offset by the given amount.
+		 * @returns {RegExp.match}
+		 * @private
+		 */
 		exec: function(/**RegExp*/ regex, /**String*/ text, /**Number*/ offset) {
 			var match = regex.exec(text);
 			if (match) { match.index += offset; }
 			regex.lastIndex = 0; // Just in case
 			return match;
 		},
-		/** @returns {Number} The position immediately following the match. */
+		/** @returns {Number} The position immediately following the match.
+		 * @private
+		 */
 		afterMatch: function(/**RegExp.match*/ match) {
 			return match.index + match[0].length;
 		},
-		/** @returns {RegExp.match} If node is a BeginEndNode and its rule's "end" pattern matches the text. */
+		/**
+		 * @returns {RegExp.match} If node is a BeginEndNode and its rule's "end" pattern matches the text.
+		 * @private
+		 */
 		getEndMatch: function(/**Node*/ node, /**String*/ text, /**Number*/ offset) {
 			if (node instanceof this.BeginEndNode) {
 				var rule = node.rule;
@@ -727,7 +749,10 @@ orion.editor.TextMateStyler = (function() {
 			}
 			return null;
 		},
-		/** Called once when file is first loaded to build the parse tree. Tree is updated incrementally thereafter as buffer is modified */
+		/** Called once when file is first loaded to build the parse tree. Tree is updated incrementally thereafter 
+		 * as buffer is modified.
+		 * @private
+		 */
 		initialParse: function() {
 			var last = this.textView.getModel().getCharCount();
 			// First time; make parse tree for whole buffer
@@ -766,6 +791,7 @@ orion.editor.TextMateStyler = (function() {
 		},
 		/** @returns {BeginEndNode|ContainerNode} The result of taking the first (smallest "start" value) 
 		 * node overlapping [start,end] and drilling down to get its deepest damaged descendant (if any).
+		 * @private
 		 */
 		getFirstDamaged: function(start, end) {
 			// If start === 0 we actually have to start from the root because there is no position
@@ -793,7 +819,9 @@ orion.editor.TextMateStyler = (function() {
 			}
 			return result || this._tree;
 		},
-		/** @returns true If n overlaps the interval [start,end] */
+		/** @returns true If <code>n</code> overlaps the interval [start,end].
+		 * @private
+		 */
 		isDamaged: function(/**BeginEndNode*/ n, start, end) {
 			// Note strict > since [2,5] doesn't overlap [5,7]
 			return (n.start <= end && n.end > start);
@@ -809,6 +837,7 @@ orion.editor.TextMateStyler = (function() {
 		 * @param {Number} [addedCharCount] Only used for repairing === true
 		 * @param {Number} [removedCharCount] Only used for repairing === true
 		 * @returns {Number} The end position that redrawRange should be called for.
+		 * @private
 		 */
 		parse: function(origNode, repairing, rs, editStart, addedCharCount, removedCharCount) {
 			var model = this.textView.getModel();
@@ -921,6 +950,7 @@ orion.editor.TextMateStyler = (function() {
 		},
 		/** Helper for parse() in the repair case. To be called when ending a node, as any children that
 		 * lie in [rs,node.end] and were not repaired must've been deleted.
+		 * @private
 		 */
 		removeUnrepairedChildren: function(node, repairing, start) {
 			if (repairing) {
@@ -938,7 +968,9 @@ orion.editor.TextMateStyler = (function() {
 				}
 			}
 		},
-		/** Helper for parse() in the repair case */
+		/** Helper for parse() in the repair case
+		 * @private
+		 */
 		cleanup: function(repairing, origNode, rs, re, eof, addedCharCount, removedCharCount) {
 			var i, node, maybeRepairedNodes;
 			if (repairing) {
@@ -983,6 +1015,7 @@ orion.editor.TextMateStyler = (function() {
 		 * {Boolean} isSub
 		 * {RegExp.match} match
 		 * {(Match|BeginEnd)Rule} rule
+		 * @private
 		 */
 		getNextMatch: function(model, node, pos, matchRulesOnly) {
 			var lineIndex = model.getLineAtOffset(pos);
@@ -1047,6 +1080,7 @@ orion.editor.TextMateStyler = (function() {
 		 * This is the only time we rely on the start/end values from the pre-change tree. After this 
 		 * we only look at node ordering, never use the old indices.
 		 * @returns {Node}
+		 * @private
 		 */
 		getInitialExpected: function(node, rs) {
 			// TODO: Kind of weird.. maybe ContainerNodes should have start & end set, like BeginEndNodes
@@ -1084,6 +1118,7 @@ orion.editor.TextMateStyler = (function() {
 		 * @param {String} event "begin" if the last value of expected was matched as "begin",
 		 *  or "end" if it was matched as an end.
 		 * @returns {Node} The next expected node to match, or null.
+		 * @private
 		 */
 		getNextExpected: function(/**Node*/ expected, event) {
 			var node = expected;
@@ -1107,7 +1142,9 @@ orion.editor.TextMateStyler = (function() {
 			}
 			return null;
 		},
-		/** Helper for parse() when repairing. Prunes out the unmatched nodes from the tree so we can continue parsing. */
+		/** Helper for parse() when repairing. Prunes out the unmatched nodes from the tree so we can continue parsing.
+		 * @private
+		 */
 		prune: function(/**BeginEndNode|ContainerNode*/ node, /**Node*/ expected) {
 			var expectedAChild = expected.parent === node;
 			if (expectedAChild) {
@@ -1144,7 +1181,9 @@ orion.editor.TextMateStyler = (function() {
 //			// Editor requires StyleRanges must be in ascending order by 'start', or else some will be ignored
 			e.ranges.sort(byStart);
 		},
-		// Run parse algorithm on [start, end] in the context of node, assigning scope as we find matches
+		/** Runs parse algorithm on [start, end] in the context of node, assigning scope as we find matches.
+		 * @private
+		 */
 		getLineScope: function(model, node, start, end) {
 			var pos = start;
 			var expected = this.getInitialExpected(node, start);
@@ -1188,6 +1227,7 @@ orion.editor.TextMateStyler = (function() {
 			var inherited = this.getInheritedLineScope(gaps, start, end);
 			return scopes.concat(inherited);
 		},
+		/** @private */
 		getInheritedLineScope: function(gaps, start, end) {
 			var scopes = [];
 			for (var i=0; i < gaps.length; i++) {
@@ -1209,14 +1249,17 @@ orion.editor.TextMateStyler = (function() {
 			}
 			return scopes;
 		},
+		/** @private */
 		addBeginScope: function(scopes, match, typedRule) {
 			var rule = typedRule.rule;
 			this.addCapturesScope(scopes, match, (rule.beginCaptures || rule.captures), typedRule.isComplex, typedRule.beginOld2New, typedRule.beginConsuming);
 		},
+		/** @private */
 		addEndScope: function(scopes, match, typedRule) {
 			var rule = typedRule.rule;
 			this.addCapturesScope(scopes, match, (rule.endCaptures || rule.captures), typedRule.isComplex, typedRule.endOld2New, typedRule.endConsuming);
 		},
+		/** @private */
 		addMatchScope: function(scopes, match, typedRule) {
 			var rule = typedRule.rule,
 			    name = rule.name,
@@ -1228,14 +1271,17 @@ orion.editor.TextMateStyler = (function() {
 				this.addScope(scopes, match, name);
 			}
 		},
+		/** @private */
 		addScope: function(scopes, match, name) {
 			if (!name) { return; }
 			scopes.push({start: match.index, end: this.afterMatch(match), scope: name });
 		},
+		/** @private */
 		addScopeRange: function(scopes, start, end, name) {
 			if (!name) { return; }
 			scopes.push({start: start, end: end, scope: name });
 		},
+		/** @private */
 		addCapturesScope: function(/**Array*/scopes, /*RegExp.match*/ match, /**Object*/captures, /**Boolean*/isComplex, /**Object*/old2New, /**Object*/consuming) {
 			if (!captures) { return; }
 			if (!isComplex) {
@@ -1269,7 +1315,9 @@ orion.editor.TextMateStyler = (function() {
 				}
 			}
 		},
-		/** @returns {Node[]} In depth-first order */
+		/** @returns {Node[]} In depth-first order
+		 * @private
+		 */
 		getIntersecting: function(start, end) {
 			var result = [];
 			var nodes = this._tree ? [this._tree] : [];
@@ -1304,6 +1352,7 @@ orion.editor.TextMateStyler = (function() {
 		/**
 		 * Applies the grammar to obtain the {@link eclipse.StyleRange[]} for the given line.
 		 * @returns eclipse.StyleRange[]
+		 * @private
 		 */
 		toStyleRanges: function(/**ScopeRange[]*/ scopeRanges) {
 			var styleRanges = [];

@@ -13,9 +13,8 @@
 
 
 /**
- * @namespace The global container for orion APIs.
+ * @namespace The container for Orion APIs.
  */ 
-
 var orion = orion || {};
 orion.editor = orion.editor || {};	
 

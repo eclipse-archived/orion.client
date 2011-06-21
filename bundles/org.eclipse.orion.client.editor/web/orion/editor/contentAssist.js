@@ -13,20 +13,23 @@
 
 
 /**
- * @namespace The global container for eclipse APIs.
+ * @namespace The container for Orion APIs.
  */ 
 	var orion = orion || {};
 	orion.editor = orion.editor || {};
 
 /**
- * A ContentAssist will look for content assist providers in the service registry (if provided).
- * Alternately providers can be registered directly by calling {@link #addProvider}.
- * @name eclipse.ContentAssist
- * @param {orion.editor.Editor} editor
- * @param {String} contentAssistId
- * @param {eclipse.ServiceRegistry} [serviceRegistry] If omitted, providers must be registered via {@link #addProvider}.
+ * A <tt>ContentAssist</tt> will look for content assist providers in the service registry (if provided).
+ * Alternatively, providers can be registered directly by calling {@link #addProvider}.
+ * @name orion.editor.ContentAssist
+ * @class Can be attached to an Editor to display content assist suggestions.
+ * @param {orion.editor.Editor} editor The Editor to provide content assist for.
+ * @param {String|DomNode} contentAssistId The ID or DOMNode to use as the parent for content assist.
+ * @param {orion.ServiceRegistry} [serviceRegistry] Service registry to use for looking up content assist providers.
+ * If this parameter is omitted, providers must instead be registered by calling {@link #addProvider}.
  */
 orion.editor.ContentAssist = (function() {
+	/** @private */
 	function ContentAssist(editor, contentAssistId, serviceRegistry) {
 		this.editor = editor;
 		this.textView = editor.getTextView();
@@ -47,7 +50,7 @@ orion.editor.ContentAssist = (function() {
 		};
 		this.init();
 	}
-	ContentAssist.prototype = {
+	ContentAssist.prototype = /** @lends orion.editor.ContentAssist.prototype */ {
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
 			this.textView.setKeyBinding(isMac ? new orion.textview.KeyBinding(' ', false, false, false, true) : new orion.textview.KeyBinding(' ', true), "Content Assist");
@@ -57,8 +60,8 @@ orion.editor.ContentAssist = (function() {
 			}));
 			dojo.connect(this.editor, "onInputChange", this, this.inputChanged);
 		},
-	
-		inputChanged: function(fileName) {
+		/** @private */
+		inputChanged: function(/**String*/ fileName) {
 			if (this.serviceRegistry) {
 				// Filter the ServiceReferences
 				this.activeServiceReferences = [];
@@ -83,7 +86,6 @@ orion.editor.ContentAssist = (function() {
 				}
 			}
 		},
-		
 		cancel: function() {
 			this.showContentAssist(false);
 		},
@@ -136,7 +138,7 @@ orion.editor.ContentAssist = (function() {
 				return true;
 			}
 		},
-		showContentAssist: function(enable) {
+		showContentAssist: function(/**Boolean*/ enable) {
 			if (!this.contentAssistPanel) {
 				return;
 			}
@@ -199,10 +201,9 @@ orion.editor.ContentAssist = (function() {
 			}
 		},
 		/**
-		 * @param {String} The string buffer.substring(w+1, c) where c is the caret offset and w is the index of the 
-		 * rightmost whitespace character preceding c.
-		 * @param {String} buffer The entire buffer being edited
-		 * @param {eclipse.Selection} selection The current textView selection.
+		 * @param {String} prefix A prefix against which content assist proposals should be evaluated.
+		 * @param {String} buffer The entire buffer being edited.
+		 * @param {orion.textview.Selection} selection The current selection from the Editor.
 		 * @returns {dojo.Deferred} A future that will provide the keywords.
 		 */
 		getKeywords: function(prefix, buffer, selection) {
@@ -243,7 +244,7 @@ orion.editor.ContentAssist = (function() {
 		 * Adds a content assist provider.
 		 * @param {Object} provider The provider object. See {@link orion.contentAssist.CssContentAssistProvider} for an example.
 		 * @param {String} name Name for this provider.
-		 * @param {String} pattern The regex pattern matching filenames that provider can offer content assist for.
+		 * @param {String} pattern A regex pattern matching filenames that <tt>provider</tt> can offer content assist for.
 		 */
 		addProvider: function(provider, name, pattern) {
 			this.contentAssistProviders = this.contentAssistProviders || [];

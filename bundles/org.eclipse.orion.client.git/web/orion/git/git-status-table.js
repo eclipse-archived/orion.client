@@ -311,10 +311,13 @@ orion.GitLogTableRenderer = (function() {
 		this._parentId = parentId;
 		this._header = header;
 		this._type = type;
+		//The section Id represents a div that wraps the header , separator , and log contetn div
+		this._sectionId = this._parentId + "_" + this._type + "_section";
 	}
 	GitLogTableRenderer.prototype = {
 		render: function (renderSeparator) {
-			var headerTable = dojo.create("table", null,this._parentId);
+			dojo.create("div", {id:this._sectionId},this._parentId);
+			var headerTable = dojo.create("table", null,this._sectionId);
 			var row = dojo.create("tr", null, headerTable);
 			var titleCol = dojo.create("td", null, row, "last");
 			dojo.create("h2", {id : this._type + "_header" ,innerHTML: this._header}, titleCol, "last");
@@ -322,18 +325,22 @@ orion.GitLogTableRenderer = (function() {
 			this._cmdSpanAdditional = dojo.create("span", {style: "margin-left: 5px;"}, cmdColAdditional, "last");
 			var cmdCol = dojo.create("td", null, row, "last");
 			this._cmdSpan = dojo.create("span", {style: "margin-left: 5px;"}, cmdCol, "last");
-			dojo.create("hr", null,this._parentId);
-			this._logContentId = this._parentId + "_" + this._type;
+			dojo.create("hr", null,this._sectionId);
+			this._logContentId = this._parentId + "_" + this._type + "_content";
 			//dojo.create("div", {id:this._logContentId , style: "border:1px solid grey ;margin-left: 5px; margin-right: 30px; width: 95%; height: 200px; overflow: auto"}, this._parentId, "last");
-			dojo.create("div", {id:this._logContentId , style: "margin-left: 5px; margin-right: 5px; width: 99%; overflow: false"}, this._parentId, "last");
+			dojo.create("div", {id:this._logContentId , style: "margin-left: 5px; margin-right: 5px; width: 99%; overflow: false"}, this._sectionId, "last");
 			if(	renderSeparator)
-				dojo.create("table", {width:"100%", height:"10px"},this._parentId);
+				dojo.create("table", {width:"100%", height:"10px"},this._sectionId);
 		},
 		
 		getLogContentId: function(){
 			return this._logContentId;
 		},
-		
+			
+		getLogSectionId: function(){
+			return this._sectionId;
+		},
+			
 		modifyHeader: function(location){
 			dojo.place(document.createTextNode("Recent commits on " + location), this._type + "_header", "only");
 		},
@@ -494,7 +501,7 @@ orion.GitStatusController = (function() {
 				if(this._branchInfo.Children[i].Current)
 					this._curBranch = this._branchInfo.Children[i];
 			}
-			this._curRemote = this._remoteInfo.Children[0];
+			this._curRemote =  ( this._remoteInfo &&  this._remoteInfo.Children && this._remoteInfo.Children.length > 0 ) ? this._remoteInfo.Children[0]:null;
 			this._curClone = this._cloneInfo.Children[0];
 			
 			this._initTitleBar(true);
@@ -583,8 +590,11 @@ orion.GitStatusController = (function() {
 			if(!this._renderLog)
 				return;
 			if (isRemote) {
-				if(!this._curRemote || !this._curBranch)
+				if(!this._curRemote || !this._curBranch){
+					//We want to empty the mini log section for the tracked remote branch if there is no such 
+					dojo.empty(this._remoteTableRenderer.getLogSectionId());
 					return;
+				}
 		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null, {checkbox: false, minimal: true}, this._remoteTableRenderer.getLogContentId());    
 				dojo.place(document.createTextNode(""), this._remoteTableRenderer.getLogContentId(), "only");
 				// refresh the commit list for the remote
