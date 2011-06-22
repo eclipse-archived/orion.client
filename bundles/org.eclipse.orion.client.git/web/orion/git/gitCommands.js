@@ -154,6 +154,11 @@ var exports = {};
 	
 	exports.displayErrorOnStatus = 	function (error) {
 						serviceRegistry.getService("orion.page.message").then(function(progressService){
+						
+						if(error.status===401 || error.status===403)
+							return;
+						
+						
 							var display = [];
 							
 							display.Severity = "Error";
