@@ -152,7 +152,7 @@ var exports = {};
 		}
 	};
 	
-	exports.displayErrorOnStatus = 	function (error) {
+	displayErrorOnStatus = 	function (error) {
 						serviceRegistry.getService("orion.page.message").then(function(progressService){
 						
 						if(error.status===401 || error.status===403)
@@ -228,7 +228,7 @@ var exports = {};
 								function(){
 									dojo.hitch(explorer, explorer.changedItem)(item.parent);
 								},
-								 exports.displayErrorOnStatus
+								 displayErrorOnStatus
 							);
 						} else {
 							service.addBranch(item.BranchLocation, null, item.Name).then(
@@ -237,10 +237,10 @@ var exports = {};
 										function(){
 											dojo.hitch(explorer, explorer.changedItem)(item.parent.parent.parent);
 										},
-										exports.displayErrorOnStatus
+										displayErrorOnStatus
 									);
 								},
-							exports.displayErrorOnStatus
+							displayErrorOnStatus
 							);
 						}
 					}
@@ -266,7 +266,7 @@ var exports = {};
 								service.addBranch(item.Location, name).then(function(){
 									dojo.hitch(explorer, explorer.changedItem)(item);
 								},
-								exports.displayErrorOnStatus);
+								displayErrorOnStatus);
 							});
 				});
 				
@@ -289,7 +289,7 @@ var exports = {};
 								function(){
 									dojo.hitch(explorer, explorer.changedItem)(item.parent);
 								},
-								exports.displayErrorOnStatus);
+								displayErrorOnStatus);
 					}
 				);
 			},
@@ -311,7 +311,7 @@ var exports = {};
 											function() {
 												dojo.hitch(explorer, explorer.changedItem)(item);
 											},
-											exports.displayErrorOnStatus);
+											displayErrorOnStatus);
 								});
 							}
 				});
@@ -336,7 +336,7 @@ var exports = {};
 								function(){
 									dojo.hitch(explorer, explorer.changedItem)(item.parent);
 								},
-								exports.displayErrorOnStatus);
+								displayErrorOnStatus);
 					}
 				);
 			},
@@ -472,7 +472,7 @@ var exports = {};
 																explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
 																explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);			
 															});
-													}, exports.displayErrorOnStatus
+													}, displayErrorOnStatus
 													);
 												}, func, "Fetch Git Repository");
 									});
@@ -969,7 +969,7 @@ var exports = {};
 														if(explorer.redisplayClonesList){
 															dojo.hitch(explorer, explorer.redisplayClonesList)();
 														}
-													}, exports.displayErrorOnStatus);
+													}, displayErrorOnStatus);
 									});
 								});
 							}
@@ -1013,7 +1013,7 @@ var exports = {};
 											if(alreadyDeleted >= item.length && explorer.redisplayClonesList){
 												dojo.hitch(explorer, explorer.redisplayClonesList)();
 											}
-										}, exports.displayErrorOnStatus);
+										}, displayErrorOnStatus);
 							});
 						}
 					}
@@ -1025,7 +1025,7 @@ var exports = {};
 									if(explorer.redisplayClonesList){
 										dojo.hitch(explorer, explorer.redisplayClonesList)();
 									}
-								}, exports.displayErrorOnStatus);
+								}, displayErrorOnStatus);
 					});
 				}
 				
