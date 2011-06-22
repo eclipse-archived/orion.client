@@ -152,7 +152,7 @@ var exports = {};
 		}
 	};
 	
-	displayErrorOnStatus = 	function (error) {
+	function displayErrorOnStatus(error) {
 						serviceRegistry.getService("orion.page.message").then(function(progressService){
 						
 						if(error.status===401 || error.status===403)
