@@ -1104,7 +1104,7 @@ orion.GitStatusController = (function() {
 				var amendBtn = document.getElementById("amend");
 				amend = amendBtn.checked;
 			}
-			this.commitAll(this._model.items.CommitLocation , message , amend ?dojo.toJson({"Message":message,"Amend":"true"}): dojo.toJson({"Message":message}));
+			this.commitAll(this._curClone.HeadLocation, message , amend ?dojo.toJson({"Message":message,"Amend":"true"}): dojo.toJson({"Message":message}));
 		}
 		
 	};

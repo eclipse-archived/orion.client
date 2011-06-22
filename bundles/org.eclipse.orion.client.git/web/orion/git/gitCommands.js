@@ -579,7 +579,12 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				return item.RepositoryPath==="" || (item.Type === "Branch" && item.Current);
+				if (item.toRef)
+					// for action in the git log
+					return item.RepositoryPath === "" && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation;
+				else
+					// for action in the repo view
+					return item.Type === "Branch" && item.Current && item.RemoteLocation;
 			}
 		});
 	
@@ -593,7 +598,7 @@ var exports = {};
 				return "/git/git-log.html#" + item.toRef.RemoteLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
-				return item.toRef != null && item.toRef.Type === "Branch" && item.toRef.Current;
+				return item.toRef != null && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation;
 			}
 		});
 	
@@ -604,8 +609,15 @@ var exports = {};
 			id : "eclipse.orion.git.switchToCurrentLocal",
 			hrefCallback : function(item) {
 				var clientDeferred = new dojo.Deferred();
+				
+				var cloneLocation = item.CloneLocation;
+				if (cloneLocation == null){
+					var obj = JSON.parse(item.responseText);
+					cloneLocation = obj.ErrorData.CloneLocation;
+				}
+				
 				dojo.xhrGet({
-					url : item.CloneLocation,
+					url : cloneLocation,
 					headers : {
 						"Orion-Version" : "1"
 					},
@@ -633,7 +645,18 @@ var exports = {};
 				return clientDeferred;
 			},
 			visibleWhen : function(item) {
-				return item.Type === "RemoteTrackingBranch";
+				if (item.Type === "RemoteTrackingBranch")
+					return true;
+				
+				try {
+					var obj = JSON.parse(item.responseText);
+					if (obj.ErrorData)
+						return true;
+				} catch(error) {
+					//it is not JSON, just continue;
+				}
+				
+				return false;
 			}
 		});
 	
