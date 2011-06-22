@@ -548,7 +548,7 @@ orion.GitStatusController = (function() {
 			dojo.place(document.createTextNode(location), "location", "only");
 			if(withBranchName) {
 				this._logTableRenderer.modifyHeader(this._curBranch ? this._curBranch.Name : "detached");
-				if(this._curBranch)
+				if(this._curBranch && this._curRemote)
 					this._remoteTableRenderer.modifyHeader((this._curRemote ? this._curRemote.Name : "") + "/" + this._curBranch.Name);
 			}
 				

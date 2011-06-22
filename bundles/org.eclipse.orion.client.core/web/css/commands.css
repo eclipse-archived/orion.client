@@ -29,11 +29,6 @@
 	cursor: pointer;
 }
 
-.commandLink:visited {
-	margin-right: 12px;
-	cursor: pointer;
-}
-
 .commandLink:hover {
 	margin-right: 12px;
 	cursor: hand;
