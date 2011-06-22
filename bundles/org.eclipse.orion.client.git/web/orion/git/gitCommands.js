@@ -152,6 +152,29 @@ var exports = {};
 		}
 	};
 	
+	function displayErrorOnStatus(error) {
+						serviceRegistry.getService("orion.page.message").then(function(progressService){
+						
+						if(error.status===401 || error.status===403)
+							return;
+						
+						
+							var display = [];
+							
+							display.Severity = "Error";
+							display.HTML = false;
+							
+							try{
+								var resp = JSON.parse(error.responseText);
+								display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+							}catch(Exception){
+								display.Message = error.message;
+							}
+							
+							progressService.setProgressResult(display);
+						});
+					};
+	
 	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 		
 		// TODO: not used by the git clone navigator, could be removed
@@ -204,16 +227,20 @@ var exports = {};
 							service.checkoutBranch(item.CloneLocation, item.Name).then(
 								function(){
 									dojo.hitch(explorer, explorer.changedItem)(item.parent);
-								});
+								},
+								 displayErrorOnStatus
+							);
 						} else {
 							service.addBranch(item.BranchLocation, null, item.Name).then(
 								function(branch){
 									service.checkoutBranch(branch.CloneLocation, branch.Name).then(
 										function(){
 											dojo.hitch(explorer, explorer.changedItem)(item.parent.parent.parent);
-										}
+										},
+										displayErrorOnStatus
 									);
-								}
+								},
+							displayErrorOnStatus
 							);
 						}
 					}
@@ -238,9 +265,9 @@ var exports = {};
 							function(service) {
 								service.addBranch(item.Location, name).then(function(){
 									dojo.hitch(explorer, explorer.changedItem)(item);
-								});
-							}
-						);
+								},
+								displayErrorOnStatus);
+							});
 				});
 				
 			},
@@ -261,7 +288,8 @@ var exports = {};
 						service.removeBranch(item.Location).then(
 								function(){
 									dojo.hitch(explorer, explorer.changedItem)(item.parent);
-								});
+								},
+								displayErrorOnStatus);
 					}
 				);
 			},
@@ -282,7 +310,8 @@ var exports = {};
 									gitService.addRemote(item.Location, remote, remoteURI).then(
 											function() {
 												dojo.hitch(explorer, explorer.changedItem)(item);
-											});
+											},
+											displayErrorOnStatus);
 								});
 							}
 				});
@@ -306,7 +335,8 @@ var exports = {};
 						service.removeRemote(item.Location).then(
 								function(){
 									dojo.hitch(explorer, explorer.changedItem)(item.parent);
-								});
+								},
+								displayErrorOnStatus);
 					}
 				);
 			},
@@ -434,6 +464,7 @@ var exports = {};
 														error : function(error, ioArgs) {
 															//handleGetAuthenticationError(this, ioArgs);
 															console.error("HTTP status code: ", ioArgs.xhr.status);
+															return error;
 														}
 													}).then(function(remoteJsonData){
 														if (explorer.parentId === "explorer-tree")
@@ -441,7 +472,8 @@ var exports = {};
 																explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
 																explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);			
 															});
-													});
+													}, displayErrorOnStatus
+													);
 												}, func, "Fetch Git Repository");
 									});
 							});
@@ -547,7 +579,12 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				return item.RepositoryPath==="" || (item.Type === "Branch" && item.Current);
+				if (item.toRef)
+					// for action in the git log
+					return item.RepositoryPath === "" && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation;
+				else
+					// for action in the repo view
+					return item.Type === "Branch" && item.Current && item.RemoteLocation;
 			}
 		});
 	
@@ -561,7 +598,7 @@ var exports = {};
 				return "/git/git-log.html#" + item.toRef.RemoteLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
-				return item.toRef != null && item.toRef.Type === "Branch" && item.toRef.Current;
+				return item.toRef != null && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation;
 			}
 		});
 	
@@ -572,8 +609,15 @@ var exports = {};
 			id : "eclipse.orion.git.switchToCurrentLocal",
 			hrefCallback : function(item) {
 				var clientDeferred = new dojo.Deferred();
+				
+				var cloneLocation = item.CloneLocation;
+				if (cloneLocation == null){
+					var obj = JSON.parse(item.responseText);
+					cloneLocation = obj.ErrorData.CloneLocation;
+				}
+				
 				dojo.xhrGet({
-					url : item.CloneLocation,
+					url : cloneLocation,
 					headers : {
 						"Orion-Version" : "1"
 					},
@@ -601,7 +645,18 @@ var exports = {};
 				return clientDeferred;
 			},
 			visibleWhen : function(item) {
-				return item.Type === "RemoteTrackingBranch";
+				if (item.Type === "RemoteTrackingBranch")
+					return true;
+				
+				try {
+					var obj = JSON.parse(item.responseText);
+					if (obj.ErrorData)
+						return true;
+				} catch(error) {
+					//it is not JSON, just continue;
+				}
+				
+				return false;
 			}
 		});
 	
@@ -937,7 +992,7 @@ var exports = {};
 														if(explorer.redisplayClonesList){
 															dojo.hitch(explorer, explorer.redisplayClonesList)();
 														}
-													});
+													}, displayErrorOnStatus);
 									});
 								});
 							}
@@ -981,7 +1036,7 @@ var exports = {};
 											if(alreadyDeleted >= item.length && explorer.redisplayClonesList){
 												dojo.hitch(explorer, explorer.redisplayClonesList)();
 											}
-										});
+										}, displayErrorOnStatus);
 							});
 						}
 					}
@@ -993,7 +1048,7 @@ var exports = {};
 									if(explorer.redisplayClonesList){
 										dojo.hitch(explorer, explorer.redisplayClonesList)();
 									}
-								});
+								}, displayErrorOnStatus);
 					});
 				}
 				
