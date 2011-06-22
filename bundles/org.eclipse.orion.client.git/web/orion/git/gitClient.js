@@ -77,6 +77,7 @@ eclipse.GitService = (function() {
 					error : function(error, ioArgs) {
 						mAuth.handleGetAuthenticationError(this, ioArgs);
 						console.error("HTTP status code: ", ioArgs.xhr.status);
+						return error;
 					}
 				});
 			
@@ -100,6 +101,7 @@ eclipse.GitService = (function() {
 				error : function(error, ioArgs) {
 					mAuth.handleGetAuthenticationError(this, ioArgs);
 					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return error;
 				}
 			});
 		},
@@ -418,6 +420,7 @@ eclipse.GitService = (function() {
 				error : function(error, ioArgs) {
 					mAuth.handleGetAuthenticationError(this, ioArgs);
 					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return error;
 				}
 			});
 		},
@@ -464,6 +467,7 @@ eclipse.GitService = (function() {
 				error : function(error, ioArgs) {
 					mAuth.handleGetAuthenticationError(this, ioArgs);
 					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return error;
 				}
 			});
 		},
@@ -482,6 +486,7 @@ eclipse.GitService = (function() {
 				error : function(error, ioArgs) {
 					mAuth.handleGetAuthenticationError(this, ioArgs);
 					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return error;
 				}
 			});
 		},
@@ -504,6 +509,7 @@ eclipse.GitService = (function() {
 				error : function(error, ioArgs) {
 					mAuth.handleGetAuthenticationError(this, ioArgs);
 					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return error;
 				}
 			});
 		},
@@ -522,6 +528,7 @@ eclipse.GitService = (function() {
 				error : function(error, ioArgs) {
 					mAuth.handleGetAuthenticationError(this, ioArgs);
 					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return error;
 				}
 			});
 		},
@@ -667,6 +674,7 @@ eclipse.GitService = (function() {
 				error : function(error, ioArgs) {
 					mAuth.handleGetAuthenticationError(this, ioArgs);
 					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return error;
 				}
 			});
 		},

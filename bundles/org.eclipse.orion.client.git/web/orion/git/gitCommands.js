@@ -152,6 +152,24 @@ var exports = {};
 		}
 	};
 	
+	exports.displayErrorOnStatus = 	function (error) {
+						serviceRegistry.getService("orion.page.message").then(function(progressService){
+							var display = [];
+							
+							display.Severity = "Error";
+							display.HTML = false;
+							
+							try{
+								var resp = JSON.parse(error.responseText);
+								display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+							}catch(Exception){
+								display.Message = error.message;
+							}
+							
+							progressService.setProgressResult(display);
+						});
+					};
+	
 	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 		
 		// TODO: not used by the git clone navigator, could be removed
@@ -204,16 +222,20 @@ var exports = {};
 							service.checkoutBranch(item.CloneLocation, item.Name).then(
 								function(){
 									dojo.hitch(explorer, explorer.changedItem)(item.parent);
-								});
+								},
+								 exports.displayErrorOnStatus
+							);
 						} else {
 							service.addBranch(item.BranchLocation, null, item.Name).then(
 								function(branch){
 									service.checkoutBranch(branch.CloneLocation, branch.Name).then(
 										function(){
 											dojo.hitch(explorer, explorer.changedItem)(item.parent.parent.parent);
-										}
+										},
+										exports.displayErrorOnStatus
 									);
-								}
+								},
+							exports.displayErrorOnStatus
 							);
 						}
 					}
@@ -238,9 +260,9 @@ var exports = {};
 							function(service) {
 								service.addBranch(item.Location, name).then(function(){
 									dojo.hitch(explorer, explorer.changedItem)(item);
-								});
-							}
-						);
+								},
+								exports.displayErrorOnStatus);
+							});
 				});
 				
 			},
@@ -261,7 +283,8 @@ var exports = {};
 						service.removeBranch(item.Location).then(
 								function(){
 									dojo.hitch(explorer, explorer.changedItem)(item.parent);
-								});
+								},
+								exports.displayErrorOnStatus);
 					}
 				);
 			},
@@ -282,7 +305,8 @@ var exports = {};
 									gitService.addRemote(item.Location, remote, remoteURI).then(
 											function() {
 												dojo.hitch(explorer, explorer.changedItem)(item);
-											});
+											},
+											exports.displayErrorOnStatus);
 								});
 							}
 				});
@@ -306,7 +330,8 @@ var exports = {};
 						service.removeRemote(item.Location).then(
 								function(){
 									dojo.hitch(explorer, explorer.changedItem)(item.parent);
-								});
+								},
+								exports.displayErrorOnStatus);
 					}
 				);
 			},
@@ -434,6 +459,7 @@ var exports = {};
 														error : function(error, ioArgs) {
 															//handleGetAuthenticationError(this, ioArgs);
 															console.error("HTTP status code: ", ioArgs.xhr.status);
+															return error;
 														}
 													}).then(function(remoteJsonData){
 														if (explorer.parentId === "explorer-tree")
@@ -441,7 +467,8 @@ var exports = {};
 																explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
 																explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);			
 															});
-													});
+													}, exports.displayErrorOnStatus
+													);
 												}, func, "Fetch Git Repository");
 									});
 							});
@@ -937,7 +964,7 @@ var exports = {};
 														if(explorer.redisplayClonesList){
 															dojo.hitch(explorer, explorer.redisplayClonesList)();
 														}
-													});
+													}, exports.displayErrorOnStatus);
 									});
 								});
 							}
@@ -981,7 +1008,7 @@ var exports = {};
 											if(alreadyDeleted >= item.length && explorer.redisplayClonesList){
 												dojo.hitch(explorer, explorer.redisplayClonesList)();
 											}
-										});
+										}, exports.displayErrorOnStatus);
 							});
 						}
 					}
@@ -993,7 +1020,7 @@ var exports = {};
 									if(explorer.redisplayClonesList){
 										dojo.hitch(explorer, explorer.redisplayClonesList)();
 									}
-								});
+								}, exports.displayErrorOnStatus);
 					});
 				}
 				
