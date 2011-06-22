@@ -30,7 +30,7 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 	},
 	postCreate : function() {
 		this.inherited(arguments);
-		var h = new dojox.form.FileUploader({
+		this.fileUpload = new dojox.form.FileUploader({
 			isDebug : false,
 			hoverClass : "uploadHover",
 			activeClass : "uploadPress",
@@ -46,21 +46,39 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 		}, this.importDialogSelectButton.id);
 
 		dojo.connect(this.importButton, "onClick", dojo.hitch(this, function() {
-			h.upload();
+			this.fileUpload.upload();
 		}));
 		
-		dojo.connect(h, "onError", dojo.hitch(this, function(dataArray) {
+		dojo.connect(this.fileUpload, "onError", dojo.hitch(this, function(dataArray) {
 			this.hide();
 		}));
 		
-		dojo.connect(h, "onComplete", dojo.hitch(this, function(dataArray) {
+		dojo.connect(this.fileUpload, "onComplete", dojo.hitch(this, function(dataArray) {
 			this.hide();
 			this.options.func();
 		}));
 	},
 	execute : function() {
 
+	},
+	
+	onShow: function() {
+		this.inherited(arguments);
+		
+		// Fix <input> position
+		var input = dojo.query("#" + this.fileUpload.id + " input")[0];
+		dojo.style(input, {left: "0px"});
+	},
+	
+	show: function() {
+		var fadeIn = this.inherited(arguments);
+		fadeIn.then(dojo.hitch(this, function() {
+			// For some reason passing the importDialogSelectButton node itself does nothing
+			dojo.style(this.importDialogSelectButton.id, {overflow: "visible"});
+		}));
+		return fadeIn;
 	}
+	
 });
 
 });
