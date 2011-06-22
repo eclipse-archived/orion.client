@@ -72,6 +72,10 @@ exports.GitCommitNavigator = (function() {
 				if(treeRoot.status!=404 && response!=="")
 					dojo.create("b", {innerHTML: "Error " + treeRoot.status + ": "}, progress, "only");
 				dojo.place(document.createTextNode(response), progress, "last");
+				
+				if(this.toolbarId && this.selectionToolsId)
+					mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
+				
 				return;
 			}
 			
