@@ -399,26 +399,29 @@ orion.editor.RegexUtil = {
 
 /**
  * @name orion.editor.TextMateStyler
- * @class A styler that knows how to apply a subset of the TextMate grammar format to style a line.<p>
+ * @class A styler that knows how to apply a subset of the TextMate grammar format to style a line.
  *
  * <h4>Styling from a grammar:</h4>
- * Each scope name given in the grammar is converted to an array of CSS class names. For example 
+ * <p>Each scope name given in the grammar is converted to an array of CSS class names. For example 
  * a region of text with scope <code>keyword.control.php</code> will be assigned the CSS classes<br />
- * <code>keyword, keyword-control, keyword-control-php</code>
+ * <code>keyword, keyword-control, keyword-control-php</code></p>
  *
- * A CSS file can give rules matching any of these class names to provide generic or more specific styling.
- * For example, <br /><code>.keyword { font-color: blue; }</code> colors all keywords blue, while<br />
- * <code>.keyword-control-php { font-weight: bold; }</code> bolds only PHP control keywords.<p>
+ * <p>A CSS file can give rules matching any of these class names to provide generic or more specific styling.
+ * For example,</p>
+ * <p><code>.keyword { font-color: blue; }</code></p>
+ * <p>colors all keywords blue, while</p>
+ * <p><code>.keyword-control-php { font-weight: bold; }</code></p>
+ * <p>bolds only PHP control keywords.</p>
  *
- * This is useful when using grammars that adhere to TextMate's
+ * <p>This is useful when using grammars that adhere to TextMate's
  * <a href="http://manual.macromates.com/en/language_grammars.html#naming_conventions">scope name conventions</a>,
- * as a single CSS rule can provide consistent styling to similar constructs across different languages.<p>
+ * as a single CSS rule can provide consistent styling to similar constructs across different languages.</p>
  * 
  * <h4>Top-level grammar constructs:</h4>
  * <ul><li><code>patterns, repository</code> (with limitations, see "Other Features") are supported.</li>
  * <li><code>scopeName, firstLineMatch, foldingStartMarker, foldingStopMarker</code> are <b>not</b> supported.</li>
  * <li><code>fileTypes</code> is <b>not</b> supported. When using the Orion service registry, the "orion.edit.highlighter"
- * service serves a similar purpose.
+ * service serves a similar purpose.</li>
  * </ul>
  *
  * <h4>Regular expression constructs:</h4>
@@ -451,7 +454,7 @@ orion.editor.RegexUtil = {
  * <li><code>include</code> is supported, but only when it references a rule in the current grammar's <code>repository</code>.
  * Including <code>$self</code>, <code>$base</code>, or <code>rule.from.another.grammar</code> is <b>not</b> supported.</li>
  * </ul>
- * </del>
+ * 
  * @description Creates a new TextMateStyler.
  * @extends orion.editor.AbstractStyler
  * @param {orion.textview.TextView} textView The TextView to provide styling for.

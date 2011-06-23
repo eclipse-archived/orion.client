@@ -16,7 +16,7 @@ var orion = orion || {};
 orion.editor = orion.editor || {};
 
 /**
- * Uses a grammar to provide some very rough syntax highlighting for HTML.<p>
+ * Uses a grammar to provide some very rough syntax highlighting for HTML.
  * @class orion.syntax.HtmlGrammar
  */
 orion.editor.HtmlGrammar = (function() {

@@ -19,28 +19,31 @@ define(['dojo'], function(dojo) {
 	 * @param options 
 	 * @name orion.treetable.TableTree 
 	 * @class Generates an HTML table where one of the columns is indented according to depth of children.
-	 * Clients must supply a model that generates children items, and a renderer can be supplied which
+	 * <p>Clients must supply a model that generates children items, and a renderer can be supplied which
 	 * generates the HTML table row for each child. Custom rendering allows clients to use checkboxes,
 	 * images, links, etc. to describe each  element in the tree.  Renderers handle all clicks and other
-	 * behavior via their supplied row content.<p>
+	 * behavior via their supplied row content.</p>
 	 * 
-	 * The table tree parent can be specified by id or DOM node.<p>
+	 * <p>The table tree parent can be specified by id or DOM node.</p>
 	 * 
-	 * The tree provides API for the client to programmatically expand and collapse
+	 * <p>The tree provides API for the client to programmatically expand and collapse
 	 * nodes, based on the client renderer's definition of how that is done (click on icon, etc.).
-	 * The tree will manage the hiding and showing of child DOM elements and proper indent.<p>
+	 * The tree will manage the hiding and showing of child DOM elements and proper indent</p>
 	 * 
-	 * The model must implement<ul>
-	 *   <li>getRoot(onItem)  
-	 *   <li>getChildren(parentItem, onComplete)
-	 *   <li>getId(item)  // must be a valid DOM id</ul>
+	 * The model must implement:
+	 * <ul>
+	 *   <li>getRoot(onItem)</li>
+	 *   <li>getChildren(parentItem, onComplete)</li>
+	 *   <li>getId(item)  // must be a valid DOM id</li>
+	 * </ul>
 	 * 
-	 * Renderers must implement<ul>
-	 *   <li>initTable(tableNode) // set up table attributes and a header if desired
-	 *   <li>render(item, tr) // generate tds for the row
-	 *   <li>labelColumnIndex() // 0 based index of which td contains the primary label which will be indented
-	 *   <li>rowsChanged // optional, perform any work (such as styling) that should happen after the row content changes</ul>
-	 * 
+	 * Renderers must implement:
+	 * <ul>
+	 *   <li>initTable(tableNode) // set up table attributes and a header if desired</li>
+	 *   <li>render(item, tr) // generate tds for the row</li>
+	 *   <li>labelColumnIndex() // 0 based index of which td contains the primary label which will be indented</li>
+	 *   <li>rowsChanged // optional, perform any work (such as styling) that should happen after the row content changes</li>
+	 * </ul>
 	 */
 	function TableTree (options) {
 		this._init(options);

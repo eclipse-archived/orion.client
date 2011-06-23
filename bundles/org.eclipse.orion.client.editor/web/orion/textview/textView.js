@@ -239,7 +239,7 @@ orion.textview.TextView = (function() {
 		 * <b>See:</b><br/>
 		 * {@link orion.textview.TextView}<br/>
 		 * {@link orion.textview.TextView#addRuler}
-		 * </p>		 
+		 * 
 		 * @name orion.textview.Ruler
 		 * 
 		 */
@@ -1383,7 +1383,7 @@ orion.textview.TextView = (function() {
 		 * 
 		 * @param {Number} start the start offset of the selection
 		 * @param {Number} end the end offset of the selection
-		 * @param {Boolean} [show=true] if <code>true</coce>, the view will scroll if needed to show the caret location.
+		 * @param {Boolean} [show=true] if <code>true</code>, the view will scroll if needed to show the caret location.
 		 *
 		 * @see #getSelection
 		 */
