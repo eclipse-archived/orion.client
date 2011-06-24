@@ -182,6 +182,8 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 			_channel = internalRegistry.connect(url, _responseHandler);
 			window.setTimeout(function() {
 				if (!_loaded) {
+					data = {};
+					internalRegistry.updatePlugin(_self);	
 					_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
 				}
 			}, 15000);

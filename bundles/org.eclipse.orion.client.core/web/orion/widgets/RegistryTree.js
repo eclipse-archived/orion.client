@@ -47,7 +47,7 @@ dojo.declare("orion.widgets.RegistryTree", [dijit.Tree], {
 			nodes.push({
 				plugin: plugins[i],
 				id: newPrefix,
-				label: plugins[i].getLocation(),
+				label: plugins[i].getLocation() + (typeof plugins[i].getData().services === "undefined" ? " <No available services or timed out, check URL and try reloading>" : ""),
 				children: [this.buildServices(newPrefix, plugins[i].getServiceReferences())]
 			});
 		}
