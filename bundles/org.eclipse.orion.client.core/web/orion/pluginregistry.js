@@ -177,13 +177,15 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 		return result;
 	};
 	
-	this._load = function() {
+	this._load = function(isInstall) {
 		if (!_channel) {
 			_channel = internalRegistry.connect(url, _responseHandler);
 			window.setTimeout(function() {
 				if (!_loaded) {
-					data = {};
-					internalRegistry.updatePlugin(_self);	
+					if (!isInstall) {
+						data = {};
+						internalRegistry.updatePlugin(_self);
+					}
 					_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
 				}
 			}, 15000);
@@ -427,8 +429,8 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				_persist(plugin);
 				_pluginEventTarget.dispatchEvent("pluginAdded", plugin);
 				d.resolve(plugin);
-			} else {		
-				plugin._load().then(function() {
+			} else {				
+				plugin._load(!!_loaded).then(function() {
 					_persist(plugin);
 					_pluginEventTarget.dispatchEvent("pluginAdded", plugin);
 					d.resolve(plugin);
