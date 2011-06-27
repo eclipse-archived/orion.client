@@ -79,21 +79,28 @@ exports.CommitDetails = (function() {
 			dojo.addClass(commandCol, "paneHeadingContainer");
 			dojo.place("<span id='commitMetaCommands' class='paneHeadingToolbar'></span>", commandCol, "only");
 			
+			var tr, col1, col2, col3;
 			if (commitDetails != null){
-				
+
 				// commit details
-				var tr, col1, col2;
 				var tbody = dojo.create("tbody", null, commitMetaTable);
 				
-				var tr = dojo.create("tr");
-				var col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
+				tr = dojo.create("tr");
+				col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 				dojo.place(document.createTextNode("Author"), col1, "only");		
-				var col2 = dojo.create("td", null, tr, "last");
+				col2 = dojo.create("td", null, tr, "last");
 				dojo.place(document.createTextNode(commitDetails.AuthorName + " (" + commitDetails.AuthorEmail + ")"), col2, "only");
 				dojo.place(tr, tbody, "last");
-				var col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
-				dojo.style(col3, "whiteSpace", "nowrap");
-				dojo.style(col3, "textAlign", "right");
+
+				if (commitDetails.AuthorImage) {
+					col3 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px;width: 40",rowspan:"2"}, tr, "last");
+					var image = new Image();
+					image.src=commitDetails.AuthorImage;
+					image.name=commitDetails.AuthorName;
+					image.width=40;
+					image.height=40;
+					dojo.place(image, col3, "first");
+				}
 				
 				tr = dojo.create("tr");
 				col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
@@ -101,9 +108,6 @@ exports.CommitDetails = (function() {
 				col2 = dojo.create("td", null, tr, "last");
 				dojo.place(document.createTextNode(commitDetails.CommitterName + " (" + commitDetails.CommitterEmail + ")"), col2, "only");
 				dojo.place(tr, tbody, "last");
-				col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
-				dojo.style(col3, "whiteSpace", "nowrap");
-				dojo.style(col3, "textAlign", "right");
 				
 				tr = dojo.create("tr");
 				col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
@@ -111,9 +115,6 @@ exports.CommitDetails = (function() {
 				col2 = dojo.create("td", null, tr, "last");
 				dojo.place(document.createTextNode(commitDetails.Message), col2, "only");
 				dojo.place(tr, tbody, "last");
-				col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
-				dojo.style(col3, "whiteSpace", "nowrap");
-				dojo.style(col3, "textAlign", "right");
 				
 				tr = dojo.create("tr");
 				col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
@@ -121,9 +122,6 @@ exports.CommitDetails = (function() {
 				col2 = dojo.create("td", null, tr, "last");
 				dojo.place(document.createTextNode(commitDetails.Name), col2, "only");
 				dojo.place(tr, tbody, "last");
-				col3 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
-				dojo.style(col3, "whiteSpace", "nowrap");
-				dojo.style(col3, "textAlign", "right");
 			
 //			var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col3, "only");
 //			// we must hide/show the span rather than the column.  IE and Chrome will not consider
