@@ -470,12 +470,21 @@ a:hover {
 	position: fixed;
 	top: 100px;
 	left: 100px;
-	border: 1px solid black;
+	border: 2px inset #DDD;
 	z-index:10;
+	cursor: default;
 }
 
 .contentassist .selected {
-	background-color: #DDDDDD;
+	background-color: #DDD;
+}
+
+.contentassist>div {
+	padding: 1px 3px 0 3px;
+}
+
+.contentassist>div:hover {
+	background-color: #EAF2FE;
 }
 
 .test-passed {

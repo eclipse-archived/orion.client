@@ -8,15 +8,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global eclipse:true dojo */
+/*global define dojo window*/
 /*jslint maxerr:150 browser:true devel:true */
-
 
 /**
  * @namespace The container for Orion APIs.
  */ 
-	var orion = orion || {};
-	orion.editor = orion.editor || {};
+var orion = orion || {};
+orion.editor = orion.editor || {};
 
 /**
  * A <tt>ContentAssist</tt> will look for content assist providers in the service registry (if provided).
@@ -94,56 +93,67 @@ orion.editor.ContentAssist = (function() {
 		},
 		lineUp: function() {
 			if (this.contentAssistPanel) {
-				var nodes = dojo.query('> div', this.contentAssistPanel);
-				var index = 0;
-				for (var i=0; i<nodes.length; i++) {
-					if (nodes[i].className === "selected") {
-						nodes[i].className = "";
-						index = i;
-						break;
-					}
-				}
-				if (index > 0) {
-					nodes[index-1].className = "selected";
+				var selected = this.getSelected();
+				if (selected === this.contentAssistPanel.firstChild) {
+					this.setSelected(this.contentAssistPanel.lastChild);
 				} else {
-					nodes[nodes.length - 1].className = "selected";
+					this.setSelected(selected.previousSibling);
 				}
 				return true;
 			}
 		},
 		lineDown: function() {
 			if (this.contentAssistPanel) {
-				var nodes = dojo.query('> div', this.contentAssistPanel);
-				var index = 0;
-				for (var i=0; i<nodes.length; i++) {
-					if (nodes[i].className === "selected") {
-						nodes[i].className = "";
-						index = i;
-						break;
-					}
-				}
-				if (index < nodes.length - 1) {
-					nodes[index+1].className = "selected";
+				var selected = this.getSelected();
+				if (selected === this.contentAssistPanel.lastChild) {
+					this.setSelected(this.contentAssistPanel.firstChild);
 				} else {
-					nodes[0].className = "selected";
+					this.setSelected(selected.nextSibling);
 				}
 				return true;
 			}
 		},
+		setSelected: function(node) {
+			var nodes = this.contentAssistPanel.childNodes;
+			for (var i=0; i < nodes.length; i++) {
+				var child = nodes[i];
+				if (child.className === "selected") {
+					child.className = "";
+				}
+				if (child === node) {
+					child.className = "selected";
+				}
+			}
+		},
+		getSelected: function() {
+			var nodes = this.contentAssistPanel.childNodes;
+			for (var i=0; i < nodes.length; i++) {
+				if (nodes[i].className === "selected") {
+					return nodes[i];
+				}
+			}
+			return null;
+		},
 		enter: function() {
 			if (this.contentAssistPanel) {
-				var proposal = dojo.query("> .selected", this.contentAssistPanel);
-				this.textView.setText(proposal[0].innerHTML.substring(this.prefix.length), this.textView.getCaretOffset(), this.textView.getCaretOffset());
+				var proposal = this.getSelected();
+				this.textView.setText(proposal.innerHTML.substring(this.prefix.length), this.textView.getCaretOffset(), this.textView.getCaretOffset());
 				this.showContentAssist(false);
 				return true;
 			}
+		},
+		click: function(e) {
+			this.setSelected(e.target);
+			this.enter();
+			this.editor.getTextView().focus();
 		},
 		showContentAssist: function(/**Boolean*/ enable) {
 			if (!this.contentAssistPanel) {
 				return;
 			}
+			var contentAssist = this;
 			function createDiv(proposal, isSelected, parent) {
-				var attributes = {innerHTML: proposal, onclick: function(){alert(proposal);}};
+				var attributes = {innerHTML: proposal};
 				if (isSelected) {
 					attributes.className = "selected";
 				}
@@ -154,6 +164,7 @@ orion.editor.ContentAssist = (function() {
 				this.textView.removeEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
 				this.active = false;
 				this.contentAssistPanel.style.display = "none";
+				this.contentAssistPanel.onclick = null;
 			} else {
 				var offset = this.textView.getCaretOffset();
 				var index = offset;
@@ -196,6 +207,7 @@ orion.editor.ContentAssist = (function() {
 						this.contentAssistPanel.style.display = "block";
 						this.textView.addEventListener("Verify", this, this.contentAssistListener.onVerify);
 						this.textView.addEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
+						this.contentAssistPanel.onclick = dojo.hitch(this, this.click);
 						this.active = true;
 					}));
 			}
