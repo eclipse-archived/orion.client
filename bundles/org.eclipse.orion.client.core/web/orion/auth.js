@@ -78,13 +78,17 @@ function handlePutAuthenticationError(xhrArgs, ioArgs) {
  */
 function handleAuthenticationError(error, retry) {
 	if (error.status === 403) { 
-		if (forbiddenAccessDlg == null) {
+		if (typeof forbiddenAccessDlg === "undefined") {
 			forbiddenAccessDlg = new dijit.Dialog({
 		        title: "Forbidden access"
 		    });
 		}
-		
-		forbiddenAccessDlg.set("content", error.message);
+		var message = error.message;
+		if (error.responseText) {
+			var responseObject = JSON.parse(error.responseText);
+			message = responseObject.Message || error.message;
+		}
+		forbiddenAccessDlg.set("content", message);
 		forbiddenAccessDlg.show();
 	}
 	if (error.status === 401) { 
