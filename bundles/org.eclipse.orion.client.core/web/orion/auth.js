@@ -7,7 +7,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit handleAuthenticationError */
+/*global define dojo dijit handleAuthenticationError */
  /*
 	Authentication and authorization error handling. Adds methods that handle 401 and 403 responses for 
 	XHR calls.
