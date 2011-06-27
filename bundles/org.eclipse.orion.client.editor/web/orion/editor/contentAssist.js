@@ -40,10 +40,12 @@ orion.editor.ContentAssist = (function() {
 		this.activeServiceReferences = [];
 		this.activeContentAssistProviders = [];
 		this.contentAssistListener = {
-			onVerify: function(event){
-				this.showContentAssist(false);
+			onModelChanged: function(event) {
+				if (!this.finishing) {
+					this.showContentAssist(true, event);
+				}
 			},
-			onSelectionChanged: function() {
+			onScroll: function(event) {
 				this.showContentAssist(false);
 			}
 		};
@@ -137,6 +139,7 @@ orion.editor.ContentAssist = (function() {
 		enter: function() {
 			if (this.contentAssistPanel) {
 				var proposal = this.getSelected();
+				this.finishing = true;
 				this.textView.setText(proposal.innerHTML.substring(this.prefix.length), this.textView.getCaretOffset(), this.textView.getCaretOffset());
 				this.showContentAssist(false);
 				return true;
@@ -147,11 +150,14 @@ orion.editor.ContentAssist = (function() {
 			this.enter();
 			this.editor.getTextView().focus();
 		},
-		showContentAssist: function(/**Boolean*/ enable) {
+		/**
+		 * @param {Boolean} enable
+		 * @param {orion.textview.ModelChangedEvent} [event]
+		 */
+		showContentAssist: function(enable, event) {
 			if (!this.contentAssistPanel) {
 				return;
 			}
-			var contentAssist = this;
 			function createDiv(proposal, isSelected, parent) {
 				var attributes = {innerHTML: proposal};
 				if (isSelected) {
@@ -160,13 +166,16 @@ orion.editor.ContentAssist = (function() {
 				dojo.create("div", attributes, parent, this);
 			}
 			if (!enable) {
-				this.textView.removeEventListener("Verify", this, this.contentAssistListener.onVerify);
-				this.textView.removeEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
+				if (this.listenerAdded) {
+					this.textView.removeEventListener("ModelChanged", this, this.contentAssistListener.onModelChanged);
+					this.textView.removeEventListener("Scroll", this, this.contentAssistListener.onScroll);
+					this.listenerAdded = false;
+				}
 				this.active = false;
 				this.contentAssistPanel.style.display = "none";
 				this.contentAssistPanel.onclick = null;
 			} else {
-				var offset = this.textView.getCaretOffset();
+				var offset = event ? (event.start + event.addedCharCount) : this.textView.getCaretOffset();
 				var index = offset;
 				var c;
 				while (index > 0 && ((97 <= (c = this.textView.getText(index - 1, index).charCodeAt(0)) && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) { //LETTER OR UNDERSCORE OR NUMBER
@@ -191,6 +200,7 @@ orion.editor.ContentAssist = (function() {
 							}
 						}
 						if (proposals.length === 0) {
+							this.showContentAssist(false);
 							return;
 						}
 						
@@ -205,10 +215,14 @@ orion.editor.ContentAssist = (function() {
 						this.contentAssistPanel.style.left = caretLocation.x + "px";
 						this.contentAssistPanel.style.top = caretLocation.y + "px";
 						this.contentAssistPanel.style.display = "block";
-						this.textView.addEventListener("Verify", this, this.contentAssistListener.onVerify);
-						this.textView.addEventListener("Selection", this, this.contentAssistListener.onSelectionChanged);
+						if (!this.listenerAdded) {
+							this.textView.addEventListener("ModelChanged", this, this.contentAssistListener.onModelChanged);
+							this.textView.addEventListener("Scroll", this, this.contentAssistListener.onScroll);
+						}
+						this.listenerAdded = true;
 						this.contentAssistPanel.onclick = dojo.hitch(this, this.click);
 						this.active = true;
+						this.finishing = false;
 					}));
 			}
 		},
