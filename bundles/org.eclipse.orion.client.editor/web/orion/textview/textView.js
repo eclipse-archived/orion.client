@@ -8,7 +8,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bugs 334583, 348471, 349485
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bugs 334583, 348471, 349485, 350595.
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -2156,12 +2156,14 @@ orion.textview.TextView = (function() {
 				var model = this._model;
 				var caret = selection.getCaret();
 				var lineIndex = model.getLineAtOffset(caret);
-				if (caret === model.getLineStart(lineIndex)) {
+				var lineStart = model.getLineStart(lineIndex);
+				if (caret === lineStart) {
 					if (lineIndex > 0) {
 						selection.extend(model.getLineEnd(lineIndex - 1));
 					}
 				} else {
-					selection.extend(this._getOffset(caret, args.unit, -1));
+					var newOffset = args.toLineStart ? lineStart : this._getOffset(caret, args.unit, -1);
+					selection.extend(newOffset);
 				}
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
@@ -2232,12 +2234,14 @@ orion.textview.TextView = (function() {
 				var model = this._model;
 				var caret = selection.getCaret();
 				var lineIndex = model.getLineAtOffset(caret);
-				if (caret === model.getLineEnd (lineIndex)) {
+				var lineEnd = model.getLineEnd(lineIndex);
+				if (caret === lineEnd) {
 					if (lineIndex + 1 < model.getLineCount()) {
 						selection.extend(model.getLineStart(lineIndex + 1));
 					}
 				} else {
-					selection.extend(this._getOffset(caret, args.unit, 1));
+					var newOffset = args.toLineEnd ? lineEnd : this._getOffset(caret, args.unit, 1);
+					selection.extend(newOffset);
 				}
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
@@ -2246,6 +2250,20 @@ orion.textview.TextView = (function() {
 		_doEnd: function (args) {
 			var selection = this._getSelection();
 			var model = this._model;
+
+			if (args.scrollOnly) {
+				var lineCount = model.getLineCount();
+				var clientHeight = this._getClientHeight();
+				var lineHeight = this._getLineHeight();
+				var verticalMaximum = lineCount * lineHeight;
+				var currentScrollOffset = this._getScroll().y;
+				var scrollOffset = verticalMaximum - clientHeight;
+				if (scrollOffset > currentScrollOffset) {
+					this._scrollView(0, scrollOffset - currentScrollOffset);
+				}
+				return true;
+			}
+
 			if (args.ctrl) {
 				selection.extend(model.getCharCount());
 			} else {
@@ -2262,6 +2280,14 @@ orion.textview.TextView = (function() {
 			return true;
 		},
 		_doHome: function (args) {
+			if (args.scrollOnly) {
+				var currentScrollOffset = this._getScroll().y;
+				if (currentScrollOffset > 0) {
+					this._scrollView(0, -currentScrollOffset);
+				}
+				return true;
+			}
+
 			var selection = this._getSelection();
 			var model = this._model;
 			if (args.ctrl) {
@@ -2310,9 +2336,14 @@ orion.textview.TextView = (function() {
 		},
 		_doPageDown: function (args) {
 			var model = this._model;
-			var selection = this._getSelection();
-			var caret = selection.getCaret();
-			var caretLine = model.getLineAtOffset(caret);
+			var selection, caret, caretLine;
+			if (args.scrollOnly) {
+				caretLine = this.getBottomIndex(true);
+			} else {
+				selection = this._getSelection();
+				caret = selection.getCaret();
+				caretLine = model.getLineAtOffset(caret);
+			}
 			var lineCount = model.getLineCount();
 			if (caretLine < lineCount - 1) {
 				var clientHeight = this._getClientHeight();
@@ -2321,13 +2352,15 @@ orion.textview.TextView = (function() {
 				var scrollLines = Math.min(lineCount - caretLine - 1, lines);
 				scrollLines = Math.max(1, scrollLines);
 				var x = this._columnX;
-				if (x === -1 || args.select) {
-					x = this._getOffsetToX(caret);
+				if (!args.scrollOnly) {
+					if (x === -1 || args.select) {
+						x = this._getOffsetToX(caret);
+					}
+					selection.extend(this._getXToOffset(caretLine + scrollLines, x));
+					if (!args.select) { selection.collapse(); }
+					this._setSelection(selection, false, false);
 				}
-				selection.extend(this._getXToOffset(caretLine + scrollLines, x));
-				if (!args.select) { selection.collapse(); }
-				this._setSelection(selection, false, false);
-				
+
 				var verticalMaximum = lineCount * lineHeight;
 				var verticalScrollOffset = this._getScroll().y;
 				var scrollOffset = verticalScrollOffset + scrollLines * lineHeight;
@@ -2336,7 +2369,7 @@ orion.textview.TextView = (function() {
 				} 
 				if (scrollOffset > verticalScrollOffset) {
 					this._scrollView(0, scrollOffset - verticalScrollOffset);
-				} else {
+				} else if (!args.scrollOnly) {
 					this._updateDOMSelection();
 				}
 				this._columnX = x;//fix x by scrolling
@@ -2345,27 +2378,35 @@ orion.textview.TextView = (function() {
 		},
 		_doPageUp: function (args) {
 			var model = this._model;
-			var selection = this._getSelection();
-			var caret = selection.getCaret();
-			var caretLine = model.getLineAtOffset(caret);
+			var selection, caret, caretLine;
+			if (args.scrollOnly) {
+				caretLine = this.getTopIndex(true);
+			} else {
+				selection = this._getSelection();
+				caret = selection.getCaret();
+				caretLine = model.getLineAtOffset(caret);
+			}
+
 			if (caretLine > 0) {
 				var clientHeight = this._getClientHeight();
 				var lineHeight = this._getLineHeight();
 				var lines = Math.floor(clientHeight / lineHeight);
 				var scrollLines = Math.max(1, Math.min(caretLine, lines));
 				var x = this._columnX;
-				if (x === -1 || args.select) {
-					x = this._getOffsetToX(caret);
+				if (!args.scrollOnly) {
+					if (x === -1 || args.select) {
+						x = this._getOffsetToX(caret);
+					}
+					selection.extend(this._getXToOffset(caretLine - scrollLines, x));
+					if (!args.select) { selection.collapse(); }
+					this._setSelection(selection, false, false);
 				}
-				selection.extend(this._getXToOffset(caretLine - scrollLines, x));
-				if (!args.select) { selection.collapse(); }
-				this._setSelection(selection, false, false);
-				
+
 				var verticalScrollOffset = this._getScroll().y;
 				var scrollOffset = Math.max(0, verticalScrollOffset - scrollLines * lineHeight);
 				if (scrollOffset < verticalScrollOffset) {
 					this._scrollView(0, scrollOffset - verticalScrollOffset);
-				} else {
+				} else if (!args.scrollOnly) {
 					this._updateDOMSelection();
 				}
 				this._columnX = x;//fix x by scrolling
@@ -2595,18 +2636,22 @@ orion.textview.TextView = (function() {
 			bindings.push({name: "lineDown",	keyBinding: new KeyBinding(40), predefined: true});
 			bindings.push({name: "charPrevious",	keyBinding: new KeyBinding(37), predefined: true});
 			bindings.push({name: "charNext",	keyBinding: new KeyBinding(39), predefined: true});
-			bindings.push({name: "pageUp",		keyBinding: new KeyBinding(33), predefined: true});
-			bindings.push({name: "pageDown",	keyBinding: new KeyBinding(34), predefined: true});
 			if (isMac) {
+				bindings.push({name: "scrollPageUp",		keyBinding: new KeyBinding(33), predefined: true});
+				bindings.push({name: "scrollPageDown",	keyBinding: new KeyBinding(34), predefined: true});
+				bindings.push({name: "pageUp",		keyBinding: new KeyBinding(33, null, null, true), predefined: true});
+				bindings.push({name: "pageDown",	keyBinding: new KeyBinding(34, null, null, true), predefined: true});
 				bindings.push({name: "lineStart",	keyBinding: new KeyBinding(37, true), predefined: true});
 				bindings.push({name: "lineEnd",		keyBinding: new KeyBinding(39, true), predefined: true});
 				bindings.push({name: "wordPrevious",	keyBinding: new KeyBinding(37, null, null, true), predefined: true});
 				bindings.push({name: "wordNext",	keyBinding: new KeyBinding(39, null, null, true), predefined: true});
-				bindings.push({name: "textStart",	keyBinding: new KeyBinding(36), predefined: true});
-				bindings.push({name: "textEnd",		keyBinding: new KeyBinding(35), predefined: true});
+				bindings.push({name: "scrollTextStart",	keyBinding: new KeyBinding(36), predefined: true});
+				bindings.push({name: "scrollTextEnd",		keyBinding: new KeyBinding(35), predefined: true});
 				bindings.push({name: "textStart",	keyBinding: new KeyBinding(38, true), predefined: true});
 				bindings.push({name: "textEnd",		keyBinding: new KeyBinding(40, true), predefined: true});
 			} else {
+				bindings.push({name: "pageUp",		keyBinding: new KeyBinding(33), predefined: true});
+				bindings.push({name: "pageDown",	keyBinding: new KeyBinding(34), predefined: true});
 				bindings.push({name: "lineStart",	keyBinding: new KeyBinding(36), predefined: true});
 				bindings.push({name: "lineEnd",		keyBinding: new KeyBinding(35), predefined: true});
 				bindings.push({name: "wordPrevious",	keyBinding: new KeyBinding(37, true), predefined: true});
@@ -2675,6 +2720,22 @@ orion.textview.TextView = (function() {
 				bindings.push({name: "cut", keyBinding: new KeyBinding(46, null, true), predefined: true});
 			}
 
+			// Add the emacs Control+ ... key bindings.
+			if (isMac) {
+				bindings.push({name: "lineStart", keyBinding: new KeyBinding("a", false, false, false, true), predefined: true});
+				bindings.push({name: "charPrevious", keyBinding: new KeyBinding("b", false, false, false, true), predefined: true});
+				bindings.push({name: "deleteNext", keyBinding: new KeyBinding("d", false, false, false, true), predefined: true});
+				bindings.push({name: "lineEnd", keyBinding: new KeyBinding("e", false, false, false, true), predefined: true});
+				bindings.push({name: "charNext", keyBinding: new KeyBinding("f", false, false, false, true), predefined: true});
+				bindings.push({name: "deletePrevious", keyBinding: new KeyBinding("h", false, false, false, true), predefined: true});
+				bindings.push({name: "deleteLineEnd", keyBinding: new KeyBinding("k", false, false, false, true), predefined: true});
+				bindings.push({name: "lineDown", keyBinding: new KeyBinding("n", false, false, false, true), predefined: true});
+				bindings.push({name: "lineUp", keyBinding: new KeyBinding("p", false, false, false, true), predefined: true});
+				bindings.push({name: "deleteLineStart", keyBinding: new KeyBinding("u", false, false, false, true), predefined: true});
+				bindings.push({name: "deleteWordPrevious", keyBinding: new KeyBinding("w", false, false, false, true), predefined: true});
+				bindings.push({name: "scrollPageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
+			}
+
 			//1 to 1, no duplicates
 			var self = this;
 			this._actions = [
@@ -2686,6 +2747,8 @@ orion.textview.TextView = (function() {
 				{name: "charNext",		defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}},
 				{name: "pageUp",		defaultHandler: function() {return self._doPageUp({select: false});}},
 				{name: "pageDown",		defaultHandler: function() {return self._doPageDown({select: false});}},
+				{name: "scrollPageUp",		defaultHandler: function() {return self._doPageUp({scrollOnly: true});}},
+				{name: "scrollPageDown",		defaultHandler: function() {return self._doPageDown({scrollOnly: true});}},
 				{name: "wordPrevious",		defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"word"});}},
 				{name: "wordNext",		defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}},
 				{name: "textStart",		defaultHandler: function() {return self._doHome({select: false, ctrl:true});}},
@@ -2703,11 +2766,16 @@ orion.textview.TextView = (function() {
 				{name: "selectWordNext",	defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}},
 				{name: "selectTextStart",	defaultHandler: function() {return self._doHome({select: true, ctrl:true});}},
 				{name: "selectTextEnd",		defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}},
-				
+
+				{name: "scrollTextStart",	defaultHandler: function() {return self._doHome({scrollOnly: true});}},
+				{name: "scrollTextEnd",		defaultHandler: function() {return self._doEnd({scrollOnly: true});}},
+
 				{name: "deletePrevious",	defaultHandler: function() {return self._doBackspace({unit:"character"});}},
 				{name: "deleteNext",		defaultHandler: function() {return self._doDelete({unit:"character"});}},
 				{name: "deleteWordPrevious",	defaultHandler: function() {return self._doBackspace({unit:"word"});}},
 				{name: "deleteWordNext",	defaultHandler: function() {return self._doDelete({unit:"word"});}},
+				{name: "deleteLineStart",	defaultHandler: function() {return self._doBackspace({toLineStart: true});}},
+				{name: "deleteLineEnd",	defaultHandler: function() {return self._doDelete({toLineEnd: true});}},
 				{name: "tab",			defaultHandler: function() {return self._doTab();}},
 				{name: "enter",			defaultHandler: function() {return self._doEnter();}},
 				{name: "selectAll",		defaultHandler: function() {return self._doSelectAll();}},
