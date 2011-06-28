@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 /*jslint */
-/*global dojo orion:true*/
+/*global orion:true*/
 
 var orion = orion || {};
 

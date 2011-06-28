@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 /*jslint regexp:false laxbreak:true*/
-/*global define dojo window*/
+/*global define window*/
 
 var orion = orion || {};
 orion.editor = orion.editor || {};
@@ -518,11 +518,11 @@ orion.editor.TextMateStyler = (function() {
 		 */
 		addStyles: function(scope) {
 			if (scope && !this._styles[scope]) {
-				this._styles[scope] = dojo.map(scope.split("."),
-						function(segment, i, segments) {
-							return segments.slice(0, i+1).join("-");
-						});
-//				console.debug("add style for " + scope + " = [" + this._styles[scope].join(", ") + "]");
+				this._styles[scope] = [];
+				var scopeArray = scope.split(".");
+				for (var i = 0; i < scopeArray.length; i++) {
+					this._styles[scope].push(scopeArray.slice(0, i + 1).join("-"));
+				}
 			}
 		},
 		/** @private */
@@ -1374,7 +1374,7 @@ orion.editor.TextMateStyler = (function() {
 }());
 
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define(['dojo'], function() {
+	define([], function() {
 		return orion.editor;
 	});
 }
