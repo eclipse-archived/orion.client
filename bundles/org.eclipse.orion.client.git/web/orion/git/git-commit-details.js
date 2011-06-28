@@ -87,20 +87,28 @@ exports.CommitDetails = (function() {
 				
 				tr = dojo.create("tr");
 				col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
-				dojo.place(document.createTextNode("Author"), col1, "only");		
-				col2 = dojo.create("td", null, tr, "last");
-				dojo.place(document.createTextNode(commitDetails.AuthorName + " (" + commitDetails.AuthorEmail + ")"), col2, "only");
+				dojo.place(document.createTextNode("Author"), col1, "only");	
 				dojo.place(tr, tbody, "last");
-
+				
+				tr = dojo.create("tr");
 				if (commitDetails.AuthorImage) {
-					col3 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px;width: 40",rowspan:"2"}, tr, "last");
+					col1 = dojo.create("td", {style: "padding: 2px; text-align: right"}, tr, "last");
 					var image = new Image();
-					image.src=commitDetails.AuthorImage;
-					image.name=commitDetails.AuthorName;
-					image.width=40;
-					image.height=40;
-					dojo.place(image, col3, "first");
+					image.src = commitDetails.AuthorImage;
+					image.name = commitDetails.AuthorName;
+					image.width = 40;
+					image.height = 40;
+					dojo.addClass(image, "gitAuthorImage");
+					dojo.place(image, col1, "first");
 				}
+				
+				col2 = dojo.create("td", {style: "padding-left: 5px"}, tr, "last");
+				var span = dojo.create("span", null, col2, "last");
+				dojo.place(document.createTextNode(commitDetails.AuthorName), span, "only");
+				dojo.create("br", null, col2, "last");
+				span = dojo.create("span", null, col2, "last");
+				dojo.place(document.createTextNode(commitDetails.AuthorEmail), span, "only");
+				dojo.place(tr, tbody, "last");
 				
 				tr = dojo.create("tr");
 				col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");

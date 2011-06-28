@@ -18,6 +18,11 @@
 	background-position: left top; 
 }
 
+.gitAuthorImage {
+	border: 1px solid lightGrey;
+	padding: 2px;
+}
+
 .gitRepoItem {
 	background: url(/git/images/repository.gif);
 }
