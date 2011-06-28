@@ -134,8 +134,8 @@ orion.textview.Ruler = (function() {
 		 * This event is sent when the user clicks a line decoration.
 		 *
 		 * @event
-		 * @param {Number} lineIndex the line index of the clicked decoration
-		 * @param {DOMEvent} e the click event
+		 * @param {Number} lineIndex the line index of the clicked decoration.
+		 * @param {DOMEvent} e the click event.
 		 */
 		onClick: function(lineIndex, e) {
 		},
@@ -143,8 +143,8 @@ orion.textview.Ruler = (function() {
 		 * This event is sent when the user double clicks a line decoration.
 		 *
 		 * @event
-		 * @param {Number} lineIndex the line index of the double clicked decoration
-		 * @param {DOMEvent} e the double click event
+		 * @param {Number} lineIndex the line index of the double clicked decoration.
+		 * @param {DOMEvent} e the double click event.
 		 */
 		onDblClick: function(lineIndex, e) {
 		}
@@ -217,9 +217,9 @@ orion.textview.LineNumberRuler = (function() {
  * 
  * @name orion.textview.Annotation 
  * 
- * @property {String} html The [html=""] content for the annotation, typically contains an image.
+ * @property {String} [html=""] The html content for the annotation, typically contains an image.
  * @property {orion.textview.Style} [style] the style for the annotation.
- * @property {orion.textview.Style} [overviewStyle] the style for the annotation for the overview ruler.
+ * @property {orion.textview.Style} [overviewStyle] the style for the annotation in the overview ruler.
  */ 
 /**
  * Contructs a new annotation ruler. 
