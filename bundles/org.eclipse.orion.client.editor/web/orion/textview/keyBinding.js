@@ -16,6 +16,9 @@
  * @namespace The global container for Orion APIs.
  */ 
 var orion = orion || {};
+/**
+ * @namespace The container for textview APIs.
+ */ 
 orion.textview = orion.textview || {};
 
 /**
