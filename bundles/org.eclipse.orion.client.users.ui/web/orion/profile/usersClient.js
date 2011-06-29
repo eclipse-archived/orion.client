@@ -40,6 +40,9 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 		updateUserInfo: function(userUri, data, onLoad){
 			return this._doServiceCall("updateUserInfo", arguments);
 		},
+		resetUserPassword: function(login, password, onLoad){
+			return this._doServiceCall("resetUserPassword", arguments);
+		},
 		initProfile: function(userURI, pluginsEventName, dataEventName){
 			return this._doServiceCall("initProfile", arguments);
 		},
