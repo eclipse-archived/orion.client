@@ -975,27 +975,31 @@ var exports = {};
 		
 		var initGitRepositoryCommand = new mCommands.Command({
 			name : "Init Repository",
-			tooltip : "Init Git Repository in Workspace",
+			tooltip : "Init Git Repository",
 			id : "eclipse.initGitRepository",
 			callback : function(item) {
 				
 				var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
 					serviceRegistry: serviceRegistry,
-					title: "Init Repository",
+					title: "Init Git Repository",
 					fileClient: fileClient,
 					advancedOnly: true,
 					func : function(gitUrl, path, name){
 						exports.getDefaultSshOptions(serviceRegistry).then(function(options){
-									serviceRegistry.getService("orion.git.provider").then(function(gitService) {
-											gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath).then(
-													function(jsonData){
-														if(explorer.redisplayClonesList){
-															dojo.hitch(explorer, explorer.redisplayClonesList)();
-														}
-													}, displayErrorOnStatus);
+							var func = arguments.callee;
+							serviceRegistry.getService("orion.git.provider").then(function(gitService){
+								serviceRegistry.getService("orion.page.message").then(function(progressService){
+									var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath);
+									progressService.showWhile(deferred, "Initializing repository: " + name).then(function(jsonData, secondArg){
+										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData){
+											if(explorer.redisplayClonesList)
+												dojo.hitch(explorer, explorer.redisplayClonesList)();
+										}, func, "Init Git Repository");
 									});
 								});
-							}
+							});
+						});
+					}
 				});
 						
 				dialog.startup();

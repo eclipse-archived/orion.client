@@ -103,10 +103,8 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				
 				// profile item
 				var menuitem2 = new dijit.MenuItem({
-					label: "Profile",
-					onClick: 
-						dojo.hitch(this, 
-								function(){window.location = "/profile/user-profile.html#/users/" + userName;})	
+					label: "<a href=\"" + "/profile/user-profile.html#/users/" + userName + "\">Profile</a>",
+					onClick: function(event){mUtil.followLink(event.target.href, event);}
 				});
 				newMenu.addChild(menuitem2);
 				

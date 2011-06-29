@@ -14,6 +14,9 @@
  * @namespace The global container for Orion APIs.
  */ 
 var orion = orion || {};
+/**
+ * @namespace The container for textview APIs.
+ */ 
 orion.textview = orion.textview || {};
 
 /**
@@ -46,9 +49,11 @@ orion.textview.UndoStack = (function() {
 			this.previousText = previousText;
 		}
 		Change.prototype = {
+			/** @ignore */
 			undo: function (view, select) {
 				this._doUndoRedo(this.offset, this.previousText, this.text, view, select);
 			},
+			/** @ignore */
 			redo: function (view, select) {
 				this._doUndoRedo(this.offset, this.text, this.previousText, view, select);
 			},
@@ -76,9 +81,11 @@ orion.textview.UndoStack = (function() {
 			this.changes = [];
 		}
 		CompoundChange.prototype = {
+			/** @ignore */
 			add: function (change) {
 				this.changes.push(change);
 			},
+			/** @ignore */
 			undo: function (view, select) {
 				for (var i=this.changes.length - 1; i >= 0; i--) {
 					this.changes[i].undo(view, false);
@@ -89,6 +96,7 @@ orion.textview.UndoStack = (function() {
 					view.setSelection(this.caret ? start : end, this.caret ? end : start);
 				}
 			},
+			/** @ignore */
 			redo: function (view, select) {
 				for (var i = 0; i < this.changes.length; i++) {
 					this.changes[i].redo(view, false);
