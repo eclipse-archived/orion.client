@@ -74,7 +74,7 @@ dojo.addOnLoad(function() {
 					serviceRegistry.getService("orion.core.user").then(function(service) {
 						var usersProcessed = 0;
 						for(var i=0; i<item.length; i++){
-							  service.deleteUser(item[i].Location, dojo.hitch(usersList, function(jsonData, secondArg) {
+							  service.deleteUser(item[i].Location).then( dojo.hitch(usersList, function(jsonData) {
 								  usersProcessed++;
 								  if(usersProcessed==item.length)
 									  this.reloadUsers();
@@ -86,7 +86,7 @@ dojo.addOnLoad(function() {
 			}else{
 				if (confirm("Do you want to delete user " + item.login + "?")) {
 					serviceRegistry.getService("orion.core.user").then(function(service) {
-					  service.deleteUser(item.Location, dojo.hitch(usersList, function(jsonData, secondArg) {
+					  service.deleteUser(item.Location).then( dojo.hitch(usersList, function(jsonData) {
 						  this.reloadUsers();
 					  }));
 					});

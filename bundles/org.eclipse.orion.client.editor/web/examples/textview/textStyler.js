@@ -19,7 +19,7 @@ examples.textview.TextStyler = (function() {
 		["break", "continue", "do", "for", /*"import",*/ "new", "this", /*"void",*/ 
 		 "case", "default", "else", "function", "in", "return", "typeof", "while",
 		 "comment", "delete", "export", "if", /*"label",*/ "switch", "var", "with",
-		 "abstract", "implements", "protected", /*"boolean",*/ /*"instanceOf",*/ "public", 
+		 "abstract", "implements", "protected", /*"boolean",*/ "instanceof", "public",
 		 /*"byte", "int", "short", "char",*/ "interface", "static", 
 		 /*"double", "long",*/ "synchronized", "false", /*"native",*/ "throws", 
 		 "final", "null", "transient", /*"float",*/ "package", "true", 

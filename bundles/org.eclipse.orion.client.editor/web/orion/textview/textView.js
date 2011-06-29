@@ -17,6 +17,9 @@
  * @namespace The global container for Orion APIs.
  */ 
 var orion = orion || {};
+/**
+ * @namespace The container for textview APIs.
+ */ 
 orion.textview = orion.textview || {};
 
 /**
@@ -226,95 +229,6 @@ orion.textview.TextView = (function() {
 		addEventListener: function(type, context, func, data) {
 			this._eventTable.addEventListener(type, context, func, data);
 		},
-		/**
-		 * @class This interface represents a ruler for the text view.
-		 * <p>
-		 * A Ruler is a graphical element that is placed either on the left or on the right side of 
-		 * the view. It can be used to provide the view with per line decoration such as line numbering,
-		 * bookmarks, breakpoints, folding disclosures, etc. 
-		 * </p><p>
-		 * There are two types of rulers: page and document. A page ruler only shows the content for the lines that are
-		 * visible, while a document ruler always shows the whole content.
-		 * </p>
-		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#addRuler}
-		 * 
-		 * @name orion.textview.Ruler
-		 * 
-		 */
-		/**
-		 * Returns the ruler overview type.
-		 *
-		 * @name getOverview
-		 * @methodOf orion.textview.Ruler#
-		 * @returns {String} the overview type, which is either "page" or "document".
-		 *
-		 * @see #getLocation
-		 */
-		/**
-		 * Returns the ruler location.
-		 *
-		 * @name getLocation
-		 * @methodOf orion.textview.Ruler#
-		 * @returns {String} the ruler location, which is either "left" or "right".
-		 */
-		/**
-		 * Returns the HTML content for the decoration of a given line.
-		 * <p>
-		 * If the line index is <code>-1</code>, the HTML content for the decoration
-		 * that determines the width of the ruler should be returned.
-		 * </p>
-		 *
-		 * @name getHTML
-		 * @methodOf orion.textview.Ruler#
-		 * @param {Number} lineIndex
-		 * @returns {String} the HTML content for a given line, or generic line.
-		 *
-		 * @see #getStyle
-		 */
-		/**
-		 * Returns the CSS styling information for the decoration of a given line.
-		 * <p>
-		 * If the line index is <code>-1</code>, the CSS styling information for the decoration
-		 * that determines the width of the ruler should be returned. If the line is
-		 * <code>undefined</code>, the ruler styling information should be returned.
-		 * </p>
-		 *
-		 * @name getStyle
-		 * @methodOf orion.textview.Ruler#
-		 * @param {Number} lineIndex
-		 * @returns {orion.textview.Style} the CSS styling for ruler, given line, or generic line.
-		 *
-		 * @see #getHTML
-		 */
-		/**
-		 * Returns the indices of the lines that have decoration.
-		 * <p>
-		 * This function is only called for rulers with "document" overview type.
-		 * </p>
-		 * @name getAnnotations
-		 * @methodOf orion.textview.Ruler#
-		 * @returns {Number[]} an array of line indices.
-		 */
-		/**
-		 * This event is sent when the user clicks a line decoration.
-		 *
-		 * @name onClick
-		 * @event
-		 * @methodOf orion.textview.Ruler#
-		 * @param {Number} lineIndex the line index of the clicked decoration
-		 * @param {DOMEvent} e the click event
-		 */
-		/**
-		 * This event is sent when the user double clicks a line decoration.
-		 *
-		 * @name onDblClick
-		 * @event
-		 * @methodOf orion.textview.Ruler#
-		 * @param {Number} lineIndex the line index of the double clicked decoration
-		 * @param {DOMEvent} e the double click event
-		 */
 		/**
 		 * Adds a ruler to the text view.
 		 *
@@ -2080,6 +1994,7 @@ orion.textview.TextView = (function() {
 					textArea.style.width = "3000px";
 					textArea.style.height = "3000px";
 					var self = this;
+					/** @ignore */
 					var f = function() {
 						self._touchTimeout = null;
 						self._clickCount = 1;
@@ -3047,6 +2962,7 @@ orion.textview.TextView = (function() {
 				if (sel.rangeCount > 0) { sel.removeAllRanges(); }
 				sel.addRange(range);
 				var self = this;
+				/** @ignore */
 				var cleanup = function() {
 					self._updateDOMSelection();
 					self._clientDiv.removeChild(child);
@@ -3061,6 +2977,7 @@ orion.textview.TextView = (function() {
 						endNode = sel.anchorNode.childNodes[sel.anchorOffset];
 					}
 					var text = [];
+					/** @ignore */
 					var getNodeText = function(node) {
 						var nodeChild = node.firstChild;
 						while (nodeChild && nodeChild !== endNode) {
@@ -4083,6 +4000,7 @@ orion.textview.TextView = (function() {
 				if (sel.rangeCount > 0) { sel.removeAllRanges(); }
 				sel.addRange(range);
 				var self = this;
+				/** @ignore */
 				var cleanup = function() {
 					self._clientDiv.removeChild(child);
 					self._updateDOMSelection();
@@ -4792,7 +4710,7 @@ orion.textview.TextView = (function() {
 							div.removeChild(div.lastChild);
 							count--;
 						}
-						var lines = ruler.getAnnotations ();
+						var lines = ruler.getAnnotations();
 						frag = document.createDocumentFragment();
 						for (var j = 0; j < lines.length; j++) {
 							lineIndex = lines[j];

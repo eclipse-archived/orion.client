@@ -100,6 +100,7 @@ eclipse.UsersService = (function() {
 						else
 							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
 					}
+					return jsonData;
 				},
 				error : function(error, secondArg) {
 					if (onError)

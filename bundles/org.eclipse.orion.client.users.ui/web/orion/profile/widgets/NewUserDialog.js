@@ -58,17 +58,18 @@ dojo.declare("orion.profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 		var dialog = this;
 		
 		this.registry.getService("orion.core.user").then(function(service) {
-			  service.createUser(dialog.userName.value, dialog.password.value, dialog.func, function(response, ioArgs) {
-					if (ioArgs.xhr.responseText) {
-
-						var tempDiv = document.createElement('div');
-						tempDiv.innerHTML = ioArgs.xhr.responseText;
-						tempDiv.childNodes;
-						var error = tempDiv.getElementsByTagName("title")[0];
-						if (error)
-							alert(error.text);
-						else
-							alert("User could not be created.");
+			  service.createUser(dialog.userName.value, dialog.password.value).then(dialog.func, function(response) {
+				  var message = response.message;
+				  try{
+					  if(response.responseText){
+						  message = JSON.parse(response.responseText).Message;
+					  }
+				  }catch(Exception){
+					  //leave standard message
+				  }
+			  
+					if (message) {
+						alert(message);
 					} else {
 						alert("User could not be created.");
 					}
