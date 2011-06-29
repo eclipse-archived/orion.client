@@ -7,42 +7,34 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global eclipse orion console DOMParser XPathResult document*/
-var testcase = (function(assert) {
+/*jslint browser: true, devel: true*/
+/*global define XPathResult DOMParser*/
+define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], function(assert, mServiceregistry, mPluginregistry) {
 	var tests = {};
 	
-	var nsr = {
-		ns: {
-			"D":"DAV:"
-		},
-		lookupNamespaceURI: function(prefix) {
-			return this.ns[prefix];
-		}
-	};
-
 	function parseDAVResponse(response)  {
 		var result = {};
-		result.href = document.evaluate("D:href", response, nsr, XPathResult.STRING_TYPE).stringValue;
-		var props = document.evaluate("D:propstat/D:prop", response, nsr).iterateNext();
-		if (props !== null) {
-			result.displayname = document.evaluate("D:displayname", props, nsr, XPathResult.STRING_TYPE).stringValue;
-			result.creationdate = document.evaluate("D:creationdate", props, nsr, XPathResult.STRING_TYPE).stringValue;
-			result.collection = document.evaluate("D:resourcetype/D:collection", props, nsr, XPathResult.BOOLEAN_TYPE).booleanValue;
+		result.href = response.querySelector("href").textContent;
+		var prop = response.querySelector("propstat prop");
+		if (prop !== null) {
+			result.displayname = prop.querySelector("displayname").textContent;
+			result.creationdate = prop.querySelector("creationdate").textContent;
+			result.collection = prop.querySelector("resourcetype collection") !== null;
 		}
 		
 		if (! result.collection ) {
-			result.lastmodified = document.evaluate("D:getlastmodified ", props, nsr, XPathResult.STRING_TYPE).stringValue;
-			result.contentlength = document.evaluate("D:getcontentlength ", props, nsr, XPathResult.STRING_TYPE).stringValue;
-			result.contenttype = document.evaluate("D:getcontenttype ", props, nsr, XPathResult.STRING_TYPE).stringValue;
-			result.etag = document.evaluate("D:getetag ", props, nsr, XPathResult.STRING_TYPE).stringValue;
+			result.lastmodified = prop.querySelector("getlastmodified").textContent;
+			result.contentlength = prop.querySelector("getcontentlength").textContent;
+			result.contenttype = prop.querySelector("getcontenttype").textContent;
+			result.etag = prop.querySelector("getetag").textContent;
 		}
 		return result;
 	}
 
 	tests["test plugin GET call"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
 		
 		assert.equal(pluginRegistry.getPlugins().length, 0);
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
@@ -60,8 +52,8 @@ var testcase = (function(assert) {
 	
 	tests["test plugin GET and PROPFIND call"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
 				
 		assert.equal(pluginRegistry.getPlugins().length, 0);
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
@@ -75,29 +67,33 @@ var testcase = (function(assert) {
 			}).then(function(result) {
 				assert.ok(result.status >= 200 && result.status < 300);
 				var dom = new DOMParser().parseFromString(result.responseText, "text/xml");
-				var responses = dom.evaluate("D:multistatus/D:response", dom, nsr);
-				var response = responses.iterateNext();
+				var responses = dom.querySelectorAll("multistatus response");
+				var response = responses[0];
 				assert.ok(response);
 				var jsonResponse = parseDAVResponse(response);
 				assert.ok(jsonResponse.href.match(/xhrPlugin\.html$/));
 				assert.ok(jsonResponse.collection === false);
 				assert.ok(jsonResponse.contenttype === "text/html");
-				console.log(JSON.stringify(jsonResponse));
-				console.log(result.responseText);
 				return service.call("PROPFIND", ".", {depth:1});
 			}).then(function(result) {
 				assert.ok(result.status >= 200 && result.status < 300);
-				console.log(result.responseText);
+				var dom = new DOMParser().parseFromString(result.responseText, "text/xml");
+				var responses = dom.querySelectorAll("multistatus response");
+				var response = responses[0];
+				assert.ok(response);
+				var jsonResponse = parseDAVResponse(response);
+				assert.ok(jsonResponse.collection === true);
 				pluginRegistry.shutdown();
 			});
 		});
 		return promise;
 	};
+
 	
 	tests["test plugin PUT and DELETE call"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
 		
 		assert.equal(pluginRegistry.getPlugins().length, 0);
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
@@ -105,17 +101,20 @@ var testcase = (function(assert) {
 		var promise = pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
 			return serviceRegistry.getService("xhr");
 		}).then(function(service) {
-			return service.call("GET", "xhrPlugin.html").then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);
-				return service.call("PUT", "dummy-xhrPlugin.html", null, result.responseText);
+			return service.call("GET", "testput.txt").then(function(result) {
+				assert.ok(result.status === 404);
+				return service.call("PUT", "testput.txt", null, "test");
 			}).then(function(result) {
 				assert.ok(result.status >= 200 && result.status < 300);
-				return service.call("GET", "dummy-xhrPlugin.html");
+				return service.call("GET", "testput.txt");
 			}).then(function(result) {
 				assert.ok(result.status >= 200 && result.status < 300);
-				return service.call("DELETE", "dummy-xhrPlugin.html");
+				return service.call("DELETE", "testput.txt");
 			}).then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);				
+				assert.ok(result.status >= 200 && result.status < 300);
+				return service.call("GET", "testput.txt");
+			}).then(function(result) {
+				assert.ok(result.status === 404);
 				pluginRegistry.shutdown();
 			});
 		});
@@ -124,8 +123,8 @@ var testcase = (function(assert) {
 	
 	tests["test plugin MKCOL and DELETE call"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
 		
 		assert.equal(pluginRegistry.getPlugins().length, 0);
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
@@ -133,14 +132,20 @@ var testcase = (function(assert) {
 		var promise = pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
 			return serviceRegistry.getService("xhr");
 		}).then(function(service) {
-			return service.call("MKCOL", "test/").then(function(result) {
+			return service.call("PROPFIND", "test/").then(function(result) {
+				assert.ok(result.status === 404);
+				return service.call("MKCOL", "test/");
+			}).then(function(result) {
 				assert.ok(result.status >= 200 && result.status < 300);
-				return service.call("GET", "test/", null, result.responseText);
+				return service.call("PROPFIND", "test/", {depth:1});
 			}).then(function(result) {
 				assert.ok(result.status >= 200 && result.status < 300);
 				return service.call("DELETE", "test/");
 			}).then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);				
+				assert.ok(result.status >= 200 && result.status < 300);
+				return service.call("PROPFIND", "test/");
+			}).then(function(result) {
+				assert.ok(result.status === 404);			
 				pluginRegistry.shutdown();
 			});
 		});
@@ -149,4 +154,4 @@ var testcase = (function(assert) {
 	
 
 	return tests;
-}(orion.Assert));
+});
