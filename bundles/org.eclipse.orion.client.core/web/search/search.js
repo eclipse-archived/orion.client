@@ -12,9 +12,9 @@
 /*browser:true*/
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status','orion/dialogs',
-        'orion/users', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/searchResults', 'orion/globalCommands',
+        'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/searchResults', 'orion/globalCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mDialogs, mUsers, mCommands, mFavorites, 
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mDialogs, mCommands, mFavorites, 
 				mSearchClient, mSearchResults, mGlobalCommands) {
 
 dojo.addOnLoad(function(){
@@ -35,7 +35,6 @@ dojo.addOnLoad(function(){
 		return pluginRegistry.startup();
 	}).then(function() {
 		new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-		new mUsers.UserService(serviceRegistry);
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 
 		// Favorites

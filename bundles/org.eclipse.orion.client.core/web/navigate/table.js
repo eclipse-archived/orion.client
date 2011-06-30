@@ -12,10 +12,10 @@
 /*browser:true*/
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
-        'orion/users', 'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands',
+        'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands',
         'orion/fileCommands', 'orion/explorer-table',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mUsers, mSsh, mCommands, mFavorites, 
+		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mSsh, mCommands, mFavorites, 
 				mSearchClient, mFileClient, mGlobalCommands, mFileCommands, mExplorerTable) {
 
 
@@ -40,7 +40,6 @@ dojo.addOnLoad(function(){
 		var selection = new mSelection.Selection(serviceRegistry);		
 		new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		new mDialogs.DialogService(serviceRegistry);
-		new mUsers.UserService(serviceRegistry);
 		new mSsh.SshService(serviceRegistry);
 		
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
