@@ -10,7 +10,8 @@
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 'orion/selection',
 	        'orion/searchClient', 'orion/globalCommands', 'orion/profile/UsersList', 'orion/profile/usersUtil',
-	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/profile/widgets/NewUserDialog'], 
+	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/profile/widgets/NewUserDialog',
+	        'orion/profile/widgets/ResetPasswordDialog'], 
 			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSelection, mSearchClient, mGlobalCommands, mUsersList, mUsersUtil) {
 
 dojo.addOnLoad(function() {
@@ -98,6 +99,23 @@ dojo.addOnLoad(function() {
 	commandService.addCommand(deleteCommand, "object");
 	commandService.addCommand(deleteCommand, "dom");
 	
+	var changePasswordCommand = new mCommands.Command({
+		name: "Change Password",
+		id: "eclipse.changePassword",
+		callback: function(item) {
+			var dialog = new orion.profile.widgets.ResetPasswordDialog({
+				user: item,
+				registry : serviceRegistry
+			});
+			dialog.startup();
+			dialog.show();
+			
+		},
+		visibleWhen: function(item){
+			return true;
+		}
+	});
+	commandService.addCommand(changePasswordCommand, "object");
 	
 	
 
@@ -108,6 +126,7 @@ dojo.addOnLoad(function() {
 	commandService.registerCommandContribution("eclipse.createUser", 1, "pageActions", "eclipse.usersGroup");
 	
 	commandService.registerCommandContribution("eclipse.deleteUser", 1);
+	commandService.registerCommandContribution("eclipse.changePassword", 2);
 	commandService.registerCommandContribution("eclipse.deleteUser", 1, "selectionTools", "eclipse.selectionGroup");
 	
 

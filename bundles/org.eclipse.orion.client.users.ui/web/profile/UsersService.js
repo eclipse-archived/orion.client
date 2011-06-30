@@ -170,6 +170,37 @@ eclipse.UsersService = (function() {
 					return error;
 				}
 			});
+		},
+		resetUserPassword: function(login, password, onLoad){
+			
+			return dojo.xhrPost({
+				url : "/users",
+				headers : {
+					"Orion-Version" : "1"
+				},
+				content : {
+					reset: true,
+					login : login,
+					password : password
+				},
+				handleAs : "json",
+				timeout : 15000,
+				load : function(jsonData, secondArg) {
+					if (onLoad){
+						if(typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+					}
+					
+					return jsonData;
+				},
+				error : function(error, secondArg) {
+					return error;
+				}
+			});
+			
+			
 		}
 	};
 	return UsersService;
