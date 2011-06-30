@@ -2761,18 +2761,12 @@ orion.textview.TextView = (function() {
 			}
 			
 			/*
-			* Firefox, Opera and IE9 do not extend the selection at the end of the line
-			* when the line is fully selected. The fix is to add an extra space at the end
-			* of the line.
-			*
-			* Note: the height of a div with only an empty span is zero.  The fix is
-			* the add a extra zero-width non-break space to preserve the default
-			* height in the line div. In Chrome this character shows a glyph, so the
-			* zero-width non-joiner character is used instead.
-			*
-			* Note: in order to support bold and italic fonts with fixed line
-			* height all lines need to have at least one span with the largest
-			* font.
+			* A trailing span with a whitespace is added for three different reasons:
+			* 1. Make sure the height of each line is the largest of the default font
+			* in normal, italic, bold, and italic-bold.
+			* 2. When full selection is off, Firefox, Opera and IE9 do not extend the 
+			* selection at the end of the line when the line is fully selected. 
+			* 3. The height of a div with only an empty span is zero.
 			*/
 			var span = document.createElement("SPAN");
 			span.ignoreChars = 1;
@@ -2782,9 +2776,15 @@ orion.textview.TextView = (function() {
 			if ((this._largestFontStyle & 2) !== 0) {
 				span.style.fontWeight = "bold";
 			}
-			var fullSelection = this._fullSelection;
-			var extendSelection = !fullSelection && (isFirefox || isOpera || isIE >= 9);
-			var c = extendSelection ? " " : (isWebkit || isFirefox ? "\u200C" : "\uFEFF");
+			var c = " ";
+			if (!this._fullSelection && isIE < 9) {
+				/* 
+				* IE8 already selects extra space at end of a line fully selected,
+				* adding another space at the end of the line causes the selection 
+				* to look too big. The fix is to use a zero-width space instead. 
+				*/
+				c = "\uFEFF";
+			}
 			span.appendChild(document.createTextNode(c));
 			child.appendChild(span);
 			

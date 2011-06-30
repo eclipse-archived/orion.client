@@ -77,11 +77,14 @@ function(mKeyBinding, mTextModel, mTextView, mRulers, mUndoStack, mTextMateStyle
 			"/examples/textview/textstyler.css",
 			"/examples/editor/htmlStyles.css",
 		];
+		var fullSelection = window.document.getElementById('fullSelection').checked;
+		var tabSize = parseInt(window.document.getElementById('tabSize').value);
 		var options = {
 			parent: "divParent",
 			model: new mTextModel.TextModel(),
 			stylesheet: stylesheets,
-			tabSize: 4
+			fullSelection: fullSelection,
+			tabSize: tabSize > 0 ? tabSize : 4
 		};
 		view = new mTextView.TextView(options);
 		
