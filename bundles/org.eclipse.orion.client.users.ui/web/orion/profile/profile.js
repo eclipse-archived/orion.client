@@ -101,7 +101,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth',
 					handleAs : "json",
 					timeout : 15000,
 					load : function(jsonData, ioArgs) {
-						dojo.hash("/users/"+jsonData.login);
+						dojo.hash(jsonData.Location);
 						return jsonData;
 					},
 					error : function(response, ioArgs) {

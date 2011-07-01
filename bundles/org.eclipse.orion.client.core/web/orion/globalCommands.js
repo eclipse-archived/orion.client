@@ -83,7 +83,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	 * @name orion.globalCommands#generateUserInfo
 	 * @function
 	 */
-	function generateUserInfo(userName, userStatusText) {
+	function generateUserInfo(userName, userLocation, userStatusText) {
 		// add the logout button to the toolbar if available
 		var userInfo = dojo.byId("userInfo");
 		if (userInfo) {
@@ -103,7 +103,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				
 				// profile item
 				var menuitem2 = new dijit.MenuItem({
-					label: "<a href=\"" + "/profile/user-profile.html#/users/" + userName + "\">Profile</a>",
+					label: "<a href=\"" + "/profile/user-profile.html#" + (userLocation ? userLocation : "") + "\">Profile</a>",
 					onClick: function(event){mUtil.followLink(event.target.href, event);}
 				});
 				newMenu.addChild(menuitem2);
@@ -324,7 +324,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		
 		if (userDataToSet) {
 			//if last time we couldn't set the user name try again after creating the banner
-			generateUserInfo(userDataToSet.userName, userDataToSet.userStatusText);
+			generateUserInfo(userDataToSet.userName, userDataToSet.Location, userDataToSet.userStatusText);
 		}
 		
 		// generate the footer. 

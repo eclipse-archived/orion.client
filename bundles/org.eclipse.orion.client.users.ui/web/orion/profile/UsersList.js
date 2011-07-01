@@ -165,7 +165,7 @@ eclipse._UsersList = (function() {
 						dojo.connect(userRow, "onmouseout", dojo.hitch(this, function(i){document.getElementById("usersActions"+i).style.visibility="hidden";}, i));
 						dojo.create("td", {
 							innerHTML : this
-									.getUserTab(jsonData.users[i].login),
+									.getUserTab(jsonData.users[i].login, jsonData.users[i].Location),
 									className : "usersTable"
 						}, userRow);
 						var actionsTd = dojo.create("td", {className: "usersTable secondaryColumn"});
@@ -181,9 +181,9 @@ eclipse._UsersList = (function() {
 						dojo.connect(deleteAction, "onmouseover", dojo.hitch(this, function(i){dojo.style(dojo.byId("deleteAction"+i), "opacity", "1");}, i));
 						dojo.connect(deleteAction, "onmouseout", dojo.hitch(this, function(i){dojo.style(dojo.byId("deleteAction"+i), "opacity", "0.4");}, i));
 						dojo.connect(deleteAction, "onclick", dojo.hitch(this,
-								function(login) {
-									this.deleteUser(login);
-								}, jsonData.users[i].login));
+								function(login, location) {
+									this.deleteUser(login, location);
+								}, jsonData.users[i].login, jsonData.users[i].Location));
 						dojo.place(actionsTd, userRow);
 						dojo.create("td", {
 							innerHTML : jsonData.users[i].Name ? jsonData.users[i].Name : '&nbsp;',
@@ -201,19 +201,19 @@ eclipse._UsersList = (function() {
 			
 
 		},
-		getUserTab : function(userName) {
-			return tab = "<a class=\"navlinkonpage\" href=\"/profile/user-profile.html#/users/" + userName
+		getUserTab : function(userName, userLocation) {
+			return tab = "<a class=\"navlinkonpage\" href=\"/profile/user-profile.html#" + userLocation
 					+ "\">" + userName + "</a>";
 		},
 		reloadUsers : function() {
 			dojo.html._emptyNode(this.parent);
 			this.loadUsers();
 		},
-		deleteUser : function(userName) {
+		deleteUser : function(userName, userLocation) {
 			if (confirm("Do you want to delete user " + userName + "?")) {
 				var userList = this;
 				this.registry.getService("orion.core.user").then(function(service) {
-				  service.deleteUser("/users/" + userName, dojo.hitch(userList, function(jsonData, secondArg) {
+				  service.deleteUser(userLocation, dojo.hitch(userList, function(jsonData, secondArg) {
 					  this.reloadUsers();
 				  }));
 				});
