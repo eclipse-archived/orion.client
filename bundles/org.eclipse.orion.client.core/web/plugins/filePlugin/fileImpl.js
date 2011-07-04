@@ -316,10 +316,11 @@ eclipse.FileServiceImpl= (function() {
 			var xhrArgs = {
 				url: location,
 				timeout: 5000,
+				headers: { "Orion-Version": "1" },
 				putData: contents
 			};
 			//some different header for putting metadata
-			if (typeof contents === "string") {
+			if (typeof contents !== "string") {
 				xhrArgs.url = location + "?parts=meta";
 				xhrArgs.handleAs = "json";
 			}
