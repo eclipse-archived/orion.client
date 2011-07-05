@@ -45,12 +45,39 @@ exports.EditorCommandFactory = (function() {
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "Save");
 				editor.getTextView().setAction("Save", dojo.hitch(this, function () {
 					var contents = editor.getTextView().getText();
-					this.fileClient.write(this.inputManager.getInput(), contents).then(dojo.hitch(this, function() {
-						editor.onInputChange(this.inputManager.getInput(), null, contents, true);
-						if(this.inputManager.afterSave){
-							this.inputManager.afterSave();
-						}
-					}));
+					var etag = this.inputManager.getFileMetadata().ETag;
+					var args = { "ETag" : etag };
+					this.fileClient.write(this.inputManager.getInput(), contents, args).then(
+							dojo.hitch(this, function(result) {
+								this.inputManager.getFileMetadata().ETag = result.ETag;
+								editor.onInputChange(this.inputManager.getInput(), null, contents, true);
+								if(this.inputManager.afterSave){
+									this.inputManager.afterSave();
+								}
+							}),
+							dojo.hitch(this, function(error) {
+								// expected error - HTTP 412 Precondition Failed 
+								// occurs when file is out of sync with the server
+								if (error.status == 412) {
+									var forceSave = confirm("Resource is out of sync with the server. Do you want to save it anyway?");
+									if (forceSave) {
+										// repeat save operation, but without ETag 
+										this.fileClient.write(this.inputManager.getInput(), contents).then(
+												dojo.hitch(this, function(result) {
+													this.inputManager.getFileMetadata().ETag = result.ETag;
+													editor.onInputChange(this.inputManager.getInput(), null, contents, true);
+													if(this.inputManager.afterSave){
+														this.inputManager.afterSave();
+													}
+												}));
+									}
+								}
+								// unknown error
+								else {
+									error.log = true;
+								}
+							})
+					);
 					return true;
 				}));
 				var saveCommand = new mCommands.Command({

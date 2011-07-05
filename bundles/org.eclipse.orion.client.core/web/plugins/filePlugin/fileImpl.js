@@ -310,19 +310,34 @@ eclipse.FileServiceImpl= (function() {
 		 *
 		 * @param {String} location The location of the file to set contents for
 		 * @param {String|Object} contents The content string, or metadata object to write
-		 * @return A deferred for chaining events after the write completes
+		 * @param {String|Object} args Additional arguments used during write operation (i.e. ETag) 
+		 * @return A deferred for chaining events after the write completes with new metadata object
 		 */		
-		write: function(location, contents) {
+		write: function(location, contents, args) {
+			var headerData = {
+					"Orion-Version": "1"
+				};
+			if (args && args.ETag) {
+				headerData["If-Match"] = args.ETag;
+			}
 			var xhrArgs = {
 				url: location,
 				timeout: 5000,
-				headers: { "Orion-Version": "1" },
-				putData: contents
+				headers: headerData,
+				putData: contents,
+				handleAs: "json",
+				load: function(jsonData, ioArgs) {
+					return jsonData;
+				},
+				error: function(error) {
+					error.log = false;
+					return error;
+				},
+				failOk: true
 			};
 			//some different header for putting metadata
 			if (typeof contents !== "string") {
 				xhrArgs.url = location + "?parts=meta";
-				xhrArgs.handleAs = "json";
 			}
 			return dojo.xhrPut(xhrArgs);
 		},

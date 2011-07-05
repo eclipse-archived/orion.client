@@ -145,9 +145,10 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 *
 		 * @param {String} location The location of the file to set contents for
 		 * @param {String|Object} contents The content string, or metadata object to write
-		 * @return A deferred for chaining events after the write completes
+		 * @param {String|Object} args Additional arguments used during write operation (i.e. ETag) 
+		 * @return A deferred for chaining events after the write completes with new metadata object
 		 */		
-		write: function(location, contents) {
+		write: function(location, contents, args) {
 			return this._doServiceCall("write", arguments);
 		},
 
