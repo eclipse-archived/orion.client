@@ -2781,9 +2781,19 @@ orion.textview.TextView = (function() {
 				/* 
 				* IE8 already selects extra space at end of a line fully selected,
 				* adding another space at the end of the line causes the selection 
-				* to look too big. The fix is to use a zero-width space instead. 
+				* to look too big. The fix is to use a zero-width space (\uFEFF) instead. 
 				*/
 				c = "\uFEFF";
+			}
+			if (isWebkit) {
+				/*
+				* Feature in WekKit. Adding a regular white space to the line will
+				* cause the longest line in the view to wrap even though "pre" is set.
+				* The fix is to use the zero-width non-joiner character (\u200C) instead.
+				* Note: To not use \uFEFF because in old version of Chrome this character 
+				* shows a glyph;
+				*/
+				c = "\u200C";
 			}
 			span.appendChild(document.createTextNode(c));
 			child.appendChild(span);
