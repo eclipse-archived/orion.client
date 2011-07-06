@@ -2723,17 +2723,22 @@ orion.textview.TextView = (function() {
 			// Add the emacs Control+ ... key bindings.
 			if (isMac) {
 				bindings.push({name: "lineStart", keyBinding: new KeyBinding("a", false, false, false, true), predefined: true});
-				bindings.push({name: "charPrevious", keyBinding: new KeyBinding("b", false, false, false, true), predefined: true});
-				bindings.push({name: "deleteNext", keyBinding: new KeyBinding("d", false, false, false, true), predefined: true});
 				bindings.push({name: "lineEnd", keyBinding: new KeyBinding("e", false, false, false, true), predefined: true});
+				bindings.push({name: "lineUp", keyBinding: new KeyBinding("p", false, false, false, true), predefined: true});
+				bindings.push({name: "lineDown", keyBinding: new KeyBinding("n", false, false, false, true), predefined: true});
+				bindings.push({name: "charPrevious", keyBinding: new KeyBinding("b", false, false, false, true), predefined: true});
 				bindings.push({name: "charNext", keyBinding: new KeyBinding("f", false, false, false, true), predefined: true});
 				bindings.push({name: "deletePrevious", keyBinding: new KeyBinding("h", false, false, false, true), predefined: true});
+				bindings.push({name: "deleteNext", keyBinding: new KeyBinding("d", false, false, false, true), predefined: true});
 				bindings.push({name: "deleteLineEnd", keyBinding: new KeyBinding("k", false, false, false, true), predefined: true});
-				bindings.push({name: "lineDown", keyBinding: new KeyBinding("n", false, false, false, true), predefined: true});
-				bindings.push({name: "lineUp", keyBinding: new KeyBinding("p", false, false, false, true), predefined: true});
-				bindings.push({name: "deleteLineStart", keyBinding: new KeyBinding("u", false, false, false, true), predefined: true});
-				bindings.push({name: "deleteWordPrevious", keyBinding: new KeyBinding("w", false, false, false, true), predefined: true});
-				bindings.push({name: "scrollPageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
+				if (isFirefox) {
+					bindings.push({name: "scrollPageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
+					bindings.push({name: "deleteLineStart", keyBinding: new KeyBinding("u", false, false, false, true), predefined: true});
+					bindings.push({name: "deleteWordPrevious", keyBinding: new KeyBinding("w", false, false, false, true), predefined: true});
+				} else {
+					bindings.push({name: "pageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
+					//TODO implement: y (yank), l (center current line), o (insert line break without moving caret), t (transpose)
+				}
 			}
 
 			//1 to 1, no duplicates
@@ -2753,6 +2758,8 @@ orion.textview.TextView = (function() {
 				{name: "wordNext",		defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}},
 				{name: "textStart",		defaultHandler: function() {return self._doHome({select: false, ctrl:true});}},
 				{name: "textEnd",		defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}},
+				{name: "scrollTextStart",	defaultHandler: function() {return self._doHome({scrollOnly: true});}},
+				{name: "scrollTextEnd",		defaultHandler: function() {return self._doEnd({scrollOnly: true});}},
 				
 				{name: "selectLineUp",		defaultHandler: function() {return self._doLineUp({select: true});}},
 				{name: "selectLineDown",	defaultHandler: function() {return self._doLineDown({select: true});}},
@@ -2766,9 +2773,6 @@ orion.textview.TextView = (function() {
 				{name: "selectWordNext",	defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}},
 				{name: "selectTextStart",	defaultHandler: function() {return self._doHome({select: true, ctrl:true});}},
 				{name: "selectTextEnd",		defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}},
-
-				{name: "scrollTextStart",	defaultHandler: function() {return self._doHome({scrollOnly: true});}},
-				{name: "scrollTextEnd",		defaultHandler: function() {return self._doEnd({scrollOnly: true});}},
 
 				{name: "deletePrevious",	defaultHandler: function() {return self._doBackspace({unit:"character"});}},
 				{name: "deleteNext",		defaultHandler: function() {return self._doDelete({unit:"character"});}},
