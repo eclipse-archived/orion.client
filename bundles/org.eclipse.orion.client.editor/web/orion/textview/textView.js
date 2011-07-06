@@ -3043,7 +3043,14 @@ orion.textview.TextView = (function() {
 				/** @ignore */
 				var cleanup = function() {
 					self._updateDOMSelection();
-					self._clientDiv.removeChild(child);
+					/* 
+					* It is possible that child has already been removed from the clientDiv during updatePage.
+					* This happens, for example, on the Mac when command+p is held down and a second paste
+					* event happens before the timeout of the first event is called. 
+					*/
+					if (child.parent === self._clientDiv) {
+						self._clientDiv.removeChild(child);
+					}
 				};
 				var _getText = function() {
 					/*
