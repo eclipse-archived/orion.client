@@ -10,8 +10,8 @@
 /*global define */
 /*jslint browser:true regexp:true */
 
-define(['dojo', 'dijit', 'dojox', 'orion/util', 'orion/siteUtils', 'orion/commands', 'orion/explorer'],
-		function(dojo, dijit, dojox, mUtil, mSiteUtils, mCommands, mExplorer) {
+define(['dojo', 'dijit', 'orion/util', 'orion/siteUtils', 'orion/commands', 'orion/explorer'],
+		function(dojo, dijit, mUtil, mSiteUtils, mCommands, mExplorer) {
 
 var mSiteMappingsTable = {};
 

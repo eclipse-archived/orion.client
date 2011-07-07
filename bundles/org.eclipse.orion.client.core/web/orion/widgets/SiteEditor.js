@@ -10,11 +10,11 @@
 /*global define */
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'dojox', 'orion/util', 'orion/siteUtils', 'orion/commands', 'siteMappingsTable',
+define(['dojo', 'dijit', 'orion/util', 'orion/siteUtils', 'orion/commands', 'siteMappingsTable',
 		'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated', 'dijit/form/Form',
 		'dijit/form/TextBox', 'dijit/form/ValidationTextBox',
 		'text!orion/widgets/templates/SiteEditor.html'],
-		function(dojo, dijit, dojox, mUtil, mSiteUtils, mCommands, mSiteMappingsTable) {
+		function(dojo, dijit, mUtil, mSiteUtils, mCommands, mSiteMappingsTable) {
 
 /**
  * @name orion.widgets.SiteEditor
