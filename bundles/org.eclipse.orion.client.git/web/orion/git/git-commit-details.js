@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*global dijit dojo window document eclipse:true setTimeout */
+/*global define window document Image */
 /*jslint forin:true*/
 
 define(['dojo', 'orion/commands'], function(dojo, mCommands) {
@@ -22,9 +22,10 @@ exports.CommitDetails = (function() {
 			parent = dojo.byId(parent);
 		}
 		if (!parent) { throw "no parent"; }
-		if (!options.serviceRegistry) {throw "no service registry"; }
+		if (!options.commandService) {throw "no command service"; }
+		this.commandService = options.commandService;
+		this.linkService = options.linkService;
 		this._parent = parent;
-		this._registry = options.serviceRegistry;
 		this._detailsPane = options.detailsPane;
 		var commitDetails = this;
 
@@ -41,14 +42,12 @@ exports.CommitDetails = (function() {
 			}
 		});		
 
-		this._registry.getService("orion.page.command").then(function(commandService) {
-			// register commands with object scope
-			commandService.addCommand(showDiffCommand, "object");	
-			//commandService.addCommand(doSomething1, "dom");		
-			// declare the contribution to the ui
-			commandService.registerCommandContribution("eclipse.showDiff", 1);	
-			//commandService.registerCommandContribution("eclipse.doSomething1", 1, "commitMetaCommands");		
-		});
+		// register commands with object scope
+		this.commandService.addCommand(showDiffCommand, "object");	
+		//commandService.addCommand(doSomething1, "dom");		
+		// declare the contribution to the ui
+		this.commandService.registerCommandContribution("eclipse.showDiff", 1);	
+		//commandService.registerCommandContribution("eclipse.doSomething1", 1, "commitMetaCommands");		
 	}
 	CommitDetails.prototype = {
 		loadCommitDetails: function(commitDetails){
@@ -121,7 +120,13 @@ exports.CommitDetails = (function() {
 				col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 				dojo.place(document.createTextNode("Message"), col1, "only");		
 				col2 = dojo.create("td", null, tr, "last");
-				dojo.place(document.createTextNode(commitDetails.Message), col2, "only");
+				var messageNode;
+				if (this.linkService) {
+					messageNode = this.linkService.addLinks(commitDetails.Message);
+				} else {
+					messageNode = document.createTextNode(commitDetails.Message);
+				}
+				dojo.place(messageNode, col2, "only");
 				dojo.place(tr, tbody, "last");
 				
 				tr = dojo.create("tr");
@@ -135,9 +140,7 @@ exports.CommitDetails = (function() {
 //			// we must hide/show the span rather than the column.  IE and Chrome will not consider
 //			// the mouse as being over the table row if it's in a hidden column
 //			dojo.style(actionsWrapper, "visibility", "hidden");
-//			this._registry.getService("orion.page.command").then(function(service) {
-//				service.renderCommands(actionsWrapper, "object", commitDetails, this, "image", null, 0);
-//			});
+//			commandService.renderCommands(actionsWrapper, "object", commitDetails, this, "image", null, 0);
 //			
 //			dojo.connect(tr, "onmouseover", tr, function() {
 //				var wrapper = dojo.byId(this.id+"actionsWrapper");
@@ -157,9 +160,7 @@ exports.CommitDetails = (function() {
 			
 			// Now that the table is added to the dom, generate commands
 			var commands = dojo.byId("commitMetaCommands");
-			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(commands, "dom", this, this, "image");
-			});
+			this.commandService.renderCommands(commands, "dom", this, this, "image");
 			
 			// commit diffs table
 			var commitDiffsTable = dojo.create("table", {id: "commitDiffsTable"});
@@ -208,9 +209,7 @@ exports.CommitDetails = (function() {
 					// we must hide/show the span rather than the column.  IE and Chrome will not consider
 					// the mouse as being over the table row if it's in a hidden column
 					dojo.style(actionsWrapper, "visibility", "hidden");
-					this._registry.getService("orion.page.command").then(function(service) {
-						service.renderCommands(actionsWrapper, "object", commitDetails.Diffs[j], this, "image", null, j);
-					});
+					this.commandService.renderCommands(actionsWrapper, "object", commitDetails.Diffs[j], this, "image", null, j);
 					
 					dojo.connect(tr, "onmouseover", tr, function() {
 						var wrapper = dojo.byId(this.id+"actionsWrapper");
@@ -228,13 +227,11 @@ exports.CommitDetails = (function() {
 			dojo.place(commitDiffsTable, this._parent);
 			
 			// Now that the table is added to the dom, generate commands
-			var commands = dojo.byId("commitDiffsCommands");
-			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(commands, "dom", this, this, "image");
-			});
+			commands = dojo.byId("commitDiffsCommands");
+			this.commandService.renderCommands(commands, "dom", this, this, "image");
 		}
 	};
 	return CommitDetails;
-})();
+}());
 return exports;
 });

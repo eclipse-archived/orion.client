@@ -8,15 +8,16 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
+/*global window define document dijit */
 /*browser:true*/
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands',
         'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/breadcrumbs', 'orion/ssh/sshTools', 'orion/git/git-commit-details', 'orion/git/git-commit-navigator', 'orion/git/gitCommands',
-	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
+	    'orion/links', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mAuth, mDialogs, mSelection, mFileClient,
-					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitDetails, mGitCommitNavigator, mGitCommands) {
+					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitDetails, mGitCommitNavigator, mGitCommands, mLinks) {
 
+var serviceRegistry;
 dojo.addOnLoad(function() {
 	document.body.style.visibility = "visible";
 	dojo.parser.parse();
@@ -33,6 +34,7 @@ dojo.addOnLoad(function() {
 	new mSshTools.SshService(serviceRegistry);
 	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+	var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
 	
 	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 	var fileServiceReference;
@@ -56,8 +58,7 @@ dojo.addOnLoad(function() {
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 	
 	// Commit details
-	var commitDetails = new mGitCommitDetails.CommitDetails({parent: "commitDetailsPane", serviceRegistry: serviceRegistry, detailsPane: dijit.byId("orion.innerNavigator")});
-		
+	var commitDetails = new mGitCommitDetails.CommitDetails({parent: "commitDetailsPane", commandService: commandService, linkService: linkService, detailsPane: dijit.byId("orion.innerNavigator")});
 	// Commit navigator
 	var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, commitDetails, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
 	
