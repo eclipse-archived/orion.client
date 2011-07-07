@@ -2394,7 +2394,8 @@ orion.textview.TextView = (function() {
 		},
 		_doScroll: function (args) {
 			var type = args.type;
-			var lineCount = this._model.getLineCount();
+			var model = this._model;
+			var lineCount = model.getLineCount();
 			var clientHeight = this._getClientHeight();
 			var lineHeight = this._getLineHeight();
 			var verticalMaximum = lineCount * lineHeight;
@@ -2405,6 +2406,14 @@ orion.textview.TextView = (function() {
 				case "textEnd": pixel = verticalMaximum - clientHeight; break;
 				case "pageDown": pixel = verticalScrollOffset + clientHeight; break;
 				case "pageUp": pixel = verticalScrollOffset - clientHeight; break;
+				case "centerLine": { 
+						var selection = this._getSelection();
+						var lineStart = model.getLineAtOffset(selection.start);
+						var lineEnd = model.getLineAtOffset(selection.end);
+						var selectionHeight = (lineEnd - lineStart + 1) * lineHeight;
+						pixel = (lineStart * lineHeight) - (clientHeight / 2) + (selectionHeight / 2);
+					break;
+				}
 			}
 			if (pixel !== undefined) {
 				pixel = Math.min(Math.max(0, pixel), verticalMaximum - clientHeight);
@@ -2713,7 +2722,8 @@ orion.textview.TextView = (function() {
 					bindings.push({name: "deleteWordPrevious", keyBinding: new KeyBinding("w", false, false, false, true), predefined: true});
 				} else {
 					bindings.push({name: "pageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
-					//TODO implement: y (yank), l (center current line), o (insert line break without moving caret), t (transpose)
+					bindings.push({name: "centerLine", keyBinding: new KeyBinding("l", false, false, false, true), predefined: true});
+					//TODO implement: y (yank), o (insert line break without moving caret), t (transpose)
 				}
 			}
 
@@ -2736,6 +2746,7 @@ orion.textview.TextView = (function() {
 				{name: "textEnd",		defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}},
 				{name: "scrollTextStart",	defaultHandler: function() {return self._doScroll({type: "textStart"});}},
 				{name: "scrollTextEnd",		defaultHandler: function() {return self._doScroll({type: "textEnd"});}},
+				{name: "centerLine",		defaultHandler: function() {return self._doScroll({type: "centerLine"});}},
 				
 				{name: "selectLineUp",		defaultHandler: function() {return self._doLineUp({select: true});}},
 				{name: "selectLineDown",	defaultHandler: function() {return self._doLineDown({select: true});}},
