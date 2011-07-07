@@ -1939,7 +1939,20 @@ orion.textview.TextView = (function() {
 			}
 		},
 		_handleScroll: function () {
-			this._doScroll(this._getScroll());
+			var scroll = this._getScroll();
+			var oldX = this._hScroll;
+			var oldY = this._vScroll;
+			if (oldX !== scroll.x || oldY !== scroll.y) {
+				this._hScroll = scroll.x;
+				this._vScroll = scroll.y;
+				this._commitIME();
+				this._updatePage();
+				var e = {
+					oldValue: {x: oldX, y: oldY},
+					newValue: scroll
+				};
+				this.onScroll(e);
+			}
 		},
 		_handleSelectStart: function (e) {
 			if (!e) { e = window.event; }
@@ -2156,14 +2169,12 @@ orion.textview.TextView = (function() {
 				var model = this._model;
 				var caret = selection.getCaret();
 				var lineIndex = model.getLineAtOffset(caret);
-				var lineStart = model.getLineStart(lineIndex);
-				if (caret === lineStart) {
+				if (caret === model.getLineStart(lineIndex)) {
 					if (lineIndex > 0) {
 						selection.extend(model.getLineEnd(lineIndex - 1));
 					}
 				} else {
-					var newOffset = args.toLineStart ? lineStart : this._getOffset(caret, args.unit, -1);
-					selection.extend(newOffset);
+					selection.extend(this._getOffset(caret, args.unit, -1));
 				}
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
@@ -2234,14 +2245,12 @@ orion.textview.TextView = (function() {
 				var model = this._model;
 				var caret = selection.getCaret();
 				var lineIndex = model.getLineAtOffset(caret);
-				var lineEnd = model.getLineEnd(lineIndex);
-				if (caret === lineEnd) {
+				if (caret === model.getLineEnd (lineIndex)) {
 					if (lineIndex + 1 < model.getLineCount()) {
 						selection.extend(model.getLineStart(lineIndex + 1));
 					}
 				} else {
-					var newOffset = args.toLineEnd ? lineEnd : this._getOffset(caret, args.unit, 1);
-					selection.extend(newOffset);
+					selection.extend(this._getOffset(caret, args.unit, 1));
 				}
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
@@ -2250,20 +2259,6 @@ orion.textview.TextView = (function() {
 		_doEnd: function (args) {
 			var selection = this._getSelection();
 			var model = this._model;
-
-			if (args.scrollOnly) {
-				var lineCount = model.getLineCount();
-				var clientHeight = this._getClientHeight();
-				var lineHeight = this._getLineHeight();
-				var verticalMaximum = lineCount * lineHeight;
-				var currentScrollOffset = this._getScroll().y;
-				var scrollOffset = verticalMaximum - clientHeight;
-				if (scrollOffset > currentScrollOffset) {
-					this._scrollView(0, scrollOffset - currentScrollOffset);
-				}
-				return true;
-			}
-
 			if (args.ctrl) {
 				selection.extend(model.getCharCount());
 			} else {
@@ -2280,14 +2275,6 @@ orion.textview.TextView = (function() {
 			return true;
 		},
 		_doHome: function (args) {
-			if (args.scrollOnly) {
-				var currentScrollOffset = this._getScroll().y;
-				if (currentScrollOffset > 0) {
-					this._scrollView(0, -currentScrollOffset);
-				}
-				return true;
-			}
-
 			var selection = this._getSelection();
 			var model = this._model;
 			if (args.ctrl) {
@@ -2336,14 +2323,9 @@ orion.textview.TextView = (function() {
 		},
 		_doPageDown: function (args) {
 			var model = this._model;
-			var selection, caret, caretLine;
-			if (args.scrollOnly) {
-				caretLine = this.getBottomIndex(true);
-			} else {
-				selection = this._getSelection();
-				caret = selection.getCaret();
-				caretLine = model.getLineAtOffset(caret);
-			}
+			var selection = this._getSelection();
+			var caret = selection.getCaret();
+			var caretLine = model.getLineAtOffset(caret);
 			var lineCount = model.getLineCount();
 			if (caretLine < lineCount - 1) {
 				var clientHeight = this._getClientHeight();
@@ -2352,15 +2334,13 @@ orion.textview.TextView = (function() {
 				var scrollLines = Math.min(lineCount - caretLine - 1, lines);
 				scrollLines = Math.max(1, scrollLines);
 				var x = this._columnX;
-				if (!args.scrollOnly) {
-					if (x === -1 || args.select) {
-						x = this._getOffsetToX(caret);
-					}
-					selection.extend(this._getXToOffset(caretLine + scrollLines, x));
-					if (!args.select) { selection.collapse(); }
-					this._setSelection(selection, false, false);
+				if (x === -1 || args.select) {
+					x = this._getOffsetToX(caret);
 				}
-
+				selection.extend(this._getXToOffset(caretLine + scrollLines, x));
+				if (!args.select) { selection.collapse(); }
+				this._setSelection(selection, false, false);
+				
 				var verticalMaximum = lineCount * lineHeight;
 				var verticalScrollOffset = this._getScroll().y;
 				var scrollOffset = verticalScrollOffset + scrollLines * lineHeight;
@@ -2369,7 +2349,7 @@ orion.textview.TextView = (function() {
 				} 
 				if (scrollOffset > verticalScrollOffset) {
 					this._scrollView(0, scrollOffset - verticalScrollOffset);
-				} else if (!args.scrollOnly) {
+				} else {
 					this._updateDOMSelection();
 				}
 				this._columnX = x;//fix x by scrolling
@@ -2378,35 +2358,27 @@ orion.textview.TextView = (function() {
 		},
 		_doPageUp: function (args) {
 			var model = this._model;
-			var selection, caret, caretLine;
-			if (args.scrollOnly) {
-				caretLine = this.getTopIndex(true);
-			} else {
-				selection = this._getSelection();
-				caret = selection.getCaret();
-				caretLine = model.getLineAtOffset(caret);
-			}
-
+			var selection = this._getSelection();
+			var caret = selection.getCaret();
+			var caretLine = model.getLineAtOffset(caret);
 			if (caretLine > 0) {
 				var clientHeight = this._getClientHeight();
 				var lineHeight = this._getLineHeight();
 				var lines = Math.floor(clientHeight / lineHeight);
 				var scrollLines = Math.max(1, Math.min(caretLine, lines));
 				var x = this._columnX;
-				if (!args.scrollOnly) {
-					if (x === -1 || args.select) {
-						x = this._getOffsetToX(caret);
-					}
-					selection.extend(this._getXToOffset(caretLine - scrollLines, x));
-					if (!args.select) { selection.collapse(); }
-					this._setSelection(selection, false, false);
+				if (x === -1 || args.select) {
+					x = this._getOffsetToX(caret);
 				}
-
+				selection.extend(this._getXToOffset(caretLine - scrollLines, x));
+				if (!args.select) { selection.collapse(); }
+				this._setSelection(selection, false, false);
+				
 				var verticalScrollOffset = this._getScroll().y;
 				var scrollOffset = Math.max(0, verticalScrollOffset - scrollLines * lineHeight);
 				if (scrollOffset < verticalScrollOffset) {
 					this._scrollView(0, scrollOffset - verticalScrollOffset);
-				} else if (!args.scrollOnly) {
+				} else {
 					this._updateDOMSelection();
 				}
 				this._columnX = x;//fix x by scrolling
@@ -2420,19 +2392,23 @@ orion.textview.TextView = (function() {
 			}
 			return text !== null;
 		},
-		_doScroll: function (scroll) {
-			var oldX = this._hScroll;
-			var oldY = this._vScroll;
-			if (oldX !== scroll.x || oldY !== scroll.y) {
-				this._hScroll = scroll.x;
-				this._vScroll = scroll.y;
-				this._commitIME();
-				this._updatePage();
-				var e = {
-					oldValue: {x: oldX, y: oldY},
-					newValue: scroll
-				};
-				this.onScroll(e);
+		_doScroll: function (args) {
+			var type = args.type;
+			var lineCount = this._model.getLineCount();
+			var clientHeight = this._getClientHeight();
+			var lineHeight = this._getLineHeight();
+			var verticalMaximum = lineCount * lineHeight;
+			var verticalScrollOffset = this._getScroll().y;
+			var pixel = undefined;
+			switch (type) {
+				case "textStart": pixel = 0; break;
+				case "textEnd": pixel = verticalMaximum - clientHeight; break;
+				case "pageDown": pixel = verticalScrollOffset + clientHeight; break;
+				case "pageUp": pixel = verticalScrollOffset - clientHeight; break;
+			}
+			if (pixel !== undefined) {
+				pixel = Math.min(Math.max(0, pixel), verticalMaximum - clientHeight);
+				this._scrollView(0, pixel - verticalScrollOffset);
 			}
 		},
 		_doSelectAll: function (args) {
@@ -2752,14 +2728,14 @@ orion.textview.TextView = (function() {
 				{name: "charNext",		defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}},
 				{name: "pageUp",		defaultHandler: function() {return self._doPageUp({select: false});}},
 				{name: "pageDown",		defaultHandler: function() {return self._doPageDown({select: false});}},
-				{name: "scrollPageUp",		defaultHandler: function() {return self._doPageUp({scrollOnly: true});}},
-				{name: "scrollPageDown",		defaultHandler: function() {return self._doPageDown({scrollOnly: true});}},
+				{name: "scrollPageUp",		defaultHandler: function() {return self._doScroll({type: "pageUp"});}},
+				{name: "scrollPageDown",		defaultHandler: function() {return self._doScroll({type: "pageDown"});}},
 				{name: "wordPrevious",		defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"word"});}},
 				{name: "wordNext",		defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}},
 				{name: "textStart",		defaultHandler: function() {return self._doHome({select: false, ctrl:true});}},
 				{name: "textEnd",		defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}},
-				{name: "scrollTextStart",	defaultHandler: function() {return self._doHome({scrollOnly: true});}},
-				{name: "scrollTextEnd",		defaultHandler: function() {return self._doEnd({scrollOnly: true});}},
+				{name: "scrollTextStart",	defaultHandler: function() {return self._doScroll({type: "textStart"});}},
+				{name: "scrollTextEnd",		defaultHandler: function() {return self._doScroll({type: "textEnd"});}},
 				
 				{name: "selectLineUp",		defaultHandler: function() {return self._doLineUp({select: true});}},
 				{name: "selectLineDown",	defaultHandler: function() {return self._doLineDown({select: true});}},
@@ -2778,8 +2754,8 @@ orion.textview.TextView = (function() {
 				{name: "deleteNext",		defaultHandler: function() {return self._doDelete({unit:"character"});}},
 				{name: "deleteWordPrevious",	defaultHandler: function() {return self._doBackspace({unit:"word"});}},
 				{name: "deleteWordNext",	defaultHandler: function() {return self._doDelete({unit:"word"});}},
-				{name: "deleteLineStart",	defaultHandler: function() {return self._doBackspace({toLineStart: true});}},
-				{name: "deleteLineEnd",	defaultHandler: function() {return self._doDelete({toLineEnd: true});}},
+				{name: "deleteLineStart",	defaultHandler: function() {return self._doBackspace({unit: "line"});}},
+				{name: "deleteLineEnd",	defaultHandler: function() {return self._doDelete({unit: "line"});}},
 				{name: "tab",			defaultHandler: function() {return self._doTab();}},
 				{name: "enter",			defaultHandler: function() {return self._doEnter();}},
 				{name: "selectAll",		defaultHandler: function() {return self._doSelectAll();}},
@@ -3193,6 +3169,14 @@ orion.textview.TextView = (function() {
 			return node;
 		},
 		_getOffset: function (offset, unit, direction) {
+			if (unit === "line") {
+				var model = this._model;
+				var lineIndex = model.getLineAtOffset(offset);
+				if (direction > 0) {
+					return model.getLineEnd(lineIndex);
+				}
+				return model.getLineStart(lineIndex);
+			}
 			if (unit === "wordend") {
 				return this._getOffset_W3C(offset, unit, direction);
 			}
@@ -4048,8 +4032,8 @@ orion.textview.TextView = (function() {
 			* Scrolling is done only by setting the scrollLeft and scrollTop fields in the
 			* view div. This causes an updatePage from the scroll event. In some browsers 
 			* this event is asynchromous and forcing update page to run synchronously
-			* (by calling doScroll) leads to redraw problems. On Chrome 11, the view 
-			* stops redrawing at times when holding PageDown/PageUp key.
+			* leads to redraw problems. 
+			* On Chrome 11, the view redrawing at times when holding PageDown/PageUp key.
 			* On Firefox 4 for Linux, the view redraws the first page when holding 
 			* PageDown/PageUp key, but it will not redraw again until the key is released.
 			*/
