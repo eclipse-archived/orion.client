@@ -8,8 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global eclipse dojo dijit widgets window*/
-/*jslint devel:true browser:true*/
+/*global define dojo dijit orion window*/
+/*jslint browser:true*/
 
 /*
  * Glue code for site.html
@@ -47,7 +47,7 @@ dojo.addOnLoad(function() {
 			if (editor && site) {
 				var location = dojo.byId("location");
 				dojo.place(document.createTextNode(site.Name), location, "only");
-				window.document.title = site.Name + " - Edit Site";
+				document.title = site.Name + (editor.isDirty() ? "* " : "") + " - Edit Site";
 			}
 		};
 		
@@ -68,6 +68,7 @@ dojo.addOnLoad(function() {
 		var widget;
 		(function() {
 			widget = new orion.widgets.SiteEditor({
+				serviceRegistry: serviceRegistry,
 				fileClient: fileClient,
 				siteService: siteService,
 				commandService: commandService,
@@ -78,9 +79,16 @@ dojo.addOnLoad(function() {
 			widget.startup();
 			
 			dojo.connect(widget, "onSuccess", updateTitle);
+			dojo.connect(widget, "setDirty", updateTitle);
 			
 			onHashChange();
 		}());
+		
+		window.onbeforeunload = function() {
+			if (widget.isDirty()) {
+				return "There are unsaved changes.";
+			}
+		};
 		
 		// Hook up commands stuff
 		var refresher = dojo.hitch(widget, widget._setSiteConfiguration);

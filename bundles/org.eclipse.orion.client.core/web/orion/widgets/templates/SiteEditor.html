@@ -1,39 +1,45 @@
 <div>
 	<style type="text/css">
+		.siteEditorTable td, .siteEditorTable th {
+			padding: 10px 10px 5px 10px;
+		}
+		/* Style leftmost column of siteEditorTable */
+		.siteEditorTable>tbody>tr>td:first-child {
+			vertical-align: top;
+			min-width: 10em;
+			/*background-color: #fafafa;*/
+		}
+		.siteEditorTable>tbody>tr>td {
+			/*border-bottom: 1px solid #ddd;*/
+			padding-bottom: 20px;
+			vertical-align: middle;
+		}
+		.navColumn {
+			font-weight: bold;
+		}
+		.isValidColumn {
+			min-width: 32px;
+			width: 40px;
+		}
 		.isValidCell {
 			text-align: center;
+			vertical-align: middle;
 		}
-		.editablePathCell {
+		.pathInput, .serverPathInput {
+			min-width: 20em;
 		}
-		.actionCell {
-			height: 22px !important;
-			padding: 1px 1px 4px 1px;
-		}
-		.actionCell .commandLink {
-			margin: 0;
-		}
-		.dojoxGridRow .workspacePathCell, .dojoxGridRowOdd .workspacePathCell {
-			background-color: #eee;
-		}
-		td.dojoxGridCellFocus, th.dojoxGridCellFocus {
-			/* Remove annoying dashed border, but keep the width to avoid jiggling */
-			border: 1px solid transparent !important;
-		}
-		.dojoxGridRowOver .dojoxGridCell, .dojoxGridRowEditing .dojoxGridCell {
-			background-color: inherit !important;
-		}
-		.mappingsGridTable {
-			font-size: 9pt !important;
+		.addMappingToolbar {
+			padding-top: 15px;
 		}
 	</style>
 	<div dojoAttachPoint="containerNode">
 		<div dojoType="dijit.form.Form" id="siteForm">
-			<table>
+			<table class="siteEditorTable">
 				<tr>
-					<td style="padding: 5px; text-align: left;">
+					<td>
 						<label dojoAttachPoint="siteConfigNameLabel" for="${id}_name">${siteConfigNameLabelText}</label>
 					</td>
-					<td style="padding: 10px 5px 10px 5px; text-align: left;">
+					<td>
 						<input dojoType="dijit.form.ValidationTextBox" dojoAttachPoint="name" id="${id}_name"
 							required="true" value=""
 							style="display: inline-block; width: 15em;">
@@ -41,43 +47,38 @@
 				</tr>
 				
 				<tr>
-					<td style="padding: 5px; vertical-align: top">
-						<label dojoAttachPoint="mappingsLabel" for="${id}_mappings">${mappingsLabelText}</label>
+					<td>
+						<label dojoAttachPoint="hostHintLabel" for="${id}_hostHint">${hostHintLabelText}</label>
 					</td>
-					<td style="padding: 10px 25px 10px 5px; text-align: left; width:100%;">
-						<div dojoType="orion.widgets.MappingsGrid" dojoAttachPoint="mappings"
-								class="mappingsGridTable"
-								autoHeight="true" singleClickEdit="true" selectionMode="none"
-								selectable="true">
-						</div>
-						<div style="padding: 5px 0 0 5px;">
-							<div dojoAttachPoint="addMappingToolbar" id="${id}_addMappingToolbar"></div>
-						</div>
-					</td>
-				</td>
-				
-				<tr>
-					<td style="padding: 5px;">
-						<label dojoAttachPoint="hostHintLabel" for="${id}_hostHint" style="text-align: left;">${hostHintLabelText}</label>
-					</td>
-					<td style="padding: 10px 5px 10px 5px; text-align: left;">
+					<td>
 						<input dojoType="dijit.form.ValidationTextBox" dojoAttachPoint="hostHint" id="${id}_hostHint"
 							required="false" value=""
-							style="display: inline-block; width: 12em;">
+							style="display: inline-block; width: 12em;"><br />
+						<em>Optional; used to determine the URL where a started site can be accessed.</em>
 					</td>
 				</tr>
 				
 				<tr>
-					<td style="padding: 5px;">
-						<label dojoAttachPoint="hostingStatusLabel" style="text-align: left;">${hostingStatusLabelText}</label>
+					<td>
+						<label dojoAttachPoint="hostingStatusLabel">${hostingStatusLabelText}</label>
 					</td>
-					<td style="padding: 10px 5px 10px 5px; text-align: left;">
-						<p dojoAttachPoint="hostingStatus"></p>
-						<p dojoAttachPoint="siteStartedWarning" style="display: none;">
-						(Changes you make here won't affect the running copy.)
-						</p>
+					<td>
+						<span dojoAttachPoint="hostingStatus"></span>
+						<span dojoAttachPoint="siteStartedWarning" style="display: none;"><br />
+						<em>Changes you make here won't affect the running site.</em>
+						</span>
 					</td>
 				</tr>
+
+				<tr>
+					<td>
+						<label dojoAttachPoint="mappingsLabel" for="${id}_mappings">${mappingsLabelText}</label>
+					</td>
+					<td style="padding: 10px 25px 10px 5px; width:100%;">
+						<div dojoAttachPoint="mappingsPlaceholder" class="mappingsGridTable" id="${id}_mappingsPlaceholder"></div>
+						<div dojoAttachPoint="addMappingToolbar" id="${id}_addMappingToolbar" class="addMappingToolbar"></div>
+					</td>
+				</td>
 				
 			</table>
 		</div>

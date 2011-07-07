@@ -8,7 +8,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bugs 334583, 348471, 349485
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bugs 334583, 348471, 349485, 350595.
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -1939,7 +1939,20 @@ orion.textview.TextView = (function() {
 			}
 		},
 		_handleScroll: function () {
-			this._doScroll(this._getScroll());
+			var scroll = this._getScroll();
+			var oldX = this._hScroll;
+			var oldY = this._vScroll;
+			if (oldX !== scroll.x || oldY !== scroll.y) {
+				this._hScroll = scroll.x;
+				this._vScroll = scroll.y;
+				this._commitIME();
+				this._updatePage();
+				var e = {
+					oldValue: {x: oldX, y: oldY},
+					newValue: scroll
+				};
+				this.onScroll(e);
+			}
 		},
 		_handleSelectStart: function (e) {
 			if (!e) { e = window.event; }
@@ -2379,19 +2392,23 @@ orion.textview.TextView = (function() {
 			}
 			return text !== null;
 		},
-		_doScroll: function (scroll) {
-			var oldX = this._hScroll;
-			var oldY = this._vScroll;
-			if (oldX !== scroll.x || oldY !== scroll.y) {
-				this._hScroll = scroll.x;
-				this._vScroll = scroll.y;
-				this._commitIME();
-				this._updatePage();
-				var e = {
-					oldValue: {x: oldX, y: oldY},
-					newValue: scroll
-				};
-				this.onScroll(e);
+		_doScroll: function (args) {
+			var type = args.type;
+			var lineCount = this._model.getLineCount();
+			var clientHeight = this._getClientHeight();
+			var lineHeight = this._getLineHeight();
+			var verticalMaximum = lineCount * lineHeight;
+			var verticalScrollOffset = this._getScroll().y;
+			var pixel = undefined;
+			switch (type) {
+				case "textStart": pixel = 0; break;
+				case "textEnd": pixel = verticalMaximum - clientHeight; break;
+				case "pageDown": pixel = verticalScrollOffset + clientHeight; break;
+				case "pageUp": pixel = verticalScrollOffset - clientHeight; break;
+			}
+			if (pixel !== undefined) {
+				pixel = Math.min(Math.max(0, pixel), verticalMaximum - clientHeight);
+				this._scrollView(0, pixel - verticalScrollOffset);
 			}
 		},
 		_doSelectAll: function (args) {
@@ -2595,18 +2612,22 @@ orion.textview.TextView = (function() {
 			bindings.push({name: "lineDown",	keyBinding: new KeyBinding(40), predefined: true});
 			bindings.push({name: "charPrevious",	keyBinding: new KeyBinding(37), predefined: true});
 			bindings.push({name: "charNext",	keyBinding: new KeyBinding(39), predefined: true});
-			bindings.push({name: "pageUp",		keyBinding: new KeyBinding(33), predefined: true});
-			bindings.push({name: "pageDown",	keyBinding: new KeyBinding(34), predefined: true});
 			if (isMac) {
+				bindings.push({name: "scrollPageUp",		keyBinding: new KeyBinding(33), predefined: true});
+				bindings.push({name: "scrollPageDown",	keyBinding: new KeyBinding(34), predefined: true});
+				bindings.push({name: "pageUp",		keyBinding: new KeyBinding(33, null, null, true), predefined: true});
+				bindings.push({name: "pageDown",	keyBinding: new KeyBinding(34, null, null, true), predefined: true});
 				bindings.push({name: "lineStart",	keyBinding: new KeyBinding(37, true), predefined: true});
 				bindings.push({name: "lineEnd",		keyBinding: new KeyBinding(39, true), predefined: true});
 				bindings.push({name: "wordPrevious",	keyBinding: new KeyBinding(37, null, null, true), predefined: true});
 				bindings.push({name: "wordNext",	keyBinding: new KeyBinding(39, null, null, true), predefined: true});
-				bindings.push({name: "textStart",	keyBinding: new KeyBinding(36), predefined: true});
-				bindings.push({name: "textEnd",		keyBinding: new KeyBinding(35), predefined: true});
+				bindings.push({name: "scrollTextStart",	keyBinding: new KeyBinding(36), predefined: true});
+				bindings.push({name: "scrollTextEnd",		keyBinding: new KeyBinding(35), predefined: true});
 				bindings.push({name: "textStart",	keyBinding: new KeyBinding(38, true), predefined: true});
 				bindings.push({name: "textEnd",		keyBinding: new KeyBinding(40, true), predefined: true});
 			} else {
+				bindings.push({name: "pageUp",		keyBinding: new KeyBinding(33), predefined: true});
+				bindings.push({name: "pageDown",	keyBinding: new KeyBinding(34), predefined: true});
 				bindings.push({name: "lineStart",	keyBinding: new KeyBinding(36), predefined: true});
 				bindings.push({name: "lineEnd",		keyBinding: new KeyBinding(35), predefined: true});
 				bindings.push({name: "wordPrevious",	keyBinding: new KeyBinding(37, true), predefined: true});
@@ -2675,6 +2696,27 @@ orion.textview.TextView = (function() {
 				bindings.push({name: "cut", keyBinding: new KeyBinding(46, null, true), predefined: true});
 			}
 
+			// Add the emacs Control+ ... key bindings.
+			if (isMac) {
+				bindings.push({name: "lineStart", keyBinding: new KeyBinding("a", false, false, false, true), predefined: true});
+				bindings.push({name: "lineEnd", keyBinding: new KeyBinding("e", false, false, false, true), predefined: true});
+				bindings.push({name: "lineUp", keyBinding: new KeyBinding("p", false, false, false, true), predefined: true});
+				bindings.push({name: "lineDown", keyBinding: new KeyBinding("n", false, false, false, true), predefined: true});
+				bindings.push({name: "charPrevious", keyBinding: new KeyBinding("b", false, false, false, true), predefined: true});
+				bindings.push({name: "charNext", keyBinding: new KeyBinding("f", false, false, false, true), predefined: true});
+				bindings.push({name: "deletePrevious", keyBinding: new KeyBinding("h", false, false, false, true), predefined: true});
+				bindings.push({name: "deleteNext", keyBinding: new KeyBinding("d", false, false, false, true), predefined: true});
+				bindings.push({name: "deleteLineEnd", keyBinding: new KeyBinding("k", false, false, false, true), predefined: true});
+				if (isFirefox) {
+					bindings.push({name: "scrollPageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
+					bindings.push({name: "deleteLineStart", keyBinding: new KeyBinding("u", false, false, false, true), predefined: true});
+					bindings.push({name: "deleteWordPrevious", keyBinding: new KeyBinding("w", false, false, false, true), predefined: true});
+				} else {
+					bindings.push({name: "pageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
+					//TODO implement: y (yank), l (center current line), o (insert line break without moving caret), t (transpose)
+				}
+			}
+
 			//1 to 1, no duplicates
 			var self = this;
 			this._actions = [
@@ -2686,10 +2728,14 @@ orion.textview.TextView = (function() {
 				{name: "charNext",		defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}},
 				{name: "pageUp",		defaultHandler: function() {return self._doPageUp({select: false});}},
 				{name: "pageDown",		defaultHandler: function() {return self._doPageDown({select: false});}},
+				{name: "scrollPageUp",		defaultHandler: function() {return self._doScroll({type: "pageUp"});}},
+				{name: "scrollPageDown",		defaultHandler: function() {return self._doScroll({type: "pageDown"});}},
 				{name: "wordPrevious",		defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"word"});}},
 				{name: "wordNext",		defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}},
 				{name: "textStart",		defaultHandler: function() {return self._doHome({select: false, ctrl:true});}},
 				{name: "textEnd",		defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}},
+				{name: "scrollTextStart",	defaultHandler: function() {return self._doScroll({type: "textStart"});}},
+				{name: "scrollTextEnd",		defaultHandler: function() {return self._doScroll({type: "textEnd"});}},
 				
 				{name: "selectLineUp",		defaultHandler: function() {return self._doLineUp({select: true});}},
 				{name: "selectLineDown",	defaultHandler: function() {return self._doLineDown({select: true});}},
@@ -2703,11 +2749,13 @@ orion.textview.TextView = (function() {
 				{name: "selectWordNext",	defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}},
 				{name: "selectTextStart",	defaultHandler: function() {return self._doHome({select: true, ctrl:true});}},
 				{name: "selectTextEnd",		defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}},
-				
+
 				{name: "deletePrevious",	defaultHandler: function() {return self._doBackspace({unit:"character"});}},
 				{name: "deleteNext",		defaultHandler: function() {return self._doDelete({unit:"character"});}},
 				{name: "deleteWordPrevious",	defaultHandler: function() {return self._doBackspace({unit:"word"});}},
 				{name: "deleteWordNext",	defaultHandler: function() {return self._doDelete({unit:"word"});}},
+				{name: "deleteLineStart",	defaultHandler: function() {return self._doBackspace({unit: "line"});}},
+				{name: "deleteLineEnd",	defaultHandler: function() {return self._doDelete({unit: "line"});}},
 				{name: "tab",			defaultHandler: function() {return self._doTab();}},
 				{name: "enter",			defaultHandler: function() {return self._doEnter();}},
 				{name: "selectAll",		defaultHandler: function() {return self._doSelectAll();}},
@@ -2781,9 +2829,19 @@ orion.textview.TextView = (function() {
 				/* 
 				* IE8 already selects extra space at end of a line fully selected,
 				* adding another space at the end of the line causes the selection 
-				* to look too big. The fix is to use a zero-width space instead. 
+				* to look too big. The fix is to use a zero-width space (\uFEFF) instead. 
 				*/
 				c = "\uFEFF";
+			}
+			if (isWebkit) {
+				/*
+				* Feature in WekKit. Adding a regular white space to the line will
+				* cause the longest line in the view to wrap even though "pre" is set.
+				* The fix is to use the zero-width non-joiner character (\u200C) instead.
+				* Note: To not use \uFEFF because in old version of Chrome this character 
+				* shows a glyph;
+				*/
+				c = "\u200C";
 			}
 			span.appendChild(document.createTextNode(c));
 			child.appendChild(span);
@@ -2965,7 +3023,14 @@ orion.textview.TextView = (function() {
 				/** @ignore */
 				var cleanup = function() {
 					self._updateDOMSelection();
-					self._clientDiv.removeChild(child);
+					/* 
+					* It is possible that child has already been removed from the clientDiv during updatePage.
+					* This happens, for example, on the Mac when command+p is held down and a second paste
+					* event happens before the timeout of the first event is called. 
+					*/
+					if (child.parent === self._clientDiv) {
+						self._clientDiv.removeChild(child);
+					}
 				};
 				var _getText = function() {
 					/*
@@ -3104,6 +3169,14 @@ orion.textview.TextView = (function() {
 			return node;
 		},
 		_getOffset: function (offset, unit, direction) {
+			if (unit === "line") {
+				var model = this._model;
+				var lineIndex = model.getLineAtOffset(offset);
+				if (direction > 0) {
+					return model.getLineEnd(lineIndex);
+				}
+				return model.getLineStart(lineIndex);
+			}
 			if (unit === "wordend") {
 				return this._getOffset_W3C(offset, unit, direction);
 			}
@@ -3959,8 +4032,8 @@ orion.textview.TextView = (function() {
 			* Scrolling is done only by setting the scrollLeft and scrollTop fields in the
 			* view div. This causes an updatePage from the scroll event. In some browsers 
 			* this event is asynchromous and forcing update page to run synchronously
-			* (by calling doScroll) leads to redraw problems. On Chrome 11, the view 
-			* stops redrawing at times when holding PageDown/PageUp key.
+			* leads to redraw problems. 
+			* On Chrome 11, the view redrawing at times when holding PageDown/PageUp key.
 			* On Firefox 4 for Linux, the view redraws the first page when holding 
 			* PageDown/PageUp key, but it will not redraw again until the key is released.
 			*/
