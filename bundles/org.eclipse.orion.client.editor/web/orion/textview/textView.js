@@ -2271,7 +2271,12 @@ orion.textview.TextView = (function() {
 		},
 		_doEnter: function (args) {
 			var model = this._model;
+			var selection = this._getSelection();
 			this._doContent(model.getLineDelimiter()); 
+			if (args && args.noCursor) {
+				selection.end = selection.start;
+				this._setSelection(selection);
+			}
 			return true;
 		},
 		_doHome: function (args) {
@@ -2464,7 +2469,10 @@ orion.textview.TextView = (function() {
 				x += this._getOffsetToX(selection.getCaret());
 			}
 			selection.extend(this._getXToOffset(line, x));
-			this._setSelection(selection, true);
+			this._setSelection(selection, false, false);
+			if (!this._showCaret(true)) {
+				this._updateDOMSelection();
+			}
 		},
 		_autoScrollTimer: function () {
 			this._autoScroll();
@@ -2723,7 +2731,8 @@ orion.textview.TextView = (function() {
 				} else {
 					bindings.push({name: "pageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
 					bindings.push({name: "centerLine", keyBinding: new KeyBinding("l", false, false, false, true), predefined: true});
-					//TODO implement: y (yank), o (insert line break without moving caret), t (transpose)
+					bindings.push({name: "enterNoCursor", keyBinding: new KeyBinding("o", false, false, false, true), predefined: true});
+					//TODO implement: y (yank), t (transpose)
 				}
 			}
 
@@ -2769,6 +2778,7 @@ orion.textview.TextView = (function() {
 				{name: "deleteLineEnd",	defaultHandler: function() {return self._doDelete({unit: "line"});}},
 				{name: "tab",			defaultHandler: function() {return self._doTab();}},
 				{name: "enter",			defaultHandler: function() {return self._doEnter();}},
+				{name: "enterNoCursor",	defaultHandler: function() {return self._doEnter({noCursor:true});}},
 				{name: "selectAll",		defaultHandler: function() {return self._doSelectAll();}},
 				{name: "copy",			defaultHandler: function() {return self._doCopy();}},
 				{name: "cut",			defaultHandler: function() {return self._doCut();}},
@@ -4400,7 +4410,8 @@ orion.textview.TextView = (function() {
 			} 
 			this._setSelection(selection, true, true);
 		},
-		_showCaret: function () {
+		_showCaret: function (onlyCaret) {
+			if (onlyCaret === undefined) var onlyCaret = false;
 			var model = this._model;
 			var selection = this._getSelection();
 			var scroll = this._getScroll();
@@ -4419,7 +4430,7 @@ orion.textview.TextView = (function() {
 			var left = bounds.left;
 			var right = bounds.right;
 			var minScroll = clientWidth / 4;
-			if (!selection.isEmpty() && startLine === endLine) {
+			if (!onlyCaret && !selection.isEmpty() && startLine === endLine) {
 				bounds = this._getBoundsAtOffset(caret === end ? start : endInclusive);
 				var selectionWidth = caret === start ? bounds.right - left : right - bounds.left;
 				if ((clientWidth - minScroll) > selectionWidth) {
@@ -4446,7 +4457,8 @@ orion.textview.TextView = (function() {
 			var clientHeight = this._getClientHeight();
 			if (!(topIndex <= caretLine && caretLine <= bottomIndex)) {
 				var lineHeight = this._getLineHeight();
-				var selectionHeight = (endLine - startLine) * lineHeight;
+				var selectionHeight = 0;
+				if (!onlyCaret) selectionHeight = (endLine - startLine) * lineHeight;
 				pixelY = caretLine * lineHeight;
 				pixelY -= scroll.y;
 				if (pixelY + lineHeight > clientHeight) {
