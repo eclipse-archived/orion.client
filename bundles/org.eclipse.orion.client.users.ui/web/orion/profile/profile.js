@@ -294,28 +294,33 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth',
 	            data[name] = widget.get('value');
 			});
 			var url = this.currentUserURI;
-			this.usersClient.fire(action, url, data).then(function(){}, function(error){
+			this.usersClient.fire(action, url, data).then(
+					function(){
+							if(checkUser) checkUser(); //refresh the user header because user might been changed or user could be deleted
+						},
+					function(error){
 				
-				self.registry.getService("orion.page.message").then(function(progressService){
-				
-				if(error.status===401 || error.status===403 )
-					return;
-				
-				
-					var display = [];
-					
-					display.Severity = "Error";
-					display.HTML = false;
-					
-					try{
-						var resp = JSON.parse(error.responseText);
-						display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
-					}catch(Exception){
-						display.Message = error.message;
-					}
-					
-					progressService.setProgressResult(display);
-				});});
+						self.registry.getService("orion.page.message").then(function(progressService){
+						
+						if(error.status===401 || error.status===403 )
+							return;
+						
+						
+							var display = [];
+							
+							display.Severity = "Error";
+							display.HTML = false;
+							
+							try{
+								var resp = JSON.parse(error.responseText);
+								display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+							}catch(Exception){
+								display.Message = error.message;
+							}
+							
+							progressService.setProgressResult(display);
+						});
+				});
 	
 		}
 	};
