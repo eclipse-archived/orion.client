@@ -142,7 +142,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		items = dojo.isArray(items) ? items[0] : items;
 		var workspaceId = this.getSiteConfiguration().Workspace;
 		projects = projects.sort(function(projectA, projectB) {
-				return projectA.Name.localeCompare(projectB.Name);
+				return projectA.Name.toLowerCase().localeCompare(projectB.Name.toLowerCase());
 			});
 		var self = this;
 		
