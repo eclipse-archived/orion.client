@@ -1413,7 +1413,7 @@ orion.textview.TextView = (function() {
 		 * @see #setSelection
 		 */
 		showSelection: function() {
-			return this._showCaret(false);
+			return this._showCaret(true);
 		},
 		
 		/**************************************** Event handlers *********************************/
@@ -4409,8 +4409,7 @@ orion.textview.TextView = (function() {
 			} 
 			this._setSelection(selection, true, true);
 		},
-		_showCaret: function (onlyCaret) {
-			if (onlyCaret === undefined) var onlyCaret = true;
+		_showCaret: function (allSelection) {
 			var model = this._model;
 			var selection = this._getSelection();
 			var scroll = this._getScroll();
@@ -4429,7 +4428,7 @@ orion.textview.TextView = (function() {
 			var left = bounds.left;
 			var right = bounds.right;
 			var minScroll = clientWidth / 4;
-			if (!onlyCaret && !selection.isEmpty() && startLine === endLine) {
+			if (allSelection && !selection.isEmpty() && startLine === endLine) {
 				bounds = this._getBoundsAtOffset(caret === end ? start : endInclusive);
 				var selectionWidth = caret === start ? bounds.right - left : right - bounds.left;
 				if ((clientWidth - minScroll) > selectionWidth) {
@@ -4456,8 +4455,7 @@ orion.textview.TextView = (function() {
 			var clientHeight = this._getClientHeight();
 			if (!(topIndex <= caretLine && caretLine <= bottomIndex)) {
 				var lineHeight = this._getLineHeight();
-				var selectionHeight = 0;
-				if (!onlyCaret) selectionHeight = (endLine - startLine) * lineHeight;
+				var selectionHeight = allSelection ? (endLine - startLine) * lineHeight : 0;
 				pixelY = caretLine * lineHeight;
 				pixelY -= scroll.y;
 				if (pixelY + lineHeight > clientHeight) {
