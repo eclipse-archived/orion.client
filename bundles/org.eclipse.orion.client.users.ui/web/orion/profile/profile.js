@@ -284,6 +284,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth',
 			
 		},
 		fire: function(action){
+			var self = this;
 			var data = new Object();
 			//collect all data that are not reaonly and are not empty passwords
 			dojo.forEach(dijit.byId('profileForm').getDescendants(), function(widget){ 
@@ -293,7 +294,28 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth',
 	            data[name] = widget.get('value');
 			});
 			var url = this.currentUserURI;
-			this.usersClient.fire(action, url, data);
+			this.usersClient.fire(action, url, data).then(function(){}, function(error){
+				
+				self.registry.getService("orion.page.message").then(function(progressService){
+				
+				if(error.status===401 || error.status===403 )
+					return;
+				
+				
+					var display = [];
+					
+					display.Severity = "Error";
+					display.HTML = false;
+					
+					try{
+						var resp = JSON.parse(error.responseText);
+						display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+					}catch(Exception){
+						display.Message = error.message;
+					}
+					
+					progressService.setProgressResult(display);
+				});});
 	
 		}
 	};

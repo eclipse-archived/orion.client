@@ -10,9 +10,9 @@
 /*global dojo dijit window eclipse:true*/
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/commands', 'orion/profile/usersClient', 'orion/profile/profile',
-	        'orion/searchClient', 'orion/globalCommands',
+	        'orion/searchClient', 'orion/globalCommands', 'orion/status',
 	        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mCommands, mUsersClient, mProfile, mSearchClient, mGlobalCommands) {
+			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mCommands, mUsersClient, mProfile, mSearchClient, mGlobalCommands, mStatus) {
 
 	dojo.addOnLoad(function() {
 		document.body.style.visibility = "visible";
@@ -27,6 +27,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 		var prefsService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 		var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
+		new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		
 		var profile = new mProfile.Profile({
 			registry: serviceRegistry,
