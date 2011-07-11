@@ -53,7 +53,7 @@ define([], function(){
 					href = href.replace('%'+(i+1), segments[i]);
 				}
 				link.setAttribute('href', href);
-				link.innerText = match;
+				link.innerHTML = match;
 				result.appendChild(link);
 				text = remainder;
 			}
