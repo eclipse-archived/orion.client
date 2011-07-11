@@ -11,9 +11,9 @@
 /*jslint browser:true */
 
 define(['dojo', 'dijit', 'orion/util', 'orion/siteUtils', 'orion/commands', 'siteMappingsTable',
-		'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated', 'dijit/form/Form',
-		'dijit/form/TextBox', 'dijit/form/ValidationTextBox',
-		'text!orion/widgets/templates/SiteEditor.html'],
+		'orion/widgets/DirectoryPrompterDialog', 'text!orion/widgets/templates/SiteEditor.html',
+		'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
+		'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
 		function(dojo, dijit, mUtil, mSiteUtils, mCommands, mSiteMappingsTable) {
 
 /**
@@ -144,21 +144,20 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		projects = projects.sort(function(projectA, projectB) {
 				return projectA.Name.toLowerCase().localeCompare(projectB.Name.toLowerCase());
 			});
-		var self = this;
 		
 		/**
 		 * @this An object from the choices array with shape {name:String, path:String, callback:Function}
 		 * @param {Object} item
 		 */
 		var editor = this;
-		var callback = function(item, event) {
+		var addMappingCallback = function(item, event) {
 			if (event.shiftKey) {
 				// special feature for setting up self-hosting
 				var mappings = editor.getSelfHostingMappings(this.path);
 				for (var i = 0; i < mappings.length; i++) {
 					editor.mappings.addMapping(mappings[i].Source, mappings[i].Target);
 				}
-				self.onSubmit();
+				editor.onSubmit();
 			} else {
 				editor.mappings.addMapping(null, this.path, this.name);
 			}
@@ -175,7 +174,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					name: "/" + project.Name,
 					image: "/images/folder.gif",
 					path: mSiteUtils.makeRelativeFilePath(project.Location),
-					callback: callback
+					callback: addMappingCallback
 				};
 			});
 		
@@ -185,7 +184,18 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		choices.push({
 			name: "Choose folder&#8230;",
 			image: "/images/folder.gif",
-			callback: function() { alert("Directory chooser dialog appears here."); }});
+			callback: dojo.hitch(this, function() {
+				var dialog = new orion.widgets.DirectoryPrompterDialog({
+					serviceRegistry: this.serviceRegistry,
+					fileClient: this.fileClient,
+					func: dojo.hitch(this, function(folder) {
+						if (!!folder) {
+							this.mappings.addMapping(null, mSiteUtils.makeRelativeFilePath(folder.Location), folder.Name);
+						}
+					})});
+				dialog.startup();
+				dialog.show();
+			})});
 		choices.push({name: "URL", image: "/images/link.gif", callback: addUrl});
 		return choices;
 	},
