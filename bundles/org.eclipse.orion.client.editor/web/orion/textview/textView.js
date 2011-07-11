@@ -1407,11 +1407,13 @@ orion.textview.TextView = (function() {
 		/**
 		 * Scrolls the selection into view if needed.
 		 *
+		 * @returns true if the view was scrolled. 
+		 *
 		 * @see #getSelection
 		 * @see #setSelection
 		 */
 		showSelection: function() {
-			return this._showCaret();
+			return this._showCaret(false);
 		},
 		
 		/**************************************** Event handlers *********************************/
@@ -2469,10 +2471,7 @@ orion.textview.TextView = (function() {
 				x += this._getOffsetToX(selection.getCaret());
 			}
 			selection.extend(this._getXToOffset(line, x));
-			this._setSelection(selection, false, false);
-			if (!this._showCaret(true)) {
-				this._updateDOMSelection();
-			}
+			this._setSelection(selection, true);
 		},
 		_autoScrollTimer: function () {
 			this._autoScroll();
@@ -4411,7 +4410,7 @@ orion.textview.TextView = (function() {
 			this._setSelection(selection, true, true);
 		},
 		_showCaret: function (onlyCaret) {
-			if (onlyCaret === undefined) var onlyCaret = false;
+			if (onlyCaret === undefined) var onlyCaret = true;
 			var model = this._model;
 			var selection = this._getSelection();
 			var scroll = this._getScroll();
