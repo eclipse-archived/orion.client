@@ -11,9 +11,9 @@
 
 define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands',
-        'orion/textview/textModel','orion/textview/textView','examples/textview/textStyler'], 
+        'orion/textview/textModel','orion/textview/textView','examples/textview/textStyler' , 'orion/compare/compareUtils'], 
 		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
-				mGapModel , mCommands, mTextModel, mTextView, mTextStyler) {
+				mGapModel , mCommands, mTextModel, mTextView, mTextStyler , mCompareUtils) {
 
 var exports = {};
 
@@ -284,7 +284,7 @@ exports.DiffStyler = (function() {
 			var lineIndex = lineStyleEvent.lineIndex;
 			var lineTypeWrapper =  textView.getModel().getLineType(lineIndex);
 			var lineType = lineTypeWrapper.type;
-			var annotationIndex = textView.getModel().getAnnotationIndexByMapper(lineTypeWrapper.mapperIndex);
+			var annotationIndex = textView.getModel().getAnnotationIndexByMapper(lineTypeWrapper.mapperIndex).current;
 			var conflict = textView.getModel().isMapperConflict(lineTypeWrapper.mapperIndex);
 			//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349227 : we were using border style as the line below.Changing to back ground color and image.
 			//lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: "1px #AAAAAA solid" , borderLeft: borderStyle , borderRight: borderStyle}};
@@ -538,6 +538,14 @@ exports.CompareMergeContainer = (function() {
 			
 		textView.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 
+		textView.addEventListener("Selection", this, function() {
+			var lineIndex = textView.getModel().getLineAtOffset(textView.getCaretOffset());
+			var mapperIndex = mCompareUtils.lookUpMapper(textView.getModel().getMapper() , columnIndex , lineIndex).mapperIndex;
+			var annotationIndex = textView.getModel().getAnnotationIndexByMapper(mapperIndex);
+			if(annotationIndex.current !== -1)
+				self._compareMatchRenderer.gotoDiff(annotationIndex.current);
+		}); 
+		
 		if(columnIndex === 0){
 			textView.getModel().addListener(self._compareMatchRenderer);
 			textView.addEventListener("Scroll", window, function(scrollEvent) {

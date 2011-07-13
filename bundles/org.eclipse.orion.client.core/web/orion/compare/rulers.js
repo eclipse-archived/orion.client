@@ -329,6 +329,12 @@ orion.CompareMatchRenderer =  (function() {
 			this._rightEditor.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
 		},
 		
+		gotoDiff: function(annotationIndex){
+			this._currentAnnotationIndex = annotationIndex;
+			var drawLine = this._rightEditor.getTopIndex() ;
+			this._rightEditor.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
+		},
+		
 		nextDiff: function(){
 			var annotations = this._rightEditor.getModel().getAnnotations();
 			if(annotations.length !== 0 ){

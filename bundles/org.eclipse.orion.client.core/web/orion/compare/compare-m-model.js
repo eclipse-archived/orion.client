@@ -35,6 +35,10 @@ orion.CompareMergeModel = (function() {
 			}
 		},
 		
+		getMapper: function(){
+			return this._mapper;
+		},
+		
 		//To get the line type from a zero based line index  
 		getLineType: function(lineIndex){
 			var mapItem = mCompareUtils.lookUpMapper(this._mapper , this._mapperColumnIndex , lineIndex);
@@ -113,10 +117,10 @@ orion.CompareMergeModel = (function() {
 				this.getAnnotations();
 			for (var i = 0 ; i < this._annotations.length ; i++){
 				if(this._annotations[i][1] === mapperIndex){
-					return i;
+					return {current:i,prev:i-1,next:i+1};
 				}
 			}
-			return -1;
+			return {current:-1,prev:-1,next:-1};
 		},
 		
 		getLineNumber: function(lineIndex , mapperColumnIndex){
