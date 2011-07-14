@@ -1,0 +1,61 @@
+.dojoxUploaderFileList{
+	border:1px solid #ccc;
+	height:20px;
+	min-width:30em;
+}
+.dojoxUploaderFileListTable{
+	width:100%;
+	border-collapse:collapse;
+}
+.dojoxUploaderFileListHeader th{
+	display:none;
+	background-color:#eee;
+}
+.dojoxUploaderFileListRow{
+
+}
+.dojoxUploaderIndex{
+	display:none;
+	width:0px;
+}
+.dojoxUploaderIcon{
+	width:50px;
+}
+.dojoxUploaderFileName{
+
+}
+.dojoxUploaderSize{
+	display:none;
+	width:70px;
+}
+.dojoxUploaderFileListContent{
+	padding-left: 2px;
+	vertical-align: middle;	
+	width:100%;
+}
+.dojoxUploaderFileListProgress{
+	border:1px solid #666;
+	height:15px;
+	position:relative;
+	background:#fff;
+	overflow:hidden;
+}
+.dojoxUploaderFileListPercentText{
+	position:absolute;
+	right:3px;
+	top:3px;
+	font-size:10px;
+	text-align:right;
+}
+.dojoxUploaderFileListProgressBar{
+	position:absolute;
+	top:0px;
+	left:0px;
+	height:15px;
+	width:0%;
+	background:#bfe1fd;
+}
+
+.dojoxFileInput{
+	width:100px;
+}

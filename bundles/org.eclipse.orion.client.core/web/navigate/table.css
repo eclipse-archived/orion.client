@@ -10,9 +10,9 @@
 
 @import "../org.dojotoolkit/dijit/themes/nihilo/ProgressBar.css";
 
-@import "../org.dojotoolkit/dojox/form/resources/FileUploader.css";
-
 @import "../org.dojotoolkit/dojox/layout/resources/ToggleSplitter.css";
+
+@import "../css/UploaderFileList.css";
 
 @import "../css/ide.css";
 

@@ -8,51 +8,35 @@
 	<div dojoAttachPoint="containerNode" class="dijitDialogPaneContent">
 		<!-- Actual content here -->
 
-		<!--<form dojoAttachPoint="importDialogForm" id="${id}_importDialogForm" class="form">-->
-			<div style="display: table">
+		<form method="post" id="importDialog.myForm"
+			enctype="multipart/form-data" >
+			<fieldset>
 				<div style="display: table-row">
-					<div
-						style="display: table-cell; padding: 1px; vertical-align: bottom;">
-						<label>File:</label>
-					</div>
-					<div
-						style="display: table-cell; padding: 1px; vertical-align: bottom;">
-						<div
-							style="border: 1px solid #ccc; min-width: 35em; height: 19px; line-height: 19px; vertical-align: bottom;">
-							<div dojoAttachPoint="importDialogFilesList" id="${id}_importDialogFilesList" style="margin-top: -3px;"></div>
+					<div style="display: table-row; height: 20px">
+						<div style="display: table-cell; padding: 1px;">
+							File:
+						</div>
+						<div style="display: table-cell; padding: 1px; vertical-align: top;">
+							<div id="files" dojoType="dojox.form.uploader.FileList" uploaderId="importDialog.uploader"></div>
+						</div>
+						<div style="display: table-cell; padding: 1px;">
+							<input name="uploadedfile" multiple="false" type="file" id="importDialog.uploader" force="iframe"
+								dojoType="dojox.form.Uploader" style="height: 20px" label="Browse..." >
 						</div>
 					</div>
-					<div style="display: table-cell; padding: 1px; vertical-align: bottom;">
-						<div dojoAttachPoint="importDialogSelectButton" id="${id}_importDialogSelectButton">
-							Browse...
+					<div style="display: table-row">
+						<div style="display: table-cell; padding: 1px;">
+						</div>
+						<div style="display: table-cell; padding: 1px;">
+						</div>
+						<div style="display: table-cell; padding: 1px;">
+							<input type="submit" label="Finish" value="OK" dojoType="dijit.form.Button"
+								style="padding: 20 0 10 0; float: right; clear: both;"/>
 						</div>
 					</div>
-				</div>
-
-				<div style="display: table-row">
-					<div style="display: table-cell; padding: 1px;">
-					</div>
-					<div style="display: table-cell; padding: 1px;">
-						<div dojoAttachPoint="importDialogProgressBar" id="${id}_importDialogProgressBar" indeterminate="false" 
-							class="progBar" dojoType="dijit.ProgressBar"></div>
-					</div>
-					<div style="display: table-cell; padding: 1px;">
-					</div>
-				</div>
-
-				<div style="display: table-row">
-					<div style="display: table-cell; padding: 1px;">
-					</div>
-					<div style="display: table-cell; padding: 1px;">
-					</div>
-					<div style="display: table-cell; padding: 1px;">
-						<button dojoAttachPoint="importButton" id="${id}_importButton" dojoType="dijit.form.Button"
-							style="padding: 20 0 10 0; float: right; clear: both;">
-							Finish
-						</button>
-					</div>
-				</div>
-			</div>
-		<!--</form>-->
+					
+				</div>	
+			</fieldset>
+		</form>
 	</div>
 </div>
