@@ -9,9 +9,9 @@
  ******************************************************************************/
 /*global dojo dijit window eclipse:true*/
 
-define(['dojo', 'dijit', 'orion/commands', 'orion/auth',
+define(['dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
 	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Form'], 
-			function(dojo, dijit, mCommands ,mAuth) {
+			function(dojo, dijit, mCommands ,mAuth, mBreadcrumbs) {
 
 	/**
 	 * Used when a value should be displayed as Date but is returned as long.
@@ -261,8 +261,17 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth',
 				var bannerPane = dojo.byId('pageTitle');
 				
 				dojo.empty(bannerPane);
-				dojo.create("a", {id:"profileBanner", innerHTML: profile.lastJSON ? "Profile Information for <b style='color: #000'>" + profile.lastJSON.login + "</b>" : ""}, bannerPane);
+				dojo.create("span", {id:"profileBanner", innerHTML: "Profile Information"}, bannerPane);
 	
+				var location = dojo.byId("location");
+				if (location) {
+					dojo.empty(location);
+					new mBreadcrumbs.BreadCrumbs({
+						container: "location",
+						firstSegmentName: (profile.lastJSON.Name && profile.lastJSON.Name.replace(/^\s+|\s+$/g,"")!=="") ? profile.lastJSON.Name : profile.lastJSON.login
+					});
+				}
+				
 				dojo.empty(this.pageActionsPlaceholder);
 				this.commandService.addCommandGroup("eclipse.profileActionsGroup", 100, null, null, this.pageActionsPlaceholder.id);
 				for(var i=0; i<content.actions.length; i++){
