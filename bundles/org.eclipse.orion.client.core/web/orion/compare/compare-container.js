@@ -349,6 +349,11 @@ exports.CompareMergeContainer = (function() {
 					}
 				}
 			},
+			
+			getFileMetadata: function() {
+				return this._fileMetadata;
+			},
+			
 			setInput: function(fileURI, editor) {
 				fileClient.read(fileURI, true).then(
 					dojo.hitch(this, function(metadata) {
