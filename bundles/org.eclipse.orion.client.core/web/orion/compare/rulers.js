@@ -332,6 +332,8 @@ orion.CompareMatchRenderer =  (function() {
 		gotoDiff: function(annotationIndex){
 			this._currentAnnotationIndex = annotationIndex;
 			var drawLine = this._rightEditor.getTopIndex() ;
+			this._leftEditor.redrawRange();
+			this._rightEditor.redrawRange();
 			this._rightEditor.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
 		},
 		
