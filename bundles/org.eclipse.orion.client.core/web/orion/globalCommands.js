@@ -116,9 +116,9 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				newMenu.addChild(menuitem);
 	
 				var menuButton = new dijit.form.DropDownButton({
-					label: userName,
+					label: userName.length > 40 ? userName.substring(0, 30) + "..." : userName,
 					dropDown: newMenu,
-					title: userStatusText
+					title: userName + ' ' + userStatusText
 			        });
 			        dojo.addClass(menuButton.domNode, "commandImage");
 				dojo.place(menuButton.domNode, userInfo, "last");
