@@ -439,7 +439,7 @@ var exports = {};
 						var func = arguments.callee;
 						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 							serviceRegistry.getService("orion.page.message").then(function(progressService) {
-								var deferred = gitService.doFetch(path, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+								var deferred = gitService.doFetch(path, false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Fetching remote: " + path).then(
 									function(jsonData, secondArg) {
 										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry,
@@ -487,6 +487,64 @@ var exports = {};
 	
 		commandService.addCommand(fetchCommand, "dom");
 		commandService.addCommand(fetchCommand, "object");
+		
+		var fetchForceCommand = new mCommands.Command({
+			name : "Force Fetch",
+			id : "eclipse.orion.git.fetchforce",
+			callback: function(item) {
+				var path = item.Location;
+				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+						var func = arguments.callee;
+						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+							serviceRegistry.getService("orion.page.message").then(function(progressService) {
+								var deferred = gitService.doFetch(path, true, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+								progressService.showWhile(deferred, "Fetching remote: " + path).then(
+									function(jsonData, secondArg) {
+										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry,
+												function(jsonData){
+													dojo.xhrGet({
+														url : path,
+														headers : {
+															"Orion-Version" : "1"
+														},
+														postData : dojo.toJson({
+															"GitSshUsername" : options.gitSshUsername,
+															"GitSshPassword" : options.gitSshPassword,
+															"GitSshPrivateKey": options.gitPrivateKey,
+															"GitSshPassphrase": options.gitPassphrase,
+															"GitSshKnownHost" : options.knownHosts
+														}),
+														handleAs : "json",
+														timeout : 5000,
+														load : function(jsonData, secondArg) {
+															return jsonData;
+														},
+														error : function(error, ioArgs) {
+															//handleGetAuthenticationError(this, ioArgs);
+															console.error("HTTP status code: ", ioArgs.xhr.status);
+															return error;
+														}
+													}).then(function(remoteJsonData){
+														if (explorer.parentId === "explorer-tree")
+															gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArd) {
+																explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
+																explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);			
+															});
+													}, displayErrorOnStatus
+													);
+												}, func, "Fetch Git Repository");
+									});
+							});
+						});
+					});	
+			},
+			visibleWhen : function(item) {
+				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
+			}
+		});
+	
+		commandService.addCommand(fetchForceCommand, "dom");
+		commandService.addCommand(fetchForceCommand, "object");
 		
 		var mergeCommand = new mCommands.Command({
 			name : "Merge",
@@ -564,7 +622,7 @@ var exports = {};
 						var func = arguments.callee;
 						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 							serviceRegistry.getService("orion.page.message").then(function(progressService) {
-								var deferred = gitService.doPush(item.RemoteLocation, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+								var deferred = gitService.doPush(item.RemoteLocation, "HEAD", false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
 									exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
 											function(jsonData){
@@ -590,6 +648,40 @@ var exports = {};
 	
 		commandService.addCommand(pushCommand, "dom");
 		commandService.addCommand(pushCommand, "object");
+		
+		var pushForceCommand = new mCommands.Command({
+			name : "Force Push All",
+			image : "/git/images/push.gif",
+			id : "eclipse.orion.git.pushforce",
+			callback: function(item) {
+				var path = dojo.hash();
+				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+						var func = arguments.callee;
+						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+							serviceRegistry.getService("orion.page.message").then(function(progressService) {
+								var deferred = gitService.doPush(item.RemoteLocation, "HEAD", true, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
+									exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
+											function(jsonData){
+												if (jsonData.Result.Severity == "Ok")
+													dojo.query(".treeTableRow").forEach(function(node, i) {
+														dojo.toggleClass(node, "outgoingCommitsdRow", false);
+													});
+											}, func, "Push Git Repository");
+									});
+								});
+							});
+				});
+			},
+			visibleWhen : function(item) {
+				if (item.toRef)
+					// for action in the git log
+					return item.RepositoryPath === "" && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation;
+			}
+		});
+	
+		commandService.addCommand(pushForceCommand, "dom");
+		commandService.addCommand(pushForceCommand, "object");
 		
 		var switchToRemote = new mCommands.Command({
 			name : "Switch to Remote",
@@ -782,7 +874,7 @@ var exports = {};
 						var func = arguments.callee;
 						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 							serviceRegistry.getService("orion.page.message").then(function(progressService) {
-								var deferred = gitService.doFetch(path, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+								var deferred = gitService.doFetch(path, false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Fetching remote: " + path).then(
 									function(jsonData, secondArg) {
 										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry,
@@ -906,7 +998,7 @@ var exports = {};
 						var func = arguments.callee;
 						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 							serviceRegistry.getService("orion.page.message").then(function(progressService) {
-								var deferred = gitService.doPush(item.RemoteLocation, "HEAD", null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+								var deferred = gitService.doPush(item.RemoteLocation, "HEAD", false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
 									exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
 											function(jsonData){
