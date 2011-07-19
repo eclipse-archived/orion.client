@@ -366,7 +366,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		commandService.addCommand(deleteCommand, "dom");
 	
 		var downloadCommand = new mCommands.Command({
-			name: "Export as zip...",
+			name: "Export as zip",
 			image: "/images/exportzip.gif",
 			id: "eclipse.downloadFile",
 			visibleWhen: function(item) {
