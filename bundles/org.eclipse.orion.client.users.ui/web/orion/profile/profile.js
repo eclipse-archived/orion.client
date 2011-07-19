@@ -59,6 +59,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
 			this.commandService = options.commandService;
 			this.pageActionsPlaceholder = options.pageActionsPlaceholder;
 			this.usersClient = options.usersClient;
+			this.iframes = new Array();
 			
 			var userProfile = this;
 			
@@ -120,6 +121,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
 				}
 				
 				this.profileForm.destroy();
+				this.iframes = new Array();
 			}
 			this.pageActionsPlaceholder =  dojo.byId('pageActions');
 			dojo.empty(this.pageActionsPlaceholder);
@@ -146,9 +148,10 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
 							function(ref){
 								var plugin = registry.getService(ref.getServiceReferences()[0]);
 								plugin.then(function(pluginService){
-									pluginService.getDivContent().then(function(content) {
-										dojo.hitch(userProfile, userProfile.draw(content, div));
-									});
+									if(pluginService.getDivContent)
+										pluginService.getDivContent().then(function(content) {
+											dojo.hitch(userProfile, userProfile.draw(content, div));
+										});
 								});
 							});
 					})(pluginDiv);
@@ -188,11 +191,20 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
 					if(dojo.byId("profileBanner"))
 						dojo.byId("profileBanner").innerHTML = "Profile Information for <b style='color: #000'>" + jsonData.login + "</b>";
 				}
+				for(var i in this.iframes){
+					this.setHash(this.iframes[i], jsonData.Location);
+				}
 			}else{
 				throw new Error("User is not defined");
 			}
 		},
-		
+		setHash: function(iframe, hash){
+			if(iframe.src.indexOf("#")>0){
+				iframe.src = iframe.src.substr(0, iframe.src.indexOf("#")) + "#" + hash;
+			}else{
+				iframe.src = iframe.src + "#" + hash;
+			}
+		},
 		createFormElem: function(json, node){
 			  if(!json.type){
 			    throw new Error("type is missing!");
@@ -220,7 +232,13 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
 			  }
 			  
 			},
-		
+		drawIframe: function(desc, placeholder){
+			var iframe = dojo.create("iframe", desc, placeholder);
+			this.iframes.push(iframe);
+			if(this.lastJSON)
+				this.setHash(iframe, this.lastJSON.Location);
+			dojo.place(iframe, placeholder);
+		},
 		draw: function(content, placeholder){
 			var profile = this;
 			placeholder.innerHTML = "";
@@ -243,6 +261,11 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
 				
 				
 				var sectionContents = dojo.create("div", null, placeholder);
+				
+				if(content.sections[i].type==="iframe"){
+					dojo.hitch(this, this.drawIframe(content.sections[i].data, sectionContents));
+					return;
+				}
 				
 				for(var j=0; j<content.sections[i].data.length; j++){
 					var data = content.sections[i].data[j];
