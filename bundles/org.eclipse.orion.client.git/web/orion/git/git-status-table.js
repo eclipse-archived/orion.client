@@ -370,13 +370,12 @@ orion.InlineCompareRenderer = (function() {
 		this._parentId = parentId;
 	}
 	InlineCompareRenderer.prototype = {
-		render: function () {
+		render: function (createCommandSpan) {
 			var titleTable = dojo.create("table" , {width:"100%"});
 			var row = dojo.create("tr", null, titleTable);
 			var titleCol = dojo.create("td", {nowrap :true}, row, "last");
 			var title = dojo.create("h2", {id :"fileNameInViewer" ,innerHTML: "Select a file on the left to compare..."}, titleCol, "last");
 			var titleDiv = new dijit.layout.ContentPane({region: "top", style:"width:100%;height:30px;overflow: hidden;"});
-			//dojo.addClass(titleDiv, 'auxpane');
 			titleDiv.attr('content', titleTable);
 			
 			var viewerDiv = new dijit.layout.ContentPane({"class":"mainpane" ,id : "inline-compare-viewer" ,splitter:false ,region: "center", style:"width:100%;height:100%;overflow: hidden;"});
@@ -385,6 +384,14 @@ orion.InlineCompareRenderer = (function() {
 			var parent = dijit.byId(this._parentId);
 			parent.addChild(titleDiv);
 			parent.addChild(viewerDiv);
+			if (createCommandSpan) {
+				td = document.createElement('td');
+				td.id = "rightContainerCommands"; // this id should not be known here.  It is decided in compare-container.js
+				row.appendChild(td);
+				td.noWrap = true;
+				row.align = "right";
+				titleTable.align = "right";
+			}
 		}
 		
 	};
@@ -392,8 +399,9 @@ orion.InlineCompareRenderer = (function() {
 }());
 
 orion.GitStatusController = (function() {
-	function GitStatusController(options ,serviceRegistry , statusService, unstagedDivId , stagedDivId) {
+	function GitStatusController(options ,serviceRegistry , commandService , statusService, unstagedDivId , stagedDivId) {
 		this._registry = serviceRegistry;
+		this._commandService = commandService;
 		this._statusService = statusService;
 		this._model = new orion.GitStatusModel();
 		this._timerOn = false;
@@ -417,7 +425,8 @@ orion.GitStatusController = (function() {
 	        //this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, null, null,this._remoteTableRenderer.getLogContentId());
 		}
 		
-		(new orion.InlineCompareRenderer(serviceRegistry ,"viewerZone")).render();
+		(new orion.InlineCompareRenderer(serviceRegistry ,"viewerZone")).render(true);
+		this._generateInlineCompareCmds();
 		
 		this._unstagedContentRenderer = new orion.GitStatusContentRenderer(serviceRegistry ,this._unstagedTableRenderer.getStatusContentId(), this);
 		this._stagedContentRenderer = new orion.GitStatusContentRenderer(serviceRegistry ,this._stagedTableRenderer.getStatusContentId() , this);
@@ -820,6 +829,41 @@ orion.GitStatusController = (function() {
 			});
 		},
 
+		_generateInlineCompareCmds: function(){	
+			var that = this;
+			var nextDiffCommand = new mCommands.Command({
+				name : "Next Diff",
+				image : "/images/move_down.gif",
+				id: "orion.compare.nextDiff",
+				groupId: "orion.compareGroup",
+				/*
+				visibleWhen: function(item) {
+					return that._inlineCompareContainer && that._inlineCompareContainer.hasContent;
+				},*/
+				
+				callback : function() {
+					that._inlineCompareContainer.nextDiff();
+			}});
+			var prevDiffCommand = new mCommands.Command({
+				name : "Previous Diff",
+				image : "/images/move_up.gif",
+				id: "orion.compare.prevDiff",
+				groupId: "orion.compareGroup",
+				
+				
+				callback : function() {
+					that._inlineCompareContainer.prevDiff();
+			}});
+			
+			this._commandService.addCommand(prevDiffCommand, "dom");
+			this._commandService.addCommand(nextDiffCommand, "dom");
+				
+			// Register command contributions
+			this._commandService.registerCommandContribution("orion.compare.prevDiff", 2, "rightContainerCommands");
+			this._commandService.registerCommandContribution("orion.compare.nextDiff", 1, "rightContainerCommands");
+			this._commandService.renderCommands("rightContainerCommands", "dom", self, self, "image");
+		},
+		
 		startTimer: function(){
 			if(!this.timerOn){
 				this.timerOn = true;
@@ -850,6 +894,7 @@ orion.GitStatusController = (function() {
 			this.hasUnstaged = false;
 			dojo.place(document.createTextNode("Select a file on the left to compare..."), "fileNameInViewer", "only");
 			dojo.style("fileNameInViewer", "color", "#6d6d6d");
+			dojo.empty("rightContainerCommands");
 		},
 
 		_createImgButton: function(enableWaitCursor ,imgParentDiv , imgSrc, imgTitle,onClick){
@@ -957,9 +1002,12 @@ orion.GitStatusController = (function() {
 														dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
 														dojo.style("fileNameInViewer", "color", "#6d6d6d");
 														self._statusService.setProgressMessage("");
+														dojo.empty("rightContainerCommands");
+														self._commandService.renderCommands("rightContainerCommands", "dom", self, self, "image");
 													},
 													function(response, ioArgs){
 														self.handleServerErrors(response , ioArgs);
+														dojo.empty("rightContainerCommands");
 													}
 			);
 		},

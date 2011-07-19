@@ -159,6 +159,39 @@ orion.compareUtils.findNextDiff = function(mapper , fromIndex){
 	}
 	return fromIndex;
 };
+
+
+orion.compareUtils.getAnnotationIndex = function(annotations, lineIndex){
+	for (var i = 0 ; i < annotations.length ; i++){
+		if(annotations[i][0] === lineIndex){
+			return i;
+		}
+	}
+	return -1;
+};
+
+orion.compareUtils.getAnnotationMapperIndex = function(annotations, annotationIndex){
+	return annotations[annotationIndex][1];
+};
+
+orion.compareUtils.getAnnotationIndexByMapper = function(annotations, mapperIndex){
+	for (var i = 0 ; i < annotations.length ; i++){
+		if(annotations[i][1] === mapperIndex){
+			return {current:i,prev:i-1,next:i+1};
+		}
+	}
+	return {current:-1,prev:-1,next:-1};
+};
+
+orion.compareUtils.isMapperConflict = function(mapper, mapperIndex){
+	if(mapperIndex < 0)
+		return false;
+	if(!mapper[mapperIndex][3])
+		return false;
+	return mapper[mapperIndex][3] === 1;
+};
+
+
 return orion.compareUtils;
 });
 
