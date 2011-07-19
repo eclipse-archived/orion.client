@@ -281,6 +281,15 @@ orion.editor.Editor = (function() {
 				}
 				return false;
 			}));
+
+			textView.setAction("enter", dojo.hitch(this, function() {
+				for (var i=0; i<this._keyModes.length; i++) {
+					if (this._keyModes[i].isActive()) {
+						return this._keyModes[i].enter();
+					}
+				}
+				return false;
+			}));
 						
 			/** @this {orion.editor.Editor} */
 			function updateCursorStatus() {

@@ -336,9 +336,13 @@ exports.setUpEditor = function(isReadOnly){
 			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
 			keyModeStack.push(genericBindings);
 			
+			// Linked Mode
+			var linkedMode = new orion.editor.LinkedMode(editor);
+			keyModeStack.push(linkedMode);
+			
 			// create keybindings for source editing
 			// TODO this should probably be something that happens more dynamically, when the editor changes input
-			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
+			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
 			keyModeStack.push(codeBindings);
 			
 			// give our external escape handler a shot at handling escape
