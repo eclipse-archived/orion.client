@@ -49,7 +49,7 @@ dojo.addOnLoad(function() {
 
 		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
 	
-		var controller = new mGitStatusTable.GitStatusController({renderLog :true},serviceRegistry , statusService,"unstagedZone" , "stagedZone");
+		var controller = new mGitStatusTable.GitStatusController({renderLog :true},serviceRegistry , commandService , statusService,"unstagedZone" , "stagedZone");
 		controller.getGitStatus(dojo.hash(),true);
 	
 		//every time the user manually changes the hash, we need to load the git status

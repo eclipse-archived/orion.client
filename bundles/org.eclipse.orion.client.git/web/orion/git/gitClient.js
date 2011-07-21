@@ -587,7 +587,7 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		doFetch : function(gitRemoteBranchURI, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
+		doFetch : function(gitRemoteBranchURI, force, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
 			var service = this;
 			
 			return dojo.xhrPost({
@@ -597,6 +597,7 @@ eclipse.GitService = (function() {
 				},
 				postData : dojo.toJson({
 					"Fetch" : "true",
+					"Force" : force,
 					"GitSshUsername" : gitSshUsername,
 					"GitSshPassword" : gitSshPassword,
 					"GitSshKnownHost" : gitSshKnownHost,
@@ -643,7 +644,7 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		doPush : function(gitBranchURI, srcRef, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
+		doPush : function(gitBranchURI, srcRef, force, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
 			var service = this;
 			
 			return dojo.xhrPost({
@@ -654,6 +655,7 @@ eclipse.GitService = (function() {
 				postData : dojo.toJson({
 					"PushSrcRef" : srcRef,
 					"PushTags" : true,
+					"Force" : force,
 					"GitSshUsername" : gitSshUsername,
 					"GitSshPassword" : gitSshPassword,
 					"GitSshKnownHost" : gitSshKnownHost,
