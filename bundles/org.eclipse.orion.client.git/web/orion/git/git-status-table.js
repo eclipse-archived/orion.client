@@ -1046,7 +1046,7 @@ orion.GitStatusController = (function() {
 		},
 		
 		stageAll: function(){
-			this.stage(this._model.items.IndexLocation);
+			this.stage(this._curClone.IndexLocation);
 		},
 		
 		unstage: function(itemModel){
