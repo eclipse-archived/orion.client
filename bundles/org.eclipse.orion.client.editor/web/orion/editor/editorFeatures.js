@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window widgets eclipse:true orion:true serviceRegistry dojo dijit */
+/*global define window widgets eclipse:true orion:true serviceRegistry dojo dijit */
 /*jslint maxerr:150 browser:true devel:true regexp:false*/
 
 
@@ -571,11 +571,20 @@ orion.editor.TextActions = (function() {
 }());
 
 orion.editor.SourceCodeActions = (function() {
-	function SourceCodeActions(editor, undoStack, contentAssist) {
+	/**
+	 * @param {orion.editor.ContentAssist} [contentAssist]
+	 * @param {orion.editor.LinkedMode} [linkedMode]
+	 */
+	function SourceCodeActions(editor, undoStack, contentAssist, linkedMode) {
 		this.editor = editor;
 		this.textView = editor.getTextView();
 		this.undoStack = undoStack;
 		this.contentAssist = contentAssist;
+		this.linkedMode = linkedMode;
+		if (this.contentAssist) {
+			this.contentAssist.addEventListener("accept", dojo.hitch(this, this.contentAssistProposalAccepted));
+		}
+		
 		this.init();
 	}
 	SourceCodeActions.prototype = {
@@ -746,37 +755,56 @@ orion.editor.SourceCodeActions = (function() {
 				this.endUndo();
 				return true;
 			}));
-			
-			//Auto indent
-			this.textView.setAction("enter", dojo.hitch(this, function() {
-				if (this.contentAssist && this.contentAssist.isActive()) {
-					return this.contentAssist.enter();
-				}
-				var selection = this.textView.getSelection();
-				if (selection.start === selection.end) {
-					var model = this.textView.getModel();
-					var lineIndex = model.getLineAtOffset(selection.start);
-					var lineText = model.getLine(lineIndex);
-					var lineStart = model.getLineStart(lineIndex);
-					var index = 0, end = selection.start - lineStart, c;
-					while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
-					if (index > 0) {
-						var prefix = lineText.substring(0, index);
-						index = end;
-						while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
-						this.textView.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
-						return true;
-					}
-				}
-				return false;
-			}));
 		},
-	
+		/**
+		 * Called when a content assist proposal has been accepted. Inserts the proposal into the
+		 * document. Activates Linked Mode if applicable for the selected proposal.
+		 */
+		contentAssistProposalAccepted: function(event) {
+			/**
+			 * The event.proposal may be either a simple string or an object with this shape:
+			 * {   proposal: "[proposal string]", // Actual text of the proposal
+			 *     positions: [{
+			 *         offset: 10, // Offset of start position of parameter i
+			 *         length: 3  // Length of parameter string for parameter i
+			 *     }], // One object for each parameter; can be null
+			 *     escapePosition: 19 // Offset that caret will be placed at after exiting Linked Mode; can be null
+			 * }
+			 * Offsets are relative to the text buffer.
+			 */
+			var proposalInfo = event.data.proposal;
+			var proposal;
+			if (typeof proposalInfo === "string") {
+				proposal = proposalInfo;
+			} else if (typeof proposalInfo.proposal === "string") {
+				proposal = proposalInfo.proposal;
+			}
+			this.textView.setText(proposal, event.data.start, event.data.end);
+			
+			if (proposalInfo.positions && this.linkedMode) {
+				var positionGroups = [];
+				for (var i = 0; i < proposalInfo.positions.length; ++i) {
+					positionGroups[i] = {
+						positions: [{
+							offset: proposalInfo.positions[i].offset,
+							length: proposalInfo.positions[i].length
+						}]
+					};
+				}
+
+				var linkedModeModel = {
+					groups: positionGroups,
+					escapePosition: proposalInfo.escapePosition
+				};
+				this.linkedMode.enterLinkedMode(linkedModeModel);
+			}
+			return true;
+		},
 		cancel: function() {
 			return false;
 		},
 		isActive: function() {
-			return false;  // we have no modal interactions
+			return true;
 		},
 		lineUp: function() {
 			return false;
@@ -785,10 +813,165 @@ orion.editor.SourceCodeActions = (function() {
 			return false;
 		},
 		enter: function() {
+			// Auto indent
+			var selection = this.textView.getSelection();
+			if (selection.start === selection.end) {
+				var model = this.textView.getModel();
+				var lineIndex = model.getLineAtOffset(selection.start);
+				var lineText = model.getLine(lineIndex);
+				var lineStart = model.getLineStart(lineIndex);
+				var index = 0, end = selection.start - lineStart, c;
+				while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
+				if (index > 0) {
+					var prefix = lineText.substring(0, index);
+					index = end;
+					while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
+					this.textView.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
+					return true;
+				}
+			}
 			return false;
 		}
 	};
 	return SourceCodeActions;
+}());
+
+orion.editor.LinkedMode = (function() {
+	function LinkedMode(editor) {
+		this.editor = editor;
+		this.textView = editor.getTextView();
+		
+		/**
+		 * The variables used by the Linked Mode. The elements of linkedModePositions have following structure:
+		 * {
+		 *     offset: 10, // The offset of the position counted from the beginning of the text buffer
+		 *     length: 3 // The length of the position (selection)
+		 * }
+		 *
+		 * The linkedModeEscapePosition contains an offset (counted from the beginning of the text buffer) of a
+		 * position where the caret will be placed after exiting from the Linked Mode.
+		 */
+		this.linkedModeActive = false;
+		this.linkedModePositions = [];
+		this.linkedModeCurrentPositionIndex = 0;
+		this.linkedModeEscapePosition = 0;
+		
+		/**
+		 * Listener called when Linked Mode is active. Updates position's offsets and length
+		 * on user change. Also escapes the Linked Mode if the text buffer was modified outside of the Linked Mode positions.
+		 */
+		this.linkedModeListener = {
+			onVerify: dojo.hitch(this, function(event) {
+				var changeInsideGroup = false;
+				var offsetDifference = 0;
+				for (var i = 0; i < this.linkedModePositions.length; ++i) {
+					var position = this.linkedModePositions[i];
+					if (changeInsideGroup) {
+						// The change has already been noticed, update the offsets of all positions next to the changed one
+						position.offset += offsetDifference;
+					} else if (event.start >= position.offset && event.end <= position.offset + position.length) {
+						// The change was done in the current position, update its length
+						var oldLength = position.length;
+						position.length = (event.start - position.offset) + event.text.length + (position.offset + position.length - event.end);
+						offsetDifference = position.length - oldLength;
+						changeInsideGroup = true;
+					}
+				}
+
+				if (changeInsideGroup) {
+					// Update escape position too
+					this.linkedModeEscapePosition += offsetDifference;
+				} else {
+					// The change has been done outside of the positions, exit the Linked Mode
+					this.cancel();
+				}
+			})
+		};
+	}
+	LinkedMode.prototype = {
+		/**
+		 * Starts Linked Mode, selects the first position and registers the listeners.
+		 * @parma {Object} linkedModeModel An object describing the model to be used by linked mode.
+		 * Contains one or more position groups. If one positions in a group is edited, the other positions in the
+		 * group are edited the same way. The structure is as follows:<pre>
+		 * {
+		 *     groups: [{
+		 *         positions: [{
+		 *             offset: 10, // Relative to the text buffer
+		 *             length: 3
+		 *         }]
+		 *     }],
+		 *     escapePosition: 19, // Relative to the text buffer
+		 * }</pre>
+		 */
+		enterLinkedMode: function(linkedModeModel) {
+			if (this.linkedModeActive) {
+				return;
+			}
+			this.linkedModeActive = true;
+
+			// NOTE: only the first position from each group is supported for now
+			this.linkedModePositions = [];
+			for (var i = 0; i < linkedModeModel.groups.length; ++i) {
+				var group = linkedModeModel.groups[i];
+				this.linkedModePositions[i] = {
+					offset: group.positions[0].offset,
+					length: group.positions[0].length
+				};
+			}
+
+			this.linkedModeEscapePosition = linkedModeModel.escapePosition;
+			this.linkedModeCurrentPositionIndex = 0;
+			this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
+
+			this.textView.addEventListener("Verify", this, this.linkedModeListener.onVerify);
+
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(9), "nextLinkedModePosition");
+			this.textView.setAction("nextLinkedModePosition", dojo.hitch(this, function() {
+				// Switch to the next group on TAB key
+				this.linkedModeCurrentPositionIndex = ++this.linkedModeCurrentPositionIndex % this.linkedModePositions.length;
+				this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
+				return true;
+			}));
+			
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(9, false, true), "previousLinkedModePosition");
+			this.textView.setAction("previousLinkedModePosition", dojo.hitch(this, function() {
+				this.linkedModeCurrentPositionIndex = this.linkedModeCurrentPositionIndex > 0 ? this.linkedModeCurrentPositionIndex-1 : this.linkedModePositions.length-1;
+				this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
+				return true;
+			}));
+
+			this.editor.reportStatus("Linked Mode entered");
+		},
+		isActive: function() {
+			return this.linkedModeActive;
+		},
+		enter: function() {
+			this.cancel();
+			return true;
+		},
+		/** Exits Linked Mode. Places the caret at linkedModeEscapePosition. */
+		cancel: function() {
+			if (!this.linkedModeActive) {
+				return;
+			}
+			this.linkedModeActive = false;
+			this.textView.removeEventListener("Verify", this, this.linkedModeListener.onVerify);
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(9), "tab");
+			this.textView.setKeyBinding(new orion.textview.KeyBinding(9, false, true), null);
+			
+			this.textView.setCaretOffset(this.linkedModeEscapePosition, false);
+
+			this.editor.reportStatus("Linked Mode exited");
+		},
+		/**
+		 * Updates the selection in the textView for given Linked Mode position.
+		 */
+		selectTextForLinkedModePosition: function(position) {
+			this.textView.setSelection(position.offset, position.offset + position.length);
+		}
+	};
+	return LinkedMode;
 }());
 
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {

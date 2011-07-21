@@ -18,13 +18,15 @@ var orion = orion || {};
 orion.editor = orion.editor || {};
 
 /**
- * A <tt>ContentAssist</tt> will look for content assist providers in the service registry (if provided).
- * Alternatively, providers can be registered directly by calling {@link #addProvider}.
  * @name orion.editor.ContentAssist
- * @class Can be attached to an Editor to display content assist suggestions.
+ * @class A key mode for {@link orion.editor.Editor} that can display content assist suggestions.
+ * @description A <code>ContentAssist</code> will look for content assist providers in the service registry (if provided).
+ * Alternatively, providers can be registered directly by calling {@link #addProvider}.
+ * <p>To be notified when a proposal has been accepted by the user, clients can register a listener for the <code>"accept"</code> event
+ * using {@link #addEventListener}.</p>
  * @param {orion.editor.Editor} editor The Editor to provide content assist for.
  * @param {String|DomNode} contentAssistId The ID or DOMNode to use as the parent for content assist.
- * @param {orion.ServiceRegistry} [serviceRegistry] Service registry to use for looking up content assist providers.
+ * @param {orion.serviceregistry.ServiceRegistry} [serviceRegistry] Service registry to use for looking up content assist providers.
  * If this parameter is omitted, providers must instead be registered by calling {@link #addProvider}.
  */
 orion.editor.ContentAssist = (function() {
@@ -39,6 +41,8 @@ orion.editor.ContentAssist = (function() {
 		this.contentAssistProviders = [];
 		this.activeServiceReferences = [];
 		this.activeContentAssistProviders = [];
+		this.listeners = {};
+		this.proposals = [];
 		this.contentAssistListener = {
 			onModelChanged: function(event) {
 				if (!this.finishing) {
@@ -49,6 +53,7 @@ orion.editor.ContentAssist = (function() {
 				this.showContentAssist(false);
 			}
 		};
+
 		this.init();
 	}
 	ContentAssist.prototype = /** @lends orion.editor.ContentAssist.prototype */ {
@@ -60,6 +65,23 @@ orion.editor.ContentAssist = (function() {
 				return true;
 			}));
 			dojo.connect(this.editor, "onInputChange", this, this.inputChanged);
+		},
+		/** Registers a listener with this <code>ContentAssist</code>. */
+		addEventListener: function(/** String */ type, /** Function */ listener) {
+			if (!this.listeners[type]) {
+				this.listeners[type] = [];
+			}
+			this.listeners[type].push(listener);
+		},
+		/** @private */
+		dispatchEvent: function(/** String */ type, /** Object */ data) {
+			var event = { type: type, data: data };
+			var listeners = this.listeners[type];
+			if (listeners) {
+				for (var i=0; i < listeners.length; i++) {
+					listeners[i](event);
+				}
+			}
 		},
 		/** @private */
 		inputChanged: function(/**String*/ fileName) {
@@ -95,7 +117,7 @@ orion.editor.ContentAssist = (function() {
 		},
 		lineUp: function() {
 			if (this.contentAssistPanel) {
-				var selected = this.getSelected();
+				var selected = this.getSelectedNode();
 				if (selected === this.contentAssistPanel.firstChild) {
 					this.setSelected(this.contentAssistPanel.lastChild);
 				} else {
@@ -106,7 +128,7 @@ orion.editor.ContentAssist = (function() {
 		},
 		lineDown: function() {
 			if (this.contentAssistPanel) {
-				var selected = this.getSelected();
+				var selected = this.getSelectedNode();
 				if (selected === this.contentAssistPanel.lastChild) {
 					this.setSelected(this.contentAssistPanel.firstChild);
 				} else {
@@ -115,7 +137,33 @@ orion.editor.ContentAssist = (function() {
 				return true;
 			}
 		},
-		setSelected: function(node) {
+		enter: function() {
+			if (this.contentAssistPanel) {
+				return this.accept();
+			} else {
+				return false;
+			}
+		},
+		/**
+		 * Accepts the currently selected proposal, if any.
+		 * @returns {Boolean}
+		 */
+		accept: function() {
+			var proposal = this.getSelectedProposal();
+			if (proposal === null) {
+				return false;
+			}
+			this.finishing = true;
+			this.showContentAssist(false);
+			var data = {
+				proposal: proposal,
+				start: this.textView.getCaretOffset() - this.prefix.length,
+				end: this.textView.getCaretOffset()
+			};
+			this.dispatchEvent("accept", data);
+			return true;
+		},
+		setSelected: function(/** DOMNode */ node) {
 			var nodes = this.contentAssistPanel.childNodes;
 			for (var i=0; i < nodes.length; i++) {
 				var child = nodes[i];
@@ -127,27 +175,29 @@ orion.editor.ContentAssist = (function() {
 				}
 			}
 		},
-		getSelected: function() {
+		/** @returns {DOMNode} The DOM node of the currently selected proposal. */
+		getSelectedNode: function() {
+			var index = this.getSelectedIndex();
+			return index === -1 ? null : this.contentAssistPanel.childNodes[index];
+		},
+		/** @returns {Number} The index of the currently selected proposal. */
+		getSelectedIndex: function() {
 			var nodes = this.contentAssistPanel.childNodes;
 			for (var i=0; i < nodes.length; i++) {
 				if (nodes[i].className === "selected") {
-					return nodes[i];
+					return i;
 				}
 			}
-			return null;
+			return -1;
 		},
-		enter: function() {
-			if (this.contentAssistPanel) {
-				var proposal = this.getSelected();
-				this.finishing = true;
-				this.textView.setText(proposal.innerHTML.substring(this.prefix.length), this.textView.getCaretOffset(), this.textView.getCaretOffset());
-				this.showContentAssist(false);
-				return true;
-			}
+		/** @returns {Object} The currently selected proposal. */
+		getSelectedProposal: function() {
+			var index = this.getSelectedIndex();
+			return index === -1 ? null : this.proposals[index];
 		},
 		click: function(e) {
 			this.setSelected(e.target);
-			this.enter();
+			this.accept();
 			this.editor.getTextView().focus();
 		},
 		/**
@@ -188,18 +238,39 @@ orion.editor.ContentAssist = (function() {
 //				}
 				this.prefix = this.textView.getText(index, offset);
 				
-				var proposals = [],
-				    buffer = this.textView.getText(),
+				var buffer = this.textView.getText(),
 				    selection = this.textView.getSelection();
+
+				/**
+				 * Bug/feature: The selection returned by the textView doesn't seem to be updated before notifying the listeners
+				 * of onModelChanged. If content assist is triggered by Ctrl+Space, the start/end position of the selection
+				 * (i.e. the caret position) is correct. But if the user then starts to type some text (in order to filter the
+				 * the completion proposals list by a prefix) - i.e. onModelChanged listeners are notified and, in turn,
+				 * this method - the selection is not up-to-date. Because of that, I just did a simple hack of adding the offset
+				 * field for selection, which is computed above and is always correct. The selection is passed to the content
+				 * assist providers.
+				 */
+				selection.offset = offset;
+
+				/**
+				 * Each element of the keywords array returned by content assist providers may be either:
+				 * - String: a simple string proposal
+				 * - Object: must have a property "proposal" giving the proposal string. May also have other fields, which 
+				 * can trigger linked mode behavior in the editor.
+				 */
 				this.getKeywords(this.prefix, buffer, selection).then(
 					dojo.hitch(this, function(keywords) {
+						this.proposals = [];
 						for (var i = 0; i < keywords.length; i++) {
 							var proposal = keywords[i];
-							if (proposal.substr(0, this.prefix.length) === this.prefix) {
-								proposals.push(proposal);
+							if (proposal === null || proposal === undefined) {
+								continue;
+							}
+							if (this.matchesPrefix(proposal) || this.matchesPrefix(proposal.proposal)) {
+								this.proposals.push(proposal);
 							}
 						}
-						if (proposals.length === 0) {
+						if (this.proposals.length === 0) {
 							this.showContentAssist(false);
 							return;
 						}
@@ -207,8 +278,8 @@ orion.editor.ContentAssist = (function() {
 						var caretLocation = this.textView.getLocationAtOffset(offset);
 						caretLocation.y += this.textView.getLineHeight();
 						this.contentAssistPanel.innerHTML = "";
-						for (i = 0; i<proposals.length; i++) {
-							createDiv(proposals[i], i===0, this.contentAssistPanel);
+						for (i = 0; i < this.proposals.length; i++) {
+							createDiv(this.getDisplayString(this.proposals[i]), i===0, this.contentAssistPanel);
 						}
 						this.textView.convert(caretLocation, "document", "page");
 						this.contentAssistPanel.style.position = "absolute";
@@ -225,6 +296,12 @@ orion.editor.ContentAssist = (function() {
 						this.finishing = false;
 					}));
 			}
+		},
+		getDisplayString: function(proposal) {
+			return typeof proposal === "string" ? proposal : proposal.proposal;
+		},
+		matchesPrefix: function(str) {
+			return typeof str === "string" && str.substr(0, this.prefix.length) === this.prefix;
 		},
 		/**
 		 * @param {String} prefix A prefix against which content assist proposals should be evaluated.
