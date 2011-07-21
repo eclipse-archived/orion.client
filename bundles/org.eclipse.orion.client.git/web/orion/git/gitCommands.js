@@ -490,7 +490,7 @@ var exports = {};
 		
 		var fetchForceCommand = new mCommands.Command({
 			name : "Force Fetch",
-			id : "eclipse.orion.git.fetchforce",
+			id : "eclipse.orion.git.fetchForce",
 			callback: function(item) {
 				var path = item.Location;
 				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
@@ -652,7 +652,7 @@ var exports = {};
 		var pushForceCommand = new mCommands.Command({
 			name : "Force Push All",
 			image : "/git/images/push.gif",
-			id : "eclipse.orion.git.pushforce",
+			id : "eclipse.orion.git.pushForce",
 			callback: function(item) {
 				var path = dojo.hash();
 				exports.getDefaultSshOptions(serviceRegistry).then(function(options){

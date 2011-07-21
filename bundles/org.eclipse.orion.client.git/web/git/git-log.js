@@ -82,11 +82,11 @@ dojo.addOnLoad(function() {
 	
 	// git contributions
 	commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.fetchforce", 100, "pageActions", "eclipse.gitGroup.page");
+	commandService.registerCommandContribution("eclipse.orion.git.fetchForce", 100, "pageActions", "eclipse.gitGroup.page");
 	commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "pageActions", "eclipse.gitGroup.page");
 	commandService.registerCommandContribution("eclipse.orion.git.switchToCurrentLocal", 100, "pageActions", "eclipse.gitGroup.page");	
 	commandService.registerCommandContribution("eclipse.orion.git.push", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.pushforce", 100, "pageActions", "eclipse.gitGroup.page");
+	commandService.registerCommandContribution("eclipse.orion.git.pushForce", 100, "pageActions", "eclipse.gitGroup.page");
 	commandService.registerCommandContribution("eclipse.orion.git.switchToRemote", 100, "pageActions", "eclipse.gitGroup.page");
 	commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
 	
