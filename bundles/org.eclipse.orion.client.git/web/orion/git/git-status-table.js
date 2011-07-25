@@ -273,12 +273,14 @@ orion.GitCommitZoneRenderer = (function() {
 	}
 	GitCommitZoneRenderer.prototype = {
 		render: function (renderSeparator) {
-			var headerTable = dojo.create("table", {width:"100%"},this._parentId);
+			this._commitZone = dojo.create("div", null, this._parentId, "last");
+			
+			var headerTable = dojo.create("table", {width:"100%"}, this._commitZone);
 			var row = dojo.create("tr", null, headerTable);
 			var titleCol = dojo.create("td", {nowrap :true}, row, "last");
-			var title = dojo.create("h2", {innerHTML: "Commit message:"}, titleCol, "last");
+			dojo.create("h2", {innerHTML: "Commit message:"}, titleCol, "last");
 			
-			var commitTable = dojo.create("table", null,this._parentId);
+			var commitTable = dojo.create("table", null, this._commitZone);
 			var commitRow = dojo.create("tr", null, commitTable);
 			var messageCol = dojo.create("td", {nowrap :true}, commitRow, "last");
 			dojo.create("textarea", {id:"commitMessage", COLS:40, ROWS:6}, messageCol, "last");
@@ -297,11 +299,63 @@ orion.GitCommitZoneRenderer = (function() {
 			dojo.create("input", {id:"amend", type:"checkbox" ,value: "Amend"}, actionCol2, "last");
 			actionCol2.appendChild(document.createTextNode(" Amend"));
 			if(	renderSeparator)
-				dojo.create("table", {width:"100%", height:"10px"},this._parentId);
-		}
+				dojo.create("table", {width:"100%", height:"10px"}, this._commitZone);
+		},
 		
+		show:function(){
+			this._commitZone.style.display = "";
+		},
+		
+		hide:function(){
+			this._commitZone.style.display = "none";
+		}
 	};
 	return GitCommitZoneRenderer;
+}());
+
+orion.GitRebaseZoneRenderer = (function() {
+	function GitRebaseZoneRenderer(serviceRegistry, parentId) {
+		this._registry = serviceRegistry;
+		this._parentId = parentId;
+	}
+	GitRebaseZoneRenderer.prototype = {
+		render: function (renderSeparator) {
+			this._rebaseZone = dojo.create("div", null, this._parentId, "last");
+			
+			var headerTable = dojo.create("table", {width:"100%"}, this._rebaseZone);
+			var row = dojo.create("tr", null, headerTable);
+			var titleCol = dojo.create("td", {nowrap :true}, row, "last");
+			dojo.create("h2", {innerHTML: "Rebase in progress. Choose action:" }, titleCol, "last");
+			
+			var commitTable = dojo.create("table", null, this._rebaseZone);
+			var commitRow = dojo.create("tr", null, commitTable);
+			
+			var actionCol = dojo.create("td", {nowrap :true}, commitRow, "last");
+			var actionDiv = dojo.create("div", {style:"float: left;", align:"left"}, actionCol, "last");
+			
+			this._cmdSpan = dojo.create("span", {id:"rebaseActions"}, actionDiv, "last");
+
+			if(	renderSeparator)
+				dojo.create("table", {width:"100%", height:"10px"}, this._rebaseZone);
+		},
+		
+		renderAction:function(){
+			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
+			var self = this;
+			this._registry.getService("orion.page.command").then(function(service) {
+				service.renderCommands(self._cmdSpan, "dom", {type: "rebase"}, this, "image",  null, null);
+			});
+		},
+		
+		show:function(){
+			this._rebaseZone.style.display = "";
+		},
+		
+		hide:function(){
+			this._rebaseZone.style.display = "none";
+		}
+	};
+	return GitRebaseZoneRenderer;
 }());
 
 orion.GitLogTableRenderer = (function() {
@@ -414,6 +468,8 @@ orion.GitStatusController = (function() {
 		this._stagedTableRenderer.render();
 		this._commitZoneRenderer = new orion.GitCommitZoneRenderer(serviceRegistry ,"statusZone");
 		this._commitZoneRenderer.render(true);
+		this._rebaseZoneRenderer = new orion.GitRebaseZoneRenderer(serviceRegistry, "statusZone");
+		this._rebaseZoneRenderer.render(true);
 		if(this._renderLog){
 			this._logTableRenderer = new orion.GitLogTableRenderer(this ,serviceRegistry ,"logZone" , "Recent commits on" , "gitLog");
 			this._logTableRenderer.render(true);
@@ -437,7 +493,6 @@ orion.GitStatusController = (function() {
 		commitBtn.onclick = function(evt){
 			self.commit();
 		};
-		
 	}
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
@@ -492,6 +547,22 @@ orion.GitStatusController = (function() {
 			}
 			
 			this._statusService.setProgressMessage("");
+			
+			// check if repository state contains REBASING
+			// (status could be: REBASING, REBASING_REBASING, REBASING_INTERACTIVE, REBASING_MERGE)
+			if (this._model.items.RepositoryState.indexOf("REBASING") != -1) {
+				this.rebaseState = true;
+				// show rebase panel
+				this._rebaseZoneRenderer.renderAction();
+				this._rebaseZoneRenderer.show();
+				this._commitZoneRenderer.hide();
+			} 
+			else {
+				this.rebaseState = false;
+				// show commit panel
+				this._commitZoneRenderer.show();
+				this._rebaseZoneRenderer.hide();
+			}
 		},
 		
 		_renderGlobalActions:function(){
@@ -808,6 +879,45 @@ orion.GitStatusController = (function() {
 				visibleWhen: function(item) {
 					return (self.hasStaged || self.hasUnstaged);
 				}
+			});
+			
+			var rebaseContinueCommand = new mCommands.Command({
+				name: "Continue",
+				tooltip: "Continue rebase",
+				id: "orion.gitRebaseContinue",
+				callback: function(item) {
+						self._statusService.setProgressMessage("Continue rebase...");
+						return self.rebase("CONTINUE");
+				},
+				visibleWhen: function(item) {
+					return self.rebaseState;
+				}
+			});	
+			
+			var rebaseSkipCommand = new mCommands.Command({
+				name: "Skip patch",
+				tooltip: "Skip patch",
+				id: "orion.gitRebaseSkip",
+				callback: function(item) {
+						self._statusService.setProgressMessage("Skipping patch...");
+						return self.rebase("SKIP");
+				},
+				visibleWhen: function(item) {
+					return self.rebaseState;
+				}
+			});	
+			
+			var rebaseAbortCommand = new mCommands.Command({
+				name: "Abort",
+				tooltip: "Abort rebase",
+				id: "orion.gitRebaseAbort",
+				callback: function(item) {
+						self._statusService.setProgressMessage("Aborting rebase...");
+						return self.rebase("ABORT");
+				},
+				visibleWhen: function(item) {
+					return self.rebaseState;
+				}
 			});		
 
 			this._registry.getService("orion.page.command").then(function(commandService) {
@@ -818,14 +928,21 @@ orion.GitStatusController = (function() {
 				commandService.addCommand(stageAllCommand, "object");	
 				commandService.addCommand(unstageAllCommand, "object");	
 				commandService.addCommand(unstageCommand, "object");	
-				commandService.addCommand(resetChangesCommand, "dom");	
+				commandService.addCommand(resetChangesCommand, "dom");
+				commandService.addCommand(rebaseContinueCommand, "dom");
+				commandService.addCommand(rebaseSkipCommand, "dom");
+				commandService.addCommand(rebaseAbortCommand, "dom");
 				commandService.registerCommandContribution("orion.gitStage", 1);	
 				commandService.registerCommandContribution("orion.gitCheckout", 2);	
 				commandService.registerCommandContribution("orion.gitUnstage", 3);	
 				commandService.registerCommandContribution("orion.sbsCompare", 4);	
 				commandService.registerCommandContribution("orion.gitStageAll", 5);	
 				commandService.registerCommandContribution("orion.gitUnstageAll", 6);	
-				commandService.registerCommandContribution("orion.gitResetChanges", 7 , "pageActions");	
+				commandService.registerCommandContribution("orion.gitResetChanges", 7 , "pageActions");
+				commandService.registerCommandContribution("orion.gitRebaseContinue", 8, "rebaseActions");
+				commandService.registerCommandContribution("orion.gitRebaseSkip", 9, "rebaseActions");	
+				commandService.registerCommandContribution("orion.gitRebaseAbort", 10, "rebaseActions");	
+				
 			});
 		},
 
@@ -1030,7 +1147,13 @@ orion.GitStatusController = (function() {
 			var display = [];
 			display.Severity = "Error";
 			display.HTML = false;
-			display.Message =  typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;//dojo.fromJson(ioArgs.xhr.responseText).DetailedMessage;
+			
+			try{
+				var resp = JSON.parse(errorResponse.responseText);
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+			}catch(Exception){
+				display.Message =  typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;//dojo.fromJson(ioArgs.xhr.responseText).DetailedMessage;
+			}
 			
 			this._statusService.setProgressResult(display);
 		},
@@ -1153,6 +1276,45 @@ orion.GitStatusController = (function() {
 				amend = amendBtn.checked;
 			}
 			this.commitAll(this._curClone.HeadLocation, message , amend ?dojo.toJson({"Message":message,"Amend":"true"}): dojo.toJson({"Message":message}));
+		},
+				
+		rebase: function(action){
+			var self = this;
+			self._registry.getService("orion.git.provider").then(
+					function(service) {
+						service.doRebase(self._curClone.HeadLocation, "", action,
+											 function(jsonData, secondArg) {
+												if (jsonData.Result == "OK" || jsonData.Result == "ABORTED" || jsonData.Result == "FAST_FORWARD" || jsonData.Result == "UP_TO_DATE") {
+													var display = [];
+													display.Severity = "Ok";
+													display.HTML = false;
+													display.Message = jsonData.Result;
+													self._statusService.setProgressResult(display);
+													self.getGitStatus(self._url);
+												}
+												if (jsonData.Result == "STOPPED") {
+													var display = [];
+													display.Severity = "Warning";
+													display.HTML = false;
+													display.Message = jsonData.Result
+													+ ". Repository still contains conflicts.";
+													self._statusService.setProgressResult(display);
+													self.getGitStatus(self._url);
+												}
+												else if (jsonData.Result == "FAILED_UNMERGED_PATHS") {
+													var display = [];
+													display.Severity = "Error";
+													display.HTML = false;
+													display.Message = jsonData.Result
+													+ ". Repository contains unmerged paths. Resolve conflicts first.";
+													self._statusService.setProgressResult(display);
+												}
+											 },
+											 function(response, ioArgs){
+												 self.handleServerErrors(response, ioArgs);
+											 }
+						);
+					});
 		}
 		
 	};

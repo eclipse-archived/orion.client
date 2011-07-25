@@ -627,6 +627,79 @@ var exports = {};
 		commandService.addCommand(mergeCommand, "dom");
 		commandService.addCommand(mergeCommand, "object");
 		
+		var rebaseCommand = new mCommands.Command({
+			name : "Rebase",
+			id : "eclipse.orion.git.rebase",
+			callback: function(item) {
+				serviceRegistry.getService("orion.git.provider").then(function(gitService){
+					gitService.doRebase(item.HeadLocation, item.Name, "BEGIN", 
+						function(jsonData, secondArg){
+							serviceRegistry.getService("orion.page.message").then(function(progressService) {
+								var display = [];
+								var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
+								
+								if (jsonData.Result == "OK" || jsonData.Result == "FAST_FORWARD" || jsonData.Result == "UP_TO_DATE" ) {
+									// operation succeeded
+									display.Severity = "Ok";
+									display.HTML = false;
+									display.Message = jsonData.Result;
+								}
+								// handle special cases
+								else if (jsonData.Result == "STOPPED") {
+									display.Severity = "Warning";
+									display.HTML = true;
+									display.Message = "<span>" + jsonData.Result
+										+ ". Some conflicts occurred. Please resolve them and continue, skip patch or abort rebasing."
+										+ " Go to <a href=\"/git/git-status.html#" 
+										+ statusLocation +"\">Git Status page</a>.<span>";
+								}
+								else if (jsonData.Result == "FAILED_WRONG_REPOSITORY_STATE") {
+									display.Severity = "Error";
+									display.HTML = true;
+									display.Message = "<span>" + jsonData.Result
+										+ ". Repository state is invalid (i.e. already during rebasing)."
+										+ " Go to <a href=\"/git/git-status.html#" 
+										+ statusLocation +"\">Git Status page</a>.<span>";
+								}
+								else if (jsonData.Result == "FAILED_UNMERGED_PATHS") {
+									display.Severity = "Error";
+									display.HTML = true;
+									display.Message = "<span>" + jsonData.Result
+										+ ". Repository contains unmerged paths."
+										+ " Go to <a href=\"/git/git-status.html#" 
+										+ statusLocation +"\">Git Status page</a>.<span>";
+								}
+								else if (jsonData.Result == "FAILED_PENDING_CHANGES") {
+									display.Severity = "Error";
+									display.HTML = true;
+									display.Message = "<span>" + jsonData.Result
+										+ ". Repository contains pending changes. Please commit or stash them."
+										+ " Go to <a href=\"/git/git-status.html#" 
+										+ statusLocation +"\">Git Status page</a>.<span>";
+								}
+								// handle other cases
+								else {
+									display.Severity = "Warning";
+									display.HTML = true;
+									display.Message = "<span>" + jsonData.Result
+										+ ". Go to <a href=\"/git/git-status.html#" 
+										+ statusLocation +"\">Git Status page</a>.<span>";
+								} 
+								progressService.setProgressResult(display);
+							});
+						}, 
+						displayErrorOnStatus
+					);
+				});
+			},
+			visibleWhen : function(item) {
+				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
+			}
+		});
+	
+		commandService.addCommand(rebaseCommand, "dom");
+		commandService.addCommand(rebaseCommand, "object");
+		
 		var pushCommand = new mCommands.Command({
 			name : "Push All",
 			image : "/git/images/push.gif",

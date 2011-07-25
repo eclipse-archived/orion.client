@@ -644,6 +644,39 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
+		doRebase : function(gitHeadURI, commitName, operation, onLoad, onError) {
+			var service = this;
+			var postData = {};
+			postData.Rebase = commitName;
+			if (operation) postData.Operation = operation;
+			
+			return dojo.xhrPost({
+				url : gitHeadURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson(postData),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+					return {jsonData: jsonData, secondArg: secondArg};
+				},
+				error : function(error, ioArgs) {
+					if(onError)
+						onError(error, ioArgs);
+					mAuth.handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return {error: error, ioArgs: ioArgs};
+				}
+			});
+		},
 		doPush : function(gitBranchURI, srcRef, force, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
 			var service = this;
 			
