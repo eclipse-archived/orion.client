@@ -54,6 +54,7 @@ dojo.addOnLoad(function() {
 	commandService.registerCommandContribution("eclipse.removeRemote", 2);
 	commandService.registerCommandContribution("eclipse.openGitLog", 2);
 	commandService.registerCommandContribution("eclipse.openCloneContent", 2);
+	commandService.registerCommandContribution("eclipse.openGitStatus", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.fetch", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.merge", 2);
 	commandService.registerCommandContribution("eclipse.orion.git.push", 2);

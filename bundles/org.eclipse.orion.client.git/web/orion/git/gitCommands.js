@@ -361,11 +361,26 @@ var exports = {};
 	
 		commandService.addCommand(openGitLog, "object");
 		
+		var openGitStatus = new mCommands.Command({
+			name : "Show Status",
+			id : "eclipse.openGitStatus",
+			hrefCallback : function(item) {
+				return "/git/git-status.html#" + item.StatusLocation;
+			},
+			visibleWhen : function(item) {
+				if (!item.StatusLocation)
+					return false;
+				return true;
+			}
+		});
+	
+		commandService.addCommand(openGitStatus, "object");
+		
 		var openCloneContent = new mCommands.Command({
 			name : "Show in Navigator",
 			id : "eclipse.openCloneContent",
 			hrefCallback : function(item) {
-					return "/navigate/table.html#" + item.ContentLocation+"?depth=1";
+				return "/navigate/table.html#" + item.ContentLocation+"?depth=1";
 			},
 			visibleWhen : function(item) {
 				if (!item.ContentLocation)
