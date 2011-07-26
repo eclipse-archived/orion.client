@@ -382,7 +382,7 @@ orion.GitCommitterAndAuthorZoneRenderer = (function() {
 			
 			var authorRow = dojo.create("tr", null, committerTable);
 			var nameLabelCol = dojo.create("td", {nowrap :true}, authorRow, "last");
-			dojo.create("h2", {innerHTML: "Author name:\t", }, nameLabelCol, "last");
+			dojo.create("h2", {innerHTML: "Author name:\t" }, nameLabelCol, "last");
 			var nameCol = dojo.create("td", {nowrap :true}, authorRow, "last");
 			this._authorName = dojo.create("input", {id:"authorName", type:"text"}, nameCol, "last");
 			var emailLabelCol = dojo.create("td", {nowrap :true}, authorRow, "last");
@@ -427,7 +427,7 @@ orion.GitCommitterAndAuthorZoneRenderer = (function() {
 			this._committerEmail.value = this._defEmail;
 			this._authorName.value = this._defName; 
 			this._authorEmail.value = this._defEmail;		
-		},
+		}
 	};
 	return GitCommitterAndAuthorZoneRenderer;
 }());
