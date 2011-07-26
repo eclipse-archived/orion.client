@@ -50,6 +50,7 @@ dojo.addOnLoad(function() {
 	commandService.registerCommandContribution("eclipse.checkoutBranch", 2);
 	commandService.registerCommandContribution("eclipse.addBranch", 2);
 	commandService.registerCommandContribution("eclipse.removeBranch", 2);
+	commandService.registerCommandContribution("eclipse.removeRemoteBranch", 2);
 	commandService.registerCommandContribution("eclipse.addRemote", 2);
 	commandService.registerCommandContribution("eclipse.removeRemote", 2);
 	commandService.registerCommandContribution("eclipse.openGitLog", 2);
