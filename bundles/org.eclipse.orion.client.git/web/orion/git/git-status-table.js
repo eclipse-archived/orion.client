@@ -358,6 +358,80 @@ orion.GitRebaseZoneRenderer = (function() {
 	return GitRebaseZoneRenderer;
 }());
 
+orion.GitCommitterAndAuthorZoneRenderer = (function() {
+	function GitCommitterAndAuthorZoneRenderer(serviceRegistry, parentId) {
+		this._registry = serviceRegistry;
+		this._parentId = parentId;
+	}
+	GitCommitterAndAuthorZoneRenderer.prototype = {
+		render: function (renderSeparator) {
+			this._cmdSpanShow = dojo.create("span", {id:"personIdentShow"}, this._parentId, "last");
+			this._cmdSpanHide = dojo.create("span", {id:"personIdentHide"}, this._parentId, "last");
+			this._personIdentZone = dojo.create("div", null, this._parentId, "last");
+			
+			var committerTable = dojo.create("table", null, this._personIdentZone);
+			var committerRow = dojo.create("tr", null, committerTable);
+			var nameLabelCol = dojo.create("td", {nowrap :true}, committerRow, "last");
+			dojo.create("h2", {innerHTML: "Committer name:"}, nameLabelCol, "last");
+			var nameCol = dojo.create("td", {nowrap :true}, committerRow, "last");
+			this._committerName = dojo.create("input", {id:"committerName", type:"text"}, nameCol, "last");
+			var emailLabelCol = dojo.create("td", {nowrap :true}, committerRow, "last");
+			dojo.create("h2", {innerHTML: "email:"}, emailLabelCol, "last");
+			var emailCol = dojo.create("td", {nowrap :true}, committerRow, "last");
+			this._committerEmail = dojo.create("input", {id:"committerEmail", type:"text"}, emailCol, "last");
+			
+			var authorRow = dojo.create("tr", null, committerTable);
+			var nameLabelCol = dojo.create("td", {nowrap :true}, authorRow, "last");
+			dojo.create("h2", {innerHTML: "Author name:\t", }, nameLabelCol, "last");
+			var nameCol = dojo.create("td", {nowrap :true}, authorRow, "last");
+			this._authorName = dojo.create("input", {id:"authorName", type:"text"}, nameCol, "last");
+			var emailLabelCol = dojo.create("td", {nowrap :true}, authorRow, "last");
+			dojo.create("h2", {innerHTML: "email:"}, emailLabelCol, "last");
+			var emailCol = dojo.create("td", {nowrap :true}, authorRow, "last");
+			this._authorEmail = dojo.create("input", {id:"authorEmail", type:"text"}, emailCol, "last");
+			
+			if(	renderSeparator)
+				dojo.create("table", {width:"100%", height:"10px"},this._parentId);
+		},
+		
+		renderAction:function(){
+			dojo.place(document.createTextNode(""), this._cmdSpanShow, "only");
+			dojo.place(document.createTextNode(""), this._cmdSpanHide, "only");
+			var self = this;
+			this._registry.getService("orion.page.command").then(function(service) {
+				service.renderCommands(self._cmdSpanShow, "dom", {type: "personIdentShow"}, this, "image",  null, null);
+				service.renderCommands(self._cmdSpanHide, "dom", {type: "personIdentHide"}, this, "image",  null, null);
+			});
+		},
+		
+		setDefaultPersonIdent:function(name, email) {
+			this._defName = name;
+			this._defEmail = email;
+		},
+		
+		show:function() {
+			this._personIdentZone.style.display = "";
+			this._cmdSpanHide.style.display = "";
+			this._cmdSpanShow.style.display = "none";
+		},
+		
+		hide:function() {
+			this._personIdentZone.style.display = "none";
+			this._cmdSpanHide.style.display = "none";
+			this._cmdSpanShow.style.display = "";
+			this.resetCommitterAndAuthor();
+		},
+		
+		resetCommitterAndAuthor:function() {
+			this._committerName.value = this._defName; 
+			this._committerEmail.value = this._defEmail;
+			this._authorName.value = this._defName; 
+			this._authorEmail.value = this._defEmail;		
+		},
+	};
+	return GitCommitterAndAuthorZoneRenderer;
+}());
+
 orion.GitLogTableRenderer = (function() {
 	function GitLogTableRenderer(controller ,serviceRegistry ,parentId , header , type ) {
 		this._controller = controller;
@@ -470,6 +544,8 @@ orion.GitStatusController = (function() {
 		this._commitZoneRenderer.render(true);
 		this._rebaseZoneRenderer = new orion.GitRebaseZoneRenderer(serviceRegistry, "statusZone");
 		this._rebaseZoneRenderer.render(true);
+		this._committerAndAuthorZoneRenderer = new orion.GitCommitterAndAuthorZoneRenderer(serviceRegistry, "statusZone");
+		this._committerAndAuthorZoneRenderer.render(true);
 		if(this._renderLog){
 			this._logTableRenderer = new orion.GitLogTableRenderer(this ,serviceRegistry ,"logZone" , "Recent commits on" , "gitLog");
 			this._logTableRenderer.render(true);
@@ -514,6 +590,8 @@ orion.GitStatusController = (function() {
 				});
 			}
 			
+			this._committerAndAuthorZoneRenderer.hide();
+			this._committerAndAuthorZoneRenderer.renderAction();
 			this._unstagedTableRenderer.renderAction();
 			this._stagedTableRenderer.renderAction();
 			if(this._renderLog){
@@ -585,6 +663,10 @@ orion.GitStatusController = (function() {
 			this._curClone = this._cloneInfo.Children[0];
 			
 			this._initTitleBar(true);
+			
+			this._committerAndAuthorZoneRenderer.setDefaultPersonIdent(this._userName, this._userEmail);
+			this._committerAndAuthorZoneRenderer.resetCommitterAndAuthor();
+			
 			var that = this;
 			var openGitLog = new mCommands.Command({
 				name : "Complete log",
@@ -607,6 +689,7 @@ orion.GitStatusController = (function() {
 					return (item.type === "gitRemote" && that._curBranch);
 				}
 			});
+			
 			this._registry.getService("orion.page.command").then(function(commandService) {
 				commandService.addCommand(openGitLog, "object");	
 				commandService.addCommand(openGitRemote, "object");	
@@ -649,12 +732,20 @@ orion.GitStatusController = (function() {
 						}
 							
 						that._registry.getService("orion.git.provider").then(function(gitService){
-							gitService.getGitBranch(that._cloneInfo.Children[0].BranchLocation).then(function(children){
-								that._branchInfo = children;
-								gitService.getGitRemote(that._cloneInfo.Children[0].RemoteLocation).then(function(children){
-									that._remoteInfo = children;
-									that._processCloneInfo();
-									that._processStatus();
+							var userNamePath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.name");
+							gitService.getGitCloneConfig(userNamePath).then(function(configEntry){
+								that._userName = configEntry.Value;
+								var userEmailPath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.email");
+								gitService.getGitCloneConfig(userEmailPath).then(function(configEntry){
+									that._userEmail = configEntry.Value;
+									gitService.getGitBranch(that._cloneInfo.Children[0].BranchLocation).then(function(children){
+										that._branchInfo = children;
+										gitService.getGitRemote(that._cloneInfo.Children[0].RemoteLocation).then(function(children){
+											that._remoteInfo = children;
+											that._processCloneInfo();
+											that._processStatus();
+										});
+									});
 								});
 							});
 						});
@@ -778,6 +869,28 @@ orion.GitStatusController = (function() {
 				}
 			});		
 
+			var showCommitterAndAuthorPanel = new mCommands.Command({
+				name : "Change committer or author",
+				id : "orion.showCommitterAndAuthor",
+				callback : function(item) {
+					self._committerAndAuthorZoneRenderer.show();
+				},
+				visibleWhen : function(item) {
+					return item.type === "personIdentShow";
+				}
+			});
+			
+			var hideCommitterAndAuthorPanel = new mCommands.Command({
+				name : "Use default committer and author",
+				id : "orion.hideCommitterAndAuthor",
+				callback : function(item) {
+					self._committerAndAuthorZoneRenderer.hide();
+				},
+				visibleWhen : function(item) {
+					return item.type === "personIdentHide";
+				}
+			});
+			
 			var checkoutCommand = new mCommands.Command({
 				name: "checkout",
 				tooltip: "checkout",
@@ -932,6 +1045,9 @@ orion.GitStatusController = (function() {
 				commandService.addCommand(rebaseContinueCommand, "dom");
 				commandService.addCommand(rebaseSkipCommand, "dom");
 				commandService.addCommand(rebaseAbortCommand, "dom");
+				commandService.addCommand(resetChangesCommand, "dom");	
+				commandService.addCommand(showCommitterAndAuthorPanel, "dom");
+				commandService.addCommand(hideCommitterAndAuthorPanel, "dom");
 				commandService.registerCommandContribution("orion.gitStage", 1);	
 				commandService.registerCommandContribution("orion.gitCheckout", 2);	
 				commandService.registerCommandContribution("orion.gitUnstage", 3);	
@@ -942,7 +1058,8 @@ orion.GitStatusController = (function() {
 				commandService.registerCommandContribution("orion.gitRebaseContinue", 8, "rebaseActions");
 				commandService.registerCommandContribution("orion.gitRebaseSkip", 9, "rebaseActions");	
 				commandService.registerCommandContribution("orion.gitRebaseAbort", 10, "rebaseActions");	
-				
+				commandService.registerCommandContribution("orion.showCommitterAndAuthor", 11 , "personIdentShow");
+				commandService.registerCommandContribution("orion.hideCommitterAndAuthor", 12 , "personIdentHide");
 			});
 		},
 
@@ -1266,16 +1383,46 @@ orion.GitStatusController = (function() {
 					});
 		},
 		
-		commit: function(message , amend){
-			if(!message){
+		commit: function(message, amend, committerName, committerEmail, authorName, authorEmail){
+			var body = {};
+			if(!message) {
 				var messageArea = document.getElementById("commitMessage");
 				message = messageArea.value;
-				if(message === "")
+				if(message !== "")
+					body.Message = message;
+				else
 					return;
+			}
+	
+			if(!amend) {
 				var amendBtn = document.getElementById("amend");
 				amend = amendBtn.checked;
+				if(amend)
+					body.Amend = "true";
 			}
-			this.commitAll(this._curClone.HeadLocation, message , amend ?dojo.toJson({"Message":message,"Amend":"true"}): dojo.toJson({"Message":message}));
+			
+			if(!committerName) {
+				var committerNameInput = document.getElementById("committerName");
+				committerName =  committerNameInput.value;
+				body.CommitterName = committerName;
+			}
+			if(!committerEmail) {
+				var committerEmailInput = document.getElementById("committerEmail");
+				committerEmail =  committerEmailInput.value;
+				body.CommitterEmail = committerEmail;
+			}
+			if(!authorName) {
+				var authorNameInput = document.getElementById("authorName");
+				authorName =  authorNameInput.value;
+				body.AuthorName = authorName;
+			}
+			if(!authorEmail) {
+				var authorEmailInput = document.getElementById("authorEmail");
+				authorEmail =  authorEmailInput.value;
+				body.AuthorEmail = authorEmail;
+			}
+			
+			this.commitAll(this._curClone.HeadLocation, message, dojo.toJson(body));
 		},
 				
 		rebase: function(action){
