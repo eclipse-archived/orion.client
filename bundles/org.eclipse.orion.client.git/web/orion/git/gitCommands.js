@@ -963,7 +963,7 @@ var exports = {};
 									function(jsonData, secondArg) {
 										var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
 										var tr = dojo.byId(trId);
-										dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[5] /* tags column */, "last"), "only");
+										dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[6] /* tags column */, "last"), "only");
 									});
 							});
 					return clientDeferred;
