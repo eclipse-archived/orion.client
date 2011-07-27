@@ -348,8 +348,8 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 								var needMenu = true;
 								var menuCommand = children[0].eclipseCommand;
 								if (children.length === 1) {
-									// we don't want to put a single command in a button menu, just add the image
-									needMenu = !(menuCommand && menuCommand.hasImage());
+									// we don't want to put a single command in a menu, just add the text
+									needMenu = !(menuCommand && !menuCommand.hasImage());
 								}
 								if (needMenu) {
 									menuButton = new dijit.form.DropDownButton({
