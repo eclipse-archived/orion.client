@@ -590,7 +590,6 @@ orion.GitStatusController = (function() {
 				});
 			}
 			
-			this._committerAndAuthorZoneRenderer.hide();
 			this._committerAndAuthorZoneRenderer.renderAction();
 			this._unstagedTableRenderer.renderAction();
 			this._stagedTableRenderer.renderAction();
@@ -665,7 +664,7 @@ orion.GitStatusController = (function() {
 			this._initTitleBar(true);
 			
 			this._committerAndAuthorZoneRenderer.setDefaultPersonIdent(this._userName, this._userEmail);
-			this._committerAndAuthorZoneRenderer.resetCommitterAndAuthor();
+			this._committerAndAuthorZoneRenderer.hide();
 			
 			var that = this;
 			var openGitLog = new mCommands.Command({
