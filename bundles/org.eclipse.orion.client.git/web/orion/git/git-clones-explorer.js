@@ -155,7 +155,7 @@ exports.GitClonesModel = (function() {
 				onComplete(parentItem.Children);
 			}
 			else if (parentItem.BranchLocation && parentItem.RemoteLocation){
-				parentItem.children = [{GroupNode : "true", Location : parentItem.BranchLocation, Name : "Branch", parent : parentItem}, {GroupNode : "true", Location : parentItem.RemoteLocation, Name : "Remote", parent : parentItem}]; 
+				parentItem.children = [{GroupNode : "true", Location : parentItem.BranchLocation, Name : "Branches", parent : parentItem}, {GroupNode : "true", Location : parentItem.RemoteLocation, Name : "Remotes", parent : parentItem}]; 
 				onComplete(parentItem.children);
 			}
 			else if (parentItem.GroupNode){
@@ -235,7 +235,7 @@ exports.GitClonesRenderer = (function(){
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, item.Name==="Branch" ? "/git/images/branches.gif" : "/git/images/remotes.gif");
+				this.getExpandImage(tableRow, div, item.Name==="Branches" ? "/git/images/branches.gif" : "/git/images/remotes.gif");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
