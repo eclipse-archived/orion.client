@@ -135,6 +135,9 @@ exports.GitCommitRenderer = (function() {
 				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Actions</h2>"});
 				break;
 			case 4:
+				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Branches</h2>"});
+				break;
+			case 5:
 				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Tags</h2>"});
 				break;
 		};
@@ -216,7 +219,17 @@ exports.GitCommitRenderer = (function() {
 				break;
 			
 			var td = document.createElement("td", {style: "padding-left: 5px; padding-right: 5px"});
-			dojo.forEach(item.Children, function(tag, i){
+			dojo.forEach(item.Branches, function(branch, i){
+				dojo.place(document.createTextNode(branch.FullName), dojo.create("p", {style: "margin: 5px"}, td, "last"), "only");
+			});
+			return td;
+			break;
+		case 5:
+			if (this.options['minimal'])
+				break;
+			
+			var td = document.createElement("td", {style: "padding-left: 5px; padding-right: 5px"});
+			dojo.forEach(item.Tags, function(tag, i){
 				dojo.place(document.createTextNode(tag.Name), dojo.create("p", {style: "margin: 5px"}, td, "last"), "only");
 			});
 			return td;

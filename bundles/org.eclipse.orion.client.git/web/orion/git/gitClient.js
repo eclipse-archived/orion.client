@@ -677,7 +677,7 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		doPush : function(gitBranchURI, srcRef, force, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
+		doPush : function(gitBranchURI, srcRef, tags, force, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
 			var service = this;
 			
 			return dojo.xhrPost({
@@ -687,7 +687,7 @@ eclipse.GitService = (function() {
 				},
 				postData : dojo.toJson({
 					"PushSrcRef" : srcRef,
-					"PushTags" : true,
+					"PushTags" : tags,
 					"Force" : force,
 					"GitSshUsername" : gitSshUsername,
 					"GitSshPassword" : gitSshPassword,

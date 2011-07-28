@@ -154,7 +154,11 @@ function loadResource(fileServiceReference, navigator){
 				else
 					navigator.loadCommitsList(dojo.hash(), resource);
 			} else {
-				navigator.loadCommitsList(dojo.hash(), {});
+				serviceRegistry.getService(fileServiceReference).then(function(fileService) {
+					var fileClient = new mFileClient.FileClient(fileService);
+					initTitleBar(fileClient, navigator, resource);
+				});
+				navigator.loadCommitsList(dojo.hash(), resource);
 			}
 		},
 		error : function(error, ioArgs) {
@@ -165,6 +169,21 @@ function loadResource(fileServiceReference, navigator){
 			}
 		}
 	});
+}
+
+function getCloneFileUri(){
+	var path = dojo.hash().split("gitapi/commit/");
+	if(path.length === 2){
+		path = path[1].split("/");
+		if(path.length > 1){
+			fileURI="";
+			for(var i=0; i<path.length-1; i++){
+				fileURI+= "/" + path[i];
+			}
+			fileURI+="/" + path[path.length-1].split("?")[0];
+		}
+	}
+	return fileURI;
 }
 
 function getHeadFileUri(){
@@ -204,27 +223,37 @@ function getRemoteFileURI(){
 function initTitleBar(fileClient, navigator, item){
 	
 	var isRemote = (item.Type === "RemoteTrackingBranch");
+	var isBranch = (item.toRef && item.toRef.Type === "Branch");
 	
 	//TODO we are calculating file path from the URL, it should be returned by git API
-	var fileURI = isRemote ? getRemoteFileURI() : getHeadFileUri();
-	
+	var fileURI;
+	if (isRemote)
+		fileURI = getRemoteFileURI();
+	else if (isBranch)
+		fileURI = getHeadFileUri();
+	else
+		fileURI = getCloneFileUri();
 	
 	if(fileURI){
 		fileClient.read(fileURI, true).then(
 				dojo.hitch(this, function(metadata) {
-				var branchName, cloneName;
-					if(item && (isRemote ? item.Name : item.toRef)){
-						branchName = isRemote ? item.Name : item.toRef.Name;
-					}
-					if(item && (isRemote ? item.CloneLocation : item.toRef)){
-						var cloneURI = isRemote ? item.CloneLocation : item.toRef.CloneLocation;
+					var branchName;
+					if (isRemote)
+						branchName = item.Name;
+					else if (isBranch)
+						branchName = item.toRef.Name;
+					else
+						branchName = null;
+
+					if(item && item.CloneLocation){
+						var cloneURI = item.CloneLocation;
 						
 						serviceRegistry.getService("orion.git.provider").then(function(gitService){
 							gitService.getGitClone(cloneURI).then(function(jsonData){
 							if(jsonData.Children && jsonData.Children.length>0)
-								setPageTitle(branchName, jsonData.Children[0].Name, jsonData.Children[0].ContentLocation, isRemote);
+								setPageTitle(branchName, jsonData.Children[0].Name, jsonData.Children[0].ContentLocation, isRemote, isBranch);
 							else
-								setPageTitle(branchName, jsonData.Name, jsonData.ContentLocation, isRemote);
+								setPageTitle(branchName, jsonData.Name, jsonData.ContentLocation, isRemote, isBranch);
 							});
 						});
 					}else{
@@ -317,9 +346,15 @@ function makeHref(fileClient, seg, location, isRemote){
 	);
 };
 
-function setPageTitle(branchName, cloneName, cloneLocation, isRemote){
+function setPageTitle(branchName, cloneName, cloneLocation, isRemote, isBranch){
 	var pageTitle = dojo.byId("pageTitle");
-	var title = "Git Log for " + (isRemote ? "remote branch <b>" : "local branch <b>") + branchName + "</b>";
+	
+	var title = "Git Log ";
+	if (isRemote)
+		title += "for remote branch <b>" + branchName + "</b>";
+	else if (isBranch)
+		title += "for local branch <b>" + branchName + "</b>";
+	
 	if(cloneLocation){
 		title = title + " on <a href='/git/git-clone.html#" + cloneLocation + "'>" + cloneName + "</a>";
 	}

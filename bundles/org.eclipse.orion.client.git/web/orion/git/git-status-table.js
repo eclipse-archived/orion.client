@@ -590,7 +590,6 @@ orion.GitStatusController = (function() {
 				});
 			}
 			
-			this._committerAndAuthorZoneRenderer.hide();
 			this._committerAndAuthorZoneRenderer.renderAction();
 			this._unstagedTableRenderer.renderAction();
 			this._stagedTableRenderer.renderAction();
@@ -665,7 +664,7 @@ orion.GitStatusController = (function() {
 			this._initTitleBar(true);
 			
 			this._committerAndAuthorZoneRenderer.setDefaultPersonIdent(this._userName, this._userEmail);
-			this._committerAndAuthorZoneRenderer.resetCommitterAndAuthor();
+			this._committerAndAuthorZoneRenderer.hide();
 			
 			var that = this;
 			var openGitLog = new mCommands.Command({
@@ -732,20 +731,39 @@ orion.GitStatusController = (function() {
 						}
 							
 						that._registry.getService("orion.git.provider").then(function(gitService){
-							var userNamePath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.name");
-							gitService.getGitCloneConfig(userNamePath).then(function(configEntry){
-								that._userName = configEntry.Value;
-								var userEmailPath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.email");
-								gitService.getGitCloneConfig(userEmailPath).then(function(configEntry){
-									that._userEmail = configEntry.Value;
-									gitService.getGitBranch(that._cloneInfo.Children[0].BranchLocation).then(function(children){
-										that._branchInfo = children;
-										gitService.getGitRemote(that._cloneInfo.Children[0].RemoteLocation).then(function(children){
-											that._remoteInfo = children;
-											that._processCloneInfo();
-											that._processStatus();
+							gitService.getGitBranch(that._cloneInfo.Children[0].BranchLocation).then(function(children){
+								that._branchInfo = children;
+								gitService.getGitRemote(that._cloneInfo.Children[0].RemoteLocation).then(function(children){
+									that._remoteInfo = children;
+									var userNamePath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.name");
+									var setUserEmailAndProcess = function(userEmail) {
+										that._userEmail = userEmail;
+										that._processCloneInfo();
+										that._processStatus();
+									};
+									gitService.getGitCloneConfig(userNamePath).then(
+										function(configEntry){
+											that._userName = configEntry.Value;
+											var userEmailPath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.email");
+											gitService.getGitCloneConfig(userEmailPath).then(
+												function(configEntry){
+													setUserEmailAndProcess(configEntry.Value);
+												},
+												function(error) {
+													setUserEmailAndProcess("");
+												});
+										},
+										function(error) {
+											that._userName = "";
+											var userEmailPath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.email");
+											gitService.getGitCloneConfig(userEmailPath).then(
+												function(configEntry){
+													setUserEmailAndProcess(configEntry.Value);
+												},
+												function(error) {
+													setUserEmailAndProcess("");
+												});
 										});
-									});
 								});
 							});
 						});
