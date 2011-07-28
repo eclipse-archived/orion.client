@@ -109,7 +109,7 @@ orion.editor.AnnotationFactory = (function() {
  * TextCommands connects common text editing keybindings onto an editor.
  */
 orion.editor.TextActions = (function() {
-	function TextActions(editor, undoStack) {
+	function TextActions(editor, undoStack, searcher) {
 		this.editor = editor;
 		this.textView = editor.getTextView();
 		this.undoStack = undoStack;
@@ -117,6 +117,9 @@ orion.editor.TextActions = (function() {
 		this._incrementalFindSuccess = true;
 		this._incrementalFindIgnoreSelection = false;
 		this._incrementalFindPrefix = "";
+		this._searcher =  searcher;
+		if(this._searcher)
+			this._searcher.getResponser().setEditor(this.editor, this.textView);
 
 		this.init();
 	}
@@ -159,94 +162,31 @@ orion.editor.TextActions = (function() {
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("f", true), "Find...");
 			this.textView.setAction("Find...", dojo.hitch(this, function() {
 				setTimeout(dojo.hitch(this, function() {
+					if(!this._searcher)
+						return;
 					var selection = this.textView.getSelection();
 					if (selection.end > selection.start) {
 						searchString = this.textView.getText().substring(selection.start, selection.end);
 					} else {
 						searchString = "";
 					}
-					searchString = prompt("Enter search term or /regex/:", searchString);
-					if (!searchString) {
-						return;
-					}
-					
-					var ignoreCase = searchString.toLowerCase() === searchString,
-					    regexp = this.editor.parseRegExp(searchString),
-					    result;
-					if (regexp) {
-						pattern = regexp.pattern;
-						flags = regexp.flags;
-						flags = flags + (ignoreCase && flags.indexOf("i") === -1 ? "i" : "");
-						result = this.editor.doFindRegExp(pattern, flags, this.textView.getCaretOffset());
-					} else {
-						pattern = null;
-						flags = null;
-						result = this.editor.doFind(searchString, this.textView.getCaretOffset(), ignoreCase);
-					}
-					
-					if (result) {
-						this.editor.moveSelection(this.textView, result.index, result.index+result.length);
-					} else {
-						this.editor.reportStatus("not found", true);
-					}
+					this._searcher.buildToolBar(searchString);
 				}), 0);
 				return true;
 			}));
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true), "Find Next Occurrence");
 			this.textView.setAction("Find Next Occurrence", dojo.hitch(this, function() {
-				var result, ignoreCase, selection;
-				if (this._incrementalFindActive) {
-					var str = this._incrementalFindPrefix;
-					ignoreCase = str.toLowerCase() === str;
-					result = this.editor.doFind(str, this.textView.getCaretOffset(), ignoreCase);
-				} else if (pattern) {
-					// RegExp search
-					result = this.editor.doFindRegExp(pattern, flags, this.textView.getCaretOffset());
-				} else {
-					// use selection if there is one, otherwise use last stored string.  
-					// Since we aren't sure how/why text is highlighted, we will always ignore case.
-					// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=342334
-					selection = this.textView.getSelection();
-					if (selection.end > selection.start) {
-						searchString = this.textView.getText().substring(selection.start, selection.end);
-					}
-					result = this.editor.doFind(searchString, this.textView.getCaretOffset(), true);
-				}
-				
-				if (result) {
-					this._incrementalFindIgnoreSelection = true;
-					this.editor.moveSelection(this.textView, result.index, result.index+result.length);
-					this._incrementalFindIgnoreSelection = false;
-				} else {
-					this.editor.reportStatus("not found", true);
+				if(this._searcher){
+					this._searcher.setOptions({reverse:false});
+					this._searcher.findNext();
 				}
 				return true;
 			}));
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true, true), "Find Previous Occurrence");
 			this.textView.setAction("Find Previous Occurrence", dojo.hitch(this, function() {
-				var selection = this.textView.getSelection();
-				var selectionSize = (selection.end > selection.start) ? selection.end - selection.start : 0;
-				var result, ignoreCase;
-				if (this._incrementalFindActive) {
-					var str = this._incrementalFindPrefix;
-					ignoreCase = str.toLowerCase() === str;
-					result = this.editor.doFind(str, this.textView.getCaretOffset() - selectionSize - 1, ignoreCase, true);
-				} else if (pattern) {
-					// RegExp search
-					result = this.editor.doFindRegExp(pattern, flags, this.textView.getCaretOffset() - selectionSize - 1, true);
-				} else {
-					if (selectionSize > 0) {
-						searchString = this.textView.getText().substring(selection.start, selection.end);
-					}
-					result = this.editor.doFind(searchString, this.textView.getCaretOffset() - selectionSize - 1, true, true);
-				}
-				
-				if (result) {
-					this._incrementalFindIgnoreSelection = true;
-					this.editor.moveSelection(this.textView, result.index, result.index+result.length);
-					this._incrementalFindIgnoreSelection = false;
-				} else {
-					this.editor.reportStatus("not found", true);
+				if(this._searcher){
+					this._searcher.setOptions({reverse:true});
+					this._searcher.findNext();
 				}
 				return true;
 			}));

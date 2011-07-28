@@ -313,6 +313,11 @@ a:hover {
 	height: 2.5em;
 }
 
+.optionalPageToolbar {
+	background: #404040;
+	vertical-align: middle;
+}
+
 .searchbox {
 	margin-left: 12px;
 	margin-right: 8px;

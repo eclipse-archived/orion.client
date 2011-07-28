@@ -59,6 +59,12 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				'<span id="pageActions" class="pageActions"></span>' +
 			'</td>' +
 		'</tr>' +
+		// Row 5: optional Page Toolbar
+		'<tr class="optionalPageToolbar">' +
+			'<td colspan=3 style="border: 1px solid grey;padding-left: 16px;" id="optionalPageToolbar" class="optionalPageToolbar">' +
+				'<div id="optionalPageActions"  class="pageActions"></div>' +
+			'</td>' +
+		'</tr>' +
 	'</table>';
 	
 
