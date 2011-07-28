@@ -396,7 +396,8 @@ var exports = {};
 				return "/git/git-log.html#" + item.CommitLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
-				if (!item.CommitLocation)
+				// show only for a repo
+				if (!item.CommitLocation || !item.StatusLocation)
 					return false;
 				return true;
 			}
