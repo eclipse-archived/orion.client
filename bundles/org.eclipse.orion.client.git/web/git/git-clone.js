@@ -46,6 +46,7 @@ dojo.addOnLoad(function() {
 	commandService.registerCommandContribution("eclipse.initGitRepository", 101, "pageActions", "eclipse.gitGroup");
 	commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 1);
+	commandService.registerCommandContribution("eclipse.openGitLogAll", 1);
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 1, "selectionTools", "eclipse.selectionGroup");
 	commandService.registerCommandContribution("eclipse.checkoutBranch", 2);
 	commandService.registerCommandContribution("eclipse.addBranch", 2);

@@ -389,6 +389,21 @@ var exports = {};
 	
 		commandService.addCommand(openGitLog, "object");
 		
+		var openGitLogAll = new mCommands.Command({
+			name : "Show Git Log",
+			id : "eclipse.openGitLogAll",
+			hrefCallback : function(item) {
+				return "/git/git-log.html#" + item.CommitLocation + "?page=1";
+			},
+			visibleWhen : function(item) {
+				if (!item.CommitLocation)
+					return false;
+				return true;
+			}
+		});
+	
+		commandService.addCommand(openGitLogAll, "object");
+		
 		var openGitStatus = new mCommands.Command({
 			name : "Show Status",
 			id : "eclipse.openGitStatus",
