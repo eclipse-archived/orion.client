@@ -272,7 +272,7 @@ var exports = {};
 				
 			},
 			visibleWhen: function(item) {
-				return item.GroupNode && item.Name === "Branch";
+				return item.GroupNode && item.Name === "Branches";
 			}}
 		);
 		commandService.addCommand(addBranchCommand, "object");
@@ -347,7 +347,7 @@ var exports = {};
 				dialog.show();
 			},
 			visibleWhen: function(item) {
-				return item.GroupNode && item.Name === "Remote";
+				return item.GroupNode && item.Name === "Remotes";
 			}}
 		);
 		commandService.addCommand(addRemoteCommand, "object");
