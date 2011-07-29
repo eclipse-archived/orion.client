@@ -975,11 +975,21 @@ var exports = {};
 					}
 					serviceRegistry.getService("orion.git.provider").then(
 							function(service) {
-								service.doAddTag(item.Location, tagName,
+								service.doAddTag(item.Location, tagName).then(
 									function(jsonData, secondArg) {
 										var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
 										var tr = dojo.byId(trId);
 										dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[6] /* tags column */, "last"), "only");
+									},
+									function (error){
+										serviceRegistry.getService("orion.page.message").then(function(progressService){
+											var display = [];
+											display.Severity = "Error";
+											display.HTML = false;
+											var resp = JSON.parse(error.responseText);
+											display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+											progressService.setProgressResult(display);
+										});
 									});
 							});
 					return clientDeferred;
