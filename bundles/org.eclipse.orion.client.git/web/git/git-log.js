@@ -89,6 +89,7 @@ dojo.addOnLoad(function() {
 	commandService.registerCommandContribution("eclipse.orion.git.pushForce", 100, "pageActions", "eclipse.gitGroup.page");
 	commandService.registerCommandContribution("eclipse.orion.git.switchToRemote", 100, "pageActions", "eclipse.gitGroup.page");
 	commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
+	commandService.registerCommandContribution("eclipse.orion.git.cherryPick", 3);
 	
 	loadResource(fileServiceReference, navigator);
 	

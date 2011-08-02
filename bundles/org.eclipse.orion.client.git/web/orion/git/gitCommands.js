@@ -1002,6 +1002,98 @@ var exports = {};
 		});
 	
 		commandService.addCommand(addTagCommand, "object");
+		
+		var cherryPickCommand = new mCommands.Command({
+			name : "Cherry-Pick",
+			id : "eclipse.orion.git.cherryPick",
+			
+			callback: function(item) {
+				var path = dojo.hash();
+				serviceRegistry.getService("orion.git.provider").then(
+					function(service) {
+						var headLocation = item.Location.replace(item.Name, "HEAD");
+						service.doCherryPick(headLocation, item.Name,
+								function(jsonData, secondArg){
+									serviceRegistry.getService("orion.page.message").then(function(progressService) {
+										var display = [];
+										
+										// TODO we should not craft locations in the code
+										var statusLocation = item.Location.replace("commit/" + item.Name, "status");
+										
+										if (jsonData.Result == "OK") {
+											// operation succeeded
+											display.Severity = "Ok";
+											display.HTML = false;
+											display.Message = jsonData.Result;
+											
+											if (explorer.parentId === "explorer-tree") {
+												// refresh commit list
+												dojo.xhrGet({
+													url : path,
+													headers : {
+														"Orion-Version" : "1"
+													},
+													handleAs : "json",
+													timeout : 5000,
+													load : function(jsonData, secondArg) {
+														return jsonData;
+													},
+													error : function(error, ioArgs) {
+														//handleGetAuthenticationError(this, ioArgs);
+														console.error("HTTP status code: ", ioArgs.xhr.status);
+													}
+												}).then(function(jsonData) {
+													if (jsonData.HeadLocation) {
+														// log view for remote
+														service.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
+															explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
+															explorer.loadCommitsList(jsonData.CommitLocation + "?page=1", jsonData, true);			
+														});
+													} else {
+														// log view for branch / all branches
+														service.getLog(path, "HEAD", function(scopedCommitsJsonData, secondArd) {
+															explorer.renderer.setOutgoingCommits(scopedCommitsJsonData);
+															explorer.loadCommitsList(path, jsonData, true);			
+														});
+													}
+												});
+											}
+										}
+										// handle special cases
+										else if (jsonData.Result == "CONFLICTING") {
+											display.Severity = "Warning";
+											display.HTML = true;
+											display.Message = "<span>" + jsonData.Result
+												+ ". Some conflicts occurred. Go to <a href=\"/git/git-status.html#" 
+												+ statusLocation +"\">Git Status page</a>.<span>";
+										}
+										else if (jsonData.Result == "FAILED") {
+											display.Severity = "Error";
+											display.HTML = true;
+											display.Message = "<span>" + jsonData.Result
+											+ ". Go to <a href=\"/git/git-status.html#" 
+											+ statusLocation +"\">Git Status page</a>.<span>";
+										}
+										// handle other cases
+										else {
+											display.Severity = "Warning";
+											display.HTML = false;
+											display.Message = jsonData.Result;
+										} 
+										progressService.setProgressResult(display);
+									});
+								}, 
+								displayErrorOnStatus
+							);
+					});
+				
+			},
+			visibleWhen : function(item) {
+				return item.Type === "Commit";
+			}
+		});
+	
+		commandService.addCommand(cherryPickCommand, "object");
 	};
 	
 	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack , cmdBaseNumber ,logNavigator, remoteNavigator, logPath) {
