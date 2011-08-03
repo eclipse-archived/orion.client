@@ -17,15 +17,12 @@
 		handle<method>AuthenticationError(this, ioArgs);
 
  */
- 
-
 
 define(['dojo', 'orion/globalCommands', 'dojo/date/locale'], function(dojo, mGlobalCommands) {
 
 var authenticationInProgress = false;
 
 var forbiddenAccessDlg;
-
 
 dojo.addOnLoad(function () {
 	
@@ -98,8 +95,8 @@ function handleAuthenticationError(error, retry) {
 		});
 		if (!authenticationInProgress) {
 			authenticationInProgress = true;
-			// open popup and add OP response handler
-			eval(error.responseText);
+			// open popup and add OP response handler	
+			window.open("/mixloginstatic/LoginWindow.html", 'Login Window', 'width=400, height=200');
 		}
 	}
 }
