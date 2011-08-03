@@ -1023,40 +1023,45 @@ var exports = {};
 										if (jsonData.Result == "OK") {
 											// operation succeeded
 											display.Severity = "Ok";
-											display.HTML = false;
-											display.Message = jsonData.Result;
-											
-											if (explorer.parentId === "explorer-tree") {
-												// refresh commit list
-												dojo.xhrGet({
-													url : path,
-													headers : {
-														"Orion-Version" : "1"
-													},
-													handleAs : "json",
-													timeout : 5000,
-													load : function(jsonData, secondArg) {
-														return jsonData;
-													},
-													error : function(error, ioArgs) {
-														//handleGetAuthenticationError(this, ioArgs);
-														console.error("HTTP status code: ", ioArgs.xhr.status);
-													}
-												}).then(function(jsonData) {
-													if (jsonData.HeadLocation) {
-														// log view for remote
-														service.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
-															explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
-															explorer.loadCommitsList(jsonData.CommitLocation + "?page=1", jsonData, true);			
-														});
-													} else {
-														// log view for branch / all branches
-														service.getLog(path, "HEAD", function(scopedCommitsJsonData, secondArd) {
-															explorer.renderer.setOutgoingCommits(scopedCommitsJsonData);
-															explorer.loadCommitsList(path, jsonData, true);			
-														});
-													}
-												});
+											if (jsonData.HeadUpdated) {
+												display.HTML = false;
+												display.Message = jsonData.Result;
+
+												if (explorer.parentId === "explorer-tree") {
+													// refresh commit list
+													dojo.xhrGet({
+														url : path,
+														headers : {
+															"Orion-Version" : "1"
+														},
+														handleAs : "json",
+														timeout : 5000,
+														load : function(jsonData, secondArg) {
+															return jsonData;
+														},
+														error : function(error, ioArgs) {
+															//handleGetAuthenticationError(this, ioArgs);
+															console.error("HTTP status code: ", ioArgs.xhr.status);
+														}
+													}).then(function(jsonData) {
+														if (jsonData.HeadLocation) {
+															// log view for remote
+															service.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
+																explorer.renderer.setIncomingCommits(scopedCommitsJsonData);
+																explorer.loadCommitsList(jsonData.CommitLocation + "?page=1", jsonData, true);			
+															});
+														} else {
+															// log view for branch / all branches
+															service.getLog(path, "HEAD", function(scopedCommitsJsonData, secondArd) {
+																explorer.renderer.setOutgoingCommits(scopedCommitsJsonData);
+																explorer.loadCommitsList(path, jsonData, true);			
+															});
+														}
+													});
+												}
+											} else {
+												display.HTML = true;
+												display.Message = "<span>Nothing changed.</span>";
 											}
 										}
 										// handle special cases
