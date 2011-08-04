@@ -333,7 +333,7 @@ exports.setUpEditor = function(isReadOnly){
 			commandGenerator.generateEditorCommands(editor);
 			
 			// Create keybindings for generic editing, no dependency on the service model
-			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(commandService, new mResponser.OrionTextSearchResponser()));
+			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(commandService, undoStack, new mResponser.OrionTextSearchResponser()));
 			keyModeStack.push(genericBindings);
 			
 			// Linked Mode

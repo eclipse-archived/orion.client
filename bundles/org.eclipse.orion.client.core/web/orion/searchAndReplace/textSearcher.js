@@ -12,8 +12,9 @@ define([ 'dojo', 'dijit', 'orion/commands', 'dijit/Menu', 'dijit/MenuItem', 'dij
 var orion = orion || {};
 
 orion.TextSearcher = (function() {
-	function TextSearcher(cmdservice, textSearchResponser, options) {
+	function TextSearcher(cmdservice,  undoStack, textSearchResponser, options) {
 		this._commandService = cmdservice;
+		this._undoStack = undoStack;
 		this._textSearchResponser = textSearchResponser;
 		
 		this._ignoreCase = false;
@@ -56,7 +57,7 @@ orion.TextSearcher = (function() {
 				var startPos = that._textSearchResponser.getSearchStartIndex(true);
 				if(searchStr && searchStr.length > 0 && that._incremental){
 					that.setOptions({reverse : false});
-					that.doFind( document.getElementById("localSearchFindWith").value, startPos);
+					that.findOnce( document.getElementById("localSearchFindWith").value, startPos);
 				} else {
 					 that._textSearchResponser.responseFind(startPos, startPos);
 				}
@@ -195,8 +196,12 @@ orion.TextSearcher = (function() {
 		},
 
 		buildToolBar : function(defaultSearchStr) {
+			var findDiv = document.getElementById("localSearchFindWith");
 			if (this._toolBarExist) {
-				this._closeUI();
+				if(defaultSearchStr.length > 0){
+					findDiv.value = defaultSearchStr;
+					findDiv.focus();
+				}
 				return;
 			}
 			this._toolBarExist = true;
@@ -204,8 +209,7 @@ orion.TextSearcher = (function() {
 			this._refreshTopContainer();
 
 			// set the default value of search string
-			var findDiv = document
-					.getElementById("localSearchFindWith");
+			var findDiv = document.getElementById("localSearchFindWith");
 			findDiv.value = defaultSearchStr;
 			findDiv.focus();
 
@@ -283,9 +287,9 @@ orion.TextSearcher = (function() {
 		 *         {Number} index<br />
 		 *         {Number} length
 		 */
-		_findString : function(firstTime, text, searchStr, startIndex) {
+		_findString : function(firstTime, text, searchStr, startIndex, reverse, wrapSearch) {
 			var i;
-			if (this._reverse) {
+			if (reverse) {
 				if(firstTime){
 					text = text.split("").reverse().join("");
 					searchStr = searchStr.split("").reverse().join("");
@@ -293,8 +297,8 @@ orion.TextSearcher = (function() {
 				startIndex = text.length - startIndex - 1;
 				i = text.indexOf(searchStr, startIndex);
 				if (i === -1) {
-					if (this._wrapSearch && firstTime)
-						return this._findString(false, text, searchStr, text.length - 1);
+					if (wrapSearch && firstTime)
+						return this._findString(false, text, searchStr, text.length - 1, reverse, wrapSearch);
 				} else {
 					return {
 						index : text.length - searchStr.length - i,
@@ -305,7 +309,7 @@ orion.TextSearcher = (function() {
 			} else {
 				i = text.indexOf(searchStr, startIndex);
 				if (i === -1) {
-					if (this._wrapSearch && firstTime)
+					if (wrapSearch && firstTime)
 						return this._findString(false, text, searchStr, 0);
 				} else {
 					return {
@@ -370,16 +374,32 @@ orion.TextSearcher = (function() {
 			this.setOptions({
 				reverse : !next
 			});
-			this.doFind(document.getElementById("localSearchFindWith").value, this._textSearchResponser.getSearchStartIndex(this._reverse));
+			this.findOnce(document.getElementById("localSearchFindWith").value, this._textSearchResponser.getSearchStartIndex(this._reverse));
 		},
 
+		startUndo: function() {
+			if (this._undoStack) {
+				this._undoStack.startCompoundChange();
+			}
+		}, 
+		
+		endUndo: function() {
+			if (this._undoStack) {
+				this._undoStack.endCompoundChange();
+			}
+		}, 
+	
 		replace : function() {
+			this.startUndo();
 			this._textSearchResponser.responseReplace(document.getElementById("localSearchReplaceWith").value);
-			if (this._findAfterReplace && document.getElementById("localSearchFindWith").value.length > 0)
-				this.doFind(document.getElementById("localSearchFindWith").value, this._textSearchResponser.getSearchStartIndex(this._reverse));
+			this.endUndo();
+			if (this._findAfterReplace && document.getElementById("localSearchFindWith").value.length > 0){
+				var retVal = this._prepareFind(document.getElementById("localSearchFindWith").value, this._textSearchResponser.getSearchStartIndex(false));
+				this._doFind(retVal.text, retVal.searchStr, retVal.startIndex, false, this._wrapSearch);
+			}
 		},
 
-		doFind : function(searchStr, startIndex) {
+		_prepareFind: function(searchStr, startIndex){
 			var text;
 			if (this._searchOnRange && this._searchRange) {
 				text = this._textSearchResponser.getText()
@@ -395,22 +415,50 @@ orion.TextSearcher = (function() {
 			}
 			if(startIndex < 0)
 				startIndex = 0;
+			return {text:text, searchStr:searchStr, startIndex:startIndex};
+		},
+		
+		_doFind: function(text, searchStr, startIndex, reverse, wrapSearch) {
+
 			if (this._useRegExp) {
 				var regexp = this.parseRegExp("/" + searchStr + "/");
 				if (regexp) {
 					var pattern = regexp.pattern;
 					var flags = regexp.flags;
 					flags = flags + (this._ignoreCase && flags.indexOf("i") === -1 ? "i" : "");
-					result = this._findRegExp(true, text, pattern, flags, startIndex);
+					result = this._findRegExp(true, text, pattern, flags, startIndex, reverse, wrapSearch);
 				}
 			} else {
-				result = this._findString(true, text, searchStr, startIndex);
+				result = this._findString(true, text, searchStr, startIndex, reverse, wrapSearch);
 			}
 
 			if (result) {
-				this._textSearchResponser.responseFind(result.index, result.index + result.length, this._reverse);
+				this._textSearchResponser.responseFind(result.index, result.index + result.length, reverse);
 			} else {
 				this._textSearchResponser.responseFind(-1, -1);
+			}
+			return result;
+		},
+		
+		findOnce: function( searchStr, startIndex){
+			var retVal = this._prepareFind(searchStr, startIndex);
+			this._doFind(retVal.text, retVal.searchStr, retVal.startIndex, this._reverse, this._wrapSearch);
+		},
+
+		replaceAll : function() {
+			var searchStr = document.getElementById("localSearchFindWith").value;
+			if(searchStr && searchStr.length > 0){
+				this.startUndo();
+				var retVal = this._prepareFind(searchStr, startIndex);
+				var startPos = 0;
+				while(true){
+					result = this._doFind(retVal.text, retVal.searchStr,startPos, false, false);
+					startPos = this._textSearchResponser.getSearchStartIndex(false);
+					if(!result)
+						break;
+					this._textSearchResponser.responseReplace(document.getElementById("localSearchReplaceWith").value);
+				}
+				this.endUndo();
 			}
 		},
 
@@ -432,7 +480,7 @@ orion.TextSearcher = (function() {
 		 *         {Number} index<br />
 		 *         {Number} length
 		 */
-		_findRegExp : function(firsTime, text, pattern, flags, startIndex) {
+		_findRegExp : function(firsTime, text, pattern, flags, startIndex, reverse, wrapSearch) {
 			if (!pattern) {
 				return null;
 			}
@@ -444,14 +492,14 @@ orion.TextSearcher = (function() {
 					+ (flags.indexOf("m") === -1 ? "m" : "");
 			var regexp = new RegExp(pattern, flags);
 			var result = null, match = null;
-			if (this._reverse) {
+			if (reverse) {
 				while (true) {
 					result = regexp.exec(text);
 					if(result){
 						if(result.index <= startIndex){
 							match = {index : result.index, length : result[0].length};
 						} else {
-							if(!this._wrapSearch)
+							if(!wrapSearch)
 								return match;
 							if(match)
 								return match;
@@ -466,7 +514,7 @@ orion.TextSearcher = (function() {
 				}
 			} else {
 				result = regexp.exec(text.substring(startIndex));
-				if(!result && this._wrapSearch){
+				if(!result && wrapSearch){
 					startIndex = 0;
 					result = regexp.exec(text.substring(startIndex));
 				}
