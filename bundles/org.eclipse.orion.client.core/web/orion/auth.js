@@ -95,8 +95,10 @@ function handleAuthenticationError(error, retry) {
 		});
 		if (!authenticationInProgress) {
 			authenticationInProgress = true;
-			// open popup and add OP response handler	
-			window.open("/mixloginstatic/LoginWindow.html", 'Login Window', 'width=400, height=200');
+			// open popup and add OP response handler
+			// TODO add error handling here
+			window.open(dojo.fromJson(error.responseText).SignInLocation, 
+					'Login Window', 'width=400, height=200');
 		}
 	}
 }
