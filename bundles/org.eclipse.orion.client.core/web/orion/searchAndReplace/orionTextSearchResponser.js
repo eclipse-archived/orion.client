@@ -11,6 +11,7 @@
 define([], function() {
 
 var orion = orion || {};
+
 orion.OrionTextSearchResponser = (function() {
 	function OrionTextSearchResponser(editor, textView){
 		this.setEditor(editor, textView);
@@ -38,6 +39,7 @@ orion.OrionTextSearchResponser = (function() {
 			if(startIndex === -1)
 				this._editor.reportStatus("not found", true);
 			else {
+				this._editor.reportStatus("", false);
 				this._editor.moveSelection(this._textView, startIndex, endIndex);
 			}
 		},

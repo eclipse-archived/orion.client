@@ -12,6 +12,14 @@
  
 define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator' ], function(dojo, dijit, mUtil){
 
+	var CommandMenuItem = dojo.declare(dijit.MenuItem, {
+		_onClick: function(evt) {
+			if (!this.hrefCallback) {
+				this.inherited(arguments);
+			}
+		}
+	});
+
 	/**
 	 * Constructs a new command service with the given options.
 	 * @param {Object} options The command options object which includes the service registry and optional selection service.
@@ -260,7 +268,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 		 * @param {Boolean} forceText When true, always use text and not the icon when showing the command, regardless of the
 		 *  specified renderType.  
 		 */	
-		renderCommands: function(parent, scope, items, handler, renderType, cssClass, userData, forceText) {
+		renderCommands: function(parent, scope, items, handler, renderType, cssClass, userData, forceText, cssClassCmdOver, cssClassCmdLink) {
 			if (typeof(parent) === "string") {
 				parent = dojo.byId(parent);
 			}
@@ -268,7 +276,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 				var cmdService = this;
 				if (this._selection) {
 					this._selection.getSelections(function(selections) {
-						cmdService.renderCommands(parent, scope, selections, handler, renderType, cssClass, userData, forceText);
+						cmdService.renderCommands(parent, scope, selections, handler, renderType, cssClass, userData, forceText, cssClassCmdOver, cssClassCmdLink);
 					});
 				}
 				return;
@@ -283,7 +291,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 			} else {
 				throw "Unrecognized command scope " + scope;
 			}
-			this._render(this._namedGroups, parent, scope, items, handler, renderType, cssClass, userData, refCommands, forceText);
+			this._render(this._namedGroups, parent, scope, items, handler, renderType, cssClass, userData, refCommands, forceText, cssClassCmdOver, cssClassCmdLink);
 			// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
 			if (renderType === "image") {
 				if (this._isLastChildSeparator(parent, renderType)) {
@@ -298,7 +306,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 			}
 		},
 		
-		_render: function(commandItems, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText) {
+		_render: function(commandItems, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText, cssClassCmdOver, cssClassCmdLink) {
 			// sort the items
 			var positionOrder = commandItems.sortedCommands;
 			if (!positionOrder) {
@@ -333,7 +341,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 							// if commands are scoped to the dom, we'll need to identify a menu with the dom id of its original parent
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children
-							this._render(positionOrder[i].children, newMenu, scope, items, handler, "menu", cssClass, userData, commandList, forceText); 
+							this._render(positionOrder[i].children, newMenu, scope, items, handler, "menu", cssClass, userData, commandList, forceText, cssClassCmdOver, cssClassCmdLink); 
 							// special post-processing when we've created a menu in an image bar.
 							// we want to get rid of a trailing separator in the menu first, and then decide if a menu is necessary
 							children = newMenu.getChildren();
@@ -363,7 +371,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-									image = menuCommand._asImage(id, items, handler, userData, forceText);
+									image = menuCommand._asImage(id, items, handler, userData, forceText, cssClassCmdOver, cssClassCmdLink);
 									dojo.place(image, parent, "last");
 								}
 							}
@@ -374,7 +382,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 								sep = this.generateSeparatorImage();
 								dojo.place(sep, parent, "last");
 							}
-							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText); 
+							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText, cssClassCmdOver, cssClassCmdLink); 
 
 							// make sure that more than just the separator got rendered before rendering a trailing separator
 							if (parent.childNodes.length > 0) {
@@ -389,7 +397,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 						// group within a menu
 						if (group.title) {
 							var subMenu = new dijit.Menu();
-							this._render(positionOrder[i].children, subMenu, scope, items, handler, renderType, cssClass, userData, commandList, forceText); 
+							this._render(positionOrder[i].children, subMenu, scope, items, handler, renderType, cssClass, userData, commandList, forceText, cssClassCmdOver, cssClassCmdLink); 
 							if (subMenu.getChildren().length > 0) {
 								parent.addChild(new dijit.PopupMenuItem({
 									label: group.title,
@@ -403,7 +411,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 								menuSep = new dijit.MenuSeparator();
 								parent.addChild(menuSep);
 							}
-							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText); 
+							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText, cssClassCmdOver, cssClassCmdLink); 
 							// Add a trailing separator if children rendered.
 							var menuChildren = parent.getChildren();
 							if (menuChildren[menuChildren.length - 1] !== menuSep) {
@@ -482,7 +490,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 						} else {
 							if (renderType === "image") {
 								id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								image = command._asImage(id, items, handler, userData, cssClass, forceText);
+								image = command._asImage(id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink);
 								dojo.place(image, parent, "last");
 							} else if (renderType === "menu") {
 								command._addMenuItem(parent, items, handler, userData, cssClass);
@@ -556,7 +564,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 			//how will we know this?
 			this._deviceSupportsHover = false;  
 		},
-		_asImage: function(name, items, handler, userData, cssClass, forceText) {
+		_asImage: function(name, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink) {
 			handler = handler || this;
 			var image = new Image();
 			var link = dojo.create("a");
@@ -601,11 +609,17 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 				} else {
 					image.src = this.image;	
 					dojo.connect(image, "onmouseover", this, function() {
-						dojo.addClass(image, "commandOver");
+						if(cssClassCmdOver)
+							dojo.addClass(image, cssClassCmdOver);
+						else
+							dojo.addClass(image, "commandOver");
 					});
 					dojo.connect(image, "onmouseout", this, function() {
 						image.src = this.image;
-						dojo.removeClass(image, "commandOver");
+						if(cssClassCmdOver)
+							dojo.removeClass(image, cssClassCmdOver);
+						else
+							dojo.removeClass(image, "commandOver");
 					});
 				}
 				dojo.addClass(image, 'commandImage');
@@ -614,7 +628,10 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 				}			
 				dojo.place(image, link, "last");
 			}
-			dojo.addClass(link, 'commandLink');
+			if(cssClassCmdLink)
+				dojo.addClass(link, cssClassCmdLink);
+			else
+				dojo.addClass(link, 'commandLink');
 			if (cssClass) {
 				dojo.addClass(link, cssClass);
 			}
@@ -649,10 +666,11 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 			return anchor;
 		},
 		_addMenuItem: function(parent, items, handler, userData, cssClass) {
-			var menuitem = new dijit.MenuItem({
+			var menuitem = new CommandMenuItem({
 				labelType: this.hrefCallback ? "html" : "text",
 				label: this.name,
-				tooltip: this.tooltip
+				tooltip: this.tooltip,
+				hrefCallback: !!this.hrefCallback
 			});
 			if (this.hrefCallback) {
 				var loc = this.hrefCallback.call(handler, items, this.id, parent.id, userData);
@@ -660,11 +678,9 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 					if (loc.then) {
 						loc.then(dojo.hitch(this, function(l) { 
 							menuitem.set("label", "<a href='"+l+"'>"+this.name+"</a>");
-							menuitem.onClick = function(event) {mUtil.followLink(l, event);};
 						}));
 					} else {
 						menuitem.set("label", "<a href='"+loc+"'>"+this.name+"</a>");
-						menuitem.onClick = function(event) {mUtil.followLink(loc, event);};
 					}
 				}
 			} else if (this.callback) {
@@ -817,6 +833,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 	return {
 		CommandService: CommandService,
 		CommandKeyBinding: CommandKeyBinding,
-		Command: Command
+		Command: Command,
+		CommandMenuItem: CommandMenuItem
 	};
 });

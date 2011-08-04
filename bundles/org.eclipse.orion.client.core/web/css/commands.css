@@ -8,6 +8,20 @@
 	cursor: pointer;
 }
 
+.searchCommandImage {
+	margin-left: 0px;
+	margin-right: 0px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding: 1px;
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+.searchCmdGroupMargin {
+	margin-left: 16px;
+}
+
 .commandOver {
 	margin-left: 2px;
 	margin-right: 2px;
@@ -15,6 +29,19 @@
 	margin-bottom: 0px;
 	vertical-align: middle;
 	padding: 2px;
+	cursor: pointer;
+    background-color: #ffeecc;
+    border: 1px solid #ffcc66;
+    border-radius: 3px;
+}
+
+.searchCommandOver {
+	margin-left: 0px;
+	margin-right: 0px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	vertical-align: middle;
+	padding: 0px;
 	cursor: pointer;
     background-color: #ffeecc;
     border: 1px solid #ffcc66;
@@ -29,8 +56,19 @@
 	cursor: pointer;
 }
 
+.searchCommandLink {
+	margin-right: 1px;
+	cursor: pointer;
+}
+
 .commandLink:hover {
 	margin-right: 12px;
+	cursor: hand;
+	text-decoration: underline;
+}
+
+.searchCommandLink:hover {
+	margin-right: 1px;
 	cursor: hand;
 	text-decoration: underline;
 }
