@@ -262,7 +262,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 								end = window.parseInt(positions[1]);
 							}
 						} else {
-							offset = positions[0];
+							offset = window.parseInt(positions[0]);
 							if (positions.length > 1) {
 								length = window.parseInt(positions[1] - offset);
 							}
