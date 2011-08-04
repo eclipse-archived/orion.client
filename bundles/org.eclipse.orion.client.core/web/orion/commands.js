@@ -12,6 +12,14 @@
  
 define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator' ], function(dojo, dijit, mUtil){
 
+	var CommandMenuItem = dojo.declare(dijit.MenuItem, {
+		_onClick: function(evt) {
+			if (!this.hrefCallback) {
+				this.inherited(arguments);
+			}
+		}
+	});
+
 	/**
 	 * Constructs a new command service with the given options.
 	 * @param {Object} options The command options object which includes the service registry and optional selection service.
@@ -649,10 +657,11 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 			return anchor;
 		},
 		_addMenuItem: function(parent, items, handler, userData, cssClass) {
-			var menuitem = new dijit.MenuItem({
+			var menuitem = new CommandMenuItem({
 				labelType: this.hrefCallback ? "html" : "text",
 				label: this.name,
-				tooltip: this.tooltip
+				tooltip: this.tooltip,
+				hrefCallback: !!this.hrefCallback
 			});
 			if (this.hrefCallback) {
 				var loc = this.hrefCallback.call(handler, items, this.id, parent.id, userData);
@@ -660,11 +669,9 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 					if (loc.then) {
 						loc.then(dojo.hitch(this, function(l) { 
 							menuitem.set("label", "<a href='"+l+"'>"+this.name+"</a>");
-							menuitem.onClick = function(event) {mUtil.followLink(l, event);};
 						}));
 					} else {
 						menuitem.set("label", "<a href='"+loc+"'>"+this.name+"</a>");
-						menuitem.onClick = function(event) {mUtil.followLink(loc, event);};
 					}
 				}
 			} else if (this.callback) {
@@ -817,6 +824,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 	return {
 		CommandService: CommandService,
 		CommandKeyBinding: CommandKeyBinding,
-		Command: Command
+		Command: Command,
+		CommandMenuItem: CommandMenuItem
 	};
 });
