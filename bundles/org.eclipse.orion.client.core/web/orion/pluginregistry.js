@@ -439,6 +439,15 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				});
 			}
 		}
+		
+		if(plugin.getServiceReferences()){
+			for(var i=0; i<plugin.getServiceReferences().length; i++){
+				if(plugin.getServiceReferences()[i].properties.auth!=null){
+					this.installPlugin(plugin.getServiceReferences()[i].properties.auth);
+				}
+			}
+		}
+		
 		return d.promise;	
 	};
 	

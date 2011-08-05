@@ -83,13 +83,14 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	// END BOTTOM BANNER FRAGEMENT
 
 	var userDataToSet = null;
+	var authenticationInProgress = false;
 
 	/**
 	 * Adds the user-related commands to the toolbar
 	 * @name orion.globalCommands#generateUserInfo
 	 * @function
 	 */
-	function generateUserInfo(userName, userLocation, userStatusText) {
+	function generateUserInfo(authService, userName, userLocation, userStatusText) {
 		// add the logout button to the toolbar if available
 		var userInfo = dojo.byId("userInfo");
 		if (userInfo) {
@@ -117,7 +118,12 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				// signout item
 				var menuitem = new dijit.MenuItem({
 					label: "Sign out",
-					onClick: logout
+					onClick: function(){
+						authService.logout().then(function(){
+							generateUserInfo(authService);
+							window.location.replace("/index.html");
+						});
+					}
 				});
 				newMenu.addChild(menuitem);
 	
@@ -131,7 +137,15 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			} else {
 				var signout = document.createElement('span');
 				signout.appendChild(document.createTextNode("Sign in"));
-				signout.onclick = function(){login();};
+				signout.onclick = function(){
+					if (!authenticationInProgress) {
+						authenticationInProgress = true;
+						// open popup and add OP response handler
+						authService.getAuthForm().then(function(loginForm){
+							window.open(loginForm, 'Login Window', 'width=400, height=200');
+						});
+					}
+				};
 				signout.id = "signOutUser";
 				userInfo.appendChild(signout);
 				dojo.addClass(signout, "commandLink");
@@ -328,9 +342,21 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			commandService.renderCommands(toolbar, "global", item, handler, "image");
 		}
 		
-		if (userDataToSet) {
-			//if last time we couldn't set the user name try again after creating the banner
-			generateUserInfo(userDataToSet.userName, userDataToSet.Location, userDataToSet.userStatusText);
+		var authServices = serviceRegistry.getServiceReferences("orion.core.auth");
+		if(authServices.length>0){
+			serviceRegistry.getService(authServices[0]).then(function(authService){
+				authService.getUser().then(function(jsonData){
+					if(!jsonData){
+						eclipse.globalCommandUtils.generateUserInfo(authService);
+						return;
+					}
+					var lastLogin = "N/A";
+					if (jsonData && jsonData.lastlogintimestamp) {
+						lastLogin = dojo.date.locale.format(new Date(jsonData.lastlogintimestamp), {formatLength: "short"});
+					}
+					eclipse.globalCommandUtils.generateUserInfo(authService, (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login, jsonData.Location, "logged in since " + lastLogin);
+				});
+			});
 		}
 		
 		// generate the footer. 
@@ -343,6 +369,8 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		}
 	
 	}
+
+	
 	//return the module exports
 	return {
 		generateUserInfo: generateUserInfo,
