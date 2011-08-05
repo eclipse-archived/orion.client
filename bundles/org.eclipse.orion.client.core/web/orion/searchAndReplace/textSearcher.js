@@ -12,10 +12,10 @@ define([ 'dojo', 'dijit', 'orion/commands', 'dijit/Menu', 'dijit/MenuItem', 'dij
 var orion = orion || {};
 
 orion.TextSearcher = (function() {
-	function TextSearcher(cmdservice,  undoStack, textSearchResponser, options) {
+	function TextSearcher(cmdservice,  undoStack, textSearchAdaptor, options) {
 		this._commandService = cmdservice;
 		this._undoStack = undoStack;
-		this._textSearchResponser = textSearchResponser;
+		this._textSearchAdaptor = textSearchAdaptor;
 		
 		this._ignoreCase = false;
 		this._wrapSearch = true;
@@ -28,6 +28,7 @@ orion.TextSearcher = (function() {
 		
 		this._searchRange = null;
 		this._searchOnRange = false;
+		this._lastSearchString = "";
 		this._toolBarId = "optionalPageActions";
 		this.setOptions(options);
 	}
@@ -54,12 +55,14 @@ orion.TextSearcher = (function() {
 			searchStringDiv.id = "localSearchFindWith";
 			searchStringDiv.onkeyup = function(evt){
 				var searchStr = document.getElementById("localSearchFindWith").value;
-				var startPos = that._textSearchResponser.getSearchStartIndex(true);
+				var startPos = that._textSearchAdaptor.getSearchStartIndex(true);
+				if(startPos < 0)
+					startPos = 0;
 				if(searchStr && searchStr.length > 0 && that._incremental){
 					that.setOptions({reverse : false});
 					that.findOnce( document.getElementById("localSearchFindWith").value, startPos, function(){document.getElementById("localSearchFindWith").focus();});
 				} else {
-					 that._textSearchResponser.responseFind(startPos, startPos, false, function(){document.getElementById("localSearchFindWith").focus();});
+					 that._textSearchAdaptor.adaptFind(startPos, startPos, false, function(){document.getElementById("localSearchFindWith").focus();});
 				}
 				document.getElementById("localSearchFindWith").focus();
 			};
@@ -235,7 +238,7 @@ orion.TextSearcher = (function() {
 			});
 
 			var replaceCommand = new mCommands.Command({
-				name : "ReplaceWith",
+				name : "Replace",
 				image : "/images/rename.gif",
 				id : "orion.search.replace",
 				groupId : "orion.searchGroup",
@@ -246,7 +249,7 @@ orion.TextSearcher = (function() {
 
 			var replaceAllCommand = new mCommands.Command({
 				name : "Replace All",
-				image : "/images/rename.gif",
+				image : "/images/replace_all.gif",
 				id : "orion.search.replaceAll",
 				groupId : "orion.searchGroup",
 				callback : function() {
@@ -267,7 +270,7 @@ orion.TextSearcher = (function() {
 			this._commandService.addCommand(findNextCommand, "dom");
 			this._commandService.addCommand(findPrevCommand, "dom");
 			this._commandService.addCommand(replaceCommand, "dom");
-			//this._commandService.addCommand(replaceAllCommand, "dom");
+			this._commandService.addCommand(replaceAllCommand, "dom");
 			this._commandService.addCommand(closeUICommand, "dom");
 
 			// Register command contributions
@@ -333,8 +336,8 @@ orion.TextSearcher = (function() {
 			return null;
 		},
 
-		getResponser : function() {
-			return this._textSearchResponser;
+		getAdaptor : function() {
+			return this._textSearchAdaptor;
 		},
 
 		setOptions : function(options) {
@@ -386,7 +389,15 @@ orion.TextSearcher = (function() {
 			this.setOptions({
 				reverse : !next
 			});
-			this.findOnce(document.getElementById("localSearchFindWith").value, this._textSearchResponser.getSearchStartIndex(this._reverse));
+			var findTextDiv = document.getElementById("localSearchFindWith");
+			
+			if(this._toolBarExist){
+				this.findOnce(document.getElementById("localSearchFindWith").value, this._textSearchAdaptor.getSearchStartIndex(this._reverse));
+			} else if(this._lastSearchString && this._lastSearchString.length > 0){
+				var startPos = this._textSearchAdaptor.getSearchStartIndex(!next);
+				var retVal = this._prepareFind(this._lastSearchString, startPos);
+				this._doFind(retVal.text, retVal.searchStr, retVal.startIndex, !next, this._wrapSearch);
+			}
 		},
 
 		startUndo: function() {
@@ -403,10 +414,10 @@ orion.TextSearcher = (function() {
 	
 		replace : function() {
 			this.startUndo();
-			this._textSearchResponser.responseReplace(document.getElementById("localSearchReplaceWith").value);
+			this._textSearchAdaptor.adaptReplace(document.getElementById("localSearchReplaceWith").value);
 			this.endUndo();
 			if (this._findAfterReplace && document.getElementById("localSearchFindWith").value.length > 0){
-				var retVal = this._prepareFind(document.getElementById("localSearchFindWith").value, this._textSearchResponser.getSearchStartIndex(false));
+				var retVal = this._prepareFind(document.getElementById("localSearchFindWith").value, this._textSearchAdaptor.getSearchStartIndex(false));
 				this._doFind(retVal.text, retVal.searchStr, retVal.startIndex, false, this._wrapSearch);
 			}
 		},
@@ -414,12 +425,12 @@ orion.TextSearcher = (function() {
 		_prepareFind: function(searchStr, startIndex){
 			var text;
 			if (this._searchOnRange && this._searchRange) {
-				text = this._textSearchResponser.getText()
+				text = this._textSearchAdaptor.getText()
 						.substring(this._searchRange.start,
 								this._searchRange.end);
 				startIndex = startIndex - this._searchRange.start;
 			} else {
-				text = this._textSearchResponser.getText();
+				text = this._textSearchAdaptor.getText();
 			}
 			if (this._ignoreCase) {
 				searchStr = searchStr.toLowerCase();
@@ -431,7 +442,7 @@ orion.TextSearcher = (function() {
 		},
 		
 		_doFind: function(text, searchStr, startIndex, reverse, wrapSearch, callBack) {
-
+			this._lastSearchString = searchStr;
 			if (this._useRegExp) {
 				var regexp = this.parseRegExp("/" + searchStr + "/");
 				if (regexp) {
@@ -445,9 +456,9 @@ orion.TextSearcher = (function() {
 			}
 
 			if (result) {
-				this._textSearchResponser.responseFind(result.index, result.index + result.length, reverse, callBack);
+				this._textSearchAdaptor.adaptFind(result.index, result.index + result.length, reverse, callBack);
 			} else {
-				this._textSearchResponser.responseFind(-1, -1);
+				this._textSearchAdaptor.adaptFind(-1, -1);
 			}
 			return result;
 		},
@@ -461,16 +472,17 @@ orion.TextSearcher = (function() {
 			var searchStr = document.getElementById("localSearchFindWith").value;
 			if(searchStr && searchStr.length > 0){
 				this.startUndo();
-				var retVal = this._prepareFind(searchStr, 0);
-				var startPos = retVal.startIndex;
+				var startPos = 0;
 				while(true){
-					result = this._doFind(retVal.text, retVal.searchStr,startPos, false, false);
-					startPos = this._textSearchResponser.getSearchStartIndex(true, true);
+					var retVal = this._prepareFind(searchStr, startPos);
+					var result = this._doFind(retVal.text, retVal.searchStr,retVal.startIndex, false, false);
 					if(!result)
 						break;
-					this._textSearchResponser.responseReplace(document.getElementById("localSearchReplaceWith").value);
+					this._textSearchAdaptor.adaptReplace(document.getElementById("localSearchReplaceWith").value);
+					startPos = this._textSearchAdaptor.getSearchStartIndex(true, true);
 				}
 				this.endUndo();
+				this._textSearchAdaptor.adaptReplaceAll(startPos > 0);
 			}
 		},
 

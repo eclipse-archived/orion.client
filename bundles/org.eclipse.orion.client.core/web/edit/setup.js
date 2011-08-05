@@ -14,11 +14,11 @@
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
-        'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchResponser',
+        'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchAdaptor',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
-				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mKeyBinding, mSearcher, mResponser) {
+				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mKeyBinding, mSearcher, mSearchAdaptor) {
 	
 var exports = exports || {};
 	
@@ -333,7 +333,7 @@ exports.setUpEditor = function(isReadOnly){
 			commandGenerator.generateEditorCommands(editor);
 			
 			// Create keybindings for generic editing, no dependency on the service model
-			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(commandService, undoStack, new mResponser.OrionTextSearchResponser()));
+			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(commandService, undoStack, new mSearchAdaptor.OrionTextSearchAdaptor()));
 			keyModeStack.push(genericBindings);
 			
 			// Linked Mode

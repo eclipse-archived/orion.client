@@ -12,11 +12,11 @@ define([], function() {
 
 var orion = orion || {};
 
-orion.OrionTextSearchResponser = (function() {
-	function OrionTextSearchResponser(editor, textView){
+orion.OrionTextSearchAdaptor = (function() {
+	function OrionTextSearchAdaptor(editor, textView){
 		this.setEditor(editor, textView);
 	}	
-	OrionTextSearchResponser.prototype = {
+	OrionTextSearchAdaptor.prototype = {
 		setEditor: function(editor, textView){
 			this._editor = editor;
 			this._textView = textView;
@@ -37,7 +37,12 @@ orion.OrionTextSearchResponser = (function() {
 			return this._textView.getCaretOffset();
 		},
 		
-		responseFind: function(startIndex, endIndex, reverse, callBack) {
+		adaptReplaceAll: function(succeed){
+			if(succeed)
+				this._editor.reportStatus("", false);
+		},
+		
+		adaptFind: function(startIndex, endIndex, reverse, callBack) {
 			if(startIndex === -1)
 				this._editor.reportStatus("not found", true);
 			else {
@@ -46,13 +51,13 @@ orion.OrionTextSearchResponser = (function() {
 			}
 		},
 		
-		responseReplace: function(newStr, startIndex, endIndex) {
+		adaptReplace: function(newStr, startIndex, endIndex) {
 			var selection = this._textView.getSelection();
 			this._textView.setText(newStr, selection.start, selection.end);
 			this._textView.setSelection(selection.start , selection.start + newStr.length, true);
 		}
 	};
-	return OrionTextSearchResponser;
+	return OrionTextSearchAdaptor;
 }());
 
 return orion;

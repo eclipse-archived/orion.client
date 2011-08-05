@@ -119,7 +119,7 @@ orion.editor.TextActions = (function() {
 		this._incrementalFindPrefix = "";
 		this._searcher =  searcher;
 		if(this._searcher)
-			this._searcher.getResponser().setEditor(this.editor, this.textView);
+			this._searcher.getAdaptor().setEditor(this.editor, this.textView);
 
 		this.init();
 	}
