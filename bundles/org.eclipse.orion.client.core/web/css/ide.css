@@ -482,6 +482,9 @@ a:hover {
 	border: 2px inset #DDD;
 	z-index:10;
 	cursor: default;
+	overflow: auto;
+	height: 150px;
+	width: 200px;
 }
 
 .contentassist .selected {

@@ -172,6 +172,12 @@ orion.editor.ContentAssist = (function() {
 				}
 				if (child === node) {
 					child.className = "selected";
+					child.focus();
+					if (child.offsetTop < this.contentAssistPanel.scrollTop) {
+						child.scrollIntoView(true);
+					} else if ((child.offsetTop + child.offsetHeight) > (this.contentAssistPanel.scrollTop + this.contentAssistPanel.clientHeight)) {
+						child.scrollIntoView(false);
+					}
 				}
 			}
 		},
@@ -286,6 +292,18 @@ orion.editor.ContentAssist = (function() {
 						this.contentAssistPanel.style.left = caretLocation.x + "px";
 						this.contentAssistPanel.style.top = caretLocation.y + "px";
 						this.contentAssistPanel.style.display = "block";
+						this.contentAssistPanel.scrollTop = 0;
+
+						// Make sure that the panel is never outside the viewport
+						var viewportWidth = document.documentElement.clientWidth,
+						    viewportHeight =  document.documentElement.clientHeight;
+						if (caretLocation.y + this.contentAssistPanel.offsetHeight > viewportHeight) {
+							this.contentAssistPanel.style.top = (caretLocation.y - this.contentAssistPanel.offsetHeight - this.textView.getLineHeight()) + "px";
+						}
+						if (caretLocation.x + this.contentAssistPanel.offsetWidth > viewportWidth) {
+							this.contentAssistPanel.style.left = (viewportWidth - this.contentAssistPanel.offsetWidth) + "px";
+						}
+
 						if (!this.listenerAdded) {
 							this.textView.addEventListener("ModelChanged", this, this.contentAssistListener.onModelChanged);
 							this.textView.addEventListener("Scroll", this, this.contentAssistListener.onScroll);
