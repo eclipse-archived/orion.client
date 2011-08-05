@@ -26,21 +26,23 @@ orion.OrionTextSearchResponser = (function() {
 			return this._textView.getText();
 		},
 		
-		getSearchStartIndex: function(reverse) {
+		getSearchStartIndex: function(reverse, flag) {
 			if(reverse) {
 				var selection = this._textView.getSelection();
 				var selectionSize = (selection.end > selection.start) ? selection.end - selection.start : 0;
-				return (this._textView.getCaretOffset()- selectionSize - 1);
+				if(!flag)
+					return (this._textView.getCaretOffset()- selectionSize - 1);
+				return selection.end;
 			}
 			return this._textView.getCaretOffset();
 		},
 		
-		responseFind: function(startIndex, endIndex, reverse) {
+		responseFind: function(startIndex, endIndex, reverse, callBack) {
 			if(startIndex === -1)
 				this._editor.reportStatus("not found", true);
 			else {
 				this._editor.reportStatus("", false);
-				this._editor.moveSelection(this._textView, startIndex, endIndex);
+				this._editor.moveSelection(this._textView, startIndex, endIndex, callBack);
 			}
 		},
 		

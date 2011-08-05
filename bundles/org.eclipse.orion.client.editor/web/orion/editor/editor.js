@@ -82,9 +82,10 @@ orion.editor.Editor = (function() {
 		 * @param {orion.textview.TextView} textView
 		 * @param {Number} start
 		 * @param {Number} [end]
+		 * @param {function} callBack A call back function that is used after the move animation is done
 		 * @private
 		 */
-		moveSelection: function(textView, start, end) {
+		moveSelection: function(textView, start, end, callBack) {
 			end = end || start;
 			textView.setSelection(start, end, false);
 			var topPixel = textView.getTopPixel();
@@ -104,12 +105,16 @@ orion.editor.Editor = (function() {
 					onEnd: function() {
 						textView.showSelection();
 						textView.focus();
+						if(callBack)
+							callBack();
 					}
 				});
 				a.play();
 			} else {
 				textView.showSelection();
 				textView.focus();
+				if(callBack)
+					callBack();
 			}
 		},
 		/**

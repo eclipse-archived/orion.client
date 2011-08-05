@@ -57,9 +57,9 @@ orion.TextSearcher = (function() {
 				var startPos = that._textSearchResponser.getSearchStartIndex(true);
 				if(searchStr && searchStr.length > 0 && that._incremental){
 					that.setOptions({reverse : false});
-					that.findOnce( document.getElementById("localSearchFindWith").value, startPos);
+					that.findOnce( document.getElementById("localSearchFindWith").value, startPos, function(){document.getElementById("localSearchFindWith").focus();});
 				} else {
-					 that._textSearchResponser.responseFind(startPos, startPos);
+					 that._textSearchResponser.responseFind(startPos, startPos, false, function(){document.getElementById("localSearchFindWith").focus();});
 				}
 				document.getElementById("localSearchFindWith").focus();
 			};
@@ -244,6 +244,16 @@ orion.TextSearcher = (function() {
 				}
 			});
 
+			var replaceAllCommand = new mCommands.Command({
+				name : "Replace All",
+				image : "/images/rename.gif",
+				id : "orion.search.replaceAll",
+				groupId : "orion.searchGroup",
+				callback : function() {
+					that.replaceAll();
+				}
+			});
+
 			var closeUICommand = new mCommands.Command({
 				name : "Close",
 				image : "/images/delete.gif",
@@ -257,12 +267,14 @@ orion.TextSearcher = (function() {
 			this._commandService.addCommand(findNextCommand, "dom");
 			this._commandService.addCommand(findPrevCommand, "dom");
 			this._commandService.addCommand(replaceCommand, "dom");
+			//this._commandService.addCommand(replaceAllCommand, "dom");
 			this._commandService.addCommand(closeUICommand, "dom");
 
 			// Register command contributions
 			this._commandService.registerCommandContribution("orion.search.findNext", 1, "localSearchFindCommands");
 			this._commandService.registerCommandContribution("orion.search.findPrev", 2, "localSearchFindCommands");
 			this._commandService.registerCommandContribution("orion.search.replace", 1, "localSearchReplaceCommands");
+			this._commandService.registerCommandContribution("orion.search.replaceAll", 2, "localSearchReplaceCommands");
 			this._commandService.registerCommandContribution("orion.search.closeUI", 1, "localSearchCloseCommands");
 			this._commandService.renderCommands("localSearchFindCommands", "dom", that, that, "image", 'searchCommandImage', null, false, 'searchCommandOver', 'searchCommandLink');
 			this._commandService.renderCommands("localSearchReplaceCommands", "dom", that, that, "image", 'searchCommandImage', null, false, 'searchCommandOver', 'searchCommandLink');
@@ -418,7 +430,7 @@ orion.TextSearcher = (function() {
 			return {text:text, searchStr:searchStr, startIndex:startIndex};
 		},
 		
-		_doFind: function(text, searchStr, startIndex, reverse, wrapSearch) {
+		_doFind: function(text, searchStr, startIndex, reverse, wrapSearch, callBack) {
 
 			if (this._useRegExp) {
 				var regexp = this.parseRegExp("/" + searchStr + "/");
@@ -433,27 +445,27 @@ orion.TextSearcher = (function() {
 			}
 
 			if (result) {
-				this._textSearchResponser.responseFind(result.index, result.index + result.length, reverse);
+				this._textSearchResponser.responseFind(result.index, result.index + result.length, reverse, callBack);
 			} else {
 				this._textSearchResponser.responseFind(-1, -1);
 			}
 			return result;
 		},
 		
-		findOnce: function( searchStr, startIndex){
+		findOnce: function( searchStr, startIndex, callBack){
 			var retVal = this._prepareFind(searchStr, startIndex);
-			this._doFind(retVal.text, retVal.searchStr, retVal.startIndex, this._reverse, this._wrapSearch);
+			this._doFind(retVal.text, retVal.searchStr, retVal.startIndex, this._reverse, this._wrapSearch, callBack);
 		},
 
 		replaceAll : function() {
 			var searchStr = document.getElementById("localSearchFindWith").value;
 			if(searchStr && searchStr.length > 0){
 				this.startUndo();
-				var retVal = this._prepareFind(searchStr, startIndex);
-				var startPos = 0;
+				var retVal = this._prepareFind(searchStr, 0);
+				var startPos = retVal.startIndex;
 				while(true){
 					result = this._doFind(retVal.text, retVal.searchStr,startPos, false, false);
-					startPos = this._textSearchResponser.getSearchStartIndex(false);
+					startPos = this._textSearchResponser.getSearchStartIndex(true, true);
 					if(!result)
 						break;
 					this._textSearchResponser.responseReplace(document.getElementById("localSearchReplaceWith").value);
