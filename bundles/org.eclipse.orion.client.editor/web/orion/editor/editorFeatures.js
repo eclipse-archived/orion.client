@@ -177,21 +177,20 @@ orion.editor.TextActions = (function() {
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true), "Find Next Occurrence");
 			this.textView.setAction("Find Next Occurrence", dojo.hitch(this, function() {
 				if(this._searcher){
-					this._searcher.setOptions({reverse:false});
-					this._searcher.findNext();
+					this._searcher.findNext(true);
 				}
 				return true;
 			}));
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true, true), "Find Previous Occurrence");
 			this.textView.setAction("Find Previous Occurrence", dojo.hitch(this, function() {
 				if(this._searcher){
-					this._searcher.setOptions({reverse:true});
-					this._searcher.findNext();
+					this._searcher.findNext(false);
 				}
 				return true;
 			}));
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("j", true), "Incremental Find");
 			this.textView.setAction("Incremental Find", dojo.hitch(this, function() {
+				/*
 				if (!this._incrementalFindActive) {
 					this.textView.setCaretOffset(this.textView.getCaretOffset());
 					this.toggleIncrementalFind();
@@ -216,7 +215,7 @@ orion.editor.TextActions = (function() {
 							this._incrementalFindSuccess = false;
 						}
 					}
-				}
+				}*/
 				return true;
 			}));
 			this.textView.setAction("deletePrevious", dojo.hitch(this, function() {

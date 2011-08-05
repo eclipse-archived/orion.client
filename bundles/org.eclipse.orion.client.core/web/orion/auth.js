@@ -17,15 +17,12 @@
 		handle<method>AuthenticationError(this, ioArgs);
 
  */
- 
-
 
 define(['dojo', 'orion/globalCommands', 'dojo/date/locale'], function(dojo, mGlobalCommands) {
 
 var authenticationInProgress = false;
 
 var forbiddenAccessDlg;
-
 
 dojo.addOnLoad(function () {
 	
@@ -99,7 +96,9 @@ function handleAuthenticationError(error, retry) {
 		if (!authenticationInProgress) {
 			authenticationInProgress = true;
 			// open popup and add OP response handler
-			eval(error.responseText);
+			// TODO add error handling here
+			window.open(dojo.fromJson(error.responseText).SignInLocation, 
+					'Login Window', 'width=400, height=200');
 		}
 	}
 }
