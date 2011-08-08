@@ -112,12 +112,11 @@ exports.setUpEditor = function(isReadOnly){
 						
 						if (providerToUse) {
 							var providerType = providerToUse.getProperty("type");
-							if (providerType === "grammar") {
-								// TextMate styler
+							if (providerType === "parser") {
+								console.debug("TODO implement support for parser-based syntax highlight provider");
+							} else if (providerType === "grammar" || typeof providerType === "undefined") {
 								var grammar = providerToUse.getProperty("grammar");
 								this.styler = new mTextMateStyler.TextMateStyler(textView, grammar);
-							} else if (providerType === "parser") {
-								console.debug("TODO implement support for parser-based syntax highlight provider");
 							}
 						}
 					}
