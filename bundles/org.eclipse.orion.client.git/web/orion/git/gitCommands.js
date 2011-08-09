@@ -1312,11 +1312,13 @@ var exports = {};
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				var path = dojo.hash();
-				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+				
+				if(item.RemoteLocation.length==1 && item.RemoteLocation[0].Children.length==1){
+					exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
 						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 							serviceRegistry.getService("orion.page.message").then(function(progressService) {
-								var deferred = gitService.doPush(item.RemoteLocation, "HEAD", true, false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+								var deferred = gitService.doPush(item.RemoteLocation[0].Children[0].Location, "HEAD", true, false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
 									exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
 											function(jsonData){
@@ -1331,6 +1333,58 @@ var exports = {};
 								});
 							});
 				});
+				} else {
+					
+					var remotes = item.RemoteLocation;
+										
+					serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+						var dialog = new orion.git.widgets.RemotePrompterDialog({
+							title: "Choose Branch",
+							serviceRegistry: serviceRegistry,
+							gitClient: gitService,
+							treeRoot: {Children: remotes},
+							hideNewBranch: true,
+							func: dojo.hitch(this, function(targetBranch, remote) {
+								exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+									var func = arguments.callee;
+									serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+										serviceRegistry.getService("orion.page.message").then(function(progressService) {
+											var deferred = gitService.doPush(targetBranch.Location, "HEAD", true, false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+											progressService.showWhile(deferred, "Pushing remote: " + remote).then(function(remoteJsonData){
+												exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
+														function(jsonData){
+															if (jsonData.Result.Severity == "Ok"){
+																dojo.query(".treeTableRow").forEach(function(node, i) {
+																	dojo.toggleClass(node, "outgoingCommitsdRow", false);
+																});
+																refreshStatusCallBack();
+															}
+														}, func, "Push Git Repository");
+												});
+											});
+										});
+							});
+							})
+						});
+						dialog.startup();
+						dialog.show();
+						
+					});
+					
+				}
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+
 			},
 			visibleWhen : function(item) {
 				return item.Type === "LocalBranch" ;
