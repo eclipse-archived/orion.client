@@ -832,7 +832,7 @@ orion.GitStatusController = (function() {
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
 				}).then(function(commitLogJsonData){
-					if (commitLogJsonData.toRef == null || commitLogJsonData.toRef.RemoteLocation.legth!==1 || commitLogJsonData.toRef.RemoteLocation[0].Children.length!==1 || !that._curBranch){
+					if (commitLogJsonData.toRef == null || commitLogJsonData.toRef.RemoteLocation.length!==1 || commitLogJsonData.toRef.RemoteLocation[0].Children.length!==1 || !that._curBranch){
 						that._gitCommitNavigatorLog.loadCommitsList((that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation});
 						if(that._curRemote && that._curBranch)
 							that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
