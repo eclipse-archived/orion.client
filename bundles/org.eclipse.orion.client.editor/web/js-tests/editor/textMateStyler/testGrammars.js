@@ -203,6 +203,37 @@ exports.ComplexCaptures = {
 	}
 };
 
+// Refers to ExternalGrammar2
+exports.ExternalGrammar1 = {
+	"patterns": [
+		{	"match": "<b>|</b>",
+			"captures": {
+				"0": { "name": "tag.bold" }
+			}
+		},
+		{	"begin": "<\\?php",
+			"end": "\\?>",
+			"captures": {
+				"0": { "name": "tag.fakephp" }
+			},
+			"patterns": [
+				{	"include": "source.fakephp"
+				}
+			]
+		}
+	]
+};
+
+exports.ExternalGrammar2 = {
+	"scopeName": "source.fakephp",
+	"patterns": [
+		{	"match": "\\$\\w+",
+			"captures": {
+				"0": { "name": "variable" }
+			}
+		}
+	]
+};
 
 /* TODO add to the constant.character.mylang rule once we support "captures":
 
