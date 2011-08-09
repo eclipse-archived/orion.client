@@ -27,14 +27,20 @@ orion.OrionTextSearchAdaptor = (function() {
 		},
 		
 		getSearchStartIndex: function(reverse, flag) {
+			var currentCaretPos = this._textView.getCaretOffset();
 			if(reverse) {
 				var selection = this._textView.getSelection();
 				var selectionSize = (selection.end > selection.start) ? selection.end - selection.start : 0;
-				if(!flag)
-					return (this._textView.getCaretOffset()- selectionSize - 1);
-				return selection.end;
+				if(!flag){
+					return (currentCaretPos- selectionSize - 1) > 0 ? (currentCaretPos- selectionSize - 1) : 0 ;
+				}
+				return selection.end > 0 ? selection.end : 0;
 			}
-			return this._textView.getCaretOffset();
+			return currentCaretPos > 0 ? currentCaretPos : 0 ;
+		},
+		
+		adaptCloseToolBar: function(){
+			this._textView.focus();
 		},
 		
 		adaptReplaceAll: function(succeed){

@@ -156,24 +156,19 @@ orion.editor.TextActions = (function() {
 			};
 			// Find actions
 			// These variables are used among the various find actions:
-			var searchString = "",
-			    pattern,
-			    flags;
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("f", true), "Find...");
 			this.textView.setAction("Find...", dojo.hitch(this, function() {
-				setTimeout(dojo.hitch(this, function() {
-					if(!this._searcher)
-						return;
-					var selection = this.textView.getSelection();
-					if (selection.end > selection.start) {
-						searchString = this.textView.getText().substring(selection.start, selection.end);
-					} else {
-						searchString = "";
-					}
-					this._searcher.buildToolBar(searchString);
-				}), 0);
+				if(!this._searcher)
+					return false;
+				var selection = this.textView.getSelection();
+				var searchString = "";
+				if (selection.end > selection.start) {
+					searchString = this.textView.getText().substring(selection.start, selection.end);
+				}
+				this._searcher.buildToolBar(searchString);
 				return true;
 			}));
+			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true), "Find Next Occurrence");
 			this.textView.setAction("Find Next Occurrence", dojo.hitch(this, function() {
 				if(this._searcher){
@@ -181,6 +176,7 @@ orion.editor.TextActions = (function() {
 				}
 				return true;
 			}));
+			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true, true), "Find Previous Occurrence");
 			this.textView.setAction("Find Previous Occurrence", dojo.hitch(this, function() {
 				if(this._searcher){
@@ -188,9 +184,11 @@ orion.editor.TextActions = (function() {
 				}
 				return true;
 			}));
+
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("j", true), "Incremental Find");
 			this.textView.setAction("Incremental Find", dojo.hitch(this, function() {
-				/*
+				if(this._searcher && this._searcher.visible())
+					return true;
 				if (!this._incrementalFindActive) {
 					this.textView.setCaretOffset(this.textView.getCaretOffset());
 					this.toggleIncrementalFind();
@@ -203,7 +201,11 @@ orion.editor.TextActions = (function() {
 						}
 						
 						var caseInsensitive = p.toLowerCase() === p;
-						var result = this.editor.doFind(p, start, caseInsensitive);
+						var result;
+						if(this._searcher)
+							result = _searcher.findNext(true, p);
+						else
+							result = this.editor.doFind(p, start, caseInsensitive);
 						if (result) {
 							this._incrementalFindSuccess = true;
 							this._incrementalFindIgnoreSelection = true;
@@ -215,7 +217,7 @@ orion.editor.TextActions = (function() {
 							this._incrementalFindSuccess = false;
 						}
 					}
-				}*/
+				}
 				return true;
 			}));
 			this.textView.setAction("deletePrevious", dojo.hitch(this, function() {
