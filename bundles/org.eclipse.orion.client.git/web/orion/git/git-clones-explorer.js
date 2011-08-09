@@ -155,7 +155,7 @@ exports.GitClonesModel = (function() {
 				onComplete(parentItem.Children);
 			}
 			else if (parentItem.BranchLocation && parentItem.RemoteLocation){
-				parentItem.children = [{GroupNode : "true", Location : parentItem.BranchLocation, Name : "Branches", parent : parentItem}, {GroupNode : "true", Location : parentItem.RemoteLocation, Name : "Remotes", parent : parentItem}]; 
+				parentItem.children = [{GroupNode : "true", Location : parentItem.BranchLocation, Name : "Branches", parent : parentItem}, {GroupNode : "true", Location : parentItem.RemoteLocation, BranchLocation: parentItem.BranchLocation, Name : "Remotes", parent : parentItem}]; 
 				onComplete(parentItem.children);
 			}
 			else if (parentItem.GroupNode){

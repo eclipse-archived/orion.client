@@ -231,7 +231,7 @@ var exports = {};
 								 displayErrorOnStatus
 							);
 						} else {
-							service.addBranch(item.BranchLocation, null, item.Name).then(
+							service.addBranch(item.parent.parent.BranchLocation, null, item.Name).then(
 								function(branch){
 									service.checkoutBranch(branch.CloneLocation, branch.Name).then(
 										function(){
