@@ -8,11 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global dijit dojo widgets*/
+/*global define*/
 /*jslint devel:true*/
 define(['dojo', 'dijit', 'dijit/Tree', 'text!orion/widgets/templates/_ExplorerTreeNode.html'], function(dojo, dijit) {
+var mExplorerTree = {};
 
-dojo.declare(
+mExplorerTree._ExplorerTreeNode = dojo.declare(
 	"orion.widgets._ExplorerTreeNode",
 	[dijit._TreeNode],
 {
@@ -38,7 +39,7 @@ dojo.declare(
  *   to set the link's href.
  * - The selectedNode property (see dijit.Tree) stores the most-recently-selected node.
  */
-dojo.declare(
+mExplorerTree.ExplorerTree = dojo.declare(
 	"orion.widgets.ExplorerTree",
 	[dijit.Tree],
 {
@@ -110,7 +111,7 @@ dojo.declare(
 	},
 	
 	_createTreeNode: function(args) {
-		return new orion.widgets._ExplorerTreeNode(args);
+		return new mExplorerTree._ExplorerTreeNode(args);
 	},
 	
 	_eatSelectionEvent: function(/**Event*/ e) {
@@ -287,4 +288,6 @@ dojo.declare(
 		}
 	}
 });
+
+	return mExplorerTree;
 });

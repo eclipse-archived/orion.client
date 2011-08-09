@@ -8,8 +8,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo dijit widgets*/
-define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/InitGitRepositoryDialog.html'], function(dojo, dijit) {
+/*global define*/
+define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/InitGitRepositoryDialog.html'],
+	function(dojo, dijit, m_OrionDialogMixin) {
 
 
 /**
@@ -17,7 +18,7 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'tex
  *     func: function
  * }}
  */
-dojo.declare("orion.git.widgets.InitGitRepositoryDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
+dojo.declare("orion.git.widgets.InitGitRepositoryDialog", [dijit.Dialog, m_OrionDialogMixin._OrionDialogMixin], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache('orion', 'git/widgets/templates/InitGitRepositoryDialog.html'),
 	

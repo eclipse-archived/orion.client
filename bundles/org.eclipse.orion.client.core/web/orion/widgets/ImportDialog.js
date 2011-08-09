@@ -7,14 +7,14 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit dojox widgets*/
+/*global define*/
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojox/form/Uploader', 'dojox/form/uploader/FileList', 'dojox/form/uploader/plugins/IFrame', 'dijit/form/Button', 'dijit/ProgressBar', 'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/ImportDialog.html'], function(dojo, dijit, dojox) {
+define(['dojo', 'dijit', 'dojox', 'orion/widgets/_OrionDialogMixin','dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojox/form/Uploader', 'dojox/form/uploader/FileList', 'dojox/form/uploader/plugins/IFrame', 'dijit/form/Button', 'dijit/ProgressBar', 'text!orion/widgets/templates/ImportDialog.html'], function(dojo, dijit, dojox, m_OrionDialogMixin) {
 
 /**
  */
-dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], {
+dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, m_OrionDialogMixin._OrionDialogMixin ], {
 	widgetsInTemplate : true,
 	templateString : dojo.cache('orion', 'widgets/templates/ImportDialog.html'), //new dojo._Url("/orion/widgets/templates/ImportDialog.html")),
 

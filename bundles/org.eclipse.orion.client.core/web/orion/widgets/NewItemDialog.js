@@ -7,11 +7,11 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets*/
+/*global define*/
 /*jslint browser:true*/
 
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/CheckBox', 'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/NewItemDialog.html'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'orion/widgets/_OrionDialogMixin','dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/CheckBox', 'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dojo/data/ItemFileReadStore', 'text!orion/widgets/templates/NewItemDialog.html'], function(dojo, dijit, m_OrionDialogMixin) {
 
 /**
  * @param options {{ 
@@ -21,7 +21,7 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/Chec
  *     [advanced]: boolean  // Whether to show advanced controls. Default is false
  * }}
  */
-dojo.declare("orion.widgets.NewItemDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
+dojo.declare("orion.widgets.NewItemDialog", [dijit.Dialog, m_OrionDialogMixin._OrionDialogMixin], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache('orion', 'widgets/templates/NewItemDialog.html'),
 	
