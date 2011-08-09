@@ -201,7 +201,7 @@ orion.TextSearcher = (function() {
 					evt.stopPropagation(); 
 				}
 				evt.cancelBubble = true;
-				this.findNext(!evt.shiftKey, null, false, evt.target);
+				this.findNext(!evt.shiftKey, null, false, (ctrlKey &&  evt.keyCode === 75/*"k"*/ ) ? null : evt.target);
 				return false;
 			}
 			if( evt.keyCode === 27/*ESC*/ ){
