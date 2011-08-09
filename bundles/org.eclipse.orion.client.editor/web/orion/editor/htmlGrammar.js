@@ -9,23 +9,22 @@
  ******************************************************************************/
 
 /*jslint */
-/*global orion:true*/
+/*global define orion:true window */
 
 var orion = orion || {};
 
 orion.editor = orion.editor || {};
 
 /**
- * Uses a grammar to provide some very rough syntax highlighting for HTML.
+ * Provides a grammar that can do some very rough syntax highlighting for HTML.
  * @class orion.syntax.HtmlGrammar
  */
 orion.editor.HtmlGrammar = (function() {
-	var _fileTypes = [ "html", "htm" ];
 	return {
 		/**
 		 * What kind of highlight provider we are.
 		 * @public
-		 * @type "grammar"|"parser"
+		 * @type String
 		 */
 		type: "grammar",
 		
@@ -34,17 +33,15 @@ orion.editor.HtmlGrammar = (function() {
 		 * @public
 		 * @type String[]
 		 */
-		fileTypes: _fileTypes,
+		fileTypes: [ "html", "htm" ],
 		
 		/**
 		 * Object containing the grammar rules.
 		 * @public
-		 * @type JSONObject
+		 * @type Object
 		 */
 		grammar: {
-			"comment": "HTML syntax rules",
 			"name": "HTML",
-			"fileTypes": _fileTypes,
 			"scopeName": "source.html",
 			"uuid": "3B5C76FB-EBB5-D930-F40C-047D082CE99B",
 			"patterns": [
@@ -64,7 +61,6 @@ orion.editor.HtmlGrammar = (function() {
 					},
 					"patterns": [
 						{
-							// For testing nested subpatterns
 							"match": "--",
 							"name": "invalid.illegal.badcomment.html"
 						}
