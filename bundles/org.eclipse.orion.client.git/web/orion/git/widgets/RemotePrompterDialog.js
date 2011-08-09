@@ -55,7 +55,6 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 	createTree : function(myTreeModel){
 		
 		this.treeWidget = new orion.widgets.ExplorerTree({
-			id: "treeWidget",
 			style: "width:100%; height:100%",
 			model: myTreeModel,
 			region: "center",
@@ -123,7 +122,7 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 		var selectedItems = this.treeWidget.getSelectedItems();
 		this.onHide();
 		if(selectedItems[0].Type==="RemoteTrackingBranch"){
-			this.options.func(selectedItems[0]);
+			this.options.func(selectedItems[0], selectedItems[0].parent);
 		}else{
 			this.options.func(null, selectedItems[0], this.newBranch.value);
 		}

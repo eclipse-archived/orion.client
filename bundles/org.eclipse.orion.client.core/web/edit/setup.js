@@ -8,8 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global eclipse:true orion:true dojo dijit window*/
-/*jslint devel:true*/
+/*jslint browser:true devel:true*/
+/*global define eclipse:true orion:true dojo dijit window*/
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
@@ -96,28 +96,26 @@ exports.setUpEditor = function(isReadOnly){
 					}
 					
 					if (!this.styler && syntaxHighlightProviders) {
-						// Check our syntax highlight providers
-						var providerToUse;
-						dojo.some(syntaxHighlightProviders, function(provider) {
-							var fileTypes = provider.getProperty("fileTypes");
-							if (fileTypes) {
-								for (var i=0; i < fileTypes.length; i++) {
-									if (fileTypes[i] === extension) {
-										providerToUse = provider;
-										return true;
-									}
-								}
+						var grammars = [],
+						    providerToUse;
+						for (var i=0; i < syntaxHighlightProviders.length; i++) {
+							var provider = syntaxHighlightProviders[i],
+							    fileTypes = provider.getProperty("fileTypes");
+							if (provider.getProperty("type") === "grammar") {
+								grammars.push(provider.getProperty("grammar"));
 							}
-						});
+							if (fileTypes && fileTypes.indexOf(extension) !== -1) {
+								providerToUse = provider;
+							}
+						}
 						
 						if (providerToUse) {
 							var providerType = providerToUse.getProperty("type");
-							if (providerType === "grammar") {
-								// TextMate styler
-								var grammar = providerToUse.getProperty("grammar");
-								this.styler = new mTextMateStyler.TextMateStyler(textView, grammar);
-							} else if (providerType === "parser") {
+							if (providerType === "parser") {
 								console.debug("TODO implement support for parser-based syntax highlight provider");
+							} else if (providerType === "grammar" || typeof providerType === "undefined") {
+								var grammar = providerToUse.getProperty("grammar");
+								this.styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
 							}
 						}
 					}

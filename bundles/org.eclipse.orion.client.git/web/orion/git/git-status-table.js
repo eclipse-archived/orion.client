@@ -682,10 +682,10 @@ orion.GitStatusController = (function() {
 				name : "Complete log",
 				id : "orion.openGitRemote",
 				hrefCallback : function(item) {
-					return "/git/git-log.html#" + that._curBranch.RemoteLocation + "?page=1";
+					return "/git/git-log.html#" + that._curBranch.RemoteLocation[0].Children[0].Location + "?page=1";
 				},
 				visibleWhen : function(item) {
-					return (item.type === "gitRemote" && that._curBranch);
+					return (item.type === "gitRemote" && that._curBranch && that._curBranch.RemoteLocation.length===1 && that._curBranch.RemoteLocation[0].Children.length===1);
 				}
 			});
 			
@@ -779,7 +779,7 @@ orion.GitStatusController = (function() {
 			if(!this._renderLog)
 				return;
 			if (isRemote) {
-				if(!this._curRemote || !this._curBranch){
+				if(!this._curRemote || !this._curBranch || this._curBranch.RemoteLocation.length!==1 || this._curBranch.RemoteLocation[0].Children.length!==1){
 					//We want to empty the mini log section for the tracked remote branch if there is no such 
 					dojo.empty(this._remoteTableRenderer.getLogSectionId());
 					return;
@@ -787,7 +787,7 @@ orion.GitStatusController = (function() {
 		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null, {checkbox: false, minimal: true}, this._remoteTableRenderer.getLogContentId());    
 				dojo.place(document.createTextNode(""), this._remoteTableRenderer.getLogContentId(), "only");
 				// refresh the commit list for the remote
-				var path = this._curBranch.RemoteLocation + "?page=1&pageSize=5";
+				var path = this._curBranch.RemoteLocation[0].Children[0].Location + "?page=1&pageSize=5";
 				dojo.xhrGet({
 					url : path,
 					headers : {
@@ -832,14 +832,14 @@ orion.GitStatusController = (function() {
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
 				}).then(function(commitLogJsonData){
-					if (commitLogJsonData.RemoteLocation == null || !that._curBranch){
-						that._gitCommitNavigatorLog.loadCommitsList((that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
+					if (commitLogJsonData.toRef == null || commitLogJsonData.toRef.RemoteLocation.length!==1 || commitLogJsonData.toRef.RemoteLocation[0].Children.length!==1 || !that._curBranch){
+						that._gitCommitNavigatorLog.loadCommitsList((that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation});
 						if(that._curRemote && that._curBranch)
 							that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 					}
 					else {
 						dojo.xhrGet({
-							url : commitLogJsonData.RemoteLocation,
+							url : commitLogJsonData.toRef.RemoteLocation[0].Children[0].Location,
 							headers : {
 								"Orion-Version" : "1"
 							},
@@ -849,7 +849,7 @@ orion.GitStatusController = (function() {
 								that._registry.getService("orion.git.provider").then(function(gitService){
 									gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
 										that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData);
-										that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
+										that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation});
 										if(that._curRemote)
 											that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 									});
@@ -860,7 +860,7 @@ orion.GitStatusController = (function() {
 								if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
 									mAuth.handleGetAuthenticationError(this, ioArgs);
 								}else{
-									that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.RemoteLocation});
+									that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation});
 									if(that._curRemote && that._curBranch)
 										that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 								}

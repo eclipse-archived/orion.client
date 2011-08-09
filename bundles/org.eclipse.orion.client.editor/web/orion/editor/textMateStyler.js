@@ -457,20 +457,23 @@ orion.editor.RegexUtil = {
  * 
  * @description Creates a new TextMateStyler.
  * @extends orion.editor.AbstractStyler
- * @param {orion.textview.TextView} textView The TextView to provide styling for.
- * @param {Object} grammar The TextMate grammar as a JavaScript object. You can produce this object by running a 
- * PList-to-JavaScript conversion tool on a <code>.tmLanguage</code> file.
+ * @param {orion.textview.TextView} textView The <code>TextView</code> to provide styling for.
+ * @param {Object} grammar The TextMate grammar to use for styling the <code>TextView</code>, as a JavaScript object. You can
+ * produce this object by running a PList-to-JavaScript conversion tool on a TextMate <code>.tmLanguage</code> file.
+ * @param {Object[]} [externalGrammars] Additional grammar objects that will be used to resolve named rule references.
  */
 orion.editor.TextMateStyler = (function() {
 	/** @inner */
-	function TextMateStyler(textView, grammar) {
+	function TextMateStyler(textView, grammar, externalGrammars) {
 		this.initialize(textView);
-		// Copy the grammar since we'll mutate it
+		// Copy grammar object(s) since we will mutate them
 		this.grammar = this.copy(grammar);
+		this.externalGrammars = externalGrammars ? this.copy(externalGrammars) : [];
+		
 		this._styles = {}; /* key: {String} scopeName, value: {String[]} cssClassNames */
 		this._tree = null;
-		
-		this.preprocess();
+		this._allGrammars = {}; /* key: {String} scopeName of grammar, value: {Object} grammar */
+		this.preprocess(this.grammar);
 	}
 	orion.editor.AbstractStyler.extend(TextMateStyler, /** @lends orion.editor.TextMateStyler.prototype */ {
 		/** @private */
@@ -478,8 +481,8 @@ orion.editor.TextMateStyler = (function() {
 			return JSON.parse(JSON.stringify(obj));
 		},
 		/** @private */
-		preprocess: function() {
-			var stack = [this.grammar];
+		preprocess: function(grammar) {
+			var stack = [grammar];
 			for (; stack.length !== 0; ) {
 				var rule = stack.pop();
 				if (rule._resolvedRule && rule._typedRule) {
@@ -625,7 +628,7 @@ orion.editor.TextMateStyler = (function() {
 					throw new Error("Unexpected regex pattern in \"include\" rule " + rule.include);
 				}
 				var name = rule.include;
-				if (name.charAt(0) === "#") {
+				if (name[0] === "#") {
 					resolved = this.grammar.repository && this.grammar.repository[name.substring(1)];
 					if (!resolved) { throw new Error("Couldn't find included rule " + name + " in grammar repository"); }
 				} else if (name === "$self") {
@@ -634,7 +637,18 @@ orion.editor.TextMateStyler = (function() {
 					// $base is only relevant when including rules from foreign grammars
 					throw new Error("Include \"$base\" is not supported"); 
 				} else {
-					throw new Error("Include external rule \"" + name + "\" is not supported");
+					resolved = this._allGrammars[name];
+					if (!resolved) {
+						for (var i=0; i < this.externalGrammars.length; i++) {
+							var grammar = this.externalGrammars[i];
+							if (grammar.scopeName === name) {
+								this.preprocess(grammar);
+								this._allGrammars[name] = grammar;
+								resolved = grammar;
+								break;
+							}
+						}
+					}
 				}
 			}
 			return resolved;
