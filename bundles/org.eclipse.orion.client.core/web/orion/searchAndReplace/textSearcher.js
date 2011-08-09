@@ -184,10 +184,11 @@ orion.TextSearcher = (function() {
 		},
 		
 		_handleKeyUp: function(evt){
-			if(this._incremental){
+			if(this._incremental && !this._changedByOther){
 				var targetElement = evt.target;//document.getElementById("localSearchFindWith")
 				this.findNext(true, null, true, targetElement);
-			}
+			} 
+			this._changedByOther = false;
 			return true;
 		},
 		
@@ -231,12 +232,14 @@ orion.TextSearcher = (function() {
 		},
 
 		buildToolBar : function(defaultSearchStr) {
+			this._changedByOther = true;
 			var findDiv = document.getElementById("localSearchFindWith");
 			if (this._visible) {
 				if(defaultSearchStr.length > 0){
 					findDiv.value = defaultSearchStr;
-					findDiv.focus();
 				}
+				findDiv.select();
+				findDiv.focus();
 				return;
 			}
 			this._visible = true;
@@ -246,6 +249,7 @@ orion.TextSearcher = (function() {
 			// set the default value of search string
 			var findDiv = document.getElementById("localSearchFindWith");
 			findDiv.value = defaultSearchStr;
+			findDiv.select();
 			findDiv.focus();
 
 			var that = this;
