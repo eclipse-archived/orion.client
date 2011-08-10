@@ -399,8 +399,10 @@ exports.setUpEditor = function(isReadOnly){
 			});
 		};
 		
-		var statusReporter = function(message, isError) {
-			if (isError) {
+		var statusReporter = function(message, isError, isProgress) {
+			if(isProgress){
+				statusReportingService.setProgressMessage(message);
+			} else if (isError) {
 				statusReportingService.setErrorMessage(message);	
 			} else {
 				statusReportingService.setMessage(message);	

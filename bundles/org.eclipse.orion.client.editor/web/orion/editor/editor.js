@@ -69,9 +69,9 @@ orion.editor.Editor = (function() {
 		/**
 		 * @private
 		 */
-		reportStatus: function(message, isError) {
+		reportStatus: function(message, isError, isProgress) {
 			if (this._statusReporter) {
-				this._statusReporter(message, isError);
+				this._statusReporter(message, isError, isProgress);
 			} else {
 				window.alert(isError ? "ERROR: " + message : message);
 			}

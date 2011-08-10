@@ -481,6 +481,8 @@ orion.TextSearcher = (function() {
 		},
 		
 		_doFind: function(text, searchStr, startIndex, reverse, wrapSearch, callBack) {
+			if(!searchStr || searchStr.length === 0)
+				return null;
 			this._lastSearchString = searchStr;
 			if (this._useRegExp) {
 				var regexp = this.parseRegExp("/" + searchStr + "/");
@@ -493,11 +495,10 @@ orion.TextSearcher = (function() {
 			} else {
 				result = this._findString(true, text, searchStr, startIndex, reverse, wrapSearch);
 			}
-
 			if (result) {
-				this._textSearchAdaptor.adaptFind(result.index, result.index + result.length, reverse, callBack);
+				this._textSearchAdaptor.adaptFind(result.index, result.index + result.length, reverse, callBack, this._replacingAll);
 			} else {
-				this._textSearchAdaptor.adaptFind(-1, -1);
+				this._textSearchAdaptor.adaptFind(-1, -1, reverse, null, this._replacingAll);
 			}
 			return result;
 		},
@@ -510,18 +511,28 @@ orion.TextSearcher = (function() {
 		replaceAll : function() {
 			var searchStr = document.getElementById("localSearchFindWith").value;
 			if(searchStr && searchStr.length > 0){
-				this.startUndo();
-				var startPos = 0;
-				while(true){
-					var retVal = this._prepareFind(searchStr, startPos);
-					var result = this._doFind(retVal.text, retVal.searchStr,retVal.startIndex, false, false);
-					if(!result)
-						break;
-					this._textSearchAdaptor.adaptReplace(document.getElementById("localSearchReplaceWith").value);
-					startPos = this._textSearchAdaptor.getSearchStartIndex(true, true);
-				}
-				this.endUndo();
-				this._textSearchAdaptor.adaptReplaceAll(startPos > 0);
+				this._replacingAll = true;
+				this._textSearchAdaptor.adaptReplaceAllStart(true);
+				window.setTimeout(dojo.hitch(this, function() {
+					var startPos = 0;
+					var number = 0;
+					while(true){
+						var retVal = this._prepareFind(searchStr, startPos);
+						var result = this._doFind(retVal.text, retVal.searchStr,retVal.startIndex, false, false);
+						if(!result)
+							break;
+						number++;
+						if(number === 1)
+							this.startUndo();
+						this._textSearchAdaptor.adaptReplace(document.getElementById("localSearchReplaceWith").value);
+						startPos = this._textSearchAdaptor.getSearchStartIndex(true, true);
+					}
+					if(number > 0)
+						this.endUndo();
+					this._textSearchAdaptor.adaptReplaceAllEnd(startPos > 0, number);
+					this._replacingAll = false;
+				}), 100);				
+				
 			}
 		},
 
