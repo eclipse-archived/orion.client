@@ -54,6 +54,7 @@ orion.TextSearcher = (function() {
 			searchStringDiv.type = "text";
 			searchStringDiv.name = "Find:";
 			searchStringDiv.id = "localSearchFindWith";
+			searchStringDiv.placeholder="Find With";
 			searchStringDiv.onkeyup = function(evt){
 				return that._handleKeyUp(evt);
 			};
@@ -75,6 +76,7 @@ orion.TextSearcher = (function() {
 			replaceStringDiv.type = "text";
 			replaceStringDiv.name = "ReplaceWith:";
 			replaceStringDiv.id = "localSearchReplaceWith";
+			replaceStringDiv.placeholder="Replace With";
 			dojo.addClass(replaceStringDiv, 'searchCmdGroupMargin');
 			replaceStringDiv.onkeydown = function(evt){
 				return that._handleKeyDown(evt);
