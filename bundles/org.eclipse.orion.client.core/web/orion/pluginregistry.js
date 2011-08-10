@@ -410,6 +410,17 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				break;
 			}
 		}
+		
+		d.addCallback(dojo.hitch(this, function(plugin){
+			if(plugin.getServiceReferences()){
+				for(var i=0; i<plugin.getServiceReferences().length; i++){
+					if(plugin.getServiceReferences()[i].properties.auth!=null){
+						this.installPlugin(plugin.getServiceReferences()[i].properties.auth);
+					}
+				}
+			}
+		}));
+		
 		if (plugin) {
 			if(plugin.getData()) {
 				d.resolve(plugin);
@@ -437,14 +448,6 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				}, function(e) {
 					d.reject(e);
 				});
-			}
-		}
-		
-		if(plugin.getServiceReferences()){
-			for(var i=0; i<plugin.getServiceReferences().length; i++){
-				if(plugin.getServiceReferences()[i].properties.auth!=null){
-					this.installPlugin(plugin.getServiceReferences()[i].properties.auth);
-				}
 			}
 		}
 		

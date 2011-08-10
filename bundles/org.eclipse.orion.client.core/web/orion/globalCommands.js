@@ -139,7 +139,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				signout.appendChild(document.createTextNode("Sign in"));
 				signout.onclick = function(){
 					if (!authenticationInProgress) {
-						authenticationInProgress = true;
+//						authenticationInProgress = true;
 						// open popup and add OP response handler
 						authService.getAuthForm().then(function(loginForm){
 							window.open(loginForm, 'Login Window', 'width=400, height=200');
