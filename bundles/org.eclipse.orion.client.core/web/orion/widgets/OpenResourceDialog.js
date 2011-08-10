@@ -9,11 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*jslint browser:true*/
-/*global define window*/
+/*global define window dojo dijit*/
 
-define(['dojo', 'dijit', 'orion/widgets/_OrionDialogMixin', 'dijit/Dialog', 'dijit/form/TextBox',
-		'text!orion/widgets/templates/OpenResourceDialog.html'],
-	function(dojo, dijit, m_OrionDialogMixin) {
+define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox',
+		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], function(dojo, dijit) {
 
 /**
  * Usage: <code>new widgets.OpenResourceDialog(options).show();</code>
@@ -24,7 +23,7 @@ define(['dojo', 'dijit', 'orion/widgets/_OrionDialogMixin', 'dijit/Dialog', 'dij
  * @param {String} options.SearchLocation The URL to use for searching the workspace.
  * @param {orion.searchClient.Searcher} options.searcher The searcher to use for displaying results.
  */
-var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit.Dialog, m_OrionDialogMixin._OrionDialogMixin],
+var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin],
 		/** @lends orion.widgets.OpenResourceDialog.prototype */ {
 	widgetsInTemplate : true,
 	templateString : dojo.cache('orion', 'widgets/templates/OpenResourceDialog.html'),

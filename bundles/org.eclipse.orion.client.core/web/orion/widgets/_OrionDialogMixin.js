@@ -7,7 +7,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define*/
+/*global dojo dijit*/
 /*jslint browser:true*/
 
 
@@ -17,9 +17,8 @@
  */
 
 define(['dojo', 'dijit'], function(dojo, dijit) {
-var m_OrionDialogMixin = {};
 
-m_OrionDialogMixin._OrionDialogMixin = dojo.declare("orion.widgets._OrionDialogMixin", null, {
+dojo.declare("orion.widgets._OrionDialogMixin", null, {
 	postMixInProperties : function() {
 		this.inherited(arguments);
 		this.title = this.options.title || "Information Needed";
@@ -50,7 +49,5 @@ m_OrionDialogMixin._OrionDialogMixin = dojo.declare("orion.widgets._OrionDialogM
 		}), this.duration);   
 	}
 });
-
-return m_OrionDialogMixin;
 
 });

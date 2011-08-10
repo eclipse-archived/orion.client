@@ -7,10 +7,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define localStorage widgets */
+/*global dojo dijit localStorage widgets */
 /*jslint browser:true*/
 
-define(['dojo', 'dijit', 'orion/widgets/_OrionDialogMixin', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/ComboBox', 'dojo/data/ItemFileReadStore', 'text!orion/widgets/templates/SFTPConnectionDialog.html'], function(dojo, dijit, m_OrionDialogMixin) {
+define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/ComboBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/SFTPConnectionDialog.html'], function(dojo, dijit) {
 
 if (!localStorage.getItem("orion.sftpConnections")) {
 	var defaultItems = { 
@@ -32,7 +32,7 @@ if (!localStorage.getItem("orion.sftpConnections")) {
  *     [advanced]: boolean  // Whether to show advanced controls. Default is false
  * }}
  */
-dojo.declare("orion.widgets.SFTPConnectionDialog", [dijit.Dialog, m_OrionDialogMixin._OrionDialogMixin], {
+dojo.declare("orion.widgets.SFTPConnectionDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache('orion', 'widgets/templates/SFTPConnectionDialog.html'),
 	
