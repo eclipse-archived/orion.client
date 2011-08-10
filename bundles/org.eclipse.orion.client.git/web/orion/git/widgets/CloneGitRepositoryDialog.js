@@ -8,16 +8,16 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo dijit widgets*/
+/*global define */
 /*jslint browser:true*/
-define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'orion/widgets/DirectoryPrompterDialog', 'text!orion/git/widgets/templates/CloneGitRepositoryDialog.html'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'orion/widgets/DirectoryPrompterDialog', 'text!orion/git/widgets/templates/CloneGitRepositoryDialog.html'], function(dojo, dijit, m_OrionDialogMixin, mDirectoryPrompterDialog) {
 
 /**
  * @param options {{ 
  *     func: function
  * }}
  */
-dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
+dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, m_OrionDialogMixin._OrionDialogMixin], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache('orion', 'git/widgets/templates/CloneGitRepositoryDialog.html'),
 	
@@ -80,7 +80,7 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 	openDirectoryPickerDialog: function(){
 		this.isExistingProject.checked = true; 
 		var self = this;
-		var dialog = new orion.widgets.DirectoryPrompterDialog({
+		var dialog = new mDirectoryPrompterDialog.DirectoryPrompterDialog({
 				title: "Choose a Folder",
 				serviceRegistry: this.options.serviceRegistry,
 				fileClient: this.options.fileClient,	

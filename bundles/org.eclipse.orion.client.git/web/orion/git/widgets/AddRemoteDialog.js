@@ -8,16 +8,17 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo dijit widgets*/
+/*global define*/
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/AddRemoteDialog.html'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/AddRemoteDialog.html'],
+	function(dojo, dijit, m_OrionDialogMixin) {
 
 /**
  * @param options {{ 
  *     func: function
  * }}
  */
-dojo.declare("orion.git.widgets.AddRemoteDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
+dojo.declare("orion.git.widgets.AddRemoteDialog", [dijit.Dialog, m_OrionDialogMixin._OrionDialogMixin], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache('orion', 'git/widgets/templates/AddRemoteDialog.html'),
 	

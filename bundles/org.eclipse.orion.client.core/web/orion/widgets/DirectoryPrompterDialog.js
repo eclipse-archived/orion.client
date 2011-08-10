@@ -7,10 +7,11 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit eclipse widgets */
+/*global define */
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'orion/util', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/DirectoryPrompterDialog.html'], function(dojo, dijit, mUtil) {
+define(['dojo', 'dijit', 'orion/util', 'orion/widgets/_OrionDialogMixin', 'orion/widgets/ExplorerTree', 'dijit/Dialog', 'dijit/form/Button', 'text!orion/widgets/templates/DirectoryPrompterDialog.html'], function(dojo, dijit, mUtil, m_OrionDialogMixin, mExplorerTree) {
+var mDirectoryPrompterDialog = {};
 
 /**
 * @param options {{
@@ -18,7 +19,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Dialog', 'dijit/form/Button', 'ori
 	}}
  */
  
-dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], {
+mDirectoryPrompterDialog.DirectoryPrompterDialog = dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, m_OrionDialogMixin._OrionDialogMixin ], {
 	treeWidget : null,
 	treeRoot : {},
 	widgetsInTemplate : true,
@@ -55,8 +56,8 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 	},
 	
 	createTree : function(){
-		var myTreeModel = new orion.widgets.DirectoryTreeModel(this.options.serviceRegistry, this.treeRoot , this.options.fileClient);
-		this.treeWidget = new orion.widgets.ExplorerTree({
+		var myTreeModel = new mDirectoryPrompterDialog.DirectoryTreeModel(this.options.serviceRegistry, this.treeRoot , this.options.fileClient);
+		this.treeWidget = new mExplorerTree.ExplorerTree({
 			id: "treeWidget",
 			style: "width:100%; height:100%",
 			model: myTreeModel,
@@ -82,7 +83,7 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 	}
 });
 
-orion.widgets.DirectoryTreeModel = (function() {
+mDirectoryPrompterDialog.DirectoryTreeModel = (function() {
 	/**
 	 * @name orion.widgets.DirectoryTreeModel
 	 * @class Tree model used by orion.widgets.DirectoryPrompterDialog
@@ -142,4 +143,6 @@ orion.widgets.DirectoryTreeModel = (function() {
 	};
 	return DirectoryTreeModel;
 })();
+
+	return mDirectoryPrompterDialog;
 });
