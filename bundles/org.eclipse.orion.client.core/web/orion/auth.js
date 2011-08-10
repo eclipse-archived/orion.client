@@ -30,15 +30,6 @@ dojo.addOnLoad(function () {
 	window.dojo = dojo;
 	window.eclipse = window.eclipse || {};
 	eclipse.globalCommandUtils = mGlobalCommands; 
-
-	dojo.xhrGet({
-		url: "/auth2",
-		handleAs: 'javascript',
-        //sync:true, the javascript load is asynchronous already so not sure this would work -- we should also avoid sync calls!
-        headers: {
-			"Orion-Version" : "1"
-		}
-	});
 });
 
 function handleGetAuthenticationError(xhrArgs, ioArgs, cb, eb) {
@@ -98,7 +89,7 @@ function handleAuthenticationError(error, retry) {
 			// open popup and add OP response handler
 			// TODO add error handling here
 			window.open(dojo.fromJson(error.responseText).SignInLocation, 
-					'Login Window', 'width=400, height=200');
+					"loginwindow", 'width=400, height=200');
 		}
 	}
 }
