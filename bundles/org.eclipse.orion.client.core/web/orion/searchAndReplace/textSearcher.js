@@ -59,7 +59,7 @@ orion.TextSearcher = (function() {
 				return that._handleKeyUp(evt);
 			};
 			searchStringDiv.onkeydown = function(evt){
-				return that._handleKeyDown(evt);
+				return that._handleKeyDown(evt,true);
 			};
 			searchStrTd.appendChild(searchStringDiv);
 
@@ -79,7 +79,7 @@ orion.TextSearcher = (function() {
 			replaceStringDiv.placeholder="Replace With";
 			dojo.addClass(replaceStringDiv, 'searchCmdGroupMargin');
 			replaceStringDiv.onkeydown = function(evt){
-				return that._handleKeyDown(evt);
+				return that._handleKeyDown(evt, false);
 			};
 			replaceStrTd.appendChild(replaceStringDiv);
 
@@ -186,17 +186,18 @@ orion.TextSearcher = (function() {
 		},
 		
 		_handleKeyUp: function(evt){
-			if(this._incremental && !this._changedByOther){
+			if(this._incremental && !this._keyUpHandled){
 				var targetElement = evt.target;//document.getElementById("localSearchFindWith")
 				this.findNext(true, null, true, targetElement);
-			} 
-			this._changedByOther = false;
+			}
+			this._keyUpHandled = false;
 			return true;
 		},
 		
-		_handleKeyDown: function(evt){
+		_handleKeyDown: function(evt, fromSearch){
 			var ctrlKey = this.isMac ? evt.metaKey : evt.ctrlKey;
 			if(ctrlKey &&  evt.keyCode === 70/*"f"*/ ) {
+				this._keyUpHandled = fromSearch;
 				return false;
 			}
 			if((ctrlKey &&  evt.keyCode === 75/*"k"*/ ) || evt.keyCode === 13/*enter*/ ){
@@ -205,10 +206,22 @@ orion.TextSearcher = (function() {
 				}
 				evt.cancelBubble = true;
 				this.findNext(!evt.shiftKey, null, false, (ctrlKey &&  evt.keyCode === 75/*"k"*/ ) ? null : evt.target);
+				this._keyUpHandled = fromSearch;
+				return false;
+			}
+			if( ctrlKey &&  evt.keyCode === 82 /*"r"*/){
+				if( evt.stopPropagation ) { 
+					evt.stopPropagation(); 
+				}
+				evt.cancelBubble = true;
+				if(!fromSearch)
+					this.replace(function(){evt.target.focus();});
+				this._keyUpHandled = fromSearch;
 				return false;
 			}
 			if( evt.keyCode === 27/*ESC*/ ){
 				this.closeUI();
+				this._keyUpHandled = fromSearch;
 				return false;
 			}
 			return true;
@@ -234,7 +247,7 @@ orion.TextSearcher = (function() {
 		},
 
 		buildToolBar : function(defaultSearchStr) {
-			this._changedByOther = true;
+			this._keyUpHandled = true;
 			var findDiv = document.getElementById("localSearchFindWith");
 			if (this._visible) {
 				if(defaultSearchStr.length > 0){
@@ -450,14 +463,14 @@ orion.TextSearcher = (function() {
 			}
 		}, 
 	
-		replace : function() {
+		replace: function(callBack) {
 			this.startUndo();
-			this._textSearchAdaptor.adaptReplace(document.getElementById("localSearchReplaceWith").value);
+			this._textSearchAdaptor.adaptReplace(document.getElementById("localSearchReplaceWith").value, callBack);
 			this.endUndo();
 			var findTextDiv = document.getElementById("localSearchFindWith");
 			if (this._findAfterReplace && findTextDiv.value.length > 0){
 				var retVal = this._prepareFind(findTextDiv.value, this._textSearchAdaptor.getSearchStartIndex(false));
-				this._doFind(retVal.text, retVal.searchStr, retVal.startIndex, false, this._wrapSearch);
+				this._doFind(retVal.text, retVal.searchStr, retVal.startIndex, false, this._wrapSearch, callBack);
 			}
 		},
 
