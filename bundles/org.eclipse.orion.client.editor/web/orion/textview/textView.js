@@ -1979,6 +1979,14 @@ orion.textview.TextView = (function() {
 			var body = this._parentDocument.body;
 			return {left: touch.clientX - rect.left - body.scrollLeft, top: touch.clientY - rect.top - body.scrollTop};
 		},
+		_handleTextAreaClick: function (e) {
+			var pt = this._touchConvert(e);	
+			this._clickCount = 1;
+			this._ignoreDOMSelection = false;
+			this._setSelectionTo(pt.left, pt.top, false);
+			var textArea = this._textArea;
+			textArea.focus();
+		},
 		_handleTouchStart: function (e) {
 			var touches = e.touches, touch, pt, sel;
 			this._touchMoved = false;
@@ -2008,14 +2016,6 @@ orion.textview.TextView = (function() {
 					textArea.style.top = "-1000px";
 					textArea.style.width = "3000px";
 					textArea.style.height = "3000px";
-					var self = this;
-					/** @ignore */
-					var f = function() {
-						self._touchTimeout = null;
-						self._clickCount = 1;
-						self._setSelectionTo(pt.left, pt.top, false);
-					};
-					this._touchTimeout = setTimeout(f, 200);
 				}
 			} else if (touches.length === 2) {
 				this._touchGesture = "select";
@@ -2032,7 +2032,7 @@ orion.textview.TextView = (function() {
 				sel.extend(offset2);
 				this._setSelection(sel, true, true);
 			}
-			//Cannot prevent to show maginifier
+			//Cannot prevent to show magnifier
 //			e.preventDefault();
 		},
 		_handleTouchMove: function (e) {
@@ -2046,10 +2046,6 @@ orion.textview.TextView = (function() {
 				var deltaY = this._touchStartY - pageY;
 				pt = this._touchConvert(touch);
 				sel = this._getSelection();
-				if (this._touchTimeout) {
-					clearTimeout(this._touchTimeout);
-					this._touchTimeout = null;
-				}
 				if (this._touchGesture === "none") {
 					if ((e.timeStamp - this._touchStartTime) < 200 && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
 						this._touchGesture = "scroll";
@@ -2104,18 +2100,25 @@ orion.textview.TextView = (function() {
 			e.preventDefault();
 		},
 		_handleTouchEnd: function (e) {
+			var self = this;
 			if (!this._touchMoved) {
-				if (e.touches.length === 0 && e.changedTouches.length === 1 && this._touchTimeout) {
-					clearTimeout(this._touchTimeout);
-					this._touchTimeout = null;
+				if (e.touches.length === 0 && e.changedTouches.length === 1) {
 					var touch = e.changedTouches[0];
-					this._clickCount = 1;
 					var pt = this._touchConvert(touch);
-					this._setSelectionTo(pt.left, pt.top, false);
+					var textArea = this._textArea;
+					textArea.value = "";
+					textArea.style.left = "-1000px";
+					textArea.style.top = "-1000px";
+					textArea.style.width = "3000px";
+					textArea.style.height = "3000px";
+					setTimeout(function() {
+						self._clickCount = 1;
+						self._ignoreDOMSelection = false;
+						self._setSelectionTo(pt.left, pt.top, false);
+					}, 300);
 				}
 			}
 			if (e.touches.length === 0) {
-				var self = this;
 				setTimeout(function() {
 					var selection = self._getSelection();
 					var text = self._model.getText(selection.start, selection.end);
@@ -2131,7 +2134,7 @@ orion.textview.TextView = (function() {
 					}
 				}, 0);
 			}
-			e.preventDefault();
+//			e.preventDefault();
 		},
 
 		/************************************ Actions ******************************************/
@@ -3597,6 +3600,7 @@ orion.textview.TextView = (function() {
 				handlers.push({target: textArea, type: "keydown", handler: function(e) { return self._handleKeyDown(e);}});
 				handlers.push({target: textArea, type: "input", handler: function(e) { return self._handleInput(e); }});
 				handlers.push({target: textArea, type: "textInput", handler: function(e) { return self._handleTextInput(e); }});
+				handlers.push({target: textArea, type: "click", handler: function(e) { return self._handleTextAreaClick(e); }});
 				handlers.push({target: touchDiv, type: "touchstart", handler: function(e) { return self._handleTouchStart(e); }});
 				handlers.push({target: touchDiv, type: "touchmove", handler: function(e) { return self._handleTouchMove(e); }});
 				handlers.push({target: touchDiv, type: "touchend", handler: function(e) { return self._handleTouchEnd(e); }});
@@ -3938,9 +3942,12 @@ orion.textview.TextView = (function() {
 			if (e.text === null || e.text === undefined) { return; }
 			
 			var model = this._model;
-			if (e._ignoreDOMSelection) { this._ignoreDOMSelection = true; }
-			model.setText (e.text, e.start, e.end);
-			if (e._ignoreDOMSelection) { this._ignoreDOMSelection = false; }
+			try {
+				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = true; }
+				model.setText (e.text, e.start, e.end);
+			} finally {
+				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = false; }
+			}
 			
 			if (updateCaret) {
 				var selection = this._getSelection ();
