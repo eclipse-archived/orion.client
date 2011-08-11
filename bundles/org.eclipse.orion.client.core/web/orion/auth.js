@@ -88,8 +88,15 @@ function handleAuthenticationError(error, retry) {
 			authenticationInProgress = true;
 			// open popup and add OP response handler
 			// TODO add error handling here
-			window.open(dojo.fromJson(error.responseText).SignInLocation, 
-					"loginwindow", 'width=400, height=200');
+			try{
+				var responseObj = JSON.parse(error.responseText);
+				if(responseObj.SignInLocation && responseObj.SignInLocation!=""){
+					window.open(responseObj.SignInLocation, 
+							"loginwindow", 'width=400, height=200');
+				}
+			} catch (e){
+			}
+			
 		}
 	}
 }

@@ -103,15 +103,22 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 					}
 					
 					if(!jsonData || !jsonData.Name){
+						dojo.empty(userInfo);
 						var signout = document.createElement('span');
 						signout.appendChild(document.createTextNode("Sign in"));
 						signout.onclick = function(){
 							if (!authenticationInProgress) {
 //TODO								authenticationInProgress = true;
 								// open popup and add OP response handler
-								authService.getAuthForm().then(function(loginForm){
-									window.open(loginForm, 'LoginWindow', 'width=400, height=200');
-								});
+								if(authService.getAuthForm){
+									authService.getAuthForm().then(function(loginForm){
+										window.open(loginForm, 'LoginWindow', 'width=400, height=200');
+									});
+								}else if(authService.login){
+									authService.login().then(function(){
+										generateUserInfo(serviceRegistry);
+									});
+								}
 							}
 						};
 						signout.id = "signOutUser";
@@ -149,16 +156,18 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 							newMenu.addChild(menuitem2);
 							
 							// signout item
-							var menuitem = new dijit.MenuItem({
-								label: "Sign out",
-								onClick: function(){
-									authService.logout().then(function(){
-										generateUserInfo(serviceRegistry);
-										window.location.replace("/index.html");
-									});
-								}
-							});
-							newMenu.addChild(menuitem);
+							if(authService.logout){
+								var menuitem = new dijit.MenuItem({
+									label: "Sign out",
+									onClick: function(){
+										authService.logout().then(function(){
+											generateUserInfo(serviceRegistry);
+											window.location.replace("/index.html");
+										});
+									}
+								});
+								newMenu.addChild(menuitem);
+							}
 				
 							var menuButton = new dijit.form.DropDownButton({
 								label: userName.length > 40 ? userName.substring(0, 30) + "..." : userName,
