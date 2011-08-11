@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global orion:true window*/
-/*jslint devel:true*/
+/*jslint browser:true devel:true*/
 
 window.onload = function(){
 	

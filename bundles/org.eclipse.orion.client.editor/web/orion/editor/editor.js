@@ -55,7 +55,8 @@ orion.editor.Editor = (function() {
 		this._overviewRuler = null;
 		this._dirty = false;
 		this._contentAssist = null;
-		this._keyModes = [];		
+		this._title = null;
+		this._keyModes = [];
 	}
 	Editor.prototype = /** @lends orion.editor.Editor.prototype */ {
 		/**
@@ -382,6 +383,7 @@ orion.editor.Editor = (function() {
 		 * @param {Boolean} contentsSaved
 		 */
 		onInputChange : function (title, message, contents, contentsSaved) {
+			this._title = title;
 			if (contentsSaved && this._textView) {
 				// don't reset undo stack on save, just mark it clean so that we don't lose the undo past the save
 				this._undoStack.markClean();
@@ -435,6 +437,10 @@ orion.editor.Editor = (function() {
 		 */
 		onDirtyChange: function(isDirty) {
 			this._dirty = isDirty;
+		},
+		
+		getTitle: function() {
+			return this._title;
 		}
 	};
 	return Editor;

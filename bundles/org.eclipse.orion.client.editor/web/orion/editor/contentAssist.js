@@ -20,27 +20,28 @@ orion.editor = orion.editor || {};
 /**
  * @name orion.editor.ContentAssist
  * @class A key mode for {@link orion.editor.Editor} that can display content assist suggestions.
- * @description A <code>ContentAssist</code> will look for content assist providers in the service registry (if provided).
- * Alternatively, providers can be registered directly by calling {@link #addProvider}.
- * <p>To be notified when a proposal has been accepted by the user, clients can register a listener for the <code>"accept"</code> event
- * using {@link #addEventListener}.</p>
+ * @description A <code>ContentAssist</code> displays suggestions from content assist providers, which can registered by calling
+ * {@link #addProvider}.
+ * <p>Listeners may be registered on a <code>ContentAssist</code> by calling {@link #addEventListener}. The supported event types are:</p>
+ * <ul>
+ * <li><code>accept</code>: Dispatched when a proposal has been accepted by the user.</li>
+ * <li><code>show</code>: Dispatched when user invokes content assist.</li>
+ * </ul>
  * @param {orion.editor.Editor} editor The Editor to provide content assist for.
  * @param {String|DomNode} contentAssistId The ID or DOMNode to use as the parent for content assist.
- * @param {orion.serviceregistry.ServiceRegistry} [serviceRegistry] Service registry to use for looking up content assist providers.
- * If this parameter is omitted, providers must instead be registered by calling {@link #addProvider}.
  */
 orion.editor.ContentAssist = (function() {
 	/** @private */
-	function ContentAssist(editor, contentAssistId, serviceRegistry) {
+	function ContentAssist(editor, contentAssistId) {
 		this.editor = editor;
 		this.textView = editor.getTextView();
 		this.contentAssistPanel = document.getElementById(contentAssistId);
 		this.active = false;
 		this.prefix = "";
-		this.serviceRegistry = serviceRegistry;
-		this.contentAssistProviders = [];
-		this.activeServiceReferences = [];
-		this.activeContentAssistProviders = [];
+		
+		this.providers = [];
+		this.filteredProviders = [];
+		
 		this.listeners = {};
 		this.proposals = [];
 		this.contentAssistListener = {
@@ -64,7 +65,6 @@ orion.editor.ContentAssist = (function() {
 				this.showContentAssist(true);
 				return true;
 			}));
-			orion.editor.util.connect(this.editor, "onInputChange", this, this.inputChanged);
 		},
 		/** Registers a listener with this <code>ContentAssist</code>. */
 		addEventListener: function(/** String */ type, /** Function */ listener) {
@@ -80,32 +80,6 @@ orion.editor.ContentAssist = (function() {
 			if (listeners) {
 				for (var i=0; i < listeners.length; i++) {
 					listeners[i](event);
-				}
-			}
-		},
-		/** @private */
-		inputChanged: function(/**String*/ fileName) {
-			if (this.serviceRegistry) {
-				// Filter the ServiceReferences
-				this.activeServiceReferences = [];
-				var serviceReferences = this.serviceRegistry.getServiceReferences("orion.edit.contentAssist");
-				for (var i=0; i < serviceReferences.length; i++) {
-					var serviceReference = serviceReferences[i];
-					var info = {};
-					var propertyNames = serviceReference.getPropertyNames();
-					for (var j=0; j < propertyNames.length; j++) {
-						info[propertyNames[j]] = serviceReference.getProperty(propertyNames[j]);
-					}
-					if (new RegExp(info.pattern).test(fileName)) {
-						this.activeServiceReferences.push(serviceReference);
-					}
-				};
-			}
-			// Filter the registered providers
-			for (i=0; i < this.contentAssistProviders.length; i++) {
-				var provider = this.contentAssistProviders[i];
-				if (new RegExp(provider.pattern).test(fileName)) {
-					this.activeContentAssistProviders.push(provider.provider);
 				}
 			}
 		},
@@ -214,14 +188,8 @@ orion.editor.ContentAssist = (function() {
 			if (!this.contentAssistPanel) {
 				return;
 			}
-			function createDiv(proposal, isSelected, parent) {
-				var div = document.createElement("div");
-				if (isSelected) {
-					div.className = "selected";
-				}
-				div.innerHTML = proposal;
-				parent.appendChild(div);
-			}
+			this.dispatchEvent("show", null);
+			this.filterProviders(this.editor.getTitle());
 			if (!enable) {
 				if (this.listenerAdded) {
 					this.textView.removeEventListener("ModelChanged", this, this.contentAssistListener.onModelChanged);
@@ -286,7 +254,7 @@ orion.editor.ContentAssist = (function() {
 						caretLocation.y += this.textView.getLineHeight();
 						this.contentAssistPanel.innerHTML = "";
 						for (i = 0; i < this.proposals.length; i++) {
-							createDiv(this.getDisplayString(this.proposals[i]), i===0, this.contentAssistPanel);
+							this.createDiv(this.getDisplayString(this.proposals[i]), i===0, this.contentAssistPanel);
 						}
 						this.textView.convert(caretLocation, "document", "page");
 						this.contentAssistPanel.style.position = "absolute";
@@ -316,6 +284,15 @@ orion.editor.ContentAssist = (function() {
 					}));
 			}
 		},
+		/** @private */
+		createDiv: function(proposal, isSelected, parent) {
+			var div = document.createElement("div");
+			if (isSelected) {
+				div.className = "selected";
+			}
+			div.innerHTML = proposal;
+			parent.appendChild(div);
+		},
 		getDisplayString: function(proposal) {
 			return typeof proposal === "string" ? proposal : proposal.proposal;
 		},
@@ -326,47 +303,57 @@ orion.editor.ContentAssist = (function() {
 		 * @param {String} prefix A prefix against which content assist proposals should be evaluated.
 		 * @param {String} buffer The entire buffer being edited.
 		 * @param {orion.textview.Selection} selection The current selection from the Editor.
-		 * @returns {Object} An promise that will provide the keywords.
+		 * @returns {Object} A promise that will provide the keywords.
 		 */
 		getKeywords: function(prefix, buffer, selection) {
-			var keywords = [];
-			
-			// Add keywords from directly registered providers
-			for (var i=0; i < this.activeContentAssistProviders.length; i++) {
-				var provider = this.activeContentAssistProviders[i];
-				keywords = keywords.concat(provider.getKeywords() || []);
+			var keywords = [],
+			    numComplete = 0,
+			    promise = new this.Promise(),
+			    filteredProviders = this.filteredProviders;
+			function collectKeywords(result) {
+				if (result) {
+					keywords = keywords.concat(result);
+				}
+				if (++numComplete === filteredProviders.length) {
+					promise.done(keywords);
+				}
+			}
+			function errback() {
+				if (++numComplete === filteredProviders.length) {
+					promise.done(keywords);
+				}
 			}
 			
-			// Add keywords from providers registered through service registry
-			// FIXME: should just avoid Deferred entirely
-			if (this.serviceRegistry) {
-				var d = new dojo.Deferred();
-				var keywordPromises = [];
-				for (i=0; i < this.activeServiceReferences.length; i++) {
-					var serviceRef = this.activeServiceReferences[i];
-					this.serviceRegistry.getService(serviceRef).then(function(service) {
-						keywordPromises.push(service.getKeywords(prefix, buffer, selection));
-					});
+			for (var i=0; i < filteredProviders.length; i++) {
+				var provider = filteredProviders[i].provider;
+				var keywordsPromise = provider.getKeywords(prefix, buffer, selection);
+				if (keywordsPromise && keywordsPromise.then) {
+					keywordsPromise.then(collectKeywords, errback);
+				} else {
+					collectKeywords(keywordsPromise);
 				}
-				
-				var keywordCount = 0;
-				for (i=0; i < keywordPromises.length; i++) {
-					keywordPromises[i].then(function(result) {
-						keywordCount++;
-						keywords = keywords.concat(result);
-						if (keywordCount === keywordPromises.length) {
-							d.resolve(keywords);
-						}
-					}, function(e) {
-						keywordCount = -1;
-						d.reject(e); 
-					});
-				}
-				return d;
-			} else {
-				return { then: function() { return keywords; } };
 			}
+			return promise;
 		},
+		/** @private */
+		Promise: (function() {
+			function Promise() {
+			}
+			Promise.prototype.then = function(callback) {
+				this.callback = callback;
+				if (this.result) {
+					var promise = this;
+					setTimeout(function() { promise.callback(promise.result); }, 0);
+				}
+			};
+			Promise.prototype.done = function(result) {
+				this.result = result;
+				if (this.callback) {
+					this.callback(this.result);
+				}
+			};
+			return Promise;
+		}()),
 		/**
 		 * Adds a content assist provider.
 		 * @param {Object} provider The provider object. See {@link orion.contentAssist.CssContentAssistProvider} for an example.
@@ -374,8 +361,18 @@ orion.editor.ContentAssist = (function() {
 		 * @param {String} pattern A regex pattern matching filenames that <tt>provider</tt> can offer content assist for.
 		 */
 		addProvider: function(provider, name, pattern) {
-			this.contentAssistProviders = this.contentAssistProviders || [];
-			this.contentAssistProviders.push({name: name, pattern: pattern, provider: provider});
+			if (!this.providers) {
+				this.providers = [];
+			}
+			this.providers.push({name: name, pattern: pattern, provider: provider});
+		},
+		filterProviders: function(/**String*/ fileName) {
+			for (var i=0; i < this.providers.length; i++) {
+				var provider = this.providers[i];
+				if (new RegExp(provider.pattern).test(fileName)) {
+					this.filteredProviders.push(provider);
+				}
+			}
 		}
 	};
 	return ContentAssist;

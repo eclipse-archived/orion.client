@@ -8,8 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global eclipse:true orion:true window*/
-/*jslint devel:true*/
+/*global examples orion:true window*/
+/*jslint browser:true devel:true*/
 
 window.onload = function(){
 	

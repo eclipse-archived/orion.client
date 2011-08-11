@@ -62,10 +62,31 @@ exports.setUpEditor = function(isReadOnly){
 		searchFloat = dojo.byId("searchFloat"),
 		leftPane = dojo.byId("leftPane");
 
+	// Content Assist
 	var contentAssistFactory = null;
 	if (!isReadOnly) {
 		contentAssistFactory = function(editor) {
-			return new mContentAssist.ContentAssist(editor, "contentassist", serviceRegistry);
+			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
+			var providersLoaded = false;
+			contentAssist.addEventListener("show", function(event) {
+				function addProvider(service) {
+					contentAssist.addProvider(service);
+				}
+				if (!providersLoaded) {
+					// Load contributed content assist providers
+					var fileName = editor.getTitle();
+					var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist");
+					for (var i=0; i < serviceReferences.length; i++) {
+						var serviceReference = serviceReferences[i];
+						var pattern = serviceReference.getProperty("pattern");
+						if (pattern && new RegExp(pattern).test(fileName)) {
+							serviceRegistry.getService(serviceReference).then(addProvider);
+						}
+					}
+					providersLoaded = true;
+				}
+			});
+			return contentAssist;
 		};
 	}
 	
