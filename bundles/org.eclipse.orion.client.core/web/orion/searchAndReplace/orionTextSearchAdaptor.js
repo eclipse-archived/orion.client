@@ -45,21 +45,21 @@ orion.OrionTextSearchAdaptor = (function() {
 		
 		adaptReplaceAllStart: function(){
 			this._editor.reportStatus("", false);
-			this._editor.reportStatus("replacing all...", false, true);
+			this._editor.reportStatus("Replacing all...", false, true);
 		},
 		
 		adaptReplaceAllEnd: function(succeed, number){
 			this._editor.reportStatus("", false, true);
 			if(succeed)
-				this._editor.reportStatus("replaced "+number+" places", false);
+				this._editor.reportStatus("Replaced "+number+" matches", false);
 			else
-				this._editor.reportStatus("nothing replaced", true);
+				this._editor.reportStatus("Nothing replaced", true);
 		},
 		
 		adaptFind: function(startIndex, endIndex, reverse, callBack, noStatus) {
 			if(startIndex === -1){
 				if(!noStatus)
-					this._editor.reportStatus("not found", true);
+					this._editor.reportStatus("Not found", true);
 			}
 			else {
 				if(!noStatus)
