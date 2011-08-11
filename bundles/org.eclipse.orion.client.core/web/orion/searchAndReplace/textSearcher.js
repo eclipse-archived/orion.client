@@ -186,7 +186,7 @@ orion.TextSearcher = (function() {
 		},
 		
 		_handleKeyUp: function(evt){
-			if(this._incremental && !this._keyUpHandled){
+			if(this._incremental && !this._keyUpHandled && !dojo.isIE){
 				var targetElement = evt.target;//document.getElementById("localSearchFindWith")
 				this.findNext(true, null, true, targetElement);
 			}
@@ -198,6 +198,10 @@ orion.TextSearcher = (function() {
 			var ctrlKey = this.isMac ? evt.metaKey : evt.ctrlKey;
 			if(ctrlKey &&  evt.keyCode === 70/*"f"*/ ) {
 				this._keyUpHandled = fromSearch;
+				if( evt.stopPropagation ) { 
+					evt.stopPropagation(); 
+				}
+				evt.cancelBubble = true;
 				return false;
 			}
 			if((ctrlKey &&  evt.keyCode === 75/*"k"*/ ) || evt.keyCode === 13/*enter*/ ){
@@ -215,7 +219,7 @@ orion.TextSearcher = (function() {
 				}
 				evt.cancelBubble = true;
 				if(!fromSearch)
-					this.replace(function(){evt.target.focus();});
+					this.replace(dojo.isIE? null: function(){evt.target.focus();});
 				this._keyUpHandled = fromSearch;
 				return false;
 			}
@@ -253,8 +257,10 @@ orion.TextSearcher = (function() {
 				if(defaultSearchStr.length > 0){
 					findDiv.value = defaultSearchStr;
 				}
-				findDiv.select();
-				findDiv.focus();
+				window.setTimeout(function() {
+						findDiv.select();
+						findDiv.focus();
+				}, 10);				
 				return;
 			}
 			this._visible = true;
@@ -264,8 +270,10 @@ orion.TextSearcher = (function() {
 			// set the default value of search string
 			var findDiv = document.getElementById("localSearchFindWith");
 			findDiv.value = defaultSearchStr;
-			findDiv.select();
-			findDiv.focus();
+			window.setTimeout(function() {
+				findDiv.select();
+				findDiv.focus();
+			}, 10);				
 
 			var that = this;
 			var findNextCommand = new mCommands.Command({
@@ -444,7 +452,7 @@ orion.TextSearcher = (function() {
 			var startPos = this._textSearchAdaptor.getSearchStartIndex(incremental ? true : !next);
 			
 			if(this._visible){
-				return this.findOnce(searchStr ? searchStr : findTextDiv.value, startPos, focusBackDiv ? function(){focusBackDiv.focus();} : null);
+				return this.findOnce(searchStr ? searchStr : findTextDiv.value, startPos, (focusBackDiv && !dojo.isIE) ? function(){focusBackDiv.focus();} : null);
 			} else if(this._lastSearchString && this._lastSearchString.length > 0){
 				var retVal = this._prepareFind(searchStr ? searchStr : this._lastSearchString, startPos);
 				return this._doFind(retVal.text, retVal.searchStr, retVal.startIndex, !next, this._wrapSearch);
