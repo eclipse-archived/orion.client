@@ -19,14 +19,16 @@ orion.editor = orion.editor || {};
 
 /**
  * @name orion.editor.ContentAssist
- * @class A key mode for {@link orion.editor.Editor} that can display content assist suggestions.
- * @description A <code>ContentAssist</code> displays suggestions from content assist providers, which can registered by calling
- * {@link #addProvider}.
- * <p>Listeners may be registered on a <code>ContentAssist</code> by calling {@link #addEventListener}. The supported event types are:</p>
- * <ul>
- * <li><code>accept</code>: Dispatched when a proposal has been accepted by the user.</li>
- * <li><code>show</code>: Dispatched when user invokes content assist.</li>
- * </ul>
+ * @class A key mode for {@link orion.editor.Editor} that displays content assist suggestions.
+ * @description Creates a <code>ContentAssist</code>. A ContentAssist displays suggestions from registered content assist providers
+ * to the user. Content assist providers are registered by calling {@link #addProvider}.</p>
+ * <p>A ContentAssist emits events, for which listeners may be registered using {@link #addEventListener}. Supported event types are:</p>
+ * <dl>
+ * <dt><code>show</code></dt> <dd>Dispatched when this ContentAssist is activated.</dd>
+ * <dt><code>hide</code></dt> <dd>Dispatched when this ContentAssist is dismissed.</dd>
+ * <dt><code>accept</code></dt> <dd>Dispatched when a proposal has been accepted by the user. The event's <code>data</code> field
+ * contains information about the accepted proposal.</dd>
+ * </dl>
  * @param {orion.editor.Editor} editor The Editor to provide content assist for.
  * @param {String|DomNode} contentAssistId The ID or DOMNode to use as the parent for content assist.
  */
@@ -58,6 +60,7 @@ orion.editor.ContentAssist = (function() {
 		this.init();
 	}
 	ContentAssist.prototype = /** @lends orion.editor.ContentAssist.prototype */ {
+		/** @private */
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
 			this.textView.setKeyBinding(isMac ? new orion.textview.KeyBinding(' ', false, false, false, true) : new orion.textview.KeyBinding(' ', true), "Content Assist");
@@ -67,14 +70,24 @@ orion.editor.ContentAssist = (function() {
 			}));
 		},
 		/** Registers a listener with this <code>ContentAssist</code>. */
-		addEventListener: function(/** String */ type, /** Function */ listener) {
+		addEventListener: function(/**String*/ type, /**Function*/ listener) {
 			if (!this.listeners[type]) {
 				this.listeners[type] = [];
 			}
 			this.listeners[type].push(listener);
 		},
+		/** Removes a registered event listener. */
+		removeEventListener: function(/**String*/ type, /**Function*/ listener) {
+			var listeners = this.listeners[type];
+			if (listeners) {
+				var index = listeners.indexOf(listener);
+				if (index !== -1) {
+					listeners.splice(index, 1);
+				}
+			}
+		},
 		/** @private */
-		dispatchEvent: function(/** String */ type, /** Object */ data) {
+		dispatchEvent: function(/**String*/ type, /** Object */ data) {
 			var event = { type: type, data: data };
 			var listeners = this.listeners[type];
 			if (listeners) {
@@ -83,12 +96,15 @@ orion.editor.ContentAssist = (function() {
 				}
 			}
 		},
+		/** @private */
 		cancel: function() {
 			this.showContentAssist(false);
 		},
+		/** @private */
 		isActive: function() {
 			return this.active;
 		},
+		/** @private */
 		lineUp: function() {
 			if (this.contentAssistPanel) {
 				var selected = this.getSelectedNode();
@@ -100,6 +116,7 @@ orion.editor.ContentAssist = (function() {
 				return true;
 			}
 		},
+		/** @private */
 		lineDown: function() {
 			if (this.contentAssistPanel) {
 				var selected = this.getSelectedNode();
@@ -111,6 +128,7 @@ orion.editor.ContentAssist = (function() {
 				return true;
 			}
 		},
+		/** @private */
 		enter: function() {
 			if (this.contentAssistPanel) {
 				return this.accept();
@@ -120,7 +138,7 @@ orion.editor.ContentAssist = (function() {
 		},
 		/**
 		 * Accepts the currently selected proposal, if any.
-		 * @returns {Boolean}
+		 * @returns {Boolean} <code>true</code> if a proposal could be accepted; <code>false</code> if none was selected or available.
 		 */
 		accept: function() {
 			var proposal = this.getSelectedProposal();
@@ -137,6 +155,7 @@ orion.editor.ContentAssist = (function() {
 			this.dispatchEvent("accept", data);
 			return true;
 		},
+		/** @private */
 		setSelected: function(/** DOMNode */ node) {
 			var nodes = this.contentAssistPanel.childNodes;
 			for (var i=0; i < nodes.length; i++) {
@@ -160,7 +179,10 @@ orion.editor.ContentAssist = (function() {
 			var index = this.getSelectedIndex();
 			return index === -1 ? null : this.contentAssistPanel.childNodes[index];
 		},
-		/** @returns {Number} The index of the currently selected proposal. */
+		/**
+		 * @private
+		 * @returns {Number} The index of the currently selected proposal.
+		 */
 		getSelectedIndex: function() {
 			var nodes = this.contentAssistPanel.childNodes;
 			for (var i=0; i < nodes.length; i++) {
@@ -175,6 +197,7 @@ orion.editor.ContentAssist = (function() {
 			var index = this.getSelectedIndex();
 			return index === -1 ? null : this.proposals[index];
 		},
+		/** @private */
 		click: function(e) {
 			this.setSelected(e.target);
 			this.accept();
@@ -188,7 +211,9 @@ orion.editor.ContentAssist = (function() {
 			if (!this.contentAssistPanel) {
 				return;
 			}
-			this.dispatchEvent("show", null);
+			var eventType = enable ? "show" : "hide";
+			this.dispatchEvent(eventType, null);
+			
 			this.filterProviders(this.editor.getTitle());
 			if (!enable) {
 				if (this.listenerAdded) {
@@ -293,9 +318,11 @@ orion.editor.ContentAssist = (function() {
 			div.innerHTML = proposal;
 			parent.appendChild(div);
 		},
+		/** @private */
 		getDisplayString: function(proposal) {
 			return typeof proposal === "string" ? proposal : proposal.proposal;
 		},
+		/** @private */
 		matchesPrefix: function(str) {
 			return typeof str === "string" && str.substr(0, this.prefix.length) === this.prefix;
 		},
@@ -366,6 +393,7 @@ orion.editor.ContentAssist = (function() {
 			}
 			this.providers.push({name: name, pattern: pattern, provider: provider});
 		},
+		/** @private */
 		filterProviders: function(/**String*/ fileName) {
 			for (var i=0; i < this.providers.length; i++) {
 				var provider = this.providers[i];
