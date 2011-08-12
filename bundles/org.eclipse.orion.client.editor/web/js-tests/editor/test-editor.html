@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- standard scripts -->
+	<script type="text/javascript" src="/requirejs/require.js"></script>
+	<script type="text/javascript">
+	require({
+		baseUrl: '',
+	
+		// set the paths to our library packages
+		packages: [
+			{
+				name: 'dojo',
+				location: '/org.dojotoolkit/dojo',
+				main: 'lib/main-browser',
+				lib: '.'
+			},
+			{
+				name: 'dijit',
+				location: '/org.dojotoolkit/dijit',
+				main: 'lib/main',
+				lib: '.'
+			}
+		],
+	
+		paths: {
+			orion: '/orion',
+			text: '/requirejs/text',
+			i18n: '/requirejs/i18n'
+		}
+	});
+	
+	window.onload = function() {
+		require(["orion/test","testcase-editor"], function(test, testcase) {
+			test.run(testcase);
+		});
+	};
+	</script>
+	<title>TEST: Editor</title>
+</head>
+<body>
+	<div style="padding-bottom:1em;">Editor tests</div>
+	
+	<div id="editorDiv"></div>
+</body>
+</html>

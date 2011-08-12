@@ -64,10 +64,10 @@ orion.editor.ContentAssist = (function() {
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
 			this.textView.setKeyBinding(isMac ? new orion.textview.KeyBinding(' ', false, false, false, true) : new orion.textview.KeyBinding(' ', true), "Content Assist");
-			this.textView.setAction("Content Assist", orion.editor.util.hitch(this, function() {
+			this.textView.setAction("Content Assist", function() {
 				this.showContentAssist(true);
 				return true;
-			}));
+			}.bind(this));
 		},
 		/** Registers a listener with this <code>ContentAssist</code>. */
 		addEventListener: function(/**String*/ type, /**Function*/ listener) {
@@ -259,7 +259,7 @@ orion.editor.ContentAssist = (function() {
 				 * can trigger linked mode behavior in the editor.
 				 */
 				this.getKeywords(this.prefix, buffer, selection).then(
-					orion.editor.util.hitch(this, function(keywords) {
+					function(keywords) {
 						this.proposals = [];
 						for (var i = 0; i < keywords.length; i++) {
 							var proposal = keywords[i];
@@ -303,10 +303,10 @@ orion.editor.ContentAssist = (function() {
 							this.textView.addEventListener("Scroll", this, this.contentAssistListener.onScroll);
 						}
 						this.listenerAdded = true;
-						this.contentAssistPanel.onclick = orion.editor.util.hitch(this, this.click);
+						this.contentAssistPanel.onclick = this.click.bind(this);
 						this.active = true;
 						this.finishing = false;
-					}));
+					}.bind(this));
 			}
 		},
 		/** @private */

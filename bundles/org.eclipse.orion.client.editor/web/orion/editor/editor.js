@@ -9,7 +9,7 @@
  ******************************************************************************/
  
  /*global define window orion:true eclipse:true handleGetAuthenticationError*/
- /*jslint maxerr:150 browser:true devel:true regexp:false*/
+ /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
 var orion = orion || {};
 orion.editor = orion.editor || {};	
@@ -262,40 +262,40 @@ orion.editor.Editor = (function() {
 			
 			// Set keybindings for keys that apply to different modes
 			textView.setKeyBinding(new orion.textview.KeyBinding(27), "Cancel Current Mode");
-			textView.setAction("Cancel Current Mode", orion.editor.util.hitch(this, function() {
+			textView.setAction("Cancel Current Mode", function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].cancel();
 					}
 				}
 				return false;
-			}));
+			}.bind(this));
 
-			textView.setAction("lineUp", orion.editor.util.hitch(this, function() {
+			textView.setAction("lineUp", function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].lineUp();
 					}
 				}
 				return false;
-			}));
-			textView.setAction("lineDown", orion.editor.util.hitch(this, function() {
+			}.bind(this));
+			textView.setAction("lineDown", function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].lineDown();
 					}
 				}
 				return false;
-			}));
+			}.bind(this));
 
-			textView.setAction("enter", orion.editor.util.hitch(this, function() {
+			textView.setAction("enter", function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].enter();
 					}
 				}
 				return false;
-			}));
+			}.bind(this));
 						
 			/** @this {orion.editor.Editor} */
 			function updateCursorStatus() {
@@ -452,23 +452,6 @@ orion.editor.Editor = (function() {
  */
 orion.editor.util = {
 	/**
-	 * Returns a function that always executes in the given scope. Similar to <code>dojo.hitch</code>.
-	 * Differences: a scope object must always be provided; the global object is never assumed.
-	 */
-	hitch: function(/**Object*/ scope, /**Function|String*/ method /*, ...*/) {
-		method = typeof method === "string" ? scope[method] : method;
-		if (arguments.length > 2) {
-			var boundArgs = Array.prototype.slice.call(arguments, 2);
-			return function() {
-				return method.apply(scope, boundArgs.concat(Array.slice.call(arguments, 0)));
-			};
-		}
-		return function() {
-			return method.apply(scope, arguments);
-		};
-	},
-	
-	/**
 	 * Event handling helper. Similar to <code>dojo.connect</code>.
 	 * Differences: doesn't return a handle, doesn't support the <code>dontFix</code> parameter.
 	 * @deprecated Once Bug 349957 is fixed, this function should be deleted.
@@ -544,8 +527,33 @@ orion.editor.util = {
 			return Math.sin(x * (Math.PI / 2));
 		};
 		return Animation;
-	}())
+	}()),
+	
+	/**
+	 * @private
+	 * @param context Value to be used as the returned function's <code>this</code> value.
+	 * @param [arg1, arg2, ...] Fixed argument values that will prepend any arguments passed to the returned function when it is invoked.
+	 * @returns {Function} A function that always executes this function in the given <code>context</code>.
+	 */
+	bind: function(context) {
+		var fn = this,
+		    fixed = Array.prototype.slice.call(arguments, 1);
+		if (fixed.length) {
+			return function() {
+				return arguments.length
+					? fn.apply(context, fixed.concat(Array.prototype.slice.call(arguments)))
+					: fn.apply(context, fixed);
+			};
+		}
+		return function() {
+			return arguments.length ? fn.apply(context, arguments) : fn.call(context);
+		};
+	}
 };
+
+if (!Function.prototype.bind) {
+	Function.prototype.bind = orion.editor.util.bind;
+}
 
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {
 	define(['orion/textview/keyBinding'], function(){

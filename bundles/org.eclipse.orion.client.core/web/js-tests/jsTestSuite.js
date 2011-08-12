@@ -41,7 +41,8 @@ BootstrapTest.prototype.testBootstrap = function(queue) {
 				"/js-tests/serviceRegistry/test.html",
 				"/js-tests/preferences/test.html",
 				"/js-tests/pluginRegistry/test.html",
-				"/js-tests/testRunAsynch/test.html"
+				"/js-tests/testRunAsynch/test.html",
+				"/js-tests/editor/test-editor.html"
 			]).then(noop, errback);
 		});
 	});
