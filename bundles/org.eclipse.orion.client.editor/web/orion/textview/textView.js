@@ -8,7 +8,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bugs 334583, 348471, 349485, 350595.
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -853,6 +853,8 @@ orion.textview.TextView = (function() {
 		 * 
 		 * @property {String} styleClass A CSS class name.
 		 * @property {Object} style An object with CSS properties.
+		 * @property {String} tagName A DOM tag name.
+		 * @property {Object} attributes An object with DOM attributes.
 		 */
 		/**
 		 * @class This object is used to style range.
@@ -1560,6 +1562,15 @@ orion.textview.TextView = (function() {
 				}
 				return;
 			}
+			switch (e.keyCode) {
+				case 16: /* Shift */
+				case 17: /* Control */
+				case 18: /* Alt */
+				case 91: /* Command */
+					break;
+				default:
+					this._setLinksVisible(false);
+			}
 			if (e.keyCode === 229) {
 				if (this.readonly) {
 					if (e.preventDefault) { e.preventDefault(); }
@@ -1654,10 +1665,21 @@ orion.textview.TextView = (function() {
 		},
 		_handleKeyUp: function (e) {
 			if (!e) { e = window.event; }
-			
+			var ctrlKey = isMac ? e.metaKey : e.ctrlKey;
+			if (!ctrlKey) {
+				this._setLinksVisible(false);
+			}
 			// don't commit for space (it happens during JP composition)  
 			if (e.keyCode === 13) {
 				this._commitIME();
+			}
+		},
+		_handleLinkClick: function (e) {
+			if (!e) { e = window.event; }
+			var ctrlKey = isMac ? e.metaKey : e.ctrlKey;
+			if (!ctrlKey) {
+				if (e.preventDefault) { e.preventDefault(); }
+				return false;
 			}
 		},
 		_handleMouse: function (e) {
@@ -1695,6 +1717,14 @@ orion.textview.TextView = (function() {
 		},
 		_handleMouseDown: function (e) {
 			if (!e) { e = window.event; }
+			if (this._linksVisible) {
+				var target = e.target || e.srcElement;
+				if (target.tagName !== "A") {
+					this._setLinksVisible(false);
+				} else {
+					return;
+				}
+			}
 			var left = e.which ? e.button === 0 : e.button === 1;
 			this._commitIME();
 			if (left) {
@@ -1721,6 +1751,10 @@ orion.textview.TextView = (function() {
 		},
 		_handleMouseMove: function (e) {
 			if (!e) { e = window.event; }
+			this._setLinksVisible(!this._isMouseDown && (isMac ? e.metaKey : e.ctrlKey));
+			if (!this._isMouseDown) {
+				return;
+			}
 			/*
 			* Feature in IE8 and older, the sequence of events in the IE8 event model
 			* for a doule-click is:
@@ -1786,10 +1820,13 @@ orion.textview.TextView = (function() {
 		},
 		_handleMouseUp: function (e) {
 			if (!e) { e = window.event; }
-			this._endAutoScroll();
+			if (this._linksVisible) {
+				return;
+			}
 			var left = e.which ? e.button === 0 : e.button === 1;
 			if (left) {
-				this._isMouseDown=false;
+				this._isMouseDown = false;
+				this._endAutoScroll();
 				
 				/*
 				* Feature in IE8 and older, the sequence of events in the IE8 event model
@@ -2410,20 +2447,19 @@ orion.textview.TextView = (function() {
 			var lineHeight = this._getLineHeight();
 			var verticalMaximum = lineCount * lineHeight;
 			var verticalScrollOffset = this._getScroll().y;
-			var pixel = undefined;
+			var pixel;
 			switch (type) {
 				case "textStart": pixel = 0; break;
 				case "textEnd": pixel = verticalMaximum - clientHeight; break;
 				case "pageDown": pixel = verticalScrollOffset + clientHeight; break;
 				case "pageUp": pixel = verticalScrollOffset - clientHeight; break;
-				case "centerLine": { 
-						var selection = this._getSelection();
-						var lineStart = model.getLineAtOffset(selection.start);
-						var lineEnd = model.getLineAtOffset(selection.end);
-						var selectionHeight = (lineEnd - lineStart + 1) * lineHeight;
-						pixel = (lineStart * lineHeight) - (clientHeight / 2) + (selectionHeight / 2);
+				case "centerLine":
+					var selection = this._getSelection();
+					var lineStart = model.getLineAtOffset(selection.start);
+					var lineEnd = model.getLineAtOffset(selection.end);
+					var selectionHeight = (lineEnd - lineStart + 1) * lineHeight;
+					pixel = (lineStart * lineHeight) - (clientHeight / 2) + (selectionHeight / 2);
 					break;
-				}
 			}
 			if (pixel !== undefined) {
 				pixel = Math.min(Math.max(0, pixel), verticalMaximum - clientHeight);
@@ -2456,6 +2492,14 @@ orion.textview.TextView = (function() {
 				for (var s in properties) {
 					if (properties.hasOwnProperty(s)) {
 						node.style[s] = properties[s];
+					}
+				}
+			}
+			var attributes = style.attributes;
+			if (attributes) {
+				for (var a in attributes) {
+					if (attributes.hasOwnProperty(a)) {
+						node.setAttribute(a, attributes[a]);
 					}
 				}
 			}
@@ -2801,7 +2845,7 @@ orion.textview.TextView = (function() {
 				if (tabSize && tabSize !== 8) {
 					var tabIndex = lineText.indexOf("\t"), ignoreChars = 0;
 					while (tabIndex !== -1) {
-						this._createRange(child, document, e.ranges, start, tabIndex, lineText, lineStart);
+						this._createRanges(child, document, e.ranges, start, tabIndex, lineText, lineStart);
 						var spacesCount = tabSize - ((tabIndex + ignoreChars) % tabSize);
 						var spaces = "\u00A0";
 						for (var i = 1; i < spacesCount; i++) {
@@ -2828,7 +2872,7 @@ orion.textview.TextView = (function() {
 						tabIndex = lineText.indexOf("\t", start);
 					}
 				}
-				this._createRange(child, document, e.ranges, start, lineText.length, lineText, lineStart);
+				this._createRanges(child, document, e.ranges, start, lineText.length, lineText, lineStart);
 			}
 			
 			/*
@@ -2872,7 +2916,7 @@ orion.textview.TextView = (function() {
 			parent.insertBefore(child, sibling);
 			return child;
 		},
-		_createRange: function(parent, document, ranges, start, end, text, lineStart) {
+		_createRanges: function(parent, document, ranges, start, end, text, lineStart) {
 			if (start >= end) { return; }
 			var span;
 			if (ranges) {
@@ -2886,23 +2930,30 @@ orion.textview.TextView = (function() {
 						styleStart = Math.max(start, styleStart);
 						styleEnd = Math.min(end, styleEnd);
 						if (start < styleStart) {
-							span = document.createElement("SPAN");
-							span.appendChild(document.createTextNode(text.substring(start, styleStart)));
-							parent.appendChild(span);
+							parent.appendChild(this._createRange(parent, document, text.substring(start, styleStart), null));
 						}
-						span = document.createElement("SPAN");
-						span.appendChild(document.createTextNode(text.substring(styleStart, styleEnd)));
-						this._applyStyle(range.style, span);
-						parent.appendChild(span);
+						parent.appendChild(this._createRange(parent, document, text.substring(styleStart, styleEnd), range.style));
 						start = styleEnd;
 					}
 				}
 			}
 			if (start < end) {
-				span = document.createElement("SPAN");
-				span.appendChild(document.createTextNode(text.substring(start, end)));
-				parent.appendChild(span);
+				parent.appendChild(this._createRange(parent, document, text.substring(start, end), null));
 			}
+		},
+		_createRange: function(parent, document, text, style) {
+			var isLink = style && style.tagName === "A";
+			if (isLink) { parent.hasLink = true; }
+			var tagName = isLink && this._linksVisible ? "A" : "SPAN";
+			var child = document.createElement(tagName);
+			child.appendChild(document.createTextNode(text));
+			this._applyStyle(style, child);
+			if (tagName === "A") {
+				var self = this;
+				addHandler(child, "click", function(e) { return self._handleLinkClick(e); }, false);
+			}
+			child.viewStyle = style;
+			return child;
 		},
 		_doAutoScroll: function (direction, x, y) {
 			this._autoScrollDir = direction;
@@ -3581,9 +3632,6 @@ orion.textview.TextView = (function() {
 			};
 			this._model.addListener(this._modelListener);
 			
-			this._mouseMoveClosure = function(e) { return self._handleMouseMove(e);};
-			this._mouseUpClosure = function(e) { return self._handleMouseUp(e);};
-			
 			var clientDiv = this._clientDiv;
 			var viewDiv = this._viewDiv;
 			var body = this._frameDocument.body; 
@@ -3606,6 +3654,7 @@ orion.textview.TextView = (function() {
 				handlers.push({target: touchDiv, type: "touchend", handler: function(e) { return self._handleTouchEnd(e); }});
 			} else {
 				var topNode = this._overlayDiv || this._clientDiv;
+				var grabNode = isIE ? clientDiv : this._frameWindow;
 				handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return self._handleKeyDown(e);}});
 				handlers.push({target: clientDiv, type: "keypress", handler: function(e) { return self._handleKeyPress(e);}});
 				handlers.push({target: clientDiv, type: "keyup", handler: function(e) { return self._handleKeyUp(e);}});
@@ -3614,7 +3663,9 @@ orion.textview.TextView = (function() {
 				handlers.push({target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e);}});
 				handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e);}});
 				handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e);}});
-				handlers.push({target: topNode, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}});
+				handlers.push({target: clientDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}});
+				handlers.push({target: grabNode, type: "mouseup", handler: function(e) { return self._handleMouseUp(e);}});
+				handlers.push({target: grabNode, type: "mousemove", handler: function(e) { return self._handleMouseMove(e);}});
 				handlers.push({target: body, type: "mousedown", handler: function(e) { return self._handleBodyMouseDown(e);}});
 				handlers.push({target: topNode, type: "dragstart", handler: function(e) { return self._handleDragStart(e);}});
 				handlers.push({target: topNode, type: "dragover", handler: function(e) { return self._handleDragOver(e);}});
@@ -3633,6 +3684,7 @@ orion.textview.TextView = (function() {
 					handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return self._handleDataModified(e); }});
 				}
 				if (this._overlayDiv) {
+					handlers.push({target: this._overlayDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}});
 					handlers.push({target: this._overlayDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e); }});
 				}
 				if (!isW3CEvents) {
@@ -3654,6 +3706,7 @@ orion.textview.TextView = (function() {
 			this._model = options.model ? options.model : new orion.textview.TextModel();
 			this.readonly = options.readonly === true;
 			this._selection = new Selection (0, 0, false);
+			this._linksVisible = false;
 			this._eventTable = new EventTable();
 			this._maxLineWidth = 0;
 			this._maxLineIndex = -1;
@@ -4330,15 +4383,35 @@ orion.textview.TextView = (function() {
 		_setGrab: function (target) {
 			if (target === this._grabControl) { return; }
 			if (target) {
-				addHandler(target, "mousemove", this._mouseMoveClosure);
-				addHandler(target, "mouseup", this._mouseUpClosure);
 				if (target.setCapture) { target.setCapture(); }
 				this._grabControl = target;
 			} else {
-				removeHandler(this._grabControl, "mousemove", this._mouseMoveClosure);
-				removeHandler(this._grabControl, "mouseup", this._mouseUpClosure);
 				if (this._grabControl.releaseCapture) { this._grabControl.releaseCapture(); }
 				this._grabControl = null;
+			}
+		},
+		_setLinksVisible: function(visible) {
+			if (this._linksVisible === visible) { return; }
+			this._linksVisible = visible;
+			this._clientDiv.contentEditable = !visible;
+			if (this._overlayDiv) {
+				this._overlayDiv.style.zIndex = visible ? "-1" : "1";
+			}
+			var document = this._frameDocument;
+			var line = this._getLineNext();
+			while (line) {
+				if (line.hasLink) {
+					var lineChild = line.firstChild;
+					while (lineChild) {
+						var next = lineChild.nextSibling;
+						var style = lineChild.viewStyle;
+						if (style && style.tagName === "A") {
+							line.replaceChild(this._createRange(line, document, lineChild.firstChild.data, style), lineChild);
+						}
+						lineChild = next;
+					}
+				}
+				line = this._getLineNext(line);
 			}
 		},
 		_setSelection: function (selection, scroll, update) {
@@ -4505,10 +4578,6 @@ orion.textview.TextView = (function() {
 		_unhookEvents: function() {
 			this._model.removeListener(this._modelListener);
 			this._modelListener = null;
-
-			this._mouseMoveClosure = null;
-			this._mouseUpClosure = null;
-
 			for (var i=0; i<this._handlers.length; i++) {
 				var h = this._handlers[i];
 				removeHandler(h.target, h.type, h.handler);
