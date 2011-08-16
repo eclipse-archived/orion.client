@@ -1,5 +1,6 @@
 {
 	"/plugins":{
+		"/authenticationPlugin.html": true,
 		"/plugins/fileClientPlugin.html":true,
 		"/plugins/jslintPlugin.html":true,
 		"/plugins/unittestPlugin.html":true,

@@ -10,7 +10,7 @@
 		window.onload = function() {
 			var service = new eclipse.FileServiceImpl();
 			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("orion.core.file", service, {Name:'Orion contents', top:'/file/', pattern:'/file/', auth: "/authenticationPlugin.html"});
+			provider.registerServiceProvider("orion.core.file", service, {Name:'Orion contents', top:'/file/', pattern:'/file/'});
 			service.dispatchEvent = provider.dispatchEvent;
 			provider.connect();
 		};
