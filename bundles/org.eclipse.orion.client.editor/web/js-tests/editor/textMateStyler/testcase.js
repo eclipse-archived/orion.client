@@ -49,8 +49,8 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		};
 	}
 	
-	function makeStyler(view, grammar) {
-		return new mTextMateStyler.TextMateStyler(view, grammar);
+	function makeStyler(view, grammar, grammars) {
+		return new mTextMateStyler.TextMateStyler(view, grammar, grammars);
 	}
 	
 	/** Sets the given lines as the view text */
@@ -1364,6 +1364,27 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 			[7, 8, "punctuation.definition.array.end", "]"]
 		]);
 	});
+	
+	tests["test TextMateStyler - external grammar reference"] = makeTest(function(view) {
+		var grammars = [mTestGrammars.ExternalGrammar1, mTestGrammars.ExternalGrammar2];
+		var styler = makeStyler(view, grammars[0], grammars);
+		setLines(view, [
+			"<b><?php",
+			"$fizz = 0",
+			"?></b>"
+		]);
+		assertLineScope(view, styler, 0, [
+			[0, 3, "tag.bold", "<b>"],
+			[3, 8, "tag.fakephp", "<?php"]
+		]);
+		assertLineScope(view, styler, 1, [
+			[0, 5, "variable", "$fizz"]
+		]);
+		assertLineScope(view, styler, 2, [
+			[0, 2, "tag.fakephp", "?>"],
+			[2, 6, "tag.bold", "</b>"]
+		]);
+	}, false);
 	
 	return tests;
 });

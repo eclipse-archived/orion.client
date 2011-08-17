@@ -8,17 +8,17 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global eclipse:true orion:true dojo dijit window*/
-/*jslint devel:true*/
+/*jslint browser:true devel:true*/
+/*global define eclipse:true orion:true dojo dijit window*/
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
-        'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchResponser',
+        'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchAdaptor',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
-				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mKeyBinding, mSearcher, mResponser) {
+				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mKeyBinding, mSearcher, mSearchAdaptor) {
 	
 var exports = exports || {};
 	
@@ -62,10 +62,31 @@ exports.setUpEditor = function(isReadOnly){
 		searchFloat = dojo.byId("searchFloat"),
 		leftPane = dojo.byId("leftPane");
 
+	// Content Assist
 	var contentAssistFactory = null;
 	if (!isReadOnly) {
 		contentAssistFactory = function(editor) {
-			return new mContentAssist.ContentAssist(editor, "contentassist", serviceRegistry);
+			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
+			var providersLoaded = false;
+			contentAssist.addEventListener("show", function(event) {
+				function addProvider(service) {
+					contentAssist.addProvider(service);
+				}
+				if (!providersLoaded) {
+					// Load contributed content assist providers
+					var fileName = editor.getTitle();
+					var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist");
+					for (var i=0; i < serviceReferences.length; i++) {
+						var serviceReference = serviceReferences[i];
+						var pattern = serviceReference.getProperty("pattern");
+						if (pattern && new RegExp(pattern).test(fileName)) {
+							serviceRegistry.getService(serviceReference).then(addProvider);
+						}
+					}
+					providersLoaded = true;
+				}
+			});
+			return contentAssist;
 		};
 	}
 	
@@ -96,28 +117,26 @@ exports.setUpEditor = function(isReadOnly){
 					}
 					
 					if (!this.styler && syntaxHighlightProviders) {
-						// Check our syntax highlight providers
-						var providerToUse;
-						dojo.some(syntaxHighlightProviders, function(provider) {
-							var fileTypes = provider.getProperty("fileTypes");
-							if (fileTypes) {
-								for (var i=0; i < fileTypes.length; i++) {
-									if (fileTypes[i] === extension) {
-										providerToUse = provider;
-										return true;
-									}
-								}
+						var grammars = [],
+						    providerToUse;
+						for (var i=0; i < syntaxHighlightProviders.length; i++) {
+							var provider = syntaxHighlightProviders[i],
+							    fileTypes = provider.getProperty("fileTypes");
+							if (provider.getProperty("type") === "grammar") {
+								grammars.push(provider.getProperty("grammar"));
 							}
-						});
+							if (fileTypes && fileTypes.indexOf(extension) !== -1) {
+								providerToUse = provider;
+							}
+						}
 						
 						if (providerToUse) {
 							var providerType = providerToUse.getProperty("type");
-							if (providerType === "grammar") {
-								// TextMate styler
-								var grammar = providerToUse.getProperty("grammar");
-								this.styler = new mTextMateStyler.TextMateStyler(textView, grammar);
-							} else if (providerType === "parser") {
+							if (providerType === "parser") {
 								console.debug("TODO implement support for parser-based syntax highlight provider");
+							} else if (providerType === "grammar" || typeof providerType === "undefined") {
+								var grammar = providerToUse.getProperty("grammar");
+								this.styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
 							}
 						}
 					}
@@ -333,7 +352,7 @@ exports.setUpEditor = function(isReadOnly){
 			commandGenerator.generateEditorCommands(editor);
 			
 			// Create keybindings for generic editing, no dependency on the service model
-			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(commandService, new mResponser.OrionTextSearchResponser()));
+			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(commandService, undoStack, new mSearchAdaptor.OrionTextSearchAdaptor()));
 			keyModeStack.push(genericBindings);
 			
 			// Linked Mode
@@ -401,8 +420,10 @@ exports.setUpEditor = function(isReadOnly){
 			});
 		};
 		
-		var statusReporter = function(message, isError) {
-			if (isError) {
+		var statusReporter = function(message, isError, isProgress) {
+			if(isProgress){
+				statusReportingService.setProgressMessage(message);
+			} else if (isError) {
 				statusReportingService.setErrorMessage(message);	
 			} else {
 				statusReportingService.setMessage(message);	

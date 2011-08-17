@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define dojo window*/
+/*global define orion:true window*/
 /*jslint maxerr:150 browser:true devel:true */
 
 /**
@@ -19,28 +19,31 @@ orion.editor = orion.editor || {};
 
 /**
  * @name orion.editor.ContentAssist
- * @class A key mode for {@link orion.editor.Editor} that can display content assist suggestions.
- * @description A <code>ContentAssist</code> will look for content assist providers in the service registry (if provided).
- * Alternatively, providers can be registered directly by calling {@link #addProvider}.
- * <p>To be notified when a proposal has been accepted by the user, clients can register a listener for the <code>"accept"</code> event
- * using {@link #addEventListener}.</p>
+ * @class A key mode for {@link orion.editor.Editor} that displays content assist suggestions.
+ * @description Creates a <code>ContentAssist</code>. A ContentAssist displays suggestions from registered content assist providers
+ * to the user. Content assist providers are registered by calling {@link #addProvider}.</p>
+ * <p>A ContentAssist emits events, for which listeners may be registered using {@link #addEventListener}. Supported event types are:</p>
+ * <dl>
+ * <dt><code>show</code></dt> <dd>Dispatched when this ContentAssist is activated.</dd>
+ * <dt><code>hide</code></dt> <dd>Dispatched when this ContentAssist is dismissed.</dd>
+ * <dt><code>accept</code></dt> <dd>Dispatched when a proposal has been accepted by the user. The event's <code>data</code> field
+ * contains information about the accepted proposal.</dd>
+ * </dl>
  * @param {orion.editor.Editor} editor The Editor to provide content assist for.
  * @param {String|DomNode} contentAssistId The ID or DOMNode to use as the parent for content assist.
- * @param {orion.serviceregistry.ServiceRegistry} [serviceRegistry] Service registry to use for looking up content assist providers.
- * If this parameter is omitted, providers must instead be registered by calling {@link #addProvider}.
  */
 orion.editor.ContentAssist = (function() {
 	/** @private */
-	function ContentAssist(editor, contentAssistId, serviceRegistry) {
+	function ContentAssist(editor, contentAssistId) {
 		this.editor = editor;
 		this.textView = editor.getTextView();
-		this.contentAssistPanel = dojo.byId(contentAssistId);
+		this.contentAssistPanel = document.getElementById(contentAssistId);
 		this.active = false;
 		this.prefix = "";
-		this.serviceRegistry = serviceRegistry;
-		this.contentAssistProviders = [];
-		this.activeServiceReferences = [];
-		this.activeContentAssistProviders = [];
+		
+		this.providers = [];
+		this.filteredProviders = [];
+		
 		this.listeners = {};
 		this.proposals = [];
 		this.contentAssistListener = {
@@ -57,24 +60,34 @@ orion.editor.ContentAssist = (function() {
 		this.init();
 	}
 	ContentAssist.prototype = /** @lends orion.editor.ContentAssist.prototype */ {
+		/** @private */
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
 			this.textView.setKeyBinding(isMac ? new orion.textview.KeyBinding(' ', false, false, false, true) : new orion.textview.KeyBinding(' ', true), "Content Assist");
-			this.textView.setAction("Content Assist", dojo.hitch(this, function() {
+			this.textView.setAction("Content Assist", function() {
 				this.showContentAssist(true);
 				return true;
-			}));
-			dojo.connect(this.editor, "onInputChange", this, this.inputChanged);
+			}.bind(this));
 		},
 		/** Registers a listener with this <code>ContentAssist</code>. */
-		addEventListener: function(/** String */ type, /** Function */ listener) {
+		addEventListener: function(/**String*/ type, /**Function*/ listener) {
 			if (!this.listeners[type]) {
 				this.listeners[type] = [];
 			}
 			this.listeners[type].push(listener);
 		},
+		/** Removes a registered event listener. */
+		removeEventListener: function(/**String*/ type, /**Function*/ listener) {
+			var listeners = this.listeners[type];
+			if (listeners) {
+				var index = listeners.indexOf(listener);
+				if (index !== -1) {
+					listeners.splice(index, 1);
+				}
+			}
+		},
 		/** @private */
-		dispatchEvent: function(/** String */ type, /** Object */ data) {
+		dispatchEvent: function(/**String*/ type, /** Object */ data) {
 			var event = { type: type, data: data };
 			var listeners = this.listeners[type];
 			if (listeners) {
@@ -84,37 +97,14 @@ orion.editor.ContentAssist = (function() {
 			}
 		},
 		/** @private */
-		inputChanged: function(/**String*/ fileName) {
-			if (this.serviceRegistry) {
-				// Filter the ServiceReferences
-				this.activeServiceReferences = [];
-				var serviceReferences = this.serviceRegistry.getServiceReferences("orion.edit.contentAssist");
-				var serviceReference;
-				dojo.forEach(serviceReferences, dojo.hitch(this, function(serviceReference) {
-					var info = {};
-					var propertyNames = serviceReference.getPropertyNames();
-					for (var i = 0; i < propertyNames.length; i++) {
-						info[propertyNames[i]] = serviceReference.getProperty(propertyNames[i]);
-					}
-					if (new RegExp(info.pattern).test(fileName)) {
-						this.activeServiceReferences.push(serviceReference);
-					}
-				}));
-			}
-			// Filter the registered providers
-			for (var i=0; i < this.contentAssistProviders.length; i++) {
-				var provider = this.contentAssistProviders[i];
-				if (new RegExp(provider.pattern).test(fileName)) {
-					this.activeContentAssistProviders.push(provider.provider);
-				}
-			}
-		},
 		cancel: function() {
 			this.showContentAssist(false);
 		},
+		/** @private */
 		isActive: function() {
 			return this.active;
 		},
+		/** @private */
 		lineUp: function() {
 			if (this.contentAssistPanel) {
 				var selected = this.getSelectedNode();
@@ -126,6 +116,7 @@ orion.editor.ContentAssist = (function() {
 				return true;
 			}
 		},
+		/** @private */
 		lineDown: function() {
 			if (this.contentAssistPanel) {
 				var selected = this.getSelectedNode();
@@ -137,6 +128,7 @@ orion.editor.ContentAssist = (function() {
 				return true;
 			}
 		},
+		/** @private */
 		enter: function() {
 			if (this.contentAssistPanel) {
 				return this.accept();
@@ -146,7 +138,7 @@ orion.editor.ContentAssist = (function() {
 		},
 		/**
 		 * Accepts the currently selected proposal, if any.
-		 * @returns {Boolean}
+		 * @returns {Boolean} <code>true</code> if a proposal could be accepted; <code>false</code> if none was selected or available.
 		 */
 		accept: function() {
 			var proposal = this.getSelectedProposal();
@@ -163,6 +155,7 @@ orion.editor.ContentAssist = (function() {
 			this.dispatchEvent("accept", data);
 			return true;
 		},
+		/** @private */
 		setSelected: function(/** DOMNode */ node) {
 			var nodes = this.contentAssistPanel.childNodes;
 			for (var i=0; i < nodes.length; i++) {
@@ -172,6 +165,12 @@ orion.editor.ContentAssist = (function() {
 				}
 				if (child === node) {
 					child.className = "selected";
+					child.focus();
+					if (child.offsetTop < this.contentAssistPanel.scrollTop) {
+						child.scrollIntoView(true);
+					} else if ((child.offsetTop + child.offsetHeight) > (this.contentAssistPanel.scrollTop + this.contentAssistPanel.clientHeight)) {
+						child.scrollIntoView(false);
+					}
 				}
 			}
 		},
@@ -180,7 +179,10 @@ orion.editor.ContentAssist = (function() {
 			var index = this.getSelectedIndex();
 			return index === -1 ? null : this.contentAssistPanel.childNodes[index];
 		},
-		/** @returns {Number} The index of the currently selected proposal. */
+		/**
+		 * @private
+		 * @returns {Number} The index of the currently selected proposal.
+		 */
 		getSelectedIndex: function() {
 			var nodes = this.contentAssistPanel.childNodes;
 			for (var i=0; i < nodes.length; i++) {
@@ -195,6 +197,7 @@ orion.editor.ContentAssist = (function() {
 			var index = this.getSelectedIndex();
 			return index === -1 ? null : this.proposals[index];
 		},
+		/** @private */
 		click: function(e) {
 			this.setSelected(e.target);
 			this.accept();
@@ -208,13 +211,10 @@ orion.editor.ContentAssist = (function() {
 			if (!this.contentAssistPanel) {
 				return;
 			}
-			function createDiv(proposal, isSelected, parent) {
-				var attributes = {innerHTML: proposal};
-				if (isSelected) {
-					attributes.className = "selected";
-				}
-				dojo.create("div", attributes, parent, this);
-			}
+			var eventType = enable ? "show" : "hide";
+			this.dispatchEvent(eventType, null);
+			
+			this.filterProviders(this.editor.getTitle());
 			if (!enable) {
 				if (this.listenerAdded) {
 					this.textView.removeEventListener("ModelChanged", this, this.contentAssistListener.onModelChanged);
@@ -259,7 +259,7 @@ orion.editor.ContentAssist = (function() {
 				 * can trigger linked mode behavior in the editor.
 				 */
 				this.getKeywords(this.prefix, buffer, selection).then(
-					dojo.hitch(this, function(keywords) {
+					function(keywords) {
 						this.proposals = [];
 						for (var i = 0; i < keywords.length; i++) {
 							var proposal = keywords[i];
@@ -279,27 +279,50 @@ orion.editor.ContentAssist = (function() {
 						caretLocation.y += this.textView.getLineHeight();
 						this.contentAssistPanel.innerHTML = "";
 						for (i = 0; i < this.proposals.length; i++) {
-							createDiv(this.getDisplayString(this.proposals[i]), i===0, this.contentAssistPanel);
+							this.createDiv(this.getDisplayString(this.proposals[i]), i===0, this.contentAssistPanel);
 						}
 						this.textView.convert(caretLocation, "document", "page");
 						this.contentAssistPanel.style.position = "absolute";
 						this.contentAssistPanel.style.left = caretLocation.x + "px";
 						this.contentAssistPanel.style.top = caretLocation.y + "px";
 						this.contentAssistPanel.style.display = "block";
+						this.contentAssistPanel.scrollTop = 0;
+
+						// Make sure that the panel is never outside the viewport
+						var viewportWidth = document.documentElement.clientWidth,
+						    viewportHeight =  document.documentElement.clientHeight;
+						if (caretLocation.y + this.contentAssistPanel.offsetHeight > viewportHeight) {
+							this.contentAssistPanel.style.top = (caretLocation.y - this.contentAssistPanel.offsetHeight - this.textView.getLineHeight()) + "px";
+						}
+						if (caretLocation.x + this.contentAssistPanel.offsetWidth > viewportWidth) {
+							this.contentAssistPanel.style.left = (viewportWidth - this.contentAssistPanel.offsetWidth) + "px";
+						}
+
 						if (!this.listenerAdded) {
 							this.textView.addEventListener("ModelChanged", this, this.contentAssistListener.onModelChanged);
 							this.textView.addEventListener("Scroll", this, this.contentAssistListener.onScroll);
 						}
 						this.listenerAdded = true;
-						this.contentAssistPanel.onclick = dojo.hitch(this, this.click);
+						this.contentAssistPanel.onclick = this.click.bind(this);
 						this.active = true;
 						this.finishing = false;
-					}));
+					}.bind(this));
 			}
 		},
+		/** @private */
+		createDiv: function(proposal, isSelected, parent) {
+			var div = document.createElement("div");
+			if (isSelected) {
+				div.className = "selected";
+			}
+			div.innerHTML = proposal;
+			parent.appendChild(div);
+		},
+		/** @private */
 		getDisplayString: function(proposal) {
 			return typeof proposal === "string" ? proposal : proposal.proposal;
 		},
+		/** @private */
 		matchesPrefix: function(str) {
 			return typeof str === "string" && str.substr(0, this.prefix.length) === this.prefix;
 		},
@@ -307,42 +330,57 @@ orion.editor.ContentAssist = (function() {
 		 * @param {String} prefix A prefix against which content assist proposals should be evaluated.
 		 * @param {String} buffer The entire buffer being edited.
 		 * @param {orion.textview.Selection} selection The current selection from the Editor.
-		 * @returns {dojo.Deferred} A future that will provide the keywords.
+		 * @returns {Object} A promise that will provide the keywords.
 		 */
 		getKeywords: function(prefix, buffer, selection) {
-			var keywords = [];
-			
-			// Add keywords from directly registered providers
-			dojo.forEach(this.activeContentAssistProviders, function(provider) {
-				keywords = keywords.concat(provider.getKeywords() || []);
-			});
-			
-			// Add keywords from providers registered through service registry
-			var d = new dojo.Deferred();
-			if (this.serviceRegistry) {
-				var keywordPromises = dojo.map(this.activeServiceReferences, dojo.hitch(this, function(serviceRef) {
-					return this.serviceRegistry.getService(serviceRef).then(function(service) {
-						return service.getKeywords(prefix, buffer, selection);
-					});
-				}));
-				var keywordCount = 0;
-				for (var i=0; i < keywordPromises.length; i++) {
-					keywordPromises[i].then(function(result) {
-						keywordCount++;
-						keywords = keywords.concat(result);
-						if (keywordCount === keywordPromises.length) {
-							d.resolve(keywords);
-						}
-					}, function(e) {
-						keywordCount = -1;
-						d.reject(e); 
-					});
+			var keywords = [],
+			    numComplete = 0,
+			    promise = new this.Promise(),
+			    filteredProviders = this.filteredProviders;
+			function collectKeywords(result) {
+				if (result) {
+					keywords = keywords.concat(result);
 				}
-			} else {
-				d.resolve(keywords);
+				if (++numComplete === filteredProviders.length) {
+					promise.done(keywords);
+				}
 			}
-			return d;
+			function errback() {
+				if (++numComplete === filteredProviders.length) {
+					promise.done(keywords);
+				}
+			}
+			
+			for (var i=0; i < filteredProviders.length; i++) {
+				var provider = filteredProviders[i].provider;
+				var keywordsPromise = provider.getKeywords(prefix, buffer, selection);
+				if (keywordsPromise && keywordsPromise.then) {
+					keywordsPromise.then(collectKeywords, errback);
+				} else {
+					collectKeywords(keywordsPromise);
+				}
+			}
+			return promise;
 		},
+		/** @private */
+		Promise: (function() {
+			function Promise() {
+			}
+			Promise.prototype.then = function(callback) {
+				this.callback = callback;
+				if (this.result) {
+					var promise = this;
+					setTimeout(function() { promise.callback(promise.result); }, 0);
+				}
+			};
+			Promise.prototype.done = function(result) {
+				this.result = result;
+				if (this.callback) {
+					this.callback(this.result);
+				}
+			};
+			return Promise;
+		}()),
 		/**
 		 * Adds a content assist provider.
 		 * @param {Object} provider The provider object. See {@link orion.contentAssist.CssContentAssistProvider} for an example.
@@ -350,15 +388,26 @@ orion.editor.ContentAssist = (function() {
 		 * @param {String} pattern A regex pattern matching filenames that <tt>provider</tt> can offer content assist for.
 		 */
 		addProvider: function(provider, name, pattern) {
-			this.contentAssistProviders = this.contentAssistProviders || [];
-			this.contentAssistProviders.push({name: name, pattern: pattern, provider: provider});
+			if (!this.providers) {
+				this.providers = [];
+			}
+			this.providers.push({name: name, pattern: pattern, provider: provider});
+		},
+		/** @private */
+		filterProviders: function(/**String*/ fileName) {
+			for (var i=0; i < this.providers.length; i++) {
+				var provider = this.providers[i];
+				if (new RegExp(provider.pattern).test(fileName)) {
+					this.filteredProviders.push(provider);
+				}
+			}
 		}
 	};
 	return ContentAssist;
 }());
 
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define(['dojo', 'orion/textview/keyBinding'], function() {
+	define(['orion/textview/keyBinding'], function() {
 		return orion.editor;	
 	});
 }

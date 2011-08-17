@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window widgets eclipse:true orion:true serviceRegistry dojo dijit */
+/*global define window orion:true */
 /*jslint maxerr:150 browser:true devel:true regexp:false*/
 
 
@@ -119,17 +119,21 @@ orion.editor.TextActions = (function() {
 		this._incrementalFindPrefix = "";
 		this._searcher =  searcher;
 		if(this._searcher)
-			this._searcher.getResponser().setEditor(this.editor, this.textView);
+			this._searcher.getAdaptor().setEditor(this.editor, this.textView);
 
 		this.init();
 	}
 	TextActions.prototype = {
 		init: function() {
 			this._incrementalFindListener = {
-				onVerify: dojo.hitch(this, function(event){
+				onVerify: function(event){
+					/** @returns {String} with regex special characters escaped. */
+					function regexpEscape(/**String*/ str) {
+						return str.replace(/([\\$\^*\/+?\.\(\)|{}\[\]])/g, "\\$&");
+					}
 					var prefix = this._incrementalFindPrefix,
 						txt = this.textView.getText(event.start, event.end),
-						match = prefix.match(new RegExp("^"+dojo.regexp.escapeString(txt), "i"));
+						match = prefix.match(new RegExp("^"+regexpEscape(txt), "i"));
 					if (match && match.length > 0) {
 						prefix = this._incrementalFindPrefix += event.text;
 						this.editor.reportStatus("Incremental find: " + prefix);
@@ -147,50 +151,48 @@ orion.editor.TextActions = (function() {
 						event.text = null;
 					} else {
 					}
-				}),
-				onSelection: dojo.hitch(this, function() {
+				}.bind(this),
+				onSelection: function() {
 					if (!this._incrementalFindIgnoreSelection) {
 						this.toggleIncrementalFind();
 					}
-				})
+				}.bind(this)
 			};
 			// Find actions
 			// These variables are used among the various find actions:
-			var searchString = "",
-			    pattern,
-			    flags;
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("f", true), "Find...");
-			this.textView.setAction("Find...", dojo.hitch(this, function() {
-				setTimeout(dojo.hitch(this, function() {
-					if(!this._searcher)
-						return;
-					var selection = this.textView.getSelection();
-					if (selection.end > selection.start) {
-						searchString = this.textView.getText().substring(selection.start, selection.end);
-					} else {
-						searchString = "";
-					}
-					this._searcher.buildToolBar(searchString);
-				}), 0);
+			this.textView.setAction("Find...", function() {
+				if(!this._searcher)
+					return false;
+				var selection = this.textView.getSelection();
+				var searchString = "";
+				if (selection.end > selection.start) {
+					searchString = this.textView.getText().substring(selection.start, selection.end);
+				}
+				this._searcher.buildToolBar(searchString);
 				return true;
-			}));
+			}.bind(this));
+			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true), "Find Next Occurrence");
-			this.textView.setAction("Find Next Occurrence", dojo.hitch(this, function() {
+			this.textView.setAction("Find Next Occurrence", function() {
 				if(this._searcher){
 					this._searcher.findNext(true);
 				}
 				return true;
-			}));
+			}.bind(this));
+			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true, true), "Find Previous Occurrence");
-			this.textView.setAction("Find Previous Occurrence", dojo.hitch(this, function() {
+			this.textView.setAction("Find Previous Occurrence", function() {
 				if(this._searcher){
 					this._searcher.findNext(false);
 				}
 				return true;
-			}));
+			}.bind(this));
+
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("j", true), "Incremental Find");
-			this.textView.setAction("Incremental Find", dojo.hitch(this, function() {
-				/*
+			this.textView.setAction("Incremental Find", function() {
+				if(this._searcher && this._searcher.visible())
+					return true;
 				if (!this._incrementalFindActive) {
 					this.textView.setCaretOffset(this.textView.getCaretOffset());
 					this.toggleIncrementalFind();
@@ -203,7 +205,11 @@ orion.editor.TextActions = (function() {
 						}
 						
 						var caseInsensitive = p.toLowerCase() === p;
-						var result = this.editor.doFind(p, start, caseInsensitive);
+						var result;
+						if(this._searcher)
+							result = _searcher.findNext(true, p);
+						else
+							result = this.editor.doFind(p, start, caseInsensitive);
 						if (result) {
 							this._incrementalFindSuccess = true;
 							this._incrementalFindIgnoreSelection = true;
@@ -215,10 +221,10 @@ orion.editor.TextActions = (function() {
 							this._incrementalFindSuccess = false;
 						}
 					}
-				}*/
+				}
 				return true;
-			}));
-			this.textView.setAction("deletePrevious", dojo.hitch(this, function() {
+			}.bind(this));
+			this.textView.setAction("deletePrevious", function() {
 				if (this._incrementalFindActive) {
 					var p = this._incrementalFindPrefix;
 					p = this._incrementalFindPrefix = p.substring(0, p.length-1);
@@ -244,10 +250,10 @@ orion.editor.TextActions = (function() {
 				} else {
 					return false;
 				}
-			}));
+			}.bind(this));
 			
 			// Tab actions
-			this.textView.setAction("tab", dojo.hitch(this, function() {
+			this.textView.setAction("tab", function() {
 				var selection = this.textView.getSelection();
 				var model = this.textView.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
@@ -266,9 +272,9 @@ orion.editor.TextActions = (function() {
 					return true;
 				}
 				return false;
-			}));
+			}.bind(this));
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(9, false, true), "Unindent Lines");
-			this.textView.setAction("Unindent Lines", dojo.hitch(this, function() {
+			this.textView.setAction("Unindent Lines", function() {
 				var selection = this.textView.getSelection();
 				var model = this.textView.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
@@ -286,10 +292,10 @@ orion.editor.TextActions = (function() {
 				this.textView.setSelection(firstLineStart===selection.start?selection.start:selection.start - 1, selection.end - (lastLine - firstLine + 1) + (selection.end===lastLineStart+1?1:0));
 				this.endUndo();
 				return true;
-			}));
+			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(38, false, false, true), "Move Lines Up");
-			this.textView.setAction("Move Lines Up", dojo.hitch(this, function() {
+			this.textView.setAction("Move Lines Up", function() {
 				var selection = this.textView.getSelection();
 				var model = this.textView.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
@@ -317,10 +323,10 @@ orion.editor.TextActions = (function() {
 				this.textView.setSelection(insertPos, selectionEnd);
 				this.endUndo();
 				return true;
-			}));
+			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(40, false, false, true), "Move Lines Down");
-			this.textView.setAction("Move Lines Down", dojo.hitch(this, function() {
+			this.textView.setAction("Move Lines Down", function() {
 				var selection = this.textView.getSelection();
 				var model = this.textView.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
@@ -348,10 +354,10 @@ orion.editor.TextActions = (function() {
 				this.textView.setSelection(selStart, selEnd);
 				this.endUndo();
 				return true;
-			}));
+			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(38, true, false, true), "Copy Lines Up");
-			this.textView.setAction("Copy Lines Up", dojo.hitch(this, function() {
+			this.textView.setAction("Copy Lines Up", function() {
 				this.startUndo();
 				var selection = this.textView.getSelection();
 				var model = this.textView.getModel();
@@ -368,10 +374,10 @@ orion.editor.TextActions = (function() {
 				this.textView.setSelection(insertPos, insertPos+text.length-(isCopyFromLastLine?delimiter.length:0));
 				this.endUndo();
 				return true;
-			}));
+			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(40, true, false, true), "Copy Lines Down");
-			this.textView.setAction("Copy Lines Down", dojo.hitch(this, function() {
+			this.textView.setAction("Copy Lines Down", function() {
 				this.startUndo();
 				var selection = this.textView.getSelection();
 				var model = this.textView.getModel();
@@ -389,10 +395,10 @@ orion.editor.TextActions = (function() {
 				this.textView.setSelection(insertPos+(isCopyFromLastLine?delimiter.length:0), insertPos+text.length);
 				this.endUndo();
 				return true;
-			}));
+			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding('d', true, false, false), "Delete Selected Lines");
-			this.textView.setAction("Delete Selected Lines", dojo.hitch(this, function() {
+			this.textView.setAction("Delete Selected Lines", function() {
 				this.startUndo();
 				var selection = this.textView.getSelection();
 				var model = this.textView.getModel();
@@ -403,11 +409,11 @@ orion.editor.TextActions = (function() {
 				model.setText("", lineStart, lineEnd);
 				this.endUndo();
 				return true;
-			}));
+			}.bind(this));
 			
 			// Go To Line action
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("l", true), "Goto Line...");
-			this.textView.setAction("Goto Line...", dojo.hitch(this, function() {
+			this.textView.setAction("Goto Line...", function() {
 				var line = this.textView.getModel().getLineAtOffset(this.textView.getCaretOffset());
 				line = prompt("Go to line:", line + 1);
 				if (line) {
@@ -415,7 +421,7 @@ orion.editor.TextActions = (function() {
 					this.editor.onGotoLine(line-1, 0);
 				}
 				return true;
-			}));
+			}.bind(this));
 			
 		},
 			
@@ -521,7 +527,7 @@ orion.editor.SourceCodeActions = (function() {
 		this.contentAssist = contentAssist;
 		this.linkedMode = linkedMode;
 		if (this.contentAssist) {
-			this.contentAssist.addEventListener("accept", dojo.hitch(this, this.contentAssistProposalAccepted));
+			this.contentAssist.addEventListener("accept", this.contentAssistProposalAccepted.bind(this));
 		}
 		
 		this.init();
@@ -542,7 +548,7 @@ orion.editor.SourceCodeActions = (function() {
 		
 			// Block comment operations
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(191, true), "Toggle Line Comment");
-			this.textView.setAction("Toggle Line Comment", dojo.hitch(this, function() {
+			this.textView.setAction("Toggle Line Comment", function() {
 				this.startUndo();
 				var selection = this.textView.getSelection();
 				var model = this.textView.getModel();
@@ -589,7 +595,7 @@ orion.editor.SourceCodeActions = (function() {
 				}
 				this.endUndo();
 				return true;
-			}));
+			}.bind(this));
 			
 			function findEnclosingComment(model, start, end) {
 				var open = "/*", close = "*/";
@@ -625,7 +631,7 @@ orion.editor.SourceCodeActions = (function() {
 			}
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(191, true, true), "Add Block Comment");
-			this.textView.setAction("Add Block Comment", dojo.hitch(this, function() {
+			this.textView.setAction("Add Block Comment", function() {
 				var selection = this.textView.getSelection();
 				var model = this.textView.getModel();
 				var open = "/*", close = "*/", commentTags = new RegExp("/\\*" + "|" + "\\*/", "g");
@@ -649,10 +655,10 @@ orion.editor.SourceCodeActions = (function() {
 				this.textView.setSelection(selection.start + open.length, selection.end + open.length + (newLength-oldLength));
 				this.endUndo();
 				return true;
-			}));
+			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(220, true, true), "Remove Block Comment");
-			this.textView.setAction("Remove Block Comment", dojo.hitch(this, function() {
+			this.textView.setAction("Remove Block Comment", function() {
 				var selection = this.textView.getSelection();
 				var model = this.textView.getModel();
 				var open = "/*", close = "*/";
@@ -693,7 +699,7 @@ orion.editor.SourceCodeActions = (function() {
 				}
 				this.endUndo();
 				return true;
-			}));
+			}.bind(this));
 		},
 		/**
 		 * Called when a content assist proposal has been accepted. Inserts the proposal into the
@@ -800,7 +806,7 @@ orion.editor.LinkedMode = (function() {
 		 * on user change. Also escapes the Linked Mode if the text buffer was modified outside of the Linked Mode positions.
 		 */
 		this.linkedModeListener = {
-			onVerify: dojo.hitch(this, function(event) {
+			onVerify: function(event) {
 				var changeInsideGroup = false;
 				var offsetDifference = 0;
 				for (var i = 0; i < this.linkedModePositions.length; ++i) {
@@ -824,7 +830,7 @@ orion.editor.LinkedMode = (function() {
 					// The change has been done outside of the positions, exit the Linked Mode
 					this.cancel();
 				}
-			})
+			}.bind(this)
 		};
 	}
 	LinkedMode.prototype = {
@@ -866,19 +872,19 @@ orion.editor.LinkedMode = (function() {
 			this.textView.addEventListener("Verify", this, this.linkedModeListener.onVerify);
 
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(9), "nextLinkedModePosition");
-			this.textView.setAction("nextLinkedModePosition", dojo.hitch(this, function() {
+			this.textView.setAction("nextLinkedModePosition", function() {
 				// Switch to the next group on TAB key
 				this.linkedModeCurrentPositionIndex = ++this.linkedModeCurrentPositionIndex % this.linkedModePositions.length;
 				this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
 				return true;
-			}));
+			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(9, false, true), "previousLinkedModePosition");
-			this.textView.setAction("previousLinkedModePosition", dojo.hitch(this, function() {
+			this.textView.setAction("previousLinkedModePosition", function() {
 				this.linkedModeCurrentPositionIndex = this.linkedModeCurrentPositionIndex > 0 ? this.linkedModeCurrentPositionIndex-1 : this.linkedModePositions.length-1;
 				this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
 				return true;
-			}));
+			}.bind(this));
 
 			this.editor.reportStatus("Linked Mode entered");
 		},
@@ -914,7 +920,7 @@ orion.editor.LinkedMode = (function() {
 }());
 
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define(['dojo', 'orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers'], function() {
+	define(['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers'], function() {
 		return orion.editor;
 	});
 }

@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global document window navigator */
+/*global document window navigator define */
 
 var examples = examples || {};
 examples.textview = examples.textview || {};
@@ -237,6 +237,7 @@ examples.textview.TextStyler = (function() {
 			case "css": keywords = CSS_KEYWORDS; break;
 		}
 		this.whitespacesVisible = false;
+		this.detectHyperlinks = true;
 		this.highlightCaretLine = true;
 		this._scanner = new Scanner(keywords, this.whitespacesVisible);
 		//TODO this scanner is not the best/correct way to parse CSS
@@ -274,6 +275,9 @@ examples.textview.TextStyler = (function() {
 		setWhitespacesVisible: function(visible) {
 			this.whitespacesVisible = visible;
 			this._scanner.whitespacesVisible = visible;
+		},
+		setDetectHyperlinks: function(visible) {
+			this.detectHyperlinks = visible;
 		},
 		_binarySearch: function(offsets, offset, low, high) {
 			while (high - low > 2) {
@@ -355,7 +359,7 @@ examples.textview.TextStyler = (function() {
 					var o = commentStart + this.commentStart.length;
 					if (model.getText(o, o + 1) === "*") { style = javadocStyle; }
 				}
-				if (this.whitespacesVisible) {
+				if (this.whitespacesVisible || this.detectHyperlinks) {
 					var s = Math.max(offset, commentStart);
 					var e = Math.min(end, commentRanges[i+1]);
 					this._parseWhitespace(text.substring(s - start, e - start), s, styles, style);
@@ -390,7 +394,7 @@ examples.textview.TextStyler = (function() {
 							}
 							break;
 						case COMMENT: 
-							if (this.whitespacesVisible) {
+							if (this.whitespacesVisible || this.detectHyperlinks) {
 								this._parseWhitespace(scanner.getData(), tokenStart, styles, commentStyle);
 								continue;
 							} else {
@@ -419,16 +423,49 @@ examples.textview.TextStyler = (function() {
 			while ((token = scanner.nextToken())) {
 				var tokenStart = scanner.getStartOffset() + offset;
 				var style = s;
-				switch (token) {
-					case WHITE_TAB:
-						style = tabStyle;
-						break;
-					case WHITE_SPACE:
-						style = spaceStyle;
-						break;
+				if (this.whitespacesVisible) {
+					switch (token) {
+						case WHITE_TAB:
+							style = tabStyle;
+							break;
+						case WHITE_SPACE:
+							style = spaceStyle;
+							break;
+					}
+				}
+				if (this.detectHyperlinks) {
+					var data = scanner.getData();
+					var href = null;
+					if (data.indexOf("://") > 0) {
+						href = data;
+						var hrefStart = href.substring(0, 1), hrefEnd = href.substring(href.length - 1);
+						var brackets = "\"\"''(){}[]<>";
+						var bracketIndex = brackets.indexOf(hrefStart);
+						if (bracketIndex !== -1 && (bracketIndex & 1) === 0 && (bracketIndex = href.lastIndexOf(brackets.substring(bracketIndex + 1, bracketIndex + 2))) !== -1) {
+							href = href.substring(1, bracketIndex);
+						}
+					} else if (data.toLowerCase().indexOf("bug#") === 0) {
+						href = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=" + parseInt(data.substring(4), 10);
+					}
+					if (href) {
+						style = this._clone(style);
+						style.tagName = "A";
+						style.attributes = {href: href};
+					}
 				}
 				styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
 			}
+		},
+		_clone: function(obj) {
+			if (!obj) { return obj; }
+			var newObj = {};
+			for (var p in obj) {
+				if (obj.hasOwnProperty(p)) {
+					var value = obj[p];
+					newObj[p] = value;
+				}
+			}
+			return newObj;
 		},
 		_findBrackets: function(bracket, closingBracket, text, textOffset, start, end) {
 			var result = [];

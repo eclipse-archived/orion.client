@@ -131,9 +131,9 @@ function loadResource(fileServiceReference, navigator){
 					initTitleBar(fileClient, navigator, resource);
 				});
 
-				if (resource.RemoteLocation)
+				if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1)
 					dojo.xhrGet({
-						url : resource.RemoteLocation,
+						url : resource.toRef.RemoteLocation[0].Children[0].Location,
 						headers : {
 							"Orion-Version" : "1"
 						},

@@ -8,8 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*global window dojo orion:true eclipse:true handleGetAuthenticationError*/
- /*jslint maxerr:150 browser:true devel:true regexp:false*/
+ /*global define window orion:true eclipse:true handleGetAuthenticationError*/
+ /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
 var orion = orion || {};
 orion.editor = orion.editor || {};	
@@ -55,7 +55,8 @@ orion.editor.Editor = (function() {
 		this._overviewRuler = null;
 		this._dirty = false;
 		this._contentAssist = null;
-		this._keyModes = [];		
+		this._title = null;
+		this._keyModes = [];
 	}
 	Editor.prototype = /** @lends orion.editor.Editor.prototype */ {
 		/**
@@ -69,9 +70,9 @@ orion.editor.Editor = (function() {
 		/**
 		 * @private
 		 */
-		reportStatus: function(message, isError) {
+		reportStatus: function(message, isError, isProgress) {
 			if (this._statusReporter) {
-				this._statusReporter(message, isError);
+				this._statusReporter(message, isError, isProgress);
 			} else {
 				window.alert(isError ? "ERROR: " + message : message);
 			}
@@ -82,9 +83,10 @@ orion.editor.Editor = (function() {
 		 * @param {orion.textview.TextView} textView
 		 * @param {Number} start
 		 * @param {Number} [end]
+		 * @param {function} callBack A call back function that is used after the move animation is done
 		 * @private
 		 */
-		moveSelection: function(textView, start, end) {
+		moveSelection: function(textView, start, end, callBack) {
 			end = end || start;
 			textView.setSelection(start, end, false);
 			var topPixel = textView.getTopPixel();
@@ -94,7 +96,7 @@ orion.editor.Editor = (function() {
 			if (linePixel < topPixel || linePixel > bottomPixel) {
 				var height = bottomPixel - topPixel;
 				var target = Math.max(0, linePixel- Math.floor((linePixel<topPixel?3:1)*height / 4));
-				var a = new dojo.Animation({
+				var a = new orion.editor.util.Animation({
 					node: textView,
 					duration: 300,
 					curve: [topPixel, target],
@@ -104,12 +106,16 @@ orion.editor.Editor = (function() {
 					onEnd: function() {
 						textView.showSelection();
 						textView.focus();
+						if(callBack)
+							callBack();
 					}
 				});
 				a.play();
 			} else {
 				textView.showSelection();
 				textView.focus();
+				if(callBack)
+					callBack();
 			}
 		},
 		/**
@@ -256,40 +262,40 @@ orion.editor.Editor = (function() {
 			
 			// Set keybindings for keys that apply to different modes
 			textView.setKeyBinding(new orion.textview.KeyBinding(27), "Cancel Current Mode");
-			textView.setAction("Cancel Current Mode", dojo.hitch(this, function() {
+			textView.setAction("Cancel Current Mode", function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].cancel();
 					}
 				}
 				return false;
-			}));
+			}.bind(this));
 
-			textView.setAction("lineUp", dojo.hitch(this, function() {
+			textView.setAction("lineUp", function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].lineUp();
 					}
 				}
 				return false;
-			}));
-			textView.setAction("lineDown", dojo.hitch(this, function() {
+			}.bind(this));
+			textView.setAction("lineDown", function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].lineDown();
 					}
 				}
 				return false;
-			}));
+			}.bind(this));
 
-			textView.setAction("enter", dojo.hitch(this, function() {
+			textView.setAction("enter", function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].enter();
 					}
 				}
 				return false;
-			}));
+			}.bind(this));
 						
 			/** @this {orion.editor.Editor} */
 			function updateCursorStatus() {
@@ -377,6 +383,7 @@ orion.editor.Editor = (function() {
 		 * @param {Boolean} contentsSaved
 		 */
 		onInputChange : function (title, message, contents, contentsSaved) {
+			this._title = title;
 			if (contentsSaved && this._textView) {
 				// don't reset undo stack on save, just mark it clean so that we don't lose the undo past the save
 				this._undoStack.markClean();
@@ -430,13 +437,126 @@ orion.editor.Editor = (function() {
 		 */
 		onDirtyChange: function(isDirty) {
 			this._dirty = isDirty;
+		},
+		
+		getTitle: function() {
+			return this._title;
 		}
 	};
 	return Editor;
 }());
 
+/**
+ * @name orion.editor.util
+ * @class Basic helper functions used by <code>orion.editor</code>.
+ */
+orion.editor.util = {
+	/**
+	 * Event handling helper. Similar to <code>dojo.connect</code>.
+	 * Differences: doesn't return a handle, doesn't support the <code>dontFix</code> parameter.
+	 * @deprecated Once Bug 349957 is fixed, this function should be deleted.
+	 */
+	connect: function(/**Object*/ obj, /**String*/ event, /**Object*/ context, /**String|Function*/ method) {
+		var oldFunction = obj[event];
+		obj[event] = function() {
+			var listenerContext = context;
+			if (context === null || typeof(context) === "undefined") {
+				listenerContext = obj;
+			}
+			var listener = (typeof(method) === "string") ? context[method] : method;
+			// call old, then invoke listener
+			if (typeof(oldFunction) === "function") {
+				oldFunction.apply(obj, arguments);
+			}
+			listener.apply(listenerContext, arguments);
+		};
+	},
+	
+	/**
+	 * @class
+	 * @private
+	 * @name orion.editor.Animation
+	 * @description Creates an animation.
+	 * @param {Object} options Options controlling the animation.
+	 * @param {Array} options.curve Array of 2 values giving the start and end points for the animation.
+	 * @param {Number} [options.duration=350] Duration of the animation, in milliseconds.
+	 * @param {Function} [options.easing]
+	 * @param {Function} [options.onAnimate]
+	 * @param {Function} [options.onEnd]
+	 * @param {Number} [options.rate=20] The time between frames, in milliseconds.
+	 */
+	Animation: (function() {
+		function Animation(options) {
+			this.options = options;
+		}
+		/**
+		 * Plays this animation.
+		 * @methodOf orion.editor.Animation.prototype
+		 * @name play
+		 */
+		Animation.prototype.play = function() {
+			var duration = (typeof this.options.duration === "number") ? this.options.duration : 350,
+			    rate = (typeof this.options.rate === "number") ? this.options.rate : 20,
+			    easing = this.options.easing || this.defaultEasing,
+			    onAnimate = this.options.onAnimate || function() {},
+			    onEnd = this.options.onEnd || function () {},
+			    start = this.options.curve[0],
+			    end = this.options.curve[1],
+			    range = (end - start);
+			var i = 0,
+			    propertyValue,
+			    interval,
+			    startedAt = -1;
+			
+			function onFrame() {
+				startedAt = (startedAt === -1) ? new Date().getTime() : startedAt;
+				var now = new Date().getTime(),
+				    percentDone = (now - startedAt) / duration;
+				if (percentDone < 1) {
+					var eased = easing(percentDone);
+					propertyValue = start + (eased * range);
+					onAnimate(propertyValue);
+				} else {
+					clearInterval(interval);
+					onEnd();
+				}
+			}
+			interval = setInterval(onFrame, rate);
+		};
+		Animation.prototype.defaultEasing = function(x) {
+			return Math.sin(x * (Math.PI / 2));
+		};
+		return Animation;
+	}()),
+	
+	/**
+	 * @private
+	 * @param context Value to be used as the returned function's <code>this</code> value.
+	 * @param [arg1, arg2, ...] Fixed argument values that will prepend any arguments passed to the returned function when it is invoked.
+	 * @returns {Function} A function that always executes this function in the given <code>context</code>.
+	 */
+	bind: function(context) {
+		var fn = this,
+		    fixed = Array.prototype.slice.call(arguments, 1);
+		if (fixed.length) {
+			return function() {
+				return arguments.length
+					? fn.apply(context, fixed.concat(Array.prototype.slice.call(arguments)))
+					: fn.apply(context, fixed);
+			};
+		}
+		return function() {
+			return arguments.length ? fn.apply(context, arguments) : fn.call(context);
+		};
+	}
+};
+
+if (!Function.prototype.bind) {
+	Function.prototype.bind = orion.editor.util.bind;
+}
+
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define(['dojo', 'orion/textview/keyBinding'], function(){
+	define(['orion/textview/keyBinding'], function(){
 		return orion.editor;
 	});
 }
