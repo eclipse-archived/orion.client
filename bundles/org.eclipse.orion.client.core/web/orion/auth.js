@@ -80,24 +80,41 @@ function handleAuthenticationError(error, retry) {
 		forbiddenAccessDlg.show();
 	}
 	if (error.status === 401) { 
-		var handle = dojo.subscribe("/auth", function(message){
-			retry();
-			dojo.unsubscribe(handle); // ... but only once
-		});
-		if (!authenticationInProgress) {
-			authenticationInProgress = true;
+		
+
 			// open popup and add OP response handler
 			// TODO add error handling here
 			try{
 				var responseObj = JSON.parse(error.responseText);
-				if(responseObj.SignInLocation && responseObj.SignInLocation!=""){
-					window.open(responseObj.SignInLocation, 
-							"loginwindow", 'width=400, height=200');
+				
+				var storageListener = function(e){
+					var userItem = localStorage.getItem(responseObj.SignInKey);
+					if(!userItem){
+						return;
+					}
+
+					var userObject = JSON.parse(userItem);
+					if(!userObject || !userObject.uid){
+						return;
+					}
+					window.removeEventListener("storage", storageListener, false); // ... but only once
+					retry();
+
+				};
+				
+				window.addEventListener("storage", storageListener, false);
+				
+				if (!authenticationInProgress) {
+					authenticationInProgress = true;
+					if(responseObj.SignInLocation && responseObj.SignInLocation!=""){
+						window.open(responseObj.SignInLocation, 
+								"loginwindow", 'width=400, height=200');
+					}
 				}
 			} catch (e){
 			}
 			
-		}
+
 	}
 }
 return {
