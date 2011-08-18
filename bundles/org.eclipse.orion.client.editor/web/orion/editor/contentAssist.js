@@ -395,6 +395,7 @@ orion.editor.ContentAssist = (function() {
 		},
 		/** @private */
 		filterProviders: function(/**String*/ fileName) {
+			this.filteredProviders = [];
 			for (var i=0; i < this.providers.length; i++) {
 				var provider = this.providers[i];
 				if (new RegExp(provider.pattern).test(fileName)) {
