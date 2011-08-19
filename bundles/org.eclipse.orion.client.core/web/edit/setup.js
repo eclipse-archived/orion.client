@@ -69,8 +69,8 @@ exports.setUpEditor = function(isReadOnly){
 			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
 			var providersLoaded = false;
 			contentAssist.addEventListener("show", function(event) {
-				function addProvider(service) {
-					contentAssist.addProvider(service);
+				function addProvider(name, pattern, service) {
+					contentAssist.addProvider(service, name, pattern);
 				}
 				if (!providersLoaded) {
 					// Load contributed content assist providers
@@ -78,9 +78,14 @@ exports.setUpEditor = function(isReadOnly){
 					var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist");
 					for (var i=0; i < serviceReferences.length; i++) {
 						var serviceReference = serviceReferences[i];
-						var pattern = serviceReference.getProperty("pattern");
+						var name = serviceReference.getProperty("name"),
+						    pattern = serviceReference.getProperty("pattern");
 						if (pattern && new RegExp(pattern).test(fileName)) {
-							serviceRegistry.getService(serviceReference).then(addProvider);
+							(function(name, pattern) {
+								serviceRegistry.getService(serviceReference).then(function(service) {
+									addProvider(name, pattern, service);
+								});
+							}(name, pattern));
 						}
 					}
 					providersLoaded = true;
