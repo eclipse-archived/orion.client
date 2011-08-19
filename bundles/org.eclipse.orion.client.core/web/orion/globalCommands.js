@@ -82,7 +82,9 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		'<a href="http://www.eclipse.org/legal/copyright.php">Copyright Agent</a>'; 
 	// END BOTTOM BANNER FRAGEMENT
 
+	var notifyAuthenticationSite = qualifyURL('/auth/NotifyAuthentication.html');
 	var authenticationInProgress = false;
+	var authRendered = {};
 	
 	function getLabel(authService, serviceReference){
 		if(authService.getLabel){
@@ -92,6 +94,14 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			d.callback(serviceReference.properties.name);
 			return d;
 		}
+	}
+	
+	function qualifyURL(url){
+	    var img = document.createElement('img');
+	    img.src = url; // set string url
+	    url = img.src; // get qualified url
+	    img.src = null; // no server request
+	    return url;
 	}
 
 	/**
@@ -108,21 +118,28 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				authService.getKey().then(function(key){
 				
 					authService.getUser().then(function(jsonData){
-						renderUser(serviceRegistry, authService, jsonData);
+						renderUser(key, serviceRegistry, authService, jsonData);
 					}, 
 					function(errorData){
-						renderUser(serviceRegistry, authService);
-					}).then(function(){
-						window.addEventListener("storage", function(e){
-							var storageItem = localStorage.getItem(key);
-							if(storageItem!==null){
-								var jsonData = JSON.parse(storageItem);
-								renderUser(serviceRegistry, authService, jsonData);
-							}else{
-								renderUser(serviceRegistry, authService);
-							}
-						}, false);
+						renderUser(key, serviceRegistry, authService);
 					});
+						window.addEventListener("storage", function(e){
+
+							if(authRendered[key] === localStorage.getItem(key)){
+								return;
+							}
+							
+							authRendered[key] = localStorage.getItem(key);
+							
+							authService.getUser().then(function(jsonData){
+								renderUser(key, serviceRegistry, authService, jsonData);
+							}, 
+							function(errorData){
+								renderUser(key, serviceRegistry, authService);
+							});
+							
+						}, false);
+					
 
 				});
 
@@ -154,21 +171,28 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 						authService.getKey().then(function(key){
 							
 							authService.getUser().then(function(jsonData){
-								renderUserSubmenu(serviceRegistry, authService, popupMenu, label, jsonData);
+								renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label, jsonData);
 							}, 
 							function(errorData){
-								renderUserSubmenu(serviceRegistry, authService, popupMenu, label);
-							}).then(function(){
-								window.addEventListener("storage", function(e){
-									var storageItem = localStorage.getItem(key);
-									if(storageItem!==null){
-										var jsonData = JSON.parse(storageItem);
-										renderUserSubmenu(serviceRegistry, authService, popupMenu, label, jsonData);
-									}else{
-										renderUserSubmenu(serviceRegistry, authService, popupMenu, label);
-									}
-								}, false);
+								renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label);
 							});
+								window.addEventListener("storage", function(e){
+
+									if(authRendered[key] === localStorage.getItem(key)){
+										return;
+									}
+									
+									authRendered[key] = localStorage.getItem(key);
+									
+									authService.getUser().then(function(jsonData){
+										renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label, jsonData);
+									}, 
+									function(errorData){
+										renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label);
+									});
+									
+								}, false);
+							
 	
 						});
 										
@@ -188,7 +212,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		
 	}
 	
-	function renderUserSubmenu(serviceRegistry, authService, popupMenu, label, jsonData){
+	function renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label, jsonData){
 		
 		var children = popupMenu.popup.getChildren();
 		for(var i=0; i<children.length; i++){
@@ -203,19 +227,16 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 					if (!authenticationInProgress) {
 //TODO				authenticationInProgress = true;
 						if(authService.getAuthForm){
-							authService.getAuthForm().then(function(loginForm){
+							authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
 								window.open(loginForm, 'LoginWindow', 'width=400, height=200');
 							});
 						}else if(authService.login){
-							authService.login().then(function(){
-								generateUserInfo(serviceRegistry);
-							});
+							authService.login(notifyAuthenticationSite);
 						}
 					}
 	            }
 	        }));
 		} else {
-			
 			var lastLogin = "N/A";
 			if (jsonData && jsonData.lastlogintimestamp) {
 				lastLogin = dojo.date.locale.format(new Date(jsonData.lastlogintimestamp), {formatLength: "short"});
@@ -238,7 +259,8 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 					label: "Sign out",
 					onClick: function(){
 						authService.logout().then(function(){
-							renderUserSubmenu(serviceRegistry, authService, popupMenu, label);
+							renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label);
+							localStorage.removeItem(key);
 						});
 					}
 				});
@@ -249,7 +271,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		
 	}
 	
-	function renderUser(serviceRegistry, authService, jsonData){
+	function renderUser(key, serviceRegistry, authService, jsonData){
 		
 		// add the logout button to the toolbar if available
 		var userInfo = dojo.byId("userInfo");
@@ -265,13 +287,11 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				if (!authenticationInProgress) {
 //TODO				authenticationInProgress = true;
 					if(authService.getAuthForm){
-						authService.getAuthForm().then(function(loginForm){
+						authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
 							window.open(loginForm, 'LoginWindow', 'width=400, height=200');
 						});
 					}else if(authService.login){
-						authService.login().then(function(){
-							generateUserInfo(serviceRegistry);
-						});
+						authService.login(notifyAuthenticationSite);
 					}
 				}
 			};
@@ -315,7 +335,8 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 						label: "Sign out",
 						onClick: function(){
 							authService.logout().then(function(){
-								renderUser(serviceRegistry, authService);
+								renderUser(key, serviceRegistry, authService);
+								localStorage.removeItem(key);
 								window.location.replace("/index.html");
 							});
 						}
@@ -539,6 +560,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	return {
 		generateUserInfo: generateUserInfo,
 		generateDomCommandsInBanner: generateDomCommandsInBanner,
-		generateBanner: generateBanner
+		generateBanner: generateBanner,
+		notifyAuthenticationSite: notifyAuthenticationSite
 	};
 });

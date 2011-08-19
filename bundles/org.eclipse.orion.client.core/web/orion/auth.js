@@ -86,15 +86,12 @@ function handleAuthenticationError(error, retry) {
 			// TODO add error handling here
 			try{
 				var responseObj = JSON.parse(error.responseText);
+				var lastSignInKeyValue = localStorage.getItem(responseObj.SignInKey);
 				
 				var storageListener = function(e){
 					var userItem = localStorage.getItem(responseObj.SignInKey);
-					if(!userItem){
-						return;
-					}
 
-					var userObject = JSON.parse(userItem);
-					if(!userObject || !userObject.uid){
+					if(lastSignInKeyValue===userItem){
 						return;
 					}
 					window.removeEventListener("storage", storageListener, false); // ... but only once
@@ -107,8 +104,14 @@ function handleAuthenticationError(error, retry) {
 				if (!authenticationInProgress) {
 					authenticationInProgress = true;
 					if(responseObj.SignInLocation && responseObj.SignInLocation!=""){
-						window.open(responseObj.SignInLocation, 
-								"loginwindow", 'width=400, height=250');
+						
+						if(responseObj.SignInLocation.toString().indexOf("?")==-1){
+							window.open(responseObj.SignInLocation + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + responseObj.SignInKey, 
+									"loginwindow", 'width=400, height=250');
+						}else{
+							window.open(responseObj.SignInLocation + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + responseObj.SignInKey, 
+									"loginwindow", 'width=400, height=250');
+						}
 					}
 				}
 			} catch (e){
