@@ -108,7 +108,7 @@ function handleAuthenticationError(error, retry) {
 					authenticationInProgress = true;
 					if(responseObj.SignInLocation && responseObj.SignInLocation!=""){
 						window.open(responseObj.SignInLocation, 
-								"loginwindow", 'width=400, height=200');
+								"loginwindow", 'width=400, height=250');
 					}
 				}
 			} catch (e){
