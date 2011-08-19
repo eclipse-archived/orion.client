@@ -60,9 +60,8 @@ orion.editor.AnnotationFactory = (function() {
 	}
 	AnnotationFactory.prototype = {
 		createAnnotationRulers: function() {
-			var rulerStyle = {style: { backgroundColor: "#ffffff" }};
-			this.annotationRuler = new orion.textview.AnnotationRuler("left", rulerStyle, {html: "<img src='" + this.problemImageUrl + "'></img>"});
-			this.overviewRuler = new orion.textview.OverviewRuler("right", rulerStyle, this.annotationRuler);
+			this.annotationRuler = new orion.textview.AnnotationRuler("left", {style: { backgroundColor: "#ffffff" }}, {html: "<img src='" + this.problemImageUrl + "'></img>"});
+			this.overviewRuler = new orion.textview.OverviewRuler("right", {style: { backgroundColor: "#ffffff" }}, this.annotationRuler);
 			return {annotationRuler: this.annotationRuler, overviewRuler: this.overviewRuler};
 		},
 		
