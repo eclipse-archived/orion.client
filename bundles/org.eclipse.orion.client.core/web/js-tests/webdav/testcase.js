@@ -9,27 +9,8 @@
  ******************************************************************************/
 /*jslint browser: true, devel: true*/
 /*global define XPathResult DOMParser*/
-define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], function(assert, mServiceregistry, mPluginregistry) {
+define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "webdav"], function(assert, mServiceregistry, mPluginregistry, mWebdav) {
 	var tests = {};
-	
-	function parseDAVResponse(response)  {
-		var result = {};
-		result.href = response.querySelector("href").textContent;
-		var prop = response.querySelector("propstat prop");
-		if (prop !== null) {
-			result.displayname = prop.querySelector("displayname").textContent;
-			result.creationdate = prop.querySelector("creationdate").textContent;
-			result.collection = prop.querySelector("resourcetype collection") !== null;
-		}
-		
-		if (! result.collection ) {
-			result.lastmodified = prop.querySelector("getlastmodified").textContent;
-			result.contentlength = prop.querySelector("getcontentlength").textContent;
-			result.contenttype = prop.querySelector("getcontenttype").textContent;
-			result.etag = prop.querySelector("getetag").textContent;
-		}
-		return result;
-	}
 
 	tests["test plugin GET call"] = function() {
 		var storage = {};
@@ -66,23 +47,21 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 				return service.call("PROPFIND", "xhrPlugin.html");
 			}).then(function(result) {
 				assert.ok(result.status >= 200 && result.status < 300);
-				var dom = new DOMParser().parseFromString(result.responseText, "text/xml");
-				var responses = dom.querySelectorAll("multistatus response");
-				var response = responses[0];
+				var multistatus = mWebdav.parseDAV_multistatus(result.responseText);
+				var response = multistatus.response[0];
 				assert.ok(response);
-				var jsonResponse = parseDAVResponse(response);
-				assert.ok(jsonResponse.href.match(/xhrPlugin\.html$/));
-				assert.ok(jsonResponse.collection === false);
-				assert.ok(jsonResponse.contenttype === "text/html");
+				assert.ok(response.href[0].match(/xhrPlugin\.html$/));
+				var prop = response.propstat[0].prop; 
+				assert.ok(prop.resourcetype === null || prop.resourcetype.indexOf("collection") === -1);
+				assert.ok(prop.getcontenttype === "text/html");
 				return service.call("PROPFIND", ".", {depth:1});
 			}).then(function(result) {
 				assert.ok(result.status >= 200 && result.status < 300);
-				var dom = new DOMParser().parseFromString(result.responseText, "text/xml");
-				var responses = dom.querySelectorAll("multistatus response");
-				var response = responses[0];
+				var multistatus = mWebdav.parseDAV_multistatus(result.responseText);
+				var response = multistatus.response[0];
 				assert.ok(response);
-				var jsonResponse = parseDAVResponse(response);
-				assert.ok(jsonResponse.collection === true);
+				var prop = response.propstat[0].prop;
+				assert.ok(prop.resourcetype.indexOf("collection") !== -1);
 				pluginRegistry.shutdown();
 			});
 		});

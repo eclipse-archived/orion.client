@@ -6,15 +6,15 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global eclipse orion console DOMParser XPathResult document*/
-var testcase = (function(assert) {
+/*global define XPathResult DOMParser*/
+define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], function(assert, mServiceregistry, mPluginregistry) {
 	var tests = {};
 
 
 	tests["test root"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);	
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);	
 		
 		var promise = pluginRegistry.installPlugin("dummyFilePlugin.html").then(function(plugin) {
 			var references = serviceRegistry.getServiceReferences("orion.file");
@@ -30,8 +30,8 @@ var testcase = (function(assert) {
 	
 	tests["test read"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);	
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);	
 		
 		var promise = pluginRegistry.installPlugin("dummyFilePlugin.html").then(function(plugin) {
 			var references = serviceRegistry.getServiceReferences("orion.file");
@@ -49,8 +49,8 @@ var testcase = (function(assert) {
 	
 	tests["test read notfound"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);	
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);	
 		
 		var promise = pluginRegistry.installPlugin("dummyFilePlugin.html").then(function(plugin) {
 			var references = serviceRegistry.getServiceReferences("orion.file");
@@ -71,8 +71,8 @@ var testcase = (function(assert) {
 	
 	tests["test write"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);	
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);	
 		
 		var promise = pluginRegistry.installPlugin("dummyFilePlugin.html").then(function(plugin) {
 			var references = serviceRegistry.getServiceReferences("orion.file");
@@ -102,8 +102,8 @@ var testcase = (function(assert) {
 	
 	tests["test mkdir"] = function() {
 		var storage = {};
-		var serviceRegistry = new eclipse.ServiceRegistry();
-		var pluginRegistry = new eclipse.PluginRegistry(serviceRegistry, storage);	
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);	
 		
 		var promise = pluginRegistry.installPlugin("dummyFilePlugin.html").then(function(plugin) {
 			var references = serviceRegistry.getServiceReferences("orion.file");
@@ -131,6 +131,5 @@ var testcase = (function(assert) {
 		return promise;
 	};
 	
-
 	return tests;
-}(orion.Assert));
+});

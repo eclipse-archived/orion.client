@@ -5,7 +5,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script type="text/javascript" src="../orion/plugin.js"></script>
-	<script type="text/javascript" src="filePlugin/fileImpl.js"></script>
+	<script type="text/javascript" src="filePlugin/webdavImpl.js"></script>
 	<script type="text/javascript">
 		window.onload = function() {
 			function trace(implementation) {
@@ -15,7 +15,7 @@
 					if (typeof implementation[method] === 'function') {
 						traced[method] = function(methodName) {
 							return function() {
-								console.log(methodName);
+								console.log("*" + methodName);
 								var arg;
 								for (arg in arguments) {
 									console.log(" [" + arg + "] " + arguments[arg]);
@@ -31,10 +31,12 @@
 				}
 				return traced;
 			}
-
-			var service = new eclipse.FileServiceImpl();
+			var temp = document.createElement('a');
+			temp.href = ".";
+			var base = temp.href;			
+			var service = new eclipse.DAVFileServiceImpl(base, base);
 			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("orion.core.file", trace(service), {Name:'Orion contents', top:'/file/', pattern:'/file/'});
+			provider.registerServiceProvider("orion.core.file", trace(service), {Name:'WebDAV contents', top:base, pattern:base});
 			service.dispatchEvent = provider.dispatchEvent;
 			provider.connect();
 		};
