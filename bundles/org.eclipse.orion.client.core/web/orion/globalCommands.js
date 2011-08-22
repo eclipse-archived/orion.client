@@ -228,7 +228,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 //TODO				authenticationInProgress = true;
 						if(authService.getAuthForm){
 							authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
-								window.open(loginForm, 'LoginWindow', 'width=400, height=200');
+								window.open(loginForm, 'LoginWindow', 'width=400, height=250');
 							});
 						}else if(authService.login){
 							authService.login(notifyAuthenticationSite);
@@ -288,7 +288,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 //TODO				authenticationInProgress = true;
 					if(authService.getAuthForm){
 						authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
-							window.open(loginForm, 'LoginWindow', 'width=400, height=200');
+							window.open(loginForm, 'LoginWindow', 'width=400, height=250');
 						});
 					}else if(authService.login){
 						authService.login(notifyAuthenticationSite);

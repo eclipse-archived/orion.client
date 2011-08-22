@@ -4,18 +4,18 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Orion authentication</title>
 <script type="text/javascript">
-window.onload = function(){
-	  var regex = new RegExp('[\\?&]key=([^&#]*)');
-	  var results = regex.exec( window.location.href );
-	  if( results == null )
-	    return;
-	   var key = results[1];
-	   localStorage.setItem(key, (new Date()).toString());
-	   window.close();
-}
+	window.onload = function() {
+		var regex = new RegExp('[\\?&]key=([^&#]*)');
+		var results = regex.exec(window.location.href);
+		if (results == null)
+			return;
+		var key = results[1];
+		localStorage.setItem(key, (new Date()).toString());
+		window.close();
+	}
 </script>
 </head>
 <body>
-<h1>Authenticated to Orion!</h1>
+	<h1>Authenticated to Orion!</h1>
 </body>
 </html>
