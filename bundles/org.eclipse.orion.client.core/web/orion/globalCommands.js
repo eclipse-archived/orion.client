@@ -82,17 +82,232 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		'<a href="http://www.eclipse.org/legal/copyright.php">Copyright Agent</a>'; 
 	// END BOTTOM BANNER FRAGEMENT
 
-	var userDataToSet = null;
+	var notifyAuthenticationSite = qualifyURL('/auth/NotifyAuthentication.html');
+	var authenticationInProgress = false;
+	var authRendered = {};
+	
+	function getLabel(authService, serviceReference){
+		if(authService.getLabel){
+			return authService.getLabel();
+		} else {
+			var d = new dojo.Deferred();
+			d.callback(serviceReference.properties.name);
+			return d;
+		}
+	}
+	
+	function qualifyURL(url){
+	    var img = document.createElement('img');
+	    img.src = url; // set string url
+	    url = img.src; // get qualified url
+	    img.src = null; // no server request
+	    return url;
+	}
 
 	/**
 	 * Adds the user-related commands to the toolbar
 	 * @name orion.globalCommands#generateUserInfo
 	 * @function
 	 */
-	function generateUserInfo(userName, userLocation, userStatusText) {
+	function generateUserInfo(serviceRegistry) {
+		
+		var authServices = serviceRegistry.getServiceReferences("orion.core.auth");
+		if(authServices.length===1){
+			serviceRegistry.getService(authServices[0]).then(function(authService){
+				
+				authService.getKey().then(function(key){
+				
+					authService.getUser().then(function(jsonData){
+						renderUser(key, serviceRegistry, authService, jsonData);
+					}, 
+					function(errorData){
+						renderUser(key, serviceRegistry, authService);
+					});
+						window.addEventListener("storage", function(e){
+
+							if(authRendered[key] === localStorage.getItem(key)){
+								return;
+							}
+							
+							authRendered[key] = localStorage.getItem(key);
+							
+							authService.getUser().then(function(jsonData){
+								renderUser(key, serviceRegistry, authService, jsonData);
+							}, 
+							function(errorData){
+								renderUser(key, serviceRegistry, authService);
+							});
+							
+						}, false);
+					
+
+				});
+
+			});
+		} else {
+			var userInfo = dojo.byId("userInfo");
+			if(!userInfo){
+				return;
+			}
+			
+			var newMenu= new dijit.Menu({
+				style: "display: none;",
+				id: "userMenu"
+			});
+			
+			
+			for(var i=0; i<authServices.length; i++){
+				var servicePtr = authServices[i];
+				serviceRegistry.getService(servicePtr).then(function(authService){
+				
+					getLabel(authService, servicePtr).then(function(label){
+						
+						var pSubMenu = new dijit.Menu();
+				        var popupMenu = new dijit.PopupMenuItem({
+				            popup: pSubMenu
+				        });
+				        newMenu.addChild(popupMenu);
+						
+						authService.getKey().then(function(key){
+							
+							authService.getUser().then(function(jsonData){
+								renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label, jsonData);
+							}, 
+							function(errorData){
+								renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label);
+							});
+								window.addEventListener("storage", function(e){
+
+									if(authRendered[key] === localStorage.getItem(key)){
+										return;
+									}
+									
+									authRendered[key] = localStorage.getItem(key);
+									
+									authService.getUser().then(function(jsonData){
+										renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label, jsonData);
+									}, 
+									function(errorData){
+										renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label);
+									});
+									
+								}, false);
+							
+	
+						});
+										
+					});
+				
+				});
+			}
+			
+			var menuButton = new dijit.form.DropDownButton({
+				label: "Logins",
+				dropDown: newMenu,
+				title: "Login statuses"
+		        });
+		        dojo.addClass(menuButton.domNode, "commandImage");
+			dojo.place(menuButton.domNode, userInfo, "only");
+		}
+		
+	}
+	
+	function renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label, jsonData){
+		
+		var children = popupMenu.popup.getChildren();
+		for(var i=0; i<children.length; i++){
+			popupMenu.popup.removeChild(children[i]);
+		}
+		
+		if(!jsonData || !jsonData.uid){
+			popupMenu.setLabel(label);
+			popupMenu.popup.addChild(new dijit.MenuItem({
+	            label: "Sign in",
+	            onClick: function(){
+					if (!authenticationInProgress) {
+//TODO				authenticationInProgress = true;
+						if(authService.getAuthForm){
+							authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
+								window.open(loginForm, 'LoginWindow', 'width=400, height=250');
+							});
+						}else if(authService.login){
+							authService.login(notifyAuthenticationSite);
+						}
+					}
+	            }
+	        }));
+		} else {
+			var lastLogin = "N/A";
+			if (jsonData && jsonData.lastlogintimestamp) {
+				lastLogin = dojo.date.locale.format(new Date(jsonData.lastlogintimestamp), {formatLength: "short"});
+			}
+			
+			var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login;
+			
+			popupMenu.setLabel((userName.length > 40 ? userName.substring(0, 30) + "..." : userName) + " (" + label + ")");
+			popupMenu.title = userName + ' ' + "logged in since " + lastLogin;
+			
+			var menuitem2 = new mCommands.CommandMenuItem({
+				label: "<a href=\"" + "/profile/user-profile.html#" + (jsonData.Location ? jsonData.Location : "") + "\">Profile</a>",
+				hrefCallback: true
+			});
+			popupMenu.popup.addChild(menuitem2);
+			
+			// signout item
+			if(authService.logout){
+				var menuitem = new dijit.MenuItem({
+					label: "Sign out",
+					onClick: function(){
+						authService.logout().then(function(){
+							renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label);
+							localStorage.removeItem(key);
+						});
+					}
+				});
+				popupMenu.popup.addChild(menuitem);
+			}
+			
+		}
+		
+	}
+	
+	function renderUser(key, serviceRegistry, authService, jsonData){
+		
 		// add the logout button to the toolbar if available
 		var userInfo = dojo.byId("userInfo");
-		if (userInfo) {
+		if(!userInfo){
+			return;
+		}
+		
+		if(!jsonData || !jsonData.uid){
+			dojo.empty(userInfo);
+			var signout = document.createElement('span');
+			signout.appendChild(document.createTextNode("Sign in"));
+			signout.onclick = function(){
+				if (!authenticationInProgress) {
+//TODO				authenticationInProgress = true;
+					if(authService.getAuthForm){
+						authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
+							window.open(loginForm, 'LoginWindow', 'width=400, height=250');
+						});
+					}else if(authService.login){
+						authService.login(notifyAuthenticationSite);
+					}
+				}
+			};
+			signout.id = "signOutUser";
+			userInfo.appendChild(signout);
+			dojo.addClass(signout, "commandLink");
+			return;
+		}
+		var lastLogin = "N/A";
+		if (jsonData && jsonData.lastlogintimestamp) {
+			lastLogin = dojo.date.locale.format(new Date(jsonData.lastlogintimestamp), {formatLength: "short"});
+		}
+		
+		var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login;
+		
+		
 			dojo.addClass(userInfo, "globalActions");
 			var userMenu = dijit.byId("userMenu");
 			if (userMenu) {
@@ -109,38 +324,34 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				
 				// profile item
 				var menuitem2 = new mCommands.CommandMenuItem({
-					label: "<a href=\"" + "/profile/user-profile.html#" + (userLocation ? userLocation : "") + "\">Profile</a>",
+					label: "<a href=\"" + "/profile/user-profile.html#" + (jsonData.Location ? jsonData.Location : "") + "\">Profile</a>",
 					hrefCallback: true
 				});
 				newMenu.addChild(menuitem2);
 				
 				// signout item
-				var menuitem = new dijit.MenuItem({
-					label: "Sign out",
-					onClick: logout
-				});
-				newMenu.addChild(menuitem);
+				if(authService.logout){
+					var menuitem = new dijit.MenuItem({
+						label: "Sign out",
+						onClick: function(){
+							authService.logout().then(function(){
+								renderUser(key, serviceRegistry, authService);
+								localStorage.removeItem(key);
+								window.location.replace("/index.html");
+							});
+						}
+					});
+					newMenu.addChild(menuitem);
+				}
 	
 				var menuButton = new dijit.form.DropDownButton({
 					label: userName.length > 40 ? userName.substring(0, 30) + "..." : userName,
 					dropDown: newMenu,
-					title: userName + ' ' + userStatusText
+					title: userName + ' ' + "logged in since " + lastLogin
 			        });
 			        dojo.addClass(menuButton.domNode, "commandImage");
 				dojo.place(menuButton.domNode, userInfo, "last");
-			} else {
-				var signout = document.createElement('span');
-				signout.appendChild(document.createTextNode("Sign in"));
-				signout.onclick = function(){login();};
-				signout.id = "signOutUser";
-				userInfo.appendChild(signout);
-				dojo.addClass(signout, "commandLink");
-			}
-			
-			userDataToSet = null;
-		}else{
-			userDataToSet = {userName : userName, userStatusText : userStatusText};
-		}
+			} 
 	}
 
 	/**
@@ -158,6 +369,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			commandService.renderCommands(toolbar, "dom", handler, handler, "image", null, null, !useImage);  // use true when we want to force toolbar items to text
 		}
 	}
+	
 	
 	/**
 	 * Generates the banner at the top of a page.
@@ -328,10 +540,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			commandService.renderCommands(toolbar, "global", item, handler, "image");
 		}
 		
-		if (userDataToSet) {
-			//if last time we couldn't set the user name try again after creating the banner
-			generateUserInfo(userDataToSet.userName, userDataToSet.Location, userDataToSet.userStatusText);
-		}
+		generateUserInfo(serviceRegistry);
 		
 		// generate the footer. 
 		// TODO The footer div id should not be assumed here
@@ -343,10 +552,15 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		}
 	
 	}
+	
+	
+
+	
 	//return the module exports
 	return {
 		generateUserInfo: generateUserInfo,
 		generateDomCommandsInBanner: generateDomCommandsInBanner,
-		generateBanner: generateBanner
+		generateBanner: generateBanner,
+		notifyAuthenticationSite: notifyAuthenticationSite
 	};
 });

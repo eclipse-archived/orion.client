@@ -17,8 +17,6 @@
 		handle<method>AuthenticationError(this, ioArgs);
 
  */
- 
-
 
 define(['dojo', 'orion/globalCommands', 'dojo/date/locale'], function(dojo, mGlobalCommands) {
 
@@ -26,22 +24,12 @@ var authenticationInProgress = false;
 
 var forbiddenAccessDlg;
 
-
 dojo.addOnLoad(function () {
 	
 	// work around global problems in auth2 -- FIXME!!!
 	window.dojo = dojo;
 	window.eclipse = window.eclipse || {};
 	eclipse.globalCommandUtils = mGlobalCommands; 
-
-	dojo.xhrGet({
-		url: "/auth2",
-		handleAs: 'javascript',
-        //sync:true, the javascript load is asynchronous already so not sure this would work -- we should also avoid sync calls!
-        headers: {
-			"Orion-Version" : "1"
-		}
-	});
 });
 
 function handleGetAuthenticationError(xhrArgs, ioArgs, cb, eb) {
@@ -92,15 +80,44 @@ function handleAuthenticationError(error, retry) {
 		forbiddenAccessDlg.show();
 	}
 	if (error.status === 401) { 
-		var handle = dojo.subscribe("/auth", function(message){
-			retry();
-			dojo.unsubscribe(handle); // ... but only once
-		});
-		if (!authenticationInProgress) {
-			authenticationInProgress = true;
+		
+
 			// open popup and add OP response handler
-			eval(error.responseText);
-		}
+			// TODO add error handling here
+			try{
+				var responseObj = JSON.parse(error.responseText);
+				var lastSignInKeyValue = localStorage.getItem(responseObj.SignInKey);
+				
+				var storageListener = function(e){
+					var userItem = localStorage.getItem(responseObj.SignInKey);
+
+					if(lastSignInKeyValue===userItem){
+						return;
+					}
+					window.removeEventListener("storage", storageListener, false); // ... but only once
+					retry();
+
+				};
+				
+				window.addEventListener("storage", storageListener, false);
+				
+				if (!authenticationInProgress) {
+					authenticationInProgress = true;
+					if(responseObj.SignInLocation && responseObj.SignInLocation!=""){
+						
+						if(responseObj.SignInLocation.toString().indexOf("?")==-1){
+							window.open(responseObj.SignInLocation + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + responseObj.SignInKey, 
+									"loginwindow", 'width=400, height=250');
+						}else{
+							window.open(responseObj.SignInLocation + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + responseObj.SignInKey, 
+									"loginwindow", 'width=400, height=250');
+						}
+					}
+				}
+			} catch (e){
+			}
+			
+
 	}
 }
 return {
