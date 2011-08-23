@@ -253,7 +253,7 @@ var exports = {};
 		commandService.addCommand(checkoutBranchCommand, "object");
 		
 		var addBranchCommand = new mCommands.Command({
-			name: "Add Branch",
+			name: "New Branch",
 			image: "/images/add.gif",
 			id: "eclipse.addBranch",
 			callback: function(item, commandId, domId) {
@@ -278,7 +278,7 @@ var exports = {};
 		commandService.addCommand(addBranchCommand, "object");
 		
 		var removeBranchCommand = new mCommands.Command({
-			name: "Remove Branch",
+			name: "Remove", // "Remove Branch"
 			image: "/images/delete.gif",
 			id: "eclipse.removeBranch",
 			callback: function(item) {
@@ -300,7 +300,7 @@ var exports = {};
 		commandService.addCommand(removeBranchCommand, "object");
 		
 		var removeRemoteBranchCommand = new mCommands.Command({
-			name: "Remove Remote Branch",
+			name: "Remove", // "Remove Remote Branch",
 			image: "/images/delete.gif",
 			id: "eclipse.removeRemoteBranch",
 			callback: function(item) {
@@ -328,7 +328,7 @@ var exports = {};
 		commandService.addCommand(removeRemoteBranchCommand, "object");
 		
 		var addRemoteCommand = new mCommands.Command({
-			name: "Add Remote",
+			name: "New Remote",
 			image: "/images/add.gif",
 			id: "eclipse.addRemote",
 			callback : function(item) {
@@ -353,7 +353,7 @@ var exports = {};
 		commandService.addCommand(addRemoteCommand, "object");
 		
 		var removeRemoteCommand = new mCommands.Command({
-			name: "Remove Remote",
+			name: "Remove", // "Remove Remote",
 			image: "/images/delete.gif",
 			id: "eclipse.removeRemote",
 			callback: function(item) {
@@ -375,7 +375,7 @@ var exports = {};
 		commandService.addCommand(removeRemoteCommand, "object");
 		
 		var openGitLog = new mCommands.Command({
-			name : "Show Git Log",
+			name : "Open Git Log",
 			id : "eclipse.openGitLog",
 			hrefCallback : function(item) {
 				if (item.Type === "RemoteTrackingBranch")
@@ -390,7 +390,7 @@ var exports = {};
 		commandService.addCommand(openGitLog, "object");
 		
 		var openGitLogAll = new mCommands.Command({
-			name : "Show Git Log",
+			name : "Open Git Log",
 			id : "eclipse.openGitLogAll",
 			hrefCallback : function(item) {
 				return "/git/git-log.html#" + item.CommitLocation + "?page=1";
@@ -406,7 +406,7 @@ var exports = {};
 		commandService.addCommand(openGitLogAll, "object");
 		
 		var openGitStatus = new mCommands.Command({
-			name : "Show Status",
+			name : "Open Git Status",
 			id : "eclipse.openGitStatus",
 			hrefCallback : function(item) {
 				return "/git/git-status.html#" + item.StatusLocation;
@@ -1477,7 +1477,7 @@ var exports = {};
 		commandService.addCommand(initGitRepositoryCommand, "dom");
 		
 		var deleteCommand = new mCommands.Command({
-			name: "Delete Clone",
+			name: "Remove", // "Remove Clone"
 			image: "/images/delete.gif",
 			id: "eclipse.git.deleteClone",
 			visibleWhen: function(item) {

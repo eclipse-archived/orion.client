@@ -44,25 +44,39 @@ dojo.addOnLoad(function() {
 	// git contributions
 	commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup");
 	commandService.registerCommandContribution("eclipse.initGitRepository", 101, "pageActions", "eclipse.gitGroup");
+	
 	commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
-	commandService.registerCommandContribution("eclipse.git.deleteClone", 1);
-	commandService.registerCommandContribution("eclipse.openGitLogAll", 1);
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 1, "selectionTools", "eclipse.selectionGroup");
-	commandService.registerCommandContribution("eclipse.checkoutBranch", 2);
-	commandService.registerCommandContribution("eclipse.addBranch", 2);
-	commandService.registerCommandContribution("eclipse.removeBranch", 2);
-	commandService.registerCommandContribution("eclipse.removeRemoteBranch", 2);
-	commandService.registerCommandContribution("eclipse.addRemote", 2);
-	commandService.registerCommandContribution("eclipse.removeRemote", 2);
-	commandService.registerCommandContribution("eclipse.openGitLog", 2);
-	commandService.registerCommandContribution("eclipse.openCloneContent", 2);
-	commandService.registerCommandContribution("eclipse.openGitStatus", 2);
-	commandService.registerCommandContribution("eclipse.orion.git.fetch", 2);
-	commandService.registerCommandContribution("eclipse.orion.git.merge", 2);
-	commandService.registerCommandContribution("eclipse.orion.git.rebase", 2);
-	commandService.registerCommandContribution("eclipse.orion.git.push", 2);
-	commandService.registerCommandContribution("eclipse.orion.git.pushto", 3);
-	commandService.registerCommandContribution("eclipse.orion.git.resetIndex", 4);
+	
+	commandService.addCommandGroup("eclipse.gitGroup2", 1000, "More");
+	commandService.addCommandGroup("eclipse.gitGroup2.u1", 2000, null, "eclipse.gitGroup2");
+	commandService.addCommandGroup("eclipse.gitGroup2.delete", 3000, null, "eclipse.gitGroup2");
+	
+	// clone actions
+	commandService.registerCommandContribution("eclipse.openGitStatus", 100);
+	commandService.registerCommandContribution("eclipse.openGitLogAll", 200, null, "eclipse.gitGroup2");
+	commandService.registerCommandContribution("eclipse.openCloneContent", 300, null, "eclipse.gitGroup2");
+	commandService.registerCommandContribution("eclipse.git.deleteClone", 400, null, "eclipse.gitGroup2/eclipse.gitGroup2.delete");
+	
+	// remote action
+	commandService.registerCommandContribution("eclipse.addRemote", 100);
+	commandService.registerCommandContribution("eclipse.removeRemote", 400, null, "eclipse.gitGroup2/eclipse.gitGroup2.delete");
+	
+	// branch actions
+	commandService.registerCommandContribution("eclipse.addBranch", 100);
+	commandService.registerCommandContribution("eclipse.checkoutBranch", 101);
+	
+	commandService.registerCommandContribution("eclipse.openGitLog", 200, null, "eclipse.gitGroup2");
+	
+	commandService.registerCommandContribution("eclipse.orion.git.fetch", 300, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
+	commandService.registerCommandContribution("eclipse.orion.git.merge", 301, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
+	commandService.registerCommandContribution("eclipse.orion.git.rebase", 302, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
+	commandService.registerCommandContribution("eclipse.orion.git.push", 303, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
+	commandService.registerCommandContribution("eclipse.orion.git.pushto", 304, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
+	commandService.registerCommandContribution("eclipse.orion.git.resetIndex", 305, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
+	
+	commandService.registerCommandContribution("eclipse.removeBranch", 400, null, "eclipse.gitGroup2/eclipse.gitGroup2.delete");
+	commandService.registerCommandContribution("eclipse.removeRemoteBranch", 400, null, "eclipse.gitGroup2/eclipse.gitGroup2.delete");
 	
 	// Clone details
 	var cloneDetails = new mGitCloneDetails.CloneDetails({parent: "cloneDetailsPane", serviceRegistry: serviceRegistry, detailsPane: dijit.byId("orion.innerNavigator")});
