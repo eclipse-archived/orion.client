@@ -31,6 +31,7 @@ exports.setUpEditor = function(isReadOnly){
 	var commandService;
 	var statusReportingService;
 	var problemService;
+	var outlineService;
 	
 	document.body.style.visibility = "visible";
 	dojo.parser.parse();
@@ -52,7 +53,7 @@ exports.setUpEditor = function(isReadOnly){
 
 		// Editor needs additional services besides EAS.
 		problemService = new mProblems.ProblemService(serviceRegistry);
-		new mOutliner.OutlineService(serviceRegistry);
+		outlineService = new mOutliner.OutlineService(serviceRegistry);
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 	}());
 	
@@ -476,8 +477,30 @@ exports.setUpEditor = function(isReadOnly){
 			
 		var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 		
+		dojo.connect(editor, "onInputChange", function(title, message, contents, saved) {
+			// lookup outline provider, feed contents to it
+			var outliners = serviceRegistry.getServiceReferences("orion.edit.outliner"),
+			    outliner;
+			for (var i=0; i < outliners.length; i++) {
+				var serviceReference = outliners[i],
+				    pattern = serviceReference.getProperty("pattern");
+				if (pattern && new RegExp(pattern).test(title)) {
+					outliner = serviceReference;
+					break;
+				}
+			}
+			if (outliner) {
+				// Wire outliner to the outline service
+				serviceRegistry.getService(outliner).then(function(outliner) {
+					outliner.getOutline(contents, title).then(function(outlineModel) {
+						outlineService.setOutline(outlineModel, title);
+					});
+				});
+			}
+		});
+		
 		// Create outliner "gadget"
-		new mOutliner.Outliner({parent: outlineDomNode, serviceRegistry: serviceRegistry, selectionService: selection});	
+		new mOutliner.Outliner({parent: outlineDomNode, outlineService: serviceRegistry.getService("orion.edit.outline"), selectionService: selection});
 		
 		window.onbeforeunload = function() {
 			if (editor.isDirty()) {
