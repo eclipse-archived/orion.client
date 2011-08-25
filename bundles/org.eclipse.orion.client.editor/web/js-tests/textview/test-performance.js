@@ -52,11 +52,11 @@ PerformanceTest.prototype = {
 	},
 	doPage: function (queue, action, max) {
 		var view = this.view;
-		var objXml = new XMLHttpRequest();
-		objXml.open("GET","/examples/textview/text.txt",false);
-		objXml.send(null);
-		this.styler = new examples.textview.TextStyler(view, "java");
-		view.setText(objXml.responseText);
+//		var objXml = new XMLHttpRequest();
+//		objXml.open("GET","/examples/textview/text.txt",false);
+//		objXml.send(null);
+//		this.styler = new examples.textview.TextStyler(view, "java");
+//		view.setText(objXml.responseText);
 		var model = view.getModel();
 		queue.call(action, function(callbacks) {
 			function t() {
@@ -82,7 +82,7 @@ PerformanceTest.prototype = {
 	},
 	test_pageDown: function (queue) {
 		if (!queue) var queue = new this.FakeQueue();
-		this.doPage(queue, "pageDown");
+		this.doPage(queue, "pageDown", 100);
 	},
 	test_selectPageDown: function (queue) {
 		if (!queue) var queue = new this.FakeQueue();

@@ -187,10 +187,16 @@ orion.textview.LineNumberRuler = (function() {
 	};
 	/** @ignore */
 	LineNumberRuler.prototype.getHTML = function(lineIndex) {
+		var model = this._view.getModel();
 		if (lineIndex === -1) {
-			var model = this._view.getModel();
+			if (model.getParent) {
+				return model.getParent().getLineCount();
+			}
 			return model.getLineCount();
 		} else {
+			if (model.getParent) {
+				return model.mapLine(lineIndex) + 1;
+			}
 			return lineIndex + 1;
 		}
 	};

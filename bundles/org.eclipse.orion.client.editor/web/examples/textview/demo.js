@@ -37,6 +37,7 @@ function log (text) {
  
  define(["orion/textview/keyBinding",
 		"orion/textview/textModel", 
+		"orion/textview/projectionTextModel", 
 		"orion/textview/textView", 
 		"orion/textview/rulers",
 		"orion/textview/undoStack",
@@ -45,7 +46,7 @@ function log (text) {
 		"examples/textview/textStyler",
 		"tests/textview/test-performance"],   
  
-function(mKeyBinding, mTextModel, mTextView, mRulers, mUndoStack, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUndoStack, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 	var view = null;
 	var styler = null;
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
@@ -75,10 +76,10 @@ function(mKeyBinding, mTextModel, mTextView, mRulers, mUndoStack, mTextMateStyle
 			"/orion/textview/textview.css",
 			"/orion/textview/rulers.css",
 			"/examples/textview/textstyler.css",
-			"/examples/editor/htmlStyles.css",
+			"/examples/editor/htmlStyles.css"
 		];
 		var fullSelection = window.document.getElementById('fullSelection').checked;
-		var tabSize = parseInt(window.document.getElementById('tabSize').value);
+		var tabSize = parseInt(window.document.getElementById('tabSize').value, 10);
 		var options = {
 			parent: "divParent",
 			model: new mTextModel.TextModel(),
@@ -139,8 +140,23 @@ function(mKeyBinding, mTextModel, mTextView, mRulers, mUndoStack, mTextMateStyle
 			styler.destroy();
 			styler = null;
 		}
+		var model = new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel(file));
+		view.setModel(model);
 		styler = new mTextStyler.TextStyler(view, "java");
-		view.setText(file);
+		styler._computeComments(model.getCharCount());
+		var parent = model.getParent();
+		for (var i=0; i<styler.commentOffsets.length; i += 2) {
+			model.addModel(new mTextModel.TextModel(""), {
+				start: parent.getLineStart(parent.getLineAtOffset(styler.commentOffsets[i]) + 1),
+				end: parent.getLineEnd(parent.getLineAtOffset(styler.commentOffsets[i+1]), true)});
+		}
+//		var parent = model.getParent();
+//		for (var i=0; i<styler.commentOffsets.length; i += 2) {
+//			var startLine = parent.getLineAtOffset(styler.commentOffsets[i]);
+//			model.addModel(new mTextModel.TextModel(parent.getLine(startLine, true)), {
+//				start: parent.getLineStart(startLine),
+//				end: parent.getLineEnd(parent.getLineAtOffset(styler.commentOffsets[i+1]), true)});
+//		}
 	}
 	
 	function createJavaScriptSample() {
@@ -189,16 +205,54 @@ function(mKeyBinding, mTextModel, mTextView, mRulers, mUndoStack, mTextMateStyle
 		}
 		view.setText(lines.join("\r\n"));
 	}
-	
-	function test() {
+	                                        //01xxx xxxx23 4567xx xxx890
+	function test() {                       //01234 567890 123456 789012
+		//var model = new mTextModel.TextModel("line1\nline2\nline3\nline4", "\n");
+//											  0          1          2          3          4           5         6 
+//											  0123456 78901 2345678901234 567890 12345678901 234567 89012345678901234567890
+//		                                      0xx1xxx xx234 5678xx9012345 67xx89 012xxxxxxxx xxxxx3 45678901234567890123456789012
+		var model = new mTextModel.TextModel("silenio\nesta\naqui na casa\nworld\nabcdefghij\nxxxxl\nmxxxxxxxxxxxxxz", "\n");
+		var test1 = new mProjectionTextModel.ProjectionTextModel(model);
+		test1.addRange({start: 1, end: 3, text: ""});
+		test1.addRange({start: 4, end: 9, text: ""});
+		test1.addRange({start: 16, end: 18, text: ""});
+		test1.addRange({start: 27, end: 29, text: ""});
+		test1.addRange({start: 34, end: 47, text: ""});
+		log("charCount=" + test1.getCharCount() + " " + model.getCharCount());
+		log("lineCount=" + test1.getLineCount() + " " + model.getLineCount());
+		var h, map;
+		for ( h=0; h<test1.getCharCount(); h++) {
+			log("map=" + h + "->" + (map = test1.mapOffset(h)) + " -- " + test1.mapOffset(map, true));
+		}
+		for ( h=0; h<test1.getCharCount(); h++) {
+			log("lineAtOffset=" + h + "-->" + test1.getLineAtOffset(h));
+		}
+		
+		for ( h=0; h<test1.getLineCount(); h++) {
+			log("lineStart=" + h + "-->" + test1.getLineStart(h));
+		}
+		
+		for ( h=0; h<test1.getLineCount(); h++) {
+			log("lineEnd=" + h + "-->" + test1.getLineEnd(h, true));
+		}
+		for ( h=0; h<test1.getLineCount(); h++) {
+			log("line=" + h + "-->" + test1.getLine(h, false) + "<");
+		}
+		
+		for ( h=0; h<model.getLineCount(); h++) {
+			log("xxlineStart=" + h + "-->" + model.getLineStart(h));
+		}
+		for ( h=0; h<model.getLineCount(); h++) {
+			log("xxlineEnd=" + h + "-->" + model.getLineEnd(h, true));
+		}
 	}
 	
 	function performanceTest() {
 		checkView();
-		if (styler) {
-			styler.destroy();
-			styler = null;
-		}
+//		if (styler) {
+//			styler.destroy();
+//			styler = null;
+//		}
 		/* Note: PerformanceTest is not using require js */
 		var test = new PerformanceTest(view);
 		var select = document.getElementById("performanceTestSelect");
