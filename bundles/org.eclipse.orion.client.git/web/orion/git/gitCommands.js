@@ -1321,18 +1321,18 @@ var exports = {};
 								var deferred = gitService.doPush(item.RemoteLocation[0].Children[0].Location, "HEAD", true, false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
 									exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
-											function(jsonData){
-												if (jsonData.Result.Severity == "Ok"){
-													dojo.query(".treeTableRow").forEach(function(node, i) {
-														dojo.toggleClass(node, "outgoingCommitsdRow", false);
-													});
-													refreshStatusCallBack();
-												}
-											}, func, "Push Git Repository");
-									});
+										function(jsonData){
+											if (jsonData.Result.Severity == "Ok"){
+												dojo.query(".treeTableRow").forEach(function(node, i) {
+													dojo.toggleClass(node, "outgoingCommitsdRow", false);
+												});
+												refreshStatusCallBack();
+											}
+										}, func, "Push Git Repository");
 								});
 							});
-				});
+						});
+					});
 				} else {
 					
 					var remotes = item.RemoteLocation;
@@ -1351,40 +1351,25 @@ var exports = {};
 										serviceRegistry.getService("orion.page.message").then(function(progressService) {
 											var deferred = gitService.doPush(targetBranch.Location, "HEAD", true, false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 											progressService.showWhile(deferred, "Pushing remote: " + remote).then(function(remoteJsonData){
-												exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
-														function(jsonData){
-															if (jsonData.Result.Severity == "Ok"){
-																dojo.query(".treeTableRow").forEach(function(node, i) {
-																	dojo.toggleClass(node, "outgoingCommitsdRow", false);
-																});
-																refreshStatusCallBack();
-															}
-														}, func, "Push Git Repository");
-												});
+											exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
+												function(jsonData){
+													if (jsonData.Result.Severity == "Ok"){
+														dojo.query(".treeTableRow").forEach(function(node, i) {
+															dojo.toggleClass(node, "outgoingCommitsdRow", false);
+														});
+														refreshStatusCallBack();
+													}
+												}, func, "Push Git Repository");
 											});
 										});
-							});
+									});
+								});
 							})
 						});
 						dialog.startup();
 						dialog.show();
-						
 					});
-					
 				}
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-
 			},
 			visibleWhen : function(item) {
 				return item.Type === "LocalBranch" ;
