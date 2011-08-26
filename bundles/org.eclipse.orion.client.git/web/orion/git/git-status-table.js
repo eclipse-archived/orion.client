@@ -136,18 +136,24 @@ orion.GitStatusContentRenderer = (function() {
 		  	var tableParentDomNode = dojo.byId( this._tableParentDivId);
 			dojo.place(document.createTextNode(""), tableParentDomNode, "only");
 			
-		  	var table = document.createElement('table');
-			table.id = tableId;
-			table.width = "100%";
+			var table = dojo.create("table", 
+				{id: tableId ,style: "border-spacing: 0px"
+			});
+			//table.width = "100%";
 			tableParentDomNode.appendChild(table);
 			this._table = table;
 		},
 		
-		renderRow: function(itemModel) {
+		renderRow: function(itemModel, lineNumber) {
 			var self = this;
 			var row = document.createElement('tr');
 			row.id = itemModel.name + "_" + itemModel.type + "_row";
 			row._item = itemModel;
+			if (lineNumber % 2) {
+				dojo.addClass(row, "darkTreeTableRow");
+			} else {
+				dojo.addClass(row, "lightTreeTableRow");
+			}
 			this._table.appendChild(row);
 
 			//render the type icon (added , modified ,untracked ...)
@@ -159,7 +165,7 @@ orion.GitStatusContentRenderer = (function() {
 			
 			//render the file name field
 			var nameColumn = document.createElement('td');
-			nameColumn.width="100%";
+			//nameColumn.width="100%";
 			nameColumn.noWrap= true;
 			row.appendChild(nameColumn);
 			
@@ -1238,7 +1244,7 @@ orion.GitStatusController = (function() {
 			renderer.initTable();
 			var retValue = this._sortBlock(interedtedGroup);
 			for (var i = 0; i < retValue.length ; i++){
-				renderer.renderRow(retValue[i]);
+				renderer.renderRow(retValue[i], i);
 			}
 		},
 		
