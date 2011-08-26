@@ -204,47 +204,161 @@ function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUnd
 			styler = null;
 		}
 		view.setText(lines.join("\r\n"));
+	}function assertEquals(msg, expected, actual) {
+		if (expected !== actual) {
+			log ("Failed", msg, "Expected:", expected, "Actual:", actual);
+		}
 	}
+		
 	                                        //01xxx xxxx23 4567xx xxx890
 	function test() {                       //01234 567890 123456 789012
 		//var model = new mTextModel.TextModel("line1\nline2\nline3\nline4", "\n");
 //											  0          1          2          3          4           5         6 
-//											  0123456 78901 2345678901234 567890 12345678901 234567 89012345678901234567890
-//		                                      0xx1xxx xx234 5678xx9012345 67xx89 012xxxxxxxx xxxxx3 45678901234567890123456789012
+//											  0123456 78901 2345678901234 567890 12345678901 234567 8901234567890123
+//		                                      0xx1xxx xx234 5678xx9012345 67xx89 012xxxxxxxx xxxxx3 4567890123456789
+//                                                                 1             2                        3         
 		var model = new mTextModel.TextModel("silenio\nesta\naqui na casa\nworld\nabcdefghij\nxxxxl\nmxxxxxxxxxxxxxz", "\n");
+//		                                                     x             x      x                  x
 		var test1 = new mProjectionTextModel.ProjectionTextModel(model);
-		test1.addRange({start: 1, end: 3, text: ""});
-		test1.addRange({start: 4, end: 9, text: ""});
-		test1.addRange({start: 16, end: 18, text: ""});
-		test1.addRange({start: 27, end: 29, text: ""});
-		test1.addRange({start: 34, end: 47, text: ""});
-		log("charCount=" + test1.getCharCount() + " " + model.getCharCount());
-		log("lineCount=" + test1.getLineCount() + " " + model.getLineCount());
-		var h, map;
-		for ( h=0; h<test1.getCharCount(); h++) {
-			log("map=" + h + "->" + (map = test1.mapOffset(h)) + " -- " + test1.mapOffset(map, true));
+		
+		var i, a1;
+		
+		test1.addProjection({start: 1, end: 3, content: ""});// -2
+		test1.addProjection({start: 4, end: 9, content: ""});//-5
+		test1.addProjection({start: 16, end: 18, content: ""});//-2
+		test1.addProjection({start: 27, end: 29, content: ""});//-2
+		test1.addProjection({start: 34, end: 47, content: ""});//-13, total 24
+		assertEquals("a", 40, test1.getCharCount());
+		assertEquals("b", 64, model.getCharCount());
+		assertEquals("c", 5, test1.getLineCount());
+		assertEquals("d", 7, model.getLineCount());
+		a1 = [0,3,9,10,11,12,13,14,15,18,19,20,21,22,23,24,25,26,29,30,31,32,33,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63];
+		for (i=0; i<a1.length; i++) {
+			assertEquals("e="+i, a1[i], test1.mapOffset(i));
 		}
-		for ( h=0; h<test1.getCharCount(); h++) {
-			log("lineAtOffset=" + h + "-->" + test1.getLineAtOffset(h));
+		for (i=0; i<a1.length; i++) {
+			assertEquals("f="+a1[i], i, test1.mapOffset(a1[i], true));
+		}
+		a1 = [1,2,4,5,6,7,8,16,17,27,28,34,35,36,37,38,39,40,41,42,43,44,45,46];
+		for (i=0; i<a1.length; i++) {
+			assertEquals("g="+i, -1, test1.mapOffset(a1[i], true));
+		}
+		a1 = [1,2,4,5,6,7,8,16,17,27,28,34,35,36,37,38,39,40,41,42,43,44,45,46];
+		for (i=0; i<a1.length; i++) {
+			assertEquals("g="+i, -1, test1.mapOffset(a1[i], true));
+		}
+		a1 = [0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4];
+		for (i=0; i<a1.length; i++) {
+			assertEquals("g="+i, a1[i], test1.getLineAtOffset(i));
 		}
 		
-		for ( h=0; h<test1.getLineCount(); h++) {
-			log("lineStart=" + h + "-->" + test1.getLineStart(h));
+		
+		model = new mTextModel.TextModel("STARTEND", "\n");
+		test1 = new mProjectionTextModel.ProjectionTextModel(model);
+		test1.addProjection({start: 5, end: 5, content: "CENTER"});
+		//assertEquals("a1", "STARTCENTEREND", test1.getText());
+		assertEquals("a", 14, test1.getCharCount());
+		assertEquals("b", 8, model.getCharCount());
+		a1 = [0,1,2,3,4,-1,-1,-1,-1,-1,-1,5,6,7];
+		for (i=0; i<a1.length; i++) {
+			assertEquals("e2="+i, a1[i], test1.mapOffset(i));//to parent
+		}
+		a1 = [0,1,2,3,4,11,12,13];
+		for (i=0; i<a1.length; i++) {
+			assertEquals("f2="+a1[i], a1[i], test1.mapOffset(i, true));//from parent
+		}
+//		                                  0123456789
+		model = new mTextModel.TextModel("STARTXXEND", "\n");
+		test1 = new mProjectionTextModel.ProjectionTextModel(model);
+		test1.addProjection({start: 5, end: 7, content: "CENTER"});
+		//assertEquals("a1", "STARTCENTEREND", test1.getText());
+		assertEquals("a", 14, test1.getCharCount());
+		assertEquals("b", 10, model.getCharCount());
+		a1 = [0,1,2,3,4,-1,-1,-1,-1,-1,-1,7,8,9];
+		for (i=0; i<a1.length; i++) {
+			assertEquals("g2="+i, a1[i], test1.mapOffset(i));//to parent
+		}
+		a1 = [0,1,2,3,4,-1,-1,11,12,13];
+		for (i=0; i<a1.length; i++) {
+			assertEquals("h2="+a1[i], a1[i], test1.mapOffset(i, true));//from parent
 		}
 		
-		for ( h=0; h<test1.getLineCount(); h++) {
-			log("lineEnd=" + h + "-->" + test1.getLineEnd(h, true));
+		model = new mTextModel.TextModel("STARTEND", "\n");
+		test1 = new mProjectionTextModel.ProjectionTextModel(model);
+		test1.addProjection({start: 5, end: 5, content: "\nCENTER\n"});
+//		                      01234 5678901 2345
+		//assertEquals("a1", "START\nCENTER\nEND", test1.getText());
+		assertEquals("a", 16, test1.getCharCount());
+		assertEquals("b", 8, model.getCharCount());
+		assertEquals("c", 3, test1.getLineCount());
+		assertEquals("d", 1, model.getLineCount());
+		a1 = [0,0,0,0,0,0,1,1,1,1,1,1,1,2,2,2];
+		for (i=0; i<test1.getCharCount(); i++) {
+			assertEquals("h2="+i, a1[i], test1.getLineAtOffset(i));//to parent
 		}
-		for ( h=0; h<test1.getLineCount(); h++) {
-			log("line=" + h + "-->" + test1.getLine(h, false) + "<");
+//		
+//line index                              0      1        2             3      4    5        6              7  8	   9
+//line offsets                            0      6        14            27     33   37       45             59 61      68
+//                                        0          1          2          3           4          5           6          7
+//                                        01234 56789012 3456789012345 678901 23456 78901234 5678901234567 89 0123456 7890123456
+		model = new mTextModel.TextModel("01234\n0123456\n012345678901\n01234\n012\n0123456\n0123456789012\n0\n012345\n012345678", "\n");
+// deletions                              01  4\n0  34       345678901\n012          123456\n0123456789          23         5678 
+// inserts                                                      abcd       ABCDEFG                  abcd\nef\nghijlmn\nopqrst
+//                                                                                                                 ABCDE\nFGHIJK\nLMN
+// results                                014\n034345abcd678901\n012ABCDEFG123456\n0123456abcd\nef\nghijlmn\nopqrst78923ABCDE\nFGHIJK\nLMN5678    
+//                                        012 34567890123456789 01234567890123456 789012345678 901 23456789 01234567890123456 7890123 45678901
+//                                                   1          2         3          4          5           6         7          8          9
+		test1 = new mProjectionTextModel.ProjectionTextModel(model);
+		test1.addProjection({start: 2, end: 4, content: ""});//green remove 23 on line 0														-2
+		test1.addProjection({start: 7, end: 9, content: ""});//green remove 12 on line 1														-2
+		test1.addProjection({start: 11, end: 17, content: ""});//green remove from 5 on line 1 to 3 line 2 (56\n012)							-6
+		test1.addProjection({start: 20, end: 20, content: "abcd"});//orange add abcd to 6 on line 2												+4
+		test1.addProjection({start: 30, end: 38, content: "ABCDEFG"});//red replace 3 on line 3 to 1 on line 5 (34\n012\n0) by ABCDEFG		-8,+7 -1	
+		test1.addProjection({start: 52, end: 52, content: "abcd\nef\nghijlmn\nopqrst"});//orange add abcd\nef\nghijlmn\nopqrst to 7 on line 6   +22  
+		test1.addProjection({start: 55, end: 63, content: ""});//green remove from 10 on line 6 to 2 on line 8                                  -8
+		test1.addProjection({start: 65, end: 73, content: "ABCDE\nFGHIJK\nLMN"});//red replace 4 on line 8 to 5 on line 9  by ABCDE\nFGHIJK\nLMN -8, +16, +8
+		assertEquals("a", 77, model.getCharCount());
+		assertEquals("b", 92, test1.getCharCount());
+		assertEquals("d", 10, model.getLineCount());
+		assertEquals("c", 9, test1.getLineCount());
+//		
+		//map to parent
+		//    0                       1                             2                             3                             4                             5                             6                             7                             8                            9
+		//    0 1 2 3 4 5 6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1 
+		a1 = [0,1,4,5,6,9,10,17,18,19,-1,-1,-1,-1,20,21,22,23,24,25,26,27,28,29,-1,-1,-1,-1,-1,-1,-1,38,39,40,41,42,43,44,45,46,47,48,49,50,51,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,52,53,54,63,64,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,73,74,75,76];
+		for (i=0; i<a1.length; i++) {
+			assertEquals("g2="+i, a1[i], test1.mapOffset(i));//to parent
+		}
+
+		//    0                       1                             2                             3                             4                             5                             6                             7                  
+		//    0 1  2  3 4 5 6  7  8 9 0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6
+		a1 = [0,1,-1,-1,2,3,4,-1,-1,5,6,-1,-1,-1,-1,-1,-1, 7, 8, 9,14,15,16,17,18,19,20,21,22,23,-1,-1,-1,-1,-1,-1,-1,-1,31,32,33,34,35,36,37,38,39,40,41,42,43,44,67,68,69,-1,-1,-1,-1,-1,-1,-1,-1,70,71,-1,-1,-1,-1,-1,-1,-1,-1,88,89,90,91];
+		for (i=0; i<a1.length; i++) {
+			assertEquals("h2="+a1[i], a1[i], test1.mapOffset(i, true));//from parent
 		}
 		
-		for ( h=0; h<model.getLineCount(); h++) {
-			log("xxlineStart=" + h + "-->" + model.getLineStart(h));
+		//getLineAtOffset
+		a1 = [0,0,0,0,  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,3,3,3,3, 4,4,4, 5,5,5,5,5,5,5,5, 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6, 7,7,7,7,7,7,7, 8,8,8,8,8,8,8];
+		for (i=0; i<test1.getCharCount(); i++) {
+			assertEquals("i2="+i, a1[i], test1.getLineAtOffset(i));
 		}
-		for ( h=0; h<model.getLineCount(); h++) {
-			log("xxlineEnd=" + h + "-->" + model.getLineEnd(h, true));
+		
+		//getLineStart
+		a1 = [0, 4, 21, 38, 50, 53, 61, 78, 85];
+		for (i=0; i<test1.getLineCount(); i++) {
+			assertEquals("j2="+i, a1[i], test1.getLineStart(i));
 		}
+		a1 = [4, 21, 38, 50, 53, 61, 78, 85, 92];
+		for (i=0; i<test1.getLineCount(); i++) {
+			assertEquals("j2="+i, a1[i], test1.getLineEnd(i, true));
+		}
+		a1 = [3, 20, 37, 49, 52, 60, 77, 84, 92];
+		for (i=0; i<test1.getLineCount(); i++) {
+			assertEquals("j3="+i, a1[i], test1.getLineEnd(i));
+		}
+		
+		//line start 
+		log("All tests finished");
 	}
 	
 	function performanceTest() {

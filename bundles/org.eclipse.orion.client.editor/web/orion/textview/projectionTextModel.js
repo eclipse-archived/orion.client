@@ -26,10 +26,10 @@ orion.textview.ProjectionTextModel = (function() {
 
 	/** @private */
 	function ProjectionTextModel(model) {
+		this._model = model;	/* Base Model */
 		this._listeners = [];
-		this._ranges = [];
-		this._models = [];
-		this._model = model;
+		this._projections = [];
+		
 		//TODO
 		var self = this;
 		model.addListener({
@@ -54,55 +54,70 @@ orion.textview.ProjectionTextModel = (function() {
 				}
 			}
 		},
-		addModel: function(model, range) {
-			this._ranges.push(range);
-			this._models.push(model);
-			range.lineCount = this._model.getLineAtOffset(range.end) - (range.lineIndex = this._model.getLineAtOffset(range.start));
+		/*
+		* Projection
+		*   start - start offset relative base 
+		*   end - end offset relative to base, not inclusive
+		*   content - undefiend/null/string/model
+		*   _lineCount - number of lines between start and end (number of lines hidden)
+		*   _lineIndex - line index of start, first hidden line
+		*   _model - text model, never null
+		*
+		*/
+		addProjection: function(projection) {
+			if (!projection) {return;}
+			this._projections.push(projection);
+			var model = this._model;
+			projection._lineIndex = model.getLineAtOffset(projection.start);
+			projection._lineCount = model.getLineAtOffset(projection.end) - projection._lineIndex;
+			var content = projection.content;
+			if (!content) { content = ""; }
+			if (typeof content === "string") {
+				projection._model = new orion.textview.TextModel(content, model.getLineDelimiter());
+			} else {
+				projection._model = content;
+			}
 			//TODO add listeners to model
 			//TODO send events
 		},
-		removeModel: function(model) {
-			for (var i = 0; i < this._models.length; i++) {
-				if (this._models[i] === model) {
-					this._models.splice(i, 1);
-					this._ranges.splice(i, 1);
+		removeProjection: function(projection) {
+			for (var i = 0; i < this._projections.length; i++) {
+				if (this._projections[i] === projection) {
+					this._projections.splice(i, 1);
 					return;
 				}
 			}
 			//TODO remove listeners from model
 			//TODO send events
 		},
-		getModels: function() {
-			//TODO copy?
-			return this._models;
-		},
-		getRanges: function() {
-			//TODO copy?
-			return this._ranges;
-		},
 		//TODO getModel?
 		getParent: function() {
 			return this._model;
 		},
-		mapOffset: function(offset, parent) {
-			//TODO handle invalid offsets in the destination
-			var i, range, add, ranges = this._ranges, models = this._models;
-			if (parent) {
-				var offsetCount = 0;
-				for (i = 0; i < ranges.length; i++) {
-					range = ranges[i];
-					if (range.end > offset) { break; }
-					offsetCount += (range.end - range.start) - models[i].getCharCount();
+		mapOffset: function(offset, parentOffset) {
+			var i, projection, projections = this._projections, delta = 0;
+			//PARENT to THIS
+			if (parentOffset) {
+				for (i = 0; i < projections.length; i++) {
+					projection = projections[i];
+					if (projection.start <= offset && offset < projection.end) { return -1; }
+					if (projection.end > offset) { break; }
+					delta += projection._model.getCharCount() - (projection.end - projection.start);
 				}
-				return offset - offsetCount;
+				return offset + delta;
 			}
-			for (i = 0; i < ranges.length; i++) {
-				range = ranges[i];
-				add = (range.end - range.start) - models[i].getCharCount();
-				if (range.end > (offset + add)) { break; }
-				offset += add;
+			//THIS to PARENT
+			for (i = 0; i < projections.length; i++) {
+				projection = projections[i];
+				var charCount = projection._model.getCharCount();
+				if (projection.start + delta <= offset && offset < projection.start + delta + charCount) {
+					return -1;
+				}
+				var add = charCount - (projection.end - projection.start);
+				if (projection.end > offset - (delta + add)) { break; }
+				delta += add;
 			}
-			return offset;
+			return offset - delta;
 		},
 		mapLine: function(lineIndex) {
 			if (lineIndex < 0) { return -1; }
@@ -117,10 +132,10 @@ orion.textview.ProjectionTextModel = (function() {
 			return lineIndex + lineCount;
 		},
 		getCharCount: function() {
-			var count = this._model.getCharCount(), ranges = this._ranges, models = this._models;
-			for (var i = 0; i < ranges.length; i++) {
-				var range = ranges[i];
-				count += models[i].getCharCount() - (range.end - range.start);
+			var count = this._model.getCharCount(), projections = this._projections;
+			for (var i = 0; i < projections.length; i++) {
+				var projection = projections[i];
+				count += projection._model.getCharCount() - (projection.end - projection.start);
 			}
 			return count;
 		},
@@ -156,23 +171,30 @@ orion.textview.ProjectionTextModel = (function() {
 			return result.join("");
 		},
 		getLineAtOffset: function(offset) {
-			var lineCount = 0;
-			var model = this._model, ranges = this._ranges, models = this._models;
-			for (var i = 0; i < ranges.length; i++) {
-				var range = ranges[i];
-				var add = (range.end - range.start) - models[i].getCharCount();
-				if (range.end > (offset + add)) { break; }
-				lineCount += range.lineCount + models[i].getLineCount() - 1;
-				offset += add;
+			var delta = 0, lineDelta = 0;
+			var model = this._model, projections = this._projections;
+			for (var i = 0; i < projections.length; i++) {
+				var projection = projections[i];
+				var charCount = projection._model.getCharCount();
+				if (projection.start + delta <= offset && offset < projection.start + delta + charCount) {
+					var projectionOffset = offset - (projection.start + delta);
+					lineDelta += projection._model.getLineAtOffset(projectionOffset);
+					delta += projectionOffset;
+					break;
+				}
+				var add = charCount - (projection.end - projection.start);
+				if (projection.end > offset - (delta + add)) { break; }
+				lineDelta +=  projection._model.getLineCount() - 1 - projection._lineCount;
+				delta += add;
 			}
-			return model.getLineAtOffset(offset) - lineCount;
+			return model.getLineAtOffset(offset - delta) + lineDelta;
 		},
 		getLineCount: function() {
-			var model = this._model, ranges = this._ranges;
+			var model = this._model, projections = this._projections;
 			var count = model.getLineCount();
-			for (var i = 0; i < ranges.length; i++) {
-				var range = ranges[i];
-				count -= range.lineCount;
+			for (var i = 0; i < projections.length; i++) {
+				var projection = projections[i];
+				count += projection._model.getLineCount() - 1 - projection._lineCount;
 			}
 			return count;
 		},
@@ -181,29 +203,39 @@ orion.textview.ProjectionTextModel = (function() {
 		},
 		getLineEnd: function(lineIndex, includeDelimiter) {
 			if (lineIndex < 0) { return -1; }
-			var lineCount = 0, offsetCount = 0;
-			var model = this._model, ranges = this._ranges, models = this._models;
-			for (var i = 0; i < ranges.length; i++) {
-				var range = ranges[i];
-				var startLine = range.lineIndex;
-				if (startLine - lineCount > lineIndex) { break; }
-				lineCount += range.lineCount + models[i].getLineCount() - 1;
-				offsetCount += (range.end - range.start) - models[i].getCharCount();
+			var model = this._model, projections = this._projections;
+			var delta = 0, offsetDelta = 0;
+			for (var i = 0; i < projections.length; i++) {
+				var projection = projections[i];
+				var lineCount = projection._model.getLineCount() - 1;
+				if (projection._lineIndex + delta <= lineIndex && lineIndex < projection._lineIndex + delta + lineCount) {
+					var projectionLineIndex = lineIndex - (projection._lineIndex + delta);
+					return projection._model.getLineEnd (projectionLineIndex, includeDelimiter) + projection.start + offsetDelta;
+				}
+				var add = lineCount - projection._lineCount;
+				if ((projection._lineIndex + projection._lineCount) > lineIndex - (delta + add)) { break; }
+				offsetDelta += projection._model.getCharCount() - (projection.end - projection.start);
+				delta += add;
 			}
-			return model.getLineEnd(lineIndex + lineCount, includeDelimiter) - offsetCount;
+			return model.getLineEnd(lineIndex - delta, includeDelimiter) + offsetDelta;
 		},
 		getLineStart: function(lineIndex) {
 			if (lineIndex < 0) { return -1; }
-			var lineCount = 0, offsetCount = 0;
-			var model = this._model, ranges = this._ranges, models = this._models;
-			for (var i = 0; i < ranges.length; i++) {
-				var range = ranges[i];
-				var startLine = range.lineIndex;
-				if (startLine - lineCount >= lineIndex) { break; }
-				lineCount += range.lineCount + models[i].getLineCount() - 1;
-				offsetCount += (range.end - range.start) - models[i].getCharCount();
+			var model = this._model, projections = this._projections;
+			var delta = 0, offsetDelta = 0;
+			for (var i = 0; i < projections.length; i++) {
+				var projection = projections[i];
+				var lineCount = projection._model.getLineCount() - 1;
+				if (projection._lineIndex + delta < lineIndex && lineIndex <= projection._lineIndex + delta + lineCount) {
+					var projectionLineIndex = lineIndex - (projection._lineIndex + delta);
+					return projection._model.getLineStart (projectionLineIndex) + projection.start + offsetDelta;
+				}
+				var add = lineCount - projection._lineCount;
+				if ((projection._lineIndex + projection._lineCount) >= lineIndex - (delta + add)) { break; }
+				offsetDelta += projection._model.getCharCount() - (projection.end - projection.start);
+				delta += add;
 			}
-			return model.getLineStart(lineIndex + lineCount) - offsetCount;
+			return model.getLineStart(lineIndex - delta) + offsetDelta;
 		},
 		getText: function(start, end) {
 			if (start === undefined) { start = 0; }
