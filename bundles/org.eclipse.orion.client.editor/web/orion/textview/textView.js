@@ -1957,14 +1957,17 @@ orion.textview.TextView = (function() {
 				element = element.parentNode;
 			}
 			var ruler = element ? element._ruler : null;
-			if (isPad && lineIndex === undefined && ruler && ruler.getOverview() === "document") {
-				var buttonHeight = 17;
+			if (lineIndex === undefined && ruler && ruler.getOverview() === "document") {
+				var buttonHeight = isPad ? 0 : 17;
 				var clientHeight = this._getClientHeight ();
 				var lineHeight = this._getLineHeight ();
+				var lineCount = this._model.getLineCount ();
 				var viewPad = this._getViewPadding();
 				var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * buttonHeight;
-				var pixels = this._model.getLineCount () * lineHeight;
-				this.setTopPixel(Math.floor((e.clientY - buttonHeight - lineHeight) * pixels / trackHeight));
+				lineIndex = Math.floor((e.clientY - buttonHeight) * lineCount / trackHeight);
+				if (!(0 <= lineIndex && lineIndex < lineCount)) {
+					lineIndex = undefined;
+				}
 			}
 			if (ruler) {
 				switch (e.type) {
@@ -4868,7 +4871,7 @@ orion.textview.TextView = (function() {
 					}
 					if (frag.firstChild) { div.insertBefore(frag, child); }
 				} else {
-					var buttonHeight = 17;
+					var buttonHeight = isPad ? 0 : 17;
 					var clientHeight = this._getClientHeight ();
 					var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * buttonHeight;
 					var lineCount = this._model.getLineCount ();

@@ -136,11 +136,11 @@ orion.textview.TextModel = (function() {
 		 * @returns {Number} the zero based line index or <code>-1</code> if out of range.
 		 */
 		getLineAtOffset: function(offset) {
-			if (!(0 <= offset && offset <= this.getCharCount())) {
+			var charCount = this.getCharCount();
+			if (!(0 <= offset && offset <= charCount)) {
 				return -1;
 			}
 			var lineCount = this.getLineCount();
-			var charCount = this.getCharCount();
 			if (offset === charCount) {
 				return lineCount - 1; 
 			}

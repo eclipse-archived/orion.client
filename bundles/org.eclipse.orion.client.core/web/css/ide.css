@@ -499,6 +499,21 @@ a:hover {
 	background-color: #EAF2FE;
 }
 
+#outline {
+	margin: 8px 0 0 16px;
+}
+
+#outline>ul {
+	padding-left: 0 !important;
+}
+#outline ul {
+	padding-left: 14px;
+}
+#outline li {
+	list-style-type: none;
+	white-space: nowrap; /*wrapping makes indented list hard to read*/
+}
+
 .test-passed {
 	background-color: #11FF11;
 }
