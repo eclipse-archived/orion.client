@@ -143,17 +143,22 @@ function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUnd
 		var model = new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel(file));
 		view.setModel(model);
 		styler = new mTextStyler.TextStyler(view, "java");
+
 		styler._computeComments(model.getCharCount());
+
 		var parent = model.getParent();
 		for (var i=0; i<styler.commentOffsets.length; i += 2) {
-			model.addModel(new mTextModel.TextModel(""), {
+			model.addProjection({
+				content: new mTextModel.TextModel(""), 
 				start: parent.getLineStart(parent.getLineAtOffset(styler.commentOffsets[i]) + 1),
 				end: parent.getLineEnd(parent.getLineAtOffset(styler.commentOffsets[i+1]), true)});
 		}
+//
 //		var parent = model.getParent();
 //		for (var i=0; i<styler.commentOffsets.length; i += 2) {
 //			var startLine = parent.getLineAtOffset(styler.commentOffsets[i]);
-//			model.addModel(new mTextModel.TextModel(parent.getLine(startLine, true)), {
+//			model.addProjection({
+//				content: new mTextModel.TextModel(parent.getLine(startLine, true)),
 //				start: parent.getLineStart(startLine),
 //				end: parent.getLineEnd(parent.getLineAtOffset(styler.commentOffsets[i+1]), true)});
 //		}
@@ -282,12 +287,13 @@ function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUnd
 		for (i=0; i<a1.length; i++) {
 			assertEquals("h2="+a1[i], a1[i], test1.mapOffset(i, true));//from parent
 		}
+		//assertEquals("a", "STARTCENTEREND", test1.getLine(0));
 		
 		model = new mTextModel.TextModel("STARTEND", "\n");
 		test1 = new mProjectionTextModel.ProjectionTextModel(model);
 		test1.addProjection({start: 5, end: 5, content: "\nCENTER\n"});
 //		                      01234 5678901 2345
-		//assertEquals("a1", "START\nCENTER\nEND", test1.getText());
+		assertEquals("a1", "START\nCENTER\nEND", test1.getText(0, test1.getCharCount()));
 		assertEquals("a", 16, test1.getCharCount());
 		assertEquals("b", 8, model.getCharCount());
 		assertEquals("c", 3, test1.getLineCount());
@@ -296,6 +302,9 @@ function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUnd
 		for (i=0; i<test1.getCharCount(); i++) {
 			assertEquals("h2="+i, a1[i], test1.getLineAtOffset(i));//to parent
 		}
+		assertEquals("a1", "START\n", test1.getLine(0, true));
+		assertEquals("a2", "CENTER\n", test1.getLine(1, true));
+		assertEquals("a3", "END", test1.getLine(2, true));
 //		
 //line index                              0      1        2             3      4    5        6              7  8	   9
 //line offsets                            0      6        14            27     33   37       45             59 61      68
@@ -356,9 +365,28 @@ function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUnd
 		for (i=0; i<test1.getLineCount(); i++) {
 			assertEquals("j3="+i, a1[i], test1.getLineEnd(i));
 		}
+		a1 = ["014\n", "034345abcd678901\n", "012ABCDEFG123456\n", "0123456abcd\n", "ef\n", "ghijlmn\n", "opqrst78923ABCDE\n", "FGHIJK\n", "LMN5678"];
+		for (i=0; i<test1.getLineCount(); i++) {
+			assertEquals("j4="+i, a1[i], test1.getLine(i, true));
+//			log(test1.getLine(i, true));
+		}
+		var resultText = "014\n034345abcd678901\n012ABCDEFG123456\n0123456abcd\nef\nghijlmn\nopqrst78923ABCDE\nFGHIJK\nLMN5678";
+		assertEquals("getText=", resultText, test1.getText());
+//		for (i=0; i<test1.getCharCount(); i+=1) {
+//			assertEquals("getText1="+i, resultText.substring(i, i+1), test1.getText(i, i+1));
+//		}
+//		for (i=0; i<test1.getCharCount(); i+=2) {
+//			assertEquals("getText2="+i, resultText.substring(i, i+2), test1.getText(i, i+2));
+//		}
+		for (var j=1; j<test1.getCharCount(); j++) {
+			for (i=0; i+j<test1.getCharCount(); i+=j) {
+				assertEquals("getText(" + i + "-" + j + ")=", resultText.substring(i, i+j), test1.getText(i, i+j));
+			}
+		}
+		
 		
 		//line start 
-		log("All tests finished");
+		log("All tests finished2");
 	}
 	
 	function performanceTest() {

@@ -340,16 +340,14 @@ examples.textview.TextStyler = (function() {
 			return null;
 		},
 		_getStyles: function(text, start) {
-			var end = start + text.length;
 			var model = this.view.getModel();
+			if (model.getParent) {
+				start = model.mapOffset(start);
+			}
+			var end = start + text.length;
 			
 			// get comment ranges that intersect with range
-			var mapStart = start, mapEnd = end;
-			if (model.getParent) {
-				mapStart = model.mapOffset(start);
-				mapEnd = model.mapOffset(end);
-			}
-			var commentRanges = this._getCommentRanges (mapStart, mapEnd);
+			var commentRanges = this._getCommentRanges (start, end);
 			var styles = [];
 			
 			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
@@ -357,17 +355,14 @@ examples.textview.TextStyler = (function() {
 			for (var i = 0; i < commentRanges.length; i+= 2) {
 				var commentStart = commentRanges[i];
 				var commentEnd = commentRanges[i+1];
-				if (model.getParent) {
-					commentStart = model.mapOffset(commentStart, true);
-					commentEnd = model.mapOffset(commentEnd, true);
-				}
 				if (offset < commentStart) {
 					this._parse(text.substring(offset - start, commentStart - start), offset, styles);
 				}
 				var style = commentStyle;
 				if ((commentEnd - commentStart) > (this.commentStart.length + this.commentEnd.length)) {
 					var o = commentStart + this.commentStart.length;
-					if (model.getText(o, o + 1) === "*") { style = javadocStyle; }
+					var star = model.getParent ? model.getParent().getText(o, o + 1) : model.getText(o, o + 1);
+					if (star === "*") { style = javadocStyle; }
 				}
 				if (this.whitespacesVisible || this.detectHyperlinks) {
 					var s = Math.max(offset, commentStart);
@@ -380,6 +375,13 @@ examples.textview.TextStyler = (function() {
 			}
 			if (offset < end) {
 				this._parse(text.substring(offset - start, end - start), offset, styles);
+			}
+			if (model.getParent) {
+				for (var j = 0; j < styles.length; j++) {
+					var length = styles[j].end - styles[j].start;
+					styles[j].start = model.mapOffset(styles[j].start, true);
+					styles[j].end = styles[j].start + length;
+				}
 			}
 			return styles;
 		},
@@ -604,8 +606,10 @@ examples.textview.TextStyler = (function() {
 			var view = this.view;
 			var model = view.getModel();
 			var lineIndex;
-			if (this._matchingBracket !== undefined) {
-				lineIndex = model.getLineAtOffset(this._matchingBracket);
+			var bracket = this._matchingBracket;
+			if (bracket !== undefined) {
+				if (model.getParent) { bracket = model.mapOffset(bracket, true); }
+				lineIndex = model.getLineAtOffset(bracket);
 				view.redrawLines(lineIndex, lineIndex + 1);
 				this._matchingBracket = this._currentBracket = undefined;
 			}
@@ -632,19 +636,18 @@ examples.textview.TextStyler = (function() {
 			if (model.getParent) {
 				mapCaret = model.mapOffset(caret);
 			}
-			var bracket = this._findMatchingBracket(model, mapCaret);
+			bracket = this._findMatchingBracket(model, mapCaret);
 			if (bracket !== -1) {
-				if (model.getParent) {
-					bracket = model.mapOffset(bracket, true);
-				}
-				this._currentBracket = caret;
+				this._currentBracket = mapCaret;
 				this._matchingBracket = bracket;
-				var redrawLine = model.getLineAtOffset(bracket);
-				view.redrawLines(redrawLine, redrawLine + 1);
+				if (model.getParent) { bracket = model.mapOffset(bracket, true); }
+				lineIndex = model.getLineAtOffset(bracket);
+				view.redrawLines(lineIndex, lineIndex + 1);
 			}
 		},
 		_onModelChanged: function(e) {
 			var start = e.start;
+			//TODO mapping is not enough, styler has to listen onChanged on the parent model?
 			var removedCharCount = e.removedCharCount;
 			var addedCharCount = e.addedCharCount;
 			if (this._matchingBracket && start < this._matchingBracket) { this._matchingBracket += addedCharCount + removedCharCount; }

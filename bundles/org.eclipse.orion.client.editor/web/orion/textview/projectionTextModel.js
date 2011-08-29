@@ -96,7 +96,6 @@ orion.textview.ProjectionTextModel = (function() {
 		},
 		mapOffset: function(offset, parentOffset) {
 			var i, projection, projections = this._projections, delta = 0;
-			//PARENT to THIS
 			if (parentOffset) {
 				for (i = 0; i < projections.length; i++) {
 					projection = projections[i];
@@ -106,7 +105,6 @@ orion.textview.ProjectionTextModel = (function() {
 				}
 				return offset + delta;
 			}
-			//THIS to PARENT
 			for (i = 0; i < projections.length; i++) {
 				projection = projections[i];
 				var charCount = projection._model.getCharCount();
@@ -121,15 +119,19 @@ orion.textview.ProjectionTextModel = (function() {
 		},
 		mapLine: function(lineIndex) {
 			if (lineIndex < 0) { return -1; }
-			var lineCount = 0;
-			var model = this._model, ranges = this._ranges, models = this._models;
-			for (var i = 0; i < ranges.length; i++) {
-				var range = ranges[i];
-				var startLine = range.lineIndex;
-				if (startLine - lineCount > lineIndex) { break; }
-				lineCount += range.lineCount + models[i].getLineCount() - 1;
+			var model = this._model, projections = this._projections;
+			var delta = 0;
+			for (var i = 0; i < projections.length; i++) {
+				var projection = projections[i];
+				var lineCount = projection._model.getLineCount() - 1;
+				if (projection._lineIndex + delta <= lineIndex && lineIndex < projection._lineIndex + delta + lineCount) {
+					return -1;
+				}
+				var add = lineCount - projection._lineCount;
+				if ((projection._lineIndex + projection._lineCount) > lineIndex - (delta + add)) { break; }
+				delta += add;
 			}
-			return lineIndex + lineCount;
+			return lineIndex - delta;
 		},
 		getCharCount: function() {
 			var count = this._model.getCharCount(), projections = this._projections;
@@ -140,35 +142,9 @@ orion.textview.ProjectionTextModel = (function() {
 			return count;
 		},
 		getLine: function(lineIndex, includeDelimiter) {
-			if (lineIndex < 0) { return -1; }
-			var lineCount = 0, range, startLine;
-			var model = this._model, ranges = this._ranges, models = this._models;
-			for (var i = 0; i < ranges.length; i++) {
-				range = ranges[i];
-				startLine = range.lineIndex;
-				if (startLine - lineCount >= lineIndex) { break; }
-				lineCount += range.lineCount + models[i].getLineCount() - 1;
-			}
-			var rangeStart = i;
-			var mapStart = model.getLineStart(lineIndex + lineCount);
-			for (; i < ranges.length; i++) {
-				range = ranges[i];
-				startLine = range.lineIndex;
-				if (startLine - lineCount > lineIndex) { break; }
-				lineCount += range.lineCount + models[i].getLineCount() - 1;
-			}
-			var mapEnd = model.getLineEnd(lineIndex + lineCount, includeDelimiter);
-			var text = model.getText(mapStart, mapEnd);
-			var result = [];
-			var offset = 0;
-			for (var j = rangeStart; j < i; j++) {
-				range = ranges[j];
-				result.push(text.substring(offset, range.start - mapStart));
-				result.push(models[i].getText());
-				offset = range.end - mapStart;
-			}
-			result.push(text.substring(offset, text.length));
-			return result.join("");
+			if (lineIndex < 0) { return null; }
+			//TODO optimize
+			return this.getText(this.getLineStart(lineIndex), this.getLineEnd(lineIndex, includeDelimiter));
 		},
 		getLineAtOffset: function(offset) {
 			var delta = 0, lineDelta = 0;
@@ -239,36 +215,49 @@ orion.textview.ProjectionTextModel = (function() {
 		},
 		getText: function(start, end) {
 			if (start === undefined) { start = 0; }
+			if (end === undefined) { end = this.getCharCount(); }//TODO optimize
 			var model = this._model;
-			var add, i, range, offsetCount = 0, ranges = this._ranges, models = this._models;
-			for (i = 0; i < ranges.length; i++) {
-				range = ranges[i];
-				add = (range.end - range.start) - models[i].getCharCount();
-				if (range.end > (start + offsetCount + add)) { break; }
-				offsetCount += add;
-			}
-			var mapStart = start + offsetCount, rangeStart = i, mapEnd;
-			if (end === undefined) {
-				i = ranges.length;
-				mapEnd = model.getCharCount();
-			} else {
-				for (; i < ranges.length; i++) {
-					range = ranges[i];
-					add = (range.end - range.start) - models[i].getCharCount();
-					if (range.end > (end + offsetCount + add)) { break; }
-					offsetCount += add;
+			var result = [];
+			var i, projection, charCount, add, projections = this._projections, delta = 0;
+			for (i = 0; i < projections.length; i++) {
+				projection = projections[i];
+				charCount = projection._model.getCharCount();
+				add = charCount - (projection.end - projection.start);
+				if (projection.start + delta <= start && start < projection.start + delta + charCount) {
+					if (projection.start + delta < end && end <= projection.start + delta + charCount) {
+						return projection._model.getText(start - (projection.start + delta), end - (projection.start + delta));
+					} else {
+						result.push(projection._model.getText(start - (projection.start + delta)));
+						delta += add;
+						start = projection.end + delta;
+						i++;
+						break;
+					}
 				}
-				mapEnd = end + offsetCount;
+				if (projection.end > start - (delta + add)) { break; }
+				delta += add;
 			}
-			var text = model.getText(mapStart, mapEnd);
-			var result = [], offset = 0;
-			for (var j = rangeStart; j < i; j++) {
-				range = ranges[j];
-				result.push(text.substring(offset, range.start - mapStart));
-				result.push(models[i].getText());
-				offset = range.end - mapStart;
+			var offset = start - delta;
+			for (; i < projections.length; i++) {
+				projection = projections[i];
+				result.push(model.getText(offset, Math.min(end - delta, projection.start)));
+				charCount = projection._model.getCharCount();
+				if (projection.start + delta <= end && end < projection.start + delta + charCount) {
+					result.push(projection._model.getText(0, end - (projection.start + delta)));
+					return result.join("");
+				}
+				add = charCount - (projection.end - projection.start);
+				if (projection.end >= end - (delta + add)) {
+					offset = end - delta;
+					break;
+				}
+				result.push(projection._model.getText());
+				offset = projection.end;
+				delta += add;
 			}
-			result.push(text.substring(offset, text.length));
+			if (offset < end - delta) {
+				result.push(model.getText(offset, end - delta));
+			}
 			return result.join("");
 		},
 		onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
@@ -313,7 +302,7 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			model.setText(text, mapStart, mapEnd);
 			
-			//TODO update ranges cached lineIndex and lineCount
+			//TODO update ranges cached lineIndex
 			//TODO remove ranges from rangeStart to i
 			//Update ranges from i
 			// what should be done if start or end is in the middle of a range?
