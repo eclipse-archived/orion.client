@@ -99,21 +99,20 @@ orion.textview.ProjectionTextModel = (function() {
 			if (parentOffset) {
 				for (i = 0; i < projections.length; i++) {
 					projection = projections[i];
+					if (projection.start > offset) { break; }
 					if (projection.start <= offset && offset < projection.end) { return -1; }
-					if (projection.end > offset) { break; }
 					delta += projection._model.getCharCount() - (projection.end - projection.start);
 				}
 				return offset + delta;
 			}
 			for (i = 0; i < projections.length; i++) {
 				projection = projections[i];
+				if (projection.start > offset - delta) { break; }
 				var charCount = projection._model.getCharCount();
 				if (projection.start + delta <= offset && offset < projection.start + delta + charCount) {
 					return -1;
 				}
-				var add = charCount - (projection.end - projection.start);
-				if (projection.end > offset - (delta + add)) { break; }
-				delta += add;
+				delta += charCount - (projection.end - projection.start);
 			}
 			return offset - delta;
 		},
@@ -123,13 +122,12 @@ orion.textview.ProjectionTextModel = (function() {
 			var delta = 0;
 			for (var i = 0; i < projections.length; i++) {
 				var projection = projections[i];
+				if (projection._lineIndex > lineIndex - delta) { break; }
 				var lineCount = projection._model.getLineCount() - 1;
 				if (projection._lineIndex + delta <= lineIndex && lineIndex < projection._lineIndex + delta + lineCount) {
 					return -1;
 				}
-				var add = lineCount - projection._lineCount;
-				if ((projection._lineIndex + projection._lineCount) > lineIndex - (delta + add)) { break; }
-				delta += add;
+				delta += lineCount - projection._lineCount;
 			}
 			return lineIndex - delta;
 		},
@@ -151,6 +149,7 @@ orion.textview.ProjectionTextModel = (function() {
 			var model = this._model, projections = this._projections;
 			for (var i = 0; i < projections.length; i++) {
 				var projection = projections[i];
+				if (projection.start > offset - delta) { break; }
 				var charCount = projection._model.getCharCount();
 				if (projection.start + delta <= offset && offset < projection.start + delta + charCount) {
 					var projectionOffset = offset - (projection.start + delta);
@@ -158,10 +157,8 @@ orion.textview.ProjectionTextModel = (function() {
 					delta += projectionOffset;
 					break;
 				}
-				var add = charCount - (projection.end - projection.start);
-				if (projection.end > offset - (delta + add)) { break; }
 				lineDelta +=  projection._model.getLineCount() - 1 - projection._lineCount;
-				delta += add;
+				delta += charCount - (projection.end - projection.start);
 			}
 			return model.getLineAtOffset(offset - delta) + lineDelta;
 		},
@@ -183,15 +180,14 @@ orion.textview.ProjectionTextModel = (function() {
 			var delta = 0, offsetDelta = 0;
 			for (var i = 0; i < projections.length; i++) {
 				var projection = projections[i];
+				if (projection._lineIndex > lineIndex - delta) { break; }
 				var lineCount = projection._model.getLineCount() - 1;
 				if (projection._lineIndex + delta <= lineIndex && lineIndex < projection._lineIndex + delta + lineCount) {
 					var projectionLineIndex = lineIndex - (projection._lineIndex + delta);
 					return projection._model.getLineEnd (projectionLineIndex, includeDelimiter) + projection.start + offsetDelta;
 				}
-				var add = lineCount - projection._lineCount;
-				if ((projection._lineIndex + projection._lineCount) > lineIndex - (delta + add)) { break; }
 				offsetDelta += projection._model.getCharCount() - (projection.end - projection.start);
-				delta += add;
+				delta += lineCount - projection._lineCount;
 			}
 			return model.getLineEnd(lineIndex - delta, includeDelimiter) + offsetDelta;
 		},
@@ -201,15 +197,14 @@ orion.textview.ProjectionTextModel = (function() {
 			var delta = 0, offsetDelta = 0;
 			for (var i = 0; i < projections.length; i++) {
 				var projection = projections[i];
+				if (projection._lineIndex >= lineIndex - delta) { break; }
 				var lineCount = projection._model.getLineCount() - 1;
 				if (projection._lineIndex + delta < lineIndex && lineIndex <= projection._lineIndex + delta + lineCount) {
 					var projectionLineIndex = lineIndex - (projection._lineIndex + delta);
 					return projection._model.getLineStart (projectionLineIndex) + projection.start + offsetDelta;
 				}
-				var add = lineCount - projection._lineCount;
-				if ((projection._lineIndex + projection._lineCount) >= lineIndex - (delta + add)) { break; }
 				offsetDelta += projection._model.getCharCount() - (projection.end - projection.start);
-				delta += add;
+				delta += lineCount - projection._lineCount;
 			}
 			return model.getLineStart(lineIndex - delta) + offsetDelta;
 		},
@@ -218,42 +213,34 @@ orion.textview.ProjectionTextModel = (function() {
 			if (end === undefined) { end = this.getCharCount(); }//TODO optimize
 			var model = this._model;
 			var result = [];
-			var i, projection, charCount, add, projections = this._projections, delta = 0;
+			var i, projection, charCount, projections = this._projections, delta = 0;
 			for (i = 0; i < projections.length; i++) {
 				projection = projections[i];
+				if (projection.start > start - delta) { break; }
 				charCount = projection._model.getCharCount();
-				add = charCount - (projection.end - projection.start);
 				if (projection.start + delta <= start && start < projection.start + delta + charCount) {
 					if (projection.start + delta < end && end <= projection.start + delta + charCount) {
 						return projection._model.getText(start - (projection.start + delta), end - (projection.start + delta));
 					} else {
 						result.push(projection._model.getText(start - (projection.start + delta)));
-						delta += add;
-						start = projection.end + delta;
-						i++;
-						break;
+						start = projection.end + delta + charCount - (projection.end - projection.start);
 					}
 				}
-				if (projection.end > start - (delta + add)) { break; }
-				delta += add;
+				delta += charCount - (projection.end - projection.start);
 			}
 			var offset = start - delta;
 			for (; i < projections.length; i++) {
 				projection = projections[i];
+				if (projection.start > end - delta) { break; }
 				result.push(model.getText(offset, Math.min(end - delta, projection.start)));
 				charCount = projection._model.getCharCount();
 				if (projection.start + delta <= end && end < projection.start + delta + charCount) {
 					result.push(projection._model.getText(0, end - (projection.start + delta)));
 					return result.join("");
 				}
-				add = charCount - (projection.end - projection.start);
-				if (projection.end >= end - (delta + add)) {
-					offset = end - delta;
-					break;
-				}
 				result.push(projection._model.getText());
 				offset = projection.end;
-				delta += add;
+				delta += charCount - (projection.end - projection.start);
 			}
 			if (offset < end - delta) {
 				result.push(model.getText(offset, end - delta));
