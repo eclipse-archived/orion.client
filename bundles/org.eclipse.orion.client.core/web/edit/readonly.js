@@ -8,13 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global eclipse dojo*/
-/*jslint devel:true*/
+/*global define */
 
 define(['dojo','setup'], function(dojo, mSetup) {
 	
-dojo.addOnLoad(function(){
-	mSetup.setUpEditor(true);  // not read only
-});
+	dojo.addOnLoad(function(){
+		mSetup.setUpEditor(true);  // not read only
+	});
 
 });
