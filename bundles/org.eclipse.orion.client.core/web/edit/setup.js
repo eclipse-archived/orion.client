@@ -112,6 +112,7 @@ exports.setUpEditor = function(isReadOnly){
 				if (splits.length > 0) {
 					switch(extension) {
 						case "js":
+						case "json":
 							this.styler = new mTextStyler.TextStyler(textView, "js");
 							break;
 						case "java":
