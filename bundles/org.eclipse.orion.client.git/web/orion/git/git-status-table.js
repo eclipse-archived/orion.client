@@ -249,7 +249,7 @@ orion.GitStatusTableRenderer = (function() {
 			var actionDiv = dojo.create("div", {style:"float: right;", align:"right"}, actionCol, "last");
 			this._cmdSpan = dojo.create("span", null, actionDiv, "last");
 			
-			dojo.create("hr", null,this._parentId);
+			//dojo.create("hr", null,this._parentId);
 			
 			this._statusContentId = this._parentId + "_" + this._type;
 			dojo.create("div", {id:this._statusContentId}, this._parentId, "last");
@@ -459,7 +459,7 @@ orion.GitLogTableRenderer = (function() {
 			this._cmdSpanAdditional = dojo.create("span", {style: "margin-left: 5px;"}, cmdColAdditional, "last");
 			var cmdCol = dojo.create("td", null, row, "last");
 			this._cmdSpan = dojo.create("span", {style: "margin-left: 5px;"}, cmdCol, "last");
-			dojo.create("hr", null,this._sectionId);
+			//dojo.create("hr", null,this._sectionId);
 			this._logContentId = this._parentId + "_" + this._type + "_content";
 			//dojo.create("div", {id:this._logContentId , style: "border:1px solid grey ;margin-left: 5px; margin-right: 30px; width: 95%; height: 200px; overflow: auto"}, this._parentId, "last");
 			dojo.create("div", {id:this._logContentId , style: "margin-left: 5px; margin-right: 5px; width: 99%; overflow: false"}, this._sectionId, "last");
