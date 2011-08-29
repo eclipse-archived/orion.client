@@ -141,15 +141,14 @@ orion.textview.ProjectionTextModel = (function() {
 		},
 		getLine: function(lineIndex, includeDelimiter) {
 			if (lineIndex < 0) { return null; }
-			var model = this._model, projections = this._projections, i, lineCount, projection, projectionLineIndex;
+			var model = this._model, projections = this._projections, i, lineCount, projection;
 			var delta = 0, result = [], offset = 0;
 			for (i = 0; i < projections.length; i++) {
 				projection = projections[i];
-				offset =  model.getLineStart(lineIndex - delta);
 				if (projection._lineIndex >= lineIndex - delta) { break; }
 				lineCount = projection._model.getLineCount() - 1;
-				if (projection._lineIndex + lineCount > lineIndex - delta) {
-					projectionLineIndex = lineIndex - (projection._lineIndex + delta);
+				if (projection._lineIndex + lineCount >= lineIndex - delta) {
+					var projectionLineIndex = lineIndex - (projection._lineIndex + delta);
 					if (projectionLineIndex < lineCount) {
 						return projection._model.getLine(projectionLineIndex, includeDelimiter);
 					} else {
@@ -159,10 +158,9 @@ orion.textview.ProjectionTextModel = (function() {
 				offset = projection.end;
 				delta += lineCount - projection._lineCount;
 			}
-//			var end = 0;
+			offset = Math.max(offset, model.getLineStart(lineIndex - delta));
 			for (; i < projections.length; i++) {
 				projection = projections[i];
-//				end =  model.getLineEnd(lineIndex - delta, includeDelimiter);
 				if (projection._lineIndex > lineIndex - delta) { break; }
 				result.push(model.getText(offset, projection.start));
 				lineCount = projection._model.getLineCount() - 1;
