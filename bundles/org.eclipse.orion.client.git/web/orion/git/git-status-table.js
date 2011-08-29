@@ -1423,24 +1423,53 @@ orion.GitStatusController = (function() {
 				var committerNameInput = document.getElementById("committerName");
 				committerName =  committerNameInput.value;
 				body.CommitterName = committerName;
+				if (!committerName) {
+					this.reportWarning("The committer name is required.");
+					this._committerAndAuthorZoneRenderer.show();
+					return;
+				}
 			}
 			if(!committerEmail) {
 				var committerEmailInput = document.getElementById("committerEmail");
 				committerEmail =  committerEmailInput.value;
 				body.CommitterEmail = committerEmail;
+				if (!committerEmail) {
+					this.reportWarning("The committer mail is required.");
+					this._committerAndAuthorZoneRenderer.show();
+					return;
+				}
 			}
 			if(!authorName) {
 				var authorNameInput = document.getElementById("authorName");
 				authorName =  authorNameInput.value;
 				body.AuthorName = authorName;
+				if (!authorName) {
+					this.reportWarning("The author name is required.");
+					this._committerAndAuthorZoneRenderer.show();
+					return;
+				}
 			}
 			if(!authorEmail) {
 				var authorEmailInput = document.getElementById("authorEmail");
 				authorEmail =  authorEmailInput.value;
 				body.AuthorEmail = authorEmail;
+				if (!authorEmail) {
+					this.reportWarning("The author mail is required.");
+					this._committerAndAuthorZoneRenderer.show();
+					return;
+				}
 			}
 			
 			this.commitAll(this._curClone.HeadLocation, message, dojo.toJson(body));
+		},
+		
+		reportWarning: function(message){
+			this._registry.getService("orion.page.message").then(function(progressService){
+				var display = [];
+				display.Severity = "Warning";
+				display.Message = message;
+				progressService.setProgressResult(display);
+			});
 		},
 				
 		rebase: function(action){
