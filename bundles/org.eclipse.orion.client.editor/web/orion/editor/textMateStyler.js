@@ -105,29 +105,7 @@ orion.editor.RegexUtil = {
 			throw new Error("Unsupported regex feature \"" + feature + "\": \"" + match[0] + "\" at index: "
 					+ match.index + " in " + match.input);
 		}
-		function getMatchingCloseParen(str, start) {
-			var depth = 0,
-			    len = str.length,
-			    xStop = -1;
-			for (var i=start; i < len && xStop === -1; i++) {
-				switch (str[i]) {
-					case "\\":
-						i += 1; // skip next char
-						break;
-					case "(":
-						depth++;
-						break;
-					case ")":
-						depth--;
-						if (depth === 0) {
-							xStop = i;
-						}
-						break;
-				}
-			}
-			return xStop;
-		}
-		// Turns an extended regex into a normal one
+		// Turns an extended regex pattern into a normal one
 		function normalize(/**String*/ str) {
 			var result = "";
 			var insideCharacterClass = false;
@@ -170,28 +148,67 @@ orion.editor.RegexUtil = {
 		var flags = "";
 		var i;
 		
-		// Check for unsupported syntax
+		// Handle global "x" flag (whitespace/comments)
+		str = orion.editor.RegexUtil.processGlobalFlag("x", str, function(subexp) {
+				return normalize(subexp);
+			});
+		
+		// Handle global "i" flag (case-insensitive)
+		str = orion.editor.RegexUtil.processGlobalFlag("i", str, function(subexp) {
+				flags += "i";
+				return subexp;
+			});
+		
+		// Check for remaining unsupported syntax
 		for (i=0; i < this.unsupported.length; i++) {
 			var match;
 			if ((match = this.unsupported[i].regex.exec(str))) {
-				fail(this.unsupported[i].func(match));
+				fail(this.unsupported[i].func(match), match);
 			}
 		}
 		
-		// Deal with "x" flag (whitespace/comments)
-		if (str.substring(0, 4) === "(?x)") {
-			// Leading (?x) term (means "x" flag applies to entire regex)
-			str = normalize(str.substring(4));
-		} else if (str.substring(0, 4) === "(?x:") {
-			// Regex wrapped in a (?x: ...) -- again "x" applies to entire regex
-			var xStop = getMatchingCloseParen(str, 0);
-			if (xStop < str.length-1) {
-				throw new Error("Only a (?x:) group that encloses the entire regex is supported: " + str);
-			}
-			str = normalize(str.substring(4, xStop));
-		}
-		// TODO: tolerate /(?iSubExp)/ -- eg. in PHP grammar (trickier)
 		return new RegExp(str, flags);
+	},
+	
+	/**
+	 * Checks if flag applies to entire pattern. If so, obtains replacement string by calling processor
+	 * on the unwrapped pattern. Handles 2 possible syntaxes: (?f)pat and (?f:pat)
+	 */
+	processGlobalFlag: function(/**String*/ flag, /**String*/ str, /**Function*/ processor) {
+		function getMatchingCloseParen(/*String*/pat, /*Number*/start) {
+			var depth = 0,
+			    len = pat.length,
+			    flagStop = -1;
+			for (var i=start; i < len && flagStop === -1; i++) {
+				switch (pat[i]) {
+					case "\\":
+						i++; // escape: skip next char
+						break;
+					case "(":
+						depth++;
+						break;
+					case ")":
+						depth--;
+						if (depth === 0) {
+							flagStop = i;
+						}
+						break;
+				}
+			}
+			return flagStop;
+		}
+		var flag1 = "(?" + flag + ")",
+		    flag2 = "(?" + flag + ":";
+		if (str.substring(0, flag1.length) === flag1) {
+			return processor(str.substring(flag1.length));
+		} else if (str.substring(0, flag2.length) === flag2) {
+			var flagStop = getMatchingCloseParen(str, 0);
+			if (flagStop < str.length-1) {
+				throw new Error("Only a " + flag2 + ") group that encloses the entire regex is supported in: " + str);
+			}
+			return processor(str.substring(flag2.length, flagStop));
+		}
+		return str;
 	},
 	
 	hasBackReference: function(/**RegExp*/ regex) {
