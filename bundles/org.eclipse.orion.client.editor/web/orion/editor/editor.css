@@ -1,0 +1,13 @@
+.annotationRuler,
+.overviewRuler,
+.lineNumberRuler,
+.lineNumberRuler-odd,
+.lineNumberRuler-even {
+	background-color: #ffffff;
+}
+
+.lineNumberRuler {
+	text-align: right;
+	border-left: 1px solid #ddd;
+	border-right: 1px solid #ddd;
+}
