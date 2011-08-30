@@ -95,7 +95,7 @@ orion.textview.ProjectionTextModel = (function() {
 			return this._model;
 		},
 		mapOffset: function(offset, parentOffset) {
-			var i, projection, projections = this._projections, delta = 0;
+			var projections = this._projections, delta = 0, i, projection;
 			if (parentOffset) {
 				for (i = 0; i < projections.length; i++) {
 					projection = projections[i];
@@ -141,8 +141,8 @@ orion.textview.ProjectionTextModel = (function() {
 		},
 		getLine: function(lineIndex, includeDelimiter) {
 			if (lineIndex < 0) { return null; }
-			var model = this._model, projections = this._projections, i, lineCount, projection;
-			var delta = 0, result = [], offset = 0;
+			var model = this._model, projections = this._projections;
+			var delta = 0, result = [], offset = 0, i, lineCount, projection;
 			for (i = 0; i < projections.length; i++) {
 				projection = projections[i];
 				if (projection._lineIndex >= lineIndex - delta) { break; }
@@ -177,12 +177,10 @@ orion.textview.ProjectionTextModel = (function() {
 				result.push(model.getText(offset, end));
 			}
 			return result.join("");
-			//TODO optimize
-//			return this.getText(this.getLineStart(lineIndex), this.getLineEnd(lineIndex, includeDelimiter));
 		},
 		getLineAtOffset: function(offset) {
-			var delta = 0, lineDelta = 0;
 			var model = this._model, projections = this._projections;
+			var delta = 0, lineDelta = 0;
 			for (var i = 0; i < projections.length; i++) {
 				var projection = projections[i];
 				if (projection.start > offset - delta) { break; }
@@ -193,7 +191,7 @@ orion.textview.ProjectionTextModel = (function() {
 					delta += projectionOffset;
 					break;
 				}
-				lineDelta +=  projection._model.getLineCount() - 1 - projection._lineCount;
+				lineDelta += projection._model.getLineCount() - 1 - projection._lineCount;
 				delta += charCount - (projection.end - projection.start);
 			}
 			return model.getLineAtOffset(offset - delta) + lineDelta;
@@ -246,16 +244,14 @@ orion.textview.ProjectionTextModel = (function() {
 		},
 		getText: function(start, end) {
 			if (start === undefined) { start = 0; }
-			if (end === undefined) { end = this.getCharCount(); }//TODO optimize
-			var model = this._model;
-			var result = [];
-			var i, projection, charCount, projections = this._projections, delta = 0;
+			var model = this._model, projections = this._projections;
+			var delta = 0, result = [], i, projection, charCount;
 			for (i = 0; i < projections.length; i++) {
 				projection = projections[i];
 				if (projection.start > start - delta) { break; }
 				charCount = projection._model.getCharCount();
 				if (projection.start + charCount > start - delta) {
-					if (projection.start + charCount > end - delta) {
+					if (end && projection.start + charCount > end - delta) {
 						return projection._model.getText(start - (projection.start + delta), end - (projection.start + delta));
 					} else {
 						result.push(projection._model.getText(start - (projection.start + delta)));
@@ -265,21 +261,29 @@ orion.textview.ProjectionTextModel = (function() {
 				delta += charCount - (projection.end - projection.start);
 			}
 			var offset = start - delta;
-			for (; i < projections.length; i++) {
-				projection = projections[i];
-				if (projection.start > end - delta) { break; }
-				result.push(model.getText(offset,  projection.start));
-				charCount = projection._model.getCharCount();
-				if (projection.start + charCount > end - delta) {
-					result.push(projection._model.getText(0, end - (projection.start + delta)));
-					return result.join("");
+			if (end) {
+				for (; i < projections.length; i++) {
+					projection = projections[i];
+					if (projection.start > end - delta) { break; }
+					result.push(model.getText(offset, projection.start));
+					charCount = projection._model.getCharCount();
+					if (projection.start + charCount > end - delta) {
+						result.push(projection._model.getText(0, end - (projection.start + delta)));
+						return result.join("");
+					}
+					result.push(projection._model.getText());
+					offset = projection.end;
+					delta += charCount - (projection.end - projection.start);
 				}
-				result.push(projection._model.getText());
-				offset = projection.end;
-				delta += charCount - (projection.end - projection.start);
-			}
-			if (offset < end - delta) {
 				result.push(model.getText(offset, end - delta));
+			} else {
+				for (; i < projections.length; i++) {
+					projection = projections[i];
+					result.push(model.getText(offset, projection.start));
+					result.push(projection._model.getText());
+					offset = projection.end;
+				}
+				result.push(model.getText(offset));
 			}
 			return result.join("");
 		},
