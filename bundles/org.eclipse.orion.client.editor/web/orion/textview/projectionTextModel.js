@@ -251,7 +251,7 @@ orion.textview.ProjectionTextModel = (function() {
 				if (projection.start > start - delta) { break; }
 				charCount = projection._model.getCharCount();
 				if (projection.start + charCount > start - delta) {
-					if (end && projection.start + charCount > end - delta) {
+					if (end !== undefined && projection.start + charCount > end - delta) {
 						return projection._model.getText(start - (projection.start + delta), end - (projection.start + delta));
 					} else {
 						result.push(projection._model.getText(start - (projection.start + delta)));
@@ -261,7 +261,7 @@ orion.textview.ProjectionTextModel = (function() {
 				delta += charCount - (projection.end - projection.start);
 			}
 			var offset = start - delta;
-			if (end) {
+			if (end !== undefined) {
 				for (; i < projections.length; i++) {
 					projection = projections[i];
 					if (projection.start > end - delta) { break; }
@@ -306,28 +306,59 @@ orion.textview.ProjectionTextModel = (function() {
 		setText: function(text, start, end) {
 			if (text === undefined) { text = ""; }
 			if (start === undefined) { start = 0; }
-			var model = this._model;
-			var add, i, range, offsetCount = 0, ranges = this._ranges, models = this._models;
-			for (i = 0; i < ranges.length; i++) {
-				range = ranges[i];
-				add = (range.end - range.start) - models[i].getCharCount();
-				if (range.end > (start + offsetCount + add)) { break; }
-				offsetCount += add;
-			}
-			var mapStart = start + offsetCount, rangeStart = i, mapEnd;
-			if (end === undefined) {
-				i = ranges.length;
-				mapEnd = model.getCharCount();
-			} else {
-				for (; i < ranges.length; i++) {
-					range = ranges[i];
-					add = (range.end - range.start) - models[i].getCharCount();
-					if (range.end > (end + offsetCount + add)) { break; }
-					offsetCount += add;
+			var model = this._model, projections = this._projections;
+			var delta = 0, i, projection, charCount;
+			for (i = 0; i < projections.length; i++) {
+				projection = projections[i];
+				if (projection.start > start - delta) { break; }
+				charCount = projection._model.getCharCount();
+				if (projection.start + charCount > start - delta) {
+					if (end !== undefined && projection.start + charCount > end - delta) {
+						projection._model.setText(text, start - (projection.start + delta), end - (projection.start + delta));
+						//TODO events
+						return;
+					} else {
+						start = projection.end + delta + charCount - (projection.end - projection.start);
+						projection._model.setText("", start - (projection.start + delta));
+						projection.end = projection.start + projection._model.getCharCount();
+						projection._lineCount = model.getLineAtOffset(projection.end) - projection._lineIndex;
+					}
 				}
-				mapEnd = end + offsetCount;
+				delta += charCount - (projection.end - projection.start);
+			}
+			var mapStart = start - delta, rangeStart = i, rangeEnd, mapEnd;
+			if (end !== undefined) {
+				for (; i < projections.length; i++) {
+					projection = projections[i];
+					if (projection.start > end - delta) { break; }
+					charCount = projection._model.getCharCount();
+					if (projection.start + charCount > end - delta) {
+						charCount = end - (projection.start + delta);
+						end = projection.end + delta;
+						projection._model.setText("", 0, charCount);
+						projection.start = projection.end;
+						projection._lineCount = 0;
+						break;
+					}
+					delta += charCount - (projection.end - projection.start);
+				}
+				rangeEnd = i;
+				mapEnd = end - delta;
+			} else {
+				rangeEnd = projections.length - 1;
+				mapEnd = model.getCharCount();
 			}
 			model.setText(text, mapStart, mapEnd);
+			projections.splice(projections, rangeEnd - rangeStart);
+			var count = text.length - (mapEnd - mapStart);
+			for (; i < projections.length; i++) {
+				projection = projections[i];
+				projection.start += count;
+				projection.end += count;
+				projection._lineIndex = model.getLineAtOffset(projection.start);
+			}
+			
+			//TODO events
 			
 			//TODO update ranges cached lineIndex
 			//TODO remove ranges from rangeStart to i

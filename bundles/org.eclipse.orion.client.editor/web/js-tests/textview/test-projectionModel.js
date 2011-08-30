@@ -101,8 +101,8 @@ ProjectionTextModelTestCase.prototype = {
 		model = new orion.textview.TextModel("STARTEND", "\n");
 		projectionModel = new orion.textview.ProjectionTextModel(model);
 		projectionModel.addProjection({start: 5, end: 5, content: "\nCENTER\n"});
-//		                          01234 5678901 2345
-		assertEquals("projectionModel3(0,charCount)", "START\nCENTER\nEND", projectionModel.getText(0, projectionModel.getCharCount()));
+//		                                                     01234567 8901 2345
+		assertEquals("projectionModel.getText(0,charCount)3", "START\nCENTER\nEND", projectionModel.getText(0, projectionModel.getCharCount()));
 		assertEquals("projectionModel.getCharCount3", 16, projectionModel.getCharCount());
 		assertEquals("model.getCharCount3", 8, model.getCharCount());
 		assertEquals("projectionModel.getLineCount3", 3, projectionModel.getLineCount());
@@ -115,6 +115,19 @@ ProjectionTextModelTestCase.prototype = {
 		for (i=0; i<projectionModel.getLineCount(); i++) {
 			assertEquals("projectionModel.getLine(="+i+")", expected[i], projectionModel.getLine(i, true));//to parent
 		}
+		
+		// test setText
+		projectionModel.setText("hi", 0, 0);
+		assertEquals("projectionModel1.setText()", "hiSTART\nCENTER\nEND", projectionModel.getText());
+		projectionModel.setText("hello", 4, 10);
+		assertEquals("projectionModel2.setText()", "hiSThelloNTER\nEND", projectionModel.getText());
+		projectionModel.setText("NEW", 10, 11);
+		assertEquals("projectionModel3.setText()", "hiSThelloNNEWER\nEND", projectionModel.getText());
+		projectionModel.setText("1", 1, 17);
+		assertEquals("projectionModel4.setText()", "h1ND", projectionModel.getText());
+		projectionModel.setText("done");
+		assertEquals("projectionModel5.setText()", "done", projectionModel.getText());
+			
 	},
 	test_test3: function () {
 		var model, projectionModel, i, expected;
