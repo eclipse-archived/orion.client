@@ -11,7 +11,7 @@
 /*global assertEquals orion */
 
 if (window.AsyncTestCase) {
-	ProjectionTextModelTestCase = TestCase("Performance"); 
+	ProjectionTextModelTestCase = TestCase("ProjectionTextModelTestCase"); 
 } else {
 	function ProjectionTextModelTestCase (view) {
 		
