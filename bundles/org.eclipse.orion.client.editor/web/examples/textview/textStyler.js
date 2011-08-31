@@ -252,7 +252,24 @@ examples.textview.TextStyler = (function() {
 		this._matchingBracket = undefined;
 		
 		view.addEventListener("Selection", this, this._onSelection);
-		view.addEventListener("ModelChanged", this, this._onModelChanged);
+		var model = view.getModel();
+		if (model.getParent) {
+			var self = this;
+			model.getParent().addListener({
+				onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+					var e = {
+						start: start, 
+						removedCharCount: removedCharCount,
+						addedCharCount: addedCharCount,
+						removedLineCount: removedLineCount,
+						addedLineCount: addedLineCount
+					};
+					self._onModelChanged(e);
+				}
+			});
+		} else {
+			view.addEventListener("ModelChanged", this, this._onModelChanged);
+		}
 		view.addEventListener("Destroy", this, this._onDestroy);
 		view.addEventListener("LineStyle", this, this._onLineStyle);
 		view.redrawLines();
@@ -295,6 +312,7 @@ examples.textview.TextStyler = (function() {
 			// compute comments between commentOffset and end
 			if (end <= this.commentOffset) { return; }
 			var model = this.view.getModel();
+			if (model.getParent) { model = model.getParent(); }
 			var charCount = model.getCharCount();
 			var e = end;
 			// Uncomment to compute all comments
@@ -338,6 +356,50 @@ examples.textview.TextStyler = (function() {
 				}
 			}
 			return null;
+		},
+		_getStyles_faster_but_wrong: function(text, start) {
+			var end = start + text.length;
+			var model = this.view.getModel();
+			
+			// get comment ranges that intersect with range
+			var mapStart = start, mapEnd = end;
+			if (model.getParent) {
+				mapStart = model.mapOffset(start);
+				mapEnd = model.mapOffset(end);
+			}
+			var commentRanges = this._getCommentRanges (mapStart, mapEnd);
+			var styles = [];
+			
+			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
+			var offset = start;
+			for (var i = 0; i < commentRanges.length; i+= 2) {
+				var commentStart = commentRanges[i];
+				var commentEnd = commentRanges[i+1];
+				if (model.getParent) {
+					commentStart = model.mapOffset(commentStart, true);
+					commentEnd = model.mapOffset(commentEnd, true);
+				}
+				if (offset < commentStart) {
+					this._parse(text.substring(offset - start, commentStart - start), offset, styles);
+				}
+				var style = commentStyle;
+				if ((commentEnd - commentStart) > (this.commentStart.length + this.commentEnd.length)) {
+					var o = commentStart + this.commentStart.length;
+					if (model.getText(o, o + 1) === "*") { style = javadocStyle; }
+				}
+				if (this.whitespacesVisible || this.detectHyperlinks) {
+					var s = Math.max(offset, commentStart);
+					var e = Math.min(end, commentEnd);
+					this._parseWhitespace(text.substring(s - start, e - start), s, styles, style);
+				} else {
+					styles.push({start: commentStart, end: commentEnd, style: style});
+				}
+				offset = commentEnd;
+			}
+			if (offset < end) {
+				this._parse(text.substring(offset - start, end - start), offset, styles);
+			}
+			return styles;
 		},
 		_getStyles: function(text, start) {
 			var model = this.view.getModel();
@@ -654,6 +716,7 @@ examples.textview.TextStyler = (function() {
 			if (this._currentBracket && start < this._currentBracket) { this._currentBracket += addedCharCount + removedCharCount; }
 			if (start >= this.commentOffset) { return; }
 			var model = this.view.getModel();
+			if (model.getParent) { model = model.getParent(); }
 			
 //			window.console.log("start=" + start + " added=" + addedCharCount + " removed=" + removedCharCount)
 //			for (var i=0; i< this.commentOffsets.length; i++) {
@@ -751,6 +814,11 @@ examples.textview.TextStyler = (function() {
 			
 			if (redraw) {
 //				window.console.log ("redraw " + (start + addedCharCount) + " " + redrawEnd);
+				model = this.view.getModel();
+				if (model.getPatent) {
+					start = model.mapOffset(start + addedCharCount, true);
+					redrawEnd = model.mapOffset(redrawEnd, true);
+				}
 				this.view.redrawRange(start + addedCharCount, redrawEnd);
 			}
 

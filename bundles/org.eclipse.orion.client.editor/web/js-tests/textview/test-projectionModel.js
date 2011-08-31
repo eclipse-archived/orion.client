@@ -127,6 +127,44 @@ ProjectionTextModelTestCase.prototype = {
 		assertEquals("projectionModel4.setText()", "h1ND", projectionModel.getText());
 		projectionModel.setText("done");
 		assertEquals("projectionModel5.setText()", "done", projectionModel.getText());
+		
+		var listener = {
+			onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+				assertEquals("text"+expected[6], expected[0], text);
+				assertEquals("start"+expected[6], expected[1], start);
+				assertEquals("removedCharCount"+expected[6], expected[2], removedCharCount);
+				assertEquals("addedCharCount"+expected[6], expected[3], addedCharCount);
+				assertEquals("removedLineCount"+expected[6], expected[4], removedLineCount);
+				assertEquals("addedLineCount"+expected[6], expected[5], addedLineCount);
+			}
+		};
+		model = new orion.textview.TextModel("01234567", "\n");
+		projectionModel = new orion.textview.ProjectionTextModel(model);
+		projectionModel.addProjection({start: 2, end: 2, content: "A\nB\nC"});
+		assertEquals("a", "01A\nB\nC234567", projectionModel.getText());
+		projectionModel.addListener(listener);
+		expected = ["", 0, 13, 0, 2, 0, "0"];
+		projectionModel.setText("");
+		
+		//
+		model = new orion.textview.TextModel("01234567", "\n");
+		projectionModel = new orion.textview.ProjectionTextModel(model);
+		projectionModel.addProjection({start: 2, end: 2, content: "A\nB\nC"});
+		assertEquals("b", "01A\nB\nC234567", projectionModel.getText());
+		projectionModel.addListener(listener);
+		expected = ["", 4, 6, 0, 1, 0, "1"];
+		projectionModel.setText("", 4, 10);
+		assertEquals("c", "01A\n567", projectionModel.getText());
+		
+		model = new orion.textview.TextModel("01234567", "\n");
+		projectionModel = new orion.textview.ProjectionTextModel(model);
+		projectionModel.addProjection({start: 2, end: 2, content: "A\nB\nC"});
+		assertEquals("d", "01A\nB\nC234567", projectionModel.getText());
+		projectionModel.addListener(listener);
+		expected = ["", 1, 4, 0, 1, 0, "1"];
+		projectionModel.setText("", 1, 5);
+		assertEquals("e", "0\nC234567", projectionModel.getText());
+		
 			
 	},
 	test_test3: function () {

@@ -29,17 +29,15 @@ orion.textview.ProjectionTextModel = (function() {
 		this._model = model;	/* Base Model */
 		this._listeners = [];
 		this._projections = [];
-		
-		//TODO
-		var self = this;
-		model.addListener({
-			onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-				self.onChanging(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
-			},
-			onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-				self.onChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
-			}
-		});
+//		var self = this;
+//		model.addListener({
+//			onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+//				self._onChanging(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+//			},
+//			onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+//				self.onChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+//			}
+//		});
 	}
 
 	ProjectionTextModel.prototype = /** @lends orion.textview.ProjectionTextModel.prototype */ {
@@ -287,6 +285,34 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			return result.join("");
 		},
+		_onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+			var model = this._model, projections = this._projections, i, projection, delta = 0, lineDelta;
+			var end = start + removedCharCount;
+			for (; i < projections.length; i++) {
+				projection = projections[i];
+				if (projection.start > start) { break; }
+				delta += projection._model.getCharCount() - (projection.end - projection.start);
+			}
+			/*TODO add stuff saved by setText*/
+			var mapStart = start + delta, rangeStart = i;
+			for (; i < projections.length; i++) {
+				projection = projections[i];
+				if (projection.start > end) { break; }
+				delta += projection._model.getCharCount() - (projection.end - projection.start);
+				lineDelta += projection._model.getLineCount() - 1 - projection._lineCount;
+			}
+			/*TODO add stuff saved by setText*/
+			var mapEnd = end + delta, rangeEnd = i;
+			this.onChanging(mapStart, mapEnd - mapStart, addedCharCount/*TODO add stuff saved by setText*/, removedLineCount + lineDelta/*TODO add stuff saved by setText*/, addedLineCount/*TODO add stuff saved by setText*/);
+			projections.splice(projections, rangeEnd - rangeStart);
+			var count = text.length - (mapEnd - mapStart);
+			for (; i < projections.length; i++) {
+				projection = projections[i];
+				projection.start += count;
+				projection.end += count;
+				projection._lineIndex = model.getLineAtOffset(projection.start);
+			}
+		},
 		onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
@@ -306,8 +332,9 @@ orion.textview.ProjectionTextModel = (function() {
 		setText: function(text, start, end) {
 			if (text === undefined) { text = ""; }
 			if (start === undefined) { start = 0; }
+			var eventStart = start, eventEnd = end;
 			var model = this._model, projections = this._projections;
-			var delta = 0, i, projection, charCount;
+			var delta = 0, lineDelta = 0, i, projection, charCount, startProjection, endProjection, startLineDelta = 0;
 			for (i = 0; i < projections.length; i++) {
 				projection = projections[i];
 				if (projection.start > start - delta) { break; }
@@ -315,56 +342,95 @@ orion.textview.ProjectionTextModel = (function() {
 				if (projection.start + charCount > start - delta) {
 					if (end !== undefined && projection.start + charCount > end - delta) {
 						projection._model.setText(text, start - (projection.start + delta), end - (projection.start + delta));
-						//TODO events
+						//TODO events - special case
 						return;
 					} else {
+						startLineDelta = projection._model.getLineCount() - 1 - projection._model.getLineAtOffset(start - (projection.start + delta));
+						startProjection = {
+							projection: projection,
+							start: start - (projection.start + delta)
+						};
 						start = projection.end + delta + charCount - (projection.end - projection.start);
-						projection._model.setText("", start - (projection.start + delta));
-						projection.end = projection.start + projection._model.getCharCount();
-						projection._lineCount = model.getLineAtOffset(projection.end) - projection._lineIndex;
 					}
 				}
+				lineDelta += projection._model.getLineCount() - 1 - projection._lineCount;
 				delta += charCount - (projection.end - projection.start);
 			}
-			var mapStart = start - delta, rangeStart = i, rangeEnd, mapEnd;
+			var mapStart = start - delta, rangeStart = i, startLine = model.getLineAtOffset(mapStart) + lineDelta - startLineDelta;
 			if (end !== undefined) {
 				for (; i < projections.length; i++) {
 					projection = projections[i];
 					if (projection.start > end - delta) { break; }
 					charCount = projection._model.getCharCount();
 					if (projection.start + charCount > end - delta) {
+						lineDelta += projection._model.getLineAtOffset(end - (projection.start + delta));
 						charCount = end - (projection.start + delta);
 						end = projection.end + delta;
-						projection._model.setText("", 0, charCount);
-						projection.start = projection.end;
-						projection._lineCount = 0;
+						endProjection = {
+							projection: projection,
+							end: charCount
+						};
 						break;
 					}
+					lineDelta += projection._model.getLineCount() - 1 - projection._lineCount;
 					delta += charCount - (projection.end - projection.start);
 				}
-				rangeEnd = i;
-				mapEnd = end - delta;
 			} else {
-				rangeEnd = projections.length - 1;
-				mapEnd = model.getCharCount();
+				for (; i < projections.length; i++) {
+					projection = projections[i];
+					lineDelta += projection._model.getLineCount() - 1 - projection._lineCount;
+					delta += projection._model.getCharCount() - (projection.end - projection.start);
+				}
+				end = eventEnd = model.getCharCount() + delta;
 			}
+			var mapEnd = end - delta, rangeEnd = i, endLine = model.getLineAtOffset(mapEnd) + lineDelta;
+			
+			//events
+			var removedCharCount = eventEnd - eventStart;
+			var removedLineCount = endLine - startLine;
+			var addedCharCount = text.length;
+			var addedLineCount = 0;
+			var cr = 0, lf = 0, index = 0;
+			while (true) {
+				if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); }
+				if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); }
+				if (lf === -1 && cr === -1) { break; }
+				if (cr !== -1 && lf !== -1) {
+					if (cr + 1 === lf) {
+						index = lf + 1;
+					} else {
+						index = (cr < lf ? cr : lf) + 1;
+					}
+				} else if (cr !== -1) {
+					index = cr + 1;
+				} else {
+					index = lf + 1;
+				}
+				addedLineCount++;
+			}
+			this.onChanging(text, eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			
 			model.setText(text, mapStart, mapEnd);
+			if (startProjection) {
+				projection = startProjection.projection;
+				projection._model.setText("", startProjection.start);
+			}		
+			if (endProjection) {
+				projection = endProjection.projection;
+				projection._model.setText("", 0, endProjection.end);
+				projection.start = projection.end;
+				projection._lineCount = 0;
+			}
 			projections.splice(projections, rangeEnd - rangeStart);
 			var count = text.length - (mapEnd - mapStart);
-			for (; i < projections.length; i++) {
+			for (i = rangeEnd; i < projections.length; i++) {
 				projection = projections[i];
 				projection.start += count;
 				projection.end += count;
 				projection._lineIndex = model.getLineAtOffset(projection.start);
 			}
 			
-			//TODO events
-			
-			//TODO update ranges cached lineIndex
-			//TODO remove ranges from rangeStart to i
-			//Update ranges from i
-			// what should be done if start or end is in the middle of a range?
-			// is it better to do it here and send events from here as well? Or from the model listener?
+			this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 		}
 	};
 
