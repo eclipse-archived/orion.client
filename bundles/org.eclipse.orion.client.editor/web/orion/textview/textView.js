@@ -1870,19 +1870,17 @@ orion.textview.TextView = (function() {
 					* convert delta to pixel values, it is necessary to divide delta
 					* by 40.
 					*
-					* In Chrome, the wheel delta depends on the type of the mouse. In
-					* general, it is the pixel value for Mac mice and track pads, but
-					* it is a multiple of 120 for other mice. There is no presise
+					* In Chrome and Safari 5, the wheel delta depends on the type of the
+					* mouse. In general, it is the pixel value for Mac mice and track pads,
+					* but it is a multiple of 120 for other mice. There is no presise
 					* way to determine if it is pixel value or a multiple of 120.
 					* 
 					* Note that the current approach does not calculate the correct
 					* pixel value for Mac mice when the delta is a multiple of 120.
 					*/
 					var denominatorX = 40, denominatorY = 40;
-					if (isChrome) {
-						if (e.wheelDeltaX % 120 !== 0) { denominatorX = 1; }
-						if (e.wheelDeltaY % 120 !== 0) { denominatorY = 1; }
-					}
+					if (e.wheelDeltaX % 120 !== 0) { denominatorX = 1; }
+					if (e.wheelDeltaY % 120 !== 0) { denominatorY = 1; }
 					pixelX = -e.wheelDeltaX / denominatorX;
 					if (-1 < pixelX && pixelX < 0) { pixelX = -1; }
 					if (0 < pixelX && pixelX < 1) { pixelX = 1; }
