@@ -116,8 +116,8 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 				var newItem = userData || {} /* just update the HostingStatus */;
 				newItem.HostingStatus = { Status: "started" };
 				
-				var deferred = siteService.updateSiteConfiguration(item.Location, newItem).then(startCallback, errorCallback);
-				statusService.showWhile(deferred, "Starting...");
+				var deferred = siteService.updateSiteConfiguration(item.Location, newItem);
+				statusService.showWhile(deferred, "Starting...").then(startCallback, errorCallback);
 			}});
 		commandService.addCommand(startCommand, "object");
 		
@@ -133,8 +133,8 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 				var newItem = userData || {} /* just update the HostingStatus */;
 				newItem.HostingStatus = { Status: "stopped" };
 				
-				var deferred = siteService.updateSiteConfiguration(item.Location, newItem).then(stopCallback, errorCallback);
-				statusService.showWhile(deferred, "Stopping " + item.Name + "...");
+				var deferred = siteService.updateSiteConfiguration(item.Location, newItem);
+				statusService.showWhile(deferred, "Stopping " + item.Name + "...").then(stopCallback, errorCallback);
 			}});
 		commandService.addCommand(stopCommand, "object");
 		

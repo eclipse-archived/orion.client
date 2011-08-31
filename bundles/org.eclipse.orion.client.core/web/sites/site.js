@@ -92,7 +92,7 @@ dojo.addOnLoad(function() {
 		
 		// Hook up commands stuff
 		var refresher = dojo.hitch(widget, widget._setSiteConfiguration);
-		var errorHandler = statusService;
+		var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
 		
 		mSiteUtils.createSiteCommands(commandService, siteService, statusService, dialogService, 
 				/*start*/ refresher, /*stop*/ refresher, /*delete*/ null, errorHandler);
