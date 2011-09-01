@@ -8,8 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global eclipse dojo dijit window widgets*/
-/*jslint devel:true*/
+/*global define dojo dijit orion window widgets*/
+/*jslint browser:true*/
 
 /*
  * Glue code for sites.html
@@ -68,9 +68,7 @@ dojo.addOnLoad(function() {
 					treeWidget.refreshAndExpand("site-table-tree", siteConfigs);
 				});
 			};
-			var errorHandler = function(error) {
-				statusService.setErrorMessage(error);
-			};
+			var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
 			
 			var createCommand = new mCommands.Command({
 				name : "Create Site Configuration",
@@ -92,8 +90,8 @@ dojo.addOnLoad(function() {
 			commandService.addCommand(createCommand, "dom");
 			
 			// Add commands that deal with individual site configuration (edit, start, stop..)
-			mSiteUtils.createSiteCommands(commandService, siteService, statusService,
-					dialogService, /*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
+			mSiteUtils.createSiteCommands(commandService, siteService, statusService, dialogService,
+					/*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
 			
 			// Register command contributions
 			commandService.registerCommandContribution("eclipse.sites.create", 1, "pageActions");
