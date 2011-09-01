@@ -180,6 +180,7 @@ orion.GitStatusContentRenderer = (function() {
 				checkColumn.appendChild(check);
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
+					this._controller._unstagedTableRenderer.renderAction();
 				}));
 				return checkColumn;
 			}
@@ -322,6 +323,7 @@ orion.GitStatusTableRenderer = (function() {
 				checkColumn.appendChild(check);
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					this.contentRenderer.toggleSelectAll(evt.target.checked);
+					this.renderAction();
 				}));
 				return checkColumn;
 			}
@@ -1033,7 +1035,7 @@ orion.GitStatusController = (function() {
 					return self.stageSelected();
 				},
 				visibleWhen: function(item) {
-					return (item.type === "unstagedItems" && self.hasUnstaged);
+					return (item.type === "unstagedItems" && self.hasUnstaged && self._unstagedContentRenderer.getSelected().length > 0);
 				}
 			});		
 
