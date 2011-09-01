@@ -230,11 +230,10 @@ mSiteMappingsTable.MappingsTable = (function() {
 		getItemIndex: function(item) {
 			return this.siteConfiguration.Mappings.indexOf(item);
 		},
-		// TODO make this a proper Command
-		// Also we should use makeNewItemPlaceHolder()
+		// TODO: use makeNewItemPlaceHolder() ?
 		addMapping: function(/**String*/ source, /**String*/ target, /**String*/ friendlyPath) {
-			source = typeof(source) === "string" ? source : this.getNextMountPoint(friendlyPath);
-			target = typeof(target) === "string" ? target : "/";
+			source = this.safePath(typeof(source) === "string" ? source : this.getNextMountPoint(friendlyPath));
+			target = this.safePath(typeof(target) === "string" ? target : "/");
 			
 			var newItem = this.createMappingObject(source, target);
 			this.siteConfiguration.Mappings.push(newItem);
@@ -277,6 +276,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 			}
 		},
 		fieldChanged: function(/**Object*/ item, /**String*/ fieldName, /**String*/ newValue, /**Event*/ event) {
+			newValue = this.safePath(newValue);
 			var oldValue = item[fieldName];
 			if (oldValue !== newValue) {
 				item[fieldName] = newValue;
@@ -325,6 +325,9 @@ mSiteMappingsTable.MappingsTable = (function() {
 		/** @returns true if b is a sub-path of a */
 		pathsMatch: function(a, b) {
 			return a === b || a.indexOf(b + "/") === 0;
+		},
+		safePath: function(str) {
+			return str.replace(/[\r\n\t]/g, "");
 		},
 		setDirty: function(value) {
 			this._isDirty = value;
