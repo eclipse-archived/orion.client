@@ -174,7 +174,9 @@ exports.setUpEditor = function(isReadOnly){
 		var textViewFactory = function() {
 			return new mTextView.TextView({
 				parent: editorDomNode,
-				stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css", "/css/default-theme.css"],
+				stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css",
+					"/examples/textview/textstyler.css", "/css/default-theme.css",
+					"/orion/editor/editor.css"],
 				tabSize: 4,
 				readonly: isReadOnly
 			});

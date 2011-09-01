@@ -21,7 +21,8 @@ window.onload = function(){
 			stylesheet: [ "../../orion/textview/textview.css",
 							"../../orion/textview/rulers.css", 
 							"../textview/textstyler.css",
-							"htmlStyles.css" ],
+							"../../orion/editor/editor.css",
+							"htmlStyles.css"],
 			tabSize: 4
 		});
 	};
