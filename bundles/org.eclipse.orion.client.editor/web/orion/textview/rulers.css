@@ -1,6 +1,13 @@
 .ruler_annotation {
-	background-color: #e1ebfb;
+	background-color: white;
+	border-right: 1px solid lightgray;
 	width: 16px;
+}
+
+.ruler_folding {
+	background-color: white;
+	border-right: 1px solid lightgray;
+	width: 14px;
 }
 
 .ruler_annotation_todo {
@@ -14,26 +21,30 @@
 .ruler_annotation_breakpoint {
 }
 
+.ruler_folding_collapsed {
+}
+
+.ruler_folding_expanded {
+}
+
 .ruler_annotation_breakpoint_overview {
 	background-color: lightblue;
 	border: 1px solid blue;
 }
 
 .ruler_lines {
-	background-color: #e1ebfb;
-	border-right: 1px solid #b1badf;
+	background-color: white;
 	text-align: right;
 }
 
 .ruler_overview {
-	background-color: #e1ebfb;
+	background-color: white;
 }
 
 .ruler_lines_even {
-	background-color: #e1ebfb;
+	background-color: white;
 }
 
 .ruler_lines_odd {
 	background-color: white;
 }
-

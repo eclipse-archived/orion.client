@@ -4886,6 +4886,7 @@ orion.textview.TextView = (function() {
 						frag = document.createDocumentFragment();
 						for (var j = 0; j < lines.length; j++) {
 							lineIndex = lines[j];
+							if (lineIndex < 0) { continue; }
 							lineDiv = parentDocument.createElement("DIV");
 							this._applyStyle(ruler.getStyle(lineIndex), lineDiv);
 							lineDiv.style.position = "absolute";

@@ -63,9 +63,10 @@ orion.textview.ProjectionTextModel = (function() {
 		*
 		*/
 		addProjection: function(projection) {
+			//TODO remove listeners from model
 			if (!projection) {return;}
-			this._projections.push(projection);
-			var model = this._model;
+			//start and end can't overlap any exist projection
+			var model = this._model, projections = this._projections, i;
 			projection._lineIndex = model.getLineAtOffset(projection.start);
 			projection._lineCount = model.getLineAtOffset(projection.end) - projection._lineIndex;
 			var content = projection.content;
@@ -75,18 +76,44 @@ orion.textview.ProjectionTextModel = (function() {
 			} else {
 				projection._model = content;
 			}
-			//TODO add listeners to model
-			//TODO send events
-		},
-		removeProjection: function(projection) {
-			for (var i = 0; i < this._projections.length; i++) {
-				if (this._projections[i] === projection) {
-					this._projections.splice(i, 1);
-					return;
+			var eventStart = this.mapOffset(projection.start, true);
+			var removedCharCount = projection.end - projection.start;
+			var removedLineCount = projection._lineCount;
+			var addedCharCount = projection._model.getCharCount();
+			var addedLineCount = projection._model.getLineCount() - 1;
+			this.onChanging(projection._model.getText(), eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			//TODO binary search
+			for (i = 0; i < projections.length; i++) {
+				if (projections[i].start > projection.start) {
+					break;
 				}
 			}
+			projections.splice(i, 0, projection);
+			this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+		},
+		removeProjection: function(projection) {
 			//TODO remove listeners from model
-			//TODO send events
+			var i, delta = 0;
+			for (i = 0; i < this._projections.length; i++) {
+				var p = this._projections[i];
+				if (p === projection) {
+					projection = p;
+					break;
+				}
+				delta += p._model.getCharCount() - (p.end - p.start);
+			}
+			if (i < this._projections.length) {
+				var model = this._model;
+				//TODO hack?
+				var eventStart = projection.start + delta;
+				var addedCharCount = projection.end - projection.start;
+				var addedLineCount = projection._lineCount;
+				var removedCharCount = projection._model.getCharCount();
+				var removedLineCount = projection._model.getLineCount() - 1;
+				this.onChanging(model.getText(projection.start, projection.end), eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+				this._projections.splice(i, 1);
+				this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			}
 		},
 		//TODO getModel?
 		getParent: function() {
@@ -114,14 +141,25 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			return offset - delta;
 		},
-		mapLine: function(lineIndex) {
+		mapLine: function(lineIndex, parent) {
 			if (lineIndex < 0) { return -1; }
-			var model = this._model, projections = this._projections;
-			var delta = 0;
-			for (var i = 0; i < projections.length; i++) {
-				var projection = projections[i];
+			var model = this._model, projections = this._projections, delta = 0, i, projection, lineCount;
+			if (parent) {
+				for (i = 0; i < projections.length; i++) {
+					projection = projections[i];
+					if (projection._lineIndex > lineIndex) { break; }
+					lineCount = projection._model.getLineCount() - 1;
+					if (projection._lineIndex + lineCount > lineIndex) {
+						return -1;
+					}
+					delta += lineCount - projection._lineCount;
+				}
+				return lineIndex + delta;
+			}
+			for (i = 0; i < projections.length; i++) {
+				projection = projections[i];
 				if (projection._lineIndex > lineIndex - delta) { break; }
-				var lineCount = projection._model.getLineCount() - 1;
+				lineCount = projection._model.getLineCount() - 1;
 				if (projection._lineIndex + lineCount > lineIndex - delta) {
 					return -1;
 				}
@@ -410,6 +448,7 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			this.onChanging(text, eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 			
+//			var changeLineCount = model.getLineAtOffset(mapEnd) - model.getLineAtOffset(mapStart) + addedLineCount;
 			model.setText(text, mapStart, mapEnd);
 			if (startProjection) {
 				projection = startProjection.projection;
@@ -422,12 +461,16 @@ orion.textview.ProjectionTextModel = (function() {
 				projection._lineCount = 0;
 			}
 			projections.splice(projections, rangeEnd - rangeStart);
-			var count = text.length - (mapEnd - mapStart);
+			var changeCount = text.length - (mapEnd - mapStart);
 			for (i = rangeEnd; i < projections.length; i++) {
 				projection = projections[i];
-				projection.start += count;
-				projection.end += count;
+				projection.start += changeCount;
+				projection.end += changeCount;
+//				if (projection._lineIndex + changeLineCount !== model.getLineAtOffset(projection.start)) {
+//					log("here");
+//				}
 				projection._lineIndex = model.getLineAtOffset(projection.start);
+//				projection._lineIndex += changeLineCount;
 			}
 			
 			this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);

@@ -68,7 +68,24 @@ orion.textview.Ruler = (function() {
 			}
 			this._view = view;
 			if (this._onModelChanged && this._view) {
-				this._view.addEventListener("ModelChanged", this, this._onModelChanged);
+				var model = view.getModel();
+				if (model.getParent) {
+					var self = this;
+					model.getParent().addListener({
+						onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+							var e = {
+								start: start, 
+								removedCharCount: removedCharCount,
+								addedCharCount: addedCharCount,
+								removedLineCount: removedLineCount,
+								addedLineCount: addedLineCount
+							};
+							self._onModelChanged(e);
+						}
+					});
+				} else {
+					this._view.addEventListener("ModelChanged", this, this._onModelChanged);
+				}
 			}
 		},
 		/**
@@ -204,11 +221,15 @@ orion.textview.LineNumberRuler = (function() {
 	LineNumberRuler.prototype._onModelChanged = function(e) {
 		var start = e.start;
 		var model = this._view.getModel();
-		var lineCount = model.getLineCount();
+		var lineCount = model.getParent ? model.getParent().getLineCount() : model.getLineCount();
 		var numOfDigits = (lineCount+"").length;
 		if (this._numOfDigits !== numOfDigits) {
 			this._numOfDigits = numOfDigits;
 			var startLine = model.getLineAtOffset(start);
+			if (model.getParent) {
+				startLine = model.mapOffset(startLine, true);
+				lineCount = model.mapOffset(lineCount - 1, true) + 1;
+			}
 			this._view.redrawLines(startLine, lineCount, this);
 		}
 	};
@@ -298,6 +319,10 @@ orion.textview.AnnotationRuler = (function() {
 			case -1:
 				return this._defaultAnnotation ? this._defaultAnnotation.style : null;
 			default:
+				var model = this._view.getModel();
+				if (model.getParent) {
+					lineIndex = model.mapLine(lineIndex);
+				}
 				return this._annotations[lineIndex] && this._annotations[lineIndex].style ? this._annotations[lineIndex].style : null;
 		}
 	};
@@ -306,6 +331,10 @@ orion.textview.AnnotationRuler = (function() {
 		if (lineIndex === -1) {
 			return this._defaultAnnotation ? this._defaultAnnotation.html : "";
 		} else {
+			var model = this._view.getModel();
+			if (model.getParent) {
+				lineIndex = model.mapLine(lineIndex);
+			}
 			return this._annotations[lineIndex] && this._annotations[lineIndex].html ? this._annotations[lineIndex].html : "";
 		}
 	};
@@ -323,6 +352,10 @@ orion.textview.AnnotationRuler = (function() {
 	AnnotationRuler.prototype.setAnnotation = function(lineIndex, annotation) {
 		if (lineIndex === undefined) { return; }
 		this._annotations[lineIndex] = annotation;
+		var model = this._view.getModel();
+		if (model.getParent) {
+			lineIndex = model.mapLine(lineIndex, true);
+		}
 		this._view.redrawLines(lineIndex, lineIndex + 1, this);
 		if (this._overviewRuler) {
 			this._view.redrawLines(lineIndex, lineIndex + 1, this._overviewRuler);
@@ -336,6 +369,7 @@ orion.textview.AnnotationRuler = (function() {
 		var linesChanged = addedLineCount - removedLineCount;
 		if (linesChanged) {
 			var model = this._view.getModel();
+			if (model.getParent) { model = model.getParent(); }
 			var startLine = model.getLineAtOffset(start);
 			var newLines = [], lines = this._annotations;
 			var changed = false;
@@ -354,7 +388,11 @@ orion.textview.AnnotationRuler = (function() {
 			}
 			this._annotations = newLines;
 			if (changed) {
-				var lineCount = model.getLineCount();
+				var lineCount = model.getLineCount() - 1;
+				if (model.getParent) {
+					startLine = model.mapOffset(startLine, true);
+					lineCount = model.mapOffset(lineCount, true);
+				}
 				this._view.redrawLines(startLine, lineCount, this);
 				//TODO redraw overview (batch it for performance)
 				if (this._overviewRuler) {
@@ -399,7 +437,14 @@ orion.textview.OverviewRuler = (function() {
 	OverviewRuler.prototype = new orion.textview.Ruler();
 	/** @ignore */
 	OverviewRuler.prototype.getAnnotations = function() {
-		return this._annotationRuler.getAnnotations();
+		var result = this._annotationRuler.getAnnotations();
+		var model = this._view.getModel();
+		if (model.getParent) {
+			for (var i = 0; i < result.length; i++) {
+				result[i] = model.mapLine(result[i], true);
+			}
+		}
+		return result;
 	};
 	/** @ignore */	
 	OverviewRuler.prototype.getStyle = function(lineIndex) {
@@ -412,6 +457,10 @@ orion.textview.OverviewRuler = (function() {
 			style.width = "14px";
 		} else {
 			if (lineIndex !== -1) {
+				var model = this._view.getModel();
+				if (model.getParent) {
+					lineIndex = model.mapLine(lineIndex);
+				}
 				var annotation = this._annotationRuler.getAnnotation(lineIndex);
 				result = annotation.overviewStyle || {};
 			} else {
