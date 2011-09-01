@@ -305,22 +305,19 @@ mSiteMappingsTable.MappingsTable = (function() {
 		/** Rewrites item's FriendlyPath using the project shortname and sets the result into the Target */
 		propagate: function(friendlyPath, item) {
 			if (isWorkspacePath(friendlyPath)) {
-				var found = false;
 				for (var i=0; i < this.projects.length; i++) {
 					var project = this.projects[i];
 					var name = "/" + project.Name;
 					var location = mSiteUtils.makeRelativeFilePath(project.Location);
 					if (this.pathsMatch(friendlyPath, name)) {
 						var rest = friendlyPath.substring(name.length);
-						found = true;
 						item.Target = location + rest;
+						return;
 					}
 				}
-				if (!found) {
-					// Bogus path
-					item.Target = friendlyPath;
-				}
 			}
+			// Bogus workspace path, or not a workspace path at all
+			item.Target = friendlyPath;
 		},
 		/** @returns true if b is a sub-path of a */
 		pathsMatch: function(a, b) {
