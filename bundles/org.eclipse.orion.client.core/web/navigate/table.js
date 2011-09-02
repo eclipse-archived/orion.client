@@ -56,72 +56,18 @@ dojo.addOnLoad(function(){
 		};
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 					
-		var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
-		
-		function emptyArray() {
-			var d = new dojo.Deferred();
-			d.callback([]);
-			return d;
-		}
-		function emptyObject() {
-			var d = new dojo.Deferred();
-			d.callback({});
-			return d;
-		}
-		var topLevel = [];
-		var topLevelFileService = {
-			fetchChildren: emptyArray,
-			createWorkspace: emptyObject,
-			loadWorkspaces: emptyArray,
-			loadWorkspace: function(location) {
-				var d = new dojo.Deferred();
-				d.callback({Children: topLevel});
-				return d;
-			},
-			createProject: emptyObject,
-			createFolder: emptyObject,
-			createFile: emptyObject,
-			deleteFile: emptyObject,
-			moveFile: emptyObject,
-			copyFile: emptyObject,
-			read: emptyObject,
-			write: emptyObject
-		};
-	
-		var fileClient = new mFileClient.FileClient(topLevelFileService);
+//		var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
+
+		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		
 		var explorer = new mExplorerTable.FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, "explorer-tree", "location", "pageActions", "selectionTools");
 		
 		function refresh() {
-			var fileServiceReference;
-			topLevel = [];
-			for (var i=0; i<fileServices.length; i++) {
-				var info = {Directory:true, Length: 0, LocalTimeStamp: 0};
-				var propertyNames = fileServices[i].getPropertyNames();
-				for (var j = 0; j < propertyNames.length; j++) {
-					info[propertyNames[j]] = fileServices[i].getProperty(propertyNames[j]);
-				}
-				info.ChildrenLocation = info.top;
-				info.Location = info.top;
-				topLevel.push(info);
-				if (new RegExp(info.pattern).test(dojo.hash())) {
-					fileServiceReference = fileServices[i];
-				}
-			}
-			if (topLevel.length === 1 && !fileServiceReference) {
-				dojo.hash(topLevel[0].top);
-				return;
-			}
-			var deferred;
-			if (fileServiceReference) {
-				deferred = serviceRegistry.getService(fileServiceReference);
-			} else {
-				deferred = { then: function(callback) { callback(topLevelFileService); } };
-			}
-			deferred.then(function(fileService) {
-				fileClient.setFileService(fileService);
-				explorer.loadResourceList(dojo.hash());
-			});
+//			if (dojo.hash().length === 0 && fileServices.length === 1) {
+//				dojo.hash(fileServices[0].getProperty("top"));
+//				return;
+//			}
+			explorer.loadResourceList(dojo.hash());
 		}
 	
 		var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});

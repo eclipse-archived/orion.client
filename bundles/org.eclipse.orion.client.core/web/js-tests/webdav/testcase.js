@@ -80,7 +80,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "webdav
 		var promise = pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
 			return serviceRegistry.getService("xhr");
 		}).then(function(service) {
-			return service.call("GET", "testput.txt").then(function(result) {
+			return service.call("GET", "testput.txt", {"Cache-Control": "no-cache"}).then(function(result) {
 				assert.ok(result.status === 404);
 				return service.call("PUT", "testput.txt", null, "test");
 			}).then(function(result) {

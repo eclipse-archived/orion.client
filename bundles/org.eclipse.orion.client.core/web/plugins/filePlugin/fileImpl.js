@@ -53,7 +53,7 @@ eclipse.FileServiceImpl= (function() {
 		 * passed as a parameter to the provided onCreate function.
 		 * @param {String} name The name of the new workspace
 		 */
-		createWorkspace: function(name) {
+		_createWorkspace: function(name) {
 			//return the deferred so client can chain on post-processing
 			return dojo.xhrPost({
 				url: "/workspace",
@@ -115,7 +115,7 @@ eclipse.FileServiceImpl= (function() {
 							return this.loadWorkspace(jsonData.Workspaces[0].Location);
 						} else {
 							//no workspace exists, and the user didn't specify one. We'll create one for them
-							return this.createWorkspace("MyWorkspace");
+							return this._createWorkspace("MyWorkspace");
 						}
 					}
 				}),
