@@ -19,22 +19,26 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/SiteEditor'], 
 			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
 
-dojo.addOnLoad(function() {
-	document.body.style.visibility = "visible";
-	dojo.parser.parse();
+	dojo.addOnLoad(function() {
+		document.body.style.visibility = "visible";
+		dojo.parser.parse();
+		
+		// Register services
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
+		dojo.addOnWindowUnload(function() {
+			pluginRegistry.shutdown();
+		});
+		var dialogService = new mDialogs.DialogService(serviceRegistry);
+		var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
-	// Register services
-	var serviceRegistry = new mServiceregistry.ServiceRegistry();
-	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-	dojo.addOnWindowUnload(function() {
-		pluginRegistry.shutdown();
-	});
-	var dialogService = new mDialogs.DialogService(serviceRegistry);
-	var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-	
-	serviceRegistry.getService("orion.core.file").then(function(fileService) {
-		var fileClient = new mFileClient.FileClient(fileService);
+		
+		var fileClient = new mFileClient.FileClient(serviceRegistry, function(reference) {
+			var pattern = reference.getProperty("pattern");
+			return pattern && pattern.indexOf("/") === 0;
+		});
+		
 		var siteService = new mSiteService.SiteService(serviceRegistry);
 		var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
@@ -99,6 +103,4 @@ dojo.addOnLoad(function() {
 		commandService.registerCommandContribution("eclipse.site.start", 1);
 		commandService.registerCommandContribution("eclipse.site.stop", 2);
 	});
-});
-
 });

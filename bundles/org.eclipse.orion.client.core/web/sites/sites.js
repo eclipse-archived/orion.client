@@ -16,25 +16,23 @@
  */
 
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 
-	        'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'siteService', 'orion/siteUtils', 'siteTree', 'orion/treetable', 
+	        'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'siteService', 'orion/siteUtils', 'siteTree', 'orion/treetable', 
 	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/NewSiteDialog'], 
-			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
+			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
 
-dojo.addOnLoad(function() {
-	document.body.style.visibility = "visible";
-	dojo.parser.parse();
-
-	// Register services
-	var serviceRegistry = new mServiceregistry.ServiceRegistry();
-	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-	dojo.addOnWindowUnload(function() {
-		pluginRegistry.shutdown();
-	});
-	var dialogService = new mDialogs.DialogService(serviceRegistry);
-	var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-	serviceRegistry.getService("orion.core.file").then(function(fileService) {
-		var fileClient = new mFileClient.FileClient(fileService);
+	dojo.addOnLoad(function() {
+		document.body.style.visibility = "visible";
+		dojo.parser.parse();
+	
+		// Register services
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
+		dojo.addOnWindowUnload(function() {
+			pluginRegistry.shutdown();
+		});
+		var dialogService = new mDialogs.DialogService(serviceRegistry);
+		var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 
 		var siteService = new mSiteService.SiteService(serviceRegistry);
 		var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
@@ -103,6 +101,4 @@ dojo.addOnLoad(function() {
 			mGlobalCommands.generateDomCommandsInBanner(commandService, {});
 		}());
 	});
-});
-
 });
