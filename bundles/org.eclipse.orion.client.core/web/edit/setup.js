@@ -168,7 +168,18 @@ exports.setUpEditor = function(isReadOnly){
 
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
 
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+		
+		var textViewFactory = function() {
+			return new mTextView.TextView({
+				parent: editorDomNode,
+				stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css",
+					"/examples/textview/textstyler.css", "/css/default-theme.css",
+					"/orion/editor/editor.css"],
+				tabSize: 4,
+				readonly: isReadOnly
+			});
+		};
 	
 	var textViewFactory = function() {
 		return new mTextView.TextView({

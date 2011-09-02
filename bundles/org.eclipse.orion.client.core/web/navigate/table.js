@@ -132,7 +132,16 @@ dojo.addOnLoad(function(){
 		// commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup");
 			
 		mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "eclipse.fileGroup", "eclipse.selectionGroup");
-		
+
+		// when new item is fetched, display it in the page title
+		dojo.connect(explorer, "onchange", function(item) {
+			var title = "Navigator";
+			if (item) {
+			    title = "/" + item.Name + " - " + title;
+			}
+			document.title = title;
+		});
+
 		//every time the user manually changes the hash, we need to load the workspace with that name
 		dojo.subscribe("/dojo/hashchange", explorer, function() {
 			refresh();

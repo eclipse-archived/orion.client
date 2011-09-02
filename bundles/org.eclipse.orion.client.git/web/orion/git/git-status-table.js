@@ -125,8 +125,9 @@ orion.statusTypeMap = { "Missing":["/git/images/removal.gif", "Unstaged removal"
 
 
 orion.GitStatusContentRenderer = (function() {
-	function GitStatusContentRenderer(serviceRegistry ,tableDivId , model) {
+	function GitStatusContentRenderer(options, serviceRegistry ,tableDivId , model) {
 		this._registry = serviceRegistry;
+		this._useCheckboxSelection = (options.useCheckBox === undefined) ? false: options.useCheckBox;
 		this._tableParentDivId = tableDivId;
 		this._controller = model;
 	}
@@ -144,6 +145,48 @@ orion.GitStatusContentRenderer = (function() {
 			this._table = table;
 		},
 		
+		getSelected: function() {
+			var selected = [];
+			dojo.query(".selectionCheckmark" + this._tableParentDivId).forEach(dojo.hitch(this, function(node) {
+				if (node.checked) {
+					var row = node.parentNode.parentNode;
+					selected.push({rowId:row.id, modelItem:row._item});
+				}
+			}));
+			return selected;
+		},
+		
+		toggleSelectAll: function(select) {
+			var selected = [];
+			dojo.query(".selectionCheckmark" + this._tableParentDivId).forEach(dojo.hitch(this, function(node) {
+				node.checked = select;
+				var row = node.parentNode.parentNode;
+				dojo.toggleClass(row, "checkedRow", !!select);
+			}));
+			return selected;
+		},
+		
+		getCheckboxColumn: function(tableRow){
+			if (this._useCheckboxSelection) {
+				var checkColumn = document.createElement('td');
+				dojo.addClass(checkColumn, "secondaryColumn");
+				//dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Message</h2>"});
+				var check = dojo.create("input", {style: "margin-right: 5px; margin-left: 2px"});
+				dojo.style(check, "verticalAlign", "middle");
+				check.type = "checkbox";
+				check.id = tableRow.id+"selectedState";
+				dojo.addClass(check, "selectionCheckmark"+ this._tableParentDivId);
+				check.itemId = tableRow.id;
+				checkColumn.appendChild(check);
+				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
+					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
+					this._controller._unstagedTableRenderer.renderAction();
+				}));
+				return checkColumn;
+			}
+			return null;
+		},
+		
 		renderRow: function(itemModel, lineNumber) {
 			var self = this;
 			var row = document.createElement('tr');
@@ -156,10 +199,15 @@ orion.GitStatusContentRenderer = (function() {
 			}
 			this._table.appendChild(row);
 
+			//render the check box
+			if(this._useCheckboxSelection){
+				row.appendChild(this.getCheckboxColumn(row));
+			}
 			//render the type icon (added , modified ,untracked ...)
 			var typeColumn = document.createElement('td');
 			var typeImg = document.createElement('img');
 			typeImg.src = orion.statusTypeMap[itemModel.type][0];
+			dojo.style(typeImg, "verticalAlign", "middle");
 			typeColumn.appendChild(typeImg);
 			row.appendChild(typeColumn);
 			
@@ -170,7 +218,8 @@ orion.GitStatusContentRenderer = (function() {
 			row.appendChild(nameColumn);
 			
 			var nameSpan =  document.createElement('span');
-			nameSpan.id = itemModel.name + "_" + itemModel.type +  "_nameSpan";
+			dojo.style(nameSpan, "verticalAlign", "middle");
+			nameSpan.id = row.id +  "_nameSpan";
 			dojo.place(document.createTextNode(itemModel.name), nameSpan, "only");
 			nameSpan.style.color = "#0000FF";
 			nameSpan.title = "Click to compare";
@@ -232,20 +281,22 @@ orion.GitStatusContentRenderer = (function() {
 }());
 
 orion.GitStatusTableRenderer = (function() {
-	function GitStatusTableRenderer(serviceRegistry ,parentId , header , type) {
+	function GitStatusTableRenderer(options, serviceRegistry ,parentId , header , type) {
 		this._registry = serviceRegistry;
 		this._parentId = parentId;
 		this._header = header;
+		this._useCheckboxSelection = (options.useCheckBox === undefined) ? false: options.useCheckBox;
 		this._type = type;
 	}
 	GitStatusTableRenderer.prototype = {
 		render: function (renderSeparator) {
-			var headerTable = dojo.create("table", {width:"100%"},this._parentId);
+			var headerTable = dojo.create("table", {/*width:"100%"*/},this._parentId);
 			var row = dojo.create("tr", null, headerTable);
-			var titleCol = dojo.create("td", {width:"50%" ,height:"100%"}, row, "last");
+			if(this._useCheckboxSelection)
+				row.appendChild(this.getCheckboxColumn());
+			var titleCol = dojo.create("td", {/*width:"50%" ,height:"100%"*/}, row, "last");
 			var title = dojo.create("h2", {innerHTML: this._header}, titleCol, "last");
-			
-			var actionCol = dojo.create("td", {width:"50%" ,height:"100%" ,nowrap :true}, row, "last");
+			var actionCol = dojo.create("td", {/*width:"50%" ,height:"100%" ,*/nowrap :true}, row, "last");
 			var actionDiv = dojo.create("div", {style:"float: right;", align:"right"}, actionCol, "last");
 			this._cmdSpan = dojo.create("span", null, actionDiv, "last");
 			
@@ -255,6 +306,27 @@ orion.GitStatusTableRenderer = (function() {
 			dojo.create("div", {id:this._statusContentId}, this._parentId, "last");
 			if(	renderSeparator)
 				dojo.create("table", {width:"100%", height:"10px"},this._parentId);
+		},
+		
+		select: function(selected){
+			this.checkBox.checked = selected;
+		},
+		
+		getCheckboxColumn: function(){
+			if (this._useCheckboxSelection) {
+				var checkColumn = document.createElement('td');
+				dojo.addClass(checkColumn, "secondaryColumn");
+				var check = dojo.create("input", {style: "margin-right: 5px"});
+				this.checkBox = check;
+				dojo.style(check, "verticalAlign", "middle");
+				check.type = "checkbox";
+				checkColumn.appendChild(check);
+				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
+					this.contentRenderer.toggleSelectAll(evt.target.checked);
+					this.renderAction();
+				}));
+				return checkColumn;
+			}
 		},
 		
 		getStatusContentId: function(){
@@ -542,9 +614,9 @@ orion.GitStatusController = (function() {
 		this._renderLog = options.renderLog ? true:false;
 		this._generateCommands();
 		
-		this._unstagedTableRenderer = new orion.GitStatusTableRenderer(serviceRegistry ,"statusZone" , "Unstaged" , "unstagedItems");
+		this._unstagedTableRenderer = new orion.GitStatusTableRenderer({useCheckBox:true}, serviceRegistry ,"statusZone" , "Unstaged" , "unstagedItems");
 		this._unstagedTableRenderer.render(true);
-		this._stagedTableRenderer = new orion.GitStatusTableRenderer(serviceRegistry ,"statusZone" , "Staged" , "stagedItems");
+		this._stagedTableRenderer = new orion.GitStatusTableRenderer({useCheckBox:false}, serviceRegistry ,"statusZone" , "Staged" , "stagedItems");
 		this._stagedTableRenderer.render();
 		this._commitZoneRenderer = new orion.GitCommitZoneRenderer(serviceRegistry ,"statusZone");
 		this._commitZoneRenderer.render(true);
@@ -566,8 +638,10 @@ orion.GitStatusController = (function() {
 		(new orion.InlineCompareRenderer(serviceRegistry ,"viewerZone")).render(true);
 		this._generateInlineCompareCmds();
 		
-		this._unstagedContentRenderer = new orion.GitStatusContentRenderer(serviceRegistry ,this._unstagedTableRenderer.getStatusContentId(), this);
-		this._stagedContentRenderer = new orion.GitStatusContentRenderer(serviceRegistry ,this._stagedTableRenderer.getStatusContentId() , this);
+		this._unstagedContentRenderer = new orion.GitStatusContentRenderer({useCheckBox:true}, serviceRegistry ,this._unstagedTableRenderer.getStatusContentId(), this);
+		this._unstagedTableRenderer.contentRenderer = this._unstagedContentRenderer;
+		this._stagedContentRenderer = new orion.GitStatusContentRenderer({useCheckBox:false}, serviceRegistry ,this._stagedTableRenderer.getStatusContentId() , this);
+		this._stagedTableRenderer.contentRenderer = this._stagedContentRenderer;
 		this._inlineCompareContainer = new mCompareContainer.InlineCompareContainer(new mDiffProvider.DiffProvider(serviceRegistry),serviceRegistry ,"inline-compare-viewer");
 		var self = this;
 		self._stagingConflict = false;
@@ -952,16 +1026,16 @@ orion.GitStatusController = (function() {
 			});		
 
 			var stageAllCommand = new mCommands.Command({
-				name: "stageAll",
-				tooltip: "Stage all",
+				name: "stage selected",
+				tooltip: "Stage Selected",
 				image: "/git/images/stage_all.gif",
 				id: "orion.gitStageAll",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Staging...");
-					return self.stageAll();
+					return self.stageSelected();
 				},
 				visibleWhen: function(item) {
-					return (item.type === "unstagedItems" && self.hasUnstaged);
+					return (item.type === "unstagedItems" && self.hasUnstaged && self._unstagedContentRenderer.getSelected().length > 0);
 				}
 			});		
 
@@ -1246,6 +1320,8 @@ orion.GitStatusController = (function() {
 			for (var i = 0; i < retValue.length ; i++){
 				renderer.renderRow(retValue[i], i);
 			}
+			renderer.totalRow = retValue.length;
+			return retValue.length;
 		},
 		
 		loadDiffContent: function(itemModel){
@@ -1339,6 +1415,41 @@ orion.GitStatusController = (function() {
 											 }
 						);
 					});
+		},
+		
+		stageSelected: function(){
+			var selectedItems = this._unstagedContentRenderer.getSelected();
+			if(selectedItems.length === 0)
+				return;
+			this._unstagedTableRenderer.select(false);
+			if(this._unstagedContentRenderer.totalRow === selectedItems.length)
+				this.stageAll();
+			else
+				this.stageOneSelection(selectedItems, 0);
+		},
+		
+		stageOneSelection: function (selection, index){
+			var that = this;
+			var itemModel = selection[index].modelItem;
+			if(itemModel && itemModel.conflicting){
+				that._stagingConflict = true;
+				that._stagingName = itemModel.name;
+			}
+			that._registry.getService("orion.git.provider").then(
+					function(service) {
+						service.stage(itemModel.indexURI, 
+									  function(jsonData, secondArg) {
+									      if(index === (selection.length-1)){			 
+									    	  that.getGitStatus(that._url);
+									      } else {
+									    	  that.stageOneSelection(selection, index+1);
+									      }
+									  },
+									  function(response, ioArgs){
+											  that.handleServerErrors(response, ioArgs);
+									  }
+						);
+				});
 		},
 		
 		checkout: function(itemModel){

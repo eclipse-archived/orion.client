@@ -166,7 +166,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 //			editor.mappings.addMapping("/mountPoint", "/FolderId/somepath");
 //		};
 		var addUrl = function() {
-			editor.mappings.addMapping("/web/somePath", "http://some-website.com");
+			editor.mappings.addMapping("/web/somePath", "http://");
 		};
 		
 		var choices = dojo.map(projects, function(project) {

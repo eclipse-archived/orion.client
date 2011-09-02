@@ -20,6 +20,7 @@ window.onload = function(){
 			parent: editorDomNode,
 			stylesheet: [ "../../orion/textview/textview.css",
 							"../../orion/textview/rulers.css",
+							"../../orion/editor/editor.css",
 							"../textview/textstyler.css"],
 			tabSize: 4
 		});
