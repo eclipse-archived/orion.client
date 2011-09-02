@@ -221,7 +221,7 @@ orion.GitStatusContentRenderer = (function() {
 			dojo.style(nameSpan, "verticalAlign", "middle");
 			nameSpan.id = row.id +  "_nameSpan";
 			dojo.place(document.createTextNode(itemModel.name), nameSpan, "only");
-			nameSpan.style.color = "#0000FF";
+			dojo.style(nameSpan, "color", "#0000FF");
 			nameSpan.title = "Click to compare";
 			nameColumn.appendChild(nameSpan);
 			if(nameSpan.id === self._controller._model.selectedFileId ){
@@ -258,7 +258,7 @@ orion.GitStatusContentRenderer = (function() {
 			// the mouse as being over the table row if it's in a hidden column
 			dojo.style(actionsWrapper, "visibility", "hidden");
 			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(actionsWrapper, "object", {type: "fileItem", object: itemModel}, this, "image", null);
+				service.renderCommands(actionsWrapper, "object", {type: "fileItem", object: itemModel, rowId:row.id}, this, "image", null);
 			});
 			
 			dojo.connect(row, "onmouseover", row, function() {
@@ -613,7 +613,6 @@ orion.GitStatusController = (function() {
 		this._timerOn = false;
 		this._renderLog = options.renderLog ? true:false;
 		this._generateCommands();
-		
 		this._unstagedTableRenderer = new orion.GitStatusTableRenderer({useCheckBox:true}, serviceRegistry ,"statusZone" , "Unstaged" , "unstagedItems");
 		this._unstagedTableRenderer.render(true);
 		this._stagedTableRenderer = new orion.GitStatusTableRenderer({useCheckBox:false}, serviceRegistry ,"statusZone" , "Staged" , "stagedItems");
@@ -644,7 +643,9 @@ orion.GitStatusController = (function() {
 		this._stagedTableRenderer.contentRenderer = this._stagedContentRenderer;
 		this._inlineCompareContainer = new mCompareContainer.InlineCompareContainer(new mDiffProvider.DiffProvider(serviceRegistry),serviceRegistry ,"inline-compare-viewer");
 		var self = this;
+		self._staging = false;
 		self._stagingConflict = false;
+		this.startTimer();		
 		var commitBtn = document.getElementById("commit");
 		commitBtn.onclick = function(evt){
 			self.commit();
@@ -652,6 +653,7 @@ orion.GitStatusController = (function() {
 	}
 	GitStatusController.prototype = {
 		loadStatus: function(jsonData){
+			this._staging = false;
 			this._model.init(jsonData);
 			this._getCloneInfo();
 		},
@@ -679,23 +681,6 @@ orion.GitStatusController = (function() {
 			}
 			
 			this._renderGlobalActions();
-			
-			var self = this;
-			var messageArea = document.getElementById("commitMessage");
-			messageArea.disabled = !this.hasStaged;
-			
-			var commitBtn = document.getElementById("commit");
-			var amendBtn = document.getElementById("amend");
-			
-			commitBtn.disabled = !this.hasStaged;
-			amendBtn.disabled = !this.hasStaged;
-			amendBtn.checked = false;
-			messageArea.value = "";
-			if(this.hasStaged)
-				this.startTimer();
-			else 
-				this.stopTimer();
-			
 			if(this._stagingConflict){
 				this._stagingConflict = false;
 				if(!this.hasStaged){
@@ -719,6 +704,29 @@ orion.GitStatusController = (function() {
 				// show commit panel
 				this._commitZoneRenderer.show();
 				this._rebaseZoneRenderer.hide();
+			}
+		},
+		
+		_commitReady: function(){
+			var amendBtn = document.getElementById("amend");
+			if(this.hasStaged){
+				return true;
+			} else {
+				if(amendBtn.checked)
+					return true;
+				else
+					return false;
+			}
+		},
+		
+		_prepareStage: function(item, group){
+			this._staging = true;
+			if(group){
+				for(var i = 0 ; i < item.length ;  i++){
+					dojo.style(item[i].rowId + "_nameSpan", "color", "#666666");
+				}
+			} else {
+				dojo.style(item + "_nameSpan", "color", "#666666");
 			}
 		},
 		
@@ -1018,6 +1026,7 @@ orion.GitStatusController = (function() {
 				id: "orion.gitStage",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Staging...");
+					self._prepareStage(item.rowId, false);
 					return self.stage(item.object.indexURI , item.object);
 				},
 				visibleWhen: function(item) {
@@ -1213,7 +1222,14 @@ orion.GitStatusController = (function() {
 		doTimer: function(){
 			var messageArea = document.getElementById("commitMessage");
 			var commitBtn = document.getElementById("commit");
-			commitBtn.disabled = (messageArea.value === "");
+			if(this._staging){
+				commitBtn.disabled = true;
+				messageArea.disabled = false;
+			} else {
+				commitBtn.disabled = !(this._commitReady() && messageArea.value !== "");
+				messageArea.disabled = !this._commitReady();
+			}
+			
 			this._timerId = setTimeout(dojo.hitch(this, function() {
 				this.doTimer(); 
 			}), 150);
@@ -1421,6 +1437,7 @@ orion.GitStatusController = (function() {
 			var selectedItems = this._unstagedContentRenderer.getSelected();
 			if(selectedItems.length === 0)
 				return;
+			this._prepareStage(selectedItems, true);
 			this._unstagedTableRenderer.select(false);
 			if(this._unstagedContentRenderer.totalRow === selectedItems.length)
 				this.stageAll();
@@ -1504,6 +1521,8 @@ orion.GitStatusController = (function() {
 		
 		commitAll: function(location , message , body){
 			var self = this;
+			var messageArea = document.getElementById("commitMessage");
+			messageArea.value = "";
 			self._statusService.setProgressMessage("Committing...");
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
