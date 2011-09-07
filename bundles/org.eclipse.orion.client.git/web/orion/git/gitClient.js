@@ -213,6 +213,35 @@ eclipse.GitService = (function() {
 			});
 		},
 		
+		stageMultipleFiles: function(gitCloneURI, paths , onLoad , onError){
+			return dojo.xhrPut({
+				url: gitCloneURI , 
+				headers: {
+					"Orion-Version": "1"
+				},
+				putData : dojo.toJson({
+					"Path" : paths
+				}),
+				handleAs: "json",
+				timeout: 15000,
+				load: function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error: function(response, ioArgs) {
+					if(onError)
+						onError(response,ioArgs);
+					mAuth.handleGetAuthenticationError(this, ioArgs);
+					return response;
+				}
+			});
+		},
+		
 		unstageAll: function(location , resetParam ,onLoad , onError){
 			return dojo.xhrPost({
 				url: location , 

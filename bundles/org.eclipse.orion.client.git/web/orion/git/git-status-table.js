@@ -1440,9 +1440,11 @@ orion.GitStatusController = (function() {
 			this._prepareStage(selectedItems, true);
 			this._unstagedTableRenderer.select(false);
 			if(this._unstagedContentRenderer.totalRow === selectedItems.length)
-				this.stageAll();
+				//this.stageAll();
+				this.stageMultipleFiles(selectedItems);
 			else
-				this.stageOneSelection(selectedItems, 0);
+				//this.stageOneSelection(selectedItems, 0);
+				this.stageMultipleFiles(selectedItems);
 		},
 		
 		stageOneSelection: function (selection, index){
@@ -1461,6 +1463,30 @@ orion.GitStatusController = (function() {
 									      } else {
 									    	  that.stageOneSelection(selection, index+1);
 									      }
+									  },
+									  function(response, ioArgs){
+											  that.handleServerErrors(response, ioArgs);
+									  }
+						);
+				});
+		},
+		
+		stageMultipleFiles: function (selection){
+			var that = this;
+			var paths = [];
+			for(var i = 0 ; i < selection.length ; i++){
+				var itemModel = selection[i].modelItem;
+				if(itemModel && itemModel.conflicting){
+					that._stagingConflict = true;
+					that._stagingName = itemModel.name;
+				}
+				paths.push(itemModel.path);
+			}
+			that._registry.getService("orion.git.provider").then(
+					function(service) {
+						service.stageMultipleFiles(that._model.items.IndexLocation, paths,
+									  function(jsonData, secondArg) {
+									    	 that.getGitStatus(that._url);
 									  },
 									  function(response, ioArgs){
 											  that.handleServerErrors(response, ioArgs);
