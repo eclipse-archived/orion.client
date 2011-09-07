@@ -13,8 +13,84 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(["dojo", "orion/auth"], function(dojo, mAuth){
+define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 
+	/**
+	 * This helper method implements invocation of the service call,
+	 * with retry on authentication error if needed.
+	 * @private
+	 */
+	function _doServiceCall(fileService, funcName, funcArgs) {
+		var clientDeferred = new dojo.Deferred();
+		fileService[funcName].apply(fileService, funcArgs).then(
+			//on success, just forward the result to the client
+			function(result) {
+				clientDeferred.callback(result);
+			},
+			//on failure we might need to retry
+			function(error) {
+				if (error.status === 401 || error.status === 403) {
+					mAuth.handleAuthenticationError(error, function(message) {
+						//try again
+						fileService[funcName].apply(fileService, funcArgs).then(
+							function(result) {
+								clientDeferred.callback(result);
+							},
+							function(error) {
+								clientDeferred.errback(error);
+							}
+						);
+					});
+				} else {
+					//forward other errors to client
+					clientDeferred.errback(error);
+				}
+			}
+		);
+		return clientDeferred;
+	}
+	
+	function _copy(sourceService, sourceLocation, targetService, targetLocation) {
+		if (sourceLocation[sourceLocation.length -1] !== "/") {
+			return _doServiceCall(sourceService, "read", [sourceLocation]).then(function(contents) {
+				return _doServiceCall(targetService, "write", [targetLocation, contents]);
+			});
+		}
+
+		var temp = targetLocation.substring(0, targetLocation.length - 1);
+		var name = decodeURIComponent(temp.substring(temp.lastIndexOf("/")+1));
+		var parentLocation = temp.substring(0, temp.lastIndexOf("/")+1); 
+
+		return _doServiceCall(targetService, "createFolder", [parentLocation, name]).then(function() {
+			return;
+		}, function() {
+			return;
+		}).then(function() {
+			if (sourceLocation.indexOf("/") === 0) {
+				sourceLocation += "?depth=1";
+			}
+			return _doServiceCall(sourceService, "fetchChildren", [sourceLocation]).then(function(children) {
+				var results = [];
+				for(var i = 0; i < children.length; ++i) {
+					var childSourceLocation = children[i].Location;
+					var childTemp =  childSourceLocation;
+					if (children[i].Directory) {
+						childTemp = childSourceLocation.substring(0, childSourceLocation.length - 1);
+					};
+					var childName = decodeURIComponent(childTemp.substring(childTemp.lastIndexOf("/")+1));
+					
+					var childTargetLocation = targetLocation + encodeURIComponent(childName);
+					if (children[i].Directory) {
+						childTargetLocation += "/";
+					}
+					results[i] = _copy(sourceService, childSourceLocation, targetService, childTargetLocation);
+				}
+				return new dojo.DeferredList(results);
+			});
+		});
+	}
+	
+	
 	/**
 	 * Creates a new file client.
 	 * @class The file client provides a convenience API for interacting with file services
@@ -120,7 +196,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 * @return A deferred that will provide the array of child objects when complete
 		 */
 		fetchChildren: function(location) {
-			return this._doServiceCall(this._getService(location), "fetchChildren", arguments);
+			return _doServiceCall(this._getService(location), "fetchChildren", arguments);
 		},
 
 		/**
@@ -129,7 +205,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 * @param {String} name The name of the new workspace
 		 */
 		createWorkspace: function(name) {
-			return this._doServiceCall(this._getService(), "createWorkspace", arguments);
+			return _doServiceCall(this._getService(), "createWorkspace", arguments);
 		},
 
 		/**
@@ -137,7 +213,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 * workspaces when ready.
 		 */
 		loadWorkspaces: function() {
-			return this._doServiceCall(this._getService(), "loadWorkspaces", arguments);
+			return _doServiceCall(this._getService(), "loadWorkspaces", arguments);
 		},
 		
 		/**
@@ -147,7 +223,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location) {
-			return this._doServiceCall(this._getService(location), "loadWorkspace", arguments);
+			return _doServiceCall(this._getService(location), "loadWorkspace", arguments);
 		},
 		
 		/**
@@ -158,7 +234,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 * @param {Boolean} create If true, the project is created on the server file system if it doesn't already exist
 		 */
 		createProject: function(url, projectName, serverPath, create) {
-			return this._doServiceCall(this._getService(location), "createProject", arguments);
+			return _doServiceCall(this._getService(location), "createProject", arguments);
 		},
 		/**
 		 * Creates a folder.
@@ -167,7 +243,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 * @return {Object} JSON representation of the created folder
 		 */
 		createFolder: function(parentLocation, folderName) {
-			return this._doServiceCall(this._getService(parentLocation), "createFolder", arguments);
+			return _doServiceCall(this._getService(parentLocation), "createFolder", arguments);
 		},
 		/**
 		 * Create a new file in a specified location. Returns a deferred that will provide
@@ -177,17 +253,17 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 * @return {Object} A deferred that will provide the new file object
 		 */
 		createFile: function(parentLocation, fileName) {
-			return this._doServiceCall(this._getService(parentLocation), "createFile", arguments);
+			return _doServiceCall(this._getService(parentLocation), "createFile", arguments);
 		},
 		/**
 		 * Deletes a file, directory, or project.
 		 * @param {String} location The location of the file or directory to delete.
 		 */
 		deleteFile: function(location) {
-			return this._doServiceCall(this._getService(location), "deleteFile", arguments);
+			return _doServiceCall(this._getService(location), "deleteFile", arguments);
 		},
 		
-		/**
+		/**		 
 		 * Moves a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to move.
 		 * @param {String} targetLocation The location of the target folder.
@@ -198,7 +274,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 			var targetService = this._getService(targetLocation);
 			
 			if (sourceService === targetService) {
-				return this._doServiceCall(sourceService, "moveFile", arguments);				
+				return _doServiceCall(sourceService, "moveFile", arguments);				
 			}
 			
 			var isDirectory = sourceLocation[sourceLocation.length -1] === "/";
@@ -221,16 +297,9 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 			if (isDirectory && target[target.length -1] !== "/") {
 				target += "/";
 			}
-			
-			if (isDirectory) {
-				throw "no directory support... right now";
-			}
-			
-			var that = this;			
-			return this._doServiceCall(sourceService, "read", [sourceLocation]).then(function(contents) {
-				return that._doServiceCall(targetService, "write", [target, contents]);
-			}).then(function() {
-				return that._doServiceCall(sourceService, "deleteFile", [sourceLocation]);
+	
+			return _copy(sourceService, sourceLocation, targetService, target).then(function() {
+				return _doServiceCall(sourceService, "deleteFile", [sourceLocation]);
 			});
 			
 		},
@@ -246,7 +315,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 			var targetService = this._getService(targetLocation);
 			
 			if (sourceService === targetService) {
-				return this._doServiceCall(sourceService, "copyFile", arguments);				
+				return _doServiceCall(sourceService, "copyFile", arguments);				
 			}
 			
 			var isDirectory = sourceLocation[sourceLocation.length -1] === "/";
@@ -268,16 +337,9 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 			
 			if (isDirectory && target[target.length -1] !== "/") {
 				target += "/";
-			}
-			
-			if (isDirectory) {
-				throw "no directory support... right now";
-			}
-			
-			var that = this;
-			return this._doServiceCall(sourceService, "read", [sourceLocation]).then(function(contents) {
-				return that._doServiceCall(targetService, "write", [target, contents]);
-			});
+			}	
+
+			return _copy(sourceService, sourceLocation, targetService, target);
 		},
 
 		/**
@@ -289,7 +351,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
 		read: function(location, isMetadata) {
-			return this._doServiceCall(this._getService(location), "read", arguments);
+			return _doServiceCall(this._getService(location), "read", arguments);
 		},
 
 		/**
@@ -301,7 +363,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 * @return A deferred for chaining events after the write completes with new metadata object
 		 */		
 		write: function(location, contents, args) {
-			return this._doServiceCall(this._getService(location), "write", arguments);
+			return _doServiceCall(this._getService(location), "write", arguments);
 		},
 
 		/**
@@ -312,7 +374,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 * @return A deferred for chaining events after the import completes
 		 */		
 		remoteImport: function(targetLocation, options) {
-			return this._doServiceCall(this._getService(targetLocation), "remoteImport", arguments);
+			return _doServiceCall(this._getService(targetLocation), "remoteImport", arguments);
 		},
 
 		/**
@@ -323,42 +385,7 @@ define(["dojo", "orion/auth"], function(dojo, mAuth){
 		 * @return A deferred for chaining events after the export completes
 		 */		
 		remoteExport: function(sourceLocation, options) {
-			return this._doServiceCall(this._getService(sourceLocation), "remoteExport", arguments);
-		},
-
-		/**
-		 * This helper method implements invocation of the service call,
-		 * with retry on authentication error if needed.
-		 * @private
-		 */
-		_doServiceCall: function(fileService, funcName, funcArgs) {
-			var clientDeferred = new dojo.Deferred();
-			fileService[funcName].apply(fileService, funcArgs).then(
-				//on success, just forward the result to the client
-				function(result) {
-					clientDeferred.callback(result);
-				},
-				//on failure we might need to retry
-				function(error) {
-					if (error.status === 401 || error.status === 403) {
-						mAuth.handleAuthenticationError(error, function(message) {
-							//try again
-							fileService[funcName].apply(fileService, funcArgs).then(
-								function(result) {
-									clientDeferred.callback(result);
-								},
-								function(error) {
-									clientDeferred.errback(error);
-								}
-							);
-						});
-					} else {
-						//forward other errors to client
-						clientDeferred.errback(error);
-					}
-				}
-			);
-			return clientDeferred;
+			return _doServiceCall(this._getService(sourceLocation), "remoteExport", arguments);
 		}
 	};//end FileClient prototype
 	FileClient.prototype.constructor = FileClient;
