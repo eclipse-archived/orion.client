@@ -11,7 +11,7 @@
 /*jslint browser:true*/
 
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/CheckBox', 'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/NewItemDialog.html'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/CheckBox', 'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin'], function(dojo, dijit) {
 
 /**
  * @param options {{ 
