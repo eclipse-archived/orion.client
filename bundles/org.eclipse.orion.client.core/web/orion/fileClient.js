@@ -234,7 +234,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		 * @param {Boolean} create If true, the project is created on the server file system if it doesn't already exist
 		 */
 		createProject: function(url, projectName, serverPath, create) {
-			return _doServiceCall(this._getService(location), "createProject", arguments);
+			return _doServiceCall(this._getService(url), "createProject", arguments);
 		},
 		/**
 		 * Creates a folder.
