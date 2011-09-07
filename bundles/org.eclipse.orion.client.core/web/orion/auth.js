@@ -18,11 +18,13 @@
 
  */
 
-define(['dojo', 'orion/globalCommands', 'dojo/date/locale'], function(dojo, mGlobalCommands) {
+define(['dojo', 'orion/globalCommands', 'dojo/date/locale', 'orion/widgets/LoginDialog'], function(dojo, mGlobalCommands) {
 
 var authenticationInProgress = false;
 
 var forbiddenAccessDlg;
+var loginDialog;
+var pendingAuthentication = {}
 
 dojo.addOnLoad(function () {
 	
@@ -95,25 +97,31 @@ function handleAuthenticationError(error, retry) {
 						return;
 					}
 					window.removeEventListener("storage", storageListener, false); // ... but only once
+					delete pendingAuthentication[responseObj.SignInKey];
+					if(loginDialog && loginDialog.open){
+						loginDialog.setAuthenticationServices(pendingAuthentication);
+					}
 					retry();
 
 				};
 				
 				window.addEventListener("storage", storageListener, false);
 				
-				if (!authenticationInProgress) {
-					authenticationInProgress = true;
-					if(responseObj.SignInLocation && responseObj.SignInLocation!=""){
+				if(responseObj.SignInKey){
+					
+					if (!loginDialog || !loginDialog.open) {
 						
-						if(responseObj.SignInLocation.toString().indexOf("?")==-1){
-							window.open(responseObj.SignInLocation + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + responseObj.SignInKey, 
-									"loginwindow", 'width=400, height=250');
-						}else{
-							window.open(responseObj.SignInLocation + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + responseObj.SignInKey, 
-									"loginwindow", 'width=400, height=250');
-						}
+						loginDialog = new orion.widgets.LoginDialog();
+						loginDialog.startup();
+						dijit._curFocus = null; // Workaround for dojo bug #12534
+						loginDialog.show();
+						
 					}
+				
+					pendingAuthentication[responseObj.SignInKey] = responseObj;
+					loginDialog.setAuthenticationServices(pendingAuthentication);
 				}
+				
 			} catch (e){
 			}
 			

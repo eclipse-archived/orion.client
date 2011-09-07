@@ -83,7 +83,6 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	// END BOTTOM BANNER FRAGEMENT
 
 	var notifyAuthenticationSite = qualifyURL('/auth/NotifyAuthentication.html');
-	var authenticationInProgress = false;
 	var authRendered = {};
 	
 	function getLabel(authService, serviceReference){
@@ -221,21 +220,23 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		
 		if(!jsonData || !jsonData.uid){
 			popupMenu.setLabel(label);
-			popupMenu.popup.addChild(new dijit.MenuItem({
-	            label: "Sign in",
-	            onClick: function(){
-					if (!authenticationInProgress) {
-//TODO				authenticationInProgress = true;
-						if(authService.getAuthForm){
-							authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
-								window.open(loginForm, 'LoginWindow', 'width=400, height=250');
-							});
-						}else if(authService.login){
-							authService.login(notifyAuthenticationSite);
+			if(authService.getAuthForm){
+				authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
+					popupMenu.popup.addChild(new mCommands.CommandMenuItem({
+						label: "<a href='"+loginForm+"' target='_blank'>Sign in</a>",
+						hrefCallback: true
+					}));
+				});
+			}else if(authService.login){
+				popupMenu.popup.addChild(new dijit.MenuItem({
+					label: "Sign in",
+					onClick: function(){
+						authService.login(notifyAuthenticationSite);
 						}
-					}
-	            }
-	        }));
+					}));
+				
+			}
+			
 		} else {
 			var lastLogin = "N/A";
 			if (jsonData && jsonData.lastlogintimestamp) {
@@ -283,18 +284,14 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			dojo.empty(userInfo);
 			var signout = document.createElement('span');
 			signout.appendChild(document.createTextNode("Sign in"));
-			signout.onclick = function(){
-				if (!authenticationInProgress) {
-//TODO				authenticationInProgress = true;
-					if(authService.getAuthForm){
-						authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
-							window.open(loginForm, 'LoginWindow', 'width=400, height=250');
-						});
-					}else if(authService.login){
-						authService.login(notifyAuthenticationSite);
-					}
-				}
-			};
+			if(authService.getAuthForm){
+				authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
+					dojo.create("a", {href: loginForm, target: "_blank", innerHTML: "Sign in"}, signout, "only");
+				});
+			}else if(authService.login){
+				signout.onclick = function(){authService.login(notifyAuthenticationSite);};
+			}
+
 			signout.id = "signOutUser";
 			userInfo.appendChild(signout);
 			dojo.addClass(signout, "commandLink");
