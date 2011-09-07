@@ -1180,7 +1180,7 @@ var exports = {};
 		commandService.addCommand(cherryPickCommand, "object");
 	};
 	
-	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack , cmdBaseNumber ,logNavigator, remoteNavigator, logPath) {
+	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack, cmdBaseNumber, logNavigator, remoteNavigator, logPath) {
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch latest commits",
 			tooltip : "Fetch latest commits",
@@ -1256,8 +1256,10 @@ var exports = {};
 								display.Severity = "Ok";
 								display.HTML = false;
 								display.Message = result.jsonData.Result;
-							}
-							else if(result.jsonData){
+
+								refreshStatusCallBack();
+								progressService.setProgressResult(display);
+							} else if (result.jsonData){
 								var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
 								
 								display.Severity = "Warning";
@@ -1265,7 +1267,9 @@ var exports = {};
 								display.Message = "<span>" + result.jsonData.Result
 									+ ". Go to <a href=\"/git/git-status.html#" 
 									+ statusLocation +"\">Git Status page</a>.<span>";
-							} else if(result.error) {
+
+								progressService.setProgressResult(display);
+							} else if (result.error) {
 								display.Severity = "Error";
 								if(result.error.responseText && JSON.parse(result.error.responseText)){
 									var resp = JSON.parse(result.error.responseText);
@@ -1276,10 +1280,9 @@ var exports = {};
 								display.HTML = true;
 								display.Message ="<span>" + display.Message + " Go to <a href=\"/git/git-status.html#" 
 									+ statusLocation + "\">Git Status page</a>.<span>";
-							}
 								
-							progressService.setProgressResult(display);
-							refreshStatusCallBack();
+								progressService.setProgressResult(display);
+							}
 						});
 					}, function (error) {
 						serviceRegistry.getService("orion.page.message").then(function(progressService){
