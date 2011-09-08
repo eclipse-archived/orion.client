@@ -6,3 +6,19 @@
 .parentElement {
 	border: 1px solid teal;
 }
+
+.ruler_tooltip {
+	font-family: monospace;
+	font-size: 10pt;
+	background-color: InfoBackground;
+	color: InfoText;
+	padding: 3px;
+	border-radius: 4px;
+	border: 1px solid black;
+	zIndex: 100;
+}
+
+.ruler_tooltip em {
+	font-style: normal;
+	font-weight: bold;
+}

@@ -267,6 +267,8 @@ orion.textview.TextView = (function() {
 				var self = this;
 				addHandler(rulerParent, "click", function(e) { self._handleRulerEvent(e); });
 				addHandler(rulerParent, "dblclick", function(e) { self._handleRulerEvent(e); });
+				addHandler(rulerParent, "mouseover", function(e) { self._handleRulerEvent(e); });
+				addHandler(rulerParent, "mouseout", function(e) { self._handleRulerEvent(e); });
 			}
 			var div = document.createElement("DIV");
 			div._ruler = ruler;
@@ -1976,6 +1978,12 @@ orion.textview.TextView = (function() {
 						break;
 					case "dblclick": 
 						if (ruler.onDblClick) { ruler.onDblClick(lineIndex, e); }
+						break;
+					case "mouseover": 
+						if (ruler.onMouseOver) { ruler.onMouseOver(lineIndex, e); }
+						break;
+					case "mouseout": 
+						if (ruler.onMouseOut) { ruler.onMouseOut(lineIndex, e); }
 						break;
 				}
 			}
@@ -4815,7 +4823,7 @@ orion.textview.TextView = (function() {
 				var div = cells[i].firstChild;
 				var ruler = div._ruler, style;
 				if (div.rulerChanged) {
-					this._applyStyle(ruler.getStyle(), div);
+					this._applyStyle(ruler.getRulerStyle(), div);
 				}
 				
 				var widthDiv;
@@ -4828,19 +4836,25 @@ orion.textview.TextView = (function() {
 					widthDiv.style.visibility = "hidden";
 					div.appendChild(widthDiv);
 				}
-				var lineIndex;
+				var lineIndex, annotation;
 				if (div.rulerChanged) {
 					if (widthDiv) {
 						lineIndex = -1;
-						this._applyStyle(ruler.getStyle(lineIndex), widthDiv);
-						widthDiv.innerHTML = ruler.getHTML(lineIndex);
+						annotation = ruler.getWidestAnnotation();
+						if (annotation) {
+							this._applyStyle(annotation.style, widthDiv);
+							if (annotation.html) {
+								widthDiv.innerHTML = annotation.html;
+							}
+						}
 						widthDiv.lineIndex = lineIndex;
 						widthDiv.style.height = (lineHeight + viewPad.top) + "px";
 					}
 				}
 
-				var overview = ruler.getOverview(), lineDiv, frag;
+				var overview = ruler.getOverview(), lineDiv, frag, annotations;
 				if (overview === "page") {
+					annotations = ruler.getAnnotations(topIndex, bottomIndex + 1);
 					while (child) {
 						lineIndex = child.lineIndex;
 						var nextChild = child.nextSibling;
@@ -4854,8 +4868,14 @@ orion.textview.TextView = (function() {
 					for (lineIndex=topIndex; lineIndex<=bottomIndex; lineIndex++) {
 						if (!child || child.lineIndex > lineIndex) {
 							lineDiv = parentDocument.createElement("DIV");
-							this._applyStyle(ruler.getStyle(lineIndex), lineDiv);
-							lineDiv.innerHTML = ruler.getHTML(lineIndex);
+							annotation = annotations[lineIndex];
+							if (annotation) {
+								this._applyStyle(annotation.style, lineDiv);
+								if (annotation.html) {
+									lineDiv.innerHTML = annotation.html;
+								}
+								lineDiv.annotation = annotation;
+							}
 							lineDiv.lineIndex = lineIndex;
 							lineDiv.style.height = lineHeight + "px";
 							frag.appendChild(lineDiv);
@@ -4882,16 +4902,20 @@ orion.textview.TextView = (function() {
 							div.removeChild(div.lastChild);
 							count--;
 						}
-						var lines = ruler.getAnnotations();
+						annotations = ruler.getAnnotations(0, lineCount);
 						frag = document.createDocumentFragment();
-						for (var j = 0; j < lines.length; j++) {
-							lineIndex = lines[j];
+						for (var prop in annotations) {
+							lineIndex = prop >>> 0;
 							if (lineIndex < 0) { continue; }
 							lineDiv = parentDocument.createElement("DIV");
-							this._applyStyle(ruler.getStyle(lineIndex), lineDiv);
+							annotation = annotations[prop];
+							this._applyStyle(annotation.style, lineDiv);
 							lineDiv.style.position = "absolute";
 							lineDiv.style.top = buttonHeight + lineHeight + Math.floor(lineIndex * divHeight) + "px";
-							lineDiv.innerHTML = ruler.getHTML(lineIndex);
+							if (annotation.html) {
+								lineDiv.innerHTML = annotation.html;
+							}
+							lineDiv.annotation = annotation;
 							lineDiv.lineIndex = lineIndex;
 							frag.appendChild(lineDiv);
 						}

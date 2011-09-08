@@ -36,7 +36,8 @@ function log (text) {
 }
  
  define(["orion/textview/keyBinding",
-		"orion/textview/textModel", 
+		"orion/textview/textModel",
+		"orion/textview/annotationModel", 
 		"orion/textview/projectionTextModel", 
 		"orion/textview/textView", 
 		"orion/textview/rulers",
@@ -45,9 +46,10 @@ function log (text) {
 		"orion/editor/htmlGrammar",
 		"examples/textview/textStyler",
 		"tests/textview/test-performance",
+		"tests/textview/test-annotationModel",
 		"tests/textview/test-projectionModel"],   
  
-function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUndoStack, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextView, mRulers, mUndoStack, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 	var view = null;
 	var styler = null;
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
@@ -83,7 +85,7 @@ function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUnd
 		var tabSize = parseInt(window.document.getElementById('tabSize').value, 10);
 		var options = {
 			parent: "divParent",
-			model: new mTextModel.TextModel(),
+			model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
 			stylesheet: stylesheets,
 			fullSelection: fullSelection,
 			tabSize: tabSize > 0 ? tabSize : 4
@@ -102,67 +104,243 @@ function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUnd
 			undoStack.redo();
 			return true;
 		});
-		
 		/* Example: Adding a keyBinding and action*/
 		view.setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save");
 		view.setAction("save", function() {
 			log("*****************SAVE");
 			return true;
 		});
-	
-		/* Adding the Rulers */	
-		var breakpoint = {
-			html: "<img src='images/brkp_obj.gif'></img>",
-			style: {styleClass: "ruler_annotation_breakpoint"},
-			overviewStyle: {styleClass: "ruler_annotation_breakpoint_overview"}
-		};
-		var todo = {
-			html: "<img src='images/todo.gif'></img>",
-			style: {styleClass: "ruler_annotation_todo"},
-			overviewStyle: {styleClass: "ruler_annotation_todo_overview"}
-		};
-		var annotation = new mRulers.AnnotationRuler("left", {styleClass: "ruler_annotation"}, breakpoint);
-		annotation.onDblClick =  function(lineIndex, e) {
+		
+		var annotationModel = view.annotationModel = new mAnnotationModel.AnnotationModel(options.model.getParent());
+
+		/* Adding the Rulers */
+		var breakpointType = "orion.annotation.breakpoint";
+		var taskType = "orion.annotation.task";
+		var annotationRuler = view.annotationRuler = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler_annotation"});
+		annotationRuler.addAnnotationType(breakpointType);
+		annotationRuler.addAnnotationType(taskType);
+		annotationRuler.onDblClick =  function(lineIndex, e) {
 			if (lineIndex === undefined) { return; }
-			annotation.setAnnotation(lineIndex, annotation.getAnnotation(lineIndex) !== undefined ? undefined : e.ctrlKey ? todo : breakpoint);
+			var model = this._view.getModel();
+			var start = model.getLineStart(lineIndex);
+			var end = model.getLineEnd(lineIndex, true);
+			if (model.getParent) {
+				start = model.mapOffset(start);
+				end = model.mapOffset(end);
+			}
+			var type =  (isMac ? e.metaKey : e.ctrlKey) ? taskType : breakpointType;
+			var annotations = annotationModel.getAnnotations(start, end);
+			var annotation, temp;
+			while ((temp = annotations.next()) !== null) {
+				if (temp.type === type) {
+					annotation = temp;
+					break;
+				}
+			}
+			if (annotation) {
+				annotationModel.removeAnnotation(annotation);
+			} else {
+				if (isMac ? e.metaKey : e.ctrlKey) {
+					annotation = {
+						type: taskType,
+						rulerTitle: "Todo: " + model.getLine(lineIndex),
+						rulerHTML: "<img style='vertical-align:middle;align:left;' src='images/todo.gif'></img>",
+						rulerStyle: {styleClass: "ruler_annotation_todo"},
+						overviewStyle: {styleClass: "ruler_annotation_todo_overview"}
+					};
+				} else {
+					annotation = {
+						type: breakpointType,
+						rulerTitle: "Breakpoint: " + model.getLine(lineIndex),
+						rulerHTML: "<img style='vertical-align:middle;:left;' src='images/brkp_obj.gif'></img>",
+						rulerStyle: {styleClass: "ruler_annotation_breakpoint"},
+						overviewStyle: {styleClass: "ruler_annotation_breakpoint_overview"}
+					};
+				}
+				annotation.start = start;
+				annotation.end = end;
+				annotationModel.addAnnotation(annotation);
+			}
 		};
-		var lines = new mRulers.LineNumberRuler("left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
-		lines.onDblClick = annotation.onDblClick;
-		var overview = new mRulers.OverviewRuler("right", {styleClass: "ruler_overview"}, annotation);
-		view.addRuler(annotation);
-		view.addRuler(lines);
-		view.addRuler(overview);
+		var foldingRuler = view.folding = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler_folding"});
+		foldingRuler.addAnnotationType("orion.annotation.folding");
+		var linesRuler = view.lines = new mRulers.LineNumberRuler(annotationModel, "left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+		linesRuler.onDblClick = annotationRuler.onDblClick;
+		var overviewRuler = new mRulers.OverviewRuler(annotationModel, "right", {styleClass: "ruler_overview"});
+		overviewRuler.addAnnotationType(breakpointType);
+		overviewRuler.addAnnotationType(taskType);
+		
+		/* */
+//		var testAnnotationType = "orion.annotation.test";
+//		annotationRuler.addAnnotationType(testAnnotationType);
+//		view.setKeyBinding(new mKeyBinding.KeyBinding('b', true), "addannotation");
+//		view.setAction("addannotation", function() {
+//			var selection = view.getSelection();
+//			if (selection.start === selection.end) {return;}
+//			var model = view.getModel();
+//			var annotation = {
+//				type: testAnnotationType,
+//				rulerTitle: "test",
+//				rulerHTML: "<img style='vertical-align:middle;:left;' src='images/brkp_obj.gif'></img>",
+//				rulerStyle: {style: {background: "blue"}},
+//				overviewStyle: {styleClass: "ruler_annotation_breakpoint_overview"}
+//			};
+//			if (model.getParent) {
+//				selection.start = model.mapOffset(selection.start);
+//				selection.end = model.mapOffset(selection.end);
+//			}
+//			annotation.start = selection.start;
+//			annotation.end = selection.end;
+//			annotationModel.addAnnotation(annotation);
+//			log("added annotation to:", selection.start, selection.end);
+//			return true;
+//		});
+		var testAnnotationType = "orion.annotation.test";
+		linesRuler.addAnnotationType(testAnnotationType);
+		overviewRuler.addAnnotationType(testAnnotationType);
+		view.setKeyBinding(new mKeyBinding.KeyBinding('b', true), "addannotation");
+		view.setAction("addannotation", function() {
+			var selection = view.getSelection();
+			if (selection.start === selection.end) {return;}
+			var model = view.getModel();
+			var annotation = {
+				type: testAnnotationType,
+				rulerTitle: "test",
+				rulerHTML: "",
+				rulerStyle: {style: {background: "blue"}},
+				overviewStyle: {styleClass: "ruler_annotation_breakpoint_overview"}
+			};
+			if (model.getParent) {
+				selection.start = model.mapOffset(selection.start);
+				selection.end = model.mapOffset(selection.end);
+			}
+			annotation.start = selection.start;
+			annotation.end = selection.end;
+			annotationModel.addAnnotation(annotation);
+			log("added annotation to:", selection.start, selection.end);
+			return true;
+		});
+		testAnnotationType = "orion.annotation.test2";
+		linesRuler.addAnnotationType(testAnnotationType);
+		overviewRuler.addAnnotationType(testAnnotationType);
+		view.setKeyBinding(new mKeyBinding.KeyBinding('m', true), "addannotation2");
+		view.setAction("addannotation2", function() {
+			var selection = view.getSelection();
+			if (selection.start === selection.end) {return;}
+			var model = view.getModel();
+			var annotation = {
+				type: testAnnotationType,
+				rulerTitle: "test",
+				rulerHTML: "",
+				rulerStyle: {style: {color: "red"}},
+				overviewStyle: {styleClass: "ruler_annotation_todo_overview"}
+			};
+			if (model.getParent) {
+				selection.start = model.mapOffset(selection.start);
+				selection.end = model.mapOffset(selection.end);
+			}
+			annotation.start = selection.start;
+			annotation.end = selection.end;
+			annotationModel.addAnnotation(annotation);
+			log("added annotation to:", selection.start, selection.end);
+			return true;
+		});
+		
+		view.addRuler(annotationRuler);
+		view.addRuler(linesRuler);
+		view.addRuler(foldingRuler);
+		view.addRuler(overviewRuler);
 	}
 	
 	function createJavaSample() {
 		checkView();
-		var file =  getFile("text.txt");
+		var file = getFile("text.txt");
 		if (styler) {
 			styler.destroy();
 			styler = null;
 		}
-		var model = new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel(file));
-		view.setModel(model);
 		styler = new mTextStyler.TextStyler(view, "java");
+		view.setText(file);
 
-		styler._computeComments(model.getCharCount());
-
+		var model = view.getModel();
+		var annotationModel = view.annotationModel;
 		var parent = model.getParent();
+		styler._computeComments(parent.getCharCount());
+
+		
+		view.folding.onClick =  function(lineIndex, e) {
+			if (lineIndex === undefined) { return; }
+			var view = this._view;
+			var model = view.getModel();
+			var start = model.getLineStart(lineIndex);
+			var end = model.getLineEnd(lineIndex, true);
+			if (model.getParent) {
+				start = model.mapOffset(start);
+				end = model.mapOffset(end);
+			}
+			var annotation, iter = annotationModel.getAnnotations(start, end);
+			while (!annotation && iter.hasNext()) {
+				var a = iter.next();
+				if (a.type !== "orion.annotation.folding") { continue; }
+				annotation = a;
+			}
+			if (annotation) {
+				if (annotation.expanded) {
+					annotation.rulerHTML = "<img src='images/collapsed.png'></img>";
+					annotation.rulerStyle = {styleClass: "ruler_folding_expanded"};
+				} else {
+					annotation.rulerHTML = "<img src='images/expanded.png'></img>";
+					annotation.rulerStyle = {styleClass: "ruler_folding_collapsed"};
+				}
+				if (model.getParent) {
+					if (annotation.expanded) {
+						model.addProjection(annotation.projection);
+					} else {
+						model.removeProjection(annotation.projection);
+					}
+				}
+				annotation.expanded = !annotation.expanded;
+				annotationModel.modifyAnnotation(annotation);
+				// Adding/Removing projection to the ProjectioModel will only cause ModelChangeEvent on the ProjectioModel (obviously)
+				// The annotation model only listen for ModelChangeEvent on the base model (which is not changing)
+				// but in this case the annotation model needs to be notified that the offset mapping has changed (and visual location of the annotation
+				// have changed). 
+				//BAD this should be called my the rulers, once that is notified that the annotation model changed (visually only)
+				view.redrawLines(lineIndex, model.getLineCount(), view.annotationRuler);
+				view.redrawLines(lineIndex, model.getLineCount(), view.lines);
+				view.redrawLines(lineIndex, model.getLineCount(), view.folding);
+				
+			}
+		};
 		for (var i=0; i<styler.commentOffsets.length; i += 2) {
-			model.addProjection({
+			var lineIndex = parent.getLineAtOffset(styler.commentOffsets[i]);
+			var endLine = parent.getLineAtOffset(styler.commentOffsets[i+1]);
+			if (lineIndex === endLine) { continue; }
+			var projection = {
 				content: new mTextModel.TextModel(""), 
-				start: parent.getLineStart(parent.getLineAtOffset(styler.commentOffsets[i]) + 1),
-				end: parent.getLineEnd(parent.getLineAtOffset(styler.commentOffsets[i+1]), true)});
+				start: parent.getLineStart(lineIndex + 1),
+				end: parent.getLineEnd(endLine, true)
+			};
+			var start = parent.getLineStart(lineIndex), end = projection.end;
+//			var text = parent.getText(start, end);
+//			text = text.replace(/</g, "&lt;");
+//			text = text.replace(/>/g, "&gt;");
+			var annotation = {
+				start: start,
+				end: end,
+				type: "orion.annotation.folding",
+				projection: projection,
+//				rulerTitle: text,
+				rulerHTML: "<img src='images/collapsed.png'></img>",
+				rulerStyle: {styleClass: "ruler_folding_expanded"}
+			};
+			annotationModel.addAnnotation(annotation);
+			model.addProjection(projection);
 		}
-//
-//		var parent = model.getParent();
-//		for (var i=0; i<styler.commentOffsets.length; i += 2) {
-//			var startLine = parent.getLineAtOffset(styler.commentOffsets[i]);
-//			model.addProjection({
-//				content: new mTextModel.TextModel(parent.getLine(startLine, true)),
-//				start: parent.getLineStart(startLine),
-//				end: parent.getLineEnd(parent.getLineAtOffset(styler.commentOffsets[i+1]), true)});
-//		}
+		//BAD 
+		view.redrawLines(0, model.getLineCount(), view.annotationRuler);
+		view.redrawLines(0, model.getLineCount(), view.lines);
+		view.redrawLines(0, model.getLineCount(), view.folding);
 	}
 	
 	function createJavaScriptSample() {
@@ -214,10 +392,11 @@ function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUnd
 	
 
 	function test() {
+		runTestCase(new AnnotationModelTestCase(view));
 	}
 	
 	function performanceTest() {
-		checkView();
+//		checkView();
 //		if (styler) {
 //			styler.destroy();
 //			styler = null;
@@ -228,8 +407,7 @@ function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUnd
 		test[select.value]();
 	}
 	
-	function projectionTest() {
-		var test = new ProjectionTextModelTestCase(view);
+	function runTestCase(test) {
 		for (var m in test) {
 			if (m.indexOf("test_") === 0) {
 				log("Running:", m.substring(5));
@@ -238,7 +416,11 @@ function(mKeyBinding, mTextModel, mProjectionTextModel, mTextView, mRulers, mUnd
 		}
 		log("All tests finished");
 	}
-
+	
+	function projectionTest() {
+		runTestCase(new ProjectionTextModelTestCase(view));
+	}
+	
 	/* Adding events */
 	document.getElementById("createJavaSample").onclick = createJavaSample;
 	document.getElementById("createJavaScriptSample").onclick = createJavaScriptSample;

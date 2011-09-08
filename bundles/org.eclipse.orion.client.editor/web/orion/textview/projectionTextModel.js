@@ -63,7 +63,7 @@ orion.textview.ProjectionTextModel = (function() {
 		*
 		*/
 		addProjection: function(projection) {
-			//TODO remove listeners from model
+			//TODO add listeners from model
 			if (!projection) {return;}
 			//start and end can't overlap any exist projection
 			var model = this._model, projections = this._projections, i;
@@ -82,14 +82,21 @@ orion.textview.ProjectionTextModel = (function() {
 			var addedCharCount = projection._model.getCharCount();
 			var addedLineCount = projection._model.getLineCount() - 1;
 			this.onChanging(projection._model.getText(), eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
-			//TODO binary search
-			for (i = 0; i < projections.length; i++) {
-				if (projections[i].start > projection.start) {
-					break;
+			var index = this._binarySearch(projections, projection.start);
+			projections.splice(index, 0, projection);
+			this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+		},
+		_binarySearch: function (array, offset) {
+			var high = array.length, low = -1, index;
+			while (high - low > 1) {
+				index = Math.floor((high + low) / 2);
+				if (offset <= array[index].start) {
+					high = index;
+				} else {
+					low = index;
 				}
 			}
-			projections.splice(i, 0, projection);
-			this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			return high;
 		},
 		removeProjection: function(projection) {
 			//TODO remove listeners from model
@@ -104,7 +111,6 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			if (i < this._projections.length) {
 				var model = this._model;
-				//TODO hack?
 				var eventStart = projection.start + delta;
 				var addedCharCount = projection.end - projection.start;
 				var addedLineCount = projection._lineCount;

@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global assertEquals orion */
+/*global assertEquals orion ProjectionTextModelTestCase window*/
 
 if (window.AsyncTestCase) {
 	ProjectionTextModelTestCase = TestCase("ProjectionTextModelTestCase"); 
@@ -19,7 +19,9 @@ if (window.AsyncTestCase) {
 //BAD should use Simon's framework ? 
 	function assertEquals (msg, expected, actual) {
 		if (expected !== actual) {
-			if (window.log) log ("Failed", msg, "Expected:", expected, "Actual:", actual);
+			if (window.log) {
+				log ("Failed", msg, "Expected:", expected, "Actual:", actual)
+			};
 			return false;
 		}
 		return true;
@@ -32,10 +34,10 @@ ProjectionTextModelTestCase.prototype = {
 	
 	test_test1: function () {
 		var model, projectionModel, i, expected;
-//										  0          1          2          3          4           5         6 
-//										  0123456 78901 2345678901234 567890 12345678901 234567 8901234567890123
-//		                                  0xx1xxx xx234 5678xx9012345 67xx89 012xxxxxxxx xxxxx3 4567890123456789
-//                                                             1             2                        3         
+//		                                      0          1          2          3          4           5         6 
+//		                                      0123456 78901 2345678901234 567890 12345678901 234567 8901234567890123
+//		                                      0xx1xxx xx234 5678xx9012345 67xx89 012xxxxxxxx xxxxx3 4567890123456789
+//		                                                           1             2                        3         
 		model = new orion.textview.TextModel("silenio\nesta\naqui na casa\nworld\nabcdefghij\nxxxxl\nmxxxxxxxxxxxxxz", "\n");
 //		                                                 x             x      x                  x
 		projectionModel = new orion.textview.ProjectionTextModel(model);
@@ -48,6 +50,9 @@ ProjectionTextModelTestCase.prototype = {
 		assertEquals("model.getCharCount", 64, model.getCharCount());
 		assertEquals("projectionModel.getLineCount", 5, projectionModel.getLineCount());
 		assertEquals("model.getLineCount", 7, model.getLineCount());
+		assertEquals("projectionModel.getText", "sesta\naquna casa\nwld\nabl\nmxxxxxxxxxxxxxz", projectionModel.getText());
+		assertEquals("model.getText", "silenio\nesta\naqui na casa\nworld\nabcdefghij\nxxxxl\nmxxxxxxxxxxxxxz", model.getText());
+		
 		expected = [0,3,9,10,11,12,13,14,15,18,19,20,21,22,23,24,25,26,29,30,31,32,33,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63];
 		for (i=0; i<expected.length; i++) {
 			assertEquals("projectionModel.mapOffset="+i, expected[i], projectionModel.mapOffset(i));
