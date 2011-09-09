@@ -240,6 +240,13 @@ orion.textview.AnnotationModel = (function() {
 				e.changed.push(annotation);
 			}
 			e.removed = annotations.splice(startIndex, endIndex - startIndex);
+			e.modelEvent = {
+				start: start,
+				removedCharCount: removedCharCount,
+				addedCharCount: addedCharCount,
+				removedLineCount: removedLineCount,
+				addedLineCount: addedLineCount
+			};
 			this.onChanged(e);
 		}
 	};

@@ -704,6 +704,29 @@ orion.textview.TextView = (function() {
 			return offset;
 		},
 		/**
+		 * Get the view rulers.
+		 *
+		 * @returns the view rulers
+		 *
+		 * @see #addRuler
+		 */
+		getRulers: function() {
+			var rulers = [];
+			function getRulers(rulerParent) {
+				if (rulerParent) {
+					var row = rulerParent.firstChild.rows[0];
+					var cells = row.cells;
+					for (var index = 0; index < cells.length; index++) {
+						var cell = cells[index];
+						rulers.push(cell.firstChild._ruler);
+					}
+				}
+			}
+			getRulers(this._leftDiv);
+			getRulers(this._rightDiv);
+			return rulers;
+		},
+		/**
 		 * Returns the text view selection.
 		 * <p>
 		 * The selection is defined by a start and end character offset relative to the

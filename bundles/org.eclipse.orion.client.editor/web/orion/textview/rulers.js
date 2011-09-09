@@ -289,10 +289,17 @@ orion.textview.Ruler = (function() {
 			}
 		},
 		_onAnnotationModelChanged: function(e) {
-			var i, view = this._view, model = view.getModel(), self = this;
+			var view = this._view, model = view.getModel(), self = this;
 			var lineCount = model.getLineCount();
+			if (e.modelEvent) {
+				var start = e.modelEvent.start;
+				if (model.getParent) { start = model.mapOffset(start, true); }
+				var startLine = model.getLineAtOffset(start);
+				view.redrawLines(startLine, lineCount, self);
+				return;
+			}
 			function redraw(changes) {
-				for (i = 0; i < changes.length; i++) {
+				for (var i = 0; i < changes.length; i++) {
 					if (!self.isAnnotationTypeVisible(changes[i].type)) { continue; }
 					var start = changes[i].start;
 					var end = changes[i].end;
@@ -308,9 +315,6 @@ orion.textview.Ruler = (function() {
 			redraw(e.added);
 			redraw(e.removed);
 			redraw(e.changed);
-
-//			//TODO when all lines have to be redraw? see demo.js view.folding.onClick
-//			view.redrawLines(0, lineCount, self);
 		},
 		_mergeAnnotation: function(result, annotation, annotationLineIndex, annotationLineCount) {
 			if (!result) { result = {annotations: []}; }
@@ -577,6 +581,17 @@ orion.textview.OverviewRuler = (function() {
 		return result;
 	};
 	return OverviewRuler;
+}());
+
+
+orion.textview.FoldingRuler = (function() {
+	/** @private */
+	function FoldingRuler (annotationModel, rulerLocation, rulerStyle) {
+		orion.textview.Annotation.Ruler.call(this, annotationModel, rulerLocation, "page", rulerStyle);
+	}
+	FoldingRuler.prototype = new orion.textview.AnnotationRuler();
+	
+	return FoldingRuler;
 }());
 
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {
