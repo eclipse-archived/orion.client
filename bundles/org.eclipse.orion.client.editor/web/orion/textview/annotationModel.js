@@ -34,7 +34,12 @@ orion.textview = orion.textview || {};
  *   rangeStyle
  *   lineStyle
  *
- * RulerAnnotation
+ * FoldingAnnotation
+ *  expanded
+ *  expandedHTML, expandedStyle
+ *  collapsededHTML, collapsededStyle
+ *
+ * RulerAnnotation (between view and ruler)
  *   html
  *   style
  *

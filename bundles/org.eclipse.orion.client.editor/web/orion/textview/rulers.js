@@ -359,6 +359,35 @@ orion.textview.Ruler = (function() {
 			}
 			return result;
 		},
+		_createTooltip: function(document, lineIndex, annotations) {
+			if (annotations.length === 0) { return null; }
+			var model = this._view.getModel(), annotation;
+			var tooltip = document.createElement("DIV");
+			if (annotations.length === 1) {
+				annotation = annotations[0];
+				if (annotation.rulerTitle) {
+					 tooltip.innerHTML = annotation.rulerHTML + "&nbsp;" + annotation.rulerTitle;
+				} else {
+					//TODO show a projection textview to get coloring 
+					var src = model.getParent ? model.getParent().getText(annotation.start, annotation.end) : model.getText(annotation.start, annotation.end);
+					tooltip.appendChild(document.createTextNode(src));
+				}
+			} else {
+				var tooltipHTML = "<em>Multiple annotations:</em><br>";
+				for (var i = 0; i < annotations.length; i++) {
+					annotation = annotations[i];
+					var title = annotation.rulerTitle;
+					if (!title) {
+						title = model.getParent ? model.getParent().getText(annotation.start, annotation.end) : model.getText(annotation.start, annotation.end);
+					}
+					tooltipHTML += annotation.rulerHTML + "&nbsp;" + title + "<br>";
+				}
+				tooltip.innerHTML = tooltipHTML; 
+			}
+			tooltip.className = "ruler_tooltip";
+			tooltip.style.whiteSpace = "pre";
+			return tooltip;
+		},
 		_showTooltip: function(lineIndex, e) {
 			if (lineIndex === undefined) { return; }
 			var model = this._view.getModel();
@@ -370,61 +399,32 @@ orion.textview.Ruler = (function() {
 				end = model.mapOffset(end);
 			}
 			var iter = annotationModel.getAnnotations(start, end);
-			var document = this._view._parentDocument;//TODO bad not API
-			var parent = document.body;
-			var annotations = [], annotation, tooltipHTML = "";
+			var annotations = [], annotation;
 			while (iter.hasNext()) {
 				annotation = iter.next();
 				if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
 				annotations.push(annotation);
 			}
-			var tooltip = document.createElement("DIV");
-			if (annotations.length === 0) {
-				if (this.getOverview() === "document") {
-					tooltipHTML = "Line: " + ((model.getParent ? model.mapLine(lineIndex) : lineIndex) + 1);
-				} else {
-					return;
-				}
-			} else {
-				if (annotations.length === 1) {
-					annotation = annotations[0];
-					if (annotation.rulerTitle) {
-						tooltipHTML = annotation.rulerHTML + "&nbsp;" + annotation.rulerTitle;
-					} else {
-						//TODO show a projection textview to get coloring 
-						var src = model.getParent ? model.getParent().getText(annotation.start, annotation.end) : model.getText(annotation.start, annotation.end);
-						tooltip.appendChild(document.createTextNode(src));
-					}
-				} else {
-					tooltipHTML = "<em>Multiple annotations:</em><br>";
-					for (var i = 0; i < annotations.length; i++) {
-						annotation = annotations[i];
-						var title = annotation.rulerTitle;
-						if (!title) {
-							title = model.getParent ? model.getParent().getText(annotation.start, annotation.end) : model.getText(annotation.start, annotation.end);
-						}
-						tooltipHTML += annotation.rulerHTML + "&nbsp;" + title + "<br>";
-					}
-				}
-			}
-			var pt = {x: e.clientX + 10, y: e.clientY + 10};
-			this._view.convert(pt, "view", "page");
-			tooltip.className = "ruler_tooltip";
-			tooltip.style.whiteSpace = "pre";
-			tooltip.style.position = "fixed";
-			tooltip.style.left = pt.x + "px";
-			tooltip.style.top = pt.y + "px";
-			if (tooltipHTML) { tooltip.innerHTML = tooltipHTML; }
+			var document = this._view._parentDocument;//TODO bad not API
+			var parent = document.body;
+			var tooltip = this._createTooltip(document, lineIndex, annotations);
+			if (!tooltip) { return; }
 			var self = this;
 			this._tooltip = tooltip;
 			this._tooltipLineIndex = lineIndex;
 			this._tooltipShowTimeout = setTimeout(function() {
-				if (!self._tooltip) { return; } 
+				var tooltip = self._tooltip;
+				if (!tooltip) { return; } 
+				var pt = {x: e.clientX + 10, y: e.clientY + 10};
+				self._view.convert(pt, "view", "page");
+				tooltip.style.position = "fixed";
+				tooltip.style.left = pt.x + "px";
+				tooltip.style.top = pt.y + "px";
 				parent.appendChild(self._tooltip);
 				self._tooltipHideTimeout = setTimeout(function() {
 					self._hideTooltip();
 				}, 5000);
-			}, 500);
+			}, 1000);
 		}
 	};
 	return Ruler;
@@ -567,6 +567,16 @@ orion.textview.OverviewRuler = (function() {
 		this._view.setTopIndex(lineIndex);
 	};
 	/** @ignore */
+	OverviewRuler.prototype._createTooltip = function(document, lineIndex, annotations) {
+		if (annotations.length === 0) {
+			var tooltip = document.createElement("DIV"), model = this._view.getModel();
+			tooltip.className = "ruler_tooltip";
+			tooltip.innerHTML = "Line: " + ((model.getParent ? model.mapLine(lineIndex) : lineIndex) + 1);
+			return tooltip;
+		}
+		return orion.textview.Ruler.prototype._createTooltip.call(this, document, lineIndex, annotations);
+	};
+	/** @ignore */
 	OverviewRuler.prototype._mergeAnnotation = function(previousAnnotation, annotation, annotationLineIndex, annotationLineCount) {
 		if (annotationLineIndex !== 0) { return undefined; }
 		var result = previousAnnotation;
@@ -583,13 +593,119 @@ orion.textview.OverviewRuler = (function() {
 	return OverviewRuler;
 }());
 
+orion.textview.FoldingAnnotation = (function() {
+	/** @private */
+	function FoldingAnnotation (projectionModel, type, start, end, expandedHTML, expandedStyle, collapsedHTML, collapsedStyle) {
+		this.type = type;
+		this.start = start;
+		this.end = end;
+		this._projectionModel = projectionModel;
+		this._expandedHTML = expandedHTML;
+		this._expandedStyle = expandedStyle;
+		this._collapsedHTML = collapsedHTML;
+		this._collapsedStyle = collapsedStyle;
+		this.expanded = true;
+		this.collapse();
+	}
+	
+	FoldingAnnotation.prototype = /** @lends orion.textview.FoldingAnnotation.prototype */ {
+		collapse: function () {
+			if (!this.expanded) { return; } 
+			this.rulerHTML = this._collapsedHTML;
+			this.rulerStyle = this._collapsedStyle;
+			this.expanded = false;
+			var projectionModel = this._projectionModel;
+			var baseModel = projectionModel.getParent();
+			this._projection = {
+				start: baseModel.getLineStart(baseModel.getLineAtOffset(this.start) + 1),
+				end: this.end
+			};
+			projectionModel.addProjection(this._projection);
+		},
+		expand: function () {
+			if (this.expanded) { return; } 
+			this.rulerHTML = this._expandedHTML;
+			this.rulerStyle = this._expandedStyle;
+			this.expanded = true;
+			this._projectionModel.removeProjection(this._projection);
+		}
+	};
+	
+	return FoldingAnnotation;
+}());
 
 orion.textview.FoldingRuler = (function() {
 	/** @private */
 	function FoldingRuler (annotationModel, rulerLocation, rulerStyle) {
-		orion.textview.Annotation.Ruler.call(this, annotationModel, rulerLocation, "page", rulerStyle);
+		orion.textview.AnnotationRuler.call(this, annotationModel, rulerLocation, rulerStyle);
 	}
 	FoldingRuler.prototype = new orion.textview.AnnotationRuler();
+	
+	FoldingRuler.prototype.onClick =  function(lineIndex, e) {
+		if (lineIndex === undefined) { return; }
+		var view = this._view;
+		var model = view.getModel();
+		var start = model.getLineStart(lineIndex);
+		var end = model.getLineEnd(lineIndex, true);
+		if (model.getParent) {
+			start = model.mapOffset(start);
+			end = model.mapOffset(end);
+		}
+		var annotationModel = this._annotationModel;
+		var annotation, iter = annotationModel.getAnnotations(start, end);
+		while (!annotation && iter.hasNext()) {
+			var a = iter.next();
+			if (!this.isAnnotationTypeVisible(a.type)) { continue; }
+			annotation = a;
+		}
+		if (annotation) {
+			this._hideTooltip();
+			if (annotation.expanded) {
+				annotation.collapse();
+			} else {
+				annotation.expand();
+			}
+			this._annotationModel.modifyAnnotation(annotation);
+		}
+	};
+	/** @ignore */
+	FoldingRuler.prototype._createTooltip = function(document, lineIndex, annotations) {
+		if (annotations.length === 1) {
+			if (annotations[0].expanded) {
+				return null;
+			}
+		}
+		return orion.textview.AnnotationRuler.prototype._createTooltip.call(this, document, lineIndex, annotations);
+	};
+	FoldingRuler.prototype._onAnnotationModelChanged = function(e) {
+		if (e.modelEvent) {
+			orion.textview.AnnotationRuler.prototype._onAnnotationModelChanged.call(this, e);
+			return;
+		}
+		var view = this._view, model = view.getModel(), self = this, i;
+		var lineCount = model.getLineCount(), lineIndex = lineCount;
+		function redraw(changes) {
+			for (i = 0; i < changes.length; i++) {
+				if (!self.isAnnotationTypeVisible(changes[i].type)) { continue; }
+				var start = changes[i].start;
+				var end = changes[i].end;
+				if (model.getParent) {
+					start = model.mapOffset(start, true);
+					end = model.mapOffset(end, true);
+				}
+				if (start !== -1 && end !== -1) {
+					lineIndex = Math.min(lineIndex, model.getLineAtOffset(start));
+				}
+			}
+		}
+		redraw(e.added);
+		redraw(e.removed);
+		redraw(e.changed);
+		var rulers = view.getRulers();
+		for (i = 0; i < rulers.length; i++) {
+			view.redrawLines(lineIndex, lineCount, rulers[i]);
+		}
+	};
 	
 	return FoldingRuler;
 }());

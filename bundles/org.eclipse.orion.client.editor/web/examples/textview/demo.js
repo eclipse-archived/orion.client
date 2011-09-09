@@ -208,7 +208,7 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 				annotationModel.addAnnotation(annotation);
 			}
 		};
-		var foldingRuler = view.folding = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler_folding"});
+		var foldingRuler = view.folding = new mRulers.FoldingRuler(annotationModel, "left", {styleClass: "ruler_folding"});
 		foldingRuler.addAnnotationType("orion.annotation.folding");
 		var linesRuler = view.lines = new mRulers.LineNumberRuler(annotationModel, "left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
 		linesRuler.onDblClick = annotationRuler.onDblClick;
@@ -315,81 +315,16 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 		var annotationModel = view.annotationModel;
 		var parent = model.getParent();
 		styler._computeComments(parent.getCharCount());
-
-		
-		view.folding.onClick =  function(lineIndex, e) {
-			if (lineIndex === undefined) { return; }
-			var view = this._view;
-			var model = view.getModel();
-			var start = model.getLineStart(lineIndex);
-			var end = model.getLineEnd(lineIndex, true);
-			if (model.getParent) {
-				start = model.mapOffset(start);
-				end = model.mapOffset(end);
-			}
-			var annotation, iter = annotationModel.getAnnotations(start, end);
-			while (!annotation && iter.hasNext()) {
-				var a = iter.next();
-				if (a.type !== "orion.annotation.folding") { continue; }
-				annotation = a;
-			}
-			if (annotation) {
-				if (annotation.expanded) {
-					annotation.rulerHTML = "<img src='images/collapsed.png'></img>";
-					annotation.rulerStyle = {styleClass: "ruler_folding_expanded"};
-				} else {
-					annotation.rulerHTML = "<img src='images/expanded.png'></img>";
-					annotation.rulerStyle = {styleClass: "ruler_folding_collapsed"};
-				}
-				if (model.getParent) {
-					if (annotation.expanded) {
-						model.addProjection(annotation.projection);
-					} else {
-						model.removeProjection(annotation.projection);
-					}
-				}
-				annotation.expanded = !annotation.expanded;
-				annotationModel.modifyAnnotation(annotation);
-				// Adding/Removing projection to the ProjectioModel will only cause ModelChangeEvent on the ProjectioModel (obviously)
-				// The annotation model only listen for ModelChangeEvent on the base model (which is not changing)
-				// but in this case the annotation model needs to be notified that the offset mapping has changed (and visual location of the annotation
-				// have changed). 
-				//BAD this should be called my the rulers, once that is notified that the annotation model changed (visually only)
-				view.redrawLines(lineIndex, model.getLineCount(), view.annotationRuler);
-				view.redrawLines(lineIndex, model.getLineCount(), view.lines);
-				view.redrawLines(lineIndex, model.getLineCount(), view.folding);
-				
-			}
-		};
 		for (var i=0; i<styler.commentOffsets.length; i += 2) {
 			var lineIndex = parent.getLineAtOffset(styler.commentOffsets[i]);
 			var endLine = parent.getLineAtOffset(styler.commentOffsets[i+1]);
 			if (lineIndex === endLine) { continue; }
-			var projection = {
-				content: new mTextModel.TextModel(""), 
-				start: parent.getLineStart(lineIndex + 1),
-				end: parent.getLineEnd(endLine, true)
-			};
-			var start = parent.getLineStart(lineIndex), end = projection.end;
-//			var text = parent.getText(start, end);
-//			text = text.replace(/</g, "&lt;");
-//			text = text.replace(/>/g, "&gt;");
-			var annotation = {
-				start: start,
-				end: end,
-				type: "orion.annotation.folding",
-				projection: projection,
-//				rulerTitle: text,
-				rulerHTML: "<img src='images/collapsed.png'></img>",
-				rulerStyle: {styleClass: "ruler_folding_expanded"}
-			};
+			var start = parent.getLineStart(lineIndex), end = parent.getLineEnd(endLine, true);
+			var annotation = new mRulers.FoldingAnnotation(model, "orion.annotation.folding", start, end,
+				"<img src='images/expanded.png'></img>", "ruler_folding_expanded", 
+				"<img src='images/collapsed.png'></img>", "ruler_folding_collapsed");
 			annotationModel.addAnnotation(annotation);
-			model.addProjection(projection);
 		}
-		//BAD 
-		view.redrawLines(0, model.getLineCount(), view.annotationRuler);
-		view.redrawLines(0, model.getLineCount(), view.lines);
-		view.redrawLines(0, model.getLineCount(), view.folding);
 	}
 	
 	function createJavaScriptSample() {
