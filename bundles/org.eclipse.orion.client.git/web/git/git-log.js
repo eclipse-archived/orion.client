@@ -36,22 +36,8 @@ dojo.addOnLoad(function() {
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 	var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
 	
-	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
-	var fileServiceReference;
 	var branch;
-	
-	
-	for (var i=0; i<fileServices.length; i++) {
-		var info = {};
-		var propertyNames = fileServices[i].getPropertyNames();
-		for (var j = 0; j < propertyNames.length; j++) {
-			info[propertyNames[j]] = fileServices[i].getProperty(propertyNames[j]);
-		}
-		if (new RegExp(info.pattern).test(dojo.hash())) {
-			fileServiceReference = fileServices[i];
-		}
-	}	
-	
+
 	// Git operations
 	var gitClient = new mGitClient.GitService(serviceRegistry);
 	
@@ -91,18 +77,18 @@ dojo.addOnLoad(function() {
 	commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
 	commandService.registerCommandContribution("eclipse.orion.git.cherryPick", 3);
 	
-	loadResource(fileServiceReference, navigator);
+	loadResource(navigator);
 	
 	makeRightPane(navigator);
 
 	// every time the user manually changes the hash, we need to load the
 	// workspace with that name
 	dojo.subscribe("/dojo/hashchange", navigator, function() {
-		loadResource(fileServiceReference, navigator);
+		loadResource(navigator);
 	});
 });
 
-function loadResource(fileServiceReference, navigator){
+function loadResource(navigator){
 	var path = dojo.hash();
 	dojo.xhrGet({
 		url : path,
@@ -112,12 +98,9 @@ function loadResource(fileServiceReference, navigator){
 		handleAs : "json",
 		timeout : 5000,
 		load : function(resource, secondArg) {
+			var fileClient = new mFileClient.FileClient(serviceRegistry);
+			initTitleBar(fileClient, navigator, resource);
 			if (resource.Type === "RemoteTrackingBranch"){
-				serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-					var fileClient = new mFileClient.FileClient(fileService);
-					initTitleBar(fileClient, navigator, resource);
-				});
-		
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
 					gitService.getLog(resource.HeadLocation, resource.Id, function(scopedCommitsJsonData, secondArg) {
 						navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
@@ -126,11 +109,6 @@ function loadResource(fileServiceReference, navigator){
 					});
 				});
 			} else if (resource.toRef){
-				serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-					var fileClient = new mFileClient.FileClient(fileService);
-					initTitleBar(fileClient, navigator, resource);
-				});
-
 				if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1)
 					dojo.xhrGet({
 						url : resource.toRef.RemoteLocation[0].Children[0].Location,
@@ -155,10 +133,6 @@ function loadResource(fileServiceReference, navigator){
 				else
 					navigator.loadCommitsList(dojo.hash(), resource);
 			} else {
-				serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-					var fileClient = new mFileClient.FileClient(fileService);
-					initTitleBar(fileClient, navigator, resource);
-				});
 				navigator.loadCommitsList(dojo.hash(), resource);
 			}
 		},

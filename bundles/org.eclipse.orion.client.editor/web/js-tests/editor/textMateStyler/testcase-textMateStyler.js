@@ -25,7 +25,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 	 */
 	function makeTest(testBody, doTearDown) {
 		function createTextView() {
-			var options = {parent: "editorDiv", readonly: true, stylesheet: ["test.css"]};
+			var options = {parent: "editorDiv", readonly: true, stylesheet: ["test-textMateStyler.css"]};
 			return new mTextView.TextView(options);
 		}
 		
@@ -215,6 +215,24 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		var str4 = '(?x:                # turn on extended mode\n                     \\\\                # a literal backslash\n                     (?:               # ...followed by...\n                       ["\\\\/bfnrt]     # one of these characters\n                       |               # ...or...\n                       u               # a u\n                       [0-9a-fA-F]{4}  # and four hex digits\n                     )\n                   )';
 		var regex4 = mTextMateStyler.RegexUtil.toRegExp(str4, false);
 		assert.equal(regex4.source, '\\\\(?:["\\\\/bfnrt]|u[0-9a-fA-F]{4})');
+		
+		// Case-insensitive flag applied to entire regex pattern
+		var str8 = "(?i)fIzz",
+		    str9 = "(?i:BUzz)",
+		    str10 = "(?i)(foo(bar(baz.+)?)*)+",
+		    str11 = "(?i:(a(b|c)d(e(f))g))",
+		    regex8 = mTextMateStyler.RegexUtil.toRegExp(str8, false),
+		    regex9 = mTextMateStyler.RegexUtil.toRegExp(str9, false),
+		    regex10 = mTextMateStyler.RegexUtil.toRegExp(str10, false),
+		    regex11 = mTextMateStyler.RegexUtil.toRegExp(str11, false);
+		assert.equal(regex8.source, "fIzz");
+		assert.equal(regex8.ignoreCase, true);
+		assert.equal(regex9.source, "BUzz");
+		assert.equal(regex9.ignoreCase, true);
+		assert.equal(regex10.source, "(foo(bar(baz.+)?)*)+");
+		assert.equal(regex10.ignoreCase, true);
+		assert.equal(regex11.source, "(a(b|c)d(e(f))g)");
+		assert.equal(regex11.ignoreCase, true);
 	};
 	
 	tests["test TextMateStyler - Util.groupify()"] = function() {
@@ -1384,7 +1402,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 			[0, 2, "tag.fakephp", "?>"],
 			[2, 6, "tag.bold", "</b>"]
 		]);
-	}, false);
+	});
 	
 	return tests;
 });

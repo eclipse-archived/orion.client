@@ -31,6 +31,7 @@ exports.setUpEditor = function(isReadOnly){
 	var commandService;
 	var statusReportingService;
 	var problemService;
+	var outlineService;
 	
 	document.body.style.visibility = "visible";
 	dojo.parser.parse();
@@ -52,7 +53,7 @@ exports.setUpEditor = function(isReadOnly){
 
 		// Editor needs additional services besides EAS.
 		problemService = new mProblems.ProblemService(serviceRegistry);
-		new mOutliner.OutlineService(serviceRegistry);
+		outlineService = new mOutliner.OutlineService(serviceRegistry);
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 	}());
 	
@@ -111,6 +112,7 @@ exports.setUpEditor = function(isReadOnly){
 				if (splits.length > 0) {
 					switch(extension) {
 						case "js":
+						case "json":
 							this.styler = new mTextStyler.TextStyler(textView, "js");
 							break;
 						case "java":
@@ -164,346 +166,368 @@ exports.setUpEditor = function(isReadOnly){
 		}
 	}
 
-	serviceRegistry.getService(fileServiceReference).then(function(fileService) {
-		var fileClient = new mFileClient.FileClient(fileService);
+	var fileClient = new mFileClient.FileClient(serviceRegistry);
 
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 		
 		var textViewFactory = function() {
 			return new mTextView.TextView({
 				parent: editorDomNode,
-				stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css", "/examples/textview/textstyler.css", "/css/default-theme.css"],
+				stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css",
+					"/examples/textview/textstyler.css", "/css/default-theme.css",
+					"/orion/editor/editor.css"],
 				tabSize: 4,
 				readonly: isReadOnly
 			});
 		};
 	
-		var inputManager = {
-			lastFilePath: "",
-			
-			setInput: function(location, editor) {
-				var input = mUtil.getPositionInfo(location);
-				var fileURI = input.filePath;
-				// populate editor
-				if (fileURI) {
-					if (fileURI === this.lastFilePath) {
-						editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
-					} else {
-						if (!editor.getTextView()) {
-							editor.installTextView();
-						}
-						var fullPathName = fileURI;
-						var progressTimeout = setTimeout(function() {
-							editor.onInputChange(fullPathName, "Fetching " + fullPathName, null);
-						}, 800); // wait 800ms before displaying
-						fileClient.read(fileURI).then(
-							dojo.hitch(this, function(contents) {
-								clearTimeout(progressTimeout);
-								var delimiter;
-								var lf = contents.indexOf("\n");
-								var cr = contents.indexOf("\r");
-								if (cr !== -1 && lf !== -1) {
-									if (lf === cr + 1) {
-										delimiter = "\r\n";
-									} else {
-										delimiter = cr < lf ? "\r" : "\n";
-									}
-								} else if (lf !== -1) {
-									delimiter = "\n";
-								} else if (cr !== -1) {
-									delimiter = "\r";
+	var inputManager = {
+		lastFilePath: "",
+		
+		setInput: function(location, editor) {
+			var input = mUtil.getPositionInfo(location);
+			var fileURI = input.filePath;
+			// populate editor
+			if (fileURI) {
+				if (fileURI === this.lastFilePath) {
+					editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
+				} else {
+					if (!editor.getTextView()) {
+						editor.installTextView();
+					}
+					var fullPathName = fileURI;
+					var progressTimeout = setTimeout(function() {
+						editor.onInputChange(fullPathName, "Fetching " + fullPathName, null);
+					}, 800); // wait 800ms before displaying
+					fileClient.read(fileURI).then(
+						dojo.hitch(this, function(contents) {
+							clearTimeout(progressTimeout);
+							var delimiter;
+							var lf = contents.indexOf("\n");
+							var cr = contents.indexOf("\r");
+							if (cr !== -1 && lf !== -1) {
+								if (lf === cr + 1) {
+									delimiter = "\r\n";
+								} else {
+									delimiter = cr < lf ? "\r" : "\n";
 								}
-								editor.getTextView().setModel(new orion.textview.TextModel("", delimiter));
-								editor.onInputChange(fileURI, null, contents);
-								// in the long run we should be looking for plug-ins to call here for highlighting
-								syntaxHighlighter.highlight(fileURI, editor.getTextView());
-								editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
-							}),
-							dojo.hitch(this, function(error) {
-								clearTimeout(progressTimeout);
-								editor.onInputChange(fullPathName, "An error occurred: " + error.message, null);
-								console.error("HTTP status code: ", error.status);
-							})
-						);
-						fileClient.read(fileURI, true).then(
-							dojo.hitch(this, function(metadata) {
-								this._fileMetadata = metadata;
-								this.setTitle(metadata.Location);
-							}),
-							dojo.hitch(this, function(error) {
-								console.error("Error loading file metadata: " + error.message);
-								this.setTitle(fileURI);
-							})
-						);
-					}
-					this.lastFilePath = fileURI;
-				} else {
-					editor.onInputChange("No File Selected", "", null);
-				}
-			},
-			
-			getInput: function() {
-				return this.lastFilePath;
-			},
-				
-			setTitle : function(title) {
-				var indexOfSlash = title.lastIndexOf("/");
-				var shortTitle = title;
-				if (indexOfSlash !== -1) {
-					shortTitle = shortTitle.substring(indexOfSlash + 1);
-					if (title.charAt(0) === '*') {
-						shortTitle = '*' + shortTitle;
-					}
-				}
-				this._lastTitle = shortTitle;
-				window.document.title = shortTitle;
-				var titlePane = dojo.byId("location");
-				if (titlePane) {
-					dojo.empty(titlePane);
-					var root = mUtil.getUserName() || "Navigator Root";
-					new mBreadcrumbs.BreadCrumbs({
-						container: "location", 
-						resource: this._fileMetadata,
-						firstSegmentName: root
-					});
-					if (title.charAt(0) === '*') {
-						var dirty = dojo.create('b', null, titlePane, "last");
-						dirty.innerHTML = '*';
-					}
-				}
-			},
-			
-			getTitle: function() {
-				return this._lastTitle;
-			},
-			
-			getFileMetadata: function() {
-				return this._fileMetadata;
-			},
-			
-			setDirty: function(dirty) {
-				if (dirty) {
-					if (this._lastTitle && this._lastTitle.charAt(0) !== '*') {
-						this.setTitle('*'+ this._lastTitle);
-					}
-				} else {
-					if (this._lastTitle && this._lastTitle.charAt(0) === '*') {
-						this.setTitle(this._lastTitle.substring(1));
-					}
-				}
-			},
-			
-			hashChanged: function(editor) {	
-				if (this.shouldGoToURI(editor, dojo.hash())) {
-					selection.setSelections(dojo.hash());
-				} else {
-					// we are staying at our previous location
-					dojo.hash(this.lastFilePath);
-				}
-			},
-			
-			shouldGoToURI: function(editor, fileURI) {
-				if (editor.isDirty()) {
-					var oldStripped = mUtil.getPositionInfo(this.lastFilePath).filePath;
-					var newStripped = mUtil.getPositionInfo(fileURI).filePath;
-					if (oldStripped !== newStripped) {
-						return window.confirm("There are unsaved changes.  Do you still want to navigate away?");
-					}
-				}
-				return true;
-			}
-		};	
-		
-		var escHandler = {
-			handlers: [],
-			
-			addHandler: function(handler) {
-				this.handlers.push(handler);
-			},
-			
-			cancel: function() {
-				var handled = false;
-				// To be safe, we give all our handlers a chance, not just the first one.
-				// In case the user has left multiple modal popups open (such as key assist and search)
-				for (var i=0; i<this.handlers.length; i++) {
-					handled = this.handlers[i].cancel() || handled;
-				}
-				return handled;
-			},
-		
-			isActive: function() {
-				for (var i=0; i<this.handlers.length; i++) {
-					if (this.handlers[i].isActive()) {
-						return true;
-					}
-				}
-				return false;
-			},
-		
-			lineUp: function() {
-				return false;
-			},
-			lineDown: function() {
-				return false;
-			},
-			enter: function() {
-				return false;
-			}
-		};
-		
-		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
-			// Register commands that depend on external services, the registry, etc.
-			var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly);
-			commandGenerator.generateEditorCommands(editor);
-			
-			// Create keybindings for generic editing, no dependency on the service model
-			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(commandService, undoStack, new mSearchAdaptor.OrionTextSearchAdaptor()));
-			keyModeStack.push(genericBindings);
-			
-			// Linked Mode
-			var linkedMode = new orion.editor.LinkedMode(editor);
-			keyModeStack.push(linkedMode);
-			
-			// create keybindings for source editing
-			// TODO this should probably be something that happens more dynamically, when the editor changes input
-			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
-			keyModeStack.push(codeBindings);
-			
-			// give our external escape handler a shot at handling escape
-			keyModeStack.push(escHandler);
-			
-			// global search
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "Search Files");
-			editor.getTextView().setAction("Search Files", function() {
-				window.setTimeout(function() {
-					var e = editor.getTextView();
-					var selection = e.getSelection();
-					var searchPattern = "";
-					if (selection.end > selection.start) {
-						searchPattern = e.getText().substring(selection.start, selection.end);
-					} if (searchPattern.length <= 0) {
-						searchPattern = prompt("Enter search term:", searchPattern);
-					} if (!searchPattern) {
-						return;
-					}
-					dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){ 
-						if (e.charOrCode === dojo.keys.ESCAPE) {
-							searchFloat.style.display = "none";
-						}
-					}));
-					
-					var searchFloatEscHandler = {
-						isActive: function() {
-							return searchFloat.style.display === "block";
-						},
-						
-						cancel: function() {
-							if (this.isActive()) {
-								searchFloat.style.display = "none";
-								return true;
+							} else if (lf !== -1) {
+								delimiter = "\n";
+							} else if (cr !== -1) {
+								delimiter = "\r";
 							}
-							return false;   // not handled
-						}
-					};
-					escHandler.addHandler(searchFloatEscHandler);
-										
-					dojo.place(document.createTextNode("Searching for occurrences of "), searchFloat, "last");
-					var b = dojo.create("b", null, searchFloat, "last");
-					dojo.place(document.createTextNode("\"" + searchPattern + "\"..."), b, "only");
-					searchFloat.style.display = "block";
-					var query = inputManager.getFileMetadata().SearchLocation + searchPattern;
-					searcher.search(searchFloat, query, inputManager.getInput());
-				}, 0);
-				return true;
-			});
-			
-			// splitter binding
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "Toggle Outliner");
-			editor.getTextView().setAction("Toggle Outliner", function(){
-					splitArea.toggle();
-					return true;
-			});
-		};
-		
-		var statusReporter = function(message, isError, isProgress) {
-			if(isProgress){
-				statusReportingService.setProgressMessage(message);
-			} else if (isError) {
-				statusReportingService.setErrorMessage(message);	
+							editor.getTextView().setModel(new orion.textview.TextModel("", delimiter));
+							editor.onInputChange(fileURI, null, contents);
+							// in the long run we should be looking for plug-ins to call here for highlighting
+							syntaxHighlighter.highlight(fileURI, editor.getTextView());
+							editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
+						}),
+						dojo.hitch(this, function(error) {
+							clearTimeout(progressTimeout);
+							editor.onInputChange(fullPathName, "An error occurred: " + error.message, null);
+							console.error("HTTP status code: ", error.status);
+						})
+					);
+					fileClient.read(fileURI, true).then(
+						dojo.hitch(this, function(metadata) {
+							this._fileMetadata = metadata;
+							this.setTitle(metadata.Location);
+						}),
+						dojo.hitch(this, function(error) {
+							console.error("Error loading file metadata: " + error.message);
+							this.setTitle(fileURI);
+						})
+					);
+				}
+				this.lastFilePath = fileURI;
 			} else {
-				statusReportingService.setMessage(message);	
+				editor.onInputChange("No File Selected", "", null);
 			}
-		};
-	
-		var annotationFactory = new mEditorFeatures.AnnotationFactory("/images/problem.gif");
+		},
 		
-		var editor = new mEditor.Editor({
-			textViewFactory: textViewFactory,
-			undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandService, "pageActions"),
-			annotationFactory: annotationFactory,
-			lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
-			contentAssistFactory: contentAssistFactory,
-			keyBindingFactory: keyBindingFactory, 
-			statusReporter: statusReporter,
-			domNode: editorDomNode
-		});
-		
-		// Establishing dependencies on registered services
-		serviceRegistry.getService("orion.core.marker").then(function(problemProvider) {
-			problemProvider.addEventListener("problemsChanged", function(problems) {
-				annotationFactory.showProblems(problems);
-			});
-		});
-		
-		dojo.connect(editor, "onDirtyChange", inputManager, inputManager.setDirty);
-		
-		// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
-		serviceRegistry.getService("orion.page.selection").then(function(service) {
-			service.addEventListener("selectionChanged", function(fileURI) {
-				if (inputManager.shouldGoToURI(editor, fileURI)) {
-					inputManager.setInput(fileURI, editor);
-				} 
-			});
-		});
-	
-		// In this page, the hash change drives selection.  In other scenarios, a file picker might drive selection
-		dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editor);});
-		inputManager.setInput(dojo.hash(), editor);
-		
-		// TODO search location needs to be gotten from somewhere
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, editor, editor, escHandler);
-		mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
+		getInput: function() {
+			return this.lastFilePath;
+		},
 			
-		var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
-		
-		// Create outliner "gadget"
-		new mOutliner.Outliner({parent: outlineDomNode, serviceRegistry: serviceRegistry, selectionService: selection});	
-		
-		window.onbeforeunload = function() {
-			if (editor.isDirty()) {
-				 return "There are unsaved changes.";
+		setTitle : function(title) {
+			var indexOfSlash = title.lastIndexOf("/");
+			var shortTitle = title;
+			if (indexOfSlash !== -1) {
+				shortTitle = shortTitle.substring(indexOfSlash + 1);
+				if (title.charAt(0) === '*') {
+					shortTitle = '*' + shortTitle;
+				}
 			}
-		};
+			this._lastTitle = shortTitle;
+			window.document.title = shortTitle;
+			var titlePane = dojo.byId("location");
+			if (titlePane) {
+				dojo.empty(titlePane);
+				var root = mUtil.getUserName() || "Navigator Root";
+				new mBreadcrumbs.BreadCrumbs({
+					container: "location", 
+					resource: this._fileMetadata,
+					firstSegmentName: root
+				});
+				if (title.charAt(0) === '*') {
+					var dirty = dojo.create('b', null, titlePane, "last");
+					dirty.innerHTML = '*';
+				}
+			}
+		},
 		
-		// Set up the border container
-		splitArea.setToggleCallback(function() {
-			editor.getTextView().redrawLines();
-		});
+		getTitle: function() {
+			return this._lastTitle;
+		},
+		
+		getFileMetadata: function() {
+			return this._fileMetadata;
+		},
+		
+		setDirty: function(dirty) {
+			if (dirty) {
+				if (this._lastTitle && this._lastTitle.charAt(0) !== '*') {
+					this.setTitle('*'+ this._lastTitle);
+				}
+			} else {
+				if (this._lastTitle && this._lastTitle.charAt(0) === '*') {
+					this.setTitle(this._lastTitle.substring(1));
+				}
+			}
+		},
+		
+		hashChanged: function(editor) {	
+			if (this.shouldGoToURI(editor, dojo.hash())) {
+				selection.setSelections(dojo.hash());
+			} else {
+				// we are staying at our previous location
+				dojo.hash(this.lastFilePath);
+			}
+		},
+		
+		shouldGoToURI: function(editor, fileURI) {
+			if (editor.isDirty()) {
+				var oldStripped = mUtil.getPositionInfo(this.lastFilePath).filePath;
+				var newStripped = mUtil.getPositionInfo(fileURI).filePath;
+				if (oldStripped !== newStripped) {
+					return window.confirm("There are unsaved changes.  Do you still want to navigate away?");
+				}
+			}
+			return true;
+		}
+	};	
+	
+	var escHandler = {
+		handlers: [],
+		
+		addHandler: function(handler) {
+			this.handlers.push(handler);
+		},
+		
+		cancel: function() {
+			var handled = false;
+			// To be safe, we give all our handlers a chance, not just the first one.
+			// In case the user has left multiple modal popups open (such as key assist and search)
+			for (var i=0; i<this.handlers.length; i++) {
+				handled = this.handlers[i].cancel() || handled;
+			}
+			return handled;
+		},
+	
+		isActive: function() {
+			for (var i=0; i<this.handlers.length; i++) {
+				if (this.handlers[i].isActive()) {
+					return true;
+				}
+			}
+			return false;
+		},
+	
+		lineUp: function() {
+			return false;
+		},
+		lineDown: function() {
+			return false;
+		},
+		enter: function() {
+			return false;
+		}
+	};
+	
+	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
+		// Register commands that depend on external services, the registry, etc.
+		var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly);
+		commandGenerator.generateEditorCommands(editor);
+		
+		// Create keybindings for generic editing, no dependency on the service model
+		var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(commandService, undoStack, new mSearchAdaptor.OrionTextSearchAdaptor()));
+		keyModeStack.push(genericBindings);
+		
+		// Linked Mode
+		var linkedMode = new orion.editor.LinkedMode(editor);
+		keyModeStack.push(linkedMode);
+		
+		// create keybindings for source editing
+		// TODO this should probably be something that happens more dynamically, when the editor changes input
+		var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
+		keyModeStack.push(codeBindings);
+		
+		// give our external escape handler a shot at handling escape
+		keyModeStack.push(escHandler);
+		
+		// global search
+		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "Search Files");
+		editor.getTextView().setAction("Search Files", function() {
+			window.setTimeout(function() {
+				var e = editor.getTextView();
+				var selection = e.getSelection();
+				var searchPattern = "";
+				if (selection.end > selection.start) {
+					searchPattern = e.getText().substring(selection.start, selection.end);
+				} if (searchPattern.length <= 0) {
+					searchPattern = prompt("Enter search term:", searchPattern);
+				} if (!searchPattern) {
+					return;
+				}
+				dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){ 
+					if (e.charOrCode === dojo.keys.ESCAPE) {
+						searchFloat.style.display = "none";
+					}
+				}));
 				
-		// Ctrl+o handler for toggling outline 
-		document.onkeydown = function (evt){
-			evt = evt || window.event;
-			if(evt.ctrlKey && evt.keyCode  === 79){
+				var searchFloatEscHandler = {
+					isActive: function() {
+						return searchFloat.style.display === "block";
+					},
+					
+					cancel: function() {
+						if (this.isActive()) {
+							searchFloat.style.display = "none";
+							return true;
+						}
+						return false;   // not handled
+					}
+				};
+				escHandler.addHandler(searchFloatEscHandler);
+									
+				dojo.place(document.createTextNode("Searching for occurrences of "), searchFloat, "last");
+				var b = dojo.create("b", null, searchFloat, "last");
+				dojo.place(document.createTextNode("\"" + searchPattern + "\"..."), b, "only");
+				searchFloat.style.display = "block";
+				var query = inputManager.getFileMetadata().SearchLocation + searchPattern;
+				searcher.search(searchFloat, query, inputManager.getInput());
+			}, 0);
+			return true;
+		});
+		
+		// splitter binding
+		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "Toggle Outliner");
+		editor.getTextView().setAction("Toggle Outliner", function(){
 				splitArea.toggle();
-				if(document.all){ 
-					evt.keyCode = 0;
-				}else{ 
-					evt.preventDefault();
-					evt.stopPropagation();
-				}					
-			} 
-		};
+				return true;
+		});
+	};
+	
+	var statusReporter = function(message, isError, isProgress) {
+		if(isProgress){
+			statusReportingService.setProgressMessage(message);
+		} else if (isError) {
+			statusReportingService.setErrorMessage(message);	
+		} else {
+			statusReportingService.setMessage(message);	
+		}
+	};
+
+	var annotationFactory = new mEditorFeatures.AnnotationFactory("/images/problem.gif");
+	
+	var editor = new mEditor.Editor({
+		textViewFactory: textViewFactory,
+		undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandService, "pageActions"),
+		annotationFactory: annotationFactory,
+		lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
+		contentAssistFactory: contentAssistFactory,
+		keyBindingFactory: keyBindingFactory, 
+		statusReporter: statusReporter,
+		domNode: editorDomNode
 	});
+	
+	// Establishing dependencies on registered services
+	serviceRegistry.getService("orion.core.marker").then(function(problemProvider) {
+		problemProvider.addEventListener("problemsChanged", function(problems) {
+			annotationFactory.showProblems(problems);
+		});
+	});
+	
+	dojo.connect(editor, "onDirtyChange", inputManager, inputManager.setDirty);
+	
+	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
+	serviceRegistry.getService("orion.page.selection").then(function(service) {
+		service.addEventListener("selectionChanged", function(fileURI) {
+			if (inputManager.shouldGoToURI(editor, fileURI)) {
+				inputManager.setInput(fileURI, editor);
+			} 
+		});
+	});
+
+	// In this page, the hash change drives selection.  In other scenarios, a file picker might drive selection
+	dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editor);});
+	inputManager.setInput(dojo.hash(), editor);
+	
+	// TODO search location needs to be gotten from somewhere
+	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, editor, editor, escHandler);
+	mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
+		
+	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
+	
+	dojo.connect(editor, "onInputChange", function(title, message, contents, saved) {
+		// lookup outline provider, feed contents to it
+		var outliners = serviceRegistry.getServiceReferences("orion.edit.outliner"),
+		    outliner;
+		for (var i=0; i < outliners.length; i++) {
+			var serviceReference = outliners[i],
+			    pattern = serviceReference.getProperty("pattern");
+			if (pattern && new RegExp(pattern).test(title)) {
+				outliner = serviceReference;
+				break;
+			}
+		}
+		if (outliner) {
+			// Wire outliner to the outline service
+			serviceRegistry.getService(outliner).then(function(outliner) {
+				outliner.getOutline(contents, title).then(function(outlineModel) {
+					outlineService.setOutline(outlineModel, title);
+				});
+			});
+		}
+	});
+	
+	// Create outliner "gadget"
+	new mOutliner.Outliner({parent: outlineDomNode, outlineService: serviceRegistry.getService("orion.edit.outline"), selectionService: selection});
+	
+	window.onbeforeunload = function() {
+		if (editor.isDirty()) {
+			 return "There are unsaved changes.";
+		}
+	};
+	
+	// Set up the border container
+	splitArea.setToggleCallback(function() {
+		editor.getTextView().redrawLines();
+	});
+			
+	// Ctrl+o handler for toggling outline 
+	document.onkeydown = function (evt){
+		evt = evt || window.event;
+		if(evt.ctrlKey && evt.keyCode  === 79){
+			splitArea.toggle();
+			if(document.all){ 
+				evt.keyCode = 0;
+			}else{ 
+				evt.preventDefault();
+				evt.stopPropagation();
+			}					
+		} 
+	};
 };
 return exports;
 });

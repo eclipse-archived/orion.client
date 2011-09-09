@@ -264,7 +264,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 						} else {
 							offset = window.parseInt(positions[0]);
 							if (positions.length > 1) {
-								length = window.parseInt(positions[1] - offset);
+								length = window.parseInt(positions[1]);
 							}
 						}
 						break;

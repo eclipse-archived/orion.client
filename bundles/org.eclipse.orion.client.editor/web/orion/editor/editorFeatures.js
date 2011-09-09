@@ -47,7 +47,7 @@ orion.editor.LineNumberRulerFactory = (function() {
 	}
 	LineNumberRulerFactory.prototype = {
 		createLineNumberRuler: function() {
-			return new orion.textview.LineNumberRuler("left", {style: {backgroundColor: "#ffffff", textAlign: "right", borderLeft:"1px solid #ddd", borderRight:"1px solid #ddd"}}, {style: { backgroundColor: "#ffffff" }}, {style: { backgroundColor: "#ffffff" }});
+			return new orion.textview.LineNumberRuler("left", {styleClass: "lineNumberRuler"}, {styleClass: "lineNumberRuler-odd"}, {styleClass: "lineNumberRuler-even"});
 		}
 	};
 	return LineNumberRulerFactory;
@@ -60,8 +60,8 @@ orion.editor.AnnotationFactory = (function() {
 	}
 	AnnotationFactory.prototype = {
 		createAnnotationRulers: function() {
-			this.annotationRuler = new orion.textview.AnnotationRuler("left", {style: { backgroundColor: "#ffffff" }}, {html: "<img src='" + this.problemImageUrl + "'></img>"});
-			this.overviewRuler = new orion.textview.OverviewRuler("right", {style: { backgroundColor: "#ffffff" }}, this.annotationRuler);
+			this.annotationRuler = new orion.textview.AnnotationRuler("left", {styleClass: "annotationRuler"}, {html: "<img src='" + this.problemImageUrl + "'></img>"});
+			this.overviewRuler = new orion.textview.OverviewRuler("right", {styleClass: "overviewRuler"}, this.annotationRuler);
 			return {annotationRuler: this.annotationRuler, overviewRuler: this.overviewRuler};
 		},
 		

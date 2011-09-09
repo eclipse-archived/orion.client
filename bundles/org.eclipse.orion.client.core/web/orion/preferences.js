@@ -204,6 +204,10 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 					error: function(response, ioArgs) {
 						response.log=false;
 						if (ioArgs.xhr.status === 401) {
+							if(name==="/plugins"){
+								d.resolve({});
+								return;
+							}
 							mAuth.handleGetAuthenticationError(this, ioArgs);
 						} else if (ioArgs.xhr.status === 404) {
 							var data = {};
@@ -281,6 +285,10 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 					},
 					error: function(response, ioArgs) {
 						if (ioArgs.xhr.status === 401) {
+							if(name==="/plugins"){
+								d.resolve({});
+								return;
+							}
 							mAuth.handleGetAuthenticationError(ioArgs.xhr, ioArgs);
 						} else if (ioArgs.xhr.status === 404) {
 							_cache.set(key, {});

@@ -54,8 +54,8 @@ define(['dojo'], function(dojo) {
 		 * from the Orion server.
 		 */
 		setErrorMessage : function(st) {
-			//could either be responseText from xhrGet or just a string
-			var status = st.responseText || st;
+			//could be: responseText from xhrGet, dojo deferred error object, or plain string
+			var status = st.responseText || st.message || st;
 			//accept either a string or a JSON representation of an IStatus
 			try {
 				status = JSON.parse(status);

@@ -84,70 +84,31 @@ dojo.addOnLoad(function() {
 	var explorer = new mGitClonesExplorer.GitClonesExplorer(serviceRegistry, /* selection */ null, cloneDetails, "clonesList", "pageActions"/*, "selectionTools"*/);
 	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
 	
-	
-	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
-	
-	function emptyArray() {
-		var d = new dojo.Deferred();
-		d.callback([]);
-		return d;
-	}
-	function emptyObject() {
-		var d = new dojo.Deferred();
-		d.callback({});
-		return d;
-	}
-	var topLevel = [];
-	var topLevelFileService = {
-		fetchChildren: emptyArray,
-		createWorkspace: emptyObject,
-		loadWorkspaces: emptyArray,
-		loadWorkspace: function(location) {
-			var d = new dojo.Deferred();
-			d.callback({Children: topLevel});
-			return d;
-		},
-		createProject: emptyObject,
-		createFolder: emptyObject,
-		createFile: emptyObject,
-		deleteFile: emptyObject,
-		moveFile: emptyObject,
-		copyFile: emptyObject,
-		read: emptyObject,
-		write: emptyObject
-	};
-
-	var fileClient = new mFileClient.FileClient(topLevelFileService);
-	
-	var deferred;
-	if (fileServices[0]) {
-		deferred = serviceRegistry.getService(fileServices[0]);
-	} else {
-		deferred = { then: function(callback) { callback(topLevelFileService); } };
-	}
-	deferred.then(function(fileService) {
-		fileClient.setFileService(fileService);
-		fileClient.loadWorkspace().then(
-				function(workspace){
-					explorer.setDefaultPath(workspace.Location);
-			
-					// global commands
-					mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
-					mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient);
-			
-					mGitCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
-			
-					explorer.displayClonesList(dojo.hash());
-						
-					//every time the user manually changes the hash, we need to load the workspace with that name
-					dojo.subscribe("/dojo/hashchange", explorer, function() {
-					   explorer.displayClonesList(dojo.hash());
-					});
-
-				}
-			);
-		
+	var fileClient = new mFileClient.FileClient(serviceRegistry, function(reference) {
+		var pattern = reference.getProperty("pattern");
+		return pattern && pattern.indexOf("/") === 0;
 	});
+	
+	fileClient.loadWorkspace().then(
+		function(workspace){
+			explorer.setDefaultPath(workspace.Location);
+	
+			// global commands
+			mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
+			mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient);
+	
+			mGitCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
+	
+			explorer.displayClonesList(dojo.hash());
+				
+			//every time the user manually changes the hash, we need to load the workspace with that name
+			dojo.subscribe("/dojo/hashchange", explorer, function() {
+			   explorer.displayClonesList(dojo.hash());
+			});
+
+		}
+	);
+		
 	
 	makeRightPane(navigator);
 });

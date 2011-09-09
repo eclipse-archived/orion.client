@@ -237,6 +237,7 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 					mFileCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
 					this.model = new Model(this.registry, this.treeRoot, this.fileClient);
 					this.createTree(this.parentId, this.model);
+					this.onchange && this.onchange(this.treeRoot);
 				}),
 				dojo.hitch(self, function(error) {
 					clearTimeout(progressTimeout);
@@ -247,6 +248,12 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 				})
 			);
 		}
+	};
+	/**
+	 * Clients can connect to this function to receive notification when the root item changes.
+	 * @param {Object} item
+	 */
+	FileExplorer.prototype.onchange = function(item) {
 	};
 	FileExplorer.prototype.constructor = FileExplorer;
 

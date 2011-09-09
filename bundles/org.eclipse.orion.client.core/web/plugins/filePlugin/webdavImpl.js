@@ -146,8 +146,8 @@ eclipse.DAVFileServiceImpl= (function() {
 	 * @name FileServiceImpl
 	 */
 	function DAVFileServiceImpl(name, location) {
-		this.rootName = name;
-		this.rootLocation = location;		
+		this._rootName = name;
+		this._rootLocation = location;		
 	}
 	
 	DAVFileServiceImpl.prototype = /**@lends eclipse.DAVFileServiceImpl.prototype */
@@ -184,24 +184,24 @@ eclipse.DAVFileServiceImpl= (function() {
 		
 		_createParents: function(location) {
 			var result = [];
-			if (location.indexOf(this.rootLocation) === -1 || this.rootLocation === location) {
+			if (location.indexOf(this._rootLocation) === -1 || this._rootLocation === location) {
 				return result;
 			}
 			
 			result.push({
-				Name: this.rootName,
-				Location: this.baseLocation,
-				ChildrenLocation: this.rootLocation
+				Name: this._rootName,
+				Location: this._rootLocation,
+				ChildrenLocation: this._rootLocation
 			});
 			
-			var tail = location.substring(this.rootLocation.length);
+			var tail = location.substring(this._rootLocation.length);
 			if (tail[tail.length - 1] = "/") {
 				tail = tail.substring(0, tail.length - 1);
 			}
 			var segments = tail.split("/");
 			segments.pop(); // pop off the current name
 			
-			var prefix = this.rootLocation;
+			var prefix = this._rootLocation;
 			for (var i = 0; i < segments.length; ++i) {
 				var parentName = segments[i];
 				var parentPath = prefix + parentName + "/";
@@ -221,7 +221,7 @@ eclipse.DAVFileServiceImpl= (function() {
 		 */
 		fetchChildren: function(location) {
 			if (!location) {
-				location = this.rootLocation;
+				location = this._rootLocation;
 			}
 			return this._call("PROPFIND", location, {depth:1}).then(function(response) {
 				if (response.status !== 207) {
@@ -245,7 +245,7 @@ eclipse.DAVFileServiceImpl= (function() {
 		 * workspaces when ready.
 		 */
 		loadWorkspaces: function() {
-			return this.loadWorkspace(this.base);
+			return this.loadWorkspace(this._rootLocation);
 		},
 		
 		/**
@@ -256,7 +256,7 @@ eclipse.DAVFileServiceImpl= (function() {
 		 */
 		loadWorkspace: function(location) {
 			if (!location) {
-				location = this.rootLocation;
+				location = this._rootLocation;
 			}
 			var that = this; 
 			return this._call("PROPFIND", location, {depth:1}).then(function(response) {
@@ -288,8 +288,8 @@ eclipse.DAVFileServiceImpl= (function() {
 		 * passed as a parameter to the provided onCreate function.
 		 * @param {String} name The name of the new workspace
 		 */
-		createWorkspace: function(name) {
-			return this.createFolder(this.base, name);
+		_createWorkspace: function(name) {
+			return this.createFolder(this._rootLocation, name);
 		},
 		
 		/**
@@ -336,7 +336,7 @@ eclipse.DAVFileServiceImpl= (function() {
 		 * @param {String} [name] The name of the destination file or directory in the case of a rename
 		 */
 		moveFile: function(sourceLocation, targetLocation, name) {
-			if (sourceLocation.indexOf(this.rootLocation) === -1 || targetLocation.indexOf(this.rootLocation) === -1) {
+			if (sourceLocation.indexOf(this._rootLocation) === -1 || targetLocation.indexOf(this._rootLocation) === -1) {
 				throw "Not supported";	
 			}
 			
@@ -370,7 +370,7 @@ eclipse.DAVFileServiceImpl= (function() {
 		 * @param {String} [name] The name of the destination file or directory in the case of a rename
 		 */
 		copyFile: function(sourceLocation, targetLocation, name) {
-			if (sourceLocation.indexOf(this.rootLocation) === -1 || targetLocation.indexOf(this.rootLocation) === -1) {
+			if (sourceLocation.indexOf(this._rootLocation) === -1 || targetLocation.indexOf(this._rootLocation) === -1) {
 				throw "Not supported";	
 			}
 			

@@ -8,16 +8,19 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
- /*global window dojo*/
+/*global define window dojo*/
 
 define(['dojo'], function(dojo) {
 
 var eclipse = eclipse || {};
+/*
+ * Listens to editor change, looks up validator service for the file type, calls validator service, passes result to the marker service.
+ */
 eclipse.SyntaxChecker = (function () {
-	function SyntaxChecker(serviceRegistry, editorContainer) {
+	function SyntaxChecker(serviceRegistry, editor) {
 		this.registry = serviceRegistry;
-		this.editorContainer = editorContainer;
-		dojo.connect(this.editorContainer, "onInputChange", this, this.checkSyntax);
+		this.editor = editor;
+		dojo.connect(this.editor, "onInputChange", this, this.checkSyntax);
 	}
 	SyntaxChecker.prototype = {
 		checkSyntax: function (title, message, contents, contentsSaved) {
@@ -33,24 +36,17 @@ eclipse.SyntaxChecker = (function () {
 						validator = serviceReference;
 					}
 				}
+				// TODO support multiple validators
 				if (validator) {
-					var syntaxCheckerCallback = dojo.hitch(this, function (data) {
-						this.registry.getService("orion.core.marker").then(function(service) {
-							service._setProblems(data.errors);
-						});
-						this.registry.getService("orion.edit.outline").then(function(service) {
-							service._setItems({"title": t, "contents": c, "data": data});
-						});
-					});
 					this.registry.getService(validator)
-						.then(function(service) {
-							return service.checkSyntax(title, contents);
+						.then(function(validationService) {
+							return validationService.checkSyntax(title, contents);
 						})
-						.then(syntaxCheckerCallback);
-				} else {
-					this.registry.getService("orion.edit.outline").then(function(service) {
-						service._setItems({title: t, contents: c});
-					});
+						.then(dojo.hitch(this, function (data) {
+							this.registry.getService("orion.core.marker").then(function(markerService) {
+								markerService._setProblems(data.errors);
+							});
+						}));
 				}
 			}
 		}
