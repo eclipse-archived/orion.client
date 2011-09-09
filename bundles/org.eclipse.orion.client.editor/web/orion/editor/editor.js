@@ -304,9 +304,10 @@ orion.editor.Editor = (function() {
 				var lineIndex = model.getLineAtOffset(caretOffset);
 				var lineStart = model.getLineStart(lineIndex);
 				var offsetInLine = caretOffset - lineStart;
-				// If we are in a mode, we will bail out from reporting the cursor position.
+				// If we are in a mode and it owns status reporting, we bail out from reporting the cursor position.
 				for (var i=0; i<this._keyModes.length; i++) {
-					if (this._keyModes[i].isActive()) {
+					var mode = this._keyModes[i];
+					if (mode.isActive() && mode.isStatusActive && mode.isStatusActive()) {
 						return;
 					}
 				}
