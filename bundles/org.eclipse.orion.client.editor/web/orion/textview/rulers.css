@@ -28,6 +28,42 @@
 	width: 8px;
 }
 
+.ruler_annotation_bookmark {
+}
+
+.ruler_annotation_bookmark_overview {
+	background-color: yellow;
+	border: 1px solid orange;
+	border-radius: 2px;
+	cursor: pointer;
+	left: 2px;
+	width: 8px;
+}
+
+.ruler_annotation_error {
+}
+
+.ruler_annotation_error_overview {
+	background-color: lightcoral;
+	border: 1px solid darkred;
+	border-radius: 2px;
+	cursor: pointer;
+	left: 2px;
+	width: 8px;
+}
+
+.ruler_annotation_warning {
+}
+
+.ruler_annotation_warning_overview {
+	background-color: Gold;
+	border: 1px solid black;
+	border-radius: 2px;
+	cursor: pointer;
+	left: 2px;
+	width: 8px;
+}
+
 .ruler_folding {
 	background-color: white;
 	border-right: 1px solid lightgray;

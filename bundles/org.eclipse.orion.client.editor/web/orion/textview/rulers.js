@@ -69,67 +69,26 @@ orion.textview.Ruler = (function() {
 		/**
 		 * Adds an annotation type to the ruler.
 		 * <p>
-		 * Only annotations of the added types will be shown by
+		 * Only annotations of the specified types will be shown by
 		 * this ruler.
 		 * </p>
 		 *
-		 * @param type {String} the annotation type to be shown
+		 * @param type {Object} the annotation type to be shown
 		 */
 		addAnnotationType: function(type) {
 			this._types.push(type);
 		},
 		/**
 		 * Returns the annotations for a given line range.
-		 * 
+		 * <p>
+		 * This method is called the the text view when the ruler is redrawn.
+		 * </p>
+		 *
 		 * @param {Number} startLine the line index
 		 * @param {Number} endLine the line index
-		 * @return {orion.textview.Annotation} the annotations for the line range.
+		 * @return {orion.textview.LineAnnotation} the annotations for the line range.
 		 */
 		getAnnotations: function(startLine, endLine) {
-			return this._getAnnotations(startLine, endLine);
-		},
-		_mergeAnnotation: function(previousAnnotation, annotation, annotationLineIndex, annotationLineCount) {
-			var result = previousAnnotation;
-			if (!result) { result = {annotations: []}; }
-			result.annotations.push(annotation);
-			if (annotationLineIndex === 0) {
-				if (result.html) {
-					if (previousAnnotation.annotations[0].type !== annotation.type) {
-						//TODO give API for multiple annotation
-						result.html = "<img src='images/multi_annotation.gif'/>";
-					}
-				} else {
-					result.html = annotation.rulerHTML;
-				}
-			}
-			if (annotation.rulerStyle) {
-				if (!result.style) { result.style = {}; }
-				if (result.style.styleClass && annotation.rulerStyle.styleClass) {
-					result.style.styleClass += " " + annotation.rulerStyle.styleClass;
-				} else {
-					result.style.styleClass = annotation.rulerStyle.styleClass;
-				}
-				var prop;
-				if (annotation.rulerStyle.style) {
-					if (!result.style.style) { result.style.style  = {}; }
-					for (prop in annotation.rulerStyle.style) {
-						if (!result.style.style[prop]) {
-							result.style.style[prop] = annotation.rulerStyle.style[prop];
-						}
-					}
-				}
-				if (annotation.rulerStyle.attributes) {
-					if (!result.style.attributes) { result.style.attributes  = {}; }
-					for (prop in annotation.rulerStyle.attributes) {
-						if (!result.style.attributes[prop]) {
-							result.style.attributes[prop] = annotation.rulerStyle.attributes[prop];
-						}
-					}
-				}
-			}
-			return result;
-		},
-		_getAnnotations: function(startLine, endLine) {
 			var model = this._view.getModel();
 			var annotationModel = this._annotationModel;
 			var start = model.getLineStart(startLine);
@@ -205,7 +164,7 @@ orion.textview.Ruler = (function() {
 		/**
 		 * Returns whether the ruler shows annotations of the specified type.
 		 *
-		 * @param {String} the annotation type 
+		 * @param {Object} the annotation type 
 		 * @returns {Boolean} whether the specified is shown
 		 */
 		isAnnotationTypeVisible: function(type) {
@@ -219,7 +178,7 @@ orion.textview.Ruler = (function() {
 		/**
 		 * Removes an annotation type from the ruler.
 		 *
-		 * @param type {String} the annotation type to be shown
+		 * @param type {Object} the annotation type to be shown
 		 */
 		removeAnnotationType: function(type) {
 			for (var i = 0; i < this._types.length; i++) {
@@ -245,8 +204,11 @@ orion.textview.Ruler = (function() {
 			}
 		},
 		/**
-		 * Sets the view for the ruler. This method is called the the text view when the
-		 * ruler is added to the view.
+		 * Sets the view for the ruler.
+		 * <p>
+		 * This method is called the the text view when the ruler
+		 * is added to the view.
+		 * </p>
 		 *
 		 * @param {orion.textview.TextView} view the text view.
 		 */
@@ -264,6 +226,9 @@ orion.textview.Ruler = (function() {
 		 * <p>
 		 * If the ruler does not have a fixed width it should provide the widest
 		 * annotation to avoid the ruler from changing size as the view scrolls.
+		 * </p>
+		 * <p>
+		 * This method is called the the text view when the ruler is redrawn.
 		 * </p>
 		 *
 		 * @returns {orion.textview.Annotation} the annotation for the generic line.
@@ -291,6 +256,23 @@ orion.textview.Ruler = (function() {
 		 */
 		onDblClick: function(lineIndex, e) {
 		},
+		onMouseOver: function(lineIndex, e) {
+			if (this._tooltip && this._tooltipLineIndex === lineIndex) { return; }
+			this._hideTooltip();
+			this._showTooltip(lineIndex, e);
+		},
+		onMouseOut: function(lineIndex, e) {
+			this._hideTooltip();
+		},
+		/**
+		 * Sets the annotation that is displayed when a given line contains multiple
+		 * annotations.
+		 *
+		 * @param {orion.textview.Annotation} the annotation for lines with multiple annotations.
+		 */
+		setMultiAnnotation: function(annotation) {
+			this._multiAnnotation = annotation;
+		},		
 		_hideTooltip: function() {
 			if (this._tooltip) {
 				var parent = this._tooltip.parentNode;
@@ -298,13 +280,80 @@ orion.textview.Ruler = (function() {
 				this._tooltip = null;
 			}
 			if (this._tooltipShowTimeout) {
-				clearTimeout(this._tooltipTimeout);
+				clearTimeout(this._tooltipShowTimeout);
 				this._tooltipShowTimeout = null;
 			}
 			if (this._tooltipHideTimeout) {
 				clearTimeout(this._tooltipHideTimeout);
 				this._tooltipHideTimeout = null;
 			}
+		},
+		_onAnnotationModelChanged: function(e) {
+			var i, view = this._view, model = view.getModel(), self = this;
+			var lineCount = model.getLineCount();
+			function redraw(changes) {
+				for (i = 0; i < changes.length; i++) {
+					if (!self.isAnnotationTypeVisible(changes[i].type)) { continue; }
+					var start = changes[i].start;
+					var end = changes[i].end;
+					if (model.getParent) {
+						start = model.mapOffset(start, true);
+						end = model.mapOffset(end, true);
+					}
+					if (start !== -1 && end !== -1) {
+						view.redrawLines(model.getLineAtOffset(start), model.getLineAtOffset(Math.max(start, end - 1)) + 1, self);
+					}
+				}
+			}
+			redraw(e.added);
+			redraw(e.removed);
+			redraw(e.changed);
+
+//			//TODO when all lines have to be redraw? see demo.js view.folding.onClick
+//			view.redrawLines(0, lineCount, self);
+		},
+		_mergeAnnotation: function(result, annotation, annotationLineIndex, annotationLineCount) {
+			if (!result) { result = {annotations: []}; }
+			result.annotations.push(annotation);
+			if (annotationLineIndex === 0) {
+				if (result.html) {
+					if (this._multiAnnotation && result.annotations[0].type !== annotation.type) {
+						result.html = this._multiAnnotation.rulerHTML;
+					}
+				} else {
+					result.html = annotation.rulerHTML;
+				}
+			}
+			result.style = this._mergeStyle(result.style, annotation.rulerStyle);
+			return result;
+		},
+		_mergeStyle: function(result, style) {
+			if (style) {
+				if (!result) { result = {}; }
+				if (result.styleClass && style.styleClass) {
+					result.styleClass += " " + style.styleClass;
+				} else {
+					result.styleClass = style.styleClass;
+				}
+				var prop;
+				if (style.style) {
+					if (!result.style) { result.style  = {}; }
+					for (prop in style.style) {
+						if (!result.style[prop]) {
+							result.style[prop] = style.style[prop];
+						}
+					}
+				}
+				if (style.attributes) {
+					if (!result.attributes) { result.attributes  = {}; }
+					for (prop in style.attributes) {
+						if (!result.attributes[prop]) {
+							result.attributes[prop] = style.attributes[prop];
+						}
+					}
+				}
+			}
+			return result;
 		},
 		_showTooltip: function(lineIndex, e) {
 			if (lineIndex === undefined) { return; }
@@ -372,38 +421,6 @@ orion.textview.Ruler = (function() {
 					self._hideTooltip();
 				}, 5000);
 			}, 500);
-		},
-		onMouseOver: function(lineIndex, e) {
-			if (this._tooltip && this._tooltipLineIndex === lineIndex) { return; }
-			this._hideTooltip();
-			this._showTooltip(lineIndex, e);
-		},
-		onMouseOut: function(lineIndex, e) {
-			this._hideTooltip();
-		},
-		_onAnnotationModelChanged: function(e) {
-			var i, view = this._view, model = view.getModel(), self = this;
-			var lineCount = model.getLineCount();
-			function redraw(changes) {
-				for (i = 0; i < changes.length; i++) {
-					if (!self.isAnnotationTypeVisible(changes[i].type)) { continue; }
-					var start = changes[i].start;
-					var end = changes[i].end;
-					if (model.getParent) {
-						start = model.mapOffset(start, true);
-						end = model.mapOffset(end, true);
-					}
-					if (start !== -1 && end !== -1) {
-						view.redrawLines(model.getLineAtOffset(start), model.getLineAtOffset(Math.max(start, end - 1)) + 1, self);
-					}
-				}
-			}
-			redraw(e.added);
-			redraw(e.removed);
-			redraw(e.changed);
-
-//			//TODO when all lines have to be redraw? see demo.js view.folding.onClick
-//			view.redrawLines(0, lineCount, self);
 		}
 	};
 	return Ruler;
@@ -536,11 +553,14 @@ orion.textview.OverviewRuler = (function() {
 	
 	/** @ignore */
 	OverviewRuler.prototype.getRulerStyle = function() {
-		var result = this._rulerStyle || {};
-		var style = result.style || (result.style = {});
-		style.lineHeight = "1px";
-		style.fontSize = "1px";
+		var result = {style: {lineHeight: "1px", fontSize: "1px"}};
+		result = this._mergeStyle(result, this._rulerStyle);
 		return result;
+	};
+	/** @ignore */	
+	OverviewRuler.prototype.onClick = function(lineIndex, e) {
+		if (lineIndex === undefined) { return; }
+		this._view.setTopIndex(lineIndex);
 	};
 	/** @ignore */
 	OverviewRuler.prototype._mergeAnnotation = function(previousAnnotation, annotation, annotationLineIndex, annotationLineCount) {
@@ -548,26 +568,13 @@ orion.textview.OverviewRuler = (function() {
 		var result = previousAnnotation;
 		if (!result) {
 			//TODO using internal function
+			//TODO annotationLineCount does not work when there are folded lines
 			var height = (this._view._getClientHeight() / this._view.getModel().getLineCount()) * annotationLineCount;
 			height = Math.max(3, height);
 			result = {html: "&nbsp;", style: { style: {height: height + "px"}}};
-			if (annotation.overviewStyle) {
-				result.style.styleClass = annotation.overviewStyle.styleClass;
-				if (annotation.overviewStyle.style) {
-					for (var prop in annotation.overviewStyle.style) {
-						if (!result.style.style[prop]) {
-							result.style.style[prop] = annotation.rulerStyle.style[prop];
-						}
-					}
-				}
-			}
+			result.style = this._mergeStyle(result.style, annotation.overviewStyle);
 		}
 		return result;
-	};
-	/** @ignore */	
-	OverviewRuler.prototype.onClick = function(lineIndex, e) {
-		if (lineIndex === undefined) { return; }
-		this._view.setTopIndex(lineIndex);
 	};
 	return OverviewRuler;
 }());

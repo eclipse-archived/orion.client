@@ -115,10 +115,17 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 
 		/* Adding the Rulers */
 		var breakpointType = "orion.annotation.breakpoint";
+		var bookmarkType = "orion.annotation.bookmark";
+		var errorType = "orion.annotation.error";
+		var warningType = "orion.annotation.warning";
 		var taskType = "orion.annotation.task";
 		var annotationRuler = view.annotationRuler = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler_annotation"});
 		annotationRuler.addAnnotationType(breakpointType);
+		annotationRuler.addAnnotationType(bookmarkType);
+		annotationRuler.addAnnotationType(errorType);
+		annotationRuler.addAnnotationType(warningType);
 		annotationRuler.addAnnotationType(taskType);
+		annotationRuler.setMultiAnnotation({rulerHTML: "<img src='images/multiple.gif'/>"});
 		annotationRuler.onDblClick =  function(lineIndex, e) {
 			if (lineIndex === undefined) { return; }
 			var model = this._view.getModel();
@@ -128,7 +135,20 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 				start = model.mapOffset(start);
 				end = model.mapOffset(end);
 			}
-			var type =  (isMac ? e.metaKey : e.ctrlKey) ? taskType : breakpointType;
+			var type;
+			if (isMac ? e.metaKey : e.ctrlKey) {
+				if (e.shiftKey && e.altKey) {
+					type = warningType;
+				} else if (e.altKey) {
+					type = errorType;
+				} else if (e.shiftKey) {
+					type = bookmarkType;
+				} else {
+					type = taskType;
+				}
+			} else {
+				type = breakpointType;
+			}
 			var annotations = annotationModel.getAnnotations(start, end);
 			var annotation, temp;
 			while ((temp = annotations.next()) !== null) {
@@ -141,18 +161,44 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 				annotationModel.removeAnnotation(annotation);
 			} else {
 				if (isMac ? e.metaKey : e.ctrlKey) {
-					annotation = {
-						type: taskType,
-						rulerTitle: "Todo: " + model.getLine(lineIndex),
-						rulerHTML: "<img style='vertical-align:middle;align:left;' src='images/todo.gif'></img>",
-						rulerStyle: {styleClass: "ruler_annotation_todo"},
-						overviewStyle: {styleClass: "ruler_annotation_todo_overview"}
-					};
+					if (e.shiftKey && e.altKey) {
+						annotation = {
+							type: warningType,
+							rulerTitle: "Warning: " + model.getLine(lineIndex),
+							rulerHTML: "<img style='vertical-align:middle;align:center;' src='images/warning.png'></img>",
+							rulerStyle: {styleClass: "ruler_annotation_waring"},
+							overviewStyle: {styleClass: "ruler_annotation_warning_overview"}
+						};
+					} else if (e.altKey) {
+						annotation = {
+							type: errorType,
+							rulerTitle: "Error: " + model.getLine(lineIndex),
+							rulerHTML: "<img style='vertical-align:middle;align:center;' src='images/error.gif'></img>",
+							rulerStyle: {styleClass: "ruler_annotation_error"},
+							overviewStyle: {styleClass: "ruler_annotation_error_overview"}
+						};
+					} else if (e.shiftKey) {
+						annotation = {
+							type: bookmarkType,
+							rulerTitle: "Bookmark: " + model.getLine(lineIndex),
+							rulerHTML: "<img style='vertical-align:middle;align:center;' src='images/bookmark.gif'></img>",
+							rulerStyle: {styleClass: "ruler_annotation_bookmark"},
+							overviewStyle: {styleClass: "ruler_annotation_bookmark_overview"}
+						};
+					} else {
+						annotation = {
+							type: taskType,
+							rulerTitle: "Todo: " + model.getLine(lineIndex),
+							rulerHTML: "<img style='vertical-align:middle;align:center;' src='images/todo.gif'></img>",
+							rulerStyle: {styleClass: "ruler_annotation_todo"},
+							overviewStyle: {styleClass: "ruler_annotation_todo_overview"}
+						};
+					}
 				} else {
 					annotation = {
 						type: breakpointType,
 						rulerTitle: "Breakpoint: " + model.getLine(lineIndex),
-						rulerHTML: "<img style='vertical-align:middle;:left;' src='images/brkp_obj.gif'></img>",
+						rulerHTML: "<img style='vertical-align:middle;align:center;' src='images/breakpoint.gif'></img>",
 						rulerStyle: {styleClass: "ruler_annotation_breakpoint"},
 						overviewStyle: {styleClass: "ruler_annotation_breakpoint_overview"}
 					};
@@ -168,6 +214,9 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 		linesRuler.onDblClick = annotationRuler.onDblClick;
 		var overviewRuler = new mRulers.OverviewRuler(annotationModel, "right", {styleClass: "ruler_overview"});
 		overviewRuler.addAnnotationType(breakpointType);
+		overviewRuler.addAnnotationType(bookmarkType);
+		overviewRuler.addAnnotationType(errorType);
+		overviewRuler.addAnnotationType(warningType);
 		overviewRuler.addAnnotationType(taskType);
 		
 		/* */
