@@ -34,7 +34,7 @@ eclipse.PluginProvider = function(metadata) {
 
 	function _publish(message) {
 		if (_target) {
-			_target.postMessage(JSON.stringify(message), "*");
+				_target.postMessage((window.ArrayBuffer ? message : JSON.stringify(message)), "*");	
 		}
 	}
 	
@@ -74,7 +74,7 @@ eclipse.PluginProvider = function(metadata) {
 		if (event.source !== _target ) {
 			return;
 		}
-		var message = JSON.parse(event.data);
+		var message = (window.ArrayBuffer ? event.data : JSON.parse(event.data));
 		var serviceId = message.serviceId;
 		var service = _services[serviceId].implementation;
 		var method = service[message.method];
