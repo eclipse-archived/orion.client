@@ -313,16 +313,16 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 
 		var model = view.getModel();
 		var annotationModel = view.annotationModel;
-		var parent = model.getParent();
-		styler._computeComments(parent.getCharCount());
+		var baseModel = model.getParent();
+		styler._computeComments(baseModel.getCharCount());
 		for (var i=0; i<styler.commentOffsets.length; i += 2) {
-			var lineIndex = parent.getLineAtOffset(styler.commentOffsets[i]);
-			var endLine = parent.getLineAtOffset(styler.commentOffsets[i+1]);
+			var lineIndex = baseModel.getLineAtOffset(styler.commentOffsets[i]);
+			var endLine = baseModel.getLineAtOffset(styler.commentOffsets[i+1]);
 			if (lineIndex === endLine) { continue; }
-			var start = parent.getLineStart(lineIndex), end = parent.getLineEnd(endLine, true);
+			var start = baseModel.getLineStart(lineIndex), end = baseModel.getLineEnd(endLine, true);
 			var annotation = new mRulers.FoldingAnnotation(model, "orion.annotation.folding", start, end,
-				"<img src='images/expanded.png'></img>", "ruler_folding_expanded", 
-				"<img src='images/collapsed.png'></img>", "ruler_folding_collapsed");
+				"<img src='images/expanded.png'></img>", {styleClass: "ruler_folding_expanded"}, 
+				"<img src='images/collapsed.png'></img>", {styleClass: "ruler_folding_collapsed"});
 			annotationModel.addAnnotation(annotation);
 		}
 	}

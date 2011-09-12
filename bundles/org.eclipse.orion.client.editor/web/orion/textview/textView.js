@@ -267,6 +267,7 @@ orion.textview.TextView = (function() {
 				var self = this;
 				addHandler(rulerParent, "click", function(e) { self._handleRulerEvent(e); });
 				addHandler(rulerParent, "dblclick", function(e) { self._handleRulerEvent(e); });
+				addHandler(rulerParent, "mousemove", function(e) { self._handleRulerEvent(e); });
 				addHandler(rulerParent, "mouseover", function(e) { self._handleRulerEvent(e); });
 				addHandler(rulerParent, "mouseout", function(e) { self._handleRulerEvent(e); });
 			}
@@ -348,6 +349,7 @@ orion.textview.TextView = (function() {
 					}
 					break;
 			}
+			return rect;
 		},
 		/**
 		 * Destroys the text view. 
@@ -1999,6 +2001,9 @@ orion.textview.TextView = (function() {
 						break;
 					case "dblclick": 
 						if (ruler.onDblClick) { ruler.onDblClick(lineIndex, e); }
+						break;
+					case "mousemove": 
+						if (ruler.onMouseMove) { ruler.onMouseMove(lineIndex, e); }
 						break;
 					case "mouseover": 
 						if (ruler.onMouseOver) { ruler.onMouseOver(lineIndex, e); }

@@ -5,6 +5,7 @@
 }
 
 .ruler_annotation_todo {
+	cursor: pointer;
 }
 
 .ruler_annotation_todo_overview {
@@ -17,6 +18,7 @@
 }
 
 .ruler_annotation_breakpoint {
+	cursor: pointer;
 }
 
 .ruler_annotation_breakpoint_overview {
@@ -41,6 +43,7 @@
 }
 
 .ruler_annotation_error {
+	cursor: pointer;
 }
 
 .ruler_annotation_error_overview {
@@ -53,6 +56,7 @@
 }
 
 .ruler_annotation_warning {
+	cursor: pointer;
 }
 
 .ruler_annotation_warning_overview {
@@ -71,9 +75,11 @@
 }
 
 .ruler_folding_collapsed {
+	cursor: pointer;
 }
 
 .ruler_folding_expanded {
+	cursor: pointer;
 }
 
 .ruler_lines {
