@@ -71,6 +71,37 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'dijit/form/Button', 'dijit
 			});
 		},
 		/**
+		 * Returns a query URL for a search.
+		 * @param {String} searchLocation The base location of the search service
+		 * @param {String} query The text to search for, or null when searching purely on file name
+		 * @param {String} [nameQuery] The name of a file to search for
+		 */
+		createSearchQuery: function(searchLocation, query, nameQuery)  {
+			if (nameQuery) {
+				//assume implicit trailing wildcard if there isn't one already
+				var wildcard= (/\*$/.test(nameQuery) ? "" : "*");
+				return searchLocation + "Name:" + this._luceneEscape(nameQuery) + wildcard;
+			}
+			return searchLocation + this._luceneEscape(query);
+		},
+		/**
+		 * Escapes all characters in the string that require escaping in Lucene queries.
+		 * See http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Escaping%20Special%20Characters
+		 * The following characters need to be escaped in lucene queries: + - && || ! ( ) { } [ ] ^ " ~ * ? : \
+		 * @private
+		 */
+		_luceneEscape: function(input) {
+			var output = "";
+			for (var i = 0; i < input.length; i++) {
+				var c = input.charAt(i);
+				if ("+-&|!(){}[]^\"~*?:\\".indexOf(c) >= 0) {
+					output += '\\';
+				}
+				output += c;
+			}
+			return output;
+		},
+		/**
 		 * Creates a div representing the highlight snippet of a search result.
 		 * @param {String} str The highlight string we got from the server
 		 * @return {DomNode}
