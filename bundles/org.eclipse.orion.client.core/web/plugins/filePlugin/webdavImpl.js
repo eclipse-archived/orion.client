@@ -133,6 +133,36 @@ function createFile(response) {
 	return result;
 }
 
+function _call(method, url, headers, body) {
+	var d = new dojo.Deferred(); // create a promise
+	var xhr = new XMLHttpRequest();
+	var header;
+	try {
+		xhr.open(method, url);
+		if (headers !== null) {
+			for (header in headers) {
+				if (headers.hasOwnProperty(header)) {
+					xhr.setRequestHeader(header, headers[header]);
+				}
+			}
+		}
+		xhr.send(body);
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				d.resolve({
+					status: xhr.status,
+					statusText: xhr.statusText,
+					headers: xhr.getAllResponseHeaders(),
+					responseText: xhr.responseText
+				});
+			}
+		};
+	} catch (e) {
+		d.reject(e);
+	}
+	return d; // return the promise immediately
+}
+
 /** @namespace The global container for eclipse APIs. */
 var eclipse = eclipse || {};
 
@@ -152,36 +182,6 @@ eclipse.DAVFileServiceImpl= (function() {
 	
 	DAVFileServiceImpl.prototype = /**@lends eclipse.DAVFileServiceImpl.prototype */
 	{
-		_call : function(method, url, headers, body) {
-			var d = new dojo.Deferred(); // create a promise
-			var xhr = new XMLHttpRequest();
-			var header;
-			try {
-				xhr.open(method, url);
-				if (headers !== null) {
-					for (header in headers) {
-						if (headers.hasOwnProperty(header)) {
-							xhr.setRequestHeader(header, headers[header]);
-						}
-					}
-				}
-				xhr.send(body);
-				xhr.onreadystatechange = function() {
-					if (xhr.readyState === 4) {
-						d.resolve({
-							status: xhr.status,
-							statusText: xhr.statusText,
-							headers: xhr.getAllResponseHeaders(),
-							responseText: xhr.responseText
-						});
-					}
-				};
-			} catch (e) {
-				d.reject(e);
-			}
-			return d; // return the promise immediately
-		},
-		
 		_createParents: function(location) {
 			var result = [];
 			if (location.indexOf(this._rootLocation) === -1 || this._rootLocation === location) {
@@ -223,7 +223,7 @@ eclipse.DAVFileServiceImpl= (function() {
 			if (!location) {
 				location = this._rootLocation;
 			}
-			return this._call("PROPFIND", location, {depth:1}).then(function(response) {
+			return _call("PROPFIND", location, {depth:1}).then(function(response) {
 				if (response.status !== 207) {
 					throw "Error " + response.status;
 				}
@@ -259,7 +259,7 @@ eclipse.DAVFileServiceImpl= (function() {
 				location = this._rootLocation;
 			}
 			var that = this; 
-			return this._call("PROPFIND", location, {depth:1}).then(function(response) {
+			return _call("PROPFIND", location, {depth:1}).then(function(response) {
 				if (response.status !== 207) {
 					throw "Error " + response.status;
 				}
@@ -309,7 +309,7 @@ eclipse.DAVFileServiceImpl= (function() {
 		 * @return {Object} JSON representation of the created folder
 		 */
 		createFolder: function(parentLocation, folderName) {
-			return this._call("MKCOL", parentLocation + encodeURIComponent(folderName) + "/");
+			return _call("MKCOL", parentLocation + encodeURIComponent(folderName) + "/");
 		},
 		/**
 		 * Create a new file in a specified location. Returns a deferred that will provide
@@ -319,14 +319,14 @@ eclipse.DAVFileServiceImpl= (function() {
 		 * @return {Object} A deferred that will provide the new file object
 		 */
 		createFile: function(parentLocation, fileName) {
-			return this._call("PUT", parentLocation + encodeURIComponent(fileName));
+			return _call("PUT", parentLocation + encodeURIComponent(fileName));
 		},
 		/**
 		 * Deletes a file, directory, or project.
 		 * @param {String} location The location of the file or directory to delete.
 		 */
 		deleteFile: function(location) {
-			return this._call("DELETE", location);
+			return _call("DELETE", location);
 		},
 		
 		/**
@@ -360,7 +360,7 @@ eclipse.DAVFileServiceImpl= (function() {
 			if (isDirectory && target[target.length -1] !== "/") {
 				target += "/";
 			}
-			return this._call("MOVE", sourceLocation, {Destination: target});
+			return _call("MOVE", sourceLocation, {Destination: target});
 		},
 		 
 		/**
@@ -394,7 +394,7 @@ eclipse.DAVFileServiceImpl= (function() {
 			if (isDirectory && target[target.length -1] !== "/") {
 				target += "/";
 			}
-			return this._call("COPY", sourceLocation, {Destination: target});
+			return _call("COPY", sourceLocation, {Destination: target});
 		},
 		/**
 		 * Returns the contents or metadata of the file at the given location.
@@ -407,7 +407,7 @@ eclipse.DAVFileServiceImpl= (function() {
 		read: function(location, isMetadata) {
 			var that = this; 
 			if (isMetadata) {
-				return this._call("PROPFIND", location, {depth:0}).then(function(response) {
+				return _call("PROPFIND", location, {depth:0}).then(function(response) {
 					if (response.status !== 207) {
 						throw "Error " + response.status;
 					}
@@ -419,7 +419,7 @@ eclipse.DAVFileServiceImpl= (function() {
 					return result;
 				});
 			}
-			return this._call("GET", location).then(function(response) {
+			return _call("GET", location).then(function(response) {
 				return response.responseText;
 			});	
 		},
@@ -436,7 +436,7 @@ eclipse.DAVFileServiceImpl= (function() {
 			if (args && args.ETag) {
 				headerData["If-Match"] = args.ETag;
 			}
-			return this._call("PUT", location, headerData, contents);
+			return _call("PUT", location, headerData, contents);
 		},
 		/**
 		 * Imports file and directory contents from another server
@@ -460,5 +460,67 @@ eclipse.DAVFileServiceImpl= (function() {
 		}
 		
 	};
+
+	function _call2(method, url, headers, body) {
+		var d = new dojo.Deferred(); // create a promise
+		var xhr = new XMLHttpRequest();
+		var header;
+		try {
+			xhr.open(method, url);
+			if (headers !== null) {
+				for (header in headers) {
+					if (headers.hasOwnProperty(header)) {
+						xhr.setRequestHeader(header, headers[header]);
+					}
+				}
+			}
+			xhr.responseType = "arraybuffer";
+			xhr.send(body);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4) {
+					d.resolve({
+						status: xhr.status,
+						statusText: xhr.statusText,
+						headers: xhr.getAllResponseHeaders(),
+						response: xhr.response //builder.getBlob()
+					});													
+				}
+			};
+		} catch (e) {
+			d.reject(e);
+		}
+		return d; // return the promise immediately
+	}	
+	
+	window.BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder;
+	if (window.BlobBuilder) {
+		DAVFileServiceImpl.prototype.readBlob = function(location) {
+			return _call2("GET", location).then(function(response) {
+				if (window.WebKitBlobBuilder) { // webkit works better with blobs, FF with ArrayBuffers
+					var builder = new BlobBuilder();
+					builder.append(response.response);
+					return builder.getBlob();
+				}
+				return response.response;
+			});	
+		};
+		
+		DAVFileServiceImpl.prototype.writeBlob = function(location, contents, args) {
+			var headerData = {};
+			if (args && args.ETag) {
+				headerData["If-Match"] = args.ETag;
+			}
+			
+			if (!contents.type) { // webkit works better with blobs, FF with ArrayBuffers
+				var builder = new BlobBuilder();
+				if (contents) {
+					builder.append(contents);
+				}
+				contents = builder.getBlob();
+			}
+			return _call2("PUT", location, headerData, contents);
+		};
+
+	}
 	return DAVFileServiceImpl;
 }());

@@ -459,6 +459,10 @@ orion.editor.TextActions = (function() {
 			return this._incrementalFindActive;
 		},
 		
+		isStatusActive: function() {
+			return this._incrementalFindActive;
+		},
+		
 		lineUp: function() {
 			var index;
 			if (this._incrementalFindActive) {
@@ -516,6 +520,8 @@ orion.editor.TextActions = (function() {
 
 orion.editor.SourceCodeActions = (function() {
 	/**
+	 * @param {orion.editor.Editor} editor
+	 * @param {orion.textView.UndoStack} undoStack
 	 * @param {orion.editor.ContentAssist} [contentAssist]
 	 * @param {orion.editor.LinkedMode} [linkedMode]
 	 */
@@ -750,6 +756,10 @@ orion.editor.SourceCodeActions = (function() {
 		isActive: function() {
 			return true;
 		},
+		isStatusActive: function() {
+			// SourceCodeActions never reports status
+			return false;
+		},
 		lineUp: function() {
 			return false;
 		},
@@ -888,6 +898,9 @@ orion.editor.LinkedMode = (function() {
 			this.editor.reportStatus("Linked Mode entered");
 		},
 		isActive: function() {
+			return this.linkedModeActive;
+		},
+		isStatusActive: function() {
 			return this.linkedModeActive;
 		},
 		enter: function() {

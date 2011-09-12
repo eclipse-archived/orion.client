@@ -51,9 +51,18 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 	}
 	
 	function _copy(sourceService, sourceLocation, targetService, targetLocation) {
+		
+		if (!sourceService.readBlob) {
+			throw "source file service does not support binary read";
+		}
+
+		if (!targetService.writeBlob) {
+			throw "target file service does not support binary write";
+		}
+	
 		if (sourceLocation[sourceLocation.length -1] !== "/") {
-			return _doServiceCall(sourceService, "read", [sourceLocation]).then(function(contents) {
-				return _doServiceCall(targetService, "write", [targetLocation, contents]);
+			return _doServiceCall(sourceService, "readBlob", [sourceLocation]).then(function(contents) {
+				return _doServiceCall(targetService, "writeBlob", [targetLocation, contents]);
 			});
 		}
 
