@@ -53,7 +53,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	
 	/** @private */
 	postMixInProperties : function() {
-		this.options.title = this.options.title || "Open Resource";
+		this.options.title = this.options.title || "Find File Named";
 		this.selectFile = "Type the name of a file to open (? = any character, * = any string):";
 		this.searchPlaceHolder = "Search";
 		this.inherited(arguments);
@@ -104,8 +104,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		// Gives Webkit a chance to show the "Searching" message
 		var that = this;
 		setTimeout(function() {
-			var formatted = text += (/\*$/.test(text) ? "" : "*");
-			var query = that.searchLocation + "Name:" + formatted;
+			var query = that.searcher.createSearchQuery(that.searchLocation, null, text);
 			that.searcher.search(that.results, query, false, false, dojo.hitch(that, that.decorateResult), true /*no highlight*/);
 		}, 0);
 	},

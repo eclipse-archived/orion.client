@@ -393,5 +393,68 @@ eclipse.FileServiceImpl= (function() {
 		}
 		
 	};
+	
+	function _call2(method, url, headers, body) {
+		var d = new dojo.Deferred(); // create a promise
+		var xhr = new XMLHttpRequest();
+		var header;
+		try {
+			xhr.open(method, url);
+			if (headers !== null) {
+				for (header in headers) {
+					if (headers.hasOwnProperty(header)) {
+						xhr.setRequestHeader(header, headers[header]);
+					}
+				}
+			}
+			xhr.responseType = "arraybuffer";
+			xhr.send(body);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4) {
+					d.resolve({
+						status: xhr.status,
+						statusText: xhr.statusText,
+						headers: xhr.getAllResponseHeaders(),
+						response: xhr.response //builder.getBlob()
+					});													
+				}
+			};
+		} catch (e) {
+			d.reject(e);
+		}
+		return d; // return the promise immediately
+	}	
+	
+	window.BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder;
+	if (window.BlobBuilder) {
+		FileServiceImpl.prototype.readBlob = function(location) {
+			return _call2("GET", location).then(function(response) {
+				if (window.WebKitBlobBuilder) { // webkit works better with blobs, FF with ArrayBuffers
+					var builder = new BlobBuilder();
+					builder.append(response.response);
+					return builder.getBlob();
+				}
+				return response.response;
+			});	
+		};
+		
+		FileServiceImpl.prototype.writeBlob = function(location, contents, args) {
+			var headerData = {};
+			if (args && args.ETag) {
+				headerData["If-Match"] = args.ETag;
+			}
+			
+			if (!contents.type) { // webkit works better with blobs, FF with ArrayBuffers
+				var builder = new BlobBuilder();
+				if (contents) {
+					builder.append(contents);
+				}
+				contents = builder.getBlob();
+			}
+			return _call2("PUT", location, headerData, contents);
+		};
+
+	}
+	
 	return FileServiceImpl;
 }());
