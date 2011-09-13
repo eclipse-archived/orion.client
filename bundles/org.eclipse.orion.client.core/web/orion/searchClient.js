@@ -80,7 +80,7 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'dijit/form/Button', 'dijit
 			if (nameQuery) {
 				//assume implicit trailing wildcard if there isn't one already
 				var wildcard= (/\*$/.test(nameQuery) ? "" : "*");
-				return searchLocation + "Name:" + this._luceneEscape(nameQuery) + wildcard;
+				return searchLocation + "Name:" + this._luceneEscape(nameQuery, true) + wildcard;
 			}
 			return searchLocation + this._luceneEscape(query);
 		},
@@ -88,13 +88,15 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'dijit/form/Button', 'dijit
 		 * Escapes all characters in the string that require escaping in Lucene queries.
 		 * See http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Escaping%20Special%20Characters
 		 * The following characters need to be escaped in lucene queries: + - && || ! ( ) { } [ ] ^ " ~ * ? : \
+		 * @param {Boolean} [omitWildcards=false] If true, the * and ? characters will not be escaped.
 		 * @private
 		 */
-		_luceneEscape: function(input) {
-			var output = "";
+		_luceneEscape: function(input, omitWildcards) {
+			var output = "",
+			    specialChars = "+-&|!(){}[]^\"~:\\" + (!omitWildcards ? "*?" : "");
 			for (var i = 0; i < input.length; i++) {
 				var c = input.charAt(i);
-				if ("+-&|!(){}[]^\"~*?:\\".indexOf(c) >= 0) {
+				if (specialChars.indexOf(c) >= 0) {
 					output += '\\';
 				}
 				output += c;
