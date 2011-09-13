@@ -1,16 +1,23 @@
-<div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="labelledby-${id}_title">
-	<div dojoAttachPoint="titleBar" class="dijitDialogTitleBar">
-		<span dojoAttachPoint="titleNode" class="dijitDialogTitle" id="${id}_title"></span>
-		<span dojoAttachPoint="closeButtonNode" class="dijitDialogCloseIcon" dojoAttachEvent="onclick: onCancel" title="${buttonCancel}">
-			<span dojoAttachPoint="closeText" class="closeText" title="${buttonCancel}">x</span>
-		</span>
-	</div>
-	<div dojoAttachPoint="containerNode" class="dijitDialogPaneContent">
-		<!-- Actual content here -->
-		<p dojoAttachPoint = "servicesNotification">
-			Some services require authentication:
-			<ul dojoAttachPoint="servicesList">
+
+<div>
+	<div class="dijitTooltipContainer" role="presentation">
+		<div class="dijitTooltipContents dijitTooltipFocusNode" role="dialog"
+			dojoattachpoint="containerNode">
+			<span dojoAttachPoint="pendingAuthentication" style="display: none">You are requested to sign it to:
+			<ul dojoAttachPoint="pendingAuthenticationList">
 			</ul>
-		</p>
+			</span>
+			<span dojoAttachPoint="authenticated" style="display: none">You are already signed in to:
+			 <ul dojoAttachPoint="authenticatedList">
+			</ul>
+			</span>
+			
+			<span dojoAttachPoint="otherUnauthenticated" style="display: none">You may also sign in to:
+			 <ul dojoAttachPoint="otherUnauthenticatedList">
+			</ul>
+			</span>
+		</div>
 	</div>
+	<div class="dijitTooltipConnector" role="presentation"></div>
+
 </div>

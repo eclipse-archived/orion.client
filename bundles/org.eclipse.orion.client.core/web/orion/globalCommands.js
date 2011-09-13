@@ -12,7 +12,7 @@
 /*browser:true*/
 
 define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBinding', 
-        'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog'], function(dojo, dijit, mCommands, mUtil, mKeyBinding ){
+        'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog'], function(dojo, dijit, mCommands, mUtil, mKeyBinding ){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -84,6 +84,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 
 	var notifyAuthenticationSite = qualifyURL('/auth/NotifyAuthentication.html');
 	var authRendered = {};
+	var loginDialog = new orion.widgets.LoginDialog();
 	
 	function getLabel(authService, serviceReference){
 		if(authService.getLabel){
@@ -111,7 +112,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	function generateUserInfo(serviceRegistry) {
 		
 		var authServices = serviceRegistry.getServiceReferences("orion.core.auth");
-		if(authServices.length===1){
+/*		if(authServices.length===1){
 			serviceRegistry.getService(authServices[0]).then(function(authService){
 				
 				authService.getKey().then(function(key){
@@ -143,16 +144,12 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				});
 
 			});
-		} else {
+		} else {*/
 			var userInfo = dojo.byId("userInfo");
 			if(!userInfo){
 				return;
 			}
 			
-			var newMenu= new dijit.Menu({
-				style: "display: none;",
-				id: "userMenu"
-			});
 			
 			
 			for(var i=0; i<authServices.length; i++){
@@ -161,19 +158,13 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				
 					getLabel(authService, servicePtr).then(function(label){
 						
-						var pSubMenu = new dijit.Menu();
-				        var popupMenu = new dijit.PopupMenuItem({
-				            popup: pSubMenu
-				        });
-				        newMenu.addChild(popupMenu);
-						
 						authService.getKey().then(function(key){
 							
 							authService.getUser().then(function(jsonData){
-								renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label, jsonData);
+								loginDialog.addUserItem(key, authService, label, jsonData);
 							}, 
 							function(errorData){
-								renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label);
+								loginDialog.addUserItem(key, authService, label);
 							});
 								window.addEventListener("storage", function(e){
 
@@ -184,10 +175,10 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 									authRendered[key] = localStorage.getItem(key);
 									
 									authService.getUser().then(function(jsonData){
-										renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label, jsonData);
+										loginDialog.addUserItem(key, authService, label, jsonData);
 									}, 
 									function(errorData){
-										renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label);
+										loginDialog.addUserItem(key, authService, label);
 									});
 									
 								}, false);
@@ -198,15 +189,18 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 					});
 				
 				});
-			}
+			//}
 			
+			if(!dijit.byId('logins')){
 			var menuButton = new dijit.form.DropDownButton({
+				id: "logins",
 				label: "Logins",
-				dropDown: newMenu,
+				dropDown: loginDialog,
 				title: "Login statuses"
 		        });
 		        dojo.addClass(menuButton.domNode, "commandImage");
-			dojo.place(menuButton.domNode, userInfo, "only");
+		        dojo.place(menuButton.domNode, userInfo, "only");
+			}
 		}
 		
 	}
@@ -283,6 +277,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		if(!jsonData || !jsonData.uid){
 			dojo.empty(userInfo);
 			var signout = document.createElement('span');
+			signout.id = "menuButton";
 			signout.appendChild(document.createTextNode("Sign in"));
 			if(authService.getAuthForm){
 				authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
@@ -341,14 +336,24 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 					newMenu.addChild(menuitem);
 				}
 	
+				
+				
 				var menuButton = new dijit.form.DropDownButton({
 					label: userName.length > 40 ? userName.substring(0, 30) + "..." : userName,
-					dropDown: newMenu,
+					dropDown: loginDialog,
 					title: userName + ' ' + "logged in since " + lastLogin
 			        });
 			        dojo.addClass(menuButton.domNode, "commandImage");
 				dojo.place(menuButton.domNode, userInfo, "last");
 			} 
+	}
+	
+	function setPendingAuthentication(services){
+		loginDialog.setPendingAuthentication(services);
+		dijit.popup.open({
+            popup: loginDialog,
+            around: dojo.byId('logins')
+        });
 	}
 
 	/**
@@ -558,6 +563,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		generateUserInfo: generateUserInfo,
 		generateDomCommandsInBanner: generateDomCommandsInBanner,
 		generateBanner: generateBanner,
-		notifyAuthenticationSite: notifyAuthenticationSite
+		notifyAuthenticationSite: notifyAuthenticationSite,
+		setPendingAuthentication: setPendingAuthentication
 	};
 });

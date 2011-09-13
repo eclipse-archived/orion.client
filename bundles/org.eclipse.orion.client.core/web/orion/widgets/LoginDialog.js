@@ -10,48 +10,134 @@
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
 
-
-define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/CheckBox', 'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/LoginDialog.html'], function(dojo, dijit) {
-
-/**
- * @param options {{ 
- *     title: string,
- *     label: string,
- *     func: function,
- *     [advanced]: boolean  // Whether to show advanced controls. Default is false
- * }}
- */
-dojo.declare("orion.widgets.LoginDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
-	widgetsInTemplate: true,
-	templateString: dojo.cache('orion', 'widgets/templates/LoginDialog.html'),
+define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/LoginDialog.html'], function(dojo, dijit) {
 	
-	constructor : function() {
-		this.inherited(arguments);
-		this.options = arguments[0] || {};
-	},
-	postMixInProperties: function(){
-		this.inherited(arguments);
-		this.title = "Authentication required!";
-	},
-	setAuthenticationServices: function(services){
+	dojo.declare("orion.widgets.LoginDialog", [dijit.TooltipDialog], {
+		widgetsInTemplate: true,
+		templateString: dojo.cache('orion', 'widgets/templates/LoginDialog.html'),
+
+		constructor : function() {
+			this.inherited(arguments);
+			this.options = arguments[0] || {};
+			this.pendingAuthServices = {};
+			this.authenticatedServices = {};
+			this.unauthenticatedServices = {};
+		},
+	
+		setPendingAuthentication: function(services){
 		if(this.isEmpty(services)){
-			this.hide();
+			this.pendingAuthenticationList.style.display = 'none';
+			dijit.popup.hide(this);
 			return;
 		}
-		dojo.empty(this.servicesList);
-		for(var i in services){
+		this.pendingAuthentication.style.display = '';
+		this.pendingAuthServices = services;
+		dojo.empty(this.pendingAuthenticationList);
+		for(var i in this.pendingAuthServices){
 			var li = dojo.create("li");
 			dojo.place(document.createTextNode(services[i].SignInKey + ": "), li, "only");
 			
-			if(services[i].SignInLocation.toString().indexOf("?")==-1){
-				dojo.create("a", {target: "_blank", href: services[i].SignInLocation + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + services[i].SignInKey, innerHTML: "Sign in"}, li, "last");
+			if(this.pendingAuthServices[i].SignInLocation.toString().indexOf("?")==-1){
+				dojo.create("a", {target: "_blank", href: this.pendingAuthServices[i].SignInLocation + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + services[i].SignInKey, innerHTML: "Sign in"}, li, "last");
 			}else{
-				dojo.create("a", {target: "_blank", href: services[i].SignInLocation + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + services[i].SignInKey, innerHTML: "Sign in"}, li, "last");
+				dojo.create("a", {target: "_blank", href: this.pendingAuthServices[i].SignInLocation + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + services[i].SignInKey, innerHTML: "Sign in"}, li, "last");
 			}
 			
-			dojo.place(li, this.servicesList, "last");
+			dojo.place(li, this.pendingAuthenticationList, "last");
 		}
 		
+	},
+	
+	addUserItem: function(key, authService, label, jsonData){
+		if(jsonData){
+			if(this.unauthenticatedServices[key]){
+				delete this.unauthenticatedServices[key];
+			}
+			this.authenticatedServices[key] = {authService: authService, label: label, data: jsonData};
+		}else{
+			if(this.authenticatedServices[key]){
+				delete this.authenticatedServices[key];
+			}
+			this.unauthenticatedServices[key] = {authService: authService, label: label};
+		}
+		dojo.hitch(this, this.renderAuthenticatedServices)();
+		dojo.hitch(this, this.renderUnauthenticatedServices)();
+	},
+	
+	renderAuthenticatedServices: function(){
+		dojo.empty(this.authenticatedList);
+		this.authenticated.style.display = this.isEmpty(this.authenticatedServices) ? 'none' : '';
+		var self = this;
+		for(var i in this.authenticatedServices){
+			var li = dojo.create("li");
+			dojo.place(document.createTextNode(i + ": "), li, "only");
+			var jsonData = this.authenticatedServices[i].data;
+			var authService = this.authenticatedServices[i].authService;
+			if(jsonData.Location)
+				dojo.create("a", {href: ("/profile/user-profile.html#" + jsonData.Location), innerHTML: "Profile"}, li, "last");
+			dojo.place(document.createTextNode(" "), li, "last");
+			if(authService.logout){
+				var a = dojo.create("a", {
+					innerHTML: "Sign out"
+				}, li, "last");
+				
+				dojo.connect(a, "onmouseover", a, function() {
+					a.style.cursor = "pointer";
+				});
+				dojo.connect(a, "onmouseout", a, function() {
+					a.style.cursor = "default";
+				});
+				
+				dojo.connect(a, "onclick",  function(){
+					authService.logout().then(dojo.hitch(self, function(){
+						this.addUserItem(i, authService, this.authenticatedServices[i].label);
+						localStorage.removeItem(i);
+						}));
+					});
+			}
+				
+			//TODO
+			dojo.place(li, this.authenticatedList, "last");
+		}
+		
+		
+	},
+	
+	renderUnauthenticatedServices: function(){
+		dojo.empty(this.otherUnauthenticatedList);
+		this.otherUnauthenticated.style.display = this.isEmpty(this.unauthenticatedServices) ? 'none' : '';
+		for(var i in this.unauthenticatedServices){
+			var li = dojo.create("li");
+			dojo.place(document.createTextNode(i + ": "), li, "only");
+			var authService = this.unauthenticatedServices[i].authService;
+			
+			if(authService.getAuthForm){
+				dojo.hitch(this, function(li){
+				authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm){
+					
+					if(loginForm.indexOf("?")==-1){
+						dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, li, "last");
+					}else{
+						dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, li, "last");
+					}
+					
+				});
+				})(li);
+			}else if(authService.login){
+				
+				var a = dojo.create("a", {innerHTML: "Sign in", style: "cursor: hand;"}, li, "last");
+				dojo.connect(a, "onmouseover", a, function() {
+					a.style.cursor = "pointer";
+				});
+				dojo.connect(a, "onmouseout", a, function() {
+					a.style.cursor = "default";
+				});
+				dojo.connect(a, "onclick",function(){authService.login(eclipse.globalCommandUtils.notifyAuthenticationSite);});
+				
+			}
+					
+			dojo.place(li, this.otherUnauthenticatedList, "last");
+		}
 	},
 	isEmpty: function(obj) {
 		for(var prop in obj) {
@@ -60,6 +146,6 @@ dojo.declare("orion.widgets.LoginDialog", [dijit.Dialog, orion.widgets._OrionDia
 		}
 		return true;
 	}
-});
-
+	
+	});
 });
