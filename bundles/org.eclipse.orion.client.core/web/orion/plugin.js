@@ -74,7 +74,7 @@ eclipse.PluginProvider = function(metadata) {
 		if (event.source !== _target ) {
 			return;
 		}
-		var message = (window.ArrayBuffer ? event.data : JSON.parse(event.data));
+		var message = (typeof event.data !== "string" ? event.data : JSON.parse(event.data));
 		var serviceId = message.serviceId;
 		var service = _services[serviceId].implementation;
 		var method = service[message.method];
