@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window document define login logout orion eclipse */
+/*global window document define login logout localStorage orion */
 /*browser:true*/
 
 define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBinding', 
@@ -432,7 +432,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			if (e.charOrCode === dojo.keys.ENTER) {
 				if (searchLocation) {
 					if (searchField.value.length > 0) {
-						var query = searchLocation + searchField.value;
+						var query = searcher.createSearchQuery(searchLocation, searchField.value);
 						window.location = "/search/search.html#"+query;
 					}
 				} else {
