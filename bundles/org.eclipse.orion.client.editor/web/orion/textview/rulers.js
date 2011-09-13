@@ -357,10 +357,12 @@ orion.textview.Ruler = (function() {
 			}
 		},
 		_onAnnotationModelChanged: function(e) {
-			var view = this._view, model = view.getModel(), self = this;
+			var view = this._view;
+			if (!view) { return; }
+			var model = view.getModel(), self = this;
 			var lineCount = model.getLineCount();
-			if (e.modelEvent) {
-				var start = e.modelEvent.start;
+			if (e.textModelChangedEvent) {
+				var start = e.textModelChangedEvent.start;
 				if (model.getParent) { start = model.mapOffset(start, true); }
 				var startLine = model.getLineAtOffset(start);
 				view.redrawLines(startLine, lineCount, self);
@@ -648,47 +650,6 @@ orion.textview.OverviewRuler = (function() {
 	return OverviewRuler;
 }());
 
-orion.textview.FoldingAnnotation = (function() {
-	/** @private */
-	function FoldingAnnotation (projectionModel, type, start, end, expandedHTML, expandedStyle, collapsedHTML, collapsedStyle) {
-		this.type = type;
-		this.start = start;
-		this.end = end;
-		this._projectionModel = projectionModel;
-		this._expandedHTML = expandedHTML;
-		this._expandedStyle = expandedStyle;
-		this._collapsedHTML = collapsedHTML;
-		this._collapsedStyle = collapsedStyle;
-		this.expanded = true;
-		this.collapse();
-	}
-	
-	FoldingAnnotation.prototype = /** @lends orion.textview.FoldingAnnotation.prototype */ {
-		collapse: function () {
-			if (!this.expanded) { return; } 
-			this.rulerHTML = this._collapsedHTML;
-			this.rulerStyle = this._collapsedStyle;
-			this.expanded = false;
-			var projectionModel = this._projectionModel;
-			var baseModel = projectionModel.getParent();
-			this._projection = {
-				start: baseModel.getLineStart(baseModel.getLineAtOffset(this.start) + 1),
-				end: this.end
-			};
-			projectionModel.addProjection(this._projection);
-		},
-		expand: function () {
-			if (this.expanded) { return; } 
-			this.rulerHTML = this._expandedHTML;
-			this.rulerStyle = this._expandedStyle;
-			this.expanded = true;
-			this._projectionModel.removeProjection(this._projection);
-		}
-	};
-	
-	return FoldingAnnotation;
-}());
-
 orion.textview.FoldingRuler = (function() {
 	/** @private */
 	function FoldingRuler (annotationModel, rulerLocation, rulerStyle) {
@@ -696,6 +657,7 @@ orion.textview.FoldingRuler = (function() {
 	}
 	FoldingRuler.prototype = new orion.textview.AnnotationRuler();
 	
+	/** @ignore */
 	FoldingRuler.prototype.onClick =  function(lineIndex, e) {
 		if (lineIndex === undefined) { return; }
 		var view = this._view;
@@ -732,23 +694,24 @@ orion.textview.FoldingRuler = (function() {
 		}
 		return orion.textview.AnnotationRuler.prototype._getTooltip.call(this, document, lineIndex, annotations);
 	};
+	/** @ignore */
 	FoldingRuler.prototype._onAnnotationModelChanged = function(e) {
-		if (e.modelEvent) {
+		if (e.textModelChangedEvent) {
 			orion.textview.AnnotationRuler.prototype._onAnnotationModelChanged.call(this, e);
 			return;
 		}
-		var view = this._view, model = view.getModel(), self = this, i;
+		var view = this._view;
+		if (!view) { return; }
+		var model = view.getModel(), self = this, i;
 		var lineCount = model.getLineCount(), lineIndex = lineCount;
 		function redraw(changes) {
 			for (i = 0; i < changes.length; i++) {
 				if (!self.isAnnotationTypeVisible(changes[i].type)) { continue; }
 				var start = changes[i].start;
-				var end = changes[i].end;
 				if (model.getParent) {
 					start = model.mapOffset(start, true);
-					end = model.mapOffset(end, true);
 				}
-				if (start !== -1 && end !== -1) {
+				if (start !== -1) {
 					lineIndex = Math.min(lineIndex, model.getLineAtOffset(start));
 				}
 			}

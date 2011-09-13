@@ -1075,6 +1075,7 @@ orion.textview.TextView = (function() {
 		 * @param {Number} [endLine=line count] the end line
 		 */
 		redrawLines: function(startLine, endLine, ruler) {
+			if (this._redrawCount > 0) { return; }
 			if (startLine === undefined) { startLine = 0; }
 			if (endLine === undefined) { endLine = this._model.getLineCount(); }
 			if (startLine === endLine) { return; }
@@ -1273,6 +1274,21 @@ orion.textview.TextView = (function() {
 		setHorizontalPixel: function(pixel) {
 			pixel = Math.max(0, pixel);
 			this._scrollView(pixel - this._getScroll().x, 0);
+		},
+		setRedraw: function(redraw) {
+			if (redraw) {
+				if (--this._redrawCount === 0) {
+					var lineCount = this._model.getLineCount();
+					var rulers = this.getRulers();
+					for (var i = 0; i < rulers.length; i++) {
+						this.redrawLines(0, lineCount, rulers[i]);
+					}
+					this.redrawLines(0, lineCount); 
+					this._queueUpdatePage();
+				}
+			} else {
+				this._redrawCount++;
+			}
 		},
 		/**
 		 * Sets the text model of the text view.
@@ -3745,6 +3761,7 @@ orion.textview.TextView = (function() {
 			this._selection = new Selection (0, 0, false);
 			this._linksVisible = false;
 			this._eventTable = new EventTable();
+			this._redrawCount = 0;
 			this._maxLineWidth = 0;
 			this._maxLineIndex = -1;
 			this._ignoreSelect = true;
@@ -4660,6 +4677,7 @@ orion.textview.TextView = (function() {
 			this._setDOMSelection(topNode, topOffset, bottomNode, bottomOffset);
 		},
 		_updatePage: function() {
+			if (this._redrawCount > 0) { return; }
 			if (this._updateTimer) { 
 				clearTimeout(this._updateTimer);
 				this._updateTimer = null;

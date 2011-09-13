@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global document window navigator define */
+/*global document window navigator define orion */
 
 var examples = examples || {};
 examples.textview = examples.textview || {};
@@ -254,6 +254,7 @@ examples.textview.TextStyler = (function() {
 		view.addEventListener("Selection", this, this._onSelection);
 		var model = view.getModel();
 		if (model.getParent) {
+			//TODO normalize all events to use event objects
 			var self = this;
 			model.getParent().addListener({
 				onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
@@ -268,6 +269,7 @@ examples.textview.TextStyler = (function() {
 				}
 			});
 		} else {
+			//TODO still needed to keep the event order correct (styler before view)
 			view.addEventListener("ModelChanged", this, this._onModelChanged);
 		}
 		view.addEventListener("Destroy", this, this._onDestroy);
@@ -315,9 +317,9 @@ examples.textview.TextStyler = (function() {
 			if (model.getParent) { model = model.getParent(); }
 			var charCount = model.getCharCount();
 			var e = end;
-			// Uncomment to compute all comments
-//			e = charCount;
-			var t = /*start == this.commentOffset && e == end ? text : */model.getText(this.commentOffset, e);
+			//TODO Uncomment to compute all comments
+			e = charCount;
+			var t = model.getText(this.commentOffset, e);
 			if (this.commentOffsets.length > 1 && this.commentOffsets[this.commentOffsets.length - 1] === charCount) {
 				this.commentOffsets.length--;
 			}
@@ -335,6 +337,7 @@ examples.textview.TextStyler = (function() {
 			}
 			if ((this.commentOffsets.length & 1) === 1) { this.commentOffsets.push(charCount); }
 			this.commentOffset = e;
+			this._computeFolding();
 		},
 		_getCommentRanges: function(start, end) {
 			this._computeComments (end);
@@ -356,50 +359,6 @@ examples.textview.TextStyler = (function() {
 				}
 			}
 			return null;
-		},
-		_getStyles_faster_but_wrong: function(text, start) {
-			var end = start + text.length;
-			var model = this.view.getModel();
-			
-			// get comment ranges that intersect with range
-			var mapStart = start, mapEnd = end;
-			if (model.getParent) {
-				mapStart = model.mapOffset(start);
-				mapEnd = model.mapOffset(end);
-			}
-			var commentRanges = this._getCommentRanges (mapStart, mapEnd);
-			var styles = [];
-			
-			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
-			var offset = start;
-			for (var i = 0; i < commentRanges.length; i+= 2) {
-				var commentStart = commentRanges[i];
-				var commentEnd = commentRanges[i+1];
-				if (model.getParent) {
-					commentStart = model.mapOffset(commentStart, true);
-					commentEnd = model.mapOffset(commentEnd, true);
-				}
-				if (offset < commentStart) {
-					this._parse(text.substring(offset - start, commentStart - start), offset, styles);
-				}
-				var style = commentStyle;
-				if ((commentEnd - commentStart) > (this.commentStart.length + this.commentEnd.length)) {
-					var o = commentStart + this.commentStart.length;
-					if (model.getText(o, o + 1) === "*") { style = javadocStyle; }
-				}
-				if (this.whitespacesVisible || this.detectHyperlinks) {
-					var s = Math.max(offset, commentStart);
-					var e = Math.min(end, commentEnd);
-					this._parseWhitespace(text.substring(s - start, e - start), s, styles, style);
-				} else {
-					styles.push({start: commentStart, end: commentEnd, style: style});
-				}
-				offset = commentEnd;
-			}
-			if (offset < end) {
-				this._parse(text.substring(offset - start, end - start), offset, styles);
-			}
-			return styles;
 		},
 		_getStyles: function(text, start) {
 			var model = this.view.getModel();
@@ -707,16 +666,42 @@ examples.textview.TextStyler = (function() {
 				view.redrawLines(lineIndex, lineIndex + 1);
 			}
 		},
+		_createFoldingAnnotation: function(viewModel, baseModel, start, end) {
+			var startLine = baseModel.getLineAtOffset(start);
+			var endLine = baseModel.getLineAtOffset(Math.max(start, end - 1));
+			// ANNOTATION SHOULD MATCH COMMENT OFFSETS - 
+			var annotationStart = baseModel.getLineStart(startLine);
+			var annotationEnd = baseModel.getLineEnd(endLine, true);
+//			var annotationStart = start, annotationEnd = end;
+			return new orion.textview.FoldingAnnotation(viewModel, "orion.annotation.folding", annotationStart, annotationEnd,
+				"<img src='images/expanded.png'></img>", {styleClass: "ruler_folding_expanded"}, 
+				"<img src='images/collapsed.png'></img>", {styleClass: "ruler_folding_collapsed"});
+		}, 
+		_computeFolding: function() {
+			var view = this.view;
+			var viewModel = view.getModel();
+			if (!viewModel.getParent) { return; }
+			//TODO need to create styler view annotationModel
+			var annotationModel = view.annotationModel;
+			annotationModel.removeAnnotations("orion.annotation.folding");
+			var add = [];
+			var baseModel = viewModel.getParent();
+			for (var i=0; i<this.commentOffsets.length; i += 2) {
+				var annotation = this._createFoldingAnnotation(viewModel, baseModel, this.commentOffsets[i], this.commentOffsets[i+1]);
+				if (annotation) { add.push(annotation); }
+			}
+			annotationModel.replaceAnnotations(null, add);
+		},
 		_onModelChanged: function(e) {
 			var start = e.start;
-			//TODO mapping is not enough, styler has to listen onChanged on the parent model?
 			var removedCharCount = e.removedCharCount;
 			var addedCharCount = e.addedCharCount;
 			if (this._matchingBracket && start < this._matchingBracket) { this._matchingBracket += addedCharCount + removedCharCount; }
 			if (this._currentBracket && start < this._currentBracket) { this._currentBracket += addedCharCount + removedCharCount; }
 			if (start >= this.commentOffset) { return; }
-			var model = this.view.getModel();
-			if (model.getParent) { model = model.getParent(); }
+			var view = this.view;
+			var viewModel = view.getModel();
+			var baseModel = viewModel.getParent ? viewModel.getParent() : viewModel;
 			
 //			window.console.log("start=" + start + " added=" + addedCharCount + " removed=" + removedCharCount)
 //			for (var i=0; i< this.commentOffsets.length; i++) {
@@ -729,7 +714,7 @@ examples.textview.TextStyler = (function() {
 				this.commentOffset = Math.max(0, start - extra);
 				return;
 			}
-			var charCount = model.getCharCount();
+			var charCount = baseModel.getCharCount();
 			var oldCharCount = charCount - addedCharCount + removedCharCount;
 			var commentStart = this._binarySearch(this.commentOffsets, start, -1, commentCount);
 			var end = start + removedCharCount;
@@ -775,7 +760,7 @@ examples.textview.TextStyler = (function() {
 			
 			var offset = 0;
 			var newComments = [];
-			var t = model.getText(ts, te);
+			var t = baseModel.getText(ts, te);
 			if (this.commentOffset < te) { this.commentOffset = te; }
 			while (offset < t.length) {
 				var begin = ((commentStart + 1 + newComments.length) & 1) === 0;
@@ -803,6 +788,29 @@ examples.textview.TextStyler = (function() {
 					} 
 				}
 			}
+//			log ("redraw",redraw, newComments.length);
+			//if (commentEnd !== commentStart || newComments.length > 0) {
+			if (redraw) {
+				var annotationModel = view.annotationModel; //TODO replace by API
+				var cs = this.commentOffsets[commentStart + 1];
+				if (cs > start) { cs += addedCharCount - removedCharCount; }
+				var ce = this.commentOffsets[commentEnd];
+				if (ce > start) { ce += addedCharCount - removedCharCount; }
+				var iter = annotationModel.getAnnotations(cs, ce);
+				var remove = [], annotation;
+				while (iter.hasNext()) {
+					annotation = iter.next();
+					if (annotation.type === "orion.annotation.folding") {
+						remove.push(annotation);
+					}
+				}
+				var add = [];
+				for (var v = 0; v < newComments.length; v+= 2) {
+					annotation = this._createFoldingAnnotation(viewModel, baseModel, newComments[v], newComments[v+1]);
+					if (annotation) { add.push(annotation); }
+				}
+				annotationModel.replaceAnnotations(remove, add);
+			}
 			
 			var args = [commentStart + 1, (commentEnd - commentStart)].concat(newComments);
 			Array.prototype.splice.apply(this.commentOffsets, args);
@@ -813,19 +821,18 @@ examples.textview.TextStyler = (function() {
 			if ((this.commentOffsets.length & 1) === 1) { this.commentOffsets.push(charCount); }
 			
 			if (redraw) {
-//				window.console.log ("redraw " + (start + addedCharCount) + " " + redrawEnd);
-				model = this.view.getModel();
-				if (model.getPatent) {
-					start = model.mapOffset(start + addedCharCount, true);
-					redrawEnd = model.mapOffset(redrawEnd, true);
+				var redrawStart = start + addedCharCount;
+//				window.console.log("redraw " + redrawStart + " " + redrawEnd);
+				if (viewModel !== baseModel) {
+					redrawStart = viewModel.mapOffset(redrawStart, true);
+					redrawEnd = viewModel.mapOffset(redrawEnd, true);
 				}
-				this.view.redrawRange(start + addedCharCount, redrawEnd);
+				view.redrawRange(redrawStart, redrawEnd);
 			}
-
+			
 //			for (var i=0; i< this.commentOffsets.length; i++) {
 //				window.console.log(i +"="+ this.commentOffsets[i]);
 //			}
-
 		}
 	};
 	return TextStyler;

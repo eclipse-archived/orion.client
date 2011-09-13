@@ -21,6 +21,87 @@ var orion = orion || {};
  */ 
 orion.textview = orion.textview || {};
 
+orion.textview.FoldingAnnotation = (function() {
+	/** @private */
+	function FoldingAnnotation (projectionModel, type, start, end, expandedHTML, expandedStyle, collapsedHTML, collapsedStyle) {
+		this.type = type;
+		this.start = start;
+		this.end = end;
+		this._projectionModel = projectionModel;
+		this._expandedHTML = expandedHTML;
+		this._expandedStyle = expandedStyle;
+		this._collapsedHTML = collapsedHTML;
+		this._collapsedStyle = collapsedStyle;
+		this.expanded = true;
+		this.changed();
+	}
+	
+	FoldingAnnotation.prototype = /** @lends orion.textview.FoldingAnnotation.prototype */ {
+		changed: function(e) {
+			if (e) {
+				if (e.textModelChangedEvent) {
+					var changeStart = e.textModelChangedEvent.start;
+					var changeEnd = e.textModelChangedEvent.start + e.textModelChangedEvent.removedCharCount;
+					if (!(this.start <= changeStart && changeStart < this.end && this.start <= changeEnd && changeEnd < this.end)) {
+						return;
+					}
+				} else {
+					return;
+				}
+			}
+			var baseModel = this._projectionModel.getParent();
+			var startLine = baseModel.getLineAtOffset(this.start);
+			var endLine = baseModel.getLineAtOffset(this.end);
+			if (endLine - startLine > 1) {
+				if (this.expanded) {
+					this.rulerHTML = this._expandedHTML;
+					this.rulerStyle = this._expandedStyle;
+				} else {
+					this.rulerHTML = this._collapsedHTML;
+					this.rulerStyle = this._collapsedStyle;
+				}
+				this.expand();
+			} else {
+				this.rulerHTML = null;
+				this.rulerStyle = null;
+				this.expanded = true;
+			}
+		},
+		collapse: function () {
+			if (!this.expanded) { return; }
+			if (!this.rulerHTML) { return; }
+			this.expanded = false;
+			this.rulerHTML = this._collapsedHTML;
+			this.rulerStyle = this._collapsedStyle;
+			var projectionModel = this._projectionModel;
+			var baseModel = projectionModel.getParent();
+			this._projection = {
+				start: baseModel.getLineStart(baseModel.getLineAtOffset(this.start) + 1),
+//				end: baseModel.getLineEnd(baseModel.getLineAtOffset(this.end), true)
+				end: this.end
+			};
+			projectionModel.addProjection(this._projection);
+		},
+		expand: function () {
+			if (this.expanded) { return; }
+			if (!this.rulerHTML) { return; }
+			this.expanded = true;
+			this.rulerHTML = this._expandedHTML;
+			this.rulerStyle = this._expandedStyle;
+			this._projectionModel.removeProjection(this._projection);
+		},
+		removed: function(e) {
+			if (e) {
+				if (e.textModelChangedEvent) {
+					return;
+				}
+			}
+			this.expand();
+		}
+	};
+	
+	return FoldingAnnotation;
+}());
 
 /**
  * Annotation
@@ -157,19 +238,35 @@ orion.textview.AnnotationModel = (function() {
 		 * @param {Number} addedLineCount the number of lines added to the model.
 		 */
 		onChanged: function(e) {
-			for (var i = 0; i < this._listeners.length; i++) {
+			var i;
+			for (i = 0; i < e.added.length; i++) {
+				if (e.added[i].added) {
+					e.added[i].added(e);
+				}
+			}
+			for (i = 0; i < e.changed.length; i++) {
+				if (e.changed[i].changed) {
+					e.changed[i].changed(e);
+				}
+			}
+			for (i = 0; i < e.removed.length; i++) {
+				if (e.removed[i].removed) {
+					e.removed[i].removed(e);
+				}
+			}
+			for (i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanged) { 
 					l.onChanged(e);
 				}
 			}
 		},
-		removeAllAnnotations: function(type) {
+		removeAnnotations: function(type) {
 			var annotations = this._annotations;
-			var removed; 
+			var removed, i; 
 			if (type) {
 				removed = [];
-				for (var i = annotations.length; i >= 0; i--) {
+				for (i = annotations.length - 1; i >= 0; i--) {
 					var annotation = annotations[i];
 					if (annotation.type === type) {
 						annotations.splice(i, 1);
@@ -200,6 +297,29 @@ orion.textview.AnnotationModel = (function() {
 			};
 			this.onChanged(e);
 		},
+		replaceAnnotations: function(remove, add) {
+			var annotations = this._annotations, i, index, annotation;
+			if (!add) { add = []; }
+			if (!remove) { remove = []; }
+			for (i = 0; i < remove.length; i++) {
+				annotation = remove[i];
+				index = this._binarySearch(annotations, annotation.start);
+				if (!(0 <= index && index < annotations.length)) { continue; }
+				if (annotations[index] !== annotation) { continue; }
+				annotations.splice(index, 1);
+			}
+			for (i = 0; i < add.length; i++) {
+				annotation = add[i];
+				index = this._binarySearch(annotations, annotation.start);
+				annotations.splice(index, 0, annotation);
+			}
+			var e = {
+				removed: remove,
+				added: add,
+				changed: []
+			};
+			this.onChanged(e);
+		},
 		_binarySearch: function (array, offset, inclusive) {
 			var high = array.length, low = -1, index;
 			while (high - low > 1) {
@@ -221,37 +341,28 @@ orion.textview.AnnotationModel = (function() {
 			if (!(0 <= startIndex && startIndex < annotations.length)) { return; }
 			var e = {
 				added: [],
-				changed: []
+				changed: [],
+				textModelChangedEvent: {
+					start: start,
+					removedCharCount: removedCharCount,
+					addedCharCount: addedCharCount,
+					removedLineCount: removedLineCount,
+					addedLineCount: addedLineCount
+				}
 			};
-			var annotation = annotations[startIndex];
-			if (annotation.start < start && start < annotation.end) {
-				annotation.end = start;
-				e.changed.push(annotation);
-				startIndex++;
-			}
+			var changeCount = addedCharCount - removedCharCount, i;
 			var endIndex = this._binarySearch(annotations, end, true);
-			annotation = annotations[endIndex];
-			//TODO seems wrong?
-//			if (annotation.start < end && end < annotation.end) {
-//				annotation.end = end;
-//				e.changed.push(annotation);
-//				endIndex--;
-//			}
-			var changeCount = addedCharCount - removedCharCount;
-			for (var i = endIndex; i < annotations.length; i++) {
-				annotation = annotations[i];
-				annotation.start += changeCount;
-				annotation.end += changeCount;
+			for (i = endIndex; i < annotations.length; i++) {
+				var annotation = annotations[i];
+				if (annotation.start > start) {
+					annotation.start += changeCount;
+				}
+				if (annotation.end > start) {
+					annotation.end += changeCount;
+				}
 				e.changed.push(annotation);
 			}
 			e.removed = annotations.splice(startIndex, endIndex - startIndex);
-			e.modelEvent = {
-				start: start,
-				removedCharCount: removedCharCount,
-				addedCharCount: addedCharCount,
-				removedLineCount: removedLineCount,
-				addedLineCount: addedLineCount
-			};
 			this.onChanged(e);
 		}
 	};

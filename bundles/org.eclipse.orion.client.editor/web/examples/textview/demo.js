@@ -104,14 +104,47 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 			undoStack.redo();
 			return true;
 		});
-		/* Example: Adding a keyBinding and action*/
+
 		view.setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save");
 		view.setAction("save", function() {
 			log("*****************SAVE");
 			return true;
 		});
-		
+
 		var annotationModel = view.annotationModel = new mAnnotationModel.AnnotationModel(options.model.getParent());
+		/* Example: Adding a keyBinding and action*/
+		view.setKeyBinding(new mKeyBinding.KeyBinding('h', true), "collapseAll");
+		view.setAction("collapseAll", function() {
+			log("*****************COLLAPSE");
+			var iter = annotationModel.getAnnotations(0, options.model.getParent().getCharCount());
+			view.setRedraw(false);
+			while (iter.hasNext()) {
+				var a = iter.next();
+				if (a.type === "orion.annotation.folding") {
+					a.collapse();
+					annotationModel.modifyAnnotation(a);
+				}
+			}
+			view.setRedraw(true);
+			return true;
+		});
+		/* Example: Adding a keyBinding and action*/
+		view.setKeyBinding(new mKeyBinding.KeyBinding('j', true), "expandAll");
+		view.setAction("expandAll", function() {
+			log("*****************EXPAND");
+			var iter = annotationModel.getAnnotations(0, options.model.getParent().getCharCount());
+			view.setRedraw(false);
+			while (iter.hasNext()) {
+				var a = iter.next();
+				if (a.type === "orion.annotation.folding") {
+					a.expand();
+					annotationModel.modifyAnnotation(a);
+				}
+			}
+			view.setRedraw(true);
+			return true;
+		});
+		
 
 		/* Adding the Rulers */
 		var breakpointType = "orion.annotation.breakpoint";
@@ -303,6 +336,7 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 	
 	function createJavaSample() {
 		checkView();
+		view.setText("loading java file");
 		var file = getFile("text.txt");
 		if (styler) {
 			styler.destroy();
@@ -310,21 +344,6 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 		}
 		styler = new mTextStyler.TextStyler(view, "java");
 		view.setText(file);
-
-		var model = view.getModel();
-		var annotationModel = view.annotationModel;
-		var baseModel = model.getParent();
-		styler._computeComments(baseModel.getCharCount());
-		for (var i=0; i<styler.commentOffsets.length; i += 2) {
-			var lineIndex = baseModel.getLineAtOffset(styler.commentOffsets[i]);
-			var endLine = baseModel.getLineAtOffset(styler.commentOffsets[i+1]);
-			if (lineIndex === endLine) { continue; }
-			var start = baseModel.getLineStart(lineIndex), end = baseModel.getLineEnd(endLine, true);
-			var annotation = new mRulers.FoldingAnnotation(model, "orion.annotation.folding", start, end,
-				"<img src='images/expanded.png'></img>", {styleClass: "ruler_folding_expanded"}, 
-				"<img src='images/collapsed.png'></img>", {styleClass: "ruler_folding_collapsed"});
-			annotationModel.addAnnotation(annotation);
-		}
 	}
 	
 	function createJavaScriptSample() {
