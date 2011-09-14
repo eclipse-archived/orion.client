@@ -53,7 +53,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	
 	/** @private */
 	postMixInProperties : function() {
-		this.options.title = this.options.title || "Open Resource";
+		this.options.title = this.options.title || "Find File Named";
 		this.selectFile = "Type the name of a file to open (? = any character, * = any string):";
 		this.searchPlaceHolder = "Search";
 		this.inherited(arguments);

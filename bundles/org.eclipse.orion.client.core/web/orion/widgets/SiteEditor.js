@@ -223,8 +223,8 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		    { "Source": "/users",
 		      "Target": "http://localhost:8080/users"
 		    },
-		    { "Source": "/auth2",
-		      "Target": "http://localhost:8080/auth2"
+		    { "Source": "/authenticationPlugin.html",
+		      "Target": "http://localhost:8080/authenticationPlugin.html"
 		    },
 		    { "Source": "/login",
 		      "Target": "http://localhost:8080/login"

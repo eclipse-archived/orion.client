@@ -222,7 +222,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	window.addEventListener("message", function(event) {
 		for (var i = 0, source = event.source; i < _channels.length; i++) {
 			if (source === _channels[i].target) {
-				_channels[i].handler(window.ArrayBuffer ? event.data : JSON.parse(event.data));
+				_channels[i].handler(typeof event.data !== "string" ? event.data : JSON.parse(event.data));
 				break;
 			}
 		}
