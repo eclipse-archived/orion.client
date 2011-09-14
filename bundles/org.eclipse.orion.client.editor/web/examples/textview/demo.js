@@ -399,11 +399,11 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 	}
 	
 	function performanceTest() {
-//		checkView();
-//		if (styler) {
-//			styler.destroy();
-//			styler = null;
-//		}
+		checkView();
+		if (styler) {
+			styler.destroy();
+			styler = null;
+		}
 		/* Note: PerformanceTest is not using require js */
 		var test = new PerformanceTest(view);
 		var select = document.getElementById("performanceTestSelect");

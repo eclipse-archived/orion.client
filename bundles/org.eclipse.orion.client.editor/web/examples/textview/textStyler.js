@@ -256,7 +256,7 @@ examples.textview.TextStyler = (function() {
 		if (model.getParent) {
 			//TODO normalize all events to use event objects
 			var self = this;
-			model.getParent().addListener({
+			this._baseModelListener = {
 				onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
 					var e = {
 						start: start, 
@@ -267,7 +267,8 @@ examples.textview.TextStyler = (function() {
 					};
 					self._onModelChanged(e);
 				}
-			});
+			};
+			model.getParent().addListener(this._baseModelListener);
 		} else {
 			//TODO still needed to keep the event order correct (styler before view)
 			view.addEventListener("ModelChanged", this, this._onModelChanged);
@@ -281,8 +282,13 @@ examples.textview.TextStyler = (function() {
 		destroy: function() {
 			var view = this.view;
 			if (view) {
+				var model = view.getModel();
+				if (model.getParent) {
+					model.getParent().removeListener(this._baseModelListener);
+				} else {
+					view.removeEventListener("ModelChanged", this, this._onModelChanged);
+				}
 				view.removeEventListener("Selection", this, this._onSelection);
-				view.removeEventListener("ModelChanged", this, this._onModelChanged);
 				view.removeEventListener("Destroy", this, this._onDestroy);
 				view.removeEventListener("LineStyle", this, this._onLineStyle);
 				this.view = null;
@@ -667,13 +673,7 @@ examples.textview.TextStyler = (function() {
 			}
 		},
 		_createFoldingAnnotation: function(viewModel, baseModel, start, end) {
-			var startLine = baseModel.getLineAtOffset(start);
-			var endLine = baseModel.getLineAtOffset(Math.max(start, end - 1));
-			// ANNOTATION SHOULD MATCH COMMENT OFFSETS - 
-			var annotationStart = baseModel.getLineStart(startLine);
-			var annotationEnd = baseModel.getLineEnd(endLine, true);
-//			var annotationStart = start, annotationEnd = end;
-			return new orion.textview.FoldingAnnotation(viewModel, "orion.annotation.folding", annotationStart, annotationEnd,
+			return new orion.textview.FoldingAnnotation(viewModel, "orion.annotation.folding", start, end,
 				"<img src='images/expanded.png'></img>", {styleClass: "ruler_folding_expanded"}, 
 				"<img src='images/collapsed.png'></img>", {styleClass: "ruler_folding_collapsed"});
 		}, 
@@ -788,8 +788,6 @@ examples.textview.TextStyler = (function() {
 					} 
 				}
 			}
-//			log ("redraw",redraw, newComments.length);
-			//if (commentEnd !== commentStart || newComments.length > 0) {
 			if (redraw) {
 				var annotationModel = view.annotationModel; //TODO replace by API
 				var cs = this.commentOffsets[commentStart + 1];

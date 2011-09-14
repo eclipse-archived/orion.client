@@ -314,14 +314,19 @@ orion.textview.Ruler = (function() {
 		_getTooltip: function(document, lineIndex, annotations) {
 			if (annotations.length === 0) { return null; }
 			var model = this._view.getModel(), annotation;
+			function getText(start, end) {
+				var m = model.getParent ? model.getParent() : model;
+				var textStart = m.getLineStart(m.getLineAtOffset(start));
+				var textEnd = m.getLineEnd(m.getLineAtOffset(end), true);
+				return m.getText(textStart, textEnd);
+			}
 			if (annotations.length === 1) {
 				annotation = annotations[0];
 				if (annotation.rulerTitle) {
 					return annotation.rulerHTML + "&nbsp;" + annotation.rulerTitle;
 				} else {
 					//TODO show a projection textview to get coloring 
-					var src = model.getParent ? model.getParent().getText(annotation.start, annotation.end) : model.getText(annotation.start, annotation.end);
-					return document.createTextNode(src);
+					return document.createTextNode(getText(annotation.start, annotation.end));
 				}
 			} else {
 				var tooltipHTML = "<em>Multiple annotations:</em><br>";
@@ -329,7 +334,7 @@ orion.textview.Ruler = (function() {
 					annotation = annotations[i];
 					var title = annotation.rulerTitle;
 					if (!title) {
-						title = model.getParent ? model.getParent().getText(annotation.start, annotation.end) : model.getText(annotation.start, annotation.end);
+						title = getText(annotation.start, annotation.end);
 					}
 					tooltipHTML += annotation.rulerHTML + "&nbsp;" + title + "<br>";
 				}

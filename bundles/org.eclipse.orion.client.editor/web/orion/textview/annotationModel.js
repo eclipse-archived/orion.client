@@ -33,26 +33,19 @@ orion.textview.FoldingAnnotation = (function() {
 		this._collapsedHTML = collapsedHTML;
 		this._collapsedStyle = collapsedStyle;
 		this.expanded = true;
-		this.changed();
+		this._update(true);
 	}
 	
 	FoldingAnnotation.prototype = /** @lends orion.textview.FoldingAnnotation.prototype */ {
-		changed: function(e) {
-			if (e) {
-				if (e.textModelChangedEvent) {
-					var changeStart = e.textModelChangedEvent.start;
-					var changeEnd = e.textModelChangedEvent.start + e.textModelChangedEvent.removedCharCount;
-					if (!(this.start <= changeStart && changeStart < this.end && this.start <= changeEnd && changeEnd < this.end)) {
-						return;
-					}
-				} else {
-					return;
-				}
+		_update: function(checkLineCount) {
+			var visible = true;
+			if (checkLineCount) {
+				var baseModel = this._projectionModel.getParent();
+				var startLine = baseModel.getLineAtOffset(this.start);
+				var endLine = baseModel.getLineAtOffset(this.end);
+				visible = startLine !== endLine;
 			}
-			var baseModel = this._projectionModel.getParent();
-			var startLine = baseModel.getLineAtOffset(this.start);
-			var endLine = baseModel.getLineAtOffset(this.end);
-			if (endLine - startLine > 1) {
+			if (visible) {
 				if (this.expanded) {
 					this.rulerHTML = this._expandedHTML;
 					this.rulerStyle = this._expandedStyle;
@@ -60,41 +53,55 @@ orion.textview.FoldingAnnotation = (function() {
 					this.rulerHTML = this._collapsedHTML;
 					this.rulerStyle = this._collapsedStyle;
 				}
-				this.expand();
 			} else {
 				this.rulerHTML = null;
 				this.rulerStyle = null;
 				this.expanded = true;
+			}
+			
+		},
+		changed: function(e) {
+			if (e && e.textModelChangedEvent) {
+				var changeStart = e.textModelChangedEvent.start;
+				var changeEnd = e.textModelChangedEvent.start + e.textModelChangedEvent.removedCharCount;
+				var changeCount = e.textModelChangedEvent.addedCharCount - e.textModelChangedEvent.removedCharCount;
+				var start = this.start;
+				var end = this.end;
+				if (start > changeStart) {
+					start -= changeCount;
+				}
+				if (end > changeStart) {
+					end -= changeCount;
+				}
+				if (start <= changeStart && changeStart < this.end && this.start <= changeEnd && changeEnd < end) {
+					this.expand();
+					this._update(true);
+				}
 			}
 		},
 		collapse: function () {
 			if (!this.expanded) { return; }
 			if (!this.rulerHTML) { return; }
 			this.expanded = false;
-			this.rulerHTML = this._collapsedHTML;
-			this.rulerStyle = this._collapsedStyle;
 			var projectionModel = this._projectionModel;
 			var baseModel = projectionModel.getParent();
 			this._projection = {
 				start: baseModel.getLineStart(baseModel.getLineAtOffset(this.start) + 1),
-//				end: baseModel.getLineEnd(baseModel.getLineAtOffset(this.end), true)
-				end: this.end
+				end: baseModel.getLineEnd(baseModel.getLineAtOffset(this.end), true)
 			};
 			projectionModel.addProjection(this._projection);
+			this._update();
 		},
 		expand: function () {
 			if (this.expanded) { return; }
 			if (!this.rulerHTML) { return; }
 			this.expanded = true;
-			this.rulerHTML = this._expandedHTML;
-			this.rulerStyle = this._expandedStyle;
 			this._projectionModel.removeProjection(this._projection);
+			this._update();
 		},
 		removed: function(e) {
-			if (e) {
-				if (e.textModelChangedEvent) {
-					return;
-				}
+			if (e && e.textModelChangedEvent) {
+				return;
 			}
 			this.expand();
 		}
