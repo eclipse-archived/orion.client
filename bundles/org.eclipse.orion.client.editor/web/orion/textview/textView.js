@@ -2282,7 +2282,7 @@ orion.textview.TextView = (function() {
 		_doCopy: function (e) {
 			var selection = this._getSelection();
 			if (!selection.isEmpty()) {
-				var text = this._model.getText(selection.start, selection.end);
+				var text = this._getBaseText(selection.start, selection.end);
 				return this._setClipboardText(text, e);
 			}
 			return true;
@@ -2328,7 +2328,7 @@ orion.textview.TextView = (function() {
 		_doCut: function (e) {
 			var selection = this._getSelection();
 			if (!selection.isEmpty()) {
-				var text = this._model.getText(selection.start, selection.end);
+				var text = this._getBaseText(selection.start, selection.end);
 				this._doContent("");
 				return this._setClipboardText(text, e);
 			}
@@ -3020,6 +3020,16 @@ orion.textview.TextView = (function() {
 			if (this._autoScrollTimerID) { clearTimeout(this._autoScrollTimerID); }
 			this._autoScrollDir = undefined;
 			this._autoScrollTimerID = undefined;
+		},
+		_getBaseText: function(start, end) {
+			var model = this._model;
+			/* This is the only case the view access the base model, alternatively the view could use a event to application to customize the text */
+			if (model.getBaseModel) {
+				start = model.mapOffset(start);
+				end = model.mapOffset(end);
+				model = model.getBaseModel();
+			}
+			return model.getText(start, end);
 		},
 		_getBoundsAtOffset: function (offset) {
 			var model = this._model;
