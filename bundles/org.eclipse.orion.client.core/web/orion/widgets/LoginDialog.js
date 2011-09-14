@@ -58,6 +58,19 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 		}
 		dojo.hitch(this, this.renderAuthenticatedServices)();
 		dojo.hitch(this, this.renderUnauthenticatedServices)();
+		
+		if(!dijit.byId('logins')){
+			return;
+		}
+		
+		if(this.length(this.unauthenticatedServices) + this.length(this.authenticatedServices) === 1 && jsonData){
+			var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login;
+			if(userName.length > 40)
+				userName = userName.substring(0, 30) + "...";
+			dijit.byId('logins').setLabel(userName);
+		}else{
+			dijit.byId('logins').setLabel("Security");
+		}
 	},
 	
 	renderAuthenticatedServices: function(){
@@ -72,7 +85,7 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 			}
 			isFirst = false;
 			var tr = dojo.create("tr", {className: "navTableHeading"});
-			var td = dojo.create("td", {innerHTML: "<h2>" + i + "</h2>"}, tr, "only");
+			var td = dojo.create("td", {innerHTML: "<h2>" + (this.authenticatedServices[i].label ? this.authenticatedServices[i].label: i) + "</h2>"}, tr, "only");
 			dojo.addClass(td, "LoginWindowLeft");
 			td = dojo.create("td", {style: "text-align: right"}, tr, "last");
 			dojo.addClass(td, "LoginWindowRight");
@@ -135,7 +148,7 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 			var tr = dojo.create("tr", {className: "navTableHeading"});
 			var td = dojo.create("td", null, tr, "only");
 			dojo.addClass(td, "LoginWindowLeft");
-			var h2 = dojo.create("h2", {innerHTML: i}, td, "only");
+			var h2 = dojo.create("h2", {innerHTML: (this.unauthenticatedServices[i].label ? this.unauthenticatedServices[i].label : i)}, td, "only");
 			td = dojo.create("td", {style: "text-align: right"}, tr, "last");
 			dojo.addClass(td, "LoginWindowRight");
 
@@ -190,6 +203,14 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 				return false;
 		}
 		return true;
+	},
+	length: function(obj) {
+		var length = 0;
+		for(var prop in obj) {
+			if(obj.hasOwnProperty(prop))
+				length++;
+		}
+		return length;
 	},
 	getHostname : function(url) {
 		var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
