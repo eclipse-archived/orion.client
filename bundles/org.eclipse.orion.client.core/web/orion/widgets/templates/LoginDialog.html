@@ -1,16 +1,19 @@
-<div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="labelledby-${id}_title">
-	<div dojoAttachPoint="titleBar" class="dijitDialogTitleBar">
-		<span dojoAttachPoint="titleNode" class="dijitDialogTitle" id="${id}_title"></span>
-		<span dojoAttachPoint="closeButtonNode" class="dijitDialogCloseIcon" dojoAttachEvent="onclick: onCancel" title="${buttonCancel}">
-			<span dojoAttachPoint="closeText" class="closeText" title="${buttonCancel}">x</span>
-		</span>
+
+<div>
+	<div class="dijitTooltipContainer" role="presentation" style="width: 300px; padding-left: 0; padding-right: 0; padding-top: 0.5em; padding-bottom: 0.45em">
+		<div class="dijitTooltipContents dijitTooltipFocusNode" role="dialog"
+			dojoattachpoint="containerNode" style="padding: 0">
+			<table dojoAttachPoint="authenticated" style="display: none; width: 100%;">
+			 <tbody dojoAttachPoint="authenticatedList">
+			</tbody>
+			</span>
+			
+			<table dojoAttachPoint="otherUnauthenticated" style="display: none; width: 100%;">
+			 <tbody dojoAttachPoint="otherUnauthenticatedList">
+			</tbody>
+			</span>
+		</div>
 	</div>
-	<div dojoAttachPoint="containerNode" class="dijitDialogPaneContent">
-		<!-- Actual content here -->
-		<p dojoAttachPoint = "servicesNotification">
-			Some services require authentication:
-			<ul dojoAttachPoint="servicesList">
-			</ul>
-		</p>
-	</div>
+	<div class="dijitTooltipConnector" role="presentation"></div>
+
 </div>

@@ -499,6 +499,19 @@ a:hover {
 	background-color: #EAF2FE;
 }
 
+.LoginWindowLeft {
+	padding-left: 0.5em;
+}
+
+.LoginWindowRight {
+	padding-right: 0.5em;
+}
+
+.LoginWindowComment {
+	font-size: 0.9em;
+	padding-left: 15px;
+}
+
 #outline {
 	margin: 8px 0 0 16px;
 }
