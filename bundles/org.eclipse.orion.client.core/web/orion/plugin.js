@@ -87,7 +87,7 @@ eclipse.PluginProvider = function(metadata) {
 					response.result = result;
 					_publish(response);
 				}, function(error) {
-					response.error = error;
+					response.error = error ? JSON.parse(JSON.stringify(error)) : error; // sanitizing Error object 
 					_publish(response);
 				});
 			} else {
@@ -95,7 +95,7 @@ eclipse.PluginProvider = function(metadata) {
 				_publish(response);
 			}
 		} catch (error) {
-			response.error = error;
+			response.error = error ? JSON.parse(JSON.stringify(error)) : error; // sanitizing Error object
 			_publish(response);
 		}
 	}
