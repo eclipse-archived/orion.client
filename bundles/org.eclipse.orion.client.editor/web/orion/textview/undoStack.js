@@ -58,6 +58,29 @@ orion.textview.UndoStack = (function() {
 				this._doUndoRedo(this.offset, this.text, this.previousText, view, select);
 			},
 			_doUndoRedo: function(offset, text, previousText, view, select) {
+				var model = view.getModel();
+				/* 
+				* TODO UndoStack should be changing the text in the base model.
+				* This is code needs to change when modifications in the base
+				* model are supported properly by the projection model.
+				*/
+				if (model.mapOffset) {
+					var mapOffset = model.mapOffset(offset, true);
+					if (mapOffset < 0) {
+						var annotationModel = view.annotationModel;
+						var iter = annotationModel.getAnnotations(offset, offset + 1);
+						while (iter.hasNext()) {
+							annotation = iter.next();
+							if (annotation.type === "orion.annotation.folding") {
+								annotation.expand();
+								mapOffset = model.mapOffset(offset, true);
+								break;
+							}
+						}
+					}
+					if (mapOffset < 0) return;
+					offset = mapOffset;
+				}
 				view.setText(text, offset, offset + previousText.length);
 				if (select) {
 					view.setSelection(offset, offset + text.length);
@@ -116,7 +139,26 @@ orion.textview.UndoStack = (function() {
 		this.view = view;
 		this.size = size !== undefined ? size : 100;
 		this.reset();
-		view.addEventListener("ModelChanging", this, this._onModelChanging);
+		var model = view.getModel();
+		if (model.getBaseModel) {
+			model = model.getBaseModel();
+		}
+		this.model = model;
+		var self = this;
+		this._modelListener = {
+			onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+				var e = {
+					text: text,
+					start: start, 
+					removedCharCount: removedCharCount,
+					addedCharCount: addedCharCount,
+					removedLineCount: removedLineCount,
+					addedLineCount: addedLineCount
+				};
+				self._onModelChanging(e);
+			}
+		};
+		model.addListener(this._modelListener);
 		view.addEventListener("Destroy", this, this._onDestroy);
 	}
 	UndoStack.prototype = /** @lends orion.textview.UndoStack.prototype */ {
@@ -300,7 +342,7 @@ orion.textview.UndoStack = (function() {
 			}
 		},
 		_onDestroy: function() {
-			this.view.removeEventListener("ModelChanging", this, this._onModelChanging);
+			this.model.removeListener(this._modelListener);
 			this.view.removeEventListener("Destroy", this, this._onDestroy);
 		},
 		_onModelChanging: function(e) {
@@ -328,14 +370,14 @@ orion.textview.UndoStack = (function() {
 					var deleting = this._undoText.length > 0 && -this._undoStart === start;
 					this._undoStart = -start;
 					if (deleting) {
-						this._undoText = this._undoText + this.view.getText(start, start + removedCharCount);
+						this._undoText = this._undoText + this.model.getText(start, start + removedCharCount);
 					} else {
-						this._undoText = this.view.getText(start, start + removedCharCount) + this._undoText;
+						this._undoText = this.model.getText(start, start + removedCharCount) + this._undoText;
 					}
 					return;
 				}
 			}
-			this.add(new Change(start, newText, this.view.getText(start, start + removedCharCount)));
+			this.add(new Change(start, newText, this.model.getText(start, start + removedCharCount)));
 		}
 	};
 	return UndoStack;
