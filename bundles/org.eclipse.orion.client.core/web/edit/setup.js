@@ -54,7 +54,7 @@ exports.setUpEditor = function(isReadOnly){
 
 		// Editor needs additional services besides EAS.
 		problemService = new mProblems.ProblemService(serviceRegistry);
-		outlineService = new mOutliner.OutlineService(serviceRegistry);
+		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferencesService: prefsService});
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 	}());
 	
@@ -475,30 +475,29 @@ exports.setUpEditor = function(isReadOnly){
 		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 	
+	// Create outliner "gadget"
+	var outliner = new mOutliner.Outliner({parent: outlineDomNode,
+		serviceRegistry: serviceRegistry,
+		outlineService: serviceRegistry.getService("orion.edit.outline"),
+		commandService: commandService,
+		selectionService: selection});
 	dojo.connect(editor, "onInputChange", function(title, message, contents, saved) {
-		// lookup outline provider, feed contents to it
-		var outliners = serviceRegistry.getServiceReferences("orion.edit.outliner"),
-		    outliner;
-		for (var i=0; i < outliners.length; i++) {
-			var serviceReference = outliners[i],
+		var outlineProviders = serviceRegistry.getServiceReferences("orion.edit.outliner"),
+		    filteredProviders = [];
+		for (var i=0; i < outlineProviders.length; i++) {
+			var serviceReference = outlineProviders[i],
 			    pattern = serviceReference.getProperty("pattern");
 			if (pattern && new RegExp(pattern).test(title)) {
-				outliner = serviceReference;
-				break;
+				filteredProviders.push(serviceReference);
 			}
 		}
-		if (outliner) {
-			// Wire outliner to the outline service
-			serviceRegistry.getService(outliner).then(function(outliner) {
-				outliner.getOutline(contents, title).then(function(outlineModel) {
-					outlineService.setOutline(outlineModel, title);
-				});
-			});
-		}
+		outlineService.setOutlineProviders(filteredProviders, editor.getContents(), editor.getTitle());
+		outliner.setOutlineProviders(filteredProviders);
 	});
-	
-	// Create outliner "gadget"
-	new mOutliner.Outliner({parent: outlineDomNode, outlineService: serviceRegistry.getService("orion.edit.outline"), selectionService: selection});
+	dojo.connect(outliner, "setSelectedProvider", function(/**ServiceReference*/ outlineProvider) {
+		outlineService.setProvider(outlineProvider);
+		outlineService.emitOutline(editor.getContents(), editor.getTitle());
+	});
 	
 	window.onbeforeunload = function() {
 		if (editor.isDirty()) {

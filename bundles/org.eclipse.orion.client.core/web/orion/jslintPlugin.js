@@ -93,7 +93,9 @@ window.onload = function() {
 		pattern: "\\.js$"
 	});
 	provider.registerServiceProvider("orion.edit.outliner", outlineService, {
-		pattern: "\\.(js|html)$"	// TODO separate out HTML outline
+		pattern: "\\.(js|html)$",	// TODO separate out HTML outline
+		name: "Flat outline",
+		id: "orion.edit.outliner.jslint"
 	});
 	//validationService.dispatchEvent = serviceProvider.dispatchEvent;
 	provider.connect();
