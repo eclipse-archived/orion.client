@@ -1,20 +1,16 @@
 
 <div>
-	<div class="dijitTooltipContainer" role="presentation">
+	<div class="dijitTooltipContainer" role="presentation" style="width: 300px; padding-left: 0; padding-right: 0; padding-top: 0.5em; padding-bottom: 0.45em">
 		<div class="dijitTooltipContents dijitTooltipFocusNode" role="dialog"
-			dojoattachpoint="containerNode">
-			<span dojoAttachPoint="pendingAuthentication" style="display: none">You are requested to sign it to:
-			<ul dojoAttachPoint="pendingAuthenticationList">
-			</ul>
-			</span>
-			<span dojoAttachPoint="authenticated" style="display: none">You are already signed in to:
-			 <ul dojoAttachPoint="authenticatedList">
-			</ul>
+			dojoattachpoint="containerNode" style="padding: 0">
+			<table dojoAttachPoint="authenticated" style="display: none; width: 100%;">
+			 <tbody dojoAttachPoint="authenticatedList">
+			</tbody>
 			</span>
 			
-			<span dojoAttachPoint="otherUnauthenticated" style="display: none">You may also sign in to:
-			 <ul dojoAttachPoint="otherUnauthenticatedList">
-			</ul>
+			<table dojoAttachPoint="otherUnauthenticated" style="display: none; width: 100%;">
+			 <tbody dojoAttachPoint="otherUnauthenticatedList">
+			</tbody>
 			</span>
 		</div>
 	</div>

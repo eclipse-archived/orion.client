@@ -19,32 +19,24 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 		constructor : function() {
 			this.inherited(arguments);
 			this.options = arguments[0] || {};
-			this.pendingAuthServices = {};
 			this.authenticatedServices = {};
 			this.unauthenticatedServices = {};
 		},
 	
 		setPendingAuthentication: function(services){
-		if(this.isEmpty(services)){
-			this.pendingAuthenticationList.style.display = 'none';
-			dijit.popup.hide(this);
-			return;
-		}
-		this.pendingAuthentication.style.display = '';
-		this.pendingAuthServices = services;
-		dojo.empty(this.pendingAuthenticationList);
-		for(var i in this.pendingAuthServices){
-			var li = dojo.create("li");
-			dojo.place(document.createTextNode(services[i].SignInKey + ": "), li, "only");
 			
-			if(this.pendingAuthServices[i].SignInLocation.toString().indexOf("?")==-1){
-				dojo.create("a", {target: "_blank", href: this.pendingAuthServices[i].SignInLocation + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + services[i].SignInKey, innerHTML: "Sign in"}, li, "last");
-			}else{
-				dojo.create("a", {target: "_blank", href: this.pendingAuthServices[i].SignInLocation + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + services[i].SignInKey, innerHTML: "Sign in"}, li, "last");
+			for(var i in this.unauthenticatedServices){
+				delete this.unauthenticatedServices[i].pending;
 			}
 			
-			dojo.place(li, this.pendingAuthenticationList, "last");
-		}
+			for(var i in services){
+				if(this.unauthenticatedServices[services[i].SignInKey]){
+					this.unauthenticatedServices[services[i].SignInKey].pending = true;
+				}else{
+					this.unauthenticatedServices[services[i].SignInKey] = {label: services[i].SignInKey, SignInLocation: services[i].SignInLocation, pending: true};
+				}
+			}
+			this.renderUnauthenticatedServices();
 		
 	},
 	
@@ -58,7 +50,11 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 			if(this.authenticatedServices[key]){
 				delete this.authenticatedServices[key];
 			}
-			this.unauthenticatedServices[key] = {authService: authService, label: label};
+			if(this.unauthenticatedServices[key]){
+				this.unauthenticatedServices[key] = {authService: authService, label: label, pending: this.unauthenticatedServices[key].pending};
+			}else{
+				this.unauthenticatedServices[key] = {authService: authService, label: label};
+			}
 		}
 		dojo.hitch(this, this.renderAuthenticatedServices)();
 		dojo.hitch(this, this.renderUnauthenticatedServices)();
@@ -68,18 +64,27 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 		dojo.empty(this.authenticatedList);
 		this.authenticated.style.display = this.isEmpty(this.authenticatedServices) ? 'none' : '';
 		var self = this;
+		var isFirst = true;
 		for(var i in this.authenticatedServices){
-			var li = dojo.create("li");
-			dojo.place(document.createTextNode(i + ": "), li, "only");
+			if(!isFirst){
+				var tr = dojo.create("tr", null, this.authenticatedList);
+				dojo.create("td", {style: "padding: 0; margin 0;" ,colspan: 2, innerHTML: "<hr style='border-bottom: medium none; border-top: 1px solid #D3D3D3; color: gray; height: 0; margin: 2px;'>"}, tr);
+			}
+			isFirst = false;
+			var tr = dojo.create("tr", {className: "navTableHeading"});
+			var td = dojo.create("td", {innerHTML: "<h2>" + i + "</h2>"}, tr, "only");
+			dojo.addClass(td, "LoginWindowLeft");
+			td = dojo.create("td", {style: "text-align: right"}, tr, "last");
+			dojo.addClass(td, "LoginWindowRight");
 			var jsonData = this.authenticatedServices[i].data;
 			var authService = this.authenticatedServices[i].authService;
 			if(jsonData.Location)
-				dojo.create("a", {href: ("/profile/user-profile.html#" + jsonData.Location), innerHTML: "Profile"}, li, "last");
-			dojo.place(document.createTextNode(" "), li, "last");
+				dojo.create("a", {href: ("/profile/user-profile.html#" + jsonData.Location), innerHTML: "Profile"}, td, "last");
+			dojo.place(document.createTextNode(" "), td, "last");
 			if(authService.logout){
 				var a = dojo.create("a", {
 					innerHTML: "Sign out"
-				}, li, "last");
+				}, td, "last");
 				
 				dojo.connect(a, "onmouseover", a, function() {
 					a.style.cursor = "pointer";
@@ -95,9 +100,23 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 						}));
 					});
 			}
-				
-			//TODO
-			dojo.place(li, this.authenticatedList, "last");
+			dojo.place(tr, this.authenticatedList, "last");
+			
+			var lastLogin = "N/A";
+			if (jsonData && jsonData.lastlogintimestamp) {
+				lastLogin = dojo.date.locale.format(new Date(jsonData.lastlogintimestamp), {formatLength: "short"});
+			}
+			var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login;
+			tr = dojo.create("tr");
+			if(userName.length>40){
+				td = dojo.create("td", {innerHTML: userName.substring(0, 30) + '... ' + "logged in since " + lastLogin, colspan: 2, title: userName + ' ' + "logged in since " + lastLogin}, tr, "only");
+			}else{
+				td = dojo.create("td", {innerHTML: userName + ' ' + "logged in since " + lastLogin, colspan: 2}, tr, "only");
+			}
+			dojo.addClass(td, "LoginWindowLeft");
+			dojo.addClass(td, "LoginWindowRight");
+			dojo.addClass(td, "LoginWindowComment");
+			dojo.place(tr, this.authenticatedList, "last");
 		}
 		
 		
@@ -106,26 +125,44 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 	renderUnauthenticatedServices: function(){
 		dojo.empty(this.otherUnauthenticatedList);
 		this.otherUnauthenticated.style.display = this.isEmpty(this.unauthenticatedServices) ? 'none' : '';
+		var isFirst = true;
 		for(var i in this.unauthenticatedServices){
-			var li = dojo.create("li");
-			dojo.place(document.createTextNode(i + ": "), li, "only");
+			if(!isFirst || !this.isEmpty(this.authenticatedServices)){
+				var tr = dojo.create("tr", null, this.otherUnauthenticatedList);
+				dojo.create("td", {style: "padding: 0; margin 0;" ,colspan: 2, innerHTML: "<hr style='border-bottom: medium none; border-top: 1px solid #D3D3D3; color: gray; height: 0; margin: 2px;'>"}, tr);
+			}
+			isFirst = false;
+			var tr = dojo.create("tr", {className: "navTableHeading"});
+			var td = dojo.create("td", null, tr, "only");
+			dojo.addClass(td, "LoginWindowLeft");
+			var h2 = dojo.create("h2", {innerHTML: i}, td, "only");
+			td = dojo.create("td", {style: "text-align: right"}, tr, "last");
+			dojo.addClass(td, "LoginWindowRight");
+
 			var authService = this.unauthenticatedServices[i].authService;
 			
-			if(authService.getAuthForm){
-				dojo.hitch(this, function(li){
+			if(!authService){
+				var loginForm = this.unauthenticatedServices[i].SignInLocation;
+				if(loginForm.indexOf("?")==-1){
+					dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last");
+				}else{
+					dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last");
+				}
+			}else if(authService.getAuthForm){
+				dojo.hitch(this, function(td){
 				authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm){
 					
 					if(loginForm.indexOf("?")==-1){
-						dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, li, "last");
+						dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last");
 					}else{
-						dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, li, "last");
+						dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last");
 					}
 					
 				});
-				})(li);
+				})(td);
 			}else if(authService.login){
 				
-				var a = dojo.create("a", {innerHTML: "Sign in", style: "cursor: hand;"}, li, "last");
+				var a = dojo.create("a", {innerHTML: "Sign in", style: "cursor: hand;"}, td, "last");
 				dojo.connect(a, "onmouseover", a, function() {
 					a.style.cursor = "pointer";
 				});
@@ -136,7 +173,15 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 				
 			}
 					
-			dojo.place(li, this.otherUnauthenticatedList, "last");
+			dojo.place(tr, this.otherUnauthenticatedList, "last");
+			if(this.unauthenticatedServices[i].pending){
+				tr = dojo.create("tr");
+				td = dojo.create("td", {innerHTML: "Authentication required!", style: "padding-left: 10px", colspan: 2}, tr, "only");
+				dojo.addClass(td, "LoginWindowLeft");
+				dojo.addClass(td, "LoginWindowRight");
+				dojo.create("img", {src: "/images/warning.gif", style: "padding-right: 4px; vertical-align: bottom; padding-bottom: 2px;"}, td, "first");
+				dojo.place(tr, this.otherUnauthenticatedList, "last");
+			}
 		}
 	},
 	isEmpty: function(obj) {
@@ -145,7 +190,15 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 				return false;
 		}
 		return true;
-	}
+	},
+	getHostname : function(url) {
+		var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
+	    var img = document.createElement('img');
+	    img.src = url; // set string url
+	    url = img.src; // get qualified url
+	    img.src = null; // no server request
+		return url.match(re)[1].toString();
+		}
 	
 	});
 });

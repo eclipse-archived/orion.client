@@ -112,44 +112,21 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	function generateUserInfo(serviceRegistry) {
 		
 		var authServices = serviceRegistry.getServiceReferences("orion.core.auth");
-/*		if(authServices.length===1){
-			serviceRegistry.getService(authServices[0]).then(function(authService){
-				
-				authService.getKey().then(function(key){
-				
-					authService.getUser().then(function(jsonData){
-						renderUser(key, serviceRegistry, authService, jsonData);
-					}, 
-					function(errorData){
-						renderUser(key, serviceRegistry, authService);
-					});
-						window.addEventListener("storage", function(e){
-
-							if(authRendered[key] === localStorage.getItem(key)){
-								return;
-							}
-							
-							authRendered[key] = localStorage.getItem(key);
-							
-							authService.getUser().then(function(jsonData){
-								renderUser(key, serviceRegistry, authService, jsonData);
-							}, 
-							function(errorData){
-								renderUser(key, serviceRegistry, authService);
-							});
-							
-						}, false);
-					
-
-				});
-
-			});
-		} else {*/
 			var userInfo = dojo.byId("userInfo");
 			if(!userInfo){
 				return;
 			}
 			
+			if(!dijit.byId('logins')){
+				var menuButton = new dijit.form.DropDownButton({
+					id: "logins",
+					label: "Security",
+					dropDown: loginDialog,
+					title: "Login statuses"
+			        });
+			        dojo.addClass(menuButton.domNode, "commandImage");
+			        dojo.place(menuButton.domNode, userInfo, "only");
+				}
 			
 			
 			for(var i=0; i<authServices.length; i++){
@@ -189,164 +166,11 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 					});
 				
 				});
-			//}
-			
-			if(!dijit.byId('logins')){
-			var menuButton = new dijit.form.DropDownButton({
-				id: "logins",
-				label: "Logins",
-				dropDown: loginDialog,
-				title: "Login statuses"
-		        });
-		        dojo.addClass(menuButton.domNode, "commandImage");
-		        dojo.place(menuButton.domNode, userInfo, "only");
 			}
-		}
+		
 		
 	}
 	
-	function renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label, jsonData){
-		
-		var children = popupMenu.popup.getChildren();
-		for(var i=0; i<children.length; i++){
-			popupMenu.popup.removeChild(children[i]);
-		}
-		
-		if(!jsonData || !jsonData.uid){
-			popupMenu.setLabel(label);
-			if(authService.getAuthForm){
-				authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
-					popupMenu.popup.addChild(new mCommands.CommandMenuItem({
-						label: "<a href='"+loginForm+"' target='_blank'>Sign in</a>",
-						hrefCallback: true
-					}));
-				});
-			}else if(authService.login){
-				popupMenu.popup.addChild(new dijit.MenuItem({
-					label: "Sign in",
-					onClick: function(){
-						authService.login(notifyAuthenticationSite);
-						}
-					}));
-				
-			}
-			
-		} else {
-			var lastLogin = "N/A";
-			if (jsonData && jsonData.lastlogintimestamp) {
-				lastLogin = dojo.date.locale.format(new Date(jsonData.lastlogintimestamp), {formatLength: "short"});
-			}
-			
-			var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login;
-			
-			popupMenu.setLabel((userName.length > 40 ? userName.substring(0, 30) + "..." : userName) + " (" + label + ")");
-			popupMenu.title = userName + ' ' + "logged in since " + lastLogin;
-			
-			var menuitem2 = new mCommands.CommandMenuItem({
-				label: "<a href=\"" + "/profile/user-profile.html#" + (jsonData.Location ? jsonData.Location : "") + "\">Profile</a>",
-				hrefCallback: true
-			});
-			popupMenu.popup.addChild(menuitem2);
-			
-			// signout item
-			if(authService.logout){
-				var menuitem = new dijit.MenuItem({
-					label: "Sign out",
-					onClick: function(){
-						authService.logout().then(function(){
-							renderUserSubmenu(key, serviceRegistry, authService, popupMenu, label);
-							localStorage.removeItem(key);
-						});
-					}
-				});
-				popupMenu.popup.addChild(menuitem);
-			}
-			
-		}
-		
-	}
-	
-	function renderUser(key, serviceRegistry, authService, jsonData){
-		
-		// add the logout button to the toolbar if available
-		var userInfo = dojo.byId("userInfo");
-		if(!userInfo){
-			return;
-		}
-		
-		if(!jsonData || !jsonData.uid){
-			dojo.empty(userInfo);
-			var signout = document.createElement('span');
-			signout.id = "menuButton";
-			signout.appendChild(document.createTextNode("Sign in"));
-			if(authService.getAuthForm){
-				authService.getAuthForm(notifyAuthenticationSite).then(function(loginForm){
-					dojo.create("a", {href: loginForm, target: "_blank", innerHTML: "Sign in"}, signout, "only");
-				});
-			}else if(authService.login){
-				signout.onclick = function(){authService.login(notifyAuthenticationSite);};
-			}
-
-			signout.id = "signOutUser";
-			userInfo.appendChild(signout);
-			dojo.addClass(signout, "commandLink");
-			return;
-		}
-		var lastLogin = "N/A";
-		if (jsonData && jsonData.lastlogintimestamp) {
-			lastLogin = dojo.date.locale.format(new Date(jsonData.lastlogintimestamp), {formatLength: "short"});
-		}
-		
-		var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login;
-		
-		
-			dojo.addClass(userInfo, "globalActions");
-			var userMenu = dijit.byId("userMenu");
-			if (userMenu) {
-				userMenu.destroy();
-			}
-			dojo.empty(userInfo);
-			if (userName) {
-				mUtil.setUserName(userName);
-				// user menu
-				var newMenu= new dijit.Menu({
-					style: "display: none;",
-					id: "userMenu"
-				});
-				
-				// profile item
-				var menuitem2 = new mCommands.CommandMenuItem({
-					label: "<a href=\"" + "/profile/user-profile.html#" + (jsonData.Location ? jsonData.Location : "") + "\">Profile</a>",
-					hrefCallback: true
-				});
-				newMenu.addChild(menuitem2);
-				
-				// signout item
-				if(authService.logout){
-					var menuitem = new dijit.MenuItem({
-						label: "Sign out",
-						onClick: function(){
-							authService.logout().then(function(){
-								renderUser(key, serviceRegistry, authService);
-								localStorage.removeItem(key);
-								window.location.replace("/index.html");
-							});
-						}
-					});
-					newMenu.addChild(menuitem);
-				}
-	
-				
-				
-				var menuButton = new dijit.form.DropDownButton({
-					label: userName.length > 40 ? userName.substring(0, 30) + "..." : userName,
-					dropDown: loginDialog,
-					title: userName + ' ' + "logged in since " + lastLogin
-			        });
-			        dojo.addClass(menuButton.domNode, "commandImage");
-				dojo.place(menuButton.domNode, userInfo, "last");
-			} 
-	}
 	
 	function setPendingAuthentication(services){
 		loginDialog.setPendingAuthentication(services);
