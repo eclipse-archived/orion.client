@@ -174,10 +174,18 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	
 	function setPendingAuthentication(services){
 		loginDialog.setPendingAuthentication(services);
-		dijit.popup.open({
-            popup: loginDialog,
-            around: dojo.byId('logins')
-        });
+		for(i in services){
+			if(services.hasOwnProperty(i)){
+				//open prompt if there is at least one pending authentication
+				dijit.popup.open({
+		            popup: loginDialog,
+		            around: dojo.byId('logins')
+		        });		
+				return;
+			}
+		}
+		
+		dijit.popup.close(loginDialog);
 	}
 
 	/**
