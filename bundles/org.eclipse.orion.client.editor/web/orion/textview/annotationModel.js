@@ -40,7 +40,7 @@ orion.textview.FoldingAnnotation = (function() {
 		_update: function(checkLineCount) {
 			var visible = true;
 			if (checkLineCount) {
-				var baseModel = this._projectionModel.getParent();
+				var baseModel = this._projectionModel.getBaseModel();
 				var startLine = baseModel.getLineAtOffset(this.start);
 				var endLine = baseModel.getLineAtOffset(this.end);
 				visible = startLine !== endLine;
@@ -84,7 +84,7 @@ orion.textview.FoldingAnnotation = (function() {
 			if (!this.rulerHTML) { return; }
 			this.expanded = false;
 			var projectionModel = this._projectionModel;
-			var baseModel = projectionModel.getParent();
+			var baseModel = projectionModel.getBaseModel();
 			this._projection = {
 				start: baseModel.getLineStart(baseModel.getLineAtOffset(this.start) + 1),
 				end: baseModel.getLineEnd(baseModel.getLineAtOffset(this.end), true)

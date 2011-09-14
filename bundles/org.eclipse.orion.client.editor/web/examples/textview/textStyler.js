@@ -253,7 +253,7 @@ examples.textview.TextStyler = (function() {
 		
 		view.addEventListener("Selection", this, this._onSelection);
 		var model = view.getModel();
-		if (model.getParent) {
+		if (model.getBaseModel) {
 			//TODO normalize all events to use event objects
 			var self = this;
 			this._baseModelListener = {
@@ -268,7 +268,7 @@ examples.textview.TextStyler = (function() {
 					self._onModelChanged(e);
 				}
 			};
-			model.getParent().addListener(this._baseModelListener);
+			model.getBaseModel().addListener(this._baseModelListener);
 		} else {
 			//TODO still needed to keep the event order correct (styler before view)
 			view.addEventListener("ModelChanged", this, this._onModelChanged);
@@ -283,8 +283,8 @@ examples.textview.TextStyler = (function() {
 			var view = this.view;
 			if (view) {
 				var model = view.getModel();
-				if (model.getParent) {
-					model.getParent().removeListener(this._baseModelListener);
+				if (model.getBaseModel) {
+					model.getBaseModel().removeListener(this._baseModelListener);
 				} else {
 					view.removeEventListener("ModelChanged", this, this._onModelChanged);
 				}
@@ -320,7 +320,7 @@ examples.textview.TextStyler = (function() {
 			// compute comments between commentOffset and end
 			if (end <= this.commentOffset) { return; }
 			var model = this.view.getModel();
-			if (model.getParent) { model = model.getParent(); }
+			if (model.getBaseModel) { model = model.getBaseModel(); }
 			var charCount = model.getCharCount();
 			var e = end;
 			//TODO Uncomment to compute all comments
@@ -368,7 +368,7 @@ examples.textview.TextStyler = (function() {
 		},
 		_getStyles: function(text, start) {
 			var model = this.view.getModel();
-			if (model.getParent) {
+			if (model.getBaseModel) {
 				start = model.mapOffset(start);
 			}
 			var end = start + text.length;
@@ -388,7 +388,7 @@ examples.textview.TextStyler = (function() {
 				var style = commentStyle;
 				if ((commentEnd - commentStart) > (this.commentStart.length + this.commentEnd.length)) {
 					var o = commentStart + this.commentStart.length;
-					var star = model.getParent ? model.getParent().getText(o, o + 1) : model.getText(o, o + 1);
+					var star = model.getBaseModel ? model.getBaseModel().getText(o, o + 1) : model.getText(o, o + 1);
 					if (star === "*") { style = javadocStyle; }
 				}
 				if (this.whitespacesVisible || this.detectHyperlinks) {
@@ -403,7 +403,7 @@ examples.textview.TextStyler = (function() {
 			if (offset < end) {
 				this._parse(text.substring(offset - start, end - start), offset, styles);
 			}
-			if (model.getParent) {
+			if (model.getBaseModel) {
 				for (var j = 0; j < styles.length; j++) {
 					var length = styles[j].end - styles[j].start;
 					styles[j].start = model.mapOffset(styles[j].start, true);
@@ -507,7 +507,7 @@ examples.textview.TextStyler = (function() {
 			return newObj;
 		},
 		_findMatchingBracket: function(model, offset) {
-			if (model.getParent) { model = model.getParent(); }
+			if (model.getBaseModel) { model = model.getBaseModel(); }
 			var brackets = "{}()[]<>";
 			var bracket = model.getText(offset, offset + 1);
 			var bracketIndex = brackets.indexOf(bracket, 0);
@@ -635,7 +635,7 @@ examples.textview.TextStyler = (function() {
 			var lineIndex;
 			var bracket = this._matchingBracket;
 			if (bracket !== undefined) {
-				if (model.getParent) { bracket = model.mapOffset(bracket, true); }
+				if (model.getBaseModel) { bracket = model.mapOffset(bracket, true); }
 				lineIndex = model.getLineAtOffset(bracket);
 				view.redrawLines(lineIndex, lineIndex + 1);
 				this._matchingBracket = this._currentBracket = undefined;
@@ -660,14 +660,14 @@ examples.textview.TextStyler = (function() {
 			var caret = view.getCaretOffset() - 1;
 			if (caret < 0) { return; }
 			var mapCaret = caret;
-			if (model.getParent) {
+			if (model.getBaseModel) {
 				mapCaret = model.mapOffset(caret);
 			}
 			bracket = this._findMatchingBracket(model, mapCaret);
 			if (bracket !== -1) {
 				this._currentBracket = mapCaret;
 				this._matchingBracket = bracket;
-				if (model.getParent) { bracket = model.mapOffset(bracket, true); }
+				if (model.getBaseModel) { bracket = model.mapOffset(bracket, true); }
 				lineIndex = model.getLineAtOffset(bracket);
 				view.redrawLines(lineIndex, lineIndex + 1);
 			}
@@ -680,12 +680,12 @@ examples.textview.TextStyler = (function() {
 		_computeFolding: function() {
 			var view = this.view;
 			var viewModel = view.getModel();
-			if (!viewModel.getParent) { return; }
+			if (!viewModel.getBaseModel) { return; }
 			//TODO need to create styler view annotationModel
 			var annotationModel = view.annotationModel;
 			annotationModel.removeAnnotations("orion.annotation.folding");
 			var add = [];
-			var baseModel = viewModel.getParent();
+			var baseModel = viewModel.getBaseModel();
 			for (var i=0; i<this.commentOffsets.length; i += 2) {
 				var annotation = this._createFoldingAnnotation(viewModel, baseModel, this.commentOffsets[i], this.commentOffsets[i+1]);
 				if (annotation) { add.push(annotation); }
@@ -701,7 +701,7 @@ examples.textview.TextStyler = (function() {
 			if (start >= this.commentOffset) { return; }
 			var view = this.view;
 			var viewModel = view.getModel();
-			var baseModel = viewModel.getParent ? viewModel.getParent() : viewModel;
+			var baseModel = viewModel.getBaseModel ? viewModel.getBaseModel() : viewModel;
 			
 //			window.console.log("start=" + start + " added=" + addedCharCount + " removed=" + removedCharCount)
 //			for (var i=0; i< this.commentOffsets.length; i++) {

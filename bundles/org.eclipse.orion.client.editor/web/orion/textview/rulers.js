@@ -94,8 +94,8 @@ orion.textview.Ruler = (function() {
 			var start = model.getLineStart(startLine);
 			var end = model.getLineEnd(endLine - 1);
 			var baseModel = model;
-			if (model.getParent) {
-				baseModel = model.getParent();
+			if (model.getBaseModel) {
+				baseModel = model.getBaseModel();
 				start = model.mapOffset(start);
 				end = model.mapOffset(end);
 			}
@@ -315,7 +315,7 @@ orion.textview.Ruler = (function() {
 			if (annotations.length === 0) { return null; }
 			var model = this._view.getModel(), annotation;
 			function getText(start, end) {
-				var m = model.getParent ? model.getParent() : model;
+				var m = model.getBaseModel ? model.getBaseModel() : model;
 				var textStart = m.getLineStart(m.getLineAtOffset(start));
 				var textEnd = m.getLineEnd(m.getLineAtOffset(end), true);
 				return m.getText(textStart, textEnd);
@@ -368,7 +368,7 @@ orion.textview.Ruler = (function() {
 			var lineCount = model.getLineCount();
 			if (e.textModelChangedEvent) {
 				var start = e.textModelChangedEvent.start;
-				if (model.getParent) { start = model.mapOffset(start, true); }
+				if (model.getBaseModel) { start = model.mapOffset(start, true); }
 				var startLine = model.getLineAtOffset(start);
 				view.redrawLines(startLine, lineCount, self);
 				return;
@@ -378,7 +378,7 @@ orion.textview.Ruler = (function() {
 					if (!self.isAnnotationTypeVisible(changes[i].type)) { continue; }
 					var start = changes[i].start;
 					var end = changes[i].end;
-					if (model.getParent) {
+					if (model.getBaseModel) {
 						start = model.mapOffset(start, true);
 						end = model.mapOffset(end, true);
 					}
@@ -443,7 +443,7 @@ orion.textview.Ruler = (function() {
 			var annotationModel = this._annotationModel;
 			var start = model.getLineStart(lineIndex);
 			var end = model.getLineEnd(lineIndex);
-			if (model.getParent) {
+			if (model.getBaseModel) {
 				start = model.mapOffset(start);
 				end = model.mapOffset(end);
 			}
@@ -526,7 +526,7 @@ orion.textview.LineNumberRuler = (function() {
 		for (var lineIndex = startLine; lineIndex < endLine; lineIndex++) {
 			var style = lineIndex & 1 ? this._oddStyle : this._evenStyle;
 			var mapLine = lineIndex;
-			if (model.getParent) { mapLine = model.mapLine(lineIndex); }
+			if (model.getBaseModel) { mapLine = model.mapLine(lineIndex); }
 			if (!result[lineIndex]) { result[lineIndex] = {}; }
 			result[lineIndex].html = (mapLine + 1) + "";
 			if (!result[lineIndex].style) { result[lineIndex].style = style; }
@@ -542,7 +542,7 @@ orion.textview.LineNumberRuler = (function() {
 	LineNumberRuler.prototype._onTextModelChanged = function(e) {
 		var start = e.start;
 		var model = this._view.getModel();
-		var lineCount = model.getParent ? model.getParent().getLineCount() : model.getLineCount();
+		var lineCount = model.getBaseModel ? model.getBaseModel().getLineCount() : model.getLineCount();
 		var numOfDigits = (lineCount+"").length;
 		if (this._numOfDigits !== numOfDigits) {
 			this._numOfDigits = numOfDigits;
@@ -634,7 +634,7 @@ orion.textview.OverviewRuler = (function() {
 	OverviewRuler.prototype._getTooltip = function(document, lineIndex, annotations) {
 		if (annotations.length === 0) {
 			var model = this._view.getModel();
-			return "Line: " + ((model.getParent ? model.mapLine(lineIndex) : lineIndex) + 1);
+			return "Line: " + ((model.getBaseModel ? model.mapLine(lineIndex) : lineIndex) + 1);
 		}
 		return orion.textview.Ruler.prototype._getTooltip.call(this, document, lineIndex, annotations);
 	};
@@ -669,7 +669,7 @@ orion.textview.FoldingRuler = (function() {
 		var model = view.getModel();
 		var start = model.getLineStart(lineIndex);
 		var end = model.getLineEnd(lineIndex, true);
-		if (model.getParent) {
+		if (model.getBaseModel) {
 			start = model.mapOffset(start);
 			end = model.mapOffset(end);
 		}
@@ -713,7 +713,7 @@ orion.textview.FoldingRuler = (function() {
 			for (i = 0; i < changes.length; i++) {
 				if (!self.isAnnotationTypeVisible(changes[i].type)) { continue; }
 				var start = changes[i].start;
-				if (model.getParent) {
+				if (model.getBaseModel) {
 					start = model.mapOffset(start, true);
 				}
 				if (start !== -1) {

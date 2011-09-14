@@ -121,8 +121,7 @@ orion.textview.ProjectionTextModel = (function() {
 				this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 			}
 		},
-		//TODO getModel?
-		getParent: function() {
+		getBaseModel: function() {
 			return this._model;
 		},
 		mapOffset: function(offset, parentOffset) {
