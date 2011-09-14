@@ -98,9 +98,7 @@ function handleAuthenticationError(error, retry) {
 					}
 					window.removeEventListener("storage", storageListener, false); // ... but only once
 					delete pendingAuthentication[responseObj.SignInKey];
-					if(loginDialog && loginDialog.open){
-						loginDialog.setAuthenticationServices(pendingAuthentication);
-					}
+					mGlobalCommands.setPendingAuthentication(pendingAuthentication);
 					retry();
 
 				};
@@ -108,18 +106,9 @@ function handleAuthenticationError(error, retry) {
 				window.addEventListener("storage", storageListener, false);
 				
 				if(responseObj.SignInKey){
-					
-					if (!loginDialog || !loginDialog.open) {
-						
-						loginDialog = new orion.widgets.LoginDialog();
-						loginDialog.startup();
-						dijit._curFocus = null; // Workaround for dojo bug #12534
-						loginDialog.show();
-						
-					}
-				
+									
 					pendingAuthentication[responseObj.SignInKey] = responseObj;
-					loginDialog.setAuthenticationServices(pendingAuthentication);
+					mGlobalCommands.setPendingAuthentication(pendingAuthentication);
 				}
 				
 			} catch (e){
