@@ -138,7 +138,9 @@ dojo.addOnLoad(function(){
 			var title = "Navigator";
 			if (item) {
 				var name = mUtil.isAtRoot(item.Location) ? mUtil.getUserName() : item.Name;
-				title = "/" + name + " - " + title;
+				if (name) {
+					title = "/" + name + " - " + title;
+				}
 			}
 			document.title = title;
 		});
