@@ -63,7 +63,7 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 			return;
 		}
 		
-		if(this.length(this.unauthenticatedServices) + this.length(this.authenticatedServices) === 1 && jsonData){
+		if(this.isSingleService() && jsonData){
 			var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login;
 			if(userName.length > 40)
 				userName = userName.substring(0, 30) + "...";
@@ -76,7 +76,7 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 	renderAuthenticatedServices: function(){
 		dojo.empty(this.authenticatedList);
 		this.authenticated.style.display = this.isEmpty(this.authenticatedServices) ? 'none' : '';
-		var self = this;
+		var _self = this;
 		var isFirst = true;
 		for(var i in this.authenticatedServices){
 			if(!isFirst){
@@ -106,12 +106,15 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 					a.style.cursor = "default";
 				});
 				
-				dojo.connect(a, "onclick",  function(){
-					authService.logout().then(dojo.hitch(self, function(){
+				dojo.connect(a, "onclick",  dojo.hitch(_self, function(authService, i){
+					return function(){authService.logout().then(dojo.hitch(_self, function(){
 						this.addUserItem(i, authService, this.authenticatedServices[i].label);
+						if(this.isSingleService()){
+							dijit.popup.close(this);
+						}
 						localStorage.removeItem(i);
-						}));
-					});
+						}));};
+					})(authService, i));
 			}
 			dojo.place(tr, this.authenticatedList, "last");
 			
@@ -137,6 +140,7 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 	
 	renderUnauthenticatedServices: function(){
 		dojo.empty(this.otherUnauthenticatedList);
+		var _self = this;
 		this.otherUnauthenticated.style.display = this.isEmpty(this.unauthenticatedServices) ? 'none' : '';
 		var isFirst = true;
 		for(var i in this.unauthenticatedServices){
@@ -148,7 +152,7 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 			var tr = dojo.create("tr", {className: "navTableHeading"});
 			var td = dojo.create("td", null, tr, "only");
 			dojo.addClass(td, "LoginWindowLeft");
-			var h2 = dojo.create("h2", {innerHTML: (this.unauthenticatedServices[i].label ? this.unauthenticatedServices[i].label : i)}, td, "only");
+			dojo.create("h2", {innerHTML: (this.unauthenticatedServices[i].label ? this.unauthenticatedServices[i].label : i)}, td, "only");
 			td = dojo.create("td", {style: "text-align: right"}, tr, "last");
 			dojo.addClass(td, "LoginWindowRight");
 
@@ -162,7 +166,7 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 					dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last");
 				}
 			}else if(authService.getAuthForm){
-				dojo.hitch(this, function(td){
+				dojo.hitch(_self, function(td, i){
 				authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm){
 					
 					if(loginForm.indexOf("?")==-1){
@@ -172,7 +176,7 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 					}
 					
 				});
-				})(td);
+				})(td, i);
 			}else if(authService.login){
 				
 				var a = dojo.create("a", {innerHTML: "Sign in", style: "cursor: hand;"}, td, "last");
@@ -182,7 +186,12 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 				dojo.connect(a, "onmouseout", a, function() {
 					a.style.cursor = "default";
 				});
-				dojo.connect(a, "onclick",function(){authService.login(eclipse.globalCommandUtils.notifyAuthenticationSite);});
+				dojo.connect(a, "onclick", dojo.hitch(_self, function(authService){
+					return function(){authService.login(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(){
+						if(_self.isSingleService())
+							dijit.popup.close(_self);
+						});};
+					})(authService));
 				
 			}
 					
@@ -196,6 +205,9 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 				dojo.place(tr, this.otherUnauthenticatedList, "last");
 			}
 		}
+	},
+	isSingleService : function(){
+		return this.length(this.unauthenticatedServices) + this.length(this.authenticatedServices) === 1;
 	},
 	isEmpty: function(obj) {
 		for(var prop in obj) {
