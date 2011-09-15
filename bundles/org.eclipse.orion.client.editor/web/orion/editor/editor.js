@@ -238,6 +238,14 @@ orion.editor.Editor = (function() {
 			return null;
 		},
 		
+		highlightAnnotations: function() {
+			if (this._annotationStyler) {
+				this._annotationStyler.destroy();
+				this._annotationStyler = null;
+			}
+			this._annotationStyler = new orion.textview.AnnotationStyler(this._annotationModel, this.getTextView());
+		},
+		
 		/**
 		 * Creates the underlying TextView and installs the editor's features.
 		 */
@@ -322,15 +330,21 @@ orion.editor.Editor = (function() {
 			
 			// Create rulers
 			if (this._annotationFactory) {
-				var annotations = this._annotationFactory.createAnnotationRulers();
+				this._annotationModel = this._annotationFactory.createAnnotationModel(textView.getModel());
+				var annotations = this._annotationFactory.createAnnotationRulers(this._annotationModel);
 				this._annotationsRuler = annotations.annotationRuler;
 			
 				this._annotationsRuler.onClick = function(lineIndex, e) {
 					if (lineIndex === undefined) { return; }
 					if (lineIndex === -1) { return; }
-					var annotation = this.getAnnotation(lineIndex);
+					//TODO map offsets when folding is enabled
+					var viewModel = textView.getModel();
+					var annotationModel = this.getAnnotationModel();
+					var lineStart = viewModel.getLineStart(lineIndex);
+					var annotations = annotationModel.getAnnotations(lineStart, viewModel.getLineEnd(lineIndex));
+					var annotation = annotations.next();
 					if (annotation === undefined) { return; }
-					editor.onGotoLine(annotation.line, annotation.column);
+					editor.onGotoLine(lineIndex, annotation.start - lineStart, annotation.end - lineStart);
 				};
 				
 				this._overviewRuler = annotations.overviewRuler;
@@ -344,7 +358,7 @@ orion.editor.Editor = (function() {
 			}
 			
 			if (this._lineNumberRulerFactory) {
-				this._lineNumberRuler = this._lineNumberRulerFactory.createLineNumberRuler();
+				this._lineNumberRuler = this._lineNumberRulerFactory.createLineNumberRuler(this._annotationModel);
 				textView.addRuler(this._lineNumberRuler);
 			}
 		},
@@ -396,6 +410,23 @@ orion.editor.Editor = (function() {
 					this._textView.setText(message);
 				} else {
 					if (contents !== null && contents !== undefined) {
+						var delimiter;
+						var lf = contents.indexOf("\n");
+						var cr = contents.indexOf("\r");
+						if (cr !== -1 && lf !== -1) {
+							if (lf === cr + 1) {
+								delimiter = "\r\n";
+							} else {
+								delimiter = cr < lf ? "\r" : "\n";
+							}
+						} else if (lf !== -1) {
+							delimiter = "\n";
+						} else if (cr !== -1) {
+							delimiter = "\r";
+						}
+						var model = new orion.textview.TextModel("", delimiter);
+						this._textView.setModel(model);
+						this._annotationModel.setTextModel(model);
 						this._textView.setText(contents);
 					}
 				}

@@ -89,8 +89,9 @@ orion.textview.Ruler = (function() {
 		 * @return {orion.textview.LineAnnotation} the annotations for the line range.
 		 */
 		getAnnotations: function(startLine, endLine) {
-			var model = this._view.getModel();
 			var annotationModel = this._annotationModel;
+			if (!annotationModel) { return []; }
+			var model = this._view.getModel();
 			var start = model.getLineStart(startLine);
 			var end = model.getLineEnd(endLine - 1);
 			var baseModel = model;
@@ -275,7 +276,7 @@ orion.textview.Ruler = (function() {
 							}
 							self._hideTooltip();
 						}, 50);
-					}, 4000);
+					}, 5000);
 				}
 			}, 1000);
 		},
@@ -441,18 +442,21 @@ orion.textview.Ruler = (function() {
 			var view = this._view;
 			var model = view.getModel();
 			var annotationModel = this._annotationModel;
-			var start = model.getLineStart(lineIndex);
-			var end = model.getLineEnd(lineIndex);
-			if (model.getBaseModel) {
-				start = model.mapOffset(start);
-				end = model.mapOffset(end);
-			}
-			var iter = annotationModel.getAnnotations(start, end);
-			var annotations = [], annotation;
-			while (iter.hasNext()) {
-				annotation = iter.next();
-				if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
-				annotations.push(annotation);
+			var annotations = [];
+			if (annotationModel) {
+				var start = model.getLineStart(lineIndex);
+				var end = model.getLineEnd(lineIndex);
+				if (model.getBaseModel) {
+					start = model.mapOffset(start);
+					end = model.mapOffset(end);
+				}
+				var iter = annotationModel.getAnnotations(start, end);
+				var annotation;
+				while (iter.hasNext()) {
+					annotation = iter.next();
+					if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
+					annotations.push(annotation);
+				}
 			}
 			var document = this._view._parentDocument;//TODO bad not API
 			var tooltipContent = this._getTooltip(document, lineIndex, annotations);

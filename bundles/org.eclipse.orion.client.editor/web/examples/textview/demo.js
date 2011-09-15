@@ -37,8 +37,8 @@ function log (text) {
  
  define(["orion/textview/keyBinding",
 		"orion/textview/textModel",
-		"orion/textview/annotationModel", 
 		"orion/textview/projectionTextModel", 
+		"orion/textview/annotations", 
 		"orion/textview/textView", 
 		"orion/textview/rulers",
 		"orion/textview/undoStack",

@@ -46,8 +46,8 @@ orion.editor.LineNumberRulerFactory = (function() {
 	function LineNumberRulerFactory() {
 	}
 	LineNumberRulerFactory.prototype = {
-		createLineNumberRuler: function() {
-			return new orion.textview.LineNumberRuler("left", {styleClass: "lineNumberRuler"}, {styleClass: "lineNumberRuler-odd"}, {styleClass: "lineNumberRuler-even"});
+		createLineNumberRuler: function(annotationModel) {
+			return new orion.textview.LineNumberRuler(annotationModel, "left", {styleClass: "lineNumberRuler"}, {styleClass: "lineNumberRuler-odd"}, {styleClass: "lineNumberRuler-even"});
 		}
 	};
 	return LineNumberRulerFactory;
@@ -59,46 +59,63 @@ orion.editor.AnnotationFactory = (function() {
 		this.problemImageUrl = problemImageUrl;
 	}
 	AnnotationFactory.prototype = {
-		createAnnotationRulers: function() {
-			this.annotationRuler = new orion.textview.AnnotationRuler("left", {styleClass: "annotationRuler"}, {html: "<img src='" + this.problemImageUrl + "'></img>"});
-			this.overviewRuler = new orion.textview.OverviewRuler("right", {styleClass: "overviewRuler"}, this.annotationRuler);
+		createAnnotationModel: function(model) {
+			this.annotationModel = new orion.textview.AnnotationModel(model);
+			return this.annotationModel;
+		},
+		
+		createAnnotationStyler: function(annotationModel, view) {
+			this.annotationStyler = new orion.textview.AnnotationStyler(annotationModel, view);
+			return this.annotationStyler;
+		},
+
+		createAnnotationRulers: function(annotationModel) {
+			this.annotationRuler = new orion.textview.AnnotationRuler(annotationModel, "left", {styleClass: "annotationRuler"});
+			this.overviewRuler = new orion.textview.OverviewRuler(annotationModel, "right", {styleClass: "overviewRuler"});
+			var type = "orion.annotation.problem";
+			this.annotationRuler.addAnnotationType(type);
+			this.overviewRuler.addAnnotationType(type);
 			return {annotationRuler: this.annotationRuler, overviewRuler: this.overviewRuler};
 		},
 		
-		showProblems : function(problems) {
-			var errors, i, k, escapedReason, functions;
-			errors = problems || [];
-			i = 0;
-			if (errors.length>0 && errors[errors.length - 1] === null) {
-				errors.pop();
-			}
-			var ruler = this.annotationRuler;
-			if (!ruler) {
+		showProblems : function(errors) {
+			var annotationModel = this.annotationModel;
+			if (!annotationModel) {
 				return;
 			}
-			ruler.clearAnnotations();
-			var lastLine = -1;
-			for (k in errors) {
-				if (errors[k]) {
+			var type = "orion.annotation.problem";
+			annotationModel.removeAnnotations(type);
+			if (!errors) { return; }
+			var annotations = [];
+			var model = annotationModel.getTextModel();
+			window.console.log("edition:" + errors.edition);
+			for (var i = 0; i < errors.length; i++) {
+				var error = errors[i];
+				if (error) {
 					// escaping voodoo... we need to construct HTML that contains valid JavaScript.
-					escapedReason = errors[k].reason.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
-					// console.log(escapedReason);
-					var annotation = {
-						line: errors[k].line - 1,
-						column: errors[k].character,
-						html: "<img src='" + this.problemImageUrl + "' title='" + escapedReason + "' alt='" + escapedReason + "'></img>",
-						overviewStyle: {style: {"backgroundColor": "lightcoral", "border": "1px solid red"}}
-					};
-					
-					// only one error reported per line, unless we want to merge them.  
-					// For now, just show the first one, and the next one will show when the first is fixed...
-					if (lastLine !== errors[k].line) {
-						// console.log("adding annotation at line " + errors[k].line);
-						ruler.setAnnotation(errors[k].line - 1, annotation);
-						lastLine = errors[k].line;
+					var escapedReason = error.reason.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
+					var lineIndex = error.line - 1;
+					var lineStart = model.getLineStart(lineIndex);
+					var start = error.character - 1, end = start;
+					var index = error.evidence.substring(start).search(/.\b/);
+					if (index > -1) {
+						end += index + 1;
+						window.console.log(error.evidence.substring(start, end));
 					}
+					var annotation = {
+						type: type,
+						start: lineStart + start,
+						end: lineStart + end,
+						rulerTitle: escapedReason,
+						rulerHTML: "<img style='vertical-align:middle;' src='" + this.problemImageUrl + "'></img>",
+						rulerStyle: {styleClass: "annotationProblem"},
+						overviewStyle: {styleClass: "annotationProblemOverview"},
+						rangeStyle: {styleClass: "annotationProblemRange"}
+					};
+					annotations.push(annotation);
 				}
 			}
+			annotationModel.replaceAnnotations(null, annotations);
 		}
 	};
 	return AnnotationFactory;
@@ -932,7 +949,7 @@ orion.editor.LinkedMode = (function() {
 }());
 
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define(['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers'], function() {
+	define(['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations'], function() {
 		return orion.editor;
 	});
 }

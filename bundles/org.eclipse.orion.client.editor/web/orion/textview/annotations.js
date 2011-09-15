@@ -136,15 +136,15 @@ orion.textview.AnnotationModel = (function() {
 
 	/** @private */
 	function AnnotationModel(textModel) {
-		this._model = textModel;
 		this._annotations = [];
 		this._listeners = [];
 		var self = this;
-		this._model.addListener({
+		this._modelListener = {
 			onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
 				self._onChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 			}
-		});
+		};
+		this.setTextModel(textModel);
 	}
 
 	AnnotationModel.prototype = /** @lends orion.textview.AnnotationModel.prototype */ {
@@ -185,6 +185,9 @@ orion.textview.AnnotationModel = (function() {
 				changed: []
 			};
 			this.onChanged(e);
+		},
+		getTextModel: function() {
+			return this._model;
 		},
 		/**
 		 * @param {Number} start the start 
@@ -327,6 +330,15 @@ orion.textview.AnnotationModel = (function() {
 			};
 			this.onChanged(e);
 		},
+		setTextModel: function(textModel) {
+			if (this._model) {
+				this._model.removeListener(this._modelListener);
+			}
+			this._model = textModel;
+			if (this._model) {
+				this._model.addListener(this._modelListener);
+			}
+		},
 		_binarySearch: function (array, offset, inclusive) {
 			var high = array.length, low = -1, index;
 			while (high - low > 1) {
@@ -375,6 +387,132 @@ orion.textview.AnnotationModel = (function() {
 	};
 
 	return AnnotationModel;
+}());
+
+/**
+ */
+orion.textview.AnnotationStyler = (function() {
+	/** @private */
+	function AnnotationStyler (annotationModel, view) {
+		this._annotationModel = annotationModel;
+		this._view = view;
+		view.addEventListener("LineStyle", this, this._onLineStyle);
+		var self = this;
+		this._annotationModelListener = {
+			onChanged: function(e) {
+				self._onAnnotationModelChanged(e);
+			}
+		};
+		annotationModel.addListener(this._annotationModelListener);
+	}
+	AnnotationStyler.prototype = /** @lends orion.textview.AnnotationStyler.prototype */ {
+		destroy: function() {
+			var view = this._view;
+			if (view) {
+				view.removeEventListener("Destroy", this, this._onDestroy);
+				view.removeEventListener("LineStyle", this, this._onLineStyle);
+				this.view = null;
+			}
+			var annotationModel = this._annotationModel;
+			if (annotationModel) {
+				annotationModel.removeListener(this._annotationModelListener);
+				annotationModel = null;
+			}
+		},
+		_mergeStyle: function(result, style) {
+			if (style) {
+				if (!result) { result = {}; }
+				if (result.styleClass && style.styleClass) {
+					result.styleClass += " " + style.styleClass;
+				} else {
+					result.styleClass = style.styleClass;
+				}
+				var prop;
+				if (style.style) {
+					if (!result.style) { result.style  = {}; }
+					for (prop in style.style) {
+						if (!result.style[prop]) {
+							result.style[prop] = style.style[prop];
+						}
+					}
+				}
+				if (style.attributes) {
+					if (!result.attributes) { result.attributes  = {}; }
+					for (prop in style.attributes) {
+						if (!result.attributes[prop]) {
+							result.attributes[prop] = style.attributes[prop];
+						}
+					}
+				}
+			}
+			return result;
+		},
+		_mergeStyleRanges: function(ranges, styleRange) {
+			for (var i=0; i<ranges.length; i++) {
+				var range = ranges[i];
+				if (styleRange.start <= range.start && styleRange.end >= range.end) {
+					range.style = this._mergeStyle({}, range.style);//copy
+					range.style = this._mergeStyle(range.style, styleRange.style);
+				} else {
+					//need to split
+				}
+			}
+		},
+		_onAnnotationModelChanged: function(e) {
+			if (e.textModelChangedEvent) {
+				return;
+			}
+			var view = this._view;
+			if (!view) { return; }
+			var model = view.getModel(), self = this;
+			function redraw(changes) {
+				for (var i = 0; i < changes.length; i++) {
+					if (!changes[i].rangeStyle) { continue; }
+					var start = changes[i].start;
+					var end = changes[i].end;
+					if (model.getBaseModel) {
+						start = model.mapOffset(start, true);
+						end = model.mapOffset(end, true);
+					}
+					if (start !== -1 && end !== -1) {
+						view.redrawRange(start, end);
+					}
+				}
+			}
+			redraw(e.added);
+			redraw(e.removed);
+			redraw(e.changed);
+		},
+		_onDestroy: function(e) {
+			this.destroy();
+		},
+		_onLineStyle: function (e) {
+			var annotationModel = this._annotationModel;
+			var viewModel = this._view.getModel();
+			var baseModel = annotationModel.getTextModel();
+			var start = e.lineStart;
+			var end = e.lineStart + e.lineText.length;
+			if (baseModel !== viewModel) {
+				start = viewModel.mapOffset(start);
+				end = viewModel.mapOffset(end);
+			}
+			var annotations = annotationModel.getAnnotations(start, end);
+			while (annotations.hasNext()) {
+				var annotation = annotations.next();
+				if (annotation.rangeStyle) {
+					//TODO convert annotation range to view range
+					//find e.ranges that intersect with annotation and merge style, may need to split style ranges 
+					this._mergeStyleRanges(e.ranges, {start: annotation.start, end: annotation.end, style: annotation.rangeStyle});
+				}
+				if (annotation.lineStyle) { // does this make sense?
+					//merge line style
+					e.style = this._mergeStyle({}, e.style);//copy
+					e.style = this._mergeStyle(e.style, annotation.lineStyle);
+				}
+			}
+		}
+	};
+	return AnnotationStyler;
 }());
 
 if (typeof window !== "undefined" && typeof window.define !== "undefined") {
