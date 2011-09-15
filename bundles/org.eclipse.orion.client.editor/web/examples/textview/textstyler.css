@@ -39,3 +39,9 @@
 .line_caret {
 	background-color: #EAF2FE;
 }
+
+.annotationProblemRange {
+	background-image: url('/examples/textview/images/squiggly.png');
+	background-repeat: repeat-x;
+ 	background-position: left bottom;
+}
