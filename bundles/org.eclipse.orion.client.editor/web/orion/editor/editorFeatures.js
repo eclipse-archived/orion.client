@@ -100,7 +100,6 @@ orion.editor.AnnotationFactory = (function() {
 					var index = error.evidence.substring(start).search(/.\b/);
 					if (index > -1) {
 						end += index;
-						window.console.log(error.evidence.substring(start, end));
 					}
 					var annotation = {
 						type: type,
