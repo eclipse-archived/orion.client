@@ -122,6 +122,13 @@ orion.textview.Ruler = (function() {
 					}
 				}
 			}
+			if (!this._multiAnnotation) {
+				for (var k in result) {
+					if (result[k]._multiple) {
+						result[k].html = "<div>" + result[k].html + "<img style='position:relative;vertical-align:top;top:-7px;float:right;z-index:2;' src='/examples/textview/images/plus.png'/></div>";
+					}
+				}
+			}
 			return result;
 		},
 		/**
@@ -321,10 +328,12 @@ orion.textview.Ruler = (function() {
 				var textEnd = m.getLineEnd(m.getLineAtOffset(end), true);
 				return m.getText(textStart, textEnd);
 			}
+			var title;
 			if (annotations.length === 1) {
 				annotation = annotations[0];
 				if (annotation.rulerTitle) {
-					return annotation.rulerHTML + "&nbsp;" + annotation.rulerTitle;
+					title = annotation.rulerTitle.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+					return annotation.rulerHTML + "&nbsp;" + title;
 				} else {
 					//TODO show a projection textview to get coloring 
 					return document.createTextNode(getText(annotation.start, annotation.end));
@@ -333,10 +342,11 @@ orion.textview.Ruler = (function() {
 				var tooltipHTML = "<em>Multiple annotations:</em><br>";
 				for (var i = 0; i < annotations.length; i++) {
 					annotation = annotations[i];
-					var title = annotation.rulerTitle;
+					title = annotation.rulerTitle;
 					if (!title) {
 						title = getText(annotation.start, annotation.end);
 					}
+					title = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 					tooltipHTML += annotation.rulerHTML + "&nbsp;" + title + "<br>";
 				}
 				return tooltipHTML;
@@ -393,13 +403,15 @@ orion.textview.Ruler = (function() {
 			redraw(e.changed);
 		},
 		_mergeAnnotation: function(result, annotation, annotationLineIndex, annotationLineCount) {
-			if (!result) { result = {annotations: []}; }
-			result.annotations.push(annotation);
+			if (!result) { result = {}; }
 			if (annotationLineIndex === 0) {
-				if (result.html) {
-					if (this._multiAnnotation && result.annotations[0].type !== annotation.type) {
-						result.html = this._multiAnnotation.rulerHTML;
-					}
+				if (result.html && annotation.rulerHTML) {
+					if (annotation.rulerHTML !== result.html) {
+						if (!result._multiple && this._multiAnnotation) {
+							result.html = this._multiAnnotation.rulerHTML;
+						}
+					} 
+					result._multiple = true;
 				} else {
 					result.html = annotation.rulerHTML;
 				}
@@ -410,7 +422,7 @@ orion.textview.Ruler = (function() {
 		_mergeStyle: function(result, style) {
 			if (style) {
 				if (!result) { result = {}; }
-				if (result.styleClass && style.styleClass) {
+				if (result.styleClass && style.styleClass && result.styleClass !== style.styleClass) {
 					result.styleClass += " " + style.styleClass;
 				} else {
 					result.styleClass = style.styleClass;
