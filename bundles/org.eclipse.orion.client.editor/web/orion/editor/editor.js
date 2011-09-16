@@ -243,7 +243,9 @@ orion.editor.Editor = (function() {
 				this._annotationStyler.destroy();
 				this._annotationStyler = null;
 			}
-			this._annotationStyler = new orion.textview.AnnotationStyler(this._annotationModel, this.getTextView());
+			if (this._annotationFactory) {
+				this._annotationStyler = this._annotationFactory.createAnnotationStyler(this.getTextView(), this._annotationModel);
+			}
 		},
 		
 		/**
@@ -410,24 +412,8 @@ orion.editor.Editor = (function() {
 					this._textView.setText(message);
 				} else {
 					if (contents !== null && contents !== undefined) {
-						var delimiter;
-						var lf = contents.indexOf("\n");
-						var cr = contents.indexOf("\r");
-						if (cr !== -1 && lf !== -1) {
-							if (lf === cr + 1) {
-								delimiter = "\r\n";
-							} else {
-								delimiter = cr < lf ? "\r" : "\n";
-							}
-						} else if (lf !== -1) {
-							delimiter = "\n";
-						} else if (cr !== -1) {
-							delimiter = "\r";
-						}
-						var model = new orion.textview.TextModel("", delimiter);
-						this._textView.setModel(model);
-						this._annotationModel.setTextModel(model);
 						this._textView.setText(contents);
+						this._textView.getModel().setLineDelimiter("auto");
 					}
 				}
 				this._undoStack.reset();

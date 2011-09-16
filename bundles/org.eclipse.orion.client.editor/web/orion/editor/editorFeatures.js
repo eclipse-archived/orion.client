@@ -96,10 +96,10 @@ orion.editor.AnnotationFactory = (function() {
 					var escapedReason = error.reason.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
 					var lineIndex = error.line - 1;
 					var lineStart = model.getLineStart(lineIndex);
-					var start = error.character - 1, end = start;
+					var start = error.character - 1, end = start + 1;
 					var index = error.evidence.substring(start).search(/.\b/);
 					if (index > -1) {
-						end += index + 1;
+						end += index;
 						window.console.log(error.evidence.substring(start, end));
 					}
 					var annotation = {

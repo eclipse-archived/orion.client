@@ -44,10 +44,10 @@ orion.textview.TextModel = (function() {
 	/** @private */
 	function TextModel(text, lineDelimiter) {
 		this._listeners = [];
-		this._lineDelimiter = lineDelimiter ? lineDelimiter : (isWindows ? "\r\n" : "\n"); 
 		this._lastLineIndex = -1;
 		this._text = [""];
 		this._lineOffsets = [0];
+		this.setLineDelimiter(lineDelimiter);
 		this.setText(text);
 	}
 
@@ -339,6 +339,40 @@ orion.textview.TextModel = (function() {
 					l.onChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 				}
 			}
+		},
+		/**
+		 * Sets the line delimiter that is used by the view
+		 * when new lines are inserted in the model due to key
+		 * strokes  and paste operations.
+		 * <p>
+		 * If lineDelimiter is "auto", the delimiter is computed to be
+		 * the first delimiter found the in the current text. If lineDelimiter
+		 * is undefined or if there are no delimiters in the current text, the
+		 * platform delimiter is used.
+		 * </p>
+		 *
+		 * @param {String} lineDelimiter the line delimiter that is used by the view when inserting new lines.
+		 */
+		setLineDelimiter: function(lineDelimiter) {
+			if (lineDelimiter === "auto") {
+				lineDelimiter = undefined;
+				//TODO avoid getText()
+				var contents = this.getText();
+				var lf = contents.indexOf("\n");
+				var cr = contents.indexOf("\r");
+				if (cr !== -1 && lf !== -1) {
+					if (lf === cr + 1) {
+						lineDelimiter = "\r\n";
+					} else {
+						lineDelimiter = cr < lf ? "\r" : "\n";
+					}
+				} else if (lf !== -1) {
+					lineDelimiter = "\n";
+				} else if (cr !== -1) {
+					lineDelimiter = "\r";
+				}
+			}
+			this._lineDelimiter = lineDelimiter ? lineDelimiter : (isWindows ? "\r\n" : "\n"); 
 		},
 		/**
 		 * Replaces the text in the given range with the given text.
