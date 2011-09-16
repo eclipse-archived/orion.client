@@ -36,8 +36,10 @@ exports.EditorCommandFactory = (function() {
 		generateEditorCommands: function(editor) {
 		
 			// KB exists so that we can pass an array (from info.key) rather than actual arguments
-			function KB(args) {
-				return mKeyBinding.KeyBinding.apply(this, args);
+			function createKeyBinding(args) {
+				var keyBinding = new mKeyBinding.KeyBinding();
+				mKeyBinding.KeyBinding.apply(keyBinding, args);
+				return keyBinding;
 			}
 	
 			// create commands common to all editors
@@ -166,8 +168,7 @@ exports.EditorCommandFactory = (function() {
 						mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
 						if (info.key) {
 							// add it to the editor as a keybinding
-							KB.prototype = new mKeyBinding.KeyBinding();
-							editorWidget.setKeyBinding(new KB(info.key), command.id);
+							editorWidget.setKeyBinding(createKeyBinding(info.key), command.id);
 							editorWidget.setAction(command.id, command.callback);
 						}
 					}));
