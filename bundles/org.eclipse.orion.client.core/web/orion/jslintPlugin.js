@@ -12,7 +12,7 @@
 /*global define require eclipse JSLINT window*/
 window.onload = function() {
 	function jslint(contents) {
-		JSLINT(contents, {white: false, onevar: false, undef: true, nomen: false, eqeqeq: true, plusplus: false, bitwise: false, regexp: true, newcap: true, immed: true, strict: false});
+		JSLINT(contents, {white: false, onevar: false, undef: true, nomen: false, eqeqeq: true, plusplus: false, bitwise: false, regexp: true, newcap: true, immed: true, strict: false, indent: 1});
 		return JSLINT.data();
 	}
 	var validationService = {

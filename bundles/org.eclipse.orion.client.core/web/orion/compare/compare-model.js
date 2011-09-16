@@ -245,6 +245,10 @@ orion.CompareTextModel = (function() {
 			}
 		},
 		
+		setLineDelimiter: function(lineDelimiter) {
+			this._model.setLineDelimiter(lineDelimiter);
+		},
+		
 		setText: function(text, start, end) {
 			this._model.setText (text, 0, this._model.getCharCount());
 		}
