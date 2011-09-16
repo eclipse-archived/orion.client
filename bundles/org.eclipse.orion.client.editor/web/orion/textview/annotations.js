@@ -221,7 +221,15 @@ orion.textview.AnnotationModel = (function() {
 				removed: [],
 				changed: []
 			};
-			if (!(0 <= index && index < annotations.length) || annotations[index] !== annotation) {
+			var a, i = index;
+			while (i < annotations.length && annotations[i].start === annotation.start) {
+				if (annotations[i] === annotation) {
+					a = annotations[i];
+					break;
+				}
+				i++;
+			}
+			if (!(0 <= index && index < annotations.length) || !a) {
 				annotations.splice(index, 0, annotation);
 				e.added.push(annotation);
 			} else {
