@@ -88,7 +88,6 @@ orion.editor.AnnotationFactory = (function() {
 			if (!errors) { return; }
 			var annotations = [];
 			var model = annotationModel.getTextModel();
-			window.console.log("edition:" + errors.edition);
 			for (var i = 0; i < errors.length; i++) {
 				var error = errors[i];
 				if (error) {
