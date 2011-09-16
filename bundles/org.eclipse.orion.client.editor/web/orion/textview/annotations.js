@@ -508,8 +508,13 @@ orion.textview.AnnotationStyler = (function() {
 			while (annotations.hasNext()) {
 				var annotation = annotations.next();
 				if (annotation.rangeStyle) {
-					//TODO convert annotation range to view range
-					this._mergeStyleRanges(e.ranges, {start: annotation.start, end: annotation.end, style: annotation.rangeStyle});
+					var annotationStart = annotation.start;
+					var annotationEnd = annotation.end;
+					if (baseModel !== viewModel) {
+						annotationStart = viewModel.mapOffset(annotationStart, true);
+						annotationEnd = viewModel.mapOffset(annotationEnd, true);
+					}
+					this._mergeStyleRanges(e.ranges, {start: annotationStart, end: annotationEnd, style: annotation.rangeStyle});
 				}
 				if (annotation.lineStyle) { // does this make sense?
 					e.style = this._mergeStyle({}, e.style);
