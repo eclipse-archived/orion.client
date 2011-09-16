@@ -166,7 +166,7 @@ exports.EditorCommandFactory = (function() {
 						mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
 						if (info.key) {
 							// add it to the editor as a keybinding
-							KB.prototype = mKeyBinding.KeyBinding.prototype;
+							KB.prototype = new mKeyBinding.KeyBinding();
 							editorWidget.setKeyBinding(new KB(info.key), command.id);
 							editorWidget.setAction(command.id, command.callback);
 						}

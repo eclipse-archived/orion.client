@@ -26,7 +26,7 @@ eclipse.UsersList = (function(){
 		this.myTree = null;
 		this.renderer = new eclipse.UsersRenderer({checkbox: this.checkbox, cachePrefix: "UsersNavigator"}, this);
 	};
-	UsersList.prototype = mExplorer.Explorer.prototype;
+	UsersList.prototype = new mExplorer.Explorer();
 	
 	UsersList.prototype.loadUsers = function(){
 		var parent = dojo.byId(this.parentId);
@@ -63,7 +63,7 @@ eclipse.UsersRenderer = (function() {
 		this._init(options);
 		this.explorer = explorer;
 	}
-	UsersRenderer.prototype = mExplorer.SelectionRenderer.prototype;
+	UsersRenderer.prototype = new mExplorer.SelectionRenderer();
 	
 	UsersRenderer.prototype.getCellHeaderElement = function(col_no){
 		

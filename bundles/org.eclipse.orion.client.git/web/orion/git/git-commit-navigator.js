@@ -114,7 +114,7 @@ exports.GitCommitRenderer = (function() {
 		this.options = options;
 		this.explorer = explorer;
 	}
-	GitCommitRenderer.prototype = mExplorer.SelectionRenderer.prototype;
+	GitCommitRenderer.prototype = new mExplorer.SelectionRenderer();
 	
 	GitCommitRenderer.prototype.getCellHeaderElement = function(col_no){
 		

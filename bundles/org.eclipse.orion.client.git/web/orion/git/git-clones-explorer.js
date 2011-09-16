@@ -31,7 +31,7 @@ exports.GitClonesExplorer = (function() {
 		this.renderer = new exports.GitClonesRenderer({checkbox: false}, this);
 		
 	}
-	GitClonesExplorer.prototype = mExplorer.Explorer.prototype;
+	GitClonesExplorer.prototype = new mExplorer.Explorer();
 	
 	GitClonesExplorer.prototype.getGitLocation = function(path){
 		var relativePath = mUtil.makeRelative(path);
@@ -102,7 +102,7 @@ exports.GitClonesModel = (function() {
 		this.fetchItems = fetchItems;
 		this.root = root ? root : null;
 	}
-	GitClonesModel.prototype = mExplorer.ExplorerModel.prototype; 
+	GitClonesModel.prototype = new mExplorer.ExplorerModel(); 
 	
 	GitClonesModel.prototype.getRoot = function(onItem){
 		if(this.root){
@@ -191,7 +191,7 @@ exports.GitClonesRenderer = (function(){
 		this._init(options);
 		this.explorer = explorer;
 	}
-	GitClonesRenderer.prototype = mExplorer.SelectionRenderer.prototype;
+	GitClonesRenderer.prototype = new mExplorer.SelectionRenderer();
 	
 	GitClonesRenderer.prototype.getCellHeaderElement = function(col_no){
 		

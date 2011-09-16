@@ -23,7 +23,7 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 		this.fileClient = fileClient;
 		this.treeId = treeId;
 	}
-	Model.prototype = mExplorer.ExplorerModel.prototype; 
+	Model.prototype = new mExplorer.ExplorerModel(); 
 	
 	Model.prototype.getRoot = function(onItem){
 		onItem(this.root);
@@ -57,7 +57,7 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 		this.openWithCommands = null;
 		this._init(options);
 	}
-	FileRenderer.prototype = mExplorer.SelectionRenderer.prototype; 
+	FileRenderer.prototype = new mExplorer.SelectionRenderer(); 
 	FileRenderer.prototype.getCellHeaderElement = function(col_no){
 		
 		switch(col_no){
@@ -153,7 +153,7 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 		this.renderer = new FileRenderer({checkbox: true, cachePrefix: "Navigator"}, this, commandService);
 	}
 	
-	FileExplorer.prototype = mExplorer.Explorer.prototype;
+	FileExplorer.prototype = new mExplorer.Explorer();
 	
 	// we have changed an item on the server at the specified parent node
 	FileExplorer.prototype.changedItem = function(parent) {
