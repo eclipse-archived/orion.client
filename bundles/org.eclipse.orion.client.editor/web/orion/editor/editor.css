@@ -1,5 +1,22 @@
-.annotationRuler,
-.overviewRuler,
+.annotationRuler {
+	background-color: #ffffff;
+	width: 16px;
+}
+.overviewRuler {
+	background-color: #ffffff;
+	width: 14px;
+}
+.annotationProblem {
+	cursor: pointer;
+}
+.annotationProblemOverview {
+	background-color: lightcoral;
+	border: 1px solid red;
+	border-radius: 2px;
+	cursor: pointer;
+	left: 2px;
+	width: 8px;
+}
 .lineNumberRuler,
 .lineNumberRuler-odd,
 .lineNumberRuler-even {

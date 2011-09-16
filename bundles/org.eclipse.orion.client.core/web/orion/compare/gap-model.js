@@ -222,6 +222,10 @@ orion.GapTextModel = (function() {
 			}
 		},
 		
+		setLineDelimiter: function(lineDelimiter) {
+			this._model.setLineDelimiter(lineDelimiter);
+		},
+		
 		setText: function(text, start, end) {
 			this._model.setText (text, start, end);
 		}
