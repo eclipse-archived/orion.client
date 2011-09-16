@@ -6,6 +6,11 @@
 	background-color: #ffffff;
 	width: 14px;
 }
+.foldingRuler {
+	background-color: #ffffff;
+	border-right: 1px solid #ddd;
+	width: 14px;
+}
 .annotationProblem {
 	cursor: pointer;
 }

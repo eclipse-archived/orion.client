@@ -268,7 +268,7 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 			styler.destroy();
 			styler = null;
 		}
-		styler = new mTextStyler.TextStyler(view, "java");
+		styler = new mTextStyler.TextStyler(view, "java", view.annotationModel);
 		view.setText(file);
 	}
 	
@@ -279,7 +279,7 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 			styler.destroy();
 			styler = null;
 		}
-		styler = new mTextStyler.TextStyler(view, "js");
+		styler = new mTextStyler.TextStyler(view, "js", view.annotationModel);
 		view.setText(file);
 	}
 
