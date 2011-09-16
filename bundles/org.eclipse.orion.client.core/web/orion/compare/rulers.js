@@ -40,6 +40,31 @@ orion.CompareRuler = (function() {
 		},
 		getOverview: function(editor) {
 			return this._overview;
+		},
+		getAnnotationModel: function() {
+			return null;
+		},
+		addAnnotationType: function(type) {
+		},
+		isAnnotationTypeVisible: function(type) {
+			return false;
+		},
+		removeAnnotationType: function(type) {
+		},
+		setAnnotationModel: function (annotationModel) {
+		},
+		getAnnotations: function(startLine, endLine) {
+			var result = [];
+			for (var i=startLine; i<endLine; i++) {
+				result[i] = {html: this.getHTML(i), style: this.getStyle(i)};
+			}
+			return result;
+		},
+		getWidestAnnotation: function() {
+			return {html: this.getHTML(-1), style: this.getStyle(-1)};
+		},
+		getRulerStyle: function() {
+			return this.getStyle(undefined);
 		}
 	};
 	return CompareRuler;
@@ -167,19 +192,6 @@ orion.CompareOverviewRuler = (function() {
 		orion.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
 	}
 	CompareOverviewRuler.prototype = new orion.CompareRuler();
-	CompareOverviewRuler.prototype.getAnnotations = function() {
-		var model = this._editor.getModel();
-		var lines = [];
-		if(model.getAnnotations){
-			var annotations = model.getAnnotations();
-			for (var i = 0;i < annotations.length ; i++) {
-				if (annotations[i] !== undefined) {
-					lines.push(annotations[i][0]);
-				}
-			}
-		}
-		return lines;
-	};
 	CompareOverviewRuler.prototype.getStyle = function(lineIndex) {
 		var result, style;
 		if (lineIndex === undefined) {
@@ -242,19 +254,6 @@ orion.CompareMergeOverviewRuler = (function() {
 		orion.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
 	}
 	CompareMergeOverviewRuler.prototype = new orion.CompareRuler();
-	CompareMergeOverviewRuler.prototype.getAnnotations = function() {
-		var model = this._editor.getModel();
-		var lines = [];
-		if(model.getAnnotations){
-			var annotations = model.getAnnotations();
-			for (var i = 0;i < annotations.length ; i++) {
-				if (annotations[i] !== undefined) {
-					lines.push(annotations[i][0]);
-				}
-			}
-		}
-		return lines;
-	};
 	CompareMergeOverviewRuler.prototype.getStyle = function(lineIndex) {
 		var result, style;
 		if (lineIndex === undefined) {
@@ -278,6 +277,7 @@ orion.CompareMergeOverviewRuler = (function() {
 			var model = this._editor.getModel();
 			if(lineIndex >= 0 && model.getAnnotationH){
 				var annotationIndex = mCompareUtils.getAnnotationIndex(model.getAnnotations(), lineIndex);
+				if (annotationIndex === -1) return {};
 				var mapperIndex = mCompareUtils.getAnnotationMapperIndex(model.getAnnotations(), annotationIndex);
 				var conflict = mCompareUtils.isMapperConflict(model.getMapper(), mapperIndex);
 				if(conflict)

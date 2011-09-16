@@ -267,6 +267,9 @@ orion.textview.TextView = (function() {
 				var self = this;
 				addHandler(rulerParent, "click", function(e) { self._handleRulerEvent(e); });
 				addHandler(rulerParent, "dblclick", function(e) { self._handleRulerEvent(e); });
+				addHandler(rulerParent, "mousemove", function(e) { self._handleRulerEvent(e); });
+				addHandler(rulerParent, "mouseover", function(e) { self._handleRulerEvent(e); });
+				addHandler(rulerParent, "mouseout", function(e) { self._handleRulerEvent(e); });
 			}
 			var div = document.createElement("DIV");
 			div._ruler = ruler;
@@ -346,6 +349,7 @@ orion.textview.TextView = (function() {
 					}
 					break;
 			}
+			return rect;
 		},
 		/**
 		 * Destroys the text view. 
@@ -702,6 +706,29 @@ orion.textview.TextView = (function() {
 			return offset;
 		},
 		/**
+		 * Get the view rulers.
+		 *
+		 * @returns the view rulers
+		 *
+		 * @see #addRuler
+		 */
+		getRulers: function() {
+			var rulers = [];
+			function getRulers(rulerParent) {
+				if (rulerParent) {
+					var row = rulerParent.firstChild.rows[0];
+					var cells = row.cells;
+					for (var index = 0; index < cells.length; index++) {
+						var cell = cells[index];
+						rulers.push(cell.firstChild._ruler);
+					}
+				}
+			}
+			getRulers(this._leftDiv);
+			getRulers(this._rightDiv);
+			return rulers;
+		},
+		/**
 		 * Returns the text view selection.
 		 * <p>
 		 * The selection is defined by a start and end character offset relative to the
@@ -1048,6 +1075,7 @@ orion.textview.TextView = (function() {
 		 * @param {Number} [endLine=line count] the end line
 		 */
 		redrawLines: function(startLine, endLine, ruler) {
+			if (this._redrawCount > 0) { return; }
 			if (startLine === undefined) { startLine = 0; }
 			if (endLine === undefined) { endLine = this._model.getLineCount(); }
 			if (startLine === endLine) { return; }
@@ -1246,6 +1274,21 @@ orion.textview.TextView = (function() {
 		setHorizontalPixel: function(pixel) {
 			pixel = Math.max(0, pixel);
 			this._scrollView(pixel - this._getScroll().x, 0);
+		},
+		setRedraw: function(redraw) {
+			if (redraw) {
+				if (--this._redrawCount === 0) {
+					var lineCount = this._model.getLineCount();
+					var rulers = this.getRulers();
+					for (var i = 0; i < rulers.length; i++) {
+						this.redrawLines(0, lineCount, rulers[i]);
+					}
+					this.redrawLines(0, lineCount); 
+					this._queueUpdatePage();
+				}
+			} else {
+				this._redrawCount++;
+			}
 		},
 		/**
 		 * Sets the text model of the text view.
@@ -1975,6 +2018,15 @@ orion.textview.TextView = (function() {
 					case "dblclick": 
 						if (ruler.onDblClick) { ruler.onDblClick(lineIndex, e); }
 						break;
+					case "mousemove": 
+						if (ruler.onMouseMove) { ruler.onMouseMove(lineIndex, e); }
+						break;
+					case "mouseover": 
+						if (ruler.onMouseOver) { ruler.onMouseOver(lineIndex, e); }
+						break;
+					case "mouseout": 
+						if (ruler.onMouseOut) { ruler.onMouseOut(lineIndex, e); }
+						break;
 				}
 			}
 		},
@@ -2230,7 +2282,7 @@ orion.textview.TextView = (function() {
 		_doCopy: function (e) {
 			var selection = this._getSelection();
 			if (!selection.isEmpty()) {
-				var text = this._model.getText(selection.start, selection.end);
+				var text = this._getBaseText(selection.start, selection.end);
 				return this._setClipboardText(text, e);
 			}
 			return true;
@@ -2276,7 +2328,7 @@ orion.textview.TextView = (function() {
 		_doCut: function (e) {
 			var selection = this._getSelection();
 			if (!selection.isEmpty()) {
-				var text = this._model.getText(selection.start, selection.end);
+				var text = this._getBaseText(selection.start, selection.end);
 				this._doContent("");
 				return this._setClipboardText(text, e);
 			}
@@ -2968,6 +3020,16 @@ orion.textview.TextView = (function() {
 			if (this._autoScrollTimerID) { clearTimeout(this._autoScrollTimerID); }
 			this._autoScrollDir = undefined;
 			this._autoScrollTimerID = undefined;
+		},
+		_getBaseText: function(start, end) {
+			var model = this._model;
+			/* This is the only case the view access the base model, alternatively the view could use a event to application to customize the text */
+			if (model.getBaseModel) {
+				start = model.mapOffset(start);
+				end = model.mapOffset(end);
+				model = model.getBaseModel();
+			}
+			return model.getText(start, end);
 		},
 		_getBoundsAtOffset: function (offset) {
 			var model = this._model;
@@ -3709,6 +3771,7 @@ orion.textview.TextView = (function() {
 			this._selection = new Selection (0, 0, false);
 			this._linksVisible = false;
 			this._eventTable = new EventTable();
+			this._redrawCount = 0;
 			this._maxLineWidth = 0;
 			this._maxLineIndex = -1;
 			this._ignoreSelect = true;
@@ -4624,6 +4687,7 @@ orion.textview.TextView = (function() {
 			this._setDOMSelection(topNode, topOffset, bottomNode, bottomOffset);
 		},
 		_updatePage: function() {
+			if (this._redrawCount > 0) { return; }
 			if (this._updateTimer) { 
 				clearTimeout(this._updateTimer);
 				this._updateTimer = null;
@@ -4813,7 +4877,7 @@ orion.textview.TextView = (function() {
 				var div = cells[i].firstChild;
 				var ruler = div._ruler, style;
 				if (div.rulerChanged) {
-					this._applyStyle(ruler.getStyle(), div);
+					this._applyStyle(ruler.getRulerStyle(), div);
 				}
 				
 				var widthDiv;
@@ -4826,19 +4890,25 @@ orion.textview.TextView = (function() {
 					widthDiv.style.visibility = "hidden";
 					div.appendChild(widthDiv);
 				}
-				var lineIndex;
+				var lineIndex, annotation;
 				if (div.rulerChanged) {
 					if (widthDiv) {
 						lineIndex = -1;
-						this._applyStyle(ruler.getStyle(lineIndex), widthDiv);
-						widthDiv.innerHTML = ruler.getHTML(lineIndex);
+						annotation = ruler.getWidestAnnotation();
+						if (annotation) {
+							this._applyStyle(annotation.style, widthDiv);
+							if (annotation.html) {
+								widthDiv.innerHTML = annotation.html;
+							}
+						}
 						widthDiv.lineIndex = lineIndex;
 						widthDiv.style.height = (lineHeight + viewPad.top) + "px";
 					}
 				}
 
-				var overview = ruler.getOverview(), lineDiv, frag;
+				var overview = ruler.getOverview(), lineDiv, frag, annotations;
 				if (overview === "page") {
+					annotations = ruler.getAnnotations(topIndex, bottomIndex + 1);
 					while (child) {
 						lineIndex = child.lineIndex;
 						var nextChild = child.nextSibling;
@@ -4852,8 +4922,14 @@ orion.textview.TextView = (function() {
 					for (lineIndex=topIndex; lineIndex<=bottomIndex; lineIndex++) {
 						if (!child || child.lineIndex > lineIndex) {
 							lineDiv = parentDocument.createElement("DIV");
-							this._applyStyle(ruler.getStyle(lineIndex), lineDiv);
-							lineDiv.innerHTML = ruler.getHTML(lineIndex);
+							annotation = annotations[lineIndex];
+							if (annotation) {
+								this._applyStyle(annotation.style, lineDiv);
+								if (annotation.html) {
+									lineDiv.innerHTML = annotation.html;
+								}
+								lineDiv.annotation = annotation;
+							}
 							lineDiv.lineIndex = lineIndex;
 							lineDiv.style.height = lineHeight + "px";
 							frag.appendChild(lineDiv);
@@ -4880,15 +4956,20 @@ orion.textview.TextView = (function() {
 							div.removeChild(div.lastChild);
 							count--;
 						}
-						var lines = ruler.getAnnotations();
+						annotations = ruler.getAnnotations(0, lineCount);
 						frag = document.createDocumentFragment();
-						for (var j = 0; j < lines.length; j++) {
-							lineIndex = lines[j];
+						for (var prop in annotations) {
+							lineIndex = prop >>> 0;
+							if (lineIndex < 0) { continue; }
 							lineDiv = parentDocument.createElement("DIV");
-							this._applyStyle(ruler.getStyle(lineIndex), lineDiv);
+							annotation = annotations[prop];
+							this._applyStyle(annotation.style, lineDiv);
 							lineDiv.style.position = "absolute";
 							lineDiv.style.top = buttonHeight + lineHeight + Math.floor(lineIndex * divHeight) + "px";
-							lineDiv.innerHTML = ruler.getHTML(lineIndex);
+							if (annotation.html) {
+								lineDiv.innerHTML = annotation.html;
+							}
+							lineDiv.annotation = annotation;
 							lineDiv.lineIndex = lineIndex;
 							frag.appendChild(lineDiv);
 						}
