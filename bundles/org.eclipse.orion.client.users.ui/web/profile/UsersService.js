@@ -141,8 +141,9 @@ eclipse.UsersService = (function() {
 			
 
 			if(data.password!==data.passwordRetype){
-				alert("Passwords do not match!");
-				return;
+				var ret = new dojo.Deferred();
+				ret.errback({message: "Passwords do not match!"});
+				return ret;
 			}
 
 
@@ -157,9 +158,13 @@ eclipse.UsersService = (function() {
 				load : function(jsonData, secondArg) {
 					if (onLoad){
 						if(typeof onLoad === "function")
-							onLoad(jsonData, secondArg);
-						else
+							return onLoad(jsonData, secondArg);
+						else{
 							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+							return jsonData;
+						}
+					} else {
+						return jsonData;
 					}
 				},
 				error : function(error, ioArgs) {

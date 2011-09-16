@@ -327,33 +327,41 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
 			});
 			var url = this.currentUserURI;
 			this.usersClient.fire(action, url, data).then(
-					function(){
-							if(checkUser) checkUser(); //refresh the user header because user might been changed or user could be deleted
+					function(info){
+//							if(checkUser) checkUser(); //refresh the user header because user might been changed or user could be deleted
+							dojo.hitch(self, self.displayMessage)(info, "Info");
 						},
 					function(error){
-				
-						self.registry.getService("orion.page.message").then(function(progressService){
-						
-						if(error.status===401 || error.status===403 )
-							return;
-						
-						
-							var display = [];
-							
-							display.Severity = "Error";
-							display.HTML = false;
-							
-							try{
-								var resp = JSON.parse(error.responseText);
-								display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
-							}catch(Exception){
-								display.Message = error.message;
-							}
-							
-							progressService.setProgressResult(display);
-						});
+							if(error.status===401 || error.status===403 )
+								return;
+					dojo.hitch(self, self.displayMessage)(error, "Error");
+
 				});
 	
+		},
+		displayMessage: function(message, severity){
+			this.registry.getService("orion.page.message").then(function(progressService){
+				if(!message)
+					return;
+				
+				var display = [];
+				
+				display.Severity = severity;
+				display.HTML = false;
+				
+				try{
+					var resp = JSON.parse(message.responseText);
+					display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+				}catch(Exception){
+					display.Message = message.message;
+				}
+				
+				if(display.Message){
+					progressService.setProgressResult(display);	
+				}
+				
+				
+			});
 		}
 	};
 	// this has to be a global for now
