@@ -372,6 +372,9 @@ orion.textview.ProjectionTextModel = (function() {
 				}
 			}
 		},
+		setLineDelimiter: function(lineDelimiter) {
+			this._model.setLineDelimiter(lineDelimiter);
+		},
 		setText: function(text, start, end) {
 			if (text === undefined) { text = ""; }
 			if (start === undefined) { start = 0; }

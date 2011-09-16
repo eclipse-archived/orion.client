@@ -393,9 +393,9 @@ orion.textview.AnnotationModel = (function() {
  */
 orion.textview.AnnotationStyler = (function() {
 	/** @private */
-	function AnnotationStyler (annotationModel, view) {
-		this._annotationModel = annotationModel;
+	function AnnotationStyler (view, annotationModel) {
 		this._view = view;
+		this._annotationModel = annotationModel;
 		view.addEventListener("LineStyle", this, this._onLineStyle);
 		var self = this;
 		this._annotationModelListener = {
@@ -422,7 +422,7 @@ orion.textview.AnnotationStyler = (function() {
 		_mergeStyle: function(result, style) {
 			if (style) {
 				if (!result) { result = {}; }
-				if (result.styleClass && style.styleClass) {
+				if (result.styleClass && style.styleClass && result.styleClass !== style.styleClass) {
 					result.styleClass += " " + style.styleClass;
 				} else {
 					result.styleClass = style.styleClass;
@@ -501,12 +501,10 @@ orion.textview.AnnotationStyler = (function() {
 				var annotation = annotations.next();
 				if (annotation.rangeStyle) {
 					//TODO convert annotation range to view range
-					//find e.ranges that intersect with annotation and merge style, may need to split style ranges 
 					this._mergeStyleRanges(e.ranges, {start: annotation.start, end: annotation.end, style: annotation.rangeStyle});
 				}
 				if (annotation.lineStyle) { // does this make sense?
-					//merge line style
-					e.style = this._mergeStyle({}, e.style);//copy
+					e.style = this._mergeStyle({}, e.style);
 					e.style = this._mergeStyle(e.style, annotation.lineStyle);
 				}
 			}

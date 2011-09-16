@@ -139,6 +139,10 @@ orion.CompareMergeModel = (function() {
 			return this._model.getLineDelimiter();
 		},
 		
+		setLineDelimiter: function(lineDelimiter) {
+			this._model.setLineDelimiter(lineDelimiter);
+		},
+		
 		getLineEnd: function(lineIndex, includeDelimiter) {
 			return this._model.getLineEnd(lineIndex, includeDelimiter);
 		},
