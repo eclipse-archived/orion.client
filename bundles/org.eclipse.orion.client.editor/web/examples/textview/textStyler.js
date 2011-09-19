@@ -227,7 +227,7 @@ examples.textview.TextStyler = (function() {
 		return WhitespaceScanner;
 	}());
 	
-	function TextStyler (view, lang) {
+	function TextStyler (view, lang, annotationModel) {
 		this.commentStart = "/*";
 		this.commentEnd = "*/";
 		var keywords = [];
@@ -246,6 +246,7 @@ examples.textview.TextStyler = (function() {
 		}
 		this._whitespaceScanner = new WhitespaceScanner();
 		this.view = view;
+		this.annotationModel = annotationModel;
 		this.commentOffset = 0;
 		this.commentOffsets = [];
 		this._currentBracket = undefined; 
@@ -674,15 +675,15 @@ examples.textview.TextStyler = (function() {
 		},
 		_createFoldingAnnotation: function(viewModel, baseModel, start, end) {
 			return new orion.textview.FoldingAnnotation(viewModel, "orion.annotation.folding", start, end,
-				"<img src='images/expanded.png'></img>", {styleClass: "ruler_folding_expanded"}, 
-				"<img src='images/collapsed.png'></img>", {styleClass: "ruler_folding_collapsed"});
+				"<img src='/examples/textview/images/expanded.png'></img>", {styleClass: "ruler_folding_expanded"}, 
+				"<img src='/examples/textview/images/collapsed.png'></img>", {styleClass: "ruler_folding_collapsed"});
 		}, 
 		_computeFolding: function() {
 			var view = this.view;
 			var viewModel = view.getModel();
 			if (!viewModel.getBaseModel) { return; }
-			//TODO need to create styler view annotationModel
-			var annotationModel = view.annotationModel;
+			var annotationModel = this.annotationModel;
+			if (!annotationModel) { return; }
 			annotationModel.removeAnnotations("orion.annotation.folding");
 			var add = [];
 			var baseModel = viewModel.getBaseModel();
@@ -788,8 +789,8 @@ examples.textview.TextStyler = (function() {
 					} 
 				}
 			}
-			if (redraw) {
-				var annotationModel = view.annotationModel; //TODO replace by API
+			if (redraw && baseModel !== viewModel && this.annotationModel) {
+				var annotationModel = this.annotationModel;
 				var cs = this.commentOffsets[commentStart + 1];
 				if (cs > start) { cs += addedCharCount - removedCharCount; }
 				var ce = this.commentOffsets[commentEnd];

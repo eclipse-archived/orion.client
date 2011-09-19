@@ -53,6 +53,19 @@ orion.editor.LineNumberRulerFactory = (function() {
 	return LineNumberRulerFactory;
 }());
 
+orion.editor.FoldingRulerFactory = (function() {
+	function FoldingRulerFactory() {
+	}
+	FoldingRulerFactory.prototype = {
+		createFoldingRuler: function(annotationModel) {
+			this.foldingRuler = new orion.textview.FoldingRuler(annotationModel, "left", {styleClass: "foldingRuler"});
+			this.foldingRuler.addAnnotationType("orion.annotation.folding");
+			return this.foldingRuler;
+		}
+	};
+	return FoldingRulerFactory;
+}());
+
 
 orion.editor.AnnotationFactory = (function() {
 	function AnnotationFactory(problemImageUrl) {
@@ -60,6 +73,7 @@ orion.editor.AnnotationFactory = (function() {
 	}
 	AnnotationFactory.prototype = {
 		createAnnotationModel: function(model) {
+			if (model.getBaseModel) { model = model.getBaseModel(); }
 			this.annotationModel = new orion.textview.AnnotationModel(model);
 			return this.annotationModel;
 		},
@@ -88,7 +102,6 @@ orion.editor.AnnotationFactory = (function() {
 			if (!errors) { return; }
 			var annotations = [];
 			var model = annotationModel.getTextModel();
-			window.console.log("edition:" + errors.edition);
 			for (var i = 0; i < errors.length; i++) {
 				var error = errors[i];
 				if (error) {
@@ -100,7 +113,6 @@ orion.editor.AnnotationFactory = (function() {
 					var index = error.evidence.substring(start).search(/.\b/);
 					if (index > -1) {
 						end += index;
-						window.console.log(error.evidence.substring(start, end));
 					}
 					var annotation = {
 						type: type,
@@ -183,7 +195,7 @@ orion.editor.TextActions = (function() {
 				var selection = this.textView.getSelection();
 				var searchString = "";
 				if (selection.end > selection.start) {
-					searchString = this.textView.getText().substring(selection.start, selection.end);
+					searchString = this.textView.getText(selection.start, selection.end);
 				}
 				this._searcher.buildToolBar(searchString);
 				return true;

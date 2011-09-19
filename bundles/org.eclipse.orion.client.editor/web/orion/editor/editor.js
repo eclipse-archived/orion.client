@@ -44,6 +44,7 @@ orion.editor.Editor = (function() {
 		this._textViewFactory = options.textViewFactory;
 		this._undoStackFactory = options.undoStackFactory;
 		this._annotationFactory = options.annotationFactory;
+		this._foldingRulerFactory = options.foldingRulerFactory;
 		this._lineNumberRulerFactory = options.lineNumberRulerFactory;
 		this._contentAssistFactory = options.contentAssistFactory;
 		this._keyBindingFactory = options.keyBindingFactory;
@@ -146,8 +147,8 @@ orion.editor.Editor = (function() {
 		/**
 		 * @returns {Object}
 		 */
-		getAnnotationsRuler : function() {
-			return this._annotationsRuler;
+		getAnnotationModel : function() {
+			return this._annotationModel;
 		},
 
 		/**
@@ -339,11 +340,16 @@ orion.editor.Editor = (function() {
 				this._annotationsRuler.onClick = function(lineIndex, e) {
 					if (lineIndex === undefined) { return; }
 					if (lineIndex === -1) { return; }
-					//TODO map offsets when folding is enabled
 					var viewModel = textView.getModel();
 					var annotationModel = this.getAnnotationModel();
+					var baseModel = annotationModel.getTextModel();
 					var lineStart = viewModel.getLineStart(lineIndex);
-					var annotations = annotationModel.getAnnotations(lineStart, viewModel.getLineEnd(lineIndex));
+					var lineEnd = viewModel.getLineEnd(lineIndex);
+					if (viewModel !== baseModel) {
+						lineStart = viewModel.mapOffset(lineStart);
+						lineEnd = viewModel.mapOffset(lineEnd);
+					}
+					var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
 					var annotation = annotations.next();
 					if (annotation === undefined) { return; }
 					editor.onGotoLine(lineIndex, annotation.start - lineStart, annotation.end - lineStart);
@@ -362,6 +368,18 @@ orion.editor.Editor = (function() {
 			if (this._lineNumberRulerFactory) {
 				this._lineNumberRuler = this._lineNumberRulerFactory.createLineNumberRuler(this._annotationModel);
 				textView.addRuler(this._lineNumberRuler);
+			}
+			
+			if (this._foldingRulerFactory && textView.getModel().getBaseModel) {
+				/*
+				* TODO - UndoStack relies on this line to ensure that collapsed regions are expanded 
+				* when the undo operation happens to those regions. This line needs to be remove when the
+				* UndoStack is fixed.
+				*/
+				textView.annotationModel = this._annotationModel;
+				
+				this._foldingRuler = this._foldingRulerFactory.createFoldingRuler(this._annotationModel);
+				textView.addRuler(this._foldingRuler);
 			}
 		},
 		

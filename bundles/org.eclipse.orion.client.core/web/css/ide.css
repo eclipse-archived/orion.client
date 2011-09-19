@@ -513,7 +513,16 @@ a:hover {
 }
 
 #outline {
-	margin: 8px 0 0 16px;
+	margin: 8px 0 0 8px;
+}
+
+#outline #switchOutlineMenu {
+	float: right;
+	display: block;
+}
+
+#outline .dijitButtonContents {
+	padding-right: 10px;
 }
 
 #outline>ul {

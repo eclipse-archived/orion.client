@@ -46,7 +46,11 @@ exports.EditorCommandFactory = (function() {
 			if (!this.isReadOnly) {
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "Save");
 				editor.getTextView().setAction("Save", dojo.hitch(this, function () {
-					var contents = editor.getTextView().getText();
+					var model = editor.getTextView().getModel();
+					if (model.getBaseModel) {
+						model = model.getBaseModel();
+					}
+					var contents = model.getText();
 					var etag = this.inputManager.getFileMetadata().ETag;
 					var args = { "ETag" : etag };
 					this.fileClient.write(this.inputManager.getInput(), contents, args).then(
