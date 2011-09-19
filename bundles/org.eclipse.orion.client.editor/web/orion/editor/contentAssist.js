@@ -47,16 +47,21 @@ orion.editor.ContentAssist = (function() {
 		this.listeners = {};
 		this.proposals = [];
 		this.contentAssistListener = {
+			onModelChanging: function(event) {
+				this.ignoreNextChange = this.isIgnorable(event);
+			},
 			onModelChanged: function(event) {
-				if (!this.finishing) {
+				if (this.ignoreNextChange) {
+					this.cancel();
+				} else {
 					this.showContentAssist(true, event);
 				}
+				this.ignoreNextChange = false;
 			},
 			onScroll: function(event) {
-				this.showContentAssist(false);
+				this.cancel();
 			}
 		};
-
 		this.init();
 	}
 	ContentAssist.prototype = /** @lends orion.editor.ContentAssist.prototype */ {
@@ -105,6 +110,13 @@ orion.editor.ContentAssist = (function() {
 			return this.active;
 		},
 		/** @private */
+		isIgnorable: function(/**orion.textview.ModelChangingEvent*/ event) {
+			var deletion = event.removedCharCount > 0 && event.addedCharCount === 0,
+			    view = this.textView,
+			    overWhitespace = (event.start+1 <= view.getModel().getCharCount()) && /^\s*$/.test(view.getText(event.start, event.start+1));
+			return (event.removedLineCount > 0) || (deletion && overWhitespace);
+		},
+		/** @private */
 		lineUp: function() {
 			if (this.contentAssistPanel) {
 				var selected = this.getSelectedNode();
@@ -145,8 +157,8 @@ orion.editor.ContentAssist = (function() {
 			if (proposal === null) {
 				return false;
 			}
-			this.finishing = true;
-			this.showContentAssist(false);
+			this.ignoreNextChange = true;
+			this.cancel();
 			var data = {
 				proposal: proposal,
 				start: this.textView.getCaretOffset() - this.prefix.length,
@@ -217,6 +229,7 @@ orion.editor.ContentAssist = (function() {
 			this.filterProviders(this.editor.getTitle());
 			if (!enable) {
 				if (this.listenerAdded) {
+					this.textView.removeEventListener("ModelChanging", this, this.contentAssistListener.onModelChanging);
 					this.textView.removeEventListener("ModelChanged", this, this.contentAssistListener.onModelChanged);
 					this.textView.removeEventListener("Scroll", this, this.contentAssistListener.onScroll);
 					this.listenerAdded = false;
@@ -271,7 +284,7 @@ orion.editor.ContentAssist = (function() {
 							}
 						}
 						if (this.proposals.length === 0) {
-							this.showContentAssist(false);
+							this.cancel();
 							return;
 						}
 						
@@ -299,13 +312,13 @@ orion.editor.ContentAssist = (function() {
 						}
 
 						if (!this.listenerAdded) {
+							this.textView.addEventListener("ModelChanging", this, this.contentAssistListener.onModelChanging);
 							this.textView.addEventListener("ModelChanged", this, this.contentAssistListener.onModelChanged);
 							this.textView.addEventListener("Scroll", this, this.contentAssistListener.onScroll);
 						}
 						this.listenerAdded = true;
 						this.contentAssistPanel.onclick = this.click.bind(this);
 						this.active = true;
-						this.finishing = false;
 					}.bind(this));
 			}
 		},
