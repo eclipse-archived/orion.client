@@ -789,7 +789,7 @@ examples.textview.TextStyler = (function() {
 					} 
 				}
 			}
-			if (redraw && this.annotationModel) {
+			if (redraw && baseModel !== viewModel && this.annotationModel) {
 				var annotationModel = this.annotationModel;
 				var cs = this.commentOffsets[commentStart + 1];
 				if (cs > start) { cs += addedCharCount - removedCharCount; }
