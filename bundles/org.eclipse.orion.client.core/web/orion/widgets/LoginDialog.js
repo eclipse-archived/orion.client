@@ -32,11 +32,16 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 			for(var i in services){
 				if(this.unauthenticatedServices[services[i].SignInKey]){
 					this.unauthenticatedServices[services[i].SignInKey].pending = true;
+				}else if(this.authenticatedServices[services[i].SignInKey]){
+					this.unauthenticatedServices[services[i].SignInKey] = this.authenticatedServices[services[i].SignInKey];
+					this.unauthenticatedServices[services[i].SignInKey].pending = true;
+					delete this.authenticatedServices[services[i].SignInKey];
 				}else{
 					this.unauthenticatedServices[services[i].SignInKey] = {label: services[i].SignInKey, SignInLocation: services[i].SignInLocation, pending: true};
 				}
 			}
 			this.renderUnauthenticatedServices();
+			this.renderAuthenticatedServices();
 		
 	},
 	
