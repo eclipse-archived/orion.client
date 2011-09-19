@@ -64,13 +64,13 @@ orion.textview.UndoStack = (function() {
 				* This is code needs to change when modifications in the base
 				* model are supported properly by the projection model.
 				*/
-				if (model.mapOffset) {
+				if (model.mapOffset && view.annotationModel) {
 					var mapOffset = model.mapOffset(offset, true);
 					if (mapOffset < 0) {
 						var annotationModel = view.annotationModel;
 						var iter = annotationModel.getAnnotations(offset, offset + 1);
 						while (iter.hasNext()) {
-							annotation = iter.next();
+							var annotation = iter.next();
 							if (annotation.type === "orion.annotation.folding") {
 								annotation.expand();
 								mapOffset = model.mapOffset(offset, true);
@@ -78,7 +78,7 @@ orion.textview.UndoStack = (function() {
 							}
 						}
 					}
-					if (mapOffset < 0) return;
+					if (mapOffset < 0) { return; }
 					offset = mapOffset;
 				}
 				view.setText(text, offset, offset + previousText.length);

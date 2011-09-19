@@ -681,6 +681,8 @@ orion.textview.FoldingRuler = (function() {
 	/** @ignore */
 	FoldingRuler.prototype.onClick =  function(lineIndex, e) {
 		if (lineIndex === undefined) { return; }
+		var annotationModel = this._annotationModel;
+		if (!annotationModel) { return; }
 		var view = this._view;
 		var model = view.getModel();
 		var start = model.getLineStart(lineIndex);
@@ -689,7 +691,6 @@ orion.textview.FoldingRuler = (function() {
 			start = model.mapOffset(start);
 			end = model.mapOffset(end);
 		}
-		var annotationModel = this._annotationModel;
 		var annotation, iter = annotationModel.getAnnotations(start, end);
 		while (!annotation && iter.hasNext()) {
 			var a = iter.next();

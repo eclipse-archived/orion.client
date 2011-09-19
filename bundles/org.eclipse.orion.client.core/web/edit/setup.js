@@ -14,11 +14,12 @@
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
-        'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchAdaptor',
+        'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/textModel', 
+        'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchAdaptor',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
-				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mKeyBinding, mSearcher, mSearchAdaptor) {
+				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher, mSearchAdaptor) {
 	
 var exports = exports || {};
 	
@@ -53,7 +54,7 @@ exports.setUpEditor = function(isReadOnly){
 
 		// Editor needs additional services besides EAS.
 		problemService = new mProblems.ProblemService(serviceRegistry);
-		outlineService = new mOutliner.OutlineService(serviceRegistry);
+		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferencesService: prefsService});
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 	}());
 	
@@ -101,25 +102,27 @@ exports.setUpEditor = function(isReadOnly){
 	var syntaxHighlighter = {
 		styler: null, 
 		
-		highlight: function(fileName, textView) {
+		highlight: function(fileName, editor) {
 			if (this.styler) {
 				this.styler.destroy();
 				this.styler = null;
 			}
 			if (fileName) {
+				var textView = editor.getTextView();
 				var splits = fileName.split(".");
 				var extension = splits.pop().toLowerCase();
 				if (splits.length > 0) {
+					var annotationModel = editor.getAnnotationModel();
 					switch(extension) {
 						case "js":
 						case "json":
-							this.styler = new mTextStyler.TextStyler(textView, "js");
+							this.styler = new mTextStyler.TextStyler(textView, "js", annotationModel);
 							break;
 						case "java":
-							this.styler = new mTextStyler.TextStyler(textView, "java");
+							this.styler = new mTextStyler.TextStyler(textView, "java", annotationModel);
 							break;
 						case "css":
-							this.styler = new mTextStyler.TextStyler(textView, "css");
+							this.styler = new mTextStyler.TextStyler(textView, "css", annotationModel);
 							break;
 					}
 					
@@ -170,9 +173,15 @@ exports.setUpEditor = function(isReadOnly){
 
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 		
+		var model = new mTextModel.TextModel();
+		/* Folding is disabled for now until key bindings and search are fixed */ 
+		if (false) {
+			model = new mProjectionTextModel.ProjectionTextModel(model);
+		}
 		var textViewFactory = function() {
 			return new mTextView.TextView({
 				parent: editorDomNode,
+				model: model,
 				stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css",
 					"/examples/textview/textstyler.css", "/css/default-theme.css",
 					"/orion/editor/editor.css"],
@@ -204,7 +213,7 @@ exports.setUpEditor = function(isReadOnly){
 							clearTimeout(progressTimeout);
 							editor.onInputChange(fileURI, null, contents);
 							// in the long run we should be looking for plug-ins to call here for highlighting
-							syntaxHighlighter.highlight(fileURI, editor.getTextView());
+							syntaxHighlighter.highlight(fileURI, editor);
 							editor.highlightAnnotations();
 							editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 						}),
@@ -430,6 +439,7 @@ exports.setUpEditor = function(isReadOnly){
 		textViewFactory: textViewFactory,
 		undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandService, "pageActions"),
 		annotationFactory: annotationFactory,
+		foldingRulerFactory: new mEditorFeatures.FoldingRulerFactory(),
 		lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
 		contentAssistFactory: contentAssistFactory,
 		keyBindingFactory: keyBindingFactory, 
@@ -465,30 +475,29 @@ exports.setUpEditor = function(isReadOnly){
 		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 	
+	// Create outliner "gadget"
+	var outliner = new mOutliner.Outliner({parent: outlineDomNode,
+		serviceRegistry: serviceRegistry,
+		outlineService: serviceRegistry.getService("orion.edit.outline"),
+		commandService: commandService,
+		selectionService: selection});
 	dojo.connect(editor, "onInputChange", function(title, message, contents, saved) {
-		// lookup outline provider, feed contents to it
-		var outliners = serviceRegistry.getServiceReferences("orion.edit.outliner"),
-		    outliner;
-		for (var i=0; i < outliners.length; i++) {
-			var serviceReference = outliners[i],
+		var outlineProviders = serviceRegistry.getServiceReferences("orion.edit.outliner"),
+		    filteredProviders = [];
+		for (var i=0; i < outlineProviders.length; i++) {
+			var serviceReference = outlineProviders[i],
 			    pattern = serviceReference.getProperty("pattern");
 			if (pattern && new RegExp(pattern).test(title)) {
-				outliner = serviceReference;
-				break;
+				filteredProviders.push(serviceReference);
 			}
 		}
-		if (outliner) {
-			// Wire outliner to the outline service
-			serviceRegistry.getService(outliner).then(function(outliner) {
-				outliner.getOutline(contents, title).then(function(outlineModel) {
-					outlineService.setOutline(outlineModel, title);
-				});
-			});
-		}
+		outlineService.setOutlineProviders(filteredProviders, editor.getContents(), editor.getTitle());
+		outliner.setOutlineProviders(filteredProviders);
 	});
-	
-	// Create outliner "gadget"
-	new mOutliner.Outliner({parent: outlineDomNode, outlineService: serviceRegistry.getService("orion.edit.outline"), selectionService: selection});
+	dojo.connect(outliner, "setSelectedProvider", function(/**ServiceReference*/ outlineProvider) {
+		outlineService.setProvider(outlineProvider);
+		outlineService.emitOutline(editor.getContents(), editor.getTitle());
+	});
 	
 	window.onbeforeunload = function() {
 		if (editor.isDirty()) {
