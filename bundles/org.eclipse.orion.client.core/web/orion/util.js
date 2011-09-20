@@ -365,6 +365,21 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		}); 
 	}
 	
+	function processSearchResultParent(parent) {
+		parent.children.sort(function(a, b) {
+			var isDir1 = (a.type === "dir");
+			var isDir2 = (b.type === "dir");
+			if (isDir1 !== isDir2) {
+				return isDir1 ? -1 : 1;
+			}
+			var n1 = a.name && a.name.toLowerCase();
+			var n2 = b.name && b.name.toLowerCase();
+			if (n1 < n2) { return -1; }
+			if (n1 > n2) { return 1; }
+			return 0;
+		}); 
+	}
+	
 	function rememberSuccessfulTraversal(item, registry) {
 		if (item.Parents && item.Parents.length === 0) {
 			registry.getService("orion.core.preference").then(function(service) {
@@ -444,6 +459,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		makeFullPath: makeFullPath,
 		isAtRoot: isAtRoot,
 		processNavigatorParent: processNavigatorParent,
+		processSearchResultParent: processSearchResultParent,
 		rememberSuccessfulTraversal: rememberSuccessfulTraversal,
 		getText: getText,
 		safeText: safeText,
