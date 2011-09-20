@@ -69,7 +69,8 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 			var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
 			
 			var createCommand = new mCommands.Command({
-				name : "Create Site Configuration",
+				name : "Create Site",
+				tooltip: "Create a new site configuration",
 				image : "/images/add.gif",
 				id: "eclipse.sites.create",
 				groupId: "eclipse.sitesGroup",
