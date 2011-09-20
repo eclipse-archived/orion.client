@@ -28,61 +28,19 @@ orion.textview.FoldingAnnotation = (function() {
 		this.start = start;
 		this.end = end;
 		this._projectionModel = projectionModel;
-		this._expandedHTML = expandedHTML;
-		this._expandedStyle = expandedStyle;
+		this._expandedHTML = this.rulerHTML = expandedHTML;
+		this._expandedStyle = this.rulerStyle = expandedStyle;
 		this._collapsedHTML = collapsedHTML;
 		this._collapsedStyle = collapsedStyle;
 		this.expanded = true;
-		this._update(true);
 	}
 	
 	FoldingAnnotation.prototype = /** @lends orion.textview.FoldingAnnotation.prototype */ {
-		_update: function(checkLineCount) {
-			var visible = true;
-			if (checkLineCount) {
-				var baseModel = this._projectionModel.getBaseModel();
-				var startLine = baseModel.getLineAtOffset(this.start);
-				var endLine = baseModel.getLineAtOffset(this.end);
-				visible = startLine !== endLine;
-			}
-			if (visible) {
-				if (this.expanded) {
-					this.rulerHTML = this._expandedHTML;
-					this.rulerStyle = this._expandedStyle;
-				} else {
-					this.rulerHTML = this._collapsedHTML;
-					this.rulerStyle = this._collapsedStyle;
-				}
-			} else {
-				this.rulerHTML = null;
-				this.rulerStyle = null;
-				this.expanded = true;
-			}
-			
-		},
-		changed: function(e) {
-			if (e && e.textModelChangedEvent) {
-				var changeStart = e.textModelChangedEvent.start;
-				var changeEnd = e.textModelChangedEvent.start + e.textModelChangedEvent.removedCharCount;
-				var changeCount = e.textModelChangedEvent.addedCharCount - e.textModelChangedEvent.removedCharCount;
-				var start = this.start;
-				var end = this.end;
-				if (start > changeStart) {
-					start -= changeCount;
-				}
-				if (end > changeStart) {
-					end -= changeCount;
-				}
-				if (start <= changeStart && changeStart < this.end && this.start <= changeEnd && changeEnd < end) {
-					this.expand();
-					this._update(true);
-				}
-			}
-		},
 		collapse: function () {
 			if (!this.expanded) { return; }
-			if (!this.rulerHTML) { return; }
 			this.expanded = false;
+			this.rulerHTML = this._collapsedHTML;
+			this.rulerStyle = this._collapsedStyle;
 			var projectionModel = this._projectionModel;
 			var baseModel = projectionModel.getBaseModel();
 			this._projection = {
@@ -90,20 +48,13 @@ orion.textview.FoldingAnnotation = (function() {
 				end: baseModel.getLineEnd(baseModel.getLineAtOffset(this.end), true)
 			};
 			projectionModel.addProjection(this._projection);
-			this._update();
 		},
 		expand: function () {
 			if (this.expanded) { return; }
-			if (!this.rulerHTML) { return; }
 			this.expanded = true;
+			this.rulerHTML = this._expandedHTML;
+			this.rulerStyle = this._expandedStyle;
 			this._projectionModel.removeProjection(this._projection);
-			this._update();
-		},
-		removed: function(e) {
-			if (e && e.textModelChangedEvent) {
-				return;
-			}
-			this.expand();
 		}
 	};
 	
@@ -221,58 +172,27 @@ orion.textview.AnnotationModel = (function() {
 				removed: [],
 				changed: []
 			};
-			var a, i = index;
-			while (i < annotations.length && annotations[i].start === annotation.start) {
-				if (annotations[i] === annotation) {
-					a = annotations[i];
+			while (index < annotations.length && annotations[index].start === annotation.start) {
+				if (annotations[index] === annotation) {
+					e.changed.push(annotation);
 					break;
 				}
-				i++;
+				index++;
 			}
-			if (!(0 <= index && index < annotations.length) || !a) {
-				annotations.splice(index, 0, annotation);
-				e.added.push(annotation);
-			} else {
-				e.changed.push(annotation);
+			if (e.changed.length > 0) {
+				this.onChanged(e);
 			}
-			this.onChanged(e);
 		},
 		/**
-		 * Notifies all listeners that the text has changed.
-		 * <p>
-		 * This notification is intended to be used only by the view. Application clients should
-		 * use {@link orion.textview.TextView#event:onModelChanged}.
-		 * </p>
-		 * <p>
-		 * NOTE: This method is not meant to called directly by application code. It is called internally by the TextModel
-		 * as part of the implementation of {@link #setText}. This method is included in the public API for documentation
-		 * purposes and to allow integration with other toolkit frameworks.
-		 * </p>
+		 * Notifies all listeners that the annotation model has changed.
 		 *
-		 * @param {Number} start the character offset in the model where the change occurred.
-		 * @param {Number} removedCharCount the number of characters removed from the model.
-		 * @param {Number} addedCharCount the number of characters added to the model.
-		 * @param {Number} removedLineCount the number of lines removed from the model.
-		 * @param {Number} addedLineCount the number of lines added to the model.
+		 * @param {Annotation[]} added list of annotation being added to the model
+		 * @param {Annotation[]} changed list of annotation changed in the model
+		 * @param {Annotation[]} removed list of annotation being removed form the model
+		 * @param {ModelChangedEvent} e the changed event that trigger this change, can be null 
 		 */
 		onChanged: function(e) {
-			var i;
-			for (i = 0; i < e.added.length; i++) {
-				if (e.added[i].added) {
-					e.added[i].added(e);
-				}
-			}
-			for (i = 0; i < e.changed.length; i++) {
-				if (e.changed[i].changed) {
-					e.changed[i].changed(e);
-				}
-			}
-			for (i = 0; i < e.removed.length; i++) {
-				if (e.removed[i].removed) {
-					e.removed[i].removed(e);
-				}
-			}
-			for (i = 0; i < this._listeners.length; i++) {
+			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanged) { 
 					l.onChanged(e);

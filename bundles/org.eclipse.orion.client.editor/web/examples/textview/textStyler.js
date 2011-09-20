@@ -674,6 +674,11 @@ examples.textview.TextStyler = (function() {
 			}
 		},
 		_createFoldingAnnotation: function(viewModel, baseModel, start, end) {
+			var startLine = baseModel.getLineAtOffset(start);
+			var endLine = baseModel.getLineAtOffset(end);
+			if (startLine === endLine) {
+				return null;
+			}
 			return new orion.textview.FoldingAnnotation(viewModel, "orion.annotation.folding", start, end,
 				"<img src='/examples/textview/images/expanded.png'></img>", {styleClass: "ruler_folding_expanded"}, 
 				"<img src='/examples/textview/images/collapsed.png'></img>", {styleClass: "ruler_folding_collapsed"});
@@ -778,9 +783,9 @@ examples.textview.TextStyler = (function() {
 //			for (var i=0; i< newComments.length; i++) {
 //				window.console.log(i +"=>"+ newComments[i]);
 //			}
-			var redraw = (commentEnd - commentStart) !== newComments.length;
+			var redraw = (commentEnd - commentStart) !== newComments.length, i, j;
 			if (!redraw) {
-				for (var i=0; i<newComments.length; i++) {
+				for (i=0; i<newComments.length; i++) {
 					offset = this.commentOffsets[commentStart + 1 + i];
 					if (offset > start) { offset += addedCharCount - removedCharCount; }
 					if (offset !== newComments[i]) {
@@ -789,35 +794,71 @@ examples.textview.TextStyler = (function() {
 					} 
 				}
 			}
-			if (redraw && this.annotationModel) {
-				var annotationModel = this.annotationModel;
-				var cs = this.commentOffsets[commentStart + 1];
-				if (cs > start) { cs += addedCharCount - removedCharCount; }
-				var ce = this.commentOffsets[commentEnd];
-				if (ce > start) { ce += addedCharCount - removedCharCount; }
-				var iter = annotationModel.getAnnotations(cs, ce);
-				var remove = [], annotation;
-				while (iter.hasNext()) {
-					annotation = iter.next();
-					if (annotation.type === "orion.annotation.folding") {
-						remove.push(annotation);
-					}
-				}
-				var add = [];
-				for (var v = 0; v < newComments.length; v+= 2) {
-					annotation = this._createFoldingAnnotation(viewModel, baseModel, newComments[v], newComments[v+1]);
-					if (annotation) { add.push(annotation); }
-				}
-				annotationModel.replaceAnnotations(remove, add);
-			}
 			
 			var args = [commentStart + 1, (commentEnd - commentStart)].concat(newComments);
 			Array.prototype.splice.apply(this.commentOffsets, args);
-			for (var k=commentStart + 1 + newComments.length; k< this.commentOffsets.length; k++) {
-				this.commentOffsets[k] += addedCharCount - removedCharCount;
+			for (i = commentStart + 1 + newComments.length; i < this.commentOffsets.length; i++) {
+				this.commentOffsets[i] += addedCharCount - removedCharCount;
 			}
 			
 			if ((this.commentOffsets.length & 1) === 1) { this.commentOffsets.push(charCount); }
+
+			if (baseModel !== viewModel && this.annotationModel) {
+				var annotationModel = this.annotationModel;
+				var iter = annotationModel.getAnnotations(ts, te);
+				var remove = [], all = [];
+				var annotation;
+				while (iter.hasNext()) {
+					annotation = iter.next();
+					if (annotation.type === "orion.annotation.folding") {
+						all.push(annotation);
+						for (i = 0; i < newComments.length; i+= 2) {
+							if (annotation.start === newComments[i] && annotation.end === newComments[i+1]) {
+								break;
+							}
+						}
+						if (i === newComments.length) {
+							remove.push(annotation);
+							annotation.expand();
+						} else {
+							var annotationStart = annotation.start;
+							var annotationEnd = annotation.end;
+							var changeCount = addedCharCount - removedCharCount;
+							if (annotationStart > start) {
+								annotationStart -= changeCount;
+							}
+							if (annotationEnd > start) {
+								annotationEnd -= changeCount;
+							}
+							if (annotationStart <= start && start < annotationEnd && annotationStart <= end && end < annotationEnd) {
+								var startLine = baseModel.getLineAtOffset(annotation.start);
+								var endLine = baseModel.getLineAtOffset(annotation.end);
+								if (startLine !== endLine) {
+									if (!annotation.expanded) {
+										annotation.expand();
+										annotationModel.modifyAnnotation(annotation);
+									}
+								} else {
+									annotationModel.removeAnnotation(annotation);
+								}
+							}
+						}
+					}
+				}
+				var add = [];
+				for (i = 0; i < newComments.length; i+= 2) {
+					for (j = 0; j < all.length; j++) {
+						if (all[j].start === newComments[i] && all[j].end === newComments[i+1]) {
+							break;
+						}
+					}
+					if (j === all.length) {
+						annotation = this._createFoldingAnnotation(viewModel, baseModel, newComments[i], newComments[i+1]);
+						if (annotation) { add.push(annotation); }
+					}
+				}
+				annotationModel.replaceAnnotations(remove, add);
+			}
 			
 			if (redraw) {
 				var redrawStart = start + addedCharCount;

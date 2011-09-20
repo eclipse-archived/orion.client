@@ -105,9 +105,38 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 				
 				span = dojo.create("span", null, col, "only");
 				dojo.create("img", {src: "/images/none.png", style: "vertical-align: middle"}, span, "last");
-				dojo.create("img", {src: "/images/file.gif", style: "vertical-align: middle; margin-right: 4px"}, span, "last");
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
-				dojo.place(document.createTextNode(item.Name), link, "only");
+				// If the file is an image, show a thumbnail next to the name.
+				var splits = item.Name.split("."); 
+				if (splits.length > 0) {
+					var extension = splits.pop().toLowerCase(); 
+					switch (extension) {
+						case "jpg":
+						case "png":
+						case "gif":
+						case "ico":
+						case "jpeg":
+						case "jpe":
+						case "tif":
+						case "tiff":
+						case "svg":
+							var thumbnail = dojo.create("img", {src: item.Location, style: "vertical-align: middle; margin-left: 4px; margin-right: 4px"}, link, "last");
+							dojo.connect(thumbnail, "onload", thumbnail, function() {
+								// We use a height of 24 so that tall images aren't significantly larger than the default row size with 16 px icon.
+								// The width of 48 is arbitrary, we're trying to find a value that doesn't indent too far.
+								// This could become some kind of folder preference for thumbnails.  
+								this.height = Math.min(this.height, 24);
+								this.width = Math.min(this.width, 48);
+							});
+							break;
+						default: 
+							dojo.create("img", {src: "/images/file.gif", style: "vertical-align: middle; margin-right: 4px"}, link, "last");
+							break;
+					}
+				} else {
+					dojo.create("img", {src: "/images/file.gif", style: "vertical-align: middle; margin-right: 4px"}, link, "last");
+				}
+				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
 			return col;
 		case 1:
