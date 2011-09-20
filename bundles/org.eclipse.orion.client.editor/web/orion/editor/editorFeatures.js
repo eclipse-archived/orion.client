@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define window orion:true */
-/*jslint maxerr:150 browser:true devel:true regexp:false*/
+/*jslint maxerr:150 browser:true devel:true */
 
 
 /**
@@ -106,14 +106,12 @@ orion.editor.AnnotationFactory = (function() {
 				var error = errors[i];
 				if (error) {
 					// escaping voodoo... we need to construct HTML that contains valid JavaScript.
+					// TODO safeText() from util.js
 					var escapedReason = error.reason.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
 					var lineIndex = error.line - 1;
 					var lineStart = model.getLineStart(lineIndex);
-					var start = error.character - 1, end = start + 1;
-					var index = error.evidence.substring(start).search(/.\b/);
-					if (index > -1) {
-						end += index;
-					}
+					var start = error.character - 1;
+					var end = (typeof error.end === "number") ? error.end : start + 1;
 					var annotation = {
 						type: type,
 						start: lineStart + start,
