@@ -278,7 +278,7 @@ define(['dojo', 'orion/explorer'], function(dojo, mExplorer) {
 			this.myTree.expand(parentChain[i]);
 		}
 		
-		dojo.toggleClass(filItem.getId(), "checkedRow", !!evt.target.checked);
+		//dojo.toggleClass(filItem.getId(), "checkedRow", !!evt.target.checked);
 
 	};
 	
