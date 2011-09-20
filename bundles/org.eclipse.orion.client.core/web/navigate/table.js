@@ -86,6 +86,7 @@ dojo.addOnLoad(function(){
 		// navigator-specific commands
 		var toggleOutlineCommand = new mCommands.Command({
 			name: "Toggle Left Pane",
+			tooltip: "Open or close the left pane",
 			id: "eclipse.toggleSplitter",
 			callback: function() {splitArea.toggle();}
 		});
