@@ -361,12 +361,9 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 							}
 							// now decide if we needed the menu or not
 							if (children.length > 0) {
-								var needMenu = true;
+								// we don't need a menu to contain the command if there is only one item.
+								var needMenu = children.length > 1;
 								var menuCommand = children[0].eclipseCommand;
-								if (children.length === 1) {
-									// we don't want to put a single command in a menu, just add the text
-									needMenu = !(menuCommand && !menuCommand.hasImage());
-								}
 								if (needMenu) {
 									menuButton = new dijit.form.DropDownButton({
 										label: group.title,
@@ -379,7 +376,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-									image = menuCommand._asImage(id, items, handler, userData, forceText, cssClassCmdOver, cssClassCmdLink);
+									image = menuCommand._asImage(id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink);
 									dojo.place(image, parent, "last");
 								}
 							}
