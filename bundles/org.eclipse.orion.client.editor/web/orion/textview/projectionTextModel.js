@@ -468,7 +468,7 @@ orion.textview.ProjectionTextModel = (function() {
 				projection.start = projection.end;
 				projection._lineCount = 0;
 			}
-			projections.splice(projections, rangeEnd - rangeStart);
+			projections.splice(rangeStart, rangeEnd - rangeStart);
 			var changeCount = text.length - (mapEnd - mapStart);
 			for (i = rangeEnd; i < projections.length; i++) {
 				projection = projections[i];
