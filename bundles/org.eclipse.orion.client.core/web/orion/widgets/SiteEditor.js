@@ -98,6 +98,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			// Register command used for adding mapping
 			var addMappingCommand = new mCommands.Command({
 				name: "Add",
+				tooltip: "Add a directory mapping to the site configuration",
 				image: "/images/add.gif",
 				id: "eclipse.site.mappings.add",
 				visibleWhen: function(item) {
@@ -113,6 +114,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		// Save command
 		var saveCommand = new mCommands.Command({
 				name: "Save",
+				tooltip: "Save the site configuration",
 				image: "/images/save.gif",
 				id: "eclipse.site.save",
 				visibleWhen: function(item) {

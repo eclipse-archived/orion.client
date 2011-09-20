@@ -88,6 +88,7 @@ exports.EditorCommandFactory = (function() {
 				}));
 				var saveCommand = new mCommands.Command({
 					name: "Save",
+					tooltip: "Save this file",
 					id: "orion.save",
 					callback: function(editor) {
 						editor.getTextView().invokeAction("Save");

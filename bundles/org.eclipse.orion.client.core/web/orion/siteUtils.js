@@ -96,6 +96,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 			startCallback, stopCallback, deleteCallback, errorCallback) {
 		var editCommand = new mCommands.Command({
 			name: "Edit",
+			tooltip: "Edit the site configuration",
 			image: "/images/editing_16.gif",
 			id: "eclipse.site.edit",
 			visibleWhen: function(item) {
@@ -106,6 +107,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 		
 		var startCommand = new mCommands.Command({
 			name: "Start",
+			tooltip: "Start the site",
 			image: "/images/lrun_obj.gif",
 			id: "eclipse.site.start",
 			visibleWhen: function(item) {
@@ -123,6 +125,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 		
 		var stopCommand = new mCommands.Command({
 			name: "Stop",
+			tooltip: "Stop the site",
 			image: "/images/stop.gif",
 			id: "eclipse.site.stop",
 			visibleWhen: function(item) {
@@ -140,6 +143,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 		
 		var deleteCommand = new mCommands.Command({
 			name: "Delete",
+			tooltip: "Delete the site configuration",
 			image: "/images/delete.gif",
 			id: "eclipse.site.delete",
 			visibleWhen: function(item) {
