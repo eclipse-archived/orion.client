@@ -12,6 +12,14 @@
  
 define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator' ], function(dojo, dijit, mUtil){
 
+
+	/**
+	 * Override the dijit MenuItem so that the inherited click behavior is not used.
+	 * This is done when the command is defined with a link, so that the normal browser
+	 * link behavior (and interpretations of various mouse clicks) is used.
+	 * 
+	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=350584
+	 */
 	var CommandMenuItem = dojo.declare(dijit.MenuItem, {
 		_onClick: function(evt) {
 			if (!this.hrefCallback) {
@@ -353,12 +361,9 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 							}
 							// now decide if we needed the menu or not
 							if (children.length > 0) {
-								var needMenu = true;
+								// we don't need a menu to contain the command if there is only one item.
+								var needMenu = children.length > 1;
 								var menuCommand = children[0].eclipseCommand;
-								if (children.length === 1) {
-									// we don't want to put a single command in a menu, just add the text
-									needMenu = !(menuCommand && !menuCommand.hasImage());
-								}
 								if (needMenu) {
 									menuButton = new dijit.form.DropDownButton({
 										label: group.title,
@@ -371,7 +376,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-									image = menuCommand._asImage(id, items, handler, userData, forceText, cssClassCmdOver, cssClassCmdLink);
+									image = menuCommand._asImage(id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink);
 									dojo.place(image, parent, "last");
 								}
 							}
@@ -568,6 +573,9 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 			handler = handler || this;
 			var image = new Image();
 			var link = dojo.create("a");
+			if (this.tooltip) {
+				link.title = this.tooltip;
+			}
 			link.id = this.name+"link";
 			image.alt = this.name;
 			image.title = this.name;
@@ -640,6 +648,9 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 		_asLink: function(items, handler, cssClass) {
 			handler =  handler || this;
 			var anchor = window.document.createElement('a');
+			if (this.tooltip) {
+				anchor.title = this.tooltip;
+			}
 			dojo.place(window.document.createTextNode(this.name), anchor, "only");
 			anchor.href="";
 			anchor.id = this.id+"link";
@@ -669,7 +680,6 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 			var menuitem = new CommandMenuItem({
 				labelType: this.hrefCallback ? "html" : "text",
 				label: this.name,
-				tooltip: this.tooltip,
 				hrefCallback: !!this.hrefCallback
 			});
 			if (this.hrefCallback) {
