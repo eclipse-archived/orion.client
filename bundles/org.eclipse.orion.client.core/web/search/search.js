@@ -40,7 +40,7 @@ dojo.addOnLoad(function(){
 		// Favorites
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 	
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 		var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
 		var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, searcher);
