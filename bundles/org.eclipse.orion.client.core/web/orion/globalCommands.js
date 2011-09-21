@@ -57,6 +57,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		'<tr class="pageToolbar">' +
 			'<td colspan=3 style="padding-left: 16px;" id="pageToolbar" class="pageToolbar">' +
 				'<span id="pageActions" class="pageActions"></span>' +
+				'<span id="pageActionsRight" class="pageActions"></span>' +
 			'</td>' +
 		'</tr>' +
 		// Row 5: optional Page Toolbar
@@ -295,6 +296,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			
 		var openResourceCommand = new mCommands.Command({
 			name: "Find File Named...",
+			tooltip: "Choose a file by name and open an editor on it",
 			id: "eclipse.openResource",
 			callback: function(item) {
 				openResourceDialog(searchLocation, searcher, editor);
@@ -339,6 +341,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		
 		var keyAssistCommand = new mCommands.Command({
 			name: "Show Keys",
+			tooltip: "Show a list of all the keybindings on this page",
 			id: "eclipse.keyAssist",
 			callback: function() {
 				dojo.empty(keyAssistNode);

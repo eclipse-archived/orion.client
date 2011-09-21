@@ -351,8 +351,9 @@ orion.editor.Editor = (function() {
 					}
 					var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
 					var annotation = annotations.next();
-					if (annotation === undefined) { return; }
-					editor.onGotoLine(lineIndex, annotation.start - lineStart, annotation.end - lineStart);
+					if (annotation) {
+						editor.onGotoLine(lineIndex, annotation.start - lineStart, annotation.end - lineStart);
+					}
 				};
 				
 				this._overviewRuler = annotations.overviewRuler;
