@@ -128,15 +128,15 @@ var exports = {};
 	exports.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee, title){
 		if(jsonData.Running==false){
 			if(jsonData.Result && jsonData.Result.HttpCode==403){
-				if(jsonData.Result.ErrorData && jsonData.Result.ErrorData.HostKey){
-					dojo.hitch(this, exports.handleKnownHostsError)(serviceRegistry, jsonData.Result.ErrorData, options, callee);
+				if(jsonData.Result.JsonData && jsonData.Result.JsonData.HostKey){
+					dojo.hitch(this, exports.handleKnownHostsError)(serviceRegistry, jsonData.Result.JsonData, options, callee);
 					return;
 				}
 			} else if (jsonData.Result && jsonData.Result.HttpCode==401){
-				if(jsonData.Result.ErrorData){
-					options.errordata = jsonData.Result.ErrorData;
+				if(jsonData.Result.JsonData){
+					options.errordata = jsonData.Result.JsonData;
 				}
-				dojo.hitch(this, exports.handleSshAuthenticationError)(serviceRegistry, jsonData.Result.ErrorData, options, callee, title);
+				dojo.hitch(this, exports.handleSshAuthenticationError)(serviceRegistry, jsonData.Result.JsonData, options, callee, title);
 				return;
 			}
 			
@@ -148,7 +148,6 @@ var exports = {};
 			if(callback){
 				callback(jsonData);
 			}
-			
 		}
 	};
 	
@@ -916,7 +915,7 @@ var exports = {};
 				var cloneLocation = item.CloneLocation;
 				if (cloneLocation == null){
 					var obj = JSON.parse(item.responseText);
-					cloneLocation = obj.ErrorData.CloneLocation;
+					cloneLocation = obj.JsonData.CloneLocation;
 				}
 				
 				dojo.xhrGet({
@@ -953,7 +952,7 @@ var exports = {};
 				
 				try {
 					var obj = JSON.parse(item.responseText);
-					if (obj.ErrorData)
+					if (obj.JsonData)
 						return true;
 				} catch(error) {
 					//it is not JSON, just continue;
