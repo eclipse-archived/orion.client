@@ -41,7 +41,7 @@ eclipse.SyntaxChecker = (function () {
 					return validationService.checkSyntax(title, contents);
 				};
 				var extractProblems = function(data) {
-					return data.errors;
+					return data.problems || data.errors;
 				};
 				var problemPromises = [];
 				for (i=0; i < filteredValidators.length; i++) {
