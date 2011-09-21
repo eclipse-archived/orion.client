@@ -141,7 +141,7 @@ dojo.addOnLoad(function(){
 	});
 	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 	
 	// global banner
 	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);

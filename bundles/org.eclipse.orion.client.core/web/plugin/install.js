@@ -28,7 +28,7 @@ dojo.addOnLoad(function() {
 	});
 	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 	var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		
 	// global commands

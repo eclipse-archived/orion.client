@@ -171,7 +171,7 @@ exports.setUpEditor = function(isReadOnly){
 
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
 
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 		
 		var model = new mTextModel.TextModel();
 		/* Folding is disabled for now until key bindings and search are fixed */ 
@@ -410,7 +410,7 @@ exports.setUpEditor = function(isReadOnly){
 				dojo.place(document.createTextNode("\"" + searchPattern + "\"..."), b, "only");
 				searchFloat.style.display = "block";
 				var query = inputManager.getFileMetadata().SearchLocation + searchPattern;
-				searcher.search(searchFloat, query, inputManager.getInput());
+				searcher.search(searchFloat, query, inputManager.getInput(),false,null,false,true);
 			}, 0);
 			return true;
 		});
