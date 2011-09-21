@@ -215,7 +215,7 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/fileClient', 'orion/
 				id: "orion.search.nextResult",
 				groupId: "orion.searchGroup",
 				callback : function() {
-					//that.nextResult();
+					that._searchExplorer.gotoNext(true);
 			}});
 			var prevResultCommand = new mCommands.Command({
 				name : "Previous result",
@@ -223,7 +223,7 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/fileClient', 'orion/
 				id: "orion.search.prevResult",
 				groupId: "orion.searchGroup",
 				callback : function() {
-					//that.prevResult();
+					that._searchExplorer.gotoNext(false);
 			}});
 			var expandAllCommand = new mCommands.Command({
 				name : "Expand all results",
@@ -247,8 +247,8 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/fileClient', 'orion/
 			this._commandService.addCommand(collapseAllCommand, "dom");
 				
 			// Register command contributions
-			//this._commandService.registerCommandContribution("orion.search.nextResult", 1, "pageActionsRight");
-			//this._commandService.registerCommandContribution("orion.search.prevResult", 2, "pageActionsRight");
+			this._commandService.registerCommandContribution("orion.search.nextResult", 1, "pageActionsRight");
+			this._commandService.registerCommandContribution("orion.search.prevResult", 2, "pageActionsRight");
 			this._commandService.registerCommandContribution("orion.search.expandAll", 3, "pageActionsRight");
 			this._commandService.registerCommandContribution("orion.search.collapseAll", 4, "pageActionsRight");
 			dojo.empty("pageActionsRight");
