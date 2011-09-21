@@ -25,7 +25,7 @@ dojo.addOnLoad(function() {
 	});
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	var prefsService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 	var selection = new mSelection.Selection(serviceRegistry);
 
 	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, usersList, usersList);

@@ -22,7 +22,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 				});
 				var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
 				var searcher = new mSearchClient.Searcher({
-					serviceRegistry: serviceRegistry
+					serviceRegistry: serviceRegistry, commandService: commandService
 				});
 				// File operations
 				var fileClient = new mFileClient.FileClient(serviceRegistry);

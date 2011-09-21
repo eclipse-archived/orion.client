@@ -54,7 +54,7 @@ dojo.addOnLoad(function(){
 		var treeRoot = {
 			children:[]
 		};
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 					
 //		var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 
