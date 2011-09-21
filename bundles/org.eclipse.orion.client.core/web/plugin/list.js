@@ -53,13 +53,13 @@ dojo.addOnLoad(function() {
 		if (pageActions) {
 			dojo.place('<input type="text" id="installUrlTextBox" value="Type a plugin URL here" style="width:16em;"></input>',
 				pageActions, "last");
-			dojo.place('<a id="installButton">Install</a>',
+			dojo.place('<a id="installButton" title="Install the plugin specified in the edit box">Install</a>',
 				pageActions, "last");
-			dojo.place('<a id="uninstallButton">Uninstall</a>',
+			dojo.place('<a id="uninstallButton" title="Uninstall the selected plugins">Uninstall</a>',
 				pageActions, "last");
-			dojo.place('<a id="reloadButton">Reload</a>',
+			dojo.place('<a id="reloadButton" title="Reload the selected plugin from its URL">Reload</a>',
 				pageActions, "last");
-			dojo.place('<a id="copyButton">Copy Location</a>',
+			dojo.place('<a id="copyButton" title="Copy the selected location into the install edit box">Copy Location</a>',
 				pageActions, "last");
 
 

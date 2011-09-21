@@ -278,6 +278,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 	
 		var favoriteCommand = new mCommands.Command({
 			name: "Make Favorite",
+			tooltip: "Add a file or folder to the favorites list",
 			image: "/images/makeFavorite.gif",
 			id: "eclipse.makeFavorite",
 			visibleWhen: function(item) {
@@ -297,6 +298,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		
 		var renameCommand = new mCommands.Command({
 				name: "Rename",
+				tooltip: "Rename the selected files or folders",
 				image: "/images/rename.gif",
 				id: "eclipse.renameResource",
 				visibleWhen: function(item) {
@@ -324,6 +326,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		
 		var deleteCommand = new mCommands.Command({
 			name: "Delete",
+			tooltip: "Delete the selected files or folders",
 			image: "/images/delete.gif",
 			id: "eclipse.deleteFile",
 			visibleWhen: oneOrMoreFilesOrFolders,
@@ -367,6 +370,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 	
 		var downloadCommand = new mCommands.Command({
 			name: "Export as zip",
+			tooltip: "Create a zip file of the folder contents and download it",
 			image: "/images/exportzip.gif",
 			id: "eclipse.downloadFile",
 			visibleWhen: function(item) {
@@ -410,6 +414,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		
 		var newFileCommand =  new mCommands.Command({
 			name: "New File",
+			tooltip: "Create a new file",
 			image: "/images/new_file.gif",
 			id: "eclipse.newFile",
 			callback: function(item, commandId, domId) {
@@ -435,6 +440,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		
 		var newFolderCommand = new mCommands.Command({
 			name: "New Folder",
+			tooltip: "Create a new folder",
 			image: "/images/new_folder.gif",
 			id: "eclipse.newFolder",
 			callback: function(item, commandId, domId) {
@@ -460,6 +466,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		
 		var newProjectCommand = new mCommands.Command({
 			name: "New Folder",
+			tooltip: "Create a new folder",
 			image: "/images/new_folder.gif",
 			id: "eclipse.newProject",
 			callback: function(item, commandId, domId) {
@@ -478,6 +485,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		
 		var linkProjectCommand = new mCommands.Command({
 			name: "Link Folder",
+			tooltip: "Create a folder that links to an existing folder on the server",
 			image: "/images/link.gif",
 			id: "eclipse.linkProject",
 			callback: function(item) {
@@ -500,6 +508,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 					
 		var importCommand = new mCommands.Command({
 			name : "Import from zip...",
+			tooltip: "Copy files and folders contained in a local zip file",
 			image : "/images/importzip.gif",
 			id: "eclipse.importCommand",
 			callback : function(item) {
@@ -519,6 +528,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 	
 		var importSFTPCommand = new mCommands.Command({
 			name : "SFTP from...",
+			tooltip: "Copy files and folders from a specified SFTP connection",
 			image : "/images/transferin.gif",
 			id: "eclipse.importSFTPCommand",
 			callback : function(item) {
@@ -545,6 +555,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 	
 		var exportSFTPCommand = new mCommands.Command({
 			name : "SFTP to...",
+			tooltip: "Copy files and folders to a specified SFTP location",
 			image : "/images/transferout.gif",
 			id: "eclipse.exportSFTPCommand",
 			callback : function(item) {
@@ -571,6 +582,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		
 		var copyCommand = new mCommands.Command({
 			name : "Copy to",
+			tooltip: "Copy files and folders to a specified location",
 			id: "eclipse.copyFile",
 			choiceCallback: function(items, userData) {
 				return makeMoveCopyTargetChoices(items, userData, true);
@@ -583,6 +595,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		
 		var moveCommand = new mCommands.Command({
 			name : "Move to",
+			tooltip: "Move files and folders to a new location",
 			id: "eclipse.moveFile",
 			choiceCallback: function(items, userData) {
 				return makeMoveCopyTargetChoices(items, userData, false);
@@ -596,6 +609,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var bufferedSelection = [];
 		var copyToBufferCommand = new mCommands.Command({
 				name: "Copy Items",
+				tooltip: "Copy the selected items to the copy/paste buffer",
 				id: "eclipse.copySelections",
 				callback: function() {
 					commandService.getSelectionService().getSelections(function(selections) {
@@ -607,6 +621,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 			
 		var pasteFromBufferCommand = new mCommands.Command({
 				name: "Paste Items",
+				tooltip: "Paste items from the copy/paste buffer",
 				id: "eclipse.pasteSelections",
 				callback: function() {
 					if (bufferedSelection.length > 0) {

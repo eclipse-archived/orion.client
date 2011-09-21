@@ -499,6 +499,10 @@ a:hover {
 	background-color: #EAF2FE;
 }
 
+.fileNameSelectedRow {
+	background-color: #6d6d6d !important;
+}
+
 .LoginWindowLeft {
 	padding-left: 0.5em;
 }
