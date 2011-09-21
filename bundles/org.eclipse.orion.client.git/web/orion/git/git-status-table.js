@@ -665,9 +665,11 @@ orion.GitStatusController = (function() {
 			this._loadBlock(this._unstagedContentRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedContentRenderer , this._model.interestedStagedGroup);
 			if(this._renderLog && this._initializing){
-				this._renderLogs(false);
-				this._renderLogs(true);
 				var that = this;
+				this._renderLogs(false).then(function(){
+					that._renderLogs(true);
+				});
+				
 				this._registry.getService("orion.page.command").then(function(commandService) {
 					mGitCommands.createStatusCommands(that._registry , commandService , function(){that.getGitStatus(that._url ,true);} , 9 , that._gitCommitNavigatorLog , that._gitCommitNavigatorRem);
 				});
@@ -867,10 +869,13 @@ orion.GitStatusController = (function() {
 			var that = this;
 			if(!this._renderLog)
 				return;
+
+			var retDeffered = new dojo.Deferred();
 			if (isRemote) {
 				if(!this._curRemote || !this._curBranch || this._curBranch.RemoteLocation.length!==1 || this._curBranch.RemoteLocation[0].Children.length!==1){
 					//We want to empty the mini log section for the tracked remote branch if there is no such 
 					dojo.empty(this._remoteTableRenderer.getLogSectionId());
+					retDeffered.callback();
 					return;
 				}
 		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null, {checkbox: false, minimal: true}, this._remoteTableRenderer.getLogContentId());    
@@ -888,7 +893,7 @@ orion.GitStatusController = (function() {
 						that._registry.getService("orion.git.provider").then(function(gitService){
 							gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
 								that._gitCommitNavigatorRem.renderer.setIncomingCommits(scopedCommitsJsonData);
-								that._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?page=1&pageSize=5", jsonData);
+								that._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?page=1&pageSize=5", jsonData).then(function(){retDeffered.callback();});
 								that._remoteTableRenderer.renderAdditionalAction(that._gitCommitNavigatorRem._lastTreeRoot);
 							});
 						});
@@ -897,7 +902,7 @@ orion.GitStatusController = (function() {
 						if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
 							mAuth.handleGetAuthenticationError(this, ioArgs);
 						}else{
-							that._gitCommitNavigatorRem.loadCommitsList(path, error);	
+							that._gitCommitNavigatorRem.loadCommitsList(path, error).then(function(){retDeffered.callback();});	
 						}
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
@@ -913,51 +918,63 @@ orion.GitStatusController = (function() {
 					},
 					handleAs : "json",
 					timeout : 5000,
-					load : function(jsonData, secondArg) {
-						return jsonData;
+					load : function(commitLogJsonData, ioArgs) {
+						
+						function renderCommitLogJsonData(commitLogJsonData){
+							if (commitLogJsonData.toRef == null || commitLogJsonData.toRef.RemoteLocation.length!==1 || commitLogJsonData.toRef.RemoteLocation[0].Children.length!==1 || !that._curBranch){
+								that._gitCommitNavigatorLog.loadCommitsList((that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation}).then(function(){retDeffered.callback();});
+								if(that._curRemote && that._curBranch)
+									that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
+							}
+							else {
+								dojo.xhrGet({
+									url : commitLogJsonData.toRef.RemoteLocation[0].Children[0].Location,
+									headers : {
+										"Orion-Version" : "1"
+									},
+									handleAs : "json",
+									timeout : 5000,
+									load : function(remoteJsonData, secondArg) {
+										that._registry.getService("orion.git.provider").then(function(gitService){
+											gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
+												that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData);
+												that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation}).then(function(){retDeffered.callback();});
+												if(that._curRemote)
+													that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
+											});
+										});
+									},
+									error : function(error, ioArgs) {
+										console.error("HTTP status code: ", ioArgs.xhr.status);
+										if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
+											mAuth.handleGetAuthenticationError(this, ioArgs);
+										}else{
+											that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation}).then(function(){retDeffered.callback();});
+											if(that._curRemote && that._curBranch)
+												that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
+										}
+									}
+								});
+							}
+						}
+						if(ioArgs.xhr.status===200){
+							renderCommitLogJsonData(commitLogJsonData);
+						} else if (ioArgs.xhr.status===202){
+							var deferred = new dojo.Deferred();
+							deferred.callback(commitLogJsonData);
+							that._registry.getService("orion.page.message").then(function(progressService) {
+								progressService.showWhile(deferred, "Getting git log").then(function(commitLogJsonData){renderCommitLogJsonData(commitLogJsonData.Result.JsonData);});
+							});
+						}
+						
 					},
 					error : function(error, ioArgs) {
 						//mAuth.handleGetAuthenticationError(this, ioArgs);
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
-				}).then(function(commitLogJsonData){
-					if (commitLogJsonData.toRef == null || commitLogJsonData.toRef.RemoteLocation.length!==1 || commitLogJsonData.toRef.RemoteLocation[0].Children.length!==1 || !that._curBranch){
-						that._gitCommitNavigatorLog.loadCommitsList((that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation});
-						if(that._curRemote && that._curBranch)
-							that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
-					}
-					else {
-						dojo.xhrGet({
-							url : commitLogJsonData.toRef.RemoteLocation[0].Children[0].Location,
-							headers : {
-								"Orion-Version" : "1"
-							},
-							handleAs : "json",
-							timeout : 5000,
-							load : function(remoteJsonData, secondArg) {
-								that._registry.getService("orion.git.provider").then(function(gitService){
-									gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
-										that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData);
-										that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation});
-										if(that._curRemote)
-											that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
-									});
-								});
-							},
-							error : function(error, ioArgs) {
-								console.error("HTTP status code: ", ioArgs.xhr.status);
-								if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
-									mAuth.handleGetAuthenticationError(this, ioArgs);
-								}else{
-									that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation});
-									if(that._curRemote && that._curBranch)
-										that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
-								}
-							}
-						});
-					}
 				});
 			}
+			return retDeffered;
 		},
 		
 		

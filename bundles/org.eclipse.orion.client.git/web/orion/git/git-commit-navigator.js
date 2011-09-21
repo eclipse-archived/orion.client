@@ -41,10 +41,13 @@ exports.GitCommitNavigator = (function() {
 	GitCommitNavigator.prototype = new mExplorer.Explorer();
 	
 	GitCommitNavigator.prototype.loadCommitsList = function(path, treeRoot, force) {
+		
+			var waitDeferred = new dojo.Deferred();
 
 			path = mUtil.makeRelative(path);
 			if (path === this._lastHash && !force) {
-				return;
+				waitDeferred.callback();
+				return waitDeferred;
 			}
 						
 			this._lastHash = path;
@@ -75,8 +78,8 @@ exports.GitCommitNavigator = (function() {
 				
 				if(this.toolbarId && this.selectionToolsId)
 					mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
-				
-				return;
+				waitDeferred.callback();
+				return waitDeferred;
 			}
 			
 			b = dojo.create("b");
@@ -91,8 +94,42 @@ exports.GitCommitNavigator = (function() {
 				mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
 						
 			this.registry.getService("orion.git.provider").then(function(service){
-				dojo.hitch(self, self.createTree(self.parentId, new mExplorer.ExplorerFlatModel(path, service.doGitLog)));
+				
+				var doGitLog = function(gitLogURI, onLoad){
+					var ret = new dojo.Deferred();
+					service.doGitLog(gitLogURI, function(jsonData, xhrArgs){
+						if(xhrArgs.xhr.status===200){
+							waitDeferred.callback();
+							if(onLoad)
+								onLoad(jsonData.Children);
+							else{
+								ret.callback(jsonData.Children);
+							}
+						}
+						
+						if(xhrArgs.xhr.status===202){
+							var deferred = new dojo.Deferred();
+							deferred.callback(jsonData);
+							self.registry.getService("orion.page.message").then(function(progressService) {
+								progressService.showWhile(deferred, "Getting git log").then(function(gitLogProgressResp){
+									waitDeferred.callback();
+									if(onLoad)
+										onLoad(gitLogProgressResp.Result.JsonData.Children);
+									else{
+										ret.callback(gitLogProgressResp.Result.JsonData.Children);
+									}
+								});
+							});
+						}
+						
+					});
+					return ret;
+				};
+				
+				dojo.hitch(self, self.createTree(self.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog)));
 			});
+			
+			return waitDeferred;
 			
 		};
 		

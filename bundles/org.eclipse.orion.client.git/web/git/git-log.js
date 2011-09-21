@@ -98,43 +98,59 @@ function loadResource(navigator){
 		handleAs : "json",
 		timeout : 5000,
 		load : function(resource, secondArg) {
-			var fileClient = new mFileClient.FileClient(serviceRegistry);
-			initTitleBar(fileClient, navigator, resource);
-			if (resource.Type === "RemoteTrackingBranch"){
-				serviceRegistry.getService("orion.git.provider").then(function(gitService){
-					gitService.getLog(resource.HeadLocation, resource.Id, function(scopedCommitsJsonData, secondArg) {
-						navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
-						navigator.renderer.setOutgoingCommits([]);
-						navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);	
+			
+			var loadResource = function(resource){
+				var fileClient = new mFileClient.FileClient(serviceRegistry);
+				initTitleBar(fileClient, navigator, resource);
+				if (resource.Type === "RemoteTrackingBranch"){
+					serviceRegistry.getService("orion.git.provider").then(function(gitService){
+						gitService.getLog(resource.HeadLocation, resource.Id, function(scopedCommitsJsonData, secondArg) {
+							navigator.renderer.setIncomingCommits(scopedCommitsJsonData);
+							navigator.renderer.setOutgoingCommits([]);
+							navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);	
+						});
+					});
+				} else if (resource.toRef){
+					if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1)
+						dojo.xhrGet({
+							url : resource.toRef.RemoteLocation[0].Children[0].Location,
+							headers : {
+								"Orion-Version" : "1"
+							},
+							handleAs : "json",
+							timeout : 5000,
+							load : function(remoteJsonData, secondArg) {
+								serviceRegistry.getService("orion.git.provider").then(function(gitService){
+									gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
+										navigator.renderer.setIncomingCommits([]);
+										navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
+										navigator.loadCommitsList(dojo.hash(), resource);
+									});
+								});
+							},
+							error : function(error, ioArgs){
+								navigator.loadCommitsList(dojo.hash(), resource);
+							}
+						});
+					else
+						navigator.loadCommitsList(dojo.hash(), resource);
+				} else {
+					navigator.loadCommitsList(dojo.hash(), resource);
+				}
+			};
+			
+			if(secondArg.xhr.status===200){
+				loadResource(resource);
+			} else if(secondArg.xhr.status===202){
+				var deferred = new dojo.Deferred();
+				deferred.callback(resource);
+				serviceRegistry.getService("orion.page.message").then(function(progressService) {
+					progressService.showWhile(deferred, "Getting git log").then(function(resourceData){
+						loadResource(resourceData.Result.JsonData);
 					});
 				});
-			} else if (resource.toRef){
-				if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1)
-					dojo.xhrGet({
-						url : resource.toRef.RemoteLocation[0].Children[0].Location,
-						headers : {
-							"Orion-Version" : "1"
-						},
-						handleAs : "json",
-						timeout : 5000,
-						load : function(remoteJsonData, secondArg) {
-							serviceRegistry.getService("orion.git.provider").then(function(gitService){
-								gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
-									navigator.renderer.setIncomingCommits([]);
-									navigator.renderer.setOutgoingCommits(scopedCommitsJsonData);
-									navigator.loadCommitsList(dojo.hash(), resource);
-								});
-							});
-						},
-						error : function(error, ioArgs){
-							navigator.loadCommitsList(dojo.hash(), resource);
-						}
-					});
-				else
-					navigator.loadCommitsList(dojo.hash(), resource);
-			} else {
-				navigator.loadCommitsList(dojo.hash(), resource);
 			}
+			
 		},
 		error : function(error, ioArgs) {
 			if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
