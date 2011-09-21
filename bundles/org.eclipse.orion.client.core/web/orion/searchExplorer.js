@@ -109,6 +109,20 @@ define(['dojo', 'orion/explorer'], function(dojo, mExplorer) {
 		}
 	};
 	
+	SearchResultModel.prototype._fileExpanded = function(fileIndex, detailIndex){
+		var filItem = this.indexedFileItems[fileIndex];
+		if(filItem.children && filItem.children.length > 0){
+			if(detailIndex > -2){
+				if(detailIndex < 0)
+					detailIndex = 0;
+			} else {
+				detailIndex = filItem.children.length -1;
+			}
+			return  {childrenNumber: filItem.children.length, childDiv: dojo.byId(this.getId(filItem.children[detailIndex])+"NameColumn")};
+		}
+		return {childrenNumber: 0, childDiv: null};
+	};
+	
 	SearchResultModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
 		if (parentItem.children) {
 			onComplete(parentItem.children);
@@ -126,6 +140,14 @@ define(['dojo', 'orion/explorer'], function(dojo, mExplorer) {
 								  dojo.place(document.createTextNode(parentItem.name), linkUIItem, "only");
 						  }
 						  onComplete(parentItem.children);
+						  if(this.highlightSelectionLater){
+							  if(parentItem === this.indexedFileItems[this.currentFileIndex]){
+								  if(this.currentDetailIndex < -1)
+									  this.currentDetailIndex = parentItem.children.length -1;
+								  dojo.toggleClass(this._fileExpanded(this.currentFileIndex, this.currentDetailIndex).childDiv, "fileNameSelectedRow", true);
+								  this.highlightSelectionLater = false;
+							  }
+						  }
 					}),
 					dojo.hitch(this, function(error) {
 						console.error("Error loading file content: " + error.message);
@@ -267,19 +289,65 @@ define(['dojo', 'orion/explorer'], function(dojo, mExplorer) {
 			return parentChain;
 		}
 		this.findUIParentChain(targetNode.parent, parentChain);
-	},
+	};
 	
+	SearchResultExplorer.prototype._decideNext = function(next){
+		var filItem = this.model.indexedFileItems[this.model.currentFileIndex];
+		if(filItem.children && filItem.children.length > 0){
+			if(this.model.currentDetailIndex < -1)
+				this.model.currentDetailIndex = filItem.children.length - 1;
+			var newDetailIndex, newFileIndex;
+			if(next)
+				newDetailIndex = this.model.currentDetailIndex + 1;
+			else
+				newDetailIndex = this.model.currentDetailIndex - 1;
+			if(newDetailIndex < 0){
+				newFileIndex = this.model.currentFileIndex -1;
+				newDetailIndex = -100;
+			} else if(newDetailIndex > ( filItem.children.length - 1) ){
+				newFileIndex = this.model.currentFileIndex +1;
+				newDetailIndex = 0;
+			} else{
+				newFileIndex = this.model.currentFileIndex;
+			}
+			
+			if(newFileIndex < 0)
+				newFileIndex = this.model.indexedFileItems.length -1;
+			else if(newFileIndex > (this.model.indexedFileItems.length -1))
+				newFileIndex = 0;
+			
+			return {newFileIndex:newFileIndex, newDetailIndex:newDetailIndex};
+		}
+		return null;
+	};
 
 	SearchResultExplorer.prototype.gotoNext = function(next)	{
-		var filItem = this.model.indexedFileItems[this.model.currentFileIndex];
+		var curentExpanded = this.model._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex); 
+		if(curentExpanded.childDiv /*&& this.model.currentDetailIndex > -1*/)
+			dojo.toggleClass(curentExpanded.childDiv, "fileNameSelectedRow", false);
+		var nextItem = this._decideNext(next);
+		this.model.highlightSelectionLater = true;
+		if(nextItem){
+			var newExpanded = this.model._fileExpanded(nextItem.newFileIndex, nextItem.newDetailIndex); 
+			this.model.currentFileIndex = nextItem.newFileIndex;
+			this.model.currentDetailIndex = nextItem.newDetailIndex;
+			if(newExpanded.childrenNumber > 0)
+				this.model.highlightSelectionLater = false;
+			if(newExpanded.childDiv)	{
+				dojo.toggleClass(newExpanded.childDiv, "fileNameSelectedRow", true);
+				return;
+			}
+		} else if(this.model.currentDetailIndex === -1){
+			this.model.currentDetailIndex = 0;
+		}
 		var parentChain = [];
+		var filItem = this.model.indexedFileItems[this.model.currentFileIndex];
 		this.findUIParentChain(filItem, parentChain);
 		for(var i = parentChain.length -1 ; i > -1 ; i--){
 			this.myTree.expand(parentChain[i]);
 		}
-		
-		//dojo.toggleClass(filItem.getId(), "checkedRow", !!evt.target.checked);
-
+		if(!this.model.highlightSelectionLater)
+			dojo.toggleClass(this.model._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex).childDiv, "fileNameSelectedRow", true);
 	};
 	
 	SearchResultExplorer.prototype.constructor = SearchResultExplorer;
