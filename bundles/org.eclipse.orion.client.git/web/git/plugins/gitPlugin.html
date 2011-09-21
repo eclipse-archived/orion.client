@@ -4,13 +4,19 @@
 	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="/orion/plugin.js"></script>
+	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script>
 		window.onload = function() {
+			var temp = document.createElement('a');
+			
 			var provider = new eclipse.PluginProvider();
+			
+			temp.href = "/git/git-status.html";
+			var gitStatusURL = temp.href;
 			
 			provider.registerServiceProvider("orion.navigate.command", {
 				run: function(item) {
-					return "/git/git-status.html#" + item.Git.StatusLocation;
+					return gitStatusURL + "#" + item.Git.StatusLocation;
 				}
 			}, {
 				name: "Git Status",
@@ -21,9 +27,12 @@
 				forceSingleItem: true
 			});
 			
+			
+			temp.href = "/git/git-log.html";
+			var gitLogURL = temp.href;
 			provider.registerServiceProvider("orion.navigate.command", {
 				run: function(item) {
-					return "/git/git-log.html#" + item.Git.CommitLocation + "?page=1";
+					return gitLogURL + "#" + item.Git.CommitLocation + "?page=1";
 				}
 			}, {
 				name: "Git Log",
@@ -36,7 +45,7 @@
 			
 			provider.registerServiceProvider("orion.navigate.command", {
 				run : function(item) {
-					return "/git/git-log.html#" + item.Git.DefaultRemoteBranchLocation + "?page=1";
+					return gitLogURL + "#" + item.Git.DefaultRemoteBranchLocation + "?page=1";
 				}
 			}, {
 				name: "Git Remote",
@@ -47,6 +56,34 @@
 				tooltip: "Go to Git Remote"
 			});
 			
+			temp.href = "/gitapi/diff/";
+			var base = temp.href;
+			provider.registerServiceProvider("orion.core.diff", {
+				getDiffContent: function(diffURI){	
+					return dojo.xhrGet({
+						url: diffURI , 
+						headers: {
+							"Orion-Version": "1"
+						},
+						content: { "parts": "diff" },
+						handleAs: "text",
+						timeout: 15000
+					});
+				},			
+				getDiffFileURI: function(diffURI){
+					return dojo.xhrGet({
+						url: diffURI , 
+						headers: {
+							"Orion-Version": "1"
+						},
+						content: { "parts": "uris" },
+						handleAs: "json",
+						timeout: 15000
+					});
+				}
+			}, {
+				pattern: base
+			});
 			provider.connect();
 		};
 	</script>

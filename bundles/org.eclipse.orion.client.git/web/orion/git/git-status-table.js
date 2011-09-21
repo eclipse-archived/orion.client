@@ -8,9 +8,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['dojo', 'orion/compare/diff-provider', 'orion/compare/compare-container','orion/commands','orion/git/git-commit-navigator', 'orion/git/gitCommands' ,'dijit/layout/ContentPane'], function(dojo, mDiffProvider, mCompareContainer,mCommands,mGitCommitNavigator,mGitCommands) {
+define(['dojo', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/commands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'dijit/layout/ContentPane'], function(
+		dojo, mDiffProvider, mCompareContainer, mCommands, mGitCommitNavigator, mGitCommands) {
 
-var orion = orion || {};
+	var orion = orion || {};
 
 orion.GitStatusModel = (function() {
 	function GitStatusModel() {
