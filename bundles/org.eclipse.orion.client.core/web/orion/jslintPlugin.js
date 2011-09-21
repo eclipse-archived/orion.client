@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint forin:true*/
+/*jslint forin:true regexp:false*/
 /*global define require eclipse JSLINT window*/
 window.onload = function() {
 	function jslint(contents) {
@@ -19,6 +19,24 @@ window.onload = function() {
 			checkSyntax : function(title, contents) {
 				var result = jslint(contents);
 				//this.dispatchEvent("syntaxChecked", {title: title, result: result});
+				// Convert to format expected by validation service
+				var errors = result.errors;
+				if (errors) {
+					for (var i=0; i < errors.length; i++) {
+						var error = errors[i];
+						if (error) {
+							var start = error.character - 1,
+							    end = start + 1;
+							if (error.evidence) {
+								var index = error.evidence.substring(start).search(/.\b/);
+								if (index > -1) {
+									end += index;
+								}
+							}
+							error.end = end;
+						}
+					}
+				}
 				return result;
 			}
 	};
