@@ -433,7 +433,9 @@ exports.setUpEditor = function(isReadOnly){
 		}
 	};
 
-	var annotationFactory = new mEditorFeatures.AnnotationFactory("/images/problem.gif");
+	var annotationFactory = new mEditorFeatures.AnnotationFactory({
+		error: "/images/problem.gif",
+		warning: "/images/warning.gif"});
 	
 	var editor = new mEditor.Editor({
 		textViewFactory: textViewFactory,
