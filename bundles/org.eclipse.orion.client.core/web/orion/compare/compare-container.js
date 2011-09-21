@@ -35,8 +35,7 @@ exports.CompareContainer = (function() {
 		
 		getFileDiff: function(diffURI , uiCallBack , errorCallBack  ,onsave){
 			var self = this;
-			this._diffProvider.getDiffContent(diffURI, 
-										   function(jsonData, secondArg) {
+			this._diffProvider.getDiffContent(diffURI).then(function(jsonData, secondArg) {
 											  if(self._conflict){
 												  self._diff = jsonData.split("diff --git")[1];
 											  }	else {
@@ -52,8 +51,7 @@ exports.CompareContainer = (function() {
 		
 		getFileURI: function(diffURI , uiCallBack , errorCallBack ){
 			var self = this;
-			this._diffProvider.getDiffFileURI(diffURI, 
-										   function(jsonData, secondArg) {
+			this._diffProvider.getDiffFileURI(diffURI).then(function(jsonData, secondArg) {
 											  self._oldFileURI = jsonData.Git.Old;
 											  self._newFileURI = jsonData.Git.New;
 											  self.getFileContent(jsonData.Git.Old , errorCallBack);
