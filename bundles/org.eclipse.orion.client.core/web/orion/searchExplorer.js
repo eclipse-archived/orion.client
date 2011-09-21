@@ -24,7 +24,7 @@ define(['dojo', 'orion/explorer'], function(dojo, mExplorer) {
 		var isWindows = navigator.platform.indexOf("Win") !== -1;
 		this._lineDelimiter =/* isWindows ? "\r\n" :*/ "\n"; 
 	}
-	SearchResultModel.prototype = mExplorer.ExplorerModel.prototype; 
+	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
 	
 	SearchResultModel.prototype.getRoot = function(onItem){
 		onItem(this.root);
