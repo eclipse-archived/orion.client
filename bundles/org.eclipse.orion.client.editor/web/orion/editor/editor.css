@@ -15,13 +15,20 @@
 	cursor: pointer;
 }
 .annotationProblemOverview {
-	background-color: lightcoral;
-	border: 1px solid red;
 	border-radius: 2px;
 	cursor: pointer;
 	left: 2px;
 	width: 8px;
 }
+.annotationProblemOverview.error {
+	background-color: lightcoral;
+	border: 1px solid red;
+}
+.annotationProblemOverview.warning {
+	background-color: lightyellow;
+	border: 1px solid green;
+}
+
 .lineNumberRuler,
 .lineNumberRuler-odd,
 .lineNumberRuler-even {
