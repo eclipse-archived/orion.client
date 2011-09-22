@@ -15,6 +15,28 @@ window.onload = function() {
 		JSLINT(contents, {white: false, onevar: false, undef: true, nomen: false, eqeqeq: true, plusplus: false, bitwise: false, regexp: true, newcap: true, immed: true, strict: false, indent: 1});
 		return JSLINT.data();
 	}
+	
+	function cleanup(error) {
+		var warnings = [
+			["Expected '==='"],
+			["Expected '!=='"],
+			["Expected '{'", "Statement body should be inside '{ }' braces."],
+			["Do not use 'new' for side effects"],
+			["The body of a for in should be wrapped"],
+			["Don't make functions within a loop"]
+		];
+		var reason = error.reason;
+		for (var i=0; i < warnings.length; i++) {
+			var warning = warnings[i];
+			if (reason.indexOf(warning[0]) !== -1) {
+				error.severity = "warning";
+				if (warning.length > 1) {
+					error.reason = warning[1];
+				}
+			}
+		}
+	}
+	
 	var validationService = {
 			checkSyntax : function(title, contents) {
 				var result = jslint(contents);
@@ -36,6 +58,7 @@ window.onload = function() {
 								}
 							}
 							error.end = end;
+							cleanup(error);
 							problems.push(error);
 						}
 					}
