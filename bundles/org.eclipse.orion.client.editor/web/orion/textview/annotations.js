@@ -392,7 +392,7 @@ orion.textview.AnnotationStyler = (function() {
 			}
 			var view = this._view;
 			if (!view) { return; }
-			var model = view.getModel(), self = this;
+			var model = view.getModel();
 			function redraw(changes) {
 				for (var i = 0; i < changes.length; i++) {
 					if (!changes[i].rangeStyle) { continue; }

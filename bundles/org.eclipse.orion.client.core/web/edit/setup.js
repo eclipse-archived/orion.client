@@ -126,6 +126,10 @@ exports.setUpEditor = function(isReadOnly){
 							break;
 					}
 					
+					if (this.styler) {
+						editor.setFoldingEnabled(this.styler.foldingEnabled);
+					}
+					
 					if (!this.styler && syntaxHighlightProviders) {
 						var grammars = [],
 						    providerToUse;
