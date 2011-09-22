@@ -666,13 +666,17 @@ orion.GitStatusController = (function() {
 			this._loadBlock(this._stagedContentRenderer , this._model.interestedStagedGroup);
 			if(this._renderLog && this._initializing){
 				var that = this;
-				this._renderLogs(false).then(function(){
-					that._renderLogs(true);
-				});
 				
 				this._registry.getService("orion.page.command").then(function(commandService) {
-					mGitCommands.createStatusCommands(that._registry , commandService , function(){that.getGitStatus(that._url ,true);} , 9 , that._gitCommitNavigatorLog , that._gitCommitNavigatorRem);
+					mGitCommands.createStatusCommands(that._registry , commandService , function(){that.getGitStatus(that._url ,true);} , 9 , that);
+				});	
+				
+				this._renderLogs(false).then(function(){
+					that._renderLogs(true);
+					
 				});
+				
+				
 			}
 			
 			this._committerAndAuthorZoneRenderer.renderAction();
@@ -891,10 +895,25 @@ orion.GitStatusController = (function() {
 					timeout : 5000,
 					load : function(jsonData, secondArg) {
 						that._registry.getService("orion.git.provider").then(function(gitService){
-							gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArd) {
-								that._gitCommitNavigatorRem.renderer.setIncomingCommits(scopedCommitsJsonData);
-								that._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?page=1&pageSize=5", jsonData).then(function(){retDeffered.callback();});
-								that._remoteTableRenderer.renderAdditionalAction(that._gitCommitNavigatorRem._lastTreeRoot);
+							gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArg) {
+								
+									function loadScopedCommitsList(scopedCommitsJsonData){
+										that._gitCommitNavigatorRem.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
+										that._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?page=1&pageSize=5", jsonData).then(function(){retDeffered.callback();});
+										that._remoteTableRenderer.renderAdditionalAction(that._gitCommitNavigatorRem._lastTreeRoot);
+									}
+									
+									if(secondArg.xhr.status===200){
+										loadScopedCommitsList(scopedCommitsJsonData);
+									} else if(secondArg.xhr.status===202){
+										var deferred = new dojo.Deferred();
+										deferred.callback(scopedCommitsJsonData);
+										that._registry.getService("orion.page.message").then(function(progressService) {
+											progressService.showWhile(deferred, "Getting git incoming changes").then(function(scopedCommitsJsonData){
+												loadScopedCommitsList(scopedCommitsJsonData.Result.JsonData);
+											});
+										});
+									}
 							});
 						});
 					},
@@ -937,10 +956,25 @@ orion.GitStatusController = (function() {
 									load : function(remoteJsonData, secondArg) {
 										that._registry.getService("orion.git.provider").then(function(gitService){
 											gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
-												that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData);
-												that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation}).then(function(){retDeffered.callback();});
-												if(that._curRemote)
-													that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
+												function loadScopedCommitsList(scopedCommitsJsonData){
+													that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
+													that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation}).then(function(){retDeffered.callback();});
+													if(that._curRemote)
+														that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
+												}
+												
+												if(secondArg.xhr.status===200){
+													loadScopedCommitsList(scopedCommitsJsonData);
+												} else if(secondArg.xhr.status===202){
+													var deferred = new dojo.Deferred();
+													deferred.callback(scopedCommitsJsonData);
+													that._registry.getService("orion.page.message").then(function(progressService) {
+														progressService.showWhile(deferred, "Getting git incoming changes").then(function(scopedCommitsJsonData){
+															loadScopedCommitsList(scopedCommitsJsonData.Result.JsonData);
+														});
+													});
+												}
+												
 											});
 										});
 									},
