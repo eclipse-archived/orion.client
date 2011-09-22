@@ -8,28 +8,30 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+ 
+ /*global define*/
+ 
 define([], function() {
 
 var orion = orion || {};
 
 orion.OrionTextSearchAdaptor = (function() {
-	function OrionTextSearchAdaptor(editor, textView){
-		this.setEditor(editor, textView);
+	function OrionTextSearchAdaptor(editor){
+		this.setEditor(editor);
 	}	
 	OrionTextSearchAdaptor.prototype = {
-		setEditor: function(editor, textView){
+		setEditor: function(editor){
 			this._editor = editor;
-			this._textView = textView;
 		},
 		
 		getText: function() {
-			return this._textView.getText();
+			return this._editor.getText();
 		},
 		
 		getSearchStartIndex: function(reverse, flag) {
-			var currentCaretPos = this._textView.getCaretOffset();
+			var currentCaretPos = this._editor.getCaretOffset();
 			if(reverse) {
-				var selection = this._textView.getSelection();
+				var selection = this._editor.getSelection();
 				var selectionSize = (selection.end > selection.start) ? selection.end - selection.start : 0;
 				if(!flag){
 					return (currentCaretPos- selectionSize - 1) > 0 ? (currentCaretPos- selectionSize - 1) : 0 ;
@@ -40,7 +42,7 @@ orion.OrionTextSearchAdaptor = (function() {
 		},
 		
 		adaptCloseToolBar: function(){
-			this._textView.focus();
+			this._editor.getTextView().focus();
 		},
 		
 		adaptReplaceAllStart: function(){
@@ -50,28 +52,31 @@ orion.OrionTextSearchAdaptor = (function() {
 		
 		adaptReplaceAllEnd: function(succeed, number){
 			this._editor.reportStatus("", false, true);
-			if(succeed)
+			if(succeed) {
 				this._editor.reportStatus("Replaced "+number+" matches", false);
-			else
+			} else {
 				this._editor.reportStatus("Nothing replaced", true);
+			}
 		},
 		
 		adaptFind: function(startIndex, endIndex, reverse, callBack, noStatus) {
 			if(startIndex === -1){
-				if(!noStatus)
+				if(!noStatus) {
 					this._editor.reportStatus("Not found", true);
+				}
 			}
 			else {
-				if(!noStatus)
+				if(!noStatus) {
 					this._editor.reportStatus("", false);
-				this._editor.moveSelection(this._textView, startIndex, endIndex, callBack);
+				}
+				this._editor.moveSelection(startIndex, endIndex, callBack);
 			}
 		},
 		
 		adaptReplace: function(newStr, startIndex, endIndex) {
-			var selection = this._textView.getSelection();
-			this._textView.setText(newStr, selection.start, selection.end);
-			this._textView.setSelection(selection.start , selection.start + newStr.length, true);
+			var selection = this._editor.getSelection();
+			this._editor.setText(newStr, selection.start, selection.end);
+			this._editor.setSelection(selection.start , selection.start + newStr.length, true);
 		}
 	};
 	return OrionTextSearchAdaptor;

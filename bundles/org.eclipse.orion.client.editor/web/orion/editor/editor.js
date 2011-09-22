@@ -78,6 +78,101 @@ orion.editor.Editor = (function() {
 				window.alert(isError ? "ERROR: " + message : message);
 			}
 		},
+		
+		getModel: function() {
+			var model = this._textView.getModel();
+			if (model.getBaseModel) {
+				model = model.getBaseModel();
+			}
+			return model;
+		},
+		
+		mapOffset: function(offset, parent) {
+			var textView = this._textView;
+			var model = textView.getModel();
+			if (model.getBaseModel) {
+				offset = model.mapOffset(offset, parent);
+			}
+			return offset;
+		},
+		
+		getCaretOffset: function() {
+			return this.mapOffset(this._textView.getCaretOffset());
+		},
+		
+		getSelection: function() {
+			var textView = this._textView;
+			var selection = textView.getSelection();
+			var model = textView.getModel();
+			if (model.getBaseModel) {
+				selection.start = model.mapOffset(selection.start);
+				selection.end = model.mapOffset(selection.end);
+			}
+			return selection;
+		},
+		
+		getText: function(start, end) {
+			var textView = this._textView;
+			var model = textView.getModel();
+			if (model.getBaseModel) {
+				model = model.getBaseModel();
+			}
+			return model.getText(start, end);
+		},
+		
+		_expandOffset: function(offset) {
+			var model = this._textView.getModel();
+			var annotationModel = this._annotationModel;
+			if (!annotationModel || !model.getBaseModel) { return; }
+			var annotations = annotationModel.getAnnotations(offset, offset + 1);
+			while (annotations.hasNext()) {
+				var annotation = annotations.next();
+				if (annotation.type === "orion.annotation.folding") {
+					if (annotation.expand) {
+						annotation.expand();
+						annotationModel.modifyAnnotation(annotation);
+					}
+				}
+			}
+		},
+
+		setCaretOffset: function(caretOffset) {
+			var textView = this._textView;
+			var model = textView.getModel();
+			if (model.getBaseModel) {
+				this._expandOffset(caretOffset);
+				caretOffset = model.mapOffset(caretOffset, true);
+			}
+			textView.setCaretOffset(caretOffset);
+		},
+	
+		setText: function(text, start, end) {
+			var textView = this._textView;
+			var model = textView.getModel();
+			if (model.getBaseModel) {
+				if (start !== undefined) {
+					this._expandOffset(start);
+					start = model.mapOffset(start, true);
+				}
+				if (end !== undefined) {
+					this._expandOffset(end);
+					end = model.mapOffset(end, true);
+				}
+			}
+			textView.setText(text, start, end);
+		},
+		
+		setSelection: function(start, end, show) {
+			var textView = this._textView;
+			var model = textView.getModel();
+			if (model.getBaseModel) {
+				this._expandOffset(start);
+				this._expandOffset(end);
+				start = model.mapOffset(start, true);
+				end = model.mapOffset(end, true);
+			}
+			textView.setSelection(start, end, show);
+		},
 				
 		/**
 		 * @static
@@ -87,12 +182,14 @@ orion.editor.Editor = (function() {
 		 * @param {function} callBack A call back function that is used after the move animation is done
 		 * @private
 		 */
-		moveSelection: function(textView, start, end, callBack) {
+		moveSelection: function(start, end, callBack) {
 			end = end || start;
-			textView.setSelection(start, end, false);
+			var textView = this._textView;
+			this.setSelection(start, end, false);
 			var topPixel = textView.getTopPixel();
 			var bottomPixel = textView.getBottomPixel();
-			var line = textView.getModel().getLineAtOffset(start);
+			var model = this.getModel();
+			var line = model.getLineAtOffset(start);
 			var linePixel = textView.getLinePixel(line);
 			if (linePixel < topPixel || linePixel > bottomPixel) {
 				var height = bottomPixel - topPixel;
@@ -107,25 +204,18 @@ orion.editor.Editor = (function() {
 					onEnd: function() {
 						textView.showSelection();
 						textView.focus();
-						if(callBack)
+						if(callBack) {
 							callBack();
+						}
 					}
 				});
 				a.play();
 			} else {
 				textView.showSelection();
 				textView.focus();
-				if(callBack)
+				if(callBack) {
 					callBack();
-			}
-		},
-		/**
-		 * Returns the current contents of the editor. 
-		 * @returns {String}
-		 */
-		getContents : function() {
-			if (this._textView) {
-				return this._textView.getText();
+				}
 			}
 		},
 		/**
@@ -145,7 +235,8 @@ orion.editor.Editor = (function() {
 		},
 		
 		/**
-		 * @returns {Object}
+		 * 
+		 * @returns {orion.textview.AnnotationModel}
 		 */
 		getAnnotationModel : function() {
 			return this._annotationModel;
@@ -154,16 +245,16 @@ orion.editor.Editor = (function() {
 		/**
 		 * Helper for finding occurrences of str in the editor contents.
 		 * @param {String} str
-		 * @param {Number} startIndex
-		 * @param {Boolean} [ignoreCase] Default is false.
-		 * @param {Boolean} [reverse] Default is false.
+		 * @param {Number} searchStart offset in the base model where the search should start
+		 * @param {Boolean} [ignoreCase=false] whether or not the search is case sensitive
+		 * @param {Boolean} [reverse=false] whether the search should be backwards
 		 * @return {Object} An object giving the match details, or <code>null</code> if no match found. The returned 
 		 * object will have the properties:<br />
 		 * {Number} index<br />
 		 * {Number} length 
 		 */
-		doFind: function(str, startIndex, ignoreCase, reverse) {
-			var text = this._textView.getText();
+		doFind: function(str, searchStart, ignoreCase, reverse) {
+			var text = this.getContents();
 			if (ignoreCase) {
 				str = str.toLowerCase();
 				text = text.toLowerCase();
@@ -173,13 +264,13 @@ orion.editor.Editor = (function() {
 			if (reverse) {
 				text = text.split("").reverse().join("");
 				str = str.split("").reverse().join("");
-				startIndex = text.length - startIndex - 1;
-				i = text.indexOf(str, startIndex);
+				searchStart = text.length - searchStart - 1;
+				i = text.indexOf(str, searchStart);
 				if (i !== -1) {
 					return {index: text.length - str.length - i, length: str.length};
 				}
 			} else {
-				i = text.indexOf(str, startIndex);
+				i = text.indexOf(str, searchStart);
 				if (i !== -1) {
 					return {index: i, length: str.length};
 				}
@@ -191,14 +282,14 @@ orion.editor.Editor = (function() {
 		 * Helper for finding regex matches in the editor contents. Use {@link #doFind} for simple string searches.
 		 * @param {String} pattern A valid regexp pattern.
 		 * @param {String} flags Valid regexp flags: [is]
-		 * @param {Number} [startIndex] Default is false.
-		 * @param {Boolean} [reverse] Default is false.
+		 * @param {Number} searchStart offset in the base model where the search should start
+		 * @param {Boolean} [reverse=false] whether the search should be backwards
 		 * @return {Object} An object giving the match details, or <code>null</code> if no match found. The returned object
 		 * will have the properties:<br />
 		 * {Number} index<br />
 		 * {Number} length 
 		 */
-		doFindRegExp: function(pattern, flags, startIndex, reverse) {
+		doFindRegExp: function(pattern, flags, searchStart, reverse) {
 			if (!pattern) {
 				return null;
 			}
@@ -207,21 +298,21 @@ orion.editor.Editor = (function() {
 			// 'g' makes exec() iterate all matches, 'm' makes ^$ work linewise
 			flags += (flags.indexOf("g") === -1 ? "g" : "") + (flags.indexOf("m") === -1 ? "m" : "");
 			var regexp = new RegExp(pattern, flags);
-			var text = this._textView.getText();
+			var text = this.getContents();
 			var result = null,
 			    match = null;
 			if (reverse) {
 				while (true) {
 					result = regexp.exec(text);
-					if (result && result.index <= startIndex) {
+					if (result && result.index <= searchStart) {
 						match = {index: result.index, length: result[0].length};
 					} else {
 						return match;
 					}
 				}
 			} else {
-				result = regexp.exec(text.substring(startIndex));
-				return result && {index: result.index + startIndex, length: result[0].length};
+				result = regexp.exec(text.substring(searchStart));
+				return result && {index: result.index + searchStart, length: result[0].length};
 			}
 		},
 		
@@ -263,8 +354,7 @@ orion.editor.Editor = (function() {
 				this._keyModes.push(this._contentAssist);
 			}
 			
-			var editor = this,
-				textView = this._textView;
+			var editor = this, textView = this._textView;
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
@@ -310,8 +400,8 @@ orion.editor.Editor = (function() {
 						
 			/** @this {orion.editor.Editor} */
 			function updateCursorStatus() {
-				var model = textView.getModel();
-				var caretOffset = textView.getCaretOffset();
+				var model = this.getModel();
+				var caretOffset = this.getCaretOffset();
 				var lineIndex = model.getLineAtOffset(caretOffset);
 				var lineStart = model.getLineStart(lineIndex);
 				var offsetInLine = caretOffset - lineStart;
@@ -322,7 +412,7 @@ orion.editor.Editor = (function() {
 						return;
 					}
 				}
-				this.reportStatus("Line " + (lineIndex + 1) + " : Col " + offsetInLine);
+				this.reportStatus("Line " + (lineIndex + 1) + " : Col " + (offsetInLine + 1));
 			}
 			
 			// Listener for dirty state
@@ -342,14 +432,9 @@ orion.editor.Editor = (function() {
 					if (lineIndex === -1) { return; }
 					var viewModel = textView.getModel();
 					var annotationModel = this.getAnnotationModel();
-					var baseModel = annotationModel.getTextModel();
 					var lineStart = viewModel.getLineStart(lineIndex);
 					var lineEnd = viewModel.getLineEnd(lineIndex);
-					if (viewModel !== baseModel) {
-						lineStart = viewModel.mapOffset(lineStart);
-						lineEnd = viewModel.mapOffset(lineEnd);
-					}
-					var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
+					var annotations = annotationModel.getAnnotations(editor.mapOffset(lineStart), editor.mapOffset(lineEnd));
 					var annotation = annotations.next();
 					if (annotation) {
 						editor.onGotoLine(lineIndex, annotation.start - lineStart, annotation.end - lineStart);
@@ -359,7 +444,8 @@ orion.editor.Editor = (function() {
 				this._overviewRuler = annotations.overviewRuler;
 				this._overviewRuler.onClick = function(lineIndex, e) {
 					if (lineIndex === undefined) { return; }
-					editor.moveSelection(textView, textView.getModel().getLineStart(lineIndex));
+					var offset = textView.getModel().getLineStart(lineIndex);
+					editor.moveSelection(editor.mapOffset(offset));
 				};
 			
 				textView.addRuler(this._annotationsRuler);
@@ -392,22 +478,23 @@ orion.editor.Editor = (function() {
 		 * @param {Number} offset
 		 * @param {Number} length
 		 */
-		showSelection : function(start, end, line, offset, length) {
+		showSelection: function(start, end, line, offset, length) {
 			// We use typeof because we need to distinguish the number 0 from an undefined or null parameter
 			if (typeof(start) === "number") {
 				if (typeof(end) !== "number") {
 					end = start;
 				}
-				this.moveSelection(this._textView, start, end);
+				this.moveSelection(start, end);
 			} else if (typeof(line) === "number") {
-				var pos = this._textView.getModel().getLineStart(line-1);
+				var model = this.getModel();
+				var pos = model.getLineStart(line-1);
 				if (typeof(offset) === "number") {
 					pos = pos + offset;
 				}
 				if (typeof(length) !== "number") {
 					length = 0;
 				}
-				this.moveSelection(this._textView, pos, pos+length);
+				this.moveSelection(pos, pos+length);
 			}
 		},
 		
@@ -440,31 +527,33 @@ orion.editor.Editor = (function() {
 				this._textView.focus();
 			}
 		},
-		
 		/**
 		 * Reveals a line in the editor, and optionally selects a portion of the line.
-		 * @param {Number} line
+		 * @param {Number} line - document base line index
 		 * @param {Number|String} column
 		 * @param {Number} [end]
 		 */
-		onGotoLine : function (line, column, end) {
+		onGotoLine: function(line, column, end) {
 			if (this._textView) {
-				var lineStart = this._textView.getModel().getLineStart(line);
+				var model = this.getModel();
+				var lineStart = model.getLineStart(line);
+				var start = 0;
+				if (end === undefined) {
+					end = 0;
+				}
 				if (typeof column === "string") {
-					var index = this._textView.getModel().getLine(line).indexOf(column);
+					var index = model.getLine(line).indexOf(column);
 					if (index !== -1) {
-						end = index + column.length;
-						column = index;
-					} else {
-						column = 0;
+						start = index;
+						end = start + column.length;
 					}
+				} else {
+					start = column;
+					var lineLength = model.getLineEnd(line) - lineStart;
+					start = Math.min(start, lineLength);
+					end = Math.min(end, lineLength);
 				}
-				var col = Math.min(this._textView.getModel().getLineEnd(line), column);
-				if (end===undefined) {
-					end = col;
-				}
-				var offset = lineStart + col;
-				this.moveSelection(this._textView, offset, lineStart + end);
+				this.moveSelection(lineStart + start, lineStart + end);
 			}
 		},
 		

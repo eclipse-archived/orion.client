@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window widgets eclipse:true orion:true serviceRegistry dojo dijit */
+/*global window widgets eclipse:true orion:true serviceRegistry dojo dijit define */
 /*jslint maxerr:150 browser:true devel:true regexp:false*/
 
 
@@ -46,11 +46,7 @@ exports.EditorCommandFactory = (function() {
 			if (!this.isReadOnly) {
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "Save");
 				editor.getTextView().setAction("Save", dojo.hitch(this, function () {
-					var model = editor.getTextView().getModel();
-					if (model.getBaseModel) {
-						model = model.getBaseModel();
-					}
-					var contents = model.getText();
+					var contents = editor.getText();
 					var etag = this.inputManager.getFileMetadata().ETag;
 					var args = { "ETag" : etag };
 					this.fileClient.write(this.inputManager.getInput(), contents, args).then(
@@ -132,28 +128,28 @@ exports.EditorCommandFactory = (function() {
 						for (var j = 0; j < propertyNames.length; j++) {
 							info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
 						}
-						var editorWidget = editor.getTextView();
 						var command = new mCommands.Command({
 							name: info.name,
 							image: info.img,
 							id: info.name,
 							callback: dojo.hitch(editor, function(editor) {
 								// command service will provide editor parameter but editor widget callback will not
-								var editorWidget = editor ? editor.getTextView() : this.getTextView();
-								var text = editorWidget.getText();
-								var selection = editorWidget.getSelection();
-								service.run(editorWidget.getText(selection.start,selection.end),text,selection).then(function(result){
+								var editor = editor || this;
+								var selection = editor.getSelection();
+								var model = editor.getModel();
+								var text = model.getText();
+								service.run(model.getText(selection.start,selection.end),text,selection).then(function(result){
 									if (result.text) {
-										editorWidget.setText(result.text);
+										editor.setText(result.text);
 										if (result.selection) {
-											editorWidget.setSelection(result.selection.start, result.selection.end);
-											editorWidget.focus();
+											editor.setSelection(result.selection.start, result.selection.end);
+											editor.getTextView().focus();
 										}
 									} else {
 										if (typeof result === 'string') {
-											editorWidget.setText(result, selection.start, selection.end);
-											editorWidget.setSelection(selection.start, selection.end);
-											editorWidget.focus();
+											editor.setText(result, selection.start, selection.end);
+											editor.setSelection(selection.start, selection.end);
+											editor.getTextView().focus();
 										}
 									}
 								});
@@ -173,8 +169,9 @@ exports.EditorCommandFactory = (function() {
 						mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
 						if (info.key) {
 							// add it to the editor as a keybinding
-							editorWidget.setKeyBinding(createKeyBinding(info.key), command.id);
-							editorWidget.setAction(command.id, command.callback);
+							var textView = editor.getTextView();
+							textView.setKeyBinding(createKeyBinding(info.key), command.id);
+							textView.setAction(command.id, command.callback);
 						}
 					}));
 				}
