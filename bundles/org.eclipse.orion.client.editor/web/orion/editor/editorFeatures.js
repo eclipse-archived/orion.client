@@ -329,17 +329,21 @@ orion.editor.TextActions = (function() {
 				var selection = editor.getSelection();
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-				var lines = [];
+				var lines = [], removeCount = 0;
 				for (var i = firstLine; i <= lastLine; i++) {
 					var line = model.getLine(i, true);
-					if (line.indexOf("\t") !== 0) { return false; }
-					lines.push(line.substring(1));
+					if (model.getLineStart(i) !== model.getLineEnd(i)) {
+						if (line.indexOf("\t") !== 0) { return false; }
+						line = line.substring(1);
+						removeCount++;
+					}
+					lines.push(line);
 				}
-				var firstLineStart = model.getLineStart(firstLine);
+				var lineStart = model.getLineStart(firstLine);
+				var lineEnd = model.getLineEnd(lastLine, true);
 				var lastLineStart = model.getLineStart(lastLine);
-				var lastLineEnd = model.getLineEnd(lastLine, true);
-				editor.setText(lines.join(""), firstLineStart, lastLineEnd);
-				editor.setSelection(firstLineStart === selection.start ? selection.start : selection.start - 1, selection.end - (lastLine - firstLine + 1) + (selection.end === lastLineStart+1 ? 1 : 0));
+				editor.setText(lines.join(""), lineStart, lineEnd);
+				editor.setSelection(lineStart === selection.start ? selection.start : selection.start - 1, selection.end - removeCount + (selection.end === lastLineStart+1 ? 1 : 0));
 				return true;
 			}.bind(this));
 			
