@@ -805,12 +805,12 @@ eclipse.GitService = (function() {
 					load : function(jsonData, secondArg) {
 						if (onLoad) {
 							if (typeof onLoad === "function")
-								onLoad(jsonData.Children, secondArg);
+								onLoad(jsonData, secondArg);
 							else
 								service._serviceRegistration.dispatchEvent(onLoad,
-										jsonData.Children);
+										jsonData);
 						}
-						return jsonData.Children;
+						return jsonData;
 					},
 					error : function(error, ioArgs) {
 						mAuth.handleGetAuthenticationError(this, ioArgs);
