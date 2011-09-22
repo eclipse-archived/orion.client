@@ -20,9 +20,11 @@ window.onload = function() {
 				var result = jslint(contents);
 				//this.dispatchEvent("syntaxChecked", {title: title, result: result});
 				// Convert to format expected by validation service
-				var errors = result.errors;
-				if (errors) {
-					for (var i=0; i < errors.length; i++) {
+				var problems = [];
+				var i;
+				if (result.errors) {
+					var errors = result.errors;
+					for (i=0; i < errors.length; i++) {
 						var error = errors[i];
 						if (error) {
 							var start = error.character - 1,
@@ -34,10 +36,23 @@ window.onload = function() {
 								}
 							}
 							error.end = end;
+							problems.push(error);
 						}
 					}
 				}
-				return result;
+				
+				if (result.unused) {
+					for (i=0; i < result.unused.length; i++) {
+						var unused = result.unused[i];
+						problems.push({
+							reason: "Unused variable '" + unused.name + "'.",
+							line: unused.line,
+							character: 1,
+							severity: "warning"
+						});
+					}
+				}
+				return { problems: problems };
 			}
 	};
 	

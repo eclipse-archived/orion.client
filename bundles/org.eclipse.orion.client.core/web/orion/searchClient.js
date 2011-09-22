@@ -12,7 +12,7 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/fileClient', 'orion/searchExplorer', 'orion/commands', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(dojo, dijit, mAuth, mUtil, mFileClient, mExplorer, mCommands){
+define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExplorer', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(dojo, dijit, mAuth, mUtil, mExplorer){
 
 	/**
 	 * Creates a new search client.
@@ -35,8 +35,9 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/fileClient', 'orion/
 		 * @param {Boolean} [generateHeading] generate a heading for the results
 		 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
 		 * @param {Boolean} [hideSummaries] Don't show the summary of what matched beside each result.
+		 * @param {Boolean} [useFlatList] Use flat list to show the result, other wise use a tree structure.
 		 */
-		search: function(resultsNode, query, excludeFile,  generateHeadingAndSaveLink, onResultReady,  hideSummaries) {
+		search: function(resultsNode, query, excludeFile,  generateHeadingAndSaveLink, onResultReady,  hideSummaries, useFlatList) {
 			dojo.xhrGet({
 				url: query,
 				handleAs: "json",
@@ -56,7 +57,7 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/fileClient', 'orion/
 				}),
 				load: dojo.hitch(this, function(jsonData) {
 					this.showSearchResult(resultsNode, query, excludeFile, generateHeadingAndSaveLink, onResultReady, 
-							hideSummaries, jsonData); 
+							hideSummaries, useFlatList, jsonData); 
 				})
 			});
 		},
@@ -130,140 +131,20 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/fileClient', 'orion/
 			return div;
 		},
 		
-		_findExistingParent: function(parents, index){
-			var parentLocation = parents[index].Location;
-			var parentValue = this._searchExplorer.model.modelLocHash[parentLocation];
-			if(parentValue)
-				return {parent: parentValue, index: index};
-			if(index === (parents.length - 1))
-				return null;
-			return this._findExistingParent(parents, index+1);
+		showSearchResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, useFlatList, jsonData) {
+			if(useFlatList)
+				this.showSearchResultInList(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData);
+			else
+				this.showSearchResultInTree(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData);
 		},
 		
-		buildResultModelTree: function(resultsNode, fileClient, locations){
-			this._resultRoot = {
-				searchStr: this._query.split("?")[1].split("=")[1],
-				isRoot: true,
-				children:[]
-			};
-			this._searchExplorer = new mExplorer.SearchResultExplorer(this.registry, fileClient, this._resultRoot, resultsNode.id);
-			for(var i = 0; i < this._resultLocation.length; i++){
-				if(!this._resultLocation[i].metaData)
-					continue;
-				var parents = this._resultLocation[i].metaData.Parents;
-				var existingParent = this._findExistingParent(parents, 0);
-				var parentIndex, parent;
-				if(existingParent){
-					parent = existingParent.parent;
-					parentIndex = existingParent.index;
-				} else {
-					parent = this._resultRoot;
-					parentIndex = parents.length;
-				}
-				
-				//add parents chain top down if needed
-				if(parentIndex > 0){
-					for(var j = parentIndex - 1; j > -1; j--){
-						var parentNode = {parent: parent, children: [], type: "dir", name: parents[j].Name, location: parents[j].Location};
-						parent.children.push(parentNode);
-						mUtil.processSearchResultParent(parent);
-						this._searchExplorer.model.modelLocHash[parents[j].Location] = parentNode;
-						parent = parentNode;
-					}
-				}
-				
-				//Add the search result (file) as leaf node
-				var childNode = {parent: parent, type: "file", name: this._resultLocation[i].name, linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location};
-				this._searchExplorer.model.modelLocHash[childNode.location] = childNode;
-				parent.children.push(childNode);
-				mUtil.processSearchResultParent(parent);
-			}
-			this._searchExplorer.model.prepareFileItems();
-			this._searchExplorer.renderTree(resultsNode);
-			this._searchExplorer.gotoNext(true);
-			
-		},
-		
-		loadOneFileMetaData: function(resultsNode, fileClient, locations, index){
-			var that = this;
-			var item = locations[index];
-			fileClient.read(item.location, true).then(
-					dojo.hitch(this, function(meta) {
-						  item.metaData = meta;
-					      if(index === (locations.length-1)){			 
-					    	  this.buildResultModelTree(resultsNode, fileClient, locations); 
-					      } else {
-							  this.loadOneFileMetaData(resultsNode, fileClient, locations, index+1);
-					      }
-					}),
-					dojo.hitch(this, function(error) {
-						console.error("Error loading file metadata: " + error.message);
-					      if(index === (locations.length-1)){			 
-					    	  this.buildResultModelTree(resultsNode); 
-					      } else {
-							  this.loadOneFileMetaData(resultsNode, fileClient, locations, index+1);
-					      }
-					})
-			);
-		},
-
-		_initCommands: function(){	
-			var that = this;
-			var nextResultCommand = new mCommands.Command({
-				name : "Next result",
-				image : "/images/move_down.gif",
-				id: "orion.search.nextResult",
-				groupId: "orion.searchGroup",
-				callback : function() {
-					that._searchExplorer.gotoNext(true);
-			}});
-			var prevResultCommand = new mCommands.Command({
-				name : "Previous result",
-				image : "/images/move_up.gif",
-				id: "orion.search.prevResult",
-				groupId: "orion.searchGroup",
-				callback : function() {
-					that._searchExplorer.gotoNext(false);
-			}});
-			var expandAllCommand = new mCommands.Command({
-				name : "Expand all results",
-				image : "/images/add.gif",
-				id: "orion.search.expandAll",
-				groupId: "orion.searchGroup",
-				callback : function() {
-					that._searchExplorer.expandAll();
-			}});
-			var collapseAllCommand = new mCommands.Command({
-				name : "Collapse all results",
-				image : "/images/delete.gif",
-				id: "orion.search.collapseAll",
-				groupId: "orion.searchGroup",
-				callback : function() {
-					that._searchExplorer.collapseAll();
-			}});
-			this._commandService.addCommand(nextResultCommand, "dom");
-			this._commandService.addCommand(prevResultCommand, "dom");
-			this._commandService.addCommand(expandAllCommand, "dom");
-			this._commandService.addCommand(collapseAllCommand, "dom");
-				
-			// Register command contributions
-			this._commandService.registerCommandContribution("orion.search.nextResult", 1, "pageActionsRight");
-			this._commandService.registerCommandContribution("orion.search.prevResult", 2, "pageActionsRight");
-			this._commandService.registerCommandContribution("orion.search.expandAll", 3, "pageActionsRight");
-			this._commandService.registerCommandContribution("orion.search.collapseAll", 4, "pageActionsRight");
-			dojo.empty("pageActionsRight");
-			this._commandService.renderCommands("pageActionsRight", "dom", that, that, "image");
-		},
-		
-		showSearchResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
+		showSearchResultInTree: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
 			// WORKAROUND - window.location.hostname is returning "http://localhost:8080/localhost" in FF 3.6.10 
 			// surely there is a better way
 			var nonhash= window.location.href.split('#')[0];
 			var hostname = nonhash.substring(0,nonhash.length - window.location.pathname.length);
 			var foundValidHit = false;
-			var fileClient = new mFileClient.FileClient(this.registry);
-			this._resultLocation = [];
-			this._query = query;
+			var resultLocation = [];
 			dojo.empty(resultsNode);
 			var token = jsonData.responseHeader.params.q;
 			token= token.substring(token.indexOf("}")+1);
@@ -284,7 +165,7 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/fileClient', 'orion/
 						} else {
 							loc = hit.Location;
 						}
-						this._resultLocation.push({linkLocation: hostname + "/edit/edit.html#" + loc, location: loc, name: hit.Name});
+						resultLocation.push({linkLocation: hostname + "/edit/edit.html#" + loc, location: loc, name: hit.Name});
 						
 					}
 				}
@@ -297,20 +178,18 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/fileClient', 'orion/
 				var b = dojo.create("b", null, div, "last");
 				dojo.place(document.createTextNode(token), b, "only");
 			} else {
-				this._initCommands();
-				this.loadOneFileMetaData(resultsNode, fileClient, this._resultLocation, 0);
+				var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query.split("?")[1].split("=")[1]);
+				explorer.initCommands();
+				explorer.startUp();
 			}
-		}
-		/*
-		showSearchResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
+		},
+		
+		showSearchResultInList: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
 			// WORKAROUND - window.location.hostname is returning "http://localhost:8080/localhost" in FF 3.6.10 
 			// surely there is a better way
 			var nonhash= window.location.href.split('#')[0];
 			var hostname = nonhash.substring(0,nonhash.length - window.location.pathname.length);
 			var foundValidHit = false;
-			var that = this;
-			var fileClient = new mFileClient.FileClient(this.registry);
-			this._resultLocation = [];
 			dojo.empty(resultsNode);
 			var token = jsonData.responseHeader.params.q;
 			token= token.substring(token.indexOf("}")+1);
@@ -347,7 +226,6 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/fileClient', 'orion/
 						}
 						hitLink.setAttribute('href', hostname + "/edit/edit.html#" + loc);
 						col.appendChild(hitLink);
-						this._resultLocation.push({linkLocation: hitLink, location: loc, name: hit.Name});
 						
 						if (!hideSummaries && jsonData.highlighting && jsonData.highlighting[hit.Id] && jsonData.highlighting[hit.Id].Text) {
 							var highlightText = jsonData.highlighting[hit.Id].Text[0];
@@ -367,11 +245,9 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/fileClient', 'orion/
 				var div = dojo.place("<div>No matches found for </div>", resultsNode, "only");
 				var b = dojo.create("b", null, div, "last");
 				dojo.place(document.createTextNode(token), b, "only");
-			} else {
-				that.loadOneFileMetaData(resultsNode, fileClient, that._resultLocation, 0);
-			}
+			} 
 		}
-		*/
+		
 	};
 	Searcher.prototype.constructor = Searcher;
 	//return module exports

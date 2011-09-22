@@ -37,7 +37,7 @@ dojo.addOnLoad(function() {
 	// Git operations
 	new mGitClient.GitService(serviceRegistry);
 	
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 
 	// define the command contributions - where things appear, first the groups
 	commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");

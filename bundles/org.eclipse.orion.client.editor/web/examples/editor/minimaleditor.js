@@ -26,8 +26,9 @@ window.onload = function(){
 		});
 	};
 	
-	var annotationFactory = new orion.editor.AnnotationFactory("images/problem.gif");
-
+	var annotationFactory = new orion.editor.AnnotationFactory({
+		error: "/images/problem.gif",
+		warning: "/images/warning.gif"});
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 		
