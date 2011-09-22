@@ -174,10 +174,7 @@ exports.setUpEditor = function(isReadOnly){
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 		
 		var model = new mTextModel.TextModel();
-		/* Folding is disabled for now until key bindings and search are fixed */ 
-		if (false) {
-			model = new mProjectionTextModel.ProjectionTextModel(model);
-		}
+		model = new mProjectionTextModel.ProjectionTextModel(model);
 		var textViewFactory = function() {
 			return new mTextView.TextView({
 				parent: editorDomNode,
@@ -493,12 +490,12 @@ exports.setUpEditor = function(isReadOnly){
 				filteredProviders.push(serviceReference);
 			}
 		}
-		outlineService.setOutlineProviders(filteredProviders, editor.getContents(), editor.getTitle());
+		outlineService.setOutlineProviders(filteredProviders, editor.getText(), editor.getTitle());
 		outliner.setOutlineProviders(filteredProviders);
 	});
 	dojo.connect(outliner, "setSelectedProvider", function(/**ServiceReference*/ outlineProvider) {
 		outlineService.setProvider(outlineProvider);
-		outlineService.emitOutline(editor.getContents(), editor.getTitle());
+		outlineService.emitOutline(editor.getText(), editor.getTitle());
 	});
 	
 	window.onbeforeunload = function() {

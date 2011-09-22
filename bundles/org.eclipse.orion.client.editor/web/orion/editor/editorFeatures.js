@@ -154,37 +154,41 @@ orion.editor.TextActions = (function() {
 		this._incrementalFindIgnoreSelection = false;
 		this._incrementalFindPrefix = "";
 		this._searcher =  searcher;
-		if(this._searcher)
-			this._searcher.getAdaptor().setEditor(this.editor, this.textView);
-
+		if(this._searcher) {
+			this._searcher.getAdaptor().setEditor(this.editor);
+		}
 		this.init();
 	}
 	TextActions.prototype = {
 		init: function() {
 			this._incrementalFindListener = {
-				onVerify: function(event){
+				onVerify: function(e){
 					/** @returns {String} with regex special characters escaped. */
 					function regexpEscape(/**String*/ str) {
 						return str.replace(/([\\$\^*\/+?\.\(\)|{}\[\]])/g, "\\$&");
 					}
-					var prefix = this._incrementalFindPrefix,
-						txt = this.textView.getText(event.start, event.end),
-						match = prefix.match(new RegExp("^"+regexpEscape(txt), "i"));
+					var editor = this.editor;
+					var model = editor.getModel();
+					var start = editor.mapOffset(e.start), end = editor.mapOffset(e.end);
+					var txt = model.getText(start, end);
+					var prefix = this._incrementalFindPrefix;
+					var match = prefix.match(new RegExp("^"+regexpEscape(txt), "i"));
 					if (match && match.length > 0) {
-						prefix = this._incrementalFindPrefix += event.text;
+						prefix = this._incrementalFindPrefix += e.text;
 						this.editor.reportStatus("Incremental find: " + prefix);
 						var ignoreCase = prefix.toLowerCase() === prefix;
-						var result = this.editor.doFind(prefix, this.textView.getSelection().start, ignoreCase);
+						var searchStart = editor.getSelection().start;
+						var result = editor.doFind(prefix, searchStart, ignoreCase);
 						if (result) {
 							this._incrementalFindSuccess = true;
 							this._incrementalFindIgnoreSelection = true;
-							this.editor.moveSelection(this.textView, result.index, result.index+result.length);
+							editor.moveSelection(result.index, result.index+result.length);
 							this._incrementalFindIgnoreSelection = false;
 						} else {
-							this.editor.reportStatus("Incremental find: " + prefix + " (not found)", true);
+							editor.reportStatus("Incremental find: " + prefix + " (not found)", true);
 							this._incrementalFindSuccess = false;
 						}
-						event.text = null;
+						e.text = null;
 					} else {
 					}
 				}.bind(this),
@@ -198,62 +202,69 @@ orion.editor.TextActions = (function() {
 			// These variables are used among the various find actions:
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("f", true), "Find...");
 			this.textView.setAction("Find...", function() {
-				if(!this._searcher)
-					return false;
-				var selection = this.textView.getSelection();
-				var searchString = "";
-				if (selection.end > selection.start) {
-					searchString = this.textView.getText(selection.start, selection.end);
+				if (this._searcher) {
+					var editor = this.editor;
+					var selection = editor.getSelection();
+					var searchString = "";
+					if (selection.end > selection.start) {
+						var model = editor.getModel();
+						searchString = model.getText(selection.start, selection.end);
+					}
+					this._searcher.buildToolBar(searchString);
+					return true;
 				}
-				this._searcher.buildToolBar(searchString);
-				return true;
+				return false;
 			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true), "Find Next Occurrence");
 			this.textView.setAction("Find Next Occurrence", function() {
-				if(this._searcher){
+				if (this._searcher){
 					this._searcher.findNext(true);
+					return true;
 				}
-				return true;
+				return false;
 			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true, true), "Find Previous Occurrence");
 			this.textView.setAction("Find Previous Occurrence", function() {
-				if(this._searcher){
+				if (this._searcher){
 					this._searcher.findNext(false);
+					return true;
 				}
-				return true;
+				return false;
 			}.bind(this));
 
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("j", true), "Incremental Find");
 			this.textView.setAction("Incremental Find", function() {
-				if(this._searcher && this._searcher.visible())
+				if (this._searcher && this._searcher.visible()) {
 					return true;
+				}
+				var editor = this.editor;
 				if (!this._incrementalFindActive) {
-					this.textView.setCaretOffset(this.textView.getCaretOffset());
+					editor.setCaretOffset(editor.getCaretOffset());
 					this.toggleIncrementalFind();
 				} else {
-					var p = this._incrementalFindPrefix;
-					if (p.length !== 0) {
-						var start = this.textView.getSelection().start + 1;
-						if (this._incrementalFindSuccess === false) {
-							start = 0;
-						}
-						
-						var caseInsensitive = p.toLowerCase() === p;
+					var prefix = this._incrementalFindPrefix;
+					if (prefix.length !== 0) {
 						var result;
-						if(this._searcher)
-							result = _searcher.findNext(true, p);
-						else
-							result = this.editor.doFind(p, start, caseInsensitive);
+						if (this._searcher) {
+							result = this._searcher.findNext(true, prefix);
+						} else {
+							var searchStart = 0;
+							if (this._incrementalFindSuccess) {
+								searchStart = editor.getSelection().start + 1;
+							}
+							var caseInsensitive = prefix.toLowerCase() === prefix;
+							result = editor.doFind(prefix, searchStart, caseInsensitive);
+						}
 						if (result) {
 							this._incrementalFindSuccess = true;
 							this._incrementalFindIgnoreSelection = true;
-							this.editor.moveSelection(this.textView, result.index, result.index + result.length);
+							editor.moveSelection(result.index, result.index + result.length);
 							this._incrementalFindIgnoreSelection = false;
-							this.editor.reportStatus("Incremental find: " + p);
+							editor.reportStatus("Incremental find: " + prefix);
 						} else {
-							this.editor.reportStatus("Incremental find: " + p + " (not found)", true);
+							editor.reportStatus("Incremental find: " + prefix + " (not found)", true);
 							this._incrementalFindSuccess = false;
 						}
 					}
@@ -262,199 +273,204 @@ orion.editor.TextActions = (function() {
 			}.bind(this));
 			this.textView.setAction("deletePrevious", function() {
 				if (this._incrementalFindActive) {
-					var p = this._incrementalFindPrefix;
-					p = this._incrementalFindPrefix = p.substring(0, p.length-1);
-					if (p.length===0) {
+					var editor = this.editor;
+					var prefix = this._incrementalFindPrefix;
+					prefix = this._incrementalFindPrefix = prefix.substring(0, prefix.length-1);
+					if (prefix.length===0) {
 						this._incrementalFindSuccess = true;
 						this._incrementalFindIgnoreSelection = true;
-						this.textView.setCaretOffset(this.textView.getSelection().start);
+						editor.setCaretOffset(editor.getSelection().start);
 						this._incrementalFindIgnoreSelection = false;
 						this.toggleIncrementalFind();
 						return true;
 					}
-					this.editor.reportStatus("Incremental find: " + p);
-					var index = this.textView.getText().lastIndexOf(p, this.textView.getCaretOffset() - p.length - 1);
+					editor.reportStatus("Incremental find: " + prefix);
+					var caretOffset = editor.getCaretOffset();
+					var model = editor.getModel();
+					var index = model.getText().lastIndexOf(prefix, caretOffset - prefix.length - 1);
 					if (index !== -1) {
 						this._incrementalFindSuccess = true;
 						this._incrementalFindIgnoreSelection = true;
-						this.editor.moveSelection(this.textView, index,index+p.length);
+						editor.moveSelection(index,index+prefix.length);
 						this._incrementalFindIgnoreSelection = false;
 					} else {
-						this.editor.reportStatus("Incremental find: " + p + " (not found)", true);
+						editor.reportStatus("Incremental find: " + prefix + " (not found)", true);
 					}
 					return true;
-				} else {
-					return false;
 				}
+				return false;
 			}.bind(this));
 			
-			// Tab actions
 			this.textView.setAction("tab", function() {
-				var selection = this.textView.getSelection();
-				var model = this.textView.getModel();
+				var editor = this.editor;
+				var model = editor.getModel();
+				var selection = editor.getSelection();
 				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
+				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
 				if (firstLine !== lastLine) {
 					var lines = [];
 					lines.push("");
 					for (var i = firstLine; i <= lastLine; i++) {
 						lines.push(model.getLine(i, true));
 					}
-					this.startUndo();
-					var firstLineStart = model.getLineStart(firstLine);
-					this.textView.setText(lines.join("\t"), firstLineStart, model.getLineEnd(lastLine, true));
-					this.textView.setSelection(firstLineStart===selection.start?selection.start:selection.start + 1, selection.end + (lastLine - firstLine + 1));
-					this.endUndo();
+					var lineStart = model.getLineStart(firstLine);
+					var lineEnd = model.getLineEnd(lastLine, true);
+					editor.setText(lines.join("\t"), lineStart, lineEnd);
+					editor.setSelection(lineStart === selection.start ? selection.start : selection.start + 1, selection.end + (lastLine - firstLine + 1));
 					return true;
 				}
 				return false;
 			}.bind(this));
+
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(9, false, true), "Unindent Lines");
 			this.textView.setAction("Unindent Lines", function() {
-				var selection = this.textView.getSelection();
-				var model = this.textView.getModel();
+				var editor = this.editor;
+				var model = editor.getModel();
+				var selection = editor.getSelection();
 				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
+				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
 				var lines = [];
 				for (var i = firstLine; i <= lastLine; i++) {
 					var line = model.getLine(i, true);
 					if (line.indexOf("\t") !== 0) { return false; }
 					lines.push(line.substring(1));
 				}
-				this.startUndo();
 				var firstLineStart = model.getLineStart(firstLine);
 				var lastLineStart = model.getLineStart(lastLine);
-				this.textView.setText(lines.join(""), firstLineStart, model.getLineEnd(lastLine, true));
-				this.textView.setSelection(firstLineStart===selection.start?selection.start:selection.start - 1, selection.end - (lastLine - firstLine + 1) + (selection.end===lastLineStart+1?1:0));
-				this.endUndo();
+				var lastLineEnd = model.getLineEnd(lastLine, true);
+				editor.setText(lines.join(""), firstLineStart, lastLineEnd);
+				editor.setSelection(firstLineStart === selection.start ? selection.start : selection.start - 1, selection.end - (lastLine - firstLine + 1) + (selection.end === lastLineStart+1 ? 1 : 0));
 				return true;
 			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(38, false, false, true), "Move Lines Up");
 			this.textView.setAction("Move Lines Up", function() {
-				var selection = this.textView.getSelection();
-				var model = this.textView.getModel();
+				var editor = this.editor;
+				var model = editor.getModel();
+				var selection = editor.getSelection();
 				var firstLine = model.getLineAtOffset(selection.start);
-				if (firstLine===0) {
+				if (firstLine === 0) {
 					return true;
 				}
-				this.startUndo();
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				var isMoveFromLastLine = model.getLineCount()-1===lastLine;
+				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+				var lineCount = model.getLineCount();
+				var insertOffset = model.getLineStart(firstLine - 1);
 				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = isMoveFromLastLine?model.getCharCount():model.getLineStart(lastLine+1);
-				if (isMoveFromLastLine) {
-					// Move delimiter preceding selection to end
-					var delimiterStart = model.getLineEnd(firstLine-1);
-					var delimiterEnd = model.getLineEnd(firstLine-1, true);
-					var delimiter = model.getText(delimiterStart, delimiterEnd);
-					lineStart = delimiterStart;
-					model.setText(model.getText(delimiterEnd, lineEnd)+delimiter, lineStart, lineEnd);
-				}
+				var lineEnd = model.getLineEnd(lastLine, true);
 				var text = model.getText(lineStart, lineEnd);
-				model.setText("", lineStart, lineEnd);
-				var insertPos = model.getLineStart(firstLine-1);
-				model.setText(text, insertPos, insertPos);
-				var selectionEnd = insertPos+text.length-(isMoveFromLastLine?model.getLineDelimiter().length:0);
-				this.textView.setSelection(insertPos, selectionEnd);
+				var delimiterLength = 0;
+				if (lastLine === lineCount-1) {
+					// Move delimiter preceding selection to end of text
+					var delimiterStart = model.getLineEnd(firstLine - 1);
+					var delimiterEnd = model.getLineEnd(firstLine - 1, true);
+					text += model.getText(delimiterStart, delimiterEnd);
+					lineStart = delimiterStart;
+					delimiterLength = delimiterEnd - delimiterStart;
+				}
+				this.startUndo();
+				editor.setText("", lineStart, lineEnd);
+				editor.setText(text, insertOffset, insertOffset);
+				editor.setSelection(insertOffset, insertOffset + text.length - delimiterLength);
 				this.endUndo();
 				return true;
 			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(40, false, false, true), "Move Lines Down");
 			this.textView.setAction("Move Lines Down", function() {
-				var selection = this.textView.getSelection();
-				var model = this.textView.getModel();
+				var editor = this.editor;
+				var model = editor.getModel();
+				var selection = editor.getSelection();
 				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				if (lastLine===model.getLineCount()-1) {
+				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+				var lineCount = model.getLineCount();
+				if (lastLine === lineCount-1) {
 					return true;
 				}
-				this.startUndo();
-				var isMoveIntoLastLine = lastLine===model.getLineCount()-2;
 				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = model.getLineStart(lastLine+1);
-				if (isMoveIntoLastLine) {
-					// Move delimiter following selection to front
-					var delimiterStart = model.getLineStart(lastLine+1)-model.getLineDelimiter().length;
-					var delimiterEnd = model.getLineStart(lastLine+1);
-					var delimiter = model.getText(delimiterStart, delimiterEnd);
-					model.setText(delimiter + model.getText(lineStart, delimiterStart), lineStart, lineEnd);
+				var lineEnd = model.getLineEnd(lastLine, true);
+				var insertOffset = model.getLineEnd(lastLine+1, true) - (lineEnd - lineStart);
+				var text, delimiterLength = 0;
+				if (lastLine !== lineCount-2) {
+					text = model.getText(lineStart, lineEnd);
+				} else {
+					// Move delimiter following selection to front of the text
+					var lineEndNoDelimiter = model.getLineEnd(lastLine);
+					text = model.getText(lineEndNoDelimiter, lineEnd) + model.getText(lineStart, lineEndNoDelimiter);
+					delimiterLength += lineEnd - lineEndNoDelimiter;
 				}
-				var text = model.getText(lineStart, lineEnd);
-				var insertPos = (isMoveIntoLastLine?model.getCharCount():model.getLineStart(lastLine+2))-(lineEnd-lineStart);
-				model.setText("", lineStart, lineEnd);
-				model.setText(text, insertPos, insertPos);
-				var selStart = insertPos+(isMoveIntoLastLine?model.getLineDelimiter().length:0);
-				var selEnd = insertPos+text.length;
-				this.textView.setSelection(selStart, selEnd);
+				this.startUndo();
+				editor.setText("", lineStart, lineEnd);
+				editor.setText(text, insertOffset, insertOffset);
+				editor.setSelection(insertOffset + delimiterLength, insertOffset + delimiterLength + text.length);
 				this.endUndo();
 				return true;
 			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(38, true, false, true), "Copy Lines Up");
 			this.textView.setAction("Copy Lines Up", function() {
-				this.startUndo();
-				var selection = this.textView.getSelection();
-				var model = this.textView.getModel();
-				var delimiter = model.getLineDelimiter();
+				var editor = this.editor;
+				var model = editor.getModel();
+				var selection = editor.getSelection();
 				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
+				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
 				var lineStart = model.getLineStart(firstLine);
-				var isCopyFromLastLine = model.getLineCount()-1===lastLine;
-				var lineEnd = isCopyFromLastLine?model.getCharCount():model.getLineStart(lastLine+1);
-				var text = model.getText(lineStart, lineEnd)+(isCopyFromLastLine?delimiter:""); //+ delimiter;
-				//var insertPos = model.getLineStart(firstLine - 1);
-				var insertPos = lineStart;
-				model.setText(text, insertPos, insertPos);
-				this.textView.setSelection(insertPos, insertPos+text.length-(isCopyFromLastLine?delimiter.length:0));
-				this.endUndo();
+				var lineEnd = model.getLineEnd(lastLine, true);
+				var lineCount = model.getLineCount();
+				var delimiter = "";
+				var text = model.getText(lineStart, lineEnd);
+				if (lastLine === lineCount-1) {
+					text += (delimiter = model.getLineDelimiter());
+				}
+				var insertOffset = lineStart;
+				editor.setText(text, insertOffset, insertOffset);
+				editor.setSelection(insertOffset, insertOffset + text.length - delimiter.length);
 				return true;
 			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(40, true, false, true), "Copy Lines Down");
 			this.textView.setAction("Copy Lines Down", function() {
-				this.startUndo();
-				var selection = this.textView.getSelection();
-				var model = this.textView.getModel();
-				var delimiter = model.getLineDelimiter();
+				var editor = this.editor;
+				var model = editor.getModel();
+				var selection = editor.getSelection();
 				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
+				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
 				var lineStart = model.getLineStart(firstLine);
-				var isCopyFromLastLine = model.getLineCount()-1===lastLine;
-				var lineEnd = isCopyFromLastLine?model.getCharCount():model.getLineStart(lastLine+1);
-				var text = (isCopyFromLastLine?delimiter:"")+model.getText(lineStart, lineEnd);
-				//model.setText("", lineStart, lineEnd);
-				//var insertPos = model.getLineStart(firstLine - 1);
-				var insertPos = lineEnd;
-				model.setText(text, insertPos, insertPos);
-				this.textView.setSelection(insertPos+(isCopyFromLastLine?delimiter.length:0), insertPos+text.length);
-				this.endUndo();
+				var lineEnd = model.getLineEnd(lastLine, true);
+				var lineCount = model.getLineCount();
+				var delimiter = "";
+				var text = model.getText(lineStart, lineEnd);
+				if (lastLine === lineCount-1) {
+					text = (delimiter = model.getLineDelimiter()) + text;
+				}
+				var insertOffset = lineEnd;
+				editor.setText(text, insertOffset, insertOffset);
+				editor.setSelection(insertOffset + delimiter.length, insertOffset + text.length);
 				return true;
 			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding('d', true, false, false), "Delete Selected Lines");
 			this.textView.setAction("Delete Selected Lines", function() {
-				this.startUndo();
-				var selection = this.textView.getSelection();
-				var model = this.textView.getModel();
+				var editor = this.editor;
+				var selection = editor.getSelection();
+				var model = editor.getModel();
 				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
+				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
 				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = model.getLineCount()-1===lastLine?model.getCharCount():model.getLineStart(lastLine+1);
-				model.setText("", lineStart, lineEnd);
-				this.endUndo();
+				var lineEnd = model.getLineEnd(lastLine, true);
+				editor.setText("", lineStart, lineEnd);
 				return true;
 			}.bind(this));
 			
 			// Go To Line action
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("l", true), "Goto Line...");
 			this.textView.setAction("Goto Line...", function() {
-				var line = this.textView.getModel().getLineAtOffset(this.textView.getCaretOffset());
+				var editor = this.editor;
+				var model = editor.getModel();
+				var line = model.getLineAtOffset(editor.getCaretOffset());
 				line = prompt("Go to line:", line + 1);
 				if (line) {
 					line = parseInt(line, 10);
-					this.editor.onGotoLine(line-1, 0);
+					editor.onGotoLine(line - 1, 0);
 				}
 				return true;
 			}.bind(this));
@@ -501,21 +517,24 @@ orion.editor.TextActions = (function() {
 		},
 		
 		lineUp: function() {
-			var index;
 			if (this._incrementalFindActive) {
-				var p = this._incrementalFindPrefix;
-				var start = this.textView.getCaretOffset() - p.length - 1;
-				if (this._incrementalFindSuccess === false) {
-					start = this.textView.getModel().getCharCount() - 1;
+				var prefix = this._incrementalFindPrefix;
+				var editor = this.editor;
+				var model = editor.getModel();
+				var start;
+				if (this._incrementalFindSuccess) {
+					start = editor.getCaretOffset() - prefix.length - 1;
+				} else {
+					start = model.getCharCount() - 1;
 				}
-				index = this.textView.getText().lastIndexOf(p, start);
+				var index = model.getText().lastIndexOf(prefix, start);
 				if (index !== -1) {
 					this._incrementalFindSuccess = true;
 					this._incrementalFindIgnoreSelection = true;
-					this.editor.moveSelection(this.textView, index,index+p.length);
+					editor.moveSelection(index, index + prefix.length);
 					this._incrementalFindIgnoreSelection = false;
 				} else {
-					this.editor.reportStatus("Incremental find: " + p + " (not found)", true);	
+					editor.reportStatus("Incremental find: " + prefix + " (not found)", true);	
 					this._incrementalFindSuccess = false;
 				}
 				return true;
@@ -523,25 +542,26 @@ orion.editor.TextActions = (function() {
 			return false;
 		},
 		lineDown: function() {	
-			var index;
 			if (this._incrementalFindActive) {
-				var p = this._incrementalFindPrefix;
-				if (p.length===0) {
-					return;
+				var prefix = this._incrementalFindPrefix;
+				if (prefix.length === 0) {
+					return false;
 				}
-				var start = this.textView.getSelection().start + 1;
-				if (this._incrementalFindSuccess === false) {
-					start = 0;
+				var editor = this.editor;
+				var model = editor.getModel();
+				var start = 0;
+				if (this._incrementalFindSuccess) {
+					start = editor.getSelection().start + 1;
 				}
-				index = this.textView.getText().indexOf(p, start);
+				var index = model.getText().indexOf(prefix, start);
 				if (index !== -1) {
 					this._incrementalFindSuccess = true;
 					this._incrementalFindIgnoreSelection = true;
-					this.editor.moveSelection(this.textView, index, index+p.length);
+					editor.moveSelection(index, index+prefix.length);
 					this._incrementalFindIgnoreSelection = false;
-					this.editor.reportStatus("Incremental find: " + p);
+					this.editor.reportStatus("Incremental find: " + prefix);
 				} else {
-					this.editor.reportStatus("Incremental find: " + p + " (not found)", true);
+					editor.reportStatus("Incremental find: " + prefix + " (not found)", true);
 					this._incrementalFindSuccess = false;
 				}
 				return true;
@@ -591,17 +611,16 @@ orion.editor.SourceCodeActions = (function() {
 			// Block comment operations
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(191, true), "Toggle Line Comment");
 			this.textView.setAction("Toggle Line Comment", function() {
-				this.startUndo();
-				var selection = this.textView.getSelection();
-				var model = this.textView.getModel();
+				var editor = this.editor;
+				var model = editor.getModel();
+				var selection = editor.getSelection();
 				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end>selection.start?selection.end - 1:selection.end);
-				var uncomment = true;
-				var lineText;
-				for (var i = firstLine; i <= lastLine && uncomment; i++) {
-					lineText = this.textView.getModel().getLine(i);
-					var index = lineText.indexOf("//");
-					if (index === -1) {
+				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+				var uncomment = true, lines = [], lineText, index;
+				for (var i = firstLine; i <= lastLine; i++) {
+					lineText = model.getLine(i, true);
+					lines.push(lineText);
+					if (!uncomment || (index = lineText.indexOf("//")) === -1) {
 						uncomment = false;
 					} else {
 						if (index !== 0) {
@@ -616,26 +635,27 @@ orion.editor.SourceCodeActions = (function() {
 						}
 					}
 				}
-				var k, lines = [];
-				var firstLineStart = model.getLineStart(firstLine);
+				var text, selStart, selEnd;
+				var lineStart = model.getLineStart(firstLine);
+				var lineEnd = model.getLineEnd(lastLine, true);
 				if (uncomment) {
+					for (var k = 0; k < lines.length; k++) {
+						lineText = lines[k];
+						index = lineText.indexOf("//");
+						lines[k] = lineText.substring(0, index) + lineText.substring(index + 2);
+					}
+					text = lines.join("");
 					var lastLineStart = model.getLineStart(lastLine);
-					for (k = firstLine; k <= lastLine; k++) {
-						var line = model.getLine(k, true);
-						var commentIndex = lineText.indexOf("//");
-						lines.push(line.substring(0, commentIndex) + line.substring(commentIndex + 2));
-					}
-					this.textView.setText(lines.join(""), firstLineStart, model.getLineEnd(lastLine, true));
-					this.textView.setSelection(firstLineStart===selection.start?selection.start:selection.start - 2, selection.end - (2 * (lastLine - firstLine + 1)) + (selection.end===lastLineStart+1?2:0));
+					selStart = lineStart === selection.start ? selection.start : selection.start - 2;
+					selEnd = selection.end - (2 * (lastLine - firstLine + 1)) + (selection.end === lastLineStart+1 ? 2 : 0);
 				} else {
-					lines.push("");
-					for (k = firstLine; k <= lastLine; k++) {
-						lines.push(model.getLine(k, true));
-					}
-					this.textView.setText(lines.join("//"), firstLineStart, model.getLineEnd(lastLine, true));
-					this.textView.setSelection(firstLineStart===selection.start?selection.start:selection.start + 2, selection.end + (2 * (lastLine - firstLine + 1)));
+					lines.splice(0, 0, "");
+					text = lines.join("//");
+					selStart = lineStart === selection.start ? selection.start : selection.start + 2;
+					selEnd = selection.end + (2 * (lastLine - firstLine + 1));
 				}
-				this.endUndo();
+				editor.setText(text, lineStart, lineEnd);
+				editor.setSelection(selStart, selEnd);
 				return true;
 			}.bind(this));
 			
@@ -674,8 +694,9 @@ orion.editor.SourceCodeActions = (function() {
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(191, true, true), "Add Block Comment");
 			this.textView.setAction("Add Block Comment", function() {
-				var selection = this.textView.getSelection();
-				var model = this.textView.getModel();
+				var editor = this.editor;
+				var model = editor.getModel();
+				var selection = editor.getSelection();
 				var open = "/*", close = "*/", commentTags = new RegExp("/\\*" + "|" + "\\*/", "g");
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end);
@@ -692,17 +713,16 @@ orion.editor.SourceCodeActions = (function() {
 				text = text.replace(commentTags, "");
 				var newLength = text.length;
 				
-				this.startUndo();
-				model.setText(open + text + close, selection.start, selection.end);
-				this.textView.setSelection(selection.start + open.length, selection.end + open.length + (newLength-oldLength));
-				this.endUndo();
+				editor.setText(open + text + close, selection.start, selection.end);
+				editor.setSelection(selection.start + open.length, selection.end + open.length + (newLength-oldLength));
 				return true;
 			}.bind(this));
 			
 			this.textView.setKeyBinding(new orion.textview.KeyBinding(220, true, true), "Remove Block Comment");
 			this.textView.setAction("Remove Block Comment", function() {
-				var selection = this.textView.getSelection();
-				var model = this.textView.getModel();
+				var editor = this.editor;
+				var model = editor.getModel();
+				var selection = editor.getSelection();
 				var open = "/*", close = "*/";
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end);
@@ -724,10 +744,9 @@ orion.editor.SourceCodeActions = (function() {
 					}
 				}
 				
-				this.startUndo();
 				if (newStart !== undefined && newEnd !== undefined) {
-					model.setText(model.getText(newStart + open.length, newEnd), newStart, newEnd + close.length);
-					this.textView.setSelection(newStart, newEnd);
+					editor.setText(model.getText(newStart + open.length, newEnd), newStart, newEnd + close.length);
+					editor.setSelection(newStart, newEnd);
 				} else {
 					// Otherwise find enclosing comment block
 					var result = findEnclosingComment(model, selection.start, selection.end);
@@ -736,10 +755,9 @@ orion.editor.SourceCodeActions = (function() {
 					}
 					
 					var text = model.getText(result.commentStart + open.length, result.commentEnd);
-					model.setText(text, result.commentStart, result.commentEnd + close.length);
-					this.textView.setSelection(selection.start - open.length, selection.end - close.length);
+					editor.setText(text, result.commentStart, result.commentEnd + close.length);
+					editor.setSelection(selection.start - open.length, selection.end - close.length);
 				}
-				this.endUndo();
 				return true;
 			}.bind(this));
 		},
@@ -805,19 +823,21 @@ orion.editor.SourceCodeActions = (function() {
 		},
 		enter: function() {
 			// Auto indent
-			var selection = this.textView.getSelection();
+			var editor = this.editor;
+			var selection = editor.getSelection();
 			if (selection.start === selection.end) {
-				var model = this.textView.getModel();
+				var model = editor.getModel();
 				var lineIndex = model.getLineAtOffset(selection.start);
-				var lineText = model.getLine(lineIndex);
+				var lineText = model.getLine(lineIndex, true);
 				var lineStart = model.getLineStart(lineIndex);
 				var index = 0, end = selection.start - lineStart, c;
 				while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
 				if (index > 0) {
+					//TODO still wrong when typing inside folding
 					var prefix = lineText.substring(0, index);
 					index = end;
 					while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
-					this.textView.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
+					editor.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
 					return true;
 				}
 			}
