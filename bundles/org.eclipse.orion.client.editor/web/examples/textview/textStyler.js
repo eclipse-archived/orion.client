@@ -16,15 +16,22 @@ examples.textview = examples.textview || {};
 examples.textview.TextStyler = (function() {
 
 	var JS_KEYWORDS =
-		["break", "continue", "do", "for", /*"import",*/ "new", "this", /*"void",*/ 
-		 "case", "default", "else", "function", "in", "return", "typeof", "while",
-		 "comment", "delete", "export", "if", /*"label",*/ "switch", "var", "with",
-		 "abstract", "implements", "protected", /*"boolean",*/ "instanceof", "public",
-		 /*"byte", "int", "short", "char",*/ "interface", "static", 
-		 /*"double", "long",*/ "synchronized", "false", /*"native",*/ "throws", 
-		 "final", "null", "transient", /*"float",*/ "package", "true", 
-		 "goto", "private", "catch", "enum", "throw", "class", "extends", "try", 
-		 "const", "finally", "debugger", "super", "undefined"];
+		["break",
+		 "case", "class", "catch", "continue", "const", 
+		 "debugger", "default", "delete", "do",
+		 "else", "enum", "export", "extends",  
+		 "false", "finally", "for", "function",
+		 "if", "implements", "import", "in", "instanceof", "interface", 
+		 "let",
+		 "new", "null",
+		 "package", "private", "protected", "public",
+		 "return", 
+		 "static", "super", "switch",
+		 "this", "throw", "true", "try", "typeof",
+		 "undefined",
+		 "var", "void",
+		 "while", "with",
+		 "yield"];
 
 	var JAVA_KEYWORDS =
 		["abstract",
