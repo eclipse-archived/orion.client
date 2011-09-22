@@ -696,7 +696,6 @@ orion.textview.TextView = (function() {
 		 * @see #getLocationAtOffset
 		 */
 		getOffsetAtLocation: function(x, y) {
-			var model = this._model;
 			var scroll = this._getScroll();
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			var viewPad = this._getViewPadding();
@@ -2001,7 +2000,6 @@ orion.textview.TextView = (function() {
 			if (lineIndex === undefined && ruler && ruler.getOverview() === "document") {
 				var buttonHeight = isPad ? 0 : 17;
 				var clientHeight = this._getClientHeight ();
-				var lineHeight = this._getLineHeight ();
 				var lineCount = this._model.getLineCount ();
 				var viewPad = this._getViewPadding();
 				var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * buttonHeight;
@@ -2971,7 +2969,6 @@ orion.textview.TextView = (function() {
 		},
 		_createRanges: function(parent, document, ranges, start, end, text, lineStart) {
 			if (start >= end) { return; }
-			var span;
 			if (ranges) {
 				for (var i = 0; i < ranges.length; i++) {
 					var range = ranges[i];
@@ -4875,7 +4872,7 @@ orion.textview.TextView = (function() {
 			var viewPad = this._getViewPadding();
 			for (var i = 0; i < cells.length; i++) {
 				var div = cells[i].firstChild;
-				var ruler = div._ruler, style;
+				var ruler = div._ruler;
 				if (div.rulerChanged) {
 					this._applyStyle(ruler.getRulerStyle(), div);
 				}

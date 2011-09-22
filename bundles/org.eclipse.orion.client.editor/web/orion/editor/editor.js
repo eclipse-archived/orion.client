@@ -162,6 +162,33 @@ orion.editor.Editor = (function() {
 			textView.setText(text, start, end);
 		},
 		
+		setFoldingEnabled: function(enabled) {
+			this._foldingEnabled = enabled;
+			this._updateFoldingRuler();
+		},
+		
+		_updateFoldingRuler: function() {
+			var textView = this._textView;
+			if (this._foldingEnabled) {
+				if (!this._foldingRuler && this._foldingRulerFactory && textView.getModel().getBaseModel && this._foldingEnabled) {
+					/*
+					* TODO - UndoStack relies on this line to ensure that collapsed regions are expanded 
+					* when the undo operation happens to those regions. This line needs to be remove when the
+					* UndoStack is fixed.
+					*/
+					textView.annotationModel = this._annotationModel;
+					
+					this._foldingRuler = this._foldingRulerFactory.createFoldingRuler(this._annotationModel);
+					textView.addRuler(this._foldingRuler);
+				}
+			} else {
+				if (this._foldingRuler) { 
+					textView.removeRuler(this._foldingRuler);
+					this._foldingRuler = null;
+				}
+			}
+		},
+		
 		setSelection: function(start, end, show) {
 			var textView = this._textView;
 			var model = textView.getModel();
@@ -457,17 +484,7 @@ orion.editor.Editor = (function() {
 				textView.addRuler(this._lineNumberRuler);
 			}
 			
-			if (this._foldingRulerFactory && textView.getModel().getBaseModel) {
-				/*
-				* TODO - UndoStack relies on this line to ensure that collapsed regions are expanded 
-				* when the undo operation happens to those regions. This line needs to be remove when the
-				* UndoStack is fixed.
-				*/
-				textView.annotationModel = this._annotationModel;
-				
-				this._foldingRuler = this._foldingRulerFactory.createFoldingRuler(this._annotationModel);
-				textView.addRuler(this._foldingRuler);
-			}
+			this._updateFoldingRuler();
 		},
 		
 		/**

@@ -239,6 +239,7 @@ examples.textview.TextStyler = (function() {
 		this.whitespacesVisible = false;
 		this.detectHyperlinks = true;
 		this.highlightCaretLine = true;
+		this.foldingEnabled = true;
 		this._scanner = new Scanner(keywords, this.whitespacesVisible);
 		//TODO this scanner is not the best/correct way to parse CSS
 		if (lang === "css") {
@@ -304,6 +305,9 @@ examples.textview.TextStyler = (function() {
 		},
 		setDetectHyperlinks: function(visible) {
 			this.detectHyperlinks = visible;
+		},
+		setFoldingEnabled: function(enabled) {
+			this.foldingEnabled = enabled;
 		},
 		_binarySearch: function(offsets, offset, low, high) {
 			while (high - low > 2) {
@@ -478,7 +482,7 @@ examples.textview.TextStyler = (function() {
 					var href = null;
 					if (data.indexOf("://") > 0) {
 						href = data;
-						var hrefStart = href.substring(0, 1), hrefEnd = href.substring(href.length - 1);
+						var hrefStart = href.substring(0, 1);
 						var brackets = "\"\"''(){}[]<>";
 						var bracketIndex = brackets.indexOf(hrefStart);
 						if (bracketIndex !== -1 && (bracketIndex & 1) === 0 && (bracketIndex = href.lastIndexOf(brackets.substring(bracketIndex + 1, bracketIndex + 2))) !== -1) {
@@ -684,6 +688,7 @@ examples.textview.TextStyler = (function() {
 				"<img src='/examples/textview/images/collapsed.png'></img>", {styleClass: "ruler_folding_collapsed"});
 		}, 
 		_computeFolding: function() {
+			if (!this.foldingEnabled) { return; }
 			var view = this.view;
 			var viewModel = view.getModel();
 			if (!viewModel.getBaseModel) { return; }
@@ -803,7 +808,7 @@ examples.textview.TextStyler = (function() {
 			
 			if ((this.commentOffsets.length & 1) === 1) { this.commentOffsets.push(charCount); }
 
-			if (baseModel !== viewModel && this.annotationModel) {
+			if (this.foldingEnabled && baseModel !== viewModel && this.annotationModel) {
 				var annotationModel = this.annotationModel;
 				var iter = annotationModel.getAnnotations(ts, te);
 				var remove = [], all = [];

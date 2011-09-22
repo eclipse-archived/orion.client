@@ -66,7 +66,7 @@ orion.textview.ProjectionTextModel = (function() {
 			//TODO add listeners from model
 			if (!projection) {return;}
 			//start and end can't overlap any exist projection
-			var model = this._model, projections = this._projections, i;
+			var model = this._model, projections = this._projections;
 			projection._lineIndex = model.getLineAtOffset(projection.start);
 			projection._lineCount = model.getLineAtOffset(projection.end) - projection._lineIndex;
 			var content = projection.content;
@@ -145,32 +145,6 @@ orion.textview.ProjectionTextModel = (function() {
 				delta += charCount - (projection.end - projection.start);
 			}
 			return offset - delta;
-		},
-		mapLine: function(lineIndex, parent) {
-			if (lineIndex < 0) { return -1; }
-			var model = this._model, projections = this._projections, delta = 0, i, projection, lineCount;
-			if (parent) {
-				for (i = 0; i < projections.length; i++) {
-					projection = projections[i];
-					if (projection._lineIndex > lineIndex) { break; }
-					lineCount = projection._model.getLineCount() - 1;
-					if (projection._lineIndex + lineCount > lineIndex) {
-						return -1;
-					}
-					delta += lineCount - projection._lineCount;
-				}
-				return lineIndex + delta;
-			}
-			for (i = 0; i < projections.length; i++) {
-				projection = projections[i];
-				if (projection._lineIndex > lineIndex - delta) { break; }
-				lineCount = projection._model.getLineCount() - 1;
-				if (projection._lineIndex + lineCount > lineIndex - delta) {
-					return -1;
-				}
-				delta += lineCount - projection._lineCount;
-			}
-			return lineIndex - delta;
 		},
 		getCharCount: function() {
 			var count = this._model.getCharCount(), projections = this._projections;

@@ -202,7 +202,6 @@ orion.textview.Ruler = (function() {
 		 * @param {orion.textview.AnnotationModel} annotationModel the annotation model.
 		 */
 		setAnnotationModel: function (annotationModel) {
-			var self = this;
 			if (this._annotationModel) {
 				this._annotationModel.removeListener(this._annotationModelListener); 
 			}
@@ -449,7 +448,6 @@ orion.textview.Ruler = (function() {
 		},
 		_showTooltip: function() {
 			var lineIndex = this._tooltipLineIndex;
-			var e = this._tooltipEvent;
 			if (lineIndex === undefined) { return; }
 			var view = this._view;
 			var model = view.getModel();
@@ -542,7 +540,10 @@ orion.textview.LineNumberRuler = (function() {
 		for (var lineIndex = startLine; lineIndex < endLine; lineIndex++) {
 			var style = lineIndex & 1 ? this._oddStyle : this._evenStyle;
 			var mapLine = lineIndex;
-			if (model.getBaseModel) { mapLine = model.mapLine(lineIndex); }
+			if (model.getBaseModel) {
+				var lineStart = model.getLineStart(mapLine);
+				mapLine = model.getBaseModel().getLineAtOffset(model.mapOffset(lineStart));
+			}
 			if (!result[lineIndex]) { result[lineIndex] = {}; }
 			result[lineIndex].html = (mapLine + 1) + "";
 			if (!result[lineIndex].style) { result[lineIndex].style = style; }
@@ -650,7 +651,12 @@ orion.textview.OverviewRuler = (function() {
 	OverviewRuler.prototype._getTooltip = function(document, lineIndex, annotations) {
 		if (annotations.length === 0) {
 			var model = this._view.getModel();
-			return "Line: " + ((model.getBaseModel ? model.mapLine(lineIndex) : lineIndex) + 1);
+			var mapLine = lineIndex;
+			if (model.getBaseModel) {
+				var lineStart = model.getLineStart(mapLine);
+				mapLine = model.getBaseModel().getLineAtOffset(model.mapOffset(lineStart));
+			}
+			return "Line: " + (mapLine + 1);
 		}
 		return orion.textview.Ruler.prototype._getTooltip.call(this, document, lineIndex, annotations);
 	};
