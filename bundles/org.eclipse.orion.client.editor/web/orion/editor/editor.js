@@ -459,12 +459,13 @@ orion.editor.Editor = (function() {
 					if (lineIndex === -1) { return; }
 					var viewModel = textView.getModel();
 					var annotationModel = this.getAnnotationModel();
-					var lineStart = viewModel.getLineStart(lineIndex);
-					var lineEnd = viewModel.getLineEnd(lineIndex);
-					var annotations = annotationModel.getAnnotations(editor.mapOffset(lineStart), editor.mapOffset(lineEnd));
+					var lineStart = editor.mapOffset(viewModel.getLineStart(lineIndex));
+					var lineEnd = editor.mapOffset(viewModel.getLineEnd(lineIndex));
+					var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
 					var annotation = annotations.next();
 					if (annotation) {
-						editor.onGotoLine(lineIndex, annotation.start - lineStart, annotation.end - lineStart);
+						var model = editor.getModel();
+						editor.onGotoLine(model.getLineAtOffset(lineStart), annotation.start - lineStart, annotation.end - lineStart);
 					}
 				};
 				
