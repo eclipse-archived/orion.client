@@ -130,7 +130,7 @@ orion.editor.AnnotationFactory = (function() {
 						rulerHTML: "<img style='vertical-align:middle;' src='" + this.imageUrls[severity] + "'></img>",
 						rulerStyle: {styleClass: "annotationProblem"},
 						overviewStyle: {styleClass: "annotationProblemOverview" + " " + severity},
-						rangeStyle: {styleClass: "annotationProblemRange"}
+						rangeStyle: {styleClass: "annotationProblemRange" + " " + severity}
 					};
 					annotations.push(annotation);
 				}
