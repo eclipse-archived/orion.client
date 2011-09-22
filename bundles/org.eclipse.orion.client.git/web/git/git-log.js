@@ -41,7 +41,7 @@ dojo.addOnLoad(function() {
 	// Git operations
 	var gitClient = new mGitClient.GitService(serviceRegistry);
 	
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 	
 	// Commit details
 	var commitDetails = new mGitCommitDetails.CommitDetails({parent: "commitDetailsPane", commandService: commandService, linkService: linkService, detailsPane: dijit.byId("orion.innerNavigator")});

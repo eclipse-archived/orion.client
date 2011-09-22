@@ -68,8 +68,17 @@ orion.editor.FoldingRulerFactory = (function() {
 
 
 orion.editor.AnnotationFactory = (function() {
-	function AnnotationFactory(problemImageUrl) {
-		this.problemImageUrl = problemImageUrl;
+	function AnnotationFactory(imageUrls) {
+		this.imageUrls = {};
+		if (typeof imageUrls === "string") {
+			this.imageUrls.error = imageUrls;
+		} else if (typeof imageUrls === "object") {
+			for (var severity in imageUrls) {
+				if (imageUrls.hasOwnProperty(severity)) {
+					this.imageUrls[severity] = imageUrls[severity];
+				}
+			}
+		}
 	}
 	AnnotationFactory.prototype = {
 		createAnnotationModel: function(model) {
@@ -92,34 +101,35 @@ orion.editor.AnnotationFactory = (function() {
 			return {annotationRuler: this.annotationRuler, overviewRuler: this.overviewRuler};
 		},
 		
-		showProblems : function(errors) {
+		showProblems : function(problems) {
 			var annotationModel = this.annotationModel;
 			if (!annotationModel) {
 				return;
 			}
 			var type = "orion.annotation.problem";
 			annotationModel.removeAnnotations(type);
-			if (!errors) { return; }
+			if (!problems) { return; }
 			var annotations = [];
 			var model = annotationModel.getTextModel();
-			for (var i = 0; i < errors.length; i++) {
-				var error = errors[i];
-				if (error) {
+			for (var i = 0; i < problems.length; i++) {
+				var problem = problems[i];
+				if (problem) {
 					// escaping voodoo... we need to construct HTML that contains valid JavaScript.
 					// TODO safeText() from util.js
-					var escapedReason = error.reason.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
-					var lineIndex = error.line - 1;
+					var escapedReason = problem.reason.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
+					var lineIndex = problem.line - 1;
 					var lineStart = model.getLineStart(lineIndex);
-					var start = error.character - 1;
-					var end = (typeof error.end === "number") ? error.end : start + 1;
+					var start = problem.character - 1;
+					var end = (typeof problem.end === "number") ? problem.end : start + 1;
+					var severity = problem.severity || "error";
 					var annotation = {
 						type: type,
 						start: lineStart + start,
 						end: lineStart + end,
 						rulerTitle: escapedReason,
-						rulerHTML: "<img style='vertical-align:middle;' src='" + this.problemImageUrl + "'></img>",
+						rulerHTML: "<img style='vertical-align:middle;' src='" + this.imageUrls[severity] + "'></img>",
 						rulerStyle: {styleClass: "annotationProblem"},
-						overviewStyle: {styleClass: "annotationProblemOverview"},
+						overviewStyle: {styleClass: "annotationProblemOverview" + " " + severity},
 						rangeStyle: {styleClass: "annotationProblemRange"}
 					};
 					annotations.push(annotation);

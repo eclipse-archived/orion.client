@@ -141,7 +141,7 @@ var exports = {};
 			}
 			
 			if(jsonData.Result && jsonData.Result.HttpCode!=200){
-				console.error("error " + jsonData.Result.HttpCode + " while running opperation: " + jsonData.Result.DetailedMessage);
+				console.error("error " + jsonData.Result.HttpCode + " while running operation: " + jsonData.Result.DetailedMessage);
 				return;
 			}
 			
