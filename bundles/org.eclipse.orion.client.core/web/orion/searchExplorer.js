@@ -119,7 +119,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	};
 	
 	SearchResultModel.prototype.getFileItemIndex = function(fileItem){
-		for(var i = 0; i < (this.indexedFileItems.length -1) ; i++){
+		for(var i = 0; i < this.indexedFileItems.length; i++){
 			if(fileItem === this.indexedFileItems[i])
 				return i;
 		}
@@ -131,7 +131,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 			return -1;
 		var fileItem = this.indexedFileItems[fileItemIndex];
 		if(fileItem.children && fileItem.children.length > 0){
-			for(var i = 0; i < (fileItem.children.length -1) ; i++){
+			for(var i = 0; i < fileItem.children.length ; i++){
 				if(detailItem === fileItem.children[i])
 					return i;
 			}
@@ -215,7 +215,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 			} else {
 				detailIndex = filItem.children.length -1;
 			}
-			return  {childrenNumber: filItem.children.length, childDiv: dojo.byId(this.getId(filItem.children[detailIndex])+"NameColumn")};
+			return  {childrenNumber: filItem.children.length, childDiv: dojo.byId(this.getId(filItem.children[detailIndex])/*+"NameColumn"*/)};
 		}
 		return {childrenNumber: 0, childDiv: null};
 	};
@@ -242,7 +242,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 								  if(this.currentDetailIndex < -1)
 									  this.currentDetailIndex = parentItem.children.length -1;
 								  var expanded = this._fileExpanded(this.currentFileIndex, this.currentDetailIndex);
-								  dojo.toggleClass(expanded.childDiv, "fileNameSelectedRow", true);
+								  dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
 								  if(!this.explorer.visible(expanded.childDiv))
 									  expanded.childDiv.scrollIntoView(!this.lastNavDirection);
 								  this.highlightSelectionLater = false;
@@ -312,11 +312,11 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 									return;
 								var expanded = that.explorer.model._fileExpanded(that.explorer.model.currentFileIndex, that.explorer.model.currentDetailIndex);
 								if(expanded.childDiv)
-									dojo.toggleClass(expanded.childDiv, "fileNameSelectedRow", false);
+									dojo.toggleClass(expanded.childDiv, "currentSearchMatch", false);
 								that.explorer.model.currentFileIndex = fileItemIndex;
 								that.explorer.model.currentDetailIndex = fileDetailItemIndex;						
 								expanded = that.explorer.model._fileExpanded(that.explorer.model.currentFileIndex, that.explorer.model.currentDetailIndex);
-								dojo.toggleClass(expanded.childDiv, "fileNameSelectedRow", true);
+								dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
 							}
 						}
 					});
@@ -510,7 +510,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	SearchResultExplorer.prototype.gotoNext = function(next)	{
 		var curentExpanded = this.model._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex); 
 		if(curentExpanded.childDiv /*&& this.model.currentDetailIndex > -1*/)
-			dojo.toggleClass(curentExpanded.childDiv, "fileNameSelectedRow", false);
+			dojo.toggleClass(curentExpanded.childDiv, "currentSearchMatch", false);
 		var nextItem = this._decideNext(next);
 		this.model.highlightSelectionLater = true;
 		this.model.lastNavDirection = next;
@@ -521,7 +521,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 			if(newExpanded.childrenNumber > 0)
 				this.model.highlightSelectionLater = false;
 			if(newExpanded.childDiv)	{
-				dojo.toggleClass(newExpanded.childDiv, "fileNameSelectedRow", true);
+				dojo.toggleClass(newExpanded.childDiv, "currentSearchMatch", true);
 				if(!this.visible(newExpanded.childDiv))
 					newExpanded.childDiv.scrollIntoView(!next);
 				return;
@@ -537,7 +537,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		}
 		if(!this.model.highlightSelectionLater){
 			var expanded = this.model._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex);
-			dojo.toggleClass(expanded.childDiv, "fileNameSelectedRow", true);
+			dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
 			if(!this.visible(expanded.childDiv))
 				expanded.childDiv.scrollIntoView(!next);
 		}
