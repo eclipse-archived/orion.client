@@ -217,15 +217,15 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 		/**
 		 * Register a command contribution, which identifies how a command appears
 		 * on a page and how it is invoked.
-		 * @param {String} the id of the command
-		 * @param {Number} the relative position of the command within its parent
+		 * @param {String} commandId the id of the command
+		 * @param {Number} position the relative position of the command within its parent
 		 * @param {String} scopeId The id related to the scope.  Depending on the scope,
 		 *  this might be the id of the page or of a dom element.
-		 * @param {String} the path of any parent groups, separated by '/'.  For example,
+		 * @param {String} parentPath the path of any parent groups, separated by '/'.  For example,
 		 *  a path of "group1Id/group2Id/command" indicates that the command belongs as a child of 
 		 *  group2Id, which is itself a child of group1Id.  Optional.
-		 * @param {orion.commands.CommandKeyBinding} a keyBinding for the command.  Optional.
-		 * @param {boolean} if true, then the command is never rendered, but the keybinding is hooked.
+		 * @param {orion.commands.CommandKeyBinding} keyBinding a keyBinding for the command.  Optional.
+		 * @param {boolean} keyOnly if true, then the command is never rendered, but the keybinding is hooked.
 		 */
 		registerCommandContribution: function(commandId, position, scopeId, parentPath, keyBinding, keyOnly) {
 			// first ensure the parentPath is represented
