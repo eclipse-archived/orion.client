@@ -83,6 +83,14 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 		'<a href="http://www.eclipse.org/legal/copyright.php">Copyright Agent</a>'; 
 	// END BOTTOM BANNER FRAGEMENT
 
+	function qualifyURL(url){
+	    var img = document.createElement('img');
+	    img.src = url; // set string url
+	    url = img.src; // get qualified url
+	    img.src = null; // no server request
+	    return url;
+	}
+
 	var notifyAuthenticationSite = qualifyURL('/auth/NotifyAuthentication.html');
 	var authRendered = {};
 	var loginDialog = new orion.widgets.LoginDialog();
@@ -95,14 +103,6 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 			d.callback(serviceReference.properties.name);
 			return d;
 		}
-	}
-	
-	function qualifyURL(url){
-	    var img = document.createElement('img');
-	    img.src = url; // set string url
-	    url = img.src; // get qualified url
-	    img.src = null; // no server request
-	    return url;
 	}
 
 	/**
@@ -175,6 +175,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	
 	function setPendingAuthentication(services){
 		loginDialog.setPendingAuthentication(services);
+		var i;
 		for(i in services){
 			if(services.hasOwnProperty(i)){
 				//open prompt if there is at least one pending authentication

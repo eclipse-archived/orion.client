@@ -60,7 +60,7 @@ exports.EditorCommandFactory = (function() {
 							dojo.hitch(this, function(error) {
 								// expected error - HTTP 412 Precondition Failed 
 								// occurs when file is out of sync with the server
-								if (error.status == 412) {
+								if (error.status === 412) {
 									var forceSave = confirm("Resource is out of sync with the server. Do you want to save it anyway?");
 									if (forceSave) {
 										// repeat save operation, but without ETag 
@@ -134,7 +134,7 @@ exports.EditorCommandFactory = (function() {
 							id: info.name,
 							callback: dojo.hitch(editor, function(editor) {
 								// command service will provide editor parameter but editor widget callback will not
-								var editor = editor || this;
+								editor = editor || this;
 								var selection = editor.getSelection();
 								var model = editor.getModel();
 								var text = model.getText();

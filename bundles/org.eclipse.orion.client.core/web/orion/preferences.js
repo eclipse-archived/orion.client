@@ -153,7 +153,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 	var _cache = {
 			get: function(key, ignoreExpires) {
 				var item = localStorage.getItem(key);
-				if (item == null) {
+				if (item === null) {
 					return null;
 				}
 				var cached = JSON.parse(item);

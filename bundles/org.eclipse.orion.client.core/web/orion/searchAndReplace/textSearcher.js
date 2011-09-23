@@ -7,6 +7,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*global define document navigator*/
+
 define([ 'dojo', 'dijit', 'orion/commands', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton' ], function(dojo, dijit, mCommands){
 	
 var orion = orion || {};

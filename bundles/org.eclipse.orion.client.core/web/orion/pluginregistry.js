@@ -83,7 +83,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 					if (!data) {
 						data = message.params[0];
 						_parseData();
-					} else if (JSON.stringify(data) != JSON.stringify(message.params[0])) {
+					} else if (JSON.stringify(data) !== JSON.stringify(message.params[0])) {
 						// check if the data has been updated
 						for (var serviceId in _serviceRegistrations) {
 							if (_serviceRegistrations.hasOwnProperty(serviceId)) {
@@ -231,6 +231,77 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		}
 	}, false);
 	
+	function _normalizeURL(location) {
+		if (location.indexOf("://") === -1) {
+			var temp = document.createElement('a');
+			temp.href = location;
+	        return temp.href;
+		}
+		return location;
+	}
+	
+	function _clear(plugin) {
+		var pluginURL;
+		
+		delete _storage["plugin."+plugin.getLocation()];
+		for(pluginURL in _userPlugins) {
+			if (_userPlugins.hasOwnProperty(pluginURL)) {
+				if (plugin.getLocation() === _normalizeURL(pluginURL)) {
+					delete _userPlugins[plugin.getLocation()];
+					_storage["/orion/preferences/user/plugins"] = JSON.stringify(_userPlugins);
+					return;
+				}
+			}
+		}
+	}
+
+	var internalRegistry = {
+			registerService: dojo.hitch(serviceRegistry, serviceRegistry.registerService),
+			connect: function(url, handler) {
+
+				var iframe = document.createElement("iframe");
+		        iframe.id = url;
+		        iframe.name = url;
+		        iframe.style.display = "none";
+		        iframe.style.visibility = "hidden";
+		        iframe.src = url;
+		        document.body.appendChild(iframe);
+		        var channel = {iframe: iframe, target: iframe.contentWindow, handler: handler, url: url};
+		        _channels.push(channel);
+		        return channel;
+			},
+			disconnect: function(channel) {
+				for (var i = 0; i < _channels.length; i++) {
+					if (channel === _channels[i]) {
+						_channels.splice(i,1);
+						try {
+							document.body.removeChild(channel.iframe);
+						} catch(e) {
+							// best effort
+						}
+						break;
+					}
+				}
+			},
+			uninstallPlugin: function(plugin) {
+				_clear(plugin);
+				for (var i = 0; i < _plugins.length; i++) {
+					if (plugin === _plugins[i]) {
+						_plugins.splice(i,1);
+						_pluginEventTarget.dispatchEvent("pluginRemoved", plugin);
+						break;
+					}
+				}
+			},
+			updatePlugin: function(plugin) {
+				_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
+				_pluginEventTarget.dispatchEvent("pluginUpdated", plugin);
+			},
+			postMessage: function(message, channel) {
+				channel.target.postMessage((channel.useStructuredClone ? message : JSON.stringify(message)), channel.url);
+			}
+	};
+	
 	function _loadFromStorage() {
 		var plugin,
 			pluginURL,
@@ -299,77 +370,6 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		_userPlugins[plugin.getLocation()] = true;
 		_storage["/orion/preferences/user/plugins"] = JSON.stringify(_userPlugins);
 	}
-
-	function _clear(plugin) {
-		var pluginURL;
-		
-		delete _storage["plugin."+plugin.getLocation()];
-		for(pluginURL in _userPlugins) {
-			if (_userPlugins.hasOwnProperty(pluginURL)) {
-				if (plugin.getLocation() === _normalizeURL(pluginURL)) {
-					delete _userPlugins[plugin.getLocation()];
-					_storage["/orion/preferences/user/plugins"] = JSON.stringify(_userPlugins);
-					return;
-				}
-			}
-		}
-	}
-	
-	function _normalizeURL(location) {
-		if (location.indexOf("://") === -1) {
-			var temp = document.createElement('a');
-			temp.href = location;
-	        return temp.href;
-		}
-		return location;
-	}
-	
-	var internalRegistry = {
-			registerService: dojo.hitch(serviceRegistry, serviceRegistry.registerService),
-			connect: function(url, handler) {
-
-				var iframe = document.createElement("iframe");
-		        iframe.id = url;
-		        iframe.name = url;
-		        iframe.style.display = "none";
-		        iframe.style.visibility = "hidden";
-		        iframe.src = url;
-		        document.body.appendChild(iframe);
-		        var channel = {iframe: iframe, target: iframe.contentWindow, handler: handler, url: url};
-		        _channels.push(channel);
-		        return channel;
-			},
-			disconnect: function(channel) {
-				for (var i = 0; i < _channels.length; i++) {
-					if (channel === _channels[i]) {
-						_channels.splice(i,1);
-						try {
-							document.body.removeChild(channel.iframe);
-						} catch(e) {
-							// best effort
-						}
-						break;
-					}
-				}
-			},
-			uninstallPlugin: function(plugin) {
-				_clear(plugin);
-				for (var i = 0; i < _plugins.length; i++) {
-					if (plugin === _plugins[i]) {
-						_plugins.splice(i,1);
-						_pluginEventTarget.dispatchEvent("pluginRemoved", plugin);
-						break;
-					}
-				}
-			},
-			updatePlugin: function(plugin) {
-				_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
-				_pluginEventTarget.dispatchEvent("pluginUpdated", plugin);
-			},
-			postMessage: function(message, channel) {
-				channel.target.postMessage((channel.useStructuredClone ? message : JSON.stringify(message)), channel.url);
-			}
-	};
 	
 	/**
 	 * Starts the plugin registry

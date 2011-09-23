@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
+/*global window addEventListener removeEventListener self*/
+
 /**
  * @private Don't jsdoc this.
  */
@@ -105,7 +107,7 @@ eclipse.PluginProvider = function(metadata) {
 			throw new Error("Cannot register. Plugin Provider is connected");
 		}
 		
-		var method = null;;
+		var method = null;
 		var methods = [];
 		for (method in implementation) {
 			if (typeof implementation[method] === 'function') {

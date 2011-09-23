@@ -85,7 +85,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 					var childTemp =  childSourceLocation;
 					if (children[i].Directory) {
 						childTemp = childSourceLocation.substring(0, childSourceLocation.length - 1);
-					};
+					}
 					var childName = decodeURIComponent(childTemp.substring(childTemp.lastIndexOf("/")+1));
 					
 					var childTargetLocation = targetLocation + encodeURIComponent(childName);
@@ -166,18 +166,18 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			write: _noMatch
 		};
 		
-		for(var i = 0; i < _references.length; ++i) {
-			_topChildren[i] = {
+		for(var j = 0; j < _references.length; ++j) {
+			_topChildren[j] = {
 				Directory: true, 
 				Length: 0, 
 				LocalTimeStamp: 0,
-				Location: _references[i].getProperty("top"),
-				ChildrenLocation: _references[i].getProperty("top"),
-				Name: _references[i].getProperty("Name"),		
+				Location: _references[j].getProperty("top"),
+				ChildrenLocation: _references[j].getProperty("top"),
+				Name: _references[j].getProperty("Name")		
 			};
-			_patterns[i] = new RegExp(_references[i].getProperty("pattern") || ".*");			
-			serviceRegistry.getService(_references[i], 0).then(function(service) {
-				_services[i] = service;
+			_patterns[j] = new RegExp(_references[j].getProperty("pattern") || ".*");			
+			serviceRegistry.getService(_references[j], 0).then(function(service) {
+				_services[j] = service;
 			});
 		}
 		
@@ -334,15 +334,11 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 				target += "/";
 			}
 			
-			if (name) {
-				target += encodeURIComponent(name);
-			} else {
-				var temp = sourceLocation;
-				if (isDirectory) {
-					temp = temp.substring(0, temp.length - 1);
-				}
-				target += temp.substring(temp.lastIndexOf("/")+1);
+			var temp = sourceLocation;
+			if (isDirectory) {
+				temp = temp.substring(0, temp.length - 1);
 			}
+			target += temp.substring(temp.lastIndexOf("/")+1);
 			
 			if (isDirectory && target[target.length -1] !== "/") {
 				target += "/";

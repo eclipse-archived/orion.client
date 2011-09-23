@@ -220,7 +220,7 @@ orion.JSTestAdapter = (function() {
 		}
 		
 		new dojo.DeferredList(loaders, false, false, true).then(function(results) {
-			var suite = AsyncTestCase(suiteName);
+			var suite = new AsyncTestCase(suiteName);
 			for(var i = 0; i < results.length; i++) {
 				var test = results[i][1];		
 				if (typeof test.testName !== "undefined") {

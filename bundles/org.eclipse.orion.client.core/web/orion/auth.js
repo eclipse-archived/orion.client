@@ -7,7 +7,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define dojo dijit handleAuthenticationError */
+/*global define eclipse window handleAuthenticationError localStorage*/
  /*
 	Authentication and authorization error handling. Adds methods that handle 401 and 403 responses for 
 	XHR calls.
@@ -18,13 +18,13 @@
 
  */
 
-define(['dojo', 'orion/globalCommands', 'dojo/date/locale', 'orion/widgets/LoginDialog'], function(dojo, mGlobalCommands) {
+define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widgets/LoginDialog'], function(dojo, dijit, mGlobalCommands) {
 
 var authenticationInProgress = false;
 
 var forbiddenAccessDlg;
 var loginDialog;
-var pendingAuthentication = {}
+var pendingAuthentication = {};
 
 dojo.addOnLoad(function () {
 	
