@@ -378,11 +378,28 @@ orion.textview.AnnotationStyler = (function() {
 		_mergeStyleRanges: function(ranges, styleRange) {
 			for (var i=0; i<ranges.length; i++) {
 				var range = ranges[i];
+				if (styleRange.end <= range.start) { break; }
+				if (styleRange.start >= range.end) { continue; }
+				var mergedStyle = this._mergeStyle({}, range.style);
+				mergedStyle = this._mergeStyle(mergedStyle, styleRange.style);
 				if (styleRange.start <= range.start && styleRange.end >= range.end) {
-					range.style = this._mergeStyle({}, range.style);//copy
-					range.style = this._mergeStyle(range.style, styleRange.style);
-				} else {
-					//need to split
+					ranges[i] = {start: range.start, end: range.end, style: mergedStyle};
+				} else if (styleRange.start > range.start && styleRange.end < range.end) {
+					ranges.splice(i, 1,
+						{start: range.start, end: styleRange.start, style: range.style},
+						{start: styleRange.start, end: styleRange.end, style: mergedStyle},
+						{start: styleRange.end, end: range.end, style: range.style});
+					i += 2;
+				} else if (styleRange.start > range.start) {
+					ranges.splice(i, 1,
+						{start: range.start, end: styleRange.start, style: range.style},
+						{start: styleRange.start, end: range.end, style: mergedStyle});
+					i += 1;
+				} else if (styleRange.end < range.end) {
+					ranges.splice(i, 1,
+						{start: range.start, end: styleRange.end, style: mergedStyle},
+						{start: styleRange.end, end: range.end, style: range.style});
+					i += 1;
 				}
 			}
 		},
@@ -436,7 +453,7 @@ orion.textview.AnnotationStyler = (function() {
 					}
 					this._mergeStyleRanges(e.ranges, {start: annotationStart, end: annotationEnd, style: annotation.rangeStyle});
 				}
-				if (annotation.lineStyle) { // does this make sense?
+				if (annotation.lineStyle) {
 					e.style = this._mergeStyle({}, e.style);
 					e.style = this._mergeStyle(e.style, annotation.lineStyle);
 				}
