@@ -17,7 +17,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		this.registry= serviceRegistry;
 		this.fileClient = fileClient; 
 		this._resultLocation = resultLocation;
-		this.searchStr = searchStr;
+		this.searchStr = searchStr.toLowerCase();
 		this.root = {
 				isRoot: true,
 				children:[]
@@ -193,14 +193,16 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		if(fileModelNode){
 			fileModelNode.children = [];
 			for(var i = 0; i < fileContents.length ; i++){
-				var lineString = fileContents[i];
-				var result = this.searchOneline(lineString, searchStr);
-				if(result){
-					var lineNumber = i+1;
-					var detailNode = {parent: fileModelNode, type: "detail",  name: lineNumber+ " : " + lineString, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
-					fileModelNode.children.push(detailNode);
+				var lineStringOrigin = fileContents[i];
+				if(lineStringOrigin && lineStringOrigin.length > 0){
+					var lineString = lineStringOrigin.toLowerCase();
+					var result = this.searchOneline(lineString, searchStr);
+					if(result){
+						var lineNumber = i+1;
+						var detailNode = {parent: fileModelNode, type: "detail",  name: lineNumber+ " : " + lineString, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
+						fileModelNode.children.push(detailNode);
+					}
 				}
-				
 			}
 			fileModelNode.name = fileModelNode.name + " (" + fileModelNode.children.length + " matches)";
 		}
