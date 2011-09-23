@@ -691,8 +691,8 @@ examples.textview.TextStyler = (function() {
 				return null;
 			}
 			return new orion.textview.FoldingAnnotation(viewModel, "orion.annotation.folding", start, end,
-				"<img src='/examples/textview/images/expanded.png'></img>", {styleClass: "ruler_folding_expanded"}, 
-				"<img src='/examples/textview/images/collapsed.png'></img>", {styleClass: "ruler_folding_collapsed"});
+				"<img src='/examples/textview/images/expanded.png'></img>", {styleClass: "annotation expanded"}, 
+				"<img src='/examples/textview/images/collapsed.png'></img>", {styleClass: "annotation collapsed"});
 		}, 
 		_computeFolding: function() {
 			if (!this.foldingEnabled) { return; }
