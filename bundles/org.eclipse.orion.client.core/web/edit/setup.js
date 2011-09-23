@@ -177,12 +177,10 @@ exports.setUpEditor = function(isReadOnly){
 
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 		
-		var model = new mTextModel.TextModel();
-		model = new mProjectionTextModel.ProjectionTextModel(model);
 		var textViewFactory = function() {
 			return new mTextView.TextView({
 				parent: editorDomNode,
-				model: model,
+				model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
 				stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css",
 					"/examples/textview/textstyler.css", "/css/default-theme.css",
 					"/orion/editor/editor.css"],
