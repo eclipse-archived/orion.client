@@ -126,6 +126,7 @@ define(['dojo'], function(dojo) {
 		
 		refresh: function(item, children, /* optional */ forceExpand, /* optional */ imgName, /*optional */ imageSrc) {
 			var parentId = this._treeModel.getId(item);
+			var tree;
 			if (parentId === this._id) {  // root of tree
 				this._removeChildRows(parentId);
 				this._generateChildren(children, 0, dojo.byId(parentId+"tbody"), "last");

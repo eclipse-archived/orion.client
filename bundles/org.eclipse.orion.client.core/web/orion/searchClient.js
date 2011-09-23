@@ -132,10 +132,11 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExplorer', 'di
 		},
 		
 		showSearchResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, useFlatList, jsonData) {
-			if(useFlatList)
+			if(useFlatList) {
 				this.showSearchResultInList(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData);
-			else
+			} else {
 				this.showSearchResultInTree(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData);
+			}
 		},
 		
 		showSearchResultInTree: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {

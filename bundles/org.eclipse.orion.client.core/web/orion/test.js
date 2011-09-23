@@ -7,7 +7,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define console*/
+/*global define console top self eclipse*/
 define(['dojo', 'orion/assert'], function(dojo, assert) {
 
 	var Test = function() {	
@@ -122,7 +122,7 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 			}
 			deferredCount--;
 	
-			if (deferredCount == 0) {
+			if (deferredCount === 0) {
 				dispatchEvent("runDone", runName, {
 					failures : failures
 				});
@@ -136,20 +136,7 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 				return result.promise;
 			}
 		}
-	
-		exports.list = function(name, obj) {
-			if (typeof obj === "undefined") {
-				obj = name;
-				name = "";
-			}
-	
-			if (!obj || typeof obj !== "object") {
-				throw Error("not a test object");
-			}
-			return _list(name, obj);
-		};
-		
-	
+
 		function _list(runName, obj) {
 			var result = [],
 				property,
@@ -168,8 +155,19 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 				}
 			}
 			return result;
-		};
+		}
 	
+		exports.list = function(name, obj) {
+			if (typeof obj === "undefined") {
+				obj = name;
+				name = "";
+			}
+	
+			if (!obj || typeof obj !== "object") {
+				throw new Error("not a test object");
+			}
+			return _list(name, obj);
+		};
 		
 		exports.run = function(name, obj) {
 			if (typeof obj === "undefined") {
@@ -178,10 +176,10 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 			}
 	
 			if (!obj || typeof obj !== "object") {
-				throw Error("not a test object");
+				throw new Error("not a test object");
 			}
 			
-			if (!exports.useLocal && top != self && typeof(eclipse) !== "undefined" && eclipse.PluginProvider) {
+			if (!exports.useLocal && top !== self && typeof(eclipse) !== "undefined" && eclipse.PluginProvider) {
 				var result = new dojo.Deferred();
 				try {
 					var provider = new eclipse.PluginProvider();
@@ -225,15 +223,15 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 			var top;
 			
 			exports.addEventListener("runStart", function(name) {
-				var name = name ? name : "<top>";
+				name = name ? name : "<top>";
 				if (!top) {
 					top = name;
-				};
+				}
 				console.log("[Test Run] - " + name + " start");
 				times[name] = new Date().getTime();
 			});
 			exports.addEventListener("runDone", function(name, obj) {
-				var name = name ? name : "<top>";
+				name = name ? name : "<top>";
 				var result = [];
 				result.push("[Test Run] - " + name + " done - ");
 				result.push("[Failures:" + obj.failures + (name === top ? ", Test Count:" + testCount : "") +"] ");

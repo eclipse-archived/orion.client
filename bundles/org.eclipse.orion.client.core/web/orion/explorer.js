@@ -186,7 +186,7 @@ exports.ExplorerFlatModel = (function() {
 	ExplorerFlatModel.prototype = new exports.ExplorerModel();
 	
 	ExplorerFlatModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
-		if(parentItem==this.root){
+		if(parentItem === this.root){
 			onComplete(parentItem);
 		}else{
 			onComplete([]);
@@ -255,8 +255,9 @@ exports.ExplorerRenderer = (function() {
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
 					this._storeSelections();
-					if (this.explorer.selection)
+					if (this.explorer.selection) {
 						this.explorer.selection.setSelections(this.getSelected());		
+					}
 				}));
 				return checkColumn;
 			}
@@ -294,8 +295,9 @@ exports.ExplorerRenderer = (function() {
 			}	
 			// notify the selection service of our new selections
 			var selectedItems = this.getSelected();
-			if(this.explorer.selection)
+			if(this.explorer.selection) {
 				this.explorer.selection.setSelections(selectedItems);
+			}
 		},
 		
 		_storeExpansions: function(prefPath) {
@@ -408,8 +410,9 @@ exports.ExplorerRenderer = (function() {
 				}
 			});
 			// notify the selection service of the change in state.
-			if(this.explorer.selection)
+			if(this.explorer.selection) {
 				this.explorer.selection.setSelections(this.getSelected());
+			}
 		},
 		updateCommands: function(){
 			var registry = this.explorer.registry;
@@ -466,15 +469,15 @@ exports.SelectionRenderer = (function(){
 		var row = document.createElement('tr');
 		dojo.addClass(thead, "navTableHeading");
 		var th, actions, size;
-		if (this._useCheckboxSelection)
+		if (this._useCheckboxSelection) {
 			row.appendChild(this.initCheckboxColumn(tableNode));
+		}
 		
 		var i = 0;
 		var cell = this.getCellHeaderElement(i);
 		while(cell){
 			dojo.addClass(cell, "navColumn");
-			row.appendChild(cell);
-			
+			row.appendChild(cell);			
 			cell = this.getCellHeaderElement(++i);
 		}
 		thead.appendChild(row);

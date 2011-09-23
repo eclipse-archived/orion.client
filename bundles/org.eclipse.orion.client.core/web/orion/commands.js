@@ -617,17 +617,19 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 				} else {
 					image.src = this.image;	
 					dojo.connect(image, "onmouseover", this, function() {
-						if(cssClassCmdOver)
+						if(cssClassCmdOver) {
 							dojo.addClass(image, cssClassCmdOver);
-						else
+						} else {
 							dojo.addClass(image, "commandOver");
+						}
 					});
 					dojo.connect(image, "onmouseout", this, function() {
 						image.src = this.image;
-						if(cssClassCmdOver)
+						if(cssClassCmdOver) {
 							dojo.removeClass(image, cssClassCmdOver);
-						else
+						} else {
 							dojo.removeClass(image, "commandOver");
+						}
 					});
 				}
 				dojo.addClass(image, 'commandImage');
@@ -636,10 +638,11 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 				}			
 				dojo.place(image, link, "last");
 			}
-			if(cssClassCmdLink)
+			if(cssClassCmdLink) {
 				dojo.addClass(link, cssClassCmdLink);
-			else
+			} else {
 				dojo.addClass(link, 'commandLink');
+			}
 			if (cssClass) {
 				dojo.addClass(link, cssClass);
 			}

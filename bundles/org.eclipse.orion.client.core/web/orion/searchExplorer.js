@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define */
+/*global define console*/
 /*jslint regexp:false browser:true forin:true*/
 
 define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands'], function(dojo, mExplorer, mUtil, mFileClient, mCommands) {
@@ -40,17 +40,20 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	SearchResultModel.prototype._findExistingParent = function(parents, index){
 		var parentLocation = parents[index].Location;
 		var parentValue = this.modelLocHash[parentLocation];
-		if(parentValue)
+		if(parentValue) {
 			return {parent: parentValue, index: index};
-		if(index === (parents.length - 1))
+		}
+		if(index === (parents.length - 1)) {
 			return null;
+		}
 		return this._findExistingParent(parents, index+1);
 	};
 	
 	SearchResultModel.prototype.buildResultModelTree = function(onComplete){
 		for(var i = 0; i < this._resultLocation.length; i++){
-			if(!this._resultLocation[i].metaData)
+			if(!this._resultLocation[i].metaData) {
 				continue;
+			}
 			var parents = this._resultLocation[i].metaData.Parents;
 			var existingParent = this._findExistingParent(parents, 0);
 			var parentIndex, parent;
@@ -87,22 +90,22 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	SearchResultModel.prototype.loadOneFileMetaData =  function(index, onComplete){
 		var item = this._resultLocation[index];
 		this.fileClient.read(item.location, true).then(
-				dojo.hitch(this, function(meta) {
-					  item.metaData = meta;
-				      if(index === (this._resultLocation.length-1)){			 
-				    	  this.buildResultModelTree(onComplete); 
-				      } else {
-						  this.loadOneFileMetaData(index+1, onComplete);
-				      }
-				}),
-				dojo.hitch(this, function(error) {
-					console.error("Error loading file metadata: " + error.message);
-				      if(index === (this._resultLocation.length-1)){			 
-				    	  this.buildResultModelTree(onComplete); 
-				      } else {
-						  this.loadOneFileMetaData( index+1, onComplete);
-				      }
-				})
+			dojo.hitch(this, function(meta) {
+				item.metaData = meta;
+			    if(index === (this._resultLocation.length-1)){			 
+					this.buildResultModelTree(onComplete); 
+			    } else {
+					this.loadOneFileMetaData(index+1, onComplete);
+			    }
+			}),
+			dojo.hitch(this, function(error) {
+				console.error("Error loading file metadata: " + error.message);
+				if(index === (this._resultLocation.length-1)){
+					this.buildResultModelTree(onComplete); 
+				} else {
+					this.loadOneFileMetaData( index+1, onComplete);
+				}
+			})
 		);
 	};
 
@@ -120,20 +123,23 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	
 	SearchResultModel.prototype.getFileItemIndex = function(fileItem){
 		for(var i = 0; i < this.indexedFileItems.length; i++){
-			if(fileItem === this.indexedFileItems[i])
+			if(fileItem === this.indexedFileItems[i]) {
 				return i;
+			}
 		}
 		return -1;
 	};
 	
 	SearchResultModel.prototype.getFileDetailItemIndex = function(fileItemIndex, detailItem){
-		if(fileItemIndex < 0)
+		if(fileItemIndex < 0) {
 			return -1;
+		}
 		var fileItem = this.indexedFileItems[fileItemIndex];
 		if(fileItem.children && fileItem.children.length > 0){
 			for(var i = 0; i < fileItem.children.length ; i++){
-				if(detailItem === fileItem.children[i])
+				if(detailItem === fileItem.children[i]) {
 					return i;
+				}
 			}
 		}
 		return -1;
@@ -147,8 +153,9 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		}
 		
 		if(!currentNode.children){
-			if(currentNode.type === "file")
+			if(currentNode.type === "file") {
 				this.indexedFileItems.push(currentNode);
+			}
 		} else {
 			for (var i = 0; i < currentNode.children.length; i++ ){
 				this.walkTreeNode(currentNode.children[i]);
@@ -182,8 +189,9 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 				startIndex = i + searchStr.length;
 			}
 		}
-		if(found)
+		if(found) {
 			return result;
+		}
 		return null;
 		
 	};
@@ -212,8 +220,9 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		var filItem = this.indexedFileItems[fileIndex];
 		if(filItem.children && filItem.children.length > 0){
 			if(detailIndex > -2){
-				if(detailIndex < 0)
+				if(detailIndex < 0) {
 					detailIndex = 0;
+				}
 			} else {
 				detailIndex = filItem.children.length -1;
 			}
@@ -235,18 +244,21 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 						  var fileUIItem = dojo.byId(itemId);
 						  if(fileUIItem){
 							  var linkUIItem = dojo.byId(itemId + "NameColumn");
-							  if(linkUIItem)
+							  if(linkUIItem) {
 								  dojo.place(document.createTextNode(parentItem.name), linkUIItem, "only");
+							  }
 						  }
 						  onComplete(parentItem.children);
 						  if(this.highlightSelectionLater){
 							  if(parentItem === this.indexedFileItems[this.currentFileIndex]){
-								  if(this.currentDetailIndex < -1)
+								  if(this.currentDetailIndex < -1) {
 									  this.currentDetailIndex = parentItem.children.length -1;
+								  }
 								  var expanded = this._fileExpanded(this.currentFileIndex, this.currentDetailIndex);
 								  dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
-								  if(!this.explorer.visible(expanded.childDiv))
+								  if(!this.explorer.visible(expanded.childDiv)) {
 									  expanded.childDiv.scrollIntoView(!this.lastNavDirection);
+								  }
 								  this.highlightSelectionLater = false;
 							  }
 						  }
@@ -269,14 +281,10 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	}
 	SearchResultRenderer.prototype = new mExplorer.SelectionRenderer();
 	
-	SearchResultRenderer.prototype.getCellHeaderElement = function(col_no){
-		
-		switch(col_no){
-		case 0: 
+	SearchResultRenderer.prototype.getCellHeaderElement = function(col_no){	
+		if(col_no === 0){
 			return dojo.create("th", {innerHTML: "<h2>Search Results</h2>"});
-			break;
-		};
-		
+		}
 	};
 	
 	SearchResultRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -310,11 +318,13 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 						if(fileItemIndex > -1){
 							var fileDetailItemIndex = that.explorer.model.getFileDetailItemIndex(fileItemIndex, item);
 							if(fileDetailItemIndex > -1){
-								if(that.explorer.model.currentFileIndex === fileItemIndex && that.explorer.model.currentDetailIndex === fileDetailItemIndex)
+								if(that.explorer.model.currentFileIndex === fileItemIndex && that.explorer.model.currentDetailIndex === fileDetailItemIndex) {
 									return;
+								}
 								var expanded = that.explorer.model._fileExpanded(that.explorer.model.currentFileIndex, that.explorer.model.currentDetailIndex);
-								if(expanded.childDiv)
+								if(expanded.childDiv) {
 									dojo.toggleClass(expanded.childDiv, "currentSearchMatch", false);
+								}
 								that.explorer.model.currentFileIndex = fileItemIndex;
 								that.explorer.model.currentDetailIndex = fileDetailItemIndex;						
 								expanded = that.explorer.model._fileExpanded(that.explorer.model.currentFileIndex, that.explorer.model.currentDetailIndex);
@@ -331,7 +341,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 			return col;
 		case 1:
 			return this.getActionsColumn(item, tableRow);
-		};
+		}
 	};
 	SearchResultRenderer.prototype.constructor = SearchResultRenderer;
 	
@@ -404,7 +414,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		this._commandService.registerCommandContribution("orion.search.collapseAll", 4, "pageActionsRight");
 		dojo.empty("pageActionsRight");
 		this._commandService.renderCommands("pageActionsRight", "dom", that, that, "image");
-	},
+	};
 	
 	SearchResultExplorer.prototype.startUp = function() {
 		var that = this;
@@ -438,12 +448,15 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	
 	
 	SearchResultExplorer.prototype.expandRecursively = function(node)	{
-		if(node.type === "detail")
+		if(node.type === "detail") {
 			return;
+		}
 		this.myTree.expand(node);
 		var children = node.children;
-		if(children === undefined || children === null)
-				return;
+		if(children === undefined || children === null) {
+			return;
+		}
+				
 		var len = children.length;
 		for (var i = 0; i < len ; i++){
 			this.expandRecursively(children[i]);
@@ -463,13 +476,15 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	SearchResultExplorer.prototype._decideNext = function(next){
 		var filItem = this.model.indexedFileItems[this.model.currentFileIndex];
 		if(filItem.children && filItem.children.length > 0){
-			if(this.model.currentDetailIndex < -1)
+			if(this.model.currentDetailIndex < -1) {
 				this.model.currentDetailIndex = filItem.children.length - 1;
+			}
 			var newDetailIndex, newFileIndex;
-			if(next)
+			if(next) {
 				newDetailIndex = this.model.currentDetailIndex + 1;
-			else
+			} else {
 				newDetailIndex = this.model.currentDetailIndex - 1;
+			}
 			if(newDetailIndex < 0){
 				newFileIndex = this.model.currentFileIndex -1;
 				newDetailIndex = -100;
@@ -480,10 +495,11 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 				newFileIndex = this.model.currentFileIndex;
 			}
 			
-			if(newFileIndex < 0)
+			if(newFileIndex < 0) {
 				newFileIndex = this.model.indexedFileItems.length -1;
-			else if(newFileIndex > (this.model.indexedFileItems.length -1))
+			} else if(newFileIndex > (this.model.indexedFileItems.length -1)) {
 				newFileIndex = 0;
+			}
 			
 			return {newFileIndex:newFileIndex, newDetailIndex:newDetailIndex};
 		}
@@ -491,28 +507,32 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	};
 
 	SearchResultExplorer.prototype.visible = function(element) {
-		if (element.offsetWidth === 0 || element.offsetHeight === 0) return false;
+		if (element.offsetWidth === 0 || element.offsetHeight === 0) {
+			return false;
+		}
 		var parentNode = dojo.byId("orion.innerSearchResults");
 		var parentRect = parentNode.getClientRects()[0],
 		rects = element.getClientRects(),
 		on_top = function(r) {
 			var x = (r.left + r.right)/2, y = (r.top + r.bottom)/2;
-		    document.elementFromPoint(x, y) === element;
+		    // document.elementFromPoint(x, y) === element; TODO: what is this ???
 		};
 		
 		for (var i = 0, l = rects.length; i < l; i++) {
 			var r = rects[i],
 		    in_viewport = (r.top >= parentRect.top && r.top <= parentRect.bottom && r.bottom >= parentRect.top && r.bottom <= parentRect.bottom);
-		    if (in_viewport /*&& on_top(r)*/) 
-		    	return true;
-		  }
-		  return false;
+		    if (in_viewport /*&& on_top(r)*/) {
+				return true;
+		    }
+		}
+		return false;
 	};
 		
 	SearchResultExplorer.prototype.gotoNext = function(next)	{
 		var curentExpanded = this.model._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex); 
-		if(curentExpanded.childDiv /*&& this.model.currentDetailIndex > -1*/)
+		if(curentExpanded.childDiv /*&& this.model.currentDetailIndex > -1*/) {
 			dojo.toggleClass(curentExpanded.childDiv, "currentSearchMatch", false);
+		}
 		var nextItem = this._decideNext(next);
 		this.model.highlightSelectionLater = true;
 		this.model.lastNavDirection = next;
@@ -520,12 +540,14 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 			var newExpanded = this.model._fileExpanded(nextItem.newFileIndex, nextItem.newDetailIndex); 
 			this.model.currentFileIndex = nextItem.newFileIndex;
 			this.model.currentDetailIndex = nextItem.newDetailIndex;
-			if(newExpanded.childrenNumber > 0)
+			if(newExpanded.childrenNumber > 0) {
 				this.model.highlightSelectionLater = false;
+			}
 			if(newExpanded.childDiv)	{
 				dojo.toggleClass(newExpanded.childDiv, "currentSearchMatch", true);
-				if(!this.visible(newExpanded.childDiv))
+				if(!this.visible(newExpanded.childDiv)) {
 					newExpanded.childDiv.scrollIntoView(!next);
+				}
 				return;
 			}
 		} else if(this.model.currentDetailIndex === -1){
@@ -540,8 +562,9 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		if(!this.model.highlightSelectionLater){
 			var expanded = this.model._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex);
 			dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
-			if(!this.visible(expanded.childDiv))
+			if(!this.visible(expanded.childDiv)) {
 				expanded.childDiv.scrollIntoView(!next);
+			}
 		}
 	};
 	
