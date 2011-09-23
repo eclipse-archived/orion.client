@@ -154,7 +154,7 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 		var errorType = "orion.annotation.error";
 		var warningType = "orion.annotation.warning";
 		var taskType = "orion.annotation.task";
-		var annotationRuler = view.annotationRuler = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler_annotation"});
+		var annotationRuler = view.annotationRuler = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotation"});
 		annotationRuler.addAnnotationType(breakpointType);
 		annotationRuler.addAnnotationType(bookmarkType);
 		annotationRuler.addAnnotationType(errorType);
@@ -201,32 +201,32 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 							type: warningType,
 							rulerTitle: "Warning: " + model.getLine(lineIndex),
 							rulerHTML: "<img style='vertical-align:middle;align:center;' src='images/warning.png'></img>",
-							rulerStyle: {styleClass: "ruler_annotation_waring"},
-							overviewStyle: {styleClass: "ruler_annotation_warning_overview"}
+							rulerStyle: {styleClass: "annotation warning"},
+							overviewStyle: {styleClass: "annotation_overview warning"}
 						};
 					} else if (e.altKey) {
 						annotation = {
 							type: errorType,
 							rulerTitle: "Error: " + model.getLine(lineIndex),
 							rulerHTML: "<img style='vertical-align:middle;align:center;' src='images/error.gif'></img>",
-							rulerStyle: {styleClass: "ruler_annotation_error"},
-							overviewStyle: {styleClass: "ruler_annotation_error_overview"}
+							rulerStyle: {styleClass: "annotation error"},
+							overviewStyle: {styleClass: "annotation_overview error"}
 						};
 					} else if (e.shiftKey) {
 						annotation = {
 							type: bookmarkType,
 							rulerTitle: "Bookmark: " + model.getLine(lineIndex),
 							rulerHTML: "<img style='vertical-align:middle;align:center;' src='images/bookmark.gif'></img>",
-							rulerStyle: {styleClass: "ruler_annotation_bookmark"},
-							overviewStyle: {styleClass: "ruler_annotation_bookmark_overview"}
+							rulerStyle: {styleClass: "annotation bookmark"},
+							overviewStyle: {styleClass: "annotation_overview bookmark"}
 						};
 					} else {
 						annotation = {
 							type: taskType,
 							rulerTitle: "Todo: " + model.getLine(lineIndex),
 							rulerHTML: "<img style='vertical-align:middle;align:center;' src='images/todo.gif'></img>",
-							rulerStyle: {styleClass: "ruler_annotation_todo"},
-							overviewStyle: {styleClass: "ruler_annotation_todo_overview"}
+							rulerStyle: {styleClass: "annotation todo"},
+							overviewStyle: {styleClass: "annotation_overview todo"}
 						};
 					}
 				} else {
@@ -234,8 +234,8 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 						type: breakpointType,
 						rulerTitle: "Breakpoint: " + model.getLine(lineIndex),
 						rulerHTML: "<img style='vertical-align:middle;align:center;' src='images/breakpoint.gif'></img>",
-						rulerStyle: {styleClass: "ruler_annotation_breakpoint"},
-						overviewStyle: {styleClass: "ruler_annotation_breakpoint_overview"}
+						rulerStyle: {styleClass: "annotation breakpoint"},
+						overviewStyle: {styleClass: "annotation_overview breakpoint"}
 					};
 				}
 				annotation.start = start;
@@ -243,11 +243,11 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 				annotationModel.addAnnotation(annotation);
 			}
 		};
-		var foldingRuler = view.folding = new mRulers.FoldingRuler(annotationModel, "left", {styleClass: "ruler_folding"});
+		var foldingRuler = view.folding = new mRulers.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"});
 		foldingRuler.addAnnotationType("orion.annotation.folding");
-		var linesRuler = view.lines = new mRulers.LineNumberRuler(annotationModel, "left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+		var linesRuler = view.lines = new mRulers.LineNumberRuler(annotationModel, "left", {styleClass: "ruler lines"}, {styleClass: "ruler_lines odd"}, {styleClass: "ruler_lines even"});
 		linesRuler.onDblClick = annotationRuler.onDblClick;
-		var overviewRuler = new mRulers.OverviewRuler(annotationModel, "right", {styleClass: "ruler_overview"});
+		var overviewRuler = new mRulers.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"});
 		overviewRuler.addAnnotationType(breakpointType);
 		overviewRuler.addAnnotationType(bookmarkType);
 		overviewRuler.addAnnotationType(errorType);
