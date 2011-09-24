@@ -486,14 +486,30 @@ examples.textview.TextStyler = (function() {
 				}
 				if (this.detectHyperlinks) {
 					var data = scanner.getData();
-					var href = null;
-					if (data.indexOf("://") > 0) {
+					var href = null, index;
+					if ((index = data.indexOf("://")) > 0) {
 						href = data;
-						var hrefStart = href.substring(0, 1);
-						var brackets = "\"\"''(){}[]<>";
-						var bracketIndex = brackets.indexOf(hrefStart);
-						if (bracketIndex !== -1 && (bracketIndex & 1) === 0 && (bracketIndex = href.lastIndexOf(brackets.substring(bracketIndex + 1, bracketIndex + 2))) !== -1) {
-							href = href.substring(1, bracketIndex);
+						var start = index;
+						while (start > 0) {
+							var c = href.charCodeAt(start - 1);
+							if (!((97 <= c && c <= 122) || (65 <= c && c <= 90) || 0x2d === c || (48 <= c && c <= 57))) { //LETTER OR DASH OR NUMBER
+								break;
+							}
+							start--;
+						}
+						if (start > 0) {
+							var brackets = "\"\"''(){}[]<>";
+							index = brackets.indexOf(href.substring(start - 1, start));
+							if (index !== -1 && (index & 1) === 0 && (index = href.lastIndexOf(brackets.substring(index + 1, index + 2))) !== -1) {
+								var end = index;
+								var linkStyle = this._clone(style);
+								linkStyle.tagName = "A";
+								linkStyle.attributes = {href: href.substring(start, end)};
+								styles.push({start: tokenStart, end: tokenStart + start, style: style});
+								styles.push({start: tokenStart + start, end: tokenStart + end, style: linkStyle});
+								styles.push({start: tokenStart + end, end: scanner.getOffset() + offset, style: style});
+								continue;
+							}
 						}
 					} else if (data.toLowerCase().indexOf("bug#") === 0) {
 						href = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=" + parseInt(data.substring(4), 10);
