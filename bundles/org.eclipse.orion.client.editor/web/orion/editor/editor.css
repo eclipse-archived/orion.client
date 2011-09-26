@@ -25,8 +25,8 @@
 	border: 1px solid red;
 }
 .annotationProblemOverview.warning {
-	background-color: lightyellow;
-	border: 1px solid green;
+	background-color: Gold;
+	border: 1px solid black;
 }
 
 .lineNumberRuler,
