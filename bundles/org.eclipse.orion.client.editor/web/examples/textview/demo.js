@@ -83,10 +83,10 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 		];
 		var fullSelection = window.document.getElementById('fullSelection').checked;
 		var tabSize = parseInt(window.document.getElementById('tabSize').value, 10);
-		var baseModel =  new mTextModel.TextModel();
+		var baseModel =  new mTextModel.TextModel(), viewModel = baseModel;
 		var foldingEnabled = true;
 		if (foldingEnabled) {
-			var viewModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
+			viewModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 		}
 		var options = {
 			parent: "divParent",
