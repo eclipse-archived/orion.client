@@ -126,7 +126,13 @@ exports.GitCommitNavigator = (function() {
 					return ret;
 				};
 				
-				dojo.hitch(self, self.createTree(self.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog)));
+				if(treeRoot.Children){
+					dojo.hitch(self, self.createTree(self.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog, treeRoot.Children)));
+					waitDeferred.callback();
+				}
+				else{
+					dojo.hitch(self, self.createTree(self.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog)));
+				}
 			});
 			
 			return waitDeferred;

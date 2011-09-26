@@ -76,9 +76,10 @@ examples.textview.TextStyler = (function() {
 	var KEYWORD = 2;
 	var STRING = 3;
 	var COMMENT = 4;
-	var WHITE = 5;
-	var WHITE_TAB = 6;
-	var WHITE_SPACE = 7;
+	var MULTILINE_COMMENT = 5;
+	var WHITE = 6;
+	var WHITE_TAB = 7;
+	var WHITE_SPACE = 8;
 
 	// Styles 
 	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent) ? document.documentMode : undefined;
@@ -111,6 +112,48 @@ examples.textview.TextStyler = (function() {
 			getDataLength: function() {
 				return this.offset - this.startOffset;
 			},
+			_default: function(c) {
+				var keywords = this.keywords;
+				switch (c) {
+					case 32: // SPACE
+					case 9: // TAB
+						if (this.whitespacesVisible) {
+							return c === 32 ? WHITE_SPACE : WHITE_TAB;
+						}
+						do {
+							c = this._read();
+						} while(c === 32 || c === 9);
+						this._unread(c);
+						return WHITE;
+					case 123: // {
+					case 125: // }
+					case 40: // (
+					case 41: // )
+					case 91: // [
+					case 93: // ]
+					case 60: // <
+					case 62: // >
+						// BRACKETS
+						return c;
+					default:
+						var isCSS = this.isCSS;
+						if ((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (0x2d === c && isCSS)) { //LETTER OR UNDERSCORE OR NUMBER
+							var off = this.offset - 1;
+							do {
+								c = this._read();
+							} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (0x2d === c && isCSS));  //LETTER OR UNDERSCORE OR NUMBER
+							this._unread(c);
+							if (keywords.length > 0) {
+								var word = this.text.substring(off, this.offset);
+								//TODO slow
+								for (var i=0; i<keywords.length; i++) {
+									if (this.keywords[i] === word) { return KEYWORD; }
+								}
+							}
+						}
+						return UNKOWN;
+				}
+			},
 			_read: function() {
 				if (this.offset < this.text.length) {
 					return this.text.charCodeAt(this.offset++);
@@ -128,12 +171,27 @@ examples.textview.TextStyler = (function() {
 						case -1: return null;
 						case 47:	// SLASH -> comment
 							c = this._read();
-							if (c === 47) {
+							if (c === 47) { // SLASH -> single line
 								while (true) {
 									c = this._read();
-									if ((c === -1) || (c === 10)) {
+									if ((c === -1) || (c === 10) || (c === 13)) {
 										this._unread(c);
 										return COMMENT;
+									}
+								}
+							}
+							if (c === 42) { // STAR -> multi line 
+								while (true) {
+									c = this._read();
+									while (c === 42) {
+										c = this._read();
+										if (c === 47) {
+											return MULTILINE_COMMENT;
+										}
+									}
+									if (c === -1) {
+										this._unread(c);
+										return MULTILINE_COMMENT;
 									}
 								}
 							}
@@ -145,6 +203,8 @@ examples.textview.TextStyler = (function() {
 								switch (c) {
 									case 39:
 										return STRING;
+									case 13:
+									case 10:
 									case -1:
 										this._unread(c);
 										return STRING;
@@ -160,6 +220,8 @@ examples.textview.TextStyler = (function() {
 								switch (c) {
 									case 34: // DOUBLE QUOTE
 										return STRING;
+									case 13:
+									case 10:
 									case -1:
 										this._unread(c);
 										return STRING;
@@ -169,31 +231,8 @@ examples.textview.TextStyler = (function() {
 								}
 							}
 							break;
-						case 32: // SPACE
-						case 9: // TAB
-							if (this.whitespacesVisible) {
-								return c === 32 ? WHITE_SPACE : WHITE_TAB;
-							}
-							do {
-								c = this._read();
-							} while(c === 32 || c === 9);
-							this._unread(c);
-							return WHITE;
 						default:
-							var isCSS = this.isCSS;
-							if ((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (0x2d === c && isCSS)) { //LETTER OR UNDERSCORE OR NUMBER
-								var off = this.offset - 1;
-								do {
-									c = this._read();
-								} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (0x2d === c && isCSS));  //LETTER OR UNDERSCORE OR NUMBER
-								this._unread(c);
-								var word = this.text.substring(off, this.offset);
-								//TODO slow
-								for (var i=0; i<this.keywords.length; i++) {
-									if (this.keywords[i] === word) { return KEYWORD; }
-								}
-							}
-							return UNKOWN;
+							return this._default(c);
 					}
 				}
 			},
@@ -234,6 +273,28 @@ examples.textview.TextStyler = (function() {
 		return WhitespaceScanner;
 	}());
 	
+	var CommentScanner = (function() {
+		function CommentScanner () {
+			Scanner.call(this, null, false);
+		}
+		CommentScanner.prototype = new Scanner(null);
+		CommentScanner.prototype._default = function(c) {
+			while(true) {
+				c = this._read();
+				switch (c) {
+					case 47: // SLASH
+					case 34: // DOUBLE QUOTE
+					case 39: // SINGLE QUOTE
+					case -1:
+						this._unread(c);
+						return UNKOWN;
+				}
+			}
+		};
+		
+		return CommentScanner;
+	}());
+	
 	function TextStyler (view, lang, annotationModel) {
 		this.commentStart = "/*";
 		this.commentEnd = "*/";
@@ -252,11 +313,10 @@ examples.textview.TextStyler = (function() {
 		if (lang === "css") {
 			this._scanner.isCSS = true;
 		}
+		this._commentScanner = new CommentScanner();
 		this._whitespaceScanner = new WhitespaceScanner();
 		this.view = view;
 		this.annotationModel = annotationModel;
-		this.commentOffset = 0;
-		this.commentOffsets = [];
 		this._currentBracket = undefined; 
 		this._matchingBracket = undefined;
 		
@@ -284,6 +344,8 @@ examples.textview.TextStyler = (function() {
 		}
 		view.addEventListener("Destroy", this, this._onDestroy);
 		view.addEventListener("LineStyle", this, this._onLineStyle);
+		this._computeComments ();
+		this._computeFolding();
 		view.redrawLines();
 	}
 	
@@ -316,57 +378,58 @@ examples.textview.TextStyler = (function() {
 		setFoldingEnabled: function(enabled) {
 			this.foldingEnabled = enabled;
 		},
-		_binarySearch: function(offsets, offset, low, high) {
-			while (high - low > 2) {
-				var index = (((high + low) >> 1) >> 1) << 1;
-				var end = offsets[index + 1];
-				if (end > offset) {
+		_binarySearch: function (array, offset, inclusive, low, high) {
+			var index;
+			if (low === undefined) { low = -1; }
+			if (high === undefined) { high = array.length; }
+			while (high - low > 1) {
+				index = Math.floor((high + low) / 2);
+				if (offset <= array[index].start) {
 					high = index;
+				} else if (inclusive && offset < array[index].end) {
+					high = index;
+					break;
 				} else {
 					low = index;
 				}
 			}
 			return high;
 		},
-		_computeComments: function(end) {
-			// compute comments between commentOffset and end
-			if (end <= this.commentOffset) { return; }
+		_computeComments: function() {
 			var model = this.view.getModel();
 			if (model.getBaseModel) { model = model.getBaseModel(); }
-			var charCount = model.getCharCount();
-			var e = end;
-			//TODO Uncomment to compute all comments
-			e = charCount;
-			var t = model.getText(this.commentOffset, e);
-			if (this.commentOffsets.length > 1 && this.commentOffsets[this.commentOffsets.length - 1] === charCount) {
-				this.commentOffsets.length--;
-			}
-			var offset = 0;
-			while (offset < t.length) {
-				var begin = (this.commentOffsets.length & 1) === 0;
-				var search = begin ? this.commentStart : this.commentEnd;
-				var index = t.indexOf(search, offset);
-				if (index !== -1) {
-					this.commentOffsets.push(this.commentOffset + (begin ? index : index + search.length));
-				} else {
-					break;
+			this.comments = this._findComments(model.getText());
+		},
+		_computeFolding: function() {
+			if (!this.foldingEnabled) { return; }
+			var view = this.view;
+			var viewModel = view.getModel();
+			if (!viewModel.getBaseModel) { return; }
+			var annotationModel = this.annotationModel;
+			if (!annotationModel) { return; }
+			annotationModel.removeAnnotations("orion.annotation.folding");
+			var add = [];
+			var baseModel = viewModel.getBaseModel();
+			var comments = this.comments;
+			for (var i=0; i<comments.length; i++) {
+				var comment = comments[i];
+				var annotation = this._createFoldingAnnotation(viewModel, baseModel, comment.start, comment.end);
+				if (annotation) { 
+					add.push(annotation);
 				}
-				offset = index + search.length;
 			}
-			if ((this.commentOffsets.length & 1) === 1) { this.commentOffsets.push(charCount); }
-			this.commentOffset = e;
-			this._computeFolding();
+			annotationModel.replaceAnnotations(null, add);
 		},
-		_getCommentRanges: function(start, end) {
-			this._computeComments (end);
-			var commentCount = this.commentOffsets.length;
-			var commentStart = this._binarySearch(this.commentOffsets, start, -1, commentCount);
-			if (commentStart >= commentCount) { return []; }
-			if (this.commentOffsets[commentStart] > end) { return []; }
-			var commentEnd = Math.min(commentCount - 2, this._binarySearch(this.commentOffsets, end, commentStart - 1, commentCount));
-			if (this.commentOffsets[commentEnd] > end) { commentEnd = Math.max(commentStart, commentEnd - 2); }
-			return this.commentOffsets.slice(commentStart, commentEnd + 2);
-		},
+		_createFoldingAnnotation: function(viewModel, baseModel, start, end) {
+			var startLine = baseModel.getLineAtOffset(start);
+			var endLine = baseModel.getLineAtOffset(end);
+			if (startLine === endLine) {
+				return null;
+			}
+			return new orion.textview.FoldingAnnotation(viewModel, "orion.annotation.folding", start, end,
+				"<img src='/examples/textview/images/expanded.png'></img>", {styleClass: "annotation expanded"}, 
+				"<img src='/examples/textview/images/collapsed.png'></img>", {styleClass: "annotation collapsed"});
+		}, 
 		_getLineStyle: function(lineIndex) {
 			if (this.highlightCaretLine) {
 				var view = this.view;
@@ -385,15 +448,15 @@ examples.textview.TextStyler = (function() {
 			}
 			var end = start + text.length;
 			
-			// get comment ranges that intersect with range
-			var commentRanges = this._getCommentRanges (start, end);
 			var styles = [];
 			
 			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
-			var offset = start;
-			for (var i = 0; i < commentRanges.length; i+= 2) {
-				var commentStart = commentRanges[i];
-				var commentEnd = commentRanges[i+1];
+			var offset = start, comments = this.comments;
+			var startIndex = this._binarySearch(comments, start, true);
+			for (var i = startIndex; i < comments.length; i++) {
+				if (comments[i].start >= end) { break; }
+				var commentStart = comments[i].start;
+				var commentEnd = comments[i].end;
 				if (offset < commentStart) {
 					this._parse(text.substring(offset - start, commentStart - start), offset, styles);
 				}
@@ -445,6 +508,7 @@ examples.textview.TextStyler = (function() {
 							}
 							break;
 						case COMMENT: 
+						case MULTILINE_COMMENT: 
 							if (this.whitespacesVisible || this.detectHyperlinks) {
 								this._parseWhitespace(scanner.getData(), tokenStart, styles, commentStyle);
 								continue;
@@ -486,14 +550,30 @@ examples.textview.TextStyler = (function() {
 				}
 				if (this.detectHyperlinks) {
 					var data = scanner.getData();
-					var href = null;
-					if (data.indexOf("://") > 0) {
+					var href = null, index;
+					if ((index = data.indexOf("://")) > 0) {
 						href = data;
-						var hrefStart = href.substring(0, 1);
-						var brackets = "\"\"''(){}[]<>";
-						var bracketIndex = brackets.indexOf(hrefStart);
-						if (bracketIndex !== -1 && (bracketIndex & 1) === 0 && (bracketIndex = href.lastIndexOf(brackets.substring(bracketIndex + 1, bracketIndex + 2))) !== -1) {
-							href = href.substring(1, bracketIndex);
+						var start = index;
+						while (start > 0) {
+							var c = href.charCodeAt(start - 1);
+							if (!((97 <= c && c <= 122) || (65 <= c && c <= 90) || 0x2d === c || (48 <= c && c <= 57))) { //LETTER OR DASH OR NUMBER
+								break;
+							}
+							start--;
+						}
+						if (start > 0) {
+							var brackets = "\"\"''(){}[]<>";
+							index = brackets.indexOf(href.substring(start - 1, start));
+							if (index !== -1 && (index & 1) === 0 && (index = href.lastIndexOf(brackets.substring(index + 1, index + 2))) !== -1) {
+								var end = index;
+								var linkStyle = this._clone(style);
+								linkStyle.tagName = "A";
+								linkStyle.attributes = {href: href.substring(start, end)};
+								styles.push({start: tokenStart, end: tokenStart + start, style: style});
+								styles.push({start: tokenStart + start, end: tokenStart + end, style: linkStyle});
+								styles.push({start: tokenStart + end, end: scanner.getOffset() + offset, style: style});
+								continue;
+							}
 						}
 					} else if (data.toLowerCase().indexOf("bug#") === 0) {
 						href = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=" + parseInt(data.substring(4), 10);
@@ -518,6 +598,17 @@ examples.textview.TextStyler = (function() {
 			}
 			return newObj;
 		},
+		_findComments: function(text, offset) {
+			offset = offset || 0;
+			var scanner = this._commentScanner, token;
+			scanner.setText(text);
+			var result = [];
+			while ((token = scanner.nextToken())) {
+				if (token !== MULTILINE_COMMENT) { continue; }
+				result.push({start: scanner.getStartOffset() + offset, end: scanner.getOffset() + offset});
+			}
+			return result;
+		}, 
 		_findMatchingBracket: function(model, offset) {
 			if (model.getBaseModel) { model = model.getBaseModel(); }
 			var brackets = "{}()[]<>";
@@ -596,36 +687,33 @@ examples.textview.TextStyler = (function() {
 		},
 		_findBrackets: function(bracket, closingBracket, text, textOffset, start, end) {
 			var result = [];
-			
-			// get comment ranges that intersect with range
-			var commentRanges = this._getCommentRanges (start, end);
-			
+			var bracketToken = bracket.charCodeAt(0);
+			var closingBracketToken = closingBracket.charCodeAt(0);
 			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
-			var offset = start, scanner = this._scanner, token, tokenData;
-			for (var i = 0; i < commentRanges.length; i+= 2) {
-				var commentStart = commentRanges[i];
+			var offset = start, scanner = this._scanner, token, comments = this.comments;
+			var startIndex = this._binarySearch(comments, start, true);
+			for (var i = startIndex; i < comments.length; i++) {
+				if (comments[i].start >= end) { break; }
+				var commentStart = comments[i].start;
+				var commentEnd = comments[i].end;
 				if (offset < commentStart) {
 					scanner.setText(text.substring(offset - start, commentStart - start));
 					while ((token = scanner.nextToken())) {
-						if (scanner.getDataLength() !== 1) { continue; }
-						tokenData = scanner.getData();
-						if (tokenData === bracket) {
+						if (token === bracketToken) {
 							result.push(scanner.getStartOffset() + offset - start + textOffset);
-						} else if (tokenData === closingBracket) {
+						} else if (token === closingBracketToken) {
 							result.push(-(scanner.getStartOffset() + offset - start + textOffset));
 						}
 					}
 				}
-				offset = commentRanges[i+1];
+				offset = commentEnd;
 			}
 			if (offset < end) {
 				scanner.setText(text.substring(offset - start, end - start));
 				while ((token = scanner.nextToken())) {
-					if (scanner.getDataLength() !== 1) { continue; }
-					tokenData = scanner.getData();
-					if (tokenData === bracket) {
+					if (token === bracketToken) {
 						result.push(scanner.getStartOffset() + offset - start + textOffset);
-					} else if (tokenData === closingBracket) {
+					} else if (token === closingBracketToken) {
 						result.push(-(scanner.getStartOffset() + offset - start + textOffset));
 					}
 				}
@@ -684,136 +772,68 @@ examples.textview.TextStyler = (function() {
 				view.redrawLines(lineIndex, lineIndex + 1);
 			}
 		},
-		_createFoldingAnnotation: function(viewModel, baseModel, start, end) {
-			var startLine = baseModel.getLineAtOffset(start);
-			var endLine = baseModel.getLineAtOffset(end);
-			if (startLine === endLine) {
-				return null;
-			}
-			return new orion.textview.FoldingAnnotation(viewModel, "orion.annotation.folding", start, end,
-				"<img src='/examples/textview/images/expanded.png'></img>", {styleClass: "annotation expanded"}, 
-				"<img src='/examples/textview/images/collapsed.png'></img>", {styleClass: "annotation collapsed"});
-		}, 
-		_computeFolding: function() {
-			if (!this.foldingEnabled) { return; }
-			var view = this.view;
-			var viewModel = view.getModel();
-			if (!viewModel.getBaseModel) { return; }
-			var annotationModel = this.annotationModel;
-			if (!annotationModel) { return; }
-			annotationModel.removeAnnotations("orion.annotation.folding");
-			var add = [];
-			var baseModel = viewModel.getBaseModel();
-			for (var i=0; i<this.commentOffsets.length; i += 2) {
-				var annotation = this._createFoldingAnnotation(viewModel, baseModel, this.commentOffsets[i], this.commentOffsets[i+1]);
-				if (annotation) { add.push(annotation); }
-			}
-			annotationModel.replaceAnnotations(null, add);
-		},
 		_onModelChanged: function(e) {
 			var start = e.start;
 			var removedCharCount = e.removedCharCount;
 			var addedCharCount = e.addedCharCount;
-			if (this._matchingBracket && start < this._matchingBracket) { this._matchingBracket += addedCharCount + removedCharCount; }
-			if (this._currentBracket && start < this._currentBracket) { this._currentBracket += addedCharCount + removedCharCount; }
-			if (start >= this.commentOffset) { return; }
+			var changeCount = addedCharCount - removedCharCount;
+			if (this._matchingBracket && start < this._matchingBracket) { this._matchingBracket += changeCount; }
+			if (this._currentBracket && start < this._currentBracket) { this._currentBracket += changeCount; }
 			var view = this.view;
 			var viewModel = view.getModel();
 			var baseModel = viewModel.getBaseModel ? viewModel.getBaseModel() : viewModel;
-			
-//			window.console.log("start=" + start + " added=" + addedCharCount + " removed=" + removedCharCount)
-//			for (var i=0; i< this.commentOffsets.length; i++) {
-//				window.console.log(i +"="+ this.commentOffsets[i]);
-//			}
-
-			var commentCount = this.commentOffsets.length;
-			var extra = Math.max(this.commentStart.length - 1, this.commentEnd.length - 1);
-			if (commentCount === 0) {
-				this.commentOffset = Math.max(0, start - extra);
-				return;
-			}
-			var charCount = baseModel.getCharCount();
-			var oldCharCount = charCount - addedCharCount + removedCharCount;
-			var commentStart = this._binarySearch(this.commentOffsets, start, -1, commentCount);
 			var end = start + removedCharCount;
-			var commentEnd = this._binarySearch(this.commentOffsets, end, commentStart - 1, commentCount);
-//			window.console.log("s=" + commentStart + " e=" + commentEnd);
+			var charCount = baseModel.getCharCount();
+			var commentCount = this.comments.length;
+			var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(start));
+			var commentStart = this._binarySearch(this.comments, lineStart, true);
+			var commentEnd = this._binarySearch(this.comments, end, false, commentStart - 1, commentCount);
+			
 			var ts;
-			if (commentStart > 0) {
-				ts = this.commentOffsets[--commentStart];
+			if (commentStart < commentCount && this.comments[commentStart].start <= lineStart && lineStart < this.comments[commentStart].end) {
+				ts = this.comments[commentStart].start;
+				if (ts > start) { ts += changeCount; }
 			} else {
-				ts = Math.max(0, Math.min(this.commentOffsets[commentStart], start) - extra);
-				--commentStart;
+				ts = lineStart;
 			}
 			var te;
-			var redrawEnd = charCount;
-			if (commentEnd + 1 < this.commentOffsets.length) {
-				te = this.commentOffsets[++commentEnd];
-				if (end > (te - this.commentEnd.length)) {
-					if (commentEnd + 2 < this.commentOffsets.length) { 
-						commentEnd += 2;
-						te = this.commentOffsets[commentEnd];
-						redrawEnd = te + 1;
-						if (redrawEnd > start) { redrawEnd += addedCharCount - removedCharCount; }
-					} else {
-						te = Math.min(oldCharCount, end + extra);
-						this.commentOffset = te;
-					}
-				}
+			if (commentEnd < commentCount) {
+				te = this.comments[commentEnd].end;
+				if (te > start) { te += changeCount; }
+				commentEnd += 1;
 			} else {
-				te = Math.min(oldCharCount, end + extra);
-				this.commentOffset = te;
-				if (commentEnd > 0 && commentEnd === this.commentOffsets.length) {
-					commentEnd = this.commentOffsets.length - 1;
-				}
+				commentEnd = commentCount;
+				te = charCount;//TODO could it be smaller?
 			}
-			if (ts > start) { ts += addedCharCount - removedCharCount; }
-			if (te > start) { te += addedCharCount - removedCharCount; }
-			
-//			window.console.log("commentStart="+ commentStart + " commentEnd=" + commentEnd + " ts=" + ts + " te=" + te)
-
-			if (this.commentOffsets.length > 1 && this.commentOffsets[this.commentOffsets.length - 1] === oldCharCount) {
-				this.commentOffsets.length--;
+			var text = baseModel.getText(ts, te), comment;
+			var newComments = this._findComments(text, ts), i;
+			for (i = commentStart; i < this.comments.length; i++) {
+				comment = this.comments[i];
+				if (comment.start > start) { comment.start += changeCount; }
+				if (comment.start > start) { comment.end += changeCount; }
 			}
-			
-			var offset = 0;
-			var newComments = [];
-			var t = baseModel.getText(ts, te);
-			if (this.commentOffset < te) { this.commentOffset = te; }
-			while (offset < t.length) {
-				var begin = ((commentStart + 1 + newComments.length) & 1) === 0;
-				var search = begin ? this.commentStart : this.commentEnd;
-				var index = t.indexOf(search, offset);
-				if (index !== -1) {
-					newComments.push(ts + (begin ? index : index + search.length));
-				} else {
-					break;
-				}
-				offset = index + search.length;
-			}
-//			window.console.log("lengths=" + newComments.length + " " + (commentEnd - commentStart) + " t=<" + t + ">")
-//			for (var i=0; i< newComments.length; i++) {
-//				window.console.log(i +"=>"+ newComments[i]);
-//			}
-			var redraw = (commentEnd - commentStart) !== newComments.length, i, j;
+			var redraw = (commentEnd - commentStart) !== newComments.length;
 			if (!redraw) {
 				for (i=0; i<newComments.length; i++) {
-					offset = this.commentOffsets[commentStart + 1 + i];
-					if (offset > start) { offset += addedCharCount - removedCharCount; }
-					if (offset !== newComments[i]) {
+					comment = this.comments[commentStart + i];
+					var newComment = newComments[i];
+					if (comment.start !== newComment.start || comment.end !== newComment.end) {
 						redraw = true;
 						break;
 					} 
 				}
 			}
-			
-			var args = [commentStart + 1, (commentEnd - commentStart)].concat(newComments);
-			Array.prototype.splice.apply(this.commentOffsets, args);
-			for (i = commentStart + 1 + newComments.length; i < this.commentOffsets.length; i++) {
-				this.commentOffsets[i] += addedCharCount - removedCharCount;
+			var args = [commentStart, commentEnd - commentStart].concat(newComments);
+			Array.prototype.splice.apply(this.comments, args);
+			if (redraw) {
+				var redrawStart = ts;
+				var redrawEnd = te;
+				if (viewModel !== baseModel) {
+					redrawStart = viewModel.mapOffset(redrawStart, true);
+					redrawEnd = viewModel.mapOffset(redrawEnd, true);
+				}
+				view.redrawRange(redrawStart, redrawEnd);
 			}
-			
-			if ((this.commentOffsets.length & 1) === 1) { this.commentOffsets.push(charCount); }
 
 			if (this.foldingEnabled && baseModel !== viewModel && this.annotationModel) {
 				var annotationModel = this.annotationModel;
@@ -824,8 +844,8 @@ examples.textview.TextStyler = (function() {
 					annotation = iter.next();
 					if (annotation.type === "orion.annotation.folding") {
 						all.push(annotation);
-						for (i = 0; i < newComments.length; i+= 2) {
-							if (annotation.start === newComments[i] && annotation.end === newComments[i+1]) {
+						for (i = 0; i < newComments.length; i++) {
+							if (annotation.start === newComments[i].start && annotation.end === newComments[i].end) {
 								break;
 							}
 						}
@@ -835,7 +855,6 @@ examples.textview.TextStyler = (function() {
 						} else {
 							var annotationStart = annotation.start;
 							var annotationEnd = annotation.end;
-							var changeCount = addedCharCount - removedCharCount;
 							if (annotationStart > start) {
 								annotationStart -= changeCount;
 							}
@@ -858,33 +877,22 @@ examples.textview.TextStyler = (function() {
 					}
 				}
 				var add = [];
-				for (i = 0; i < newComments.length; i+= 2) {
-					for (j = 0; j < all.length; j++) {
-						if (all[j].start === newComments[i] && all[j].end === newComments[i+1]) {
+				for (i = 0; i < newComments.length; i++) {
+					comment = newComments[i];
+					for (var j = 0; j < all.length; j++) {
+						if (all[j].start === comment.start && all[j].end === comment.end) {
 							break;
 						}
 					}
 					if (j === all.length) {
-						annotation = this._createFoldingAnnotation(viewModel, baseModel, newComments[i], newComments[i+1]);
-						if (annotation) { add.push(annotation); }
+						annotation = this._createFoldingAnnotation(viewModel, baseModel, comment.start, comment.end);
+						if (annotation) {
+							add.push(annotation);
+						}
 					}
 				}
 				annotationModel.replaceAnnotations(remove, add);
 			}
-			
-			if (redraw) {
-				var redrawStart = start + addedCharCount;
-//				window.console.log("redraw " + redrawStart + " " + redrawEnd);
-				if (viewModel !== baseModel) {
-					redrawStart = viewModel.mapOffset(redrawStart, true);
-					redrawEnd = viewModel.mapOffset(redrawEnd, true);
-				}
-				view.redrawRange(redrawStart, redrawEnd);
-			}
-			
-//			for (var i=0; i< this.commentOffsets.length; i++) {
-//				window.console.log(i +"="+ this.commentOffsets[i]);
-//			}
 		}
 	};
 	return TextStyler;
