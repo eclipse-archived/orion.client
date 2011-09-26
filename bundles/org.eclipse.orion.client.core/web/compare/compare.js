@@ -7,6 +7,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+
+/*global define document */
+
 define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
 		'orion/compare/compare-features', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'],
 		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mDiffProvider, mCompareContainer) {
