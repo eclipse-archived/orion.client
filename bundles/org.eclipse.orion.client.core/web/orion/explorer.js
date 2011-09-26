@@ -178,16 +178,30 @@ exports.ExplorerFlatModel = (function() {
 	 * @param {Function} fetchItems A function that returns a promise that resolves to the
 	 * items at the provided location.
 	 */
-	function ExplorerFlatModel(rootPath, fetchItems) {
+	function ExplorerFlatModel(rootPath, fetchItems, root) {
 		this.rootPath = rootPath;
 		this.fetchItems = fetchItems;
+		this.root = root;
 	}
 	
 	ExplorerFlatModel.prototype = new exports.ExplorerModel();
 	
+	ExplorerFlatModel.prototype.getRoot = function(onItem){
+		if(this.root){
+			onItem(this.root);
+		} else {
+			this.fetchItems(this.rootPath).then(
+					dojo.hitch(this, function(item){
+						this.root = item;
+						onItem(item);
+					})
+					);
+		}
+	};
+	
 	ExplorerFlatModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
 		if(parentItem === this.root){
-			onComplete(parentItem);
+			onComplete(this.root);
 		}else{
 			onComplete([]);
 		}
