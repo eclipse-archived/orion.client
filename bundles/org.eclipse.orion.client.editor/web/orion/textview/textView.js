@@ -4944,9 +4944,15 @@ orion.textview.TextView = (function() {
 				} else {
 					var buttonHeight = isPad ? 0 : 17;
 					var clientHeight = this._getClientHeight ();
-					var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * buttonHeight;
 					var lineCount = this._model.getLineCount ();
-					var divHeight = trackHeight / lineCount;
+					var contentHeight = lineHeight * lineCount;
+					var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * buttonHeight;
+					var divHeight;
+					if (contentHeight < trackHeight) {
+						divHeight = lineHeight;
+					} else {
+						divHeight = trackHeight / lineCount;
+					}
 					if (div.rulerChanged) {
 						var count = div.childNodes.length;
 						while (count > 1) {

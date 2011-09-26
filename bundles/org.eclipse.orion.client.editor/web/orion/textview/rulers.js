@@ -665,10 +665,8 @@ orion.textview.OverviewRuler = (function() {
 		if (annotationLineIndex !== 0) { return undefined; }
 		var result = previousAnnotation;
 		if (!result) {
-			//TODO using internal function
 			//TODO annotationLineCount does not work when there are folded lines
-			var height = (this._view._getClientHeight() / this._view.getModel().getLineCount()) * annotationLineCount;
-			height = Math.max(3, height);
+			var height = 3 * annotationLineCount;
 			result = {html: "&nbsp;", style: { style: {height: height + "px"}}};
 			result.style = this._mergeStyle(result.style, annotation.overviewStyle);
 		}
