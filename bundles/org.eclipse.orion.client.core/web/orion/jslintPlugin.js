@@ -63,16 +63,36 @@ window.onload = function() {
 						}
 					}
 				}
-				
-				if (result.unused) {
-					for (i=0; i < result.unused.length; i++) {
-						var unused = result.unused[i];
-						problems.push({
-							reason: "Unused variable '" + unused.name + "'.",
-							line: unused.line,
-							character: 1,
-							severity: "warning"
-						});
+				if (result.functions) {
+					var functions = result.functions;
+					var lines;
+					for (i=0; i < functions.length; i++) {
+						var func = functions[i];
+						var unused = func.unused;
+						if (!unused || unused.length === 0) {
+							continue;
+						}
+						if (!lines) {
+							lines = contents.split(/\r?\n/);
+						}
+						var nameGuessed = func.name[0] === '"';
+						var name = nameGuessed ? func.name.substring(1, func.name.length - 1) : func.name;
+						var line = lines[func.line - 1];
+						for (var j=0; j < unused.length; j++) {
+							// Find "function" token in line based on where fName appears.
+							// nameGuessed implies "foo:function()" or "foo = function()", and !nameGuessed implies "function foo()"
+							var nameIndex = line.indexOf(name);
+							var funcIndex = nameGuessed ? line.indexOf("function", nameIndex) : line.lastIndexOf("function", nameIndex);
+							if (funcIndex !== -1) {
+								problems.push({
+									reason: "Function declares unused variable '" + unused[j] + "'.",
+									line: func.line,
+									character: funcIndex + 1,
+									end: funcIndex + "function".length,
+									severity: "warning"
+								});
+							}
+						}
 					}
 				}
 				return { problems: problems };
