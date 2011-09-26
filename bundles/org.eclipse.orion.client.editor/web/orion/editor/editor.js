@@ -281,7 +281,7 @@ orion.editor.Editor = (function() {
 		 * {Number} length 
 		 */
 		doFind: function(str, searchStart, ignoreCase, reverse) {
-			var text = this.getContents();
+			var text = this.getText();
 			if (ignoreCase) {
 				str = str.toLowerCase();
 				text = text.toLowerCase();
@@ -325,7 +325,7 @@ orion.editor.Editor = (function() {
 			// 'g' makes exec() iterate all matches, 'm' makes ^$ work linewise
 			flags += (flags.indexOf("g") === -1 ? "g" : "") + (flags.indexOf("m") === -1 ? "m" : "");
 			var regexp = new RegExp(pattern, flags);
-			var text = this.getContents();
+			var text = this.getText();
 			var result = null,
 			    match = null;
 			if (reverse) {
