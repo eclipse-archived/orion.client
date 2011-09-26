@@ -356,20 +356,8 @@ orion.textview.TextModel = (function() {
 		setLineDelimiter: function(lineDelimiter) {
 			if (lineDelimiter === "auto") {
 				lineDelimiter = undefined;
-				//TODO avoid getText()
-				var contents = this.getText();
-				var lf = contents.indexOf("\n");
-				var cr = contents.indexOf("\r");
-				if (cr !== -1 && lf !== -1) {
-					if (lf === cr + 1) {
-						lineDelimiter = "\r\n";
-					} else {
-						lineDelimiter = cr < lf ? "\r" : "\n";
-					}
-				} else if (lf !== -1) {
-					lineDelimiter = "\n";
-				} else if (cr !== -1) {
-					lineDelimiter = "\r";
+				if (this.getLineCount() > 1) {
+					lineDelimiter = this.getText(this.getLineEnd(0), this.getLineEnd(0, true));
 				}
 			}
 			this._lineDelimiter = lineDelimiter ? lineDelimiter : (isWindows ? "\r\n" : "\n"); 
