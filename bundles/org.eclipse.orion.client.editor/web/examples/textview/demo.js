@@ -84,7 +84,10 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 		var fullSelection = window.document.getElementById('fullSelection').checked;
 		var tabSize = parseInt(window.document.getElementById('tabSize').value, 10);
 		var baseModel =  new mTextModel.TextModel();
-		var viewModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
+		var foldingEnabled = true;
+		if (foldingEnabled) {
+			var viewModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
+		}
 		var options = {
 			parent: "divParent",
 			model: viewModel,
@@ -243,8 +246,6 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 				annotationModel.addAnnotation(annotation);
 			}
 		};
-		var foldingRuler = view.folding = new mRulers.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"});
-		foldingRuler.addAnnotationType("orion.annotation.folding");
 		var linesRuler = view.lines = new mRulers.LineNumberRuler(annotationModel, "left", {styleClass: "ruler lines"}, {styleClass: "ruler_lines odd"}, {styleClass: "ruler_lines even"});
 		linesRuler.onDblClick = annotationRuler.onDblClick;
 		var overviewRuler = new mRulers.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"});
@@ -256,7 +257,11 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 		
 		view.addRuler(annotationRuler);
 		view.addRuler(linesRuler);
-		view.addRuler(foldingRuler);
+		if (foldingEnabled) {
+			var foldingRuler = view.folding = new mRulers.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"});
+			foldingRuler.addAnnotationType("orion.annotation.folding");
+			view.addRuler(foldingRuler);
+		}
 		view.addRuler(overviewRuler);
 	}
 	
