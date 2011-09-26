@@ -941,7 +941,7 @@ orion.GitStatusController = (function() {
 						
 						function renderCommitLogJsonData(commitLogJsonData){
 							if (commitLogJsonData.toRef == null || commitLogJsonData.toRef.RemoteLocation.length!==1 || commitLogJsonData.toRef.RemoteLocation[0].Children.length!==1 || !that._curBranch){
-								that._gitCommitNavigatorLog.loadCommitsList((that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation}).then(function(){retDeffered.callback();});
+								that._gitCommitNavigatorLog.loadCommitsList((that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children}).then(function(){retDeffered.callback();});
 								if(that._curRemote && that._curBranch)
 									that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 							}
@@ -958,7 +958,7 @@ orion.GitStatusController = (function() {
 											gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
 												function loadScopedCommitsList(scopedCommitsJsonData){
 													that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
-													that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation}).then(function(){retDeffered.callback();});
+													that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children}).then(function(){retDeffered.callback();});
 													if(that._curRemote)
 														that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 												}
@@ -983,7 +983,7 @@ orion.GitStatusController = (function() {
 										if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
 											mAuth.handleGetAuthenticationError(this, ioArgs);
 										}else{
-											that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation}).then(function(){retDeffered.callback();});
+											that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children}).then(function(){retDeffered.callback();});
 											if(that._curRemote && that._curBranch)
 												that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 										}
