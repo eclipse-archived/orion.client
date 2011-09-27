@@ -523,6 +523,9 @@ orion.editor.TextActions = (function() {
 		lineUp: function() {
 			if (this._incrementalFindActive) {
 				var prefix = this._incrementalFindPrefix;
+				if (prefix.length === 0) {
+					return false;
+				}
 				var editor = this.editor;
 				var model = editor.getModel();
 				var start;
