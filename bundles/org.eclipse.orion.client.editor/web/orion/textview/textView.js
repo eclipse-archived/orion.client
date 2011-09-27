@@ -400,8 +400,8 @@ orion.textview.TextView = (function() {
 				this._selDiv1 = null;
 				this._selDiv2 = null;
 				this._selDiv3 = null;
-				this._textArea = null;
 			}
+			this._textArea = null;
 			
 			var e = {};
 			this.onDestroy(e);
@@ -1621,6 +1621,21 @@ orion.textview.TextView = (function() {
 				this._startIME();
 			} else {
 				this._commitIME();
+			}
+			/*
+			* Bug in Firefox.  The paste operation on Firefox is done by switching
+			* focus into a textarea, let the user agent paste the text into the
+			* textarea and retrieve the text pasted from it. This works as expected
+			* in Firefox 3.x, but fails in Firefox 4 and greater.  The fix is to
+			* switch focus to the textarea during the key down event that triggers
+			* the paste operation.
+			*/
+			if (isFirefox) {
+				var ctrlKey = isMac ? e.metaKey : e.ctrlKey;
+				if (ctrlKey && e.keyCode === 86 /*Ctrl+v*/) {
+					this._textArea.value = "";
+					this._textArea.focus();
+				}
 			}
 			/*
 			* Feature in Firefox. When a key is held down the browser sends 
@@ -3141,58 +3156,30 @@ orion.textview.TextView = (function() {
 				return clipboadText.join("");
 			}
 			if (isFirefox) {
-				var window = this._frameWindow;
 				var document = this._frameDocument;
-				var child = document.createElement("PRE");
-				child.style.position = "fixed";
-				child.style.left = "-1000px";
-				child.appendChild(document.createTextNode(" "));
-				this._clientDiv.appendChild(child);
-				var range = document.createRange();
-				range.selectNodeContents(child);
-				var sel = window.getSelection();
-				if (sel.rangeCount > 0) { sel.removeAllRanges(); }
-				sel.addRange(range);
+				var textArea = this._textArea;
+				textArea.innerHTML = "";
+				textArea.focus();
 				var self = this;
-				/** @ignore */
-				var cleanup = function() {
-					self._updateDOMSelection();
-					/* 
-					* It is possible that child has already been removed from the clientDiv during updatePage.
-					* This happens, for example, on the Mac when command+p is held down and a second paste
-					* event happens before the timeout of the first event is called. 
-					*/
-					if (child.parent === self._clientDiv) {
-						self._clientDiv.removeChild(child);
-					}
-				};
 				var _getText = function() {
-					/*
-					* Use the selection anchor to determine the end of the pasted text as it is possible that
-					* some browsers (like Firefox) add extra elements (<BR>) after the pasted text.
-					*/
-					var endNode = null;
-					if (sel.anchorNode.nodeType !== child.TEXT_NODE) {
-						endNode = sel.anchorNode.childNodes[sel.anchorOffset];
-					}
-					var text = [];
-					/** @ignore */
-					var getNodeText = function(node) {
-						var nodeChild = node.firstChild;
-						while (nodeChild && nodeChild !== endNode) {
-							if (nodeChild.nodeType === child.TEXT_NODE) {
-								text.push(nodeChild !== sel.anchorNode ? nodeChild.data : nodeChild.data.substring(0, sel.anchorOffset));
-							} else if (nodeChild.tagName === "BR") {
-								text.push(delimiter); 
-							} else {
-								getNodeText(nodeChild);
-							}
-							nodeChild = nodeChild.nextSibling;
+					var text;
+					if (textArea.firstChild) {
+						text = "";
+						var child = textArea.firstChild;
+						while (child) {
+							if (child.nodeType === child.TEXT_NODE) {
+								text += child.data;
+							} else if (child.tagName === "BR") {
+								text += delimiter; 
+							} 
+							child = child.nextSibling;
 						}
-					};
-					getNodeText(child);
-					cleanup();
-					return text.join("");
+					} else {
+						text = textArea.value;
+					}
+					clipboadText = [];
+					self._convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
+					return clipboadText.join("");
 				};
 				
 				/* Try execCommand first. Works on firefox with clipboard permission. */
@@ -3208,16 +3195,18 @@ orion.textview.TextView = (function() {
 					*/
 					if (event) {
 						setTimeout(function() {
+							self.focus();
 							var text = _getText();
 							if (text) { self._doContent(text); }
 						}, 0);
 						return null;
 					} else {
 						/* no event and no clipboard permission, paste can't be performed */
-						cleanup();
+						this.focus();
 						return "";
 					}
 				}
+				this.focus();
 				return _getText();
 			}
 			//webkit
@@ -3722,7 +3711,9 @@ orion.textview.TextView = (function() {
 				handlers.push({target: clientDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e);}});
 				handlers.push({target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e);}});
 				handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e);}});
-				handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e);}});
+				if (!isFirefox) {
+					handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e);}});
+				}
 				handlers.push({target: clientDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}});
 				handlers.push({target: grabNode, type: "mouseup", handler: function(e) { return self._handleMouseUp(e);}});
 				handlers.push({target: grabNode, type: "mousemove", handler: function(e) { return self._handleMouseMove(e);}});
@@ -3735,6 +3726,7 @@ orion.textview.TextView = (function() {
 				}
 				if (isFirefox) {
 					handlers.push({target: this._frameDocument, type: "focus", handler: function(e) { return self._handleDocFocus(e); }});
+					handlers.push({target: this._textArea, type: "paste", handler: function(e) { return self._handlePaste(e);}});
 				}
 				if (!isIE && !isOpera) {
 					var wheelEvent = isFirefox ? "DOMMouseScroll" : "mousewheel";
@@ -3864,6 +3856,7 @@ orion.textview.TextView = (function() {
 			body.style.borderWidth = "0px";
 			body.style.padding = "0px";
 			
+			var textArea;
 			if (isPad) {
 				var touchDiv = parentDocument.createElement("DIV");
 				this._touchDiv = touchDiv;
@@ -3877,7 +3870,7 @@ orion.textview.TextView = (function() {
 				touchDiv.style.WebkitUserSelect = "none";
 				parent.appendChild(touchDiv);
 
-				var textArea = parentDocument.createElement("TEXTAREA");
+				textArea = parentDocument.createElement("TEXTAREA");
 				this._textArea = textArea;
 				textArea.style.position = "absolute";
 				textArea.style.whiteSpace = "pre";
@@ -3895,6 +3888,16 @@ orion.textview.TextView = (function() {
 				textArea.style.WebkitAppearance = "none";
 				textArea.style.WebkitTapHighlightColor = "transparent";
 				touchDiv.appendChild(textArea);
+			}
+			if (isFirefox) {
+				textArea = document.createElement("TEXTAREA");
+				this._textArea = textArea;
+				textArea.id = "textArea";
+				textArea.style.position = "fixed";
+				textArea.style.whiteSpace = "pre";
+				textArea.style.left = "-1000px";
+				textArea.tabIndex = -1;
+				document.body.appendChild(textArea);
 			}
 
 			var viewDiv = document.createElement("DIV");
@@ -4348,7 +4351,7 @@ orion.textview.TextView = (function() {
 					}
 				}
 				var textArea = this._textArea;
-				if (textArea) {
+				if (textArea && isPad) {
 					textArea.selectionStart = textArea.selectionEnd = 0;
 					var rect = this._frame.getBoundingClientRect();
 					var touchRect = this._touchDiv.getBoundingClientRect();
