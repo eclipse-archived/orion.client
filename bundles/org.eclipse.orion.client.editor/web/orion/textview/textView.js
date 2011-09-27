@@ -1798,11 +1798,11 @@ orion.textview.TextView = (function() {
 				this._lastMouseY = e.clientY;
 				this._lastMouseTime = time;
 				this._handleMouse(e);
-				if (isOpera) {
-						if (!this._hasFocus) {
-							this.focus();
-						}
-						e.preventDefault();
+				if (isOpera || isChrome) {
+					if (!this._hasFocus) {
+						this.focus();
+					}
+					e.preventDefault();
 				}
 			}
 		},
@@ -1842,6 +1842,13 @@ orion.textview.TextView = (function() {
 			
 			var x = e.clientX;
 			var y = e.clientY;
+			if (isChrome) {
+				if (e.currentTarget !== this._frameWindow) {
+					var rect = this._frame.getBoundingClientRect();
+					x -= rect.left;
+					y -= rect.top;
+				}
+			}
 			var viewPad = this._getViewPadding();
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			var width = this._getClientWidth (), height = this._getClientHeight();
@@ -3721,6 +3728,10 @@ orion.textview.TextView = (function() {
 				handlers.push({target: topNode, type: "dragstart", handler: function(e) { return self._handleDragStart(e);}});
 				handlers.push({target: topNode, type: "dragover", handler: function(e) { return self._handleDragOver(e);}});
 				handlers.push({target: topNode, type: "drop", handler: function(e) { return self._handleDrop(e);}});
+				if (isChrome) {
+					handlers.push({target: this._parentDocument, type: "mousemove", handler: function(e) { return self._handleMouseMove(e);}});
+					handlers.push({target: this._parentDocument, type: "mouseup", handler: function(e) { return self._handleMouseUp(e);}});
+				}
 				if (isIE) {
 					handlers.push({target: this._frameDocument, type: "activate", handler: function(e) { return self._handleDocFocus(e); }});
 				}
