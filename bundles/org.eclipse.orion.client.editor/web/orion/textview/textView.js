@@ -4468,7 +4468,20 @@ orion.textview.TextView = (function() {
 		_setLinksVisible: function(visible) {
 			if (this._linksVisible === visible) { return; }
 			this._linksVisible = visible;
-			this._clientDiv.contentEditable = !visible;
+			/*
+			* Feature in IE.  The client div looses focus and does not regain it back
+			* when the content editable flag is reset. The fix is to remember that it
+			* had focus when the flag is cleared and give focus back to the div when
+			* the flag is set.
+			*/
+			if (isIE && visible) {
+				this._hadFocus = this._hasFocus;
+			}
+			var clientDiv = this._clientDiv;
+			clientDiv.contentEditable = !visible;
+			if (this._hadFocus && !visible) {
+				clientDiv.focus();
+			}
 			if (this._overlayDiv) {
 				this._overlayDiv.style.zIndex = visible ? "-1" : "1";
 			}
