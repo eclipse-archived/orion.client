@@ -70,8 +70,8 @@ dojo.addOnLoad(function() {
 			return true;
 		},
 		callback: function(item) {
-			if(dojo.isArray(item)){
-				if(confirm("Do you want do delete " + item.length + " users?")){
+			if(dojo.isArray(item) && item.length > 1){
+				if(confirm("Are you sure you want to delete these " + item.length + " users?")){
 					serviceRegistry.getService("orion.core.user").then(function(service) {
 						var usersProcessed = 0;
 						for(var i=0; i<item.length; i++){
@@ -85,7 +85,8 @@ dojo.addOnLoad(function() {
 				}
 				
 			}else{
-				if (confirm("Do you want to delete user " + item.login + "?")) {
+				item = dojo.isArray(item) ? item[0] : item;
+				if (confirm("Are you sure you want to delete user '" + item.login + "'?")) {
 					serviceRegistry.getService("orion.core.user").then(function(service) {
 					  service.deleteUser(item.Location).then( dojo.hitch(usersList, function(jsonData) {
 						  this.reloadUsers();
