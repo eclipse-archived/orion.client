@@ -50,7 +50,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 			});
 			
 			var switchOutlineCommand = new mCommands.Command({
-				name: "&nbsp;",
+				name: "Outline",
 				id: "eclipse.edit.outline.switch",
 				visibleWhen: function(item) {
 					return true;
