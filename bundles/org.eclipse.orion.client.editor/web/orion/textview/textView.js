@@ -235,52 +235,9 @@ orion.textview.TextView = (function() {
 		 * @param {orion.textview.Ruler} ruler the ruler.
 		 */
 		addRuler: function (ruler) {
-			var document = this._frameDocument;
-			var body = document.body;
-			var side = ruler.getLocation();
-			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv;
-			if (!rulerParent) {
-				rulerParent = document.createElement("DIV");
-				rulerParent.style.overflow = "hidden";
-				rulerParent.style.MozUserSelect = "none";
-				rulerParent.style.WebkitUserSelect = "none";
-				if (isIE) {
-					rulerParent.attachEvent("onselectstart", function() {return false;});
-				}
-				rulerParent.style.position = "absolute";
-				rulerParent.style.top = "0px";
-				rulerParent.style.cursor = "default";
-				body.appendChild(rulerParent);
-				if (side === "left") {
-					this._leftDiv = rulerParent;
-					rulerParent.className = "viewLeftRuler";
-				} else {
-					this._rightDiv = rulerParent;
-					rulerParent.className = "viewRightRuler";
-				}
-				var table = document.createElement("TABLE");
-				rulerParent.appendChild(table);
-				table.cellPadding = "0px";
-				table.cellSpacing = "0px";
-				table.border = "0px";
-				table.insertRow(0);
-				var self = this;
-				addHandler(rulerParent, "click", function(e) { self._handleRulerEvent(e); });
-				addHandler(rulerParent, "dblclick", function(e) { self._handleRulerEvent(e); });
-				addHandler(rulerParent, "mousemove", function(e) { self._handleRulerEvent(e); });
-				addHandler(rulerParent, "mouseover", function(e) { self._handleRulerEvent(e); });
-				addHandler(rulerParent, "mouseout", function(e) { self._handleRulerEvent(e); });
-			}
-			var div = document.createElement("DIV");
-			div._ruler = ruler;
-			div.rulerChanged = true;
-			div.style.position = "relative";
-			var row = rulerParent.firstChild.rows[0];
-			var index = row.cells.length;
-			var cell = row.insertCell(index);
-			cell.vAlign = "top";
-			cell.appendChild(div);
+			this._rulers.push(ruler);
 			ruler.setView(this);
+			this._createRuler(ruler);
 			this._updatePage();
 		},
 		/**
@@ -362,63 +319,23 @@ orion.textview.TextView = (function() {
 		 * @see #onDestroy
 		 */
 		destroy: function() {
-			this._setGrab(null);
-			this._unhookEvents();
-			
 			/* Destroy rulers*/
-			var destroyRulers = function(rulerDiv) {
-				if (!rulerDiv) {
-					return;
-				}
-				var cells = rulerDiv.firstChild.rows[0].cells;
-				for (var i = 0; i < cells.length; i++) {
-					var div = cells[i].firstChild;
-					div._ruler.setView(null);
-				}
-			};
-			destroyRulers (this._leftDiv);
-			destroyRulers (this._rightDiv);
+			for (var i=0; i< this._rulers.length; i++) {
+				this._rulers[i].setView(null);
+			}
+			this.rulers = null;
+			
+			this._destroyView();
 
-			/* Destroy timers */
-			if (this._autoScrollTimerID) {
-				clearTimeout(this._autoScrollTimerID);
-				this._autoScrollTimerID = null;
-			}
-			if (this._updateTimer) {
-				clearTimeout(this._updateTimer);
-				this._updateTimer = null;
-			}
-			
-			/* Destroy DOM */
-			var parent = this._parent;
-			var frame = this._frame;
-			parent.removeChild(frame);
-			
-			if (isPad) {
-				parent.removeChild(this._touchDiv);
-				this._touchDiv = null;
-				this._selDiv1 = null;
-				this._selDiv2 = null;
-				this._selDiv3 = null;
-			}
-			this._textArea = null;
-			
 			var e = {};
 			this.onDestroy(e);
-			
+
 			this._parent = null;
 			this._parentDocument = null;
 			this._model = null;
 			this._selection = null;
 			this._doubleClickSelection = null;
 			this._eventTable = null;
-			this._frame = null;
-			this._frameDocument = null;
-			this._frameWindow = null;
-			this._scrollDiv = null;
-			this._viewDiv = null;
-			this._clientDiv = null;
-			this._overlayDiv = null;
 			this._keyBindings = null;
 			this._actions = null;
 		},
@@ -712,20 +629,7 @@ orion.textview.TextView = (function() {
 		 * @see #addRuler
 		 */
 		getRulers: function() {
-			var rulers = [];
-			function getRulers(rulerParent) {
-				if (rulerParent) {
-					var row = rulerParent.firstChild.rows[0];
-					var cells = row.cells;
-					for (var index = 0; index < cells.length; index++) {
-						var cell = cells[index];
-						rulers.push(cell.firstChild._ruler);
-					}
-				}
-			}
-			getRulers(this._leftDiv);
-			getRulers(this._rightDiv);
-			return rulers;
+			return this._rulers.slice(0);
 		},
 		/**
 		 * Returns the text view selection.
@@ -1151,19 +1055,16 @@ orion.textview.TextView = (function() {
 		 * @param {orion.textview.Ruler} ruler the ruler.
 		 */
 		removeRuler: function (ruler) {
-			ruler.setView(null);
-			var side = ruler.getLocation();
-			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv;
-			var row = rulerParent.firstChild.rows[0];
-			var cells = row.cells;
-			for (var index = 0; index < cells.length; index++) {
-				var cell = cells[index];
-				if (cell.firstChild._ruler === ruler) { break; }
+			var rulers = this._rulers;
+			for (var i=0; i<rulers.length; i++) {
+				if (rulers[i] === ruler) {
+					rulers.splice(i, 1);
+					ruler.setView(null);
+					this._destroyRuler(ruler);
+					this._updatePage();
+					break;
+				}
 			}
-			if (index === cells.length) { return; }
-			row.cells[index]._ruler = undefined;
-			row.deleteCell(index);
-			this._updatePage();
 		},
 		/**
 		 * Associates an application defined handler to an action name.
@@ -2738,6 +2639,15 @@ orion.textview.TextView = (function() {
 					addDelimiterFunc();
 				}
 		},
+		_create: function() {
+			this._createFrame();
+			var rulers = this._rulers;
+			for (var i=0; i<rulers.length; i++) {
+				this._createRuler(rulers[i]);
+			}
+			this._createView();
+			this._updatePage();
+		},
 		_createActions: function () {
 			var KeyBinding = orion.textview.KeyBinding;
 			//no duplicate keybindings
@@ -2914,7 +2824,7 @@ orion.textview.TextView = (function() {
 			this._applyStyle(e.style, child);
 			if (lineText.length !== 0) {
 				var start = 0;
-				var tabSize = this._tabSize;
+				var tabSize = this._customTabSize;
 				if (tabSize && tabSize !== 8) {
 					var tabIndex = lineText.indexOf("\t"), ignoreChars = 0;
 					while (tabIndex !== -1) {
@@ -3026,6 +2936,355 @@ orion.textview.TextView = (function() {
 			}
 			child.viewStyle = style;
 			return child;
+		},
+		_createRuler: function(ruler) {
+			var document = this._frameDocument;
+			var body = document.body;
+			var side = ruler.getLocation();
+			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv;
+			if (!rulerParent) {
+				rulerParent = document.createElement("DIV");
+				rulerParent.style.overflow = "hidden";
+				rulerParent.style.MozUserSelect = "none";
+				rulerParent.style.WebkitUserSelect = "none";
+				if (isIE) {
+					rulerParent.attachEvent("onselectstart", function() {return false;});
+				}
+				rulerParent.style.position = "absolute";
+				rulerParent.style.top = "0px";
+				rulerParent.style.cursor = "default";
+				body.appendChild(rulerParent);
+				if (side === "left") {
+					this._leftDiv = rulerParent;
+					rulerParent.className = "viewLeftRuler";
+				} else {
+					this._rightDiv = rulerParent;
+					rulerParent.className = "viewRightRuler";
+				}
+				var table = document.createElement("TABLE");
+				rulerParent.appendChild(table);
+				table.cellPadding = "0px";
+				table.cellSpacing = "0px";
+				table.border = "0px";
+				table.insertRow(0);
+				var self = this;
+				addHandler(rulerParent, "click", function(e) { self._handleRulerEvent(e); });
+				addHandler(rulerParent, "dblclick", function(e) { self._handleRulerEvent(e); });
+				addHandler(rulerParent, "mousemove", function(e) { self._handleRulerEvent(e); });
+				addHandler(rulerParent, "mouseover", function(e) { self._handleRulerEvent(e); });
+				addHandler(rulerParent, "mouseout", function(e) { self._handleRulerEvent(e); });
+			}
+			var div = document.createElement("DIV");
+			div._ruler = ruler;
+			div.rulerChanged = true;
+			div.style.position = "relative";
+			var row = rulerParent.firstChild.rows[0];
+			var index = row.cells.length;
+			var cell = row.insertCell(index);
+			cell.vAlign = "top";
+			cell.appendChild(div);
+		},
+		_createFrame: function() {
+			/* Create elements */
+			var parent = this._parent;
+			while (parent.hasChildNodes()) { parent.removeChild(parent.lastChild); }
+			var parentDocument = parent.document || parent.ownerDocument;
+			this._parentDocument = parentDocument;
+			var frame = parentDocument.createElement("IFRAME");
+			this._frame = frame;
+			frame.frameBorder = "0px";//for IE, needs to be set before the frame is added to the parent
+			frame.style.width = "100%";
+			frame.style.height = "100%";
+			frame.scrolling = "no";
+			frame.style.border = "0px";
+			parent.appendChild(frame);
+
+			var html = [];
+			html.push("<!DOCTYPE html>");
+			html.push("<html>");
+			html.push("<head>");
+			if (isIE < 9) {
+				html.push("<meta http-equiv='X-UA-Compatible' content='IE=EmulateIE7'/>");
+			}
+			html.push("<style>");
+			html.push(".viewContainer {font-family: monospace; font-size: 10pt;}");
+			html.push(".view {padding: 1px 2px;}");
+			html.push(".viewContent {}");
+			html.push("</style>");
+			if (this._stylesheet) {
+				var stylesheet = typeof(this._stylesheet) === "string" ? [this._stylesheet] : this._stylesheet;
+				for (var i = 0; i < stylesheet.length; i++) {
+					try {
+						//Force CSS to be loaded synchronously so lineHeight can be calculated
+						var objXml = new XMLHttpRequest();
+						if (objXml.overrideMimeType) {
+							objXml.overrideMimeType("text/css");
+						}
+						objXml.open("GET", stylesheet[i], false);
+						objXml.send(null);
+						html.push("<style>");
+						html.push(objXml.responseText);
+						html.push("</style>");
+					} catch (e) {
+						html.push("<link rel='stylesheet' type='text/css' href='");
+						html.push(stylesheet[i]);
+						html.push("'></link>");
+					}
+				}
+			}
+			html.push("</head>");
+			html.push("<body spellcheck='false'></body>");
+			html.push("</html>");
+
+			var frameWindow = frame.contentWindow;
+			this._frameWindow = frameWindow;
+			var frameDocument = frameWindow.document;
+			this._frameDocument = frameDocument;
+			frameDocument.open();
+			frameDocument.write(html.join(""));
+			frameDocument.close();
+		},
+		_createView: function() {
+			var parent = this._parent;
+			var parentDocument = this._parentDocument;
+			var document = this._frameDocument;
+			var body = document.body;
+			body.className = "viewContainer";
+			body.style.margin = "0px";
+			body.style.borderWidth = "0px";
+			body.style.padding = "0px";
+			
+			var textArea;
+			if (isPad) {
+				var touchDiv = parentDocument.createElement("DIV");
+				this._touchDiv = touchDiv;
+				touchDiv.style.position = "absolute";
+				touchDiv.style.border = "0px";
+				touchDiv.style.padding = "0px";
+				touchDiv.style.margin = "0px";
+				touchDiv.style.zIndex = "2";
+				touchDiv.style.overflow = "hidden";
+				touchDiv.style.background="transparent";
+				touchDiv.style.WebkitUserSelect = "none";
+				parent.appendChild(touchDiv);
+
+				textArea = parentDocument.createElement("TEXTAREA");
+				this._textArea = textArea;
+				textArea.style.position = "absolute";
+				textArea.style.whiteSpace = "pre";
+				textArea.style.left = "-1000px";
+				textArea.tabIndex = 1;
+				textArea.autocapitalize = false;
+				textArea.autocorrect = false;
+				textArea.className = "viewContainer";
+				textArea.style.background = "transparent";
+				textArea.style.color = "transparent";
+				textArea.style.border = "0px";
+				textArea.style.padding = "0px";
+				textArea.style.margin = "0px";
+				textArea.style.borderRadius = "0px";
+				textArea.style.WebkitAppearance = "none";
+				textArea.style.WebkitTapHighlightColor = "transparent";
+				touchDiv.appendChild(textArea);
+			}
+			if (isFirefox) {
+				textArea = document.createElement("TEXTAREA");
+				this._textArea = textArea;
+				textArea.id = "textArea";
+				textArea.style.position = "fixed";
+				textArea.style.whiteSpace = "pre";
+				textArea.style.left = "-1000px";
+				textArea.tabIndex = -1;
+				document.body.appendChild(textArea);
+			}
+
+			var viewDiv = document.createElement("DIV");
+			viewDiv.className = "view";
+			this._viewDiv = viewDiv;
+			viewDiv.id = "viewDiv";
+			viewDiv.tabIndex = -1;
+			viewDiv.style.overflow = "auto";
+			viewDiv.style.position = "absolute";
+			viewDiv.style.top = "0px";
+			viewDiv.style.borderWidth = "0px";
+			viewDiv.style.margin = "0px";
+			viewDiv.style.MozOutline = "none";
+			viewDiv.style.outline = "none";
+			body.appendChild(viewDiv);
+				
+			var scrollDiv = document.createElement("DIV");
+			this._scrollDiv = scrollDiv;
+			scrollDiv.id = "scrollDiv";
+			scrollDiv.style.margin = "0px";
+			scrollDiv.style.borderWidth = "0px";
+			scrollDiv.style.padding = "0px";
+			viewDiv.appendChild(scrollDiv);
+
+			if (isPad || (this._fullSelection && !isWebkit)) {
+				this._hightlightRGB = "Highlight";
+				var selDiv1 = document.createElement("DIV");
+				this._selDiv1 = selDiv1;
+				selDiv1.id = "selDiv1";
+				selDiv1.style.position = "fixed";
+				selDiv1.style.borderWidth = "0px";
+				selDiv1.style.margin = "0px";
+				selDiv1.style.padding = "0px";
+				selDiv1.style.MozOutline = "none";
+				selDiv1.style.outline = "none";
+				selDiv1.style.background = this._hightlightRGB;
+				selDiv1.style.width="0px";
+				selDiv1.style.height="0px";
+				scrollDiv.appendChild(selDiv1);
+				var selDiv2 = document.createElement("DIV");
+				this._selDiv2 = selDiv2;
+				selDiv2.id = "selDiv2";
+				selDiv2.style.position = "fixed";
+				selDiv2.style.borderWidth = "0px";
+				selDiv2.style.margin = "0px";
+				selDiv2.style.padding = "0px";
+				selDiv2.style.MozOutline = "none";
+				selDiv2.style.outline = "none";
+				selDiv2.style.background = this._hightlightRGB;
+				selDiv2.style.width="0px";
+				selDiv2.style.height="0px";
+				scrollDiv.appendChild(selDiv2);
+				var selDiv3 = document.createElement("DIV");
+				this._selDiv3 = selDiv3;
+				selDiv3.id = "selDiv3";
+				selDiv3.style.position = "fixed";
+				selDiv3.style.borderWidth = "0px";
+				selDiv3.style.margin = "0px";
+				selDiv3.style.padding = "0px";
+				selDiv3.style.MozOutline = "none";
+				selDiv3.style.outline = "none";
+				selDiv3.style.background = this._hightlightRGB;
+				selDiv3.style.width="0px";
+				selDiv3.style.height="0px";
+				scrollDiv.appendChild(selDiv3);
+				
+				/*
+				* Bug in Firefox. The Highlight color is mapped to list selection
+				* background instead of the text selection background.  The fix
+				* is to map known colors using a table or fallback to light blue.
+				*/
+				if (isFirefox && isMac) {
+					var style = this._frameWindow.getComputedStyle(selDiv3, null);
+					var rgb = style.getPropertyValue("background-color");
+					switch (rgb) {
+						case "rgb(119, 141, 168)": rgb = "rgb(199, 208, 218)"; break;
+						case "rgb(127, 127, 127)": rgb = "rgb(198, 198, 198)"; break;
+						case "rgb(255, 193, 31)": rgb = "rgb(250, 236, 115)"; break;
+						case "rgb(243, 70, 72)": rgb = "rgb(255, 176, 139)"; break;
+						case "rgb(255, 138, 34)": rgb = "rgb(255, 209, 129)"; break;
+						case "rgb(102, 197, 71)": rgb = "rgb(194, 249, 144)"; break;
+						case "rgb(140, 78, 184)": rgb = "rgb(232, 184, 255)"; break;
+						default: rgb = "rgb(180, 213, 255)"; break;
+					}
+					this._hightlightRGB = rgb;
+					selDiv1.style.background = rgb;
+					selDiv2.style.background = rgb;
+					selDiv3.style.background = rgb;
+					var styleSheet = document.styleSheets[0];
+					styleSheet.insertRule("::-moz-selection {background: " + rgb + "; }", 0);
+				}
+			}
+
+			var clientDiv = document.createElement("DIV");
+			clientDiv.className = "viewContent";
+			this._clientDiv = clientDiv;
+			clientDiv.id = "clientDiv";
+			clientDiv.style.whiteSpace = "pre";
+			clientDiv.style.position = "fixed";
+			clientDiv.style.borderWidth = "0px";
+			clientDiv.style.margin = "0px";
+			clientDiv.style.padding = "0px";
+			clientDiv.style.MozOutline = "none";
+			clientDiv.style.outline = "none";
+			if (isPad) {
+				clientDiv.style.WebkitTapHighlightColor = "transparent";
+			}
+			scrollDiv.appendChild(clientDiv);
+
+			if (isFirefox) {
+				var overlayDiv = document.createElement("DIV");
+				this._overlayDiv = overlayDiv;
+				overlayDiv.id = "overlayDiv";
+				overlayDiv.style.position = clientDiv.style.position;
+				overlayDiv.style.borderWidth = clientDiv.style.borderWidth;
+				overlayDiv.style.margin = clientDiv.style.margin;
+				overlayDiv.style.padding = clientDiv.style.padding;
+				overlayDiv.style.cursor = "text";
+				overlayDiv.style.zIndex = "1";
+				scrollDiv.appendChild(overlayDiv);
+			}
+			if (!isPad) {
+				clientDiv.contentEditable = "true";
+			}
+			this._lineHeight = this._calculateLineHeight();
+			this._viewPadding = this._calculatePadding();
+			if (isIE) {
+				body.style.lineHeight = this._lineHeight + "px";
+			}
+			if (this._tabSize) {
+				if (isOpera) {
+					clientDiv.style.OTabSize = this._tabSize+"";
+				} else if (isFirefox >= 4) {
+					clientDiv.style.MozTabSize = this._tabSize+"";
+				} else if (this._tabSize !== 8) {
+					this._customTabSize = this._tabSize;
+				}
+			}
+			this._hookEvents();
+			this._updatePage();
+		},
+		_destroyRuler: function(ruler) {
+			var side = ruler.getLocation();
+			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv;
+			var row = rulerParent.firstChild.rows[0];
+			var cells = row.cells;
+			for (var index = 0; index < cells.length; index++) {
+				var cell = cells[index];
+				if (cell.firstChild._ruler === ruler) { break; }
+			}
+			if (index === cells.length) { return; }
+			row.cells[index]._ruler = undefined;
+			row.deleteCell(index);
+		},
+		_destroyView: function() {
+			this._setGrab(null);
+			this._unhookEvents();
+
+			/* Destroy timers */
+			if (this._autoScrollTimerID) {
+				clearTimeout(this._autoScrollTimerID);
+				this._autoScrollTimerID = null;
+			}
+			if (this._updateTimer) {
+				clearTimeout(this._updateTimer);
+				this._updateTimer = null;
+			}
+
+			/* Destroy DOM */
+			var parent = this._parent;
+			var frame = this._frame;
+			parent.removeChild(frame);
+			if (isPad) {
+				parent.removeChild(this._touchDiv);
+				this._touchDiv = null;
+				this._selDiv1 = null;
+				this._selDiv2 = null;
+				this._selDiv3 = null;
+			}
+			this._textArea = null;
+			this._frame = null;
+			this._frameDocument = null;
+			this._frameWindow = null;
+			this._scrollDiv = null;
+			this._viewDiv = null;
+			this._clientDiv = null;
+			this._overlayDiv = null;
+			this._leftDiv = null;
+			this._rightDiv = null;
 		},
 		_doAutoScroll: function (direction, x, y) {
 			this._autoScrollDir = direction;
@@ -3768,6 +4027,18 @@ orion.textview.TextView = (function() {
 			this._parent = parent;
 			this._model = options.model ? options.model : new orion.textview.TextModel();
 			this.readonly = options.readonly === true;
+			this._fullSelection = options.fullSelection === undefined || options.fullSelection;
+			/* 
+			* Bug in IE 8. For some reason, during scrolling IE does not reflow the elements
+			* that are used to compute the location for the selection divs. This causes the
+			* divs to be placed at the wrong location. The fix is to disabled full selection for IE8.
+			*/
+			if (isIE < 9) {
+				this._fullSelection = false;
+			}
+			this._stylesheet = options.stylesheet;
+			this._tabSize = options.tabSize;
+			this._rulers = [];
 			this._selection = new Selection (0, 0, false);
 			this._linksVisible = false;
 			this._eventTable = new EventTable();
@@ -3828,8 +4099,8 @@ orion.textview.TextView = (function() {
 			html.push(".view {padding: 1px 2px;}");
 			html.push(".viewContent {}");
 			html.push("</style>");
-			if (options.stylesheet) {
-				var stylesheet = typeof(options.stylesheet) === "string" ? [options.stylesheet] : options.stylesheet;
+			if (this._stylesheet) {
+				var stylesheet = typeof(this._stylesheet) === "string" ? [this._stylesheet] : this._stylesheet;
 				for (var i = 0; i < stylesheet.length; i++) {
 					try {
 						//Force CSS to be loaded synchronously so lineHeight can be calculated
@@ -3933,15 +4204,6 @@ orion.textview.TextView = (function() {
 			scrollDiv.style.padding = "0px";
 			viewDiv.appendChild(scrollDiv);
 
-			this._fullSelection = options.fullSelection === undefined || options.fullSelection;
-			/* 
-			* Bug in IE 8. For some reason, during scrolling IE does not reflow the elements
-			* that are used to compute the location for the selection divs. This causes the
-			* divs to be placed at the wrong location. The fix is to disabled full selection for IE8.
-			*/
-			if (isIE < 9) {
-				this._fullSelection = false;
-			}
 			if (isPad || (this._fullSelection && !isWebkit)) {
 				this._hightlightRGB = "Highlight";
 				var selDiv1 = document.createElement("DIV");
@@ -4047,18 +4309,18 @@ orion.textview.TextView = (function() {
 			if (isIE) {
 				body.style.lineHeight = this._lineHeight + "px";
 			}
-			if (options.tabSize) {
+			if (this._tabSize) {
 				if (isOpera) {
-					clientDiv.style.OTabSize = options.tabSize+"";
+					clientDiv.style.OTabSize = this._tabSize+"";
 				} else if (isFirefox >= 4) {
-					clientDiv.style.MozTabSize = options.tabSize+"";
-				} else if (options.tabSize !== 8) {
-					this._tabSize = options.tabSize;
+					clientDiv.style.MozTabSize = this._tabSize+"";
+				} else if (this._tabSize !== 8) {
+					this._customTabSize = this._tabSize;
 				}
 			}
-			this._createActions();
 			this._hookEvents();
 			this._updatePage();
+			this._createActions();
 		},
 		_modifyContent: function(e, updateCaret) {
 			if (this.readonly && !e._code) {
@@ -4942,7 +5204,7 @@ orion.textview.TextView = (function() {
 						child = nextChild;
 					}
 					child = div.firstChild.nextSibling;
-					frag = document.createDocumentFragment();
+					frag = parentDocument.createDocumentFragment();
 					for (lineIndex=topIndex; lineIndex<=bottomIndex; lineIndex++) {
 						if (!child || child.lineIndex > lineIndex) {
 							lineDiv = parentDocument.createElement("DIV");
@@ -4960,7 +5222,7 @@ orion.textview.TextView = (function() {
 						} else {
 							if (frag.firstChild) {
 								div.insertBefore(frag, child);
-								frag = document.createDocumentFragment();
+								frag = parentDocument.createDocumentFragment();
 							}
 							if (child) {
 								child = child.nextSibling;
@@ -4987,7 +5249,7 @@ orion.textview.TextView = (function() {
 							count--;
 						}
 						annotations = ruler.getAnnotations(0, lineCount);
-						frag = document.createDocumentFragment();
+						frag = parentDocument.createDocumentFragment();
 						for (var prop in annotations) {
 							lineIndex = prop >>> 0;
 							if (lineIndex < 0) { continue; }
