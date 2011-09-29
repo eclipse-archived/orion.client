@@ -119,13 +119,11 @@ orion.editor.AnnotationFactory = (function() {
 					var escapedReason = problem.reason.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
 					var lineIndex = problem.line - 1;
 					var lineStart = model.getLineStart(lineIndex);
-					var start = problem.character - 1;
-					var end = (typeof problem.end === "number") ? problem.end : start + 1;
-					var severity = problem.severity || "error";
+					var severity = problem.severity;
 					var annotation = {
 						type: type,
-						start: lineStart + start,
-						end: lineStart + end,
+						start: lineStart + problem.character - 1,
+						end: lineStart + problem.end,
 						rulerTitle: escapedReason,
 						rulerHTML: "<img style='vertical-align:middle;' src='" + this.imageUrls[severity] + "'></img>",
 						rulerStyle: {styleClass: "annotationProblem"},
