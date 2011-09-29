@@ -25,8 +25,6 @@ eclipse.SyntaxChecker = (function () {
 	SyntaxChecker.prototype = {
 		checkSyntax: function (title, message, contents, contentsSaved) {
 			if (!message) {
-				var t = title;
-				var c = contents;
 				var validators = this.registry.getServiceReferences("orion.edit.validator");
 				var filteredValidators = [];
 				for (var i=0; i < validators.length; i++) {
@@ -58,12 +56,28 @@ eclipse.SyntaxChecker = (function () {
 						for (i=0; i < result.length; i++) {
 							var probs = result[i] && result[i][1];
 							if (probs) {
+								this._fixup(probs);
 								problems = problems.concat(probs);
 							}
 						}
 						this.registry.getService("orion.core.marker").then(function(markerService) {
 							markerService._setProblems(problems);
 						});}));
+			}
+		},
+		_fixup: function(problems) {
+			var model = this.editor.getModel();
+			for (var i=0; i < problems.length; i++) {
+				var problem = problems[i];
+				
+				problem.end = (typeof problem.end === "number") ? problem.end : problem.character + 1;
+				problem.severity = problem.severity || "error";
+				
+				var lineLength = model.getLine(problem.line - 1, false).length;
+				problem.character = Math.max(1, problem.character);
+				problem.character = Math.min(problem.character, lineLength);
+				problem.end = Math.min(problem.end, lineLength);
+				problem.end = Math.max(problem.character, problem.end);
 			}
 		}
 	};
