@@ -37,10 +37,10 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 		this.inherited(arguments);
 		this.title = this.options.title || "Git Credentials";
 		this.gitUrlLabelText = "Repository URL:";
-		this.gitSshUsernameLabelText = "Ssh username:";
+		this.gitSshUsernameLabelText = "Username:";
 		this.gitSshPasswordLabelText = "Ssh password:";
 		this.gitPrivateKeyLabelText = "Private key:";
-		this.gitPassphraseLabelText = "Passphrase:";
+		this.gitPassphraseLabelText = "Passphrase (optional):";
 		if(!this.options.username && !this.options.password && !this.options.privatekey && !this.options.passphrase){
 			this.options.username=true;
 			this.options.password=true;
@@ -69,23 +69,29 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 		}
 		if(!this.options.passphrase){
 			dojo.style(this.gitPassphraseRow, "display", "none");
+			dojo.style(this.gitPassphraseRow_1, "display", "none");
 		}
 		if(this.options.errordata && this.options.errordata.Url){
 			dojo.style(this.gitCredentialsLabel, "display", "block");
 			this.url.innerHTML = this.options.errordata.Url;
 		}
-		if(this.options.errordata && this.options.errordata.User){
+		if(this.options.errordata && this.options.errordata.User && this.options.errordata.User!==""){
 			 this.gitSshUsername.value = this.options.errordata.User;
+			 dojo.style(this.gitSshUsernameRow, "display", "none");
 			 setTimeout(function () { self.gitSshPassword.focus(); }, 400);
 		}
+		
+		dojo.connect(this.gitSshPassword, "onfocus", null, dojo.hitch(this, function(){this.isSshPassword.checked = true;}) );
+		dojo.connect(this.gitPrivateKey, "onfocus", null, dojo.hitch(this, function(){this.isPrivateKey.checked = true;}) );
+		dojo.connect(this.gitPassphrase, "onfocus", null, dojo.hitch(this, function(){this.isPrivateKey.checked = true;}) );
 	},
 	execute: function() {
 		
 		if(this._sshService){
 			var self = this;
 			this._sshService.getKnownHosts().then(function(knownHosts){
-				self.options.func({ gitSshUsername: self.gitSshUsername.value, gitSshPassword: self.gitSshPassword.value,
-					gitPrivateKey: self.gitPrivateKey.value, gitPassphrase: self.gitPassphrase.value,
+				self.options.func({ gitSshUsername: self.gitSshUsername.value, gitSshPassword: self.isSshPassword.checked ? self.gitSshPassword.value : undefined,
+					gitPrivateKey: self.isPrivateKey.checked ? self.gitPrivateKey.value : undefined, gitPassphrase: self.isPrivateKey.checked ? self.gitPassphrase.value: undefined,
 					knownHosts: knownHosts});
 			});
 			
