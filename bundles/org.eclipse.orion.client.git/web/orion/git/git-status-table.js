@@ -118,7 +118,7 @@ orion.GitStatusModel = (function() {
 orion.statusTypeMap = { "Missing":["/git/images/removal.gif", "Unstaged removal" , "/git/images/stage.gif", "Stage" ],
 						"Removed":["/git/images/removal.gif","Staged removal" ,"/git/images/unstage.gif", "Unstage" ],	
 						 "Modified":["/git/images/modification.gif","Unstaged change" ,"/git/images/stage.gif", "Stage" ],	
-						 "Changed":["/git/images/modification.gif","Staged change" ,"/git/images/unstage.gif", "Untage"],	
+						 "Changed":["/git/images/modification.gif","Staged change" ,"/git/images/unstage.gif", "Unstage"],	
 					     "Untracked":["/git/images/addition.gif","Unstaged add" ,"/git/images/stage.gif", "Stage"],	
 						 "Added":["/git/images/addition.gif","Staged add" ,"/git/images/unstage.gif" , "Unstage"],	
 						 "Conflicting":["/git/images/conflict-file.gif","Conflicting" ,"/git/images/stage.gif" , "Resolve Conflict"]	
@@ -1073,7 +1073,7 @@ orion.GitStatusController = (function() {
 
 			var stageCommand = new mCommands.Command({
 				name: "stage",
-				tooltip: "stage",
+				tooltip: "Stage",
 				image: "/git/images/stage.gif",
 				id: "orion.gitStage",
 				callback: function(item) {
@@ -1110,7 +1110,7 @@ orion.GitStatusController = (function() {
 					return self.unstage(item.object);
 				},
 				visibleWhen: function(item) {
-					return false;//(item.type === "fileItem" && self._model.isStaged(item.object.type));
+					return item.type === "fileItem" && self._model.isStaged(item.object.type);
 				}
 			});		
 
@@ -1571,7 +1571,7 @@ orion.GitStatusController = (function() {
 			var self = this;
 			self._registry.getService("orion.git.provider").then(
 					function(service) {
-						service.unstage(self._model.items.IndexLocation, [itemModel.path],
+						service.unstage(self._model.items.IndexLocation, [itemModel.name],
 											 function(jsonData, secondArg) {
 											 	 self.getGitStatus(self._url);
 											 },
