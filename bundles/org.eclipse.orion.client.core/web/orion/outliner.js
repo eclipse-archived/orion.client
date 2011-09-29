@@ -50,7 +50,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 			});
 			
 			var switchOutlineCommand = new mCommands.Command({
-				name: "&nbsp;",
+				name: "Outline",
 				id: "eclipse.edit.outline.switch",
 				visibleWhen: function(item) {
 					return true;
@@ -104,7 +104,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 			if (this.menuNode) {
 				dojo.empty(this.menuNode);
 			} else {
-				this.menuNode = dojo.create("span", {id: "switchOutlineMenu"}, this._parent, "last");
+				this.menuNode = dojo.create("div", {id: "switchOutlineMenu"}, this._parent, "last");
 			}
 			if (outlineProviders.length > 1) {
 				this._commandService.registerCommandContribution("eclipse.edit.outline.switch", 1, this.menuNode.id);

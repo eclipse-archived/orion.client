@@ -77,9 +77,10 @@ examples.textview.TextStyler = (function() {
 	var STRING = 3;
 	var COMMENT = 4;
 	var MULTILINE_COMMENT = 5;
-	var WHITE = 6;
-	var WHITE_TAB = 7;
-	var WHITE_SPACE = 8;
+	var DOC_COMMENT = 6;
+	var WHITE = 7;
+	var WHITE_TAB = 8;
+	var WHITE_SPACE = 9;
 
 	// Styles 
 	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent) ? document.documentMode : undefined;
@@ -181,18 +182,23 @@ examples.textview.TextStyler = (function() {
 								}
 							}
 							if (c === 42) { // STAR -> multi line 
+								c = this._read();
+								var token = MULTILINE_COMMENT;
+								if (c === 42) {
+									token = DOC_COMMENT;
+								}
 								while (true) {
-									c = this._read();
 									while (c === 42) {
 										c = this._read();
 										if (c === 47) {
-											return MULTILINE_COMMENT;
+											return token;
 										}
 									}
 									if (c === -1) {
 										this._unread(c);
-										return MULTILINE_COMMENT;
+										return token;
 									}
+									c = this._read();
 								}
 							}
 							this._unread(c);
@@ -460,12 +466,7 @@ examples.textview.TextStyler = (function() {
 				if (offset < commentStart) {
 					this._parse(text.substring(offset - start, commentStart - start), offset, styles);
 				}
-				var style = commentStyle;
-				if ((commentEnd - commentStart) > (this.commentStart.length + this.commentEnd.length)) {
-					var o = commentStart + this.commentStart.length;
-					var star = model.getBaseModel ? model.getBaseModel().getText(o, o + 1) : model.getText(o, o + 1);
-					if (star === "*") { style = javadocStyle; }
-				}
+				var style = comments[i].type === DOC_COMMENT ? javadocStyle : commentStyle;
 				if (this.whitespacesVisible || this.detectHyperlinks) {
 					var s = Math.max(offset, commentStart);
 					var e = Math.min(end, commentEnd);
@@ -508,6 +509,7 @@ examples.textview.TextStyler = (function() {
 							}
 							break;
 						case COMMENT: 
+						case DOC_COMMENT: 
 						case MULTILINE_COMMENT: 
 							if (this.whitespacesVisible || this.detectHyperlinks) {
 								this._parseWhitespace(scanner.getData(), tokenStart, styles, commentStyle);
@@ -604,8 +606,14 @@ examples.textview.TextStyler = (function() {
 			scanner.setText(text);
 			var result = [];
 			while ((token = scanner.nextToken())) {
-				if (token !== MULTILINE_COMMENT) { continue; }
-				result.push({start: scanner.getStartOffset() + offset, end: scanner.getOffset() + offset});
+				if (token === MULTILINE_COMMENT || token === DOC_COMMENT) {
+					var comment = {
+						start: scanner.getStartOffset() + offset,
+						end: scanner.getOffset() + offset,
+						type: token
+					};
+					result.push(comment);
+				}
 			}
 			return result;
 		}, 
@@ -817,7 +825,7 @@ examples.textview.TextStyler = (function() {
 				for (i=0; i<newComments.length; i++) {
 					comment = this.comments[commentStart + i];
 					var newComment = newComments[i];
-					if (comment.start !== newComment.start || comment.end !== newComment.end) {
+					if (comment.start !== newComment.start || comment.end !== newComment.end || comment.type !== newComment.type) {
 						redraw = true;
 						break;
 					} 
