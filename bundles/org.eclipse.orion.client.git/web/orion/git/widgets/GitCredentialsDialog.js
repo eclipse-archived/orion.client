@@ -90,8 +90,8 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 		if(this._sshService){
 			var self = this;
 			this._sshService.getKnownHosts().then(function(knownHosts){
-				self.options.func({ gitSshUsername: self.gitSshUsername.value, gitSshPassword: self.isSshPassword.checked ? self.gitSshPassword.value : undefined,
-					gitPrivateKey: self.isPrivateKey.checked ? self.gitPrivateKey.value : undefined, gitPassphrase: self.isPrivateKey.checked ? self.gitPassphrase.value: undefined,
+				self.options.func({ gitSshUsername: self.gitSshUsername.value, gitSshPassword: self.isSshPassword.checked ? self.gitSshPassword.value : "",
+					gitPrivateKey: self.isPrivateKey.checked ? self.gitPrivateKey.value : "", gitPassphrase: self.isPrivateKey.checked ? self.gitPassphrase.value: "",
 					knownHosts: knownHosts});
 			});
 			
