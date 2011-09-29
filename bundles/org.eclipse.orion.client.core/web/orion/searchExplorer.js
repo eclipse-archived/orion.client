@@ -37,14 +37,14 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		onItem(this.root);
 	};
 	
-	SearchResultModel.prototype.markUpSharedParent = function(parentMetaData, directChildMeta){
+	SearchResultModel.prototype.markUpSharedParent = function(parentMetaData, directChildLocation){
 		if(!this.sharedParentHash[parentMetaData.Location]){
-			this.sharedParentHash[parentMetaData.Location] = directChildMeta.Location;
+			this.sharedParentHash[parentMetaData.Location] = directChildLocation;
 			return;
 		}
 		var hashValue = this.sharedParentHash[parentMetaData.Location];
 		if(typeof(hashValue) === "string"){
-			if(hashValue !== directChildMeta.Location)
+			if(hashValue !== directChildLocation)
 				this.sharedParentHash[parentMetaData.Location] = 2;
 		}
 	};
@@ -55,11 +55,11 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 			var parents = this._resultLocation[i].metaData.Parents;
 			if(parents.length === 0)
 				continue;
-			var diectChildMeta = this._resultLocation[i];
+			var diectChildLocation = this._resultLocation[i].location;
 			for(var j = 0; j< parents.length; j++){
 				var parentMeta = parents[j];
-				this.markUpSharedParent(parentMeta, diectChildMeta);
-				diectChildMeta = parentMeta;
+				this.markUpSharedParent(parentMeta, diectChildLocation);
+				diectChildLocation = parentMeta.Location;
 			}
 		}
 	};
@@ -186,13 +186,6 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	SearchResultModel.prototype.prepareFileItems = function(currentNode){
 		this.indexedFileItems = [];
 		this.walkTreeNode(this.root);
-		this.indexedFileItems.sort(function(a, b) {
-			var n1 = a.indexedName && a.indexedName.toLowerCase();
-			var n2 = b.indexedName && b.indexedName.toLowerCase();
-			if (n1 < n2) { return -1; }
-			if (n1 > n2) { return 1; }
-			return 0;
-		}); 
 	};
 	
 	SearchResultModel.prototype.getFileItemIndex = function(fileItem){
@@ -220,12 +213,6 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	};
 	
 	SearchResultModel.prototype.walkTreeNode = function(currentNode){
-		if(!currentNode.parent){
-			currentNode.indexedName = "root";
-		} else {
-			currentNode.indexedName = currentNode.parent.indexedName + "-" + currentNode.name;
-		}
-		
 		if(!currentNode.children){
 			if(currentNode.type === "file") {
 				this.indexedFileItems.push(currentNode);
