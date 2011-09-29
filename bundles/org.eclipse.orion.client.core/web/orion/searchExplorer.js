@@ -37,6 +37,74 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		onItem(this.root);
 	};
 	
+	SearchResultModel.prototype.markUpSharedParent = function(parentMetaData, directChildMeta){
+		if(!this.sharedParentHash[parentMetaData.Location]){
+			this.sharedParentHash[parentMetaData.Location] = directChildMeta.Location;
+			return;
+		}
+		var hashValue = this.sharedParentHash[parentMetaData.Location];
+		if(typeof(hashValue) === "string"){
+			if(hashValue !== directChildMeta.Location)
+				this.sharedParentHash[parentMetaData.Location] = 2;
+		}
+	};
+	
+	SearchResultModel.prototype.preparecompressHash = function(){
+		this.sharedParentHash = [];
+		for(var i = 0 ; i < this._resultLocation.length; i++){
+			var parents = this._resultLocation[i].metaData.Parents;
+			if(parents.length === 0)
+				continue;
+			var diectChildMeta = this._resultLocation[i];
+			for(var j = 0; j< parents.length; j++){
+				var parentMeta = parents[j];
+				this.markUpSharedParent(parentMeta, diectChildMeta);
+				diectChildMeta = parentMeta;
+			}
+		}
+	};
+
+	SearchResultModel.prototype.compressParents = function(parents, currentIndex, newParents){
+		if(parents.length === 0)
+			return;
+		if(currentIndex > (parents.length - 1))
+			return;
+		var newParentName = parents[currentIndex].Name;
+		var location = parents[currentIndex].Location;
+		var newIndex = currentIndex + 1;
+		var stop = false;
+		if(newIndex < parents.length){
+			for(var j = currentIndex + 1; j < parents.length; j++){
+				newIndex = j;
+				if(this.sharedParentHash[parents[j].Location] === 2){
+					break;
+				} else {
+					newParentName =  parents[j].Name + " / " + newParentName;
+					if(j === (parents.length - 1))
+						stop = true;
+				}
+			}
+		}
+		newParents.push({Location: location, Name:newParentName});
+		if(!stop)
+			this.compressParents(parents, newIndex, newParents);
+	};
+	
+	SearchResultModel.prototype.compressTree = function(){
+		for(var i = 0; i < this._resultLocation.length ; i++){
+			if(!this._resultLocation[i].metaData) {
+				continue;
+			}
+			var parents = this._resultLocation[i].metaData.Parents;
+			if(parents.length === 0)
+				continue;
+			this.preparecompressHash();
+			var newParents = [];
+			this.compressParents(parents, 0, newParents);
+			this._resultLocation[i].metaData.compressedParents = newParents;
+		}
+	};
+	
 	SearchResultModel.prototype._findExistingParent = function(parents, index){
 		var parentLocation = parents[index].Location;
 		var parentValue = this.modelLocHash[parentLocation];
@@ -49,12 +117,18 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		return this._findExistingParent(parents, index+1);
 	};
 	
-	SearchResultModel.prototype.buildResultModelTree = function(onComplete){
+	SearchResultModel.prototype.buildResultModelTree = function(onComplete, compress){
+		if(compress)
+			this.compressTree();
 		for(var i = 0; i < this._resultLocation.length; i++){
 			if(!this._resultLocation[i].metaData) {
 				continue;
 			}
-			var parents = this._resultLocation[i].metaData.Parents;
+			var parents;
+			if(compress)
+				parents = this._resultLocation[i].metaData.compressedParents;
+			else
+				parents = this._resultLocation[i].metaData.Parents;
 			var existingParent = this._findExistingParent(parents, 0);
 			var parentIndex, parent;
 			if(existingParent){
@@ -93,7 +167,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 			dojo.hitch(this, function(meta) {
 				item.metaData = meta;
 			    if(index === (this._resultLocation.length-1)){			 
-					this.buildResultModelTree(onComplete); 
+					this.buildResultModelTree(onComplete, true); 
 			    } else {
 					this.loadOneFileMetaData(index+1, onComplete);
 			    }
@@ -101,7 +175,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 			dojo.hitch(this, function(error) {
 				console.error("Error loading file metadata: " + error.message);
 				if(index === (this._resultLocation.length-1)){
-					this.buildResultModelTree(onComplete); 
+					this.buildResultModelTree(onComplete, true); 
 				} else {
 					this.loadOneFileMetaData( index+1, onComplete);
 				}
@@ -333,7 +407,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 						}
 					});
 					dojo.create("img", {src: "/images/none.png", style: "vertical-align: middle"}, span, "last");
-					dojo.create("img", {src: "/images/leftarrow.gif", style: "vertical-align: middle; margin-right: 4px"}, span, "last");
+					dojo.create("img", {src: "/images/rightarrow.gif", style: "vertical-align: middle; margin-right: 4px"}, span, "last");
 				}
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
 				dojo.place(document.createTextNode(item.name), link, "only");
