@@ -118,6 +118,7 @@ a:hover {
 
 .navColumn {
 	min-width: 150px;
+	padding-right: 8px;
 }
 
 .pane {
@@ -449,6 +450,7 @@ a:hover {
 
 .secondaryColumn {
 	color: #666666;	
+	padding-right: 8px;
 }
 
 .lightTreeTableRow {
