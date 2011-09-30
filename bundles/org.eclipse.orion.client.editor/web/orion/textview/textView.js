@@ -155,37 +155,54 @@ orion.textview.TextView = (function() {
 	var EventTable = (function() {
 		/** @private */
 		function EventTable(){
-		    this._listeners = {};
+		    this._types = {};
 		}
 		EventTable.prototype = /** @lends EventTable.prototype */ {
 			/** @private */
 			addEventListener: function(type, context, func, data) {
-				if (!this._listeners[type]) {
-					this._listeners[type] = [];
+				var state = this._types[type];
+				if (!state) {
+					state = this._types[type] = {level: 0, listeners: []};
 				}
 				var listener = {
 						context: context,
 						func: func,
 						data: data
 				};
-				this._listeners[type].push(listener);
+				var listeners = state.listeners;
+				if (state.level !== 0) {
+					listeners = state.listeners = listeners.slice(0);
+				}
+				listeners.push(listener);
 			},
 			/** @private */
 			sendEvent: function(type, event) {
-				var listeners = this._listeners[type];
-				if (listeners) {
-					for (var i=0, len=listeners.length; i < len; i++){
-						var l = listeners[i];
-						if (l && l.context && l.func) {
-							l.func.call(l.context, event, l.data);
+				var state = this._types[type];
+				if (state) {
+					try {
+						state.level++;
+						var listeners = state.listeners;
+						if (listeners) {
+							for (var i=0, len=listeners.length; i < len; i++){
+								var l = listeners[i];
+								if (l && l.context && l.func) {
+									l.func.call(l.context, event, l.data);
+								}
+							}
 						}
+					} finally {
+						state.level--;
 					}
 				}
 			},
 			/** @private */
 			removeEventListener: function(type, context, func, data){
-				var listeners = this._listeners[type];
-				if (listeners) {
+				var state = this._types[type];
+				if (state) {
+					var listeners = state.listeners;
+					if (state.level !== 0) {
+						listeners = state.listeners = listeners.slice(0);
+					}
 					for (var i=0, len=listeners.length; i < len; i++){
 						var l = listeners[i];
 						if (l.context === context && l.func === func && l.data === data) {
