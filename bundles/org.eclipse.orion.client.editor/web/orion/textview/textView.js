@@ -165,25 +165,22 @@ orion.textview.TextView = (function() {
 					state = this._types[type] = {level: 0, listeners: []};
 				}
 				var listener = {
-						context: context,
-						func: func,
-						data: data
+					context: context,
+					func: func,
+					data: data
 				};
 				var listeners = state.listeners;
-				if (state.level !== 0) {
-					listeners = state.listeners = listeners.slice(0);
-				}
 				listeners.push(listener);
 			},
 			/** @private */
 			sendEvent: function(type, event) {
 				var state = this._types[type];
 				if (state) {
+					var listeners = state.listeners;
 					try {
 						state.level++;
-						var listeners = state.listeners;
 						if (listeners) {
-							for (var i=0, len=listeners.length; i < len; i++){
+							for (var i=0, len=listeners.length; i < len; i++) {
 								var l = listeners[i];
 								if (l && l.context && l.func) {
 									l.func.call(l.context, event, l.data);
@@ -192,6 +189,14 @@ orion.textview.TextView = (function() {
 						}
 					} finally {
 						state.level--;
+						if (state.compact && state.level === 0) {
+							for (var j=listeners.length - 1; j >= 0; j--) {
+								if (!listeners[j]) {
+									listeners.splice(j, 1);
+								}
+							}
+							state.compact = false;
+						}
 					}
 				}
 			},
@@ -200,13 +205,15 @@ orion.textview.TextView = (function() {
 				var state = this._types[type];
 				if (state) {
 					var listeners = state.listeners;
-					if (state.level !== 0) {
-						listeners = state.listeners = listeners.slice(0);
-					}
-					for (var i=0, len=listeners.length; i < len; i++){
+					for (var i=0, len=listeners.length; i < len; i++) {
 						var l = listeners[i];
-						if (l.context === context && l.func === func && l.data === data) {
-							listeners.splice(i, 1);
+						if (l && l.context === context && l.func === func && l.data === data) {
+							if (state.level !== 0) {
+								listeners[i] = null;
+								state.compact = true;
+							} else {
+								listeners.splice(i, 1);
+							}
 							break;
 						}
 					}
@@ -3332,9 +3339,11 @@ orion.textview.TextView = (function() {
 			if (!frame) { return; }
 			if (this._loadHandler) {
 				removeHandler(frame, "load", this._loadHandler);
+				this._loadHandler = null;
 			}
 			if (this._attrModifiedHandler) {
 				removeHandler(this._parentDocument, "DOMAttrModified", this._attrModifiedHandler);
+				this._attrModifiedHandler = null;
 			}
 			frame.parentNode.removeChild(frame);
 			this._frame = null;
