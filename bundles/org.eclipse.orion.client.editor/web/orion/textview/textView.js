@@ -325,7 +325,11 @@ orion.textview.TextView = (function() {
 			}
 			this.rulers = null;
 			
-			this._destroyView();
+			/*
+			* Note that when the frame is removed, the unload event is trigged
+			* and the view contents and handlers is released properly by
+			* destroyView().
+			*/
 			this._destroyFrame();
 
 			var e = {};
@@ -1448,6 +1452,25 @@ orion.textview.TextView = (function() {
 				return false;
 			}
 		},
+		_handleDOMAttrModified: function (e) {
+			if (!e) { e = window.event; }
+			var ancestor = false;
+			var parent = this._parent;
+			while (parent) {
+				if (parent === e.target) {
+					ancestor = true;
+					break;
+				}
+				parent = parent.parentNode;
+			}
+			if (!ancestor) { return; }
+			var state = this._getVisible();
+			if (state === "visible") {
+				this._createView();
+			} else if (state === "hidden") {
+				this._destroyView();
+			}
+		},
 		_handleDataModified: function(e) {
 			this._startIME();
 		},
@@ -1643,6 +1666,12 @@ orion.textview.TextView = (function() {
 			if (!ctrlKey) {
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
+			}
+		},
+		_handleLoad: function (e) {
+			var state = this._getVisible();
+			if (state === "visible" || (state === "hidden" && isWebkit)) {
+				this._createView(!e);
 			}
 		},
 		_handleMouse: function (e) {
@@ -2986,7 +3015,6 @@ orion.textview.TextView = (function() {
 			cell.appendChild(div);
 		},
 		_createFrame: function() {
-			/* Create elements */
 			if (this.frame) { return; }
 			var parent = this._parent;
 			while (parent.hasChildNodes()) { parent.removeChild(parent.lastChild); }
@@ -2995,18 +3023,33 @@ orion.textview.TextView = (function() {
 			var frame = parentDocument.createElement("IFRAME");
 			this._frame = frame;
 			frame.frameBorder = "0px";//for IE, needs to be set before the frame is added to the parent
+			frame.style.border = "0px";
 			frame.style.width = "100%";
 			frame.style.height = "100%";
 			frame.scrolling = "no";
-			frame.style.border = "0px";
 			var self = this;
-			addHandler(frame, "load", function(e) {
-				self._createView();
-			});
-			parent.appendChild(frame);
-			if (this._getVisible() === "visible") {
-				this._createView(true);
+			/*
+			* Note that it is not possible to create the contents of the frame if the
+			* parent is not connected to the document.  Only create it when the load
+			* event is trigged.
+			*/
+			addHandler(frame, "load", this._loadHandler = function(e) { self._handleLoad(e); });
+			if (!isWebkit) {
+				/*
+				* Feature in IE and Firefox.  It is not possible to get the style of an
+				* element if it is not layed out because one of the ancestor has
+				* style.display = none.  This means that the view cannot be created in this
+				* situations, since no measuring can be performed.  The fix is to listen
+				* for DOMAttrModified and create or destroy the view when the style.display
+				* attribute changes.
+				*/
+				addHandler(parentDocument, "DOMAttrModified", this._attrModifiedHandler = function(e) {
+					self._handleDOMAttrModified(e);
+				});
 			}
+			parent.appendChild(frame);
+			/* create synchronously if possible */
+			this._handleLoad();
 		},
 		_createView: function(sync) {
 			if (this._clientDiv) { return; }
@@ -3256,12 +3299,27 @@ orion.textview.TextView = (function() {
 				this._updatePage();
 			} else {
 				this._queueUpdatePage();
+				var h = this._hScroll, v = this._vScroll;
+				this._vScroll = this._hScroll = 0;
+				if (h > 0 || v > 0) {
+					var self = this;
+					setTimeout(function() {
+						self._scrollView(h, v);
+					}, 0);
+				}
 			}
 			this._ignoreCreate = false;
 		},
 		_destroyFrame: function() {
-			if (!this._frame) { return; }
-			this._frame.parentNode.removeChild(this._frame);
+			var frame = this._frame;
+			if (!frame) { return; }
+			if (this._loadHandler) {
+				removeHandler(frame, "load", this._loadHandler);
+			}
+			if (this._attrModifiedHandler) {
+				removeHandler(this._parentDocument, "DOMAttrModified", this._attrModifiedHandler);
+			}
+			frame.parentNode.removeChild(frame);
 			this._frame = null;
 			this._frameDocument = null;
 			this._frameWindow = null;
@@ -3300,13 +3358,13 @@ orion.textview.TextView = (function() {
 			/* Destroy DOM */
 			var parent = this._frameDocument.body;
 			while (parent.hasChildNodes()) { parent.removeChild(parent.lastChild); }
-			if (isPad) {
+			if (this._touchDiv) {
 				this._parent.removeChild(this._touchDiv);
 				this._touchDiv = null;
-				this._selDiv1 = null;
-				this._selDiv2 = null;
-				this._selDiv3 = null;
 			}
+			this._selDiv1 = null;
+			this._selDiv2 = null;
+			this._selDiv3 = null;
 			this._textArea = null;
 			this._scrollDiv = null;
 			this._viewDiv = null;
