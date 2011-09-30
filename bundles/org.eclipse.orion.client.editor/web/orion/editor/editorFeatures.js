@@ -116,15 +116,15 @@ orion.editor.AnnotationFactory = (function() {
 				if (problem) {
 					// escaping voodoo... we need to construct HTML that contains valid JavaScript.
 					// TODO safeText() from util.js
-					var escapedReason = problem.reason.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
+					var escapedDescription = problem.description.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
 					var lineIndex = problem.line - 1;
 					var lineStart = model.getLineStart(lineIndex);
 					var severity = problem.severity;
 					var annotation = {
 						type: type,
-						start: lineStart + problem.character - 1,
+						start: lineStart + problem.start - 1,
 						end: lineStart + problem.end,
-						rulerTitle: escapedReason,
+						rulerTitle: escapedDescription,
 						rulerHTML: "<img style='vertical-align:middle;' src='" + this.imageUrls[severity] + "'></img>",
 						rulerStyle: {styleClass: "annotationProblem"},
 						overviewStyle: {styleClass: "annotationProblemOverview" + " " + severity},
