@@ -326,6 +326,7 @@ orion.textview.TextView = (function() {
 			this.rulers = null;
 			
 			this._destroyView();
+			this._destroyFrame();
 
 			var e = {};
 			this.onDestroy(e);
@@ -1978,6 +1979,10 @@ orion.textview.TextView = (function() {
 				return false;
 			}
 		},
+		_handleUnload: function (e) {
+			if (!e) { e = window.event; }
+			this._destroyView();
+		},
 		_handleInput: function (e) {
 			var textArea = this._textArea;
 			this._doContent(textArea.value);
@@ -2643,15 +2648,6 @@ orion.textview.TextView = (function() {
 					addDelimiterFunc();
 				}
 		},
-		_create: function() {
-			this._createFrame();
-			var rulers = this._rulers;
-			for (var i=0; i<rulers.length; i++) {
-				this._createRuler(rulers[i]);
-			}
-			this._createView();
-			this._updatePage();
-		},
 		_createActions: function () {
 			var KeyBinding = orion.textview.KeyBinding;
 			//no duplicate keybindings
@@ -2942,8 +2938,8 @@ orion.textview.TextView = (function() {
 			return child;
 		},
 		_createRuler: function(ruler) {
+			if (!this._clientDiv) { return; }
 			var document = this._frameDocument;
-			if (!document) { return; }
 			var body = document.body;
 			var side = ruler.getLocation();
 			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv;
@@ -2991,9 +2987,10 @@ orion.textview.TextView = (function() {
 		},
 		_createFrame: function() {
 			/* Create elements */
+			if (this.frame) { return; }
 			var parent = this._parent;
 			while (parent.hasChildNodes()) { parent.removeChild(parent.lastChild); }
-			var parentDocument = parent.document || parent.ownerDocument;
+			var parentDocument = parent.ownerDocument;
 			this._parentDocument = parentDocument;
 			var frame = parentDocument.createElement("IFRAME");
 			this._frame = frame;
@@ -3002,9 +2999,21 @@ orion.textview.TextView = (function() {
 			frame.style.height = "100%";
 			frame.scrolling = "no";
 			frame.style.border = "0px";
+			var self = this;
+			addHandler(frame, "load", function(e) {
+				self._createView();
+			});
 			parent.appendChild(frame);
+			if (this._getVisible() === "visible") {
+				this._createView(true);
+			}
+		},
+		_createView: function(sync) {
+			if (this._clientDiv) { return; }
+			if (this._ignoreCreate) { return; }
+			this._ignoreCreate = true;
 
-			var html = [];
+			var html = [], i;
 			html.push("<!DOCTYPE html>");
 			html.push("<html>");
 			html.push("<head>");
@@ -3018,7 +3027,7 @@ orion.textview.TextView = (function() {
 			html.push("</style>");
 			if (this._stylesheet) {
 				var stylesheet = typeof(this._stylesheet) === "string" ? [this._stylesheet] : this._stylesheet;
-				for (var i = 0; i < stylesheet.length; i++) {
+				for (i = 0; i < stylesheet.length; i++) {
 					try {
 						//Force CSS to be loaded synchronously so lineHeight can be calculated
 						var objXml = new XMLHttpRequest();
@@ -3041,6 +3050,9 @@ orion.textview.TextView = (function() {
 			html.push("<body spellcheck='false'></body>");
 			html.push("</html>");
 
+			var frame = this._frame;
+			var parent = this._parent;
+			var parentDocument = this._parentDocument;
 			var frameWindow = frame.contentWindow;
 			this._frameWindow = frameWindow;
 			var frameDocument = frameWindow.document;
@@ -3048,12 +3060,8 @@ orion.textview.TextView = (function() {
 			frameDocument.open();
 			frameDocument.write(html.join(""));
 			frameDocument.close();
-		},
-		_createView: function() {
-			var parent = this._parent;
-			var parentDocument = this._parentDocument;
-			var document = this._frameDocument;
-			var body = document.body;
+			
+			var body = frameDocument.body;
 			body.className = "viewContainer";
 			body.style.margin = "0px";
 			body.style.borderWidth = "0px";
@@ -3093,17 +3101,17 @@ orion.textview.TextView = (function() {
 				touchDiv.appendChild(textArea);
 			}
 			if (isFirefox) {
-				textArea = document.createElement("TEXTAREA");
+				textArea = frameDocument.createElement("TEXTAREA");
 				this._textArea = textArea;
 				textArea.id = "textArea";
 				textArea.style.position = "fixed";
 				textArea.style.whiteSpace = "pre";
 				textArea.style.left = "-1000px";
 				textArea.tabIndex = -1;
-				document.body.appendChild(textArea);
+				body.appendChild(textArea);
 			}
 
-			var viewDiv = document.createElement("DIV");
+			var viewDiv = frameDocument.createElement("DIV");
 			viewDiv.className = "view";
 			this._viewDiv = viewDiv;
 			viewDiv.id = "viewDiv";
@@ -3117,7 +3125,7 @@ orion.textview.TextView = (function() {
 			viewDiv.style.outline = "none";
 			body.appendChild(viewDiv);
 				
-			var scrollDiv = document.createElement("DIV");
+			var scrollDiv = frameDocument.createElement("DIV");
 			this._scrollDiv = scrollDiv;
 			scrollDiv.id = "scrollDiv";
 			scrollDiv.style.margin = "0px";
@@ -3127,7 +3135,7 @@ orion.textview.TextView = (function() {
 
 			if (isPad || (this._fullSelection && !isWebkit)) {
 				this._hightlightRGB = "Highlight";
-				var selDiv1 = document.createElement("DIV");
+				var selDiv1 = frameDocument.createElement("DIV");
 				this._selDiv1 = selDiv1;
 				selDiv1.id = "selDiv1";
 				selDiv1.style.position = "fixed";
@@ -3140,7 +3148,7 @@ orion.textview.TextView = (function() {
 				selDiv1.style.width="0px";
 				selDiv1.style.height="0px";
 				scrollDiv.appendChild(selDiv1);
-				var selDiv2 = document.createElement("DIV");
+				var selDiv2 = frameDocument.createElement("DIV");
 				this._selDiv2 = selDiv2;
 				selDiv2.id = "selDiv2";
 				selDiv2.style.position = "fixed";
@@ -3153,7 +3161,7 @@ orion.textview.TextView = (function() {
 				selDiv2.style.width="0px";
 				selDiv2.style.height="0px";
 				scrollDiv.appendChild(selDiv2);
-				var selDiv3 = document.createElement("DIV");
+				var selDiv3 = frameDocument.createElement("DIV");
 				this._selDiv3 = selDiv3;
 				selDiv3.id = "selDiv3";
 				selDiv3.style.position = "fixed";
@@ -3189,12 +3197,12 @@ orion.textview.TextView = (function() {
 					selDiv1.style.background = rgb;
 					selDiv2.style.background = rgb;
 					selDiv3.style.background = rgb;
-					var styleSheet = document.styleSheets[0];
+					var styleSheet = frameDocument.styleSheets[0];
 					styleSheet.insertRule("::-moz-selection {background: " + rgb + "; }", 0);
 				}
 			}
 
-			var clientDiv = document.createElement("DIV");
+			var clientDiv = frameDocument.createElement("DIV");
 			clientDiv.className = "viewContent";
 			this._clientDiv = clientDiv;
 			clientDiv.id = "clientDiv";
@@ -3211,7 +3219,7 @@ orion.textview.TextView = (function() {
 			scrollDiv.appendChild(clientDiv);
 
 			if (isFirefox) {
-				var overlayDiv = document.createElement("DIV");
+				var overlayDiv = frameDocument.createElement("DIV");
 				this._overlayDiv = overlayDiv;
 				overlayDiv.id = "overlayDiv";
 				overlayDiv.style.position = clientDiv.style.position;
@@ -3240,7 +3248,23 @@ orion.textview.TextView = (function() {
 				}
 			}
 			this._hookEvents();
-			this._updatePage();
+			var rulers = this._rulers;
+			for (i=0; i<rulers.length; i++) {
+				this._createRuler(rulers[i]);
+			}
+			if (sync) {
+				this._updatePage();
+			} else {
+				this._queueUpdatePage();
+			}
+			this._ignoreCreate = false;
+		},
+		_destroyFrame: function() {
+			if (!this._frame) { return; }
+			this._frame.parentNode.removeChild(this._frame);
+			this._frame = null;
+			this._frameDocument = null;
+			this._frameWindow = null;
 		},
 		_destroyRuler: function(ruler) {
 			var side = ruler.getLocation();
@@ -3258,8 +3282,8 @@ orion.textview.TextView = (function() {
 			}
 		},
 		_destroyView: function() {
-			var frame = this._frame;
-			if (!frame) { return; }
+			var clientDiv = this._clientDiv;
+			if (!clientDiv) { return; }
 			this._setGrab(null);
 			this._unhookEvents();
 
@@ -3274,19 +3298,16 @@ orion.textview.TextView = (function() {
 			}
 
 			/* Destroy DOM */
-			var parent = this._parent;
-			parent.removeChild(frame);
+			var parent = this._frameDocument.body;
+			while (parent.hasChildNodes()) { parent.removeChild(parent.lastChild); }
 			if (isPad) {
-				parent.removeChild(this._touchDiv);
+				this._parent.removeChild(this._touchDiv);
 				this._touchDiv = null;
 				this._selDiv1 = null;
 				this._selDiv2 = null;
 				this._selDiv3 = null;
 			}
 			this._textArea = null;
-			this._frame = null;
-			this._frameDocument = null;
-			this._frameWindow = null;
 			this._scrollDiv = null;
 			this._viewDiv = null;
 			this._clientDiv = null;
@@ -3928,6 +3949,23 @@ orion.textview.TextView = (function() {
 			var bottom = top + lineHeight;
 			return {left: left, top: top, right: right, bottom: bottom};
 		},
+		_getVisible: function() {
+			var temp = this._parent;
+			var parentDocument = temp.ownerDocument;
+			while (temp !== parentDocument) {
+				var hidden;
+				if (isIE < 9) {
+					hidden = temp.currentStyle && temp.currentStyle.display === "none";
+				} else {
+					var tempStyle = parentDocument.defaultView.getComputedStyle(temp, null);
+					hidden = tempStyle && tempStyle.getPropertyValue("display") === "none";
+				}
+				if (hidden) { return "hidden"; }
+				temp =  temp.parentNode;
+				if (!temp) { return "disconnected"; }
+			}
+			return "visible";
+		},
 		_hitOffset: function (offset, x, y) {
 			var bounds = this._getOffsetBounds(offset);
 			var left = bounds.left;
@@ -3961,6 +3999,7 @@ orion.textview.TextView = (function() {
 			var handlers = this._handlers = [];
 			var resizeNode = isIE < 9 ? this._frame : this._frameWindow;
 			var focusNode = isPad ? this._textArea : (isIE ||  isFirefox ? this._clientDiv: this._frameWindow);
+			handlers.push({target: this._frameWindow, type: "unload", handler: function(e) { return self._handleUnload(e);}});
 			handlers.push({target: resizeNode, type: "resize", handler: function(e) { return self._handleResize(e);}});
 			handlers.push({target: focusNode, type: "blur", handler: function(e) { return self._handleBlur(e);}});
 			handlers.push({target: focusNode, type: "focus", handler: function(e) { return self._handleFocus(e);}});
@@ -4084,7 +4123,7 @@ orion.textview.TextView = (function() {
 			
 			/* Create elements */
 			this._createActions();
-			this._create();
+			this._createFrame();
 		},
 		_modifyContent: function(e, updateCaret) {
 			if (this.readonly && !e._code) {
@@ -4604,7 +4643,7 @@ orion.textview.TextView = (function() {
 			this._setSelection(selection, true, true);
 		},
 		_showCaret: function (allSelection) {
-			if (!this._frameDocument) { return; }
+			if (!this._clientDiv) { return; }
 			var model = this._model;
 			var selection = this._getSelection();
 			var scroll = this._getScroll();
@@ -4701,7 +4740,7 @@ orion.textview.TextView = (function() {
 		},
 		_updateDOMSelection: function () {
 			if (this._ignoreDOMSelection) { return; }
-			if (!this._frameDocument) { return; }
+			if (!this._clientDiv) { return; }
 			var selection = this._getSelection();
 			var model = this._model;
 			var startLine = model.getLineAtOffset(selection.start);
@@ -4745,14 +4784,13 @@ orion.textview.TextView = (function() {
 				this._updateTimer = null;
 			}
 			var document = this._frameDocument;
-			if (!document) { return; }
+			var viewDiv = this._viewDiv;
+			var clientDiv = this._clientDiv;
+			if (!clientDiv) { return; }
 			var frameWidth = this._getFrameWidth();
 			var frameHeight = this._getFrameHeight();
 			document.body.style.width = frameWidth + "px";
 			document.body.style.height = frameHeight + "px";
-			
-			var viewDiv = this._viewDiv;
-			var clientDiv = this._clientDiv;
 			var viewPad = this._getViewPadding();
 			
 			/* Update view height in order to have client height computed */
