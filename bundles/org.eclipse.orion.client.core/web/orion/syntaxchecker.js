@@ -70,14 +70,17 @@ eclipse.SyntaxChecker = (function () {
 			for (var i=0; i < problems.length; i++) {
 				var problem = problems[i];
 				
-				problem.end = (typeof problem.end === "number") ? problem.end : problem.character + 1;
+				problem.description = problem.description || problem.reason;
 				problem.severity = problem.severity || "error";
+				problem.start = (typeof problem.start === "number") ? problem.start : problem.character;
+				problem.end = (typeof problem.end === "number") ? problem.end : problem.start + 1;
 				
+				// Range check
 				var lineLength = model.getLine(problem.line - 1, false).length;
-				problem.character = Math.max(1, problem.character);
-				problem.character = Math.min(problem.character, lineLength);
+				problem.start = Math.max(1, problem.start);
+				problem.start = Math.min(problem.start, lineLength);
 				problem.end = Math.min(problem.end, lineLength);
-				problem.end = Math.max(problem.character, problem.end);
+				problem.end = Math.max(problem.start, problem.end);
 			}
 		}
 	};

@@ -25,13 +25,13 @@ window.onload = function() {
 			["The body of a for in should be wrapped"],
 			["Don't make functions within a loop"]
 		];
-		var reason = error.reason;
+		var description = error.description;
 		for (var i=0; i < warnings.length; i++) {
 			var warning = warnings[i];
-			if (reason.indexOf(warning[0]) !== -1) {
+			if (description.indexOf(warning[0]) !== -1) {
 				error.severity = "warning";
 				if (warning.length > 1) {
-					error.reason = warning[1];
+					error.description = warning[1];
 				}
 			}
 		}
@@ -41,7 +41,6 @@ window.onload = function() {
 			checkSyntax : function(title, contents) {
 				var result = jslint(contents);
 				//this.dispatchEvent("syntaxChecked", {title: title, result: result});
-				// Convert to format expected by validation service
 				var problems = [];
 				var i;
 				if (result.errors) {
@@ -57,6 +56,9 @@ window.onload = function() {
 									end += index;
 								}
 							}
+							// Convert to format expected by validation service
+							error.description = error.reason;
+							error.start = error.character;
 							error.end = end;
 							cleanup(error);
 							problems.push(error);
