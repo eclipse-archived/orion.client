@@ -204,72 +204,75 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	
 	getSelfHostingMappings: function(clientRepoPath) {
 		return [
-		    { "Source": "/",
-		      "Target": clientRepoPath + "/bundles/org.eclipse.orion.client.core/web"
-		    },
-		    { "Source": "/",
-		      "Target": clientRepoPath + "/bundles/org.eclipse.orion.client.editor/web"
-		    },
-		    { "Source": "/file",
-		      "Target": "http://localhost:8080/file"
-		    },
-		    { "Source": "/prefs",
-		      "Target": "http://localhost:8080/prefs"
-		    },
-		    { "Source": "/workspace",
-		      "Target": "http://localhost:8080/workspace"
-		    },
-		    { "Source": "/org.dojotoolkit",
-		      "Target": "http://localhost:8080/org.dojotoolkit"
-		    },
-		    { "Source": "/users",
-		      "Target": "http://localhost:8080/users"
-		    },
-		    { "Source": "/authenticationPlugin.html",
-		      "Target": "http://localhost:8080/authenticationPlugin.html"
-		    },
-		    { "Source": "/login",
-		      "Target": "http://localhost:8080/login"
-		    },
-		    { "Source": "/loginstatic",
-		      "Target": "http://localhost:8080/loginstatic"
-		    },
-		    { "Source": "/site",
-		      "Target": "http://localhost:8080/site"
-		    },
-		    { "Source": "/",
-		      "Target": clientRepoPath + "/bundles/org.eclipse.orion.client.git/web"
-		    },
-		    { "Source": "/gitapi",
-		      "Target": "http://localhost:8080/gitapi"
-		    },
-		    { "Source": "/",
-		      "Target": clientRepoPath + "/bundles/org.eclipse.orion.client.users.ui/web"
-		    },
-		    { "Source": "/xfer",
-		      "Target": "http://localhost:8080/xfer"
-		    },
-		    { "Source": "/filesearch",
-		      "Target": "http://localhost:8080/filesearch"
-		    },
-		    { "Source": "/index.jsp",
-		      "Target": "http://localhost:8080/index.jsp"
-		    },
-		    { "Source": "/plugins/git",
-		      "Target": "http://localhost:8080/plugins/git"
-		    },
-		    { "Source": "/plugins/user",
-		      "Target": "http://localhost:8080/plugins/user"
-		    },
-		    { "Source": "/logout",
-		      "Target": "http://localhost:8080/logout"
-		    },
-		    { "Source": "/mixloginstatic",
-		      "Target": "http://localhost:8080/mixloginstatic"
-		    },
-		    { "Source": "/openids",
-		      "Target": "http://localhost:8080/openids"
-		    }
+			{ Source: "/",
+			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.core/web"
+			},
+			{ Source: "/",
+			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.editor/web"
+			},
+			{ Source: "/file",
+			  Target: "http://localhost:8080/file"
+			},
+			{ Source: "/prefs",
+			  Target: "http://localhost:8080/prefs"
+			},
+			{ Source: "/workspace",
+			  Target: "http://localhost:8080/workspace"
+			},
+			{ Source: "/org.dojotoolkit",
+			  Target: "http://localhost:8080/org.dojotoolkit"
+			},
+			{ Source: "/users",
+			  Target: "http://localhost:8080/users"
+			},
+			{ Source: "/authenticationPlugin.html",
+			  Target: "http://localhost:8080/authenticationPlugin.html"
+			},
+			{ Source: "/login",
+			  Target: "http://localhost:8080/login"
+			},
+			{ Source: "/loginstatic",
+			  Target: "http://localhost:8080/loginstatic"
+			},
+			{ Source: "/site",
+			  Target: "http://localhost:8080/site"
+			},
+			{ Source: "/",
+			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.git/web"
+			},
+			{ Source: "/gitapi",
+			  Target: "http://localhost:8080/gitapi"
+			},
+			{ Source: "/",
+			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.users.ui/web"
+			},
+			{ Source: "/xfer",
+			  Target: "http://localhost:8080/xfer"
+			},
+			{ Source: "/filesearch",
+			  Target: "http://localhost:8080/filesearch"
+			},
+			{ Source: "/index.jsp",
+			  Target: "http://localhost:8080/index.jsp"
+			},
+			{ Source: "/plugins/git",
+			  Target: "http://localhost:8080/plugins/git"
+			},
+			{ Source: "/plugins/user",
+			  Target: "http://localhost:8080/plugins/user"
+			},
+			{ Source: "/logout",
+			  Target: "http://localhost:8080/logout"
+			},
+			{ Source: "/mixloginstatic",
+			  Target: "http://localhost:8080/mixloginstatic"
+			},
+			{ Source: "/openids",
+			  Target: "http://localhost:8080/openids"
+			},
+			{ Source: "/task",
+			  Target: "http://localhost:8080/task"
+			}
 		];
 	},
 	
