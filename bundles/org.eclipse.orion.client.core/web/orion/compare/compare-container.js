@@ -52,11 +52,11 @@ exports.CompareContainer = (function() {
 		getFileURI: function(diffURI , uiCallBack , errorCallBack ){
 			var self = this;
 			this._diffProvider.getDiffFileURI(diffURI).then(function(jsonData, secondArg) {
-											  self._oldFileURI = jsonData.Git.Old;
-											  self._newFileURI = jsonData.Git.New;
-											  self.getFileContent(jsonData.Git.Old , errorCallBack);
+											  self._oldFileURI = jsonData.Old;
+											  self._newFileURI = jsonData.New;
+											  self.getFileContent(jsonData.Old , errorCallBack);
 											  if(uiCallBack)
-												  uiCallBack(jsonData.Git.New , jsonData.Git.Old);
+												  uiCallBack(jsonData.New , jsonData.Old);
 										   },
 										   errorCallBack);
 		},
