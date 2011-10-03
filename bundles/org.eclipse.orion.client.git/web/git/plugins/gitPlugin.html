@@ -11,7 +11,7 @@
 			
 			var provider = new eclipse.PluginProvider();
 			
-			temp.href = "/git/git-status.html";
+			temp.href = "../git-status.html";
 			var gitStatusURL = temp.href;
 			
 			provider.registerServiceProvider("orion.navigate.command", {
@@ -28,7 +28,7 @@
 			});
 			
 			
-			temp.href = "/git/git-log.html";
+			temp.href = "../git-log.html";
 			var gitLogURL = temp.href;
 			provider.registerServiceProvider("orion.navigate.command", {
 				run: function(item) {
@@ -56,7 +56,7 @@
 				tooltip: "Go to Git Remote"
 			});
 			
-			temp.href = "/gitapi/diff/";
+			temp.href = "../../gitapi/diff/";
 			var base = temp.href;
 			provider.registerServiceProvider("orion.core.diff", {
 				getDiffContent: function(diffURI){	

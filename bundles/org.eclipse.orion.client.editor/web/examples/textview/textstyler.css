@@ -25,13 +25,13 @@
 }
 
 .token_space {
-	background-image: url('/examples/textview/images/white_space.png');
+	background-image: url('images/white_space.png');
 	background-repeat: no-repeat;
  	background-position: center center;
 }
 
 .token_tab {
-	background-image: url('/examples/textview/images/white_tab.png');
+	background-image: url('images/white_tab.png');
 	background-repeat: no-repeat;
  	background-position: left center;
 }
@@ -46,9 +46,9 @@
 }
 
 .annotationProblemRange.error {
-	background-image: url('/examples/textview/images/squiggly_error.png');
+	background-image: url('images/squiggly_error.png');
 }
 
 .annotationProblemRange.warning {
-	background-image: url('/examples/textview/images/squiggly_warning.png');
+	background-image: url('images/squiggly_warning.png');
 }
