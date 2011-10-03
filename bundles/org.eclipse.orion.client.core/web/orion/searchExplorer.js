@@ -449,7 +449,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		}});
 		var expandAllCommand = new mCommands.Command({
 			name : "Expand all results",
-			image : "/images/add.gif",
+			image : "/images/expandAll.gif",
 			id: "orion.search.expandAll",
 			groupId: "orion.searchGroup",
 			callback : function() {
@@ -457,7 +457,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		}});
 		var collapseAllCommand = new mCommands.Command({
 			name : "Collapse all results",
-			image : "/images/delete.gif",
+			image : "/images/collapseAll.gif",
 			id: "orion.search.collapseAll",
 			groupId: "orion.searchGroup",
 			callback : function() {

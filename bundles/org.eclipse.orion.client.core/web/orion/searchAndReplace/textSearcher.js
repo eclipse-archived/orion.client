@@ -300,7 +300,7 @@ orion.TextSearcher = (function() {
 
 			var replaceCommand = new mCommands.Command({
 				name : "Replace",
-				image : "/images/rename.gif",
+				image : "/images/replace.gif",
 				id : "orion.search.replace",
 				groupId : "orion.searchGroup",
 				callback : function() {
@@ -310,7 +310,7 @@ orion.TextSearcher = (function() {
 
 			var replaceAllCommand = new mCommands.Command({
 				name : "Replace All",
-				image : "/images/replace_all.gif",
+				image : "/images/replaceAll.gif",
 				id : "orion.search.replaceAll",
 				groupId : "orion.searchGroup",
 				callback : function() {
