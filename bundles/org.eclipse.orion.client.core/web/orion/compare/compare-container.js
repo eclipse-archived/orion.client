@@ -93,16 +93,8 @@ exports.CompareContainer = (function() {
 		},
 		
 		resolveDiff: function(hash , callBack , errorCallBack , onsave){
-			var diffURI = hash;
-			var params = hash.split("?");
-			if(params.length === 2){
-				diffURI = params[0];
-				var subParams = params[1].split("=");
-				if(subParams.length === 2 && subParams[0] === "conflict" && subParams[1] === "true" )
-					this._conflict = true;
-			} 
-			this._diffURI = diffURI;
-			this.getFileDiff(diffURI , callBack , errorCallBack , onsave );
+			this._diffURI = hash;
+			this.getFileDiff(this._diffURI , callBack , errorCallBack , onsave );
 		},
 				
 		resolveDiffonSave: function(){
@@ -226,10 +218,11 @@ exports.CompareMergeStyler = (function() {
 
 exports.CompareMergeContainer = (function() {
 	/** @private */
-	function CompareMergeContainer(readonly , diffProvider , resgistry , commandService , fileClient,uiFactory) {
+	function CompareMergeContainer(readonly , compareConflict, diffProvider , resgistry , commandService , fileClient,uiFactory) {
 		this.setDiffProvider(diffProvider);
 		this._uiFactory = uiFactory;
 		this.readonly = readonly;
+		this._conflict = compareConflict;
 		this._registry = resgistry;
 		this._commandService = commandService;
 		this._leftEditorDivId = this._uiFactory.getEditorParentDivId(true);
@@ -658,6 +651,10 @@ exports.InlineCompareContainer = (function() {
 	InlineCompareContainer.prototype.nextDiff = function(){	
 		this._annotation.nextDiff();
 		this.positionAnnotation(this._textView.getModel().getAnnotations()[this._annotation.getCurrentAnnotationIndex()][0]);
+	};
+	
+	InlineCompareContainer.prototype.setConflicting =  function(conflicting){	
+		this._conflcit = conflicting;
 	};
 	
 	InlineCompareContainer.prototype.prevDiff = function(){	
