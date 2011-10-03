@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="../orion/plugin.js"></script>
-	<script type="text/javascript" src="/org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<script type="text/javascript" src="../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script>
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider({postInstallUrl:"/plugin/list.html"});
@@ -12,7 +12,7 @@
 					window.alert("Running code on: " + item.Location);
 				}
 			}, {
-				image: "/profile/images/create_user.gif",
+				image: "../profile/images/create_user.gif",
 				name: "Run Code on Single Item",
 				id: "sample.commands.sample1",
 				forceSingleItem: true,
@@ -27,7 +27,7 @@
 					return clientDeferred;
 				}
 			}, {
-				image: "/images/gear.gif",
+				image: "../images/gear.gif",
 				name: "Open HTML in 5 seconds",
 				id: "sample.commands.sample11",
 				forceSingleItem: true,
@@ -40,7 +40,7 @@
 					return item.Location;
 				}
 			}, {
-				image: "/profile/images/create_user.gif",
+				image: "../profile/images/create_user.gif",
 				name: "Open HTML Raw",
 				id: "sample.commands.sample2",
 				forceSingleItem: true,
@@ -58,7 +58,7 @@
 					window.alert("Bulk operation on: " + locations);
 				}
 			}, {
-				image: "/profile/images/create_user.gif",
+				image: "../profile/images/create_user.gif",
 				name: "Bulk Item Command",
 				id: "sample.commands.sample3",
 				tooltip: "Bulk command operates on selections"

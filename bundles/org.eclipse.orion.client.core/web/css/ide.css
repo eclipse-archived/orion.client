@@ -342,7 +342,7 @@ a:hover {
 }
 
 .toolbarTest {
-/*	background: #fff url("/images/titleBarTest.png")  repeat-x top left; */
+/*	background: #fff url("../images/titleBarTest.png")  repeat-x top left; */
 	border:1px solid #bfbfbf;
 	cursor: default;
 	font-size: 0.9em;
@@ -355,7 +355,7 @@ a:hover {
 	cursor: pointer;
 	font-size: 0.9em;
 	font-weight: bold;
-	background: #fff url("/images/titleBar.png") repeat-x top left;
+	background: #fff url("../images/titleBar.png") repeat-x top left;
 	min-width: 600px;
 }
 
@@ -427,15 +427,15 @@ a:hover {
 }
 
 .folderItem {
-	background: url(/images/folder.gif);
+	background: url(../images/folder.gif);
 }
 
 .fileItem {
-	background: url(/images/file.gif);
+	background: url(../images/file.gif);
 }
 
 .newItem {
-	background: url(/images/add.gif);
+	background: url(../images/add.gif);
 }
 
 .treetable {
@@ -472,7 +472,7 @@ a:hover {
 }
 
 .followFile {
-	background: url(/images/silk/page_go.png);
+	background: url(../images/silk/page_go.png);
 }
 
 .contentassist {
