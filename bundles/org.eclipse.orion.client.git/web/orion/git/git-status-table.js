@@ -1398,8 +1398,9 @@ orion.GitStatusController = (function() {
 			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) " : "local VS index ) " ;
 			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS ;
 			
-			var diffURI = (this._model.isConflict(itemModel.type) ? itemModel.diffURI : itemModel.diffURI + "?conflict=true");
-			this._inlineCompareContainer.resolveDiff(diffURI + "?conflict=true",
+			//var diffURI = (this._model.isConflict(itemModel.type) ? itemModel.diffURI : itemModel.diffURI + "?conflict=true");
+			this._inlineCompareContainer.setConflicting(this._model.isConflict(itemModel.type));
+			this._inlineCompareContainer.resolveDiff(itemModel.diffURI,
 					                                function(newFile , OldFile){					
 														dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
 														dojo.style("fileNameInViewer", "color", "#6d6d6d");
@@ -1417,13 +1418,21 @@ orion.GitStatusController = (function() {
 		openCompareEditor: function(itemModel){
 			var diffParam = "";
 			var baseUrl = "/compare/compare.html#";
-			if(this._model.isConflict(itemModel.type)){
-				diffParam = "?conflict=true";
-			}
+			var paramLength = 0;
 			if(this._model.isStaged(itemModel.type)){
-				baseUrl = "/compare/compare.html?readonly#";
+				diffParam = "readonly";
+				paramLength = 1;
+			} 
+			if(this._model.isConflict(itemModel.type)){
+				if(paramLength === 0)
+					diffParam = "conflict";
+				else
+					diffParam = diffParam + "&conflict";
+				paramLength++;	
 			}
-			var url = baseUrl + itemModel.diffURI + diffParam;
+			if(paramLength > 0)
+				baseUrl = "/compare/compare.html" + "?" + diffParam + "#";
+			var url = baseUrl + itemModel.diffURI;
 			return url;
 			//window.open(url,"");
 		},

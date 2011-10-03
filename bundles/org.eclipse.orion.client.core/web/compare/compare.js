@@ -41,7 +41,8 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 
 				// Diff operations
 				var readOnly = isReadOnly();
-				compareMergeContainer = new mCompareContainer.CompareMergeContainer(readOnly, diffProvider, serviceRegistry, commandService, fileClient, uiFactory);
+				var conflciting = isConflciting();
+				compareMergeContainer = new mCompareContainer.CompareMergeContainer(readOnly, conflciting, diffProvider, serviceRegistry, commandService, fileClient, uiFactory);
 				compareMergeContainer.resolveDiff(dojo.hash(), function(newFile, oldFile) {
 					handleTile(newFile, oldFile, uiFactory);
 				}, function(errorResponse, ioArgs) {
@@ -51,7 +52,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 				// every time the user manually changes the hash, we need to
 				// load the diff
 				dojo.subscribe("/dojo/hashchange", compareMergeContainer, function() {
-					compareMergeContainer = new mCompareContainer.CompareMergeContainer(readOnly, diffProvider, serviceRegistry, commandService, fileClient, uiFactory);
+					compareMergeContainer = new mCompareContainer.CompareMergeContainer(readOnly, conflciting, diffProvider, serviceRegistry, commandService, fileClient, uiFactory);
 					compareMergeContainer.resolveDiff(dojo.hash(), function(newFile, oldFile) {
 						handleTile(newFile, oldFile, uiFactory);
 					}, function(errorResponse, ioArgs) {
@@ -63,6 +64,11 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 			function isReadOnly() {
 				var queryParams = dojo.queryToObject(window.location.search.slice(1));
 				return queryParams["readonly"] != null;
+			}
+
+			function isConflciting() {
+				var queryParams = dojo.queryToObject(window.location.search.slice(1));
+				return queryParams["conflict"] != null;
 			}
 
 			function handleTile(newFile, oldFile, uiFactory) {
