@@ -97,7 +97,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 		var editCommand = new mCommands.Command({
 			name: "Edit",
 			tooltip: "Edit the site configuration",
-			image: "/images/editing_16.gif",
+			image: "/images/edit.gif",
 			id: "eclipse.site.edit",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
@@ -108,7 +108,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 		var startCommand = new mCommands.Command({
 			name: "Start",
 			tooltip: "Start the site",
-			image: "/images/lrun_obj.gif",
+			image: "/images/start.gif",
 			id: "eclipse.site.start",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
