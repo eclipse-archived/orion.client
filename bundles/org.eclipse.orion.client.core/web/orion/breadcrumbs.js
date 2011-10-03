@@ -16,8 +16,9 @@ define(['dojo'], function(dojo) {
 	 * @param {Object} options The options object which must specify the parent container
 	 * @param options.container The parent container for the bread crumb presentation
 	 * @param options.resource The current resource
+	 * @param options.firstSegmentName The name of the first segment
 	 * @param [options.makeHref] The call back function to make the href on a bread crumb item. If not defined "/navigate/table.html#" is used.
-	 * @param [option.getFirstSegment] The call back function to make DOM node for the first segment in breadcrumb. If not defined "Orion Navigator" is used. 
+	 * @param [option.getFirstSegment] The call back function to make DOM node for the first segment in breadcrumb. 
 	 * @class Bread crumbs show the current position within a resource tree and allow navigation
 	 * to different places in the tree. Unlike the fairy tale, bread crumbs typically don't lead
 	 * to a cottage made of gingerbread. Sorry!
