@@ -1,13 +1,13 @@
 <!doctype html>
 <html style="height: 100%">
 <head>
-<meta name="copyright"
-	content="Copyright (c) IBM Corporation and others 2011.">
-<meta http-equiv="Content-Language" content="en-us">
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Manage Users</title>
-<link rel="stylesheet" type="text/css" href="user-list.css" />
-<script type="text/javascript" src="/requirejs/require.js"></script>
+	<meta name="copyright"
+		content="Copyright (c) IBM Corporation and others 2011.">
+	<meta http-equiv="Content-Language" content="en-us">
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<title>Manage Users</title>
+	<link rel="stylesheet" type="text/css" href="user-list.css" />
+   		<script type="text/javascript" src="../requirejs/require.js"></script>
 		<script type="text/javascript">
 		require({
 		  baseUrl: '',
@@ -16,28 +16,30 @@
 		  packages: [
 		    {
 		      name: 'dojo',
-		      location: '/org.dojotoolkit/dojo',
+		      location: '../org.dojotoolkit/dojo',
 		      main: 'lib/main-browser',
 		      lib: '.'
 		    },
 		    {
 		      name: 'dijit',
-		      location: '/org.dojotoolkit/dijit',
+		      location: '../org.dojotoolkit/dijit',
 		      main: 'lib/main',
 		      lib: '.'
 		    },
 		    {
 		      name: 'dojox',
-		      location: '/org.dojotoolkit/dojox',
+		      location: '../org.dojotoolkit/dojox',
 		      main: 'lib/main',
 		      lib: '.'
 		    }		    
 		  ],
-		
 		  paths: {
-		    orion: '/orion',
-		    text: '/requirejs/text',
-		    i18n: '/requirejs/i18n'
+			  orion: '../orion',
+			  images: '../images',
+			  css: '../css',
+			  examples: '../examples',
+			  text: '../requirejs/text',
+			  i18n: '../requirejs/i18n',	    
 		  }
 		});
 		

@@ -19,11 +19,11 @@
 .nihilo .dojoxToggleSplitterLeft .dojoxToggleSplitterIconOpen, 
 .nihilo .dojoxToggleSplitterRight .dojoxToggleSplitterIconClosed 
 {
-background:  url(/images/splitterleft.gif) no-repeat 0px 50%;
+background:  url(../images/splitterleft.gif) no-repeat 0px 50%;
 }
 
 .nihilo .dojoxToggleSplitterRight .dojoxToggleSplitterIconOpen, 
 .nihilo .dojoxToggleSplitterLeft .dojoxToggleSplitterIconClosed 
 {
-background:  url(/images/splitterright.gif) no-repeat 0px 50%;
+background:  url(../images/splitterright.gif) no-repeat 0px 50%;
 } 

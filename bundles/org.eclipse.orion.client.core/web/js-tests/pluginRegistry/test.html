@@ -3,8 +3,7 @@
 <head>
 <!-- standard scripts -->
 	<script type="text/javascript" src="../../orion/plugin.js"></script>
-
-	<script type="text/javascript" src="/requirejs/require.js"></script>
+	<script type="text/javascript" src="../../requirejs/require.js"></script>
 	<script type="text/javascript">
 	require({
 	  baseUrl: '',
@@ -13,22 +12,22 @@
 	  packages: [
 	    {
 	      name: 'dojo',
-	      location: '/org.dojotoolkit/dojo',
+	      location: '../../org.dojotoolkit/dojo',
 	      main: 'lib/main-browser',
 	      lib: '.'
 	    },
 	    {
 	      name: 'dijit',
-	      location: '/org.dojotoolkit/dijit',
+	      location: '../../org.dojotoolkit/dijit',
 	      main: 'lib/main',
 	      lib: '.'
 	    }
 	  ],
 	
 	  paths: {
-	    orion: '/orion',
-	    text: '/requirejs/text',
-	    i18n: '/requirejs/i18n'
+	    orion: '../../orion',
+	    text: '../../requirejs/text',
+	    i18n: '../../requirejs/i18n'
 	  }
 	});
 	
