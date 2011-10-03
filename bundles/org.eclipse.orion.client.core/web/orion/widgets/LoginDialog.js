@@ -10,7 +10,7 @@
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
 
-define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/LoginDialog.html'], function(dojo, dijit) {
+define(['dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widgets/templates/LoginDialog.html'], function(dojo, dijit, mUtil) {
 	
 	dojo.declare("orion.widgets.LoginDialog", [dijit.TooltipDialog], {
 		widgetsInTemplate: true,
@@ -69,6 +69,7 @@ define(['dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/Lo
 		}
 		
 		if(this.isSingleService() && jsonData){
+			mUtil.setUserName(jsonData.login);
 			var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login;
 			if(userName.length > 40)
 				userName = userName.substring(0, 30) + "...";
