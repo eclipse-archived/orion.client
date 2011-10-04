@@ -90,10 +90,6 @@ eclipse.sites.SiteRenderer = (function() {
 			
 			// Site config column
 			var href = mSiteUtils.generateEditSiteHref(item);
-			var imgLink = dojo.create("a", {href: href}, siteConfigCol, "last");
-			var icon = dojo.create("img",
-					{src: "/images/config_obj.gif", style: {verticalAlign: "bottom", paddingRight: "3px"}},
-				imgLink, "last");
 			var nameLink = dojo.create("a", {href: href}, siteConfigCol, "last");
 			dojo.place(document.createTextNode(item.Name), nameLink, "last");
 			
