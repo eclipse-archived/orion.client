@@ -196,7 +196,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 		var addFaveURLCommand = new mCommands.Command({
 			name: "Add Favorite",
 			tooltip: "Add link as favorite",
-			image: require.toUrl("images/add.gif"),
+			imageClass: "core-sprite-add",
 			id: "eclipse.addExternalFave",
 			callback: dojo.hitch(this, function(item, commandId, domId) {
 				this.getUserURL(domId);
@@ -204,7 +204,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 		});		
 		var deleteFaveCommand = new mCommands.Command({
 			name: "Delete",
-			image: require.toUrl("images/delete.gif"),
+			imageClass: "core-sprite-delete",
 			id: "eclipse.deleteFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: function(item) {
@@ -217,7 +217,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 		});		
 		var renameFaveCommand = new mCommands.Command({
 			name: "Rename",
-			image: require.toUrl("images/rename.gif"),
+			imageClass: "core-sprite-rename",
 			id: "eclipse.renameFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: dojo.hitch(this, function(item, commandId, domId, faveIndex) {
@@ -226,7 +226,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 		});
 		var deleteSearchCommand = new mCommands.Command({
 			name: "Delete",
-			image: require.toUrl("images/delete.gif"),
+			imageClass: "core-sprite-delete",
 			id: "eclipse.deleteSearch",
 			visibleWhen: function(item) {return item.isSearch;},
 			callback: function(item) {

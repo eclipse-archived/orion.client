@@ -563,6 +563,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
 			this.image = options.image || require.toUrl("images/none.png");
+			this.imageClass = options.imageClass;
 			this.visibleWhen = options.visibleWhen;
 			// when false, affordances for commands are always shown.  When true,
 			// they are shown on hover only.
@@ -571,19 +572,21 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		},
 		_asImage: function(name, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink) {
 			handler = handler || this;
-			var image = new Image();
 			var link = dojo.create("a");
+			var image = null;
 			if (this.tooltip) {
 				link.title = this.tooltip;
 			}
-			link.id = this.name+"link";
-			image.alt = this.name;
-			image.title = this.name;
-			image.name = name;
-			image.id = name;
 			if (forceText || !this.hasImage()) {
 				var text = window.document.createTextNode(this.name);
 				dojo.place(text, link, "last");
+			} else {
+				image = new Image();
+				link.id = this.name+"link";
+				image.alt = this.name;
+				image.title = this.name;
+				image.name = name;
+				image.id = name;
 			}
 			if (this.hrefCallback) {
 				var href = this.hrefCallback.call(handler, items, this.id, userData);
@@ -595,7 +598,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					link.href = href; 
 				}
 			} else if (this.callback) {
-				if (!forceText && this.hasImage()) {
+				if (image) {
 					dojo.connect(image, "onclick", this, function() {
 						this.callback.call(handler, items, this.id, image.id, userData);
 					});
@@ -605,7 +608,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					});
 				}
 			}
-			if (!forceText && this.hasImage()) {
+			if (image) {
 				if (this._deviceSupportsHover) {
 					image.src = require.toUrl("images/none.png");
 					dojo.connect(image, "onmouseover", this, function() {
@@ -635,9 +638,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				dojo.addClass(image, 'commandImage');
 				if (cssClass) {
 					dojo.addClass(image, cssClass);
-				}			
+				}	
+				if (this.imageClass) {
+					dojo.addClass(image, "commandSprite");
+					dojo.addClass(image, this.imageClass);
+				} 
 				dojo.place(image, link, "last");
-			}
+			} 
+			
 			if(cssClassCmdLink) {
 				dojo.addClass(link, cssClassCmdLink);
 			} else {
@@ -683,6 +691,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			var menuitem = new CommandMenuItem({
 				labelType: this.hrefCallback ? "html" : "text",
 				label: this.name,
+				iconClass: this.imageClass,
 				hrefCallback: !!this.hrefCallback
 			});
 			if (this.hrefCallback) {
@@ -705,7 +714,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			// we may need to refer back to the command.  
 			menuitem.eclipseCommand = this;
 			parent.addChild(menuitem);
-			if (this.image) {
+			if (this.imageClass) {
+				dojo.addClass(menuitem.iconNode, 'commandSprite');
+			} else if (this.image) {
 				dojo.addClass(menuitem.iconNode, 'commandImage');
 				if (cssClass) {
 					dojo.addClass(menuitem.iconNode, cssClass);
@@ -778,7 +789,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 * externally.
 		 */
 		hasImage: function() {
-			return this.image !== require.toUrl("images/none.png");
+			return this.imageClass || this.image !== require.toUrl("images/none.png");
 		}
 	};  // end Command prototype
 	Command.prototype.constructor = Command;
