@@ -10,7 +10,7 @@
 /*global define */
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'orion/util', 'orion/siteUtils', 'orion/commands', 'siteMappingsTable',
+define(['dojo', 'dijit', 'orion/util', 'orion/siteUtils', 'orion/commands', 'orion/siteMappingsTable',
 		'orion/widgets/DirectoryPrompterDialog', 'text!orion/widgets/templates/SiteEditor.html',
 		'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
 		'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],

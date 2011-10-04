@@ -1039,23 +1039,24 @@ var exports = {};
 				if(confirm("The content of your active branch will be replaced with " + item.Name + ". Are you sure?")){
 					serviceRegistry.getService("orion.git.provider").then(
 						function(service) {
-							service.resetIndex(item.IndexLocation, item.Name).then(
-								function(result){
-									serviceRegistry.getService("orion.page.message").then(function(progressService){
-										var display = [];
-										display.Severity = "Info";
-										display.HTML = false;
-										display.Message = "Ok";
-										progressService.setProgressResult(display);
-									});
-								}, function (error){
-									serviceRegistry.getService("orion.page.message").then(function(progressService){
-										var display = [];
-										display.Severity = "Error";
-										display.HTML = false;
-										display.Message = error.message;
-										progressService.setProgressResult(display);
-									});
+							serviceRegistry.getService("orion.page.message").then(
+								function(progressService){
+									progressService.setProgressMessage("Resetting index...");
+									service.resetIndex(item.IndexLocation, item.Name).then(
+										function(result){
+											var display = {};
+											display.Severity = "Info";
+											display.HTML = false;
+											display.Message = "Ok";
+											progressService.setProgressResult(display);
+										}, function (error){
+											var display = {};
+											display.Severity = "Error";
+											display.HTML = false;
+											display.Message = error.message;
+											progressService.setProgressResult(display);
+										}
+									);
 								}
 							);
 						}

@@ -254,13 +254,12 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);					
 					// erase any old page title
 					var breadcrumb = dojo.byId(this.breadcrumbId);
-					var root = mUtil.getUserName() || "Navigator Root";
 					if (breadcrumb) {
 						dojo.empty(breadcrumb);
 						new mBreadcrumbs.BreadCrumbs({
 							container: breadcrumb, 
 							resource: this.treeRoot,
-							firstSegmentName: root
+							firstSegmentName: "root"
 						});
 					}
 					mFileCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
