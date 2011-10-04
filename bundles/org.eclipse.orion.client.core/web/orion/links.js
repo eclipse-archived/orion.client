@@ -60,12 +60,15 @@ define([], function(){
 			return text;
 		},
 		/**
-		 * Adds links to an input text string.
+		 * Adds links to an input text string. The links are added to the provided node, or to a new div
+		 * node if not input node is provided.
 		 * @param {String} text The string to compute links for
+		 * @param {Object} [parent] The optional parent DOM node to place the links into
 		 * @returns {Object} A DOM node containing the provided text as a series of text and anchor child nodes
 		 */
-		addLinks: function(text) {
-			var result = document.createElement('div');
+		addLinks: function(text, parent) {
+			//define div if one isn't provided
+			var result = parent || document.createElement('div');
 			var linkScanners = this._registry.getServiceReferences("orion.core.linkScanner");
 			if (linkScanners.length > 0) {
 				//TODO: support multiple scanners by picking the scanner with the first match
