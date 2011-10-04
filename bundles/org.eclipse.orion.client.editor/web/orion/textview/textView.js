@@ -3075,12 +3075,8 @@ orion.textview.TextView = (function() {
 			/* create synchronously if possible */
 			this._handleLoad();
 		},
-		_createView: function(sync) {
-			if (this._clientDiv) { return; }
-			if (this._ignoreCreate) { return; }
-			this._ignoreCreate = true;
-
-			var html = [], i;
+		_getFrameHTML: function(sync) {
+			var html = [];
 			html.push("<!DOCTYPE html>");
 			html.push("<html>");
 			html.push("<head>");
@@ -3094,28 +3090,36 @@ orion.textview.TextView = (function() {
 			html.push("</style>");
 			if (this._stylesheet) {
 				var stylesheet = typeof(this._stylesheet) === "string" ? [this._stylesheet] : this._stylesheet;
-				for (i = 0; i < stylesheet.length; i++) {
-					try {
-						//Force CSS to be loaded synchronously so lineHeight can be calculated
-						var objXml = new XMLHttpRequest();
-						if (objXml.overrideMimeType) {
-							objXml.overrideMimeType("text/css");
-						}
-						objXml.open("GET", stylesheet[i], false);
-						objXml.send(null);
-						html.push("<style>");
-						html.push(objXml.responseText);
-						html.push("</style>");
-					} catch (e) {
-						html.push("<link rel='stylesheet' type='text/css' href='");
-						html.push(stylesheet[i]);
-						html.push("'></link>");
+				for (var i = 0; i < stylesheet.length; i++) {
+					if (sync) {
+						try {
+							//Force CSS to be loaded synchronously so lineHeight can be calculated
+							var objXml = new XMLHttpRequest();
+							if (objXml.overrideMimeType) {
+								objXml.overrideMimeType("text/css");
+							}
+							objXml.open("GET", stylesheet[i], false);
+							objXml.send(null);
+							html.push("<style>");
+							html.push(objXml.responseText);
+							html.push("</style>");
+							continue;
+						} catch (e) {}
 					}
+					html.push("<link rel='stylesheet' type='text/css' href='");
+					html.push(stylesheet[i]);
+					html.push("'></link>");
 				}
 			}
 			html.push("</head>");
 			html.push("<body spellcheck='false'></body>");
 			html.push("</html>");
+			return html.join("");
+		},
+		_createView: function(sync) {
+			if (this._clientDiv) { return; }
+			if (this._ignoreCreate) { return; }
+			this._ignoreCreate = true;
 
 			var frame = this._frame;
 			var parent = this._parent;
@@ -3125,7 +3129,7 @@ orion.textview.TextView = (function() {
 			var frameDocument = frameWindow.document;
 			this._frameDocument = frameDocument;
 			frameDocument.open();
-			frameDocument.write(html.join(""));
+			frameDocument.write(this._getFrameHTML(true));
 			frameDocument.close();
 			
 			var body = frameDocument.body;
@@ -3316,7 +3320,7 @@ orion.textview.TextView = (function() {
 			}
 			this._hookEvents();
 			var rulers = this._rulers;
-			for (i=0; i<rulers.length; i++) {
+			for (var i=0; i<rulers.length; i++) {
 				this._createRuler(rulers[i]);
 			}
 			if (sync) {
