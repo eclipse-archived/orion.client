@@ -9,7 +9,7 @@
  ******************************************************************************/
 /*global define document navigator*/
 
-define([ 'dojo', 'dijit', 'orion/commands', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton' ], function(dojo, dijit, mCommands){
+define(['require', 'dojo', 'dijit', 'orion/commands', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton' ], function(require, dojo, dijit, mCommands){
 	
 var orion = orion || {};
 
