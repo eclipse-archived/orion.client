@@ -54,7 +54,7 @@ dojo.addOnLoad(function() {
 	
 	// clone actions
 	commandService.registerCommandContribution("eclipse.openGitStatus", 100);
-	commandService.registerCommandContribution("eclipse.openGitLogAll", 200, null, "eclipse.gitGroup2");
+	commandService.registerCommandContribution("eclipse.openGitLogAll", 200);
 	commandService.registerCommandContribution("eclipse.openCloneContent", 300, null, "eclipse.gitGroup2");
 	commandService.registerCommandContribution("eclipse.git.deleteClone", 400, null, "eclipse.gitGroup2/eclipse.gitGroup2.delete");
 	
@@ -64,12 +64,12 @@ dojo.addOnLoad(function() {
 	
 	// branch actions
 	commandService.registerCommandContribution("eclipse.addBranch", 100);
-	commandService.registerCommandContribution("eclipse.checkoutBranch", 101);
 	
-	commandService.registerCommandContribution("eclipse.openGitLog", 200, null, "eclipse.gitGroup2");
+	commandService.registerCommandContribution("eclipse.openGitLog", 200);
+	commandService.registerCommandContribution("eclipse.orion.git.fetch", 201);
+	commandService.registerCommandContribution("eclipse.orion.git.merge", 202);
 	
-	commandService.registerCommandContribution("eclipse.orion.git.fetch", 300, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
-	commandService.registerCommandContribution("eclipse.orion.git.merge", 301, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
+	commandService.registerCommandContribution("eclipse.checkoutBranch", 301, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
 	commandService.registerCommandContribution("eclipse.orion.git.rebase", 302, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
 	commandService.registerCommandContribution("eclipse.orion.git.push", 303, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
 	commandService.registerCommandContribution("eclipse.orion.git.pushto", 304, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
