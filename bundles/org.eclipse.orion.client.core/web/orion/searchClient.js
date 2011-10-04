@@ -179,7 +179,7 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExplorer', 'di
 				var b = dojo.create("b", null, div, "last");
 				dojo.place(document.createTextNode(token), b, "only");
 			} else {
-				var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query.split("?")[1].split("=")[1]);
+				var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query.split("q=")[1]);
 				explorer.initCommands();
 				explorer.startUp();
 			}
