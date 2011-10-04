@@ -25,14 +25,16 @@
 }
 
 .token_space {
-	background-image: url('images/white_space.png');
-	background-repeat: no-repeat;
+/*	background-image: url('images/white_space.png'); */
+	background-image: url('data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%09%00%00%00%09%08%02%00%00%00o%F3%91G%00%00%00%06tRNS%00%FF%00%00%00%00%A4%C2%C0%1D%00%00%00!IDATx%9Cc%F8%CF%C0%80%0B%E1%94%20E%EE%00%18%60%91%3B%80%04H%91%C3g%26i%EE%04%00%7D9_%BCC%A2SQ%00%00%00%00IEND%AEB%60%82');
+background-repeat: no-repeat;
  	background-position: center center;
 }
 
 .token_tab {
-	background-image: url('images/white_tab.png');
-	background-repeat: no-repeat;
+/*	background-image: url('images/white_tab.png');*/
+	background-image: url('data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%0C%00%00%00%09%08%02%00%00%00%89%DAZ%03%00%00%00%06tRNS%00%FF%00%FF%00%FF7X%1B%7D%00%00%002IDATx%9Cc%F8O%04%60%A0%AE%A2%E7g7o%3Ep%EB3%12%03%ABI%9Fo%1D%D8%BCy%F3%D9%E7%08%06.%EBp%1AH%BCID%BA%09%3F%00%00x%D94hn(%A5%F3%00%00%00%00IEND%AEB%60%82');
+background-repeat: no-repeat;
  	background-position: left center;
 }
 
@@ -46,9 +48,11 @@
 }
 
 .annotationProblemRange.error {
-	background-image: url('images/squiggly_error.png');
+	/*background-image: url('images/squiggly_error.png');*/
+	background-image:url('data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%04%00%00%00%03%08%06%00%00%00%B4%F4%AE%C6%00%00%00%01sRGB%00%AE%CE%1C%E9%00%00%00%06bKGD%00%FF%00%FF%00%FF%A0%BD%A7%93%00%00%00%09pHYs%00%00%0B%13%00%00%0B%13%01%00%9A%9C%18%00%00%00%07tIME%07%DB%09%0F%0E%1C8%25%B5%FC%A2%00%00%00%19tEXtComment%00Created%20with%20GIMPW%81%0E%17%00%00%00%1CIDAT%08%D7c%60%80%82%FF%0C%0C%FF%19%D09%FF%19%18%FE%A3%CA000%00%00%CBg%07%F9%AE%F9%BE-%00%00%00%00IEND%AEB%60%82');
 }
 
 .annotationProblemRange.warning {
-	background-image: url('images/squiggly_warning.png');
+	/*background-image: url('images/squiggly_warning.png');*/
+	background-image: url('data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%04%00%00%00%03%08%06%00%00%00%B4%F4%AE%C6%00%00%00%01sRGB%00%AE%CE%1C%E9%00%00%00%06bKGD%00%FF%00%FF%00%FF%A0%BD%A7%93%00%00%00%09pHYs%00%00%0B%13%00%00%0B%13%01%00%9A%9C%18%00%00%00%07tIME%07%DB%09%16%14%17%11%B8S%83%B6%00%00%00%19tEXtComment%00Created%20with%20GIMPW%81%0E%17%00%00%002IDAT%08%D7cd%80%82%2F't%17200t3~9%A1%1B%CA%C0%C0%E0%C3%C0%C0%D0%CD%C0%C0%B0%88%E1%CB%09%DDs_N%E8%EA%40U%19%01%00(%10%0D%B6%86%EC%90%D3%00%00%00%00IEND%AEB%60%82');
 }
