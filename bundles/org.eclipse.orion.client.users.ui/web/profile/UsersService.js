@@ -29,7 +29,7 @@ eclipse.UsersService = (function() {
 		getUsersList : function(onLoad) {
 			var service = this;
 			return dojo.xhrGet({
-				url : "/users",
+				url : "../users",
 				headers : {
 					"Orion-Version" : "1"
 				},
@@ -83,7 +83,7 @@ eclipse.UsersService = (function() {
 		createUser : function(userName, password, onLoad, onError) {
 			var service = this;
 			return dojo.xhrPost({
-				url : "/users",
+				url : "../users",
 				headers : {
 					"Orion-Version" : "1"
 				},
@@ -179,7 +179,7 @@ eclipse.UsersService = (function() {
 		resetUserPassword: function(login, password, onLoad){
 			
 			return dojo.xhrPost({
-				url : "/users",
+				url : "../users",
 				headers : {
 					"Orion-Version" : "1"
 				},

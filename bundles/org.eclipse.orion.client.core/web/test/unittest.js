@@ -11,9 +11,9 @@
  /*global eclipse:true dojo document console*/
 
 
-define(['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/preferences', 'orion/commands', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable',
+define(['require', 'dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/preferences', 'orion/commands', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable',
         'dojo/hash', 'dojo/parser'],
-        function(dojo, mServiceRegistry, mPluginRegistry, mPreferences, mCommands, mSearchClient, mGlobalCommands, mTreetable) {
+        function(require, dojo, mServiceRegistry, mPluginRegistry, mPreferences, mCommands, mSearchClient, mGlobalCommands, mTreetable) {
 	
 
 var eclipse = eclipse || {};
@@ -96,20 +96,18 @@ eclipse.Unittest.Renderer = (function() {
 				tableRow.appendChild(col);
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
-				var expandImg = dojo.create("img", {src: "/images/collapsed-gray.png", name: nameId}, div, "last");
-				dojo.create("img", {src: "/images/folder.gif"}, div, "last");
+				var expandImg = dojo.create("img", {src: require.toUrl("images/collapsed-gray.png"), name: nameId}, div, "last");
+				dojo.create("img", {src: require.toUrl("images/folder.gif")}, div, "last");
 				link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
 				expandImg.onclick = dojo.hitch(this, function(evt) {
-					this.tableTree.toggle(tableRow.id, nameId, '/images/expanded-gray.png', '/images/collapsed-gray.png');
+					this.tableTree.toggle(tableRow.id, nameId, require.toUrl("images/expanded-gray.png"), require.toUrl("images/collapsed-gray.png"));
 				});
 			} else {
 				col = document.createElement('td');
 				tableRow.appendChild(col);
 				div = dojo.create("div", null, col, "only");
-//				dojo.create("img", {src: "/images/none.png"}, div, "last");
-				dojo.create("img", {src: item.result?"/images/unit_test/testok.gif":"/images/unit_test/testfail.gif"}, div, "first");
-//				link = dojo.create("a", {className: "navlink", href: "/"}, div, "last");
+				dojo.create("img", {src: item.result?require.toUrl("images/unit_test/testok.gif"):require.toUrl("images/unit_test/testfail.gif")}, div, "first");
 				dojo.place(document.createTextNode(item.Name + " (" + (item.millis / 1000) + "s)"), div, "last");
 				if (!item.result && !item.logged) {
 					console.log("[FAILURE][" + item.Name + "][" + item.message + "]\n" + ((item.stack !== undefined && item.stack) ? item.stack : ""));
@@ -150,7 +148,7 @@ dojo.addOnLoad(function(){
 		//console.log("installing non-persistent plugin: " + fileURI);
 		var testOverview = dojo.byId("test-overview");
 		dojo.place(document.createTextNode("Running tests from: "), testOverview, "last");
-		var link = dojo.create("a", {className: "navlink", href: "/edit/edit.html#"+fileURI}, testOverview, "last");
+		var link = dojo.create("a", {className: "navlink", href: require.toUrl("edit/edit.html") + "#"+fileURI}, testOverview, "last");
 		dojo.place(document.createTextNode(fileURI), link, "last");
 		
 		// these are isolated from the regular service and plugin registry

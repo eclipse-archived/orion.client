@@ -11,7 +11,7 @@
 /*global define window document Image */
 /*jslint forin:true*/
 
-define(['dojo', 'orion/commands'], function(dojo, mCommands) {
+define(['require', 'dojo', 'orion/commands'], function(require, dojo, mCommands) {
 
 var exports = {};
 
@@ -35,7 +35,7 @@ exports.CommitDetails = (function() {
 			image: "images/open_compare.gif",
 			id: "eclipse.showDiff",
 			hrefCallback: function(item) {
-				return "/compare/compare.html?readonly#" + item.DiffLocation;
+				return require.toUrl("compare/compare.html") +"?readonly#" + item.DiffLocation;
 			},
 			visibleWhen: function(item) {
 				return item.Type === "Diff";
@@ -192,11 +192,11 @@ exports.CommitDetails = (function() {
 					col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 					
 					if (diff.ChangeType === "ADD")
-						img = dojo.create("img", {src: "/git/images/addition.gif"}, col1);
+						img = dojo.create("img", {src: require.toUrl("git/images/addition.gif")}, col1);
 					else if (diff.ChangeType === "DELETE")
-						img = dojo.create("img", {src: "/git/images/removal.gif"}, col1);
+						img = dojo.create("img", {src: require.toUrl("git/images/removal.gif")}, col1);
 					else if (diff.ChangeType === "MODIFY")
-						img = dojo.create("img", {src: "/git/images/modification.gif"}, col1);
+						img = dojo.create("img", {src: require.toUrl("git/images/modification.gif")}, col1);
 					
 					col2 = dojo.create("td", null, tr, "last");
 					dojo.place(document.createTextNode(diff.ChangeType === "DELETE" ? diff.OldPath : diff.NewPath), col2, "only");		

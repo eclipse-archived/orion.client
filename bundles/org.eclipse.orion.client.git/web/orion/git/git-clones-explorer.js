@@ -10,7 +10,7 @@
 
 /*global dojo eclipse:true widgets*/
 
-define(['dojo', 'orion/explorer', 'orion/util'], function(dojo, mExplorer, mUtil) {
+define(['require', 'dojo', 'orion/explorer', 'orion/util'], function(require, dojo, mExplorer, mUtil) {
 var exports = {};
 
 exports.GitClonesExplorer = (function() {
@@ -35,7 +35,12 @@ exports.GitClonesExplorer = (function() {
 	
 	GitClonesExplorer.prototype.getGitLocation = function(path){
 		var relativePath = mUtil.makeRelative(path);
-		return relativePath[0]==="/" ? "/gitapi/clone" + relativePath : "/gitapi/clone/" + relativePath;
+		
+		//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
+		var gitapiCloneUrl = require.toUrl("gitapi/clone/._");
+		gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
+		
+		return relativePath[0]==="/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath;
 	};
 	
 	GitClonesExplorer.prototype.setDefaultPath = function(defaultPath){
@@ -216,9 +221,9 @@ exports.GitClonesRenderer = (function(){
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, "/git/images/repository.gif");
+				this.getExpandImage(tableRow, div, require.toUrl("git/images/repository.gif"));
 				
-				//link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage", href: "/navigate/table.html#" + item.ContentLocation+"?depth=1"}, div, "last");
+				//link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage", href: require.toUrl("navigate/table.html") + "#" + item.ContentLocation+"?depth=1"}, div, "last");
 				link = dojo.create("a", {className: "navlinkonpage"}, div, "last");
 				dojo.connect(link, "onclick", link, dojo.hitch(this, function() {
 					this.explorer.loadCloneDetails(item);	
@@ -235,7 +240,7 @@ exports.GitClonesRenderer = (function(){
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, item.Name==="Branches" ? "/git/images/branches.gif" : "/git/images/remotes.gif");
+				this.getExpandImage(tableRow, div, item.Name==="Branches" ? require.toUrl("git/images/branches.gif") : require.toUrl("git/images/remotes.gif"));
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
@@ -247,14 +252,14 @@ exports.GitClonesRenderer = (function(){
 				if (item.Current)
 					link.style.fontWeight = "bold";
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				dojo.create("img", {src: "/git/images/branch.gif", style: "vertical-align: middle; margin-right: 4px"}, link, "first");
+				dojo.create("img", {src: require.toUrl("git/images/branch.gif"), style: "vertical-align: middle; margin-right: 4px"}, link, "first");
 				
 			} else if (item.Type === "Remote"){
 				col = document.createElement('td');
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, "/git/images/remote.gif");
+				this.getExpandImage(tableRow, div, require.toUrl("git/images/remote.gif"));
 
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				if (!item.PushUrl || item.PushUrl === item.GitUrl) {
@@ -270,7 +275,7 @@ exports.GitClonesRenderer = (function(){
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 								
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				dojo.create("img", {src: "/git/images/branch.gif", style: "vertical-align: middle; margin-right: 4px"}, link, "first");
+				dojo.create("img", {src: require.toUrl("git/images/branch.gif"), style: "vertical-align: middle; margin-right: 4px"}, link, "first");
 			}	
 			return col;
 		case 1:

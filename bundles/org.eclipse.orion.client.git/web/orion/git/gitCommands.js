@@ -10,9 +10,9 @@
 
 /*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
-define(['dojo', 'orion/commands', 'orion/util',
+define(['require', 'dojo', 'orion/commands', 'orion/util',
         'orion/git/widgets/CloneGitRepositoryDialog', 'orion/git/widgets/InitGitRepositoryDialog', 'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 'orion/git/widgets/RemotePrompterDialog'], 
-        function(dojo, mCommands, mUtil) {
+        function(require, dojo, mCommands, mUtil) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -179,7 +179,7 @@ var exports = {};
 		// TODO: not used by the git clone navigator, could be removed
 		var linkRepoCommand = new mCommands.Command({
 			name: "Link Repository",
-			image: "/images/link.gif",
+			image: require.toUrl("images/link.gif"),
 			id: "eclipse.linkRepository",
 			callback: function(item) {
 				var dialog = new orion.widgets.NewItemDialog({
@@ -193,7 +193,7 @@ var exports = {};
 										function(jsonResp){
 											alert("Repository was linked to " + jsonResp.Name);
 											service.read(jsonResp.ContentLocation, true).then(function(jsonData){
-												window.location.replace("/navigate/table.html#"+jsonData.ChildrenLocation); //redirect to the workspace to see the linked resource
+												window.location.replace(require.toUrl("navigate/table.html")+"#"+jsonData.ChildrenLocation); //redirect to the workspace to see the linked resource
 											});
 										}
 									);
@@ -217,7 +217,7 @@ var exports = {};
 		
 		var checkoutBranchCommand = new mCommands.Command({
 			name: "Checkout",
-			image: "/git/images/checkout.gif",
+			image: require.toUrl("git/images/checkout.gif"),
 			id: "eclipse.checkoutBranch",
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(
@@ -253,7 +253,7 @@ var exports = {};
 		
 		var addBranchCommand = new mCommands.Command({
 			name: "New Branch",
-			image: "/images/add.gif",
+			image: require.toUrl("images/add.gif"),
 			id: "eclipse.addBranch",
 			callback: function(item, commandId, domId) {
 				exports.getNewItemName(item, explorer, false, domId, "Branch name", function(name){
@@ -278,7 +278,7 @@ var exports = {};
 		
 		var removeBranchCommand = new mCommands.Command({
 			name: "Remove", // "Remove Branch"
-			image: "/images/delete.gif",
+			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.removeBranch",
 			callback: function(item) {
 				if(confirm("Are you sure you want to remove branch " + item.Name+"?"))
@@ -300,7 +300,7 @@ var exports = {};
 		
 		var removeRemoteBranchCommand = new mCommands.Command({
 			name: "Remove", // "Remove Remote Branch",
-			image: "/images/delete.gif",
+			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.removeRemoteBranch",
 			callback: function(item) {
 				if(confirm("You're going to remove remote branch " + item.Name+" and push the change.\n\nAre you sure?"))
@@ -328,7 +328,7 @@ var exports = {};
 		
 		var addRemoteCommand = new mCommands.Command({
 			name: "New Remote",
-			image: "/images/add.gif",
+			image: require.toUrl("images/add.gif"),
 			id: "eclipse.addRemote",
 			callback : function(item) {
 				var dialog = new orion.git.widgets.AddRemoteDialog({
@@ -353,7 +353,7 @@ var exports = {};
 		
 		var removeRemoteCommand = new mCommands.Command({
 			name: "Remove", // "Remove Remote",
-			image: "/images/delete.gif",
+			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.removeRemote",
 			callback: function(item) {
 				if(confirm("Are you sure you want to remove remote " + item.Name+"?"))
@@ -378,8 +378,8 @@ var exports = {};
 			id : "eclipse.openGitLog",
 			hrefCallback : function(item) {
 				if (item.Type === "RemoteTrackingBranch")
-					return "/git/git-log.html#" + item.Location + "?page=1";
-				return "/git/git-log.html#" + item.CommitLocation + "?page=1";
+					return require.toUrl("git/git-log.html")+"#" + item.Location + "?page=1";
+				return require.toUrl("git/git-log.html")+"#" + item.CommitLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Branch" || item.Type === "RemoteTrackingBranch";
@@ -392,7 +392,7 @@ var exports = {};
 			name : "Open Git Log",
 			id : "eclipse.openGitLogAll",
 			hrefCallback : function(item) {
-				return "/git/git-log.html#" + item.CommitLocation + "?page=1";
+				return require.toUrl("git/git-log.html")+"#" + item.CommitLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
 				// show only for a repo
@@ -408,7 +408,7 @@ var exports = {};
 			name : "Open Git Status",
 			id : "eclipse.openGitStatus",
 			hrefCallback : function(item) {
-				return "/git/git-status.html#" + item.StatusLocation;
+				return require.toUrl("git/git-status.html")+"#" + item.StatusLocation;
 			},
 			visibleWhen : function(item) {
 				if (!item.StatusLocation)
@@ -423,7 +423,7 @@ var exports = {};
 			name : "Show in Navigator",
 			id : "eclipse.openCloneContent",
 			hrefCallback : function(item) {
-				return "/navigate/table.html#" + item.ContentLocation+"?depth=1";
+				return require.toUrl("navigate/table.html")+"#" + item.ContentLocation+"?depth=1";
 			},
 			visibleWhen : function(item) {
 				if (!item.ContentLocation)
@@ -436,7 +436,7 @@ var exports = {};
 		
 		var compareGitCommits = new mCommands.Command({
 			name : "Compare With Each Other",
-			image : "/git/images/open_compare.gif",
+			image : require.toUrl("git/images/open_compare.gif"),
 			id : "eclipse.compareGitCommits",
 			hrefCallback : function(item) {
 				var clientDeferred = new dojo.Deferred();
@@ -444,7 +444,7 @@ var exports = {};
 						function(service) {
 							service.getDiff(item[0].DiffLocation, item[1].Name,
 								function(jsonData, secondArg) {
-									clientDeferred.callback("/compare/compare.html?readonly#" + secondArg.xhr.getResponseHeader("Location"));
+									clientDeferred.callback(require.toUrl("compare/compare.html")+ "?readonly#" + secondArg.xhr.getResponseHeader("Location"));
 								});
 						});
 				return clientDeferred;
@@ -462,10 +462,10 @@ var exports = {};
 		
 		var compareWithWorkingTree = new mCommands.Command({
 			name : "Compare With Working Tree",
-			image : "/git/images/open_compare.gif",
+			image : require.toUrl("git/images/open_compare.gif"),
 			id : "eclipse.compareWithWorkingTree",
 			hrefCallback : function(item) {
-				return "/compare/compare.html#" + item.DiffLocation;
+				return require.toUrl("compare/compare.html")+"#" + item.DiffLocation;
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit" && !explorer.isDirectory;
@@ -478,7 +478,7 @@ var exports = {};
 			name : "Open",
 			id : "eclipse.openGitCommit",
 			hrefCallback: function(item) {
-				return "/edit/edit.html#" + item.ContentLocation;
+				return require.toUrl("edit/edit.html")+"#" + item.ContentLocation;
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit" && item.ContentLocation != null && !explorer.isDirectory;
@@ -489,7 +489,7 @@ var exports = {};
 		
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
-			image : "/git/images/fetch.gif",
+			image : require.toUrl("git/images/fetch.gif"),
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = item.Location;
@@ -635,7 +635,7 @@ var exports = {};
 		
 		var mergeCommand = new mCommands.Command({
 			name : "Merge",
-			image : "/git/images/merge.gif",
+			image : require.toUrl("git/images/merge.gif"),
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
@@ -657,7 +657,7 @@ var exports = {};
 								display.Severity = "Warning";
 								display.HTML = true;
 								display.Message = "<span>" + result.jsonData.Result
-									+ ". Go to <a href=\"/git/git-status.html#" 
+									+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
 									+ statusLocation +"\">Git Status page</a>.<span>";
 							} else if(result.error) {
 								display.Severity = "Error";
@@ -668,7 +668,7 @@ var exports = {};
 									display.Message = result.error.message;
 								}
 								display.HTML = true;
-								display.Message ="<span>" + display.Message + " Go to <a href=\"/git/git-status.html#" 
+								display.Message ="<span>" + display.Message + " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
 									+ statusLocation + "\">Git Status page</a>.<span>";
 							}
 								
@@ -683,7 +683,7 @@ var exports = {};
 							display.Severity = "Error";
 							display.HTML = true;
 							display.Message = "<span>" + dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage
-							+ ". Go to <a href=\"/git/git-status.html#" 
+							+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
 							+ statusLocation +"\">Git Status page</a>.<span>";
 							
 							progressService.setProgressResult(display);
@@ -722,7 +722,7 @@ var exports = {};
 									display.HTML = true;
 									display.Message = "<span>" + jsonData.Result
 										+ ". Some conflicts occurred. Please resolve them and continue, skip patch or abort rebasing."
-										+ " Go to <a href=\"/git/git-status.html#" 
+										+ " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
 										+ statusLocation +"\">Git Status page</a>.<span>";
 								}
 								else if (jsonData.Result == "FAILED_WRONG_REPOSITORY_STATE") {
@@ -730,7 +730,7 @@ var exports = {};
 									display.HTML = true;
 									display.Message = "<span>" + jsonData.Result
 										+ ". Repository state is invalid (i.e. already during rebasing)."
-										+ " Go to <a href=\"/git/git-status.html#" 
+										+ " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
 										+ statusLocation +"\">Git Status page</a>.<span>";
 								}
 								else if (jsonData.Result == "FAILED_UNMERGED_PATHS") {
@@ -738,7 +738,7 @@ var exports = {};
 									display.HTML = true;
 									display.Message = "<span>" + jsonData.Result
 										+ ". Repository contains unmerged paths."
-										+ " Go to <a href=\"/git/git-status.html#" 
+										+ " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
 										+ statusLocation +"\">Git Status page</a>.<span>";
 								}
 								else if (jsonData.Result == "FAILED_PENDING_CHANGES") {
@@ -746,7 +746,7 @@ var exports = {};
 									display.HTML = true;
 									display.Message = "<span>" + jsonData.Result
 										+ ". Repository contains pending changes. Please commit or stash them."
-										+ " Go to <a href=\"/git/git-status.html#" 
+										+ " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
 										+ statusLocation +"\">Git Status page</a>.<span>";
 								}
 								// handle other cases
@@ -754,7 +754,7 @@ var exports = {};
 									display.Severity = "Warning";
 									display.HTML = true;
 									display.Message = "<span>" + jsonData.Result
-										+ ". Go to <a href=\"/git/git-status.html#" 
+										+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
 										+ statusLocation +"\">Git Status page</a>.<span>";
 								} 
 								progressService.setProgressResult(display);
@@ -774,7 +774,7 @@ var exports = {};
 		
 		var pushCommand = new mCommands.Command({
 			name : "Push All",
-			image : "/git/images/push.gif",
+			image : require.toUrl("git/images/push.gif"),
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -852,7 +852,7 @@ var exports = {};
 		
 		var pushForceCommand = new mCommands.Command({
 			name : "Force Push All",
-			image : "/git/images/push.gif",
+			image : require.toUrl("git/images/push.gif"),
 			id : "eclipse.orion.git.pushForce",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -926,7 +926,7 @@ var exports = {};
 			name : "Switch to Remote",
 			id : "eclipse.orion.git.switchToRemote",
 			hrefCallback : function(item) {
-				return "/git/git-log.html#" + item.toRef.RemoteLocation[0].Children[0].Location + "?page=1";
+				return require.toUrl("git/git-log.html")+"#" + item.toRef.RemoteLocation[0].Children[0].Location + "?page=1";
 			},
 			visibleWhen : function(item) {
 				return item.toRef != null && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation && item.toRef.RemoteLocation.length===1 && item.toRef.RemoteLocation[0].Children.length===1;
@@ -965,7 +965,7 @@ var exports = {};
 							load : function(branches, secondArg) {
 								dojo.forEach(branches.Children, function(branch, i) {
 									if (branch.Current == true){
-										clientDeferred.callback("/git/git-log.html#" + branch.CommitLocation + "?page=1");
+										clientDeferred.callback(require.toUrl("git/git-log.html")+"#" + branch.CommitLocation + "?page=1");
 										return;
 									}
 								});
@@ -995,7 +995,7 @@ var exports = {};
 		
 		var pushToCommand = new mCommands.Command({
 			name : "Push to...",
-			image : "/git/images/push.gif",
+			image : require.toUrl("git/images/push.gif"),
 			id : "eclipse.orion.git.pushto",
 			callback: function(item) {
 				
@@ -1033,7 +1033,7 @@ var exports = {};
 		
 		var resetIndexCommand = new mCommands.Command({
 			name : "Reset Index",
-			image : "/git/images/refresh.gif",
+			image : require.toUrl("git/images/refresh.gif"),
 			id : "eclipse.orion.git.resetIndex",
 			callback: function(item) {
 				if(confirm("The content of your active branch will be replaced with " + item.Name + ". Are you sure?")){
@@ -1072,7 +1072,7 @@ var exports = {};
 		
 		var addTagCommand = new mCommands.Command({
 			name : "Tag",
-			image : "/git/images/tag.gif",
+			image : require.toUrl("git/images/tag.gif"),
 			id : "eclipse.orion.git.addTag",
 			
 			callback: function(item, commandId, domId) {
@@ -1207,14 +1207,14 @@ var exports = {};
 											display.Severity = "Warning";
 											display.HTML = true;
 											display.Message = "<span>" + jsonData.Result
-												+ ". Some conflicts occurred. Go to <a href=\"/git/git-status.html#" 
+												+ ". Some conflicts occurred. Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
 												+ statusLocation +"\">Git Status page</a>.<span>";
 										}
 										else if (jsonData.Result == "FAILED") {
 											display.Severity = "Error";
 											display.HTML = true;
 											display.Message = "<span>" + jsonData.Result
-											+ ". Go to <a href=\"/git/git-status.html#" 
+											+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
 											+ statusLocation +"\">Git Status page</a>.<span>";
 										}
 										// handle other cases
@@ -1243,7 +1243,7 @@ var exports = {};
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch latest commits",
 			tooltip : "Fetch latest commits",
-			image : "/git/images/fetch.gif",
+			image : require.toUrl("git/images/fetch.gif"),
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = item.Location;
@@ -1314,7 +1314,7 @@ var exports = {};
 		
 		var mergeCommand = new mCommands.Command({
 			name : "Merge into local",
-			image : "/git/images/merge.gif",
+			image : require.toUrl("git/images/merge.gif"),
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
@@ -1338,7 +1338,7 @@ var exports = {};
 								display.Severity = "Warning";
 								display.HTML = true;
 								display.Message = "<span>" + result.jsonData.Result
-									+ ". Go to <a href=\"/git/git-status.html#" 
+									+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
 									+ statusLocation +"\">Git Status page</a>.<span>";
 
 								progressService.setProgressResult(display);
@@ -1351,7 +1351,7 @@ var exports = {};
 									display.Message = result.error.message;
 								}
 								display.HTML = true;
-								display.Message ="<span>" + display.Message + " Go to <a href=\"/git/git-status.html#" 
+								display.Message ="<span>" + display.Message + " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
 									+ statusLocation + "\">Git Status page</a>.<span>";
 								
 								progressService.setProgressResult(display);
@@ -1366,7 +1366,7 @@ var exports = {};
 							display.Severity = "Error";
 							display.HTML = true;
 							display.Message = "<span>" + dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage
-							+ ". Go to <a href=\"/git/git-status.html#" 
+							+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
 							+ statusLocation +"\">Git Status page</a>.<span>";
 							
 							progressService.setProgressResult(display);
@@ -1384,7 +1384,7 @@ var exports = {};
 		
 		var pushCommand = new mCommands.Command({
 			name : "Push into remote",
-			image : "/git/images/push.gif",
+			image : require.toUrl("git/images/push.gif"),
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -1539,7 +1539,7 @@ var exports = {};
 		
 		var deleteCommand = new mCommands.Command({
 			name: "Remove", // "Remove Clone"
-			image: "/images/delete.gif",
+			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.git.deleteClone",
 			visibleWhen: function(item) {
 				var items = dojo.isArray(item) ? item : [item];

@@ -10,11 +10,11 @@
 
 /*global window define document dijit */
 /*browser:true*/
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands',
+define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands',
         'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/breadcrumbs', 'orion/ssh/sshTools', 'orion/git/git-commit-details', 'orion/git/git-commit-navigator', 'orion/git/gitCommands',
 	    'orion/links', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mAuth, mDialogs, mSelection, mFileClient,
+		function(require, dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mAuth, mDialogs, mSelection, mFileClient,
 					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitDetails, mGitCommitNavigator, mGitCommands, mLinks) {
 
 var serviceRegistry;
@@ -350,7 +350,7 @@ function makeHref(fileClient, seg, location, isRemote){
 						gitService.getDefaultRemoteBranch(
 								metadata.Git.RemoteLocation, function(
 										defaultRemoteBranchJsonData, secondArg) {
-									seg.href = "/git/git-log.html#"
+									seg.href = require.toUrl("git/git-log.html") + "#"
 											+ defaultRemoteBranchJsonData.Location
 											+ "?page=1";
 								});
@@ -358,7 +358,7 @@ function makeHref(fileClient, seg, location, isRemote){
 
 				} else {
 					if(metadata.Git)
-					seg.href = "/git/git-log.html#" + metadata.Git.CommitLocation
+					seg.href = require.toUrl("git/git-log.html") + "#" + metadata.Git.CommitLocation
 							+ "?page=1";
 				}
 			}),
@@ -378,7 +378,7 @@ function setPageTitle(branchName, cloneName, cloneLocation, isRemote, isBranch){
 		title += "for local branch <b>" + branchName + "</b>";
 	
 	if(cloneLocation){
-		title = title + " on <a href='/git/git-clone.html#" + cloneLocation + "'>" + cloneName + "</a>";
+		title = title + " on <a href='" + require.toUrl("git/git-clone.html") + "#" + cloneLocation + "'>" + cloneName + "</a>";
 	}
 	pageTitle.innerHTML = title;
 	if(branchName){

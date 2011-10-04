@@ -8,11 +8,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 'orion/selection',
+define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 'orion/selection',
 	        'orion/searchClient', 'orion/globalCommands', 'orion/profile/UsersList', 'orion/profile/usersUtil',
 	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/profile/widgets/NewUserDialog',
 	        'orion/profile/widgets/ResetPasswordDialog'], 
-			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSelection, mSearchClient, mGlobalCommands, mUsersList, mUsersUtil) {
+			function(require, dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSelection, mSearchClient, mGlobalCommands, mUsersList, mUsersUtil) {
 
 dojo.addOnLoad(function() {
 	document.body.style.visibility = "visible";
@@ -55,7 +55,7 @@ dojo.addOnLoad(function() {
 		
 	var deleteCommand = new mCommands.Command({
 		name: "Delete User",
-		image: "/images/delete.gif",
+		image: require.toUrl("images/delete.gif"),
 		id: "eclipse.deleteUser",
 		visibleWhen: function(item) {
 			var items = dojo.isArray(item) ? item : [item];

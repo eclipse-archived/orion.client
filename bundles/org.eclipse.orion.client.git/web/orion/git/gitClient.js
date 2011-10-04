@@ -12,7 +12,7 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(['dojo', 'orion/auth'], function(dojo, mAuth) {
+define(['require', 'dojo', 'orion/auth'], function(require, dojo, mAuth) {
 
 var eclipse = eclipse || {};
 
@@ -63,23 +63,27 @@ eclipse.GitService = (function() {
 			if(privateKey) postData.GitSshPrivateKey=privateKey;
 			if(passphrase) postData.GitSshPassphrase=passphrase;			
 			
-				return dojo.xhrPost({
-					url : "/gitapi/clone/",
-					headers : {
-						"Orion-Version" : "1"
-					},
-					postData : dojo.toJson(postData),
-					handleAs : "json",
-					timeout : 15000,
-					load : function(jsonData, secondArg) {
-						return jsonData;
-					},
-					error : function(error, ioArgs) {
-						mAuth.handleGetAuthenticationError(this, ioArgs);
-						console.error("HTTP status code: ", ioArgs.xhr.status);
-						return error;
-					}
-				});
+			//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
+			var gitapiCloneUrl = require.toUrl("gitapi/clone/._");
+			gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
+			
+			return dojo.xhrPost({
+				url : gitapiCloneUrl,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson(postData),
+				handleAs : "json",
+				timeout : 15000,
+				load : function(jsonData, secondArg) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					mAuth.handleGetAuthenticationError(this, ioArgs);
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return error;
+				}
+			});
 			
 		},
 		

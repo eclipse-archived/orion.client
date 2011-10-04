@@ -10,7 +10,7 @@
 
  /*global define window Image */
  
-define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator' ], function(dojo, dijit, mUtil){
+define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator' ], function(require, dojo, dijit, mUtil){
 
 
 	/**
@@ -562,7 +562,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
-			this.image = options.image || "/images/none.png";
+			this.image = options.image || require.toUrl("images/none.png");
 			this.visibleWhen = options.visibleWhen;
 			// when false, affordances for commands are always shown.  When true,
 			// they are shown on hover only.
@@ -607,12 +607,12 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 			}
 			if (!forceText && this.hasImage()) {
 				if (this._deviceSupportsHover) {
-					image.src = "/images/none.png";
+					image.src = require.toUrl("images/none.png");
 					dojo.connect(image, "onmouseover", this, function() {
 						image.src = this.image;
 					});
 					dojo.connect(image, "onmouseout", this, function() {
-						image.src = "/images/none.png";
+						image.src = require.toUrl("images/none.png");
 					});	
 				} else {
 					image.src = this.image;	
@@ -778,7 +778,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton'
 		 * externally.
 		 */
 		hasImage: function() {
-			return this.image !== "/images/none.png";
+			return this.image !== require.toUrl("images/none.png");
 		}
 	};  // end Command prototype
 	Command.prototype.constructor = Command;

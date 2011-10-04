@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['dojo', 'orion/explorer', 'orion/profile/usersUtil'], function(dojo, mExplorer, mUsersUtil) {
+define(['require', 'dojo', 'orion/explorer', 'orion/profile/usersUtil'], function(require, dojo, mExplorer, mUsersUtil) {
 
 
 var eclipse = eclipse || {};
@@ -93,7 +93,7 @@ eclipse.UsersRenderer = (function() {
 
 			col = document.createElement('td');
 			div = dojo.create("div", {style: "padding-left: 5px; padding-right: 5px; ; padding-top: 5px; padding-bottom: 5px"}, col, "only");
-			link = dojo.create("a", {className: "navlinkonpage", href: "/profile/user-profile.html#" + item.Location}, div, "last");
+			link = dojo.create("a", {className: "navlinkonpage", href: require.toUrl("profile/user-profile.html") +"#" + item.Location}, div, "last");
 			dojo.place(document.createTextNode(item.login), link, "only");			
 			return col;
 			break;
@@ -172,7 +172,7 @@ eclipse._UsersList = (function() {
 						var actions = dojo.create("span",{id: "usersActions"+i, style: "visibility: hidden"}, actionsTd);
 						var deleteAction = dojo.create("img", {
 							id: "deleteAction"+i,
-							src : "/images/delete.gif",
+							src : require.toUrl("images/delete.gif"),
 							alt : "Delete",
 							title : "Delete user " + jsonData.users[i].login,
 							className: "commandImage"
@@ -202,7 +202,7 @@ eclipse._UsersList = (function() {
 
 		},
 		getUserTab : function(userName, userLocation) {
-			return tab = "<a class=\"navlinkonpage\" href=\"/profile/user-profile.html#" + userLocation
+			return tab = "<a class=\"navlinkonpage\" href=\"" + require.toUrl("profile/user-profile.html") + "#" + userLocation
 					+ "\">" + userName + "</a>";
 		},
 		reloadUsers : function() {

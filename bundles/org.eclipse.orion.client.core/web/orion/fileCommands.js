@@ -11,7 +11,7 @@
 /*global window define orion */
 /*browser:true*/
 
-define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'], function(dojo, mUtil, mCommands){
+define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'], function(require, dojo, mUtil, mCommands){
 
 	/**
 	 * Utility methods
@@ -218,7 +218,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 				for (i=0; i<favorites.length; i++) {
 					var stripped = stripPath(favorites[i].path);
 					if (!contains(sourceLocations, stripped)) {
-						choices.push({name: favorites[i].name, image: "/images/makeFavorite.gif", path: stripped, callback: callback});
+						choices.push({name: favorites[i].name, image: require.toUrl("images/makeFavorite.gif"), path: stripped, callback: callback});
 					}
 				}
 			}
@@ -279,7 +279,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var favoriteCommand = new mCommands.Command({
 			name: "Make Favorite",
 			tooltip: "Add a file or folder to the favorites list",
-			image: "/images/makeFavorite.gif",
+			image: require.toUrl("images/makeFavorite.gif"),
 			id: "eclipse.makeFavorite",
 			visibleWhen: function(item) {
 				var items = dojo.isArray(item) ? item : [item];
@@ -299,7 +299,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var renameCommand = new mCommands.Command({
 				name: "Rename",
 				tooltip: "Rename the selected files or folders",
-				image: "/images/rename.gif",
+				image: require.toUrl("images/rename.gif"),
 				id: "eclipse.renameResource",
 				visibleWhen: function(item) {
 					item = forceSingleItem(item);
@@ -327,7 +327,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var deleteCommand = new mCommands.Command({
 			name: "Delete",
 			tooltip: "Delete the selected files or folders",
-			image: "/images/delete.gif",
+			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.deleteFile",
 			visibleWhen: oneOrMoreFilesOrFolders,
 			callback: function(item) {
@@ -371,7 +371,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var downloadCommand = new mCommands.Command({
 			name: "Export as zip",
 			tooltip: "Create a zip file of the folder contents and download it",
-			image: "/images/exportzip.gif",
+			image: require.toUrl("images/exportzip.gif"),
 			id: "eclipse.downloadFile",
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -415,7 +415,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var newFileCommand =  new mCommands.Command({
 			name: "New File",
 			tooltip: "Create a new file",
-			image: "/images/new_file.gif",
+			image: require.toUrl("images/new_file.gif"),
 			id: "eclipse.newFile",
 			callback: function(item, commandId, domId) {
 				item = forceSingleItem(item);
@@ -441,7 +441,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var newFolderCommand = new mCommands.Command({
 			name: "New Folder",
 			tooltip: "Create a new folder",
-			image: "/images/new_folder.gif",
+			image: require.toUrl("images/new_folder.gif"),
 			id: "eclipse.newFolder",
 			callback: function(item, commandId, domId) {
 				item = forceSingleItem(item);
@@ -467,7 +467,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var newProjectCommand = new mCommands.Command({
 			name: "New Folder",
 			tooltip: "Create a new folder",
-			image: "/images/new_folder.gif",
+			image: require.toUrl("images/new_folder.gif"),
 			id: "eclipse.newProject",
 			callback: function(item, commandId, domId) {
 				getNewItemName(item, domId, "New Folder", function(name) {
@@ -486,7 +486,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var linkProjectCommand = new mCommands.Command({
 			name: "Link Folder",
 			tooltip: "Create a folder that links to an existing folder on the server",
-			image: "/images/link.gif",
+			image: require.toUrl("images/link.gif"),
 			id: "eclipse.linkProject",
 			callback: function(item) {
 				var dialog = new orion.widgets.NewItemDialog({
@@ -509,7 +509,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var importCommand = new mCommands.Command({
 			name : "Import from zip...",
 			tooltip: "Copy files and folders contained in a local zip file",
-			image : "/images/importzip.gif",
+			image : require.toUrl("images/importzip.gif"),
 			id: "eclipse.importCommand",
 			callback : function(item) {
 				item = forceSingleItem(item);
@@ -529,7 +529,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var importSFTPCommand = new mCommands.Command({
 			name : "SFTP from...",
 			tooltip: "Copy files and folders from a specified SFTP connection",
-			image : "/images/transferin.gif",
+			image : require.toUrl("images/transferin.gif"),
 			id: "eclipse.importSFTPCommand",
 			callback : function(item) {
 				item = forceSingleItem(item);
@@ -556,7 +556,7 @@ define(["dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "
 		var exportSFTPCommand = new mCommands.Command({
 			name : "SFTP to...",
 			tooltip: "Copy files and folders to a specified SFTP location",
-			image : "/images/transferout.gif",
+			image : require.toUrl("images/transferout.gif"),
 			id: "eclipse.exportSFTPCommand",
 			callback : function(item) {
 				item = forceSingleItem(item);

@@ -11,7 +11,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands){
+define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, dojo, mUtil, mCommands){
 
 	/**
 	 * Instantiates the favorites service. Clients should obtain the 
@@ -196,7 +196,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 		var addFaveURLCommand = new mCommands.Command({
 			name: "Add Favorite",
 			tooltip: "Add link as favorite",
-			image: "/images/add.gif",
+			image: require.toUrl("images/add.gif"),
 			id: "eclipse.addExternalFave",
 			callback: dojo.hitch(this, function(item, commandId, domId) {
 				this.getUserURL(domId);
@@ -204,7 +204,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 		});		
 		var deleteFaveCommand = new mCommands.Command({
 			name: "Delete",
-			image: "/images/delete.gif",
+			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.deleteFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: function(item) {
@@ -217,7 +217,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 		});		
 		var renameFaveCommand = new mCommands.Command({
 			name: "Rename",
-			image: "/images/rename.gif",
+			image: require.toUrl("images/rename.gif"),
 			id: "eclipse.renameFave",
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: dojo.hitch(this, function(item, commandId, domId, faveIndex) {
@@ -226,7 +226,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 		});
 		var deleteSearchCommand = new mCommands.Command({
 			name: "Delete",
-			image: "/images/delete.gif",
+			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.deleteSearch",
 			visibleWhen: function(item) {return item.isSearch;},
 			callback: function(item) {
@@ -326,7 +326,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 				if (fave.isExternalResource) {
 					href = fave.path;
 				} else {
-					href = fave.directory ? "/navigate/table.html#" + fave.path : "/edit/edit.html#" + fave.path;
+					href = fave.directory ? require.toUrl("navigate/table.html") + "#" + fave.path : require.toUrl("edit/edit.html") + "#" + fave.path;
 					if (href==="#") {
 						href="";
 					}
@@ -386,7 +386,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 				tbody = dojo.create("tbody", null, faveTable);
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
-					href="/search/search.html#" + search.query;
+					href=require.toUrl("search/search.html") + "#" + search.query;
 					tr = dojo.create("tr");
 					tr.id = "searchRow"+i;
 					col1 = dojo.create("td", null, tr, "last");

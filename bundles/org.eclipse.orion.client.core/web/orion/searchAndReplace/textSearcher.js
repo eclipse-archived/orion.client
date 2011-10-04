@@ -280,7 +280,7 @@ orion.TextSearcher = (function() {
 			var that = this;
 			var findNextCommand = new mCommands.Command({
 				name : "Find Next",
-				image : "/images/move_down.gif",
+				image : require.toUrl("images/move_down.gif"),
 				id : "orion.search.findNext",
 				groupId : "orion.searchGroup",
 				callback : function() {
@@ -290,7 +290,7 @@ orion.TextSearcher = (function() {
 
 			var findPrevCommand = new mCommands.Command({
 				name : "Find Previous",
-				image : "/images/move_up.gif",
+				image : require.toUrl("images/move_up.gif"),
 				id : "orion.search.findPrev",
 				groupId : "orion.searchGroup",
 				callback : function() {
@@ -300,7 +300,7 @@ orion.TextSearcher = (function() {
 
 			var replaceCommand = new mCommands.Command({
 				name : "Replace",
-				image : "/images/replace.gif",
+				image : require.toUrl("images/replace.gif"),
 				id : "orion.search.replace",
 				groupId : "orion.searchGroup",
 				callback : function() {
@@ -310,7 +310,7 @@ orion.TextSearcher = (function() {
 
 			var replaceAllCommand = new mCommands.Command({
 				name : "Replace All",
-				image : "/images/replaceAll.gif",
+				image : require.toUrl("images/replaceAll.gif"),
 				id : "orion.search.replaceAll",
 				groupId : "orion.searchGroup",
 				callback : function() {
@@ -320,7 +320,7 @@ orion.TextSearcher = (function() {
 
 			var closeUICommand = new mCommands.Command({
 				name : "Close",
-				image : "/images/delete.gif",
+				image : require.toUrl("images/delete.gif"),
 				id : "orion.search.closeUI",
 				groupId : "orion.searchGroup",
 				callback : function() {

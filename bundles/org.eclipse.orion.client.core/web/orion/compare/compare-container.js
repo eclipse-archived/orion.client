@@ -9,10 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/editor/contentAssist',
+define(['require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-model', 'orion/compare/compare-m-model', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands',
         'orion/textview/textModel','orion/textview/textView','examples/textview/textStyler' , 'orion/compare/compareUtils'], 
-		function(dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
+		function(require, dojo, mDiffParser, mRulers, mCompareModel, mCompareMergeModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
 				mGapModel , mCommands, mTextModel, mTextView, mTextStyler , mCompareUtils) {
 
 var exports = {};
@@ -185,11 +185,11 @@ exports.DiffStyler = (function() {
 			//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349227 : we were using border style as the line below.Changing to back ground color and image.
 			//lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: "1px #AAAAAA solid" , borderLeft: borderStyle , borderRight: borderStyle}};
 			var backgroundColor = conflict ? "#EEB4B4" : "#DDDDDD";
-			var backgroundImg = "url('/images/diff-border.png')";
+			var backgroundImg = "url('" + require.toUrl("images/diff-border.png") + "')";
 			
 			if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex()){
 				backgroundColor = conflict ? "#F08080" : "#BBBBBB";
-				backgroundImg = "url('/images/diff-border-sel.png')";
+				backgroundImg = "url('" + require.toUrl("images/diff-border-sel.png") + "')";
 			}
 			if(lineType === "top-only") {
 				lineStyleEvent.style = {style: {backgroundImage: backgroundImg, backgroundRepeat:"repeat-x"}};
@@ -320,7 +320,7 @@ exports.CompareMergeContainer = (function() {
 		var self = this;
 		var nextDiffCommand = new mCommands.Command({
 			name : "Next Diff",
-			image : "/images/move_down.gif",
+			image : require.toUrl("images/move_down.gif"),
 			id: "orion.compare.nextDiff",
 			groupId: "orion.compareGroup",
 			callback : function() {
@@ -328,7 +328,7 @@ exports.CompareMergeContainer = (function() {
 		}});
 		var prevDiffCommand = new mCommands.Command({
 			name : "Previous Diff",
-			image : "/images/move_up.gif",
+			image : require.toUrl("images/move_up.gif"),
 			id: "orion.compare.prevDiff",
 			groupId: "orion.compareGroup",
 			callback : function() {
@@ -336,7 +336,7 @@ exports.CompareMergeContainer = (function() {
 		}});
 		var copyToLeftCommand = new mCommands.Command({
 			name : "Copy Current Change From Right to left",
-			image : "/images/leftarrow.gif",
+			image : require.toUrl("images/leftarrow.gif"),
 			id: "orion.compare.copyToLeft",
 			groupId: "orion.compareGroup",
 			callback : function() {
@@ -378,7 +378,7 @@ exports.CompareMergeContainer = (function() {
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: readOnly,
-				stylesheet: "/orion/compare/editor.css" ,
+				stylesheet: require.toUrl("orion/compare/editor.css") ,
 				tabSize: 4
 			});
 		};
@@ -550,7 +550,7 @@ exports.InlineCompareContainer = (function() {
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: true,
-				stylesheet: "/orion/compare/editor.css" ,
+				stylesheet: require.toUrl("orion/compare/editor.css") ,
 				tabSize: 4
 			});
 		};

@@ -35,7 +35,8 @@ function log (text) {
 	}
 }
  
- define(["orion/textview/keyBinding",
+ define(["require", 
+         "orion/textview/keyBinding",
 		"orion/textview/textModel",
 		"orion/textview/projectionTextModel", 
 		"orion/textview/annotations", 
@@ -49,7 +50,7 @@ function log (text) {
 		"tests/textview/test-annotationModel",
 		"tests/textview/test-projectionModel"],   
  
-function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextView, mRulers, mUndoStack, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextView, mRulers, mUndoStack, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 	var view = null;
 	var styler = null;
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
@@ -76,10 +77,10 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 	function checkView() {
 		if (view) { return; }
 		var stylesheets = [
-			"/orion/textview/textview.css",
-			"/orion/textview/rulers.css",
-			"/examples/textview/textstyler.css",
-			"/examples/editor/htmlStyles.css"
+			require.toUrl("orion/textview/textview.css"),
+			require.toUrl("orion/textview/rulers.css"),
+			require.toUrl("examples/textview/textstyler.css"),
+			require.toUrl("examples/editor/htmlStyles.css")
 		];
 		var fullSelection = window.document.getElementById('fullSelection').checked;
 		var tabSize = parseInt(window.document.getElementById('tabSize').value, 10);
@@ -163,7 +164,7 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 		annotationRuler.addAnnotationType(errorType);
 		annotationRuler.addAnnotationType(warningType);
 		annotationRuler.addAnnotationType(taskType);
-		annotationRuler.setMultiAnnotation({rulerHTML: "<img src='images/multiple.gif'/>"});
+		annotationRuler.setMultiAnnotation({rulerHTML: "<img src='" + require.toUrl("./images/multiple.gif") + "'/>"});
 		annotationRuler.onDblClick =  function(lineIndex, e) {
 			if (lineIndex === undefined) { return; }
 			var model = this._view.getModel();
@@ -279,7 +280,7 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 	
 	function createJavaScriptSample() {
 		checkView();
-		var file =  getFile("/orion/textview/textView.js");
+		var file =  getFile(require.toUrl("orion/textview/textView.js"));
 		if (styler) {
 			styler.destroy();
 			styler = null;
@@ -290,7 +291,7 @@ function(mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextV
 
 	function createHtmlSample() {
 		checkView();
-		var file =  getFile("/examples/textview/demo.html");
+		var file =  getFile(require.toUrl("examples/textview/demo.html"));
 		if (styler) {
 			styler.destroy();
 			styler = null;

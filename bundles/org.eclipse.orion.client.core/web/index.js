@@ -11,9 +11,9 @@
 /*jslint browser:true devel:true*/
 /*global define*/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/commands', 'orion/searchClient', 'orion/status', 'orion/globalCommands',
+define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/commands', 'orion/searchClient', 'orion/status', 'orion/globalCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'/*, 'dojox/widget/Portlet', 'dojox/widget/FeedPortlet'*/], 
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mCommands, mSearchClient, mStatus, mGlobalCommands) {
+		function(require, dojo, mServiceregistry, mPreferences, mPluginRegistry, mCommands, mSearchClient, mStatus, mGlobalCommands) {
 
 dojo.addOnLoad(function() {
 
@@ -51,11 +51,11 @@ dojo.addOnLoad(function() {
 				if (projects && projects.length && projects.length > 0) {
 					for (var i=projects.length-1; i>=0; i--) {
 						if (projects[i].location && projects[i].name) {
-							dojo.place("<a class='landingLink' href='/navigate/table.html#"+projects[i].location+"'>"+projects[i].name+"</a><br>", recent, "last");
+							dojo.place("<a class='landingLink' href='" + require.toUrl("navigate/table.html") + "#" + projects[i].location+"'>"+projects[i].name+"</a><br>", recent, "last");
 						}
 					}
 				} else {
-					dojo.place("<div>Go to the <a href='/navigate/table.html#'>Navigator</a> to create or view your projects.</div>", recent, "only");
+					dojo.place("<div>Go to the <a href='" + require.toUrl("navigate/table.html") + "#'>Navigator</a> to create or view your projects.</div>", recent, "only");
 				}
 			});
 		
