@@ -11,30 +11,44 @@
 /*global define console*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands'], function(dojo, mExplorer, mUtil, mFileClient, mCommands) {
+define(['dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands'], function(dojo, dijit, mExplorer, mUtil, mFileClient, mCommands) {
 
 	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, searchStr, explorer) {
 		this.registry= serviceRegistry;
 		this.fileClient = fileClient; 
 		this._resultLocation = resultLocation;
 		this.searchStr = searchStr.toLowerCase();
-		this.root = {
+		this.useFlatList = false;
+		
+		this._treeRoot = {
 				isRoot: true,
 				children:[]
-			};
+		};
+		this._listRoot = {
+				isRoot: true,
+				children:[]
+		};
 		
 		this.currentDetail = null;
 		this.indexedFileItems = null;
 		this.modelLocHash = [];
 		this.currentFileIndex = 0;
-		this.currentDetailIndex = -1;
+		this.currentDetailIndex = 0;
 		this._lineDelimiter = "\n"; 
 		this.explorer = explorer;
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
 	
+	SearchResultModel.prototype.getRealRoot = function(){
+		if(this.useFlatList){
+			return this._listRoot;
+		} else {
+			return this._treeRoot;
+		}
+	};
+	
 	SearchResultModel.prototype.getRoot = function(onItem){
-		onItem(this.root);
+		onItem(this.getRealRoot());
 	};
 	
 	SearchResultModel.prototype.markUpSharedParent = function(parentMetaData, directChildLocation){
@@ -135,7 +149,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 				parent = existingParent.parent;
 				parentIndex = existingParent.index;
 			} else {
-				parent = this.root;
+				parent = this.getRealRoot();
 				parentIndex = parents.length;
 			}
 			
@@ -185,7 +199,10 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 
 	SearchResultModel.prototype.prepareFileItems = function(currentNode){
 		this.indexedFileItems = [];
-		this.walkTreeNode(this.root);
+		this.walkTreeNode(this._treeRoot);
+		for(var i = 0; i < this.indexedFileItems.length; i++){
+			this._listRoot.children.push(this.indexedFileItems[i]);
+		}
 	};
 	
 	SearchResultModel.prototype.getFileItemIndex = function(fileItem){
@@ -226,7 +243,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 	
 	SearchResultModel.prototype.getId = function(item){
 		var result;
-		if (item === this.root) {
+		if (item === this.getRealRoot()) {
 			result = this.rootId;
 		} else {
 			result = item.location;
@@ -437,7 +454,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 			id: "orion.search.nextResult",
 			groupId: "orion.searchGroup",
 			callback : function() {
-				that.gotoNext(true);
+				that.gotoNext(true, true);
 		}});
 		var prevResultCommand = new mCommands.Command({
 			name : "Previous result",
@@ -445,7 +462,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 			id: "orion.search.prevResult",
 			groupId: "orion.searchGroup",
 			callback : function() {
-				that.gotoNext(false);
+				that.gotoNext(false, true);
 		}});
 		var expandAllCommand = new mCommands.Command({
 			name : "Expand all results",
@@ -475,18 +492,50 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		this._commandService.registerCommandContribution("orion.search.collapseAll", 4, "pageActionsRight");
 		dojo.empty("pageActionsRight");
 		this._commandService.renderCommands("pageActionsRight", "dom", that, that, "image");
+		
+		var optionMenu = dijit.byId("globalSearchOptMenu");
+		if (optionMenu) {
+			optionMenu.destroy();
+		}
+		var newMenu = new dijit.Menu({
+			style : "display: none;",
+			id : "globalSearchOptMenu"
+		});
+		
+		newMenu.addChild(new dijit.CheckedMenuItem({
+			label: "Show as List",
+			checked: false,
+			onChange : function(checked) {
+				that.switchTo(checked);
+			}
+		}));
+		var menuButton = new dijit.form.DropDownButton({
+			label : "Options",
+			dropDown : newMenu
+		});
+		dojo.addClass(menuButton.domNode, "commandImage");
+		dojo.place(menuButton.domNode, "pageActionsRight", "last");
+		
+		
 	};
 	
 	SearchResultExplorer.prototype.startUp = function() {
 		var that = this;
 		this.model.loadOneFileMetaData(0, function(onComplete){
 			that.createTree(that.parentNode, that.model);
-			that.gotoNext(true);
+			that.gotoCurrent();
 		});
 	};
 	
+	SearchResultExplorer.prototype.switchTo = function(flatList) {
+		this.model.useFlatList = flatList;
+		this.createTree(this.parentNode, this.model);
+		//this.myTree.refresh(this.model.getRealRoot());
+		this.gotoCurrent();
+	};
+	
 	SearchResultExplorer.prototype.expandAll = function() {
-		var root = this.model.root;
+		var root = this.model.getRealRoot();
 		if(root.isRoot){
 			for (var i = 0; i < root.children.length ; i++){
 				this.expandRecursively(root.children[i]);
@@ -494,10 +543,11 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		} else {
 			this.expandRecursively(root);
 		}
+		this.gotoCurrent();
 	};
 	
 	SearchResultExplorer.prototype.collapseAll = function() {
-		var root = this.model.root;
+		var root = this.model.getRealRoot();
 		if(root.isRoot){
 			for (var i = 0; i < root.children.length ; i++){
 				this.myTree.collapse(root.children[i]);
@@ -534,7 +584,11 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		this.findUIParentChain(targetNode.parent, parentChain);
 	};
 	
-	SearchResultExplorer.prototype._decideNext = function(next){
+	SearchResultExplorer.prototype._decideNext = function(next, calculateNext){
+		if(!calculateNext){
+			return {newFileIndex:this.model.currentFileIndex, newDetailIndex:this.model.currentDetailIndex};
+		}
+		
 		var filItem = this.model.indexedFileItems[this.model.currentFileIndex];
 		if(filItem.children && filItem.children.length > 0){
 			if(this.model.currentDetailIndex < -1) {
@@ -589,12 +643,16 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/fileClient', 'orion/comma
 		return false;
 	};
 		
-	SearchResultExplorer.prototype.gotoNext = function(next)	{
+	SearchResultExplorer.prototype.gotoCurrent = function()	{
+		this.gotoNext(true, false);
+	};
+	
+	SearchResultExplorer.prototype.gotoNext = function(next, calculateNext)	{
 		var curentExpanded = this.model._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex); 
 		if(curentExpanded.childDiv /*&& this.model.currentDetailIndex > -1*/) {
 			dojo.toggleClass(curentExpanded.childDiv, "currentSearchMatch", false);
 		}
-		var nextItem = this._decideNext(next);
+		var nextItem = this._decideNext(next, calculateNext);
 		this.model.highlightSelectionLater = true;
 		this.model.lastNavDirection = next;
 		if(nextItem){
