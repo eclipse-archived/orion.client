@@ -9,9 +9,9 @@
  ******************************************************************************/
 /*global dojo dijit window eclipse:true*/
 
-define(['dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
+define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
 	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Form'], 
-			function(dojo, dijit, mCommands ,mAuth, mBreadcrumbs) {
+			function(require, dojo, dijit, mCommands ,mAuth, mBreadcrumbs) {
 
 	/**
 	 * Used when a value should be displayed as Date but is returned as long.
@@ -93,9 +93,12 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
 			else{
 						
 				// TODO if no hash provided current user profile should be loaded - need a better way to find logged user URI
-						
+				//NOTE: require.toURL needs special logic here to handle "login"
+				var loginUrl = require.toUrl("login._");
+				loginUrl = loginUrl.substring(0,loginUrl.length-2);
+				
 				dojo.xhrPost({
-					url : "/login",
+					url : require.toUrl("login"),
 					headers : {
 						"Orion-Version" : "1"
 					},

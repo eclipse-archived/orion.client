@@ -8,8 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['dojo', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/commands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'dijit/layout/ContentPane'], function(
-		dojo, mDiffProvider, mCompareContainer, mCommands, mGitCommitNavigator, mGitCommands) {
+define(['require', 'dojo', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/commands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'dijit/layout/ContentPane'], function(
+		require, dojo, mDiffProvider, mCompareContainer, mCommands, mGitCommitNavigator, mGitCommands) {
 
 	var orion = orion || {};
 
@@ -115,13 +115,13 @@ orion.GitStatusModel = (function() {
 	return GitStatusModel;
 }());
 
-orion.statusTypeMap = { "Missing":["/git/images/removal.gif", "Unstaged removal" , "/git/images/stage.gif", "Stage" ],
-						"Removed":["/git/images/removal.gif","Staged removal" ,"/git/images/unstage.gif", "Unstage" ],	
-						 "Modified":["/git/images/modification.gif","Unstaged change" ,"/git/images/stage.gif", "Stage" ],	
-						 "Changed":["/git/images/modification.gif","Staged change" ,"/git/images/unstage.gif", "Unstage"],	
-					     "Untracked":["/git/images/addition.gif","Unstaged add" ,"/git/images/stage.gif", "Stage"],	
-						 "Added":["/git/images/addition.gif","Staged add" ,"/git/images/unstage.gif" , "Unstage"],	
-						 "Conflicting":["/git/images/conflict-file.gif","Conflicting" ,"/git/images/stage.gif" , "Resolve Conflict"]	
+orion.statusTypeMap = { "Missing":[require.toUrl("git/images/removal.gif"), "Unstaged removal" , require.toUrl("git/images/stage.gif"), "Stage" ],
+						"Removed":[require.toUrl("git/images/removal.gif"),"Staged removal" ,require.toUrl("git/images/unstage.gif"), "Unstage" ],	
+						 "Modified":[require.toUrl("git/images/modification.gif"),"Unstaged change" ,require.toUrl("git/images/stage.gif"), "Stage" ],	
+						 "Changed":[require.toUrl("git/images/modification.gif"),"Staged change" ,require.toUrl("git/images/unstage.gif"), "Unstage"],	
+					     "Untracked":[require.toUrl("git/images/addition.gif"),"Unstaged add" ,require.toUrl("git/images/stage.gif"), "Stage"],	
+						 "Added":[require.toUrl("git/images/addition.gif"),"Staged add" ,require.toUrl("git/images/unstage.gif") , "Unstage"],	
+						 "Conflicting":[require.toUrl("git/images/conflict-file.gif"),"Conflicting" ,require.toUrl("git/images/stage.gif") , "Resolve Conflict"]	
 					  };
 
 
@@ -766,7 +766,7 @@ orion.GitStatusController = (function() {
 				name : "Complete log",
 				id : "orion.openGitLog",
 				hrefCallback : function(item) {
-					return "/git/git-log.html#" + (that._curBranch ? that._curBranch.CommitLocation : that._model.items.CommitLocation) + "?page=1";
+					return require.toUrl("git/git-log.html") +"#" + (that._curBranch ? that._curBranch.CommitLocation : that._model.items.CommitLocation) + "?page=1";
 				},
 				visibleWhen : function(item) {
 					return item.type === "gitLog";
@@ -777,7 +777,7 @@ orion.GitStatusController = (function() {
 				name : "Complete log",
 				id : "orion.openGitRemote",
 				hrefCallback : function(item) {
-					return "/git/git-log.html#" + that._curBranch.RemoteLocation[0].Children[0].Location + "?page=1";
+					return require.toUrl("git/git-log.html") +"#" + that._curBranch.RemoteLocation[0].Children[0].Location + "?page=1";
 				},
 				visibleWhen : function(item) {
 					return (item.type === "gitRemote" && that._curBranch && that._curBranch.RemoteLocation.length===1 && that._curBranch.RemoteLocation[0].Children.length===1);
@@ -1017,7 +1017,7 @@ orion.GitStatusController = (function() {
 			var sbsCompareCommand = new mCommands.Command({
 				name: "Side by side compare",
 				tooltip: "Side by side compare",
-				image: "/git/images/open_compare.gif",
+				image: require.toUrl("git/images/open_compare.gif"),
 				id: "orion.sbsCompare",
 				hrefCallback: function(item) {
 					return self.openCompareEditor(item.object);
@@ -1052,7 +1052,7 @@ orion.GitStatusController = (function() {
 			var checkoutCommand = new mCommands.Command({
 				name: "checkout",
 				tooltip: "checkout",
-				image: "/git/images/checkout.gif",
+				image: require.toUrl("git/images/checkout.gif"),
 				id: "orion.gitCheckout",
 				callback: function(item) {
 					self._registry.getService("orion.page.dialog").then(function(service) {
@@ -1074,7 +1074,7 @@ orion.GitStatusController = (function() {
 			var stageCommand = new mCommands.Command({
 				name: "stage",
 				tooltip: "Stage",
-				image: "/git/images/stage.gif",
+				image: require.toUrl("git/images/stage.gif"),
 				id: "orion.gitStage",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Staging...");
@@ -1089,7 +1089,7 @@ orion.GitStatusController = (function() {
 			var stageAllCommand = new mCommands.Command({
 				name: "stage selected",
 				tooltip: "Stage Selected",
-				image: "/git/images/stage_all.gif",
+				image: require.toUrl("git/images/stage_all.gif"),
 				id: "orion.gitStageAll",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Staging...");
@@ -1103,7 +1103,7 @@ orion.GitStatusController = (function() {
 			var unstageCommand = new mCommands.Command({
 				name: "unstage",
 				tooltip: "Unstage",
-				image: "/git/images/unstage.gif",
+				image: require.toUrl("git/images/unstage.gif"),
 				id: "orion.gitUnstage",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Unstaging...");
@@ -1117,7 +1117,7 @@ orion.GitStatusController = (function() {
 			var unstageAllCommand = new mCommands.Command({
 				name: "unstageAll",
 				tooltip: "Unstage all",
-				image: "/git/images/unstage_all.gif",
+				image: require.toUrl("git/images/unstage_all.gif"),
 				id: "orion.gitUnstageAll",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Unstaging...");
@@ -1131,7 +1131,7 @@ orion.GitStatusController = (function() {
 			var resetChangesCommand = new mCommands.Command({
 				name: "Reset",
 				tooltip: "Reset all changes",
-				image: "/git/images/refresh.gif",
+				image: require.toUrl("git/images/refresh.gif"),
 				id: "orion.gitResetChanges",
 				callback: function(item) {
 					self._registry.getService("orion.page.dialog").then(function(service) {
@@ -1226,7 +1226,7 @@ orion.GitStatusController = (function() {
 			var that = this;
 			var nextDiffCommand = new mCommands.Command({
 				name : "Next Diff",
-				image : "/images/move_down.gif",
+				image : require.toUrl("images/move_down.gif"),
 				id: "orion.compare.nextDiff",
 				groupId: "orion.compareGroup",
 				/*
@@ -1239,7 +1239,7 @@ orion.GitStatusController = (function() {
 			}});
 			var prevDiffCommand = new mCommands.Command({
 				name : "Previous Diff",
-				image : "/images/move_up.gif",
+				image : require.toUrl("images/move_up.gif"),
 				id: "orion.compare.prevDiff",
 				groupId: "orion.compareGroup",
 				
@@ -1417,7 +1417,7 @@ orion.GitStatusController = (function() {
 		
 		openCompareEditor: function(itemModel){
 			var diffParam = "";
-			var baseUrl = "/compare/compare.html#";
+			var baseUrl = require.toUrl("compare/compare.html") +"#";
 			var paramLength = 0;
 			if(this._model.isStaged(itemModel.type)){
 				diffParam = "readonly";
@@ -1431,7 +1431,7 @@ orion.GitStatusController = (function() {
 				paramLength++;	
 			}
 			if(paramLength > 0)
-				baseUrl = "/compare/compare.html" + "?" + diffParam + "#";
+				baseUrl = require.toUrl("compare/compare.html") + "?" + diffParam + "#";
 			var url = baseUrl + itemModel.diffURI;
 			return url;
 			//window.open(url,"");

@@ -11,7 +11,7 @@
 /*global define */
 /*jslint devel:true*/
 
-define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil) {
+define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, dojo, mCommands, mUtil) {
 
 	/**
 	 * This class contains static utility methods for dealing with sites.
@@ -97,7 +97,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 		var editCommand = new mCommands.Command({
 			name: "Edit",
 			tooltip: "Edit the site configuration",
-			image: "/images/edit.gif",
+			image: require.toUrl("images/edit.gif"),
 			id: "eclipse.site.edit",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
@@ -108,7 +108,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 		var startCommand = new mCommands.Command({
 			name: "Start",
 			tooltip: "Start the site",
-			image: "/images/start.gif",
+			image: require.toUrl("images/start.gif"),
 			id: "eclipse.site.start",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
@@ -126,7 +126,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 		var stopCommand = new mCommands.Command({
 			name: "Stop",
 			tooltip: "Stop the site",
-			image: "/images/stop.gif",
+			image: require.toUrl("images/stop.gif"),
 			id: "eclipse.site.stop",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "started";
@@ -144,7 +144,7 @@ define(['dojo', 'orion/commands', 'orion/util'], function(dojo, mCommands, mUtil
 		var deleteCommand = new mCommands.Command({
 			name: "Delete",
 			tooltip: "Delete the site configuration",
-			image: "/images/delete.gif",
+			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.site.delete",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";

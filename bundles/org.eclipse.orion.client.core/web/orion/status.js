@@ -9,7 +9,7 @@
  *******************************************************************************/
 /*global define window Image */
  
-define(['dojo'], function(dojo) {
+define(['require', 'dojo'], function(require, dojo) {
 	
 	/**
 	 * Service for reporting status
@@ -107,16 +107,16 @@ define(['dojo'], function(dojo) {
 				//it is not JSON, just continue;
 			}
 			var msg = status.Message || status;
-			var src = "/images/info.gif";
+			var src = require.toUrl("images/info.gif");
 			var alt = "info";
 			if (status.Severity) {
 				switch (status.Severity) {
 				case "Warning":
-					src = "/images/warning.gif";
+					src = require.toUrl("images/warning.gif");
 					alt = "warning";
 					break;
 				case "Error":
-					src = "/images/error.gif";
+					src = require.toUrl("images/error.gif");
 					alt = "error";
 					break;
 				}

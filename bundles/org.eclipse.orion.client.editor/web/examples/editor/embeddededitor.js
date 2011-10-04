@@ -67,8 +67,8 @@ window.onload = function(){
 	};
 	
 	var annotationFactory = new orion.editor.AnnotationFactory({
-		error: "/images/problem.gif",
-		warning: "/images/warning.gif"});
+		error: "../../images/problem.gif",
+		warning: "../../images/warning.gif"});
 
 	function save(editor) {
 		editor.onInputChange(null, null, null, true);

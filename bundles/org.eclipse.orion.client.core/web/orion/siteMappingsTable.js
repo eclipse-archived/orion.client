@@ -10,8 +10,8 @@
 /*global define */
 /*jslint browser:true regexp:true */
 
-define(['dojo', 'dijit', 'orion/util', 'orion/siteUtils', 'orion/commands', 'orion/explorer'],
-		function(dojo, dijit, mUtil, mSiteUtils, mCommands, mExplorer) {
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/siteUtils', 'orion/commands', 'orion/explorer'],
+		function(require, dojo, dijit, mUtil, mSiteUtils, mCommands, mExplorer) {
 
 var mSiteMappingsTable = {};
 
@@ -113,13 +113,13 @@ mSiteMappingsTable.Renderer = (function() {
 					handleAs: "json"
 				}).then(
 					function(children) {
-						col.innerHTML = '<a href="' + href + '" target="_new"><img src="/images/folder.gif" title="Workspace folder ' + href + '"/></a>';
+						col.innerHTML = '<a href="' + href + '" target="_new"><img src="' + require.toUrl("images/folder.gif") + '" title="Workspace folder ' + href + '"/></a>';
 					}, function(error) {
-						col.innerHTML = '<a href="' + href + '" target="_new"><img src="/images/error.gif" title="Workspace folder not found: ' + href + '"/></a>';
+						col.innerHTML = '<a href="' + href + '" target="_new"><img src="' + require.toUrl("images/error.gif") + '" title="Workspace folder not found: ' + href + '"/></a>';
 					});
 			} else {
 				href = mUtil.safeText(target);
-				col.innerHTML = '<a href="' + href + '" target="_new"><img src="/images/link.gif" title="External link to ' + href + '"/></a>';
+				col.innerHTML = '<a href="' + href + '" target="_new"><img src="' + require.toUrl("images/link.gif") + '" title="External link to ' + href + '"/></a>';
 			}
 			dojo.addClass(col, "isValidCell");
 			return col;
@@ -173,7 +173,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 		registerCommands: function() {
 			var deleteMappingCommand = new mCommands.Command({
 				name: "Delete",
-				image: "/images/delete.gif",
+				image: require.toUrl("images/delete.gif"),
 				id: "eclipse.site.mappings.remove",
 				visibleWhen: function(item) {
 					// Only show on a Mappings object
@@ -190,7 +190,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 			
 			var moveUpCommand = new mCommands.Command({
 				name: "Move Up",
-				image: "/images/move_up.gif",
+				image: require.toUrl("images/move_up.gif"),
 				id: "eclipse.site.mappings.moveUp",
 				visibleWhen: dojo.hitch(this, function(item) {
 					return item.Source && item.Target;
@@ -209,7 +209,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 			
 			var moveDownCommand = new mCommands.Command({
 				name: "Move Down",
-				image: "/images/move_down.gif",
+				image: require.toUrl("images/move_down.gif"),
 				id: "eclipse.site.mappings.moveDown",
 				visibleWhen: dojo.hitch(this, function(item) {
 					return item.Source && item.Target;

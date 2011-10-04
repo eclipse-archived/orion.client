@@ -11,22 +11,33 @@
 
 /*global orion require jstestdriver AsyncTestCase*/
 
-require({
-	baseUrl: '',
-	packages: [
-		{
-	      name: 'dojo',
-	      location: '/org.dojotoolkit/dojo',
-	      main: 'lib/main-browser',
-	      lib: '.'
-	    }
-	],
-	paths: {
-		orion: '/orion',
-		text: '/requirejs/text',
-		i18n: '/requirejs/i18n'
-	}
-});
+	require({
+		  baseUrl: '..',
+		  packages: [
+		    {
+		      name: 'dojo',
+		      location: 'org.dojotoolkit/dojo',
+		      main: 'lib/main-browser',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dijit',
+		      location: 'org.dojotoolkit/dijit',
+		      main: 'lib/main',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dojox',
+		      location: 'org.dojotoolkit/dojox',
+		      main: 'lib/main',
+		      lib: '.'
+		    }		    
+		  ],
+		  paths: {
+			  text: 'requirejs/text',
+			  i18n: 'requirejs/i18n',	    
+		  }
+		});
 
 /* Have one jstestdriver test that can wait for requirejs */
 var BootstrapTest = AsyncTestCase("bootstrap");

@@ -12,7 +12,7 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExplorer', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(dojo, dijit, mAuth, mUtil, mExplorer){
+define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExplorer', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(require, dojo, dijit, mAuth, mUtil, mExplorer){
 
 	/**
 	 * Creates a new search client.
@@ -166,7 +166,7 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExplorer', 'di
 						} else {
 							loc = hit.Location;
 						}
-						resultLocation.push({linkLocation: hostname + "/edit/edit.html#" + loc, location: loc, name: hit.Name});
+						resultLocation.push({linkLocation: hostname + require.toUrl("edit/edit.html") +"#" + loc, location: loc, name: hit.Name});
 						
 					}
 				}
@@ -225,7 +225,7 @@ define(['dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExplorer', 'di
 						} else {
 							loc = hit.Location;
 						}
-						hitLink.setAttribute('href', hostname + "/edit/edit.html#" + loc);
+						hitLink.setAttribute('href', hostname + require.toUrl("edit/edit.html") + "#" + loc);
 						col.appendChild(hitLink);
 						
 						if (!hideSummaries && jsonData.highlighting && jsonData.highlighting[hit.Id] && jsonData.highlighting[hit.Id].Text) {

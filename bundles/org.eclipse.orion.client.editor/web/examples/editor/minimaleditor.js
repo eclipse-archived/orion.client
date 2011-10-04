@@ -27,8 +27,8 @@ window.onload = function(){
 	};
 	
 	var annotationFactory = new orion.editor.AnnotationFactory({
-		error: "/images/problem.gif",
-		warning: "/images/warning.gif"});
+		error: "../../images/problem.gif",
+		warning: "../../images/warning.gif"});
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 		

@@ -11,7 +11,7 @@
 /*global define */
 /*jslint devel:true*/
 
-define(['dojo', 'orion/auth'], function(dojo, mAuth) {
+define(['require', 'dojo', 'orion/auth'], function(require, dojo, mAuth) {
 
 /**
  * Service id used for registering the site service with the service registry.
@@ -136,8 +136,11 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 		 */
 		_serviceImpl : {
 			getSiteConfigurations: function() {
+				//NOTE: require.toURL needs special logic here to handle "site"
+				var siteUrl = require.toUrl("site._");
+				siteUrl = siteUrl.substring(0,siteUrl.length-2);
 				return dojo.xhrGet({
-					url: "/site",
+					url: siteUrl,
 					preventCache: true,
 					headers: {
 						"Orion-Version": "1"
@@ -165,8 +168,12 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 					};
 				if (mappings) { toCreate.Mappings = mappings; }
 				if (hostHint) { toCreate.HostHint = hostHint; }
+				
+				//NOTE: require.toURL needs special logic here to handle "site"
+				var siteUrl = require.toUrl("site._");
+				siteUrl = siteUrl.substring(0,siteUrl.length-2);
 				return dojo.xhrPost({
-					url: "/site",
+					url: siteUrl,
 					postData: dojo.toJson(toCreate),
 					headers: {
 						"Content-Type": "application/json; charset=utf-8",

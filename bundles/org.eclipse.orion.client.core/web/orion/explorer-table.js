@@ -11,7 +11,7 @@
 /*global define */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/fileCommands', 'dojo/number'], function(dojo, mUtil, mExplorer, mBreadcrumbs, mFileCommands){
+define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/fileCommands', 'dojo/number'], function(require, dojo, mUtil, mExplorer, mBreadcrumbs, mFileCommands){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -104,7 +104,7 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 				}
 				
 				span = dojo.create("span", null, col, "only");
-				dojo.create("img", {src: "/images/none.png", style: "vertical-align: middle"}, span, "last");
+				dojo.create("img", {src: require.toUrl("images/none.png"), style: "vertical-align: middle"}, span, "last");
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
 				// If the file is an image, show a thumbnail next to the name.
 				var splits = item.Name.split("."); 
@@ -130,11 +130,11 @@ define(['dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/file
 							});
 							break;
 						default: 
-							dojo.create("img", {src: "/images/file.gif", style: "vertical-align: middle; margin-right: 4px"}, link, "last");
+							dojo.create("img", {src: require.toUrl("images/file.gif"), style: "vertical-align: middle; margin-right: 4px"}, link, "last");
 							break;
 					}
 				} else {
-					dojo.create("img", {src: "/images/file.gif", style: "vertical-align: middle; margin-right: 4px"}, link, "last");
+					dojo.create("img", {src: require.toUrl("images/file.gif"), style: "vertical-align: middle; margin-right: 4px"}, link, "last");
 				}
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}

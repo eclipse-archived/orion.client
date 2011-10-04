@@ -11,8 +11,8 @@
 /*global window document define login logout localStorage orion */
 /*browser:true*/
 
-define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBinding', 
-        'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog'], function(dojo, dijit, mCommands, mUtil, mKeyBinding ){
+define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBinding', 
+        'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog'], function(require, dojo, dijit, mCommands, mUtil, mKeyBinding ){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -27,7 +27,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	'<table style="border: 2px solid white; margin: 0; padding: 0; border-collapse: collapse; width: 100%;">' +
 	// Row 1:  Logo + page title + primary nav links
 		'<tr class="topRowBanner" id="bannerRow1">' +
-			'<td rowspan=3 style="padding-top: 12px; padding-bottom: 12px; padding-left: 8px; width: 148px"><a id="home" href="/index.html"><img class="toolbarLabel" src="/images/orion.gif" alt="Orion Logo" align="top"></a></td>' +
+			'<td rowspan=3 style="padding-top: 12px; padding-bottom: 12px; padding-left: 8px; width: 148px"><a id="home" href="' + require.toUrl("index.html") + '"><img class="toolbarLabel" src="' + require.toUrl("images/orion.gif") + '" alt="Orion Logo" align="top"></a></td>' +
 			'<td class="leftGlobalToolbar" style="padding-top: 16px">' +
 				'<span id="pageTitle" class="pageTitle"></span>' +
 			'</td>' + 
@@ -36,7 +36,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				'<span id="globalActions" class="globalActions"></span>' +
 				'<input type="search" id="search" class="searchbox">' +
 				'<span id="userInfo"></span>' +
-				'<span id="help" class="help"><a id="help" href="/help/index.jsp">?</a></span>' +
+				'<span id="help" class="help"><a id="help" href="' + require.toUrl("help/index.jsp") + '">?</a></span>' +
 			'</td>' + 
 		'</tr>' +
 	// Row 2:  Location (optional breadcrumb + current page resource)
@@ -89,7 +89,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	    return a.href;
 	}
 
-	var notifyAuthenticationSite = qualifyURL('/auth/NotifyAuthentication.html');
+	var notifyAuthenticationSite = qualifyURL(require.toUrl('auth/NotifyAuthentication.html'));
 	var authRendered = {};
 	var loginDialog = new orion.widgets.LoginDialog();
 	
@@ -212,7 +212,11 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 	 */
 	function generateBanner(parentId, serviceRegistry, commandService, prefsService, searcher, handler, /* optional */ editor, /* optional */ escapeProvider) {
 		// this needs to come from somewhere but I'm not going to do a separate get for it
-		var searchLocation = "/filesearch?q=";
+		
+		
+		// NOTE: require.toURL needs special logic here to handle "filesearch"
+		var searchLocation = require.toUrl("filesearch._");
+		searchLocation = searchLocation.substring(0, searchLocation.length - 2) +"?q=";
 		var text;
 		var parent = dojo.byId(parentId);
 		if (!parent) {
@@ -265,7 +269,7 @@ define(['dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBind
 				if (searchLocation) {
 					if (searchField.value.length > 0) {
 						var query = searcher.createSearchQuery(searchLocation, searchField.value);
-						window.location = "/search/search.html#"+query;
+						window.location = require.toUrl("search/search.html") + "#"+query;
 					}
 				} else {
 					window.alert("Can't search: SearchLocation not available");

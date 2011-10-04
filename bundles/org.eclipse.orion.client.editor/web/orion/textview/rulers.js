@@ -125,6 +125,8 @@ orion.textview.Ruler = (function() {
 			if (!this._multiAnnotation) {
 				for (var k in result) {
 					if (result[k]._multiple) {
+						// TODO: next line has a bug -- the image url will be busted in some deployments
+						// instead should use a class and have the css file provide the image or if really desperate use a data url
 						result[k].html = "<div>" + result[k].html + "<img style='position:relative;vertical-align:top;top:-7px;float:right;z-index:2;' src='/examples/textview/images/plus.png'/></div>";
 					}
 				}

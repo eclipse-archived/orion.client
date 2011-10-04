@@ -10,7 +10,7 @@
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
 
-define(['dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widgets/templates/LoginDialog.html'], function(dojo, dijit, mUtil) {
+define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widgets/templates/LoginDialog.html'], function(require, dojo, dijit, mUtil) {
 	
 	dojo.declare("orion.widgets.LoginDialog", [dijit.TooltipDialog], {
 		widgetsInTemplate: true,
@@ -98,7 +98,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widget
 			var jsonData = this.authenticatedServices[i].data;
 			var authService = this.authenticatedServices[i].authService;
 			if(jsonData.Location)
-				dojo.create("a", {href: ("/profile/user-profile.html#" + jsonData.Location), innerHTML: "Profile"}, td, "last");
+				dojo.create("a", {href: (require.toUrl("profile/user-profile.html") + "#" + jsonData.Location), innerHTML: "Profile"}, td, "last");
 			dojo.place(document.createTextNode(" "), td, "last");
 			if(authService.logout){
 				var a = dojo.create("a", {
@@ -207,7 +207,7 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widget
 				td = dojo.create("td", {innerHTML: "Authentication required!", style: "padding-left: 10px", colspan: 2}, tr, "only");
 				dojo.addClass(td, "LoginWindowLeft");
 				dojo.addClass(td, "LoginWindowRight");
-				dojo.create("img", {src: "/images/warning.gif", style: "padding-right: 4px; vertical-align: bottom; padding-bottom: 2px;"}, td, "first");
+				dojo.create("img", {src: require.toUrl("images/warning.gif"), style: "padding-right: 4px; vertical-align: bottom; padding-bottom: 2px;"}, td, "first");
 				dojo.place(tr, this.otherUnauthenticatedList, "last");
 			}
 		}

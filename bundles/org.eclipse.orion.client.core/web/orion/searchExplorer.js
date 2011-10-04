@@ -11,7 +11,7 @@
 /*global define console*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands'], function(dojo, dijit, mExplorer, mUtil, mFileClient, mCommands) {
+define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands'], function(require, dojo, dijit, mExplorer, mUtil, mFileClient, mCommands) {
 
 	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, searchStr, explorer) {
 		this.registry= serviceRegistry;
@@ -385,9 +385,9 @@ define(['dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'ori
 				
 				span = dojo.create("span", null, col, "only");
 				if(item.type ===  "file"){
-					this.getExpandImage(tableRow, span, "/images/file.gif");
-					//dojo.create("img", {src: "/images/none.png", style: "vertical-align: middle"}, span, "last");
-					//dojo.create("img", {src: "/images/file.gif", style: "vertical-align: middle; margin-right: 4px"}, span, "last");
+					this.getExpandImage(tableRow, span, require.toUrl("images/file.gif"));
+					//dojo.create("img", {src: require.toUrl("images/none.png"), style: "vertical-align: middle"}, span, "last");
+					//dojo.create("img", {src: require.toUrl("images/file.gif"), style: "vertical-align: middle; margin-right: 4px"}, span, "last");
 				} else {
 					var that = this;
 					dojo.connect(tableRow, "onclick", tableRow, function() {
@@ -410,8 +410,8 @@ define(['dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'ori
 							}
 						}
 					});
-					dojo.create("img", {src: "/images/none.png", style: "vertical-align: middle"}, span, "last");
-					dojo.create("img", {src: "/images/rightarrow.gif", style: "vertical-align: middle; margin-right: 4px"}, span, "last");
+					dojo.create("img", {src: require.toUrl("images/none.png"), style: "vertical-align: middle"}, span, "last");
+					dojo.create("img", {src: require.toUrl("images/rightarrow.gif"), style: "vertical-align: middle; margin-right: 4px"}, span, "last");
 				}
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
 				dojo.place(document.createTextNode(item.name), link, "only");
@@ -450,7 +450,7 @@ define(['dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'ori
 		var that = this;
 		var nextResultCommand = new mCommands.Command({
 			name : "Next result",
-			image : "/images/move_down.gif",
+			image : require.toUrl("images/move_down.gif"),
 			id: "orion.search.nextResult",
 			groupId: "orion.searchGroup",
 			callback : function() {
@@ -458,7 +458,7 @@ define(['dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'ori
 		}});
 		var prevResultCommand = new mCommands.Command({
 			name : "Previous result",
-			image : "/images/move_up.gif",
+			image : require.toUrl("images/move_up.gif"),
 			id: "orion.search.prevResult",
 			groupId: "orion.searchGroup",
 			callback : function() {
@@ -466,7 +466,7 @@ define(['dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'ori
 		}});
 		var expandAllCommand = new mCommands.Command({
 			name : "Expand all results",
-			image : "/images/expandAll.gif",
+			image : require.toUrl("images/expandAll.gif"),
 			id: "orion.search.expandAll",
 			groupId: "orion.searchGroup",
 			callback : function() {
@@ -474,7 +474,7 @@ define(['dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'ori
 		}});
 		var collapseAllCommand = new mCommands.Command({
 			name : "Collapse all results",
-			image : "/images/collapseAll.gif",
+			image : require.toUrl("images/collapseAll.gif"),
 			id: "orion.search.collapseAll",
 			groupId: "orion.searchGroup",
 			callback : function() {

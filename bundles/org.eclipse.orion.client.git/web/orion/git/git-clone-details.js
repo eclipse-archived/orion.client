@@ -11,7 +11,7 @@
 /*global dijit dojo window document eclipse:true setTimeout */
 /*jslint forin:true*/
 
-define(['dojo', 'orion/commands',  'orion/util'], function(dojo, mCommands, mUtil) {
+define(['require', 'dojo', 'orion/commands',  'orion/util'], function(require, dojo, mCommands, mUtil) {
 
 var exports = {};
 
@@ -29,7 +29,7 @@ exports.CloneDetails = (function() {
 		
 		var addPropertyCommand = new mCommands.Command({
 			name: "Add Configuration Item",
-			image: "/images/add.gif",
+			image: require.toUrl("images/add.gif"),
 			id: "eclipse.git.addProperty",
 			callback: dojo.hitch(this, function(item, commandId, domId) {
 				this.newProperty(item, commandId, domId);
@@ -38,7 +38,7 @@ exports.CloneDetails = (function() {
 		
 		var editPropertyCommand = new mCommands.Command({
 			name: "Edit",
-			image: "/images/edit.gif",
+			image: require.toUrl("images/edit.gif"),
 			id: "eclipse.git.editProperty",
 			visibleWhen: function(item) {
 				return (item.Key && item.Value && item.Location);
@@ -50,7 +50,7 @@ exports.CloneDetails = (function() {
 		
 		var deletePropertyCommand = new mCommands.Command({
 			name: "Delete",
-			image: "/images/delete.gif",
+			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.git.deleteProperty",
 			visibleWhen: function(item) {
 				return (item.Key && item.Value && item.Location);

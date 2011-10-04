@@ -9,7 +9,7 @@
  ******************************************************************************/
 /*global window define document */
 
-define(['dojo'], function(dojo) {
+define(['require', 'dojo'], function(require, dojo) {
 
 	/**
 	 * Constructs a new BreadCrumb with the given options.
@@ -48,7 +48,7 @@ define(['dojo'], function(dojo) {
 				var seg = document.createElement('a');
 				var segText = this._firstSegmentName;
 				dojo.place(document.createTextNode(segText), seg, "only");
-				seg.href = "/navigate/table.html#";
+				seg.href = require.toUrl("navigate/table.html") + "#";
 				return seg;
 			}
 			return null;
@@ -95,7 +95,7 @@ define(['dojo'], function(dojo) {
 						this._makeHref(seg , parents[i].ChildrenLocation);
 					}
 					else {
-						seg.href = "/navigate/table.html#" + parents[i].ChildrenLocation;
+						seg.href = require.toUrl("navigate/table.html") +"#" + parents[i].ChildrenLocation;
 					}
 					crumbs.appendChild(seg);
 					slash = document.createElement('span');

@@ -11,13 +11,13 @@
 /*jslint browser:true devel:true*/
 /*global define eclipse:true orion:true dojo dijit window*/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
+define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchAdaptor',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mCommands, mUtil, mFavorites,
+		function(require, dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher, mSearchAdaptor) {
 	
@@ -181,9 +181,9 @@ exports.setUpEditor = function(isReadOnly){
 			return new mTextView.TextView({
 				parent: editorDomNode,
 				model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
-				stylesheet: ["/orion/textview/textview.css", "/orion/textview/rulers.css",
-					"/examples/textview/textstyler.css", "/css/default-theme.css",
-					"/orion/editor/editor.css"],
+				stylesheet: [require.toUrl("orion/textview/textview.css"), require.toUrl("orion/textview/rulers.css"),
+				             require.toUrl("examples/textview/textstyler.css"), require.toUrl("css/default-theme.css"),
+				             require.toUrl("orion/editor/editor.css")],
 				tabSize: 4,
 				readonly: isReadOnly
 			});
@@ -433,8 +433,8 @@ exports.setUpEditor = function(isReadOnly){
 	};
 
 	var annotationFactory = new mEditorFeatures.AnnotationFactory({
-		error: "/images/problem.gif",
-		warning: "/images/warning.gif"});
+		error: require.toUrl("images/problem.gif"),
+		warning: require.toUrl("images/warning.gif")});
 	
 	var editor = new mEditor.Editor({
 		textViewFactory: textViewFactory,

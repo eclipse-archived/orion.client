@@ -11,7 +11,7 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['dojo', 'orion/treetable'], function(dojo, mTreeTable){
+define(['require', 'dojo', 'orion/treetable'], function(require, dojo, mTreeTable){
 
 var exports = {};
 
@@ -215,8 +215,8 @@ exports.ExplorerRenderer = (function() {
 	function ExplorerRenderer (options, explorer) {
 		this.explorer = explorer;
 		this._init(options);
-		this._expandImgSrc = '/images/twistie_open.gif';
-		this._collapseImgSrc = '/images/twistie_closed.gif';
+		this._expandImgSrc = require.toUrl("images/twistie_open.gif");
+		this._collapseImgSrc = require.toUrl("images/twistie_closed.gif");
 	}
 	ExplorerRenderer.prototype = {
 		initTable: function (tableNode, tableTree) {
@@ -364,7 +364,7 @@ exports.ExplorerRenderer = (function() {
 		
 		getExpandImage: function(tableRow, placeHolder, decorateImage){
 			var expandImg = dojo.create("img", {style: "vertical-align: middle;", src: this._collapseImgSrc, name: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
-			dojo.create("img", {style: "vertical-align: middle; margin-right: 4px; padding-top: 3px; padding-bottom: 3px;", src: decorateImage ? decorateImage : "/images/folder.gif"}, placeHolder, "last");
+			dojo.create("img", {style: "vertical-align: middle; margin-right: 4px; padding-top: 3px; padding-bottom: 3px;", src: decorateImage ? decorateImage : require.toUrl("images/folder.gif")}, placeHolder, "last");
 			expandImg.onclick = dojo.hitch(this, function(evt) {
 				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImgSrc, this._collapseImgSrc);
 				var expanded = this.tableTree.isExpanded(tableRow.id);
