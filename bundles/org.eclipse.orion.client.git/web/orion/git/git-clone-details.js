@@ -38,7 +38,7 @@ exports.CloneDetails = (function() {
 		
 		var editPropertyCommand = new mCommands.Command({
 			name: "Edit",
-			image: "/images/editing_16.gif",
+			image: "/images/edit.gif",
 			id: "eclipse.git.editProperty",
 			visibleWhen: function(item) {
 				return (item.Key && item.Value && item.Location);
