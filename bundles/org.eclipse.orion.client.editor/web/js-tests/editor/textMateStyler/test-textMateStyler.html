@@ -5,33 +5,35 @@
 	<script type="text/javascript" src="../../../requirejs/require.js"></script>
 	<script type="text/javascript">
 	require({
-	  baseUrl: '',
-	
-	  // set the paths to our library packages
-	  packages: [
-	    {
-	      name: 'dojo',
-	      location: '../../../org.dojotoolkit/dojo',
-	      main: 'lib/main-browser',
-	      lib: '.'
-	    },
-	    {
-	      name: 'dijit',
-	      location: '../../../org.dojotoolkit/dijit',
-	      main: 'lib/main',
-	      lib: '.'
-	    }
-	  ],
-	
-	  paths: {
-	    orion: '../../../orion',
-	    text: '../../../requirejs/text',
-	    i18n: '../../../requirejs/i18n'
-	  }
-	});
+		  baseUrl: '../../..',
+		  packages: [
+		    {
+		      name: 'dojo',
+		      location: 'org.dojotoolkit/dojo',
+		      main: 'lib/main-browser',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dijit',
+		      location: 'org.dojotoolkit/dijit',
+		      main: 'lib/main',
+		      lib: '.'
+		    },
+		    {
+		      name: 'dojox',
+		      location: 'org.dojotoolkit/dojox',
+		      main: 'lib/main',
+		      lib: '.'
+		    }		    
+		  ],
+		  paths: {
+			  text: 'requirejs/text',
+			  i18n: 'requirejs/i18n',	    
+		  }
+		});
 	
 	window.onload = function() {
-		require(["orion/test","testcase-textMateStyler"], function(test, testcase) {
+		require(["orion/test","./testcase-textMateStyler"], function(test, testcase) {
 			test.run(testcase);			
 		});
 	};

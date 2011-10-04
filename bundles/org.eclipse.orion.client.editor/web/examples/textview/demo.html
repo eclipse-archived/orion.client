@@ -9,14 +9,13 @@
 <script type="text/javascript" src="../../requirejs/require.js"></script>
 <script type="text/javascript">
 	require({
-	  baseUrl: '',
+	  baseUrl: '../..',
 	  paths: {
-	    orion: '../../orion',
-	    examples: '../../examples',
-	    tests: '../../js-tests',
+		  text: 'requirejs/text',
+		  i18n: 'requirejs/i18n',	    
 	  }
 	});
-	require(["demo"]);
+	require(["./demo"]);
 </script>
 </head>
 <body>
