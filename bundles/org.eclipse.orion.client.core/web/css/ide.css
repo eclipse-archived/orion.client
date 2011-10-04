@@ -350,15 +350,6 @@ a:hover {
 	color: #6d6d6d;
 }
 
-.toolbarLocal {
-	padding:0px;
-	cursor: pointer;
-	font-size: 0.9em;
-	font-weight: bold;
-	background: #fff url("../images/titleBar.png") repeat-x top left;
-	min-width: 600px;
-}
-
 .searchFloat {
 	display: none;
 	background: #ffffe0;
@@ -469,10 +460,6 @@ a:hover {
 .testResultTreetable {
 	cellspacing: 0px; /* mistake? */
 	min-width: 600px;
-}
-
-.followFile {
-	background: url(../images/silk/page_go.png);
 }
 
 .contentassist {
