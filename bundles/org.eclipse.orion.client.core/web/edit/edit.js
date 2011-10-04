@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define */
-define(['dojo','setup'], function(dojo, mSetup) {
+define(['dojo','./setup'], function(dojo, mSetup) {
 	
 	dojo.addOnLoad(function(){
 		mSetup.setUpEditor(false);  // not read only
