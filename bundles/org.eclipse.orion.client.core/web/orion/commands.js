@@ -584,7 +584,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				image = new Image();
 				link.id = this.name+"link";
 				image.alt = this.name;
-				image.title = this.name;
+				image.title = this.tooltip || this.name;
 				image.name = name;
 				image.id = name;
 			}
