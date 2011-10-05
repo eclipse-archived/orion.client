@@ -433,8 +433,8 @@ examples.textview.TextStyler = (function() {
 				return null;
 			}
 			return new orion.textview.FoldingAnnotation(viewModel, "orion.annotation.folding", start, end,
-				"<img class='annotationExpanded'></img>", {styleClass: "annotation expanded"}, 
-				"<img class='annotationCollapsed'></img>", {styleClass: "annotation collapsed"});
+				"<div class='annotationExpanded'></div>", {styleClass: "annotation expanded"}, 
+				"<div class='annotationCollapsed'></div>", {styleClass: "annotation collapsed"});
 		}, 
 		_getLineStyle: function(lineIndex) {
 			if (this.highlightCaretLine) {
