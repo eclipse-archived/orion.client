@@ -18,7 +18,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.fileClient = fileClient; 
 		this._resultLocation = resultLocation;
 		this.searchStr = searchStr.toLowerCase();
-		this.useFlatList = false;
 		
 		this._treeRoot = {
 				isRoot: true,
@@ -32,12 +31,47 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.currentDetail = null;
 		this.indexedFileItems = null;
 		this.modelLocHash = [];
-		this.currentFileIndex = 0;
-		this.currentDetailIndex = 0;
+		this.restoreStatus();
 		this._lineDelimiter = "\n"; 
 		this.explorer = explorer;
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
+	
+	SearchResultModel.prototype.setCurrent = function(currentFileIndex, currentDetailIndex) {
+		this.currentFileIndex = currentFileIndex;
+		this.currentDetailIndex = currentDetailIndex;
+		this.storeStatus();
+	};
+	
+	SearchResultModel.prototype.storeStatus = function() {
+		window.sessionStorage["search_result_useFlatList"] = JSON.stringify(this.useFlatList);
+		window.sessionStorage["search_result_currentFileIndex"] = JSON.stringify(this.currentFileIndex);
+		window.sessionStorage["search_result_currentDetailIndex"] = JSON.stringify(this.currentDetailIndex);
+	};
+	
+	SearchResultModel.prototype.restoreStatus = function() {
+		this.useFlatList = false;
+		var useFlatList = window.sessionStorage["search_result_useFlatList"];
+		if (typeof useFlatList=== "string") {
+			if (useFlatList.length > 0) {
+				this.useFlatList= JSON.parse(useFlatList);
+			} 
+		}
+		this.currentFileIndex = 0;
+		var currentFileIndex = window.sessionStorage["search_result_currentFileIndex"];
+		if (typeof currentFileIndex=== "string") {
+			if (currentFileIndex.length > 0) {
+				this.currentFileIndex= JSON.parse(currentFileIndex);
+			} 
+		}
+		this.currentDetailIndex = 0;
+		var currentDetailIndex = window.sessionStorage["search_result_currentDetailIndex"];
+		if (typeof currentDetailIndex=== "string") {
+			if (currentDetailIndex.length > 0) {
+				this.currentDetailIndex= JSON.parse(currentDetailIndex);
+			} 
+		}
+	},
 	
 	SearchResultModel.prototype.getRealRoot = function(){
 		if(this.useFlatList){
@@ -149,7 +183,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				parent = existingParent.parent;
 				parentIndex = existingParent.index;
 			} else {
-				parent = this.getRealRoot();
+				parent = this._treeRoot;
 				parentIndex = parents.length;
 			}
 			
@@ -403,8 +437,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 								if(expanded.childDiv) {
 									dojo.toggleClass(expanded.childDiv, "currentSearchMatch", false);
 								}
-								that.explorer.model.currentFileIndex = fileItemIndex;
-								that.explorer.model.currentDetailIndex = fileDetailItemIndex;						
+								that.explorer.model.setCurrent(fileItemIndex, fileDetailItemIndex);
 								expanded = that.explorer.model._fileExpanded(that.explorer.model.currentFileIndex, that.explorer.model.currentDetailIndex);
 								dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
 							}
@@ -504,7 +537,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		
 		newMenu.addChild(new dijit.CheckedMenuItem({
 			label: "Show as List",
-			checked: false,
+			checked: that.model.useFlatList,
 			onChange : function(checked) {
 				that.switchTo(checked);
 			}
@@ -529,6 +562,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultExplorer.prototype.switchTo = function(flatList) {
 		this.model.useFlatList = flatList;
+		this.model.storeStatus();
 		this.createTree(this.parentNode, this.model);
 		//this.myTree.refresh(this.model.getRealRoot());
 		this.gotoCurrent();
@@ -657,8 +691,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.model.lastNavDirection = next;
 		if(nextItem){
 			var newExpanded = this.model._fileExpanded(nextItem.newFileIndex, nextItem.newDetailIndex); 
-			this.model.currentFileIndex = nextItem.newFileIndex;
-			this.model.currentDetailIndex = nextItem.newDetailIndex;
+			this.model.setCurrent(nextItem.newFileIndex, nextItem.newDetailIndex);
 			if(newExpanded.childrenNumber > 0) {
 				this.model.highlightSelectionLater = false;
 			}
