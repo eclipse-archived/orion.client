@@ -24,7 +24,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 			pluginRegistry.shutdown();
 		});
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-		var prefsService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+		var prefsService = new mPreferences.PreferencesService(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 		var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
 		new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");

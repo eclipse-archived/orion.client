@@ -20,7 +20,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 		var serviceRegistry = new mServiceregistry.ServiceRegistry();
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-		var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+		var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 		// Git operations
 		new mGitClient.GitService(serviceRegistry);

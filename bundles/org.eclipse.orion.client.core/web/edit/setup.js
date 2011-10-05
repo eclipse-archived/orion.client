@@ -49,7 +49,7 @@ exports.setUpEditor = function(isReadOnly){
 		selection = new mSelection.Selection(serviceRegistry);
 		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		new mDialogs.DialogService(serviceRegistry);
-		prefsService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+		prefsService = new mPreferences.PreferencesService(serviceRegistry);
 		commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 
 		// Editor needs additional services besides EAS.
