@@ -137,7 +137,7 @@ dojo.addOnLoad(function(){
 	dojo.addOnWindowUnload(function() {
 		pluginRegistry.shutdown();
 	});
-	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 	

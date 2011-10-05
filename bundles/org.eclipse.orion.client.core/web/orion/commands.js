@@ -515,7 +515,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		generateSeparatorImage: function() {
 			var sep = new Image();
 			// TODO should get this from CSS
-			sep.src = "/images/sep.gif";
+			sep.src = require.toUrl("images/sep.gif");
 			dojo.addClass(sep, "commandImage");
 			dojo.addClass(sep, "commandSeparator");
 			return sep;
