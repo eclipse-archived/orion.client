@@ -104,7 +104,12 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				}
 				
 				span = dojo.create("span", null, col, "only");
-				dojo.create("img", {src: require.toUrl("images/none.png"), style: "vertical-align: middle"}, span, "last");
+				// spacer where a folder would have expand node
+				var spacer = dojo.create("span", null, span, "last");
+				dojo.addClass(spacer, "imageSprite");
+				dojo.addClass(spacer, "core-sprite-none");
+					
+				// link with file image and name
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
 				// If the file is an image, show a thumbnail next to the name.
 				var splits = item.Name.split("."); 
@@ -130,11 +135,15 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 							});
 							break;
 						default: 
-							dojo.create("img", {src: require.toUrl("images/file.gif"), style: "vertical-align: middle; margin-right: 4px"}, link, "last");
+							var fileIcon = dojo.create("span", null, link, "last");
+							dojo.addClass(fileIcon, "imageSprite");
+							dojo.addClass(fileIcon, "core-sprite-file");
 							break;
 					}
 				} else {
-					dojo.create("img", {src: require.toUrl("images/file.gif"), style: "vertical-align: middle; margin-right: 4px"}, link, "last");
+					var fileIcon = dojo.create("span", null, link, "last");
+					dojo.addClass(fileIcon, "imageSprite");
+					dojo.addClass(fileIcon, "core-sprite-file");
 				}
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
@@ -189,7 +198,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 		var self = this;
 		this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
 			mUtil.processNavigatorParent(parent, children);
-			dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children, self.renderer.expandCollapseImageId(self.model.getId(parent)), self.renderer._expandImgSrc);
+			dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children, self.renderer.expandCollapseImageId(self.model.getId(parent)), self.renderer._expandImageClass, self.renderer._collapseImageClass);
 		});
 	};
 		

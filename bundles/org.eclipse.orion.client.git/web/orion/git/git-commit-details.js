@@ -32,7 +32,8 @@ exports.CommitDetails = (function() {
 		var showDiffCommand = new mCommands.Command({
 			name: "Show diff",
 			tooltip: "Show the diff",
-			image: "images/open_compare.gif",
+			imageClass: "git-sprite-open_compare",
+			spriteClass: "gitCommandSprite",
 			id: "eclipse.showDiff",
 			hrefCallback: function(item) {
 				return require.toUrl("compare/compare.html") +"?readonly#" + item.DiffLocation;
@@ -191,12 +192,18 @@ exports.CommitDetails = (function() {
 					
 					col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 					
-					if (diff.ChangeType === "ADD")
-						img = dojo.create("img", {src: require.toUrl("git/images/addition.gif")}, col1);
-					else if (diff.ChangeType === "DELETE")
-						img = dojo.create("img", {src: require.toUrl("git/images/removal.gif")}, col1);
-					else if (diff.ChangeType === "MODIFY")
-						img = dojo.create("img", {src: require.toUrl("git/images/modification.gif")}, col1);
+					var image;
+					if (diff.ChangeType === "ADD") {
+						image = dojo.create("span", null, col1);
+						dojo.addClass(image, "git-sprite-addition");
+					} else if (diff.ChangeType === "DELETE") {
+						image = dojo.create("span", null, col1);
+						dojo.addClass(image, "git-sprite-removal");
+					} else { // "MODIFY"
+						image = dojo.create("span", null, col1);
+						dojo.addClass(image, "git-sprite-modification");
+					}
+					dojo.addClass(image, "imageSprite");
 					
 					col2 = dojo.create("td", null, tr, "last");
 					dojo.place(document.createTextNode(diff.ChangeType === "DELETE" ? diff.OldPath : diff.NewPath), col2, "only");		

@@ -221,7 +221,7 @@ exports.GitClonesRenderer = (function(){
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, require.toUrl("git/images/repository.gif"));
+				this.getExpandImage(tableRow, div, "git-sprite-repository", "gitImageSprite");
 				
 				//link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage", href: require.toUrl("navigate/table.html") + "#" + item.ContentLocation+"?depth=1"}, div, "last");
 				link = dojo.create("a", {className: "navlinkonpage"}, div, "last");
@@ -240,7 +240,7 @@ exports.GitClonesRenderer = (function(){
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, item.Name==="Branches" ? require.toUrl("git/images/branches.gif") : require.toUrl("git/images/remotes.gif"));
+				this.getExpandImage(tableRow, div, item.Name==="Branches" ? "git-sprite-branches" : "git-sprite-remotes", "gitImageSprite");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
@@ -252,14 +252,16 @@ exports.GitClonesRenderer = (function(){
 				if (item.Current)
 					link.style.fontWeight = "bold";
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				dojo.create("img", {src: require.toUrl("git/images/branch.gif"), style: "vertical-align: middle; margin-right: 4px"}, link, "first");
+				var branch = dojo.create("span", null,  link, "first");
+				dojo.addClass(branch, "gitImageSprite");
+				dojo.addClass(branch, "git-sprite-branch");
 				
 			} else if (item.Type === "Remote"){
 				col = document.createElement('td');
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, require.toUrl("git/images/remote.gif"));
+				this.getExpandImage(tableRow, div, "git-sprite-remote", "gitImageSprite");
 
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				if (!item.PushUrl || item.PushUrl === item.GitUrl) {
@@ -275,7 +277,9 @@ exports.GitClonesRenderer = (function(){
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 								
 				dojo.place(document.createTextNode(item.Name), link, "only");
-				dojo.create("img", {src: require.toUrl("git/images/branch.gif"), style: "vertical-align: middle; margin-right: 4px"}, link, "first");
+				var branch = dojo.create("span", null,  link, "first");
+				dojo.addClass(branch, "gitImageSprite");
+				dojo.addClass(branch, "git-sprite-branch");
 			}	
 			return col;
 		case 1:

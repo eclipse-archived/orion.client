@@ -215,8 +215,8 @@ exports.ExplorerRenderer = (function() {
 	function ExplorerRenderer (options, explorer) {
 		this.explorer = explorer;
 		this._init(options);
-		this._expandImgSrc = require.toUrl("images/twistie_open.gif");
-		this._collapseImgSrc = require.toUrl("images/twistie_closed.gif");
+		this._expandImageClass = "core-sprite-twistie_open";
+		this._collapseImageClass = "core-sprite-twistie_closed";
 	}
 	ExplorerRenderer.prototype = {
 		initTable: function (tableNode, tableTree) {
@@ -362,11 +362,15 @@ exports.ExplorerRenderer = (function() {
 			return rowId+"__expand";
 		},
 		
-		getExpandImage: function(tableRow, placeHolder, decorateImage){
-			var expandImg = dojo.create("img", {style: "vertical-align: middle;", src: this._collapseImgSrc, name: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
-			dojo.create("img", {style: "vertical-align: middle; margin-right: 4px; padding-top: 3px; padding-bottom: 3px;", src: decorateImage ? decorateImage : require.toUrl("images/folder.gif")}, placeHolder, "last");
-			expandImg.onclick = dojo.hitch(this, function(evt) {
-				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImgSrc, this._collapseImgSrc);
+		getExpandImage: function(tableRow, placeHolder, /* optional */ decorateImageClass, /* optional */ spriteClass){
+			var expandImage = dojo.create("span", {id: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
+			dojo.addClass(expandImage, "imageSprite");
+			dojo.addClass(expandImage, this._collapseImageClass);
+			var decorateImage = dojo.create("span", null, placeHolder, "last");
+			dojo.addClass(decorateImage, spriteClass || "imageSprite");
+			dojo.addClass(decorateImage, decorateImageClass || "core-sprite-folder");
+			expandImage.onclick = dojo.hitch(this, function(evt) {
+				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImageClass, this._collapseImageClass);
 				var expanded = this.tableTree.isExpanded(tableRow.id);
 				if (expanded) {
 					this._expanded.push(tableRow.id);
@@ -384,7 +388,7 @@ exports.ExplorerRenderer = (function() {
 				}
 				
 			});
-			return expandImg;
+			return expandImage;
 		},
 		render: function(item, tableRow){
 			tableRow.cellSpacing = "8px";

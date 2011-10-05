@@ -124,7 +124,7 @@ define(['dojo'], function(dojo) {
 			return this._renderer.getSelected();
 		},
 		
-		refresh: function(item, children, /* optional */ forceExpand, /* optional */ imgName, /*optional */ imageSrc) {
+		refresh: function(item, children, /* optional */ forceExpand, /* optional */ imageId, /*optional */ classToAdd, /*optional */ classToRemove) {
 			var parentId = this._treeModel.getId(item);
 			var tree;
 			if (parentId === this._id) {  // root of tree
@@ -143,8 +143,12 @@ define(['dojo'], function(dojo) {
 						if(children){
 							this._generateChildren(children, row._depth+1, row, "after");
 							this._rowsChanged();
-							if (imgName && imageSrc) {
-								document.images[imgName].src=imageSrc;
+							if (imageId && classToAdd) {
+								var node = dojo.byId(imageId);
+								dojo.addClass(node, classToAdd);
+								if (classToRemove) {
+									dojo.removeClass(node, classToRemove);
+								}
 							}
 						} else {
 							tree = this;
@@ -162,8 +166,8 @@ define(['dojo'], function(dojo) {
 			}
 		},
 		
-		refreshAndExpand: function(item, children, imgName, image) {
-			this.refresh(item, children, true, imgName, image);
+		refreshAndExpand: function(item, children, imageId, classToAdd, classToRemove) {
+			this.refresh(item, children, true, imageId, classToAdd, classToRemove);
 		},
 		
 		getItem: function(itemOrId) {  // a dom node, a dom id, or the item
@@ -179,19 +183,24 @@ define(['dojo'], function(dojo) {
 			return itemOrId;  // return what we were given
 		},
 		
-		toggle: function(id, imgName, expandedImage, collapsedImage) {
+		toggle: function(id, imageId, expandClass, collapseClass) {
 			var row = dojo.byId(id);
 			if (row) {
+				var node;
 				if (row._expanded) {
 					this.collapse(id);
-					if (imgName) {
-						document.images[imgName].src=collapsedImage;
+					if (imageId) {
+						node = dojo.byId(imageId);
+						dojo.addClass(node, collapseClass);
+						dojo.removeClass(node, expandClass);
 					}
 				}
 				else {
 					this.expand(id);
-					if (imgName) {
-						document.images[imgName].src=expandedImage;
+					if (imageId) {
+						node = dojo.byId(imageId);
+						dojo.addClass(node, expandClass);
+						dojo.removeClass(node, collapseClass);
 					}
 				}
 			}
