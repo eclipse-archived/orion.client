@@ -29,7 +29,7 @@ exports.CloneDetails = (function() {
 		
 		var addPropertyCommand = new mCommands.Command({
 			name: "Add Configuration Item",
-			image: require.toUrl("images/add.gif"),
+			imageClass: "core-sprite-add",
 			id: "eclipse.git.addProperty",
 			callback: dojo.hitch(this, function(item, commandId, domId) {
 				this.newProperty(item, commandId, domId);
@@ -38,7 +38,7 @@ exports.CloneDetails = (function() {
 		
 		var editPropertyCommand = new mCommands.Command({
 			name: "Edit",
-			image: require.toUrl("images/edit.gif"),
+			imageClass: "core-sprite-edit",
 			id: "eclipse.git.editProperty",
 			visibleWhen: function(item) {
 				return (item.Key && item.Value && item.Location);
@@ -50,7 +50,7 @@ exports.CloneDetails = (function() {
 		
 		var deletePropertyCommand = new mCommands.Command({
 			name: "Delete",
-			image: require.toUrl("images/delete.gif"),
+			imageClass: "core-sprite-delete",
 			id: "eclipse.git.deleteProperty",
 			visibleWhen: function(item) {
 				return (item.Key && item.Value && item.Location);
