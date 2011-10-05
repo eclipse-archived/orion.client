@@ -24,7 +24,7 @@ dojo.addOnLoad(function() {
 		pluginRegistry.shutdown();
 	});
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-	var prefsService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+	var prefsService = new mPreferences.PreferencesService(serviceRegistry);
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 	var selection = new mSelection.Selection(serviceRegistry);
 

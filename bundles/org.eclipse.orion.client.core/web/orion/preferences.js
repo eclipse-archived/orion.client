@@ -10,7 +10,7 @@
 
 /*global define window localStorage */
 
-define(['dojo', 'orion/auth'], function(dojo, mAuth){
+define(['require', 'dojo', 'orion/auth'], function(require, dojo, mAuth){
 
 	/**
 	 * Constructs a new preferences instance. This constructor is not
@@ -322,8 +322,11 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth){
 	 */
 	function PreferencesService(serviceRegistry, userPreferencesLocation, defaultPreferencesLocation) {
 		
-		userPreferencesLocation = userPreferencesLocation || "/prefs/user";
-		defaultPreferencesLocation = defaultPreferencesLocation || "/defaults.pref";
+		userPreferencesLocation = userPreferencesLocation || "prefs/user";
+		userPreferencesLocation = require.toUrl(userPreferencesLocation + "._");
+		userPreferencesLocation = userPreferencesLocation.substring(0, userPreferencesLocation.length - 2);
+		
+		defaultPreferencesLocation = defaultPreferencesLocation || require.toUrl("defaults.pref");
 		this._userProvider = new UserPreferencesProvider(userPreferencesLocation);
 		this._defaultsProvider = new DefaultPreferencesProvider(defaultPreferencesLocation);
 		this._serviceRegistration = serviceRegistry.registerService("orion.core.preference", this);

@@ -40,7 +40,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 		});
 		
 		var siteService = new mSiteService.SiteService(serviceRegistry);
-		var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+		var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 		
 		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
