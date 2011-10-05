@@ -1017,7 +1017,8 @@ orion.GitStatusController = (function() {
 			var sbsCompareCommand = new mCommands.Command({
 				name: "Side by Side Compare",
 				tooltip: "Show the side-by-side compare",
-				image: require.toUrl("git/images/open_compare.gif"),
+				imageClass: "git-sprite-open_compare",
+				spriteClass: "gitCommandSprite",
 				id: "orion.sbsCompare",
 				hrefCallback: function(item) {
 					return self.openCompareEditor(item.object);
@@ -1052,7 +1053,8 @@ orion.GitStatusController = (function() {
 			var checkoutCommand = new mCommands.Command({
 				name: "Checkout",
 				tooltip: "Discard the selected unstaged change",
-				image: require.toUrl("git/images/checkout.gif"),
+				imageClass: "git-sprite-checkout",
+				spriteClass: "gitCommandSprite",
 				id: "orion.gitCheckout",
 				callback: function(item) {
 					self._registry.getService("orion.page.dialog").then(function(service) {
@@ -1074,7 +1076,8 @@ orion.GitStatusController = (function() {
 			var stageCommand = new mCommands.Command({
 				name: "Stage",
 				tooltip: "Stage the change",
-				image: require.toUrl("git/images/stage.gif"),
+				imageClass: "git-sprite-stage",
+				spriteClass: "gitCommandSprite",
 				id: "orion.gitStage",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Staging...");
@@ -1089,7 +1092,8 @@ orion.GitStatusController = (function() {
 			var stageAllCommand = new mCommands.Command({
 				name: "Stage Selected",
 				tooltip: "Stage the selected changes",
-				image: require.toUrl("git/images/stage_all.gif"),
+				imageClass: "git-sprite-stage_all",
+				spriteClass: "gitCommandSprite",
 				id: "orion.gitStageAll",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Staging...");
@@ -1103,7 +1107,8 @@ orion.GitStatusController = (function() {
 			var unstageCommand = new mCommands.Command({
 				name: "Unstage",
 				tooltip: "Unstage the change",
-				image: require.toUrl("git/images/unstage.gif"),
+				imageClass: "git-sprite-unstage",
+				spriteClass: "gitCommandSprite",
 				id: "orion.gitUnstage",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Unstaging...");
@@ -1117,7 +1122,8 @@ orion.GitStatusController = (function() {
 			var unstageAllCommand = new mCommands.Command({
 				name: "Unstage All",
 				tooltip: "Unstage all changes",
-				image: require.toUrl("git/images/unstage_all.gif"),
+				imageClass: "git-sprite-unstage_all",
+				spriteClass: "gitCommandSprite",
 				id: "orion.gitUnstageAll",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Unstaging...");
@@ -1131,7 +1137,8 @@ orion.GitStatusController = (function() {
 			var resetChangesCommand = new mCommands.Command({
 				name: "Reset",
 				tooltip: "Discard all staged and unstaged changes",
-				image: require.toUrl("git/images/refresh.gif"),
+				imageClass: "git-sprite-refresh",
+				spriteClass: "gitCommandSprite",
 				id: "orion.gitResetChanges",
 				callback: function(item) {
 					self._registry.getService("orion.page.dialog").then(function(service) {
@@ -1225,7 +1232,7 @@ orion.GitStatusController = (function() {
 			var that = this;
 			var nextDiffCommand = new mCommands.Command({
 				name : "Next Diff",
-				image : require.toUrl("images/move_down.gif"),
+				imageClass : "core-sprite-move_down"),
 				id: "orion.compare.nextDiff",
 				groupId: "orion.compareGroup",
 				/*
@@ -1238,7 +1245,7 @@ orion.GitStatusController = (function() {
 			}});
 			var prevDiffCommand = new mCommands.Command({
 				name : "Previous Diff",
-				image : require.toUrl("images/move_up.gif"),
+				imageClass : "core-sprite-move_up"),
 				id: "orion.compare.prevDiff",
 				groupId: "orion.compareGroup",
 				

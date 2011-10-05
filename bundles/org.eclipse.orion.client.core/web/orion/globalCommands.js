@@ -27,7 +27,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	'<table style="border: 2px solid white; margin: 0; padding: 0; border-collapse: collapse; width: 100%;">' +
 	// Row 1:  Logo + page title + primary nav links
 		'<tr class="topRowBanner" id="bannerRow1">' +
-			'<td rowspan=3 style="padding-top: 12px; padding-bottom: 12px; padding-left: 8px; width: 148px"><a id="home" href="' + require.toUrl("index.html") + '"><img class="toolbarLabel" src="' + require.toUrl("images/orion.gif") + '" alt="Orion Logo" align="top"></a></td>' +
+			'<td rowspan=3 style="padding-top: 12px; padding-bottom: 12px; padding-left: 8px; width: 148px"><a id="home" href="' + require.toUrl("index.html") + '"><span class="imageSprite core-sprite-orion toolbarLabel" alt="Orion Logo" align="top"></a></td>' +
 			'<td class="leftGlobalToolbar" style="padding-top: 16px">' +
 				'<span id="pageTitle" class="pageTitle"></span>' +
 			'</td>' + 

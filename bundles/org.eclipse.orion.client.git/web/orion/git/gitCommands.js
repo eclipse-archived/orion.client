@@ -179,7 +179,7 @@ var exports = {};
 		// TODO: not used by the git clone navigator, could be removed
 		var linkRepoCommand = new mCommands.Command({
 			name: "Link Repository",
-			image: require.toUrl("images/link.gif"),
+			imageClass: "core-sprite-link",
 			id: "eclipse.linkRepository",
 			callback: function(item) {
 				var dialog = new orion.widgets.NewItemDialog({
@@ -218,7 +218,8 @@ var exports = {};
 		var checkoutBranchCommand = new mCommands.Command({
 			name: "Checkout",
 			tooltip: "Make the branch or corresponding local branch active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first.",
-			image: require.toUrl("git/images/checkout.gif"),
+			imageClass: "git-sprite-checkout",
+			spriteClass: "gitCommandSprite",
 			id: "eclipse.checkoutBranch",
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(
@@ -255,7 +256,7 @@ var exports = {};
 		var addBranchCommand = new mCommands.Command({
 			name: "New Branch",
 			tooltip: "Add a new local branch to the repository",
-			image: require.toUrl("images/add.gif"),
+			imageClass: "core-sprite-add",
 			id: "eclipse.addBranch",
 			callback: function(item, commandId, domId) {
 				exports.getNewItemName(item, explorer, false, domId, "Branch name", function(name){
@@ -281,7 +282,7 @@ var exports = {};
 		var removeBranchCommand = new mCommands.Command({
 			name: "Remove", // "Remove Branch"
 			tooltip: "Remove the local branch from the repository",
-			image: require.toUrl("images/delete.gif"),
+			imageClass: "core-sprite-delete",
 			id: "eclipse.removeBranch",
 			callback: function(item) {
 				if(confirm("Are you sure you want to remove branch " + item.Name+"?"))
@@ -304,7 +305,7 @@ var exports = {};
 		var removeRemoteBranchCommand = new mCommands.Command({
 			name: "Remove", // "Remove Remote Branch",
 			tooltip: "Remove the remote tracking branch from the repository",
-			image: require.toUrl("images/delete.gif"),
+			imageClass: "core-sprite-delete",
 			id: "eclipse.removeRemoteBranch",
 			callback: function(item) {
 				if(confirm("You're going to remove remote branch " + item.Name+" and push the change.\n\nAre you sure?"))
@@ -333,7 +334,7 @@ var exports = {};
 		var addRemoteCommand = new mCommands.Command({
 			name: "New Remote",
 			tooltip: "Add a new remote to the repository",
-			image: require.toUrl("images/add.gif"),
+			imageClass: "core-sprite-add",
 			id: "eclipse.addRemote",
 			callback : function(item) {
 				var dialog = new orion.git.widgets.AddRemoteDialog({
@@ -359,7 +360,7 @@ var exports = {};
 		var removeRemoteCommand = new mCommands.Command({
 			name: "Remove", // "Remove Remote",
 			tooltip: "Remove the remote from the repository",
-			image: require.toUrl("images/delete.gif"),
+			imageClass: "core-sprite-delete",
 			id: "eclipse.removeRemote",
 			callback: function(item) {
 				if(confirm("Are you sure you want to remove remote " + item.Name+"?"))
@@ -446,7 +447,8 @@ var exports = {};
 		
 		var compareGitCommits = new mCommands.Command({
 			name : "Compare With Each Other",
-			image : require.toUrl("git/images/open_compare.gif"),
+			imageClass: "git-sprite-open_compare",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.compareGitCommits",
 			hrefCallback : function(item) {
 				var clientDeferred = new dojo.Deferred();
@@ -472,7 +474,8 @@ var exports = {};
 		
 		var compareWithWorkingTree = new mCommands.Command({
 			name : "Compare With Working Tree",
-			image : require.toUrl("git/images/open_compare.gif"),
+			imageClass: "git-sprite-open_compare",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.compareWithWorkingTree",
 			hrefCallback : function(item) {
 				return require.toUrl("compare/compare.html")+"#" + item.DiffLocation;
@@ -500,7 +503,8 @@ var exports = {};
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
 			tooltip: "Update the remote tracking branch using the content from the remote",
-			image : require.toUrl("git/images/fetch.gif"),
+			imageClass: "git-sprite-fetch",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = item.Location;
@@ -648,7 +652,8 @@ var exports = {};
 		var mergeCommand = new mCommands.Command({
 			name : "Merge",
 			tooltip: "Merge the content from the branch to your active branch",
-			image : require.toUrl("git/images/merge.gif"),
+			imageClass: "git-sprite-merge",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
@@ -789,7 +794,8 @@ var exports = {};
 		var pushCommand = new mCommands.Command({
 			name : "Push All",
 			tooltip: "Update the remote branch using content from your active branch",
-			image : require.toUrl("git/images/push.gif"),
+			imageClass: "git-sprite-push",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -868,7 +874,8 @@ var exports = {};
 		var pushForceCommand = new mCommands.Command({
 			name : "Force Push All",
 			tooltip: "Override the remote branch using the content from your active branch. Be careful! You may lose history.",
-			image : require.toUrl("git/images/push.gif"),
+			imageClass: "git-sprite-push",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.pushForce",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -1014,7 +1021,8 @@ var exports = {};
 		var pushToCommand = new mCommands.Command({
 			name : "Push to...",
 			tooltip: "Update the remote branch using content from your active branch",
-			image : require.toUrl("git/images/push.gif"),
+			imageClass: "git-sprite-push",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.pushto",
 			callback: function(item) {
 				
@@ -1053,7 +1061,8 @@ var exports = {};
 		var resetIndexCommand = new mCommands.Command({
 			name : "Reset",
 			tooltip: "Reset your active branch to the state of the selected branch. Remove all staged and unstaged changes.",
-			image : require.toUrl("git/images/refresh.gif"),
+			imageClass: "git-sprite-refresh",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.resetIndex",
 			callback: function(item) {
 				if(confirm("The content of your active branch will be replaced with " + item.Name + ". " +
@@ -1094,7 +1103,8 @@ var exports = {};
 		var addTagCommand = new mCommands.Command({
 			name : "Tag",
 			tooltip: "Create a tag for the commit",
-			image : require.toUrl("git/images/tag.gif"),
+			imageClass: "git-sprite-tag",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.addTag",
 			
 			callback: function(item, commandId, domId) {
@@ -1266,7 +1276,8 @@ var exports = {};
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
 			tooltip : "Update the remote tracking branch using the content from the remote",
-			image : require.toUrl("git/images/fetch.gif"),
+			imageClass: "git-sprite-fetch",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
 				var path = item.Location;
@@ -1338,7 +1349,8 @@ var exports = {};
 		var mergeCommand = new mCommands.Command({
 			name : "Merge",
 			tooltip: "Merge the content from the branch to your active branch",
-			image : require.toUrl("git/images/merge.gif"),
+			imageClass: "git-sprite-merge",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
@@ -1409,7 +1421,8 @@ var exports = {};
 		var pushCommand = new mCommands.Command({
 			name : "Push",
 			tooltip: "Update the remote branch using content from your active branch",
-			image : require.toUrl("git/images/push.gif"),
+			imageClass: "git-sprite-push",
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
 				var path = dojo.hash();
@@ -1486,7 +1499,7 @@ var exports = {};
 		
 		var cloneGitRepositoryCommand = new mCommands.Command({
 			name : "Clone Repository",
-			tooltip : "Clone an existing Git repository to the workspace",
+			tooltip : "Clone an existing Git repository to a folder",
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
 				var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
@@ -1525,7 +1538,7 @@ var exports = {};
 		
 		var initGitRepositoryCommand = new mCommands.Command({
 			name : "Init Repository",
-			tooltip : "Create a new Git repository in the workspace",
+			tooltip : "Create a new Git repository in a new folder",
 			id : "eclipse.initGitRepository",
 			callback : function(item) {
 				
@@ -1565,7 +1578,7 @@ var exports = {};
 		var deleteCommand = new mCommands.Command({
 			name: "Remove", // "Remove Clone"
 			tooltip: "Remove the repository",
-			image: require.toUrl("images/delete.gif"),
+			imageClass: "core-sprite-delete",
 			id: "eclipse.git.deleteClone",
 			visibleWhen: function(item) {
 				var items = dojo.isArray(item) ? item : [item];
