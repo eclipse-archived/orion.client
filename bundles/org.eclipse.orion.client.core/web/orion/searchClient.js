@@ -143,7 +143,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 			// WORKAROUND - window.location.hostname is returning "http://localhost:8080/localhost" in FF 3.6.10 
 			// surely there is a better way
 			var nonhash= window.location.href.split('#')[0];
-			var hostname = nonhash.substring(0,nonhash.length - window.location.pathname.length);
+			//var hostname = nonhash.substring(0,nonhash.length - window.location.pathname.length);
 			var foundValidHit = false;
 			var resultLocation = [];
 			dojo.empty(resultsNode);
@@ -166,7 +166,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 						} else {
 							loc = hit.Location;
 						}
-						resultLocation.push({linkLocation: hostname + require.toUrl("edit/edit.html") +"#" + loc, location: loc, name: hit.Name});
+						resultLocation.push({linkLocation: /*hostname +*/ require.toUrl("edit/edit.html") +"#" + loc, location: loc, name: hit.Name});
 						
 					}
 				}
@@ -189,7 +189,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 			// WORKAROUND - window.location.hostname is returning "http://localhost:8080/localhost" in FF 3.6.10 
 			// surely there is a better way
 			var nonhash= window.location.href.split('#')[0];
-			var hostname = nonhash.substring(0,nonhash.length - window.location.pathname.length);
+			//var hostname = nonhash.substring(0,nonhash.length - window.location.pathname.length);
 			var foundValidHit = false;
 			dojo.empty(resultsNode);
 			var token = jsonData.responseHeader.params.q;
@@ -225,7 +225,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 						} else {
 							loc = hit.Location;
 						}
-						hitLink.setAttribute('href', hostname + require.toUrl("edit/edit.html") + "#" + loc);
+						hitLink.setAttribute('href', /*hostname + */require.toUrl("edit/edit.html") + "#" + loc);
 						col.appendChild(hitLink);
 						
 						if (!hideSummaries && jsonData.highlighting && jsonData.highlighting[hit.Id] && jsonData.highlighting[hit.Id].Text) {
