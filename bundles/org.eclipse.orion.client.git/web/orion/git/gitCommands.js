@@ -217,6 +217,7 @@ var exports = {};
 		
 		var checkoutBranchCommand = new mCommands.Command({
 			name: "Checkout",
+			tooltip: "Make the branch or corresponding local branch active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first.",
 			image: require.toUrl("git/images/checkout.gif"),
 			id: "eclipse.checkoutBranch",
 			callback: function(item) {
@@ -253,6 +254,7 @@ var exports = {};
 		
 		var addBranchCommand = new mCommands.Command({
 			name: "New Branch",
+			tooltip: "Add a new local branch to the repository",
 			image: require.toUrl("images/add.gif"),
 			id: "eclipse.addBranch",
 			callback: function(item, commandId, domId) {
@@ -278,6 +280,7 @@ var exports = {};
 		
 		var removeBranchCommand = new mCommands.Command({
 			name: "Remove", // "Remove Branch"
+			tooltip: "Remove the local branch from the repository",
 			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.removeBranch",
 			callback: function(item) {
@@ -300,6 +303,7 @@ var exports = {};
 		
 		var removeRemoteBranchCommand = new mCommands.Command({
 			name: "Remove", // "Remove Remote Branch",
+			tooltip: "Remove the remote tracking branch from the repository",
 			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.removeRemoteBranch",
 			callback: function(item) {
@@ -328,6 +332,7 @@ var exports = {};
 		
 		var addRemoteCommand = new mCommands.Command({
 			name: "New Remote",
+			tooltip: "Add a new remote to the repository",
 			image: require.toUrl("images/add.gif"),
 			id: "eclipse.addRemote",
 			callback : function(item) {
@@ -353,6 +358,7 @@ var exports = {};
 		
 		var removeRemoteCommand = new mCommands.Command({
 			name: "Remove", // "Remove Remote",
+			tooltip: "Remove the remote from the repository",
 			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.removeRemote",
 			callback: function(item) {
@@ -374,7 +380,8 @@ var exports = {};
 		commandService.addCommand(removeRemoteCommand, "object");
 		
 		var openGitLog = new mCommands.Command({
-			name : "Open Git Log",
+			name : "Git Log",
+			tooltip: "Open the log for the branch",
 			id : "eclipse.openGitLog",
 			hrefCallback : function(item) {
 				if (item.Type === "RemoteTrackingBranch")
@@ -389,7 +396,8 @@ var exports = {};
 		commandService.addCommand(openGitLog, "object");
 		
 		var openGitLogAll = new mCommands.Command({
-			name : "Open Git Log",
+			name : "Git Log",
+			tooltip: "Open the log for the repository",
 			id : "eclipse.openGitLogAll",
 			hrefCallback : function(item) {
 				return require.toUrl("git/git-log.html")+"#" + item.CommitLocation + "?page=1";
@@ -405,7 +413,8 @@ var exports = {};
 		commandService.addCommand(openGitLogAll, "object");
 		
 		var openGitStatus = new mCommands.Command({
-			name : "Open Git Status",
+			name : "Git Status",
+			tooltip: "Open the status for the repository",
 			id : "eclipse.openGitStatus",
 			hrefCallback : function(item) {
 				return require.toUrl("git/git-status.html")+"#" + item.StatusLocation;
@@ -421,6 +430,7 @@ var exports = {};
 		
 		var openCloneContent = new mCommands.Command({
 			name : "Show in Navigator",
+			tooltip: "Show the repository folder in the file navigator",
 			id : "eclipse.openCloneContent",
 			hrefCallback : function(item) {
 				return require.toUrl("navigate/table.html")+"#" + item.ContentLocation+"?depth=1";
@@ -489,6 +499,7 @@ var exports = {};
 		
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
+			tooltip: "Update the remote tracking branch using the content from the remote",
 			image : require.toUrl("git/images/fetch.gif"),
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
@@ -562,6 +573,7 @@ var exports = {};
 		
 		var fetchForceCommand = new mCommands.Command({
 			name : "Force Fetch",
+			tooltip: "Override the remote tracking branch using the content from the remote",
 			id : "eclipse.orion.git.fetchForce",
 			callback: function(item) {
 				var path = item.Location;
@@ -635,6 +647,7 @@ var exports = {};
 		
 		var mergeCommand = new mCommands.Command({
 			name : "Merge",
+			tooltip: "Merge the content from the branch to your active branch",
 			image : require.toUrl("git/images/merge.gif"),
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
@@ -701,6 +714,7 @@ var exports = {};
 		
 		var rebaseCommand = new mCommands.Command({
 			name : "Rebase",
+			tooltip: "Rewind commits from the active branch and replay them on top of the selected branch",
 			id : "eclipse.orion.git.rebase",
 			callback: function(item) {
 				serviceRegistry.getService("orion.git.provider").then(function(gitService){
@@ -774,6 +788,7 @@ var exports = {};
 		
 		var pushCommand = new mCommands.Command({
 			name : "Push All",
+			tooltip: "Update the remote branch using content from your active branch",
 			image : require.toUrl("git/images/push.gif"),
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
@@ -852,6 +867,7 @@ var exports = {};
 		
 		var pushForceCommand = new mCommands.Command({
 			name : "Force Push All",
+			tooltip: "Override the remote branch using the content from your active branch. Be careful! You may lose history.",
 			image : require.toUrl("git/images/push.gif"),
 			id : "eclipse.orion.git.pushForce",
 			callback: function(item) {
@@ -924,6 +940,7 @@ var exports = {};
 		
 		var switchToRemote = new mCommands.Command({
 			name : "Switch to Remote",
+			tooltip: "Show the log for the corresponding remote tracking branch",
 			id : "eclipse.orion.git.switchToRemote",
 			hrefCallback : function(item) {
 				return require.toUrl("git/git-log.html")+"#" + item.toRef.RemoteLocation[0].Children[0].Location + "?page=1";
@@ -936,7 +953,8 @@ var exports = {};
 		commandService.addCommand(switchToRemote, "dom");
 		
 		var switchToCurrentLocal = new mCommands.Command({
-			name : "Switch to Current Local",
+			name : "Switch to Active Local",
+			tooltip: "Show the log for the active local branch",
 			id : "eclipse.orion.git.switchToCurrentLocal",
 			hrefCallback : function(item) {
 				var clientDeferred = new dojo.Deferred();
@@ -995,6 +1013,7 @@ var exports = {};
 		
 		var pushToCommand = new mCommands.Command({
 			name : "Push to...",
+			tooltip: "Update the remote branch using content from your active branch",
 			image : require.toUrl("git/images/push.gif"),
 			id : "eclipse.orion.git.pushto",
 			callback: function(item) {
@@ -1032,11 +1051,13 @@ var exports = {};
 		commandService.addCommand(pushToCommand, "object");
 		
 		var resetIndexCommand = new mCommands.Command({
-			name : "Reset Index",
+			name : "Reset",
+			tooltip: "Reset your active branch to the state of the selected branch. Remove all staged and unstaged changes.",
 			image : require.toUrl("git/images/refresh.gif"),
 			id : "eclipse.orion.git.resetIndex",
 			callback: function(item) {
-				if(confirm("The content of your active branch will be replaced with " + item.Name + ". Are you sure?")){
+				if(confirm("The content of your active branch will be replaced with " + item.Name + ". " +
+						"All unstaged and staged changes will be discarded and cannot be recovered. Are you sure?")){
 					serviceRegistry.getService("orion.git.provider").then(
 						function(service) {
 							serviceRegistry.getService("orion.page.message").then(
@@ -1072,6 +1093,7 @@ var exports = {};
 		
 		var addTagCommand = new mCommands.Command({
 			name : "Tag",
+			tooltip: "Create a tag for the commit",
 			image : require.toUrl("git/images/tag.gif"),
 			id : "eclipse.orion.git.addTag",
 			
@@ -1113,6 +1135,7 @@ var exports = {};
 		
 		var cherryPickCommand = new mCommands.Command({
 			name : "Cherry-Pick",
+			tooltip: "Apply the change introduced by the commit to your active branch",
 			id : "eclipse.orion.git.cherryPick",
 			
 			callback: function(item) {
@@ -1241,8 +1264,8 @@ var exports = {};
 	
 	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack, cmdBaseNumber, navigator) {
 		var fetchCommand = new mCommands.Command({
-			name : "Fetch latest commits",
-			tooltip : "Fetch latest commits",
+			name : "Fetch",
+			tooltip : "Update the remote tracking branch using the content from the remote",
 			image : require.toUrl("git/images/fetch.gif"),
 			id : "eclipse.orion.git.fetch",
 			callback: function(item) {
@@ -1313,7 +1336,8 @@ var exports = {};
 		commandService.registerCommandContribution("eclipse.orion.git.fetch", cmdBaseNumber+1);	
 		
 		var mergeCommand = new mCommands.Command({
-			name : "Merge into local",
+			name : "Merge",
+			tooltip: "Merge the content from the branch to your active branch",
 			image : require.toUrl("git/images/merge.gif"),
 			id : "eclipse.orion.git.merge",
 			callback: function(item) {
@@ -1383,7 +1407,8 @@ var exports = {};
 		commandService.registerCommandContribution("eclipse.orion.git.merge", cmdBaseNumber+2);	
 		
 		var pushCommand = new mCommands.Command({
-			name : "Push into remote",
+			name : "Push",
+			tooltip: "Update the remote branch using content from your active branch",
 			image : require.toUrl("git/images/push.gif"),
 			id : "eclipse.orion.git.push",
 			callback: function(item) {
@@ -1461,7 +1486,7 @@ var exports = {};
 		
 		var cloneGitRepositoryCommand = new mCommands.Command({
 			name : "Clone Repository",
-			tooltip : "Clone Git Repository",
+			tooltip : "Clone an existing Git repository to the workspace",
 			id : "eclipse.cloneGitRepository",
 			callback : function(item) {
 				var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
@@ -1500,7 +1525,7 @@ var exports = {};
 		
 		var initGitRepositoryCommand = new mCommands.Command({
 			name : "Init Repository",
-			tooltip : "Init Git Repository",
+			tooltip : "Create a new Git repository in the workspace",
 			id : "eclipse.initGitRepository",
 			callback : function(item) {
 				
@@ -1539,6 +1564,7 @@ var exports = {};
 		
 		var deleteCommand = new mCommands.Command({
 			name: "Remove", // "Remove Clone"
+			tooltip: "Remove the repository",
 			image: require.toUrl("images/delete.gif"),
 			id: "eclipse.git.deleteClone",
 			visibleWhen: function(item) {
