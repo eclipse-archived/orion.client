@@ -285,7 +285,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					var result = this.searchOneline(lineString, searchStr);
 					if(result){
 						var lineNumber = i+1;
-						var detailNode = {parent: fileModelNode, type: "detail",  name: lineNumber+ " : " + lineString, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
+						var detailNode = {parent: fileModelNode, type: "detail",  name: lineNumber+ " : " + lineStringOrigin, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
 						fileModelNode.children.push(detailNode);
 					}
 				}
