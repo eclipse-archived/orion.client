@@ -11,7 +11,7 @@
 
 /*global define window document console localStorage */
 
-define(["dojo", "orion/serviceregistry", "dojo/DeferredList"], function(dojo, mServiceregistry){
+define(["require", "dojo", "orion/serviceregistry", "dojo/DeferredList"], function(require, dojo, mServiceregistry){
 var eclipse = eclipse || {};
 
 /**
@@ -246,7 +246,11 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		delete _storage["plugin."+plugin.getLocation()];
 		for(pluginURL in _userPlugins) {
 			if (_userPlugins.hasOwnProperty(pluginURL)) {
-				if (plugin.getLocation() === _normalizeURL(pluginURL)) {
+				if (pluginURL.indexOf("://") === -1) {
+					pluginURL = require.toUrl(pluginURL)
+				}
+				pluginURL = _normalizeURL(pluginURL);
+				if (plugin.getLocation() === pluginURL) {
 					delete _userPlugins[plugin.getLocation()];
 					_storage["/orion/preferences/user/plugins"] = JSON.stringify(_userPlugins);
 					return;
@@ -316,6 +320,9 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 			_defaultPlugins = defaults["/plugins"];
 			for(pluginURL in _defaultPlugins) {
 				if (_defaultPlugins.hasOwnProperty(pluginURL)) {
+					if (pluginURL.indexOf("://") === -1) {
+						pluginURL = require.toUrl(pluginURL)
+					}
 					pluginURL = _normalizeURL(pluginURL);
 					key = "plugin." + pluginURL;
 					if (_storage[key]) {
@@ -336,6 +343,9 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		}
 		for(pluginURL in _userPlugins) {
 			if (_userPlugins.hasOwnProperty(pluginURL) && pluginURL !== "_expires") {
+				if (pluginURL.indexOf("://") === -1) {
+					pluginURL = require.toUrl(pluginURL)
+				}
 				pluginURL = _normalizeURL(pluginURL);
 				key = "plugin." + pluginURL;
 				if (_storage[key]) {

@@ -31,7 +31,7 @@ dojo.addOnLoad(function() {
 	new mDialogs.DialogService(serviceRegistry);
 	var selection = new mSelection.Selection(serviceRegistry);
 	new mSshTools.SshService(serviceRegistry);
-	var preferenceService = new mPreferences.PreferencesService(serviceRegistry, "/prefs/user");
+	var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
 	// Git operations
