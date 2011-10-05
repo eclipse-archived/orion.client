@@ -385,9 +385,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				
 				span = dojo.create("span", null, col, "only");
 				if(item.type ===  "file"){
-					this.getExpandImage(tableRow, span, require.toUrl("images/file.gif"));
-					//dojo.create("img", {src: require.toUrl("images/none.png"), style: "vertical-align: middle"}, span, "last");
-					//dojo.create("img", {src: require.toUrl("images/file.gif"), style: "vertical-align: middle; margin-right: 4px"}, span, "last");
+					this.getExpandImage(tableRow, span, "core-sprite-file");
 				} else {
 					var that = this;
 					dojo.connect(tableRow, "onclick", tableRow, function() {

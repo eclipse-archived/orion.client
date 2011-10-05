@@ -384,8 +384,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							var sep;
 							// Only draw a separator if there is a non-separator preceding it.
 							if (parent.childNodes.length > 0 && !this._isLastChildSeparator(parent, renderType)) {
-								sep = this.generateSeparatorImage();
-								dojo.place(sep, parent, "last");
+								sep = this.generateSeparatorImage(parent);
 							}
 							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText, cssClassCmdOver, cssClassCmdLink); 
 
@@ -393,8 +392,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							if (parent.childNodes.length > 0) {
 								var lastRendered = parent.childNodes[parent.childNodes.length - 1];
 								if (lastRendered !== sep) {
-									sep = this.generateSeparatorImage();
-									dojo.place(sep, parent, "last");
+									sep = this.generateSeparatorImage(parent);
 								}
 							}
 						}
@@ -507,16 +505,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		},
 		
 		/**
-		 * Return an image object that is appropriate for using a separator between different groups
+		 * Add a dom node appropriate for using a separator between different groups
 		 * of commands.  This function is useful when a page is precisely arranging groups of commands
 		 * (in a table or contiguous spans) and needs to use the same separator that the command service
 		 * would use when rendering different groups of commands.
 		 */
-		generateSeparatorImage: function() {
-			var sep = new Image();
-			// TODO should get this from CSS
-			sep.src = require.toUrl("images/sep.gif");
-			dojo.addClass(sep, "commandImage");
+		generateSeparatorImage: function(parent) {
+			var sep = dojo.create("span", null, parent, "last");
+			dojo.addClass(sep, "core-sprite-sep");  // location in sprite
+			dojo.addClass(sep, "commandImage");   // expected spacing
+			dojo.addClass(sep, "commandSprite");  // sets sprite background
 			dojo.addClass(sep, "commandSeparator");
 			return sep;
 		}
@@ -563,7 +561,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
 			this.image = options.image || require.toUrl("images/none.png");
-			this.imageClass = options.imageClass;
+			this.imageClass = options.imageClass;   // points to the location in a sprite
+			this.spriteClass = options.spriteClass || "commandSprite"; // defines the background image containing sprites
 			this.visibleWhen = options.visibleWhen;
 			// when false, affordances for commands are always shown.  When true,
 			// they are shown on hover only.
@@ -640,7 +639,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					dojo.addClass(image, cssClass);
 				}	
 				if (this.imageClass) {
-					dojo.addClass(image, "commandSprite");
+					dojo.addClass(image, this.spriteClass);
 					dojo.addClass(image, this.imageClass);
 				} 
 				dojo.place(image, link, "last");
@@ -715,7 +714,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			menuitem.eclipseCommand = this;
 			parent.addChild(menuitem);
 			if (this.imageClass) {
-				dojo.addClass(menuitem.iconNode, 'commandSprite');
+				dojo.addClass(menuitem.iconNode, this.spriteClass);
 			} else if (this.image) {
 				dojo.addClass(menuitem.iconNode, 'commandImage');
 				if (cssClass) {
