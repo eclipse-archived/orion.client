@@ -369,13 +369,13 @@ orion.GitCommitZoneRenderer = (function() {
 			var actionTable = dojo.create("table", null,actionDiv);
 			var actionRow1 = dojo.create("tr", null, actionTable);
 			var actionCol1 = dojo.create("td", {nowrap :true}, actionRow1, "last");
-			dojo.create("button", {id:"commit", innerHTML: "Commit"}, actionCol1, "last");
+			dojo.create("button", {id:"commit", innerHTML: "Commit", title: "Record changes in the active branch"}, actionCol1, "last");
 			
 			dojo.create("tr", {width:"100%" ,height:"20px"}, actionTable);
 
 			var actionRow2 = dojo.create("tr", null, actionTable);
 			var actionCol2 = dojo.create("td", {nowrap :true}, actionRow2, "last");
-			dojo.create("input", {id:"amend", type:"checkbox" ,value: "Amend"}, actionCol2, "last");
+			dojo.create("input", {id:"amend", type:"checkbox" ,value: "Amend", title: "Amend last commit"}, actionCol2, "last");
 			actionCol2.appendChild(document.createTextNode(" Amend"));
 			if(	renderSeparator)
 				dojo.create("table", {width:"100%", height:"10px"}, this._commitZone);
