@@ -140,17 +140,13 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 		},
 		
 		showSearchResultInTree: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
-			// WORKAROUND - window.location.hostname is returning "http://localhost:8080/localhost" in FF 3.6.10 
-			// surely there is a better way
 			var nonhash= window.location.href.split('#')[0];
-			//var hostname = nonhash.substring(0,nonhash.length - window.location.pathname.length);
 			var foundValidHit = false;
 			var resultLocation = [];
 			dojo.empty(resultsNode);
 			var token = jsonData.responseHeader.params.q;
 			token= token.substring(token.indexOf("}")+1);
 			if (jsonData.response.numFound > 0) {
-				//var table = document.createElement('table');
 				for (var i=0; i < jsonData.response.docs.length; i++) {
 					var hit = jsonData.response.docs[i];
 					// ignore hits in the file that launched the search
@@ -166,7 +162,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 						} else {
 							loc = hit.Location;
 						}
-						resultLocation.push({linkLocation: /*hostname +*/ require.toUrl("edit/edit.html") +"#" + loc, location: loc, name: hit.Name});
+						resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, name: hit.Name});
 						
 					}
 				}
@@ -186,10 +182,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 		},
 		
 		showSearchResultInList: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
-			// WORKAROUND - window.location.hostname is returning "http://localhost:8080/localhost" in FF 3.6.10 
-			// surely there is a better way
 			var nonhash= window.location.href.split('#')[0];
-			//var hostname = nonhash.substring(0,nonhash.length - window.location.pathname.length);
 			var foundValidHit = false;
 			dojo.empty(resultsNode);
 			var token = jsonData.responseHeader.params.q;
@@ -225,7 +218,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 						} else {
 							loc = hit.Location;
 						}
-						hitLink.setAttribute('href', /*hostname + */require.toUrl("edit/edit.html") + "#" + loc);
+						hitLink.setAttribute('href', require.toUrl("edit/edit.html") + "#" + loc);
 						col.appendChild(hitLink);
 						
 						if (!hideSummaries && jsonData.highlighting && jsonData.highlighting[hit.Id] && jsonData.highlighting[hit.Id].Text) {
