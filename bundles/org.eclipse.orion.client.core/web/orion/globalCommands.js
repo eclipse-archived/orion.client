@@ -73,7 +73,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	
 	// BEGIN BOTTOM BANNER FRAGMENT
 	// styling of the surrounding div (text-align, etc) is in ide.css "footer"
-	var bottomHTMLFragment = '<img src="http://dev.eclipse.org/small_icons/emblems/emblem-important.png"/> ' + 
+	var bottomHTMLFragment = '<span class="imageSprite core-sprite-warning"></span> ' + 
 		'This is a Beta build of Orion.  You can use it, play with it and explore the ' +
 		'capabilities but BEWARE your data may be lost. &nbsp;| '+ 
 		'<a href="http://wiki.eclipse.org/Orion/FAQ">FAQ</a> | ' + 
