@@ -1015,8 +1015,8 @@ orion.GitStatusController = (function() {
 		_generateCommands: function(){
 			var self = this;
 			var sbsCompareCommand = new mCommands.Command({
-				name: "Side by side compare",
-				tooltip: "Side by side compare",
+				name: "Side by Side Compare",
+				tooltip: "Show the side-by-side compare",
 				image: require.toUrl("git/images/open_compare.gif"),
 				id: "orion.sbsCompare",
 				hrefCallback: function(item) {
@@ -1028,7 +1028,7 @@ orion.GitStatusController = (function() {
 			});		
 
 			var showCommitterAndAuthorPanel = new mCommands.Command({
-				name : "Change committer or author",
+				name : "Change Committer or Author",
 				id : "orion.showCommitterAndAuthor",
 				callback : function(item) {
 					self._committerAndAuthorZoneRenderer.show();
@@ -1039,7 +1039,7 @@ orion.GitStatusController = (function() {
 			});
 			
 			var hideCommitterAndAuthorPanel = new mCommands.Command({
-				name : "Use default committer and author",
+				name : "Use Default Committer and Author",
 				id : "orion.hideCommitterAndAuthor",
 				callback : function(item) {
 					self._committerAndAuthorZoneRenderer.hide();
@@ -1050,8 +1050,8 @@ orion.GitStatusController = (function() {
 			});
 			
 			var checkoutCommand = new mCommands.Command({
-				name: "checkout",
-				tooltip: "checkout",
+				name: "Checkout",
+				tooltip: "Discard the selected unstaged change",
 				image: require.toUrl("git/images/checkout.gif"),
 				id: "orion.gitCheckout",
 				callback: function(item) {
@@ -1072,8 +1072,8 @@ orion.GitStatusController = (function() {
 			});		
 
 			var stageCommand = new mCommands.Command({
-				name: "stage",
-				tooltip: "Stage",
+				name: "Stage",
+				tooltip: "Stage the change",
 				image: require.toUrl("git/images/stage.gif"),
 				id: "orion.gitStage",
 				callback: function(item) {
@@ -1087,8 +1087,8 @@ orion.GitStatusController = (function() {
 			});		
 
 			var stageAllCommand = new mCommands.Command({
-				name: "stage selected",
-				tooltip: "Stage Selected",
+				name: "Stage Selected",
+				tooltip: "Stage the selected changes",
 				image: require.toUrl("git/images/stage_all.gif"),
 				id: "orion.gitStageAll",
 				callback: function(item) {
@@ -1101,8 +1101,8 @@ orion.GitStatusController = (function() {
 			});		
 
 			var unstageCommand = new mCommands.Command({
-				name: "unstage",
-				tooltip: "Unstage",
+				name: "Unstage",
+				tooltip: "Unstage the change",
 				image: require.toUrl("git/images/unstage.gif"),
 				id: "orion.gitUnstage",
 				callback: function(item) {
@@ -1115,8 +1115,8 @@ orion.GitStatusController = (function() {
 			});		
 
 			var unstageAllCommand = new mCommands.Command({
-				name: "unstageAll",
-				tooltip: "Unstage all",
+				name: "Unstage All",
+				tooltip: "Unstage all changes",
 				image: require.toUrl("git/images/unstage_all.gif"),
 				id: "orion.gitUnstageAll",
 				callback: function(item) {
@@ -1130,13 +1130,12 @@ orion.GitStatusController = (function() {
 
 			var resetChangesCommand = new mCommands.Command({
 				name: "Reset",
-				tooltip: "Reset all changes",
+				tooltip: "Discard all staged and unstaged changes",
 				image: require.toUrl("git/images/refresh.gif"),
 				id: "orion.gitResetChanges",
 				callback: function(item) {
 					self._registry.getService("orion.page.dialog").then(function(service) {
-						service.confirm("The content of the working directory will be reset to content on the index.\n" + 
-								"All unstaged and staged changes in the working directory will be discarded and cannot be recovered.\n" +
+						service.confirm("All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.\n" +
 								"Are you sure you want to continue?",
 						function(doit) {
 							if (!doit) {
@@ -1167,7 +1166,7 @@ orion.GitStatusController = (function() {
 			});	
 			
 			var rebaseSkipCommand = new mCommands.Command({
-				name: "Skip patch",
+				name: "Skip Patch",
 				tooltip: "Skip patch",
 				id: "orion.gitRebaseSkip",
 				callback: function(item) {
