@@ -31,7 +31,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.currentDetail = null;
 		this.indexedFileItems = null;
 		this.modelLocHash = [];
-		this.restoreStatus();
 		this._lineDelimiter = "\n"; 
 		this.explorer = explorer;
 	}
@@ -44,28 +43,31 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultModel.prototype.storeStatus = function() {
-		window.sessionStorage["search_result_useFlatList"] = JSON.stringify(this.useFlatList);
-		window.sessionStorage["search_result_currentFileIndex"] = JSON.stringify(this.currentFileIndex);
-		window.sessionStorage["search_result_currentDetailIndex"] = JSON.stringify(this.currentDetailIndex);
+		window.sessionStorage[this.searchStr + "_search_result_useFlatList"] = JSON.stringify(this.useFlatList);
+		window.sessionStorage[this.searchStr + "_search_result_currentFileIndex"] = JSON.stringify(this.currentFileIndex);
+		window.sessionStorage[this.searchStr + "_search_result_currentDetailIndex"] = JSON.stringify(this.currentDetailIndex);
 	};
 	
 	SearchResultModel.prototype.restoreStatus = function() {
 		this.useFlatList = false;
-		var useFlatList = window.sessionStorage["search_result_useFlatList"];
+		var useFlatList = window.sessionStorage[this.searchStr + "_search_result_useFlatList"];
 		if (typeof useFlatList=== "string") {
 			if (useFlatList.length > 0) {
 				this.useFlatList= JSON.parse(useFlatList);
 			} 
 		}
 		this.currentFileIndex = 0;
-		var currentFileIndex = window.sessionStorage["search_result_currentFileIndex"];
+		var currentFileIndex = window.sessionStorage[this.searchStr + "_search_result_currentFileIndex"];
 		if (typeof currentFileIndex=== "string") {
 			if (currentFileIndex.length > 0) {
 				this.currentFileIndex= JSON.parse(currentFileIndex);
 			} 
 		}
+		if(this.currentFileIndex < 0 || this.currentFileIndex >= this.indexedFileItems.length){
+			this.currentFileIndex = 0;
+		}
 		this.currentDetailIndex = 0;
-		var currentDetailIndex = window.sessionStorage["search_result_currentDetailIndex"];
+		var currentDetailIndex = window.sessionStorage[this.searchStr + "_search_result_currentDetailIndex"];
 		if (typeof currentDetailIndex=== "string") {
 			if (currentDetailIndex.length > 0) {
 				this.currentDetailIndex= JSON.parse(currentDetailIndex);
@@ -206,6 +208,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 		
 		this.prepareFileItems();
+		this.restoreStatus();
 		onComplete();
 	};
 	
@@ -293,7 +296,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var result = [];
 		while(true){
 			i = lineString.indexOf(searchStr, startIndex);
-			if (i === -1) {
+			if (i < 0) {
 				break;
 			} else {
 				result.push({startIndex: i});
@@ -331,12 +334,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	SearchResultModel.prototype._fileExpanded = function(fileIndex, detailIndex){
 		var filItem = this.indexedFileItems[fileIndex];
 		if(filItem.children && filItem.children.length > 0){
-			if(detailIndex > -2){
-				if(detailIndex < 0) {
-					detailIndex = 0;
-				}
-			} else {
+			if(detailIndex < 0){
 				detailIndex = filItem.children.length -1;
+			} else if (detailIndex >= filItem.children.length){
+				detailIndex = 0;
 			}
 			return  {childrenNumber: filItem.children.length, childDiv: dojo.byId(this.getId(filItem.children[detailIndex])/*+"NameColumn"*/)};
 		}
@@ -363,8 +364,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 						  onComplete(parentItem.children);
 						  if(this.highlightSelectionLater){
 							  if(parentItem === this.indexedFileItems[this.currentFileIndex]){
-								  if(this.currentDetailIndex < -1) {
+								  if(this.currentDetailIndex < 0) {
 									  this.currentDetailIndex = parentItem.children.length -1;
+								  } else if (this.currentDetailIndex >= parentItem.children.length){
+									  this.currentDetailIndex = 0;
 								  }
 								  var expanded = this._fileExpanded(this.currentFileIndex, this.currentDetailIndex);
 								  dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
@@ -553,6 +556,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	SearchResultExplorer.prototype.startUp = function() {
 		var that = this;
 		this.model.loadOneFileMetaData(0, function(onComplete){
+			that.initCommands();
 			that.createTree(that.parentNode, that.model);
 			that.gotoCurrent();
 		});
@@ -562,7 +566,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.model.useFlatList = flatList;
 		this.model.storeStatus();
 		this.createTree(this.parentNode, this.model);
-		//this.myTree.refresh(this.model.getRealRoot());
 		this.gotoCurrent();
 	};
 	
@@ -623,9 +626,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		
 		var filItem = this.model.indexedFileItems[this.model.currentFileIndex];
 		if(filItem.children && filItem.children.length > 0){
-			if(this.model.currentDetailIndex < -1) {
-				this.model.currentDetailIndex = filItem.children.length - 1;
-			}
 			var newDetailIndex, newFileIndex;
 			if(next) {
 				newDetailIndex = this.model.currentDetailIndex + 1;
@@ -634,7 +634,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			}
 			if(newDetailIndex < 0){
 				newFileIndex = this.model.currentFileIndex -1;
-				newDetailIndex = -100;
+				newDetailIndex = -1;
 			} else if(newDetailIndex > ( filItem.children.length - 1) ){
 				newFileIndex = this.model.currentFileIndex +1;
 				newDetailIndex = 0;
@@ -644,7 +644,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			
 			if(newFileIndex < 0) {
 				newFileIndex = this.model.indexedFileItems.length -1;
-			} else if(newFileIndex > (this.model.indexedFileItems.length -1)) {
+			} else if(newFileIndex >= this.model.indexedFileItems.length) {
 				newFileIndex = 0;
 			}
 			
@@ -681,7 +681,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultExplorer.prototype.gotoNext = function(next, calculateNext)	{
 		var curentExpanded = this.model._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex); 
-		if(curentExpanded.childDiv /*&& this.model.currentDetailIndex > -1*/) {
+		if(curentExpanded.childDiv) {
 			dojo.toggleClass(curentExpanded.childDiv, "currentSearchMatch", false);
 		}
 		var nextItem = this._decideNext(next, calculateNext);
@@ -692,6 +692,11 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			this.model.setCurrent(nextItem.newFileIndex, nextItem.newDetailIndex);
 			if(newExpanded.childrenNumber > 0) {
 				this.model.highlightSelectionLater = false;
+				if(nextItem.newDetailIndex < 0 ){
+					this.model.setCurrent(nextItem.newFileIndex, newExpanded.childrenNumber - 1);
+				} else if(nextItem.newDetailIndex >= newExpanded.childrenNumber){
+					this.model.setCurrent(nextItem.newFileIndex, 0);
+				}
 			}
 			if(newExpanded.childDiv)	{
 				dojo.toggleClass(newExpanded.childDiv, "currentSearchMatch", true);
@@ -700,9 +705,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				}
 				return;
 			}
-		} else if(this.model.currentDetailIndex === -1){
-			this.model.currentDetailIndex = 0;
-		}
+		} 
 		var parentChain = [];
 		var filItem = this.model.indexedFileItems[this.model.currentFileIndex];
 		this.findUIParentChain(filItem, parentChain);
