@@ -218,7 +218,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 				for (i=0; i<favorites.length; i++) {
 					var stripped = stripPath(favorites[i].path);
 					if (!contains(sourceLocations, stripped)) {
-						choices.push({name: favorites[i].name, image: require.toUrl("images/makeFavorite.gif"), path: stripped, callback: callback});
+						choices.push({name: favorites[i].name, imageClass: "core-sprite-makeFavorite", path: stripped, callback: callback});
 					}
 				}
 			}

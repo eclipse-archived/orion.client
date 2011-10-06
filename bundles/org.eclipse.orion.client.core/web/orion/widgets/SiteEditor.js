@@ -99,7 +99,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			var addMappingCommand = new mCommands.Command({
 				name: "Add",
 				tooltip: "Add a directory mapping to the site configuration",
-				image: require.toUrl("images/add.gif"),
+				imageClass: "core-sprite-add",
 				id: "eclipse.site.mappings.add",
 				visibleWhen: function(item) {
 					return true;
@@ -115,7 +115,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		var saveCommand = new mCommands.Command({
 				name: "Save",
 				tooltip: "Save the site configuration",
-				image: require.toUrl("/images/save.gif"),
+				imageClass: "core-sprite-save",
 				id: "eclipse.site.save",
 				visibleWhen: function(item) {
 					return item.Location /*looks like a site config*/;
@@ -174,7 +174,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		var choices = dojo.map(projects, function(project) {
 				return {
 					name: "/" + project.Name,
-					image: require.toUrl("images/folder.gif"),
+					imageClass: "core-sprite-folder",
 					path: mSiteUtils.makeRelativeFilePath(project.Location),
 					callback: addMappingCallback
 				};
@@ -185,7 +185,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		}
 		choices.push({
 			name: "Choose folder&#8230;",
-			image: require.toUrl("images/folder.gif"),
+			imageClass: "core-sprite-folder",
 			callback: dojo.hitch(this, function() {
 				var dialog = new orion.widgets.DirectoryPrompterDialog({
 					serviceRegistry: this.serviceRegistry,
@@ -198,7 +198,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				dialog.startup();
 				dialog.show();
 			})});
-		choices.push({name: "URL", image: require.toUrl("images/link.gif"), callback: addUrl});
+		choices.push({name: "URL", imageClass: "core-sprite-link", callback: addUrl});
 		return choices;
 	},
 	
