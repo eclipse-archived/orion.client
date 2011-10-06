@@ -744,12 +744,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				if (choice.name) {
 					menuitem = new dijit.MenuItem({
 						label: choice.name,
+						iconClass: choice.imageClass,
 						onClick: this.makeChoiceCallback(choice, items)
 					});
-					if (choice.image) {
+					if (choice.imageClass) {
+						dojo.addClass(menuitem.iconNode, choice.spriteClass || 'commandSprite');
+					} else if (choice.image) {
 						dojo.addClass(menuitem.iconNode, 'commandImage');
 						menuitem.iconNode.src = choice.image;
-					}
+					}			
 				} else {  // anything not named is a separator
 					menuitem = new dijit.MenuSeparator();
 				}

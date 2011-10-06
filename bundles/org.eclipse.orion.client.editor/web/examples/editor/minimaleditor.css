@@ -1,3 +1,6 @@
+@import "../../orion/textview/rulers.css";
+@import "../../orion/textview/annotations.css";
+
 body {
 	margin: 0;
 	padding: 0;
