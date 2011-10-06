@@ -183,7 +183,7 @@ exports.setUpEditor = function(isReadOnly){
 				model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
 				stylesheet: [require.toUrl("orion/textview/textview.css"), require.toUrl("orion/textview/rulers.css"),
 				             require.toUrl("examples/textview/textstyler.css"), require.toUrl("css/default-theme.css"),
-				             require.toUrl("orion/editor/editor.css")],
+				             require.toUrl("orion/textview/annotations.css")],
 				tabSize: 4,
 				readonly: isReadOnly
 			});
@@ -432,9 +432,7 @@ exports.setUpEditor = function(isReadOnly){
 		}
 	};
 
-	var annotationFactory = new mEditorFeatures.AnnotationFactory({
-		error: require.toUrl("images/problem.gif"),
-		warning: require.toUrl("images/warning.gif")});
+	var annotationFactory = new mEditorFeatures.AnnotationFactory();
 	
 	var editor = new mEditor.Editor({
 		textViewFactory: textViewFactory,

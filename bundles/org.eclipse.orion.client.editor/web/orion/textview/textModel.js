@@ -263,6 +263,7 @@ orion.textview.TextModel = (function() {
 		getText: function(start, end) {
 			if (start === undefined) { start = 0; }
 			if (end === undefined) { end = this.getCharCount(); }
+			if (start === end) { return ""; }
 			var offset = 0, chunk = 0, length;
 			while (chunk<this._text.length) {
 				length = this._text[chunk].length; 
