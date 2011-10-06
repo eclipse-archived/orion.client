@@ -31,11 +31,29 @@
 				}
 				return traced;
 			}
+			
+			function makeParentRelative(location) {
+				if (window.location.origin === parent.location.origin) {
+					return location.substring(parent.location.origin.length);
+				}
+				return location;
+			}
 
 			var service = new eclipse.FileServiceImpl();
 			var provider = new eclipse.PluginProvider();
+			
+			var temp = document.createElement('a');
+			temp.href = "../file";
+			
+			// note global
+			fileBase = makeParentRelative(temp.href);	
+			temp.href = "../workspace";
+			// note global
+			workspaceBase = makeParentRelative(temp.href);	
+			
+			
 			//provider.registerServiceProvider("orion.core.file", trace(service), {Name:'Orion contents', top:'/file/', pattern:'/file/|/workspace'});
-			provider.registerServiceProvider("orion.core.file", service, {Name:'Orion contents', top:'/file/', pattern:'/file/|/workspace'});
+			provider.registerServiceProvider("orion.core.file", service, {Name:'Orion contents', top:fileBase, pattern:fileBase + "|" + workspaceBase});
 			service.dispatchEvent = provider.dispatchEvent;
 			provider.connect();
 		};

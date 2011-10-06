@@ -1232,7 +1232,7 @@ orion.GitStatusController = (function() {
 			var that = this;
 			var nextDiffCommand = new mCommands.Command({
 				name : "Next Diff",
-				imageClass : "core-sprite-move_down"),
+				imageClass : "core-sprite-move_down",
 				id: "orion.compare.nextDiff",
 				groupId: "orion.compareGroup",
 				/*
@@ -1245,7 +1245,7 @@ orion.GitStatusController = (function() {
 			}});
 			var prevDiffCommand = new mCommands.Command({
 				name : "Previous Diff",
-				imageClass : "core-sprite-move_up"),
+				imageClass : "core-sprite-move_up",
 				id: "orion.compare.prevDiff",
 				groupId: "orion.compareGroup",
 				

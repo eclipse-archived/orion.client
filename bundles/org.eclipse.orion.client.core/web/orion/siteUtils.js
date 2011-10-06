@@ -186,12 +186,14 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 	 * @function
 	 */
 	function makeFullFilePath(target) {
-		var relativePath = "/file" + target;
+		var relativePath = require.toUrl("file" + target);
 		var segments = target.split("/");
 		if (_removeEmptyElements(segments).length === 1) {
 			relativePath += "/";
 		}
-		return mUtil.makeFullPath(relativePath);
+		var a = document.createElement('a');
+	    a.href = relativePath;
+	    return a.href;
 	}
 	//return the module exports
 	return {
