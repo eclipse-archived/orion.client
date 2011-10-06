@@ -444,8 +444,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 							}
 						}
 					});
-					dojo.create("img", {src: require.toUrl("images/none.png"), style: "vertical-align: middle"}, span, "last");
-					dojo.create("img", {src: require.toUrl("images/rightarrow.gif"), style: "vertical-align: middle; margin-right: 4px"}, span, "last");
+					var icon = dojo.create("span", null, span, "last");
+					dojo.addClass(icon, "imageSprite");
+					dojo.addClass(icon, "core-sprite-none");
+					icon = dojo.create("span", null, span, "last");
+					dojo.addClass(icon, "imageSprite");
+					dojo.addClass(icon, "core-sprite-rightarrow");
 				}
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
 				dojo.place(document.createTextNode(item.name), link, "only");
@@ -484,7 +488,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var that = this;
 		var nextResultCommand = new mCommands.Command({
 			name : "Next result",
-			image : require.toUrl("images/move_down.gif"),
+			imageClass : "core-sprite-move_down",
 			id: "orion.search.nextResult",
 			groupId: "orion.searchGroup",
 			callback : function() {
@@ -492,7 +496,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}});
 		var prevResultCommand = new mCommands.Command({
 			name : "Previous result",
-			image : require.toUrl("images/move_up.gif"),
+			imageClass : "core-sprite-move_up",
 			id: "orion.search.prevResult",
 			groupId: "orion.searchGroup",
 			callback : function() {
@@ -500,7 +504,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}});
 		var expandAllCommand = new mCommands.Command({
 			name : "Expand all results",
-			image : require.toUrl("images/expandAll.gif"),
+			imageClass : "core-sprite-expandAll",
 			id: "orion.search.expandAll",
 			groupId: "orion.searchGroup",
 			callback : function() {
@@ -508,7 +512,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}});
 		var collapseAllCommand = new mCommands.Command({
 			name : "Collapse all results",
-			image : require.toUrl("images/collapseAll.gif"),
+			imageClass : "core-sprite-collapseAll",
 			id: "orion.search.collapseAll",
 			groupId: "orion.searchGroup",
 			callback : function() {
