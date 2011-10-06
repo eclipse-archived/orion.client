@@ -268,76 +268,58 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 		view.addRuler(overviewRuler);
 	}
 	
-	function createJavaSample() {
+	function setupView(text, lang) {
 		checkView();
-		view.setText("loading java file");
-		var file = getFile("text.txt");
 		if (styler) {
 			styler.destroy();
 			styler = null;
 		}
-		styler = new mTextStyler.TextStyler(view, "java", view.annotationModel);
-		view.setText(file);
+		switch (lang) {
+			case "js":
+			case "java":
+			case "css":
+				styler = new mTextStyler.TextStyler(view, lang, view.annotationModel);
+				break;
+			case "html":
+				styler = new mTextMateStyler.TextMateStyler(view, mHtmlGrammar.HtmlGrammar.grammar);
+				break;
+		}
+		view.setText(text);
+	}
+	
+	function createJavaSample() {
+		setupView(getFile("text.txt"), "java");
 	}
 	
 	function createJavaScriptSample() {
-		checkView();
-		var file =  getFile(require.toUrl("orion/textview/textView.js"));
-		if (styler) {
-			styler.destroy();
-			styler = null;
-		}
-		styler = new mTextStyler.TextStyler(view, "js", view.annotationModel);
-		view.setText(file);
+		setupView(getFile("/orion/textview/textView.js"), "js");
 	}
 
 	function createHtmlSample() {
-		checkView();
-		var file =  getFile(require.toUrl("examples/textview/demo.html"));
-		if (styler) {
-			styler.destroy();
-			styler = null;
-		}
-		styler = new mTextMateStyler.TextMateStyler(view, mHtmlGrammar.HtmlGrammar.grammar);
-		view.setText(file);
+		setupView(getFile("/examples/textview/demo.html"), "html");
 	}
 	
 	function createPlainTextSample() {
-		checkView();
 		var lineCount = 50000;
 		var lines = [];
 		for(var i = 0; i < lineCount; i++) {
 			lines.push("This is the line of text number "+i);
 		}
-		if (styler) {
-			styler.destroy();
-			styler = null;
-		}
-		view.setText(lines.join("\r\n"));
+		setupView(lines.join("\r\n"), null);
 	}
 	
 	function createBidiTextSample() {
-		checkView();
 		var lines = [];
 		lines.push("Hello \u0644\u0645\u0646\u0647");
-		if (styler) {
-			styler.destroy();
-			styler = null;
-		}
-		view.setText(lines.join("\r\n"));
+		setupView(lines.join("\r\n"), null);
 	}
-	
 
 	function test() {
 		runTestCase(new AnnotationModelTestCase(view));
 	}
 	
 	function performanceTest() {
-		checkView();
-		if (styler) {
-			styler.destroy();
-			styler = null;
-		}
+		setupView("", null);
 		/* Note: PerformanceTest is not using require js */
 		var test = new PerformanceTest(view);
 		var select = document.getElementById("performanceTestSelect");
