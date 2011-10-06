@@ -47,7 +47,7 @@ orion.editor.LineNumberRulerFactory = (function() {
 	}
 	LineNumberRulerFactory.prototype = {
 		createLineNumberRuler: function(annotationModel) {
-			return new orion.textview.LineNumberRuler(annotationModel, "left", {styleClass: "lineNumberRuler"}, {styleClass: "lineNumberRuler-odd"}, {styleClass: "lineNumberRuler-even"});
+			return new orion.textview.LineNumberRuler(annotationModel, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"});
 		}
 	};
 	return LineNumberRulerFactory;
@@ -57,9 +57,10 @@ orion.editor.FoldingRulerFactory = (function() {
 	function FoldingRulerFactory() {
 	}
 	FoldingRulerFactory.prototype = {
+		foldingType: "orion.annotation.folding",
 		createFoldingRuler: function(annotationModel) {
-			this.foldingRuler = new orion.textview.FoldingRuler(annotationModel, "left", {styleClass: "foldingRuler"});
-			this.foldingRuler.addAnnotationType("orion.annotation.folding");
+			this.foldingRuler = new orion.textview.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"});
+			this.foldingRuler.addAnnotationType(this.foldingType);
 			return this.foldingRuler;
 		}
 	};
@@ -68,19 +69,12 @@ orion.editor.FoldingRulerFactory = (function() {
 
 
 orion.editor.AnnotationFactory = (function() {
-	function AnnotationFactory(imageUrls) {
-		this.imageUrls = {};
-		if (typeof imageUrls === "string") {
-			this.imageUrls.error = imageUrls;
-		} else if (typeof imageUrls === "object") {
-			for (var severity in imageUrls) {
-				if (imageUrls.hasOwnProperty(severity)) {
-					this.imageUrls[severity] = imageUrls[severity];
-				}
-			}
-		}
+	function AnnotationFactory() {
 	}
 	AnnotationFactory.prototype = {
+		errorType: "orion.annotation.error",
+		warningType: "orion.annotation.warning",
+		taskType: "orion.annotation.task",
 		createAnnotationModel: function(model) {
 			if (model.getBaseModel) { model = model.getBaseModel(); }
 			this.annotationModel = new orion.textview.AnnotationModel(model);
@@ -93,11 +87,15 @@ orion.editor.AnnotationFactory = (function() {
 		},
 
 		createAnnotationRulers: function(annotationModel) {
-			this.annotationRuler = new orion.textview.AnnotationRuler(annotationModel, "left", {styleClass: "annotationRuler"});
-			this.overviewRuler = new orion.textview.OverviewRuler(annotationModel, "right", {styleClass: "overviewRuler"});
-			var type = "orion.annotation.problem";
-			this.annotationRuler.addAnnotationType(type);
-			this.overviewRuler.addAnnotationType(type);
+			this.annotationRuler = new orion.textview.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotations"});
+			this.overviewRuler = new orion.textview.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"});
+			this.annotationRuler.setMultiAnnotationOverlay({rulerHTML: "<div class='annotationHTML overlay'></div>"});
+			this.annotationRuler.addAnnotationType(this.errorType);
+			this.overviewRuler.addAnnotationType(this.errorType);
+			this.annotationRuler.addAnnotationType(this.warningType);
+			this.overviewRuler.addAnnotationType(this.warningType);
+			this.annotationRuler.addAnnotationType(this.taskType);
+			this.overviewRuler.addAnnotationType(this.taskType);
 			return {annotationRuler: this.annotationRuler, overviewRuler: this.overviewRuler};
 		},
 		
@@ -106,8 +104,8 @@ orion.editor.AnnotationFactory = (function() {
 			if (!annotationModel) {
 				return;
 			}
-			var type = "orion.annotation.problem";
-			annotationModel.removeAnnotations(type);
+			annotationModel.removeAnnotations(this.errorType);
+			annotationModel.removeAnnotations(this.warningType);
 			if (!problems) { return; }
 			var annotations = [];
 			var model = annotationModel.getTextModel();
@@ -121,14 +119,14 @@ orion.editor.AnnotationFactory = (function() {
 					var lineStart = model.getLineStart(lineIndex);
 					var severity = problem.severity;
 					var annotation = {
-						type: type,
+						type: this[severity + "Type"],
 						start: lineStart + problem.start - 1,
 						end: lineStart + problem.end,
 						rulerTitle: escapedDescription,
-						rulerHTML: "<img style='vertical-align:middle;' src='" + this.imageUrls[severity] + "'></img>",
-						rulerStyle: {styleClass: "annotationProblem"},
-						overviewStyle: {styleClass: "annotationProblemOverview" + " " + severity},
-						rangeStyle: {styleClass: "annotationProblemRange" + " " + severity}
+						rulerHTML: "<div class='" + "annotationHTML" + " " + severity + "'></div>",
+						rulerStyle: {styleClass: "annotation" + " " + severity},
+						overviewStyle: {styleClass: "annotationOverview" + " " + severity},
+						rangeStyle: {styleClass: "annotationRange" + " " + severity}
 					};
 					annotations.push(annotation);
 				}

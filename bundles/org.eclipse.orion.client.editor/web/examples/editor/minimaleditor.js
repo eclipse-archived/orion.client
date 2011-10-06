@@ -20,15 +20,13 @@ window.onload = function(){
 			parent: editorDomNode,
 			stylesheet: [ "../../orion/textview/textview.css",
 							"../../orion/textview/rulers.css",
-							"../../orion/editor/editor.css",
+							"../../orion/textview/annotations.css",
 							"../textview/textstyler.css"],
 			tabSize: 4
 		});
 	};
 	
-	var annotationFactory = new orion.editor.AnnotationFactory({
-		error: "../../images/problem.gif",
-		warning: "../../images/warning.gif"});
+	var annotationFactory = new orion.editor.AnnotationFactory();
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 		
@@ -50,7 +48,11 @@ window.onload = function(){
 					if (text.charAt(i) === 'z') {
 						var line = editor.getTextView().getModel().getLineAtOffset(i) + 1;
 						var character = i - editor.getTextView().getModel().getLineStart(line);
-						problems.push({character: character, line: line, reason: "I don't like the letter 'z'"});
+						problems.push({
+							start: character,
+							end: character + 1,
+							severity: "error",
+							description: "I don't like the letter 'z'"});
 					}
 				}
 				annotationFactory.showProblems(problems);

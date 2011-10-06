@@ -122,12 +122,10 @@ orion.textview.Ruler = (function() {
 					}
 				}
 			}
-			if (!this._multiAnnotation) {
+			if (!this._multiAnnotation && this._multiAnnotationOverlay) {
 				for (var k in result) {
 					if (result[k]._multiple) {
-						// TODO: next line has a bug -- the image url will be busted in some deployments
-						// instead should use a class and have the css file provide the image or if really desperate use a data url
-						result[k].html = "<div>" + result[k].html + "<img style='position:relative;vertical-align:top;top:-7px;float:right;z-index:2;' src='/examples/textview/images/plus.png'/></div>";
+						result[k].html = result[k].html + this._multiAnnotationOverlay.rulerHTML;
 					}
 				}
 			}
@@ -172,6 +170,23 @@ orion.textview.Ruler = (function() {
 			return this._rulerStyle;
 		},
 		/**
+		 * Returns the widest annotation which determines the width of the ruler.
+		 * <p>
+		 * If the ruler does not have a fixed width it should provide the widest
+		 * annotation to avoid the ruler from changing size as the view scrolls.
+		 * </p>
+		 * <p>
+		 * This method is called the the text view when the ruler is redrawn.
+		 * </p>
+		 *
+		 * @returns {orion.textview.Annotation} the annotation for the generic line.
+		 *
+		 * @see #getAnnotations
+		 */
+		getWidestAnnotation: function() {
+			return null;
+		},
+		/**
 		 * Returns whether the ruler shows annotations of the specified type.
 		 *
 		 * @param {Object} the annotation type 
@@ -213,6 +228,23 @@ orion.textview.Ruler = (function() {
 			}
 		},
 		/**
+		 * Sets the annotation that is displayed when a given line contains multiple
+		 * annotations.
+		 *
+		 * @param {orion.textview.Annotation} the annotation for lines with multiple annotations.
+		 */
+		setMultiAnnotation: function(annotation) {
+			this._multiAnnotation = annotation;
+		},
+		/**
+		 * Sets the annotation that overlays a line with multiple  annotations.
+		 *
+		 * @param {orion.textview.Annotation} the annotation overlay for lines with multiple annotations.
+		 */
+		setMultiAnnotationOverlay: function(annotation) {
+			this._multiAnnotationOverlay = annotation;
+		},
+		/**
 		 * Sets the view for the ruler.
 		 * <p>
 		 * This method is called the the text view when the ruler
@@ -229,23 +261,6 @@ orion.textview.Ruler = (function() {
 			if (this._onTextModelChanged && this._view) {
 				this._view.addEventListener("ModelChanged", this, this._onTextModelChanged);
 			}
-		},
-		/**
-		 * Returns the widest annotation which determines the width of the ruler.
-		 * <p>
-		 * If the ruler does not have a fixed width it should provide the widest
-		 * annotation to avoid the ruler from changing size as the view scrolls.
-		 * </p>
-		 * <p>
-		 * This method is called the the text view when the ruler is redrawn.
-		 * </p>
-		 *
-		 * @returns {orion.textview.Annotation} the annotation for the generic line.
-		 *
-		 * @see #getAnnotations
-		 */
-		getWidestAnnotation: function() {
-			return null;
 		},
 		/**
 		 * This event is sent when the user clicks a line decoration.
@@ -291,15 +306,6 @@ orion.textview.Ruler = (function() {
 		onMouseOver: this._onMouseMove,
 		onMouseOut: function(lineIndex, e) {
 			this._hideTooltip();
-		},
-		/**
-		 * Sets the annotation that is displayed when a given line contains multiple
-		 * annotations.
-		 *
-		 * @param {orion.textview.Annotation} the annotation for lines with multiple annotations.
-		 */
-		setMultiAnnotation: function(annotation) {
-			this._multiAnnotation = annotation;
 		},
 		_getNodeStyle: function(node, prop, defaultValue) {
 			var value;
@@ -474,7 +480,7 @@ orion.textview.Ruler = (function() {
 			var tooltipContent = this._getTooltip(document, lineIndex, annotations);
 			if (!tooltipContent) { return; }
 			var tooltip = this._tooltip = document.createElement("DIV");
-			tooltip.className = "ruler_tooltip";
+			tooltip.className = "rulerTooltip";
 			if (typeof tooltipContent === "string") {
 				tooltip.innerHTML = tooltipContent;
 			} else {
