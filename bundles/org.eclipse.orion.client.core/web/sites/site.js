@@ -33,12 +33,10 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 		var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
-		
 		var fileClient = new mFileClient.FileClient(serviceRegistry, function(reference) {
 			var pattern = reference.getProperty("pattern");
 			return pattern && pattern.indexOf("/") === 0;
 		});
-		
 		var siteService = new mSiteService.SiteService(serviceRegistry);
 		var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
