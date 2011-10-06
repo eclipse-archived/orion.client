@@ -20,8 +20,8 @@ window.onload = function(){
 			parent: editorDomNode,
 			stylesheet: [ "../../orion/textview/textview.css",
 							"../../orion/textview/rulers.css", 
+							"../../orion/textview/annotations.css",
 							"../textview/textstyler.css",
-							"../../orion/editor/editor.css",
 							"htmlStyles.css"],
 			tabSize: 4
 		});
@@ -38,7 +38,7 @@ window.onload = function(){
 	var syntaxHighlighter = {
 		styler: null, 
 		
-		highlight: function(fileName, textView) {
+		highlight: function(fileName, editor) {
 			if (this.styler) {
 				this.styler.destroy();
 				this.styler = null;
@@ -46,16 +46,14 @@ window.onload = function(){
 			if (fileName) {
 				var splits = fileName.split(".");
 				var extension = splits.pop().toLowerCase();
+				var textView = editor.getTextView();
+				var annotationModel = editor.getAnnotationModel();
 				if (splits.length > 0) {
 					switch(extension) {
 						case "js":
-							this.styler = new examples.textview.TextStyler(textView, "js");
-							break;
 						case "java":
-							this.styler = new examples.textview.TextStyler(textView, "java");
-							break;
 						case "css":
-							this.styler = new examples.textview.TextStyler(textView, "css");
+							this.styler = new examples.textview.TextStyler(textView, extension, annotationModel);
 							break;
 						case "html":
 							this.styler = new orion.editor.TextMateStyler(textView, orion.editor.HtmlGrammar.grammar);
@@ -66,9 +64,7 @@ window.onload = function(){
 		}
 	};
 	
-	var annotationFactory = new orion.editor.AnnotationFactory({
-		error: "../../images/problem.gif",
-		warning: "../../images/warning.gif"});
+	var annotationFactory = new orion.editor.AnnotationFactory();
 
 	function save(editor) {
 		editor.onInputChange(null, null, null, true);
@@ -134,7 +130,7 @@ window.onload = function(){
 	var contentName = "sample.js";  // for example, a file name, something the user recognizes as the content.
 	var initialContent = "window.alert('this is some javascript code');  // try pasting in some real code";
 	editor.onInputChange(contentName, null, initialContent);
-	syntaxHighlighter.highlight(contentName, editor.getTextView());
+	syntaxHighlighter.highlight(contentName, editor);
 	// end of code to run when content changes.
 	
 	window.onbeforeunload = function() {

@@ -1,7 +1,8 @@
+/* Styles for rulers */
 .ruler {
 	background-color: white;
 }
-.ruler.annotation {
+.ruler.annotations {
 	border-right: 1px solid lightgray;
 	width: 16px;
 }
@@ -16,48 +17,30 @@
 .ruler.overview {
 	width: 14px;
 }
-.ruler_lines {
+
+/* Styles for the line number ruler */
+.rulerLines {
 	background-color: white;
 }
-.ruler_lines.even
-.ruler_lines.odd {
+.rulerLines.even
+.rulerLines.odd {
 }
 
-.annotation {
-	cursor: pointer;
-}
-.annotation.todo,
-.annotation.breakpoint,
-.annotation.bookmark,
-.annotation.error,
-.annotation.warning
-.annotation.collapsed
-.annotation.expanded {
-}
-
-.annotation_overview {
-	cursor: pointer;
-	border-radius: 2px;
-	left: 2px;
-	width: 8px;
-}
-.annotation_overview.todo {
-	background-color: lightgreen;
-	border: 1px solid green;
-}
-.annotation_overview.breakpoint {
-	background-color: lightblue;
-	border: 1px solid blue;
-}
-.annotation_overview.bookmark {
-	background-color: yellow;
-	border: 1px solid orange;
-}
-.annotation_overview.error {
-	background-color: lightcoral;
-	border: 1px solid darkred;
-}
-.annotation_overview.warning {
-	background-color: Gold;
+/* Styles for the ruler tooltips */
+.rulerTooltip {
+	font-family: monospace;
+	font-size: 10pt;
+	background-color: InfoBackground;
+	color: InfoText;
+	padding: 2px;
+	border-radius: 4px;
 	border: 1px solid black;
+	z-index: 100;
+	position: absolute;
+	overflow: hidden;
+	white-space: pre;
+}
+.rulerTooltip em {
+	font-style: normal;
+	font-weight: bold;
 }

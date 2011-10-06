@@ -113,13 +113,13 @@ mSiteMappingsTable.Renderer = (function() {
 					handleAs: "json"
 				}).then(
 					function(children) {
-						col.innerHTML = '<a href="' + href + '" target="_new"><img src="' + require.toUrl("images/folder.gif") + '" title="Workspace folder ' + href + '"/></a>';
+						col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-folder" title="Workspace folder ' + href + '"/></a>';
 					}, function(error) {
-						col.innerHTML = '<a href="' + href + '" target="_new"><img src="' + require.toUrl("images/error.gif") + '" title="Workspace folder not found: ' + href + '"/></a>';
+						col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-error" title="Workspace folder not found: ' + href + '"/></a>';
 					});
 			} else {
 				href = mUtil.safeText(target);
-				col.innerHTML = '<a href="' + href + '" target="_new"><img src="' + require.toUrl("images/link.gif") + '" title="External link to ' + href + '"/></a>';
+				col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-link" title="External link to ' + href + '"/></a>';
 			}
 			dojo.addClass(col, "isValidCell");
 			return col;
@@ -173,7 +173,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 		registerCommands: function() {
 			var deleteMappingCommand = new mCommands.Command({
 				name: "Delete",
-				image: require.toUrl("images/delete.gif"),
+				imageClass: "core-sprite-delete",
 				id: "eclipse.site.mappings.remove",
 				visibleWhen: function(item) {
 					// Only show on a Mappings object
@@ -190,7 +190,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 			
 			var moveUpCommand = new mCommands.Command({
 				name: "Move Up",
-				image: require.toUrl("images/move_up.gif"),
+				imageClass: "core-sprite-move_up",
 				id: "eclipse.site.mappings.moveUp",
 				visibleWhen: dojo.hitch(this, function(item) {
 					return item.Source && item.Target;
@@ -209,7 +209,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 			
 			var moveDownCommand = new mCommands.Command({
 				name: "Move Down",
-				image: require.toUrl("images/move_down.gif"),
+				imageClass: "core-sprite-move_down",
 				id: "eclipse.site.mappings.moveDown",
 				visibleWhen: dojo.hitch(this, function(item) {
 					return item.Source && item.Target;
