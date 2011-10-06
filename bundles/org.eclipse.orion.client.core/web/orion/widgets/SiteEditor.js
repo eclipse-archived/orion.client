@@ -10,11 +10,11 @@
 /*global define */
 /*jslint browser:true */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/siteUtils', 'orion/commands', 'orion/siteMappingsTable',
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/siteMappingsTable',
 		'orion/widgets/DirectoryPrompterDialog', 'text!orion/widgets/templates/SiteEditor.html',
 		'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
 		'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
-		function(require, dojo, dijit, mUtil, mSiteUtils, mCommands, mSiteMappingsTable) {
+		function(require, dojo, dijit, mUtil, mCommands, mSiteMappingsTable) {
 
 /**
  * @name orion.widgets.SiteEditor
@@ -175,7 +175,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				return {
 					name: "/" + project.Name,
 					imageClass: "core-sprite-folder",
-					path: mSiteUtils.makeRelativeFilePath(project.Location),
+					path: editor._siteService.makeRelativeFilePath(project.Location),
 					callback: addMappingCallback
 				};
 			});
@@ -192,7 +192,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					fileClient: this.fileClient,
 					func: dojo.hitch(this, function(folder) {
 						if (!!folder) {
-							this.mappings.addMapping(null, mSiteUtils.makeRelativeFilePath(folder.Location), folder.Name);
+							this.mappings.addMapping(null, editor._siteService.makeRelativeFilePath(folder.Location), folder.Name);
 						}
 					})});
 				dialog.startup();
@@ -203,6 +203,9 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	},
 	
 	getSelfHostingMappings: function(clientRepoPath) {
+		var context = this._siteService.getContext();
+		context = this._siteService._makeHostRelative(context);
+		var hostPrefix = "http://localhost:8080" + context;
 		return [
 			{ Source: "/",
 			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.core/web"
@@ -211,67 +214,67 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.editor/web"
 			},
 			{ Source: "/file",
-			  Target: "http://localhost:8080/file"
+			  Target: hostPrefix + "file"
 			},
 			{ Source: "/prefs",
-			  Target: "http://localhost:8080/prefs"
+			  Target: hostPrefix + "prefs"
 			},
 			{ Source: "/workspace",
-			  Target: "http://localhost:8080/workspace"
+			  Target: hostPrefix + "workspace"
 			},
 			{ Source: "/org.dojotoolkit",
-			  Target: "http://localhost:8080/org.dojotoolkit"
+			  Target: hostPrefix + "org.dojotoolkit"
 			},
 			{ Source: "/users",
-			  Target: "http://localhost:8080/users"
+			  Target: hostPrefix + "users"
 			},
 			{ Source: "/authenticationPlugin.html",
-			  Target: "http://localhost:8080/authenticationPlugin.html"
+			  Target: hostPrefix + "authenticationPlugin.html"
 			},
 			{ Source: "/login",
-			  Target: "http://localhost:8080/login"
+			  Target: hostPrefix + "login"
 			},
 			{ Source: "/loginstatic",
-			  Target: "http://localhost:8080/loginstatic"
+			  Target: hostPrefix + "loginstatic"
 			},
 			{ Source: "/site",
-			  Target: "http://localhost:8080/site"
+			  Target: hostPrefix + "site"
 			},
 			{ Source: "/",
 			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.git/web"
 			},
 			{ Source: "/gitapi",
-			  Target: "http://localhost:8080/gitapi"
+			  Target: hostPrefix + "gitapi"
 			},
 			{ Source: "/",
 			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.users.ui/web"
 			},
 			{ Source: "/xfer",
-			  Target: "http://localhost:8080/xfer"
+			  Target: hostPrefix + "xfer"
 			},
 			{ Source: "/filesearch",
-			  Target: "http://localhost:8080/filesearch"
+			  Target: hostPrefix + "filesearch"
 			},
 			{ Source: "/index.jsp",
-			  Target: "http://localhost:8080/index.jsp"
+			  Target: hostPrefix + "index.jsp"
 			},
 			{ Source: "/plugins/git",
-			  Target: "http://localhost:8080/plugins/git"
+			  Target: hostPrefix + "plugins/git"
 			},
 			{ Source: "/plugins/user",
-			  Target: "http://localhost:8080/plugins/user"
+			  Target: hostPrefix + "plugins/user"
 			},
 			{ Source: "/logout",
-			  Target: "http://localhost:8080/logout"
+			  Target: hostPrefix + "logout"
 			},
 			{ Source: "/mixloginstatic",
-			  Target: "http://localhost:8080/mixloginstatic"
+			  Target: hostPrefix + "mixloginstatic"
 			},
 			{ Source: "/openids",
-			  Target: "http://localhost:8080/openids"
+			  Target: hostPrefix + "openids"
 			},
 			{ Source: "/task",
-			  Target: "http://localhost:8080/task"
+			  Target: hostPrefix + "task"
 			}
 		];
 	},
@@ -346,7 +349,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		this.name.set("value", this._siteConfiguration.Name);
 		this.hostHint.set("value", this._siteConfiguration.HostHint);
 		
-		this.mappings = new mSiteMappingsTable.MappingsTable(this.serviceRegistry, null, this.mappingsPlaceholder.id, this._siteConfiguration, this._projects);
+		this.mappings = new mSiteMappingsTable.MappingsTable(this.serviceRegistry, this._siteService, null, this.mappingsPlaceholder.id, this._siteConfiguration, this._projects);
 		this.mappings.startup();
 
 		var hostStatus = this._siteConfiguration.HostingStatus;

@@ -12,13 +12,11 @@
 /*jslint devel:true*/
 
 define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, dojo, mCommands, mUtil) {
-
 	/**
-	 * This class contains static utility methods for dealing with sites.
+	 * This class contains utility methods for dealing with sites.
 	 * @name orion.siteUtils
 	 */
-
-
+	
 	/**
 	 * Returns a relative URL pointing to the editing page for the given site configuration. 
 	 * @param {orion.siteService.SiteConfiguration} site The site configuration
@@ -27,7 +25,8 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 	 * @function
 	 */
 	function generateEditSiteHref(site) {
-		return "site.html#" + mUtil.makeRelative(site.Location);
+		var base = require.toUrl("sites/site.html");
+		return base + "#" + mUtil.makeRelative(site.Location);
 	}
 	
 	/**
@@ -160,48 +159,12 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 		commandService.addCommand(deleteCommand, "object");
 	}
 
-	function _removeEmptyElements(array) {
-		return dojo.filter(array, function(s){return s !== "";});
-	}
+	var siteUtils = {};
+	siteUtils.generateEditSiteHref = generateEditSiteHref;
+	siteUtils.parseStateFromHash = parseStateFromHash,
+	siteUtils.stateToHash = stateToHash;
+	siteUtils.createSiteCommands = createSiteCommands;
 	
-	/**
-	 * @param location The absolute URL of a file resource.
-	 * @returns {String} The path of the URL, relative to this server, with no /file/ prefix.<br/>
-	 * <b>FIXME:</b> this is URL manipulation; it should be done by the server
-	 * @name orion.siteUtils#makeRelativeFilePath
-	 * @function
-	 */
-	function makeRelativeFilePath(location) {
-		var path = mUtil.makeRelative(location);
-		var segments = path.split("/");
-		var filteredSegments = _removeEmptyElements(segments);
-		return "/" + filteredSegments.slice(1).join("/");
-	}
-	
-	/**
-	 * @param target The "Target" field from a site configuration
-	 * @returns {String} The URL that the target points to.<br/>
-	 * <b>FIXME:</b> this is URL manipulation; it should be done by the server
-	 * @name orion.siteUtils#makeFullFilePath
-	 * @function
-	 */
-	function makeFullFilePath(target) {
-		var relativePath = require.toUrl("file" + target);
-		var segments = target.split("/");
-		if (_removeEmptyElements(segments).length === 1) {
-			relativePath += "/";
-		}
-		var a = document.createElement('a');
-	    a.href = relativePath;
-	    return a.href;
-	}
 	//return the module exports
-	return {
-		generateEditSiteHref: generateEditSiteHref,
-		parseStateFromHash: parseStateFromHash,
-		stateToHash: stateToHash,
-		createSiteCommands: createSiteCommands,
-		makeRelativeFilePath: makeRelativeFilePath,
-		makeFullFilePath: makeFullFilePath
-	};
+	return siteUtils;
 });

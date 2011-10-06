@@ -74,6 +74,16 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 	 */
 	function SiteService(serviceRegistry) {
 		this._serviceRegistration = serviceRegistry.registerService(SITE_SERVICE_NAME, this);
+		
+		var baseUrl = this.getContext();
+		var fileReferences = serviceRegistry.getServiceReferences("orion.core.file");
+		for (var i=0; i < fileReferences.length; i++) {
+			var top = fileReferences[i].getProperty("top");
+			if (top && this.toFullUrl(top).indexOf(baseUrl) === 0) {
+				this.filePrefix = top;
+				break;
+			}
+		}
 	}
 	
 	SiteService.prototype = /** @lends orion.siteService.SiteService.prototype */ {
@@ -244,6 +254,54 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 			
 			serviceMethod.apply(service, args).then(onSuccess, onError);
 			return clientDeferred;
+		},
+		
+		_makeHostRelative: function(url) {
+			if (url.indexOf(":") !== -1) {
+				return url.substring(url.indexOf(window.location.host) + window.location.host.length);
+			}
+			return url;
+		},
+		
+		getContext: function() {
+			var root = require.toUrl("._");
+			var url = this.toFullUrl(root);
+			return url.substring(0, url.length-2);
+		},
+		
+		toFullUrl: function(url) {
+			var link = document.createElement("a");
+			link.href = url;
+			return link.href;
+		},
+		
+		makeRelativeFilePath: function(location) {
+//			var context = this.getContext();
+//			var fakeUrl = this._makeHostRelative(context);
+//			var relativePath = location.substring(location.indexOf(fakeUrl) + fakeUrl.length);
+//			var path = relativePath.substring(relativePath.indexOf(this.filePrefix) + this.filePrefix.length);
+			var relFilePrefix = this._makeHostRelative(this.filePrefix);
+			var relLocation = this._makeHostRelative(location);
+			if (relLocation.indexOf(relFilePrefix) === 0) {
+				path = relLocation.substring(relFilePrefix.length);
+			}
+			if (path[path.length-1] === "/"){
+				path = path.substring(0, path.length - 1);
+			}
+			return path;
+		},
+		
+		makeFullFilePath: function(target) {
+			function _removeEmptyElements(array) {
+				return dojo.filter(array, function(s){return s !== "";});
+			}
+			var relativePath = require.toUrl(this.filePrefix + target + "._");
+			relativePath = relativePath.substring(0, relativePath.length - 2);
+			var segments = target.split("/");
+			if (_removeEmptyElements(segments).length === 1) {
+				relativePath += "/";
+			}
+			return this.toFullUrl(relativePath);
 		}
 	};
 	SiteService.prototype.constructor = SiteService;

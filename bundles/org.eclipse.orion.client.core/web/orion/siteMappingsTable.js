@@ -10,8 +10,8 @@
 /*global define */
 /*jslint browser:true regexp:true */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/siteUtils', 'orion/commands', 'orion/explorer'],
-		function(require, dojo, dijit, mUtil, mSiteUtils, mCommands, mExplorer) {
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/explorer'],
+		function(require, dojo, dijit, mUtil, mCommands, mExplorer) {
 
 var mSiteMappingsTable = {};
 
@@ -102,10 +102,10 @@ mSiteMappingsTable.Renderer = (function() {
 			var col = document.createElement("td");
 			var href, result;
 			if (isWorkspacePath(target)) {
-				var location = mSiteUtils.makeFullFilePath(target);
+				var location = this.options.siteService.makeFullFilePath(target);
 				href = mUtil.safeText(location);
 				col.innerHTML = "<span class=\"validating\">&#8230;</span>";
-				// TODO: should use fileClient here, but we don't want its retrying or error dialog
+				// TODO: should use fileClient here, but without authentication prompt & without retrying
 				//this._fileClient.fetchChildren(location)
 				dojo.xhrGet({
 					url: location,
@@ -132,17 +132,19 @@ mSiteMappingsTable.Renderer = (function() {
  * @name orion.sites.MappingsTable
  */
 mSiteMappingsTable.MappingsTable = (function() {
-	function MappingsTable(serviceRegistry, selection, parentId, siteConfiguration, /**dojo.Deferred*/ projectsPromise) {
+	function MappingsTable(serviceRegistry, siteService, selection, parentId, siteConfiguration, /**dojo.Deferred*/ projectsPromise) {
 		this.registry = serviceRegistry;
 		serviceRegistry.getService("orion.page.command").then(dojo.hitch(this, function(commandService) {
 			this.commandService = commandService;
 			this.registerCommands();
 		}));
+		this.siteService = siteService;
 		this.parentId = parentId;
 		this.selection = selection;
 		this.renderer = new mSiteMappingsTable.Renderer({
 				checkbox: false, /*TODO make true when we have selection-based commands*/
-				onchange: dojo.hitch(this, this.fieldChanged)
+				onchange: dojo.hitch(this, this.fieldChanged),
+				siteService: siteService
 			}, this);
 		this.myTree = null;
 		this.siteConfiguration = siteConfiguration;
@@ -293,7 +295,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 				for (var i=0; i < this.projects.length; i++) {
 					var project = this.projects[i];
 					var name = "/" + project.Name;
-					var location = mSiteUtils.makeRelativeFilePath(project.Location);
+					var location = this.siteService.makeRelativeFilePath(project.Location);
 					if (this.pathsMatch(target, location)) {
 						friendlyPath = name + target.substring(location.length);
 						break;
@@ -308,7 +310,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 				for (var i=0; i < this.projects.length; i++) {
 					var project = this.projects[i];
 					var name = "/" + project.Name;
-					var location = mSiteUtils.makeRelativeFilePath(project.Location);
+					var location = this.siteService.makeRelativeFilePath(project.Location);
 					if (this.pathsMatch(friendlyPath, name)) {
 						var rest = friendlyPath.substring(name.length);
 						item.Target = location + rest;
