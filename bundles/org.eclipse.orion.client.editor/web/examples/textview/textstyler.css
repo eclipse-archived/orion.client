@@ -1,9 +1,25 @@
-.token_comment {
+.token_singleline_comment {
 	color: green;
 }
 
-.token_javadoc {
+.token_multiline_comment {
+	color: green;
+}
+
+.token_doc_comment {
 	color: #00008F;
+}
+
+.token_doc_html_markup {
+	color: #7F7F9F;
+}
+
+.token_doc_tag {
+	color: #7F9FBF;
+}
+
+.token_task_tag {
+	color: #7F9FBF;
 }
 
 .token_string {

@@ -74,6 +74,7 @@ orion.editor.AnnotationFactory = (function() {
 	AnnotationFactory.prototype = {
 		errorType: "orion.annotation.error",
 		warningType: "orion.annotation.warning",
+		taskType: "orion.annotation.task",
 		createAnnotationModel: function(model) {
 			if (model.getBaseModel) { model = model.getBaseModel(); }
 			this.annotationModel = new orion.textview.AnnotationModel(model);
@@ -93,6 +94,8 @@ orion.editor.AnnotationFactory = (function() {
 			this.overviewRuler.addAnnotationType(this.errorType);
 			this.annotationRuler.addAnnotationType(this.warningType);
 			this.overviewRuler.addAnnotationType(this.warningType);
+			this.annotationRuler.addAnnotationType(this.taskType);
+			this.overviewRuler.addAnnotationType(this.taskType);
 			return {annotationRuler: this.annotationRuler, overviewRuler: this.overviewRuler};
 		},
 		
