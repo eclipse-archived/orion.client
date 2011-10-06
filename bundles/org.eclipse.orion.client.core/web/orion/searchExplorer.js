@@ -129,7 +129,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				if(this.sharedParentHash[parents[j].Location] === 2){
 					break;
 				} else {
-					newParentName =  parents[j].Name + " / " + newParentName;
+					newParentName =  parents[j].Name + "/" + newParentName;
 					if(j === (parents.length - 1))
 						stop = true;
 				}
@@ -167,6 +167,19 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return this._findExistingParent(parents, index+1);
 	};
 	
+	SearchResultModel.prototype.fullPathName = function(childNode, fullPath){
+		if(!childNode || !childNode.parent){
+			return;
+		}
+		if(childNode.parent.isRoot){
+			return;
+		}
+		var separator = (fullPath.name === "") ? "" : "/";
+		fullPath.name = childNode.parent.name + separator + fullPath.name;
+		if(childNode.parent)
+			this.fullPathName(childNode.parent, fullPath);
+	};
+	
 	SearchResultModel.prototype.buildResultModelTree = function(onComplete, compress){
 		if(compress)
 			this.compressTree();
@@ -201,7 +214,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			}
 			
 			//Add the search result (file) as leaf node
+			var fullPath = {name: ""};
 			var childNode = {parent: parent, type: "file", name: this._resultLocation[i].name, linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location};
+			this.fullPathName(childNode, fullPath);
+			childNode.fullPathName = fullPath.name;
 			this.modelLocHash[childNode.location] = childNode;
 			parent.children.push(childNode);
 			mUtil.processSearchResultParent(parent);
@@ -399,6 +415,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	SearchResultRenderer.prototype.getCellHeaderElement = function(col_no){	
 		if(col_no === 0){
 			return dojo.create("th", {innerHTML: "<h2>Search Results</h2>"});
+		} else if(this.explorer.model.useFlatList && col_no === 1){
+			return dojo.create("th", {innerHTML: "<h2>Location</h2>"});
 		}
 	};
 	
@@ -452,7 +470,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			}
 			return col;
 		case 1:
-			return this.getActionsColumn(item, tableRow);
+			if(this.explorer.model.useFlatList && item.type ===  "file"){
+				col = document.createElement('td');
+				span = dojo.create("span", null, col, "only");
+				dojo.place(document.createTextNode(item.fullPathName), span, "only");
+				return col;
+			}
 		}
 	};
 	SearchResultRenderer.prototype.constructor = SearchResultRenderer;
