@@ -75,17 +75,24 @@ examples.textview.TextStyler = (function() {
 	var UNKOWN = 1;
 	var KEYWORD = 2;
 	var STRING = 3;
-	var COMMENT = 4;
+	var SINGLELINE_COMMENT = 4;
 	var MULTILINE_COMMENT = 5;
 	var DOC_COMMENT = 6;
 	var WHITE = 7;
 	var WHITE_TAB = 8;
 	var WHITE_SPACE = 9;
+	var HTML_MARKUP = 10;
+	var DOC_TAG = 11;
+	var TASK_TAG = 12;
 
 	// Styles 
 	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent) ? document.documentMode : undefined;
-	var commentStyle = {styleClass: "token_comment"};
-	var javadocStyle = {styleClass: "token_javadoc"};
+	var singleCommentStyle = {styleClass: "token_singleline_comment"};
+	var multiCommentStyle = {styleClass: "token_multiline_comment"};
+	var docCommentStyle = {styleClass: "token_doc_comment"};
+	var htmlMarkupStyle = {styleClass: "token_doc_html_markup"};
+	var tasktagStyle = {styleClass: "token_task_tag"};
+	var doctagStyle = {styleClass: "token_doc_tag"};
 	var stringStyle = {styleClass: "token_string"};
 	var keywordStyle = {styleClass: "token_keyword"};
 	var spaceStyle = {styleClass: "token_space"};
@@ -177,7 +184,7 @@ examples.textview.TextStyler = (function() {
 									c = this._read();
 									if ((c === -1) || (c === 10) || (c === 13)) {
 										this._unread(c);
-										return COMMENT;
+										return SINGLELINE_COMMENT;
 									}
 								}
 							}
@@ -280,11 +287,87 @@ examples.textview.TextStyler = (function() {
 	}());
 	
 	var CommentScanner = (function() {
-		function CommentScanner () {
-			Scanner.call(this, null, false);
+		function CommentScanner (whitespacesVisible) {
+			Scanner.call(this, null, whitespacesVisible);
 		}
 		CommentScanner.prototype = new Scanner(null);
-		CommentScanner.prototype._default = function(c) {
+		CommentScanner.prototype.setType = function(type) {
+			this._type = type;
+		};
+		CommentScanner.prototype.nextToken = function() {
+			this.startOffset = this.offset;
+			while (true) {
+				var c = this._read();
+				switch (c) {
+					case -1: return null;
+					case 32: // SPACE
+					case 9: // TAB
+						if (this.whitespacesVisible) {
+							return c === 32 ? WHITE_SPACE : WHITE_TAB;
+						}
+						do {
+							c = this._read();
+						} while(c === 32 || c === 9);
+						this._unread(c);
+						return WHITE;
+					case 60: // <
+						if (this._type === DOC_COMMENT) {
+							do {
+								c = this._read();
+							} while(!(c === 62 || c === -1)); // >
+							if (c === 62) {
+								return HTML_MARKUP;
+							}
+						}
+						return UNKOWN;
+					case 64: // @
+						if (this._type === DOC_COMMENT) {
+							do {
+								c = this._read();
+							} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57));  //LETTER OR UNDERSCORE OR NUMBER
+							this._unread(c);
+							return DOC_TAG;
+						}
+						return UNKOWN;
+					case 84: // T
+						if ((c = this._read()) === 79) { // O
+							if ((c = this._read()) === 68) { // D
+								if ((c = this._read()) === 79) { // O
+									c = this._read();
+									if (!((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) {
+										this._unread(c);
+										return TASK_TAG;
+									}
+									this._unread(c);
+								} else {
+									this._unread(c);
+								}
+							} else {
+								this._unread(c);
+							}
+						} else {
+							this._unread(c);
+						}
+						//FALL THROUGH
+					default:
+						do {
+							c = this._read();
+						} while(!(c === 32 || c === 9 || c === -1 || c === 60 || c === 64 || c === 84));
+						this._unread(c);
+						return UNKOWN;
+				}
+			}
+		};
+		
+		return CommentScanner;
+	}());
+	
+	var FirstScanner = (function() {
+		function FirstScanner () {
+			Scanner.call(this, null, false);
+		}
+		FirstScanner.prototype = new Scanner(null);
+		FirstScanner.prototype._default = function(c) {
 			while(true) {
 				c = this._read();
 				switch (c) {
@@ -298,7 +381,7 @@ examples.textview.TextStyler = (function() {
 			}
 		};
 		
-		return CommentScanner;
+		return FirstScanner;
 	}());
 	
 	function TextStyler (view, lang, annotationModel) {
@@ -314,12 +397,14 @@ examples.textview.TextStyler = (function() {
 		this.detectHyperlinks = true;
 		this.highlightCaretLine = true;
 		this.foldingEnabled = true;
+		this.detectTasks = true;
 		this._scanner = new Scanner(keywords, this.whitespacesVisible);
 		//TODO this scanner is not the best/correct way to parse CSS
 		if (lang === "css") {
 			this._scanner.isCSS = true;
 		}
-		this._commentScanner = new CommentScanner();
+		this._firstScanner = new FirstScanner();
+		this._commentScanner = new CommentScanner(this.whitespacesVisible);
 		this._whitespaceScanner = new WhitespaceScanner();
 		this.view = view;
 		this.annotationModel = annotationModel;
@@ -377,12 +462,16 @@ examples.textview.TextStyler = (function() {
 		setWhitespacesVisible: function(visible) {
 			this.whitespacesVisible = visible;
 			this._scanner.whitespacesVisible = visible;
+			this._commentScanner.whitespacesVisible = visible;
 		},
-		setDetectHyperlinks: function(visible) {
-			this.detectHyperlinks = visible;
+		setDetectHyperlinks: function(enabled) {
+			this.detectHyperlinks = enabled;
 		},
 		setFoldingEnabled: function(enabled) {
 			this.foldingEnabled = enabled;
+		},
+		setDetectTasks: function(enabled) {
+			this.detectTasks = enabled;
 		},
 		_binarySearch: function (array, offset, inclusive, low, high) {
 			var index;
@@ -435,7 +524,43 @@ examples.textview.TextStyler = (function() {
 			return new orion.textview.FoldingAnnotation(viewModel, "orion.annotation.folding", start, end,
 				"<div class='annotationHTML expanded'></div>", {styleClass: "annotation expanded"}, 
 				"<div class='annotationHTML collapsed'></div>", {styleClass: "annotation collapsed"});
-		}, 
+		},
+		_computeTasks: function(type, commentStart, commentEnd) {
+			if (!this.detectTasks) { return; }
+			var annotationModel = this.annotationModel;
+			if (!annotationModel) { return; }
+			var view = this.view;
+			var viewModel = view.getModel(), baseModel = viewModel;
+			if (viewModel.getBaseModel) { baseModel = viewModel.getBaseModel(); }
+			var annotations = annotationModel.getAnnotations(commentStart, commentEnd);
+			var remove = [];
+			while (annotations.hasNext()) {
+				remove.push(annotations.next());
+			}
+			var add = [];
+			var scanner = this._commentScanner;
+			scanner.setText(baseModel.getText(commentStart, commentEnd));
+			var token;
+			while ((token = scanner.nextToken())) {
+				var tokenStart = scanner.getStartOffset() + commentStart;
+				if (token === TASK_TAG) {
+					var end = baseModel.getLineEnd(baseModel.getLineAtOffset(tokenStart));
+					if (type !== SINGLELINE_COMMENT) {
+						end = Math.min(end, commentEnd - this.commentEnd.length);
+					}
+					add.push({
+						start: tokenStart,
+						end: end,
+						type: "orion.annotation.task",
+						rulerTitle: baseModel.getText(tokenStart, end),
+						rulerStyle: {styleClass: "annotation task"},
+						rulerHTML: "<div class='annotationHTML task'></div>",
+						overviewStyle: {styleClass: "annotationOverview task"}
+					});
+				}
+			}
+			annotationModel.replaceAnnotations(remove, add);
+		},
 		_getLineStyle: function(lineIndex) {
 			if (this.highlightCaretLine) {
 				var view = this.view;
@@ -466,11 +591,11 @@ examples.textview.TextStyler = (function() {
 				if (offset < commentStart) {
 					this._parse(text.substring(offset - start, commentStart - start), offset, styles);
 				}
-				var style = comments[i].type === DOC_COMMENT ? javadocStyle : commentStyle;
+				var style = comments[i].type === DOC_COMMENT ? docCommentStyle : multiCommentStyle;
 				if (this.whitespacesVisible || this.detectHyperlinks) {
 					var s = Math.max(offset, commentStart);
 					var e = Math.min(end, commentEnd);
-					this._parseWhitespace(text.substring(s - start, e - start), s, styles, style);
+					this._parseComment(text.substring(s - start, e - start), s, styles, style, comments[i].type);
 				} else {
 					styles.push({start: commentStart, end: commentEnd, style: style});
 				}
@@ -502,22 +627,21 @@ examples.textview.TextStyler = (function() {
 						case KEYWORD: style = keywordStyle; break;
 						case STRING:
 							if (this.whitespacesVisible) {
-								this._parseWhitespace(scanner.getData(), tokenStart, styles, stringStyle);
+								this._parseString(scanner.getData(), tokenStart, styles, stringStyle);
 								continue;
 							} else {
 								style = stringStyle;
 							}
 							break;
-						case COMMENT: 
 						case DOC_COMMENT: 
+							this._parseComment(scanner.getData(), tokenStart, styles, docCommentStyle, token);
+							continue;
+						case SINGLELINE_COMMENT:
+							this._parseComment(scanner.getData(), tokenStart, styles, singleCommentStyle, token);
+							continue;
 						case MULTILINE_COMMENT: 
-							if (this.whitespacesVisible || this.detectHyperlinks) {
-								this._parseWhitespace(scanner.getData(), tokenStart, styles, commentStyle);
-								continue;
-							} else {
-								style = commentStyle;
-							}
-							break;
+							this._parseComment(scanner.getData(), tokenStart, styles, multiCommentStyle, token);
+							continue;
 						case WHITE_TAB:
 							if (this.whitespacesVisible) {
 								style = tabStyle;
@@ -533,61 +657,104 @@ examples.textview.TextStyler = (function() {
 				styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
 			}
 		},
-		_parseWhitespace: function(text, offset, styles, s) {
+		_parseComment: function(text, offset, styles, s, type) {
+			var scanner = this._commentScanner;
+			scanner.setText(text);
+			scanner.setType(type);
+			var token;
+			while ((token = scanner.nextToken())) {
+				var tokenStart = scanner.getStartOffset() + offset;
+				var style = s;
+				switch (token) {
+					case WHITE_TAB:
+						if (this.whitespacesVisible) {
+							style = tabStyle;
+						}
+						break;
+					case WHITE_SPACE:
+						if (this.whitespacesVisible) {
+							style = spaceStyle;
+						}
+						break;
+					case HTML_MARKUP:
+						style = htmlMarkupStyle;
+						break;
+					case DOC_TAG:
+						style = doctagStyle;
+						break;
+					case TASK_TAG:
+						style = tasktagStyle;
+						break;
+					default:
+						if (this.detectHyperlinks) {
+							style = this._detectHyperlinks(scanner.getData(), tokenStart, styles, style);
+						}
+				}
+				if (style) {
+					styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
+				}
+			}
+		},
+		_parseString: function(text, offset, styles, s) {
 			var scanner = this._whitespaceScanner;
 			scanner.setText(text);
 			var token;
 			while ((token = scanner.nextToken())) {
 				var tokenStart = scanner.getStartOffset() + offset;
 				var style = s;
-				if (this.whitespacesVisible) {
-					switch (token) {
-						case WHITE_TAB:
+				switch (token) {
+					case WHITE_TAB:
+						if (this.whitespacesVisible) {
 							style = tabStyle;
-							break;
-						case WHITE_SPACE:
+						}
+						break;
+					case WHITE_SPACE:
+						if (this.whitespacesVisible) {
 							style = spaceStyle;
-							break;
-					}
-				}
-				if (this.detectHyperlinks) {
-					var data = scanner.getData();
-					var href = null, index;
-					if ((index = data.indexOf("://")) > 0) {
-						href = data;
-						var start = index;
-						while (start > 0) {
-							var c = href.charCodeAt(start - 1);
-							if (!((97 <= c && c <= 122) || (65 <= c && c <= 90) || 0x2d === c || (48 <= c && c <= 57))) { //LETTER OR DASH OR NUMBER
-								break;
-							}
-							start--;
 						}
-						if (start > 0) {
-							var brackets = "\"\"''(){}[]<>";
-							index = brackets.indexOf(href.substring(start - 1, start));
-							if (index !== -1 && (index & 1) === 0 && (index = href.lastIndexOf(brackets.substring(index + 1, index + 2))) !== -1) {
-								var end = index;
-								var linkStyle = this._clone(style);
-								linkStyle.tagName = "A";
-								linkStyle.attributes = {href: href.substring(start, end)};
-								styles.push({start: tokenStart, end: tokenStart + start, style: style});
-								styles.push({start: tokenStart + start, end: tokenStart + end, style: linkStyle});
-								styles.push({start: tokenStart + end, end: scanner.getOffset() + offset, style: style});
-								continue;
-							}
-						}
-					} else if (data.toLowerCase().indexOf("bug#") === 0) {
-						href = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=" + parseInt(data.substring(4), 10);
-					}
-					if (href) {
-						style = this._clone(style);
-						style.tagName = "A";
-						style.attributes = {href: href};
-					}
+						break;
 				}
-				styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
+				if (style) {
+					styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
+				}
 			}
+		},
+		_detectHyperlinks: function(text, offset, styles, s) {
+			var href = null, index, linkStyle;
+			if ((index = text.indexOf("://")) > 0) {
+				href = text;
+				var start = index;
+				while (start > 0) {
+					var c = href.charCodeAt(start - 1);
+					if (!((97 <= c && c <= 122) || (65 <= c && c <= 90) || 0x2d === c || (48 <= c && c <= 57))) { //LETTER OR DASH OR NUMBER
+						break;
+					}
+					start--;
+				}
+				if (start > 0) {
+					var brackets = "\"\"''(){}[]<>";
+					index = brackets.indexOf(href.substring(start - 1, start));
+					if (index !== -1 && (index & 1) === 0 && (index = href.lastIndexOf(brackets.substring(index + 1, index + 2))) !== -1) {
+						var end = index;
+						linkStyle = this._clone(s);
+						linkStyle.tagName = "A";
+						linkStyle.attributes = {href: href.substring(start, end)};
+						styles.push({start: offset, end: offset + start, style: s});
+						styles.push({start: offset + start, end: offset + end, style: linkStyle});
+						styles.push({start: offset + end, end: offset + text.length, style: s});
+						return null;
+					}
+				}
+			} else if (text.toLowerCase().indexOf("bug#") === 0) {
+				href = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=" + parseInt(text.substring(4), 10);
+			}
+			if (href) {
+				linkStyle = this._clone(s);
+				linkStyle.tagName = "A";
+				linkStyle.attributes = {href: href};
+				return linkStyle;
+			}
+			return s;
 		},
 		_clone: function(obj) {
 			if (!obj) { return obj; }
@@ -602,7 +769,7 @@ examples.textview.TextStyler = (function() {
 		},
 		_findComments: function(text, offset) {
 			offset = offset || 0;
-			var scanner = this._commentScanner, token;
+			var scanner = this._firstScanner, token;
 			scanner.setText(text);
 			var result = [];
 			while ((token = scanner.nextToken())) {
@@ -613,6 +780,12 @@ examples.textview.TextStyler = (function() {
 						type: token
 					};
 					result.push(comment);
+					//TODO can we avoid this work if edition does not overlap comment?
+					this._computeTasks(token, scanner.getStartOffset() + offset, scanner.getOffset() + offset);
+				}
+				if (token === SINGLELINE_COMMENT) {
+					//TODO can we avoid this work if edition does not overlap comment?
+					this._computeTasks(token, scanner.getStartOffset() + offset, scanner.getOffset() + offset);
 				}
 			}
 			return result;
