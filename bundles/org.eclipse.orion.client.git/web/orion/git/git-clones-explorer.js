@@ -37,7 +37,7 @@ exports.GitClonesExplorer = (function() {
 		var relativePath = mUtil.makeRelative(path);
 		
 		//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
-		var gitapiCloneUrl = require.toUrl("gitapi/clone/._");
+		var gitapiCloneUrl = require.toUrl("gitapi/clone._");
 		gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
 		
 		return relativePath[0]==="/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath;

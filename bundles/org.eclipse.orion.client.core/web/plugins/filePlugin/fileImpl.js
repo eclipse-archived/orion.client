@@ -56,7 +56,7 @@ eclipse.FileServiceImpl= (function() {
 		_createWorkspace: function(name) {
 			//return the deferred so client can chain on post-processing
 			return dojo.xhrPost({
-				url: "/workspace",
+				url: workspaceBase,
 				headers: {
 					"Orion-Version": "1",
 					"Slug": name
@@ -75,7 +75,7 @@ eclipse.FileServiceImpl= (function() {
 		 */
 		loadWorkspaces: function() {
 			return dojo.xhrGet({
-				url: "/workspace",
+				url: workspaceBase,
 				headers: {
 					"Orion-Version": "1"
 				},
@@ -94,11 +94,11 @@ eclipse.FileServiceImpl= (function() {
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location) {
-			if (location==="/file/") {
+			if (location===fileBase) {
 				location = null;
 			}
 			return dojo.xhrGet({
-				url: location ? location : "/workspace",
+				url: location ? location : workspaceBase,
 				headers: {
 					"Orion-Version": "1"
 				},

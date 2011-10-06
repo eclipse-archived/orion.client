@@ -10,11 +10,11 @@
 /*global define */
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'orion/util', 'orion/siteUtils', 'orion/commands', 'orion/siteMappingsTable',
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/siteUtils', 'orion/commands', 'orion/siteMappingsTable',
 		'orion/widgets/DirectoryPrompterDialog', 'text!orion/widgets/templates/SiteEditor.html',
 		'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
 		'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
-		function(dojo, dijit, mUtil, mSiteUtils, mCommands, mSiteMappingsTable) {
+		function(require, dojo, dijit, mUtil, mSiteUtils, mCommands, mSiteMappingsTable) {
 
 /**
  * @name orion.widgets.SiteEditor
@@ -99,7 +99,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			var addMappingCommand = new mCommands.Command({
 				name: "Add",
 				tooltip: "Add a directory mapping to the site configuration",
-				image: "/images/add.gif",
+				image: require.toUrl("images/add.gif"),
 				id: "eclipse.site.mappings.add",
 				visibleWhen: function(item) {
 					return true;
@@ -115,7 +115,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		var saveCommand = new mCommands.Command({
 				name: "Save",
 				tooltip: "Save the site configuration",
-				image: "/images/save.gif",
+				image: require.toUrl("/images/save.gif"),
 				id: "eclipse.site.save",
 				visibleWhen: function(item) {
 					return item.Location /*looks like a site config*/;
@@ -174,7 +174,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		var choices = dojo.map(projects, function(project) {
 				return {
 					name: "/" + project.Name,
-					image: "/images/folder.gif",
+					image: require.toUrl("images/folder.gif"),
 					path: mSiteUtils.makeRelativeFilePath(project.Location),
 					callback: addMappingCallback
 				};
@@ -185,7 +185,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		}
 		choices.push({
 			name: "Choose folder&#8230;",
-			image: "/images/folder.gif",
+			image: require.toUrl("images/folder.gif"),
 			callback: dojo.hitch(this, function() {
 				var dialog = new orion.widgets.DirectoryPrompterDialog({
 					serviceRegistry: this.serviceRegistry,
@@ -198,7 +198,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				dialog.startup();
 				dialog.show();
 			})});
-		choices.push({name: "URL", image: "/images/link.gif", callback: addUrl});
+		choices.push({name: "URL", image: require.toUrl("images/link.gif"), callback: addUrl});
 		return choices;
 	},
 	
