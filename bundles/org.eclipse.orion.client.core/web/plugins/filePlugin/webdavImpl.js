@@ -195,7 +195,7 @@ eclipse.DAVFileServiceImpl= (function() {
 			});
 			
 			var tail = location.substring(this._rootLocation.length);
-			if (tail[tail.length - 1] = "/") {
+			if (tail[tail.length - 1] === "/") {
 				tail = tail.substring(0, tail.length - 1);
 			}
 			var segments = tail.split("/");
