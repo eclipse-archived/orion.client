@@ -268,7 +268,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			if (e.charOrCode === dojo.keys.ENTER) {
 				if (searchLocation) {
 					if (searchField.value.length > 0) {
-						var query = searcher.createSearchQuery(searchLocation, searchField.value);
+						// we create the filesearch location relative to search.html
+						var query = searcher.createSearchQuery("../filesearch?q=", searchField.value);
 						window.location = require.toUrl("search/search.html") + "#"+query;
 					}
 				} else {
