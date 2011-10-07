@@ -7,7 +7,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define */
+/*global define orion*/
 /*jslint browser:true */
 
 define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/siteMappingsTable',
@@ -109,6 +109,21 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			var toolbarId = this.addMappingToolbar.id;
 			this._commandService.registerCommandContribution("eclipse.site.mappings.add", 1, toolbarId);
 			this._commandService.renderCommands(this.addMappingToolbar, "dom", this.mappings, this, "image");
+			
+			var convertCommand = new mCommands.Command({
+				name: "Convert to Self-Hosting",
+				tooltip: "Enable the site configuration to launch an Orion server running your local client code",
+				imageClass: "core-sprite-add",
+				id: "eclipse.site.convert",
+				visibleWhen: dojo.hitch(this, function(item) {
+					// Only applies to SiteConfiguration objects
+					return !!item.Location && !this.isSelfHosting(projects);
+				}),
+				callback: dojo.hitch(this, this.convertToSelfHostedSite, this._projects)});
+			this._commandService.addCommand(convertCommand, "object");
+			this._commandService.registerCommandContribution("eclipse.site.convert", 2);
+			
+			this._refreshFields();
 		}));
 		
 		// Save command
@@ -118,7 +133,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				imageClass: "core-sprite-save",
 				id: "eclipse.site.save",
 				visibleWhen: function(item) {
-					return item.Location /*looks like a site config*/;
+					return !!item.Location /*looks like a site config*/;
 				},
 				callback: dojo.hitch(this, this.onSubmit)});
 		this._commandService.addCommand(saveCommand, "object");
@@ -153,16 +168,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		 */
 		var editor = this;
 		var addMappingCallback = function(item, event) {
-			if (event.shiftKey) {
-				// special feature for setting up self-hosting
-				var mappings = editor.getSelfHostingMappings(this.path);
-				for (var i = 0; i < mappings.length; i++) {
-					editor.mappings.addMapping(mappings[i].Source, mappings[i].Target);
-				}
-				editor.onSubmit();
-			} else {
-				editor.mappings.addMapping(null, this.path, this.name);
-			}
+			editor.mappings.addMapping(null, this.path, this.name);
 		};
 //		var addOther = function() {
 //			editor.mappings.addMapping("/mountPoint", "/FolderId/somepath");
@@ -201,11 +207,48 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		choices.push({name: "URL", imageClass: "core-sprite-link", callback: addUrl});
 		return choices;
 	},
+
+	// Special feature for setting up self-hosting
+	convertToSelfHostedSite: function(projectsPromise, items, userData) {
+		var dialog = new orion.widgets.DirectoryPrompterDialog({
+			serviceRegistry: this.serviceRegistry,
+			fileClient: this.fileClient,
+			func: dojo.hitch(this, function(folder) {
+				if (folder) {
+					var path = this._siteService.makeRelativeFilePath(folder.Location);
+					this.mappings.deleteAllMappings();
+					this.mappings.addMappings(this.getSelfHostingMappings(path));
+					this.onSubmit(); // save
+				}
+			}),
+			title: "Choose Orion Source Folder",
+			message: "Select the folder where you checked out the <b>org.eclipse.orion.client</b> repository:"});
+		dialog.startup();
+		dialog.show();
+	},
+	
+	isSelfHosting: function(projects) {
+		for (var i=0; i < projects.length; i++) {
+			var path = this._siteService.makeRelativeFilePath(projects[i].Location);
+			var selfHostingMappings = this.getSelfHostingMappings(path);
+			var pass = true;
+			for (var j=0; j < selfHostingMappings.length; j++) {
+				if (!this.mappings.mappingExists(selfHostingMappings[j])) {
+					pass = false;
+				}
+			}
+			if (pass) {
+				return true;
+			}
+		}
+		return false;
+	},
 	
 	getSelfHostingMappings: function(clientRepoPath) {
 		var context = this._siteService.getContext();
 		context = this._siteService._makeHostRelative(context);
-		var hostPrefix = "http://localhost:8080" + context;
+		// TODO: prompt for port? It is not detectable from client side if proxy is used
+		var hostPrefix = "http://localhost" + ":" + "8080" + context;
 		return [
 			{ Source: "/",
 			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.core/web"
@@ -353,11 +396,9 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		this.mappings.startup();
 
 		var hostStatus = this._siteConfiguration.HostingStatus;
-		var status;
 		if (hostStatus && hostStatus.Status === "started") {
 			dojo.style(this.siteStartedWarning, {display: "block"});
 			this.hostingStatus.innerHTML = mUtil.safeText(hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1) + " at ");
-			var url = mUtil.safeText(hostStatus.URL);
 			dojo.create("a", {href: hostStatus.URL, innerHTML: mUtil.safeText(hostStatus.URL), target: "_new"}, this.hostingStatus, "last");
 		} else {
 			dojo.style(this.siteStartedWarning, {display: "none"});

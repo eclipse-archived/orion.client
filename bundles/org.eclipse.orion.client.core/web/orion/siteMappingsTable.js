@@ -233,15 +233,38 @@ mSiteMappingsTable.MappingsTable = (function() {
 			return this.siteConfiguration.Mappings.indexOf(item);
 		},
 		// TODO: use makeNewItemPlaceHolder() ?
-		addMapping: function(/**String*/ source, /**String*/ target, /**String*/ friendlyPath) {
+		_addMapping: function(/**String*/ source, /**String*/ target, /**String*/ friendlyPath) {
 			source = this.safePath(typeof(source) === "string" ? source : this.getNextMountPoint(friendlyPath));
 			target = this.safePath(typeof(target) === "string" ? target : "/");
-			
-			var newItem = this.createMappingObject(source, target);
-			this.siteConfiguration.Mappings.push(newItem);
-			
+			if (!this.mappingExists(source, target)) {
+				var newItem = this.createMappingObject(source, target);
+				this.siteConfiguration.Mappings.push(newItem);
+			}
+		},
+		addMapping: function(source, target, friendlyPath) {
+			this._addMapping(source, target, friendlyPath);
 			this.render();
 			this.setDirty(true);
+		},
+		addMappings: function(mappings) {
+			for (var i=0; i < mappings.length; i++) {
+				this._addMapping(mappings[i].Source, mappings[i].Target);
+			}
+			this.render();
+			this.setDirty(true);
+		},
+		mappingExists: function(source, target) {
+			if (typeof source === "object" && typeof target === "undefined") {
+				target = source.Target;
+				source = source.Source;
+			}
+			var mappings = this.siteConfiguration.Mappings;
+			for (var i=0; i < mappings.length; i++) {
+				if (mappings[i].Source === source && mappings[i].Target === target) {
+					return true;
+				}
+			}
+			return false;
 		},
 		getNextMountPoint: function(/**String*/ friendlyPath) {
 			// Try root first
@@ -276,6 +299,9 @@ mSiteMappingsTable.MappingsTable = (function() {
 			if (index !== -1) {
 				this.siteConfiguration.Mappings.splice(index, 1);
 			}
+		},
+		deleteAllMappings: function() {
+			this.siteConfiguration.Mappings.splice(0, this.siteConfiguration.Mappings.length);
 		},
 		fieldChanged: function(/**Object*/ item, /**String*/ fieldName, /**String*/ newValue, /**Event*/ event) {
 			newValue = this.safePath(newValue);
