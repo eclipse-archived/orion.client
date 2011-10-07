@@ -7,14 +7,16 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit eclipse widgets */
+/*global define dojo dijit eclipse orion widgets */
 /*jslint browser:true */
 
 define(['dojo', 'dijit', 'orion/util', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/DirectoryPrompterDialog.html'], function(dojo, dijit, mUtil) {
 
 /**
 * @param options {{
-		func : function(item)  Function to be called with the selected item
+		func : function(item)     Function to be called with the selected item
+		message : String          (Optional) Message to display in dialog.
+		title : String            (Optional) Dialog title.
 	}}
  */
  
@@ -32,11 +34,15 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 		this.inherited(arguments);
 		this.title = this.options.title || "Choose a Folder";
 		this.buttonOk = "OK";	
+		this.message = this.options.message || "";
 	},
 	
 	postCreate : function() {
 		this.inherited(arguments);
 		this.loadFolderList("");	// workspace root
+		if (!this.message) {
+			dojo.style(this.messageCell, {display: "none"});
+		}
 	},
 	
 	loadFolderList: function(path) {
