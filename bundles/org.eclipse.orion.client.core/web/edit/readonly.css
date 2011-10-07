@@ -17,3 +17,7 @@
 @import "../css/breadcrumbs.css";
 
 @import "../css/commands.css";
+
+@import "../../orion/textview/rulers.css";
+
+@import "../../orion/textview/annotations.css";
