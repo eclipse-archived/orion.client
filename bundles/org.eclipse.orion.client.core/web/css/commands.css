@@ -124,6 +124,11 @@
     background: #e3e3e3;
 }
 
+.nihilo .dijitTooltip {
+	max-width: 300px;
+	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
+}
+
 /* Why do we have custom search command classes?   Should reconcile this */
 
 .searchCommandImage {

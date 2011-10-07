@@ -10,7 +10,7 @@
 
  /*global define window Image */
  
-define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator' ], function(require, dojo, dijit, mUtil){
+define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip' ], function(require, dojo, dijit, mUtil){
 
 
 	/**
@@ -693,6 +693,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				iconClass: this.imageClass,
 				hrefCallback: !!this.hrefCallback
 			});
+			if (this.tooltip) {
+				new dijit.Tooltip({
+					connectId: [menuitem.domNode],
+					label: this.tooltip
+				});
+			}
 			if (this.hrefCallback) {
 				var loc = this.hrefCallback.call(handler, items, this.id, parent.id, userData);
 				if (loc) {
