@@ -12,7 +12,7 @@
 /*global orion require jstestdriver AsyncTestCase*/
 
 	require({
-		  baseUrl: '..',
+		  baseUrl: '/',
 		  packages: [
 		    {
 		      name: 'dojo',
