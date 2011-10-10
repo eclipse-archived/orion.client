@@ -192,18 +192,15 @@ exports.CommitDetails = (function() {
 					
 					col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 					
-					var image;
+					var image = dojo.create("span", null, col1);
+					dojo.addClass(image, "gitImageSprite");
 					if (diff.ChangeType === "ADD") {
-						image = dojo.create("span", null, col1);
 						dojo.addClass(image, "git-sprite-addition");
 					} else if (diff.ChangeType === "DELETE") {
-						image = dojo.create("span", null, col1);
 						dojo.addClass(image, "git-sprite-removal");
 					} else { // "MODIFY"
-						image = dojo.create("span", null, col1);
 						dojo.addClass(image, "git-sprite-modification");
 					}
-					dojo.addClass(image, "imageSprite");
 					
 					col2 = dojo.create("td", null, tr, "last");
 					dojo.place(document.createTextNode(diff.ChangeType === "DELETE" ? diff.OldPath : diff.NewPath), col2, "only");		
