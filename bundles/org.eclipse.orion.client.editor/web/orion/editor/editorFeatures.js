@@ -89,7 +89,7 @@ orion.editor.AnnotationFactory = (function() {
 		createAnnotationRulers: function(annotationModel) {
 			this.annotationRuler = new orion.textview.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotations"});
 			this.overviewRuler = new orion.textview.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"});
-			this.annotationRuler.setMultiAnnotationOverlay({rulerHTML: "<div class='annotationHTML overlay'></div>"});
+			this.annotationRuler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"});
 			this.annotationRuler.addAnnotationType(this.errorType);
 			this.overviewRuler.addAnnotationType(this.errorType);
 			this.annotationRuler.addAnnotationType(this.warningType);
