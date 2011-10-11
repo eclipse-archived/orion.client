@@ -122,9 +122,9 @@ orion.editor.AnnotationFactory = (function() {
 						type: this[severity + "Type"],
 						start: lineStart + problem.start - 1,
 						end: lineStart + problem.end,
-						rulerTitle: escapedDescription,
-						rulerHTML: "<div class='" + "annotationHTML" + " " + severity + "'></div>",
-						rulerStyle: {styleClass: "annotation" + " " + severity},
+						title: escapedDescription,
+						html: "<div class='" + "annotationHTML" + " " + severity + "'></div>",
+						style: {styleClass: "annotation" + " " + severity},
 						overviewStyle: {styleClass: "annotationOverview" + " " + severity},
 						rangeStyle: {styleClass: "annotationRange" + " " + severity}
 					};

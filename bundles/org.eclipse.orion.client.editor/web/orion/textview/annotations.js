@@ -28,8 +28,8 @@ orion.textview.FoldingAnnotation = (function() {
 		this.start = start;
 		this.end = end;
 		this._projectionModel = projectionModel;
-		this._expandedHTML = this.rulerHTML = expandedHTML;
-		this._expandedStyle = this.rulerStyle = expandedStyle;
+		this._expandedHTML = this.html = expandedHTML;
+		this._expandedStyle = this.style = expandedStyle;
 		this._collapsedHTML = collapsedHTML;
 		this._collapsedStyle = collapsedStyle;
 		this.expanded = true;
@@ -39,8 +39,8 @@ orion.textview.FoldingAnnotation = (function() {
 		collapse: function () {
 			if (!this.expanded) { return; }
 			this.expanded = false;
-			this.rulerHTML = this._collapsedHTML;
-			this.rulerStyle = this._collapsedStyle;
+			this.html = this._collapsedHTML;
+			this.style = this._collapsedStyle;
 			var projectionModel = this._projectionModel;
 			var baseModel = projectionModel.getBaseModel();
 			this._projection = {
@@ -52,8 +52,8 @@ orion.textview.FoldingAnnotation = (function() {
 		expand: function () {
 			if (this.expanded) { return; }
 			this.expanded = true;
-			this.rulerHTML = this._expandedHTML;
-			this.rulerStyle = this._expandedStyle;
+			this.html = this._expandedHTML;
+			this.style = this._expandedStyle;
 			this._projectionModel.removeProjection(this._projection);
 		}
 	};
@@ -66,9 +66,9 @@ orion.textview.FoldingAnnotation = (function() {
  *   type - {String} i.e orion.annotation.breakpoint, orion.annotation.folding
  *   start
  *   end
- *   rulerHTML
- *   rulerStyle
- *   rulerTitle
+ *   html
+ *   style
+ *   title
  *   overviewStyle
  *   rangeStyle
  *   lineStyle

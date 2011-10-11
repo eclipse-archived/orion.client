@@ -165,8 +165,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 		annotationRuler.addAnnotationType(errorType);
 		annotationRuler.addAnnotationType(warningType);
 		annotationRuler.addAnnotationType(taskType);
-		annotationRuler.setMultiAnnotation({rulerHTML: "<div class='annotationHTML multiple'></div>"});
-		annotationRuler.setMultiAnnotationOverlay({rulerHTML: "<div class='annotationHTML overlay'></div>"});
+		annotationRuler.setMultiAnnotation({html: "<div class='annotationHTML multiple'></div>"});
+		annotationRuler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"});
 		annotationRuler.onDblClick =  function(lineIndex, e) {
 			if (lineIndex === undefined) { return; }
 			var model = this._view.getModel();
@@ -205,42 +205,42 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 					if (e.shiftKey && e.altKey) {
 						annotation = {
 							type: warningType,
-							rulerTitle: "Warning: " + model.getLine(lineIndex),
-							rulerStyle: {styleClass: "annotation warning"},
-							rulerHTML: "<div class='annotationHTML warning'></div>",
+							title: "Warning: " + model.getLine(lineIndex),
+							style: {styleClass: "annotation warning"},
+							html: "<div class='annotationHTML warning'></div>",
 							overviewStyle: {styleClass: "annotationOverview warning"}
 						};
 					} else if (e.altKey) {
 						annotation = {
 							type: errorType,
-							rulerTitle: "Error: " + model.getLine(lineIndex),
-							rulerStyle: {styleClass: "annotation error"},
-							rulerHTML: "<div class='annotationHTML error'></div>",
+							title: "Error: " + model.getLine(lineIndex),
+							style: {styleClass: "annotation error"},
+							html: "<div class='annotationHTML error'></div>",
 							overviewStyle: {styleClass: "annotationOverview error"}
 						};
 					} else if (e.shiftKey) {
 						annotation = {
 							type: bookmarkType,
-							rulerTitle: "Bookmark: " + model.getLine(lineIndex),
-							rulerStyle: {styleClass: "annotation bookmark"},
-							rulerHTML: "<div class='annotationHTML bookmark'></div>",
+							title: "Bookmark: " + model.getLine(lineIndex),
+							style: {styleClass: "annotation bookmark"},
+							html: "<div class='annotationHTML bookmark'></div>",
 							overviewStyle: {styleClass: "annotationOverview bookmark"}
 						};
 					} else {
 						annotation = {
 							type: taskType,
-							rulerTitle: "Todo: " + model.getLine(lineIndex),
-							rulerStyle: {styleClass: "annotation task"},
-							rulerHTML: "<div class='annotationHTML task'></div>",
+							title: "Todo: " + model.getLine(lineIndex),
+							style: {styleClass: "annotation task"},
+							html: "<div class='annotationHTML task'></div>",
 							overviewStyle: {styleClass: "annotationOverview task"}
 						};
 					}
 				} else {
 					annotation = {
 						type: breakpointType,
-						rulerTitle: "Breakpoint: " + model.getLine(lineIndex),
-						rulerStyle: {styleClass: "annotation breakpoint"},
-						rulerHTML: "<div class='annotationHTML breakpoint'></div>",
+						title: "Breakpoint: " + model.getLine(lineIndex),
+						style: {styleClass: "annotation breakpoint"},
+						html: "<div class='annotationHTML breakpoint'></div>",
 						overviewStyle: {styleClass: "annotationOverview breakpoint"}
 					};
 				}
