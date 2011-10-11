@@ -19,6 +19,7 @@ var orion = orion || {};
  */ 
 orion.textview = orion.textview || {};
 
+/** @ignore */
 orion.textview.Tooltip = (function() {
 	/** @private */
 	function Tooltip (view) {
@@ -238,7 +239,7 @@ orion.textview.Tooltip = (function() {
  * and is useful only for objects implementing rulers.
  * <p/>
  * 
- * @param {orion.textview.AnnotationModel} [annotationModel] the annotation model for the ruler.
+ * @param {orion.textview.AnnotationModel} annotationModel the annotation model for the ruler.
  * @param {String} [rulerLocation="left"] the location for the ruler.
  * @param {String} [rulerOverview="page"] the overview for the ruler.
  * @param {orion.textview.Style} [rulerStyle] the style for the ruler. 
@@ -291,14 +292,15 @@ orion.textview.Ruler = (function() {
 			this._types.push(type);
 		},
 		/**
-		 * Returns the annotations for a given line range.
+		 * Returns the annotations for a given line range merging multiple
+		 * annotations when necessary.
 		 * <p>
-		 * This method is called the the text view when the ruler is redrawn.
+		 * This method is called by the text view when the ruler is redrawn.
 		 * </p>
 		 *
 		 * @param {Number} startLine the line index
 		 * @param {Number} endLine the line index
-		 * @return {orion.textview.LineAnnotation} the annotations for the line range.
+		 * @return {orion.textview.Annotation[]} the annotations for the line range. The array may sparce.
 		 */
 		getAnnotations: function(startLine, endLine) {
 			var annotationModel = this._annotationModel;
@@ -388,10 +390,10 @@ orion.textview.Ruler = (function() {
 		 * annotation to avoid the ruler from changing size as the view scrolls.
 		 * </p>
 		 * <p>
-		 * This method is called the the text view when the ruler is redrawn.
+		 * This method is called by the text view when the ruler is redrawn.
 		 * </p>
 		 *
-		 * @returns {orion.textview.Annotation} the annotation for the generic line.
+		 * @returns {orion.textview.Annotation} the widest annotation.
 		 *
 		 * @see #getAnnotations
 		 */
@@ -401,8 +403,8 @@ orion.textview.Ruler = (function() {
 		/**
 		 * Returns whether the ruler shows annotations of the specified type.
 		 *
-		 * @param {Object} the annotation type 
-		 * @returns {Boolean} whether the specified is shown
+		 * @param {Object} type the annotation type 
+		 * @returns {Boolean} whether the specified annotation type is shown
 		 */
 		isAnnotationTypeVisible: function(type) {
 			for (var i = 0; i < this._types.length; i++) {
@@ -415,7 +417,7 @@ orion.textview.Ruler = (function() {
 		/**
 		 * Removes an annotation type from the ruler.
 		 *
-		 * @param type {Object} the annotation type to be shown
+		 * @param {Object} type the annotation type to be shown
 		 */
 		removeAnnotationType: function(type) {
 			for (var i = 0; i < this._types.length; i++) {
@@ -441,17 +443,20 @@ orion.textview.Ruler = (function() {
 		},
 		/**
 		 * Sets the annotation that is displayed when a given line contains multiple
-		 * annotations.
+		 * annotations.  This annotation is used when there are different types of
+		 * annotations in a given line.
 		 *
-		 * @param {orion.textview.Annotation} the annotation for lines with multiple annotations.
+		 * @param {orion.textview.Annotation} annotation the annotation for lines with multiple annotations.
 		 */
 		setMultiAnnotation: function(annotation) {
 			this._multiAnnotation = annotation;
 		},
 		/**
-		 * Sets the annotation that overlays a line with multiple  annotations.
+		 * Sets the annotation that overlays a line with multiple annotations.  This annotation is displayed on
+		 * top of the computed annotation for a given line when there are multiple annotations of the same type
+		 * in the line. It is also used when the multiple annotation is not set {@link #setMultiAnnotation}.
 		 *
-		 * @param {orion.textview.Annotation} the annotation overlay for lines with multiple annotations.
+		 * @param {orion.textview.Annotation} annotation the annotation overlay for lines with multiple annotations.
 		 */
 		setMultiAnnotationOverlay: function(annotation) {
 			this._multiAnnotationOverlay = annotation;
@@ -459,7 +464,7 @@ orion.textview.Ruler = (function() {
 		/**
 		 * Sets the view for the ruler.
 		 * <p>
-		 * This method is called the the text view when the ruler
+		 * This method is called by the text view when the ruler
 		 * is added to the view.
 		 * </p>
 		 *
@@ -478,7 +483,7 @@ orion.textview.Ruler = (function() {
 		 * This event is sent when the user clicks a line annotation.
 		 *
 		 * @event
-		 * @param {Number} lineIndex the line index of the clicked annotation.
+		 * @param {Number} lineIndex the line index of the annotation under the pointer.
 		 * @param {DOMEvent} e the click event.
 		 */
 		onClick: function(lineIndex, e) {
@@ -487,7 +492,7 @@ orion.textview.Ruler = (function() {
 		 * This event is sent when the user double clicks a line annotation.
 		 *
 		 * @event
-		 * @param {Number} lineIndex the line index of the double clicked annotation.
+		 * @param {Number} lineIndex the line index of the annotation under the pointer.
 		 * @param {DOMEvent} e the double click event.
 		 */
 		onDblClick: function(lineIndex, e) {
@@ -496,7 +501,7 @@ orion.textview.Ruler = (function() {
 		 * This event is sent when the user moves the mouse over a line annotation.
 		 *
 		 * @event
-		 * @param {Number} lineIndex the line index of the double clicked annotation.
+		 * @param {Number} lineIndex the line index of the annotation under the pointer.
 		 * @param {DOMEvent} e the mouse move event.
 		 */
 		onMouseMove: function(lineIndex, e) {
@@ -516,7 +521,7 @@ orion.textview.Ruler = (function() {
 		 * This event is sent when the mouse pointer enters a line annotation.
 		 *
 		 * @event
-		 * @param {Number} lineIndex the line index of the double clicked annotation.
+		 * @param {Number} lineIndex the line index of the annotation under the pointer.
 		 * @param {DOMEvent} e the mouse over event.
 		 */
 		onMouseOver: this._onMouseMove,
@@ -524,7 +529,7 @@ orion.textview.Ruler = (function() {
 		 * This event is sent when the mouse pointer exits a line annotation.
 		 *
 		 * @event
-		 * @param {Number} lineIndex the line index of the double clicked annotation.
+		 * @param {Number} lineIndex the line index of the annotation under the pointer.
 		 * @param {DOMEvent} e the mouse out event.
 		 */
 		onMouseOut: function(lineIndex, e) {
@@ -532,6 +537,7 @@ orion.textview.Ruler = (function() {
 			if (!tooltip) { return; }
 			tooltip.setTarget(null);
 		},
+		/** @ignore */
 		_getTooltipInfo: function(lineIndex, y) {
 			if (lineIndex === undefined) { return; }
 			var view = this._view;
@@ -575,9 +581,11 @@ orion.textview.Ruler = (function() {
 			info.maxHeight = rect.height - (rect.y - view._parent.getBoundingClientRect().top);
 			return info;
 		},
+		/** @ignore */
 		_getTooltipContents: function(lineIndex, annotations) {
 			return annotations;
-		},	
+		},
+		/** @ignore */
 		_onAnnotationModelChanged: function(e) {
 			var view = this._view;
 			if (!view) { return; }
@@ -608,6 +616,7 @@ orion.textview.Ruler = (function() {
 			redraw(e.removed);
 			redraw(e.changed);
 		},
+		/** @ignore */
 		_mergeAnnotation: function(result, annotation, annotationLineIndex, annotationLineCount) {
 			if (!result) { result = {}; }
 			if (annotationLineIndex === 0) {
@@ -625,6 +634,7 @@ orion.textview.Ruler = (function() {
 			result.style = this._mergeStyle(result.style, annotation.style);
 			return result;
 		},
+		/** @ignore */
 		_mergeStyle: function(result, style) {
 			if (style) {
 				if (!result) { result = {}; }
