@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(["orion/assert", "orion/compare/compare-model", "orion/textview/textModel", "mapper-test-data"], function(assert, mCompareModel, mTextModel, mMapperTestData) {
+define(["orion/assert", "orion/compare/compare-model", "orion/textview/textModel", "./mapper-test-data"], function(assert, mCompareModel, mTextModel, mMapperTestData) {
 	var tests = {};
 		
 	tests["test model : empty file"] = function() {
