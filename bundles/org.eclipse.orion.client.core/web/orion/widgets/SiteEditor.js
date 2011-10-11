@@ -313,6 +313,9 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			{ Source: "/mixloginstatic",
 			  Target: hostPrefix + "mixloginstatic"
 			},
+			{ Source: "/mixlogin/manageopenids",
+			  Target: hostPrefix + "mixlogin/manageopenids"
+			},
 			{ Source: "/openids",
 			  Target: hostPrefix + "openids"
 			},
