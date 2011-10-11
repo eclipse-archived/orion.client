@@ -535,7 +535,6 @@ var exports = {};
 															return jsonData;
 														},
 														error : function(error, ioArgs) {
-															//handleGetAuthenticationError(this, ioArgs);
 															console.error("HTTP status code: ", ioArgs.xhr.status);
 															return error;
 														}
@@ -608,7 +607,6 @@ var exports = {};
 															return jsonData;
 														},
 														error : function(error, ioArgs) {
-															//handleGetAuthenticationError(this, ioArgs);
 															console.error("HTTP status code: ", ioArgs.xhr.status);
 															return error;
 														}
@@ -990,7 +988,7 @@ var exports = {};
 							load : function(branches, secondArg) {
 								dojo.forEach(branches.Children, function(branch, i) {
 									if (branch.Current == true){
-										clientDeferred.callback(require.toUrl("git/git-log.html")+"#" + branch.CommitLocation + "?page=1");
+										clientDeferred.callback(require.toUrl("git/git-log.html") + "#" + branch.CommitLocation + "?page=1");
 										return;
 									}
 								});
@@ -1181,7 +1179,6 @@ var exports = {};
 															return jsonData;
 														},
 														error : function(error, ioArgs) {
-															//handleGetAuthenticationError(this, ioArgs);
 															console.error("HTTP status code: ", ioArgs.xhr.status);
 														}
 													}).then(function(jsonData) {
@@ -1308,7 +1305,6 @@ var exports = {};
 															return jsonData;
 														},
 														error : function(error, ioArgs) {
-															//handleGetAuthenticationError(this, ioArgs);
 															console.error("HTTP status code: ", ioArgs.xhr.status);
 														}
 													}).then(function(remoteJsonData){

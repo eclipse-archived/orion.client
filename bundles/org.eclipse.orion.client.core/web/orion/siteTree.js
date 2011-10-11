@@ -8,8 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo eclipse:true handleGetAuthenticationError handlePostAuthenticationError
-  handleDeleteAuthenticationError */
+/*global dojo eclipse:true */
 /*jslint browser:true devel:true*/
 
 define(['dojo', 'orion/siteUtils'], function(dojo, mSiteUtils) {

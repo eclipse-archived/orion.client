@@ -919,7 +919,10 @@ orion.GitStatusController = (function() {
 					},
 					error : function(error, ioArgs) {
 						if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
-							mAuth.handleGetAuthenticationError(this, ioArgs);
+							var currentXHR = this;
+							mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+								dojo.xhrGet(currentXHR); // retry GET							
+							});
 						}else{
 							that._gitCommitNavigatorRem.loadCommitsList(path, error).then(function(){retDeffered.callback();});	
 						}
@@ -981,7 +984,10 @@ orion.GitStatusController = (function() {
 									error : function(error, ioArgs) {
 										console.error("HTTP status code: ", ioArgs.xhr.status);
 										if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
-											mAuth.handleGetAuthenticationError(this, ioArgs);
+											var currentXHR = this;
+											mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+												dojo.xhrGet(currentXHR); // retry GET							
+											});
 										}else{
 											that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children}).then(function(){retDeffered.callback();});
 											if(that._curRemote && that._curBranch)
@@ -1003,7 +1009,6 @@ orion.GitStatusController = (function() {
 						
 					},
 					error : function(error, ioArgs) {
-						//mAuth.handleGetAuthenticationError(this, ioArgs);
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
 				});

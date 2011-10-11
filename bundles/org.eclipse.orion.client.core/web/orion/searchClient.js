@@ -48,13 +48,12 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 				sync: false,
 				timeout: 15000,
 				// need to use inline errback to get ioArgs
-				error: dojo.hitch(this, function(response, ioArgs) {
-					this.handleError(response, resultsNode);
-					mAuth.handleGetAuthenticationError(this, ioArgs, 
-						dojo.hitch(this, this.showSearchResult),
-						dojo.hitch(this,function(response) { this.handleError(response, resultsNode); }));
-					return response;
-				}),
+				error: function(response, ioArgs) {
+					var currentXHR = this;
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+						dojo.xhrGet(currentXHR); // retry GET							
+					});
+				},
 				load: dojo.hitch(this, function(jsonData) {
 					this.showSearchResult(resultsNode, query, excludeFile, generateHeadingAndSaveLink, onResultReady, 
 							hideSummaries, useFlatList, jsonData); 
