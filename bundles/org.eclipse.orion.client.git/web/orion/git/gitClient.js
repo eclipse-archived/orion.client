@@ -79,7 +79,7 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					return error;
 				}
@@ -103,7 +103,7 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					return error;
 				}
@@ -132,7 +132,10 @@ eclipse.GitService = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					var currentXHR = this;
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+						dojo.xhrGet(currentXHR); // retry GET							
+					});
 					return response;
 				}
 			});
@@ -159,7 +162,10 @@ eclipse.GitService = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					var currentXHR = this;
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+						dojo.xhrGet(currentXHR); // retry GET							
+					});
 					return response;
 				}
 			});
@@ -185,7 +191,10 @@ eclipse.GitService = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					var currentXHR = this;
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+						dojo.xhrGet(currentXHR); // retry GET							
+					});
 					return response;
 				}
 			});
@@ -209,10 +218,10 @@ eclipse.GitService = (function() {
 					}
 				},
 				error: function(response, ioArgs) {
-					if(onError)
+					if(onError) {
 						onError(response,ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
-					return response;
+					}
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 				}
 			});
 		},
@@ -240,7 +249,7 @@ eclipse.GitService = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					return response;
 				}
 			});
@@ -267,7 +276,7 @@ eclipse.GitService = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					return response;
 				}
 			});
@@ -294,7 +303,7 @@ eclipse.GitService = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					return response;
 				}
 			});
@@ -323,7 +332,7 @@ eclipse.GitService = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					return response;
 				}
 			});
@@ -350,7 +359,7 @@ eclipse.GitService = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					return response;
 				}
 			});
@@ -376,7 +385,10 @@ eclipse.GitService = (function() {
 					}
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					var currentXHR = this;
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+						dojo.xhrGet(currentXHR); // retry GET							
+					});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
@@ -394,7 +406,10 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					var currentXHR = this;
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+						dojo.xhrGet(currentXHR); // retry GET							
+					});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
@@ -412,7 +427,10 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					var currentXHR = this;
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+						dojo.xhrGet(currentXHR); // retry GET							
+					});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
@@ -430,7 +448,10 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					var currentXHR = this;
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+						dojo.xhrGet(currentXHR); // retry GET							
+					});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
@@ -451,7 +472,7 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					return error;
 				}
@@ -474,7 +495,7 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
@@ -498,7 +519,7 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					return error;
 				}
@@ -517,7 +538,7 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					return error;
 				}
@@ -540,7 +561,7 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					return error;
 				}
@@ -559,7 +580,7 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					return error;
 				}
@@ -587,7 +608,10 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					var currentXHR = this;
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+						dojo.xhrGet(currentXHR); // retry GET							
+					});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
@@ -615,7 +639,10 @@ eclipse.GitService = (function() {
 					}
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					var currentXHR = this;
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+						dojo.xhrGet(currentXHR); // retry GET							
+					});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
@@ -649,14 +676,12 @@ eclipse.GitService = (function() {
 					}
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
 		},
 		doMerge : function(gitHeadURI, commitName) {
-			var service = this;
-			
 			return dojo.xhrPost({
 				url : gitHeadURI,
 				headers : {
@@ -671,7 +696,7 @@ eclipse.GitService = (function() {
 					return {jsonData: jsonData, secondArg: secondArg};
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					return {error: error, ioArgs: ioArgs};
 				}
@@ -703,7 +728,7 @@ eclipse.GitService = (function() {
 				error : function(error, ioArgs) {
 					if(onError)
 						onError(error, ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					return {error: error, ioArgs: ioArgs};
 				}
@@ -736,7 +761,7 @@ eclipse.GitService = (function() {
 				error : function(error, ioArgs) {
 					if(onError)
 						onError(error, ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					return {error: error, ioArgs: ioArgs};
 				}
@@ -772,7 +797,7 @@ eclipse.GitService = (function() {
 					}
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 					return error;
 				}
@@ -795,7 +820,7 @@ eclipse.GitService = (function() {
 					return secondArg.xhr.getResponseHeader("Location");
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			}).then(function(scopedGitCommitURI){
@@ -817,7 +842,10 @@ eclipse.GitService = (function() {
 						return jsonData;
 					},
 					error : function(error, ioArgs) {
-						mAuth.handleGetAuthenticationError(this, ioArgs);
+						var currentXHR = this;
+						mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+							dojo.xhrGet(currentXHR); // retry GET							
+						});
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
 				});
@@ -837,7 +865,10 @@ eclipse.GitService = (function() {
 					return jsonData;
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					var currentXHR = this;
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+						dojo.xhrGet(currentXHR); // retry GET							
+					});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			}).then(function(remoteJsonData){
@@ -862,7 +893,10 @@ eclipse.GitService = (function() {
 						return jsonData;
 					},
 					error : function(error, ioArgs) {
-						mAuth.handleGetAuthenticationError(this, ioArgs);
+						var currentXHR = this;
+						mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+							dojo.xhrGet(currentXHR); // retry GET							
+						});
 						console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
 				});
@@ -891,7 +925,7 @@ eclipse.GitService = (function() {
 					}
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
 				}
 			});
@@ -920,7 +954,7 @@ eclipse.GitService = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					return response;
 				}
 			});
@@ -949,7 +983,7 @@ eclipse.GitService = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					return response;
 				}
 			});
@@ -975,7 +1009,7 @@ eclipse.GitService = (function() {
 				error: function(response, ioArgs) {
 					if(onError)
 						onError(response,ioArgs);
-					mAuth.handleGetAuthenticationError(this, ioArgs);
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					return response;
 				}
 			});

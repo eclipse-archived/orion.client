@@ -208,7 +208,10 @@ define(['require', 'dojo', 'orion/auth'], function(require, dojo, mAuth){
 								d.resolve({});
 								return;
 							}
-							mAuth.handleGetAuthenticationError(this, ioArgs);
+							var currentXHR = this;
+							mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+								dojo.xhrGet(currentXHR); // retry GET							
+							});
 						} else if (ioArgs.xhr.status === 404) {
 							var data = {};
 							_cache.set(key, data);
@@ -243,7 +246,10 @@ define(['require', 'dojo', 'orion/auth'], function(require, dojo, mAuth){
 				},
 				error: function(response, ioArgs) {
 					if (ioArgs.xhr.status === 401) {
-						mAuth.handlePutAuthenticationError(this, ioArgs);
+						var currentXHR = this;
+						mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+							dojo.xhrPut(currentXHR); // retry PUT							
+						});
 					} else {
 						d.resolve(); // consider throwing here
 					}
@@ -289,7 +295,10 @@ define(['require', 'dojo', 'orion/auth'], function(require, dojo, mAuth){
 								d.resolve({});
 								return;
 							}
-							mAuth.handleGetAuthenticationError(ioArgs.xhr, ioArgs);
+							var currentXHR = this;
+							mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+								dojo.xhrGet(currentXHR); // retry GET							
+							});
 						} else if (ioArgs.xhr.status === 404) {
 							_cache.set(key, {});
 							that._currentPromise = null;

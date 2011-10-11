@@ -106,10 +106,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 					timeout : 15000,
 					load : function(jsonData, ioArgs) {
 						dojo.hash(jsonData.Location);
-						return jsonData;
 					},
 					error : function(response, ioArgs) {
-						mAuth.handleGetAuthenticationError(this, ioArgs);
+						var currentXHR = this;
+						mAuth.handleAuthenticationError(ioArgs.xhr, function(){
+							dojo.xhrPost(currentXHR); // retry POST							
+						});
 					}
 				});
 			}
