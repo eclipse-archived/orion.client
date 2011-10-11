@@ -12,9 +12,8 @@
 	Authentication and authorization error handling. Adds methods that handle 401 and 403 responses for 
 	XHR calls.
 
-	To handle 401 and 403 error add the following line to 'error' function in your dojo.xhr<method> request,
-	where <method> is the method you would like to call
-		handle<method>AuthenticationError(this, ioArgs);
+	To handle 401 and 403 error add the following line to 'error' function in your service request,
+		handleAuthenticationError(error, <optional retry function>)
 
  */
 
@@ -69,8 +68,9 @@ define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widg
 						window.removeEventListener("storage", storageListener, false); // ... but only once
 						delete pendingAuthentication[responseObj.SignInKey];
 						mGlobalCommands.setPendingAuthentication(pendingAuthentication);
-						retry();
-	
+						if (retry) {
+							retry();
+						}
 					};
 					
 					window.addEventListener("storage", storageListener, false);
