@@ -1,6 +1,5 @@
 /* Styles for the annotation ruler (all lines) */
 .annotation {
-	cursor: pointer;
 }
 .annotation.error,
 .annotation.warning
@@ -13,6 +12,7 @@
 
 /* Styles for the annotation ruler (first line) */
 .annotationHTML {
+	cursor: pointer;
 	width: 16px;
 	height: 16px;
 	float: left;

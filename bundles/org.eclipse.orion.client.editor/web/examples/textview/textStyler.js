@@ -552,9 +552,9 @@ examples.textview.TextStyler = (function() {
 						start: tokenStart,
 						end: end,
 						type: "orion.annotation.task",
-						rulerTitle: baseModel.getText(tokenStart, end),
-						rulerStyle: {styleClass: "annotation task"},
-						rulerHTML: "<div class='annotationHTML task'></div>",
+						title: baseModel.getText(tokenStart, end),
+						style: {styleClass: "annotation task"},
+						html: "<div class='annotationHTML task'></div>",
 						overviewStyle: {styleClass: "annotationOverview task"}
 					});
 				}

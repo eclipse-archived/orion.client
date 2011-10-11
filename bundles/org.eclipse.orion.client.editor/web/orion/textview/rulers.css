@@ -36,7 +36,7 @@
 	border-radius: 4px;
 	border: 1px solid black;
 	z-index: 100;
-	position: absolute;
+	position: fixed;
 	overflow: hidden;
 	white-space: pre;
 }
