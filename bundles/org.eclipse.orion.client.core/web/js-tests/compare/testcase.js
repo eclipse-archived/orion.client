@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 
-define(["orion/assert", "orion/compare/diff-parser", "mapper-test-data"], function(assert, mDiffParser, mMapperTestData) {
+define(["orion/assert", "orion/compare/diff-parser", "./mapper-test-data"], function(assert, mDiffParser, mMapperTestData) {
 	var tests = {};
 	var mapperTestCases = mMapperTestData.mapperTestCases;
 
