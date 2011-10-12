@@ -509,34 +509,40 @@ orion.editor.Editor = (function() {
 			if (!annotationModel) {
 				return;
 			}
-			annotationModel.removeAnnotations(this.errorType);
-			annotationModel.removeAnnotations(this.warningType);
-			if (!problems) { return; }
-			var annotations = [];
+			var remove = [], add = [];
 			var model = annotationModel.getTextModel();
-			for (var i = 0; i < problems.length; i++) {
-				var problem = problems[i];
-				if (problem) {
-					// escaping voodoo... we need to construct HTML that contains valid JavaScript.
-					// TODO safeText() from util.js
-					var escapedDescription = problem.description.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
-					var lineIndex = problem.line - 1;
-					var lineStart = model.getLineStart(lineIndex);
-					var severity = problem.severity;
-					var annotation = {
-						type: this[severity + "Type"],
-						start: lineStart + problem.start - 1,
-						end: lineStart + problem.end,
-						title: escapedDescription,
-						html: "<div class='" + "annotationHTML" + " " + severity + "'></div>",
-						style: {styleClass: "annotation" + " " + severity},
-						overviewStyle: {styleClass: "annotationOverview" + " " + severity},
-						rangeStyle: {styleClass: "annotationRange" + " " + severity}
-					};
-					annotations.push(annotation);
+			var annotations = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
+			while (annotations.hasNext()) {
+				annotation = annotations.next();
+				if (annotation.type === this.errorType || annotation.type === this.warningType) {
+					remove.push(annotation);
 				}
 			}
-			annotationModel.replaceAnnotations(null, annotations);
+			if (problems) { 
+				for (var i = 0; i < problems.length; i++) {
+					var problem = problems[i];
+					if (problem) {
+						// escaping voodoo... we need to construct HTML that contains valid JavaScript.
+						// TODO safeText() from util.js
+						var escapedDescription = problem.description.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
+						var lineIndex = problem.line - 1;
+						var lineStart = model.getLineStart(lineIndex);
+						var severity = problem.severity;
+						annotation = {
+							type: this[severity + "Type"],
+							start: lineStart + problem.start - 1,
+							end: lineStart + problem.end,
+							title: escapedDescription,
+							html: "<div class='" + "annotationHTML" + " " + severity + "'></div>",
+							style: {styleClass: "annotation" + " " + severity},
+							overviewStyle: {styleClass: "annotationOverview" + " " + severity},
+							rangeStyle: {styleClass: "annotationRange" + " " + severity}
+						};
+						add.push(annotation);
+					}
+				}
+			}
+			annotationModel.replaceAnnotations(remove, add);
 		},
 		
 		/**
