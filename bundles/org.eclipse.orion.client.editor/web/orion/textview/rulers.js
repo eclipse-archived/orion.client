@@ -287,6 +287,9 @@ orion.textview.Ruler = (function() {
 		 * </p>
 		 *
 		 * @param type {Object} the annotation type to be shown
+		 * 
+		 * @see #removeAnnotationType
+		 * @see #isAnnotationTypeVisible
 		 */
 		addAnnotationType: function(type) {
 			this._types.push(type);
@@ -298,9 +301,9 @@ orion.textview.Ruler = (function() {
 		 * This method is called by the text view when the ruler is redrawn.
 		 * </p>
 		 *
-		 * @param {Number} startLine the line index
-		 * @param {Number} endLine the line index
-		 * @return {orion.textview.Annotation[]} the annotations for the line range. The array may sparce.
+		 * @param {Number} startLine the start line index
+		 * @param {Number} endLine the end line index
+		 * @return {orion.textview.Annotation[]} the annotations for the line range. The array might be sparse.
 		 */
 		getAnnotations: function(startLine, endLine) {
 			var annotationModel = this._annotationModel;
@@ -346,11 +349,11 @@ orion.textview.Ruler = (function() {
 			return result;
 		},
 		/**
-		 * Returns the ruler annotation model.
+		 * Returns the annotation model.
 		 *
 		 * @returns {orion.textview.AnnotationModel} the ruler annotation model.
 		 *
-		 * @see #getOverview
+		 * @see #setAnnotationModel
 		 */
 		getAnnotationModel: function() {
 			return this._annotationModel;
@@ -376,9 +379,9 @@ orion.textview.Ruler = (function() {
 			return this._overview;
 		},
 		/**
-		 * Returns the CSS styling information for the ruler.
+		 * Returns the style information for the ruler.
 		 *
-		 * @returns {orion.textview.Style} the CSS styling for ruler.
+		 * @returns {orion.textview.Style} the style information.
 		 */
 		getRulerStyle: function() {
 			return this._rulerStyle;
@@ -405,6 +408,9 @@ orion.textview.Ruler = (function() {
 		 *
 		 * @param {Object} type the annotation type 
 		 * @returns {Boolean} whether the specified annotation type is shown
+		 * 
+		 * @see #addAnnotationType
+		 * @see #removeAnnotationType
 		 */
 		isAnnotationTypeVisible: function(type) {
 			for (var i = 0; i < this._types.length; i++) {
@@ -417,7 +423,10 @@ orion.textview.Ruler = (function() {
 		/**
 		 * Removes an annotation type from the ruler.
 		 *
-		 * @param {Object} type the annotation type to be shown
+		 * @param {Object} type the annotation type to be removed
+		 * 
+		 * @see #addAnnotationType
+		 * @see #isAnnotationTypeVisible
 		 */
 		removeAnnotationType: function(type) {
 			for (var i = 0; i < this._types.length; i++) {
@@ -431,6 +440,8 @@ orion.textview.Ruler = (function() {
 		 * Sets the annotation model for the ruler.
 		 *
 		 * @param {orion.textview.AnnotationModel} annotationModel the annotation model.
+		 *
+		 * @see #getAnnotationModel
 		 */
 		setAnnotationModel: function (annotationModel) {
 			if (this._annotationModel) {
@@ -447,6 +458,8 @@ orion.textview.Ruler = (function() {
 		 * annotations in a given line.
 		 *
 		 * @param {orion.textview.Annotation} annotation the annotation for lines with multiple annotations.
+		 * 
+		 * @see #setMultiAnnotationOverlay
 		 */
 		setMultiAnnotation: function(annotation) {
 			this._multiAnnotation = annotation;
@@ -454,9 +467,11 @@ orion.textview.Ruler = (function() {
 		/**
 		 * Sets the annotation that overlays a line with multiple annotations.  This annotation is displayed on
 		 * top of the computed annotation for a given line when there are multiple annotations of the same type
-		 * in the line. It is also used when the multiple annotation is not set {@link #setMultiAnnotation}.
+		 * in the line. It is also used when the multiple annotation is not set.
 		 *
 		 * @param {orion.textview.Annotation} annotation the annotation overlay for lines with multiple annotations.
+		 * 
+		 * @see #setMultiAnnotation
 		 */
 		setMultiAnnotationOverlay: function(annotation) {
 			this._multiAnnotationOverlay = annotation;
