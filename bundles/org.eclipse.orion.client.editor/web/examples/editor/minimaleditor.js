@@ -55,7 +55,7 @@ window.onload = function(){
 							description: "I don't like the letter 'z'"});
 					}
 				}
-				annotationFactory.showProblems(problems);
+				editor.showProblems(problems);
 				return true;
 		});
 	};

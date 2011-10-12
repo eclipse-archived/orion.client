@@ -52,14 +52,20 @@ orion.editor.Editor = (function() {
 		this._domNode = options.domNode;
 		this._syntaxHighlightProviders = options.syntaxHighlightProviders;
 		
-		this._annotationsRuler = null;
+		this._annotationRuler = null;
 		this._overviewRuler = null;
+		this._foldingRuler = null;
 		this._dirty = false;
 		this._contentAssist = null;
 		this._title = null;
 		this._keyModes = [];
 	}
 	Editor.prototype = /** @lends orion.editor.Editor.prototype */ {
+		errorType: "orion.annotation.error",
+		warningType: "orion.annotation.warning",
+		taskType: "orion.annotation.task",
+		foldingType: "orion.annotation.folding",
+		
 		/**
 		 * Returns the underlying <code>TextView</code> used by this editor. 
 		 * @returns orion.textview.TextView
@@ -179,6 +185,7 @@ orion.editor.Editor = (function() {
 					textView.annotationModel = this._annotationModel;
 					
 					this._foldingRuler = this._foldingRulerFactory.createFoldingRuler(this._annotationModel);
+					this._foldingRuler.addAnnotationType(this.foldingType);
 					textView.addRuler(this._foldingRuler);
 				}
 			} else {
@@ -450,11 +457,13 @@ orion.editor.Editor = (function() {
 			
 			// Create rulers
 			if (this._annotationFactory) {
-				this._annotationModel = this._annotationFactory.createAnnotationModel(textView.getModel());
+				var textModel = textView.getModel();
+				if (textModel.getBaseModel) { textModel = textModel.getBaseModel(); }
+				this._annotationModel = this._annotationFactory.createAnnotationModel(textModel);
 				var annotations = this._annotationFactory.createAnnotationRulers(this._annotationModel);
-				this._annotationsRuler = annotations.annotationRuler;
+				this._annotationRuler = annotations.annotationRuler;
 			
-				this._annotationsRuler.onClick = function(lineIndex, e) {
+				this._annotationRuler.onClick = function(lineIndex, e) {
 					if (lineIndex === undefined) { return; }
 					if (lineIndex === -1) { return; }
 					var viewModel = textView.getModel();
@@ -476,7 +485,14 @@ orion.editor.Editor = (function() {
 					editor.moveSelection(editor.mapOffset(offset));
 				};
 			
-				textView.addRuler(this._annotationsRuler);
+				this._annotationRuler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"});
+				this._annotationRuler.addAnnotationType(this.errorType);
+				this._annotationRuler.addAnnotationType(this.warningType);
+				this._annotationRuler.addAnnotationType(this.taskType);
+				this._overviewRuler.addAnnotationType(this.errorType);
+				this._overviewRuler.addAnnotationType(this.warningType);
+				this._overviewRuler.addAnnotationType(this.taskType);
+				textView.addRuler(this._annotationRuler);
 				textView.addRuler(this._overviewRuler);
 			}
 			
@@ -486,6 +502,41 @@ orion.editor.Editor = (function() {
 			}
 			
 			this._updateFoldingRuler();
+		},
+		
+		showProblems: function(problems) {
+			var annotationModel = this._annotationModel;
+			if (!annotationModel) {
+				return;
+			}
+			annotationModel.removeAnnotations(this.errorType);
+			annotationModel.removeAnnotations(this.warningType);
+			if (!problems) { return; }
+			var annotations = [];
+			var model = annotationModel.getTextModel();
+			for (var i = 0; i < problems.length; i++) {
+				var problem = problems[i];
+				if (problem) {
+					// escaping voodoo... we need to construct HTML that contains valid JavaScript.
+					// TODO safeText() from util.js
+					var escapedDescription = problem.description.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
+					var lineIndex = problem.line - 1;
+					var lineStart = model.getLineStart(lineIndex);
+					var severity = problem.severity;
+					var annotation = {
+						type: this[severity + "Type"],
+						start: lineStart + problem.start - 1,
+						end: lineStart + problem.end,
+						title: escapedDescription,
+						html: "<div class='" + "annotationHTML" + " " + severity + "'></div>",
+						style: {styleClass: "annotation" + " " + severity},
+						overviewStyle: {styleClass: "annotationOverview" + " " + severity},
+						rangeStyle: {styleClass: "annotationRange" + " " + severity}
+					};
+					annotations.push(annotation);
+				}
+			}
+			annotationModel.replaceAnnotations(null, annotations);
 		},
 		
 		/**
