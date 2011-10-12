@@ -300,18 +300,13 @@ orion.textview.TextModel = (function() {
 		 * purposes and to allow integration with other toolkit frameworks.
 		 * </p>
 		 *
-		 * @param {String} text the text that is about to be inserted in the model.
-		 * @param {Number} start the character offset in the model where the change will occur.
-		 * @param {Number} removedCharCount the number of characters being removed from the model.
-		 * @param {Number} addedCharCount the number of characters being added to the model.
-		 * @param {Number} removedLineCount the number of lines being removed from the model.
-		 * @param {Number} addedLineCount the number of lines being added to the model.
+		 * @param {orion.textview.ModelChangingEvent} modelChangingEvent the changing event
 		 */
-		onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+		onChanging: function(modelChangingEvent) {
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanging) { 
-					l.onChanging(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+					l.onChanging(modelChangingEvent);
 				}
 			}
 		},
@@ -327,17 +322,13 @@ orion.textview.TextModel = (function() {
 		 * purposes and to allow integration with other toolkit frameworks.
 		 * </p>
 		 *
-		 * @param {Number} start the character offset in the model where the change occurred.
-		 * @param {Number} removedCharCount the number of characters removed from the model.
-		 * @param {Number} addedCharCount the number of characters added to the model.
-		 * @param {Number} removedLineCount the number of lines removed from the model.
-		 * @param {Number} addedLineCount the number of lines added to the model.
+		 * @param {orion.textview.ModelChangedEvent} modelChangedEvent the changed event
 		 */
-		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+		onChanged: function(modelChangedEvent) {
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanged) { 
-					l.onChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+					l.onChanged(modelChangedEvent);
 				}
 			}
 		},
@@ -415,7 +406,15 @@ orion.textview.TextModel = (function() {
 				addedLineCount++;
 			}
 		
-			this.onChanging(text, eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			var modelChangingEvent = {
+				text: text,
+				start: eventStart,
+				removedCharCount: removedCharCount,
+				addedCharCount: addedCharCount,
+				removedLineCount: removedLineCount,
+				addedLineCount: addedLineCount
+			};
+			this.onChanging(modelChangingEvent);
 			
 			//TODO this should be done the loops below to avoid getText()
 			if (newLineOffsets.length === 0) {
@@ -470,7 +469,14 @@ orion.textview.TextModel = (function() {
 			Array.prototype.splice.apply(this._text, params);
 			if (this._text.length === 0) { this._text = [""]; }
 			
-			this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			var modelChangedEvent = {
+				start: eventStart,
+				removedCharCount: removedCharCount,
+				addedCharCount: addedCharCount,
+				removedLineCount: removedLineCount,
+				addedLineCount: addedLineCount
+			};
+			this.onChanged(modelChangedEvent);
 		}
 	};
 	

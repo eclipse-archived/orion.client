@@ -873,7 +873,7 @@ orion.textview.TextView = (function() {
 		 * This event is sent when the text in the model has changed.
 		 *
 		 * @event
-		 * @param {orion.textview.ModelChangingEvent} modelChangingEvent the event
+		 * @param {orion.textview.ModelChangedEvent} modelChangedEvent the event
 		 */
 		onModelChanged: function(modelChangedEvent) {
 			this._eventTable.sendEvent("ModelChanged", modelChangedEvent);
@@ -4071,12 +4071,12 @@ orion.textview.TextView = (function() {
 			var self = this;
 			this._modelListener = {
 				/** @private */
-				onChanging: function(newText, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-					self._onModelChanging(newText, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+				onChanging: function(modelChangingEvent) {
+					self._onModelChanging(modelChangingEvent);
 				},
 				/** @private */
-				onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-					self._onModelChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+				onChanged: function(modelChangedEvent) {
+					self._onModelChanged(modelChangedEvent);
 				}
 			};
 			this._model.addListener(this._modelListener);
@@ -4237,16 +4237,13 @@ orion.textview.TextView = (function() {
 			}
 			this.onModify({});
 		},
-		_onModelChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-			var e = {
-				start: start,
-				removedCharCount: removedCharCount,
-				addedCharCount: addedCharCount,
-				removedLineCount: removedLineCount,
-				addedLineCount: addedLineCount
-			};
-			this.onModelChanged(e);
-			
+		_onModelChanged: function(modelChangedEvent) {
+			this.onModelChanged(modelChangedEvent);
+			var start = modelChangedEvent.start;
+			var addedCharCount = modelChangedEvent.addedCharCount;
+			var removedCharCount = modelChangedEvent.removedCharCount;
+			var addedLineCount = modelChangedEvent.addedLineCount;
+			var removedLineCount = modelChangedEvent.removedLineCount;
 			var selection = this._getSelection();
 			if (selection.end > start) {
 				if (selection.end > start && selection.start < start + removedCharCount) {
@@ -4279,16 +4276,8 @@ orion.textview.TextView = (function() {
 			}
 			this._updatePage();
 		},
-		_onModelChanging: function(newText, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-			var e = {
-				text: newText,
-				start: start,
-				removedCharCount: removedCharCount,
-				addedCharCount: addedCharCount,
-				removedLineCount: removedLineCount,
-				addedLineCount: addedLineCount
-			};
-			this.onModelChanging(e);
+		_onModelChanging: function(modelChangingEvent) {
+			this.onModelChanging(modelChangingEvent);
 		},
 		_queueUpdatePage: function() {
 			if (this._updateTimer) { return; }
