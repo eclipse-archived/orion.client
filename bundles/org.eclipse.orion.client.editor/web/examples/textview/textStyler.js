@@ -414,7 +414,6 @@ examples.textview.TextStyler = (function() {
 		view.addEventListener("Selection", this, this._onSelection);
 		var model = view.getModel();
 		if (model.getBaseModel) {
-			//TODO normalize all events to use event objects
 			var self = this;
 			this._baseModelListener = {
 				onChanged: function(modelChangedEvent) {

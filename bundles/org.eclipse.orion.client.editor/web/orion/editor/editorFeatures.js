@@ -23,16 +23,17 @@ orion.editor.UndoFactory = (function() {
 	}
 	UndoFactory.prototype = {
 		createUndoStack: function(editor) {
-			var undoStack =  new orion.textview.UndoStack(editor.getTextView(), 200);
-			editor.getTextView().setKeyBinding(new orion.textview.KeyBinding('z', true), "Undo");
-			editor.getTextView().setAction("Undo", function() {
+			var textView = editor.getTextView();
+			var undoStack =  new orion.textview.UndoStack(textView, 200);
+			textView.setKeyBinding(new orion.textview.KeyBinding('z', true), "Undo");
+			textView.setAction("Undo", function() {
 				undoStack.undo();
 				return true;
 			});
 			
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			editor.getTextView().setKeyBinding(isMac ? new orion.textview.KeyBinding('z', true, true) : new orion.textview.KeyBinding('y', true), "Redo");
-			editor.getTextView().setAction("Redo", function() {
+			textView.setKeyBinding(isMac ? new orion.textview.KeyBinding('z', true, true) : new orion.textview.KeyBinding('y', true), "Redo");
+			textView.setAction("Redo", function() {
 				undoStack.redo();
 				return true;
 			});
@@ -57,11 +58,8 @@ orion.editor.FoldingRulerFactory = (function() {
 	function FoldingRulerFactory() {
 	}
 	FoldingRulerFactory.prototype = {
-		foldingType: "orion.annotation.folding",
 		createFoldingRuler: function(annotationModel) {
-			this.foldingRuler = new orion.textview.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"});
-			this.foldingRuler.addAnnotationType(this.foldingType);
-			return this.foldingRuler;
+			return new orion.textview.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"});
 		}
 	};
 	return FoldingRulerFactory;
@@ -72,66 +70,16 @@ orion.editor.AnnotationFactory = (function() {
 	function AnnotationFactory() {
 	}
 	AnnotationFactory.prototype = {
-		errorType: "orion.annotation.error",
-		warningType: "orion.annotation.warning",
-		taskType: "orion.annotation.task",
 		createAnnotationModel: function(model) {
-			if (model.getBaseModel) { model = model.getBaseModel(); }
-			this.annotationModel = new orion.textview.AnnotationModel(model);
-			return this.annotationModel;
+			return new orion.textview.AnnotationModel(model);
 		},
-		
 		createAnnotationStyler: function(annotationModel, view) {
-			this.annotationStyler = new orion.textview.AnnotationStyler(annotationModel, view);
-			return this.annotationStyler;
+			return new orion.textview.AnnotationStyler(annotationModel, view);
 		},
-
 		createAnnotationRulers: function(annotationModel) {
-			this.annotationRuler = new orion.textview.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotations"});
-			this.overviewRuler = new orion.textview.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"});
-			this.annotationRuler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"});
-			this.annotationRuler.addAnnotationType(this.errorType);
-			this.overviewRuler.addAnnotationType(this.errorType);
-			this.annotationRuler.addAnnotationType(this.warningType);
-			this.overviewRuler.addAnnotationType(this.warningType);
-			this.annotationRuler.addAnnotationType(this.taskType);
-			this.overviewRuler.addAnnotationType(this.taskType);
-			return {annotationRuler: this.annotationRuler, overviewRuler: this.overviewRuler};
-		},
-		
-		showProblems : function(problems) {
-			var annotationModel = this.annotationModel;
-			if (!annotationModel) {
-				return;
-			}
-			annotationModel.removeAnnotations(this.errorType);
-			annotationModel.removeAnnotations(this.warningType);
-			if (!problems) { return; }
-			var annotations = [];
-			var model = annotationModel.getTextModel();
-			for (var i = 0; i < problems.length; i++) {
-				var problem = problems[i];
-				if (problem) {
-					// escaping voodoo... we need to construct HTML that contains valid JavaScript.
-					// TODO safeText() from util.js
-					var escapedDescription = problem.description.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
-					var lineIndex = problem.line - 1;
-					var lineStart = model.getLineStart(lineIndex);
-					var severity = problem.severity;
-					var annotation = {
-						type: this[severity + "Type"],
-						start: lineStart + problem.start - 1,
-						end: lineStart + problem.end,
-						title: escapedDescription,
-						html: "<div class='" + "annotationHTML" + " " + severity + "'></div>",
-						style: {styleClass: "annotation" + " " + severity},
-						overviewStyle: {styleClass: "annotationOverview" + " " + severity},
-						rangeStyle: {styleClass: "annotationRange" + " " + severity}
-					};
-					annotations.push(annotation);
-				}
-			}
-			annotationModel.replaceAnnotations(null, annotations);
+			var annotationRuler = new orion.textview.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotations"});
+			var overviewRuler = new orion.textview.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"});
+			return {annotationRuler: annotationRuler, overviewRuler: overviewRuler};
 		}
 	};
 	return AnnotationFactory;
