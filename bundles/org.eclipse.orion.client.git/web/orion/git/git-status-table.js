@@ -182,6 +182,9 @@ orion.GitStatusContentRenderer = (function() {
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
 					this._controller._unstagedTableRenderer.renderAction();
+					this._controller._stagedTableRenderer.renderAction();
+					this._controller._stagedTableRenderer.updateCheckbox();
+					this._controller._unstagedTableRenderer.updateCheckbox();
 				}));
 				return checkColumn;
 			}
@@ -311,6 +314,21 @@ orion.GitStatusTableRenderer = (function() {
 		
 		select: function(selected){
 			this.checkBox.checked = selected;
+		},
+		
+		disable: function (disable) {
+			this.checkBox.disabled = disable;
+		},
+		
+		updateCheckbox: function(){
+			var selectedItems = this.contentRenderer.getSelected();
+			if (this.contentRenderer.totalRow === 0) 
+				return;
+			if(this.contentRenderer.totalRow === selectedItems.length)
+				this.select(true);
+			else
+				this.select(false);
+			
 		},
 		
 		getCheckboxColumn: function(){
@@ -616,8 +634,8 @@ orion.GitStatusController = (function() {
 		this._generateCommands();
 		this._unstagedTableRenderer = new orion.GitStatusTableRenderer({useCheckBox:true}, serviceRegistry ,"statusZone" , "Unstaged" , "unstagedItems");
 		this._unstagedTableRenderer.render(true);
-		this._stagedTableRenderer = new orion.GitStatusTableRenderer({useCheckBox:false}, serviceRegistry ,"statusZone" , "Staged" , "stagedItems");
-		this._stagedTableRenderer.render();
+		this._stagedTableRenderer = new orion.GitStatusTableRenderer({useCheckBox:true}, serviceRegistry ,"statusZone" , "Staged" , "stagedItems");
+		this._stagedTableRenderer.render(true);
 		this._commitZoneRenderer = new orion.GitCommitZoneRenderer(serviceRegistry ,"statusZone");
 		this._commitZoneRenderer.render(true);
 		this._rebaseZoneRenderer = new orion.GitRebaseZoneRenderer(serviceRegistry, "statusZone");
@@ -640,7 +658,7 @@ orion.GitStatusController = (function() {
 		
 		this._unstagedContentRenderer = new orion.GitStatusContentRenderer({useCheckBox:true}, serviceRegistry ,this._unstagedTableRenderer.getStatusContentId(), this);
 		this._unstagedTableRenderer.contentRenderer = this._unstagedContentRenderer;
-		this._stagedContentRenderer = new orion.GitStatusContentRenderer({useCheckBox:false}, serviceRegistry ,this._stagedTableRenderer.getStatusContentId() , this);
+		this._stagedContentRenderer = new orion.GitStatusContentRenderer({useCheckBox:true}, serviceRegistry ,this._stagedTableRenderer.getStatusContentId() , this);
 		this._stagedTableRenderer.contentRenderer = this._stagedContentRenderer;
 		this._inlineCompareContainer = new mCompareContainer.InlineCompareContainer(new mDiffProvider.DiffProvider(serviceRegistry),serviceRegistry ,"inline-compare-viewer");
 		var self = this;
@@ -664,6 +682,8 @@ orion.GitStatusController = (function() {
 			this._model.selectedFileId = null;
 			this._loadBlock(this._unstagedContentRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedContentRenderer , this._model.interestedStagedGroup);
+			this._stagedTableRenderer.disable(!this.hasStaged);
+			this._unstagedTableRenderer.disable(!this.hasUnstaged);
 			if(this._renderLog && this._initializing){
 				var that = this;
 				
@@ -1105,7 +1125,8 @@ orion.GitStatusController = (function() {
 					return self.stageSelected();
 				},
 				visibleWhen: function(item) {
-					return (item.type === "unstagedItems" && self.hasUnstaged && self._unstagedContentRenderer.getSelected().length > 0);
+					var return_value = (item.type === "unstagedItems" && self.hasUnstaged && self._unstagedContentRenderer.getSelected().length > 0);
+					return return_value;
 				}
 			});		
 
@@ -1125,17 +1146,18 @@ orion.GitStatusController = (function() {
 			});		
 
 			var unstageAllCommand = new mCommands.Command({
-				name: "Unstage All",
-				tooltip: "Unstage all changes",
+				name: "Unstage Selected",
+				tooltip: "Unstage the selected changes",
 				imageClass: "git-sprite-unstage_all",
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitUnstageAll",
 				callback: function(item) {
 					self._statusService.setProgressMessage("Unstaging...");
-					return self.unstageAll("MIXED");
+					return self.unstageSelected("MIXED");
 				},
 				visibleWhen: function(item) {
-					return (item.type === "stagedItems" && self.hasStaged);
+					var return_value = (item.type === "stagedItems" && self.hasStaged && self._stagedContentRenderer.getSelected().length > 0);
+					return return_value;
 				}
 			});		
 
@@ -1511,6 +1533,7 @@ orion.GitStatusController = (function() {
 				return;
 			this._prepareStage(selectedItems, true);
 			this._unstagedTableRenderer.select(false);
+			this._stagedTableRenderer.select(false);
 			if(this._unstagedContentRenderer.totalRow === selectedItems.length)
 				//this.stageAll();
 				this.stageMultipleFiles(selectedItems);
@@ -1586,6 +1609,18 @@ orion.GitStatusController = (function() {
 		stageAll: function(){
 			this.stage(this._curClone.IndexLocation);
 		},
+
+		unstageSelected: function(resetParam){
+			var selectedItems = this._stagedContentRenderer.getSelected();
+			this._stagedTableRenderer.select(false);
+			this._unstagedTableRenderer.select(false);
+			if(selectedItems.length === 0)
+				return;
+			if(this._stagedContentRenderer.totalRow === selectedItems.length)
+				this.unstageAll(resetParam);
+			else
+				this.unstageMultipleFiles(selectedItems);
+		},
 		
 		unstage: function(itemModel){
 			var self = this;
@@ -1615,6 +1650,26 @@ orion.GitStatusController = (function() {
 											 }
 						);
 					});
+		},
+		
+		unstageMultipleFiles: function (selection){
+			var that = this;
+			var paths = [];
+			for(var i = 0 ; i < selection.length ; i++){
+				var itemModel = selection[i].modelItem;
+				paths.push(itemModel.path);
+			}
+			that._registry.getService("orion.git.provider").then(
+					function(service) {
+						service.unstage(that._model.items.IndexLocation, paths,
+									  function(jsonData, secondArg) {
+									    	 that.getGitStatus(that._url);
+									  },
+									  function(response, ioArgs){
+											  that.handleServerErrors(response, ioArgs);
+									  }
+						);
+				});
 		},
 		
 		commitAll: function(location , message , body){
