@@ -417,15 +417,8 @@ examples.textview.TextStyler = (function() {
 			//TODO normalize all events to use event objects
 			var self = this;
 			this._baseModelListener = {
-				onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-					var e = {
-						start: start, 
-						removedCharCount: removedCharCount,
-						addedCharCount: addedCharCount,
-						removedLineCount: removedLineCount,
-						addedLineCount: addedLineCount
-					};
-					self._onModelChanged(e);
+				onChanged: function(modelChangedEvent) {
+					self._onModelChanged(modelChangedEvent);
 				}
 			};
 			model.getBaseModel().addListener(this._baseModelListener);

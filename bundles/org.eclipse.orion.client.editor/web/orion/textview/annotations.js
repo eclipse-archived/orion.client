@@ -124,8 +124,8 @@ orion.textview.AnnotationModel = (function() {
 		this._listeners = [];
 		var self = this;
 		this._modelListener = {
-			onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-				self._onChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			onChanged: function(modelChangedEvent) {
+				self._onChanged(modelChangedEvent);
 			}
 		};
 		this.setTextModel(textModel);
@@ -389,20 +389,17 @@ orion.textview.AnnotationModel = (function() {
 			return high;
 		},
 		/** @ignore */
-		_onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+		_onChanged: function(modelChangedEvent) {
+			var start = modelChangedEvent.start;
+			var addedCharCount = modelChangedEvent.addedCharCount;
+			var removedCharCount = modelChangedEvent.removedCharCount;
 			var annotations = this._annotations, end = start + removedCharCount;
 			var startIndex = this._binarySearch(annotations, start, true);
 			if (!(0 <= startIndex && startIndex < annotations.length)) { return; }
 			var e = {
 				added: [],
 				changed: [],
-				textModelChangedEvent: {
-					start: start,
-					removedCharCount: removedCharCount,
-					addedCharCount: addedCharCount,
-					removedLineCount: removedLineCount,
-					addedLineCount: addedLineCount
-				}
+				textModelChangedEvent: modelChangedEvent
 			};
 			var changeCount = addedCharCount - removedCharCount, i;
 			var endIndex = this._binarySearch(annotations, end, true);
