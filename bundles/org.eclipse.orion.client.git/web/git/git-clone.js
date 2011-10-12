@@ -78,6 +78,9 @@ dojo.addOnLoad(function() {
 	commandService.registerCommandContribution("eclipse.removeBranch", 400, null, "eclipse.gitGroup2/eclipse.gitGroup2.delete");
 	commandService.registerCommandContribution("eclipse.removeRemoteBranch", 400, null, "eclipse.gitGroup2/eclipse.gitGroup2.delete");
 	
+	// tag actions
+	commandService.registerCommandContribution("eclipse.checkoutTag", 100);
+	
 	// Clone details
 	var cloneDetails = new mGitCloneDetails.CloneDetails({parent: "cloneDetailsPane", serviceRegistry: serviceRegistry, detailsPane: dijit.byId("orion.innerNavigator")});
 	

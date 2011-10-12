@@ -160,7 +160,23 @@ exports.GitClonesModel = (function() {
 				onComplete(parentItem.Children);
 			}
 			else if (parentItem.BranchLocation && parentItem.RemoteLocation){
-				parentItem.children = [{GroupNode : "true", Location : parentItem.BranchLocation, Name : "Branches", parent : parentItem}, {GroupNode : "true", Location : parentItem.RemoteLocation, BranchLocation: parentItem.BranchLocation, Name : "Remotes", parent : parentItem}]; 
+						parentItem.children = [ {
+							GroupNode : "true",
+							Location : parentItem.BranchLocation,
+							Name : "Branches",
+							parent : parentItem
+						}, {
+							GroupNode : "true",
+							Location : parentItem.RemoteLocation,
+							BranchLocation : parentItem.BranchLocation,
+							Name : "Remotes",
+							parent : parentItem
+						}, {
+							GroupNode: "true",
+							Location: parentItem.TagLocation,
+							Name: "Tags",
+							parent: parentItem
+						} ]; 
 				onComplete(parentItem.children);
 			}
 			else if (parentItem.GroupNode){
@@ -240,7 +256,12 @@ exports.GitClonesRenderer = (function(){
 				var nameId =  tableRow.id + "__expand";
 				div = dojo.create("div", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, div, item.Name==="Branches" ? "git-sprite-branches" : "git-sprite-remotes", "gitImageSprite");
+				if(item.Name==="Branches")
+					this.getExpandImage(tableRow, div, "git-sprite-branches", "gitImageSprite");
+				if(item.Name==="Remotes")
+					this.getExpandImage(tableRow, div, "git-sprite-remotes", "gitImageSprite");
+				if(item.Name==="Tags")
+					this.getExpandImage(tableRow, div, "git-sprite-tags", "gitImageSprite");
 				
 				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
 				dojo.place(document.createTextNode(item.Name), link, "only");
@@ -280,7 +301,15 @@ exports.GitClonesRenderer = (function(){
 				var branch = dojo.create("span", null,  link, "first");
 				dojo.addClass(branch, "gitImageSprite");
 				dojo.addClass(branch, "git-sprite-branch");
-			}	
+			} else if (item.Type === "Tag"){
+				col = document.createElement('td');
+				div = dojo.create("div", {style: "margin-left: 10px"}, col, "only");
+				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
+				dojo.place(document.createTextNode(item.Name), link, "only");
+				var tag = dojo.create("span", null,  link, "first");
+				dojo.addClass(tag, "gitImageSprite");
+				dojo.addClass(tag, "git-sprite-tag");
+			} 	
 			return col;
 		case 1:
 			return this.getActionsColumn(item, tableRow);
