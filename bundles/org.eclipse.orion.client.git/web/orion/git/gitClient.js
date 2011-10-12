@@ -930,6 +930,36 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
+		checkoutTag : function(gitCloneURI, tag, branchName, onLoad, onError){
+			var service = this;
+			return dojo.xhrPut({
+				url : gitCloneURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				putData : dojo.toJson({
+					"Tag" : tag,
+					"Branch" : branchName
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return error;
+				}
+			});
+		},
 		addCloneConfigurationProperty: function(location, newKey, newValue, onLoad , onError){
 			return dojo.xhrPost({
 				url: location , 

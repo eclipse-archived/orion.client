@@ -215,6 +215,44 @@ var exports = {};
 			});
 		commandService.addCommand(linkRepoCommand, "object");
 		
+		var checkoutTagCommand = new mCommands.Command({
+			name: "Checkout",
+			tooltip: "Create a local branch corresponding with the current tag.",
+			imageClass: "git-sprite-checkout",
+			spriteClass: "gitCommandSprite",
+			id: "eclipse.checkoutTag",
+			callback: function(item, commandId, domId) {
+				
+				function getBranchItem(){
+					for(var child_no in item.parent.parent.children){
+						if(item.parent.parent.children[child_no].Name==="Branches"){
+							return item.parent.parent.children[child_no];
+						}
+					}
+					return item.parent.parent;
+				};
+				
+				exports.getNewItemName(item, explorer, false, domId, "Branch name", function(name){
+					if(!name && name==""){
+						return;
+					}
+					serviceRegistry.getService("orion.git.provider").then(
+							function(service) {
+								service.checkoutTag(item.parent.parent.Location, item.Name, name).then(function(){
+									dojo.hitch(explorer, explorer.changedItem)(getBranchItem());
+								},
+								displayErrorOnStatus);
+							});
+				});
+				
+			},
+			visibleWhen: function(item){
+				return item.Type === "Tag";
+			}
+		});
+		
+		commandService.addCommand(checkoutTagCommand, "object");
+		
 		var checkoutBranchCommand = new mCommands.Command({
 			name: "Checkout",
 			tooltip: "Make the branch or corresponding local branch active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first.",
