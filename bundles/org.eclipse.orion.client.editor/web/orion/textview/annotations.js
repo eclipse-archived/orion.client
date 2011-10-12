@@ -31,12 +31,12 @@ orion.textview = orion.textview || {};
  * </p>		 
  * @name orion.textview.Annotation
  * 
- * @property {String} type The annotation type (i. e. orion.annotation.error).
+ * @property {String} type The annotation type (for example, orion.annotation.error).
  * @property {Number} start The start offset of the annotation in the text model.
  * @property {Number} end The end offset of the annotation in the text model.
- * @property {String} html The HTML displayed for this annotation.
- * @property {String} title The text description by the annotation.
- * @property {orion.textview.Style} style The style information for the annotation used on in the annotations ruler and tooltips.
+ * @property {String} html The HTML displayed for the annotation.
+ * @property {String} title The text description for the annotation.
+ * @property {orion.textview.Style} style The style information for the annotation used in the annotations ruler and tooltips.
  * @property {orion.textview.Style} overviewStyle The style information for the annotation used in the overview ruler.
  * @property {orion.textview.Style} rangeStyle The style information for the annotation used in the text view to decorate a range of text.
  * @property {orion.textview.Style} lineStyle The style information for the annotation used in the text view to decorate a line of text.
@@ -50,9 +50,9 @@ orion.textview = orion.textview || {};
  * @param {Number} start The start offset of the annotation in the text model.
  * @param {Number} end The end offset of the annotation in the text model.
  * @param {String} expandedHTML The HTML displayed for this annotation when it is expanded.
- * @param {orion.textview.Style} style The style information for the annotation when it is expanded.
+ * @param {orion.textview.Style} expandedStyle The style information for the annotation when it is expanded.
  * @param {String} collapsedHTML The HTML displayed for this annotation when it is collapsed.
- * @param {orion.textview.Style} style The style information for the annotation when it is collapsed.
+ * @param {orion.textview.Style} collapsedStyle The style information for the annotation when it is collapsed.
  * 
  * @class This object represents a folding annotation.
  * @name orion.textview.FoldingAnnotation
@@ -104,11 +104,16 @@ orion.textview.FoldingAnnotation = (function() {
 }());
 
 /**
- * Constructs a annotation model.
+ * Constructs an annotation model.
  * 
- * @param {textModel} the view options.
+ * @param {textModel} textModel The text model.
  * 
  * @class This object manages annotations for a <code>TextModel</code>.
+ * <p>
+ * <b>See:</b><br/>
+ * {@link orion.textview.Annotation}<br/>
+ * {@link orion.textview.TextModel}<br/> 
+ * </p>	
  * @name orion.textview.AnnotationModel
  */
 orion.textview.AnnotationModel = (function() {
@@ -133,7 +138,7 @@ orion.textview.AnnotationModel = (function() {
 		 * @param {Object} listener the listener to add.
 		 * @param {Function} [listener.onChanged] see {@link #onChanged}.
 		 * 
-		 * @see removeListener
+		 * @see #removeListener
 		 */
 		addListener: function(listener) {
 			this._listeners.push(listener);
@@ -154,8 +159,8 @@ orion.textview.AnnotationModel = (function() {
 			}
 		},
 		/**
-		 * Adds an annotation to the annotation model.  The annotation model listeners are
-		 * notified of this change.
+		 * Adds an annotation to the annotation model. 
+		 * <p>The annotation model listeners are notified of this change.</p>
 		 * 
 		 * @param {orion.textview.Annotation} annotation the annotation to be added.
 		 * 
@@ -174,7 +179,7 @@ orion.textview.AnnotationModel = (function() {
 			this.onChanged(e);
 		},
 		/**
-		 * Gets the attached text model. 
+		 * Returns the text model. 
 		 * 
 		 * @return {orion.textview.TextModel} The text model.
 		 * 
@@ -192,14 +197,14 @@ orion.textview.AnnotationModel = (function() {
 		 * @name orion.textview.AnnotationIterator
 		 * 
 		 * @property {Function} hasNext Determines whether there are more annotations in the iterator.
-		 * @property {Function} next Gets the next annotation in the iterator.
+		 * @property {Function} next Returns the next annotation in the iterator.
 		 */		
 		/**
 		 * Returns an iterator of annotations for the given range of text.
 		 *
-		 * @param {Number} start the start offset of the range
-		 * @param {Number} end the end offset of the range
-		 * @return {orion.textview.AnnotationIterator} an annotation iterartor
+		 * @param {Number} start the start offset of the range.
+		 * @param {Number} end the end offset of the range.
+		 * @return {orion.textview.AnnotationIterator} an annotation iterartor.
 		 */
 		getAnnotations: function(start, end) {
 			var annotations = this._annotations;
@@ -220,12 +225,12 @@ orion.textview.AnnotationModel = (function() {
 			};
 		},
 		/**
-		 * Notifies the annotation model listeners that the given annotation has
-		 * been modified.
+		 * Notifies the annotation model that the given annotation has been modified.
+		 * <p>The annotation model listeners are notified of this change.</p>
 		 * 
-		 * @param {orion.textview.Annotation} annotation the annotation modified.
+		 * @param {orion.textview.Annotation} annotation the modified annotation.
 		 * 
-		 * @see addAnnotation
+		 * @see #addAnnotation
 		 */
 		modifyAnnotation: function(annotation) {
 			if (!annotation) { return; }
@@ -253,7 +258,7 @@ orion.textview.AnnotationModel = (function() {
 		 * @param {orion.textview.Annotation[]} added The list of annotation being added to the model.
 		 * @param {orion.textview.Annotation[]} changed The list of annotation modified in the model.
 		 * @param {orion.textview.Annotation[]} removed The list of annotation being removed from the model.
-		 * @param {ModelChangedEvent} textModelChangedEvent the text odel changed event that trigger this change, can be null if the change happen because of {@link #addAnnotation}.
+		 * @param {ModelChangedEvent} textModelChangedEvent the text model changed event that trigger this change, can be null if the change was trigger by a method call (for example, {@link #addAnnotation}).
 		 */
 		onChanged: function(e) {
 			for (var i = 0; i < this._listeners.length; i++) {
@@ -265,11 +270,12 @@ orion.textview.AnnotationModel = (function() {
 		},
 		/**
 		 * Removes all annotations of the given <code>type</code>. All annotations
-		 * are removed if the type is not specified.
+		 * are removed if the type is not specified. 
+		 * <p>The annotation model listeners are notified of this change.  Only one changed event is generated.</p>
 		 * 
 		 * @param {Object} type the type of annotations to be removed.
 		 * 
-		 * @see removeAnnotation
+		 * @see #removeAnnotation
 		 */
 		removeAnnotations: function(type) {
 			var annotations = this._annotations;
@@ -295,8 +301,8 @@ orion.textview.AnnotationModel = (function() {
 			this.onChanged(e);
 		},
 		/**
-		 * Removes an annotation from the annotation model.  The annotation model listeners are
-		 * notified of this change.
+		 * Removes an annotation from the annotation model. 
+		 * <p>The annotation model listeners are notified of this change.</p>
 		 * 
 		 * @param {orion.textview.Annotation} annotation the annotation to be removed.
 		 * 
@@ -316,8 +322,8 @@ orion.textview.AnnotationModel = (function() {
 			this.onChanged(e);
 		},
 		/**
-		 * Removes and adds the specifed annotations to the annotation model. The annotation
-		 * model listeners are notified of this change.  Only one changed event is generated.
+		 * Removes and adds the specifed annotations to the annotation model. 
+		 * <p>The annotation model listeners are notified of this change.  Only one changed event is generated.</p>
 		 * 
 		 * @param {orion.textview.Annotation} remove the annotations to be removed.
 		 * @param {orion.textview.Annotation} add the annotations to be added.
@@ -349,13 +355,13 @@ orion.textview.AnnotationModel = (function() {
 			this.onChanged(e);
 		},
 		/**
-		 * Attaches the annotation model to the given text model.  The annotation
-		 * model keeps track of changes in the text model and update and/or removes
+		 * Sets the text model of the annotation model.  The annotation
+		 * model listens for changes in the text model to update and remove
 		 * annotations that are affected by the change.
 		 * 
-		 * @return {orion.textview.TextModel} The text model.
+		 * @param {orion.textview.TextModel} textModel the text model.
 		 * 
-		 * @see #setTextModel
+		 * @see #getTextModel
 		 */
 		setTextModel: function(textModel) {
 			if (this._model) {
