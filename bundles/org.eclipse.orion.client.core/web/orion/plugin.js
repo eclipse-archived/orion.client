@@ -91,6 +91,8 @@ eclipse.PluginProvider = function(metadata) {
 				}, function(error) {
 					response.error = error ? JSON.parse(JSON.stringify(error)) : error; // sanitizing Error object 
 					_publish(response);
+				}, function() {
+					_publish({requestId: message.id, method: "progress", params: Array.prototype.slice.call(arguments)});
 				});
 			} else {
 				response.result = promiseOrResult;
