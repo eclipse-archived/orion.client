@@ -111,7 +111,7 @@ orion.textview.ProjectionTextModel = (function() {
 		/**
 		 * Returns all projection ranges of this model.
 		 * 
-		 * @param {orion.textview.Projection[]} The projection ranges.
+		 * @return {orion.textview.Projection[]} The projection ranges.
 		 * 
 		 * @see #addProjection
 		 */
@@ -129,7 +129,7 @@ orion.textview.ProjectionTextModel = (function() {
 		/**
 		 * Maps offsets between the projection model and its base model.
 		 *
-		 * @param {Number} offset The offset to be mapped
+		 * @param {Number} offset The offset to be mapped.
 		 * @param {Boolean} [baseOffset=false] <code>true</code> if <code>offset</code> is in base model and
 		 *	should be mapped to the projection model.
 		 * @return {Number} The mapped offset
@@ -203,7 +203,7 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			return high;
 		},
-		/**
+		/** 
 		 * @see orion.textview.TextModel#addListener
 		 */
 		addListener: function(listener) {
