@@ -21,12 +21,46 @@ var orion = orion || {};
  */ 
 orion.textview = orion.textview || {};
 
-
+/**
+ * @class This object represents a projection range. A projection specifies a
+ * range of text and the replacement text. The range of text is relative to the
+ * base text model associated to a projection model.
+ * <p>
+ * <b>See:</b><br/>
+ * {@link orion.textview.ProjectionTextModel}<br/>
+ * {@link orion.textview.ProjectionTextModel#addProjection}<br/>
+ * </p>		 
+ * @name orion.textview.Projection
+ * 
+ * @property {Number} start The start offset of the projection range. 
+ * @property {Number} end The end offset of the projection range. This offset is exclusive.
+ * @property {String|orion.textview.TextModel} [text=""] The projection text to be inserted
+ */
+/**
+ * Constructs a new <code>ProjectionTextModel</code> based on the specified <code>TextModel</code>.
+ *
+ * @param {orion.textview.TextModel} baseModel The base text model.
+ *
+ * @name orion.textview.ProjectionTextModel
+ * @class The <code>ProjectionTextModel</code> represents a projection of its base text
+ * model. Projection ranges can be added to the projection text model to hide and/or insert
+ * ranges to the base text model.
+ * <p>
+ * The contents of the projection text model is modified when changes occur in the base model,
+ * projection model or by calls to {@link #addProjection} and {@link #removeProjection}.
+ * </p>
+ * <p>
+ * <b>See:</b><br/>
+ * {@link orion.textview.TextView}<br/>
+ * {@link orion.textview.TextModel}
+ * {@link orion.textview.TextView#setModel}
+ * </p>
+ */
 orion.textview.ProjectionTextModel = (function() {
 
 	/** @private */
-	function ProjectionTextModel(model) {
-		this._model = model;	/* Base Model */
+	function ProjectionTextModel(baseModel) {
+		this._model = baseModel;	/* Base Model */
 		this._listeners = [];
 		this._projections = [];
 //		var self = this;
@@ -41,40 +75,28 @@ orion.textview.ProjectionTextModel = (function() {
 	}
 
 	ProjectionTextModel.prototype = /** @lends orion.textview.ProjectionTextModel.prototype */ {
-		addListener: function(listener) {
-			this._listeners.push(listener);
-		},
-		removeListener: function(listener) {
-			for (var i = 0; i < this._listeners.length; i++) {
-				if (this._listeners[i] === listener) {
-					this._listeners.splice(i, 1);
-					return;
-				}
-			}
-		},
-		/*
-		* Projection
-		*   start - start offset relative base 
-		*   end - end offset relative to base, not inclusive
-		*   content - undefiend/null/string/model
-		*   _lineCount - number of lines between start and end (number of lines hidden)
-		*   _lineIndex - line index of start, first hidden line
-		*   _model - text model, never null
-		*
-		*/
+		/**
+		 * Adds a projection range to the model.
+		 * <p>
+		 * The model must notify the listeners before and after the the text is
+		 * changed by calling {@link #onChanging} and {@link #onChanged} respectively. 
+		 * </p>
+		 * @param {orion.textview.Projection} projection The projection range to be added.
+		 * 
+		 * @see #removeProjection
+		 */
 		addProjection: function(projection) {
-			//TODO add listeners from model
 			if (!projection) {return;}
 			//start and end can't overlap any exist projection
 			var model = this._model, projections = this._projections;
 			projection._lineIndex = model.getLineAtOffset(projection.start);
 			projection._lineCount = model.getLineAtOffset(projection.end) - projection._lineIndex;
-			var content = projection.content;
-			if (!content) { content = ""; }
-			if (typeof content === "string") {
-				projection._model = new orion.textview.TextModel(content, model.getLineDelimiter());
+			var text = projection.text;
+			if (!text) { text = ""; }
+			if (typeof text === "string") {
+				projection._model = new orion.textview.TextModel(text, model.getLineDelimiter());
 			} else {
-				projection._model = content;
+				projection._model = text;
 			}
 			var eventStart = this.mapOffset(projection.start, true);
 			var removedCharCount = projection.end - projection.start;
@@ -86,18 +108,65 @@ orion.textview.ProjectionTextModel = (function() {
 			projections.splice(index, 0, projection);
 			this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 		},
-		_binarySearch: function (array, offset) {
-			var high = array.length, low = -1, index;
-			while (high - low > 1) {
-				index = Math.floor((high + low) / 2);
-				if (offset <= array[index].start) {
-					high = index;
-				} else {
-					low = index;
-				}
-			}
-			return high;
+		/**
+		 * Returns all projection ranges of this model.
+		 * 
+		 * @return {orion.textview.Projection[]} The projection ranges.
+		 * 
+		 * @see #addProjection
+		 */
+		getProjections: function() {
+			return this._projections.slice(0);
 		},
+		/**
+		 * Gets the base text model.
+		 *
+		 * @return {orion.textview.TextModel} The base text model.
+		 */
+		getBaseModel: function() {
+			return this._model;
+		},
+		/**
+		 * Maps offsets between the projection model and its base model.
+		 *
+		 * @param {Number} offset The offset to be mapped.
+		 * @param {Boolean} [baseOffset=false] <code>true</code> if <code>offset</code> is in base model and
+		 *	should be mapped to the projection model.
+		 * @return {Number} The mapped offset
+		 */
+		mapOffset: function(offset, baseOffset) {
+			var projections = this._projections, delta = 0, i, projection;
+			if (baseOffset) {
+				for (i = 0; i < projections.length; i++) {
+					projection = projections[i];
+					if (projection.start > offset) { break; }
+					if (projection.end > offset) { return -1; }
+					delta += projection._model.getCharCount() - (projection.end - projection.start);
+				}
+				return offset + delta;
+			}
+			for (i = 0; i < projections.length; i++) {
+				projection = projections[i];
+				if (projection.start > offset - delta) { break; }
+				var charCount = projection._model.getCharCount();
+				if (projection.start + charCount > offset - delta) {
+					return -1;
+				}
+				delta += charCount - (projection.end - projection.start);
+			}
+			return offset - delta;
+		},
+		/**
+		 * Removes a projection range from the model.
+		 * <p>
+		 * The model must notify the listeners before and after the the text is
+		 * changed by calling {@link #onChanging} and {@link #onChanged} respectively. 
+		 * </p>
+		 * 
+		 * @param {orion.textview.Projection} projection The projection range to be removed.
+		 * 
+		 * @see #addProjection
+		 */
 		removeProjection: function(projection) {
 			//TODO remove listeners from model
 			var i, delta = 0;
@@ -121,31 +190,39 @@ orion.textview.ProjectionTextModel = (function() {
 				this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
 			}
 		},
-		getBaseModel: function() {
-			return this._model;
-		},
-		mapOffset: function(offset, parentOffset) {
-			var projections = this._projections, delta = 0, i, projection;
-			if (parentOffset) {
-				for (i = 0; i < projections.length; i++) {
-					projection = projections[i];
-					if (projection.start > offset) { break; }
-					if (projection.end > offset) { return -1; }
-					delta += projection._model.getCharCount() - (projection.end - projection.start);
+		/** @ignore */
+		_binarySearch: function (array, offset) {
+			var high = array.length, low = -1, index;
+			while (high - low > 1) {
+				index = Math.floor((high + low) / 2);
+				if (offset <= array[index].start) {
+					high = index;
+				} else {
+					low = index;
 				}
-				return offset + delta;
 			}
-			for (i = 0; i < projections.length; i++) {
-				projection = projections[i];
-				if (projection.start > offset - delta) { break; }
-				var charCount = projection._model.getCharCount();
-				if (projection.start + charCount > offset - delta) {
-					return -1;
-				}
-				delta += charCount - (projection.end - projection.start);
-			}
-			return offset - delta;
+			return high;
 		},
+		/** 
+		 * @see orion.textview.TextModel#addListener
+		 */
+		addListener: function(listener) {
+			this._listeners.push(listener);
+		},
+		/**
+		 * @see orion.textview.TextModel#removeListener
+		 */
+		removeListener: function(listener) {
+			for (var i = 0; i < this._listeners.length; i++) {
+				if (this._listeners[i] === listener) {
+					this._listeners.splice(i, 1);
+					return;
+				}
+			}
+		},
+		/**
+		 * @see orion.textview.TextModel#getCharCount
+		 */
 		getCharCount: function() {
 			var count = this._model.getCharCount(), projections = this._projections;
 			for (var i = 0; i < projections.length; i++) {
@@ -154,6 +231,9 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			return count;
 		},
+		/**
+		 * @see orion.textview.TextModel#getLine
+		 */
 		getLine: function(lineIndex, includeDelimiter) {
 			if (lineIndex < 0) { return null; }
 			var model = this._model, projections = this._projections;
@@ -193,6 +273,9 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			return result.join("");
 		},
+		/**
+		 * @see orion.textview.TextModel#getLineAtOffset
+		 */
 		getLineAtOffset: function(offset) {
 			var model = this._model, projections = this._projections;
 			var delta = 0, lineDelta = 0;
@@ -211,6 +294,9 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			return model.getLineAtOffset(offset - delta) + lineDelta;
 		},
+		/**
+		 * @see orion.textview.TextModel#getLineCount
+		 */
 		getLineCount: function() {
 			var model = this._model, projections = this._projections;
 			var count = model.getLineCount();
@@ -220,9 +306,15 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			return count;
 		},
+		/**
+		 * @see orion.textview.TextModel#getLineDelimiter
+		 */
 		getLineDelimiter: function() {
 			return this._model.getLineDelimiter();
 		},
+		/**
+		 * @see orion.textview.TextModel#getLineEnd
+		 */
 		getLineEnd: function(lineIndex, includeDelimiter) {
 			if (lineIndex < 0) { return -1; }
 			var model = this._model, projections = this._projections;
@@ -240,6 +332,9 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			return model.getLineEnd(lineIndex - delta, includeDelimiter) + offsetDelta;
 		},
+		/**
+		 * @see orion.textview.TextModel#getLineStart
+		 */
 		getLineStart: function(lineIndex) {
 			if (lineIndex < 0) { return -1; }
 			var model = this._model, projections = this._projections;
@@ -257,6 +352,9 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			return model.getLineStart(lineIndex - delta) + offsetDelta;
 		},
+		/**
+		 * @see orion.textview.TextModel#getText
+		 */
 		getText: function(start, end) {
 			if (start === undefined) { start = 0; }
 			var model = this._model, projections = this._projections;
@@ -302,6 +400,7 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			return result.join("");
 		},
+		/** @ignore */
 		_onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
 			var model = this._model, projections = this._projections, i, projection, delta = 0, lineDelta;
 			var end = start + removedCharCount;
@@ -330,6 +429,9 @@ orion.textview.ProjectionTextModel = (function() {
 				projection._lineIndex = model.getLineAtOffset(projection.start);
 			}
 		},
+		/**
+		 * @see orion.textview.TextModel#onChanging
+		 */
 		onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
@@ -338,6 +440,9 @@ orion.textview.ProjectionTextModel = (function() {
 				}
 			}
 		},
+		/**
+		 * @see orion.textview.TextModel#onChanged
+		 */
 		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
@@ -346,9 +451,15 @@ orion.textview.ProjectionTextModel = (function() {
 				}
 			}
 		},
+		/**
+		 * @see orion.textview.TextModel#setLineDelimiter
+		 */
 		setLineDelimiter: function(lineDelimiter) {
 			this._model.setLineDelimiter(lineDelimiter);
 		},
+		/**
+		 * @see orion.textview.TextModel#setText
+		 */
 		setText: function(text, start, end) {
 			if (text === undefined) { text = ""; }
 			if (start === undefined) { start = 0; }
