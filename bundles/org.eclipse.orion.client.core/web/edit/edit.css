@@ -18,6 +18,6 @@
 
 @import "../css/commands.css";
 
-@import "../orion/textview/rulers.css";
+@import "../orion/textview/tooltip.css";
 
 @import "../orion/textview/annotations.css";

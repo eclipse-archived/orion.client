@@ -564,8 +564,7 @@ examples.textview.TextStyler = (function() {
 			}
 			return null;
 		},
-		_getStyles: function(text, start) {
-			var model = this.view.getModel();
+		_getStyles: function(model, text, start) {
 			if (model.getBaseModel) {
 				start = model.mapOffset(start);
 			}
@@ -897,8 +896,10 @@ examples.textview.TextStyler = (function() {
 			this.destroy();
 		},
 		_onLineStyle: function (e) {
-			e.style = this._getLineStyle(e.lineIndex);
-			e.ranges = this._getStyles(e.lineText, e.lineStart);
+			if (e.textView === this.view) {
+				e.style = this._getLineStyle(e.lineIndex);
+			}
+			e.ranges = this._getStyles(e.textView.getModel(), e.lineText, e.lineStart);
 		},
 		_onSelection: function(e) {
 			var oldSelection = e.oldValue;
