@@ -101,6 +101,33 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 		return promise;
 	};
 	
+	tests["test plugin service call promise"] = function() {
+		var storage = {};
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
+		
+		var progress = false;
+		
+		assert.equal(pluginRegistry.getPlugins().length, 0);
+		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
+		
+		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+			return serviceRegistry.getService("test");
+		}).then(function(service) {
+			return service.testPromise("echo");
+		}).then(function(result) {
+			assert.equal(result, "echo");
+			assert.ok(progress);
+			pluginRegistry.shutdown();
+		}, function(error) {
+			assert.ok(false);
+		}, function (update) {
+			assert.equal(update, "progress");
+			progress = true;
+		});
+		return promise;
+	};
+	
 	tests["test plugin event"] = function() {
 		var storage = {};
 		var serviceRegistry = new mServiceregistry.ServiceRegistry();
