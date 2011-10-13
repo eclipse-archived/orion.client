@@ -449,7 +449,7 @@ exports.setUpEditor = function(isReadOnly){
 	// Establishing dependencies on registered services
 	serviceRegistry.getService("orion.core.marker").then(function(problemProvider) {
 		problemProvider.addEventListener("problemsChanged", function(problems) {
-			annotationFactory.showProblems(problems);
+			editor.showProblems(problems);
 		});
 	});
 	
