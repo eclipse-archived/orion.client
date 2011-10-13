@@ -8,7 +8,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -2416,7 +2416,8 @@ orion.textview.TextView = (function() {
 			if (lineIndex + 1 < model.getLineCount()) {
 				var x = this._columnX;
 				if (x === -1 || args.select) {
-					x = this._getOffsetToX(caret);
+					var offset = args.wholeLine ? model.getLineEnd(lineIndex + 1) : caret;
+					x = this._getOffsetToX(offset);
 				}
 				selection.extend(this._getXToOffset(lineIndex + 1, x));
 				if (!args.select) { selection.collapse(); }
@@ -2433,7 +2434,8 @@ orion.textview.TextView = (function() {
 			if (lineIndex > 0) {
 				var x = this._columnX;
 				if (x === -1 || args.select) {
-					x = this._getOffsetToX(caret);
+					var offset = args.wholeLine ? model.getLineStart(lineIndex - 1) : caret;
+					x = this._getOffsetToX(offset);
 				}
 				selection.extend(this._getXToOffset(lineIndex - 1, x));
 				if (!args.select) { selection.collapse(); }
@@ -2790,6 +2792,10 @@ orion.textview.TextView = (function() {
 				bindings.push({name: "selectTextStart",	keyBinding: new KeyBinding(38, true, true), predefined: true});
 				bindings.push({name: "selectTextEnd",		keyBinding: new KeyBinding(40, true, true), predefined: true});
 			} else {
+				if (isLinux) {
+					bindings.push({name: "selectWholeLineUp",		keyBinding: new KeyBinding(38, true, true), predefined: true});
+					bindings.push({name: "selectWholeLineDown",		keyBinding: new KeyBinding(40, true, true), predefined: true});
+				}
 				bindings.push({name: "selectLineStart",		keyBinding: new KeyBinding(36, null, true), predefined: true});
 				bindings.push({name: "selectLineEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true});
 				bindings.push({name: "selectWordPrevious",	keyBinding: new KeyBinding(37, true, true), predefined: true});
@@ -2879,6 +2885,8 @@ orion.textview.TextView = (function() {
 				
 				{name: "selectLineUp",		defaultHandler: function() {return self._doLineUp({select: true});}},
 				{name: "selectLineDown",	defaultHandler: function() {return self._doLineDown({select: true});}},
+				{name: "selectWholeLineUp",		defaultHandler: function() {return self._doLineUp({select: true, wholeLine: true});}},
+				{name: "selectWholeLineDown",	defaultHandler: function() {return self._doLineDown({select: true, wholeLine: true});}},
 				{name: "selectLineStart",	defaultHandler: function() {return self._doHome({select: true, ctrl:false});}},
 				{name: "selectLineEnd",		defaultHandler: function() {return self._doEnd({select: true, ctrl:false});}},
 				{name: "selectCharPrevious",	defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"character"});}},
