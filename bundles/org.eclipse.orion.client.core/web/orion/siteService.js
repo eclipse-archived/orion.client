@@ -8,8 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define */
-/*jslint devel:true*/
+/*global define document window*/
+/*jslint devel:true regexp:false*/
 
 define(['require', 'dojo', 'orion/auth'], function(require, dojo, mAuth) {
 
@@ -172,9 +172,13 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 				});
 			},
 			createSiteConfiguration: function(name, workspace, mappings, hostHint) {
+				function hostify(name) {
+					return name.replace(/ /g, "-").replace(/[^A-Za-z0-9-_]/g, "").toLowerCase();
+				}
 				var toCreate = {
 						Name: name,
-						Workspace: workspace
+						Workspace: workspace,
+						HostHint: hostify(name)
 					};
 				if (mappings) { toCreate.Mappings = mappings; }
 				if (hostHint) { toCreate.HostHint = hostHint; }
@@ -282,6 +286,7 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 //			var path = relativePath.substring(relativePath.indexOf(this.filePrefix) + this.filePrefix.length);
 			var relFilePrefix = this._makeHostRelative(this.filePrefix);
 			var relLocation = this._makeHostRelative(location);
+			var path;
 			if (relLocation.indexOf(relFilePrefix) === 0) {
 				path = relLocation.substring(relFilePrefix.length);
 			}
