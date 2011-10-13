@@ -1076,6 +1076,7 @@ orion.textview.TextView = (function() {
 			}
 			if (!ruler) {
 				if (startLine <= this._maxLineIndex && this._maxLineIndex < endLine) {
+					this._checkMaxLineIndex = this._maxLineIndex;
 					this._maxLineIndex = -1;
 					this._maxLineWidth = 0;
 				}
@@ -4308,6 +4309,7 @@ orion.textview.TextView = (function() {
 				child = this._getLineNext(child);
 			}
 			if (startLine <= this._maxLineIndex && this._maxLineIndex <= startLine + removedLineCount) {
+				this._checkMaxLineIndex = this._maxLineIndex;
 				this._maxLineIndex = -1;
 				this._maxLineWidth = 0;
 			}
@@ -5001,11 +5003,12 @@ orion.textview.TextView = (function() {
 				clientDiv.style.width = (0x7FFFF).toString() + "px";
 			}
 
+			var rect;
 			child = this._getLineNext();
 			while (child) {
 				lineWidth = child.lineWidth;
 				if (lineWidth === undefined) {
-					var rect = this._getLineBoundingClientRect(child);
+					rect = this._getLineBoundingClientRect(child);
 					lineWidth = child.lineWidth = rect.right - rect.left;
 				}
 				if (lineWidth >= this._maxLineWidth) {
@@ -5014,7 +5017,22 @@ orion.textview.TextView = (function() {
 				}
 				if (child.lineIndex === topIndex) { this._topChild = child; }
 				if (child.lineIndex === bottomIndex) { this._bottomChild = child; }
+				if (this._checkMaxLineIndex === child.lineIndex) { this._checkMaxLineIndex = -1; }
 				child = this._getLineNext(child);
+			}
+			if (this._checkMaxLineIndex !== -1) {
+				lineIndex = this._checkMaxLineIndex;
+				this._checkMaxLineIndex = -1;
+				if (0 <= lineIndex && lineIndex < lineCount) {
+					var dummy = this._createLine(clientDiv, null, document, lineIndex, model);
+					rect = this._getLineBoundingClientRect(dummy);
+					lineWidth = rect.right - rect.left;
+					if (lineWidth >= this._maxLineWidth) {
+						this._maxLineWidth = lineWidth;
+						this._maxLineIndex = lineIndex;
+					}
+					clientDiv.removeChild(dummy);
+				}
 			}
 
 			// Update rulers
