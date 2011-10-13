@@ -264,6 +264,41 @@ orion.textview.TextView = (function() {
 			this._createRuler(ruler);
 			this._updatePage();
 		},
+		computeSize: function() {
+			var w = 0, h = 0;
+			var model = this._model, clientDiv = this._clientDiv;
+			var clientWidth = clientDiv.style.width;
+			/*
+			* Feature in WekKit. Webkit limits the width of the lines
+			* computed below to the width of the client div.  This causes
+			* the lines to be wrapped even though "pre" is set.  The fix
+			* is to set the width of the client div to a larger number
+			* before computing the lines width.  Note that this value is
+			* reset to the appropriate value further down.
+			*/
+			if (isWebkit) {
+				clientDiv.style.width = (0x7FFFF).toString() + "px";
+			}
+			var lineCount = model.getLineCount();
+			var document = this._frameDocument;
+			for (var lineIndex=0; lineIndex<lineCount; lineIndex++) {
+				var child = this._getLineNode(lineIndex), dummy = null;
+				if (!child || child.lineChanged) {
+					child = dummy = this._createLine(clientDiv, null, document, lineIndex, model);
+				}
+				var rect = this._getLineBoundingClientRect(child);
+				w = Math.max(w, rect.right - rect.left);
+				h += rect.bottom - rect.top;
+				if (dummy) { clientDiv.removeChild(dummy); }
+			}
+			if (isWebkit) {
+				clientDiv.style.width = clientWidth;
+			}
+			var viewPadding = this._getViewPadding();
+			w += viewPadding.right - viewPadding.left;
+			h += viewPadding.bottom - viewPadding.top;
+			return {width: w, height: h};
+		},
 		/**
 		 * Converts the given rectangle from one coordinate spaces to another.
 		 * <p>The supported coordinate spaces are:
@@ -838,6 +873,7 @@ orion.textview.TextView = (function() {
 		 * </p>		 
 		 * @name orion.textview.LineStyleEvent
 		 * 
+		 * @property {orion.textview.TextView} textView The text view.		 
 		 * @property {Number} lineIndex The line index.
 		 * @property {String} lineText The line text.
 		 * @property {Number} lineStart The character offset, relative to document, of the first character in the line.
@@ -1228,6 +1264,7 @@ orion.textview.TextView = (function() {
 		 */
 		setModel: function(model) {
 			if (!model) { return; }
+			if (model === this._model) { return; }
 			this._model.removeListener(this._modelListener);
 			var oldLineCount = this._model.getLineCount();
 			var oldCharCount = this._model.getCharCount();
@@ -1242,8 +1279,7 @@ orion.textview.TextView = (function() {
 				removedLineCount: oldLineCount,
 				addedLineCount: newLineCount
 			};
-			this.onModelChanging(e); 
-			this.redrawRange();
+			this.onModelChanging(e);
 			this._model = model;
 			e = {
 				start: 0,
@@ -1254,7 +1290,8 @@ orion.textview.TextView = (function() {
 			};
 			this.onModelChanged(e); 
 			this._model.addListener(this._modelListener);
-			this.redrawRange();
+			this._reset();
+			this._updatePage();
 		},
 		/**
 		 * Sets the text view selection.
@@ -2870,7 +2907,7 @@ orion.textview.TextView = (function() {
 		_createLine: function(parent, sibling, document, lineIndex, model) {
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
-			var e = {lineIndex: lineIndex, lineText: lineText, lineStart: lineStart};
+			var e = {textView: this, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart};
 			this.onLineStyle(e);
 			var child = document.createElement("DIV");
 			child.lineIndex = lineIndex;
@@ -4287,6 +4324,39 @@ orion.textview.TextView = (function() {
 				self._updatePage();
 			}, 0);
 		},
+		_reset: function() {
+			this._maxLineIndex = -1;
+			this._maxLineWidth = 0;
+			this._columnX = -1;
+			this._topChild = null;
+			this._bottomChild = null;
+			this._partialY = 0;
+			this._setSelection(new Selection (0, 0, false), false, false);
+			if (this._viewDiv) {
+				this._viewDiv.scrollLeft = 0;
+				this._viewDiv.scrollTop = 0;
+			}
+			var clientDiv = this._clientDiv;
+			if (clientDiv) {
+				var child = clientDiv.firstChild;
+				while (child) {
+					child.lineChanged = true;
+					child = child.nextSibling;
+				}
+				/*
+				* Bug in Firefox.  For some reason, the caret does not show after the
+				* view is refreshed.  The fix is to toggle the contentEditable state and
+				* force the clientDiv to loose and receive focus if the it is focused.
+				*/
+				if (isFirefox) {
+					var hasFocus = this._hasFocus;
+					if (hasFocus) { clientDiv.blur(); }
+					clientDiv.contentEditable = false;
+					clientDiv.contentEditable = true;
+					if (hasFocus) { clientDiv.focus(); }
+				}
+			}
+		},
 		_resizeTouchDiv: function() {
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			var parentRect = this._frame.getBoundingClientRect();
@@ -4963,6 +5033,9 @@ orion.textview.TextView = (function() {
 			/* Need to set the height first in order for the width to consider the vertical scrollbar */
 			var scrollHeight = lineCount * lineHeight;
 			scrollDiv.style.height = scrollHeight + "px";
+			// TODO if frameHeightWithoutHScrollbar < scrollHeight  < frameHeightWithHScrollbar and the horizontal bar is visible, 
+			// then the clientWidth is wrong because the vertical scrollbar is showing. To correct code should hide both scrollbars 
+			// at this point.
 			var clientWidth = this._getClientWidth();
 			var width = Math.max(this._maxLineWidth, clientWidth);
 			/*
