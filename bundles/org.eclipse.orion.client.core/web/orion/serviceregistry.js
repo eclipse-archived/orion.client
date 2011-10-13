@@ -125,11 +125,11 @@ define(["dojo"], function(dojo){
 							var d = new dojo.Deferred();
 							try {
 								var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
-								dojo.when(result, dojo.hitch(d, d.resolve), dojo.hitch(d, d.reject));
+								dojo.when(result, dojo.hitch(d, d.resolve), dojo.hitch(d, d.reject), dojo.hitch(d, d.progress));
 							} catch (e) {
 								d.reject(e);
 							}
-							return d.promise;
+							return d;
 						}
 						throw new Error("Service was unregistered");
 					};
