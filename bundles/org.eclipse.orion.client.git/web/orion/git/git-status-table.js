@@ -32,20 +32,9 @@ orion.GitStatusModel = (function() {
 		
 		init: function(jsonData){
 			this.items = jsonData;
-			/*
-			for(var i = 0; i < this.conflictPatterns.length ; i++ ){
-				this._markConflict(this.conflictPatterns[i]);
-			}*/
 		},
 		
 		getModelType: function(groupItem , groupName){
-			/*
-			if(groupItem.Conflicting){
-				if(groupItem.Conflicting === "Hide")
-					return undefined;
-				else
-					return this.conflictType;
-			}*/
 			return groupName;
 		},
 		
@@ -137,11 +126,8 @@ orion.GitStatusContentRenderer = (function() {
 			tableId = this._tableParentDivId + "_table";
 		  	var tableParentDomNode = dojo.byId( this._tableParentDivId);
 			dojo.place(document.createTextNode(""), tableParentDomNode, "only");
-			
-			var table = dojo.create("table", 
-				{id: tableId ,style: "border-spacing: 0px"
-			});
-			//table.width = "100%";
+			var table = dojo.create("table", {id: tableId});
+			dojo.addClass(table, "statusTable");
 			tableParentDomNode.appendChild(table);
 			this._table = table;
 		},
@@ -171,12 +157,9 @@ orion.GitStatusContentRenderer = (function() {
 			if (this._useCheckboxSelection) {
 				var checkColumn = document.createElement('td');
 				dojo.addClass(checkColumn, "secondaryColumn");
-				//dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Message</h2>"});
-				var check = dojo.create("input", {style: "margin-right: 5px; margin-left: 2px"});
-				dojo.style(check, "verticalAlign", "middle");
-				check.type = "checkbox";
-				check.id = tableRow.id+"selectedState";
+				var check = dojo.create("input", {type: "checkbox", id: tableRow.id+"selectedState" });
 				dojo.addClass(check, "selectionCheckmark"+ this._tableParentDivId);
+				dojo.addClass(check, "statusCheckBoxRow");
 				check.itemId = tableRow.id;
 				checkColumn.appendChild(check);
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
@@ -255,7 +238,8 @@ orion.GitStatusContentRenderer = (function() {
 				}
 			});
 			
-			var actionCol = dojo.create("td", {id: row.id+"actions" ,style: "padding-left: 5px"}, row, "last");
+			var actionCol = dojo.create("td", {id: row.id+"actions"}, row, "last");
+			dojo.addClass(actionCol, "statusAction");
 			actionCol.noWrap= true;
 			var actionsWrapper = dojo.create("span", {id: row.id+"actionsWrapper"}, actionCol, "only");
 			// we must hide/show the span rather than the column.  IE and Chrome will not consider
@@ -294,17 +278,15 @@ orion.GitStatusTableRenderer = (function() {
 	}
 	GitStatusTableRenderer.prototype = {
 		render: function (renderSeparator) {
-			var headerTable = dojo.create("table", {/*width:"100%"*/},this._parentId);
+			var headerTable = dojo.create("table", {},this._parentId);
 			var row = dojo.create("tr", null, headerTable);
 			if(this._useCheckboxSelection)
 				row.appendChild(this.getCheckboxColumn());
-			var titleCol = dojo.create("td", {/*width:"50%" ,height:"100%"*/}, row, "last");
+			var titleCol = dojo.create("td", {}, row, "last");
 			var title = dojo.create("h2", {innerHTML: this._header}, titleCol, "last");
-			var actionCol = dojo.create("td", {/*width:"50%" ,height:"100%" ,*/nowrap :true}, row, "last");
-			var actionDiv = dojo.create("div", {style:"float: right;", align:"right"}, actionCol, "last");
+			var actionCol = dojo.create("td", {nowrap :true}, row, "last");
+			var actionDiv = dojo.create("div", {}, actionCol, "last");
 			this._cmdSpan = dojo.create("span", null, actionDiv, "last");
-			
-			//dojo.create("hr", null,this._parentId);
 			
 			this._statusContentId = this._parentId + "_" + this._type;
 			dojo.create("div", {id:this._statusContentId}, this._parentId, "last");
@@ -335,10 +317,11 @@ orion.GitStatusTableRenderer = (function() {
 			if (this._useCheckboxSelection) {
 				var checkColumn = document.createElement('td');
 				dojo.addClass(checkColumn, "secondaryColumn");
-				var check = dojo.create("input", {style: "margin-right: 5px"});
+				
+				var check = dojo.create("input", {type: "checkbox"});
+				dojo.addClass(check, "statusCheckBoxOverall");
 				this.checkBox = check;
-				dojo.style(check, "verticalAlign", "middle");
-				check.type = "checkbox";
+				
 				checkColumn.appendChild(check);
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					this.contentRenderer.toggleSelectAll(evt.target.checked);
@@ -547,13 +530,14 @@ orion.GitLogTableRenderer = (function() {
 			var titleCol = dojo.create("td", null, row, "last");
 			dojo.create("h2", {id : this._type + "_header" ,innerHTML: this._header}, titleCol, "last");
 			var cmdColAdditional = dojo.create("td", null, row, "last");
-			this._cmdSpanAdditional = dojo.create("span", {style: "margin-left: 5px;"}, cmdColAdditional, "last");
+			this._cmdSpanAdditional = dojo.create("span", {}, cmdColAdditional, "last");
+			dojo.addClass(this._cmdSpanAdditional, "statusLogCmd");
 			var cmdCol = dojo.create("td", null, row, "last");
-			this._cmdSpan = dojo.create("span", {style: "margin-left: 5px;"}, cmdCol, "last");
-			//dojo.create("hr", null,this._sectionId);
+			this._cmdSpan = dojo.create("span", {}, cmdCol, "last");
+			dojo.addClass(this._cmdSpan, "statusLogCmd");
 			this._logContentId = this._parentId + "_" + this._type + "_content";
-			//dojo.create("div", {id:this._logContentId , style: "border:1px solid grey ;margin-left: 5px; margin-right: 30px; width: 95%; height: 200px; overflow: auto"}, this._parentId, "last");
-			dojo.create("div", {id:this._logContentId , style: "margin-left: 5px; margin-right: 5px; width: 99%; overflow: false"}, this._sectionId, "last");
+			var contentDiv = dojo.create("div", {id:this._logContentId }, this._sectionId, "last");
+			dojo.addClass(contentDiv, "statusLogContent");
 			if(	renderSeparator)
 				dojo.create("table", {width:"100%", height:"10px"},this._sectionId);
 		},
@@ -600,11 +584,13 @@ orion.InlineCompareRenderer = (function() {
 			var row = dojo.create("tr", null, titleTable);
 			var titleCol = dojo.create("td", {nowrap :true}, row, "last");
 			var title = dojo.create("h2", {id :"fileNameInViewer" ,innerHTML: "Select a file on the left to compare..."}, titleCol, "last");
-			var titleDiv = new dijit.layout.ContentPane({region: "top", style:"width:100%;height:30px;overflow: hidden;"});
+			var titleDiv = new dijit.layout.ContentPane({region: "top"});
+			dojo.addClass(titleDiv.domNode, "inlineCompareTitle");
 			titleDiv.attr('content', titleTable);
 			
-			var viewerDiv = new dijit.layout.ContentPane({"class":"mainpane" ,id : "inline-compare-viewer" ,splitter:false ,region: "center", style:"width:100%;height:100%;overflow: hidden;"});
-			dojo.addClass(viewerDiv, 'mainpane');
+			var viewerDiv = new dijit.layout.ContentPane({"class":"mainpane" ,id : "inline-compare-viewer" ,splitter:false ,region: "center"});
+			dojo.addClass(viewerDiv.domNode, 'mainpane');
+			dojo.addClass(viewerDiv.domNode, 'inlineCompareContent');
 			
 			var parent = dijit.byId(this._parentId);
 			parent.addChild(titleDiv);
