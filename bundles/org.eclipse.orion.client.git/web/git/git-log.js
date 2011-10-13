@@ -187,7 +187,7 @@ function loadResource(navigator){
 			if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
 				var currentXHR = this;
 				mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-					dojo.xhrGett(currentXHR); // retry GET							
+					dojo.xhrGet(currentXHR); // retry GET							
 				});
 			}else{
 				navigator.loadCommitsList(dojo.hash(), error);	
