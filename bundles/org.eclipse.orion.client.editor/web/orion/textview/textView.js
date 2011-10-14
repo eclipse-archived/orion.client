@@ -2465,19 +2465,12 @@ orion.textview.TextView = (function() {
 				}
 				selection.extend(this._getXToOffset(caretLine + scrollLines, x - scroll.x));
 				if (!args.select) { selection.collapse(); }
-				this._setSelection(selection, false, false);
-				
 				var verticalMaximum = lineCount * lineHeight;
-				var verticalScrollOffset = scroll.y;
-				var scrollOffset = verticalScrollOffset + scrollLines * lineHeight;
+				var scrollOffset = scroll.y + scrollLines * lineHeight;
 				if (scrollOffset + clientHeight > verticalMaximum) {
 					scrollOffset = verticalMaximum - clientHeight;
-				} 
-				if (scrollOffset > verticalScrollOffset) {
-					this._scrollView(0, scrollOffset - verticalScrollOffset);
-				} else {
-					this._updateDOMSelection();
 				}
+				this._setSelection(selection, true, true, scrollOffset - scroll.y);
 				this._columnX = x;
 			}
 			return true;
@@ -2499,15 +2492,8 @@ orion.textview.TextView = (function() {
 				}
 				selection.extend(this._getXToOffset(caretLine - scrollLines, x - scroll.x));
 				if (!args.select) { selection.collapse(); }
-				this._setSelection(selection, false, false);
-				
-				var verticalScrollOffset = scroll.y;
-				var scrollOffset = Math.max(0, verticalScrollOffset - scrollLines * lineHeight);
-				if (scrollOffset < verticalScrollOffset) {
-					this._scrollView(0, scrollOffset - verticalScrollOffset);
-				} else {
-					this._updateDOMSelection();
-				}
+				var scrollOffset = Math.max(0, scroll.y - scrollLines * lineHeight);
+				this._setSelection(selection, true, true, scrollOffset - scroll.y);
 				this._columnX = x;
 			}
 			return true;
@@ -4728,7 +4714,7 @@ orion.textview.TextView = (function() {
 				line = this._getLineNext(line);
 			}
 		},
-		_setSelection: function (selection, scroll, update) {
+		_setSelection: function (selection, scroll, update, pageScroll) {
 			if (selection) {
 				this._columnX = -1;
 				if (update === undefined) { update = true; }
@@ -4747,7 +4733,7 @@ orion.textview.TextView = (function() {
 				* keyboard navigation when the selection does not chanage. For example, line down
 				* when the caret is already at the last line.
 				*/
-				if (scroll) { update = !this._showCaret(); }
+				if (scroll) { update = !this._showCaret(false, pageScroll); }
 				
 				/* 
 				* Sometimes the browser changes the selection 
@@ -4803,7 +4789,7 @@ orion.textview.TextView = (function() {
 			} 
 			this._setSelection(selection, true, true);
 		},
-		_showCaret: function (allSelection) {
+		_showCaret: function (allSelection, pageScroll) {
 			if (!this._clientDiv) { return; }
 			var model = this._model;
 			var selection = this._getSelection();
@@ -4861,6 +4847,17 @@ orion.textview.TextView = (function() {
 				} else {
 					if (caret === end) {
 						pixelY -= Math.min (clientHeight - lineHeight, selectionHeight);
+					}
+				}
+				if (pageScroll) {
+					if (pageScroll > 0) {
+						if (pixelY > 0) {
+							pixelY = Math.max(pixelY, pageScroll);
+						}
+					} else {
+						if (pixelY < 0) {
+							pixelY = Math.min(pixelY, pageScroll);
+						}
 					}
 				}
 			}
