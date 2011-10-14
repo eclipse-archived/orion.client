@@ -502,7 +502,7 @@ var exports = {};
 		
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
-			tooltip : "Fetch from the remote branch into your remote tracking branch (when on a remote tracking branch) or fetch from the remote into your remote tracking branches (when on a remote)",
+			tooltip : "Fetch from the remote",
 			imageClass: "git-sprite-fetch",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.fetch",
@@ -997,7 +997,7 @@ var exports = {};
 		
 		var nextLogPage = new mCommands.Command({
 			name : "Next Page >",
-			tooltip: "Show naxt page of git log",
+			tooltip: "Show next page of git log",
 			id : "eclipse.orion.git.nextLogPage",
 			hrefCallback : function(item) {
 				return require.toUrl("git/git-log.html")+"#" + getPageUri(dojo.hash(), getPageNumber(dojo.hash())+1);
