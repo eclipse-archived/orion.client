@@ -957,6 +957,60 @@ var exports = {};
 	
 		commandService.addCommand(switchToRemote, "dom");
 		
+		var getPageNumber = function(uri){
+			var regex = new RegExp('[\\?&]page=([^&#]*)');
+			var results = regex.exec(window.location.href);
+			if (results == null)
+				return;
+			try{
+				return parseInt(results[1]);
+			}catch (e) {
+				console.error(e);
+				return;
+			}
+		};
+		
+		var getPageUri = function(uri, page){
+			var regex = new RegExp('page=([0-9]*)');
+			return uri.replace(regex, 'page='+page);
+		};
+		
+		var previousLogPage = new mCommands.Command({
+			name : "< Previous Page",
+			tooltip: "Show previous page of git log",
+			id : "eclipse.orion.git.previousLogPage",
+			hrefCallback : function(item) {
+				return require.toUrl("git/git-log.html")+"#" + getPageUri(dojo.hash(), getPageNumber(dojo.hash())-1);
+			},
+			visibleWhen : function(item) {
+				if(item.Type==="RemoteTrackingBranch" || (item.toRef != null && item.toRef.Type === "Branch")){
+					return getPageNumber(dojo.hash()) > 1;
+				}
+				return false;
+			}
+		});
+		
+		commandService.addCommand(previousLogPage, "dom");
+		
+		var nextLogPage = new mCommands.Command({
+			name : "Next Page >",
+			tooltip: "Show naxt page of git log",
+			id : "eclipse.orion.git.nextLogPage",
+			hrefCallback : function(item) {
+				return require.toUrl("git/git-log.html")+"#" + getPageUri(dojo.hash(), getPageNumber(dojo.hash())+1);
+			},
+			visibleWhen : function(item) {
+				if(item.Type==="RemoteTrackingBranch" ||(item.toRef != null && item.toRef.Type === "Branch")){
+					if(item.Children)
+						return item.Children.length > 0;
+					return true;
+				}
+				return false;
+			}
+		});
+		
+		commandService.addCommand(nextLogPage, "dom");
+		
 		var switchToCurrentLocal = new mCommands.Command({
 			name : "Switch to Active Local",
 			tooltip: "Show the log for the active local branch",
