@@ -2414,15 +2414,16 @@ orion.textview.TextView = (function() {
 			var caret = selection.getCaret();
 			var lineIndex = model.getLineAtOffset(caret);
 			if (lineIndex + 1 < model.getLineCount()) {
+				var scrollX = this._getScroll().x;
 				var x = this._columnX;
 				if (x === -1 || args.select) {
 					var offset = args.wholeLine ? model.getLineEnd(lineIndex + 1) : caret;
-					x = this._getOffsetToX(offset);
+					x = this._getOffsetToX(offset) + scrollX;
 				}
-				selection.extend(this._getXToOffset(lineIndex + 1, x));
+				selection.extend(this._getXToOffset(lineIndex + 1, x - scrollX));
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, true, true);
-				this._columnX = x;//fix x by scrolling
+				this._columnX = x;
 			}
 			return true;
 		},
@@ -2432,15 +2433,16 @@ orion.textview.TextView = (function() {
 			var caret = selection.getCaret();
 			var lineIndex = model.getLineAtOffset(caret);
 			if (lineIndex > 0) {
+				var scrollX = this._getScroll().x;
 				var x = this._columnX;
 				if (x === -1 || args.select) {
 					var offset = args.wholeLine ? model.getLineStart(lineIndex - 1) : caret;
-					x = this._getOffsetToX(offset);
+					x = this._getOffsetToX(offset) + scrollX;
 				}
-				selection.extend(this._getXToOffset(lineIndex - 1, x));
+				selection.extend(this._getXToOffset(lineIndex - 1, x - scrollX));
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, true, true);
-				this._columnX = x;//fix x by scrolling
+				this._columnX = x;
 			}
 			return true;
 		},
@@ -2451,6 +2453,7 @@ orion.textview.TextView = (function() {
 			var caretLine = model.getLineAtOffset(caret);
 			var lineCount = model.getLineCount();
 			if (caretLine < lineCount - 1) {
+				var scroll = this._getScroll();
 				var clientHeight = this._getClientHeight();
 				var lineHeight = this._getLineHeight();
 				var lines = Math.floor(clientHeight / lineHeight);
@@ -2458,14 +2461,14 @@ orion.textview.TextView = (function() {
 				scrollLines = Math.max(1, scrollLines);
 				var x = this._columnX;
 				if (x === -1 || args.select) {
-					x = this._getOffsetToX(caret);
+					x = this._getOffsetToX(caret) + scroll.x;
 				}
-				selection.extend(this._getXToOffset(caretLine + scrollLines, x));
+				selection.extend(this._getXToOffset(caretLine + scrollLines, x - scroll.x));
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, false, false);
 				
 				var verticalMaximum = lineCount * lineHeight;
-				var verticalScrollOffset = this._getScroll().y;
+				var verticalScrollOffset = scroll.y;
 				var scrollOffset = verticalScrollOffset + scrollLines * lineHeight;
 				if (scrollOffset + clientHeight > verticalMaximum) {
 					scrollOffset = verticalMaximum - clientHeight;
@@ -2475,7 +2478,7 @@ orion.textview.TextView = (function() {
 				} else {
 					this._updateDOMSelection();
 				}
-				this._columnX = x;//fix x by scrolling
+				this._columnX = x;
 			}
 			return true;
 		},
@@ -2485,26 +2488,27 @@ orion.textview.TextView = (function() {
 			var caret = selection.getCaret();
 			var caretLine = model.getLineAtOffset(caret);
 			if (caretLine > 0) {
+				var scroll = this._getScroll();
 				var clientHeight = this._getClientHeight();
 				var lineHeight = this._getLineHeight();
 				var lines = Math.floor(clientHeight / lineHeight);
 				var scrollLines = Math.max(1, Math.min(caretLine, lines));
 				var x = this._columnX;
 				if (x === -1 || args.select) {
-					x = this._getOffsetToX(caret);
+					x = this._getOffsetToX(caret) + scroll.x;
 				}
-				selection.extend(this._getXToOffset(caretLine - scrollLines, x));
+				selection.extend(this._getXToOffset(caretLine - scrollLines, x - scroll.x));
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, false, false);
 				
-				var verticalScrollOffset = this._getScroll().y;
+				var verticalScrollOffset = scroll.y;
 				var scrollOffset = Math.max(0, verticalScrollOffset - scrollLines * lineHeight);
 				if (scrollOffset < verticalScrollOffset) {
 					this._scrollView(0, scrollOffset - verticalScrollOffset);
 				} else {
 					this._updateDOMSelection();
 				}
-				this._columnX = x;//fix x by scrolling
+				this._columnX = x;
 			}
 			return true;
 		},
