@@ -16,4 +16,6 @@
 
 @import "css/git.css";
 
+@import "css/status.css";
+
 @import "../orion/compare/compare.css";

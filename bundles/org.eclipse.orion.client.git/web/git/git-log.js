@@ -74,6 +74,8 @@ dojo.addOnLoad(function() {
 	commandService.registerCommandContribution("eclipse.orion.git.push", 100, "pageActions", "eclipse.gitGroup.page");
 	commandService.registerCommandContribution("eclipse.orion.git.pushForce", 100, "pageActions", "eclipse.gitGroup.page");
 	commandService.registerCommandContribution("eclipse.orion.git.switchToRemote", 100, "pageActions", "eclipse.gitGroup.page");
+	commandService.registerCommandContribution("eclipse.orion.git.previousLogPage", 200, "pageActions", "eclipse.gitGroup.page");
+	commandService.registerCommandContribution("eclipse.orion.git.nextLogPage", 201, "pageActions", "eclipse.gitGroup.page");
 	commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
 	commandService.registerCommandContribution("eclipse.orion.git.cherryPick", 3);
 	
@@ -187,7 +189,7 @@ function loadResource(navigator){
 			if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
 				var currentXHR = this;
 				mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-					dojo.xhrGett(currentXHR); // retry GET							
+					dojo.xhrGet(currentXHR); // retry GET							
 				});
 			}else{
 				navigator.loadCommitsList(dojo.hash(), error);	

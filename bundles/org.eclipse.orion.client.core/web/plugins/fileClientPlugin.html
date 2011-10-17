@@ -44,16 +44,18 @@
 			
 			var temp = document.createElement('a');
 			temp.href = "../file";
-			
 			// note global
-			fileBase = makeParentRelative(temp.href);	
+			fileBase = makeParentRelative(temp.href);
+			
 			temp.href = "../workspace";
 			// note global
-			workspaceBase = makeParentRelative(temp.href);	
+			workspaceBase = makeParentRelative(temp.href);
 			
+			temp.href = "..";
+			var patternBase = makeParentRelative(temp.href);
 			
-			//provider.registerServiceProvider("orion.core.file", trace(service), {Name:'Orion contents', top:'/file/', pattern:'/file/|/workspace'});
-			provider.registerServiceProvider("orion.core.file", service, {Name:'Orion contents', top:fileBase, pattern:fileBase + "|" + workspaceBase});
+			//provider.registerServiceProvider("orion.core.file", trace(service), {Name:'Orion contents', top:fileBase, pattern:patternBase});
+			provider.registerServiceProvider("orion.core.file", service, {Name:'Orion contents', top:fileBase, pattern: patternBase});
 			service.dispatchEvent = provider.dispatchEvent;
 			provider.connect();
 		};

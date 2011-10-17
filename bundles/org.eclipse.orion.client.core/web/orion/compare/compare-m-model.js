@@ -159,33 +159,33 @@ orion.CompareMergeModel = (function() {
 			return this._model.getText(start, end);
 		},
 		
-		onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+		onChanging: function(modelChangingEvent) {
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanging) { 
-					l.onChanging(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+					l.onChanging(modelChangingEvent);
 				}
 			}
 		},
 		
-		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+		onChanged: function(e) {
 			/*
-			console.log("start : " + start);
-			console.log("removedCharCount : " + removedCharCount);
-			console.log("addedCharCount : " + addedCharCount);
-			console.log("removedLineCount : " + removedLineCount);
-			console.log("addedLineCount : " + addedLineCount);
-			console.log("line number : " + this.getLineAtOffset(start));
+			console.log("start : " + e.start);
+			console.log("removedCharCount : " + e.removedCharCount);
+			console.log("addedCharCount : " + e.addedCharCount);
+			console.log("removedLineCount : " + e.removedLineCount);
+			console.log("addedLineCount : " + e.addedLineCount);
+			console.log("line number : " + this.getLineAtOffset(e.start));
 			*/
 			if(!this._initing){
-				this.updateMapper(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+				this.updateMapper(e.start, e.removedCharCount, e.addedCharCount, e.removedLineCount, e.addedLineCount);
 			} else {
 				this._initing = false;
 			}
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanged) { 
-					l.onChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+					l.onChanged(e);
 				}
 			}
 		}

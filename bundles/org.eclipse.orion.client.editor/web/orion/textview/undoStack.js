@@ -146,15 +146,7 @@ orion.textview.UndoStack = (function() {
 		this.model = model;
 		var self = this;
 		this._modelListener = {
-			onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-				var e = {
-					text: text,
-					start: start, 
-					removedCharCount: removedCharCount,
-					addedCharCount: addedCharCount,
-					removedLineCount: removedLineCount,
-					addedLineCount: addedLineCount
-				};
+			onChanging: function(e) {
 				self._onModelChanging(e);
 			}
 		};

@@ -540,7 +540,7 @@ var exports = {};
 		
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
-			tooltip: "Update the remote tracking branch using the content from the remote",
+			tooltip : "Fetch from the remote",
 			imageClass: "git-sprite-fetch",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.fetch",
@@ -614,11 +614,12 @@ var exports = {};
 		
 		var fetchForceCommand = new mCommands.Command({
 			name : "Force Fetch",
-			tooltip: "Override the remote tracking branch using the content from the remote",
+			tooltip: "Fetch from the remote branch into your remote tracking branch overriding its current content",
 			id : "eclipse.orion.git.fetchForce",
 			callback: function(item) {
-				var path = item.Location;
-				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+				if(confirm("You're going to override content of the remote tracking branch. This can cause the branch to lose commits.\n\nAre you sure?")) {
+					var path = item.Location;
+					exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
 						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
 							serviceRegistry.getService("orion.page.message").then(function(progressService) {
@@ -676,6 +677,7 @@ var exports = {};
 							});
 						});
 					});	
+				}
 			},
 			visibleWhen : function(item) {
 				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
@@ -829,7 +831,7 @@ var exports = {};
 		
 		var pushCommand = new mCommands.Command({
 			name : "Push All",
-			tooltip: "Update the remote branch using content from your active branch",
+			tooltip: "Push commits and tags from your local branch into the remote branch",
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.push",
@@ -909,66 +911,67 @@ var exports = {};
 		
 		var pushForceCommand = new mCommands.Command({
 			name : "Force Push All",
-			tooltip: "Override the remote branch using the content from your active branch. Be careful! You may lose history.",
+			tooltip: "Push commits and tags from your local branch into the remote branch overriding its current content",
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.pushForce",
 			callback: function(item) {
-				var path = dojo.hash();
-				if(item.toRef){
-					item = item.toRef;
-				}
-				if(item.RemoteLocation.length==1 && item.RemoteLocation[0].Children.length==1){
-				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
-						var func = arguments.callee;
-						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
-							serviceRegistry.getService("orion.page.message").then(function(progressService) {
-								var deferred = gitService.doPush(item.RemoteLocation[0].Children[0].Location, "HEAD", true, true, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
-								progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
-									exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
-											function(jsonData){
-												if (jsonData.Result.Severity == "Ok")
-													dojo.query(".treeTableRow").forEach(function(node, i) {
-														dojo.toggleClass(node, "outgoingCommitsdRow", false);
-													});
-											}, func, "Push Git Repository");
+				if(confirm("You're going to override content of the remote branch. This can cause the remote repository to lose commits.\n\nAre you sure?")) {
+					var path = dojo.hash();
+					if(item.toRef){
+						item = item.toRef;
+					}
+					if(item.RemoteLocation.length==1 && item.RemoteLocation[0].Children.length==1){
+						exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+							var func = arguments.callee;
+							serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+								serviceRegistry.getService("orion.page.message").then(function(progressService) {
+									var deferred = gitService.doPush(item.RemoteLocation[0].Children[0].Location, "HEAD", true, true, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+									progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
+										exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
+												function(jsonData){
+											if (jsonData.Result.Severity == "Ok")
+												dojo.query(".treeTableRow").forEach(function(node, i) {
+													dojo.toggleClass(node, "outgoingCommitsdRow", false);
+												});
+										}, func, "Push Git Repository");
 									});
 								});
 							});
-				});
-				} else {
-					var remotes = item.RemoteLocation;
-					
-					serviceRegistry.getService("orion.git.provider").then(function(gitService) {
-						var dialog = new orion.git.widgets.RemotePrompterDialog({
-							title: "Choose Branch",
-							serviceRegistry: serviceRegistry,
-							gitClient: gitService,
-							treeRoot: {Children: remotes},
-							hideNewBranch: true,
-							func: dojo.hitch(this, function(targetBranch, remote) {
-								exports.getDefaultSshOptions(serviceRegistry).then(function(options){
-									var func = arguments.callee;
-									serviceRegistry.getService("orion.git.provider").then(function(gitService) {
-										serviceRegistry.getService("orion.page.message").then(function(progressService) {
-											var deferred = gitService.doPush(targetBranch.Location, "HEAD", true, true, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
-											progressService.showWhile(deferred, "Pushing remote: " + remote).then(function(remoteJsonData){
-												exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
-														function(jsonData){
-															if (jsonData.Result.Severity == "Ok")
-																dojo.query(".treeTableRow").forEach(function(node, i) {
-																	dojo.toggleClass(node, "outgoingCommitsdRow", false);
-																});
-														}, func, "Push Git Repository");
+						});
+					} else {
+						var remotes = item.RemoteLocation;
+						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+							var dialog = new orion.git.widgets.RemotePrompterDialog({
+								title: "Choose Branch",
+								serviceRegistry: serviceRegistry,
+								gitClient: gitService,
+								treeRoot: {Children: remotes},
+								hideNewBranch: true,
+								func: dojo.hitch(this, function(targetBranch, remote) {
+									exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+										var func = arguments.callee;
+										serviceRegistry.getService("orion.git.provider").then(function(gitService) {
+											serviceRegistry.getService("orion.page.message").then(function(progressService) {
+												var deferred = gitService.doPush(targetBranch.Location, "HEAD", true, true, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+												progressService.showWhile(deferred, "Pushing remote: " + remote).then(function(remoteJsonData){
+													exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
+															function(jsonData){
+														if (jsonData.Result.Severity == "Ok")
+															dojo.query(".treeTableRow").forEach(function(node, i) {
+																dojo.toggleClass(node, "outgoingCommitsdRow", false);
+															});
+													}, func, "Push Git Repository");
 												});
 											});
 										});
+									});
+								})
 							});
-							})
+							dialog.startup();
+							dialog.show();
 						});
-						dialog.startup();
-						dialog.show();
-					});
+					}
 				}
 			},
 			visibleWhen : function(item) {
@@ -994,6 +997,60 @@ var exports = {};
 		});
 	
 		commandService.addCommand(switchToRemote, "dom");
+		
+		var getPageNumber = function(uri){
+			var regex = new RegExp('[\\?&]page=([^&#]*)');
+			var results = regex.exec(window.location.href);
+			if (results == null)
+				return;
+			try{
+				return parseInt(results[1]);
+			}catch (e) {
+				console.error(e);
+				return;
+			}
+		};
+		
+		var getPageUri = function(uri, page){
+			var regex = new RegExp('page=([0-9]*)');
+			return uri.replace(regex, 'page='+page);
+		};
+		
+		var previousLogPage = new mCommands.Command({
+			name : "< Previous Page",
+			tooltip: "Show previous page of git log",
+			id : "eclipse.orion.git.previousLogPage",
+			hrefCallback : function(item) {
+				return require.toUrl("git/git-log.html")+"#" + getPageUri(dojo.hash(), getPageNumber(dojo.hash())-1);
+			},
+			visibleWhen : function(item) {
+				if(item.Type==="RemoteTrackingBranch" || (item.toRef != null && item.toRef.Type === "Branch")){
+					return getPageNumber(dojo.hash()) > 1;
+				}
+				return false;
+			}
+		});
+		
+		commandService.addCommand(previousLogPage, "dom");
+		
+		var nextLogPage = new mCommands.Command({
+			name : "Next Page >",
+			tooltip: "Show next page of git log",
+			id : "eclipse.orion.git.nextLogPage",
+			hrefCallback : function(item) {
+				return require.toUrl("git/git-log.html")+"#" + getPageUri(dojo.hash(), getPageNumber(dojo.hash())+1);
+			},
+			visibleWhen : function(item) {
+				if(item.Type==="RemoteTrackingBranch" ||(item.toRef != null && item.toRef.Type === "Branch")){
+					if(item.Children)
+						return item.Children.length > 0;
+					return true;
+				}
+				return false;
+			}
+		});
+		
+		commandService.addCommand(nextLogPage, "dom");
 		
 		var switchToCurrentLocal = new mCommands.Command({
 			name : "Switch to Active Local",
@@ -1056,7 +1113,7 @@ var exports = {};
 		
 		var pushToCommand = new mCommands.Command({
 			name : "Push to...",
-			tooltip: "Update the remote branch using content from your active branch",
+			tooltip: "Push from your local branch into the selected remote branch",
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.pushto",
@@ -1310,7 +1367,7 @@ var exports = {};
 	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack, cmdBaseNumber, navigator) {
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
-			tooltip : "Update the remote tracking branch using the content from the remote",
+			tooltip : "Fetch from the remote branch into your remote tracking branch",
 			imageClass: "git-sprite-fetch",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.fetch",
@@ -1373,7 +1430,7 @@ var exports = {};
 					});	
 			},
 			visibleWhen : function(item) {
-				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
+				return item.Type === "RemoteTrackingBranch";
 			}
 		});
 	
@@ -1454,7 +1511,7 @@ var exports = {};
 		
 		var pushCommand = new mCommands.Command({
 			name : "Push",
-			tooltip: "Update the remote branch using content from your active branch",
+			tooltip: "Push from your local branch into the remote branch",
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.push",
