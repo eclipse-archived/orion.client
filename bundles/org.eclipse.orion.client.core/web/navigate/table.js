@@ -11,32 +11,17 @@
 /*global define document dojo dijit window eclipse orion serviceRegistry:true widgets alert*/
 /*browser:true*/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
+define(['dojo', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands',
         'orion/fileCommands', 'orion/explorer-table', 'orion/util',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mSsh, mCommands, mFavorites, 
+		function(dojo, mBootstrap, mSelection, mStatus, mDialogs, mSsh, mCommands, mFavorites, 
 				mSearchClient, mFileClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil) {
 
-
-
 dojo.addOnLoad(function(){
-
-	
-	// initialize service registry and EAS services
-	var serviceRegistry = new mServiceregistry.ServiceRegistry();
-
-	// This is code to ensure the first visit to orion works
-	// we read settings and wait for the plugin registry to fully startup before continuing
-	var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
-	var pluginRegistry;
-	preferenceService.getPreferences("/plugins").then(function() {
-		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-		dojo.addOnWindowUnload(function() {
-			pluginRegistry.shutdown();
-		});
-		return pluginRegistry.startup();
-	}).then(function() {
+	mBootstrap.startup().then(function(core) {
+		var serviceRegistry = core.serviceRegistry;
+		var preferences = core.preferences;
 		var selection = new mSelection.Selection(serviceRegistry);		
 		new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		new mDialogs.DialogService(serviceRegistry);
@@ -76,7 +61,7 @@ dojo.addOnLoad(function(){
 		var splitArea = dijit.byId("orion.innerNavigator");
 				
 		// global commands
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, explorer);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, explorer);
 		// commands shared by navigators
 		mFileCommands.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools");
 		

@@ -11,29 +11,19 @@
 /*jslint browser:true devel:true*/
 /*global dijit dojo orion widgets serviceRegistry:true window*/
 
-
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 
+define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 	        'orion/searchClient', 'orion/globalCommands', 'orion/dialogs',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/RegistryTree'], 
-			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSearchClient, mGlobalCommands, mDialogs) {
+			function(dojo, mBootstrap, mStatus, mCommands, mSearchClient, mGlobalCommands, mDialogs) {
 
 dojo.addOnLoad(function() {
-	document.body.style.visibility = "visible";
-	dojo.parser.parse();
-
-	var serviceRegistry = new mServiceregistry.ServiceRegistry();
-	// This is code to ensure the first visit to orion works
-	// we read settings and wait for the plugin registry to fully startup before continuing
-	var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
-	var dialogService = new mDialogs.DialogService(serviceRegistry);
-	var pluginRegistry;
-	preferenceService.getPreferences("/plugins").then(function() {
-		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-		dojo.addOnWindowUnload(function() {
-			pluginRegistry.shutdown();
-		});
-		return pluginRegistry.startup();
-	}).then(function() {
+	mBootstrap.startup().then(function(core) {
+		var serviceRegistry = core.serviceRegistry;
+		var preferences = core.preferences;
+		var pluginRegistry = core.pluginRegistry;
+		document.body.style.visibility = "visible";
+		dojo.parser.parse();
+		var dialogService = new mDialogs.DialogService(serviceRegistry);
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 		var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
@@ -45,7 +35,7 @@ dojo.addOnLoad(function() {
 		};
 		
 		// global commands
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
 	
 		// add install stuff to page actions toolbar
 		// We could use the command framework for the links but we are being lazy since we have to add a textbox anyway
@@ -89,7 +79,7 @@ dojo.addOnLoad(function() {
 						initTree();
 						installUrlTextBox.value="";
 						statusService.setMessage("Installed " + plugin.getLocation(), 5000);
-						preferenceService.getPreferences("/plugins").then(function(plugins) {
+						preferences.getPreferences("/plugins").then(function(plugins) {
 							plugins.flush();
 						}); // this will force a sync
 					}, function(error) {
@@ -136,7 +126,7 @@ dojo.addOnLoad(function() {
 				initTree();
 				// report what we uninstalled so it's easy for user to copy/paste a plugin that they want back
 				statusService.setMessage("Uninstalled " + message, 5000);
-				preferenceService.getPreferences("/plugins").then(function(plugins) {
+				preferences.getPreferences("/plugins").then(function(plugins) {
 					plugins.flush();
 				}); // this will force a sync
 			});

@@ -11,61 +11,59 @@
 /*jslint browser:true devel:true*/
 /*global dijit dojo eclipse widgets serviceRegistry:true*/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 
+define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 	        'orion/searchClient', 'orion/globalCommands',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSearchClient, mGlobalCommands) {
+			function(dojo, mBootstrap, mStatus, mCommands, mSearchClient, mGlobalCommands) {
 
-dojo.addOnLoad(function() {
-	document.body.style.visibility = "visible";
-	dojo.parser.parse();
-	
-	// TODO get the registry from somewhere else
-	var serviceRegistry = new mServiceregistry.ServiceRegistry();
-	var registry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-	dojo.addOnWindowUnload(function() {
-		registry.shutdown();
-	});
-	var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
-	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
-	var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+	dojo.addOnLoad(function() {
+		mBootstrap.startup().then(function(core) {
+			var serviceRegistry = core.serviceRegistry;
+			var preferences = core.preferences;
+			var pluginRegistry = core.pluginRegistry;
+			document.body.style.visibility = "visible";
+			dojo.parser.parse();
+			
+			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+				
+			// global commands
+			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
 		
-	// global commands
-	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
-
-	var pluginUrl = dojo.hash();
-	if(pluginUrl) {
-		dojo.byId("valid-hash").style.display = "block";
-		dojo.place(window.document.createTextNode(pluginUrl), "plugin-location", "only");
-		
-		dojo.connect(dojo.byId("install"), "click", function(evt) {
-			dojo.byId("valid-hash").style.display = "none";
-			dojo.byId("wait").style.display = "block";
-			registry.installPlugin(pluginUrl).then(
-				function(plugin) {
-					dojo.byId("wait").style.display = "none";
-					dojo.byId("success").style.display = "block";
-					statusService.setMessage("Installed " + plugin.getLocation(), 5000);
-					preferenceService.getPreferences("/plugins").then(function(plugins) {
-						plugins.flush();
-					}); // this will force a sync 
-					var metadata = plugin.getData().metadata;
-					if (metadata) {
-						if (metadata.postInstallUrl) {
-							window.location.href = metadata.postInstallUrl;
-						}
-					}
-				}, function(error) {
-					dojo.byId("wait").style.display = "none";
-					dojo.byId("failure").style.display = "block";
-					dojo.place(window.document.createTextNode(error), "problem", "only");
-					statusService.setErrorMessage(error);
+			var pluginUrl = dojo.hash();
+			if(pluginUrl) {
+				dojo.byId("valid-hash").style.display = "block";
+				dojo.place(window.document.createTextNode(pluginUrl), "plugin-location", "only");
+				
+				dojo.connect(dojo.byId("install"), "click", function(evt) {
+					dojo.byId("valid-hash").style.display = "none";
+					dojo.byId("wait").style.display = "block";
+					pluginRegistry.installPlugin(pluginUrl).then(
+						function(plugin) {
+							dojo.byId("wait").style.display = "none";
+							dojo.byId("success").style.display = "block";
+							statusService.setMessage("Installed " + plugin.getLocation(), 5000);
+							preferences.getPreferences("/plugins").then(function(plugins) {
+								plugins.flush();
+							}); // this will force a sync 
+							var metadata = plugin.getData().metadata;
+							if (metadata) {
+								if (metadata.postInstallUrl) {
+									window.location.href = metadata.postInstallUrl;
+								}
+							}
+						}, function(error) {
+							dojo.byId("wait").style.display = "none";
+							dojo.byId("failure").style.display = "block";
+							dojo.place(window.document.createTextNode(error), "problem", "only");
+							statusService.setErrorMessage(error);
+						});
 				});
+			} else {
+				dojo.byId("invalid-hash").style.display = "block";
+			}
 		});
-	} else {
-		dojo.byId("invalid-hash").style.display = "block";
-	}
-});
-
+	
+	});
 });

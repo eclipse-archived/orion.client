@@ -9,37 +9,35 @@
  ******************************************************************************/
 /*global dojo dijit window eclipse:true*/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/commands', 'orion/profile/usersClient', 'orion/profile/profile',
+define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient', 'orion/profile/profile',
 	        'orion/searchClient', 'orion/globalCommands', 'orion/status',
 	        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mCommands, mUsersClient, mProfile, mSearchClient, mGlobalCommands, mStatus) {
+			function(dojo, mBootstrap, mCommands, mUsersClient, mProfile, mSearchClient, mGlobalCommands, mStatus) {
 
 	dojo.addOnLoad(function() {
-		document.body.style.visibility = "visible";
-		dojo.parser.parse();
+		mBootstrap.startup().then(function(core) {
+			var serviceRegistry = core.serviceRegistry;
+			var preferences = core.preferences;
+			var pluginRegistry = core.pluginRegistry;
+			document.body.style.visibility = "visible";
+			dojo.parser.parse();
 	
-		var serviceRegistry = new mServiceregistry.ServiceRegistry();
-		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-		dojo.addOnUnload(function() {
-			pluginRegistry.shutdown();
+			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
+			new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+			
+			var profile = new mProfile.Profile({
+				registry: serviceRegistry,
+				pluginRegistry: pluginRegistry,
+				profilePlaceholder: dojo.byId('profileContent'),
+				commandService: commandService,
+				pageActionsPlaceholder: dojo.byId('pageActions'),
+				usersClient: usersClient
+			});
+			
+			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, profile);
+			mGlobalCommands.generateDomCommandsInBanner(commandService, profile);
 		});
-		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-		var prefsService = new mPreferences.PreferencesService(serviceRegistry);
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
-		var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
-		new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-		
-		var profile = new mProfile.Profile({
-			registry: serviceRegistry,
-			pluginRegistry: pluginRegistry,
-			profilePlaceholder: dojo.byId('profileContent'),
-			commandService: commandService,
-			pageActionsPlaceholder: dojo.byId('pageActions'),
-			usersClient: usersClient
-		});
-		
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, profile);
-		mGlobalCommands.generateDomCommandsInBanner(commandService, profile);
 	});
-
 });

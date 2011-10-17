@@ -10,20 +10,22 @@
 
 /*global define document */
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
+define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
 		'orion/compare/compare-features', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'],
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mDiffProvider, mCompareContainer) {
+		function(dojo, mBootstrap, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mDiffProvider, mCompareContainer) {
 
-			dojo.addOnLoad(function() {
+		dojo.addOnLoad(function(){
+			mBootstrap.startup().then(function(core) {
+				var serviceRegistry = core.serviceRegistry;
+				var preferences = core.preferences;
+				
 				document.body.style.visibility = "visible";
 				dojo.parser.parse();
 				// initialize service registry and EAS services
-				var serviceRegistry = new mServiceregistry.ServiceRegistry();
-				var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
+
 				var commandService = new mCommands.CommandService({
 					serviceRegistry: serviceRegistry
 				});
-				var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
 				var searcher = new mSearchClient.Searcher({
 					serviceRegistry: serviceRegistry, commandService: commandService
 				});
@@ -31,7 +33,7 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
 				var diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
 
-				mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+				mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
 				var uiFactory = new mCompareFeatures.CompareMergeUIFactory({
 					parentDivID: "compareContainer",
 					showTitle: true,
@@ -88,3 +90,4 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 				}
 			}
 		});
+});

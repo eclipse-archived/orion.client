@@ -11,9 +11,11 @@
 /*global define */
 
 define(['dojo','./setup'], function(dojo, mSetup) {
-	
 	dojo.addOnLoad(function(){
-		mSetup.setUpEditor(true);  // not read only
+		mBootstrap.startup().then(function(core) {
+			var serviceRegistry = core.serviceRegistry;
+			var preferences = core.preferences;
+			mSetup.setUpEditor(serviceRegistry, preferences, true);  // read only
+		});
 	});
-
 });

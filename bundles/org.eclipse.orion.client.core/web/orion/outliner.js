@@ -178,13 +178,13 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 	 * Clients may listen to the service's <code>outline</code> event to receive notification when this occurs.
 	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry The service registry to use for obtaining
 	 * outline providers.
-	 * @param {orion.preferences.PreferencesService} options.preferencesService The preferences service to use.
+	 * @param {orion.preferences.PreferencesService} options.preferences The preferences service to use.
 	 */
 	function OutlineService(options) {
 		this._serviceRegistry = options.serviceRegistry;
-		this._preferencesService = options.preferencesService;
+		this._preferences = options.preferences;
 		this._serviceRegistration = this._serviceRegistry.registerService("orion.edit.outline", this);
-		this._outlinePref = this._preferencesService.getPreferences("/edit/outline");
+		this._outlinePref = this._preferences.getPreferences("/edit/outline");
 	}
 	OutlineService.prototype = /** @lends orion.outliner.OutlineService.prototype */ {
 		setOutlineProviders: function(/**ServiceReference[]*/ providers, contents, title) {
