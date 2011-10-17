@@ -801,20 +801,25 @@ orion.GitStatusController = (function() {
 		_initTitleBar:function(withBranchName){
 			var title = "Git Status";
 			var location = "";
+			var branchName = this._curBranch ? this._curBranch.Name : "detached";
 			if(withBranchName) {
-				var name =  this._curBranch ? this._curBranch.Name : "detached";
-				location = this._curClone.Name + " on " + name;
+				location = this._curClone.Name + " on " + branchName;
 			}
+			//render browser title
 			document.title = location;
-			// not good that these dom id's are known way down here
+			//render page title
 			dojo.place(document.createTextNode(title), "pageTitle", "only");
-			dojo.place(document.createTextNode(location), "location", "only");
 			if(withBranchName) {
-				this._logTableRenderer.modifyHeader(this._curBranch ? this._curBranch.Name : "detached");
-				if(this._curBranch && this._curRemote)
-					this._remoteTableRenderer.modifyHeader((this._curRemote ? this._curRemote.Name : "") + "/" + this._curBranch.Name);
+				//render git log title on local branch 
+				this._logTableRenderer.modifyHeader(branchName);
+				if(this._curBranch && this._curRemote){
+					branchName = (this._curBranch.RemoteLocation.length > 0 ? this._curBranch.RemoteLocation[0].Name : "") + "/" + this._curBranch.Name;
+					//render git log title on remote branch
+					this._remoteTableRenderer.modifyHeader(branchName);
+				}
+				//render page tilte details (clone name + remote name + local branch name)
+				dojo.place(document.createTextNode(this._curClone.Name + " on " + branchName), "location", "only");
 			}
-				
 		},
 		
 		_getCloneInfo:function(){
