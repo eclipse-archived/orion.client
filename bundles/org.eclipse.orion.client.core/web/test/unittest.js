@@ -11,9 +11,9 @@
  /*global eclipse:true dojo document console*/
 
 
-define(['require', 'dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/preferences', 'orion/commands', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable',
+define(['require', 'dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable',
         'dojo/hash', 'dojo/parser'],
-        function(require, dojo, mServiceRegistry, mPluginRegistry, mPreferences, mCommands, mSearchClient, mGlobalCommands, mTreetable) {
+        function(require, dojo, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mSearchClient, mGlobalCommands, mTreetable) {
 	
 
 var eclipse = eclipse || {};
@@ -128,95 +128,92 @@ eclipse.Unittest.Renderer = (function() {
 
 var root = {children:[]};
 
-dojo.addOnLoad(function(){
-	document.body.style.visibility = "visible";
-	dojo.parser.parse();
-	// create registry and instantiate needed services
-	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
-	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-	dojo.addOnWindowUnload(function() {
-		pluginRegistry.shutdown();
-	});
-	var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
-	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+dojo.addOnLoad(function() {
+	mBootstrap.startup().then(function(core) {
+		var serviceRegistry = core.serviceRegistry;
+		var preferences = core.preferences;
+		document.body.style.visibility = "visible";
+		dojo.parser.parse();
+		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+		
+		// global banner
+		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+		
+		function runTests(fileURI) {
+			//console.log("installing non-persistent plugin: " + fileURI);
+			var testOverview = dojo.byId("test-overview");
+			dojo.place(document.createTextNode("Running tests from: "), testOverview, "last");
+			var link = dojo.create("a", {className: "navlink", href: require.toUrl("edit/edit.html") + "#"+fileURI}, testOverview, "last");
+			dojo.place(document.createTextNode(fileURI), link, "last");
+			
+			// these are isolated from the regular service and plugin registry
+			var testServiceRegistry = new mServiceRegistry.ServiceRegistry();
+			var testPluginRegistry = new mPluginRegistry.PluginRegistry(testServiceRegistry, {});
+			
+			
+			testPluginRegistry.installPlugin(fileURI).then(function() {
+				return testServiceRegistry.getService("orion.test.runner");
+			}).then(function(service) {
+				//console.log("got service: " + service);
 	
-	// global banner
-	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
+				var myTree = new mTreetable.TableTree({
+					model: new eclipse.Unittest.Model(root),
+					showRoot: false,
+					parent: "test-tree",
+					labelColumnIndex: 0,  // 1 if with checkboxes
+					renderer: new eclipse.Unittest.Renderer()
+				});			
 	
-	function runTests(fileURI) {
-		//console.log("installing non-persistent plugin: " + fileURI);
-		var testOverview = dojo.byId("test-overview");
-		dojo.place(document.createTextNode("Running tests from: "), testOverview, "last");
-		var link = dojo.create("a", {className: "navlink", href: require.toUrl("edit/edit.html") + "#"+fileURI}, testOverview, "last");
-		dojo.place(document.createTextNode(fileURI), link, "last");
-		
-		// these are isolated from the regular service and plugin registry
-		var testServiceRegistry = new mServiceRegistry.ServiceRegistry();
-		var testPluginRegistry = new mPluginRegistry.PluginRegistry(testServiceRegistry, {});
-		
-		
-		testPluginRegistry.installPlugin(fileURI).then(function() {
-			return testServiceRegistry.getService("orion.test.runner");
-		}).then(function(service) {
-			//console.log("got service: " + service);
-
-			var myTree = new mTreetable.TableTree({
-				model: new eclipse.Unittest.Model(root),
-				showRoot: false,
-				parent: "test-tree",
-				labelColumnIndex: 0,  // 1 if with checkboxes
-				renderer: new eclipse.Unittest.Renderer()
-			});			
-
-			var times = {};
-			var testCount = 0;
-			var _top;
-			service.addEventListener("runStart", function(name) {
-				var n = name ? name : "<top>";
-				if (!_top) {
-					_top = n;
-				}
-//				console.log("[Test Run] - " + name + " start");
-				times[n] = new Date().getTime();
+				var times = {};
+				var testCount = 0;
+				var _top;
+				service.addEventListener("runStart", function(name) {
+					var n = name ? name : "<top>";
+					if (!_top) {
+						_top = n;
+					}
+	//				console.log("[Test Run] - " + name + " start");
+					times[n] = new Date().getTime();
+				});
+				service.addEventListener("runDone", function(name, obj) {
+					var n = name ? name : "<top>";
+	//				var result = [];
+	//				result.push("[Test Run] - " + name + " done - ");
+	//				result.push("[Failures:" + obj.failures + (name === top ? ", Test Count:" + testCount : "") +"] ");
+	//				result.push("(" + (new Date().getTime() - times[name]) / 1000 + "s)");
+					delete times[n];
+	//				console.log(result.join(""));
+				});
+				service.addEventListener("testStart", function(name) {
+					times[name] = new Date().getTime();
+					testCount++;
+				});
+				service.addEventListener("testDone", function(name, obj) {
+	//				var result = [];
+	//				result.push(obj.result ? " [passed] " : " [failed] ");
+	//				result.push(name);
+					var millis = new Date().getTime() - times[name];
+	//				result.push(" (" + (millis) / 1000 + "s)");
+					delete times[name];
+	//				if (!obj.result) {
+	//					result.push("\n  " + obj.message);
+	//				}
+	//				console.log(result.join(""));
+					root.children.push({"Name":name, result: obj.result, message: obj.message, stack: obj.stack, millis: millis});
+					myTree.refresh(root, root.children);
+				});	
+				service.run().then(function(result) {
+					testPluginRegistry.shutdown();
+				});
 			});
-			service.addEventListener("runDone", function(name, obj) {
-				var n = name ? name : "<top>";
-//				var result = [];
-//				result.push("[Test Run] - " + name + " done - ");
-//				result.push("[Failures:" + obj.failures + (name === top ? ", Test Count:" + testCount : "") +"] ");
-//				result.push("(" + (new Date().getTime() - times[name]) / 1000 + "s)");
-				delete times[n];
-//				console.log(result.join(""));
-			});
-			service.addEventListener("testStart", function(name) {
-				times[name] = new Date().getTime();
-				testCount++;
-			});
-			service.addEventListener("testDone", function(name, obj) {
-//				var result = [];
-//				result.push(obj.result ? " [passed] " : " [failed] ");
-//				result.push(name);
-				var millis = new Date().getTime() - times[name];
-//				result.push(" (" + (millis) / 1000 + "s)");
-				delete times[name];
-//				if (!obj.result) {
-//					result.push("\n  " + obj.message);
-//				}
-//				console.log(result.join(""));
-				root.children.push({"Name":name, result: obj.result, message: obj.message, stack: obj.stack, millis: millis});
-				myTree.refresh(root, root.children);
-			});	
-			service.run().then(function(result) {
-				testPluginRegistry.shutdown();
-			});
+		}
+	
+		dojo.subscribe("/dojo/hashchange", this, function() {
+				runTests(dojo.hash());
 		});
-	}
-
-	dojo.subscribe("/dojo/hashchange", this, function() {
-			runTests(dojo.hash());
+		runTests(dojo.hash());
 	});
-	runTests(dojo.hash());
 });
 
 });

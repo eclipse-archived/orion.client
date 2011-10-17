@@ -8,41 +8,40 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status',  'orion/commands',
+define(['dojo', 'orion/bootstrap', 'orion/status',  'orion/commands',
 	        'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient', 'orion/git/git-status-table', 'orion/breadcrumbs','orion/dialogs','orion/ssh/sshTools',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSearchClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs,mDialogs,mSshTools) {
+			function(dojo, mBootstrap, mStatus, mCommands, mSearchClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs,mDialogs,mSshTools) {
 
 	dojo.addOnLoad(function() {
-		document.body.style.visibility = "visible";
-		dojo.parser.parse();
-		// initialize service registry and EAS services
-		var serviceRegistry = new mServiceregistry.ServiceRegistry();
-		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-		var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
-		// Git operations
-		new mGitClient.GitService(serviceRegistry);
-		new mSshTools.SshService(serviceRegistry);
-		// File operations
-	
-		new mDialogs.DialogService(serviceRegistry);
+		mBootstrap.startup().then(function(core) {
+			var serviceRegistry = core.serviceRegistry;
+			var preferences = core.preferences;
+			document.body.style.visibility = "visible";
+			dojo.parser.parse();
+			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			// Git operations
+			new mGitClient.GitService(serviceRegistry);
+			new mSshTools.SshService(serviceRegistry);
+			// File operations
 		
-		var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
-	
-		var controller = new mGitStatusTable.GitStatusController({renderLog :true},serviceRegistry , commandService , statusService,"unstagedZone" , "stagedZone");
-		controller.getGitStatus(dojo.hash(),true);
-	
-		//every time the user manually changes the hash, we need to load the git status
-		dojo.subscribe("/dojo/hashchange", controller, function() {
+			new mDialogs.DialogService(serviceRegistry);
+			
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+		
+			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+		
+			var controller = new mGitStatusTable.GitStatusController({renderLog :true},serviceRegistry , commandService , statusService,"unstagedZone" , "stagedZone");
 			controller.getGitStatus(dojo.hash(),true);
-		});
 		
+			//every time the user manually changes the hash, we need to load the git status
+			dojo.subscribe("/dojo/hashchange", controller, function() {
+				controller.getGitStatus(dojo.hash(),true);
+			});
+			
+		});
 	});
-
 });
 
 

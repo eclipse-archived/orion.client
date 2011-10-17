@@ -11,24 +11,21 @@
 /*jslint browser:true devel:true*/
 /*global define eclipse:true orion:true dojo dijit window*/
 
-define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/selection', 'orion/status', 'orion/dialogs',
+define(['require', 'dojo', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchAdaptor',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(require, dojo, mServiceregistry, mPreferences, mPluginRegistry, mSelection, mStatus, mDialogs, mCommands, mUtil, mFavorites,
+		function(require, dojo, mSelection, mStatus, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher, mSearchAdaptor) {
 	
 var exports = exports || {};
 	
-exports.setUpEditor = function(isReadOnly){
-	var pluginRegistry = null;
-	var serviceRegistry = null;
+exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var document = window.document;
 	var selection;
-	var prefsService;
 	var commandService;
 	var statusReportingService;
 	var problemService;
@@ -39,22 +36,14 @@ exports.setUpEditor = function(isReadOnly){
 	
 	// Initialize the plugin registry
 	(function() {
-		// This is the new service registry.  All services should be registered and obtained here.
-		serviceRegistry = new mServiceregistry.ServiceRegistry();
-		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-		dojo.addOnWindowUnload(function() {
-			pluginRegistry.shutdown();
-		});
-		
 		selection = new mSelection.Selection(serviceRegistry);
 		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		new mDialogs.DialogService(serviceRegistry);
-		prefsService = new mPreferences.PreferencesService(serviceRegistry);
 		commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 
 		// Editor needs additional services besides EAS.
 		problemService = new mProblems.ProblemService(serviceRegistry);
-		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferencesService: prefsService});
+		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 	}());
 	
@@ -469,7 +458,7 @@ exports.setUpEditor = function(isReadOnly){
 	inputManager.setInput(dojo.hash(), editor);
 	
 	// TODO search location needs to be gotten from somewhere
-	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, prefsService, searcher, editor, editor, escHandler);
+	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, editor, editor, escHandler);
 	mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);

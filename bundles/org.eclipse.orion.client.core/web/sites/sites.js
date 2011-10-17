@@ -15,91 +15,89 @@
  * Glue code for sites.html
  */
 
-define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands', 
+define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 	        'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/siteService', 'orion/siteUtils', 'orion/siteTree', 'orion/treetable', 
 	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/NewSiteDialog'], 
-			function(require, dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
+			function(require, dojo, mBootstrap, mStatus, mCommands, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
 
 	dojo.addOnLoad(function() {
-		document.body.style.visibility = "visible";
-		dojo.parser.parse();
+		mBootstrap.startup().then(function(core) {
+			var serviceRegistry = core.serviceRegistry;
+			var preferences = core.preferences;
+			document.body.style.visibility = "visible";
+			dojo.parser.parse();
+		
+			// Register services
+			var dialogService = new mDialogs.DialogService(serviceRegistry);
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
-		// Register services
-		var serviceRegistry = new mServiceregistry.ServiceRegistry();
-		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-		dojo.addOnWindowUnload(function() {
-			pluginRegistry.shutdown();
-		});
-		var dialogService = new mDialogs.DialogService(serviceRegistry);
-		var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-
-		var siteService = new mSiteService.SiteService(serviceRegistry);
-		var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
-		
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher);
-		
-		// Create the visuals
-		var model;
-		var treeWidget;
-		(function() {
-			statusService.setMessage("Loading...");
-			var renderer = new mSiteTree.SiteRenderer(commandService);
-			dojo.connect(renderer, "rowsChanged", null, function() {
-				statusService.setMessage("");
-			});
-			treeWidget = new mTreeTable.TableTree({
-				id: "site-table-tree",
-				parent: dojo.byId("site-table"),
-				model: new mSiteTree.SiteTreeModel(siteService, "site-table-tree"),
-				showRoot: false,
-				renderer: renderer
-			});
-		}());
-		
-		(function() {
-			// Reloads the table view after doing a command
-			var refresher = function() {
-				siteService.getSiteConfigurations().then(function(siteConfigs) {
+			var siteService = new mSiteService.SiteService(serviceRegistry);
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			
+			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+			
+			// Create the visuals
+			var model;
+			var treeWidget;
+			(function() {
+				statusService.setMessage("Loading...");
+				var renderer = new mSiteTree.SiteRenderer(commandService);
+				dojo.connect(renderer, "rowsChanged", null, function() {
 					statusService.setMessage("");
-					treeWidget.refreshAndExpand("site-table-tree", siteConfigs);
 				});
-			};
-			var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
+				treeWidget = new mTreeTable.TableTree({
+					id: "site-table-tree",
+					parent: dojo.byId("site-table"),
+					model: new mSiteTree.SiteTreeModel(siteService, "site-table-tree"),
+					showRoot: false,
+					renderer: renderer
+				});
+			}());
 			
-			var createCommand = new mCommands.Command({
-				name : "Create Site",
-				tooltip: "Create a new site configuration",
-				image : require.toUrl("images/add.gif"),
-				id: "eclipse.sites.create",
-				groupId: "eclipse.sitesGroup",
-				callback : function() {
-					var dialog = new orion.widgets.NewSiteDialog({
-						title: "Create Site Configuration",
-						serviceRegistry: serviceRegistry,
-						func: function(name, workspace) {
-							siteService.createSiteConfiguration(name, workspace).then(function(site) {
-								window.location = mSiteUtils.generateEditSiteHref(site);
-							}, errorHandler);
-						}});
-					dialog.startup();
-					dialog.show();
-				}});
-			commandService.addCommand(createCommand, "dom");
-			
-			// Add commands that deal with individual site configuration (edit, start, stop..)
-			mSiteUtils.createSiteCommands(commandService, siteService, statusService, dialogService,
-					/*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
-			
-			// Register command contributions
-			commandService.registerCommandContribution("eclipse.sites.create", 1, "pageActions");
-			commandService.registerCommandContribution("eclipse.site.edit", 1);
-			commandService.registerCommandContribution("eclipse.site.start", 2);
-			commandService.registerCommandContribution("eclipse.site.stop", 3);
-			commandService.registerCommandContribution("eclipse.site.delete", 4);
-			
-			mGlobalCommands.generateDomCommandsInBanner(commandService, {});
-		}());
+			(function() {
+				// Reloads the table view after doing a command
+				var refresher = function() {
+					siteService.getSiteConfigurations().then(function(siteConfigs) {
+						statusService.setMessage("");
+						treeWidget.refreshAndExpand("site-table-tree", siteConfigs);
+					});
+				};
+				var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
+				
+				var createCommand = new mCommands.Command({
+					name : "Create Site",
+					tooltip: "Create a new site configuration",
+					image : require.toUrl("images/add.gif"),
+					id: "eclipse.sites.create",
+					groupId: "eclipse.sitesGroup",
+					callback : function() {
+						var dialog = new orion.widgets.NewSiteDialog({
+							title: "Create Site Configuration",
+							serviceRegistry: serviceRegistry,
+							func: function(name, workspace) {
+								siteService.createSiteConfiguration(name, workspace).then(function(site) {
+									window.location = mSiteUtils.generateEditSiteHref(site);
+								}, errorHandler);
+							}});
+						dialog.startup();
+						dialog.show();
+					}});
+				commandService.addCommand(createCommand, "dom");
+				
+				// Add commands that deal with individual site configuration (edit, start, stop..)
+				mSiteUtils.createSiteCommands(commandService, siteService, statusService, dialogService,
+						/*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
+				
+				// Register command contributions
+				commandService.registerCommandContribution("eclipse.sites.create", 1, "pageActions");
+				commandService.registerCommandContribution("eclipse.site.edit", 1);
+				commandService.registerCommandContribution("eclipse.site.start", 2);
+				commandService.registerCommandContribution("eclipse.site.stop", 3);
+				commandService.registerCommandContribution("eclipse.site.delete", 4);
+				
+				mGlobalCommands.generateDomCommandsInBanner(commandService, {});
+			}());
+		});
 	});
 });

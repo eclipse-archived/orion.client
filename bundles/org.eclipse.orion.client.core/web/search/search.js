@@ -11,47 +11,38 @@
 /*global window define */
 /*browser:true*/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status','orion/dialogs',
+define(['dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
         'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/searchResults', 'orion/globalCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mDialogs, mCommands, mFavorites, 
+		function(dojo, mBootstrap, mStatus, mDialogs, mCommands, mFavorites, 
 				mSearchClient, mSearchResults, mGlobalCommands) {
 
-dojo.addOnLoad(function(){
-	window.document.body.style.visibility = "visible";
-	dojo.parser.parse();
+	dojo.addOnLoad(function() {
+		mBootstrap.startup().then(function(core) {
+			var serviceRegistry = core.serviceRegistry;
+			var preferences = core.preferences;
+			window.document.body.style.visibility = "visible";
+			dojo.parser.parse();
 
-	var serviceRegistry = new mServiceregistry.ServiceRegistry();
-	// This is code to ensure the first visit to orion works
-	// we read settings and wait for the plugin registry to fully startup before continuing
-	var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
-	var dialogService = new mDialogs.DialogService(serviceRegistry);
-	var pluginRegistry;
-	preferenceService.getPreferences("/plugins").then(function() {
-		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-		dojo.addOnWindowUnload(function() {
-			pluginRegistry.shutdown();
-		});
-		return pluginRegistry.startup();
-	}).then(function() {
-		new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-
-		// Favorites
-		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+			var dialogService = new mDialogs.DialogService(serviceRegistry);
+			new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
-		var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
-		var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, searcher);
-		searchResultsGenerator.loadResults(dojo.hash());
-		mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");
-	
-		//every time the user manually changes the hash, we need to load the results with that name
-		dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
-		   searchResultsGenerator.loadResults(dojo.hash());
-			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");   
+			// Favorites
+			new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+		
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
+			var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, searcher);
+			searchResultsGenerator.loadResults(dojo.hash());
+			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");
+		
+			//every time the user manually changes the hash, we need to load the results with that name
+			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
+			   searchResultsGenerator.loadResults(dojo.hash());
+				mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");   
+			});
 		});
 	});
-});
 });

@@ -10,85 +10,85 @@
 
 /*global window define document dijit */
 /*browser:true*/
-define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/status', 'orion/commands',
+define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands',
         'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/breadcrumbs', 'orion/ssh/sshTools', 'orion/git/git-commit-details', 'orion/git/git-commit-navigator', 'orion/git/gitCommands',
 	    'orion/links', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(require, dojo, mServiceregistry, mPreferences, mPluginRegistry, mStatus, mCommands, mAuth, mDialogs, mSelection, mFileClient,
+		function(require, dojo, mBootstrap, mStatus, mCommands, mAuth, mDialogs, mSelection, mFileClient,
 					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitDetails, mGitCommitNavigator, mGitCommands, mLinks) {
 
+// TODO: This is naughty -- feel bad and then fix it please
 var serviceRegistry;
-dojo.addOnLoad(function() {
-	document.body.style.visibility = "visible";
-	dojo.parser.parse();
 	
-	// initialize service registry and EAS services
-	serviceRegistry = new mServiceregistry.ServiceRegistry();
-	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-	dojo.addOnUnload(function() {
-		pluginRegistry.shutdown();
+	dojo.addOnLoad(function() {
+		mBootstrap.startup().then(function(core) {
+			serviceRegistry = core.serviceRegistry;
+			var preferences = core.preferences;
+			document.body.style.visibility = "visible";
+			dojo.parser.parse();
+			
+		
+			new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+			new mDialogs.DialogService(serviceRegistry);
+			var selection = new mSelection.Selection(serviceRegistry);
+			new mSshTools.SshService(serviceRegistry);
+			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+			var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
+			
+			var branch;
+		
+			// Git operations
+			var gitClient = new mGitClient.GitService(serviceRegistry);
+			
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			
+			// Commit details
+			var commitDetails = new mGitCommitDetails.CommitDetails({parent: "commitDetailsPane", commandService: commandService, linkService: linkService, detailsPane: dijit.byId("orion.innerNavigator")});
+			// Commit navigator
+			var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, commitDetails, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+			
+			// global commands
+			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, navigator);
+			
+			//TODO this should be removed and contributed by a plug-in
+			mGitCommands.createFileCommands(serviceRegistry, commandService, navigator, "pageActions", "selectionTools");
+			
+			// define the command contributions - where things appear, first the groups
+			commandService.addCommandGroup("eclipse.gitGroup.nav", 200, "More");
+			commandService.addCommandGroup("eclipse.gitGroup.page", 100, null, null, "pageActions");
+			commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
+			
+			// commands appearing directly in local actions column
+			commandService.registerCommandContribution("eclipse.openGitCommit", 1);
+			commandService.registerCommandContribution("eclipse.compareWithWorkingTree", 2);
+		
+			// selection based command contributions in nav toolbar
+			commandService.registerCommandContribution("eclipse.compareGitCommits", 1, "selectionTools", "eclipse.selectionGroup");
+			
+			// git contributions
+			commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "pageActions", "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("eclipse.orion.git.fetchForce", 100, "pageActions", "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "pageActions", "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("eclipse.orion.git.switchToCurrentLocal", 100, "pageActions", "eclipse.gitGroup.page");	
+			commandService.registerCommandContribution("eclipse.orion.git.push", 100, "pageActions", "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("eclipse.orion.git.pushForce", 100, "pageActions", "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("eclipse.orion.git.switchToRemote", 100, "pageActions", "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("eclipse.orion.git.previousLogPage", 200, "pageActions", "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("eclipse.orion.git.nextLogPage", 201, "pageActions", "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
+			commandService.registerCommandContribution("eclipse.orion.git.cherryPick", 3);
+			
+			loadResource(navigator);
+			
+			makeRightPane(navigator);
+		
+			// every time the user manually changes the hash, we need to load the
+			// workspace with that name
+			dojo.subscribe("/dojo/hashchange", navigator, function() {
+				loadResource(navigator);
+			});
+		});
 	});
-	new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
-	new mDialogs.DialogService(serviceRegistry);
-	var selection = new mSelection.Selection(serviceRegistry);
-	new mSshTools.SshService(serviceRegistry);
-	var preferenceService = new mPreferences.PreferencesService(serviceRegistry);
-	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
-	var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
-	
-	var branch;
-
-	// Git operations
-	var gitClient = new mGitClient.GitService(serviceRegistry);
-	
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
-	
-	// Commit details
-	var commitDetails = new mGitCommitDetails.CommitDetails({parent: "commitDetailsPane", commandService: commandService, linkService: linkService, detailsPane: dijit.byId("orion.innerNavigator")});
-	// Commit navigator
-	var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, commitDetails, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
-	
-	// global commands
-	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferenceService, searcher, navigator);
-	
-	//TODO this should be removed and contributed by a plug-in
-	mGitCommands.createFileCommands(serviceRegistry, commandService, navigator, "pageActions", "selectionTools");
-	
-	// define the command contributions - where things appear, first the groups
-	commandService.addCommandGroup("eclipse.gitGroup.nav", 200, "More");
-	commandService.addCommandGroup("eclipse.gitGroup.page", 100, null, null, "pageActions");
-	commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
-	
-	// commands appearing directly in local actions column
-	commandService.registerCommandContribution("eclipse.openGitCommit", 1);
-	commandService.registerCommandContribution("eclipse.compareWithWorkingTree", 2);
-
-	// selection based command contributions in nav toolbar
-	commandService.registerCommandContribution("eclipse.compareGitCommits", 1, "selectionTools", "eclipse.selectionGroup");
-	
-	// git contributions
-	commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.fetchForce", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.switchToCurrentLocal", 100, "pageActions", "eclipse.gitGroup.page");	
-	commandService.registerCommandContribution("eclipse.orion.git.push", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.pushForce", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.switchToRemote", 100, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.previousLogPage", 200, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.nextLogPage", 201, "pageActions", "eclipse.gitGroup.page");
-	commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
-	commandService.registerCommandContribution("eclipse.orion.git.cherryPick", 3);
-	
-	loadResource(navigator);
-	
-	makeRightPane(navigator);
-
-	// every time the user manually changes the hash, we need to load the
-	// workspace with that name
-	dojo.subscribe("/dojo/hashchange", navigator, function() {
-		loadResource(navigator);
-	});
-});
 
 function loadResource(navigator){
 	var path = dojo.hash();
