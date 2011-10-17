@@ -54,7 +54,7 @@ var exports = {};
 		}
 	};
 	
-	exports.getNewItemName = function(item, explorer, onRoot, domId, defaultName, onDone, column_no) {
+	exports.getNewItemName = function(item, explorer, onRoot, domId, defaultName, onDone, column_no, isDefaultValid) {
 		var refNode, name, tempNode;
 		if (onRoot) {
 			refNode = dojo.byId(domId);
@@ -76,7 +76,7 @@ var exports = {};
 						}
 						onDone(name);
 					}
-				})); 
+				}), undefined, undefined, undefined, isDefaultValid); 
 		} else {
 			name = window.prompt(defaultName);
 			if (name) {
@@ -232,7 +232,7 @@ var exports = {};
 					return item.parent.parent;
 				};
 				
-				exports.getNewItemName(item, explorer, false, domId, "Branch name", function(name){
+				exports.getNewItemName(item, explorer, false, domId, "tag_"+item.Name, function(name){
 					if(!name && name==""){
 						return;
 					}
@@ -243,7 +243,7 @@ var exports = {};
 								},
 								displayErrorOnStatus);
 							});
-				});
+				}, undefined, true);
 				
 			},
 			visibleWhen: function(item){
