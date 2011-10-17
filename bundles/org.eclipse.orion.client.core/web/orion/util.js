@@ -134,7 +134,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		dialog.show();
 	}
 	
-	function getUserText(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy, promptMessage, selectTo) {
+	function getUserText(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy, promptMessage, selectTo, isInitialValid) {
 		/** @return function(event) */
 		var handler = function(isKeyEvent) {
 			return function(event) {
@@ -153,7 +153,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 				}
 				if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
 					return;
-				} else if (!editBox.isValid() || newValue === initialText) {
+				} else if (!editBox.isValid() || (!isInitialValid && newValue === initialText)) {
 					// No change; restore the old refnode
 					if (shouldHideRefNode) {
 						dojo.style(refNode, "display", "inline");
