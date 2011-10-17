@@ -493,10 +493,10 @@ orion.CompareMatchRenderer =  (function() {
 			context.stroke();
 		},
 		
-		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-			if(removedLineCount === addedLineCount)
+		onChanged: function(e) {
+			if(e.removedLineCount === e.addedLineCount)
 				return;
-			if(removedLineCount > 0 || addedLineCount > 0)
+			if(e.removedLineCount > 0 || e.addedLineCount > 0)
 				this.render();
 			
 		}

@@ -46,13 +46,15 @@ orion.CompareMergeUIFactory = (function() {
 		},
 		
 		_createEditorParentDiv: function(editorParentDivId ,containerDivId) {
-			var editorParentDiv = new dijit.layout.ContentPane({id :editorParentDivId ,region: "center", style:"width:100%;height: 100%;overflow: hidden;"});
-			dojo.addClass(editorParentDiv, 'paneScrolled');
+			var editorParentDiv = new dijit.layout.ContentPane({id :editorParentDivId ,region: "center"});
+			dojo.addClass(editorParentDiv.domNode, 'paneScrolled');
+			dojo.addClass(editorParentDiv.domNode, 'compareEditorParent');
 			return editorParentDiv;
 		},
 		
 		_createCompareCanvasDiv: function(canvasDivId ,containerDivId){
-			var canvasContainer = new dijit.layout.ContentPane({ region: "leading", splitter: false ,style:"width:44px;height:100%;overflow: hidden;"});
+			var canvasContainer = new dijit.layout.ContentPane({ region: "leading", splitter: false});
+			dojo.addClass(canvasContainer.domNode, 'canvasContainer');
 			
 			var canvas = document.createElement('canvas');
 			canvas.id = canvasDivId;
@@ -70,14 +72,16 @@ orion.CompareMergeUIFactory = (function() {
 		
 		_createTileDiv: function(titleDivId, createCommandArea) {
 			var table = this._createNoWrapTextDiv(titleDivId , "Compare...", null, createCommandArea);
-			var titleContainer = new dijit.layout.ContentPane({region: "top", style:"width:100%;height:30px;overflow: hidden;"});
+			var titleContainer = new dijit.layout.ContentPane({region: "top"});
+			dojo.addClass(titleContainer.domNode, 'titleContainer');
 			titleContainer.attr('content', table);
 			return titleContainer;
 		},
 		
 		_createStatusDiv: function(statusDivId) {
 			var table = this._createNoWrapTextDiv(statusDivId , "Line Status" , "center");
-			var statusContainer = new dijit.layout.ContentPane({region: "bottom", style:"width:100%;height:30px;overflow: hidden;"});
+			var statusContainer = new dijit.layout.ContentPane({region: "bottom"});
+			dojo.addClass(statusContainer.domNode, 'statusContainer');
 			statusContainer.attr('content', table);
 			return statusContainer;
 		},
@@ -87,7 +91,8 @@ orion.CompareMergeUIFactory = (function() {
 		},
 		
 		_createRightEditorParentDiv: function(editorParentDivId ,canvasId) {
-			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", style:"width:100%;height: 100%;" ,liveSplitters:false, persist:false , splitter:false});
+			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false});
+			dojo.addClass(bc.domNode, 'borderContainer');
 			this._appendDomNode(bc,this._createCompareCanvasDiv(canvasId));
 			this._appendDomNode(bc,this._createEditorParentDiv(editorParentDivId));
 			bc.startup();
@@ -95,7 +100,8 @@ orion.CompareMergeUIFactory = (function() {
 		},
 		
 		_createLeftBorder:function(){
-			var bc = new dijit.layout.BorderContainer({region:"leading" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true , style:"width: 50%;height:100%;"});
+			var bc = new dijit.layout.BorderContainer({region:"leading" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
+			dojo.addClass(bc.domNode, 'leftBorder');
 			
 			if(this._showTitle){
 				this._leftTitleDivId = this._parentDivID + "_left_title_id";
@@ -114,7 +120,8 @@ orion.CompareMergeUIFactory = (function() {
 		},
 		
 		_createRightBorder:function(){
-			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", style:"height:100%;" ,liveSplitters:false, persist:false , splitter:false});
+			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false});
+			dojo.addClass(bc.domNode, 'rightBorder');
 			
 			if(this._showTitle){
 				this._rightTitleDivId = this._parentDivID + "_right_title_id";
@@ -137,13 +144,6 @@ orion.CompareMergeUIFactory = (function() {
 		buildUI:function(){
 			var leftB = this._createLeftBorder();
 			var rightB = this._createRightBorder();
-			/*
-			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", style:"background: #ffffff;width:100%;height: 100%;" , liveSplitters:false, persist:false , splitter:false});
-			bc.addChild(leftB);
-			bc.addChild(rightB);
-			bc.startup();
-			this._appendDomNode(this._parentDivID , bc);
-			*/
 			var parent = dijit.byId(this._parentDivID);
 			parent.addChild(leftB);
 			parent.addChild(rightB);

@@ -414,18 +414,10 @@ examples.textview.TextStyler = (function() {
 		view.addEventListener("Selection", this, this._onSelection);
 		var model = view.getModel();
 		if (model.getBaseModel) {
-			//TODO normalize all events to use event objects
 			var self = this;
 			this._baseModelListener = {
-				onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-					var e = {
-						start: start, 
-						removedCharCount: removedCharCount,
-						addedCharCount: addedCharCount,
-						removedLineCount: removedLineCount,
-						addedLineCount: addedLineCount
-					};
-					self._onModelChanged(e);
+				onChanged: function(modelChangedEvent) {
+					self._onModelChanged(modelChangedEvent);
 				}
 			};
 			model.getBaseModel().addListener(this._baseModelListener);
@@ -572,8 +564,7 @@ examples.textview.TextStyler = (function() {
 			}
 			return null;
 		},
-		_getStyles: function(text, start) {
-			var model = this.view.getModel();
+		_getStyles: function(model, text, start) {
 			if (model.getBaseModel) {
 				start = model.mapOffset(start);
 			}
@@ -905,8 +896,10 @@ examples.textview.TextStyler = (function() {
 			this.destroy();
 		},
 		_onLineStyle: function (e) {
-			e.style = this._getLineStyle(e.lineIndex);
-			e.ranges = this._getStyles(e.lineText, e.lineStart);
+			if (e.textView === this.view) {
+				e.style = this._getLineStyle(e.lineIndex);
+			}
+			e.ranges = this._getStyles(e.textView.getModel(), e.lineText, e.lineStart);
 		},
 		_onSelection: function(e) {
 			var oldSelection = e.oldValue;

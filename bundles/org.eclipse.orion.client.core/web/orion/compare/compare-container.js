@@ -184,19 +184,28 @@ exports.DiffStyler = (function() {
 			var conflict = mCompareUtils.isMapperConflict(textView.getModel().getMapper(), lineTypeWrapper.mapperIndex);
 			//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349227 : we were using border style as the line below.Changing to back ground color and image.
 			//lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: "1px #AAAAAA solid" , borderLeft: borderStyle , borderRight: borderStyle}};
-			var backgroundColor = conflict ? "#EEB4B4" : "#DDDDDD";
-			var backgroundImg = "url('" + require.toUrl("images/diff-border.png") + "')";
 			
-			if(annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex()){
-				backgroundColor = conflict ? "#F08080" : "#BBBBBB";
-				backgroundImg = "url('" + require.toUrl("images/diff-border-sel.png") + "')";
-			}
+			var selected = (annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex());
 			if(lineType === "top-only") {
+				
+				var backgroundImg;
+				if(selected){
+					backgroundImg = "url('" + require.toUrl("images/diff-border-sel.png") + "')";
+				} else {
+					backgroundImg = "url('" + require.toUrl("images/diff-border.png") + "')";
+				}
 				lineStyleEvent.style = {style: {backgroundImage: backgroundImg, backgroundRepeat:"repeat-x"}};
 			} else if (lineType !== "unchanged"){
-				lineStyleEvent.style = {style: {backgroundColor: backgroundColor }};
+				var backgroundClass;
+				if(selected){
+					backgroundClass = conflict ?  "diffConflictSelect" : "diffNormalSelect";
+				} else {
+					backgroundClass = conflict ?  "diffConflict" : "diffNormal";
+				}
+				lineStyleEvent.style = {styleClass : backgroundClass}; 
 			}
 		}
+		
 	};
 	return DiffStyler;
 }());
@@ -320,7 +329,7 @@ exports.CompareMergeContainer = (function() {
 		var self = this;
 		var nextDiffCommand = new mCommands.Command({
 			name : "Next Diff",
-			image : require.toUrl("images/move_down.gif"),
+			imageClass : "core-sprite-move_down",
 			id: "orion.compare.nextDiff",
 			groupId: "orion.compareGroup",
 			callback : function() {
@@ -328,7 +337,7 @@ exports.CompareMergeContainer = (function() {
 		}});
 		var prevDiffCommand = new mCommands.Command({
 			name : "Previous Diff",
-			image : require.toUrl("images/move_up.gif"),
+			imageClass : "core-sprite-move_up",
 			id: "orion.compare.prevDiff",
 			groupId: "orion.compareGroup",
 			callback : function() {
@@ -336,7 +345,7 @@ exports.CompareMergeContainer = (function() {
 		}});
 		var copyToLeftCommand = new mCommands.Command({
 			name : "Copy Current Change From Right to left",
-			image : require.toUrl("images/leftarrow.gif"),
+			imageClass : "core-sprite-leftarrow",
 			id: "orion.compare.copyToLeft",
 			groupId: "orion.compareGroup",
 			callback : function() {
@@ -619,14 +628,14 @@ exports.InlineCompareContainer = (function() {
 		var annotationIndex = mCompareUtils.getAnnotationIndexByMapper(this._textView.getModel().getAnnotations(), lineTypeWrapper.mapperIndex).current;
 		if(lineType === "added") {
 			if(annotationIndex === this._annotation.getCurrentAnnotationIndex())
-				lineStyleEvent.style = {style: {backgroundColor: "#00B400"}};
+				lineStyleEvent.style = {styleClass: "diffInlineAddedSelect"};
 			else
-				lineStyleEvent.style = {style: {backgroundColor: "#99EE99"}};
+				lineStyleEvent.style = {styleClass: "diffInlineAdded"};
 		} else if (lineType === "removed"){
 			if(annotationIndex === this._annotation.getCurrentAnnotationIndex())
-				lineStyleEvent.style = {style: {backgroundColor: "#B44040"}};
+				lineStyleEvent.style = {styleClass: "diffInlineRemovedSelect"};
 			else
-				lineStyleEvent.style = {style: {backgroundColor: "#EE9999"}};
+				lineStyleEvent.style = {styleClass: "diffInlineRemoved"};
 		} 
 	};
 	

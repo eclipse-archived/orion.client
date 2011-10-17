@@ -103,6 +103,9 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 				} else if ("dispatchEvent" === message.method){
 					var serviceRegistration = _serviceRegistrations[message.serviceId];
 					serviceRegistration.dispatchEvent.apply(serviceRegistration, message.params);		
+				} else if ("progress" === message.method){
+					var deferred = _deferredResponses[String(message.requestId)];
+					deferred.progress.apply(deferred, message.params);	
 				} else {
 					throw new Error("Bad response method: " + message.method);
 				}		

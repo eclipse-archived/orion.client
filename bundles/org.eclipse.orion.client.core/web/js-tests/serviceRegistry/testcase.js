@@ -10,7 +10,7 @@
 /*global define */
 
 
-define(["orion/assert", "orion/serviceregistry"], function(assert, mServiceRegistry) {
+define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert, mServiceRegistry) {
 	var tests = {};
 	tests.testRegisterAndGetService = function() {
 		var count = 0;
@@ -175,6 +175,59 @@ define(["orion/assert", "orion/serviceregistry"], function(assert, mServiceRegis
 		registration.unregister();
 		assert.equal(1, serviceAddedCount);
 		assert.equal(1, serviceRemovedCount);
+	};
+	
+	tests.testDojoPromiseProgressBasic = function() {
+		var a = new dojo.Deferred();
+		var b = new dojo.Deferred();
+		var called = false;
+		
+		window.setTimeout(function() {
+			a.resolve();
+			b.progress();
+			b.resolve();
+		}, 0);
+		
+		return a.then(function() {
+			return b.then(function(){
+				if (!called) {
+					assert.ok(called);
+					//console.log("Boo. ProgressBasic not called");
+				}
+			}, function(){
+				console.log("Unexpected");
+			}, function(){
+				called = true; 
+				//console.log("Yay. ProgressBasic called");
+			});
+		});
+	};
+	
+	// see http://bugs.dojotoolkit.org/ticket/14090
+	tests.testDojoPromiseProgressChain = function() {
+		var a = new dojo.Deferred();
+		var b = new dojo.Deferred();
+		var called = false;
+
+		window.setTimeout(function() {
+			a.resolve();
+			b.progress();
+			b.resolve();
+		}, 0);
+		
+		return a.then(function() {
+			return b;
+		}).then(function(){
+			if (!called) {
+				assert.ok(called);
+				//console.log("Boo. ProgressChain not called");
+			}
+		}, function(){
+			console.log("Unexpected");
+		}, function(){
+			called = true; 
+			//console.log("Yay. ProgressChain called");
+		});
 	};
 
 	return tests;

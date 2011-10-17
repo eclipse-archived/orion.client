@@ -8,7 +8,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -263,6 +263,41 @@ orion.textview.TextView = (function() {
 			ruler.setView(this);
 			this._createRuler(ruler);
 			this._updatePage();
+		},
+		computeSize: function() {
+			var w = 0, h = 0;
+			var model = this._model, clientDiv = this._clientDiv;
+			var clientWidth = clientDiv.style.width;
+			/*
+			* Feature in WekKit. Webkit limits the width of the lines
+			* computed below to the width of the client div.  This causes
+			* the lines to be wrapped even though "pre" is set.  The fix
+			* is to set the width of the client div to a larger number
+			* before computing the lines width.  Note that this value is
+			* reset to the appropriate value further down.
+			*/
+			if (isWebkit) {
+				clientDiv.style.width = (0x7FFFF).toString() + "px";
+			}
+			var lineCount = model.getLineCount();
+			var document = this._frameDocument;
+			for (var lineIndex=0; lineIndex<lineCount; lineIndex++) {
+				var child = this._getLineNode(lineIndex), dummy = null;
+				if (!child || child.lineChanged) {
+					child = dummy = this._createLine(clientDiv, null, document, lineIndex, model);
+				}
+				var rect = this._getLineBoundingClientRect(child);
+				w = Math.max(w, rect.right - rect.left);
+				h += rect.bottom - rect.top;
+				if (dummy) { clientDiv.removeChild(dummy); }
+			}
+			if (isWebkit) {
+				clientDiv.style.width = clientWidth;
+			}
+			var viewPadding = this._getViewPadding();
+			w += viewPadding.right - viewPadding.left;
+			h += viewPadding.bottom - viewPadding.top;
+			return {width: w, height: h};
 		},
 		/**
 		 * Converts the given rectangle from one coordinate spaces to another.
@@ -838,6 +873,7 @@ orion.textview.TextView = (function() {
 		 * </p>		 
 		 * @name orion.textview.LineStyleEvent
 		 * 
+		 * @property {orion.textview.TextView} textView The text view.		 
 		 * @property {Number} lineIndex The line index.
 		 * @property {String} lineText The line text.
 		 * @property {Number} lineStart The character offset, relative to document, of the first character in the line.
@@ -873,7 +909,7 @@ orion.textview.TextView = (function() {
 		 * This event is sent when the text in the model has changed.
 		 *
 		 * @event
-		 * @param {orion.textview.ModelChangingEvent} modelChangingEvent the event
+		 * @param {orion.textview.ModelChangedEvent} modelChangedEvent the event
 		 */
 		onModelChanged: function(modelChangedEvent) {
 			this._eventTable.sendEvent("ModelChanged", modelChangedEvent);
@@ -1040,6 +1076,7 @@ orion.textview.TextView = (function() {
 			}
 			if (!ruler) {
 				if (startLine <= this._maxLineIndex && this._maxLineIndex < endLine) {
+					this._checkMaxLineIndex = this._maxLineIndex;
 					this._maxLineIndex = -1;
 					this._maxLineWidth = 0;
 				}
@@ -1228,6 +1265,7 @@ orion.textview.TextView = (function() {
 		 */
 		setModel: function(model) {
 			if (!model) { return; }
+			if (model === this._model) { return; }
 			this._model.removeListener(this._modelListener);
 			var oldLineCount = this._model.getLineCount();
 			var oldCharCount = this._model.getCharCount();
@@ -1242,8 +1280,7 @@ orion.textview.TextView = (function() {
 				removedLineCount: oldLineCount,
 				addedLineCount: newLineCount
 			};
-			this.onModelChanging(e); 
-			this.redrawRange();
+			this.onModelChanging(e);
 			this._model = model;
 			e = {
 				start: 0,
@@ -1254,7 +1291,8 @@ orion.textview.TextView = (function() {
 			};
 			this.onModelChanged(e); 
 			this._model.addListener(this._modelListener);
-			this.redrawRange();
+			this._reset();
+			this._updatePage();
 		},
 		/**
 		 * Sets the text view selection.
@@ -2376,14 +2414,16 @@ orion.textview.TextView = (function() {
 			var caret = selection.getCaret();
 			var lineIndex = model.getLineAtOffset(caret);
 			if (lineIndex + 1 < model.getLineCount()) {
+				var scrollX = this._getScroll().x;
 				var x = this._columnX;
 				if (x === -1 || args.select) {
-					x = this._getOffsetToX(caret);
+					var offset = args.wholeLine ? model.getLineEnd(lineIndex + 1) : caret;
+					x = this._getOffsetToX(offset) + scrollX;
 				}
-				selection.extend(this._getXToOffset(lineIndex + 1, x));
+				selection.extend(this._getXToOffset(lineIndex + 1, x - scrollX));
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, true, true);
-				this._columnX = x;//fix x by scrolling
+				this._columnX = x;
 			}
 			return true;
 		},
@@ -2393,14 +2433,16 @@ orion.textview.TextView = (function() {
 			var caret = selection.getCaret();
 			var lineIndex = model.getLineAtOffset(caret);
 			if (lineIndex > 0) {
+				var scrollX = this._getScroll().x;
 				var x = this._columnX;
 				if (x === -1 || args.select) {
-					x = this._getOffsetToX(caret);
+					var offset = args.wholeLine ? model.getLineStart(lineIndex - 1) : caret;
+					x = this._getOffsetToX(offset) + scrollX;
 				}
-				selection.extend(this._getXToOffset(lineIndex - 1, x));
+				selection.extend(this._getXToOffset(lineIndex - 1, x - scrollX));
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, true, true);
-				this._columnX = x;//fix x by scrolling
+				this._columnX = x;
 			}
 			return true;
 		},
@@ -2411,6 +2453,7 @@ orion.textview.TextView = (function() {
 			var caretLine = model.getLineAtOffset(caret);
 			var lineCount = model.getLineCount();
 			if (caretLine < lineCount - 1) {
+				var scroll = this._getScroll();
 				var clientHeight = this._getClientHeight();
 				var lineHeight = this._getLineHeight();
 				var lines = Math.floor(clientHeight / lineHeight);
@@ -2418,24 +2461,17 @@ orion.textview.TextView = (function() {
 				scrollLines = Math.max(1, scrollLines);
 				var x = this._columnX;
 				if (x === -1 || args.select) {
-					x = this._getOffsetToX(caret);
+					x = this._getOffsetToX(caret) + scroll.x;
 				}
-				selection.extend(this._getXToOffset(caretLine + scrollLines, x));
+				selection.extend(this._getXToOffset(caretLine + scrollLines, x - scroll.x));
 				if (!args.select) { selection.collapse(); }
-				this._setSelection(selection, false, false);
-				
 				var verticalMaximum = lineCount * lineHeight;
-				var verticalScrollOffset = this._getScroll().y;
-				var scrollOffset = verticalScrollOffset + scrollLines * lineHeight;
+				var scrollOffset = scroll.y + scrollLines * lineHeight;
 				if (scrollOffset + clientHeight > verticalMaximum) {
 					scrollOffset = verticalMaximum - clientHeight;
-				} 
-				if (scrollOffset > verticalScrollOffset) {
-					this._scrollView(0, scrollOffset - verticalScrollOffset);
-				} else {
-					this._updateDOMSelection();
 				}
-				this._columnX = x;//fix x by scrolling
+				this._setSelection(selection, true, true, scrollOffset - scroll.y);
+				this._columnX = x;
 			}
 			return true;
 		},
@@ -2445,26 +2481,20 @@ orion.textview.TextView = (function() {
 			var caret = selection.getCaret();
 			var caretLine = model.getLineAtOffset(caret);
 			if (caretLine > 0) {
+				var scroll = this._getScroll();
 				var clientHeight = this._getClientHeight();
 				var lineHeight = this._getLineHeight();
 				var lines = Math.floor(clientHeight / lineHeight);
 				var scrollLines = Math.max(1, Math.min(caretLine, lines));
 				var x = this._columnX;
 				if (x === -1 || args.select) {
-					x = this._getOffsetToX(caret);
+					x = this._getOffsetToX(caret) + scroll.x;
 				}
-				selection.extend(this._getXToOffset(caretLine - scrollLines, x));
+				selection.extend(this._getXToOffset(caretLine - scrollLines, x - scroll.x));
 				if (!args.select) { selection.collapse(); }
-				this._setSelection(selection, false, false);
-				
-				var verticalScrollOffset = this._getScroll().y;
-				var scrollOffset = Math.max(0, verticalScrollOffset - scrollLines * lineHeight);
-				if (scrollOffset < verticalScrollOffset) {
-					this._scrollView(0, scrollOffset - verticalScrollOffset);
-				} else {
-					this._updateDOMSelection();
-				}
-				this._columnX = x;//fix x by scrolling
+				var scrollOffset = Math.max(0, scroll.y - scrollLines * lineHeight);
+				this._setSelection(selection, true, true, scrollOffset - scroll.y);
+				this._columnX = x;
 			}
 			return true;
 		},
@@ -2752,6 +2782,10 @@ orion.textview.TextView = (function() {
 				bindings.push({name: "selectTextStart",	keyBinding: new KeyBinding(38, true, true), predefined: true});
 				bindings.push({name: "selectTextEnd",		keyBinding: new KeyBinding(40, true, true), predefined: true});
 			} else {
+				if (isLinux) {
+					bindings.push({name: "selectWholeLineUp",		keyBinding: new KeyBinding(38, true, true), predefined: true});
+					bindings.push({name: "selectWholeLineDown",		keyBinding: new KeyBinding(40, true, true), predefined: true});
+				}
 				bindings.push({name: "selectLineStart",		keyBinding: new KeyBinding(36, null, true), predefined: true});
 				bindings.push({name: "selectLineEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true});
 				bindings.push({name: "selectWordPrevious",	keyBinding: new KeyBinding(37, true, true), predefined: true});
@@ -2841,6 +2875,8 @@ orion.textview.TextView = (function() {
 				
 				{name: "selectLineUp",		defaultHandler: function() {return self._doLineUp({select: true});}},
 				{name: "selectLineDown",	defaultHandler: function() {return self._doLineDown({select: true});}},
+				{name: "selectWholeLineUp",		defaultHandler: function() {return self._doLineUp({select: true, wholeLine: true});}},
+				{name: "selectWholeLineDown",	defaultHandler: function() {return self._doLineDown({select: true, wholeLine: true});}},
 				{name: "selectLineStart",	defaultHandler: function() {return self._doHome({select: true, ctrl:false});}},
 				{name: "selectLineEnd",		defaultHandler: function() {return self._doEnd({select: true, ctrl:false});}},
 				{name: "selectCharPrevious",	defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"character"});}},
@@ -2870,7 +2906,7 @@ orion.textview.TextView = (function() {
 		_createLine: function(parent, sibling, document, lineIndex, model) {
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
-			var e = {lineIndex: lineIndex, lineText: lineText, lineStart: lineStart};
+			var e = {textView: this, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart};
 			this.onLineStyle(e);
 			var child = document.createElement("DIV");
 			child.lineIndex = lineIndex;
@@ -4071,12 +4107,12 @@ orion.textview.TextView = (function() {
 			var self = this;
 			this._modelListener = {
 				/** @private */
-				onChanging: function(newText, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-					self._onModelChanging(newText, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+				onChanging: function(modelChangingEvent) {
+					self._onModelChanging(modelChangingEvent);
 				},
 				/** @private */
-				onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-					self._onModelChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+				onChanged: function(modelChangedEvent) {
+					self._onModelChanged(modelChangedEvent);
 				}
 			};
 			this._model.addListener(this._modelListener);
@@ -4237,16 +4273,13 @@ orion.textview.TextView = (function() {
 			}
 			this.onModify({});
 		},
-		_onModelChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-			var e = {
-				start: start,
-				removedCharCount: removedCharCount,
-				addedCharCount: addedCharCount,
-				removedLineCount: removedLineCount,
-				addedLineCount: addedLineCount
-			};
-			this.onModelChanged(e);
-			
+		_onModelChanged: function(modelChangedEvent) {
+			this.onModelChanged(modelChangedEvent);
+			var start = modelChangedEvent.start;
+			var addedCharCount = modelChangedEvent.addedCharCount;
+			var removedCharCount = modelChangedEvent.removedCharCount;
+			var addedLineCount = modelChangedEvent.addedLineCount;
+			var removedLineCount = modelChangedEvent.removedLineCount;
 			var selection = this._getSelection();
 			if (selection.end > start) {
 				if (selection.end > start && selection.start < start + removedCharCount) {
@@ -4274,21 +4307,14 @@ orion.textview.TextView = (function() {
 				child = this._getLineNext(child);
 			}
 			if (startLine <= this._maxLineIndex && this._maxLineIndex <= startLine + removedLineCount) {
+				this._checkMaxLineIndex = this._maxLineIndex;
 				this._maxLineIndex = -1;
 				this._maxLineWidth = 0;
 			}
 			this._updatePage();
 		},
-		_onModelChanging: function(newText, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-			var e = {
-				text: newText,
-				start: start,
-				removedCharCount: removedCharCount,
-				addedCharCount: addedCharCount,
-				removedLineCount: removedLineCount,
-				addedLineCount: addedLineCount
-			};
-			this.onModelChanging(e);
+		_onModelChanging: function(modelChangingEvent) {
+			this.onModelChanging(modelChangingEvent);
 		},
 		_queueUpdatePage: function() {
 			if (this._updateTimer) { return; }
@@ -4297,6 +4323,39 @@ orion.textview.TextView = (function() {
 				self._updateTimer = null;
 				self._updatePage();
 			}, 0);
+		},
+		_reset: function() {
+			this._maxLineIndex = -1;
+			this._maxLineWidth = 0;
+			this._columnX = -1;
+			this._topChild = null;
+			this._bottomChild = null;
+			this._partialY = 0;
+			this._setSelection(new Selection (0, 0, false), false, false);
+			if (this._viewDiv) {
+				this._viewDiv.scrollLeft = 0;
+				this._viewDiv.scrollTop = 0;
+			}
+			var clientDiv = this._clientDiv;
+			if (clientDiv) {
+				var child = clientDiv.firstChild;
+				while (child) {
+					child.lineChanged = true;
+					child = child.nextSibling;
+				}
+				/*
+				* Bug in Firefox.  For some reason, the caret does not show after the
+				* view is refreshed.  The fix is to toggle the contentEditable state and
+				* force the clientDiv to loose and receive focus if the it is focused.
+				*/
+				if (isFirefox) {
+					var hasFocus = this._hasFocus;
+					if (hasFocus) { clientDiv.blur(); }
+					clientDiv.contentEditable = false;
+					clientDiv.contentEditable = true;
+					if (hasFocus) { clientDiv.focus(); }
+				}
+			}
 		},
 		_resizeTouchDiv: function() {
 			var viewRect = this._viewDiv.getBoundingClientRect();
@@ -4655,7 +4714,7 @@ orion.textview.TextView = (function() {
 				line = this._getLineNext(line);
 			}
 		},
-		_setSelection: function (selection, scroll, update) {
+		_setSelection: function (selection, scroll, update, pageScroll) {
 			if (selection) {
 				this._columnX = -1;
 				if (update === undefined) { update = true; }
@@ -4674,7 +4733,7 @@ orion.textview.TextView = (function() {
 				* keyboard navigation when the selection does not chanage. For example, line down
 				* when the caret is already at the last line.
 				*/
-				if (scroll) { update = !this._showCaret(); }
+				if (scroll) { update = !this._showCaret(false, pageScroll); }
 				
 				/* 
 				* Sometimes the browser changes the selection 
@@ -4730,7 +4789,7 @@ orion.textview.TextView = (function() {
 			} 
 			this._setSelection(selection, true, true);
 		},
-		_showCaret: function (allSelection) {
+		_showCaret: function (allSelection, pageScroll) {
 			if (!this._clientDiv) { return; }
 			var model = this._model;
 			var selection = this._getSelection();
@@ -4788,6 +4847,17 @@ orion.textview.TextView = (function() {
 				} else {
 					if (caret === end) {
 						pixelY -= Math.min (clientHeight - lineHeight, selectionHeight);
+					}
+				}
+				if (pageScroll) {
+					if (pageScroll > 0) {
+						if (pixelY > 0) {
+							pixelY = Math.max(pixelY, pageScroll);
+						}
+					} else {
+						if (pixelY < 0) {
+							pixelY = Math.min(pixelY, pageScroll);
+						}
 					}
 				}
 			}
@@ -4942,11 +5012,12 @@ orion.textview.TextView = (function() {
 				clientDiv.style.width = (0x7FFFF).toString() + "px";
 			}
 
+			var rect;
 			child = this._getLineNext();
 			while (child) {
 				lineWidth = child.lineWidth;
 				if (lineWidth === undefined) {
-					var rect = this._getLineBoundingClientRect(child);
+					rect = this._getLineBoundingClientRect(child);
 					lineWidth = child.lineWidth = rect.right - rect.left;
 				}
 				if (lineWidth >= this._maxLineWidth) {
@@ -4955,7 +5026,22 @@ orion.textview.TextView = (function() {
 				}
 				if (child.lineIndex === topIndex) { this._topChild = child; }
 				if (child.lineIndex === bottomIndex) { this._bottomChild = child; }
+				if (this._checkMaxLineIndex === child.lineIndex) { this._checkMaxLineIndex = -1; }
 				child = this._getLineNext(child);
+			}
+			if (this._checkMaxLineIndex !== -1) {
+				lineIndex = this._checkMaxLineIndex;
+				this._checkMaxLineIndex = -1;
+				if (0 <= lineIndex && lineIndex < lineCount) {
+					var dummy = this._createLine(clientDiv, null, document, lineIndex, model);
+					rect = this._getLineBoundingClientRect(dummy);
+					lineWidth = rect.right - rect.left;
+					if (lineWidth >= this._maxLineWidth) {
+						this._maxLineWidth = lineWidth;
+						this._maxLineIndex = lineIndex;
+					}
+					clientDiv.removeChild(dummy);
+				}
 			}
 
 			// Update rulers
@@ -4974,6 +5060,9 @@ orion.textview.TextView = (function() {
 			/* Need to set the height first in order for the width to consider the vertical scrollbar */
 			var scrollHeight = lineCount * lineHeight;
 			scrollDiv.style.height = scrollHeight + "px";
+			// TODO if frameHeightWithoutHScrollbar < scrollHeight  < frameHeightWithHScrollbar and the horizontal bar is visible, 
+			// then the clientWidth is wrong because the vertical scrollbar is showing. To correct code should hide both scrollbars 
+			// at this point.
 			var clientWidth = this._getClientWidth();
 			var width = Math.max(this._maxLineWidth, clientWidth);
 			/*

@@ -65,11 +65,11 @@ orion.textview.ProjectionTextModel = (function() {
 		this._projections = [];
 //		var self = this;
 //		model.addListener({
-//			onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-//				self._onChanging(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+//			onChanging: function(modelChangingEvent) {
+//				self._onChanging(modelChangingEvent);
 //			},
-//			onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
-//				self.onChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+//			onChanged: function(modelChangedEvent) {
+//				self.onChanged(modelChangedEvent);
 //			}
 //		});
 	}
@@ -103,10 +103,25 @@ orion.textview.ProjectionTextModel = (function() {
 			var removedLineCount = projection._lineCount;
 			var addedCharCount = projection._model.getCharCount();
 			var addedLineCount = projection._model.getLineCount() - 1;
-			this.onChanging(projection._model.getText(), eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			var modelChangingEvent = {
+				text: projection._model.getText(),
+				start: eventStart,
+				removedCharCount: removedCharCount,
+				addedCharCount: addedCharCount,
+				removedLineCount: removedLineCount,
+				addedLineCount: addedLineCount
+			};
+			this.onChanging(modelChangingEvent);
 			var index = this._binarySearch(projections, projection.start);
 			projections.splice(index, 0, projection);
-			this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			var modelChangedEvent = {
+				start: eventStart,
+				removedCharCount: removedCharCount,
+				addedCharCount: addedCharCount,
+				removedLineCount: removedLineCount,
+				addedLineCount: addedLineCount
+			};
+			this.onChanged(modelChangedEvent);
 		},
 		/**
 		 * Returns all projection ranges of this model.
@@ -185,9 +200,24 @@ orion.textview.ProjectionTextModel = (function() {
 				var addedLineCount = projection._lineCount;
 				var removedCharCount = projection._model.getCharCount();
 				var removedLineCount = projection._model.getLineCount() - 1;
-				this.onChanging(model.getText(projection.start, projection.end), eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+				var modelChangingEvent = {
+					text: model.getText(projection.start, projection.end),
+					start: eventStart,
+					removedCharCount: removedCharCount,
+					addedCharCount: addedCharCount,
+					removedLineCount: removedLineCount,
+					addedLineCount: addedLineCount
+				};
+				this.onChanging(modelChangingEvent);
 				this._projections.splice(i, 1);
-				this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+				var modelChangedEvent = {
+					start: eventStart,
+					removedCharCount: removedCharCount,
+					addedCharCount: addedCharCount,
+					removedLineCount: removedLineCount,
+					addedLineCount: addedLineCount
+				};
+				this.onChanged(modelChangedEvent);
 			}
 		},
 		/** @ignore */
@@ -432,22 +462,22 @@ orion.textview.ProjectionTextModel = (function() {
 		/**
 		 * @see orion.textview.TextModel#onChanging
 		 */
-		onChanging: function(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+		onChanging: function(modelChangingEvent) {
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanging) { 
-					l.onChanging(text, start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+					l.onChanging(modelChangingEvent);
 				}
 			}
 		},
 		/**
 		 * @see orion.textview.TextModel#onChanged
 		 */
-		onChanged: function(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount) {
+		onChanged: function(modelChangedEvent) {
 			for (var i = 0; i < this._listeners.length; i++) {
 				var l = this._listeners[i]; 
 				if (l && l.onChanged) { 
-					l.onChanged(start, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+					l.onChanged(modelChangedEvent);
 				}
 			}
 		},
@@ -539,7 +569,16 @@ orion.textview.ProjectionTextModel = (function() {
 				}
 				addedLineCount++;
 			}
-			this.onChanging(text, eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			
+			var modelChangingEvent = {
+				text: text,
+				start: eventStart,
+				removedCharCount: removedCharCount,
+				addedCharCount: addedCharCount,
+				removedLineCount: removedLineCount,
+				addedLineCount: addedLineCount
+			};
+			this.onChanging(modelChangingEvent);
 			
 //			var changeLineCount = model.getLineAtOffset(mapEnd) - model.getLineAtOffset(mapStart) + addedLineCount;
 			model.setText(text, mapStart, mapEnd);
@@ -566,7 +605,14 @@ orion.textview.ProjectionTextModel = (function() {
 //				projection._lineIndex += changeLineCount;
 			}
 			
-			this.onChanged(eventStart, removedCharCount, addedCharCount, removedLineCount, addedLineCount);
+			var modelChangedEvent = {
+				start: eventStart,
+				removedCharCount: removedCharCount,
+				addedCharCount: addedCharCount,
+				removedLineCount: removedLineCount,
+				addedLineCount: addedLineCount
+			};
+			this.onChanged(modelChangedEvent);
 		}
 	};
 

@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global assertEquals orion */
+/*global assertEquals orion window log examples setTimeout XMLHttpRequest assertNotNull */
 
 if (window.AsyncTestCase) {
 	PerformanceTest = AsyncTestCase("Performance"); 
@@ -31,11 +31,11 @@ if (window.AsyncTestCase) {
 PerformanceTest.prototype = {
 	setUp: function () {
 		/*:DOC += <div id="divParent" style="width:800px;height:800px;"></div>*/   
-		assertNotNull(document.getElementById('divParent')); 
+		assertNotNull(window.document.getElementById('divParent')); 
 		var stylesheets = [
 			"/orion/textview/textview.css",
 			"/orion/textview/rulers.css",
-			"/examples/textview/textstyler.css",
+			"/examples/textview/textstyler.css"
 		];
 		var options = {
 			parent: "divParent",
@@ -44,7 +44,7 @@ PerformanceTest.prototype = {
 			tabSize: 4
 		};
 		window.top.moveTo(0,0);
-		window.top.resizeTo(screen.width,screen.height);
+		window.top.resizeTo(window.screen.width,window.screen.height);
 		this.view = new orion.textview.TextView(options);
 	},
 	tearDown: function () {
@@ -59,13 +59,14 @@ PerformanceTest.prototype = {
 		view.setText(objXml.responseText);
 		var model = view.getModel();
 		queue.call(action, function(callbacks) {
+			var start = new Date().getTime();
 			function t() {
 				var caretLine = model.getLineAtOffset(view.getCaretOffset());
 				view.invokeAction(action);
 				if (model.getLineAtOffset(view.getCaretOffset()) !== caretLine && (max === undefined || --max > 0)) {
 					setTimeout(callbacks.add(t), 0);
 				} else {
-					if (window.log) log ("time(",action,")=", (new Date().getTime() - start));
+					if (window.log) { log ("time(",action,")=", (new Date().getTime() - start)); }
 				}
 			}
 			if (action.toLowerCase().indexOf("down") !== -1) {
@@ -75,45 +76,74 @@ PerformanceTest.prototype = {
 				view.setSelection(charCount, charCount);
 			}
 			view.focus();
-			var start = new Date().getTime();
 			t();
 		}); 
 	
 	},
 	test_pageDown: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		this.doPage(queue, "pageDown");
 	},
 	test_selectPageDown: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		this.doPage(queue, "selectPageDown");
 	},
 	test_pageUp: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		this.doPage(queue, "pageUp");
 	},
 	test_selectPageUp: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		this.doPage(queue, "selectPageUp");
 	},
 	test_lineDown: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		this.doPage(queue, "lineDown", 300);
 	},
 	test_selectLineDown: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		this.doPage(queue, "selectLineDown", 300);
 	},
 	test_lineUp: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		this.doPage(queue, "lineUp", 300);
 	},
+	test_scrollLeft: function (queue) {
+		if (!queue) { queue = new this.FakeQueue(); }
+		
+		var view = this.view;
+		var buffer = "";
+		for (var i = 0; i < 1000;i++) {
+			buffer += "var id; function() {return 30;} var foo; ";
+		}
+		new examples.textview.TextStyler(view, "js");
+		var max = 256;
+		//test hit test without any styles
+		view.setText(buffer);
+
+		queue.call('setHorizontalPixel', function(callbacks) {
+			var start = new Date().getTime();
+			var hscroll = -1;
+			function t() {
+				var newHscroll = view.getHorizontalPixel();
+				if (newHscroll !== hscroll && --max > 0) {			
+					hscroll = newHscroll;
+					view.setHorizontalPixel(hscroll + 4);
+					setTimeout(callbacks.add(t), 0);
+				} else {
+					if (window.log) { log ("time(setHorizontalPixel)=", (new Date().getTime() - start)); }
+				}
+			}
+			view.focus();
+			t();
+		});
+	},
 	test_selectLineUp: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		this.doPage(queue, "selectLineUp", 300);
 	},
 	test_getLocationAtOffset: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		var view = this.view;
 		var count = 10;
 		var buffer = "";
@@ -132,11 +162,11 @@ PerformanceTest.prototype = {
 					view.getLocationAtOffset(j);
 				}
 			}
-			if (window.log) log("time(getLocationAtOffset)=" + (new Date().getTime() - start));
+			if (window.log) { log("time(getLocationAtOffset)=" + (new Date().getTime() - start)); }
 		});
 	},
 	test_getLocationAtOffsetStyled: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		var view = this.view;
 		var count = 10;
 		var buffer = "";
@@ -146,21 +176,21 @@ PerformanceTest.prototype = {
 		
 		//test hit test with styles
 		view.setText(buffer);
-		styler = new examples.textview.TextStyler(view, "js");
+		new examples.textview.TextStyler(view, "js");
 		view.focus();
 		var length = buffer.length;
 		queue.call('getLocationAtOffsetStyled', function(callbacks) {
-			start = new Date().getTime();
+			var start = new Date().getTime();
 			for (i = 0; i < count;i++) {
-				for (j = 0; j < length;j++) {
+				for (var j = 0; j < length;j++) {
 					view.getLocationAtOffset(j);
 				}
 			}
-			if (window.log) log("time(getLocationAtOffset)[styled]=" + (new Date().getTime() - start));
+			if (window.log) { log("time(getLocationAtOffset)[styled]=" + (new Date().getTime() - start)); }
 		});
 	},
 	test_getOffsetAtLocation: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		var view = this.view;
 		var count = 100;
 		var buffer = "";
@@ -171,7 +201,7 @@ PerformanceTest.prototype = {
 		//test hit test without any styles
 		view.setText(buffer);
 		view.focus();
-		var location = view.getLocationAtOffset(length);
+		var location = view.getLocationAtOffset(buffer.length);
 		queue.call('getLocationAtOffset', function(callbacks) {
 			var start = new Date().getTime();
 			for (i = 0; i < count;i++) {
@@ -179,11 +209,11 @@ PerformanceTest.prototype = {
 					view.getOffsetAtLocation(j, location.y);
 				}
 			}
-			if (window.log) log("time(getOffseAtLocation)=" + (new Date().getTime() - start));
+			if (window.log) { log("time(getOffseAtLocation)=" + (new Date().getTime() - start)); }
 		});
 	},
 	test_getOffsetAtLocationStyled: function (queue) {
-		if (!queue) var queue = new this.FakeQueue();
+		if (!queue) { queue = new this.FakeQueue(); }
 		var view = this.view;
 		var count = 100;
 		var buffer = "";
@@ -193,17 +223,17 @@ PerformanceTest.prototype = {
 		
 		//test hit test with styles
 		view.setText(buffer);
-		styler = new examples.textview.TextStyler(view, "js");
+		new examples.textview.TextStyler(view, "js");
 		view.focus();
-		var location = view.getLocationAtOffset(length);
+		var location = view.getLocationAtOffset(buffer.length);
 		queue.call('getLocationAtOffset[styled]', function(callbacks) {
-			start = new Date().getTime();
+			var start = new Date().getTime();
 			for (i = 0; i < count;i++) {
 				for (var j = 0; j < location.x; j++) {
 					view.getOffsetAtLocation(j, location.y);
 				}
 			}
-			if (window.log) log("time(getOffseAtLocation)[styled]=" + (new Date().getTime() - start));
+			if (window.log) { log("time(getOffseAtLocation)[styled]=" + (new Date().getTime() - start)); }
 		});
 	}
 };

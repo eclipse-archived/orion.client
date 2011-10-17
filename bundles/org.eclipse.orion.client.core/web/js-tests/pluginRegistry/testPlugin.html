@@ -2,6 +2,7 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="../../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script type="text/javascript" src="../../orion/plugin.js"></script>
 	<script>
 		window.onload = function() {
@@ -9,6 +10,14 @@
 			var serviceProvider = provider.registerServiceProvider("test", {
 				test: function(echo) {
 					return echo;
+				},
+				testPromise: function(echo) {
+					var d = new dojo.Deferred();
+					window.setTimeout(function() {
+						d.progress("progress");
+						d.resolve(echo);
+					},0)
+					return d;
 				},
 				testEvent: function(name) {
 					serviceProvider.dispatchEvent(name, name + "test");
