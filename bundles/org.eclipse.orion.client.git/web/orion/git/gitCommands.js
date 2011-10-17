@@ -596,6 +596,9 @@ var exports = {};
 																	});
 																}
 															});
+														if(item.Type==="Remote"){
+															dojo.hitch(explorer, explorer.changedItem)(item);
+														}
 													}, displayErrorOnStatus
 													);
 												}, func, "Fetch Git Repository");
