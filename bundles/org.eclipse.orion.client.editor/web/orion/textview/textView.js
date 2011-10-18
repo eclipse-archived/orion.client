@@ -3577,12 +3577,14 @@ orion.textview.TextView = (function() {
 			if (isFirefox) {
 				var document = this._frameDocument;
 				var textArea = this._textArea;
-				textArea.innerHTML = "";
-				textArea.focus();
+				textArea.contentEditable = false;
+				textArea.innerHTML = "<pre contenteditable=''></pre>";
+				textArea.firstChild.focus();
 				var self = this;
 				var _getText = function() {
 					var text = self._getTextFromElement(textArea);
 					textArea.innerHTML = "";
+					textArea.contentEditable = true;
 					clipboadText = [];
 					self._convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
 					return clipboadText.join("");
