@@ -1,14 +1,90 @@
-/* Simple theme that handles our HTML styling. 
- * A real theme would be more comprehensive
- */
+/* Default theme */
+.comment {
+	color: green;
+}
 
+.comment-block-documentation {
+	color: #00008F;
+}
+
+.constant {
+	font-style: italic;
+	color: blue;
+}
+
+.entity {
+	color: #3f7f7f;
+}
+
+.entity-name-function, .entity-name-type {
+	font-weight: bold;
+}
+
+.invalid-illegal {
+	color: white;
+	background-color: red;
+}
+
+.invalid-deprecated {
+	text-decoration: line-through;
+}
+
+.keyword-control {
+	color: #7F0055;
+	font-weight: bold;
+}
+
+.keyword-operator {
+	color: #ddd;
+}
+
+.markup-heading {
+	font-weight: bold;
+}
+
+.markup-quote {
+	font-style: italic;
+}
+
+.meta-tag {
+	color: #3f7f7f;
+}
+
+.storage {
+	color: #7F0055;
+}
+
+.string {
+	color: blue;
+}
+
+.support {
+	color: #21439c;
+}
+
+.variable {
+	color: #0000c0;
+}
+
+.variable-parameter {
+	color: black;
+}
+
+.variable-language {
+	color: #7F0055;
+	font-weight: bold;
+}
+
+
+
+
+/* Hardcoded HTML styles */
 .entity-name-tag /*tag name*/ {
 	color: #3f7f7f;
 }
 
 .entity-other-attribute-name {
 	color: #7f007f;
-	/*text-decoration: underline;*/
 }
 
 .punctuation-definition-comment {
@@ -23,34 +99,3 @@
 	color: #2a00ff;
 }
 
-.comment {
-	color: green;
-}
-
-.constant {
-	font-weight: bold;
-}
-
-.invalid {
-	color: white;
-	background-color: red;
-}
-
-/*
-.invalid {
-}
-.keyword {
-}
-.markup {
-}
-.meta {
-}
-.storage {
-}
-.string {
-}
-.support {
-}
-.variable {
-}
-*/
