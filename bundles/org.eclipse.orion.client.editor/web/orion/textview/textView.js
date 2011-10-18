@@ -8,7 +8,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -3208,13 +3208,13 @@ orion.textview.TextView = (function() {
 				touchDiv.appendChild(textArea);
 			}
 			if (isFirefox) {
-				textArea = frameDocument.createElement("TEXTAREA");
+				textArea = frameDocument.createElement("DIV");
 				this._textArea = textArea;
 				textArea.id = "textArea";
+				textArea.contentEditable = true;
 				textArea.style.position = "fixed";
 				textArea.style.whiteSpace = "pre";
 				textArea.style.left = "-1000px";
-				textArea.tabIndex = -1;
 				body.appendChild(textArea);
 			}
 
@@ -3581,21 +3581,8 @@ orion.textview.TextView = (function() {
 				textArea.focus();
 				var self = this;
 				var _getText = function() {
-					var text;
-					if (textArea.firstChild) {
-						text = "";
-						var child = textArea.firstChild;
-						while (child) {
-							if (child.nodeType === child.TEXT_NODE) {
-								text += child.data;
-							} else if (child.tagName === "BR") {
-								text += delimiter; 
-							} 
-							child = child.nextSibling;
-						}
-					} else {
-						text = textArea.value;
-					}
+					var text = self._getTextFromElement(textArea);
+					textArea.innerHTML = "";
 					clipboadText = [];
 					self._convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
 					return clipboadText.join("");
@@ -3664,6 +3651,36 @@ orion.textview.TextView = (function() {
 				}
 				lineChild = lineChild.nextSibling;
 			}
+			return text;
+		},
+		_getTextFromElement: function(element) {
+			var document = element.ownerDocument;
+			var window = document.defaultView;
+			if (!window.getSelection) {
+				return element.innerText || element.textContent;
+			}
+
+			var newRange = document.createRange();
+			newRange.selectNode(element);
+
+			var selection = window.getSelection();
+			var oldRanges = [];
+			for (var i = 0; i < selection.rangeCount; i++) {
+				oldRanges.push(selection.getRangeAt(i));
+			}
+
+			this._ignoreSelect = true;
+			selection.removeAllRanges();
+			selection.addRange(newRange);
+
+			var text = selection.toString();
+
+			selection.removeAllRanges();
+			for (var i = 0; i < oldRanges.length; i++) {
+				selection.addRange(oldRanges[i]);
+			}
+
+			this._ignoreSelect = false;
 			return text;
 		},
 		_getViewPadding: function() {
@@ -4148,9 +4165,7 @@ orion.textview.TextView = (function() {
 				handlers.push({target: clientDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e);}});
 				handlers.push({target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e);}});
 				handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e);}});
-				if (!isFirefox) {
-					handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e);}});
-				}
+				handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e);}});
 				handlers.push({target: clientDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}});
 				handlers.push({target: grabNode, type: "mouseup", handler: function(e) { return self._handleMouseUp(e);}});
 				handlers.push({target: grabNode, type: "mousemove", handler: function(e) { return self._handleMouseMove(e);}});
