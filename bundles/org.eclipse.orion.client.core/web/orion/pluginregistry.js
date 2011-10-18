@@ -329,25 +329,22 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 			installList = [];
 		
 		//default
-		defaults = _storage["/orion/preferences/default"] ? JSON.parse(_storage["/orion/preferences/default"]) : null;
-		if (defaults && defaults["/plugins"]) {
-			_defaultPlugins = defaults["/plugins"];
-			for(pluginURL in _defaultPlugins) {
-				if (_defaultPlugins.hasOwnProperty(pluginURL)) {
-					if (pluginURL.indexOf("://") === -1) {
-						pluginURL = require.toUrl(pluginURL);
+		_defaultPlugins = _storage["/orion/preferences/default/plugins"] ? JSON.parse(_storage["/orion/preferences/default/plugins"]) : null;
+		for(pluginURL in _defaultPlugins) {
+			if (_defaultPlugins.hasOwnProperty(pluginURL) && pluginURL !== "_expires") {
+				if (pluginURL.indexOf("://") === -1) {
+					pluginURL = require.toUrl(pluginURL);
+				}
+				pluginURL = _normalizeURL(pluginURL);
+				key = "plugin." + pluginURL;
+				if (_storage[key]) {
+					if (_getPlugin(pluginURL) === null) {
+						pluginData = JSON.parse(_storage[key]);
+						plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
+						_plugins.push(plugin);
 					}
-					pluginURL = _normalizeURL(pluginURL);
-					key = "plugin." + pluginURL;
-					if (_storage[key]) {
-						if (_getPlugin(pluginURL) === null) {
-							pluginData = JSON.parse(_storage[key]);
-							plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
-							_plugins.push(plugin);
-						}
-					} else {
-						installList.push(_self.installPlugin(pluginURL));
-					}
+				} else {
+					installList.push(_self.installPlugin(pluginURL));
 				}
 			}
 		}
