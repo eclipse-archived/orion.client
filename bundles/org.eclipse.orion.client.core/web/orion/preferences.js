@@ -370,7 +370,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 			}
 			return d;
 		},
-		set: function(name, data) {
+		put: function(name, data) {
 			var d = new dojo.Deferred();
 			d.resolve();
 			return d;
@@ -392,7 +392,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 			}
 			return d;
 		},
-		set: function(name, data) {
+		put: function(name, data) {
 			var d = new dojo.Deferred();
 			this._cache.set(name, data);
 			d.resolve();
