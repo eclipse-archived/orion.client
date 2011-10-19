@@ -29,7 +29,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			},
 			//on failure we might need to retry
 			function(error) {
-				if (error.status === 401 || error.status === 403) {
+				if (error.status === 401) {
 					mAuth.handleAuthenticationError(error, function(message) {
 						//try again
 						fileService[funcName].apply(fileService, funcArgs).then(

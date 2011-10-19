@@ -17,9 +17,8 @@
 
  */
 
-define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widgets/LoginDialog'], function(dojo, dijit, mGlobalCommands) {
+define(['dojo', 'orion/globalCommands', 'dojo/date/locale', 'orion/widgets/LoginDialog'], function(dojo, mGlobalCommands) {
 
-	var forbiddenAccessDlg;
 	var pendingAuthentication = {};
 	
 	dojo.addOnLoad(function () {
@@ -36,23 +35,7 @@ define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widg
 	 * @param retry A function to invoke after authentication to retry the server request.
 	 */
 	function handleAuthenticationError(error, retry) {
-		if (error.status === 403) { 
-			if (typeof forbiddenAccessDlg === "undefined") {
-				forbiddenAccessDlg = new dijit.Dialog({
-			        title: "Forbidden access"
-			    });
-			}
-			var message = error.message;
-			if (error.responseText) {
-				var responseObject = JSON.parse(error.responseText);
-				message = responseObject.Message || error.message;
-			}
-			forbiddenAccessDlg.set("content", message);
-			forbiddenAccessDlg.show();
-		}
 		if (error.status === 401) { 
-			
-	
 				// open popup and add OP response handler
 				// TODO add error handling here
 				try{
