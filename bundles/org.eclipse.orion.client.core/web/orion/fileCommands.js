@@ -108,6 +108,13 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 	 * @function
 	 */
 	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient, toolbarId) {
+		var errorHandler = function(error) {
+			serviceRegistry.getService("orion.page.message").then(
+				function(statusService) {
+					statusService.setProgressResult(error);
+				});
+		};
+		var progress = serviceRegistry.getService("orion.page.message");
 		
 		function forceSingleItem(item) {
 			if (dojo.isArray(item)) {
@@ -152,7 +159,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 					var item = selectedItems[i];
 					var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 					func.apply(fileClient, [item.Location, this.path]).then(
-						dojo.hitch(explorer, refreshFunc)//refresh the root
+						dojo.hitch(explorer, refreshFunc), //refresh the root
+						errorHandler
 					);
 				}
 			};
@@ -179,11 +187,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 								if (location) {
 									func.apply(fileClient, [item.Location, targetFolder.Location, newName]).then(
 										dojo.hitch(explorer, refreshFunc), //refresh the root
-										function(error) {
-											serviceRegistry.getService("orion.page.message").then(function(statusService) {
-												statusService.setErrorMessage(error);
-											});
-										}
+										errorHandler
 									);
 								}
 							}
@@ -315,7 +319,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 					mUtil.getUserText(domId+"EditBox", refNode, true, item.Name, 
 						dojo.hitch(this, function(newText) {
 							fileClient.moveFile(item.Location, item.parent.Location, newText).then(
-								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);})//refresh the root
+								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}), //refresh the root
+								errorHandler
 							);
 						}), 
 						null, null, "."
@@ -359,7 +364,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 							if (deleteLocation) {
 								fileClient.deleteFile(deleteLocation).then(function() {
 									explorer.changedItem(refreshItem);
-								});
+								}, errorHandler);
 							}
 						}
 					}));
@@ -423,12 +428,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 					if (name) {
 						fileClient.createFile(item.Location, name).then(
 							dojo.hitch(explorer, function() {this.changedItem(item);}),
-								function(error) {
-									serviceRegistry.getService("orion.page.message").then(function(statusService) {
-										statusService.setErrorMessage(error);
-									});
-								}
-							);
+							errorHandler);
 					}
 				});
 			},
@@ -448,12 +448,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 				getNewItemName(item, domId, "New Folder", function(name) {
 					if (name) {
 						fileClient.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}),
-								function(error) {
-									serviceRegistry.getService("orion.page.message").then(function(statusService) {
-										statusService.setErrorMessage(error);
-									});
-								});
+							dojo.hitch(explorer, function() {this.changedItem(item);}), 
+							errorHandler);
 					}
 				});
 			},
@@ -473,7 +469,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 				getNewItemName(item, domId, "New Folder", function(name) {
 					if (name) {
 						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name).then(
-							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);})); // refresh the root
+							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}), // refresh the root
+							errorHandler);
 					}
 				});
 			},
@@ -494,7 +491,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 					label: "Folder name:",
 					func:  function(name, url, create){
 						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, create).then(
-							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}));//refresh the root
+							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}), //refresh the root
+							errorHandler);
 					},
 					advanced: true
 				});
@@ -535,12 +533,13 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 				item = forceSingleItem(item);
 				var dialog = new orion.widgets.SFTPConnectionDialog({
 					func:  function(host,path,user,password, overwriteOptions){
-						serviceRegistry.getService("orion.page.message").then(function(progressService) {
-							var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
-							var importOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
-							var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
+						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
+						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
+						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
+						progress.then(function(progressService) {
 							progressService.showWhile(deferred, "Importing from " + host).then(
-								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}),
+								errorHandler);//refresh the root
 						});
 					}
 				});
@@ -562,12 +561,13 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 				item = forceSingleItem(item);
 				var dialog = new orion.widgets.SFTPConnectionDialog({
 					func:  function(host,path,user,password, overwriteOptions){
-						serviceRegistry.getService("orion.page.message").then(function(progressService) {
-							var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
-							var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
-							var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
+						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
+						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
+						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
+						progress.then(function(progressService) {
 							progressService.showWhile(deferred, "Exporting from " + host).then(
-								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}));//refresh the root
+								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}),
+								errorHandler);//refresh the root
 						});
 					}
 				});
@@ -639,7 +639,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 								if (location) {
 									fileClient.copyFile(location, explorer.treeRoot.Location, name).then(dojo.hitch(explorer, function() {
 										this.changedItem(this.treeRoot);
-									}));
+									}), errorHandler);
 								}
 							}
 						}
