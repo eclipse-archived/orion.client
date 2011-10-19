@@ -11,7 +11,7 @@
 
 /*global define window document console localStorage */
 
-define(["require", "dojo", "orion/serviceregistry", "dojo/DeferredList"], function(require, dojo, mServiceregistry){
+define(["dojo", "orion/serviceregistry", "dojo/DeferredList"], function(dojo, mServiceregistry){
 var eclipse = eclipse || {};
 
 /**
@@ -216,11 +216,6 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	var _plugins = [];
 	var _channels = [];
 	var _pluginEventTarget = new mServiceregistry.EventTarget();
-	var _loaded;
-		
-	// storage
-	var _defaultPlugins = {};
-	var _userPlugins;
 
 	window.addEventListener("message", function(event) {
 		for (var i = 0, source = event.source; i < _channels.length; i++) {
@@ -244,22 +239,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	}
 	
 	function _clear(plugin) {
-		var pluginURL;
-		
 		delete _storage["plugin."+plugin.getLocation()];
-		for(pluginURL in _userPlugins) {
-			if (_userPlugins.hasOwnProperty(pluginURL)) {
-				if (pluginURL.indexOf("://") === -1) {
-					pluginURL = require.toUrl(pluginURL);
-				}
-				pluginURL = _normalizeURL(pluginURL);
-				if (plugin.getLocation() === pluginURL) {
-					delete _userPlugins[plugin.getLocation()];
-					_storage["/orion/preferences/user/plugins"] = JSON.stringify(_userPlugins);
-					return;
-				}
-			}
-		}
 	}
 
 	var internalRegistry = {
@@ -320,80 +300,8 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		return null;
 	}
 	
-	function _loadFromStorage() {
-		var plugin,
-			pluginURL,
-			pluginData,
-			key,
-			defaults,
-			installList = [];
-		
-		//default
-		_defaultPlugins = _storage["/orion/preferences/default/plugins"] ? JSON.parse(_storage["/orion/preferences/default/plugins"]) : null;
-		for(pluginURL in _defaultPlugins) {
-			if (_defaultPlugins.hasOwnProperty(pluginURL) && pluginURL !== "_expires") {
-				if (pluginURL.indexOf("://") === -1) {
-					pluginURL = require.toUrl(pluginURL);
-				}
-				pluginURL = _normalizeURL(pluginURL);
-				key = "plugin." + pluginURL;
-				if (_storage[key]) {
-					if (_getPlugin(pluginURL) === null) {
-						pluginData = JSON.parse(_storage[key]);
-						plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
-						_plugins.push(plugin);
-					}
-				} else {
-					installList.push(_self.installPlugin(pluginURL));
-				}
-			}
-		}
-		
-		//user
-		_userPlugins = _storage["/orion/preferences/user/plugins"] ? JSON.parse(_storage["/orion/preferences/user/plugins"]) : null;
-		if (!_userPlugins) {
-			_userPlugins = {};
-		}
-		for(pluginURL in _userPlugins) {
-			if (_userPlugins.hasOwnProperty(pluginURL) && pluginURL !== "_expires") {
-				if (pluginURL.indexOf("://") === -1) {
-					pluginURL = require.toUrl(pluginURL);
-				}
-				pluginURL = _normalizeURL(pluginURL);
-				key = "plugin." + pluginURL;
-				if (_storage[key]) {
-					if (_getPlugin(pluginURL) === null) {
-						pluginData = JSON.parse(_storage[key]);
-						plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
-						_plugins.push(plugin);
-					}
-				} else {
-					installList.push(_self.installPlugin(pluginURL));
-				}
-			}
-		}
-		_loaded = new dojo.DeferredList(installList);
-	}
-	
 	function _persist(plugin) {
-		var pluginURL;
 		_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
-		for(pluginURL in _defaultPlugins) {
-			if (_defaultPlugins.hasOwnProperty(pluginURL)) {
-				if (plugin.getLocation() === _normalizeURL(pluginURL)) {
-					return;
-				}
-			}
-		}
-		for(pluginURL in _userPlugins) {
-			if (_userPlugins.hasOwnProperty(pluginURL)) {
-				if (plugin.getLocation() === _normalizeURL(pluginURL)) {
-					return;
-				}
-			}
-		}
-		_userPlugins[plugin.getLocation()] = true;
-		_storage["/orion/preferences/user/plugins"] = JSON.stringify(_userPlugins);
 	}
 	
 	/**
@@ -402,8 +310,23 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	 * @return A promise that will resolve when the registry has been fully started
 	 * @function 
 	 */
-	this.startup = function() {
-		return _loaded.promise;
+	this.startup = function(pluginURLs) {	
+		var installList = [];
+		for(var i = 0; i < pluginURLs.length; ++i) {
+			var pluginURL = pluginURLs[i];
+			pluginURL = _normalizeURL(pluginURL);
+			var key = "plugin." + pluginURL;
+			if (_storage[key]) {
+				if (_getPlugin(pluginURL) === null) {
+					var pluginData = JSON.parse(_storage[key]);
+					var plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
+					_plugins.push(plugin);
+				}
+			} else {
+				installList.push(_self.installPlugin(pluginURL));
+			}
+		}		
+		return new dojo.DeferredList(installList);
 	};
 	
 	/**
@@ -452,7 +375,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				_pluginEventTarget.dispatchEvent("pluginAdded", plugin);
 				d.resolve(plugin);
 			} else {				
-				plugin._load(!!_loaded).then(function() {
+				plugin._load(true).then(function() {
 					_persist(plugin);
 					_pluginEventTarget.dispatchEvent("pluginAdded", plugin);
 					d.resolve(plugin);
@@ -503,8 +426,6 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	this.removeEventListener = function(eventName, listener) {
 		_pluginEventTarget.removeEventListener(eventName, listener);
 	};
-	
-	_loadFromStorage();
 };
 return eclipse;
 });

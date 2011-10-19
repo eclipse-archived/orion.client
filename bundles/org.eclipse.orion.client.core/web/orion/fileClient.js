@@ -175,9 +175,13 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 				ChildrenLocation: _references[j].getProperty("top"),
 				Name: _references[j].getProperty("Name")		
 			};
-			_patterns[j] = new RegExp(_references[j].getProperty("pattern") || ".*");			
+			var patternString = _references[j].getProperty("pattern") || ".*";
+			if (patternString[0] !== "^") {
+				patternString = "^" + patternString;
+			}
+			_patterns[j] = new RegExp(patternString);			
 			serviceRegistry.getService(_references[j], 0).then(function(service) {
-				_services[j] = service;
+				_services[j] = service; // note: sync
 			});
 		}
 		
