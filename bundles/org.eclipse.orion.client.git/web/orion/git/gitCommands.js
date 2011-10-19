@@ -318,12 +318,12 @@ var exports = {};
 		commandService.addCommand(addBranchCommand, "object");
 		
 		var removeBranchCommand = new mCommands.Command({
-			name: "Remove", // "Remove Branch"
-			tooltip: "Remove the local branch from the repository",
+			name: "Delete", // "Delete Branch"
+			tooltip: "Delete the local branch from the repository",
 			imageClass: "core-sprite-delete",
 			id: "eclipse.removeBranch",
 			callback: function(item) {
-				if(confirm("Are you sure you want to remove branch " + item.Name+"?"))
+				if(confirm("Are you sure you want to delete branch " + item.Name+"?"))
 				serviceRegistry.getService("orion.git.provider").then(
 					function(service) {
 						service.removeBranch(item.Location).then(
@@ -341,12 +341,12 @@ var exports = {};
 		commandService.addCommand(removeBranchCommand, "object");
 		
 		var removeRemoteBranchCommand = new mCommands.Command({
-			name: "Remove", // "Remove Remote Branch",
-			tooltip: "Remove the remote tracking branch from the repository",
+			name: "Delete", // "Delete Remote Branch",
+			tooltip: "Delete the remote tracking branch from the repository",
 			imageClass: "core-sprite-delete",
 			id: "eclipse.removeRemoteBranch",
 			callback: function(item) {
-				if(confirm("You're going to remove remote branch " + item.Name+" and push the change.\n\nAre you sure?"))
+				if(confirm("You're going to delete remote branch " + item.Name+" and push the change.\n\nAre you sure?"))
 				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
 						serviceRegistry.getService("orion.git.provider").then(function(gitService) {
@@ -357,7 +357,7 @@ var exports = {};
 											function(jsonData){
 												if (jsonData.Result.Severity == "Ok")
 													dojo.hitch(explorer, explorer.changedItem)(item.parent);
-											}, func, "Remove Remote Branch");
+											}, func, "Delete Remote Branch");
 									});
 								});
 							});
@@ -396,12 +396,12 @@ var exports = {};
 		commandService.addCommand(addRemoteCommand, "object");
 		
 		var removeRemoteCommand = new mCommands.Command({
-			name: "Remove", // "Remove Remote",
-			tooltip: "Remove the remote from the repository",
+			name: "Delete", // "Delete Remote",
+			tooltip: "Delete the remote from the repository",
 			imageClass: "core-sprite-delete",
 			id: "eclipse.removeRemote",
 			callback: function(item) {
-				if(confirm("Are you sure you want to remove remote " + item.Name+"?"))
+				if(confirm("Are you sure you want to delete remote " + item.Name+"?"))
 				serviceRegistry.getService("orion.git.provider").then(
 					function(service) {
 						service.removeRemote(item.Location).then(
@@ -1156,7 +1156,7 @@ var exports = {};
 		
 		var resetIndexCommand = new mCommands.Command({
 			name : "Reset",
-			tooltip: "Reset your active branch to the state of the selected branch. Remove all staged and unstaged changes.",
+			tooltip: "Reset your active branch to the state of the selected branch. Discard all staged and unstaged changes.",
 			imageClass: "git-sprite-refresh",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.resetIndex",
@@ -1670,8 +1670,8 @@ var exports = {};
 		commandService.addCommand(initGitRepositoryCommand, "dom");
 		
 		var deleteCommand = new mCommands.Command({
-			name: "Remove", // "Remove Clone"
-			tooltip: "Remove the repository",
+			name: "Delete", // "Delete Repository"
+			tooltip: "Delete the repository",
 			imageClass: "core-sprite-delete",
 			id: "eclipse.git.deleteClone",
 			visibleWhen: function(item) {
