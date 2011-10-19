@@ -11,7 +11,7 @@
 /*global define document dojo dijit window eclipse orion serviceRegistry:true widgets alert*/
 /*browser:true*/
 
-define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry'], function(dojo, mServiceregistry, mPreferences, mPluginRegistry) {
+define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry'], function(require, dojo, mServiceregistry, mPreferences, mPluginRegistry) {
 	function startup() {
 		// initialize service registry and EAS services
 		var serviceRegistry = new mServiceregistry.ServiceRegistry();
@@ -19,13 +19,31 @@ define(['dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregis
 		// This is code to ensure the first visit to orion works
 		// we read settings and wait for the plugin registry to fully startup before continuing
 		var preferences = new mPreferences.PreferencesService(serviceRegistry);
-		var pluginRegistry;
-		return preferences.getPreferences("/plugins").then(function() {
-			pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
+		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
+		return preferences.getPreferences("/plugins").then(function(pluginsPreference) {
+			var pluginURLs = pluginsPreference.keys();
+			for (var i=0; i < pluginURLs.length; ++i) {				
+				if (pluginURLs[i].indexOf("://") === -1) {
+					pluginURLs[i] = require.toUrl(pluginURLs[i]);
+				}
+			}		
+			return pluginRegistry.startup(pluginURLs);
+		}).then(function() {
+			if (serviceRegistry.getServiceReferences("orion.core.preference.provider").length > 0) {
+				return preferences.getPreferences("/plugins", preferences.USER_SCOPE).then(function(pluginsPreference) {
+					var pluginURLs = pluginsPreference.keys();
+					for (var i=0; i < pluginURLs.length; ++i) {				
+						if (pluginURLs[i].indexOf("://") === -1) {
+							pluginURLs[i] = require.toUrl(pluginURLs[i]);
+						}
+					}		
+					return pluginRegistry.startup(pluginURLs);
+				});
+			}
+		}).then(function() {
 			dojo.addOnWindowUnload(function() {
 				pluginRegistry.shutdown();
 			});
-			return pluginRegistry.startup();
 		}).then(function() {
 			return {
 				serviceRegistry: serviceRegistry,

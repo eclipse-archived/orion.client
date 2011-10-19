@@ -30,15 +30,30 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 		
 		// filled by sync call
 		this._stores = []; 
-		this._top = null;
+
+		// filled by _scheduleFlush
+		this._dirty = [];
 	}
 	Preferences.prototype = /** @lends orion.preferences.Preferences.prototype */ {
 		
 		_flush: function() {
-			return this._providers[0].put(this._name, this._top);
+			var flushes = [];
+			
+			for (var i=0; i < this._stores.length; ++i) {
+				var store = this._stores[i];
+				if (this._dirty.indexOf(store) !== -1) {
+					flushes.push(this._providers[i].put(this._name, store));
+				}
+			}
+			this._dirty = [];
+			return new dojo.DeferredList(flushes);
 		},
 		
-		_scheduleFlush: function() {
+		_scheduleFlush: function(store) {
+			if (this._dirty.indexOf(store) === -1) {
+				this._dirty.push(store);
+			}
+			
 			if (this._flushPending) {
 				return;
 			}
@@ -89,14 +104,16 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 		 * @param {String} value The preference value
 		 */
 		put: function(key, value) {
-			if (!this._top) {
+			if (this._stores.length === 0) {
 				return;
 			}
 			
-			if (this._top[key] !== value) {
-				this._top[key] = value;
+			var top = this._stores[0];
+			
+			if (top[key] !== value) {
+				top[key] = value;
 				this._cached = null;
-				this._scheduleFlush();
+				this._scheduleFlush(top);
 			}
 		},
 		
@@ -105,16 +122,15 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 		 * effect if no such key is defined.
 		 * @param {String} key The preference key to remove
 		 */
-		remove: function(key) {
-			if (!this._top) {
-				return;
-			}
-			
-			if (this._top[key]) {
-				delete this._top[key];
-				this._cached = null;
-				this._scheduleFlush();
-				return true;			
+		remove: function(key) {	
+			for (var i=0; i < this._stores.length; ++i) {
+				var store = this._stores[i];
+				if (store.hasOwnProperty(key)) {
+					delete store[key];
+					this._cached = null;
+					this._scheduleFlush(store);
+					return true;
+				}
 			}
 			return false;
 		},
@@ -123,17 +139,11 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 		 * Removes all preferences from this preference node.
 		 */
 		clear: function() {
-			if (!this._top) {
-				return;
-			}
-			
-			for (var i in this._top) {
-				if (this._top.hasOwnProperty(i)) {
-					delete this._top[i];
-				}
+			for (var i=0; i < this._stores.length; ++i) {
+				this._stores[i] = {};
+				this._scheduleFlush(this._stores[i]);
 			}
 			this._cached = null;
-			this._scheduleFlush();
 		},
 		
 		/**
@@ -153,9 +163,6 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 				storeList.push(this._providers[i].get(this._name, optForce).then(function(i) { // curry i 
 					return function(result) {
 						that._stores[i] = result;
-						if (i === 0) {
-							that._top = result;
-						}
 					};
 				}(i)));
 			}
@@ -176,6 +183,10 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 	function Cache(prefix, expiresSeconds) {
 		return {
 			get: function(name, ignoreExpires) {
+				if (expiresSeconds === 0) {
+					return null;
+				}
+				
 				var item = localStorage.getItem(prefix + name);
 				if (item === null) {
 					return null;
@@ -188,6 +199,10 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 				return null;
 			},
 			set: function(name, data) {
+				if (expiresSeconds === 0) {
+					return;
+				}
+				
 				if (expiresSeconds !== -1) {
 					data._expires = new Date().getTime() + 1000 * expiresSeconds;
 				}
@@ -205,10 +220,23 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 		};
 	}
 	
-	function UserPreferencesProvider(location) {
-		this._location = location;
+	function UserPreferencesProvider(serviceRegistry) {
 		this._currentPromises = {};
-		this._cache = new Cache("/orion/preferences/user", 60*60);
+		this._cache = new Cache("/orion/preferences/user", 0);
+		
+		this._service = null;
+		this.available = function() {
+			var that = this;
+			if (!this._service) {
+				var references = serviceRegistry.getServiceReferences("orion.core.preference.provider");
+				if (references.length > 0) {
+					serviceRegistry.getService(references[0], 0).then(function(service) { // synchronously set
+						that._service = service;
+					});
+				}
+			}
+			return !!this._service;
+		};
 	}
 	
 	UserPreferencesProvider.prototype = {	
@@ -228,42 +256,28 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 			} else {
 				this._currentPromises[name] = d;
 				var that = this;
-				dojo.xhrGet({
-					url: this._location + name,
-					headers: {
-						"Orion-Version": "1"
-					},
-					handleAs: "json",
-					timeout: 15000,
-					load: function(data, ioArgs) {
+				this._service.get(name).then(function(data) {
+					that._cache.set(name, data);
+					delete that._currentPromises[name];
+					d.resolve(data);
+				}, function (error) {
+					if (error.status === 401) {
+						delete that._currentPromises[name];
+						d.resolve({});
+						
+						// retry
+						mAuth.handleAuthenticationError(error, function(){
+							that.get(name);
+						});
+					} else if (error.status === 404) {
+						var data = {};
 						that._cache.set(name, data);
 						delete that._currentPromises[name];
 						d.resolve(data);
-					},
-					error: function(response, ioArgs) {
-						response.log = false;
-						if (ioArgs.xhr.status === 401) {
-							delete that._currentPromises[name];
-							d.resolve({});
-							
-							// retry
-							d = new dojo.Deferred();
-							that._currentPromises[name] = d;
-							var currentXHR = this;
-							mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-								dojo.xhrGet(currentXHR); // retry GET							
-							});
-						} else if (ioArgs.xhr.status === 404) {
-							var data = {};
-							that._cache.set(name, data);
-							delete that._currentPromises[name];
-							d.resolve(data);
-						} else  {
-							delete that._currentPromises[name];
-							d.resolve(that._cache.get(name, true) || {});
-						}
-					},
-					failOk: true
+					} else  {
+						delete that._currentPromises[name];
+						d.resolve(that._cache.get(name, true) || {});
+					}
 				});
 			}
 			return d;
@@ -272,27 +286,20 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 		put: function(name, data) {
 			var d = new dojo.Deferred();
 			this._cache.set(name, data);
-			dojo.xhrPut({
-				url: this._location + name,
-				putData: JSON.stringify(data),
-				headers: {
-					"Orion-Version": "1"
-				},
-				handleAs: "json",
-				contentType: "application/json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					d.resolve();
-				},
-				error: function(response, ioArgs) {
-					if (ioArgs.xhr.status === 401) {
-						var currentXHR = this;
-						mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-							dojo.xhrPut(currentXHR); // retry PUT							
-						});
-					} else {
-						d.resolve(); // consider throwing here
-					}
+			var that = this;
+			this._service.put(name, data).then(function() {
+				d.resolve();
+			}, function(error) {
+				if (error.status === 401) {
+					mAuth.handleAuthenticationError(error, function(){
+						that._service.put(name, data).then(function() {
+							d.resolve();
+						}, function() {
+							d.resolve();
+						});				
+					});
+				} else {
+					d.resolve(); // consider throwing here
 				}
 			});
 			return d;
@@ -319,7 +326,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 				cached = this._cache.get(name);
 			}
 			if (cached !== null) {
-				d.resolve(cached[name] || {});
+				d.resolve(cached);
 			} else {
 				this._currentPromise = d;
 				var that = this;
@@ -365,7 +372,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 		},
 		set: function(name, data) {
 			var d = new dojo.Deferred();
-			d.reject("not supported");
+			d.resolve();
 			return d;
 		}
 	};
@@ -403,15 +410,14 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 	 * @name orion.preferences.PreferencesService
 	 * @see orion.preferences.Preferences
 	 */
-	function PreferencesService(serviceRegistry, userPreferencesLocation, defaultPreferencesLocation) {
-		
-		userPreferencesLocation = userPreferencesLocation || "prefs/user";
-		userPreferencesLocation = require.toUrl(userPreferencesLocation + "._");
-		userPreferencesLocation = userPreferencesLocation.substring(0, userPreferencesLocation.length - 2);
-		
-		defaultPreferencesLocation = defaultPreferencesLocation || require.toUrl("defaults.pref");
-		this._userProvider = new UserPreferencesProvider(userPreferencesLocation);
+	function PreferencesService(serviceRegistry, defaultPreferencesLocation) {
+		this._userProvider = new UserPreferencesProvider(serviceRegistry);
 		this._localProvider = new LocalPreferencesProvider();
+		
+		defaultPreferencesLocation = defaultPreferencesLocation || "defaults.pref";
+		if (defaultPreferencesLocation.indexOf("://") === -1) {
+			defaultPreferencesLocation = require.toUrl(defaultPreferencesLocation);
+		}
 		this._defaultsProvider = new DefaultPreferencesProvider(defaultPreferencesLocation);
 		this._serviceRegistration = serviceRegistry.registerService("orion.core.preference", this);
 	}
@@ -432,7 +438,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 				optScope = PreferencesService.DEFAULT_SCOPE | PreferencesService.LOCAL_SCOPE | PreferencesService.USER_SCOPE;
 			}
 			var providers = [];
-			if ((PreferencesService.USER_SCOPE & optScope) && this._userProvider) {
+			if ((PreferencesService.USER_SCOPE & optScope) && this._userProvider.available()) {
 				providers.push(this._userProvider);
 			}
 			if (PreferencesService.LOCAL_SCOPE & optScope) {

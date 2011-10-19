@@ -9,12 +9,12 @@
  ******************************************************************************/
 
 /*jslint browser:true devel:true*/
-/*global dijit dojo orion widgets serviceRegistry:true window*/
+/*global define dijit dojo orion widgets serviceRegistry:true window*/
 
-define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
+define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 	        'orion/searchClient', 'orion/globalCommands', 'orion/dialogs',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/RegistryTree'], 
-			function(dojo, mBootstrap, mStatus, mCommands, mSearchClient, mGlobalCommands, mDialogs) {
+			function(require, dojo, mBootstrap, mStatus, mCommands, mSearchClient, mGlobalCommands, mDialogs) {
 
 dojo.addOnLoad(function() {
 	mBootstrap.startup().then(function(core) {
@@ -70,21 +70,25 @@ dojo.addOnLoad(function() {
 			var pluginUrl = installUrlTextBox.value;
 			if (/^\S+$/.test(dojo.trim(pluginUrl))) {
 				statusService.setMessage("Installing " + pluginUrl + "...");
-				pluginRegistry.installPlugin(pluginUrl).then(
-					function(plugin) {
-						var old = dijit.byId("registry-tree");
-						if (old) {
-							dijit.registry.remove("registry-tree");
-						}
-						initTree();
-						installUrlTextBox.value="";
-						statusService.setMessage("Installed " + plugin.getLocation(), 5000);
-						preferences.getPreferences("/plugins").then(function(plugins) {
-							plugins.flush();
-						}); // this will force a sync
-					}, function(error) {
-						statusService.setErrorMessage(error);
-					});
+				if (pluginRegistry.getPlugin(pluginUrl)) {
+					statusService.setErrorMessage("Already installed");
+				} else {
+					pluginRegistry.installPlugin(pluginUrl).then(
+						function(plugin) {
+							var old = dijit.byId("registry-tree");
+							if (old) {
+								dijit.registry.remove("registry-tree");
+							}
+							initTree();
+							installUrlTextBox.value="";
+							statusService.setMessage("Installed " + plugin.getLocation(), 5000);
+							preferences.getPreferences("/plugins").then(function(plugins) {
+								plugins.put(pluginUrl, true);
+							}); // this will force a sync
+						}, function(error) {
+							statusService.setErrorMessage(error);
+						});
+				}
 			}
 		};
 		
@@ -126,8 +130,26 @@ dojo.addOnLoad(function() {
 				initTree();
 				// report what we uninstalled so it's easy for user to copy/paste a plugin that they want back
 				statusService.setMessage("Uninstalled " + message, 5000);
-				preferences.getPreferences("/plugins").then(function(plugins) {
-					plugins.flush();
+				preferences.getPreferences("/plugins").then(function(pref) {
+					var uninstalled = [];
+					var i;
+					for (i=0; i<plugins.length; i++) {
+						uninstalled.push(plugins[i].getLocation());
+					}
+
+					var temp = document.createElement('a');
+					var keys = pref.keys();
+					for (i=0; i<keys.length; i++) {
+						var key = keys[i];
+						var location = key;
+						if (location.indexOf("://") === -1) {
+							temp.href = require.toUrl(location);
+					        location = temp.href;
+						}
+						if (uninstalled.indexOf(location) !== -1) {
+							pref.remove(key);
+						}
+					}
 				}); // this will force a sync
 			});
 		});

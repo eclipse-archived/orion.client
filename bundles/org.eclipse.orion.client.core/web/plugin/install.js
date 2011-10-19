@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 /*jslint browser:true devel:true*/
-/*global dijit dojo eclipse widgets serviceRegistry:true*/
+/*global define window dijit dojo eclipse widgets serviceRegistry:true*/
 
 define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 	        'orion/searchClient', 'orion/globalCommands',
@@ -39,26 +39,31 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands',
 				dojo.connect(dojo.byId("install"), "click", function(evt) {
 					dojo.byId("valid-hash").style.display = "none";
 					dojo.byId("wait").style.display = "block";
-					pluginRegistry.installPlugin(pluginUrl).then(
-						function(plugin) {
-							dojo.byId("wait").style.display = "none";
-							dojo.byId("success").style.display = "block";
-							statusService.setMessage("Installed " + plugin.getLocation(), 5000);
-							preferences.getPreferences("/plugins").then(function(plugins) {
-								plugins.flush();
-							}); // this will force a sync 
-							var metadata = plugin.getData().metadata;
-							if (metadata) {
-								if (metadata.postInstallUrl) {
-									window.location.href = metadata.postInstallUrl;
+					
+					if (pluginRegistry.getPlugin(pluginUrl)) {
+						statusService.setErrorMessage("Already installed");
+					} else {					
+						pluginRegistry.installPlugin(pluginUrl).then(
+							function(plugin) {
+								dojo.byId("wait").style.display = "none";
+								dojo.byId("success").style.display = "block";
+								statusService.setMessage("Installed " + plugin.getLocation(), 5000);
+								preferences.getPreferences("/plugins").then(function(plugins) {
+									plugins.put(pluginUrl, true);
+								}); // this will force a sync 
+								var metadata = plugin.getData().metadata;
+								if (metadata) {
+									if (metadata.postInstallUrl) {
+										window.location.href = metadata.postInstallUrl;
+									}
 								}
-							}
-						}, function(error) {
-							dojo.byId("wait").style.display = "none";
-							dojo.byId("failure").style.display = "block";
-							dojo.place(window.document.createTextNode(error), "problem", "only");
-							statusService.setErrorMessage(error);
-						});
+							}, function(error) {
+								dojo.byId("wait").style.display = "none";
+								dojo.byId("failure").style.display = "block";
+								dojo.place(window.document.createTextNode(error), "problem", "only");
+								statusService.setErrorMessage(error);
+							});
+					}
 				});
 			} else {
 				dojo.byId("invalid-hash").style.display = "block";
