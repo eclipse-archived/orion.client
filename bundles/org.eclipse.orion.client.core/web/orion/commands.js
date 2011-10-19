@@ -572,6 +572,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		_asImage: function(name, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink) {
 			handler = handler || this;
 			var link = dojo.create("a");
+			link.id = this.name+"link";
 			var image = null;
 			if (this.tooltip) {
 				link.title = this.tooltip;
@@ -581,7 +582,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				dojo.place(text, link, "last");
 			} else {
 				image = new Image();
-				link.id = this.name+"link";
 				image.alt = this.name;
 				image.title = this.tooltip || this.name;
 				image.name = name;
