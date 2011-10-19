@@ -1614,21 +1614,6 @@ orion.textview.TextView = (function() {
 				this._commitIME();
 			}
 			/*
-			* Bug in Firefox.  The paste operation on Firefox is done by switching
-			* focus into a textarea, let the user agent paste the text into the
-			* textarea and retrieve the text pasted from it. This works as expected
-			* in Firefox 3.x, but fails in Firefox 4 and greater.  The fix is to
-			* switch focus to the textarea during the key down event that triggers
-			* the paste operation.
-			*/
-			if (isFirefox) {
-				var ctrlKey = isMac ? e.metaKey : e.ctrlKey;
-				if (ctrlKey && e.keyCode === 86 /*Ctrl+v*/) {
-					this._textArea.value = "";
-					this._textArea.focus();
-				}
-			}
-			/*
 			* Feature in Firefox. When a key is held down the browser sends 
 			* right number of keypress events but only one keydown. This is
 			* unexpected and causes the view to only execute an action
@@ -3208,14 +3193,12 @@ orion.textview.TextView = (function() {
 				touchDiv.appendChild(textArea);
 			}
 			if (isFirefox) {
-				textArea = frameDocument.createElement("DIV");
-				this._textArea = textArea;
-				textArea.id = "textArea";
-				textArea.contentEditable = true;
-				textArea.style.position = "fixed";
-				textArea.style.whiteSpace = "pre";
-				textArea.style.left = "-1000px";
-				body.appendChild(textArea);
+				var clipboardDiv = frameDocument.createElement("DIV");
+				this._clipboardDiv = clipboardDiv;
+				clipboardDiv.style.position = "fixed";
+				clipboardDiv.style.whiteSpace = "pre";
+				clipboardDiv.style.left = "-1000px";
+				body.appendChild(clipboardDiv);
 			}
 
 			var viewDiv = frameDocument.createElement("DIV");
@@ -3432,6 +3415,7 @@ orion.textview.TextView = (function() {
 			this._selDiv2 = null;
 			this._selDiv3 = null;
 			this._textArea = null;
+			this._clipboardDiv = null;
 			this._scrollDiv = null;
 			this._viewDiv = null;
 			this._clientDiv = null;
@@ -3576,15 +3560,13 @@ orion.textview.TextView = (function() {
 			}
 			if (isFirefox) {
 				var document = this._frameDocument;
-				var textArea = this._textArea;
-				textArea.contentEditable = false;
-				textArea.innerHTML = "<pre contenteditable=''></pre>";
-				textArea.firstChild.focus();
+				var clipboardDiv = this._clipboardDiv;
+				clipboardDiv.innerHTML = "<pre contenteditable=''></pre>";
+				clipboardDiv.firstChild.focus();
 				var self = this;
 				var _getText = function() {
-					var text = self._getTextFromElement(textArea);
-					textArea.innerHTML = "";
-					textArea.contentEditable = true;
+					var text = self._getTextFromElement(clipboardDiv);
+					clipboardDiv.innerHTML = "";
 					clipboadText = [];
 					self._convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
 					return clipboadText.join("");
@@ -4184,7 +4166,6 @@ orion.textview.TextView = (function() {
 				}
 				if (isFirefox) {
 					handlers.push({target: this._frameDocument, type: "focus", handler: function(e) { return self._handleDocFocus(e); }});
-					handlers.push({target: this._textArea, type: "paste", handler: function(e) { return self._handlePaste(e);}});
 				}
 				if (!isIE && !isOpera) {
 					var wheelEvent = isFirefox ? "DOMMouseScroll" : "mousewheel";
