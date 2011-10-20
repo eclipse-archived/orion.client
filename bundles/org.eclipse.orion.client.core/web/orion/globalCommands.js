@@ -213,10 +213,6 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	function generateBanner(parentId, serviceRegistry, commandService, prefsService, searcher, handler, /* optional */ editor, /* optional */ escapeProvider) {
 		// this needs to come from somewhere but I'm not going to do a separate get for it
 		
-		
-		// NOTE: require.toURL needs special logic here to handle "filesearch"
-		var searchLocation = require.toUrl("filesearch._");
-		searchLocation = searchLocation.substring(0, searchLocation.length - 2) +"?q=";
 		var text;
 		var parent = dojo.byId(parentId);
 		if (!parent) {
@@ -266,14 +262,13 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		}
 		dojo.connect(searchField, "onkeypress", function(e){
 			if (e.charOrCode === dojo.keys.ENTER) {
-				if (searchLocation) {
+				if (searcher) {
 					if (searchField.value.length > 0) {
-						// we create the filesearch location relative to search.html
-						var query = searcher.createSearchQuery("../filesearch?q=", searchField.value);
+						var query = searcher.createSearchQuery(searchField.value);
 						window.location = require.toUrl("search/search.html") + "#"+query;
 					}
 				} else {
-					window.alert("Can't search: SearchLocation not available");
+					window.alert("Can't search: no search service is available");
 				}
 			}
 		});
@@ -285,11 +280,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			dojo.place(text, title, "last");
 		}
 	
-		var openResourceDialog = function(searchLocation, searcher, /* optional */ editor) {
-			var dialog = new orion.widgets.OpenResourceDialog({
-				SearchLocation: searchLocation,
-				searcher: searcher
-			});
+		var openResourceDialog = function(searcher, /* optional */ editor) {
+			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher});
 			if (editor) {
 				dojo.connect(dialog, "onHide", function() {
 					editor.getTextView().focus(); // Focus editor after dialog close, Dojo's doesn't work
@@ -303,14 +295,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			tooltip: "Choose a file by name and open an editor on it",
 			id: "eclipse.openResource",
 			callback: function(item) {
-				openResourceDialog(searchLocation, searcher, editor);
+				openResourceDialog(searcher, editor);
 			}});
 			
 		// We need a mod key binding in the editor, for now use the old one (ctrl-shift-r)
 		if (editor) {
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("r", true, true, false), "Find File Named...");
 			editor.getTextView().setAction("Find File Named...", function() {
-					openResourceDialog(searchLocation, searcher, editor);
+					openResourceDialog(searcher, editor);
 					return true;
 				});
 		}
@@ -391,11 +383,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				dojo.place(bottomHTMLFragment, footer, "only");
 			}
 		}
-	
 	}
-	
-	
-
 	
 	//return the module exports
 	return {
