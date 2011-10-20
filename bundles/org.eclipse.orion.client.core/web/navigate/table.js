@@ -39,11 +39,11 @@ dojo.addOnLoad(function(){
 		var treeRoot = {
 			children:[]
 		};
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+		var fileClient = new mFileClient.FileClient(serviceRegistry);
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 					
 //		var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 
-		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		
 		var explorer = new mExplorerTable.FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, "explorer-tree", "location", "pageActions", "selectionTools");
 		
