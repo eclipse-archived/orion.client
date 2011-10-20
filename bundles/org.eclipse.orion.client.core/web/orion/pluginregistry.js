@@ -323,9 +323,12 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 					_plugins.push(plugin);
 				}
 			} else {
-				installList.push(_self.installPlugin(pluginURL));
+				_storage[key] ="{}";
+				var plugin = new eclipse.Plugin(pluginURL, {}, internalRegistry); 
+				_plugins.push(plugin);
+				installList.push(plugin._load(false)); // _load(false) because we want to ensure the plugin is updated
 			}
-		}		
+		}
 		return new dojo.DeferredList(installList);
 	};
 	
