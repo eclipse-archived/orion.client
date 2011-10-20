@@ -11,9 +11,10 @@
  /*global eclipse:true dojo document console*/
 
 
-define(['require', 'dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable',
+define(['require', 'dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 
+		'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable',
         'dojo/hash', 'dojo/parser'],
-        function(require, dojo, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mSearchClient, mGlobalCommands, mTreetable) {
+        function(require, dojo, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mTreetable) {
 	
 
 var eclipse = eclipse || {};
@@ -135,7 +136,8 @@ dojo.addOnLoad(function() {
 		document.body.style.visibility = "visible";
 		dojo.parser.parse();
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+		var fileClient = new mFileClient.FileClient(serviceRegistry);
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 		
 		// global banner
 		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);

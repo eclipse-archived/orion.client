@@ -12,10 +12,10 @@
 /*browser:true*/
 
 define(['dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
-        'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/searchResults', 'orion/globalCommands',
+        'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/searchResults', 'orion/globalCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, mBootstrap, mStatus, mDialogs, mCommands, mFavorites, 
-				mSearchClient, mSearchResults, mGlobalCommands) {
+				mSearchClient, mFileClient, mSearchResults, mGlobalCommands) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -30,8 +30,9 @@ define(['dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
 	
 			// Favorites
 			new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
-		
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+
+			var fileClient = new mFileClient.FileClient(serviceRegistry);
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
 			var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, searcher);

@@ -26,11 +26,11 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/file
 				var commandService = new mCommands.CommandService({
 					serviceRegistry: serviceRegistry
 				});
-				var searcher = new mSearchClient.Searcher({
-					serviceRegistry: serviceRegistry, commandService: commandService
-				});
 				// File operations
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
+				var searcher = new mSearchClient.Searcher({
+					serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient
+				});
 				var diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
 
 				mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
