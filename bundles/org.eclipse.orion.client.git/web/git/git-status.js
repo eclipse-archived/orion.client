@@ -9,9 +9,9 @@
  ******************************************************************************/
 
 define(['dojo', 'orion/bootstrap', 'orion/status',  'orion/commands',
-	        'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient', 'orion/git/git-status-table', 'orion/breadcrumbs','orion/dialogs','orion/ssh/sshTools',
+	        'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/git/gitClient', 'orion/git/git-status-table', 'orion/breadcrumbs','orion/dialogs','orion/ssh/sshTools',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(dojo, mBootstrap, mStatus, mCommands, mSearchClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs,mDialogs,mSshTools) {
+			function(dojo, mBootstrap, mStatus, mCommands, mSearchClient, mFileClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs,mDialogs,mSshTools) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -20,7 +20,8 @@ define(['dojo', 'orion/bootstrap', 'orion/status',  'orion/commands',
 			document.body.style.visibility = "visible";
 			dojo.parser.parse();
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			var fileClient = new mFileClient.FileClient(serviceRegistry);
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			// Git operations
 			new mGitClient.GitService(serviceRegistry);
 			new mSshTools.SshService(serviceRegistry);

@@ -36,7 +36,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands',
 				return pattern && pattern.indexOf("/") === 0;
 			});
 			var siteService = new mSiteService.SiteService(serviceRegistry);
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
 			
