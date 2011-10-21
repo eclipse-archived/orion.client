@@ -3,7 +3,6 @@
 		"authenticationPlugin.html": true,
 		"plugins/fileClientPlugin.html":true,
 		"plugins/jslintPlugin.html":true,
-		"plugins/unittestPlugin.html":true,
 		"git/plugins/gitPlugin.html":true,
 		"profile/userservicePlugin.html":true,
 		"plugins/user/userProfilePlugin.html":true,
