@@ -389,6 +389,12 @@ orion.editor.Editor = (function() {
 			}
 			
 			var editor = this, textView = this._textView;
+			
+			// Listener for dirty state
+			textView.addEventListener("ModelChanged", this, this.checkDirty);
+			
+			// Selection changed listener
+			textView.addEventListener("Selection", this, this._updateCursorStatus);
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
@@ -432,29 +438,6 @@ orion.editor.Editor = (function() {
 				return false;
 			}.bind(this));
 						
-			/** @this {orion.editor.Editor} */
-			function updateCursorStatus() {
-				var model = this.getModel();
-				var caretOffset = this.getCaretOffset();
-				var lineIndex = model.getLineAtOffset(caretOffset);
-				var lineStart = model.getLineStart(lineIndex);
-				var offsetInLine = caretOffset - lineStart;
-				// If we are in a mode and it owns status reporting, we bail out from reporting the cursor position.
-				for (var i=0; i<this._keyModes.length; i++) {
-					var mode = this._keyModes[i];
-					if (mode.isActive() && mode.isStatusActive && mode.isStatusActive()) {
-						return;
-					}
-				}
-				this.reportStatus("Line " + (lineIndex + 1) + " : Col " + (offsetInLine + 1));
-			}
-			
-			// Listener for dirty state
-			textView.addEventListener("ModelChanged", this, this.checkDirty);
-					
-			//Adding selection changed listener
-			textView.addEventListener("Selection", this, updateCursorStatus);
-			
 			// Create rulers
 			if (this._annotationFactory) {
 				var textModel = textView.getModel();
@@ -502,6 +485,22 @@ orion.editor.Editor = (function() {
 			}
 			
 			this._updateFoldingRuler();
+		},
+		
+		_updateCursorStatus: function() {
+			var model = this.getModel();
+			var caretOffset = this.getCaretOffset();
+			var lineIndex = model.getLineAtOffset(caretOffset);
+			var lineStart = model.getLineStart(lineIndex);
+			var offsetInLine = caretOffset - lineStart;
+			// If we are in a mode and it owns status reporting, we bail out from reporting the cursor position.
+			for (var i=0; i<this._keyModes.length; i++) {
+				var mode = this._keyModes[i];
+				if (mode.isActive() && mode.isStatusActive && mode.isStatusActive()) {
+					return;
+				}
+			}
+			this.reportStatus("Line " + (lineIndex + 1) + " : Col " + (offsetInLine + 1));
 		},
 		
 		showProblems: function(problems) {
