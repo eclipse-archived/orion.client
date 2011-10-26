@@ -11,16 +11,17 @@
 /*jslint browser:true devel:true*/
 /*global define*/
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/searchClient', 'orion/status', 'orion/globalCommands',
+define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/status', 'orion/globalCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'/*, 'dojox/widget/Portlet', 'dojox/widget/FeedPortlet'*/], 
-		function(require, dojo, mBootstrap, mCommands, mSearchClient, mStatus, mGlobalCommands) {
+		function(require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mStatus, mGlobalCommands) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			var fileClient = new mFileClient.FileClient(serviceRegistry);
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 				
 			// global commands

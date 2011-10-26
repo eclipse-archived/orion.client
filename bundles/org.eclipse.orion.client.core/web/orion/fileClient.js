@@ -156,6 +156,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 				});
 				return d;
 			},
+			search: _noMatch,
 			createProject: _noMatch,
 			createFolder: _noMatch,
 			createFile: _noMatch,
@@ -395,6 +396,14 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		 */		
 		remoteExport: function(sourceLocation, options) {
 			return _doServiceCall(this._getService(sourceLocation), "remoteExport", arguments);
+		},
+		
+		/**
+		 * Performs a search with the given query.
+		 * @param {String} query The search query
+		 */
+		search: function(query) {
+			return _doServiceCall(this._getService(), "search", arguments);
 		}
 	};//end FileClient prototype
 	FileClient.prototype.constructor = FileClient;

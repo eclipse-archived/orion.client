@@ -164,19 +164,19 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
 
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
-		
-		var textViewFactory = function() {
-			return new mTextView.TextView({
-				parent: editorDomNode,
-				model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
-				stylesheet: [require.toUrl("orion/textview/textview.css"), require.toUrl("orion/textview/rulers.css"),
-				             require.toUrl("examples/textview/textstyler.css"), require.toUrl("css/default-theme.css"),
-				             require.toUrl("orion/textview/annotations.css")],
-				tabSize: 4,
-				readonly: isReadOnly
-			});
-		};
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+	
+	var textViewFactory = function() {
+		return new mTextView.TextView({
+			parent: editorDomNode,
+			model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
+			stylesheet: [require.toUrl("orion/textview/textview.css"), require.toUrl("orion/textview/rulers.css"),
+			             require.toUrl("examples/textview/textstyler.css"), require.toUrl("css/default-theme.css"),
+			             require.toUrl("orion/textview/annotations.css")],
+			tabSize: 4,
+			readonly: isReadOnly
+		});
+	};
 	
 	var inputManager = {
 		lastFilePath: "",
@@ -397,7 +397,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				var b = dojo.create("b", null, searchFloat, "last");
 				dojo.place(document.createTextNode("\"" + searchPattern + "\"..."), b, "only");
 				searchFloat.style.display = "block";
-				var query = inputManager.getFileMetadata().SearchLocation + searchPattern;
+				var query = searcher.createSearchQuery(searchPattern);
 				searcher.search(searchFloat, query, inputManager.getInput(),false,null,false,true);
 			}, 0);
 			return true;
