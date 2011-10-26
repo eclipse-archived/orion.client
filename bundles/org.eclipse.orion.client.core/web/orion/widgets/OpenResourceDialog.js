@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*jslint browser:true*/
-/*global define window dojo dijit*/
+/*global define orion window dojo dijit*/
 
 define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox',
 		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], function(dojo, dijit) {
@@ -20,7 +20,6 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox',
  * @name orion.widgets.OpenResourceDialog
  * @class A dialog that searches for files by name or wildcard.
  * @param {String} [options.title] Text to display in the dialog's titlebar.
- * @param {String} options.SearchLocation The URL to use for searching the workspace.
  * @param {orion.searchClient.Searcher} options.searcher The searcher to use for displaying results.
  */
 var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin],
@@ -32,7 +31,6 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	timeoutId: null,
 	time: null,
 	options: null,
-	searchLocation: null,
 	searcher: null,
 	
 	/** @private */
@@ -41,11 +39,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		this.timeoutId = null;
 		this.time = 0;
 		this.options = arguments[0];
-		this.searchLocation = this.options && this.options.SearchLocation;
 		this.searcher = this.options && this.options.searcher;
-		if (!this.searchLocation) {
-			throw new Error("Missing required argument: SearchLocation");
-		}
 		if (!this.searcher) {
 			throw new Error("Missing required argument: searcher");
 		}
@@ -104,7 +98,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		// Gives Webkit a chance to show the "Searching" message
 		var that = this;
 		setTimeout(function() {
-			var query = that.searcher.createSearchQuery(that.searchLocation, null, text);
+			var query = that.searcher.createSearchQuery(null, text);
 			that.searcher.search(that.results, query, false, false, dojo.hitch(that, that.decorateResult), true /*no highlight*/,true/*use flat list*/);
 		}, 0);
 	},

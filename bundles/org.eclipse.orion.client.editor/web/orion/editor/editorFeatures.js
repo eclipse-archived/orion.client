@@ -101,6 +101,7 @@ orion.editor.TextActions = (function() {
 		if(this._searcher) {
 			this._searcher.getAdaptor().setEditor(this.editor);
 		}
+		this._lastEditLocation = null;
 		this.init();
 	}
 	TextActions.prototype = {
@@ -135,13 +136,23 @@ orion.editor.TextActions = (function() {
 						e.text = null;
 					} else {
 					}
-				}.bind(this),
+				},
 				onSelection: function() {
 					if (!this._incrementalFindIgnoreSelection) {
 						this.toggleIncrementalFind();
 					}
-				}.bind(this)
+				}
 			};
+			
+			this._lastEditListener = {
+				onModelChanged: function(e) {
+					if (this.editor.isDirty()) {
+						this._lastEditLocation = e.start + e.addedCharCount;
+					}
+				}
+			};
+			this.textView.addEventListener("ModelChanged", this, this._lastEditListener.onModelChanged);
+			
 			// Find actions
 			// These variables are used among the various find actions:
 			this.textView.setKeyBinding(new orion.textview.KeyBinding("f", true), "Find...");
@@ -423,6 +434,14 @@ orion.editor.TextActions = (function() {
 				return true;
 			}.bind(this));
 			
+			var isMac = navigator.platform.indexOf("Mac") !== -1;
+			this.textView.setKeyBinding(new orion.textview.KeyBinding("q", !isMac, false, false, isMac), "Last Edit Location");
+			this.textView.setAction("Last Edit Location", function() {
+				if (typeof this._lastEditLocation === "number")  {
+					this.editor.showSelection(this._lastEditLocation);
+				}
+				return true;
+			}.bind(this));
 		},
 			
 		toggleIncrementalFind: function() {

@@ -24,6 +24,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 	function Searcher(options) {
 		this.registry= options.serviceRegistry;
 		this._commandService = options.commandService;
+		this._fileService = options.fileService;
 	}
 	Searcher.prototype = /**@lends orion.searchClient.Searcher.prototype*/ {
 		/**
@@ -38,27 +39,12 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 		 * @param {Boolean} [useFlatList] Use flat list to show the result, other wise use a tree structure.
 		 */
 		search: function(resultsNode, query, excludeFile,  generateHeadingAndSaveLink, onResultReady,  hideSummaries, useFlatList) {
-			dojo.xhrGet({
-				url: query,
-				handleAs: "json",
-				headers: {
-					"Accept": "application/json",
-					"Orion-Version": "1"
-				},
-				sync: false,
-				timeout: 15000,
-				// need to use inline errback to get ioArgs
-				error: function(response, ioArgs) {
-					var currentXHR = this;
-					mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-						dojo.xhrGet(currentXHR); // retry GET							
-					});
-				},
-				load: dojo.hitch(this, function(jsonData) {
+			this._fileService.search(query).then(
+				dojo.hitch(this, function(jsonData) {
 					this.showSearchResult(resultsNode, query, excludeFile, generateHeadingAndSaveLink, onResultReady, 
 							hideSummaries, useFlatList, jsonData); 
 				})
-			});
+			);
 		},
 		handleError: function(response, resultsNode) {
 			console.error(response);
@@ -77,13 +63,13 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 		 * @param {String} query The text to search for, or null when searching purely on file name
 		 * @param {String} [nameQuery] The name of a file to search for
 		 */
-		createSearchQuery: function(searchLocation, query, nameQuery)  {
+		createSearchQuery: function(query, nameQuery)  {
 			if (nameQuery) {
 				//assume implicit trailing wildcard if there isn't one already
 				var wildcard= (/\*$/.test(nameQuery) ? "" : "*");
-				return searchLocation + "Name:" + this._luceneEscape(nameQuery, true) + wildcard;
+				return "?q=" + "Name:" + this._luceneEscape(nameQuery, true) + wildcard;
 			}
-			return searchLocation + this._luceneEscape(query);
+			return "?q=" + this._luceneEscape(query);
 		},
 		/**
 		 * Escapes all characters in the string that require escaping in Lucene queries.

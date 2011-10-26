@@ -4440,7 +4440,9 @@ orion.textview.TextView = (function() {
 				var self = this;
 				/** @ignore */
 				var cleanup = function() {
-					self._clientDiv.removeChild(child);
+					if (child && child.parentNode === self._clientDiv) {
+						self._clientDiv.removeChild(child);
+					}
 					self._updateDOMSelection();
 				};
 				var result = false;
