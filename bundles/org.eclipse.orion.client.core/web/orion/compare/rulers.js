@@ -56,7 +56,9 @@ orion.CompareRuler = (function() {
 		getAnnotations: function(startLine, endLine) {
 			var result = [];
 			for (var i=startLine; i<endLine; i++) {
-				result[i] = {html: this.getHTML(i), style: this.getStyle(i)};
+				var style = this.getStyle(i);
+				if(style)
+					result[i] = {html: this.getHTML(i), style: style};
 			}
 			return result;
 		},
@@ -277,7 +279,7 @@ orion.CompareMergeOverviewRuler = (function() {
 			var model = this._editor.getModel();
 			if(lineIndex >= 0 && model.getAnnotationH){
 				var annotationIndex = mCompareUtils.getAnnotationIndex(model.getAnnotations(), lineIndex);
-				if (annotationIndex === -1) return {};
+				if (annotationIndex === -1) return null;
 				var mapperIndex = mCompareUtils.getAnnotationMapperIndex(model.getAnnotations(), annotationIndex);
 				var conflict = mCompareUtils.isMapperConflict(model.getMapper(), mapperIndex);
 				if(conflict)
