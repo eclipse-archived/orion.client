@@ -344,6 +344,13 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 						if (!doit) {
 							return;
 						}
+						var count = 0;
+						var refresher = function(item) {
+							count++;
+							if (count === items.length) {
+								explorer.changedItem(item);
+							}
+						};
 						for (var i=0; i < items.length; i++) {
 							var item = items[i];
 							var deleteLocation = item.Location;
@@ -363,8 +370,11 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 							}
 							if (deleteLocation) {
 								fileClient.deleteFile(deleteLocation).then(function() {
-									explorer.changedItem(refreshItem);
-								}, errorHandler);
+									refresher(refreshItem);
+								}, function(error) {
+									errorHandler(error);
+									refresher(refreshItem);
+								});
 							}
 						}
 					}));
