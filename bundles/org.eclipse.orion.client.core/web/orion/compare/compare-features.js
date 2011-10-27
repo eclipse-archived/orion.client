@@ -79,7 +79,7 @@ orion.CompareMergeUIFactory = (function() {
 		},
 		
 		_createStatusDiv: function(statusDivId) {
-			var table = this._createNoWrapTextDiv(statusDivId , "Line Status" , "center");
+			var table = this._createNoWrapTextDiv(statusDivId , "Line 0 : Col 0" , "center");
 			var statusContainer = new dijit.layout.ContentPane({region: "bottom"});
 			dojo.addClass(statusContainer.domNode, 'statusContainer');
 			statusContainer.attr('content', table);
