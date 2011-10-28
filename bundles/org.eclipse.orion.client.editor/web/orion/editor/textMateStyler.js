@@ -34,21 +34,6 @@
 	 * @name orion.editor.AbstractStyler
 	 */
 	function AbstractStyler() {
-		var self = this;
-		this._listener = {
-			onModelChanged: function(e) {
-				self._onModelChanged(e);
-			},
-			onDestroy: function(e) {
-				self._onDestroy(e);
-			},
-			onLineStyle: function(e) {
-				self._onLineStyle(e);
-			},
-			onSelection: function(e) {
-				self._onSelection(e);
-			}
-		};
 	}
 	AbstractStyler.prototype = /** @lends orion.editor.AbstractStyler.prototype */ {
 		/**
@@ -59,6 +44,21 @@
 		initialize: function(textView) {
 			this.textView = textView;
 			
+			var self = this;
+			this._listener = {
+				onModelChanged: function(e) {
+					self._onModelChanged(e);
+				},
+				onDestroy: function(e) {
+					self._onDestroy(e);
+				},
+				onLineStyle: function(e) {
+					self._onLineStyle(e);
+				},
+				onSelection: function(e) {
+					self._onSelection(e);
+				}
+			};
 			textView.addEventListener("Selection", this._listener.onSelection);
 			textView.addEventListener("ModelChanged", this._listener.onModelChanged);
 			textView.addEventListener("Destroy", this._listener.onDestroy);
