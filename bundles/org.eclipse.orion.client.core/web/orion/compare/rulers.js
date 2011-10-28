@@ -25,15 +25,21 @@ orion.CompareRuler = (function() {
 		this._overview = rulerOverview || "page";
 		this._rulerStyle = rulerStyle;
 		this._editor = null;
+		var self = this;
+		this._listener = {
+			onModelChanged: function(e) {
+				self._onModelChanged(e);
+			}
+		};
 	}
 	CompareRuler.prototype = /** @lends orion.compare.rulers.CompareRuler.prototype */ {
 		setView: function (editor) {
 			if (this._onModelChanged && this._editor) {
-				this._editor.removeEventListener("ModelChanged", this, this._onModelChanged); 
+				this._editor.removeEventListener("ModelChanged", this._listener.onModelChanged); 
 			}
 			this._editor = editor;
 			if (this._onModelChanged && this._editor) {
-				this._editor.addEventListener("ModelChanged", this, this._onModelChanged);
+				this._editor.addEventListener("ModelChanged", this._listener.onModelChanged);
 			}
 		},
 		getLocation: function() {

@@ -10,17 +10,29 @@
  ******************************************************************************/
 
 /*jslint */
-/*global define orion:true window */
+/*global define */
 
-var orion = orion || {};
-
-orion.editor = orion.editor || {};
+(define ||
+	function(deps, callback) {
+		/**
+		 * @namespace The global container for Orion APIs.
+		 */ 
+		var orion = this.orion = this.orion || {};
+		orion.editor = orion.editor || {};
+		var module = callback();
+		for (var p in module) {
+			if (module.hasOwnProperty(p)) {
+				orion.editor[p] = module[p];
+			}
+		}
+	}
+)([], function() {
 
 /**
  * Provides a grammar that can do some very rough syntax highlighting for HTML.
  * @class orion.syntax.HtmlGrammar
  */
-orion.editor.HtmlGrammar = (function() {
+function HtmlGrammar() {
 	return {
 		/**
 		 * What kind of highlight provider we are.
@@ -100,10 +112,7 @@ orion.editor.HtmlGrammar = (function() {
 			}
 		}
 	};
-}());
-
-if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define([], function() {
-		return orion.editor;
-	});
 }
+
+return {HtmlGrammar: HtmlGrammar};
+});

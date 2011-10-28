@@ -168,12 +168,12 @@ exports.DiffStyler = (function() {
 	DiffStyler.prototype = {
 		highlight: function(textView) {
 			if (this._textView) {
-				this._textView.removeEventListener("LineStyle", this, this._onLineStyle);
+				this._textView.removeEventListener("LineStyle", this._lineStyleListener);
 			}
 			if(textView)
 				this._textView = textView;
 			if(this._textView && !this._textView.getModel().isMapperEmpty())
-				this._textView.addEventListener("LineStyle", this, this._onLineStyle);
+				this._textView.addEventListener("LineStyle", this._lineStyleListener = dojo.hitch(this, this._onLineStyle));
 		},
 		
 		_onLineStyle: function(lineStyleEvent){
@@ -439,20 +439,22 @@ exports.CompareMergeContainer = (function() {
 				
 		editor.installTextView();
 		if(!readOnly){
-			inputManager = this._inputManager;
-			dojo.connect(editor, "onDirtyChange", inputManager, inputManager.setDirty);
+			var inputManager = this._inputManager;
+			editor.addEventListener("DirtyChanged", function(evt) {
+				inputManager.setDirty(editor.isDirty());
+			});
 		}
 			
 		var textView = editor.getTextView();
 		if(createLineStyler && fileURI){
 			var fileName = fileURI.split("?")[0];
-			editor.onInputChange(fileName);
+			editor.setInput(fileName);
 			this._highlighter[columnIndex].highlight(fileName , editor);
 		}
 			
 		textView.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
 
-		textView.addEventListener("Selection", this, function() {
+		textView.addEventListener("Selection", function() {
 			var lineIndex = textView.getModel().getLineAtOffset(textView.getCaretOffset());
 			var mapperIndex = mCompareUtils.lookUpMapper(textView.getModel().getMapper() , columnIndex , lineIndex).mapperIndex;
 			var annotationIndex = mCompareUtils.getAnnotationIndexByMapper(textView.getModel().getAnnotations(), mapperIndex);
@@ -461,15 +463,17 @@ exports.CompareMergeContainer = (function() {
 		}); 
 		
 		if(columnIndex === 0){
-			textView.getModel().addListener(self._compareMatchRenderer);
-			textView.addEventListener("Scroll", window, function(scrollEvent) {
+			textView.getModel().addEventListener("Changed", function(e) {
+				self._compareMatchRenderer.onChanged(e);
+			});
+			textView.addEventListener("Scroll", function(scrollEvent) {
 				if(self._compareMatchRenderer){
 					self._compareMatchRenderer.matchPositionFrom(true);
 					self._compareMatchRenderer.render();
 				}
 			}); 
 		} else {
-			textView.addEventListener("Scroll", window, function(scrollEvent) {
+			textView.addEventListener("Scroll", function(scrollEvent) {
 				if(self._compareMatchRenderer){
 					self._compareMatchRenderer.render();
 				}
@@ -494,11 +498,11 @@ exports.CompareMergeContainer = (function() {
 			this._textViewRight.getModel().init(result.mapper);
 			
 			var fileNameR = this._oldFileURI.split("?")[0];
-			this._editorRight.onInputChange(fileNameR, null, input);
+			this._editorRight.setInput(fileNameR, null, input);
 			this._highlighter[1].highlight(fileNameR , this._textViewRight);
 			
 			var fileNameL = this._newFileURI.split("?")[0];
-			this._editorLeft.onInputChange(fileNameL, null, result.output);
+			this._editorLeft.setInput(fileNameL, null, result.output);
 			this._highlighter[0].highlight(fileNameL , this._textViewLeft);
 			if(!this.readonly)
 				this._inputManager.setInput(fileNameL , this._editorLeft);
@@ -586,7 +590,7 @@ exports.InlineCompareContainer = (function() {
 				
 		editor.installTextView();
 		if(createLineStyler && fileURI)
-			editor.onInputChange(fileURI.split("?")[0]);
+			editor.setInput(fileURI.split("?")[0]);
 			
 		var textView = editor.getTextView();
 			
@@ -598,9 +602,11 @@ exports.InlineCompareContainer = (function() {
 					that._annotation.matchPositionFromAnnotation(lineIndex);
 					that.positionAnnotation(lineIndex);
 				});
-		textView.addEventListener("LineStyle", this, this._onLineStyle);
+		textView.addEventListener("LineStyle", function(e) {
+			that._onLineStyle(e);
+		});
 		
-		textView.addEventListener("Selection", this, function() {
+		textView.addEventListener("Selection", function() {
 			var lineIndex = textView.getModel().getLineAtOffset(textView.getCaretOffset());
 			var mapperIndex = textView.getModel().getLineType(lineIndex).mapperIndex;
 			var annotationIndex = mCompareUtils.getAnnotationIndexByMapper(textView.getModel().getAnnotations(), mapperIndex);

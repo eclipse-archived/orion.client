@@ -42,7 +42,7 @@ window.onload = function(){
 		// save binding
 		editor.getTextView().setKeyBinding(new orion.textview.KeyBinding("s", true), "save");
 		editor.getTextView().setAction("save", function(){
-				editor.onInputChange(null, null, null, true);
+				editor.setInput(null, null, null, true);
 				var text = editor.getTextView().getText();
 				var problems = [];
 				for (var i=0; i<text.length; i++) {
@@ -84,8 +84,8 @@ window.onload = function(){
 		domNode: editorDomNode
 	});
 		
-	orion.editor.util.connect(editor, "onDirtyChange", this, function(dirty) {
-		if (dirty) {
+	editor.addEventListener("DirtyChanged", function(evt) {
+		if (editor.isDirty()) {
 			dirtyIndicator = "You have unsaved changes.  ";
 		} else {
 			dirtyIndicator = "";
@@ -94,7 +94,7 @@ window.onload = function(){
 	});
 	
 	editor.installTextView();
-	editor.onInputChange("Content", null, "This is the initial editor contentz.  Type some text and press Ctrl-S to save.");
+	editor.setInput("Content", null, "This is the initial editor contentz.  Type some text and press Ctrl-S to save.");
 	
 	window.onbeforeunload = function() {
 		if (editor.isDirty()) {

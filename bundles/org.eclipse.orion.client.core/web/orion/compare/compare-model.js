@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define([], function() {
+define(['orion/textview/eventTarget'], function(mEventTarget) {
 
 var orion = orion || {};
 
@@ -21,8 +21,19 @@ orion.CompareTextModel = (function() {
 	    this._model = model;
 	    this._mapperColumnIndex = mapWrapper.columnIndex;
 	    this._mapper = mapWrapper.mapper;
-		this._listeners = [];
-		model.addListener(this);
+		var self = this;
+		this._listener = {
+			/** @private */
+			onChanging: function(modelChangingEvent) {
+				self.onChanging(modelChangingEvent);
+			},
+			/** @private */
+			onChanged: function(modelChangedEvent) {
+				self.onChanged(modelChangedEvent);
+			}
+		};
+		model.addEventListener("Changing", this._listener.onChanging);
+		model.addEventListener("Changed", this._listener.onChanged);
 		this._lineFeeder = lineFeeder;
 	    this.init();
 	}
@@ -100,19 +111,6 @@ orion.CompareTextModel = (function() {
 			return realIndex.lineIndex;
 		},
 		
-		addListener: function(listener) {
-			this._listeners.push(listener);
-		},
-		
-		removeListener: function(listener) {
-			for (var i = 0; i < this._listeners.length; i++) {
-				if (this._listeners[i] === listener) {
-					this._listeners.splice(i, 1);
-					return;
-				}
-			}
-		},
-
 		getCharCount: function() {
 			var count = this._model.getCharCount();
 			if(this._dummyLBlock.length > 0)
@@ -227,23 +225,11 @@ orion.CompareTextModel = (function() {
 		},
 		
 		onChanging: function(modelChangingEvent) {
-			
-			for (var i = 0; i < this._listeners.length; i++) {
-				var l = this._listeners[i]; 
-				if (l && l.onChanging) { 
-					l.onChanging(modelChangingEvent);
-				}
-			}
+			return this.dispatchEvent(modelChangingEvent);
 		},
 		
 		onChanged: function(modelChangedEvent) {
-			
-			for (var i = 0; i < this._listeners.length; i++) {
-				var l = this._listeners[i]; 
-				if (l && l.onChanged) { 
-					l.onChanged(modelChangedEvent);
-				}
-			}
+			return this.dispatchEvent(modelChangedEvent);
 		},
 		
 		setLineDelimiter: function(lineDelimiter) {
@@ -254,6 +240,7 @@ orion.CompareTextModel = (function() {
 			this._model.setText (text, 0, this._model.getCharCount());
 		}
 	};
+	mEventTarget.EventTarget.addMixin(CompareTextModel.prototype);
 	
 	return CompareTextModel;
 }()); 

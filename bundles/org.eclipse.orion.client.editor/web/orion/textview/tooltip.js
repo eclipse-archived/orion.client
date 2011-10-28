@@ -9,19 +9,24 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define setTimeout clearTimeout setInterval clearInterval Node */
+/*global define setTimeout clearTimeout setInterval clearInterval Node */
 
-/**
- * @namespace The global container for Orion APIs.
- */ 
-var orion = orion || {};
-/**
- * @namespace The container for textview APIs.
- */ 
-orion.textview = orion.textview || {};
+(define ||
+	function(deps, callback) {
+		/**
+		 * @namespace The global container for Orion APIs.
+		 */ 
+		var orion = this.orion = this.orion || {};
+		orion.textview = orion.textview || {};
+		var module = callback(orion.textview, orion.textview, orion.textview);
+		for (var p in module) {
+			if (module.hasOwnProperty(p)) {
+				orion.textview[p] = module[p];
+			}
+		}
+	}
+)(['orion/textview/textView', 'orion/textview/textModel', 'orion/textview/projectionTextModel'], function(mTextView, mTextModel, mProjectionTextModel) {
 
-/** @ignore */
-orion.textview.Tooltip = (function() {
 	/** @private */
 	function Tooltip (view) {
 		this._view = view;
@@ -118,11 +123,11 @@ orion.textview.Tooltip = (function() {
 				(contentsDiv = this._htmlParent).innerHTML = contents;
 			} else if (contents instanceof Node) {
 				(contentsDiv = this._htmlParent).appendChild(contents);
-			} else if (contents instanceof orion.textview.ProjectionTextModel) {
+			} else if (contents instanceof mProjectionTextModel.ProjectionTextModel) {
 				if (!this._contentsView) {
-					this._emptyModel = new orion.textview.TextModel("");
+					this._emptyModel = new mTextModel.TextModel("");
 					//TODO need hook into setup.js (or editor.js) to create a text view (and styler)
-					var newView = this._contentsView = new orion.textview.TextView({
+					var newView = this._contentsView = new mTextView.TextView({
 						model: this._emptyModel,
 						parent: this._viewParent,
 						tabSize: 4,
@@ -133,7 +138,12 @@ orion.textview.Tooltip = (function() {
 					newView._clientDiv.contentEditable = false;
 					//TODO need to find a better way of sharing the styler for multiple views
 					var view = this._view;
-					newView.addEventListener("LineStyle", view, view.onLineStyle);
+					var listener = {
+						onLineStyle: function(e) {
+							view.onLineStyle(e);
+						}
+					};
+					newView.addEventListener("LineStyle", listener.onLineStyle);
 				}
 				var contentsView = this._contentsView;
 				contentsView.setModel(contents);
@@ -197,7 +207,7 @@ orion.textview.Tooltip = (function() {
 					title = annotation.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 					return annotation.html + "&nbsp;" + title;
 				} else {
-					var newModel = new orion.textview.ProjectionTextModel(baseModel);
+					var newModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 					var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
 					newModel.addProjection({start: annotation.end, end: newModel.getCharCount()});
 					newModel.addProjection({start: 0, end: lineStart});
@@ -237,11 +247,5 @@ orion.textview.Tooltip = (function() {
 			return value || defaultValue;
 		}
 	};
-	return Tooltip;
-}());
-
-if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define([], function() {
-		return orion.textview;
-	});
-}
+	return {Tooltip: Tooltip};
+});

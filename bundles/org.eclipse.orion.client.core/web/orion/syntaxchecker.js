@@ -21,7 +21,9 @@ eclipse.SyntaxChecker = (function () {
 	function SyntaxChecker(serviceRegistry, editor) {
 		this.registry = serviceRegistry;
 		this.editor = editor;
-		dojo.connect(this.editor, "onInputChange", this, this.checkSyntax);
+		this.editor.addEventListener("InputChanged", dojo.hitch(this, function(evt) {
+			this.checkSyntax(evt.title, evt.message, evt.contents, evt.contentsSaved);
+		}));
 	}
 	SyntaxChecker.prototype = {
 		checkSyntax: function (title, message, contents, contentsSaved) {
