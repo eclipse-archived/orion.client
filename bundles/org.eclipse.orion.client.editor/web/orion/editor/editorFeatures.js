@@ -9,31 +9,40 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window orion:true */
+/*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
+(define ||
+	function(deps, callback) {
+		/**
+		 * @namespace The global container for Orion APIs.
+		 */ 
+		var orion = this.orion = this.orion || {};
+		orion.editor = orion.editor || {};
+		orion.textview = orion.textview || {};
+		var module = callback(orion.textview, orion.textview, orion.textview, orion.textview);
+		for (var p in module) {
+			if (module.hasOwnProperty(p)) {
+				orion.editor[p] = module[p];
+			}
+		}
+	}
+)(['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations'], function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
 
-/**
- * @namespace The container for Orion APIs.
- */ 
-var orion = orion || {};
-orion.editor = orion.editor || {};	
-
-orion.editor.UndoFactory = (function() {
 	function UndoFactory() {
 	}
 	UndoFactory.prototype = {
 		createUndoStack: function(editor) {
 			var textView = editor.getTextView();
-			var undoStack =  new orion.textview.UndoStack(textView, 200);
-			textView.setKeyBinding(new orion.textview.KeyBinding('z', true), "Undo");
+			var undoStack =  new mUndoStack.UndoStack(textView, 200);
+			textView.setKeyBinding(new mKeyBinding.KeyBinding('z', true), "Undo");
 			textView.setAction("Undo", function() {
 				undoStack.undo();
 				return true;
 			});
 			
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			textView.setKeyBinding(isMac ? new orion.textview.KeyBinding('z', true, true) : new orion.textview.KeyBinding('y', true), "Redo");
+			textView.setKeyBinding(isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "Redo");
 			textView.setAction("Redo", function() {
 				undoStack.redo();
 				return true;
@@ -41,55 +50,42 @@ orion.editor.UndoFactory = (function() {
 			return undoStack;
 		}
 	};
-	return UndoFactory;
-}());
 
-orion.editor.LineNumberRulerFactory = (function() {
 	function LineNumberRulerFactory() {
 	}
 	LineNumberRulerFactory.prototype = {
 		createLineNumberRuler: function(annotationModel) {
-			return new orion.textview.LineNumberRuler(annotationModel, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"});
+			return new mRulers.LineNumberRuler(annotationModel, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"});
 		}
 	};
-	return LineNumberRulerFactory;
-}());
-
-orion.editor.FoldingRulerFactory = (function() {
+	
 	function FoldingRulerFactory() {
 	}
 	FoldingRulerFactory.prototype = {
 		createFoldingRuler: function(annotationModel) {
-			return new orion.textview.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"});
+			return new mRulers.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"});
 		}
 	};
-	return FoldingRulerFactory;
-}());
-
-
-orion.editor.AnnotationFactory = (function() {
+	
 	function AnnotationFactory() {
 	}
 	AnnotationFactory.prototype = {
 		createAnnotationModel: function(model) {
-			return new orion.textview.AnnotationModel(model);
+			return new mAnnotations.AnnotationModel(model);
 		},
 		createAnnotationStyler: function(annotationModel, view) {
-			return new orion.textview.AnnotationStyler(annotationModel, view);
+			return new mAnnotations.AnnotationStyler(annotationModel, view);
 		},
 		createAnnotationRulers: function(annotationModel) {
-			var annotationRuler = new orion.textview.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotations"});
-			var overviewRuler = new orion.textview.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"});
+			var annotationRuler = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotations"});
+			var overviewRuler = new mRulers.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"});
 			return {annotationRuler: annotationRuler, overviewRuler: overviewRuler};
 		}
 	};
-	return AnnotationFactory;
-}());
 
-/**
- * TextCommands connects common text editing keybindings onto an editor.
- */
-orion.editor.TextActions = (function() {
+	/**
+	 * TextCommands connects common text editing keybindings onto an editor.
+	 */
 	function TextActions(editor, undoStack, searcher) {
 		this.editor = editor;
 		this.textView = editor.getTextView();
@@ -107,56 +103,57 @@ orion.editor.TextActions = (function() {
 	}
 	TextActions.prototype = {
 		init: function() {
+			var self = this;
 			this._incrementalFindListener = {
 				onVerify: function(e){
 					/** @returns {String} with regex special characters escaped. */
 					function regexpEscape(/**String*/ str) {
 						return str.replace(/([\\$\^*\/+?\.\(\)|{}\[\]])/g, "\\$&");
 					}
-					var editor = this.editor;
+					var editor = self.editor;
 					var model = editor.getModel();
 					var start = editor.mapOffset(e.start), end = editor.mapOffset(e.end);
 					var txt = model.getText(start, end);
-					var prefix = this._incrementalFindPrefix;
+					var prefix = self._incrementalFindPrefix;
 					var match = prefix.match(new RegExp("^"+regexpEscape(txt), "i"));
 					if (match && match.length > 0) {
-						prefix = this._incrementalFindPrefix += e.text;
-						this.editor.reportStatus("Incremental find: " + prefix);
+						prefix = self._incrementalFindPrefix += e.text;
+						self.editor.reportStatus("Incremental find: " + prefix);
 						var ignoreCase = prefix.toLowerCase() === prefix;
 						var searchStart = editor.getSelection().start;
 						var result = editor.doFind(prefix, searchStart, ignoreCase);
 						if (result) {
-							this._incrementalFindSuccess = true;
-							this._incrementalFindIgnoreSelection = true;
+							self._incrementalFindSuccess = true;
+							self._incrementalFindIgnoreSelection = true;
 							editor.moveSelection(result.index, result.index+result.length);
-							this._incrementalFindIgnoreSelection = false;
+							self._incrementalFindIgnoreSelection = false;
 						} else {
 							editor.reportStatus("Incremental find: " + prefix + " (not found)", true);
-							this._incrementalFindSuccess = false;
+							self._incrementalFindSuccess = false;
 						}
 						e.text = null;
 					} else {
 					}
 				},
 				onSelection: function() {
-					if (!this._incrementalFindIgnoreSelection) {
-						this.toggleIncrementalFind();
+					if (!self._incrementalFindIgnoreSelection) {
+						self.toggleIncrementalFind();
 					}
 				}
 			};
 			
 			this._lastEditListener = {
 				onModelChanged: function(e) {
-					if (this.editor.isDirty()) {
-						this._lastEditLocation = e.start + e.addedCharCount;
+					if (self.editor.isDirty()) {
+						self._lastEditLocation = e.start + e.addedCharCount;
 					}
 				}
 			};
-			this.textView.addEventListener("ModelChanged", this, this._lastEditListener.onModelChanged);
+			this.textView.addEventListener("ModelChanged", this._lastEditListener.onModelChanged);
 			
 			// Find actions
 			// These variables are used among the various find actions:
-			this.textView.setKeyBinding(new orion.textview.KeyBinding("f", true), "Find...");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("f", true), "Find...");
 			this.textView.setAction("Find...", function() {
 				if (this._searcher) {
 					var editor = this.editor;
@@ -172,7 +169,7 @@ orion.editor.TextActions = (function() {
 				return false;
 			}.bind(this));
 			
-			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true), "Find Next Occurrence");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true), "Find Next Occurrence");
 			this.textView.setAction("Find Next Occurrence", function() {
 				if (this._searcher){
 					this._searcher.findNext(true);
@@ -181,7 +178,7 @@ orion.editor.TextActions = (function() {
 				return false;
 			}.bind(this));
 			
-			this.textView.setKeyBinding(new orion.textview.KeyBinding("k", true, true), "Find Previous Occurrence");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true, true), "Find Previous Occurrence");
 			this.textView.setAction("Find Previous Occurrence", function() {
 				if (this._searcher){
 					this._searcher.findNext(false);
@@ -189,8 +186,8 @@ orion.editor.TextActions = (function() {
 				}
 				return false;
 			}.bind(this));
-
-			this.textView.setKeyBinding(new orion.textview.KeyBinding("j", true), "Incremental Find");
+	
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true), "Incremental Find");
 			this.textView.setAction("Incremental Find", function() {
 				if (this._searcher && this._searcher.visible()) {
 					return true;
@@ -277,8 +274,8 @@ orion.editor.TextActions = (function() {
 				}
 				return false;
 			}.bind(this));
-
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(9, false, true), "Unindent Lines");
+	
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "Unindent Lines");
 			this.textView.setAction("Unindent Lines", function() {
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -303,7 +300,7 @@ orion.editor.TextActions = (function() {
 				return true;
 			}.bind(this));
 			
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(38, false, false, true), "Move Lines Up");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(38, false, false, true), "Move Lines Up");
 			this.textView.setAction("Move Lines Up", function() {
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -335,7 +332,7 @@ orion.editor.TextActions = (function() {
 				return true;
 			}.bind(this));
 			
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(40, false, false, true), "Move Lines Down");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(40, false, false, true), "Move Lines Down");
 			this.textView.setAction("Move Lines Down", function() {
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -366,7 +363,7 @@ orion.editor.TextActions = (function() {
 				return true;
 			}.bind(this));
 			
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(38, true, false, true), "Copy Lines Up");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(38, true, false, true), "Copy Lines Up");
 			this.textView.setAction("Copy Lines Up", function() {
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -387,7 +384,7 @@ orion.editor.TextActions = (function() {
 				return true;
 			}.bind(this));
 			
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(40, true, false, true), "Copy Lines Down");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(40, true, false, true), "Copy Lines Down");
 			this.textView.setAction("Copy Lines Down", function() {
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -408,7 +405,7 @@ orion.editor.TextActions = (function() {
 				return true;
 			}.bind(this));
 			
-			this.textView.setKeyBinding(new orion.textview.KeyBinding('d', true, false, false), "Delete Selected Lines");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding('d', true, false, false), "Delete Selected Lines");
 			this.textView.setAction("Delete Selected Lines", function() {
 				var editor = this.editor;
 				var selection = editor.getSelection();
@@ -422,7 +419,7 @@ orion.editor.TextActions = (function() {
 			}.bind(this));
 			
 			// Go To Line action
-			this.textView.setKeyBinding(new orion.textview.KeyBinding("l", true), "Goto Line...");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("l", true), "Goto Line...");
 			this.textView.setAction("Goto Line...", function() {
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -436,7 +433,7 @@ orion.editor.TextActions = (function() {
 			}.bind(this));
 			
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			this.textView.setKeyBinding(new orion.textview.KeyBinding("q", !isMac, false, false, isMac), "Last Edit Location");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !isMac, false, false, isMac), "Last Edit Location");
 			this.textView.setAction("Last Edit Location", function() {
 				if (typeof this._lastEditLocation === "number")  {
 					this.editor.showSelection(this._lastEditLocation);
@@ -449,13 +446,13 @@ orion.editor.TextActions = (function() {
 			this._incrementalFindActive = !this._incrementalFindActive;
 			if (this._incrementalFindActive) {
 				this.editor.reportStatus("Incremental find: " + this._incrementalFindPrefix);
-				this.textView.addEventListener("Verify", this, this._incrementalFindListener.onVerify);
-				this.textView.addEventListener("Selection", this, this._incrementalFindListener.onSelection);
+				this.textView.addEventListener("Verify", this._incrementalFindListener.onVerify);
+				this.textView.addEventListener("Selection", this._incrementalFindListener.onSelection);
 			} else {
 				this._incrementalFindPrefix = "";
 				this.editor.reportStatus("");
-				this.textView.removeEventListener("Verify", this, this._incrementalFindListener.onVerify);
-				this.textView.removeEventListener("Selection", this, this._incrementalFindListener.onSelection);
+				this.textView.removeEventListener("Verify", this._incrementalFindListener.onVerify);
+				this.textView.removeEventListener("Selection", this._incrementalFindListener.onSelection);
 				this.textView.setCaretOffset(this.textView.getCaretOffset());
 			}
 		},
@@ -543,10 +540,7 @@ orion.editor.TextActions = (function() {
 			return false;
 		}
 	};
-	return TextActions;
-}());
-
-orion.editor.SourceCodeActions = (function() {
+	
 	/**
 	 * @param {orion.editor.Editor} editor
 	 * @param {orion.textView.UndoStack} undoStack
@@ -580,7 +574,7 @@ orion.editor.SourceCodeActions = (function() {
 		init: function() {
 		
 			// Block comment operations
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(191, true), "Toggle Line Comment");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true), "Toggle Line Comment");
 			this.textView.setAction("Toggle Line Comment", function() {
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -663,7 +657,7 @@ orion.editor.SourceCodeActions = (function() {
 				return {commentStart: commentStart, commentEnd: commentEnd};
 			}
 			
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(191, true, true), "Add Block Comment");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true, true), "Add Block Comment");
 			this.textView.setAction("Add Block Comment", function() {
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -689,7 +683,7 @@ orion.editor.SourceCodeActions = (function() {
 				return true;
 			}.bind(this));
 			
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(220, true, true), "Remove Block Comment");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(220, true, true), "Remove Block Comment");
 			this.textView.setAction("Remove Block Comment", function() {
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -815,10 +809,7 @@ orion.editor.SourceCodeActions = (function() {
 			return false;
 		}
 	};
-	return SourceCodeActions;
-}());
-
-orion.editor.LinkedMode = (function() {
+	
 	function LinkedMode(editor) {
 		this.editor = editor;
 		this.textView = editor.getTextView();
@@ -906,9 +897,9 @@ orion.editor.LinkedMode = (function() {
 			this.linkedModeCurrentPositionIndex = 0;
 			this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
 
-			this.textView.addEventListener("Verify", this, this.linkedModeListener.onVerify);
+			this.textView.addEventListener("Verify", this.linkedModeListener.onVerify);
 
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(9), "nextLinkedModePosition");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "nextLinkedModePosition");
 			this.textView.setAction("nextLinkedModePosition", function() {
 				// Switch to the next group on TAB key
 				this.linkedModeCurrentPositionIndex = ++this.linkedModeCurrentPositionIndex % this.linkedModePositions.length;
@@ -916,7 +907,7 @@ orion.editor.LinkedMode = (function() {
 				return true;
 			}.bind(this));
 			
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(9, false, true), "previousLinkedModePosition");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "previousLinkedModePosition");
 			this.textView.setAction("previousLinkedModePosition", function() {
 				this.linkedModeCurrentPositionIndex = this.linkedModeCurrentPositionIndex > 0 ? this.linkedModeCurrentPositionIndex-1 : this.linkedModePositions.length-1;
 				this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
@@ -941,9 +932,9 @@ orion.editor.LinkedMode = (function() {
 				return;
 			}
 			this.linkedModeActive = false;
-			this.textView.removeEventListener("Verify", this, this.linkedModeListener.onVerify);
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(9), "tab");
-			this.textView.setKeyBinding(new orion.textview.KeyBinding(9, false, true), null);
+			this.textView.removeEventListener("Verify", this.linkedModeListener.onVerify);
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "tab");
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), null);
 			
 			this.textView.setCaretOffset(this.linkedModeEscapePosition, false);
 
@@ -956,11 +947,14 @@ orion.editor.LinkedMode = (function() {
 			this.textView.setSelection(position.offset, position.offset + position.length);
 		}
 	};
-	return LinkedMode;
-}());
 
-if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define(['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations'], function() {
-		return orion.editor;
-	});
-}
+	return {
+		UndoFactory: UndoFactory,
+		LineNumberRulerFactory: LineNumberRulerFactory,
+		FoldingRulerFactory: FoldingRulerFactory,
+		AnnotationFactory: AnnotationFactory,
+		TextActions: TextActions,
+		SourceCodeActions: SourceCodeActions,
+		LinkedMode: LinkedMode
+	};
+});

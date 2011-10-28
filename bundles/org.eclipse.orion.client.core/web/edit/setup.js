@@ -195,12 +195,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					}
 					var fullPathName = fileURI;
 					var progressTimeout = setTimeout(function() {
-						editor.onInputChange(fullPathName, "Fetching " + fullPathName, null);
+						editor.setInput(fullPathName, "Fetching " + fullPathName, null);
 					}, 800); // wait 800ms before displaying
 					fileClient.read(fileURI).then(
 						dojo.hitch(this, function(contents) {
 							clearTimeout(progressTimeout);
-							editor.onInputChange(fileURI, null, contents);
+							editor.setInput(fileURI, null, contents);
 							// in the long run we should be looking for plug-ins to call here for highlighting
 							syntaxHighlighter.highlight(fileURI, editor);
 							editor.highlightAnnotations();
@@ -208,7 +208,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						}),
 						dojo.hitch(this, function(error) {
 							clearTimeout(progressTimeout);
-							editor.onInputChange(fullPathName, "An error occurred: " + error.message, null);
+							editor.setInput(fullPathName, "An error occurred: " + error.message, null);
 							console.error("HTTP status code: ", error.status);
 						})
 					);
@@ -225,7 +225,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				}
 				this.lastFilePath = fileURI;
 			} else {
-				editor.onInputChange("No File Selected", "", null);
+				editor.setInput("No File Selected", "", null);
 			}
 		},
 		
@@ -348,7 +348,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		keyModeStack.push(genericBindings);
 		
 		// Linked Mode
-		var linkedMode = new orion.editor.LinkedMode(editor);
+		var linkedMode = new mEditorFeatures.LinkedMode(editor);
 		keyModeStack.push(linkedMode);
 		
 		// create keybindings for source editing
@@ -443,7 +443,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 	});
 	
-	dojo.connect(editor, "onDirtyChange", inputManager, inputManager.setDirty);
+	editor.addEventListener("DirtyChanged", function(evt) {
+		inputManager.setDirty(editor.isDirty());
+	});
 	
 	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
 	serviceRegistry.getService("orion.page.selection").then(function(service) {
@@ -470,13 +472,13 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		outlineService: serviceRegistry.getService("orion.edit.outline"),
 		commandService: commandService,
 		selectionService: selection});
-	dojo.connect(editor, "onInputChange", function(title, message, contents, saved) {
+	editor.addEventListener("InputChanged", function(evt) {
 		var outlineProviders = serviceRegistry.getServiceReferences("orion.edit.outliner"),
 		    filteredProviders = [];
 		for (var i=0; i < outlineProviders.length; i++) {
 			var serviceReference = outlineProviders[i],
 			    pattern = serviceReference.getProperty("pattern");
-			if (pattern && new RegExp(pattern).test(title)) {
+			if (pattern && new RegExp(pattern).test(evt.title)) {
 				filteredProviders.push(serviceReference);
 			}
 		}

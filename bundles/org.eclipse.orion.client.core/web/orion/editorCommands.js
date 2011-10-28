@@ -53,7 +53,7 @@ exports.EditorCommandFactory = (function() {
 					this.fileClient.write(this.inputManager.getInput(), contents, args).then(
 							dojo.hitch(this, function(result) {
 								this.inputManager.getFileMetadata().ETag = result.ETag;
-								editor.onInputChange(this.inputManager.getInput(), null, contents, true);
+								editor.setInput(this.inputManager.getInput(), null, contents, true);
 								if(this.inputManager.afterSave){
 									this.inputManager.afterSave();
 								}
@@ -68,7 +68,7 @@ exports.EditorCommandFactory = (function() {
 										this.fileClient.write(this.inputManager.getInput(), contents).then(
 												dojo.hitch(this, function(result) {
 													this.inputManager.getFileMetadata().ETag = result.ETag;
-													editor.onInputChange(this.inputManager.getInput(), null, contents, true);
+													editor.setInput(this.inputManager.getInput(), null, contents, true);
 													if(this.inputManager.afterSave){
 														this.inputManager.afterSave();
 													}

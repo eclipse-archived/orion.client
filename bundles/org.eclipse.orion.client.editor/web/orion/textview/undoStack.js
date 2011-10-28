@@ -9,33 +9,24 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define */
+/*global define */
 
-/**
- * @namespace The global container for Orion APIs.
- */ 
-var orion = orion || {};
-/**
- * @namespace The container for textview APIs.
- */ 
-orion.textview = orion.textview || {};
+(define ||
+	function(deps, callback) {
+		/**
+		 * @namespace The global container for Orion APIs.
+		 */
+		var orion = this.orion = this.orion || {};
+		orion.textview = orion.textview || {};
+		var module = callback();
+		for (var p in module) {
+			if (module.hasOwnProperty(p)) {
+				orion.textview[p] = module[p];
+			}
+		}
+	}
+)([], function() {
 
-/**
- * Constructs a new UndoStack on a text view.
- *
- * @param {orion.textview.TextView} view the text view for the undo stack.
- * @param {Number} [size=100] the size for the undo stack.
- *
- * @name orion.textview.UndoStack
- * @class The UndoStack is used to record the history of a text model associated to an view. Every
- * change to the model is added to stack, allowing the application to undo and redo these changes.
- *
- * <p>
- * <b>See:</b><br/>
- * {@link orion.textview.TextView}<br/>
- * </p>
- */
-orion.textview.UndoStack = (function() {
 	/** 
 	 * Constructs a new Change object.
 	 * 
@@ -43,53 +34,50 @@ orion.textview.UndoStack = (function() {
 	 * @name orion.textview.Change
 	 * @private
 	 */
-	var Change = (function() {
-		function Change(offset, text, previousText) {
-			this.offset = offset;
-			this.text = text;
-			this.previousText = previousText;
-		}
-		Change.prototype = {
-			/** @ignore */
-			undo: function (view, select) {
-				this._doUndoRedo(this.offset, this.previousText, this.text, view, select);
-			},
-			/** @ignore */
-			redo: function (view, select) {
-				this._doUndoRedo(this.offset, this.text, this.previousText, view, select);
-			},
-			_doUndoRedo: function(offset, text, previousText, view, select) {
-				var model = view.getModel();
-				/* 
-				* TODO UndoStack should be changing the text in the base model.
-				* This is code needs to change when modifications in the base
-				* model are supported properly by the projection model.
-				*/
-				if (model.mapOffset && view.annotationModel) {
-					var mapOffset = model.mapOffset(offset, true);
-					if (mapOffset < 0) {
-						var annotationModel = view.annotationModel;
-						var iter = annotationModel.getAnnotations(offset, offset + 1);
-						while (iter.hasNext()) {
-							var annotation = iter.next();
-							if (annotation.type === "orion.annotation.folding") {
-								annotation.expand();
-								mapOffset = model.mapOffset(offset, true);
-								break;
-							}
+	function Change(offset, text, previousText) {
+		this.offset = offset;
+		this.text = text;
+		this.previousText = previousText;
+	}
+	Change.prototype = {
+		/** @ignore */
+		undo: function (view, select) {
+			this._doUndoRedo(this.offset, this.previousText, this.text, view, select);
+		},
+		/** @ignore */
+		redo: function (view, select) {
+			this._doUndoRedo(this.offset, this.text, this.previousText, view, select);
+		},
+		_doUndoRedo: function(offset, text, previousText, view, select) {
+			var model = view.getModel();
+			/* 
+			* TODO UndoStack should be changing the text in the base model.
+			* This is code needs to change when modifications in the base
+			* model are supported properly by the projection model.
+			*/
+			if (model.mapOffset && view.annotationModel) {
+				var mapOffset = model.mapOffset(offset, true);
+				if (mapOffset < 0) {
+					var annotationModel = view.annotationModel;
+					var iter = annotationModel.getAnnotations(offset, offset + 1);
+					while (iter.hasNext()) {
+						var annotation = iter.next();
+						if (annotation.type === "orion.annotation.folding") {
+							annotation.expand();
+							mapOffset = model.mapOffset(offset, true);
+							break;
 						}
 					}
-					if (mapOffset < 0) { return; }
-					offset = mapOffset;
 				}
-				view.setText(text, offset, offset + previousText.length);
-				if (select) {
-					view.setSelection(offset, offset + text.length);
-				}
+				if (mapOffset < 0) { return; }
+				offset = mapOffset;
 			}
-		};
-		return Change;
-	}());
+			view.setText(text, offset, offset + previousText.length);
+			if (select) {
+				view.setSelection(offset, offset + text.length);
+			}
+		}
+	};
 
 	/** 
 	 * Constructs a new CompoundChange object.
@@ -98,44 +86,55 @@ orion.textview.UndoStack = (function() {
 	 * @name orion.textview.CompoundChange
 	 * @private
 	 */
-	var CompoundChange = (function() {
-		function CompoundChange (selection, caret) {
-			this.selection = selection;
-			this.caret = caret;
-			this.changes = [];
-		}
-		CompoundChange.prototype = {
-			/** @ignore */
-			add: function (change) {
-				this.changes.push(change);
-			},
-			/** @ignore */
-			undo: function (view, select) {
-				for (var i=this.changes.length - 1; i >= 0; i--) {
-					this.changes[i].undo(view, false);
-				}
-				if (select) {
-					var start = this.selection.start;
-					var end = this.selection.end;
-					view.setSelection(this.caret ? start : end, this.caret ? end : start);
-				}
-			},
-			/** @ignore */
-			redo: function (view, select) {
-				for (var i = 0; i < this.changes.length; i++) {
-					this.changes[i].redo(view, false);
-				}
-				if (select) {
-					var start = this.selection.start;
-					var end = this.selection.end;
-					view.setSelection(this.caret ? start : end, this.caret ? end : start);
-				}
+	function CompoundChange (selection, caret) {
+		this.selection = selection;
+		this.caret = caret;
+		this.changes = [];
+	}
+	CompoundChange.prototype = {
+		/** @ignore */
+		add: function (change) {
+			this.changes.push(change);
+		},
+		/** @ignore */
+		undo: function (view, select) {
+			for (var i=this.changes.length - 1; i >= 0; i--) {
+				this.changes[i].undo(view, false);
 			}
-		};
-		return CompoundChange;
-	}());
+			if (select) {
+				var start = this.selection.start;
+				var end = this.selection.end;
+				view.setSelection(this.caret ? start : end, this.caret ? end : start);
+			}
+		},
+		/** @ignore */
+		redo: function (view, select) {
+			for (var i = 0; i < this.changes.length; i++) {
+				this.changes[i].redo(view, false);
+			}
+			if (select) {
+				var start = this.selection.start;
+				var end = this.selection.end;
+				view.setSelection(this.caret ? start : end, this.caret ? end : start);
+			}
+		}
+	};
 
-	/** @private */
+	/**
+	 * Constructs a new UndoStack on a text view.
+	 *
+	 * @param {orion.textview.TextView} view the text view for the undo stack.
+	 * @param {Number} [size=100] the size for the undo stack.
+	 *
+	 * @name orion.textview.UndoStack
+	 * @class The UndoStack is used to record the history of a text model associated to an view. Every
+	 * change to the model is added to stack, allowing the application to undo and redo these changes.
+	 *
+	 * <p>
+	 * <b>See:</b><br/>
+	 * {@link orion.textview.TextView}<br/>
+	 * </p>
+	 */
 	function UndoStack (view, size) {
 		this.view = view;
 		this.size = size !== undefined ? size : 100;
@@ -146,13 +145,16 @@ orion.textview.UndoStack = (function() {
 		}
 		this.model = model;
 		var self = this;
-		this._modelListener = {
+		this._listener = {
 			onChanging: function(e) {
-				self._onModelChanging(e);
+				self._onChanging(e);
+			},
+			onDestroy: function(e) {
+				self._onDestroy(e);
 			}
 		};
-		model.addListener(this._modelListener);
-		view.addEventListener("Destroy", this, this._onDestroy);
+		model.addEventListener("Changing", this._listener.onChanging);
+		view.addEventListener("Destroy", this._listener.onDestroy);
 	}
 	UndoStack.prototype = /** @lends orion.textview.UndoStack.prototype */ {
 		/**
@@ -334,11 +336,11 @@ orion.textview.UndoStack = (function() {
 				this._undoText = "";
 			}
 		},
-		_onDestroy: function() {
-			this.model.removeListener(this._modelListener);
-			this.view.removeEventListener("Destroy", this, this._onDestroy);
+		_onDestroy: function(evt) {
+			this.model.removeEventListener("Changing", this._listener.onChanging);
+			this.view.removeEventListener("Destroy", this._listnener.onDestroy);
 		},
-		_onModelChanging: function(e) {
+		_onChanging: function(e) {
 			var newText = e.text;
 			var start = e.start;
 			var removedCharCount = e.removedCharCount;
@@ -373,11 +375,8 @@ orion.textview.UndoStack = (function() {
 			this.add(new Change(start, newText, this.model.getText(start, start + removedCharCount)));
 		}
 	};
-	return UndoStack;
-}());
-
-if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define([], function() {
-		return orion.textview;
-	});
-}
+	
+	return {
+		UndoStack: UndoStack
+	};
+});

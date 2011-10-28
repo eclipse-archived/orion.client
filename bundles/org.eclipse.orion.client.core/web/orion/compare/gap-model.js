@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define([], function(){
+define(['orion/textview/eventTarget'], function(mEventTarget){
 
 var orion = orion || {};
 
@@ -23,8 +23,19 @@ orion.GapTextModel = (function() {
 	    this._myIndex = this._isOriginal ? 1:0;
 	    this._reverseIndex = 1-this._myIndex;
 	    this._map = map;
-		this._listeners = [];
-		model.addListener(this);
+		var self = this;
+		this._listener = {
+			/** @private */
+			onChanging: function(modelChangingEvent) {
+				self.onChanging(modelChangingEvent);
+			},
+			/** @private */
+			onChanged: function(modelChangedEvent) {
+				self.onChanged(modelChangedEvent);
+			}
+		};
+		model.addEventListener("Changing", this._listener.onChanging);
+		model.addEventListener("Changed", this._listener.onChanged);
 	    this._init();
 	}
 
@@ -87,19 +98,6 @@ orion.GapTextModel = (function() {
 				curLineindex += Math.max(this._map[i][this._reverseIndex], this._map[i][this._myIndex]);
 			}
 			return "unchnaged";
-		},
-			
-		addListener: function(listener) {
-			this._listeners.push(listener);
-		},
-		
-		removeListener: function(listener) {
-			for (var i = 0; i < this._listeners.length; i++) {
-				if (this._listeners[i] === listener) {
-					this._listeners.splice(i, 1);
-					return;
-				}
-			}
 		},
 
 		getCharCount: function() {
@@ -206,21 +204,11 @@ orion.GapTextModel = (function() {
 		},
 		
 		onChanging: function(modelChangingEvent) {
-			for (var i = 0; i < this._listeners.length; i++) {
-				var l = this._listeners[i]; 
-				if (l && l.onChanging) { 
-					l.onChanging(modelChangingEvent);
-				}
-			}
+			return this.dispatchEvent(modelChangingEvent);
 		},
 		
 		onChanged: function(modelChangedEvent) {
-			for (var i = 0; i < this._listeners.length; i++) {
-				var l = this._listeners[i]; 
-				if (l && l.onChanged) { 
-					l.onChanged(modelChangedEvent);
-				}
-			}
+			return this.dispatchEvent(modelChangedEvent);
 		},
 		
 		setLineDelimiter: function(lineDelimiter) {
@@ -232,6 +220,7 @@ orion.GapTextModel = (function() {
 		}
 	};
 	
+	mEventTarget.EventTarget.addMixin(GapTextModel.prototype);
 	return GapTextModel;
 }()); 
 

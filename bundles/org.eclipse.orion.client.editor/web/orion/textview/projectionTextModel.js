@@ -11,68 +11,62 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
 
-/*global window define */
+/*global define */
 
-/**
- * @namespace The global container for Orion APIs.
- */ 
-var orion = orion || {};
-/**
- * @namespace The container for textview APIs.
- */ 
-orion.textview = orion.textview || {};
+(define ||
+	function(deps, callback) {
+		/**
+		 * @namespace The global container for Orion APIs.
+		 */ 
+		var orion = this.orion = this.orion || {};
+		orion.textview = orion.textview || {};
+		var module = callback(orion.textview, orion.textview);
+		for (var p in module) {
+			if (module.hasOwnProperty(p)) {
+				orion.textview[p] = module[p];
+			}
+		}
+	}
+)(['orion/textview/textModel', 'orion/textview/eventTarget'], function(mTextModel, mEventTarget) {
 
-/**
- * @class This object represents a projection range. A projection specifies a
- * range of text and the replacement text. The range of text is relative to the
- * base text model associated to a projection model.
- * <p>
- * <b>See:</b><br/>
- * {@link orion.textview.ProjectionTextModel}<br/>
- * {@link orion.textview.ProjectionTextModel#addProjection}<br/>
- * </p>		 
- * @name orion.textview.Projection
- * 
- * @property {Number} start The start offset of the projection range. 
- * @property {Number} end The end offset of the projection range. This offset is exclusive.
- * @property {String|orion.textview.TextModel} [text=""] The projection text to be inserted
- */
-/**
- * Constructs a new <code>ProjectionTextModel</code> based on the specified <code>TextModel</code>.
- *
- * @param {orion.textview.TextModel} baseModel The base text model.
- *
- * @name orion.textview.ProjectionTextModel
- * @class The <code>ProjectionTextModel</code> represents a projection of its base text
- * model. Projection ranges can be added to the projection text model to hide and/or insert
- * ranges to the base text model.
- * <p>
- * The contents of the projection text model is modified when changes occur in the base model,
- * projection model or by calls to {@link #addProjection} and {@link #removeProjection}.
- * </p>
- * <p>
- * <b>See:</b><br/>
- * {@link orion.textview.TextView}<br/>
- * {@link orion.textview.TextModel}
- * {@link orion.textview.TextView#setModel}
- * </p>
- */
-orion.textview.ProjectionTextModel = (function() {
-
-	/** @private */
+	/**
+	 * @class This object represents a projection range. A projection specifies a
+	 * range of text and the replacement text. The range of text is relative to the
+	 * base text model associated to a projection model.
+	 * <p>
+	 * <b>See:</b><br/>
+	 * {@link orion.textview.ProjectionTextModel}<br/>
+	 * {@link orion.textview.ProjectionTextModel#addProjection}<br/>
+	 * </p>		 
+	 * @name orion.textview.Projection
+	 * 
+	 * @property {Number} start The start offset of the projection range. 
+	 * @property {Number} end The end offset of the projection range. This offset is exclusive.
+	 * @property {String|orion.textview.TextModel} [text=""] The projection text to be inserted
+	 */
+	/**
+	 * Constructs a new <code>ProjectionTextModel</code> based on the specified <code>TextModel</code>.
+	 *
+	 * @param {orion.textview.TextModel} baseModel The base text model.
+	 *
+	 * @name orion.textview.ProjectionTextModel
+	 * @class The <code>ProjectionTextModel</code> represents a projection of its base text
+	 * model. Projection ranges can be added to the projection text model to hide and/or insert
+	 * ranges to the base text model.
+	 * <p>
+	 * The contents of the projection text model is modified when changes occur in the base model,
+	 * projection model or by calls to {@link #addProjection} and {@link #removeProjection}.
+	 * </p>
+	 * <p>
+	 * <b>See:</b><br/>
+	 * {@link orion.textview.TextView}<br/>
+	 * {@link orion.textview.TextModel}
+	 * {@link orion.textview.TextView#setModel}
+	 * </p>
+	 */
 	function ProjectionTextModel(baseModel) {
 		this._model = baseModel;	/* Base Model */
-		this._listeners = [];
 		this._projections = [];
-//		var self = this;
-//		model.addListener({
-//			onChanging: function(modelChangingEvent) {
-//				self._onChanging(modelChangingEvent);
-//			},
-//			onChanged: function(modelChangedEvent) {
-//				self.onChanged(modelChangedEvent);
-//			}
-//		});
 	}
 
 	ProjectionTextModel.prototype = /** @lends orion.textview.ProjectionTextModel.prototype */ {
@@ -95,7 +89,7 @@ orion.textview.ProjectionTextModel = (function() {
 			var text = projection.text;
 			if (!text) { text = ""; }
 			if (typeof text === "string") {
-				projection._model = new orion.textview.TextModel(text, model.getLineDelimiter());
+				projection._model = new mTextModel.TextModel(text, model.getLineDelimiter());
 			} else {
 				projection._model = text;
 			}
@@ -105,6 +99,7 @@ orion.textview.ProjectionTextModel = (function() {
 			var addedCharCount = projection._model.getCharCount();
 			var addedLineCount = projection._model.getLineCount() - 1;
 			var modelChangingEvent = {
+				type: "Changing",
 				text: projection._model.getText(),
 				start: eventStart,
 				removedCharCount: removedCharCount,
@@ -116,6 +111,7 @@ orion.textview.ProjectionTextModel = (function() {
 			var index = this._binarySearch(projections, projection.start);
 			projections.splice(index, 0, projection);
 			var modelChangedEvent = {
+				type: "Changed",
 				start: eventStart,
 				removedCharCount: removedCharCount,
 				addedCharCount: addedCharCount,
@@ -202,6 +198,7 @@ orion.textview.ProjectionTextModel = (function() {
 				var removedCharCount = projection._model.getCharCount();
 				var removedLineCount = projection._model.getLineCount() - 1;
 				var modelChangingEvent = {
+					type: "Changing",
 					text: model.getText(projection.start, projection.end),
 					start: eventStart,
 					removedCharCount: removedCharCount,
@@ -212,6 +209,7 @@ orion.textview.ProjectionTextModel = (function() {
 				this.onChanging(modelChangingEvent);
 				this._projections.splice(i, 1);
 				var modelChangedEvent = {
+					type: "Changed",
 					start: eventStart,
 					removedCharCount: removedCharCount,
 					addedCharCount: addedCharCount,
@@ -233,23 +231,6 @@ orion.textview.ProjectionTextModel = (function() {
 				}
 			}
 			return high;
-		},
-		/** 
-		 * @see orion.textview.TextModel#addListener
-		 */
-		addListener: function(listener) {
-			this._listeners.push(listener);
-		},
-		/**
-		 * @see orion.textview.TextModel#removeListener
-		 */
-		removeListener: function(listener) {
-			for (var i = 0; i < this._listeners.length; i++) {
-				if (this._listeners[i] === listener) {
-					this._listeners.splice(i, 1);
-					return;
-				}
-			}
 		},
 		/**
 		 * @see orion.textview.TextModel#getCharCount
@@ -464,23 +445,13 @@ orion.textview.ProjectionTextModel = (function() {
 		 * @see orion.textview.TextModel#onChanging
 		 */
 		onChanging: function(modelChangingEvent) {
-			for (var i = 0; i < this._listeners.length; i++) {
-				var l = this._listeners[i]; 
-				if (l && l.onChanging) { 
-					l.onChanging(modelChangingEvent);
-				}
-			}
+			return this.dispatchEvent(modelChangingEvent);
 		},
 		/**
 		 * @see orion.textview.TextModel#onChanged
 		 */
 		onChanged: function(modelChangedEvent) {
-			for (var i = 0; i < this._listeners.length; i++) {
-				var l = this._listeners[i]; 
-				if (l && l.onChanged) { 
-					l.onChanged(modelChangedEvent);
-				}
-			}
+			return this.dispatchEvent(modelChangedEvent);
 		},
 		/**
 		 * @see orion.textview.TextModel#setLineDelimiter
@@ -572,6 +543,7 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			
 			var modelChangingEvent = {
+				type: "Changing",
 				text: text,
 				start: eventStart,
 				removedCharCount: removedCharCount,
@@ -607,6 +579,7 @@ orion.textview.ProjectionTextModel = (function() {
 			}
 			
 			var modelChangedEvent = {
+				type: "Changed",
 				start: eventStart,
 				removedCharCount: removedCharCount,
 				addedCharCount: addedCharCount,
@@ -616,12 +589,7 @@ orion.textview.ProjectionTextModel = (function() {
 			this.onChanged(modelChangedEvent);
 		}
 	};
+	mEventTarget.EventTarget.addMixin(ProjectionTextModel.prototype);
 
-	return ProjectionTextModel;
-}());
-
-if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define([], function() {
-		return orion.textview;
-	});
-}
+	return {ProjectionTextModel: ProjectionTextModel};
+});

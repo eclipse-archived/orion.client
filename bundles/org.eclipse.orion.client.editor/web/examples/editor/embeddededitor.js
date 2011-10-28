@@ -68,7 +68,7 @@ window.onload = function(){
 	var annotationFactory = new orion.editor.AnnotationFactory();
 
 	function save(editor) {
-		editor.onInputChange(null, null, null, true);
+		editor.setInput(null, null, null, true);
 		window.alert("Save hook.");
 	}
 	
@@ -117,8 +117,8 @@ window.onload = function(){
 		domNode: editorDomNode
 	});
 		
-	orion.editor.util.connect(editor, "onDirtyChange", this, function(dirty) {
-		if (dirty) {
+	editor.addEventListener("DirtyChanged", function(evt) {
+		if (editor.isDirty()) {
 			dirtyIndicator = "*";
 		} else {
 			dirtyIndicator = "";
@@ -130,7 +130,7 @@ window.onload = function(){
 	// if there is a mechanism to change which file is being viewed, this code would be run each time it changed.
 	var contentName = "sample.js";  // for example, a file name, something the user recognizes as the content.
 	var initialContent = "window.alert('this is some javascript code');  // try pasting in some real code";
-	editor.onInputChange(contentName, null, initialContent);
+	editor.setInput(contentName, null, initialContent);
 	syntaxHighlighter.highlight(contentName, editor);
 	// end of code to run when content changes.
 	

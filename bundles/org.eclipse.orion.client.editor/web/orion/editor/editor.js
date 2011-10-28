@@ -9,38 +9,56 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*global define window orion:true eclipse:true */
+ /*global define window */
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
-var orion = orion || {};
-orion.editor = orion.editor || {};	
+(define ||
+	function(deps, callback) {
+		/**
+		 * @namespace The global container for Orion APIs.
+		 */ 
+		var orion = this.orion = this.orion || {};
+		orion.editor = orion.editor || {};
+		orion.textview = orion.textview || {};
+		var module = callback(orion.textview, orion.textview);
+			for (var p in module) {
+			if (module.hasOwnProperty(p)) {
+				orion.editor[p] = module[p];
+			}
+		}
+	}
+)(['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKeyBinding, mEventTarget) {
 
-/**
- * @name orion.editor.Editor
- * @class An <code>Editor</code> is a user interface for editing text that provides additional features over the basic {@link orion.textview.TextView}.
- * Some of <code>Editor</code>'s features include:
- * <ul>
- * <li>Additional actions and key bindings for editing text</li>
- * <li>Content assist</li>
- * <li>Find and Incremental Find</li>
- * <li>Rulers for displaying line numbers and annotations</li>
- * <li>Status reporting</li>
- * </ul>
- * 
- * @description Creates a new Editor with the given options.
- * @param {Object} options Options controlling the features of this Editor.
- * @param {Object} options.annotationFactory
- * @param {Object} options.contentAssistFactory
- * @param {Object} options.domNode
- * @param {Object} options.keyBindingFactory
- * @param {Object} options.lineNumberRulerFactory
- * @param {Object} options.statusReporter
- * @param {Object} options.syntaxHighlightProviders
- * @param {Object} options.textViewFactory
- * @param {Object} options.undoStackFactory
- */
-orion.editor.Editor = (function() {
-	/** @private */
+	/**
+	 * @name orion.editor.util
+	 * @class Basic helper functions used by <code>orion.editor</code>.
+	 */
+	var util;
+
+	/**
+	 * @name orion.editor.Editor
+	 * @class An <code>Editor</code> is a user interface for editing text that provides additional features over the basic {@link orion.textview.TextView}.
+	 * Some of <code>Editor</code>'s features include:
+	 * <ul>
+	 * <li>Additional actions and key bindings for editing text</li>
+	 * <li>Content assist</li>
+	 * <li>Find and Incremental Find</li>
+	 * <li>Rulers for displaying line numbers and annotations</li>
+	 * <li>Status reporting</li>
+	 * </ul>
+	 * 
+	 * @description Creates a new Editor with the given options.
+	 * @param {Object} options Options controlling the features of this Editor.
+	 * @param {Object} options.annotationFactory
+	 * @param {Object} options.contentAssistFactory
+	 * @param {Object} options.domNode
+	 * @param {Object} options.keyBindingFactory
+	 * @param {Object} options.lineNumberRulerFactory
+	 * @param {Object} options.statusReporter
+	 * @param {Object} options.syntaxHighlightProviders
+	 * @param {Object} options.textViewFactory
+	 * @param {Object} options.undoStackFactory
+	 */
 	function Editor(options) {
 		this._textViewFactory = options.textViewFactory;
 		this._undoStackFactory = options.undoStackFactory;
@@ -229,7 +247,7 @@ orion.editor.Editor = (function() {
 			if (linePixel < topPixel || linePixel > bottomPixel) {
 				var height = bottomPixel - topPixel;
 				var target = Math.max(0, linePixel- Math.floor((linePixel<topPixel?3:1)*height / 4));
-				var a = new orion.editor.util.Animation({
+				var a = new util.Animation({
 					node: textView,
 					duration: 300,
 					curve: [topPixel, target],
@@ -260,13 +278,19 @@ orion.editor.Editor = (function() {
 		isDirty : function() {
 			return this._dirty;
 		},
+		/**
+		 * Sets whether the editor is dirty.
+		 *
+		 * @param {Boollean} dirty
+		 */
+		setDirty: function(dirty) {
+			if (this._dirty === dirty) { return; }
+			this._dirty = dirty;
+			this.onDirtyChanged({type: "DirtyChanged"});
+		},
 		/** @private */
 		checkDirty : function() {
-			var dirty = !this._undoStack.isClean();
-			if (this._dirty === dirty) {
-				return;
-			}
-			this.onDirtyChange(dirty);
+			this.setDirty(!this._undoStack.isClean());
 		},
 		
 		/**
@@ -391,11 +415,21 @@ orion.editor.Editor = (function() {
 			
 			var editor = this, textView = this._textView;
 			
+			var self = this;
+			this._listener = {
+				onModelChanged: function(e) {
+					self.checkDirty();
+				},
+				onSelection: function(e) {
+					self._updateCursorStatus();
+				}
+			};
+			
 			// Listener for dirty state
-			textView.addEventListener("ModelChanged", this, this.checkDirty);
+			textView.addEventListener("ModelChanged", this._listener.onModelChanged);
 			
 			// Selection changed listener
-			textView.addEventListener("Selection", this, this._updateCursorStatus);
+			textView.addEventListener("Selection", this._listener.onSelection);
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
@@ -403,7 +437,7 @@ orion.editor.Editor = (function() {
 			}
 			
 			// Set keybindings for keys that apply to different modes
-			textView.setKeyBinding(new orion.textview.KeyBinding(27), "Cancel Current Mode");
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(27), "Cancel Current Mode");
 			textView.setAction("Cancel Current Mode", function() {
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
@@ -574,33 +608,49 @@ orion.editor.Editor = (function() {
 		},
 		
 		/**
-		 * Called when the editor's contents have changed.
+		 * Sets the editor's contents.
+		 *
 		 * @param {String} title
 		 * @param {String} message
 		 * @param {String} contents
 		 * @param {Boolean} contentsSaved
 		 */
-		onInputChange : function (title, message, contents, contentsSaved) {
+		setInput: function(title, message, contents, contentsSaved) {
 			this._title = title;
-			if (contentsSaved && this._textView) {
-				// don't reset undo stack on save, just mark it clean so that we don't lose the undo past the save
-				this._undoStack.markClean();
-				this.checkDirty();
-				return;
-			}
 			if (this._textView) {
-				if (message) {
-					this._textView.setText(message);
+				if (contentsSaved) {
+					// don't reset undo stack on save, just mark it clean so that we don't lose the undo past the save
+					this._undoStack.markClean();
+					this.checkDirty();
 				} else {
-					if (contents !== null && contents !== undefined) {
-						this._textView.setText(contents);
-						this._textView.getModel().setLineDelimiter("auto");
+					if (message) {
+						this._textView.setText(message);
+					} else {
+						if (contents !== null && contents !== undefined) {
+							this._textView.setText(contents);
+							this._textView.getModel().setLineDelimiter("auto");
+						}
 					}
+					this._undoStack.reset();
+					this.checkDirty();
+					this._textView.focus();
 				}
-				this._undoStack.reset();
-				this.checkDirty();
-				this._textView.focus();
 			}
+			this.onInputChanged({
+				type: "InputChanged",
+				title: title,
+				message: message,
+				contents: contents,
+				contentsSaved: contentsSaved
+			});
+		},
+		
+		/**
+		 * Called when the editor's contents have changed.
+		 * @param {Event} inputChangedEvent
+		 */
+		onInputChanged: function (inputChangedEvent) {
+			return this.dispatchEvent(inputChangedEvent);
 		},
 		/**
 		 * Reveals a line in the editor, and optionally selects a portion of the line.
@@ -633,46 +683,24 @@ orion.editor.Editor = (function() {
 		},
 		
 		/**
-		 * Called when the dirty state of the editor is changing.
-		 * @param {Boolean} isDirty
+		 * Called when the dirty state of the editor changes.
+		 * @param {Event} dirtyChangedEvent
 		 */
-		onDirtyChange: function(isDirty) {
-			this._dirty = isDirty;
+		onDirtyChanged: function(dirtyChangedEvent) {
+			return this.dispatchEvent(dirtyChangedEvent);
 		},
 		
 		getTitle: function() {
 			return this._title;
 		}
 	};
-	return Editor;
-}());
+	mEventTarget.EventTarget.addMixin(Editor.prototype);
 
 /**
  * @name orion.editor.util
  * @class Basic helper functions used by <code>orion.editor</code>.
  */
-orion.editor.util = {
-	/**
-	 * Event handling helper. Similar to <code>dojo.connect</code>.
-	 * Differences: doesn't return a handle, doesn't support the <code>dontFix</code> parameter.
-	 * @deprecated Once Bug 349957 is fixed, this function should be deleted.
-	 */
-	connect: function(/**Object*/ obj, /**String*/ event, /**Object*/ context, /**String|Function*/ method) {
-		var oldFunction = obj[event];
-		obj[event] = function() {
-			var listenerContext = context;
-			if (context === null || typeof(context) === "undefined") {
-				listenerContext = obj;
-			}
-			var listener = (typeof(method) === "string") ? context[method] : method;
-			// call old, then invoke listener
-			if (typeof(oldFunction) === "function") {
-				oldFunction.apply(obj, arguments);
-			}
-			listener.apply(listenerContext, arguments);
-		};
-	},
-	
+util = {
 	/**
 	 * @class
 	 * @private
@@ -753,11 +781,8 @@ orion.editor.util = {
 };
 
 if (!Function.prototype.bind) {
-	Function.prototype.bind = orion.editor.util.bind;
+	Function.prototype.bind = util.bind;
 }
 
-if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define(['orion/textview/keyBinding'], function(){
-		return orion.editor;
-	});
-}
+	return {Editor: Editor};
+});

@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-define(['orion/compare/compareUtils'], function(mCompareUtils) {
+define(['orion/compare/compareUtils', 'orion/textview/eventTarget'], function(mCompareUtils, mEventTarget) {
 
 
 var orion = orion || {};
@@ -21,8 +21,19 @@ orion.CompareMergeModel = (function() {
 	    this._model = model;
 	    this._mapperColumnIndex = mapWrapper.columnIndex;
 	    this._mapper = mapWrapper.mapper;
-		this._listeners = [];
-		model.addListener(this);
+	    var self = this;
+		this._listener = {
+			/** @private */
+			onChanging: function(modelChangingEvent) {
+				self.onChanging(modelChangingEvent);
+			},
+			/** @private */
+			onChanged: function(modelChangedEvent) {
+				self.onChanged(modelChangedEvent);
+			}
+		};
+		model.addEventListener("Changing", this._listener.onChanging);
+		model.addEventListener("Changed", this._listener.onChanged);
 	    this.init();
 	}
 
@@ -107,19 +118,6 @@ orion.CompareMergeModel = (function() {
 			mCompareUtils.updateMapper(this._mapper , this._mapperColumnIndex , this.getLineAtOffset(start) , removedLineCount, addedLineCount);
 		},
 		
-		addListener: function(listener) {
-			this._listeners.push(listener);
-		},
-		
-		removeListener: function(listener) {
-			for (var i = 0; i < this._listeners.length; i++) {
-				if (this._listeners[i] === listener) {
-					this._listeners.splice(i, 1);
-					return;
-				}
-			}
-		},
-
 		getCharCount: function() {
 			return this._model.getCharCount();
 		},
@@ -161,12 +159,7 @@ orion.CompareMergeModel = (function() {
 		},
 		
 		onChanging: function(modelChangingEvent) {
-			for (var i = 0; i < this._listeners.length; i++) {
-				var l = this._listeners[i]; 
-				if (l && l.onChanging) { 
-					l.onChanging(modelChangingEvent);
-				}
-			}
+			return this.dispatchEvent(modelChangingEvent);
 		},
 		
 		onChanged: function(e) {
@@ -183,16 +176,12 @@ orion.CompareMergeModel = (function() {
 			} else {
 				this._initing = false;
 			}
-			for (var i = 0; i < this._listeners.length; i++) {
-				var l = this._listeners[i]; 
-				if (l && l.onChanged) { 
-					l.onChanged(e);
-				}
-			}
+			return this.dispatchEvent(e);
 		}
 		
 	};
 	
+	mEventTarget.EventTarget.addMixin(CompareMergeModel.prototype);
 	return CompareMergeModel;
 }()); 
 return orion;

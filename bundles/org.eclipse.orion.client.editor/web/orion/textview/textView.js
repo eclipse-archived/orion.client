@@ -14,30 +14,21 @@
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
 
-/**
- * @namespace The global container for Orion APIs.
- */ 
-var orion = orion || {};
-/**
- * @namespace The container for textview APIs.
- */ 
-orion.textview = orion.textview || {};
-
-/**
- * Constructs a new text view.
- * 
- * @param options the view options.
- * @param {String|DOMElement} options.parent the parent element for the view, it can be either a DOM element or an ID for a DOM element.
- * @param {orion.textview.TextModel} [options.model] the text model for the view. If this options is not set the view creates an empty {@link orion.textview.TextModel}.
- * @param {Boolean} [options.readonly=false] whether or not the view is read-only.
- * @param {Boolean} [options.fullSelection=true] whether or not the view is in full selection mode.
- * @param {String|String[]} [options.stylesheet] one or more stylesheet URIs for the view.
- * @param {Number} [options.tabSize] The number of spaces in a tab.
- * 
- * @class A TextView is a user interface for editing text.
- * @name orion.textview.TextView
- */
-orion.textview.TextView = (function() {
+(define ||
+	function(deps, callback) {
+		/**
+		 * @namespace The global container for Orion APIs.
+		 */ 
+		var orion = this.orion = this.orion || {};
+		orion.textview = orion.textview || {};
+		var module = callback(orion.textview, orion.textview, orion.textview);
+		for (var p in module) {
+			if (module.hasOwnProperty(p)) {
+				orion.textview[p] = module[p];
+			}
+		}
+	}
+)(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mTextModel, mKeyBinding, mEventTarget) {
 
 	/** @private */
 	function addHandler(node, type, handler, capture) {
@@ -75,185 +66,92 @@ orion.textview.TextView = (function() {
 	 * @class A Selection represents a range of selected text in the view.
 	 * @name orion.textview.Selection
 	 */
-	var Selection = (function() {
+	function Selection (start, end, caret) {
+		/**
+		 * The selection start offset.
+		 *
+		 * @name orion.textview.Selection#start
+		 */
+		this.start = start;
+		/**
+		 * The selection end offset.
+		 *
+		 * @name orion.textview.Selection#end
+		 */
+		this.end = end;
 		/** @private */
-		function Selection (start, end, caret) {
-			/**
-			 * The selection start offset.
-			 *
-			 * @name orion.textview.Selection#start
-			 */
-			this.start = start;
-			/**
-			 * The selection end offset.
-			 *
-			 * @name orion.textview.Selection#end
-			 */
-			this.end = end;
-			/** @private */
-			this.caret = caret; //true if the start, false if the caret is at end
-		}
-		Selection.prototype = /** @lends orion.textview.Selection.prototype */ {
-			/** @private */
-			clone: function() {
-				return new Selection(this.start, this.end, this.caret);
-			},
-			/** @private */
-			collapse: function() {
-				if (this.caret) {
-					this.end = this.start;
-				} else {
-					this.start = this.end;
-				}
-			},
-			/** @private */
-			extend: function (offset) {
-				if (this.caret) {
-					this.start = offset;
-				} else {
-					this.end = offset;
-				}
-				if (this.start > this.end) {
-					var tmp = this.start;
-					this.start = this.end;
-					this.end = tmp;
-					this.caret = !this.caret;
-				}
-			},
-			/** @private */
-			setCaret: function(offset) {
+		this.caret = caret; //true if the start, false if the caret is at end
+	}
+	Selection.prototype = /** @lends orion.textview.Selection.prototype */ {
+		/** @private */
+		clone: function() {
+			return new Selection(this.start, this.end, this.caret);
+		},
+		/** @private */
+		collapse: function() {
+			if (this.caret) {
+				this.end = this.start;
+			} else {
+				this.start = this.end;
+			}
+		},
+		/** @private */
+		extend: function (offset) {
+			if (this.caret) {
 				this.start = offset;
+			} else {
 				this.end = offset;
-				this.caret = false;
-			},
-			/** @private */
-			getCaret: function() {
-				return this.caret ? this.start : this.end;
-			},
-			/** @private */
-			toString: function() {
-				return "start=" + this.start + " end=" + this.end + (this.caret ? " caret is at start" : " caret is at end");
-			},
-			/** @private */
-			isEmpty: function() {
-				return this.start === this.end;
-			},
-			/** @private */
-			equals: function(object) {
-				return this.caret === object.caret && this.start === object.start && this.end === object.end;
 			}
-		};
-		return Selection;
-	}());
-
-	/** 
-	 * Constructs a new EventTable object.
-	 * 
-	 * @class 
-	 * @name orion.textview.EventTable
-	 * @private
-	 */
-	var EventTable = (function() {
+			if (this.start > this.end) {
+				var tmp = this.start;
+				this.start = this.end;
+				this.end = tmp;
+				this.caret = !this.caret;
+			}
+		},
 		/** @private */
-		function EventTable(){
-		    this._types = {};
+		setCaret: function(offset) {
+			this.start = offset;
+			this.end = offset;
+			this.caret = false;
+		},
+		/** @private */
+		getCaret: function() {
+			return this.caret ? this.start : this.end;
+		},
+		/** @private */
+		toString: function() {
+			return "start=" + this.start + " end=" + this.end + (this.caret ? " caret is at start" : " caret is at end");
+		},
+		/** @private */
+		isEmpty: function() {
+			return this.start === this.end;
+		},
+		/** @private */
+		equals: function(object) {
+			return this.caret === object.caret && this.start === object.start && this.end === object.end;
 		}
-		EventTable.prototype = /** @lends EventTable.prototype */ {
-			/** @private */
-			addEventListener: function(type, context, func, data) {
-				var state = this._types[type];
-				if (!state) {
-					state = this._types[type] = {level: 0, listeners: []};
-				}
-				var listener = {
-					context: context,
-					func: func,
-					data: data
-				};
-				var listeners = state.listeners;
-				listeners.push(listener);
-			},
-			/** @private */
-			sendEvent: function(type, event) {
-				var state = this._types[type];
-				if (state) {
-					var listeners = state.listeners;
-					try {
-						state.level++;
-						if (listeners) {
-							for (var i=0, len=listeners.length; i < len; i++) {
-								var l = listeners[i];
-								if (l && l.context && l.func) {
-									l.func.call(l.context, event, l.data);
-								}
-							}
-						}
-					} finally {
-						state.level--;
-						if (state.compact && state.level === 0) {
-							for (var j=listeners.length - 1; j >= 0; j--) {
-								if (!listeners[j]) {
-									listeners.splice(j, 1);
-								}
-							}
-							state.compact = false;
-						}
-					}
-				}
-			},
-			/** @private */
-			removeEventListener: function(type, context, func, data){
-				var state = this._types[type];
-				if (state) {
-					var listeners = state.listeners;
-					for (var i=0, len=listeners.length; i < len; i++) {
-						var l = listeners[i];
-						if (l && l.context === context && l.func === func && l.data === data) {
-							if (state.level !== 0) {
-								listeners[i] = null;
-								state.compact = true;
-							} else {
-								listeners.splice(i, 1);
-							}
-							break;
-						}
-					}
-				}
-			}
-		};
-		return EventTable;
-	}());
-	
-	/** @private */
+	};
+
+	/**
+	 * Constructs a new text view.
+	 * 
+	 * @param options the view options.
+	 * @param {String|DOMElement} options.parent the parent element for the view, it can be either a DOM element or an ID for a DOM element.
+	 * @param {orion.textview.TextModel} [options.model] the text model for the view. If this options is not set the view creates an empty {@link orion.textview.TextModel}.
+	 * @param {Boolean} [options.readonly=false] whether or not the view is read-only.
+	 * @param {Boolean} [options.fullSelection=true] whether or not the view is in full selection mode.
+	 * @param {String|String[]} [options.stylesheet] one or more stylesheet URIs for the view.
+	 * @param {Number} [options.tabSize] The number of spaces in a tab.
+	 * 
+	 * @class A TextView is a user interface for editing text.
+	 * @name orion.textview.TextView
+	 */
 	function TextView (options) {
 		this._init(options);
 	}
 	
 	TextView.prototype = /** @lends orion.textview.TextView.prototype */ {
-		/**
-		 * Adds an event listener to the text view.
-		 * 
-		 * @param {String} type the event type. The supported events are:
-		 * <ul>
-		 * <li>"Modify" See {@link #onModify} </li>
-		 * <li>"Selection" See {@link #onSelection} </li>
-		 * <li>"Scroll" See {@link #onScroll} </li>
-		 * <li>"Verify" See {@link #onVerify} </li>
-		 * <li>"Destroy" See {@link #onDestroy} </li>
-		 * <li>"LineStyle" See {@link #onLineStyle} </li>
-		 * <li>"ModelChanging" See {@link #onModelChanging} </li>
-		 * <li>"ModelChanged" See {@link #onModelChanged} </li>
-		 * </ul>
-		 * @param {Object} context the context of the function.
-		 * @param {Function} func the function that will be executed when the event happens. 
-		 *   The function should take an event as the first parameter and optional data as the second parameter.
-		 * @param {Object} [data] optional data passed to the function.
-		 * 
-		 * @see #removeEventListener
-		 */
-		addEventListener: function(type, context, func, data) {
-			this._eventTable.addEventListener(type, context, func, data);
-		},
 		/**
 		 * Adds a ruler to the text view.
 		 *
@@ -392,7 +290,7 @@ orion.textview.TextView = (function() {
 			*/
 			this._destroyFrame();
 
-			var e = {};
+			var e = {type: "Destroy"};
 			this.onDestroy(e);
 
 			this._parent = null;
@@ -400,7 +298,6 @@ orion.textview.TextView = (function() {
 			this._model = null;
 			this._selection = null;
 			this._doubleClickSelection = null;
-			this._eventTable = null;
 			this._keyBindings = null;
 			this._actions = null;
 		},
@@ -815,8 +712,8 @@ orion.textview.TextView = (function() {
 		 * @event 
 		 * @param {orion.textview.ContextMenuEvent} contextMenuEvent the event 
 		 */ 
-		onContextMenu: function(contextMenuEvent) { 
-		  this._eventTable.sendEvent("ContextMenu", contextMenuEvent); 
+		onContextMenu: function(contextMenuEvent) {
+			return this.dispatchEvent(contextMenuEvent); 
 		}, 
 		/**
 		 * @class This is the event sent when the text view is destroyed.
@@ -836,7 +733,7 @@ orion.textview.TextView = (function() {
 		 * @see #destroy
 		 */
 		onDestroy: function(destroyEvent) {
-			this._eventTable.sendEvent("Destroy", destroyEvent);
+			return this.dispatchEvent(destroyEvent);
 		},
 		/**
 		 * @class This object is used to define style information for the text view.
@@ -888,7 +785,7 @@ orion.textview.TextView = (function() {
 		 * @param {orion.textview.LineStyleEvent} lineStyleEvent the event
 		 */
 		onLineStyle: function(lineStyleEvent) {
-			this._eventTable.sendEvent("LineStyle", lineStyleEvent);
+			return this.dispatchEvent(lineStyleEvent);
 		},
 		/**
 		 * @class This is the event sent when the text in the model has changed.
@@ -913,7 +810,7 @@ orion.textview.TextView = (function() {
 		 * @param {orion.textview.ModelChangedEvent} modelChangedEvent the event
 		 */
 		onModelChanged: function(modelChangedEvent) {
-			this._eventTable.sendEvent("ModelChanged", modelChangedEvent);
+			return this.dispatchEvent(modelChangedEvent);
 		},
 		/**
 		 * @class This is the event sent when the text in the model is about to change.
@@ -939,7 +836,7 @@ orion.textview.TextView = (function() {
 		 * @param {orion.textview.ModelChangingEvent} modelChangingEvent the event
 		 */
 		onModelChanging: function(modelChangingEvent) {
-			this._eventTable.sendEvent("ModelChanging", modelChangingEvent);
+			return this.dispatchEvent(modelChangingEvent);
 		},
 		/**
 		 * @class This is the event sent when the text is modified by the text view.
@@ -961,7 +858,7 @@ orion.textview.TextView = (function() {
 		 * @param {orion.textview.ModifyEvent} modifyEvent the event
 		 */
 		onModify: function(modifyEvent) {
-			this._eventTable.sendEvent("Modify", modifyEvent);
+			return this.dispatchEvent(modifyEvent);
 		},
 		/**
 		 * @class This is the event sent when the selection changes in the text view.
@@ -982,7 +879,7 @@ orion.textview.TextView = (function() {
 		 * @param {orion.textview.SelectionEvent} selectionEvent the event
 		 */
 		onSelection: function(selectionEvent) {
-			this._eventTable.sendEvent("Selection", selectionEvent);
+			return this.dispatchEvent(selectionEvent);
 		},
 		/**
 		 * @class This is the event sent when the text view scrolls.
@@ -1003,7 +900,7 @@ orion.textview.TextView = (function() {
 		 * @param {orion.textview.ScrollEvent} scrollEvent the event
 		 */
 		onScroll: function(scrollEvent) {
-			this._eventTable.sendEvent("Scroll", scrollEvent);
+			return this.dispatchEvent(scrollEvent);
 		},
 		/**
 		 * @class This is the event sent when the text is about to be modified by the text view.
@@ -1033,7 +930,7 @@ orion.textview.TextView = (function() {
 		 * @param {orion.textview.VerifyEvent} verifyEvent the event
 		 */
 		onVerify: function(verifyEvent) {
-			this._eventTable.sendEvent("Verify", verifyEvent);
+			return this.dispatchEvent(verifyEvent);
 		},
 		/**
 		 * Redraws the text in the given line range.
@@ -1101,22 +998,6 @@ orion.textview.TextView = (function() {
 			var startLine = model.getLineAtOffset(start);
 			var endLine = model.getLineAtOffset(Math.max(0, end - 1)) + 1;
 			this.redrawLines(startLine, endLine);
-		},
-		/**
-		 * Removes an event listener from the text view.
-		 * <p>
-		 * All the parameters must be the same ones used to add the listener.
-		 * </p>
-		 * 
-		 * @param {String} type the event type.
-		 * @param {Object} context the context of the function.
-		 * @param {Function} func the function that will be executed when the event happens. 
-		 * @param {Object} [data] optional data passed to the function.
-		 * 
-		 * @see #addEventListener
-		 */
-		removeEventListener: function(type, context, func, data) {
-			this._eventTable.removeEventListener(type, context, func, data);
 		},
 		/**
 		 * Removes a ruler from the text view.
@@ -1267,13 +1148,15 @@ orion.textview.TextView = (function() {
 		setModel: function(model) {
 			if (!model) { return; }
 			if (model === this._model) { return; }
-			this._model.removeListener(this._modelListener);
+			this._model.removeEventListener("Changing", this._modelListener.onChanging);
+			this._model.removeEventListener("Changed", this._modelListener.onChanged);
 			var oldLineCount = this._model.getLineCount();
 			var oldCharCount = this._model.getCharCount();
 			var newLineCount = model.getLineCount();
 			var newCharCount = model.getCharCount();
 			var newText = model.getText();
 			var e = {
+				type: "ModelChanging",
 				text: newText,
 				start: 0,
 				removedCharCount: oldCharCount,
@@ -1284,6 +1167,7 @@ orion.textview.TextView = (function() {
 			this.onModelChanging(e);
 			this._model = model;
 			e = {
+				type: "ModelChanged",
 				start: 0,
 				removedCharCount: oldCharCount,
 				addedCharCount: newCharCount,
@@ -1291,7 +1175,8 @@ orion.textview.TextView = (function() {
 				addedLineCount: newLineCount
 			};
 			this.onModelChanged(e); 
-			this._model.addListener(this._modelListener);
+			this._model.addEventListener("Changing", this._modelListener.onChanging);
+			this._model.addEventListener("Changed", this._modelListener.onChanged);
 			this._reset();
 			this._updatePage();
 		},
@@ -1496,7 +1381,7 @@ orion.textview.TextView = (function() {
 			var viewPad = this._getViewPadding(); 
 			var x = e.clientX + scroll.x - viewRect.left - viewPad.left; 
 			var y = e.clientY + scroll.y - viewRect.top - viewPad.top; 
-			this.onContextMenu({x: x, y: y, screenX: e.screenX, screenY: e.screenY}); 
+			this.onContextMenu({type: "ContextMenu", x: x, y: y, screenX: e.screenX, screenY: e.screenY}); 
 			if (e.preventDefault) { e.preventDefault(); }
 			return false;
 		},
@@ -2043,6 +1928,7 @@ orion.textview.TextView = (function() {
 				this._commitIME();
 				this._updatePage();
 				var e = {
+					type: "Scroll",
 					oldValue: {x: oldX, y: oldY},
 					newValue: scroll
 				};
@@ -2718,7 +2604,7 @@ orion.textview.TextView = (function() {
 				}
 		},
 		_createActions: function () {
-			var KeyBinding = orion.textview.KeyBinding;
+			var KeyBinding = mKeyBinding.KeyBinding;
 			//no duplicate keybindings
 			var bindings = this._keyBindings = [];
 
@@ -2892,7 +2778,7 @@ orion.textview.TextView = (function() {
 		_createLine: function(parent, sibling, document, lineIndex, model) {
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
-			var e = {textView: this, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart};
+			var e = {type:"LineStyle", textView: this, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart};
 			this.onLineStyle(e);
 			var child = document.createElement("DIV");
 			child.lineIndex = lineIndex;
@@ -3649,8 +3535,8 @@ orion.textview.TextView = (function() {
 			newRange.selectNode(element);
 
 			var selection = window.getSelection();
-			var oldRanges = [];
-			for (var i = 0; i < selection.rangeCount; i++) {
+			var oldRanges = [], i;
+			for (i = 0; i < selection.rangeCount; i++) {
 				oldRanges.push(selection.getRangeAt(i));
 			}
 
@@ -3661,7 +3547,7 @@ orion.textview.TextView = (function() {
 			var text = selection.toString();
 
 			selection.removeAllRanges();
-			for (var i = 0; i < oldRanges.length; i++) {
+			for (i = 0; i < oldRanges.length; i++) {
 				selection.addRange(oldRanges[i]);
 			}
 
@@ -4117,7 +4003,8 @@ orion.textview.TextView = (function() {
 					self._onModelChanged(modelChangedEvent);
 				}
 			};
-			this._model.addListener(this._modelListener);
+			this._model.addEventListener("Changing", this._modelListener.onChanging);
+			this._model.addEventListener("Changed", this._modelListener.onChanged);
 			
 			var clientDiv = this._clientDiv;
 			var viewDiv = this._viewDiv;
@@ -4195,7 +4082,7 @@ orion.textview.TextView = (function() {
 			}
 			if (!parent) { throw "no parent"; }
 			this._parent = parent;
-			this._model = options.model ? options.model : new orion.textview.TextModel();
+			this._model = options.model ? options.model : new mTextModel.TextModel();
 			this.readonly = options.readonly === true;
 			this._fullSelection = options.fullSelection === undefined || options.fullSelection;
 			/* 
@@ -4211,7 +4098,6 @@ orion.textview.TextView = (function() {
 			this._rulers = [];
 			this._selection = new Selection (0, 0, false);
 			this._linksVisible = false;
-			this._eventTable = new EventTable();
 			this._redrawCount = 0;
 			this._maxLineWidth = 0;
 			this._maxLineIndex = -1;
@@ -4252,7 +4138,7 @@ orion.textview.TextView = (function() {
 			if (this.readonly && !e._code) {
 				return;
 			}
-
+			e.type = "Verify";
 			this.onVerify(e);
 
 			if (e.text === null || e.text === undefined) { return; }
@@ -4270,10 +4156,12 @@ orion.textview.TextView = (function() {
 				selection.setCaret(e.start + e.text.length);
 				this._setSelection(selection, true);
 			}
-			this.onModify({});
+			this.onModify({type: "Modify"});
 		},
 		_onModelChanged: function(modelChangedEvent) {
+			modelChangedEvent.type = "ModelChanged";
 			this.onModelChanged(modelChangedEvent);
+			modelChangedEvent.type = "Changed";
 			var start = modelChangedEvent.start;
 			var addedCharCount = modelChangedEvent.addedCharCount;
 			var removedCharCount = modelChangedEvent.removedCharCount;
@@ -4313,7 +4201,9 @@ orion.textview.TextView = (function() {
 			this._updatePage();
 		},
 		_onModelChanging: function(modelChangingEvent) {
+			modelChangingEvent.type = "ModelChanging";
 			this.onModelChanging(modelChangingEvent);
+			modelChangingEvent.type = "Changing";
 		},
 		_queueUpdatePage: function() {
 			if (this._updateTimer) { return; }
@@ -4723,6 +4613,7 @@ orion.textview.TextView = (function() {
 				if (!oldSelection.equals(selection)) {
 					this._selection = selection;
 					var e = {
+						type: "Selection",
 						oldValue: {start:oldSelection.start, end:oldSelection.end},
 						newValue: {start:selection.start, end:selection.end}
 					};
@@ -4889,7 +4780,8 @@ orion.textview.TextView = (function() {
 			this._imeOffset = selection.start;
 		},
 		_unhookEvents: function() {
-			this._model.removeListener(this._modelListener);
+			this._model.removeEventListener("Changing", this._modelListener.onChanging);
+			this._model.removeEventListener("Changed", this._modelListener.onChanged);
 			this._modelListener = null;
 			for (var i=0; i<this._handlers.length; i++) {
 				var h = this._handlers[i];
@@ -5263,12 +5155,7 @@ orion.textview.TextView = (function() {
 			}
 		}
 	};//end prototype
+	mEventTarget.EventTarget.addMixin(TextView.prototype);
 	
-	return TextView;
-}());
-
-if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define(['orion/textview/textModel', 'orion/textview/keyBinding'], function() {
-		return orion.textview;
-	});
-}
+	return {TextView: TextView};
+});

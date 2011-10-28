@@ -9,12 +9,25 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global document window navigator define orion */
+/*global document window navigator define */
 
-var examples = examples || {};
-examples.textview = examples.textview || {};
-
-examples.textview.TextStyler = (function() {
+(define ||
+	function(deps, callback) {
+		/**
+		 * @namespace The global container for Orion APIs.
+		 */ 
+		var orion = this.orion = this.orion || {};
+		orion.textview = orion.textview || {};
+		var examples = this.examples = this.examples || {};
+		examples.textview = examples.textview || {};
+		var module = callback(orion.textview);
+		for (var p in module) {
+			if (module.hasOwnProperty(p)) {
+				examples.textview[p] = module[p];
+			}
+		}
+	}
+)(['orion/textview/annotations'], function(mAnnotations) {
 
 	var JS_KEYWORDS =
 		["break",
@@ -101,289 +114,274 @@ examples.textview.TextStyler = (function() {
 	var bracketStyle = {styleClass: isIE < 9 ? "token_bracket" : "token_bracket_outline"};
 	var caretLineStyle = {styleClass: "line_caret"};
 	
-	var Scanner = (function() {
-		function Scanner (keywords, whitespacesVisible) {
-			this.keywords = keywords;
-			this.whitespacesVisible = whitespacesVisible;
-			this.setText("");
-		}
-		
-		Scanner.prototype = {
-			getOffset: function() {
-				return this.offset;
-			},
-			getStartOffset: function() {
-				return this.startOffset;
-			},
-			getData: function() {
-				return this.text.substring(this.startOffset, this.offset);
-			},
-			getDataLength: function() {
-				return this.offset - this.startOffset;
-			},
-			_default: function(c) {
-				var keywords = this.keywords;
-				switch (c) {
-					case 32: // SPACE
-					case 9: // TAB
-						if (this.whitespacesVisible) {
-							return c === 32 ? WHITE_SPACE : WHITE_TAB;
-						}
+	function Scanner (keywords, whitespacesVisible) {
+		this.keywords = keywords;
+		this.whitespacesVisible = whitespacesVisible;
+		this.setText("");
+	}
+	
+	Scanner.prototype = {
+		getOffset: function() {
+			return this.offset;
+		},
+		getStartOffset: function() {
+			return this.startOffset;
+		},
+		getData: function() {
+			return this.text.substring(this.startOffset, this.offset);
+		},
+		getDataLength: function() {
+			return this.offset - this.startOffset;
+		},
+		_default: function(c) {
+			var keywords = this.keywords;
+			switch (c) {
+				case 32: // SPACE
+				case 9: // TAB
+					if (this.whitespacesVisible) {
+						return c === 32 ? WHITE_SPACE : WHITE_TAB;
+					}
+					do {
+						c = this._read();
+					} while(c === 32 || c === 9);
+					this._unread(c);
+					return WHITE;
+				case 123: // {
+				case 125: // }
+				case 40: // (
+				case 41: // )
+				case 91: // [
+				case 93: // ]
+				case 60: // <
+				case 62: // >
+					// BRACKETS
+					return c;
+				default:
+					var isCSS = this.isCSS;
+					if ((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (0x2d === c && isCSS)) { //LETTER OR UNDERSCORE OR NUMBER
+						var off = this.offset - 1;
 						do {
 							c = this._read();
-						} while(c === 32 || c === 9);
+						} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (0x2d === c && isCSS));  //LETTER OR UNDERSCORE OR NUMBER
 						this._unread(c);
-						return WHITE;
-					case 123: // {
-					case 125: // }
-					case 40: // (
-					case 41: // )
-					case 91: // [
-					case 93: // ]
-					case 60: // <
-					case 62: // >
-						// BRACKETS
-						return c;
-					default:
-						var isCSS = this.isCSS;
-						if ((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (0x2d === c && isCSS)) { //LETTER OR UNDERSCORE OR NUMBER
-							var off = this.offset - 1;
-							do {
+						if (keywords.length > 0) {
+							var word = this.text.substring(off, this.offset);
+							//TODO slow
+							for (var i=0; i<keywords.length; i++) {
+								if (this.keywords[i] === word) { return KEYWORD; }
+							}
+						}
+					}
+					return UNKOWN;
+			}
+		},
+		_read: function() {
+			if (this.offset < this.text.length) {
+				return this.text.charCodeAt(this.offset++);
+			}
+			return -1;
+		},
+		_unread: function(c) {
+			if (c !== -1) { this.offset--; }
+		},
+		nextToken: function() {
+			this.startOffset = this.offset;
+			while (true) {
+				var c = this._read();
+				switch (c) {
+					case -1: return null;
+					case 47:	// SLASH -> comment
+						c = this._read();
+						if (c === 47) { // SLASH -> single line
+							while (true) {
 								c = this._read();
-							} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (0x2d === c && isCSS));  //LETTER OR UNDERSCORE OR NUMBER
-							this._unread(c);
-							if (keywords.length > 0) {
-								var word = this.text.substring(off, this.offset);
-								//TODO slow
-								for (var i=0; i<keywords.length; i++) {
-									if (this.keywords[i] === word) { return KEYWORD; }
+								if ((c === -1) || (c === 10) || (c === 13)) {
+									this._unread(c);
+									return SINGLELINE_COMMENT;
 								}
 							}
 						}
-						return UNKOWN;
-				}
-			},
-			_read: function() {
-				if (this.offset < this.text.length) {
-					return this.text.charCodeAt(this.offset++);
-				}
-				return -1;
-			},
-			_unread: function(c) {
-				if (c !== -1) { this.offset--; }
-			},
-			nextToken: function() {
-				this.startOffset = this.offset;
-				while (true) {
-					var c = this._read();
-					switch (c) {
-						case -1: return null;
-						case 47:	// SLASH -> comment
+						if (c === 42) { // STAR -> multi line 
 							c = this._read();
-							if (c === 47) { // SLASH -> single line
-								while (true) {
-									c = this._read();
-									if ((c === -1) || (c === 10) || (c === 13)) {
-										this._unread(c);
-										return SINGLELINE_COMMENT;
-									}
-								}
+							var token = MULTILINE_COMMENT;
+							if (c === 42) {
+								token = DOC_COMMENT;
 							}
-							if (c === 42) { // STAR -> multi line 
-								c = this._read();
-								var token = MULTILINE_COMMENT;
-								if (c === 42) {
-									token = DOC_COMMENT;
-								}
-								while (true) {
-									while (c === 42) {
-										c = this._read();
-										if (c === 47) {
-											return token;
-										}
-									}
-									if (c === -1) {
-										this._unread(c);
+							while (true) {
+								while (c === 42) {
+									c = this._read();
+									if (c === 47) {
 										return token;
 									}
+								}
+								if (c === -1) {
+									this._unread(c);
+									return token;
+								}
+								c = this._read();
+							}
+						}
+						this._unread(c);
+						return UNKOWN;
+					case 39:	// SINGLE QUOTE -> char const
+						while(true) {
+							c = this._read();
+							switch (c) {
+								case 39:
+									return STRING;
+								case 13:
+								case 10:
+								case -1:
+									this._unread(c);
+									return STRING;
+								case 92: // BACKSLASH
 									c = this._read();
-								}
+									break;
 							}
-							this._unread(c);
-							return UNKOWN;
-						case 39:	// SINGLE QUOTE -> char const
-							while(true) {
-								c = this._read();
-								switch (c) {
-									case 39:
-										return STRING;
-									case 13:
-									case 10:
-									case -1:
-										this._unread(c);
-										return STRING;
-									case 92: // BACKSLASH
-										c = this._read();
-										break;
-								}
+						}
+						break;
+					case 34:	// DOUBLE QUOTE -> string
+						while(true) {
+							c = this._read();
+							switch (c) {
+								case 34: // DOUBLE QUOTE
+									return STRING;
+								case 13:
+								case 10:
+								case -1:
+									this._unread(c);
+									return STRING;
+								case 92: // BACKSLASH
+									c = this._read();
+									break;
 							}
-							break;
-						case 34:	// DOUBLE QUOTE -> string
-							while(true) {
-								c = this._read();
-								switch (c) {
-									case 34: // DOUBLE QUOTE
-										return STRING;
-									case 13:
-									case 10:
-									case -1:
-										this._unread(c);
-										return STRING;
-									case 92: // BACKSLASH
-										c = this._read();
-										break;
-								}
-							}
-							break;
-						default:
-							return this._default(c);
-					}
-				}
-			},
-			setText: function(text) {
-				this.text = text;
-				this.offset = 0;
-				this.startOffset = 0;
-			}
-		};
-		return Scanner;
-	}());
-	
-	var WhitespaceScanner = (function() {
-		function WhitespaceScanner () {
-			Scanner.call(this, null, true);
-		}
-		WhitespaceScanner.prototype = new Scanner(null);
-		WhitespaceScanner.prototype.nextToken = function() {
-			this.startOffset = this.offset;
-			while (true) {
-				var c = this._read();
-				switch (c) {
-					case -1: return null;
-					case 32: // SPACE
-						return WHITE_SPACE;
-					case 9: // TAB
-						return WHITE_TAB;
+						}
+						break;
 					default:
-						do {
-							c = this._read();
-						} while(!(c === 32 || c === 9 || c === -1));
-						this._unread(c);
-						return UNKOWN;
+						return this._default(c);
 				}
 			}
-		};
-		
-		return WhitespaceScanner;
-	}());
-	
-	var CommentScanner = (function() {
-		function CommentScanner (whitespacesVisible) {
-			Scanner.call(this, null, whitespacesVisible);
+		},
+		setText: function(text) {
+			this.text = text;
+			this.offset = 0;
+			this.startOffset = 0;
 		}
-		CommentScanner.prototype = new Scanner(null);
-		CommentScanner.prototype.setType = function(type) {
-			this._type = type;
-		};
-		CommentScanner.prototype.nextToken = function() {
-			this.startOffset = this.offset;
-			while (true) {
-				var c = this._read();
-				switch (c) {
-					case -1: return null;
-					case 32: // SPACE
-					case 9: // TAB
-						if (this.whitespacesVisible) {
-							return c === 32 ? WHITE_SPACE : WHITE_TAB;
-						}
+	};
+	
+	function WhitespaceScanner () {
+		Scanner.call(this, null, true);
+	}
+	WhitespaceScanner.prototype = new Scanner(null);
+	WhitespaceScanner.prototype.nextToken = function() {
+		this.startOffset = this.offset;
+		while (true) {
+			var c = this._read();
+			switch (c) {
+				case -1: return null;
+				case 32: // SPACE
+					return WHITE_SPACE;
+				case 9: // TAB
+					return WHITE_TAB;
+				default:
+					do {
+						c = this._read();
+					} while(!(c === 32 || c === 9 || c === -1));
+					this._unread(c);
+					return UNKOWN;
+			}
+		}
+	};
+	
+	function CommentScanner (whitespacesVisible) {
+		Scanner.call(this, null, whitespacesVisible);
+	}
+	CommentScanner.prototype = new Scanner(null);
+	CommentScanner.prototype.setType = function(type) {
+		this._type = type;
+	};
+	CommentScanner.prototype.nextToken = function() {
+		this.startOffset = this.offset;
+		while (true) {
+			var c = this._read();
+			switch (c) {
+				case -1: return null;
+				case 32: // SPACE
+				case 9: // TAB
+					if (this.whitespacesVisible) {
+						return c === 32 ? WHITE_SPACE : WHITE_TAB;
+					}
+					do {
+						c = this._read();
+					} while(c === 32 || c === 9);
+					this._unread(c);
+					return WHITE;
+				case 60: // <
+					if (this._type === DOC_COMMENT) {
 						do {
 							c = this._read();
-						} while(c === 32 || c === 9);
+						} while(!(c === 62 || c === -1)); // >
+						if (c === 62) {
+							return HTML_MARKUP;
+						}
+					}
+					return UNKOWN;
+				case 64: // @
+					if (this._type === DOC_COMMENT) {
+						do {
+							c = this._read();
+						} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57));  //LETTER OR UNDERSCORE OR NUMBER
 						this._unread(c);
-						return WHITE;
-					case 60: // <
-						if (this._type === DOC_COMMENT) {
-							do {
+						return DOC_TAG;
+					}
+					return UNKOWN;
+				case 84: // T
+					if ((c = this._read()) === 79) { // O
+						if ((c = this._read()) === 68) { // D
+							if ((c = this._read()) === 79) { // O
 								c = this._read();
-							} while(!(c === 62 || c === -1)); // >
-							if (c === 62) {
-								return HTML_MARKUP;
-							}
-						}
-						return UNKOWN;
-					case 64: // @
-						if (this._type === DOC_COMMENT) {
-							do {
-								c = this._read();
-							} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57));  //LETTER OR UNDERSCORE OR NUMBER
-							this._unread(c);
-							return DOC_TAG;
-						}
-						return UNKOWN;
-					case 84: // T
-						if ((c = this._read()) === 79) { // O
-							if ((c = this._read()) === 68) { // D
-								if ((c = this._read()) === 79) { // O
-									c = this._read();
-									if (!((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) {
-										this._unread(c);
-										return TASK_TAG;
-									}
+								if (!((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) {
 									this._unread(c);
-								} else {
-									this._unread(c);
+									return TASK_TAG;
 								}
+								this._unread(c);
 							} else {
 								this._unread(c);
 							}
 						} else {
 							this._unread(c);
 						}
-						//FALL THROUGH
-					default:
-						do {
-							c = this._read();
-						} while(!(c === 32 || c === 9 || c === -1 || c === 60 || c === 64 || c === 84));
+					} else {
 						this._unread(c);
-						return UNKOWN;
-				}
+					}
+					//FALL THROUGH
+				default:
+					do {
+						c = this._read();
+					} while(!(c === 32 || c === 9 || c === -1 || c === 60 || c === 64 || c === 84));
+					this._unread(c);
+					return UNKOWN;
 			}
-		};
-		
-		return CommentScanner;
-	}());
-	
-	var FirstScanner = (function() {
-		function FirstScanner () {
-			Scanner.call(this, null, false);
 		}
-		FirstScanner.prototype = new Scanner(null);
-		FirstScanner.prototype._default = function(c) {
-			while(true) {
-				c = this._read();
-				switch (c) {
-					case 47: // SLASH
-					case 34: // DOUBLE QUOTE
-					case 39: // SINGLE QUOTE
-					case -1:
-						this._unread(c);
-						return UNKOWN;
-				}
+	};
+	
+	function FirstScanner () {
+		Scanner.call(this, null, false);
+	}
+	FirstScanner.prototype = new Scanner(null);
+	FirstScanner.prototype._default = function(c) {
+		while(true) {
+			c = this._read();
+			switch (c) {
+				case 47: // SLASH
+				case 34: // DOUBLE QUOTE
+				case 39: // SINGLE QUOTE
+				case -1:
+					this._unread(c);
+					return UNKOWN;
 			}
-		};
-		
-		return FirstScanner;
-	}());
+		}
+	};
 	
 	function TextStyler (view, lang, annotationModel) {
 		this.commentStart = "/*";
@@ -412,22 +410,31 @@ examples.textview.TextStyler = (function() {
 		this._currentBracket = undefined; 
 		this._matchingBracket = undefined;
 		
-		view.addEventListener("Selection", this, this._onSelection);
+		var self = this;
+		this._listener = {
+			onChanged: function(e) {
+				self._onModelChanged(e);
+			},
+			onDestroy: function(e) {
+				self._onDestroy(e);
+			},
+			onLineStyle: function(e) {
+				self._onLineStyle(e);
+			},
+			onSelection: function(e) {
+				self._onSelection(e);
+			}
+		};
 		var model = view.getModel();
 		if (model.getBaseModel) {
-			var self = this;
-			this._baseModelListener = {
-				onChanged: function(modelChangedEvent) {
-					self._onModelChanged(modelChangedEvent);
-				}
-			};
-			model.getBaseModel().addListener(this._baseModelListener);
+			model.getBaseModel().addEventListener("Changed", this._listener.onChanged);
 		} else {
 			//TODO still needed to keep the event order correct (styler before view)
-			view.addEventListener("ModelChanged", this, this._onModelChanged);
+			view.addEventListener("ModelChanged", this._listener.onChanged);
 		}
-		view.addEventListener("Destroy", this, this._onDestroy);
-		view.addEventListener("LineStyle", this, this._onLineStyle);
+		view.addEventListener("Selection", this._listener.onSelection);
+		view.addEventListener("Destroy", this._listener.onDestroy);
+		view.addEventListener("LineStyle", this._listener.onLineStyle);
 		this._computeComments ();
 		this._computeFolding();
 		view.redrawLines();
@@ -439,13 +446,13 @@ examples.textview.TextStyler = (function() {
 			if (view) {
 				var model = view.getModel();
 				if (model.getBaseModel) {
-					model.getBaseModel().removeListener(this._baseModelListener);
+					model.getBaseModel().removeEventListener("Changed", this._listener.onChanged);
 				} else {
-					view.removeEventListener("ModelChanged", this, this._onModelChanged);
+					view.removeEventListener("ModelChanged", this._listener.onChanged);
 				}
-				view.removeEventListener("Selection", this, this._onSelection);
-				view.removeEventListener("Destroy", this, this._onDestroy);
-				view.removeEventListener("LineStyle", this, this._onLineStyle);
+				view.removeEventListener("Selection", this._listener.onSelection);
+				view.removeEventListener("Destroy", this._listener.onDestroy);
+				view.removeEventListener("LineStyle", this._listener.onLineStyle);
 				this.view = null;
 			}
 		},
@@ -514,7 +521,7 @@ examples.textview.TextStyler = (function() {
 			if (startLine === endLine) {
 				return null;
 			}
-			return new orion.textview.FoldingAnnotation(viewModel, "orion.annotation.folding", start, end,
+			return new mAnnotations.FoldingAnnotation(viewModel, "orion.annotation.folding", start, end,
 				"<div class='annotationHTML expanded'></div>", {styleClass: "annotation expanded"}, 
 				"<div class='annotationHTML collapsed'></div>", {styleClass: "annotation collapsed"});
 		},
@@ -1070,11 +1077,6 @@ examples.textview.TextStyler = (function() {
 			}
 		}
 	};
-	return TextStyler;
-}());
-
-if (typeof window !== "undefined" && typeof window.define !== "undefined") {
-	define([], function() {
-		return examples.textview;
-	});
-}
+	
+	return {TextStyler: TextStyler};
+});
