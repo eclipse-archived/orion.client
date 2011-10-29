@@ -71,8 +71,8 @@
 							if (listeners[i]) {
 								var l = listeners[i].listener;
 								if (typeof l === "function") {
-									l(evt);
-								} else if (typeof l.handleEvent === "function") {
+									l.call(this, evt);
+								} else if (l.handleEvent && typeof l.handleEvent === "function") {
 									l.handleEvent(evt);
 								}
 							}
