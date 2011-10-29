@@ -9,25 +9,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*global define window */
+ /*global define defineGlobal window */
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
-(define ||
-	function(deps, callback) {
-		/**
-		 * @namespace The global container for Orion APIs.
-		 */ 
-		var orion = this.orion = this.orion || {};
-		orion.editor = orion.editor || {};
-		orion.textview = orion.textview || {};
-		var module = callback(orion.textview, orion.textview);
-			for (var p in module) {
-			if (module.hasOwnProperty(p)) {
-				orion.editor[p] = module[p];
-			}
-		}
-	}
-)(['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKeyBinding, mEventTarget) {
+(define || function(deps, callback) { defineGlobal("orion/editor", deps, callback); })
+(['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKeyBinding, mEventTarget) {
 
 	/**
 	 * @name orion.editor.util
