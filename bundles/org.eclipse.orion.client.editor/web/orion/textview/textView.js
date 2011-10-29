@@ -12,23 +12,10 @@
  *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180
  ******************************************************************************/
 
-/*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
+/*global window document navigator setTimeout clearTimeout XMLHttpRequest define defineGlobal */
 
-(define ||
-	function(deps, callback) {
-		/**
-		 * @namespace The global container for Orion APIs.
-		 */ 
-		var orion = this.orion = this.orion || {};
-		orion.textview = orion.textview || {};
-		var module = callback(orion.textview, orion.textview, orion.textview);
-		for (var p in module) {
-			if (module.hasOwnProperty(p)) {
-				orion.textview[p] = module[p];
-			}
-		}
-	}
-)(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mTextModel, mKeyBinding, mEventTarget) {
+(define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
+(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mTextModel, mKeyBinding, mEventTarget) {
 
 	/** @private */
 	function addHandler(node, type, handler, capture) {

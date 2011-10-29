@@ -9,25 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global document window navigator define */
+/*global document window navigator define defineGlobal */
 
-(define ||
-	function(deps, callback) {
-		/**
-		 * @namespace The global container for Orion APIs.
-		 */ 
-		var orion = this.orion = this.orion || {};
-		orion.textview = orion.textview || {};
-		var examples = this.examples = this.examples || {};
-		examples.textview = examples.textview || {};
-		var module = callback(orion.textview);
-		for (var p in module) {
-			if (module.hasOwnProperty(p)) {
-				examples.textview[p] = module[p];
-			}
-		}
-	}
-)(['orion/textview/annotations'], function(mAnnotations) {
+(define || function(deps, callback) { defineGlobal("examples/textview", deps, callback); })
+(['orion/textview/annotations'], function(mAnnotations) {
 
 	var JS_KEYWORDS =
 		["break",

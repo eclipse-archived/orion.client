@@ -9,23 +9,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define*/
+/*global define defineGlobal */
 
-(define ||
-	function(deps, callback) {
-		/**
-		 * @namespace The global container for Orion APIs.
-		 */ 
-		var orion = this.orion = this.orion || {};
-		orion.editor = orion.editor || {};
-		var module = callback();
-		for (var p in module) {
-			if (module.hasOwnProperty(p)) {
-				orion.editor[p] = module[p];
-			}
-		}
-	}
-)([], function() {
+(define || function(deps, callback) { defineGlobal("orion/editor", deps, callback); })
+([], function() {
 
 	/**
 	 * @name orion.contentAssist.CssContentAssistProvider

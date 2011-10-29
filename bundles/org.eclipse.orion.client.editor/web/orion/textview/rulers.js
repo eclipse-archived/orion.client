@@ -9,23 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define setTimeout clearTimeout setInterval clearInterval Node */
+/*global define defineGlobal setTimeout clearTimeout setInterval clearInterval Node */
 
-(define ||
-	function(deps, callback) {
-		/**
-		 * @namespace The global container for Orion APIs.
-		 */ 
-		var orion = this.orion = this.orion || {};
-		orion.textview = orion.textview || {};
-		var module = callback(orion.textview);
-		for (var p in module) {
-			if (module.hasOwnProperty(p)) {
-				orion.textview[p] = module[p];
-			}
-		}
-	}
-)(['orion/textview/tooltip'], function(mTooltip) {
+(define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
+(['orion/textview/tooltip'], function(mTooltip) {
 
 	/**
 	 * Constructs a new ruler. 

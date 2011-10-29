@@ -11,23 +11,10 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
 
-/*global window define */
+/*global window define defineGlobal */
 
-(define ||
-	function(deps, callback) {
-		/**
-		 * @namespace The global container for Orion APIs.
-		 */ 
-		var orion = this.orion = this.orion || {};
-		orion.textview = orion.textview || {};
-		var module = callback(orion.textview);
-		for (var p in module) {
-			if (module.hasOwnProperty(p)) {
-				orion.textview[p] = module[p];
-			}
-		}
-	}
-)([], function() {
+(define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
+([], function() {
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 
 	/**
