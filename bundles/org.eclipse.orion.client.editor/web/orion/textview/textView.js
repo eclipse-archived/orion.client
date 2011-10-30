@@ -9,7 +9,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -3864,7 +3864,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 							}
 							offset += high;
 							start = high;
-							end = high === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : high + 1;
+							end = high === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : Math.min(high + 1, textNode.length);
 							if (isRangeRects) {
 								range.setStart(textNode, start);
 								range.setEnd(textNode, end);
