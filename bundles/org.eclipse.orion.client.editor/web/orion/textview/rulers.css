@@ -15,6 +15,7 @@
 	text-align: right;
 }
 .ruler.overview {
+	border-left: 1px solid lightgray;
 	width: 14px;
 }
 
