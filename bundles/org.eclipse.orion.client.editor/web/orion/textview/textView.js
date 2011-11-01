@@ -14,7 +14,7 @@
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define defineGlobal */
 
-(define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
+(window.define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
 (['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mTextModel, mKeyBinding, mEventTarget) {
 
 	/** @private */

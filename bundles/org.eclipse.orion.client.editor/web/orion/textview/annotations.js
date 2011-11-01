@@ -11,9 +11,9 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
 
-/*global define defineGlobal */
+/*global window define defineGlobal */
 
-(define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
+(window.define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
 (['orion/textview/eventTarget'], function(mEventTarget) {
 	/**
 	 * @class This object represents a decoration attached to a range of text. Annotations are added to a

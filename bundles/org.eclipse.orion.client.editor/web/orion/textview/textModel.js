@@ -13,7 +13,7 @@
  
 /*global define defineGlobal window*/
 
-(define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
+(window.define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
 (['orion/textview/eventTarget'], function(mEventTarget) {
 	var isWindows = window.navigator.platform.indexOf("Win") !== -1;
 

@@ -10,9 +10,9 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
  
-/*global define defineGlobal */
+/*global window define defineGlobal */
 
-(define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
+(window.define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
 ([], function() {
 	/** 
 	 * Constructs a new EventTarget object.

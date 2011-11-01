@@ -9,25 +9,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define */
+/*global window define defineGlobal */
 /*jslint maxerr:150 browser:true devel:true */
 
-(define ||
-	function(deps, callback) {
-		/**
-		 * @namespace The global container for Orion APIs.
-		 */ 
-		var orion = this.orion = this.orion || {};
-		orion.editor = orion.editor || {};
-		orion.textview = orion.textview || {};
-		var module = callback(orion.textview, orion.textview, orion.textview, orion.textview);
-		for (var p in module) {
-			if (module.hasOwnProperty(p)) {
-				orion.editor[p] = module[p];
-			}
-		}
-	}
-)(['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations'], function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
+(window.define || function(deps, callback) { defineGlobal("orion/editor", deps, callback); })
+(['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations'], function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
 
 	function UndoFactory() {
 	}

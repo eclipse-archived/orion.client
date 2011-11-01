@@ -9,10 +9,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define defineGlobal */
+/*global window define defineGlobal */
 /*jslint maxerr:150 browser:true devel:true */
 
-(define || function(deps, callback) { defineGlobal("orion/editor", deps, callback); })
+(window.define || function(deps, callback) { defineGlobal("orion/editor", deps, callback); })
 (['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKeyBinding, mEventTarget) {
 
 	/**

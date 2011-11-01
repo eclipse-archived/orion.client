@@ -12,7 +12,7 @@
  /*global define defineGlobal window */
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
-(define || function(deps, callback) { defineGlobal("orion/editor", deps, callback); })
+(window.define || function(deps, callback) { defineGlobal("orion/editor", deps, callback); })
 (['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKeyBinding, mEventTarget) {
 
 	/**

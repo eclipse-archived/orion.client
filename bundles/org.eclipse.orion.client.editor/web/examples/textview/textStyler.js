@@ -11,7 +11,7 @@
 
 /*global document window navigator define defineGlobal */
 
-(define || function(deps, callback) { defineGlobal("examples/textview", deps, callback); })
+(window.define || function(deps, callback) { defineGlobal("examples/textview", deps, callback); })
 (['orion/textview/annotations'], function(mAnnotations) {
 
 	var JS_KEYWORDS =
