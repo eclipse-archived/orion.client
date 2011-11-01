@@ -770,5 +770,8 @@ if (!Function.prototype.bind) {
 	Function.prototype.bind = util.bind;
 }
 
-	return {Editor: Editor};
+	return {
+		Editor: Editor,
+		util: util
+	};
 });
