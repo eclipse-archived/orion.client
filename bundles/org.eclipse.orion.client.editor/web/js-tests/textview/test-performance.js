@@ -9,232 +9,190 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global assertEquals orion window log examples setTimeout XMLHttpRequest assertNotNull */
+/*global define defineGlobal setTimeout window */
 
-if (window.AsyncTestCase) {
-	PerformanceTest = AsyncTestCase("Performance"); 
-} else {
-	function PerformanceTest (view) {
-		this.view = view;
-		this.FakeQueue = function() {
-		};
-		this.FakeQueue.prototype = { 
-		call: function (name, func) {
-				var callback = {
-					add: function(f) {return f;} 
-				};
-				func(callback);
-			}
-		};
-	}
-}
+(define || function(deps, callback) { defineGlobal("tests/textview", deps, callback); })
+([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 
-PerformanceTest.prototype = {
-	setUp: function () {
-		/*:DOC += <div id="divParent" style="width:800px;height:800px;"></div>*/   
-		assertNotNull(window.document.getElementById('divParent')); 
-		var stylesheets = [
-			"/orion/textview/textview.css",
-			"/orion/textview/rulers.css",
-			"/examples/textview/textstyler.css"
-		];
-		var options = {
-			parent: "divParent",
-			model: new orion.textview.TextModel(),
-			stylesheet: stylesheets,
-			tabSize: 4
-		};
-		window.top.moveTo(0,0);
-		window.top.resizeTo(window.screen.width,window.screen.height);
-		this.view = new orion.textview.TextView(options);
-	},
-	tearDown: function () {
-		this.view.destroy();
-	},
-	doPage: function (queue, action, max) {
-		var view = this.view;
-		var objXml = new XMLHttpRequest();
-		objXml.open("GET","/examples/textview/text.txt",false);
-		objXml.send(null);
-		this.styler = new examples.textview.TextStyler(view, "java");
-		view.setText(objXml.responseText);
-		var model = view.getModel();
-		queue.call(action, function(callbacks) {
-			var start = new Date().getTime();
-			function t() {
-				var caretLine = model.getLineAtOffset(view.getCaretOffset());
-				view.invokeAction(action);
-				if (model.getLineAtOffset(view.getCaretOffset()) !== caretLine && (max === undefined || --max > 0)) {
-					setTimeout(callbacks.add(t), 0);
-				} else {
-					if (window.log) { log ("time(",action,")=", (new Date().getTime() - start)); }
-				}
-			}
-			if (action.toLowerCase().indexOf("down") !== -1) {
-				view.setSelection(0, 0);
-			} else {
-				var charCount = model.getCharCount();
-				view.setSelection(charCount, charCount);
-			}
-			view.focus();
-			t();
-		}); 
+	/*
+	* TODO async tests are run simultaneously in orion test framework Bug#362595
+	*/
+
+	var tests = {};
 	
-	},
-	test_pageDown: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		this.doPage(queue, "pageDown");
-	},
-	test_selectPageDown: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		this.doPage(queue, "selectPageDown");
-	},
-	test_pageUp: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		this.doPage(queue, "pageUp");
-	},
-	test_selectPageUp: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		this.doPage(queue, "selectPageUp");
-	},
-	test_lineDown: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		this.doPage(queue, "lineDown", 300);
-	},
-	test_selectLineDown: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		this.doPage(queue, "selectLineDown", 300);
-	},
-	test_lineUp: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		this.doPage(queue, "lineUp", 300);
-	},
-	test_scrollLeft: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		
-		var view = this.view;
+	function log() {
+		if (window.log) {
+			window.log.apply(this, arguments);
+		}
+	}
+	
+	function doAction(action, max) {
+//		var d = new dojo.Deferred();
+		var view = mSetup.setupView(mSetup.getFile("/orion/textview/textView.js"), "js");
+		var model = view.getModel();
+		if (action.toLowerCase().indexOf("down") !== -1) {
+			view.setSelection(0, 0);
+		} else {
+			var charCount = model.getCharCount();
+			view.setSelection(charCount, charCount);
+		}
+		view.focus();
+		var start = new Date().getTime();
+		function t() {
+			var caretLine = model.getLineAtOffset(view.getCaretOffset());
+			view.invokeAction(action);
+			if (model.getLineAtOffset(view.getCaretOffset()) !== caretLine && (max === undefined || --max > 0)) {
+				setTimeout(t, 0);
+			} else {
+//				d.resolve(true);
+				log("time(",action,")=", (new Date().getTime() - start));
+			}
+		}
+		t();
+//		return d;
+	}
+	
+	tests.testPageDown = function () {
+		return doAction("pageDown");
+	};
+	tests.testSelectPageDown = function () {
+		return doAction("selectPageDown");
+	};
+	tests.testPageUp = function () {
+		return doAction("pageUp");
+	};
+	tests.testSelectPageUp = function () {
+		return doAction("selectPageUp");
+	};
+	tests.testLineDown = function () {
+		return doAction("lineDown", 300);
+	};
+	tests.testSelectLineDown = function () {
+		return doAction("selectLineDown", 300);
+	};
+	tests.testLineUp = function () {
+		return doAction("lineUp", 300);
+	};
+	tests.testSelectLineUp = function () {
+		return doAction("selectLineUp", 300);
+	};
+	tests.testScrollLeft = function () {
+//		var d = new dojo.Deferred();
 		var buffer = "";
 		for (var i = 0; i < 1000;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
 		}
-		new examples.textview.TextStyler(view, "js");
 		var max = 256;
-		//test hit test without any styles
-		view.setText(buffer);
-
-		queue.call('setHorizontalPixel', function(callbacks) {
-			var start = new Date().getTime();
-			var hscroll = -1;
-			function t() {
-				var newHscroll = view.getHorizontalPixel();
-				if (newHscroll !== hscroll && --max > 0) {			
-					hscroll = newHscroll;
-					view.setHorizontalPixel(hscroll + 4);
-					setTimeout(callbacks.add(t), 0);
-				} else {
-					if (window.log) { log ("time(setHorizontalPixel)=", (new Date().getTime() - start)); }
-				}
+		var view = mSetup.setupView(buffer, "js");
+		var start = new Date().getTime();
+		var hscroll = -1;
+		function t() {
+			var newHscroll = view.getHorizontalPixel();
+			if (newHscroll !== hscroll && --max > 0) {			
+				hscroll = newHscroll;
+				view.setHorizontalPixel(hscroll + 4);
+				setTimeout(t, 0);
+			} else {
+				log ("time(setHorizontalPixel)=", (new Date().getTime() - start));
+//				d.resolve(true);
 			}
-			view.focus();
-			t();
-		});
-	},
-	test_selectLineUp: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		this.doPage(queue, "selectLineUp", 300);
-	},
-	test_getLocationAtOffset: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		var view = this.view;
+		}
+		view.focus();
+		t();
+//		return d;
+	};
+	tests.testGetLocationAtOffset = function () {
+//		var d = new dojo.Deferred();
 		var count = 10;
 		var buffer = "";
 		for (var i = 0; i < 10;i++) {
 			buffer += "var nada for nada function " + i + " ";
 		}
-		
 		//test hit test without any styles
-		view.setText(buffer);
+		var view = mSetup.setupView(buffer, null);
 		view.focus();
-		var length = buffer.length;
-		queue.call('getLocationAtOffset', function(callbacks) {
+		setTimeout(function() {
+			var length = buffer.length;
 			var start = new Date().getTime();
 			for (i = 0; i < count;i++) {
 				for (var j = 0; j < length;j++) {
 					view.getLocationAtOffset(j);
 				}
 			}
-			if (window.log) { log("time(getLocationAtOffset)=" + (new Date().getTime() - start)); }
-		});
-	},
-	test_getLocationAtOffsetStyled: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		var view = this.view;
+			log("time(getLocationAtOffset)=" + (new Date().getTime() - start));
+//			d.resolve(true);
+		}, 0);
+//		return d;
+	};
+	tests.testGetLocationAtOffsetStyled = function () {
+//		var d = new dojo.Deferred();
 		var count = 10;
 		var buffer = "";
 		for (var i = 0; i < 10;i++) {
 			buffer += "var nada for nada function " + i + " ";
 		}
-		
 		//test hit test with styles
-		view.setText(buffer);
-		new examples.textview.TextStyler(view, "js");
+		var view = mSetup.setupView(buffer, "js");
 		view.focus();
-		var length = buffer.length;
-		queue.call('getLocationAtOffsetStyled', function(callbacks) {
+		setTimeout(function() {
+			var length = buffer.length;
 			var start = new Date().getTime();
 			for (i = 0; i < count;i++) {
 				for (var j = 0; j < length;j++) {
 					view.getLocationAtOffset(j);
 				}
 			}
-			if (window.log) { log("time(getLocationAtOffset)[styled]=" + (new Date().getTime() - start)); }
-		});
-	},
-	test_getOffsetAtLocation: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		var view = this.view;
+			log("time(getLocationAtOffset)[styled]=" + (new Date().getTime() - start));
+//			d.resolve(true);
+		}, 0);
+//		return d;
+	};
+	tests.testGetOffsetAtLocation = function () {
+//		var d = new dojo.Deferred();
 		var count = 100;
 		var buffer = "";
 		for (var i = 0; i < 6;i++) {
 			buffer += "var nada for nada function " + i + " ";
 		}
-		
 		//test hit test without any styles
-		view.setText(buffer);
+		var view = mSetup.setupView(buffer, null);
 		view.focus();
 		var location = view.getLocationAtOffset(buffer.length);
-		queue.call('getLocationAtOffset', function(callbacks) {
+		setTimeout(function() {
 			var start = new Date().getTime();
 			for (i = 0; i < count;i++) {
 				for (var j = 0; j < location.x; j++) {
 					view.getOffsetAtLocation(j, location.y);
 				}
 			}
-			if (window.log) { log("time(getOffseAtLocation)=" + (new Date().getTime() - start)); }
-		});
-	},
-	test_getOffsetAtLocationStyled: function (queue) {
-		if (!queue) { queue = new this.FakeQueue(); }
-		var view = this.view;
+			log("time(getOffseAtLocation)=" + (new Date().getTime() - start));
+//			d.resolve(true);
+		}, 0);
+//		return d;
+	};
+	tests.testGetOffsetAtLocationStyled = function () {
+//		var d = new dojo.Deferred();
 		var count = 100;
 		var buffer = "";
 		for (var i = 0; i < 6;i++) {
 			buffer += "var nada for nada function " + i + " ";
 		}
-		
 		//test hit test with styles
-		view.setText(buffer);
-		new examples.textview.TextStyler(view, "js");
+		var view = mSetup.setupView(buffer, "js");
 		view.focus();
 		var location = view.getLocationAtOffset(buffer.length);
-		queue.call('getLocationAtOffset[styled]', function(callbacks) {
+		setTimeout(function() {
 			var start = new Date().getTime();
 			for (i = 0; i < count;i++) {
 				for (var j = 0; j < location.x; j++) {
 					view.getOffsetAtLocation(j, location.y);
 				}
 			}
-			if (window.log) { log("time(getOffseAtLocation)[styled]=" + (new Date().getTime() - start)); }
-		});
-	}
-};
+			log("time(getOffseAtLocation)[styled]=" + (new Date().getTime() - start));
+//			d.resolve(true);
+		}, 0);
+//		return d;
+	};
+	
+	return tests;
+});
