@@ -19,6 +19,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.fileClient = fileClient; 
 		this._resultLocation = resultLocation;
 		this.searchStr = searchStr.toLowerCase();
+		this.searchStrLength = searchStr.length;
 		
 		this._treeRoot = {
 				isRoot: true,
@@ -339,7 +340,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					var result = this.searchOneline(lineString, searchStr);
 					if(result){
 						var lineNumber = i+1;
-						var detailNode = {parent: fileModelNode, type: "detail",  name: lineNumber+ " : " + lineStringOrigin, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
+						var detailNode = {parent: fileModelNode, type: "detail", matches: result, lineNumber: lineNumber + " : ", name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
 						fileModelNode.children.push(detailNode);
 					}
 				}
@@ -442,6 +443,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				span = dojo.create("span", null, col, "only");
 				if(item.type ===  "file"){
 					this.getExpandImage(tableRow, span, "core-sprite-file");
+					link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
+					dojo.place(document.createTextNode(item.name), link, "only");
 				} else {
 					var that = this;
 					dojo.connect(tableRow, "onclick", tableRow, function() {
@@ -469,9 +472,26 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					icon = dojo.create("span", null, span, "last");
 					dojo.addClass(icon, "imageSprite");
 					dojo.addClass(icon, "core-sprite-rightarrow");
+					
+					link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
+					var linkSpan = dojo.create("span", null, link, "only");
+					dojo.place(document.createTextNode(item.lineNumber), linkSpan, "last");
+					var startIndex = 0;
+					var gap = this.explorer.model.searchStrLength;
+					for(var i = 0; i < item.matches.length; i++){
+						if(startIndex >= item.name.length)
+							break;
+						if(startIndex !== item.matches[i].startIndex){
+							dojo.place(document.createTextNode(item.name.substring(startIndex, item.matches[i].startIndex)), linkSpan, "last");
+						}
+						var matchSegBold = dojo.create("b", null, linkSpan, "last");
+						dojo.place(document.createTextNode(item.name.substring(item.matches[i].startIndex, item.matches[i].startIndex + gap)), matchSegBold, "only");
+						startIndex = item.matches[i].startIndex + gap;
+					}
+					if(startIndex < (item.name.length - 1)){
+						dojo.place(document.createTextNode(item.name.substring(startIndex)), linkSpan, "last");
+					}
 				}
-				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
-				dojo.place(document.createTextNode(item.name), link, "only");
 			}
 			return col;
 		case 1:
