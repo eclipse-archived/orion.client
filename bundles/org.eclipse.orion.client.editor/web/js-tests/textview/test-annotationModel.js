@@ -9,32 +9,18 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global assertEquals orion AnnotationModelTestCase window*/
+/*global define defineGlobal */
 
-if (window.AsyncTestCase) {
-	AnnotationModelTestCase = TestCase("AnnotationModelTestCase"); 
-} else {
-	function AnnotationModelTestCase (view) {
-		
-	}
-//BAD should use Simon's framework ? 
-	function assertEquals (msg, expected, actual) {
-		if (expected !== actual) {
-			if (window.log) {
-				log ("Failed", msg, "Expected:", expected, "Actual:", actual)
-			};
-			return false;
-		}
-		return true;
-	}
-}
+(define || function(deps, callback) { defineGlobal("tests/textview", deps, callback); })
+(["orion/assert", 'orion/textview/textModel', 'orion/textview/annotations'], function(assert, mTextModel, mAnnotations) {
 
-AnnotationModelTestCase.prototype = {
-	test_annotationModelTest1: function () {
+	var tests = {};
+	
+	tests.testAnnotationModel1 = function () {
 //		                      1         2         3         4         5         6         7	
 		var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
-		var textModel = new orion.textview.TextModel(text, "\n");
-		var annotationModel = new orion.textview.AnnotationModel(textModel);
+		var textModel = new mTextModel.TextModel(text, "\n");
+		var annotationModel = new mAnnotations.AnnotationModel(textModel);
 		var annotation1 = {start: 0, end: 5};
 		var annotation2 = {start: 10, end: 15};
 		var annotation3 = {start: 20, end: 30};
@@ -52,17 +38,17 @@ AnnotationModelTestCase.prototype = {
 		var iter;
 		
 		iter = annotationModel.getAnnotations(0, 30);
-		assertEquals("", iter.hasNext(), true);
-		assertEquals("", iter.next(), annotation1);
-		assertEquals("", iter.hasNext(), true);
-		assertEquals("", iter.next(), annotation2);
-		assertEquals("", iter.hasNext(), true);
-		assertEquals("", iter.next(), annotation3);
-		assertEquals("", iter.hasNext(), true);
-		assertEquals("", iter.next(), annotation4);
-		assertEquals("", iter.hasNext(), false);
-		
-		
-	}
-};
+		assert.equal(iter.hasNext(), true);
+		assert.equal(iter.next(), annotation1);
+		assert.equal(iter.hasNext(), true);
+		assert.equal(iter.next(), annotation2);
+		assert.equal(iter.hasNext(), true);
+		assert.equal(iter.next(), annotation3);
+		assert.equal(iter.hasNext(), true);
+		assert.equal(iter.next(), annotation4);
+		assert.equal(iter.hasNext(), false);
+	};
+	
+	return tests;
 
+});

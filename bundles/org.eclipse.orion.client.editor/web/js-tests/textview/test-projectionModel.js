@@ -9,44 +9,31 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global assertEquals orion ProjectionTextModelTestCase window*/
+/*global define defineGlobal */
 
-if (window.AsyncTestCase) {
-	ProjectionTextModelTestCase = TestCase("ProjectionTextModelTestCase"); 
-} else {
-	function ProjectionTextModelTestCase (view) {
-		
-	}
-//BAD should use Simon's framework ? 
-	function assertEquals (msg, expected, actual) {
-		if (expected !== actual) {
-			if (window.log) {
-				log ("Failed", msg, "Expected:", expected, "Actual:", actual)
-			};
-			return false;
-		}
-		return true;
-	}
-}
+(define || function(deps, callback) { defineGlobal("tests/textview", deps, callback); })
+(["orion/assert", 'orion/textview/textModel', 'orion/textview/projectionTextModel'], function(assert, mTextModel, mProjectionTextModel) {
 
-
-ProjectionTextModelTestCase.prototype = {
+	var tests = {};
 	
+	function assertEquals(msg, expected, actual) {
+		assert.equal(actual, expected, msg);
+	}
 	
-	test_test1: function () {
+	tests.testProjectionModel1 = function () {
 		var model, projectionModel, i, expected;
 //		                                      0          1          2          3          4           5         6 
 //		                                      0123456 78901 2345678901234 567890 12345678901 234567 8901234567890123
 //		                                      0xx1xxx xx234 5678xx9012345 67xx89 012xxxxxxxx xxxxx3 4567890123456789
 //		                                                           1             2                        3         
-		model = new orion.textview.TextModel("silenio\nesta\naqui na casa\nworld\nabcdefghij\nxxxxl\nmxxxxxxxxxxxxxz", "\n");
+		model = new mTextModel.TextModel("silenio\nesta\naqui na casa\nworld\nabcdefghij\nxxxxl\nmxxxxxxxxxxxxxz", "\n");
 //		                                                 x             x      x                  x
-		projectionModel = new orion.textview.ProjectionTextModel(model);
-		projectionModel.addProjection({start: 1, end: 3, content: ""});// -2
-		projectionModel.addProjection({start: 4, end: 9, content: ""});//-5
-		projectionModel.addProjection({start: 16, end: 18, content: ""});//-2
-		projectionModel.addProjection({start: 27, end: 29, content: ""});//-2
-		projectionModel.addProjection({start: 34, end: 47, content: ""});//-13, total 24
+		projectionModel = new mProjectionTextModel.ProjectionTextModel(model);
+		projectionModel.addProjection({start: 1, end: 3, text: ""});// -2
+		projectionModel.addProjection({start: 4, end: 9, text: ""});//-5
+		projectionModel.addProjection({start: 16, end: 18, text: ""});//-2
+		projectionModel.addProjection({start: 27, end: 29, text: ""});//-2
+		projectionModel.addProjection({start: 34, end: 47, text: ""});//-13, total 24
 		assertEquals("projectionModel.getCharCount", 40, projectionModel.getCharCount());
 		assertEquals("model.getCharCount", 64, model.getCharCount());
 		assertEquals("projectionModel.getLineCount", 5, projectionModel.getLineCount());
@@ -69,12 +56,13 @@ ProjectionTextModelTestCase.prototype = {
 		for (i=0; i<expected.length; i++) {
 			assertEquals("projectionModel.getLineAtOffset="+i, expected[i], projectionModel.getLineAtOffset(i));
 		}
-	},
-	test_test2: function () {
+	};
+	
+	tests.testProjectionModel2 = function () {
 		var model, projectionModel, i, expected;
-		model = new orion.textview.TextModel("STARTEND", "\n");
-		projectionModel = new orion.textview.ProjectionTextModel(model);
-		projectionModel.addProjection({start: 5, end: 5, content: "CENTER"});
+		model = new mTextModel.TextModel("STARTEND", "\n");
+		projectionModel = new mProjectionTextModel.ProjectionTextModel(model);
+		projectionModel.addProjection({start: 5, end: 5, text: "CENTER"});
 		assertEquals("projectionModel.getText", "STARTCENTEREND", projectionModel.getText());
 		assertEquals("projectionModel.getCharCount", 14, projectionModel.getCharCount());
 		assertEquals("model.getCharCount", 8, model.getCharCount());
@@ -87,9 +75,9 @@ ProjectionTextModelTestCase.prototype = {
 			assertEquals("projectionModel.mapOffset(i,true)="+expected[i], expected[i], projectionModel.mapOffset(i, true));//from parent
 		}
 //		                                  0123456789
-		model = new orion.textview.TextModel("STARTXXEND", "\n");
-		projectionModel = new orion.textview.ProjectionTextModel(model);
-		projectionModel.addProjection({start: 5, end: 7, content: "CENTER"});
+		model = new mTextModel.TextModel("STARTXXEND", "\n");
+		projectionModel = new mProjectionTextModel.ProjectionTextModel(model);
+		projectionModel.addProjection({start: 5, end: 7, text: "CENTER"});
 		assertEquals("projectionModel.getText2", "STARTCENTEREND", projectionModel.getText());
 		assertEquals("projectionModel.getCharCount2", 14, projectionModel.getCharCount());
 		assertEquals("model.getCharCount2", 10, model.getCharCount());
@@ -104,9 +92,9 @@ ProjectionTextModelTestCase.prototype = {
 		assertEquals("projectionModel.getLineCount2", 1, projectionModel.getLineCount());
 		assertEquals("projectionModel.getLine(0)", "STARTCENTEREND", projectionModel.getLine(0));
 		
-		model = new orion.textview.TextModel("STARTEND", "\n");
-		projectionModel = new orion.textview.ProjectionTextModel(model);
-		projectionModel.addProjection({start: 5, end: 5, content: "\nCENTER\n"});
+		model = new mTextModel.TextModel("STARTEND", "\n");
+		projectionModel = new mProjectionTextModel.ProjectionTextModel(model);
+		projectionModel.addProjection({start: 5, end: 5, text: "\nCENTER\n"});
 //		                                                     01234567 8901 2345
 		assertEquals("projectionModel.getText(0,charCount)3", "START\nCENTER\nEND", projectionModel.getText(0, projectionModel.getCharCount()));
 		assertEquals("projectionModel.getCharCount3", 16, projectionModel.getCharCount());
@@ -144,58 +132,57 @@ ProjectionTextModelTestCase.prototype = {
 				assertEquals("addedLineCount"+expected[6], expected[5], e.addedLineCount);
 			}
 		};
-		model = new orion.textview.TextModel("01234567", "\n");
-		projectionModel = new orion.textview.ProjectionTextModel(model);
-		projectionModel.addProjection({start: 2, end: 2, content: "A\nB\nC"});
+		model = new mTextModel.TextModel("01234567", "\n");
+		projectionModel = new mProjectionTextModel.ProjectionTextModel(model);
+		projectionModel.addProjection({start: 2, end: 2, text: "A\nB\nC"});
 		assertEquals("a", "01A\nB\nC234567", projectionModel.getText());
 		projectionModel.addEventListener("Changing", listener.onChanging);
 		expected = ["", 0, 13, 0, 2, 0, "0"];
 		projectionModel.setText("");
 		
 		//
-		model = new orion.textview.TextModel("01234567", "\n");
-		projectionModel = new orion.textview.ProjectionTextModel(model);
-		projectionModel.addProjection({start: 2, end: 2, content: "A\nB\nC"});
+		model = new mTextModel.TextModel("01234567", "\n");
+		projectionModel = new mProjectionTextModel.ProjectionTextModel(model);
+		projectionModel.addProjection({start: 2, end: 2, text: "A\nB\nC"});
 		assertEquals("b", "01A\nB\nC234567", projectionModel.getText());
 		projectionModel.addEventListener("Changing", listener.onChanging);
 		expected = ["", 4, 6, 0, 1, 0, "1"];
 		projectionModel.setText("", 4, 10);
 		assertEquals("c", "01A\n567", projectionModel.getText());
 		
-		model = new orion.textview.TextModel("01234567", "\n");
-		projectionModel = new orion.textview.ProjectionTextModel(model);
-		projectionModel.addProjection({start: 2, end: 2, content: "A\nB\nC"});
+		model = new mTextModel.TextModel("01234567", "\n");
+		projectionModel = new mProjectionTextModel.ProjectionTextModel(model);
+		projectionModel.addProjection({start: 2, end: 2, text: "A\nB\nC"});
 		assertEquals("d", "01A\nB\nC234567", projectionModel.getText());
 		projectionModel.addEventListener("Changing", listener.onChanging);
 		expected = ["", 1, 4, 0, 1, 0, "1"];
 		projectionModel.setText("", 1, 5);
 		assertEquals("e", "0\nC234567", projectionModel.getText());
-		
-			
-	},
-	test_test3: function () {
+	};
+	
+	tests.testProjectionModel3 = function () {
 		var model, projectionModel, i, expected;
 //		
 //line index                                  0      1        2             3      4    5        6              7  8	   9
 //line offsets                                0      6        14            27     33   37       45             59 61      68
 //		                                      0          1          2          3           4          5           6          7
 //		                                      01234 56789012 3456789012345 678901 23456 78901234 5678901234567 89 0123456 7890123456
-		model = new orion.textview.TextModel("01234\n0123456\n012345678901\n01234\n012\n0123456\n0123456789012\n0\n012345\n012345678", "\n");
+		model = new mTextModel.TextModel("01234\n0123456\n012345678901\n01234\n012\n0123456\n0123456789012\n0\n012345\n012345678", "\n");
 // deletions                                  01  4\n0  34       345678901\n012          123456\n0123456789          23         5678 
 // inserts                                                          abcd       ABCDEFG                  abcd\nef\nghijlmn\nopqrst
 //                                                                                                                 ABCDE\nFGHIJK\nLMN
 // results                                    014\n034345abcd678901\n012ABCDEFG123456\n0123456abcd\nef\nghijlmn\nopqrst78923ABCDE\nFGHIJK\nLMN5678    
 //                                            012 34567890123456789 01234567890123456 789012345678 901 23456789 01234567890123456 7890123 45678901
 //                                                       1          2         3          4          5           6         7          8          9
-		projectionModel = new orion.textview.ProjectionTextModel(model);
-		projectionModel.addProjection({start: 2, end: 4, content: ""});//green remove 23 on line 0														-2
-		projectionModel.addProjection({start: 7, end: 9, content: ""});//green remove 12 on line 1														-2
-		projectionModel.addProjection({start: 11, end: 17, content: ""});//green remove from 5 on line 1 to 3 line 2 (56\n012)							-6
-		projectionModel.addProjection({start: 20, end: 20, content: "abcd"});//orange add abcd to 6 on line 2												+4
-		projectionModel.addProjection({start: 30, end: 38, content: "ABCDEFG"});//red replace 3 on line 3 to 1 on line 5 (34\n012\n0) by ABCDEFG		-8,+7 -1	
-		projectionModel.addProjection({start: 52, end: 52, content: "abcd\nef\nghijlmn\nopqrst"});//orange add abcd\nef\nghijlmn\nopqrst to 7 on line 6   +22  
-		projectionModel.addProjection({start: 55, end: 63, content: ""});//green remove from 10 on line 6 to 2 on line 8                                  -8
-		projectionModel.addProjection({start: 65, end: 73, content: "ABCDE\nFGHIJK\nLMN"});//red replace 4 on line 8 to 5 on line 9  by ABCDE\nFGHIJK\nLMN -8, +16, +8
+		projectionModel = new mProjectionTextModel.ProjectionTextModel(model);
+		projectionModel.addProjection({start: 2, end: 4, text: ""});//green remove 23 on line 0														-2
+		projectionModel.addProjection({start: 7, end: 9, text: ""});//green remove 12 on line 1														-2
+		projectionModel.addProjection({start: 11, end: 17, text: ""});//green remove from 5 on line 1 to 3 line 2 (56\n012)							-6
+		projectionModel.addProjection({start: 20, end: 20, text: "abcd"});//orange add abcd to 6 on line 2												+4
+		projectionModel.addProjection({start: 30, end: 38, text: "ABCDEFG"});//red replace 3 on line 3 to 1 on line 5 (34\n012\n0) by ABCDEFG		-8,+7 -1	
+		projectionModel.addProjection({start: 52, end: 52, text: "abcd\nef\nghijlmn\nopqrst"});//orange add abcd\nef\nghijlmn\nopqrst to 7 on line 6   +22  
+		projectionModel.addProjection({start: 55, end: 63, text: ""});//green remove from 10 on line 6 to 2 on line 8                                  -8
+		projectionModel.addProjection({start: 65, end: 73, text: "ABCDE\nFGHIJK\nLMN"});//red replace 4 on line 8 to 5 on line 9  by ABCDE\nFGHIJK\nLMN -8, +16, +8
 		assertEquals("model.getCharCount", 77, model.getCharCount());
 		assertEquals("projectionModel.getCharCount", 92, projectionModel.getCharCount());
 		assertEquals("model.getLineCount", 10, model.getLineCount());
@@ -246,6 +233,8 @@ ProjectionTextModelTestCase.prototype = {
 				assertEquals("getText(" + i + "-" + j + ")=", resultText.substring(i, i+j), projectionModel.getText(i, i+j));
 			}
 		}
-	}
-};
+	};
+	
+	return tests;
+});
 
