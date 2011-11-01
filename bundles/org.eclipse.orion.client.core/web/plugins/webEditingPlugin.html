@@ -4,7 +4,11 @@
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2011.">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
+<script>
+	window.define = window.define || undefined;
+</script>
 <script type="text/javascript" src="../orion/plugin.js"></script>
+<script type="text/javascript" src="../orion/textview/global.js"></script>
 <script type="text/javascript" src="../orion/editor/webContentAssist.js"></script>
 <script type="text/javascript" src="../orion/editor/htmlGrammar.js"></script>
 <script type="text/javascript">
@@ -24,7 +28,7 @@ window.onload = function() {
 	// Syntax highlighting for HTML
 	(function() {
 		var serviceImpl = { /* Grammar-based, so no service impl. All data is in properties */ };
-		var serviceProperties = orion.editor.HtmlGrammar;
+		var serviceProperties = orion.editor.HtmlGrammar();
 		provider.registerServiceProvider("orion.edit.highlighter", serviceImpl, serviceProperties);
 	}());
 	
