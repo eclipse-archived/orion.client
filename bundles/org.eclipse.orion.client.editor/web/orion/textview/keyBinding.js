@@ -13,7 +13,7 @@
 
 /*global window define defineGlobal */
 
-(define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
+(window.define || function(deps, callback) { defineGlobal("orion/textview", deps, callback); })
 ([], function() {
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 
