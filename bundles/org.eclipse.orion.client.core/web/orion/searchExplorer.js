@@ -333,6 +333,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var fileContents = fileContentText.split(this._lineDelimiter);
 		if(fileModelNode){
 			fileModelNode.children = [];
+			var totalMatches = 0;
 			for(var i = 0; i < fileContents.length ; i++){
 				var lineStringOrigin = fileContents[i];
 				if(lineStringOrigin && lineStringOrigin.length > 0){
@@ -342,10 +343,11 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 						var lineNumber = i+1;
 						var detailNode = {parent: fileModelNode, type: "detail", matches: result, lineNumber: lineNumber + " : ", name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
 						fileModelNode.children.push(detailNode);
+						totalMatches += result.length;
 					}
 				}
 			}
-			fileModelNode.name = fileModelNode.name + " (" + fileModelNode.children.length + " matches)";
+			fileModelNode.name = fileModelNode.name + " (" + totalMatches + " matches)";
 		}
 	};
 	
@@ -437,9 +439,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				dojo.place(document.createTextNode(item.name), link, "only");
 			} else {
 				col = document.createElement('td');
-				
 				var href = item.linkLocation;
-				
 				span = dojo.create("span", null, col, "only");
 				if(item.type ===  "file"){
 					this.getExpandImage(tableRow, span, "core-sprite-file");
