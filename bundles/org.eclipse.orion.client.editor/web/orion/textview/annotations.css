@@ -15,7 +15,8 @@
 	cursor: pointer;
 	width: 16px;
 	height: 16px;
-	float: left;
+	display: inline-block;
+	vertical-align: middle;
 	background-position: center;
 	background-repeat: no-repeat;
 }
