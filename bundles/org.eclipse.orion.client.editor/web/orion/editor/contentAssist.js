@@ -13,8 +13,6 @@
 /*jslint maxerr:150 browser:true devel:true */
 
 (function() {
-	var deps = ['orion/textview/keyBinding', 'orion/textview/eventTarget'];
-	var moduleParent = "orion/editor";
 	var module = function(mKeyBinding, mEventTarget) {
 
 		/**
@@ -394,8 +392,8 @@
 	};
 	
 	if (window.define) {
-		define(deps, module);
+		define(['orion/textview/keyBinding', 'orion/textview/eventTarget'], module);
 	} else {
-		defineGlobal(moduleParent, deps, module);
+		defineGlobal("orion/editor", ['orion/textview/keyBinding', 'orion/textview/eventTarget'], module);
 	}
 }());

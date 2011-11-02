@@ -12,8 +12,6 @@
 /*global window define defineGlobal setTimeout clearTimeout setInterval clearInterval Node */
 
 (function() {
-	var deps = ['orion/textview/textView', 'orion/textview/textModel', 'orion/textview/projectionTextModel'];
-	var moduleParent = "orion/textview";
 	var module = function(mTextView, mTextModel, mProjectionTextModel) {
 
 		/** @private */
@@ -240,8 +238,8 @@
 	};
 	
 	if (window.define) {
-		define(deps, module);
+		define(['orion/textview/textView', 'orion/textview/textModel', 'orion/textview/projectionTextModel'], module);
 	} else {
-		defineGlobal(moduleParent, deps, module);
+		defineGlobal("orion/textview", ['orion/textview/textView', 'orion/textview/textModel', 'orion/textview/projectionTextModel'], module);
 	}
 }());

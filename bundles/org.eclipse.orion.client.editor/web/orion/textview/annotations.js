@@ -14,8 +14,6 @@
 /*global window define defineGlobal */
 
 (function() {
-	var deps = ['orion/textview/eventTarget'];
-	var moduleParent = "orion/textview";
 	var module = function(mEventTarget) {
 		/**
 		 * @class This object represents a decoration attached to a range of text. Annotations are added to a
@@ -536,8 +534,8 @@
 	};
 	
 	if (window.define) {
-		define(deps, module);
+		define(['orion/textview/eventTarget'], module);
 	} else {
-		defineGlobal(moduleParent, deps, module);
+		defineGlobal("orion/textview", ['orion/textview/eventTarget'], module);
 	}
 }());

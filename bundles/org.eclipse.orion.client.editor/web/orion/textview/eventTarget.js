@@ -12,8 +12,6 @@
  
 /*global window define defineGlobal */
 (function() {
-	var deps = [];
-	var moduleParent = "orion/textview";
 	var module = function() {
 		/** 
 		 * Constructs a new EventTarget object.
@@ -128,8 +126,8 @@
 	};
 	
 	if (window.define) {
-		define(deps, module);
+		define([], module);
 	} else {
-		defineGlobal(moduleParent, deps, module);
+		defineGlobal("orion/textview", [], module);
 	}
 }());
