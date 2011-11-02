@@ -1121,7 +1121,6 @@
 						this.redrawLines(0, lineCount, rulers[i]);
 					}
 					this.redrawLines(0, lineCount); 
-					this._queueUpdatePage();
 				}
 			} else {
 				this._redrawCount++;
@@ -1913,7 +1912,7 @@
 				this._hScroll = scroll.x;
 				this._vScroll = scroll.y;
 				this._commitIME();
-				this._updatePage();
+				this._updatePage(oldY === scroll.y);
 				var e = {
 					type: "Scroll",
 					oldValue: {x: oldX, y: oldY},
@@ -4815,146 +4814,156 @@
 			}
 			this._setDOMSelection(topNode, topOffset, bottomNode, bottomOffset);
 		},
-		_updatePage: function() {
+		_updatePage: function(hScrollOnly) {
 			if (this._redrawCount > 0) { return; }
-			if (this._updateTimer) { 
+			if (this._updateTimer) {
 				clearTimeout(this._updateTimer);
 				this._updateTimer = null;
+				hScrollOnly = false;
 			}
-			var document = this._frameDocument;
-			var viewDiv = this._viewDiv;
 			var clientDiv = this._clientDiv;
 			if (!clientDiv) { return; }
-			var frameWidth = this._getFrameWidth();
-			var frameHeight = this._getFrameHeight();
-			document.body.style.width = frameWidth + "px";
-			document.body.style.height = frameHeight + "px";
-			var viewPad = this._getViewPadding();
-			
-			/* Update view height in order to have client height computed */
-			viewDiv.style.height = Math.max(0, (frameHeight - viewPad.top - viewPad.bottom)) + "px";
-			
 			var model = this._model;
+			var scroll = this._getScroll();
+			var viewPad = this._getViewPadding();
+			var lineCount = model.getLineCount();
 			var lineHeight = this._getLineHeight();
-			var scrollY = this._getScroll().y;
-			var firstLine = Math.max(0, scrollY) / lineHeight;
+			var firstLine = Math.max(0, scroll.y) / lineHeight;
 			var topIndex = Math.floor(firstLine);
 			var lineStart = Math.max(0, topIndex - 1);
 			var top = Math.round((firstLine - lineStart) * lineHeight);
-			var lineCount = model.getLineCount();
-			var clientHeight = this._getClientHeight();
-			var partialY = Math.round((firstLine - topIndex) * lineHeight);
-			var linesPerPage = Math.floor((clientHeight + partialY) / lineHeight);
-			var bottomIndex = Math.min(topIndex + linesPerPage, lineCount - 1);
-			var lineEnd = Math.min(bottomIndex + 1, lineCount - 1);
-			this._partialY = partialY;
-			
-			var lineIndex, lineWidth;
-			var child = clientDiv.firstChild;
-			while (child) {
-				lineIndex = child.lineIndex;
-				var nextChild = child.nextSibling;
-				if (!(lineStart <= lineIndex && lineIndex <= lineEnd) || child.lineChanged || child.lineIndex === -1) {
-					if (this._mouseWheelLine === child) {
-						child.style.display = "none";
-						child.lineIndex = -1;
+			var partialY = this._partialY = Math.round((firstLine - topIndex) * lineHeight);
+			var scrollWidth, scrollHeight = lineCount * lineHeight;
+			var leftWidth, clientWidth, clientHeight;
+			if (hScrollOnly) {
+				clientWidth = this._getClientWidth();
+				clientHeight = this._getClientHeight();
+				leftWidth = this._leftDiv ? this._leftDiv.scrollWidth : 0;
+				scrollWidth = Math.max(this._maxLineWidth, clientWidth);
+			} else {
+				var document = this._frameDocument;
+				var frameWidth = this._getFrameWidth();
+				var frameHeight = this._getFrameHeight();
+				document.body.style.width = frameWidth + "px";
+				document.body.style.height = frameHeight + "px";
+
+				/* Update view height in order to have client height computed */
+				var viewDiv = this._viewDiv;
+				viewDiv.style.height = Math.max(0, (frameHeight - viewPad.top - viewPad.bottom)) + "px";
+				clientHeight = this._getClientHeight();
+				var linesPerPage = Math.floor((clientHeight + partialY) / lineHeight);
+				var bottomIndex = Math.min(topIndex + linesPerPage, lineCount - 1);
+				var lineEnd = Math.min(bottomIndex + 1, lineCount - 1);
+				
+				var lineIndex, lineWidth;
+				var child = clientDiv.firstChild;
+				while (child) {
+					lineIndex = child.lineIndex;
+					var nextChild = child.nextSibling;
+					if (!(lineStart <= lineIndex && lineIndex <= lineEnd) || child.lineChanged || child.lineIndex === -1) {
+						if (this._mouseWheelLine === child) {
+							child.style.display = "none";
+							child.lineIndex = -1;
+						} else {
+							clientDiv.removeChild(child);
+						}
+					}
+					child = nextChild;
+				}
+	
+				child = this._getLineNext();
+				var frag = document.createDocumentFragment();
+				for (lineIndex=lineStart; lineIndex<=lineEnd; lineIndex++) {
+					if (!child || child.lineIndex > lineIndex) {
+						this._createLine(frag, null, document, lineIndex, model);
 					} else {
-						clientDiv.removeChild(child);
+						if (frag.firstChild) {
+							clientDiv.insertBefore(frag, child);
+							frag = document.createDocumentFragment();
+						}
+						child = this._getLineNext(child);
 					}
 				}
-				child = nextChild;
-			}
-
-			child = this._getLineNext();
-			var frag = document.createDocumentFragment();
-			for (lineIndex=lineStart; lineIndex<=lineEnd; lineIndex++) {
-				if (!child || child.lineIndex > lineIndex) {
-					this._createLine(frag, null, document, lineIndex, model);
-				} else {
-					if (frag.firstChild) {
-						clientDiv.insertBefore(frag, child);
-						frag = document.createDocumentFragment();
+				if (frag.firstChild) { clientDiv.insertBefore(frag, child); }
+	
+				/*
+				* Feature in WekKit. Webkit limits the width of the lines
+				* computed below to the width of the client div.  This causes
+				* the lines to be wrapped even though "pre" is set.  The fix
+				* is to set the width of the client div to a larger number
+				* before computing the lines width.  Note that this value is
+				* reset to the appropriate value further down.
+				*/ 
+				if (isWebkit) {
+					clientDiv.style.width = (0x7FFFF).toString() + "px";
+				}
+	
+				var rect;
+				child = this._getLineNext();
+				while (child) {
+					lineWidth = child.lineWidth;
+					if (lineWidth === undefined) {
+						rect = this._getLineBoundingClientRect(child);
+						lineWidth = child.lineWidth = rect.right - rect.left;
 					}
-					child = this._getLineNext(child);
-				}
-			}
-			if (frag.firstChild) { clientDiv.insertBefore(frag, child); }
-
-			/*
-			* Feature in WekKit. Webkit limits the width of the lines
-			* computed below to the width of the client div.  This causes
-			* the lines to be wrapped even though "pre" is set.  The fix
-			* is to set the width of the client div to a larger number
-			* before computing the lines width.  Note that this value is
-			* reset to the appropriate value further down.
-			*/ 
-			if (isWebkit) {
-				clientDiv.style.width = (0x7FFFF).toString() + "px";
-			}
-
-			var rect;
-			child = this._getLineNext();
-			while (child) {
-				lineWidth = child.lineWidth;
-				if (lineWidth === undefined) {
-					rect = this._getLineBoundingClientRect(child);
-					lineWidth = child.lineWidth = rect.right - rect.left;
-				}
-				if (lineWidth >= this._maxLineWidth) {
-					this._maxLineWidth = lineWidth;
-					this._maxLineIndex = child.lineIndex;
-				}
-				if (child.lineIndex === topIndex) { this._topChild = child; }
-				if (child.lineIndex === bottomIndex) { this._bottomChild = child; }
-				if (this._checkMaxLineIndex === child.lineIndex) { this._checkMaxLineIndex = -1; }
-				child = this._getLineNext(child);
-			}
-			if (this._checkMaxLineIndex !== -1) {
-				lineIndex = this._checkMaxLineIndex;
-				this._checkMaxLineIndex = -1;
-				if (0 <= lineIndex && lineIndex < lineCount) {
-					var dummy = this._createLine(clientDiv, null, document, lineIndex, model);
-					rect = this._getLineBoundingClientRect(dummy);
-					lineWidth = rect.right - rect.left;
 					if (lineWidth >= this._maxLineWidth) {
 						this._maxLineWidth = lineWidth;
-						this._maxLineIndex = lineIndex;
+						this._maxLineIndex = child.lineIndex;
 					}
-					clientDiv.removeChild(dummy);
+					if (child.lineIndex === topIndex) { this._topChild = child; }
+					if (child.lineIndex === bottomIndex) { this._bottomChild = child; }
+					if (this._checkMaxLineIndex === child.lineIndex) { this._checkMaxLineIndex = -1; }
+					child = this._getLineNext(child);
 				}
+				if (this._checkMaxLineIndex !== -1) {
+					lineIndex = this._checkMaxLineIndex;
+					this._checkMaxLineIndex = -1;
+					if (0 <= lineIndex && lineIndex < lineCount) {
+						var dummy = this._createLine(clientDiv, null, document, lineIndex, model);
+						rect = this._getLineBoundingClientRect(dummy);
+						lineWidth = rect.right - rect.left;
+						if (lineWidth >= this._maxLineWidth) {
+							this._maxLineWidth = lineWidth;
+							this._maxLineIndex = lineIndex;
+						}
+						clientDiv.removeChild(dummy);
+					}
+				}
+	
+				// Update rulers
+				this._updateRuler(this._leftDiv, topIndex, bottomIndex);
+				this._updateRuler(this._rightDiv, topIndex, bottomIndex);
+				
+				leftWidth = this._leftDiv ? this._leftDiv.scrollWidth : 0;
+				var rightWidth = this._rightDiv ? this._rightDiv.scrollWidth : 0;
+				viewDiv.style.left = leftWidth + "px";
+				viewDiv.style.width = Math.max(0, frameWidth - leftWidth - rightWidth - viewPad.left - viewPad.right) + "px";
+				if (this._rightDiv) {
+					this._rightDiv.style.left = (frameWidth - rightWidth) + "px"; 
+				}
+				/* Need to set the height first in order for the width to consider the vertical scrollbar */
+				var scrollDiv = this._scrollDiv;
+				scrollDiv.style.height = scrollHeight + "px";
+				/*
+				* TODO if frameHeightWithoutHScrollbar < scrollHeight  < frameHeightWithHScrollbar and the horizontal bar is visible, 
+				* then the clientWidth is wrong because the vertical scrollbar is showing. To correct code should hide both scrollbars 
+				* at this point.
+				*/
+				clientWidth = this._getClientWidth();
+				var width = Math.max(this._maxLineWidth, clientWidth);
+				/*
+				* Except by IE 8 and earlier, all other browsers are not allocating enough space for the right padding 
+				* in the scrollbar. It is possible this a bug since all other paddings are considered.
+				*/
+				scrollWidth = width;
+				if (!isIE || isIE >= 9) { width += viewPad.right; }
+				scrollDiv.style.width = width + "px";
+				/* Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset. */
+				scroll = this._getScroll();
+				var rulerHeight = clientHeight + viewPad.top + viewPad.bottom;
+				this._updateRulerSize(this._leftDiv, rulerHeight);
+				this._updateRulerSize(this._rightDiv, rulerHeight);
 			}
-
-			// Update rulers
-			this._updateRuler(this._leftDiv, topIndex, bottomIndex);
-			this._updateRuler(this._rightDiv, topIndex, bottomIndex);
-			
-			var leftWidth = this._leftDiv ? this._leftDiv.scrollWidth : 0;
-			var rightWidth = this._rightDiv ? this._rightDiv.scrollWidth : 0;
-			viewDiv.style.left = leftWidth + "px";
-			viewDiv.style.width = Math.max(0, frameWidth - leftWidth - rightWidth - viewPad.left - viewPad.right) + "px";
-			if (this._rightDiv) {
-				this._rightDiv.style.left = (frameWidth - rightWidth) + "px"; 
-			}
-			
-			var scrollDiv = this._scrollDiv;
-			/* Need to set the height first in order for the width to consider the vertical scrollbar */
-			var scrollHeight = lineCount * lineHeight;
-			scrollDiv.style.height = scrollHeight + "px";
-			// TODO if frameHeightWithoutHScrollbar < scrollHeight  < frameHeightWithHScrollbar and the horizontal bar is visible, 
-			// then the clientWidth is wrong because the vertical scrollbar is showing. To correct code should hide both scrollbars 
-			// at this point.
-			var clientWidth = this._getClientWidth();
-			var width = Math.max(this._maxLineWidth, clientWidth);
-			/*
-			* Except by IE 8 and earlier, all other browsers are not allocating enough space for the right padding 
-			* in the scrollbar. It is possible this a bug since all other paddings are considered.
-			*/
-			var scrollWidth = width;
-			if (!isIE || isIE >= 9) { width += viewPad.right; }
-			scrollDiv.style.width = width + "px";
-
-			// Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset.
-			var scroll = this._getScroll();
 			var left = scroll.x;
 			var clipLeft = left;
 			var clipTop = top;
@@ -4966,36 +4975,20 @@
 			if (scroll.y + clientHeight === scrollHeight) { clipBottom += viewPad.bottom; }
 			clientDiv.style.clip = "rect(" + clipTop + "px," + clipRight + "px," + clipBottom + "px," + clipLeft + "px)";
 			clientDiv.style.left = (-left + leftWidth + viewPad.left) + "px";
-			clientDiv.style.top = (-top + viewPad.top) + "px";
-			clientDiv.style.width = (isWebkit ? scrollWidth : clientWidth + left) + "px";
-			clientDiv.style.height = (clientHeight + top) + "px";
+			if (!hScrollOnly) {
+				clientDiv.style.top = (-top + viewPad.top) + "px";
+				clientDiv.style.width = (isWebkit ? scrollWidth : clientWidth + left) + "px";
+				clientDiv.style.height = (clientHeight + top) + "px";
+			}
 			var overlayDiv = this._overlayDiv;
 			if (overlayDiv) {
 				overlayDiv.style.clip = clientDiv.style.clip;
 				overlayDiv.style.left = clientDiv.style.left;
-				overlayDiv.style.top = clientDiv.style.top;
-				overlayDiv.style.width = clientDiv.style.width;
-				overlayDiv.style.height = clientDiv.style.height;
-			}
-			function _updateRulerSize(divRuler) {
-				if (!divRuler) { return; }
-				var rulerHeight = clientHeight + viewPad.top + viewPad.bottom;
-				var cells = divRuler.firstChild.rows[0].cells;
-				for (var i = 0; i < cells.length; i++) {
-					var div = cells[i].firstChild;
-					var offset = lineHeight;
-					if (div._ruler.getOverview() === "page") { offset += partialY; }
-					div.style.top = -offset + "px";
-					div.style.height = (rulerHeight + offset) + "px";
-					div = div.nextSibling;
+				if (!hScrollOnly) {
+					overlayDiv.style.top = clientDiv.style.top;
+					overlayDiv.style.width = clientDiv.style.width;
+					overlayDiv.style.height = clientDiv.style.height;
 				}
-				divRuler.style.height = rulerHeight + "px";
-			}
-			_updateRulerSize(this._leftDiv);
-			_updateRulerSize(this._rightDiv);
-			if (isPad) {
-				var self = this;
-				setTimeout(function() {self._resizeTouchDiv();}, 0);
 			}
 			this._updateDOMSelection();
 
@@ -5014,6 +5007,25 @@
 					this._showCaret();
 				}
 			}
+			if (isPad) {
+				var self = this;
+				setTimeout(function() {self._resizeTouchDiv();}, 0);
+			}
+		},
+		_updateRulerSize: function (divRuler, rulerHeight) {
+			if (!divRuler) { return; }
+			var partialY = this._partialY;
+			var lineHeight = this._getLineHeight();
+			var cells = divRuler.firstChild.rows[0].cells;
+			for (var i = 0; i < cells.length; i++) {
+				var div = cells[i].firstChild;
+				var offset = lineHeight;
+				if (div._ruler.getOverview() === "page") { offset += partialY; }
+				div.style.top = -offset + "px";
+				div.style.height = (rulerHeight + offset) + "px";
+				div = div.nextSibling;
+			}
+			divRuler.style.height = rulerHeight + "px";
 		},
 		_updateRuler: function (divRuler, topIndex, bottomIndex) {
 			if (!divRuler) { return; }
