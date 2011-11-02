@@ -11,8 +11,7 @@
 
 /*global define defineGlobal */
 
-(define || function(deps, callback) { defineGlobal("tests/textview", deps, callback); })
-(["orion/assert", 'orion/textview/textModel', 'orion/textview/projectionTextModel'], function(assert, mTextModel, mProjectionTextModel) {
+define(["orion/assert", 'orion/textview/textModel', 'orion/textview/projectionTextModel'], function(assert, mTextModel, mProjectionTextModel) {
 
 	var tests = {};
 	
