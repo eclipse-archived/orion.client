@@ -12,94 +12,103 @@
 /*jslint */
 /*global window define defineGlobal */
 
-(window.define || function(deps, callback) { defineGlobal("orion/editor", deps, callback); })
-([], function() {
+(function() {
+	var deps = [];
+	var moduleParent = "orion/editor";
+	var module = function() {
 
-/**
- * Provides a grammar that can do some very rough syntax highlighting for HTML.
- * @class orion.syntax.HtmlGrammar
- */
-function HtmlGrammar() {
-	return {
 		/**
-		 * What kind of highlight provider we are.
-		 * @public
-		 * @type String
+		 * Provides a grammar that can do some very rough syntax highlighting for HTML.
+		 * @class orion.syntax.HtmlGrammar
 		 */
-		type: "grammar",
-		
-		/**
-		 * The file extensions that we provide rules for.
-		 * @public
-		 * @type String[]
-		 */
-		fileTypes: [ "html", "htm" ],
-		
-		/**
-		 * Object containing the grammar rules.
-		 * @public
-		 * @type Object
-		 */
-		grammar: {
-			"name": "HTML",
-			"scopeName": "source.html",
-			"uuid": "3B5C76FB-EBB5-D930-F40C-047D082CE99B",
-			"patterns": [
-				// TODO unicode?
-				{
-					"match": "<!(doctype|DOCTYPE)[^>]+>",
-					"name": "entity.name.tag.doctype.html"
-				},
-				{
-					"begin": "<!--",
-					"end": "-->",
-					"beginCaptures": {
-						"0": { "name": "punctuation.definition.comment.html" }
-					},
-					"endCaptures": {
-						"0": { "name": "punctuation.definition.comment.html" }
-					},
+		function HtmlGrammar() {
+			return {
+				/**
+				 * What kind of highlight provider we are.
+				 * @public
+				 * @type String
+				 */
+				type: "grammar",
+				
+				/**
+				 * The file extensions that we provide rules for.
+				 * @public
+				 * @type String[]
+				 */
+				fileTypes: [ "html", "htm" ],
+				
+				/**
+				 * Object containing the grammar rules.
+				 * @public
+				 * @type Object
+				 */
+				grammar: {
+					"name": "HTML",
+					"scopeName": "source.html",
+					"uuid": "3B5C76FB-EBB5-D930-F40C-047D082CE99B",
 					"patterns": [
+						// TODO unicode?
 						{
-							"match": "--",
-							"name": "invalid.illegal.badcomment.html"
+							"match": "<!(doctype|DOCTYPE)[^>]+>",
+							"name": "entity.name.tag.doctype.html"
+						},
+						{
+							"begin": "<!--",
+							"end": "-->",
+							"beginCaptures": {
+								"0": { "name": "punctuation.definition.comment.html" }
+							},
+							"endCaptures": {
+								"0": { "name": "punctuation.definition.comment.html" }
+							},
+							"patterns": [
+								{
+									"match": "--",
+									"name": "invalid.illegal.badcomment.html"
+								}
+							],
+							"contentName": "comment.block.html"
+						},
+						{ // startDelimiter + tagName
+							"match": "<[A-Za-z0-9_\\-:]+(?= ?)",
+							"name": "entity.name.tag.html"
+						},
+						{ "include": "#attrName" },
+						{ "include": "#qString" },
+						{ "include": "#qqString" },
+						// TODO attrName, qString, qqString should be applied first while inside a tag
+						{ // startDelimiter + slash + tagName + endDelimiter
+							"match": "</[A-Za-z0-9_\\-:]+>",
+							"name": "entity.name.tag.html"
+						},
+						{ // end delimiter of open tag
+							"match": ">", 
+							"name": "entity.name.tag.html"
+						} ],
+					"repository": {
+						"attrName": { // attribute name
+							"match": "[A-Za-z\\-:]+(?=\\s*=\\s*['\"])",
+							"name": "entity.other.attribute.name.html"
+						},
+						"qqString": { // double quoted string
+							"match": "(\")[^\"]+(\")",
+							"name": "string.quoted.double.html"
+						},
+						"qString": { // single quoted string
+							"match": "(')[^']+(\')",
+							"name": "string.quoted.single.html"
 						}
-					],
-					"contentName": "comment.block.html"
-				},
-				{ // startDelimiter + tagName
-					"match": "<[A-Za-z0-9_\\-:]+(?= ?)",
-					"name": "entity.name.tag.html"
-				},
-				{ "include": "#attrName" },
-				{ "include": "#qString" },
-				{ "include": "#qqString" },
-				// TODO attrName, qString, qqString should be applied first while inside a tag
-				{ // startDelimiter + slash + tagName + endDelimiter
-					"match": "</[A-Za-z0-9_\\-:]+>",
-					"name": "entity.name.tag.html"
-				},
-				{ // end delimiter of open tag
-					"match": ">", 
-					"name": "entity.name.tag.html"
-				} ],
-			"repository": {
-				"attrName": { // attribute name
-					"match": "[A-Za-z\\-:]+(?=\\s*=\\s*['\"])",
-					"name": "entity.other.attribute.name.html"
-				},
-				"qqString": { // double quoted string
-					"match": "(\")[^\"]+(\")",
-					"name": "string.quoted.double.html"
-				},
-				"qString": { // single quoted string
-					"match": "(')[^']+(\')",
-					"name": "string.quoted.single.html"
+					}
 				}
-			}
+			};
 		}
-	};
-}
 
-return {HtmlGrammar: HtmlGrammar};
-});
+		return {HtmlGrammar: HtmlGrammar};
+	};
+		
+	if (window.define) {
+		define(deps, module);
+	} else {
+		defineGlobal(moduleParent, deps, module);
+	}
+}());
