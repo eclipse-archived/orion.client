@@ -12,8 +12,6 @@
 /*global window define defineGlobal setTimeout clearTimeout setInterval clearInterval Node */
 
 (function() {
-	var deps = ['orion/textview/tooltip'];
-	var moduleParent = "orion/textview";
 	var module = function(mTooltip) {
 
 		/**
@@ -723,8 +721,8 @@
 	};
 	
 	if (window.define) {
-		define(deps, module);
+		define(['orion/textview/tooltip'], module);
 	} else {
-		defineGlobal(moduleParent, deps, module);
+		defineGlobal("orion/textview", ['orion/textview/tooltip'], module);
 	}
 }());

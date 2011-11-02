@@ -12,8 +12,6 @@
 /*global document window navigator define defineGlobal */
 
 (function() {
-	var deps = ['orion/textview/annotations'];
-	var moduleParent = "examples/textview";
 	var module = function(mAnnotations) {
 
 		var JS_KEYWORDS =
@@ -1069,8 +1067,8 @@
 	};
 	
 	if (window.define) {
-		define(deps, module);
+		define(['orion/textview/annotations'], module);
 	} else {
-		defineGlobal(moduleParent, deps, module);
+		defineGlobal("examples/textview", ['orion/textview/annotations'], module);
 	}
 }());

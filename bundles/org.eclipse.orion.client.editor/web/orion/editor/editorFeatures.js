@@ -13,8 +13,6 @@
 /*jslint maxerr:150 browser:true devel:true */
 
 (function() {
-	var deps = ['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations'];
-	var moduleParent = "orion/editor";
 	var module = function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
 
 		function UndoFactory() {
@@ -948,8 +946,8 @@
 	};
 	
 	if (window.define) {
-		define(deps, module);
+		define(['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations'], module);
 	} else {
-		defineGlobal(moduleParent, deps, module);
+		defineGlobal("orion/editor", ['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations'], module);
 	}
 }());

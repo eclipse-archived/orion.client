@@ -13,8 +13,6 @@
 /*global window define defineGlobal */
 
 (function() {
-	var deps = [];
-	var moduleParent = "orion/editor";
 	var module = function() {
 
 		/**
@@ -107,8 +105,8 @@
 	};
 		
 	if (window.define) {
-		define(deps, module);
+		define([], module);
 	} else {
-		defineGlobal(moduleParent, deps, module);
+		defineGlobal("orion/editor", [], module);
 	}
 }());

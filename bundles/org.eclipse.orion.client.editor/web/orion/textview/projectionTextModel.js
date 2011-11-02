@@ -14,8 +14,6 @@
 /*global window define defineGlobal */
 
 (function() {
-	var deps = ['orion/textview/textModel', 'orion/textview/eventTarget'];
-	var moduleParent = "orion/textview";
 	var module = function(mTextModel, mEventTarget) {
 
 		/**
@@ -584,8 +582,8 @@
 	};
 	
 	if (window.define) {
-		define(deps, module);
+		define(['orion/textview/textModel', 'orion/textview/eventTarget'], module);
 	} else {
-		defineGlobal(moduleParent, deps, module);
+		defineGlobal("orion/textview", ['orion/textview/textModel', 'orion/textview/eventTarget'], module);
 	}
 }());

@@ -13,8 +13,6 @@
 
 /*global window define defineGlobal */
 (function() {
-	var deps = [];
-	var moduleParent = "orion/textview";
 	var module = function() {
 		var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 
@@ -87,8 +85,8 @@
 	};
 	
 	if (window.define) {
-		define(deps, module);
+		define([], module);
 	} else {
-		defineGlobal(moduleParent, deps, module);
+		defineGlobal("orion/textview", [], module);
 	}
 }());

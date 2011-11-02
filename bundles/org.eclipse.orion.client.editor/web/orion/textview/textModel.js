@@ -14,8 +14,6 @@
 /*global define defineGlobal window*/
 
 (function() {
-	var deps = ['orion/textview/eventTarget'];
-	var moduleParent = "orion/textview";
 	var module = function(mEventTarget) {
 		var isWindows = window.navigator.platform.indexOf("Win") !== -1;
 
@@ -443,8 +441,8 @@
 	};
 	
 	if (window.define) {
-		define(deps, module);
+		define(['orion/textview/eventTarget'], module);
 	} else {
-		defineGlobal(moduleParent, deps, module);
+		defineGlobal("orion/textview", ['orion/textview/eventTarget'], module);
 	}
 }());
