@@ -11,8 +11,7 @@
 
 /*global define defineGlobal setTimeout window */
 
-(define || function(deps, callback) { defineGlobal("tests/textview", deps, callback); })
-([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
+define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 
 	/*
 	* TODO async tests are run simultaneously in orion test framework Bug#362595
