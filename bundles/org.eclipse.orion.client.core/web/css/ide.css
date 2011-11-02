@@ -314,9 +314,56 @@ a:hover {
 	height: 2.5em;
 }
 
-.optionalPageToolbar {
-	background: #404040;
+.slideContainer {
+	border-bottom: 1px solid #ededed;
+}
+
+.leftSlide {
+	text-align: left;
 	vertical-align: middle;
+	float: left;
+	margin-left: -400px;
+	background: #f5f5f5;
+	opacity: 0;
+	height: 0;
+ 	transition: margin-left .5s ease-out;
+	-o-transition: margin-left .5s ease-out;
+	-moz-transition: margin-left .5s ease-out;
+	-webkit-transition: margin-left .5s ease-out;   
+}
+
+.leftSlideActive {
+	margin-left: 0px;
+	padding: 8px;
+	opacity: 1;
+	height: auto;
+	border-bottom-right-radius: 15px;
+	border-right: 2px solid #ffd400;
+	border-bottom: 2px solid #ffd400;
+}
+
+.rightSlide {
+	text-align: right;
+	vertical-align: middle;
+	float: right;
+	height: 0;
+	margin-right: -400px;
+	background: #f5f5f5;
+	opacity: 0;
+ 	transition: margin-right .5s ease-out;
+	-o-transition: margin-right .5s ease-out;
+	-moz-transition: margin-right .5s ease-out;
+	-webkit-transition: margin-right .5s ease-out;
+}
+
+.rightSlideActive {
+	opacity: 1;
+	padding: 8px;
+	margin-right: 0px;
+	height: auto;
+	border-bottom-left-radius: 15px;
+	border-left: 2px solid #ffd400;
+	border-bottom: 2px solid #ffd400;
 }
 
 .searchbox {

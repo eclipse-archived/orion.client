@@ -25,7 +25,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	// BEGIN TOP BANNER FRAGMENT
 	var topHTMLFragment =
 	// a table?!!?  Yes, you can't mix CSS float right and absolutes to pin the bottom.
-	'<table style="border: 2px solid white; margin: 0; padding: 0; border-collapse: collapse; width: 100%;">' +
+	'<table style="margin: 0; padding: 0; border-collapse: collapse; width: 100%;">' +
 	// Row 1:  Logo + page title + primary nav links
 		'<tr class="topRowBanner" id="bannerRow1">' +
 			'<td rowspan=3 style="padding-top: 12px; padding-bottom: 12px; padding-left: 8px; width: 148px"><a id="home" href="' + require.toUrl("index.html") + '"><span class="imageSprite core-sprite-orion toolbarLabel" alt="Orion Logo" align="top"></a></td>' +
@@ -58,18 +58,23 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		'<tr class="pageToolbar">' +
 			'<td colspan=3 style="padding-left: 16px;" id="pageToolbar" class="pageToolbar">' +
 				'<span id="pageActions" class="pageActions"></span>' +
-				'<span id="pageActionsRight" class="pageActions"></span>' +
+				'<span id="pageNavigationActions" class="pageActions"></span>' +
 			'</td>' +
 		'</tr>' +
-		// Row 5: optional Page Toolbar
-		'<tr class="optionalPageToolbar">' +
-			'<td colspan=3 style="border: 1px solid grey;padding-left: 16px;" id="optionalPageToolbar" class="optionalPageToolbar">' +
-				'<div id="optionalPageActions"  class="pageActions"></div>' +
+	// Row 5: Command Parameter area
+		'<tr>' +
+			'<td id="parameterArea" class="slideContainer" class colspan=3>' +
+				'<span id="pageParameterArea" class="leftSlide">' +
+					'<span id="pageCommandParameters" class="pageActions"></span>' +
+					'<span id="pageCommandDismiss" class="pageActions"></span>' +
+				'</span>' +
+				'<span id="pageNavigationParameterArea" class="rightSlide">' +
+					'<span id="pageNavigationCommandParameters" class="pageActions"></span>' +
+					'<span id="pageNavigationDismiss" class="pageActions"></span>' +
+				'</span>' +
 			'</td>' +
 		'</tr>' +
 	'</table>';
-	
-
 	// END TOP BANNER FRAGMENT
 	
 	// BEGIN BOTTOM BANNER FRAGMENT

@@ -33,7 +33,7 @@ orion.TextSearcher = (function() {
 		this._searchRange = null;
 		this._searchOnRange = false;
 		this._lastSearchString = "";
-		this._toolBarId = "optionalPageActions";
+		this._toolBarId = "pageNavigationCommandParameters";
 		this.setOptions(options);
 	}
 	TextSearcher.prototype = {
@@ -41,18 +41,6 @@ orion.TextSearcher = (function() {
 			var that = this;
 			var parentDiv = document
 					.getElementById(this._toolBarId);
-			var table = document.createElement('table');
-			// table.width = "100%";
-			parentDiv.appendChild(table);
-
-			var row = document.createElement('tr');
-			table.appendChild(row);
-			row.align = "right";
-			table.align = "right";
-
-			// create search text area
-			var searchStrTd = document.createElement('td');
-			row.appendChild(searchStrTd);
 			var searchStringDiv = document.createElement('input');
 			searchStringDiv.type = "text";
 			searchStringDiv.name = "Find:";
@@ -64,17 +52,15 @@ orion.TextSearcher = (function() {
 			searchStringDiv.onkeydown = function(evt){
 				return that._handleKeyDown(evt,true);
 			};
-			searchStrTd.appendChild(searchStringDiv);
+			parentDiv.appendChild(searchStringDiv);
 
 			// create the command span for Find
-			var td = document.createElement('td');
-			td.id = "localSearchFindCommands";
-			row.appendChild(td);
+			var span = document.createElement('span');
+			span.id = "localSearchFindCommands";
+			parentDiv.appendChild(span);
 			// td.noWrap = true;
 
 			// create replace text
-			var replaceStrTd = document.createElement('td');
-			row.appendChild(replaceStrTd);
 			var replaceStringDiv = document.createElement('input');
 			replaceStringDiv.type = "text";
 			replaceStringDiv.name = "ReplaceWith:";
@@ -84,34 +70,23 @@ orion.TextSearcher = (function() {
 			replaceStringDiv.onkeydown = function(evt){
 				return that._handleKeyDown(evt, false);
 			};
-			replaceStrTd.appendChild(replaceStringDiv);
+			parentDiv.appendChild(replaceStringDiv);
 
 			// create the command span for Replace
-			td = document.createElement('td');
-			td.id = "localSearchReplaceCommands";
-			row.appendChild(td);
+			span = document.createElement('span');
+			span.id = "localSearchReplaceCommands";
+			parentDiv.appendChild(span);
 
 			// create all other span for commands : replace/find ,
 			// replace all
-			td = document.createElement('td');
-			td.id = "localSearchOtherCommands";
-			row.appendChild(td);
-
-			// create directions : forward , backward (radion
-			// button)
-			var dirTd = document.createElement('td');
-			// td.noWrap = true;
-			row.appendChild(dirTd);
-
-			// create Scope : All , selected lines (radion button)
-			var scopeTd = document.createElement('td');
-			// td.noWrap = true;
-			row.appendChild(scopeTd);
+			span = document.createElement('span');
+			span.id = "localSearchOtherCommands";
+			parentDiv.appendChild(span);
 
 			// create Options button , which will bring a dialog
-			var optionTd = document.createElement('td');
+			var optionTd = document.createElement('span');
 			// td.noWrap = true;
-			row.appendChild(optionTd);
+			parentDiv.appendChild(optionTd);
 
 			var optionMenu = dijit.byId("searchOptMenu");
 			if (optionMenu) {
@@ -178,10 +153,9 @@ orion.TextSearcher = (function() {
 			dojo.place(menuButton.domNode, optionTd, "last");
 
 			// create close command span
-			var closeTd = document.createElement('td');
+			var closeTd = document.createElement('span');
 			closeTd.id = "localSearchCloseCommands";
-			row.appendChild(closeTd);
-			return table;
+			parentDiv.appendChild(closeTd);
 		},
 		
 		visible: function(){
@@ -238,8 +212,8 @@ orion.TextSearcher = (function() {
 			if(!this._visible)
 				return;
 			dojo.empty(this._toolBarId);
-			this._refreshTopContainer();
 			this._visible = false;
+			this._refreshTopContainer();
 			this._textSearchAdaptor.adaptCloseToolBar();
 		},
 
@@ -249,8 +223,16 @@ orion.TextSearcher = (function() {
 			// We need to work this around by doing the layout()
 			// call.
 			var topContainer = dijit.byId("topContainer");
-			if (topContainer && topContainer.layout)
+			var commandArea = dojo.byId("pageNavigationParameterArea");
+			//hack
+			if (this._visible) {
+				dojo.addClass(commandArea, "rightSlideActive");
+			} else {
+				dojo.removeClass(commandArea, "rightSlideActive");
+			}
+			if (topContainer && topContainer.layout) {
 				topContainer.layout();
+			}
 		},
 
 		buildToolBar : function(defaultSearchStr) {
