@@ -192,7 +192,7 @@
 					annotation = annotations[0];
 					if (annotation.title) {
 						title = annotation.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-						return annotation.html + "&nbsp;" + title;
+						return "<div>" + annotation.html + "&nbsp;<span style='vertical-align:mddle;'>" + title + "</span><div>";
 					} else {
 						var newModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 						var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
@@ -201,7 +201,7 @@
 						return newModel;
 					}
 				} else {
-					var tooltipHTML = "<em>Multiple annotations:</em><br>";
+					var tooltipHTML = "<div><em>Multiple annotations:</em></div>";
 					for (var i = 0; i < annotations.length; i++) {
 						annotation = annotations[i];
 						title = annotation.title;
@@ -209,7 +209,7 @@
 							title = getText(annotation.start, annotation.end);
 						}
 						title = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-						tooltipHTML += annotation.html + "&nbsp;" + title + "<br>";
+						tooltipHTML += "<div>" + annotation.html + "&nbsp;<span style='vertical-align:mddle;'>" + title + "</span><div>";
 					}
 					return tooltipHTML;
 				}
