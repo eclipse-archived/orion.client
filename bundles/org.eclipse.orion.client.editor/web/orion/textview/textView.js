@@ -9,7 +9,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -3449,7 +3449,10 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				this._ignorePaste = true;
 				try {
 					result = document.execCommand("paste", false, null);
-				} catch (ex) {}
+				} catch (ex) {
+					// Firefox can throw even when execCommand() works, see bug 362835
+					result = clipboardDiv.childNodes.length > 1 || clipboardDiv.firstChild && clipboardDiv.firstChild.childNodes.length > 0;
+				}
 				this._ignorePaste = false;
 				if (!result) {
 					/*
