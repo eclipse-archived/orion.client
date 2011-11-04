@@ -102,6 +102,9 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 	 * {@link orion.textview.TextModel}<br/> 
 	 * </p>	
 	 * @name orion.textview.AnnotationModel
+	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.textview.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function AnnotationModel(textModel) {
 		this._annotations = [];
