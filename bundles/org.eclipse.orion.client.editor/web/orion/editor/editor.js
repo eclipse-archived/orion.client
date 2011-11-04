@@ -43,6 +43,10 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKe
 	 * @param {Object} options.syntaxHighlightProviders
 	 * @param {Object} options.textViewFactory
 	 * @param {Object} options.undoStackFactory
+	 *
+	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.textview.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function Editor(options) {
 		this._textViewFactory = options.textViewFactory;

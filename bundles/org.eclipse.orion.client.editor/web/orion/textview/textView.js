@@ -133,6 +133,9 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 	 * 
 	 * @class A TextView is a user interface for editing text.
 	 * @name orion.textview.TextView
+	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.textview.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function TextView (options) {
 		this._init(options);
