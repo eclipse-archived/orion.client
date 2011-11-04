@@ -212,6 +212,81 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			throw "could not find banner parent, id was " + parentId;
 		}
 		
+		commandService.setParameterCollector(function(command, domElement, handler, callbackParameters) {
+			if (command.parameters) {
+				// get the banner node's parent.  If it is managed by dijit, we will need to layout
+				var layoutWidget = dijit.byId(parent.parentNode.id);
+				var parameterArea = null;
+				var parameterContainer = null;
+				var activeClass = null;
+				if (domElement.id === "pageActions") {
+					parameterArea = dojo.byId("pageCommandParameters");
+					parameterContainer = dojo.byId("pageParameterArea");
+					activeClass = "leftSlideActive";
+				} else if (domElement.id === "pageNavigationActions") {
+					parameterArea = dojo.byId("pageNavigationCommandParameters");
+					parameterContainer = dojo.byId("pageNavigationParameterArea");
+					activeClass = "rightSlideActive";
+				}
+				if (parameterArea) {
+					var first = null;
+					if (typeof command.parameters === "function") {
+						command.parameters.call(command, parameterArea, callbackParameters);
+					} else {
+						var keyHandler = function(event) {
+							if (event.keyCode === dojo.keys.ENTER) {
+								dojo.query("input", parameterArea).forEach(function(field) {
+									command.parameters[field.parameterName].value = field.value;
+									if (command.callback) {
+										command.callback.apply(handler, callbackParameters);
+									}
+								});
+							}
+							if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
+								dojo.empty(parameterArea);
+								dojo.removeClass(parameterContainer, activeClass);
+								if (layoutWidget) {
+									layoutWidget.layout();
+								}
+							}
+						};
+						for (var key in command.parameters) {
+							if (command.parameters[key].type) {
+								var parm = command.parameters[key];
+								if (parm.label) {
+									dojo.place(document.createTextNode(parm.label), parameterArea, "last");
+								} 
+								var field = dojo.create("input", {type: parm.type}, parameterArea, "last");
+								field.setAttribute("speech", "speech");
+								field.setAttribute("x-webkit-speech", "x-webkit-speech");
+								field.parameterName = key;
+								if (!first) {
+									first = field;
+								}
+								if (parm.value) {
+									field.value = parm.value;
+								}
+								dojo.connect(field, "onkeypress", keyHandler);
+							}
+						}
+						// need cancel button
+					} 
+					// all parameters have been generated.  Activate the area.
+					dojo.addClass(parameterContainer, activeClass);
+					if (layoutWidget) {
+						layoutWidget.layout();
+					}
+					if (first) {
+						window.setTimeout(function() {
+							first.focus();
+						}, 0);
+					}
+					return true;
+				}	
+			}
+			return false;
+		});
+		
 		// place the HTML fragment from above.
 		dojo.place(topHTMLFragment, parent, "only");
 		

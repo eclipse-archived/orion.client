@@ -127,6 +127,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		},
 		
 		/**
+		 * Provide a function that will collect parameters for a given command.  The function
+		 * will be called with two parameters.  The command in question, and the dom element that
+		 * contains the command.
+		 */
+		setParameterCollector: function(parameterCollector) {
+			this._parameterCollector = parameterCollector;
+		},
+		
+		/**
 		 * Show the keybindings that are registered with the command service inside the specified domNode.
 		 * @param {DOMElement} the dom node where the key bindings should be shown.
 		 */
@@ -377,8 +386,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-									image = menuCommand._asImage(id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink);
-									dojo.place(image, parent, "last");
+									menuCommand._addImage(parent, id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink);
 								}
 							}
 						} else {
@@ -494,8 +502,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						} else {
 							if (renderType === "image") {
 								id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								image = command._asImage(id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink);
-								dojo.place(image, parent, "last");
+								command._addImage(parent, id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, this._parameterCollector);
 							} else if (renderType === "menu") {
 								command._addMenuItem(parent, items, handler, userData, cssClass);
 							}
@@ -565,12 +572,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			this.imageClass = options.imageClass;   // points to the location in a sprite
 			this.spriteClass = options.spriteClass || "commandSprite"; // defines the background image containing sprites
 			this.visibleWhen = options.visibleWhen;
+			this.parameters = options.parameters;
 			// when false, affordances for commands are always shown.  When true,
 			// they are shown on hover only.
 			//how will we know this?
 			this._deviceSupportsHover = false;  
 		},
-		_asImage: function(name, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink) {
+		_addImage: function(parent, name, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, parameterCollector) {
 			handler = handler || this;
 			var link = dojo.create("a");
 			link.id = this.name+"link";
@@ -597,14 +605,26 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				}else{
 					link.href = href; 
 				}
-			} else if (this.callback) {
+			} else {
 				if (image) {
 					dojo.connect(image, "onclick", this, function() {
-						this.callback.call(handler, items, this.id, image.id, userData);
+						// collect parameters in advance if specified
+						if (this.parameters && parameterCollector) {
+							// should the handler be bound to this, or something else?
+							parameterCollector.call(handler, this, parent, handler, [items, this.id, image.id, userData, this.parameters]);
+						} else if (this.callback) {
+							this.callback.call(handler, items, this.id, image.id, userData, this.parameters);
+						}
 					});
 				} else {
 					dojo.connect(link, "onclick", this, function() {
-						this.callback.call(handler, items, this.id, link.id, userData);
+						// collect parameters in advance if specified
+						if (this.parameters && parameterCollector) {
+							// should the handler be bound to this, or something else?
+							parameterCollector.call(handler, this, parent, handler, [items, this.id, link.id, userData, this.parameters]);
+						} else if (this.callback) {
+							this.callback.call(handler, items, this.id, link.id, userData, this.parameters);
+						}
 					});
 				}
 			}
@@ -654,8 +674,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			if (cssClass) {
 				dojo.addClass(link, cssClass);
 			}
-			return link;
+			dojo.place(link, parent, "last");
 		},
+		
 		_asLink: function(items, handler, cssClass) {
 			handler =  handler || this;
 			var anchor = window.document.createElement('a');
