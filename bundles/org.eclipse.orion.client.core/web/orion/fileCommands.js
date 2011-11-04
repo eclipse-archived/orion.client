@@ -417,20 +417,29 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			}
 		}
 		
+		var newNameParameters = {};
+		newNameParameters.name = {label: 'Name:', type: 'text', required: true};
+		
 		var newFileCommand =  new mCommands.Command({
 			name: "New File",
 			tooltip: "Create a new file",
 			imageClass: "core-sprite-new_file",
 			id: "eclipse.newFile",
-			callback: function(item, commandId, domId) {
+			parameters: newNameParameters,
+			callback: function(item, commandId, domId, userData, parameters) {
 				item = forceSingleItem(item);
-				getNewItemName(item, domId, "New File", function(name) {
+				var createFunction = function(name) {
 					if (name) {
 						fileClient.createFile(item.Location, name).then(
 							dojo.hitch(explorer, function() {this.changedItem(item);}),
 							errorHandler);
 					}
-				});
+				};
+				if (parameters.name && parameters.name.value) {
+					createFunction(parameters.name.value);
+				} else {
+					getNewItemName(item, domId, "New File", createFunction);
+				}
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -443,15 +452,21 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			tooltip: "Create a new folder",
 			imageClass: "core-sprite-new_folder",
 			id: "eclipse.newFolder",
-			callback: function(item, commandId, domId) {
+			parameters: newNameParameters,
+			callback: function(item, commandId, domId, userData, parameters) {
 				item = forceSingleItem(item);
-				getNewItemName(item, domId, "New Folder", function(name) {
+				var createFunction = function(name) {
 					if (name) {
 						fileClient.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}), 
+							dojo.hitch(explorer, function() {this.changedItem(item);}),
 							errorHandler);
 					}
-				});
+				};
+				if (parameters.name && parameters.name.value) {
+					createFunction(parameters.name.value);
+				} else {
+					getNewItemName(item, domId, "New Folder", createFunction);
+				}
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
