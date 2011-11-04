@@ -27,7 +27,7 @@
 if (!window.define) {
 	window.define = function(deps, callback, moduleName) {
 		var module = this;
-		var split = moduleName.split("/"), i, j;
+		var split = (moduleName || "").split("/"), i, j;
 		for (i = 0; i < split.length; i++) {
 			module = module[split[i]] = (module[split[i]] || {});
 		}
