@@ -127,6 +127,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 	 * @param {orion.textview.TextModel} [options.model] the text model for the view. If this options is not set the view creates an empty {@link orion.textview.TextModel}.
 	 * @param {Boolean} [options.readonly=false] whether or not the view is read-only.
 	 * @param {Boolean} [options.fullSelection=true] whether or not the view is in full selection mode.
+	 * @param {Boolean} [options.sync=false] whether or not the view creation should be synchronous (if possible).
 	 * @param {String|String[]} [options.stylesheet] one or more stylesheet URIs for the view.
 	 * @param {Number} [options.tabSize] The number of spaces in a tab.
 	 * 
@@ -152,6 +153,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		computeSize: function() {
 			var w = 0, h = 0;
 			var model = this._model, clientDiv = this._clientDiv;
+			if (!clientDiv) { return {width: w, height: h}; }
 			var clientWidth = clientDiv.style.width;
 			/*
 			* Feature in WekKit. Webkit limits the width of the lines
@@ -209,6 +211,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #setTopPixel
 		 */
 		convert: function(rect, from, to) {
+			if (!this._clientDiv) { return; }
 			var scroll = this._getScroll();
 			var viewPad = this._getViewPadding();
 			var frame = this._frame.getBoundingClientRect();
@@ -403,6 +406,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #setTopIndex
 		 */
 		getBottomIndex: function(fullyVisible) {
+			if (!this._clientDiv) { return 0; }
 			return this._getBottomIndex(fullyVisible);
 		},
 		/**
@@ -420,6 +424,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #convert
 		 */
 		getBottomPixel: function() {
+			if (!this._clientDiv) { return 0; }
 			return this._getScroll().y + this._getClientHeight();
 		},
 		/**
@@ -450,6 +455,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #convert
 		 */
 		getClientArea: function() {
+			if (!this._clientDiv) { return {x: 0, y: 0, width: 0, height: 0}; }
 			var scroll = this._getScroll();
 			return {x: scroll.x, y: scroll.y, width: this._getClientWidth(), height: this._getClientHeight()};
 		},
@@ -467,6 +473,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #convert
 		 */
 		getHorizontalPixel: function() {
+			if (!this._clientDiv) { return 0; }
 			return this._getScroll().x;
 		},
 		/**
@@ -498,6 +505,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #getLinePixel
 		 */
 		getLineHeight: function(lineIndex) {
+			if (!this._clientDiv) { return 0; }
 			return this._getLineHeight();
 		},
 		/**
@@ -514,6 +522,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #convert
 		 */
 		getLinePixel: function(lineIndex) {
+			if (!this._clientDiv) { return 0; }
 			lineIndex = Math.min(Math.max(0, lineIndex), this._model.getLineCount());
 			var lineHeight = this._getLineHeight();
 			return lineHeight * lineIndex;
@@ -533,6 +542,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #convert
 		 */
 		getLocationAtOffset: function(offset) {
+			if (!this._clientDiv) { return {x: 0, y: 0}; }
 			var model = this._model;
 			offset = Math.min(Math.max(0, offset), model.getCharCount());
 			var lineIndex = model.getLineAtOffset(offset);
@@ -562,6 +572,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #getLocationAtOffset
 		 */
 		getOffsetAtLocation: function(x, y) {
+			if (!this._clientDiv) { return 0; }
 			var scroll = this._getScroll();
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			var viewPad = this._getViewPadding();
@@ -626,6 +637,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #setTopIndex
 		 */
 		getTopIndex: function(fullyVisible) {
+			if (!this._clientDiv) { return 0; }
 			return this._getTopIndex(fullyVisible);
 		},
 		/**
@@ -643,6 +655,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #convert
 		 */
 		getTopPixel: function() {
+			if (!this._clientDiv) { return 0; }
 			return this._getScroll().y;
 		},
 		/**
@@ -664,6 +677,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #getActions
 		 */
 		invokeAction: function (name, defaultAction) {
+			if (!this._clientDiv) { return; }
 			var actions = this._actions;
 			for (var i = 0; i < actions.length; i++) {
 				var a = actions[i];
@@ -772,6 +786,24 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 */
 		onLineStyle: function(lineStyleEvent) {
 			return this.dispatchEvent(lineStyleEvent);
+		},
+		/**
+		 * @class This is the event sent when the text view has loaded its contents.
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onLoad}
+		 * </p>		 
+		 * @name orion.textview.LoadEvent
+		 */
+		/**
+		 * This event is sent when the text view has loaded its contents.
+		 *
+		 * @event
+		 * @param {orion.textview.LoadEvent} loadEvent the event
+		 */
+		onLoad: function(loadEvent) {
+			return this.dispatchEvent(loadEvent);
 		},
 		/**
 		 * @class This is the event sent when the text in the model has changed.
@@ -917,6 +949,24 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 */
 		onVerify: function(verifyEvent) {
 			return this.dispatchEvent(verifyEvent);
+		},
+		/**
+		 * @class This is the event sent when the text view has unloaded its contents.
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onLoad}
+		 * </p>		 
+		 * @name orion.textview.UnloadEvent
+		 */
+		/**
+		 * This event is sent when the text view has unloaded its contents.
+		 *
+		 * @event
+		 * @param {orion.textview.UnloadEvent} unloadEvent the event
+		 */
+		onUnload: function(unloadEvent) {
+			return this.dispatchEvent(unloadEvent);
 		},
 		/**
 		 * Redraws the text in the given line range.
@@ -1108,6 +1158,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #convert
 		 */
 		setHorizontalPixel: function(pixel) {
+			if (!this._clientDiv) { return; }
 			pixel = Math.max(0, pixel);
 			this._scrollView(pixel - this._getScroll().x, 0);
 		},
@@ -1255,6 +1306,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #getTopIndex
 		 */
 		setTopIndex: function(topIndex) {
+			if (!this._clientDiv) { return; }
 			var model = this._model;
 			if (model.getCharCount() === 0) {
 				return;
@@ -1285,6 +1337,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * @see #convert
 		 */
 		setTopPixel: function(pixel) {
+			if (!this._clientDiv) { return; }
 			var lineHeight = this._getLineHeight();
 			var clientHeight = this._getClientHeight();
 			var lineCount = this._model.getLineCount();
@@ -1589,7 +1642,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		_handleLoad: function (e) {
 			var state = this._getVisible();
 			if (state === "visible" || (state === "hidden" && isWebkit)) {
-				this._createView(!e);
+				this._createView();
 			}
 		},
 		_handleMouse: function (e) {
@@ -2964,9 +3017,11 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			}
 			parent.appendChild(frame);
 			/* create synchronously if possible */
-			this._handleLoad();
+			if (this._syncLoad) {
+				this._handleLoad();
+			}
 		},
-		_getFrameHTML: function(sync) {
+		_getFrameHTML: function() {
 			var html = [];
 			html.push("<!DOCTYPE html>");
 			html.push("<html>");
@@ -2982,9 +3037,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (this._stylesheet) {
 				var stylesheet = typeof(this._stylesheet) === "string" ? [this._stylesheet] : this._stylesheet;
 				for (var i = 0; i < stylesheet.length; i++) {
-					if (sync) {
+					if (this._syncLoad) {
 						try {
-							//Force CSS to be loaded synchronously so lineHeight can be calculated
 							var objXml = new XMLHttpRequest();
 							if (objXml.overrideMimeType) {
 								objXml.overrideMimeType("text/css");
@@ -3002,27 +3056,61 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					html.push("'></link>");
 				}
 			}
+			/*
+			* Feature in WebKit.  In WebKit, window load will not wait for the style sheets
+			* to be loaded unless there is script element after the style sheet link elements.
+			*/
+			html.push("<script>");
+			html.push("var waitForStyleSheets = true;");
+			html.push("</script>");
 			html.push("</head>");
 			html.push("<body spellcheck='false'></body>");
 			html.push("</html>");
 			return html.join("");
 		},
-		_createView: function(sync) {
+		_createView: function() {
+			if (this._frameDocument) { return; }
+			var frameWindow = this._frameWindow = this._frame.contentWindow;
+			var frameDocument = this._frameDocument = frameWindow.document;
+			var self = this;
+			function write() {
+				frameDocument.open();
+				frameDocument.write(self._getFrameHTML());
+				frameDocument.close();
+				addHandler(frameWindow, "load", this._windowLoadHandler = function(e) {
+					self._createContent();
+				});
+			}
+			/*
+			* Bug in Firefox.  Firefox does not send window load event if document.write
+			* is done inside of the frame load event handler.
+			*/
+			if (isFirefox && !this._syncLoad) {
+				setTimeout(write, 0);
+			} else {
+				write();
+			}
+			if (this._syncLoad) {
+				this._createContent();
+			}
+		},
+		_createContent: function() {
 			if (this._clientDiv) { return; }
-			if (this._ignoreCreate) { return; }
-			this._ignoreCreate = true;
-
-			var frame = this._frame;
 			var parent = this._parent;
 			var parentDocument = this._parentDocument;
-			var frameWindow = frame.contentWindow;
-			this._frameWindow = frameWindow;
-			var frameDocument = frameWindow.document;
-			this._frameDocument = frameDocument;
-			frameDocument.open();
-			frameDocument.write(this._getFrameHTML(true));
-			frameDocument.close();
-			
+			var frameDocument = this._frameDocument;
+			/*
+			* Bug in Safari.  Safari sends the window load event before the
+			* style sheets are loaded. The fix is to defer creation of the
+			* contents until the document readyState changes to complete.
+			*/
+			var self = this;
+			if (!this._syncLoad && frameDocument.readyState !== "complete") {
+				setTimeout(function() {
+					self._createContent();
+				}, 10);
+				return;
+			}
 			var body = frameDocument.body;
 			body.className = "viewContainer";
 			body.style.margin = "0px";
@@ -3212,20 +3300,14 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			for (var i=0; i<rulers.length; i++) {
 				this._createRuler(rulers[i]);
 			}
-			if (sync) {
-				this._updatePage();
-			} else {
-				this._queueUpdatePage();
-				var h = this._hScroll, v = this._vScroll;
-				this._vScroll = this._hScroll = 0;
-				if (h > 0 || v > 0) {
-					var self = this;
-					setTimeout(function() {
-						self._scrollView(h, v);
-					}, 0);
-				}
+			this._updatePage();
+			var h = this._hScroll, v = this._vScroll;
+			this._vScroll = this._hScroll = 0;
+			if (h > 0 || v > 0) {
+				viewDiv.scrollLeft = h;
+				viewDiv.scrollTop = v;
 			}
-			this._ignoreCreate = false;
+			this.onLoad({type: "Load"});
 		},
 		_destroyFrame: function() {
 			var frame = this._frame;
@@ -3240,8 +3322,6 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			}
 			frame.parentNode.removeChild(frame);
 			this._frame = null;
-			this._frameDocument = null;
-			this._frameWindow = null;
 		},
 		_destroyRuler: function(ruler) {
 			var side = ruler.getLocation();
@@ -3263,6 +3343,10 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (!clientDiv) { return; }
 			this._setGrab(null);
 			this._unhookEvents();
+			if (this._windowLoadHandler) {
+				removeHandler(this._frameWindow, "load", this._windowLoadHandler);
+				this._windowLoadHandler = null;
+			}
 
 			/* Destroy timers */
 			if (this._autoScrollTimerID) {
@@ -3292,6 +3376,9 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			this._overlayDiv = null;
 			this._leftDiv = null;
 			this._rightDiv = null;
+			this._frameDocument = null;
+			this._frameWindow = null;
+			this.onUnload({type: "Unload"});
 		},
 		_doAutoScroll: function (direction, x, y) {
 			this._autoScrollDir = direction;
@@ -4068,6 +4155,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			}
 			if (!parent) { throw "no parent"; }
 			this._parent = parent;
+			this._syncLoad = options.sync;
 			this._model = options.model ? options.model : new mTextModel.TextModel();
 			this.readonly = options.readonly === true;
 			this._fullSelection = options.fullSelection === undefined || options.fullSelection;

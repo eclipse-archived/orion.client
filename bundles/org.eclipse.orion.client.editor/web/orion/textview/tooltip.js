@@ -117,6 +117,7 @@ define(['orion/textview/textView', 'orion/textview/textModel', 'orion/textview/p
 						model: this._emptyModel,
 						parent: this._viewParent,
 						tabSize: 4,
+						sync: true,
 						stylesheet: ["/orion/textview/tooltip.css", "/orion/textview/rulers.css",
 							"/examples/textview/textstyler.css", "/css/default-theme.css"]
 					});
