@@ -111,6 +111,18 @@ a:hover {
 	text-decoration: underline;
 }
 
+.pageNavigationActions {
+	text-align: right;
+}
+
+.parameters {
+	color: #404040;
+}
+
+.parameterInput {
+	margin-left: 4px;
+}
+
 .navTableHeading {
 	color: #404040;
 	border-bottom: 1px solid #404040;
@@ -314,6 +326,18 @@ a:hover {
 	height: 2.5em;
 }
 
+.pageToolbarLeft {
+	background: #404040;
+	text-align: left;
+	padding-left: 16px;
+}
+
+.pageToolbarRight {
+	background: #404040;
+	text-align: right;
+	padding-right: 16px;
+}
+
 .slideContainer {
 	border-bottom: 1px solid #ededed;
 }
@@ -330,6 +354,11 @@ a:hover {
 	-o-transition: margin-left .5s ease-out;
 	-moz-transition: margin-left .5s ease-out;
 	-webkit-transition: margin-left .5s ease-out;   
+}
+
+.activeCommand {
+	border: 1px solid #ffd400;
+	padding: 2px;
 }
 
 .leftSlideActive {

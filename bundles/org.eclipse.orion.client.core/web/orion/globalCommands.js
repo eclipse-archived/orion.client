@@ -55,22 +55,26 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		'</tr>' +
 		
 	// Row 4: Page Toolbar
-		'<tr class="pageToolbar">' +
-			'<td colspan=3 style="padding-left: 16px;" id="pageToolbar" class="pageToolbar">' +
+		'<tr class="pageToolbar" id="pageToolbar">' +
+			'<td class="pageToolbarLeft">' +
 				'<span id="pageActions" class="pageActions"></span>' +
-				'<span id="pageNavigationActions" class="pageActions"></span>' +
+			'</td>' +
+			'<td>' +
+			'</td>' +
+			'<td class="pageToolbarRight">' +
+				'<span id="pageNavigationActions" class="pageActions pageNavigationActions"></span>' +
 			'</td>' +
 		'</tr>' +
 	// Row 5: Command Parameter area
 		'<tr>' +
 			'<td id="parameterArea" class="slideContainer" class colspan=3>' +
 				'<span id="pageParameterArea" class="leftSlide">' +
-					'<span id="pageCommandParameters" class="pageActions"></span>' +
-					'<span id="pageCommandDismiss" class="pageActions"></span>' +
+					'<span id="pageCommandParameters" class="parameters"></span>' +
+					'<span id="pageCommandDismiss" class="parameters"></span>' +
 				'</span>' +
 				'<span id="pageNavigationParameterArea" class="rightSlide">' +
-					'<span id="pageNavigationCommandParameters" class="pageActions"></span>' +
-					'<span id="pageNavigationDismiss" class="pageActions"></span>' +
+					'<span id="pageNavigationCommandParameters" class="parameters"></span>' +
+					'<span id="pageNavigationDismiss" class="parameters"></span>' +
 				'</span>' +
 			'</td>' +
 		'</tr>' +
@@ -195,6 +199,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			dojo.empty(toolbar);
 			commandService.renderCommands(toolbar, "dom", handler, handler, "image", null, null, !useImage);  // use true when we want to force toolbar items to text
 		}
+		// now page navigation actions
+		toolbar = dojo.byId("pageNavigationActions");
+		if (toolbar) {	
+			dojo.empty(toolbar);
+			commandService.renderCommands(toolbar, "dom", handler, handler, "image", null, null, !useImage);  // use true when we want to force toolbar items to text
+		}
 	}
 	
 	
@@ -212,18 +222,18 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			throw "could not find banner parent, id was " + parentId;
 		}
 		
-		commandService.setParameterCollector(function(command, domElement, handler, callbackParameters) {
+		commandService.setParameterCollector(function(command, parentDomElement, handler, commandDomElement, callbackParameters) {
 			if (command.parameters) {
 				// get the banner node's parent.  If it is managed by dijit, we will need to layout
 				var layoutWidget = dijit.byId(parent.parentNode.id);
 				var parameterArea = null;
 				var parameterContainer = null;
 				var activeClass = null;
-				if (domElement.id === "pageActions") {
+				if (parentDomElement.id === "pageActions") {
 					parameterArea = dojo.byId("pageCommandParameters");
 					parameterContainer = dojo.byId("pageParameterArea");
 					activeClass = "leftSlideActive";
-				} else if (domElement.id === "pageNavigationActions") {
+				} else if (parentDomElement.id === "pageNavigationActions") {
 					parameterArea = dojo.byId("pageNavigationCommandParameters");
 					parameterContainer = dojo.byId("pageNavigationParameterArea");
 					activeClass = "rightSlideActive";
@@ -245,6 +255,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 							if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
 								dojo.empty(parameterArea);
 								dojo.removeClass(parameterContainer, activeClass);
+								dojo.removeClass(commandDomElement, "activeCommand");
 								if (layoutWidget) {
 									layoutWidget.layout();
 								}
@@ -254,9 +265,10 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 							if (command.parameters[key].type) {
 								var parm = command.parameters[key];
 								if (parm.label) {
-									dojo.place(document.createTextNode(parm.label), parameterArea, "last");
+									var label = dojo.place(document.createTextNode(parm.label), parameterArea, "last");
 								} 
 								var field = dojo.create("input", {type: parm.type}, parameterArea, "last");
+								dojo.addClass(field, "parameterInput");
 								field.setAttribute("speech", "speech");
 								field.setAttribute("x-webkit-speech", "x-webkit-speech");
 								field.parameterName = key;
@@ -273,6 +285,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 					} 
 					// all parameters have been generated.  Activate the area.
 					dojo.addClass(parameterContainer, activeClass);
+					dojo.addClass(commandDomElement, "activeCommand");
 					if (layoutWidget) {
 						layoutWidget.layout();
 					}

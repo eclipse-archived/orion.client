@@ -1475,11 +1475,14 @@ var exports = {};
 	};
 	
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
-		
+		var newNameParameters = {};
+		newNameParameters.url = {label: 'Location:', type: 'url', required: true};
+
 		var cloneGitRepositoryCommand = new mCommands.Command({
 			name : "Clone Repository",
 			tooltip : "Clone an existing Git repository to a folder",
 			id : "eclipse.cloneGitRepository",
+			parameters: newNameParameters,
 			callback : function(item) {
 				var gitService = serviceRegistry.getService("orion.git.provider");
 				var progressService = serviceRegistry.getService("orion.page.message");
@@ -1549,7 +1552,7 @@ var exports = {};
 			}
 		});
 		
-		commandService.addCommand(initGitRepositoryCommand, "dom");
+		// commandService.addCommand(initGitRepositoryCommand, "dom");
 		
 		var deleteCommand = new mCommands.Command({
 			name: "Delete", // "Delete Repository"

@@ -128,8 +128,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		
 		/**
 		 * Provide a function that will collect parameters for a given command.  The function
-		 * will be called with two parameters.  The command in question, and the dom element that
-		 * contains the command.
+		 * parameters are
+		 *     function(command, parentNode, handler, commandNode, callbackParameters)
 		 */
 		setParameterCollector: function(parameterCollector) {
 			this._parameterCollector = parameterCollector;
@@ -611,7 +611,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						// collect parameters in advance if specified
 						if (this.parameters && parameterCollector) {
 							// should the handler be bound to this, or something else?
-							parameterCollector.call(handler, this, parent, handler, [items, this.id, image.id, userData, this.parameters]);
+							parameterCollector.call(handler, this, parent, handler, image.id, [items, this.id, image.id, userData, this.parameters]);
 						} else if (this.callback) {
 							this.callback.call(handler, items, this.id, image.id, userData, this.parameters);
 						}
@@ -621,7 +621,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						// collect parameters in advance if specified
 						if (this.parameters && parameterCollector) {
 							// should the handler be bound to this, or something else?
-							parameterCollector.call(handler, this, parent, handler, [items, this.id, link.id, userData, this.parameters]);
+							parameterCollector.call(handler, this, parent, handler, link.id, [items, this.id, link.id, userData, this.parameters]);
 						} else if (this.callback) {
 							this.callback.call(handler, items, this.id, link.id, userData, this.parameters);
 						}
