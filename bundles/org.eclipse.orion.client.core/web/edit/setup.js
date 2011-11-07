@@ -336,7 +336,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 		// Register commands that depend on external services, the registry, etc.
-		var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly);
+		var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions");
 		commandGenerator.generateEditorCommands(editor);
 		
 		// Create keybindings for generic editing, no dependency on the service model
