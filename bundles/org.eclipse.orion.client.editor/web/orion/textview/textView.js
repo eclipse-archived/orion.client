@@ -881,6 +881,21 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		onModify: function(modifyEvent) {
 			return this.dispatchEvent(modifyEvent);
 		},
+		onMouseDown: function(mouseEvent) {
+			return this.dispatchEvent(mouseEvent);
+		},
+		onMouseUp: function(mouseEvent) {
+			return this.dispatchEvent(mouseEvent);
+		},
+		onMouseMove: function(mouseEvent) {
+			return this.dispatchEvent(mouseEvent);
+		},
+		onMouseOver: function(mouseEvent) {
+			return this.dispatchEvent(mouseEvent);
+		},
+		onMouseOut: function(mouseEvent) {
+			return this.dispatchEvent(mouseEvent);
+		},
 		/**
 		 * @class This is the event sent when the selection changes in the text view.
 		 * <p>
@@ -1417,12 +1432,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		},
 		_handleContextMenu: function (e) {
 			if (!e) { e = window.event; }
-			var scroll = this._getScroll(); 
-			var viewRect = this._viewDiv.getBoundingClientRect(); 
-			var viewPad = this._getViewPadding(); 
-			var x = e.clientX + scroll.x - viewRect.left - viewPad.left; 
-			var y = e.clientY + scroll.y - viewRect.top - viewPad.top; 
-			this.onContextMenu({type: "ContextMenu", x: x, y: y, screenX: e.screenX, screenY: e.screenY}); 
+			if (this.isListening("ContextMenu")) {
+				var evt = this._createMouseEvent("ContextMenu", e);
+				evt.screenX = e.screenX;
+				evt.screenY = e.screenY;
+				this.onContextMenu(evt);
+			}
 			if (e.preventDefault) { e.preventDefault(); }
 			return false;
 		},
@@ -1683,6 +1698,9 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		},
 		_handleMouseDown: function (e) {
 			if (!e) { e = window.event; }
+			if (this.isListening("MouseDown")) {
+				this.onMouseDown(this._createMouseEvent("MouseDown", e));
+			}
 			if (this._linksVisible) {
 				var target = e.target || e.srcElement;
 				if (target.tagName !== "A") {
@@ -1715,8 +1733,31 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				}
 			}
 		},
+		_handleMouseOver: function (e) {
+			if (!e) { e = window.event; }
+			if (this.isListening("MouseOver")) {
+				this.onMouseOver(this._createMouseEvent("MouseOver", e));
+			}
+		},
+		_handleMouseOut: function (e) {
+			if (!e) { e = window.event; }
+			if (this.isListening("MouseOut")) {
+				this.onMouseOut(this._createMouseEvent("MouseOut", e));
+			}
+		},
 		_handleMouseMove: function (e) {
 			if (!e) { e = window.event; }
+			if (this.isListening("MouseMove")) {
+				var topNode = this._overlayDiv || this._clientDiv;
+				var temp = e.target ? e.target : e.srcElement;
+				while (temp) {
+					if (topNode === temp) {
+						this.onMouseMove(this._createMouseEvent("MouseMove", e));
+						break;
+					}
+					temp = temp.parentNode;
+				}
+			}
 			this._setLinksVisible(!this._isMouseDown && (isMac ? e.metaKey : e.ctrlKey));
 			if (!this._isMouseDown) {
 				return;
@@ -1791,8 +1832,24 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				}
 			}
 		},
+		_createMouseEvent: function(type, e) {
+			var scroll = this._getScroll();
+			var viewRect = this._viewDiv.getBoundingClientRect();
+			var viewPad = this._getViewPadding();
+			var x = e.clientX + scroll.x - viewRect.left - viewPad.left;
+			var y = e.clientY + scroll.y - viewRect.top - viewPad.top;
+			return {
+				type: type,
+				event: e,
+				x: x,
+				y: y
+			};
+		},
 		_handleMouseUp: function (e) {
 			if (!e) { e = window.event; }
+			if (this.isListening("MouseUp")) {
+				this.onMouseUp(this._createMouseEvent("MouseUp", e));
+			}
 			if (this._linksVisible) {
 				return;
 			}
@@ -4115,6 +4172,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e);}});
 				handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e);}});
 				handlers.push({target: clientDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}});
+				handlers.push({target: clientDiv, type: "mouseover", handler: function(e) { return self._handleMouseOver(e);}});
+				handlers.push({target: clientDiv, type: "mouseout", handler: function(e) { return self._handleMouseOut(e);}});
 				handlers.push({target: grabNode, type: "mouseup", handler: function(e) { return self._handleMouseUp(e);}});
 				handlers.push({target: grabNode, type: "mousemove", handler: function(e) { return self._handleMouseMove(e);}});
 				handlers.push({target: body, type: "mousedown", handler: function(e) { return self._handleBodyMouseDown(e);}});
@@ -4140,6 +4199,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				}
 				if (this._overlayDiv) {
 					handlers.push({target: this._overlayDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}});
+					handlers.push({target: this._overlayDiv, type: "mouseover", handler: function(e) { return self._handleMouseOver(e);}});
+					handlers.push({target: this._overlayDiv, type: "mouseout", handler: function(e) { return self._handleMouseOut(e);}});
 					handlers.push({target: this._overlayDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e); }});
 				}
 				if (!isW3CEvents) {
