@@ -35,7 +35,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			'<td class="rightGlobalToolbar" style="padding-top: 16px">' +
 				'<span id="primaryNav" class="globalActions"></span>' +
 				'<span id="globalActions" class="globalActions"></span>' +
-				'<input type="search" id="search" class="searchbox">' +
+				'<input type="search" id="search" placeholder="Search" title="Type a keyword or wild card to search" class="searchbox">' +
 				'<span id="userInfo"></span>' +
 				'<span id="help" class="help"><a id="help" href="' + require.toUrl("help/index.jsp") + '">?</a></span>' +
 			'</td>' + 
