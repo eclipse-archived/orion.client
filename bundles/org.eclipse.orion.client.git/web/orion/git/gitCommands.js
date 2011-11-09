@@ -1028,7 +1028,7 @@ var exports = {};
 				return require.toUrl("git/git-log.html")+"#" + getPageUri(dojo.hash(), getPageNumber(dojo.hash())-1);
 			},
 			visibleWhen : function(item) {
-				if(item.Type==="RemoteTrackingBranch" || (item.toRef != null && item.toRef.Type === "Branch")){
+				if(item.Type==="RemoteTrackingBranch" || (item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){
 					return getPageNumber(dojo.hash()) > 1;
 				}
 				return false;
@@ -1045,7 +1045,7 @@ var exports = {};
 				return require.toUrl("git/git-log.html")+"#" + getPageUri(dojo.hash(), getPageNumber(dojo.hash())+1);
 			},
 			visibleWhen : function(item) {
-				if(item.Type==="RemoteTrackingBranch" ||(item.toRef != null && item.toRef.Type === "Branch")){
+				if(item.Type==="RemoteTrackingBranch" ||(item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){
 					if(item.Children)
 						return item.Children.length > 0;
 					return true;
