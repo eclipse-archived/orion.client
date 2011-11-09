@@ -718,6 +718,27 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		onContextMenu: function(contextMenuEvent) {
 			return this.dispatchEvent(contextMenuEvent); 
 		}, 
+		onDragStart: function(dragEvent) {
+			return this.dispatchEvent(dragEvent);
+		},
+		onDrag: function(dragEvent) {
+			return this.dispatchEvent(dragEvent);
+		},
+		onDragEnd: function(dragEvent) {
+			return this.dispatchEvent(dragEvent);
+		},
+		onDragEnter: function(dragEvent) {
+			return this.dispatchEvent(dragEvent);
+		},
+		onDragOver: function(dragEvent) {
+			return this.dispatchEvent(dragEvent);
+		},
+		onDragLeave: function(dragEvent) {
+			return this.dispatchEvent(dragEvent);
+		},
+		onDrop: function(dragEvent) {
+			return this.dispatchEvent(dragEvent);
+		},
 		/**
 		 * @class This is the event sent when the text view is destroyed.
 		 * <p>
@@ -1384,7 +1405,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			 * do not have this problem and stopping the click over the 
 			 * scrollbar for them causes mouse capture problems.
 			 */
-			var topNode = isOpera ? this._clientDiv : this._overlayDiv || this._viewDiv;
+			var topNode = isOpera || (isFirefox && !this._overlayDiv) ? this._clientDiv : this._overlayDiv || this._viewDiv;
 			
 			var temp = e.target ? e.target : e.srcElement;
 			while (temp) {
@@ -1489,17 +1510,83 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		},
 		_handleDragStart: function (e) {
 			if (!e) { e = window.event; }
-			if (e.preventDefault) { e.preventDefault(); }
-			return false;
+			if (this.isListening("DragStart") && this._dragOffset !== -1) {
+				this._isMouseDown = false;
+				this.onDragStart(this._createMouseEvent("DragStart", e));
+				this._dragOffset = -1;
+			} else {
+				if (e.preventDefault) { e.preventDefault(); }
+				return false;
+			}
+		},
+		_handleDrag: function (e) {
+			if (!e) { e = window.event; }
+			if (this.isListening("Drag")) {
+				this.onDrag(this._createMouseEvent("Drag", e));
+			}
+		},
+		_handleDragEnd: function (e) {
+			if (!e) { e = window.event; }
+			if (this.isListening("DragEnd")) {
+				this.onDragEnd(this._createMouseEvent("DragEnd", e));
+			}
+		},
+		_handleDragEnter: function (e) {
+			if (!e) { e = window.event; }
+			var prevent = true;
+			if (this.isListening("DragEnter")) {
+				prevent = false;
+				this._dropTarget = true;
+				this.onDragEnter(this._createMouseEvent("DragEnter", e));
+			}
+			/*
+			* Webkit will not send drop events if this event is not prevented, as spec in HTML5.
+			* Firefox and IE do not follow this spec for contentEditable. Note that preventing this 
+			* event will result is loss of functionality (insertion mark, etc).
+			*/
+			if (isWebkit || prevent) {
+				if (e.preventDefault) { e.preventDefault(); }
+				return false;
+			}
 		},
 		_handleDragOver: function (e) {
 			if (!e) { e = window.event; }
-			e.dataTransfer.dropEffect = "none";
-			if (e.preventDefault) { e.preventDefault(); }
-			return false;
+			var prevent = true;
+			if (this.isListening("DragOver")) {
+				prevent = false;
+				this.onDragOver(this._createMouseEvent("DragOver", e));
+			}
+			/*
+			* Webkit will not send drop events if this event is not prevented, as spec in HTML5.
+			* Firefox and IE do not follow this spec for contentEditable. Note that preventing this 
+			* event will result is loss of functionality (insertion mark, etc).
+			*/
+			if (isWebkit || prevent) {
+				if (prevent) { e.dataTransfer.dropEffect = "none"; }
+				if (e.preventDefault) { e.preventDefault(); }
+				return false;
+			}
+		},
+		_handleDragLeave: function (e) {
+			if (!e) { e = window.event; }
+			if (this.isListening("DragLeave")) {
+				this._dropTarget = false;
+				this.onDragLeave(this._createMouseEvent("DragLeave", e));
+			}
 		},
 		_handleDrop: function (e) {
 			if (!e) { e = window.event; }
+			if (this.isListening("Drop")) {
+				this._dropTarget = false;
+				this.onDrop(this._createMouseEvent("Drop", e));
+			}
+			/*
+			* This event must be prevented otherwise the user agent will modify
+			* the DOM. Note that preventing the event on some user agents (i.e. IE)
+			* indicates that the operation is cancelled. This causes the dropEffect to 
+			* be set to none  in the dragend event causing the implementor to not execute
+			* the code responsible by the move effect.
+			*/
 			if (e.preventDefault) { e.preventDefault(); }
 			return false;
 		},
@@ -1664,8 +1751,9 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			}
 		},
 		_handleMouse: function (e) {
+			var result = true;
 			var target = this._frameWindow;
-			if (isIE) { target = this._clientDiv; }
+			if (isIE || (isFirefox && !this._overlayDiv)) { target = this._clientDiv; }
 			if (this._overlayDiv) {
 				var self = this;
 				setTimeout(function () {
@@ -1673,8 +1761,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				}, 0);
 			}
 			if (this._clickCount === 1) {
-				this._setGrab(target);
-				this._setSelectionTo(e.clientX, e.clientY, e.shiftKey);
+				result = this._setSelectionTo(e.clientX, e.clientY, e.shiftKey, !isOpera && this.isListening("DragStart"));
+				if (result) { this._setGrab(target); }
 			} else {
 				/*
 				* Feature in IE8 and older, the sequence of events in the IE8 event model
@@ -1695,6 +1783,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				this._setSelectionTo(e.clientX, e.clientY, e.shiftKey);
 				this._doubleClickSelection = this._getSelection();
 			}
+			return result;
 		},
 		_handleMouseDown: function (e) {
 			if (!e) { e = window.event; }
@@ -1724,8 +1813,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				this._lastMouseX = e.clientX;
 				this._lastMouseY = e.clientY;
 				this._lastMouseTime = time;
-				this._handleMouse(e);
-				if (isOpera || isChrome) {
+				if (this._handleMouse(e) && (isOpera || isChrome || (isFirefox && !this._overlayDiv))) {
 					if (!this._hasFocus) {
 						this.focus();
 					}
@@ -1758,8 +1846,11 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					temp = temp.parentNode;
 				}
 			}
+			if (this._dropTarget) {
+				return;
+			}
 			this._setLinksVisible(!this._isMouseDown && (isMac ? e.metaKey : e.ctrlKey));
-			if (!this._isMouseDown) {
+			if (!this._isMouseDown || this._dragOffset !== -1) {
 				return;
 			}
 			/*
@@ -1855,6 +1946,13 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			}
 			var left = e.which ? e.button === 0 : e.button === 1;
 			if (left) {
+				if (this._dragOffset !== -1) {
+					var selection = this._getSelection();
+					selection.extend(this._dragOffset);
+					selection.collapse();
+					this._setSelection(selection, true, true);
+					this._dragOffset = -1;
+				}
 				this._isMouseDown = false;
 				this._endAutoScroll();
 				
@@ -3326,7 +3424,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			}
 			scrollDiv.appendChild(clientDiv);
 
-			if (isFirefox) {
+			if (isFirefox && !clientDiv.setCapture) {
 				var overlayDiv = frameDocument.createElement("DIV");
 				this._overlayDiv = overlayDiv;
 				overlayDiv.id = "overlayDiv";
@@ -4178,7 +4276,11 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				handlers.push({target: grabNode, type: "mousemove", handler: function(e) { return self._handleMouseMove(e);}});
 				handlers.push({target: body, type: "mousedown", handler: function(e) { return self._handleBodyMouseDown(e);}});
 				handlers.push({target: topNode, type: "dragstart", handler: function(e) { return self._handleDragStart(e);}});
+				handlers.push({target: topNode, type: "drag", handler: function(e) { return self._handleDrag(e);}});
+				handlers.push({target: topNode, type: "dragend", handler: function(e) { return self._handleDragEnd(e);}});
+				handlers.push({target: topNode, type: "dragenter", handler: function(e) { return self._handleDragEnter(e);}});
 				handlers.push({target: topNode, type: "dragover", handler: function(e) { return self._handleDragOver(e);}});
+				handlers.push({target: topNode, type: "dragleave", handler: function(e) { return self._handleDragLeave(e);}});
 				handlers.push({target: topNode, type: "drop", handler: function(e) { return self._handleDrop(e);}});
 				if (isChrome) {
 					handlers.push({target: this._parentDocument, type: "mousemove", handler: function(e) { return self._handleMouseMove(e);}});
@@ -4241,6 +4343,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			this._maxLineIndex = -1;
 			this._ignoreSelect = true;
 			this._columnX = -1;
+			this._dragOffset = -1;
 
 			/* Auto scroll */
 			this._autoScrollX = null;
@@ -4774,12 +4877,18 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				if (update) { this._updateDOMSelection(); }
 			}
 		},
-		_setSelectionTo: function (x,y,extent) {
+		_setSelectionTo: function (x, y, extent, drag) {
 			var model = this._model, offset;
 			var selection = this._getSelection();
 			var lineIndex = this._getYToLine(y);
 			if (this._clickCount === 1) {
 				offset = this._getXToOffset(lineIndex, x);
+				if (drag && !extent) {
+					if (selection.start <= offset && offset < selection.end) {
+						this._dragOffset = offset;
+						return false;
+					}
+				}
 				selection.extend(offset);
 				if (!extent) { selection.collapse(); }
 			} else {
@@ -4818,6 +4927,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				selection.extend(end);
 			} 
 			this._setSelection(selection, true, true);
+			return true;
 		},
 		_showCaret: function (allSelection, pageScroll) {
 			if (!this._clientDiv) { return; }

@@ -18,6 +18,7 @@ define(["require",
 		"orion/textview/annotations", 
 		"orion/textview/projectionTextModel", 
 		"orion/textview/textView", 
+		"orion/textview/textDND", 
 		"orion/textview/rulers",
 		"orion/textview/undoStack",
 		"orion/textview/eventTarget",
@@ -25,7 +26,7 @@ define(["require",
 		"orion/editor/htmlGrammar",
 		"examples/textview/textStyler"],   
  
-function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextView, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextView, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 
 	var exports = {
 		parent: "divParent",
@@ -72,7 +73,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 		view = new mTextView.TextView(options);
 		
 		/* Undo stack */
-		var undoStack = new mUndoStack.UndoStack(view, 200);
+		var undoStack = exports.undoStack = new mUndoStack.UndoStack(view, 200);
+		var dnd = exports.textDND = new mTextDND.TextDND(view, undoStack);
 		view.setKeyBinding(new mKeyBinding.KeyBinding('z', true), "undo");
 		view.setAction("undo", function() {
 			undoStack.undo();
