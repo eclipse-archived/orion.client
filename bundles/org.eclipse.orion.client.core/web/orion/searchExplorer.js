@@ -35,6 +35,19 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
 	
+	SearchResultModel.prototype._parseLocationAndSearchStr = function(searchStr) {
+		var hasLocation = (searchStr.indexOf("+Location:") > -1);
+		this.searchLocation = "";
+		if(hasLocation){
+			var splitStr = searchStr.split("+Location:");
+			if(splitStr.length === 2){
+				this.searchLocation = splitStr[1];
+				searchStr = splitStr[0];
+			}
+		}
+		this._parseSearchStr(searchStr);
+	};
+	
 	SearchResultModel.prototype._parseSearchStr = function(searchStr) {
 		var hasStar = (searchStr.indexOf("*") > -1);
 		var hasQMark = (searchStr.indexOf("?") > -1);
@@ -71,7 +84,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			var splitparameters = splitQ[i].split("=");
 			if(splitparameters.length === 2){
 				if(splitparameters[0] === "q"){
-					this._parseSearchStr(splitparameters[1]);
+					this._parseLocationAndSearchStr(splitparameters[1]);
 				} else if(splitparameters[0] === "rows"){
 					this.rows = parseInt(splitparameters[1]);
 				} else if(splitparameters[0] === "start"){

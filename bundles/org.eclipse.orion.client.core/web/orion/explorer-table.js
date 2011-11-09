@@ -261,7 +261,11 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 						this.treeRoot[i] = loadedWorkspace[i];
 					}
 					mUtil.rememberSuccessfulTraversal(this.treeRoot, this.registry);
-					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);					
+					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);	
+					//If current location is not the root, set the search location in the searcher
+					if(this.treeRoot.Location && this.treeRoot.Path && this.treeRoot.Path.length > 0){
+						this.searcher.setLocation(this.treeRoot.Location);
+					}
 					// erase any old page title
 					var breadcrumb = dojo.byId(this.breadcrumbId);
 					if (breadcrumb) {

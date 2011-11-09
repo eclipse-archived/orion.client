@@ -58,6 +58,9 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 				favorites.addFavoriteSearch(favoriteName, query);
 			});
 		},
+		setLocation: function(location){
+			this.location = location;
+		},
 		/**
 		 * Returns a query URL for a search.
 		 * @param {String} searchLocation The base location of the search service
@@ -70,7 +73,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 				var wildcard= (/\*$/.test(nameQuery) ? "" : "*");
 				return "?rows=100&start=0&q=" + "Name:" + this._luceneEscape(nameQuery, true) + wildcard;
 			}
-			return "?rows=100&start=0&q=" + this._luceneEscape(query, true);
+			return "?rows=100&start=0&q=" + this._luceneEscape(query, true) + (this.location ? "+Location:" + this.location + "*" : "");
 		},
 		/**
 		 * Escapes all characters in the string that require escaping in Lucene queries.
