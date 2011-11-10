@@ -12,9 +12,136 @@
 /*global window document define login logout localStorage orion */
 /*browser:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBinding', 
-        'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog'], function(require, dojo, dijit, mCommands, mUtil, mKeyBinding ){
+define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBinding',
+        'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog'], function(require, dojo, dijit, mCommands, mUtil, mKeyBinding){
 
+	/**
+	 * Constructs a new command parameter collector
+	 * @param {DOMElement} the parent of the banner
+	 * @class CommandParameterCollector can collect parameters in a way that is integrated with the 
+	 * common header elements
+	 * @name orion.globalCommands.CommandParameterCollector
+	 */	
+	function CommandParameterCollector (parent) {
+		// get the banner node's parent.  If it is managed by dijit, we will need to layout
+		this.layoutWidgetId = parent.parentNode.id;
+	}
+	CommandParameterCollector.prototype =  {
+	
+		_getLayoutWidget: function() {
+			return this.layoutWidget || dijit.byId(this.layoutWidgetId);
+		},
+		/**
+		 * Closes any active parameter collectors
+		 *
+		 * @param {DOMElement} commandNode the node representing the command
+		 */
+		close: function (commandNode) {
+			if (this.parameterArea && this.parameterContainer) {
+				dojo.empty(this.parameterArea);
+				dojo.removeClass(this.parameterContainer, this.activeClass);
+			}
+			if (commandNode) {
+				dojo.removeClass(commandNode, "activeCommand");
+			}
+			if (this._getLayoutWidget()) {
+				this._getLayoutWidget().layout();
+			}
+		},
+		
+		/**
+		 * Open a parameter collector and return the dom node where parameter 
+		 * information should be inserted
+		 *
+		 * @param {DOMElement} parent the node containing the triggering command
+		 * @returns {DOMElement} commandNode the node representing the command
+		 */
+		open: function() {
+		},
+		
+		/**
+		 * Returns whether this key binding is the same as the given parameter.
+		 * 
+		 * @param {orion.commands.Command} the command being executed
+		 * @param {Object} handler the command's handler
+		 * @param {DOMElement} parent the command's parent node
+		 * @param {DOMElement} commandNode the node representing the command
+		 * @param {Array} the callback parameters to be sent to the handler
+		 * @returns {Boolean} whether or not required parameters were collected.
+		 */
+		collectParameters: function(command, handler, parent, commandNode, callbackParameters) {
+			if (command.parameters) {
+				this.parameterArea = null;
+				this.parameterContainer = null;
+				this.activeClass = null;
+				if (parent.id === "pageActions") {
+					this.parameterArea = dojo.byId("pageCommandParameters");
+					this.parameterContainer = dojo.byId("pageParameterArea");
+					this.activeClass = "leftSlideActive";
+				} else if (parent.id === "pageNavigationActions") {
+					this.parameterArea = dojo.byId("pageNavigationCommandParameters");
+					this.parameterContainer = dojo.byId("pageNavigationParameterArea");
+					this.activeClass = "rightSlideActive";
+				}
+				if (this.parameterArea) {
+					var first = null;
+					if (typeof command.parameters === "function") {
+						command.parameters.call(command, this.parameterArea, callbackParameters);
+					} else {
+						var keyHandler = dojo.hitch(this, function(event) {
+							if (event.keyCode === dojo.keys.ENTER) {
+								dojo.query("input", this.parameterArea).forEach(function(field) {
+									command.parameters[field.parameterName].value = field.value;
+									if (command.callback) {
+										command.callback.apply(handler, callbackParameters);
+									}
+								});
+							}
+							if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
+								this.close(commandNode);
+							}
+						});
+						for (var key in command.parameters) {
+							if (command.parameters[key].type) {
+								var parm = command.parameters[key];
+								if (parm.label) {
+									dojo.place(document.createTextNode(parm.label), this.parameterArea, "last");
+								} 
+								var field = dojo.create("input", {type: parm.type}, this.parameterArea, "last");
+								dojo.addClass(field, "parameterInput");
+								field.setAttribute("speech", "speech");
+								field.setAttribute("x-webkit-speech", "x-webkit-speech");
+								field.parameterName = key;
+								if (!first) {
+									first = field;
+								}
+								if (parm.value) {
+									field.value = parm.value;
+								}
+								dojo.connect(field, "onkeypress", keyHandler);
+							}
+						}
+						// need cancel button
+					} 
+					// all parameters have been generated.  Activate the area.
+					dojo.addClass(this.parameterContainer, this.activeClass);
+					dojo.addClass(commandNode, "activeCommand");
+					if (this._getLayoutWidget()) {
+						this._getLayoutWidget().layout();
+					}
+					if (first) {
+						window.setTimeout(function() {
+							first.focus();
+						}, 0);
+					}
+					return true;
+				}	
+			}
+			return false;
+		}
+	};
+	CommandParameterCollector.prototype.constructor = CommandParameterCollector;
+	
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 * @class This class contains static utility methods for creating and managing 
@@ -56,10 +183,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		
 	// Row 4: Page Toolbar
 		'<tr class="pageToolbar" id="pageToolbar">' +
-			'<td class="pageToolbarLeft">' +
+			'<td colspan=2 class="pageToolbarLeft">' +
 				'<span id="pageActions" class="pageActions"></span>' +
-			'</td>' +
-			'<td>' +
 			'</td>' +
 			'<td class="pageToolbarRight">' +
 				'<span id="pageNavigationActions" class="pageActions pageNavigationActions"></span>' +
@@ -222,83 +347,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			throw "could not find banner parent, id was " + parentId;
 		}
 		
-		commandService.setParameterCollector(function(command, parentDomElement, handler, commandDomElement, callbackParameters) {
-			if (command.parameters) {
-				// get the banner node's parent.  If it is managed by dijit, we will need to layout
-				var layoutWidget = dijit.byId(parent.parentNode.id);
-				var parameterArea = null;
-				var parameterContainer = null;
-				var activeClass = null;
-				if (parentDomElement.id === "pageActions") {
-					parameterArea = dojo.byId("pageCommandParameters");
-					parameterContainer = dojo.byId("pageParameterArea");
-					activeClass = "leftSlideActive";
-				} else if (parentDomElement.id === "pageNavigationActions") {
-					parameterArea = dojo.byId("pageNavigationCommandParameters");
-					parameterContainer = dojo.byId("pageNavigationParameterArea");
-					activeClass = "rightSlideActive";
-				}
-				if (parameterArea) {
-					var first = null;
-					if (typeof command.parameters === "function") {
-						command.parameters.call(command, parameterArea, callbackParameters);
-					} else {
-						var keyHandler = function(event) {
-							if (event.keyCode === dojo.keys.ENTER) {
-								dojo.query("input", parameterArea).forEach(function(field) {
-									command.parameters[field.parameterName].value = field.value;
-									if (command.callback) {
-										command.callback.apply(handler, callbackParameters);
-									}
-								});
-							}
-							if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
-								dojo.empty(parameterArea);
-								dojo.removeClass(parameterContainer, activeClass);
-								dojo.removeClass(commandDomElement, "activeCommand");
-								if (layoutWidget) {
-									layoutWidget.layout();
-								}
-							}
-						};
-						for (var key in command.parameters) {
-							if (command.parameters[key].type) {
-								var parm = command.parameters[key];
-								if (parm.label) {
-									var label = dojo.place(document.createTextNode(parm.label), parameterArea, "last");
-								} 
-								var field = dojo.create("input", {type: parm.type}, parameterArea, "last");
-								dojo.addClass(field, "parameterInput");
-								field.setAttribute("speech", "speech");
-								field.setAttribute("x-webkit-speech", "x-webkit-speech");
-								field.parameterName = key;
-								if (!first) {
-									first = field;
-								}
-								if (parm.value) {
-									field.value = parm.value;
-								}
-								dojo.connect(field, "onkeypress", keyHandler);
-							}
-						}
-						// need cancel button
-					} 
-					// all parameters have been generated.  Activate the area.
-					dojo.addClass(parameterContainer, activeClass);
-					dojo.addClass(commandDomElement, "activeCommand");
-					if (layoutWidget) {
-						layoutWidget.layout();
-					}
-					if (first) {
-						window.setTimeout(function() {
-							first.focus();
-						}, 0);
-					}
-					return true;
-				}	
-			}
-			return false;
-		});
+		// Set up a custom parameter collector that slides out of the header.
+		commandService.setParameterCollector(new CommandParameterCollector(parent));
 		
 		// place the HTML fragment from above.
 		dojo.place(topHTMLFragment, parent, "only");
@@ -470,6 +520,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		generateDomCommandsInBanner: generateDomCommandsInBanner,
 		generateBanner: generateBanner,
 		notifyAuthenticationSite: notifyAuthenticationSite,
-		setPendingAuthentication: setPendingAuthentication
+		setPendingAuthentication: setPendingAuthentication,
+		CommandParameterCollector: CommandParameterCollector
 	};
 });

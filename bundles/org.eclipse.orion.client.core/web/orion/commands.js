@@ -41,6 +41,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		this._globalScope = {};
 		this._namedGroups = {};
 		this._activeBindings = {};
+		this._activeModalCommand = null;
+		this._activeModalCommandNode = null;
 		this._init(options);
 	}
 	CommandService.prototype = /** @lends orion.commands.CommandService.prototype */ {
@@ -127,12 +129,32 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		},
 		
 		/**
-		 * Provide a function that will collect parameters for a given command.  The function
-		 * parameters are
-		 *     function(command, parentNode, handler, commandNode, callbackParameters)
+		 * Provide an object that can collect parameters for a given command.  
 		 */
 		setParameterCollector: function(parameterCollector) {
 			this._parameterCollector = parameterCollector;
+		},
+		
+		openParameterCollector: function(command, commandNode) {
+			if (this._parameterCollector) {
+				if (this._activeModalCommand) {
+					this._parameterCollector.close(this._activeModalCommandNode);
+				}
+				this._activeModalCommand = command;
+				this._activeModalCommandNode = commandNode;
+				this._parameterCollector.open(command, commandNode);
+			}
+		},
+		
+		_collectParameters: function(command, handler, parentNode, commandNode, callbackParameters) {
+			if (this._parameterCollector) {
+				if (this._activeModalCommand) {
+					this._parameterCollector.close(this._activeModalCommandNode);
+				}
+				this._activeModalCommand = command;
+				this._activeModalCommandNode = commandNode;
+				this._parameterCollector.collectParameters(command, handler, parentNode, commandNode, callbackParameters);
+			}
 		},
 		
 		/**
@@ -386,7 +408,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-									menuCommand._addImage(parent, id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink);
+									menuCommand._addImage(parent, id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, this);
 								}
 							}
 						} else {
@@ -502,7 +524,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						} else {
 							if (renderType === "image") {
 								id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								command._addImage(parent, id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, this._parameterCollector);
+								command._addImage(parent, id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, this);
 							} else if (renderType === "menu") {
 								command._addMenuItem(parent, items, handler, userData, cssClass);
 							}
@@ -578,7 +600,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			//how will we know this?
 			this._deviceSupportsHover = false;  
 		},
-		_addImage: function(parent, name, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, parameterCollector) {
+		_addImage: function(parent, name, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, commandService) {
 			handler = handler || this;
 			var link = dojo.create("a");
 			link.id = this.name+"link";
@@ -609,9 +631,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				if (image) {
 					dojo.connect(image, "onclick", this, function() {
 						// collect parameters in advance if specified
-						if (this.parameters && parameterCollector) {
+						if (this.parameters && commandService._parameterCollector) {
 							// should the handler be bound to this, or something else?
-							parameterCollector.call(handler, this, parent, handler, image.id, [items, this.id, image.id, userData, this.parameters]);
+							commandService._collectParameters(this, parent, handler, image.id, [items, this.id, image.id, userData, this.parameters]);
 						} else if (this.callback) {
 							this.callback.call(handler, items, this.id, image.id, userData, this.parameters);
 						}
@@ -619,9 +641,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				} else {
 					dojo.connect(link, "onclick", this, function() {
 						// collect parameters in advance if specified
-						if (this.parameters && parameterCollector) {
-							// should the handler be bound to this, or something else?
-							parameterCollector.call(handler, this, parent, handler, link.id, [items, this.id, link.id, userData, this.parameters]);
+						if (this.parameters && commandService._parameterCollector) {
+							commandService._collectParameters(this, handler, parent, link.id, [items, this.id, link.id, userData, this.parameters]);
 						} else if (this.callback) {
 							this.callback.call(handler, items, this.id, link.id, userData, this.parameters);
 						}
