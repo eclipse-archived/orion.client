@@ -1020,36 +1020,36 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 * <p>
 		 * <b>See:</b><br/>
 		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onFocusIn}<br/>
+		 * {@link orion.textview.TextView#event:onFocus}<br/>
 		 * </p>
-		 * @name orion.textview.FocusInEvent
+		 * @name orion.textview.FocusEvent
 		 */
 		/**
 		 * This event is sent when the text view is focused.
 		 *
 		 * @event
-		 * @param {orion.textview.FocusInEvent} focusInEvent the event
+		 * @param {orion.textview.FocusEvent} focusEvent the event
 		 */
-		onFocusIn: function(focusInEvent) {
-			this._eventTable.sendEvent("FocusIn", focusInEvent);
+		onFocus: function(focusEvent) {
+			return this.dispatchEvent(focusEvent);
 		},
 		/**
 		 * @class This is the event sent when the text view goes out of focus.
 		 * <p>
 		 * <b>See:</b><br/>
 		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onFocusOut}<br/>
+		 * {@link orion.textview.TextView#event:onBlur}<br/>
 		 * </p>
-		 * @name orion.textview.FocusOutEvent
+		 * @name orion.textview.BlurEvent
 		 */
 		/**
 		 * This event is sent when the text view goes out of focus.
 		 *
 		 * @event
-		 * @param {orion.textview.FocusOutEvent} focusOutEvent the event
+		 * @param {orion.textview.BlurEvent} blurEvent the event
 		 */
-		onFocusOut: function(focusOutEvent) {
-			this._eventTable.sendEvent("FocusOut", focusOutEvent);
+		onBlur: function(blurEvent) {
+			return this.dispatchEvent(blurEvent);
 		},
 		/**
 		 * Redraws the text in the given line range.
@@ -1368,12 +1368,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					var clientDiv = this._clientDiv;
 					if (clientDiv) {
 						var hasFocus = this._hasFocus;
-						this._silentFocus = true;
+						this._ignoreFocus = true;
 						if (hasFocus) { clientDiv.blur(); }
 						clientDiv.contentEditable = false;
 						clientDiv.contentEditable = true;
 						if (hasFocus) { clientDiv.focus(); }
-						this._silentFocus = false;
+						this._ignoreFocus = false;
 					}
 				}
 			}
@@ -1496,8 +1496,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					this._selDiv3.style.background = color;
 				}
 			}
-			if (!this._silentFocus) {
-				this.onFocusOut({});
+			if (!this._ignoreFocus) {
+				this.onBlur({type: "Blur"});
 			}
 		},
 		_handleContextMenu: function (e) {
@@ -1663,8 +1663,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					this._selDiv3.style.background = color;
 				}
 			}
-			if (!this._silentFocus) {
-				this.onFocusIn({});
+			if (!this._ignoreFocus) {
+				this.onFocus({type: "Focus"});
 			}
 		},
 		_handleKeyDown: function (e) {
@@ -1808,12 +1808,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (isIE || (isFirefox && !this._overlayDiv)) { target = this._clientDiv; }
 			if (this._overlayDiv) {
 				if (this._hasFocus) {
-					this._silentFocus = true;
+					this._ignoreFocus = true;
 				}
 				var self = this;
 				setTimeout(function () {
 					self.focus();
-					self._silentFocus = false;
+					self._ignoreFocus = false;
 				}, 0);
 			}
 			if (this._clickCount === 1) {
@@ -2110,7 +2110,11 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					 * Bug in IE,  
 					 */
 					var self = this;
-					setTimeout(function() {self._updateDOMSelection();}, 0);
+					this._ignoreFocus = true;
+					setTimeout(function() {
+						self._updateDOMSelection();
+						this._ignoreFocus = false;
+					}, 0);
 				}
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
@@ -3746,7 +3750,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				return clipboadText.join("");
 			}
 			if (isFirefox) {
-				this._silentFocus = true;
+				this._ignoreFocus = true;
 				var document = this._frameDocument;
 				var clipboardDiv = this._clipboardDiv;
 				clipboardDiv.innerHTML = "<pre contenteditable=''></pre>";
@@ -3779,18 +3783,18 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 							self.focus();
 							var text = _getText();
 							if (text) { self._doContent(text); }
-							self._silentFocus = false;
+							self._ignoreFocus = false;
 						}, 0);
 						return null;
 					} else {
 						/* no event and no clipboard permission, paste can't be performed */
 						this.focus();
-						this._silentFocus = false;
+						this._ignoreFocus = false;
 						return "";
 					}
 				}
 				this.focus();
-				this._silentFocus = false;
+				this._ignoreFocus = false;
 				return _getText();
 			}
 			//webkit
@@ -4418,7 +4422,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			this._maxLineWidth = 0;
 			this._maxLineIndex = -1;
 			this._ignoreSelect = true;
-			this._silentFocus = false;
+			this._ignoreFocus = false;
 			this._columnX = -1;
 			this._dragOffset = -1;
 
@@ -4556,13 +4560,13 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				* force the clientDiv to loose and receive focus if the it is focused.
 				*/
 				if (isFirefox) {
-					this._silentFocus = false;
+					this._ignoreFocus = false;
 					var hasFocus = this._hasFocus;
 					if (hasFocus) { clientDiv.blur(); }
 					clientDiv.contentEditable = false;
 					clientDiv.contentEditable = true;
 					if (hasFocus) { clientDiv.focus(); }
-					this._silentFocus = false;
+					this._ignoreFocus = false;
 				}
 			}
 		},
