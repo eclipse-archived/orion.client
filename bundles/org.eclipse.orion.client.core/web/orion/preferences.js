@@ -227,13 +227,10 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 		
 		this._service = null;
 		this.available = function() {
-			var that = this;
 			if (!this._service) {
 				var references = serviceRegistry.getServiceReferences("orion.core.preference.provider");
 				if (references.length > 0) {
-					serviceRegistry.getService(references[0], 0).then(function(service) { // synchronously set
-						that._service = service;
-					});
+					this._service = serviceRegistry.getService(references[0]);
 				}
 			}
 			return !!this._service;

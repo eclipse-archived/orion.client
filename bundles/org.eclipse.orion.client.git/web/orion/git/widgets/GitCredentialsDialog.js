@@ -49,10 +49,7 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 			this.options.passphrase=true;
 		}
 		if(this.options.serviceRegistry){
-			var self = this;
-			this.options.serviceRegistry.getService("orion.net.ssh").then(function(sshService){
-				self._sshService = sshService;
-			});
+			this._sshService = this.options.serviceRegistry.getService("orion.net.ssh");
 		}
 	},
 	postCreate: function() {

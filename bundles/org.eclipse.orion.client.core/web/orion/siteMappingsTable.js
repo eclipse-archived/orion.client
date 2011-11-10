@@ -135,10 +135,8 @@ mSiteMappingsTable.Renderer = (function() {
 mSiteMappingsTable.MappingsTable = (function() {
 	function MappingsTable(serviceRegistry, siteService, selection, parentId, siteConfiguration, /**dojo.Deferred*/ projectsPromise) {
 		this.registry = serviceRegistry;
-		serviceRegistry.getService("orion.page.command").then(dojo.hitch(this, function(commandService) {
-			this.commandService = commandService;
-			this.registerCommands();
-		}));
+		this.commandService = serviceRegistry.getService("orion.page.command");
+		this.registerCommands();
 		this.siteService = siteService;
 		this.parentId = parentId;
 		this.selection = selection;

@@ -123,58 +123,57 @@ exports.EditorCommandFactory = (function() {
 				var actionReferences = this.serviceRegistry.getServiceReferences("orion.edit.command");
 						
 				for (var i=0; i<actionReferences.length; i++) {
-					this.serviceRegistry.getService(actionReferences[i]).then(dojo.hitch(this, function(service) {
-						var info = {};
-						var propertyNames = actionReferences[i].getPropertyNames();
-						for (var j = 0; j < propertyNames.length; j++) {
-							info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
-						}
-						var command = new mCommands.Command({
-							name: info.name,
-							image: info.img,
-							id: info.name,
-							callback: dojo.hitch(editor, function(editor) {
-								// command service will provide editor parameter but editor widget callback will not
-								editor = editor || this;
-								var selection = editor.getSelection();
-								var model = editor.getModel();
-								var text = model.getText();
-								service.run(model.getText(selection.start,selection.end),text,selection).then(function(result){
-									if (result.text) {
-										editor.setText(result.text);
-										if (result.selection) {
-											editor.setSelection(result.selection.start, result.selection.end);
-											editor.getTextView().focus();
-										}
-									} else {
-										if (typeof result === 'string') {
-											editor.setText(result, selection.start, selection.end);
-											editor.setSelection(selection.start, selection.end);
-											editor.getTextView().focus();
-										}
+					var service = this.serviceRegistry.getService(actionReferences[i]);
+					var info = {};
+					var propertyNames = actionReferences[i].getPropertyNames();
+					for (var j = 0; j < propertyNames.length; j++) {
+						info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
+					}
+					var command = new mCommands.Command({
+						name: info.name,
+						image: info.img,
+						id: info.name,
+						callback: dojo.hitch(editor, function(editor) {
+							// command service will provide editor parameter but editor widget callback will not
+							editor = editor || this;
+							var selection = editor.getSelection();
+							var model = editor.getModel();
+							var text = model.getText();
+							service.run(model.getText(selection.start,selection.end),text,selection).then(function(result){
+								if (result.text) {
+									editor.setText(result.text);
+									if (result.selection) {
+										editor.setSelection(result.selection.start, result.selection.end);
+										editor.getTextView().focus();
 									}
-								});
-								return true;
-							})});
-						this.commandService.addCommand(command, "dom");
-						if (info.img) {
-							// image will be placed on toolbar
-							this.commandService.registerCommandContribution(command.id, i, this.toolbarId, "orion.editorActions.contributed.images");
-						} else {
-							// if there is no image it will be grouped in a "More..." menu button
-							this.commandService.registerCommandContribution(command.id, i, this.toolbarId, "orion.editorActions.contributed.noImages");
-						}
-						// We must regenerate the command toolbar everytime we process an extension because
-						// this is asynchronous and we probably have already populated the toolbar.
-						// In the editor, we generate page level commands to the banner.
-						mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
-						if (info.key) {
-							// add it to the editor as a keybinding
-							var textView = editor.getTextView();
-							textView.setKeyBinding(createKeyBinding(info.key), command.id);
-							textView.setAction(command.id, command.callback);
-						}
-					}));
+								} else {
+									if (typeof result === 'string') {
+										editor.setText(result, selection.start, selection.end);
+										editor.setSelection(selection.start, selection.end);
+										editor.getTextView().focus();
+									}
+								}
+							});
+							return true;
+						})});
+					this.commandService.addCommand(command, "dom");
+					if (info.img) {
+						// image will be placed on toolbar
+						this.commandService.registerCommandContribution(command.id, i, this.toolbarId, "orion.editorActions.contributed.images");
+					} else {
+						// if there is no image it will be grouped in a "More..." menu button
+						this.commandService.registerCommandContribution(command.id, i, this.toolbarId, "orion.editorActions.contributed.noImages");
+					}
+					// We must regenerate the command toolbar everytime we process an extension because
+					// this is asynchronous and we probably have already populated the toolbar.
+					// In the editor, we generate page level commands to the banner.
+					mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
+					if (info.key) {
+						// add it to the editor as a keybinding
+						var textView = editor.getTextView();
+						textView.setKeyBinding(createKeyBinding(info.key), command.id);
+						textView.setAction(command.id, command.callback);
+					}				
 				}
 			}
 		}

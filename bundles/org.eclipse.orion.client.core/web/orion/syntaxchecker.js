@@ -37,20 +37,14 @@ eclipse.SyntaxChecker = (function () {
 						filteredValidators.push(serviceReference);
 					}
 				}
-				
-				var callService = function(validationService) {
-					return validationService.checkSyntax(title, contents);
-				};
+
 				var extractProblems = function(data) {
 					return data.problems || data.errors;
 				};
 				var problemPromises = [];
 				for (i=0; i < filteredValidators.length; i++) {
 					var validator = filteredValidators[i];
-					problemPromises.push(
-						this.registry.getService(validator)
-							.then(callService)
-							.then(extractProblems));
+					problemPromises.push(this.registry.getService(validator).checkSyntax(title, contents).then(extractProblems));
 				}
 				
 				new dojo.DeferredList(problemPromises)
@@ -63,9 +57,8 @@ eclipse.SyntaxChecker = (function () {
 								problems = problems.concat(probs);
 							}
 						}
-						this.registry.getService("orion.core.marker").then(function(markerService) {
-							markerService._setProblems(problems);
-						});}));
+						this.registry.getService("orion.core.marker")._setProblems(problems);
+					}));
 			}
 		},
 		_fixup: function(problems) {

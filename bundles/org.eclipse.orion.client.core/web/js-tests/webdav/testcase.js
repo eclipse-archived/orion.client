@@ -22,9 +22,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "webdav
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
 		
 		var promise = pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
-			return serviceRegistry.getService("xhr");
-		}).then(function(service) {
-			return service.call("GET", "xhrPlugin.html");
+			return serviceRegistry.getService("xhr").call("GET", "xhrPlugin.html");
 		}).then(function(result) {
 			assert.ok(result.status >= 200 && result.status < 300);
 			pluginRegistry.shutdown();
@@ -41,8 +39,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "webdav
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
 		
 		var promise = pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
-			return serviceRegistry.getService("xhr");
-		}).then(function(service) {
+			var service = serviceRegistry.getService("xhr");
 			return service.call("GET", "xhrPlugin.html").then(function(result) {
 				assert.ok(result.status >= 200 && result.status < 300);
 				return service.call("PROPFIND", "xhrPlugin.html");
@@ -79,8 +76,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "webdav
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
 		
 		var promise = pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
-			return serviceRegistry.getService("xhr");
-		}).then(function(service) {
+			var service = serviceRegistry.getService("xhr");
 			return service.call("GET", "testput.txt", {"Cache-Control": "no-cache"}).then(function(result) {
 				assert.ok(result.status === 404);
 				return service.call("PUT", "testput.txt", null, "test");
@@ -110,8 +106,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "webdav
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
 		
 		var promise = pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
-			return serviceRegistry.getService("xhr");
-		}).then(function(service) {
+			var service = serviceRegistry.getService("xhr");
 			return service.call("PROPFIND", "test/").then(function(result) {
 				assert.ok(result.status === 404);
 				return service.call("MKCOL", "test/");

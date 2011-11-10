@@ -290,7 +290,6 @@ define(["dojo"], function(dojo){
 		 */
 		getService: function(nameOrServiceReference, timeout) {
 			var service;
-			var d = new dojo.Deferred();
 			if (typeof nameOrServiceReference === 'string') {
 				if (this._namedReferences[nameOrServiceReference]) {
 					for (var i = 0; i < this._namedReferences[nameOrServiceReference].length; i++) {
@@ -303,21 +302,7 @@ define(["dojo"], function(dojo){
 			} else {
 				service = this._entries[nameOrServiceReference.getServiceId()].service;
 			}
-			if (service) {
-				d.resolve(service);
-			} else if (timeout === 0) {
-				d.reject(new Error("timeout: getService"));
-			} else {
-				var that = this;
-				var serviceTracker = function(reference, service) {
-					if (nameOrServiceReference === reference || nameOrServiceReference === reference.getName()) {
-						d.resolve(service);
-						that._serviceEventTarget.removeEventListener("serviceAdded", serviceTracker);
-					}
-				};
-				this._serviceEventTarget.addEventListener("serviceAdded", serviceTracker);
-			}
-			return d.promise;
+			return service;
 		},
 		
 		/**
