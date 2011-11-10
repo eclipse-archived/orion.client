@@ -38,9 +38,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 			var references = serviceRegistry.getServiceReferences("orion.file");
 			var reference = references[0];
 			var root = reference.getProperty("root");
-			return serviceRegistry.getService(reference).then(function(service) {
-				return service.read(root + "dummyFilePlugin.html");
-			});
+			return serviceRegistry.getService(reference).read(root + "dummyFilePlugin.html");
 		}).then(function(result) {
 			assert.ok(result.status >= 200 && result.status < 300);
 			pluginRegistry.shutdown();
@@ -57,9 +55,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 			var references = serviceRegistry.getServiceReferences("orion.file");
 			var reference = references[0];
 			var root = reference.getProperty("root");
-			return serviceRegistry.getService(reference).then(function(service) {
-				return service.read(root + "notfound.html");
-			});
+			return serviceRegistry.getService(reference).read(root + "notfound.html");
 		}).then(function(result) {
 			assert.ok(false);
 		}, function(result) {
@@ -79,22 +75,21 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 			var references = serviceRegistry.getServiceReferences("orion.file");
 			var reference = references[0];
 			var root = reference.getProperty("root");
-			return serviceRegistry.getService(reference).then(function(service) {
-				return service.read(root + "newfile.html").then(function(result) {
-					assert.ok(false);
-				}, function(result) {
-					assert.ok(result.status === 404);
-					return service.write(root + "newfile.html", "<html><body>test</body></html>");
-				}).then(function(result) {
-					assert.ok(result.status >= 200 && result.status < 300);
-					return service.read(root + "newfile.html");
-				}).then(function(result) {
-					assert.ok(result.status >= 200 && result.status < 300);
-					return service.remove(root + "newfile.html");
-				}).then(function(result) {
-					assert.ok(result.status >= 200 && result.status < 300);
-				});
+			return serviceRegistry.getService(reference).read(root + "newfile.html").then(function(result) {
+				assert.ok(false);
+			}, function(result) {
+				assert.ok(result.status === 404);
+				return service.write(root + "newfile.html", "<html><body>test</body></html>");
+			}).then(function(result) {
+				assert.ok(result.status >= 200 && result.status < 300);
+				return service.read(root + "newfile.html");
+			}).then(function(result) {
+				assert.ok(result.status >= 200 && result.status < 300);
+				return service.remove(root + "newfile.html");
+			}).then(function(result) {
+				assert.ok(result.status >= 200 && result.status < 300);
 			});
+
 		}).then(function(){
 			pluginRegistry.shutdown();
 		});
@@ -110,21 +105,19 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 			var references = serviceRegistry.getServiceReferences("orion.file");
 			var reference = references[0];
 			var root = reference.getProperty("root");
-			return serviceRegistry.getService(reference).then(function(service) {
-				return service.list(root + "newdir").then(function(result) {
-					assert.ok(false);
-				}, function(result) {
-					assert.ok(result.status === 404);
-					return service.mkdir(root + "newdir");
-				}).then(function(result) {
-					assert.ok(result.status >= 200 && result.status < 300);
-					return service.list(root + "newdir");
-				}).then(function(result) {
-					assert.ok(result.status >= 200 && result.status < 300);
-					return service.remove(root + "newdir");
-				}).then(function(result) {
-					assert.ok(result.status >= 200 && result.status < 300);
-				});
+			return serviceRegistry.getService(reference).list(root + "newdir").then(function(result) {
+				assert.ok(false);
+			}, function(result) {
+				assert.ok(result.status === 404);
+				return service.mkdir(root + "newdir");
+			}).then(function(result) {
+				assert.ok(result.status >= 200 && result.status < 300);
+				return service.list(root + "newdir");
+			}).then(function(result) {
+				assert.ok(result.status >= 200 && result.status < 300);
+				return service.remove(root + "newdir");
+			}).then(function(result) {
+				assert.ok(result.status >= 200 && result.status < 300);
 			});
 		}).then(function(){
 			pluginRegistry.shutdown();

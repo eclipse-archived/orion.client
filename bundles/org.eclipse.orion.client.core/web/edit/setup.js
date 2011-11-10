@@ -73,11 +73,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						var name = serviceReference.getProperty("name"),
 						    pattern = serviceReference.getProperty("pattern");
 						if (pattern && new RegExp(pattern).test(fileName)) {
-							(function(name, pattern) {
-								serviceRegistry.getService(serviceReference).then(function(service) {
-									addProvider(name, pattern, service);
-								});
-							}(name, pattern));
+							serviceRegistry.getService(serviceReference).addProvider(name, pattern, service);
 						}
 					}
 					providersLoaded = true;
@@ -437,10 +433,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	});
 	
 	// Establishing dependencies on registered services
-	serviceRegistry.getService("orion.core.marker").then(function(problemProvider) {
-		problemProvider.addEventListener("problemsChanged", function(problems) {
-			editor.showProblems(problems);
-		});
+	serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(problems) {
+		editor.showProblems(problems);
 	});
 	
 	editor.addEventListener("DirtyChanged", function(evt) {
@@ -448,12 +442,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	});
 	
 	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
-	serviceRegistry.getService("orion.page.selection").then(function(service) {
-		service.addEventListener("selectionChanged", function(fileURI) {
-			if (inputManager.shouldGoToURI(editor, fileURI)) {
-				inputManager.setInput(fileURI, editor);
-			} 
-		});
+	serviceRegistry.getService("orion.page.selection").addEventListener("selectionChanged", function(fileURI) {
+		if (inputManager.shouldGoToURI(editor, fileURI)) {
+			inputManager.setInput(fileURI, editor);
+		} 
 	});
 
 	// In this page, the hash change drives selection.  In other scenarios, a file picker might drive selection

@@ -106,28 +106,25 @@ function loadResource(navigator){
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
 				initTitleBar(fileClient, navigator, resource);
 				if (resource.Type === "RemoteTrackingBranch"){
-					serviceRegistry.getService("orion.git.provider").then(function(gitService){
-						gitService.getLog(resource.HeadLocation, resource.Id, function(scopedCommitsJsonData, secondArg) {
-							
-							function loadScopedCommitsList(scopedCommitsJsonData){
-								navigator.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
-								navigator.renderer.setOutgoingCommits([]);
-								navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);									
-							}
-							
-							if(secondArg.xhr.status===200){
-								loadScopedCommitsList(scopedCommitsJsonData);
-							} else if(secondArg.xhr.status===202){
-								var deferred = new dojo.Deferred();
-								deferred.callback(scopedCommitsJsonData);
-								serviceRegistry.getService("orion.page.message").then(function(progressService) {
-									progressService.showWhile(deferred, "Getting git incoming changes").then(function(resourceData){
-										loadScopedCommitsList(resourceData.Result.JsonData);
-									});
-								});
-							}
-							
-						});
+					var gitService = serviceRegistry.getService("orion.git.provider")
+					gitService.getLog(resource.HeadLocation, resource.Id, function(scopedCommitsJsonData, secondArg) {
+						
+						function loadScopedCommitsList(scopedCommitsJsonData){
+							navigator.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
+							navigator.renderer.setOutgoingCommits([]);
+							navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);									
+						}
+						
+						if(secondArg.xhr.status===200){
+							loadScopedCommitsList(scopedCommitsJsonData);
+						} else if(secondArg.xhr.status===202){
+							var deferred = new dojo.Deferred();
+							deferred.callback(scopedCommitsJsonData);
+							serviceRegistry.getService("orion.page.message").showWhile(deferred, "Getting git incoming changes").then(function(resourceData){
+								loadScopedCommitsList(resourceData.Result.JsonData);
+							});
+						}
+						
 					});
 				} else if (resource.toRef){
 					if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1)
@@ -139,27 +136,24 @@ function loadResource(navigator){
 							handleAs : "json",
 							timeout : 5000,
 							load : function(remoteJsonData, secondArg) {
-								serviceRegistry.getService("orion.git.provider").then(function(gitService){
-									gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
-										function loadScopedCommitsList(scopedCommitsJsonData){
-											navigator.renderer.setIncomingCommits([]);
-											navigator.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
-											navigator.loadCommitsList(dojo.hash(), resource);
-										}
-										
-										if(secondArg.xhr.status===200){
-											loadScopedCommitsList(scopedCommitsJsonData);
-										} else if(secondArg.xhr.status===202){
-											var deferred = new dojo.Deferred();
-											deferred.callback(scopedCommitsJsonData);
-											serviceRegistry.getService("orion.page.message").then(function(progressService) {
-												progressService.showWhile(deferred, "Getting git outgoing changes").then(function(resourceData){
-													loadScopedCommitsList(resourceData.Result.JsonData);
-												});
-											});
-										}
-										
-									});
+								var gitService = serviceRegistry.getService("orion.git.provider");
+								gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
+									function loadScopedCommitsList(scopedCommitsJsonData){
+										navigator.renderer.setIncomingCommits([]);
+										navigator.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
+										navigator.loadCommitsList(dojo.hash(), resource);
+									}
+									
+									if(secondArg.xhr.status===200){
+										loadScopedCommitsList(scopedCommitsJsonData);
+									} else if(secondArg.xhr.status===202){
+										var deferred = new dojo.Deferred();
+										deferred.callback(scopedCommitsJsonData);
+										serviceRegistry.getService("orion.page.message").showWhile(deferred, "Getting git outgoing changes").then(function(resourceData){
+											loadScopedCommitsList(resourceData.Result.JsonData);
+										});
+									}
+									
 								});
 							},
 							error : function(error, ioArgs){
@@ -178,13 +172,10 @@ function loadResource(navigator){
 			} else if(secondArg.xhr.status===202){
 				var deferred = new dojo.Deferred();
 				deferred.callback(resource);
-				serviceRegistry.getService("orion.page.message").then(function(progressService) {
-					progressService.showWhile(deferred, "Getting git log").then(function(resourceData){
-						loadResource(resourceData.Result.JsonData);
-					});
+				serviceRegistry.getService("orion.page.message").showWhile(deferred, "Getting git log").then(function(resourceData){
+					loadResource(resourceData.Result.JsonData);
 				});
-			}
-			
+			}			
 		},
 		error : function(error, ioArgs) {
 			if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
@@ -276,13 +267,12 @@ function initTitleBar(fileClient, navigator, item){
 					if(item && item.CloneLocation){
 						var cloneURI = item.CloneLocation;
 						
-						serviceRegistry.getService("orion.git.provider").then(function(gitService){
-							gitService.getGitClone(cloneURI).then(function(jsonData){
-							if(jsonData.Children && jsonData.Children.length>0)
+						serviceRegistry.getService("orion.git.provider").getGitClone(cloneURI).then(function(jsonData){
+							if(jsonData.Children && jsonData.Children.length>0) {
 								setPageTitle(branchName, jsonData.Children[0].Name, jsonData.Children[0].ContentLocation, isRemote, isBranch);
-							else
+							} else {
 								setPageTitle(branchName, jsonData.Name, jsonData.ContentLocation, isRemote, isBranch);
-							});
+							}
 						});
 					}else{
 						setPageTitle(branchName);
@@ -344,35 +334,27 @@ function makeRightPane(explorer){
 		};
 }
 
-function makeHref(fileClient, seg, location, isRemote){
-	if(!location){
+function makeHref(fileClient, seg, location, isRemote) {
+	if (!location) {
 		return;
 	}
-	fileClient.read(location, true).then(
-			dojo.hitch(this, function(metadata) {
-				if (isRemote) {
-					serviceRegistry.getService("orion.git.provider").then(function(gitService){
-						if(metadata.Git)
-						gitService.getDefaultRemoteBranch(
-								metadata.Git.RemoteLocation, function(
-										defaultRemoteBranchJsonData, secondArg) {
-									seg.href = require.toUrl("git/git-log.html") + "#"
-											+ defaultRemoteBranchJsonData.Location
-											+ "?page=1";
-								});
-					});
-
-				} else {
-					if(metadata.Git)
-					seg.href = require.toUrl("git/git-log.html") + "#" + metadata.Git.CommitLocation
-							+ "?page=1";
-				}
-			}),
-			dojo.hitch(this, function(error) {
-				console.error("Error loading file metadata: " + error.message);
-			})
-	);
-};
+	
+	fileClient.read(location, true).then(dojo.hitch(this, function(metadata) {
+		if (isRemote) {
+			var gitService = serviceRegistry.getService("orion.git.provider");
+			if (metadata.Git) {
+				gitService.getDefaultRemoteBranch(metadata.Git.RemoteLocation, function(defaultRemoteBranchJsonData, secondArg) {
+					seg.href = require.toUrl("git/git-log.html") + "#" + defaultRemoteBranchJsonData.Location + "?page=1";
+				});
+			}
+		} else {
+			if (metadata.Git)
+				seg.href = require.toUrl("git/git-log.html") + "#" + metadata.Git.CommitLocation + "?page=1";
+		}
+	}), dojo.hitch(this, function(error) {
+		console.error("Error loading file metadata: " + error.message);
+	}));
+}
 
 function setPageTitle(branchName, cloneName, cloneLocation, isRemote, isBranch){
 	var pageTitle = dojo.byId("pageTitle");

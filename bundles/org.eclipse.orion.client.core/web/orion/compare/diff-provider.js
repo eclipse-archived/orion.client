@@ -74,9 +74,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 		
 		for(var i = 0; i < _references.length; ++i) {
 			_patterns[i] = new RegExp(_references[i].getProperty("pattern") || ".*");			
-			serviceRegistry.getService(_references[i], 0).then(function(service) {
-				_services[i] = service;
-			});
+			_services[i] = serviceRegistry.getService(_references[i]);
 		}
 
 		this._getService = function(location) {

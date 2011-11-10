@@ -28,10 +28,7 @@ eclipse.GitService = (function() {
 			this._serviceRegistry = serviceRegistry;
 			this._serviceRegistration = serviceRegistry.registerService(
 					"orion.git.provider", this);
-			var self = this;
-			serviceRegistry.getService("orion.net.ssh").then(function(sshService){
-				self._sshService = sshService;
-			});
+			this._sshService = serviceRegistry.getService("orion.net.ssh");
 		}
 	}
 
