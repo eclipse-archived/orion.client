@@ -9,7 +9,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -317,6 +317,14 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			* itself. The fix is to call _updateDOMSelection() after calling focus().
 			*/
 			this._updateDOMSelection();
+		},
+		/**
+		 * Check if the text view has focus.
+		 *
+		 * @returns {Boolean} <code>true</code> if the text view has focus, otherwise <code>false</code>.
+		 */
+		hasFocus: function() {
+			return this._hasFocus;
 		},
 		/**
 		 * Returns all action names defined in the text view.
@@ -1008,6 +1016,42 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			return this.dispatchEvent(unloadEvent);
 		},
 		/**
+		 * @class This is the event sent when the text view is focused.
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onFocus}<br/>
+		 * </p>
+		 * @name orion.textview.FocusEvent
+		 */
+		/**
+		 * This event is sent when the text view is focused.
+		 *
+		 * @event
+		 * @param {orion.textview.FocusEvent} focusEvent the event
+		 */
+		onFocus: function(focusEvent) {
+			return this.dispatchEvent(focusEvent);
+		},
+		/**
+		 * @class This is the event sent when the text view goes out of focus.
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onBlur}<br/>
+		 * </p>
+		 * @name orion.textview.BlurEvent
+		 */
+		/**
+		 * This event is sent when the text view goes out of focus.
+		 *
+		 * @event
+		 * @param {orion.textview.BlurEvent} blurEvent the event
+		 */
+		onBlur: function(blurEvent) {
+			return this.dispatchEvent(blurEvent);
+		},
+		/**
 		 * Redraws the text in the given line range.
 		 * <p>
 		 * The line at the end index is not redrawn.
@@ -1324,10 +1368,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					var clientDiv = this._clientDiv;
 					if (clientDiv) {
 						var hasFocus = this._hasFocus;
+						this._ignoreFocus = true;
 						if (hasFocus) { clientDiv.blur(); }
 						clientDiv.contentEditable = false;
 						clientDiv.contentEditable = true;
 						if (hasFocus) { clientDiv.focus(); }
+						this._ignoreFocus = false;
 					}
 				}
 			}
@@ -1449,6 +1495,9 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					this._selDiv2.style.background = color;
 					this._selDiv3.style.background = color;
 				}
+			}
+			if (!this._ignoreFocus) {
+				this.onBlur({type: "Blur"});
 			}
 		},
 		_handleContextMenu: function (e) {
@@ -1614,6 +1663,9 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					this._selDiv3.style.background = color;
 				}
 			}
+			if (!this._ignoreFocus) {
+				this.onFocus({type: "Focus"});
+			}
 		},
 		_handleKeyDown: function (e) {
 			if (!e) { e = window.event; }
@@ -1755,9 +1807,13 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var target = this._frameWindow;
 			if (isIE || (isFirefox && !this._overlayDiv)) { target = this._clientDiv; }
 			if (this._overlayDiv) {
+				if (this._hasFocus) {
+					this._ignoreFocus = true;
+				}
 				var self = this;
 				setTimeout(function () {
 					self.focus();
+					self._ignoreFocus = false;
 				}, 0);
 			}
 			if (this._clickCount === 1) {
@@ -2054,7 +2110,11 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					 * Bug in IE,  
 					 */
 					var self = this;
-					setTimeout(function() {self._updateDOMSelection();}, 0);
+					this._ignoreFocus = true;
+					setTimeout(function() {
+						self._updateDOMSelection();
+						this._ignoreFocus = false;
+					}, 0);
 				}
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
@@ -2484,7 +2544,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (lineIndex + 1 < model.getLineCount()) {
 				var scrollX = this._getScroll().x;
 				var x = this._columnX;
-				if (x === -1 || args.select) {
+				if (x === -1 || (args.select && isIE)) {
 					var offset = args.wholeLine ? model.getLineEnd(lineIndex + 1) : caret;
 					x = this._getOffsetToX(offset) + scrollX;
 				}
@@ -2503,7 +2563,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (lineIndex > 0) {
 				var scrollX = this._getScroll().x;
 				var x = this._columnX;
-				if (x === -1 || args.select) {
+				if (x === -1 || (args.select && isIE)) {
 					var offset = args.wholeLine ? model.getLineStart(lineIndex - 1) : caret;
 					x = this._getOffsetToX(offset) + scrollX;
 				}
@@ -2528,7 +2588,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				var scrollLines = Math.min(lineCount - caretLine - 1, lines);
 				scrollLines = Math.max(1, scrollLines);
 				var x = this._columnX;
-				if (x === -1 || args.select) {
+				if (x === -1 || (args.select && isIE)) {
 					x = this._getOffsetToX(caret) + scroll.x;
 				}
 				selection.extend(this._getXToOffset(caretLine + scrollLines, x - scroll.x));
@@ -2555,7 +2615,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				var lines = Math.floor(clientHeight / lineHeight);
 				var scrollLines = Math.max(1, Math.min(caretLine, lines));
 				var x = this._columnX;
-				if (x === -1 || args.select) {
+				if (x === -1 || (args.select && isIE)) {
 					x = this._getOffsetToX(caret) + scroll.x;
 				}
 				selection.extend(this._getXToOffset(caretLine - scrollLines, x - scroll.x));
@@ -2820,6 +2880,13 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				bindings.push({name: "scrollTextEnd",		keyBinding: new KeyBinding(35), predefined: true});
 				bindings.push({name: "textStart",	keyBinding: new KeyBinding(38, true), predefined: true});
 				bindings.push({name: "textEnd",		keyBinding: new KeyBinding(40, true), predefined: true});
+				bindings.push({name: "scrollPageUp",	keyBinding: new KeyBinding(38, null, null, null, true), predefined: true});
+				bindings.push({name: "scrollPageDown",		keyBinding: new KeyBinding(40, null, null, null, true), predefined: true});
+				bindings.push({name: "lineStart",	keyBinding: new KeyBinding(37, null, null, null, true), predefined: true});
+				bindings.push({name: "lineEnd",		keyBinding: new KeyBinding(39, null, null, null, true), predefined: true});
+				//TODO These two actions should be changed to paragraph start and paragraph end  when word wrap is implemented
+				bindings.push({name: "lineStart",	keyBinding: new KeyBinding(38, null, null, true), predefined: true});
+				bindings.push({name: "lineEnd",		keyBinding: new KeyBinding(40, null, null, true), predefined: true});
 			} else {
 				bindings.push({name: "pageUp",		keyBinding: new KeyBinding(33), predefined: true});
 				bindings.push({name: "pageDown",	keyBinding: new KeyBinding(34), predefined: true});
@@ -2829,6 +2896,10 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				bindings.push({name: "wordNext",	keyBinding: new KeyBinding(39, true), predefined: true});
 				bindings.push({name: "textStart",	keyBinding: new KeyBinding(36, true), predefined: true});
 				bindings.push({name: "textEnd",		keyBinding: new KeyBinding(35, true), predefined: true});
+			}
+			if (isFirefox && isLinux) {
+				bindings.push({name: "lineUp",		keyBinding: new KeyBinding(38, true), predefined: true});
+				bindings.push({name: "lineDown",	keyBinding: new KeyBinding(40, true), predefined: true});
 			}
 
 			// Select Cursor Navigation
@@ -2847,6 +2918,11 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				bindings.push({name: "selectTextEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true});
 				bindings.push({name: "selectTextStart",	keyBinding: new KeyBinding(38, true, true), predefined: true});
 				bindings.push({name: "selectTextEnd",		keyBinding: new KeyBinding(40, true, true), predefined: true});
+				bindings.push({name: "selectLineStart",	keyBinding: new KeyBinding(37, null, true, null, true), predefined: true});
+				bindings.push({name: "selectLineEnd",		keyBinding: new KeyBinding(39, null, true, null, true), predefined: true});
+				//TODO These two actions should be changed to select paragraph start and select paragraph end  when word wrap is implemented
+				bindings.push({name: "selectLineStart",	keyBinding: new KeyBinding(38, null, true, true), predefined: true});
+				bindings.push({name: "selectLineEnd",		keyBinding: new KeyBinding(40, null, true, true), predefined: true});
 			} else {
 				if (isLinux) {
 					bindings.push({name: "selectWholeLineUp",		keyBinding: new KeyBinding(38, true, true), predefined: true});
@@ -3674,6 +3750,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				return clipboadText.join("");
 			}
 			if (isFirefox) {
+				this._ignoreFocus = true;
 				var document = this._frameDocument;
 				var clipboardDiv = this._clipboardDiv;
 				clipboardDiv.innerHTML = "<pre contenteditable=''></pre>";
@@ -3706,15 +3783,18 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 							self.focus();
 							var text = _getText();
 							if (text) { self._doContent(text); }
+							self._ignoreFocus = false;
 						}, 0);
 						return null;
 					} else {
 						/* no event and no clipboard permission, paste can't be performed */
 						this.focus();
+						this._ignoreFocus = false;
 						return "";
 					}
 				}
 				this.focus();
+				this._ignoreFocus = false;
 				return _getText();
 			}
 			//webkit
@@ -4342,6 +4422,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			this._maxLineWidth = 0;
 			this._maxLineIndex = -1;
 			this._ignoreSelect = true;
+			this._ignoreFocus = false;
 			this._columnX = -1;
 			this._dragOffset = -1;
 
@@ -4479,11 +4560,13 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				* force the clientDiv to loose and receive focus if the it is focused.
 				*/
 				if (isFirefox) {
+					this._ignoreFocus = false;
 					var hasFocus = this._hasFocus;
 					if (hasFocus) { clientDiv.blur(); }
 					clientDiv.contentEditable = false;
 					clientDiv.contentEditable = true;
 					if (hasFocus) { clientDiv.focus(); }
+					this._ignoreFocus = false;
 				}
 			}
 		},

@@ -54,9 +54,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 			return response;
 		},
 		saveSearch: function(favoriteName, query) {
-			this.registry.getService("orion.core.favorite").then(function(favorites) {
-				favorites.addFavoriteSearch(favoriteName, query);
-			});
+			this.registry.getService("orion.core.favorite").addFavoriteSearch(favoriteName, query);
 		},
 		setLocationByMetaData: function(meta){
 			if(meta &&  meta.Location && meta.Parents){

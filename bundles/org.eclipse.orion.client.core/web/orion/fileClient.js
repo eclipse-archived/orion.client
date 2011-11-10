@@ -182,9 +182,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 				patternString = "^" + patternString;
 			}
 			_patterns[j] = new RegExp(patternString);			
-			serviceRegistry.getService(_references[j], 0).then(function(service) {
-				_services[j] = service; // note: sync
-			});
+			_services[j] = serviceRegistry.getService(_references[j]);
 		}
 		
 		if (_services.length === 1) {

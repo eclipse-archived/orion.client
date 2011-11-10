@@ -68,31 +68,28 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 					return true;
 				},
 				callback: function(item) {
+					
+					var userService = serviceRegistry.getService("orion.core.user");
 					if(dojo.isArray(item) && item.length > 1){
 						if(confirm("Are you sure you want to delete these " + item.length + " users?")){
-							serviceRegistry.getService("orion.core.user").then(function(service) {
-								var usersProcessed = 0;
-								for(var i=0; i<item.length; i++){
-									  service.deleteUser(item[i].Location).then( dojo.hitch(usersList, function(jsonData) {
-										  usersProcessed++;
-										  if(usersProcessed==item.length)
-											  this.reloadUsers();
-									  }));	
-								}
-							});
+							var usersProcessed = 0;
+							for(var i=0; i<item.length; i++){
+								userService.deleteUser(item[i].Location).then( dojo.hitch(usersList, function(jsonData) {
+									  usersProcessed++;
+									  if(usersProcessed==item.length)
+										  this.reloadUsers();
+								  }));	
+							}
 						}
 						
 					}else{
 						item = dojo.isArray(item) ? item[0] : item;
 						if (confirm("Are you sure you want to delete user '" + item.login + "'?")) {
-							serviceRegistry.getService("orion.core.user").then(function(service) {
-							  service.deleteUser(item.Location).then( dojo.hitch(usersList, function(jsonData) {
-								  this.reloadUsers();
-							  }));
-							});
+							userService.deleteUser(item.Location).then( dojo.hitch(usersList, function(jsonData) {
+							  this.reloadUsers();
+						  }));
 						}
 					}
-					
 				}
 			});
 			commandService.addCommand(deleteCommand, "object");

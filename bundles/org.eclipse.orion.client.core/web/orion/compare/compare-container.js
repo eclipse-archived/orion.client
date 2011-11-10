@@ -34,53 +34,45 @@ exports.CompareContainer = (function() {
 			this._diffProvider = diffProvider;
 		},
 		
-		getFileDiff: function(diffURI , uiCallBack , errorCallBack  ,onsave){
+		getFileDiff: function(diffURI, uiCallBack, errorCallBack, onsave) {
 			var self = this;
 			this._diffProvider.getDiffContent(diffURI).then(function(jsonData, secondArg) {
-											  if(self._conflict){
-												  self._diff = jsonData.split("diff --git")[1];
-											  }	else {
-												  self._diff = jsonData;
-											  }
-											  if(onsave)
-												  self.setEditor(this._input , self._diff ,onsave);
-											  else
-												  self.getFileURI(diffURI , uiCallBack , errorCallBack);
-										   },
-										   errorCallBack);
+				if (self._conflict) {
+					self._diff = jsonData.split("diff --git")[1];
+				} else {
+					self._diff = jsonData;
+				}
+				if (onsave)
+					self.setEditor(this._input, self._diff, onsave);
+				else
+					self.getFileURI(diffURI, uiCallBack, errorCallBack);
+			}, errorCallBack);
 		},
 		
-		getFileURI: function(diffURI , uiCallBack , errorCallBack ){
+		getFileURI: function(diffURI, uiCallBack, errorCallBack) {
 			var self = this;
 			this._diffProvider.getDiffFileURI(diffURI).then(function(jsonData, secondArg) {
-											  self._oldFileURI = jsonData.Old;
-											  self._newFileURI = jsonData.New;
-											  self.getFileContent(jsonData.Old , errorCallBack);
-											  if(uiCallBack)
-												  uiCallBack(jsonData.New , jsonData.Old);
-										   },
-										   errorCallBack);
+				self._oldFileURI = jsonData.Old;
+				self._newFileURI = jsonData.New;
+				self.getFileContent(jsonData.Old, errorCallBack);
+				if (uiCallBack)
+					uiCallBack(jsonData.New, jsonData.Old);
+			}, errorCallBack);
 		},
 		
-		getFileContent: function(fileURI , errorCallBack ){
+		getFileContent: function(fileURI, errorCallBack) {
 			var self = this;
-			self._registry.getService("orion.core.file").then(
-					function(service) {
-						service.read(fileURI).then( 
-											  function(contents) {
-												  this._input = contents;
-												  self.setEditor(contents , self._diff );					  
-											  },
-											  function(error ,ioArgs) {
-												  if(error.status === 404){
-													  this._input = "";
-													  self.setEditor("" , self._diff );	
-												  } else if(errorCallBack){
-													  errorCallBack(error ,ioArgs);
-												  }
-													  
-											  });
-					});
+			self._registry.getService("orion.core.file").read(fileURI).then(function(contents) {
+				self._input = contents;
+				self.setEditor(contents, self._diff);
+			}, function(error, ioArgs) {
+				if (error.status === 404) {
+					self._input = "";
+					self.setEditor("", self._diff);
+				} else if (errorCallBack) {
+					errorCallBack(error, ioArgs);
+				}
+			});
 		},
 		
 		parseMapper: function(input , diff , detectConflicts ,doNotBuildNewFile){

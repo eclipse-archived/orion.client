@@ -66,20 +66,17 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 			
 			this.usersService = this.registry.getService("orion.core.user");
 			
-			if(this.usersService!==null){
-				this.usersService.then(function(service) {
-					service.addEventListener("requiredPluginsChanged", function(pluginsList){
-						dojo.hitch(userProfile, userProfile.drawPlugins(pluginsList.plugins));
-					});
-					service.addEventListener("userInfoChanged", function(jsonData){
-						dojo.hitch(userProfile,	userProfile.populateData(jsonData));
-					});
-					service.addEventListener("userDeleted", function(jsonData){
-						window.location.replace("/");
-					});
-					dojo.hitch(userProfile, function(){this.addInputListener();})();
+			if(this.usersService !== null){
+				usersService.addEventListener("requiredPluginsChanged", function(pluginsList){
+					dojo.hitch(userProfile, userProfile.drawPlugins(pluginsList.plugins));
 				});
-	
+				usersService.addEventListener("userInfoChanged", function(jsonData){
+					dojo.hitch(userProfile,	userProfile.populateData(jsonData));
+				});
+				usersService.addEventListener("userDeleted", function(jsonData){
+					window.location.replace("/");
+				});
+				dojo.hitch(userProfile, function(){this.addInputListener();})();
 			}
 	
 		},
@@ -152,13 +149,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 					var registry = this.registry;
 					dojo.hitch(this, function(div){this.pluginRegistry.installPlugin(pluginsList[i].Url).then(
 							function(ref){
-								var plugin = registry.getService(ref.getServiceReferences()[0]);
-								plugin.then(function(pluginService){
-									if(pluginService.getDivContent)
-										pluginService.getDivContent().then(function(content) {
-											dojo.hitch(userProfile, userProfile.draw(content, div));
-										});
-								});
+								var pluginService = registry.getService(ref.getServiceReferences()[0]);
+								if(pluginService.getDivContent) {
+									pluginService.getDivContent().then(function(content) {
+										dojo.hitch(userProfile, userProfile.draw(content, div));
+									});
+								}
 							});
 					})(pluginDiv);
 					continue;
@@ -346,28 +342,24 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 	
 		},
 		displayMessage: function(message, severity){
-			this.registry.getService("orion.page.message").then(function(progressService){
-				if(!message)
-					return;
-				
-				var display = [];
-				
-				display.Severity = severity;
-				display.HTML = false;
-				
-				try{
-					var resp = JSON.parse(message.responseText);
-					display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
-				}catch(Exception){
-					display.Message = message.message;
-				}
-				
-				if(display.Message){
-					progressService.setProgressResult(display);	
-				}
-				
-				
-			});
+			if(!message)
+				return;
+			
+			var display = [];
+			
+			display.Severity = severity;
+			display.HTML = false;
+			
+			try{
+				var resp = JSON.parse(message.responseText);
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+			}catch(Exception){
+				display.Message = message.message;
+			}
+			
+			if(display.Message){
+				this.registry.getService("orion.page.message").setProgressResult(display);	
+			}
 		}
 	};
 	// this has to be a global for now
