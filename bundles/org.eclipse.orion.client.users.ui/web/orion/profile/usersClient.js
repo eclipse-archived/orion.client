@@ -61,33 +61,30 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 		 */
 		_doServiceCall: function(funcName, funcArgs) {
 			var clientDeferred = new dojo.Deferred();
-			this.serviceRegistry.getService("orion.core.user").then(
-				function(usersService) {
-					usersService[funcName].apply(usersService, funcArgs).then(
-						//on success, just forward the result to the client
-						function(result) {
-							clientDeferred.callback(result);
-						},
-						//on failure we might need to retry
-						function(error) {
-							if (error.status === 401 || error.status===403) {
-								mAuth.handleAuthenticationError(error, function(message) {
-									//try again
-									usersService[funcName].apply(usersService, funcArgs).then(
-										function(result) {
-											clientDeferred.callback(result);
-										},
-										function(error) {
-											clientDeferred.errback(error);
-										}
-									);
-								});
-							} else {
-								//forward other errors to client
-								clientDeferred.errback(error);
-							}
-						}
-					);
+			var usersService = this.serviceRegistry.getService("orion.core.user");
+			usersService[funcName].apply(usersService, funcArgs).then(
+				//on success, just forward the result to the client
+				function(result) {
+					clientDeferred.callback(result);
+				},
+				//on failure we might need to retry
+				function(error) {
+					if (error.status === 401 || error.status===403) {
+						mAuth.handleAuthenticationError(error, function(message) {
+							//try again
+							usersService[funcName].apply(usersService, funcArgs).then(
+								function(result) {
+									clientDeferred.callback(result);
+								},
+								function(error) {
+									clientDeferred.errback(error);
+								}
+							);
+						});
+					} else {
+						//forward other errors to client
+						clientDeferred.errback(error);
+					}
 				}
 			);
 			return clientDeferred;
