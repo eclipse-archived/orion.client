@@ -372,11 +372,11 @@ a:hover {
 }
 
 .rightSlide {
-	text-align: right;
 	vertical-align: middle;
 	float: right;
 	height: 0;
-	margin-right: -400px;
+	width: auto;
+	margin-right: -150px;
 	background: #f5f5f5;
 	opacity: 0;
  	transition: margin-right .5s ease-out;
@@ -387,8 +387,8 @@ a:hover {
 
 .rightSlideActive {
 	opacity: 1;
+	margin-right: 1px;
 	padding: 8px;
-	margin-right: 0px;
 	height: auto;
 	border-bottom-left-radius: 15px;
 	border-left: 2px solid #ffd400;
