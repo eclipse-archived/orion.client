@@ -53,23 +53,21 @@ dojo.declare("orion.profile.widgets.ResetPasswordDialog", [ dijit.Dialog ], {
 		
 		var dialog = this;
 		
-		this.registry.getService("orion.core.user").then(function(service) {
-			  service.resetUserPassword(dialog.user.login, dialog.password.value).then(dialog.func, function(response) {
-				  var message = response.message;
-				  try{
-					  if(response.responseText){
-						  message = JSON.parse(response.responseText).Message;
-					  }
-				  }catch(Exception){
-					  //leave standard message
-				  }
-			  
-					if (message) {
-						alert(message);
-					} else {
-						alert("Password reset failed");
-					}
-				});
+		this.registry.getService("orion.core.user").resetUserPassword(dialog.user.login, dialog.password.value).then(dialog.func, function(response) {
+		  var message = response.message;
+		  try{
+			  if(response.responseText){
+				  message = JSON.parse(response.responseText).Message;
+			  }
+		  }catch(Exception){
+			  //leave standard message
+		  }
+	  
+			if (message) {
+				alert(message);
+			} else {
+				alert("Password reset failed");
+			}
 		});
 		
 	}
