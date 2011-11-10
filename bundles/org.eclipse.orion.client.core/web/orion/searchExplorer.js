@@ -49,6 +49,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultModel.prototype._parseSearchStr = function(searchStr) {
+		var pageTitle = dojo.byId("pageTitle");
+		if(pageTitle){
+			pageTitle.innerHTML = "Search results for <b>" + searchStr.split("\\").join("") + "</b> " + "on";
+		}
 		var hasStar = (searchStr.indexOf("*") > -1);
 		var hasQMark = (searchStr.indexOf("?") > -1);
 		if(hasStar){

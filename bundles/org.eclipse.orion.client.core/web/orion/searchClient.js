@@ -58,8 +58,13 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 				favorites.addFavoriteSearch(favoriteName, query);
 			});
 		},
-		setLocation: function(location){
-			this.location = location;
+		setLocationByMetaData: function(meta){
+			if(meta &&  meta.Location && meta.Parents){
+				this.setLocationByURL(meta.Location);
+			}
+		},
+		setLocationByURL: function(locationURL){
+			this.location = locationURL;
 		},
 		/**
 		 * Returns a query URL for a search.
@@ -188,7 +193,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 								var favoriteName = token || query;
 								var heading = table.insertRow(0);
 								col = heading.insertCell(0);
-								col.innerHTML = "<h2>Search Results</h2>";
+								col.innerHTML = "<h2>Search Results On</h2>";
 							}
 						}
 						var row = table.insertRow(-1);

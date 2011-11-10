@@ -79,19 +79,19 @@ var serviceRegistry;
 			commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
 			commandService.registerCommandContribution("eclipse.orion.git.cherryPick", 3);
 			
-			loadResource(navigator);
+			loadResource(navigator, searcher);
 			
 			makeRightPane(navigator);
 		
 			// every time the user manually changes the hash, we need to load the
 			// workspace with that name
 			dojo.subscribe("/dojo/hashchange", navigator, function() {
-				loadResource(navigator);
+				loadResource(navigator, searcher);
 			});
 		});
 	});
 
-function loadResource(navigator){
+function loadResource(navigator, searcher){
 	var path = dojo.hash();
 	dojo.xhrGet({
 		url : path,
@@ -104,7 +104,7 @@ function loadResource(navigator){
 			
 			var loadResource = function(resource){
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
-				initTitleBar(fileClient, navigator, resource);
+				initTitleBar(fileClient, navigator, resource, searcher);
 				if (resource.Type === "RemoteTrackingBranch"){
 					serviceRegistry.getService("orion.git.provider").then(function(gitService){
 						gitService.getLog(resource.HeadLocation, resource.Id, function(scopedCommitsJsonData, secondArg) {
@@ -248,7 +248,7 @@ function getRemoteFileURI(){
 	return fileURI;
 }
 
-function initTitleBar(fileClient, navigator, item){
+function initTitleBar(fileClient, navigator, item, searcher){
 	
 	var isRemote = (item.Type === "RemoteTrackingBranch");
 	var isBranch = (item.toRef && item.toRef.Type === "Branch");
@@ -289,6 +289,8 @@ function initTitleBar(fileClient, navigator, item){
 					}
 					var location = dojo.byId("location");
 					if (location) {
+						//If current location is not the root, set the search location in the searcher
+						searcher.setLocationByMetaData(metadata);
 						dojo.empty(location);
 						var breadcrumb = new mBreadcrumbs.BreadCrumbs({
 							container: "location",
