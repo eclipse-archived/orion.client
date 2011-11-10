@@ -156,8 +156,7 @@ dojo.addOnLoad(function() {
 			
 			
 			testPluginRegistry.installPlugin(fileURI).then(function() {
-				return testServiceRegistry.getService("orion.test.runner");
-			}).then(function(service) {
+				var service = testServiceRegistry.getService("orion.test.runner");
 				//console.log("got service: " + service);
 	
 				var myTree = new mTreetable.TableTree({

@@ -53,28 +53,23 @@ orion.JSTestAdapter = (function() {
 			
 			var loaderServiceRegistry = new mServiceregistry.ServiceRegistry();
 			var loaderPluginRegistry = new mPluginregistry.PluginRegistry(loaderServiceRegistry, {});
-			loaderPluginRegistry.installPlugin(test).then(
-				function() {
-					return loaderServiceRegistry.getService("orion.test.runner");
-				}
-			).then(
-				function(service) {
-					service.addEventListener("testDone", function(testName, testResult) {
-						if (typeof testSuite[testName] !== "undefined") {
-							testSuite[testName].testDone(testResult);
-						}
+			loaderPluginRegistry.installPlugin(test).then(function() {
+				var service = loaderServiceRegistry.getService("orion.test.runner");
+				service.addEventListener("testDone", function(testName, testResult) {
+					if (typeof testSuite[testName] !== "undefined") {
+						testSuite[testName].testDone(testResult);
+					}
+				});
+				service.addEventListener("runDone", function(runName, obj) {
+					shutdown.then(function(noop) {
+						loaderPluginRegistry.shutdown();
+						noop();
 					});
-					service.addEventListener("runDone", function(runName, obj) {
-						shutdown.then(function(noop) {
-							loaderPluginRegistry.shutdown();
-							noop();
-						});
-					});
-						
-					console.log("Launching test suite: " + test);
-					service.run();
-				}
-			);
+				});
+					
+				console.log("Launching test suite: " + test);
+				service.run();
+			});
 		}
 		
 		var first = true;
@@ -172,10 +167,7 @@ orion.JSTestAdapter = (function() {
 		/* Install the test plugin and get the list of tests it contains */
 		testPluginRegistry.installPlugin(fileURI).then(
 			function() {
-				return testServiceRegistry.getService("orion.test.runner");
-			}
-		).then(
-			function(service) {
+				var service =  testServiceRegistry.getService("orion.test.runner");
 				service.list().then( function(testNames) {
 					var testName;
 					var testSuite = {};

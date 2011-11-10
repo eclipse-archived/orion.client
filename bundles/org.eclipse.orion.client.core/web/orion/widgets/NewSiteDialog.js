@@ -54,13 +54,12 @@ dojo.declare("orion.widgets.NewSiteDialog", [orion.widgets.NewItemDialog], {
 		
 		// Load workspaces
 		var widget = this;
-		this.options.serviceRegistry.getService("orion.core.file").then(function(service) {
-			service.loadWorkspaces().then(dojo.hitch(widget, function(workspaces) {
-				this.workspaceIds = dojo.map(workspaces, function(workspace) {
-					return workspace.Id;
-				});
-				this.workspaceId = this.workspaceIds[0];
-			}));});
+		this.options.serviceRegistry.getService("orion.core.file").loadWorkspaces().then(dojo.hitch(widget, function(workspaces) {
+			this.workspaceIds = dojo.map(workspaces, function(workspace) {
+				return workspace.Id;
+			});
+			this.workspaceId = this.workspaceIds[0];
+		}));
 	},
 	
 	_onSubmit: function() {

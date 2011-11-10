@@ -383,9 +383,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	
 	function rememberSuccessfulTraversal(item, registry) {
 		if (item.Parents && item.Parents.length === 0) {
-			registry.getService("orion.core.preference").then(function(service) {
-				return service.getPreferences("/window/recent");
-			}).then(function(prefs){
+			registry.getService("orion.core.preference").getPreferences("/window/recent").then(function(prefs){
 				var projects = prefs.get("projects");
 				if (typeof projects === "string") {
 					projects = JSON.parse(projects);

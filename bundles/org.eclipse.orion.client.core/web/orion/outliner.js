@@ -217,10 +217,8 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 		},
 		emitOutline: function(contents, title, providerId) {
 			var self = this;
-			dojo.when(this._serviceRegistry.getService(this.outlineProvider), function(service) {
-				service.getOutline(contents, title).then(function(outline) {
-					self._serviceRegistration.dispatchEvent("outline", outline, title, self.outlineProvider.getProperty("id"));
-				});
+			this._serviceRegistry.getService(this.outlineProvider).getOutline(contents, title).then(function(outline) {
+				self._serviceRegistration.dispatchEvent("outline", outline, title, self.outlineProvider.getProperty("id"));
 			});
 		}
 	};

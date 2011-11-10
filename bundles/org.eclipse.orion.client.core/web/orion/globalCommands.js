@@ -112,65 +112,52 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	function generateUserInfo(serviceRegistry) {
 		
 		var authServices = serviceRegistry.getServiceReferences("orion.core.auth");
-			var userInfo = dojo.byId("userInfo");
-			if(!userInfo){
-				return;
+		var userInfo = dojo.byId("userInfo");
+		if(!userInfo){
+			return;
+		}
+		
+		if(!dijit.byId('logins')){
+			var menuButton = new dijit.form.DropDownButton({
+				id: "logins",
+				label: "Security",
+				dropDown: loginDialog,
+				title: "Login statuses"
+		        });
+		        dojo.addClass(menuButton.domNode, "commandImage");
+		        dojo.place(menuButton.domNode, userInfo, "only");
 			}
-			
-			if(!dijit.byId('logins')){
-				var menuButton = new dijit.form.DropDownButton({
-					id: "logins",
-					label: "Security",
-					dropDown: loginDialog,
-					title: "Login statuses"
-			        });
-			        dojo.addClass(menuButton.domNode, "commandImage");
-			        dojo.place(menuButton.domNode, userInfo, "only");
-				}
-			
-			
-			for(var i=0; i<authServices.length; i++){
-				var servicePtr = authServices[i];
-				serviceRegistry.getService(servicePtr).then(function(authService){
-				
-					getLabel(authService, servicePtr).then(function(label){
-						
-						authService.getKey().then(function(key){
-							
-							authService.getUser().then(function(jsonData){
-								loginDialog.addUserItem(key, authService, label, jsonData);
-							}, 
-							function(errorData){
-								loginDialog.addUserItem(key, authService, label);
-							});
-								window.addEventListener("storage", function(e){
-
-									if(authRendered[key] === localStorage.getItem(key)){
-										return;
-									}
-									
-									authRendered[key] = localStorage.getItem(key);
-									
-									authService.getUser().then(function(jsonData){
-										loginDialog.addUserItem(key, authService, label, jsonData);
-									}, 
-									function(errorData){
-										loginDialog.addUserItem(key, authService, label);
-									});
-									
-								}, false);
-							
-	
-						});
-										
+		
+		
+		for(var i=0; i<authServices.length; i++){
+			var servicePtr = authServices[i];
+			var authService = serviceRegistry.getService(servicePtr);		
+			getLabel(authService, servicePtr).then(function(label){			
+				authService.getKey().then(function(key){
+					authService.getUser().then(function(jsonData){
+						loginDialog.addUserItem(key, authService, label, jsonData);
+					}, 
+					function(errorData){
+						loginDialog.addUserItem(key, authService, label);
 					});
-				
-				});
-			}
-		
-		
+					window.addEventListener("storage", function(e){
+						if(authRendered[key] === localStorage.getItem(key)){
+							return;
+						}
+						
+						authRendered[key] = localStorage.getItem(key);
+						
+						authService.getUser().then(function(jsonData){
+							loginDialog.addUserItem(key, authService, label, jsonData);
+						}, 
+						function(errorData){
+							loginDialog.addUserItem(key, authService, label);
+						});				
+					}, false);
+				});							
+			});
+		}
 	}
-	
 	
 	function setPendingAuthentication(services){
 		loginDialog.setPendingAuthentication(services);
@@ -240,19 +227,17 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			//     optional attribute: image - a URL to an icon representing the link (currently not used, may use in future)
 			var navLinks= serviceRegistry.getServiceReferences("orion.page.link");
 			for (var i=0; i<navLinks.length; i++) {
-				serviceRegistry.getService(navLinks[i]).then(function(service) {
-					var info = {};
-					var propertyNames = navLinks[i].getPropertyNames();
-					for (var j = 0; j < propertyNames.length; j++) {
-						info[propertyNames[j]] = navLinks[i].getProperty(propertyNames[j]);
-					}
-					if (info.href && info.name) {
-						var link = dojo.create("a", {href: info.href}, primaryNav, "last");
-						dojo.addClass(link, "commandLink");
-						text = document.createTextNode(info.name);
-						dojo.place(text, link, "only");
-					}
-				});
+				var info = {};
+				var propertyNames = navLinks[i].getPropertyNames();
+				for (var j = 0; j < propertyNames.length; j++) {
+					info[propertyNames[j]] = navLinks[i].getProperty(propertyNames[j]);
+				}
+				if (info.href && info.name) {
+					var link = dojo.create("a", {href: info.href}, primaryNav, "last");
+					dojo.addClass(link, "commandLink");
+					text = document.createTextNode(info.name);
+					dojo.place(text, link, "only");
+				}
 			}
 		}
 		

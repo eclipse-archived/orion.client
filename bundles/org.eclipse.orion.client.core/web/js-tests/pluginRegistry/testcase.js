@@ -92,9 +92,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
 		
 		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
-			return serviceRegistry.getService("test");
-		}).then(function(service) {
-			return service.test("echo");
+			return serviceRegistry.getService("test").test("echo");
 		}).then(function(result) {
 			assert.equal(result, "echo");
 			pluginRegistry.shutdown();
@@ -113,9 +111,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
 		
 		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
-			return serviceRegistry.getService("test");
-		}).then(function(service) {
-			return service.testPromise("echo");
+			return serviceRegistry.getService("test").testPromise("echo");
 		}).then(function(result) {
 			assert.equal(result, "echo");
 			assert.ok(progress);
@@ -145,8 +141,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 		}
 		
 		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
-			return serviceRegistry.getService("test");
-		}).then(function(service) {
+			var service = serviceRegistry.getService("test");
 			service.addEventListener("echo", eventListener);
 			return service.testEvent("echo").then(function() {
 				service.removeEventListener("echo", eventListener);

@@ -246,9 +246,7 @@ orion.GitStatusContentRenderer = (function() {
 			// we must hide/show the span rather than the column.  IE and Chrome will not consider
 			// the mouse as being over the table row if it's in a hidden column
 			dojo.style(actionsWrapper, "visibility", "hidden");
-			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(actionsWrapper, "object", {type: "fileItem", object: itemModel, rowId:row.id}, this, "image", null);
-			});
+			this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", {type: "fileItem", object: itemModel, rowId:row.id}, this, "image", null);
 			
 			dojo.connect(row, "onmouseover", row, function() {
 				var wrapper = dojo.byId(this.id+"actionsWrapper");
@@ -339,9 +337,7 @@ orion.GitStatusTableRenderer = (function() {
 		renderAction:function(){
 			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(self._cmdSpan, "object", {type: self._type}, this, "image", null);
-			});
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "object", {type: self._type}, this, "image", null);
 		}
 	};
 	return GitStatusTableRenderer;
@@ -423,9 +419,7 @@ orion.GitRebaseZoneRenderer = (function() {
 		renderAction:function(){
 			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(self._cmdSpan, "dom", {type: "rebase"}, this, "image",  null, null);
-			});
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "dom", {type: "rebase"}, this, "image",  null, null);
 		},
 		
 		show:function(){
@@ -479,10 +473,9 @@ orion.GitCommitterAndAuthorZoneRenderer = (function() {
 			dojo.place(document.createTextNode(""), this._cmdSpanShow, "only");
 			dojo.place(document.createTextNode(""), this._cmdSpanHide, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(self._cmdSpanShow, "dom", {type: "personIdentShow"}, this, "image",  null, null);
-				service.renderCommands(self._cmdSpanHide, "dom", {type: "personIdentHide"}, this, "image",  null, null);
-			});
+			var service = this._registry.getService("orion.page.command");
+			service.renderCommands(self._cmdSpanShow, "dom", {type: "personIdentShow"}, this, "image",  null, null);
+			service.renderCommands(self._cmdSpanHide, "dom", {type: "personIdentHide"}, this, "image",  null, null);
 		},
 		
 		setDefaultPersonIdent:function(name, email) {
@@ -558,17 +551,13 @@ orion.GitLogTableRenderer = (function() {
 		renderAction:function(){
 			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(self._cmdSpan, "object", {type: self._type , object:self._controller}, this, "image", null,null, true);
-			});
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "object", {type: self._type , object:self._controller}, this, "image", null,null, true);
 		},
 		
 		renderAdditionalAction:function(item){
 			dojo.place(document.createTextNode(""), this._cmdSpanAdditional, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(self._cmdSpanAdditional, "object", item, this, "image", null,null);
-			});
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpanAdditional, "object", item, this, "image", null,null);
 		}
 	};
 	return GitLogTableRenderer;
@@ -674,9 +663,8 @@ orion.GitStatusController = (function() {
 			if(this._renderLog && this._initializing){
 				var that = this;
 				
-				this._registry.getService("orion.page.command").then(function(commandService) {
-					mGitCommands.createStatusCommands(that._registry , commandService , function(){that.getGitStatus(that._url ,true);} , 9 , that);
-				});	
+				var commandService = this._registry.getService("orion.page.command");
+				mGitCommands.createStatusCommands(that._registry , commandService , function(){that.getGitStatus(that._url ,true);} , 9 , that);
 				
 				this._renderLogs(false).then(function(){
 					that._renderLogs(true);
@@ -748,9 +736,7 @@ orion.GitStatusController = (function() {
 			var toolbar = dojo.byId( "pageActions");
 			dojo.place(document.createTextNode(""), toolbar, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(toolbar, "dom", {type: "global"}, this, "image",  null, null, true);
-			});
+			this._registry.getService("orion.page.command").renderCommands(toolbar, "dom", {type: "global"}, this, "image",  null, null, true);
 		},
 		
 		_processCloneInfo:function(){
@@ -791,12 +777,11 @@ orion.GitStatusController = (function() {
 				}
 			});
 			
-			this._registry.getService("orion.page.command").then(function(commandService) {
-				commandService.addCommand(openGitLog, "object");	
-				commandService.addCommand(openGitRemote, "object");	
-				commandService.registerCommandContribution("orion.openGitLog", 8);	
-				commandService.registerCommandContribution("orion.openGitRemote", 9);	
-			});
+			var commandService = this._registry.getService("orion.page.command");
+			commandService.addCommand(openGitLog, "object");	
+			commandService.addCommand(openGitRemote, "object");	
+			commandService.registerCommandContribution("orion.openGitLog", 8);	
+			commandService.registerCommandContribution("orion.openGitRemote", 9);	
 		},
 		
 		_initTitleBar:function(withBranchName){
@@ -827,52 +812,49 @@ orion.GitStatusController = (function() {
 			var that = this;
 			if (that._initializing) {
 				var path = that._model.items.CloneLocation;
-				that._registry.getService("orion.git.provider").then(function(gitService){
-					gitService.getGitClone(path, function(cloneJsonData, secondArd) {
-						that._cloneInfo = cloneJsonData;
-						if(that._cloneInfo.Children.length === 0){
-							that._renderLog = false;
-							that._initTitleBar();
-							that._processStatus();
-							return;
-						}
-							
-						that._registry.getService("orion.git.provider").then(function(gitService){
-							gitService.getGitBranch(that._cloneInfo.Children[0].BranchLocation).then(function(children){
-								that._branchInfo = children;
-								gitService.getGitRemote(that._cloneInfo.Children[0].RemoteLocation).then(function(children){
-									that._remoteInfo = children;
-									var userNamePath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.name");
-									var setUserEmailAndProcess = function(userEmail) {
-										that._userEmail = userEmail;
-										that._processCloneInfo();
-										that._processStatus();
-									};
-									gitService.getGitCloneConfig(userNamePath).then(
+				gitService = that._registry.getService("orion.git.provider");
+				gitService.getGitClone(path, function(cloneJsonData, secondArd) {
+					that._cloneInfo = cloneJsonData;
+					if(that._cloneInfo.Children.length === 0){
+						that._renderLog = false;
+						that._initTitleBar();
+						that._processStatus();
+						return;
+					}
+						
+					gitService.getGitBranch(that._cloneInfo.Children[0].BranchLocation).then(function(children){
+						that._branchInfo = children;
+						gitService.getGitRemote(that._cloneInfo.Children[0].RemoteLocation).then(function(children){
+							that._remoteInfo = children;
+							var userNamePath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.name");
+							var setUserEmailAndProcess = function(userEmail) {
+								that._userEmail = userEmail;
+								that._processCloneInfo();
+								that._processStatus();
+							};
+							gitService.getGitCloneConfig(userNamePath).then(
+								function(configEntry){
+									that._userName = configEntry.Value;
+									var userEmailPath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.email");
+									gitService.getGitCloneConfig(userEmailPath).then(
 										function(configEntry){
-											that._userName = configEntry.Value;
-											var userEmailPath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.email");
-											gitService.getGitCloneConfig(userEmailPath).then(
-												function(configEntry){
-													setUserEmailAndProcess(configEntry.Value);
-												},
-												function(error) {
-													setUserEmailAndProcess("");
-												});
+											setUserEmailAndProcess(configEntry.Value);
 										},
 										function(error) {
-											that._userName = "";
-											var userEmailPath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.email");
-											gitService.getGitCloneConfig(userEmailPath).then(
-												function(configEntry){
-													setUserEmailAndProcess(configEntry.Value);
-												},
-												function(error) {
-													setUserEmailAndProcess("");
-												});
+											setUserEmailAndProcess("");
+										});
+								},
+								function(error) {
+									that._userName = "";
+									var userEmailPath = that._cloneInfo.Children[0].ConfigLocation.replace("config", "config/user.email");
+									gitService.getGitCloneConfig(userEmailPath).then(
+										function(configEntry){
+											setUserEmailAndProcess(configEntry.Value);
+										},
+										function(error) {
+											setUserEmailAndProcess("");
 										});
 								});
-							});
 						});
 					});
 				});
@@ -906,27 +888,24 @@ orion.GitStatusController = (function() {
 					handleAs : "json",
 					timeout : 5000,
 					load : function(jsonData, secondArg) {
-						that._registry.getService("orion.git.provider").then(function(gitService){
-							gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArg) {
+						var gitService = that._registry.getService("orion.git.provider");
+						gitService.getLog(jsonData.HeadLocation, jsonData.Id, function(scopedCommitsJsonData, secondArg) {
+							
+								function loadScopedCommitsList(scopedCommitsJsonData){
+									that._gitCommitNavigatorRem.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
+									that._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?page=1&pageSize=5", jsonData).then(function(){retDeffered.callback();});
+									that._remoteTableRenderer.renderAdditionalAction(that._gitCommitNavigatorRem._lastTreeRoot);
+								}
 								
-									function loadScopedCommitsList(scopedCommitsJsonData){
-										that._gitCommitNavigatorRem.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
-										that._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?page=1&pageSize=5", jsonData).then(function(){retDeffered.callback();});
-										that._remoteTableRenderer.renderAdditionalAction(that._gitCommitNavigatorRem._lastTreeRoot);
-									}
-									
-									if(secondArg.xhr.status===200){
-										loadScopedCommitsList(scopedCommitsJsonData);
-									} else if(secondArg.xhr.status===202){
-										var deferred = new dojo.Deferred();
-										deferred.callback(scopedCommitsJsonData);
-										that._registry.getService("orion.page.message").then(function(progressService) {
-											progressService.showWhile(deferred, "Getting git incoming changes").then(function(scopedCommitsJsonData){
-												loadScopedCommitsList(scopedCommitsJsonData.Result.JsonData);
-											});
-										});
-									}
-							});
+								if(secondArg.xhr.status===200){
+									loadScopedCommitsList(scopedCommitsJsonData);
+								} else if(secondArg.xhr.status===202){
+									var deferred = new dojo.Deferred();
+									deferred.callback(scopedCommitsJsonData);
+									that._registry.getService("orion.page.message").showWhile(deferred, "Getting git incoming changes").then(function(scopedCommitsJsonData){
+										loadScopedCommitsList(scopedCommitsJsonData.Result.JsonData);
+									});
+								}
 						});
 					},
 					error : function(error, ioArgs) {
@@ -969,28 +948,24 @@ orion.GitStatusController = (function() {
 									handleAs : "json",
 									timeout : 5000,
 									load : function(remoteJsonData, secondArg) {
-										that._registry.getService("orion.git.provider").then(function(gitService){
-											gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
-												function loadScopedCommitsList(scopedCommitsJsonData){
-													that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
-													that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children}).then(function(){retDeffered.callback();});
-													if(that._curRemote)
-														that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
-												}
-												
-												if(secondArg.xhr.status===200){
-													loadScopedCommitsList(scopedCommitsJsonData);
-												} else if(secondArg.xhr.status===202){
-													var deferred = new dojo.Deferred();
-													deferred.callback(scopedCommitsJsonData);
-													that._registry.getService("orion.page.message").then(function(progressService) {
-														progressService.showWhile(deferred, "Getting git incoming changes").then(function(scopedCommitsJsonData){
-															loadScopedCommitsList(scopedCommitsJsonData.Result.JsonData);
-														});
-													});
-												}
-												
-											});
+										that._registry.getService("orion.git.provider").getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
+											function loadScopedCommitsList(scopedCommitsJsonData){
+												that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
+												that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children}).then(function(){retDeffered.callback();});
+												if(that._curRemote)
+													that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
+											}
+											
+											if(secondArg.xhr.status===200){
+												loadScopedCommitsList(scopedCommitsJsonData);
+											} else if(secondArg.xhr.status===202){
+												var deferred = new dojo.Deferred();
+												deferred.callback(scopedCommitsJsonData);
+												that._registry.getService("orion.page.message").showWhile(deferred, "Getting git incoming changes").then(function(scopedCommitsJsonData){
+													loadScopedCommitsList(scopedCommitsJsonData.Result.JsonData);
+												});
+											}
+											
 										});
 									},
 									error : function(error, ioArgs) {
@@ -1014,9 +989,7 @@ orion.GitStatusController = (function() {
 						} else if (ioArgs.xhr.status===202){
 							var deferred = new dojo.Deferred();
 							deferred.callback(commitLogJsonData);
-							that._registry.getService("orion.page.message").then(function(progressService) {
-								progressService.showWhile(deferred, "Getting git log").then(function(commitLogJsonData){renderCommitLogJsonData(commitLogJsonData.Result.JsonData);});
-							});
+							that._registry.getService("orion.page.message").showWhile(deferred, "Getting git log").then(function(commitLogJsonData){renderCommitLogJsonData(commitLogJsonData.Result.JsonData);});
 						}
 						
 					},
@@ -1074,15 +1047,12 @@ orion.GitStatusController = (function() {
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitCheckout",
 				callback: function(item) {
-					self._registry.getService("orion.page.dialog").then(function(service) {
-						service.confirm("Your changes to the file will be lost. Are you sure you want to checkout?",
-						function(doit) {
-							if (!doit) {
-								return;
-							}
-							self._statusService.setProgressMessage("Checking out...");
-							self.checkout(item.object);
-						});
+					self._registry.getService("orion.page.dialog").confirm("Your changes to the file will be lost. Are you sure you want to checkout?", function(doit) {
+						if (!doit) {
+							return;
+						}
+						self._statusService.setProgressMessage("Checking out...");
+						self.checkout(item.object);
 					});
 				},
 				visibleWhen: function(item) {
@@ -1160,17 +1130,17 @@ orion.GitStatusController = (function() {
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitResetChanges",
 				callback: function(item) {
-					self._registry.getService("orion.page.dialog").then(function(service) {
-						service.confirm("All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.\n" +
-								"Are you sure you want to continue?",
+					var dialog = self._registry.getService("orion.page.dialog");
+					dialog.confirm("All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.\n" +
+						"Are you sure you want to continue?",
 						function(doit) {
 							if (!doit) {
 								return;
 							}
 							self._statusService.setProgressMessage("Resetting local changes...");
 							return self.unstageAll("HARD");
-						});
-					});
+						}
+					);
 				},
 				
 				visibleWhen: function(item) {
@@ -1217,34 +1187,33 @@ orion.GitStatusController = (function() {
 				}
 			});		
 
-			this._registry.getService("orion.page.command").then(function(commandService) {
-				// register commands with object scope
-				commandService.addCommand(sbsCompareCommand, "object");	
-				commandService.addCommand(stageCommand, "object");	
-				commandService.addCommand(checkoutCommand, "object");	
-				commandService.addCommand(stageAllCommand, "object");	
-				commandService.addCommand(unstageAllCommand, "object");	
-				commandService.addCommand(unstageCommand, "object");	
-				commandService.addCommand(resetChangesCommand, "dom");
-				commandService.addCommand(rebaseContinueCommand, "dom");
-				commandService.addCommand(rebaseSkipCommand, "dom");
-				commandService.addCommand(rebaseAbortCommand, "dom");
-				commandService.addCommand(resetChangesCommand, "dom");	
-				commandService.addCommand(showCommitterAndAuthorPanel, "dom");
-				commandService.addCommand(hideCommitterAndAuthorPanel, "dom");
-				commandService.registerCommandContribution("orion.gitStage", 1);	
-				commandService.registerCommandContribution("orion.gitCheckout", 2);	
-				commandService.registerCommandContribution("orion.gitUnstage", 3);	
-				commandService.registerCommandContribution("orion.sbsCompare", 4);	
-				commandService.registerCommandContribution("orion.gitStageAll", 5);	
-				commandService.registerCommandContribution("orion.gitUnstageAll", 6);	
-				commandService.registerCommandContribution("orion.gitResetChanges", 7 , "pageActions");
-				commandService.registerCommandContribution("orion.gitRebaseContinue", 8, "rebaseActions");
-				commandService.registerCommandContribution("orion.gitRebaseSkip", 9, "rebaseActions");	
-				commandService.registerCommandContribution("orion.gitRebaseAbort", 10, "rebaseActions");	
-				commandService.registerCommandContribution("orion.showCommitterAndAuthor", 11 , "personIdentShow");
-				commandService.registerCommandContribution("orion.hideCommitterAndAuthor", 12 , "personIdentHide");
-			});
+			var commandService = this._registry.getService("orion.page.command");
+			// register commands with object scope
+			commandService.addCommand(sbsCompareCommand, "object");	
+			commandService.addCommand(stageCommand, "object");	
+			commandService.addCommand(checkoutCommand, "object");	
+			commandService.addCommand(stageAllCommand, "object");	
+			commandService.addCommand(unstageAllCommand, "object");	
+			commandService.addCommand(unstageCommand, "object");	
+			commandService.addCommand(resetChangesCommand, "dom");
+			commandService.addCommand(rebaseContinueCommand, "dom");
+			commandService.addCommand(rebaseSkipCommand, "dom");
+			commandService.addCommand(rebaseAbortCommand, "dom");
+			commandService.addCommand(resetChangesCommand, "dom");	
+			commandService.addCommand(showCommitterAndAuthorPanel, "dom");
+			commandService.addCommand(hideCommitterAndAuthorPanel, "dom");
+			commandService.registerCommandContribution("orion.gitStage", 1);	
+			commandService.registerCommandContribution("orion.gitCheckout", 2);	
+			commandService.registerCommandContribution("orion.gitUnstage", 3);	
+			commandService.registerCommandContribution("orion.sbsCompare", 4);	
+			commandService.registerCommandContribution("orion.gitStageAll", 5);	
+			commandService.registerCommandContribution("orion.gitUnstageAll", 6);	
+			commandService.registerCommandContribution("orion.gitResetChanges", 7 , "pageActions");
+			commandService.registerCommandContribution("orion.gitRebaseContinue", 8, "rebaseActions");
+			commandService.registerCommandContribution("orion.gitRebaseSkip", 9, "rebaseActions");	
+			commandService.registerCommandContribution("orion.gitRebaseAbort", 10, "rebaseActions");	
+			commandService.registerCommandContribution("orion.showCommitterAndAuthor", 11 , "personIdentShow");
+			commandService.registerCommandContribution("orion.hideCommitterAndAuthor", 12 , "personIdentHide");
 		},
 
 		_generateInlineCompareCmds: function(){	
@@ -1479,44 +1448,32 @@ orion.GitStatusController = (function() {
 		
 		getGitStatus: function(url , initializing){
 			this._url = url;
-			this._initializing = (initializing ? true:false);
-			if(this._initializing){
+			this._initializing = (initializing ? true : false);
+			if (this._initializing) {
 				this._cloneInfo = undefined;
 				this._statusService.setProgressMessage("Loading status...");
 			}
 			var self = this;
-			self._registry.getService("orion.git.provider").then(
-				function(service) {
-					service.getGitStatus(url, 
-										 function(jsonData, secondArg) {
-										 	 self.loadStatus(jsonData);
-										 },
-										 function(response, ioArgs){
-											 self.handleServerErrors(response, ioArgs);
-										 }
-					);
-				});
+			self._registry.getService("orion.git.provider").getGitStatus(url, function(jsonData, secondArg) {
+				self.loadStatus(jsonData);
+			}, function(response, ioArgs) {
+				self.handleServerErrors(response, ioArgs);
+			});
 		},
 		
 		stage: function(location , itemModel){
 			var self = this;
-			if(itemModel && itemModel.conflicting){
+			if (itemModel && itemModel.conflicting) {
 				self._stagingConflict = true;
 				self._stagingName = itemModel.name;
-			}
-			else
+			} else
 				self._stagingConflict = false;
-			self._registry.getService("orion.git.provider").then(
-					function(service) {
-						service.stage(location, 
-											 function(jsonData, secondArg) {
-											 	 self.getGitStatus(self._url);
-											 },
-											 function(response, ioArgs){
-												 self.handleServerErrors(response, ioArgs);
-											 }
-						);
-					});
+			self._registry.getService("orion.git.provider").stage(location, function(jsonData, secondArg) {
+				self.getGitStatus(self._url);
+			}, function(response, ioArgs) {
+				self.handleServerErrors(response, ioArgs);
+			});
+
 		},
 		
 		stageSelected: function(){
@@ -1537,65 +1494,47 @@ orion.GitStatusController = (function() {
 		stageOneSelection: function (selection, index){
 			var that = this;
 			var itemModel = selection[index].modelItem;
-			if(itemModel && itemModel.conflicting){
+			if (itemModel && itemModel.conflicting) {
 				that._stagingConflict = true;
 				that._stagingName = itemModel.name;
 			}
-			that._registry.getService("orion.git.provider").then(
-					function(service) {
-						service.stage(itemModel.indexURI, 
-									  function(jsonData, secondArg) {
-									      if(index === (selection.length-1)){			 
-									    	  that.getGitStatus(that._url);
-									      } else {
-									    	  that.stageOneSelection(selection, index+1);
-									      }
-									  },
-									  function(response, ioArgs){
-											  that.handleServerErrors(response, ioArgs);
-									  }
-						);
-				});
+			that._registry.getService("orion.git.provider").stage(itemModel.indexURI, function(jsonData, secondArg) {
+				if (index === (selection.length - 1)) {
+					that.getGitStatus(that._url);
+				} else {
+					that.stageOneSelection(selection, index + 1);
+				}
+			}, function(response, ioArgs) {
+				that.handleServerErrors(response, ioArgs);
+			});
 		},
 		
 		stageMultipleFiles: function (selection){
 			var that = this;
 			var paths = [];
-			for(var i = 0 ; i < selection.length ; i++){
+			for ( var i = 0; i < selection.length; i++) {
 				var itemModel = selection[i].modelItem;
-				if(itemModel && itemModel.conflicting){
+				if (itemModel && itemModel.conflicting) {
 					that._stagingConflict = true;
 					that._stagingName = itemModel.name;
 				}
 				paths.push(itemModel.path);
 			}
-			that._registry.getService("orion.git.provider").then(
-					function(service) {
-						service.stageMultipleFiles(that._model.items.IndexLocation, paths,
-									  function(jsonData, secondArg) {
-									    	 that.getGitStatus(that._url);
-									  },
-									  function(response, ioArgs){
-											  that.handleServerErrors(response, ioArgs);
-									  }
-						);
-				});
+			that._registry.getService("orion.git.provider").stageMultipleFiles(that._model.items.IndexLocation, paths, function(jsonData, secondArg) {
+				that.getGitStatus(that._url);
+			}, function(response, ioArgs) {
+				that.handleServerErrors(response, ioArgs);
+			});
 		},
 		
 		checkout: function(itemModel){
 			var self = this;
 			var location = this._model.items.CloneLocation;
-			self._registry.getService("orion.git.provider").then(
-					function(service) {
-						service.checkoutPath(location, [itemModel.name],
-											 function(jsonData, secondArg) {
-											 	 self.getGitStatus(self._url);
-											 },
-											 function(response, ioArgs){
-												 self.handleServerErrors(response, ioArgs);
-											 }
-						);
-					});
+			self._registry.getService("orion.git.provider").checkoutPath(location, [itemModel.name], function(jsonData, secondArg) {
+				self.getGitStatus(self._url);
+			}, function(response, ioArgs) {
+				self.handleServerErrors(response, ioArgs);
+			});
 		},
 		
 		stageAll: function(){
@@ -1616,52 +1555,34 @@ orion.GitStatusController = (function() {
 		
 		unstage: function(itemModel){
 			var self = this;
-			self._registry.getService("orion.git.provider").then(
-					function(service) {
-						service.unstage(self._model.items.IndexLocation, [itemModel.name],
-											 function(jsonData, secondArg) {
-											 	 self.getGitStatus(self._url);
-											 },
-											 function(response, ioArgs){
-												 self.handleServerErrors(response, ioArgs);
-											 }
-						);
-					});
+			self._registry.getService("orion.git.provider").unstage(self._model.items.IndexLocation, [itemModel.name], function(jsonData, secondArg) {
+				self.getGitStatus(self._url);
+			}, function(response, ioArgs) {
+				self.handleServerErrors(response, ioArgs);
+			});
 		},
 		
 		unstageAll: function(resetParam){
 			var self = this;
-			self._registry.getService("orion.git.provider").then(
-					function(service) {
-						service.unstageAll(self._model.items.IndexLocation, resetParam,
-											 function(jsonData, secondArg) {
-											 	 self.getGitStatus(self._url);
-											 },
-											 function(response, ioArgs){
-												 self.handleServerErrors(response, ioArgs);
-											 }
-						);
-					});
+			self._registry.getService("orion.git.provider").unstageAll(self._model.items.IndexLocation, resetParam, function(jsonData, secondArg) {
+				self.getGitStatus(self._url);
+			}, function(response, ioArgs) {
+				self.handleServerErrors(response, ioArgs);
+			});
 		},
 		
-		unstageMultipleFiles: function (selection){
+		unstageMultipleFiles: function(selection){
 			var that = this;
 			var paths = [];
-			for(var i = 0 ; i < selection.length ; i++){
+			for ( var i = 0; i < selection.length; i++) {
 				var itemModel = selection[i].modelItem;
 				paths.push(itemModel.path);
 			}
-			that._registry.getService("orion.git.provider").then(
-					function(service) {
-						service.unstage(that._model.items.IndexLocation, paths,
-									  function(jsonData, secondArg) {
-									    	 that.getGitStatus(that._url);
-									  },
-									  function(response, ioArgs){
-											  that.handleServerErrors(response, ioArgs);
-									  }
-						);
-				});
+			that._registry.getService("orion.git.provider").unstage(that._model.items.IndexLocation, paths, function(jsonData, secondArg) {
+				that.getGitStatus(that._url);
+			}, function(response, ioArgs) {
+				that.handleServerErrors(response, ioArgs);
+			});
 		},
 		
 		commitAll: function(location , message , body){
@@ -1669,17 +1590,11 @@ orion.GitStatusController = (function() {
 			var messageArea = document.getElementById("commitMessage");
 			messageArea.value = "";
 			self._statusService.setProgressMessage("Committing...");
-			self._registry.getService("orion.git.provider").then(
-					function(service) {
-						service.commitAll(location,  message , body,
-											 function(jsonData, secondArg) {
-											 	 self.getGitStatus(self._url,true);
-											 },
-											 function(response, ioArgs){
-												 self.handleServerErrors(response, ioArgs);
-											 }
-						);
-					});
+			self._registry.getService("orion.git.provider").commitAll(location, message, body, function(jsonData, secondArg) {
+				self.getGitStatus(self._url, true);
+			}, function(response, ioArgs) {
+				self.handleServerErrors(response, ioArgs);
+			});
 		},
 		
 		commit: function(message, amend, committerName, committerEmail, authorName, authorEmail){
@@ -1745,53 +1660,41 @@ orion.GitStatusController = (function() {
 		},
 		
 		reportWarning: function(message){
-			this._registry.getService("orion.page.message").then(function(progressService){
-				var display = [];
-				display.Severity = "Warning";
-				display.Message = message;
-				progressService.setProgressResult(display);
-			});
+			var display = [];
+			display.Severity = "Warning";
+			display.Message = message;
+			this._registry.getService("orion.page.message").setProgressResult(display);
 		},
 				
 		rebase: function(action){
 			var self = this;
-			self._registry.getService("orion.git.provider").then(
-					function(service) {
-						service.doRebase(self._curClone.HeadLocation, "", action,
-											 function(jsonData, secondArg) {
-												if (jsonData.Result == "OK" || jsonData.Result == "ABORTED" || jsonData.Result == "FAST_FORWARD" || jsonData.Result == "UP_TO_DATE") {
-													var display = [];
-													display.Severity = "Ok";
-													display.HTML = false;
-													display.Message = jsonData.Result;
-													self._statusService.setProgressResult(display);
-													self.getGitStatus(self._url);
-												}
-												if (jsonData.Result == "STOPPED") {
-													var display = [];
-													display.Severity = "Warning";
-													display.HTML = false;
-													display.Message = jsonData.Result
-													+ ". Repository still contains conflicts.";
-													self._statusService.setProgressResult(display);
-													self.getGitStatus(self._url);
-												}
-												else if (jsonData.Result == "FAILED_UNMERGED_PATHS") {
-													var display = [];
-													display.Severity = "Error";
-													display.HTML = false;
-													display.Message = jsonData.Result
-													+ ". Repository contains unmerged paths. Resolve conflicts first.";
-													self._statusService.setProgressResult(display);
-												}
-											 },
-											 function(response, ioArgs){
-												 self.handleServerErrors(response, ioArgs);
-											 }
-						);
-					});
-		}
-		
+			self._registry.getService("orion.git.provider").doRebase(self._curClone.HeadLocation, "", action, function(jsonData, secondArg) {
+				if (jsonData.Result == "OK" || jsonData.Result == "ABORTED" || jsonData.Result == "FAST_FORWARD" || jsonData.Result == "UP_TO_DATE") {
+					var display = [];
+					display.Severity = "Ok";
+					display.HTML = false;
+					display.Message = jsonData.Result;
+					self._statusService.setProgressResult(display);
+					self.getGitStatus(self._url);
+				}
+				if (jsonData.Result == "STOPPED") {
+					var display = [];
+					display.Severity = "Warning";
+					display.HTML = false;
+					display.Message = jsonData.Result + ". Repository still contains conflicts.";
+					self._statusService.setProgressResult(display);
+					self.getGitStatus(self._url);
+				} else if (jsonData.Result == "FAILED_UNMERGED_PATHS") {
+					var display = [];
+					display.Severity = "Error";
+					display.HTML = false;
+					display.Message = jsonData.Result + ". Repository contains unmerged paths. Resolve conflicts first.";
+					self._statusService.setProgressResult(display);
+				}
+			}, function(response, ioArgs) {
+				self.handleServerErrors(response, ioArgs);
+			});
+		}	
 	};
 	return GitStatusController;
 }());

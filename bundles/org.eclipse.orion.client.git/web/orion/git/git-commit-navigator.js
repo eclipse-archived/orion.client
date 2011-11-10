@@ -41,104 +41,104 @@ exports.GitCommitNavigator = (function() {
 	
 	GitCommitNavigator.prototype = new mExplorer.Explorer();
 	
+
 	GitCommitNavigator.prototype.loadCommitsList = function(path, treeRoot, force) {
-		
-			var waitDeferred = new dojo.Deferred();
 
-			path = mUtil.makeRelative(path);
-			if (path === this._lastHash && !force) {
-				waitDeferred.callback();
-				return waitDeferred;
-			}
-						
-			this._lastHash = path;
-			this._lastTreeRoot = treeRoot;
-			//dojo.hash(path, true);
-			var parent = dojo.byId(this.parentId);
+		var waitDeferred = new dojo.Deferred();
 
-			// Progress indicator
-			var progress = dojo.byId(parent.id + "progress"); 
-			if(!progress){
-				progress = dojo.create("div", {id: parent.id + "progress"}, parent, "only");
-			}
-			dojo.empty(progress);
-			
-			if(treeRoot.status && treeRoot.status!=200){
-				var response = treeRoot.message;
-				try {
-					var obj = JSON.parse(treeRoot.responseText);
-					if(obj.Message){
-						response = obj.Message;
-					} 
-				} catch(error) {
-					//it is not JSON, just continue;
+		path = mUtil.makeRelative(path);
+		if (path === this._lastHash && !force) {
+			waitDeferred.callback();
+			return waitDeferred;
+		}
+
+		this._lastHash = path;
+		this._lastTreeRoot = treeRoot;
+		// dojo.hash(path, true);
+		var parent = dojo.byId(this.parentId);
+
+		// Progress indicator
+		var progress = dojo.byId(parent.id + "progress");
+		if (!progress) {
+			progress = dojo.create("div", {
+				id: parent.id + "progress"
+			}, parent, "only");
+		}
+		dojo.empty(progress);
+
+		if (treeRoot.status && treeRoot.status != 200) {
+			var response = treeRoot.message;
+			try {
+				var obj = JSON.parse(treeRoot.responseText);
+				if (obj.Message) {
+					response = obj.Message;
 				}
-				if(treeRoot.status!=404 && response!=="")
-					dojo.create("b", {innerHTML: "Error " + treeRoot.status + ": "}, progress, "only");
-				dojo.place(document.createTextNode(response), progress, "last");
-				
-				if(this.toolbarId && this.selectionToolsId)
-					mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
-				waitDeferred.callback();
-				return waitDeferred;
+			} catch (error) {
+				// it is not JSON, just continue;
 			}
-			
-			b = dojo.create("b");
-			dojo.place(document.createTextNode("Loading "), progress, "last");
-			dojo.place(document.createTextNode(path), b, "last");
-			dojo.place(b, progress, "last");
-			dojo.place(document.createTextNode("..."), progress, "last");
-			
-			var self = this;
+			if (treeRoot.status != 404 && response !== "")
+				dojo.create("b", {
+					innerHTML: "Error " + treeRoot.status + ": "
+				}, progress, "only");
+			dojo.place(document.createTextNode(response), progress, "last");
 
-			if(this.toolbarId && this.selectionToolsId)
+			if (this.toolbarId && this.selectionToolsId)
 				mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
-						
-			this.registry.getService("orion.git.provider").then(function(service){
-				
-				var doGitLog = function(gitLogURI, onLoad){
-					var ret = new dojo.Deferred();
-					service.doGitLog(gitLogURI, function(jsonData, xhrArgs){
-						if(xhrArgs.xhr.status===200){
-							waitDeferred.callback();
-							if(onLoad)
-								onLoad(jsonData.Children);
-							else{
-								ret.callback(jsonData.Children);
-							}
-						}
-						
-						if(xhrArgs.xhr.status===202){
-							var deferred = new dojo.Deferred();
-							deferred.callback(jsonData);
-							self.registry.getService("orion.page.message").then(function(progressService) {
-								progressService.showWhile(deferred, "Getting git log").then(function(gitLogProgressResp){
-									waitDeferred.callback();
-									if(onLoad)
-										onLoad(gitLogProgressResp.Result.JsonData.Children);
-									else{
-										ret.callback(gitLogProgressResp.Result.JsonData.Children);
-									}
-								});
-							});
-						}
-						
-					});
-					return ret;
-				};
-				
-				if(treeRoot.Children){
-					dojo.hitch(self, self.createTree(self.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog, treeRoot.Children)));
+			waitDeferred.callback();
+			return waitDeferred;
+		}
+
+		b = dojo.create("b");
+		dojo.place(document.createTextNode("Loading "), progress, "last");
+		dojo.place(document.createTextNode(path), b, "last");
+		dojo.place(b, progress, "last");
+		dojo.place(document.createTextNode("..."), progress, "last");
+
+		var self = this;
+
+		if (this.toolbarId && this.selectionToolsId)
+			mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
+
+		var service = this.registry.getService("orion.git.provider");
+
+		var doGitLog = function(gitLogURI, onLoad) {
+			var ret = new dojo.Deferred();
+			service.doGitLog(gitLogURI, function(jsonData, xhrArgs) {
+				if (xhrArgs.xhr.status === 200) {
 					waitDeferred.callback();
+					if (onLoad)
+						onLoad(jsonData.Children);
+					else {
+						ret.callback(jsonData.Children);
+					}
 				}
-				else{
-					dojo.hitch(self, self.createTree(self.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog)));
+
+				if (xhrArgs.xhr.status === 202) {
+					var deferred = new dojo.Deferred();
+					deferred.callback(jsonData);
+					self.registry.getService("orion.page.message").showWhile(deferred, "Getting git log").then(function(gitLogProgressResp) {
+						waitDeferred.callback();
+						if (onLoad)
+							onLoad(gitLogProgressResp.Result.JsonData.Children);
+						else {
+							ret.callback(gitLogProgressResp.Result.JsonData.Children);
+						}
+					});
 				}
 			});
-			
-			return waitDeferred;
-			
+			return ret;
 		};
+
+		if (treeRoot.Children) {
+			this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog, treeRoot.Children));
+			waitDeferred.callback();
+		} else {
+			this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog));
+		}
+
+		return waitDeferred;
+
+	};
 		
 	GitCommitNavigator.prototype.loadCommitDetails = function(commitDetails) {
 		if(this.commitDetails)
