@@ -128,6 +128,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 	 * @param {Boolean} [options.readonly=false] whether or not the view is read-only.
 	 * @param {Boolean} [options.fullSelection=true] whether or not the view is in full selection mode.
 	 * @param {Boolean} [options.sync=false] whether or not the view creation should be synchronous (if possible).
+	 * @param {Boolean} [options.expandTab=false] whether or not the tab key inserts white spaces
 	 * @param {String|String[]} [options.stylesheet] one or more stylesheet URIs for the view.
 	 * @param {Number} [options.tabSize] The number of spaces in a tab.
 	 * 
@@ -2466,12 +2467,22 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				var model = this._model;
 				var caret = selection.getCaret();
 				var lineIndex = model.getLineAtOffset(caret);
-				if (caret === model.getLineStart(lineIndex)) {
+				var lineStart = model.getLineStart(lineIndex);
+				if (caret === lineStart) {
 					if (lineIndex > 0) {
 						selection.extend(model.getLineEnd(lineIndex - 1));
 					}
 				} else {
-					selection.extend(this._getOffset(caret, args.unit, -1));
+					var removeTab = false;
+					if (this._expandTab && args.unit === "character" && (caret - lineStart) % this._tabSize === 0) {
+						var lineText = model.getText(lineStart, caret);
+						removeTab = !/[^ ]/.test(lineText); // Only spaces between line start and caret.
+					}
+					if (removeTab) {
+						selection.extend(caret - this._tabSize);
+					} else {
+						selection.extend(this._getOffset(caret, args.unit, -1));
+					}
 				}
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
@@ -2722,7 +2733,16 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			return true;
 		},
 		_doTab: function (args) {
-			this._doContent("\t"); 
+			var text = "\t";
+			if (this._expandTab) {
+				var model = this._model;
+				var caret = this._getSelection().getCaret();
+				var lineIndex = model.getLineAtOffset(caret);
+				var lineStart = model.getLineStart(lineIndex);
+				var spaces = this._tabSize - ((caret - lineStart) % this._tabSize);
+				text = (new Array(spaces + 1)).join(" ");
+			}
+			this._doContent(text);
 			return true;
 		},
 		
@@ -3573,12 +3593,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (isIE) {
 				body.style.lineHeight = this._lineHeight + "px";
 			}
-			if (this._tabSize) {
+			if (this._tabSize !== 8) {
 				if (isOpera) {
 					clientDiv.style.OTabSize = this._tabSize+"";
 				} else if (isFirefox >= 4) {
 					clientDiv.style.MozTabSize = this._tabSize+"";
-				} else if (this._tabSize !== 8) {
+				} else {
 					this._customTabSize = this._tabSize;
 				}
 			}
@@ -3603,6 +3623,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				readonly: false,
 				fullSelection: true,
 				tabSize: 8,
+				expandTab: false,
 				stylesheet: [],
 				sync: false
 			};
