@@ -23,7 +23,8 @@ var exports = {};
 (function() {
 	var doOnce = false;
 
-	exports.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
+	exports.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item, pageNavId) {
+		// we should be using orion.globalCommands#generateDomCommandsInBanner rather than managing these toolbars ourself
 		var toolbar = dojo.byId(toolbarId);
 		if (toolbar) {
 			dojo.empty(toolbar);
@@ -32,6 +33,13 @@ var exports = {};
 		}
 		var commandService = registry.getService("orion.page.command");
 		commandService.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  // true would force text links
+		if (pageNavId) {
+			toolbar = dojo.byId(pageNavId);
+			if (toolbar) {
+				dojo.empty(toolbar);
+				commandService.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  
+			}
+		}
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
 			commandService.renderCommands(selectionTools, "dom", null, explorer, "image", null, null, true);  // true would force text links
@@ -1475,7 +1483,7 @@ var exports = {};
 	};
 	
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
-		
+
 		var cloneGitRepositoryCommand = new mCommands.Command({
 			name : "Clone Repository",
 			tooltip : "Clone an existing Git repository to a folder",

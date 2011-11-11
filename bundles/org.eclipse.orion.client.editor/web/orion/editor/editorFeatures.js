@@ -268,13 +268,21 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
 				var selection = editor.getSelection();
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+				var tabSize = this.textView.getOptions("tabSize");
+				var spaceTab = new Array(tabSize + 1).join(" ");
 				var lines = [], removeCount = 0;
 				for (var i = firstLine; i <= lastLine; i++) {
 					var line = model.getLine(i, true);
 					if (model.getLineStart(i) !== model.getLineEnd(i)) {
-						if (line.indexOf("\t") !== 0) { return false; }
-						line = line.substring(1);
-						removeCount++;
+						if (line.indexOf("\t") === 0) {
+							line = line.substring(1);
+							removeCount++;
+						} else if (line.indexOf(spaceTab) === 0) {
+							line = line.substring(tabSize);
+							removeCount += tabSize;
+						} else {
+							return true;
+						}
 					}
 					lines.push(line);
 				}
