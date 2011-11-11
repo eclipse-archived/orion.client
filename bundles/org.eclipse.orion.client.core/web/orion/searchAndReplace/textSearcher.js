@@ -33,133 +33,132 @@ orion.TextSearcher = (function() {
 		this._searchRange = null;
 		this._searchOnRange = false;
 		this._lastSearchString = "";
-		this._toolBarId = "pageNavigationCommandParameters";
 		this.setOptions(options);
 	}
 	TextSearcher.prototype = {
 		_createActionTable : function() {
 			var that = this;
-			var parentDiv = document
-					.getElementById(this._toolBarId);
-			var searchStringDiv = document.createElement('input');
-			searchStringDiv.type = "text";
-			searchStringDiv.name = "Find:";
-			searchStringDiv.id = "localSearchFindWith";
-			searchStringDiv.placeholder="Find With";
-			searchStringDiv.onkeyup = function(evt){
-				return that._handleKeyUp(evt);
-			};
-			searchStringDiv.onkeydown = function(evt){
-				return that._handleKeyDown(evt,true);
-			};
-			parentDiv.appendChild(searchStringDiv);
+			this._commandService.openParameterCollector(null, "pageNavigationActions", function(parentDiv) {
+				var searchStringDiv = document.createElement('input');
+				searchStringDiv.type = "text";
+				searchStringDiv.name = "Find:";
+				searchStringDiv.id = "localSearchFindWith";
+				searchStringDiv.placeholder="Find With";
+				searchStringDiv.onkeyup = function(evt){
+					return that._handleKeyUp(evt);
+				};
+				searchStringDiv.onkeydown = function(evt){
+					return that._handleKeyDown(evt,true);
+				};
+				parentDiv.appendChild(searchStringDiv);
+	
+				// create the command span for Find
+				var span = document.createElement('span');
+				dojo.addClass(span, "parameters");
+				span.id = "localSearchFindCommands";
+				parentDiv.appendChild(span);
+				// td.noWrap = true;
+	
+				// create replace text
+				var replaceStringDiv = document.createElement('input');
+				replaceStringDiv.type = "text";
+				replaceStringDiv.name = "ReplaceWith:";
+				replaceStringDiv.id = "localSearchReplaceWith";
+				replaceStringDiv.placeholder="Replace With";
+				dojo.addClass(replaceStringDiv, 'searchCmdGroupMargin');
+				replaceStringDiv.onkeydown = function(evt){
+					return that._handleKeyDown(evt, false);
+				};
+				parentDiv.appendChild(replaceStringDiv);
+	
+				// create the command span for Replace
+				span = document.createElement('span');
+				dojo.addClass(span, "parameters");
+				span.id = "localSearchReplaceCommands";
+				parentDiv.appendChild(span);
+	
+				// create all other span for commands : replace/find ,
+				// replace all
+				span = document.createElement('span');
+				span.id = "localSearchOtherCommands";
+				dojo.addClass(span, "parameters");
+				parentDiv.appendChild(span);
+	
+				// create Options button , which will bring a dialog
+				var optionTd = document.createElement('span');
+				dojo.addClass(optionTd, "parameters");
 
-			// create the command span for Find
-			var span = document.createElement('span');
-			span.id = "localSearchFindCommands";
-			parentDiv.appendChild(span);
-			// td.noWrap = true;
-
-			// create replace text
-			var replaceStringDiv = document.createElement('input');
-			replaceStringDiv.type = "text";
-			replaceStringDiv.name = "ReplaceWith:";
-			replaceStringDiv.id = "localSearchReplaceWith";
-			replaceStringDiv.placeholder="Replace With";
-			dojo.addClass(replaceStringDiv, 'searchCmdGroupMargin');
-			replaceStringDiv.onkeydown = function(evt){
-				return that._handleKeyDown(evt, false);
-			};
-			parentDiv.appendChild(replaceStringDiv);
-
-			// create the command span for Replace
-			span = document.createElement('span');
-			span.id = "localSearchReplaceCommands";
-			parentDiv.appendChild(span);
-
-			// create all other span for commands : replace/find ,
-			// replace all
-			span = document.createElement('span');
-			span.id = "localSearchOtherCommands";
-			parentDiv.appendChild(span);
-
-			// create Options button , which will bring a dialog
-			var optionTd = document.createElement('span');
-			// td.noWrap = true;
-			parentDiv.appendChild(optionTd);
-
-			var optionMenu = dijit.byId("searchOptMenu");
-			if (optionMenu) {
-				optionMenu.destroy();
-			}
-			var newMenu = new dijit.Menu({
-				style : "display: none;",
-				id : "searchOptMenu"
+				// td.noWrap = true;
+				parentDiv.appendChild(optionTd);
+	
+				var optionMenu = dijit.byId("searchOptMenu");
+				if (optionMenu) {
+					optionMenu.destroy();
+				}
+				var newMenu = new dijit.Menu({
+					style : "display: none;",
+					id : "searchOptMenu"
+				});
+				
+				newMenu.addChild(new dijit.CheckedMenuItem({
+					label: "Case sensitive",
+					checked: !that._ignoreCase,
+					onChange : function(checked) {
+						that.setOptions({ignoreCase: !checked});
+					}
+				}));
+				
+				newMenu.addChild(new dijit.CheckedMenuItem({
+					label: "Wrap search",
+					checked: that._wrapSearch,
+					onChange : function(checked) {
+						that.setOptions({wrapSearch: checked});
+					}
+				}));
+				/*
+				newMenu.addChild(new dijit.CheckedMenuItem({
+					label: "Whole word",
+					checked: that._wholeWord,
+					onChange : function(checked) {
+						that.setOptions({wholeWord: checked});
+					}
+				}));
+				*/
+				newMenu.addChild(new dijit.CheckedMenuItem({
+					label: "Incremental search",
+					checked: that._incremental,
+					onChange : function(checked) {
+						that.setOptions({incremental: checked});
+					}
+				}));
+				
+				newMenu.addChild(new dijit.CheckedMenuItem({
+					label: "Regular expression",
+					checked: that._useRegExp,
+					onChange : function(checked) {
+						that.setOptions({useRegExp: checked});
+					}
+				}));
+				
+				newMenu.addChild(new dijit.CheckedMenuItem({
+					label: "Find after replace",
+					checked: that._findAfterReplace,
+					onChange : function(checked) {
+						that.setOptions({findAfterReplace: checked});
+					}
+				}));
+				
+				var menuButton = new dijit.form.DropDownButton({
+					label : "Options",
+					dropDown : newMenu
+				});
+				dojo.addClass(menuButton.domNode, "commandImage");
+				dojo.place(menuButton.domNode, optionTd, "last");
 			});
-			
-			newMenu.addChild(new dijit.CheckedMenuItem({
-				label: "Case sensitive",
-				checked: !that._ignoreCase,
-				onChange : function(checked) {
-					that.setOptions({ignoreCase: !checked});
-				}
-			}));
-			
-			newMenu.addChild(new dijit.CheckedMenuItem({
-				label: "Wrap search",
-				checked: that._wrapSearch,
-				onChange : function(checked) {
-					that.setOptions({wrapSearch: checked});
-				}
-			}));
-			/*
-			newMenu.addChild(new dijit.CheckedMenuItem({
-				label: "Whole word",
-				checked: that._wholeWord,
-				onChange : function(checked) {
-					that.setOptions({wholeWord: checked});
-				}
-			}));
-			*/
-			newMenu.addChild(new dijit.CheckedMenuItem({
-				label: "Incremental search",
-				checked: that._incremental,
-				onChange : function(checked) {
-					that.setOptions({incremental: checked});
-				}
-			}));
-			
-			newMenu.addChild(new dijit.CheckedMenuItem({
-				label: "Regular expression",
-				checked: that._useRegExp,
-				onChange : function(checked) {
-					that.setOptions({useRegExp: checked});
-				}
-			}));
-			
-			newMenu.addChild(new dijit.CheckedMenuItem({
-				label: "Find after replace",
-				checked: that._findAfterReplace,
-				onChange : function(checked) {
-					that.setOptions({findAfterReplace: checked});
-				}
-			}));
-			
-			var menuButton = new dijit.form.DropDownButton({
-				label : "Options",
-				dropDown : newMenu
-			});
-			dojo.addClass(menuButton.domNode, "commandImage");
-			dojo.place(menuButton.domNode, optionTd, "last");
-
-			// create close command span
-			var closeTd = document.createElement('span');
-			closeTd.id = "localSearchCloseCommands";
-			parentDiv.appendChild(closeTd);
 		},
 		
 		visible: function(){
-			return this._visible;
+			return document.getElementById("localSearchFindWith") ? true : false;
 		},
 		
 		_handleKeyUp: function(evt){
@@ -209,36 +208,16 @@ orion.TextSearcher = (function() {
 		},
 		
 		closeUI : function() {
-			if(!this._visible)
+			if(!this.visible())
 				return;
-			dojo.empty(this._toolBarId);
-			this._visible = false;
-			this._refreshTopContainer();
+			this._commandService.closeParameterCollector();
 			this._textSearchAdaptor.adaptCloseToolBar();
-		},
-
-		_refreshTopContainer : function() {
-			// There is refresh issue when we add some thing inside
-			// the dijit.layout.BorderContainer
-			// We need to work this around by doing the layout()
-			// call.
-			var topContainer = dijit.byId("topContainer");
-			var commandArea = dojo.byId("pageNavigationParameterArea");
-			//hack
-			if (this._visible) {
-				dojo.addClass(commandArea, "rightSlideActive");
-			} else {
-				dojo.removeClass(commandArea, "rightSlideActive");
-			}
-			if (topContainer && topContainer.layout) {
-				topContainer.layout();
-			}
 		},
 
 		buildToolBar : function(defaultSearchStr) {
 			this._keyUpHandled = true;
 			var findDiv = document.getElementById("localSearchFindWith");
-			if (this._visible) {
+			if (this.visible()) {
 				if(defaultSearchStr.length > 0){
 					findDiv.value = defaultSearchStr;
 				}
@@ -248,9 +227,7 @@ orion.TextSearcher = (function() {
 				}, 10);				
 				return;
 			}
-			this._visible = true;
 			this._createActionTable();
-			this._refreshTopContainer();
 
 			// set the default value of search string
 			var findDiv = document.getElementById("localSearchFindWith");
@@ -301,31 +278,18 @@ orion.TextSearcher = (function() {
 				}
 			});
 
-			var closeUICommand = new mCommands.Command({
-				name : "Close",
-				image : require.toUrl("images/delete.gif"),
-				id : "orion.search.closeUI",
-				groupId : "orion.searchGroup",
-				callback : function() {
-					that.closeUI();
-				}
-			});
-
 			this._commandService.addCommand(findNextCommand, "dom");
 			this._commandService.addCommand(findPrevCommand, "dom");
 			this._commandService.addCommand(replaceCommand, "dom");
 			this._commandService.addCommand(replaceAllCommand, "dom");
-			this._commandService.addCommand(closeUICommand, "dom");
 
 			// Register command contributions
 			this._commandService.registerCommandContribution("orion.search.findNext", 1, "localSearchFindCommands");
 			this._commandService.registerCommandContribution("orion.search.findPrev", 2, "localSearchFindCommands");
 			this._commandService.registerCommandContribution("orion.search.replace", 1, "localSearchReplaceCommands");
 			this._commandService.registerCommandContribution("orion.search.replaceAll", 2, "localSearchReplaceCommands");
-			this._commandService.registerCommandContribution("orion.search.closeUI", 1, "localSearchCloseCommands");
 			this._commandService.renderCommands("localSearchFindCommands", "dom", that, that, "image", 'searchCommandImage', null, false, 'searchCommandOver', 'searchCommandLink');
 			this._commandService.renderCommands("localSearchReplaceCommands", "dom", that, that, "image", 'searchCommandImage', null, false, 'searchCommandOver', 'searchCommandLink');
-			this._commandService.renderCommands("localSearchCloseCommands", "dom", that, that, "image", 'searchCommandImage', null, false, 'searchCommandOver', 'searchCommandLink');
 		},
 
 		/**
@@ -436,7 +400,7 @@ orion.TextSearcher = (function() {
 			var findTextDiv = document.getElementById("localSearchFindWith");
 			var startPos = this._textSearchAdaptor.getSearchStartIndex(incremental ? true : !next);
 			
-			if(this._visible){
+			if(this.visible()){
 				return this.findOnce(searchStr ? searchStr : findTextDiv.value, startPos, (focusBackDiv && !dojo.isIE) ? function(){focusBackDiv.focus();} : null);
 			} else if(this._lastSearchString && this._lastSearchString.length > 0){
 				var retVal = this._prepareFind(searchStr ? searchStr : this._lastSearchString, startPos);

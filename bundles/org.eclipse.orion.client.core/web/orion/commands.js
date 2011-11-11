@@ -41,7 +41,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		this._globalScope = {};
 		this._namedGroups = {};
 		this._activeBindings = {};
-		this._activeModalCommand = null;
 		this._activeModalCommandNode = null;
 		this._init(options);
 	}
@@ -135,23 +134,26 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			this._parameterCollector = parameterCollector;
 		},
 		
-		openParameterCollector: function(command, commandNode) {
+		openParameterCollector: function(commandNode, id, fillFunction) {
 			if (this._parameterCollector) {
-				if (this._activeModalCommand) {
+				if (this._activeModalCommandNode) {
 					this._parameterCollector.close(this._activeModalCommandNode);
 				}
-				this._activeModalCommand = command;
 				this._activeModalCommandNode = commandNode;
-				this._parameterCollector.open(command, commandNode);
+				this._parameterCollector.open(commandNode, id, fillFunction);
+			}
+		},
+		
+		closeParameterCollector: function(commandNode) {
+			this._activeModalCommandNode = null;
+			if (this._parameterCollector) {
+				this._parameterCollector.close(commandNode);
 			}
 		},
 		
 		_collectParameters: function(command, handler, parentNode, commandNode, callbackParameters) {
 			if (this._parameterCollector) {
-				if (this._activeModalCommand) {
-					this._parameterCollector.close(this._activeModalCommandNode);
-				}
-				this._activeModalCommand = command;
+				this._parameterCollector.close(this._activeModalCommandNode);
 				this._activeModalCommandNode = commandNode;
 				this._parameterCollector.collectParameters(command, handler, parentNode, commandNode, callbackParameters);
 			}

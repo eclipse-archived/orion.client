@@ -117,6 +117,17 @@ a:hover {
 
 .parameters {
 	color: #404040;
+	vertical-align: top;
+}
+
+.dismiss {
+    border: 1px solid #f5f5f5;
+}
+
+.dismiss:hover {
+	background-color: #ffeecc;
+    border: 1px solid #ffcc66;
+    border-radius: 3px;
 }
 
 .parameterInput {
