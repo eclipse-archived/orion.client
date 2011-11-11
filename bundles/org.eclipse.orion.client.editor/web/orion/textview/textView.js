@@ -32,16 +32,17 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			node.detachEvent("on" + type, handler);
 		}
 	}
+	var userAgent = navigator.userAgent;
 	var isIE;
-	if (document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent)) {
+	if (document.selection && window.ActiveXObject && /MSIE/.test(userAgent)) {
 		isIE = document.documentMode ? document.documentMode : 7;
 	}
-	var isFirefox = parseFloat(navigator.userAgent.split("Firefox/")[1] || navigator.userAgent.split("Minefield/")[1]) || undefined;
-	var isOpera = navigator.userAgent.indexOf("Opera") !== -1;
-	var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
-	var isSafari = navigator.userAgent.indexOf("Safari") !== -1;
-	var isWebkit = navigator.userAgent.indexOf("WebKit") !== -1;
-	var isPad = navigator.userAgent.indexOf("iPad") !== -1;
+	var isFirefox = parseFloat(userAgent.split("Firefox/")[1] || userAgent.split("Minefield/")[1]) || undefined;
+	var isOpera = userAgent.indexOf("Opera") !== -1;
+	var isChrome = userAgent.indexOf("Chrome") !== -1;
+	var isSafari = userAgent.indexOf("Safari") !== -1 && !isChrome;
+	var isWebkit = userAgent.indexOf("WebKit") !== -1;
+	var isPad = userAgent.indexOf("iPad") !== -1;
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 	var isLinux = navigator.platform.indexOf("Linux") !== -1;
