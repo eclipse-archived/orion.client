@@ -9,7 +9,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270 Bug#361474
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -1885,21 +1885,31 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					return;
 				}
 			}
-			var left = e.which ? e.button === 0 : e.button === 1;
 			this._commitIME();
+
+			var left = e.which ? e.button === 0 : e.button === 1;
+			var button = e.which; // 1 - left, 2 - middle, 3 - right
+			if (!button && e.button === 4) { // if IE 8 or older
+				button = 2;
+			}
+
+			// For middle click we always need getTime(). See _getClipboardText().
+			var time = button !== 2 && e.timeStamp ? e.timeStamp : new Date().getTime();
+			var timeDiff = time - this._lastMouseTime;
+			var deltaX = Math.abs(this._lastMouseX - e.clientX);
+			var deltaY = Math.abs(this._lastMouseY - e.clientY);
+			this._lastMouseX = e.clientX;
+			this._lastMouseY = e.clientY;
+			this._lastMouseTime = time;
+			this._lastMouseButton = button;
+
 			if (left) {
 				this._isMouseDown = true;
-				var deltaX = Math.abs(this._lastMouseX - e.clientX);
-				var deltaY = Math.abs(this._lastMouseY - e.clientY);
-				var time = e.timeStamp ? e.timeStamp : new Date().getTime();  
-				if ((time - this._lastMouseTime) <= this._clickTime && deltaX <= this._clickDist && deltaY <= this._clickDist) {
+				if (timeDiff <= this._clickTime && deltaX <= this._clickDist && deltaY <= this._clickDist) {
 					this._clickCount++;
 				} else {
 					this._clickCount = 1;
 				}
-				this._lastMouseX = e.clientX;
-				this._lastMouseY = e.clientY;
-				this._lastMouseTime = time;
 				if (this._handleMouse(e) && (isOpera || isChrome || (isFirefox && !this._overlayDiv))) {
 					if (!this._hasFocus) {
 						this.focus();
@@ -3887,9 +3897,21 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					if (event) {
 						setTimeout(function() {
 							self.focus();
-							var text = _getText();
-							if (text) { self._doContent(text); }
 							self._ignoreFocus = false;
+
+							var text = _getText();
+							if (!text) {
+								return;
+							}
+
+							var timeDiff = new Date().getTime() - self._lastMouseTime;
+							if (self._lastMouseButton === 2 && timeDiff <= self._clickTime) {
+								var line = self._getYToLine(self._lastMouseY);
+								var offset = self._getXToOffset(line, self._lastMouseX);
+								self._modifyContent({text: text, start: offset, end: offset});
+							} else {
+								self._doContent(text);
+							}
 						}, 0);
 						return null;
 					} else {
