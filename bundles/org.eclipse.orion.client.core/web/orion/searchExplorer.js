@@ -18,7 +18,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.registry= serviceRegistry;
 		this.fileClient = fileClient; 
 		this._resultLocation = resultLocation;
-		this._parseQueryStr(queryStr);
 		this._treeRoot = {
 				isRoot: true,
 				children:[]
@@ -32,6 +31,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.modelLocHash = [];
 		this._lineDelimiter = "\n"; 
 		this.explorer = explorer;
+		this._parseQueryStr(queryStr);
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
 	
@@ -45,14 +45,11 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				searchStr = splitStr[0];
 			}
 		}
+		this.OriginalSearchString = searchStr.split("\\").join("");
 		this._parseSearchStr(searchStr);
 	};
 	
 	SearchResultModel.prototype._parseSearchStr = function(searchStr) {
-		var pageTitle = dojo.byId("pageTitle");
-		if(pageTitle){
-			pageTitle.innerHTML = "Search results for <b>" + searchStr.split("\\").join("") + "</b> " + "on";
-		}
 		var hasStar = (searchStr.indexOf("*") > -1);
 		var hasQMark = (searchStr.indexOf("?") > -1);
 		if(hasStar){
@@ -84,6 +81,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			queryStr = splitQ[1];
 		}
 		splitQ = queryStr.split("&");
+		this.start = 0;
+		this.rows = 20;
 		for(var i=0; i < splitQ.length; i++){
 			var splitparameters = splitQ[i].split("=");
 			if(splitparameters.length === 2){
@@ -95,6 +94,13 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					this.start = parseInt(splitparameters[1]);
 				}
 			}
+		}
+		var pageTitle = dojo.byId("pageTitle");
+		if(pageTitle && this.OriginalSearchString && this.explorer.numberOnPage > 0){
+			var startNumber = this.start + 1;
+			var endNumber = startNumber + this.explorer.numberOnPage - 1;
+			pageTitle.innerHTML = "Files " + "<b>" + startNumber + "-"  + endNumber + "</b>" + " of " + this.explorer.totalNumber + 
+			" found by keyword " + "<b>" + this.OriginalSearchString + "</b>" + " on:";
 		}
 	};
 	
@@ -648,15 +654,16 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	 * Creates a new search result explorer.
 	 * @name orion.SearchResultExplorer
 	 */
-	function SearchResultExplorer(registry, commandService, resultLocation,  parentNode, queryStr){
+	function SearchResultExplorer(registry, commandService, resultLocation,  parentNode, queryStr, totalNumber){
 		this.parentNode = parentNode;
 		this.registry = registry;
 		this._commandService = commandService;
 		this.fileClient = new mFileClient.FileClient(this.registry);
 		this.checkbox = false;
 		this.renderer = new SearchResultRenderer({checkbox: false}, this);
+		this.totalNumber = totalNumber;
+		this.numberOnPage = resultLocation.length;
 		this.model = new SearchResultModel(registry, this.fileClient, resultLocation, queryStr, this);
-		
 	}
 	SearchResultExplorer.prototype = new mExplorer.Explorer();
 	
@@ -740,12 +747,18 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		
 	};
 	
+	SearchResultExplorer.prototype.reportStatus = function(message) {
+		this.registry.getService("orion.page.message").setProgressMessage(message);	
+	};
+	
 	SearchResultExplorer.prototype.startUp = function() {
 		var that = this;
+		this.reportStatus("Generating search result...");	
 		this.model.loadOneFileMetaData(0, function(onComplete){
 			that.initCommands();
 			that.createTree(that.parentNode, that.model);
 			that.gotoCurrent();
+			that.reportStatus("");	
 		});
 	};
 	
