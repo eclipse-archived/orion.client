@@ -4506,7 +4506,13 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var defaultOptions = this._defaultOptions();
 			for (var option in defaultOptions) {
 				if (defaultOptions.hasOwnProperty(option)) {
-					this["_" + option] = options[option] || defaultOptions[option];
+					var value;
+					if (options[option] !== undefined) {
+						value = options[option];
+					} else {
+						value = defaultOptions[option];
+					}
+					this["_" + option] = value;
 				}
 			}
 			/* 
