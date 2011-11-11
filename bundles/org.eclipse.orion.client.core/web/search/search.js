@@ -118,5 +118,5 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
 				});
 			}
 		}
-		
-	};
+	}
+});
