@@ -37,9 +37,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		 * @param {DOMElement} commandNode the node representing the command
 		 */
 		close: function (commandNode) {
-			if (this.parameterArea && this.parameterContainer) {
+			if (this.parameterArea) {
 				dojo.empty(this.parameterArea);
+			}
+			if (this.parameterContainer) {
 				dojo.removeClass(this.parameterContainer, this.activeClass);
+			}
+			if (this.dismissArea) {
+				 dojo.empty(this.dismissArea);
 			}
 			if (commandNode) {
 				dojo.removeClass(commandNode, "activeCommand");
@@ -56,7 +61,51 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		 * @param {DOMElement} parent the node containing the triggering command
 		 * @returns {DOMElement} commandNode the node representing the command
 		 */
-		open: function() {
+		open: function(commandNode, id, fillFunction) {
+			this.parameterContainer = null;
+			this.activeClass = null;
+			this.parameterArea = null;
+			this.dismissArea = null;
+			if (id === "pageActions") {
+				this.parameterArea = dojo.byId("pageCommandParameters");
+				this.parameterContainer = dojo.byId("pageParameterArea");
+				this.activeClass = "leftSlideActive";
+				this.dismissArea = dojo.byId("pageCommandDismiss");
+			} else if (id === "pageNavigationActions") {
+				this.parameterArea = dojo.byId("pageNavigationCommandParameters");
+				this.parameterContainer = dojo.byId("pageNavigationParameterArea");
+				this.activeClass = "rightSlideActive";
+				this.dismissArea = dojo.byId("pageNavigationDismiss");
+			}
+			if (commandNode) {
+				dojo.addClass(commandNode, "activeCommand");
+			}
+			if (this.parameterArea) {
+				var focusNode = fillFunction(this.parameterArea);
+				// add the close button
+				if (this.dismissArea) {
+					var spacer = dojo.create("span", null, this.dismissArea, "last");
+					dojo.addClass(spacer, "dismiss");
+					var close = dojo.create("span", null, this.dismissArea, "last");
+					dojo.addClass(close, "imageSprite");
+					dojo.addClass(close, "core-sprite-delete");
+					dojo.addClass(close, "dismiss");
+					close.title = "Close";
+					dojo.connect(close, "onclick", dojo.hitch(this, function(event) {
+						this.close(commandNode);
+					}));
+				}
+				// all parameters have been generated.  Activate the area.
+				dojo.addClass(this.parameterContainer, this.activeClass);
+				if (this._getLayoutWidget()) {
+					this._getLayoutWidget().layout();
+				}
+				if (focusNode) {
+					window.setTimeout(function() {
+						focusNode.focus();
+					}, 0);
+				}
+			}
 		},
 		
 		/**
@@ -71,73 +120,44 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		 */
 		collectParameters: function(command, handler, parent, commandNode, callbackParameters) {
 			if (command.parameters) {
-				this.parameterArea = null;
-				this.parameterContainer = null;
-				this.activeClass = null;
-				if (parent.id === "pageActions") {
-					this.parameterArea = dojo.byId("pageCommandParameters");
-					this.parameterContainer = dojo.byId("pageParameterArea");
-					this.activeClass = "leftSlideActive";
-				} else if (parent.id === "pageNavigationActions") {
-					this.parameterArea = dojo.byId("pageNavigationCommandParameters");
-					this.parameterContainer = dojo.byId("pageNavigationParameterArea");
-					this.activeClass = "rightSlideActive";
-				}
-				if (this.parameterArea) {
+				this.open(commandNode, parent.id, dojo.hitch(this, function(parameterArea) {
 					var first = null;
-					if (typeof command.parameters === "function") {
-						command.parameters.call(command, this.parameterArea, callbackParameters);
-					} else {
-						var keyHandler = dojo.hitch(this, function(event) {
-							if (event.keyCode === dojo.keys.ENTER) {
-								dojo.query("input", this.parameterArea).forEach(function(field) {
-									command.parameters[field.parameterName].value = field.value;
-									if (command.callback) {
-										command.callback.apply(handler, callbackParameters);
-									}
-								});
-							}
-							if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
-								this.close(commandNode);
-							}
-						});
-						for (var key in command.parameters) {
-							if (command.parameters[key].type) {
-								var parm = command.parameters[key];
-								if (parm.label) {
-									dojo.place(document.createTextNode(parm.label), this.parameterArea, "last");
-								} 
-								var field = dojo.create("input", {type: parm.type}, this.parameterArea, "last");
-								dojo.addClass(field, "parameterInput");
-								field.setAttribute("speech", "speech");
-								field.setAttribute("x-webkit-speech", "x-webkit-speech");
-								field.parameterName = key;
-								if (!first) {
-									first = field;
+					var keyHandler = dojo.hitch(this, function(event) {
+						if (event.keyCode === dojo.keys.ENTER) {
+							dojo.query("input", this.parameterArea).forEach(function(field) {
+								command.parameters[field.parameterName].value = field.value;
+								if (command.callback) {
+									command.callback.apply(handler, callbackParameters);
 								}
-								if (parm.value) {
-									field.value = parm.value;
-								}
-								dojo.connect(field, "onkeypress", keyHandler);
-							}
+							});
 						}
-						// need cancel button
-					} 
-					// all parameters have been generated.  Activate the area.
-					dojo.addClass(this.parameterContainer, this.activeClass);
-					dojo.addClass(commandNode, "activeCommand");
-					if (this._getLayoutWidget()) {
-						this._getLayoutWidget().layout();
+						if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
+							this.close(commandNode);
+						}
+					});
+					for (var key in command.parameters) {
+						if (command.parameters[key].type) {
+							var parm = command.parameters[key];
+							if (parm.label) {
+								dojo.place(document.createTextNode(parm.label), parameterArea, "last");
+							} 
+							var field = dojo.create("input", {type: parm.type}, parameterArea, "last");
+							dojo.addClass(field, "parameterInput");
+							field.setAttribute("speech", "speech");
+							field.setAttribute("x-webkit-speech", "x-webkit-speech");
+							field.parameterName = key;
+							if (!first) {
+								first = field;
+							}
+							if (parm.value) {
+								field.value = parm.value;
+							}
+							dojo.connect(field, "onkeypress", keyHandler);
+						}
 					}
-					if (first) {
-						window.setTimeout(function() {
-							first.focus();
-						}, 0);
-					}
-					return true;
-				}	
+					return first;
+				}));
 			}
-			return false;
 		}
 	};
 	CommandParameterCollector.prototype.constructor = CommandParameterCollector;
