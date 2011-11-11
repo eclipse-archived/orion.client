@@ -46,7 +46,7 @@ var serviceRegistry;
 			// Commit details
 			var commitDetails = new mGitCommitDetails.CommitDetails({parent: "commitDetailsPane", commandService: commandService, linkService: linkService, detailsPane: dijit.byId("orion.innerNavigator")});
 			// Commit navigator
-			var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, commitDetails, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools");
+			var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, commitDetails, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools", "pageNavigationActions");
 			
 			// global commands
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, navigator);
@@ -74,11 +74,12 @@ var serviceRegistry;
 			commandService.registerCommandContribution("eclipse.orion.git.push", 100, "pageActions", "eclipse.gitGroup.page");
 			commandService.registerCommandContribution("eclipse.orion.git.pushForce", 100, "pageActions", "eclipse.gitGroup.page");
 			commandService.registerCommandContribution("eclipse.orion.git.switchToRemote", 100, "pageActions", "eclipse.gitGroup.page");
-			commandService.registerCommandContribution("eclipse.orion.git.previousLogPage", 200, "pageActions", "eclipse.gitGroup.page");
-			commandService.registerCommandContribution("eclipse.orion.git.nextLogPage", 201, "pageActions", "eclipse.gitGroup.page");
 			commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
 			commandService.registerCommandContribution("eclipse.orion.git.cherryPick", 3);
-			
+			// page navigation actions
+			commandService.registerCommandContribution("eclipse.orion.git.previousLogPage", 1, "pageNavigationActions");
+			commandService.registerCommandContribution("eclipse.orion.git.nextLogPage", 2, "pageNavigationActions");
+
 			loadResource(navigator, searcher);
 			
 			makeRightPane(navigator);

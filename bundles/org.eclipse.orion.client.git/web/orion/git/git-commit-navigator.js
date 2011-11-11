@@ -21,7 +21,7 @@ exports.GitCommitNavigator = (function() {
 	 * @name orion.git.GitCommitNavigator
 	 * @class A table-based git commit navigator
 	 */
-	function GitCommitNavigator(serviceRegistry, selection, commitDetails, options, parentId, pageTitleId, toolbarId, selectionToolsId) {
+	function GitCommitNavigator(serviceRegistry, selection, commitDetails, options, parentId, pageTitleId, toolbarId, selectionToolsId, pageNavId) {
 		this.registry = serviceRegistry;
 		this.selection = selection;
 		this.checkbox = options != null ? options.checkbox : true;
@@ -29,6 +29,7 @@ exports.GitCommitNavigator = (function() {
 		this.parentId = parentId;
 		this.pageTitleId = pageTitleId;
 		this.toolbarId = toolbarId;
+		this.pageNavId = pageNavId;
 		this.selectionToolsId = selectionToolsId;
 		this.isDirectory = true;
 		this.model = null;
@@ -83,7 +84,7 @@ exports.GitCommitNavigator = (function() {
 			dojo.place(document.createTextNode(response), progress, "last");
 
 			if (this.toolbarId && this.selectionToolsId)
-				mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
+				mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot, this.pageNavId);
 			waitDeferred.callback();
 			return waitDeferred;
 		}
@@ -97,7 +98,7 @@ exports.GitCommitNavigator = (function() {
 		var self = this;
 
 		if (this.toolbarId && this.selectionToolsId)
-			mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot);
+			mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot, this.pageNavId);
 
 		var service = this.registry.getService("orion.git.provider");
 
