@@ -254,8 +254,10 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
 					}
 					var lineStart = model.getLineStart(firstLine);
 					var lineEnd = model.getLineEnd(lastLine, true);
-					editor.setText(lines.join("\t"), lineStart, lineEnd);
-					editor.setSelection(lineStart === selection.start ? selection.start : selection.start + 1, selection.end + (lastLine - firstLine + 1));
+					var options = this.textView.getOptions("tabSize", "expandTab");
+					var text = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t";
+					editor.setText(lines.join(text), lineStart, lineEnd);
+					editor.setSelection(lineStart === selection.start ? selection.start : selection.start + text.length, selection.end + ((lastLine - firstLine + 1) * text.length));
 					return true;
 				}
 				return false;
@@ -270,7 +272,7 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
 				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
 				var tabSize = this.textView.getOptions("tabSize");
 				var spaceTab = new Array(tabSize + 1).join(" ");
-				var lines = [], removeCount = 0;
+				var lines = [], removeCount = 0, firstRemoveCount = 0;
 				for (var i = firstLine; i <= lastLine; i++) {
 					var line = model.getLine(i, true);
 					if (model.getLineStart(i) !== model.getLineEnd(i)) {
@@ -284,13 +286,16 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
 							return true;
 						}
 					}
+					if (i === firstLine) {
+						firstRemoveCount = removeCount;
+					}
 					lines.push(line);
 				}
 				var lineStart = model.getLineStart(firstLine);
 				var lineEnd = model.getLineEnd(lastLine, true);
 				var lastLineStart = model.getLineStart(lastLine);
 				editor.setText(lines.join(""), lineStart, lineEnd);
-				editor.setSelection(lineStart === selection.start ? selection.start : selection.start - 1, selection.end - removeCount + (selection.end === lastLineStart+1 ? 1 : 0));
+				editor.setSelection(lineStart === selection.start ? selection.start : selection.start - firstRemoveCount, selection.end - removeCount + (selection.end === lastLineStart+1 ? 1 : 0));
 				return true;
 			}.bind(this));
 			
