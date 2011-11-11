@@ -417,20 +417,29 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			}
 		}
 		
+		var newFileNameParameters = {};
+		newFileNameParameters.name = {label: 'Name:', type: 'text', value: 'New File', required: true};
+		
 		var newFileCommand =  new mCommands.Command({
 			name: "New File",
 			tooltip: "Create a new file",
 			imageClass: "core-sprite-new_file",
 			id: "eclipse.newFile",
-			callback: function(item, commandId, domId) {
+			parameters: newFileNameParameters,
+			callback: function(item, commandId, domId, userData, parameters) {
 				item = forceSingleItem(item);
-				getNewItemName(item, domId, "New File", function(name) {
+				var createFunction = function(name) {
 					if (name) {
 						fileClient.createFile(item.Location, name).then(
 							dojo.hitch(explorer, function() {this.changedItem(item);}),
 							errorHandler);
 					}
-				});
+				};
+				if (parameters.name && parameters.name.value) {
+					createFunction(parameters.name.value);
+				} else {
+					getNewItemName(item, domId, "New File", createFunction);
+				}
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -438,20 +447,29 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		commandService.addCommand(newFileCommand, "dom");
 		commandService.addCommand(newFileCommand, "object");
 		
+		var newFolderNameParameters = {};
+		newFolderNameParameters.name = {label: 'Name:', type: 'text', value: 'New Folder', required: true};
+
 		var newFolderCommand = new mCommands.Command({
 			name: "New Folder",
 			tooltip: "Create a new folder",
 			imageClass: "core-sprite-new_folder",
 			id: "eclipse.newFolder",
-			callback: function(item, commandId, domId) {
+			parameters: newFolderNameParameters,
+			callback: function(item, commandId, domId, userData, parameters) {
 				item = forceSingleItem(item);
-				getNewItemName(item, domId, "New Folder", function(name) {
+				var createFunction = function(name) {
 					if (name) {
 						fileClient.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}), 
+							dojo.hitch(explorer, function() {this.changedItem(item);}),
 							errorHandler);
 					}
-				});
+				};
+				if (parameters.name && parameters.name.value) {
+					createFunction(parameters.name.value);
+				} else {
+					getNewItemName(item, domId, "New Folder", createFunction);
+				}
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -462,17 +480,23 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		
 		var newProjectCommand = new mCommands.Command({
 			name: "New Folder",
+			parameters: newFolderNameParameters,
 			tooltip: "Create a new folder",
 			imageClass: "core-sprite-new_folder",
 			id: "eclipse.newProject",
-			callback: function(item, commandId, domId) {
-				getNewItemName(item, domId, "New Folder", function(name) {
+			callback: function(item, commandId, domId, userData, parameters) {
+				var createFunction = function(name) {
 					if (name) {
 						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name).then(
 							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}), // refresh the root
 							errorHandler);
 					}
-				});
+				};
+				if (parameters.name && parameters.name.value) {
+					createFunction(parameters.name.value);
+				} else {
+					getNewItemName(item, domId, "New Folder", createFunction);
+				}
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);

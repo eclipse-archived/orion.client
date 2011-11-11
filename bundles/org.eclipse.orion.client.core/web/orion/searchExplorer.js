@@ -714,12 +714,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService.addCommand(collapseAllCommand, "dom");
 			
 		// Register command contributions
-		this._commandService.registerCommandContribution("orion.search.nextResult", 1, "pageActionsRight");
-		this._commandService.registerCommandContribution("orion.search.prevResult", 2, "pageActionsRight");
-		this._commandService.registerCommandContribution("orion.search.expandAll", 3, "pageActionsRight");
-		this._commandService.registerCommandContribution("orion.search.collapseAll", 4, "pageActionsRight");
-		dojo.empty("pageActionsRight");
-		this._commandService.renderCommands("pageActionsRight", "dom", that, that, "image");
+		this._commandService.registerCommandContribution("orion.search.nextResult", 1, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.prevResult", 2, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.expandAll", 3, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.collapseAll", 4, "pageNavigationActions");
+		dojo.empty("pageNavigationActions");
+		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "image");
 		
 		var optionMenu = dijit.byId("globalSearchOptMenu");
 		if (optionMenu) {
@@ -742,7 +742,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			dropDown : newMenu
 		});
 		dojo.addClass(menuButton.domNode, "commandImage");
-		dojo.place(menuButton.domNode, "pageActionsRight", "last");
+		dojo.place(menuButton.domNode, "pageNavigationActions", "last");
 		
 		
 	};
