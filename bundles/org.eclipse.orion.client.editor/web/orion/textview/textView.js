@@ -1365,16 +1365,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				* force the clientDiv to loose and receive focus if the it is focused.
 				*/
 				if (isFirefox) {
-					var clientDiv = this._clientDiv;
-					if (clientDiv) {
-						var hasFocus = this._hasFocus;
-						this._ignoreFocus = true;
-						if (hasFocus) { clientDiv.blur(); }
-						clientDiv.contentEditable = false;
-						clientDiv.contentEditable = true;
-						if (hasFocus) { clientDiv.focus(); }
-						this._ignoreFocus = false;
-					}
+					this._fixCaret();
 				}
 			}
 		},
@@ -1576,6 +1567,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		},
 		_handleDragEnd: function (e) {
 			if (!e) { e = window.event; }
+			this._dropTarget = false;
+			this._dragOffset = e.dataTransfer.mozUserCancelled ? -2 : -1;
 			if (this.isListening("DragEnd")) {
 				this.onDragEnd(this._createMouseEvent("DragEnd", e));
 			}
@@ -1583,9 +1576,9 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		_handleDragEnter: function (e) {
 			if (!e) { e = window.event; }
 			var prevent = true;
+			this._dropTarget = true;
 			if (this.isListening("DragEnter")) {
 				prevent = false;
-				this._dropTarget = true;
 				this.onDragEnter(this._createMouseEvent("DragEnter", e));
 			}
 			/*
@@ -1618,15 +1611,15 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		},
 		_handleDragLeave: function (e) {
 			if (!e) { e = window.event; }
+			this._dropTarget = false;
 			if (this.isListening("DragLeave")) {
-				this._dropTarget = false;
 				this.onDragLeave(this._createMouseEvent("DragLeave", e));
 			}
 		},
 		_handleDrop: function (e) {
 			if (!e) { e = window.event; }
+			this._dropTarget = false;
 			if (this.isListening("Drop")) {
-				this._dropTarget = false;
 				this.onDrop(this._createMouseEvent("Drop", e));
 			}
 			/*
@@ -2002,6 +1995,17 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			}
 			var left = e.which ? e.button === 0 : e.button === 1;
 			if (left) {
+				/*
+				* Bug in Firefox.  For some reason, Firefox stops showing the caret
+				* when the user cancels a drag operation by pressing ESC.  The fix is
+				* to detect that the drag operation was cancelled,  toggle the
+				* contentEditable state and force the clientDiv to loose and receive
+				* focus if the it is focused.
+				*/
+				if (this._dragOffset === -2) {
+					this._fixCaret();
+					this._dragOffset = -1;
+				}
 				if (this._dragOffset !== -1) {
 					var selection = this._getSelection();
 					selection.extend(this._dragOffset);
@@ -2026,6 +2030,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				* mouse down and ungrab on mouse move when the button 1 is not set.
 				*/
 				if (isW3CEvents) { this._setGrab(null); }
+
+				/*
+				* Note that there cases when the user agent sets the DOM selection in mouse up.
+				* This happens for example after a cancelled drag operation in Firefox.
+				*/
+				e.preventDefault();
 			}
 		},
 		_handleMouseWheel: function (e) {
@@ -3626,6 +3636,18 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (this._autoScrollTimerID) { clearTimeout(this._autoScrollTimerID); }
 			this._autoScrollDir = undefined;
 			this._autoScrollTimerID = undefined;
+		},
+		_fixCaret: function() {
+			var clientDiv = this._clientDiv;
+			if (clientDiv) {
+				var hasFocus = this._hasFocus;
+				this._ignoreFocus = true;
+				if (hasFocus) { clientDiv.blur(); }
+				clientDiv.contentEditable = false;
+				clientDiv.contentEditable = true;
+				if (hasFocus) { clientDiv.focus(); }
+				this._ignoreFocus = false;
+			}
 		},
 		_getBaseText: function(start, end) {
 			var model = this._model;
