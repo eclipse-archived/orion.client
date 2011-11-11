@@ -36,6 +36,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
 	
 	SearchResultModel.prototype._parseLocationAndSearchStr = function(searchStr) {
+		this.locationAndSearchStr = searchStr;
 		var hasLocation = (searchStr.indexOf("+Location:") > -1);
 		this.searchLocation = "";
 		if(hasLocation){
@@ -674,8 +675,51 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	SearchResultExplorer.prototype.onchange = function(item) {
 	};
 	
+	SearchResultExplorer.prototype.caculateNextPage = function(currentStart, pageSize, totalNumber){
+		if((currentStart + pageSize) >= totalNumber){
+			return {start:currentStart};
+		}
+		return {start: currentStart+pageSize};
+	};
+	
+	SearchResultExplorer.prototype.caculatePrevPage = function(currentStart, pageSize, totalNumber){
+		var start = currentStart - pageSize;
+		if(start < 0){
+			start = 0;
+		}
+		return {start: start};
+	};
+	
 	SearchResultExplorer.prototype.initCommands = function(){	
 		var that = this;
+		var previousPage = new mCommands.Command({
+			name : "Previous Page",
+			tooltip: "Show previous page of search result",
+			imageClass : "core-sprite-leftarrow",
+			id : "orion.search.prevPage",
+			hrefCallback : function(item) {
+				var prevPage = that.caculatePrevPage(that.model.start, that.model.rows, that.totalNumber);
+				return require.toUrl("search/search.html") + "#" + "?rows=" + that.model.rows + "&start=" + prevPage.start + "&q=" + that.model.locationAndSearchStr;
+			},
+			visibleWhen : function(item) {
+				var prevPage = that.caculatePrevPage(that.model.start, that.model.rows, that.totalNumber);
+				return (prevPage.start !== that.model.start);
+			}
+		});
+		var nextPage = new mCommands.Command({
+			name : "Next Page",
+			tooltip: "Show next page of search result",
+			imageClass : "core-sprite-rightarrow",
+			id : "orion.search.nextPage",
+			hrefCallback : function(item) {
+				var nextPage = that.caculateNextPage(that.model.start, that.model.rows, that.totalNumber);
+				return require.toUrl("search/search.html") + "#" + "?rows=" + that.model.rows + "&start=" + nextPage.start + "&q=" + that.model.locationAndSearchStr;
+			},
+			visibleWhen : function(item) {
+				var nextPage = that.caculateNextPage(that.model.start, that.model.rows, that.totalNumber);
+				return (nextPage.start !== that.model.start);
+			}
+		});
 		var nextResultCommand = new mCommands.Command({
 			name : "Next result",
 			imageClass : "core-sprite-move_down",
@@ -708,16 +752,20 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			callback : function() {
 				that.collapseAll();
 		}});
+		this._commandService.addCommand(previousPage, "dom");
+		this._commandService.addCommand(nextPage, "dom");
 		this._commandService.addCommand(nextResultCommand, "dom");
 		this._commandService.addCommand(prevResultCommand, "dom");
 		this._commandService.addCommand(expandAllCommand, "dom");
 		this._commandService.addCommand(collapseAllCommand, "dom");
 			
 		// Register command contributions
-		this._commandService.registerCommandContribution("orion.search.nextResult", 1, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.prevResult", 2, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.expandAll", 3, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.collapseAll", 4, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.prevPage", 1, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.nextPage", 2, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.nextResult", 3, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.prevResult", 4, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.expandAll", 5, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.collapseAll", 6, "pageNavigationActions");
 		dojo.empty("pageNavigationActions");
 		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "image");
 		

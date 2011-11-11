@@ -76,7 +76,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 				var wildcard= (/\*$/.test(nameQuery) ? "" : "*");
 				return "?rows=100&start=0&q=" + "Name:" + this._luceneEscape(nameQuery, true) + wildcard;
 			}
-			return "?rows=100&start=0&q=" + this._luceneEscape(query, true) + (this.location ? "+Location:" + this.location + "*" : "");
+			return "?rows=40&start=0&q=" + this._luceneEscape(query, true) + (this.location ? "+Location:" + this.location + "*" : "");
 		},
 		/**
 		 * Escapes all characters in the string that require escaping in Lucene queries.
