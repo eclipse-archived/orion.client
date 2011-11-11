@@ -32,7 +32,10 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			node.detachEvent("on" + type, handler);
 		}
 	}
-	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent) ? document.documentMode : undefined;
+	var isIE;
+	if (document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent)) {
+		isIE = document.documentMode ? document.documentMode : 7;
+	}
 	var isFirefox = parseFloat(navigator.userAgent.split("Firefox/")[1] || navigator.userAgent.split("Minefield/")[1]) || undefined;
 	var isOpera = navigator.userAgent.indexOf("Opera") !== -1;
 	var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
