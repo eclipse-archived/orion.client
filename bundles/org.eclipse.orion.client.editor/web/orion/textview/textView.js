@@ -1898,7 +1898,17 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (this._dropTarget) {
 				return;
 			}
-			this._setLinksVisible(!this._isMouseDown && (isMac ? e.metaKey : e.ctrlKey));
+			/*
+			* Bug in IE9. IE sends one mouse event when the user changes the text by
+			* pasting or undo.  These operations usually happen with the Ctrl key
+			* down which causes the view to enter link mode.  Link mode does not end
+			* because there are no further events.  The fix is to only enter link
+			* mode when the coordinates of the mouse move event have changed.
+			*/
+			var changed = this._linksVisible || this._lastMouseMoveX !== e.clientX || this._lastMouseMoveY !== e.clientY;
+			this._lastMouseMoveX = e.clientX;
+			this._lastMouseMoveY = e.clientY;
+			this._setLinksVisible(changed && !this._isMouseDown && (isMac ? e.metaKey : e.ctrlKey));
 			if (!this._isMouseDown || this._dragOffset !== -1) {
 				return;
 			}
