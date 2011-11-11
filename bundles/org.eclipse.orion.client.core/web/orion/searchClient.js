@@ -167,7 +167,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 				var b = dojo.create("b", null, div, "last");
 				dojo.place(document.createTextNode(token), b, "only");
 			} else {
-				var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query);
+				var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query, jsonData.response.numFound);
 				explorer.startUp();
 			}
 		},
