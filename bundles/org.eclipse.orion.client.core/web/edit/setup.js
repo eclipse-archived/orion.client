@@ -61,9 +61,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
 			var providersLoaded = false;
 			contentAssist.addEventListener("show", function(event) {
-				function addProvider(name, pattern, service) {
-					contentAssist.addProvider(service, name, pattern);
-				}
 				if (!providersLoaded) {
 					// Load contributed content assist providers
 					var fileName = editor.getTitle();
@@ -73,7 +70,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						var name = serviceReference.getProperty("name"),
 						    pattern = serviceReference.getProperty("pattern");
 						if (pattern && new RegExp(pattern).test(fileName)) {
-							serviceRegistry.getService(serviceReference).addProvider(name, pattern, service);
+							contentAssist.addProvider(serviceRegistry.getService(serviceReference), name, pattern);
 						}
 					}
 					providersLoaded = true;
