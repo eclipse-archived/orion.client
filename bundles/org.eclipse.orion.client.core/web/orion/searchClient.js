@@ -76,7 +76,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 				var wildcard= (/\*$/.test(nameQuery) ? "" : "*");
 				return "?rows=100&start=0&q=" + "Name:" + this._luceneEscape(nameQuery, true) + wildcard;
 			}
-			return "?rows=100&start=0&q=" + this._luceneEscape(query, true) + (this.location ? "+Location:" + this.location + "*" : "");
+			return "?rows=40&start=0&q=" + this._luceneEscape(query, true) + (this.location ? "+Location:" + this.location + "*" : "");
 		},
 		/**
 		 * Escapes all characters in the string that require escaping in Lucene queries.
@@ -167,7 +167,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 				var b = dojo.create("b", null, div, "last");
 				dojo.place(document.createTextNode(token), b, "only");
 			} else {
-				var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query);
+				var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query, jsonData.response.numFound);
 				explorer.startUp();
 			}
 		},
