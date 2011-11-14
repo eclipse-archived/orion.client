@@ -58,7 +58,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		 * Open a parameter collector and return the dom node where parameter 
 		 * information should be inserted
 		 *
-		 * @param {DOMElement} parent the node containing the triggering command
+		 * @param {DOMElement} commandNode the node containing the triggering command
+		 * @param {String} id the id of parent node containing the triggering command
 		 * @returns {DOMElement} commandNode the node representing the command
 		 */
 		open: function(commandNode, id, fillFunction) {
@@ -532,6 +533,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				dojo.place(bottomHTMLFragment, footer, "only");
 			}
 		}
+		
+		dojo.addOnLoad(function() {
+			commandService.processURL(window.location.href);
+		});
+		//every time the user manually changes the hash, we need to load the workspace with that name
+		dojo.subscribe("/dojo/hashchange", commandService, function() {
+			commandService.processURL(window.location.href);
+		});
 	}
 	
 	//return the module exports
