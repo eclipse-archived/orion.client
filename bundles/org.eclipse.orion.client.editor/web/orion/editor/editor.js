@@ -12,7 +12,7 @@
  /*global define window */
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
-define(['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKeyBinding, mEventTarget) {
+define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip'], function(mKeyBinding, mEventTarget, mTooltip) {
 
 	/**
 	 * @name orion.editor.util
@@ -282,6 +282,33 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKe
 			this.setDirty(!this._undoStack.isClean());
 		},
 		
+		/** @private */
+		_getTooltipInfo: function(x, y) {
+			var textView = this._textView;			
+			var annotationModel = this.getAnnotationModel();
+			if (!annotationModel) { return null; }
+			var annotationStyler = this._annotationStyler;
+			if (!annotationStyler) { return null; }
+			var offset = textView.getOffsetAtLocation(x, y);
+			if (offset === -1) { return null; }
+			var iter = annotationModel.getAnnotations(offset, offset + 1);
+			var annotation, annotations = [];
+			while (iter.hasNext()) {
+				annotation = iter.next();
+				if (!annotationStyler.isAnnotationTypeVisible(annotation.type)) { continue; }
+				annotations.push(annotation);
+			}
+			if (annotations.length === 0) { return null; }
+			var pt = textView.convert({x: x, y: y}, "document", "page");
+			var info = {
+				contents: annotations,
+				anchor: "left",
+				x: pt.x + 10,
+				y: pt.y + 20
+			};
+			return info;
+		}, 
+		
 		/**
 		 * 
 		 * @returns {orion.textview.AnnotationModel}
@@ -385,6 +412,8 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKe
 			}
 			if (this._annotationFactory) {
 				this._annotationStyler = this._annotationFactory.createAnnotationStyler(this.getTextView(), this._annotationModel);
+				this._annotationStyler.addAnnotationType(this.errorType);
+				this._annotationStyler.addAnnotationType(this.warningType);
 			}
 		},
 		
@@ -409,16 +438,34 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKe
 				onModelChanged: function(e) {
 					self.checkDirty();
 				},
+				onMouseOver: function(e) {
+					self._listener.onMouseMove(e);
+				},
+				onMouseMove: function(e) {
+					var tooltip = mTooltip.Tooltip.getTooltip(textView);
+					if (!tooltip) { return; }
+					tooltip.setTarget({
+						x: e.x,
+						y: e.y,
+						getTooltipInfo: function() {
+							return self._getTooltipInfo(this.x, this.y);
+						}
+					});
+				},
+				onMouseOut: function(lineIndex, e) {
+					var tooltip = mTooltip.Tooltip.getTooltip(textView);
+					if (!tooltip) { return; }
+					tooltip.setTarget(null);
+				},
 				onSelection: function(e) {
 					self._updateCursorStatus();
 				}
 			};
-			
-			// Listener for dirty state
 			textView.addEventListener("ModelChanged", this._listener.onModelChanged);
-			
-			// Selection changed listener
 			textView.addEventListener("Selection", this._listener.onSelection);
+			textView.addEventListener("MouseOver", this._listener.onMouseOver);
+			textView.addEventListener("MouseOut", this._listener.onMouseOut);
+			textView.addEventListener("MouseMove", this._listener.onMouseMove);
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
