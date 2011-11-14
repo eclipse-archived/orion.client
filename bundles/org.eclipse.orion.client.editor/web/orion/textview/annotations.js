@@ -384,6 +384,7 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 	function AnnotationStyler (view, annotationModel) {
 		this._view = view;
 		this._annotationModel = annotationModel;
+		this._types = [];
 		var self = this;
 		this._listener = {
 			onDestroy: function(e) {
@@ -401,6 +402,21 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 		annotationModel.addEventListener("Changed", this._listener.onChanged);
 	}
 	AnnotationStyler.prototype = /** @lends orion.textview.AnnotationStyler.prototype */ {
+		/**
+		 * Adds an annotation type to the ruler.
+		 * <p>
+		 * Only annotations of the specified types will be shown by
+		 * this ruler.
+		 * </p>
+		 *
+		 * @param type {Object} the annotation type to be shown
+		 * 
+		 * @see #removeAnnotationType
+		 * @see #isAnnotationTypeVisible
+		 */
+		addAnnotationType: function(type) {
+			this._types.push(type);
+		},
 		destroy: function() {
 			var view = this._view;
 			if (view) {
@@ -412,6 +428,39 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 			if (annotationModel) {
 				annotationModel.removeEventListener("Changed", this._listener.onChanged);
 				annotationModel = null;
+			}
+		},
+		/**
+		 * Returns whether the ruler shows annotations of the specified type.
+		 *
+		 * @param {Object} type the annotation type 
+		 * @returns {Boolean} whether the specified annotation type is shown
+		 * 
+		 * @see #addAnnotationType
+		 * @see #removeAnnotationType
+		 */
+		isAnnotationTypeVisible: function(type) {
+			for (var i = 0; i < this._types.length; i++) {
+				if (this._types[i] === type) {
+					return true;
+				}
+			}
+			return false;
+		},
+		/**
+		 * Removes an annotation type from the ruler.
+		 *
+		 * @param {Object} type the annotation type to be removed
+		 * 
+		 * @see #addAnnotationType
+		 * @see #isAnnotationTypeVisible
+		 */
+		removeAnnotationType: function(type) {
+			for (var i = 0; i < this._types.length; i++) {
+				if (this._types[i] === type) {
+					this._types.splice(i, 1);
+					break;
+				}
 			}
 		},
 		_mergeStyle: function(result, style) {
@@ -511,6 +560,7 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 			var annotations = annotationModel.getAnnotations(start, end);
 			while (annotations.hasNext()) {
 				var annotation = annotations.next();
+				if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
 				if (annotation.rangeStyle) {
 					var annotationStart = annotation.start;
 					var annotationEnd = annotation.end;
