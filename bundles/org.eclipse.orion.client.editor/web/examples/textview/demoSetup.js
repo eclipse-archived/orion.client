@@ -35,6 +35,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 	};
 	var view = null;
 	var styler = null;
+	var annotationStyler = null;
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	
 	function getFile(file) {
@@ -182,7 +183,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 							title: "Warning: " + model.getLine(lineIndex),
 							style: {styleClass: "annotation warning"},
 							html: "<div class='annotationHTML warning'></div>",
-							overviewStyle: {styleClass: "annotationOverview warning"}
+							overviewStyle: {styleClass: "annotationOverview warning"},
+							rangeStyle: {styleClass: "annotationRange warning"}
 						};
 					} else if (e.altKey) {
 						annotation = {
@@ -190,7 +192,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 							title: "Error: " + model.getLine(lineIndex),
 							style: {styleClass: "annotation error"},
 							html: "<div class='annotationHTML error'></div>",
-							overviewStyle: {styleClass: "annotationOverview error"}
+							overviewStyle: {styleClass: "annotationOverview error"},
+							rangeStyle: {styleClass: "annotationRange error"}
 						};
 					} else if (e.shiftKey) {
 						annotation = {
@@ -198,7 +201,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 							title: "Bookmark: " + model.getLine(lineIndex),
 							style: {styleClass: "annotation bookmark"},
 							html: "<div class='annotationHTML bookmark'></div>",
-							overviewStyle: {styleClass: "annotationOverview bookmark"}
+							overviewStyle: {styleClass: "annotationOverview bookmark"},
+							rangeStyle: {styleClass: "annotationRange bookmark"}
 						};
 					} else {
 						annotation = {
@@ -206,7 +210,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 							title: "Todo: " + model.getLine(lineIndex),
 							style: {styleClass: "annotation task"},
 							html: "<div class='annotationHTML task'></div>",
-							overviewStyle: {styleClass: "annotationOverview task"}
+							overviewStyle: {styleClass: "annotationOverview task"},
+							rangeStyle: {styleClass: "annotationRange task"}
 						};
 					}
 				} else {
@@ -215,7 +220,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 						title: "Breakpoint: " + model.getLine(lineIndex),
 						style: {styleClass: "annotation breakpoint"},
 						html: "<div class='annotationHTML breakpoint'></div>",
-						overviewStyle: {styleClass: "annotationOverview breakpoint"}
+						overviewStyle: {styleClass: "annotationOverview breakpoint"},
+						rangeStyle: {styleClass: "annotationRange breakpoint"}
 					};
 				}
 				annotation.start = start;
@@ -247,6 +253,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 		if (styler) {
 			styler.destroy();
 			styler = null;
+			annotationStyler.destroy();
+			annotationStyler = null;
 		}
 		switch (lang) {
 			case "js":
@@ -258,6 +266,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 				styler = new mTextMateStyler.TextMateStyler(view, mHtmlGrammar.HtmlGrammar.grammar);
 				break;
 		}
+		annotationStyler = new mAnnotationModel.AnnotationStyler(view, view.annotationModel);
+		annotationStyler.addAnnotationType("orion.annotation.task");
 		view.setText(text);
 		return view;
 	}
