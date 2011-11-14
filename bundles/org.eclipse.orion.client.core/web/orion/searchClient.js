@@ -57,8 +57,21 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 			this.registry.getService("orion.core.favorite").addFavoriteSearch(favoriteName, query);
 		},
 		setLocationByMetaData: function(meta){
-			if(meta &&  meta.Location && meta.Parents){
+			var locationName = "root";
+			if(meta &&  meta.Directory && meta.Location && meta.Parents){
 				this.setLocationByURL(meta.Location);
+				locationName = meta.Name;
+			} 
+			var searchInputDom = dojo.byId("search");
+			if(searchInputDom && searchInputDom.placeholder){
+				if(locationName.length > 13){
+					searchInputDom.placeholder = "Search " + locationName.substring(0, 10) + "...";
+				} else {
+					searchInputDom.placeholder = "Search " + locationName;
+				}
+			}
+			if(searchInputDom && searchInputDom.title){
+				searchInputDom.title = "Type a keyword or wild card to search in " + locationName;
 			}
 		},
 		setLocationByURL: function(locationURL){
