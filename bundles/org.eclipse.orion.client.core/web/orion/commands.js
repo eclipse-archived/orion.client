@@ -42,6 +42,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		this._namedGroups = {};
 		this._activeBindings = {};
 		this._activeModalCommandNode = null;
+		this._urlBindings = {};
 		this._init(options);
 	}
 	CommandService.prototype = /** @lends orion.commands.CommandService.prototype */ {
@@ -109,16 +110,41 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							return;
 						} else if (command.callback) {
 							stop(event);
-							window.setTimeout(function() {
-								command.callback.call(activeBinding.handler || window, activeBinding.items, id, null, activeBinding.userData);
-							}, 0);
+							var commandNode = dojo.byId(activeBinding.callbackParameters[2]);
+							window.setTimeout(dojo.hitch(this, function() {
+								if (command.parameters && this._parameterCollector) {
+									// should the handler be bound to this, or something else?
+									this._collectParameters(command, activeBinding.handler || window, commandNode.parentNode, commandNode, activeBinding.callbackParameters);
+								} else {
+									command.callback.apply(activeBinding.handler || window, activeBinding.callbackParameters);
+								}	
+							}), 0);
 							return;
 						}
 					}
 				}
 			}
 		},
-
+		processURL: function(url) {
+			for (var id in this._urlBindings) {
+				if (this._urlBindings[id] && this._urlBindings[id].urlBinding && this._urlBindings[id].command) {
+					var match = this._urlBindings[id].urlBinding.match(url);
+					if (match) {
+						var urlBinding = this._urlBindings[id];
+						var command = urlBinding.command;
+						command.parameters[match.parameterName].value = match.parameterValue;
+						// ignore hrefCallback for the time being, on the assumption that we would never take you to a link without confirmation
+						var commandNode = dojo.byId(urlBinding.callbackParameters[2]);
+						if (command.callback) {
+							window.setTimeout(dojo.hitch(this, function() {
+								this._collectParameters(command, urlBinding.handler || window, commandNode.parentNode, commandNode, urlBinding.callbackParameters);
+							}), 0);
+							return;
+						}
+					}
+				}
+			}
+		},
 		
 		/**
 		 * Return the selection service that is being used when commands should apply against a selection.
@@ -260,22 +286,33 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 *  group2Id, which is itself a child of group1Id.  Optional.
 		 * @param {orion.commands.CommandKeyBinding} keyBinding a keyBinding for the command.  Optional.
 		 * @param {boolean} keyOnly if true, then the command is never rendered, but the keybinding is hooked.
+		 * @param {orion.commands.URLBinding} urlBinding a url binding for the command.  Optional.
 		 */
-		registerCommandContribution: function(commandId, position, scopeId, parentPath, keyBinding, keyOnly) {
+		registerCommandContribution: function(commandId, position, scopeId, parentPath, keyBinding, keyOnly, urlBinding) {
 			// first ensure the parentPath is represented
 			var parentTable = this._createEntryForPath(parentPath);
 			
 			// store the contribution
 			parentTable[commandId] = {scopeId: scopeId, position: position};
 			
+			var command;
 			// add to the bindings table now
 			if (keyBinding) {
-				var command = this._domScope[commandId] || this._globalScope[commandId];
+				// look for global or dom scope, since we wouldn't be able to ascertain an item scope for a key binding
+				 command = this._domScope[commandId] || this._globalScope[commandId];
 				if (command) {
 					this._activeBindings[commandId] = {command: command, keyBinding: keyBinding, keyOnly: keyOnly};
 				}
 			}
 			
+			// add to the url key table
+			if (urlBinding) {
+				// look for global or dom scope, since we wouldn't be able to ascertain an item scope for a key binding
+				command = this._domScope[commandId] || this._globalScope[commandId];
+				if (command) {
+					this._urlBindings[commandId] = {command: command, urlBinding: urlBinding};
+				}
+			}
 			// get rid of sort cache because we have a new contribution
 			parentTable.sortedCommands = null;
 		},
@@ -460,6 +497,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					// processing atomic commands
 					var command = commandList[positionOrder[i].id];
 					var render = command ? true : false;
+					var keyBinding;
+					var urlBinding;
 					if (command) {
 						if (scope === "dom") {
 							if (renderType=== "image") {
@@ -472,14 +511,22 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						} 
 						// ensure that keybindings are bound to the current handler, items, and user data
 						if (this._activeBindings[command.id] && this._activeBindings[command.id].keyBinding) {
-							var binding = this._activeBindings[command.id];
-							binding.items = items;
-							binding.userData = userData;
-							binding.handler = handler;
+							keyBinding = this._activeBindings[command.id];
+							keyBinding.items = items;
+							keyBinding.userData = userData;
+							keyBinding.handler = handler;
 							// if the binding is keyOnly, don't render the command.
-							if (binding.keyOnly) {
+							if (keyBinding.keyOnly) {
 								render = false;
 							}
+						}
+						
+						// same for url bindings
+						if (this._urlBindings[command.id] && this._urlBindings[command.id].urlBinding) {
+							urlBinding = this._urlBindings[command.id];
+							urlBinding.items = items;
+							urlBinding.userData = userData;
+							urlBinding.handler = handler;
 						}
 						if (render && command.visibleWhen) {
 							render = command.visibleWhen(items);
@@ -526,7 +573,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						} else {
 							if (renderType === "image") {
 								id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								command._addImage(parent, id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, this);
+								var callbackParameters = command._addImage(parent, id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, this);
+								if (keyBinding) {
+									keyBinding.callbackParameters = callbackParameters;
+								}
+								if (urlBinding) {
+									urlBinding.callbackParameters = callbackParameters;
+								}
 							} else if (renderType === "menu") {
 								command._addMenuItem(parent, items, handler, userData, cssClass);
 							}
@@ -620,7 +673,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				image.name = name;
 				image.id = name;
 			}
+			var callbackParameters;
 			if (this.hrefCallback) {
+				callbackParameters = [items, this.id, userData];
 				var href = this.hrefCallback.call(handler, items, this.id, userData);
 				if(href.then){
 					href.then(function(l){
@@ -631,6 +686,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				}
 			} else {
 				if (image) {
+					callbackParameters = [items, this.id, image.id, userData, this.parameters];
 					dojo.connect(image, "onclick", this, function() {
 						// collect parameters in advance if specified
 						if (this.parameters && commandService._parameterCollector) {
@@ -641,6 +697,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						}
 					});
 				} else {
+					callbackParameters = [items, this.id, link.id, userData, this.parameters];
 					dojo.connect(link, "onclick", this, function() {
 						// collect parameters in advance if specified
 						if (this.parameters && commandService._parameterCollector) {
@@ -698,38 +755,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				dojo.addClass(link, cssClass);
 			}
 			dojo.place(link, parent, "last");
-		},
-		
-		_asLink: function(items, handler, cssClass) {
-			handler =  handler || this;
-			var anchor = window.document.createElement('a');
-			if (this.tooltip) {
-				anchor.title = this.tooltip;
-			}
-			dojo.place(window.document.createTextNode(this.name), anchor, "only");
-			anchor.href="";
-			anchor.id = this.id+"link";
-			if (this.callback) {
-				dojo.connect(anchor, "onclick", this, function() {
-					this.callback.call(handler, items, this.id, anchor.id);
-				});
-			} else if (this.hrefCallback) {
-				var href = this.hrefCallback.call(handler, items, this.id);
-				if (href) {
-					if (href.then){
-						href.then(function(link){
-							anchor.href = link;
-						});
-					}else{
-						anchor.href = href;
-					}
-				}
-			}
-			dojo.addClass(anchor, 'commandLink');
-			if (cssClass) {
-				dojo.addClass(anchor, cssClass);
-			} 
-			return anchor;
+			return callbackParameters;
 		},
 		_addMenuItem: function(parent, items, handler, userData, cssClass) {
 			var menuitem = new CommandMenuItem({
@@ -906,11 +932,56 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 	};
 	CommandKeyBinding.prototype.constructor = CommandKeyBinding;
 
+	/**
+	 * A URL binding defines how a URL token is bound to a command, and what parameter
+	 * is provided
+	 * @param {String} token the token in a URL query parameter that identifies the command
+	 * @param {String} parameterName the name of the parameter being specified in the value of the query 
+	 * @param {Boolean} forceConfirm a boolean indicating whether the user must confirm execution of the command
+	 * 
+	 * @name orion.commands.URLBinding
+	 * 
+	 */
+	function URLBinding (token, parameterName, forceConfirm) {
+		this.token = token;
+		this.parameterName = parameterName;
+		this.forceConfirm = forceConfirm;
+	}
+	URLBinding.prototype = /** @lends orion.commands.URLBinding.prototype */ {
+		/**
+		 * Returns whether this URL binding matches the given URL
+		 * 
+		 * @param url the URL.
+		 * @returns {Boolean} whether this URL binding matches
+		 */
+		match: function (url) {
+			//ensure this is only the hash portion
+			var hashSegments = url.split('#');
+			var postHash = hashSegments[hashSegments.length - 1];
+			var postQuerySegments = postHash.split('?');
+			if (postQuerySegments.length > 1) {
+				// Split on "&"
+				var segments = postQuerySegments[1].split('&');
+				for (var i=0; i<segments.length; i++) {
+					var subsegments = segments[i].split('=');
+					if (subsegments[0] === this.token) {
+						if (subsegments.length > 1) {
+							this.parameterValue = subsegments[1];
+						}
+						return this;
+					}
+				}  
+			}
+			return null;
+		}
+	};
+	URLBinding.prototype.constructor = URLBinding;
 	//return the module exports
 	return {
 		CommandService: CommandService,
 		CommandKeyBinding: CommandKeyBinding,
 		Command: Command,
-		CommandMenuItem: CommandMenuItem
+		CommandMenuItem: CommandMenuItem,
+		URLBinding: URLBinding
 	};
 });
