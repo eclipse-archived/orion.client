@@ -32,13 +32,17 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			node.detachEvent("on" + type, handler);
 		}
 	}
-	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent) ? document.documentMode : undefined;
-	var isFirefox = parseFloat(navigator.userAgent.split("Firefox/")[1] || navigator.userAgent.split("Minefield/")[1]) || undefined;
-	var isOpera = navigator.userAgent.indexOf("Opera") !== -1;
-	var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
-	var isSafari = navigator.userAgent.indexOf("Safari") !== -1;
-	var isWebkit = navigator.userAgent.indexOf("WebKit") !== -1;
-	var isPad = navigator.userAgent.indexOf("iPad") !== -1;
+	var userAgent = navigator.userAgent;
+	var isIE;
+	if (document.selection && window.ActiveXObject && /MSIE/.test(userAgent)) {
+		isIE = document.documentMode ? document.documentMode : 7;
+	}
+	var isFirefox = parseFloat(userAgent.split("Firefox/")[1] || userAgent.split("Minefield/")[1]) || undefined;
+	var isOpera = userAgent.indexOf("Opera") !== -1;
+	var isChrome = userAgent.indexOf("Chrome") !== -1;
+	var isSafari = userAgent.indexOf("Safari") !== -1 && !isChrome;
+	var isWebkit = userAgent.indexOf("WebKit") !== -1;
+	var isPad = userAgent.indexOf("iPad") !== -1;
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 	var isLinux = navigator.platform.indexOf("Linux") !== -1;
@@ -128,6 +132,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 	 * @param {Boolean} [options.readonly=false] whether or not the view is read-only.
 	 * @param {Boolean} [options.fullSelection=true] whether or not the view is in full selection mode.
 	 * @param {Boolean} [options.sync=false] whether or not the view creation should be synchronous (if possible).
+	 * @param {Boolean} [options.expandTab=false] whether or not the tab key inserts white spaces
 	 * @param {String|String[]} [options.stylesheet] one or more stylesheet URIs for the view.
 	 * @param {Number} [options.tabSize] The number of spaces in a tab.
 	 * 
@@ -563,6 +568,39 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var x = this._getOffsetToX(offset) + scroll.x - viewRect.left - viewPad.left;
 			var y = this.getLinePixel(lineIndex);
 			return {x: x, y: y};
+		},
+		/**
+		 * Returns the specified view options.
+		 * <p>
+		 * The return value depends on the number of parameters. The
+		 * actual option value is returned if only one option is requested,
+		 * otherwise a property object is returned. A property object with
+		 * all the view options is returned if there are no parameters.
+		 * </p>
+		 *
+		 * @param {String} [options] The options to return.
+		 * @return {Object} An object with the requested options or the actual value of the option when getting only one option
+		 */
+		getOptions: function() {
+			var options;
+			if (arguments.length === 0) {
+				options = this._defaultOptions();
+			} else if (arguments.length === 1 && typeof arguments[0] === "string") {
+				return this["_" + arguments[0]];
+			} else {
+				options = {};
+				for (var index in arguments) {
+					if (arguments.hasOwnProperty(index)) {
+						options[arguments[index]] = undefined;
+					}
+				}
+			}
+			for (var option in options) {
+				if (options.hasOwnProperty(option)) {
+					options[option] = this["_" + option];
+				}
+			}
+			return options;
 		},
 		/**
 		 * Returns the text model of the text view.
@@ -1679,7 +1717,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					this._setLinksVisible(false);
 			}
 			if (e.keyCode === 229) {
-				if (this.readonly) {
+				if (this._readonly) {
 					if (e.preventDefault) { e.preventDefault(); }
 					return false;
 				}
@@ -2433,12 +2471,22 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				var model = this._model;
 				var caret = selection.getCaret();
 				var lineIndex = model.getLineAtOffset(caret);
-				if (caret === model.getLineStart(lineIndex)) {
+				var lineStart = model.getLineStart(lineIndex);
+				if (caret === lineStart) {
 					if (lineIndex > 0) {
 						selection.extend(model.getLineEnd(lineIndex - 1));
 					}
 				} else {
-					selection.extend(this._getOffset(caret, args.unit, -1));
+					var removeTab = false;
+					if (this._expandTab && args.unit === "character" && (caret - lineStart) % this._tabSize === 0) {
+						var lineText = model.getText(lineStart, caret);
+						removeTab = !/[^ ]/.test(lineText); // Only spaces between line start and caret.
+					}
+					if (removeTab) {
+						selection.extend(caret - this._tabSize);
+					} else {
+						selection.extend(this._getOffset(caret, args.unit, -1));
+					}
 				}
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
@@ -2689,7 +2737,16 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			return true;
 		},
 		_doTab: function (args) {
-			this._doContent("\t"); 
+			var text = "\t";
+			if (this._expandTab) {
+				var model = this._model;
+				var caret = this._getSelection().getCaret();
+				var lineIndex = model.getLineAtOffset(caret);
+				var lineStart = model.getLineStart(lineIndex);
+				var spaces = this._tabSize - ((caret - lineStart) % this._tabSize);
+				text = (new Array(spaces + 1)).join(" ");
+			}
+			this._doContent(text);
 			return true;
 		},
 		
@@ -3271,7 +3328,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			}
 			parent.appendChild(frame);
 			/* create synchronously if possible */
-			if (this._syncLoad) {
+			if (this._sync) {
 				this._handleLoad();
 			}
 		},
@@ -3291,7 +3348,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (this._stylesheet) {
 				var stylesheet = typeof(this._stylesheet) === "string" ? [this._stylesheet] : this._stylesheet;
 				for (var i = 0; i < stylesheet.length; i++) {
-					if (this._syncLoad) {
+					if (this._sync) {
 						try {
 							var objXml = new XMLHttpRequest();
 							if (objXml.overrideMimeType) {
@@ -3339,12 +3396,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			* Bug in Firefox.  Firefox does not send window load event if document.write
 			* is done inside of the frame load event handler.
 			*/
-			if (isFirefox && !this._syncLoad) {
+			if (isFirefox && !this._sync) {
 				setTimeout(write, 0);
 			} else {
 				write();
 			}
-			if (this._syncLoad) {
+			if (this._sync) {
 				this._createContent();
 			}
 		},
@@ -3359,7 +3416,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			* contents until the document readyState changes to complete.
 			*/
 			var self = this;
-			if (!this._syncLoad && frameDocument.readyState !== "complete") {
+			if (!this._sync && frameDocument.readyState !== "complete") {
 				setTimeout(function() {
 					self._createContent();
 				}, 10);
@@ -3540,12 +3597,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (isIE) {
 				body.style.lineHeight = this._lineHeight + "px";
 			}
-			if (this._tabSize) {
+			if (this._tabSize !== 8) {
 				if (isOpera) {
 					clientDiv.style.OTabSize = this._tabSize+"";
 				} else if (isFirefox >= 4) {
 					clientDiv.style.MozTabSize = this._tabSize+"";
-				} else if (this._tabSize !== 8) {
+				} else {
 					this._customTabSize = this._tabSize;
 				}
 			}
@@ -3562,6 +3619,18 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				viewDiv.scrollTop = v;
 			}
 			this.onLoad({type: "Load"});
+		},
+		_defaultOptions: function() {
+			return {
+				parent: undefined,
+				model: undefined,
+				readonly: false,
+				fullSelection: true,
+				tabSize: 8,
+				expandTab: false,
+				stylesheet: [],
+				sync: false
+			};
 		},
 		_destroyFrame: function() {
 			var frame = this._frame;
@@ -4432,11 +4501,20 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				parent = window.document.getElementById(parent);
 			}
 			if (!parent) { throw "no parent"; }
-			this._parent = parent;
-			this._syncLoad = options.sync;
-			this._model = options.model ? options.model : new mTextModel.TextModel();
-			this.readonly = options.readonly === true;
-			this._fullSelection = options.fullSelection === undefined || options.fullSelection;
+			options.parent = parent;
+			options.model = options.model || new mTextModel.TextModel();
+			var defaultOptions = this._defaultOptions();
+			for (var option in defaultOptions) {
+				if (defaultOptions.hasOwnProperty(option)) {
+					var value;
+					if (options[option] !== undefined) {
+						value = options[option];
+					} else {
+						value = defaultOptions[option];
+					}
+					this["_" + option] = value;
+				}
+			}
 			/* 
 			* Bug in IE 8. For some reason, during scrolling IE does not reflow the elements
 			* that are used to compute the location for the selection divs. This causes the
@@ -4445,8 +4523,6 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (isIE < 9) {
 				this._fullSelection = false;
 			}
-			this._stylesheet = options.stylesheet;
-			this._tabSize = options.tabSize;
 			this._rulers = [];
 			this._selection = new Selection (0, 0, false);
 			this._linksVisible = false;
@@ -4489,7 +4565,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			this._createFrame();
 		},
 		_modifyContent: function(e, updateCaret) {
-			if (this.readonly && !e._code) {
+			if (this._readonly && !e._code) {
 				return;
 			}
 			e.type = "Verify";
