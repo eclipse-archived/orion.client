@@ -2080,10 +2080,15 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				if (isW3CEvents) { this._setGrab(null); }
 
 				/*
-				* Note that there cases when the user agent sets the DOM selection in mouse up.
-				* This happens for example after a cancelled drag operation in Firefox.
+				* Note that there cases when Firefox sets the DOM selection in mouse up.
+				* This happens for example after a cancelled drag operation.
+				*
+				* Note that on Chrome and IE, the caret stops blicking if mouse up is
+				* prevented.
 				*/
-				e.preventDefault();
+				if (isFirefox) {
+					e.preventDefault();
+				}
 			}
 		},
 		_handleMouseWheel: function (e) {
