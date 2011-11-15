@@ -964,7 +964,11 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 				ts = this.comments[commentStart].start;
 				if (ts > start) { ts += changeCount; }
 			} else {
-				ts = lineStart;
+				if (commentStart === commentCount && commentCount > 0 && charCount - changeCount === this.comments[commentCount - 1].end) {
+					ts = this.comments[commentCount - 1].start;
+				} else {
+					ts = lineStart;
+				}
 			}
 			var te;
 			if (commentEnd < commentCount) {
