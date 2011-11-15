@@ -114,7 +114,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							window.setTimeout(dojo.hitch(this, function() {
 								if (command.parameters && this._parameterCollector) {
 									// should the handler be bound to this, or something else?
-									this._collectParameters(command, activeBinding.handler || window, commandNode.parentNode, commandNode, activeBinding.callbackParameters);
+									this._collectParameters(command, activeBinding.handler || window, activeBinding.parentNode, commandNode, activeBinding.callbackParameters);
 								} else {
 									command.callback.apply(activeBinding.handler || window, activeBinding.callbackParameters);
 								}	
@@ -137,11 +137,27 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						var commandNode = dojo.byId(urlBinding.callbackParameters[2]);
 						if (command.callback) {
 							window.setTimeout(dojo.hitch(this, function() {
-								this._collectParameters(command, urlBinding.handler || window, commandNode.parentNode, commandNode, urlBinding.callbackParameters);
+								this._collectParameters(command, urlBinding.handler || window, urlBinding.parentNode, commandNode, urlBinding.callbackParameters);
 							}), 0);
 							return;
 						}
 					}
+				}
+			}
+		},
+		//TODO
+		// this is not fully implemented.  We are looking up commands in the urlBindings list.
+		// Right now we only have the contextual information for key bindings or URL bindings.  
+		// Address this in
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=363763
+		runCommand: function(commandId) {
+			var binding = this._urlBindings[commandId];
+			if (binding && binding.command) {
+				var commandNode = dojo.byId(binding.callbackParameters[2]);
+				if (binding.command.callback) {
+					window.setTimeout(dojo.hitch(this, function() {
+						this._collectParameters(binding.command, binding.handler || window, binding.parentNode, commandNode, binding.callbackParameters);
+					}), 0);
 				}
 			}
 		},
@@ -576,13 +592,25 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 								var callbackParameters = command._addImage(parent, id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, this);
 								if (keyBinding) {
 									keyBinding.callbackParameters = callbackParameters;
+									keyBinding.parentNode = parent;
 								}
 								if (urlBinding) {
 									urlBinding.callbackParameters = callbackParameters;
+									urlBinding.parentNode = parent;
 								}
 							} else if (renderType === "menu") {
 								command._addMenuItem(parent, items, handler, userData, cssClass);
 							}
+						}
+					} else if (command) {   // commands that aren't being rendered
+						// hack.  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=363763
+						if (keyBinding) {
+							keyBinding.callbackParameters = [items, command.id, null, userData, command.parameters];
+							keyBinding.parentNode = parent;
+						}
+						if (urlBinding) {
+							urlBinding.callbackParameters = [items, command.id, null, userData, command.parameters];
+							urlBinding.parentNode = parent;
 						}
 					}
 				}

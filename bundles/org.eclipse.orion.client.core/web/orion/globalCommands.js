@@ -104,6 +104,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				if (focusNode) {
 					window.setTimeout(function() {
 						focusNode.focus();
+						focusNode.select();
 					}, 0);
 				}
 			}
