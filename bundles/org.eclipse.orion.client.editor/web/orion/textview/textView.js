@@ -2080,10 +2080,15 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				if (isW3CEvents) { this._setGrab(null); }
 
 				/*
-				* Note that there cases when the user agent sets the DOM selection in mouse up.
-				* This happens for example after a cancelled drag operation in Firefox.
+				* Note that there cases when Firefox sets the DOM selection in mouse up.
+				* This happens for example after a cancelled drag operation.
+				*
+				* Note that on Chrome and IE, the caret stops blicking if mouse up is
+				* prevented.
 				*/
-				e.preventDefault();
+				if (isFirefox) {
+					e.preventDefault();
+				}
 			}
 		},
 		_handleMouseWheel: function (e) {
@@ -4719,7 +4724,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			/*
 			* Scrolling is done only by setting the scrollLeft and scrollTop fields in the
 			* view div. This causes an updatePage from the scroll event. In some browsers 
-			* this event is asynchromous and forcing update page to run synchronously
+			* this event is asynchronous and forcing update page to run synchronously
 			* leads to redraw problems. 
 			* On Chrome 11, the view redrawing at times when holding PageDown/PageUp key.
 			* On Firefox 4 for Linux, the view redraws the first page when holding 

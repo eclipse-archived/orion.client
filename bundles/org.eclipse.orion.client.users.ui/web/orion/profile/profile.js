@@ -67,13 +67,13 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 			this.usersService = this.registry.getService("orion.core.user");
 			
 			if(this.usersService !== null){
-				usersService.addEventListener("requiredPluginsChanged", function(pluginsList){
+				this.usersService.addEventListener("requiredPluginsChanged", function(pluginsList){
 					dojo.hitch(userProfile, userProfile.drawPlugins(pluginsList.plugins));
 				});
-				usersService.addEventListener("userInfoChanged", function(jsonData){
+				this.usersService.addEventListener("userInfoChanged", function(jsonData){
 					dojo.hitch(userProfile,	userProfile.populateData(jsonData));
 				});
-				usersService.addEventListener("userDeleted", function(jsonData){
+				this.usersService.addEventListener("userDeleted", function(jsonData){
 					window.location.replace("/");
 				});
 				dojo.hitch(userProfile, function(){this.addInputListener();})();
@@ -165,10 +165,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 					console.error("Could not deploy plugin " + pluginsList[i].Url);
 					continue;
 				}
-				dojo.hitch(this, function(div){plugin.then(function(pluginService){
-						pluginService.getDivContent().then(function(content) {
-							dojo.hitch(userProfile, userProfile.draw(content, div));
-						});
+				dojo.hitch(this, function(div){
+					plugin.getDivContent().then(function(content) {
+						dojo.hitch(userProfile, userProfile.draw(content, div));
 					});
 				})(pluginDiv);
 			}
