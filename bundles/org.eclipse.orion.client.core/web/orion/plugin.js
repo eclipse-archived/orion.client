@@ -138,7 +138,9 @@ eclipse.PluginProvider = function(metadata) {
 		} else if (window.opener !== null) {
 			_target = window.opener;
 		} else {
-			errback("No valid plugin target");
+			if (errback) {
+				errback("No valid plugin target");
+			}
 			return;
 		}
 		addEventListener("message", _handleRequest, false);
