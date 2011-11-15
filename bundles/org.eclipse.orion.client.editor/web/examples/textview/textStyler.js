@@ -176,12 +176,14 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 					case -1: return null;
 					case 47:	// SLASH -> comment
 						c = this._read();
-						if (c === 47) { // SLASH -> single line
-							while (true) {
-								c = this._read();
-								if ((c === -1) || (c === 10) || (c === 13)) {
-									this._unread(c);
-									return SINGLELINE_COMMENT;
+						if (!this.isCSS) {
+							if (c === 47) { // SLASH -> single line
+								while (true) {
+									c = this._read();
+									if ((c === -1) || (c === 10) || (c === 13)) {
+										this._unread(c);
+										return SINGLELINE_COMMENT;
+									}
 								}
 							}
 						}
@@ -382,13 +384,14 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 		this.foldingEnabled = true;
 		this.detectTasks = true;
 		this._scanner = new Scanner(keywords, this.whitespacesVisible);
-		//TODO this scanner is not the best/correct way to parse CSS
-		if (lang === "css") {
-			this._scanner.isCSS = true;
-		}
 		this._firstScanner = new FirstScanner();
 		this._commentScanner = new CommentScanner(this.whitespacesVisible);
 		this._whitespaceScanner = new WhitespaceScanner();
+		//TODO these scanners are not the best/correct way to parse CSS
+		if (lang === "css") {
+			this._scanner.isCSS = true;
+			this._firstScanner.isCSS = true;
+		}
 		this.view = view;
 		this.annotationModel = annotationModel;
 		this._currentBracket = undefined; 
