@@ -326,7 +326,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				// look for global or dom scope, since we wouldn't be able to ascertain an item scope for a key binding
 				command = this._domScope[commandId] || this._globalScope[commandId];
 				if (command) {
-					this._urlBindings[commandId] = {command: command, urlBinding: urlBinding};
+					this._urlBindings[commandId] = {command: command, urlBinding: urlBinding, bindingOnly: keyOnly};
 				}
 			}
 			// get rid of sort cache because we have a new contribution
@@ -513,8 +513,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					// processing atomic commands
 					var command = commandList[positionOrder[i].id];
 					var render = command ? true : false;
-					var keyBinding;
-					var urlBinding;
+					var keyBinding = null;
+					var urlBinding = null;
 					if (command) {
 						if (scope === "dom") {
 							if (renderType=== "image") {
@@ -525,8 +525,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 								render = false;
 							}
 						} 
+						// only check bindings that would otherwise render (ie, dom id matches parent, etc.)
+						var checkBinding = render;
 						// ensure that keybindings are bound to the current handler, items, and user data
-						if (this._activeBindings[command.id] && this._activeBindings[command.id].keyBinding) {
+						if (checkBinding && this._activeBindings[command.id] && this._activeBindings[command.id].keyBinding) {
 							keyBinding = this._activeBindings[command.id];
 							keyBinding.items = items;
 							keyBinding.userData = userData;
@@ -534,15 +536,23 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							// if the binding is keyOnly, don't render the command.
 							if (keyBinding.keyOnly) {
 								render = false;
+								// hack.  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=363763
+								keyBinding.callbackParameters = [items, command.id, null, userData, command.parameters];
+								keyBinding.parentNode = parent;
 							}
 						}
 						
 						// same for url bindings
-						if (this._urlBindings[command.id] && this._urlBindings[command.id].urlBinding) {
+						if (checkBinding && this._urlBindings[command.id] && this._urlBindings[command.id].urlBinding) {
 							urlBinding = this._urlBindings[command.id];
 							urlBinding.items = items;
 							urlBinding.userData = userData;
 							urlBinding.handler = handler;
+							if (urlBinding.bindingOnly) {
+								// hack.  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=363763
+								urlBinding.callbackParameters = [items, command.id, null, userData, command.parameters];
+								urlBinding.parentNode = parent;
+							}
 						}
 						if (render && command.visibleWhen) {
 							render = command.visibleWhen(items);
@@ -602,17 +612,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 								command._addMenuItem(parent, items, handler, userData, cssClass);
 							}
 						}
-					} else if (command) {   // commands that aren't being rendered
-						// hack.  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=363763
-						if (keyBinding) {
-							keyBinding.callbackParameters = [items, command.id, null, userData, command.parameters];
-							keyBinding.parentNode = parent;
-						}
-						if (urlBinding) {
-							urlBinding.callbackParameters = [items, command.id, null, userData, command.parameters];
-							urlBinding.parentNode = parent;
-						}
-					}
+					} 
 				}
 			}
 		},
