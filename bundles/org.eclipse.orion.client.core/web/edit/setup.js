@@ -335,9 +335,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	};
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
-		// Register commands that depend on external services, the registry, etc.
-		var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions");
-		commandGenerator.generateEditorCommands(editor);
 		
 		// Create keybindings for generic editing, no dependency on the service model
 		var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(commandService, undoStack, new mSearchAdaptor.OrionTextSearchAdaptor()));
@@ -351,6 +348,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		// TODO this should probably be something that happens more dynamically, when the editor changes input
 		var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
 		keyModeStack.push(codeBindings);
+		
+		// Register commands that depend on external services, the registry, etc.  Do this after
+		// the generic keybindings so that we can override some of them.
+		var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions");
+		commandGenerator.generateEditorCommands(editor);
+
 		
 		// give our external escape handler a shot at handling escape
 		keyModeStack.push(escHandler);
