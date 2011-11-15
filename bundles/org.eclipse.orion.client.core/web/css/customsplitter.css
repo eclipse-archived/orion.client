@@ -10,10 +10,10 @@
 
 .nihilo .dijitSplitterV .dijitSplitterThumb {
 	width: 8px;
-	left: 0px;
+	left: 0;
 	height: 28px;
 	cursor: pointer;
-	//background-color: #AAAAAA;
+	/*background-color: #AAAAAA;*/
 }
 
 /* handcrafted positions taken from sprites.  be careful. 

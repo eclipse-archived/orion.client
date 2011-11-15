@@ -145,8 +145,8 @@ a:hover {
 }
 
 .pane {
-   	margin: 0px;
-    padding: 0px;
+   	margin: 0;
+    padding: 0;
     background: #FFFFFF;
 }
 
@@ -197,8 +197,8 @@ a:hover {
 
 .landingPanelContainer {
 	background: #EDEDED;
-	padding: 0px;
-	margin: 0px;
+	padding: 0;
+	margin: 0;
 	border-left: 1px solid white;
 	border-right: 2px solid white;
 }
@@ -207,8 +207,8 @@ a:hover {
 	background: #EDEDED;
 	border-left: 1px solid white;
 	border-right: 1px solid #cccccc;
-	padding: 0px;
-	margin: 0px;
+	padding: 0;
+	margin: 0;
 }
 
 .auxpane {
@@ -241,26 +241,26 @@ a:hover {
 }
 
 .nihilo .dijitDialogTitleBar {
-    background: #white;
-    color: #black;
+    background: white;
+    color: black;
     font: 8px;
     outline: 0 none;
     padding: 5px 6px 3px;
 }
 
 .nihilo .dijitTreeRowSelected .dijitTreeLabel {
-	background-color: #fedda7;   // same color used for command menu hover
+	background-color: #fedda7;   /* same color used for command menu hover */
 }
 
 .mainpane {
-    margin: 0px;
+    margin: 0;
     padding-left: 8px;
     padding-top: 20px;
     background: #FFFFFF;
 	overflow: auto;
 }
 
-// not used currently but keep it just in case
+/* not used currently but keep it just in case */
 .statuspane {
 	text-decoration: none;
 	cursor: pointer;
@@ -276,9 +276,9 @@ a:hover {
 }
 
 .toolbar {
-	border: 0px;
-	padding: 0px;
-	margin: 0px;
+	border: 0;
+	padding: 0;
+	margin: 0;
 	overflow: hidden; /* works around a "mystery pixels" problem in IE, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339302 */
 	cursor: pointer;
 	font-size: 0.9em;
@@ -295,8 +295,8 @@ a:hover {
 	text-align: center;
 	width: 100%;
 	background: #f5f5f5;
-	border: 0px;
-	padding: 0px;
+	border: 0;
+	padding: 0;
 	cursor: pointer;
 	font-size: 0.9em;
 	color: #333333;
@@ -309,16 +309,16 @@ a:hover {
 }
 
 .topRowBanner {
-	margin: 0px;
-	border: 0px;
-	padding: 0px;
+	margin: 0;
+	border: 0;
+	padding: 0;
 	background: #f5f5f5;
 }
 
 .bottomRowBanner {
-	margin: 0px;
-	border: 0px;
-	padding: 0px;
+	margin: 0;
+	border: 0;
+	padding: 0;
 }
 
 .leftGlobalToolbar {
@@ -373,7 +373,7 @@ a:hover {
 }
 
 .leftSlideActive {
-	margin-left: 0px;
+	margin-left: 0;
 	padding: 8px;
 	opacity: 1;
 	height: auto;
@@ -417,14 +417,14 @@ a:hover {
 .nihilo .dijitButtonNode {
 	background-image: none;
 	background: none;
-	border: 0px;
-	padding: 0px;
+	border: 0;
+	padding: 0;
 	height: 20px;
 }
 
 .toolbarButton {
-	border: 0px;
-	padding: 0px;
+	border: 0;
+	padding: 0;
 	height: 20px;
 }
 
@@ -465,11 +465,11 @@ a:hover {
 }
 
 #rightPane .dijitTitlePaneContentInner {
-	padding: 0px; /* Remove the padding around the editor */
+	padding: 0; /* Remove the padding around the editor */
 }
 
 #codeTitle .dijitTitlePaneContentInner {
-	padding: 0px; /* Remove the padding around the editor */
+	padding: 0; /* Remove the padding around the editor */
 }
 
 #tree {
@@ -517,13 +517,13 @@ a:hover {
 }
 
 .treetable {
-	border-spacing: 0px;
+	border-spacing: 0;
 	min-width: 600px;
 }
 
 .favoritesTable {
-	border-spacing: 0px;
-	overflow-x: hidden; // because it is placed inside a div with overflow scrollbars
+	border-spacing: 0;
+	overflow-x: hidden; /* because it is placed inside a div with overflow scrollbars */
 }
 
 .secondaryColumn {
@@ -540,12 +540,12 @@ a:hover {
 }
 
 .testNavTreetable {
-	cellspacing: 0px; /* mistake? */
+	cellspacing: 0; /* mistake? */
 	min-width: 150px;
 }
 
 .testResultTreetable {
-	cellspacing: 0px; /* mistake? */
+	cellspacing: 0; /* mistake? */
 	min-width: 600px;
 }
 
