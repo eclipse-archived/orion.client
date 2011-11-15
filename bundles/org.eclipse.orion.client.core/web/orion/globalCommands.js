@@ -52,6 +52,10 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			if (this._getLayoutWidget()) {
 				this._getLayoutWidget().layout();
 			}
+			if (this._oldFocusNode) {
+				this._oldFocusNode.focus();
+				this._oldFocusNode = null;
+			}
 		},
 		
 		/**
@@ -102,6 +106,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 					this._getLayoutWidget().layout();
 				}
 				if (focusNode) {
+					this._oldFocusNode = window.document.activeElement;
 					window.setTimeout(function() {
 						focusNode.focus();
 						focusNode.select();
