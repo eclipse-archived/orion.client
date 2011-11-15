@@ -10,22 +10,16 @@
 }
 
 .commandImage {
-	margin-left: 1px;
-	margin-right: 1px;
-	margin-top: 1px;
-	margin-bottom: 1px;
-	padding: 0px;
+	margin: 1px;
+	padding: 0;
 	vertical-align: middle;
 	cursor: pointer;
 }
 
 .commandOver {
-	margin-left: 0px;
-	margin-right: 0px;
-	margin-top: 0px;
-	margin-bottom: 0px;
+	margin: 0;
 	vertical-align: middle;
-	padding: 0px;
+	padding: 0;
 	cursor: pointer;
     background-color: #ffeecc;
     border: 1px solid #ffcc66;
@@ -132,10 +126,7 @@
 /* Why do we have custom search command classes?   Should reconcile this */
 
 .searchCommandImage {
-	margin-left: 0px;
-	margin-right: 0px;
-	margin-top: 0px;
-	margin-bottom: 0px;
+	margin: 0;
 	padding: 1px;
 	vertical-align: middle;
 	cursor: pointer;
@@ -145,12 +136,9 @@
 	margin-left: 16px;
 }
 .searchCommandOver {
-	margin-left: 0px;
-	margin-right: 0px;
-	margin-top: 0px;
-	margin-bottom: 0px;
+	margin: 0;
 	vertical-align: middle;
-	padding: 0px;
+	padding: 0;
 	cursor: pointer;
     background-color: #ffeecc;
     border: 1px solid #ffcc66;
