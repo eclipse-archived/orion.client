@@ -539,7 +539,8 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 						title: baseModel.getText(tokenStart, end),
 						style: {styleClass: "annotation task"},
 						html: "<div class='annotationHTML task'></div>",
-						overviewStyle: {styleClass: "annotationOverview task"}
+						overviewStyle: {styleClass: "annotationOverview task"},
+						rangeStyle: {styleClass: "annotationRange task"}
 					});
 				}
 			}

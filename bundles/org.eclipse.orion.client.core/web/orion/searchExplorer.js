@@ -101,7 +101,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			var startNumber = this.start + 1;
 			var endNumber = startNumber + this.explorer.numberOnPage - 1;
 			pageTitle.innerHTML = "Files " + "<b>" + startNumber + "-"  + endNumber + "</b>" + " of " + this.explorer.totalNumber + 
-			" found by keyword " + "<b>" + this.OriginalSearchString + "</b>" + " on:";
+			" found by keyword " + "<b>" + this.OriginalSearchString + "</b>" + " in:";
 		}
 	};
 	
