@@ -17,10 +17,12 @@ define(['require', 'dojo', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchAdaptor',
-        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
+        'orion/editor/asyncStyler', 'orion/edit/dispatcher',
+        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer' ], 
 		function(require, dojo, mSelection, mStatus, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
-				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher, mSearchAdaptor) {
+				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
+				mSearchAdaptor, mAsyncStyler, mDispatcher) {
 	
 var exports = exports || {};
 	
@@ -129,8 +131,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						
 						if (providerToUse) {
 							var providerType = providerToUse.getProperty("type");
-							if (providerType === "parser") {
-								console.debug("TODO implement support for parser-based syntax highlight provider");
+							if (providerType === "highlighter") {
+								var service = serviceRegistry.getService(providerToUse);
+								service.setExtension(extension);
+								this.styler = new mAsyncStyler.AsyncStyler(service, textView);
 							} else if (providerType === "grammar" || typeof providerType === "undefined") {
 								var grammar = providerToUse.getProperty("grammar");
 								this.styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
@@ -185,6 +189,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				} else {
 					if (!editor.getTextView()) {
 						editor.installTextView();
+						dispatcher.wire(); // not cool.. need a better way
 					}
 					var fullPathName = fileURI;
 					var progressTimeout = setTimeout(function() {
@@ -447,6 +452,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			inputManager.setInput(fileURI, editor);
 		} 
 	});
+	
+	var dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor);
 
 	// In this page, the hash change drives selection.  In other scenarios, a file picker might drive selection
 	dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editor);});

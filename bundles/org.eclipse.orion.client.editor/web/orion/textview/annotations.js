@@ -506,6 +506,7 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 			return result;
 		},
 		_mergeStyleRanges: function(ranges, styleRange) {
+			if (!ranges) { return; }
 			for (var i=0; i<ranges.length; i++) {
 				var range = ranges[i];
 				if (styleRange.end <= range.start) { break; }
