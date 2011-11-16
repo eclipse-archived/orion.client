@@ -1483,37 +1483,46 @@ var exports = {};
 	};
 	
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
+		var cloneParameters = {};
+		cloneParameters.url = {label: 'Repository URL:', type: 'url', required: true};
+		cloneParameters.options = true;
 
 		var cloneGitRepositoryCommand = new mCommands.Command({
 			name : "Clone Repository",
 			tooltip : "Clone an existing Git repository to a folder",
 			id : "eclipse.cloneGitRepository",
-			callback : function(item) {
+			parameters: cloneParameters,
+			callback : function(item, commandId, domId, userData, parameters) {
 				var gitService = serviceRegistry.getService("orion.git.provider");
 				var progressService = serviceRegistry.getService("orion.page.message");
-
-				var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
-					serviceRegistry: serviceRegistry,
-					fileClient: fileClient,
-					func: function(gitUrl, path, name) {
-						exports.getDefaultSshOptions(serviceRegistry).then(
-								function(options) {
-									var func = arguments.callee;
-									var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts,
-											options.gitPrivateKey, options.gitPassphrase);
-									progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(function(jsonData, secondArg) {
-										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
-											if (explorer.redisplayClonesList) {
-												dojo.hitch(explorer, explorer.redisplayClonesList)();
-											}
-										}, func, "Clone Git Repository");
-									});
-								});
-					}
-				});
-						
-				dialog.startup();
-				dialog.show();
+				var cloneFunction = function(gitUrl, path, name) {
+					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
+						var func = arguments.callee;
+						var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts,
+							options.gitPrivateKey, options.gitPassphrase);
+						progressService.showWhile(deferred, "Cloning repository: " + gitUrl).then(function(jsonData, secondArg) {
+							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
+								if (explorer.redisplayClonesList) {
+									dojo.hitch(explorer, explorer.redisplayClonesList)();
+								}
+							}, func, "Clone Git Repository");
+						});
+					});
+				};
+				if (parameters.url && !parameters.optionsTriggered) {
+					cloneFunction(parameters.url.value);
+				} else {
+					var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
+						serviceRegistry: serviceRegistry,
+						fileClient: fileClient,
+						url: parameters.url.value,
+						alwaysShowAdvanced: parameters.optionsTriggered,
+						func: cloneFunction
+					});
+							
+					dialog.startup();
+					dialog.show();
+				}
 			},
 			visibleWhen : function(item) {
 				return true;

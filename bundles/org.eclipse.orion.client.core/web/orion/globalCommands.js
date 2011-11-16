@@ -115,6 +115,18 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			}
 		},
 		
+		_collectAndCall: function(command, handler, callbackParameters) {
+			dojo.query("input", this.parameterArea).forEach(function(field) {
+				if (field.type !== "button") {
+					command.parameters[field.parameterName].value = field.value;
+				}
+			});
+			if (command.callback) {
+				command.callback.apply(handler, callbackParameters);
+			}
+
+		},
+		
 		/**
 		 * Returns whether this key binding is the same as the given parameter.
 		 * 
@@ -131,12 +143,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 					var first = null;
 					var keyHandler = dojo.hitch(this, function(event) {
 						if (event.keyCode === dojo.keys.ENTER) {
-							dojo.query("input", this.parameterArea).forEach(function(field) {
-								command.parameters[field.parameterName].value = field.value;
-								if (command.callback) {
-									command.callback.apply(handler, callbackParameters);
-								}
-							});
+							this._collectAndCall(command, handler, callbackParameters);
 						}
 						if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
 							this.close(commandNode);
@@ -161,6 +168,16 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 							}
 							dojo.connect(field, "onkeypress", keyHandler);
 						}
+					}
+					if (command.parameters.options) {
+						command.parameters.optionsTriggered = false;
+						var optionsButton = dojo.create("input", {type: "button", value: "More"}, parameterArea, "last");
+						dojo.addClass(optionsButton, "parameterInput");
+						dojo.connect(optionsButton, "onclick", dojo.hitch(this, function () {
+							command.parameters.optionsTriggered = true;
+							this._collectAndCall(command, handler, callbackParameters);
+							this.close(commandNode);
+						}));
 					}
 					return first;
 				}));
