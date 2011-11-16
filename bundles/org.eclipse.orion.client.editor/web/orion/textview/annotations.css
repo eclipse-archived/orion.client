@@ -63,6 +63,14 @@
 	position: relative;
 	top: -16px;
 }
+.annotationHTML.currentBracket {
+	/* images/currentBracket.png */
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sLEBULCGQmEKAAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAnklEQVQ4y7VTsRHDIBATJg1HCUzAHEzFBExAzwZsRMkE9gifKhc72ODYibr/+xcnoQdugq0LAujEwmbn0UxQh4OxpjX1XgshwFqLnPM5PQTQGlprWpbl3RhJ/CSQUm7qPYLp7i8cEpRSoJT6ju0lIaVEQgiKMQ4lHHpQayVjzHWCn5jIOcc8z9dMBADvPZxz3SC1tzCI8vgWdvL+VzwB8JSj2GFTyxIAAAAASUVORK5CYII=");
+}
+.annotationHTML.matchingBracket {
+	/* images/matchingBracket.png */
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sLEBUMAsuyb3kAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAoklEQVQ4y61TsQ3EIAw80DcI0USKGIApWIsB2IGGKbJPugxBR3VfvfRRCOSTvw7LPuPzGXgI8f0gwAsFu5rXIYMdDiEOIdnKW5YFzjnEGH+bhwA/KKVwmibu0BhRnpEZY1BrHTaVT7fQJZjnGeu63tOAJFNKVEox53yqQZfAWstt27oidgm01ve3UEqBaBjnspG89wgh3LiFgZXHt3Dh23/FGxKViehm0X85AAAAAElFTkSuQmCC");
+}
 
 /* Styles for the overview ruler  */
 .annotationOverview {
@@ -91,6 +99,14 @@
 	background-color: Gold;
 	border: 1px solid black;
 }
+.annotationOverview.currentBracket {
+	background-color: lightgray;
+	border: 1px solid red;
+}
+.annotationOverview.matchingBracket {
+	background-color: lightgray;
+	border: 1px solid red;
+}
 
 /* Styles for text range */
 .annotationRange {
@@ -116,4 +132,9 @@
 .annotationRange.warning {
 	/* images/squiggly_warning.png */
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJFhQXEbhTg7YAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAMklEQVQI12NkgIIvJ3QXMjAwdDN+OaEbysDA4MPAwNDNwMCwiOHLCd1zX07o6kBVGQEAKBANtobskNMAAAAASUVORK5CYII=");
+}
+.annotationRange.currentBracket {
+}
+.annotationRange.matchingBracket {
+	outline: 1px solid red;
 }
