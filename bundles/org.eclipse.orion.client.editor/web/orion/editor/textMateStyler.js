@@ -438,6 +438,9 @@ var RegexUtil = {
 			textView.redrawLines();
 		},
 		onDestroy: function(/**eclipse.DestroyEvent*/ e) {
+			this.destroy();
+		},
+		destroy: function() {
 			if (this.textView) {
 				this.textView.removeEventListener("ModelChanged", this._listener.onModelChanged);
 				this.textView.removeEventListener("Destroy", this._listener.onDestroy);
@@ -447,6 +450,7 @@ var RegexUtil = {
 			this.grammar = null;
 			this._styles = null;
 			this._tree = null;
+			this._listener = null;
 		},
 		/** @private */
 		copy: function(obj) {
