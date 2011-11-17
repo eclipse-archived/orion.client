@@ -89,7 +89,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		
 		highlight: function(fileName, editor) {
 			if (this.styler) {
-				this.styler.destroy();
+				if (this.styler.destroy) {
+					this.styler.destroy();
+				}
 				this.styler = null;
 			}
 			if (fileName) {
@@ -134,7 +136,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							if (providerType === "highlighter") {
 								var service = serviceRegistry.getService(providerToUse);
 								service.setExtension(extension);
-								this.styler = new mAsyncStyler.AsyncStyler(service, textView);
+								this.styler = new mAsyncStyler.AsyncStyler(textView, service);
 							} else if (providerType === "grammar" || typeof providerType === "undefined") {
 								var grammar = providerToUse.getProperty("grammar");
 								this.styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);

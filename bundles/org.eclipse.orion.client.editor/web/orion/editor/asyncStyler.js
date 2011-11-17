@@ -14,17 +14,14 @@ define([], function() {
 	/**
 	 * Pushes styles provided by a service into the textView.
 	 */
-	function AsyncStyler(service, textView) {
-		this.initialize(textView);
-		var self = this;
-		service.addEventListener("orion.edit.highlighter.styleReady", function(e) {
-			self.onStyleReady(e);
-		});
+	function AsyncStyler(textView, service) {
+		this.initialize(textView, service);
 		this.lineStyles = [];
 	}
 	AsyncStyler.prototype = {
-		initialize: function(textView) {
+		initialize: function(textView, service) {
 			this.textView = textView;
+			this.service = service;
 			var self = this;
 			this._listener = {
 				onModelChanging: function(e) {
@@ -34,26 +31,38 @@ define([], function() {
 					self.onModelChanged(e);
 				},
 				onDestroy: function(e) {
-					this.textView = null;
 					self.onDestroy(e);
 				},
 				onLineStyle: function(e) {
 					self.onLineStyle(e);
+				},
+				onStyleReady: function(e) {
+					self.onStyleReady(e);
 				}
 			};
 			textView.addEventListener("ModelChanging", this._listener.onModelChanging);
 			textView.addEventListener("ModelChanged", this._listener.onModelChanged);
 			textView.addEventListener("Destroy", this._listener.onDestroy);
 			textView.addEventListener("LineStyle", this._listener.onLineStyle);
+			service.addEventListener("orion.edit.highlighter.styleReady", this._listener.onStyleReady);
 		},
 		onDestroy: function(e) {
+			this.destroy();
+		},
+		destroy: function() {
 			if (this.textView) {
-				this.textView.removeEventListener("ModelChanging", this._listener.onModelChanged);
+				this.textView.removeEventListener("ModelChanging", this._listener.onModelChanging);
 				this.textView.removeEventListener("ModelChanged", this._listener.onModelChanged);
 				this.textView.removeEventListener("Destroy", this._listener.onDestroy);
 				this.textView.removeEventListener("LineStyle", this._listener.onLineStyle);
 				this.textView = null;
 			}
+			if (this.service) {
+				this.service.removeEventListener("orion.edit.highlighter.styleReady", this._listener.onStyleReady);
+				this.service = null;
+			}
+			this._listener = null;
+			this.lineStyles = null;
 		},
 		onModelChanging: function(e) {
 			this.startLine = this.textView.getModel().getLineAtOffset(e.start);
