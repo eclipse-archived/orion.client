@@ -38,6 +38,14 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 	var annotationStyler = null;
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	
+	var breakpointType = "orion.annotation.breakpoint";
+	var bookmarkType = "orion.annotation.bookmark";
+	var errorType = "orion.annotation.error";
+	var warningType = "orion.annotation.warning";
+	var taskType = "orion.annotation.task";
+	var currentBracketType = "orion.annotation.currentBracket";
+	var matchingBracketType = "orion.annotation.matchingBracket";
+	
 	function getFile(file) {
 		try {
 			var objXml = new XMLHttpRequest();
@@ -75,7 +83,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 		
 		/* Undo stack */
 		var undoStack = exports.undoStack = new mUndoStack.UndoStack(view, 200);
-		var dnd = exports.textDND = new mTextDND.TextDND(view, undoStack);
+		exports.textDND = new mTextDND.TextDND(view, undoStack);
 		view.setKeyBinding(new mKeyBinding.KeyBinding('z', true), "undo");
 		view.setAction("undo", function() {
 			undoStack.undo();
@@ -129,11 +137,6 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 		
 
 		/* Adding the Rulers */
-		var breakpointType = "orion.annotation.breakpoint";
-		var bookmarkType = "orion.annotation.bookmark";
-		var errorType = "orion.annotation.error";
-		var warningType = "orion.annotation.warning";
-		var taskType = "orion.annotation.task";
 		var annotationRuler = view.annotationRuler = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotations"});
 		annotationRuler.addAnnotationType(breakpointType);
 		annotationRuler.addAnnotationType(bookmarkType);
@@ -237,6 +240,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 		overviewRuler.addAnnotationType(errorType);
 		overviewRuler.addAnnotationType(warningType);
 		overviewRuler.addAnnotationType(taskType);
+		overviewRuler.addAnnotationType(matchingBracketType);
+		overviewRuler.addAnnotationType(currentBracketType);
 		
 		view.addRuler(annotationRuler);
 		view.addRuler(linesRuler);
@@ -267,7 +272,9 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 				break;
 		}
 		annotationStyler = new mAnnotationModel.AnnotationStyler(view, view.annotationModel);
-		annotationStyler.addAnnotationType("orion.annotation.task");
+		annotationStyler.addAnnotationType(taskType);
+		annotationStyler.addAnnotationType(matchingBracketType);
+		annotationStyler.addAnnotationType(currentBracketType);
 		view.setText(text);
 		return view;
 	}

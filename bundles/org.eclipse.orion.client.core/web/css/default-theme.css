@@ -75,9 +75,6 @@
 	font-weight: bold;
 }
 
-
-
-
 /* Hardcoded HTML styles */
 .entity-name-tag /*tag name*/ {
 	color: #3f7f7f;
@@ -99,3 +96,23 @@
 	color: #2a00ff;
 }
 
+/* CodeMirror */
+.cm-meta { color: #00008F; }
+.cm-keyword { font-weight: bold; color: #7F0055; }
+.cm-atom { color: #21439c; }
+.cm-number { color: black; }
+.cm-def { color: green; }
+.cm-variable { color: black; }
+.cm-variable-2 { color: #004080; }
+.cm-variable-3 { color: #004080; }
+.cm-property { color: black; }
+.cm-operator { color: #222; }
+.cm-comment { color: green; }
+.cm-string { color: blue; }
+/*.cm-string-2 { color: blue; }*/
+.cm-error { color: #ff0000; }
+.cm-qualifier { color: gray; }
+.cm-builtin { color: #7F0055; }
+.cm-bracket { color: white; background-color: gray; }
+.cm-tag { color: #3f7f7f; }
+.cm-attribute { color: #7f007f; }

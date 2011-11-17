@@ -132,6 +132,7 @@ window.onload = function(){
 	var initialContent = "window.alert('this is some javascript code');  // try pasting in some real code";
 	editor.setInput(contentName, null, initialContent);
 	syntaxHighlighter.highlight(contentName, editor);
+	editor.highlightAnnotations();
 	// end of code to run when content changes.
 	
 	window.onbeforeunload = function() {
