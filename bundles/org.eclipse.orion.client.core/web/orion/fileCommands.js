@@ -435,7 +435,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 							errorHandler);
 					}
 				};
-				if (parameters.name && parameters.name.value) {
+				if (parameters && parameters.name && parameters.name.value) {
 					createFunction(parameters.name.value);
 				} else {
 					getNewItemName(item, domId, "New File", createFunction);
@@ -465,7 +465,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 							errorHandler);
 					}
 				};
-				if (parameters.name && parameters.name.value) {
+				if (parameters && parameters.name && parameters.name.value) {
 					createFunction(parameters.name.value);
 				} else {
 					getNewItemName(item, domId, "New Folder", createFunction);
