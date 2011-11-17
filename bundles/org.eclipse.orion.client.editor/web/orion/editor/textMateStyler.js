@@ -13,88 +13,6 @@
 /*global define */
 
 define([], function() {
-	/**
-	 * @class A styler that does nothing, but can be extended by concrete stylers. To extend, call 
-	 * {@link orion.editor.AbstractStyler.extend} and provide implementations of one or more of
-	 * the {@link #_onSelection}, {@link #_onModelChanged}, {@link #_onDestroy} and {@link #_onLineStyle} methods.
-	 * @name orion.editor.AbstractStyler
-	 */
-	function AbstractStyler() {
-	}
-	AbstractStyler.prototype = /** @lends orion.editor.AbstractStyler.prototype */ {
-		/**
-		 * Initializes this styler with a TextView. If you are extending AbstractStyler,
-		 * you <b>must</b> call this from your subclass's constructor function.
-		 * @param {orion.textview.TextView} textView The TextView to provide styling for.
-		 */
-		initialize: function(textView) {
-			this.textView = textView;
-			
-			var self = this;
-			this._listener = {
-				onModelChanged: function(e) {
-					self._onModelChanged(e);
-				},
-				onDestroy: function(e) {
-					self._onDestroy(e);
-				},
-				onLineStyle: function(e) {
-					self._onLineStyle(e);
-				},
-				onSelection: function(e) {
-					self._onSelection(e);
-				}
-			};
-			textView.addEventListener("Selection", this._listener.onSelection);
-			textView.addEventListener("ModelChanged", this._listener.onModelChanged);
-			textView.addEventListener("Destroy", this._listener.onDestroy);
-			textView.addEventListener("LineStyle", this._listener.onLineStyle);
-			textView.redrawLines();
-		},
-		/** Destroys this styler and removes all listeners. Called by the editor. */
-		destroy: function() {
-			if (this.textView) {
-				this.textView.removeEventListener("Selection", this._listener.onSelection);
-				this.textView.removeEventListener("ModelChanged", this._listener.onModelChanged);
-				this.textView.removeEventListener("Destroy", this._listener.onDestroy);
-				this.textView.removeEventListener("LineStyle", this._listener.onLineStyle);
-				this.textView = null;
-			}
-		},
-		/** To be overridden by subclass.
-		 * @public
-		 */
-		_onSelection: function(/**eclipse.SelectionEvent*/ selectionEvent) {},
-		/** To be overridden by subclass.
-		 * @public
-		 */
-		_onModelChanged: function(/**eclipse.ModelChangedEvent*/ modelChangedEvent) {},
-		/** To be overridden by subclass.
-		 * @public
-		 */
-		_onDestroy: function(/**eclipse.DestroyEvent*/ destroyEvent) {},
-		/** To be overridden by subclass.
-		 * @public
-		 */
-		_onLineStyle: function(/**eclipse.LineStyleEvent*/ lineStyleEvent) {}
-	};
-	
-	/**
-	 * Helper for extending {@link orion.editor.AbstractStyler}.
-	 * @methodOf orion.editor.AbstractStyler
-	 * @static
-	 * @param {Function} subCtor The constructor function for the subclass.
-	 * @param {Object} [proto] Object to be mixed into the subclass's prototype. This object should 
-	 * contain your implementation of _onSelection, _onModelChanged, etc.
-	 */
-	AbstractStyler.extend = function(subCtor, proto) {
-		if (typeof(subCtor) !== "function") { throw new Error("Function expected"); }
-		subCtor.prototype = new AbstractStyler();
-		subCtor.constructor = subCtor;
-		for (var p in proto) {
-			if (proto.hasOwnProperty(p)) { subCtor.prototype[p] = proto[p]; }
-		}
-	};
 
 var RegexUtil = {
 	// Rules to detect some unsupported Oniguruma features
@@ -499,7 +417,37 @@ var RegexUtil = {
 		this._allGrammars = {}; /* key: {String} scopeName of grammar, value: {Object} grammar */
 		this.preprocess(this.grammar);
 	}
-	AbstractStyler.extend(TextMateStyler, /** @lends orion.editor.TextMateStyler.prototype */ {
+	TextMateStyler.prototype = /** @lends orion.editor.TextMateStyler.prototype */ {
+		initialize: function(textView) {
+			this.textView = textView;
+			var self = this;
+			this._listener = {
+				onModelChanged: function(e) {
+					self.onModelChanged(e);
+				},
+				onDestroy: function(e) {
+					self.onDestroy(e);
+				},
+				onLineStyle: function(e) {
+					self.onLineStyle(e);
+				}
+			};
+			textView.addEventListener("ModelChanged", this._listener.onModelChanged);
+			textView.addEventListener("Destroy", this._listener.onDestroy);
+			textView.addEventListener("LineStyle", this._listener.onLineStyle);
+			textView.redrawLines();
+		},
+		onDestroy: function(/**eclipse.DestroyEvent*/ e) {
+			if (this.textView) {
+				this.textView.removeEventListener("ModelChanged", this._listener.onModelChanged);
+				this.textView.removeEventListener("Destroy", this._listener.onDestroy);
+				this.textView.removeEventListener("LineStyle", this._listener.onLineStyle);
+				this.textView = null;
+			}
+			this.grammar = null;
+			this._styles = null;
+			this._tree = null;
+		},
 		/** @private */
 		copy: function(obj) {
 			return JSON.parse(JSON.stringify(obj));
@@ -801,7 +749,7 @@ var RegexUtil = {
 			this._tree = root;
 			this.parse(this._tree, false, 0);
 		},
-		_onModelChanged: function(/**eclipse.ModelChangedEvent*/ e) {
+		onModelChanged: function(/**eclipse.ModelChangedEvent*/ e) {
 			var addedCharCount = e.addedCharCount,
 			    addedLineCount = e.addedLineCount,
 			    removedCharCount = e.removedCharCount,
@@ -1201,7 +1149,7 @@ var RegexUtil = {
 				node.parent.children.length = node.getIndexInParent() + 1;
 			}
 		},
-		_onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {
+		onLineStyle: function(/**eclipse.LineStyleEvent*/ e) {
 			function byStart(r1, r2) {
 				return r1.start - r2.start;
 			}
@@ -1383,13 +1331,6 @@ var RegexUtil = {
 			}
 			return result.reverse();
 		},
-		_onSelection: function(e) {
-		},
-		_onDestroy: function(/**eclipse.DestroyEvent*/ e) {
-			this.grammar = null;
-			this._styles = null;
-			this._tree = null;
-		},
 		/**
 		 * Applies the grammar to obtain the {@link eclipse.StyleRange[]} for the given line.
 		 * @returns eclipse.StyleRange[]
@@ -1407,10 +1348,9 @@ var RegexUtil = {
 			}
 			return styleRanges;
 		}
-	});
+	};
 	
 	return {
-		AbstractStyler: AbstractStyler,
 		RegexUtil: RegexUtil,
 		TextMateStyler: TextMateStyler
 	};

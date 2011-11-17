@@ -31,15 +31,6 @@
 	font-weight: bold;
 }
 
-.token_bracket_outline {
-	outline: 1px solid red;
-}
-
-.token_bracket {
-	color: white;
-	background-color: grey;
-}
-
 .token_space {
 	/* images/white_space.png */
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAIAAABv85FHAAAABnRSTlMA/wAAAACkwsAdAAAAIUlEQVR4nGP4z8CAC+GUIEXuABhgkTuABEiRw2cmae4EAH05X7xDolNRAAAAAElFTkSuQmCC");

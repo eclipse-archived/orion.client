@@ -73,6 +73,8 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 		warningType: "orion.annotation.warning",
 		taskType: "orion.annotation.task",
 		foldingType: "orion.annotation.folding",
+		currentBracketType: "orion.annotation.currentBracket",
+		matchingBracketType: "orion.annotation.matchingBracket",
 		
 		/**
 		 * Returns the underlying <code>TextView</code> used by this editor. 
@@ -414,6 +416,8 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 				this._annotationStyler = this._annotationFactory.createAnnotationStyler(this.getTextView(), this._annotationModel);
 				this._annotationStyler.addAnnotationType(this.errorType);
 				this._annotationStyler.addAnnotationType(this.warningType);
+				this._annotationStyler.addAnnotationType(this.matchingBracketType);
+				this._annotationStyler.addAnnotationType(this.currentBracketType);
 			}
 		},
 		
@@ -546,6 +550,8 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 				this._overviewRuler.addAnnotationType(this.errorType);
 				this._overviewRuler.addAnnotationType(this.warningType);
 				this._overviewRuler.addAnnotationType(this.taskType);
+				this._overviewRuler.addAnnotationType(this.matchingBracketType);
+				this._overviewRuler.addAnnotationType(this.currentBracketType);
 				textView.addRuler(this._annotationRuler);
 				textView.addRuler(this._overviewRuler);
 			}
