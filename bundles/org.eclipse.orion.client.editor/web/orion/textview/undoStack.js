@@ -336,7 +336,7 @@ define([], function() {
 		},
 		_onDestroy: function(evt) {
 			this.model.removeEventListener("Changing", this._listener.onChanging);
-			this.view.removeEventListener("Destroy", this._listnener.onDestroy);
+			this.view.removeEventListener("Destroy", this._listener.onDestroy);
 		},
 		_onChanging: function(e) {
 			var newText = e.text;
