@@ -3339,8 +3339,6 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			* event is trigged.
 			*/
 			this._loadHandler = function(e) {
-				removeHandler(frame, "load", self._loadHandler, !!isFirefox);
-				self._loadHandler = null;
 				self._handleLoad(e);
 			};
 			addHandler(frame, "load", this._loadHandler, !!isFirefox);
@@ -3420,8 +3418,6 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				frameDocument.write(self._getFrameHTML());
 				frameDocument.close();
 				self._windowLoadHandler = function(e) {
-					removeHandler(frameWindow, "load", self._windowLoadHandler);
-					self._windowLoadHandler = null;
 					self._createContent();
 				};
 				addHandler(frameWindow, "load", self._windowLoadHandler);
