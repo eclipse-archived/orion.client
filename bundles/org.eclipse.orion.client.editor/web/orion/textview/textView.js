@@ -9,7 +9,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270 Bug#361474
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270 Bug#361474 Bug#363945
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -3338,7 +3338,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			* parent is not connected to the document.  Only create it when the load
 			* event is trigged.
 			*/
-			addHandler(frame, "load", this._loadHandler = function(e) { self._handleLoad(e); });
+			this._loadHandler = function(e) {
+				removeHandler(frame, "load", self._loadHandler, !!isFirefox);
+				self._loadHandler = null;
+				self._handleLoad(e);
+			};
+			addHandler(frame, "load", this._loadHandler, !!isFirefox);
 			if (!isWebkit) {
 				/*
 				* Feature in IE and Firefox.  It is not possible to get the style of an
@@ -3414,9 +3419,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				frameDocument.open();
 				frameDocument.write(self._getFrameHTML());
 				frameDocument.close();
-				addHandler(frameWindow, "load", this._windowLoadHandler = function(e) {
+				self._windowLoadHandler = function(e) {
+					removeHandler(frameWindow, "load", self._windowLoadHandler);
+					self._windowLoadHandler = null;
 					self._createContent();
-				});
+				};
+				addHandler(frameWindow, "load", self._windowLoadHandler);
 			}
 			/*
 			* Bug in Firefox.  Firefox does not send window load event if document.write
@@ -3662,7 +3670,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var frame = this._frame;
 			if (!frame) { return; }
 			if (this._loadHandler) {
-				removeHandler(frame, "load", this._loadHandler);
+				removeHandler(frame, "load", this._loadHandler, !!isFirefox);
 				this._loadHandler = null;
 			}
 			if (this._attrModifiedHandler) {
