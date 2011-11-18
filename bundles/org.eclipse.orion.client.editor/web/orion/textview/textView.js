@@ -1887,10 +1887,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			}
 			this._commitIME();
 
-			var left = e.which ? e.button === 0 : e.button === 1;
 			var button = e.which; // 1 - left, 2 - middle, 3 - right
-			if (!button && e.button === 4) { // if IE 8 or older
-				button = 2;
+			if (!button) { 
+				// if IE 8 or older
+				if (e.button === 4) { button = 2; }
+				if (e.button === 2) { button = 3; }
+				if (e.button === 1) { button = 1; }
 			}
 
 			// For middle click we always need getTime(). See _getClipboardText().
@@ -1898,14 +1900,15 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var timeDiff = time - this._lastMouseTime;
 			var deltaX = Math.abs(this._lastMouseX - e.clientX);
 			var deltaY = Math.abs(this._lastMouseY - e.clientY);
+			var sameButton = this._lastMouseButton == button;
 			this._lastMouseX = e.clientX;
 			this._lastMouseY = e.clientY;
 			this._lastMouseTime = time;
 			this._lastMouseButton = button;
 
-			if (left) {
+			if (button === 1) {
 				this._isMouseDown = true;
-				if (timeDiff <= this._clickTime && deltaX <= this._clickDist && deltaY <= this._clickDist) {
+				if (sameButton && timeDiff <= this._clickTime && deltaX <= this._clickDist && deltaY <= this._clickDist) {
 					this._clickCount++;
 				} else {
 					this._clickCount = 1;
@@ -2710,11 +2713,19 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			return true;
 		},
 		_doPaste: function(e) {
-			var text = this._getClipboardText(e);
-			if (text) {
-				this._doContent(text);
-			}
-			return text !== null;
+			var self = this;
+			var result = this._getClipboardText(e, function(text) {
+				if (text) {
+					if (isLinux && self._lastMouseButton === 2) {
+						var timeDiff = new Date().getTime() - self._lastMouseTime;
+						if (timeDiff <= self._clickTime) {
+							self._setSelectionTo(self._lastMouseX, self._lastMouseY);
+						}
+					}
+					self._doContent(text);
+				}
+			});
+			return result !== null;
 		},
 		_doScroll: function (args) {
 			var type = args.type;
@@ -3855,7 +3866,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var viewPad = this._getViewPadding();
 			return Math.max(0, this._viewDiv.clientWidth - viewPad.left - viewPad.right);
 		},
-		_getClipboardText: function (event) {
+		_getClipboardText: function (event, handler) {
 			var delimiter = this._model.getLineDelimiter();
 			var clipboadText, text;
 			if (this._frameWindow.clipboardData) {
@@ -3863,7 +3874,9 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				clipboadText = [];
 				text = this._frameWindow.clipboardData.getData("Text");
 				this._convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
-				return clipboadText.join("");
+				text = clipboadText.join("");
+				if (handler) { handler(text); }
+				return text;
 			}
 			if (isFirefox) {
 				this._ignoreFocus = true;
@@ -3873,10 +3886,10 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				clipboardDiv.firstChild.focus();
 				var self = this;
 				var _getText = function() {
-					var text = self._getTextFromElement(clipboardDiv);
+					var noteText = self._getTextFromElement(clipboardDiv);
 					clipboardDiv.innerHTML = "";
 					clipboadText = [];
-					self._convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
+					self._convertDelimiter(noteText, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
 					return clipboadText.join("");
 				};
 				
@@ -3886,32 +3899,20 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				try {
 					result = document.execCommand("paste", false, null);
 				} catch (ex) {
-					// Firefox can throw even when execCommand() works, see bug 362835
+					/* Firefox can throw even when execCommand() works, see bug 362835. */
 					result = clipboardDiv.childNodes.length > 1 || clipboardDiv.firstChild && clipboardDiv.firstChild.childNodes.length > 0;
 				}
 				this._ignorePaste = false;
 				if (!result) {
-					/*
-					* Try native paste in DOM, works for firefox during the paste event.
-					*/
+					/* Try native paste in DOM, works for firefox during the paste event. */
 					if (event) {
 						setTimeout(function() {
 							self.focus();
+							text = _getText();
+							if (text && handler) {
+								handler(text);
+							}
 							self._ignoreFocus = false;
-
-							var text = _getText();
-							if (!text) {
-								return;
-							}
-
-							var timeDiff = new Date().getTime() - self._lastMouseTime;
-							if (self._lastMouseButton === 2 && timeDiff <= self._clickTime) {
-								var line = self._getYToLine(self._lastMouseY);
-								var offset = self._getXToOffset(line, self._lastMouseX);
-								self._modifyContent({text: text, start: offset, end: offset});
-							} else {
-								self._doContent(text);
-							}
 						}, 0);
 						return null;
 					} else {
@@ -3923,7 +3924,11 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				}
 				this.focus();
 				this._ignoreFocus = false;
-				return _getText();
+				text = _getText();
+				if (text && handler) {
+					handler(text);
+				}
+				return text;
 			}
 			//webkit
 			if (event && event.clipboardData) {
@@ -3934,7 +3939,11 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				clipboadText = [];
 				text = event.clipboardData.getData("text/plain");
 				this._convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
-				return clipboadText.join("");
+				text = clipboadText.join("");
+				if (text && handler) {
+					handler(text);
+				}
+				return text;
 			} else {
 				//TODO try paste using extension (Chrome only)
 			}
