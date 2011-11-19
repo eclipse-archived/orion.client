@@ -9,6 +9,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug#364214
  */
 
 /*global window */
@@ -46,5 +47,39 @@ if (!window.define) {
 				module[p] = newModule[p];
 			}
 		}
+	};
+}
+
+/**
+ * Require/get the defined modules.
+ * <p>
+ * This function is intented to by used when RequireJS is not available.
+ * </p>
+ *
+ * @param {String[]|String} deps The array of dependency names. This can also be
+ * a string, a single dependency name.
+ * @param {Function} [callback] Optional, the callback function to execute when
+ * multiple dependencies are required. The callback arguments will have
+ * references to each module in the same order as the deps array.
+ * @returns {Object|undefined} If the deps parameter is a string, then this
+ * function returns the required module definition, otherwise undefined is
+ * returned.
+ */
+if (!window.require) {
+	window.require = function(deps, callback) {
+		var depsArr = typeof deps === "string" ? [deps] : deps;
+		var depModules = [], depModule, split, i, j;
+		for (j = 0; j < depsArr.length; j++) {
+			depModule = this;
+			split = depsArr[j].split("/");
+			for (i = 0; i < split.length - 1; i++) {
+				depModule = depModule[split[i]] = (depModule[split[i]] || {});
+			}
+			depModules.push(depModule);
+		}
+		if (callback) {
+			callback.apply(this, depModules);
+		}
+		return typeof deps === "string" ? depModules[0] : undefined;
 	};
 }
