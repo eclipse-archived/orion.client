@@ -84,6 +84,10 @@
 .core-sprite-twistie_partOpen{ background-position: -173px -584px; width: 16px; height: 16px; } 
 .core-sprite-warning{ background-position: -173px -650px; width: 16px; height: 16px; } 
 
+/* temporary sprite hacks */
+.core-sprite-options{ background-position: 0px 0px; width: 16px; height: 16px; background: url(../images/more.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.core-sprite-ok{ background-position: 0px 0px; width: 16px; height: 16px; background: url(../images/check.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+
 /* dojo theme changes according to graphic designer, primarily menu hovers */
 
 .nihilo .dijitMenu, .nihilo .dijitMenuBar {
