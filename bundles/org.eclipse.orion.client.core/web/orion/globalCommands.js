@@ -169,16 +169,37 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 							dojo.connect(field, "onkeypress", keyHandler);
 						}
 					}
+					var spacer;
 					if (command.parameters.options) {
 						command.parameters.optionsTriggered = false;
-						var optionsButton = dojo.create("input", {type: "button", value: "More"}, parameterArea, "last");
-						dojo.addClass(optionsButton, "parameterInput");
-						dojo.connect(optionsButton, "onclick", dojo.hitch(this, function () {
+						spacer = dojo.create("span", null, this.dismissArea, "last");
+						dojo.addClass(spacer, "dismiss");
+						
+						var options = dojo.create("span", null, this.dismissArea || parameterArea, "last");
+						dojo.addClass(options, "core-sprite-options");
+						dojo.addClass(options, "dismiss");
+						options.title = "More options...";
+						dojo.connect(options, "onclick", dojo.hitch(this, function () {
 							command.parameters.optionsTriggered = true;
 							this._collectAndCall(command, handler, callbackParameters);
 							this.close(commandNode);
 						}));
 					}
+					// OK button
+					if (this.dismissArea) {
+						spacer = dojo.create("span", null, this.dismissArea, "last");
+						dojo.addClass(spacer, "dismiss");
+
+						var ok = dojo.create("span", null, this.dismissArea, "last");
+						ok.title = "Submit";
+						dojo.addClass(ok, "core-sprite-ok");
+						dojo.addClass(ok, "dismiss");
+						dojo.connect(ok, "onclick", dojo.hitch(this, function () {
+							this._collectAndCall(command, handler, callbackParameters);
+							this.close(commandNode);
+						}));
+					}
+
 					return first;
 				}));
 			}
