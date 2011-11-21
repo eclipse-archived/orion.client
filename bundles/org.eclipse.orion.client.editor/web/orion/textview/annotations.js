@@ -102,6 +102,9 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 	 * {@link orion.textview.TextModel}<br/> 
 	 * </p>	
 	 * @name orion.textview.AnnotationModel
+	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.textview.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function AnnotationModel(textModel) {
 		this._annotations = [];
@@ -377,10 +380,19 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 	};
 	mEventTarget.EventTarget.addMixin(AnnotationModel.prototype);
 
-	/** @ignore */
+	/**
+	 * Constructs a new styler for annotations.
+	 * 
+	 * @param {orion.textview.TextView} view The styler view.
+	 * @param {orion.textview.AnnotationModel} view The styler annotation model.
+	 * 
+	 * @class This object represents a styler for annotation attached to a text view.
+	 * @name orion.textview.AnnotationStyler
+	 */
 	function AnnotationStyler (view, annotationModel) {
 		this._view = view;
 		this._annotationModel = annotationModel;
+		this._types = [];
 		var self = this;
 		this._listener = {
 			onDestroy: function(e) {
@@ -398,6 +410,27 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 		annotationModel.addEventListener("Changed", this._listener.onChanged);
 	}
 	AnnotationStyler.prototype = /** @lends orion.textview.AnnotationStyler.prototype */ {
+		/**
+		 * Adds an annotation type to the receiver.
+		 * <p>
+		 * Only annotations of the specified types will be shown by
+		 * this receiver.
+		 * </p>
+		 *
+		 * @param type {Object} the annotation type to be shown
+		 * 
+		 * @see #removeAnnotationType
+		 * @see #isAnnotationTypeVisible
+		 */
+		addAnnotationType: function(type) {
+			this._types.push(type);
+		},
+		/**
+		 * Destroys the styler. 
+		 * <p>
+		 * Removes all listeners added by this styler.
+		 * </p>
+		 */
 		destroy: function() {
 			var view = this._view;
 			if (view) {
@@ -409,6 +442,39 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 			if (annotationModel) {
 				annotationModel.removeEventListener("Changed", this._listener.onChanged);
 				annotationModel = null;
+			}
+		},
+		/**
+		 * Returns whether the receiver shows annotations of the specified type.
+		 *
+		 * @param {Object} type the annotation type 
+		 * @returns {Boolean} whether the specified annotation type is shown
+		 * 
+		 * @see #addAnnotationType
+		 * @see #removeAnnotationType
+		 */
+		isAnnotationTypeVisible: function(type) {
+			for (var i = 0; i < this._types.length; i++) {
+				if (this._types[i] === type) {
+					return true;
+				}
+			}
+			return false;
+		},
+		/**
+		 * Removes an annotation type from the receiver.
+		 *
+		 * @param {Object} type the annotation type to be removed
+		 * 
+		 * @see #addAnnotationType
+		 * @see #isAnnotationTypeVisible
+		 */
+		removeAnnotationType: function(type) {
+			for (var i = 0; i < this._types.length; i++) {
+				if (this._types[i] === type) {
+					this._types.splice(i, 1);
+					break;
+				}
 			}
 		},
 		_mergeStyle: function(result, style) {
@@ -440,6 +506,7 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 			return result;
 		},
 		_mergeStyleRanges: function(ranges, styleRange) {
+			if (!ranges) { return; }
 			for (var i=0; i<ranges.length; i++) {
 				var range = ranges[i];
 				if (styleRange.end <= range.start) { break; }
@@ -508,6 +575,7 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 			var annotations = annotationModel.getAnnotations(start, end);
 			while (annotations.hasNext()) {
 				var annotation = annotations.next();
+				if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
 				if (annotation.rangeStyle) {
 					var annotationStart = annotation.start;
 					var annotationEnd = annotation.end;

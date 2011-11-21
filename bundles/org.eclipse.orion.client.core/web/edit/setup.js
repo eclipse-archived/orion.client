@@ -17,10 +17,12 @@ define(['require', 'dojo', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchAdaptor',
-        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
+        'orion/editor/asyncStyler', 'orion/edit/dispatcher',
+        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer' ], 
 		function(require, dojo, mSelection, mStatus, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
-				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher, mSearchAdaptor) {
+				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
+				mSearchAdaptor, mAsyncStyler, mDispatcher) {
 	
 var exports = exports || {};
 	
@@ -61,9 +63,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
 			var providersLoaded = false;
 			contentAssist.addEventListener("show", function(event) {
-				function addProvider(name, pattern, service) {
-					contentAssist.addProvider(service, name, pattern);
-				}
 				if (!providersLoaded) {
 					// Load contributed content assist providers
 					var fileName = editor.getTitle();
@@ -73,11 +72,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						var name = serviceReference.getProperty("name"),
 						    pattern = serviceReference.getProperty("pattern");
 						if (pattern && new RegExp(pattern).test(fileName)) {
-							(function(name, pattern) {
-								serviceRegistry.getService(serviceReference).then(function(service) {
-									addProvider(name, pattern, service);
-								});
-							}(name, pattern));
+							contentAssist.addProvider(serviceRegistry.getService(serviceReference), name, pattern);
 						}
 					}
 					providersLoaded = true;
@@ -94,7 +89,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		
 		highlight: function(fileName, editor) {
 			if (this.styler) {
-				this.styler.destroy();
+				if (this.styler.destroy) {
+					this.styler.destroy();
+				}
 				this.styler = null;
 			}
 			if (fileName) {
@@ -136,8 +133,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						
 						if (providerToUse) {
 							var providerType = providerToUse.getProperty("type");
-							if (providerType === "parser") {
-								console.debug("TODO implement support for parser-based syntax highlight provider");
+							if (providerType === "highlighter") {
+								var service = serviceRegistry.getService(providerToUse);
+								service.setExtension(extension);
+								this.styler = new mAsyncStyler.AsyncStyler(textView, service);
 							} else if (providerType === "grammar" || typeof providerType === "undefined") {
 								var grammar = providerToUse.getProperty("grammar");
 								this.styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
@@ -192,6 +191,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				} else {
 					if (!editor.getTextView()) {
 						editor.installTextView();
+						dispatcher.wire(); // not cool.. need a better way
 					}
 					var fullPathName = fileURI;
 					var progressTimeout = setTimeout(function() {
@@ -339,9 +339,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	};
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
-		// Register commands that depend on external services, the registry, etc.
-		var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly);
-		commandGenerator.generateEditorCommands(editor);
 		
 		// Create keybindings for generic editing, no dependency on the service model
 		var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(commandService, undoStack, new mSearchAdaptor.OrionTextSearchAdaptor()));
@@ -355,6 +352,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		// TODO this should probably be something that happens more dynamically, when the editor changes input
 		var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
 		keyModeStack.push(codeBindings);
+		
+		// Register commands that depend on external services, the registry, etc.  Do this after
+		// the generic keybindings so that we can override some of them.
+		var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions");
+		commandGenerator.generateEditorCommands(editor);
+
 		
 		// give our external escape handler a shot at handling escape
 		keyModeStack.push(escHandler);
@@ -437,10 +440,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	});
 	
 	// Establishing dependencies on registered services
-	serviceRegistry.getService("orion.core.marker").then(function(problemProvider) {
-		problemProvider.addEventListener("problemsChanged", function(problems) {
-			editor.showProblems(problems);
-		});
+	serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(problems) {
+		editor.showProblems(problems);
 	});
 	
 	editor.addEventListener("DirtyChanged", function(evt) {
@@ -448,13 +449,13 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	});
 	
 	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
-	serviceRegistry.getService("orion.page.selection").then(function(service) {
-		service.addEventListener("selectionChanged", function(fileURI) {
-			if (inputManager.shouldGoToURI(editor, fileURI)) {
-				inputManager.setInput(fileURI, editor);
-			} 
-		});
+	serviceRegistry.getService("orion.page.selection").addEventListener("selectionChanged", function(fileURI) {
+		if (inputManager.shouldGoToURI(editor, fileURI)) {
+			inputManager.setInput(fileURI, editor);
+		} 
 	});
+	
+	var dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor);
 
 	// In this page, the hash change drives selection.  In other scenarios, a file picker might drive selection
 	dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editor);});

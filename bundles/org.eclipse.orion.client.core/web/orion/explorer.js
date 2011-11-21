@@ -245,9 +245,7 @@ exports.ExplorerRenderer = (function() {
 			actionsColumn.appendChild(actionsWrapper);
 			dojo.style(actionsWrapper, "visibility", "hidden");
 			// contact the command service to render appropriate commands here.
-			this.explorer.registry.getService("orion.page.command").then(function(service) {
-				service.renderCommands(actionsWrapper, "object", item, this.explorer, "image");
-			});
+			this.explorer.registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", item, this.explorer, "image");
 			return actionsColumn;
 		},
 		initCheckboxColumn: function(tableNode){
@@ -442,10 +440,7 @@ exports.ExplorerRenderer = (function() {
 				
 				dojo.empty(actionsWrapper);
 				// contact the command service to render appropriate commands here.
-				registry.getService("orion.page.command").then(function(service) {
-					service.renderCommands(actionsWrapper, "object", node._item, this.explorer, "image");
-				});
-
+				registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", node._item, this.explorer, "image");
 			});
 		},
 		

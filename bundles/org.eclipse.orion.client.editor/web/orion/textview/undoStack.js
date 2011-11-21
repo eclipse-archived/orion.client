@@ -72,9 +72,7 @@ define([], function() {
 	 * @name orion.textview.CompoundChange
 	 * @private
 	 */
-	function CompoundChange (selection, caret) {
-		this.selection = selection;
-		this.caret = caret;
+	function CompoundChange () {
 		this.changes = [];
 	}
 	CompoundChange.prototype = {
@@ -83,14 +81,19 @@ define([], function() {
 			this.changes.push(change);
 		},
 		/** @ignore */
+		end: function (view) {
+			this.endSelection = view.getSelection();
+			this.endCaret = view.getCaretOffset();
+		},
+		/** @ignore */
 		undo: function (view, select) {
 			for (var i=this.changes.length - 1; i >= 0; i--) {
 				this.changes[i].undo(view, false);
 			}
 			if (select) {
-				var start = this.selection.start;
-				var end = this.selection.end;
-				view.setSelection(this.caret ? start : end, this.caret ? end : start);
+				var start = this.startSelection.start;
+				var end = this.startSelection.end;
+				view.setSelection(this.startCaret ? start : end, this.startCaret ? end : start);
 			}
 		},
 		/** @ignore */
@@ -99,10 +102,15 @@ define([], function() {
 				this.changes[i].redo(view, false);
 			}
 			if (select) {
-				var start = this.selection.start;
-				var end = this.selection.end;
-				view.setSelection(this.caret ? start : end, this.caret ? end : start);
+				var start = this.endSelection.start;
+				var end = this.endSelection.end;
+				view.setSelection(this.endCaret ? start : end, this.endCaret ? end : start);
 			}
+		},
+		/** @ignore */
+		start: function (view) {
+			this.startSelection = view.getSelection();
+			this.startCaret = view.getCaretOffset();
 		}
 	};
 
@@ -227,6 +235,9 @@ define([], function() {
 		 * @see #startCompoundChange
 		 */
 		endCompoundChange: function() {
+			if (this.compoundChange) {
+				this.compoundChange.end(this.view);
+			}
 			this.compoundChange = undefined;
 		},
 		/**
@@ -307,9 +318,10 @@ define([], function() {
 		 */
 		startCompoundChange: function() {
 			this._commitUndo();
-			var change = new CompoundChange(this.view.getSelection(), this.view.getCaretOffset());
+			var change = new CompoundChange();
 			this.add(change);
 			this.compoundChange = change;
+			this.compoundChange.start(this.view);
 		},
 		_commitUndo: function () {
 			if (this._undoStart !== undefined) {
@@ -324,7 +336,7 @@ define([], function() {
 		},
 		_onDestroy: function(evt) {
 			this.model.removeEventListener("Changing", this._listener.onChanging);
-			this.view.removeEventListener("Destroy", this._listnener.onDestroy);
+			this.view.removeEventListener("Destroy", this._listener.onDestroy);
 		},
 		_onChanging: function(e) {
 			var newText = e.text;

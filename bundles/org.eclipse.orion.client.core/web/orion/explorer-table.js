@@ -261,7 +261,9 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 						this.treeRoot[i] = loadedWorkspace[i];
 					}
 					mUtil.rememberSuccessfulTraversal(this.treeRoot, this.registry);
-					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);					
+					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);	
+					//If current location is not the root, set the search location in the searcher
+					this.searcher.setLocationByMetaData(this.treeRoot);
 					// erase any old page title
 					var breadcrumb = dojo.byId(this.breadcrumbId);
 					if (breadcrumb) {

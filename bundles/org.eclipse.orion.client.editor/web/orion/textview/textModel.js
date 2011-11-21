@@ -32,6 +32,9 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 	 * {@link orion.textview.TextView}<br/>
 	 * {@link orion.textview.TextView#setModel}
 	 * </p>
+	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.textview.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function TextModel(text, lineDelimiter) {
 		this._lastLineIndex = -1;

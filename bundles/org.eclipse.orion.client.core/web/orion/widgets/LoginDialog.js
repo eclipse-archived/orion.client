@@ -38,7 +38,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 					this.unauthenticatedServices[services[i].SignInKey].pending = true;
 					delete this.authenticatedServices[services[i].SignInKey];
 				}else{
-					this.unauthenticatedServices[services[i].SignInKey] = {label: services[i].SignInKey, SignInLocation: services[i].SignInLocation, pending: true};
+					this.unauthenticatedServices[services[i].SignInKey] = {label: services[i].label, SignInLocation: services[i].SignInLocation, pending: true};
 				}
 			}
 			this.renderUnauthenticatedServices();
@@ -92,9 +92,29 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			}
 			isFirst = false;
 			var tr = dojo.create("tr", {className: "navTableHeading"});
-			var td = dojo.create("td", {innerHTML: "<h2>" + (this.authenticatedServices[i].label ? this.authenticatedServices[i].label: i) + "</h2>"}, tr, "only");
+			var authService = this.authenticatedServices[i].authService;
+			var td = dojo.create("td", null, tr, "only");
+			var h2 = dojo.create("h2", null, td, "only");
+			if(!authService){
+				var loginForm = this.authenticatedServices[i].SignInLocation;
+				if(this.authenticatedServices[i].label){
+					h2.innerHTML = this.authenticatedServices[i].label + "<br>";
+				}
+				h2.innerHTML += this.getHostname(loginForm);
+			}else if(authService.getAuthForm){
+				dojo.hitch(_self, function(h2, i){
+					authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm){
+						if(_self.authenticatedServices[i].label){
+							h2.innerHTML = _self.authenticatedServices[i].label + "<br>";
+						}
+						h2.innerHTML += _self.getHostname(loginForm);
+					});
+					})(h2, i);
+			}else{
+				h2.innerHTML = this.authenticatedServices[i].label ? this.authenticatedServices[i].label: i;
+			}
 			dojo.addClass(td, "LoginWindowLeft");
-			td = dojo.create("td", {style: "text-align: right"}, tr, "last");
+			var td = dojo.create("td", {style: "text-align: right"}, tr, "last");
 			dojo.addClass(td, "LoginWindowRight");
 			var jsonData = this.authenticatedServices[i].data;
 			var authService = this.authenticatedServices[i].authService;
@@ -159,7 +179,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			var tr = dojo.create("tr", {className: "navTableHeading"});
 			var td = dojo.create("td", null, tr, "only");
 			dojo.addClass(td, "LoginWindowLeft");
-			dojo.create("h2", {innerHTML: (this.unauthenticatedServices[i].label ? this.unauthenticatedServices[i].label : i)}, td, "only");
+			var h2 = dojo.create("h2", null, td, "only");
 			td = dojo.create("td", {style: "text-align: right"}, tr, "last");
 			dojo.addClass(td, "LoginWindowRight");
 
@@ -172,6 +192,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				}else{
 					dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last");
 				}
+				
+				if(this.unauthenticatedServices[i].label){
+					h2.innerHTML = this.unauthenticatedServices[i].label + "<br>";
+				}
+				h2.innerHTML += this.getHostname(loginForm);
 			}else if(authService.getAuthForm){
 				dojo.hitch(_self, function(td, i){
 				authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm){
@@ -181,10 +206,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 					}else{
 						dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last");
 					}
-					
+					if(_self.unauthenticatedServices[i].label){
+						h2.innerHTML = _self.unauthenticatedServices[i].label + "<br>";
+					}
+					h2.innerHTML += _self.getHostname(loginForm);
 				});
 				})(td, i);
 			}else if(authService.login){
+				
+				dojo.place(document.createTextNode(this.unauthenticatedServices[i].label ? this.unauthenticatedServices[i].label : i), h2, "only");
 				
 				var a = dojo.create("a", {innerHTML: "Sign in", style: "cursor: hand;"}, td, "last");
 				dojo.connect(a, "onmouseover", a, function() {
