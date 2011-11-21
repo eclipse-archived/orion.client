@@ -31,13 +31,12 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		this.registry = registry;
 		this.favorites = [];
 		var self = this;
-		this.registry.getService("orion.core.favorite").then(function(service) {
-			service.getFavorites().then(function(favs) {
-				self.cacheFavorites(favs.navigator);
-			});
-			service.addEventListener("favoritesChanged", function(favs) {
-				self.cacheFavorites(favs.navigator);
-			});
+		var service = this.registry.getService("orion.core.favorite");
+		service.getFavorites().then(function(favs) {
+			self.cacheFavorites(favs.navigator);
+		});
+		service.addEventListener("favoritesChanged", function(favs) {
+			self.cacheFavorites(favs.navigator);
 		});
 	}
 	FavoriteFoldersCache.prototype = {
@@ -73,27 +72,23 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		} else {
 			throw "could not find toolbar " + toolbarId;
 		}
-		registry.getService("orion.page.command").then(dojo.hitch(explorer, function(service) {
-			service.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  // true for force icons to text
-			if (selectionToolbarId) {
-				var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-				service.renderCommands(selectionTools, "dom", null, explorer, "image", null, null, true); // true would force icons to text
-			}
-		}));
+		var service = registry.getService("orion.page.command");
+		service.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  // true for force icons to text
+		if (selectionToolbarId) {
+			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
+			service.renderCommands(selectionTools, "dom", null, explorer, "image", null, null, true); // true would force icons to text
+		}
 		
 		// Stuff we do only the first time
 		if (!favoritesCache) {
 			favoritesCache = new FavoriteFoldersCache(registry);
-			registry.getService("orion.page.selection").then(function(service) {
-				service.addEventListener("selectionChanged", function(singleSelection, selections) {
-					var selectionTools = dojo.byId(selectionToolbarId);
-					if (selectionTools) {
-						dojo.empty(selectionTools);
-						registry.getService("orion.page.command").then(function(commandService) {
-							commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", null, null, true);
-						});
-					}
-				});
+			var service = registry.getService("orion.page.selection");
+			service.addEventListener("selectionChanged", function(singleSelection, selections) {
+				var selectionTools = dojo.byId(selectionToolbarId);
+				if (selectionTools) {
+					dojo.empty(selectionTools);
+					registry.getService("orion.page.command").renderCommands(selectionTools, "dom", selections, explorer, "image", null, null, true);
+				}
 			});
 		}
 	};
@@ -109,13 +104,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 	 * @function
 	 */
 	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient, toolbarId) {
-		var errorHandler = function(error) {
-			serviceRegistry.getService("orion.page.message").then(
-				function(statusService) {
-					statusService.setProgressResult(error);
-				});
-		};
 		var progress = serviceRegistry.getService("orion.page.message");
+		var errorHandler = function(error) {
+			progress.setProgressResult(error);
+		};
 		
 		function forceSingleItem(item) {
 			if (dojo.isArray(item)) {
@@ -295,9 +287,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 				}
 				return true;},
 			callback: function(item) {
-				serviceRegistry.getService("orion.core.favorite").then(function(service) {
-					service.makeFavorites(item);
-				});
+				serviceRegistry.getService("orion.core.favorite").makeFavorites(item);
 			}});
 		commandService.addCommand(favoriteCommand, "object");
 		
@@ -339,8 +329,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			callback: function(item) {
 				var items = dojo.isArray(item) ? item : [item];
 				var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
-				serviceRegistry.getService("orion.page.dialog").then(function(service) {
-					service.confirm(confirmMessage, 
+				serviceRegistry.getService("orion.page.dialog").confirm(confirmMessage, 
 					dojo.hitch(explorer, function(doit) {
 						if (!doit) {
 							return;
@@ -378,8 +367,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 								});
 							}
 						}
-					}));
-				});		
+					})
+				);	
 			}});
 		commandService.addCommand(deleteCommand, "object");
 		commandService.addCommand(deleteCommand, "dom");
@@ -428,20 +417,29 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			}
 		}
 		
+		var newFileNameParameters = {};
+		newFileNameParameters.name = {label: 'Name:', type: 'text', value: 'New File', required: true};
+		
 		var newFileCommand =  new mCommands.Command({
 			name: "New File",
 			tooltip: "Create a new file",
 			imageClass: "core-sprite-new_file",
 			id: "eclipse.newFile",
-			callback: function(item, commandId, domId) {
+			parameters: newFileNameParameters,
+			callback: function(item, commandId, domId, userData, parameters) {
 				item = forceSingleItem(item);
-				getNewItemName(item, domId, "New File", function(name) {
+				var createFunction = function(name) {
 					if (name) {
 						fileClient.createFile(item.Location, name).then(
 							dojo.hitch(explorer, function() {this.changedItem(item);}),
 							errorHandler);
 					}
-				});
+				};
+				if (parameters && parameters.name && parameters.name.value) {
+					createFunction(parameters.name.value);
+				} else {
+					getNewItemName(item, domId, "New File", createFunction);
+				}
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -449,20 +447,29 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		commandService.addCommand(newFileCommand, "dom");
 		commandService.addCommand(newFileCommand, "object");
 		
+		var newFolderNameParameters = {};
+		newFolderNameParameters.name = {label: 'Name:', type: 'text', value: 'New Folder', required: true};
+
 		var newFolderCommand = new mCommands.Command({
 			name: "New Folder",
 			tooltip: "Create a new folder",
 			imageClass: "core-sprite-new_folder",
 			id: "eclipse.newFolder",
-			callback: function(item, commandId, domId) {
+			parameters: newFolderNameParameters,
+			callback: function(item, commandId, domId, userData, parameters) {
 				item = forceSingleItem(item);
-				getNewItemName(item, domId, "New Folder", function(name) {
+				var createFunction = function(name) {
 					if (name) {
 						fileClient.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}), 
+							dojo.hitch(explorer, function() {this.changedItem(item);}),
 							errorHandler);
 					}
-				});
+				};
+				if (parameters && parameters.name && parameters.name.value) {
+					createFunction(parameters.name.value);
+				} else {
+					getNewItemName(item, domId, "New Folder", createFunction);
+				}
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -473,17 +480,23 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		
 		var newProjectCommand = new mCommands.Command({
 			name: "New Folder",
+			parameters: newFolderNameParameters,
 			tooltip: "Create a new folder",
 			imageClass: "core-sprite-new_folder",
 			id: "eclipse.newProject",
-			callback: function(item, commandId, domId) {
-				getNewItemName(item, domId, "New Folder", function(name) {
+			callback: function(item, commandId, domId, userData, parameters) {
+				var createFunction = function(name) {
 					if (name) {
 						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name).then(
 							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}), // refresh the root
 							errorHandler);
 					}
-				});
+				};
+				if (parameters.name && parameters.name.value) {
+					createFunction(parameters.name.value);
+				} else {
+					getNewItemName(item, domId, "New Folder", createFunction);
+				}
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -547,11 +560,12 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
 						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
-						progress.then(function(progressService) {
-							progressService.showWhile(deferred, "Importing from " + host).then(
-								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}),
-								errorHandler);//refresh the root
-						});
+						progress.showWhile(deferred, "Importing from " + host).then(
+							dojo.hitch(explorer, function() {
+								this.changedItem(this.treeRoot);
+							}),
+							errorHandler
+						);//refresh the root
 					}
 				});
 				dialog.startup();
@@ -714,14 +728,13 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		var fileCommands = [];
 		var i;
 		for (i=0; i<commandsReferences.length; i++) {
-			serviceRegistry.getService(commandsReferences[i]).then(function(service) {
-				var info = {};
-				var propertyNames = commandsReferences[i].getPropertyNames();
-				for (var j = 0; j < propertyNames.length; j++) {
-					info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
-				}
-				fileCommands.push({properties: info, service: service});
-			});
+			var service = serviceRegistry.getService(commandsReferences[i])
+			var info = {};
+			var propertyNames = commandsReferences[i].getPropertyNames();
+			for (var j = 0; j < propertyNames.length; j++) {
+				info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
+			}
+			fileCommands.push({properties: info, service: service});
 		}
 		
 		// Convert "orion.navigate.openWith" contributions into orion.navigate.command that open the appropriate editors

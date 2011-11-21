@@ -36,6 +36,9 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 	},
 	postCreate : function(){
 		this.inherited(arguments);
+		if (this.options.url) {
+			this.gitUrl.value = this.options.url;
+		}
 		if(this.options.advancedOnly){
 			this.Basic.style.display="none";
 			this.Advanced.style.display="";
@@ -47,6 +50,9 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 		dojo.connect(this.gitName, "onfocus", null, dojo.hitch(this, this.showNewProject));
 		dojo.connect(this.advancedLink, "onclick", null, dojo.hitch(this, this.showAdvanced));
 		dojo.connect(this.advancedLinkHide, "onclick", null, dojo.hitch(this, this.hideAdvanced));
+		if (this.options.alwaysShowAdvanced) {
+			this.showAdvanced();
+		}
 	},
 	execute: function() {
 		this.options.func(

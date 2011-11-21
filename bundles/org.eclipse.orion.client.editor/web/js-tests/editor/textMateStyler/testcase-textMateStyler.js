@@ -26,7 +26,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 	 */
 	function makeTest(testBody, doTearDown) {
 		function createTextView() {
-			var options = {parent: "editorDiv", readonly: true, stylesheet: ["test-textMateStyler.css"]};
+			var options = {parent: "editorDiv", readonly: true, stylesheet: ["test-textMateStyler.css"], sync: true};
 			return new mTextView.TextView(options);
 		}
 		

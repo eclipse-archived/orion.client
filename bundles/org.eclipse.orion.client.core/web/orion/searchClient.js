@@ -54,9 +54,28 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 			return response;
 		},
 		saveSearch: function(favoriteName, query) {
-			this.registry.getService("orion.core.favorite").then(function(favorites) {
-				favorites.addFavoriteSearch(favoriteName, query);
-			});
+			this.registry.getService("orion.core.favorite").addFavoriteSearch(favoriteName, query);
+		},
+		setLocationByMetaData: function(meta){
+			var locationName = "root";
+			if(meta &&  meta.Directory && meta.Location && meta.Parents){
+				this.setLocationByURL(meta.Location);
+				locationName = meta.Name;
+			} 
+			var searchInputDom = dojo.byId("search");
+			if(searchInputDom && searchInputDom.placeholder){
+				if(locationName.length > 13){
+					searchInputDom.placeholder = "Search " + locationName.substring(0, 10) + "...";
+				} else {
+					searchInputDom.placeholder = "Search " + locationName;
+				}
+			}
+			if(searchInputDom && searchInputDom.title){
+				searchInputDom.title = "Type a keyword or wild card to search in " + locationName;
+			}
+		},
+		setLocationByURL: function(locationURL){
+			this.location = locationURL;
 		},
 		/**
 		 * Returns a query URL for a search.
@@ -68,9 +87,9 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 			if (nameQuery) {
 				//assume implicit trailing wildcard if there isn't one already
 				var wildcard= (/\*$/.test(nameQuery) ? "" : "*");
-				return "?q=" + "Name:" + this._luceneEscape(nameQuery, true) + wildcard;
+				return "?rows=100&start=0&q=" + "Name:" + this._luceneEscape(nameQuery, true) + wildcard;
 			}
-			return "?q=" + this._luceneEscape(query);
+			return "?rows=40&start=0&q=" + this._luceneEscape(query, true) + (this.location ? "+Location:" + this.location + "*" : "");
 		},
 		/**
 		 * Escapes all characters in the string that require escaping in Lucene queries.
@@ -161,7 +180,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 				var b = dojo.create("b", null, div, "last");
 				dojo.place(document.createTextNode(token), b, "only");
 			} else {
-				var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query.split("q=")[1]);
+				var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query, jsonData.response.numFound);
 				explorer.startUp();
 			}
 		},
@@ -185,7 +204,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 								var favoriteName = token || query;
 								var heading = table.insertRow(0);
 								col = heading.insertCell(0);
-								col.innerHTML = "<h2>Search Results</h2>";
+								col.innerHTML = "<h2>Search Results On</h2>";
 							}
 						}
 						var row = table.insertRow(-1);

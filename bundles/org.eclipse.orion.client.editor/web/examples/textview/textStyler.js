@@ -84,7 +84,6 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 	var TASK_TAG = 12;
 
 	// Styles 
-	var isIE = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent) ? document.documentMode : undefined;
 	var singleCommentStyle = {styleClass: "token_singleline_comment"};
 	var multiCommentStyle = {styleClass: "token_multiline_comment"};
 	var docCommentStyle = {styleClass: "token_doc_comment"};
@@ -95,7 +94,6 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 	var keywordStyle = {styleClass: "token_keyword"};
 	var spaceStyle = {styleClass: "token_space"};
 	var tabStyle = {styleClass: "token_tab"};
-	var bracketStyle = {styleClass: isIE < 9 ? "token_bracket" : "token_bracket_outline"};
 	var caretLineStyle = {styleClass: "line_caret"};
 	
 	function Scanner (keywords, whitespacesVisible) {
@@ -176,12 +174,14 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 					case -1: return null;
 					case 47:	// SLASH -> comment
 						c = this._read();
-						if (c === 47) { // SLASH -> single line
-							while (true) {
-								c = this._read();
-								if ((c === -1) || (c === 10) || (c === 13)) {
-									this._unread(c);
-									return SINGLELINE_COMMENT;
+						if (!this.isCSS) {
+							if (c === 47) { // SLASH -> single line
+								while (true) {
+									c = this._read();
+									if ((c === -1) || (c === 10) || (c === 13)) {
+										this._unread(c);
+										return SINGLELINE_COMMENT;
+									}
 								}
 							}
 						}
@@ -382,17 +382,17 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 		this.foldingEnabled = true;
 		this.detectTasks = true;
 		this._scanner = new Scanner(keywords, this.whitespacesVisible);
-		//TODO this scanner is not the best/correct way to parse CSS
-		if (lang === "css") {
-			this._scanner.isCSS = true;
-		}
 		this._firstScanner = new FirstScanner();
 		this._commentScanner = new CommentScanner(this.whitespacesVisible);
 		this._whitespaceScanner = new WhitespaceScanner();
+		//TODO these scanners are not the best/correct way to parse CSS
+		if (lang === "css") {
+			this._scanner.isCSS = true;
+			this._firstScanner.isCSS = true;
+		}
 		this.view = view;
 		this.annotationModel = annotationModel;
-		this._currentBracket = undefined; 
-		this._matchingBracket = undefined;
+		this._bracketAnnotations = undefined; 
 		
 		var self = this;
 		this._listener = {
@@ -539,7 +539,8 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 						title: baseModel.getText(tokenStart, end),
 						style: {styleClass: "annotation task"},
 						html: "<div class='annotationHTML task'></div>",
-						overviewStyle: {styleClass: "annotationOverview task"}
+						overviewStyle: {styleClass: "annotationOverview task"},
+						rangeStyle: {styleClass: "annotationRange task"}
 					});
 				}
 			}
@@ -603,39 +604,35 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			while ((token = scanner.nextToken())) {
 				var tokenStart = scanner.getStartOffset() + offset;
 				var style = null;
-				if (tokenStart === this._matchingBracket) {
-					style = bracketStyle;
-				} else {
-					switch (token) {
-						case KEYWORD: style = keywordStyle; break;
-						case STRING:
-							if (this.whitespacesVisible) {
-								this._parseString(scanner.getData(), tokenStart, styles, stringStyle);
-								continue;
-							} else {
-								style = stringStyle;
-							}
-							break;
-						case DOC_COMMENT: 
-							this._parseComment(scanner.getData(), tokenStart, styles, docCommentStyle, token);
+				switch (token) {
+					case KEYWORD: style = keywordStyle; break;
+					case STRING:
+						if (this.whitespacesVisible) {
+							this._parseString(scanner.getData(), tokenStart, styles, stringStyle);
 							continue;
-						case SINGLELINE_COMMENT:
-							this._parseComment(scanner.getData(), tokenStart, styles, singleCommentStyle, token);
-							continue;
-						case MULTILINE_COMMENT: 
-							this._parseComment(scanner.getData(), tokenStart, styles, multiCommentStyle, token);
-							continue;
-						case WHITE_TAB:
-							if (this.whitespacesVisible) {
-								style = tabStyle;
-							}
-							break;
-						case WHITE_SPACE:
-							if (this.whitespacesVisible) {
-								style = spaceStyle;
-							}
-							break;
-					}
+						} else {
+							style = stringStyle;
+						}
+						break;
+					case DOC_COMMENT: 
+						this._parseComment(scanner.getData(), tokenStart, styles, docCommentStyle, token);
+						continue;
+					case SINGLELINE_COMMENT:
+						this._parseComment(scanner.getData(), tokenStart, styles, singleCommentStyle, token);
+						continue;
+					case MULTILINE_COMMENT: 
+						this._parseComment(scanner.getData(), tokenStart, styles, multiCommentStyle, token);
+						continue;
+					case WHITE_TAB:
+						if (this.whitespacesVisible) {
+							style = tabStyle;
+						}
+						break;
+					case WHITE_SPACE:
+						if (this.whitespacesVisible) {
+							style = spaceStyle;
+						}
+						break;
 				}
 				styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
 			}
@@ -774,7 +771,6 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			return result;
 		}, 
 		_findMatchingBracket: function(model, offset) {
-			if (model.getBaseModel) { model = model.getBaseModel(); }
 			var brackets = "{}()[]<>";
 			var bracket = model.getText(offset, offset + 1);
 			var bracketIndex = brackets.indexOf(bracket, 0);
@@ -899,13 +895,6 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			var view = this.view;
 			var model = view.getModel();
 			var lineIndex;
-			var bracket = this._matchingBracket;
-			if (bracket !== undefined) {
-				if (model.getBaseModel) { bracket = model.mapOffset(bracket, true); }
-				lineIndex = model.getLineAtOffset(bracket);
-				view.redrawLines(lineIndex, lineIndex + 1);
-				this._matchingBracket = this._currentBracket = undefined;
-			}
 			if (this.highlightCaretLine) {
 				var oldLineIndex = model.getLineAtOffset(oldSelection.start);
 				lineIndex = model.getLineAtOffset(newSelection.start);
@@ -920,31 +909,44 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 					}
 				}
 			}
-			if (newSelection.start !== newSelection.end || newSelection.start === 0) {
-				return;
+			if (!this.annotationModel) { return; }
+			var remove = this._bracketAnnotations, add, caret;
+			if (newSelection.start === newSelection.end && (caret = view.getCaretOffset()) > 0) {
+				var mapCaret = caret - 1;
+				if (model.getBaseModel) {
+					mapCaret = model.mapOffset(mapCaret);
+					model = model.getBaseModel();
+				}
+				var bracket = this._findMatchingBracket(model, mapCaret);
+				if (bracket !== -1) {
+					add = [{
+						start: bracket,
+						end: bracket + 1,
+						type: "orion.annotation.matchingBracket",
+						title: "Matching Bracket",
+						html: "<div class='annotationHTML matchingBracket'></div>",
+						overviewStyle: {styleClass: "annotationOverview matchingBracket"},
+						rangeStyle: {styleClass: "annotationRange matchingBracket"}
+					},
+					{
+						start: mapCaret,
+						end: mapCaret + 1,
+						type: "orion.annotation.currentBracket",
+						title: "Current Bracket",
+						html: "<div class='annotationHTML currentBracket'></div>",
+						overviewStyle: {styleClass: "annotationOverview currentBracket"},
+						rangeStyle: {styleClass: "annotationRange currentBracket"}
+					}];
+				}
 			}
-			var caret = view.getCaretOffset() - 1;
-			if (caret < 0) { return; }
-			var mapCaret = caret;
-			if (model.getBaseModel) {
-				mapCaret = model.mapOffset(caret);
-			}
-			bracket = this._findMatchingBracket(model, mapCaret);
-			if (bracket !== -1) {
-				this._currentBracket = mapCaret;
-				this._matchingBracket = bracket;
-				if (model.getBaseModel) { bracket = model.mapOffset(bracket, true); }
-				lineIndex = model.getLineAtOffset(bracket);
-				view.redrawLines(lineIndex, lineIndex + 1);
-			}
+			this._bracketAnnotations = add;
+			this.annotationModel.replaceAnnotations(remove, add);
 		},
 		_onModelChanged: function(e) {
 			var start = e.start;
 			var removedCharCount = e.removedCharCount;
 			var addedCharCount = e.addedCharCount;
 			var changeCount = addedCharCount - removedCharCount;
-			if (this._matchingBracket && start < this._matchingBracket) { this._matchingBracket += changeCount; }
-			if (this._currentBracket && start < this._currentBracket) { this._currentBracket += changeCount; }
 			var view = this.view;
 			var viewModel = view.getModel();
 			var baseModel = viewModel.getBaseModel ? viewModel.getBaseModel() : viewModel;
@@ -960,7 +962,11 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 				ts = this.comments[commentStart].start;
 				if (ts > start) { ts += changeCount; }
 			} else {
-				ts = lineStart;
+				if (commentStart === commentCount && commentCount > 0 && charCount - changeCount === this.comments[commentCount - 1].end) {
+					ts = this.comments[commentCount - 1].start;
+				} else {
+					ts = lineStart;
+				}
 			}
 			var te;
 			if (commentEnd < commentCount) {

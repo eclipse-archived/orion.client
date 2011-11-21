@@ -84,11 +84,26 @@ define([], function() {
 								listeners.splice(j, 1);
 							}
 						}
+						if (listeners.length === 0) {
+							delete this._eventTypes[type];
+						}
 						state.compact = false;
 					}
 				}
 			}
 		},
+		/**
+		 * Returns whether there is a listener for the specified event type.
+		 * 
+		 * @param {String} type The event type
+		 * 
+		 * @see #addEventListener
+		 * @see #removeEventListener
+		 */
+		isListening: function(type) {
+			if (!this._eventTypes) { return false; }
+			return this._eventTypes[type] !== undefined;
+		},		
 		/**
 		 * Removes an event listener from the event target.
 		 * <p>
@@ -117,6 +132,9 @@ define([], function() {
 						}
 						break;
 					}
+				}
+				if (listeners.length === 0) {
+					delete this._eventTypes[type];
 				}
 			}
 		}

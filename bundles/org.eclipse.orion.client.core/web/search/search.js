@@ -12,11 +12,11 @@
 /*global window define */
 /*browser:true*/
 
-define(['dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
-        'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/searchResults', 'orion/globalCommands',
+define(['require', 'dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
+        'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/searchResults', 'orion/breadcrumbs', 'orion/globalCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mBootstrap, mStatus, mDialogs, mCommands, mFavorites, 
-				mSearchClient, mFileClient, mSearchResults, mGlobalCommands) {
+		function(require, dojo, mBootstrap, mStatus, mDialogs, mCommands, mFavorites, 
+				mSearchClient, mFileClient, mSearchResults, mBreadcrumbs, mGlobalCommands) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -39,12 +39,84 @@ define(['dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, searcher);
 			searchResultsGenerator.loadResults(dojo.hash());
 			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");
-		
+			initTitleBreadCrumb(fileClient, searcher);
 			//every time the user manually changes the hash, we need to load the results with that name
 			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
-			   searchResultsGenerator.loadResults(dojo.hash());
+				initTitleBreadCrumb(fileClient, searcher);
+				searchResultsGenerator.loadResults(dojo.hash());
 				mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");   
 			});
 		});
 	});
+
+	function parseHash(){
+		var hash = dojo.hash();
+		var hasLocation = (hash.indexOf("+Location:") > -1);
+		var searchLocation = null;
+		var searchStr = hash;
+		if(hasLocation){
+			var splitHash = hash.split("+Location:");
+			if(splitHash.length === 2){
+				searchLocation = splitHash[1].split("*")[0];
+				searchStr = splitHash[0];
+			}
+		}
+		return {searchStr: searchStr, searchLocation: searchLocation};
+	}
+	
+	function makeHref(fileClient, seg, location, searchStr){
+		if(!location || location === "" || location === "root"){
+			seg.href = require.toUrl("search/search.html") + "#" + searchStr;
+			return;
+		}
+		fileClient.read(location, true).then(
+			dojo.hitch(this, function(metadata) {
+				if(metadata.Location){
+					seg.href = require.toUrl("search/search.html") + "#" + searchStr + "+Location:" + metadata.Location + "*";
+				}
+			}),
+			dojo.hitch(this, function(error) {
+				console.error("Error loading file metadata: " + error.message);
+			})
+		);
+	}
+
+	function initTitleBreadCrumb(fileClient, searcher){
+		var searchLoc = parseHash();
+		
+		if(searchLoc.searchLocation){
+			fileClient.read(searchLoc.searchLocation, true).then(
+					dojo.hitch(this, function(metadata) {
+						var breadCrumbDomNode = dojo.byId("location");
+						if (breadCrumbDomNode) {
+							//If current location is not the root, set the search location in the searcher
+							searcher.setLocationByMetaData(metadata);
+							dojo.empty(breadCrumbDomNode);
+							var breadcrumb = new mBreadcrumbs.BreadCrumbs({
+								container: breadCrumbDomNode,
+								resource: metadata ,
+								firstSegmentName: "root",
+								makeHref:function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr);
+								}
+							});
+						}
+					}),
+					dojo.hitch(this, function(error) {
+						console.error("Error loading file metadata: " + error.message);
+					})
+			);
+		} else {
+			var breadCrumbDomNode = dojo.byId("location");
+			if (breadCrumbDomNode) {
+				dojo.empty(breadCrumbDomNode);
+				var breadcrumb = new mBreadcrumbs.BreadCrumbs({
+					container: breadCrumbDomNode,
+					resource: {} ,
+					firstSegmentName: "root",
+					makeHref:function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr);
+					}
+				});
+			}
+		}
+	}
 });

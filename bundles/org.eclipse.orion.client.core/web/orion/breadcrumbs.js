@@ -49,7 +49,12 @@ define(['require', 'dojo'], function(require, dojo) {
 				var seg = document.createElement('a');
 				var segText = this._firstSegmentName;
 				dojo.place(document.createTextNode(segText), seg, "only");
-				seg.href = require.toUrl("navigate/table.html") + "#";
+				if(this._makeHref) {
+					this._makeHref(seg , "");
+				}
+				else {
+					seg.href = require.toUrl("navigate/table.html") + "#";
+				}
 				return seg;
 			}
 			return null;

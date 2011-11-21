@@ -61,18 +61,15 @@ exports.CloneDetails = (function() {
 			})
 		});
 		
-		this._registry.getService("orion.page.command").then(function(commandService) {
-			// register commands with object scope
-			commandService.addCommand(editPropertyCommand, "object");
-			commandService.addCommand(deletePropertyCommand, "object");
-			commandService.addCommand(addPropertyCommand, "dom");
-			// declare the contribution to the ui
-			commandService.registerCommandContribution("eclipse.git.editProperty", 1);
-			commandService.registerCommandContribution("eclipse.git.deleteProperty", 2);
-			commandService.registerCommandContribution("eclipse.git.addProperty", 1, "configurationCommands");
-		});
-		
-
+		var commandService = this._registry.getService("orion.page.command");
+		// register commands with object scope
+		commandService.addCommand(editPropertyCommand, "object");
+		commandService.addCommand(deletePropertyCommand, "object");
+		commandService.addCommand(addPropertyCommand, "dom");
+		// declare the contribution to the ui
+		commandService.registerCommandContribution("eclipse.git.editProperty", 1);
+		commandService.registerCommandContribution("eclipse.git.deleteProperty", 2);
+		commandService.registerCommandContribution("eclipse.git.addProperty", 1, "configurationCommands");
 	}
 	
 	CloneDetails.prototype = {
@@ -88,21 +85,17 @@ exports.CloneDetails = (function() {
 			}
 			
 			var self = this;
-			this._registry.getService("orion.git.provider").then(function(service) {
-				service.getGitCloneConfig(configPath).then(function(item) { 
-					self.render(item); 
-				});
+			this._registry.getService("orion.git.provider").getGitCloneConfig(configPath).then(function(item) { 
+				self.render(item); 
 			});
 		},
 		
 		reportError: function(errorJson){
-			this._registry.getService("orion.page.message").then(function(progressService){
-					var display = [];
-					display.Severity = "Error";
-					var resp = JSON.parse( errorJson.responseText );
-					display.Message = resp.Message ? resp.Message : errorJson.responseText;
-					progressService.setProgressResult(display);
-			});
+			var display = [];
+			display.Severity = "Error";
+			var resp = JSON.parse( errorJson.responseText );
+			display.Message = resp.Message ? resp.Message : errorJson.responseText;
+			this._registry.getService("orion.page.message").setProgressResult(display);
 		},
 		
 		newProperty: function(item, commandId, domId){
@@ -116,12 +109,12 @@ exports.CloneDetails = (function() {
 					dojo.place(document.createTextNode(newKeyText), tempSpan, "only");					
 					mUtil.getUserText("propertyValueNewEditBox", newPropertyVal, true, "", 
 						function(newValueText) {
-							self._registry.getService("orion.git.provider").then(function(gitService) {
-								gitService.addCloneConfigurationProperty(self.configPath, newKeyText, newValueText).then(function(jsonData){
+							self._registry.getService("orion.git.provider").addCloneConfigurationProperty(self.configPath, newKeyText, newValueText).then(function(jsonData){
 									dojo.hitch(self, self.loadCloneDetails)(self.configPath);
 								},
-								function(errorJson){dojo.hitch(self, self.reportError)(errorJson);});
-							});
+								function(errorJson){
+									dojo.hitch(self, self.reportError)(errorJson);
+								});
 						}, 
 						function() {
 							newPropertyKey.parentNode.removeChild(tempSpan);
@@ -143,12 +136,12 @@ exports.CloneDetails = (function() {
 			
 			mUtil.getUserText("propertyValue"+propertyIndex+"EditBox", propertySpan, true, item.Value, 
 				function(newText) {
-					registry.getService("orion.git.provider").then(function(gitService) {
-						gitService.editCloneConfigurationProperty(item.Location, newText).then(function(jsonData){
+					registry.getService("orion.git.provider").editCloneConfigurationProperty(item.Location, newText).then(function(jsonData){
 							propertySpan.innerHTML = newText;
 						},
-						function(errorJson){dojo.hitch(self, self.reportError)(errorJson);});
-					});
+						function(errorJson){
+							dojo.hitch(self, self.reportError)(errorJson);
+						});
 				}, 
 				function() {
 					// re-show
@@ -157,19 +150,17 @@ exports.CloneDetails = (function() {
 			
 		},
 		
-		deleteProperty: function(item, commandId, imageId, propertyIndex){
-			var propertyRow = dojo.byId("property"+propertyIndex);
+		deleteProperty: function(item, commandId, imageId, propertyIndex) {
+			var propertyRow = dojo.byId("property" + propertyIndex);
 			var self = this;
-			
-			if(confirm("Do you really want to delete " + item.Key + "?")){
-					this._registry.getService("orion.git.provider").then(function(gitService) {
-						gitService.deleteCloneConfigurationProperty(item.Location).then(function(jsonData){
-							dojo.style(propertyRow, "display", "none");
-						},
-						function(errorJson){dojo.hitch(self, self.reportError)(errorJson);});
-					});
+
+			if (confirm("Do you really want to delete " + item.Key + "?")) {
+				this._registry.getService("orion.git.provider").deleteCloneConfigurationProperty(item.Location).then(function(jsonData) {
+					dojo.style(propertyRow, "display", "none");
+				}, function(errorJson) {
+					dojo.hitch(self, self.reportError)(errorJson);
+				});
 			}
-			
 		},
 
 		render: function(cloneDetails) {
@@ -211,9 +202,7 @@ exports.CloneDetails = (function() {
 					// we must hide/show the span rather than the column.  IE and Chrome will not consider
 					// the mouse as being over the table row if it's in a hidden column
 					dojo.style(actionsWrapper, "visibility", "hidden");
-					this._registry.getService("orion.page.command").then(function(service) {
-						service.renderCommands(actionsWrapper, "object", cloneDetails.Children[i], this, "image", null, i);
-					});
+					this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", cloneDetails.Children[i], this, "image", null, i);
 					
 					dojo.connect(tr, "onmouseover", tr, function() {
 						var wrapper = dojo.byId(this.id+"actionsWrapper");
@@ -242,9 +231,7 @@ exports.CloneDetails = (function() {
 			dojo.place(cloneMetaTable, this._parent, "only");
 			
 			var commands = dojo.byId("configurationCommands");
-				this._registry.getService("orion.page.command").then(function(service) {
-					service.renderCommands(commands, "dom", this, this, "image");
-				});
+			this._registry.getService("orion.page.command").renderCommands(commands, "dom", this, this, "image");
 		}
 	};
 	return CloneDetails;

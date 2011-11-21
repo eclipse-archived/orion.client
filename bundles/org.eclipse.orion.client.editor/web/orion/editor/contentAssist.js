@@ -28,6 +28,10 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKe
 	 * </dl>
 	 * @param {orion.editor.Editor} editor The Editor to provide content assist for.
 	 * @param {String|DomNode} contentAssistId The ID or DOMNode to use as the parent for content assist.
+	 *
+	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.textview.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function ContentAssist(editor, contentAssistId) {
 		this.editor = editor;

@@ -33,9 +33,7 @@ exports.LogService.prototype = /** @lends orion.log.LogService.prototype */ {
 	info : function(message) {
 		// TODO temporary implementation uses status line
 		// obviously not the real answer
-		this._serviceRegistry.getService("orion.page.message").then(function(service) {
-			service.setMessage("LOG: " + message);
-		});
+		this._serviceRegistry.getService("orion.page.message").setMessage("LOG: " + message);
 	}
 };
 

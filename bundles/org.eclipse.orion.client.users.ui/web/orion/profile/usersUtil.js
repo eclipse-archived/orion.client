@@ -20,27 +20,25 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 		} else {
 			throw "could not find toolbar " + toolbarId;
 		}
-		registry.getService("orion.page.command").then(dojo.hitch(explorer, function(service) {
-			service.renderCommands(toolbar, "dom", item, explorer, "image");
-			if (selectionToolbarId) {
-				var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-				service.renderCommands(selectionTools, "dom", null, explorer, "image");
-			}
-		}));
+		var commandService = registry.getService("orion.page.command");
+		commandService.renderCommands(toolbar, "dom", item, explorer, "image");
+		if (selectionToolbarId) {
+			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
+			commandService.renderCommands(selectionTools, "dom", null, explorer, "image");
+		}
+
 		
 		// Stuff we do only the first time
 		if (!eclipse.doOnce) {
 			eclipse.doOnce = true;
-			registry.getService("orion.page.selection").then(function(service) {
-				service.addEventListener("selectionChanged", function(singleSelection, selections) {
-					var selectionTools = dojo.byId(selectionToolbarId);
-					if (selectionTools) {
-						dojo.empty(selectionTools);
-						registry.getService("orion.page.command").then(function(commandService) {
-							commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
-						});
-					}
-				});
+			registry.getService("orion.page.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
+				var selectionTools = dojo.byId(selectionToolbarId);
+				if (selectionTools) {
+					dojo.empty(selectionTools);
+					registry.getService("orion.page.command").then(function(commandService) {
+						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
+					});
+				}
 			});
 		}
 	}

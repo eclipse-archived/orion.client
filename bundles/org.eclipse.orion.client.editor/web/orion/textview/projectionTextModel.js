@@ -49,6 +49,9 @@ define(['orion/textview/textModel', 'orion/textview/eventTarget'], function(mTex
 	 * {@link orion.textview.TextModel}
 	 * {@link orion.textview.TextView#setModel}
 	 * </p>
+	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.textview.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function ProjectionTextModel(baseModel) {
 		this._model = baseModel;	/* Base Model */

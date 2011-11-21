@@ -14,13 +14,10 @@
 
 define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands'], function(require, dojo, dijit, mExplorer, mUtil, mFileClient, mCommands) {
 
-	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, searchStr, explorer) {
+	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, queryStr, explorer) {
 		this.registry= serviceRegistry;
 		this.fileClient = fileClient; 
 		this._resultLocation = resultLocation;
-		this.searchStr = searchStr.toLowerCase();
-		this.searchStrLength = searchStr.length;
-		
 		this._treeRoot = {
 				isRoot: true,
 				children:[]
@@ -29,14 +26,84 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				isRoot: true,
 				children:[]
 		};
-		
 		this.currentDetail = null;
 		this.indexedFileItems = null;
 		this.modelLocHash = [];
 		this._lineDelimiter = "\n"; 
 		this.explorer = explorer;
+		this._parseQueryStr(queryStr);
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
+	
+	SearchResultModel.prototype._parseLocationAndSearchStr = function(searchStr) {
+		this.locationAndSearchStr = searchStr;
+		var hasLocation = (searchStr.indexOf("+Location:") > -1);
+		this.searchLocation = "";
+		if(hasLocation){
+			var splitStr = searchStr.split("+Location:");
+			if(splitStr.length === 2){
+				this.searchLocation = splitStr[1];
+				searchStr = splitStr[0];
+			}
+		}
+		this.OriginalSearchString = searchStr.split("\\").join("");
+		this._parseSearchStr(searchStr);
+	};
+	
+	SearchResultModel.prototype._parseSearchStr = function(searchStr) {
+		var hasStar = (searchStr.indexOf("*") > -1);
+		var hasQMark = (searchStr.indexOf("?") > -1);
+		if(hasStar){
+			searchStr = searchStr.split("*").join(".*");
+		}
+		if(hasQMark){
+			searchStr = searchStr.split("?").join(".");
+		}
+		if(!hasStar && !hasQMark){
+			this.searchStr =searchStr.split("\\").join("").toLowerCase();
+			this.wildCard = false;
+		} else {
+			this.searchStr =searchStr.toLowerCase();
+			var regexp = this.parseRegExp("/" + this.searchStr + "/");
+			if (regexp) {
+				var pattern = regexp.pattern;
+				var flags = regexp.flags;
+				flags = flags + (flags.indexOf("i") === -1 ? "i" : "");
+				this.regExp = {pattern: pattern, flags: flags};
+				this.wildCard = true;
+			}
+		}
+		this.searchStrLength = this.searchStr.length;
+	};
+	
+	SearchResultModel.prototype._parseQueryStr = function(queryStr) {
+		var splitQ = queryStr.split("?");
+		if(splitQ.length === 2){
+			queryStr = splitQ[1];
+		}
+		splitQ = queryStr.split("&");
+		this.start = 0;
+		this.rows = 20;
+		for(var i=0; i < splitQ.length; i++){
+			var splitparameters = splitQ[i].split("=");
+			if(splitparameters.length === 2){
+				if(splitparameters[0] === "q"){
+					this._parseLocationAndSearchStr(splitparameters[1]);
+				} else if(splitparameters[0] === "rows"){
+					this.rows = parseInt(splitparameters[1]);
+				} else if(splitparameters[0] === "start"){
+					this.start = parseInt(splitparameters[1]);
+				}
+			}
+		}
+		var pageTitle = dojo.byId("pageTitle");
+		if(pageTitle && this.OriginalSearchString && this.explorer.numberOnPage > 0){
+			var startNumber = this.start + 1;
+			var endNumber = startNumber + this.explorer.numberOnPage - 1;
+			pageTitle.innerHTML = "Files " + "<b>" + startNumber + "-"  + endNumber + "</b>" + " of " + this.explorer.totalNumber + 
+			" found by keyword " + "<b>" + this.OriginalSearchString + "</b>" + " in:";
+		}
+	};
 	
 	SearchResultModel.prototype.setCurrent = function(currentFileIndex, currentDetailIndex) {
 		this.currentFileIndex = currentFileIndex;
@@ -308,7 +375,58 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return result;
 	};
 	
-	SearchResultModel.prototype.searchOneline =  function(lineString, searchStr){
+	/**
+	 * @private
+	 * @static
+	 * @param {String}  Input string
+	 * @returns {pattern:String, flags:String} if str looks like
+	 *          a RegExp, or null otherwise
+	 */
+	SearchResultModel.prototype.parseRegExp =  function(str){
+		var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
+		if (regexp) {
+			return {
+				pattern : regexp[1],
+				flags : regexp[2]
+			};
+		}
+		return null;
+	};
+	
+	/**
+	 * Helper for finding regex matches in text contents.
+	 * 
+	 * @param {String}
+	 *            pattern A valid regexp pattern.
+	 * @param {String}
+	 *            flags Valid regexp flags: [is]
+	 * @param {Number}
+	 *            [startIndex] Default is false.
+	 * @return {Object} An object giving the match details, or
+	 *         <code>null</code> if no match found. The
+	 *         returned object will have the properties:<br />
+	 *         {Number} index<br />
+	 *         {Number} length
+	 */
+	SearchResultModel.prototype._findRegExp =  function(text, pattern, flags, startIndex) {
+		if (!pattern) {
+			return null;
+		}
+		flags = flags || "";
+		// 'g' makes exec() iterate all matches, 'm' makes ^$
+		// work linewise
+		flags += (flags.indexOf("g") === -1 ? "g" : "")
+				+ (flags.indexOf("m") === -1 ? "m" : "");
+		var regexp = new RegExp(pattern, flags);
+		var result = null, match = null;
+		result = regexp.exec(text.substring(startIndex));
+		return result && {
+			startIndex : result.index + startIndex,
+			length : result[0].length
+		};
+	};
+	
+	SearchResultModel.prototype.searchOnelineLiteral =  function(lineString, searchStr){
 		var i,startIndex = 0;
 		var found = false;
 		var result = [];
@@ -319,7 +437,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			} else {
 				result.push({startIndex: i});
 				found = true;
-				startIndex = i + searchStr.length;
+				startIndex = i + this.searchStrLength;
 			}
 		}
 		if(found) {
@@ -327,6 +445,26 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 		return null;
 		
+	};
+	
+	SearchResultModel.prototype.searchOnelineRegEx =  function(lineString){
+		var i,startIndex = 0;
+		var found = false;
+		var result = [];
+		while(true){
+			var regExResult = this._findRegExp(lineString, this.regExp.pattern, this.regExp.flags, startIndex);
+			if(regExResult){
+				result.push(regExResult);
+				found = true;
+				startIndex = regExResult.startIndex + regExResult.length;
+			} else {
+				break;
+			}
+		}
+		if(found) {
+			return result;
+		}
+		return null;
 	};
 	
 	SearchResultModel.prototype.searchWithinFile = function( fileModelNode, fileContentText, searchStr){
@@ -338,7 +476,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				var lineStringOrigin = fileContents[i];
 				if(lineStringOrigin && lineStringOrigin.length > 0){
 					var lineString = lineStringOrigin.toLowerCase();
-					var result = this.searchOneline(lineString, searchStr);
+					var result;
+					if(this.wildCard){
+						result = this.searchOnelineRegEx(lineString);
+					} else {
+						result = this.searchOnelineLiteral(lineString, searchStr);
+					}
 					if(result){
 						var lineNumber = i+1;
 						var detailNode = {parent: fileModelNode, type: "detail", matches: result, lineNumber: lineNumber + " : ", name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
@@ -485,6 +628,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 							dojo.place(document.createTextNode(item.name.substring(startIndex, item.matches[i].startIndex)), linkSpan, "last");
 						}
 						var matchSegBold = dojo.create("b", null, linkSpan, "last");
+						if(this.explorer.model.wildCard){
+							gap = item.matches[i].length;
+						}
 						dojo.place(document.createTextNode(item.name.substring(item.matches[i].startIndex, item.matches[i].startIndex + gap)), matchSegBold, "only");
 						startIndex = item.matches[i].startIndex + gap;
 					}
@@ -509,15 +655,16 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	 * Creates a new search result explorer.
 	 * @name orion.SearchResultExplorer
 	 */
-	function SearchResultExplorer(registry, commandService, resultLocation,  parentNode, searchStr){
+	function SearchResultExplorer(registry, commandService, resultLocation,  parentNode, queryStr, totalNumber){
 		this.parentNode = parentNode;
 		this.registry = registry;
 		this._commandService = commandService;
 		this.fileClient = new mFileClient.FileClient(this.registry);
 		this.checkbox = false;
 		this.renderer = new SearchResultRenderer({checkbox: false}, this);
-		this.model = new SearchResultModel(registry, this.fileClient, resultLocation, searchStr, this);
-		
+		this.totalNumber = totalNumber;
+		this.numberOnPage = resultLocation.length;
+		this.model = new SearchResultModel(registry, this.fileClient, resultLocation, queryStr, this);
 	}
 	SearchResultExplorer.prototype = new mExplorer.Explorer();
 	
@@ -528,8 +675,51 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	SearchResultExplorer.prototype.onchange = function(item) {
 	};
 	
+	SearchResultExplorer.prototype.caculateNextPage = function(currentStart, pageSize, totalNumber){
+		if((currentStart + pageSize) >= totalNumber){
+			return {start:currentStart};
+		}
+		return {start: currentStart+pageSize};
+	};
+	
+	SearchResultExplorer.prototype.caculatePrevPage = function(currentStart, pageSize, totalNumber){
+		var start = currentStart - pageSize;
+		if(start < 0){
+			start = 0;
+		}
+		return {start: start};
+	};
+	
 	SearchResultExplorer.prototype.initCommands = function(){	
 		var that = this;
+		var previousPage = new mCommands.Command({
+			name : "Previous Page",
+			tooltip: "Show previous page of search result",
+			imageClass : "core-sprite-leftarrow",
+			id : "orion.search.prevPage",
+			hrefCallback : function(item) {
+				var prevPage = that.caculatePrevPage(that.model.start, that.model.rows, that.totalNumber);
+				return require.toUrl("search/search.html") + "#" + "?rows=" + that.model.rows + "&start=" + prevPage.start + "&q=" + that.model.locationAndSearchStr;
+			},
+			visibleWhen : function(item) {
+				var prevPage = that.caculatePrevPage(that.model.start, that.model.rows, that.totalNumber);
+				return (prevPage.start !== that.model.start);
+			}
+		});
+		var nextPage = new mCommands.Command({
+			name : "Next Page",
+			tooltip: "Show next page of search result",
+			imageClass : "core-sprite-rightarrow",
+			id : "orion.search.nextPage",
+			hrefCallback : function(item) {
+				var nextPage = that.caculateNextPage(that.model.start, that.model.rows, that.totalNumber);
+				return require.toUrl("search/search.html") + "#" + "?rows=" + that.model.rows + "&start=" + nextPage.start + "&q=" + that.model.locationAndSearchStr;
+			},
+			visibleWhen : function(item) {
+				var nextPage = that.caculateNextPage(that.model.start, that.model.rows, that.totalNumber);
+				return (nextPage.start !== that.model.start);
+			}
+		});
 		var nextResultCommand = new mCommands.Command({
 			name : "Next result",
 			imageClass : "core-sprite-move_down",
@@ -562,18 +752,22 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			callback : function() {
 				that.collapseAll();
 		}});
+		this._commandService.addCommand(previousPage, "dom");
+		this._commandService.addCommand(nextPage, "dom");
 		this._commandService.addCommand(nextResultCommand, "dom");
 		this._commandService.addCommand(prevResultCommand, "dom");
 		this._commandService.addCommand(expandAllCommand, "dom");
 		this._commandService.addCommand(collapseAllCommand, "dom");
 			
 		// Register command contributions
-		this._commandService.registerCommandContribution("orion.search.nextResult", 1, "pageActionsRight");
-		this._commandService.registerCommandContribution("orion.search.prevResult", 2, "pageActionsRight");
-		this._commandService.registerCommandContribution("orion.search.expandAll", 3, "pageActionsRight");
-		this._commandService.registerCommandContribution("orion.search.collapseAll", 4, "pageActionsRight");
-		dojo.empty("pageActionsRight");
-		this._commandService.renderCommands("pageActionsRight", "dom", that, that, "image");
+		this._commandService.registerCommandContribution("orion.search.prevPage", 1, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.nextPage", 2, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.nextResult", 3, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.prevResult", 4, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.expandAll", 5, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.collapseAll", 6, "pageNavigationActions");
+		dojo.empty("pageNavigationActions");
+		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "image");
 		
 		var optionMenu = dijit.byId("globalSearchOptMenu");
 		if (optionMenu) {
@@ -596,17 +790,23 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			dropDown : newMenu
 		});
 		dojo.addClass(menuButton.domNode, "commandImage");
-		dojo.place(menuButton.domNode, "pageActionsRight", "last");
+		dojo.place(menuButton.domNode, "pageNavigationActions", "last");
 		
 		
 	};
 	
+	SearchResultExplorer.prototype.reportStatus = function(message) {
+		this.registry.getService("orion.page.message").setProgressMessage(message);	
+	};
+	
 	SearchResultExplorer.prototype.startUp = function() {
 		var that = this;
+		this.reportStatus("Generating search result...");	
 		this.model.loadOneFileMetaData(0, function(onComplete){
 			that.initCommands();
 			that.createTree(that.parentNode, that.model);
 			that.gotoCurrent();
+			that.reportStatus("");	
 		});
 	};
 	
