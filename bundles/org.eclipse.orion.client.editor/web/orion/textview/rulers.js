@@ -105,7 +105,7 @@ define(['orion/textview/tooltip'], function(mTooltip) {
 				var annotation = annotations.next();
 				if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
 				var annotationLineStart = baseModel.getLineAtOffset(annotation.start);
-				var annotationLineEnd = baseModel.getLineAtOffset(annotation.end - 1);
+				var annotationLineEnd = baseModel.getLineAtOffset(Math.max(annotation.start, annotation.end - 1));
 				for (var lineIndex = annotationLineStart; lineIndex<=annotationLineEnd; lineIndex++) {
 					var visualLineIndex = lineIndex;
 					if (model !== baseModel) {
@@ -321,7 +321,9 @@ define(['orion/textview/tooltip'], function(mTooltip) {
 		 * @param {Number} lineIndex the line index of the annotation under the pointer.
 		 * @param {DOMEvent} e the mouse over event.
 		 */
-		onMouseOver: this._onMouseMove,
+		onMouseOver: function(lineIndex, e) {
+			this.onMouseMove(lineIndex, e);
+		},
 		/**
 		 * This event is sent when the mouse pointer exits a line annotation.
 		 *

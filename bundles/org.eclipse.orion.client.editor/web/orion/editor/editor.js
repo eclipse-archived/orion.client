@@ -75,6 +75,7 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 		foldingType: "orion.annotation.folding",
 		currentBracketType: "orion.annotation.currentBracket",
 		matchingBracketType: "orion.annotation.matchingBracket",
+		currentLineType: "orion.annotation.currentLine",
 		
 		/**
 		 * Returns the underlying <code>TextView</code> used by this editor. 
@@ -297,7 +298,7 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 			var annotation, annotations = [];
 			while (iter.hasNext()) {
 				annotation = iter.next();
-				if (!annotationStyler.isAnnotationTypeVisible(annotation.type)) { continue; }
+				if (!annotationStyler.isAnnotationTypeVisible(annotation.type) || !annotation.rangeStyle) { continue; }
 				annotations.push(annotation);
 			}
 			if (annotations.length === 0) { return null; }
@@ -407,6 +408,42 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 			return null;
 		},
 		
+		/** @private */
+		_highlightCurrentLine: function(newSelection, oldSelection) {
+			var annotationModel = this._annotationModel;
+			if (!annotationModel) { return; }
+			var textView = this._textView;	
+			var model = textView.getModel();
+			var oldLineIndex = oldSelection ? model.getLineAtOffset(oldSelection.start) : -1;
+			var lineIndex = model.getLineAtOffset(newSelection.start);
+			var newEmpty = newSelection.start === newSelection.end;
+			var oldEmpty = !oldSelection || oldSelection.start === oldSelection.end;
+			if (!(oldLineIndex === lineIndex && oldEmpty && newEmpty)) {
+				var remove = this._currentLineAnnotation ? [this._currentLineAnnotation] : null;
+				this._currentLineAnnotation = null;
+				var add;
+				if (newEmpty) {
+					var start = model.getLineStart(lineIndex);
+					var end = model.getLineEnd(lineIndex);
+					if (model.getBaseModel) {
+						start = model.mapOffset(start);
+						end = model.mapOffset(end);
+					}
+					this._currentLineAnnotation = {
+						start: start,
+						end: end,
+						type: this.currentLineType,
+						title: "Current Line",
+						html: "<div class='annotationHTML currentLine'></div>",
+						overviewStyle: {styleClass: "annotationOverview currentLine"},
+						lineStyle: {styleClass: "annotationLine currentLine"}
+					};
+					add = [this._currentLineAnnotation];
+				}
+				annotationModel.replaceAnnotations(remove, add);
+			}
+		},
+		
 		highlightAnnotations: function() {
 			if (this._annotationStyler) {
 				this._annotationStyler.destroy();
@@ -418,6 +455,7 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 				this._annotationStyler.addAnnotationType(this.warningType);
 				this._annotationStyler.addAnnotationType(this.matchingBracketType);
 				this._annotationStyler.addAnnotationType(this.currentBracketType);
+				this._annotationStyler.addAnnotationType(this.currentLineType);
 			}
 		},
 		
@@ -463,6 +501,7 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 				},
 				onSelection: function(e) {
 					self._updateCursorStatus();
+					self._highlightCurrentLine(e.newValue, e.oldValue);
 				}
 			};
 			textView.addEventListener("ModelChanged", this._listener.onModelChanged);
@@ -552,6 +591,7 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 				this._overviewRuler.addAnnotationType(this.taskType);
 				this._overviewRuler.addAnnotationType(this.matchingBracketType);
 				this._overviewRuler.addAnnotationType(this.currentBracketType);
+				this._overviewRuler.addAnnotationType(this.currentLineType);
 				textView.addRuler(this._annotationRuler);
 				textView.addRuler(this._overviewRuler);
 			}
@@ -671,6 +711,7 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 						if (contents !== null && contents !== undefined) {
 							this._textView.setText(contents);
 							this._textView.getModel().setLineDelimiter("auto");
+							this._highlightCurrentLine(this._textView.getSelection());
 						}
 					}
 					this._undoStack.reset();

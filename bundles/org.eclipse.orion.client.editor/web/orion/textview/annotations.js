@@ -168,20 +168,30 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 		 * @return {orion.textview.AnnotationIterator} an annotation iterartor.
 		 */
 		getAnnotations: function(start, end) {
-			var annotations = this._annotations;
-			var startIndex = this._binarySearch(annotations, start, true);
+			var annotations = this._annotations, current;
+			//TODO binary search does not work for range intersection when there are overlaping ranges, need interval search tree for this
+			var i = 0;
+			var skip = function() {
+				while (i < annotations.length) {
+					var a =  annotations[i++];
+					if ((start === a.start) || (start > a.start ? start < a.end : a.start < end)) {
+						return a;
+					}
+					if (a.start >= end) {
+						break;
+					}
+				}
+				return null;
+			};
+			current = skip();
 			return {
 				next: function() {
-					if (startIndex < annotations.length) {
-						var annotation = annotations[startIndex++];
-						if (annotation.start < end) {
-							return annotation;
-						}
-					}
-					return null;
+					var result = current;
+					if (result) { current = skip(); }
+					return result;					
 				},
 				hasNext: function() {
-					return startIndex < annotations.length && annotations[startIndex].start < end;
+					return current !== null;
 				}
 			};
 		},
@@ -195,24 +205,15 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 		 */
 		modifyAnnotation: function(annotation) {
 			if (!annotation) { return; }
-			var annotations = this._annotations;
-			var index = this._binarySearch(annotations, annotation.start);
+			var index = this._getAnnotationIndex(annotation);
+			if (index < 0) { return; }
 			var e = {
 				type: "Changed",
 				added: [],
 				removed: [],
-				changed: []
+				changed: [annotation]
 			};
-			while (index < annotations.length && annotations[index].start === annotation.start) {
-				if (annotations[index] === annotation) {
-					e.changed.push(annotation);
-					break;
-				}
-				index++;
-			}
-			if (e.changed.length > 0) {
-				this.onChanged(e);
-			}
+			this.onChanged(e);
 		},
 		/**
 		 * Notifies all listeners that the annotation model has changed.
@@ -267,14 +268,12 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 		 * @see #addAnnotation
 		 */
 		removeAnnotation: function(annotation) {
-			var annotations = this._annotations;
-			var index = this._binarySearch(annotations, annotation.start);
-			if (!(0 <= index && index < annotations.length)) { return; }
-			if (annotations[index] !== annotation) { return; }
-			annotations.splice(index, 1);
+			if (!annotation) { return; }
+			var index = this._getAnnotationIndex(annotation);
+			if (index < 0) { return; }
 			var e = {
 				type: "Changed",
-				removed: [annotation],
+				removed: this._annotations.splice(index, 1),
 				added: [],
 				changed: []
 			};
@@ -291,16 +290,17 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 		 * @see #removeAnnotation
 		 */
 		replaceAnnotations: function(remove, add) {
-			var annotations = this._annotations, i, index, annotation;
-			if (!add) { add = []; }
-			if (!remove) { remove = []; }
-			for (i = 0; i < remove.length; i++) {
-				annotation = remove[i];
-				index = this._binarySearch(annotations, annotation.start);
-				if (!(0 <= index && index < annotations.length)) { continue; }
-				if (annotations[index] !== annotation) { continue; }
-				annotations.splice(index, 1);
+			var annotations = this._annotations, i, index, annotation, removed = [];
+			if (remove) {
+				for (i = remove.length - 1; i >= 0; i--) {
+					annotation = remove[i];
+					index = this._getAnnotationIndex(annotation);
+					if (index < 0) { continue; }
+					annotations.splice(index, 1);
+					removed.splice(0, 0, annotation);
+				}
 			}
+			if (!add) { add = []; }
 			for (i = 0; i < add.length; i++) {
 				annotation = add[i];
 				index = this._binarySearch(annotations, annotation.start);
@@ -308,7 +308,7 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 			}
 			var e = {
 				type: "Changed",
-				removed: remove,
+				removed: removed,
 				added: add,
 				changed: []
 			};
@@ -333,15 +333,12 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 			}
 		},
 		/** @ignore */
-		_binarySearch: function (array, offset, inclusive) {
+		_binarySearch: function (array, offset) {
 			var high = array.length, low = -1, index;
 			while (high - low > 1) {
 				index = Math.floor((high + low) / 2);
 				if (offset <= array[index].start) {
 					high = index;
-				} else if (inclusive && offset < array[index].end) {
-					high = index;
-					break;
 				} else {
 					low = index;
 				}
@@ -349,33 +346,54 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 			return high;
 		},
 		/** @ignore */
+		_getAnnotationIndex: function(annotation) {
+			var annotations = this._annotations;
+			var index = this._binarySearch(annotations, annotation.start);
+			while (index < annotations.length && annotations[index].start === annotation.start) {
+				if (annotations[index] === annotation) {
+					return index;
+				}
+				index++;
+			}
+			return -1;
+		},
+		/** @ignore */
 		_onChanged: function(modelChangedEvent) {
 			var start = modelChangedEvent.start;
 			var addedCharCount = modelChangedEvent.addedCharCount;
 			var removedCharCount = modelChangedEvent.removedCharCount;
 			var annotations = this._annotations, end = start + removedCharCount;
-			var startIndex = this._binarySearch(annotations, start, true);
+			//TODO binary search does not work for range intersection when there are overlaping ranges, need interval search tree for this
+			var startIndex = 0;
 			if (!(0 <= startIndex && startIndex < annotations.length)) { return; }
 			var e = {
 				type: "Changed",
 				added: [],
+				removed: [],
 				changed: [],
 				textModelChangedEvent: modelChangedEvent
 			};
 			var changeCount = addedCharCount - removedCharCount, i;
-			var endIndex = this._binarySearch(annotations, end, true);
-			for (i = endIndex; i < annotations.length; i++) {
+			for (i = startIndex; i < annotations.length; i++) {
 				var annotation = annotations[i];
-				if (annotation.start > start) {
+				if (annotation.start >= end) {
 					annotation.start += changeCount;
-				}
-				if (annotation.end > start) {
 					annotation.end += changeCount;
+					e.changed.push(annotation);
+				} else if (annotation.end <= start) {
+					//nothing
+				} else if (annotation.start < start && end < annotation.end) {
+					annotation.end += changeCount;
+					e.changed.push(annotation);
+				} else {
+					annotations.splice(i, 1);
+					e.removed.push(annotation);
+					i--;
 				}
-				e.changed.push(annotation);
 			}
-			e.removed = annotations.splice(startIndex, endIndex - startIndex);
-			this.onChanged(e);
+			if (e.added.length > 0 || e.removed.length > 0 || e.changed.length > 0) {
+				this.onChanged(e);
+			}
 		}
 	};
 	mEventTarget.EventTarget.addMixin(AnnotationModel.prototype);
@@ -540,10 +558,11 @@ define(['orion/textview/eventTarget'], function(mEventTarget) {
 			}
 			var view = this._view;
 			if (!view) { return; }
+			var self = this;
 			var model = view.getModel();
 			function redraw(changes) {
 				for (var i = 0; i < changes.length; i++) {
-					if (!changes[i].rangeStyle) { continue; }
+					if (!self.isAnnotationTypeVisible(changes[i].type)) { continue; }
 					var start = changes[i].start;
 					var end = changes[i].end;
 					if (model.getBaseModel) {
