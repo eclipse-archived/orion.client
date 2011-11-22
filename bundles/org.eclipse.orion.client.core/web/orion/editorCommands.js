@@ -93,7 +93,7 @@ exports.EditorCommandFactory = (function() {
 					}});
 				this.commandService.addCommand(saveCommand, "dom");
 				this.commandService.addCommandGroup("orion.editorActions.unlabeled", 200, null, null, this.toolbarId);
-				this.commandService.registerCommandContribution("orion.save", 1, this.toolbarId, "orion.editorActions.unlabeled", new mCommands.CommandKeyBinding('s', true));
+				this.commandService.registerCommandContribution("orion.save", 1, this.toolbarId, "orion.editorActions.unlabeled", false, new mCommands.CommandKeyBinding('s', true));
 	
 				// page navigation commands (go to line)
 				var lineParameter = new mCommands.ParametersDescription([new mCommands.CommandParameter('line', 'number', 'Line:')], false);
@@ -120,7 +120,7 @@ exports.EditorCommandFactory = (function() {
 						}
 					}});
 				this.commandService.addCommand(gotoLineCommand, "dom");
-				this.commandService.registerCommandContribution("orion.gotoLine", 1, this.pageNavId, null, new mCommands.CommandKeyBinding('l', true), true, new mCommands.URLBinding("gotoLine", "line"));
+				this.commandService.registerCommandContribution("orion.gotoLine", 1, this.pageNavId, null, true, new mCommands.CommandKeyBinding('l', true), new mCommands.URLBinding("gotoLine", "line"));
 				// override the editor binding 
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('l', true), "gotoLine");
 				editor.getTextView().setAction("gotoLine", dojo.hitch(this, function () {
@@ -254,8 +254,8 @@ exports.UndoCommandFactory = (function() {
 				}});
 			this.commandService.addCommand(redoCommand, "dom");
 	
-			this.commandService.registerCommandContribution("orion.undo", 400, this.toolbarId, "orion.editorActions.unlabeled", new mCommands.CommandKeyBinding('z', true), true);
-			this.commandService.registerCommandContribution("orion.redo", 401, this.toolbarId, "orion.editorActions.unlabeled", binding, true);
+			this.commandService.registerCommandContribution("orion.undo", 400, this.toolbarId, "orion.editorActions.unlabeled", true, new mCommands.CommandKeyBinding('z', true));
+			this.commandService.registerCommandContribution("orion.redo", 401, this.toolbarId, "orion.editorActions.unlabeled", true, binding);
 
 			return undoStack;
 		}

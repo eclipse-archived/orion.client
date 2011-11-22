@@ -58,7 +58,8 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands',
 				// now define the command contributions
 				commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
 				// git contributions
-				commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup", null, false, new mCommands.URLBinding("cloneGitRepository", "url"));		commandService.registerCommandContribution("eclipse.initGitRepository", 101, "pageActions", "eclipse.gitGroup");
+				commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup", false, null, new mCommands.URLBinding("cloneGitRepository", "url"));
+				commandService.registerCommandContribution("eclipse.initGitRepository", 101, "pageActions", "eclipse.gitGroup");
 				
 				commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
 				commandService.registerCommandContribution("eclipse.git.deleteClone", 1, "selectionTools", "eclipse.selectionGroup");

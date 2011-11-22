@@ -300,11 +300,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 * @param {String} parentPath the path of any parent groups, separated by '/'.  For example,
 		 *  a path of "group1Id/group2Id/command" indicates that the command belongs as a child of 
 		 *  group2Id, which is itself a child of group1Id.  Optional.
+		 * @param {boolean} bindingOnly if true, then the command is never rendered, but the key or URL binding is hooked.
 		 * @param {orion.commands.CommandKeyBinding} keyBinding a keyBinding for the command.  Optional.
-		 * @param {boolean} keyOnly if true, then the command is never rendered, but the keybinding is hooked.
 		 * @param {orion.commands.URLBinding} urlBinding a url binding for the command.  Optional.
 		 */
-		registerCommandContribution: function(commandId, position, scopeId, parentPath, keyBinding, keyOnly, urlBinding) {
+		registerCommandContribution: function(commandId, position, scopeId, parentPath, bindingOnly, keyBinding, urlBinding) {
 			// first ensure the parentPath is represented
 			var parentTable = this._createEntryForPath(parentPath);
 			
@@ -317,16 +317,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				// look for global or dom scope, since we wouldn't be able to ascertain an item scope for a key binding
 				 command = this._domScope[commandId] || this._globalScope[commandId];
 				if (command) {
-					this._activeBindings[commandId] = {command: command, keyBinding: keyBinding, keyOnly: keyOnly};
+					this._activeBindings[commandId] = {command: command, keyBinding: keyBinding, bindingOnly: bindingOnly};
 				}
 			}
 			
 			// add to the url key table
 			if (urlBinding) {
-				// look for global or dom scope, since we wouldn't be able to ascertain an item scope for a key binding
+				// look for global or dom scope, since we wouldn't be able to ascertain an item scope for a URL binding
 				command = this._domScope[commandId] || this._globalScope[commandId];
 				if (command) {
-					this._urlBindings[commandId] = {command: command, urlBinding: urlBinding, bindingOnly: keyOnly};
+					this._urlBindings[commandId] = {command: command, urlBinding: urlBinding, bindingOnly: bindingOnly};
 				}
 			}
 			// get rid of sort cache because we have a new contribution
@@ -533,8 +533,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							keyBinding.items = items;
 							keyBinding.userData = userData;
 							keyBinding.handler = handler;
-							// if the binding is keyOnly, don't render the command.
-							if (keyBinding.keyOnly) {
+							// if it is a binding only, don't render the command.
+							if (keyBinding.bindingOnly) {
 								render = false;
 								// hack.  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=363763
 								keyBinding.callbackParameters = [items, command.id, null, userData, command.parameters];

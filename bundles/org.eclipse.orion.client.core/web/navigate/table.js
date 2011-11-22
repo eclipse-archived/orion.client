@@ -86,9 +86,9 @@ dojo.addOnLoad(function(){
 		commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
 		commandService.addCommandGroup("eclipse.selectionGroup", 500, "More", null, "selectionTools");
 		// commands that don't appear but have keybindings
-		commandService.registerCommandContribution("eclipse.toggleSplitter", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('o', true),  true);
-		commandService.registerCommandContribution("eclipse.copySelections", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('c', true),  true);
-		commandService.registerCommandContribution("eclipse.pasteSelections", 1, "eclipse.navigate-table", null, new mCommands.CommandKeyBinding('v', true),  true);
+		commandService.registerCommandContribution("eclipse.toggleSplitter", 1, "eclipse.navigate-table", null, true, new mCommands.CommandKeyBinding('o', true));
+		commandService.registerCommandContribution("eclipse.copySelections", 1, "eclipse.navigate-table", null, true, new mCommands.CommandKeyBinding('c', true));
+		commandService.registerCommandContribution("eclipse.pasteSelections", 1, "eclipse.navigate-table", null, true, new mCommands.CommandKeyBinding('v', true));
 		
 		// commands appearing directly in local actions column
 		commandService.registerCommandContribution("eclipse.makeFavorite", 1);
@@ -108,7 +108,7 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("eclipse.newFolder", 2, null, "eclipse.fileGroup/eclipse.newResources");
 		//new file and new folder in the nav bar do not label the group (we don't want a menu)
 		commandService.registerCommandContribution("eclipse.newFile", 1, "pageActions", "eclipse.fileGroup.unlabeled");
-		commandService.registerCommandContribution("eclipse.newFolder", 2, "pageActions", "eclipse.fileGroup.unlabeled", null, false, new mCommands.URLBinding("newFolder", "name"));
+		commandService.registerCommandContribution("eclipse.newFolder", 2, "pageActions", "eclipse.fileGroup.unlabeled", false, null, new mCommands.URLBinding("newFolder", "name"));
 		commandService.registerCommandContribution("eclipse.newProject", 3, "pageActions", "eclipse.fileGroup.unlabeled");
 		commandService.registerCommandContribution("eclipse.linkProject", 4, "pageActions", "eclipse.fileGroup.unlabeled");
 		// selection based command contributions in nav toolbar
