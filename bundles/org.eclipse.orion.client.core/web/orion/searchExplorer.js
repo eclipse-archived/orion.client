@@ -767,7 +767,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService.registerCommandContribution("orion.search.expandAll", 5, "pageNavigationActions");
 		this._commandService.registerCommandContribution("orion.search.collapseAll", 6, "pageNavigationActions");
 		dojo.empty("pageNavigationActions");
-		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "image");
+		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "tool");
 		
 		var optionMenu = dijit.byId("globalSearchOptMenu");
 		if (optionMenu) {
