@@ -142,7 +142,7 @@ exports.CommitDetails = (function() {
 //			// we must hide/show the span rather than the column.  IE and Chrome will not consider
 //			// the mouse as being over the table row if it's in a hidden column
 //			dojo.style(actionsWrapper, "visibility", "hidden");
-//			commandService.renderCommands(actionsWrapper, "object", commitDetails, this, "image", null, 0);
+//			commandService.renderCommands(actionsWrapper, "object", commitDetails, this, "tool", false, 0);
 //			
 //			dojo.connect(tr, "onmouseover", tr, function() {
 //				var wrapper = dojo.byId(this.id+"actionsWrapper");
@@ -162,7 +162,7 @@ exports.CommitDetails = (function() {
 			
 			// Now that the table is added to the dom, generate commands
 			var commands = dojo.byId("commitMetaCommands");
-			this.commandService.renderCommands(commands, "dom", this, this, "image");
+			this.commandService.renderCommands(commands, "dom", this, this, "tool");
 			
 			// commit diffs table
 			var commitDiffsTable = dojo.create("table", {id: "commitDiffsTable"});
@@ -214,7 +214,7 @@ exports.CommitDetails = (function() {
 					// we must hide/show the span rather than the column.  IE and Chrome will not consider
 					// the mouse as being over the table row if it's in a hidden column
 					dojo.style(actionsWrapper, "visibility", "hidden");
-					this.commandService.renderCommands(actionsWrapper, "object", commitDetails.Diffs[j], this, "image", null, j);
+					this.commandService.renderCommands(actionsWrapper, "object", commitDetails.Diffs[j], this, "tool", false, j);
 					
 					dojo.connect(tr, "onmouseover", tr, function() {
 						var wrapper = dojo.byId(this.id+"actionsWrapper");
@@ -233,7 +233,7 @@ exports.CommitDetails = (function() {
 			
 			// Now that the table is added to the dom, generate commands
 			commands = dojo.byId("commitDiffsCommands");
-			this.commandService.renderCommands(commands, "dom", this, this, "image");
+			this.commandService.renderCommands(commands, "dom", this, this, "tool");
 		}
 	};
 	return CommitDetails;

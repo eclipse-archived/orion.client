@@ -202,7 +202,7 @@ exports.CloneDetails = (function() {
 					// we must hide/show the span rather than the column.  IE and Chrome will not consider
 					// the mouse as being over the table row if it's in a hidden column
 					dojo.style(actionsWrapper, "visibility", "hidden");
-					this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", cloneDetails.Children[i], this, "image", null, i);
+					this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", cloneDetails.Children[i], this, "tool", false, i);
 					
 					dojo.connect(tr, "onmouseover", tr, function() {
 						var wrapper = dojo.byId(this.id+"actionsWrapper");
@@ -231,7 +231,7 @@ exports.CloneDetails = (function() {
 			dojo.place(cloneMetaTable, this._parent, "only");
 			
 			var commands = dojo.byId("configurationCommands");
-			this._registry.getService("orion.page.command").renderCommands(commands, "dom", this, this, "image");
+			this._registry.getService("orion.page.command").renderCommands(commands, "dom", this, this, "tool");
 		}
 	};
 	return CloneDetails;

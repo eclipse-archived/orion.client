@@ -21,10 +21,10 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 			throw "could not find toolbar " + toolbarId;
 		}
 		var commandService = registry.getService("orion.page.command");
-		commandService.renderCommands(toolbar, "dom", item, explorer, "image");
+		commandService.renderCommands(toolbar, "dom", item, explorer, "tool");
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			commandService.renderCommands(selectionTools, "dom", null, explorer, "image");
+			commandService.renderCommands(selectionTools, "dom", null, explorer, "tool");
 		}
 
 		
@@ -36,7 +36,7 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 				if (selectionTools) {
 					dojo.empty(selectionTools);
 					registry.getService("orion.page.command").then(function(commandService) {
-						commandService.renderCommands(selectionTools, "dom", selections, explorer, "image");
+						commandService.renderCommands(selectionTools, "dom", selections, explorer, "tool");
 					});
 				}
 			});

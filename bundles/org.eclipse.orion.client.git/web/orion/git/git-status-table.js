@@ -246,7 +246,7 @@ orion.GitStatusContentRenderer = (function() {
 			// we must hide/show the span rather than the column.  IE and Chrome will not consider
 			// the mouse as being over the table row if it's in a hidden column
 			dojo.style(actionsWrapper, "visibility", "hidden");
-			this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", {type: "fileItem", object: itemModel, rowId:row.id}, this, "image", null);
+			this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", {type: "fileItem", object: itemModel, rowId:row.id}, this, "tool");
 			
 			dojo.connect(row, "onmouseover", row, function() {
 				var wrapper = dojo.byId(this.id+"actionsWrapper");
@@ -337,7 +337,7 @@ orion.GitStatusTableRenderer = (function() {
 		renderAction:function(){
 			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "object", {type: self._type}, this, "image", null);
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "object", {type: self._type}, this, "tool");
 		}
 	};
 	return GitStatusTableRenderer;
@@ -419,7 +419,7 @@ orion.GitRebaseZoneRenderer = (function() {
 		renderAction:function(){
 			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "dom", {type: "rebase"}, this, "image",  null, null);
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "dom", {type: "rebase"}, this, "tool");
 		},
 		
 		show:function(){
@@ -474,8 +474,8 @@ orion.GitCommitterAndAuthorZoneRenderer = (function() {
 			dojo.place(document.createTextNode(""), this._cmdSpanHide, "only");
 			var self = this;
 			var service = this._registry.getService("orion.page.command");
-			service.renderCommands(self._cmdSpanShow, "dom", {type: "personIdentShow"}, this, "image",  null, null);
-			service.renderCommands(self._cmdSpanHide, "dom", {type: "personIdentHide"}, this, "image",  null, null);
+			service.renderCommands(self._cmdSpanShow, "dom", {type: "personIdentShow"}, this, "tool");
+			service.renderCommands(self._cmdSpanHide, "dom", {type: "personIdentHide"}, this, "tool");
 		},
 		
 		setDefaultPersonIdent:function(name, email) {
@@ -551,13 +551,13 @@ orion.GitLogTableRenderer = (function() {
 		renderAction:function(){
 			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "object", {type: self._type , object:self._controller}, this, "image", null,null, true);
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "object", {type: self._type , object:self._controller}, this, "tool", true);
 		},
 		
 		renderAdditionalAction:function(item){
 			dojo.place(document.createTextNode(""), this._cmdSpanAdditional, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(self._cmdSpanAdditional, "object", item, this, "image", null,null);
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpanAdditional, "object", item, this, "tool");
 		}
 	};
 	return GitLogTableRenderer;
@@ -736,7 +736,7 @@ orion.GitStatusController = (function() {
 			var toolbar = dojo.byId( "pageActions");
 			dojo.place(document.createTextNode(""), toolbar, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(toolbar, "dom", {type: "global"}, this, "image",  null, null, true);
+			this._registry.getService("orion.page.command").renderCommands(toolbar, "dom", {type: "global"}, this, "tool", true);
 		},
 		
 		_processCloneInfo:function(){
@@ -1248,7 +1248,7 @@ orion.GitStatusController = (function() {
 			// Register command contributions
 			this._commandService.registerCommandContribution("orion.compare.prevDiff", 2, "rightContainerCommands");
 			this._commandService.registerCommandContribution("orion.compare.nextDiff", 1, "rightContainerCommands");
-			this._commandService.renderCommands("rightContainerCommands", "dom", self, self, "image");
+			this._commandService.renderCommands("rightContainerCommands", "dom", self, self, "tool");
 		},
 		
 		startTimer: function(){
@@ -1400,7 +1400,7 @@ orion.GitStatusController = (function() {
 														dojo.style("fileNameInViewer", "color", "#6d6d6d");
 														self._statusService.setProgressMessage("");
 														dojo.empty("rightContainerCommands");
-														self._commandService.renderCommands("rightContainerCommands", "dom", self, self, "image");
+														self._commandService.renderCommands("rightContainerCommands", "dom", self, self, "tool");
 													},
 													function(response, ioArgs){
 														self.handleServerErrors(response , ioArgs);

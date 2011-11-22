@@ -32,17 +32,17 @@ var exports = {};
 			throw "could not find toolbar " + toolbarId;
 		}
 		var commandService = registry.getService("orion.page.command");
-		commandService.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  // true would force text links
+		commandService.renderCommands(toolbar, "dom", item, explorer, "tool", true);  // true forces text links
 		if (pageNavId) {
 			toolbar = dojo.byId(pageNavId);
 			if (toolbar) {
 				dojo.empty(toolbar);
-				commandService.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  
+				commandService.renderCommands(toolbar, "dom", item, explorer, "tool", true);  
 			}
 		}
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			commandService.renderCommands(selectionTools, "dom", null, explorer, "image", null, null, true);  // true would force text links
+			commandService.renderCommands(selectionTools, "dom", null, explorer, "tool", true);
 		}
 		
 		// Stuff we do only the first time
@@ -52,7 +52,7 @@ var exports = {};
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					commandService.renderCommands(selectionTools, "dom", selections, explorer, "image", null, null, true); // true would force text links
+					commandService.renderCommands(selectionTools, "dom", selections, explorer, "tool", true);
 				}
 			});
 		}

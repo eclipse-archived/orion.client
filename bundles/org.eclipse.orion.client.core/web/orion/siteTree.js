@@ -120,7 +120,7 @@ eclipse.sites.SiteRenderer = (function() {
 			});
 			
 			// contact the command service to render appropriate commands here.
-			this._commandService.renderCommands(actionsWrapper, "object", item, {} /*??*/, "image");
+			this._commandService.renderCommands(actionsWrapper, "object", item, {} /*handler*/, "tool");
 			
 			dojo.place(siteConfigCol, tableRow, "last");
 			dojo.place(statusCol, tableRow, "last");
