@@ -500,7 +500,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		
 		// We are using 't' for the non-editor binding because of git-hub's use of t for similar function
 		commandService.addCommand(openResourceCommand, "global");
-		commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions", null, new mCommands.CommandKeyBinding('t'), true);
+		commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions", null, true, new mCommands.CommandKeyBinding('t'));
 		
 		var keyAssistNode = dojo.byId("keyAssist");
 		dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){ 
@@ -549,7 +549,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				return true;
 			}});
 		commandService.addCommand(keyAssistCommand, "global");
-		commandService.registerCommandContribution("eclipse.keyAssist", 1, "globalActions", null, new mCommands.CommandKeyBinding(191, false, true), true);
+		commandService.registerCommandContribution("eclipse.keyAssist", 1, "globalActions", null, true, new mCommands.CommandKeyBinding(191, false, true));
 		if (editor) {
 			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('L', true, true), "Show Keys");
 			editor.getTextView().setAction("Show Keys", keyAssistCommand.callback);
