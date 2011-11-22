@@ -1069,7 +1069,7 @@ orion.GitStatusController = (function() {
 				callback: function(data) {
 					self._statusService.setProgressMessage("Staging...");
 					self._prepareStage(data.items.rowId, false);
-					return self.stage(data.items.object.indexURI , item.object);
+					return self.stage(data.items.object.indexURI , data.items.object);
 				},
 				visibleWhen: function(item) {
 					return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
