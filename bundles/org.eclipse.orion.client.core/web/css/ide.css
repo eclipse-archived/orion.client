@@ -579,6 +579,10 @@ a:hover {
 	background-color: #CEFFFF !important;
 }
 
+.searchCmdGroupMargin {
+	margin-left: 16px;
+}
+
 .LoginWindowLeft {
 	padding-left: 0.5em;
 }

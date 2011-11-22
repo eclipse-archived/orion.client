@@ -11,6 +11,7 @@
 
 .commandImage {
 	margin: 1px;
+	margin-right: 4px;
 	padding: 0;
 	vertical-align: middle;
 	cursor: pointer;
@@ -18,6 +19,7 @@
 
 .commandOver {
 	margin: 0;
+	margin-right: 3px;
 	vertical-align: middle;
 	padding: 0;
 	cursor: pointer;
@@ -125,37 +127,4 @@
 .nihilo .dijitTooltip {
 	max-width: 300px;
 	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
-}
-
-/* Why do we have custom search command classes?   Should reconcile this */
-
-.searchCommandImage {
-	margin: 0;
-	padding: 1px;
-	vertical-align: middle;
-	cursor: pointer;
-}
-
-.searchCmdGroupMargin {
-	margin-left: 16px;
-}
-.searchCommandOver {
-	margin: 0;
-	vertical-align: middle;
-	padding: 0;
-	cursor: pointer;
-    background-color: #ffeecc;
-    border: 1px solid #ffcc66;
-    border-radius: 3px;
-}
-
-.searchCommandLink {
-	margin-right: 1px;
-	cursor: pointer;
-}
-
-.searchCommandLink:hover {
-	margin-right: 1px;
-	cursor: hand;
-	text-decoration: underline;
 }
