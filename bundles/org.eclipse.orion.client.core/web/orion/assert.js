@@ -179,6 +179,16 @@ define(function() {
 		}
 	};
 
+	exports.fail = function(message_opt) {
+		var message = "Failed";
+		if (message_opt) {
+			message += ": " + message_opt;
+		}
+		throw new AssertionError({
+			message : message
+		});
+	};
+	
 	exports.raises = function(block, Error_opt, message_opt) {
 		if (typeof Error_opt === "string") {
 			message_opt = Error_opt;
