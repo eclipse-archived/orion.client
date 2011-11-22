@@ -63,6 +63,9 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 			persist: true, // remember expanded state
 			openOnClick: false,
 			getLabel: function(item) {
+				if(item.Type === "RemoteTrackingBranch" && !item.Id){
+					return item.Name + " [New branch]";
+				}
 				return item.Name;
 			},
 			getIconClass: function(/* dojo.data.Item */ item, /* Boolean */ opened){
