@@ -522,7 +522,7 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			while (annotations.hasNext()) {
 				var annotation = annotations.next();
 				if (annotation.type === annotationType) {
-					remove.push(annotations.next());
+					remove.push(annotation);
 				}
 			}
 			var add = [];
