@@ -225,6 +225,7 @@ define(["orion/assert", 'orion/textview/textModel', 'orion/textview/annotations'
 		textModel.setText("", 25, 55);
 	};
 	
+	//test annotation before range
 	tests.testAnnotationModel7 = function () {
 //		                      1         2         3         4         5         6         7	
 		var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
@@ -233,8 +234,7 @@ define(["orion/assert", 'orion/textview/textModel', 'orion/textview/annotations'
 		var annotation = {start: 10, end: 20};
 		annotationModel.addAnnotation(annotation);
 		annotationModel.addEventListener("Changed", function(e) {
-//			assert.throws(null, "listener should not be called");
-			assert.equal(10,11, "listener should not be called");
+			assert.fail("f0");
 		});
 		textModel.setText("", 25, 55);
 		var iter = annotationModel.getAnnotations(0, text.length);
@@ -245,7 +245,7 @@ define(["orion/assert", 'orion/textview/textModel', 'orion/textview/annotations'
 	};
 	
 	
-	
+	//test range at annotation start 
 	tests.testAnnotationModel8 = function () {
 //		                      1         2         3         4         5         6         7	
 		var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
@@ -267,6 +267,114 @@ define(["orion/assert", 'orion/textview/textModel', 'orion/textview/annotations'
 		assert.equal(iter.next(), annotation, "f2");
 		assert.equal(iter.hasNext(), false, "f3");
 		assert.equal(iter.next(), null, "f4");
+	};
+	
+	//test annotation after range
+	tests.testAnnotationModel9 = function () {
+//		                      1         2         3         4         5         6         7	
+		var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
+		var textModel = new mTextModel.TextModel(text, "\n");
+		var annotationModel = new mAnnotations.AnnotationModel(textModel);
+		var annotation = {start: 60, end: 70};
+		annotationModel.addAnnotation(annotation);
+		annotationModel.addEventListener("Changed", function(e) {
+			assert.equal(e.removed.length, 0, "a1");
+			assert.equal(e.changed.length, 1, "a2");
+			assert.equal(e.added.length, 0, "a3");
+			assert.equal(e.changed[0], annotation, "a4");
+			assert.equal(e.changed[0].start, 51, "a5");
+			assert.equal(e.changed[0].end, 61, "a6");
+		});
+		textModel.setText("a", 30, 40);
+		var iter = annotationModel.getAnnotations(0, text.length);
+		assert.equal(iter.hasNext(), true, "f1");
+		assert.equal(iter.next(), annotation, "f2");
+		assert.equal(iter.hasNext(), false, "f3");
+		assert.equal(iter.next(), null, "f4");
+	};
+	
+	//test range includes annotation
+	tests.testAnnotationModel10 = function () {
+//		                      1         2         3         4         5         6         7	
+		var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
+		var textModel = new mTextModel.TextModel(text, "\n");
+		var annotationModel = new mAnnotations.AnnotationModel(textModel);
+		var annotation = {start: 30, end: 40};
+		annotationModel.addAnnotation(annotation);
+		annotationModel.addEventListener("Changed", function(e) {
+			assert.equal(e.removed.length, 1, "a1");
+			assert.equal(e.changed.length, 0, "a2");
+			assert.equal(e.added.length, 0, "a3");
+			assert.equal(e.removed[0], annotation, "a4");
+		});
+		textModel.setText("a", 10, 60);
+		var iter = annotationModel.getAnnotations(0, text.length);
+		assert.equal(iter.hasNext(), false, "f1");
+		assert.equal(iter.next(), null, "f2");
+	};
+	
+	//test annotation includes range 
+	tests.testAnnotationModel11 = function () {
+//		                      1         2         3         4         5         6         7	
+		var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
+		var textModel = new mTextModel.TextModel(text, "\n");
+		var annotationModel = new mAnnotations.AnnotationModel(textModel);
+		var annotation = {start: 20, end: 60};
+		annotationModel.addAnnotation(annotation);
+		annotationModel.addEventListener("Changed", function(e) {
+			assert.equal(e.removed.length, 0, "a1");
+			assert.equal(e.changed.length, 1, "a2");
+			assert.equal(e.added.length, 0, "a3");
+			assert.equal(e.changed[0], annotation, "a4");
+			assert.equal(e.changed[0].start, 20, "a5");
+			assert.equal(e.changed[0].end, 64, "a5");			
+		});
+		textModel.setText("abcd", 30, 30);
+		var iter = annotationModel.getAnnotations(0, text.length);
+		assert.equal(iter.hasNext(), true, "f1");
+		assert.equal(iter.next(), annotation, "f2");
+		assert.equal(iter.hasNext(), false, "f3");
+		assert.equal(iter.next(), null, "f4");
+	};
+	
+	//test annotation intersects range start
+	tests.testAnnotationModel12 = function () {
+//		                      1         2         3         4         5         6         7	
+		var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
+		var textModel = new mTextModel.TextModel(text, "\n");
+		var annotationModel = new mAnnotations.AnnotationModel(textModel);
+		var annotation = {start: 20, end: 40};
+		annotationModel.addAnnotation(annotation);
+		annotationModel.addEventListener("Changed", function(e) {
+			assert.equal(e.removed.length, 1, "a1");
+			assert.equal(e.changed.length, 0, "a2");
+			assert.equal(e.added.length, 0, "a3");
+			assert.equal(e.removed[0], annotation, "a4");
+		});
+		textModel.setText("a", 30, 60);
+		var iter = annotationModel.getAnnotations(0, text.length);
+		assert.equal(iter.hasNext(), false, "f1");
+		assert.equal(iter.next(), null, "f2");
+	};
+	
+	//test annotation intersects range end
+	tests.testAnnotationModel13 = function () {
+//		                      1         2         3         4         5         6         7	
+		var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
+		var textModel = new mTextModel.TextModel(text, "\n");
+		var annotationModel = new mAnnotations.AnnotationModel(textModel);
+		var annotation = {start: 30, end: 60};
+		annotationModel.addAnnotation(annotation);
+		annotationModel.addEventListener("Changed", function(e) {
+			assert.equal(e.removed.length, 1, "a1");
+			assert.equal(e.changed.length, 0, "a2");
+			assert.equal(e.added.length, 0, "a3");
+			assert.equal(e.removed[0], annotation, "a4");
+		});
+		textModel.setText("a", 20, 40);
+		var iter = annotationModel.getAnnotations(0, text.length);
+		assert.equal(iter.hasNext(), false, "f1");
+		assert.equal(iter.next(), null, "f2");
 	};
 	
 	return tests;
