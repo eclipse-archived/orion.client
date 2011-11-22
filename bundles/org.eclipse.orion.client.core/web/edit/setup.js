@@ -200,10 +200,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					fileClient.read(fileURI).then(
 						dojo.hitch(this, function(contents) {
 							clearTimeout(progressTimeout);
-							editor.setInput(fileURI, null, contents);
 							// in the long run we should be looking for plug-ins to call here for highlighting
 							syntaxHighlighter.highlight(fileURI, editor);
 							editor.highlightAnnotations();
+							editor.setInput(fileURI, null, contents);
 							editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 						}),
 						dojo.hitch(this, function(error) {

@@ -1151,9 +1151,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var model = this._model;
 			if (start === undefined) { start = 0; }
 			if (end === undefined) { end = model.getCharCount(); }
-			if (start === end) { return; }
 			var startLine = model.getLineAtOffset(start);
-			var endLine = model.getLineAtOffset(Math.max(0, end - 1)) + 1;
+			var endLine = model.getLineAtOffset(Math.max(start, end - 1)) + 1;
 			this.redrawLines(startLine, endLine);
 		},
 		/**

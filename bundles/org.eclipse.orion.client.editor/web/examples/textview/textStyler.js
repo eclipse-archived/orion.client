@@ -378,7 +378,7 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 		}
 		this.whitespacesVisible = false;
 		this.detectHyperlinks = true;
-		this.highlightCaretLine = true;
+		this.highlightCaretLine = false;
 		this.foldingEnabled = true;
 		this.detectTasks = true;
 		this._scanner = new Scanner(keywords, this.whitespacesVisible);
@@ -518,8 +518,12 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			if (viewModel.getBaseModel) { baseModel = viewModel.getBaseModel(); }
 			var annotations = annotationModel.getAnnotations(commentStart, commentEnd);
 			var remove = [];
+			var annotationType = "orion.annotation.task";
 			while (annotations.hasNext()) {
-				remove.push(annotations.next());
+				var annotation = annotations.next();
+				if (annotation.type === annotationType) {
+					remove.push(annotations.next());
+				}
 			}
 			var add = [];
 			var scanner = this._commentScanner;
@@ -535,7 +539,7 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 					add.push({
 						start: tokenStart,
 						end: end,
-						type: "orion.annotation.task",
+						type: annotationType,
 						title: baseModel.getText(tokenStart, end),
 						style: {styleClass: "annotation task"},
 						html: "<div class='annotationHTML task'></div>",
