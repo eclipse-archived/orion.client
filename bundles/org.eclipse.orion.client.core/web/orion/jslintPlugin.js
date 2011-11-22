@@ -18,24 +18,37 @@ window.onload = function() {
 	}
 	
 	function cleanup(error) {
-		var warnings = [
-			["Expected '==='"],
-			["Expected '!=='"],
-			["Expected '{'", "Statement body should be inside '{ }' braces."],
-			["Do not use 'new' for side effects"],
-			["The body of a for in should be wrapped"],
-			["Don't make functions within a loop"]
-		];
-		var description = error.description;
-		for (var i=0; i < warnings.length; i++) {
-			var warning = warnings[i];
-			if (description.indexOf(warning[0]) !== -1) {
-				error.severity = "warning";
-				if (warning.length > 1) {
-					error.description = warning[1];
+		function fixWith(fixes, severity, force) {
+			var description = error.description;
+			for (var i=0; i < fixes.length; i++) {
+				var fix = fixes[i],
+				    find = (typeof fix === "string" ? fix : fix[0]),
+				    replace = (typeof fix === "string" ? null : fix[1]),
+				    found = description.indexOf(find) !== -1;
+				if (force || found) {
+					error.severity = severity;
+				}
+				if (found && replace) {
+					error.description = replace;
 				}
 			}
 		}
+		var warnings = [
+			["Expected '{'", "Statement body should be inside '{ }' braces."]
+		];
+		var errors = [
+			"Missing semicolon",
+			"Extra comma",
+			"Missing property name",
+			"Unmatched ",
+			" and instead saw",
+			" is not defined",
+			"Unclosed string",
+			"Stopping, unable to continue"
+		];
+		// All problems are warnings by default
+		fixWith(warnings, "warning", true);
+		fixWith(errors, "error");
 	}
 	
 	var validationService = {
