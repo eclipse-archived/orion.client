@@ -82,8 +82,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		// Stuff we do only the first time
 		if (!favoritesCache) {
 			favoritesCache = new FavoriteFoldersCache(registry);
-			var service = registry.getService("orion.page.selection");
-			service.addEventListener("selectionChanged", function(singleSelection, selections) {
+			var selectionService = registry.getService("orion.page.selection");
+			selectionService.addEventListener("selectionChanged", function(singleSelection, selections) {
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
@@ -417,8 +417,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			}
 		}
 		
-		var newFileNameParameters = {};
-		newFileNameParameters.name = {label: 'Name:', type: 'text', value: 'New File', required: true};
+		var newFileNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New File')], false);
 		
 		var newFileCommand =  new mCommands.Command({
 			name: "New File",
@@ -435,8 +434,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 							errorHandler);
 					}
 				};
-				if (parameters && parameters.name && parameters.name.value) {
-					createFunction(parameters.name.value);
+				if (parameters && parameters.valueFor('name')) {
+					createFunction(parameters.valueFor('name'));
 				} else {
 					getNewItemName(item, domId, "New File", createFunction);
 				}
@@ -447,8 +446,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		commandService.addCommand(newFileCommand, "dom");
 		commandService.addCommand(newFileCommand, "object");
 		
-		var newFolderNameParameters = {};
-		newFolderNameParameters.name = {label: 'Name:', type: 'text', value: 'New Folder', required: true};
+		var newFolderNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New Folder')], false);
 
 		var newFolderCommand = new mCommands.Command({
 			name: "New Folder",
@@ -465,8 +463,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 							errorHandler);
 					}
 				};
-				if (parameters && parameters.name && parameters.name.value) {
-					createFunction(parameters.name.value);
+				if (parameters && parameters.valueFor('name')) {
+					createFunction(parameters.valueFor('name'));
 				} else {
 					getNewItemName(item, domId, "New Folder", createFunction);
 				}
@@ -492,8 +490,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 							errorHandler);
 					}
 				};
-				if (parameters.name && parameters.name.value) {
-					createFunction(parameters.name.value);
+				if (parameters && parameters.valueFor('name')) {
+					createFunction(parameters.valueFor('name'));
 				} else {
 					getNewItemName(item, domId, "New Folder", createFunction);
 				}
@@ -728,13 +726,13 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		var fileCommands = [];
 		var i;
 		for (i=0; i<commandsReferences.length; i++) {
-			var service = serviceRegistry.getService(commandsReferences[i])
+			var impl = serviceRegistry.getService(commandsReferences[i]);
 			var info = {};
 			var propertyNames = commandsReferences[i].getPropertyNames();
 			for (var j = 0; j < propertyNames.length; j++) {
 				info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
 			}
-			fileCommands.push({properties: info, service: service});
+			fileCommands.push({properties: info, service: impl});
 		}
 		
 		// Convert "orion.navigate.openWith" contributions into orion.navigate.command that open the appropriate editors
@@ -762,19 +760,19 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		}
 	
 		for (i=0; i < fileCommands.length; i++) {
-			var info = fileCommands[i].properties;
+			var commandInfo = fileCommands[i].properties;
 			var service = fileCommands[i].service;
 			
-			var commandOptions = fileCommandUtils._createFileCommandOptions(info, service);
+			var commandOptions = fileCommandUtils._createFileCommandOptions(commandInfo, service);
 			var command = new mCommands.Command(commandOptions);
-			if (info.isEditor) {
+			if (commandInfo.isEditor) {
 				command.isEditor = true;
 			}
 			
 			var extensionGroupCreated = false;
 			var selectionGroupCreated = false;
 			var openWithGroupCreated = false;
-			if (info.forceSingleItem || info.href) {
+			if (commandInfo.forceSingleItem || commandInfo.href) {
 				// single items go in the local actions column, grouped in their own unnamed group to get a separator
 				commandService.addCommand(command, "object");
 				if (!extensionGroupCreated) {
@@ -786,7 +784,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 					commandService.addCommandGroup("eclipse.openWith", 1000, "Open With", fileGroup + "/eclipse.fileCommandExtensions");
 				}
 				
-				if (info.isEditor) {
+				if (commandInfo.isEditor) {
 					commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions/eclipse.openWith");
 				} else {
 					commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions");

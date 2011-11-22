@@ -118,7 +118,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		_collectAndCall: function(command, handler, callbackParameters) {
 			dojo.query("input", this.parameterArea).forEach(function(field) {
 				if (field.type !== "button") {
-					command.parameters[field.parameterName].value = field.value;
+					command.parameters.setValue(field.parameterName, field.value);
 				}
 			});
 			if (command.callback) {
@@ -149,29 +149,26 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 							this.close(commandNode);
 						}
 					});
-					for (var key in command.parameters) {
-						if (command.parameters[key].type) {
-							var parm = command.parameters[key];
-							if (parm.label) {
-								dojo.place(document.createTextNode(parm.label), parameterArea, "last");
-							} 
-							var field = dojo.create("input", {type: parm.type}, parameterArea, "last");
-							dojo.addClass(field, "parameterInput");
-							field.setAttribute("speech", "speech");
-							field.setAttribute("x-webkit-speech", "x-webkit-speech");
-							field.parameterName = key;
-							if (!first) {
-								first = field;
-							}
-							if (parm.value) {
-								field.value = parm.value;
-							}
-							dojo.connect(field, "onkeypress", keyHandler);
+					command.parameters.forEach(function(parm) {
+						if (parm.label) {
+							dojo.place(document.createTextNode(parm.label), parameterArea, "last");
+						} 
+						var field = dojo.create("input", {type: parm.type}, parameterArea, "last");
+						dojo.addClass(field, "parameterInput");
+						field.setAttribute("speech", "speech");
+						field.setAttribute("x-webkit-speech", "x-webkit-speech");
+						field.parameterName = parm.name;
+						if (!first) {
+							first = field;
 						}
-					}
+						if (parm.value) {
+							field.value = parm.value;
+						}
+						dojo.connect(field, "onkeypress", keyHandler);
+					});
 					var spacer;
 					if (command.parameters.options) {
-						command.parameters.optionsTriggered = false;
+						command.parameters.optionsRequested = false;
 						spacer = dojo.create("span", null, this.dismissArea, "last");
 						dojo.addClass(spacer, "dismiss");
 						
@@ -180,7 +177,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 						dojo.addClass(options, "dismiss");
 						options.title = "More options...";
 						dojo.connect(options, "onclick", dojo.hitch(this, function () {
-							command.parameters.optionsTriggered = true;
+							command.parameters.optionsRequested = true;
 							this._collectAndCall(command, handler, callbackParameters);
 							this.close(commandNode);
 						}));

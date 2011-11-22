@@ -96,8 +96,7 @@ exports.EditorCommandFactory = (function() {
 				this.commandService.registerCommandContribution("orion.save", 1, this.toolbarId, "orion.editorActions.unlabeled", new mCommands.CommandKeyBinding('s', true));
 	
 				// page navigation commands (go to line)
-				var lineParameter = {};
-				lineParameter.line = {label: 'Line:', type: 'number', required: true};
+				var lineParameter = new mCommands.ParametersDescription([new mCommands.CommandParameter('line', 'number', 'Line:')], false);
 				
 				var gotoLineCommand =  new mCommands.Command({
 					name: "Go to Line",
@@ -107,8 +106,8 @@ exports.EditorCommandFactory = (function() {
 					callback: function(item, commandId, domId, userData, parameters) {
 						var line;
 						var model = editor.getModel();
-						if (parameters.line && parameters.line.value) {
-							line = parameters.line.value;
+						if (parameters && parameters.valueFor('line')) {
+							line = parameters.valueFor('line');
 						} else {
 							line = model.getLineAtOffset(editor.getCaretOffset());
 							line = prompt("Go to line:", line + 1);

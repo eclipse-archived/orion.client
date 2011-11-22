@@ -157,7 +157,7 @@ exports.ExplorerModel = (function() {
 		},
 		getId: function(/* item */ item){
 			var result;
-			if (item === this.root) {
+			if (item.Location === this.root.Location) {
 				result = this.rootId;
 			} else {
 				result = item.Location;

@@ -1483,9 +1483,7 @@ var exports = {};
 	};
 	
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
-		var cloneParameters = {};
-		cloneParameters.url = {label: 'Repository URL:', type: 'url', required: true};
-		cloneParameters.options = true;
+		var cloneParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("url", "url", "Repository URL:")], true);
 
 		var cloneGitRepositoryCommand = new mCommands.Command({
 			name : "Clone Repository",
@@ -1509,14 +1507,14 @@ var exports = {};
 						});
 					});
 				};
-				if (parameters.url && !parameters.optionsTriggered) {
-					cloneFunction(parameters.url.value);
+				if (parameters.valueFor("url") && !parameters.optionsRequested) {
+					cloneFunction(parameters.valueFor("url"));
 				} else {
 					var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
 						serviceRegistry: serviceRegistry,
 						fileClient: fileClient,
-						url: parameters.url.value,
-						alwaysShowAdvanced: parameters.optionsTriggered,
+						url: parameters.valueFor("url"),
+						alwaysShowAdvanced: parameters.optionsRequested,
 						func: cloneFunction
 					});
 							
