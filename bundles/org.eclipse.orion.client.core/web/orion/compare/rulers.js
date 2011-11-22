@@ -256,14 +256,14 @@ orion.CompareOverviewRuler = (function() {
 }());
 
 
-orion.CompareMergeOverviewRuler = (function() {
-	function CompareMergeOverviewRuler ( rulerLocation, rulerStyle , compareAnnotaion , onClick) {
+orion.TwoWayCompareOverviewRuler = (function() {
+	function TwoWayCompareOverviewRuler ( rulerLocation, rulerStyle , compareAnnotaion , onClick) {
 		this._compareAnnotaion = compareAnnotaion;
 		this._onClick = onClick;
 		orion.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
 	}
-	CompareMergeOverviewRuler.prototype = new orion.CompareRuler();
-	CompareMergeOverviewRuler.prototype.getStyle = function(lineIndex) {
+	TwoWayCompareOverviewRuler.prototype = new orion.CompareRuler();
+	TwoWayCompareOverviewRuler.prototype.getStyle = function(lineIndex) {
 		var result, style;
 		if (lineIndex === undefined) {
 			result = this._rulerStyle || {};
@@ -306,20 +306,20 @@ orion.CompareMergeOverviewRuler = (function() {
 		}
 		return result;
 	};
-	CompareMergeOverviewRuler.prototype.getHTML = function(lineIndex) {
+	TwoWayCompareOverviewRuler.prototype.getHTML = function(lineIndex) {
 		return "&nbsp;";
 	};
-	CompareMergeOverviewRuler.prototype.onClick = function(lineIndex, e) {
+	TwoWayCompareOverviewRuler.prototype.onClick = function(lineIndex, e) {
 		if (lineIndex === undefined) { return; }
 		this._onClick(lineIndex , this);
 	};
-	CompareMergeOverviewRuler.prototype._onModelChanged = function(e) {
+	TwoWayCompareOverviewRuler.prototype._onModelChanged = function(e) {
 		var model = this._editor.getModel();
 		var lineCount = model.getLineCount();
 		if(lineCount > 0)
 			this._editor.redrawLines(0, 1, this);
 	};
-	return CompareMergeOverviewRuler;
+	return TwoWayCompareOverviewRuler;
 }());
 
 

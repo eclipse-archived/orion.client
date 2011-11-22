@@ -14,13 +14,13 @@ define(['dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContain
 
 
 var orion = orion || {};
-orion.CompareMergeUIFactory = (function() {
-	function CompareMergeUIFactory(option){
+orion.TwoWayCompareUIFactory = (function() {
+	function TwoWayCompareUIFactory(option){
 		this._parentDivID = option.parentDivID;
 		this._showTitle = option.showTitle;
 		this._showLineStatus = option.showLineStatus;
 	}	
-	CompareMergeUIFactory.prototype = {
+	TwoWayCompareUIFactory.prototype = {
 		_createNoWrapTextDiv:function(textDivId , defaultText , align, createCommandSpan){
 			var table = document.createElement('table');
 			table.width = "100%";
@@ -167,7 +167,7 @@ orion.CompareMergeUIFactory = (function() {
 		}
 
 	};
-	return CompareMergeUIFactory;
+	return TwoWayCompareUIFactory;
 }());
 
 return orion;

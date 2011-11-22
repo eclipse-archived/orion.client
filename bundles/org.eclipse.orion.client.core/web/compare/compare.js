@@ -35,7 +35,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/file
 				var diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
 
 				mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
-				var uiFactory = new mCompareFeatures.CompareMergeUIFactory({
+				var uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
 					parentDivID: "compareContainer",
 					showTitle: true,
 					showLineStatus: true
@@ -45,8 +45,8 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/file
 				// Diff operations
 				var readOnly = isReadOnly();
 				var conflciting = isConflciting();
-				compareMergeContainer = new mCompareContainer.CompareMergeContainer(readOnly, conflciting, diffProvider, serviceRegistry, commandService, fileClient, uiFactory);
-				compareMergeContainer.resolveDiff(dojo.hash(), function(newFile, oldFile) {
+				var twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(readOnly, conflciting, diffProvider, serviceRegistry, commandService, fileClient, uiFactory);
+				twoWayCompareContainer.resolveDiff(dojo.hash(), function(newFile, oldFile) {
 					handleTile(newFile, oldFile, uiFactory);
 				}, function(errorResponse, ioArgs) {
 					handleErrorTile(errorResponse, ioArgs, uiFactory);
@@ -54,9 +54,9 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/file
 
 				// every time the user manually changes the hash, we need to
 				// load the diff
-				dojo.subscribe("/dojo/hashchange", compareMergeContainer, function() {
-					compareMergeContainer = new mCompareContainer.CompareMergeContainer(readOnly, conflciting, diffProvider, serviceRegistry, commandService, fileClient, uiFactory);
-					compareMergeContainer.resolveDiff(dojo.hash(), function(newFile, oldFile) {
+				dojo.subscribe("/dojo/hashchange", twoWayCompareContainer, function() {
+					twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(readOnly, conflciting, diffProvider, serviceRegistry, commandService, fileClient, uiFactory);
+					twoWayCompareContainer.resolveDiff(dojo.hash(), function(newFile, oldFile) {
 						handleTile(newFile, oldFile, uiFactory);
 					}, function(errorResponse, ioArgs) {
 						handleErrorTile(errorResponse, ioArgs, uiFactory);
