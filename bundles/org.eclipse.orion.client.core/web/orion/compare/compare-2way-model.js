@@ -13,11 +13,11 @@ define(['orion/compare/compareUtils', 'orion/textview/eventTarget'], function(mC
 
 var orion = orion || {};
 
-orion.CompareMergeModel = (function() {
+orion.TwoWayCompareModel = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 
 	/** @private */
-	function CompareMergeModel(model, mapWrapper) {
+	function TwoWayCompareModel(model, mapWrapper) {
 	    this._model = model;
 	    this._mapperColumnIndex = mapWrapper.columnIndex;
 	    this._mapper = mapWrapper.mapper;
@@ -37,7 +37,7 @@ orion.CompareMergeModel = (function() {
 	    this.init();
 	}
 
-	CompareMergeModel.prototype =  {
+	TwoWayCompareModel.prototype =  {
 		//private functions
 		init: function(mapper){
 			this._initing = true;
@@ -181,8 +181,8 @@ orion.CompareMergeModel = (function() {
 		
 	};
 	
-	mEventTarget.EventTarget.addMixin(CompareMergeModel.prototype);
-	return CompareMergeModel;
+	mEventTarget.EventTarget.addMixin(TwoWayCompareModel.prototype);
+	return TwoWayCompareModel;
 }()); 
 return orion;
 });
