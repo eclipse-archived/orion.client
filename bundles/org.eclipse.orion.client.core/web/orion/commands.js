@@ -694,6 +694,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			if (forceText || !this.hasImage()) {
 				var text = window.document.createTextNode(this.name);
 				dojo.place(text, link, "last");
+				dojo.addClass(link, 'commandLink');
 			} else {
 				image = new Image();
 				image.alt = this.name;
@@ -748,19 +749,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				} else {
 					image.src = this.image;	
 					dojo.connect(image, "onmouseover", this, function() {
-						if(cssClassCmdOver) {
-							dojo.addClass(image, cssClassCmdOver);
-						} else {
-							dojo.addClass(image, "commandOver");
-						}
+						dojo.addClass(image, "commandOver");
 					});
 					dojo.connect(image, "onmouseout", this, function() {
 						image.src = this.image;
-						if(cssClassCmdOver) {
-							dojo.removeClass(image, cssClassCmdOver);
-						} else {
-							dojo.removeClass(image, "commandOver");
-						}
+						dojo.removeClass(image, "commandOver");
 					});
 				}
 				dojo.addClass(image, 'commandImage');
@@ -774,11 +767,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				dojo.place(image, link, "last");
 			} 
 			
-			if(cssClassCmdLink) {
-				dojo.addClass(link, cssClassCmdLink);
-			} else {
-				dojo.addClass(link, 'commandLink');
-			}
 			if (cssClass) {
 				dojo.addClass(link, cssClass);
 			}
@@ -900,6 +888,24 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		}
 	};  // end Command prototype
 	Command.prototype.constructor = Command;
+	
+	/**
+	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
+	 * @param {String} token the token in a URL query parameter that identifies the command
+	 * @param {String} parameterName the name of the parameter being specified in the value of the query 
+	 * 
+	 * @name orion.commands.CommandInvocation
+	 * 
+	 */
+	function CommandInvocation (command, items, userData) {
+		this.command = command;
+		this.items = items;
+		this.userData = userData;
+	}
+	CommandInvocation.prototype = /** @lends orion.commands.CommandInvocation.prototype */ {
+		
+	};
+	CommandInvocation.prototype.constructor = CommandInvocation;
 
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	/**
@@ -1113,6 +1119,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		CommandService: CommandService,
 		CommandKeyBinding: CommandKeyBinding,
 		Command: Command,
+		CommandInvocation: CommandInvocation,
 		CommandMenuItem: CommandMenuItem,
 		URLBinding: URLBinding,
 		ParametersDescription: ParametersDescription,
