@@ -132,7 +132,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					if (match) {
 						var urlBinding = this._urlBindings[id];
 						var command = urlBinding.command;
-						command.parameters[match.parameterName].value = match.parameterValue;
+						command.parameters.setValue(match.parameterName, match.parameterValue);
 						// ignore hrefCallback for the time being, on the assumption that we would never take you to a link without confirmation
 						var commandNode = dojo.byId(urlBinding.callbackParameters[2]);
 						if (command.callback) {
@@ -965,7 +965,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 	 * is provided
 	 * @param {String} token the token in a URL query parameter that identifies the command
 	 * @param {String} parameterName the name of the parameter being specified in the value of the query 
-	 * @param {Boolean} forceConfirm a boolean indicating whether the user must confirm execution of the command
 	 * 
 	 * @name orion.commands.URLBinding
 	 * 
@@ -973,7 +972,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 	function URLBinding (token, parameterName, forceConfirm) {
 		this.token = token;
 		this.parameterName = parameterName;
-		this.forceConfirm = forceConfirm;
 	}
 	URLBinding.prototype = /** @lends orion.commands.URLBinding.prototype */ {
 		/**
@@ -1004,12 +1002,120 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		}
 	};
 	URLBinding.prototype.constructor = URLBinding;
+
+	/**
+	 * A CommandParameter defines a parameter that is required by a command.
+	 *
+	 * @param {String} name the name of the parameter
+	 * @param {String} type the type of the parameter, one of the HTML5 input types
+	 * @param {String} label the (optional) label that should be used when showing the parameter
+	 * @param {String} value the (optional) default value for the parameter
+	 * 
+	 * @name orion.commands.CommandParameter
+	 * 
+	 */
+	function CommandParameter (name, type, label, value) {
+		this.name = name;
+		this.type = type;
+		this.label = label;
+		this.value = value;
+	}
+	CommandParameter.prototype = /** @lends orion.commands.ParametersDescription.prototype */ {
+		/**
+		 * Returns whether the user has requested to assign values to optional parameters
+		 * 
+		 * @returns {Boolean} whether the user has requested optional parameters
+		 */
+		optionsRequested: function () {
+			return this.optionsRequested;
+		}
+	};
+	CommandParameter.prototype.constructor = CommandParameter;
+	
+	/**
+	 * A ParametersDescription defines the parameters required by a command, and whether there are additional
+	 * optional parameters that can be specified.  The command service will attempt to collect required parameters
+	 * before calling a command callback.  The command is expected to provide UI for optional parameter, when the user has
+	 * signalled a desire to provide optional information.
+	 *
+	 * @param {Array} parameters an array of CommandParameters that are required
+	 * @param {Boolean} options specifies whether additional, optional parameters can be specified
+	 * 
+	 * @name orion.commands.ParametersDescription
+	 * 
+	 */
+	function ParametersDescription (parameters, options) {
+		this.parameterTable = {};
+		for (var i=0; i<parameters.length; i++) {
+			this.parameterTable[parameters[i].name] = parameters[i];
+		}
+		this.options = options;
+		this.optionsRequested = false;
+	}
+	ParametersDescription.prototype = /** @lends orion.commands.ParametersDescription.prototype */ {		
+		/**
+		 * Returns the CommandParameter with the given name, or <code>null</code> if there is no parameter
+		 * by that name.
+		 *
+		 * @param {String} name the name of the parameter
+		 * @returns {CommandParameter} the parameter with the given name
+		*/
+		parameterNamed: function(name) {
+			return this.parameterTable[name];
+		},
+		
+		/**
+		 * Returns the value of the parameter with the given name, or <code>null</code> if there is no parameter
+		 * by that name, or no value for that parameter.
+		 *
+		 * @param {String} name the name of the parameter
+		 * @returns {String} the value of the parameter with the given name
+		 */
+		valueFor: function(name) {
+			var parm = this.parameterTable[name];
+			if (parm) {
+				return parm.value;
+			}
+			return null;
+		},
+		
+		/**
+		 * Sets the value of the parameter with the given name.
+		 *
+		 * @param {String} name the name of the parameter
+		 * @param {String} value the value of the parameter with the given name
+		 */
+		setValue: function(name, value) {
+			var parm = this.parameterTable[name];
+			if (parm) {
+				parm.value = value;
+			}
+		},
+		 
+		/**
+		 * Evaluate the specified function for each parameter.
+		 *
+		 * @param {Function} a function which operates on a provided command parameter
+		 *
+		 */
+		forEach: function(func) {
+			for (var key in this.parameterTable) {
+				if (this.parameterTable[key].type && this.parameterTable[key].name) {
+					func(this.parameterTable[key]);
+				}
+			}
+		}
+	};
+	ParametersDescription.prototype.constructor = ParametersDescription;
+	
 	//return the module exports
 	return {
 		CommandService: CommandService,
 		CommandKeyBinding: CommandKeyBinding,
 		Command: Command,
 		CommandMenuItem: CommandMenuItem,
-		URLBinding: URLBinding
+		URLBinding: URLBinding,
+		ParametersDescription: ParametersDescription,
+		CommandParameter: CommandParameter
 	};
 });
