@@ -115,14 +115,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			}
 		},
 		
-		_collectAndCall: function(command, handler, callbackParameters) {
+		_collectAndCall: function(commandInvocation) {
 			dojo.query("input", this.parameterArea).forEach(function(field) {
 				if (field.type !== "button") {
-					command.parameters.setValue(field.parameterName, field.value);
+					commandInvocation.command.parameters.setValue(field.parameterName, field.value);
 				}
 			});
-			if (command.callback) {
-				command.callback.apply(handler, callbackParameters);
+			if (commandInvocation.command.callback) {
+				commandInvocation.command.callback.call(commandInvocation.handler, commandInvocation);
 			}
 
 		},
@@ -130,26 +130,22 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		/**
 		 * Returns whether this key binding is the same as the given parameter.
 		 * 
-		 * @param {orion.commands.Command} the command being executed
-		 * @param {Object} handler the command's handler
-		 * @param {DOMElement} parent the command's parent node
-		 * @param {DOMElement} commandNode the node representing the command
-		 * @param {Array} the callback parameters to be sent to the handler
+		 * @param {orion.commands.CommandInvocation} the command invocation
 		 * @returns {Boolean} whether or not required parameters were collected.
 		 */
-		collectParameters: function(command, handler, parent, commandNode, callbackParameters) {
-			if (command.parameters) {
-				this.open(commandNode, parent.id, dojo.hitch(this, function(parameterArea) {
+		collectParameters: function(commandInvocation) {
+			if (commandInvocation.command.parameters) {
+				this.open(commandInvocation.domNode, commandInvocation.domParent.id, dojo.hitch(this, function(parameterArea) {
 					var first = null;
 					var keyHandler = dojo.hitch(this, function(event) {
 						if (event.keyCode === dojo.keys.ENTER) {
-							this._collectAndCall(command, handler, callbackParameters);
+							this._collectAndCall(commandInvocation);
 						}
 						if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
-							this.close(commandNode);
+							this.close(commandInvocation.domNode);
 						}
 					});
-					command.parameters.forEach(function(parm) {
+					commandInvocation.command.parameters.forEach(function(parm) {
 						if (parm.label) {
 							dojo.place(document.createTextNode(parm.label), parameterArea, "last");
 						} 
@@ -167,8 +163,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 						dojo.connect(field, "onkeypress", keyHandler);
 					});
 					var spacer;
-					if (command.parameters.options) {
-						command.parameters.optionsRequested = false;
+					if (commandInvocation.command.parameters.options) {
+						commandInvocation.command.parameters.optionsRequested = false;
 						spacer = dojo.create("span", null, this.dismissArea, "last");
 						dojo.addClass(spacer, "dismiss");
 						
@@ -177,9 +173,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 						dojo.addClass(options, "dismiss");
 						options.title = "More options...";
 						dojo.connect(options, "onclick", dojo.hitch(this, function () {
-							command.parameters.optionsRequested = true;
-							this._collectAndCall(command, handler, callbackParameters);
-							this.close(commandNode);
+							commandInvocation.command.parameters.optionsRequested = true;
+							this._collectAndCall(commandInvocation);
+							this.close(commandInvocation.domNode);
 						}));
 					}
 					// OK button
@@ -192,8 +188,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 						dojo.addClass(ok, "core-sprite-ok");
 						dojo.addClass(ok, "dismiss");
 						dojo.connect(ok, "onclick", dojo.hitch(this, function () {
-							this._collectAndCall(command, handler, callbackParameters);
-							this.close(commandNode);
+							this._collectAndCall(commandInvocation);
+							this.close(commandInvocation.domNode);
 						}));
 					}
 
@@ -384,13 +380,13 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		}
 		if (toolbar) {	
 			dojo.empty(toolbar);
-			commandService.renderCommands(toolbar, "dom", handler, handler, "image", null, null, !useImage);  // use true when we want to force toolbar items to text
+			commandService.renderCommands(toolbar, "dom", handler, handler, "tool", !useImage);  // use true when we want to force toolbar items to text
 		}
 		// now page navigation actions
 		toolbar = dojo.byId("pageNavigationActions");
 		if (toolbar) {	
 			dojo.empty(toolbar);
-			commandService.renderCommands(toolbar, "dom", handler, handler, "image", null, null, !useImage);  // use true when we want to force toolbar items to text
+			commandService.renderCommands(toolbar, "dom", handler, handler, "tool", !useImage);  // use true when we want to force toolbar items to text
 		}
 	}
 	
@@ -485,7 +481,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			name: "Find File Named...",
 			tooltip: "Choose a file by name and open an editor on it",
 			id: "eclipse.openResource",
-			callback: function(item) {
+			callback: function(data) {
 				openResourceDialog(searcher, editor);
 			}});
 			
@@ -561,7 +557,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			dojo.empty(toolbar);
 			// need to have some item, for global scoped commands it won't matter
 			var item = handler || {};
-			commandService.renderCommands(toolbar, "global", item, handler, "image");
+			commandService.renderCommands(toolbar, "global", item, handler, "tool");
 		}
 		
 		generateUserInfo(serviceRegistry);

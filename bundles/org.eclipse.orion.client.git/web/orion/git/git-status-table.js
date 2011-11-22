@@ -758,7 +758,7 @@ orion.GitStatusController = (function() {
 			var openGitLog = new mCommands.Command({
 				name : "Complete log",
 				id : "orion.openGitLog",
-				hrefCallback : function(item) {
+				hrefCallback : function() {
 					return require.toUrl("git/git-log.html") +"#" + (that._curBranch ? that._curBranch.CommitLocation : that._model.items.CommitLocation) + "?page=1";
 				},
 				visibleWhen : function(item) {
@@ -769,7 +769,7 @@ orion.GitStatusController = (function() {
 			var openGitRemote = new mCommands.Command({
 				name : "Complete log",
 				id : "orion.openGitRemote",
-				hrefCallback : function(item) {
+				hrefCallback : function() {
 					return require.toUrl("git/git-log.html") +"#" + that._curBranch.RemoteLocation[0].Children[0].Location + "?page=1";
 				},
 				visibleWhen : function(item) {
@@ -1010,8 +1010,8 @@ orion.GitStatusController = (function() {
 				imageClass: "git-sprite-open_compare",
 				spriteClass: "gitCommandSprite",
 				id: "orion.sbsCompare",
-				hrefCallback: function(item) {
-					return self.openCompareEditor(item.object);
+				hrefCallback: function(data) {
+					return self.openCompareEditor(data.items.object);
 				},
 				visibleWhen: function(item) {
 					return item.type === "fileItem";
@@ -1021,7 +1021,7 @@ orion.GitStatusController = (function() {
 			var showCommitterAndAuthorPanel = new mCommands.Command({
 				name : "Change Committer or Author",
 				id : "orion.showCommitterAndAuthor",
-				callback : function(item) {
+				callback : function() {
 					self._committerAndAuthorZoneRenderer.show();
 				},
 				visibleWhen : function(item) {
@@ -1032,7 +1032,7 @@ orion.GitStatusController = (function() {
 			var hideCommitterAndAuthorPanel = new mCommands.Command({
 				name : "Use Default Committer and Author",
 				id : "orion.hideCommitterAndAuthor",
-				callback : function(item) {
+				callback : function() {
 					self._committerAndAuthorZoneRenderer.hide();
 				},
 				visibleWhen : function(item) {
@@ -1046,13 +1046,13 @@ orion.GitStatusController = (function() {
 				imageClass: "git-sprite-checkout",
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitCheckout",
-				callback: function(item) {
+				callback: function(data) {
 					self._registry.getService("orion.page.dialog").confirm("Your changes to the file will be lost. Are you sure you want to checkout?", function(doit) {
 						if (!doit) {
 							return;
 						}
 						self._statusService.setProgressMessage("Checking out...");
-						self.checkout(item.object);
+						self.checkout(data.items.object);
 					});
 				},
 				visibleWhen: function(item) {
@@ -1066,10 +1066,10 @@ orion.GitStatusController = (function() {
 				imageClass: "git-sprite-stage",
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitStage",
-				callback: function(item) {
+				callback: function(data) {
 					self._statusService.setProgressMessage("Staging...");
-					self._prepareStage(item.rowId, false);
-					return self.stage(item.object.indexURI , item.object);
+					self._prepareStage(data.items.rowId, false);
+					return self.stage(data.items.object.indexURI , item.object);
 				},
 				visibleWhen: function(item) {
 					return (item.type === "fileItem" && !self._model.isStaged(item.object.type));
@@ -1082,7 +1082,7 @@ orion.GitStatusController = (function() {
 				imageClass: "git-sprite-stage_all",
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitStageAll",
-				callback: function(item) {
+				callback: function(data) {
 					self._statusService.setProgressMessage("Staging...");
 					return self.stageSelected();
 				},
@@ -1098,9 +1098,9 @@ orion.GitStatusController = (function() {
 				imageClass: "git-sprite-unstage",
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitUnstage",
-				callback: function(item) {
+				callback: function(data) {
 					self._statusService.setProgressMessage("Unstaging...");
-					return self.unstage(item.object);
+					return self.unstage(data.items.object);
 				},
 				visibleWhen: function(item) {
 					return item.type === "fileItem" && self._model.isStaged(item.object.type);
@@ -1113,7 +1113,7 @@ orion.GitStatusController = (function() {
 				imageClass: "git-sprite-unstage_all",
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitUnstageAll",
-				callback: function(item) {
+				callback: function(data) {
 					self._statusService.setProgressMessage("Unstaging...");
 					return self.unstageSelected("MIXED");
 				},
@@ -1129,7 +1129,7 @@ orion.GitStatusController = (function() {
 				imageClass: "git-sprite-refresh",
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitResetChanges",
-				callback: function(item) {
+				callback: function(data) {
 					var dialog = self._registry.getService("orion.page.dialog");
 					dialog.confirm("All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.\n" +
 						"Are you sure you want to continue?",
@@ -1152,11 +1152,11 @@ orion.GitStatusController = (function() {
 				name: "Continue",
 				tooltip: "Continue rebase",
 				id: "orion.gitRebaseContinue",
-				callback: function(item) {
+				callback: function() {
 						self._statusService.setProgressMessage("Continue rebase...");
 						return self.rebase("CONTINUE");
 				},
-				visibleWhen: function(item) {
+				visibleWhen: function(data) {
 					return self.rebaseState;
 				}
 			});	
@@ -1165,11 +1165,11 @@ orion.GitStatusController = (function() {
 				name: "Skip Patch",
 				tooltip: "Skip patch",
 				id: "orion.gitRebaseSkip",
-				callback: function(item) {
+				callback: function() {
 						self._statusService.setProgressMessage("Skipping patch...");
 						return self.rebase("SKIP");
 				},
-				visibleWhen: function(item) {
+				visibleWhen: function(data) {
 					return self.rebaseState;
 				}
 			});	
@@ -1178,11 +1178,11 @@ orion.GitStatusController = (function() {
 				name: "Abort",
 				tooltip: "Abort rebase",
 				id: "orion.gitRebaseAbort",
-				callback: function(item) {
+				callback: function() {
 						self._statusService.setProgressMessage("Aborting rebase...");
 						return self.rebase("ABORT");
 				},
-				visibleWhen: function(item) {
+				visibleWhen: function(data) {
 					return self.rebaseState;
 				}
 			});		

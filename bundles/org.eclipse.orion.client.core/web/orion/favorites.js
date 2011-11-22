@@ -193,8 +193,8 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			tooltip: "Add link as favorite",
 			imageClass: "core-sprite-add",
 			id: "eclipse.addExternalFave",
-			callback: dojo.hitch(this, function(item, commandId, domId) {
-				this.getUserURL(domId);
+			callback: dojo.hitch(this, function(data) {
+				this.getUserURL(data.domNode.id);
 			})
 		});		
 		var deleteFaveCommand = new mCommands.Command({
@@ -202,9 +202,9 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			imageClass: "core-sprite-delete",
 			id: "eclipse.deleteFave",
 			visibleWhen: function(item) {return item.isFavorite;},
-			callback: function(item) {
-				if(window.confirm("Do you want to remove " + item.name + " from favorites?")) {
-					options.serviceRegistry.getService("orion.core.favorite").removeFavorite(item.path);
+			callback: function(data) {
+				if(window.confirm("Do you want to remove " + data.items.name + " from favorites?")) {
+					options.serviceRegistry.getService("orion.core.favorite").removeFavorite(data.items.path);
 				}
 			}
 		});		
@@ -213,8 +213,8 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			imageClass: "core-sprite-rename",
 			id: "eclipse.renameFave",
 			visibleWhen: function(item) {return item.isFavorite;},
-			callback: dojo.hitch(this, function(item, commandId, domId, faveIndex) {
-				this.editFavoriteName(item, commandId, domId, faveIndex);
+			callback: dojo.hitch(this, function(data) {
+				this.editFavoriteName(data.items, data.id, data.domNode.id, data.userData);
 			})
 		});
 		var deleteSearchCommand = new mCommands.Command({
@@ -222,13 +222,13 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			imageClass: "core-sprite-delete",
 			id: "eclipse.deleteSearch",
 			visibleWhen: function(item) {return item.isSearch;},
-			callback: function(item) {
-				if(window.confirm("Do you want to remove " + item.name + " from favorites?")) {
-					options.serviceRegistry.getService("orion.core.favorite").removeSearch(item.query);
+			callback: function(data) {
+				if(window.confirm("Do you want to remove " + data.items.name + " from favorites?")) {
+					options.serviceRegistry.getService("orion.core.favorite").removeSearch(data.items.query);
 				}
 			}
 		});
-		var commandService = this._registry.getService("orion.page.command")
+		var commandService = this._registry.getService("orion.page.command");
 		// register commands with object scope
 		commandService.addCommand(deleteFaveCommand, "object");
 		commandService.addCommand(renameFaveCommand, "object");
@@ -332,7 +332,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				// we must hide/show the span rather than the column.  IE and Chrome will not consider
 				// the mouse as being over the table row if it's in a hidden column
 				dojo.style(actionsWrapper, "visibility", "hidden");
-				this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", fave, this, "image", null, j);
+				this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", fave, this, "tool", false, j);
 				dojo.place(tr, tbody, "last");
 				dojo.connect(tr, "onmouseover", tr, function() {
 					var wrapper = dojo.byId(this.id+"actionsWrapper");
@@ -346,7 +346,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			dojo.place(faveTable, this._parent, "only");
 			// Now that the table is added to the dom, generate commands
 			var commands = dojo.byId("faveCommands");
-			this._registry.getService("orion.page.command").renderCommands(commands, "dom", this, this, "image");
+			this._registry.getService("orion.page.command").renderCommands(commands, "dom", this, this, "tool");
 			
 			// spacer, which also is a placeholder for newly added favorites
 			var spacer = dojo.create("tr", null, faveTable);
@@ -378,7 +378,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 					// render local commands
 					actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
 					dojo.style(actionsWrapper, "visibility", "hidden");
-					this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", search, this, "image", null, i);
+					this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", search, this, "tool", false, i);
 					dojo.place(tr, tbody, "last");
 					dojo.connect(tr, "onmouseover", tr, function() {
 						var wrapper = dojo.byId(this.id+"actionsWrapper");

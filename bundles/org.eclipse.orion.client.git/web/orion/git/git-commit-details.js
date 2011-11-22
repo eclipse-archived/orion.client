@@ -36,8 +36,8 @@ exports.CommitDetails = (function() {
 			imageClass: "git-sprite-open_compare",
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.showDiff",
-			hrefCallback: function(item) {
-				return require.toUrl("compare/compare.html") +"?readonly#" + item.DiffLocation;
+			hrefCallback: function(data) {
+				return require.toUrl("compare/compare.html") +"?readonly#" + data.items.DiffLocation;
 			},
 			visibleWhen: function(item) {
 				return item.Type === "Diff";

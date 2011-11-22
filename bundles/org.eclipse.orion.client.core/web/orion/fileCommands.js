@@ -73,10 +73,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			throw "could not find toolbar " + toolbarId;
 		}
 		var service = registry.getService("orion.page.command");
-		service.renderCommands(toolbar, "dom", item, explorer, "image", null, null, true);  // true for force icons to text
+		service.renderCommands(toolbar, "dom", item, explorer, "tool", true);  // true for force icons to text
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			service.renderCommands(selectionTools, "dom", null, explorer, "image", null, null, true); // true would force icons to text
+			service.renderCommands(selectionTools, "dom", null, explorer, "tool", true); // true would force icons to text
 		}
 		
 		// Stuff we do only the first time
@@ -87,7 +87,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					registry.getService("orion.page.command").renderCommands(selectionTools, "dom", selections, explorer, "image", null, null, true);
+					registry.getService("orion.page.command").renderCommands(selectionTools, "dom", selections, explorer, "tool", true);
 				}
 			});
 		}
@@ -286,8 +286,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 					}
 				}
 				return true;},
-			callback: function(item) {
-				serviceRegistry.getService("orion.core.favorite").makeFavorites(item);
+			callback: function(data) {
+				serviceRegistry.getService("orion.core.favorite").makeFavorites(data.items);
 			}});
 		commandService.addCommand(favoriteCommand, "object");
 		
@@ -300,14 +300,15 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 					item = forceSingleItem(item);
 					return item.Location;
 				},
-				callback: dojo.hitch(this, function(item, commandId, domId) {
+				callback: dojo.hitch(this, function(data) {
 					// we want to popup the edit box over the name in the explorer.
 					// if we can't find it, we'll pop it up over the command dom element.
+					var item = data.items;
 					var refNode = explorer.getNameNode(item);
 					if (!refNode) {
-						refNode = dojo.byId(domId);
+						refNode = data.domNode;
 					}
-					mUtil.getUserText(domId+"EditBox", refNode, true, item.Name, 
+					mUtil.getUserText(refNode.id+"EditBox", refNode, true, item.Name, 
 						dojo.hitch(this, function(newText) {
 							fileClient.moveFile(item.Location, item.parent.Location, newText).then(
 								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}), //refresh the root
@@ -326,8 +327,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			imageClass: "core-sprite-delete",
 			id: "eclipse.deleteFile",
 			visibleWhen: oneOrMoreFilesOrFolders,
-			callback: function(item) {
-				var items = dojo.isArray(item) ? item : [item];
+			callback: function(data) {
+				var items = dojo.isArray(data.items) ? data.items : [data.items];
 				var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
 				serviceRegistry.getService("orion.page.dialog").confirm(confirmMessage, 
 					dojo.hitch(explorer, function(doit) {
@@ -381,8 +382,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
 				return item.ExportLocation && item.Directory;},
-			hrefCallback: function(item) {
-				return forceSingleItem(item).ExportLocation;
+			hrefCallback: function(data) {
+				return forceSingleItem(data.items).ExportLocation;
 			}});
 		commandService.addCommand(downloadCommand, "object");
 		
@@ -425,8 +426,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			imageClass: "core-sprite-new_file",
 			id: "eclipse.newFile",
 			parameters: newFileNameParameters,
-			callback: function(item, commandId, domId, userData, parameters) {
-				item = forceSingleItem(item);
+			callback: function(data) {
+				var item = forceSingleItem(data.items);
 				var createFunction = function(name) {
 					if (name) {
 						fileClient.createFile(item.Location, name).then(
@@ -434,10 +435,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 							errorHandler);
 					}
 				};
-				if (parameters && parameters.valueFor('name')) {
-					createFunction(parameters.valueFor('name'));
+				if (data.parameters && data.parameters.valueFor('name')) {
+					createFunction(data.parameters.valueFor('name'));
 				} else {
-					getNewItemName(item, domId, "New File", createFunction);
+					getNewItemName(item, data.domNode.id, "New File", createFunction);
 				}
 			},
 			visibleWhen: function(item) {
@@ -454,8 +455,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			imageClass: "core-sprite-new_folder",
 			id: "eclipse.newFolder",
 			parameters: newFolderNameParameters,
-			callback: function(item, commandId, domId, userData, parameters) {
-				item = forceSingleItem(item);
+			callback: function(data) {
+				var item = forceSingleItem(data.items);
 				var createFunction = function(name) {
 					if (name) {
 						fileClient.createFolder(item.Location, name).then(
@@ -463,10 +464,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 							errorHandler);
 					}
 				};
-				if (parameters && parameters.valueFor('name')) {
-					createFunction(parameters.valueFor('name'));
+				if (data.parameters && data.parameters.valueFor('name')) {
+					createFunction(data.parameters.valueFor('name'));
 				} else {
-					getNewItemName(item, domId, "New Folder", createFunction);
+					getNewItemName(item, data.domNode.id, "New Folder", createFunction);
 				}
 			},
 			visibleWhen: function(item) {
@@ -482,7 +483,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			tooltip: "Create a new folder",
 			imageClass: "core-sprite-new_folder",
 			id: "eclipse.newProject",
-			callback: function(item, commandId, domId, userData, parameters) {
+			callback: function(data) {
 				var createFunction = function(name) {
 					if (name) {
 						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name).then(
@@ -490,10 +491,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 							errorHandler);
 					}
 				};
-				if (parameters && parameters.valueFor('name')) {
-					createFunction(parameters.valueFor('name'));
+				if (data.parameters && data.parameters.valueFor('name')) {
+					createFunction(data.parameters.valueFor('name'));
 				} else {
-					getNewItemName(item, domId, "New Folder", createFunction);
+					getNewItemName(data.items, data.domNode.id, "New Folder", createFunction);
 				}
 			},
 			visibleWhen: function(item) {
@@ -507,7 +508,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			tooltip: "Create a folder that links to an existing folder on the server",
 			imageClass: "core-sprite-link",
 			id: "eclipse.linkProject",
-			callback: function(item) {
+			callback: function(data) {
 				var dialog = new orion.widgets.NewItemDialog({
 					title: "Link Folder",
 					label: "Folder name:",
@@ -531,8 +532,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			tooltip: "Copy files and folders contained in a local zip file",
 			imageClass: "core-sprite-importzip",
 			id: "eclipse.importCommand",
-			callback : function(item) {
-				item = forceSingleItem(item);
+			callback : function(data) {
+				var item = forceSingleItem(data.items);
 				var dialog = new orion.widgets.ImportDialog({
 					importLocation: item.ImportLocation,
 					func: dojo.hitch(explorer, function() { this.changedItem(item); })
@@ -551,8 +552,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			tooltip: "Copy files and folders from a specified SFTP connection",
 			imageClass: "core-sprite-transferin",
 			id: "eclipse.importSFTPCommand",
-			callback : function(item) {
-				item = forceSingleItem(item);
+			callback : function(data) {
+				var item = forceSingleItem(data.items);
 				var dialog = new orion.widgets.SFTPConnectionDialog({
 					func:  function(host,path,user,password, overwriteOptions){
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
@@ -580,8 +581,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			tooltip: "Copy files and folders to a specified SFTP location",
 			imageClass: "core-sprite-transferout",
 			id: "eclipse.exportSFTPCommand",
-			callback : function(item) {
-				item = forceSingleItem(item);
+			callback : function(data) {
+				var item = forceSingleItem(data.items);
 				var dialog = new orion.widgets.SFTPConnectionDialog({
 					func:  function(host,path,user,password, overwriteOptions){
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
@@ -607,8 +608,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			name : "Copy to",
 			tooltip: "Copy files and folders to a specified location",
 			id: "eclipse.copyFile",
-			choiceCallback: function(items, userData) {
-				return makeMoveCopyTargetChoices(items, userData, true);
+			choiceCallback: function(data) {
+				return makeMoveCopyTargetChoices(data.items, data.userData, true);
 			},
 			visibleWhen: oneOrMoreFilesOrFolders 
 		});
@@ -620,8 +621,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			name : "Move to",
 			tooltip: "Move files and folders to a new location",
 			id: "eclipse.moveFile",
-			choiceCallback: function(items, userData) {
-				return makeMoveCopyTargetChoices(items, userData, false);
+			choiceCallback: function(data) {
+				return makeMoveCopyTargetChoices(data.items, data.userData, false);
 			},
 			visibleWhen: oneOrMoreFilesOrFolders
 			});
@@ -901,27 +902,27 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			isEditor: info.isEditor
 		};
 		if (info.href) {
-			commandOptions.hrefCallback = dojo.hitch(info, function(items){
-				var item = dojo.isArray(items) ? items[0] : items;
+			commandOptions.hrefCallback = dojo.hitch(info, function(data){
+				var item = dojo.isArray(data.items) ? data.items[0] : data.items;
 				var shallowItemClone = fileCommandUtils._cloneItemWithoutChildren(item);
 				if(service.run) {
 					return service.run(shallowItemClone);
 				}
 			});
 		} else {
-			commandOptions.callback = dojo.hitch(info, function(items){
+			commandOptions.callback = dojo.hitch(info, function(data){
 				var shallowItemsClone;
 				if (this.forceSingleItem) {
-					var item = dojo.isArray() ? items[0] : items;
+					var item = dojo.isArray() ? data.items[0] : data.items;
 					shallowItemsClone = fileCommandUtils._cloneItemWithoutChildren(item);
 				} else {
-					if (dojo.isArray(items)) {
+					if (dojo.isArray(data.items)) {
 						shallowItemsClone = [];
-						for (var j = 0; j<items.length; j++) {
-							shallowItemsClone.push(fileCommandUtils._cloneItemWithoutChildren(items[j]));
+						for (var j = 0; j<data.items.length; j++) {
+							shallowItemsClone.push(fileCommandUtils._cloneItemWithoutChildren(data.items[j]));
 						}
 					} else {
-						shallowItemsClone = fileCommandUtils._cloneItemWithoutChildren(items);
+						shallowItemsClone = fileCommandUtils._cloneItemWithoutChildren(data.items);
 					}
 				}
 				if(service.run) {

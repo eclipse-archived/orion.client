@@ -32,8 +32,8 @@ exports.CloneDetails = (function() {
 			name: "Add Configuration Item",
 			imageClass: "core-sprite-add",
 			id: "eclipse.git.addProperty",
-			callback: dojo.hitch(this, function(item, commandId, domId) {
-				this.newProperty(item, commandId, domId);
+			callback: dojo.hitch(this, function(data) {
+				this.newProperty(data.items, data.id, data.domNode.id);
 			})
 		});
 		
@@ -44,8 +44,8 @@ exports.CloneDetails = (function() {
 			visibleWhen: function(item) {
 				return (item.Key && item.Value && item.Location);
 				},
-			callback: dojo.hitch(this, function(item, commandId, domId, propertyIndex) {
-				this.editProperty(item, commandId, domId, propertyIndex);
+			callback: dojo.hitch(this, function(data) {
+				this.editProperty(data.items, data.id, data.domNode.id, data.userData);
 			})
 		});
 		
@@ -56,8 +56,8 @@ exports.CloneDetails = (function() {
 			visibleWhen: function(item) {
 				return (item.Key && item.Value && item.Location);
 				},
-			callback: dojo.hitch(this, function(item, commandId, domId, propertyIndex) {
-				this.deleteProperty(item, commandId, domId, propertyIndex);
+			callback: dojo.hitch(this, function(data) {
+				this.deleteProperty(data.items, data.id, data.domNode.id, data.userData);
 			})
 		});
 		

@@ -697,7 +697,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			tooltip: "Show previous page of search result",
 			imageClass : "core-sprite-leftarrow",
 			id : "orion.search.prevPage",
-			hrefCallback : function(item) {
+			hrefCallback : function() {
 				var prevPage = that.caculatePrevPage(that.model.start, that.model.rows, that.totalNumber);
 				return require.toUrl("search/search.html") + "#" + "?rows=" + that.model.rows + "&start=" + prevPage.start + "&q=" + that.model.locationAndSearchStr;
 			},
@@ -711,7 +711,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			tooltip: "Show next page of search result",
 			imageClass : "core-sprite-rightarrow",
 			id : "orion.search.nextPage",
-			hrefCallback : function(item) {
+			hrefCallback : function() {
 				var nextPage = that.caculateNextPage(that.model.start, that.model.rows, that.totalNumber);
 				return require.toUrl("search/search.html") + "#" + "?rows=" + that.model.rows + "&start=" + nextPage.start + "&q=" + that.model.locationAndSearchStr;
 			},

@@ -67,8 +67,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 					}
 					return true;
 				},
-				callback: function(item) {
-					
+				callback: function(data) {
+					var item = data.items;
 					var userService = serviceRegistry.getService("orion.core.user");
 					if(dojo.isArray(item) && item.length > 1){
 						if(confirm("Are you sure you want to delete these " + item.length + " users?")){
@@ -98,7 +98,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 			var changePasswordCommand = new mCommands.Command({
 				name: "Change Password",
 				id: "eclipse.changePassword",
-				callback: function(item) {
+				callback: function(data) {
+					var item = data.items;
 					var dialog = new orion.profile.widgets.ResetPasswordDialog({
 						user: item,
 						registry : serviceRegistry

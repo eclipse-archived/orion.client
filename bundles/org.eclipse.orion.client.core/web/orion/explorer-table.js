@@ -99,7 +99,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				for (var i=0; i < this.openWithCommands.length; i++) {
 					var openWithCommand = this.openWithCommands[i];
 					if (openWithCommand.visibleWhen(item)) {
-						href = openWithCommand.hrefCallback(item);
+						href = openWithCommand.hrefCallback({items: item});
 						break; // use the first one
 					}
 				}
