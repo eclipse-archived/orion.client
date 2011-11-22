@@ -13,6 +13,30 @@
  
 define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip' ], function(require, dojo, dijit, mUtil){
 
+	/**
+	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
+	 * 
+	 * @name orion.commands.CommandInvocation
+	 * 
+	 */
+	function CommandInvocation (commandService, handler, items, userData, command) {
+		this.commandService = commandService;
+		this.handler = handler;
+		this.items = items;
+		this.userData = userData;
+		this.command = command;
+	}
+	CommandInvocation.prototype = /** @lends orion.commands.CommandInvocation.prototype */ {
+		/**
+		 * Returns whether this command invocation can collect parameters.
+		 * 
+		 * @returns {Boolean} whether parameters can be collected
+		 */
+		collectsParameters: function() {
+			return this.commandService && this.commandService._parameterCollector;  // reachy
+		}
+	};
+	CommandInvocation.prototype.constructor = CommandInvocation;
 
 	/**
 	 * Override the dijit MenuItem so that the inherited click behavior is not used.
@@ -95,10 +119,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				if (this._activeBindings[id] && this._activeBindings[id].keyBinding && this._activeBindings[id].command) {
 					if (this._activeBindings[id].keyBinding.match(event)) {
 						var activeBinding = this._activeBindings[id];
+						var invocation = activeBinding.invocation;
 						var command = activeBinding.command;
 						if (command.hrefCallback) {
 							stop(event);
-							var href = command.hrefCallback.call(activeBinding.handler || window, activeBinding.items, id, activeBinding.userData);
+							var href = command.hrefCallback.call(invocation.handler || window, invocation);
 							if (href.then){
 								href.then(function(l){
 									window.open(l);
@@ -110,13 +135,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							return;
 						} else if (command.callback) {
 							stop(event);
-							var commandNode = dojo.byId(activeBinding.callbackParameters[2]);
 							window.setTimeout(dojo.hitch(this, function() {
 								if (command.parameters && this._parameterCollector) {
 									// should the handler be bound to this, or something else?
-									this._collectParameters(command, activeBinding.handler || window, activeBinding.parentNode, commandNode, activeBinding.callbackParameters);
+									this._collectParameters(invocation);
 								} else {
-									command.callback.apply(activeBinding.handler || window, activeBinding.callbackParameters);
+									command.callback.call(invocation.handler || window, invocation);
 								}	
 							}), 0);
 							return;
@@ -132,12 +156,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					if (match) {
 						var urlBinding = this._urlBindings[id];
 						var command = urlBinding.command;
+						var invocation = urlBinding.invocation;
 						command.parameters.setValue(match.parameterName, match.parameterValue);
 						// ignore hrefCallback for the time being, on the assumption that we would never take you to a link without confirmation
-						var commandNode = dojo.byId(urlBinding.callbackParameters[2]);
 						if (command.callback) {
 							window.setTimeout(dojo.hitch(this, function() {
-								this._collectParameters(command, urlBinding.handler || window, urlBinding.parentNode, commandNode, urlBinding.callbackParameters);
+								this._collectParameters(invocation);
 							}), 0);
 							return;
 						}
@@ -153,10 +177,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		runCommand: function(commandId) {
 			var binding = this._urlBindings[commandId];
 			if (binding && binding.command) {
-				var commandNode = dojo.byId(binding.callbackParameters[2]);
 				if (binding.command.callback) {
 					window.setTimeout(dojo.hitch(this, function() {
-						this._collectParameters(binding.command, binding.handler || window, binding.parentNode, commandNode, binding.callbackParameters);
+						this._collectParameters(binding.invocation);
 					}), 0);
 				}
 			}
@@ -193,11 +216,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			}
 		},
 		
-		_collectParameters: function(command, handler, parentNode, commandNode, callbackParameters) {
+		_collectParameters: function(commandInvocation) {
 			if (this._parameterCollector) {
 				this._parameterCollector.close(this._activeModalCommandNode);
-				this._activeModalCommandNode = commandNode;
-				this._parameterCollector.collectParameters(command, handler, parentNode, commandNode, callbackParameters);
+				this._activeModalCommandNode = commandInvocation.domNode;
+				this._parameterCollector.collectParameters(commandInvocation);
 			}
 		},
 		
@@ -334,7 +357,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		},
 		
 		_isLastChildSeparator: function(parent, style) {
-			if (style === "image") {
+			if (style === "tool") {
 				return parent.childNodes.length > 0 && dojo.hasClass(parent.childNodes[parent.childNodes.length - 1], "commandSeparator");
 			}
 			if (style === "menu") {
@@ -355,15 +378,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 *  items are specified and a selection service was specified at creation time, then the selection
 		 *  service will be used to determine which items are involved. 
 		 * @param {Object} handler The object that should perform the command
-		 * @param {String} renderType The style in which the command should be rendered.  "image" will render
-		 *  a button-like image element in the dom.  "menu" will render a push button menu containing
+		 * @param {String} renderType The style in which the command should be rendered.  "tool" will render
+		 *  a button-like image or text element in the dom.  "menu" will render a push button menu containing
 		 *  the commands.
-		 * @param {String} cssClass Optional name of a CSS class that should be added to any rendered commands.
-		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
 		 * @param {Boolean} forceText When true, always use text and not the icon when showing the command, regardless of the
 		 *  specified renderType.  
+		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
 		 */	
-		renderCommands: function(parent, scope, items, handler, renderType, cssClass, userData, forceText, cssClassCmdOver, cssClassCmdLink) {
+		renderCommands: function(parent, scope, items, handler, renderType, forceText, userData) {
 			if (typeof(parent) === "string") {
 				parent = dojo.byId(parent);
 			}
@@ -371,7 +393,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				var cmdService = this;
 				if (this._selection) {
 					this._selection.getSelections(function(selections) {
-						cmdService.renderCommands(parent, scope, selections, handler, renderType, cssClass, userData, forceText, cssClassCmdOver, cssClassCmdLink);
+						cmdService.renderCommands(parent, scope, selections, handler, renderType, forceText, userData);
 					});
 				}
 				return;
@@ -386,9 +408,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			} else {
 				throw "Unrecognized command scope " + scope;
 			}
-			this._render(this._namedGroups, parent, scope, items, handler, renderType, cssClass, userData, refCommands, forceText, cssClassCmdOver, cssClassCmdLink);
+			this._render(this._namedGroups, parent, scope, items, handler, renderType, forceText, userData, refCommands);
 			// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
-			if (renderType === "image") {
+			if (renderType === "tool") {
 				if (this._isLastChildSeparator(parent, renderType)) {
 					parent.removeChild(parent.childNodes[parent.childNodes.length-1]);
 				}
@@ -401,7 +423,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			}
 		},
 		
-		_render: function(commandItems, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText, cssClassCmdOver, cssClassCmdLink) {
+		_render: function(commandItems, parent, scope, items, handler, renderType, forceText, userData, commandList) {
 			// sort the items
 			var positionOrder = commandItems.sortedCommands;
 			if (!positionOrder) {
@@ -420,14 +442,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			}
 			// now traverse the command items and render as we go
 			for (var i = 0; i < positionOrder.length; i++) {
-				var image, id, menuButton;
+				var image, id, menuButton, invocation;
 				if (positionOrder[i].children) {
 					var group = positionOrder[i];
 					if (group.scopeId && parent.id !== group.scopeId) {
 						continue;
 					}
 					var children;
-					if (renderType === "image") {
+					if (renderType === "tool") {
 						if (group.title) {
 							// we need a named menu button, but first let's see if we actually have content
 							var newMenu= new dijit.Menu({
@@ -436,7 +458,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							// if commands are scoped to the dom, we'll need to identify a menu with the dom id of its original parent
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children
-							this._render(positionOrder[i].children, newMenu, scope, items, handler, "menu", cssClass, userData, commandList, forceText, cssClassCmdOver, cssClassCmdLink); 
+							this._render(positionOrder[i].children, newMenu, scope, items, handler, "menu", forceText, userData, commandList); 
 							// special post-processing when we've created a menu in an image bar.
 							// we want to get rid of a trailing separator in the menu first, and then decide if a menu is necessary
 							children = newMenu.getChildren();
@@ -457,13 +479,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 										dropDown: newMenu
 								        });
 									dojo.addClass(menuButton.domNode, "commandLink");
-							        if (cssClass) {
-										dojo.addClass(menuButton.domNode, cssClass);
-							        } 
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-									menuCommand._addImage(parent, id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, this);
+									invocation = new CommandInvocation(this, handler, items, userData, menuCommand);
+									menuCommand._addTool(parent, forceText, id, invocation);
 								}
 							}
 						} else {
@@ -472,7 +492,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							if (parent.childNodes.length > 0 && !this._isLastChildSeparator(parent, renderType)) {
 								sep = this.generateSeparatorImage(parent);
 							}
-							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText, cssClassCmdOver, cssClassCmdLink); 
+							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, forceText, userData, commandList); 
 
 							// make sure that more than just the separator got rendered before rendering a trailing separator
 							if (parent.childNodes.length > 0) {
@@ -486,7 +506,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						// group within a menu
 						if (group.title) {
 							var subMenu = new dijit.Menu();
-							this._render(positionOrder[i].children, subMenu, scope, items, handler, renderType, cssClass, userData, commandList, forceText, cssClassCmdOver, cssClassCmdLink); 
+							this._render(positionOrder[i].children, subMenu, scope, items, handler, renderType, forceText, userData, commandList); 
 							if (subMenu.getChildren().length > 0) {
 								parent.addChild(new dijit.PopupMenuItem({
 									label: group.title,
@@ -500,7 +520,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 								menuSep = new dijit.MenuSeparator();
 								parent.addChild(menuSep);
 							}
-							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, cssClass, userData, commandList, forceText, cssClassCmdOver, cssClassCmdLink); 
+							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, forceText, userData, commandList); 
 							// Add a trailing separator if children rendered.
 							var menuChildren = parent.getChildren();
 							if (menuChildren[menuChildren.length - 1] !== menuSep) {
@@ -517,7 +537,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					var urlBinding = null;
 					if (command) {
 						if (scope === "dom") {
-							if (renderType=== "image") {
+							if (renderType=== "tool") {
 								render = parent.id === positionOrder[i].scopeId;
 							} else if (renderType=== "menu") {
 								render = parent.eclipseScopeId === positionOrder[i].scopeId;
@@ -527,31 +547,24 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						} 
 						// only check bindings that would otherwise render (ie, dom id matches parent, etc.)
 						var checkBinding = render;
+						invocation = new CommandInvocation(this, handler, items, userData, command);
+
 						// ensure that keybindings are bound to the current handler, items, and user data
 						if (checkBinding && this._activeBindings[command.id] && this._activeBindings[command.id].keyBinding) {
 							keyBinding = this._activeBindings[command.id];
-							keyBinding.items = items;
-							keyBinding.userData = userData;
-							keyBinding.handler = handler;
+							keyBinding.invocation = invocation;
 							// if it is a binding only, don't render the command.
 							if (keyBinding.bindingOnly) {
 								render = false;
-								// hack.  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=363763
-								keyBinding.callbackParameters = [items, command.id, null, userData, command.parameters];
-								keyBinding.parentNode = parent;
 							}
 						}
 						
 						// same for url bindings
 						if (checkBinding && this._urlBindings[command.id] && this._urlBindings[command.id].urlBinding) {
 							urlBinding = this._urlBindings[command.id];
-							urlBinding.items = items;
-							urlBinding.userData = userData;
-							urlBinding.handler = handler;
+							urlBinding.invocation = invocation;
 							if (urlBinding.bindingOnly) {
-								// hack.  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=363763
-								urlBinding.callbackParameters = [items, command.id, null, userData, command.parameters];
-								urlBinding.parentNode = parent;
+								render = false;
 							}
 						}
 						if (render && command.visibleWhen) {
@@ -564,16 +577,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							var choicesMenu = new dijit.Menu({
 								style: "display: none;"
 							});
-							if (renderType === "image") {
+							if (renderType === "tool") {
 								menuButton = new dijit.form.DropDownButton({
 										label: command.name,
 										dropDown: choicesMenu
 								        });
 								if (command.image) {
 									dojo.addClass(menuButton.iconNode, "commandImage");
-									if (cssClass) {
-										dojo.addClass(menuButton.iconNode, cssClass);
-									}
 									menuButton.iconNode.src = command.image;
 								}
 								dojo.place(menuButton.domNode, parent, "last");
@@ -597,19 +607,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 								});
 							}
 						} else {
-							if (renderType === "image") {
+							if (renderType === "tool") {
 								id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								var callbackParameters = command._addImage(parent, id, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, this);
-								if (keyBinding) {
-									keyBinding.callbackParameters = callbackParameters;
-									keyBinding.parentNode = parent;
-								}
-								if (urlBinding) {
-									urlBinding.callbackParameters = callbackParameters;
-									urlBinding.parentNode = parent;
-								}
+								command._addTool(parent, forceText, id, invocation);
+								
 							} else if (renderType === "menu") {
-								command._addMenuItem(parent, items, handler, userData, cssClass);
+								command._addMenuItem(parent, invocation);
 							}
 						}
 					} 
@@ -683,8 +686,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			//how will we know this?
 			this._deviceSupportsHover = false;  
 		},
-		_addImage: function(parent, name, items, handler, userData, cssClass, forceText, cssClassCmdOver, cssClassCmdLink, commandService) {
-			handler = handler || this;
+		_addTool: function(parent, forceText, name, context) {
+			context.handler = context.handler || this;
 			var link = dojo.create("a");
 			link.id = this.name+"link";
 			var image = null;
@@ -702,10 +705,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				image.name = name;
 				image.id = name;
 			}
-			var callbackParameters;
+			context.id = this.id;
+			context.command = this;
+			context.domParent = parent;
+			context.parameters = this.parameters;
 			if (this.hrefCallback) {
-				callbackParameters = [items, this.id, userData];
-				var href = this.hrefCallback.call(handler, items, this.id, userData);
+				var href = this.hrefCallback.call(context.handler, context);
 				if(href.then){
 					href.then(function(l){
 						link.href = l;
@@ -715,24 +720,23 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				}
 			} else {
 				if (image) {
-					callbackParameters = [items, this.id, image.id, userData, this.parameters];
+					context.domNode = image;
 					dojo.connect(image, "onclick", this, function() {
 						// collect parameters in advance if specified
-						if (this.parameters && commandService._parameterCollector) {
-							// should the handler be bound to this, or something else?
-							commandService._collectParameters(this, parent, handler, image.id, [items, this.id, image.id, userData, this.parameters]);
+						if (this.parameters && context.collectsParameters()) {
+							context.commandService._collectParameters(context);
 						} else if (this.callback) {
-							this.callback.call(handler, items, this.id, image.id, userData, this.parameters);
+							this.callback.call(context.handler, context);
 						}
 					});
 				} else {
-					callbackParameters = [items, this.id, link.id, userData, this.parameters];
+					context.domNode = link;
 					dojo.connect(link, "onclick", this, function() {
 						// collect parameters in advance if specified
-						if (this.parameters && commandService._parameterCollector) {
-							commandService._collectParameters(this, handler, parent, link.id, [items, this.id, link.id, userData, this.parameters]);
+						if (this.parameters && context.collectsParameters()) {
+							context.commandService._collectParameters(context);
 						} else if (this.callback) {
-							this.callback.call(handler, items, this.id, link.id, userData, this.parameters);
+							this.callback.call(context.handler, context);
 						}
 					});
 				}
@@ -757,23 +761,20 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					});
 				}
 				dojo.addClass(image, 'commandImage');
-				if (cssClass) {
-					dojo.addClass(image, cssClass);
-				}	
 				if (this.imageClass) {
 					dojo.addClass(image, this.spriteClass);
 					dojo.addClass(image, this.imageClass);
 				} 
 				dojo.place(image, link, "last");
 			} 
-			
-			if (cssClass) {
-				dojo.addClass(link, cssClass);
-			}
 			dojo.place(link, parent, "last");
-			return callbackParameters;
 		},
-		_addMenuItem: function(parent, items, handler, userData, cssClass) {
+		_addMenuItem: function(parent, context) {
+			context.id = this.id;
+			context.command = this;
+			context.domParent = parent;
+			context.parameters = this.parameters;
+
 			var menuitem = new CommandMenuItem({
 				labelType: this.hrefCallback ? "html" : "text",
 				label: this.name,
@@ -787,7 +788,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				});
 			}
 			if (this.hrefCallback) {
-				var loc = this.hrefCallback.call(handler, items, this.id, parent.id, userData);
+				var loc = this.hrefCallback.call(context.handler, context);
 				if (loc) {
 					if (loc.then) {
 						loc.then(dojo.hitch(this, function(l) { 
@@ -799,7 +800,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				}
 			} else if (this.callback) {
 				menuitem.onClick = dojo.hitch(this, function() {
-					this.callback.call(handler, items, this.id, null, userData);
+					this.callback.call(context.handler, context);
 				});
 			}
 			
@@ -810,9 +811,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				dojo.addClass(menuitem.iconNode, this.spriteClass);
 			} else if (this.image) {
 				dojo.addClass(menuitem.iconNode, 'commandImage');
-				if (cssClass) {
-					dojo.addClass(menuitem.iconNode, cssClass);
-				}
 				// reaching...
 				menuitem.iconNode.src = this.image;
 			}
@@ -888,24 +886,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		}
 	};  // end Command prototype
 	Command.prototype.constructor = Command;
-	
-	/**
-	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
-	 * @param {String} token the token in a URL query parameter that identifies the command
-	 * @param {String} parameterName the name of the parameter being specified in the value of the query 
-	 * 
-	 * @name orion.commands.CommandInvocation
-	 * 
-	 */
-	function CommandInvocation (command, items, userData) {
-		this.command = command;
-		this.items = items;
-		this.userData = userData;
-	}
-	CommandInvocation.prototype = /** @lends orion.commands.CommandInvocation.prototype */ {
-		
-	};
-	CommandInvocation.prototype.constructor = CommandInvocation;
 
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	/**
@@ -975,7 +955,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 	 * @name orion.commands.URLBinding
 	 * 
 	 */
-	function URLBinding (token, parameterName, forceConfirm) {
+	function URLBinding (token, parameterName) {
 		this.token = token;
 		this.parameterName = parameterName;
 	}

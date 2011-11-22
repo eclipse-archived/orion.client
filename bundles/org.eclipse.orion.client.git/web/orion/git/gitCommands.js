@@ -181,14 +181,14 @@ var exports = {};
 			name: "Link Repository",
 			imageClass: "core-sprite-link",
 			id: "eclipse.linkRepository",
-			callback: function(item) {
+			callback: function(data) {
 				var dialog = new orion.widgets.NewItemDialog({
 					title: "Link Repository",
 					label: "Folder name:",
 					func:  function(name, url, create){
 						var service = serviceRegistry.getService("orion.core.file");							
 						service.loadWorkspace("").then(function(loadedWorkspace){
-							service.createProject(loadedWorkspace.Location, name, item.ContentLocation, false).then(
+							service.createProject(loadedWorkspace.Location, name, data.items.ContentLocation, false).then(
 									function(jsonResp){
 										alert("Repository was linked to " + jsonResp.Name);
 										service.read(jsonResp.ContentLocation, true).then(function(jsonData){
@@ -219,8 +219,8 @@ var exports = {};
 			imageClass: "git-sprite-checkout",
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.checkoutTag",
-			callback: function(item, commandId, domId) {
-				
+			callback: function(data) {
+				var item = data.items;
 				function getBranchItem(){
 					for(var child_no in item.parent.parent.children){
 						if(item.parent.parent.children[child_no].Name==="Branches"){
@@ -228,9 +228,9 @@ var exports = {};
 						}
 					}
 					return item.parent.parent;
-				};
+				}
 				
-				exports.getNewItemName(item, explorer, false, domId, "tag_"+item.Name, function(name){
+				exports.getNewItemName(item, explorer, false, data.domNode.id, "tag_"+item.Name, function(name){
 					if(!name && name==""){
 						return;
 					}
@@ -253,7 +253,8 @@ var exports = {};
 			imageClass: "git-sprite-checkout",
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.checkoutBranch",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				var service = serviceRegistry.getService("orion.git.provider");
 				if (item.Type === "Branch") {
 					service.checkoutBranch(item.CloneLocation, item.Name).then(
@@ -287,13 +288,13 @@ var exports = {};
 			tooltip: "Add a new local branch to the repository",
 			imageClass: "core-sprite-add",
 			id: "eclipse.addBranch",
-			callback: function(item, commandId, domId) {
-				exports.getNewItemName(item, explorer, false, domId, "Branch name", function(name) {
+			callback: function(data) {
+				exports.getNewItemName(data.items, explorer, false, data.domNode.id, "Branch name", function(name) {
 					if (!name && name == "") {
 						return;
 					}
-					serviceRegistry.getService("orion.git.provider").addBranch(item.Location, name).then(function() {
-						dojo.hitch(explorer, explorer.changedItem)(item);
+					serviceRegistry.getService("orion.git.provider").addBranch(data.items.Location, name).then(function() {
+						dojo.hitch(explorer, explorer.changedItem)(data.items);
 					}, displayErrorOnStatus);
 				});
 
@@ -309,7 +310,8 @@ var exports = {};
 			tooltip: "Delete the local branch from the repository",
 			imageClass: "core-sprite-delete",
 			id: "eclipse.removeBranch",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				if (confirm("Are you sure you want to delete branch " + item.Name + "?")) {
 					serviceRegistry.getService("orion.git.provider").removeBranch(item.Location).then(function() {
 						dojo.hitch(explorer, explorer.changedItem)(item.parent);
@@ -327,7 +329,8 @@ var exports = {};
 			tooltip: "Delete the remote tracking branch from the repository",
 			imageClass: "core-sprite-delete",
 			id: "eclipse.removeRemoteBranch",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				if(confirm("You're going to delete remote branch " + item.Name+" and push the change.\n\nAre you sure?"))
 				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 					var func = arguments.callee;
@@ -354,7 +357,8 @@ var exports = {};
 			tooltip: "Add a new remote to the repository",
 			imageClass: "core-sprite-add",
 			id: "eclipse.addRemote",
-			callback : function(item) {
+			callback : function(data) {
+				var item = data.items;
 				var dialog = new orion.git.widgets.AddRemoteDialog({
 					func : function(remote, remoteURI){
 						serviceRegistry.getService("orion.git.provider").addRemote(item.Location, remote, remoteURI).then(function() {
@@ -377,7 +381,8 @@ var exports = {};
 			tooltip: "Delete the remote from the repository",
 			imageClass: "core-sprite-delete",
 			id: "eclipse.removeRemote",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				if (confirm("Are you sure you want to delete remote " + item.Name + "?")) {
 					serviceRegistry.getService("orion.git.provider").removeRemote(item.Location).then(function() {
 						dojo.hitch(explorer, explorer.changedItem)(item.parent);
@@ -394,7 +399,8 @@ var exports = {};
 			name : "Git Log",
 			tooltip: "Open the log for the branch",
 			id : "eclipse.openGitLog",
-			hrefCallback : function(item) {
+			hrefCallback : function(data) {
+				var item = data.items;
 				if (item.Type === "RemoteTrackingBranch")
 					return require.toUrl("git/git-log.html")+"#" + item.Location + "?page=1";
 				return require.toUrl("git/git-log.html")+"#" + item.CommitLocation + "?page=1";
@@ -410,8 +416,8 @@ var exports = {};
 			name : "Git Log",
 			tooltip: "Open the log for the repository",
 			id : "eclipse.openGitLogAll",
-			hrefCallback : function(item) {
-				return require.toUrl("git/git-log.html")+"#" + item.CommitLocation + "?page=1";
+			hrefCallback : function(data) {
+				return require.toUrl("git/git-log.html")+"#" + data.items.CommitLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
 				// show only for a repo
@@ -427,8 +433,8 @@ var exports = {};
 			name : "Git Status",
 			tooltip: "Open the status for the repository",
 			id : "eclipse.openGitStatus",
-			hrefCallback : function(item) {
-				return require.toUrl("git/git-status.html")+"#" + item.StatusLocation;
+			hrefCallback : function(data) {
+				return require.toUrl("git/git-status.html")+"#" + data.items.StatusLocation;
 			},
 			visibleWhen : function(item) {
 				if (!item.StatusLocation)
@@ -443,8 +449,8 @@ var exports = {};
 			name : "Show in Navigator",
 			tooltip: "Show the repository folder in the file navigator",
 			id : "eclipse.openCloneContent",
-			hrefCallback : function(item) {
-				return require.toUrl("navigate/table.html")+"#" + item.ContentLocation+"?depth=1";
+			hrefCallback : function(data) {
+				return require.toUrl("navigate/table.html")+"#" + data.items.ContentLocation+"?depth=1";
 			},
 			visibleWhen : function(item) {
 				if (!item.ContentLocation)
@@ -460,7 +466,8 @@ var exports = {};
 			imageClass: "git-sprite-open_compare",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.compareGitCommits",
-			hrefCallback : function(item) {
+			hrefCallback : function(data) {
+				var item = data.items;
 				var clientDeferred = new dojo.Deferred();
 				serviceRegistry.getService("orion.git.provider").getDiff(item[0].DiffLocation, item[1].Name, function(jsonData, secondArg) {
 					clientDeferred.callback(require.toUrl("compare/compare.html") + "?readonly#" + secondArg.xhr.getResponseHeader("Location"));
@@ -484,8 +491,8 @@ var exports = {};
 			imageClass: "git-sprite-open_compare",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.compareWithWorkingTree",
-			hrefCallback : function(item) {
-				return require.toUrl("compare/compare.html")+"#" + item.DiffLocation;
+			hrefCallback : function(data) {
+				return require.toUrl("compare/compare.html")+"#" + data.items.DiffLocation;
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit" && !explorer.isDirectory;
@@ -497,8 +504,8 @@ var exports = {};
 		var openGitCommit = new mCommands.Command({
 			name : "Open",
 			id : "eclipse.openGitCommit",
-			hrefCallback: function(item) {
-				return require.toUrl("edit/edit.html")+"#" + item.ContentLocation;
+			hrefCallback: function(data) {
+				return require.toUrl("edit/edit.html")+"#" + data.items.ContentLocation;
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit" && item.ContentLocation != null && !explorer.isDirectory;
@@ -513,7 +520,8 @@ var exports = {};
 			imageClass: "git-sprite-fetch",
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.orion.git.fetch",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				var path = item.Location;
 				exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
 					var func = arguments.callee;
@@ -581,7 +589,8 @@ var exports = {};
 			name : "Force Fetch",
 			tooltip: "Fetch from the remote branch into your remote tracking branch overriding its current content",
 			id : "eclipse.orion.git.fetchForce",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				if(confirm("You're going to override content of the remote tracking branch. This can cause the branch to lose commits.\n\nAre you sure?")) {
 					var path = item.Location;
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
@@ -651,7 +660,8 @@ var exports = {};
 			imageClass: "git-sprite-merge",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.merge",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				var gitService = serviceRegistry.getService("orion.git.provider");
 				var progressService = serviceRegistry.getService("orion.page.message");
 				gitService.doMerge(item.HeadLocation, item.Name).then(function(result){
@@ -713,7 +723,8 @@ var exports = {};
 			name : "Rebase",
 			tooltip: "Rewind commits from the active branch and replay them on top of the selected branch",
 			id : "eclipse.orion.git.rebase",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				serviceRegistry.getService("orion.git.provider").doRebase(item.HeadLocation, item.Name, "BEGIN", function(jsonData, secondArg){
 					var display = [];
 					var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
@@ -784,7 +795,8 @@ var exports = {};
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.push",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 					var path = dojo.hash();
 					if (item.toRef) {
 						item = item.toRef;
@@ -860,7 +872,8 @@ var exports = {};
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.pushForce",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				if(confirm("You're going to override content of the remote branch. This can cause the remote repository to lose commits.\n\nAre you sure?")) {
 					var path = dojo.hash();
 					if(item.toRef){
@@ -926,8 +939,8 @@ var exports = {};
 			name : "Switch to Remote",
 			tooltip: "Show the log for the corresponding remote tracking branch",
 			id : "eclipse.orion.git.switchToRemote",
-			hrefCallback : function(item) {
-				return require.toUrl("git/git-log.html")+"#" + item.toRef.RemoteLocation[0].Children[0].Location + "?page=1";
+			hrefCallback : function(data) {
+				return require.toUrl("git/git-log.html")+"#" + data.items.toRef.RemoteLocation[0].Children[0].Location + "?page=1";
 			},
 			visibleWhen : function(item) {
 				return item.toRef != null && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation && item.toRef.RemoteLocation.length===1 && item.toRef.RemoteLocation[0].Children.length===1;
@@ -958,7 +971,7 @@ var exports = {};
 			name : "< Previous Page",
 			tooltip: "Show previous page of git log",
 			id : "eclipse.orion.git.previousLogPage",
-			hrefCallback : function(item) {
+			hrefCallback : function(data) {
 				return require.toUrl("git/git-log.html")+"#" + getPageUri(dojo.hash(), getPageNumber(dojo.hash())-1);
 			},
 			visibleWhen : function(item) {
@@ -975,7 +988,7 @@ var exports = {};
 			name : "Next Page >",
 			tooltip: "Show next page of git log",
 			id : "eclipse.orion.git.nextLogPage",
-			hrefCallback : function(item) {
+			hrefCallback : function(data) {
 				return require.toUrl("git/git-log.html")+"#" + getPageUri(dojo.hash(), getPageNumber(dojo.hash())+1);
 			},
 			visibleWhen : function(item) {
@@ -994,7 +1007,8 @@ var exports = {};
 			name : "Switch to Active Local",
 			tooltip: "Show the log for the active local branch",
 			id : "eclipse.orion.git.switchToCurrentLocal",
-			hrefCallback : function(item) {
+			hrefCallback : function(data) {
+				var item = data.items;
 				var clientDeferred = new dojo.Deferred();
 				
 				var cloneLocation = item.CloneLocation;
@@ -1055,8 +1069,8 @@ var exports = {};
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.pushto",
-			callback: function(item) {
-				
+			callback: function(data) {
+				var item = data.items
 				var remotes = {};
 				for(var child_no in item.parent.parent.children){
 					if(item.parent.parent.children[child_no].Name === "Remote"){
@@ -1093,7 +1107,8 @@ var exports = {};
 			imageClass: "git-sprite-refresh",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.resetIndex",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				if(confirm("The content of your active branch will be replaced with " + item.Name + ". " +
 						"All unstaged and staged changes will be discarded and cannot be recovered. Are you sure?")){
 					var service = serviceRegistry.getService("orion.git.provider");
@@ -1130,9 +1145,10 @@ var exports = {};
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.addTag",
 			
-			callback: function(item, commandId, domId) {
+			callback: function(data) {
+				var item = data.items;
 				var clientDeferred = new dojo.Deferred();
-				exports.getNewItemName(item, explorer, false, domId, "Tag name", function(tagName){
+				exports.getNewItemName(item, explorer, false, data.domNode.id, "Tag name", function(tagName){
 					if(!tagName || tagName===""){
 						return;
 					}
@@ -1166,7 +1182,8 @@ var exports = {};
 			id : "eclipse.orion.git.cherryPick",
 			
 
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				var path = dojo.hash();
 				var service = serviceRegistry.getService("orion.git.provider");
 				var headLocation = item.Location.replace(item.Name, "HEAD");
@@ -1284,7 +1301,8 @@ var exports = {};
 			imageClass: "git-sprite-fetch",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.fetch",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				var path = item.Location;
 				var gitService = serviceRegistry.getService("orion.git.provider");
 				var progressService = serviceRegistry.getService("orion.page.message");
@@ -1353,7 +1371,8 @@ var exports = {};
 			imageClass: "git-sprite-merge",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.merge",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				var gitService = serviceRegistry.getService("orion.git.provider");
 				var progressService = serviceRegistry.getService("orion.page.message");
 				gitService.doMerge(item.HeadLocation, item.Name).then(function(result){
@@ -1421,7 +1440,8 @@ var exports = {};
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.push",
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				var path = dojo.hash();
 				var gitService = serviceRegistry.getService("orion.git.provider");
 				var progressService = serviceRegistry.getService("orion.page.message");
@@ -1490,7 +1510,7 @@ var exports = {};
 			tooltip : "Clone an existing Git repository to a folder",
 			id : "eclipse.cloneGitRepository",
 			parameters: cloneParameters,
-			callback : function(item, commandId, domId, userData, parameters) {
+			callback : function(data) {
 				var gitService = serviceRegistry.getService("orion.git.provider");
 				var progressService = serviceRegistry.getService("orion.page.message");
 				var cloneFunction = function(gitUrl, path, name) {
@@ -1507,14 +1527,14 @@ var exports = {};
 						});
 					});
 				};
-				if (parameters.valueFor("url") && !parameters.optionsRequested) {
-					cloneFunction(parameters.valueFor("url"));
+				if (data.parameters.valueFor("url") && !data.parameters.optionsRequested) {
+					cloneFunction(data.parameters.valueFor("url"));
 				} else {
 					var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
 						serviceRegistry: serviceRegistry,
 						fileClient: fileClient,
-						url: parameters.valueFor("url"),
-						alwaysShowAdvanced: parameters.optionsRequested,
+						url: data.parameters.valueFor("url"),
+						alwaysShowAdvanced: data.parameters.optionsRequested,
 						func: cloneFunction
 					});
 							
@@ -1533,10 +1553,9 @@ var exports = {};
 			name : "Init Repository",
 			tooltip : "Create a new Git repository in a new folder",
 			id : "eclipse.initGitRepository",
-			callback : function(item) {
+			callback : function(data) {
 				var gitService = serviceRegistry.getService("orion.git.provider");
 				var progressService = serviceRegistry.getService("orion.page.message");
-				
 				var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
 					serviceRegistry: serviceRegistry,
 					title: "Init Git Repository",
@@ -1583,7 +1602,8 @@ var exports = {};
 				}
 				return true;
 			},
-			callback: function(item) {
+			callback: function(data) {
+				var item = data.items;
 				var gitService = serviceRegistry.getService("orion.git.provider");
 				if(dojo.isArray(item)){
 					if(confirm("Are you sure you want do delete " + item.length + " repositories?")){

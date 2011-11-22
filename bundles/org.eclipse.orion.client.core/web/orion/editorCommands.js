@@ -88,8 +88,8 @@ exports.EditorCommandFactory = (function() {
 					name: "Save",
 					tooltip: "Save this file",
 					id: "orion.save",
-					callback: function(editor) {
-						editor.getTextView().invokeAction("Save");
+					callback: function(data) {
+						data.items.getTextView().invokeAction("Save");
 					}});
 				this.commandService.addCommand(saveCommand, "dom");
 				this.commandService.addCommandGroup("orion.editorActions.unlabeled", 200, null, null, this.toolbarId);
@@ -103,11 +103,11 @@ exports.EditorCommandFactory = (function() {
 					tooltip: "Go to specified line number",
 					id: "orion.gotoLine",
 					parameters: lineParameter,
-					callback: function(item, commandId, domId, userData, parameters) {
+					callback: function(data) {
 						var line;
 						var model = editor.getModel();
-						if (parameters && parameters.valueFor('line')) {
-							line = parameters.valueFor('line');
+						if (data.parameters && data.parameters.valueFor('line')) {
+							line = data.parameters.valueFor('line');
 						} else {
 							line = model.getLineAtOffset(editor.getCaretOffset());
 							line = prompt("Go to line:", line + 1);
@@ -167,9 +167,9 @@ exports.EditorCommandFactory = (function() {
 						name: info.name,
 						image: info.img,
 						id: info.name,
-						callback: dojo.hitch(editor, function(editor) {
+						callback: dojo.hitch(editor, function(data) {
 							// command service will provide editor parameter but editor widget callback will not
-							editor = editor || this;
+							editor = data.items || this;
 							var selection = editor.getSelection();
 							var model = editor.getModel();
 							var text = model.getText();
@@ -232,8 +232,8 @@ exports.UndoCommandFactory = (function() {
 			var undoCommand = new mCommands.Command({
 				name: "Undo",
 				id: "orion.undo",
-				callback: function(editor) {
-					editor.getTextView().invokeAction("Undo");
+				callback: function(data) {
+					data.items.getTextView().invokeAction("Undo");
 				}});
 			this.commandService.addCommand(undoCommand, "dom");
 			
@@ -249,8 +249,8 @@ exports.UndoCommandFactory = (function() {
 			var redoCommand = new mCommands.Command({
 				name: "Redo",
 				id: "orion.redo",
-				callback: function(editor) {
-					editor.getTextView().invokeAction("Redo");
+				callback: function(data) {
+					data.items.getTextView().invokeAction("Redo");
 				}});
 			this.commandService.addCommand(redoCommand, "dom");
 	

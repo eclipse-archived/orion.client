@@ -168,7 +168,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		 * @param {Object} item
 		 */
 		var editor = this;
-		var addMappingCallback = function(item, event) {
+		var addMappingCallback = function(data) {
 			editor.mappings.addMapping(null, this.path, this.name);
 		};
 //		var addOther = function() {

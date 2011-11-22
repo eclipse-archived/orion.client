@@ -180,9 +180,9 @@ mSiteMappingsTable.MappingsTable = (function() {
 					// Only show on a Mappings object
 					return item.Source && item.Target;
 				},
-				callback: dojo.hitch(this, function(item) {
+				callback: dojo.hitch(this, function(data) {
 					//table._hideTooltip();
-					this.deleteMapping(item);
+					this.deleteMapping(data.items);
 					this.render();
 					this.setDirty(true);
 				})});
@@ -196,11 +196,11 @@ mSiteMappingsTable.MappingsTable = (function() {
 				visibleWhen: dojo.hitch(this, function(item) {
 					return item.Source && item.Target;
 				}),
-				callback: dojo.hitch(this, function(item) {
-					var index = this.getItemIndex(item);
+				callback: dojo.hitch(this, function(data) {
+					var index = this.getItemIndex(data.items);
 					if (index === 0) { return; }
 					var temp = this.siteConfiguration.Mappings[index-1];
-					this.siteConfiguration.Mappings[index-1] = item;
+					this.siteConfiguration.Mappings[index-1] = data.items;
 					this.siteConfiguration.Mappings[index] = temp;
 					this.render();
 					this.setDirty(true);
@@ -215,12 +215,12 @@ mSiteMappingsTable.MappingsTable = (function() {
 				visibleWhen: dojo.hitch(this, function(item) {
 					return item.Source && item.Target;
 				}),
-				callback: dojo.hitch(this, function(item) {
+				callback: dojo.hitch(this, function(data) {
 //					this._hideTooltip();
-					var index = this.getItemIndex(item);
+					var index = this.getItemIndex(data.items);
 					if (index === this.siteConfiguration.Mappings.length - 1) { return; }
 					var temp = this.siteConfiguration.Mappings[index+1];
-					this.siteConfiguration.Mappings[index+1] = item;
+					this.siteConfiguration.Mappings[index+1] = data.items;
 					this.siteConfiguration.Mappings[index] = temp;
 					this.render();
 					this.setDirty(true);

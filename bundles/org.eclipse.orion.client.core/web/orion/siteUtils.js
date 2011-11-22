@@ -102,7 +102,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
-			hrefCallback: generateEditSiteHref});
+			hrefCallback: function(data) {generateEditSiteHref(data.items);}});
 		commandService.addCommand(editCommand, "object");
 		
 		var startCommand = new mCommands.Command({
@@ -114,11 +114,11 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
 			/** @param {SiteConfiguration} [userData] If passed, we'll mutate this site config. */
-			callback: function(item, cmdId, imageId, userData) {
-				var newItem = userData || {} /* just update the HostingStatus */;
+			callback: function(data) {
+				var newItem = data.userData || {} /* just update the HostingStatus */;
 				newItem.HostingStatus = { Status: "started" };
 				
-				var deferred = siteService.updateSiteConfiguration(item.Location, newItem);
+				var deferred = siteService.updateSiteConfiguration(data.items.Location, newItem);
 				statusService.showWhile(deferred, "Starting...").then(startCallback, errorCallback);
 			}});
 		commandService.addCommand(startCommand, "object");
@@ -132,12 +132,12 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 				return item.HostingStatus && item.HostingStatus.Status === "started";
 			},
 			/** @param {SiteConfiguration} [userData] If passed, we'll mutate this site config. */
-			callback: function(item, cmdId, imageId, userData) {
-				var newItem = userData || {} /* just update the HostingStatus */;
+			callback: function(data) {
+				var newItem = data.userData || {} /* just update the HostingStatus */;
 				newItem.HostingStatus = { Status: "stopped" };
 				
-				var deferred = siteService.updateSiteConfiguration(item.Location, newItem);
-				statusService.showWhile(deferred, "Stopping " + item.Name + "...").then(stopCallback, errorCallback);
+				var deferred = siteService.updateSiteConfiguration(data.items.Location, newItem);
+				statusService.showWhile(deferred, "Stopping " + data.items.Name + "...").then(stopCallback, errorCallback);
 			}});
 		commandService.addCommand(stopCommand, "object");
 		
@@ -149,11 +149,11 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
-			callback: function(item) {
-				var msg = "Are you sure you want to delete the site configuration '" + item.Name + "'?";
+			callback: function(data) {
+				var msg = "Are you sure you want to delete the site configuration '" + data.items.Name + "'?";
 				dialogService.confirm(msg, function(confirmed) {
 						if (confirmed) {
-							siteService.deleteSiteConfiguration(item.Location).then(deleteCallback, errorCallback);
+							siteService.deleteSiteConfiguration(data.items.Location).then(deleteCallback, errorCallback);
 						}
 					});
 			}});
@@ -162,7 +162,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 
 	var siteUtils = {};
 	siteUtils.generateEditSiteHref = generateEditSiteHref;
-	siteUtils.parseStateFromHash = parseStateFromHash,
+	siteUtils.parseStateFromHash = parseStateFromHash;
 	siteUtils.stateToHash = stateToHash;
 	siteUtils.createSiteCommands = createSiteCommands;
 	
