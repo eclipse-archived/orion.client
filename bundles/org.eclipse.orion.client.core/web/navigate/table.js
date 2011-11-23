@@ -57,10 +57,7 @@ dojo.addOnLoad(function(){
 		}
 	
 		var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
-			
-		// set up the splitter bar and its key binding
-		var splitArea = dijit.byId("orion.innerNavigator");
-				
+							
 		// global commands
 		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, explorer);
 		// commands shared by navigators
@@ -71,7 +68,9 @@ dojo.addOnLoad(function(){
 			name: "Toggle Left Pane",
 			tooltip: "Open or close the left pane",
 			id: "eclipse.toggleSplitter",
-			callback: function() {splitArea.toggle();}
+			callback: function() {
+				var splitArea = dijit.byId("orion.innerNavigator");
+				splitArea.toggle();}
 		});
 		commandService.addCommand(toggleOutlineCommand, "dom");
 				
