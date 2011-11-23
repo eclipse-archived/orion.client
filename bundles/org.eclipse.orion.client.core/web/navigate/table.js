@@ -12,11 +12,11 @@
 /*global define document dojo dijit window eclipse orion serviceRegistry:true widgets alert*/
 /*browser:true*/
 
-define(['dojo', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/dialogs',
+define(['dojo', 'dijit', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands',
         'orion/fileCommands', 'orion/explorer-table', 'orion/util',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mBootstrap, mSelection, mStatus, mDialogs, mSsh, mCommands, mFavorites, 
+		function(dojo, dijit, mBootstrap, mSelection, mStatus, mDialogs, mSsh, mCommands, mFavorites, 
 				mSearchClient, mFileClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil) {
 
 dojo.addOnLoad(function(){
@@ -66,9 +66,6 @@ dojo.addOnLoad(function(){
 		// commands shared by navigators
 		mFileCommands.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools");
 		
-		//TODO this should be removed and contributed by a plug-in
-		//eclipse.gitCommandUtils.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
-		
 		// navigator-specific commands
 		var toggleOutlineCommand = new mCommands.Command({
 			name: "Toggle Left Pane",
@@ -86,9 +83,9 @@ dojo.addOnLoad(function(){
 		commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
 		commandService.addCommandGroup("eclipse.selectionGroup", 500, "More", null, "selectionTools");
 		// commands that don't appear but have keybindings
-		commandService.registerCommandContribution("eclipse.toggleSplitter", 1, "eclipse.navigate-table", null, true, new mCommands.CommandKeyBinding('o', true));
-		commandService.registerCommandContribution("eclipse.copySelections", 1, "eclipse.navigate-table", null, true, new mCommands.CommandKeyBinding('c', true));
-		commandService.registerCommandContribution("eclipse.pasteSelections", 1, "eclipse.navigate-table", null, true, new mCommands.CommandKeyBinding('v', true));
+		commandService.registerCommandContribution("eclipse.toggleSplitter", 1, "pageActions", null, true, new mCommands.CommandKeyBinding('o', true));
+		commandService.registerCommandContribution("eclipse.copySelections", 1, "pageActions", null, true, new mCommands.CommandKeyBinding('c', true));
+		commandService.registerCommandContribution("eclipse.pasteSelections", 1, "pageActions", null, true, new mCommands.CommandKeyBinding('v', true));
 		
 		// commands appearing directly in local actions column
 		commandService.registerCommandContribution("eclipse.makeFavorite", 1);
