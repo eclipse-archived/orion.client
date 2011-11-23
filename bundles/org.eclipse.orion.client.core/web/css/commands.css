@@ -88,7 +88,7 @@
 
 /* temporary sprite hacks */
 .core-sprite-options{ background-position: 0px 0px; width: 16px; height: 16px; background: url(../images/more.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
-.core-sprite-ok{ background-position: 0px 0px; width: 16px; height: 16px; background: url(../images/check.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.core-sprite-ok{ background-position: 0px 0px; width: 16px; height: 16px; background: url(../images/ok.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
 
 /* dojo theme changes according to graphic designer, primarily menu hovers */
 
