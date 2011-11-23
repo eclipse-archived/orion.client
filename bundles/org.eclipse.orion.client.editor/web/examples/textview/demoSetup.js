@@ -28,11 +28,7 @@ define(["require",
  
 function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextView, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 
-	var exports = {
-		parent: "divParent",
-		fullSelection: true,
-		tabSize: 4
-	};
+	var exports = {};
 	var view = null;
 	var styler = null;
 	var annotationStyler = null;
@@ -58,8 +54,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 	}
 	exports.getFile = getFile;
 	
-	function checkView() {
-		if (view) { return; }
+	function checkView(options) {
+		if (view) { return view; }
 		var stylesheets = [
 			require.toUrl("orion/textview/textview.css"),
 			require.toUrl("orion/textview/rulers.css"),
@@ -72,14 +68,11 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 		if (foldingEnabled) {
 			viewModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 		}
-		var options = {
-			parent: exports.parent,
-			model: viewModel,
-			stylesheet: stylesheets,
-			fullSelection: exports.fullSelection,
-			tabSize: exports.tabSize > 0 ? exports.tabSize : 4
-		};
-		view = new mTextView.TextView(options);
+		options = options || {};
+		options.parent = options.parent || "divParent";
+		options.stylesheet = options.stylesheet || stylesheets;
+		options.model = viewModel;
+		exports.view = view = new mTextView.TextView(options);
 		
 		/* Undo stack */
 		var undoStack = exports.undoStack = new mUndoStack.UndoStack(view, 200);
@@ -251,10 +244,16 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 			view.addRuler(foldingRuler);
 		}
 		view.addRuler(overviewRuler);
+		return view;
 	}
+	exports.checkView = checkView;
 	
-	function setupView(text, lang) {
-		checkView();
+	function setupView(text, lang, options) {
+		var newView = view;
+		checkView(options);
+		if (newView && options) {
+			newView.setOptions(options);
+		}
 		if (styler) {
 			styler.destroy();
 			styler = null;
@@ -266,6 +265,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 			case "java":
 			case "css":
 				styler = new mTextStyler.TextStyler(view, lang, view.annotationModel);
+				styler.setHighlightCaretLine(true);
 				break;
 			case "html":
 				styler = new mTextMateStyler.TextMateStyler(view, mHtmlGrammar.HtmlGrammar.grammar);

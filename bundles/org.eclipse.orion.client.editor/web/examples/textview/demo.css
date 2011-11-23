@@ -2,10 +2,16 @@
 @import "../../orion/textview/annotations.css";
 
 .button {
-  border: 2px dotted orange;
+  color: teal;
+  cursor: pointer;
+  text-decoration: underline;
   padding: 0 2 0 2
 }
 
 .parentElement {
+	border: 1px solid teal;
+}
+
+.option {
 	border: 1px solid teal;
 }
