@@ -122,19 +122,29 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			return this.caret === object.caret && this.start === object.start && this.end === object.end;
 		}
 	};
-
+	/**
+	 * @class This object describes the options for the text view.
+	 * <p>
+	 * <b>See:</b><br/>
+	 * {@link orion.textview.TextView}<br/>
+	 * {@link orion.textview.TextView#setOptions}
+	 * {@link orion.textview.TextView#getOptions}	 
+	 * </p>		 
+	 * @name orion.textview.TextViewOptions
+	 *
+	 * @property {String|DOMElement} parent the parent element for the view, it can be either a DOM element or an ID for a DOM element.
+	 * @property {orion.textview.TextModel} [model] the text model for the view. If it is not set the view creates an empty {@link orion.textview.TextModel}.
+	 * @property {Boolean} [readonly=false] whether or not the view is read-only.
+	 * @property {Boolean} [fullSelection=true] whether or not the view is in full selection mode.
+	 * @property {Boolean} [sync=false] whether or not the view creation should be synchronous (if possible).
+	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces
+	 * @property {String|String[]} [stylesheet] one or more stylesheet URIs for the view.
+	 * @property {Number} [options.tabSize] The number of spaces in a tab.
+	 */
 	/**
 	 * Constructs a new text view.
 	 * 
-	 * @param options the view options.
-	 * @param {String|DOMElement} options.parent the parent element for the view, it can be either a DOM element or an ID for a DOM element.
-	 * @param {orion.textview.TextModel} [options.model] the text model for the view. If this options is not set the view creates an empty {@link orion.textview.TextModel}.
-	 * @param {Boolean} [options.readonly=false] whether or not the view is read-only.
-	 * @param {Boolean} [options.fullSelection=true] whether or not the view is in full selection mode.
-	 * @param {Boolean} [options.sync=false] whether or not the view creation should be synchronous (if possible).
-	 * @param {Boolean} [options.expandTab=false] whether or not the tab key inserts white spaces
-	 * @param {String|String[]} [options.stylesheet] one or more stylesheet URIs for the view.
-	 * @param {Number} [options.tabSize] The number of spaces in a tab.
+	 * @param {orion.textview.TextViewOptions} options the view options.
 	 * 
 	 * @class A TextView is a user interface for editing text.
 	 * @name orion.textview.TextView
@@ -572,21 +582,26 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		/**
 		 * Returns the specified view options.
 		 * <p>
-		 * The return value depends on the number of parameters. The
-		 * actual option value is returned if only one option is requested,
-		 * otherwise a property object is returned. A property object with
-		 * all the view options is returned if there are no parameters.
+		 * The returned value is either a <code>orion.textview.TextViewOptions</code> or an option value. An option value is returned when only one string paremeter
+		 * is specified. A <code>orion.textview.TextViewOptions</code> is returned when there are no paremeters, or the parameters are a list of options names or a
+		 * <code>orion.textview.TextViewOptions</code>. All view options are returned when there no paremeters.
 		 * </p>
 		 *
-		 * @param {String} [options] The options to return.
-		 * @return {Object} An object with the requested options or the actual value of the option when getting only one option
+		 * @param {String|orion.textview.TextViewOptions} [options] The options to return.
+		 * @return {Object|orion.textview.TextViewOptions} The requested options or an option value.
+		 *
+		 * @see #setOptions
 		 */
 		getOptions: function() {
 			var options;
 			if (arguments.length === 0) {
 				options = this._defaultOptions();
-			} else if (arguments.length === 1 && typeof arguments[0] === "string") {
-				return this["_" + arguments[0]];
+			} else if (arguments.length === 1) {
+				var arg = arguments[0];
+				if (typeof arg === "string") {
+					return this["_" + arg];
+				}
+				options = arg;
 			} else {
 				options = {};
 				for (var index in arguments) {
@@ -1090,6 +1105,22 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			return this.dispatchEvent(blurEvent);
 		},
 		/**
+		 * Redraws the entire view, including rulers.
+		 *
+		 * @see #redrawLines
+		 * @see #redrawRange
+		 * @see #setRedraw
+		 */
+		redraw: function() {
+			if (this._redrawCount > 0) { return; }
+			var lineCount = this._model.getLineCount();
+			var rulers = this.getRulers();
+			for (var i = 0; i < rulers.length; i++) {
+				this.redrawLines(0, lineCount, rulers[i]);
+			}
+			this.redrawLines(0, lineCount); 
+		},
+		/**
 		 * Redraws the text in the given line range.
 		 * <p>
 		 * The line at the end index is not redrawn.
@@ -1097,6 +1128,10 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 *
 		 * @param {Number} [startLine=0] the start line
 		 * @param {Number} [endLine=line count] the end line
+		 *
+		 * @see #redraw
+		 * @see #redrawRange
+		 * @see #setRedraw
 		 */
 		redrawLines: function(startLine, endLine, ruler) {
 			if (this._redrawCount > 0) { return; }
@@ -1146,8 +1181,13 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		 *
 		 * @param {Number} [start=0] the start offset of text range
 		 * @param {Number} [end=char count] the end offset of text range
+		 *
+		 * @see #redraw
+		 * @see #redrawLines
+		 * @see #setRedraw
 		 */
 		redrawRange: function(start, end) {
+			if (this._redrawCount > 0) { return; }
 			var model = this._model;
 			if (start === undefined) { start = 0; }
 			if (end === undefined) { end = model.getCharCount(); }
@@ -1282,15 +1322,24 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			pixel = Math.max(0, pixel);
 			this._scrollView(pixel - this._getScroll().x, 0);
 		},
+		/**
+		 * Sets whether the view should update the DOM.
+		 * <p>
+		 * This can be used to improve the performance.
+		 * </p><p>
+		 * When the flag is set to <code>true</code>,
+		 * the entire view is marked as needing to be redrawn. 
+		 * Nested calls to this method are stacked.
+		 * </p>
+		 *
+		 * @param {Boolean} redraw the new redraw state
+		 * 
+		 * @see #redraw
+		 */
 		setRedraw: function(redraw) {
 			if (redraw) {
 				if (--this._redrawCount === 0) {
-					var lineCount = this._model.getLineCount();
-					var rulers = this.getRulers();
-					for (var i = 0; i < rulers.length; i++) {
-						this.redrawLines(0, lineCount, rulers[i]);
-					}
-					this.redrawLines(0, lineCount); 
+					this.redraw();
 				}
 			} else {
 				this._redrawCount++;
@@ -1335,6 +1384,50 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			this._model.addEventListener("Changed", this._modelListener.onChanged);
 			this._reset();
 			this._updatePage();
+		},
+		/**
+		 * Sets the view options for the view.
+		 *
+		 * @param {orion.textview.TextViewOptions} options the view options.
+		 * 
+		 * @see #getOptions
+		 */
+		setOptions: function (options) {
+			var defaultOptions = this._defaultOptions();
+			var recreate = false, option, created = this._clientDiv;
+			if (created) {
+				for (option in options) {
+					if (options.hasOwnProperty(option)) {
+						if (defaultOptions[option].recreate) {
+							recreate = true;
+							break;
+						}
+					}
+				}
+			}
+			var changed = false;
+			for (option in options) {
+				if (options.hasOwnProperty(option)) {
+					var newValue = options[option], oldValue = this["_" + option];
+					if (oldValue === newValue) { continue; }
+					changed = true;
+					if (!recreate) {
+						var update = defaultOptions[option].update;
+						if (created && update) {
+							update.call(this, newValue);
+							continue;
+						}
+					}
+					this["_" + option] = newValue;
+				}
+			}
+			if (changed) {
+				if (recreate) {
+					var oldParent = this._frame.parentNode;
+					oldParent.removeChild(this._frame);
+					this._parent.appendChild(this._frame);
+				}
+			}
 		},
 		/**
 		 * Sets the text view selection.
@@ -1899,7 +1992,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var timeDiff = time - this._lastMouseTime;
 			var deltaX = Math.abs(this._lastMouseX - e.clientX);
 			var deltaY = Math.abs(this._lastMouseY - e.clientY);
-			var sameButton = this._lastMouseButton == button;
+			var sameButton = this._lastMouseButton === button;
 			this._lastMouseX = e.clientX;
 			this._lastMouseY = e.clientY;
 			this._lastMouseTime = time;
@@ -3520,75 +3613,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			scrollDiv.style.borderWidth = "0px";
 			scrollDiv.style.padding = "0px";
 			viewDiv.appendChild(scrollDiv);
-
-			if (isPad || (this._fullSelection && !isWebkit)) {
-				this._hightlightRGB = "Highlight";
-				var selDiv1 = frameDocument.createElement("DIV");
-				this._selDiv1 = selDiv1;
-				selDiv1.id = "selDiv1";
-				selDiv1.style.position = "fixed";
-				selDiv1.style.borderWidth = "0px";
-				selDiv1.style.margin = "0px";
-				selDiv1.style.padding = "0px";
-				selDiv1.style.MozOutline = "none";
-				selDiv1.style.outline = "none";
-				selDiv1.style.background = this._hightlightRGB;
-				selDiv1.style.width="0px";
-				selDiv1.style.height="0px";
-				scrollDiv.appendChild(selDiv1);
-				var selDiv2 = frameDocument.createElement("DIV");
-				this._selDiv2 = selDiv2;
-				selDiv2.id = "selDiv2";
-				selDiv2.style.position = "fixed";
-				selDiv2.style.borderWidth = "0px";
-				selDiv2.style.margin = "0px";
-				selDiv2.style.padding = "0px";
-				selDiv2.style.MozOutline = "none";
-				selDiv2.style.outline = "none";
-				selDiv2.style.background = this._hightlightRGB;
-				selDiv2.style.width="0px";
-				selDiv2.style.height="0px";
-				scrollDiv.appendChild(selDiv2);
-				var selDiv3 = frameDocument.createElement("DIV");
-				this._selDiv3 = selDiv3;
-				selDiv3.id = "selDiv3";
-				selDiv3.style.position = "fixed";
-				selDiv3.style.borderWidth = "0px";
-				selDiv3.style.margin = "0px";
-				selDiv3.style.padding = "0px";
-				selDiv3.style.MozOutline = "none";
-				selDiv3.style.outline = "none";
-				selDiv3.style.background = this._hightlightRGB;
-				selDiv3.style.width="0px";
-				selDiv3.style.height="0px";
-				scrollDiv.appendChild(selDiv3);
-				
-				/*
-				* Bug in Firefox. The Highlight color is mapped to list selection
-				* background instead of the text selection background.  The fix
-				* is to map known colors using a table or fallback to light blue.
-				*/
-				if (isFirefox && isMac) {
-					var style = this._frameWindow.getComputedStyle(selDiv3, null);
-					var rgb = style.getPropertyValue("background-color");
-					switch (rgb) {
-						case "rgb(119, 141, 168)": rgb = "rgb(199, 208, 218)"; break;
-						case "rgb(127, 127, 127)": rgb = "rgb(198, 198, 198)"; break;
-						case "rgb(255, 193, 31)": rgb = "rgb(250, 236, 115)"; break;
-						case "rgb(243, 70, 72)": rgb = "rgb(255, 176, 139)"; break;
-						case "rgb(255, 138, 34)": rgb = "rgb(255, 209, 129)"; break;
-						case "rgb(102, 197, 71)": rgb = "rgb(194, 249, 144)"; break;
-						case "rgb(140, 78, 184)": rgb = "rgb(232, 184, 255)"; break;
-						default: rgb = "rgb(180, 213, 255)"; break;
-					}
-					this._hightlightRGB = rgb;
-					selDiv1.style.background = rgb;
-					selDiv2.style.background = rgb;
-					selDiv3.style.background = rgb;
-					var styleSheet = frameDocument.styleSheets[0];
-					styleSheet.insertRule("::-moz-selection {background: " + rgb + "; }", 0);
-				}
-			}
+			
+			this._setFullSelection(this._fullSelection, true);
 
 			var clientDiv = frameDocument.createElement("DIV");
 			clientDiv.className = "viewContent";
@@ -3601,6 +3627,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			clientDiv.style.padding = "0px";
 			clientDiv.style.MozOutline = "none";
 			clientDiv.style.outline = "none";
+			clientDiv.style.zIndex = "1";
 			if (isPad) {
 				clientDiv.style.WebkitTapHighlightColor = "transparent";
 			}
@@ -3615,7 +3642,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				overlayDiv.style.margin = clientDiv.style.margin;
 				overlayDiv.style.padding = clientDiv.style.padding;
 				overlayDiv.style.cursor = "text";
-				overlayDiv.style.zIndex = "1";
+				overlayDiv.style.zIndex = "2";
 				scrollDiv.appendChild(overlayDiv);
 			}
 			if (!isPad) {
@@ -3626,15 +3653,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (isIE) {
 				body.style.lineHeight = this._lineHeight + "px";
 			}
-			if (this._tabSize !== 8) {
-				if (isOpera) {
-					clientDiv.style.OTabSize = this._tabSize+"";
-				} else if (isFirefox >= 4) {
-					clientDiv.style.MozTabSize = this._tabSize+"";
-				} else {
-					this._customTabSize = this._tabSize;
-				}
-			}
+			this._setTabSize(this._tabSize, true);
 			this._hookEvents();
 			var rulers = this._rulers;
 			for (var i=0; i<rulers.length; i++) {
@@ -3651,14 +3670,14 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		},
 		_defaultOptions: function() {
 			return {
-				parent: undefined,
-				model: undefined,
-				readonly: false,
-				fullSelection: true,
-				tabSize: 8,
-				expandTab: false,
-				stylesheet: [],
-				sync: false
+				parent: {value: undefined, recreate: true, update: null},
+				model: {value: undefined, recreate: false, update: this.setModel},
+				readonly: {value: false, recreate: false, update: null},
+				fullSelection: {value: true, recreate: false, update: this._setFullSelection},
+				tabSize: {value: 8, recreate: false, update: this._setTabSize},
+				expandTab: {value: false, recraete: false, update: null},
+				stylesheet: {value: [], recraete: true, update: null},
+				sync: {value: false, recreate: false, update: null}
 			};
 		},
 		_destroyFrame: function() {
@@ -3720,6 +3739,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			this._selDiv1 = null;
 			this._selDiv2 = null;
 			this._selDiv3 = null;
+			this._insertedSelRule = false;
 			this._textArea = null;
 			this._clipboardDiv = null;
 			this._scrollDiv = null;
@@ -4549,18 +4569,10 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					if (options[option] !== undefined) {
 						value = options[option];
 					} else {
-						value = defaultOptions[option];
+						value = defaultOptions[option].value;
 					}
 					this["_" + option] = value;
 				}
-			}
-			/* 
-			* Bug in IE 8. For some reason, during scrolling IE does not reflow the elements
-			* that are used to compute the location for the selection divs. This causes the
-			* divs to be placed at the wrong location. The fix is to disabled full selection for IE8.
-			*/
-			if (isIE < 9) {
-				this._fullSelection = false;
 			}
 			this._rulers = [];
 			this._selection = new Selection (0, 0, false);
@@ -5158,6 +5170,134 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			} 
 			this._setSelection(selection, true, true);
 			return true;
+		},
+		_setFullSelection: function(fullSelection, init) {
+			this._fullSelection = fullSelection;
+			
+			/* 
+			* Bug in IE 8. For some reason, during scrolling IE does not reflow the elements
+			* that are used to compute the location for the selection divs. This causes the
+			* divs to be placed at the wrong location. The fix is to disabled full selection for IE8.
+			*/
+			if (isIE < 9) {
+				this._fullSelection = false;
+			}
+			if (isWebkit) {
+				this._fullSelection = true;
+			}
+			var scrollDiv = this._scrollDiv;
+			if (!scrollDiv) {
+				return;
+			}
+			if (!isPad && !this._fullSelection) {
+				if (this._selDiv1) {
+					scrollDiv.removeChild(this._selDiv1);
+					this._selDiv1 = null;
+				}
+				if (this._selDiv2) {
+					scrollDiv.removeChild(this._selDiv2);
+					this._selDiv2 = null;
+				}
+				if (this._selDiv3) {
+					scrollDiv.removeChild(this._selDiv3);
+					this._selDiv3 = null;
+				}
+				return;
+			}
+			
+			if (!this._selDiv1 && (isPad || (this._fullSelection && !isWebkit))) {
+				var frameDocument = this._frameDocument;
+				this._hightlightRGB = "Highlight";
+				var selDiv1 = frameDocument.createElement("DIV");
+				this._selDiv1 = selDiv1;
+				selDiv1.id = "selDiv1";
+				selDiv1.style.position = "fixed";
+				selDiv1.style.borderWidth = "0px";
+				selDiv1.style.margin = "0px";
+				selDiv1.style.padding = "0px";
+				selDiv1.style.MozOutline = "none";
+				selDiv1.style.outline = "none";
+				selDiv1.style.background = this._hightlightRGB;
+				selDiv1.style.width = "0px";
+				selDiv1.style.height = "0px";
+				selDiv1.style.zIndex = "0";
+				scrollDiv.appendChild(selDiv1);
+				var selDiv2 = frameDocument.createElement("DIV");
+				this._selDiv2 = selDiv2;
+				selDiv2.id = "selDiv2";
+				selDiv2.style.position = "fixed";
+				selDiv2.style.borderWidth = "0px";
+				selDiv2.style.margin = "0px";
+				selDiv2.style.padding = "0px";
+				selDiv2.style.MozOutline = "none";
+				selDiv2.style.outline = "none";
+				selDiv2.style.background = this._hightlightRGB;
+				selDiv2.style.width = "0px";
+				selDiv2.style.height = "0px";
+				selDiv2.style.zIndex = "0";
+				scrollDiv.appendChild(selDiv2);
+				var selDiv3 = frameDocument.createElement("DIV");
+				this._selDiv3 = selDiv3;
+				selDiv3.id = "selDiv3";
+				selDiv3.style.position = "fixed";
+				selDiv3.style.borderWidth = "0px";
+				selDiv3.style.margin = "0px";
+				selDiv3.style.padding = "0px";
+				selDiv3.style.MozOutline = "none";
+				selDiv3.style.outline = "none";
+				selDiv3.style.background = this._hightlightRGB;
+				selDiv3.style.width = "0px";
+				selDiv3.style.height = "0px";
+				selDiv3.style.zIndex = "0";
+				scrollDiv.appendChild(selDiv3);
+				
+				/*
+				* Bug in Firefox. The Highlight color is mapped to list selection
+				* background instead of the text selection background.  The fix
+				* is to map known colors using a table or fallback to light blue.
+				*/
+				if (isFirefox && isMac) {
+					var style = this._frameWindow.getComputedStyle(selDiv3, null);
+					var rgb = style.getPropertyValue("background-color");
+					switch (rgb) {
+						case "rgb(119, 141, 168)": rgb = "rgb(199, 208, 218)"; break;
+						case "rgb(127, 127, 127)": rgb = "rgb(198, 198, 198)"; break;
+						case "rgb(255, 193, 31)": rgb = "rgb(250, 236, 115)"; break;
+						case "rgb(243, 70, 72)": rgb = "rgb(255, 176, 139)"; break;
+						case "rgb(255, 138, 34)": rgb = "rgb(255, 209, 129)"; break;
+						case "rgb(102, 197, 71)": rgb = "rgb(194, 249, 144)"; break;
+						case "rgb(140, 78, 184)": rgb = "rgb(232, 184, 255)"; break;
+						default: rgb = "rgb(180, 213, 255)"; break;
+					}
+					this._hightlightRGB = rgb;
+					selDiv1.style.background = rgb;
+					selDiv2.style.background = rgb;
+					selDiv3.style.background = rgb;
+					if (!this._insertedSelRule) {
+						var styleSheet = frameDocument.styleSheets[0];
+						styleSheet.insertRule("::-moz-selection {background: " + rgb + "; }", 0);
+						this._insertedSelRule = true;
+					}
+				}
+				if (!init) {
+					this._updateDOMSelection();
+				}
+			}
+		},
+		_setTabSize: function (tabSize, init) {
+			this._tabSize = tabSize;
+			this._customTabSize = undefined;
+			var clientDiv = this._clientDiv;
+			if (isOpera) {
+				if (clientDiv) { clientDiv.style.OTabSize = this._tabSize+""; }
+			} else if (isFirefox >= 4) {
+				if (clientDiv) {  clientDiv.style.MozTabSize = this._tabSize+""; }
+			} else if (this._tabSize !== 8) {
+				this._customTabSize = this._tabSize;
+				if (!init) {
+					this.redrawLines();
+				}
+			}
 		},
 		_showCaret: function (allSelection, pageScroll) {
 			if (!this._clientDiv) { return; }

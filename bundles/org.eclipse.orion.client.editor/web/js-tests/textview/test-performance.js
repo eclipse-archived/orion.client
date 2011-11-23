@@ -25,9 +25,21 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 		}
 	}
 	
+	function setupView(text, lang) {
+		var options = null;
+		if (!mSetup.view) {
+			options = {
+				sync: true,
+				fullSelection: true,
+				tabSize: 4
+			};
+		}
+		return mSetup.setupView(text, lang, options);
+	}
+	
 	function doAction(action, max) {
 //		var d = new dojo.Deferred();
-		var view = mSetup.setupView(mSetup.getFile("/orion/textview/textView.js"), "js");
+		var view = setupView(mSetup.getFile("/orion/textview/textView.js"), "js");
 		var model = view.getModel();
 		if (action.toLowerCase().indexOf("down") !== -1) {
 			view.setSelection(0, 0);
@@ -82,7 +94,7 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 			buffer += "var id; function() {return 30;} var foo; ";
 		}
 		var max = 256;
-		var view = mSetup.setupView(buffer, "js");
+		var view = setupView(buffer, "js");
 		var start = new Date().getTime();
 		var hscroll = -1;
 		function t() {
@@ -108,7 +120,7 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 			buffer += "var nada for nada function " + i + " ";
 		}
 		//test hit test without any styles
-		var view = mSetup.setupView(buffer, null);
+		var view = setupView(buffer, null);
 		view.focus();
 		setTimeout(function() {
 			var length = buffer.length;
@@ -131,7 +143,7 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 			buffer += "var nada for nada function " + i + " ";
 		}
 		//test hit test with styles
-		var view = mSetup.setupView(buffer, "js");
+		var view = setupView(buffer, "js");
 		view.focus();
 		setTimeout(function() {
 			var length = buffer.length;
@@ -154,7 +166,7 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 			buffer += "var nada for nada function " + i + " ";
 		}
 		//test hit test without any styles
-		var view = mSetup.setupView(buffer, null);
+		var view = setupView(buffer, null);
 		view.focus();
 		var location = view.getLocationAtOffset(buffer.length);
 		setTimeout(function() {
@@ -177,7 +189,7 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 			buffer += "var nada for nada function " + i + " ";
 		}
 		//test hit test with styles
-		var view = mSetup.setupView(buffer, "js");
+		var view = setupView(buffer, "js");
 		view.focus();
 		var location = view.getLocationAtOffset(buffer.length);
 		setTimeout(function() {
