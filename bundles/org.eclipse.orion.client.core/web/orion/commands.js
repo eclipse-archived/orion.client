@@ -546,7 +546,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							}
 						} 
 						// only check bindings that would otherwise render (ie, dom id matches parent, etc.)
-						var checkBinding = render;
+						var checkBinding = render && (scope === "global" || scope === "dom");
 						invocation = new CommandInvocation(this, handler, items, userData, command);
 
 						// ensure that keybindings are bound to the current handler, items, and user data
