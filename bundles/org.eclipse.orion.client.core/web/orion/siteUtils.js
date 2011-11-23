@@ -102,7 +102,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
-			hrefCallback: function(data) {generateEditSiteHref(data.items);}});
+			hrefCallback: function(data) { return generateEditSiteHref(data.items);}});
 		commandService.addCommand(editCommand, "object");
 		
 		var startCommand = new mCommands.Command({
