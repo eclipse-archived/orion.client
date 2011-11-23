@@ -156,15 +156,25 @@ exports.ExplorerModel = (function() {
 			}
 		},
 		getId: function(/* item */ item){
-			var result;
 			if (item.Location === this.root.Location) {
-				result = this.rootId;
-			} else {
-				result = item.Location;
-				// remove all non valid chars to make a dom id. 
-				result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+				return this.rootId;
 			} 
-			return result;
+			// first strip slashes so we aren't processing path separators.
+			var stripSlashes = item.Location.replace(/[\\\/]/g, "");
+			// these id's are used in the DOM, so we can't use characters that aren't valid in DOM id's.
+			// However we need a unique substitution string for these characters, so that we don't duplicate id's
+			// So we are going to substitute ascii values for invalid characters.
+			// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=363062
+			
+			var id = "";
+			for (var i=0; i<stripSlashes.length; i++) {
+				if (stripSlashes[i].match(/[^\.\:\-\_0-9A-Za-z]/g)) {
+					id += stripSlashes.charCodeAt(i);
+				} else {
+					id += stripSlashes[i];
+				}
+			}
+			return id;
 		}
 	};
 	return ExplorerModel;
