@@ -106,8 +106,8 @@ exports.EditorCommandFactory = (function() {
 					callback: function(data) {
 						var line;
 						var model = editor.getModel();
-						if (data.parameters && data.parameters.valueFor('line')) {
-							line = data.parameters.valueFor('line');
+						if (data.command.parameters && data.command.parameters.valueFor('line')) {
+							line = data.command.parameters.valueFor('line');
 						} else {
 							line = model.getLineAtOffset(editor.getCaretOffset());
 							line = prompt("Go to line:", line + 1);
