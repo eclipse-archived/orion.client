@@ -54,23 +54,48 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 	}
 	exports.getFile = getFile;
 	
+	function addTheme(stylesheet, theme) {
+		if (theme) {
+			if (typeof stylesheet === "string") {
+				stylesheet = [stylesheet];
+			}
+			var uri = require.toUrl("examples/textview/themes/" + theme + ".css");
+			for (var i = 0; i < stylesheet.length; i++) {
+				if (stylesheet[i] === uri) { break; }
+			}
+			if (i === stylesheet.length) {
+				stylesheet.push(uri);
+				return stylesheet;
+			}
+		}
+		return undefined;
+	}
+	
 	function checkView(options) {
-		if (view) { return view; }
-		var stylesheets = [
-			require.toUrl("orion/textview/textview.css"),
-			require.toUrl("orion/textview/rulers.css"),
-			require.toUrl("orion/textview/annotations.css"),
-			require.toUrl("examples/textview/textstyler.css"),
-			require.toUrl("examples/editor/htmlStyles.css")
-		];
+		var stylesheet;
+		if (view) {
+			if (options) {
+				stylesheet = addTheme(view.getOptions("stylesheet"), options.themeClass);
+				if (stylesheet) {
+					options.stylesheet = stylesheet;
+				}
+				view.setOptions(options);
+			}
+			return view;
+		}
+		
 		var baseModel =  new mTextModel.TextModel(), viewModel = baseModel;
 		var foldingEnabled = true;
 		if (foldingEnabled) {
 			viewModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 		}
 		options = options || {};
+		options.stylesheet = require.toUrl("examples/textview/themes/default.css");
+		stylesheet = addTheme(options.stylesheet, options.themeClass);
+		if (stylesheet) {
+			options.stylesheet = stylesheet;
+		}
 		options.parent = options.parent || "divParent";
-		options.stylesheet = options.stylesheet || stylesheets;
 		options.model = viewModel;
 		exports.view = view = new mTextView.TextView(options);
 		
@@ -249,11 +274,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 	exports.checkView = checkView;
 	
 	function setupView(text, lang, options) {
-		var newView = view;
 		checkView(options);
-		if (newView && options) {
-			newView.setOptions(options);
-		}
 		if (styler) {
 			styler.destroy();
 			styler = null;
@@ -268,7 +289,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 				styler.setHighlightCaretLine(true);
 				break;
 			case "html":
-				styler = new mTextMateStyler.TextMateStyler(view, mHtmlGrammar.HtmlGrammar.grammar);
+				styler = new mTextMateStyler.TextMateStyler(view, mHtmlGrammar.HtmlGrammar().grammar);
 				break;
 		}
 		annotationStyler = new mAnnotationModel.AnnotationStyler(view, view.annotationModel);

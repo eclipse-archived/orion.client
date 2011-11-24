@@ -51,8 +51,9 @@
 		URL: <input type="text" size="60" id="urlContent">
 		Lang: <select id="langSelect">
 			<option>js</option>
-			<option>java</option>
+			<option>css</option>
 			<option>html</option>
+			<option>java</option>
 		</select>
 		<span id='createLoad' class="button">Load</span>
 	</td>
@@ -74,7 +75,16 @@
 			Expand Tabs: <input type="checkbox" id="expandTab">
 		</span>&nbsp;
 		<span class="option">
-			Tab Size: <input type="text" value="4" size="2" style="border:none;outline:none;" id="tabSize">
+			Tab Size: <input type="text" value="4" size="2" id="tabSize">
+		</span>&nbsp;
+		<span class="option">
+			Theme:
+			<select id="themeSelect">
+				<option value="">Default</option>
+				<option value="dark">Dark</option>
+				<option value="">Eclipse</option>
+				<option value="orion">Orion</option>
+			</select>
 		</span>&nbsp;
 		<span id='setOptions' class="button">Set Options</span>
 	</td>
