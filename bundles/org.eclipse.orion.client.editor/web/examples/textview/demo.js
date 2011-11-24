@@ -46,11 +46,8 @@ function log (text) {
 		text += " ";
 		text += arguments[n];
 	}
-	
-	var t = document.createTextNode(text);
-	console.appendChild(t);
-	var br = document.createElement("br");
-	console.appendChild(br);
+	console.appendChild(document.createTextNode(text));
+	console.appendChild(document.createElement("br"));
 	console.scrollTop = console.scrollHeight;
 }
 
@@ -72,40 +69,40 @@ function(mSetup, mTestPerformance) {
 	var bTest = document.getElementById("test");
 	var bPerform = document.getElementById("performanceTest");
 	var sPerform = document.getElementById("performanceTestSelect");
+	var sTheme = document.getElementById("themeSelect");
 	var bReadOnly = document.getElementById('readOnly');
 	var bFullSel = document.getElementById('fullSelection');
 	var bExpandTab = document.getElementById('expandTab');
 	var sTabSize = document.getElementById('tabSize');
 	
+	function getOptions() {
+		return {
+			readonly: bReadOnly.checked,
+			fullSelection: bFullSel.checked,
+			expandTab: bExpandTab.checked,
+			tabSize: parseInt(sTabSize.value, 10),
+			themeClass: sTheme.value
+		};
+	}
+	
 	function updateOptions() {
-		var view = mSetup.checkView();
+		var view = mSetup.view;
 		var options = view.getOptions();
 		bReadOnly.checked = options.readonly;
 		bFullSel.checked = options.fullSelection;
 		bExpandTab.checked = options.expandTab;
 		sTabSize.value = options.tabSize;
+		sTheme.value = options.themeClass;
 	}
 
 	function setOptions() {
-		var view = mSetup.checkView();
-		view.setOptions({
-			readonly: bReadOnly.checked,
-			fullSelection: bFullSel.checked,
-			expandTab: bExpandTab.checked,
-			tabSize: parseInt(sTabSize.value, 10)
-		});
+		var view = mSetup.checkView(getOptions());
 		view.focus();
 		updateOptions();
 	}
 
 	function setupView(text, lang) {
-		var options = {
-			readonly: bReadOnly.checked,
-			fullSelection: bFullSel.checked,
-			expandTab: bExpandTab.checked,
-			tabSize: parseInt(sTabSize.value, 10)
-		};
-		var view = mSetup.setupView(text, lang, options);
+		var view = mSetup.setupView(text, lang, getOptions());
 		view.focus();
 		updateOptions();
 		return view;
