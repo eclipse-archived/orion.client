@@ -9,36 +9,69 @@
 <script type="text/javascript" src="../orion/editor/webContentAssist.js"></script>
 <script type="text/javascript" src="../orion/editor/htmlGrammar.js"></script>
 <script type="text/javascript">
+/*global window eclipse orion*/
 window.onload = function() {
 	var provider = new eclipse.PluginProvider();
 	
-	// Content assist for CSS, JavaScript
-	(function() {
-		provider.registerServiceProvider("orion.edit.contentAssist",
-			new orion.editor.CssContentAssistProvider(), 
-			{name: "CSS content assist", pattern: "\\.css$"});
-		provider.registerServiceProvider("orion.edit.contentAssist",
-			new orion.editor.JavaScriptContentAssistProvider(),
-			{name: "JavaScript content assist", pattern: "\\.js$"});
-	}());
+	provider.registerServiceProvider("orion.file.contentType", {}, {
+		contentTypes:
+			[{	id: "text.plain",
+				name: "Text",
+				extension: "txt"
+			},
+			{	id: "text.html",
+				"extends": "text.plain",
+				name: "HTML",
+				extension: ["html", "htm"]
+			},
+			{	id: "text.css",
+				"extends": "text.plain",
+				name: "CSS",
+				extension: "css"
+			},
+			{	id: "text.javascript",
+				"extends": "text.plain",
+				name: "JavaScript",
+				extension: "js"
+			},
+			{	id: "text.json",
+				"extends": "text.plain",
+				name: "JSON",
+				extension: "json"
+			},
+			{	id: "text.xml",
+				"extends": "text.plain",
+				name: "XML",
+				extension: "xml"
+			},
+			{	id: "text.java",
+				"extends": "text.plain",
+				name: "Java",
+				extension: "java"
+			}]
+		});
 	
-	// Syntax highlighting for HTML
-	(function() {
-		var serviceImpl = { /* Grammar-based, so no service impl. All data is in properties */ };
-		var serviceProperties = orion.editor.HtmlGrammar();
-		provider.registerServiceProvider("orion.edit.highlighter", serviceImpl, serviceProperties);
-	}());
+	provider.registerServiceProvider("orion.edit.editor", {}, {
+		id: "orion.editor",
+		name: "Orion Editor",
+		href: "../edit/edit.html#${Location}"});
 	
-	// Register our editor for html, js, json, css, xml, java
-	(function() {
-		var serviceImpl = {};
-		var serviceProperties = {
-			name: "Orion web editor",
-			href: "../edit/edit.html#${Location}",
-			validationProperties: {Name: "*.(css|js|json|htm|html|txt|xml|java)"}
-		};
-		provider.registerServiceProvider("orion.navigate.openWith", serviceImpl, serviceProperties);
-	}());
+	provider.registerServiceProvider("orion.navigate.openWith", {}, {
+			editor: "orion.editor",
+			contentType: ["text.plain", "text.html", "text.css", "text.javascript", "text.json", "text.xml", "text.java"]});
+	
+	// Register content assist providers
+	provider.registerServiceProvider("orion.edit.contentAssist",
+		new orion.editor.CssContentAssistProvider(), 
+		{name: "CSS content assist", pattern: "\\.css$"});
+	provider.registerServiceProvider("orion.edit.contentAssist",
+		new orion.editor.JavaScriptContentAssistProvider(),
+		{name: "JavaScript content assist", pattern: "\\.js$"});
+	
+	// Register syntax highlighting
+	provider.registerServiceProvider("orion.edit.highlighter",
+		{ /* Grammar-based, so no service impl. All data is in properties */ },
+		orion.editor.HtmlGrammar());
 	
 	provider.connect();
 };

@@ -12,7 +12,8 @@
 /*global window define orion */
 /*browser:true*/
 
-define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'], function(require, dojo, mUtil, mCommands){
+define(["require", "dojo", "orion/util", "orion/commands", "orion/contentTypes", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
+	function(require, dojo, mUtil, mCommands, mContentTypes){
 
 	/**
 	 * Utility methods
@@ -690,16 +691,6 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 	};
 	
 	fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, fileGroup, selectionGroup) {
-		function makeOpenWithRunner(href) {
-			return function(item) {
-				// String substitution: replace ${foo} with item.foo, ${foo.bar} with item.foo.bar, etc.
-				return href.replace(/\$\{([\d\w-_$.]+)\}/g, function(str, properties) {
-					// getObject handles property chains
-					return dojo.getObject(properties, false, item);
-				});
-			};
-		}
-	
 		// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
 		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 		
@@ -721,9 +712,6 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 		//			if info.href is not true, the run function is assumed to perform all necessary action and the return is not used.
 		var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
 		
-		// Contributions to the orion.navigate.openWith service type also get mapped to orion.navigate.command
-		var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith");
-	
 		var fileCommands = [];
 		var i;
 		for (i=0; i<commandsReferences.length; i++) {
@@ -736,29 +724,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			fileCommands.push({properties: info, service: impl});
 		}
 		
-		// Convert "orion.navigate.openWith" contributions into orion.navigate.command that open the appropriate editors
-		for (i=0; i < openWithReferences.length; i++) {
-			var openWithServiceRef = openWithReferences[i];
-			var name = openWithServiceRef.getProperty("name"),
-			    href = openWithServiceRef.getProperty("href"),
-			    validationProperties = openWithServiceRef.getProperty("validationProperties");
-			if (href && validationProperties && name) {
-				var properties = {
-						name: name,
-						id: "eclipse.editor." + i,
-						tooltip: name,
-						validationProperties: validationProperties,
-						href: true,
-						forceSingleItem: true,
-						isEditor: true // Distinguishes from a normal fileCommand
-					};
-				// Pretend that this is a real service
-				var fakeService = {
-						run: makeOpenWithRunner(href)
-					};
-				fileCommands.push({properties: properties, service: fakeService});
-			}
-		}
+		var contentTypes = new mContentTypes.ContentTypes(serviceRegistry);
+		fileCommands = fileCommands.concat(contentTypes.toFileCommands());
 	
 		for (i=0; i < fileCommands.length; i++) {
 			var commandInfo = fileCommands[i].properties;
