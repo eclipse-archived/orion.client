@@ -1566,6 +1566,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		/**************************************** Event handlers *********************************/
 		_handleBodyMouseDown: function (e) {
 			if (!e) { e = window.event; }
+			if (isFirefox) {
+				this._clientDiv.contentEditable = false;
+				(this._overlayDiv || this._clientDiv).draggable = true;
+				this._ignoreBlur = true;
+			}
+			
 			/*
 			 * Prevent clicks outside of the view from taking focus 
 			 * away the view. Note that in Firefox and Opera clicking on the 
@@ -1593,8 +1599,26 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				setTimeout(function() { topNode.releaseCapture(); }, 0);
 			}
 		},
+		_handleBodyMouseUp: function (e) {
+			if (!e) { e = window.event; }
+			if (isFirefox) {
+				this._clientDiv.contentEditable = true;
+				(this._overlayDiv || this._clientDiv).draggable = false;
+				
+				/*
+				* Bug in Firefox.  For some reason, Firefox stops showing the caret
+				* in some cases. For example when the user cancels a drag operation 
+				* by pressing ESC.  The fix is to detect that the drag operation was
+				* cancelled,  toggle the contentEditable state and force the clientDiv
+				* to loose and receive focus if the it is focused.
+				*/
+				this._fixCaret();
+				this._ignoreBlur = false;
+			}
+		},
 		_handleBlur: function (e) {
 			if (!e) { e = window.event; }
+			if (this._ignoreBlur) { return; }
 			this._hasFocus = false;
 			/*
 			* Bug in IE 8 and earlier. For some reason when text is deselected
@@ -1681,6 +1705,14 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		},
 		_handleDragStart: function (e) {
 			if (!e) { e = window.event; }
+			if (isFirefox) {
+				var self = this;
+				setTimeout(function() {
+					self._clientDiv.contentEditable = true;
+					self._clientDiv.draggable = false;
+					self._ignoreBlur = false;
+				}, 0);
+			}
 			if (this.isListening("DragStart") && this._dragOffset !== -1) {
 				this._isMouseDown = false;
 				this.onDragStart(this._createMouseEvent("DragStart", e));
@@ -1699,9 +1731,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		_handleDragEnd: function (e) {
 			if (!e) { e = window.event; }
 			this._dropTarget = false;
-			this._dragOffset = e.dataTransfer.mozUserCancelled ? -2 : -1;
+			this._dragOffset = -1;
 			if (this.isListening("DragEnd")) {
 				this.onDragEnd(this._createMouseEvent("DragEnd", e));
+			}
+			if (isFirefox) {
+				this._fixCaret();
 			}
 		},
 		_handleDragEnter: function (e) {
@@ -2131,7 +2166,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			var viewPad = this._getViewPadding();
 			var x = e.clientX + scroll.x - viewRect.left - viewPad.left;
-			var y = e.clientY + scroll.y - viewRect.top - viewPad.top;
+			var y = e.clientY + scroll.y - viewRect.top;
 			return {
 				type: type,
 				event: e,
@@ -2149,17 +2184,6 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			}
 			var left = e.which ? e.button === 0 : e.button === 1;
 			if (left) {
-				/*
-				* Bug in Firefox.  For some reason, Firefox stops showing the caret
-				* when the user cancels a drag operation by pressing ESC.  The fix is
-				* to detect that the drag operation was cancelled,  toggle the
-				* contentEditable state and force the clientDiv to loose and receive
-				* focus if the it is focused.
-				*/
-				if (this._dragOffset === -2) {
-					this._fixCaret();
-					this._dragOffset = -1;
-				}
 				if (this._dragOffset !== -1) {
 					var selection = this._getSelection();
 					selection.extend(this._dragOffset);
@@ -3635,6 +3659,26 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			scrollDiv.style.padding = "0px";
 			viewDiv.appendChild(scrollDiv);
 			
+			if (isFirefox) {
+				var clipDiv = frameDocument.createElement("DIV");
+				this._clipDiv = clipDiv;
+				clipDiv.id = "clipDiv";
+				clipDiv.style.position = "fixed";
+				clipDiv.style.overflow = "hidden";
+				clipDiv.style.margin = "0px";
+				clipDiv.style.borderWidth = "0px";
+				clipDiv.style.padding = "0px";
+				scrollDiv.appendChild(clipDiv);
+				
+				var clipScrollDiv = frameDocument.createElement("DIV");
+				this._clipScrollDiv = clipScrollDiv;
+				clipScrollDiv.id = "clipScrollDiv";
+				clipScrollDiv.style.position = "absolute";
+				clipScrollDiv.style.height = "1px";
+				clipScrollDiv.style.top = "-1000px";
+				clipDiv.appendChild(clipScrollDiv);
+			}
+			
 			this._setFullSelection(this._fullSelection, true);
 
 			var clientDiv = frameDocument.createElement("DIV");
@@ -3642,7 +3686,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			this._clientDiv = clientDiv;
 			clientDiv.id = "clientDiv";
 			clientDiv.style.whiteSpace = "pre";
-			clientDiv.style.position = "fixed";
+			clientDiv.style.position = this._clipDiv ? "absolute" : "fixed";
 			clientDiv.style.borderWidth = "0px";
 			clientDiv.style.margin = "0px";
 			clientDiv.style.padding = "0px";
@@ -3652,7 +3696,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (isPad) {
 				clientDiv.style.WebkitTapHighlightColor = "transparent";
 			}
-			scrollDiv.appendChild(clientDiv);
+			(this._clipDiv || scrollDiv).appendChild(clientDiv);
 
 			if (isFirefox && !clientDiv.setCapture) {
 				var overlayDiv = frameDocument.createElement("DIV");
@@ -3664,7 +3708,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				overlayDiv.style.padding = clientDiv.style.padding;
 				overlayDiv.style.cursor = "text";
 				overlayDiv.style.zIndex = "2";
-				scrollDiv.appendChild(overlayDiv);
+				(this._clipDiv || scrollDiv).appendChild(overlayDiv);
 			}
 			if (!isPad) {
 				clientDiv.contentEditable = "true";
@@ -3766,6 +3810,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			this._clipboardDiv = null;
 			this._scrollDiv = null;
 			this._viewDiv = null;
+			this._clipDiv = null;
+			this._clipScrollDiv = null;
 			this._clientDiv = null;
 			this._overlayDiv = null;
 			this._leftDiv = null;
@@ -4537,6 +4583,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				handlers.push({target: grabNode, type: "mouseup", handler: function(e) { return self._handleMouseUp(e);}});
 				handlers.push({target: grabNode, type: "mousemove", handler: function(e) { return self._handleMouseMove(e);}});
 				handlers.push({target: body, type: "mousedown", handler: function(e) { return self._handleBodyMouseDown(e);}});
+				handlers.push({target: body, type: "mouseup", handler: function(e) { return self._handleBodyMouseUp(e);}});
 				handlers.push({target: topNode, type: "dragstart", handler: function(e) { return self._handleDragStart(e);}});
 				handlers.push({target: topNode, type: "drag", handler: function(e) { return self._handleDrag(e);}});
 				handlers.push({target: topNode, type: "dragend", handler: function(e) { return self._handleDragEnd(e);}});
@@ -5007,6 +5054,12 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					var right = clientRect.right;
 					var top = viewRect.top + viewPad.top;
 					var bottom = clientRect.bottom;
+					var hd = 0, vd = 0;
+					if (this._clipDiv) {
+						var clipRect = this._clipDiv.getBoundingClientRect();
+						hd = clipRect.left - this._clipDiv.scrollLeft;
+						vd = clipRect.top;
+					}
 					var r;
 					var endLineBounds = this._getLineBoundingClientRect(endNode);
 					if (endOffset === 0) {
@@ -5025,8 +5078,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 					var sel1Top = Math.min(bottom, Math.max(top, startLineBounds.top));
 					var sel1Right = right;
 					var sel1Bottom = Math.min(bottom, Math.max(top, startLineBounds.bottom));
-					sel1Div.style.left = sel1Left + "px";
-					sel1Div.style.top = sel1Top + "px";
+					sel1Div.style.left = (sel1Left - hd) + "px";
+					sel1Div.style.top = (sel1Top - vd) + "px";
 					sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px";
 					sel1Div.style.height = Math.max(0, sel1Bottom - sel1Top) + (isPad ? 1 : 0) + "px";
 					if (isPad) {
@@ -5045,8 +5098,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 						var sel3Right = Math.min(right, Math.max(left, r));
 						var sel3Bottom = Math.min(bottom, Math.max(top, endLineBounds.bottom));
 						var sel3Div = this._selDiv3;
-						sel3Div.style.left = sel3Left + "px";
-						sel3Div.style.top = sel3Top + "px";
+						sel3Div.style.left = (sel3Left - hd) + "px";
+						sel3Div.style.top = (sel3Top - vd) + "px";
 						sel3Div.style.width = Math.max(0, sel3Right - sel3Left - handleWidth) + "px";
 						sel3Div.style.height = Math.max(0, sel3Bottom - sel3Top) + "px";
 						if (isPad) {
@@ -5054,8 +5107,8 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 						}
 						if (sel3Top - sel1Bottom > 0) {
 							var sel2Div = this._selDiv2;
-							sel2Div.style.left = left + "px";
-							sel2Div.style.top = sel1Bottom + "px";
+							sel2Div.style.left = (left - hd)  + "px";
+							sel2Div.style.top = (sel1Bottom - vd) + "px";
 							sel2Div.style.width = Math.max(0, right - left) + "px";
 							sel2Div.style.height = Math.max(0, sel3Top - sel1Bottom) + (isPad ? 1 : 0) + "px";
 						}
@@ -5207,21 +5260,21 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (isWebkit) {
 				this._fullSelection = true;
 			}
-			var scrollDiv = this._scrollDiv;
-			if (!scrollDiv) {
+			var parent = this._clipDiv || this._scrollDiv;
+			if (!parent) {
 				return;
 			}
 			if (!isPad && !this._fullSelection) {
 				if (this._selDiv1) {
-					scrollDiv.removeChild(this._selDiv1);
+					parent.removeChild(this._selDiv1);
 					this._selDiv1 = null;
 				}
 				if (this._selDiv2) {
-					scrollDiv.removeChild(this._selDiv2);
+					parent.removeChild(this._selDiv2);
 					this._selDiv2 = null;
 				}
 				if (this._selDiv3) {
-					scrollDiv.removeChild(this._selDiv3);
+					parent.removeChild(this._selDiv3);
 					this._selDiv3 = null;
 				}
 				return;
@@ -5233,7 +5286,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				var selDiv1 = frameDocument.createElement("DIV");
 				this._selDiv1 = selDiv1;
 				selDiv1.id = "selDiv1";
-				selDiv1.style.position = "fixed";
+				selDiv1.style.position = this._clipDiv ? "absolute" : "fixed";
 				selDiv1.style.borderWidth = "0px";
 				selDiv1.style.margin = "0px";
 				selDiv1.style.padding = "0px";
@@ -5243,11 +5296,11 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				selDiv1.style.width = "0px";
 				selDiv1.style.height = "0px";
 				selDiv1.style.zIndex = "0";
-				scrollDiv.appendChild(selDiv1);
+				parent.appendChild(selDiv1);
 				var selDiv2 = frameDocument.createElement("DIV");
 				this._selDiv2 = selDiv2;
 				selDiv2.id = "selDiv2";
-				selDiv2.style.position = "fixed";
+				selDiv2.style.position = this._clipDiv ? "absolute" : "fixed";
 				selDiv2.style.borderWidth = "0px";
 				selDiv2.style.margin = "0px";
 				selDiv2.style.padding = "0px";
@@ -5257,11 +5310,11 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				selDiv2.style.width = "0px";
 				selDiv2.style.height = "0px";
 				selDiv2.style.zIndex = "0";
-				scrollDiv.appendChild(selDiv2);
+				parent.appendChild(selDiv2);
 				var selDiv3 = frameDocument.createElement("DIV");
 				this._selDiv3 = selDiv3;
 				selDiv3.id = "selDiv3";
-				selDiv3.style.position = "fixed";
+				selDiv3.style.position = this._clipDiv ? "absolute" : "fixed";
 				selDiv3.style.borderWidth = "0px";
 				selDiv3.style.margin = "0px";
 				selDiv3.style.padding = "0px";
@@ -5271,7 +5324,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				selDiv3.style.width = "0px";
 				selDiv3.style.height = "0px";
 				selDiv3.style.zIndex = "0";
-				scrollDiv.appendChild(selDiv3);
+				parent.appendChild(selDiv3);
 				
 				/*
 				* Bug in Firefox. The Highlight color is mapped to list selection
@@ -5632,36 +5685,80 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				scrollWidth = width;
 				if (!isIE || isIE >= 9) { width += viewPad.right; }
 				scrollDiv.style.width = width + "px";
+				if (this._clipScrollDiv) {
+					this._clipScrollDiv.style.width = width + "px";
+				}
 				/* Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset. */
 				scroll = this._getScroll();
 				var rulerHeight = clientHeight + viewPad.top + viewPad.bottom;
 				this._updateRulerSize(this._leftDiv, rulerHeight);
 				this._updateRulerSize(this._rightDiv, rulerHeight);
 			}
-			var left = scroll.x;
-			var clipLeft = left;
-			var clipTop = top;
-			var clipRight = left + clientWidth;
-			var clipBottom = top + clientHeight;
-			if (clipLeft === 0) { clipLeft -= viewPad.left; }
-			if (clipTop === 0) { clipTop -= viewPad.top; }
-			if (clipRight === scrollWidth) { clipRight += viewPad.right; }
-			if (scroll.y + clientHeight === scrollHeight) { clipBottom += viewPad.bottom; }
-			clientDiv.style.clip = "rect(" + clipTop + "px," + clipRight + "px," + clipBottom + "px," + clipLeft + "px)";
-			clientDiv.style.left = (-left + leftWidth + viewPad.left) + "px";
-			if (!hScrollOnly) {
-				clientDiv.style.top = (-top + viewPad.top) + "px";
-				clientDiv.style.width = (isWebkit ? scrollWidth : clientWidth + left) + "px";
-				clientDiv.style.height = (clientHeight + top) + "px";
-			}
+			var left = scroll.x;	
+			var clipDiv = this._clipDiv;
 			var overlayDiv = this._overlayDiv;
-			if (overlayDiv) {
-				overlayDiv.style.clip = clientDiv.style.clip;
-				overlayDiv.style.left = clientDiv.style.left;
-				if (!hScrollOnly) {
+			var clipLeft, clipTop;
+			if (clipDiv) {
+				clipDiv.scrollLeft = left;			
+				clipLeft = leftWidth + viewPad.left;
+				clipTop = viewPad.top;
+				var clipWidth = clientWidth;
+				var clipHeight = clientHeight;
+				var clientLeft = 0, clientTop = -top;
+				if (scroll.x === 0) {
+					clipLeft -= viewPad.left;
+					clipWidth += viewPad.left;
+					clientLeft = viewPad.left;
+				} 
+				if (scroll.x + clientWidth === scrollWidth) {
+					clipWidth += viewPad.right;
+				}
+				if (scroll.y === 0) {
+					clipTop -= viewPad.top;
+					clipHeight += viewPad.top;
+					clientTop += viewPad.top;
+				}
+				if (scroll.y + clientHeight === scrollHeight) { 
+					clipHeight += viewPad.bottom; 
+				}
+				clipDiv.style.left = clipLeft + "px";
+				clipDiv.style.top = clipTop + "px";
+				clipDiv.style.width = clipWidth + "px";
+				clipDiv.style.height = clipHeight + "px";
+				clientDiv.style.left = clientLeft + "px";
+				clientDiv.style.top = clientTop + "px";
+				clientDiv.style.width = scrollWidth + "px";
+				clientDiv.style.height = (clientHeight + top) + "px";
+				if (overlayDiv) {
+					overlayDiv.style.left = clientDiv.style.left;
 					overlayDiv.style.top = clientDiv.style.top;
 					overlayDiv.style.width = clientDiv.style.width;
 					overlayDiv.style.height = clientDiv.style.height;
+				}
+			} else {
+				clipLeft = left;
+				clipTop = top;
+				var clipRight = left + clientWidth;
+				var clipBottom = top + clientHeight;
+				if (clipLeft === 0) { clipLeft -= viewPad.left; }
+				if (clipTop === 0) { clipTop -= viewPad.top; }
+				if (clipRight === scrollWidth) { clipRight += viewPad.right; }
+				if (scroll.y + clientHeight === scrollHeight) { clipBottom += viewPad.bottom; }
+				clientDiv.style.clip = "rect(" + clipTop + "px," + clipRight + "px," + clipBottom + "px," + clipLeft + "px)";
+				clientDiv.style.left = (-left + leftWidth + viewPad.left) + "px";
+				clientDiv.style.width = (isWebkit ? scrollWidth : clientWidth + left) + "px";
+				if (!hScrollOnly) {
+					clientDiv.style.top = (-top + viewPad.top) + "px";
+					clientDiv.style.height = (clientHeight + top) + "px";
+				}
+				if (overlayDiv) {
+					overlayDiv.style.clip = clientDiv.style.clip;
+					overlayDiv.style.left = clientDiv.style.left;
+					overlayDiv.style.width = clientDiv.style.width;
+					if (!hScrollOnly) {
+						overlayDiv.style.top = clientDiv.style.top;
+						overlayDiv.style.height = clientDiv.style.height;
+					}
 				}
 			}
 			this._updateDOMSelection();
