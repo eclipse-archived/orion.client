@@ -12,8 +12,8 @@
 /*global define document */
 
 define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
-		'orion/compare/compare-features', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'],
-		function(dojo, mBootstrap, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mDiffProvider, mCompareContainer) {
+		'orion/compare/compare-features', 'orion/compare/compare-container', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'],
+		function(dojo, mBootstrap, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mCompareContainer) {
 
 		dojo.addOnLoad(function(){
 			mBootstrap.startup().then(function(core) {
@@ -32,7 +32,6 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/file
 				var searcher = new mSearchClient.Searcher({
 					serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient
 				});
-				var diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
 
 				mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
 				var uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
@@ -46,17 +45,12 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/file
 				var readOnly = isReadOnly();
 				var conflciting = isConflciting();
 
+				var diffProvider = new mCompareContainer.GitDiffProvider(serviceRegistry);
 				var options = {
 					readonly: readOnly,
 					hasConflicts: conflciting,
 					diffProvider: diffProvider,
-					complexURL: dojo.hash(),
-					callback: function(newFile, oldFile) {
-						handleTile(newFile, oldFile, uiFactory);
-					}, 
-					errorCallback: function(errorResponse, ioArgs) {
-						handleErrorTile(errorResponse, ioArgs, uiFactory);
-					}
+					complexURL: dojo.hash()
 				};
 				
 				var twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(serviceRegistry, uiFactory, options);
@@ -80,21 +74,5 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/file
 				return queryParams["conflict"] != null;
 			}
 
-			function handleTile(newFile, oldFile, uiFactory) {
-				if (uiFactory.getTitleDivId(true) && uiFactory.getTitleDivId(false)) {
-					dojo.place(document.createTextNode(newFile), uiFactory.getTitleDivId(true), "only");
-					dojo.place(document.createTextNode(oldFile), uiFactory.getTitleDivId(false), "only");
-				}
-			}
-
-			function handleErrorTile(errorResponse, ioArgs, uiFactory) {
-				if (uiFactory.getTitleDivId(true) && uiFactory.getTitleDivId(false)) {
-					var message = typeof (errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
-					dojo.place(document.createTextNode(message), uiFactory.getTitleDivId(true), "only");
-					dojo.place(document.createTextNode(message), uiFactory.getTitleDivId(false), "only");
-					dojo.style(uiFactory.getTitleDivId(true), "color", "red");
-					dojo.style(uiFactory.getTitleDivId(false), "color", "red");
-				}
-			}
 		});
 });

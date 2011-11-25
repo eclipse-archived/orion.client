@@ -47,43 +47,62 @@ exports.EditorCommandFactory = (function() {
 			// create commands common to all editors
 			if (!this.isReadOnly) {
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "Save");
-				editor.getTextView().setAction("Save", dojo.hitch(this, function () {
-					var contents = editor.getText();
-					var etag = this.inputManager.getFileMetadata().ETag;
-					var args = { "ETag" : etag };
-					this.fileClient.write(this.inputManager.getInput(), contents, args).then(
-							dojo.hitch(this, function(result) {
-								this.inputManager.getFileMetadata().ETag = result.ETag;
-								editor.setInput(this.inputManager.getInput(), null, contents, true);
-								if(this.inputManager.afterSave){
-									this.inputManager.afterSave();
-								}
-							}),
-							dojo.hitch(this, function(error) {
-								// expected error - HTTP 412 Precondition Failed 
-								// occurs when file is out of sync with the server
-								if (error.status === 412) {
-									var forceSave = confirm("Resource is out of sync with the server. Do you want to save it anyway?");
-									if (forceSave) {
-										// repeat save operation, but without ETag 
-										this.fileClient.write(this.inputManager.getInput(), contents).then(
+				//If we are introducing other file system to provide save action, we need to define an onSave function in the input manager
+				//That way the file system knows how to implement their save mechanism
+				if(this.inputManager.onSave){
+					editor.getTextView().setAction("Save", dojo.hitch(this, function () {
+						this.inputManager.onSave(this.inputManager.getInput(), contents,
 												dojo.hitch(this, function(result) {
-													this.inputManager.getFileMetadata().ETag = result.ETag;
 													editor.setInput(this.inputManager.getInput(), null, contents, true);
 													if(this.inputManager.afterSave){
 														this.inputManager.afterSave();
 													}
-												}));
+												}),
+												dojo.hitch(this, function(error) {
+													error.log = true;
+												})
+						);
+						return true;
+					}));
+				} else {
+					editor.getTextView().setAction("Save", dojo.hitch(this, function () {
+						var contents = editor.getText();
+						var etag = this.inputManager.getFileMetadata().ETag;
+						var args = { "ETag" : etag };
+						this.fileClient.write(this.inputManager.getInput(), contents, args).then(
+								dojo.hitch(this, function(result) {
+									this.inputManager.getFileMetadata().ETag = result.ETag;
+									editor.setInput(this.inputManager.getInput(), null, contents, true);
+									if(this.inputManager.afterSave){
+										this.inputManager.afterSave();
 									}
-								}
-								// unknown error
-								else {
-									error.log = true;
-								}
-							})
-					);
-					return true;
-				}));
+								}),
+								dojo.hitch(this, function(error) {
+									// expected error - HTTP 412 Precondition Failed 
+									// occurs when file is out of sync with the server
+									if (error.status === 412) {
+										var forceSave = confirm("Resource is out of sync with the server. Do you want to save it anyway?");
+										if (forceSave) {
+											// repeat save operation, but without ETag 
+											this.fileClient.write(this.inputManager.getInput(), contents).then(
+													dojo.hitch(this, function(result) {
+														this.inputManager.getFileMetadata().ETag = result.ETag;
+														editor.setInput(this.inputManager.getInput(), null, contents, true);
+														if(this.inputManager.afterSave){
+															this.inputManager.afterSave();
+														}
+													}));
+										}
+									}
+									// unknown error
+									else {
+										error.log = true;
+									}
+								})
+						);
+						return true;
+					}));
+				}
 				var saveCommand = new mCommands.Command({
 					name: "Save",
 					tooltip: "Save this file",

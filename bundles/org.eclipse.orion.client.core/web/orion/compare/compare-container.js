@@ -12,9 +12,9 @@
 
 define(['require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-inline-model', 'orion/compare/compare-2way-model', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands',
-        'orion/textview/textModel','orion/textview/textView','examples/textview/textStyler' , 'orion/compare/compareUtils', 'orion/editor/asyncStyler', 'orion/editor/textMateStyler'], 
+        'orion/textview/textModel','orion/textview/textView','examples/textview/textStyler' , 'orion/compare/compareUtils', 'orion/editor/asyncStyler', 'orion/editor/textMateStyler','orion/compare/diff-provider'], 
 		function(require, dojo, mDiffParser, mRulers, mCompareModel, mTwoWayCompareModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
-				mGapModel , mCommands, mTextModel, mTextView, mTextStyler , mCompareUtils, mAsyncStyler, mTextMateStyler) {
+				mGapModel , mCommands, mTextModel, mTextView, mTextStyler , mCompareUtils, mAsyncStyler, mTextMateStyler, mDiffProvider) {
 
 var exports = {};
 
@@ -28,15 +28,14 @@ exports.CompareContainer = (function() {
 			this._hasConflicts = undefined;
 			this._diffProvider = undefined;
 			this._complexURL = undefined;
-			
 			this._baseFile = {};
 			this._newFile = {};
 			
 			this._diffURL = undefined;
 			this._diffContent = undefined;
 			
-			this._callback = undefined;
-			this._errorCallback = undefined;
+			this._onSave = undefined;
+			this._onSetTitle = undefined;
 		},
 			
 		setOptions: function(options, clearExisting){
@@ -60,8 +59,8 @@ exports.CompareContainer = (function() {
 				this._diffURL = options.diffURL ? options.diffURL : this._diffURL;
 				this._diffContent = options.diffContent ? options.diffContent : this._diffContent;
 				
-				this._callback = options.callback ? options.callback : this._callback;
-				this._errorCallback = options.errorCallback ? options.errorCallback : this._errorCallback ;
+				this._onSave = options.onSave ? options.onSave : this._onSave;
+				this._onSetTitle = options.onSetTitle ? options.onSetTitle : this._onSetTitle;
 			}
 		},
 		
@@ -69,49 +68,30 @@ exports.CompareContainer = (function() {
 			var delim = "\n";
 			return delim;
 		},
-		
-		setDiffProvider: function(diffProvider){
-			this._diffProvider = diffProvider;
-		},
-		
+
 		resolveComplexDiff: function(onsave) {
 			if(!this._diffProvider){
 				console.log("A diff provider is needed for Complex diff URL");
 				return;
 			}
 			var that = this;
-			that._diffProvider.getDiffContent(that._complexURL).then(function(jsonData, secondArg) {
-				if (that._hasConflicts) {
-					that._diffContent = jsonData.split("diff --git")[1];
-				} else {
-					that._diffContent = jsonData;
-				}
+			that._diffProvider.provide(that._complexURL, onsave, that._hasConflicts, function(diffParam){
+				that._baseFile.URL = (diffParam.baseFile && diffParam.baseFile.URL) ? diffParam.baseFile.URL : that._baseFile.URL;
+				that._newFile.URL = (diffParam.newFile && diffParam.newFile.URL) ? diffParam.newFile.URL : that._newFile.URL;
+				that._diffContent = (diffParam.diff) ? diffParam.diff : that._diffContent;
 				if (onsave)
 					that.setEditor(onsave);
-				else
-					that.resolveComplexFileURL();
-			}, that._errorCallback);
-		},
-		
-		resolveComplexFileURL: function() {
-			var that = this;
-			this._diffProvider.getDiffFileURI(that._complexURL).then(function(jsonData, secondArg) {
-				that._baseFile.URL = jsonData.Old;
-				that._newFile.URL = jsonData.New;
-				if(that._newFile.URL && that._newFile.URL.length > 0){
-					that.getFileContent([that._baseFile/*, that._newFile*/], 0);
-				} else {
+				else{
+					if(that._callback)
+						that._callback(that._baseFile.URL, that._newFile.URL);
 					that.getFileContent([that._baseFile], 0);
 				}
-				if (that._callback)
-					that._callback(that._newFile.URL, that._baseFile.URL);
 			}, that._errorCallback);
 		},
 		
-
 		getFileContent: function(files, currentIndex) {
 			if(!this._fileClient){
-				console.log("A file clientr is needed for getting file content");
+				console.log("A file client is needed for getting file content");
 				return;
 			}
 			var that = this;
@@ -154,6 +134,55 @@ exports.CompareContainer = (function() {
 	};
 	return CompareContainer;
 }());
+
+exports.GitDiffProvider = (function() {
+	function GitDiffProvider(serviceRegistry){
+		this.serviceRegistry = serviceRegistry;
+		this._diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
+	}	
+	GitDiffProvider.prototype = {
+		_resolveComplexDiff: function(complexURL, onlyDiff, errorCallback) {
+			if(!this._diffProvider){
+				console.log("A diff provider is needed for compound diff URL");
+				return;
+			}
+			var that = this;
+			that._diffProvider.getDiffContent(complexURL).then(function(jsonData, secondArg) {
+				if (that._hasConflicts) {
+					that._diffContent = jsonData.split("diff --git")[1];
+				} else {
+					that._diffContent = jsonData;
+				}
+				if (onlyDiff){
+					that.callBack({ 
+			 			diff: that._diffContent
+					 });
+				} else {
+					that._resolveComplexFileURL(complexURL);
+				}
+			}, errorCallback);
+		},
+			
+		_resolveComplexFileURL: function(complexURL, errorCallback) {
+			var that = this;
+			this._diffProvider.getDiffFileURI(complexURL).then(function(jsonData, secondArg) {
+				that.callBack({ baseFile:{URL: jsonData.Old, Name: jsonData.Old/*temporary*/, Type:undefined/*temporary*/},
+					 			newFile:{URL: jsonData.New, Name: jsonData.New/*temporary*/, Type:undefined/*temporary*/},
+					 			diff: that._diffContent
+							 });
+			}, errorCallback);
+		},
+		
+		provide: function(complexURL, onlyDiff, hasConflicts,callBack, errorCallBack) {
+			this.callBack = callBack;
+			this._hasConflicts = hasConflicts;
+			this._resolveComplexDiff(complexURL, onlyDiff, errorCallBack);
+		}
+	};
+	return GitDiffProvider;
+}());
+
+
 /*
 //Temporary.  This will evolve into something pluggable.
 exports.CompareSyntaxHighlighter = (function() {
@@ -344,6 +373,24 @@ exports.TwoWayCompareContainer = (function() {
 		
 		this.setOptions(options, true);
 		
+		var that = this;
+		this._callback = function(baseFileName, newFileName) {
+			if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
+				dojo.place(document.createTextNode(newFileName), that._uiFactory.getTitleDivId(true), "only");
+				dojo.place(document.createTextNode(baseFileName), that._uiFactory.getTitleDivId(false), "only");
+			}
+		};
+
+		this._errorCallback = function(errorResponse, ioArgs) {
+			if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
+				var message = typeof (errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
+				dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(true), "only");
+				dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(false), "only");
+				dojo.style(uiFactory.getTitleDivId(true), "color", "red");
+				dojo.style(uiFactory.getTitleDivId(false), "color", "red");
+			}
+		};
+		
 		this._leftEditorDivId = this._uiFactory.getEditorParentDivId(true);
 		this._rightEditorDivId = this._uiFactory.getEditorParentDivId(false);
 		
@@ -371,18 +418,31 @@ exports.TwoWayCompareContainer = (function() {
 			},
 			
 			setInput: function(fileURI, editor) {
-				that._fileClient.read(fileURI, true).then(
-					dojo.hitch(this, function(metadata) {
-						this._fileMetadata = metadata;
-						this.setTitle(metadata.Location);
-					}),
-					dojo.hitch(this, function(error) {
-						console.error("Error loading file metadata: " + error.message);
-						this.setTitle(fileURI);
-					})
-				);
+				if(this.onSetTitle){
+					this.onSetTitle(fileURI,
+							dojo.hitch(this, function(title) {
+								this.setTitle(title);
+							}),
+							dojo.hitch(this, function(error) {
+								console.error("Error loading file metadata: " + error.message);
+								this.setTitle(fileURI);
+							})
+					);
+				} else {
+					that._fileClient.read(fileURI, true).then(
+						dojo.hitch(this, function(metadata) {
+							this._fileMetadata = metadata;
+							this.setTitle(metadata.Location);
+						}),
+						dojo.hitch(this, function(error) {
+							console.error("Error loading file metadata: " + error.message);
+							this.setTitle(fileURI);
+						})
+					);
+				}
 				this.lastFilePath = fileURI;
 			},
+			
 			setTitle : function(title) {
 				var indexOfSlash = title.lastIndexOf("/");
 				var shortTitle = title;
@@ -395,7 +455,7 @@ exports.TwoWayCompareContainer = (function() {
 				this._lastTitle = shortTitle;
 				window.document.title = shortTitle;
 				var location = dojo.byId("location");
-				if (location) {
+				if (location && this._fileMetadata) {
 					dojo.empty(location);
 					new mBreadcrumbs.BreadCrumbs({container: "location", resource: this._fileMetadata});
 					if (title.charAt(0) === '*') {
@@ -408,6 +468,15 @@ exports.TwoWayCompareContainer = (function() {
 				that.startup(true);
 			}
 		};
+		
+		if(this._onSave){
+			this._inputManager.onSave = this._onSave;	
+		}
+		
+		if(this._onSetTitle){
+			this._inputManager.onSetTitle = this._onSetTitle;	
+		}
+		
 		this._compareMatchRenderer = new mRulers.CompareMatchRenderer(document.getElementById(this._uiFactory.getDiffCanvasDivId()));
 		this._highlighter = [];
 		this._highlighter.push( new exports.TwoWayCompareStyler(this._registry, this._compareMatchRenderer));//left side styler
@@ -638,7 +707,33 @@ exports.InlineCompareContainer = (function() {
 		this._registry = serviceRegistry;
 		this._commandService = this._registry.getService("orion.page.command");
 		this._fileClient = this._registry.getService("orion.core.file");
+		this._statusService = this._registry.getService("orion.page.message");
 		this.setOptions(options, true);
+
+		var that = this;
+		this._callback = function(baseFileName, newFileName) {
+			dojo.place(document.createTextNode(that._diffTitle), "fileNameInViewer", "only");
+			dojo.style("fileNameInViewer", "color", "#6d6d6d");
+			that._statusService.setProgressMessage("");
+			dojo.empty("rightContainerCommands");
+			that._commandService.renderCommands("rightContainerCommands", "dom", that, that, "tool");
+		};
+		
+		this._errorCallback = function(errorResponse, ioArgs) {
+			var display = [];
+			display.Severity = "Error";
+			display.HTML = false;
+			
+			try{
+				var resp = JSON.parse(errorResponse.responseText);
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+			}catch(Exception){
+				display.Message =  typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
+			}
+			
+			this._statusService.setProgressResult(display);
+			dojo.empty("rightContainerCommands");
+		};
 		
 		this._annotation = new mRulers.CompareAnnotation();
 		this._editorDivId = editorDivId;
@@ -780,6 +875,10 @@ exports.InlineCompareContainer = (function() {
 				textView.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
 			}
 		}
+	};
+	
+	InlineCompareContainer.prototype.setDiffTitle =  function(title){
+		this._diffTitle = title;
 	};
 	
 	InlineCompareContainer.prototype.setEditor = function(){
