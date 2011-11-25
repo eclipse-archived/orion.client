@@ -21,7 +21,6 @@
 
 /* Styles for the line number ruler */
 .rulerLines {
-	background-color: white;
 }
 .rulerLines.even
 .rulerLines.odd {

@@ -76,6 +76,7 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 		currentBracketType: "orion.annotation.currentBracket",
 		matchingBracketType: "orion.annotation.matchingBracket",
 		currentLineType: "orion.annotation.currentLine",
+		highlightErrorType: "orion.annotation.highlightError",
 		
 		/**
 		 * Returns the underlying <code>TextView</code> used by this editor. 
@@ -456,6 +457,7 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 				this._annotationStyler.addAnnotationType(this.matchingBracketType);
 				this._annotationStyler.addAnnotationType(this.currentBracketType);
 				this._annotationStyler.addAnnotationType(this.currentLineType);
+				this._annotationStyler.addAnnotationType(this.highlightErrorType);
 			}
 		},
 		
