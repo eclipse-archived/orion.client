@@ -33,6 +33,15 @@ window.onload = function() {
 				}
 			}
 		}
+		function isBogus() {
+			var bogus = ["Dangerous comment"], description = error.description;
+			for (var i=0; i < bogus.length; i++) {
+				if (description.indexOf(bogus[i]) !== -1) {
+					return true;
+				}
+			}
+			return false;
+		}
 		var warnings = [
 			["Expected '{'", "Statement body should be inside '{ }' braces."]
 		];
@@ -49,6 +58,7 @@ window.onload = function() {
 		// All problems are warnings by default
 		fixWith(warnings, "warning", true);
 		fixWith(errors, "error");
+		return isBogus(error) ? null : error;
 	}
 	
 	var validationService = {
@@ -74,8 +84,8 @@ window.onload = function() {
 							error.description = error.reason;
 							error.start = error.character;
 							error.end = end;
-							cleanup(error);
-							problems.push(error);
+							error = cleanup(error);
+							if (error) { problems.push(error); }
 						}
 					}
 				}
@@ -182,7 +192,7 @@ window.onload = function() {
 	
 	var provider = new eclipse.PluginProvider();
 	provider.registerServiceProvider("orion.edit.validator", validationService, {
-		pattern: "\\.js$"
+		pattern: "\\.(js|htm|html)$"
 	});
 	provider.registerServiceProvider("orion.edit.outliner", outlineService, {
 		pattern: "\\.(js|html)$",	// TODO separate out HTML outline
