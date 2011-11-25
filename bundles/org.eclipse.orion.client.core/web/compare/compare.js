@@ -45,22 +45,28 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/file
 				// Diff operations
 				var readOnly = isReadOnly();
 				var conflciting = isConflciting();
-				var twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(readOnly, conflciting, diffProvider, serviceRegistry, commandService, fileClient, uiFactory);
-				twoWayCompareContainer.resolveDiff(dojo.hash(), function(newFile, oldFile) {
-					handleTile(newFile, oldFile, uiFactory);
-				}, function(errorResponse, ioArgs) {
-					handleErrorTile(errorResponse, ioArgs, uiFactory);
-				});
 
-				// every time the user manually changes the hash, we need to
-				// load the diff
-				dojo.subscribe("/dojo/hashchange", twoWayCompareContainer, function() {
-					twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(readOnly, conflciting, diffProvider, serviceRegistry, commandService, fileClient, uiFactory);
-					twoWayCompareContainer.resolveDiff(dojo.hash(), function(newFile, oldFile) {
+				var options = {
+					readonly: readOnly,
+					hasConflicts: conflciting,
+					diffProvider: diffProvider,
+					complexURL: dojo.hash(),
+					callback: function(newFile, oldFile) {
 						handleTile(newFile, oldFile, uiFactory);
-					}, function(errorResponse, ioArgs) {
+					}, 
+					errorCallback: function(errorResponse, ioArgs) {
 						handleErrorTile(errorResponse, ioArgs, uiFactory);
-					});
+					}
+				};
+				
+				var twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(serviceRegistry, uiFactory, options);
+				twoWayCompareContainer.startup();
+
+				// every time the user manually changes the hash, we need to load the diff.
+				dojo.subscribe("/dojo/hashchange", twoWayCompareContainer, function() {
+					options.compoundURL = dojo.hash();
+					twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(serviceRegistry, uiFactory, options);
+					twoWayCompareContainer.startup();
 				});
 			});
 

@@ -636,14 +636,33 @@ orion.GitStatusController = (function() {
 		this._unstagedTableRenderer.contentRenderer = this._unstagedContentRenderer;
 		this._stagedContentRenderer = new orion.GitStatusContentRenderer({useCheckBox:true}, serviceRegistry ,this._stagedTableRenderer.getStatusContentId() , this);
 		this._stagedTableRenderer.contentRenderer = this._stagedContentRenderer;
-		this._inlineCompareContainer = new mCompareContainer.InlineCompareContainer(new mDiffProvider.DiffProvider(serviceRegistry),serviceRegistry ,"inline-compare-viewer");
-		var self = this;
-		self._staging = false;
-		self._stagingConflict = false;
+		
+		var diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
+		var that = this;
+		var options = {
+				readonly: true,
+				diffProvider: diffProvider,
+				callback: function(newFile, oldFile) {
+					dojo.place(document.createTextNode(that.diffViewTitle), "fileNameInViewer", "only");
+					dojo.style("fileNameInViewer", "color", "#6d6d6d");
+					that._statusService.setProgressMessage("");
+					dojo.empty("rightContainerCommands");
+					that._commandService.renderCommands("rightContainerCommands", "dom", that, that, "tool");
+				}, 
+				errorCallback: function(errorResponse, ioArgs) {
+					that.handleServerErrors(response , ioArgs);
+					dojo.empty("rightContainerCommands");
+				}
+			};
+			
+		
+		this._inlineCompareContainer = new mCompareContainer.InlineCompareContainer(serviceRegistry, "inline-compare-viewer", options);
+		that._staging = false;
+		that._stagingConflict = false;
 		this.startTimer();		
 		var commitBtn = document.getElementById("commit");
 		commitBtn.onclick = function(evt){
-			self.commit();
+			that.commit();
 		};
 	}
 	GitStatusController.prototype = {
@@ -1390,23 +1409,14 @@ orion.GitStatusController = (function() {
 			this._statusService.setProgressMessage("Loading diff...");
 			var self = this;
 			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) " : "local VS index ) " ;
-			var message = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS ;
+			this.diffViewTitle = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS ;
 			
-			//var diffURI = (this._model.isConflict(itemModel.type) ? itemModel.diffURI : itemModel.diffURI + "?conflict=true");
 			this._inlineCompareContainer.setConflicting(this._model.isConflict(itemModel.type));
-			this._inlineCompareContainer.resolveDiff(itemModel.diffURI,
-					                                function(newFile , OldFile){					
-														dojo.place(document.createTextNode(message), "fileNameInViewer", "only");
-														dojo.style("fileNameInViewer", "color", "#6d6d6d");
-														self._statusService.setProgressMessage("");
-														dojo.empty("rightContainerCommands");
-														self._commandService.renderCommands("rightContainerCommands", "dom", self, self, "tool");
-													},
-													function(response, ioArgs){
-														self.handleServerErrors(response , ioArgs);
-														dojo.empty("rightContainerCommands");
-													}
-			);
+			
+			this._inlineCompareContainer.setOptions({hasConflicts: this._model.isConflict(itemModel.type),
+													 complexURL: itemModel.diffURI});
+			
+			this._inlineCompareContainer.startup();
 		},
 		
 		openCompareEditor: function(itemModel){
