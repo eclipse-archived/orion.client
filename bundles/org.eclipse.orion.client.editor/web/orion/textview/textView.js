@@ -139,6 +139,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 	 * @property {Boolean} [sync=false] whether or not the view creation should be synchronous (if possible).
 	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces
 	 * @property {String|String[]} [stylesheet] one or more stylesheet URIs for the view.
+	 * @property {String} [themeClass] the CSS class for the view theming.
 	 * @property {Number} [options.tabSize] The number of spaces in a tab.
 	 */
 	/**
@@ -599,7 +600,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			} else if (arguments.length === 1) {
 				var arg = arguments[0];
 				if (typeof arg === "string") {
-					return this["_" + arg];
+					return this._clone(this["_" + arg]);
 				}
 				options = arg;
 			} else {
@@ -612,7 +613,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			}
 			for (var option in options) {
 				if (options.hasOwnProperty(option)) {
-					options[option] = this["_" + option];
+					options[option] = this._clone(this["_" + option]);
 				}
 			}
 			return options;
@@ -1409,7 +1410,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			for (option in options) {
 				if (options.hasOwnProperty(option)) {
 					var newValue = options[option], oldValue = this["_" + option];
-					if (oldValue === newValue) { continue; }
+					if (this._compare(oldValue, newValue)) { continue; }
 					changed = true;
 					if (!recreate) {
 						var update = defaultOptions[option].update;
@@ -1418,7 +1419,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 							continue;
 						}
 					}
-					this["_" + option] = newValue;
+					this["_" + option] = this._clone(newValue);
 				}
 			}
 			if (changed) {
@@ -3002,6 +3003,26 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			this._setSelection(selection, true);
 			return true;
 		},
+		_clone: function (obj) {
+			if (typeof obj === "object" && obj.slice) {
+				/*Note that this code is only works because of the limited of types used in TextViewOptions */
+				return obj.slice(0);
+			}
+			return obj;
+		},
+		_compare: function(obj1, obj2) {
+			if (obj1 === obj2) { return true; }
+			if (typeof obj1 === "object" && obj1.slice && typeof obj1 === typeof obj2) {
+				if (obj1.length !== obj2.length) { return false; }
+				for (var i = 0; i < obj1.length; i++) {
+					if (obj1[i] !== obj2[i]) {
+						return false;
+					}
+				}
+				return true;
+			}
+			return false;
+		},
 		_commitIME: function () {
 			if (this._imeOffset === -1) { return; }
 			// make the state of the IME match the state the view expects it be in
@@ -3545,7 +3566,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				return;
 			}
 			var body = frameDocument.body;
-			body.className = "viewContainer";
+			this._setThemeClass(this._themeClass, true);
 			body.style.margin = "0px";
 			body.style.borderWidth = "0px";
 			body.style.padding = "0px";
@@ -3675,8 +3696,9 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				readonly: {value: false, recreate: false, update: null},
 				fullSelection: {value: true, recreate: false, update: this._setFullSelection},
 				tabSize: {value: 8, recreate: false, update: this._setTabSize},
-				expandTab: {value: false, recraete: false, update: null},
-				stylesheet: {value: [], recraete: true, update: null},
+				expandTab: {value: false, recreate: false, update: null},
+				stylesheet: {value: [], recreate: true, update: null},
+				themeClass: {value: undefined, recreate: false, update: this._setThemeClass},
 				sync: {value: false, recreate: false, update: null}
 			};
 		},
@@ -5296,6 +5318,26 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				this._customTabSize = this._tabSize;
 				if (!init) {
 					this.redrawLines();
+				}
+			}
+		},
+		_setThemeClass: function (themeClass, init) {
+			this._themeClass = themeClass;
+			var document = this._frameDocument;
+			if (document) {
+				var viewContainerClass = "viewContainer";
+				if (this._themeClass) { viewContainerClass += " " + this._themeClass; }
+				document.body.className = viewContainerClass;
+				if (!init) {
+					if (isIE) {
+						document.body.style.lineHeight = "normal";
+					}
+					this._lineHeight = this._calculateLineHeight();
+					this._viewPadding = this._calculatePadding();
+					if (isIE) {
+						document.body.style.lineHeight = this._lineHeight + "px";
+					}
+					this.redraw();
 				}
 			}
 		},

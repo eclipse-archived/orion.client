@@ -1,0 +1,24 @@
+.orion {
+	background-coXXlor: #ffd400;
+	color: black;
+}
+
+.orion .viewContainer {
+	background-color: #ededed;
+}
+
+.orion .view {
+	background-color: #ffd400;
+}
+
+.orion .ruler {
+	background-color: #ededed;
+}
+
+.orion .line_caret {
+	background-color: #fcffca;
+}
+
+.orion .annotationLine.currentLine {
+	background-color: #fcffca;
+}

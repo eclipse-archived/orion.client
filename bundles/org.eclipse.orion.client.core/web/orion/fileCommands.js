@@ -608,8 +608,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			name : "Copy to",
 			tooltip: "Copy files and folders to a specified location",
 			id: "eclipse.copyFile",
-			choiceCallback: function(data) {
-				return makeMoveCopyTargetChoices(data.items, data.userData, true);
+			choiceCallback: function(items, userData) {
+				return makeMoveCopyTargetChoices(items, userData, true);
 			},
 			visibleWhen: oneOrMoreFilesOrFolders 
 		});
@@ -621,8 +621,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/widgets/NewIte
 			name : "Move to",
 			tooltip: "Move files and folders to a new location",
 			id: "eclipse.moveFile",
-			choiceCallback: function(data) {
-				return makeMoveCopyTargetChoices(data.items, data.userData, false);
+			choiceCallback: function(items, userData) {
+				return makeMoveCopyTargetChoices(items, userData, false);
 			},
 			visibleWhen: oneOrMoreFilesOrFolders
 			});
