@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['require', 'dojo', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/commands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'dijit/layout/ContentPane'], function(
-		require, dojo, mDiffProvider, mCompareContainer, mCommands, mGitCommitNavigator, mGitCommands) {
+define(['require', 'dojo',  'orion/compare/compare-container', 'orion/commands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'dijit/layout/ContentPane'], function(
+		require, dojo,  mCompareContainer, mCommands, mGitCommitNavigator, mGitCommands) {
 
 	var orion = orion || {};
 
@@ -637,22 +637,11 @@ orion.GitStatusController = (function() {
 		this._stagedContentRenderer = new orion.GitStatusContentRenderer({useCheckBox:true}, serviceRegistry ,this._stagedTableRenderer.getStatusContentId() , this);
 		this._stagedTableRenderer.contentRenderer = this._stagedContentRenderer;
 		
-		var diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
+		var diffProvider = new mCompareContainer.GitDiffProvider(serviceRegistry);
 		var that = this;
 		var options = {
 				readonly: true,
-				diffProvider: diffProvider,
-				callback: function(newFile, oldFile) {
-					dojo.place(document.createTextNode(that.diffViewTitle), "fileNameInViewer", "only");
-					dojo.style("fileNameInViewer", "color", "#6d6d6d");
-					that._statusService.setProgressMessage("");
-					dojo.empty("rightContainerCommands");
-					that._commandService.renderCommands("rightContainerCommands", "dom", that, that, "tool");
-				}, 
-				errorCallback: function(errorResponse, ioArgs) {
-					that.handleServerErrors(response , ioArgs);
-					dojo.empty("rightContainerCommands");
-				}
+				diffProvider: diffProvider
 			};
 			
 		
@@ -1409,7 +1398,7 @@ orion.GitStatusController = (function() {
 			this._statusService.setProgressMessage("Loading diff...");
 			var self = this;
 			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) " : "local VS index ) " ;
-			this.diffViewTitle = "Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS ;
+			this._inlineCompareContainer.setDiffTitle("Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS) ;
 			
 			this._inlineCompareContainer.setConflicting(this._model.isConflict(itemModel.type));
 			
