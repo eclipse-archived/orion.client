@@ -637,7 +637,7 @@ orion.GitStatusController = (function() {
 		this._stagedContentRenderer = new orion.GitStatusContentRenderer({useCheckBox:true}, serviceRegistry ,this._stagedTableRenderer.getStatusContentId() , this);
 		this._stagedTableRenderer.contentRenderer = this._stagedContentRenderer;
 		
-		var diffProvider = new mCompareContainer.GitDiffProvider(serviceRegistry);
+		var diffProvider = new mCompareContainer.DefaultDiffProvider(serviceRegistry);
 		var that = this;
 		var options = {
 				readonly: true,

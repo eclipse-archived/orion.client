@@ -60,6 +60,8 @@ exports.CompareContainer = (function() {
 				this._diffContent = options.diffContent ? options.diffContent : this._diffContent;
 				
 				this._onSave = options.onSave ? options.onSave : this._onSave;
+				this._callback = options.callback ? options.callback : this._callback;
+				this._errorCallback = options.errorCallback ? options.errorCallback : this._errorCallback;
 				this._onSetTitle = options.onSetTitle ? options.onSetTitle : this._onSetTitle;
 			}
 		},
@@ -76,8 +78,14 @@ exports.CompareContainer = (function() {
 			}
 			var that = this;
 			that._diffProvider.provide(that._complexURL, onsave, that._hasConflicts, function(diffParam){
-				that._baseFile.URL = (diffParam.baseFile && diffParam.baseFile.URL) ? diffParam.baseFile.URL : that._baseFile.URL;
-				that._newFile.URL = (diffParam.newFile && diffParam.newFile.URL) ? diffParam.newFile.URL : that._newFile.URL;
+				that._baseFile.URL = (diffParam.baseFile && typeof(diffParam.baseFile.URL) === "string") ? diffParam.baseFile.URL : that._baseFile.URL;
+				that._baseFile.Name = (diffParam.baseFile && typeof(diffParam.baseFile.Name) === "string") ? diffParam.baseFile.Name : that._baseFile.Name;
+				that._baseFile.Type = (diffParam.baseFile && typeof(diffParam.baseFile.Type) === "string") ? diffParam.baseFile.Type : that._baseFile.Type;
+				
+				that._newFile.URL = (diffParam.newFile && typeof(diffParam.newFile.URL) === "string") ? diffParam.newFile.URL : that._newFile.URL;
+				that._newFile.Name = (diffParam.baseFile && typeof(diffParam.newFile.Name) === "string") ? diffParam.baseFile.Name : that._newFile.Name;
+				that._newFile.Type = (diffParam.baseFile && typeof(diffParam.newFile.Type) === "string") ? diffParam.baseFile.Type : that._newFile.Type;
+				
 				that._diffContent = (diffParam.diff) ? diffParam.diff : that._diffContent;
 				if (onsave)
 					that.setEditor(onsave);
@@ -135,12 +143,12 @@ exports.CompareContainer = (function() {
 	return CompareContainer;
 }());
 
-exports.GitDiffProvider = (function() {
-	function GitDiffProvider(serviceRegistry){
+exports.DefaultDiffProvider = (function() {
+	function DefaultDiffProvider(serviceRegistry){
 		this.serviceRegistry = serviceRegistry;
 		this._diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
 	}	
-	GitDiffProvider.prototype = {
+	DefaultDiffProvider.prototype = {
 		_resolveComplexDiff: function(complexURL, onlyDiff, errorCallback) {
 			if(!this._diffProvider){
 				console.log("A diff provider is needed for compound diff URL");
@@ -166,8 +174,8 @@ exports.GitDiffProvider = (function() {
 		_resolveComplexFileURL: function(complexURL, errorCallback) {
 			var that = this;
 			this._diffProvider.getDiffFileURI(complexURL).then(function(jsonData, secondArg) {
-				that.callBack({ baseFile:{URL: jsonData.Old, Name: jsonData.Old/*temporary*/, Type:undefined/*temporary*/},
-					 			newFile:{URL: jsonData.New, Name: jsonData.New/*temporary*/, Type:undefined/*temporary*/},
+				that.callBack({ baseFile:{URL: jsonData.Old, Name: jsonData.Old.split("?")[0]/*temporary*/, Type:undefined/*temporary*/},
+					 			newFile:{URL: jsonData.New, Name: jsonData.New.split("?")[0]/*temporary*/, Type:undefined/*temporary*/},
 					 			diff: that._diffContent
 							 });
 			}, errorCallback);
@@ -179,7 +187,7 @@ exports.GitDiffProvider = (function() {
 			this._resolveComplexDiff(complexURL, onlyDiff, errorCallBack);
 		}
 	};
-	return GitDiffProvider;
+	return DefaultDiffProvider;
 }());
 
 
@@ -374,22 +382,26 @@ exports.TwoWayCompareContainer = (function() {
 		this.setOptions(options, true);
 		
 		var that = this;
-		this._callback = function(baseFileName, newFileName) {
-			if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
-				dojo.place(document.createTextNode(newFileName), that._uiFactory.getTitleDivId(true), "only");
-				dojo.place(document.createTextNode(baseFileName), that._uiFactory.getTitleDivId(false), "only");
-			}
-		};
+		if(!this._callback){
+			this._callback = function(baseFileName, newFileName) {
+				if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
+					dojo.place(document.createTextNode(newFileName), that._uiFactory.getTitleDivId(true), "only");
+					dojo.place(document.createTextNode(baseFileName), that._uiFactory.getTitleDivId(false), "only");
+				}
+			};
+		}
 
-		this._errorCallback = function(errorResponse, ioArgs) {
-			if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
-				var message = typeof (errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
-				dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(true), "only");
-				dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(false), "only");
-				dojo.style(uiFactory.getTitleDivId(true), "color", "red");
-				dojo.style(uiFactory.getTitleDivId(false), "color", "red");
-			}
-		};
+		if(!this._errorCallback){
+			this._errorCallback = function(errorResponse, ioArgs) {
+				if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
+					var message = typeof (errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
+					dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(true), "only");
+					dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(false), "only");
+					dojo.style(uiFactory.getTitleDivId(true), "color", "red");
+					dojo.style(uiFactory.getTitleDivId(false), "color", "red");
+				}
+			};
+		}
 		
 		this._leftEditorDivId = this._uiFactory.getEditorParentDivId(true);
 		this._rightEditorDivId = this._uiFactory.getEditorParentDivId(false);
@@ -711,29 +723,33 @@ exports.InlineCompareContainer = (function() {
 		this.setOptions(options, true);
 
 		var that = this;
-		this._callback = function(baseFileName, newFileName) {
-			dojo.place(document.createTextNode(that._diffTitle), "fileNameInViewer", "only");
-			dojo.style("fileNameInViewer", "color", "#6d6d6d");
-			that._statusService.setProgressMessage("");
-			dojo.empty("rightContainerCommands");
-			that._commandService.renderCommands("rightContainerCommands", "dom", that, that, "tool");
-		};
+		if(!this._callback){
+			this._callback = function(baseFileName, newFileName) {
+				dojo.place(document.createTextNode(that._diffTitle), "fileNameInViewer", "only");
+				dojo.style("fileNameInViewer", "color", "#6d6d6d");
+				that._statusService.setProgressMessage("");
+				dojo.empty("rightContainerCommands");
+				that._commandService.renderCommands("rightContainerCommands", "dom", that, that, "tool");
+			};
+		}
 		
-		this._errorCallback = function(errorResponse, ioArgs) {
-			var display = [];
-			display.Severity = "Error";
-			display.HTML = false;
-			
-			try{
-				var resp = JSON.parse(errorResponse.responseText);
-				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
-			}catch(Exception){
-				display.Message =  typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
-			}
-			
-			this._statusService.setProgressResult(display);
-			dojo.empty("rightContainerCommands");
-		};
+		if(!this._errorCallback){
+			this._errorCallback = function(errorResponse, ioArgs) {
+				var display = [];
+				display.Severity = "Error";
+				display.HTML = false;
+				
+				try{
+					var resp = JSON.parse(errorResponse.responseText);
+					display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+				}catch(Exception){
+					display.Message =  typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
+				}
+				
+				this._statusService.setProgressResult(display);
+				dojo.empty("rightContainerCommands");
+			};
+		}
 		
 		this._annotation = new mRulers.CompareAnnotation();
 		this._editorDivId = editorDivId;

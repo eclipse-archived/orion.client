@@ -45,7 +45,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/file
 				var readOnly = isReadOnly();
 				var conflciting = isConflciting();
 
-				var diffProvider = new mCompareContainer.GitDiffProvider(serviceRegistry);
+				var diffProvider = new mCompareContainer.DefaultDiffProvider(serviceRegistry);
 				var options = {
 					readonly: readOnly,
 					hasConflicts: conflciting,
