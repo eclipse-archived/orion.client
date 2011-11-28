@@ -81,17 +81,19 @@ exports.CompareContainer = (function() {
 				that._baseFile.URL = (diffParam.baseFile && typeof(diffParam.baseFile.URL) === "string") ? diffParam.baseFile.URL : that._baseFile.URL;
 				that._baseFile.Name = (diffParam.baseFile && typeof(diffParam.baseFile.Name) === "string") ? diffParam.baseFile.Name : that._baseFile.Name;
 				that._baseFile.Type = (diffParam.baseFile && typeof(diffParam.baseFile.Type) === "string") ? diffParam.baseFile.Type : that._baseFile.Type;
+				that._baseFile.Content = (diffParam.baseFile && typeof(diffParam.baseFile.Content) === "string") ? diffParam.baseFile.Content : that._baseFile.Content;
 				
 				that._newFile.URL = (diffParam.newFile && typeof(diffParam.newFile.URL) === "string") ? diffParam.newFile.URL : that._newFile.URL;
-				that._newFile.Name = (diffParam.baseFile && typeof(diffParam.newFile.Name) === "string") ? diffParam.baseFile.Name : that._newFile.Name;
-				that._newFile.Type = (diffParam.baseFile && typeof(diffParam.newFile.Type) === "string") ? diffParam.baseFile.Type : that._newFile.Type;
+				that._newFile.Name = (diffParam.newFile && typeof(diffParam.newFile.Name) === "string") ? diffParam.newFile.Name : that._newFile.Name;
+				that._newFile.Type = (diffParam.newFile && typeof(diffParam.newFile.Type) === "string") ? diffParam.newFile.Type : that._newFile.Type;
+				that._newFile.Content = (diffParam.newFile && typeof(diffParam.newFile.Content) === "string") ? diffParam.newFile.Content : that._newFile.Content;
 				
 				that._diffContent = (diffParam.diff) ? diffParam.diff : that._diffContent;
-				if (onsave)
+				if (onsave || that._baseFile.Content)
 					that.setEditor(onsave);
 				else{
 					if(that._callback)
-						that._callback(that._baseFile.URL, that._newFile.URL);
+						that._callback(that._baseFile.Name, that._newFile.Name);
 					that.getFileContent([that._baseFile], 0);
 				}
 			}, that._errorCallback);
@@ -170,12 +172,36 @@ exports.DefaultDiffProvider = (function() {
 				}
 			}, errorCallback);
 		},
-			
+		
+		//temporary
+		//TODO : get the file name from file service
+		_resolveFileName: function(fileURL){
+			var fileName = fileURL.split("?")[0];
+			/*
+			var indexOfSlash = fileName.lastIndexOf("/");
+			if (indexOfSlash !== -1) {
+				return fileName.substring(indexOfSlash + 1);
+			}
+			*/
+			return fileName;
+		},
+		
+		//temporary
+		//TODO : get the file type from file service
+		_resolveFileType: function(fileURL){
+			var fileName = this._resolveFileName(fileURL);
+			var splits = fileName.split(".");
+			if (splits.length > 0) {
+				return splits.pop().toLowerCase();
+			}
+			return "";
+		},
+		
 		_resolveComplexFileURL: function(complexURL, errorCallback) {
 			var that = this;
 			this._diffProvider.getDiffFileURI(complexURL).then(function(jsonData, secondArg) {
-				that.callBack({ baseFile:{URL: jsonData.Old, Name: jsonData.Old.split("?")[0]/*temporary*/, Type:undefined/*temporary*/},
-					 			newFile:{URL: jsonData.New, Name: jsonData.New.split("?")[0]/*temporary*/, Type:undefined/*temporary*/},
+				that.callBack({ baseFile:{URL: jsonData.Old, Name: that._resolveFileName(jsonData.Old), Type: that._resolveFileType(jsonData.Old)},
+					 			newFile:{URL: jsonData.New, Name: that._resolveFileName(jsonData.New), Type: that._resolveFileType(jsonData.New)},
 					 			diff: that._diffContent
 							 });
 			}, errorCallback);
@@ -268,32 +294,28 @@ exports.CompareSyntaxHighlighter = (function() {
 		this.styler = null;
 	}	
 	CompareSyntaxHighlighter.prototype = {
-			highlight: function(fileName, textView) {
+			highlight: function(fileName, fileType, textView) {
 				if (this.styler) {
 					this.styler.destroy();
 					this.styler = null;
 				}
-				if (fileName) {
-					var splits = fileName.split(".");
-					if (splits.length > 0) {
-						var extension = splits.pop().toLowerCase();
-						switch(extension) {
-							case "js":
-								this.styler = new mTextStyler.TextStyler(textView, "js");
-								break;
-							case "java":
-								this.styler = new mTextStyler.TextStyler(textView, "java");
-								break;
-							case "html":
-								//TODO
-								break;
-							case "xml":
-								//TODO
-								break;
-							case "css":
-								this.styler = new mTextStyler.TextStyler(textView, "css");
-								break;
-						}
+				if (fileName && fileType) {
+					switch(fileType) {
+						case "js":
+							this.styler = new mTextStyler.TextStyler(textView, "js");
+							break;
+						case "java":
+							this.styler = new mTextStyler.TextStyler(textView, "java");
+							break;
+						case "html":
+							//TODO
+							break;
+						case "xml":
+							//TODO
+							break;
+						case "css":
+							this.styler = new mTextStyler.TextStyler(textView, "css");
+							break;
 					}
 				}
 			}
@@ -361,8 +383,8 @@ exports.TwoWayCompareStyler = (function() {
 		this._diffHighlither = new exports.DiffStyler(compareMatchRenderer);
 	}	
 	TwoWayCompareStyler.prototype = {
-		highlight: function(fileName, editorWidget) {
-			this._syntaxHighlither.highlight(fileName, editorWidget);
+		highlight: function(fileName, fileType, editorWidget) {
+			this._syntaxHighlither.highlight(fileName, fileType, editorWidget);
 			this._diffHighlither.highlight(editorWidget);
 		}
 	};
@@ -497,11 +519,11 @@ exports.TwoWayCompareContainer = (function() {
 	}
 	TwoWayCompareContainer.prototype = new exports.CompareContainer();
 	
-	TwoWayCompareContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler , fileURILeft , fileURIRight){	
-		this._editorLeft = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this._readonly ,createLineStyler , fileURILeft);
+	TwoWayCompareContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler){	
+		this._editorLeft = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this._readonly ,createLineStyler , this._newFile);
 		mGlobalCommands.generateDomCommandsInBanner(this._commandService, this._editorLeft , "pageActions",true);
 		this._textViewLeft = this._editorLeft.getTextView();
-		this._editorRight = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , fileURIRight);
+		this._editorRight = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , this._baseFile);
 		this._textViewRight = this._editorRight.getTextView();
 		var that = this;
 		var overview  = new mRulers.TwoWayCompareOverviewRuler("right", {styleClass: "ruler_overview"} , that._compareMatchRenderer.getAnnotation(),
@@ -568,7 +590,7 @@ exports.TwoWayCompareContainer = (function() {
 		this._compareMatchRenderer.copyToLeft();
 	};
 	
-	TwoWayCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , statusDivId ,readOnly , createLineStyler , fileURI){
+	TwoWayCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , statusDivId ,readOnly , createLineStyler , fileObj){
 		var editorContainerDomNode = dojo.byId(parentDivId);
 		var that = this;
 		
@@ -637,10 +659,9 @@ exports.TwoWayCompareContainer = (function() {
 		}
 			
 		var textView = editor.getTextView();
-		if(createLineStyler && fileURI){
-			var fileName = fileURI.split("?")[0];
-			editor.setInput(fileName);
-			this._highlighter[columnIndex].highlight(fileName , editor);
+		if(createLineStyler && fileObj && typeof(fileObj.Name) === "string"  && typeof(fileObj.Type) === "string"){
+			editor.setInput(fileObj.Name);
+			this._highlighter[columnIndex].highlight(fileObj.Name , fileObj.Type, editor);
 		}
 			
 		textView.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
@@ -687,7 +708,7 @@ exports.TwoWayCompareContainer = (function() {
 		}
 		var that = this;
 		if(!this._editorLeft){
-			this.initEditorContainers(result.delim , output , input ,  result.mapper , true , this._newFile.URL , this._baseFile.URL);
+			this.initEditorContainers(result.delim , output , input ,  result.mapper , true);
 		} else if (onsave) {
 			this._textViewLeft.getModel().init(result.mapper);
 			this._textViewRight.getModel().init(result.mapper);
@@ -698,15 +719,13 @@ exports.TwoWayCompareContainer = (function() {
 			this._textViewLeft.getModel().init(result.mapper);
 			this._textViewRight.getModel().init(result.mapper);
 			
-			var fileNameR = this._baseFile.URL.split("?")[0];
-			this._editorRight.setInput(fileNameR, null, input);
-			this._highlighter[1].highlight(fileNameR , this._textViewRight);
+			this._editorRight.setInput(this._baseFile.Name, null, input);
+			this._highlighter[1].highlight(this._baseFile.Name, this._baseFile.Type, this._textViewRight);
 			
-			var fileNameL = this._newFile.URL.split("?")[0];
-			this._editorLeft.setInput(fileNameL, null, output);
-			this._highlighter[0].highlight(fileNameL , this._textViewLeft);
+			this._editorLeft.setInput(this._newFile.Name, null, output);
+			this._highlighter[0].highlight(this._newFile.Name, this._newFile.Type, this._textViewLeft);
 			if(!this._readonly)
-				this._inputManager.setInput(fileNameL , this._editorLeft);
+				this._inputManager.setInput(this._newFile.URL , this._editorLeft);
 		}
 		this._compareMatchRenderer.init(result.mapper ,this._textViewLeft , this._textViewRight);
 		this._compareMatchRenderer.matchPositionFromAnnotation(-1);
@@ -785,7 +804,7 @@ exports.InlineCompareContainer = (function() {
 		this.hasContent = false;
 	};
 
-	InlineCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , diffArray ,createLineStyler , fileURI){
+	InlineCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , diffArray ,createLineStyler , fileObj){
 		var editorContainerDomNode = dojo.byId(this._editorDivId);
 		var that = this;
 		
@@ -822,8 +841,8 @@ exports.InlineCompareContainer = (function() {
 		});
 				
 		editor.installTextView();
-		if(createLineStyler && fileURI)
-			editor.setInput(fileURI.split("?")[0]);
+		if(createLineStyler && fileObj)
+			editor.setInput(fileObj.Name);
 			
 		var textView = editor.getTextView();
 			
@@ -854,8 +873,8 @@ exports.InlineCompareContainer = (function() {
 		return editor;
 	};
 
-	InlineCompareContainer.prototype.initEditorContainers = function(delim , content , mapper, createLineStyler , fileURI){	
-		this._editor = this.createEditorContainer(content , delim , mapper, createLineStyler , fileURI);
+	InlineCompareContainer.prototype.initEditorContainers = function(delim , content , mapper, createLineStyler){	
+		this._editor = this.createEditorContainer(content , delim , mapper, createLineStyler , this._newFile);
 		this._textView = this._editor.getTextView();
 	};
 	
@@ -909,7 +928,7 @@ exports.InlineCompareContainer = (function() {
 		}
 		var that = this;
 		if(!this._textView){
-			this.initEditorContainers(result.delim , input ,  result.mapper , result.diffArray , true , this._newFile.URL);
+			this.initEditorContainers(result.delim , input ,  result.mapper , result.diffArray , true);
 		}else {
 			this.addRulers();
 			this._textView.getModel().init([],[]);
