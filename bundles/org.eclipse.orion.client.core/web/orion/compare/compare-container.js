@@ -28,8 +28,8 @@ exports.CompareContainer = (function() {
 			this._hasConflicts = undefined;
 			this._diffProvider = undefined;
 			this._complexURL = undefined;
-			this._baseFile = {};
-			this._newFile = {};
+			this._baseFile = {URL:"", Name:"", Type:""};
+			this._newFile = {URL:"", Name:"", Type:""};
 			
 			this._diffURL = undefined;
 			this._diffContent = undefined;
@@ -43,6 +43,9 @@ exports.CompareContainer = (function() {
 				this._clearOptions();
 			}
 			if(options){
+				//mapper is purely internal option
+				this._mapper = options.mapper ? options.mapper : this._mapper;
+				
 				this._readonly = (options.readonly !== undefined ||  options.readonly !== null) ? options.readonly : this._readonly;
 				this._hasConflicts = (options.hasConflicts !== undefined ||  options.hasConflicts !== null) ? options.hasConflicts : this._hasConflicts;
 				this._diffProvider = options.diffProvider ? options.diffProvider : this._diffProvider;
@@ -89,7 +92,7 @@ exports.CompareContainer = (function() {
 				that._newFile.Content = (diffParam.newFile && typeof(diffParam.newFile.Content) === "string") ? diffParam.newFile.Content : that._newFile.Content;
 				
 				that._diffContent = (diffParam.diff) ? diffParam.diff : that._diffContent;
-				if (onsave || that._baseFile.Content)
+				if (onsave || typeof(that._baseFile.Content) === "string")
 					that.setEditor(onsave);
 				else{
 					if(that._callback)
@@ -97,6 +100,18 @@ exports.CompareContainer = (function() {
 					that.getFileContent([that._baseFile], 0);
 				}
 			}, that._errorCallback);
+		},
+		
+		resolveDiffByContents: function(onsave) {
+			if (typeof(this._baseFile.Content) === "string" && typeof(this._newFile.Content) === "string"){
+				if(!this._diffContent && !this._mapper){
+					this._diffContent = "";//SomeDiffEngine.createPatch(this._baseFile.Name, this._baseFile.Content, this._newFile.Content, "", "") ;
+				}
+				this.setEditor(onsave);
+				return true;
+			} else {
+				return false;
+			}
 		},
 		
 		getFileContent: function(files, currentIndex) {
@@ -128,6 +143,10 @@ exports.CompareContainer = (function() {
 		
 		parseMapper: function(input, output, diff , detectConflicts ,doNotBuildNewFile){
 			var delim = this._getLineDelim(input , diff);
+			if(this._mapper){
+				return {delim:delim , mapper:this._mapper, output: output, diffArray:output};
+			}
+			
 			this._diffParser.setLineDelim(delim);
 			var result = this._diffParser.parse(input, diff, detectConflicts ,doNotBuildNewFile);
 			
@@ -138,7 +157,9 @@ exports.CompareContainer = (function() {
 		
 		startup: function(onsave){
 			if(this._complexURL){
-				this.resolveComplexDiff();
+				this.resolveComplexDiff(onsave);
+			} else if(!this.resolveDiffByContents(onsave)){
+				//resolve from mapper
 			}
 		}
 	};
@@ -217,81 +238,11 @@ exports.DefaultDiffProvider = (function() {
 }());
 
 
-/*
-//Temporary.  This will evolve into something pluggable.
 exports.CompareSyntaxHighlighter = (function() {
 	function CompareSyntaxHighlighter(serviceRegistry){
 		this.styler = null;
 		this.syntaxHighlightProviders = serviceRegistry.getServiceReferences("orion.edit.highlighter");
 		this.serviceRegistry = serviceRegistry;
-	}	
-	CompareSyntaxHighlighter.prototype = {
-			highlight: function(fileName, editor) {
-				if (this.styler) {
-					if (this.styler.destroy) {
-						this.styler.destroy();
-					}
-					this.styler = null;
-				}
-				if (fileName) {
-					var textView = editor.getTextView();
-					var splits = fileName.split(".");
-					var extension = splits.pop().toLowerCase();
-					if (splits.length > 0) {
-						var annotationModel = editor.getAnnotationModel();
-						switch(extension) {
-							case "js":
-							case "json":
-								this.styler = new mTextStyler.TextStyler(textView, "js", annotationModel);
-								break;
-							case "java":
-								this.styler = new mTextStyler.TextStyler(textView, "java", annotationModel);
-								break;
-							case "css":
-								this.styler = new mTextStyler.TextStyler(textView, "css", annotationModel);
-								break;
-						}
-						
-						if (this.styler) {
-							editor.setFoldingEnabled(this.styler.foldingEnabled);
-						}
-						
-						if (!this.styler && this.syntaxHighlightProviders) {
-							var grammars = [],
-							    providerToUse;
-							for (var i=0; i < this.syntaxHighlightProviders.length; i++) {
-								var provider = this.syntaxHighlightProviders[i],
-								    fileTypes = provider.getProperty("fileTypes");
-								if (provider.getProperty("type") === "grammar") {
-									grammars.push(provider.getProperty("grammar"));
-								}
-								if (fileTypes && fileTypes.indexOf(extension) !== -1) {
-									providerToUse = provider;
-								}
-							}
-							
-							if (providerToUse) {
-								var providerType = providerToUse.getProperty("type");
-								if (providerType === "highlighter") {
-									var service = this.serviceRegistry.getService(providerToUse);
-									service.setExtension(extension);
-									this.styler = new mAsyncStyler.AsyncStyler(textView, service);
-								} else if (providerType === "grammar" || typeof providerType === "undefined") {
-									var grammar = providerToUse.getProperty("grammar");
-									this.styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
-								}
-							}
-						}
-					}
-				}
-			}
-	};
-	return CompareSyntaxHighlighter;
-}());
-*/
-exports.CompareSyntaxHighlighter = (function() {
-	function CompareSyntaxHighlighter(){
-		this.styler = null;
 	}	
 	CompareSyntaxHighlighter.prototype = {
 			highlight: function(fileName, fileType, textView) {
@@ -698,7 +649,7 @@ exports.TwoWayCompareContainer = (function() {
 		var input = this._baseFile.Content;
 		var output = this._newFile.Content;
 		var diff = this._diffContent;
-	
+		
 		var result;
 		if(output) {
 			result = this.parseMapper(input , output, diff , this._hasConflicts, true);
