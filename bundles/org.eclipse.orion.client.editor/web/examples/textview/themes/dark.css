@@ -17,11 +17,11 @@
 }
 
 .dark .line_caret {
-	background-color: gray;
+	background-color: #fefefe;
 }
 
 .dark .annotationLine.currentLine {
-	background-color: gray;
+	background-color: #fefefe;
 }
 
 .dark .annotationRange.task {
