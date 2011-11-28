@@ -60,6 +60,8 @@ exports.CompareContainer = (function() {
 				this._diffContent = options.diffContent ? options.diffContent : this._diffContent;
 				
 				this._onSave = options.onSave ? options.onSave : this._onSave;
+				this._callback = options.callback ? options.callback : this._callback;
+				this._errorCallback = options.errorCallback ? options.errorCallback : this._errorCallback;
 				this._onSetTitle = options.onSetTitle ? options.onSetTitle : this._onSetTitle;
 			}
 		},
@@ -380,22 +382,26 @@ exports.TwoWayCompareContainer = (function() {
 		this.setOptions(options, true);
 		
 		var that = this;
-		this._callback = function(baseFileName, newFileName) {
-			if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
-				dojo.place(document.createTextNode(newFileName), that._uiFactory.getTitleDivId(true), "only");
-				dojo.place(document.createTextNode(baseFileName), that._uiFactory.getTitleDivId(false), "only");
-			}
-		};
+		if(!this._callback){
+			this._callback = function(baseFileName, newFileName) {
+				if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
+					dojo.place(document.createTextNode(newFileName), that._uiFactory.getTitleDivId(true), "only");
+					dojo.place(document.createTextNode(baseFileName), that._uiFactory.getTitleDivId(false), "only");
+				}
+			};
+		}
 
-		this._errorCallback = function(errorResponse, ioArgs) {
-			if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
-				var message = typeof (errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
-				dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(true), "only");
-				dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(false), "only");
-				dojo.style(uiFactory.getTitleDivId(true), "color", "red");
-				dojo.style(uiFactory.getTitleDivId(false), "color", "red");
-			}
-		};
+		if(!this._errorCallback){
+			this._errorCallback = function(errorResponse, ioArgs) {
+				if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
+					var message = typeof (errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
+					dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(true), "only");
+					dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(false), "only");
+					dojo.style(uiFactory.getTitleDivId(true), "color", "red");
+					dojo.style(uiFactory.getTitleDivId(false), "color", "red");
+				}
+			};
+		}
 		
 		this._leftEditorDivId = this._uiFactory.getEditorParentDivId(true);
 		this._rightEditorDivId = this._uiFactory.getEditorParentDivId(false);
@@ -717,29 +723,33 @@ exports.InlineCompareContainer = (function() {
 		this.setOptions(options, true);
 
 		var that = this;
-		this._callback = function(baseFileName, newFileName) {
-			dojo.place(document.createTextNode(that._diffTitle), "fileNameInViewer", "only");
-			dojo.style("fileNameInViewer", "color", "#6d6d6d");
-			that._statusService.setProgressMessage("");
-			dojo.empty("rightContainerCommands");
-			that._commandService.renderCommands("rightContainerCommands", "dom", that, that, "tool");
-		};
+		if(!this._callback){
+			this._callback = function(baseFileName, newFileName) {
+				dojo.place(document.createTextNode(that._diffTitle), "fileNameInViewer", "only");
+				dojo.style("fileNameInViewer", "color", "#6d6d6d");
+				that._statusService.setProgressMessage("");
+				dojo.empty("rightContainerCommands");
+				that._commandService.renderCommands("rightContainerCommands", "dom", that, that, "tool");
+			};
+		}
 		
-		this._errorCallback = function(errorResponse, ioArgs) {
-			var display = [];
-			display.Severity = "Error";
-			display.HTML = false;
-			
-			try{
-				var resp = JSON.parse(errorResponse.responseText);
-				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
-			}catch(Exception){
-				display.Message =  typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
-			}
-			
-			this._statusService.setProgressResult(display);
-			dojo.empty("rightContainerCommands");
-		};
+		if(!this._errorCallback){
+			this._errorCallback = function(errorResponse, ioArgs) {
+				var display = [];
+				display.Severity = "Error";
+				display.HTML = false;
+				
+				try{
+					var resp = JSON.parse(errorResponse.responseText);
+					display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+				}catch(Exception){
+					display.Message =  typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
+				}
+				
+				this._statusService.setProgressResult(display);
+				dojo.empty("rightContainerCommands");
+			};
+		}
 		
 		this._annotation = new mRulers.CompareAnnotation();
 		this._editorDivId = editorDivId;
