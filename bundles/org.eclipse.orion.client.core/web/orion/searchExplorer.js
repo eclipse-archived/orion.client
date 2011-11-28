@@ -276,7 +276,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				for(var j = parentIndex - 1; j > -1; j--){
 					var parentNode = {parent: parent, children: [], type: "dir", name: parents[j].Name, location: parents[j].Location};
 					parent.children.push(parentNode);
-					mUtil.processSearchResultParent(parent);
 					this.modelLocHash[parents[j].Location] = parentNode;
 					parent = parentNode;
 				}
@@ -289,7 +288,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			childNode.fullPathName = fullPath.name;
 			this.modelLocHash[childNode.location] = childNode;
 			parent.children.push(childNode);
-			mUtil.processSearchResultParent(parent);
 		}
 		
 		this.prepareFileItems();

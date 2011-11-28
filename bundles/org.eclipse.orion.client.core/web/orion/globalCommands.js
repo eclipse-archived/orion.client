@@ -210,7 +210,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	// BEGIN TOP BANNER FRAGMENT
 	var topHTMLFragment =
 	// a table?!!?  Yes, you can't mix CSS float right and absolutes to pin the bottom.
-	'<table style="margin: 0; padding: 0; border-collapse: collapse; width: 100%;">' +
+	'<table id="banner" style="margin: 0; padding: 0; border-collapse: collapse; width: 100%;">' +
 	// Row 1:  Logo + page title + primary nav links
 		'<tr class="topRowBanner" id="bannerRow1">' +
 			'<td rowspan=3 style="padding-top: 12px; padding-bottom: 12px; padding-left: 8px; width: 148px"><a id="home" href="' + require.toUrl("index.html") + '"><span class="imageSprite core-sprite-orion toolbarLabel" alt="Orion Logo" align="top"></a></td>' +
@@ -412,7 +412,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		dojo.place(topHTMLFragment, parent, "only");
 		
 		// place an empty div for keyAssist
-		dojo.place('<div id="keyAssist" class="keyAssistFloat"></div>', document.body, "last");
+		dojo.place('<div id="keyAssist" style="display: none"; class="keyAssistFloat"></div>', document.body, "last");
 		
 		// generate primary nav links. 
 		var primaryNav = dojo.byId("primaryNav");
@@ -494,6 +494,35 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				});
 		}
 		
+		// Toggle trim command
+		var toggleBanner = new mCommands.Command({
+			name: "Toggle banner and footer",
+			tooltip: "Hide or show the page banner and footer",
+			id: "orion.toggleTrim",
+			callback: function() {
+				var layoutWidget = dijit.byId(parent.parentNode.id);
+				if (layoutWidget) {
+					var header = parent;
+					var footer = dojo.byId("footer");
+					if (header.style.display === "none") {
+						header.style.display = "block";
+						footer.style.display = "block";
+					} else {
+						header.style.display = "none";
+						footer.style.display = "none";
+					}
+					layoutWidget.layout();
+				}
+				return true;
+			}});
+		commandService.addCommand(toggleBanner, "global");
+		commandService.registerCommandContribution("orion.toggleTrim", 1, "globalActions", null, true, new mCommands.CommandKeyBinding("m", true, true));
+		
+		if (editor) {
+			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('m', true, true), "Toggle Trim");
+			editor.getTextView().setAction("Toggle Trim", toggleBanner.callback);
+		}
+		
 		// We are using 't' for the non-editor binding because of git-hub's use of t for similar function
 		commandService.addCommand(openResourceCommand, "global");
 		commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions", null, true, new mCommands.CommandKeyBinding('t'));
@@ -504,6 +533,17 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				keyAssistNode.style.display = "none";
 			}
 		}));
+		dojo.connect(document, "onclick", dojo.hitch(this, function(e) {
+			var clickNode =  e.target || e.originalTarget || e.srcElement; 
+			if (clickNode && clickNode.id !== "keyAssist") {
+				keyAssistNode.style.display = "none";
+			}
+		}));
+		if (editor) {
+			editor.getTextView().addEventListener("MouseDown", function() {
+				keyAssistNode.style.display = "none";
+			});
+		}
 		
 		if (escapeProvider) {
 			var keyAssistEscHandler = {
@@ -527,21 +567,25 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			tooltip: "Show a list of all the keybindings on this page",
 			id: "eclipse.keyAssist",
 			callback: function() {
-				dojo.empty(keyAssistNode);
-				if (editor) {
-					dojo.place("<h2>Editor</h2>", keyAssistNode, "last");
-					var editorActions = editor.getTextView().getActions(false);
-					for(var i=0; i<editorActions.length; i++) {
-						var actionName = editorActions[i];
-						var bindings = editor.getTextView().getKeyBindings(actionName);
-						for (var j=0; j<bindings.length; j++) {
-							dojo.place("<span>"+mUtil.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last");
+				if (keyAssistNode.style.display === "none") {
+					dojo.empty(keyAssistNode);
+					if (editor) {
+						dojo.place("<h2>Editor</h2>", keyAssistNode, "last");
+						var editorActions = editor.getTextView().getActions(false);
+						for(var i=0; i<editorActions.length; i++) {
+							var actionName = editorActions[i];
+							var bindings = editor.getTextView().getKeyBindings(actionName);
+							for (var j=0; j<bindings.length; j++) {
+								dojo.place("<span>"+mUtil.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last");
+							}
 						}
 					}
+					dojo.place("<h2>Global</h2>", keyAssistNode, "last");
+					commandService.showKeyBindings(keyAssistNode);
+					keyAssistNode.style.display = "block";
+				} else {
+					keyAssistNode.style.display = "none";
 				}
-				dojo.place("<h2>Global</h2>", keyAssistNode, "last");
-				commandService.showKeyBindings(keyAssistNode);
-				keyAssistNode.style.display = "block";
 				return true;
 			}});
 		commandService.addCommand(keyAssistCommand, "global");
