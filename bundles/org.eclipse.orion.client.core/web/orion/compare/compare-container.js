@@ -76,8 +76,14 @@ exports.CompareContainer = (function() {
 			}
 			var that = this;
 			that._diffProvider.provide(that._complexURL, onsave, that._hasConflicts, function(diffParam){
-				that._baseFile.URL = (diffParam.baseFile && diffParam.baseFile.URL) ? diffParam.baseFile.URL : that._baseFile.URL;
-				that._newFile.URL = (diffParam.newFile && diffParam.newFile.URL) ? diffParam.newFile.URL : that._newFile.URL;
+				that._baseFile.URL = (diffParam.baseFile && typeof(diffParam.baseFile.URL) === "string") ? diffParam.baseFile.URL : that._baseFile.URL;
+				that._baseFile.Name = (diffParam.baseFile && typeof(diffParam.baseFile.Name) === "string") ? diffParam.baseFile.Name : that._baseFile.Name;
+				that._baseFile.Type = (diffParam.baseFile && typeof(diffParam.baseFile.Type) === "string") ? diffParam.baseFile.Type : that._baseFile.Type;
+				
+				that._newFile.URL = (diffParam.newFile && typeof(diffParam.newFile.URL) === "string") ? diffParam.newFile.URL : that._newFile.URL;
+				that._newFile.Name = (diffParam.baseFile && typeof(diffParam.newFile.Name) === "string") ? diffParam.baseFile.Name : that._newFile.Name;
+				that._newFile.Type = (diffParam.baseFile && typeof(diffParam.newFile.Type) === "string") ? diffParam.baseFile.Type : that._newFile.Type;
+				
 				that._diffContent = (diffParam.diff) ? diffParam.diff : that._diffContent;
 				if (onsave)
 					that.setEditor(onsave);
@@ -135,12 +141,12 @@ exports.CompareContainer = (function() {
 	return CompareContainer;
 }());
 
-exports.GitDiffProvider = (function() {
-	function GitDiffProvider(serviceRegistry){
+exports.DefaultDiffProvider = (function() {
+	function DefaultDiffProvider(serviceRegistry){
 		this.serviceRegistry = serviceRegistry;
 		this._diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
 	}	
-	GitDiffProvider.prototype = {
+	DefaultDiffProvider.prototype = {
 		_resolveComplexDiff: function(complexURL, onlyDiff, errorCallback) {
 			if(!this._diffProvider){
 				console.log("A diff provider is needed for compound diff URL");
@@ -166,8 +172,8 @@ exports.GitDiffProvider = (function() {
 		_resolveComplexFileURL: function(complexURL, errorCallback) {
 			var that = this;
 			this._diffProvider.getDiffFileURI(complexURL).then(function(jsonData, secondArg) {
-				that.callBack({ baseFile:{URL: jsonData.Old, Name: jsonData.Old/*temporary*/, Type:undefined/*temporary*/},
-					 			newFile:{URL: jsonData.New, Name: jsonData.New/*temporary*/, Type:undefined/*temporary*/},
+				that.callBack({ baseFile:{URL: jsonData.Old, Name: jsonData.Old.split("?")[0]/*temporary*/, Type:undefined/*temporary*/},
+					 			newFile:{URL: jsonData.New, Name: jsonData.New.split("?")[0]/*temporary*/, Type:undefined/*temporary*/},
 					 			diff: that._diffContent
 							 });
 			}, errorCallback);
@@ -179,7 +185,7 @@ exports.GitDiffProvider = (function() {
 			this._resolveComplexDiff(complexURL, onlyDiff, errorCallBack);
 		}
 	};
-	return GitDiffProvider;
+	return DefaultDiffProvider;
 }());
 
 
