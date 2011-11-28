@@ -87,6 +87,42 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 	tests.testSelectLineUp = function () {
 		return doAction("selectLineUp", 300);
 	};
+	
+	tests.testCaretUpDown = function () {
+//		var d = new dojo.Deferred();
+		var buffer = "", i;
+		for (i = 0; i < 256;i++) {
+			buffer += "var id; function() {return 30;} var foo; ";
+		}
+		buffer += "\n";
+		for (i = 0; i < 256;i++) {
+			buffer += "var id; function() {return 30;} var foo; ";
+		}
+
+		var max = 50;
+		var view = setupView(buffer, "js");
+		var start = new Date().getTime();
+		var caretLine = 0;
+		function t() {
+			if (caretLine === 0) {
+				view.invokeAction("lineDown");
+				caretLine = 1;
+			} else {
+				view.invokeAction("lineUp");
+				caretLine = 0;
+			}
+			if (--max > 0) {			
+				setTimeout(t, 0);
+			} else {
+				log ("time(CaretUpDown)=", (new Date().getTime() - start));
+//				d.resolve(true);
+			}
+		}
+		view.focus();
+		t();
+//		return d;
+	};
+	
 	tests.testScrollLeft = function () {
 //		var d = new dojo.Deferred();
 		var buffer = "";
