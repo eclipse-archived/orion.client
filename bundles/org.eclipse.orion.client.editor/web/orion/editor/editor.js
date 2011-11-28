@@ -525,12 +525,14 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 			// Set keybindings for keys that apply to different modes
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(27), "Cancel Current Mode");
 			textView.setAction("Cancel Current Mode", function() {
+				// loop through all modes in case multiple modes are active.  Keep track of whether we processed the key.
+				var keyUsed = false;
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
-						return this._keyModes[i].cancel();
+						keyUsed = this._keyModes[i].cancel() || keyUsed;
 					}
 				}
-				return false;
+				return keyUsed;
 			}.bind(this));
 
 			textView.setAction("lineUp", function() {

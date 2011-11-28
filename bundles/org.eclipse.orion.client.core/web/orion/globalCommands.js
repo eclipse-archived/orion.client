@@ -412,7 +412,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		dojo.place(topHTMLFragment, parent, "only");
 		
 		// place an empty div for keyAssist
-		dojo.place('<div id="keyAssist" class="keyAssistFloat"></div>', document.body, "last");
+		dojo.place('<div id="keyAssist" style="display: none"; class="keyAssistFloat"></div>', document.body, "last");
 		
 		// generate primary nav links. 
 		var primaryNav = dojo.byId("primaryNav");
@@ -504,6 +504,17 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				keyAssistNode.style.display = "none";
 			}
 		}));
+		dojo.connect(document, "onclick", dojo.hitch(this, function(e) {
+			var clickNode =  e.target || e.originalTarget || e.srcElement; 
+			if (clickNode && clickNode.id !== "keyAssist") {
+				keyAssistNode.style.display = "none";
+			}
+		}));
+		if (editor) {
+			editor.getTextView().addEventListener("MouseDown", function() {
+				keyAssistNode.style.display = "none";
+			});
+		}
 		
 		if (escapeProvider) {
 			var keyAssistEscHandler = {
@@ -527,21 +538,25 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			tooltip: "Show a list of all the keybindings on this page",
 			id: "eclipse.keyAssist",
 			callback: function() {
-				dojo.empty(keyAssistNode);
-				if (editor) {
-					dojo.place("<h2>Editor</h2>", keyAssistNode, "last");
-					var editorActions = editor.getTextView().getActions(false);
-					for(var i=0; i<editorActions.length; i++) {
-						var actionName = editorActions[i];
-						var bindings = editor.getTextView().getKeyBindings(actionName);
-						for (var j=0; j<bindings.length; j++) {
-							dojo.place("<span>"+mUtil.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last");
+				if (keyAssistNode.style.display === "none") {
+					dojo.empty(keyAssistNode);
+					if (editor) {
+						dojo.place("<h2>Editor</h2>", keyAssistNode, "last");
+						var editorActions = editor.getTextView().getActions(false);
+						for(var i=0; i<editorActions.length; i++) {
+							var actionName = editorActions[i];
+							var bindings = editor.getTextView().getKeyBindings(actionName);
+							for (var j=0; j<bindings.length; j++) {
+								dojo.place("<span>"+mUtil.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last");
+							}
 						}
 					}
+					dojo.place("<h2>Global</h2>", keyAssistNode, "last");
+					commandService.showKeyBindings(keyAssistNode);
+					keyAssistNode.style.display = "block";
+				} else {
+					keyAssistNode.style.display = "none";
 				}
-				dojo.place("<h2>Global</h2>", keyAssistNode, "last");
-				commandService.showKeyBindings(keyAssistNode);
-				keyAssistNode.style.display = "block";
 				return true;
 			}});
 		commandService.addCommand(keyAssistCommand, "global");
