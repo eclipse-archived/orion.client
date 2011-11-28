@@ -430,6 +430,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var editor = new mEditor.Editor({
 		textViewFactory: textViewFactory,
 		undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandService, "pageActions"),
+		textDNDFactory: new mEditorFeatures.TextDNDFactory(),
 		annotationFactory: annotationFactory,
 		foldingRulerFactory: new mEditorFeatures.FoldingRulerFactory(),
 		lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),

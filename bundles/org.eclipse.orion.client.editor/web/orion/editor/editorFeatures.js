@@ -12,8 +12,8 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define(['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations'],
-function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
+define(['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations', 'orion/textview/textDND'],
+function(mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND) {
 
 	function UndoFactory() {
 	}
@@ -66,6 +66,14 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
 			var annotationRuler = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotations"});
 			var overviewRuler = new mRulers.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"});
 			return {annotationRuler: annotationRuler, overviewRuler: overviewRuler};
+		}
+	};
+	
+	function TextDNDFactory() {
+	}
+	TextDNDFactory.prototype = {
+		createTextDND: function(editor, undoStack) {
+			return new mTextDND.TextDND(editor.getTextView(), undoStack);
 		}
 	};
 
@@ -662,8 +670,6 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
 				var model = editor.getModel();
 				var selection = editor.getSelection();
 				var open = "/*", close = "*/", commentTags = new RegExp("/\\*" + "|" + "\\*/", "g");
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end);
 				
 				var result = findEnclosingComment(model, selection.start, selection.end);
 				if (result.commentStart !== undefined && result.commentEnd !== undefined) {
@@ -688,8 +694,6 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
 				var model = editor.getModel();
 				var selection = editor.getSelection();
 				var open = "/*", close = "*/";
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end);
 				
 				// Try to shrink selection to a comment block
 				var selectedText = model.getText(selection.start, selection.end);
@@ -952,6 +956,7 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations) {
 		LineNumberRulerFactory: LineNumberRulerFactory,
 		FoldingRulerFactory: FoldingRulerFactory,
 		AnnotationFactory: AnnotationFactory,
+		TextDNDFactory: TextDNDFactory,
 		TextActions: TextActions,
 		SourceCodeActions: SourceCodeActions,
 		LinkedMode: LinkedMode
