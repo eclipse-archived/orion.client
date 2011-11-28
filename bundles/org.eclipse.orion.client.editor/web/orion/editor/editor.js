@@ -43,6 +43,7 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 	 * @param {Object} options.syntaxHighlightProviders
 	 * @param {Object} options.textViewFactory
 	 * @param {Object} options.undoStackFactory
+	 * @param {Object} options.textDNDFactory
 	 *
 	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
 	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
@@ -51,6 +52,7 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 	function Editor(options) {
 		this._textViewFactory = options.textViewFactory;
 		this._undoStackFactory = options.undoStackFactory;
+		this._textDNDFactory = options.textDNDFactory;
 		this._annotationFactory = options.annotationFactory;
 		this._foldingRulerFactory = options.foldingRulerFactory;
 		this._lineNumberRulerFactory = options.lineNumberRulerFactory;
@@ -470,6 +472,9 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 			if (this._undoStackFactory) {
 				this._undoStack = this._undoStackFactory.createUndoStack(this);
 			}
+			if (this._textDNDFactory) {
+				this._textDND = this._textDNDFactory.createTextDND(this, this._undoStack);
+			}
 			if (this._contentAssistFactory) {
 				this._contentAssist = this._contentAssistFactory(this);
 				this._keyModes.push(this._contentAssist);
@@ -817,8 +822,7 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 				    start = this.options.curve[0],
 				    end = this.options.curve[1],
 				    range = (end - start);
-				var i = 0,
-				    propertyValue,
+				var propertyValue,
 				    interval,
 				    startedAt = -1;
 				
