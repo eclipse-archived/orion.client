@@ -469,7 +469,7 @@ var exports = {};
 			hrefCallback : function(data) {
 				var item = data.items;
 				var clientDeferred = new dojo.Deferred();
-				serviceRegistry.getService("orion.git.provider").getDiff(item[0].DiffLocation, item[1].Name, function(jsonData, secondArg) {
+				serviceRegistry.getService("orion.git.provider").getDiff(item[1].DiffLocation, item[0].Name, function(jsonData, secondArg) {
 					clientDeferred.callback(require.toUrl("compare/compare.html") + "?readonly#" + secondArg.xhr.getResponseHeader("Location"));
 				});
 
