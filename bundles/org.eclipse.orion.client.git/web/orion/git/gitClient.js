@@ -84,11 +84,9 @@ eclipse.GitService = (function() {
 			});
 			
 		},
-		
 		initGitRepository : function(targetLocation){
 			console.error("Not implemented yet");
 		},
-		
 		removeGitRepository : function(repositoryLocation){
 			return dojo.xhrDelete({
 				url : repositoryLocation,
@@ -107,7 +105,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		
 		getDiffContent: function(diffURI , onLoad , onError){
 			var service = this;
 			dojo.xhrGet({
@@ -138,7 +135,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		
 		getDiffFileURI: function(diffURI , onLoad , onError){
 			dojo.xhrGet({
 				url: diffURI , 
@@ -168,7 +164,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		
 		getGitStatus: function(url , onLoad , onError){
 			dojo.xhrGet({
 				url: url , 
@@ -197,7 +192,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		
 		stage: function(location , onLoad , onError){
 			return dojo.xhrPut({
 				url: location , 
@@ -223,7 +217,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		
 		stageMultipleFiles: function(gitCloneURI, paths , onLoad , onError){
 			return dojo.xhrPut({
 				url: gitCloneURI , 
@@ -252,7 +245,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		
 		unstageAll: function(location , resetParam ,onLoad , onError){
 			return dojo.xhrPost({
 				url: location , 
@@ -279,7 +271,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		
 		unstage: function(location , paths ,onLoad , onError){
 			return dojo.xhrPost({
 				url: location , 
@@ -306,7 +297,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		
 		checkoutPath: function(gitCloneURI, paths , onLoad , onError){
 			return dojo.xhrPut({
 				url : gitCloneURI,
@@ -335,7 +325,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		
 		commitAll: function(location , message , body ,  onLoad , onError){
 			dojo.xhrPost({
 				url: location , 
@@ -362,7 +351,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		
 		getGitClone : function(gitCloneURI, onLoad) {
 			var service = this;
 			
@@ -647,7 +635,6 @@ eclipse.GitService = (function() {
 		},
 		doFetch : function(gitRemoteBranchURI, force, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
 			var service = this;
-			
 			return dojo.xhrPost({
 				url : gitRemoteBranchURI,
 				headers : {
@@ -655,6 +642,39 @@ eclipse.GitService = (function() {
 				},
 				postData : dojo.toJson({
 					"Fetch" : "true",
+					"Force" : force,
+					"GitSshUsername" : gitSshUsername,
+					"GitSshPassword" : gitSshPassword,
+					"GitSshKnownHost" : gitSshKnownHost,
+					"GitSshPrivateKey" : gitPrivateKey,
+					"GitSshPassphrase" : gitPassphrase
+				}),
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, secondArg) {
+					if (onLoad) {
+						if (typeof onLoad === "function")
+							onLoad(jsonData, secondArg, secondArg);
+						else
+							service._serviceRegistration.dispatchEvent(onLoad,
+									jsonData);
+					}
+				},
+				error : function(error, ioArgs) {
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
+		doPull : function(gitRemoteURI, force, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
+			var service = this;
+			return dojo.xhrPost({
+				url : gitRemoteURI,
+				headers : {
+					"Orion-Version" : "1"
+				},
+				postData : dojo.toJson({
+					"Pull" : "true",
 					"Force" : force,
 					"GitSshUsername" : gitSshUsername,
 					"GitSshPassword" : gitSshPassword,
@@ -987,7 +1007,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-	
 		editCloneConfigurationProperty: function(location, newValue, onLoad , onError){
 			return dojo.xhrPut({
 				url: location , 
@@ -1016,7 +1035,6 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-	
 		deleteCloneConfigurationProperty: function(location, onLoad , onError){
 			return dojo.xhrDelete({
 				url: location , 
@@ -1043,7 +1061,6 @@ eclipse.GitService = (function() {
 			});
 		}
 	};
-	
 	return GitService;
 }());
 
