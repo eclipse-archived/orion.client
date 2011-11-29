@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="../orion/plugin.js"></script>
+	<script type="text/javascript" src="../../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<script>
+		window.onload = function() {
+			var provider = new eclipse.PluginProvider();
+			var temp = document.createElement('a');
+			temp.href = "../task"
+			var base = temp.href;
+			
+			// testing that command service handles image-less actions properly
+			provider.registerServiceProvider("orion.core.task", {
+				getTasks: function(){
+					return dojo.xhrGet({
+						url: base , 
+						headers: {
+							"Orion-Version": "1"
+						},
+						handleAs: "json",
+						timeout: 15000
+					});
+				}
+			}, {
+				name : "Tasks",
+				pattern: base
+			});
+			
+			
+			provider.connect();
+		};
+	</script>
+</head>
+<body>
+</body>
+</html>

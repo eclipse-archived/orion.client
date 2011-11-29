@@ -9,6 +9,7 @@
 		"plugins/git/userProfilePlugin.html":true,
 		"plugins/webEditingPlugin.html":true,
 		"plugins/landingPageTasks.html":true,
-		"plugins/preferencesPlugin.html":true
+		"plugins/preferencesPlugin.html":true,
+		"plugins/taskPlugin.html": true
 	}
 }
