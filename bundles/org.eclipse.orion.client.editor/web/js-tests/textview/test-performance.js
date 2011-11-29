@@ -39,7 +39,7 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 	
 	function doAction(action, max) {
 //		var d = new dojo.Deferred();
-		var view = setupView(mSetup.getFile("/orion/textview/textView.js"), "js");
+		var view = mSetup.view || setupView(mSetup.getFile("/examples/textview/text.txt"), "java");
 		var model = view.getModel();
 		if (action.toLowerCase().indexOf("down") !== -1) {
 			view.setSelection(0, 0);
@@ -115,6 +115,42 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 				setTimeout(t, 0);
 			} else {
 				log ("time(CaretUpDown)=", (new Date().getTime() - start));
+//				d.resolve(true);
+			}
+		}
+		view.focus();
+		t();
+//		return d;
+	};
+	
+	tests.testCaretNextPrevious = function () {
+//		var d = new dojo.Deferred();
+		var buffer = "", i;
+		for (i = 0; i < 256;i++) {
+			buffer += "var id; function() {return 30;} var foo; ";
+		}
+		buffer += "\n";
+		for (i = 0; i < 256;i++) {
+			buffer += "var id; function() {return 30;} var foo; ";
+		}
+
+		var max = 30;
+		var view = setupView(buffer, "js");
+		var start = new Date().getTime();
+		var caret = buffer.indexOf("{"), initialCaret = caret;
+		view.setCaretOffset(caret);
+		function t() {
+			if (caret === initialCaret) {
+				view.invokeAction("charNext");
+				caret++;
+			} else {
+				view.invokeAction("charPrevious");
+				caret--;
+			}
+			if (--max > 0) {			
+				setTimeout(t, 0);
+			} else {
+				log ("time(CaretNextPrevious)=", (new Date().getTime() - start));
 //				d.resolve(true);
 			}
 		}
