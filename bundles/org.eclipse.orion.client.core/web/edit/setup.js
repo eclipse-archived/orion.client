@@ -17,12 +17,12 @@ define(['require', 'dojo', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchAdaptor',
-        'orion/editor/asyncStyler', 'orion/edit/dispatcher',
+        'orion/editor/asyncStyler', 'orion/edit/dispatcher', 'orion/contentTypes',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer' ], 
 		function(require, dojo, mSelection, mStatus, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mSearchAdaptor, mAsyncStyler, mDispatcher) {
+				mSearchAdaptor, mAsyncStyler, mDispatcher, mContentTypes) {
 	
 var exports = exports || {};
 	
@@ -83,11 +83,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	}
 	
 	// Temporary.  This will evolve into something pluggable.
+	var contentTypes = new mContentTypes.ContentTypes(serviceRegistry);
 	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("orion.edit.highlighter");
 	var syntaxHighlighter = {
 		styler: null, 
 		
-		highlight: function(fileName, editor) {
+		highlight: function(fileName, editor, metadata) {
 			if (this.styler) {
 				if (this.styler.destroy) {
 					this.styler.destroy();
@@ -135,7 +136,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							var providerType = providerToUse.getProperty("type");
 							if (providerType === "highlighter") {
 								var service = serviceRegistry.getService(providerToUse);
-								service.setExtension(extension);
+								var contentType = contentTypes.getContentType(metadata);
+								service.setContentType(contentType);
 								this.styler = new mAsyncStyler.AsyncStyler(textView, service, annotationModel);
 							} else if (providerType === "grammar" || typeof providerType === "undefined") {
 								var grammar = providerToUse.getProperty("grammar");
@@ -200,8 +202,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					fileClient.read(fileURI).then(
 						dojo.hitch(this, function(contents) {
 							clearTimeout(progressTimeout);
-							// in the long run we should be looking for plug-ins to call here for highlighting
-							syntaxHighlighter.highlight(fileURI, editor);
 							editor.highlightAnnotations();
 							editor.setInput(fileURI, null, contents);
 							editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
@@ -216,6 +216,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						dojo.hitch(this, function(metadata) {
 							this._fileMetadata = metadata;
 							this.setTitle(metadata.Location);
+							syntaxHighlighter.highlight(fileURI, editor, metadata);
+							editor.highlightAnnotations();
 						}),
 						dojo.hitch(this, function(error) {
 							console.error("Error loading file metadata: " + error.message);
