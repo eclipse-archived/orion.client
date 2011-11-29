@@ -25,6 +25,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		this.items = items;
 		this.userData = userData;
 		this.command = command;
+		this.parameters = command.parameters;
+		this.id = command.id;
 	}
 	CommandInvocation.prototype = /** @lends orion.commands.CommandInvocation.prototype */ {
 		/**
@@ -149,6 +151,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				}
 			}
 		},
+		/**
+		 * Process the provided URL to determine whether any commands should be invoked.  Note that we never
+		 * invoke a command callback by URL, only its parameter collector.  If a parameter collector is not
+		 * specified, commands in the URL will be ignored.
+		 *
+		 * @param {String} url a url that may contain URL bindings.
+		 */
 		processURL: function(url) {
 			for (var id in this._urlBindings) {
 				if (this._urlBindings[id] && this._urlBindings[id].urlBinding && this._urlBindings[id].command) {
@@ -157,9 +166,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						var urlBinding = this._urlBindings[id];
 						var command = urlBinding.command;
 						var invocation = urlBinding.invocation;
-						command.parameters.setValue(match.parameterName, match.parameterValue);
-						// ignore hrefCallback for the time being, on the assumption that we would never take you to a link without confirmation
-						if (command.callback) {
+						if (command.parameters && command.callback) {
+							command.parameters.setValue(match.parameterName, match.parameterValue);
 							window.setTimeout(dojo.hitch(this, function() {
 								this._collectParameters(invocation);
 							}), 0);
@@ -169,12 +177,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				}
 			}
 		},
-		//TODO
-		// this is not fully implemented.  We are looking up commands in the urlBindings list.
-		// Right now we only have the contextual information for key bindings or URL bindings.  
-		// Address this in
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=363763
+		/**
+		 * Run the command with the specified commandId.
+		 *
+		 * @param {String} commandId the id of the command to run.
+		 *
+		 * Note:  The current implementation will only run the command if a URL binding has been
+		 * specified.  
+		 */
 		runCommand: function(commandId) {
+			//TODO should we be keeping invocation context for commands without bindings? 
 			var binding = this._urlBindings[commandId];
 			if (binding && binding.command) {
 				if (binding.command.callback) {
@@ -193,12 +205,34 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		},
 		
 		/**
-		 * Provide an object that can collect parameters for a given command.  
+		 * Provide an object that can collect parameters for a given "tool" command.  When a command that
+		 * describes its required parameters is shown in a toolbar (as an image, button, or link), clicking
+		 * the command will invoke any registered parameterCollector before calling the command's callback.
+		 * This hook allows a page to define a standard way for collecting required parameters that is 
+		 * appropriate for the page architecture.  If no parameterCollector is specified, then the command callback
+		 * will be responsible for collecting parameters.
+		 *
+		 * @param {Object} parameterCollector a collector which implements <code>open(commandNode, id, fillFunction)</code>,
+		 *  <code>close(commandNode)</code>, and <code>collectParameters(commandInvocation)</code>.
+		 *
 		 */
 		setParameterCollector: function(parameterCollector) {
 			this._parameterCollector = parameterCollector;
 		},
 		
+		/**
+		 * Open a parameter collector suitable for collecting information about a command.
+		 * Once a collector is created, the specified function is used to fill it with
+		 * information needed by the command.  This method is used for commands that cannot
+		 * rely on a simple parameter description to collect parameters.  Commands that describe
+		 * their required parameters do not need to use this method because the command framework
+		 * will open and close parameter collectors as needed and call the command callback with
+		 * the values of those parameters.
+		 *
+		 * @param {DOMElement} commandNode the dom node that is displaying the command
+		 * @param {String} id the id of the parent node containing the command
+		 * @param {Function} fillFunction a function that will fill the parameter area
+		 */
 		openParameterCollector: function(commandNode, id, fillFunction) {
 			if (this._parameterCollector) {
 				if (this._activeModalCommandNode) {
@@ -209,6 +243,18 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			}
 		},
 		
+		/**
+		 * Close any active parameter collector.  This method should be used to deactivate a
+		 * parameter collector that was opened with <code>openParameterCollector</code>.
+		 * Commands that describe their required parameters do not need to use this method 
+		 * because the command framework will open and close parameter collectors as needed and 
+		 * call the command callback with the values of those parameters.
+		 *
+		 * @param {DOMElement} commandNode the dom node that is displaying the command
+		 * @param {String} id the id of the parent node containing the command
+		 * @param {Function} fillFunction a function that will fill the parameter area
+		 */
+
 		closeParameterCollector: function(commandNode) {
 			this._activeModalCommandNode = null;
 			if (this._parameterCollector) {
@@ -647,7 +693,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 	 * @param {String} options.tooltip the tooltip description to use when explaining the purpose of the command.
 	 * @param {Function} options.callback the callback to call when the command is activated.  The callback should either 
 	 *  perform the command or return a deferred that represents the asynchronous performance of the command.  Optional.
-	 * @param {Function} options.hrefcallback when options.callback is not specfied, this callback is used to retrieve
+	 * @param {Function} options.hrefcallback if specified, this callback is used to retrieve
 	 *  a URL that can be used as the location for a command represented as a hyperlink.  The callback should return 
 	 *  the URL.  In this release, the callback may also return a deferred that will eventually return the URL, but this 
 	 *  functionality may not be supported in the future.  See https://bugs.eclipse.org/bugs/show_bug.cgi?id=341540.
@@ -655,11 +701,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 	 * @param {Function} options.choicecallback a callback which retrieves choices that should be shown in a secondary
 	 *  menu from the command itself.  Returns a list of choices that supply the name and image to show, and the callback
 	 *  to call when the choice is made.  Optional.
+	 * @param {String} options.imageClass a CSS class name suitable for showing a background image.  Optional.
+	 * @param {String} options.spriteClass an additional CSS class name that can be used to specify a sprite background image.  This
+	 *  useful with some sprite generation tools, where imageClass specifies the location in a sprite, and spriteClass describes the
+	 *  sprite itself.  Optional.
+	 * @param {Function} options.visibleWhen A callback that returns a boolean to indicate whether the command should be visible
+	 *  given a particular set of items that are selected.  Optional, defaults to always visible.
+	 * @param {ParametersDescription} options.parameters A description of parameters that should be collected before invoking
+	 *  the command.
 	 * @param {Image} options.image the image that may be used to represent the callback.  A text link will be shown in lieu
 	 *  of an image if no image is supplied.  Optional.
-	 * @param {Function} options.visibleWhen A callback that returns a boolean to indicate whether the command should be visible
-	 *  given a particular set of items that are selected.
-	 *
 	 * @class A command is an object that describes an action a user can perform, as well as when and
 	 *  what it should look like when presented in various contexts.  Commands are identified by a
 	 *  unique id.
@@ -706,10 +757,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				image.name = name;
 				image.id = name;
 			}
-			context.id = this.id;
-			context.command = this;
 			context.domParent = parent;
-			context.parameters = this.parameters;
 			if (this.hrefCallback) {
 				var href = this.hrefCallback.call(context.handler, context);
 				if(href.then){
@@ -771,11 +819,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			dojo.place(link, parent, "last");
 		},
 		_addMenuItem: function(parent, context) {
-			context.id = this.id;
-			context.command = this;
-			context.domParent = parent;
-			context.parameters = this.parameters;
-
+			context.domParent = parent.domNode;
 			var menuitem = new CommandMenuItem({
 				labelType: this.hrefCallback ? "html" : "text",
 				label: this.name,
@@ -815,6 +859,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				// reaching...
 				menuitem.iconNode.src = this.image;
 			}
+			context.domNode = menuitem.domNode;
+
 		},
 		/**
 		 * Populate the specified menu with choices using the choiceCallback.
