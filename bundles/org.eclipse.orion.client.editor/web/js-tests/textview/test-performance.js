@@ -123,6 +123,42 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 //		return d;
 	};
 	
+	tests.testCaretNextPrevious = function () {
+//		var d = new dojo.Deferred();
+		var buffer = "", i;
+		for (i = 0; i < 256;i++) {
+			buffer += "var id; function() {return 30;} var foo; ";
+		}
+		buffer += "\n";
+		for (i = 0; i < 256;i++) {
+			buffer += "var id; function() {return 30;} var foo; ";
+		}
+
+		var max = 30;
+		var view = setupView(buffer, "js");
+		var start = new Date().getTime();
+		var caret = buffer.indexOf("{"), initialCaret = caret;
+		view.setCaretOffset(caret);
+		function t() {
+			if (caret === initialCaret) {
+				view.invokeAction("charNext");
+				caret++;
+			} else {
+				view.invokeAction("charPrevious");
+				caret--;
+			}
+			if (--max > 0) {			
+				setTimeout(t, 0);
+			} else {
+				log ("time(CaretNextPrevious)=", (new Date().getTime() - start));
+//				d.resolve(true);
+			}
+		}
+		view.focus();
+		t();
+//		return d;
+	};
+	
 	tests.testScrollLeft = function () {
 //		var d = new dojo.Deferred();
 		var buffer = "";
