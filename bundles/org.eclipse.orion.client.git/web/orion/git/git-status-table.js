@@ -1400,11 +1400,10 @@ orion.GitStatusController = (function() {
 			var diffVS = this._model.isStaged(itemModel.type) ? "index VS HEAD ) " : "local VS index ) " ;
 			this._inlineCompareContainer.setDiffTitle("Compare( " + orion.statusTypeMap[itemModel.type][1] + " : " +diffVS) ;
 			
-			this._inlineCompareContainer.setConflicting(this._model.isConflict(itemModel.type));
-			
 			this._inlineCompareContainer.setOptions({hasConflicts: this._model.isConflict(itemModel.type),
 													 complexURL: itemModel.diffURI});
 			
+			this._inlineCompareContainer.clearContent();
 			this._inlineCompareContainer.startup();
 		},
 		
