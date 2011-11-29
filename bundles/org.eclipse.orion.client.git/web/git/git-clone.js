@@ -76,6 +76,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands',
 				
 				// remote action
 				commandService.registerCommandContribution("eclipse.addRemote", 100);
+				commandService.registerCommandContribution("eclipse.orion.git.pull", 200);
 				commandService.registerCommandContribution("eclipse.removeRemote", 400, null, "eclipse.gitGroup2/eclipse.gitGroup2.delete");
 				
 				// branch actions

@@ -44,7 +44,7 @@ var exports = {};
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
 			commandService.renderCommands(selectionTools, "dom", null, explorer, "tool", true);
 		}
-		
+
 		// Stuff we do only the first time
 		if (!doOnce) {
 			doOnce = true;
@@ -57,7 +57,7 @@ var exports = {};
 			});
 		}
 	};
-	
+
 	exports.getNewItemName = function(item, explorer, onRoot, domId, defaultName, onDone, column_no, isDefaultValid) {
 		var refNode, name, tempNode;
 		if (onRoot) {
@@ -88,7 +88,7 @@ var exports = {};
 			}
 		}
 	}
-	
+
 	exports.handleKnownHostsError = function(serviceRegistry, errorData, options, func){
 		if(confirm("Would you like to add " + errorData.KeyType + " key for host " + errorData.Host
 				+ " to continue operation? Key fingerpt is " + errorData.HostFingerprint + ".")){
@@ -101,6 +101,7 @@ var exports = {};
 			});
 		}
 	};
+
 	exports.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title){
 					var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
 								title: title,
@@ -111,7 +112,7 @@ var exports = {};
 					credentialsDialog.startup();
 					credentialsDialog.show();
 	};
-	
+
 	exports.getDefaultSshOptions = function(serviceRegistry){
 		var def = new dojo.Deferred();
 		var sshService = serviceRegistry.getService("orion.net.ssh");
@@ -126,7 +127,7 @@ var exports = {};
 		});
 		return def;
 	};
-	
+
 	exports.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee, title){
 		if(jsonData.Running==false){
 			if(jsonData.Result && jsonData.Result.HttpCode==403){
@@ -152,7 +153,6 @@ var exports = {};
 			}
 		}
 	};
-	
 
 	function displayErrorOnStatus(error) {
 
@@ -173,7 +173,7 @@ var exports = {};
 
 		serviceRegistry.getService("orion.page.message").setProgressResult(display);
 	}
-	
+
 	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 		
 		// TODO: not used by the git clone navigator, could be removed
@@ -197,7 +197,6 @@ var exports = {};
 									}
 								);
 						});
-
 					},
 					advanced: false
 				});
@@ -212,7 +211,7 @@ var exports = {};
 				}
 			});
 		commandService.addCommand(linkRepoCommand, "object");
-		
+
 		var checkoutTagCommand = new mCommands.Command({
 			name: "Checkout",
 			tooltip: "Create a local branch corresponding with the current tag.",
@@ -229,7 +228,7 @@ var exports = {};
 					}
 					return item.parent.parent;
 				}
-				
+
 				exports.getNewItemName(item, explorer, false, data.domNode.id, "tag_"+item.Name, function(name){
 					if(!name && name==""){
 						return;
@@ -244,9 +243,8 @@ var exports = {};
 				return item.Type === "Tag";
 			}
 		});
-		
 		commandService.addCommand(checkoutTagCommand, "object");
-		
+
 		var checkoutBranchCommand = new mCommands.Command({
 			name: "Checkout",
 			tooltip: "Make the branch or corresponding local branch active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first.",
@@ -279,10 +277,10 @@ var exports = {};
 			},
 			visibleWhen: function(item) {
 				return item.Type === "Branch" || item.Type === "RemoteTrackingBranch";
-			}}
-		);
+			}
+		});
 		commandService.addCommand(checkoutBranchCommand, "object");
-		
+
 		var addBranchCommand = new mCommands.Command({
 			name: "New Branch",
 			tooltip: "Add a new local branch to the repository",
@@ -297,14 +295,13 @@ var exports = {};
 						dojo.hitch(explorer, explorer.changedItem)(data.items);
 					}, displayErrorOnStatus);
 				});
-
 			},
 			visibleWhen: function(item) {
 				return item.GroupNode && item.Name === "Branches";
-			}}
-		);
+			}
+		});
 		commandService.addCommand(addBranchCommand, "object");
-		
+
 		var removeBranchCommand = new mCommands.Command({
 			name: "Delete", // "Delete Branch"
 			tooltip: "Delete the local branch from the repository",
@@ -320,10 +317,10 @@ var exports = {};
 			},
 			visibleWhen: function(item) {
 				return item.Type === "Branch" && !item.Current;
-			}}
-		);
+			}
+		});
 		commandService.addCommand(removeBranchCommand, "object");
-		
+
 		var removeRemoteBranchCommand = new mCommands.Command({
 			name: "Delete", // "Delete Remote Branch",
 			tooltip: "Delete the remote tracking branch from the repository",
@@ -348,10 +345,10 @@ var exports = {};
 			},
 			visibleWhen: function(item) {
 				return item.Type === "RemoteTrackingBranch";
-			}}
-		);
+			}
+		});
 		commandService.addCommand(removeRemoteBranchCommand, "object");
-		
+
 		var addRemoteCommand = new mCommands.Command({
 			name: "New Remote",
 			tooltip: "Add a new remote to the repository",
@@ -364,7 +361,6 @@ var exports = {};
 						serviceRegistry.getService("orion.git.provider").addRemote(item.Location, remote, remoteURI).then(function() {
 							dojo.hitch(explorer, explorer.changedItem)(item);
 						}, displayErrorOnStatus);
-
 					}
 				});
 				dialog.startup();
@@ -372,10 +368,10 @@ var exports = {};
 			},
 			visibleWhen: function(item) {
 				return item.GroupNode && item.Name === "Remotes";
-			}}
-		);
+			}
+		});
 		commandService.addCommand(addRemoteCommand, "object");
-		
+
 		var removeRemoteCommand = new mCommands.Command({
 			name: "Delete", // "Delete Remote",
 			tooltip: "Delete the remote from the repository",
@@ -391,10 +387,62 @@ var exports = {};
 			},
 			visibleWhen: function(item) {
 				return item.Type === "Remote";
-			}}
-		);
+			}
+		});
 		commandService.addCommand(removeRemoteCommand, "object");
-		
+
+		var pullCommand = new mCommands.Command({
+			name : "Pull",
+			tooltip: "Pull from the repository",
+			imageClass: "git-sprite-pull",
+			spriteClass: "gitCommandSprite",
+			id : "eclipse.orion.git.pull",
+			callback: function(data) {
+				var item = data.items;
+				var path = item.Location;
+				exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
+					var func = arguments.callee;
+					var gitService = serviceRegistry.getService("orion.git.provider");
+					var progressService = serviceRegistry.getService("orion.page.message");
+					var deferred = gitService.doPull(path, false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
+					progressService.showWhile(deferred, "Pulling remote: " + path).then(function(jsonData, secondArg) {
+						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
+							dojo.xhrGet({
+								url: path,
+								headers: {
+									"Orion-Version": "1"
+								},
+								postData: dojo.toJson({
+									"GitSshUsername": options.gitSshUsername,
+									"GitSshPassword": options.gitSshPassword,
+									"GitSshPrivateKey": options.gitPrivateKey,
+									"GitSshPassphrase": options.gitPassphrase,
+									"GitSshKnownHost": options.knownHosts
+								}),
+								handleAs: "json",
+								timeout: 5000,
+								load: function(jsonData, secondArg) {
+									return jsonData;
+								},
+								error: function(error, ioArgs) {
+									console.error("HTTP status code: ", ioArgs.xhr.status);
+									return error;
+								}
+							}).then(function(remoteJsonData) {
+								if (item.Type === "Remote") {
+									dojo.hitch(explorer, explorer.changedItem)(item);
+								}
+							}, displayErrorOnStatus);
+						}, func, "Pull Git Repository");
+					});
+				});
+			},
+			visibleWhen : function(item) {
+				return item.Type === "Remote" ;
+			}
+		});
+		commandService.addCommand(pullCommand, "object");
+
 		var openGitLog = new mCommands.Command({
 			name : "Git Log",
 			tooltip: "Open the log for the branch",
@@ -409,9 +457,8 @@ var exports = {};
 				return item.Type === "Branch" || item.Type === "RemoteTrackingBranch";
 			}
 		});
-	
 		commandService.addCommand(openGitLog, "object");
-		
+
 		var openGitLogAll = new mCommands.Command({
 			name : "Git Log",
 			tooltip: "Open the log for the repository",
@@ -426,9 +473,8 @@ var exports = {};
 				return true;
 			}
 		});
-	
 		commandService.addCommand(openGitLogAll, "object");
-		
+
 		var openGitStatus = new mCommands.Command({
 			name : "Git Status",
 			tooltip: "Open the status for the repository",
@@ -442,9 +488,8 @@ var exports = {};
 				return true;
 			}
 		});
-	
 		commandService.addCommand(openGitStatus, "object");
-		
+
 		var openCloneContent = new mCommands.Command({
 			name : "Show in Navigator",
 			tooltip: "Show the repository folder in the file navigator",
@@ -458,9 +503,8 @@ var exports = {};
 				return true;
 			}
 		});
-	
 		commandService.addCommand(openCloneContent, "object");
-		
+
 		var compareGitCommits = new mCommands.Command({
 			name : "Compare With Each Other",
 			imageClass: "git-sprite-open_compare",
@@ -472,7 +516,6 @@ var exports = {};
 				serviceRegistry.getService("orion.git.provider").getDiff(item[1].DiffLocation, item[0].Name, function(jsonData, secondArg) {
 					clientDeferred.callback(require.toUrl("compare/compare.html") + "?readonly#" + secondArg.xhr.getResponseHeader("Location"));
 				});
-
 				return clientDeferred;
 			},
 			visibleWhen : function(item) {
@@ -483,9 +526,8 @@ var exports = {};
 				return false;
 			}
 		});
-	
 		commandService.addCommand(compareGitCommits, "dom");
-		
+
 		var compareWithWorkingTree = new mCommands.Command({
 			name : "Compare With Working Tree",
 			imageClass: "git-sprite-open_compare",
@@ -498,9 +540,8 @@ var exports = {};
 				return item.Type === "Commit" && !explorer.isDirectory;
 			}
 		});
-	
 		commandService.addCommand(compareWithWorkingTree, "object");
-		
+
 		var openGitCommit = new mCommands.Command({
 			name : "Open",
 			id : "eclipse.openGitCommit",
@@ -511,9 +552,8 @@ var exports = {};
 				return item.Type === "Commit" && item.ContentLocation != null && !explorer.isDirectory;
 			}
 		});
-	
 		commandService.addCommand(openGitCommit, "object");
-		
+
 		var fetchCommand = new mCommands.Command({
 			name: "Fetch",
 			tooltip: "Fetch from the remote",
@@ -552,7 +592,7 @@ var exports = {};
 									return error;
 								}
 							}).then(function(remoteJsonData) {
-								if (explorer.parentId === "explorer-tree")
+								if (explorer.parentId === "explorer-tree") {
 									gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, function(scopedCommitsJsonData, secondArg) {
 										function loadScopedCommitsList(loadScopedCommitsList) {
 											explorer.renderer.setIncomingCommits(loadScopedCommitsList.Children);
@@ -569,6 +609,7 @@ var exports = {};
 											});
 										}
 									});
+								}
 								if (item.Type === "Remote") {
 									dojo.hitch(explorer, explorer.changedItem)(item);
 								}
@@ -581,10 +622,9 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
 			}
 		});
-	
 		commandService.addCommand(fetchCommand, "dom");
 		commandService.addCommand(fetchCommand, "object");
-		
+
 		var fetchForceCommand = new mCommands.Command({
 			name : "Force Fetch",
 			tooltip: "Fetch from the remote branch into your remote tracking branch overriding its current content",
@@ -628,7 +668,6 @@ var exports = {};
 												explorer.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
 												explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);
 											}
-
 											if (secondArg.xhr.status === 200) {
 												loadScopedCommitsList(scopedCommitsJsonData);
 											} else if (secondArg.xhr.status === 202) {
@@ -650,10 +689,9 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
 			}
 		});
-	
 		commandService.addCommand(fetchForceCommand, "dom");
 		commandService.addCommand(fetchForceCommand, "object");
-		
+
 		var mergeCommand = new mCommands.Command({
 			name : "Merge",
 			tooltip: "Merge the content from the branch to your active branch",
@@ -666,7 +704,7 @@ var exports = {};
 				var progressService = serviceRegistry.getService("orion.page.message");
 				gitService.doMerge(item.HeadLocation, item.Name).then(function(result){
 					var display = [];
-					
+
 					if (result.jsonData && (result.jsonData.Result == "FAST_FORWARD" || result.jsonData.Result == "ALREADY_UP_TO_DATE")){
 						dojo.query(".treeTableRow").forEach(function(node, i) {
 							dojo.toggleClass(node, "incomingCommitsdRow", false);
@@ -677,7 +715,7 @@ var exports = {};
 					}
 					else if(result.jsonData){
 						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
-						
+
 						display.Severity = "Warning";
 						display.HTML = true;
 						display.Message = "<span>" + result.jsonData.Result
@@ -695,19 +733,19 @@ var exports = {};
 						display.Message ="<span>" + display.Message + " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
 							+ statusLocation + "\">Git Status page</a>.<span>";
 					}
-						
+
 					progressService.setProgressResult(display);
 				}, function (error) {
 						var display = [];
-						
+
 						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
-						
+
 						display.Severity = "Error";
 						display.HTML = true;
 						display.Message = "<span>" + dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage
 						+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
 						+ statusLocation +"\">Git Status page</a>.<span>";
-						
+
 						serviceRegistry.getService("orion.page.message").setProgressResult(display);
 				});
 			},
@@ -715,10 +753,9 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
 			}
 		});
-	
 		commandService.addCommand(mergeCommand, "dom");
 		commandService.addCommand(mergeCommand, "object");
-		
+
 		var rebaseCommand = new mCommands.Command({
 			name : "Rebase",
 			tooltip: "Rewind commits from the active branch and replay them on top of the selected branch",
@@ -728,7 +765,7 @@ var exports = {};
 				serviceRegistry.getService("orion.git.provider").doRebase(item.HeadLocation, item.Name, "BEGIN", function(jsonData, secondArg){
 					var display = [];
 					var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
-					
+
 					if (jsonData.Result == "OK" || jsonData.Result == "FAST_FORWARD" || jsonData.Result == "UP_TO_DATE" ) {
 						// operation succeeded
 						display.Severity = "Ok";
@@ -785,10 +822,9 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
 			}
 		});
-	
 		commandService.addCommand(rebaseCommand, "dom");
 		commandService.addCommand(rebaseCommand, "object");
-		
+
 		var pushCommand = new mCommands.Command({
 			name : "Push All",
 			tooltip: "Push commits and tags from your local branch into the remote branch",
@@ -820,7 +856,6 @@ var exports = {};
 									});
 								});
 					} else {
-
 						var remotes = item.RemoteLocation;
 
 						var dialog = new orion.git.widgets.RemotePrompterDialog({
@@ -850,7 +885,6 @@ var exports = {};
 						});
 						dialog.startup();
 						dialog.show();
-
 					}
 			},
 			visibleWhen : function(item) {
@@ -862,10 +896,9 @@ var exports = {};
 					return item.Type === "Branch" && item.Current && item.RemoteLocation;
 			}
 		});
-	
 		commandService.addCommand(pushCommand, "dom");
 		commandService.addCommand(pushCommand, "object");
-		
+
 		var pushForceCommand = new mCommands.Command({
 			name : "Force Push All",
 			tooltip: "Push commits and tags from your local branch into the remote branch overriding its current content",
@@ -881,7 +914,7 @@ var exports = {};
 					}
 					var gitService = serviceRegistry.getService("orion.git.provider");
 					var progressService = serviceRegistry.getService("orion.page.message");
-					
+
 					if(item.RemoteLocation.length==1 && item.RemoteLocation[0].Children.length==1){
 						exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 							var func = arguments.callee;
@@ -931,10 +964,9 @@ var exports = {};
 					return item.RepositoryPath === "" && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation;
 			}
 		});
-	
 		commandService.addCommand(pushForceCommand, "dom");
 		commandService.addCommand(pushForceCommand, "object");
-		
+
 		var switchToRemote = new mCommands.Command({
 			name : "Switch to Remote",
 			tooltip: "Show the log for the corresponding remote tracking branch",
@@ -946,9 +978,8 @@ var exports = {};
 				return item.toRef != null && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation && item.toRef.RemoteLocation.length===1 && item.toRef.RemoteLocation[0].Children.length===1;
 			}
 		});
-	
 		commandService.addCommand(switchToRemote, "dom");
-		
+
 		var getPageNumber = function(uri){
 			var regex = new RegExp('[\\?&]page=([^&#]*)');
 			var results = regex.exec(window.location.href);
@@ -961,12 +992,12 @@ var exports = {};
 				return;
 			}
 		};
-		
+
 		var getPageUri = function(uri, page){
 			var regex = new RegExp('page=([0-9]*)');
 			return uri.replace(regex, 'page='+page);
 		};
-		
+
 		var previousLogPage = new mCommands.Command({
 			name : "< Previous Page",
 			tooltip: "Show previous page of git log",
@@ -981,9 +1012,8 @@ var exports = {};
 				return false;
 			}
 		});
-		
 		commandService.addCommand(previousLogPage, "dom");
-		
+
 		var nextLogPage = new mCommands.Command({
 			name : "Next Page >",
 			tooltip: "Show next page of git log",
@@ -1000,9 +1030,8 @@ var exports = {};
 				return false;
 			}
 		});
-		
 		commandService.addCommand(nextLogPage, "dom");
-		
+
 		var switchToCurrentLocal = new mCommands.Command({
 			name : "Switch to Active Local",
 			tooltip: "Show the log for the active local branch",
@@ -1010,13 +1039,13 @@ var exports = {};
 			hrefCallback : function(data) {
 				var item = data.items;
 				var clientDeferred = new dojo.Deferred();
-				
+
 				var cloneLocation = item.CloneLocation;
 				if (cloneLocation == null){
 					var obj = JSON.parse(item.responseText);
 					cloneLocation = obj.JsonData.CloneLocation;
 				}
-				
+
 				dojo.xhrGet({
 					url : cloneLocation,
 					headers : {
@@ -1060,9 +1089,8 @@ var exports = {};
 				return false;
 			}
 		});
-	
 		commandService.addCommand(switchToCurrentLocal, "dom");
-		
+
 		var pushToCommand = new mCommands.Command({
 			name : "Push to...",
 			tooltip: "Push from your local branch into the selected remote branch",
@@ -1077,7 +1105,7 @@ var exports = {};
 						remotes = item.parent.parent.children[child_no];
 					}
 				}
-				
+
 				var gitService = serviceRegistry.getService("orion.git.provider");
 				var dialog = new orion.git.widgets.RemotePrompterDialog({
 					title: "Choose Branch",
@@ -1097,10 +1125,9 @@ var exports = {};
 				return false && item.Type === "Branch" && item.Current; //TODO when committing to anothe branch is ready remofe "false &&"
 			}
 		});
-	
 		commandService.addCommand(pushToCommand, "dom");
 		commandService.addCommand(pushToCommand, "object");
-		
+
 		var resetIndexCommand = new mCommands.Command({
 			name : "Reset",
 			tooltip: "Reset your active branch to the state of the selected branch. Discard all staged and unstaged changes.",
@@ -1135,9 +1162,8 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch";
 			}
 		});
-
 		commandService.addCommand(resetIndexCommand, "object");
-		
+
 		var addTagCommand = new mCommands.Command({
 			name : "Tag",
 			tooltip: "Create a tag for the commit",
@@ -1173,14 +1199,12 @@ var exports = {};
 				return item.Type === "Commit";
 			}
 		});
-	
 		commandService.addCommand(addTagCommand, "object");
-		
+
 		var cherryPickCommand = new mCommands.Command({
 			name : "Cherry-Pick",
 			tooltip: "Apply the change introduced by the commit to your active branch",
 			id : "eclipse.orion.git.cherryPick",
-			
 
 			callback: function(data) {
 				var item = data.items;
@@ -1224,7 +1248,6 @@ var exports = {};
 												explorer.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
 												explorer.loadCommitsList(jsonData.CommitLocation + "?page=1", jsonData, true);
 											}
-
 											if (secondArg.xhr.status === 200) {
 												loadScopedCommitsList(scopedCommitsJsonData);
 											} else if (secondArg.xhr.status === 202) {
@@ -1234,7 +1257,6 @@ var exports = {};
 													loadScopedCommitsList(scopedCommitsJsonData.Result.JsonData);
 												});
 											}
-
 										});
 									} else {
 										// log view for branch /
@@ -1244,7 +1266,6 @@ var exports = {};
 												explorer.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
 												explorer.loadCommitsList(path, jsonData, true);
 											}
-
 											if (secondArg.xhr.status === 200) {
 												loadScopedCommitsList(scopedCommitsJsonData);
 											} else if (secondArg.xhr.status === 202) {
@@ -1254,7 +1275,6 @@ var exports = {};
 													loadScopedCommitsList(scopedCommitsJsonData.Result.JsonData);
 												});
 											}
-
 										});
 									}
 								});
@@ -1290,10 +1310,9 @@ var exports = {};
 				return item.Type === "Commit";
 			}
 		});
-	
 		commandService.addCommand(cherryPickCommand, "object");
 	};
-	
+
 	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack, cmdBaseNumber, navigator) {
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
@@ -1341,7 +1360,6 @@ var exports = {};
 											navigator._gitCommitNavigatorRem.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
 											navigator._gitCommitNavigatorRem.loadCommitsList(remoteJsonData.CommitLocation + "?page=1&pageSize=5", remoteJsonData, true);
 										}
-	
 										if (secondArg.xhr.status === 200) {
 											loadScopedCommitsList(scopedCommitsJsonData);
 										} else if (secondArg.xhr.status === 202) {
@@ -1361,10 +1379,9 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch";
 			}
 		});
-	
 		commandService.addCommand(fetchCommand, "object");
 		commandService.registerCommandContribution("eclipse.orion.git.fetch", cmdBaseNumber+1);	
-		
+
 		var mergeCommand = new mCommands.Command({
 			name : "Merge",
 			tooltip: "Merge the content from the branch to your active branch",
@@ -1430,10 +1447,9 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
 			}
 		});
-	
 		commandService.addCommand(mergeCommand, "object");
 		commandService.registerCommandContribution("eclipse.orion.git.merge", cmdBaseNumber+2);	
-		
+
 		var pushCommand = new mCommands.Command({
 			name : "Push",
 			tooltip: "Push from your local branch into the remote branch",
@@ -1496,12 +1512,10 @@ var exports = {};
 				return item.Type === "LocalBranch" ;
 			}
 		});
-	
 		commandService.addCommand(pushCommand, "object");
-		commandService.registerCommandContribution("eclipse.orion.git.push", cmdBaseNumber+3);	
-		
+		commandService.registerCommandContribution("eclipse.orion.git.push", cmdBaseNumber+3);
 	};
-	
+
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
 		var cloneParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("url", "url", "Repository URL:")], true);
 
@@ -1546,9 +1560,8 @@ var exports = {};
 				return true;
 			}
 		});
-		
 		commandService.addCommand(cloneGitRepositoryCommand, "dom");
-		
+
 		var initGitRepositoryCommand = new mCommands.Command({
 			name : "Init Repository",
 			tooltip : "Create a new Git repository in a new folder",
@@ -1582,9 +1595,8 @@ var exports = {};
 				return true;
 			}
 		});
-		
 		commandService.addCommand(initGitRepositoryCommand, "dom");
-		
+
 		var deleteCommand = new mCommands.Command({
 			name: "Delete", // "Delete Repository"
 			tooltip: "Delete the repository",
@@ -1632,7 +1644,6 @@ var exports = {};
 			}});
 		commandService.addCommand(deleteCommand, "object");
 		commandService.addCommand(deleteCommand, "dom");
-		
 	};
 }());
 return exports;	
