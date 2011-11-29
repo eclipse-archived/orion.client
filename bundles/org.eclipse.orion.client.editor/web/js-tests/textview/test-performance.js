@@ -39,7 +39,7 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 	
 	function doAction(action, max) {
 //		var d = new dojo.Deferred();
-		var view = setupView(mSetup.getFile("/orion/textview/textView.js"), "js");
+		var view = mSetup.view || setupView(mSetup.getFile("/examples/textview/text.txt"), "java");
 		var model = view.getModel();
 		if (action.toLowerCase().indexOf("down") !== -1) {
 			view.setSelection(0, 0);
