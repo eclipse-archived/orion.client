@@ -69,6 +69,15 @@ exports.CompareContainer = (function() {
 			}
 		},
 		
+		clearContent: function(){
+			if(this._baseFile){
+				this._baseFile.Content = null;
+			}
+			if(this._newFile){
+				this._newFile.Content = null;
+			}
+		},
+		
 		_getLineDelim: function(input , diff){	
 			var delim = "\n";
 			return delim;
