@@ -51,6 +51,7 @@ exports.EditorCommandFactory = (function() {
 				//That way the file system knows how to implement their save mechanism
 				if(this.inputManager.onSave){
 					editor.getTextView().setAction("Save", dojo.hitch(this, function () {
+						var contents = editor.getText();
 						this.inputManager.onSave(this.inputManager.getInput(), contents,
 												dojo.hitch(this, function(result) {
 													editor.setInput(this.inputManager.getInput(), null, contents, true);
