@@ -3307,11 +3307,17 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var lineStart = model.getLineStart(lineIndex);
 			var e = {type:"LineStyle", textView: this, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart};
 			this.onLineStyle(e);
-			var child = document.createElement("DIV");
-			child.lineIndex = lineIndex;
-			this._applyStyle(e.style, child);
-			var data = {tabOffset: 0};
-			this._createRanges(child, document, e.ranges, lineText, 0, lineText.length, lineStart, data);
+			var lineDiv = document.createElement("DIV");
+			lineDiv.lineIndex = lineIndex;
+			this._applyStyle(e.style, lineDiv);
+			var ranges = [], range , span;
+			var data = {tabOffset: 0, ranges: ranges};
+			this._createRanges(e.ranges, lineText, 0, lineText.length, lineStart, data);
+			for (var i = 0; i < ranges.length; i++) {
+				range = ranges[i];
+				span = this._createSpan(lineDiv, document, range.text, range.style, range.ignoreChars);
+				lineDiv.appendChild(span);
+			}
 			
 			/*
 			* A trailing span with a whitespace is added for three different reasons:
@@ -3347,14 +3353,13 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				*/
 				c = "\u200C";
 			}
-			var span = this._createSpan(child, document, c, style, data);
-			span.ignoreChars = 1;
-			child.appendChild(span);
+			span = this._createSpan(lineDiv, document, c, style, 1);
+			lineDiv.appendChild(span);
 			
-			parent.insertBefore(child, sibling);
-			return child;
+			parent.insertBefore(lineDiv, sibling);
+			return lineDiv;
 		},
-		_createRanges: function(parent, document, ranges, text, start, end, lineStart, data) {
+		_createRanges: function(ranges, text, start, end, lineStart, data) {
 			if (start >= end) { return; }
 			if (ranges) {
 				for (var i = 0; i < ranges.length; i++) {
@@ -3367,32 +3372,32 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 						styleStart = Math.max(start, styleStart);
 						styleEnd = Math.min(end, styleEnd);
 						if (start < styleStart) {
-							this._createRange(parent, document, text, start, styleStart, null, data);
+							this._createRange(text, start, styleStart, null, data);
 						}
 						while (i + 1 < ranges.length && ranges[i + 1].start - lineStart === styleEnd && this._compareStyle(range.style, ranges[i + 1].style)) {
 							range = ranges[i + 1];
 							styleEnd = Math.min(lineStart + end, range.end) - lineStart;
 							i++;
 						}
-						this._createRange(parent, document, text, styleStart, styleEnd, range.style, data);
+						this._createRange(text, styleStart, styleEnd, range.style, data);
 						start = styleEnd;
 					}
 				}
 			}
 			if (start < end) {
-				this._createRange(parent, document, text, start, end, null, data);
+				this._createRange(text, start, end, null, data);
 			}
 		},
-		_createRange: function(parent, document, text, start, end, style, data) {
+		_createRange: function(text, start, end, style, data) {
 			if (start >= end) { return; }
-			var tabSize = this._customTabSize;
-			var span;
+			var tabSize = this._customTabSize, range;
 			if (tabSize && tabSize !== 8) {
 				var tabIndex = text.indexOf("\t", start);
 				while (tabIndex !== -1 && tabIndex < end) {
 					if (start < tabIndex) {
-						span = this._createSpan(parent, document, text.substring(start, tabIndex), style, data);
-						parent.appendChild(span);
+						range = {text: text.substring(start, tabIndex), style: style};
+						data.ranges.push(range);
+						data.tabOffset += range.text.length;
 					}
 					var spacesCount = tabSize - (data.tabOffset % tabSize);
 					if (spacesCount > 0) {
@@ -3401,21 +3406,21 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 						for (var i = 1; i < spacesCount; i++) {
 							spaces += " ";
 						}
-						span = this._createSpan(parent, document, spaces, style, data);
-						span.ignoreChars = spacesCount - 1;
-						parent.appendChild(span);
+						range = {text: spaces, style: style, ignoreChars: spacesCount - 1};
+						data.ranges.push(range);
+						data.tabOffset += range.text.length;
 					}
 					start = tabIndex + 1;
 					tabIndex = text.indexOf("\t", start);
 				}
 			}
 			if (start < end) {
-				span = this._createSpan(parent, document, text.substring(start, end), style, data);
-				parent.appendChild(span);
+				range = {text: text.substring(start, end), style: style};
+				data.ranges.push(range);
+				data.tabOffset += range.text.length;
 			}
 		},
-		_createSpan: function(parent, document, text, style, data) {
-			if (data) { data.tabOffset += text.length; }
+		_createSpan: function(parent, document, text, style, ignoreChars) {
 			var isLink = style && style.tagName === "A";
 			if (isLink) { parent.hasLink = true; }
 			var tagName = isLink && this._linksVisible ? "A" : "SPAN";
@@ -3427,6 +3432,9 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				addHandler(child, "click", function(e) { return self._handleLinkClick(e); }, false);
 			}
 			child.viewStyle = style;
+			if (ignoreChars) {
+				child.ignoreChars = ignoreChars;
+			}
 			return child;
 		},
 		_createRuler: function(ruler) {
