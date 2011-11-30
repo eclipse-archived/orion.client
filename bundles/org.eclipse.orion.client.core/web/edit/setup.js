@@ -433,16 +433,15 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 	};
 	
-	var statusReporter = function(message, isError, isProgress) {
-		if(isProgress){
+	var statusReporter =  function(message, type) {
+		if (type === "progress") {
 			statusReportingService.setProgressMessage(message);
-		} else if (isError) {
-			statusReportingService.setErrorMessage(message);	
+		} else if (type === "error") {
+			statusReportingService.setErrorMessage(message);
 		} else {
-			statusReportingService.setMessage(message);	
+			statusReportingService.setMessage(message);
 		}
 	};
-
 	var annotationFactory = new mEditorFeatures.AnnotationFactory();
 	
 	var editor = new mEditor.Editor({
