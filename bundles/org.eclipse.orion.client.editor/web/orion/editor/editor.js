@@ -611,6 +611,12 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 			}
 			
 			this._updateFoldingRuler();
+			
+			var textViewInstalledEvent = {
+				type: "TextViewInstalled",
+				textView: textView
+			};
+			this.dispatchEvent(textViewInstalledEvent);
 		},
 		
 		_updateCursorStatus: function() {

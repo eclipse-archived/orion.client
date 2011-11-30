@@ -193,7 +193,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				} else {
 					if (!editor.getTextView()) {
 						editor.installTextView();
-						dispatcher.wire(); // not cool.. need a better way
 					}
 					var fullPathName = fileURI;
 					var progressTimeout = setTimeout(function() {
