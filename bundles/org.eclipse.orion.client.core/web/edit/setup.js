@@ -184,6 +184,14 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		lastFilePath: "",
 		
 		setInput: function(location, editor) {
+			function errorMessage(error) {
+				try {
+					error = JSON.parse(error.responseText);
+					return error.Message;
+				} catch(e) {}
+				return error.responseText;
+			}
+			
 			var input = mUtil.getPositionInfo(location);
 			var fileURI = input.filePath;
 			// populate editor
@@ -219,7 +227,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							}
 						}, dojo.hitch(this, function(error) {
 							clearTimeout(progressTimeout);
-							editor.setInput(fullPathName, "An error occurred: " + error.message, null);
+							editor.setInput(fullPathName, "An error occurred: " + errorMessage(error), null);
 							console.error("HTTP status code: ", error.status);
 						}));
 					fileClient.read(fileURI, true).then(function(result) {
@@ -228,7 +236,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 								load(metadata, contents);
 							}
 						}, dojo.hitch(this, function(error) {
-							console.error("Error loading file metadata: " + error.message);
+							clearTimeout(progressTimeout);
+							console.error("Error loading file metadata: " + errorMessage(error));
 							this.setTitle(fileURI);
 						}));
 				}
