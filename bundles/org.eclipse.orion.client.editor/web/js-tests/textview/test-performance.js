@@ -131,6 +131,30 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 //		return d;
 	};
 	
+	tests.testInsertText = function () {
+//		var d = new dojo.Deferred();
+		var buffer = "", i;
+		for (i = 0; i < 512;i++) {
+			buffer += "var id; function() {return 30;} var foo; ";
+		}
+
+		var max = 10;
+		var view = setupView(buffer, "js");
+		var start = new Date().getTime();
+		function t() {
+			view.setText("a", 0, 0);
+			if (--max > 0) {			
+				setTimeout(t, 0);
+			} else {
+				log ("time(InsertText)=", (new Date().getTime() - start));
+//				d.resolve(true);
+			}
+		}
+		view.focus();
+		t();
+//		return d;
+	};
+	
 	tests.testCaretNextPrevious = function () {
 //		var d = new dojo.Deferred();
 		var buffer = "", i;
