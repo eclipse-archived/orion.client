@@ -90,7 +90,18 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 			viewModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 		}
 		options = options || {};
-		options.stylesheet = require.toUrl("examples/textview/themes/default.css");
+		if (options.stylesheet) {
+			if (typeof options.stylesheet === "string") {
+				options.stylesheet =  require.toUrl(options.stylesheet);
+			} else {
+				for (var i = 0; i < options.stylesheet.length; i++) {
+					options.stylesheet[i] =  require.toUrl(options.stylesheet[i]);
+				}
+			}
+		} else {
+			options.stylesheet =  require.toUrl("examples/textview/themes/default.css");
+		}
+		
 		stylesheet = addTheme(options.stylesheet, options.themeClass);
 		if (stylesheet) {
 			options.stylesheet = stylesheet;
