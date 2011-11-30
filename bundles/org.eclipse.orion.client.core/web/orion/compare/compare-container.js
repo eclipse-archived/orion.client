@@ -100,7 +100,7 @@ exports.CompareContainer = (function() {
 				that._newFile.Type = (diffParam.newFile && typeof(diffParam.newFile.Type) === "string") ? diffParam.newFile.Type : that._newFile.Type;
 				that._newFile.Content = (diffParam.newFile && typeof(diffParam.newFile.Content) === "string") ? diffParam.newFile.Content : that._newFile.Content;
 				
-				that._diffContent = (diffParam.diff) ? diffParam.diff : that._diffContent;
+				that._diffContent = typeof(diffParam.diff) === "string" ? diffParam.diff : that._diffContent;
 				if (onsave || typeof(that._baseFile.Content) === "string")
 					that.setEditor(onsave);
 				else{
