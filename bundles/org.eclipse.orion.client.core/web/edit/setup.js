@@ -193,37 +193,44 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				} else {
 					if (!editor.getTextView()) {
 						editor.installTextView();
-						dispatcher.wire(); // not cool.. need a better way
 					}
 					var fullPathName = fileURI;
 					var progressTimeout = setTimeout(function() {
 						editor.setInput(fullPathName, "Fetching " + fullPathName, null);
 					}, 800); // wait 800ms before displaying
-					fileClient.read(fileURI).then(
-						dojo.hitch(this, function(contents) {
-							clearTimeout(progressTimeout);
-							editor.highlightAnnotations();
-							editor.setInput(fileURI, null, contents);
-							editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
-						}),
-						dojo.hitch(this, function(error) {
+					var load = dojo.hitch(this, function(metadata, contents) {
+						// Metadata
+						this._fileMetadata = metadata;
+						this.setTitle(metadata.Location);
+						syntaxHighlighter.highlight(fileURI, editor, metadata);
+						editor.highlightAnnotations();
+						
+						// Contents
+						clearTimeout(progressTimeout);
+						editor.setInput(fileURI, null, contents);
+						editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
+					});
+					
+					var metadata, contents;
+					fileClient.read(fileURI).then(function(result) {
+							contents = result;
+							if (metadata) {
+								load(metadata, contents);
+							}
+						}, dojo.hitch(this, function(error) {
 							clearTimeout(progressTimeout);
 							editor.setInput(fullPathName, "An error occurred: " + error.message, null);
 							console.error("HTTP status code: ", error.status);
-						})
-					);
-					fileClient.read(fileURI, true).then(
-						dojo.hitch(this, function(metadata) {
-							this._fileMetadata = metadata;
-							this.setTitle(metadata.Location);
-							syntaxHighlighter.highlight(fileURI, editor, metadata);
-							editor.highlightAnnotations();
-						}),
-						dojo.hitch(this, function(error) {
+						}));
+					fileClient.read(fileURI, true).then(function(result) {
+							metadata = result;
+							if (contents) {
+								load(metadata, contents);
+							}
+						}, dojo.hitch(this, function(error) {
 							console.error("Error loading file metadata: " + error.message);
 							this.setTitle(fileURI);
-						})
-					);
+						}));
 				}
 				this.lastFilePath = fileURI;
 			} else {
