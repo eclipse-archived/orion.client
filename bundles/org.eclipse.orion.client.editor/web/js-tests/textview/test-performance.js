@@ -28,8 +28,16 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 	function setupView(text, lang) {
 		var options = null;
 		if (!mSetup.view) {
+			/* When sync is used to create the view the stylesheet should not include paths (as they are loaded in style elements and relative to the html) */
 			options = {
 				sync: true,
+				stylesheet: [
+					"/orion/textview/textview.css", 
+					"/orion/textview/rulers.css", 
+					"/orion/textview/annotations.css", 
+					"/examples/textview/textstyler.css", 
+					"/examples/editor/htmlStyles.css"
+				],
 				fullSelection: true,
 				tabSize: 4
 			};
