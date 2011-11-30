@@ -19,6 +19,10 @@ define(['orion/edit/dispatcher'], function() {
 	function Dispatcher(serviceRegistry, editor) {
 		this.serviceRegistry = serviceRegistry;
 		this.editor = editor;
+		var self = this;
+		this.editor.addEventListener("TextViewInstalled", function() {
+			self.wire();
+		});
 	}
 	Dispatcher.prototype = /** @lends orion.edit.Dispatcher.prototype */ {
 		wire: function() {
@@ -30,18 +34,19 @@ define(['orion/edit/dispatcher'], function() {
 		},
 		_wireService: function(serviceReference, service) {
 			var types = serviceReference.getProperty("types");
+			var textView = this.editor.getTextView();
 			if (!types) { return; }
 			for (var i=0; i < types.length; i++) {
 				var type = types[i];
-				var method = service["on" + type];	// bad convention
+				var method = service["on" + type];
 				if (method) {
-					this._wireServiceMethod(service, method, type);
+					this._wireServiceMethod(service, method, textView, type);
 				}
 			}
 		},
-		_wireServiceMethod: function(service, serviceMethod, type) {
+		_wireServiceMethod: function(service, serviceMethod, textView, type) {
 			//console.debug("Connect " + type + " -> " + ("on" + type));
-			this.editor.getTextView().addEventListener(type, function(event) {
+			textView.addEventListener(type, function(event) {
 				serviceMethod(event).then(/*No return value*/);
 			}, false);
 		}
