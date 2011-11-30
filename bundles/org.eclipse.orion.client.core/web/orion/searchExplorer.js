@@ -12,7 +12,7 @@
 /*global define console*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands'], function(require, dojo, dijit, mExplorer, mUtil, mFileClient, mCommands) {
+define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils'], function(require, dojo, dijit, mExplorer, mUtil, mFileClient, mCommands, mSearchUtils) {
 
 	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, queryStr, explorer) {
 		this.registry= serviceRegistry;
@@ -35,7 +35,15 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.modelLocHash_flat = [];
 		this._lineDelimiter = "\n"; 
 		this.explorer = explorer;
-		this._parseQueryStr(queryStr);
+		this.queryObj = mSearchUtils.parseQueryStr(queryStr);
+		
+		var pageTitle = dojo.byId("pageTitle");
+		if(pageTitle && this.queryObj.searchStrTitle && this.explorer.numberOnPage > 0){
+			var startNumber = this.queryObj.start + 1;
+			var endNumber = startNumber + this.explorer.numberOnPage - 1;
+			pageTitle.innerHTML = "Files " + "<b>" + startNumber + "-"  + endNumber + "</b>" + " of " + this.explorer.totalNumber + 
+			" found by keyword " + "<b>" + this.queryObj.searchStrTitle + "</b>" + " in:";
+		}
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
 	
@@ -79,74 +87,25 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
-	SearchResultModel.prototype._parseLocationAndSearchStr = function(searchStr) {
-		this.locationAndSearchStr = searchStr;
-		var hasLocation = (searchStr.indexOf("+Location:") > -1);
-		this.searchLocation = "";
-		if(hasLocation){
-			var splitStr = searchStr.split("+Location:");
-			if(splitStr.length === 2){
-				this.searchLocation = splitStr[1];
-				searchStr = splitStr[0];
-			}
-		}
-		this.OriginalSearchString = searchStr.split("\\").join("");
-		this._parseSearchStr(searchStr);
+	SearchResultModel.prototype.indexToLocation = function(index){
+		var fileModel = this.indexedFileItems()[index];
+		return fileModel.location;
 	};
 	
-	SearchResultModel.prototype._parseSearchStr = function(searchStr) {
-		var hasStar = (searchStr.indexOf("*") > -1);
-		var hasQMark = (searchStr.indexOf("?") > -1);
-		if(hasStar){
-			searchStr = searchStr.split("*").join(".*");
-		}
-		if(hasQMark){
-			searchStr = searchStr.split("?").join(".");
-		}
-		if(!hasStar && !hasQMark){
-			this.searchStr =searchStr.split("\\").join("").toLowerCase();
-			this.wildCard = false;
-		} else {
-			this.searchStr =searchStr.toLowerCase();
-			var regexp = this.parseRegExp("/" + this.searchStr + "/");
-			if (regexp) {
-				var pattern = regexp.pattern;
-				var flags = regexp.flags;
-				flags = flags + (flags.indexOf("i") === -1 ? "i" : "");
-				this.regExp = {pattern: pattern, flags: flags};
-				this.wildCard = true;
-			}
-		}
-		this.searchStrLength = this.searchStr.length;
-	};
-	
-	SearchResultModel.prototype._parseQueryStr = function(queryStr) {
-		var splitQ = queryStr.split("?");
-		if(splitQ.length === 2){
-			queryStr = splitQ[1];
-		}
-		splitQ = queryStr.split("&");
-		this.start = 0;
-		this.rows = 20;
-		for(var i=0; i < splitQ.length; i++){
-			var splitparameters = splitQ[i].split("=");
-			if(splitparameters.length === 2){
-				if(splitparameters[0] === "q"){
-					this._parseLocationAndSearchStr(splitparameters[1]);
-				} else if(splitparameters[0] === "rows"){
-					this.rows = parseInt(splitparameters[1]);
-				} else if(splitparameters[0] === "start"){
-					this.start = parseInt(splitparameters[1]);
+	SearchResultModel.prototype.locationToIndex = function(location, setCurrentIndex){
+		var lookAt = this.indexedFileItems();
+		for(var i = 0 ; i < lookAt.length; i++){
+			if(lookAt[i].location == location){
+				if(setCurrentIndex){
+					this.currentFileIndex = i;
 				}
+				return i;
 			}
 		}
-		var pageTitle = dojo.byId("pageTitle");
-		if(pageTitle && this.OriginalSearchString && this.explorer.numberOnPage > 0){
-			var startNumber = this.start + 1;
-			var endNumber = startNumber + this.explorer.numberOnPage - 1;
-			pageTitle.innerHTML = "Files " + "<b>" + startNumber + "-"  + endNumber + "</b>" + " of " + this.explorer.totalNumber + 
-			" found by keyword " + "<b>" + this.OriginalSearchString + "</b>" + " in:";
+		if(setCurrentIndex){
+			this.currentFileIndex = 0;
 		}
+		return 0;
 	};
 	
 	SearchResultModel.prototype.setCurrent = function(currentFileIndex, currentDetailIndex) {
@@ -156,31 +115,38 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultModel.prototype.storeStatus = function() {
-		window.sessionStorage[this.searchStr + "_search_result_useFlatList"] = JSON.stringify(this.useFlatList);
-		window.sessionStorage[this.searchStr + "_search_result_currentFileIndex"] = JSON.stringify(this.currentFileIndex);
-		window.sessionStorage[this.searchStr + "_search_result_currentDetailIndex"] = JSON.stringify(this.currentDetailIndex);
+		window.sessionStorage["globa_search" + "_search_result_useFlatList"] = JSON.stringify(this.useFlatList);
+		window.sessionStorage[this.queryObj.queryStr + "_search_result_currentFileLocation"] = this.indexToLocation(this.currentFileIndex);
+		window.sessionStorage[this.queryObj.queryStr + "_search_result_currentDetailIndex"] = JSON.stringify(this.currentDetailIndex);
 	};
 	
-	SearchResultModel.prototype.restoreStatus = function() {
+	SearchResultModel.prototype.restoreGlobalStatus = function() {
 		this.useFlatList = true;
-		var useFlatList = window.sessionStorage[this.searchStr + "_search_result_useFlatList"];
+		var useFlatList = window.sessionStorage["globa_search" + "_search_result_useFlatList"];
+		if (typeof useFlatList=== "string") {
+			if (useFlatList.length > 0) {
+				this.useFlatList= JSON.parse(useFlatList);
+			} 
+		}
+	},
+	
+	SearchResultModel.prototype.restoreLocationStatus = function() {
+		this.useFlatList = true;
+		var useFlatList = window.sessionStorage["globa_search" + "_search_result_useFlatList"];
 		if (typeof useFlatList=== "string") {
 			if (useFlatList.length > 0) {
 				this.useFlatList= JSON.parse(useFlatList);
 			} 
 		}
 		this.currentFileIndex = 0;
-		var currentFileIndex = window.sessionStorage[this.searchStr + "_search_result_currentFileIndex"];
-		if (typeof currentFileIndex=== "string") {
-			if (currentFileIndex.length > 0) {
-				this.currentFileIndex= JSON.parse(currentFileIndex);
+		var currentFileLocation = window.sessionStorage[this.queryObj.queryStr + "_search_result_currentFileLocation"];
+		if (typeof currentFileLocation=== "string") {
+			if (currentFileLocation.length > 0) {
+				this.currentFileIndex= this.locationToIndex(currentFileLocation);
 			} 
 		}
-		if(this.currentFileIndex < 0 || this.currentFileIndex >= this.indexedFileItems().length){
-			this.currentFileIndex = 0;
-		}
 		this.currentDetailIndex = 0;
-		var currentDetailIndex = window.sessionStorage[this.searchStr + "_search_result_currentDetailIndex"];
+		var currentDetailIndex = window.sessionStorage[this.queryObj.queryStr + "_search_result_currentDetailIndex"];
 		if (typeof currentDetailIndex=== "string") {
 			if (currentDetailIndex.length > 0) {
 				this.currentDetailIndex= JSON.parse(currentDetailIndex);
@@ -299,12 +265,13 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultModel.prototype.buildResultModel = function(onComplete){
-		this.restoreStatus();
+		this.restoreGlobalStatus();
 		if(this.useFlatList){
 			this.buildFlatModel();
 		} else {
 			this.buildTreeModel(true);
 		}
+		this.restoreLocationStatus();
 		onComplete();
 	};
 	
@@ -369,6 +336,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			//Add the search result (file) as leaf node
 			var childNode = {parent: this._listRoot, type: "file", name: this._resultLocation[i].name, linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location};
 			childNode.fullPathName = this.fullPathNameByMeta(this._resultLocation[i].metaData.Parents);
+			childNode.parentLocation = this._resultLocation[i].metaData.Parents[0].Location;
 			this.modelLocHash_flat[childNode.location] = childNode;
 			this._listRoot.children.push(childNode);
 			this.indexedFileItems_flat.push(childNode);
@@ -512,7 +480,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			} else {
 				result.push({startIndex: i});
 				found = true;
-				startIndex = i + this.searchStrLength;
+				startIndex = i + this.queryObj.inFileQuery.searchStrLength;
 			}
 		}
 		if(found) {
@@ -527,7 +495,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var found = false;
 		var result = [];
 		while(true){
-			var regExResult = this._findRegExp(lineString, this.regExp.pattern, this.regExp.flags, startIndex);
+			var regExResult = this._findRegExp(lineString, this.queryObj.inFileQuery.regExp.pattern, this.queryObj.inFileQuery.regExp.flags, startIndex);
 			if(regExResult){
 				result.push(regExResult);
 				found = true;
@@ -542,7 +510,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return null;
 	};
 	
-	SearchResultModel.prototype.searchWithinFile = function( fileModelNode, fileContentText, searchStr){
+	SearchResultModel.prototype.searchWithinFile = function( fileModelNode, fileContentText){
 		var fileContents = fileContentText.split(this._lineDelimiter);
 		if(fileModelNode){
 			fileModelNode.children = [];
@@ -552,10 +520,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				if(lineStringOrigin && lineStringOrigin.length > 0){
 					var lineString = lineStringOrigin.toLowerCase();
 					var result;
-					if(this.wildCard){
+					if(this.queryObj.inFileQuery.wildCard){
 						result = this.searchOnelineRegEx(lineString);
 					} else {
-						result = this.searchOnelineLiteral(lineString, searchStr);
+						result = this.searchOnelineLiteral(lineString, this.queryObj.inFileQuery.searchStr);
 					}
 					if(result){
 						var lineNumber = i+1;
@@ -590,7 +558,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		} else if (parentItem.type === "file" && parentItem.location) {
 			this.fileClient.read(parentItem.location).then(
 					dojo.hitch(this, function(jsonData) {
-						  this.searchWithinFile(parentItem, jsonData, this.searchStr);
+						  this.searchWithinFile(parentItem, jsonData);
 						  var itemId = this.getId(parentItem);
 						  var fileUIItem = dojo.byId(itemId);
 						  if(fileUIItem){
@@ -695,7 +663,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					var linkSpan = dojo.create("span", null, link, "only");
 					dojo.place(document.createTextNode(item.lineNumber), linkSpan, "last");
 					var startIndex = 0;
-					var gap = this.explorer.model.searchStrLength;
+					var gap = this.explorer.model.queryObj.inFileQuery.searchStrLength;
 					for(var i = 0; i < item.matches.length; i++){
 						if(startIndex >= item.name.length)
 							break;
@@ -703,7 +671,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 							dojo.place(document.createTextNode(item.name.substring(startIndex, item.matches[i].startIndex)), linkSpan, "last");
 						}
 						var matchSegBold = dojo.create("b", null, linkSpan, "last");
-						if(this.explorer.model.wildCard){
+						if(this.explorer.model.queryObj.inFileQuery.wildCard){
 							gap = item.matches[i].length;
 						}
 						dojo.place(document.createTextNode(item.name.substring(item.matches[i].startIndex, item.matches[i].startIndex + gap)), matchSegBold, "only");
@@ -719,7 +687,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			if(this.explorer.model.useFlatList && item.type ===  "file"){
 				col = document.createElement('td');
 				span = dojo.create("span", null, col, "only");
-				dojo.place(document.createTextNode(item.fullPathName), span, "only");
+				var qParams = mSearchUtils.copyQueryParams(this.explorer.model.queryObj);
+				qParams.location = item.parentLocation;
+				qParams.start = 0;
+				var href =  mSearchUtils.generateSearchHref(qParams);
+				link = dojo.create("a", {className: "navlink", id: tableRow.id+"LocationColumn", href: href}, span, "last");
+				dojo.place(document.createTextNode(item.fullPathName), link, "only");
 				return col;
 			}
 		}
@@ -773,12 +746,14 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			imageClass : "core-sprite-leftarrow",
 			id : "orion.search.prevPage",
 			hrefCallback : function() {
-				var prevPage = that.caculatePrevPage(that.model.start, that.model.rows, that.totalNumber);
-				return require.toUrl("search/search.html") + "#" + "?rows=" + that.model.rows + "&start=" + prevPage.start + "&q=" + that.model.locationAndSearchStr;
+				var prevPage = that.caculatePrevPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
+				var qParams = mSearchUtils.copyQueryParams(that.model.queryObj);
+				qParams.start = prevPage.start;
+				return mSearchUtils.generateSearchHref(qParams);
 			},
 			visibleWhen : function(item) {
-				var prevPage = that.caculatePrevPage(that.model.start, that.model.rows, that.totalNumber);
-				return (prevPage.start !== that.model.start);
+				var prevPage = that.caculatePrevPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
+				return (prevPage.start !== that.model.queryObj.start);
 			}
 		});
 		var nextPage = new mCommands.Command({
@@ -787,12 +762,14 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			imageClass : "core-sprite-rightarrow",
 			id : "orion.search.nextPage",
 			hrefCallback : function() {
-				var nextPage = that.caculateNextPage(that.model.start, that.model.rows, that.totalNumber);
-				return require.toUrl("search/search.html") + "#" + "?rows=" + that.model.rows + "&start=" + nextPage.start + "&q=" + that.model.locationAndSearchStr;
+				var nextPage = that.caculateNextPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
+				var qParams = mSearchUtils.copyQueryParams(that.model.queryObj);
+				qParams.start = nextPage.start;
+				return mSearchUtils.generateSearchHref(qParams);
 			},
 			visibleWhen : function(item) {
-				var nextPage = that.caculateNextPage(that.model.start, that.model.rows, that.totalNumber);
-				return (nextPage.start !== that.model.start);
+				var nextPage = that.caculateNextPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
+				return (nextPage.start !== that.model.queryObj.start);
 			}
 		});
 		var nextResultCommand = new mCommands.Command({
@@ -889,13 +866,14 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		if(this.model.useFlatList === flatList){
 			return;
 		}
+		var currentFileLocation = this.model.indexToLocation(this.model.currentFileIndex);
 		this.model.useFlatList = flatList;
 		if(this.model.useFlatList){
 			this.model.buildFlatModel();
 		} else {
 			this.model.buildTreeModel(true);
 		}
-		this.model.convertFileIndex();
+		this.model.locationToIndex(currentFileLocation, true);
 		this.model.storeStatus();
 		this.createTree(this.parentNode, this.model);
 		this.gotoCurrent();

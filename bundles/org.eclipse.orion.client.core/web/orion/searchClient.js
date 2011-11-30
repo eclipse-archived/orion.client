@@ -13,7 +13,7 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExplorer', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(require, dojo, dijit, mAuth, mUtil, mExplorer){
+define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExplorer', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(require, dojo, dijit, mAuth, mUtil, mExplorer, mSearchUtils){
 
 	/**
 	 * Creates a new search client.
@@ -89,7 +89,11 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 				var wildcard= (/\*$/.test(nameQuery) ? "" : "*");
 				return "?rows=100&start=0&q=" + "Name:" + this._luceneEscape(nameQuery, true) + wildcard;
 			}
-			return "?sort=Path asc&rows=40&start=0&q=" + this._luceneEscape(query, true) + (this.location ? "+Location:" + this.location + "*" : "");
+			return  mSearchUtils.generateSearchQuery({sort: "Path asc",
+													 rows: 40,
+													 start: 0,
+													 searchStr: this._luceneEscape(query, true),
+													 location: this.location});
 		},
 		/**
 		 * Escapes all characters in the string that require escaping in Lucene queries.
