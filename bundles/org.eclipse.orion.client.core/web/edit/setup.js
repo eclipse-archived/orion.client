@@ -219,10 +219,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 					});
 					
-					var metadata, contents;
+					var metadata = null, contents = null;
 					fileClient.read(fileURI).then(function(result) {
 							contents = result;
-							if (metadata) {
+							if (metadata !== null) {
 								load(metadata, contents);
 							}
 						}, dojo.hitch(this, function(error) {
@@ -232,7 +232,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						}));
 					fileClient.read(fileURI, true).then(function(result) {
 							metadata = result;
-							if (contents) {
+							if (contents !== null) {
 								load(metadata, contents);
 							}
 						}, dojo.hitch(this, function(error) {
