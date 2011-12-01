@@ -37,13 +37,13 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 		 * @param {Boolean} [generateHeading] generate a heading for the results
 		 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
 		 * @param {Boolean} [hideSummaries] Don't show the summary of what matched beside each result.
-		 * @param {Boolean} [useFlatList] Use flat list to show the result, other wise use a tree structure.
+		 * @param {Boolean} [useSimpleFormat] Use simple format that only shows the file name to show the result, other wise use a complex format with search details.
 		 */
-		search: function(resultsNode, query, excludeFile,  generateHeadingAndSaveLink, onResultReady,  hideSummaries, useFlatList) {
+		search: function(resultsNode, query, excludeFile,  generateHeadingAndSaveLink, onResultReady,  hideSummaries, useSimpleFormat) {
 			this._fileService.search(query).then(
 				dojo.hitch(this, function(jsonData) {
 					this.showSearchResult(resultsNode, query, excludeFile, generateHeadingAndSaveLink, onResultReady, 
-							hideSummaries, useFlatList, jsonData); 
+							hideSummaries, useSimpleFormat, jsonData); 
 				})
 			);
 		},
@@ -140,15 +140,15 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 			return div;
 		},
 		
-		showSearchResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, useFlatList, jsonData) {
-			if(useFlatList) {
-				this.showSearchResultInList(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData);
+		showSearchResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, useSimpleFormat, jsonData) {
+			if(useSimpleFormat) {
+				this.showSimpleResult(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData);
 			} else {
-				this.showSearchResultInTree(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData);
+				this.showComplexResult(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData);
 			}
 		},
 		
-		showSearchResultInTree: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
+		showComplexResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
 			var nonhash= window.location.href.split('#')[0];
 			var foundValidHit = false;
 			var resultLocation = [];
@@ -171,7 +171,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 						} else {
 							loc = hit.Location;
 						}
-						resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, name: hit.Name});
+						resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, name: hit.Name, lastModified: hit.LastModified});
 						
 					}
 				}
@@ -189,7 +189,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 			}
 		},
 		
-		showSearchResultInList: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
+		showSimpleResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
 			var nonhash= window.location.href.split('#')[0];
 			var foundValidHit = false;
 			dojo.empty(resultsNode);
