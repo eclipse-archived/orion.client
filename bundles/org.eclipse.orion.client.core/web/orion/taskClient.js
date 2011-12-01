@@ -95,8 +95,11 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			else
 				_registreTaskChangeListener(service, listener, [longpollingId]);
 			
-		}, function(){
-			_registreTaskChangeListener(service, listener, [longpollingId]);
+		}, function(error){
+			if("timeout"===error.dojoType)				
+				_registreTaskChangeListener(service, listener, [longpollingId]);
+			else
+				setTimeout(function(){_registreTaskChangeListener(service, listener, [longpollingId]);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
 		});
 	}
 	
