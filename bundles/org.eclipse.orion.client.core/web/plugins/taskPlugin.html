@@ -23,6 +23,25 @@
 						handleAs: "json",
 						timeout: 15000
 					});
+				},
+				getTasksLongpolling: function(longpollingId){
+					
+					var args = {
+							Longpolling: true,
+						}
+					if(longpollingId){
+						args.LongpollingId = longpollingId;
+					}
+					
+					return dojo.xhrGet({
+						url: base ,
+						content: args,
+						headers: {
+							"Orion-Version": "1"
+						},
+						handleAs: "json",
+						timeout: 70000
+					});
 				}
 			}, {
 				name : "Tasks",

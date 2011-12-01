@@ -34,15 +34,10 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 			
 			var taskTable = new mTaskTable.TasksExplorer(serviceRegistry, selection, "tasks-lisk", "pageActions", "selectionTools");
 			
-			loadTasks(taskClient, taskTable);
+			taskClient.registreTaskChangeListener(function(taskList){
+				dojo.hitch(taskTable, taskTable.mergeTasks)(taskList);
+			});
 			
-			function loadTasks(){
-				taskClient.getTasks().then(	function(taskList){
-					dojo.hitch(taskTable, taskTable.loadTasks)(taskList);
-					setTimeout(loadTasks, 2000); //TODO this is temporary, we should create a long-polling update
-				});
-			}
-
 		});
 	});
 	
