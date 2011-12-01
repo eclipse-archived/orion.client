@@ -122,7 +122,7 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND) {
 							editor.moveSelection(result.index, result.index+result.length);
 							self._incrementalFindIgnoreSelection = false;
 						} else {
-							editor.reportStatus("Incremental find: " + prefix + " (not found)", true);
+							editor.reportStatus("Incremental find: " + prefix + " (not found)", "error");
 							self._incrementalFindSuccess = false;
 						}
 						e.text = null;
@@ -211,7 +211,7 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND) {
 							this._incrementalFindIgnoreSelection = false;
 							editor.reportStatus("Incremental find: " + prefix);
 						} else {
-							editor.reportStatus("Incremental find: " + prefix + " (not found)", true);
+							editor.reportStatus("Incremental find: " + prefix + " (not found)", "error");
 							this._incrementalFindSuccess = false;
 						}
 					}
@@ -241,7 +241,7 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND) {
 						editor.moveSelection(index,index+prefix.length);
 						this._incrementalFindIgnoreSelection = false;
 					} else {
-						editor.reportStatus("Incremental find: " + prefix + " (not found)", true);
+						editor.reportStatus("Incremental find: " + prefix + " (not found)", "error");
 					}
 					return true;
 				}
@@ -509,7 +509,7 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND) {
 					editor.moveSelection(index, index + prefix.length);
 					this._incrementalFindIgnoreSelection = false;
 				} else {
-					editor.reportStatus("Incremental find: " + prefix + " (not found)", true);	
+					editor.reportStatus("Incremental find: " + prefix + " (not found)", "error");
 					this._incrementalFindSuccess = false;
 				}
 				return true;
@@ -536,7 +536,7 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND) {
 					this._incrementalFindIgnoreSelection = false;
 					this.editor.reportStatus("Incremental find: " + prefix);
 				} else {
-					editor.reportStatus("Incremental find: " + prefix + " (not found)", true);
+					editor.reportStatus("Incremental find: " + prefix + " (not found)", "error");
 					this._incrementalFindSuccess = false;
 				}
 				return true;

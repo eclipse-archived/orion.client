@@ -91,11 +91,11 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 		/**
 		 * @private
 		 */
-		reportStatus: function(message, isError, isProgress) {
+		reportStatus: function(message, type) {
 			if (this._statusReporter) {
-				this._statusReporter(message, isError, isProgress);
+				this._statusReporter(message, type);
 			} else {
-				window.alert(isError ? "ERROR: " + message : message);
+				window.alert(type === "error" ? "ERROR: " + message : message);
 			}
 		},
 		
