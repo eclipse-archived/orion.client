@@ -20,13 +20,44 @@ define([ 'require', 'dojo', 'orion/explorer' ], function(require, dojo,
 			this.toolbarId = toolbarId;
 			this.selectionToolsId = selectionToolsId;
 			this.checkbox = true;
-			this.renderer = new exports.TasksRenderer({}, this);
+			this.renderer = new exports.TasksRenderer({checkbox: true}, this);
 		};
 
 		TasksExplorer.prototype = new mExplorer.Explorer();
 		
 		TasksExplorer.prototype.loadTasks = function(taskList){
+			this.tasks = taskList;
 			this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, taskList.Children));
+		};
+		
+		TasksExplorer.prototype.mergeTasks = function(tasksToMerge){
+			if(!this.tasks){
+				this.loadTasks(tasksToMerge);
+				return;
+			}
+			if(!tasksToMerge || !tasksToMerge.Children || tasksToMerge.Children.length===0){
+				return;
+			}
+			var newTasks = [];
+			for(var j=0; j<tasksToMerge.Children.length; j++){
+				var taskToMerge = tasksToMerge.Children[j];
+				var foundTask = false;
+				for(var i=0; i<this.tasks.Children.length; i++){
+					var task = this.tasks.Children[i];
+					if(task.Location===taskToMerge.Location){
+						this.tasks.Children[i] = taskToMerge;
+						foundTask = true;
+						break;
+					}
+				}
+				if(!foundTask){
+					newTasks.push(taskToMerge);
+				}
+			}
+			for(var i=0; i<newTasks.length; i++)
+				this.tasks.Children.unshift(newTasks[i]);
+			this.loadTasks(this.tasks);
+			
 		};
 
 		return TasksExplorer;
