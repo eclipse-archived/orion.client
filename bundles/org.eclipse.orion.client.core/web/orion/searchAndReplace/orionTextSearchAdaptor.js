@@ -47,28 +47,28 @@ orion.OrionTextSearchAdaptor = (function() {
 		},
 		
 		adaptReplaceAllStart: function(){
-			this._editor.reportStatus("", false);
-			this._editor.reportStatus("Replacing all...", false, true);
+			this._editor.reportStatus("");
+			this._editor.reportStatus("Replacing all...", "progress");
 		},
 		
 		adaptReplaceAllEnd: function(succeed, number){
-			this._editor.reportStatus("", false, true);
+			this._editor.reportStatus("", "progress");
 			if(succeed) {
-				this._editor.reportStatus("Replaced "+number+" matches", false);
+				this._editor.reportStatus("Replaced "+number+" matches");
 			} else {
-				this._editor.reportStatus("Nothing replaced", true);
+				this._editor.reportStatus("Nothing replaced", "error");
 			}
 		},
 		
 		adaptFind: function(startIndex, endIndex, reverse, callBack, noStatus) {
 			if(startIndex === -1){
 				if(!noStatus) {
-					this._editor.reportStatus("Not found", true);
+					this._editor.reportStatus("Not found", "error");
 				}
 			}
 			else {
 				if(!noStatus) {
-					this._editor.reportStatus("", false);
+					this._editor.reportStatus("");
 				}
 				this._editor.moveSelection(startIndex, endIndex, callBack);
 			}
