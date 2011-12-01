@@ -154,6 +154,32 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 		t();
 //		return d;
 	};
+	
+	tests.testAppendText = function () {
+//		var d = new dojo.Deferred();
+		var buffer = "", i;
+		for (i = 0; i < 512;i++) {
+			buffer += "var id; function() {return 30;} var foo; ";
+		}
+
+		var max = 10;
+		var view = setupView(buffer, "js");
+		var start = new Date().getTime();
+		function t() {
+			var charCount = view.getModel().getCharCount();
+			view.setText("a", charCount, charCount);
+			if (--max > 0) {			
+				setTimeout(t, 0);
+			} else {
+				log ("time(AppendText)=", (new Date().getTime() - start));
+//				d.resolve(true);
+			}
+		}
+		view.focus();
+		t();
+//		return d;
+	};
+	
 	tests.testChangeText = function () {
 //		var d = new dojo.Deferred();
 		var buffer = "", i;
