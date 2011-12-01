@@ -128,6 +128,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				this.useFlatList= JSON.parse(useFlatList);
 			} 
 		}
+		this.sortByName = (this.queryObj.sort.indexOf("Name") > -1);
 	},
 	
 	SearchResultModel.prototype.restoreLocationStatus = function() {
@@ -925,6 +926,14 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				that.switchTo(!checked);
 			}
 		}));
+		
+		newMenu.addChild(new dijit.CheckedMenuItem({
+			label: "Sort by Name",
+			checked: that.model.sortByName,
+			onChange : function(checked) {
+				that.sortWithName(checked);
+			}
+		}));
 		var menuButton = new dijit.form.DropDownButton({
 			label : "Options",
 			dropDown : newMenu
@@ -970,6 +979,18 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		} else {
 			this.model.buildTreeModel(true, callBack);
 		}
+	};
+	
+	SearchResultExplorer.prototype.sortWithName = function(byName) {
+		if(this.model.sortByName === byName){
+			return;
+		}
+		var qParams = mSearchUtils.copyQueryParams(this.model.queryObj);
+		qParams.sort = byName ? "Name asc" : "Path asc";
+		qParams.start = 0;
+		var href =  mSearchUtils.generateSearchHref(qParams);
+		//window.open(href);
+		window.location.href = href;
 	};
 	
 	SearchResultExplorer.prototype.expandAll = function() {
