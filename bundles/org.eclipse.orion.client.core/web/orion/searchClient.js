@@ -179,14 +179,8 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 					onResultReady(resultsNode);
 				}
 			}
-			if (!foundValidHit) {
-				var div = dojo.place("<div>No matches found for </div>", resultsNode, "only");
-				var b = dojo.create("b", null, div, "last");
-				dojo.place(document.createTextNode(token), b, "only");
-			} else {
-				var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query, jsonData.response.numFound);
-				explorer.startUp();
-			}
+			var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query, jsonData.response.numFound);
+			explorer.startUp();
 		},
 		
 		showSimpleResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {

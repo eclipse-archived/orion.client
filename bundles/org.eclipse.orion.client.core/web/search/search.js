@@ -28,7 +28,6 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-	
 			// Favorites
 			new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 
@@ -40,11 +39,15 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
 			searchResultsGenerator.loadResults(dojo.hash());
 			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");
 			initTitleBreadCrumb(fileClient, searcher);
+			//Work arround: we want to make sure the page navigation span is cleaned first
+			dojo.empty("pageNavigationActions");
 			//every time the user manually changes the hash, we need to load the results with that name
 			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
 				initTitleBreadCrumb(fileClient, searcher);
 				searchResultsGenerator.loadResults(dojo.hash());
 				mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");   
+				//Work arround: we want to make sure the page navigation span is cleaned first
+				dojo.empty("pageNavigationActions");
 			});
 		});
 	});
