@@ -189,7 +189,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var document = this._frameDocument;
 			for (var lineIndex=0; lineIndex<lineCount; lineIndex++) {
 				var child = this._getLineNode(lineIndex), dummy = null;
-				if (!child || child.lineChanged) {
+				if (!child || child.lineChanged || child.lineRemoved) {
 					child = dummy = this._createLine(clientDiv, null, document, lineIndex, model);
 				}
 				var rect = this._getLineBoundingClientRect(child);
@@ -2894,7 +2894,13 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		},
 		
 		/************************************ Internals ******************************************/
-		_applyStyle: function(style, node) {
+		_applyStyle: function(style, node, reset) {
+			if (reset) {
+				var attrs = node.attributes;
+				for (var i= attrs.length; i-->0;) {
+					node.removeAttributeNode(attrs[i]); 
+				}
+			}
 			if (!style) {
 				return;
 			}
@@ -2983,7 +2989,17 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (h4 > h3) {
 				fontStyle = 3;
 			}
-			this._largestFontStyle = fontStyle;
+			var style;
+			if (fontStyle !== 0) {
+				style = {style: {}};
+				if ((fontStyle & 1) !== 0) {
+					style.style.fontStyle = "italic";
+				}
+				if ((fontStyle & 2) !== 0) {
+					style.style.fontWeight = "bold";
+				}
+			}
+			this._largestFontStyle = style;
 			parent.removeChild(line);
 			return lineHeight;
 		},
@@ -3028,35 +3044,32 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			return true;
 		},
 		_clone: function (obj) {
-			if (typeof obj === "object" && obj.slice) {
-				/*Note that this code is only works because of the limited of types used in TextViewOptions */
+			/*Note that this code only works because of the limited types used in TextViewOptions */
+			if (obj instanceof Array) {
 				return obj.slice(0);
 			}
 			return obj;
 		},
-		_compare: function(obj1, obj2) {
-			if (obj1 === obj2) { return true; }
-			if (typeof obj1 === "object" && obj1.slice && typeof obj1 === typeof obj2) {
-				if (obj1.length !== obj2.length) { return false; }
-				for (var i = 0; i < obj1.length; i++) {
-					if (obj1[i] !== obj2[i]) {
+		_compare: function (s1, s2) {
+			if (s1 === s2) { return true; }
+			if (s1 && !s2 || !s1 && s2) { return false; }
+			if ((s1 && s1.constructor === String) || (s2 && s2.constructor === String)) { return false; }
+			if (s1 instanceof Array || s2 instanceof Array) {
+				if (!(s1 instanceof Array && s2 instanceof Array)) { return false; }
+				if (s1.length !== s2.length) { return false; }
+				for (var i = 0; i < s1.length; i++) {
+					if (!this._compare(s1[i], s2[i])) {
 						return false;
 					}
 				}
 				return true;
 			}
-			return false;
-		},
-		_compareStyle: function (s1, s2) {
-			if (s1 === s2) { return true; }
-			if (s1 && !s2 || !s1 && s2) { return false; }
-			if (s1.constructor === String || s2.constructor === String) { return false; }
-			if (!(s1 instanceof Object) || !(s1 instanceof Object)) { return false; }
+			if (!(s1 instanceof Object) || !(s2 instanceof Object)) { return false; }
 			var p;
 			for (p in s1) {
 				if (s1.hasOwnProperty(p)) {
 					if (!s2.hasOwnProperty(p)) { return false; }
-					if (!this._compareStyle(s1[p], s2[p])) {return false; }
+					if (!this._compare(s1[p], s2[p])) {return false; }
 				}
 			}
 			for (p in s2) {
@@ -3302,22 +3315,20 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				{name: "paste",			defaultHandler: function() {return self._doPaste();}}
 			];
 		},
-		_createLine: function(parent, sibling, document, lineIndex, model) {
+		_createLine: function(parent, div, document, lineIndex, model) {
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
 			var e = {type:"LineStyle", textView: this, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart};
 			this.onLineStyle(e);
-			var lineDiv = document.createElement("DIV");
+			var lineDiv = div || document.createElement("DIV");
+			if (!div || !this._compare(div.viewStyle, e.style)) {
+				this._applyStyle(e.style, lineDiv, div);
+				lineDiv.viewStyle = e.style;
+			}
 			lineDiv.lineIndex = lineIndex;
-			this._applyStyle(e.style, lineDiv);
-			var ranges = [], range , span;
+			var ranges = [];
 			var data = {tabOffset: 0, ranges: ranges};
 			this._createRanges(e.ranges, lineText, 0, lineText.length, lineStart, data);
-			for (var i = 0; i < ranges.length; i++) {
-				range = ranges[i];
-				span = this._createSpan(lineDiv, document, range.text, range.style, range.ignoreChars);
-				lineDiv.appendChild(span);
-			}
 			
 			/*
 			* A trailing span with a whitespace is added for three different reasons:
@@ -3327,13 +3338,6 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			* selection at the end of the line when the line is fully selected. 
 			* 3. The height of a div with only an empty span is zero.
 			*/
-			var style = {style: {}};
-			if ((this._largestFontStyle & 1) !== 0) {
-				style.style.fontStyle = "italic";
-			}
-			if ((this._largestFontStyle & 2) !== 0) {
-				style.style.fontWeight = "bold";
-			}
 			var c = " ";
 			if (!this._fullSelection && isIE < 9) {
 				/* 
@@ -3353,10 +3357,73 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				*/
 				c = "\u200C";
 			}
-			span = this._createSpan(lineDiv, document, c, style, 1);
-			lineDiv.appendChild(span);
+			ranges.push({text: c, style: this._largestFontStyle, ignoreChar: 1});
 			
-			parent.insertBefore(lineDiv, sibling);
+			var range, span, style, oldSpan, oldStyle, text, oldText, end = 0, oldEnd = 0, next;
+			var changeCount, changeStart;
+			if (div) {
+				var modelChangedEvent = div.modelChangedEvent;
+				if (modelChangedEvent) {
+					if (modelChangedEvent.removedLineCount === 0 && modelChangedEvent.addedLineCount === 0) {
+						changeStart = modelChangedEvent.start - lineStart;
+						changeCount = modelChangedEvent.addedCharCount - modelChangedEvent.removedCharCount;
+					} else {
+						changeStart = -1;
+					}
+					delete div.modelChangedEvent;
+				}
+				oldSpan = div.firstChild;
+			}
+			for (var i = 0; i < ranges.length; i++) {
+				range = ranges[i];
+				text = range.text;
+				end += text.length;
+				style = range.style;
+				if (oldSpan) {
+					oldText = oldSpan.firstChild.data;
+					oldStyle = oldSpan.viewStyle;
+					if (oldText === text && this._compare(style, oldStyle)) {
+						oldEnd += oldText.length;
+						delete oldSpan._rectsCache;
+						span = oldSpan = oldSpan.nextSibling;
+						continue;
+					} else {
+						while (oldSpan) {
+							if (changeStart !== -1) {
+								var spanEnd = end;
+								if (spanEnd >= changeStart) {
+									spanEnd -= changeCount;
+								}
+								var length = oldSpan.firstChild.data.length;
+								if (oldEnd + length > spanEnd) { break; }
+								oldEnd += length;
+							}
+							next = oldSpan.nextSibling;
+							lineDiv.removeChild(oldSpan);
+							oldSpan = next;
+						}
+					}
+				}
+				span = this._createSpan(lineDiv, document, text, style, range.ignoreChars);
+				if (oldSpan) {
+					lineDiv.insertBefore(span, oldSpan);
+				} else {
+					lineDiv.appendChild(span);
+				}
+				if (div) {
+					div.lineWidth = undefined;
+				}
+			}
+			if (div) {
+				var tmp = span ? span.nextSibling : null;
+				while (tmp) {
+					next = tmp.nextSibling;
+					div.removeChild(tmp);
+					tmp = next;
+				}
+			} else {
+				parent.appendChild(lineDiv);
+			}
 			return lineDiv;
 		},
 		_createRanges: function(ranges, text, start, end, lineStart, data) {
@@ -3374,7 +3441,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 						if (start < styleStart) {
 							this._createRange(text, start, styleStart, null, data);
 						}
-						while (i + 1 < ranges.length && ranges[i + 1].start - lineStart === styleEnd && this._compareStyle(range.style, ranges[i + 1].style)) {
+						while (i + 1 < ranges.length && ranges[i + 1].start - lineStart === styleEnd && this._compare(range.style, ranges[i + 1].style)) {
 							range = ranges[i + 1];
 							styleEnd = Math.min(lineStart + end, range.end) - lineStart;
 							i++;
@@ -4765,7 +4832,14 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			while (child) {
 				var lineIndex = child.lineIndex;
 				if (startLine <= lineIndex && lineIndex <= startLine + removedLineCount) {
-					child.lineChanged = true;
+					if (startLine === lineIndex && !child.modelChangedEvent && !child.lineRemoved) {
+						child.modelChangedEvent = modelChangedEvent;
+						child.lineChanged = true;
+					} else {
+						child.lineRemoved = true;
+						child.lineChanged = false;
+						child.modelChangedEvent = null;
+					}
 				}
 				if (lineIndex > startLine + removedLineCount) {
 					child.lineIndex = lineIndex + addedLineCount - removedLineCount;
@@ -4808,7 +4882,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (clientDiv) {
 				var child = clientDiv.firstChild;
 				while (child) {
-					child.lineChanged = true;
+					child.lineRemoved = true;
 					child = child.nextSibling;
 				}
 				/*
@@ -5616,7 +5690,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				while (child) {
 					lineIndex = child.lineIndex;
 					var nextChild = child.nextSibling;
-					if (!(lineStart <= lineIndex && lineIndex <= lineEnd) || child.lineChanged || child.lineIndex === -1) {
+					if (!(lineStart <= lineIndex && lineIndex <= lineEnd) || child.lineRemoved || child.lineIndex === -1) {
 						if (this._mouseWheelLine === child) {
 							child.style.display = "none";
 							child.lineIndex = -1;
@@ -5636,6 +5710,10 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 						if (frag.firstChild) {
 							clientDiv.insertBefore(frag, child);
 							frag = document.createDocumentFragment();
+						}
+						if (child && child.lineChanged) {
+							child = this._createLine(frag, child, document, lineIndex, model);
+							child.lineChanged = false;
 						}
 						child = this._getLineNext(child);
 					}
