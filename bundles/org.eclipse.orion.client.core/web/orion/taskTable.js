@@ -77,11 +77,14 @@ define([ 'require', 'dojo', 'orion/explorer' ], function(require, dojo,
 			if (this.options['minimal'])
 				return;
 			
-			switch(col_no){		
+			switch(col_no){
 				case 0: 
+					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Name</h2>"});
+					break;
+				case 1: 
 					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Message</h2>"});
 					break;
-				case 1:
+				case 2:
 					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Status</h2>"});
 					break;
 			}
@@ -91,9 +94,16 @@ define([ 'require', 'dojo', 'orion/explorer' ], function(require, dojo,
 		TasksRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 			switch(col_no){
 			case 0:
-				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.Message});
+				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.Name});
+				var div = dojo.create("div", null, col, "only");
+				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
+				dojo.place(document.createTextNode(item.Name), link, "only");
+				return col;
 				break;
 			case 1:
+				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.Message});
+				break;
+			case 2:
 				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.Running ? "running" : "completed"});
 				break;
 			}
