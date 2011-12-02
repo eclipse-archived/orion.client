@@ -36,14 +36,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._lineDelimiter = "\n"; 
 		this.explorer = explorer;
 		this.queryObj = mSearchUtils.parseQueryStr(queryStr);
-		
-		var pageTitle = dojo.byId("pageTitle");
-		if(pageTitle && this.queryObj.searchStrTitle && this.explorer.numberOnPage > 0){
-			var startNumber = this.queryObj.start + 1;
-			var endNumber = startNumber + this.explorer.numberOnPage - 1;
-			pageTitle.innerHTML = "Files " + "<b>" + startNumber + "-"  + endNumber + "</b>" + " of " + this.explorer.totalNumber + 
-			" found by keyword " + "<b>" + this.queryObj.searchStrTitle + "</b>" + " in:";
-		}
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
 	
@@ -781,6 +773,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				qParams.start = 0;
 				var href =  mSearchUtils.generateSearchHref(qParams);
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"LocationColumn", href: href}, span, "last");
+				link.title = "Search again in this folder with \"" + this.explorer.model.queryObj.searchStrTitle + "\"";
 				dojo.place(document.createTextNode(item.fullPathName), link, "only");
 				return col;
 			}
@@ -950,7 +943,21 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultExplorer.prototype.startUp = function() {
 		var that = this;
-		this.reportStatus("Generating search result...");	
+		var pageTitle = dojo.byId("pageTitle");
+		if(pageTitle && this.model.queryObj.searchStrTitle){
+			if(this.numberOnPage < 1){
+				pageTitle.innerHTML = "<b>" + "No matches" + "</b>" +
+				" found by keyword " + "<b>" + this.model.queryObj.searchStrTitle + "</b>" + " in:";
+				return;
+			} else {
+				this.reportStatus("Generating search result...");	
+				var startNumber = this.model.queryObj.start + 1;
+				var endNumber = startNumber + this.numberOnPage - 1;
+				pageTitle.innerHTML = "Files " + "<b>" + startNumber + "-"  + endNumber + "</b>" + " of " + this.totalNumber + 
+				" found by keyword " + "<b>" + this.model.queryObj.searchStrTitle + "</b>" + " in:";
+			}
+		}
+		
 		this.model.loadOneFileMetaData(0, function(onComplete){
 			that.initCommands();
 			that.createTree(that.parentNode, that.model);
@@ -989,7 +996,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		qParams.sort = byName ? "Name asc" : "Path asc";
 		qParams.start = 0;
 		var href =  mSearchUtils.generateSearchHref(qParams);
-		//window.open(href);
 		window.location.href = href;
 	};
 	

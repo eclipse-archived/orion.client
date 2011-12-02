@@ -34,10 +34,10 @@ orion.searchUtils = orion.searchUtils || {};
  * @function
  */
 orion.searchUtils.parseQueryStr = function(queryStr) {
-	var splitQ = queryStr.split("?");
-	if(splitQ.length === 2){
-		queryStr = splitQ[1];
+	if(queryStr[0] === '?'){
+		queryStr = queryStr.substring(1);
 	}
+	
 	//var obj = dojo.queryToObject(queryStr);
 	
 	splitQ = queryStr.split("&");
