@@ -744,7 +744,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			link.id = this.name+"link";
 			var image = null;
 			if (this.tooltip) {
-				link.title = this.tooltip;
+				new dijit.Tooltip({
+					connectId: [link],
+					label: this.tooltip,
+					position: ["below", "above", "right", "left"] // otherwise defaults to right and obscures adjacent commands
+				});
 			}
 			if (forceText || !this.hasImage()) {
 				var text = window.document.createTextNode(this.name);
@@ -753,7 +757,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			} else {
 				image = new Image();
 				image.alt = this.name;
-				image.title = this.tooltip || this.name;
 				image.name = name;
 				image.id = name;
 			}
@@ -815,6 +818,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					dojo.addClass(image, this.imageClass);
 				} 
 				dojo.place(image, link, "last");
+				new dijit.Tooltip({
+					connectId: [image],
+					label: this.tooltip || this.name,
+					position: ["below", "above", "right", "left"] // otherwise defaults to right and obscures adjacent commands
+				});
 			} 
 			dojo.place(link, parent, "last");
 		},
