@@ -140,7 +140,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces
 	 * @property {String|String[]} [stylesheet] one or more stylesheet URIs for the view.
 	 * @property {String} [themeClass] the CSS class for the view theming.
-	 * @property {Number} [options.tabSize] The number of spaces in a tab.
+	 * @property {Number} [tabSize] The number of spaces in a tab.
 	 */
 	/**
 	 * Constructs a new text view.
