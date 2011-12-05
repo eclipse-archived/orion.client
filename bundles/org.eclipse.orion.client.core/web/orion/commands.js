@@ -822,19 +822,19 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			var link = dojo.create("a");
 			link.id = this.name+"link";
 			var image = null;
-			if (this.tooltip) {
-				new CommandTooltip({
-					connectId: [link],
-					label: this.tooltip,
-					position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
-					commandParent: parent,
-					commandService: context.commandService
-				});
-			}
 			if (forceText || !this.hasImage()) {
 				var text = window.document.createTextNode(this.name);
 				dojo.place(text, link, "last");
 				dojo.addClass(link, 'commandLink');
+				if (this.tooltip) {
+					new CommandTooltip({
+						connectId: [link],
+						label: this.tooltip,
+						position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
+						commandParent: parent,
+						commandService: context.commandService
+					});
+				}
 			} else {
 				image = new Image();
 				image.alt = this.name;
