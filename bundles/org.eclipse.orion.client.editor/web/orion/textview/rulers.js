@@ -467,6 +467,7 @@ define(['orion/textview/tooltip'], function(mTooltip) {
 	/**
 	 * Constructs a new line numbering ruler. 
 	 *
+	 * @param {orion.textview.AnnotationModel} annotationModel the annotation model for the ruler.
 	 * @param {String} [rulerLocation="left"] the location for the ruler.
 	 * @param {orion.textview.Style} [rulerStyle=undefined] the style for the ruler.
 	 * @param {orion.textview.Style} [oddStyle={style: {backgroundColor: "white"}] the style for lines with odd line index.
@@ -536,8 +537,9 @@ define(['orion/textview/tooltip'], function(mTooltip) {
 	 * @property {orion.textview.Style} [overviewStyle] the style for the annotation in the overview ruler.
 	 */ 
 	/**
-	 * Contructs a new annotation ruler. 
+	 * Constructs a new annotation ruler. 
 	 *
+	 * @param {orion.textview.AnnotationModel} annotationModel the annotation model for the ruler.
 	 * @param {String} [rulerLocation="left"] the location for the ruler.
 	 * @param {orion.textview.Style} [rulerStyle=undefined] the style for the ruler.
 	 * @param {orion.textview.Annotation} [defaultAnnotation] the default annotation.
@@ -557,7 +559,7 @@ define(['orion/textview/tooltip'], function(mTooltip) {
 	AnnotationRuler.prototype = new Ruler();
 	
 	/**
-	 * Contructs an overview ruler. 
+	 * Constructs a new overview ruler. 
 	 * <p>
 	 * The overview ruler is used in conjunction with a AnnotationRuler, for each annotation in the 
 	 * AnnotationRuler this ruler displays a mark in the overview. Clicking on the mark causes the 
@@ -620,7 +622,7 @@ define(['orion/textview/tooltip'], function(mTooltip) {
 	};
 
 	/**
-	 * Contructs an folding ruler. 
+	 * Constructs a new folding ruler. 
 	 *
 	 * @param {orion.textview.AnnotationModel} annotationModel the annotation model for the ruler.
 	 * @param {String} [rulerLocation="left"] the location for the ruler.
