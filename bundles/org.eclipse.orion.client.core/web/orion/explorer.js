@@ -256,7 +256,6 @@ exports.ExplorerRenderer = (function() {
 			dojo.connect(tableRow, "onmouseout", tableRow, function() {
 				var actionsColumn = dojo.byId(this.id+"actionswrapper");
 				dojo.style(actionsColumn, "visibility", "hidden");
-				commandService.commandsHidden(actionsWrapper);
 			});
 			
 
