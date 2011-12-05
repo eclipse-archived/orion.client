@@ -3357,7 +3357,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				*/
 				c = "\u200C";
 			}
-			ranges.push({text: c, style: this._largestFontStyle, ignoreChar: 1});
+			ranges.push({text: c, style: this._largestFontStyle, ignoreChars: 1});
 			
 			var range, span, style, oldSpan, oldStyle, text, oldText, end = 0, oldEnd = 0, next;
 			var changeCount, changeStart;
