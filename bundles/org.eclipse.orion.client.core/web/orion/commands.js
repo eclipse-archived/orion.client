@@ -54,6 +54,49 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			}
 		}
 	});
+	
+	/**
+	 * Override the dijit Tooltip to handle cases where the tooltip is not dismissing
+	 * when expected.
+	 * Case 1:  the tooltip should close when the command dom node that generated it is hidden.
+	 * Case 2:  the tooltip should always disappear when unhovered, regardless of who has the 
+	 * focus.  This allows the tooltip to properly disappear when we hit Esc to close the menu.  
+	 * We may have to revisit this when we do an accessibility pass.
+	 * 
+	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=360687
+	 */
+	var CommandTooltip = dojo.declare(dijit.Tooltip, {
+		constructor : function() {
+			this.inherited(arguments);
+			this.options = arguments[0] || {};
+		},
+		
+		_onUnHover: function(evt){
+			// comment out line below from dijit implementation
+			// if(this._focus){ return; }
+			// this is the rest of it
+			if(this._showTimer){
+				window.clearTimeout(this._showTimer);
+				delete this._showTimer;
+			}
+			this.close();
+		}, 
+		
+		postMixInProperties: function() {
+			this.inherited(arguments);
+			if (this.options.commandParent) {
+				if (dijit.byId(this.options.commandParent.id)) {
+					// this is a menu
+					dojo.connect(this.options.commandParent, "onClose", dojo.hitch(this, function() {this.close();}));
+				} else {
+					if (this.options.commandService) {
+						this.options.commandService.whenHidden(this.options.commandParent, 
+							dojo.hitch(this, function() {this.close();}));
+					}
+				}				
+			}
+		}
+	});
 
 	/**
 	 * Constructs a new command service with the given options.
@@ -668,6 +711,42 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		},
 		
 		/**
+		 * Notifies the command service that commands rendered in the specified dom node are now hidden.
+		 * 
+		 * @param domElementOrId {String|DOMElement} the element containing the rendered commands.  This should
+		 *  be a DOM element in which commands were previously rendered.
+		 */
+		commandsHidden: function(domElementOrId) {
+			var id = typeof domElementOrId === "string" ? domElementOrId : domElementOrId.id;
+			if (this.hidden && this.hidden[id]) {
+				var notifyList = this.hidden[id];
+				for (var i=0; i<notifyList.length; i++) {
+					if (typeof notifyList[i] === "function") {
+						window.setTimeout(notifyList[i], 0);
+					}
+				}
+			}
+		},
+		/**
+		 * Registers a function that should be called when the specified DOM element is hidden.
+		 * 
+		 * @param {String|DOMElement} domElementOrId the element containing the rendered commands.  This should
+		 *  be a DOM element in which commands are being rendered.
+		 * @param {Function} onHide a function to be called when the dom element is hidden
+		 */
+		whenHidden: function(domElementOrId, onHide) {
+			var id = typeof domElementOrId === "string" ? domElementOrId : domElementOrId.id;
+			if (!this.hidden) {
+				this.hidden = {};
+			}
+			if (this.hidden[id]) {
+				this.hidden[id].push(onHide);
+			} else {
+				this.hidden[id] = [onHide];
+			}
+		},
+				
+		/**
 		 * Add a dom node appropriate for using a separator between different groups
 		 * of commands.  This function is useful when a page is precisely arranging groups of commands
 		 * (in a table or contiguous spans) and needs to use the same separator that the command service
@@ -744,10 +823,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			link.id = this.name+"link";
 			var image = null;
 			if (this.tooltip) {
-				new dijit.Tooltip({
+				new CommandTooltip({
 					connectId: [link],
 					label: this.tooltip,
-					position: ["below", "above", "right", "left"] // otherwise defaults to right and obscures adjacent commands
+					position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
+					commandParent: parent,
+					commandService: context.commandService
 				});
 			}
 			if (forceText || !this.hasImage()) {
@@ -818,10 +899,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					dojo.addClass(image, this.imageClass);
 				} 
 				dojo.place(image, link, "last");
-				new dijit.Tooltip({
+				new CommandTooltip({
 					connectId: [image],
 					label: this.tooltip || this.name,
-					position: ["below", "above", "right", "left"] // otherwise defaults to right and obscures adjacent commands
+					position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
+					commandParent: parent,
+					commandService: context.commandService
 				});
 			} 
 			dojo.place(link, parent, "last");
@@ -835,9 +918,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				hrefCallback: !!this.hrefCallback
 			});
 			if (this.tooltip) {
-				new dijit.Tooltip({
+				new CommandTooltip({
 					connectId: [menuitem.domNode],
-					label: this.tooltip
+					label: this.tooltip,
+					commandParent: parent,
+					commandService: context.commandService
 				});
 			}
 			if (this.hrefCallback) {
