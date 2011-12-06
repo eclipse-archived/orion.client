@@ -20,6 +20,7 @@ orion.DiffParser = (function() {
 	/** @private */
 	function DiffParser(lineDelimiter) {
 		this._lineDelimiter = lineDelimiter ? lineDelimiter : (isWindows ? "\r\n" : "\n"); 
+		this._DEBUG = false;
 	}
 	DiffParser.prototype = {
 		_init: function(){
@@ -68,31 +69,48 @@ orion.DiffParser = (function() {
 				return {outPutFile:oFileString,mapper:[]};
 			}
 
-			//console.log(JSON.stringify(this._hunkRanges));
-			for(var j = 0; j <this._hunkRanges.length ; j++){
-				this._parsehunkBlock(j);
+			if(this._DEBUG){
+				console.log("***Hunk ranges: \n");
+				console.log(JSON.stringify(this._hunkRanges));
 			}
-			//console.log(JSON.stringify(this._oBlocks));
-			//console.log(JSON.stringify(this._nBlocks));
+			for(var j = 0; j <this._hunkRanges.length ; j++){
+				this._parseHunkBlock(j);
+			}
+			if(this._DEBUG){
+				console.log("***Original Hunk range blocks: \n");
+				console.log(JSON.stringify(this._oBlocks));
+				console.log("***New Hunk range blocks: \n");
+				console.log(JSON.stringify(this._nBlocks));
+			}
 			this._buildMap(detectConflicts);
-			//this._logMap();
-			//console.log("Total line number in original file: " + this._oFileContents.length);
+			if(this._DEBUG){
+				console.log("***New Line at end of file(original): \n");
+				console.log(JSON.stringify(this._oNewLineAtEnd));
+				console.log("***New Line at end of file(new): \n");
+				console.log(JSON.stringify(this._nNewLineAtEnd));
+				console.log("***Mapper: \n");
+				this._logMap();
+				console.log("***Total line number in original file: " + this._oFileContents.length);
+			}
 			if(doNotBuildNewFile === undefined || !doNotBuildNewFile)
 				this._buildNewFile();
-			//this._logNewFile();
-			//console.log("Total line number in new file: " + this._nFileContents.length);
+			if(this._DEBUG){
+				//console.log("***New File: \n");
+				//this._logNewFile();
+				//console.log("***Total line number in new file: " + this._nFileContents.length);
+			}
 			return {outPutFile:this._nFileContents.join(this._lineDelimiter),mapper:this._deltaMap};
 		},
 		
 		_logMap: function(){
 			for(var i = 0;i < this._deltaMap.length ; i++){
 				console.log(JSON.stringify(this._deltaMap[i]));
-				/*
 				if(this._deltaMap[i][2] > 0){
+					console.log("    **Diff content on change/add: \n");
 					for(var j = 0;j < this._deltaMap[i][0] ; j++){
-						console.log(this._diffContents[this._deltaMap[i][2]+j-1]);
+						console.log("    " + this._diffContents[this._deltaMap[i][2]+j-1]);
 					}
-				}*/
+				}
 			}
 		},
 		
@@ -138,7 +156,7 @@ orion.DiffParser = (function() {
 		},
 		
 		//read line by line in a hunk range
-		_parsehunkBlock: function(hunkRangeNo ){
+		_parseHunkBlock: function(hunkRangeNo ){
 			var lastToken = " ";
 			var startNo = this._hunkRanges[hunkRangeNo][0] + 1;
 			var endNo = (hunkRangeNo === (this._hunkRanges.length - 1) ) ? this._diffContents.length : this._hunkRanges[hunkRangeNo+1][0];
@@ -156,7 +174,14 @@ orion.DiffParser = (function() {
 				if(curToken === "\\"){
 					if( NO_NEW_LINE === this._diffContents[i].substring(0 , this._diffContents[i].length-1) ||
 						NO_NEW_LINE === this._diffContents[i]){
-						lastToken === "-" ? this._oNewLineAtEnd = false:this._nNewLineAtEnd = false ;
+						if(lastToken === "-"){
+							this._oNewLineAtEnd = false;
+						} else if(lastToken === " "){
+							this._nNewLineAtEnd = false;
+							this._oNewLineAtEnd = false;
+						} else {
+							this._nNewLineAtEnd = false;
+						}		
 						if(i > startNo && nl === this._diffContents[i-1].substring(this._diffContents[i-1].length-1)){
 							this._diffContents[i-1] = this._diffContents[i-1].substring(0 , this._diffContents[i-1].length-1);
 						}
@@ -257,6 +282,8 @@ orion.DiffParser = (function() {
 					lastMapItem[0] += delta;
 					lastMapItem[1] += delta;
 				} else if (lastMapItem[2] === -1){
+					this._deltaMap.push([delta , delta , 0]);
+				} else if(!this._nNewLineAtEnd && !this._oNewLineAtEnd){
 					this._deltaMap.push([delta , delta , 0]);
 				} else {
 					lastMapItem[1] += delta;
