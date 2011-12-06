@@ -87,19 +87,19 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		return result;
 	}
 	
-	function _registreTaskChangeListener(service, listener, longpollingId){
+	function _registerTaskChangeListener(service, listener, longpollingId){
 		_doServiceCall(service, "getTasksLongpolling", longpollingId).then(function(result){
 			listener(result);
-			if(result.LongpollingId)
-				_registreTaskChangeListener(service, listener, [result.LongpollingId]);
-			else
-				_registreTaskChangeListener(service, listener, [longpollingId]);
+			if(result.LongpollingId){
+				_registerTaskChangeListener(service, listener, [result.LongpollingId]);
+			} else
+				_registerTaskChangeListener(service, listener, [longpollingId]);
 			
 		}, function(error){
 			if("timeout"===error.dojoType)				
-				_registreTaskChangeListener(service, listener, [longpollingId]);
+				_registerTaskChangeListener(service, listener, [longpollingId]);
 			else
-				setTimeout(function(){_registreTaskChangeListener(service, listener, [longpollingId]);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
+				setTimeout(function(){_registerTaskChangeListener(service, listener, [longpollingId]);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
 		});
 	}
 	
@@ -121,12 +121,24 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 				});
 				return result;
 			},
+			
+			removeCompletedTasks: function(){
+				var results = [];
+				for(var i=0; i<this._services.length; i++){
+					results[i] = _doServiceCall(this._services[i], "removeCompletedTasks");
+				}
+				return new dojo.DeferredList(results);
+			},
+			
+			removeTask: function(taskLocation){
+				return _doServiceCall(this._getService(taskLocation), "removeTask", arguments);
+			},
 	
 			registreTaskChangeListener: function(listener){
 				this._taskListeners.push(listener);
 				if(this._taskListeners.length===1){
 					for(var i=0; i<this._services.length; i++){
-						_registreTaskChangeListener(this._services[i], dojo.hitch(this, _notifyChangeListeners));
+						_registerTaskChangeListener(this._services[i], dojo.hitch(this, _notifyChangeListeners));
 					}
 				}
 			}
