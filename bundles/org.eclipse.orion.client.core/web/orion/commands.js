@@ -318,10 +318,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		},
 		
 		_collectParameters: function(renderType, commandInvocation) {
+			var collected = false;
 			if (this._parameterCollectors[renderType]) {
 				this._parameterCollectors[renderType].close(this._activeModalCommandNode);
 				this._activeModalCommandNode = commandInvocation.domNode;
-				this._parameterCollectors[renderType].collectParameters(commandInvocation);
+				collected = this._parameterCollectors[renderType].collectParameters(commandInvocation);
 			} else if (renderType === "menu" && this._parameterCollectors.tool) {
 				// if parameter collection has been set up, we should have some default collection for menu commands.
 				// Clients don't know the details of how we construct menus, so we can't expect them to provide reasonable
@@ -340,6 +341,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					focusNode.focus();
 					focusNode.select();
 				}, 0);
+				collected = true;
+			}
+			if (!collected) {
+				commandInvocation.parameters = null;
+				commandInvocation.command.callback.call(commandInvocation.handler, commandInvocation);
 			}
 		},
 		
