@@ -471,24 +471,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	/**
-	 * @private
-	 * @static
-	 * @param {String}  Input string
-	 * @returns {pattern:String, flags:String} if str looks like
-	 *          a RegExp, or null otherwise
-	 */
-	SearchResultModel.prototype.parseRegExp =  function(str){
-		var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
-		if (regexp) {
-			return {
-				pattern : regexp[1],
-				flags : regexp[2]
-			};
-		}
-		return null;
-	};
-	
-	/**
 	 * Helper for finding regex matches in text contents.
 	 * 
 	 * @param {String}

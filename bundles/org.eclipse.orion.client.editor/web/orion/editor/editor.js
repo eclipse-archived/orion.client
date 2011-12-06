@@ -397,20 +397,6 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 			}
 		},
 		
-		/**
-		 * @private
-		 * @static
-		 * @param {String} Input string
-		 * @returns {pattern:String, flags:String} if str looks like a RegExp, or null otherwise
-		 */
-		parseRegExp: function(str) {
-			var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
-			if (regexp) {
-				return {pattern: regexp[1], flags: regexp[2]};
-			}
-			return null;
-		},
-		
 		/** @private */
 		_highlightCurrentLine: function(newSelection, oldSelection) {
 			var annotationModel = this._annotationModel;
