@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['require', 'dojo'], function(require, dojo) {
+define(['require', 'dojo', 'orion/editor/regex'], function(require, dojo, mRegex) {
 
 var orion = orion || {};
 
@@ -157,7 +157,7 @@ orion.searchUtils.generateInFileQuery = function(searchStr) {
 		inFileQuery.wildCard = false;
 	} else {
 		inFileQuery.searchStr =searchStr.toLowerCase();
-		var regexp = orion.searchUtils.parseRegExp("/" + inFileQuery.searchStr + "/");
+		var regexp = mRegex.parse("/" + inFileQuery.searchStr + "/");
 		if (regexp) {
 			var pattern = regexp.pattern;
 			var flags = regexp.flags;
@@ -168,17 +168,6 @@ orion.searchUtils.generateInFileQuery = function(searchStr) {
 	}
 	inFileQuery.searchStrLength = inFileQuery.searchStr.length;
 	return inFileQuery;
-};
-
-orion.searchUtils.parseRegExp =  function(str){
-	var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
-	if (regexp) {
-		return {
-			pattern : regexp[1],
-			flags : regexp[2]
-		};
-	}
-	return null;
 };
 
 return orion.searchUtils;

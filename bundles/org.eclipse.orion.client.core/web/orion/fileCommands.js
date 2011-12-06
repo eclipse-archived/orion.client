@@ -809,8 +809,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			};
 		}
 		function toNamePattern(exts, filenames) {
-			exts = exts.map(function(ext) { return mRegex.escapeRegex(ext); });
-			filenames = filenames.map(function(ext) { return mRegex.escapeRegex(ext); });
+			exts = exts.map(function(ext) { return mRegex.escape(ext); });
+			filenames = filenames.map(function(ext) { return mRegex.escape(ext); });
 			var extsPart = exts.length && "(*\\.(" + exts.join("|") + ")$)";
 			var filenamesPart = filenames.length && "(^(" + filenames.join("|") + ")$)";
 			var pattern;
