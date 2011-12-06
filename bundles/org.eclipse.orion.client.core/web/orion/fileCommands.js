@@ -12,8 +12,8 @@
 /*global window define orion */
 /*browser:true*/
 
-define(["require", "dojo", "orion/util", "orion/commands", "orion/contentTypes", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
-	function(require, dojo, mUtil, mCommands, mContentTypes){
+define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
+	function(require, dojo, mUtil, mCommands, mRegex, mContentTypes){
 
 	/**
 	 * Utility methods
@@ -725,7 +725,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/contentTypes",
 		}
 		
 		var contentTypes = new mContentTypes.ContentTypes(serviceRegistry);
-		fileCommands = fileCommands.concat(contentTypes.toFileCommands());
+		fileCommands = fileCommands.concat(this._createOpenWithCommands(serviceRegistry, contentTypes));
 	
 		for (i=0; i < fileCommands.length; i++) {
 			var commandInfo = fileCommands[i].properties;
@@ -734,7 +734,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/contentTypes",
 			var commandOptions = fileCommandUtils._createFileCommandOptions(commandInfo, service);
 			var command = new mCommands.Command(commandOptions);
 			if (commandInfo.isEditor) {
-				command.isEditor = true;
+				command.isEditor = commandInfo.isEditor;
 			}
 			
 			var extensionGroupCreated = false;
@@ -771,6 +771,120 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/contentTypes",
 			fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
 			explorer.updateCommands();
 		}
+	};
+	
+	/**
+	 * Converts "orion.navigate.openWith" service contributions into orion.navigate.command that open the appropriate editors.
+	 * @returns {Object[]} The "open with" fileCommands
+	 */
+	fileCommandUtils._createOpenWithCommands = function(serviceRegistry, /**orion.file.ContentTypes*/ contentTypes) {
+		function getEditors() {
+			var serviceReferences = contentTypes.serviceRegistry.getServiceReferences("orion.edit.editor");
+			var editors = [];
+			for (var i=0; i < serviceReferences.length; i++) {
+				var serviceRef = serviceReferences[i], id = serviceRef.getProperty("id");
+				editors.push({
+					id: id,
+					name: serviceRef.getProperty("name"),
+					href: serviceRef.getProperty("href")
+				});
+			}
+			return editors;
+		}
+		function getObject(parent, fields) {
+			if (parent === null || typeof parent === "undefined") { return parent; }
+			fields = fields.split(".");
+			var value;
+			for (var i=0; i < fields.length; i++) {
+				value = parent[fields[i]];
+				parent = value;
+				if (value === null || typeof value === "undefined") { break; }
+			}
+			return value;
+		}
+		function makeHrefCallback(editorHref) {
+			return function(item) {
+				// String substitution: replace ${foo} with item.foo, ${foo.bar} with item.foo.bar, etc.
+				return editorHref.replace(/\$\{([\d\w-_$.]+)\}/g, function(str, properties) {
+					return getObject(item, properties);
+				});
+			};
+		}
+		function toNamePattern(exts, filenames) {
+			exts = exts.map(function(ext) { return mRegex.escapeRegex(ext); });
+			filenames = filenames.map(function(ext) { return mRegex.escapeRegex(ext); });
+			var extsPart = exts.length && "(*\\.(" + exts.join("|") + ")$)";
+			var filenamesPart = filenames.length && "(^(" + filenames.join("|") + ")$)";
+			var pattern;
+			if (extsPart && filenamesPart) {
+				pattern = extsPart + "|" + filenamesPart;
+			} else if (extsPart) {
+				pattern = extsPart;
+			} else if (filenamesPart) {
+				pattern = filenamesPart;
+			} else {
+				pattern = null;
+			}
+			// /(*\.(ext1|ext2|...)$)|(^(filename1|filename2|...)$)/
+			return pattern;
+		}
+		function getEditorOpenWith(serviceRegistry, editor) {
+			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith");
+			var types = [];
+			for (var i=0; i < openWithReferences.length; i++) {
+				var ref = openWithReferences[i];
+				if (ref.getProperty("editor") === editor.id) {
+					var ct = ref.getProperty("contentType");
+					if (ct instanceof Array) {
+						types = types.concat(ct);
+					} else if (ct !== null && typeof ct !== "undefined") {
+						types.push(ct);
+					}
+				}
+			}
+			return types;
+		}
+		function getDefaultEditor(serviceRegistry) {
+			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith.default");
+			for (var i=0; i < openWithReferences.length; i++) {
+				return {editor: openWithReferences[i].getProperty("editor")};
+			}
+			return null;
+		}
+		
+		var editors = getEditors(), defaultEditor = getDefaultEditor(serviceRegistry);
+		var contentTypesMap = contentTypes.getContentTypesMap();
+		var fileCommands = [];
+		for (var i=0; i < editors.length; i++) {
+			var editor = editors[i];
+			var isDefaultEditor = (defaultEditor && defaultEditor.editor === editor.id);
+			var editorContentTypes = getEditorOpenWith(serviceRegistry, editor);
+			if (editorContentTypes.length) {
+				var exts = [], filenames = [];
+				for (var j=0; j < editorContentTypes.length; j++) {
+					var contentType = contentTypesMap[editorContentTypes[j]];
+					if (contentType) {
+						exts = exts.concat(contentType.extension);
+						filenames = filenames.concat(contentType.filename);	
+					}
+				}
+				var href = editor.href;
+				var validationProperties = { Name: toNamePattern(exts, filenames) };
+				var properties = {
+						name: editor.name || editor.id,
+						id: "eclipse.openWithCommand." + editor.id,
+						tooltip: editor.name,
+						validationProperties: validationProperties,
+						href: true,
+						forceSingleItem: true,
+						isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand
+					};
+				// Pretend that this is a real service
+				var fakeService = { run: makeHrefCallback(href) };
+				fileCommands.push({properties: properties, service: fakeService});
+			}
+		}
+		return fileCommands;
 	};
 	
 	// Turns an info object containing the service properties and the service into Command options.

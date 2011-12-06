@@ -238,6 +238,17 @@ exports.ExplorerRenderer = (function() {
 
 		},
 		getActionsColumn: function(item, tableRow){
+			var commandService = this.explorer.registry.getService("orion.page.command");
+			var actionsColumn = document.createElement('td');
+			actionsColumn.id = tableRow.id + "actions";
+			
+			var actionsWrapper = document.createElement('span');
+			actionsWrapper.id = tableRow.id + "actionswrapper";
+			actionsColumn.appendChild(actionsWrapper);
+			dojo.style(actionsWrapper, "visibility", "hidden");
+			// contact the command service to render appropriate commands here.
+			commandService.renderCommands(actionsWrapper, "object", item, this.explorer, "tool");
+			
 			dojo.connect(tableRow, "onmouseover", tableRow, function() {
 				var actionsColumn = dojo.byId(this.id+"actionswrapper");
 				dojo.style(actionsColumn, "visibility", "visible");
@@ -247,15 +258,7 @@ exports.ExplorerRenderer = (function() {
 				dojo.style(actionsColumn, "visibility", "hidden");
 			});
 			
-			var actionsColumn = document.createElement('td');
-			actionsColumn.id = tableRow.id + "actions";
-			
-			var actionsWrapper = document.createElement('span');
-			actionsWrapper.id = tableRow.id + "actionswrapper";
-			actionsColumn.appendChild(actionsWrapper);
-			dojo.style(actionsWrapper, "visibility", "hidden");
-			// contact the command service to render appropriate commands here.
-			this.explorer.registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", item, this.explorer, "tool");
+
 			return actionsColumn;
 		},
 		initCheckboxColumn: function(tableNode){

@@ -38,7 +38,7 @@ orion.TextSearcher = (function() {
 	TextSearcher.prototype = {
 		_createActionTable : function() {
 			var that = this;
-			this._commandService.openParameterCollector(null, "pageNavigationActions", function(parentDiv) {
+			this._commandService.openParameterCollector("tool", null, "pageNavigationActions", function(parentDiv) {
 				var searchStringDiv = document.createElement('input');
 				searchStringDiv.type = "text";
 				searchStringDiv.name = "Find:";
@@ -210,7 +210,7 @@ orion.TextSearcher = (function() {
 		closeUI : function() {
 			if(!this.visible())
 				return;
-			this._commandService.closeParameterCollector();
+			this._commandService.closeParameterCollector("tool");
 			this._textSearchAdaptor.adaptCloseToolBar();
 		},
 
