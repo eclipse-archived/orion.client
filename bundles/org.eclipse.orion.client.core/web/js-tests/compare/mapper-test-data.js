@@ -552,6 +552,37 @@ exports.mapperTestCases = [
 	  //description  
 	  "input file without line at end -->add 2 empty lines in the middle"]
 	,
+    //add 1 line before last line 
+	[ 
+	  //input file 
+	  "line 1\r\n" + 
+	  "line 2\r\n" + 
+	  "line 3\r\n" + 
+	  "line 4", 
+	  //diff
+	  "diff --git a/file1.js b/file1.j\r\n" + 
+	  "index 7dbc9e3..86f6a24 100644\r\n" + 
+	  "--- a/file1.js\r\n" + 
+	  "+++ b/file1.js\r\n" + 
+	  "@@ -1,4 +1,5 @@\r\n" + 
+	  " line 1\r\n" + 
+	  " line 2\r\n" + 
+	  " line 3\r\n" + 
+	  "+line 3-1\r\n" + 
+	  " line 4\r\n" + 
+	  "\\ No newline at end of file\r\n" +
+	  "", 
+	  //output file
+	  "line 1\r\n" + 
+	  "line 2\r\n" + 
+	  "line 3\r\n" + 
+	  "line 3-1\r\n" + 
+	  "line 4", 
+	  //mapper
+	  [[3,3,0],[1,0,9],[1,1,0]],
+	  //description  
+	  "input file without line at end -->add 1 line before last line(Bug 360985)"]
+	,
     //add 3 blocks at beginning , middle and end
 	[ 
 	  //input file 
