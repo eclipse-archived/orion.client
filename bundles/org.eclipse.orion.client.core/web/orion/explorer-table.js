@@ -12,7 +12,8 @@
 /*global define */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/fileCommands', 'dojo/number'], function(require, dojo, mUtil, mExplorer, mBreadcrumbs, mFileCommands){
+define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/contentTypes', 'dojo/number'],
+		function(require, dojo, mUtil, mExplorer, mBreadcrumbs, mFileCommands){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -52,9 +53,10 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 	/**
 	 * Renders json items into columns in the tree
 	 */
-	function FileRenderer (options, explorer, commandService) {
+	function FileRenderer (options, explorer, commandService, contentTypes) {
 		this.explorer = explorer;
 		this.commandService = commandService;
+		this.contentTypes = contentTypes;
 		this.openWithCommands = null;
 		this._init(options);
 	}
@@ -76,6 +78,21 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 	};
 		
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		var self = this;
+		function isImage(item) {
+			var contentType = self.contentTypes.getContentType(item);
+			switch (contentType && contentType.id) {
+				case "image.jpeg":
+				case "image.png":
+				case "image.gif":
+				case "image.ico":
+				case "image.tiff":
+				case "image.svg":
+					return true;
+			}
+			return false;
+		}
+
 		switch(col_no){
 		case 0:
 			var col, span, link;
@@ -89,19 +106,30 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				dojo.place(document.createTextNode(item.Name), link, "only");
 			} else {
 				col = document.createElement('td');
+				var i;
 				
-				// Only generate an "open with" href if there's a matching orion.navigate.openWith handler.
-				// This way we can still view images, etc.
+				// Images: always generate link to file. Non-images: use the "open with" href if one matches,
+				// otherwise use default editor.
 				if (!this.openWithCommands) {
 					this.openWithCommands = mFileCommands.getOpenWithCommands(this.commandService);
+					for (i=0; i < this.openWithCommands.length; i++) {
+						if (this.openWithCommands[i].isEditor === "default") {
+							this.defaultEditor = this.openWithCommands[i];
+						}
+					}
 				}
-				var href = item.Location;
-				for (var i=0; i < this.openWithCommands.length; i++) {
+				var href = item.Location, foundEditor = false;
+				for (i=0; i < this.openWithCommands.length; i++) {
 					var openWithCommand = this.openWithCommands[i];
 					if (openWithCommand.visibleWhen(item)) {
 						href = openWithCommand.hrefCallback({items: item});
+						foundEditor = true;
 						break; // use the first one
 					}
+				}
+				var itemIsImage = isImage(item);
+				if (!foundEditor && this.defaultEditor && !itemIsImage) {
+					href = this.defaultEditor.hrefCallback({items: item});
 				}
 				
 				span = dojo.create("span", null, col, "only");
@@ -113,34 +141,15 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				// link with file image and name
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
 				// If the file is an image, show a thumbnail next to the name.
-				var splits = item.Name.split("."); 
-				if (splits.length > 0) {
-					var extension = splits.pop().toLowerCase(); 
-					switch (extension) {
-						case "jpg":
-						case "png":
-						case "gif":
-						case "ico":
-						case "jpeg":
-						case "jpe":
-						case "tif":
-						case "tiff":
-						case "svg":
-							var thumbnail = dojo.create("img", {src: item.Location, style: "vertical-align: middle; margin-left: 4px; margin-right: 4px"}, link, "last");
-							dojo.connect(thumbnail, "onload", thumbnail, function() {
-								// We use a height of 24 so that tall images aren't significantly larger than the default row size with 16 px icon.
-								// The width of 48 is arbitrary, we're trying to find a value that doesn't indent too far.
-								// This could become some kind of folder preference for thumbnails.  
-								this.height = Math.min(this.height, 24);
-								this.width = Math.min(this.width, 48);
-							});
-							break;
-						default: 
-							var fileIcon = dojo.create("span", null, link, "last");
-							dojo.addClass(fileIcon, "imageSprite");
-							dojo.addClass(fileIcon, "core-sprite-file");
-							break;
-					}
+				if (itemIsImage) {
+					var thumbnail = dojo.create("img", {src: item.Location, style: "vertical-align: middle; margin-left: 4px; margin-right: 4px"}, link, "last");
+					dojo.connect(thumbnail, "onload", thumbnail, function() {
+						// We use a height of 24 so that tall images aren't significantly larger than the default row size with 16 px icon.
+						// The width of 48 is arbitrary, we're trying to find a value that doesn't indent too far.
+						// This could become some kind of folder preference for thumbnails.  
+						this.height = Math.min(this.height, 24);
+						this.width = Math.min(this.width, 48);
+					});
 				} else {
 					var fileIcon = dojo.create("span", null, link, "last");
 					dojo.addClass(fileIcon, "imageSprite");
@@ -176,20 +185,33 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 	 * Creates a new file explorer.
 	 * @name orion.explorer-table.FileExplorer
 	 * @class A user interface component that displays a table-oriented file explorer
+	 * @param {orion.serviceRegistry.ServiceRegistry} options.serviceRegistry
+	 * @param {Object} options.treeRoot
+	 * @param {orion.selection.Selection} options.selection
+	 * @param {orion.searchClient.Searcher} options.searcher
+	 * @param {orion.fileClient.FileClient} options.fileClient
+	 * @param {orion.commands.CommandService} options.commandService
+	 * @param {orion.file.ContentTypes} options.contentTypes
+	 * @param {String} options.parentId
+	 * @param {String} options.breadcrumbId
+	 * @param {String} options.toolbarId
+	 * @param {String} options.selectionToolsId
 	 */
-	function FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, parentId, breadcrumbId, toolbarId, selectionToolsId) {
-		this.registry = serviceRegistry;
-		this.treeRoot = treeRoot;
-		this.selection = selection;
-		this.searcher = searcher;
-		this.fileClient = fileClient;
-		this.parentId = parentId;
-		this.breadcrumbId = breadcrumbId;
-		this.toolbarId = toolbarId;
-		this.selectionToolsId = selectionToolsId;
+	function FileExplorer(options) {
+		this.registry = options.serviceRegistry;
+		this.treeRoot = options.treeRoot;
+		this.selection = options.selection;
+		this.searcher = options.searcher;
+		this.fileClient = options.fileClient;
+		this.commandService = options.commandService;
+		this.contentTypes = options.contentTypes;
+		this.parentId = options.parentId;
+		this.breadcrumbId = options.breadcrumbId;
+		this.toolbarId = options.toolbarId;
+		this.selectionToolsId = options.selectionToolsId;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new FileRenderer({checkbox: true, cachePrefix: "Navigator"}, this, commandService);
+		this.renderer = new FileRenderer({checkbox: true, cachePrefix: "Navigator"}, this, this.commandService, this.contentTypes);
 	}
 	
 	FileExplorer.prototype = new mExplorer.Explorer();
