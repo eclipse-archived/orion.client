@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name           Clone into Orion
 // @namespace      http://eclipse.org/orion
-// @description    Allows to clone repositories into Orion
-// @include        http://git.eclipse.org/c/*
+// @description    Allows to clone repository for the selected bug into Orion
+// @include        /^https://bugs\.eclipse\.org/bugs/show_bug\.cgi\?id=\d+$/
 // ==/UserScript==
 
 /*
@@ -59,6 +59,19 @@ map["Orion_Client"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.cli
 map["Orion_Editor"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git";
 map["Orion_Git"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.server.git";
 map["Orion_Server"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.server.git";
+map["Platform_Ant"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.git";
+map["Platform_Compare"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.team.git";
+map["Platform_CVS"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.team.git";
+map["Platform_Debug"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.debug.git";
+map["Platform_Doc"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.common.git";
+map["Platform_Releng"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.maps.git";
+map["Platform_Resources"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.resources.git";
+map["Platform_Runtime"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.runtime.git";
+map["Platform_SWT"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.swt.git";
+map["Platform_Team"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.team.git";
+map["Platform_Text"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git";
+map["Platform_UI"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.ui.git";
+map["Platform_User Assistance"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.ua.git";
 
 var product = document.getElementById("product");
 var component = document.getElementById("component");

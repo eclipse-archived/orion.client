@@ -14,10 +14,10 @@
 
 define(['dojo', 'dijit', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands',
-        'orion/fileCommands', 'orion/explorer-table', 'orion/util',
+        'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/contentTypes',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, dijit, mBootstrap, mSelection, mStatus, mDialogs, mSsh, mCommands, mFavorites, 
-				mSearchClient, mFileClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil) {
+				mSearchClient, mFileClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, mContentTypes) {
 
 dojo.addOnLoad(function(){
 	mBootstrap.startup().then(function(core) {
@@ -45,8 +45,10 @@ dojo.addOnLoad(function(){
 					
 //		var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 
-		
-		var explorer = new mExplorerTable.FileExplorer(serviceRegistry, treeRoot, selection, searcher, fileClient, commandService, "explorer-tree", "location", "pageActions", "selectionTools");
+		var contentTypes = new mContentTypes.ContentTypes(serviceRegistry);
+		var explorer = new mExplorerTable.FileExplorer({serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection, searcher: searcher, 
+				fileClient: fileClient, commandService: commandService, contentTypes: contentTypes,
+				parentId: "explorer-tree", breadcrumbId: "location", toolbarId: "pageActions", selectionToolsId: "selectionTools"});
 		
 		function refresh() {
 //			if (dojo.hash().length === 0 && fileServices.length === 1) {

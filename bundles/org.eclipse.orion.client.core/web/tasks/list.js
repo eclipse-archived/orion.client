@@ -13,8 +13,8 @@
 /*global define*/
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/taskClient', 'orion/status', 'orion/globalCommands',
-        'orion/taskTable', 'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-		function(require, dojo, mBootstrap, mCommands, mSelection, mFileClient, mSearchClient, mTaskClient, mStatus, mGlobalCommands, mTaskTable) {
+        'orion/taskTable', 'orion/taskCommands', 'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
+		function(require, dojo, mBootstrap, mCommands, mSelection, mFileClient, mSearchClient, mTaskClient, mStatus, mGlobalCommands, mTaskTable, mTasksCommands) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -27,17 +27,26 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 			var taskClient = new mTaskClient.TaskClient(serviceRegistry);
 				
+			var taskTable = new mTaskTable.TasksExplorer(serviceRegistry, selection, "tasks-lisk", "pageActions", "selectionTools");
+			
 			// global commands
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
-			document.body.style.visibility = "visible";
-			dojo.parser.parse();
+			mTasksCommands.createTaskCommands(serviceRegistry, commandService, taskTable, taskClient);
 			
-			var taskTable = new mTaskTable.TasksExplorer(serviceRegistry, selection, "tasks-lisk", "pageActions", "selectionTools");
+			commandService.addCommandGroup("eclipse.taskGroup.unlabeled", 100, null, null, "pageActions");
+			commandService.addCommandGroup("eclipse.selectionGroup", 500, "More", null, "selectionTools");
+			
+			commandService.registerCommandContribution("eclipse.removeCompletedTasks", 1, "pageActions", "eclipse.taskGroup.unlabeled");
+			commandService.registerCommandContribution("eclipse.removeTask", 1);
+			commandService.registerCommandContribution("eclipse.removeTask", 1, "selectionTools", "eclipse.selectionGroup");
+			
 			
 			taskClient.registreTaskChangeListener(function(taskList){
 				dojo.hitch(taskTable, taskTable.mergeTasks)(taskList);
 			});
 			
+			document.body.style.visibility = "visible";
+			dojo.parser.parse();
 		});
 	});
 	

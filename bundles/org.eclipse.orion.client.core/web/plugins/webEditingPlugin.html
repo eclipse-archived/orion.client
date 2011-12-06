@@ -15,6 +15,7 @@ window.onload = function() {
 	
 	provider.registerServiceProvider("orion.file.contentType", {}, {
 		contentTypes:
+			// Text types
 			[{	id: "text.plain",
 				name: "Text",
 				extension: ["txt"]
@@ -48,6 +49,31 @@ window.onload = function() {
 				"extends": "text.plain",
 				name: "Java",
 				extension: ["java"]
+			},
+			// Image types
+			{	id: "image.gif",
+				name: "GIF",
+				extension: ["gif"]
+			},
+			{	id: "image.jpeg",
+				name: "JPG",
+				extension: ["jpg", "jpeg", "jpe"]
+			},
+			{	id: "image.ico",
+				name: "ICO",
+				extension: ["ico"]
+			},
+			{	id: "image.png",
+				name: "PNG",
+				extension: ["png"]
+			},
+			{	id: "image.tiff",
+				name: "TIFF",
+				extension: ["tif", "tiff"]
+			},
+			{	id: "image.svg",
+				name: "SVG",
+				extension: ["svg"]
 			}]
 		});
 	
@@ -59,6 +85,9 @@ window.onload = function() {
 	provider.registerServiceProvider("orion.navigate.openWith", {}, {
 			editor: "orion.editor",
 			contentType: ["text.plain", "text.html", "text.css", "text.javascript", "text.json", "text.xml", "text.java"]});
+	
+	provider.registerServiceProvider("orion.navigate.openWith.default", {}, {
+			editor: "orion.editor"});
 	
 	// Register content assist providers
 	provider.registerServiceProvider("orion.edit.contentAssist",
