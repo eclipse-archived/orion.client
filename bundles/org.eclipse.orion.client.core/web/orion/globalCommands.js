@@ -130,7 +130,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		_collectAndCall: function(commandInvocation) {
 			dojo.query("input", this.parameterArea).forEach(function(field) {
 				if (field.type !== "button") {
-					commandInvocation.command.parameters.setValue(field.parameterName, field.value);
+					commandInvocation.parameters.setValue(field.parameterName, field.value);
 				}
 			});
 			if (commandInvocation.command.callback) {
@@ -146,7 +146,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		 * @returns {Boolean} whether or not required parameters were collected.
 		 */
 		collectParameters: function(commandInvocation) {
-			if (commandInvocation.command.parameters) {
+			if (commandInvocation.parameters) {
 				return this.open(commandInvocation.domNode, commandInvocation.domParent.id, this.getFillFunction(commandInvocation));
 			}
 			return false;
@@ -178,7 +178,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 						dojo.stopEvent(event);
 					}
 				});
-				commandInvocation.command.parameters.forEach(function(parm) {
+				commandInvocation.parameters.forEach(function(parm) {
 					if (parm.label) {
 						dojo.place(document.createTextNode(parm.label), parameterArea, "last");
 					} 
@@ -198,8 +198,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				var spacer;
 				var parentDismiss = this.dismissArea || parameterArea;
 
-				if (commandInvocation.command.parameters.options) {
-					commandInvocation.command.parameters.optionsRequested = false;
+				if (commandInvocation.parameters.options) {
+					commandInvocation.parameters.optionsRequested = false;
 					spacer = dojo.create("span", null, parentDismiss, "last");
 					dojo.addClass(spacer, "dismiss");
 					
@@ -208,7 +208,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 					dojo.addClass(options, "dismiss");
 					options.title = "More options...";
 					dojo.connect(options, "onclick", dojo.hitch(this, function () {
-						commandInvocation.command.parameters.optionsRequested = true;
+						commandInvocation.parameters.optionsRequested = true;
 						this._collectAndCall(commandInvocation);
 						localClose();
 					}));
