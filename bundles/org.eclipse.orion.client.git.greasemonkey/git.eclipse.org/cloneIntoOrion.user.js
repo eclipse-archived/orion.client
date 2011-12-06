@@ -24,9 +24,15 @@
  * </div>
  */
 
-var contentTableRows = document.getElementById("cgit").children[2].children[0].children[0].children;
-contentTableRows[contentTableRows.length - 4].children[0].innerHTML = "Clone into Orion";
-for (var i = contentTableRows.length - 3; i < contentTableRows.length; i++) {
-	var gitRepoUrl = contentTableRows[i].children[0].innerHTML;
-	contentTableRows[i].children[0].innerHTML = "<a href='http://localhost:8080/git/git-clone.html?cloneGitRepository=" + gitRepoUrl + "' target='_blank'>" + gitRepoUrl + "</a>";
+try {
+	var contentTableRows = document.getElementById("cgit").children[2].children[0].children[0].children;
+	if (contentTableRows[contentTableRows.length - 4].children[0].innerHTML === "Clone") {
+		contentTableRows[contentTableRows.length - 4].children[0].innerHTML = "Clone into Orion";
+		for (var i = contentTableRows.length - 3; i < contentTableRows.length; i++) {
+			var gitRepoUrl = contentTableRows[i].children[0].innerHTML;
+			contentTableRows[i].children[0].innerHTML = "<a href='http://localhost:8080/git/git-clone.html?cloneGitRepository=" + gitRepoUrl + "' target='_blank'>" + gitRepoUrl + "</a>";
+		}
+	}
+} catch (e) {
+	// silently ignore, not on the right page
 }

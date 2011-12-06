@@ -58,6 +58,10 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				this._oldFocusNode.focus();
 				this._oldFocusNode = null;
 			}
+			this.parameterContainer = null;
+			this.activeClass = null;
+			this.parameterArea = null;
+			this.dismissArea = null;
 		},
 		
 		/**
@@ -69,6 +73,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		 * @param {Function} fillFunction a function that will fill the parameter area
 		 */
 		open: function(commandNode, id, fillFunction) {
+			this.close(commandNode);
 			this.parameterContainer = null;
 			this.activeClass = null;
 			this.parameterArea = null;
@@ -89,11 +94,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			}
 			if (this.parameterArea) {
 				var focusNode = fillFunction(this.parameterArea);
-				// add the close button
-				if (this.dismissArea) {
+				
+				if (!dojo.byId(	"parameterClose") && this.dismissArea	) {
+				// add the close button if the fill function did not.
 					var spacer = dojo.create("span", null, this.dismissArea, "last");
 					dojo.addClass(spacer, "dismiss");
-					var close = dojo.create("span", null, this.dismissArea, "last");
+					var close = dojo.create("span", {id: "parameterClose"}, this.dismissArea, "last");
 					dojo.addClass(close, "imageSprite");
 					dojo.addClass(close, "core-sprite-delete");
 					dojo.addClass(close, "dismiss");
@@ -102,6 +108,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 						this.close(commandNode);
 					}));
 				}
+
+
 				// all parameters have been generated.  Activate the area.
 				dojo.addClass(this.parameterContainer, this.activeClass);
 				if (this._getLayoutWidget()) {
@@ -137,68 +145,98 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		 */
 		collectParameters: function(commandInvocation) {
 			if (commandInvocation.command.parameters) {
-				this.open(commandInvocation.domNode, commandInvocation.domParent.id, dojo.hitch(this, function(parameterArea) {
-					var first = null;
-					var keyHandler = dojo.hitch(this, function(event) {
-						if (event.keyCode === dojo.keys.ENTER) {
-							this._collectAndCall(commandInvocation);
-						}
-						if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
-							this.close(commandInvocation.domNode);
-						}
-					});
-					commandInvocation.command.parameters.forEach(function(parm) {
-						if (parm.label) {
-							dojo.place(document.createTextNode(parm.label), parameterArea, "last");
-						} 
-						var field = dojo.create("input", {type: parm.type}, parameterArea, "last");
-						dojo.addClass(field, "parameterInput");
-						field.setAttribute("speech", "speech");
-						field.setAttribute("x-webkit-speech", "x-webkit-speech");
-						field.parameterName = parm.name;
-						if (!first) {
-							first = field;
-						}
-						if (parm.value) {
-							field.value = parm.value;
-						}
-						dojo.connect(field, "onkeypress", keyHandler);
-					});
-					var spacer;
-					if (commandInvocation.command.parameters.options) {
-						commandInvocation.command.parameters.optionsRequested = false;
-						spacer = dojo.create("span", null, this.dismissArea, "last");
-						dojo.addClass(spacer, "dismiss");
-						
-						var options = dojo.create("span", null, this.dismissArea || parameterArea, "last");
-						dojo.addClass(options, "core-sprite-options");
-						dojo.addClass(options, "dismiss");
-						options.title = "More options...";
-						dojo.connect(options, "onclick", dojo.hitch(this, function () {
-							commandInvocation.command.parameters.optionsRequested = true;
-							this._collectAndCall(commandInvocation);
-							this.close(commandInvocation.domNode);
-						}));
-					}
-					// OK button
-					if (this.dismissArea) {
-						spacer = dojo.create("span", null, this.dismissArea, "last");
-						dojo.addClass(spacer, "dismiss");
-
-						var ok = dojo.create("span", null, this.dismissArea, "last");
-						ok.title = "Submit";
-						dojo.addClass(ok, "core-sprite-ok");
-						dojo.addClass(ok, "dismiss");
-						dojo.connect(ok, "onclick", dojo.hitch(this, function () {
-							this._collectAndCall(commandInvocation);
-							this.close(commandInvocation.domNode);
-						}));
-					}
-
-					return first;
-				}));
+				this.open(commandInvocation.domNode, commandInvocation.domParent.id, this.getFillFunction(commandInvocation));
 			}
-		}
+		},
+		
+		/**
+		 * Returns a function that can be used to fill a specified parent node with parameter information.
+		 *
+		 * @param {orion.commands.CommandInvocation} the command invocation used when gathering parameters
+		 * @param {Function} an optional function called when the area must be closed. 
+		 * @returns {Function} a function that can fill the specified dom node with parameter collection behavior
+		 */
+		 getFillFunction: function(commandInvocation, closeFunction) {
+			return dojo.hitch(this, function(parameterArea) {
+				var first = null;
+				var localClose = dojo.hitch(this, function() {
+					if (closeFunction) {
+						closeFunction();
+					} else {
+						this.close(commandInvocation.domNode);
+					}
+				});
+				var keyHandler = dojo.hitch(this, function(event) {
+					if (event.keyCode === dojo.keys.ENTER) {
+						this._collectAndCall(commandInvocation);
+					}
+					if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
+						localClose();
+						dojo.stopEvent(event);
+					}
+				});
+				commandInvocation.command.parameters.forEach(function(parm) {
+					if (parm.label) {
+						dojo.place(document.createTextNode(parm.label), parameterArea, "last");
+					} 
+					var field = dojo.create("input", {type: parm.type}, parameterArea, "last");
+					dojo.addClass(field, "parameterInput");
+					field.setAttribute("speech", "speech");
+					field.setAttribute("x-webkit-speech", "x-webkit-speech");
+					field.parameterName = parm.name;
+					if (!first) {
+						first = field;
+					}
+					if (parm.value) {
+						field.value = parm.value;
+					}
+					dojo.connect(field, "onkeypress", keyHandler);
+				});
+				var spacer;
+				var parentDismiss = this.dismissArea || parameterArea;
+
+				if (commandInvocation.command.parameters.options) {
+					commandInvocation.command.parameters.optionsRequested = false;
+					spacer = dojo.create("span", null, parentDismiss, "last");
+					dojo.addClass(spacer, "dismiss");
+					
+					var options = dojo.create("span", null, parentDismiss, "last");
+					dojo.addClass(options, "core-sprite-options");
+					dojo.addClass(options, "dismiss");
+					options.title = "More options...";
+					dojo.connect(options, "onclick", dojo.hitch(this, function () {
+						commandInvocation.command.parameters.optionsRequested = true;
+						this._collectAndCall(commandInvocation);
+						localClose();
+					}));
+				}
+				// OK and cancel buttons
+				spacer = dojo.create("span", null, parentDismiss, "last");
+				dojo.addClass(spacer, "dismiss");
+
+				var ok = dojo.create("span", null, parentDismiss, "last");
+				ok.title = "Submit";
+				dojo.addClass(ok, "core-sprite-ok");
+				dojo.addClass(ok, "dismiss");
+				dojo.connect(ok, "onclick", dojo.hitch(this, function () {
+					this._collectAndCall(commandInvocation);
+					localClose();
+				}));
+				
+				spacer = dojo.create("span", null, parentDismiss, "last");
+				dojo.addClass(spacer, "dismiss");
+				var close = dojo.create("span", {id: "parameterClose"}, parentDismiss, "last");
+				dojo.addClass(close, "imageSprite");
+				dojo.addClass(close, "core-sprite-delete");
+				dojo.addClass(close, "dismiss");
+				close.title = "Close";
+				dojo.connect(close, "onclick", dojo.hitch(this, function(event) {
+					localClose();
+				}));
+
+				return first;
+			});
+		 }
 	};
 	CommandParameterCollector.prototype.constructor = CommandParameterCollector;
 	
@@ -408,7 +446,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		}
 		
 		// Set up a custom parameter collector that slides out of the header.
-		commandService.setParameterCollector(new CommandParameterCollector(parent));
+		commandService.setParameterCollector("tool", new CommandParameterCollector(parent));
 		
 		// place the HTML fragment from above.
 		dojo.place(topHTMLFragment, parent, "only");

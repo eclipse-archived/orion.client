@@ -11,7 +11,7 @@
 
  /*global define window Image */
  
-define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip' ], function(require, dojo, dijit, mUtil){
+define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(require, dojo, dijit, mUtil){
 
 	/**
 	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
@@ -35,7 +35,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 * @returns {Boolean} whether parameters can be collected
 		 */
 		collectsParameters: function() {
-			return this.commandService && this.commandService._parameterCollector;  // reachy
+			return this.commandService && this.commandService.collectsParameters();
 		}
 	};
 	CommandInvocation.prototype.constructor = CommandInvocation;
@@ -51,6 +51,49 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		_onClick: function(evt) {
 			if (!this.hrefCallback) {
 				this.inherited(arguments);
+			}
+		}
+	});
+	
+	/**
+	 * Override the dijit Tooltip to handle cases where the tooltip is not dismissing
+	 * when expected.
+	 * Case 1:  the tooltip should close when the command dom node that generated it is hidden.
+	 * Case 2:  the tooltip should always disappear when unhovered, regardless of who has the 
+	 * focus.  This allows the tooltip to properly disappear when we hit Esc to close the menu.  
+	 * We may have to revisit this when we do an accessibility pass.
+	 * 
+	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=360687
+	 */
+	var CommandTooltip = dojo.declare(dijit.Tooltip, {
+		constructor : function() {
+			this.inherited(arguments);
+			this.options = arguments[0] || {};
+		},
+		
+		_onUnHover: function(evt){
+			// comment out line below from dijit implementation
+			// if(this._focus){ return; }
+			// this is the rest of it
+			if(this._showTimer){
+				window.clearTimeout(this._showTimer);
+				delete this._showTimer;
+			}
+			this.close();
+		}, 
+		
+		postMixInProperties: function() {
+			this.inherited(arguments);
+			if (this.options.commandParent) {
+				if (dijit.byId(this.options.commandParent.id)) {
+					// this is a menu
+					dojo.connect(this.options.commandParent, "onClose", dojo.hitch(this, function() {this.close();}));
+				} else {
+					if (this.options.commandService) {
+						this.options.commandService.whenHidden(this.options.commandParent, 
+							dojo.hitch(this, function() {this.close();}));
+					}
+				}				
 			}
 		}
 	});
@@ -70,6 +113,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		this._activeModalCommandNode = null;
 		this._urlBindings = {};
 		this._init(options);
+		this._parameterCollectors = {tool: null, menu: null};
 	}
 	CommandService.prototype = /** @lends orion.commands.CommandService.prototype */ {
 		_init: function(options) {
@@ -138,9 +182,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						} else if (command.callback) {
 							stop(event);
 							window.setTimeout(dojo.hitch(this, function() {
-								if (command.parameters && this._parameterCollector) {
-									// should the handler be bound to this, or something else?
-									this._collectParameters(invocation);
+								if (command.parameters && this.collectsParameters()) {
+									this._collectParameters("tool", invocation);
 								} else {
 									command.callback.call(invocation.handler || window, invocation);
 								}	
@@ -169,7 +212,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						if (command.parameters && command.callback) {
 							command.parameters.setValue(match.parameterName, match.parameterValue);
 							window.setTimeout(dojo.hitch(this, function() {
-								this._collectParameters(invocation);
+								this._collectParameters("tool", invocation);
 							}), 0);
 							return;
 						}
@@ -191,7 +234,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			if (binding && binding.command) {
 				if (binding.command.callback) {
 					window.setTimeout(dojo.hitch(this, function() {
-						this._collectParameters(binding.invocation);
+						this._collectParameters("tool", binding.invocation);
 					}), 0);
 				}
 			}
@@ -213,13 +256,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 * will be responsible for collecting parameters.
 		 *
 		 * @param {Object} parameterCollector a collector which implements <code>open(commandNode, id, fillFunction)</code>,
-		 *  <code>close(commandNode)</code>, and <code>collectParameters(commandInvocation)</code>.
+		 *  <code>close(commandNode)</code>, <code>getFillFunction(commandInvocation)</code>, and <code>collectParameters(commandInvocation)</code>.
+		 * @param {String} renderType a render type for which this collector will generate the containing parameter.  For render
+		 *  types that aren't supported, only the collector's fill function will be used to fill the contents of an area
+		 *  generated by the command service.
 		 *
 		 */
-		setParameterCollector: function(parameterCollector) {
-			this._parameterCollector = parameterCollector;
+		setParameterCollector: function(renderType, parameterCollector) {
+			this._parameterCollectors[renderType] = parameterCollector;
 		},
-		
+				
 		/**
 		 * Open a parameter collector suitable for collecting information about a command.
 		 * Once a collector is created, the specified function is used to fill it with
@@ -229,17 +275,18 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 * will open and close parameter collectors as needed and call the command callback with
 		 * the values of those parameters.
 		 *
+		 * @param {String} renderType the type of commands for which parameters are collected ("tool," "menu")
 		 * @param {DOMElement} commandNode the dom node that is displaying the command
 		 * @param {String} id the id of the parent node containing the command
 		 * @param {Function} fillFunction a function that will fill the parameter area
 		 */
-		openParameterCollector: function(commandNode, id, fillFunction) {
-			if (this._parameterCollector) {
+		openParameterCollector: function(renderType, commandNode, id, fillFunction) {
+			if (this._parameterCollectors[renderType]) {
 				if (this._activeModalCommandNode) {
-					this._parameterCollector.close(this._activeModalCommandNode);
+					this._parameterCollectors[renderType].close(this._activeModalCommandNode);
 				}
 				this._activeModalCommandNode = commandNode;
-				this._parameterCollector.open(commandNode, id, fillFunction);
+				this._parameterCollectors[renderType].open(commandNode, id, fillFunction);
 			}
 		},
 		
@@ -250,23 +297,49 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 * because the command framework will open and close parameter collectors as needed and 
 		 * call the command callback with the values of those parameters.
 		 *
+		 * @param {String} renderType the type of command collecting parameters ("tool", "menu")
 		 * @param {DOMElement} commandNode the dom node that is displaying the command
-		 * @param {String} id the id of the parent node containing the command
-		 * @param {Function} fillFunction a function that will fill the parameter area
 		 */
 
-		closeParameterCollector: function(commandNode) {
+		closeParameterCollector: function(renderType, commandNode) {
 			this._activeModalCommandNode = null;
-			if (this._parameterCollector) {
-				this._parameterCollector.close(commandNode);
+			if (this._parameterCollectors[renderType]) {
+				this._parameterCollectors[renderType].close(commandNode);
 			}
 		},
 		
-		_collectParameters: function(commandInvocation) {
-			if (this._parameterCollector) {
-				this._parameterCollector.close(this._activeModalCommandNode);
+		/**
+		 * Returns whether this service has been configured to collect command parameters
+		 *
+		 * @returns whether or not this service is configured to collect parameters.
+		 */
+		collectsParameters: function() {
+			return this._parameterCollectors.tool || this._parameterCollectors.menu;
+		},
+		
+		_collectParameters: function(renderType, commandInvocation) {
+			if (this._parameterCollectors[renderType]) {
+				this._parameterCollectors[renderType].close(this._activeModalCommandNode);
 				this._activeModalCommandNode = commandInvocation.domNode;
-				this._parameterCollector.collectParameters(commandInvocation);
+				this._parameterCollectors[renderType].collectParameters(commandInvocation);
+			} else if (renderType === "menu" && this._parameterCollectors.tool) {
+				// if parameter collection has been set up, we should have some default collection for menu commands.
+				// Clients don't know the details of how we construct menus, so we can't expect them to provide reasonable
+				// default behavior.
+				var tooltipDialog = new dijit.TooltipDialog({
+					onBlur: function() {dijit.popup.close(tooltipDialog);}
+				});		
+				var parameterArea = dojo.create("div");
+				var focusNode = this._parameterCollectors.tool.getFillFunction(commandInvocation, function() {
+					dijit.popup.close(tooltipDialog);})(parameterArea);
+				tooltipDialog.set("content", parameterArea);
+				var menu = dijit.byId(commandInvocation.domParent.id);
+				var pos = dojo.position(menu.eclipseScopeId, true);
+				dijit.popup.open({popup: tooltipDialog, x: pos.x, y: pos.y + 8});
+				window.setTimeout(function() {
+					focusNode.focus();
+					focusNode.select();
+				}, 0);
 			}
 		},
 		
@@ -668,6 +741,42 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		},
 		
 		/**
+		 * Notifies the command service that commands rendered in the specified dom node are now hidden.
+		 * 
+		 * @param domElementOrId {String|DOMElement} the element containing the rendered commands.  This should
+		 *  be a DOM element in which commands were previously rendered.
+		 */
+		commandsHidden: function(domElementOrId) {
+			var id = typeof domElementOrId === "string" ? domElementOrId : domElementOrId.id;
+			if (this.hidden && this.hidden[id]) {
+				var notifyList = this.hidden[id];
+				for (var i=0; i<notifyList.length; i++) {
+					if (typeof notifyList[i] === "function") {
+						window.setTimeout(notifyList[i], 0);
+					}
+				}
+			}
+		},
+		/**
+		 * Registers a function that should be called when the specified DOM element is hidden.
+		 * 
+		 * @param {String|DOMElement} domElementOrId the element containing the rendered commands.  This should
+		 *  be a DOM element in which commands are being rendered.
+		 * @param {Function} onHide a function to be called when the dom element is hidden
+		 */
+		whenHidden: function(domElementOrId, onHide) {
+			var id = typeof domElementOrId === "string" ? domElementOrId : domElementOrId.id;
+			if (!this.hidden) {
+				this.hidden = {};
+			}
+			if (this.hidden[id]) {
+				this.hidden[id].push(onHide);
+			} else {
+				this.hidden[id] = [onHide];
+			}
+		},
+				
+		/**
 		 * Add a dom node appropriate for using a separator between different groups
 		 * of commands.  This function is useful when a page is precisely arranging groups of commands
 		 * (in a table or contiguous spans) and needs to use the same separator that the command service
@@ -743,17 +852,22 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			var link = dojo.create("a");
 			link.id = this.name+"link";
 			var image = null;
-			if (this.tooltip) {
-				link.title = this.tooltip;
-			}
 			if (forceText || !this.hasImage()) {
 				var text = window.document.createTextNode(this.name);
 				dojo.place(text, link, "last");
 				dojo.addClass(link, 'commandLink');
+				if (this.tooltip) {
+					new CommandTooltip({
+						connectId: [link],
+						label: this.tooltip,
+						position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
+						commandParent: parent,
+						commandService: context.commandService
+					});
+				}
 			} else {
 				image = new Image();
 				image.alt = this.name;
-				image.title = this.tooltip || this.name;
 				image.name = name;
 				image.id = name;
 			}
@@ -773,7 +887,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					dojo.connect(image, "onclick", this, function() {
 						// collect parameters in advance if specified
 						if (this.parameters && context.collectsParameters()) {
-							context.commandService._collectParameters(context);
+							context.commandService._collectParameters("tool", context);
 						} else if (this.callback) {
 							this.callback.call(context.handler, context);
 						}
@@ -783,7 +897,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					dojo.connect(link, "onclick", this, function() {
 						// collect parameters in advance if specified
 						if (this.parameters && context.collectsParameters()) {
-							context.commandService._collectParameters(context);
+							context.commandService._collectParameters("tool", context);
 						} else if (this.callback) {
 							this.callback.call(context.handler, context);
 						}
@@ -815,6 +929,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					dojo.addClass(image, this.imageClass);
 				} 
 				dojo.place(image, link, "last");
+				new CommandTooltip({
+					connectId: [image],
+					label: this.tooltip || this.name,
+					position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
+					commandParent: parent,
+					commandService: context.commandService
+				});
 			} 
 			dojo.place(link, parent, "last");
 		},
@@ -827,9 +948,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				hrefCallback: !!this.hrefCallback
 			});
 			if (this.tooltip) {
-				new dijit.Tooltip({
+				new CommandTooltip({
 					connectId: [menuitem.domNode],
-					label: this.tooltip
+					label: this.tooltip,
+					commandParent: parent,
+					commandService: context.commandService
 				});
 			}
 			if (this.hrefCallback) {
@@ -844,9 +967,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					}
 				}
 			} else if (this.callback) {
-				menuitem.onClick = dojo.hitch(this, function() {
-					this.callback.call(context.handler, context);
-				});
+				if (this.parameters && context.collectsParameters()) {
+					menuitem.onClick = dojo.hitch(this, function() {
+						context.commandService._collectParameters("menu", context);
+					});
+				} else {
+					menuitem.onClick = dojo.hitch(this, function() {
+						this.callback.call(context.handler, context);
+					});
+				}
 			}
 			
 			// we may need to refer back to the command.  
