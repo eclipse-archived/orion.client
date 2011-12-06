@@ -615,8 +615,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			visibleWhen: oneOrMoreFilesOrFolders 
 		});
 		commandService.addCommand(copyCommand, "dom");
-		// don't do this at the row-level until we figure out bug 338888
-		// commandService.addCommand(copyCommand, "object");
+		commandService.addCommand(copyCommand, "object");
 		
 		var moveCommand = new mCommands.Command({
 			name : "Move to",
@@ -628,8 +627,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			visibleWhen: oneOrMoreFilesOrFolders
 			});
 		commandService.addCommand(moveCommand, "dom");
-		// don't do this at the row-level until we figure out bug 338888
-		// commandService.addCommand(moveCommand, "object");
+		commandService.addCommand(moveCommand, "object");
 		
 		var bufferedSelection = [];
 		var copyToBufferCommand = new mCommands.Command({
