@@ -15,6 +15,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 
 	/**
 	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
+	 * Note:  when retrieving parameters for a command invocation, clients should always use <code>commandInvocation.parameters</code>
+	 * rather than obtaining the parameter object originally specified for the command (<code>commandInvocation.command.parameters</code>).
+	 * This ensures that the parameter values for the actual invocation are used vs. any default parameters that may have been
+	 * specified originally.
 	 * 
 	 * @name orion.commands.CommandInvocation
 	 * 
@@ -25,7 +29,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		this.items = items;
 		this.userData = userData;
 		this.command = command;
-		this.parameters = command.parameters;
+		if (command.parameters) {
+			this.parameters = command.parameters.makeCopy(); // so that we aren't retaining old values from previous invocations
+		}
 		this.id = command.id;
 	}
 	CommandInvocation.prototype = /** @lends orion.commands.CommandInvocation.prototype */ {
@@ -182,7 +188,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						} else if (command.callback) {
 							stop(event);
 							window.setTimeout(dojo.hitch(this, function() {
-								if (command.parameters && this.collectsParameters()) {
+								if (invocation.parameters && this.collectsParameters()) {
 									this._collectParameters("tool", invocation);
 								} else {
 									command.callback.call(invocation.handler || window, invocation);
@@ -209,8 +215,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						var urlBinding = this._urlBindings[id];
 						var command = urlBinding.command;
 						var invocation = urlBinding.invocation;
-						if (command.parameters && command.callback) {
-							command.parameters.setValue(match.parameterName, match.parameterValue);
+						if (invocation.parameters && command.callback) {
+							invocation.parameters.setValue(match.parameterName, match.parameterValue);
 							window.setTimeout(dojo.hitch(this, function() {
 								this._collectParameters("tool", invocation);
 							}), 0);
@@ -1272,7 +1278,21 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					func(this.parameterTable[key]);
 				}
 			}
-		}
+		},
+		
+		/**
+		 * Make a copy of this description.  Used for collecting values when a client doesn't want
+		 * the values to be persisted across different objects.
+		 *
+		 */
+		 makeCopy: function() {
+			var parameters = [];
+			this.forEach(function(parm) {
+				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value);
+				parameters.push(newParm);
+			});
+			return new ParametersDescription(parameters, this.options);
+		 }
 	};
 	ParametersDescription.prototype.constructor = ParametersDescription;
 	
