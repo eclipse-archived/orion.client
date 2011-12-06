@@ -103,24 +103,26 @@ var exports = {};
 	};
 
 	exports.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title){
-					var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
-								title: title,
-								serviceRegistry: serviceRegistry,
-								func: func,
-								errordata: options.errordata
-							});		
-					credentialsDialog.startup();
-					credentialsDialog.show();
+		var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
+					title: title,
+					serviceRegistry: serviceRegistry,
+					func: func,
+					errordata: options.errordata
+				});		
+		credentialsDialog.startup();
+		credentialsDialog.show();
 	};
 
-	exports.getDefaultSshOptions = function(serviceRegistry){
+	exports.getDefaultSshOptions = function(serviceRegistry, authParameters){
 		var def = new dojo.Deferred();
 		var sshService = serviceRegistry.getService("orion.net.ssh");
+		var sshUser =  authParameters && !authParameters.optionsRequested ? authParameters.valueFor("sshuser") : "";
+		var sshPassword = authParameters && !authParameters.optionsRequested ? authParameters.valueFor("sshpassword") : "";
 		sshService.getKnownHosts().then(function(knownHosts){
 			def.callback({
 						knownHosts: knownHosts,
-						gitSshUsername: "",
-						gitSshPassword: "",
+						gitSshUsername: sshUser,
+						gitSshPassword: sshPassword,
 						gitPrivateKey: "",
 						gitPassphrase: ""
 			});
@@ -553,17 +555,18 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(openGitCommit, "object");
-
+		var gitAuthParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
 		var fetchCommand = new mCommands.Command({
 			name: "Fetch",
 			tooltip: "Fetch from the remote",
 			imageClass: "git-sprite-fetch",
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.orion.git.fetch",
+			parameters: gitAuthParameters,
 			callback: function(data) {
 				var item = data.items;
 				var path = item.Location;
-				exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
+				exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(function(options) {
 					var func = arguments.callee;
 					var gitService = serviceRegistry.getService("orion.git.provider");
 					var progressService = serviceRegistry.getService("orion.page.message");
@@ -629,11 +632,12 @@ var exports = {};
 			name : "Force Fetch",
 			tooltip: "Fetch from the remote branch into your remote tracking branch overriding its current content",
 			id : "eclipse.orion.git.fetchForce",
+			parameters: gitAuthParameters,
 			callback: function(data) {
 				var item = data.items;
 				if(confirm("You're going to override content of the remote tracking branch. This can cause the branch to lose commits.\n\nAre you sure?")) {
 					var path = item.Location;
-					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
+					exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(function(options) {
 						var func = arguments.callee;
 						var gitService = serviceRegistry.getService("orion.git.provider");
 						var progressService = serviceRegistry.getService("orion.page.message");
@@ -831,6 +835,7 @@ var exports = {};
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.push",
+			parameters: gitAuthParameters,
 			callback: function(data) {
 				var item = data.items;
 					var path = dojo.hash();
@@ -841,7 +846,7 @@ var exports = {};
 					var progressService = serviceRegistry.getService("orion.page.message");
 
 					if (item.RemoteLocation.length == 1 && item.RemoteLocation[0].Children.length == 1) {
-						exports.getDefaultSshOptions(serviceRegistry).then(
+						exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(
 								function(options) {
 									var func = arguments.callee;
 									var deferred = gitService.doPush(item.RemoteLocation[0].Children[0].Location, "HEAD", true, false, null, options.gitSshUsername, options.gitSshPassword,
@@ -867,7 +872,7 @@ var exports = {};
 							},
 							hideNewBranch: true,
 							func: dojo.hitch(this, function(targetBranch, remote) {
-								exports.getDefaultSshOptions(serviceRegistry).then(
+								exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(
 										function(options) {
 											var func = arguments.callee;
 											var deferred = gitService.doPush(targetBranch.Location, "HEAD", true, false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts,
@@ -905,6 +910,7 @@ var exports = {};
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.pushForce",
+			parameters: gitAuthParameters,
 			callback: function(data) {
 				var item = data.items;
 				if(confirm("You're going to override content of the remote branch. This can cause the remote repository to lose commits.\n\nAre you sure?")) {
@@ -916,7 +922,7 @@ var exports = {};
 					var progressService = serviceRegistry.getService("orion.page.message");
 
 					if(item.RemoteLocation.length==1 && item.RemoteLocation[0].Children.length==1){
-						exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+						exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(function(options){
 							var func = arguments.callee;
 							var deferred = gitService.doPush(item.RemoteLocation[0].Children[0].Location, "HEAD", true, true, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 							progressService.showWhile(deferred, "Pushing remote: " + path).then(function(remoteJsonData){
@@ -938,7 +944,7 @@ var exports = {};
 							treeRoot: {Children: remotes},
 							hideNewBranch: true,
 							func: dojo.hitch(this, function(targetBranch, remote) {
-								exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+								exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(function(options){
 									var func = arguments.callee;
 									var deferred = gitService.doPush(targetBranch.Location, "HEAD", true, true, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey, options.gitPassphrase);
 									progressService.showWhile(deferred, "Pushing remote: " + remote).then(function(remoteJsonData){

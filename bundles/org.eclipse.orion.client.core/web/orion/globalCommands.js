@@ -122,7 +122,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 						focusNode.select();
 					}, 0);
 				}
+				return true;
 			}
+			return false;
 		},
 		
 		_collectAndCall: function(commandInvocation) {
@@ -138,15 +140,16 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		},
 		
 		/**
-		 * Returns whether this key binding is the same as the given parameter.
+		 * Collect parameters for the given command.
 		 * 
 		 * @param {orion.commands.CommandInvocation} the command invocation
 		 * @returns {Boolean} whether or not required parameters were collected.
 		 */
 		collectParameters: function(commandInvocation) {
 			if (commandInvocation.command.parameters) {
-				this.open(commandInvocation.domNode, commandInvocation.domParent.id, this.getFillFunction(commandInvocation));
+				return this.open(commandInvocation.domNode, commandInvocation.domParent.id, this.getFillFunction(commandInvocation));
 			}
+			return false;
 		},
 		
 		/**
