@@ -78,10 +78,11 @@ dojo.addOnLoad(function(){
 				
 		// define the command contributions - where things appear, first the groups
 		commandService.addCommandGroup("eclipse.fileGroup", 100, "More");
-		commandService.addCommandGroup("eclipse.newResources", 100, null, "eclipse.fileGroup");
+		commandService.addCommandGroup("eclipse.importExportGroup", 100, null, "eclipse.fileGroup");		
+		commandService.addCommandGroup("eclipse.newResources", 101, null, "eclipse.fileGroup");
 		commandService.addCommandGroup("eclipse.fileGroup.unlabeled", 100, null, null, "pageActions");
 		commandService.addCommandGroup("eclipse.fileGroup.openWith", 100, "Open With", "eclipse.fileGroup");
-		commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
+		commandService.addCommandGroup("eclipse.gitGroup", 200, null, null, "pageActions");
 		commandService.addCommandGroup("eclipse.selectionGroup", 500, "More", null, "selectionTools");
 		// commands that don't appear but have keybindings
 		commandService.registerCommandContribution("eclipse.toggleSplitter", 1, "pageActions", null, true, new mCommands.CommandKeyBinding('o', true));
@@ -97,10 +98,10 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("eclipse.copyFile", 1, null, "eclipse.fileGroup");
 		commandService.registerCommandContribution("eclipse.moveFile", 2, null, "eclipse.fileGroup");
 		commandService.registerCommandContribution("eclipse.deleteFile", 3, null, "eclipse.fileGroup");
-		commandService.registerCommandContribution("eclipse.importCommand", 4, null, "eclipse.fileGroup");
-		commandService.registerCommandContribution("eclipse.downloadFile", 5, null, "eclipse.fileGroup");
-		commandService.registerCommandContribution("eclipse.importSFTPCommand", 6, null, "eclipse.fileGroup");
-		commandService.registerCommandContribution("eclipse.exportSFTPCommand", 7, null, "eclipse.fileGroup");
+		commandService.registerCommandContribution("eclipse.importCommand", 4, null, "eclipse.fileGroup/eclipse.importExportGroup");
+		commandService.registerCommandContribution("eclipse.downloadFile", 5, null, "eclipse.fileGroup/eclipse.importExportGroup");
+		commandService.registerCommandContribution("eclipse.importSFTPCommand", 6, null, "eclipse.fileGroup/eclipse.importExportGroup");
+		commandService.registerCommandContribution("eclipse.exportSFTPCommand", 7, null, "eclipse.fileGroup/eclipse.importExportGroup");
 		// new file and new folder in the actions column uses the labeled group
 		commandService.registerCommandContribution("eclipse.newFile", 1, null, "eclipse.fileGroup/eclipse.newResources");
 		commandService.registerCommandContribution("eclipse.newFolder", 2, null, "eclipse.fileGroup/eclipse.newResources");
