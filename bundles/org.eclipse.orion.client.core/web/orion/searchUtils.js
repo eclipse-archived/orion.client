@@ -34,14 +34,14 @@ orion.searchUtils = orion.searchUtils || {};
  * @function
  */
 orion.searchUtils.parseQueryStr = function(queryStr) {
-	if(queryStr[0] === '?'){
-		queryStr = queryStr.substring(1);
+	var indexOfQMark = queryStr.indexOf("?");
+	var indexOfQWqual = queryStr.indexOf("q=");
+	if(indexOfQMark < indexOfQWqual && indexOfQWqual > 0){
+		queryStr = queryStr.substring(indexOfQMark+1);
 	}
-	
 	//var obj = dojo.queryToObject(queryStr);
-	
 	splitQ = queryStr.split("&");
-	var queryObj = {queryStr: queryStr, start:0, rows:20};
+	var queryObj = {queryStr: queryStr, start:0, rows:10, sort:"Path asc"};
 	for(var i=0; i < splitQ.length; i++){
 		var splitparameters = splitQ[i].split("=");
 		if(splitparameters.length === 2){

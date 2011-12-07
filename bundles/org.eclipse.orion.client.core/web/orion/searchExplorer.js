@@ -63,22 +63,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
-	SearchResultModel.prototype.convertFileIndex = function(){
-		var fileModel, lookAt;
-		if(this.useFlatList){
-			fileModel = this.indexedFileItems_tree[this.currentFileIndex];
-			lookAt = this.indexedFileItems_flat;
-		} else {
-			fileModel = this.indexedFileItems_flat[this.currentFileIndex];
-			lookAt = this.indexedFileItems_tree;
-		}
-		for(var i = 0 ; i < lookAt.length; i++){
-			if(lookAt[i].location == fileModel.location){
-				this.currentFileIndex = i;
-			}
-		}
-	};
-	
 	SearchResultModel.prototype.indexToLocation = function(index){
 		var fileModel = this.indexedFileItems()[index];
 		return fileModel.location;
@@ -163,7 +147,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
-	SearchResultModel.prototype.preparecompressHash = function(){
+	SearchResultModel.prototype.prepareCompressHash = function(){
 		this.sharedParentHash = [];
 		for(var i = 0 ; i < this._resultLocation.length; i++){
 			var parents = this._resultLocation[i].metaData.Parents;
@@ -212,7 +196,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			var parents = this._resultLocation[i].metaData.Parents;
 			if(parents.length === 0)
 				continue;
-			this.preparecompressHash();
+			this.prepareCompressHash();
 			var newParents = [];
 			this.compressParents(parents, 0, newParents);
 			this._resultLocation[i].metaData.compressedParents = newParents;
