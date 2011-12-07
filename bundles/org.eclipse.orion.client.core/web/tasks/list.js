@@ -39,7 +39,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 			commandService.registerCommandContribution("eclipse.removeCompletedTasks", 1, "pageActions", "eclipse.taskGroup.unlabeled");
 			commandService.registerCommandContribution("eclipse.removeTask", 1);
 			commandService.registerCommandContribution("eclipse.removeTask", 1, "selectionTools", "eclipse.selectionGroup");
-			
+			commandService.registerCommandContribution("eclipse.cancelTask", 2);
+			commandService.registerCommandContribution("eclipse.cancelTask", 2, "selectionTools", "eclipse.selectionGroup");
 			
 			taskClient.registreTaskChangeListener(function(taskList){
 				dojo.hitch(taskTable, taskTable.mergeTasks)(taskList);

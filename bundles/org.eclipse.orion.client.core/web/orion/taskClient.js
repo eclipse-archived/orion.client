@@ -142,6 +142,10 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			removeTask: function(taskLocation){
 				return _doServiceCall(this._getService(taskLocation), "removeTask", arguments);
 			},
+			
+			cancelTask: function(taskLocation){
+				return _doServiceCall(this._getService(taskLocation), "cancelTask", arguments);
+			},
 	
 			registreTaskChangeListener: function(listener){
 				this._taskListeners.push(listener);
