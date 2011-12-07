@@ -92,6 +92,32 @@ define(['require', 'dojo', 'orion/commands'],
 			});
 			commandService.addCommand(removeTaskCommand, "object");
 			commandService.addCommand(removeTaskCommand, "dom");
+			
+			var cancelTaskCommand = new mCommands.Command({
+				name : "Cancel",
+				tooltip : "Cancel tasks from the tasks list.",
+				imageClass: "core-sprite-stop",
+				id : "eclipse.cancelTask",
+				callback : function(data) {
+					var items = dojo.isArray(data.items) ? data.items : [data.items];
+					for (var i=0; i < items.length; i++) {
+						var item = items[i];
+						taskClient.cancelTask(item.Location);
+					}
+				},
+				visibleWhen : function(items) {
+					if(!dojo.isArray(items) || items.length===0)
+						return items.CanBeCanceled===true && items.Running===true;
+					for(var i in items){
+						if(items[i].CanBeCanceled!=true || items[i].Running!=true){
+							return false;
+						}
+					}
+					return true;
+				}
+			});
+			commandService.addCommand(cancelTaskCommand, "object");
+			commandService.addCommand(cancelTaskCommand, "dom");
 		};
 	
 	}());	
