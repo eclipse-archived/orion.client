@@ -121,6 +121,21 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/taskCommands' ], function(r
 			
 		};
 		
+		TasksRenderer.prototype.parseProgressResult = function(message){
+			if(!message){
+				return {};
+			}
+			//could either be responseText from xhrGet or just a string
+			var status = message.responseText || message;
+			//accept either a string or a JSON representation of an IStatus
+			try {
+				status = JSON.parse(status);
+			} catch(error) {
+				//it is not JSON, just continue;
+			}
+			return {Message: status.Message || status, Severity: status.Severity};
+		};
+		
 		TasksRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 			switch(col_no){
 			case 0:
@@ -132,6 +147,20 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/taskCommands' ], function(r
 				
 				var taskIcon = dojo.create("span", null, div, "first");
 				dojo.addClass(taskIcon, "imageSprite");
+				
+				var result =  this.parseProgressResult(item.Result);
+				
+				if(result.Severity){
+					switch (status.Severity) {
+						case "Warning":
+							dojo.addClass(taskIcon, "core-sprite-warning");
+							return col;
+						case "Error":
+							dojo.addClass(taskIcon, "core-sprite-error");
+							return col;
+					}
+				}
+				
 				if(item.Running===true)
 					dojo.addClass(taskIcon, "core-sprite-start");
 				else if(item.Canceled===true)
@@ -144,7 +173,8 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/taskCommands' ], function(r
 				return col;
 				break;
 			case 1:
-				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.Message});
+				var result =  this.parseProgressResult(item.Result);
+				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: result.Message || item.Message});
 				break;
 			case 2:
 				return this.getActionsColumn(item, tableRow);

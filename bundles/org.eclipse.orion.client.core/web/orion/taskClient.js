@@ -49,6 +49,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		this._services = [];
 		this._patterns = [];
 		this._taskListeners = [];
+		this._currentLongpollingIds = [];
 		var taskServices = serviceRegistry.getServiceReferences("orion.core.task");
 		for(var i=0; i<taskServices.length; i++){
 			var servicePtr = taskServices[i];
@@ -88,18 +89,26 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 	}
 	
 	function _registerTaskChangeListener(service, listener, longpollingId){
-		_doServiceCall(service, "getTasksLongpolling", longpollingId).then(function(result){
-			listener(result);
+		var that = this;
+		_doServiceCall(service, "getTasksLongpolling", [longpollingId]).then(function(result){
+			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
+				return;
+			}
+			listener(result, longpollingId);
 			if(result.LongpollingId){
-				_registerTaskChangeListener(service, listener, [result.LongpollingId]);
+				that._currentLongpollingIds.push(result.LongpollingId);
+				dojo.hitch(that, _registerTaskChangeListener)(service, listener, result.LongpollingId);
 			} else
-				_registerTaskChangeListener(service, listener, [longpollingId]);
+				dojo.hitch(that, _registerTaskChangeListener)(service, listener, longpollingId);
 			
 		}, function(error){
+			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
+				return;
+			}
 			if("timeout"===error.dojoType)				
-				_registerTaskChangeListener(service, listener, [longpollingId]);
+				dojo.hitch(that, _registerTaskChangeListener)(service, listener, longpollingId);
 			else
-				setTimeout(function(){_registerTaskChangeListener(service, listener, [longpollingId]);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
+				setTimeout(function(){dojo.hitch(that, _registerTaskChangeListener)(service, listener, longpollingId);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
 		});
 	}
 	
@@ -133,13 +142,24 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			removeTask: function(taskLocation){
 				return _doServiceCall(this._getService(taskLocation), "removeTask", arguments);
 			},
+			
+			cancelTask: function(taskLocation){
+				return _doServiceCall(this._getService(taskLocation), "cancelTask", arguments);
+			},
 	
 			registreTaskChangeListener: function(listener){
 				this._taskListeners.push(listener);
 				if(this._taskListeners.length===1){
 					for(var i=0; i<this._services.length; i++){
-						_registerTaskChangeListener(this._services[i], dojo.hitch(this, _notifyChangeListeners));
+						dojo.hitch(this, _registerTaskChangeListener)(this._services[i], dojo.hitch(this, _notifyChangeListeners));
 					}
+				}
+			},
+			
+			resetChangeListeners: function(){
+				this._currentLongpollingIds = [];
+				for(var i=0; i<this._services.length; i++){
+					dojo.hitch(this, _registerTaskChangeListener)(this._services[i], dojo.hitch(this, _notifyChangeListeners));
 				}
 			}
 	};
