@@ -12,7 +12,7 @@
 /*global define */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['dojo', 'orion/commands'], function(dojo, mCommands){
+define(['dojo', 'orion/commands', 'orion/searchUtils'], function(dojo, mCommands, mSearchUtils){
 
 	/**
 	 * Creates a new search results generator.
@@ -21,6 +21,7 @@ define(['dojo', 'orion/commands'], function(dojo, mCommands){
 	 */
 	function SearchResultsGenerator(serviceRegistry, searcher, resultsId, commandService, toolbarId) {
 		this.registry = serviceRegistry;
+		this._fileClient = this.registry.getService("orion.core.file")
 		this.searcher = searcher;
 		this.resultsId = resultsId;
 		this.commandService = commandService;
@@ -39,7 +40,26 @@ define(['dojo', 'orion/commands'], function(dojo, mCommands){
 				tooltip: "Save query to search favorites",
 				id: "orion.saveSearchResults",
 				callback: dojo.hitch(this, function() {
-					this.searcher.saveSearch(query, query);
+					var queryObj = mSearchUtils.parseQueryStr(query);
+					var qName = query;
+					if(queryObj && typeof(queryObj.searchStrTitle) === "string" && typeof(queryObj.location) === "string" ){
+						qName = "\'" + queryObj.searchStrTitle + "\' in ";// +queryObj.location;
+						if(queryObj.location.length > 0){
+							this._fileClient.read(queryObj.location, true).then(
+								dojo.hitch(this, function(meta) {
+									this.searcher.saveSearch(qName + mSearchUtils.fullPathNameByMeta(meta.Parents), query);
+								}),
+								dojo.hitch(this, function(error) {
+									console.error("Error loading file meta data: " + error.message);
+									this.searcher.saveSearch(qName + "root", query);
+								})
+							);
+						} else {
+							this.searcher.saveSearch(qName + "root", query);
+						}
+					} else {
+						this.searcher.saveSearch(qName, query);
+					}
 			})});
 		
 			this.commandService.addCommand(saveresultsCommand, "dom");

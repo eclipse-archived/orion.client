@@ -228,19 +228,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			this.fullPathNameByTree(childNode.parent, fullPath);
 	};
 	
-	SearchResultModel.prototype.fullPathNameByMeta = function(parents){
-		var parentIndex = parents.length;
-		var fullPath = "";
-		//add parents chain top down if needed
-		if(parentIndex > 0){
-			for(var j = parentIndex - 1; j > -1; j--){
-				var separator = (fullPath === "") ? "" : "/";
-				fullPath = fullPath + separator + parents[j].Name;
-			}
-		}
-		return fullPath;
-	};
-	
 	SearchResultModel.prototype.buildResultModel = function(onComplete){
 		this.restoreGlobalStatus();
 		var that = this;
@@ -335,7 +322,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			var childNode = {parent: this._listRoot, type: "file", name: this._resultLocation[i].name, 
 					linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location, 
 					stale: (this._resultLocation[i].lastModified !== this._resultLocation[i].metaData.LocalTimeStamp) };
-			childNode.fullPathName = this.fullPathNameByMeta(this._resultLocation[i].metaData.Parents);
+			childNode.fullPathName = mSearchUtils.fullPathNameByMeta(this._resultLocation[i].metaData.Parents);
 			childNode.parentLocation = this._resultLocation[i].metaData.Parents[0].Location;
 			this.modelLocHash_flat[childNode.location] = childNode;
 			this._listRoot.children.push(childNode);

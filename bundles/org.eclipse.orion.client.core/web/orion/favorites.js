@@ -120,6 +120,23 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			this._notifyListeners();
 		},
 					
+		renameSearch: function(query, newName) {
+			var changed = false;
+			for (var i in this._searches) {
+				if (this._searches[i].query === query) {
+					var search = this._searches[i];
+					if (search.name !== newName) {
+						search.name = newName;
+						changed = true;
+					}
+				}
+			}
+			if (changed) {
+				this._storeSearches();
+				this._notifyListeners();
+			}
+		},
+		
 		_initializeFavorites: function () {
 			var favorites = this;
 			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) { 
@@ -217,6 +234,15 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				this.editFavoriteName(data.items, data.id, data.domNode.id, data.userData);
 			})
 		});
+		var renameSearchCommand = new mCommands.Command({
+			name: "Rename",
+			imageClass: "core-sprite-rename",
+			id: "eclipse.renameSearch",
+			visibleWhen: function(item) {return item.isSearch;},
+			callback: dojo.hitch(this, function(data) {
+				this.editSearchName(data.items, data.id, data.domNode.id, data.userData);
+			})
+		});
 		var deleteSearchCommand = new mCommands.Command({
 			name: "Delete",
 			imageClass: "core-sprite-delete",
@@ -232,12 +258,14 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 		// register commands with object scope
 		commandService.addCommand(deleteFaveCommand, "object");
 		commandService.addCommand(renameFaveCommand, "object");
+		commandService.addCommand(renameSearchCommand, "object");	
 		commandService.addCommand(deleteSearchCommand, "object");	
 		commandService.addCommand(addFaveURLCommand, "dom");		
 		// declare the contribution to the ui
 		commandService.registerCommandContribution("eclipse.renameFave", 1);
 		commandService.registerCommandContribution("eclipse.deleteFave", 2);
-		commandService.registerCommandContribution("eclipse.deleteSearch", 1);	
+		commandService.registerCommandContribution("eclipse.renameSearch", 1);	
+		commandService.registerCommandContribution("eclipse.deleteSearch", 2);	
 		commandService.registerCommandContribution("eclipse.addExternalFave", 1, "faveCommands");		
 
 		var favoritesService = this._registry.getService("orion.core.favorite");
@@ -275,6 +303,31 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			mUtil.getUserText(imageId+"EditBox", link, true, fave.name, 
 				function(newText) {
 					reg.getService("orion.core.favorite").renameFavorite(fave.path, newText);
+				}, 
+				function() {
+					// re-show the local commands
+					var commandParent = dojo.byId(imageId).parentNode;
+					var children = commandParent.childNodes;
+					for (var i = 0; i < children.length; i++) {
+						dojo.style(children[i], "display", "inline");
+					}
+				});				
+		},
+
+		editSearchName: function(search, commandId, imageId, faveIndex) {
+			var reg = this._registry;
+			var link = dojo.byId("search"+faveIndex);
+			
+			// hide command buttons while editor is up
+			var commandParent = dojo.byId(imageId).parentNode;
+			dojo.style(link, "display", "none");
+			var children = commandParent.childNodes;
+			for (var i = 0; i < children.length; i++) {
+				dojo.style(children[i], "display", "none");
+			}
+			mUtil.getUserText(imageId+"EditBox", link, true, search.name, 
+				function(newText) {
+					reg.getService("orion.core.favorite").renameSearch(search.query, newText);
 				}, 
 				function() {
 					// re-show the local commands
@@ -368,12 +421,13 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				for (var i=0; i < searches.length; i++) {
 					var search = searches[i];
 					href=require.toUrl("search/search.html") + "#" + search.query;
+					var id = "search"+i;
 					tr = dojo.create("tr");
-					tr.id = "searchRow"+i;
+					tr.id = "searchRow"+id;
 					col1 = dojo.create("td", null, tr, "last");
 					col2 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
 					dojo.style(col2, "textAlign", "right");
-					link = dojo.create("a", {href: href}, col1, "only");
+					link = dojo.create("a", {id:id, href: href}, col1, "only");
 					dojo.place(window.document.createTextNode(search.name), link, "only");
 					// render local commands
 					actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");

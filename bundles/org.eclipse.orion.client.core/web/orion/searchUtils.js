@@ -40,7 +40,7 @@ orion.searchUtils.parseQueryStr = function(queryStr) {
 		queryStr = queryStr.substring(indexOfQMark+1);
 	}
 	//var obj = dojo.queryToObject(queryStr);
-	splitQ = queryStr.split("&");
+	var splitQ = queryStr.split("&");
 	var queryObj = {queryStr: queryStr, start:0, rows:10, sort:"Path asc"};
 	for(var i=0; i < splitQ.length; i++){
 		var splitparameters = splitQ[i].split("=");
@@ -169,14 +169,19 @@ orion.searchUtils.generateInFileQuery = function(searchStr) {
 	inFileQuery.searchStrLength = inFileQuery.searchStr.length;
 	return inFileQuery;
 };
-
+	
+orion.searchUtils.fullPathNameByMeta = function(parents){
+	var parentIndex = parents.length;
+	var fullPath = "";
+	//add parents chain top down if needed
+	if(parentIndex > 0){
+		for(var j = parentIndex - 1; j > -1; j--){
+			var separator = (fullPath === "") ? "" : "/";
+			fullPath = fullPath + separator + parents[j].Name;
+		}
+	}
+	return fullPath;
+};
+	
 return orion.searchUtils;
 });
-
-
-
-
-
-
-
-
