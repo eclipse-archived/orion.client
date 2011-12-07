@@ -45,6 +45,13 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 				dojo.hitch(taskTable, taskTable.mergeTasks)(taskList);
 			});
 			
+			window.addEventListener("storage", function(e){
+				if(mGlobalCommands.getAuthenticationIds().indexOf(e.key)>=0){
+					dojo.hitch(taskTable, taskTable.loadTasks)({Children: []});
+					taskClient.resetChangeListeners();
+				}
+			}, false);
+			
 			document.body.style.visibility = "visible";
 			dojo.parser.parse();
 		});
