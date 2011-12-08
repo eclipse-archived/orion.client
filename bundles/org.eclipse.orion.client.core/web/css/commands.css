@@ -42,6 +42,14 @@
 	text-decoration: underline;
 }
 
+.commandActiveItem {
+	opacity: 1.0;
+}
+
+.commandInactiveItem {
+	opacity: 0.3;
+}
+
 /* sprites for the core plugin, need to figure out where these really live */
 
 .core-sprite-add{ background-position: 0 0; width: 16px; height: 16px; } 
@@ -122,6 +130,11 @@
 .nihilo .dijitButtonActive, .nihilo .dijitButtonActive .dijitButtonNode, .nihilo .dijitToggleButtonActive .dijitButtonNode, .nihilo .dijitDropDownButtonActive .dijitButtonNode, .nihilo .dijitComboButtonActive .dijitButtonContents, .nihilo .dijitStackController .dijitToggleButtonChecked .dijitButtonNode {
     border: 1px solid #eba600;
     background: #e3e3e3;
+}
+
+.nihilo .dijitDropDownButtonFocused {
+    background: #e3e3e3;
+    opacity: 1.0 !important;
 }
 
 .nihilo .dijitTooltip {
