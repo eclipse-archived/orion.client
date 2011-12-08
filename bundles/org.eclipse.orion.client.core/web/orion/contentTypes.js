@@ -40,7 +40,7 @@ define([], function() {
 		 * @return {Object} A map of registered content type descriptors, keyed by content type id.
 		 */
 		getContentTypesMap: function() {
-			var serviceReferences = this.serviceRegistry.getServiceReferences("orion.file.contentType");
+			var serviceReferences = this.serviceRegistry.getServiceReferences("orion.file.contenttype");
 			var contentTypes = {};
 			for (var i=0; i < serviceReferences.length; i++) {
 				var serviceRef = serviceReferences[i], types = array(serviceRef.getProperty("contentTypes"));
