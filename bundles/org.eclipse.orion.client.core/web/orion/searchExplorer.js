@@ -63,22 +63,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
-	SearchResultModel.prototype.convertFileIndex = function(){
-		var fileModel, lookAt;
-		if(this.useFlatList){
-			fileModel = this.indexedFileItems_tree[this.currentFileIndex];
-			lookAt = this.indexedFileItems_flat;
-		} else {
-			fileModel = this.indexedFileItems_flat[this.currentFileIndex];
-			lookAt = this.indexedFileItems_tree;
-		}
-		for(var i = 0 ; i < lookAt.length; i++){
-			if(lookAt[i].location == fileModel.location){
-				this.currentFileIndex = i;
-			}
-		}
-	};
-	
 	SearchResultModel.prototype.indexToLocation = function(index){
 		var fileModel = this.indexedFileItems()[index];
 		return fileModel.location;
@@ -163,7 +147,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
-	SearchResultModel.prototype.preparecompressHash = function(){
+	SearchResultModel.prototype.prepareCompressHash = function(){
 		this.sharedParentHash = [];
 		for(var i = 0 ; i < this._resultLocation.length; i++){
 			var parents = this._resultLocation[i].metaData.Parents;
@@ -212,7 +196,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			var parents = this._resultLocation[i].metaData.Parents;
 			if(parents.length === 0)
 				continue;
-			this.preparecompressHash();
+			this.prepareCompressHash();
 			var newParents = [];
 			this.compressParents(parents, 0, newParents);
 			this._resultLocation[i].metaData.compressedParents = newParents;
@@ -242,19 +226,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		fullPath.name = childNode.parent.name + separator + fullPath.name;
 		if(childNode.parent)
 			this.fullPathNameByTree(childNode.parent, fullPath);
-	};
-	
-	SearchResultModel.prototype.fullPathNameByMeta = function(parents){
-		var parentIndex = parents.length;
-		var fullPath = "";
-		//add parents chain top down if needed
-		if(parentIndex > 0){
-			for(var j = parentIndex - 1; j > -1; j--){
-				var separator = (fullPath === "") ? "" : "/";
-				fullPath = fullPath + separator + parents[j].Name;
-			}
-		}
-		return fullPath;
 	};
 	
 	SearchResultModel.prototype.buildResultModel = function(onComplete){
@@ -351,7 +322,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			var childNode = {parent: this._listRoot, type: "file", name: this._resultLocation[i].name, 
 					linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location, 
 					stale: (this._resultLocation[i].lastModified !== this._resultLocation[i].metaData.LocalTimeStamp) };
-			childNode.fullPathName = this.fullPathNameByMeta(this._resultLocation[i].metaData.Parents);
+			childNode.fullPathName = mSearchUtils.fullPathNameByMeta(this._resultLocation[i].metaData.Parents);
 			childNode.parentLocation = this._resultLocation[i].metaData.Parents[0].Location;
 			this.modelLocHash_flat[childNode.location] = childNode;
 			this._listRoot.children.push(childNode);
@@ -468,24 +439,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
 		} 
 		return result;
-	};
-	
-	/**
-	 * @private
-	 * @static
-	 * @param {String}  Input string
-	 * @returns {pattern:String, flags:String} if str looks like
-	 *          a RegExp, or null otherwise
-	 */
-	SearchResultModel.prototype.parseRegExp =  function(str){
-		var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
-		if (regexp) {
-			return {
-				pattern : regexp[1],
-				flags : regexp[2]
-			};
-		}
-		return null;
 	};
 	
 	/**
