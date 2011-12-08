@@ -10,7 +10,8 @@
  ******************************************************************************/
 /*global define document navigator*/
 
-define(['require', 'dojo', 'dijit', 'orion/commands', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton' ], function(require, dojo, dijit, mCommands){
+define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/editor/regex', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton' ], 
+	function(require, dojo, dijit, mCommands, mRegex){
 	
 var orion = orion || {};
 
@@ -455,7 +456,7 @@ orion.TextSearcher = (function() {
 				return null;
 			this._lastSearchString = searchStr;
 			if (this._useRegExp) {
-				var regexp = this.parseRegExp("/" + searchStr + "/");
+				var regexp = mRegex.parse("/" + searchStr + "/");
 				if (regexp) {
 					var pattern = regexp.pattern;
 					var flags = regexp.flags;
@@ -567,27 +568,7 @@ orion.TextSearcher = (function() {
 					length : result[0].length
 				};
 			}
-		},
-
-		/**
-		 * @private
-		 * @static
-		 * @param {String}
-		 *            Input string
-		 * @returns {pattern:String, flags:String} if str looks like
-		 *          a RegExp, or null otherwise
-		 */
-		parseRegExp : function(str) {
-			var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
-			if (regexp) {
-				return {
-					pattern : regexp[1],
-					flags : regexp[2]
-				};
-			}
-			return null;
 		}
-
 	};
 	return TextSearcher;
 }());

@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['require', 'dojo'], function(require, dojo) {
+define(['require', 'dojo', 'orion/editor/regex'], function(require, dojo, mRegex) {
 
 var orion = orion || {};
 
@@ -34,14 +34,14 @@ orion.searchUtils = orion.searchUtils || {};
  * @function
  */
 orion.searchUtils.parseQueryStr = function(queryStr) {
-	if(queryStr[0] === '?'){
-		queryStr = queryStr.substring(1);
+	var indexOfQMark = queryStr.indexOf("?");
+	var indexOfQWqual = queryStr.indexOf("q=");
+	if(indexOfQMark < indexOfQWqual && indexOfQWqual > 0){
+		queryStr = queryStr.substring(indexOfQMark+1);
 	}
-	
 	//var obj = dojo.queryToObject(queryStr);
-	
-	splitQ = queryStr.split("&");
-	var queryObj = {queryStr: queryStr, start:0, rows:20};
+	var splitQ = queryStr.split("&");
+	var queryObj = {queryStr: queryStr, start:0, rows:10, sort:"Path asc"};
 	for(var i=0; i < splitQ.length; i++){
 		var splitparameters = splitQ[i].split("=");
 		if(splitparameters.length === 2){
@@ -157,7 +157,7 @@ orion.searchUtils.generateInFileQuery = function(searchStr) {
 		inFileQuery.wildCard = false;
 	} else {
 		inFileQuery.searchStr =searchStr.toLowerCase();
-		var regexp = orion.searchUtils.parseRegExp("/" + inFileQuery.searchStr + "/");
+		var regexp = mRegex.parse("/" + inFileQuery.searchStr + "/");
 		if (regexp) {
 			var pattern = regexp.pattern;
 			var flags = regexp.flags;
@@ -169,25 +169,19 @@ orion.searchUtils.generateInFileQuery = function(searchStr) {
 	inFileQuery.searchStrLength = inFileQuery.searchStr.length;
 	return inFileQuery;
 };
-
-orion.searchUtils.parseRegExp =  function(str){
-	var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
-	if (regexp) {
-		return {
-			pattern : regexp[1],
-			flags : regexp[2]
-		};
+	
+orion.searchUtils.fullPathNameByMeta = function(parents){
+	var parentIndex = parents.length;
+	var fullPath = "";
+	//add parents chain top down if needed
+	if(parentIndex > 0){
+		for(var j = parentIndex - 1; j > -1; j--){
+			var separator = (fullPath === "") ? "" : "/";
+			fullPath = fullPath + separator + parents[j].Name;
+		}
 	}
-	return null;
+	return fullPath;
 };
-
+	
 return orion.searchUtils;
 });
-
-
-
-
-
-
-
-

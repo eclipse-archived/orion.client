@@ -338,6 +338,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			return d;
 		}
 	}
+	
+	var authenticationIds = [];
+	
+	function getAuthenticationIds(){
+		return authenticationIds;
+	}	
 
 	/**
 	 * Adds the user-related commands to the toolbar
@@ -347,6 +353,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	function generateUserInfo(serviceRegistry) {
 		
 		var authServices = serviceRegistry.getServiceReferences("orion.core.auth");
+		authenticationIds = [];
 		var userInfo = dojo.byId("userInfo");
 		if(!userInfo){
 			return;
@@ -369,6 +376,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			var authService = serviceRegistry.getService(servicePtr);		
 			getLabel(authService, servicePtr).then(function(label){			
 				authService.getKey().then(function(key){
+					authenticationIds.push(key);
 					authService.getUser().then(function(jsonData){
 						loginDialog.addUserItem(key, authService, label, jsonData);
 					}, 
@@ -674,6 +682,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		generateBanner: generateBanner,
 		notifyAuthenticationSite: notifyAuthenticationSite,
 		setPendingAuthentication: setPendingAuthentication,
-		CommandParameterCollector: CommandParameterCollector
+		CommandParameterCollector: CommandParameterCollector,
+		getAuthenticationIds: getAuthenticationIds
 	};
 });
