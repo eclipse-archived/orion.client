@@ -10,9 +10,9 @@
  ******************************************************************************/
 
 define(['dojo', 'orion/bootstrap', 'orion/status',  'orion/commands',
-	        'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/git/gitClient', 'orion/git/git-status-table', 'orion/breadcrumbs','orion/dialogs','orion/ssh/sshTools',
+	        'orion/searchClient', 'orion/fileClient', 'orion/taskClient', 'orion/globalCommands', 'orion/git/gitClient', 'orion/git/git-status-table', 'orion/breadcrumbs','orion/dialogs','orion/ssh/sshTools',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(dojo, mBootstrap, mStatus, mCommands, mSearchClient, mFileClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs,mDialogs,mSshTools) {
+			function(dojo, mBootstrap, mStatus, mCommands, mSearchClient, mFileClient, mTaskClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs,mDialogs,mSshTools) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -30,7 +30,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status',  'orion/commands',
 		
 			new mDialogs.DialogService(serviceRegistry);
 			
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, new mTaskClient.TaskClient(serviceRegistry), "statusPane", "notifications");
 		
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
 		

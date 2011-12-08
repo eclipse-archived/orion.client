@@ -17,12 +17,14 @@ define(['require', 'dojo'], function(require, dojo) {
 	 * @class Service for reporting status
 	 * @name orion.status.StatusReportingService
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
+	 * @param {orion.taskclient.TaskClient} taskClient
 	 * @param {String} domId ID of the DOM node under which status will be displayed.
 	 * @param {String} progressDomId ID of the DOM node used to display progress messages.
 	 */
-	function StatusReportingService(serviceRegistry, domId, progressDomId) {
+	function StatusReportingService(serviceRegistry, taskClient, domId, progressDomId) {
 		this._serviceRegistry = serviceRegistry;
 		this._serviceRegistration = serviceRegistry.registerService("orion.page.message", this);
+		this._taskClient = taskClient;
 		this.domId = domId;
 		this.progressDomId = progressDomId || domId;
 	}
@@ -155,7 +157,7 @@ define(['require', 'dojo'], function(require, dojo) {
 			return deferred.then(function(result) {
 				//see if we are dealing with a progress resource
 				if (result && result.Location && result.Message && result.Running) {
-					return that._doProgressWhile(result);
+					return dojo.hitch(that, that._doProgressWhile)(result);
 				}
 				//clear the progress message
 				that.setProgressMessage("");
@@ -174,18 +176,13 @@ define(['require', 'dojo'], function(require, dojo) {
 		 */	
 		_doProgressWhile: function(progress) {
 			var deferred = new dojo.Deferred();
+			var that = this;
 			//sleep for awhile before we get more progress
 			window.setTimeout(function() {
-				dojo.xhrGet({
-					url: progress.Location,
-					headers: { "Orion-Version" : "1"},
-					handleAs: "json",
-					timeout: 15000,
-					load: function(jsonData, ioArgs) {
+				that._taskClient.getTask(progress.Location).then(function(jsonData, ioArgs) {
 						//jsonData is either the final result or a progress resource
 						deferred.callback(jsonData);
-					}
-				});
+					});
 			}, 2000);
 			//recurse until operation completes
 			return this.showWhile(deferred, progress.Message);
