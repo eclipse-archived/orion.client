@@ -72,6 +72,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands',
 				commandService.registerCommandContribution("eclipse.openGitStatus", 100);
 				commandService.registerCommandContribution("eclipse.openGitLogAll", 200);
 				commandService.registerCommandContribution("eclipse.openCloneContent", 300, null, "eclipse.gitGroup2");
+				commandService.registerCommandContribution("eclipse.orion.git.applyPatch", 350, null, "eclipse.gitGroup2/eclipse.gitGroup2.u1");
 				commandService.registerCommandContribution("eclipse.git.deleteClone", 400, null, "eclipse.gitGroup2/eclipse.gitGroup2.delete");
 				
 				// remote action
