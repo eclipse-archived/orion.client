@@ -24,8 +24,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 			var taskClient = new mTaskClient.TaskClient(serviceRegistry);
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, taskClient, "statusPane", "notifications");
 				
 			var taskTable = new mTaskTable.TasksExplorer(serviceRegistry, selection, "tasks-lisk", "pageActions", "selectionTools");
 			

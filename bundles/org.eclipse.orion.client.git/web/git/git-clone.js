@@ -12,10 +12,10 @@
 /*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
 /*browser:true*/
 define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands',
-        'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/git/gitClient',
+        'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/taskClient', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/ssh/sshTools', 'orion/git/git-clone-details', 'orion/git/git-clones-explorer', 'orion/git/gitCommands',
 	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mBootstrap, mStatus, mCommands, mDialogs, mSelection, mFileClient,
+		function(dojo, mBootstrap, mStatus, mCommands, mDialogs, mSelection, mFileClient, mTaskClient,
 					mSearchClient, mFileClient, mGlobalCommands, mGitClient, mSshTools, mGitCloneDetails, mGitClonesExplorer, mGitCommands) {
 
 	mBootstrap.startup().then(function(core) {
@@ -24,7 +24,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands',
 		document.body.style.visibility = "visible";
 		dojo.parser.parse();
 		
-		new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+		new mStatus.StatusReportingService(serviceRegistry, new mTaskClient.TaskClient(serviceRegistry), "statusPane", "notifications");
 		new mDialogs.DialogService(serviceRegistry);
 		var selection = new mSelection.Selection(serviceRegistry);
 		new mSshTools.SshService(serviceRegistry);

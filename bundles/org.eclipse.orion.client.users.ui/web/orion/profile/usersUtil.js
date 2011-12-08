@@ -35,9 +35,7 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					registry.getService("orion.page.command").then(function(commandService) {
-						commandService.renderCommands(selectionTools, "dom", selections, explorer, "tool");
-					});
+					registry.getService("orion.page.command").renderCommands(selectionTools, "dom", selections, explorer, "tool");
 				}
 			});
 		}
