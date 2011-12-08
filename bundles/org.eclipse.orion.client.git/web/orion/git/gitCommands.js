@@ -256,10 +256,14 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				var service = serviceRegistry.getService("orion.git.provider");
+				var progressService = serviceRegistry.getService("orion.page.message");
+				
+				progressService.setProgressMessage("Checking out branch...");
 				if (item.Type === "Branch") {
 					service.checkoutBranch(item.CloneLocation, item.Name).then(
 						function(){
 							dojo.hitch(explorer, explorer.changedItem)(item.parent);
+							progressService.setProgressResult("Ok");
 						},
 						 displayErrorOnStatus
 					);
@@ -269,6 +273,7 @@ var exports = {};
 							service.checkoutBranch(branch.CloneLocation, branch.Name).then(
 								function(){
 									dojo.hitch(explorer, explorer.changedItem)(item.parent.parent.parent);
+									progressService.setProgressResult("Ok");
 								},
 								displayErrorOnStatus
 							);
@@ -334,7 +339,7 @@ var exports = {};
 				exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 					var func = arguments.callee;
 					var gitService = serviceRegistry.getService("orion.git.provider");
-					var progressService = serviceRegistry.getService("orion.page.message")
+					var progressService = serviceRegistry.getService("orion.page.message");
 					var deferred = gitService.doPush(item.Location, "", false, false, null, options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey,
 							options.gitPassphrase);
 					progressService.showWhile(deferred, "Removing remote branch: " + item.Name).then(function(remoteJsonData) {
