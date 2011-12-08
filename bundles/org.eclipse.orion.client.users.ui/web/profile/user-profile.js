@@ -11,9 +11,9 @@
 /*global dojo dijit window eclipse:true*/
 
 define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient', 'orion/profile/profile',
-	        'orion/searchClient', 'orion/globalCommands', 'orion/status',
+	        'orion/taskClient', 'orion/searchClient', 'orion/globalCommands', 'orion/status',
 	        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(dojo, mBootstrap, mCommands, mUsersClient, mProfile, mSearchClient, mGlobalCommands, mStatus) {
+			function(dojo, mBootstrap, mCommands, mUsersClient, mProfile, mTaskClient, mSearchClient, mGlobalCommands, mStatus) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -26,7 +26,7 @@ define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient'
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 			var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
-			new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+			new mStatus.StatusReportingService(serviceRegistry, new mTaskClient.TaskClient(serviceRegistry), "statusPane", "notifications");
 			
 			var profile = new mProfile.Profile({
 				registry: serviceRegistry,

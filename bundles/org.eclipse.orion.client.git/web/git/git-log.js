@@ -12,10 +12,10 @@
 /*global window define document dijit */
 /*browser:true*/
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands',
-        'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
+        'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/taskClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/breadcrumbs', 'orion/ssh/sshTools', 'orion/git/git-commit-details', 'orion/git/git-commit-navigator', 'orion/git/gitCommands',
 	    'orion/links', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(require, dojo, mBootstrap, mStatus, mCommands, mAuth, mDialogs, mSelection, mFileClient,
+		function(require, dojo, mBootstrap, mStatus, mCommands, mAuth, mDialogs, mSelection, mFileClient, mTaskClient,
 					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitDetails, mGitCommitNavigator, mGitCommands, mLinks) {
 
 // TODO: This is naughty -- feel bad and then fix it please
@@ -29,7 +29,7 @@ var serviceRegistry;
 			dojo.parser.parse();
 			
 		
-			new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+			new mStatus.StatusReportingService(serviceRegistry, new mTaskClient.TaskClient(serviceRegistry), "statusPane", "notifications");
 			new mDialogs.DialogService(serviceRegistry);
 			var selection = new mSelection.Selection(serviceRegistry);
 			new mSshTools.SshService(serviceRegistry);
