@@ -77,7 +77,7 @@ dojo.addOnLoad(function(){
 		commandService.addCommand(toggleOutlineCommand, "dom");
 				
 		// define the command contributions - where things appear, first the groups
-		commandService.addCommandGroup("eclipse.fileGroup", 100, "More");
+		commandService.addCommandGroup("eclipse.fileGroup", 100, "*");  // TODO: '*' is a total undocumented hack
 		commandService.addCommandGroup("eclipse.importExportGroup", 100, null, "eclipse.fileGroup");		
 		commandService.addCommandGroup("eclipse.newResources", 101, null, "eclipse.fileGroup");
 		commandService.addCommandGroup("eclipse.fileGroup.unlabeled", 100, null, null, "pageActions");
