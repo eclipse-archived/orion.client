@@ -245,20 +245,8 @@ exports.ExplorerRenderer = (function() {
 			var actionsWrapper = document.createElement('span');
 			actionsWrapper.id = tableRow.id + "actionswrapper";
 			actionsColumn.appendChild(actionsWrapper);
-			dojo.style(actionsWrapper, "visibility", "hidden");
 			// contact the command service to render appropriate commands here.
-			commandService.renderCommands(actionsWrapper, "object", item, this.explorer, "tool");
-			
-			dojo.connect(tableRow, "onmouseover", tableRow, function() {
-				var actionsColumn = dojo.byId(this.id+"actionswrapper");
-				dojo.style(actionsColumn, "visibility", "visible");
-			});
-			dojo.connect(tableRow, "onmouseout", tableRow, function() {
-				var actionsColumn = dojo.byId(this.id+"actionswrapper");
-				dojo.style(actionsColumn, "visibility", "hidden");
-			});
-			
-
+			commandService.renderCommands(actionsWrapper, "object", item, this.explorer, "tool", false, null, "commandActiveItem", "commandInactiveItem");
 			return actionsColumn;
 		},
 		initCheckboxColumn: function(tableNode){
