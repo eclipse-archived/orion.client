@@ -12,7 +12,7 @@
 /*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
 define(['require', 'dojo', 'orion/commands', 'orion/util',
-        'orion/git/widgets/CloneGitRepositoryDialog', 'orion/git/widgets/InitGitRepositoryDialog', 'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 'orion/git/widgets/RemotePrompterDialog'], 
+        'orion/git/widgets/CloneGitRepositoryDialog', 'orion/git/widgets/InitGitRepositoryDialog', 'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog'], 
         function(require, dojo, mCommands, mUtil) {
 
 /**
@@ -555,7 +555,9 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(openGitCommit, "object");
+
 		var gitAuthParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+
 		var fetchCommand = new mCommands.Command({
 			name: "Fetch",
 			tooltip: "Fetch from the remote",
@@ -1525,6 +1527,17 @@ var exports = {};
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
 		var cloneParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("url", "url", "Repository URL:")], true);
 
+		function forceSingleItem(item) {
+			if (dojo.isArray(item)) {
+				if (item.length > 1) {
+					item = {};
+				} else {
+					item = item[0];
+				}
+			}
+			return item;
+		}
+
 		var cloneGitRepositoryCommand = new mCommands.Command({
 			name : "Clone Repository",
 			tooltip : "Clone an existing Git repository to a folder",
@@ -1647,9 +1660,32 @@ var exports = {};
 							displayErrorOnStatus);
 				}
 				
-			}});
+			}
+		});
 		commandService.addCommand(deleteCommand, "object");
 		commandService.addCommand(deleteCommand, "dom");
+
+		var applyPatchCommand = new mCommands.Command({
+			name : "Apply Patch",
+			tooltip: "Apply a patch on the selected repository",
+			id : "eclipse.orion.git.applyPatch",
+
+			callback: function(data) {
+				var item = forceSingleItem(data.items);
+				var gitService = serviceRegistry.getService("orion.git.provider");
+				var dialog = new orion.git.widgets.ApplyPatchDialog({
+					title: "Apply Patch",
+					diffLocation: item.DiffLocation
+				});
+
+				dialog.startup();
+				dialog.show();
+			},
+			visibleWhen : function(item) {
+				return true;
+			}
+		});
+		commandService.addCommand(applyPatchCommand, "object");
 	};
 }());
 return exports;	
