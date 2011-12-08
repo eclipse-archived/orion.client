@@ -608,10 +608,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 								var menuCommand = children[0].eclipseCommand;
 								if (needMenu) {
 									menuButton = new dijit.form.DropDownButton({
-										label: group.title,
+										label: group.title === "*" ? "" : group.title, // TODO undocumented hack
 										dropDown: newMenu
 								        });
 									dojo.addClass(menuButton.domNode, "commandLink");
+									// TODO 
+									/* special styling so the button looks better????? 
+									if (group.title === "*") {
+										dojo.addClass(menuButton.domNode, "textless");
+									}
+									*/
 									menuCommand._setupActivateVisuals(menuButton.domNode, menuButton.focusNode, activeCommandClass, inactiveCommandClass);
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {

@@ -65,9 +65,9 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 		
 		switch(col_no){
 		case 0: 
-			return dojo.create("th", {innerHTML: "<h2>Name</h2>"});
+			return dojo.create("th", {innerHTML: ""});
 		case 1:
-			return dojo.create("th", {innerHTML: "<h2>Actions</h2>"});
+			return dojo.create("th", {innerHTML: "<h2>Name</h2>"});
 		case 2:
 			return dojo.create("th", {innerHTML: "<h2>Date/Time</h2>"});
 		case 3:
@@ -75,6 +75,10 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 			dojo.style(th, "textAlign", "right");
 			return th;
 		}
+	};
+	
+	FileRenderer.prototype.getLabelColumnIndex = function() {
+		return this.explorer.checkbox ? 2 : 1;
 	};
 		
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -95,10 +99,12 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 
 		switch(col_no){
 		case 0:
+			return this.getActionsColumn(item, tableRow, true);
+
+		case 1:
 			var col, span, link;
 			if (item.Directory) {
 				col = document.createElement('td');
-				var nameId =  tableRow.id + "__expand";
 				span = dojo.create("span", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				this.getExpandImage(tableRow, span);
@@ -158,8 +164,6 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
 			return col;
-		case 1:
-			return this.getActionsColumn(item, tableRow);
 		case 2:
 			var dateColumn = document.createElement('td');
 			if (item.LocalTimeStamp) {

@@ -99,7 +99,7 @@ exports.Explorer = (function() {
 				model: model,
 				showRoot: false,
 				parent: parentId,
-				labelColumnIndex: this.checkbox ? 1 : 0,  // 0 if no checkboxes
+				labelColumnIndex: this.renderer.getLabelColumnIndex(),
 				renderer: this.renderer
 			});
 			this.renderer._initializeUIState();
@@ -230,6 +230,11 @@ exports.ExplorerRenderer = (function() {
 		this._collapseImageClass = "core-sprite-twistie_closed";
 	}
 	ExplorerRenderer.prototype = {
+	
+		getLabelColumnIndex: function() {
+			return this.explorer.checkbox ? 1 : 0;  // 0 if no checkboxes
+		}, 
+		
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
 			dojo.empty(tableNode);
@@ -491,7 +496,9 @@ exports.SelectionRenderer = (function(){
 		var i = 0;
 		var cell = this.getCellHeaderElement(i);
 		while(cell){
-			dojo.addClass(cell, "navColumn");
+			if (cell.innerHTML.length > 0) {
+				dojo.addClass(cell, "navColumn");
+			}
 			row.appendChild(cell);			
 			cell = this.getCellHeaderElement(++i);
 		}
