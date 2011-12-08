@@ -95,7 +95,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			if (this.parameterArea) {
 				var focusNode = fillFunction(this.parameterArea);
 				
-				if (!dojo.byId(	"parameterClose") && this.dismissArea	) {
+				if (!dojo.byId("parameterClose") && this.dismissArea) {
 				// add the close button if the fill function did not.
 					var spacer = dojo.create("span", null, this.dismissArea, "last");
 					dojo.addClass(spacer, "dismiss");
@@ -127,8 +127,20 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			return false;
 		},
 		
-		_collectAndCall: function(commandInvocation) {
-			dojo.query("input", this.parameterArea).forEach(function(field) {
+		/**
+		 * Return whether this collector would collect parameters for commands on the given dom node
+		 *
+		 * @param {DOMElement | String} the id or node on which commands are rendered
+		 * @returns {Boolean} whether or not collection would occur.
+		 */
+		collectsFor: function(domElementOrId) {
+			var answer = false;
+			answer = (typeof(domElementOrId) === "string") && (domElementOrId === "pageActions" || domElementOrId === "pageNavigationActions");
+			return answer || (domElementOrId && domElementOrId.id && (domElementOrId.id === "pageActions" || domElementOrId.id === "pageNavigationActions"));
+		},
+		
+		_collectAndCall: function(commandInvocation, parent) {
+			dojo.query("input", parent).forEach(function(field) {
 				if (field.type !== "button") {
 					commandInvocation.parameters.setValue(field.parameterName, field.value);
 				}
@@ -171,7 +183,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				});
 				var keyHandler = dojo.hitch(this, function(event) {
 					if (event.keyCode === dojo.keys.ENTER) {
-						this._collectAndCall(commandInvocation);
+						this._collectAndCall(commandInvocation, parameterArea);
 					}
 					if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
 						localClose();
@@ -196,7 +208,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 					dojo.connect(field, "onkeypress", keyHandler);
 				});
 				var spacer;
-				var parentDismiss = this.dismissArea || parameterArea;
+				var parentDismiss = parameterArea;
 
 				if (commandInvocation.parameters.options) {
 					commandInvocation.parameters.optionsRequested = false;
@@ -209,7 +221,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 					options.title = "More options...";
 					dojo.connect(options, "onclick", dojo.hitch(this, function () {
 						commandInvocation.parameters.optionsRequested = true;
-						this._collectAndCall(commandInvocation);
+						this._collectAndCall(commandInvocation, parameterArea);
 						localClose();
 					}));
 				}
@@ -222,7 +234,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				dojo.addClass(ok, "core-sprite-ok");
 				dojo.addClass(ok, "dismiss");
 				dojo.connect(ok, "onclick", dojo.hitch(this, function () {
-					this._collectAndCall(commandInvocation);
+					this._collectAndCall(commandInvocation, parameterArea);
 					localClose();
 				}));
 				
