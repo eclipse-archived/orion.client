@@ -106,6 +106,10 @@ function loadResource(navigator, searcher){
 			var loadResource = function(resource){
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
 				initTitleBar(fileClient, navigator, resource, searcher);
+				
+				// clear and close the commit details pane
+				navigator.loadCommitDetails(null);
+				
 				if (resource.Type === "RemoteTrackingBranch"){
 					var gitService = serviceRegistry.getService("orion.git.provider")
 					gitService.getLog(resource.HeadLocation, resource.Id, function(scopedCommitsJsonData, secondArg) {
