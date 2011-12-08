@@ -130,7 +130,9 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 				});
 				return result;
 			},
-			
+			getTask: function(taskLocation){
+				return _doServiceCall(this._getService(taskLocation), "getTask", arguments);
+			},
 			removeCompletedTasks: function(){
 				var results = [];
 				for(var i=0; i<this._services.length; i++){
