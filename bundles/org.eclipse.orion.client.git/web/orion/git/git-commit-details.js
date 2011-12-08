@@ -55,9 +55,11 @@ exports.CommitDetails = (function() {
 		loadCommitDetails: function(commitDetails){
 		
 			if(this._detailsPane){ //open details pane each time loading new details
-				if(!this._detailsPane.isRightPaneOpen()){
+				if(!this._detailsPane.isRightPaneOpen() && commitDetails != null)
 					this._detailsPane.toggle();
-				}
+				else if (this._detailsPane.isRightPaneOpen() && commitDetails == null)
+					this._detailsPane.toggle();
+				
 				this._detailsPane.style.overflow = "hidden";
 			}
 			this.render(commitDetails);
