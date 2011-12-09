@@ -4083,11 +4083,15 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				/* Try execCommand first. Works on firefox with clipboard permission. */
 				var result = false;
 				this._ignorePaste = true;
-				try {
-					result = document.execCommand("paste", false, null);
-				} catch (ex) {
-					/* Firefox can throw even when execCommand() works, see bug 362835. */
-					result = clipboardDiv.childNodes.length > 1 || clipboardDiv.firstChild && clipboardDiv.firstChild.childNodes.length > 0;
+
+				/* Do not try execCommand if middle-click is used, because if we do, we get the clipboard text, not the primary selection text. */
+				if (!isLinux || this._lastMouseButton !== 2) {
+					try {
+						result = document.execCommand("paste", false, null);
+					} catch (ex) {
+						/* Firefox can throw even when execCommand() works, see bug 362835. */
+						result = clipboardDiv.childNodes.length > 1 || clipboardDiv.firstChild && clipboardDiv.firstChild.childNodes.length > 0;
+					}
 				}
 				this._ignorePaste = false;
 				if (!result) {
