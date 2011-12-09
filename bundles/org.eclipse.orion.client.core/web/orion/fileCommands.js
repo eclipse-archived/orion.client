@@ -149,6 +149,9 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				this.changedItem(this.treeRoot);
 			};
 			var callback = function(selectedItems) {
+				if (!dojo.isArray(selectedItems)) {
+					selectedItems = [selectedItems];
+				}
 				for (var i=0; i < selectedItems.length; i++) {
 					var item = selectedItems[i];
 					var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
