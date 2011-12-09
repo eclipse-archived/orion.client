@@ -47,7 +47,9 @@ define(['dojo', 'orion/commands', 'orion/searchUtils'], function(dojo, mCommands
 						if(queryObj.location.length > 0){
 							this._fileClient.read(queryObj.location, true).then(
 								dojo.hitch(this, function(meta) {
-									this.searcher.saveSearch(qName + mSearchUtils.fullPathNameByMeta(meta.Parents), query);
+									var parentName = mSearchUtils.fullPathNameByMeta(meta.Parents);
+									var fullName = parentName.length === 0 ? meta.Name: parentName + "/" + meta.Name;
+									this.searcher.saveSearch(qName + fullName, query);
 								}),
 								dojo.hitch(this, function(error) {
 									console.error("Error loading file meta data: " + error.message);
