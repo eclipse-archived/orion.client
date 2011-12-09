@@ -222,8 +222,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						choices.push({name: favorites[i].name, imageClass: "core-sprite-makeFavorite", path: stripped, callback: callback});
 					}
 				}
+				if (favorites.length > 0) {
+					choices.push({});  //separator
+				}
 			}
-			choices.push({});  //separator
 			var proposedPaths = [];
 			// All children of the root that are folders should be available for choosing.
 			var topLevel = explorer.treeRoot.Children;
