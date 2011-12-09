@@ -24,15 +24,39 @@
  * </div>
  */
 
+function changeLinks(hostUrl, contentTableRows /*optional*/) {
+	if (!contentTableRows)
+		contentTableRows = document.getElementById("cgit").children[2].children[0].children[0].children;
+	for (var i = contentTableRows.length - 3; i < contentTableRows.length; i++) {
+		var gitRepoUrl = contentTableRows[i].children[0].textContent;
+		contentTableRows[i].children[0].innerHTML = "<a href='http://" + hostUrl + "/git/git-clone.html?cloneGitRepository=" + gitRepoUrl + "' target='_blank'>" + gitRepoUrl + "</a>";
+	}
+}
+
 try {
 	var contentTableRows = document.getElementById("cgit").children[2].children[0].children[0].children;
-	if (contentTableRows[contentTableRows.length - 4].children[0].innerHTML === "Clone") {
-		contentTableRows[contentTableRows.length - 4].children[0].innerHTML = "Clone into Orion";
-		for (var i = contentTableRows.length - 3; i < contentTableRows.length; i++) {
-			var gitRepoUrl = contentTableRows[i].children[0].innerHTML;
-			contentTableRows[i].children[0].innerHTML = "<a href='http://localhost:8080/git/git-clone.html?cloneGitRepository=" + gitRepoUrl + "' target='_blank'>" + gitRepoUrl + "</a>";
-		}
+	var cloneTh = contentTableRows[contentTableRows.length - 4].children[0];
+	if (cloneTh.innerHTML === "Clone") {
+		cloneTh.innerHTML = "Clone into Orion@<span id='host_span_id'><a href='http://orionhub.org'>orionhub.org</a> </span><span id='change_span_id'>(<a href='javascript:changeHost()'>change</a>)</span>";
+		changeLinks("orionhub.org", contentTableRows);
 	}
 } catch (e) {
 	// silently ignore, not on the right page
+}
+
+function changeHost() {
+	var select = document.createElement("select");
+	select.setAttribute("onChange", "changeLinks(this.options[selectedIndex].text);");
+	var option1 = document.createElement("option");
+	option1.appendChild(document.createTextNode("orionhub.org"));
+	select.appendChild(option1);
+	var option2 = document.createElement("option");
+	option2.appendChild(document.createTextNode("localhost:8080"));
+	select.appendChild(option2);
+	
+	var hostHref = document.getElementById("host_span_id");
+	hostHref.parentNode.replaceChild(select, hostHref);
+
+	var changeHref = document.getElementById("change_span_id");
+	changeHref.parentNode.removeChild(changeHref);
 }
