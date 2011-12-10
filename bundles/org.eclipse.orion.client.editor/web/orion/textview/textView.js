@@ -9,7 +9,7 @@
  * Contributors: 
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
- *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270 Bug#361474 Bug#363945
+ *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270 Bug#361474 Bug#363945 Bug#366312
  ******************************************************************************/
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
@@ -1648,6 +1648,15 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 		},
 		_handleContextMenu: function (e) {
 			if (!e) { e = window.event; }
+			if (isFirefox && this._lastMouseButton === 3) {
+				// We need to update the DOM selection, because on
+				// right-click the caret moves to the mouse location.
+				// See bug 366312.
+				var timeDiff = e.timeStamp - this._lastMouseTime;
+				if (timeDiff <= this._clickTime) {
+					this._updateDOMSelection();
+				}
+			}
 			if (this.isListening("ContextMenu")) {
 				var evt = this._createMouseEvent("ContextMenu", e);
 				evt.screenX = e.screenX;
