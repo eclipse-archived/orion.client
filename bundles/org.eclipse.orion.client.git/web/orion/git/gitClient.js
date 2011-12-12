@@ -304,7 +304,8 @@ eclipse.GitService = (function() {
 					"Orion-Version" : "1"
 				},
 				putData : dojo.toJson({
-					"Path" : paths
+					"Path" : paths,
+					"RemoveUntracked" : "true"
 				}),
 				handleAs: "json",
 				timeout: 15000,
