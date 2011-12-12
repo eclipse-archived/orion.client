@@ -89,15 +89,17 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("eclipse.copySelections", 1, "pageActions", null, true, new mCommands.CommandKeyBinding('c', true));
 		commandService.registerCommandContribution("eclipse.pasteSelections", 1, "pageActions", null, true, new mCommands.CommandKeyBinding('v', true));
 		
-		// commands appearing directly in local actions column
-		commandService.registerCommandContribution("eclipse.makeFavorite", 1);
+		// commands appearing directly in local actions column.  Currently we are putting everything in the menu.
+		// commandService.registerCommandContribution("eclipse.makeFavorite", 1);
+
 		// commands appearing in nav tool bar
 		commandService.registerCommandContribution("eclipse.openResource", 500, "pageActions");
-		// commands appearing in local actions "More"
-		commandService.registerCommandContribution("eclipse.renameResource", 1, null, "eclipse.fileGroup");
-		commandService.registerCommandContribution("eclipse.copyFile", 2, null, "eclipse.fileGroup");
-		commandService.registerCommandContribution("eclipse.moveFile", 3, null, "eclipse.fileGroup");
-		commandService.registerCommandContribution("eclipse.deleteFile", 4, null, "eclipse.fileGroup");
+		// commands appearing in local actions menu
+		commandService.registerCommandContribution("eclipse.makeFavorite", 1, null, "eclipse.fileGroup");
+		commandService.registerCommandContribution("eclipse.renameResource", 2, null, "eclipse.fileGroup");
+		commandService.registerCommandContribution("eclipse.copyFile", 3, null, "eclipse.fileGroup");
+		commandService.registerCommandContribution("eclipse.moveFile", 4, null, "eclipse.fileGroup");
+		commandService.registerCommandContribution("eclipse.deleteFile", 5, null, "eclipse.fileGroup");
 		commandService.registerCommandContribution("eclipse.importCommand", 1, null, "eclipse.fileGroup/eclipse.importExportGroup");
 		commandService.registerCommandContribution("eclipse.downloadFile", 2, null, "eclipse.fileGroup/eclipse.importExportGroup");
 		commandService.registerCommandContribution("eclipse.importSFTPCommand", 3, null, "eclipse.fileGroup/eclipse.importExportGroup");
