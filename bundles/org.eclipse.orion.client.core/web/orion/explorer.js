@@ -263,16 +263,16 @@ exports.ExplorerRenderer = (function() {
 		getCheckboxColumn: function(item, tableRow){
 			if (this._useCheckboxSelection) {
 				var checkColumn = document.createElement('td');
-				dojo.addClass(checkColumn, "secondaryColumn");
-				var check = document.createElement('input');
-				dojo.style(check, "verticalAlign", "middle");
-				check.type = "checkbox";
+				var check = document.createElement("span");
 				check.id = tableRow.id+"selectedState";
 				dojo.addClass(check, "selectionCheckmark");
 				check.itemId = tableRow.id;
 				checkColumn.appendChild(check);
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
-					dojo.toggleClass(tableRow, "checkedRow", !!evt.target.checked);
+					var newValue = evt.target.checked ? false : true;
+					evt.target.checked = newValue;
+					dojo.toggleClass(tableRow, "checkedRow", newValue);
+					dojo.toggleClass(evt.target, "selectionCheckmarkChecked", newValue);
 					this._storeSelections();
 					if (this.explorer.selection) {
 						this.explorer.selection.setSelections(this.getSelected());		
@@ -308,6 +308,7 @@ exports.ExplorerRenderer = (function() {
 						var check = dojo.byId(tableRow.id + "selectedState");
 						if (check) {
 							check.checked = true;
+							dojo.addClass(check, "selectionCheckmarkChecked");
 						}
 					}
 				}
@@ -369,11 +370,7 @@ exports.ExplorerRenderer = (function() {
 		
 		getExpandImage: function(tableRow, placeHolder, /* optional */ decorateImageClass, /* optional */ spriteClass){
 			var expandImage = dojo.create("span", {id: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
-			dojo.addClass(expandImage, "imageSprite");
 			dojo.addClass(expandImage, this._collapseImageClass);
-			var decorateImage = dojo.create("span", null, placeHolder, "last");
-			dojo.addClass(decorateImage, spriteClass || "imageSprite");
-			dojo.addClass(decorateImage, decorateImageClass || "core-sprite-folder");
 			expandImage.onclick = dojo.hitch(this, function(evt) {
 				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImageClass, this._collapseImageClass);
 				var expanded = this.tableTree.isExpanded(tableRow.id);
@@ -402,22 +399,18 @@ exports.ExplorerRenderer = (function() {
 		
 		getSelected: function() {
 			var selected = [];
-			dojo.query(".selectionCheckmark").forEach(dojo.hitch(this, function(node) {
-				if (node.checked) {
-					var row = node.parentNode.parentNode;
-					selected.push(this.tableTree.getItem(row));
-				}
+			dojo.query(".selectionCheckmarkChecked").forEach(dojo.hitch(this, function(node) {
+				var row = node.parentNode.parentNode;
+				selected.push(this.tableTree.getItem(row));
 			}));
 			return selected;
 		},
 		
 		getSelectedIds: function() {
 			var selected = [];
-			dojo.query(".selectionCheckmark").forEach(dojo.hitch(this, function(node) {
-				if (node.checked) {
-					var row = node.parentNode.parentNode;
-					selected.push(row.id);
-				}
+			dojo.query(".selectionCheckmarkChecked").forEach(dojo.hitch(this, function(node) {
+				var row = node.parentNode.parentNode;
+				selected.push(row.id);
 			}));
 			return selected;
 		},

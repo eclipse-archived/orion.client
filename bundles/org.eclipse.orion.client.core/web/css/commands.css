@@ -89,8 +89,6 @@
 .core-sprite-stop{ background-position: -173px -254px; width: 16px; height: 16px; } 
 .core-sprite-transferin{ background-position: -173px -320px; width: 16px; height: 16px; } 
 .core-sprite-transferout{ background-position: -173px -386px; width: 16px; height: 16px; } 
-.core-sprite-twistie_closed{ background-position: -173px -452px; width: 16px; height: 16px; } 
-.core-sprite-twistie_open{ background-position: -173px -518px; width: 16px; height: 16px; } 
 .core-sprite-twistie_partOpen{ background-position: -173px -584px; width: 16px; height: 16px; } 
 .core-sprite-warning{ background-position: -173px -650px; width: 16px; height: 16px; } 
 
@@ -134,6 +132,21 @@
 
 .nihilo .dijitDropDownButtonFocused {
     opacity: 1.0 !important;
+}
+
+.nihilo .textless .dijitArrowButtonInner {
+	background-position: 0px 0px; 
+	width: 16px; height: 16px; 
+	background: url(../images/gear.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle; 
+}
+
+/* this keeps the default gray hover from happening for the gear node */
+.nihilo .textless .dijitButtonNode, .nihilo .textless .dijitButtonNodeHover, .nihilo .textless .dijitButtonNodeActive {
+    color: black;
+    background-color: transparent;
+    padding-left: 8px;
 }
 
 .nihilo .dijitTooltip {

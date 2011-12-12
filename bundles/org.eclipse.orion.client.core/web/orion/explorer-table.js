@@ -61,24 +61,15 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 		this._init(options);
 	}
 	FileRenderer.prototype = new mExplorer.SelectionRenderer(); 
-	FileRenderer.prototype.getCellHeaderElement = function(col_no){
-		
-		switch(col_no){
-		case 0: 
-			return dojo.create("th", {innerHTML: ""});
-		case 1:
-			return dojo.create("th", {innerHTML: "<h2>Name</h2>"});
-		case 2:
-			return dojo.create("th", {innerHTML: "<h2>Date/Time</h2>"});
-		case 3:
-			var th = dojo.create("th", {innerHTML: "<h2>Size</h2>"});
-			dojo.style(th, "textAlign", "right");
-			return th;
-		}
-	};
 	
-	FileRenderer.prototype.getLabelColumnIndex = function() {
-		return this.explorer.checkbox ? 2 : 1;
+	// we are really only using the header for a spacer at this point.
+	FileRenderer.prototype.getCellHeaderElement = function(col_no){
+		switch(col_no){
+		case 0:
+		case 1:
+		case 2:
+			return dojo.create("th", {style: "height: 8px;"});
+		}
 	};
 		
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -98,18 +89,16 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 		}
 
 		switch(col_no){
-		case 0:
-			return this.getActionsColumn(item, tableRow, true);
 
-		case 1:
+		case 0:
 			var col, span, link;
 			if (item.Directory) {
 				col = document.createElement('td');
 				span = dojo.create("span", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, span);
+					this.getExpandImage(tableRow, span);
 				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameColumn", href: "#" + item.ChildrenLocation}, span, "last");
-				dojo.place(document.createTextNode(item.Name), link, "only");
+				dojo.place(document.createTextNode(item.Name), link, "last");
 			} else {
 				col = document.createElement('td');
 				var i;
@@ -139,6 +128,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				}
 				
 				span = dojo.create("span", null, col, "only");
+				
 				// spacer where a folder would have expand node
 				var spacer = dojo.create("span", null, span, "last");
 				dojo.addClass(spacer, "imageSprite");
@@ -148,23 +138,17 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
 				// If the file is an image, show a thumbnail next to the name.
 				if (itemIsImage) {
-					var thumbnail = dojo.create("img", {src: item.Location, style: "vertical-align: middle; margin-left: 4px; margin-right: 4px"}, link, "last");
-					dojo.connect(thumbnail, "onload", thumbnail, function() {
-						// We use a height of 24 so that tall images aren't significantly larger than the default row size with 16 px icon.
-						// The width of 48 is arbitrary, we're trying to find a value that doesn't indent too far.
-						// This could become some kind of folder preference for thumbnails.  
-						this.height = Math.min(this.height, 24);
-						this.width = Math.min(this.width, 48);
-					});
+					var thumbnail = dojo.create("img", {src: item.Location}, link, "last");
+					dojo.addClass(thumbnail, "thumbnail");
 				} else {
 					var fileIcon = dojo.create("span", null, link, "last");
-					dojo.addClass(fileIcon, "imageSprite");
-					dojo.addClass(fileIcon, "core-sprite-file");
+					dojo.addClass(fileIcon, "core-sprite-file_model");
 				}
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
+			this.explorer.registry.getService("orion.page.command").renderCommands(span, "object", item, this.explorer, "tool", false, null, "commandActiveItem", "commandInactiveItem");
 			return col;
-		case 2:
+		case 1:
 			var dateColumn = document.createElement('td');
 			if (item.LocalTimeStamp) {
 				var fileDate = new Date(item.LocalTimeStamp);
@@ -172,7 +156,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 			}
 
 			return dateColumn;
-		case 3:
+		case 2:
 			var sizeColumn = document.createElement('td');
 			if (!item.Directory && typeof item.Length === "number") {
 				var length = parseInt(item.Length, 10),

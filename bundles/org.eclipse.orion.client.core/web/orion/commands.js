@@ -616,12 +616,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 										dropDown: newMenu
 								        });
 									dojo.addClass(menuButton.domNode, "commandLink");
-									// TODO 
-									/* special styling so the button looks better????? 
 									if (group.title === "*") {
 										dojo.addClass(menuButton.domNode, "textless");
 									}
-									*/
 									menuCommand._setupActivateVisuals(menuButton.domNode, menuButton.focusNode, activeCommandClass, inactiveCommandClass);
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
