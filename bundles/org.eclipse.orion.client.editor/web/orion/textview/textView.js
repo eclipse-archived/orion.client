@@ -3645,27 +3645,68 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			if (this._frameDocument) { return; }
 			var frameWindow = this._frameWindow = this._frame.contentWindow;
 			var frameDocument = this._frameDocument = frameWindow.document;
-			var self = this;
-			function write() {
-				frameDocument.open();
-				frameDocument.write(self._getFrameHTML());
-				frameDocument.close();
-				self._windowLoadHandler = function(e) {
-					self._createContent();
-				};
-				addHandler(frameWindow, "load", self._windowLoadHandler);
-			}
-			/*
-			* Bug in Firefox.  Firefox does not send window load event if document.write
-			* is done inside of the frame load event handler.
-			*/
-			if (isFirefox && !this._sync) {
-				setTimeout(write, 0);
-			} else {
-				write();
-			}
+			frameDocument.open();
+			frameDocument.write(this._getFrameHTML());
+			frameDocument.close();
 			if (this._sync) {
 				this._createContent();
+			} else {
+				var self = this;
+				this._windowLoadHandler = function(e) {
+					/*
+					* Bug in Safari.  Safari sends the window load event before the
+					* style sheets are loaded. The fix is to defer creation of the
+					* contents until the document readyState changes to complete.
+					*/
+					if (frameDocument.readyState === "complete") {
+						self._createContent();
+					}
+				};
+				/*
+				* Bug in Firefox. Firefox does not send any load events for the elements inside the iframe
+				* when document.write() is called during of the load event for the iframe.
+				* Bug Webkit. Webkit does not send the load event for the iframe window when the main page
+				* is load as a result from the backward or forward navigation.
+				* The fix, for both cases, is to use a timer and create the content only when the document is ready.
+				*/
+				addHandler(frameWindow, "load", this._windowLoadHandler);
+				this._createViewTimer = function() {
+					if (self._clientDiv) { return; }
+					var loaded = false;
+					if (frameDocument.readyState === "complete") {
+						loaded = true;
+					} else if (frameDocument.readyState === "interactive" && isFirefox) {
+						/*
+						* Bug in Firefox. Firefox does not change the document ready state to complete 
+						* when document.write() is called during of the load event for the iframe.
+						* The fix is to wait for ready state equals to "interactive" and check that 
+						* all css rules are initialized.
+						*/
+						var styleSheets = frameDocument.styleSheets;
+						var styleSheetCount = 1;
+						if (self._stylesheet) {
+							styleSheetCount += typeof(self._stylesheet) === "string" ? 1 : self._stylesheet.length;
+						}
+						if (styleSheetCount === styleSheets.length) {
+							var index = 0;
+							while (index < styleSheets.length) {
+								var count = 0;
+								try {
+									count = styleSheets.item(index).cssRules.length;
+								} catch (ex) {}
+								if (count === 0) { break; }
+								index++;
+							}
+							loaded = index === styleSheets.length;
+						}	
+					}
+					if (loaded) {
+						self._createContent();
+					} else {
+						setTimeout(self._createViewTimer, 20);
+					}
+				};
+				setTimeout(this._createViewTimer, 5);
 			}
 		},
 		_createContent: function() {
@@ -3673,18 +3714,6 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 			var parent = this._parent;
 			var parentDocument = this._parentDocument;
 			var frameDocument = this._frameDocument;
-			/*
-			* Bug in Safari.  Safari sends the window load event before the
-			* style sheets are loaded. The fix is to defer creation of the
-			* contents until the document readyState changes to complete.
-			*/
-			var self = this;
-			if (!this._sync && frameDocument.readyState !== "complete") {
-				setTimeout(function() {
-					self._createContent();
-				}, 10);
-				return;
-			}
 			var body = frameDocument.body;
 			this._setThemeClass(this._themeClass, true);
 			body.style.margin = "0px";
