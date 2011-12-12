@@ -769,7 +769,8 @@ var exports = {};
 
 		var rebaseCommand = new mCommands.Command({
 			name : "Rebase",
-			tooltip: "Rewind commits from the active branch and replay them on top of the selected branch",
+			tooltip: "Remove your commits from the active branch, start the active branch again based on the latest state of the selected branch " +
+					"and apply each commit again to the updated active branch.",
 			id : "eclipse.orion.git.rebase",
 			callback: function(data) {
 				var item = data.items;
@@ -830,6 +831,10 @@ var exports = {};
 				);
 			},
 			visibleWhen : function(item) {
+				this.tooltip = "Remove your commits from the active branch, " +
+					"start the active branch again based on the latest state of '" + item.Name + "' " + 
+					"and apply each commit again to the updated active branch.";
+
 				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
 			}
 		});
