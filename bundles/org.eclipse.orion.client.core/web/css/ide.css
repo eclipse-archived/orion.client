@@ -144,6 +144,52 @@ a:hover {
 	padding-right: 8px;
 }
 
+.selectionCheckmark {
+	background-position: 0px 0px; 
+	width: 16px; height: 16px; 
+	background: url(../images/check.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle; 
+}
+
+.selectionCheckmarkChecked {
+	background-position: 0px 0px; 
+	width: 16px; height: 16px; 
+	background: url(../images/check_on.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle; 
+}
+
+.core-sprite-twistie_closed { 
+	background-position: 0px 0px; 
+	width: 16px; height: 16px; 
+	background: url(../images/twistie_closed.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle; 
+}
+.core-sprite-twistie_open { 	
+	background-position: 0px 0px; 
+	width: 16px; height: 16px; 
+	background: url(../images/twistie_open.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle; 
+}
+.core-sprite-file_model { 	
+	background-position: 0px 0px; 
+	width: 16px; height: 16px; 
+	background: url(../images/file_model.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle; 
+}
+
+.thumbnail {
+	vertical-align: middle; 
+	margin-left: 4px; 
+	margin-right: 4px;
+	max-height: 24px;
+	max-width: 48px;
+}
+
 .pane {
    	margin: 0;
     padding: 0;
