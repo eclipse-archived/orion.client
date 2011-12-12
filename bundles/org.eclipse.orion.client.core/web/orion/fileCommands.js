@@ -149,6 +149,9 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				this.changedItem(this.treeRoot);
 			};
 			var callback = function(selectedItems) {
+				if (!dojo.isArray(selectedItems)) {
+					selectedItems = [selectedItems];
+				}
 				for (var i=0; i < selectedItems.length; i++) {
 					var item = selectedItems[i];
 					var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
@@ -219,8 +222,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						choices.push({name: favorites[i].name, imageClass: "core-sprite-makeFavorite", path: stripped, callback: callback});
 					}
 				}
+				if (favorites.length > 0) {
+					choices.push({});  //separator
+				}
 			}
-			choices.push({});  //separator
 			var proposedPaths = [];
 			// All children of the root that are folders should be available for choosing.
 			var topLevel = explorer.treeRoot.Children;
