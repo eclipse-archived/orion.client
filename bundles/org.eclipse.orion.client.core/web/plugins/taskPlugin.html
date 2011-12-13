@@ -32,6 +32,17 @@
 						timeout: 15000
 					});
 				},
+				getRunningTasks: function(){
+					return dojo.xhrGet({
+						url: base, 
+						headers: {
+							"Orion-Version": "1"
+						},
+						content:{RunningOnly: true},
+						handleAs: "json",
+						timeout: 15000
+					});
+				},
 				getTask: function(taskLocation){
 					return dojo.xhrGet({
 						url: taskLocation , 
