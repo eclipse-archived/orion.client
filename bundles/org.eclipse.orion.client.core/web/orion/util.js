@@ -56,6 +56,9 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		if (binding.mod3) {
 			userString += "Alt+";
 		}
+		if (binding.mod4 && isMac) {
+			userString += "Ctrl+";
+		}
 		if (binding.alphaKey) {
 			return userString+binding.alphaKey;
 		}
