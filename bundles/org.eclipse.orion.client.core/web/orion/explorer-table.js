@@ -129,11 +129,6 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				
 				span = dojo.create("span", null, col, "only");
 				
-				// spacer where a folder would have expand node
-				var spacer = dojo.create("span", null, span, "last");
-				dojo.addClass(spacer, "imageSprite");
-				dojo.addClass(spacer, "core-sprite-none");
-					
 				// link with file image and name
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
 				// If the file is an image, show a thumbnail next to the name.

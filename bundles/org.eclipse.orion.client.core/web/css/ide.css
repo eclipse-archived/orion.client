@@ -163,21 +163,47 @@ a:hover {
 }
 
 .core-sprite-twistie_closed { 
-	background-position: 0px 0px; 
-	width: 16px; height: 16px; 
-	background: url(../images/twistie_closed.gif) no-repeat top left; 
+	background: url(../images/core_sprites.png) no-repeat top left;
+	background-position: 0 -627px; width: 16px; height: 16px;	
 	display: inline-block; 
 	vertical-align: middle; 
 	margin-right: 2px;
+	letter-spacing: 10px;  /*  this is a hack so I can recognize the twistie in js code */
 }
-.core-sprite-twistie_open { 	
-	background-position: 0px 0px; 
-	width: 16px; height: 16px; 
-	background: url(../images/twistie_open.gif) no-repeat top left; 
+
+@media all and (min-device-width: 1025px) {
+	.core-sprite-twistie_closed { 
+		background: url(../images/twistie_closed.gif);
+		background-position: 0px 0px; 
+		width: 16px; height: 16px; 
+		display: inline-block; 
+		vertical-align: middle; 
+		margin-right: 2px;
+		letter-spacing: normal;
+	}
+}
+
+.core-sprite-twistie_open { 
+	background: url(../images/core_sprites.png) no-repeat top left;
+	background-position: 0 -627px; width: 16px; height: 16px;	
 	display: inline-block; 
 	vertical-align: middle; 
 	margin-right: 2px;
+	letter-spacing: 10px;  /*  this is a hack so I can recognize the twistie in js code */
 }
+
+@media all and (min-device-width: 1025px) {
+	.core-sprite-twistie_open { 	
+		background-position: 0px 0px; 
+		width: 16px; height: 16px; 
+		background: url(../images/twistie_open.gif);
+		display: inline-block; 
+		vertical-align: middle; 
+		margin-right: 2px;
+		letter-spacing: normal;
+	}
+}
+	
 .core-sprite-file_model { 	
 	background-position: 0px 0px; 
 	width: 16px; height: 16px; 
