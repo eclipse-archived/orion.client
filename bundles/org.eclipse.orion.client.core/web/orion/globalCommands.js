@@ -127,18 +127,6 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			return false;
 		},
 		
-		/**
-		 * Return whether this collector would collect parameters for commands on the given dom node
-		 *
-		 * @param {DOMElement | String} the id or node on which commands are rendered
-		 * @returns {Boolean} whether or not collection would occur.
-		 */
-		collectsFor: function(domElementOrId) {
-			var answer = false;
-			answer = (typeof(domElementOrId) === "string") && (domElementOrId === "pageActions" || domElementOrId === "pageNavigationActions");
-			return answer || (domElementOrId && domElementOrId.id && (domElementOrId.id === "pageActions" || domElementOrId.id === "pageNavigationActions"));
-		},
-		
 		_collectAndCall: function(commandInvocation, parent) {
 			dojo.query("input", parent).forEach(function(field) {
 				if (field.type !== "button") {
@@ -437,13 +425,17 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	 * @function
 	 */
 	function generateDomCommandsInBanner(commandService, handler , pageActionDomId , useImage) {
+		// close any open slideouts because we are retargeting
+		commandService.closeParameterCollector("tool");
 		var toolbar = dojo.byId("pageActions");
 		if(pageActionDomId) {
 			toolbar = dojo.byId(pageActionDomId);
 		}
 		if (toolbar) {	
 			dojo.empty(toolbar);
-			commandService.renderCommands(toolbar, "dom", handler, handler, "tool", !useImage);  // use true when we want to force toolbar items to text
+			commandService.renderCommands(toolbar, "dom", handler, handler, "tool", !useImage).then(function() {
+				commandService.processURL(window.location.href);
+			});  
 		}
 		// now page navigation actions
 		toolbar = dojo.byId("pageNavigationActions");
@@ -678,9 +670,6 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			}
 		}
 		
-		dojo.addOnLoad(function() {
-			commandService.processURL(window.location.href);
-		});
 		//every time the user manually changes the hash, we need to load the workspace with that name
 		dojo.subscribe("/dojo/hashchange", commandService, function() {
 			commandService.processURL(window.location.href);
