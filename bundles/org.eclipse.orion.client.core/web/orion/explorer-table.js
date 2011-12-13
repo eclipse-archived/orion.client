@@ -74,8 +74,8 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 		
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		var self = this;
-		function isImage(item) {
-			var contentType = self.contentTypes.getContentType(item);
+		
+		function isImage(contentType) {
 			switch (contentType && contentType.id) {
 				case "image.jpeg":
 				case "image.png":
@@ -86,6 +86,29 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 					return true;
 			}
 			return false;
+		}
+		
+		function addImageToLink(contentType, link) {
+			switch (contentType && contentType.id) {
+				case "image.jpeg":
+				case "image.png":
+				case "image.gif":
+				case "image.ico":
+				case "image.tiff":
+				case "image.svg":
+					var thumbnail = dojo.create("img", {src: item.Location}, link, "last");
+					dojo.addClass(thumbnail, "thumbnail");
+					break;
+				default:
+					if (contentType && contentType.image) {
+						var image = dojo.create("img", {src: contentType.image}, link, "last");
+						// to minimize the height/width in case of a large one
+						dojo.addClass(image, "thumbnail");
+					} else {	
+						var fileIcon = dojo.create("span", null, link, "last");
+						dojo.addClass(fileIcon, "core-sprite-file_model");
+					}
+			}
 		}
 
 		switch(col_no){
@@ -122,8 +145,8 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 						break; // use the first one
 					}
 				}
-				var itemIsImage = isImage(item);
-				if (!foundEditor && this.defaultEditor && !itemIsImage) {
+				var contentType = this.contentTypes.getContentType(item);
+				if (!foundEditor && this.defaultEditor && !isImage(contentType)) {
 					href = this.defaultEditor.hrefCallback({items: item});
 				}
 				
@@ -131,14 +154,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				
 				// link with file image and name
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
-				// If the file is an image, show a thumbnail next to the name.
-				if (itemIsImage) {
-					var thumbnail = dojo.create("img", {src: item.Location}, link, "last");
-					dojo.addClass(thumbnail, "thumbnail");
-				} else {
-					var fileIcon = dojo.create("span", null, link, "last");
-					dojo.addClass(fileIcon, "core-sprite-file_model");
-				}
+				addImageToLink(contentType, link);
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
 			this.explorer.registry.getService("orion.page.command").renderCommands(span, "object", item, this.explorer, "tool", false, null, "commandActiveItem", "commandInactiveItem");

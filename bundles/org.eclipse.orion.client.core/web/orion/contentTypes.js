@@ -50,6 +50,7 @@ define([], function() {
 						contentTypes[type.id] = {
 							id: type.id,
 							name: type.name,
+							image: type.image,
 							"extends": type["extends"],
 							extension: array(type.extension),
 							filename: array(type.filename)
