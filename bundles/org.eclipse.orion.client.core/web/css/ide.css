@@ -147,69 +147,80 @@ a:hover {
 .selectionCheckmark {
 	background-position: 0px 0px; 
 	width: 16px; height: 16px; 
-	background: url(../images/check.gif) no-repeat top left; 
+	background: url(../images/check.gif) no-repeat center; 
 	display: inline-block; 
 	vertical-align: middle; 
-	margin-left: 2px;
+	padding: 4px;
+	padding-left: 8px;
+	padding-right: 8px;
+	margin-right: 4px;
 }
 
 .selectionCheckmarkChecked {
 	background-position: 0px 0px; 
 	width: 16px; height: 16px; 
-	background: url(../images/check_on.gif) no-repeat top left; 
+	background: url(../images/check_on.gif) no-repeat center; 
 	display: inline-block; 
 	vertical-align: middle; 
-	margin-left: 2px;
+	padding: 4px;
+	padding-left: 8px;
+	padding-right: 8px;
+	margin-right: 4px;
 }
 
 .core-sprite-twistie_closed { 
-	background: url(../images/core_sprites.png) no-repeat top left;
-	background-position: 0 -627px; width: 16px; height: 16px;	
+	background-position: 0px 0px; 
+	width: 16px; height: 16px; 
+	background: url(../images/twistie_closed.gif) no-repeat center;
 	display: inline-block; 
 	vertical-align: middle; 
-	margin-right: 2px;
-	letter-spacing: 10px;  /*  this is a hack so I can recognize the twistie in js code */
-}
-
-@media all and (min-device-width: 1025px) {
-	.core-sprite-twistie_closed { 
-		background: url(../images/twistie_closed.gif);
-		background-position: 0px 0px; 
-		width: 16px; height: 16px; 
-		display: inline-block; 
-		vertical-align: middle; 
-		margin-right: 2px;
-		letter-spacing: normal;
-	}
+	padding-left: 8px;
+	padding-right: 8px;
+	margin-right: 8px;
 }
 
 .core-sprite-twistie_open { 
-	background: url(../images/core_sprites.png) no-repeat top left;
-	background-position: 0 -627px; width: 16px; height: 16px;	
+	background-position: 0px 0px; 
+	width: 16px; height: 16px; 
+	background: url(../images/twistie_open.gif) no-repeat center;
 	display: inline-block; 
 	vertical-align: middle; 
-	margin-right: 2px;
-	letter-spacing: 10px;  /*  this is a hack so I can recognize the twistie in js code */
-}
-
-@media all and (min-device-width: 1025px) {
-	.core-sprite-twistie_open { 	
-		background-position: 0px 0px; 
-		width: 16px; height: 16px; 
-		background: url(../images/twistie_open.gif);
-		display: inline-block; 
-		vertical-align: middle; 
-		margin-right: 2px;
-		letter-spacing: normal;
-	}
+	padding-left: 8px;
+	padding-right: 8px;
+	margin-right: 8px;
 }
 	
 .core-sprite-file_model { 	
 	background-position: 0px 0px; 
 	width: 16px; height: 16px; 
-	background: url(../images/file_model.gif) no-repeat top left; 
+	background: url(../images/file_model.gif) no-repeat center; 
 	display: inline-block; 
 	vertical-align: middle; 
+	padding-left: 8px;
+	padding-right: 8px;
+	margin-right: 8px;
+}
+
+/* less hit-area since we aren't worried about touch */
+@media all and (min-device-width: 1025px) {
+	.core-sprite-twistie_open, .core-sprite-twistie_closed, .core-sprite-file_model { 	
+		padding: 0px;
+		padding-left: 4px;
+		padding-right: 4px;
+		margin: 0px;
+		margin-right: 2px;
+	}
+	
+	.selectionCheckmark, .selectionCheckmarkChecked { 	
+		padding: 0px;
+		padding-left: 2px;
+		padding-right: 2px;
+		margin-right: 2px;
+	}
+	
+	.checkColumn {
+		width: 22px;
+	}
 }
 
 .thumbnail {
@@ -605,6 +616,10 @@ a:hover {
 .secondaryColumn {
 	color: #666666;	
 	padding-right: 8px;
+}
+
+.checkColumn {
+	padding: 0px;
 }
 
 .lightTreeTableRow {
