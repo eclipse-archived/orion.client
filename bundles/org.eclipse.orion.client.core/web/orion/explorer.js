@@ -371,25 +371,31 @@ exports.ExplorerRenderer = (function() {
 		getExpandImage: function(tableRow, placeHolder, /* optional */ decorateImageClass, /* optional */ spriteClass){
 			var expandImage = dojo.create("span", {id: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
 			dojo.addClass(expandImage, this._collapseImageClass);
-			expandImage.onclick = dojo.hitch(this, function(evt) {
-				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImageClass, this._collapseImageClass);
-				var expanded = this.tableTree.isExpanded(tableRow.id);
-				if (expanded) {
-					this._expanded.push(tableRow.id);
-				} else {
-					for (var i in this._expanded) {
-						if (this._expanded[i] === tableRow.id) {
-							this._expanded.splice(i, 1);
-							break;
+			// this is somewhat bogus.  We have to know something about the CSS on this image to know if it should be assigned
+			// expand behavior.  We're using the letter-spacing becuase it's obscure.  We could check the background image 
+			// but this requires knowing sprite locations, which can change.  We set letterSpacing to 10px when we do not
+			// want expand collapse behavior.
+			var val = dojo.style(expandImage, "letterSpacing");
+			if (dojo.style(expandImage, "letterSpacing") !== "10px") {
+					expandImage.onclick = dojo.hitch(this, function(evt) {
+						this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImageClass, this._collapseImageClass);
+					var expanded = this.tableTree.isExpanded(tableRow.id);
+					if (expanded) {
+						this._expanded.push(tableRow.id);
+					} else {
+						for (var i in this._expanded) {
+							if (this._expanded[i] === tableRow.id) {
+								this._expanded.splice(i, 1);
+								break;
+							}
 						}
 					}
-				}
-				var prefPath = this._getUIStatePreferencePath();
-				if (prefPath && window.sessionStorage) {
-					this._storeExpansions(prefPath);
-				}
-				
-			});
+					var prefPath = this._getUIStatePreferencePath();
+					if (prefPath && window.sessionStorage) {
+						this._storeExpansions(prefPath);
+					}
+				});
+			}
 			return expandImage;
 		},
 		render: function(item, tableRow){
