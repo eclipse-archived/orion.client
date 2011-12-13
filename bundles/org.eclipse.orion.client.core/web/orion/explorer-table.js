@@ -96,7 +96,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				col = document.createElement('td');
 				span = dojo.create("span", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-					this.getExpandImage(tableRow, span);
+				this.getExpandImage(tableRow, span);
 				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameColumn", href: "#" + item.ChildrenLocation}, span, "last");
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			} else {

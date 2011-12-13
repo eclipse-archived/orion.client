@@ -150,6 +150,7 @@ a:hover {
 	background: url(../images/check.gif) no-repeat top left; 
 	display: inline-block; 
 	vertical-align: middle; 
+	margin-left: 2px;
 }
 
 .selectionCheckmarkChecked {
@@ -158,6 +159,7 @@ a:hover {
 	background: url(../images/check_on.gif) no-repeat top left; 
 	display: inline-block; 
 	vertical-align: middle; 
+	margin-left: 2px;
 }
 
 .core-sprite-twistie_closed { 
@@ -166,6 +168,7 @@ a:hover {
 	background: url(../images/twistie_closed.gif) no-repeat top left; 
 	display: inline-block; 
 	vertical-align: middle; 
+	margin-right: 2px;
 }
 .core-sprite-twistie_open { 	
 	background-position: 0px 0px; 
@@ -173,6 +176,7 @@ a:hover {
 	background: url(../images/twistie_open.gif) no-repeat top left; 
 	display: inline-block; 
 	vertical-align: middle; 
+	margin-right: 2px;
 }
 .core-sprite-file_model { 	
 	background-position: 0px 0px; 
