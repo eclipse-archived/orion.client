@@ -371,6 +371,12 @@ exports.ExplorerRenderer = (function() {
 		getExpandImage: function(tableRow, placeHolder, /* optional */ decorateImageClass, /* optional */ spriteClass){
 			var expandImage = dojo.create("span", {id: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
 			dojo.addClass(expandImage, this._collapseImageClass);
+			if (decorateImageClass) {
+				var decorateImage = dojo.create("span", null, placeHolder, "last");
+				dojo.addClass(decorateImage, spriteClass || "imageSprite");
+				dojo.addClass(decorateImage, decorateImageClass);
+			}
+
 			expandImage.onclick = dojo.hitch(this, function(evt) {
 				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImageClass, this._collapseImageClass);
 				var expanded = this.tableTree.isExpanded(tableRow.id);
