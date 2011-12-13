@@ -1493,7 +1493,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				/*
 				* Bug in Firefox.  For some reason, the caret does not show after the
 				* view is refreshed.  The fix is to toggle the contentEditable state and
-				* force the clientDiv to loose and receive focus if the it is focused.
+				* force the clientDiv to loose and receive focus if it is focused.
 				*/
 				if (isFirefox) {
 					this._fixCaret();
@@ -1610,7 +1610,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				* in some cases. For example when the user cancels a drag operation 
 				* by pressing ESC.  The fix is to detect that the drag operation was
 				* cancelled,  toggle the contentEditable state and force the clientDiv
-				* to loose and receive focus if the it is focused.
+				* to loose and receive focus if it is focused.
 				*/
 				this._fixCaret();
 				this._ignoreBlur = false;
@@ -3673,10 +3673,10 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				};
 				/*
 				* Bug in Firefox. Firefox does not send any load events for the elements inside the iframe
-				* when document.write() is called during of the load event for the iframe.
-				* Bug Webkit. Webkit does not send the load event for the iframe window when the main page
-				* is load as a result from the backward or forward navigation.
-				* The fix, for both cases, is to use a timer and create the content only when the document is ready.
+				* when document.write() is called during the load event for the iframe.
+				* Bug in Webkit. Webkit does not send the load event for the iframe window when the main page
+				* loads as a result of backward or forward navigation.
+				* The fix, for both cases, is to use a timer to create the content only when the document is ready.
 				*/
 				addHandler(frameWindow, "load", this._windowLoadHandler);
 				this._createViewTimer = function() {
@@ -3688,7 +3688,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 						/*
 						* Bug in Firefox. Firefox does not change the document ready state to complete 
 						* when document.write() is called during of the load event for the iframe.
-						* The fix is to wait for ready state equals to "interactive" and check that 
+						* The fix is to wait for the ready state to be "interactive" and check that 
 						* all css rules are initialized.
 						*/
 						var styleSheets = frameDocument.styleSheets;
@@ -4930,7 +4930,7 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 				/*
 				* Bug in Firefox.  For some reason, the caret does not show after the
 				* view is refreshed.  The fix is to toggle the contentEditable state and
-				* force the clientDiv to loose and receive focus if the it is focused.
+				* force the clientDiv to loose and receive focus if it is focused.
 				*/
 				if (isFirefox) {
 					this._ignoreFocus = false;
