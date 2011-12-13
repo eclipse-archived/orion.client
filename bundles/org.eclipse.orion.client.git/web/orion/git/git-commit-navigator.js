@@ -117,7 +117,7 @@ exports.GitCommitNavigator = (function() {
 				if (xhrArgs.xhr.status === 202) {
 					var deferred = new dojo.Deferred();
 					deferred.callback(jsonData);
-					self.registry.getService("orion.page.message").showWhile(deferred, "Getting git log").then(function(gitLogProgressResp) {
+					self.registry.getService("orion.page.progress").showWhile(deferred, "Getting git log").then(function(gitLogProgressResp) {
 						waitDeferred.callback();
 						if (onLoad)
 							onLoad(gitLogProgressResp.Result.JsonData.Children);

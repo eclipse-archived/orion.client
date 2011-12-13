@@ -45,6 +45,10 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		return _doServiceCall(taskService, "getTasks");
 	}
 	
+	function _getRunningTasks(taskService){
+		return _doServiceCall(taskService, "getRunningTasks");
+	}
+	
 	function TaskClient(serviceRegistry){
 		this._services = [];
 		this._patterns = [];
@@ -124,6 +128,17 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 				var results = [];
 				for(var i=0; i<this._services.length; i++){
 					results[i] = _getTasks(this._services[i]);
+				}
+				new dojo.DeferredList(results).then(function(lists){
+					result.resolve(_mergeTasks(lists));
+				});
+				return result;
+			},
+			getRunningTasks: function(){
+				var result = new dojo.Deferred();
+				var results = [];
+				for(var i=0; i<this._services.length; i++){
+					results[i] = _getRunningTasks(this._services[i]);
 				}
 				new dojo.DeferredList(results).then(function(lists){
 					result.resolve(_mergeTasks(lists));
