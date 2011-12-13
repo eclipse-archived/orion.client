@@ -519,10 +519,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 * @param {String} inactiveCommandClass (optional) class to use when a command becomes inactive by lost focus or blur
 		 */	
 		renderCommands: function(parent, scope, items, handler, renderType, forceText, userData, activeCommandClass, inactiveCommandClass) {
-		
-			if (this._parameterCollectors[renderType] && this._parameterCollectors[renderType].collectsFor(parent)) {
-				this.closeParameterCollector(renderType, this._activeModalCommandNode);
-			}
 			if (typeof(parent) === "string") {
 				parent = dojo.byId(parent);
 			}

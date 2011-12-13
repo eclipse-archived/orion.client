@@ -24,6 +24,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	var fileCommandUtils = {};
 
 	var favoritesCache = null;
+	
+	var lastItemLoaded = {Location: null};
 
 	// I'm not sure where this belongs.  This is the first time an outer party consumes
 	// favorites and understands the structure.  We need a cache for synchronous requests
@@ -74,7 +76,17 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			throw "could not find toolbar " + toolbarId;
 		}
 		var service = registry.getService("orion.page.command");
-		service.renderCommands(toolbar, "dom", item, explorer, "tool", true);  // true for force icons to text
+		// close any open slideouts because if we are retargeting the command
+		if (item.Location !== lastItemLoaded.Location) {
+			service.closeParameterCollector("tool");
+			lastItemLoaded.Location = item.Location;
+		}
+
+		service.renderCommands(toolbar, "dom", item, explorer, "tool", true).then(function() {
+			if (lastItemLoaded.Location) {
+				service.processURL(window.location.href);
+			}
+		}); 
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
 			service.renderCommands(selectionTools, "dom", null, explorer, "tool", true); // true would force icons to text
