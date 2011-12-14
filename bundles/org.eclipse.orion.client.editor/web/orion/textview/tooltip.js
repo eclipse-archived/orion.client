@@ -11,7 +11,7 @@
 
 /*global define setTimeout clearTimeout setInterval clearInterval Node */
 
-define(['orion/textview/textView', 'orion/textview/textModel', 'orion/textview/projectionTextModel'], function(mTextView, mTextModel, mProjectionTextModel) {
+define("orion/textview/tooltip", ['orion/textview/textView', 'orion/textview/textModel', 'orion/textview/projectionTextModel'], function(mTextView, mTextModel, mProjectionTextModel) {
 
 	/** @private */
 	function Tooltip (view) {
@@ -235,4 +235,4 @@ define(['orion/textview/textView', 'orion/textview/textModel', 'orion/textview/p
 		}
 	};
 	return {Tooltip: Tooltip};
-}, "orion/textview");
+});

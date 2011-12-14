@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define */
 
-define([], function() {
+define("orion/editor/webContentAssist", [], function() {
 
 	/**
 	 * @name orion.contentAssist.CssContentAssistProvider
@@ -57,4 +57,4 @@ define([], function() {
 		CssContentAssistProvider: CssContentAssistProvider,
 		JavaScriptContentAssistProvider: JavaScriptContentAssistProvider
 	};
-}, "orion/editor");
+});
