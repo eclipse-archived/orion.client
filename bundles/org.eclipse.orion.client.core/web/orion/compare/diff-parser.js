@@ -18,8 +18,9 @@ orion.DiffParser = (function() {
 	var isWindows = navigator.platform.indexOf("Win") !== -1;
 	var NO_NEW_LINE = "\\ No newline at end of file";
 	/** @private */
-	function DiffParser(lineDelimiter) {
+	function DiffParser(lineDelimiter, diffLineDilemeter) {
 		this._lineDelimiter = lineDelimiter ? lineDelimiter : (isWindows ? "\r\n" : "\n"); 
+		this._diffLineDelimiter = diffLineDilemeter ? diffLineDilemeter : this._lineDelimiter; 
 		this._DEBUG = false;
 	}
 	DiffParser.prototype = {
@@ -46,6 +47,7 @@ orion.DiffParser = (function() {
 		
 		setLineDelim: function(lineDelimiter){
 			this._lineDelimiter = lineDelimiter;
+			this._diffLineDelimiter = lineDelimiter;
 		},
 		
 		getDiffArray: function(){
@@ -57,7 +59,7 @@ orion.DiffParser = (function() {
 			if(diffString === "")
 				return {outPutFile:oFileString ,mapper:[]};
 			this._oFileContents = oFileString === "" ? []:oFileString.split(this._lineDelimiter);
-			this._diffContents = diffString.split(this._lineDelimiter);
+			this._diffContents = diffString.split(this._diffLineDelimiter);
 			var lineNumber = this._diffContents.length;
 			this._hunkRanges = [];
 			for(var i = 0; i <lineNumber ; i++){
@@ -70,6 +72,10 @@ orion.DiffParser = (function() {
 			}
 
 			if(this._DEBUG){
+				console.log("***Diff contents: \n");
+				for(var j = 0;j < this._diffContents.length ; j++){
+					console.log(this._diffContents[j]);
+				}
 				console.log("***Hunk ranges: \n");
 				console.log(JSON.stringify(this._hunkRanges));
 			}
@@ -99,7 +105,7 @@ orion.DiffParser = (function() {
 				//this._logNewFile();
 				//console.log("***Total line number in new file: " + this._nFileContents.length);
 			}
-			return {outPutFile:this._nFileContents.join(this._lineDelimiter),mapper:this._deltaMap};
+			return {outPutFile:this._nFileContents.join(this._diffLineDelimiter),mapper:this._deltaMap};
 		},
 		
 		_logMap: function(){
@@ -166,7 +172,6 @@ orion.DiffParser = (function() {
 			var oBlkStart = this._hunkRanges[hunkRangeNo][1];
 			var nBlkStart = this._hunkRanges[hunkRangeNo][3];
 			var lastPlusPos = startNo;
-			var nl = "\r";
 			for (var i = startNo ; i< endNo ; i++){
 				if( 0 === this._diffContents[i].length)
 					continue;
@@ -182,7 +187,7 @@ orion.DiffParser = (function() {
 						} else {
 							this._nNewLineAtEnd = false;
 						}		
-						if(i > startNo && nl === this._diffContents[i-1].substring(this._diffContents[i-1].length-1)){
+						if(i > startNo ){
 							this._diffContents[i-1] = this._diffContents[i-1].substring(0 , this._diffContents[i-1].length-1);
 						}
 						continue;
@@ -311,7 +316,7 @@ orion.DiffParser = (function() {
 			}
 			if(this._nNewLineAtEnd && !lastUpdateBySameBlk){
 				this._nFileContents.push("");
-				this._deltaMap[len-1][0] = this._deltaMap[len-1][0] + 1;
+				//this._deltaMap[len-1][0] = this._deltaMap[len-1][0] + 1;
 			}
 		},
 		
@@ -319,10 +324,13 @@ orion.DiffParser = (function() {
 		_parseHRangeBody: function(body , retVal){
 			if(0 < body.indexOf(",")){
 				var splitted = body.split(",");
-				retVal.push(parseInt(splitted[0]));
-				retVal.push(parseInt(splitted[1]));
+				var split0 = parseInt(splitted[0]);
+				var split1 = parseInt(splitted[1]);
+				retVal.push(split0 >= 0 ? split0 : 1);
+				retVal.push(split1 >= 0 ? split1 : 1);
 			} else {
-				retVal.push(parseInt(body));
+				var bodyInt = parseInt(body);
+				retVal.push(bodyInt >= 0 ? bodyInt : 1);
 				retVal.push(1);
 			}
 		},
