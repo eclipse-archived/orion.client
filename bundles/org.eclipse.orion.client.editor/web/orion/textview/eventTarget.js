@@ -11,7 +11,7 @@
  ******************************************************************************/
  
 /*global define */
-define([], function() {
+define("orion/textview/eventTarget", [], function() {
 	/** 
 	 * Constructs a new EventTarget object.
 	 * 
@@ -140,4 +140,4 @@ define([], function() {
 		}
 	};
 	return {EventTarget: EventTarget};
-}, "orion/textview");
+});
