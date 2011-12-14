@@ -433,9 +433,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		}
 		if (toolbar) {	
 			dojo.empty(toolbar);
-			commandService.renderCommands(toolbar, "dom", handler, handler, "tool", !useImage).then(function() {
+			// The render call may be synch (when called by page glue code that created the service)
+			// or asynch (when called after getting a service reference).
+			var retn = commandService.renderCommands(toolbar, "dom", handler, handler, "tool", !useImage);
+			if (retn && retn.then) {
+				retn.then(function() {commandService.processURL(window.location.href);});
+			} else {
 				commandService.processURL(window.location.href);
-			});  
+			} 
 		}
 		// now page navigation actions
 		toolbar = dojo.byId("pageNavigationActions");
