@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console*/
+/*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
 define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils'], function(require, dojo, dijit, mExplorer, mUtil, mFileClient, mCommands, mSearchUtils) {
@@ -105,7 +105,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			} 
 		}
 		this.sortByName = (this.queryObj.sort.indexOf("Name") > -1);
-	},
+	};
 	
 	SearchResultModel.prototype.restoreLocationStatus = function() {
 		this.useFlatList = true;
@@ -129,7 +129,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				this.currentDetailIndex= JSON.parse(currentDetailIndex);
 			} 
 		}
-	},
+	};
 	
 	SearchResultModel.prototype.getRoot = function(onItem){
 		onItem(this.getRealRoot());
@@ -748,6 +748,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.totalNumber = totalNumber;
 		this.numberOnPage = resultLocation.length;
 		this.model = new SearchResultModel(registry, this.fileClient, resultLocation, queryStr, this);
+		this.declareCommands();
 	}
 	SearchResultExplorer.prototype = new mExplorer.Explorer();
 	
@@ -758,27 +759,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	SearchResultExplorer.prototype.onchange = function(item) {
 	};
 	
-	SearchResultExplorer.prototype.caculateNextPage = function(currentStart, pageSize, totalNumber){
-		if((currentStart + pageSize) >= totalNumber){
-			return {start:currentStart};
-		}
-		return {start: currentStart+pageSize};
-	};
-	
-	SearchResultExplorer.prototype.caculatePrevPage = function(currentStart, pageSize, totalNumber){
-		var start = currentStart - pageSize;
-		if(start < 0){
-			start = 0;
-		}
-		return {start: start};
-	};
-	
-	SearchResultExplorer.prototype.initCommands = function(){	
+	/* one-time setup of commands */
+	SearchResultExplorer.prototype.declareCommands = function() {
 		var that = this;
 		var previousPage = new mCommands.Command({
-			name : "Previous Page",
+			name : "< Previous Page",
 			tooltip: "Show previous page of search result",
-			imageClass : "core-sprite-leftarrow",
 			id : "orion.search.prevPage",
 			hrefCallback : function() {
 				var prevPage = that.caculatePrevPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
@@ -792,9 +778,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			}
 		});
 		var nextPage = new mCommands.Command({
-			name : "Next Page",
+			name : "Next Page >",
 			tooltip: "Show next page of search result",
-			imageClass : "core-sprite-rightarrow",
 			id : "orion.search.nextPage",
 			hrefCallback : function() {
 				var nextPage = that.caculateNextPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
@@ -847,12 +832,31 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService.addCommand(collapseAllCommand, "dom");
 			
 		// Register command contributions
-		this._commandService.registerCommandContribution("orion.search.prevPage", 1, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.nextPage", 2, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.nextResult", 3, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.prevResult", 4, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.expandAll", 5, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.collapseAll", 6, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.nextResult", 1, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.prevResult", 2, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.expandAll", 3, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.collapseAll", 4, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.prevPage", 5, "pageNavigationActions");
+		this._commandService.registerCommandContribution("orion.search.nextPage", 6, "pageNavigationActions");
+	};
+	
+	SearchResultExplorer.prototype.caculateNextPage = function(currentStart, pageSize, totalNumber){
+		if((currentStart + pageSize) >= totalNumber){
+			return {start:currentStart};
+		}
+		return {start: currentStart+pageSize};
+	};
+	
+	SearchResultExplorer.prototype.caculatePrevPage = function(currentStart, pageSize, totalNumber){
+		var start = currentStart - pageSize;
+		if(start < 0){
+			start = 0;
+		}
+		return {start: start};
+	};
+	
+	SearchResultExplorer.prototype.initCommands = function(){	
+		var that = this;
 		dojo.empty("pageNavigationActions");
 		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "tool");
 		
