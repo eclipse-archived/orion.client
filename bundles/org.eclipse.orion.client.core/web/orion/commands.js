@@ -500,7 +500,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 
 		/**
 		 * Render the commands that are appropriate for the given scope.
-		 * @param {DOMElement} parent The element in which commands should be rendered.
+		 * @param {DOMElement} parent The element in which commands should be rendered.  If commands have been
+		 *  previously rendered into this element, it is up to the caller to empty any previously generated content.
 		 * @param {String} scope The scope to which the command applies.  "dom" level 
 		 *  commands apply only when a specified dom element is rendering commands.
 		 *  "object" scope applies to particular objects/items displayed in widgets
