@@ -34,46 +34,37 @@ define(['dojo', 'orion/commands', 'orion/searchUtils'], function(dojo, mCommands
 		 * @param {String} query The search query
 		 */
 		loadResults: function(query) {
-			// define command for saving the results
-			var saveresultsCommand = new mCommands.Command({
-				name: "Save Search",
-				tooltip: "Save query to search favorites",
-				id: "orion.saveSearchResults",
-				callback: dojo.hitch(this, function() {
-					var queryObj = mSearchUtils.parseQueryStr(query);
-					var qName = query;
-					if(queryObj && typeof(queryObj.searchStrTitle) === "string" && typeof(queryObj.location) === "string" ){
-						qName = "\'" + queryObj.searchStrTitle + "\' in ";// +queryObj.location;
-						if(queryObj.location.length > 0){
-							this._fileClient.read(queryObj.location, true).then(
-								dojo.hitch(this, function(meta) {
-									var parentName = mSearchUtils.fullPathNameByMeta(meta.Parents);
-									var fullName = parentName.length === 0 ? meta.Name: parentName + "/" + meta.Name;
-									this.searcher.saveSearch(qName + fullName, query);
-								}),
-								dojo.hitch(this, function(error) {
-									console.error("Error loading file meta data: " + error.message);
-									this.searcher.saveSearch(qName + "root", query);
-								})
-							);
-						} else {
-							this.searcher.saveSearch(qName + "root", query);
-						}
-					} else {
-						this.searcher.saveSearch(qName, query);
-					}
-			})});
-		
-			this.commandService.addCommand(saveresultsCommand, "dom");
-			this.commandService.addCommandGroup("orion.searchActions.unlabeled", 200, null, null, this.toolbarId);
-			this.commandService.registerCommandContribution("orion.saveSearchResults", 1, this.toolbarId, "orion.searchActions.unlabeled");
-			
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
 			var parent = dojo.byId(this.resultsId);
 			dojo.place(document.createTextNode("Searching..."), parent, "only");
 			var results = dojo.create("div", null, parent);
 			this.searcher.search(results, query);
 			dojo.place(results, parent, "only");
+		},
+		
+		saveSearch: function(query) {
+			var queryObj = mSearchUtils.parseQueryStr(query);
+			var qName = query;
+			if(queryObj && typeof(queryObj.searchStrTitle) === "string" && typeof(queryObj.location) === "string" ){
+				qName = "\'" + queryObj.searchStrTitle + "\' in ";// +queryObj.location;
+				if(queryObj.location.length > 0){
+					this._fileClient.read(queryObj.location, true).then(
+						dojo.hitch(this, function(meta) {
+							var parentName = mSearchUtils.fullPathNameByMeta(meta.Parents);
+							var fullName = parentName.length === 0 ? meta.Name: parentName + "/" + meta.Name;
+							this.searcher.saveSearch(qName + fullName, query);
+						}),
+						dojo.hitch(this, function(error) {
+							console.error("Error loading file meta data: " + error.message);
+							this.searcher.saveSearch(qName + "root", query);
+						})
+					);
+				} else {
+					this.searcher.saveSearch(qName + "root", query);
+				}
+			} else {
+				this.searcher.saveSearch(qName, query);
+			}
 		}
 	};
 	SearchResultsGenerator.prototype.constructor = SearchResultsGenerator;

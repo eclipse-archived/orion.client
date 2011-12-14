@@ -481,7 +481,7 @@ exports.TwoWayCompareContainer = (function() {
 	
 	TwoWayCompareContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler){	
 		this._editorLeft = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this._readonly ,createLineStyler , this._newFile);
-		mGlobalCommands.generateDomCommandsInBanner(this._commandService, this._editorLeft , "pageActions",true);
+		mGlobalCommands.generateDomCommandsInBanner(this._commandService, this._editorLeft , null, null, null, true);
 		this._textViewLeft = this._editorLeft.getTextView();
 		this._editorRight = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , this._baseFile);
 		this._textViewRight = this._editorRight.getTextView();
