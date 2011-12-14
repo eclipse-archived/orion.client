@@ -14,7 +14,7 @@
 
 /*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
 
-define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mTextModel, mKeyBinding, mEventTarget) {
+define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mTextModel, mKeyBinding, mEventTarget) {
 
 	/** @private */
 	function addHandler(node, type, handler, capture) {
@@ -6077,5 +6077,5 @@ define(['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview
 	mEventTarget.EventTarget.addMixin(TextView.prototype);
 	
 	return {TextView: TextView};
-}, "orion/textview");
+});
 

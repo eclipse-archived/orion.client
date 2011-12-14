@@ -424,24 +424,28 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	 * @name orion.globalCommands#generateDomCommandsInBanner
 	 * @function
 	 */
-	function generateDomCommandsInBanner(commandService, handler , pageActionDomId , useImage) {
+	function generateDomCommandsInBanner(commandService, handler, item, navHandler, navItem, useImage, clientManagesPageNav) {
 		// close any open slideouts because we are retargeting
 		commandService.closeParameterCollector("tool");
 		var toolbar = dojo.byId("pageActions");
-		if(pageActionDomId) {
-			toolbar = dojo.byId(pageActionDomId);
-		}
 		if (toolbar) {	
 			dojo.empty(toolbar);
-			commandService.renderCommands(toolbar, "dom", handler, handler, "tool", !useImage).then(function() {
+			// The render call may be synch (when called by page glue code that created the service)
+			// or asynch (when called after getting a service reference).
+			var retn = commandService.renderCommands(toolbar, "dom", item || handler, handler, "tool", !useImage);
+			if (retn && retn.then) {
+				retn.then(function() {commandService.processURL(window.location.href);});
+			} else {
 				commandService.processURL(window.location.href);
-			});  
+			} 
 		}
 		// now page navigation actions
-		toolbar = dojo.byId("pageNavigationActions");
-		if (toolbar) {	
-			dojo.empty(toolbar);
-			commandService.renderCommands(toolbar, "dom", handler, handler, "tool", !useImage);  // use true when we want to force toolbar items to text
+		if (!clientManagesPageNav) {
+			toolbar = dojo.byId("pageNavigationActions");
+			if (toolbar) {	
+				dojo.empty(toolbar);
+				commandService.renderCommands(toolbar, "dom", navItem || item || handler, navHandler || handler, "tool", !useImage);  // use true when we want to force toolbar items to text
+			}
 		}
 	}
 	

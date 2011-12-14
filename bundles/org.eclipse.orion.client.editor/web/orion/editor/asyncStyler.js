@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*jslint browser:true regexp:true*/
 /*global define console*/
-define([], function() {
+define("orion/editor/asyncStyler", [], function() {
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
 	
 	/**
@@ -157,4 +157,4 @@ define([], function() {
 	};
 	
 	return { AsyncStyler: AsyncStyler };
-}, "orion/editor");
+});
