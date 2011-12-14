@@ -12,7 +12,7 @@
  /*global define window */
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
-define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip'], function(mKeyBinding, mEventTarget, mTooltip) {
+define("orion/editor/editor", ['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip'], function(mKeyBinding, mEventTarget, mTooltip) {
 
 	/**
 	 * @name orion.editor.util
@@ -871,4 +871,4 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textvi
 		Editor: Editor,
 		util: util
 	};
-}, "orion/editor");
+});
