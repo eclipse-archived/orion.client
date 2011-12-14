@@ -12,7 +12,7 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define(['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKeyBinding, mEventTarget) {
+define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKeyBinding, mEventTarget) {
 
 	/**
 	 * @name orion.editor.ContentAssist
@@ -392,4 +392,4 @@ define(['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKe
 	mEventTarget.EventTarget.addMixin(ContentAssist.prototype);
 	
 	return {ContentAssist: ContentAssist};
-}, "orion/editor");
+});

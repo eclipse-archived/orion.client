@@ -11,7 +11,7 @@
 
 /*global define */
 
-define([], function() {
+define("orion/textview/undoStack", [], function() {
 
 	/** 
 	 * Constructs a new Change object.
@@ -377,4 +377,4 @@ define([], function() {
 	return {
 		UndoStack: UndoStack
 	};
-}, "orion/textview");
+});
