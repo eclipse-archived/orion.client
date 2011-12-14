@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['require', 'dojo'], function(require, dojo) {
+define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlobalCommands) {
 	
 	/**
 	 * Service for tracking tasks changes
@@ -27,16 +27,12 @@ define(['require', 'dojo'], function(require, dojo) {
 	}
 	
 	ProgressService.prototype = /** @lends orion.progress.ProgressService.prototype */ {
-			//FIXME reset tasks list when user changes
 			_init: function(){
 				var that = this;
 				//if tasks waren't updated for 60 seconds this means they are out of date and not updated.
 				if(new Date()-this.getLastListUpdate()>60000){
 					this._taskClient.getRunningTasks().then(function(taskList){
-						taskList.lastClientDate = new Date();
-						if(taskList.lastClientDate-that.getLastListUpdate()>60000){
-							localStorage.setItem("orionTasks", JSON.stringify(taskList));
-						}
+						dojo.hitch(that, that._loadTasksList)(taskList);
 						window.setTimeout(function() {
 							dojo.hitch(that, that._checkTaskChanges());
 						}, 5000);
@@ -46,6 +42,22 @@ define(['require', 'dojo'], function(require, dojo) {
 						dojo.hitch(that, that._checkTaskChanges());
 					}, 5000);
 				}
+				
+				window.addEventListener("storage", function(e){
+					if(mGlobalCommands.getAuthenticationIds().indexOf(e.key)>=0){
+						//refresh task list every time when user changes
+						that._taskClient.getRunningTasks().then(function(taskList){
+							dojo.hitch(that, that._loadTasksList)(taskList);
+						},function(error){throw new Error(error);});
+					}
+				}, false);
+			},
+			_loadTasksList: function(taskList){
+				taskList.lastClientDate = new Date();
+				if(taskList.lastClientDate-this.getLastListUpdate()>60000){
+					localStorage.setItem("orionTasks", JSON.stringify(taskList));
+				}
+				
 			},
 			/**
 			 * Gets information when tasks list was last updated.
