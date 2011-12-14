@@ -12,7 +12,7 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define(['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations', 'orion/textview/textDND',
+define("orion/editor/editorFeatures", ['orion/textview/undoStack', 'orion/textview/keyBinding', 'orion/textview/rulers', 'orion/textview/annotations', 'orion/textview/textDND',
 	'orion/editor/regex'],
 function(mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRegex) {
 
@@ -960,4 +960,4 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRegex) {
 		SourceCodeActions: SourceCodeActions,
 		LinkedMode: LinkedMode
 	};
-}, "orion/editor");
+});

@@ -11,7 +11,7 @@
 
 /*global document window navigator define */
 
-define(['orion/textview/annotations'], function(mAnnotations) {
+define("examples/textview/textStyler", ['orion/textview/annotations'], function(mAnnotations) {
 
 	var JS_KEYWORDS =
 		["break",
@@ -1073,4 +1073,4 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 	};
 	
 	return {TextStyler: TextStyler};
-}, "examples/textview");
+});

@@ -12,7 +12,7 @@
 /*jslint */
 /*global define */
 
-define([], function() {
+define("orion/editor/htmlGrammar", [], function() {
 
 	/**
 	 * Provides a grammar that can do some very rough syntax highlighting for HTML.
@@ -101,4 +101,4 @@ define([], function() {
 	}
 
 	return {HtmlGrammar: HtmlGrammar};
-}, "orion/editor");
+});

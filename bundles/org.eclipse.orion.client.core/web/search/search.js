@@ -36,18 +36,33 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
 			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
 			var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, searcher);
-			searchResultsGenerator.loadResults(dojo.hash());
-			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");
+			
+			// page actions for search
+			
+			var saveresultsCommand = new mCommands.Command({
+				name: "Save Search",
+				tooltip: "Save query to search favorites",
+				id: "orion.saveSearchResults",
+				callback: function(data) {
+					searchResultsGenerator.saveSearch(data.items);
+				}
+			});
+		
+			commandService.addCommand(saveresultsCommand, "dom");
+			commandService.addCommandGroup("orion.searchActions.unlabeled", 200, null, null, "pageActions");
+			commandService.registerCommandContribution("orion.saveSearchResults", 1, "pageActions", "orion.searchActions.unlabeled");
+						
+			var item = dojo.hash();
+			searchResultsGenerator.loadResults(item);
+			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, item, null, null,  /* no images */ false, /* client handle page nav area */ true);     
+
 			initTitleBreadCrumb(fileClient, searcher);
-			//Work arround: we want to make sure the page navigation span is cleaned first
-			dojo.empty("pageNavigationActions");
 			//every time the user manually changes the hash, we need to load the results with that name
 			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
 				initTitleBreadCrumb(fileClient, searcher);
-				searchResultsGenerator.loadResults(dojo.hash());
-				mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, "pageActions");   
-				//Work arround: we want to make sure the page navigation span is cleaned first
-				dojo.empty("pageNavigationActions");
+				var query = dojo.hash();
+				searchResultsGenerator.loadResults(query);
+				mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, query, null, null,  /* no images */ false, /* client handle page nav area */ true);     
 			});
 		});
 	});
@@ -79,7 +94,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
 				}
 			}),
 			dojo.hitch(this, function(error) {
-				console.error("Error loading file metadata: " + error.message);
+				window.console.error("Error loading file metadata: " + error.message);
 			})
 		);
 	}
@@ -105,7 +120,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
 						}
 					}),
 					dojo.hitch(this, function(error) {
-						console.error("Error loading file metadata: " + error.message);
+						window.console.error("Error loading file metadata: " + error.message);
 					})
 			);
 		} else {
