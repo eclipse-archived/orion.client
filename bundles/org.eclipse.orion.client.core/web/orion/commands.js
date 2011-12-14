@@ -522,6 +522,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			if (typeof(parent) === "string") {
 				parent = dojo.byId(parent);
 			}
+			if (!parent) { 
+				throw "no parent"; 
+			} else if (!parent.id || parent.id === "") {
+				window.console.log("renderCommands: " + scope + "," + renderType + ">> WARNING: command parent must have an id");
+			}
+
 			if (!items) {
 				var cmdService = this;
 				if (this._selection) {

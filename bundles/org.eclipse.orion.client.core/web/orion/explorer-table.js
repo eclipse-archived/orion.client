@@ -114,18 +114,16 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 		switch(col_no){
 
 		case 0:
-			var col, span, link;
+			var col = document.createElement('td');
+			var span = dojo.create("span", {id: tableRow.id+"Actions"}, col, "only");
+			var link;
 			if (item.Directory) {
-				col = document.createElement('td');
-				span = dojo.create("span", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				this.getExpandImage(tableRow, span);
 				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameColumn", href: "#" + item.ChildrenLocation}, span, "last");
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			} else {
-				col = document.createElement('td');
-				var i;
-				
+				var i;			
 				// Images: always generate link to file. Non-images: use the "open with" href if one matches,
 				// otherwise use default editor.
 				if (!this.openWithCommands) {
@@ -148,10 +146,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				var contentType = this.contentTypes.getContentType(item);
 				if (!foundEditor && this.defaultEditor && !isImage(contentType)) {
 					href = this.defaultEditor.hrefCallback({items: item});
-				}
-				
-				span = dojo.create("span", null, col, "only");
-				
+				}				
 				// link with file image and name
 				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
 				addImageToLink(contentType, link);
