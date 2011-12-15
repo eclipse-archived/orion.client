@@ -57,7 +57,6 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 				if(taskList.lastClientDate-this.getLastListUpdate()>60000){
 					localStorage.setItem("orionTasks", JSON.stringify(taskList));
 				}
-				
 			},
 			/**
 			 * Gets information when tasks list was last updated.
