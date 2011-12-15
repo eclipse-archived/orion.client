@@ -22,25 +22,15 @@
 			
 			// testing that command service handles image-less actions properly
 			provider.registerServiceProvider("orion.core.task", {
-				getTasks: function(){
+				getTasks: function(options){
 					return dojo.xhrGet({
 						url: base , 
 						headers: {
 							"Orion-Version": "1"
 						},
+						content: options,
 						handleAs: "json",
-						timeout: 15000
-					});
-				},
-				getRunningTasks: function(){
-					return dojo.xhrGet({
-						url: base, 
-						headers: {
-							"Orion-Version": "1"
-						},
-						content:{RunningOnly: true},
-						handleAs: "json",
-						timeout: 15000
+						timeout: options.Longpolling == true? 70000: 15000
 					});
 				},
 				getTask: function(taskLocation){
@@ -51,25 +41,6 @@
 						},
 						handleAs: "json",
 						timeout: 15000
-					});
-				},
-				getTasksLongpolling: function(longpollingId){
-					
-					var args = {
-							Longpolling: true,
-						}
-					if(longpollingId){
-						args.LongpollingId = longpollingId;
-					}
-					
-					return dojo.xhrGet({
-						url: base ,
-						content: args,
-						headers: {
-							"Orion-Version": "1"
-						},
-						handleAs: "json",
-						timeout: 70000
 					});
 				},
 				removeCompletedTasks: function(){

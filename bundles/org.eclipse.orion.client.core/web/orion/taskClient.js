@@ -41,12 +41,8 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		return clientDeferred;
 	}
 	
-	function _getTasks(taskService){
-		return _doServiceCall(taskService, "getTasks");
-	}
-	
-	function _getRunningTasks(taskService){
-		return _doServiceCall(taskService, "getRunningTasks");
+	function _getTasks(taskService, options){
+		return _doServiceCall(taskService, "getTasks", [options]);
 	}
 	
 	function TaskClient(serviceRegistry){
@@ -94,7 +90,11 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 	
 	function _registerTaskChangeListener(service, listener, longpollingId){
 		var that = this;
-		_doServiceCall(service, "getTasksLongpolling", [longpollingId]).then(function(result){
+		var args = {Longpolling: true};
+		if(longpollingId){
+			args.LongpollingId = longpollingId;
+		}
+		_doServiceCall(service, "getTasks", [args]).then(function(result){
 			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
 				return;
 			}
@@ -138,7 +138,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 				var result = new dojo.Deferred();
 				var results = [];
 				for(var i=0; i<this._services.length; i++){
-					results[i] = _getRunningTasks(this._services[i]);
+					results[i] = _getTasks(this._services[i], {RunningOnly: true});
 				}
 				new dojo.DeferredList(results).then(function(lists){
 					result.resolve(_mergeTasks(lists));
@@ -164,12 +164,25 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 				return _doServiceCall(this._getService(taskLocation), "cancelTask", arguments);
 			},
 	
-			registreTaskChangeListener: function(listener){
+			addTaskChangeListener: function(listener){
 				this._taskListeners.push(listener);
 				if(this._taskListeners.length===1){
 					for(var i=0; i<this._services.length; i++){
 						dojo.hitch(this, _registerTaskChangeListener)(this._services[i], dojo.hitch(this, _notifyChangeListeners));
 					}
+				}
+			},
+			
+			removeTaskChangeListener: function(listener){
+				for(var i=0; i<this._taskListeners.length; i++){
+					if(this._taskListeners[i]===listener){
+						this._taskListeners.splice(i, 1);
+						break;
+					}
+				}
+				if(this._taskListeners.length===0){
+					//stop listening if no listeners registered
+					this._currentLongpollingIds = [];
 				}
 			},
 			
