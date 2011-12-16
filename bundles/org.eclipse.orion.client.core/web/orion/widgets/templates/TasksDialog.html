@@ -1,0 +1,19 @@
+
+<div>
+	<div class="dijitTooltipContainer" role="presentation" style="padding: 0.5em;">
+		<div class="dijitTooltipContents dijitTooltipFocusNode" role="dialog"
+			dojoattachpoint="containerNode" style="padding: 0">
+			<table style="width: 100%">
+				<tr>
+					<td><h2>Recent tasks</h2></td>
+					<td style="text-align: right;"><a dojoAttachPoint="allTasksLink">All tasks</a></td>
+				</tr>
+			</table>
+			<table dojoAttachPoint="tasksList" style="display: none; width: 100%;">
+			</table>
+			<span dojoAttachPoint="noTasks">No tasks running.</span>
+		</div>
+	</div>
+	<div class="dijitTooltipConnector" role="presentation"></div>
+
+</div>

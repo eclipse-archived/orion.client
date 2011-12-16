@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlobalCommands) {
+define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/TasksDialog'], function(require, dojo, mGlobalCommands) {
 	
 	/**
 	 * Service for tracking tasks changes
@@ -22,12 +22,18 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 		this._serviceRegistry = serviceRegistry;
 		this._serviceRegistration = serviceRegistry.registerService("orion.page.progress", this);
 		this._taskClient = taskClient;
-		this._init();
+		this._initDone = false;
 		this._topicListeners = {};
 	}
 	
 	ProgressService.prototype = /** @lends orion.progress.ProgressService.prototype */ {
-			_init: function(){
+			init: function(progressPane){
+				if(this._progressPane){
+					return;
+				}
+				this._progressPane = dojo.byId(progressPane);
+				this._taskDialog = new orion.widgets.TasksDialog();
+				this._tasksDialogConnection = dojo.connect(this._progressPane, "onclick", dojo.hitch(this, this._openTasksPopup));
 				var that = this;
 				//if tasks waren't updated for 60 seconds this means they are out of date and not updated.
 				if(new Date()-this.getLastListUpdate()>60000){
@@ -38,6 +44,7 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 						}, 5000);
 					}, function(error){throw new Error(error);});
 				}else{
+					dojo.hitch(that, that._generateTaskInfo(JSON.parse(localStorage.getItem("orionTasks") || "{'Children': []}")));
 					window.setTimeout(function() {
 						dojo.hitch(that, that._checkTaskChanges());
 					}, 5000);
@@ -51,11 +58,18 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 						},function(error){throw new Error(error);});
 					}
 				}, false);
+				
+				window.addEventListener("storage", function(e){
+					if(e.key === "orionTasks"){
+						dojo.hitch(that, that._generateTaskInfo(JSON.parse(localStorage.getItem("orionTasks") || "{'Children': []}")));
+					}
+				});
 			},
 			_loadTasksList: function(taskList){
 				taskList.lastClientDate = new Date();
 				if(taskList.lastClientDate-this.getLastListUpdate()>60000){
 					localStorage.setItem("orionTasks", JSON.stringify(taskList));
+					this._generateTaskInfo(taskList);
 				}
 			},
 			/**
@@ -94,12 +108,31 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 						tasks.Children.splice(tasksToDelete[i], 1);
 					}
 					localStorage.setItem("orionTasks", JSON.stringify(tasks));
+					dojo.hitch(that, that._generateTaskInfo)(tasks);
 				}
 				new dojo.DeferredList(allRequests).addBoth(function(result){
 					window.setTimeout(function() {
 						dojo.hitch(that, that._checkTaskChanges());
 					}, 5000);
 				});
+			},
+			_openTasksPopup: function(){
+				dijit.popup.open({
+					popup: this._taskDialog,
+					around: this._progressPane
+				});
+				dijit.focus(this._taskDialog.domNode);
+			},
+			_generateTaskInfo: function(tasks){
+				this._taskDialog.setTasks(tasks);
+				
+				if(!tasks.Children || tasks.Children.length==0){
+					this._progressPane.className = "progressPane_empty";
+					this._progressPane.title = "Tasks";
+					return;
+				}
+				this._progressPane.className = "progressPane_tasks";
+				this._progressPane.title = "Tasks";
 			},
 			/**
 			 * Checks every 2 seconds for the task update.
@@ -182,6 +215,7 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 				//update also the last list update
 				tasks.lastClientDate = new Date();
 				localStorage.setItem("orionTasks", JSON.stringify(tasks));
+				this._generateTaskInfo(tasks); 
 			}
 	};
 			

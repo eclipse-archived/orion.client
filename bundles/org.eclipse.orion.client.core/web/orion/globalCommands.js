@@ -283,7 +283,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				'<span style="display: table-row">'+
 					'<span id="statusPane" style="color: #5a5a5a; display: table-cell"></span>' +
 					'<span id="notifications"  style="display: table-cell"></span>' +
-					'<span id="progressPane" class="rightGlobalToolbar progressPane" style="display: table-cell"></span>' +
+					'<a id="progressPane" style="display: table-cell; width: 16px; height: 16px;"></span>' +
 				'</span>' +
 			'</span>' +
 			'</td>' +
@@ -350,7 +350,13 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	
 	function getAuthenticationIds(){
 		return authenticationIds;
-	}	
+	}
+	
+	function startProgressService(serviceRegistry){
+		var progressService = serviceRegistry.getService("orion.page.progress");
+		if(progressService)
+			dojo.hitch(progressService, progressService.init)("progressPane");
+	}
 
 	/**
 	 * Adds the user-related commands to the toolbar
@@ -407,6 +413,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				});							
 			});
 		}
+		
 	}
 	
 	function setPendingAuthentication(services){
@@ -671,6 +678,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		}
 		
 		generateUserInfo(serviceRegistry);
+		startProgressService(serviceRegistry);
+
 		
 		// generate the footer. 
 		// TODO The footer div id should not be assumed here

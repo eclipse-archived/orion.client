@@ -366,10 +366,22 @@ a:hover {
 	padding-right: 8px;
 }
 
-.progressPane {
+.progressPane_tasks {
 	padding-left: 8px;
 	padding-right: 8px;
 	vertical-align: bottom;
+	background-position: 0px 0px; 
+	text-align: right; 
+	background: url(../images/progress_none.gif) no-repeat center;  /* TODO move icon to sprite*/
+}
+
+.progressPane_empty {
+	padding-left: 8px;
+	padding-right: 8px;
+	vertical-align: bottom;
+	background-position: 0px 0px; 
+	text-align: right; 
+	background: url(../images/progress_gray.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .toolbar {
