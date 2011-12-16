@@ -306,7 +306,16 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 		},
 		/** @private */
 		getDisplayString: function(proposal) {
-			return typeof proposal === "string" ? proposal : proposal.proposal;
+			//for simple string content assist, the display string is just the proposal
+			if (typeof proposal === "string") {
+				return proposal;
+			}
+			//return the description if applicable
+			if (proposal.description && typeof proposal.description === "string") {
+				return proposal.description;
+			}
+			//by default return the straight proposal text
+			return proposal.proposal;
 		},
 		/** @private */
 		matchesPrefix: function(str) {
