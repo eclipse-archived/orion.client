@@ -1746,6 +1746,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			if (isFirefox) {
 				this._fixCaret();
+				/*
+				* Bug in Firefox.  For some reason, Firefox stops showing the caret when the 
+				* selection is dropped onto itself. The fix is to detected the case and 
+				* call fixCaret() a second time.
+				*/
+				if (e.dataTransfer.dropEffect === "none" && !e.dataTransfer.mozUserCancelled) {
+					this._fixCaret();
+				}
 			}
 		},
 		_handleDragEnter: function (e) {

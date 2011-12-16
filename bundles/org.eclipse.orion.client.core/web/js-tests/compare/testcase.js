@@ -14,9 +14,28 @@ define(["orion/assert", "orion/compare/diff-parser", "./mapper-test-data", 'jsdi
 	var tests = {};
 	var mapperTestCases = mMapperTestData.mapperTestCases;
 
-	var testMapper = function (){
-		for ( var i = 0; i < mapperTestCases.length; i++) {
-			var testCase = mapperTestCases[i];
+	var _inTestArray = function(testDataIndexs, index){
+		var ret = false;
+		for(var k = 0; k < testDataIndexs.length; k++){
+			if(testDataIndexs[k] === index){
+				return true;
+			}
+		}
+		return false;
+	};
+	
+	var testMapper = function (testData, testOnly, skipTest){
+		for ( var i = 0; i < testData.length; i++) {
+			if(testOnly){
+				if(!_inTestArray(testOnly, i)){
+					continue;
+				}
+			} else if(skipTest){
+				if(_inTestArray(skipTest, i)){
+					continue;
+				}
+			}
+			var testCase = testData[i];
 			var input = testCase[0];
 			var diff = testCase[1];
 			var expectedOutput = testCase[2];
@@ -36,7 +55,7 @@ define(["orion/assert", "orion/compare/diff-parser", "./mapper-test-data", 'jsdi
 		}
 	};
 	
-	var _mapperPartlyEqual = function(mapper, expectedMapper){
+	var _mapperPartialEqual = function(mapper, expectedMapper){
 		if(mapper.length !== expectedMapper.length){
 			throw new assert.AssertionError({
 				message :  "mapper failed at total length",
@@ -61,23 +80,21 @@ define(["orion/assert", "orion/compare/diff-parser", "./mapper-test-data", 'jsdi
 		}
 	};
 	
-	var jsDiffSkip = [23,29,37,39,40,41,42,43,44,49];
-	var testJSDiff = function (){
-		for ( var i = 0; i < mapperTestCases.length; i++) {
-			var skip = false;
-			for(var k = 0; k < jsDiffSkip.length; k++){
-				if(jsDiffSkip[k] === i){
-					skip = true;
-					break;
+	var testJSDiff = function (testData, testOnly, skipTest){
+		for ( var i = 0; i < testData.length; i++) {
+			if(testOnly){
+				if(!_inTestArray(testOnly, i)){
+					continue;
+				}
+			} else if(skipTest){
+				if(_inTestArray(skipTest, i)){
+					continue;
 				}
 			}
-			if(skip){
-				continue;
-			}
-			var testCase = mapperTestCases[i];
+			var testCase = testData[i];
 			var input = testCase[0];
 			var expectedOutput = testCase[2];
-			var diff = JsDiff.createPatch("foo", input, expectedOutput, "", "") ;			
+			var diff = JsDiff.createPatch("foo", input.split("\r").join(""), expectedOutput.split("\r").join(""), "", "") ;			
 			var expectedMapping = testCase[3];
 			var description = testCase[4];
 			var j = i + 1;
@@ -89,15 +106,16 @@ define(["orion/assert", "orion/compare/diff-parser", "./mapper-test-data", 'jsdi
 					//console.log("\n\nDiff:\n");
 					//console.log(diff);
 					var result = diffParser.parse(input, diff, false,true);
-					_mapperPartlyEqual(result.mapper, expectedMapping);
+					_mapperPartialEqual(result.mapper, expectedMapping);
 				};				
 			}(input, diff, expectedOutput, expectedMapping);
 		}
 		
 	};
-	testMapper();
-	testJSDiff();
-		
+	
+	testMapper(mapperTestCases);
+	testJSDiff(mapperTestCases, null, [23,29,39,40]);
+	
 	tests["test empty case"] = function() {
 		var input = "";
 		var diff = "";
@@ -146,6 +164,5 @@ define(["orion/assert", "orion/compare/diff-parser", "./mapper-test-data", 'jsdi
 		assert.deepEqual(result.mapper, expectedMapping);
 		assert.equal(result.outPutFile, expectedOutput);
 	};
-	
 	return tests;
 });
