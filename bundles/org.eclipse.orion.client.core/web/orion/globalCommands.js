@@ -184,6 +184,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 					} 
 					var field = dojo.create("input", {type: parm.type}, parameterArea, "last");
 					dojo.addClass(field, "parameterInput");
+					// we define special classes for some parameter types
+					dojo.addClass(field, "parameterInput"+parm.type);
 					field.setAttribute("speech", "speech");
 					field.setAttribute("x-webkit-speech", "x-webkit-speech");
 					field.parameterName = parm.name;
