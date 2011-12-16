@@ -68,7 +68,7 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 			},
 			_checkTaskChanges: function(){
 				var that = this;
-				var tasks = JSON.parse(localStorage.getItem("orionTasks") || "{Children: []}");
+				var tasks = JSON.parse(localStorage.getItem("orionTasks") || "{'Children': []}");
 				var allRequests = [];
 				for(var i=0; i<tasks.Children.length; i++){
 					var task = tasks.Children[i];
@@ -151,14 +151,19 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 				}
 				this._topicListeners[topic].push(topicListener);
 			},
-			writeTask: function(taskJson){
-				var tasks = JSON.parse(localStorage.getItem("orionTasks") || "{Children: []}");
+			writeTask: function(taskj){
+				var taskJson = JSON.parse(JSON.stringify(taskj));
+				var tasks = JSON.parse(localStorage.getItem("orionTasks") || "{'Children': []}");
 				for(var i=0; i<tasks.Children.length; i++){
 					var task = tasks.Children[i];
 					if(task.Id && task.Id===taskJson.Id){
 						tasks.Children.splice(i, 1);
 						break;
 					}
+				}
+				//do not store results, they may be too big for localStorage
+				if(!taskJson.Running && !taskJson.Failed){
+					delete taskJson.Result;
 				}
 				taskJson.lastClientDate = new Date();
 				tasks.Children.push(taskJson);
