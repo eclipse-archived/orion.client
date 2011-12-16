@@ -3,13 +3,13 @@
 <head>
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2011.">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
 <script type="text/javascript" src="../orion/plugin.js"></script>
 <script type="text/javascript" src="../orion/textview/global.js"></script>
 <script type="text/javascript" src="../orion/editor/webContentAssist.js"></script>
 <script type="text/javascript" src="../orion/editor/htmlGrammar.js"></script>
+<script type="text/javascript" src="webEditingPlugin/htmlContentAssist.js"></script>
 <script type="text/javascript">
-/*global window eclipse orion*/
+/*global window eclipse orion HTMLContentAssistProvider*/
 window.onload = function() {
 	var provider = new eclipse.PluginProvider();
 	
@@ -108,6 +108,9 @@ window.onload = function() {
 	provider.registerServiceProvider("orion.edit.contentAssist",
 		new orion.editor.JavaScriptContentAssistProvider(),
 		{name: "JavaScript content assist", pattern: "\\.js$"});
+	provider.registerServiceProvider("orion.edit.contentAssist",
+		new HTMLContentAssistProvider(),
+		{name: "HTML content assist", pattern: "\\.html?$"});
 	
 	// Register syntax highlighting
 	provider.registerServiceProvider("orion.edit.highlighter",
