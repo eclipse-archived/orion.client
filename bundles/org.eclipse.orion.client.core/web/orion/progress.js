@@ -69,6 +69,7 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 			_checkTaskChanges: function(){
 				var that = this;
 				var tasks = JSON.parse(localStorage.getItem("orionTasks") || "{'Children': []}");
+				var tasksToDelete = [];
 				var allRequests = [];
 				for(var i=0; i<tasks.Children.length; i++){
 					var task = tasks.Children[i];
@@ -82,6 +83,17 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 							throw new Error(error); //TODO what to do on error?
 						});
 					}
+					if(!task.Running  && (new Date() - new Date(task.lastClientDate ? task.lastClientDate : 0) > 300000)){
+						//after 5 minutes remove task from the list
+						tasksToDelete.push(i);
+					}
+				}
+				if(tasksToDelete.length>0){
+					tasks.lastClientDate = new Date();
+					for(var i=tasksToDelete.length-1; i>=0; i--){
+						tasks.Children.splice(tasksToDelete[i], 1);
+					}
+					localStorage.setItem("orionTasks", JSON.stringify(tasks));
 				}
 				new dojo.DeferredList(allRequests).addBoth(function(result){
 					window.setTimeout(function() {
