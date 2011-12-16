@@ -1746,6 +1746,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			if (isFirefox) {
 				this._fixCaret();
+				/*
+				* Bug in Firefox.  For some reason, Firefox stops showing the caret when the 
+				* selection is dropped onto itself. The fix is to detected the case and 
+				* call fixCaret() a second time.
+				*/
+				if (e.dataTransfer.dropEffect === "none" && !e.dataTransfer.mozUserCancelled) {
+					this._fixCaret();
+				}
 			}
 		},
 		_handleDragEnter: function (e) {
@@ -1858,7 +1866,22 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					if (e.preventDefault) { e.preventDefault(); }
 					return false;
 				}
-				this._startIME();
+				var startIME = true;
+				
+				/*
+				* Bug in Safari. Some Control+key combinations send key events
+				* with keyCode equals to 229. This is unexpected and causes the
+				* view to start an IME composition. The fix is to ignore these
+				* events.
+				*/
+				if (isSafari && isMac) {
+					if (e.ctrlKey) {
+						startIME = false;
+					}
+				}
+				if (startIME) {
+					this._startIME();
+				}
 			} else {
 				this._commitIME();
 			}

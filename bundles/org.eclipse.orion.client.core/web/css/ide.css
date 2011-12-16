@@ -134,6 +134,10 @@ a:hover {
 	margin-left: 4px;
 }
 
+.parameterInputurl {
+	width: 30em;
+}
+
 .navTableHeading {
 	color: #404040;
 	border-bottom: 1px solid #404040;
@@ -700,9 +704,11 @@ a:hover {
 	clear: both;
 	margin: 4px 0 0 8px;
 }
+
 #outline ul {
 	padding-left: 14px;
 }
+
 #outline li {
 	list-style-type: none;
 	white-space: nowrap; /*wrapping makes indented list hard to read*/
