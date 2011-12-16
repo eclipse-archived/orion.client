@@ -362,6 +362,12 @@ a:hover {
 	padding-right: 8px;
 }
 
+.progressPane {
+	padding-left: 8px;
+	padding-right: 8px;
+	vertical-align: bottom;
+}
+
 .toolbar {
 	border: 0;
 	padding: 0;
