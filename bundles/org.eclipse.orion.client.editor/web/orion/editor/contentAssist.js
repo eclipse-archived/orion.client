@@ -300,7 +300,8 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 			if (isSelected) {
 				div.className = "selected";
 			}
-			div.innerHTML = proposal;
+			var textNode = document.createTextNode(proposal);
+			div.appendChild(textNode, div);
 			parent.appendChild(div);
 		},
 		/** @private */
