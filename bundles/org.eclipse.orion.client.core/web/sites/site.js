@@ -31,7 +31,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var taskClient = new mTaskClient.TaskClient(serviceRegistry);
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, taskClient, "statusPane", "notifications");
-			new mProgress.ProgressService(serviceRegistry, taskClient);
+			var progressService = new mProgress.ProgressService(serviceRegistry, taskClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 		
 			var fileClient = new mFileClient.FileClient(serviceRegistry, function(reference) {
@@ -75,6 +75,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 					siteService: siteService,
 					commandService: commandService,
 					statusService: statusService,
+					progressService: progressService,
 					commandsContainer: dojo.byId("pageActions"),
 					id: "site-editor"});
 				dojo.place(widget.domNode, dojo.byId("site"), "only");
@@ -96,7 +97,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 			var refresher = dojo.hitch(widget, widget._setSiteConfiguration);
 			var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
 			
-			mSiteUtils.createSiteCommands(commandService, siteService, statusService, dialogService, 
+			mSiteUtils.createSiteCommands(commandService, siteService, progressService, dialogService, 
 					/*start*/ refresher, /*stop*/ refresher, /*delete*/ null, errorHandler);
 			commandService.registerCommandContribution("eclipse.site.start", 1);
 			commandService.registerCommandContribution("eclipse.site.stop", 2);

@@ -83,7 +83,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 	 * Creates & adds commands that act on an individual site configuration.
 	 * @param {eclipse.CommandService} commandService
 	 * @param {eclipse.sites.SiteService} siteService
-	 * @param {eclipse.StatusReportingService} statusService
+	 * @param {eclipse.ProgressService} progressService
 	 * @param {eclipse.DialogService} dialogService
 	 * @param {Function} startCallback
 	 * @param {Function} stopCallback
@@ -92,7 +92,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 	 * @name orion.siteUtils#createSiteCommands
 	 * @function
 	 */
-	function createSiteCommands(commandService, siteService, statusService, dialogService,
+	function createSiteCommands(commandService, siteService, progressService, dialogService,
 			startCallback, stopCallback, deleteCallback, errorCallback) {
 		var editCommand = new mCommands.Command({
 			name: "Edit",
@@ -119,7 +119,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 				newItem.HostingStatus = { Status: "started" };
 				
 				var deferred = siteService.updateSiteConfiguration(data.items.Location, newItem);
-				statusService.showWhile(deferred, "Starting...").then(startCallback, errorCallback);
+				progressService.showWhile(deferred, "Starting...").then(startCallback, errorCallback);
 			}});
 		commandService.addCommand(startCommand, "object");
 		
@@ -137,7 +137,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 				newItem.HostingStatus = { Status: "stopped" };
 				
 				var deferred = siteService.updateSiteConfiguration(data.items.Location, newItem);
-				statusService.showWhile(deferred, "Stopping " + data.items.Name + "...").then(stopCallback, errorCallback);
+				progressService.showWhile(deferred, "Stopping " + data.items.Name + "...").then(stopCallback, errorCallback);
 			}});
 		commandService.addCommand(stopCommand, "object");
 		

@@ -149,7 +149,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/TasksDialog'],
 						that._taskClient.getTask(taskJson.Location).then(function(jsonData, ioArgs) {
 								dojo.hitch(that, that.followTask(jsonData, result));
 							}, function(error){
-								that._serviceRegistry.getService("orion.page.message").setProgressResult(error);
+								dojo.hitch(that, that.setProgressResult)(error);
 								result.errback(error);
 								});
 					}, 2000);
@@ -157,11 +157,14 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/TasksDialog'],
 						that._serviceRegistry.getService("orion.page.message").setProgressMessage(taskJson.Message);
 					}
 				} else if (taskJson && taskJson.Result) {
-					that._serviceRegistry.getService("orion.page.message").setProgressResult(taskJson.Result);
+					dojo.hitch(that, that.setProgressResult)(taskJson.Result);
 					result.callback(taskJson);
 				}
 				
 				return result;
+			},
+			setProgressResult: function(result){
+				this._serviceRegistry.getService("orion.page.message").setProgressResult(result);
 			},
 			/**
 			 * Shows a progress message until the given deferred is resolved. Returns a deferred that resolves when

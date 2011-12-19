@@ -32,7 +32,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var taskClient = new mTaskClient.TaskClient(serviceRegistry);
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, taskClient, "statusPane", "notifications");
-			new mProgress.ProgressService(serviceRegistry, taskClient);
+			var progressService = new mProgress.ProgressService(serviceRegistry, taskClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
 			var siteService = new mSiteService.SiteService(serviceRegistry);
@@ -90,7 +90,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 				commandService.addCommand(createCommand, "dom");
 				
 				// Add commands that deal with individual site configuration (edit, start, stop..)
-				mSiteUtils.createSiteCommands(commandService, siteService, statusService, dialogService,
+				mSiteUtils.createSiteCommands(commandService, siteService, progressService, dialogService,
 						/*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
 				
 				// Register command contributions
