@@ -89,6 +89,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		}); 
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
+			dojo.addClass(selectionTools, "selectionTools");
 			service.renderCommands(selectionTools, "dom", null, explorer, "tool", true); // true would force icons to text
 		}
 		
