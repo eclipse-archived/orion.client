@@ -753,6 +753,7 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRegex) {
 			}
 			this.textView.setText(proposal, event.data.start, event.data.end);
 			
+			//if the proposal specifies linked positions, build the model and enter linked mode
 			if (proposalInfo.positions && this.linkedMode) {
 				var positionGroups = [];
 				for (var i = 0; i < proposalInfo.positions.length; ++i) {
@@ -769,6 +770,9 @@ function(mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRegex) {
 					escapePosition: proposalInfo.escapePosition
 				};
 				this.linkedMode.enterLinkedMode(linkedModeModel);
+			} else if (proposalInfo.escapePosition) {
+				//we don't want linked mode, but there is an escape position, so just set cursor position
+				this.textView.setCaretOffset(proposalInfo.escapePosition);
 			}
 			return true;
 		},
