@@ -12,10 +12,10 @@
 /*global window define */
 /*browser:true*/
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
+define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
         'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/taskClient', 'orion/searchResults', 'orion/breadcrumbs', 'orion/globalCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(require, dojo, mBootstrap, mStatus, mDialogs, mCommands, mFavorites, 
+		function(require, dojo, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, 
 				mSearchClient, mFileClient, mTaskClient, mSearchResults, mBreadcrumbs, mGlobalCommands) {
 
 	dojo.addOnLoad(function() {
@@ -26,7 +26,9 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status','orion/dialogs',
 			dojo.parser.parse();
 
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
-			new mStatus.StatusReportingService(serviceRegistry, new mTaskClient.TaskClient(serviceRegistry), "statusPane", "notifications");
+			var taskClient = new mTaskClient.TaskClient(serviceRegistry)
+			new mStatus.StatusReportingService(serviceRegistry, taskClient, "statusPane", "notifications");
+			new mProgress.ProgressService(serviceRegistry, taskClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			// Favorites
 			new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
