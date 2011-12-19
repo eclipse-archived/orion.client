@@ -35,8 +35,8 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/TasksDialog'],
 				this._taskDialog = new orion.widgets.TasksDialog();
 				this._tasksDialogConnection = dojo.connect(this._progressPane, "onclick", dojo.hitch(this, this._openTasksPopup));
 				var that = this;
-				//if tasks waren't updated for 60 seconds this means they are out of date and not updated.
-				if(new Date()-this.getLastListUpdate()>60000){
+				//if tasks waren't updated for 5 minutes this means they are out of date and not updated.
+				if(new Date()-this.getLastListUpdate()>300000){
 					this._taskClient.getRunningTasks().then(function(taskList){
 						dojo.hitch(that, that._loadTasksList)(taskList);
 						window.setTimeout(function() {
@@ -67,7 +67,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/TasksDialog'],
 			},
 			_loadTasksList: function(taskList){
 				taskList.lastClientDate = new Date();
-				if(taskList.lastClientDate-this.getLastListUpdate()>60000){
+				if(taskList.lastClientDate-this.getLastListUpdate()>300000){
 					localStorage.setItem("orionTasks", JSON.stringify(taskList));
 					this._generateTaskInfo(taskList);
 				}
