@@ -12,10 +12,10 @@
 /*jslint browser:true devel:true*/
 /*global define window dijit dojo eclipse widgets serviceRegistry:true*/
 
-define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/fileClient', 'orion/taskClient',
+define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/taskClient',
 	        'orion/searchClient', 'orion/globalCommands',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(dojo, mBootstrap, mStatus, mCommands, mFileClient, mTaskClient, mSearchClient, mGlobalCommands) {
+			function(dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mTaskClient, mSearchClient, mGlobalCommands) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -28,7 +28,9 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/file
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, new mTaskClient.TaskClient(serviceRegistry), "statusPane", "notifications");
+			var taskClient = new mTaskClient.TaskClient(serviceRegistry);
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, taskClient, "statusPane", "notifications");
+			new mProgress.ProgressService(serviceRegistry, taskClient);
 				
 			// global commands
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);

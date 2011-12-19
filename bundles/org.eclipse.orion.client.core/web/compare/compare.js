@@ -11,9 +11,9 @@
 
 /*global define document */
 
-define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
+define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/taskClient', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
 		'orion/compare/compare-features', 'orion/compare/compare-container', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'],
-		function(dojo, mBootstrap, mStatus, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mCompareContainer) {
+		function(dojo, mBootstrap, mStatus, mProgress, mTaskClient, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mCompareContainer) {
 
 		dojo.addOnLoad(function(){
 			mBootstrap.startup().then(function(core) {
@@ -32,6 +32,9 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/file
 				var searcher = new mSearchClient.Searcher({
 					serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient
 				});
+				var taskClient = new mTaskClient.TaskClient(serviceRegistry);
+				var statusService = new mStatus.StatusReportingService(serviceRegistry, taskClient, "statusPane", "notifications");
+				var progressService = new mProgress.ProgressService(serviceRegistry, taskClient);
 
 				mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
 				var uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({

@@ -15,10 +15,10 @@
 /*
  * Glue code for site.html
  */
-define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
+define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
 	        'orion/fileClient', 'orion/taskClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/siteService', 'orion/siteUtils', 'orion/siteTree', 'orion/treetable', 
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/SiteEditor'], 
-			function(dojo, mBootstrap, mStatus, mCommands, mFileClient, mTaskClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
+			function(dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mTaskClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -29,7 +29,9 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/commands',
 			
 			// Register services
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, new mTaskClient.TaskClient(serviceRegistry), "statusPane", "notifications");
+			var taskClient = new mTaskClient.TaskClient(serviceRegistry);
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, taskClient, "statusPane", "notifications");
+			new mProgress.ProgressService(serviceRegistry, taskClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 		
 			var fileClient = new mFileClient.FileClient(serviceRegistry, function(reference) {

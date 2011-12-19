@@ -9,11 +9,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/selection',
+define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/taskClient', 'orion/commands', 'orion/selection',
 	        'orion/searchClient', 'orion/globalCommands', 'orion/profile/UsersList', 'orion/profile/usersUtil',
 	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/profile/widgets/NewUserDialog',
 	        'orion/profile/widgets/ResetPasswordDialog'], 
-			function(require, dojo, mBootstrap, mStatus, mCommands, mSelection, mSearchClient, mGlobalCommands, mUsersList, mUsersUtil) {
+			function(require, dojo, mBootstrap, mStatus, mProgress, mTaskClient, mCommands, mSelection, mSearchClient, mGlobalCommands, mUsersList, mUsersUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -25,6 +25,10 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 			var selection = new mSelection.Selection(serviceRegistry);
+			
+			var taskClient = new mTaskClient.TaskClient(serviceRegistry);
+			new mStatus.StatusReportingService(serviceRegistry, taskClient, "statusPane", "notifications");
+			new mProgress.ProgressService(serviceRegistry, taskClient);
 		
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, usersList, usersList);
 			mGlobalCommands.generateDomCommandsInBanner(commandService, usersList);
