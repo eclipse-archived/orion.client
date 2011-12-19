@@ -82,6 +82,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				else
 					dojo.addClass(taskIcon, "core-sprite-ok");
 				
+				if(result.Message || task.Message){
+					dojo.create("br", null, div, "last");
+					dojo.create("span", {style: "margin-left: 18px;", innerHTML: result.Message || task.Message}, div, "last");
+					
+				}
+				
 				dojo.place(tr, this.tasksList, "last");
 			}
 			this._setTasksVisibility();
