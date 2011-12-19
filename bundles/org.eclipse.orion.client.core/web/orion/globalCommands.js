@@ -278,12 +278,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		'</tr>' +
 	// Row 3:  Status on left, global commands, search, user, etc. on right
 		'<tr class="topRowBanner" id="bannerRow3">' +
-			'<td colspan=2 style="height: 16px; text-align: left">' +
+			'<td colspan=2 style="height: 16px; text-align: left; vertical-align: bottom;">' +
 			'<span style="display: table; width: 100%">'+
 				'<span style="display: table-row">'+
 					'<span id="statusPane" style="color: #5a5a5a; display: table-cell"></span>' +
 					'<span id="notifications"  style="display: table-cell"></span>' +
-					'<a id="progressPane" style="display: table-cell; width: 16px; height: 16px;"></span>' +
+					'<span style="display: table-cell; width: 16px; height: 16px; padding-left: 8px; padding-right: 8px; text-align: right;"><a id="progressPane"></a></span>' +
 				'</span>' +
 			'</span>' +
 			'</td>' +
