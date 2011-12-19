@@ -150,6 +150,8 @@ define(['require', 'dojo'], function(require, dojo) {
 		/**
 		 * Shows a progress message until the given deferred is resolved. Returns a deferred that resolves when
 		 * the operation completes.
+		 * 
+		 * @Deprecated use orion.page.progress showWhile method with the same signature
 		 */
 		showWhile: function(deferred, message) {
 			var that = this;
