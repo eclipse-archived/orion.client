@@ -431,6 +431,26 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 			node.innerText = text;
 		}
 	}
+	
+	/**
+	 * Create a stylized pane heading.
+	 * @param {DomNode} node the node containing the title element.
+	 * @param {DomNode} commandNode the node containing the commands.
+	 * @param {String} heading the pane heading
+	 */
+	function createPaneHeading(titleElement, commandElement, headingLabel, headingId, commandId, commandService, handler) {
+		dojo.addClass(titleElement, "paneHeadingContainer");
+		var title = dojo.place("<span class='paneHeading'>"+headingLabel+"</span>", titleElement, "only");
+		if (headingId) {
+			title.id = headingId;
+		}
+		dojo.addClass(commandElement,  "paneHeadingContainer paneHeadingCommands");
+		if (commandService) {
+			var commands = dojo.place("<span id='" + commandId + "' class='paneHeadingToolbar'></span>", commandElement, "last");
+			commandService.renderCommands(commands, "dom", handler, handler, "tool");
+		}
+	}
+	
 	//return module exports
 	return {
 		setUserName: setUserName,
@@ -449,6 +469,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		rememberSuccessfulTraversal: rememberSuccessfulTraversal,
 		getText: getText,
 		safeText: safeText,
-		setText: setText
+		setText: setText,
+		createPaneHeading: createPaneHeading
 	};
 });

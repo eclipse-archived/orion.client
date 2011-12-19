@@ -148,6 +148,10 @@ a:hover {
 	padding-right: 8px;
 }
 
+.selectionTools {
+	vertical-align: middle;
+}
+
 .selectionCheckmark {
 	background-position: 0px 0px; 
 	width: 16px; height: 16px; 
@@ -257,6 +261,10 @@ a:hover {
 .paneHeadingContainer {
 	border-bottom: 1px dotted #bfbfbf;
 	height: 30px;
+}
+
+.paneHeadingCommands {
+	text-align: right;
 }
 
 .userEditBoxPrompt {
