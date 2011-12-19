@@ -120,9 +120,11 @@ window.onload = function() {
 		});
 	
 	// Register syntax highlighting
-	provider.registerServiceProvider("orion.edit.highlighter",
-		{ /* Grammar-based, so no service impl. All data is in properties */ },
-		orion.editor.HtmlGrammar());
+	provider.registerServiceProvider("orion.edit.highlighter", {},
+		{	type: "grammar",
+			contentType: ["text.html"],
+			grammar: new orion.editor.HtmlGrammar()
+		});
 	
 	provider.connect();
 };
