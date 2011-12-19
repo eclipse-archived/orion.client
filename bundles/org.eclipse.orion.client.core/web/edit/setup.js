@@ -65,61 +65,60 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var syntaxHighlighter = {
 		styler: null, 
 		
-		highlight: function(fileName, editor, metadata) {
+		highlight: function(fileName, editor, fileContentType) {
 			if (this.styler) {
 				if (this.styler.destroy) {
 					this.styler.destroy();
 				}
 				this.styler = null;
 			}
-			if (fileName) {
-				var textView = editor.getTextView();
-				var splits = fileName.split(".");
-				var extension = splits.pop().toLowerCase();
-				if (splits.length > 0) {
-					var annotationModel = editor.getAnnotationModel();
-					switch(extension) {
-						case "js":
-						case "json":
-							this.styler = new mTextStyler.TextStyler(textView, "js", annotationModel);
-							break;
-						case "java":
-							this.styler = new mTextStyler.TextStyler(textView, "java", annotationModel);
-							break;
-						case "css":
-							this.styler = new mTextStyler.TextStyler(textView, "css", annotationModel);
-							break;
+			
+			var textView = editor.getTextView();
+			var annotationModel = editor.getAnnotationModel();
+			switch(fileContentType && fileContentType.id) {
+				case "text.javascript":
+				case "text.json":
+					this.styler = new mTextStyler.TextStyler(textView, "js", annotationModel);
+					break;
+				case "text.java":
+					this.styler = new mTextStyler.TextStyler(textView, "java", annotationModel);
+					break;
+				case "text.css":
+					this.styler = new mTextStyler.TextStyler(textView, "css", annotationModel);
+					break;
+			}
+			
+			if (this.styler) {
+				editor.setFoldingEnabled(this.styler.foldingEnabled);
+			}
+			
+			if (!this.styler && syntaxHighlightProviders) {
+				var grammars = [], providerToUse;
+				var extension = fileName.split(".").pop().toLowerCase();
+				for (var i=0; i < syntaxHighlightProviders.length; i++) {
+					var provider = syntaxHighlightProviders[i],
+					    contentTypeIds = provider.getProperty("contentType"),
+					    fileTypes = provider.getProperty("fileTypes"); // backwards compatibility
+					if (provider.getProperty("type") === "grammar") {
+						grammars.push(provider.getProperty("grammar"));
 					}
-					
-					if (this.styler) {
-						editor.setFoldingEnabled(this.styler.foldingEnabled);
+					if ((contentTypeIds && contentTypeService.isSomeExtensionOf(fileContentType, contentTypeIds)) ||
+							(fileTypes && fileTypes.indexOf(extension) !== -1)) {
+						providerToUse = provider;
 					}
-					
-					if (!this.styler && syntaxHighlightProviders) {
-						var grammars = [],
-						    providerToUse;
-						for (var i=0; i < syntaxHighlightProviders.length; i++) {
-							var provider = syntaxHighlightProviders[i],
-							    fileTypes = provider.getProperty("fileTypes");
-							if (provider.getProperty("type") === "grammar") {
-								grammars.push(provider.getProperty("grammar"));
-							}
-							if (fileTypes && fileTypes.indexOf(extension) !== -1) {
-								providerToUse = provider;
-							}
+				}
+				
+				if (providerToUse) {
+					var providerType = providerToUse.getProperty("type");
+					if (providerType === "highlighter") {
+						var service = serviceRegistry.getService(providerToUse);
+						if (service.setContentType) {
+							service.setContentType(fileContentType);
 						}
-						
-						if (providerToUse) {
-							var providerType = providerToUse.getProperty("type");
-							if (providerType === "highlighter") {
-								var service = serviceRegistry.getService(providerToUse);
-								service.setContentType(contentType);
-								this.styler = new mAsyncStyler.AsyncStyler(textView, service, annotationModel);
-							} else if (providerType === "grammar" || typeof providerType === "undefined") {
-								var grammar = providerToUse.getProperty("grammar");
-								this.styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
-							}
-						}
+						this.styler = new mAsyncStyler.AsyncStyler(textView, service, annotationModel);
+					} else if (providerType === "grammar" || typeof providerType === "undefined") {
+						var grammar = providerToUse.getProperty("grammar");
+						this.styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
 					}
 				}
 			}
@@ -187,7 +186,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						this._fileMetadata = metadata;
 						this.setTitle(metadata.Location);
 						this._contentType = contentTypeService.getFileContentType(metadata);
-						syntaxHighlighter.highlight(fileURI, editor, metadata);
+						syntaxHighlighter.highlight(fileURI, editor, this._contentType);
 						editor.highlightAnnotations();
 						setOutlineProviders(this._contentType, location);
 						
