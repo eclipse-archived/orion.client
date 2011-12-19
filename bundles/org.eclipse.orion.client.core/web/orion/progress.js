@@ -153,11 +153,9 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/TasksDialog'],
 								result.errback(error);
 								});
 					}, 2000);
-					if(taskJson.Message){
-						that._serviceRegistry.getService("orion.page.message").setProgressMessage(taskJson.Message);
-					}
 				} else if (taskJson && taskJson.Result) {
-					dojo.hitch(that, that.setProgressResult)(taskJson.Result);
+					that._serviceRegistry.getService("orion.page.message").setProgressMessage("");
+					dojo.hitch(that, that._openTasksPopup)();
 					result.callback(taskJson);
 				}
 				
@@ -179,6 +177,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/TasksDialog'],
 				return deferred.then(function(jsonResult){
 					//see if we are dealing with a progress resource
 					if (jsonResult && jsonResult.Location && jsonResult.Message && jsonResult.Running) {
+						dojo.hitch(that, that._openTasksPopup)();
 						return dojo.hitch(that, that.followTask)(jsonResult);
 					}
 					//clear the progress message
