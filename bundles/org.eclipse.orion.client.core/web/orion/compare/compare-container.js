@@ -12,9 +12,9 @@
 
 define(['require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-inline-model', 'orion/compare/compare-2way-model', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands',
-        'orion/textview/textModel','orion/textview/textView','examples/textview/textStyler' , 'orion/compare/compareUtils', 'orion/editor/asyncStyler', 'orion/editor/textMateStyler','orion/compare/diff-provider', 'jsdiff/diff'], 
+        'orion/textview/textModel','orion/textview/textView','examples/textview/textStyler' , 'orion/compare/compareUtils', 'orion/editor/asyncStyler', 'orion/editor/textMateStyler','orion/compare/diff-provider', 'orion/compare/jsdiffAdapter'], 
 		function(require, dojo, mDiffParser, mRulers, mCompareModel, mTwoWayCompareModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
-				mGapModel , mCommands, mTextModel, mTextView, mTextStyler , mCompareUtils, mAsyncStyler, mTextMateStyler, mDiffProvider) {
+				mGapModel , mCommands, mTextModel, mTextView, mTextStyler , mCompareUtils, mAsyncStyler, mTextMateStyler, mDiffProvider, mJSDiffAdapter) {
 
 var exports = {};
 
@@ -155,14 +155,16 @@ exports.CompareContainer = (function() {
 			if(this._mapper){
 				return {delim:delim , mapper:this._mapper, output: output, diffArray:output};
 			}
-			
-			//var patch = JsDiff.createPatch("foo", input, output, "", "") ;
-			this._diffParser.setLineDelim(delim);
-			var result = this._diffParser.parse(input, diff, detectConflicts ,doNotBuildNewFile);
-			
-			var mapper = result.mapper;
-			var diffArray = this._diffParser.getDiffArray();
-			return {delim:delim , mapper:result.mapper, output: result.outPutFile, diffArray:diffArray};
+			if(output){
+				var adapter = new mJSDiffAdapter.JSDiffAdapter();
+				var maps = adapter.adapt(input, output);
+				return {delim:delim , mapper:maps.mapper, output: output, diffArray:maps.changContents};
+			} else {
+				this._diffParser.setLineDelim(delim);
+				var result = this._diffParser.parse(input, diff, detectConflicts ,doNotBuildNewFile);
+				var diffArray = this._diffParser.getDiffArray();
+				return {delim:delim , mapper:result.mapper, output: result.outPutFile, diffArray:diffArray};
+			}
 		},
 		
 		startup: function(onsave){

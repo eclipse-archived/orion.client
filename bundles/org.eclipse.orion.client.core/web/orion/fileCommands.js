@@ -89,6 +89,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		}); 
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
+			dojo.addClass(selectionTools, "selectionTools");
 			service.renderCommands(selectionTools, "dom", null, explorer, "tool", true); // true would force icons to text
 		}
 		
@@ -117,7 +118,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	 * @function
 	 */
 	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient, toolbarId) {
-		var progress = serviceRegistry.getService("orion.page.message");
+		var progress = serviceRegistry.getService("orion.page.progress");
 		var errorHandler = function(error) {
 			progress.setProgressResult(error);
 		};
@@ -606,11 +607,9 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
 						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
 						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
-						progress.then(function(progressService) {
-							progressService.showWhile(deferred, "Exporting from " + host).then(
-								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}),
-								errorHandler);//refresh the root
-						});
+						progress.showWhile(deferred, "Exporting from " + host).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}),
+							errorHandler);//refresh the root
 					}
 				});
 				dialog.startup();

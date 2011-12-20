@@ -53,12 +53,13 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	constructor: function() {
 		this.inherited(arguments);
 		this.options = arguments[0] || {};
-		this.checkOptions(this.options, ["serviceRegistry", "fileClient", "siteService", "commandService", "statusService"]);
+		this.checkOptions(this.options, ["serviceRegistry", "fileClient", "siteService", "commandService", "statusService", "progressService"]);
 
 		this._fileClient = this.options.fileClient;
 		this._siteService = this.options.siteService;
 		this._commandService = this.options.commandService;
 		this._statusService = this.options.statusService;
+		this._progressService = this.options.progressService;
 		
 		this._commandsContainer = this.options.commandsContainer;
 		
@@ -488,7 +489,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			widget.set("disabled", true);
 		});
 		deferred.then(dojo.hitch(this, this._onSuccess), dojo.hitch(this, this._onError));
-		this._statusService.showWhile(deferred, msg);
+		this.progressService.showWhile(deferred, msg);
 	},
 	
 	_onSuccess: function(deferred) {
