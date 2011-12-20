@@ -84,7 +84,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				
 				if(result.Message || task.Message){
 					dojo.create("br", null, div, "last");
-					dojo.create("span", {style: "margin-left: 18px;", innerHTML: result.Message || task.Message}, div, "last");
+					dojo.create("span", {className: "secondaryColumn", style: "margin-left: 18px;", innerHTML: result.Message || task.Message}, div, "last");
 					
 				}
 				

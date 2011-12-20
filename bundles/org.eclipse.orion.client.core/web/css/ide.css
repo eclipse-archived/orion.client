@@ -374,21 +374,31 @@ a:hover {
 	padding-right: 8px;
 }
 
-.progressPane_tasks {
+.progressPane {
 	padding-left: 8px;
 	padding-right: 8px;
 	vertical-align: bottom;
 	background-position: 0px 0px; 
-	text-align: right; 
+	text-align: right;
+}
+
+.progressPane_tasks {
 	background: url(../images/progress_none.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
+.progressPane_running {
+	background: url(../images/progress_running.gif) no-repeat center;  /* TODO move icon to sprite*/
+}
+
+.progressPane_error {
+	background: url(../images/progress_error.gif) no-repeat center;  /* TODO move icon to sprite*/
+}
+
+.progressPane_warning {
+	background: url(../images/progress_warning.gif) no-repeat center;  /* TODO move icon to sprite*/
+}
+
 .progressPane_empty {
-	padding-left: 8px;
-	padding-right: 8px;
-	vertical-align: bottom;
-	background-position: 0px 0px; 
-	text-align: right; 
 	background: url(../images/progress_gray.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 

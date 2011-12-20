@@ -127,12 +127,45 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/TasksDialog'],
 				this._taskDialog.setTasks(tasks);
 				
 				if(!tasks.Children || tasks.Children.length==0){
-					this._progressPane.className = "progressPane_empty";
+					this._progressPane.className = "progressPane progressPane_empty";
 					this._progressPane.title = "Tasks";
 					return;
 				}
-				this._progressPane.className = "progressPane_tasks";
-				this._progressPane.title = "Tasks";
+				var status = "";
+				for(var i=0; i<tasks.Children.length; i++){
+					var task = tasks.Children[i];
+					if(task.Running==true){
+						status = "running";
+						break;
+					}
+					if(task.Result){
+						switch (this._taskDialog.parseProgressResult(task.Result).Severity) {
+						case "Warning":
+							if(status!=="error")
+								status="warning";
+							break;
+						case "Error":
+							status = "error";
+						} 
+					}
+				}
+				switch(status){
+				case "running":
+					this._progressPane.title = "Tasks running";
+					this._progressPane.className = "progressPane progressPane_running";
+					break;
+				case "warning":
+					this._progressPane.title = "Some tasks finished with warning";
+					this._progressPane.className = "progressPane progressPane_warning";
+					break;
+				case "error":
+					this._progressPane.title = "Some tasks finished with error";
+					this._progressPane.className = "progressPane progressPane_error";
+					break;
+				default:
+					this._progressPane.title = "Tasks";
+					this._progressPane.className = "progressPane progressPane_tasks";					
+				}
 			},
 			/**
 			 * Checks every 2 seconds for the task update.

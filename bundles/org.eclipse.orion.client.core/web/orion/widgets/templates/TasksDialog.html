@@ -1,6 +1,6 @@
 
 <div>
-	<div class="dijitTooltipContainer" role="presentation" style="padding: 0.5em;">
+	<div class="dijitTooltipContainer" role="presentation" style="padding: 0.5em; min-width: 300px;">
 		<div class="dijitTooltipContents dijitTooltipFocusNode" role="dialog"
 			dojoattachpoint="containerNode" style="padding: 0">
 			<table style="width: 100%">
@@ -11,7 +11,7 @@
 			</table>
 			<table dojoAttachPoint="tasksList" style="display: none;">
 			</table>
-			<span dojoAttachPoint="noTasks">No tasks running.</span>
+			<span class="secondaryColumn" dojoAttachPoint="noTasks">No tasks running.</span>
 		</div>
 	</div>
 	<div class="dijitTooltipConnector" role="presentation"></div>
