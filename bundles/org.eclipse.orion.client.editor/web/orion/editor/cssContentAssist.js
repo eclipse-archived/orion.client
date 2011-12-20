@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define */
 
-define("orion/editor/webContentAssist", [], function() {
+define("orion/editor/cssContentAssist", [], function() {
 
 	/**
 	 * @name orion.contentAssist.CssContentAssistProvider
@@ -39,22 +39,7 @@ define("orion/editor/webContentAssist", [], function() {
 		}
 	};
 
-	/**
-	 * @name orion.editor.JavaScriptContentAssistProvider
-	 * @class Provides content assist for JavaScript keywords.
-	 */
-	function JavaScriptContentAssistProvider() {
-	}
-	JavaScriptContentAssistProvider.prototype = /** @lends orion.editor.JavaScriptContentAssistProvider.prototype */ {
-		getKeywords: function(prefix, buffer, selection) {
-			return [ "break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else",
-					"finally", "for", "function", "if", "in", "instanceof", "new", "return", "switch",
-					"this", "throw", "try", "typeof", "var", "void", "while", "with" ];
-		}
-	};
-	
 	return {
-		CssContentAssistProvider: CssContentAssistProvider,
-		JavaScriptContentAssistProvider: JavaScriptContentAssistProvider
+		CssContentAssistProvider: CssContentAssistProvider
 	};
 });
