@@ -49,7 +49,12 @@ define("orion/editor/jsContentAssist", [], function() {
 		var proposals = [];
 		
 		//functions common to all objects - ECMA 262, section 15.2.4.
-		proposals = proposals.concat(proposals, ["toString", "toLocaleString", "valueOf", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable"]);
+		var members = ["toString", "toLocaleString", "valueOf", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable"];
+		for (var i = 0; i < members.length; i++) {
+			if (members[i].indexOf(prefix) === 0) {
+				proposals.push(members[i]);
+			}
+		}
 
 		return proposals;
 	}
