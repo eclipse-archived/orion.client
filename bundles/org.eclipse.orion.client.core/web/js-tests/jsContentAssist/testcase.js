@@ -97,6 +97,17 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 	};
 
 	/**
+	 * Test that keyword suggestions are not made when looking for a member function or property.
+	 */
+	tests.testKeywordCompletionInVariableMember = function() {
+		var result = getKeywords("var x; x.to@@@");
+		assertNoProposal("case", result);
+		assertNoProposal("switch", result);
+		assertNoProposal("var", result);
+		assertNoProposal("function", result);
+	};
+
+	/**
 	 * Test accessing members on a variable that we can't infer the type of.
 	 */
 	tests.testUnknownArgumentFunctions = function() {
