@@ -215,6 +215,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						this._contentType = contentTypeService.getFileContentType(metadata);
 						syntaxHighlighter.highlight(fileURI, editor, metadata);
 						editor.highlightAnnotations();
+						setOutlineProviders(this._contentType, location);
 						
 						// Contents
 						clearTimeout(progressTimeout);
@@ -498,18 +499,30 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		outlineService: serviceRegistry.getService("orion.edit.outline"),
 		commandService: commandService,
 		selectionService: selection});
-	editor.addEventListener("InputChanged", function(evt) {
+	function setOutlineProviders(fileContentType, title) {
 		var outlineProviders = serviceRegistry.getServiceReferences("orion.edit.outliner"),
 		    filteredProviders = [];
 		for (var i=0; i < outlineProviders.length; i++) {
 			var serviceReference = outlineProviders[i],
-			    pattern = serviceReference.getProperty("pattern");
-			if (pattern && new RegExp(pattern).test(evt.title)) {
+			    contentTypeIds = serviceReference.getProperty("contentType"),
+			    pattern = serviceReference.getProperty("pattern"); // for backwards compatibility
+			var isSupported = false;
+			if (contentTypeIds) {
+				isSupported = contentTypeIds.some(function(contentTypeId) {
+						return contentTypeService.isExtensionOf(fileContentType, contentTypeId);
+					});
+			} else if (pattern && new RegExp(pattern).test(title)) {
+				isSupported = true;
+			}
+			if (isSupported) {
 				filteredProviders.push(serviceReference);
 			}
 		}
-		outlineService.setOutlineProviders(filteredProviders, editor.getText(), editor.getTitle());
+		outlineService.setOutlineProviders(filteredProviders);
 		outliner.setOutlineProviders(filteredProviders);
+	}
+	editor.addEventListener("InputChanged", function(evt) {
+		outlineService.emitOutline(editor.getText(), editor.getTitle());
 	});
 	dojo.connect(outliner, "setSelectedProvider", function(/**ServiceReference*/ outlineProvider) {
 		outlineService.setProvider(outlineProvider);
