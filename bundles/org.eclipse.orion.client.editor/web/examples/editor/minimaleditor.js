@@ -9,38 +9,43 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global orion:true window*/
+/*global orion:true window define*/
 /*jslint browser:true devel:true*/
 
-window.onload = function(){
+
+define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures"],
+
+function(require, mTextView, mKeyBinding, mEditor, mEditorFeatures){
 	
 	var editorDomNode = document.getElementById("editor");
 	
 	var textViewFactory = function() {
-		return new orion.textview.TextView({
+		return new mTextView.TextView({
 			parent: editorDomNode,
-			stylesheet: [ "../../orion/textview/textview.css",
-							"../../orion/textview/rulers.css",
-							"../../orion/textview/annotations.css",
-							"../textview/textstyler.css"],
+			stylesheet: [
+				require.toUrl("orion/textview/textview.css"),
+				require.toUrl("orion/textview/rulers.css"),
+				require.toUrl("orion/textview/annotations.css"),
+				require.toUrl("examples/textview/textstyler.css")
+			],
 			tabSize: 4
 		});
 	};
 	
-	var annotationFactory = new orion.editor.AnnotationFactory();
+	var annotationFactory = new mEditorFeatures.AnnotationFactory();
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 		
 		// Create keybindings for generic editing
-		var genericBindings = new orion.editor.TextActions(editor, undoStack);
+		var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
 		keyModeStack.push(genericBindings);
 		
 		// create keybindings for source editing
-		var codeBindings = new orion.editor.SourceCodeActions(editor, undoStack, contentAssist);
+		var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
 		keyModeStack.push(codeBindings);
 		
 		// save binding
-		editor.getTextView().setKeyBinding(new orion.textview.KeyBinding("s", true), "save");
+		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "save");
 		editor.getTextView().setAction("save", function(){
 				editor.setInput(null, null, null, true);
 				var text = editor.getTextView().getText();
@@ -73,11 +78,11 @@ window.onload = function(){
 		document.getElementById("status").innerHTML = dirtyIndicator + status;
 	};
 		
-	var editor = new orion.editor.Editor({
+	var editor = new mEditor.Editor({
 		textViewFactory: textViewFactory,
-		undoStackFactory: new orion.editor.UndoFactory(),
+		undoStackFactory: new mEditorFeatures.UndoFactory(),
 		annotationFactory: annotationFactory,
-		lineNumberRulerFactory: new orion.editor.LineNumberRulerFactory(),
+		lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
 		contentAssistFactory: null,
 		keyBindingFactory: keyBindingFactory, 
 		statusReporter: statusReporter,
@@ -101,4 +106,4 @@ window.onload = function(){
 			 return "There are unsaved changes.";
 		}
 	};
-};
+});
