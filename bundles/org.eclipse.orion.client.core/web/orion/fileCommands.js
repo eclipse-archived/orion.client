@@ -704,6 +704,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	    return temp;
 	};
 	
+	var contentTypesMapCache;
 	fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, fileGroup, selectionGroup) {
 		// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
 		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
@@ -738,62 +739,68 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			fileCommands.push({properties: info, service: impl});
 		}
 		
-		var contentTypes = new mContentTypes.ContentTypes(serviceRegistry);
-		fileCommands = fileCommands.concat(this._createOpenWithCommands(serviceRegistry, contentTypes));
-	
-		for (i=0; i < fileCommands.length; i++) {
-			var commandInfo = fileCommands[i].properties;
-			var service = fileCommands[i].service;
-			
-			var commandOptions = fileCommandUtils._createFileCommandOptions(commandInfo, service);
-			var command = new mCommands.Command(commandOptions);
-			if (commandInfo.isEditor) {
-				command.isEditor = commandInfo.isEditor;
-			}
-			
-			var extensionGroupCreated = false;
-			var selectionGroupCreated = false;
-			var openWithGroupCreated = false;
-			if (commandInfo.forceSingleItem || commandInfo.href) {
-				// single items go in the local actions column, grouped in their own unnamed group to get a separator
-				commandService.addCommand(command, "object");
-				if (!extensionGroupCreated) {
-					extensionGroupCreated = true;
-					commandService.addCommandGroup("eclipse.fileCommandExtensions", 1000, null, fileGroup);
-				}
-				if (!openWithGroupCreated) {
-					openWithGroupCreated = true;
-					commandService.addCommandGroup("eclipse.openWith", 1000, "Open With", fileGroup + "/eclipse.fileCommandExtensions");
+		if (!contentTypesMapCache) {
+			serviceRegistry.getService("orion.file.contenttypes").getContentTypesMap().then(function(map) {
+				contentTypesMapCache = map;
+			});
+		}
+		dojo.when(contentTypesMapCache, dojo.hitch(this, function() {
+			fileCommands = fileCommands.concat(this._createOpenWithCommands(serviceRegistry, contentTypesMapCache));
+		
+			for (i=0; i < fileCommands.length; i++) {
+				var commandInfo = fileCommands[i].properties;
+				var service = fileCommands[i].service;
+				
+				var commandOptions = fileCommandUtils._createFileCommandOptions(commandInfo, service);
+				var command = new mCommands.Command(commandOptions);
+				if (commandInfo.isEditor) {
+					command.isEditor = commandInfo.isEditor;
 				}
 				
-				if (commandInfo.isEditor) {
-					commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions/eclipse.openWith");
-				} else {
-					commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions");
+				var extensionGroupCreated = false;
+				var selectionGroupCreated = false;
+				var openWithGroupCreated = false;
+				if (commandInfo.forceSingleItem || commandInfo.href) {
+					// single items go in the local actions column, grouped in their own unnamed group to get a separator
+					commandService.addCommand(command, "object");
+					if (!extensionGroupCreated) {
+						extensionGroupCreated = true;
+						commandService.addCommandGroup("eclipse.fileCommandExtensions", 1000, null, fileGroup);
+					}
+					if (!openWithGroupCreated) {
+						openWithGroupCreated = true;
+						commandService.addCommandGroup("eclipse.openWith", 1000, "Open With", fileGroup + "/eclipse.fileCommandExtensions");
+					}
+					
+					if (commandInfo.isEditor) {
+						commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions/eclipse.openWith");
+					} else {
+						commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions");
+					}
+				} else {  
+					// items based on selection are added to the selections toolbar, grouped in their own unnamed group to get a separator
+					// TODO would we also want to add these to the menu above so that they are available for single selections?  
+					// For now we do not do this to reduce clutter, but we may revisit this.
+					commandService.addCommand(command, "dom");
+					if (!selectionGroupCreated) {
+						selectionGroupCreated = true;
+						commandService.addCommandGroup("eclipse.bulkFileCommandExtensions", 1000, null, selectionGroup);
+					}
+					commandService.registerCommandContribution(command.id, i, selectionToolbarId, selectionGroup + "/eclipse.bulkFileCommandExtensions");
 				}
-			} else {  
-				// items based on selection are added to the selections toolbar, grouped in their own unnamed group to get a separator
-				// TODO would we also want to add these to the menu above so that they are available for single selections?  
-				// For now we do not do this to reduce clutter, but we may revisit this.
-				commandService.addCommand(command, "dom");
-				if (!selectionGroupCreated) {
-					selectionGroupCreated = true;
-					commandService.addCommandGroup("eclipse.bulkFileCommandExtensions", 1000, null, selectionGroup);
-				}
-				commandService.registerCommandContribution(command.id, i, selectionToolbarId, selectionGroup + "/eclipse.bulkFileCommandExtensions");
+				fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
+				explorer.updateCommands();
 			}
-			fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
-			explorer.updateCommands();
-		}
+		}));
 	};
 	
 	/**
 	 * Converts "orion.navigate.openWith" service contributions into orion.navigate.command that open the appropriate editors.
 	 * @returns {Object[]} The "open with" fileCommands
 	 */
-	fileCommandUtils._createOpenWithCommands = function(serviceRegistry, /**orion.file.ContentTypes*/ contentTypes) {
+	fileCommandUtils._createOpenWithCommands = function(serviceRegistry, contentTypesMap) {
 		function getEditors() {
-			var serviceReferences = contentTypes.serviceRegistry.getServiceReferences("orion.edit.editor");
+			var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.editor");
 			var editors = [];
 			for (var i=0; i < serviceReferences.length; i++) {
 				var serviceRef = serviceReferences[i], id = serviceRef.getProperty("id");
@@ -867,7 +874,6 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		}
 		
 		var editors = getEditors(), defaultEditor = getDefaultEditor(serviceRegistry);
-		var contentTypesMap = contentTypes.getContentTypesMap();
 		var fileCommands = [];
 		for (var i=0; i < editors.length; i++) {
 			var editor = editors[i];
