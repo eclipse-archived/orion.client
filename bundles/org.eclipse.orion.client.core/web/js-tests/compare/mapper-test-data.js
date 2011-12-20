@@ -398,7 +398,7 @@ exports.mapperTestCases = [
 	  "\r\n" + 
 	  "", 
 	  //mapper
-	  [[2,2,0],[1,1,4]],
+	  [[2,2,0],[1,0,4],[1,1,0]],
 	  //description  
 	  "input file with new line at end --> add 1 empty line at end"]
 	,
@@ -466,7 +466,7 @@ exports.mapperTestCases = [
 	  "line 3\r\n" + 
 	  "", 
 	  //mapper
-	  [[2,2,0],[1,1,4]],
+	  [[2,2,0],[1,0,4],[1,1,0]],
 	  //description  
 	  "input file with new line at end --> add 1 line at end"]
 	,
@@ -490,7 +490,7 @@ exports.mapperTestCases = [
 	  "line 4\r\n" + 
 	  "", 
 	  //mapper
-	  [[2,2,0],[2,1,4]],
+	  [[2,2,0],[2,0,4],[1,1,0]],
 	  //description  
 	  "input file with new line at end --> add 2 lines at end"]
 	,
@@ -1006,7 +1006,7 @@ exports.mapperTestCases = [
 	  "line 444\r\n" + 
 	  "", 
 	  //mapper
-	  [[3,3,0],[1,2,6]],
+	  [[3,3,0],[1,1,6],[1,1,0]],
 	  //description  
 	  "input file has new line at end --> change the last line"]
 	,
@@ -1035,7 +1035,7 @@ exports.mapperTestCases = [
 	  "line 5\r\n" + 
 	  "", 
 	  //mapper
-	  [[3,3,0],[2,2,6]],
+	  [[3,3,0],[2,1,6],[1,1,0]],
 	  //description  
 	  "input file has new line at end --> change the last line to 2 lines"]
 	,
@@ -1151,7 +1151,7 @@ exports.mapperTestCases = [
 	  "line 44\r\n" + 
 	  "", 
 	  //mapper
-	  [[4,5,6]],
+	  [[4,4,6],[1,1,0]],
 	  //description  
 	  "input file has new line at end --> change all lines"]
 	,
