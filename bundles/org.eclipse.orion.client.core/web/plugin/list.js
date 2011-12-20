@@ -12,10 +12,10 @@
 /*jslint browser:true devel:true*/
 /*global define dijit dojo orion widgets serviceRegistry:true window*/
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/taskClient',
+define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 	        'orion/searchClient', 'orion/globalCommands', 'orion/dialogs',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/RegistryTree'], 
-			function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mTaskClient, mSearchClient, mGlobalCommands, mDialogs) {
+			function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mDialogs) {
 
 dojo.addOnLoad(function() {
 	mBootstrap.startup().then(function(core) {
@@ -28,9 +28,9 @@ dojo.addOnLoad(function() {
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-		var taskClient = new mTaskClient.TaskClient(serviceRegistry);
-		var statusService = new mStatus.StatusReportingService(serviceRegistry, taskClient, "statusPane", "notifications");
-		new mProgress.ProgressService(serviceRegistry, taskClient);
+		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+		var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
+		new mProgress.ProgressService(serviceRegistry, operationsClient);
 		var tree;
 		
 		var initTree = function() {
