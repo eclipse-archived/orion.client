@@ -192,7 +192,7 @@ window.onload = function() {
 	
 	var provider = new eclipse.PluginProvider();
 	provider.registerServiceProvider("orion.edit.validator", validationService, {
-		pattern: "\\.(js|htm|html)$"
+		contentType: ["text.javascript", "text.html"]
 	});
 	provider.registerServiceProvider("orion.edit.outliner", outlineService, {
 		contentType: ["text.javascript", "text.html"],	// TODO separate out HTML outline

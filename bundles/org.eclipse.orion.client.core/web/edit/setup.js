@@ -492,6 +492,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
+	editor.addEventListener("InputChanged", function(evt) {
+		syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
+	});
 	
 	// Create outliner "gadget"
 	var outliner = new mOutliner.Outliner({parent: outlineDomNode,
