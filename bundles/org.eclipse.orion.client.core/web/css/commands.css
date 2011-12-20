@@ -42,12 +42,11 @@
 	text-decoration: underline;
 }
 
+/* placeholders for possible hover states on command items */
 .commandActiveItem {
-	opacity: 1.0;
 }
 
 .commandInactiveItem {
-	opacity: 0.3;
 }
 
 /* sprites for the core plugin, need to figure out where these really live */
@@ -137,7 +136,15 @@
 .nihilo .textless .dijitArrowButtonInner {
 	background-position: 0px 0px; 
 	width: 16px; height: 16px; 
-	background: url(../images/gear.gif) no-repeat top left; 
+	background: url(../images/menu.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle; 
+}
+
+.nihilo .textlessOver .dijitArrowButtonInner {
+	background-position: 0px 0px; 
+	width: 16px; height: 16px; 
+	background: url(../images/menuactive.gif) no-repeat top left; 
 	display: inline-block; 
 	vertical-align: middle; 
 }
