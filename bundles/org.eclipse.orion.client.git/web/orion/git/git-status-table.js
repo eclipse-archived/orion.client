@@ -28,7 +28,6 @@ orion.GitStatusModel = (function() {
 		},
 		
 		interestedCategory: function(){
-			
 		},
 		
 		init: function(jsonData){
@@ -1099,6 +1098,26 @@ orion.GitStatusController = (function() {
 					return return_value;
 				}
 			});		
+			var savePatchCommand = new mCommands.Command({
+				name: "Save Patch",
+				tooltip: "Save workspace changes as a patch",
+				imageClass: "git-sprite-diff",
+				spriteClass: "gitCommandSprite",
+				id: "orion.gitSavePatch",
+				hrefCallback : function() {
+					var url = self._curClone.DiffLocation + "?parts=diff";
+					var selectedItems = self._unstagedContentRenderer.getSelected();
+					for (var i = 0; i < selectedItems.length; i++) {
+						url += "&Path=";
+						url += selectedItems[i].modelItem.path;
+					}
+					return url;
+				},
+				visibleWhen: function(item) {
+					var return_value = (item.type === "unstagedItems" && self.hasUnstaged && self._unstagedContentRenderer.getSelected().length > 0);
+					return return_value;
+				}
+			});
 
 			var unstageCommand = new mCommands.Command({
 				name: "Unstage",
@@ -1197,31 +1216,33 @@ orion.GitStatusController = (function() {
 
 			var commandService = this._registry.getService("orion.page.command");
 			// register commands with object scope
-			commandService.addCommand(sbsCompareCommand, "object");	
+			commandService.addCommand(sbsCompareCommand, "object");
 			commandService.addCommand(stageCommand, "object");	
-			commandService.addCommand(checkoutCommand, "object");	
-			commandService.addCommand(stageAllCommand, "object");	
-			commandService.addCommand(unstageAllCommand, "object");	
-			commandService.addCommand(unstageCommand, "object");	
+			commandService.addCommand(checkoutCommand, "object");
+			commandService.addCommand(stageAllCommand, "object");
+			commandService.addCommand(savePatchCommand, "object");
+			commandService.addCommand(unstageAllCommand, "object");
+			commandService.addCommand(unstageCommand, "object");
 			commandService.addCommand(resetChangesCommand, "dom");
 			commandService.addCommand(rebaseContinueCommand, "dom");
 			commandService.addCommand(rebaseSkipCommand, "dom");
 			commandService.addCommand(rebaseAbortCommand, "dom");
-			commandService.addCommand(resetChangesCommand, "dom");	
+			commandService.addCommand(resetChangesCommand, "dom");
 			commandService.addCommand(showCommitterAndAuthorPanel, "dom");
 			commandService.addCommand(hideCommitterAndAuthorPanel, "dom");
-			commandService.registerCommandContribution("orion.gitStage", 1);	
+			commandService.registerCommandContribution("orion.gitStage", 1);
 			commandService.registerCommandContribution("orion.gitCheckout", 2);	
 			commandService.registerCommandContribution("orion.gitUnstage", 3);	
 			commandService.registerCommandContribution("orion.sbsCompare", 4);	
 			commandService.registerCommandContribution("orion.gitStageAll", 5);	
-			commandService.registerCommandContribution("orion.gitUnstageAll", 6);	
+			commandService.registerCommandContribution("orion.gitUnstageAll", 6);
 			commandService.registerCommandContribution("orion.gitResetChanges", 7 , "pageActions");
 			commandService.registerCommandContribution("orion.gitRebaseContinue", 8, "rebaseActions");
 			commandService.registerCommandContribution("orion.gitRebaseSkip", 9, "rebaseActions");	
-			commandService.registerCommandContribution("orion.gitRebaseAbort", 10, "rebaseActions");	
+			commandService.registerCommandContribution("orion.gitRebaseAbort", 10, "rebaseActions");
 			commandService.registerCommandContribution("orion.showCommitterAndAuthor", 11 , "personIdentShow");
 			commandService.registerCommandContribution("orion.hideCommitterAndAuthor", 12 , "personIdentHide");
+			commandService.registerCommandContribution("orion.gitSavePatch", 13);
 		},
 
 		_generateInlineCompareCmds: function(){	
@@ -1488,7 +1509,7 @@ orion.GitStatusController = (function() {
 				//this.stageOneSelection(selectedItems, 0);
 				this.stageMultipleFiles(selectedItems);
 		},
-		
+
 		stageOneSelection: function (selection, index){
 			var that = this;
 			var itemModel = selection[index].modelItem;
@@ -1506,7 +1527,7 @@ orion.GitStatusController = (function() {
 				that.handleServerErrors(response, ioArgs);
 			});
 		},
-		
+
 		stageMultipleFiles: function (selection){
 			var that = this;
 			var paths = [];
@@ -1524,7 +1545,7 @@ orion.GitStatusController = (function() {
 				that.handleServerErrors(response, ioArgs);
 			});
 		},
-		
+
 		checkout: function(itemModel){
 			var self = this;
 			var location = this._model.items.CloneLocation;
