@@ -104,14 +104,20 @@ window.onload = function() {
 	
 	// Register content assist providers
 	provider.registerServiceProvider("orion.edit.contentAssist",
-		new orion.editor.CssContentAssistProvider(), 
-		{name: "CSS content assist", pattern: "\\.css$"});
+		new orion.editor.CssContentAssistProvider(),
+		{	name: "CSS content assist",
+			contentType: ["text.css"]
+		});
 	provider.registerServiceProvider("orion.edit.contentAssist",
 		new orion.editor.JavaScriptContentAssistProvider(),
-		{name: "JavaScript content assist", pattern: "\\.js$"});
+		{	name: "JavaScript content assist",
+			contentType: ["text.javascript"]
+		});
 	provider.registerServiceProvider("orion.edit.contentAssist",
 		new HTMLContentAssistProvider(),
-		{name: "HTML content assist", pattern: "\\.html?$"});
+		{	name: "HTML content assist",
+			contentType: ["text.html"]
+		});
 	
 	// Register syntax highlighting
 	provider.registerServiceProvider("orion.edit.highlighter",
