@@ -278,9 +278,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		'</tr>' +
 	// Row 3:  Status on left, global commands, search, user, etc. on right
 		'<tr class="topRowBanner" id="bannerRow3">' +
-			'<td colspan=2 style="height: 16px; text-align: left">' +
-				'<span id="statusPane" style="color: #5a5a5a;"></span>' +
-				'<span id="notifications"></span>' +
+			'<td colspan=2 style="height: 16px; text-align: left; vertical-align: bottom;">' +
+			'<span style="display: table; width: 100%">'+
+				'<span style="display: table-row">'+
+					'<span id="statusPane" style="color: #5a5a5a; display: table-cell"></span>' +
+					'<span id="notifications"  style="display: table-cell"></span>' +
+					'<span style="display: table-cell; width: 16px; height: 16px; padding-left: 8px; padding-right: 8px; text-align: right;"><a id="progressPane"></a></span>' +
+				'</span>' +
+			'</span>' +
 			'</td>' +
 		'</tr>' +
 		
@@ -315,7 +320,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		'This is a Beta build of Orion.  You can use it, play with it and explore the ' +
 		'capabilities but BEWARE your data may be lost. &nbsp;| '+ 
 		'<a href="http://wiki.eclipse.org/Orion/FAQ">FAQ</a> | ' + 
-		'<a href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&version=0.4">Report a Bug</a> | ' +
+		'<a href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&version=0.4" target="_blank">Report a Bug</a> | ' +
 		'<a href="http://www.eclipse.org/legal/privacy.php">Privacy Policy</a> | ' + 
 		'<a href="http://www.eclipse.org/legal/termsofuse.php">Terms of Use</a> | '+ 
 		'<a href="http://www.eclipse.org/legal/copyright.php">Copyright Agent</a>'; 
@@ -345,7 +350,13 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	
 	function getAuthenticationIds(){
 		return authenticationIds;
-	}	
+	}
+	
+	function startProgressService(serviceRegistry){
+		var progressService = serviceRegistry.getService("orion.page.progress");
+		if(progressService)
+			dojo.hitch(progressService, progressService.init)("progressPane");
+	}
 
 	/**
 	 * Adds the user-related commands to the toolbar
@@ -402,6 +413,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				});							
 			});
 		}
+		
 	}
 	
 	function setPendingAuthentication(services){
@@ -666,6 +678,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		}
 		
 		generateUserInfo(serviceRegistry);
+		startProgressService(serviceRegistry);
+
 		
 		// generate the footer. 
 		// TODO The footer div id should not be assumed here

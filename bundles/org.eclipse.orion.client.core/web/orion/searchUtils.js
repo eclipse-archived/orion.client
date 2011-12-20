@@ -113,6 +113,7 @@ orion.searchUtils.generateSearchQuery = function(options) {
 		}
 		if(options.searchStr){
 			searchStr = options.searchStr;
+			searchStr = searchStr.split(" ").join("");
 		}
 		if(options.location){
 			loc = options.location;
@@ -134,12 +135,12 @@ orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj
 	if(hasLocation){
 		var splitStr = locAndSearchStr.split("+Location:");
 		if(splitStr.length === 2){
-			var loc = splitStr[1]
+			var loc = splitStr[1];
 			if(loc.length > 0 && loc[loc.length - 1] === '*'){
 				loc = loc.substring(0, loc.length-1);
 			}
 			queryObj.location = loc;
-			queryObj.searchStr = splitStr[0];
+			queryObj.searchStr = splitStr[0].split(" ").join("");
 		}
 	}
 	queryObj.searchStrTitle = queryObj.searchStr.split("\\").join("");

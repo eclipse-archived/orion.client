@@ -348,12 +348,8 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			var thead = dojo.create("thead", null, faveTable);
 			var row = dojo.create("tr", null, thead);
 			var headCol = dojo.create("td", null, row);
-			dojo.addClass(headCol, "paneHeadingContainer");
-			dojo.place("<span class='paneHeading'>Favorites</span>", headCol, "only");
 			var commandCol = dojo.create("td", null, row);
-			dojo.style(commandCol, "textAlign", "right");
-			dojo.addClass(commandCol, "paneHeadingContainer");
-			dojo.place("<span id='faveCommands' class='paneHeadingToolbar'></span>", commandCol, "only");
+			mUtil.createPaneHeading(headCol, commandCol, "Favorites", null, "faveCommands", this._registry.getService("orion.page.command"), this);
 			
 			// favorites
 			var tr, col1, col2, href, link, actionsWrapper;
@@ -397,9 +393,6 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				});
 			}
 			dojo.place(faveTable, this._parent, "only");
-			// Now that the table is added to the dom, generate commands
-			var commands = dojo.byId("faveCommands");
-			this._registry.getService("orion.page.command").renderCommands(commands, "dom", this, this, "tool");
 			
 			// spacer, which also is a placeholder for newly added favorites
 			var spacer = dojo.create("tr", null, faveTable);
@@ -411,11 +404,8 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				thead = dojo.create("thead", null, faveTable);
 				row = dojo.create("tr", null, thead);
 				headCol = dojo.create("td", null, row);
-				dojo.addClass(headCol, "paneHeadingContainer");
-				dojo.place("<span class='paneHeading'>Searches</span>", headCol, "only");
 				commandCol = dojo.create("td", null, row);
-				dojo.style(commandCol, "textAlign", "right");
-				dojo.addClass(commandCol, "paneHeadingContainer");
+				mUtil.createPaneHeading(headCol, commandCol, "Searches");
 
 				tbody = dojo.create("tbody", null, faveTable);
 				for (var i=0; i < searches.length; i++) {
