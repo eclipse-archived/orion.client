@@ -65,7 +65,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 				commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
 				commandService.registerCommandContribution("eclipse.git.deleteClone", 1, "selectionTools", "eclipse.selectionGroup");
 				
-				commandService.addCommandGroup("eclipse.gitGroup2", 1000, "More");
+				commandService.addCommandGroup("eclipse.gitGroup2", 1000, "*");
 				commandService.addCommandGroup("eclipse.gitGroup2.u1", 2000, null, "eclipse.gitGroup2");
 				commandService.addCommandGroup("eclipse.gitGroup2.delete", 3000, null, "eclipse.gitGroup2");
 				
