@@ -1155,8 +1155,6 @@ var exports = {};
 		var resetIndexCommand = new mCommands.Command({
 			name : "Reset",
 			tooltip: "Reset your active branch to the state of the selected branch. Discard all staged and unstaged changes.",
-			imageClass: "git-sprite-refresh",
-			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.resetIndex",
 			callback: function(data) {
 				var item = data.items;
