@@ -33,6 +33,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var statusReportingService;
 	var problemService;
 	var outlineService;
+	var contentTypeService;
 	
 	document.body.style.visibility = "visible";
 	dojo.parser.parse();
@@ -50,6 +51,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		problemService = new mProblems.ProblemService(serviceRegistry);
 		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 	}());
 	
 	var splitArea = dijit.byId("orion.innerCoding"),
@@ -85,7 +87,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	}
 	
 	// Temporary.  This will evolve into something pluggable.
-	var contentTypes = new mContentTypes.ContentTypes(serviceRegistry);
 	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("orion.edit.highlighter");
 	var syntaxHighlighter = {
 		styler: null, 
@@ -138,7 +139,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							var providerType = providerToUse.getProperty("type");
 							if (providerType === "highlighter") {
 								var service = serviceRegistry.getService(providerToUse);
-								var contentType = contentTypes.getContentType(metadata);
 								service.setContentType(contentType);
 								this.styler = new mAsyncStyler.AsyncStyler(textView, service, annotationModel);
 							} else if (providerType === "grammar" || typeof providerType === "undefined") {
@@ -212,6 +212,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						// Metadata
 						this._fileMetadata = metadata;
 						this.setTitle(metadata.Location);
+						this._contentType = contentTypeService.getFileContentType(metadata);
 						syntaxHighlighter.highlight(fileURI, editor, metadata);
 						editor.highlightAnnotations();
 						
@@ -287,7 +288,11 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		getFileMetadata: function() {
 			return this._fileMetadata;
 		},
-		
+
+		getContentType: function() {
+			return this._contentType;
+		},
+
 		setDirty: function(dirty) {
 			if (dirty) {
 				if (this._lastTitle && this._lastTitle.charAt(0) !== '*') {
