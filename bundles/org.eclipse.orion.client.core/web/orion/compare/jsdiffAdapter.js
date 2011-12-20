@@ -26,6 +26,11 @@ orion.JSDiffAdapter = (function() {
 	}
 	JSDiffAdapter.prototype = {
 		adapt: function(oldStr, newStr){
+			var splitOld = oldStr.split("\n");
+			var splitNew = newStr.split("\n");
+			var newLineAtEndOld = (splitOld[splitOld.length-1] === "");
+			var newLineAtEndNew = (splitNew[splitNew.length-1] === "");
+			
 			var diff = JsDiff.diffLines(oldStr, newStr);
 			var map = [];
 			var changContents = [];
@@ -33,6 +38,7 @@ orion.JSDiffAdapter = (function() {
 			linesAdded = 0;
 			linesRemoved = 0;
 			changeIndex = -1;
+			var oFileLineCounter = 0;
 		    for (var i = 0; i < diff.length; i++) {
 		    	var current = diff[i],
 		        lines = current.lines || current.value.replace(/\n$/, "").split("\n");
@@ -43,8 +49,10 @@ orion.JSDiffAdapter = (function() {
 						linesAdded = 0;
 						linesRemoved = 0;
 						changeIndex = -1;
+						oFileLineCounter += linesRemoved;
 		        	}
 		        	map.push([current.lines.length, current.lines.length, 0]);
+					oFileLineCounter += current.lines.length;
 		        } else if (current.added){
 		        	if(changeIndex === -1){
 		        		changeIndex = changContents.length +1;
@@ -59,8 +67,27 @@ orion.JSDiffAdapter = (function() {
 		    }
         	if(linesAdded || linesRemoved){
 	        	map.push([linesAdded, linesRemoved, changeIndex]);
+				oFileLineCounter += linesRemoved;
         	}
-        	return {mapper:map, changContents: {array:changContents , index:0}};
+        	
+        	if(oFileLineCounter < splitOld.length){
+				var lastMapItem = map[map.length-1];
+				if(lastMapItem[2] === 0){
+					lastMapItem[0] += 1;
+					lastMapItem[1] += 1;
+				} else if (lastMapItem[2] === -1){
+					map.push([1 , 1 , 0]);
+				} else if(newLineAtEndOld === newLineAtEndNew){
+					map.push([1 , 1 , 0]);
+				} else {
+					if(newLineAtEndNew)
+						lastMapItem[0] += 1;
+					if(newLineAtEndOld)
+						lastMapItem[1] += 1;
+				}
+        	}
+       	
+         	return {mapper:map, changContents: {array:changContents , index:0}};
 		}
 	};
 	return JSDiffAdapter;
