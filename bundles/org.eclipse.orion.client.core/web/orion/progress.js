@@ -188,7 +188,9 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/TasksDialog'],
 					}, 2000);
 				} else if (taskJson && taskJson.Result) {
 					that._serviceRegistry.getService("orion.page.message").setProgressMessage("");
-					dojo.hitch(that, that._openTasksPopup)();
+					var severity = this._taskDialog.parseProgressResult(taskJson.Result).Severity;
+					if(severity=="Error" || severity=="Warning")
+						dojo.hitch(that, that._openTasksPopup)();
 					result.callback(taskJson);
 				}
 				
@@ -210,7 +212,6 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/TasksDialog'],
 				return deferred.then(function(jsonResult){
 					//see if we are dealing with a progress resource
 					if (jsonResult && jsonResult.Location && jsonResult.Message && jsonResult.Running) {
-						dojo.hitch(that, that._openTasksPopup)();
 						return dojo.hitch(that, that.followTask)(jsonResult);
 					}
 					//clear the progress message
