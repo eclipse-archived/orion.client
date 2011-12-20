@@ -288,10 +288,13 @@ orion.DiffParser = (function() {
 					lastMapItem[1] += delta;
 				} else if (lastMapItem[2] === -1){
 					this._deltaMap.push([delta , delta , 0]);
-				} else if(!this._nNewLineAtEnd && !this._oNewLineAtEnd){
+				} else if(this._nNewLineAtEnd === this._oNewLineAtEnd){
 					this._deltaMap.push([delta , delta , 0]);
 				} else {
-					lastMapItem[1] += delta;
+					if(this._nNewLineAtEnd)
+						lastMapItem[0] += delta;
+					if(this._oNewLineAtEnd)
+						lastMapItem[1] += delta;
 				}
 			}
 		},

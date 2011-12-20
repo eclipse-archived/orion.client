@@ -63,6 +63,7 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 				"\t</body>\n" +
 				"</html>";
 			proposals.push({proposal: text, description: "Simple HTML document", escapePosition: selection.offset+152});
+			return proposals;
 		}
 
 		//only offer HTML element proposals if the character preceeding the prefix is the start of an HTML element
