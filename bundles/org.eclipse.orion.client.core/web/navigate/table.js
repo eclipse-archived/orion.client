@@ -13,20 +13,20 @@
 /*browser:true*/
 
 define(['dojo', 'dijit', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
-        'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/taskClient', 'orion/globalCommands',
+        'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
         'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/contentTypes',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, dijit, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, 
-				mSearchClient, mFileClient, mTaskClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, mContentTypes) {
+				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, mContentTypes) {
 
 dojo.addOnLoad(function(){
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
 		var selection = new mSelection.Selection(serviceRegistry);
-		var taskClient = new mTaskClient.TaskClient(serviceRegistry);
-		new mStatus.StatusReportingService(serviceRegistry, taskClient, "statusPane", "notifications");
-		new mProgress.ProgressService(serviceRegistry, taskClient);
+		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
+		new mProgress.ProgressService(serviceRegistry, operationsClient);
 		new mDialogs.DialogService(serviceRegistry);
 		new mSsh.SshService(serviceRegistry);
 		

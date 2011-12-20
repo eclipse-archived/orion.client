@@ -382,7 +382,7 @@ a:hover {
 	text-align: right;
 }
 
-.progressPane_tasks {
+.progressPane_operations {
 	background: url(../images/progress_none.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 

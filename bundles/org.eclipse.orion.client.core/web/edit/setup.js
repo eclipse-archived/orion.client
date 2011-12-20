@@ -13,14 +13,14 @@
 /*global define eclipse:true orion:true dojo dijit window*/
 
 define(['require', 'dojo', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
-        'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/taskClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
+        'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchAdaptor',
         'orion/editor/asyncStyler', 'orion/edit/dispatcher', 'orion/contentTypes',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer' ], 
 		function(require, dojo, mSelection, mStatus, mProgress, mDialogs, mCommands, mUtil, mFavorites,
-				mFileClient, mTaskClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
+				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
 				mSearchAdaptor, mAsyncStyler, mDispatcher, mContentTypes) {
 	
@@ -40,9 +40,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	// Initialize the plugin registry
 	(function() {
 		selection = new mSelection.Selection(serviceRegistry);
-		var taskClient = new mTaskClient.TaskClient(serviceRegistry);
-		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, taskClient, "statusPane", "notifications");
-		new mProgress.ProgressService(serviceRegistry, taskClient);
+		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
+		new mProgress.ProgressService(serviceRegistry, operationsClient);
 		new mDialogs.DialogService(serviceRegistry);
 		commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 
