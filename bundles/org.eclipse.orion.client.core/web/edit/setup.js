@@ -60,32 +60,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		searchFloat = dojo.byId("searchFloat"),
 		leftPane = dojo.byId("leftPane");
 
-	// Content Assist
-	var contentAssistFactory = null;
-	if (!isReadOnly) {
-		contentAssistFactory = function(editor) {
-			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
-			var providersLoaded = false;
-			contentAssist.addEventListener("show", function(event) {
-				if (!providersLoaded) {
-					// Load contributed content assist providers
-					var fileName = editor.getTitle();
-					var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist");
-					for (var i=0; i < serviceReferences.length; i++) {
-						var serviceReference = serviceReferences[i];
-						var name = serviceReference.getProperty("name"),
-						    pattern = serviceReference.getProperty("pattern");
-						if (pattern && new RegExp(pattern).test(fileName)) {
-							contentAssist.addProvider(serviceRegistry.getService(serviceReference), name, pattern);
-						}
-					}
-					providersLoaded = true;
-				}
-			});
-			return contentAssist;
-		};
-	}
-	
 	// Temporary.  This will evolve into something pluggable.
 	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("orion.edit.highlighter");
 	var syntaxHighlighter = {
@@ -441,6 +415,32 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 	};
 	
+	// Content Assist
+	var contentAssistFactory = null;
+	if (!isReadOnly) {
+		contentAssistFactory = function(editor) {
+			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
+			contentAssist.addEventListener("show", function(event) {
+				// Filter the providers to be used by content assist
+				var fileContentType = inputManager.getContentType();
+				var fileName = editor.getTitle();
+				var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist");
+				var providers = [];
+				for (var i=0; i < serviceReferences.length; i++) {
+					var serviceReference = serviceReferences[i],
+					    contentTypeIds = serviceReference.getProperty("contentType"),
+					    pattern = serviceReference.getProperty("pattern"); // backwards compatibility
+					if ((contentTypeIds && contentTypeService.isSomeExtensionOf(fileContentType, contentTypeIds)) || 
+							(pattern && new RegExp(pattern).test(fileName))) {
+						providers.push(serviceRegistry.getService(serviceReference));
+					}
+				}
+				contentAssist.setProviders(providers);
+			});
+			return contentAssist;
+		};
+	}
+
 	var statusReporter =  function(message, type) {
 		if (type === "progress") {
 			statusReportingService.setProgressMessage(message);
