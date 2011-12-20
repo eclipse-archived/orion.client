@@ -454,6 +454,8 @@ var exports = {};
 			name : "Git Log",
 			tooltip: "Open the log for the branch",
 			id : "eclipse.openGitLog",
+			imageClass: "git-sprite-log",
+			spriteClass: "gitCommandSprite",
 			hrefCallback : function(data) {
 				var item = data.items;
 				if (item.Type === "RemoteTrackingBranch")
@@ -470,6 +472,8 @@ var exports = {};
 			name : "Git Log",
 			tooltip: "Open the log for the repository",
 			id : "eclipse.openGitLogAll",
+			imageClass: "git-sprite-log",
+			spriteClass: "gitCommandSprite",
 			hrefCallback : function(data) {
 				return require.toUrl("git/git-log.html")+"#" + data.items.CommitLocation + "?page=1";
 			},
@@ -486,6 +490,8 @@ var exports = {};
 			name : "Git Status",
 			tooltip: "Open the status for the repository",
 			id : "eclipse.openGitStatus",
+			imageClass: "git-sprite-status",
+			spriteClass: "gitCommandSprite",
 			hrefCallback : function(data) {
 				return require.toUrl("git/git-status.html")+"#" + data.items.StatusLocation;
 			},
@@ -1223,7 +1229,8 @@ var exports = {};
 			name : "Cherry-Pick",
 			tooltip: "Apply the change introduced by the commit to your active branch",
 			id : "eclipse.orion.git.cherryPick",
-
+			imageClass: "git-sprite-cherry_pick",
+			spriteClass: "gitCommandSprite",
 			callback: function(data) {
 				var item = data.items;
 				var path = dojo.hash();
@@ -1679,7 +1686,8 @@ var exports = {};
 			name : "Apply Patch",
 			tooltip: "Apply a patch on the selected repository",
 			id : "eclipse.orion.git.applyPatch",
-
+			imageClass: "git-sprite-apply_patch",
+			spriteClass: "gitCommandSprite",
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				var gitService = serviceRegistry.getService("orion.git.provider");
