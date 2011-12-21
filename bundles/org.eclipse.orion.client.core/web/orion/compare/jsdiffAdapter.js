@@ -70,7 +70,7 @@ orion.JSDiffAdapter = (function() {
 				oFileLineCounter += linesRemoved;
         	}
         	
-        	if(oFileLineCounter < splitOld.length){
+        	if(oFileLineCounter < splitOld.length && splitOld.length > 1){
 				var lastMapItem = map[map.length-1];
 				if(lastMapItem[2] === 0){
 					lastMapItem[0] += 1;
@@ -82,7 +82,7 @@ orion.JSDiffAdapter = (function() {
 				} else {
 					if(newLineAtEndNew)
 						lastMapItem[0] += 1;
-					if(newLineAtEndOld)
+					if(newLineAtEndOld )
 						lastMapItem[1] += 1;
 				}
         	}
