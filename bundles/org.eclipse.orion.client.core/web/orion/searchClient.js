@@ -53,9 +53,6 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 			dojo.place(errorText, resultsNode, "only");
 			return response;
 		},
-		saveSearch: function(favoriteName, query) {
-			this.registry.getService("orion.core.favorite").addFavoriteSearch(favoriteName, query);
-		},
 		setLocationByMetaData: function(meta){
 			var locationName = "root";
 			if(meta &&  meta.Directory && meta.Location && meta.Parents){
