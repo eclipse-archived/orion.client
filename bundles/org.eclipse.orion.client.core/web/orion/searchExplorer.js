@@ -12,7 +12,7 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils'], function(require, dojo, dijit, mExplorer, mUtil, mFileClient, mCommands, mSearchUtils) {
+define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features'], function(require, dojo, dijit, mExplorer, mUtil, mFileClient, mCommands, mSearchUtils, mSearchFeatures) {
 
 	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, queryStr, explorer) {
 		this.registry= serviceRegistry;
@@ -747,6 +747,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.renderer = new SearchResultRenderer({checkbox: false}, this);
 		this.totalNumber = totalNumber;
 		this.numberOnPage = resultLocation.length;
+		this.queryStr = queryStr;
 		this.model = new SearchResultModel(registry, this.fileClient, resultLocation, queryStr, this);
 		this.declareCommands();
 	}
@@ -762,6 +763,32 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	/* one-time setup of commands */
 	SearchResultExplorer.prototype.declareCommands = function() {
 		var that = this;
+		// page actions for search
+		
+		var saveresultsCommand = new mCommands.Command({
+			name: "Save Search",
+			tooltip: "Save query to search favorites",
+			id: "orion.saveSearchResults",
+			callback: function(data) {
+				that.saveSearch(that.queryStr);
+			}
+		});
+	
+		var replaceAllCommand = new mCommands.Command({
+			name: "Replace With",
+			tooltip: "Replace all matches with",
+			id: "orion.globalSearch.replaceAll",
+			callback: function(data) {
+				that.replaceAll();
+			}
+		});
+	
+		this._commandService.addCommand(saveresultsCommand, "dom");
+		//this._commandService.addCommand(replaceAllCommand, "dom");
+		this._commandService.addCommandGroup("orion.searchActions.unlabeled", 200, null, null, "pageActions");
+		this._commandService.registerCommandContribution("orion.saveSearchResults", 1, "pageActions", "orion.searchActions.unlabeled");
+		//this._commandService.registerCommandContribution("orion.globalSearch.replaceAll", 2, "pageActions", "orion.searchActions.unlabeled");
+
 		var previousPage = new mCommands.Command({
 			name : "< Previous Page",
 			tooltip: "Show previous page of search result",
@@ -840,6 +867,46 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService.registerCommandContribution("orion.search.nextPage", 6, "pageNavigationActions");
 	};
 	
+	SearchResultExplorer.prototype.replaceAll = function() {
+		dojo.empty("results");
+		var uiFactory = new mSearchFeatures.SearchUIFactory({
+			parentDivID: "results"
+		});
+		uiFactory.buildUI();
+		this.renderer = new SearchResultRenderer({checkbox: true}, this);
+		this.createTree(uiFactory.getMatchDivID(), this.model);
+		this.gotoCurrent();
+	};
+	
+	SearchResultExplorer.prototype.addFavorite = function(favoriteName, query) {
+		this.registry.getService("orion.core.favorite").addFavoriteSearch(favoriteName, query);
+	};
+	
+	SearchResultExplorer.prototype.saveSearch = function(query) {
+		var queryObj = mSearchUtils.parseQueryStr(query);
+		var qName = query;
+		if(queryObj && typeof(queryObj.searchStrTitle) === "string" && typeof(queryObj.location) === "string" ){
+			qName = "\'" + queryObj.searchStrTitle + "\' in ";// +queryObj.location;
+			if(queryObj.location.length > 0){
+				this.fileClient.read(queryObj.location, true).then(
+					dojo.hitch(this, function(meta) {
+						var parentName = mSearchUtils.fullPathNameByMeta(meta.Parents);
+						var fullName = parentName.length === 0 ? meta.Name: parentName + "/" + meta.Name;
+						this.addFavorite(qName + fullName, query);
+					}),
+					dojo.hitch(this, function(error) {
+						console.error("Error loading file meta data: " + error.message);
+						this.addFavorite(qName + "root", query);
+					})
+				);
+			} else {
+				this.addFavorite(qName + "root", query);
+			}
+		} else {
+			this.addFavorite(qName, query);
+		}
+	};
+	
 	SearchResultExplorer.prototype.caculateNextPage = function(currentStart, pageSize, totalNumber){
 		if((currentStart + pageSize) >= totalNumber){
 			return {start:currentStart};
@@ -857,6 +924,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultExplorer.prototype.initCommands = function(){	
 		var that = this;
+		dojo.empty("pageActions");
+		this._commandService.renderCommands("pageActions", "dom", that, that, "tool");
 		dojo.empty("pageNavigationActions");
 		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "tool");
 		
