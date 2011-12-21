@@ -95,7 +95,7 @@ var serviceRegistry;
 
 function loadResource(navigator, searcher){
 	var path = dojo.hash();
-	dojo.xhrGet({
+	dojo.xhrGet({ //TODO Bug 367352
 		url : path,
 		headers : {
 			"Orion-Version" : "1"
@@ -112,25 +112,11 @@ function loadResource(navigator, searcher){
 				navigator.loadCommitDetails(null);
 				
 				if (resource.Type === "RemoteTrackingBranch"){
-					var gitService = serviceRegistry.getService("orion.git.provider")
-					gitService.getLog(resource.HeadLocation, resource.Id, function(scopedCommitsJsonData, secondArg) {
-						
-						function loadScopedCommitsList(scopedCommitsJsonData){
+					var gitService = serviceRegistry.getService("orion.git.provider");
+					gitService.getLog(resource.HeadLocation, resource.Id, "Getting git incoming changes", function(scopedCommitsJsonData) {
 							navigator.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
 							navigator.renderer.setOutgoingCommits([]);
-							navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);									
-						}
-						
-						if(secondArg.xhr.status===200){
-							loadScopedCommitsList(scopedCommitsJsonData);
-						} else if(secondArg.xhr.status===202){
-							var deferred = new dojo.Deferred();
-							deferred.callback(scopedCommitsJsonData);
-							serviceRegistry.getService("orion.page.progress").showWhile(deferred, "Getting git incoming changes").then(function(resourceData){
-								loadScopedCommitsList(resourceData.Result.JsonData);
-							});
-						}
-						
+							navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);															
 					});
 				} else if (resource.toRef){
 					if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1)
@@ -143,23 +129,10 @@ function loadResource(navigator, searcher){
 							timeout : 5000,
 							load : function(remoteJsonData, secondArg) {
 								var gitService = serviceRegistry.getService("orion.git.provider");
-								gitService.getLog(remoteJsonData.CommitLocation, "HEAD", function(scopedCommitsJsonData, secondArg) {
-									function loadScopedCommitsList(scopedCommitsJsonData){
+								gitService.getLog(remoteJsonData.CommitLocation, "HEAD", "Getting git outgoing changes", function(scopedCommitsJsonData) {
 										navigator.renderer.setIncomingCommits([]);
 										navigator.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
 										navigator.loadCommitsList(dojo.hash(), resource);
-									}
-									
-									if(secondArg.xhr.status===200){
-										loadScopedCommitsList(scopedCommitsJsonData);
-									} else if(secondArg.xhr.status===202){
-										var deferred = new dojo.Deferred();
-										deferred.callback(scopedCommitsJsonData);
-										serviceRegistry.getService("orion.page.progress").showWhile(deferred, "Getting git outgoing changes").then(function(resourceData){
-											loadScopedCommitsList(resourceData.Result.JsonData);
-										});
-									}
-									
 								});
 							},
 							error : function(error, ioArgs){
