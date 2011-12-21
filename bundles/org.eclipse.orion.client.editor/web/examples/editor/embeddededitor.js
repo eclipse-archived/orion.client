@@ -22,10 +22,10 @@ define([
 	"orion/editor/editor",
 	"orion/editor/editorFeatures",
 	"orion/editor/contentAssist",
-	"orion/editor/webContentAssist"],
+	"orion/editor/jsContentAssist",
+	"orion/editor/cssContentAssist"],
 
-function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGrammar, mEditor, mEditorFeatures, mContentAssist, mWebContentAssist){
-
+function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGrammar, mEditor, mEditorFeatures, mContentAssist, mJSContentAssist, mCSSContentAssist){
 	
 	var editorDomNode = document.getElementById("editor");
 	
@@ -45,8 +45,8 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 
 	var contentAssistFactory = function(editor) {
 		var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
-		contentAssist.addProvider(new mWebContentAssist.CssContentAssistProvider(), "css", "\\.css$");
-		contentAssist.addProvider(new mWebContentAssist.JavaScriptContentAssistProvider(), "js", "\\.js$");
+		contentAssist.addProvider(new mCSSContentAssist.CssContentAssistProvider(), "css", "\\.css$");
+		contentAssist.addProvider(new mJSContentAssist.JavaScriptContentAssistProvider(), "js", "\\.js$");
 		return contentAssist;
 	};
 	

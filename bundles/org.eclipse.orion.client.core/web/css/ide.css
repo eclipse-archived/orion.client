@@ -148,6 +148,14 @@ a:hover {
 	padding-right: 8px;
 }
 
+.actionsColumn {
+	min-width: 200px;
+	text-align: right;
+	padding-left: 16px;
+	vertical-align: middle;
+	height: 24px;  /* breathing room */
+}
+
 .selectionTools {
 	vertical-align: middle;
 }
