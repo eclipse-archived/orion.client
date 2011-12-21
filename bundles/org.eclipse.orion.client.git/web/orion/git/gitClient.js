@@ -75,7 +75,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 15000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, gitRepoUrl ? "Cloning repository: " + gitRepoUrl : "Initializing repository: " + gitName);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, gitRepoUrl ? "Cloning repository: " + gitRepoUrl : "Initializing repository: " + gitName);
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -95,7 +95,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Removing repository");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Removing repository");
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -115,7 +115,7 @@ eclipse.GitService = (function() {
 				handleAs: "text",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Getting git diff", onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Getting git diff", onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError)
@@ -138,7 +138,7 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Getting git diff", onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Getting git diff", onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError)
@@ -161,7 +161,7 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Getting git status", onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Getting git status", onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError)
@@ -184,7 +184,7 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Staging", onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Staging", onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError) {
@@ -207,7 +207,7 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Staging", onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Staging", onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError)
@@ -228,7 +228,7 @@ eclipse.GitService = (function() {
 				timeout: 15000,
 				postData: dojo.toJson({"Reset":resetParam} ),
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Unstaging", onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Unstaging", onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError)
@@ -249,7 +249,7 @@ eclipse.GitService = (function() {
 				timeout: 15000,
 				postData: dojo.toJson({"Path" : paths} ),
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Unstaging", onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Unstaging", onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError)
@@ -273,7 +273,7 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Checking out", onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Checking out", onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError)
@@ -294,7 +294,7 @@ eclipse.GitService = (function() {
 				timeout: 15000,
 				postData: body,
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Committing", onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Committing", onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError)
@@ -314,7 +314,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Getting git repository information", onLoad);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Getting git repository information", onLoad);
 				},
 				error : function(error, ioArgs) {
 					var currentXHR = this;
@@ -335,7 +335,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Getting git repository configuration");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Getting git repository configuration");
 				},
 				error : function(error, ioArgs) {
 					var currentXHR = this;
@@ -356,7 +356,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Getting branch information");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Getting branch information");
 				},
 				error : function(error, ioArgs) {
 					var currentXHR = this;
@@ -377,7 +377,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Getting remote branch information");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Getting remote branch information");
 				},
 				error : function(error, ioArgs) {
 					var currentXHR = this;
@@ -401,7 +401,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, branchName ? "Checking out branch " + branchName: "Checking out branch");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, branchName ? "Checking out branch " + branchName: "Checking out branch");
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -424,7 +424,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Resetting index");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Resetting index");
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -448,7 +448,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, branchName ? "Adding branch " + branchName: "Adding branch");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, branchName ? "Adding branch " + branchName: "Adding branch");
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -467,7 +467,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Removing branch");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Removing branch");
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -490,7 +490,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, remoteName ? "Adding remote " + remoteName : "Adding remote");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, remoteName ? "Adding remote " + remoteName : "Adding remote");
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -509,7 +509,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Removing remote");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Removing remote");
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -529,7 +529,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Getting git log", onLoad);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Getting git log", onLoad);
 				},
 				error : function(error, ioArgs) {
 					var currentXHR = this;
@@ -554,7 +554,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, commitName ? "Getting git diff for " + commitName: "Getting git diff", onLoad);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, commitName ? "Getting git diff for " + commitName: "Getting git diff", onLoad);
 				},
 				error : function(error, ioArgs) {
 					var currentXHR = this;
@@ -584,7 +584,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Fetching remote: " + gitRemoteBranchURI, onLoad);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Fetching remote: " + gitRemoteBranchURI, onLoad);
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -611,7 +611,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Pulling remote: " + gitRemoteURI, onLoad);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Pulling remote: " + gitRemoteURI, onLoad);
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -632,7 +632,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					var mergeResult = dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Merging " + gitHeadURI);
+					var mergeResult = dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Merging " + gitHeadURI);
 					if(mergeResult.than){
 						return mergeResult.than(function(jsonData){
 							return {jsonData: jsonData};
@@ -662,7 +662,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Cherry pick of " + commitName, onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Cherry pick of " + commitName, onLoad, onError);
 				},
 				error : function(error, ioArgs) {
 					if(onError)
@@ -688,7 +688,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, commitName ? "Rebase on top of " : "Rebase" + commitName, onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, commitName ? "Rebase on top of " : "Rebase" + commitName, onLoad, onError);
 				},
 				error : function(error, ioArgs) {
 					if(onError)
@@ -720,7 +720,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, message ? message : "Pushing repository");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, message ? message : "Pushing repository");
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -758,7 +758,7 @@ eclipse.GitService = (function() {
 					handleAs : "json",
 					timeout : 5000,
 					load : function(jsonData, xhrArgs) {
-						return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, message ? message : "Generating git log", onLoad);
+						return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, message ? message : "Generating git log", onLoad);
 					},
 					error : function(error, ioArgs) {
 						var currentXHR = this;
@@ -781,7 +781,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Getting remote branches");
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Getting remote branches");
 				},
 				error : function(error, ioArgs) {
 					var currentXHR = this;
@@ -802,7 +802,7 @@ eclipse.GitService = (function() {
 					handleAs : "json",
 					timeout : 5000,
 					load : function(jsonData, xhrArgs) {
-						return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Getting default remote branch", onLoad);
+						return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Getting default remote branch", onLoad);
 					},
 					error : function(error, ioArgs) {
 						var currentXHR = this;
@@ -828,7 +828,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Adding tag " + tagName, onLoad);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Adding tag " + tagName, onLoad);
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -850,7 +850,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Checking out tag " + tag, onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Checking out tag " + tag, onLoad, onError);
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
@@ -873,7 +873,7 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Adding configuration property " + newKey, onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Adding configuration property " + newKey, onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError)
@@ -896,7 +896,7 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Saving configuration property as " + newValue, onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Saving configuration property as " + newValue, onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError)
@@ -916,7 +916,7 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResonse)(jsonData, xhrArgs, "Deleting configuration property", onLoad, onError);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Deleting configuration property", onLoad, onError);
 				},
 				error: function(response, ioArgs) {
 					if(onError)
@@ -926,7 +926,7 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		_getGitServiceResonse: function(jsonData, xhrArgs, message, onLoad){
+		_getGitServiceResponse: function(jsonData, xhrArgs, message, onLoad){
 			var service = this;
 			
 			if(xhrArgs.xhr.status === 202){
