@@ -90,6 +90,7 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		assertProposal("concat", actualProposals);
 		assertProposal("indexOf", actualProposals);
 		assertProposal("lastIndexOf", actualProposals);
+		assertProposal("length", actualProposals);
 		assertProposal("localeCompare", actualProposals);
 		assertProposal("match", actualProposals);
 		assertProposal("replace", actualProposals);
@@ -184,6 +185,35 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		assertNoProposal("if", result);
 		assertNoProposal("do", result);
 	};
+	/**
+	 * Test that the String length property doesn't look like a function
+	 */
+	tests.testStringLengthProperty= function() {
+		var result = getKeywords("\"Hello\".len@@@");
+		assert.equal(result.length, 1);
+		assert.equal(result[0].proposal, "length");
+	};
+
+	/**
+	 * Test that the String trim property looks like a function
+	 */
+	tests.testStringTrimMethod= function() {
+		var result = getKeywords("\"Hello\".tr@@@");
+		assert.equal(result.length, 1);
+		assert.equal(result[0].proposal, "trim()");
+		assert.equal(result[0].description, "trim() - String");
+	};
+
+	/**
+	 * Test that the Object toString property looks like a function
+	 */
+	tests.testStringTrimMethod= function() {
+		var result = getKeywords("\"Hello\".toS@@@");
+		assert.equal(result.length, 1);
+		assert.equal(result[0].proposal, "toString()");
+		assert.equal(result[0].description, "toString() - Object");
+	};
+
 	/**
 	 * Test completion on a string literal.
 	 */
