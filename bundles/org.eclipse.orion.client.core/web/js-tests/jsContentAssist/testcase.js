@@ -68,19 +68,50 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		}
 		//we didn't find it, so pass
 	}
+	
+	/**
+	 * Asserts that a proposal list contains all global functions available to all objects.
+	 */
+	function assertAllObjectProposals(actualProposals) {
+		assertProposal("hasOwnProperty", actualProposals);
+		assertProposal("isPrototypeOf", actualProposals);
+		assertProposal("propertyIsEnumerable", actualProposals);
+		assertProposal("toString", actualProposals);
+		assertProposal("toLocaleString", actualProposals);
+		assertProposal("valueOf", actualProposals);
+	}
 
+	/**
+	 * Asserts that a proposal list contains all global functions available to all objects.
+	 */
+	function assertAllStringProposals(actualProposals) {
+		assertProposal("charAt", actualProposals);
+		assertProposal("charCodeAt", actualProposals);
+		assertProposal("concat", actualProposals);
+		assertProposal("indexOf", actualProposals);
+		assertProposal("lastIndexOf", actualProposals);
+		assertProposal("length", actualProposals);
+		assertProposal("localeCompare", actualProposals);
+		assertProposal("match", actualProposals);
+		assertProposal("replace", actualProposals);
+		assertProposal("search", actualProposals);
+		assertProposal("slice", actualProposals);
+		assertProposal("split", actualProposals);
+		assertProposal("substring", actualProposals);
+		assertProposal("toLowerCase", actualProposals);
+		assertProposal("toLocaleLowerCase", actualProposals);
+		assertProposal("toUpperCase", actualProposals);
+		assertProposal("toLocaleUpperCase", actualProposals);
+		assertProposal("trim", actualProposals);
+	}
+	
 	var tests = {};
 	/**
 	 * Test accessing members on a variable that we can't infer the type of.
 	 */
 	tests.testUnknownVariableFunctions = function() {
 		var result = getKeywords("var x; x.@@@");
-		assertProposal("toString", result);
-		assertProposal("toLocaleString", result);
-		assertProposal("valueOf", result);
-		assertProposal("hasOwnProperty", result);
-		assertProposal("isPrototypeOf", result);
-		assertProposal("propertyIsEnumerable", result);
+		assertAllObjectProposals(result);
 	};
 
 	/**
@@ -112,16 +143,11 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 	 */
 	tests.testUnknownArgumentFunctions = function() {
 		var result = getKeywords("function x(a) {\n a.@@@");
-		assertProposal("toString", result);
-		assertProposal("toLocaleString", result);
-		assertProposal("valueOf", result);
-		assertProposal("hasOwnProperty", result);
-		assertProposal("isPrototypeOf", result);
-		assertProposal("propertyIsEnumerable", result);
+		assertAllObjectProposals(result);
 	};
 
 	/**
-	 * Test accessing members on a variable that we can't infer the type of.
+	 * Test completion of control structure templates in the body of a function.
 	 */
 	tests.testTemplateInFunctionBody= function() {
 		var result = getKeywords("function x(a) {\n @@@");
@@ -133,5 +159,100 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		assertProposal("if", result);
 		assertProposal("do", result);
 	};
+
+	/**
+	 * Test completion of control structure templates in the body of a function.
+	 */
+	tests.testKeywordsInFunctionBodyWithPrefix= function() {
+		var result = getKeywords("function x(a) {\n t@@@");
+		assertNoProposal("toString", result);
+		assertProposal("this", result);
+		assertProposal("throw", result);
+		assertProposal("try", result);
+		assertProposal("typeof", result);
+	};
+
+	/**
+	 * Test completion of control structure templates in the body of a function.
+	 */
+	tests.testTemplateInFunctionBodyWithPrefix= function() {
+		var result = getKeywords("function x(a) {\n f@@@");
+		assertNoProposal("toString", result);
+		assertProposal("for", result);
+		assertNoProposal("while", result);
+		assertNoProposal("switch", result);
+		assertNoProposal("try", result);
+		assertNoProposal("if", result);
+		assertNoProposal("do", result);
+	};
+	/**
+	 * Test that the String length property doesn't look like a function
+	 */
+	tests.testStringLengthProperty= function() {
+		var result = getKeywords("\"Hello\".len@@@");
+		assert.equal(result.length, 1);
+		assert.equal(result[0].proposal, "length");
+	};
+
+	/**
+	 * Test that the String trim property looks like a function
+	 */
+	tests.testStringTrimMethod= function() {
+		var result = getKeywords("\"Hello\".tr@@@");
+		assert.equal(result.length, 1);
+		assert.equal(result[0].proposal, "trim()");
+		assert.equal(result[0].description, "trim() - String");
+	};
+
+	/**
+	 * Test that the Object toString property looks like a function
+	 */
+	tests.testStringTrimMethod= function() {
+		var result = getKeywords("\"Hello\".toS@@@");
+		assert.equal(result.length, 1);
+		assert.equal(result[0].proposal, "toString()");
+		assert.equal(result[0].description, "toString() - Object");
+	};
+
+	/**
+	 * Test completion on a string literal.
+	 */
+	tests.testDoubleQuoteStringLiteral= function() {
+		var result = getKeywords("\"Hello\".@@@");
+		//string proposals
+		assertAllStringProposals(result);
+		
+		//object proposals should still apply
+		assertAllObjectProposals(result);
+	};
+
+	/**
+	 * Test completion on a string literal.
+	 */
+	tests.testSingleQuoteStringLiteral= function() {
+		var result = getKeywords("'Hello'.@@@");
+		//string proposals
+		assertAllStringProposals(result);
+		
+		//object proposals should still apply
+		assertAllObjectProposals(result);
+	};
+
+	/**
+	 * Test completion on a string literal with a prefix
+	 */
+	tests.testDoubleQuoteStringLiteralWithPrefix= function() {
+		var result = getKeywords("\"Hello\".to@@@");
+		assertProposal("toLowerCase", result);
+		assertProposal("toLocaleLowerCase", result);
+		assertProposal("toUpperCase", result);
+		assertProposal("toLocaleUpperCase", result);
+		assertProposal("toString", result);
+		assertProposal("toLocaleString", result);
+		assertNoProposal("valueOf", result);
+		assertNoProposal("propertyIsEnumerable", result);
+		assertNoProposal("trim", result);
+	};
+
 	return tests;
 });

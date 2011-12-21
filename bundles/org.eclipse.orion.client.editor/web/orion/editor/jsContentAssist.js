@@ -14,6 +14,44 @@
 define("orion/editor/jsContentAssist", [], function() {
 
 	/**
+	 * Properties common to all objects - ECMA 262, section 15.2.4.
+	 * @see addPropertyProposals
+	 */
+	var objectProps = [
+		{name: "toString"}, 
+		{name: "toLocaleString"}, 
+		{name: "valueOf"}, 
+		{name: "hasOwnProperty", args: ["property"]},
+		{name: "isPrototypeOf", args: ["object"]},
+		{name: "propertyIsEnumerable", args: ["property"]}
+	];
+
+	/**
+	 * Properties common to all Strings - ECMA 262, section 15.5.4
+	 * @see addPropertyProposals
+	 */
+	var stringProps = [
+		{name: "charAt", args: ["index"]},
+		{name: "charCodeAt", args: ["index"]},
+		{name: "concat", args: ["array"]},
+		{name: "indexOf", args: ["searchString", "[position]"]},
+		{name: "lastIndexOf", args: ["searchString", "[position]"]},
+		{name: "length", field: true},
+		{name: "localeCompare", args: ["object"]},
+		{name: "match", args: ["regexp"]},
+		{name: "replace", args: ["searchValue", "replaceValue"]},
+		{name: "search", args: ["regexp"]},
+		{name: "slice", args: ["start", "end"]},
+		{name: "split", args: ["separator", "[limit]"]},
+		{name: "substring", args: ["start", "[end]"]},
+		{name: "toLowerCase"},
+		{name: "toLocaleLowerCase"},
+		{name: "toUpperCase"},
+		{name: "toLocaleUpperCase"},
+		{name: "trim"}
+	];
+
+	/**
 	 * Returns a string of all the whitespace at the start of the current line.
 	 * @param {String} buffer The document
 	 * @param {Object} selection The current selection
@@ -39,22 +77,98 @@ define("orion/editor/jsContentAssist", [], function() {
 		}
 		return whitespace;
 	}
+	
+	/**
+	 * Returns the current line up to, but not including, the prefix
+	 */
+	function prefixLine(prefix, buffer, selection) {
+		var offset = selection.offset-1;
+		while (offset > 0) {
+			var c = buffer.charAt(offset);
+			if (c === '\n' || c === '\r') {
+				//we hit the start of the line so we are done
+				break;
+			}
+			offset--;
+		}
+		return buffer.substring(offset+1, (selection.offset-prefix.length));
+	}
+	
+	/**
+	 * Attempts to infer the type of the receiver of a function.
+	 */
+	function inferType(prefix, buffer, selection) {
+		var line = prefixLine(prefix, buffer, selection);
+		//Note: we already know at this point the line ends with a dot
+		//if the last character is a quote and there is an odd number of quotes on the line, then we have a string literal
+		if (line.length > 1 && (line.charAt(line.length-2) === "\"" || line.charAt(line.length-2) === "'")) {
+			return "String";
+		}
+		//we failed to infer the type
+		return null;
+	}
+	
+	/**
+	 * Adds proposals for the given property descriptions (methods and fields) to the proposal list.
+	 * @param properties {Array} Array of property description objects. Each object
+	 * has a 'name' property indicating the function name, and an 'args' property
+	 * which is an array of strings indicating the function arguments. Example: {name: "charAt", args: ["index"]}.
+	 * A property can also have a 'field' boolean property indicating it is a field. If the 'field'
+	 * property is not specified it is assumed to be a function.
+	 * @param objectName {String} The name of the object associated with these functions
+	 * @param prefix {String} The content assist prefix
+	 * @param selection {Object} The current editor buffer selection
+	 * @param proposals {Array} The current array of proposal objects.
+	 */
+	function addPropertyProposals(properties, objectName, prefix, selection, proposals) {
+		var text, description, positions, endOffset;
+		for (var i = 0; i < properties.length; i++) {
+			var name = properties[i].name;
+			//don't bother computing proposals that don't match
+			if (name.indexOf(prefix) !== 0) {
+				continue;
+			}
+			var args = properties[i].args;
+			if (!args || args.length === 0) {
+				//don't use linked mode for functions with no arguments
+				text = name + (properties[i].field ? "" : "()");
+				description = text + " - " + objectName;
+				proposals.push({proposal: text, description: description});
+				continue;
+			}
+			text = name + "(";
+			//add linked mode position for each function argument
+			positions = [];
+			endOffset = selection.offset + name.length+1 - prefix.length;
+			for (var argIndex = 0; argIndex < args.length; argIndex++) {
+				positions.push({offset: endOffset, length: args[argIndex].length});
+				endOffset += args[argIndex].length+2;//add extra for comma and space
+				//add argument to completion string
+				text += args[argIndex];
+				if (argIndex < args.length - 1) {
+					text += ", ";
+				}
+			}
+			text += ")";
+			description = text + " - " + objectName;
+			endOffset--;//no comma after last argument
+			proposals.push({proposal: text, description: description, positions: positions, escapePosition: endOffset});
+		}
+	}
 
 	/**
 	 * Returns proposals for completion on members of an object
 	 */
-
 	function getMemberProposals(prefix, buffer, selection) {
-		//TODO type inferencing
 		var proposals = [];
-		
-		//functions common to all objects - ECMA 262, section 15.2.4.
-		var members = ["toString", "toLocaleString", "valueOf", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable"];
-		for (var i = 0; i < members.length; i++) {
-			if (members[i].indexOf(prefix) === 0) {
-				proposals.push(members[i]);
-			}
+
+		var type = inferType(prefix, buffer, selection);
+		if (type === "String") {
+			addPropertyProposals(stringProps, "String", prefix, selection, proposals);
 		}
+		
+		//properties common to all objects
+		addPropertyProposals(objectProps, "Object", prefix, selection, proposals);
 
 		return proposals;
 	}
@@ -143,9 +257,19 @@ define("orion/editor/jsContentAssist", [], function() {
 	 * Returns proposals for javascript keywords.
 	 */
 	function getKeyWordProposals(prefix, buffer, selection) {
-		return ["break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else", "finally", 
+		var keywords = ["break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else", "finally", 
 			"for", "function", "if", "in", "instanceof", "new", "return", "switch", "this", "throw", "try", "typeof", 
 			"var", "void", "while", "with"];
+		if (prefix.length === 0) {
+			return keywords;
+		}
+		var proposals = [];
+		for (var i = 0; i < keywords.length; i++) {
+			if (keywords[i].indexOf(prefix) === 0) {
+				proposals.push(keywords[i]);
+			}
+		}
+		return proposals;
 	}
 
 	/**
