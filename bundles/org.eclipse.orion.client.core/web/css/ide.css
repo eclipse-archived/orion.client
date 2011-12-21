@@ -149,7 +149,7 @@ a:hover {
 }
 
 .actionsColumn {
-	min-width: 200px;
+	min-width: 300px;
 	text-align: right;
 	padding-left: 16px;
 	vertical-align: middle;
@@ -699,7 +699,7 @@ a:hover {
 	cursor: default;
 	overflow: auto;
 	height: 150px;
-	width: 200px;
+	width: 300px;
 }
 
 .contentassist .selected {
