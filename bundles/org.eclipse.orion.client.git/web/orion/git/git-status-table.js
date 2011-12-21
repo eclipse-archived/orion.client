@@ -336,7 +336,7 @@ orion.GitStatusTableRenderer = (function() {
 		renderAction:function(){
 			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "object", {type: self._type}, this, "tool");
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "object", {type: self._type}, this, "button");
 		}
 	};
 	return GitStatusTableRenderer;
@@ -550,13 +550,13 @@ orion.GitLogTableRenderer = (function() {
 		renderAction:function(){
 			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "object", {type: self._type , object:self._controller}, this, "tool", true);
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "object", {type: self._type , object:self._controller}, this, "button", true);
 		},
 		
 		renderAdditionalAction:function(item){
 			dojo.place(document.createTextNode(""), this._cmdSpanAdditional, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(self._cmdSpanAdditional, "object", item, this, "tool");
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpanAdditional, "object", item, this, "button");
 		}
 	};
 	return GitLogTableRenderer;
@@ -1084,7 +1084,7 @@ orion.GitStatusController = (function() {
 			});		
 
 			var stageAllCommand = new mCommands.Command({
-				name: "Stage Selected",
+				name: "Stage",
 				tooltip: "Stage the selected changes",
 				imageClass: "git-sprite-stage_all",
 				spriteClass: "gitCommandSprite",
@@ -1135,7 +1135,7 @@ orion.GitStatusController = (function() {
 			});		
 
 			var unstageAllCommand = new mCommands.Command({
-				name: "Unstage Selected",
+				name: "Unstage",
 				tooltip: "Unstage the selected changes",
 				imageClass: "git-sprite-unstage_all",
 				spriteClass: "gitCommandSprite",
