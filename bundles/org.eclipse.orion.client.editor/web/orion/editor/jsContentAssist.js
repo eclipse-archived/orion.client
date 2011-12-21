@@ -13,13 +13,30 @@
 
 define("orion/editor/jsContentAssist", [], function() {
 
-	//from ECMA 262 - section 15.5.4
-	var stringMethods = [
+	/**
+	 * Properties common to all objects - ECMA 262, section 15.2.4.
+	 * @see addPropertyProposals
+	 */
+	var objectProps = [
+		{name: "toString"}, 
+		{name: "toLocaleString"}, 
+		{name: "valueOf"}, 
+		{name: "hasOwnProperty", args: ["property"]},
+		{name: "isPrototypeOf", args: ["object"]},
+		{name: "propertyIsEnumerable", args: ["property"]}
+	];
+
+	/**
+	 * Properties common to all Strings - ECMA 262, section 15.5.4
+	 * @see addPropertyProposals
+	 */
+	var stringProps = [
 		{name: "charAt", args: ["index"]},
 		{name: "charCodeAt", args: ["index"]},
 		{name: "concat", args: ["array"]},
 		{name: "indexOf", args: ["searchString", "[position]"]},
 		{name: "lastIndexOf", args: ["searchString", "[position]"]},
+		{name: "length", field: true},
 		{name: "localeCompare", args: ["object"]},
 		{name: "match", args: ["regexp"]},
 		{name: "replace", args: ["searchValue", "replaceValue"]},
@@ -27,13 +44,12 @@ define("orion/editor/jsContentAssist", [], function() {
 		{name: "slice", args: ["start", "end"]},
 		{name: "split", args: ["separator", "[limit]"]},
 		{name: "substring", args: ["start", "[end]"]},
-		{name: "toLowerCase", args: []},
-		{name: "toLocaleLowerCase", args: []},
-		{name: "toUpperCase", args: []},
-		{name: "toLocaleUpperCase", args: []},
-		{name: "trim", args: []}
+		{name: "toLowerCase"},
+		{name: "toLocaleLowerCase"},
+		{name: "toUpperCase"},
+		{name: "toLocaleUpperCase"},
+		{name: "trim"}
 	];
-	var stringProperties = ["length"];
 
 	/**
 	 * Returns a string of all the whitespace at the start of the current line.
@@ -91,60 +107,68 @@ define("orion/editor/jsContentAssist", [], function() {
 		//we failed to infer the type
 		return null;
 	}
+	
+	/**
+	 * Adds proposals for the given property descriptions (methods and fields) to the proposal list.
+	 * @param properties {Array} Array of property description objects. Each object
+	 * has a 'name' property indicating the function name, and an 'args' property
+	 * which is an array of strings indicating the function arguments. Example: {name: "charAt", args: ["index"]}.
+	 * A property can also have a 'field' boolean property indicating it is a field. If the 'field'
+	 * property is not specified it is assumed to be a function.
+	 * @param objectName {String} The name of the object associated with these functions
+	 * @param prefix {String} The content assist prefix
+	 * @param selection {Object} The current editor buffer selection
+	 * @param proposals {Array} The current array of proposal objects.
+	 */
+	function addPropertyProposals(properties, objectName, prefix, selection, proposals) {
+		var text, description, positions, endOffset;
+		for (var i = 0; i < properties.length; i++) {
+			var name = properties[i].name;
+			//don't bother computing proposals that don't match
+			if (name.indexOf(prefix) !== 0) {
+				continue;
+			}
+			var args = properties[i].args;
+			if (!args || args.length === 0) {
+				//don't use linked mode for functions with no arguments
+				text = name + (properties[i].field ? "" : "()");
+				description = text + " - " + objectName;
+				proposals.push({proposal: text, description: description});
+				continue;
+			}
+			text = name + "(";
+			//add linked mode position for each function argument
+			positions = [];
+			endOffset = selection.offset + name.length+1 - prefix.length;
+			for (var argIndex = 0; argIndex < args.length; argIndex++) {
+				positions.push({offset: endOffset, length: args[argIndex].length});
+				endOffset += args[argIndex].length+2;//add extra for comma and space
+				//add argument to completion string
+				text += args[argIndex];
+				if (argIndex < args.length - 1) {
+					text += ", ";
+				}
+			}
+			text += ")";
+			description = text + " - " + objectName;
+			endOffset--;//no comma after last argument
+			proposals.push({proposal: text, description: description, positions: positions, escapePosition: endOffset});
+		}
+	}
 
 	/**
 	 * Returns proposals for completion on members of an object
 	 */
 	function getMemberProposals(prefix, buffer, selection) {
-		//TODO type inferencing
 		var proposals = [];
 
-		//common vars for each proposal
-		var text, description, positions, endOffset;
-		
 		var type = inferType(prefix, buffer, selection);
 		if (type === "String") {
-			for (var i = 0; i < stringMethods.length; i++) {
-				var name = stringMethods[i].name;
-				//don't bother computing proposals that don't match
-				if (name.indexOf(prefix) !== 0) {
-					continue;
-				}
-				var args = stringMethods[i].args;
-				if (args.length === 0) {
-					//don't use linked mode for functions with no arguments
-					text = name + "()";
-					description = text + " - String";
-					proposals.push({proposal: text, description: description});
-					continue;
-				}
-				text = name + "(";
-				//add linked mode position for each function argument
-				positions = [];
-				endOffset = selection.offset + name.length+1 - prefix.length;
-				for (var argIndex = 0; argIndex < args.length; argIndex++) {
-					positions.push({offset: endOffset, length: args[argIndex].length});
-					endOffset += args[argIndex].length+2;//add extra for comma and space
-					//add argument to completion string
-					text += args[argIndex];
-					if (argIndex < args.length - 1) {
-						text += ", ";
-					}
-				}
-				text += ")";
-				description = text + " - String";
-				endOffset--;//no comma after last argument
-				proposals.push({proposal: text, description: description, positions: positions, escapePosition: endOffset});
-			}
+			addPropertyProposals(stringProps, "String", prefix, selection, proposals);
 		}
 		
-		//functions common to all objects - ECMA 262, section 15.2.4.
-		var members = ["toString", "toLocaleString", "valueOf", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable"];
-		for (var memberIndex = 0; memberIndex < members.length; memberIndex++) {
-			if (members[memberIndex].indexOf(prefix) === 0) {
-				proposals.push(members[memberIndex]);
-			}
-		}
+		//properties common to all objects
+		addPropertyProposals(objectProps, "Object", prefix, selection, proposals);
 
 		return proposals;
 	}
