@@ -83,3 +83,9 @@
 .git-sprite-tags{ background-position: 0 -1452px; width: 16px; height: 16px; }
 .git-sprite-pull{ background-position: 0 -1518px; width: 16px; height: 16px; }
 .git-sprite-diff{ background-position: 0 -1584px; width: 16px; height: 16px; }
+
+/* temporary sprite hacks */
+.git-sprite-cherry_pick{ background-position: 0px 0px; width: 16px; height: 16px; background: url(../images/cherry_pick.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.git-sprite-apply_patch{ background-position: 0px 0px; width: 16px; height: 16px; background: url(../images/apply_patch.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.git-sprite-log{ background-position: 0px 0px; width: 16px; height: 16px; background: url(../images/log.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.git-sprite-status{ background-position: 0px 0px; width: 16px; height: 16px; background: url(../images/status.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }

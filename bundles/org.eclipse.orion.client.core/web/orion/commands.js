@@ -619,10 +619,19 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 										dropDown: newMenu
 								        });
 									dojo.addClass(menuButton.domNode, "commandLink");
+									var overclass = null;
 									if (group.title === "*") {
 										dojo.addClass(menuButton.domNode, "textless");
+										overclass = "textlessOver";
+										new CommandTooltip({
+											connectId: [menuButton.domNode],
+											label: "Actions menu",
+											position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
+											commandParent: parent,
+											commandService: this
+										});
 									}
-									menuCommand._setupActivateVisuals(menuButton.domNode, menuButton.focusNode, activeCommandClass, inactiveCommandClass);
+									menuCommand._setupActivateVisuals(menuButton.domNode, menuButton.focusNode, activeCommandClass, inactiveCommandClass, overclass);
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item

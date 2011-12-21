@@ -165,8 +165,7 @@ define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapte
 	
 	testMapper(mapperTestCases);
 	testJSDiffPatch(mapperTestCases, null, [23,29,31,39,40]);
-	testJSDiffAdapter(mapperTestCases, null, [0,1,2,3]);
-	//testJSDiffAdapter(mapperTestCases, [16]);
+	testJSDiffAdapter(mapperTestCases);
 	
 	tests["test empty case"] = function() {
 		var input = "";
