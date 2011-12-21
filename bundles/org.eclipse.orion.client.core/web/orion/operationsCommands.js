@@ -48,35 +48,35 @@ define(['require', 'dojo', 'orion/commands'],
 			}
 		};
 		
-		exports.createTaskCommands = function(serviceRegistry, commandService, explorer, taskClient){
+		exports.createOperationsCommands = function(serviceRegistry, commandService, explorer, operationsClient){
 		
-			var removeCompletedTasksCommand = new mCommands.Command({
+			var removeCompletedOperationsCommand = new mCommands.Command({
 				name : "Remove Completed",
-				tooltip : "Remove all completed tasks",
-				id : "eclipse.removeCompletedTasks",
+				tooltip : "Remove all completed operations",
+				id : "eclipse.removeCompletedOperations",
 				callback : function(data) {
-					taskClient.removeCompletedTasks().then(function(){explorer.removeCompletedTasks();});
+					operationsClient.removeCompletedOperations().then(function(){explorer.removeCompletedOperations();});
 				},
 				visibleWhen : function(item) {
 					return true;
 				}
 			});
-			commandService.addCommand(removeCompletedTasksCommand, "dom");
+			commandService.addCommand(removeCompletedOperationsCommand, "dom");
 			
-			var removeTaskCommand = new mCommands.Command({
+			var removeOperationCommand = new mCommands.Command({
 				name : "Remove",
-				tooltip : "Remove tasks from the tasks list.",
+				tooltip : "Remove operations from the operations list.",
 				imageClass: "core-sprite-delete",
-				id : "eclipse.removeTask",
+				id : "eclipse.removeOperation",
 				callback : function(data) {
 					var items = dojo.isArray(data.items) ? data.items : [data.items];
 					var removeResults = [];
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
-						removeResults[i] = taskClient.removeTask(item.Location);
+						removeResults[i] = operationsClient.removeOperation(item.Location);
 					}
 					 new dojo.DeferredList(removeResults).then(function(){
-						 dojo.hitch(explorer, explorer.removeTasks)(items);
+						 dojo.hitch(explorer, explorer.removeOperations)(items);
 					 });
 				},
 				visibleWhen : function(items) {
@@ -90,19 +90,19 @@ define(['require', 'dojo', 'orion/commands'],
 					return true;
 				}
 			});
-			commandService.addCommand(removeTaskCommand, "object");
-			commandService.addCommand(removeTaskCommand, "dom");
+			commandService.addCommand(removeOperationCommand, "object");
+			commandService.addCommand(removeOperationCommand, "dom");
 			
-			var cancelTaskCommand = new mCommands.Command({
+			var cancelOperationCommand = new mCommands.Command({
 				name : "Cancel",
-				tooltip : "Cancel tasks from the tasks list.",
+				tooltip : "Cancel operations from the operations list.",
 				imageClass: "core-sprite-stop",
-				id : "eclipse.cancelTask",
+				id : "eclipse.cancelOperation",
 				callback : function(data) {
 					var items = dojo.isArray(data.items) ? data.items : [data.items];
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
-						taskClient.cancelTask(item.Location);
+						operationsClient.cancelOperation(item.Location);
 					}
 				},
 				visibleWhen : function(items) {
@@ -116,8 +116,8 @@ define(['require', 'dojo', 'orion/commands'],
 					return true;
 				}
 			});
-			commandService.addCommand(cancelTaskCommand, "object");
-			commandService.addCommand(cancelTaskCommand, "dom");
+			commandService.addCommand(cancelOperationCommand, "object");
+			commandService.addCommand(cancelOperationCommand, "dom");
 		};
 	
 	}());	

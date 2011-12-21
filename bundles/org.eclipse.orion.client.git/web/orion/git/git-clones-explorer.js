@@ -214,13 +214,10 @@ exports.GitClonesRenderer = (function(){
 	GitClonesRenderer.prototype.getCellHeaderElement = function(col_no){
 		
 		switch(col_no){
-		case 0: 
-			return dojo.create("th", {innerHTML: "<h2>Name</h2>"});
-			break;
+		case 0:
 		case 1:
-			return dojo.create("th", {innerHTML: "<h2>Actions</h2>"});
-			break;
-		};
+			return dojo.create("th", {style: "height: 8px;"});
+		}
 		
 	};
 	

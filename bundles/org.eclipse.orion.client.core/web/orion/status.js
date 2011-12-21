@@ -17,14 +17,14 @@ define(['require', 'dojo'], function(require, dojo) {
 	 * @class Service for reporting status
 	 * @name orion.status.StatusReportingService
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
-	 * @param {orion.taskclient.TaskClient} taskClient
+	 * @param {orion.operationclient.OperationsClient} operationsClient
 	 * @param {String} domId ID of the DOM node under which status will be displayed.
 	 * @param {String} progressDomId ID of the DOM node used to display progress messages.
 	 */
-	function StatusReportingService(serviceRegistry, taskClient, domId, progressDomId) {
+	function StatusReportingService(serviceRegistry, operationsClient, domId, progressDomId) {
 		this._serviceRegistry = serviceRegistry;
 		this._serviceRegistration = serviceRegistry.registerService("orion.page.message", this);
-		this._taskClient = taskClient;
+		this._operationsClient = operationsClient;
 		this.domId = domId;
 		this.progressDomId = progressDomId || domId;
 	}
@@ -95,7 +95,7 @@ define(['require', 'dojo'], function(require, dojo) {
 		},
 		
 		/**
-		 * Set a message that indicates that a long-running (progress) task is complete.
+		 * Set a message that indicates that a long-running (progress) operation is complete.
 		 * @param {String|dojoError|orionError} message The error to display. Can be a simple String,
 		 * or an error object from a dojo XHR error callback, or the body of an error response 
 		 * from the Orion server.
@@ -150,6 +150,8 @@ define(['require', 'dojo'], function(require, dojo) {
 		/**
 		 * Shows a progress message until the given deferred is resolved. Returns a deferred that resolves when
 		 * the operation completes.
+		 * 
+		 * @Deprecated use orion.page.progress showWhile method with the same signature
 		 */
 		showWhile: function(deferred, message) {
 			var that = this;
@@ -179,7 +181,7 @@ define(['require', 'dojo'], function(require, dojo) {
 			var that = this;
 			//sleep for awhile before we get more progress
 			window.setTimeout(function() {
-				that._taskClient.getTask(progress.Location).then(function(jsonData, ioArgs) {
+				that._operationsClient.getOperation(progress.Location).then(function(jsonData, ioArgs) {
 						//jsonData is either the final result or a progress resource
 						deferred.callback(jsonData);
 					});

@@ -16,10 +16,10 @@
  * Glue code for sites.html
  */
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/fileClient', 'orion/taskClient',
+define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 	        'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/siteService', 'orion/siteUtils', 'orion/siteTree', 'orion/treetable', 
 	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/NewSiteDialog'], 
-			function(require, dojo, mBootstrap, mStatus, mCommands, mFileClient, mTaskClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
+			function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -30,7 +30,9 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 		
 			// Register services
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, new mTaskClient.TaskClient(serviceRegistry), "statusPane", "notifications");
+			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
+			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
 			var siteService = new mSiteService.SiteService(serviceRegistry);
@@ -88,7 +90,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 				commandService.addCommand(createCommand, "dom");
 				
 				// Add commands that deal with individual site configuration (edit, start, stop..)
-				mSiteUtils.createSiteCommands(commandService, siteService, statusService, dialogService,
+				mSiteUtils.createSiteCommands(commandService, siteService, progressService, dialogService,
 						/*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
 				
 				// Register command contributions

@@ -21,18 +21,19 @@
 			var base = makeParentRelative(temp.href);
 			
 			// testing that command service handles image-less actions properly
-			provider.registerServiceProvider("orion.core.task", {
-				getTasks: function(){
+			provider.registerServiceProvider("orion.core.operation", {
+				getOperations: function(options){
 					return dojo.xhrGet({
 						url: base , 
 						headers: {
 							"Orion-Version": "1"
 						},
+						content: options,
 						handleAs: "json",
-						timeout: 15000
+						timeout: options.Longpolling == true? 70000: 15000
 					});
 				},
-				getTask: function(taskLocation){
+				getOperation: function(taskLocation){
 					return dojo.xhrGet({
 						url: taskLocation , 
 						headers: {
@@ -42,26 +43,7 @@
 						timeout: 15000
 					});
 				},
-				getTasksLongpolling: function(longpollingId){
-					
-					var args = {
-							Longpolling: true,
-						}
-					if(longpollingId){
-						args.LongpollingId = longpollingId;
-					}
-					
-					return dojo.xhrGet({
-						url: base ,
-						content: args,
-						headers: {
-							"Orion-Version": "1"
-						},
-						handleAs: "json",
-						timeout: 70000
-					});
-				},
-				removeCompletedTasks: function(){
+				removeCompletedOperations: function(){
 					return dojo.xhrDelete({
 						url: base , 
 						headers: {
@@ -71,7 +53,7 @@
 						timeout: 15000
 					});
 				},
-				removeTask: function(taskLocation){
+				removeOperation: function(taskLocation){
 					return dojo.xhrDelete({
 						url: taskLocation , 
 						headers: {
@@ -81,7 +63,7 @@
 						timeout: 15000
 					});
 				},
-				cancelTask: function(taskLocation){
+				cancelOperation: function(taskLocation){
 					return dojo.xhrPut({
 						url: taskLocation ,
 						putData: JSON.stringify({Cancel: true}),

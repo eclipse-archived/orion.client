@@ -9,29 +9,44 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global examples orion:true window*/
+/*global examples orion:true window define*/
 /*jslint browser:true devel:true*/
 
-window.onload = function(){
+define([
+	"require", 
+	"orion/textview/textView",
+	"orion/textview/keyBinding",
+	"examples/textview/textStyler",
+	"orion/editor/textMateStyler",
+	"orion/editor/htmlGrammar",
+	"orion/editor/editor",
+	"orion/editor/editorFeatures",
+	"orion/editor/contentAssist",
+	"orion/editor/jsContentAssist",
+	"orion/editor/cssContentAssist"],
+
+function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGrammar, mEditor, mEditorFeatures, mContentAssist, mJSContentAssist, mCSSContentAssist){
 	
 	var editorDomNode = document.getElementById("editor");
 	
 	var textViewFactory = function() {
-		return new orion.textview.TextView({
+		return new mTextView.TextView({
 			parent: editorDomNode,
-			stylesheet: [ "../../orion/textview/textview.css",
-							"../../orion/textview/rulers.css", 
-							"../../orion/textview/annotations.css",
-							"../textview/textstyler.css",
-							"htmlStyles.css"],
+			stylesheet: [
+				require.toUrl("orion/textview/textview.css"),
+				require.toUrl("orion/textview/rulers.css"),
+				require.toUrl("orion/textview/annotations.css"),
+				require.toUrl("examples/editor/htmlStyles.css"),
+				require.toUrl("examples/textview/textstyler.css")
+			],
 			tabSize: 4
 		});
 	};
 
 	var contentAssistFactory = function(editor) {
-		var contentAssist = new orion.editor.ContentAssist(editor, "contentassist");
-		contentAssist.addProvider(new orion.editor.CssContentAssistProvider(), "css", "\\.css$");
-		contentAssist.addProvider(new orion.editor.JavaScriptContentAssistProvider(), "js", "\\.js$");
+		var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
+		contentAssist.addProvider(new mCSSContentAssist.CssContentAssistProvider(), "css", "\\.css$");
+		contentAssist.addProvider(new mJSContentAssist.JavaScriptContentAssistProvider(), "js", "\\.js$");
 		return contentAssist;
 	};
 	
@@ -54,10 +69,10 @@ window.onload = function(){
 						case "js":
 						case "java":
 						case "css":
-							this.styler = new examples.textview.TextStyler(textView, extension, annotationModel);
+							this.styler = new mTextStyler.TextStyler(textView, extension, annotationModel);
 							break;
 						case "html":
-							this.styler = new orion.editor.TextMateStyler(textView, orion.editor.HtmlGrammar.grammar);
+							this.styler = new mTextMateStyler.TextMateStyler(textView, mHtmlGrammar.HtmlGrammar().grammar);
 							break;
 					}
 				}
@@ -65,7 +80,7 @@ window.onload = function(){
 		}
 	};
 	
-	var annotationFactory = new orion.editor.AnnotationFactory();
+	var annotationFactory = new mEditorFeatures.AnnotationFactory();
 
 	function save(editor) {
 		editor.setInput(null, null, null, true);
@@ -75,15 +90,15 @@ window.onload = function(){
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 		
 		// Create keybindings for generic editing
-		var genericBindings = new orion.editor.TextActions(editor, undoStack);
+		var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
 		keyModeStack.push(genericBindings);
 		
 		// create keybindings for source editing
-		var codeBindings = new orion.editor.SourceCodeActions(editor, undoStack, contentAssist);
+		var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
 		keyModeStack.push(codeBindings);
 		
 		// save binding
-		editor.getTextView().setKeyBinding(new orion.textview.KeyBinding("s", true), "save");
+		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "save");
 		editor.getTextView().setAction("save", function(){
 				save(editor);
 				return true;
@@ -106,11 +121,11 @@ window.onload = function(){
 		document.getElementById("status").innerHTML = dirtyIndicator + status;
 	};
 	
-	var editor = new orion.editor.Editor({
+	var editor = new mEditor.Editor({
 		textViewFactory: textViewFactory,
-		undoStackFactory: new orion.editor.UndoFactory(),
+		undoStackFactory: new mEditorFeatures.UndoFactory(),
 		annotationFactory: annotationFactory,
-		lineNumberRulerFactory: new orion.editor.LineNumberRulerFactory(),
+		lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
 		contentAssistFactory: contentAssistFactory,
 		keyBindingFactory: keyBindingFactory, 
 		statusReporter: statusReporter,
@@ -140,4 +155,4 @@ window.onload = function(){
 			 return "There are unsaved changes.";
 		}
 	};
-};
+});

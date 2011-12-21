@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 
-define(["orion/assert", "orion/compare/diff-parser", "./mapper-test-data", 'jsdiff/diff'], function(assert, mDiffParser, mMapperTestData) {
+define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapter", "./mapper-test-data", 'jsdiff/diff'], function(assert, mDiffParser, mJSDiffAdapter, mMapperTestData) {
 	var tests = {};
 	var mapperTestCases = mMapperTestData.mapperTestCases;
 
@@ -80,7 +80,7 @@ define(["orion/assert", "orion/compare/diff-parser", "./mapper-test-data", 'jsdi
 		}
 	};
 	
-	var testJSDiff = function (testData, testOnly, skipTest){
+	var testJSDiffPatch = function (testData, testOnly, skipTest){
 		for ( var i = 0; i < testData.length; i++) {
 			if(testOnly){
 				if(!_inTestArray(testOnly, i)){
@@ -94,13 +94,23 @@ define(["orion/assert", "orion/compare/diff-parser", "./mapper-test-data", 'jsdi
 			var testCase = testData[i];
 			var input = testCase[0];
 			var expectedOutput = testCase[2];
-			var diff = JsDiff.createPatch("foo", input.split("\r").join(""), expectedOutput.split("\r").join(""), "", "") ;			
+			
+			var output;
+			if(expectedOutput.indexOf("\r\n") >= 0){
+				output = expectedOutput.split("\r\n").join("\n");
+			} else {
+				output = expectedOutput;
+			}
+			if(input.indexOf("\r\n") >= 0){
+				input = input.split("\r\n").join("\n");
+			}
+			var diff = JsDiff.createPatch("foo", input, output, "", "") ;			
 			var expectedMapping = testCase[3];
 			var description = testCase[4];
 			var j = i + 1;
 			
 			// Note: This is not a great way to do tests. Each test should be separate
-			tests["test jsDiff " + j + ": " + description] = function(input, diff, expectedOutput, expectedMapping) {
+			tests["test jsDiff " + j + ": " + description] = function(input, diff, output, expectedMapping) {
 				return function() {
 					var diffParser = new mDiffParser.DiffParser("\n");
 					//console.log("\n\nDiff:\n");
@@ -108,13 +118,54 @@ define(["orion/assert", "orion/compare/diff-parser", "./mapper-test-data", 'jsdi
 					var result = diffParser.parse(input, diff, false,true);
 					_mapperPartialEqual(result.mapper, expectedMapping);
 				};				
-			}(input, diff, expectedOutput, expectedMapping);
+			}(input, diff, output, expectedMapping);
+		}
+		
+	};
+	
+	var testJSDiffAdapter = function (testData, testOnly, skipTest){
+		var adapter = new mJSDiffAdapter.JSDiffAdapter();
+		for ( var i = 0; i < testData.length; i++) {
+			if(testOnly){
+				if(!_inTestArray(testOnly, i)){
+					continue;
+				}
+			} else if(skipTest){
+				if(_inTestArray(skipTest, i)){
+					continue;
+				}
+			}
+			var testCase = testData[i];
+			var input = testCase[0];
+			var expectedOutput = testCase[2];
+			var output;
+			if(expectedOutput.indexOf("\r\n") >= 0){
+				output = expectedOutput.split("\r\n").join("\n");
+			} else {
+				output = expectedOutput;
+			}
+			if(input.indexOf("\r\n") >= 0){
+				input = input.split("\r\n").join("\n");
+			}
+			
+			var expectedMapping = testCase[3];
+			var description = testCase[4];
+			var j = i + 1;
+			
+			// Note: This is not a great way to do tests. Each test should be separate
+			tests["test jsDiff adapter " + j + ": " + description] = function(input, output, expectedMapping) {
+				return function() {
+					var result = adapter.adapt(input, output);
+					_mapperPartialEqual(result.mapper, expectedMapping);
+				};				
+			}(input,  output, expectedMapping);
 		}
 		
 	};
 	
 	testMapper(mapperTestCases);
-	testJSDiff(mapperTestCases, null, [23,29,39,40]);
+	testJSDiffPatch(mapperTestCases, null, [23,29,31,39,40]);
+	testJSDiffAdapter(mapperTestCases);
 	
 	tests["test empty case"] = function() {
 		var input = "";
@@ -164,5 +215,6 @@ define(["orion/assert", "orion/compare/diff-parser", "./mapper-test-data", 'jsdi
 		assert.deepEqual(result.mapper, expectedMapping);
 		assert.equal(result.outPutFile, expectedOutput);
 	};
+	
 	return tests;
 });
