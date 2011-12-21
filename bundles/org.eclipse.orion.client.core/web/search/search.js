@@ -35,25 +35,11 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+			
 			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
 			var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, searcher);
 			
-			// page actions for search
-			
-			var saveresultsCommand = new mCommands.Command({
-				name: "Save Search",
-				tooltip: "Save query to search favorites",
-				id: "orion.saveSearchResults",
-				callback: function(data) {
-					searchResultsGenerator.saveSearch(data.items);
-				}
-			});
-		
-			commandService.addCommand(saveresultsCommand, "dom");
-			commandService.addCommandGroup("orion.searchActions.unlabeled", 200, null, null, "pageActions");
-			commandService.registerCommandContribution("orion.saveSearchResults", 1, "pageActions", "orion.searchActions.unlabeled");
-						
 			var item = dojo.hash();
 			searchResultsGenerator.loadResults(item);
 			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, item, null, null,  /* no images */ false, /* client handle page nav area */ true);     

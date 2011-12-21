@@ -1,0 +1,20 @@
+
+.bottomBorderReplace {
+	height: 40%;
+}
+
+.bottomBorderSearch {
+	height: 0px;
+}
+
+.search_mainpane {
+    margin: 0;
+    padding-left: 0px;
+    padding-top: 0px;
+    background: #FFFFFF;
+	overflow: auto;
+}
+
+.topBorder {
+	overflow: auto;
+}

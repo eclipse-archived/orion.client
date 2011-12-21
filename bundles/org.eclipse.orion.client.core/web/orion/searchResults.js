@@ -40,32 +40,8 @@ define(['dojo', 'orion/commands', 'orion/searchUtils'], function(dojo, mCommands
 			var results = dojo.create("div", null, parent);
 			this.searcher.search(results, query);
 			dojo.place(results, parent, "only");
-		},
-		
-		saveSearch: function(query) {
-			var queryObj = mSearchUtils.parseQueryStr(query);
-			var qName = query;
-			if(queryObj && typeof(queryObj.searchStrTitle) === "string" && typeof(queryObj.location) === "string" ){
-				qName = "\'" + queryObj.searchStrTitle + "\' in ";// +queryObj.location;
-				if(queryObj.location.length > 0){
-					this._fileClient.read(queryObj.location, true).then(
-						dojo.hitch(this, function(meta) {
-							var parentName = mSearchUtils.fullPathNameByMeta(meta.Parents);
-							var fullName = parentName.length === 0 ? meta.Name: parentName + "/" + meta.Name;
-							this.searcher.saveSearch(qName + fullName, query);
-						}),
-						dojo.hitch(this, function(error) {
-							console.error("Error loading file meta data: " + error.message);
-							this.searcher.saveSearch(qName + "root", query);
-						})
-					);
-				} else {
-					this.searcher.saveSearch(qName + "root", query);
-				}
-			} else {
-				this.searcher.saveSearch(qName, query);
-			}
 		}
+		
 	};
 	SearchResultsGenerator.prototype.constructor = SearchResultsGenerator;
 	//return module exports
