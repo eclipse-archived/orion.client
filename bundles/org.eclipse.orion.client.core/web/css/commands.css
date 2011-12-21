@@ -7,6 +7,7 @@
 
 .commandSprite {
    background: url(../images/core_sprites.png) no-repeat top left;
+   vertical-align: middle;
 }
 
 .commandImage {
@@ -26,6 +27,30 @@
     background-color: #ffeecc;
     border: 1px solid #ffcc66;
     border-radius: 3px;
+}
+
+.commandButton {
+	margin: 2px;
+	background: transparent;
+	font: 8pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
+	border: 1px solid #c3c3c3;
+    border-radius: 6px;
+    vertical-align: middle;
+    min-width: 50px;
+    min-height: 20px;
+}
+
+commandButtonImage {
+	vertical-align: middle;
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
+.commandButtonOver {
+	background: #e3e3e3;
+	border: 1px solid #9a9a9a;
+    border-radius: 6px;
+    vertical-align: middle;
 }
 
 .commandSeparator {

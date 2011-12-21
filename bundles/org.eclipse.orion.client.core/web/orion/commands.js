@@ -589,7 +589,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						continue;
 					}
 					var children;
-					if (renderType === "tool") {
+					if (renderType === "tool" || renderType === "button") {
 						if (group.title) {
 							// we need a named menu button, but first let's see if we actually have content
 							var newMenu= new dijit.Menu({
@@ -634,9 +634,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 									menuCommand._setupActivateVisuals(menuButton.domNode, menuButton.focusNode, activeCommandClass, inactiveCommandClass, overclass);
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
-									id = "image" + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
+									id = renderType + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
 									invocation = new CommandInvocation(this, handler, items, userData, menuCommand);
-									menuCommand._addTool(parent, forceText, id, invocation, activeCommandClass, inactiveCommandClass);
+									if (renderType === "button") {
+										menuCommand._addButton(parent, forceText, id, invocation, activeCommandClass, inactiveCommandClass);
+									} else {
+										menuCommand._addTool(parent, forceText, id, invocation, activeCommandClass, inactiveCommandClass);
+									}
 								}
 							}
 						} else {
@@ -762,9 +766,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							}
 						} else {
 							if (renderType === "tool") {
-								id = "image" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								command._addTool(parent, forceText, id, invocation, activeCommandClass, inactiveCommandClass);
-								
+								id = "tool" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
+								command._addTool(parent, forceText, id, invocation, activeCommandClass, inactiveCommandClass);	
+							} else if (renderType === "button") {
+								id = "button" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
+								command._addButton(parent, forceText, id, invocation, activeCommandClass, inactiveCommandClass);	
 							} else if (renderType === "menu") {
 								command._addMenuItem(parent, invocation, activeCommandClass, inactiveCommandClass);
 							}
@@ -938,6 +944,67 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			var overClass = image ? "commandOver" : null;
 			this._setupActivateVisuals(visual, visual, activeCommandClass, inactiveCommandClass, overClass);			
 			dojo.place(link, parent, "last");
+		},
+		
+		_addButton: function(parent, forceText, name, context, activeCommandClass, inactiveCommandClass) {
+			context.handler = context.handler || this;
+			var button  = dojo.create("button");
+			button.type = "button";
+			button.id = name;
+			var image = null;
+			if (this.hasImage()) {
+				image = new Image();
+				image.alt = this.name;
+				image.name = name;
+				image.id = name;
+				image.src = this.image;	
+				dojo.place(image, button, "last");
+				if (this.imageClass) {
+					dojo.addClass(image, this.spriteClass);
+					dojo.addClass(image, this.imageClass);
+				} 
+				dojo.addClass(image, "commandButtonImage");
+			}
+			var text = window.document.createTextNode(this.name);
+			dojo.place(text, button, "last");
+			dojo.addClass(button, "commandButton");
+			if (this.tooltip) {
+				new CommandTooltip({
+					connectId: [button],
+					label: this.tooltip,
+					position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
+					commandParent: parent,
+					commandService: context.commandService
+				});
+			}
+			context.domParent = parent;
+			context.domNode = button;
+			var location;
+			if (this.hrefCallback) {
+				var href = this.hrefCallback.call(context.handler, context);
+				if(href.then){
+					href.then(function(l){
+						location = l;
+					});
+				}else{
+					location = href; 
+				}
+				dojo.connect(button, "onclick", this, function() {
+					window.open(location);
+				});
+
+			} else {
+				dojo.connect(button, "onclick", this, function() {
+					// collect parameters in advance if specified
+					if (this.parameters && context.collectsParameters()) {
+						context.commandService._collectParameters("button", context);
+					} else if (this.callback) {
+						this.callback.call(context.handler, context);
+					}
+				});
+			}
+			this._setupActivateVisuals(button, button, activeCommandClass, inactiveCommandClass, "commandButtonOver");			
+			dojo.place(button, parent, "last");
 		},
 		_addMenuItem: function(parent, context) {
 			context.domParent = parent.domNode;

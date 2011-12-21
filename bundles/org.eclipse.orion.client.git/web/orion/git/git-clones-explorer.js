@@ -306,7 +306,7 @@ exports.GitClonesRenderer = (function(){
 			} 	
 			return col;
 		case 1:
-			return this.getActionsColumn(item, tableRow);
+			return this.getActionsColumn(item, tableRow, "button", "actionsColumn");
 		};
 	};
 
