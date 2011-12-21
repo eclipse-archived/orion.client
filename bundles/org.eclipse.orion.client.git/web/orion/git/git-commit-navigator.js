@@ -104,28 +104,14 @@ exports.GitCommitNavigator = (function() {
 
 		var doGitLog = function(gitLogURI, onLoad) {
 			var ret = new dojo.Deferred();
-			service.doGitLog(gitLogURI, function(jsonData, xhrArgs) {
-				if (xhrArgs.xhr.status === 200) {
+			service.doGitLog(gitLogURI, function(jsonData) {
 					waitDeferred.callback();
 					if (onLoad)
 						onLoad(jsonData.Children);
 					else {
 						ret.callback(jsonData.Children);
 					}
-				}
 
-				if (xhrArgs.xhr.status === 202) {
-					var deferred = new dojo.Deferred();
-					deferred.callback(jsonData);
-					self.registry.getService("orion.page.progress").showWhile(deferred, "Getting git log").then(function(gitLogProgressResp) {
-						waitDeferred.callback();
-						if (onLoad)
-							onLoad(gitLogProgressResp.Result.JsonData.Children);
-						else {
-							ret.callback(gitLogProgressResp.Result.JsonData.Children);
-						}
-					});
-				}
 			});
 			return ret;
 		};
