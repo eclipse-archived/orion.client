@@ -63,12 +63,14 @@ var exports = {};
 		if (onRoot) {
 			refNode = dojo.byId(domId);
 		} else {
-			var nodes = explorer.makeNewItemPlaceHolder(item, domId, column_no);
-			if (nodes) {
-				refNode = nodes.refNode;
-				tempNode = nodes.tempNode;
-			} else {
-				refNode = dojo.byId(domId);
+			if (explorer.makeNewItemPlaceHolder != null) {
+				var nodes = explorer.makeNewItemPlaceHolder(item, domId, column_no);
+				if (nodes) {
+					refNode = nodes.refNode;
+					tempNode = nodes.tempNode;
+				} else {
+					refNode = dojo.byId(domId);
+				}
 			}
 		}
 		if (refNode) {
@@ -239,6 +241,15 @@ var exports = {};
 					if(!name && name==""){
 						return;
 					}
+								
+					if (item.Repository != null) {
+						serviceRegistry.getService("orion.git.provider").checkoutTag(item.Repository.Location, item.Name, name).then(function() {
+							dojo.hitch(explorer, explorer.displayBranches)(item.Repository.BranchLocation);
+						}, displayErrorOnStatus);
+						return;
+					}
+					
+					console.info(item.parent.parent.Location + " " + item.Name + " " + name);
 					serviceRegistry.getService("orion.git.provider").checkoutTag(item.parent.parent.Location, item.Name, name).then(function() {
 						dojo.hitch(explorer, explorer.changedItem)(getBranchItem());
 					}, displayErrorOnStatus);
@@ -292,11 +303,14 @@ var exports = {};
 		});
 		commandService.addCommand(checkoutBranchCommand, "object");
 
+		var branchNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:')], false);
+
 		var addBranchCommand = new mCommands.Command({
 			name: "New Branch",
 			tooltip: "Add a new local branch to the repository",
 			imageClass: "core-sprite-add",
 			id: "eclipse.addBranch",
+			parameters: branchNameParameters,
 			callback: function(data) {
 				exports.getNewItemName(data.items, explorer, false, data.domNode.id, "Branch name", function(name) {
 					if (!name && name == "") {
@@ -312,6 +326,28 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(addBranchCommand, "object");
+		
+		var addBranchCommand = new mCommands.Command({
+			name: "New Branch",
+			tooltip: "Add a new local branch to the repository",
+			imageClass: "core-sprite-add",
+			id: "eclipse.addBranch2",
+			parameters: branchNameParameters,
+			callback: function(data) {
+				exports.getNewItemName(data.items, explorer, false, data.domNode.id, "Branch name", function(name) {
+					if (!name && name == "") {
+						return;
+					}
+					serviceRegistry.getService("orion.git.provider").addBranch(data.items.BranchLocation, name).then(function() {
+						dojo.hitch(explorer, explorer.displayBranches)(data.items.BranchLocation, data.items);
+					}, displayErrorOnStatus);
+				});
+			},
+			visibleWhen: function(item) {
+				return item.Type === "Clone";
+			}
+		});
+		commandService.addCommand(addBranchCommand, "dom");
 
 		var removeBranchCommand = new mCommands.Command({
 			name: "Delete", // "Delete Branch"
@@ -322,7 +358,10 @@ var exports = {};
 				var item = data.items;
 				if (confirm("Are you sure you want to delete branch " + item.Name + "?")) {
 					serviceRegistry.getService("orion.git.provider").removeBranch(item.Location).then(function() {
-						dojo.hitch(explorer, explorer.changedItem)(item.parent);
+						if (explorer.changedItem)
+							dojo.hitch(explorer, explorer.changedItem)(item.parent);
+						else if (explorer.displayBranches)
+							dojo.hitch(explorer, explorer.displayBranches)(item.ParentLocation, null);
 					}, displayErrorOnStatus);
 				}
 			},
