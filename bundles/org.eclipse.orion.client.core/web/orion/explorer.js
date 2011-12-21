@@ -242,14 +242,16 @@ exports.ExplorerRenderer = (function() {
 			this.renderTableHeader(tableNode);
 
 		},
-		getActionsColumn: function(item, tableRow){
+		getActionsColumn: function(item, tableRow, renderType, columnClass){
+			renderType = renderType || "tool";
 			var commandService = this.explorer.registry.getService("orion.page.command");
 			var actionsColumn = document.createElement('td');
 			actionsColumn.id = tableRow.id + "actions";
-			dojo.addClass(actionsColumn, "actionsColumn");
-			
+			if (columnClass) {
+				dojo.addClass(actionsColumn, columnClass);
+			}
 			// contact the command service to render appropriate commands here.
-			commandService.renderCommands(actionsColumn, "object", item, this.explorer, "tool", false, null, "commandActiveItem", "commandInactiveItem");
+			commandService.renderCommands(actionsColumn, "object", item, this.explorer, renderType, false, null, "commandActiveItem", "commandInactiveItem");
 			return actionsColumn;
 		},
 		initCheckboxColumn: function(tableNode){
