@@ -1718,17 +1718,15 @@ var exports = {};
 			spriteClass: "gitCommandSprite",
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
-				var gitService = serviceRegistry.getService("orion.git.provider");
 				var dialog = new orion.git.widgets.ApplyPatchDialog({
 					title: "Apply Patch",
 					diffLocation: item.DiffLocation
 				});
-
 				dialog.startup();
 				dialog.show();
 			},
 			visibleWhen : function(item) {
-				return true;
+				return item.Type === "Clone" ;
 			}
 		});
 		commandService.addCommand(applyPatchCommand, "object");
