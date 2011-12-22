@@ -273,6 +273,33 @@ define("orion/editor/jsContentAssist", [], function() {
 	}
 
 	/**
+	 * Returns proposals for variables and arguments within the current function scope.
+	 */
+	function getVariableProposals(prefix, buffer, selection) {
+		var proposals = [];
+		//search only between the current cursor position and most recent function declaration
+		var block = buffer.substring(0, selection.offset);
+		var lastFunction = block.lastIndexOf("function");
+		if (lastFunction >= 0) {
+			block = block.substring(lastFunction);
+			//collect function arguments
+			var start = block.indexOf("(");
+			var end = block.indexOf(")");
+			if (start >= 0 && end >= 0) {
+				var argList = block.substring(start+1, end);
+				var args = argList.split(",");
+				for (var i = 0; i < args.length; i++) {
+					if (args[i].indexOf(prefix) === 0) {
+						proposals.push(args[i].trim());
+					}
+				}
+			}
+		}
+		//collect all variable declarations
+		
+		return proposals;
+	}
+	/**
 	 * @name orion.editor.JavaScriptContentAssistProvider
 	 * @class Provides content assist for JavaScript keywords.
 	 */
@@ -288,12 +315,13 @@ define("orion/editor/jsContentAssist", [], function() {
 				//if the character preceeding the prefix is a '.' character, then we are completing an object member
 				var preceedingChar = buffer.charAt(selection.offset - prefix.length - 1);
 				if (preceedingChar === '.') {
-					return getMemberProposals(prefix, buffer, selection, proposals);
+					return getMemberProposals(prefix, buffer, selection);
 				}
 			}
 			//we are not completing on an object member, so suggest templates and keywords
-			proposals = proposals.concat(getTemplateProposals(prefix, buffer, selection, proposals));
-			proposals = proposals.concat(getKeyWordProposals(prefix, buffer, selection, proposals));
+			proposals = proposals.concat(getVariableProposals(prefix, buffer, selection));
+			proposals = proposals.concat(getTemplateProposals(prefix, buffer, selection));
+			proposals = proposals.concat(getKeyWordProposals(prefix, buffer, selection));
 			return proposals;
 		}
 	};
