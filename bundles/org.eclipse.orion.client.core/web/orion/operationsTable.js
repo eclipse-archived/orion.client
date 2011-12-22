@@ -141,9 +141,9 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 			case 0:
 				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.Name});
 				var div = dojo.create("div", null, col, "only");
-				link = dojo.create("a", {innerHTML: item.Name, className: "navlinkonpage"}, div, "last");
+				var span = dojo.create("span", {innerHTML: item.Name, className: "primaryColumn"}, div, "last");
 
-				dojo.place(document.createTextNode(item.Name), link, "only");
+				dojo.place(document.createTextNode(item.Name), span, "only");
 				
 				var operationIcon = dojo.create("span", null, div, "first");
 				dojo.addClass(operationIcon, "imageSprite");
