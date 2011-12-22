@@ -11,7 +11,7 @@
 
 /*global define setTimeout clearTimeout setInterval clearInterval Node */
 
-define("orion/textview/rulers", ['orion/textview/tooltip'], function(mTooltip) {
+define("orion/textview/rulers", ['orion/textview/annotations', 'orion/textview/tooltip'], function(mAnnotations, mTooltip) {
 
 	/**
 	 * Constructs a new ruler. 
@@ -42,12 +42,16 @@ define("orion/textview/rulers", ['orion/textview/tooltip'], function(mTooltip) {
 	 * {@link orion.textview.TextView#addRuler}
 	 * </p>		 
 	 * @name orion.textview.Ruler
+	 * @borrows orion.textview.AnnotationTypeList#addAnnotationType as #addAnnotationType
+	 * @borrows orion.textview.AnnotationTypeList#getAnnotationTypePriority as #getAnnotationTypePriority
+	 * @borrows orion.textview.AnnotationTypeList#getAnnotationsByType as #getAnnotationsByType
+	 * @borrows orion.textview.AnnotationTypeList#isAnnotationTypeVisible as #isAnnotationTypeVisible
+	 * @borrows orion.textview.AnnotationTypeList#removeAnnotationType as #removeAnnotationType
 	 */
 	function Ruler (annotationModel, rulerLocation, rulerOverview, rulerStyle) {
 		this._location = rulerLocation || "left";
 		this._overview = rulerOverview || "page";
 		this._rulerStyle = rulerStyle;
-		this._types = [];
 		this._view = null;
 		var self = this;
 		this._listener = {
@@ -61,21 +65,6 @@ define("orion/textview/rulers", ['orion/textview/tooltip'], function(mTooltip) {
 		this.setAnnotationModel(annotationModel);
 	}
 	Ruler.prototype = /** @lends orion.textview.Ruler.prototype */ {
-		/**
-		 * Adds an annotation type to the ruler.
-		 * <p>
-		 * Only annotations of the specified types will be shown by
-		 * this ruler.
-		 * </p>
-		 *
-		 * @param type {Object} the annotation type to be shown
-		 * 
-		 * @see #removeAnnotationType
-		 * @see #isAnnotationTypeVisible
-		 */
-		addAnnotationType: function(type) {
-			this._types.push(type);
-		},
 		/**
 		 * Returns the annotations for a given line range merging multiple
 		 * annotations when necessary.
@@ -99,11 +88,10 @@ define("orion/textview/rulers", ['orion/textview/tooltip'], function(mTooltip) {
 				start = model.mapOffset(start);
 				end = model.mapOffset(end);
 			}
-			var annotations = annotationModel.getAnnotations(start, end);
 			var result = [];
-			while (annotations.hasNext()) {
-				var annotation = annotations.next();
-				if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
+			var annotations = this.getAnnotationsByType(annotationModel, start, end);
+			for (var i = 0; i < annotations.length; i++) {
+				var annotation = annotations[i];
 				var annotationLineStart = baseModel.getLineAtOffset(annotation.start);
 				var annotationLineEnd = baseModel.getLineAtOffset(Math.max(annotation.start, annotation.end - 1));
 				for (var lineIndex = annotationLineStart; lineIndex<=annotationLineEnd; lineIndex++) {
@@ -184,39 +172,6 @@ define("orion/textview/rulers", ['orion/textview/tooltip'], function(mTooltip) {
 		 */
 		getWidestAnnotation: function() {
 			return null;
-		},
-		/**
-		 * Returns whether the ruler shows annotations of the specified type.
-		 *
-		 * @param {Object} type the annotation type 
-		 * @returns {Boolean} whether the specified annotation type is shown
-		 * 
-		 * @see #addAnnotationType
-		 * @see #removeAnnotationType
-		 */
-		isAnnotationTypeVisible: function(type) {
-			for (var i = 0; i < this._types.length; i++) {
-				if (this._types[i] === type) {
-					return true;
-				}
-			}
-			return false;
-		},
-		/**
-		 * Removes an annotation type from the ruler.
-		 *
-		 * @param {Object} type the annotation type to be removed
-		 * 
-		 * @see #addAnnotationType
-		 * @see #isAnnotationTypeVisible
-		 */
-		removeAnnotationType: function(type) {
-			for (var i = 0; i < this._types.length; i++) {
-				if (this._types[i] === type) {
-					this._types.splice(i, 1);
-					break;
-				}
-			}
 		},
 		/**
 		 * Sets the annotation model for the ruler.
@@ -350,13 +305,7 @@ define("orion/textview/rulers", ['orion/textview/tooltip'], function(mTooltip) {
 					start = model.mapOffset(start);
 					end = model.mapOffset(end);
 				}
-				var iter = annotationModel.getAnnotations(start, end);
-				var annotation;
-				while (iter.hasNext()) {
-					annotation = iter.next();
-					if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
-					annotations.push(annotation);
-				}
+				annotations = this.getAnnotationsByType(annotationModel, start, end);
 			}
 			var contents = this._getTooltipContents(lineIndex, annotations);
 			if (!contents) { return null; }
@@ -463,6 +412,7 @@ define("orion/textview/rulers", ['orion/textview/tooltip'], function(mTooltip) {
 			return result;
 		}
 	};
+	mAnnotations.AnnotationTypeList.addMixin(Ruler.prototype);
 
 	/**
 	 * Constructs a new line numbering ruler. 
