@@ -329,7 +329,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", null, detailsView );
 		var description = dojo.create( "span", { "class":"extension-description"}, detailsView );
 		
-		link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + tag.Commit.Location}, description);
+		link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + tag.Commit.Location + "?page=1&pageSize=1"}, description);
 		dojo.place(document.createTextNode(tag.Commit.Message), link);	
 		dojo.place(document.createTextNode(" by " + tag.Commit.AuthorName + " on " + 
 			dojo.date.locale.format(new Date(tag.Commit.Time), {formatLength: "short"})), description, "last");
