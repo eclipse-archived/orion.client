@@ -111,12 +111,16 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 				case 0: 
 					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Name</h2>"});
 					break;
-				case 1: 
-					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Status</h2>"});
-					break;
-				case 2:
+				case 1:
 					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Actions</h2>"});
 					break;
+				case 2: 
+					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Status</h2>"});
+					break;
+				case 3: 
+					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Scheduled</h2>"});
+					break;
+
 			}
 			
 		};
@@ -173,12 +177,19 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 				return col;
 				break;
 			case 1:
+				return this.getActionsColumn(item, tableRow);
+				break;
+			case 2:
 				var result =  this.parseProgressResult(item.Result);
 				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: result.Message || item.Message});
 				break;
-			case 2:
-				return this.getActionsColumn(item, tableRow);
-				break;
+			case 3:
+				if(item.Created && parseInt(item.Created)>0){
+					return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML:  dojo.date.locale.format(
+							new Date(parseInt(item.Created)),
+							{selector: "datetime", formatLength: "medium"})});
+				}
+				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"});
 			}
 		};
 		
