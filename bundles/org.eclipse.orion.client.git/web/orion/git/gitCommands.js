@@ -462,9 +462,7 @@ var exports = {};
 						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
 							dojo.xhrGet({
 								url: path,
-								headers: {
-									"Orion-Version": "1"
-								},
+								headers: { "Orion-Version": "1"	},
 								postData: dojo.toJson({
 									"GitSshUsername": options.gitSshUsername,
 									"GitSshPassword": options.gitSshPassword,
@@ -482,7 +480,7 @@ var exports = {};
 									return error;
 								}
 							}).then(function(remoteJsonData) {
-								if (item.Type === "Remote") {
+								if (item.Type === "Clone") {
 									dojo.hitch(explorer, explorer.changedItem)(item);
 								}
 							}, displayErrorOnStatus);
@@ -491,7 +489,7 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				return item.Type === "Remote" ;
+				return item.Type === "Clone";
 			}
 		});
 		commandService.addCommand(pullCommand, "object");

@@ -592,10 +592,10 @@ eclipse.GitService = (function() {
 				}
 			});
 		},
-		doPull : function(gitRemoteURI, force, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
+		doPull : function(gitCloneURI, force, onLoad, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
 			var service = this;
 			return dojo.xhrPost({
-				url : gitRemoteURI,
+				url : gitCloneURI,
 				headers : {
 					"Orion-Version" : "1"
 				},
@@ -611,7 +611,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Pulling remote: " + gitRemoteURI, onLoad);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Pulling : " + gitCloneURI, onLoad);
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
