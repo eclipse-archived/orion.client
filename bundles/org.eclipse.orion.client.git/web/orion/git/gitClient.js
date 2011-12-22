@@ -819,20 +819,33 @@ eclipse.GitService = (function() {
 			
 			return dojo.xhrPut({
 				url : gitCommitURI,
-				headers : {
-					"Orion-Version" : "1"
-				},
-				putData : dojo.toJson({
-					"Name" : tagName
-				}),
+				headers : { "Orion-Version" : "1" },
+				putData : dojo.toJson({ "Name" : tagName }),
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Adding tag " + tagName, onLoad);
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Adding tag ..." + tagName, onLoad);
 				},
 				error : function(error, ioArgs) {
 					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
 					console.error("HTTP status code: ", ioArgs.xhr.status);
+				}
+			});
+		},
+		doRemoveTag : function(gitTagURI) {
+			var service = this;
+			return dojo.xhrDelete({
+				url : gitTagURI,
+				headers : { "Orion-Version" : "1" },
+				handleAs : "json",
+				timeout : 5000,
+				load : function(jsonData, xhrArgs) {
+					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, "Removing tag ...");
+				},
+				error : function(error, ioArgs) {
+					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
+					console.error("HTTP status code: ", ioArgs.xhr.status);
+					return error;
 				}
 			});
 		},

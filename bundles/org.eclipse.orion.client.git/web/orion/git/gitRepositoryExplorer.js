@@ -96,8 +96,8 @@ exports.GitRepositoryExplorer = (function() {
 					"<div id=\"tagSectionActionsArea\" class=\"pageActions\"></div>" +
 					"</div>" +
 					"</div>" +
-					"</div>" +
 					"</list>" +
+					"</div>" +
 					"</section>" +
 
 					"<h2><a href=\"a\">See all tags</a></h2>" +
