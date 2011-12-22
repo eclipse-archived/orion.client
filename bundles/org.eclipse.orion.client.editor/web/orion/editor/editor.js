@@ -297,13 +297,8 @@ define("orion/editor/editor", ['orion/textview/keyBinding', 'orion/textview/even
 			if (!annotationStyler) { return null; }
 			var offset = textView.getOffsetAtLocation(x, y);
 			if (offset === -1) { return null; }
-			var iter = annotationModel.getAnnotations(offset, offset + 1);
-			var annotation, annotations = [];
-			while (iter.hasNext()) {
-				annotation = iter.next();
-				if (!annotationStyler.isAnnotationTypeVisible(annotation.type) || !annotation.rangeStyle) { continue; }
-				annotations.push(annotation);
-			}
+			offset = this.mapOffset(offset);
+			var annotations = annotationStyler.getAnnotationsByType(annotationModel, offset, offset + 1);
 			if (annotations.length === 0) { return null; }
 			var pt = textView.convert({x: x, y: y}, "document", "page");
 			var info = {

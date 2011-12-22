@@ -90,6 +90,116 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 		}
 	};
 	
+	function AnnotationTypeList () {
+	}
+	/**
+	 * Adds in the annotation type interface into the specified object.
+	 *
+	 * @param {Object} object The object to add in the annotation type interface.
+	 */
+	AnnotationTypeList.addMixin = function(object) {
+		var proto = AnnotationTypeList.prototype;
+		for (var p in proto) {
+			if (proto.hasOwnProperty(p)) {
+				object[p] = proto[p];
+			}
+		}
+	};	
+	AnnotationTypeList.prototype = /** @lends orion.textview.AnnotationTypeList.prototype */ {
+		/**
+		 * Adds an annotation type to the receiver.
+		 * <p>
+		 * Only annotations of the specified types will be shown by
+		 * the receiver.
+		 * </p>
+		 *
+		 * @param {Object} type the annotation type to be shown
+		 * 
+		 * @see #removeAnnotationType
+		 * @see #isAnnotationTypeVisible
+		 */
+		addAnnotationType: function(type) {
+			if (!this._annotationTypes) { this._annotationTypes = []; }
+			this._annotationTypes.push(type);
+		},
+		/**
+		 * Gets the annotation type priority.  The priority is determined by the
+		 * order the annotation type is added to the receiver.  Annotation types
+		 * added first have higher priority.
+		 * <p>
+		 * Returns <code>0</code> if the annotation type is not added.
+		 * </p>
+		 *
+		 * @param {Object} type the annotation type
+		 * 
+		 * @see #addAnnotationType
+		 * @see #removeAnnotationType
+		 * @see #isAnnotationTypeVisible
+		 */
+		getAnnotationTypePriority: function(type) {
+			if (this._annotationTypes) { 
+				for (var i = 0; i < this._annotationTypes.length; i++) {
+					if (this._annotationTypes[i] === type) {
+						return i + 1;
+					}
+				}
+			}
+			return 0;
+		},
+		/**
+		 * Returns an array of annotations in the specified annotation model for the given range of text sorted by type.
+		 *
+		 * @param {orion.textview.AnnotationModel} annotationModel the annotation model.
+		 * @param {Number} start the start offset of the range.
+		 * @param {Number} end the end offset of the range.
+		 * @return {orion.textview.Annotation[]} an annotation array.
+		 */
+		getAnnotationsByType: function(annotationModel, start, end) {
+			var iter = annotationModel.getAnnotations(start, end);
+			var annotation, annotations = [];
+			while (iter.hasNext()) {
+				annotation = iter.next();
+				var priority = this.getAnnotationTypePriority(annotation.type);
+				if (priority === 0) { continue; }
+				annotations.push(annotation);
+			}
+			var self = this;
+			annotations.sort(function(a, b) {
+				return self.getAnnotationTypePriority(a.type) - self.getAnnotationTypePriority(b.type);
+			});
+			return annotations;
+		},
+		/**
+		 * Returns whether the receiver shows annotations of the specified type.
+		 *
+		 * @param {Object} type the annotation type 
+		 * @returns {Boolean} whether the specified annotation type is shown
+		 * 
+		 * @see #addAnnotationType
+		 * @see #removeAnnotationType
+		 */
+		isAnnotationTypeVisible: function(type) {
+			return this.getAnnotationTypePriority(type) !== 0;
+		},
+		/**
+		 * Removes an annotation type from the receiver.
+		 *
+		 * @param {Object} type the annotation type to be removed
+		 * 
+		 * @see #addAnnotationType
+		 * @see #isAnnotationTypeVisible
+		 */
+		removeAnnotationType: function(type) {
+			if (!this._annotationTypes) { return; }
+			for (var i = 0; i < this._annotationTypes.length; i++) {
+				if (this._annotationTypes[i] === type) {
+					this._annotationTypes.splice(i, 1);
+					break;
+				}
+			}
+		}
+	};
+	
 	/**
 	 * Constructs an annotation model.
 	 * 
@@ -406,11 +516,15 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 	 * 
 	 * @class This object represents a styler for annotation attached to a text view.
 	 * @name orion.textview.AnnotationStyler
+	 * @borrows orion.textview.AnnotationTypeList#addAnnotationType as #addAnnotationType
+	 * @borrows orion.textview.AnnotationTypeList#getAnnotationTypePriority as #getAnnotationTypePriority
+	 * @borrows orion.textview.AnnotationTypeList#getAnnotationsByType as #getAnnotationsByType
+	 * @borrows orion.textview.AnnotationTypeList#isAnnotationTypeVisible as #isAnnotationTypeVisible
+	 * @borrows orion.textview.AnnotationTypeList#removeAnnotationType as #removeAnnotationType
 	 */
 	function AnnotationStyler (view, annotationModel) {
 		this._view = view;
 		this._annotationModel = annotationModel;
-		this._types = [];
 		var self = this;
 		this._listener = {
 			onDestroy: function(e) {
@@ -429,21 +543,6 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 	}
 	AnnotationStyler.prototype = /** @lends orion.textview.AnnotationStyler.prototype */ {
 		/**
-		 * Adds an annotation type to the receiver.
-		 * <p>
-		 * Only annotations of the specified types will be shown by
-		 * this receiver.
-		 * </p>
-		 *
-		 * @param type {Object} the annotation type to be shown
-		 * 
-		 * @see #removeAnnotationType
-		 * @see #isAnnotationTypeVisible
-		 */
-		addAnnotationType: function(type) {
-			this._types.push(type);
-		},
-		/**
 		 * Destroys the styler. 
 		 * <p>
 		 * Removes all listeners added by this styler.
@@ -460,39 +559,6 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 			if (annotationModel) {
 				annotationModel.removeEventListener("Changed", this._listener.onChanged);
 				annotationModel = null;
-			}
-		},
-		/**
-		 * Returns whether the receiver shows annotations of the specified type.
-		 *
-		 * @param {Object} type the annotation type 
-		 * @returns {Boolean} whether the specified annotation type is shown
-		 * 
-		 * @see #addAnnotationType
-		 * @see #removeAnnotationType
-		 */
-		isAnnotationTypeVisible: function(type) {
-			for (var i = 0; i < this._types.length; i++) {
-				if (this._types[i] === type) {
-					return true;
-				}
-			}
-			return false;
-		},
-		/**
-		 * Removes an annotation type from the receiver.
-		 *
-		 * @param {Object} type the annotation type to be removed
-		 * 
-		 * @see #addAnnotationType
-		 * @see #isAnnotationTypeVisible
-		 */
-		removeAnnotationType: function(type) {
-			for (var i = 0; i < this._types.length; i++) {
-				if (this._types[i] === type) {
-					this._types.splice(i, 1);
-					break;
-				}
 			}
 		},
 		_mergeStyle: function(result, style) {
@@ -611,9 +677,11 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 			}
 		}
 	};
+	AnnotationTypeList.addMixin(AnnotationStyler.prototype);
 	
 	return {
 		FoldingAnnotation: FoldingAnnotation,
+		AnnotationTypeList: AnnotationTypeList,
 		AnnotationModel: AnnotationModel,
 		AnnotationStyler: AnnotationStyler
 	};
