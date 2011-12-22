@@ -1216,25 +1216,31 @@ var exports = {};
 		});
 		commandService.addCommand(resetIndexCommand, "object");
 
+		var tagNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:')], false);
+
 		var addTagCommand = new mCommands.Command({
 			name : "Tag",
 			tooltip: "Create a tag for the commit",
 			imageClass: "git-sprite-tag",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.addTag",
-			
+			parameters: tagNameParameters,
 			callback: function(data) {
 				var item = data.items;
 				var clientDeferred = new dojo.Deferred();
 				exports.getNewItemName(item, explorer, false, data.domNode.id, "Tag name", function(tagName){
-					if(!tagName || tagName===""){
+					if(!tagName || tagName === ""){
 						return;
 					}
 					serviceRegistry.getService("orion.git.provider").doAddTag(item.Location, tagName).then(
 						function(jsonData, secondArg) {
-							var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
-							var tr = dojo.byId(trId);
-							dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[6] /* tags column */, "last"), "only");
+							if (explorer.displayTags) {
+								dojo.hitch(explorer, explorer.displayTags)(jsonData.Tags, null);
+							} else {
+								var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+								var tr = dojo.byId(trId);
+								dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[6] /* tags column */, "last"), "only");
+							}
 						},
 						function (error){
 							var display = [];
@@ -1252,6 +1258,31 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(addTagCommand, "object");
+		commandService.addCommand(addTagCommand, "dom");
+
+		var removeTagCommand = new mCommands.Command({
+			name: "Delete",
+			tooltip: "Delete the tag from the repository",
+			imageClass: "core-sprite-delete",
+			id: "eclipse.removeTag",
+			callback: function(data) {
+				var item = data.items;
+				if (confirm("Are you sure you want to delete tag " + item.Name + "?")) {
+					serviceRegistry.getService("orion.git.provider").doRemoveTag(item.Location).then(function() {
+						if (explorer.changedItem) {
+							dojo.hitch(explorer, explorer.changedItem)(item.parent);
+						} else if (explorer.displayCommit) {
+							// TODO: call displayTags and reload tags only
+							dojo.hitch(explorer, explorer.displayCommit)(item.CommitLocation + "?page=1&pageSize=1", null);
+						}
+					}, displayErrorOnStatus);
+				}
+			},
+			visibleWhen: function(item) {
+				return item.Type === "Tag";
+			}
+		});
+		commandService.addCommand(removeTagCommand, "object");
 
 		var cherryPickCommand = new mCommands.Command({
 			name : "Cherry-Pick",
@@ -1687,17 +1718,15 @@ var exports = {};
 			spriteClass: "gitCommandSprite",
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
-				var gitService = serviceRegistry.getService("orion.git.provider");
 				var dialog = new orion.git.widgets.ApplyPatchDialog({
 					title: "Apply Patch",
 					diffLocation: item.DiffLocation
 				});
-
 				dialog.startup();
 				dialog.show();
 			},
 			visibleWhen : function(item) {
-				return true;
+				return item.Type === "Clone" ;
 			}
 		});
 		commandService.addCommand(applyPatchCommand, "object");
