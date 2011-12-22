@@ -12,11 +12,11 @@
 var eclipse;
 /*global define document dojo dijit serviceRegistry:true */
 /*browser:true*/
-define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/dialogs', 'orion/selection', 
+define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/util', 'orion/commands', 'orion/dialogs', 'orion/selection', 
         'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
         'orion/git/gitRepositoryExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/links',
 	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection, 
+		function(require, dojo, mBootstrap, mStatus, mProgress, mUtil, mCommands, mDialogs, mSelection, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, 
 				mGitRepositoryExplorer, mGitCommands, mGitClient, mLinks) {
 
@@ -57,11 +57,34 @@ mBootstrap.startup().then(function(core) {
 	
 	commandService.registerCommandContribution("eclipse.checkoutTag", 1000);
 	
-	explorer.displayRepository(dojo.hash());
+	
+	fileClient.loadWorkspace().then(
+		function(workspace){
+			var path = dojo.hash() || workspace.Location;
+			var relativePath = mUtil.makeRelative(path);
+			
+			//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
+			var gitapiCloneUrl = require.toUrl("gitapi/clone._");
+			gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
+			
+			explorer.displayRepository(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath);
+		}	
+	);	
 	
 	//every time the user manually changes the hash, we need to load the workspace with that name
 	dojo.subscribe("/dojo/hashchange", explorer, function() {
-		explorer.displayRepository(dojo.hash());
+		fileClient.loadWorkspace().then(
+			function(workspace){
+				var path = dojo.hash() || workspace.Location;
+				var relativePath = mUtil.makeRelative(path);
+				
+				//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
+				var gitapiCloneUrl = require.toUrl("gitapi/clone._");
+				gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
+				
+				explorer.displayRepository(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath);
+			}	
+		);	
 	});
 
 //	makeRightPane(explorer);
