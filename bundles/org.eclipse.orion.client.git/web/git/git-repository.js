@@ -53,6 +53,8 @@ mBootstrap.startup().then(function(core) {
 	commandService.registerCommandContribution("eclipse.openGitStatus", 100);
 	commandService.registerCommandContribution("eclipse.openGitLog", 100);
 	
+	commandService.registerCommandContribution("eclipse.orion.git.pull", 1000);
+	
 	commandService.registerCommandContribution("eclipse.removeBranch", 1000);
 	
 	commandService.registerCommandContribution("eclipse.checkoutTag", 1000);

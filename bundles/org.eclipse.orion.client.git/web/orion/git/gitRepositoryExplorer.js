@@ -99,7 +99,6 @@ exports.GitRepositoryExplorer = (function() {
 					if (resp.Parents != null)
 						for (var i=resp.Parents.length; i>0; i--){
 							path += resp.Parents[i-1].Name + " / ";
-							console.info(path);
 						}
 					path += resp.Name;
 					
