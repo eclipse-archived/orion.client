@@ -215,11 +215,6 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
 	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
 	 * @borrows orion.textview.EventTarget#dispatchEvent as #dispatchEvent
-	 * @borrows orion.textview.AnnotationTypeList#addAnnotationType as #addAnnotationType
-	 * @borrows orion.textview.AnnotationTypeList#getAnnotationTypePriority as #getAnnotationTypePriority
-	 * @borrows orion.textview.AnnotationTypeList#getAnnotationsByType as #getAnnotationsByType
-	 * @borrows orion.textview.AnnotationTypeList#isAnnotationTypeVisible as #isAnnotationTypeVisible
-	 * @borrows orion.textview.AnnotationTypeList#removeAnnotationType as #removeAnnotationType
 	 */
 	function AnnotationModel(textModel) {
 		this._annotations = [];
@@ -521,6 +516,11 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 	 * 
 	 * @class This object represents a styler for annotation attached to a text view.
 	 * @name orion.textview.AnnotationStyler
+	 * @borrows orion.textview.AnnotationTypeList#addAnnotationType as #addAnnotationType
+	 * @borrows orion.textview.AnnotationTypeList#getAnnotationTypePriority as #getAnnotationTypePriority
+	 * @borrows orion.textview.AnnotationTypeList#getAnnotationsByType as #getAnnotationsByType
+	 * @borrows orion.textview.AnnotationTypeList#isAnnotationTypeVisible as #isAnnotationTypeVisible
+	 * @borrows orion.textview.AnnotationTypeList#removeAnnotationType as #removeAnnotationType
 	 */
 	function AnnotationStyler (view, annotationModel) {
 		this._view = view;
