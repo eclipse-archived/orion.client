@@ -666,6 +666,11 @@ a:hover {
 	padding-right: 8px;
 }
 
+.primaryColumn {
+	color: #024892;
+	text-decoration: none;
+}
+
 .checkColumn {
 	padding: 0px;
 }

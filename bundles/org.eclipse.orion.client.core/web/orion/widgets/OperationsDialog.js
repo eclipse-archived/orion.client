@@ -53,7 +53,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				var tr = dojo.create("tr");
 				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: operation.Name}, tr);
 				var div = dojo.create("div", null, col, "only");
-				link = dojo.create("a", {innerHTML: operation.Name, className: "navlinkonpage"}, div, "last");
+				link = dojo.create("span", {innerHTML: operation.Name, className: "primaryColumn"}, div, "last");
 
 				dojo.place(document.createTextNode(operation.Name), link, "only");
 				
