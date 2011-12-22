@@ -137,7 +137,11 @@ exports.CommitDetails = (function() {
 				col1 = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr, "last");
 				dojo.place(document.createTextNode("Name"), col1, "only");		
 				col2 = dojo.create("td", null, tr, "last");
-				dojo.place(document.createTextNode(commitDetails.Name), col2, "only");
+
+				var commitLink = document.createElement("a");
+				commitLink.setAttribute("href", require.toUrl("/git/git-commit.html") + "#" + commitDetails.Location + "?page=1&pageSize=1");
+				commitLink.appendChild(document.createTextNode(commitDetails.Name));
+				dojo.place(commitLink, col2, "only");
 				dojo.place(tr, tbody, "last");
 			
 //			var actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col3, "only");
