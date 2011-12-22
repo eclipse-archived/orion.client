@@ -271,32 +271,151 @@ define("orion/editor/jsContentAssist", [], function() {
 		}
 		return proposals;
 	}
+	
+	/**
+	 * Returns an array of all variables declared in the given block. Nested closures
+	 * are ignored.
+	 * @param block {String} A block of JavaScript code
+	 * @return {Array(String)} All variable names declared in the block
+	 */
+	function collectVariables(block) {
+		var variables = [];
+		var index = 0;
+		while (index < block.length) {
+			var c = block.charAt(index);
+			switch (c) {
+				case "v":
+					if (block.substring(index, index+3) === "var") {
+						//found a variable declaration
+						index += 3;
+						var name = block.substring(index).match(/[\w]+/);
+						if (name.length > 0) {
+							variables.push(name[0]);
+							index += name[0].length;
+						}
+						//TODO repeat for multiple declarations on a line
+					}
+			}
+			//nothing interesting here, go to next char and repeat
+			index++;
+		}
+		return variables;
+	}
+	
+	/**
+	 * Given a block of javascript and the index of an opening brace, return the location
+	 * of the matching closing brace, or the end of the block if no matching brace is found.
+	 */
+	function findClosingBrace(buffer, start) {
+		var index = start;
+		var braceDepth = 0;
+		while (index < buffer.length) {
+			var c = buffer.charAt(index);
+			switch (c) {
+				case "/" :
+					if (buffer.charAt(index+1) === "/") {
+						//we hit a line comment.. skip to end of line
+						index = buffer.indexOf("\n", index) + 2;
+						if (index === 1) {
+							return buffer.length;
+						}
+					} else if (buffer.charAt(index+1) === "*") {
+						//we hit a block comment, so jump to end of comment
+						index = buffer.indexOf("*/", index+2) + 2;
+						if (index === 1) {
+							return buffer.length;
+						}
+					}
+					break;
+				case "\"":
+					//we hit a string so jump to end of string or line
+					var lineEnd = buffer.indexOf("\n", index);
+					if (lineEnd < 0) {
+						lineEnd = buffer.length;
+					}
+					var stringEnd = buffer.indexOf("\"", index+1);
+					//skip escaped quotes
+					while (stringEnd > 0 && stringEnd < lineEnd && buffer.charAt(stringEnd-1) === "\\") {
+						stringEnd = buffer.indexOf("\"", stringEnd+1);
+					}
+					index = lineEnd > stringEnd ? stringEnd : lineEnd;
+					break;
+				case "{":
+					braceDepth++;
+					index++;
+					break;
+				case "}":
+					if (--braceDepth === 0) {
+						//we found the end!
+						return index;
+					}
+					index++;
+					break;
+				default:
+					index++;
+			}
+		}
+		return index;
+	}
+	
+	/**
+	 * Given a block of javascript, and a current cursor position, return the string of
+	 * the enclosing function. Returns null if no function is founed. The returned
+	 * function might not be well-formed but this function will make a best effort.
+	 */
+	function findEnclosingFunction(buffer, offset) {
+		var block = buffer.substring(0, offset);
+		var lastFunction = block.lastIndexOf("function");
+		if (lastFunction >= 0) {
+			var funcStart = block.indexOf("{", lastFunction);
+			var funcEnd = findClosingBrace(buffer, funcStart);
+			if (funcEnd < offset) {
+				//this is a peer function - look for its parent closure
+				return findEnclosingFunction(buffer, lastFunction);
+			}
+			//we found the enclosing function
+			return buffer.substring(lastFunction, funcEnd);
+		}
+		//nothing found
+		return null;
+	}
 
 	/**
 	 * Returns proposals for variables and arguments within the current function scope.
 	 */
-	function getVariableProposals(prefix, buffer, selection) {
+	function getFunctionProposals(prefix, buffer, selection) {
 		var proposals = [];
-		//search only between the current cursor position and most recent function declaration
-		var block = buffer.substring(0, selection.offset);
-		var lastFunction = block.lastIndexOf("function");
-		if (lastFunction >= 0) {
-			block = block.substring(lastFunction);
+		var start, i;
+		//search only the function containing the current cursorr position
+		var block = findEnclosingFunction(buffer, selection.offset-prefix.length);
+		if (block) {
 			//collect function arguments
-			var start = block.indexOf("(");
+			start = block.indexOf("(");
 			var end = block.indexOf(")");
 			if (start >= 0 && end >= 0) {
 				var argList = block.substring(start+1, end);
 				var args = argList.split(",");
-				for (var i = 0; i < args.length; i++) {
-					if (args[i].indexOf(prefix) === 0) {
-						proposals.push(args[i].trim());
+				for (i = 0; i < args.length; i++) {
+					var arg = args[i].trim();
+					if (arg.indexOf(prefix) === 0) {
+						proposals.push(arg);
 					}
 				}
 			}
+			//skip to opening brace to start function
+			start = block.indexOf("{");
+			if (start > 0) {
+				block = block.substring(start+1);
+			}
+		} else {
+			//no function found, assume the whole script is one closure
+			block = buffer;
 		}
-		//collect all variable declarations
-		
+		//add proposals for all variables in the function
+		var variables = collectVariables(block);
+		for (i = 0; i < variables.length; i++) {
+			proposals.push(variables[i]);
+		}
 		return proposals;
 	}
 	/**
@@ -319,7 +438,7 @@ define("orion/editor/jsContentAssist", [], function() {
 				}
 			}
 			//we are not completing on an object member, so suggest templates and keywords
-			proposals = proposals.concat(getVariableProposals(prefix, buffer, selection));
+			proposals = proposals.concat(getFunctionProposals(prefix, buffer, selection));
 			proposals = proposals.concat(getTemplateProposals(prefix, buffer, selection));
 			proposals = proposals.concat(getKeyWordProposals(prefix, buffer, selection));
 			return proposals;

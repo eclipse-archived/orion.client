@@ -253,6 +253,62 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		assertNoProposal("propertyIsEnumerable", result);
 		assertNoProposal("trim", result);
 	};
+	
+	/**
+	 * Tests completion of function arguments.
+	 */
+	tests.testSimpleFunctionArgs = function() {
+		var result = getKeywords("var x = function(abracadabra,blort) { \n ab@@@");
+		assertProposal("abracadabra", result);
+		assertNoProposal("blort", result);
+	};
+
+	/**
+	 * Tests completion of function arguments.
+	 */
+	tests.testFunctionArgsWithWhitespace = function() {
+		var result = getKeywords("var x = function(  abracadabra ,  blort ) { \n blo@@@");
+		assert.equal(result.length, 1);
+		var value = result[0].proposal || result[0];
+		assert.equal(value,"blort");
+	};
+
+	/**
+	 * Tests completion of function arguments.
+	 */
+	tests.testFunctionArgsWithLineBreaks = function() {
+		var result = getKeywords("var x = function(abracadabra,\n blort\n ) { \n blo@@@");
+		assert.equal(result.length, 1);
+		var value = result[0].proposal || result[0];
+		assert.equal(value,"blort");
+	};
+	
+	/**
+	 * Tests variable declaration in current closure.
+	 */
+	tests.testVariableInCurrentClosure = function() {
+		var result = getKeywords("var x = function(abracadabra,blort){\nvar abacus;\n ab@@@");
+		assertProposal("abracadabra", result);
+		assertProposal("abacus", result);
+	};
+
+	/**
+	 * Tests that we don't find an argument in a previous closure that we are not inside.
+	 */
+	tests.testVariableInOtherClosure = function() {
+		var result = getKeywords("function(abracadabra,blort){\nvar abacus;\n}\n ab@@@");
+		assertNoProposal("abracadabra", result);
+		assertNoProposal("abacus", result);
+	};
+
+	/**
+	 * Tests variable declaration in a script with no closure.
+	 */
+	tests.testVariableNoClosure= function() {
+		var result = getKeywords("var abacus;\n ab@@@");
+		assertProposal("abacus", result);
+	};
+
 
 	return tests;
 });
