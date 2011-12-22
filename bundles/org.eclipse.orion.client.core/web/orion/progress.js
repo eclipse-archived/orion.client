@@ -90,27 +90,34 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 					if(operation.Running==true && (new Date() - new Date(operation.lastClientDate ? operation.lastClientDate : 0) > 5000)){
 						var def = this._operationsClient.getOperation(operation.Location);
 						allRequests.push(def);
-						def.then(function(jsonData, ioArgs) {
-							jsonData.lastClientDate = new Date();
-							dojo.hitch(that, that.writeOperation)(jsonData);
-						}, function(error, ioArgs){
-							throw new Error(error); //TODO what to do on error?
-						});
+						dojo.hitch(this, function(i){
+							def.then(function(jsonData, ioArgs) {
+								jsonData.lastClientDate = new Date();
+								dojo.hitch(that, that.writeOperation)(jsonData);
+							}, function(error, ioArgs){
+								if(error.status == 404){
+									//if task not found is must have been removed so remove it from tracking list
+									operationsToDelete.push(i);
+									return error;
+								}
+								throw new Error(error); //TODO what to do on error?
+							});
+						})(i);
 					}
 					if(!operation.Running  && (new Date() - new Date(operation.lastClientDate ? operation.lastClientDate : 0) > 300000)){
 						//after 5 minutes remove operation from the list
 						operationsToDelete.push(i);
 					}
 				}
-				if(operationsToDelete.length>0){
-					operations.lastClientDate = new Date();
-					for(var i=operationsToDelete.length-1; i>=0; i--){
-						operations.Children.splice(operationsToDelete[i], 1);
-					}
-					localStorage.setItem("orionOperations", JSON.stringify(operations));
-					dojo.hitch(that, that._generateOperationsInfo)(operations);
-				}
 				new dojo.DeferredList(allRequests).addBoth(function(result){
+					if(operationsToDelete.length>0){
+						operations.lastClientDate = new Date();
+						for(var i=operationsToDelete.length-1; i>=0; i--){
+							operations.Children.splice(operationsToDelete[i], 1);
+						}
+						localStorage.setItem("orionOperations", JSON.stringify(operations));
+						dojo.hitch(that, that._generateOperationsInfo)(operations);
+					}
 					window.setTimeout(function() {
 						dojo.hitch(that, that._checkOperationsChanges());
 					}, 5000);
