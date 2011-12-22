@@ -30,14 +30,17 @@
 }
 
 .commandButton {
-	margin: 2px;
+	margin-left: 4px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	padding: 2px;
 	background: transparent;
 	font: 8pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
+	color: black;
 	border: 1px solid #c3c3c3;
     border-radius: 6px;
     vertical-align: middle;
     min-width: 50px;
-    min-height: 20px;
 }
 
 commandButtonImage {
@@ -49,8 +52,6 @@ commandButtonImage {
 .commandButtonOver {
 	background: #e3e3e3;
 	border: 1px solid #9a9a9a;
-    border-radius: 6px;
-    vertical-align: middle;
 }
 
 .commandSeparator {

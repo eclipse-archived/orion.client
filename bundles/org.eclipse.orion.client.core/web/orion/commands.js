@@ -948,29 +948,34 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		
 		_addButton: function(parent, forceText, name, context, activeCommandClass, inactiveCommandClass) {
 			context.handler = context.handler || this;
-			var button  = dojo.create("button");
-			button.type = "button";
-			button.id = name;
-			var image = null;
-			if (this.hasImage()) {
-				image = new Image();
-				image.alt = this.name;
-				image.name = name;
-				image.id = name;
-				image.src = this.image;	
-				dojo.place(image, button, "last");
-				if (this.imageClass) {
-					dojo.addClass(image, this.spriteClass);
-					dojo.addClass(image, this.imageClass);
-				} 
-				dojo.addClass(image, "commandButtonImage");
+			var element;
+			if (this.hrefCallback) {
+				element = dojo.create("a");
+				dojo.addClass(element, "commandLink");
+			} else {
+				element = dojo.create("button");
+				element.type = "button";
+				dojo.addClass(element, "commandButton");
+				if (this.hasImage()) {
+					var image = new Image();
+					image.alt = this.name;
+					image.name = name;
+					image.id = name;
+					image.src = this.image;	
+					dojo.place(image, element, "last");
+					if (this.imageClass) {
+						dojo.addClass(image, this.spriteClass);
+						dojo.addClass(image, this.imageClass);
+					} 
+					dojo.addClass(image, "commandButtonImage");
+				}
 			}
+			element.id = name;
 			var text = window.document.createTextNode(this.name);
-			dojo.place(text, button, "last");
-			dojo.addClass(button, "commandButton");
+			dojo.place(text, element, "last");
 			if (this.tooltip) {
 				new CommandTooltip({
-					connectId: [button],
+					connectId: [element],
 					label: this.tooltip,
 					position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
 					commandParent: parent,
@@ -978,23 +983,19 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				});
 			}
 			context.domParent = parent;
-			context.domNode = button;
+			context.domNode = element;
 			var location;
 			if (this.hrefCallback) {
 				var href = this.hrefCallback.call(context.handler, context);
 				if(href.then){
 					href.then(function(l){
-						location = l;
+						element.href = l;
 					});
 				}else{
-					location = href; 
+					element.href = href; 
 				}
-				dojo.connect(button, "onclick", this, function() {
-					window.open(location);
-				});
-
 			} else {
-				dojo.connect(button, "onclick", this, function() {
+				dojo.connect(element, "onclick", this, function() {
 					// collect parameters in advance if specified
 					if (this.parameters && context.collectsParameters()) {
 						context.commandService._collectParameters("button", context);
@@ -1002,9 +1003,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						this.callback.call(context.handler, context);
 					}
 				});
+				this._setupActivateVisuals(element, element, activeCommandClass, inactiveCommandClass, "commandButtonOver");			
 			}
-			this._setupActivateVisuals(button, button, activeCommandClass, inactiveCommandClass, "commandButtonOver");			
-			dojo.place(button, parent, "last");
+			dojo.place(element, parent, "last");
 		},
 		_addMenuItem: function(parent, context) {
 			context.domParent = parent.domNode;
