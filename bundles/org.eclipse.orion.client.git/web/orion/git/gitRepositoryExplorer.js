@@ -96,8 +96,8 @@ exports.GitRepositoryExplorer = (function() {
 					"<div id=\"tagSectionActionsArea\" class=\"pageActions\"></div>" +
 					"</div>" +
 					"</div>" +
-					"</div>" +
 					"</list>" +
+					"</div>" +
 					"</section>" +
 
 					"<h2><a href=\"a\">See all tags</a></h2>" +
@@ -153,7 +153,7 @@ exports.GitRepositoryExplorer = (function() {
 		var description = dojo.create( "span", { "class":"extension-description", innerHTML: "location: root / testD" }, detailsView );
 		
 		var actionsArea = dojo.create( "div", {"id":"repositoryActionsArea"}, horizontalBox );
-		this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", repository, this, "tool", false);
+		this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", repository, this, "button", false);
 	};
 	
 	// Git status
@@ -191,7 +191,7 @@ exports.GitRepositoryExplorer = (function() {
 			+ staged + " file(s) to commit."}, detailsView );
 				
 		var actionsArea = dojo.create( "div", {"id":"statusActionsArea"}, horizontalBox );
-		this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", repository, this, "tool", false);	
+		this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", repository, this, "button", false);	
 	};
 	
 	// Git branches
@@ -268,7 +268,7 @@ exports.GitRepositoryExplorer = (function() {
 		}
 		
 		var actionsArea = dojo.create( "div", {"id":"branchActionsArea"}, horizontalBox );
-		this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", branch, this, "tool", false);	
+		this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", branch, this, "button", false);	
 	};
 	
 	// Git tags
@@ -303,7 +303,7 @@ exports.GitRepositoryExplorer = (function() {
 		var title = dojo.create( "span", { "class":"extension-title", innerHTML: tag.Name }, detailsView );
 
 		var actionsArea = dojo.create( "div", {"id":"tagActionsArea"}, horizontalBox );
-		this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", tag, this, "tool", false);	
+		this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", tag, this, "button", false);	
 	};
 	
 	return GitRepositoryExplorer;
