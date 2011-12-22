@@ -41,7 +41,7 @@ exports.GitRepositoryExplorer = (function() {
 				
 				"<div class=\"displayTable\">" + 
 					"<h1>Repository</h1>" +
-					"<h2><a href=\"/git/git-clone.html\">See all your repositories</a></h2>" +
+					"<h2><a href=\"/git/git-repository.html#\">See all your repositories</a></h2>" +
 					"<section class=\"extension-settings-content\">" +
 					"<div class=\"extension-settings\">" +
 						"<list id=\"repositoryNode\" class=\"extension-settings-list\">" +
@@ -51,63 +51,63 @@ exports.GitRepositoryExplorer = (function() {
 				"</div>" + 
 				
 				
-				"<div class=\"displayTable\">" + 
-					"<h1>Working Directory</h1>" +
-					"<section class=\"extension-settings-content\">" +
-					"<div class=\"extension-settings\">" +
-						"<list id=\"workingDirectoryNode\" class=\"extension-settings-list\">" +
-						"</list>" +
-					"</div>" + 
-					"</section>" + 
-				"</div>" + 
+//				"<div class=\"displayTable\">" + 
+//					"<h1>Working Directory</h1>" +
+//					"<section class=\"extension-settings-content\">" +
+//					"<div class=\"extension-settings\">" +
+//						"<list id=\"workingDirectoryNode\" class=\"extension-settings-list\">" +
+//						"</list>" +
+//					"</div>" + 
+//					"</section>" + 
+//				"</div>" + 
 				
-				"<div class=\"displayTable\">" + 
+//				"<div class=\"displayTable\">" + 
+//				
+//					"<section class=\"extension-settings-content\">" +
+//					"<div class=\"extension-settings\">" +
+//					"<list class=\"extension-settings-list\">" +
+//					"<div class=\"vbox extension-list-item\">" +
+//					"<div class=\"hbox\">" +
+//					"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Branches</h1></div>"+
+//					"<div id=\"branchSectionActionsArea\" class=\"pageActions\"></div>" +
+//					"</div>" +
+//					"</div>" +
+//					"</div>" +
+//					"</list>" +
+//					"</section>" +
+//					
+//					"<h2><a href=\"/git/git-clone.html\">See all branches</a></h2>" +			
+//					"<section class=\"extension-settings-content\">" +
+//					"<div class=\"extension-settings\">" +
+//						"<list id=\"branchNode\" class=\"extension-settings-list\">" +
+//						"</list>" +
+//					"</div>" + 
+//					"</section>" + 
+//				"</div>" + 
 				
-					"<section class=\"extension-settings-content\">" +
-					"<div class=\"extension-settings\">" +
-					"<list class=\"extension-settings-list\">" +
-					"<div class=\"vbox extension-list-item\">" +
-					"<div class=\"hbox\">" +
-					"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Branches</h1></div>"+
-					"<div id=\"branchSectionActionsArea\" class=\"pageActions\"></div>" +
-					"</div>" +
-					"</div>" +
-					"</div>" +
-					"</list>" +
-					"</section>" +
-					
-					"<h2><a href=\"/git/git-clone.html\">See all branches</a></h2>" +			
-					"<section class=\"extension-settings-content\">" +
-					"<div class=\"extension-settings\">" +
-						"<list id=\"branchNode\" class=\"extension-settings-list\">" +
-						"</list>" +
-					"</div>" + 
-					"</section>" + 
-				"</div>" + 
-				
-				"<div class=\"displayTable\">" + 
-				
-					"<section class=\"extension-settings-content\">" +
-					"<div class=\"extension-settings\">" +
-					"<list class=\"extension-settings-list\">" +
-					"<div class=\"vbox extension-list-item\">" +
-					"<div class=\"hbox\">" +
-					"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Tags (10 most recent)</h1></div>"+
-					"<div id=\"tagSectionActionsArea\" class=\"pageActions\"></div>" +
-					"</div>" +
-					"</div>" +
-					"</list>" +
-					"</div>" +
-					"</section>" +
-
-					"<h2><a href=\"a\">See all tags</a></h2>" +
-					"<section class=\"extension-settings-content\">" +
-					"<div class=\"extension-settings\">" +
-						"<list id=\"tagNode\" class=\"extension-settings-list\">" +
-						"</list>" +
-					"</div>" + 
-					"</section>" + 
-				"</div>" + 
+//				"<div class=\"displayTable\">" + 
+//				
+//					"<section class=\"extension-settings-content\">" +
+//					"<div class=\"extension-settings\">" +
+//					"<list class=\"extension-settings-list\">" +
+//					"<div class=\"vbox extension-list-item\">" +
+//					"<div class=\"hbox\">" +
+//					"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Tags (10 most recent)</h1></div>"+
+//					"<div id=\"tagSectionActionsArea\" class=\"pageActions\"></div>" +
+//					"</div>" +
+//					"</div>" +
+//					"</list>" +
+//					"</div>" +
+//					"</section>" +
+//
+//					"<h2><a href=\"a\">See all tags</a></h2>" +
+//					"<section class=\"extension-settings-content\">" +
+//					"<div class=\"extension-settings\">" +
+//						"<list id=\"tagNode\" class=\"extension-settings-list\">" +
+//						"</list>" +
+//					"</div>" + 
+//					"</section>" + 
+//				"</div>" + 
 				
 			"</div>";
 		
@@ -117,8 +117,11 @@ exports.GitRepositoryExplorer = (function() {
 		progressService.setProgressMessage("Loading...");
 		this.registry.getService("orion.git.provider").getGitClone(repositoryLocation).then(
 			function(resp){
+				if (resp.Children.length == 1) {
+				
+				
 				var repository = resp.Children[0];
-				that.renderRepository(repository);
+				that.displayRepositories(resp.Children);
 				that.displayStatus(repository, repository.StatusLocation);
 				that.displayBranches(repository.BranchLocation);
 				that.displayTags(repository.TagLocation, repository);
@@ -128,6 +131,12 @@ exports.GitRepositoryExplorer = (function() {
 				
 //				that.registry.getService("orion.page.command").registerCommandContribution("eclipse.addTag", 100, "tagSectionActionsArea");
 //				that.registry.getService("orion.page.command").renderCommands(dojo.byId("tagSectionActionsArea"), "dom", {}, this, "tool", false);  
+				} else {
+					that.displayRepositories(resp.Children, true);
+					
+					
+					
+				}
 				
 				progressService.setProgressMessage("");
 			}, function(error){
@@ -138,7 +147,13 @@ exports.GitRepositoryExplorer = (function() {
 	
 	// Git repo
 	
-	GitRepositoryExplorer.prototype.renderRepository = function(repository){
+	GitRepositoryExplorer.prototype.displayRepositories = function(repositories, links){
+		for(var i=0; i<repositories.length;i++){
+			this.renderRepository(repositories[i], links);
+		}
+	};
+	
+	GitRepositoryExplorer.prototype.renderRepository = function(repository, links){
 		var extensionListItemCollapsed = dojo.create( "div", { "class":"extension-list-item-collaped" }, dojo.byId("repositoryNode") );
 		var extensionListItem = dojo.create( "div", { "class":"vbox extension-list-item" }, extensionListItemCollapsed );
 		var horizontalBox = dojo.create( "div", { "class":"hbox" }, extensionListItem );
@@ -146,7 +161,15 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "span", { "class":"gitImageSprite git-sprite-repository" }, horizontalBox );
 		
 		var detailsView = dojo.create( "div", { "class":"vbox stretch details-view" }, horizontalBox );
-		var title = dojo.create( "span", { "class":"extension-title", innerHTML: repository.Name }, detailsView );
+		var title = dojo.create( "span", { "class":"extension-title"}, detailsView );
+		
+		if (links){
+			link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-repository.html#" + repository.ContentLocation}, title);
+			dojo.place(document.createTextNode(repository.Name), link);
+		} else {
+			dojo.place(document.createTextNode(repository.Name), title);
+		}
+
 		dojo.create( "div", null, detailsView );
 		var description = dojo.create( "span", { "class":"extension-description", innerHTML: repository.GitUrl }, detailsView );
 		dojo.create( "div", null, detailsView );
@@ -159,6 +182,21 @@ exports.GitRepositoryExplorer = (function() {
 	// Git status
 	
 	GitRepositoryExplorer.prototype.displayStatus = function(repository, statusLocation){
+		
+		var statusSkeleton =
+		"<div class=\"displayTable\">" + 
+			"<h1>Working Directory</h1>" +
+			"<section class=\"extension-settings-content\">" +
+			"<div class=\"extension-settings\">" +
+				"<list id=\"workingDirectoryNode\" class=\"extension-settings-list\">" +
+				"</list>" +
+			"</div>" + 
+			"</section>" + 
+		"</div>";
+		
+		var parentNode = dojo.byId("mainNode");
+		dojo.place(statusSkeleton, parentNode);
+		
 		var that = this;
 		this.registry.getService("orion.git.provider").getGitBranch(statusLocation).then(
 			function(resp){
@@ -216,6 +254,35 @@ exports.GitRepositoryExplorer = (function() {
 	};
 		
 	GitRepositoryExplorer.prototype.displayBranches = function(branchLocation){
+		
+		var branchesSectionSkeleton = 
+		"<div class=\"displayTable\">" + 
+			
+			"<section class=\"extension-settings-content\">" +
+			"<div class=\"extension-settings\">" +
+			"<list class=\"extension-settings-list\">" +
+			"<div class=\"vbox extension-list-item\">" +
+			"<div class=\"hbox\">" +
+			"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Branches</h1></div>"+
+			"<div id=\"branchSectionActionsArea\" class=\"pageActions\"></div>" +
+			"</div>" +
+			"</div>" +
+			"</div>" +
+			"</list>" +
+			"</section>" +
+			
+			"<h2><a href=\"/git/git-clone.html\">See all branches</a></h2>" +			
+			"<section class=\"extension-settings-content\">" +
+			"<div class=\"extension-settings\">" +
+				"<list id=\"branchNode\" class=\"extension-settings-list\">" +
+				"</list>" +
+			"</div>" + 
+			"</section>" + 
+		"</div>";
+		
+		var parentNode = dojo.byId("mainNode");
+		dojo.place(branchesSectionSkeleton, parentNode);
+		
 		var that = this;
 		
 		dojo.empty("branchNode");
@@ -223,10 +290,10 @@ exports.GitRepositoryExplorer = (function() {
 
 		this.registry.getService("orion.git.provider").getGitBranch(branchLocation).then(
 			function(resp){
-				dojo.empty("branchNode");
 				var branches = resp.Children;
 				that.decorateBranches(branches).then(
 					function(){
+						dojo.empty("branchNode");
 						for(var i=0; (i<branches.length && i<5);i++){
 							branches[i].ParentLocation = branchLocation;
 							that.renderBranch(branches[i]);
@@ -293,6 +360,34 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.displayTags = function(tagLocation, repository){
+		
+		var tagsSectionSkeleton = 
+		"<div class=\"displayTable\">" + 
+			"<section class=\"extension-settings-content\">" +
+			"<div class=\"extension-settings\">" +
+			"<list class=\"extension-settings-list\">" +
+			"<div class=\"vbox extension-list-item\">" +
+			"<div class=\"hbox\">" +
+			"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Tags (10 most recent)</h1></div>"+
+			"<div id=\"tagSectionActionsArea\" class=\"pageActions\"></div>" +
+			"</div>" +
+			"</div>" +
+			"</list>" +
+			"</div>" +
+			"</section>" +
+	
+			"<h2><a href=\"a\">See all tags</a></h2>" +
+			"<section class=\"extension-settings-content\">" +
+			"<div class=\"extension-settings\">" +
+				"<list id=\"tagNode\" class=\"extension-settings-list\">" +
+				"</list>" +
+			"</div>" + 
+			"</section>" + 
+		"</div>";
+		
+		var parentNode = dojo.byId("mainNode");
+		dojo.place(tagsSectionSkeleton, parentNode);
+		
 		var that = this;
 		
 		dojo.empty("tagNode");
@@ -300,10 +395,10 @@ exports.GitRepositoryExplorer = (function() {
 		
 		this.registry.getService("orion.git.provider").getGitBranch(tagLocation).then(
 			function(resp){
-				dojo.empty("tagNode");
 				var tags = resp.Children.slice(0, 9);
 				that.decorateTags(tags).then(
 					function(){
+						dojo.empty("tagNode");
 						for(var i=0; i<tags.length ;i++){
 							tags[i].Repository = repository;
 							that.renderTag(tags[i]);
