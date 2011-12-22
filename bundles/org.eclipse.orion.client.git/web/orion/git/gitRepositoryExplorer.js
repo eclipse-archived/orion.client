@@ -273,19 +273,43 @@ exports.GitRepositoryExplorer = (function() {
 	
 	// Git tags
 	
+	GitRepositoryExplorer.prototype.decorateTags = function(tags, deferred){
+		var that = this;
+		if (deferred == null)
+			deferred = new dojo.Deferred();
+		
+		if (tags.length > 0) {
+			this.registry.getService("orion.git.provider").doGitLog(tags[0].CommitLocation + "?page=1&pageSize=1").then(
+				function(resp){
+					tags[0].Commit = resp.Children[0];
+					that.decorateTags(tags.slice(1), deferred);
+				}
+			);
+		} else {
+			deferred.callback();
+		}
+		
+		return deferred;
+	};
+	
 	GitRepositoryExplorer.prototype.displayTags = function(tagLocation, repository){
 		var that = this;
 		
-		dojo.empty("branchNode");
-		dojo.byId("branchNode").innerHTML = "Loading...";
+		dojo.empty("tagNode");
+		dojo.byId("tagNode").innerHTML = "Loading...";
 		
 		this.registry.getService("orion.git.provider").getGitBranch(tagLocation).then(
 			function(resp){
-				var tags = resp.Children;
-				for(var i=0; (i<tags.length && i<10);i++){
-					tags[i].Repository = repository;
-					that.renderTag(tags[i]);
-				}
+				dojo.empty("tagNode");
+				var tags = resp.Children.slice(0, 9);
+				that.decorateTags(tags).then(
+					function(){
+						for(var i=0; i<tags.length ;i++){
+							tags[i].Repository = repository;
+							that.renderTag(tags[i]);
+						};
+					}
+				);
 			}, function(error){
 				
 			}
@@ -301,6 +325,14 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var detailsView = dojo.create( "div", { "class":"vbox stretch details-view"}, horizontalBox );
 		var title = dojo.create( "span", { "class":"extension-title", innerHTML: tag.Name }, detailsView );
+		
+		dojo.create( "div", null, detailsView );
+		var description = dojo.create( "span", { "class":"extension-description"}, detailsView );
+		
+		link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + tag.Commit.Location}, description);
+		dojo.place(document.createTextNode(tag.Commit.Message), link);	
+		dojo.place(document.createTextNode(" by " + tag.Commit.AuthorName + " on " + 
+			dojo.date.locale.format(new Date(tag.Commit.Time), {formatLength: "short"})), description, "last");
 
 		var actionsArea = dojo.create( "div", {"id":"tagActionsArea"}, horizontalBox );
 		this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", tag, this, "button", false);	
