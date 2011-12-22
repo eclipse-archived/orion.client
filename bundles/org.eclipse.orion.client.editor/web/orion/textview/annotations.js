@@ -90,6 +90,12 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 		}
 	};
 	
+	/** 
+	 * Constructs a new AnnotationTypeList object.
+	 * 
+	 * @class 
+	 * @name orion.textview.AnnotationTypeList
+	 */
 	function AnnotationTypeList () {
 	}
 	/**
