@@ -30,7 +30,7 @@
 }
 
 .commandButton {
-	margin-left: 4px;
+	margin-left: 6px;
 	margin-top: 2px;
 	margin-bottom: 2px;
 	padding: 2px;
@@ -58,12 +58,14 @@ commandButtonImage {
 }
 
 .commandLink {
-	margin-right: 12px;
+	margin-right: 6px;
+	margin-left: 6px;
 	cursor: pointer;
 }
 
 .commandLink:hover {
-	margin-right: 12px;
+	margin-right: 6px;
+	margin-left: 6px;
 	cursor: hand;
 	text-decoration: underline;
 }
