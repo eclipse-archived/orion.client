@@ -251,6 +251,7 @@ a:hover {
    	margin: 0;
     padding: 0;
     background: #FFFFFF;
+    min-width: 300px;
 }
 
 .paneHeading {
@@ -258,17 +259,23 @@ a:hover {
 	font-weight: bold;
 	color: #666666;
 	vertical-align: middle;
+	margin-right: 16px;
 }
 
 .paneHeadingToolbar {
 	text-align: right;
 	vertical-align: middle;
-	height: 30px;
+	margin-left: 16px;
+}
+
+.paneHeadingContainerFixed {
+	min-width: 300px;
 }
 
 .paneHeadingContainer {
 	border-bottom: 1px dotted #bfbfbf;
-	height: 30px;
+	margin: 8px;
+	margin-top: 12px;
 }
 
 .paneHeadingCommands {

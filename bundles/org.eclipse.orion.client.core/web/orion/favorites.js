@@ -347,9 +347,8 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			// heading and commands
 			var thead = dojo.create("thead", null, faveTable);
 			var row = dojo.create("tr", null, thead);
-			var headCol = dojo.create("td", null, row);
-			var commandCol = dojo.create("td", null, row);
-			mUtil.createPaneHeading(headCol, commandCol, "Favorites", null, "faveCommands", this._registry.getService("orion.page.command"), this);
+			var headCol = dojo.create("td", {colspan: 2}, row);
+			mUtil.createPaneHeading(headCol, "Favorites", null, "faveCommands", this._registry.getService("orion.page.command"), this);
 			
 			// favorites
 			var tr, col1, col2, href, link, actionsWrapper;
@@ -403,9 +402,8 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				// heading and commands
 				thead = dojo.create("thead", null, faveTable);
 				row = dojo.create("tr", null, thead);
-				headCol = dojo.create("td", null, row);
-				commandCol = dojo.create("td", null, row);
-				mUtil.createPaneHeading(headCol, commandCol, "Searches");
+				headCol = dojo.create("td", {colspan: 2}, row);
+				mUtil.createPaneHeading(headCol, "Searches");
 
 				tbody = dojo.create("tbody", null, faveTable);
 				for (var i=0; i < searches.length; i++) {
