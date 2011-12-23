@@ -271,91 +271,115 @@ define("orion/editor/jsContentAssist", [], function() {
 		}
 		return proposals;
 	}
-	
+
 	/**
-	 * Returns an array of all variables declared in the given block. Nested closures
-	 * are ignored.
-	 * @param block {String} A block of JavaScript code
-	 * @return {Array(String)} All variable names declared in the block
+	 * Given a block of javascript and a current index, skip any string literal or
+	 * comment starting at that position. Returns the index of the character after the
+	 * end of the comment or string. If the current character does not start a comment
+	 * or string, the unchanged index is returned.
 	 */
-	function collectVariables(block) {
-		var variables = [];
-		var index = 0;
-		while (index < block.length) {
-			var c = block.charAt(index);
-			switch (c) {
-				case "v":
-					if (block.substring(index, index+3) === "var") {
-						//found a variable declaration
-						index += 3;
-						var name = block.substring(index).match(/[\w]+/);
-						if (name.length > 0) {
-							variables.push(name[0]);
-							index += name[0].length;
-						}
-						//TODO repeat for multiple declarations on a line
+	function skipCommentsAndStrings(buffer, index) {
+		var c = buffer.charAt(index);
+		switch (c) {
+			case "/" :
+				if (buffer.charAt(index+1) === "/") {
+					//we hit a line comment.. skip to end of line
+					index = buffer.indexOf("\n", index) + 2;
+					if (index === 1) {
+						return buffer.length;
 					}
-			}
-			//nothing interesting here, go to next char and repeat
-			index++;
+				} else if (buffer.charAt(index+1) === "*") {
+					//we hit a block comment, so jump to end of comment
+					index = buffer.indexOf("*/", index+2) + 2;
+					if (index === 1) {
+						return buffer.length;
+					}
+				}
+				break;
+			case "\"":
+				//we hit a string so jump to end of string or line
+				var lineEnd = buffer.indexOf("\n", index);
+				if (lineEnd < 0) {
+					lineEnd = buffer.length;
+				}
+				var stringEnd = buffer.indexOf("\"", index+1);
+				//skip escaped quotes
+				while (stringEnd > 0 && stringEnd < lineEnd && buffer.charAt(stringEnd-1) === "\\") {
+					stringEnd = buffer.indexOf("\"", stringEnd+1);
+				}
+				index = lineEnd > stringEnd ? stringEnd : lineEnd;
+				break;
 		}
-		return variables;
+		return index;
 	}
-	
+
 	/**
 	 * Given a block of javascript and the index of an opening brace, return the location
 	 * of the matching closing brace, or the end of the block if no matching brace is found.
 	 */
 	function findClosingBrace(buffer, start) {
-		var index = start;
-		var braceDepth = 0;
+		var index = start, braceDepth = 0;
 		while (index < buffer.length) {
+			index = skipCommentsAndStrings(buffer, index);
 			var c = buffer.charAt(index);
 			switch (c) {
-				case "/" :
-					if (buffer.charAt(index+1) === "/") {
-						//we hit a line comment.. skip to end of line
-						index = buffer.indexOf("\n", index) + 2;
-						if (index === 1) {
-							return buffer.length;
-						}
-					} else if (buffer.charAt(index+1) === "*") {
-						//we hit a block comment, so jump to end of comment
-						index = buffer.indexOf("*/", index+2) + 2;
-						if (index === 1) {
-							return buffer.length;
-						}
-					}
-					break;
-				case "\"":
-					//we hit a string so jump to end of string or line
-					var lineEnd = buffer.indexOf("\n", index);
-					if (lineEnd < 0) {
-						lineEnd = buffer.length;
-					}
-					var stringEnd = buffer.indexOf("\"", index+1);
-					//skip escaped quotes
-					while (stringEnd > 0 && stringEnd < lineEnd && buffer.charAt(stringEnd-1) === "\\") {
-						stringEnd = buffer.indexOf("\"", stringEnd+1);
-					}
-					index = lineEnd > stringEnd ? stringEnd : lineEnd;
-					break;
 				case "{":
 					braceDepth++;
-					index++;
 					break;
 				case "}":
 					if (--braceDepth === 0) {
 						//we found the end!
 						return index;
 					}
-					index++;
 					break;
-				default:
-					index++;
 			}
+			index++;
 		}
 		return index;
+	}
+	
+	/**
+	 * Returns an array of all variables declared in the given block. Nested closures
+	 * are skipped.
+	 * @param block {String} A block of JavaScript code
+	 * @return {Array(String)} All variable names declared in the block
+	 */
+	function collectVariables(block) {
+		var variables = [];
+		var index = 0;
+		while ((index = skipCommentsAndStrings(block, index)) < block.length) {
+			var subBlock = block.substring(index);
+			if (subBlock.match(/^var\s/)) {
+				//block starts a variable declaration statement
+				//TODO variable assigned to a function has no semi-colon
+				var endDeclaration = block.indexOf(";", index);
+				if (endDeclaration < 0) {
+					endDeclaration = block.length;
+				}
+				//TODO handle multiple declarations in a single statement
+				var names = block.substring(index+3, endDeclaration).match(/[\w]+/);
+				if (names) {
+					variables.push(names[0]);
+					index += names[0].length;
+				}
+				
+				//skip to end of variable declaration
+				index = endDeclaration+1;
+			} else if (subBlock.match(/^function[\s(]/)) {
+				//block starts a function declaration, so skip the function
+				index = findClosingBrace(block, index);
+			} else {
+				//skip any words and trailing whitespace that start at current cursor position
+				var words = block.substring(index).match(/^\w[\w\s\()]+/);
+				if (words) {
+					index += words[0].length;
+				} else {
+					//nothing interesting here, go to next char and repeat
+					index++;
+				}
+			}
+		}
+		return variables;
 	}
 	
 	/**
