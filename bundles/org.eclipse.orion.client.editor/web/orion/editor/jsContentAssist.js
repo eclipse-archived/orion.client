@@ -297,7 +297,7 @@ define("orion/editor/jsContentAssist", [], function() {
 				}
 				break;
 			case "\"":
-				//we hit a string so jump to end of string or line
+				//we hit a string so jump to end of string or line, whichever comes first
 				var lineEnd = buffer.indexOf("\n", index);
 				if (lineEnd < 0) {
 					lineEnd = buffer.length;
@@ -307,7 +307,7 @@ define("orion/editor/jsContentAssist", [], function() {
 				while (stringEnd > 0 && stringEnd < lineEnd && buffer.charAt(stringEnd-1) === "\\") {
 					stringEnd = buffer.indexOf("\"", stringEnd+1);
 				}
-				index = lineEnd > stringEnd ? stringEnd : lineEnd;
+				index = (stringEnd > 0 && lineEnd > stringEnd) ? stringEnd : lineEnd;
 				break;
 		}
 		return index;
