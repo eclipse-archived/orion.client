@@ -175,6 +175,17 @@ orion.searchUtils.generateInFileQuery = function(searchStr) {
 	return inFileQuery;
 };
 	
+orion.searchUtils.replaceRegEx = function(text, regEx, replaceStr){
+	var regexp = new RegExp(regEx.pattern, regEx.flags);
+	return text.replace(regexp, replaceStr); 
+	
+};
+
+orion.searchUtils.replaceStringLiteral = function(text, keyword, replaceStr){
+	var regexp = mRegex.parse("/" + keyword + "/gim");
+	return orion.searchUtils.replaceRegEx(text,regexp, replaceStr);
+};
+
 orion.searchUtils.fullPathNameByMeta = function(parents){
 	var parentIndex = parents.length;
 	var fullPath = "";
