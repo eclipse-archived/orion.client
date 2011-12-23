@@ -12,7 +12,8 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features'], function(require, dojo, dijit, mExplorer, mUtil, mFileClient, mCommands, mSearchUtils, mSearchFeatures) {
+define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container'], 
+		function(require, dojo, dijit, mExplorer, mUtil, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer) {
 
 	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, queryStr, explorer) {
 		this.registry= serviceRegistry;
@@ -532,9 +533,38 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return result;
 	};
 	
+	SearchResultModel.prototype.generateNewContents = function( fileModelNode, replaceStr){
+		if(fileModelNode){
+			var fileContents = fileModelNode.contents;
+			fileModelNode.newContents = [];
+			for(var i = 0; i < fileContents.length ; i++){
+				var lineStringOrigin = fileContents[i];
+				var changingLine = false;
+				for(var j = 0; j < fileModelNode.children.length; j++){
+					var lnumber = fileModelNode.children[j].lineNumber - 1;
+					if(lnumber === i){
+						changingLine = true;
+						break;
+					}
+				}
+				if(changingLine){
+					var newStr;
+					if(this.queryObj.inFileQuery.wildCard){
+						newStr = mSearchUtils.replaceRegEx(lineStringOrigin, this.queryObj.inFileQuery.regExp, replaceStr);
+					} else {
+						newStr = mSearchUtils.replaceStringLiteral(lineStringOrigin, this.queryObj.inFileQuery.searchStr, replaceStr);
+					}
+					fileModelNode.newContents.push(newStr);
+				} else {
+					fileModelNode.newContents.push(lineStringOrigin);
+				}
+			}
+		}
+	};
 	
 	SearchResultModel.prototype.searchWithinFile = function( fileModelNode, fileContentText){
 		var fileContents = fileContentText.split(this._lineDelimiter);
+		fileModelNode.contents = fileContents;
 		if(fileModelNode){
 			fileModelNode.children = [];
 			var totalMatches = 0;
@@ -550,7 +580,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					}
 					if(result){
 						var lineNumber = i+1;
-						var detailNode = {parent: fileModelNode, type: "detail", matches: result, lineNumber: lineNumber + " : ", name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
+						var detailNode = {parent: fileModelNode, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
 						fileModelNode.children.push(detailNode);
 						totalMatches += result.length;
 					}
@@ -695,7 +725,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					
 					link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
 					var linkSpan = dojo.create("span", null, link, "only");
-					dojo.place(document.createTextNode(item.lineNumber), linkSpan, "last");
+					dojo.place(document.createTextNode(item.lineNumber + " : "), linkSpan, "last");
 					var startIndex = 0;
 					var gap = this.explorer.model.queryObj.inFileQuery.searchStrLength;
 					for(var i = 0; i < item.matches.length; i++){
@@ -873,10 +903,42 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			parentDivID: "results"
 		});
 		uiFactory.buildUI();
+		var parentPane = dijit.byId("orion.innerSearchResults");
+		if(parentPane.isLeftPaneOpen()){
+			parentPane.toggle();
+		}
+		this.previewMode = true;
 		this.renderer = new SearchResultRenderer({checkbox: true}, this);
 		this.createTree(uiFactory.getMatchDivID(), this.model);
 		this.gotoCurrent();
+		this.buildPreview(uiFactory);
 	};
+	
+	SearchResultExplorer.prototype.buildPreview = function(uiFactory) {
+		var filItem = this.model.indexedFileItems()[this.model.currentFileIndex];
+		this.model.generateNewContents(filItem, this.replaceStrDiv.value);
+		
+		var uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
+			parentDivID: uiFactory.getCompareDivID(),
+			showTitle: false,
+			showLineStatus: false
+		});
+		uiFactoryCompare.buildUI();
+
+		// Diff operations
+
+		var options = {
+			readonly: true,
+			hasConflicts: false,
+			baseFileContent: filItem.contents.join(this.model._lineDelimiter),
+			newFileContent: filItem.newContents.join(this.model._lineDelimiter)
+		};
+		
+		var twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(this.registry, uiFactoryCompare, options);
+		twoWayCompareContainer.startup();
+		return;
+	};
+	
 	
 	SearchResultExplorer.prototype.addFavorite = function(favoriteName, query) {
 		this.registry.getService("orion.core.favorite").addFavoriteSearch(favoriteName, query);
@@ -926,6 +988,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var that = this;
 		dojo.empty("pageActions");
 		this._commandService.renderCommands("pageActions", "dom", that, that, "tool");
+		//this.replaceStrDiv= dojo.create("input", {type: "search", id: "replaceString", placeholder: "replace text", title:"Type a text to replace all with"}, "pageActions", "last");
+		//dojo.addClass(this.replaceStrDiv, "searchbox");
 		dojo.empty("pageNavigationActions");
 		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "tool");
 		
