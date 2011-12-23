@@ -407,12 +407,14 @@ define("orion/editor/jsContentAssist", [], function() {
 	/**
 	 * Returns proposals for variables and arguments within the current function scope.
 	 */
-	function getFunctionProposals(prefix, buffer, selection) {
+	function getFunctionProposals(prefix, buffer, startOffset) {
 		var proposals = [];
 		var start, i;
 		//search only the function containing the current cursorr position
-		var block = findEnclosingFunction(buffer, selection.offset-prefix.length);
+		var block = findEnclosingFunction(buffer, startOffset);
+		var funcStart = 0;
 		if (block) {
+			funcStart = buffer.indexOf(block);
 			//collect function arguments
 			start = block.indexOf("(");
 			var end = block.indexOf(")");
@@ -438,7 +440,13 @@ define("orion/editor/jsContentAssist", [], function() {
 		//add proposals for all variables in the function
 		var variables = collectVariables(block);
 		for (i = 0; i < variables.length; i++) {
-			proposals.push(variables[i]);
+			if (variables[i].indexOf(prefix) === 0) {
+				proposals.push(variables[i]);
+			}
+		}
+		//recurse on parent closure
+		if (funcStart > 0) {
+			proposals = proposals.concat(getFunctionProposals(prefix, buffer, funcStart));
 		}
 		return proposals;
 	}
@@ -462,7 +470,7 @@ define("orion/editor/jsContentAssist", [], function() {
 				}
 			}
 			//we are not completing on an object member, so suggest templates and keywords
-			proposals = proposals.concat(getFunctionProposals(prefix, buffer, selection));
+			proposals = proposals.concat(getFunctionProposals(prefix, buffer, selection.offset-prefix.length));
 			proposals = proposals.concat(getTemplateProposals(prefix, buffer, selection));
 			proposals = proposals.concat(getKeyWordProposals(prefix, buffer, selection));
 			return proposals;
