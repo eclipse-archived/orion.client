@@ -273,6 +273,184 @@ define("orion/editor/jsContentAssist", [], function() {
 	}
 
 	/**
+	 * Given a block of javascript and a current index, skip any string literal or
+	 * comment starting at that position. Returns the index of the character after the
+	 * end of the comment or string. If the current character does not start a comment
+	 * or string, the unchanged index is returned.
+	 */
+	function skipCommentsAndStrings(buffer, index) {
+		var c = buffer.charAt(index);
+		switch (c) {
+			case "/" :
+				if (buffer.charAt(index+1) === "/") {
+					//we hit a line comment.. skip to end of line
+					index = buffer.indexOf("\n", index) + 2;
+					if (index === 1) {
+						return buffer.length;
+					}
+				} else if (buffer.charAt(index+1) === "*") {
+					//we hit a block comment, so jump to end of comment
+					index = buffer.indexOf("*/", index+2) + 2;
+					if (index === 1) {
+						return buffer.length;
+					}
+				}
+				break;
+			case "\"":
+				//we hit a string so jump to end of string or line
+				var lineEnd = buffer.indexOf("\n", index);
+				if (lineEnd < 0) {
+					lineEnd = buffer.length;
+				}
+				var stringEnd = buffer.indexOf("\"", index+1);
+				//skip escaped quotes
+				while (stringEnd > 0 && stringEnd < lineEnd && buffer.charAt(stringEnd-1) === "\\") {
+					stringEnd = buffer.indexOf("\"", stringEnd+1);
+				}
+				index = lineEnd > stringEnd ? stringEnd : lineEnd;
+				break;
+		}
+		return index;
+	}
+
+	/**
+	 * Given a block of javascript and the index of an opening brace, return the location
+	 * of the matching closing brace, or the end of the block if no matching brace is found.
+	 */
+	function findClosingBrace(buffer, start) {
+		var index = start, braceDepth = 0;
+		while (index < buffer.length) {
+			index = skipCommentsAndStrings(buffer, index);
+			var c = buffer.charAt(index);
+			switch (c) {
+				case "{":
+					braceDepth++;
+					break;
+				case "}":
+					if (--braceDepth === 0) {
+						//we found the end!
+						return index;
+					}
+					break;
+			}
+			index++;
+		}
+		return index;
+	}
+	
+	/**
+	 * Returns an array of all variables declared in the given block. Nested closures
+	 * are skipped.
+	 * @param block {String} A block of JavaScript code
+	 * @return {Array(String)} All variable names declared in the block
+	 */
+	function collectVariables(block) {
+		var variables = [];
+		var index = 0;
+		while ((index = skipCommentsAndStrings(block, index)) < block.length) {
+			var subBlock = block.substring(index);
+			if (subBlock.match(/^var\s/)) {
+				//block starts a variable declaration statement
+				//TODO variable assigned to a function has no semi-colon
+				var endDeclaration = block.indexOf(";", index);
+				if (endDeclaration < 0) {
+					endDeclaration = block.length;
+				}
+				//TODO handle multiple declarations in a single statement
+				var names = block.substring(index+3, endDeclaration).match(/[\w]+/);
+				if (names) {
+					variables.push(names[0]);
+					index += names[0].length;
+				}
+				
+				//skip to end of variable declaration
+				index = endDeclaration+1;
+			} else if (subBlock.match(/^function[\s(]/)) {
+				//block starts a function declaration, so skip the function
+				index = findClosingBrace(block, index);
+			} else {
+				//skip any words and trailing whitespace that start at current cursor position
+				var words = block.substring(index).match(/^\w[\w\s\()]+/);
+				if (words) {
+					index += words[0].length;
+				} else {
+					//nothing interesting here, go to next char and repeat
+					index++;
+				}
+			}
+		}
+		return variables;
+	}
+	
+	/**
+	 * Given a block of javascript, and a current cursor position, return the string of
+	 * the enclosing function. Returns null if no function is founed. The returned
+	 * function might not be well-formed but this function will make a best effort.
+	 */
+	function findEnclosingFunction(buffer, offset) {
+		var block = buffer.substring(0, offset);
+		var lastFunction = block.lastIndexOf("function");
+		if (lastFunction >= 0) {
+			var funcStart = block.indexOf("{", lastFunction);
+			var funcEnd = findClosingBrace(buffer, funcStart);
+			if (funcEnd < offset) {
+				//this is a peer function - look for its parent closure
+				return findEnclosingFunction(buffer, lastFunction);
+			}
+			//we found the enclosing function
+			return buffer.substring(lastFunction, funcEnd);
+		}
+		//nothing found
+		return null;
+	}
+
+	/**
+	 * Returns proposals for variables and arguments within the current function scope.
+	 */
+	function getFunctionProposals(prefix, buffer, startOffset) {
+		var proposals = [];
+		var start, i;
+		//search only the function containing the current cursorr position
+		var block = findEnclosingFunction(buffer, startOffset);
+		var funcStart = 0;
+		if (block) {
+			funcStart = buffer.indexOf(block);
+			//collect function arguments
+			start = block.indexOf("(");
+			var end = block.indexOf(")");
+			if (start >= 0 && end >= 0) {
+				var argList = block.substring(start+1, end);
+				var args = argList.split(",");
+				for (i = 0; i < args.length; i++) {
+					var arg = args[i].trim();
+					if (arg.indexOf(prefix) === 0) {
+						proposals.push(arg);
+					}
+				}
+			}
+			//skip to opening brace to start function
+			start = block.indexOf("{");
+			if (start > 0) {
+				block = block.substring(start+1);
+			}
+		} else {
+			//no function found, assume the whole script is one closure
+			block = buffer;
+		}
+		//add proposals for all variables in the function
+		var variables = collectVariables(block);
+		for (i = 0; i < variables.length; i++) {
+			if (variables[i].indexOf(prefix) === 0) {
+				proposals.push(variables[i]);
+			}
+		}
+		//recurse on parent closure
+		if (funcStart > 0) {
+			proposals = proposals.concat(getFunctionProposals(prefix, buffer, funcStart));
+		}
+		return proposals;
+	}
+	/**
 	 * @name orion.editor.JavaScriptContentAssistProvider
 	 * @class Provides content assist for JavaScript keywords.
 	 */
@@ -288,12 +466,13 @@ define("orion/editor/jsContentAssist", [], function() {
 				//if the character preceeding the prefix is a '.' character, then we are completing an object member
 				var preceedingChar = buffer.charAt(selection.offset - prefix.length - 1);
 				if (preceedingChar === '.') {
-					return getMemberProposals(prefix, buffer, selection, proposals);
+					return getMemberProposals(prefix, buffer, selection);
 				}
 			}
 			//we are not completing on an object member, so suggest templates and keywords
-			proposals = proposals.concat(getTemplateProposals(prefix, buffer, selection, proposals));
-			proposals = proposals.concat(getKeyWordProposals(prefix, buffer, selection, proposals));
+			proposals = proposals.concat(getFunctionProposals(prefix, buffer, selection.offset-prefix.length));
+			proposals = proposals.concat(getTemplateProposals(prefix, buffer, selection));
+			proposals = proposals.concat(getKeyWordProposals(prefix, buffer, selection));
 			return proposals;
 		}
 	};

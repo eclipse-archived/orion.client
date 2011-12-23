@@ -694,7 +694,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					var urlBinding = null;
 					if (command) {
 						if (scope === "dom") {
-							if (renderType=== "tool") {
+							if (renderType === "tool" || renderType === "button") {
 								render = parent.id === positionOrder[i].scopeId;
 							} else if (renderType=== "menu") {
 								render = parent.eclipseScopeId === positionOrder[i].scopeId;
@@ -735,7 +735,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							var choicesMenu = new dijit.Menu({
 								style: "display: none;"
 							});
-							if (renderType === "tool") {
+							if (renderType === "tool" || renderType === "button") {
 								menuButton = new dijit.form.DropDownButton({
 										label: command.name,
 										dropDown: choicesMenu

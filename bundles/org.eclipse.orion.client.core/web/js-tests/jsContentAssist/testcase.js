@@ -253,6 +253,97 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		assertNoProposal("propertyIsEnumerable", result);
 		assertNoProposal("trim", result);
 	};
+	
+	/**
+	 * Tests completion of function arguments.
+	 */
+	tests.testSimpleFunctionArgs = function() {
+		var result = getKeywords("var x = function(abracadabra,blort) { \n ab@@@");
+		assertProposal("abracadabra", result);
+		assertNoProposal("blort", result);
+	};
+
+	/**
+	 * Tests completion of function arguments.
+	 */
+	tests.testFunctionArgsWithWhitespace = function() {
+		var result = getKeywords("var x = function(  abracadabra ,  blort ) { \n blo@@@");
+		assert.equal(result.length, 1);
+		var value = result[0].proposal || result[0];
+		assert.equal(value,"blort");
+	};
+
+	/**
+	 * Tests completion of function arguments.
+	 */
+	tests.testFunctionArgsWithLineBreaks = function() {
+		var result = getKeywords("var x = function(abracadabra,\n blort\n ) { \n blo@@@");
+		assert.equal(result.length, 1);
+		var value = result[0].proposal || result[0];
+		assert.equal(value,"blort");
+	};
+	
+	/**
+	 * Tests variable declaration in current closure.
+	 */
+	tests.testVariableInCurrentClosure = function() {
+		var result = getKeywords("var x = function(abracadabra,blort){\nvar abacus;\n ab@@@");
+		assertProposal("abracadabra", result);
+		assertProposal("abacus", result);
+	};
+
+	/**
+	 * Tests that we don't find an argument in a previous closure that we are not inside.
+	 */
+	tests.testVariableInOtherClosure = function() {
+		var result = getKeywords("function(abracadabra,blort){\nvar abacus;\n}\n ab@@@");
+		assertNoProposal("abracadabra", result);
+		assertNoProposal("abacus", result);
+	};
+
+	/**
+	 * Tests that we find arguments and variables in a parent function.
+	 */
+	tests.testVariableInParentClosure = function() {
+		var result = getKeywords("function(abracadabra,blort){\nvar abacus;\n" +
+			"function (antelope) { var aardvark; a@@@" +
+			"}\n}");
+		assertProposal("abracadabra", result);
+		assertProposal("abacus", result);
+		assertProposal("antelope", result);
+		assertProposal("aardvark", result);
+		assertNoProposal("blort", result);
+	};
+
+	/**
+	 * Tests that we find a variable defined above a nested function.
+	 */
+	tests.testVariableBeforeOtherClosure = function() {
+		var result = getKeywords("var antelope = x;\nfunction(abracadabra,blort){\nvar abacus;\n}\n a@@@");
+		assertProposal("antelope", result);
+		assertNoProposal("abracadabra", result);
+		assertNoProposal("abacus", result);
+	};
+
+	/**
+	 * Tests variable declaration in a script with no closure.
+	 */
+	tests.testVariableNoClosure= function() {
+		var result = getKeywords("var abacus;\n ab@@@");
+		assertProposal("abacus", result);
+	};
+
+	/**
+	 * Tests variable declaration in a script with no closure.
+	 */
+	tests.testVariableAssignedToFunction= function() {
+		//should not find contents of function, but should find variable assigned to it
+		var result = getKeywords("var abacus = function(arctic, animal) { var aardvark;\n};\n a@@@");
+		assertProposal("abacus", result);
+		assertNoProposal("arctic", result);
+		assertNoProposal("animal", result);
+		assertNoProposal("aardvark", result);
+	};
 
 	return tests;
 });
