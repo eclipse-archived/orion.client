@@ -242,20 +242,8 @@ orion.GitStatusContentRenderer = (function() {
 			dojo.addClass(actionCol, "statusAction");
 			actionCol.noWrap= true;
 			var actionsWrapper = dojo.create("span", {id: row.id+"actionsWrapper"}, actionCol, "only");
-			// we must hide/show the span rather than the column.  IE and Chrome will not consider
-			// the mouse as being over the table row if it's in a hidden column
-			dojo.style(actionsWrapper, "visibility", "hidden");
 			this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", {type: "fileItem", object: itemModel, rowId:row.id}, this, "tool");
 			
-			dojo.connect(row, "onmouseover", row, function() {
-				var wrapper = dojo.byId(this.id+"actionsWrapper");
-				dojo.style(wrapper, "visibility", "visible");
-			});
-			
-			dojo.connect(row, "onmouseout", row, function() {
-				var wrapper = dojo.byId(this.id+"actionsWrapper");
-				dojo.style(wrapper, "visibility", "hidden");
-			});
 			if(this._controller._model.isStaged(itemModel.type)){
 				this._controller.hasStaged = true;
 			} else {
@@ -276,20 +264,24 @@ orion.GitStatusTableRenderer = (function() {
 	}
 	GitStatusTableRenderer.prototype = {
 		render: function (renderSeparator) {
-			var headerTable = dojo.create("table", {},this._parentId);
-			var row = dojo.create("tr", null, headerTable);
-			if(this._useCheckboxSelection)
-				row.appendChild(this.getCheckboxColumn());
-			var titleCol = dojo.create("td", {}, row, "last");
-			var title = dojo.create("h2", {innerHTML: this._header}, titleCol, "last");
-			var actionCol = dojo.create("td", {nowrap :true}, row, "last");
-			var actionDiv = dojo.create("div", {}, actionCol, "last");
-			this._cmdSpan = dojo.create("span", null, actionDiv, "last");
+			var headingSection = dojo.create("div", null, this._parentId);
+			dojo.addClass(headingSection, "paneHeadingContainer paneHeadingContainerFixed");
+			var title = dojo.create("span", {id : this._type + "_header" ,innerHTML: this._header}, headingSection);
+			dojo.addClass(title, "paneHeading");
+			var localTools = dojo.create("span", null, headingSection);
+			dojo.addClass(localTools,  "paneHeadingToolbar");
 			
+			var check = dojo.create("input", {type: "checkbox"}, localTools);
+			dojo.addClass(check, "statusCheckBoxOverall");
+			this.checkBox = check;
+			dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
+				this.contentRenderer.toggleSelectAll(evt.target.checked);
+				this.renderAction();
+			}));
+			this._cmdSpan = dojo.create("span", {}, localTools, "last");
+			dojo.addClass(this._cmdSpan, "paneHeadingCommands");
 			this._statusContentId = this._parentId + "_" + this._type;
 			dojo.create("div", {id:this._statusContentId}, this._parentId, "last");
-			if(	renderSeparator)
-				dojo.create("table", {width:"100%", height:"10px"},this._parentId);
 		},
 		
 		select: function(selected){
@@ -309,24 +301,6 @@ orion.GitStatusTableRenderer = (function() {
 			else
 				this.select(false);
 			
-		},
-		
-		getCheckboxColumn: function(){
-			if (this._useCheckboxSelection) {
-				var checkColumn = document.createElement('td');
-				dojo.addClass(checkColumn, "secondaryColumn");
-				
-				var check = dojo.create("input", {type: "checkbox"});
-				dojo.addClass(check, "statusCheckBoxOverall");
-				this.checkBox = check;
-				
-				checkColumn.appendChild(check);
-				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
-					this.contentRenderer.toggleSelectAll(evt.target.checked);
-					this.renderAction();
-				}));
-				return checkColumn;
-			}
 		},
 		
 		getStatusContentId: function(){
@@ -350,17 +324,16 @@ orion.GitCommitZoneRenderer = (function() {
 	GitCommitZoneRenderer.prototype = {
 		render: function (renderSeparator) {
 			this._commitZone = dojo.create("div", null, this._parentId, "last");
-			
-			var headerTable = dojo.create("table", {width:"100%"}, this._commitZone);
-			var row = dojo.create("tr", null, headerTable);
-			var titleCol = dojo.create("td", {nowrap :true}, row, "last");
-			dojo.create("h2", {innerHTML: "Commit message:"}, titleCol, "last");
+			var headingSection = dojo.create("div", null, this._commitZone);
+			dojo.addClass(headingSection, "paneHeadingContainer paneHeadingContainerFixed");
+			var title = dojo.create("span", {innerHTML: "Commit message"}, headingSection);
+			dojo.addClass(title, "paneHeading");
 			
 			var commitTable = dojo.create("table", null, this._commitZone);
 			var commitRow = dojo.create("tr", null, commitTable);
 			var messageCol = dojo.create("td", {nowrap :true}, commitRow, "last");
-			dojo.create("textarea", {id:"commitMessage", COLS:40, ROWS:6}, messageCol, "last");
-			
+			var text = dojo.create("textarea", {id:"commitMessage", ROWS:6}, messageCol, "last");
+			dojo.addClass(text, "pane");
 			var actionCol = dojo.create("td", {nowrap :true}, commitRow, "last");
 			var actionDiv = dojo.create("div", {style:"float: left;", align:"left"}, actionCol, "last");
 			var actionTable = dojo.create("table", null,actionDiv);
@@ -374,8 +347,6 @@ orion.GitCommitZoneRenderer = (function() {
 			var actionCol2 = dojo.create("td", {nowrap :true}, actionRow2, "last");
 			dojo.create("input", {id:"amend", type:"checkbox" ,value: "Amend", title: "Amend last commit"}, actionCol2, "last");
 			actionCol2.appendChild(document.createTextNode(" Amend"));
-			if(	renderSeparator)
-				dojo.create("table", {width:"100%", height:"10px"}, this._commitZone);
 		},
 		
 		show:function(){
@@ -473,8 +444,8 @@ orion.GitCommitterAndAuthorZoneRenderer = (function() {
 			dojo.place(document.createTextNode(""), this._cmdSpanHide, "only");
 			var self = this;
 			var service = this._registry.getService("orion.page.command");
-			service.renderCommands(self._cmdSpanShow, "dom", {type: "personIdentShow"}, this, "tool");
-			service.renderCommands(self._cmdSpanHide, "dom", {type: "personIdentHide"}, this, "tool");
+			service.renderCommands(self._cmdSpanShow, "dom", {type: "personIdentShow"}, this, "button");
+			service.renderCommands(self._cmdSpanHide, "dom", {type: "personIdentHide"}, this, "button");
 		},
 		
 		setDefaultPersonIdent:function(name, email) {
@@ -517,22 +488,20 @@ orion.GitLogTableRenderer = (function() {
 	}
 	GitLogTableRenderer.prototype = {
 		render: function (renderSeparator) {
-			dojo.create("div", {id:this._sectionId},this._parentId);
-			var headerTable = dojo.create("table", null,this._sectionId);
-			var row = dojo.create("tr", null, headerTable);
-			var titleCol = dojo.create("td", null, row, "last");
-			dojo.create("h2", {id : this._type + "_header" ,innerHTML: this._header}, titleCol, "last");
-			var cmdColAdditional = dojo.create("td", null, row, "last");
-			this._cmdSpanAdditional = dojo.create("span", {}, cmdColAdditional, "last");
-			dojo.addClass(this._cmdSpanAdditional, "statusLogCmd");
-			var cmdCol = dojo.create("td", null, row, "last");
-			this._cmdSpan = dojo.create("span", {}, cmdCol, "last");
-			dojo.addClass(this._cmdSpan, "statusLogCmd");
+			var section = dojo.create("div", {id:this._sectionId}, this._parentId);
+			var headingSection = dojo.create("div", null, section);
+			dojo.addClass(headingSection, "paneHeadingContainer paneHeadingContainerFixed");
+			var title = dojo.create("span", {id : this._type + "_header" ,innerHTML: this._header}, headingSection);
+			dojo.addClass(title, "paneHeading");
+			var localTools = dojo.create("span", null, headingSection);
+			dojo.addClass(localTools,  "paneHeadingToolbar");
+			this._cmdSpanAdditional = dojo.create("span", {}, localTools, "last");
+			dojo.addClass(this._cmdSpanAdditional, "statusLogCmd paneHeadingCommands");
+			this._cmdSpan = dojo.create("span", {}, localTools, "last");
+			dojo.addClass(this._cmdSpan, "statusLogCmd paneHeadingCommands");
 			this._logContentId = this._parentId + "_" + this._type + "_content";
-			var contentDiv = dojo.create("div", {id:this._logContentId }, this._sectionId, "last");
+			var contentDiv = dojo.create("div", {id:this._logContentId }, section, "last");
 			dojo.addClass(contentDiv, "statusLogContent");
-			if(	renderSeparator)
-				dojo.create("table", {width:"100%", height:"10px"},this._sectionId);
 		},
 		
 		getLogContentId: function(){

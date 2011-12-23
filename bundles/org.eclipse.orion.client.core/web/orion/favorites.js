@@ -262,10 +262,11 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 		commandService.addCommand(deleteSearchCommand, "object");	
 		commandService.addCommand(addFaveURLCommand, "dom");		
 		// declare the contribution to the ui
-		commandService.registerCommandContribution("eclipse.renameFave", 1);
-		commandService.registerCommandContribution("eclipse.deleteFave", 2);
-		commandService.registerCommandContribution("eclipse.renameSearch", 1);	
-		commandService.registerCommandContribution("eclipse.deleteSearch", 2);	
+		commandService.addCommandGroup("orion.favorites", 100, "*");
+		commandService.registerCommandContribution("eclipse.renameFave", 1, null, "orion.favorites");
+		commandService.registerCommandContribution("eclipse.deleteFave", 2, null, "orion.favorites");
+		commandService.registerCommandContribution("eclipse.renameSearch", 1, null, "orion.favorites");	
+		commandService.registerCommandContribution("eclipse.deleteSearch", 2, null, "orion.favorites");
 		commandService.registerCommandContribution("eclipse.addExternalFave", 1, "faveCommands");		
 
 		var favoritesService = this._registry.getService("orion.core.favorite");
@@ -348,11 +349,10 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			var thead = dojo.create("thead", null, faveTable);
 			var row = dojo.create("tr", null, thead);
 			var headCol = dojo.create("td", null, row);
-			var commandCol = dojo.create("td", null, row);
-			mUtil.createPaneHeading(headCol, commandCol, "Favorites", null, "faveCommands", this._registry.getService("orion.page.command"), this);
+			mUtil.createPaneHeading(headCol, "Favorites", null, "faveCommands", this._registry.getService("orion.page.command"), this);
 			
 			// favorites
-			var tr, col1, col2, href, link, actionsWrapper;
+			var tr, col1, href, link, actionsWrapper;
 			var tbody = dojo.create("tbody", null, faveTable);
 
 			for (var j=0; j < favorites.length; j++) {
@@ -372,25 +372,11 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				tr.id = "row"+id;
 				col1 = dojo.create("td", null, tr, "last");
 				dojo.style(col1, "whiteSpace", "nowrap");
-				col2 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
-				dojo.style(col2, "whiteSpace", "nowrap");
-				dojo.style(col2, "textAlign", "right");
 				link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
 				dojo.place(window.document.createTextNode(fave.name), link, "only");
-				actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
-				// we must hide/show the span rather than the column.  IE and Chrome will not consider
-				// the mouse as being over the table row if it's in a hidden column
-				dojo.style(actionsWrapper, "visibility", "hidden");
+				actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col1, "last");
 				this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", fave, this, "tool", false, j);
 				dojo.place(tr, tbody, "last");
-				dojo.connect(tr, "onmouseover", tr, function() {
-					var wrapper = dojo.byId(this.id+"actionsWrapper");
-					dojo.style(wrapper, "visibility", "visible");
-				});
-				dojo.connect(tr, "onmouseout", tr, function() {
-					var wrapper = dojo.byId(this.id+"actionsWrapper");
-					dojo.style(wrapper, "visibility", "hidden");
-				});
 			}
 			dojo.place(faveTable, this._parent, "only");
 			
@@ -404,8 +390,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				thead = dojo.create("thead", null, faveTable);
 				row = dojo.create("tr", null, thead);
 				headCol = dojo.create("td", null, row);
-				commandCol = dojo.create("td", null, row);
-				mUtil.createPaneHeading(headCol, commandCol, "Searches");
+				mUtil.createPaneHeading(headCol, "Searches");
 
 				tbody = dojo.create("tbody", null, faveTable);
 				for (var i=0; i < searches.length; i++) {
@@ -415,23 +400,11 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 					tr = dojo.create("tr");
 					tr.id = "searchRow"+id;
 					col1 = dojo.create("td", null, tr, "last");
-					col2 = dojo.create("td", {id: tr.id+"actions"}, tr, "last");
-					dojo.style(col2, "textAlign", "right");
 					link = dojo.create("a", {id:id, href: href}, col1, "only");
 					dojo.place(window.document.createTextNode(search.name), link, "only");
-					// render local commands
-					actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col2, "only");
-					dojo.style(actionsWrapper, "visibility", "hidden");
+					actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col1, "last");
 					this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", search, this, "tool", false, i);
 					dojo.place(tr, tbody, "last");
-					dojo.connect(tr, "onmouseover", tr, function() {
-						var wrapper = dojo.byId(this.id+"actionsWrapper");
-						dojo.style(wrapper, "visibility", "visible");
-					});
-					dojo.connect(tr, "onmouseout", tr, function() {
-						var wrapper = dojo.byId(this.id+"actionsWrapper");
-						dojo.style(wrapper, "visibility", "hidden");
-					});
 				}
 			}
 		}
