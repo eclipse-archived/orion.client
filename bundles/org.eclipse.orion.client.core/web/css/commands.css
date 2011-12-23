@@ -169,19 +169,11 @@ commandButtonImage {
 	vertical-align: middle; 
 }
 
-.nihilo .textlessOver .dijitArrowButtonInner {
-	background-position: 0px 0px; 
-	width: 16px; height: 16px; 
-	background: url(../images/menuactive.gif) no-repeat top left; 
-	display: inline-block; 
-	vertical-align: middle; 
-}
-
-/* this keeps the default gray hover from happening for the gear node */
-.nihilo .textless .dijitButtonNode, .nihilo .textless .dijitButtonNodeHover, .nihilo .textless .dijitButtonNodeActive {
+/* this keeps the default gray hover from happening for menu node */
+.nihilo .textless .dijitButtonNode {
     color: black;
     background-color: transparent;
-    padding-left: 8px;
+    margin: 1px;
 }
 
 .nihilo .dijitTooltip {
