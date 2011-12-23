@@ -110,14 +110,7 @@ eclipse.sites.SiteRenderer = (function() {
 			}
 			
 			// Action column
-			var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper",
-					style: {visibility: "hidden"}}, actionCol, "only");
-			dojo.connect(tableRow, "onmouseover", tableRow, function() {
-				dojo.style(actionsWrapper, "visibility", "visible");
-			});
-			dojo.connect(tableRow, "onmouseout", tableRow, function() {
-				dojo.style(actionsWrapper, "visibility", "hidden");
-			});
+			var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper"}, actionCol, "only");
 			
 			// contact the command service to render appropriate commands here.
 			this._commandService.renderCommands(actionsWrapper, "object", item, {} /*handler*/, "tool");
