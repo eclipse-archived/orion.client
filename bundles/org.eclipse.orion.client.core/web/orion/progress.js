@@ -44,7 +44,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 						}, 5000);
 					}, function(error){throw new Error(error);});
 				}else{
-					dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || "{'Children': []}")));
+					dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}')));
 					window.setTimeout(function() {
 						dojo.hitch(that, that._checkOperationsChanges());
 					}, 5000);
@@ -61,7 +61,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				
 				window.addEventListener("storage", function(e){
 					if(e.key === "orionOperations"){
-						dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || "{'Children': []}")));
+						dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}')));
 					}
 				});
 			},
@@ -82,7 +82,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			},
 			_checkOperationsChanges: function(){
 				var that = this;
-				var operations = JSON.parse(localStorage.getItem("orionOperations") || "{'Children': []}");
+				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
 				var operationsToDelete = [];
 				var allRequests = [];
 				for(var i=0; i<operations.Children.length; i++){
@@ -180,14 +180,14 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			 * @param deferred {dojo.Deferred} [optional] deferred to be notified when operation is done, if not provided created by function
 			 * @returns {dojo.Deferred} notified when operation finishes
 			 */
-			followOperation: function(operationJson, deferred){
+			followOperation: function(operationJson, deferred, operationLocation){
 				var result = deferred ? deferred : new dojo.Deferred();
 				this.writeOperation(operationJson);
 				var that = this;
 				if (operationJson && operationJson.Location && operationJson.Running==true) {
 					window.setTimeout(function() {
 						that._operationsClient.getOperation(operationJson.Location).then(function(jsonData, ioArgs) {
-								dojo.hitch(that, that.followOperation(jsonData, result));
+								dojo.hitch(that, that.followOperation(jsonData, result, operationJson.Location));
 							}, function(error){
 								dojo.hitch(that, that.setProgressResult)(error);
 								result.errback(error);
@@ -199,6 +199,23 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 					if(severity=="Error" || severity=="Warning")
 						dojo.hitch(that, that._openOperationsPopup)();
 					result.callback(operationJson);
+					
+					if(!operationJson.Failed && operationJson.Idempotent==true){
+						window.setTimeout(function() {
+							dojo.hitch(that._operationsClient, that._operationsClient.removeOperation)(operationLocation).then(function(){
+								var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
+								for(var i=0; i<operations.Children.length; i++){
+									var operation = operations.Children[i];
+									if(operation.Id && operation.Id===operationJson.Id){
+										operations.Children.splice(i, 1);
+										break;
+									}
+								}
+								localStorage.setItem("orionOperations", JSON.stringify(operations));
+								dojo.hitch(that, that._generateOperationsInfo)(operations); 
+							});
+						}, 5000);
+					}
 				}
 				
 				return result;
@@ -219,7 +236,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				return deferred.then(function(jsonResult){
 					//see if we are dealing with a progress resource
 					if (jsonResult && jsonResult.Location && jsonResult.Message && jsonResult.Running) {
-						return dojo.hitch(that, that.followOperation)(jsonResult);
+						return dojo.hitch(that, that.followOperation)(jsonResult, null, jsonResult.Location);
 					}
 					//clear the progress message
 					that._serviceRegistry.getService("orion.page.message").setProgressMessage("");
@@ -241,7 +258,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			},
 			writeOperation: function(operationj){
 				var operationJson = JSON.parse(JSON.stringify(operationj));
-				var operations = JSON.parse(localStorage.getItem("orionOperations") || "{'Children': []}");
+				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
 				for(var i=0; i<operations.Children.length; i++){
 					var operation = operations.Children[i];
 					if(operation.Id && operation.Id===operationJson.Id){

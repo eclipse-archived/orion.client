@@ -32,40 +32,12 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 			this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, operationsList.Children));
 		};
 		
-		OperationsExplorer.prototype.removeCompletedOperations = function(){
-			var newOperations = [];
-			for(var operationId in this.operations.Children){
-				if(this.operations.Children[operationId].Running){
-					newOperations.push(this.operations.Children[operationId]);
-				}
-			}
-			this.operations.Children = newOperations;
-			this.loadOperations(this.operations);		
-		};
-		
-		OperationsExplorer.prototype.removeOperations = function(operationsToRemove){
-			var newOperations = [];
-			for(var operationId in this.operations.Children){
-				var foundOperation = false;
-				for(var i in operationsToRemove){
-					if(operationsToRemove[i].Location === this.operations.Children[operationId].Location){
-						foundOperation = true;
-						break;
-					}
-				}
-				if(!foundOperation)
-					newOperations.push(this.operations.Children[operationId]);
-			}
-			this.operations.Children = newOperations;
-			this.loadOperations(this.operations);
-		};
-		
 		OperationsExplorer.prototype.mergeOperations = function(operationsToMerge){
 			if(!this.operations){
 				this.loadOperations(operationsToMerge);
 				return;
 			}
-			if(!operationsToMerge || !operationsToMerge.Children || operationsToMerge.Children.length===0){
+			if(!operationsToMerge || (!operationsToMerge.Children && !operationsToMerge.DeletedChildren) || (operationsToMerge.Children.length===0 && operationsToMerge.DeletedChildren.length===0)){
 				return;
 			}
 			var newOperations = [];
@@ -86,6 +58,20 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 			}
 			for(var i=0; i<newOperations.length; i++)
 				this.operations.Children.unshift(newOperations[i]);
+			
+			if(operationsToMerge.DeletedChildren){
+				for(var j=0; j<operationsToMerge.DeletedChildren.length; j++){
+					var operationToDelete = operationsToMerge.DeletedChildren[j]; 
+					for(var i=0; i<this.operations.Children.length; i++){
+						var operation = this.operations.Children[i];
+						if(operationToDelete == operation.Id){
+							this.operations.Children.splice(i, 1);
+							break;
+						}
+					}
+				}
+			}
+
 			this.loadOperations(this.operations);
 			
 		};
