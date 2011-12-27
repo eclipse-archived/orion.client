@@ -55,7 +55,7 @@ define(['require', 'dojo', 'orion/commands'],
 				tooltip : "Remove all completed operations",
 				id : "eclipse.removeCompletedOperations",
 				callback : function(data) {
-					operationsClient.removeCompletedOperations().then(function(){explorer.removeCompletedOperations();});
+					operationsClient.removeCompletedOperations();
 				},
 				visibleWhen : function(item) {
 					return true;
@@ -70,14 +70,10 @@ define(['require', 'dojo', 'orion/commands'],
 				id : "eclipse.removeOperation",
 				callback : function(data) {
 					var items = dojo.isArray(data.items) ? data.items : [data.items];
-					var removeResults = [];
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
-						removeResults[i] = operationsClient.removeOperation(item.Location);
+						operationsClient.removeOperation(item.Location);
 					}
-					 new dojo.DeferredList(removeResults).then(function(){
-						 dojo.hitch(explorer, explorer.removeOperations)(items);
-					 });
 				},
 				visibleWhen : function(items) {
 					if(!dojo.isArray(items) || items.length===0)
