@@ -3,6 +3,14 @@
 	<div class="dijitTooltipContainer" role="presentation" style="width: 300px; padding-left: 0; padding-right: 0; padding-top: 0.5em; padding-bottom: 0.45em">
 		<div class="dijitTooltipContents dijitTooltipFocusNode" role="dialog"
 			dojoattachpoint="containerNode" style="padding: 0">
+			<table style="width: 100%;">
+				<tr>
+					<td class="LoginWindowLeft"><h2>User Operations</h2></td>
+					<td class="LoginWindowRight" style="text-align: right">
+						<a dojoAttachPoint="allOperationsLink">All operations list</a>
+					</td>
+				</tr>
+			</table>
 			<table dojoAttachPoint="authenticated" style="display: none; width: 100%;">
 			 <tbody dojoAttachPoint="authenticatedList">
 			</tbody>

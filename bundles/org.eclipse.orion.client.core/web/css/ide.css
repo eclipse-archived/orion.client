@@ -414,7 +414,7 @@ a:hover {
 }
 
 .progressPane_empty {
-	background: url(../images/progress_gray.gif) no-repeat center;  /* TODO move icon to sprite*/
+	background: inherit;
 }
 
 .toolbar {

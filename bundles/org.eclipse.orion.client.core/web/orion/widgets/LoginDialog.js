@@ -23,6 +23,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			this.authenticatedServices = {};
 			this.unauthenticatedServices = {};
 		},
+		
+		postCreate : function() {
+			this.inherited(arguments);
+			this.allOperationsLink.href = require.toUrl("operations/list.html");
+		},
 	
 		setPendingAuthentication: function(services){
 			
