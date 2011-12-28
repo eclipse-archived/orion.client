@@ -188,9 +188,9 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 					window.setTimeout(function() {
 						that._operationsClient.getOperation(operationJson.Location).then(function(jsonData, ioArgs) {
 								dojo.hitch(that, that.followOperation(jsonData, result, operationJson.Location));
-							}, function(error){
+							}, function(error, secondArg){
 								dojo.hitch(that, that.setProgressResult)(error);
-								result.errback(error);
+								result.errback(error, secondArg);
 								});
 					}, 2000);
 				} else if (operationJson && operationJson.Result) {
@@ -241,6 +241,9 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 					//clear the progress message
 					that._serviceRegistry.getService("orion.page.message").setProgressMessage("");
 					return jsonResult;
+				}, function(jsonError){
+					dojo.hitch(that, that.setProgressResult)(jsonError);
+					return jsonError;
 				});
 			},
 			
