@@ -11,7 +11,7 @@
 /*global dojo dijit window eclipse:true*/
 
 define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
-	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/Form'], 
+	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/CheckBox', 'dijit/form/Form'], 
 			function(require, dojo, dijit, mCommands ,mAuth, mBreadcrumbs) {
 
 	/**
@@ -221,10 +221,31 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 				  formElem = new cls(json.props);
 				  formElem.placeAt(node);
 				  
+				  function setInnerHTML(myDijit,p){
+					  if(myDijit.declaredClass==="dijit.form.CheckBox"){
+						  p.innerHTML = myDijit.get('checked') ? "yes" : "no";
+						  return;
+					  }
+					  p.innerHTML = myDijit.get('value');
+					  if(p.innerHTML=="")
+						  p.innerHTML="&nbsp";
+					};
+				  
 				  if(formElem.get('readOnly')===true && !formElem.get('ecliplseCustomValue')){
 					  formElem.set('style', 'display: none');
 					  var p = dojo.create("p", {id: formElem.get('id')+"_p", className: "userprofile", innerHTML: formElem.get('value')?formElem.get('value'):"&nbsp;"}, node, "last");
-					  dojo.connect(formElem, "onChange", dojo.hitch(this, function(myDijit,p){p.innerHTML = myDijit.get('value'); if(p.innerHTML=="") p.innerHTML="&nbsp";}, formElem, p));
+					  
+					  setInnerHTML(formElem, p);
+					  
+					  dojo.connect(formElem, "onChange", dojo.hitch(this, function(myDijit,p){
+						  if(myDijit.declaredClass==="dijit.form.CheckBox"){
+							  p.innerHTML = myDijit.get('checked') ? "yes" : "no";
+							  return;
+						  }
+						  p.innerHTML = myDijit.get('value');
+						  if(p.innerHTML=="")
+							  p.innerHTML="&nbsp";
+						}, formElem, p));
 				  }
 				  
 				  return formElem;
