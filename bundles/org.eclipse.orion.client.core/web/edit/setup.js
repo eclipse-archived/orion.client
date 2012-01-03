@@ -155,6 +155,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 	};
 	
+	var dispatcher;
+
 	var inputManager = {
 		lastFilePath: "",
 		
@@ -189,6 +191,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						syntaxHighlighter.highlight(fileURI, editor, this._contentType);
 						editor.highlightAnnotations();
 						setOutlineProviders(this._contentType, location);
+						if (!dispatcher) {
+							dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor, this._contentType);
+						}
 						
 						// Contents
 						clearTimeout(progressTimeout);
@@ -480,8 +485,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		} 
 	});
 	
-	var dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor);
-
 	// In this page, the hash change drives selection.  In other scenarios, a file picker might drive selection
 	dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editor);});
 	inputManager.setInput(dojo.hash(), editor);
