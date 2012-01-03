@@ -374,7 +374,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 				var resp = JSON.parse(message.responseText);
 				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
 			}catch(Exception){
-				display.Message = message.message;
+				display.Message = message.Message;
 			}
 			
 			if(display.Message){

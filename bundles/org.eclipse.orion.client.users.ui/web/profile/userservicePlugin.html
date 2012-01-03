@@ -41,7 +41,9 @@
   usersService.fire = function(action, url, jsonData){
 	  switch(action){
 	  	case "saveProfile":
-	  		return this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url) {this.initProfile(url, "requiredPluginsChanged", "userInfoChanged"); return {message: "Profile saved!", status: 200};}, url));
+	  		return this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url, jsonResp) {
+	  			this.initProfile(url, "requiredPluginsChanged", "userInfoChanged");
+	  			return (jsonResp && jsonResp.Message) ? jsonResp : {Message: "Profile saved!", status: 200};}, url));
 	  		break;
 	  	case "resetProfile":
 	  		return this.getUserInfo(url, "userInfoChanged");
@@ -55,7 +57,7 @@
 			}
 			break;
 		default:
-			return this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url) {this.initProfile(url, "requiredPluginsChanged", "userInfoChanged"); return {message: "Profile saved!", status: 200};}, url));
+			return this.updateUserInfo(url, jsonData, dojo.hitch(this, function(url, jsonResp) {this.initProfile(url, "requiredPluginsChanged", "userInfoChanged"); return (jsonResp && jsonResp.Message) ? jsonResp : {Message: "Profile saved!", status: 200};}, url));
   			break;
 	  }
   };
