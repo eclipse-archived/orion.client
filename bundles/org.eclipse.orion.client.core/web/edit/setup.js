@@ -33,6 +33,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var statusReportingService;
 	var problemService;
 	var outlineService;
+	var contentTypeService;
 	
 	document.body.style.visibility = "visible";
 	dojo.parser.parse();
@@ -50,6 +51,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		problemService = new mProblems.ProblemService(serviceRegistry);
 		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 	}());
 	
 	var splitArea = dijit.byId("orion.innerCoding"),
@@ -58,94 +60,65 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		searchFloat = dojo.byId("searchFloat"),
 		leftPane = dojo.byId("leftPane");
 
-	// Content Assist
-	var contentAssistFactory = null;
-	if (!isReadOnly) {
-		contentAssistFactory = function(editor) {
-			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
-			var providersLoaded = false;
-			contentAssist.addEventListener("show", function(event) {
-				if (!providersLoaded) {
-					// Load contributed content assist providers
-					var fileName = editor.getTitle();
-					var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist");
-					for (var i=0; i < serviceReferences.length; i++) {
-						var serviceReference = serviceReferences[i];
-						var name = serviceReference.getProperty("name"),
-						    pattern = serviceReference.getProperty("pattern");
-						if (pattern && new RegExp(pattern).test(fileName)) {
-							contentAssist.addProvider(serviceRegistry.getService(serviceReference), name, pattern);
-						}
-					}
-					providersLoaded = true;
-				}
-			});
-			return contentAssist;
-		};
-	}
-	
 	// Temporary.  This will evolve into something pluggable.
-	var contentTypes = new mContentTypes.ContentTypes(serviceRegistry);
 	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("orion.edit.highlighter");
 	var syntaxHighlighter = {
 		styler: null, 
 		
-		highlight: function(fileName, editor, metadata) {
+		highlight: function(fileName, editor, fileContentType) {
 			if (this.styler) {
 				if (this.styler.destroy) {
 					this.styler.destroy();
 				}
 				this.styler = null;
 			}
-			if (fileName) {
-				var textView = editor.getTextView();
-				var splits = fileName.split(".");
-				var extension = splits.pop().toLowerCase();
-				if (splits.length > 0) {
-					var annotationModel = editor.getAnnotationModel();
-					switch(extension) {
-						case "js":
-						case "json":
-							this.styler = new mTextStyler.TextStyler(textView, "js", annotationModel);
-							break;
-						case "java":
-							this.styler = new mTextStyler.TextStyler(textView, "java", annotationModel);
-							break;
-						case "css":
-							this.styler = new mTextStyler.TextStyler(textView, "css", annotationModel);
-							break;
+			
+			var textView = editor.getTextView();
+			var annotationModel = editor.getAnnotationModel();
+			switch(fileContentType && fileContentType.id) {
+				case "text.javascript":
+				case "text.json":
+					this.styler = new mTextStyler.TextStyler(textView, "js", annotationModel);
+					break;
+				case "text.java":
+					this.styler = new mTextStyler.TextStyler(textView, "java", annotationModel);
+					break;
+				case "text.css":
+					this.styler = new mTextStyler.TextStyler(textView, "css", annotationModel);
+					break;
+			}
+			
+			if (this.styler) {
+				editor.setFoldingEnabled(this.styler.foldingEnabled);
+			}
+			
+			if (!this.styler && syntaxHighlightProviders) {
+				var grammars = [], providerToUse;
+				var extension = fileName.split(".").pop().toLowerCase();
+				for (var i=0; i < syntaxHighlightProviders.length; i++) {
+					var provider = syntaxHighlightProviders[i],
+					    contentTypeIds = provider.getProperty("contentType"),
+					    fileTypes = provider.getProperty("fileTypes"); // backwards compatibility
+					if (provider.getProperty("type") === "grammar") {
+						grammars.push(provider.getProperty("grammar"));
 					}
-					
-					if (this.styler) {
-						editor.setFoldingEnabled(this.styler.foldingEnabled);
+					if ((contentTypeIds && contentTypeService.isSomeExtensionOf(fileContentType, contentTypeIds)) ||
+							(fileTypes && fileTypes.indexOf(extension) !== -1)) {
+						providerToUse = provider;
 					}
-					
-					if (!this.styler && syntaxHighlightProviders) {
-						var grammars = [],
-						    providerToUse;
-						for (var i=0; i < syntaxHighlightProviders.length; i++) {
-							var provider = syntaxHighlightProviders[i],
-							    fileTypes = provider.getProperty("fileTypes");
-							if (provider.getProperty("type") === "grammar") {
-								grammars.push(provider.getProperty("grammar"));
-							}
-							if (fileTypes && fileTypes.indexOf(extension) !== -1) {
-								providerToUse = provider;
-							}
+				}
+				
+				if (providerToUse) {
+					var providerType = providerToUse.getProperty("type");
+					if (providerType === "highlighter") {
+						var service = serviceRegistry.getService(providerToUse);
+						if (service.setContentType) {
+							service.setContentType(fileContentType);
 						}
-						
-						if (providerToUse) {
-							var providerType = providerToUse.getProperty("type");
-							if (providerType === "highlighter") {
-								var service = serviceRegistry.getService(providerToUse);
-								var contentType = contentTypes.getContentType(metadata);
-								service.setContentType(contentType);
-								this.styler = new mAsyncStyler.AsyncStyler(textView, service, annotationModel);
-							} else if (providerType === "grammar" || typeof providerType === "undefined") {
-								var grammar = providerToUse.getProperty("grammar");
-								this.styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
-							}
-						}
+						this.styler = new mAsyncStyler.AsyncStyler(textView, service, annotationModel);
+					} else if (providerType === "grammar" || typeof providerType === "undefined") {
+						var grammar = providerToUse.getProperty("grammar");
+						this.styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
 					}
 				}
 			}
@@ -182,6 +155,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 	};
 	
+	var dispatcher;
+
 	var inputManager = {
 		lastFilePath: "",
 		
@@ -212,8 +187,13 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						// Metadata
 						this._fileMetadata = metadata;
 						this.setTitle(metadata.Location);
-						syntaxHighlighter.highlight(fileURI, editor, metadata);
+						this._contentType = contentTypeService.getFileContentType(metadata);
+						syntaxHighlighter.highlight(fileURI, editor, this._contentType);
 						editor.highlightAnnotations();
+						setOutlineProviders(this._contentType, location);
+						if (!dispatcher) {
+							dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor, this._contentType);
+						}
 						
 						// Contents
 						clearTimeout(progressTimeout);
@@ -287,7 +267,11 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		getFileMetadata: function() {
 			return this._fileMetadata;
 		},
-		
+
+		getContentType: function() {
+			return this._contentType;
+		},
+
 		setDirty: function(dirty) {
 			if (dirty) {
 				if (this._lastTitle && this._lastTitle.charAt(0) !== '*') {
@@ -435,6 +419,32 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 	};
 	
+	// Content Assist
+	var contentAssistFactory = null;
+	if (!isReadOnly) {
+		contentAssistFactory = function(editor) {
+			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
+			contentAssist.addEventListener("show", function(event) {
+				// Filter the providers to be used by content assist
+				var fileContentType = inputManager.getContentType();
+				var fileName = editor.getTitle();
+				var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist");
+				var providers = [];
+				for (var i=0; i < serviceReferences.length; i++) {
+					var serviceReference = serviceReferences[i],
+					    contentTypeIds = serviceReference.getProperty("contentType"),
+					    pattern = serviceReference.getProperty("pattern"); // backwards compatibility
+					if ((contentTypeIds && contentTypeService.isSomeExtensionOf(fileContentType, contentTypeIds)) || 
+							(pattern && new RegExp(pattern).test(fileName))) {
+						providers.push(serviceRegistry.getService(serviceReference));
+					}
+				}
+				contentAssist.setProviders(providers);
+			});
+			return contentAssist;
+		};
+	}
+
 	var statusReporter =  function(message, type) {
 		if (type === "progress") {
 			statusReportingService.setProgressMessage(message);
@@ -475,8 +485,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		} 
 	});
 	
-	var dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor);
-
 	// In this page, the hash change drives selection.  In other scenarios, a file picker might drive selection
 	dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editor);});
 	inputManager.setInput(dojo.hash(), editor);
@@ -486,6 +494,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
+	editor.addEventListener("InputChanged", function(evt) {
+		syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
+	});
 	
 	// Create outliner "gadget"
 	var outliner = new mOutliner.Outliner({parent: outlineDomNode,
@@ -493,18 +504,30 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		outlineService: serviceRegistry.getService("orion.edit.outline"),
 		commandService: commandService,
 		selectionService: selection});
-	editor.addEventListener("InputChanged", function(evt) {
+	function setOutlineProviders(fileContentType, title) {
 		var outlineProviders = serviceRegistry.getServiceReferences("orion.edit.outliner"),
 		    filteredProviders = [];
 		for (var i=0; i < outlineProviders.length; i++) {
 			var serviceReference = outlineProviders[i],
-			    pattern = serviceReference.getProperty("pattern");
-			if (pattern && new RegExp(pattern).test(evt.title)) {
+			    contentTypeIds = serviceReference.getProperty("contentType"),
+			    pattern = serviceReference.getProperty("pattern"); // for backwards compatibility
+			var isSupported = false;
+			if (contentTypeIds) {
+				isSupported = contentTypeIds.some(function(contentTypeId) {
+						return contentTypeService.isExtensionOf(fileContentType, contentTypeId);
+					});
+			} else if (pattern && new RegExp(pattern).test(title)) {
+				isSupported = true;
+			}
+			if (isSupported) {
 				filteredProviders.push(serviceReference);
 			}
 		}
-		outlineService.setOutlineProviders(filteredProviders, editor.getText(), editor.getTitle());
+		outlineService.setOutlineProviders(filteredProviders);
 		outliner.setOutlineProviders(filteredProviders);
+	}
+	editor.addEventListener("InputChanged", function(evt) {
+		outlineService.emitOutline(editor.getText(), editor.getTitle());
 	});
 	dojo.connect(outliner, "setSelectedProvider", function(/**ServiceReference*/ outlineProvider) {
 		outlineService.setProvider(outlineProvider);

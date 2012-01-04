@@ -47,9 +47,9 @@ dojo.addOnLoad(function(){
 					
 //		var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 
-		var contentTypes = new mContentTypes.ContentTypes(serviceRegistry);
+		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 		var explorer = new mExplorerTable.FileExplorer({serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection, searcher: searcher, 
-				fileClient: fileClient, commandService: commandService, contentTypes: contentTypes,
+				fileClient: fileClient, commandService: commandService, contentTypeService: contentTypeService,
 				parentId: "explorer-tree", breadcrumbId: "location", toolbarId: "pageActions", selectionToolsId: "selectionTools"});
 		
 		function refresh() {

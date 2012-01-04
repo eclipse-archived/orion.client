@@ -172,7 +172,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 	
 	/**
 	 * Constructs a new outline service. Clients should obtain an outline service by requesting
-	 * the service <tt>orion.edit.outline</tt> from the service registry. This service constructor
+	 * the service <code>orion.edit.outline</code> from the service registry. This service constructor
 	 * is only intended to be used by page service registry initialization code.
 	 * @name orion.outliner.OutlineService
 	 * @class <code>OutlineService</code> dispatches an event when an outline for a resource is available.
@@ -188,7 +188,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 		this._outlinePref = this._preferences.getPreferences("/edit/outline");
 	}
 	OutlineService.prototype = /** @lends orion.outliner.OutlineService.prototype */ {
-		setOutlineProviders: function(/**ServiceReference[]*/ providers, contents, title) {
+		setOutlineProviders: function(/**ServiceReference[]*/ providers) {
 			this.providers = providers;
 			// Check pref to see if user has chosen a preferred outline provider
 			var self = this;
@@ -202,7 +202,6 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 				}
 				if (provider) {
 					self.setProvider(provider);
-					self.emitOutline(contents, title);
 				}
 			});
 		},
@@ -216,10 +215,12 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 			}
 		},
 		emitOutline: function(contents, title, providerId) {
-			var self = this;
-			this._serviceRegistry.getService(this.outlineProvider).getOutline(contents, title).then(function(outline) {
-				self._serviceRegistration.dispatchEvent("outline", outline, title, self.outlineProvider.getProperty("id"));
-			});
+			if (this.outlineProvider) {
+				var self = this;
+				this._serviceRegistry.getService(this.outlineProvider).getOutline(contents, title).then(function(outline) {
+					self._serviceRegistration.dispatchEvent("outline", outline, title, self.outlineProvider.getProperty("id"));
+				});
+			}
 		}
 	};
 	OutlineService.prototype.constructor = OutlineService;

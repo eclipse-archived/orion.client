@@ -53,10 +53,10 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 	/**
 	 * Renders json items into columns in the tree
 	 */
-	function FileRenderer (options, explorer, commandService, contentTypes) {
+	function FileRenderer (options, explorer, commandService, contentTypeService) {
 		this.explorer = explorer;
 		this.commandService = commandService;
-		this.contentTypes = contentTypes;
+		this.contentTypeService = contentTypeService;
 		this.openWithCommands = null;
 		this._init(options);
 	}
@@ -73,8 +73,6 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 	};
 		
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		var self = this;
-		
 		function isImage(contentType) {
 			switch (contentType && contentType.id) {
 				case "image.jpeg":
@@ -143,7 +141,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 						break; // use the first one
 					}
 				}
-				var contentType = this.contentTypes.getContentType(item);
+				var contentType = this.contentTypeService.getFileContentType(item);
 				if (!foundEditor && this.defaultEditor && !isImage(contentType)) {
 					href = this.defaultEditor.hrefCallback({items: item});
 				}				
@@ -185,7 +183,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 	 * @param {orion.searchClient.Searcher} options.searcher
 	 * @param {orion.fileClient.FileClient} options.fileClient
 	 * @param {orion.commands.CommandService} options.commandService
-	 * @param {orion.file.ContentTypes} options.contentTypes
+	 * @param {orion.file.ContentTypeService} options.contentTypeService
 	 * @param {String} options.parentId
 	 * @param {String} options.breadcrumbId
 	 * @param {String} options.toolbarId
@@ -198,14 +196,14 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 		this.searcher = options.searcher;
 		this.fileClient = options.fileClient;
 		this.commandService = options.commandService;
-		this.contentTypes = options.contentTypes;
+		this.contentTypeService = options.contentTypeService;
 		this.parentId = options.parentId;
 		this.breadcrumbId = options.breadcrumbId;
 		this.toolbarId = options.toolbarId;
 		this.selectionToolsId = options.selectionToolsId;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new FileRenderer({checkbox: true, cachePrefix: "Navigator"}, this, this.commandService, this.contentTypes);
+		this.renderer = new FileRenderer({checkbox: true, cachePrefix: "Navigator"}, this, this.commandService, this.contentTypeService);
 	}
 	
 	FileExplorer.prototype = new mExplorer.Explorer();

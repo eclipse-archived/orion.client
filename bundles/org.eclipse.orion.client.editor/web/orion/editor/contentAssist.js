@@ -18,7 +18,7 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 	 * @name orion.editor.ContentAssist
 	 * @class A key mode for {@link orion.editor.Editor} that displays content assist suggestions.
 	 * @description Creates a <code>ContentAssist</code>. A ContentAssist displays suggestions from registered content assist providers
-	 * to the user. Content assist providers are registered by calling {@link #addProvider}.</p>
+	 * to the user. Content assist providers are registered by calling {@link #setProviders}.</p>
 	 * <p>A ContentAssist emits events, for which listeners may be registered using {@link #addEventListener}. Supported event types are:</p>
 	 * <dl>
 	 * <dt><code>show</code></dt> <dd>Dispatched when this ContentAssist is activated.</dd>
@@ -40,7 +40,6 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 		this.active = false;
 		this.prefix = "";
 		
-		this.providers = [];
 		this.filteredProviders = [];
 		
 		this.proposals = [];
@@ -198,7 +197,6 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 			var eventType = enable ? "show" : "hide";
 			this.dispatchEvent({type: eventType, data: null});
 			
-			this.filterProviders(this.editor.getTitle());
 			if (!enable) {
 				if (this.listenerAdded) {
 					this.textView.removeEventListener("ModelChanging", this.contentAssistListener.onModelChanging);
@@ -347,7 +345,7 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 			}
 			
 			for (var i=0; i < filteredProviders.length; i++) {
-				var provider = filteredProviders[i].provider;
+				var provider = filteredProviders[i];
 				var keywordsPromise = provider.getKeywords(prefix, buffer, selection);
 				if (keywordsPromise && keywordsPromise.then) {
 					keywordsPromise.then(collectKeywords, errback);
@@ -377,26 +375,11 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 			return Promise;
 		}()),
 		/**
-		 * Adds a content assist provider.
-		 * @param {Object} provider The provider object. See {@link orion.contentAssist.CssContentAssistProvider} for an example.
-		 * @param {String} name Name for this provider.
-		 * @param {String} pattern A regex pattern matching filenames that <tt>provider</tt> can offer content assist for.
+		 * Sets the content assist providers that we will consult to obtain proposals.
+		 * @param {Object[]} providers The providers. See {@link orion.contentAssist.CssContentAssistProvider} for an example.
 		 */
-		addProvider: function(provider, name, pattern) {
-			if (!this.providers) {
-				this.providers = [];
-			}
-			this.providers.push({name: name, pattern: pattern, provider: provider});
-		},
-		/** @private */
-		filterProviders: function(/**String*/ fileName) {
-			this.filteredProviders = [];
-			for (var i=0; i < this.providers.length; i++) {
-				var provider = this.providers[i];
-				if (new RegExp(provider.pattern).test(fileName)) {
-					this.filteredProviders.push(provider);
-				}
-			}
+		setProviders: function(providers) {
+			this.filteredProviders = providers;
 		}
 	};
 	mEventTarget.EventTarget.addMixin(ContentAssist.prototype);

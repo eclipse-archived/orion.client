@@ -43,12 +43,13 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 		});
 	};
 
+	var contentAssist;
 	var contentAssistFactory = function(editor) {
-		var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
-		contentAssist.addProvider(new mCSSContentAssist.CssContentAssistProvider(), "css", "\\.css$");
-		contentAssist.addProvider(new mJSContentAssist.JavaScriptContentAssistProvider(), "js", "\\.js$");
+		contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
 		return contentAssist;
 	};
+	var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
+	var jsContentAssistProvider = new mJSContentAssist.JavaScriptContentAssistProvider();
 	
 	// Canned highlighters for js, java, and css. Grammar-based highlighter for html
 	var syntaxHighlighter = {
@@ -148,6 +149,13 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	editor.setInput(contentName, null, initialContent);
 	syntaxHighlighter.highlight(contentName, editor);
 	editor.highlightAnnotations();
+	contentAssist.addEventListener("show", function() {
+		if (/\.css$/.test(contentName)) {
+			contentAssist.setProviders([cssContentAssistProvider]);
+		} else if (/\.js$/.test(contentName)) {
+			contentAssist.setProviders([jsContentAssistProvider]);
+		}
+	});
 	// end of code to run when content changes.
 	
 	window.onbeforeunload = function() {
