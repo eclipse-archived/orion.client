@@ -13,52 +13,77 @@
 
 define(['dojo'], function(dojo) {
 
-var eclipse = eclipse || {};
-/*
- * Listens to editor change, looks up validator service for the file type, calls validator service, passes result to the marker service.
- */
-eclipse.SyntaxChecker = (function () {
+var SyntaxChecker = (function () {
 	function SyntaxChecker(serviceRegistry, editor) {
 		this.registry = serviceRegistry;
 		this.editor = editor;
-		this.editor.addEventListener("InputChanged", dojo.hitch(this, function(evt) {
-			this.checkSyntax(evt.title, evt.message, evt.contents, evt.contentsSaved);
-		}));
 	}
 	SyntaxChecker.prototype = {
-		checkSyntax: function (title, message, contents, contentsSaved) {
-			if (!message) {
-				var validators = this.registry.getServiceReferences("orion.edit.validator");
+		/* Looks up applicable validator services, calls validators, passes result to the marker service. */
+		checkSyntax: function (contentType, title, message, contents) {
+			function getValidators(registry, contentType) {
+				var contentTypeService = registry.getService("orion.file.contenttypes");
+				function getFilteredValidator(registry, validator, contentType) {
+					var contentTypeIds = validator.getProperty("contentType");
+					return contentTypeService.isSomeExtensionOf(contentType, contentTypeIds).then(function(result) {
+						return result ? validator : null;
+					});
+				}
+				var validators = registry.getServiceReferences("orion.edit.validator");
 				var filteredValidators = [];
 				for (var i=0; i < validators.length; i++) {
 					var serviceReference = validators[i];
-					var pattern = serviceReference.getProperty("pattern");
-					if (pattern && new RegExp(pattern).test(title)) {
-						filteredValidators.push(serviceReference);
+					var pattern = serviceReference.getProperty("pattern"); // backwards compatibility
+					if (serviceReference.getProperty("contentType")) {
+						filteredValidators.push(getFilteredValidator(registry, serviceReference, contentType));
+					} else if (pattern && new RegExp(pattern).test(title)) {
+						var d = new dojo.Deferred();
+						d.callback(serviceReference);
+						filteredValidators.push(d);
 					}
 				}
-
-				var extractProblems = function(data) {
-					return data.problems || data.errors;
-				};
-				var problemPromises = [];
-				for (i=0; i < filteredValidators.length; i++) {
-					var validator = filteredValidators[i];
-					problemPromises.push(this.registry.getService(validator).checkSyntax(title, contents).then(extractProblems));
-				}
-				
-				new dojo.DeferredList(problemPromises)
-					.then(dojo.hitch(this, function(result) {
-						var problems = [];
-						for (i=0; i < result.length; i++) {
-							var probs = result[i] && result[i][1];
-							if (probs) {
-								this._fixup(probs);
-								problems = problems.concat(probs);
+				// Return a promise that gives the validators that aren't null
+				return new dojo.DeferredList(filteredValidators).then(
+					function(validators) {
+						var capableValidators = [];
+						for (var i=0; i < validators.length; i++) {
+							var validator = validators[i][1];
+							if (validator !== null) {
+								capableValidators.push(validator);
 							}
 						}
-						this.registry.getService("orion.core.marker")._setProblems(problems);
-					}));
+						return capableValidators;
+					});
+			}
+			
+			if (!contentType) {
+				return;
+			}
+			if (!message) {
+				var self = this;
+				getValidators(this.registry, contentType).then(function(validators) {
+					var extractProblems = function(data) {
+						return data.problems || data.errors;
+					};
+					var problemPromises = [];
+					for (var i=0; i < validators.length; i++) {
+						var validator = validators[i];
+						problemPromises.push(self.registry.getService(validator).checkSyntax(title, contents).then(extractProblems));
+					}
+					
+					new dojo.DeferredList(problemPromises)
+						.then(function(result) {
+							var problems = [];
+							for (i=0; i < result.length; i++) {
+								var probs = result[i] && result[i][1];
+								if (probs) {
+									self._fixup(probs);
+									problems = problems.concat(probs);
+								}
+							}
+							self.registry.getService("orion.core.marker")._setProblems(problems);
+						});
+				});
 			}
 		},
 		_fixup: function(problems) {
@@ -82,5 +107,5 @@ eclipse.SyntaxChecker = (function () {
 	};
 	return SyntaxChecker;
 }());
-return eclipse;	
+return {SyntaxChecker: SyntaxChecker};
 });
