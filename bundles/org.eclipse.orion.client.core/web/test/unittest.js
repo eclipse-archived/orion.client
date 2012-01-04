@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
- /*global eclipse:true dojo document console*/
+ /*global eclipse:true dojo document console define*/
 
 
 define(['require', 'dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 
@@ -18,117 +18,78 @@ define(['require', 'dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'ori
         function(require, dojo, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mTreetable) {
 	
 
-var eclipse = eclipse || {};
-eclipse.Unittest = eclipse.Unittest || {};
-eclipse.Unittest.Model = (function() {
-	/**
-	 * @name eclipse.Model
-	 * @class Tree model used by eclipse.Explorer.
-	 * TODO: Consolidate with eclipse.TreeModel.
-	 */
-	function Model(root) {
-		this.root = root;
-	}
-	Model.prototype = {
-		destroy: function(){
-		},
-		getRoot: function(onItem){
-			onItem(this.root);
-		},
-		getChildren: function(parentItem, /* function(items) */ onComplete){
-			if (parentItem.children) {
-				onComplete(parentItem.children);
-			} else {
-				onComplete([]);
-			}
-		},
-		getId: function(/* item */ item){
-			var result;
-			if (item === this.root) {
-				result = "treetable";
-			} else {
-				result = item.Name;
-				// remove all non valid chars to make a dom id. 
-//				result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
-			} 
-			return result;
+function UnitTestModel(root) {
+	this.root = root;
+}
+UnitTestModel.prototype = {
+	destroy: function(){
+	},
+	getRoot: function(onItem){
+		onItem(this.root);
+	},
+	getChildren: function(parentItem, /* function(items) */ onComplete){
+		if (parentItem.children) {
+			onComplete(parentItem.children);
+		} else {
+			onComplete([]);
 		}
-	};
-	return Model;
-}());
-
-eclipse.Unittest.Renderer = (function() {
-	function Renderer () {
+	},
+	getId: function(/* item */ item){
+		var result;
+		if (item === this.root) {
+			result = "treetable";
+		} else {
+			result = item.Name;
+		} 
+		return result;
 	}
-	Renderer.prototype = {
-		initTable: function (tableNode, tableTree) {
-			this.tableTree = tableTree;
-			
-			dojo.addClass(tableNode, 'treetable');
-			var thead = document.createElement('thead');
-			var row = document.createElement('tr');
+};
 
-//			var th = document.createElement('th');
-//			th.innerHTML = "Name";
-//			row.appendChild(th);
-//
-//			var result= document.createElement('th');
-//			result.innerHTML = "Result";
-//			row.appendChild(result);
 
-//			th = document.createElement('th');
-//			th.innerHTML = "Date";
-//			row.appendChild(th);
-			
-			thead.appendChild(row);
-			tableNode.appendChild(thead);
-			
-//			dojo.style(actions, "textAlign", "center");
-//			dojo.style(size, "textAlign", "right");
-
-		},
+function UnitTestRenderer () {
+}
+UnitTestRenderer.prototype = {
+	initTable: function (tableNode, tableTree) {
+		this.tableTree = tableTree;
 		
-		render: function(item, tableRow) {
-			tableRow.cellSpacing = "8px";
-			dojo.style(tableRow, "verticalAlign", "baseline");
-			dojo.addClass(tableRow, "treeTableRow");
-			var col, div, link;
-			if (item.Directory) {
-				col = document.createElement('td');
-				tableRow.appendChild(col);
-				var nameId =  tableRow.id + "__expand";
-				div = dojo.create("div", null, col, "only");
-				var expandImg = dojo.create("img", {src: require.toUrl("images/collapsed-gray.png"), name: nameId}, div, "last");
-				dojo.create("img", {src: require.toUrl("images/folder.gif")}, div, "last");
-				link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
-				dojo.place(document.createTextNode(item.Name), link, "only");
-				expandImg.onclick = dojo.hitch(this, function(evt) {
-					this.tableTree.toggle(tableRow.id, nameId, require.toUrl("images/expanded-gray.png"), require.toUrl("images/collapsed-gray.png"));
-				});
-			} else {
-				col = document.createElement('td');
-				tableRow.appendChild(col);
-				div = dojo.create("div", null, col, "only");
-				dojo.create("img", {src: item.result?require.toUrl("images/unit_test/testok.gif"):require.toUrl("images/unit_test/testfail.gif")}, div, "first");
-				dojo.place(document.createTextNode(item.Name + " (" + (item.millis / 1000) + "s)"), div, "last");
-				if (!item.result && !item.logged) {
-					console.log("[FAILURE][" + item.Name + "][" + item.message + "]\n" + ((item.stack !== undefined && item.stack) ? item.stack : ""));
-					item.logged =true;
-				}
+		dojo.addClass(tableNode, 'treetable');
+	},
+	
+	render: function(item, tableRow) {
+		tableRow.cellSpacing = "8px";
+		dojo.style(tableRow, "verticalAlign", "baseline");
+		dojo.addClass(tableRow, "treeTableRow");
+		var col, div, link;
+		if (item.Directory) {
+			col = document.createElement('td');
+			tableRow.appendChild(col);
+			var nameId =  tableRow.id + "__expand";
+			div = dojo.create("div", null, col, "only");
+			var expandImg = dojo.create("img", {src: require.toUrl("images/collapsed-gray.png"), name: nameId}, div, "last");
+			dojo.create("img", {src: require.toUrl("images/folder.gif")}, div, "last");
+			link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
+			dojo.place(document.createTextNode(item.Name), link, "only");
+			expandImg.onclick = dojo.hitch(this, function(evt) {
+				this.tableTree.toggle(tableRow.id, nameId, require.toUrl("images/expanded-gray.png"), require.toUrl("images/collapsed-gray.png"));
+			});
+		} else {
+			col = document.createElement('td');
+			tableRow.appendChild(col);
+			div = dojo.create("div", null, col, "only");
+			dojo.create("img", {src: item.result?require.toUrl("images/unit_test/testok.gif"):require.toUrl("images/unit_test/testfail.gif")}, div, "first");
+			dojo.place(document.createTextNode(item.Name + " (" + (item.millis / 1000) + "s)"), div, "last");
+			if (!item.result && !item.logged) {
+				console.log("[FAILURE][" + item.Name + "][" + item.message + "]\n" + ((item.stack !== undefined && item.stack) ? item.stack : ""));
+				item.logged =true;
 			}
-			
-			var resultColumn = document.createElement('td');
-			tableRow.appendChild(resultColumn);
-		},
-		rowsChanged: function() {
 		}
 		
-	};
-	return Renderer;
-}());
-
-
-var root = {children:[]};
+		var resultColumn = document.createElement('td');
+		tableRow.appendChild(resultColumn);
+	},
+	rowsChanged: function() {
+	}
+};
 
 dojo.addOnLoad(function() {
 	mBootstrap.startup().then(function(core) {
@@ -146,25 +107,30 @@ dojo.addOnLoad(function() {
 		function runTests(fileURI) {
 			//console.log("installing non-persistent plugin: " + fileURI);
 			var testOverview = dojo.byId("test-overview");
+			dojo.empty(testOverview);
+			var testTree = dojo.byId("test-tree");
+			dojo.empty(testTree);
+			
 			dojo.place(document.createTextNode("Running tests from: "), testOverview, "last");
-			var link = dojo.create("a", {className: "navlink", href: require.toUrl("edit/edit.html") + "#"+fileURI}, testOverview, "last");
+			var link = dojo.create("a", {className: "navlink", href: require.toUrl("edit/edit.html") + "#" + fileURI}, testOverview, "last");
 			dojo.place(document.createTextNode(fileURI), link, "last");
 			
 			// these are isolated from the regular service and plugin registry
 			var testServiceRegistry = new mServiceRegistry.ServiceRegistry();
 			var testPluginRegistry = new mPluginRegistry.PluginRegistry(testServiceRegistry, {});
 			
-			
 			testPluginRegistry.installPlugin(fileURI).then(function() {
 				var service = testServiceRegistry.getService("orion.test.runner");
 				//console.log("got service: " + service);
+
+				var root = {children:[]};
 	
 				var myTree = new mTreetable.TableTree({
-					model: new eclipse.Unittest.Model(root),
+					model: new UnitTestModel(root),
 					showRoot: false,
 					parent: "test-tree",
 					labelColumnIndex: 0,  // 1 if with checkboxes
-					renderer: new eclipse.Unittest.Renderer()
+					renderer: new UnitTestRenderer()
 				});			
 	
 				var times = {};
@@ -208,6 +174,9 @@ dojo.addOnLoad(function() {
 				service.run().then(function(result) {
 					testPluginRegistry.shutdown();
 				});
+			}, function(error) {
+				dojo.create("img", {src: require.toUrl("images/unit_test/testfail.gif")}, testTree, "first");
+				dojo.place(document.createTextNode(error), testTree, "last");
 			});
 		}
 	
