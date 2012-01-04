@@ -17,6 +17,7 @@ var orion = orion || {};
 orion.TwoWayCompareUIFactory = (function() {
 	function TwoWayCompareUIFactory(option){
 		this._parentDivID = option.parentDivID;
+		this._commandSpanId = option.commandSpanId;
 		this._showTitle = option.showTitle;
 		this._showLineStatus = option.showLineStatus;
 	}	
@@ -35,9 +36,10 @@ orion.TwoWayCompareUIFactory = (function() {
 			textDiv.id = textDivId;
 			dojo.place(document.createTextNode(defaultText), textDiv, "only");
 			td.appendChild(textDiv);
-			if (createCommandSpan) {
+			if (createCommandSpan && !this._commandSpanId) {//If there is already a command span defined for the compare command, we do not want to create it here
+				this._commandSpanId = "compare_rightContainerCommands";
 				td = document.createElement('td');
-				td.id = "rightContainerCommands"; // this id should not be known here.  It is decided in compare-container.js
+				td.id = this._commandSpanId; 
 				row.appendChild(td);
 				td.noWrap = true;
 				row.align = "right";
@@ -160,6 +162,10 @@ orion.TwoWayCompareUIFactory = (function() {
 		
 		getStatusDivId: function(left){
 			return (left ? this._leftStatusDivId : this._rightStatusDivId);
+		},
+		
+		getCommandSpanId: function(){
+			return this._commandSpanId;
 		},
 		
 		getDiffCanvasDivId: function(){

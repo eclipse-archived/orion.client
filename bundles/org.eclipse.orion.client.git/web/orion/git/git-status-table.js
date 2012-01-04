@@ -555,7 +555,7 @@ orion.InlineCompareRenderer = (function() {
 			parent.addChild(viewerDiv);
 			if (createCommandSpan) {
 				td = document.createElement('td');
-				td.id = "rightContainerCommands"; // this id should not be known here.  It is decided in compare-container.js
+				td.id = "compare_rightContainerCommands"; // this id should not be known here.  It is decided in compare-container.js
 				row.appendChild(td);
 				td.noWrap = true;
 				row.align = "right";
@@ -1219,9 +1219,9 @@ orion.GitStatusController = (function() {
 			this._commandService.addCommand(nextDiffCommand, "dom");
 				
 			// Register command contributions
-			this._commandService.registerCommandContribution("orion.compare.prevDiff", 2, "rightContainerCommands");
-			this._commandService.registerCommandContribution("orion.compare.nextDiff", 1, "rightContainerCommands");
-			this._commandService.renderCommands("rightContainerCommands", "dom", self, self, "tool");
+			this._commandService.registerCommandContribution("orion.compare.prevDiff", 2, "compare_rightContainerCommands");
+			this._commandService.registerCommandContribution("orion.compare.nextDiff", 1, "compare_rightContainerCommands");
+			this._commandService.renderCommands("compare_rightContainerCommands", "dom", self, self, "tool");
 		},
 		
 		startTimer: function(){
@@ -1261,7 +1261,7 @@ orion.GitStatusController = (function() {
 			this.hasUnstaged = false;
 			dojo.place(document.createTextNode("Select a file on the left to compare..."), "fileNameInViewer", "only");
 			dojo.style("fileNameInViewer", "color", "#6d6d6d");
-			dojo.empty("rightContainerCommands");
+			dojo.empty("compare_rightContainerCommands");
 		},
 
 		_createImgButton: function(enableWaitCursor ,imgParentDiv , imgSrc, imgTitle,onClick){
