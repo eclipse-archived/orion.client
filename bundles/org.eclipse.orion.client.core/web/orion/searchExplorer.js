@@ -914,9 +914,18 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.buildPreview(uiFactory);
 	};
 	
+	SearchResultExplorer.prototype._resolveFileType = function(fileLocation){
+		var fileName = fileLocation;
+		var splits = fileName.split(".");
+		if (splits.length > 0) {
+			return splits.pop().toLowerCase();
+		}
+		return "";
+	},
+	
 	SearchResultExplorer.prototype.buildPreview = function(uiFactory) {
-		var filItem = this.model.indexedFileItems()[this.model.currentFileIndex];
-		this.model.generateNewContents(filItem, this.replaceStrDiv.value);
+		var fileItem = this.model.indexedFileItems()[this.model.currentFileIndex];
+		this.model.generateNewContents(fileItem, this.replaceStrDiv.value);
 		
 		var uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
 			parentDivID: uiFactory.getCompareDivID(),
@@ -926,12 +935,16 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		uiFactoryCompare.buildUI();
 
 		// Diff operations
-
+		var fType = this._resolveFileType(fileItem.location);
 		var options = {
 			readonly: true,
 			hasConflicts: false,
-			baseFileContent: filItem.contents.join(this.model._lineDelimiter),
-			newFileContent: filItem.newContents.join(this.model._lineDelimiter)
+			baseFileName: fileItem.location,
+			newFileName: fileItem.location,
+			baseFileType: fType,
+			newFileType: fType,
+			baseFileContent: fileItem.contents.join(this.model._lineDelimiter),
+			newFileContent: fileItem.newContents.join(this.model._lineDelimiter)
 		};
 		
 		var twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(this.registry, uiFactoryCompare, options);

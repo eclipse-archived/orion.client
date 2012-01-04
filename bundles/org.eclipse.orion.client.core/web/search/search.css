@@ -18,4 +18,6 @@
 
 @import "../css/commands.css";
 
+@import "../orion/compare/compare.css";
+
 @import "../orion/globalSearch/globalSearch.css";

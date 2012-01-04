@@ -53,9 +53,11 @@ exports.CompareContainer = (function() {
 				
 				this._baseFile.URL = options.baseFileURL ? options.baseFileURL : this._baseFile.URL;
 				this._baseFile.Name = options.baseFileName ? options.baseFileName : this._baseFile.Name;
+				this._baseFile.Type = options.baseFileType ? options.baseFileType : this._baseFile.Type;
 				this._baseFile.Content = options.baseFileContent ? options.baseFileContent : this._baseFile.Content;
 				this._newFile.URL = options.newFileURL ? options.newFileURL : this._newFile.URL;
 				this._newFile.Name = options.newFileName ? options.newFileName : this._newFile.Name;
+				this._newFile.Type = options.newFileType ? options.newFileType : this._newFile.Type;
 				this._newFile.Content = options.newFileContent ? options.newFileContent : this._newFile.Content;
 				
 				
@@ -503,6 +505,10 @@ exports.TwoWayCompareContainer = (function() {
 	};
 	
 	TwoWayCompareContainer.prototype.initCommands = function(){	
+		var commandSpanId = this._uiFactory.getCommandSpanId();
+		if(!commandSpanId){
+			return;
+		}
 		var that = this;
 		var nextDiffCommand = new mCommands.Command({
 			name : "Next Diff",
@@ -533,12 +539,12 @@ exports.TwoWayCompareContainer = (function() {
 		this._commandService.addCommand(copyToLeftCommand, "dom");
 			
 		// Register command contributions
-		this._commandService.registerCommandContribution("orion.compare.prevDiff", 3, "rightContainerCommands");
-		this._commandService.registerCommandContribution("orion.compare.nextDiff", 2, "rightContainerCommands");
+		this._commandService.registerCommandContribution("orion.compare.prevDiff", 3, commandSpanId);
+		this._commandService.registerCommandContribution("orion.compare.nextDiff", 2, commandSpanId);
 		if (!this._readonly) {
-			this._commandService.registerCommandContribution("orion.compare.copyToLeft", 1, "rightContainerCommands");
+			this._commandService.registerCommandContribution("orion.compare.copyToLeft", 1, commandSpanId);
 		}
-		this._commandService.renderCommands("rightContainerCommands", "dom", that, that, "tool");
+		this._commandService.renderCommands(commandSpanId, "dom", that, that, "tool");
 	};
 	
 	TwoWayCompareContainer.prototype.nextDiff = function(){	
@@ -710,8 +716,8 @@ exports.InlineCompareContainer = (function() {
 				dojo.place(document.createTextNode(that._diffTitle), "fileNameInViewer", "only");
 				dojo.style("fileNameInViewer", "color", "#6d6d6d");
 				that._statusService.setProgressMessage("");
-				dojo.empty("rightContainerCommands");
-				that._commandService.renderCommands("rightContainerCommands", "dom", that, that, "tool");
+				dojo.empty("compare_rightContainerCommands");
+				that._commandService.renderCommands("compare_rightContainerCommands", "dom", that, that, "tool");
 			};
 		}
 		
@@ -729,7 +735,7 @@ exports.InlineCompareContainer = (function() {
 				}
 				
 				this._statusService.setProgressResult(display);
-				dojo.empty("rightContainerCommands");
+				dojo.empty("compare_rightContainerCommands");
 			};
 		}
 		
