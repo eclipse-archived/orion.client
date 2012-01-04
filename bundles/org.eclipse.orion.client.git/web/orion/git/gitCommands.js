@@ -162,27 +162,28 @@ var exports = {};
 			
 	};
 
-	function displayErrorOnStatus(error) {
-
-		if (error.status === 401 || error.status === 403)
-			return;
-
-		var display = [];
-
-		display.Severity = "Error";
-		display.HTML = false;
-
-		try {
-			var resp = JSON.parse(error.responseText);
-			display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
-		} catch (Exception) {
-			display.Message = error.message;
-		}
-
-		serviceRegistry.getService("orion.page.message").setProgressResult(display);//TODO we don't have serviceRegistry here
-	}
 
 	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
+		
+		function displayErrorOnStatus(error) {
+			
+			if (error.status === 401 || error.status === 403)
+				return;
+			
+			var display = [];
+			
+			display.Severity = "Error";
+			display.HTML = false;
+			
+			try {
+				var resp = JSON.parse(error.responseText);
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+			} catch (Exception) {
+				display.Message = error.message;
+			}
+			
+			serviceRegistry.getService("orion.page.message").setProgressResult(display);
+		}
 		
 		// TODO: not used by the git clone navigator, could be removed
 		var linkRepoCommand = new mCommands.Command({
@@ -1354,6 +1355,27 @@ var exports = {};
 	};
 
 	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack, cmdBaseNumber, navigator) {
+		
+		function displayErrorOnStatus(error) {
+			
+			if (error.status === 401 || error.status === 403)
+				return;
+			
+			var display = [];
+			
+			display.Severity = "Error";
+			display.HTML = false;
+			
+			try {
+				var resp = JSON.parse(error.responseText);
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+			} catch (Exception) {
+				display.Message = error.message;
+			}
+			
+			serviceRegistry.getService("orion.page.message").setProgressResult(display);
+		}
+		
 		var fetchCommand = new mCommands.Command({
 			name : "Fetch",
 			tooltip : "Fetch from the remote branch into your remote tracking branch",
