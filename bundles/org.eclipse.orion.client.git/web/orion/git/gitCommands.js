@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -1032,34 +1032,16 @@ var exports = {};
 		});
 		commandService.addCommand(switchToRemote, "dom");
 
-		var getPageNumber = function(uri){
-			var regex = new RegExp('[\\?&]page=([^&#]*)');
-			var results = regex.exec(window.location.href);
-			if (results == null)
-				return;
-			try{
-				return parseInt(results[1]);
-			}catch (e) {
-				console.error(e);
-				return;
-			}
-		};
-
-		var getPageUri = function(uri, page){
-			var regex = new RegExp('page=([0-9]*)');
-			return uri.replace(regex, 'page='+page);
-		};
-
 		var previousLogPage = new mCommands.Command({
 			name : "< Previous Page",
 			tooltip: "Show previous page of git log",
 			id : "eclipse.orion.git.previousLogPage",
 			hrefCallback : function(data) {
-				return require.toUrl("git/git-log.html")+"#" + getPageUri(dojo.hash(), getPageNumber(dojo.hash())-1);
+				return require.toUrl("git/git-log.html") + "#" + data.items.PreviousLocation;
 			},
 			visibleWhen : function(item) {
-				if(item.Type==="RemoteTrackingBranch" || (item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){
-					return getPageNumber(dojo.hash()) > 1;
+				if(item.Type === "RemoteTrackingBranch" || (item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){
+					return item.PreviousLocation !== undefined;
 				}
 				return false;
 			}
@@ -1071,13 +1053,11 @@ var exports = {};
 			tooltip: "Show next page of git log",
 			id : "eclipse.orion.git.nextLogPage",
 			hrefCallback : function(data) {
-				return require.toUrl("git/git-log.html")+"#" + getPageUri(dojo.hash(), getPageNumber(dojo.hash())+1);
+				return require.toUrl("git/git-log.html") + "#" + data.items.NextLocation;
 			},
 			visibleWhen : function(item) {
-				if(item.Type==="RemoteTrackingBranch" ||(item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){
-					if(item.Children)
-						return item.Children.length > 0;
-					return true;
+				if(item.Type === "RemoteTrackingBranch" ||(item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){
+					return item.NextLocation !== undefined;
 				}
 				return false;
 			}
