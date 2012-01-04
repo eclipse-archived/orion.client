@@ -889,7 +889,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 					}
 				}
 				var href = editor.href;
-				var validationProperties = { Name: toNamePattern(exts, filenames) };
+				var validationProperties = { Directory: false, Name: toNamePattern(exts, filenames) };
 				var properties = {
 						name: editor.name || editor.id,
 						id: "eclipse.openWithCommand." + editor.id,
