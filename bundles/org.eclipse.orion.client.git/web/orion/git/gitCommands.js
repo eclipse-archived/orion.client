@@ -109,7 +109,8 @@ var exports = {};
 					title: title,
 					serviceRegistry: serviceRegistry,
 					func: func,
-					errordata: options.errordata
+					errordata: options.errordata,
+					failedOperation: options.failedOperation
 				});		
 		credentialsDialog.startup();
 		credentialsDialog.show();
@@ -147,6 +148,9 @@ var exports = {};
 		case 401:
 			if(jsonData.JsonData){
 				options.errordata = jsonData.JsonData;
+			}
+			if(jsonData.failedOperation){
+				options.failedOperation = jsonData.failedOperation;
 			}
 			dojo.hitch(this, exports.handleSshAuthenticationError)(serviceRegistry, jsonData.JsonData, options, callee, title);
 			return;
