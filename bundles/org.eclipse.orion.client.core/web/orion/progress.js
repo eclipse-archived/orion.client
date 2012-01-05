@@ -196,29 +196,35 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				} else if (operationJson && operationJson.Result) {
 					that._serviceRegistry.getService("orion.page.message").setProgressMessage("");
 					var severity = this._operationsDialog.parseProgressResult(operationJson.Result).Severity;
-					if(severity=="Error" || severity=="Warning")
+					if(severity=="Error" || severity=="Warning"){
 						dojo.hitch(that, that._openOperationsPopup)();
+						operationJson.Result.failedOperation = {Location: operationLocation, Id: operationJson.Id, Name: operationJson.Name};
+					}
 					result.callback(operationJson);
 					
 					if(!operationJson.Failed && operationJson.Idempotent==true){
 						window.setTimeout(function() {
-							dojo.hitch(that._operationsClient, that._operationsClient.removeOperation)(operationLocation).then(function(){
-								var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
-								for(var i=0; i<operations.Children.length; i++){
-									var operation = operations.Children[i];
-									if(operation.Id && operation.Id===operationJson.Id){
-										operations.Children.splice(i, 1);
-										break;
-									}
-								}
-								localStorage.setItem("orionOperations", JSON.stringify(operations));
-								dojo.hitch(that, that._generateOperationsInfo)(operations); 
-							});
+							dojo.hitch(that, that.removeOperation)(operationLocation, operationJson.Id);
 						}, 5000);
 					}
 				}
 				
 				return result;
+			},
+			removeOperation: function(operationLocation, operationId){
+				that = this;
+				dojo.hitch(that._operationsClient, that._operationsClient.removeOperation)(operationLocation).then(function(){
+					var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
+					for(var i=0; i<operations.Children.length; i++){
+						var operation = operations.Children[i];
+						if(operation.Id && operation.Id===operationId){
+							operations.Children.splice(i, 1);
+							break;
+						}
+					}
+					localStorage.setItem("orionOperations", JSON.stringify(operations));
+					dojo.hitch(that, that._generateOperationsInfo)(operations); 
+				});
 			},
 			setProgressResult: function(result){
 				this._serviceRegistry.getService("orion.page.message").setProgressResult(result);
