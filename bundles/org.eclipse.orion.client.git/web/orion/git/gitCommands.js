@@ -99,6 +99,10 @@ var exports = {};
 				sshService.getKnownHosts().then(function(knownHosts){
 					options.knownHosts = knownHosts;
 					func(options);
+					if(options.failedOperation){
+						var progressService = serviceRegistry.getService("orion.page.progress");
+						dojo.hitch(progressService, progressService.removeOperation)(options.failedOperation.Location, options.failedOperation.Id);
+					}
 				});
 			});
 		}
@@ -156,6 +160,9 @@ var exports = {};
 			return;
 		case 403:
 			if(jsonData.JsonData && jsonData.JsonData.HostKey){
+				if(jsonData.failedOperation){
+					options.failedOperation = jsonData.failedOperation;
+				}
 				dojo.hitch(this, exports.handleKnownHostsError)(serviceRegistry, jsonData.JsonData, options, callee);
 				return;
 			}
