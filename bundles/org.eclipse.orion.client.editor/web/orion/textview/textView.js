@@ -12,7 +12,7 @@
  *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270 Bug#361474 Bug#363945 Bug#366312
  ******************************************************************************/
 
-/*global window document navigator setTimeout clearTimeout XMLHttpRequest define */
+/*global window document navigator setTimeout clearTimeout XMLHttpRequest define DOMException */
 
 define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mTextModel, mKeyBinding, mEventTarget) {
 
@@ -3725,7 +3725,17 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 								var count = 0;
 								try {
 									count = styleSheets.item(index).cssRules.length;
-								} catch (ex) {}
+								} catch (ex) {
+									/*
+									* Feature in Firefox. To determine if a stylesheet is loaded the number of css rules is used, if the 
+									* stylesheet is not loaded this operation will throw an invalid access error. When a stylesheet from
+									* a different domain is loaded, accessing the css rules will result in a security exception. In this
+									* case count is set to 1 to indicate the stylesheet is loaded.
+									*/
+									if (ex.code !== DOMException.INVALID_ACCESS_ERR) {
+										count = 1;
+									}
+								}
 								if (count === 0) { break; }
 								index++;
 							}
