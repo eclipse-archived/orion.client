@@ -9,19 +9,31 @@
 		<!-- Actual content here -->
 
 		<form method="post" id="applyPatchDialog.myForm"
-			enctype="multipart/form-data" >
+			enctype="multipart/form-data">
 			<fieldset>
 				<div style="display: table-row">
 					<div style="display: table-row; height: 20px">
 						<div style="display: table-cell; padding: 1px;">
-							Patch:
+							<input type="radio" name="radio" value="urlRadio" id="applyPatchDialog.urlRadio" checked/>URL:
+						</div>
+						<div style="display: table-cell; padding: 1px;">
+							<input type="text" name="url" id="applyPatchDialog.url" style="display: inline-block; width: 98%;"
+								dojoType="dijit.form.ValidationTextBox"
+								regExp="^http(s)*://.+" invalidMessage="Invalid URL."/>
+						</div>
+						<div style="display: table-cell; padding: 1px;">
+						</div>
+					</div>
+					<div style="display: table-row; height: 20px">
+						<div style="display: table-cell; padding: 1px;">
+							<input type="radio" name="radio" value="fileRadio" id="applyPatchDialog.fileRadio"/>File:
 						</div>
 						<div style="display: table-cell; padding: 1px; vertical-align: top;">
 							<div id="files" dojoType="dojox.form.uploader.FileList" uploaderId="applyPatchDialog.uploader"></div>
 						</div>
 						<div style="display: table-cell; padding: 1px;">
 							<input name="uploadedfile" multiple="false" type="file" id="applyPatchDialog.uploader" force="iframe"
-								dojoType="dojox.form.Uploader" style="height: 20px" label="Browse..." >
+								dojoType="dojox.form.Uploader" style="height: 20px" label="Browse..."/>
 						</div>
 					</div>
 					<div style="display: table-row">
@@ -34,7 +46,7 @@
 								style="padding: 20 0 10 0; float: right; clear: both;"/>
 						</div>
 					</div>
-				</div>	
+				</div>
 			</fieldset>
 		</form>
 	</div>
