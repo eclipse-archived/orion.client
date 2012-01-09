@@ -237,7 +237,8 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			 * @returns
 			 */
 			showWhile: function(deferred, message){
-				this._serviceRegistry.getService("orion.page.message").setProgressMessage(message);
+				if(message)
+					this._serviceRegistry.getService("orion.page.message").setProgressMessage(message);
 				var that = this;
 				return deferred.then(function(jsonResult){
 					//see if we are dealing with a progress resource
