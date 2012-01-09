@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011 IBM Corporation and others. 
+ * Copyright (c) 2011, 2012 IBM Corporation and others. 
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -33,7 +33,24 @@ dojo.declare("orion.git.widgets.ApplyPatchDialog", [ dijit.Dialog, orion.widgets
 		dojo.byId("applyPatchDialog.uploader").url = this.options.diffLocation;
 
 		var self = this;
-		
+
+		function toogle(disableFile) {
+			dijit.byId("files").set("disabled", disableFile);
+			dijit.byId("applyPatchDialog.uploader").set("disabled", disableFile);
+			dijit.byId("applyPatchDialog.url").set("disabled", !disableFile);
+		}
+		toogle(true);
+
+		dojo.connect(dijit.byId("applyPatchDialog.urlRadio"), "onclick", dojo.hitch(this, function(dataArray) {
+			if (dataArray.target.id === "applyPatchDialog.urlRadio")
+				toogle(true);
+		}));
+
+		dojo.connect(dijit.byId("applyPatchDialog.fileRadio"), "onclick", dojo.hitch(this, function(dataArray) {
+			if (dataArray.target.id === "applyPatchDialog.fileRadio")
+				toogle(false);
+		}));
+
 		dojo.connect(dijit.byId("applyPatchDialog.uploader"), "onError", dojo.hitch(this, function(dataArray) {
 			setTimeout(dojo.hitch(this, function(){
 				this.hide();
