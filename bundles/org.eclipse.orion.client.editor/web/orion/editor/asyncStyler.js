@@ -85,12 +85,12 @@ define("orion/editor/asyncStyler", [], function() {
 			var model = this.textView.getModel();
 			for (var lineIndex in style) {
 				if (style.hasOwnProperty(lineIndex)) {
-//					console.debug("Got style for line# " + lineIndex);
 					this.lineStyles[lineIndex] = style[lineIndex];
 					min = Math.min(min, lineIndex);
 					max = Math.max(max, lineIndex);
 				}
 			}
+//			console.debug("Got style for lines " + (min+1) + " to " + (max+1));
 			min = Math.max(min, 0);
 			max = Math.min(max, model.getLineCount());
 			
@@ -113,8 +113,8 @@ define("orion/editor/asyncStyler", [], function() {
 						for (var j=0; j < errors.length; j++) {
 							var err = errors[j];
 							toAdd.push({
-								start: lineStart + err.start,
-								end: lineStart + err.end,
+								start: err.start,
+								end: err.end,
 								type: HIGHLIGHT_ERROR_ANNOTATION,
 								title: "Syntax error.",
 								html: "<div class='annotationHTML error'></div>",
@@ -128,10 +128,23 @@ define("orion/editor/asyncStyler", [], function() {
 			this.textView.redrawLines(min, max + 1);
 		},
 		onLineStyle: function(e) {
+			function _toDocumentOffset(ranges, lineStart) {
+				var len = ranges.length, result = [];
+				for (var i=0; i < len; i++) {
+					var r = ranges[i];
+					result.push({
+						start: r.start + lineStart,
+						end: r.end + lineStart,
+						style: r.style
+					});
+				}
+				return result;
+			}
 			var style = this.lineStyles[e.lineIndex];
 			if (style) {
-				// The ranges property has same shape as orion.textview.LineStyleEvent.ranges except indices are line-relative
-				if (style.ranges) { e.ranges = this._toDocumentOffset(style.ranges, e.lineStart); }
+				// AsyncStyler expects the 'ranges' property to have identical shape to {@link orion.textview.LineStyleEvent#ranges},
+				// with one exception: AynscStyler requires the start and end indices to be line-relative, not document-relative.
+				if (style.ranges) { e.ranges = _toDocumentOffset(style.ranges, e.lineStart); }
 				else if (style.style) { e.style = style.style; }
 			}
 		},
@@ -139,18 +152,6 @@ define("orion/editor/asyncStyler", [], function() {
 			var result = [];
 			for (var i=0; i < n; i++) {
 				result.push(null);
-			}
-			return result;
-		},
-		_toDocumentOffset: function(ranges, lineStart) {
-			var len = ranges.length, result = [];
-			for (var i=0; i < len; i++) {
-				var r = ranges[i];
-				result.push({
-					start: r.start + lineStart,
-					end: r.end + lineStart,
-					style: r.style
-				});
 			}
 			return result;
 		}
