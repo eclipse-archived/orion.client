@@ -45,7 +45,7 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 		}
 		return whitespace;
 	},
-	getKeywords: function(prefix, buffer, selection) {
+	computeProposals: function(prefix, buffer, selection) {
 		var proposals = [];
 		//template - simple html document
 		if (buffer.length === 0) {

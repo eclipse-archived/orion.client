@@ -346,7 +346,12 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 			
 			for (var i=0; i < filteredProviders.length; i++) {
 				var provider = filteredProviders[i];
-				var keywordsPromise = provider.getKeywords(prefix, buffer, selection);
+				//prefer computeProposals but support getKeywords for backwards compatibility
+				var proposalsFunc = provider.getKeywords;
+				if (typeof provider.computeProposals === "function") {
+					proposalsFunc = provider.computeProposals;
+				}
+				var keywordsPromise = proposalsFunc.apply(provider, [prefix, buffer, selection]);
 				if (keywordsPromise && keywordsPromise.then) {
 					keywordsPromise.then(collectKeywords, errback);
 				} else {

@@ -32,7 +32,7 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		}
 		var prefix = buffer.substring(index, cursor);
 		var assist = new mContentAssist.JavaScriptContentAssistProvider();
-		return assist.getKeywords(prefix, buffer, selection);
+		return assist.computeProposals(prefix, buffer, selection);
 	}
 	
 	/**
