@@ -73,7 +73,7 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 							this.styler = new mTextStyler.TextStyler(textView, extension, annotationModel);
 							break;
 						case "html":
-							this.styler = new mTextMateStyler.TextMateStyler(textView, mHtmlGrammar.HtmlGrammar().grammar);
+							this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
 							break;
 					}
 				}
