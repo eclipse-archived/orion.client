@@ -302,12 +302,22 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 	};
 
 	/**
+	 * Try to trick the closure detection with a string containing the word function.
+	 */
+	tests.testRegexContainingFunction = function() {
+		var result = getKeywords("var abacus;\n function x(block) {\n var ant = /^function[\\s(]/;\n } \n a@@@");
+		assertProposal("abacus", result);
+		assertNoProposal("ant", result);
+	};
+
+	/**
 	 * Try to trick the closure detection with a comment containing the word function.
 	 */
 	tests.testVariableInFunctionWithCommentContainingFunction = function() {
-		var result = getKeywords("var x = function(abracadabra,blort){\nvar abacus; // function() {;\n ab@@@");
+		var result = getKeywords("var x = function(abracadabra,blort){\nvar abacus; // function() { var absolute;\n ab@@@");
 		assertProposal("abracadabra", result);
 		assertProposal("abacus", result);
+		assertNoProposal("absolute", result);
 	};
 
 	/**
@@ -318,6 +328,7 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		assertProposal("abracadabra", result);
 		assertProposal("abacus", result);
 	};
+
 
 	/**
 	 * Tests that we don't find an argument in a previous closure that we are not inside.
