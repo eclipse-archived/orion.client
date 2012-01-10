@@ -55,7 +55,7 @@
 			var patternBase = makeParentRelative(temp.href);
 			
 			//provider.registerServiceProvider("orion.core.file", trace(service), {Name:'Orion contents', top:fileBase, pattern:patternBase});
-			provider.registerServiceProvider("orion.core.file", service, {Name:'Orion contents', top:fileBase, pattern: patternBase});
+			provider.registerServiceProvider("orion.core.file", service, {Name:'Orion Projects', top:fileBase, pattern: patternBase});
 			service.dispatchEvent = provider.dispatchEvent;
 			provider.connect();
 		};

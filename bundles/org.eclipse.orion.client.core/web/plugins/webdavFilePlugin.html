@@ -36,7 +36,7 @@
 			var base = temp.href;			
 			var service = new eclipse.DAVFileServiceImpl(base, base);
 			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("orion.core.file", service, {Name:'WebDAV contents', top:base, pattern:base});
+			provider.registerServiceProvider("orion.core.file", service, {Name:'WebDAV Folders', top:base, pattern:base});
 			service.dispatchEvent = provider.dispatchEvent;
 			provider.connect();
 		};
