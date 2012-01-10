@@ -502,7 +502,7 @@ define("orion/editor/jsContentAssist", [], function() {
 
 	JavaScriptContentAssistProvider.prototype = /** @lends orion.editor.JavaScriptContentAssistProvider.prototype */
 	{
-		getKeywords: function(prefix, buffer, selection) {
+		computeProposals: function(prefix, buffer, selection) {
 			var proposals = [];
 
 			if (selection.offset > 0) {
