@@ -300,7 +300,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 				styler.setHighlightCaretLine(true);
 				break;
 			case "html":
-				styler = new mTextMateStyler.TextMateStyler(view, mHtmlGrammar.HtmlGrammar().grammar);
+				styler = new mTextMateStyler.TextMateStyler(view, new mHtmlGrammar.HtmlGrammar());
 				break;
 		}
 		annotationStyler = new mAnnotationModel.AnnotationStyler(view, view.annotationModel);
