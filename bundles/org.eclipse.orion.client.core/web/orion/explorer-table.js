@@ -285,7 +285,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 						new mBreadcrumbs.BreadCrumbs({
 							container: breadcrumb, 
 							resource: this.treeRoot,
-							firstSegmentName: "root"
+							firstSegmentName: this.fileClient.fileServiceName(this.treeRoot.Location)
 						});
 					}
 					mFileCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);

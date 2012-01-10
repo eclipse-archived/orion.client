@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
-        'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/breadcrumbs', 'orion/globalCommands',
+        'orion/commands', 'orion/favorites', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/breadcrumbs', 'orion/globalCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(require, dojo, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, 
+		function(require, dojo, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mNavOutliner, 
 				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mBreadcrumbs, mGlobalCommands) {
 
 	dojo.addOnLoad(function() {
@@ -26,7 +26,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			dojo.parser.parse();
 
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
-			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry)
+			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
@@ -37,7 +37,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
 			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
-			var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+			var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, searcher);
 			
 			var item = dojo.hash();
@@ -101,7 +101,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 							var breadcrumb = new mBreadcrumbs.BreadCrumbs({
 								container: breadCrumbDomNode,
 								resource: metadata ,
-								firstSegmentName: "root",
+								firstSegmentName: fileClient.fileServiceName(metadata.Location),
 								makeHref:function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr);
 								}
 							});
@@ -118,7 +118,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 				var breadcrumb = new mBreadcrumbs.BreadCrumbs({
 					container: breadCrumbDomNode,
 					resource: {} ,
-					firstSegmentName: "root",
+					firstSegmentName: fileClient.fileServiceName(""),
 					makeHref:function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr);
 					}
 				});
