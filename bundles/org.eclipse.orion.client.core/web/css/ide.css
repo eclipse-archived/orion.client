@@ -275,7 +275,8 @@ a:hover {
 .paneHeadingContainer {
 	border-bottom: 1px dotted #bfbfbf;
 	margin: 8px;
-	margin-top: 12px;
+	padding-top: 8px;
+	padding-bottom: 4px;
 }
 
 .paneHeadingCommands {
@@ -664,7 +665,8 @@ a:hover {
 }
 
 .favoritesTable {
-	border-spacing: 0;
+	border-collapse: separate;
+	border-spacing: 2;
 	overflow-x: hidden; /* because it is placed inside a div with overflow scrollbars */
 }
 

@@ -13,10 +13,10 @@
 /*browser:true*/
 
 define(['dojo', 'dijit', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
-        'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
+        'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
         'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/contentTypes',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, dijit, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, 
+		function(dojo, dijit, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mNavOutliner,
 				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, mContentTypes) {
 
 dojo.addOnLoad(function(){
@@ -29,12 +29,8 @@ dojo.addOnLoad(function(){
 		new mProgress.ProgressService(serviceRegistry, operationsClient);
 		new mDialogs.DialogService(serviceRegistry);
 		new mSsh.SshService(serviceRegistry);
-		
-		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
-	
-		
-		// Favorites
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 		
 		// Git operations
 		//new eclipse.GitService(serviceRegistry);
@@ -60,7 +56,7 @@ dojo.addOnLoad(function(){
 			explorer.loadResourceList(dojo.hash());
 		}
 	
-		var favorites = new mFavorites.Favorites({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+		var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
 							
 		// global commands
 		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, explorer);
