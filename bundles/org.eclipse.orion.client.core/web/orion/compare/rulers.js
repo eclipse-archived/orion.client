@@ -328,12 +328,14 @@ orion.CompareMatchRenderer =  (function() {
 	function CompareMatchRenderer(canvasDiv) {
 		this._canvasDiv = canvasDiv;
 		this._mapper = undefined;
+		this._initialized = false;
 		this._annotation = new orion.CompareAnnotation();
 	}
 
 	CompareMatchRenderer.prototype =  {
 		
 		init: function(mapper , leftEditor , rightEditor ){
+			this._initialized = true;
 			this._mapper = mapper;
 			this._leftEditor = leftEditor;
 			this._rightEditor = rightEditor;
@@ -381,6 +383,9 @@ orion.CompareMatchRenderer =  (function() {
 		},
 
 		matchPositionFromAnnotation: function(index){
+			if(!this._initialized){
+				return;
+			}
 			this._annotation.matchPositionFromAnnotation(index);
 			this.positionAnnotation(this._annotation.getCurrentAnnotationIndex());
 		},
