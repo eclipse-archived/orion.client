@@ -121,88 +121,55 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		}
 		var _patterns = [];
 		var _services = [];
+		var _names = [];
 		
 		function _noMatch(location) {
 			var d = new dojo.Deferred();
 			d.reject("No Matching FileService for location:" + location);
 			return d;
 		}
-		
-		var _topChildren = [];
-		var _topFileService =  {
-			fetchChildren: function() {
-				var d = new dojo.Deferred();
-				d.resolve(_topChildren);
-				return d;
-			},
-			createWorkspace: function() {
-				var d = new dojo.Deferred();
-				d.reject("no file service");
-				return d;
-			},
-			loadWorkspaces: function() {
-				var d = new dojo.Deferred();
-				d.reject("no file service");
-				return d;
-			},
-			loadWorkspace: function(location) {
-				var d = new dojo.Deferred();
-				d.resolve({
-					Directory: true, 
-					Length: 0, 
-					LocalTimeStamp: 0,
-					Name: "",
-					Location: "", 
-					Children: _topChildren
-				});
-				return d;
-			},
-			search: _noMatch,
-			createProject: _noMatch,
-			createFolder: _noMatch,
-			createFile: _noMatch,
-			deleteFile: _noMatch,
-			moveFile: _noMatch,
-			copyFile: _noMatch,
-			read: _noMatch,
-			write: _noMatch
-		};
-		
+				
 		for(var j = 0; j < _references.length; ++j) {
-			_topChildren[j] = {
-				Directory: true, 
-				Length: 0, 
-				LocalTimeStamp: 0,
-				Location: _references[j].getProperty("top"),
-				ChildrenLocation: _references[j].getProperty("top"),
-				Name: _references[j].getProperty("Name")		
-			};
 			var patternString = _references[j].getProperty("pattern") || ".*";
 			if (patternString[0] !== "^") {
 				patternString = "^" + patternString;
 			}
 			_patterns[j] = new RegExp(patternString);			
 			_services[j] = serviceRegistry.getService(_references[j]);
+			_names[j] = _references[j].getProperty("Name");
 		}
-		
-		if (_services.length === 1) {
-			_topFileService = _services[0]; 
-		}
-		
-		this._getService = function(location) {
-			if (!location) {
-				return _topFileService;
+				
+		this._getServiceIndex = function(location) {
+			if (!location || (location.length && location.length === 0)) {
+				// TODO we could make the default file service a preference but for now we use the first one
+				return 0;
 			}
 			for(var i = 0; i < _patterns.length; ++i) {
 				if (_patterns[i].test(location)) {
-					return _services[i];
+					return i;
 				}
 			}
 			throw "No Matching FileService for location:" + location;
 		};
+		
+		this._getService = function(location) {
+			return _services[this._getServiceIndex(location)];
+		};
+		
+		this._getServiceName = function(location) {
+			return _names[this._getServiceIndex(location)];
+		};
 	}
 	
 	FileClient.prototype = /**@lends orion.fileClient.FileClient.prototype */ {
+		/**
+		 * Returns the name of the file service managing this location
+		 * @param location The location of the item 
+		 */
+		fileServiceName: function(location) {
+			return this._getServiceName(location);
+		},
+		 
 		/**
 		 * Obtains the children of a remote resource
 		 * @param location The location of the item to obtain children for

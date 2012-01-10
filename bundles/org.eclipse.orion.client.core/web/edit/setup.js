@@ -124,23 +124,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			}
 		}
 	};
-
-	var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
-	var fileServiceReference;
-	
-	for (var i=0; i<fileServices.length; i++) {
-		var info = {};
-		var propertyNames = fileServices[i].getPropertyNames();
-		for (var j = 0; j < propertyNames.length; j++) {
-			info[propertyNames[j]] = fileServices[i].getProperty(propertyNames[j]);
-		}
-		if (new RegExp(info.pattern).test(dojo.hash())) {
-			fileServiceReference = fileServices[i];
-		}
-	}
-
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
-
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 	
 	var textViewFactory = function() {
@@ -156,7 +140,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	};
 	
 	var dispatcher;
-
+	
 	var inputManager = {
 		lastFilePath: "",
 		
@@ -247,7 +231,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			var titlePane = dojo.byId("location");
 			if (titlePane) {
 				dojo.empty(titlePane);
-				var root = mUtil.getUserName() || "Navigator Root";
+				var root = fileClient.fileServiceName(this._fileMetadata.Location);
 				new mBreadcrumbs.BreadCrumbs({
 					container: "location", 
 					resource: this._fileMetadata,

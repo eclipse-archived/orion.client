@@ -123,7 +123,7 @@ dojo.addOnLoad(function(){
 		dojo.connect(explorer, "onchange", function(item) {
 			var title = "Navigator";
 			if (item) {
-				var name = mUtil.isAtRoot(item.Location) ? mUtil.getUserName() : item.Name;
+				var name = mUtil.isAtRoot(item.Location) ? fileClient.fileServiceName(item.Location) : item.Name;
 				if (name) {
 					title = "/" + name + " - " + title;
 				}
