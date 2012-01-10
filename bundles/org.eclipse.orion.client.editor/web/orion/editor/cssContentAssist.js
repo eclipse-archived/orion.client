@@ -20,7 +20,7 @@ define("orion/editor/cssContentAssist", [], function() {
 	function CssContentAssistProvider() {
 	}
 	CssContentAssistProvider.prototype = /** @lends orion.editor.CssContentAssistProvider.prototype */ {
-		getKeywords: function(prefix, buffer, selection) {
+		computeProposals: function(prefix, buffer, selection) {
 			return [ "background", "background-attachment", "background-color", "background-image",
 					"background-position", "background-repeat", "border", "border-bottom",
 					"border-bottom-color", "border-bottom-style", "border-bottom-width", "border-color",
