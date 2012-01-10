@@ -81,8 +81,8 @@ define("orion/editor/jsContentAssist", [], function() {
 	/**
 	 * Returns the current line up to, but not including, the prefix
 	 */
-	function prefixLine(prefix, buffer, selection) {
-		var offset = selection.offset-1;
+	function prefixLine(prefix, buffer, startOffset) {
+		var offset = startOffset-1;
 		while (offset > 0) {
 			var c = buffer.charAt(offset);
 			if (c === '\n' || c === '\r') {
@@ -91,14 +91,14 @@ define("orion/editor/jsContentAssist", [], function() {
 			}
 			offset--;
 		}
-		return buffer.substring(offset+1, (selection.offset-prefix.length));
+		return buffer.substring(offset+1, (startOffset-prefix.length));
 	}
 	
 	/**
 	 * Attempts to infer the type of the receiver of a function.
 	 */
 	function inferType(prefix, buffer, selection) {
-		var line = prefixLine(prefix, buffer, selection);
+		var line = prefixLine(prefix, buffer, selection.offset);
 		//Note: we already know at this point the line ends with a dot
 		//if the last character is a quote and there is an odd number of quotes on the line, then we have a string literal
 		if (line.length > 1 && (line.charAt(line.length-2) === "\"" || line.charAt(line.length-2) === "'")) {
@@ -294,20 +294,37 @@ define("orion/editor/jsContentAssist", [], function() {
 					if (index === 1) {
 						return buffer.length;
 					}
+				} else {
+					//we hit a regular expression, so jump to end of expression or end of line
+					var lineEnd = buffer.indexOf("\n", index);
+					if (lineEnd < 0) {
+						lineEnd = buffer.length;
+					}
+					var regexEnd = buffer.indexOf("/", index+1);
+					//skip escaped frontslash inside regex
+					while (regexEnd > 0 && regexEnd < lineEnd && buffer.charAt(regexEnd-1) === "\\") {
+						regexEnd = buffer.indexOf("/", regexEnd+1);
+					}
+					index = (regexEnd > 0 && lineEnd > regexEnd) ? regexEnd : lineEnd;
+					//skip the regex or line terminator character
+					index++;
 				}
 				break;
 			case "\"":
-				//we hit a string so jump to end of string or line
+			case "\'":
+				//we hit a string so jump to end of string or line, whichever comes first
 				var lineEnd = buffer.indexOf("\n", index);
 				if (lineEnd < 0) {
 					lineEnd = buffer.length;
 				}
-				var stringEnd = buffer.indexOf("\"", index+1);
+				var stringEnd = buffer.indexOf(c, index+1);
 				//skip escaped quotes
 				while (stringEnd > 0 && stringEnd < lineEnd && buffer.charAt(stringEnd-1) === "\\") {
-					stringEnd = buffer.indexOf("\"", stringEnd+1);
+					stringEnd = buffer.indexOf(c, stringEnd+1);
 				}
-				index = lineEnd > stringEnd ? stringEnd : lineEnd;
+				index = (stringEnd > 0 && lineEnd > stringEnd) ? stringEnd : lineEnd;
+				//skip the string or line terminator character
+				index++;
 				break;
 		}
 		return index;
@@ -407,10 +424,11 @@ define("orion/editor/jsContentAssist", [], function() {
 	/**
 	 * Returns proposals for variables and arguments within the current function scope.
 	 */
-	function getFunctionProposals(prefix, buffer, startOffset) {
+	function recursiveGetFunctionProposals(prefix, buffer, startOffset) {
 		var proposals = [];
 		var start, i;
-		//search only the function containing the current cursorr position
+		
+		//search only the function containing the current cursor position
 		var block = findEnclosingFunction(buffer, startOffset);
 		var funcStart = 0;
 		if (block) {
@@ -446,10 +464,35 @@ define("orion/editor/jsContentAssist", [], function() {
 		}
 		//recurse on parent closure
 		if (funcStart > 0) {
-			proposals = proposals.concat(getFunctionProposals(prefix, buffer, funcStart));
+			proposals = proposals.concat(recursiveGetFunctionProposals(prefix, buffer, funcStart));
 		}
 		return proposals;
 	}
+	
+	/**
+	 * Given a block of javascript, remove all comments and literals (strings, regex).
+	 * @param block {String} The javascript text
+	 */
+	function removeCommentsAndLiterals(block) {
+		var cleanBlock = "";
+		var index = 0;
+		while (index < block.length) {
+			index = skipCommentsAndStrings(block, index);
+			cleanBlock += block.charAt(index++);
+		}
+		return cleanBlock;
+	}
+	
+	/**
+	 * Returns proposals for variables and arguments within the current function scope.
+	 */
+	function getFunctionProposals(prefix, buffer, startOffset) {
+		var bufferPrefix = buffer.substring(0,startOffset);
+		var cleanBuffer = removeCommentsAndLiterals(bufferPrefix);
+		var removedChars = bufferPrefix.length-cleanBuffer.length;
+		return recursiveGetFunctionProposals(prefix, cleanBuffer, startOffset-removedChars);
+	}
+
 	/**
 	 * @name orion.editor.JavaScriptContentAssistProvider
 	 * @class Provides content assist for JavaScript keywords.
