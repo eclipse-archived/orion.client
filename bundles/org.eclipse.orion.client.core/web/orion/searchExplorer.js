@@ -580,7 +580,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					}
 					if(result){
 						var lineNumber = i+1;
-						var detailNode = {parent: fileModelNode, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
+						var detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + "?line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
 						fileModelNode.children.push(detailNode);
 						totalMatches += result.length;
 					}
@@ -655,9 +655,26 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	}
 	SearchResultRenderer.prototype = new mExplorer.SelectionRenderer();
 	
+	SearchResultRenderer.prototype.initCheckboxColumn = function(tableNode){	
+		if (this._useCheckboxSelection) {
+			var th = document.createElement('th');
+			var check = document.createElement("span");
+			dojo.addClass(check, "selectionCheckmark");
+			if(this.getCheckedFunc){
+				check.checked = this.getCheckedFunc(this.explorer.model.getRealRoot());
+				dojo.toggleClass(check, "selectionCheckmarkChecked", check.checked);
+			}
+			th.appendChild(check);
+			dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
+				var newValue = evt.target.checked ? false : true;
+				this.onCheck(null, evt.target, newValue);
+			}));
+			return th;
+		}
+	},
 	SearchResultRenderer.prototype.getCellHeaderElement = function(col_no){	
 		if(col_no === 0){
-			return dojo.create("th", {innerHTML: "<h2>Search Results</h2>"});
+			return dojo.create("th", {innerHTML: "<h2> Matches</h2>"});
 		} else if(this.explorer.model.useFlatList && col_no === 1){
 			return dojo.create("th", {innerHTML: "<h2>Location</h2>"});
 		}
@@ -779,6 +796,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.numberOnPage = resultLocation.length;
 		this.queryStr = queryStr;
 		this.model = new SearchResultModel(registry, this.fileClient, resultLocation, queryStr, this);
+		//there are 3 states:
+		//result_view: viewing the seach result
+		//replace_preview: after user inputs the replace string and enters into the preview 
+		//replace_report: after user finishes preview and commits the replace
+		this._state = "result_view";
+		this._replacable = false;
 		this.declareCommands();
 	}
 	SearchResultExplorer.prototype = new mExplorer.Explorer();
@@ -795,29 +818,49 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var that = this;
 		// page actions for search
 		
-		var saveresultsCommand = new mCommands.Command({
+		var saveResultsCommand = new mCommands.Command({
 			name: "Save Search",
 			tooltip: "Save query to search favorites",
 			id: "orion.saveSearchResults",
 			callback: function(data) {
 				that.saveSearch(that.queryStr);
+			},
+			visibleWhen : function(item) {
+				return that._state === "result_view";
 			}
 		});
 	
 		var replaceAllCommand = new mCommands.Command({
-			name: "Replace With",
-			tooltip: "Replace all matches with",
+			name: "Replace",
+			tooltip: "Replace all selected matches",
 			id: "orion.globalSearch.replaceAll",
 			callback: function(data) {
-				that.replaceAll();
+				//that.replaceAll();
+			},
+			visibleWhen : function(item) {
+				return that._state === "replace_preview";
 			}
 		});
 	
-		this._commandService.addCommand(saveresultsCommand, "dom");
-		//this._commandService.addCommand(replaceAllCommand, "dom");
+		var cancelReplaceCommand = new mCommands.Command({
+			name: "Cancel",
+			tooltip: "Cancell replace",
+			id: "orion.globalSearch.cancellReplace",
+			callback: function(data) {
+				that.cancellReplace();
+			},
+			visibleWhen : function(item) {
+				return that._state === "replace_preview";
+			}
+		});
+	
+		this._commandService.addCommand(saveResultsCommand, "dom");
+		this._commandService.addCommand(cancelReplaceCommand, "dom");
+		this._commandService.addCommand(replaceAllCommand, "dom");
 		this._commandService.addCommandGroup("orion.searchActions.unlabeled", 200, null, null, "pageActions");
 		this._commandService.registerCommandContribution("orion.saveSearchResults", 1, "pageActions", "orion.searchActions.unlabeled");
-		//this._commandService.registerCommandContribution("orion.globalSearch.replaceAll", 2, "pageActions", "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("orion.globalSearch.cancellReplace", 2, "pageActions", "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("orion.globalSearch.replaceAll", 3, "pageActions", "orion.searchActions.unlabeled");
 
 		var previousPage = new mCommands.Command({
 			name : "< Previous Page",
@@ -830,6 +873,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				return mSearchUtils.generateSearchHref(qParams);
 			},
 			visibleWhen : function(item) {
+				if(that._state !== "result_view"){
+					return false;
+				}
 				var prevPage = that.caculatePrevPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
 				return (prevPage.start !== that.model.queryObj.start);
 			}
@@ -845,6 +891,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				return mSearchUtils.generateSearchHref(qParams);
 			},
 			visibleWhen : function(item) {
+				if(that._state !== "result_view"){
+					return false;
+				}
 				var nextPage = that.caculateNextPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
 				return (nextPage.start !== that.model.queryObj.start);
 			}
@@ -897,7 +946,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService.registerCommandContribution("orion.search.nextPage", 6, "pageNavigationActions");
 	};
 	
-	SearchResultExplorer.prototype.replaceAll = function() {
+	SearchResultExplorer.prototype.replacePreview = function(replaceStr) {
+		var that = this;
+		this._state = "replace_preview";
+		this.checkbox = true;
+		this.initCommands();
+
 		dojo.empty("results");
 		var uiFactory = new mSearchFeatures.SearchUIFactory({
 			parentDivID: "results"
@@ -907,11 +961,62 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		if(parentPane.isLeftPaneOpen()){
 			parentPane.toggle();
 		}
-		this.previewMode = true;
-		this.renderer = new SearchResultRenderer({checkbox: true}, this);
+		this.renderer = new SearchResultRenderer({checkbox: true, highlightSelection:false,
+												  getCheckedFunc: function(item){return that.getItemChecked(item);},
+												  onCheckedFunc: function(rowId, checked){that.onRowChecked(rowId, checked);}}, this);
 		this.createTree(uiFactory.getMatchDivID(), this.model);
 		this.gotoCurrent();
-		this.buildPreview(uiFactory);
+		this.buildPreview(uiFactory, replaceStr);
+	};
+	
+	SearchResultExplorer.prototype.getItemChecked = function(item) {
+		if(item.checked === undefined){
+			item.checked = true;
+		}
+		return item.checked;
+	};
+	
+	SearchResultExplorer.prototype.onRowChecked = function(rowId, checked) {
+		if(!rowId){
+			this.onItemChecked(this.model.getRealRoot(), checked);
+			return;
+		}
+		var row = dojo.byId(rowId);
+		if(row && row._item){
+			this.onItemChecked(row._item, checked);
+		}
+	};
+	
+	SearchResultExplorer.prototype.onItemChecked = function(item, checked) {
+		item.checked = checked;
+		if(item.type === "file" || item.isRoot){
+			if(item.children){
+				for(var i = 0; i < item.children.length; i++){
+					var checkBox  = dojo.byId(this.renderer.getCheckBoxId(this.model.getId(item.children[i])));
+					if(checkBox){
+						this.renderer.onCheck(null, checkBox, checked);
+					} else {
+						item.children[i].checked = checked;
+					}
+				}
+			}
+		}
+	};
+	
+	SearchResultExplorer.prototype.cancellReplace = function() {
+		var parentPane = dijit.byId("orion.innerSearchResults");
+		if(!parentPane.isLeftPaneOpen()){
+			parentPane.toggle();
+		}
+		this._state = "result_view";
+		this.checkbox = false;
+		this.initCommands();
+
+		dojo.empty("results");
+		this.renderer = new SearchResultRenderer({checkbox: false}, this);
+		this.createTree("results", this.model);
+		this.gotoCurrent();
+		//this.reportStatus("");	
 	};
 	
 	SearchResultExplorer.prototype._resolveFileType = function(fileLocation){
@@ -921,11 +1026,11 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			return splits.pop().toLowerCase();
 		}
 		return "";
-	},
+	};
 	
-	SearchResultExplorer.prototype.buildPreview = function(uiFactory) {
+	SearchResultExplorer.prototype.buildPreview = function(uiFactory, replaceStr) {
 		var fileItem = this.model.indexedFileItems()[this.model.currentFileIndex];
-		this.model.generateNewContents(fileItem, this.replaceStrDiv.value);
+		this.model.generateNewContents(fileItem, replaceStr);
 		
 		var uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
 			parentDivID: uiFactory.getCompareDivID(),
@@ -1001,8 +1106,19 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var that = this;
 		dojo.empty("pageActions");
 		this._commandService.renderCommands("pageActions", "dom", that, that, "tool");
-		//this.replaceStrDiv= dojo.create("input", {type: "search", id: "replaceString", placeholder: "replace text", title:"Type a text to replace all with"}, "pageActions", "last");
-		//dojo.addClass(this.replaceStrDiv, "searchbox");
+		if(this._replacable){
+			if(this._state === "result_view"){
+				var replaceStrDiv= dojo.create("input", {type: "search", id: "replaceString", placeholder: "replace text", title:"Type a text to replace all with"}, "pageActions", "last");
+				dojo.addClass(replaceStrDiv, "searchbox");
+				dojo.connect(replaceStrDiv, "onkeypress", function(e){
+					if (e.charOrCode === dojo.keys.ENTER) {
+						if (replaceStrDiv.value.length > 0) {
+							that.replacePreview(replaceStrDiv.value);
+						} 
+					}
+				});
+			}
+		}
 		dojo.empty("pageNavigationActions");
 		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "tool");
 		
