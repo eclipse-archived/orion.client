@@ -128,8 +128,57 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			d.reject("No Matching FileService for location:" + location);
 			return d;
 		}
+		
+		var _fileSystemsRoots = [];
+		var _allFileSystemsService =  {
+			fetchChildren: function() {
+				var d = new dojo.Deferred();
+				d.resolve(_fileSystemsRoots);
+				return d;
+			},
+			createWorkspace: function() {
+				var d = new dojo.Deferred();
+				d.reject("no file service");
+				return d;
+			},
+			loadWorkspaces: function() {
+				var d = new dojo.Deferred();
+				d.reject("no file service");
+				return d;
+			},
+			loadWorkspace: function(location) {
+				var d = new dojo.Deferred();
+				d.resolve({
+					Directory: true, 
+					Length: 0, 
+					LocalTimeStamp: 0,
+					Name: "File Servers",
+					Location: "/", 
+					Children: _fileSystemsRoots
+				});
+				return d;
+			},
+			search: _noMatch,
+			createProject: _noMatch,
+			createFolder: _noMatch,
+			createFile: _noMatch,
+			deleteFile: _noMatch,
+			moveFile: _noMatch,
+			copyFile: _noMatch,
+			read: _noMatch,
+			write: _noMatch
+		};
 				
 		for(var j = 0; j < _references.length; ++j) {
+			_fileSystemsRoots[j] = {
+				Directory: true, 
+				Length: 0, 
+				LocalTimeStamp: 0,
+				Location: _references[j].getProperty("top"),
+				ChildrenLocation: _references[j].getProperty("top"),
+				Name: _references[j].getProperty("Name")		
+			};
+
 			var patternString = _references[j].getProperty("pattern") || ".*";
 			if (patternString[0] !== "^") {
 				patternString = "^" + patternString;
@@ -140,7 +189,10 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		}
 				
 		this._getServiceIndex = function(location) {
-			if (!location || (location.length && location.length === 0)) {
+			// client must specify via "/" when a multi file service tree is truly wanted
+			if (location === "/") {
+				return -1;
+			} else if (!location || (location.length && location.length === 0)) {
 				// TODO we could make the default file service a preference but for now we use the first one
 				return 0;
 			}
@@ -153,11 +205,13 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		};
 		
 		this._getService = function(location) {
-			return _services[this._getServiceIndex(location)];
+			var i = this._getServiceIndex(location);
+			return i === -1 ? _allFileSystemsService : _services[i];
 		};
 		
 		this._getServiceName = function(location) {
-			return _names[this._getServiceIndex(location)];
+			var i = this._getServiceIndex(location);
+			return i === -1 ? _allFileSystemsService.Name : _names[i];
 		};
 	}
 	
