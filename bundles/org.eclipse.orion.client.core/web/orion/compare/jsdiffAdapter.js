@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['jsdiff/diff'], function() {
+define(['jsdiff/diff'], function(JsDiff) {
 
 var orion = orion || {};
 
