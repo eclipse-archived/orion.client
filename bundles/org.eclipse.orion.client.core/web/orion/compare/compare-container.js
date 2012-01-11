@@ -365,6 +365,7 @@ exports.TwoWayCompareContainer = (function() {
 		this._commandService = this._registry.getService("orion.page.command");
 		this._fileClient = this._registry.getService("orion.core.file");
 		this._uiFactory = uiFactory;
+		this._viewLoadedCounter = 0;
 		
 		this.setOptions(options, true);
 		
@@ -566,13 +567,20 @@ exports.TwoWayCompareContainer = (function() {
 		var model = new mTextModel.TextModel(content , delim);
 		var compareModel = new mTwoWayCompareModel.TwoWayCompareModel(model, {mapper:mapper, columnIndex:columnIndex } );
 		var textViewFactory = function() {
-			return new mTextView.TextView({
+			var view = new mTextView.TextView({
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: readOnly,
 				stylesheet: require.toUrl("orion/compare/editor.css") ,
 				tabSize: 4
 			});
+			view.addEventListener("Load", function(){
+				that._viewLoadedCounter++;
+				if(that._viewLoadedCounter === 2){				
+					that._compareMatchRenderer.matchPositionFromAnnotation(-1);
+				}
+			});
+			return view;
 		};
 			
 		var contentAssistFactory = function(editor) {
@@ -676,6 +684,7 @@ exports.TwoWayCompareContainer = (function() {
 			output = result.output;
 		}
 		var that = this;
+		this._compareMatchRenderer.init(result.mapper ,this._textViewLeft , this._textViewRight);
 		if(!this._editorLeft){
 			this.initEditorContainers(result.delim , output , input ,  result.mapper , true);
 		} else if (onsave) {
@@ -696,8 +705,9 @@ exports.TwoWayCompareContainer = (function() {
 			if(!this._readonly)
 				this._inputManager.setInput(this._newFile.URL , this._editorLeft);
 		}
-		this._compareMatchRenderer.init(result.mapper ,this._textViewLeft , this._textViewRight);
-		this._compareMatchRenderer.matchPositionFromAnnotation(-1);
+		if(this._viewLoadedCounter > 1){
+			this._compareMatchRenderer.matchPositionFromAnnotation(-1);
+		}
 	};
 	return TwoWayCompareContainer;
 }());

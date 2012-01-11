@@ -23,8 +23,22 @@ orion.SearchUIFactory = (function() {
 		buildUI:function(){
 			this._matchDivId = this._parentDivID + "_matches";
 			this._compareDivId = this._parentDivID + "_compare";
-			var topDiv = new dijit.layout.BorderContainer({id: this._matchDivId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
-			var bottomDiv = new dijit.layout.BorderContainer({id:this._compareDivId, region:"bottom" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
+			var topDiv = dijit.byId(this._matchDivId);
+			if(topDiv){
+				topDiv.destroyRecursive();
+			}
+			var bottomDiv = dijit.byId(this._compareDivId);
+			if(bottomDiv){
+				bottomDiv.destroyRecursive();
+			}
+			
+			var splitter = dijit.byId(this._compareDivId + "_splitter");
+			if(splitter){
+				splitter.destroyRecursive();
+			}
+			
+			topDiv = new dijit.layout.BorderContainer({id: this._matchDivId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
+			bottomDiv = new dijit.layout.BorderContainer({id:this._compareDivId, region:"bottom" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
 			dojo.addClass(topDiv.domNode, 'topBorder');
 			dojo.addClass(bottomDiv.domNode, 'bottomBorderReplace');
 			
