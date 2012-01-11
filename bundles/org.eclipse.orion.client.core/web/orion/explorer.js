@@ -264,21 +264,41 @@ exports.ExplorerRenderer = (function() {
 			if (this._useCheckboxSelection) {
 				var checkColumn = document.createElement('td');
 				var check = document.createElement("span");
-				check.id = tableRow.id+"selectedState";
+				check.id = this.getCheckBoxId(tableRow.id);
 				dojo.addClass(check, "selectionCheckmark");
 				check.itemId = tableRow.id;
+				if(this.getCheckedFunc){
+					check.checked = this.getCheckedFunc(item);
+					if(this._highlightSelection){
+						dojo.toggleClass(tableRow, "checkedRow", check.checked);
+					}
+					dojo.toggleClass(check, "selectionCheckmarkChecked", check.checked);
+				}
 				checkColumn.appendChild(check);
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					var newValue = evt.target.checked ? false : true;
-					evt.target.checked = newValue;
-					dojo.toggleClass(tableRow, "checkedRow", newValue);
-					dojo.toggleClass(evt.target, "selectionCheckmarkChecked", newValue);
-					this._storeSelections();
-					if (this.explorer.selection) {
-						this.explorer.selection.setSelections(this.getSelected());		
-					}
+					this.onCheck(tableRow, evt.target, newValue);
 				}));
 				return checkColumn;
+			}
+		},
+		
+		getCheckBoxId: function(rowId){
+			return rowId + "selectedState";
+		},
+			
+		onCheck: function(tableRow, checkBox, checked){
+			checkBox.checked = checked;
+			if(this._highlightSelection && tableRow){
+				dojo.toggleClass(tableRow, "checkedRow", checked);
+			}
+			dojo.toggleClass(checkBox, "selectionCheckmarkChecked", checked);
+			if(this.onCheckedFunc){
+				this.onCheckedFunc(checkBox.itemId, checked);
+			}
+			this._storeSelections();
+			if (this.explorer.selection) {
+				this.explorer.selection.setSelections(this.getSelected());		
 			}
 		},
 		
@@ -304,8 +324,10 @@ exports.ExplorerRenderer = (function() {
 				for (i=0; i<selections.length; i++) {
 					var tableRow = dojo.byId(selections[i]);
 					if (tableRow) {
-						dojo.addClass(tableRow, "checkedRow");
-						var check = dojo.byId(tableRow.id + "selectedState");
+						if(this._highlightSelection){
+							dojo.addClass(tableRow, "checkedRow");
+						}
+						var check = dojo.byId(this.getCheckBoxId(tableRow.id));
 						if (check) {
 							check.checked = true;
 							dojo.addClass(check, "selectionCheckmarkChecked");
@@ -453,6 +475,12 @@ exports.ExplorerRenderer = (function() {
 				this._useCheckboxSelection = options.checkbox === undefined ? false : options.checkbox;
 				this._colums = options.colums || [];
 				this._cachePrefix = options.cachePrefix;
+				this.getCheckedFunc = options.getCheckedFunc;
+				this.onCheckedFunc = options.onCheckedFunc;
+				this._highlightSelection = true;
+				if(options.highlightSelection === false){
+					this._highlightSelection = false;
+				}
 			}
 		},
 		
