@@ -4,10 +4,10 @@
 	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>Debug</title>
-	<link rel="stylesheet" type="text/css" href="debug.css" />
+	<link rel="stylesheet" type="text/css" href="./debug.css" />
 	<script src="../requirejs/require.js"></script>
-	<script src="../../orion/plugin.js"></script>
-	<script src="../../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<script src="../orion/plugin.js"></script>
+	<script src="../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script type="text/javascript">
 		require({
 			baseUrl: '..',
@@ -45,8 +45,7 @@
 		<div class="toolbar" id="toolbar" dojotype="dijit.layout.ContentPane" region="top">
 		</div>
 		<div id="orion-debugMainPane" dojotype="dijit.layout.ContentPane" region="center" class="mainpane">
-			<div id="orion-debugMessaging"></div>
-			<div id="debug-table"></div>
+			<div id="debug-console" style='width:100%;height:650px;border: 1px solid teal;'></div>
 		</div>
 		<div class="footer" id="footer" dojotype="dijit.layout.ContentPane" region="bottom" splitter="false">
 		</div>
