@@ -262,6 +262,13 @@ var JsDiff = (function() {
   };
 })();
 
+
 if (typeof module !== "undefined") {
     module.exports = JsDiff;
+}
+//define an AMD module if module loader is available
+if (typeof define === 'function' && define.amd) {
+	define(function() {
+		return JsDiff;
+	});
 }
