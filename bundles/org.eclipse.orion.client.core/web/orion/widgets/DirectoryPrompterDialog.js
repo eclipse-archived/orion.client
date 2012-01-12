@@ -40,7 +40,7 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 	
 	postCreate : function() {
 		this.inherited(arguments);
-		this.loadFolderList("");	// workspace root
+		this.loadFolderList("/");	// workspace root
 		if (!this.message) {
 			dojo.style(this.messageCell, {display: "none"});
 		}
@@ -48,7 +48,7 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 	
 	loadFolderList: function(path) {
 		path = mUtil.makeRelative(path);
-		this.treeRoot.Path = path;
+		this.treeRoot.Location = path;
 		this.options.fileClient.loadWorkspace(path).then(
 			dojo.hitch(this, function(loadedWorkspace) {
 				for (var i in loadedWorkspace) {
