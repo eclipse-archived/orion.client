@@ -10,6 +10,7 @@
 		"plugins/webEditingPlugin.html":true,
 		"plugins/landingPageTasks.html":true,
 		"plugins/preferencesPlugin.html":true,
-		"plugins/taskPlugin.html": true
+		"plugins/taskPlugin.html": true,
+		"plugins/csslintPlugin.html": true
 	}
 }
