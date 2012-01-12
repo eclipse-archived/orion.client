@@ -38,10 +38,10 @@ define(["orion/assert", "orion/textview/eventTarget", "orion/textview/textModel"
 	// ************************************************************************************************
 	tests["CodeMirror - 1"] = function() {
 		var view = new MockTextView();
-		var annotationModel = new mAnnotations.AnnotationModel(view.getModel());
 		var codeMirror = new mMirror.CodeMirror();
+		var annotationModel = new mAnnotations.AnnotationModel(view.getModel());
 		codeMirror.defineMode("test", SampleMode);
-		var styler = new mMirror.CodeMirrorStyler(view, annotationModel, codeMirror);
+		var styler = new mMirror.CodeMirrorStyler(view, codeMirror, annotationModel);
 		
 		
 	};
