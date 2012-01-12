@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,11 +14,11 @@ var eclipse;
 /*browser:true*/
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/util', 'orion/commands', 'orion/dialogs', 'orion/selection', 
         'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
-        'orion/git/gitRepositoryExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/links',
+        'orion/git/gitRepositoryExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links',
 	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(require, dojo, mBootstrap, mStatus, mProgress, mUtil, mCommands, mDialogs, mSelection, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, 
-				mGitRepositoryExplorer, mGitCommands, mGitClient, mLinks) {
+				mGitRepositoryExplorer, mGitCommands, mGitClient, mSshTools, mLinks) {
 
 mBootstrap.startup().then(function(core) {
 	var serviceRegistry = core.serviceRegistry;
@@ -29,6 +29,7 @@ mBootstrap.startup().then(function(core) {
 	new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 	new mDialogs.DialogService(serviceRegistry);
 	var selection = new mSelection.Selection(serviceRegistry);
+	new mSshTools.SshService(serviceRegistry);
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 	new mProgress.ProgressService(serviceRegistry, operationsClient);
@@ -52,32 +53,24 @@ mBootstrap.startup().then(function(core) {
 	commandService.registerCommandContribution("eclipse.openCloneContent", 100);
 	commandService.registerCommandContribution("eclipse.openGitStatus", 100);
 	commandService.registerCommandContribution("eclipse.openGitLog", 100);
-	
 	commandService.registerCommandContribution("eclipse.orion.git.pull", 1000);
-	
 	commandService.registerCommandContribution("eclipse.removeBranch", 1000);
-	
 	commandService.registerCommandContribution("eclipse.checkoutTag", 1000);
+	commandService.registerCommandContribution("eclipse.removeTag", 1000);
+	commandService.registerCommandContribution("eclipse.checkoutBranch", 1000);
+	commandService.registerCommandContribution("eclipse.orion.git.applyPatch", 1000);
+	commandService.registerCommandContribution("eclipse.git.deleteClone", 1000);
+	commandService.registerCommandContribution("eclipse.orion.git.fetch", 1000);
+	commandService.registerCommandContribution("eclipse.orion.git.merge", 1000);
+	commandService.registerCommandContribution("eclipse.orion.git.rebase", 1000);
+	commandService.registerCommandContribution("eclipse.orion.git.resetIndex", 1000);
 	
-	
-	fileClient.loadWorkspace().then(
-		function(workspace){
-			var path = dojo.hash() || workspace.Location;
-			var relativePath = mUtil.makeRelative(path);
-			
-			//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
-			var gitapiCloneUrl = require.toUrl("gitapi/clone._");
-			gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
-			
-			explorer.displayRepository(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath);
-		}	
-	);	
-	
-	//every time the user manually changes the hash, we need to load the workspace with that name
-	dojo.subscribe("/dojo/hashchange", explorer, function() {
+	if (dojo.hash())
+		explorer.displayRepository(dojo.hash());
+	else
 		fileClient.loadWorkspace().then(
 			function(workspace){
-				var path = dojo.hash() || workspace.Location;
+				var path = workspace.Location;
 				var relativePath = mUtil.makeRelative(path);
 				
 				//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
@@ -87,6 +80,24 @@ mBootstrap.startup().then(function(core) {
 				explorer.displayRepository(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath);
 			}	
 		);	
+	
+	//every time the user manually changes the hash, we need to load the workspace with that name
+	dojo.subscribe("/dojo/hashchange", explorer, function() {
+		if (dojo.hash())
+			explorer.displayRepository(dojo.hash());
+		else
+			fileClient.loadWorkspace().then(
+				function(workspace){
+					var path = workspace.Location;
+					var relativePath = mUtil.makeRelative(path);
+					
+					//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
+					var gitapiCloneUrl = require.toUrl("gitapi/clone._");
+					gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
+					
+					explorer.displayRepository(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath);
+				}	
+			);	
 	});
 
 //	makeRightPane(explorer);
