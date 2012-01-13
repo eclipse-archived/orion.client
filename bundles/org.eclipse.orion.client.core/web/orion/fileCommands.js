@@ -182,6 +182,9 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 					fileClient: fileClient,				
 					func: function(targetFolder) { 
 						if (targetFolder && targetFolder.Location) {
+							if (!dojo.isArray(selectedItems)) {
+								selectedItems = [selectedItems];
+							}
 							for (var i=0; i < selectedItems.length; i++) {
 								var location = targetFolder.Location;
 								var newName; // intentionally undefined.  Only use if we need.
