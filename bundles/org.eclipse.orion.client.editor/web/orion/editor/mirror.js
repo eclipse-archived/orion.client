@@ -381,10 +381,12 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 			return newLines;
 		},
 		/**
-		 * Sets the CodeMirror mode to be used for highlighting. The mode must be defined in the
-		 * {@link orion.mirror.Mirror} that this <code>ModeApplier</code>'s was created with.
+		 * Sets the CodeMirror mode to be used for highlighting. The mode must be defined in the {@link orion.mirror.Mirror}
+		 * that this <code>ModeApplier</code> was created with.
+		 * @param {String} modeSpec Mode name or MIME type.
+		 * @param {Boolean} [highlightImmediately=false]
 		 */
-		setMode: function(/**String*/ modeSpec, highlightImmediately) {
+		setMode: function(modeSpec, highlightImmediately) {
 			if (!modeSpec) { return; }
 			this.mode = this.codeMirror.getMode(this.codeMirror.options, modeSpec);
 			this.lines = this._newLines(this.model.getLineCount());
@@ -418,8 +420,8 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 		},
 		/**
 		 * Schedules a job that will begin highlighting from <code>startLine</code>. The job runs for a short amount of time,
-		 * after which it dispatches a {@link #event:HighlightEvent} and yields. Follow-up jobs are scheduled automatically
-		 * if there's more highlighting to be done.
+		 * after which it dispatches a {@link #event:HighlightEvent} indicating its progress, and yields. Follow-up jobs are
+		 * scheduled automatically if there's more highlighting to be done.
 		 */
 		highlightLater: function(/**Number*/ startLine) {
 			this.dirtyLines.push(startLine);
@@ -480,7 +482,7 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 			}
 			this.onHighlightDone();
 		},
-		/** Called when some highlighting has been performed. Dispatches a {@link orion.mirror.ModeApplier#HighlightEvent}. */
+		/** Called when some highlighting has been performed. Dispatches a {@link #event:HighlightEvent}. */
 		onHighlightDone: function() {
 			if (this.startLine !== Number.MAX_VALUE && this.endLine !== -1) {
 				this.dispatchEvent({
@@ -502,9 +504,7 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 			return -1;
 		},
 		/**
-		 * Returns the state we can use for parsing from the start of the <i><code>lineIndex</code></i>th line. The state is
-		 * guaranteed to be up-to-date with the model, because we highlight whatever preceding lines are 
-		 * necessary to get it.
+		 * Returns the state we can use for parsing from the start of the <i><code>lineIndex</code></i>th line.
 		 * @returns {Object} The state. This object is safe to mutate.
 		 */
 		getState: function(/**Number*/ lineIndex) {
@@ -713,8 +713,9 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 			this.listener = null;
 		},
 		/** 
-		 * Sets the CodeMirror mode that this styler will use for highlighting the view.
-		 * @param {String} modeSpec The mode to use.
+		 * Sets the CodeMirror mode that this styler will use for styling the view.
+		 * @param {String} modeSpec Name of the mode to use (eg. <code>"css"</code>), or a MIME type defined by the mode
+		 * (eg. <code>"text/css"</code>).
 		 */
 		setMode: function(modeSpec) {
 			this.modeApplier.setMode(modeSpec);
