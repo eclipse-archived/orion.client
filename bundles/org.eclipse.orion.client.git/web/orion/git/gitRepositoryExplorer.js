@@ -100,11 +100,8 @@ exports.GitRepositoryExplorer = (function() {
 					that.displayRepositories(resp.Children);
 					that.displayStatus(repository, repository.StatusLocation);
 					that.displayCommits(repository);
-					that.displayBranches(repository.BranchLocation);
-					that.displayTags(repository.TagLocation, repository);
-					
-					that.registry.getService("orion.page.command").registerCommandContribution("eclipse.addBranch2", 100, "branchSectionActionsArea");
-					that.registry.getService("orion.page.command").renderCommands(dojo.byId("branchSectionActionsArea"), "dom", repository, this, "tool", false);
+					that.displayBranches(repository.BranchLocation, repository);
+					that.displayTags(repository.TagLocation, repository);	
 				} else if (resp.Children[0].Type === "Clone"){
 					that.displayRepositories(resp.Children, true);
 				} else if (resp.Children[0].Type === "Branch"){
@@ -112,7 +109,7 @@ exports.GitRepositoryExplorer = (function() {
 					that.registry.getService("orion.git.provider").getGitClone(branches.Children[0].CloneLocation).then(
 						function(resp){
 							that.displayRepositories(resp.Children, true);
-							that.displayBranches(location, null, "full");
+							that.displayBranches(location, resp.Children[0], "full");
 							that.displayRemoteBranches(resp.Children[0].RemoteLocation, resp.Children[0], "full");
 						}, function () {
 							
@@ -314,6 +311,9 @@ exports.GitRepositoryExplorer = (function() {
 		
 		dojo.empty("branchNode");
 		dojo.byId("branchNode").innerHTML = "Loading...";
+		
+		this.registry.getService("orion.page.command").registerCommandContribution("eclipse.addBranch", 100, "branchSectionActionsArea");
+		this.registry.getService("orion.page.command").renderCommands(dojo.byId("branchSectionActionsArea"), "dom", repository, this, "tool", false);
 
 		this.registry.getService("orion.git.provider").getGitBranch(branchLocation).then(
 			function(resp){

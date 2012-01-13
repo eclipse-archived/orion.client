@@ -343,10 +343,11 @@ var exports = {};
 				});
 			},
 			visibleWhen: function(item) {
-				return item.GroupNode && item.Name === "Branches";
+				return (item.GroupNode && item.Name === "Branches") || (item.Type === "Clone" && explorer.parentId === "artifacts");
 			}
 		});
 		commandService.addCommand(addBranchCommand, "object");
+		commandService.addCommand(addBranchCommand, "dom");
 
 		var removeBranchCommand = new mCommands.Command({
 			name: "Delete", // "Delete Branch"
