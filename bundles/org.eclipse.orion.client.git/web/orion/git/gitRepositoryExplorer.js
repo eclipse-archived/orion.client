@@ -32,7 +32,7 @@ exports.GitRepositoryExplorer = (function() {
 	}
 	
 	GitRepositoryExplorer.prototype.handleError = function(error, registry) {
-		var display = [];
+		var display = {};
 		display.Severity = "Error";
 		display.HTML = false;
 		try {
@@ -42,7 +42,43 @@ exports.GitRepositoryExplorer = (function() {
 			display.Message = error.message;
 		}
 		registry.getService("orion.page.message").setProgressResult(display);
-	}
+		
+		if (error.status === 404) {
+			// Create the page skeleton
+			var repositoryPageSkeleton =
+				"<div id=\"mainNode\" class=\"settings\">" +
+					
+					"<div class=\"displayTable\">" + 
+						"<h1>Repository</h1>" +
+						"<h2><a href=\"/git/git-repository.html#\">See all your repositories</a></h2>" +
+						"<section class=\"extension-settings-content\">" +
+						"<div class=\"extension-settings\">" +
+							"<list id=\"repositoryNode\" class=\"extension-settings-list\">" +
+								
+								"<div class=\"extension-list-item-collaped\">" +
+									"<div class=\"vbox extension-list-item\">" +
+										"<div class=\"hbox\">" +
+											"<div class=\"vbox stretch details-view\">" +
+												"<span class=\"extension-title\">Repository does not exist.</span>" +
+												"<div></div>" +
+												"<span class=\"extension-description\">Go back to the full repository list.</span>" +
+											"</div>" +
+											"<div id=\"statusActionsArea\">" +
+										"</div>" +
+									"</div>" +
+								"</div>" +
+							
+							"</list>" +
+						"</div>" + 
+						"</section>" + 
+					"</div>" + 
+									
+				"</div>";
+			
+			var parentNode = dojo.byId(this.parentId);
+			dojo.place(repositoryPageSkeleton, parentNode, "only");
+		}
+	};
 	
 	GitRepositoryExplorer.prototype.setDefaultPath = function(defaultPath){
 		this.defaultPath = defaultPath;
@@ -71,58 +107,47 @@ exports.GitRepositoryExplorer = (function() {
 	GitRepositoryExplorer.prototype.displayRepository = function(location){
 		var that = this;
 		var progressService = this.registry.getService("orion.page.message");
-		
-		// Create the page skeleton
-		var repositoryPageSkeleton =
-			"<div id=\"mainNode\" class=\"settings\">" +
-				
-				"<div class=\"displayTable\">" + 
-					"<h1>Repository</h1>" +
-					"<h2><a href=\"/git/git-repository.html#\">See all your repositories</a></h2>" +
-					"<section class=\"extension-settings-content\">" +
-					"<div class=\"extension-settings\">" +
-						"<list id=\"repositoryNode\" class=\"extension-settings-list\">" +
-						"</list>" +
-					"</div>" + 
-					"</section>" + 
-				"</div>" + 
-								
-			"</div>";
-		
-		var parentNode = dojo.byId(this.parentId);
-		dojo.place(repositoryPageSkeleton, parentNode, "only");
-		
+
 		progressService.setProgressMessage("Loading...");
 		this.registry.getService("orion.git.provider").getGitClone(location).then(
 			function(resp){
 				if (resp.Children.length == 1 && resp.Children[0].Type === "Clone") {
-					var repository = resp.Children[0];
-					that.displayRepositories(resp.Children);
-					that.displayStatus(repository, repository.StatusLocation);
-					that.displayCommits(repository);
-					that.displayBranches(repository.BranchLocation, repository);
-					that.displayTags(repository.TagLocation, repository);	
+					var repositories = resp.Children;
+					
+					that.displayRepositories(repositories);
+					that.displayStatus(repositories[0]);
+					that.displayCommits(repositories[0]);
+					that.displayBranches(repositories[0]);
+					that.displayTags(repositories[0]);	
 				} else if (resp.Children[0].Type === "Clone"){
-					that.displayRepositories(resp.Children, true);
+					var repositories = resp.Children;
+					
+					that.displayRepositories(repositories, "full", true);
 				} else if (resp.Children[0].Type === "Branch"){
-					var branches = resp;
-					that.registry.getService("orion.git.provider").getGitClone(branches.Children[0].CloneLocation).then(
+					var branches = resp.Children;
+					
+					that.registry.getService("orion.git.provider").getGitClone(branches[0].CloneLocation).then(
 						function(resp){
-							that.displayRepositories(resp.Children, true);
-							that.displayBranches(location, resp.Children[0], "full");
-							that.displayRemoteBranches(resp.Children[0].RemoteLocation, resp.Children[0], "full");
-						}, function () {
+							var repositories = resp.Children;
 							
+							that.displayRepositories(repositories, "mini", true);
+							that.displayBranches(repositories[0], "full");
+							that.displayRemoteBranches(repositories[0], "full");
+						}, function () {
+							that.handleError(error, that.registry);
 						}
 					);
 				} else if (resp.Children[0].Type === "Tag"){
-					var tags = resp;
-					that.registry.getService("orion.git.provider").getGitClone(tags.Children[0].CloneLocation).then(
+					var tags = resp.Children;
+					
+					that.registry.getService("orion.git.provider").getGitClone(tags[0].CloneLocation).then(
 						function(resp){
-							that.displayRepositories(resp.Children, true);
-							that.displayTags(location, resp.Children[0], "full");
-						}, function () {
+							var repositories = resp.Children;
 							
+							that.displayRepositories(repositories, "mini", true);
+							that.displayTags(repositories[0], "full");
+						}, function () {
+							that.handleError(error, that.registry);
 						}
 					);
 				}
@@ -164,8 +189,28 @@ exports.GitRepositoryExplorer = (function() {
 		return deferred;
 	};
 	
-	GitRepositoryExplorer.prototype.displayRepositories = function(repositories, links){
+	GitRepositoryExplorer.prototype.displayRepositories = function(repositories, mode, links){
 		var that = this;
+		
+		// Create the page skeleton
+		var repositoryPageSkeleton =
+			"<div id=\"mainNode\" class=\"settings\">" +
+				
+				"<div class=\"displayTable\">" + 
+					"<h1>Repository</h1>" +
+					(mode === "full" ? "" : "<h2><a href=\"/git/git-repository.html#\">See all your repositories</a></h2>") +
+					"<section class=\"extension-settings-content\">" +
+					"<div class=\"extension-settings\">" +
+						"<list id=\"repositoryNode\" class=\"extension-settings-list\">" +
+						"</list>" +
+					"</div>" + 
+					"</section>" + 
+				"</div>" + 
+								
+			"</div>";
+		
+		var parentNode = dojo.byId(this.parentId);
+		dojo.place(repositoryPageSkeleton, parentNode, "only");
 		
 		this.decorateRepositories(repositories).then(
 			function(){
@@ -205,7 +250,9 @@ exports.GitRepositoryExplorer = (function() {
 	
 	// Git status
 	
-	GitRepositoryExplorer.prototype.displayStatus = function(repository, statusLocation){
+	GitRepositoryExplorer.prototype.displayStatus = function(repository){
+		
+		var statusLocation = repository.StatusLocation;
 		
 		var statusSkeleton =
 		"<div class=\"displayTable\">" + 
@@ -277,7 +324,9 @@ exports.GitRepositoryExplorer = (function() {
 		return deferred;
 	};
 		
-	GitRepositoryExplorer.prototype.displayBranches = function(branchLocation, repository, mode){
+	GitRepositoryExplorer.prototype.displayBranches = function(repository, mode){
+		
+		var branchLocation = repository.BranchLocation;
 		
 		var branchesSectionSkeleton = 
 		"<div class=\"displayTable\">" + 
@@ -294,8 +343,7 @@ exports.GitRepositoryExplorer = (function() {
 			"</div>" +
 			"</list>" +
 			"</section>" +
-			
-			"<h2><a href=\"/git/git-repository.html#" + branchLocation + "\">See all branches</a></h2>" +			
+			(mode === "full" ? "" : ("<h2><a href=\"/git/git-repository.html#" + branchLocation + "\">See all branches</a></h2>")) +		
 			"<section class=\"extension-settings-content\">" +
 			"<div class=\"extension-settings\">" +
 				"<list id=\"branchNode\" class=\"extension-settings-list\">" +
@@ -321,7 +369,7 @@ exports.GitRepositoryExplorer = (function() {
 				that.decorateBranches(branches).then(
 					function(){
 						dojo.empty("branchNode");
-						for(var i=0; (i<branches.length && i<5);i++){
+						for(var i=0; (i<branches.length && (i<5 || mode === "full"));i++){
 							branches[i].ParentLocation = branchLocation;
 							that.renderBranch(branches[i]);
 						}
@@ -354,7 +402,9 @@ exports.GitRepositoryExplorer = (function() {
 	
 	// Git remote branches
 	
-	GitRepositoryExplorer.prototype.displayRemoteBranches = function(remoteLocation, repository, mode){
+	GitRepositoryExplorer.prototype.displayRemoteBranches = function(repository, mode){
+		
+		var remoteLocation = repository.RemoteLocation;
 		
 		var branchesSectionSkeleton = 
 		"<div class=\"displayTable\">" + 
@@ -391,6 +441,12 @@ exports.GitRepositoryExplorer = (function() {
 			function(resp){
 				var remotes = resp.Children;
 				dojo.empty("remoteBranchNode");
+				
+				if (remotes.length === 0){
+					that.renderNoRemoteBranch();
+					return;
+				}
+				
 				that.displayRemoteBranches2(remotes, repository);
 			}, function(error){
 				
@@ -407,7 +463,7 @@ exports.GitRepositoryExplorer = (function() {
 			this.registry.getService("orion.git.provider").getGitRemote(remotes[0].Location).then(
 				function(resp){
 					var remoteBranches = resp.Children;
-					for(var i=0; (i<remoteBranches.length && i<5);i++){
+					for(var i=0; (i<remoteBranches.length);i++){
 						remoteBranches[i].Repository = repository;
 						that.renderRemoteBranch(remoteBranches[i]);
 					}
@@ -421,6 +477,19 @@ exports.GitRepositoryExplorer = (function() {
 		}
 		
 		return deferred;
+	};
+	
+	GitRepositoryExplorer.prototype.renderNoRemoteBranch = function(){
+		var extensionListItemCollapsed = dojo.create( "div", { "class":"extension-list-item-collaped" }, dojo.byId("remoteBranchNode") );
+		var extensionListItem = dojo.create( "div", { "class":"vbox extension-list-item" }, extensionListItemCollapsed );
+		var horizontalBox = dojo.create( "div", { "class":"hbox" }, extensionListItem );
+		
+		var detailsView = dojo.create( "div", { "class":"vbox stretch details-view"}, horizontalBox );
+		var title = dojo.create( "span", { "class":"extension-title", innerHTML: "No remote branches."}, detailsView );
+		dojo.create( "div", null, detailsView );
+		
+//		var description = dojo.create( "span", { "class":"extension-description", 
+//			innerHTML: "You have no outgoing and incoming commits."}, detailsView );	
 	};
 		
 	GitRepositoryExplorer.prototype.renderRemoteBranch = function(remoteBranch){
@@ -610,24 +679,25 @@ exports.GitRepositoryExplorer = (function() {
 		return deferred;
 	};
 	
-	GitRepositoryExplorer.prototype.displayTags = function(tagLocation, repository, mode){
+	GitRepositoryExplorer.prototype.displayTags = function(repository, mode){
+		
+		var tagLocation = repository.TagLocation;
 		
 		var tagsSectionSkeleton = 
 		"<div class=\"displayTable\">" + 
 			"<section class=\"extension-settings-content\">" +
 			"<div class=\"extension-settings\">" +
 			"<list class=\"extension-settings-list\">" +
-			"<div class=\"vbox extension-list-item\">" +
-			"<div class=\"hbox\">" +
-			"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Tags (5 most recent)</h1></div>"+
-			"<div id=\"tagSectionActionsArea\" class=\"pageActions\"></div>" +
-			"</div>" +
-			"</div>" +
+				"<div class=\"vbox extension-list-item\">" +
+					"<div class=\"hbox\">" +
+						"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Tags" + (mode === "full" ? "" : " (5 most recent)") + "</h1></div>"+
+						"<div id=\"tagSectionActionsArea\" class=\"pageActions\"></div>" +
+					"</div>" +
+				"</div>" +
 			"</list>" +
 			"</div>" +
 			"</section>" +
-	
-			"<h2><a href=\"/git/git-repository.html#" + tagLocation + "\">See all tags</a></h2>" +
+			(mode === "full" ? "" : ("<h2 id=\"tagSubHeader\"><a href=\"/git/git-repository.html#" + tagLocation + "\">See all tags</a></h2>")) +
 			"<section class=\"extension-settings-content\">" +
 			"<div class=\"extension-settings\">" +
 				"<list id=\"tagNode\" class=\"extension-settings-list\">" +
@@ -649,6 +719,13 @@ exports.GitRepositoryExplorer = (function() {
 				var tags = resp.Children.slice(0, 5);
 				if (mode === 'full')
 					tags = resp.Children;
+				
+				if (tags.length === 0) {
+					dojo.empty("tagNode");
+					that.renderNoTag();
+					dojo.empty("tagSubHeader");
+					return;
+				}
 					
 				that.decorateTags(tags).then(
 					function(){
@@ -663,6 +740,19 @@ exports.GitRepositoryExplorer = (function() {
 				
 			}
 		);
+	};
+	
+	GitRepositoryExplorer.prototype.renderNoTag = function(){
+		var extensionListItemCollapsed = dojo.create( "div", { "class":"extension-list-item-collaped" }, dojo.byId("tagNode") );
+		var extensionListItem = dojo.create( "div", { "class":"vbox extension-list-item" }, extensionListItemCollapsed );
+		var horizontalBox = dojo.create( "div", { "class":"hbox" }, extensionListItem );
+		
+		var detailsView = dojo.create( "div", { "class":"vbox stretch details-view"}, horizontalBox );
+		var title = dojo.create( "span", { "class":"extension-title", innerHTML: "No tags."}, detailsView );
+		dojo.create( "div", null, detailsView );
+		
+//		var description = dojo.create( "span", { "class":"extension-description", 
+//			innerHTML: "You have no outgoing and incoming commits."}, detailsView );	
 	};
 		
 	GitRepositoryExplorer.prototype.renderTag = function(tag){
