@@ -189,7 +189,7 @@ exports.EditorCommandFactory = (function() {
 						id: info.name,
 						callback: dojo.hitch(editor, function(data) {
 							// command service will provide editor parameter but editor widget callback will not
-							editor = data.items || this;
+							editor = data ? data.items || this : this;
 							var selection = editor.getSelection();
 							var model = editor.getModel();
 							var text = model.getText();
@@ -203,7 +203,7 @@ exports.EditorCommandFactory = (function() {
 								} else {
 									if (typeof result === 'string') {
 										editor.setText(result, selection.start, selection.end);
-										editor.setSelection(selection.start, selection.end);
+										editor.setSelection(selection.start, selection.start + result.length);
 										editor.getTextView().focus();
 									}
 								}
