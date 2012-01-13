@@ -725,10 +725,10 @@ exports.GitRepositoryExplorer = (function() {
 			"<h1>Tags" + (mode === "full" ? "" : " (5 most recent)") + "</h1>" +
 			(mode === "full" ? "" : ("<h2 id=\"tagSubHeader\"><a href=\"/git/git-repository.html#" + tagLocation + "\">See all tags</a></h2>")) +
 			"<section class=\"extension-settings-content\">" +
-			"<div class=\"extension-settings\">" +
-				"<list id=\"tagNode\" class=\"extension-settings-list\">" +
-				"</list>" +
-			"</div>" + 
+				"<div class=\"extension-settings\">" +
+					"<list id=\"tagNode\" class=\"extension-settings-list\">" +
+					"</list>" +
+				"</div>" + 
 			"</section>" + 
 		"</div>";
 		
@@ -740,7 +740,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.empty("tagNode");
 		dojo.byId("tagNode").innerHTML = "Loading...";
 		
-		this.registry.getService("orion.git.provider").getGitBranch(tagLocation).then(
+		this.registry.getService("orion.git.provider").getGitBranch(tagLocation + (mode === "full" ? "" : "?commits=1&page=1&pageSize=5")).then(
 			function(resp){
 				var tags = resp.Children.slice(0, 5);
 				if (mode === 'full')
@@ -752,18 +752,24 @@ exports.GitRepositoryExplorer = (function() {
 					dojo.empty("tagSubHeader");
 					return;
 				}
-					
-				that.decorateTags(tags).then(
-					function(){
-						dojo.empty("tagNode");
-						for(var i=0; i<tags.length ;i++){
-							tags[i].Repository = repository;
-							that.renderTag(tags[i]);
-						};
-					}
-				);
-			}, function(error){
 				
+				dojo.empty("tagNode");
+				for(var i=0; i<tags.length ;i++){
+					tags[i].Repository = repository;
+					that.renderTag(tags[i]);
+				};
+					
+//				that.decorateTags(tags).then(
+//					function(){
+//						dojo.empty("tagNode");
+//						for(var i=0; i<tags.length ;i++){
+//							tags[i].Repository = repository;
+//							that.renderTag(tags[i]);
+//						};
+//					}
+//				);
+			}, function(error){
+				that.handleError(error, that.registry);
 			}
 		);
 	};
@@ -794,10 +800,13 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", null, detailsView );
 		var description = dojo.create( "span", { "class":"extension-description"}, detailsView );
 		
-		link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + tag.Commit.Location + "?page=1&pageSize=1"}, description);
-		dojo.place(document.createTextNode(tag.Commit.Message), link);	
-		dojo.place(document.createTextNode(" by " + tag.Commit.AuthorName + " on " + 
-			dojo.date.locale.format(new Date(tag.Commit.Time), {formatLength: "short"})), description, "last");
+		if (tag.Commit){
+			var commit = tag.Commit.Children[0];
+			link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, description);
+			dojo.place(document.createTextNode(commit.Message), link);	
+			dojo.place(document.createTextNode(" by " + commit.AuthorName + " on " + 
+				dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})), description, "last");
+		}
 
 		var actionsArea = dojo.create( "div", {"id":"tagActionsArea"}, horizontalBox );
 		this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", tag, this, "button", false);	
