@@ -148,14 +148,17 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			},
 			loadWorkspace: function(location) {
 				var d = new dojo.Deferred();
-				d.resolve({
-					Directory: true, 
-					Length: 0, 
-					LocalTimeStamp: 0,
-					Name: "File Servers",
-					Location: "/", 
-					Children: _fileSystemsRoots
-				});
+				window.setTimeout(function() {
+					d.resolve({
+						Directory: true, 
+						Length: 0, 
+						LocalTimeStamp: 0,
+						Name: "File Servers",
+						Location: "/", 
+						Children: _fileSystemsRoots,
+						ChildrenLocation: "/"
+					});
+				}, 100);
 				return d;
 			},
 			search: _noMatch,

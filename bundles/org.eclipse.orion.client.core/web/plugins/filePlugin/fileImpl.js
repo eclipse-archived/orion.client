@@ -35,6 +35,9 @@ eclipse.FileServiceImpl= (function() {
 		 * @return A deferred that will provide the array of child objects when complete
 		 */
 		fetchChildren: function(location) {
+			if (location===fileBase) {
+				return this.loadWorkspace(location).then(function(jsondata) {return jsondata.Children || [];});
+			}
 			// console.log("get children");
 			return dojo.xhrGet({
 				url: location,
