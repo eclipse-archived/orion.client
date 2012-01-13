@@ -68,6 +68,7 @@ mBootstrap.startup().then(function(core) {
 	commandService.registerCommandContribution("eclipse.orion.git.merge", 1000);
 	commandService.registerCommandContribution("eclipse.orion.git.rebase", 1000);
 	commandService.registerCommandContribution("eclipse.orion.git.resetIndex", 1000);
+	commandService.registerCommandContribution("eclipse.removeRemote", 1000);
 	
 	// render commands
 	mGitCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});

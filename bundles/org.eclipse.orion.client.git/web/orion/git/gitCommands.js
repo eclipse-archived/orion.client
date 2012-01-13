@@ -418,7 +418,14 @@ var exports = {};
 				var item = data.items;
 				var dialog = new orion.git.widgets.AddRemoteDialog({
 					func : function(remote, remoteURI){
-						serviceRegistry.getService("orion.git.provider").addRemote(item.Location, remote, remoteURI).then(function() {
+						var remoteLocation;
+						if (item.Type === "Clone") {
+							remoteLocation = item.RemoteLocation;
+						} else {
+							remoteLocation = item.Location;
+						}
+						
+						serviceRegistry.getService("orion.git.provider").addRemote(remoteLocation, remote, remoteURI).then(function() {
 							dojo.hitch(explorer, explorer.changedItem)(item);
 						}, displayErrorOnStatus);
 					}
@@ -427,10 +434,11 @@ var exports = {};
 				dialog.show();
 			},
 			visibleWhen: function(item) {
-				return item.GroupNode && item.Name === "Remotes";
+				return (item.GroupNode && item.Name === "Remotes") ||  (item.Type === "Clone" && explorer.parentId === "artifacts");
 			}
 		});
 		commandService.addCommand(addRemoteCommand, "object");
+		commandService.addCommand(addRemoteCommand, "dom");
 
 		var removeRemoteCommand = new mCommands.Command({
 			name: "Delete", // "Delete Remote",
