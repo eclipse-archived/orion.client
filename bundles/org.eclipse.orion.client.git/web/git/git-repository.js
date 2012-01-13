@@ -47,6 +47,10 @@ mBootstrap.startup().then(function(core) {
 	mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
 	mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient);
 
+	commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
+	commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup", false, null, new mCommands.URLBinding("cloneGitRepository", "url"));
+	commandService.registerCommandContribution("eclipse.initGitRepository", 101, "pageActions", "eclipse.gitGroup");
+	
 	// define the command contributions - where things appear, first the groups
 	
 	// object contributions
@@ -65,11 +69,16 @@ mBootstrap.startup().then(function(core) {
 	commandService.registerCommandContribution("eclipse.orion.git.rebase", 1000);
 	commandService.registerCommandContribution("eclipse.orion.git.resetIndex", 1000);
 	
-	if (dojo.hash())
-		explorer.displayRepository(dojo.hash());
-	else
-		fileClient.loadWorkspace().then(
-			function(workspace){
+	// render commands
+	mGitCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
+	
+	
+	fileClient.loadWorkspace().then(
+		function(workspace){
+			explorer.setDefaultPath(workspace.Location);
+			if (dojo.hash()) {
+				explorer.displayRepository(dojo.hash());
+			} else {
 				var path = workspace.Location;
 				var relativePath = mUtil.makeRelative(path);
 				
@@ -78,16 +87,18 @@ mBootstrap.startup().then(function(core) {
 				gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
 				
 				explorer.displayRepository(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath);
-			}	
-		);	
+			}
+		}	
+	);	
 	
 	//every time the user manually changes the hash, we need to load the workspace with that name
 	dojo.subscribe("/dojo/hashchange", explorer, function() {
-		if (dojo.hash())
-			explorer.displayRepository(dojo.hash());
-		else
-			fileClient.loadWorkspace().then(
-				function(workspace){
+		fileClient.loadWorkspace().then(
+			function(workspace){
+				explorer.setDefaultPath(workspace.Location);
+				if (dojo.hash()) {
+					explorer.displayRepository(dojo.hash());
+				} else {
 					var path = workspace.Location;
 					var relativePath = mUtil.makeRelative(path);
 					
@@ -96,8 +107,9 @@ mBootstrap.startup().then(function(core) {
 					gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
 					
 					explorer.displayRepository(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath);
-				}	
-			);	
+				}
+			}	
+		);	
 	});
 
 //	makeRightPane(explorer);
