@@ -406,28 +406,39 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var remoteLocation = repository.RemoteLocation;
 		
+//		var branchesSectionSkeleton = 
+//		"<div class=\"displayTable\">" + 
+//			
+//			"<section class=\"extension-settings-content\">" +
+//			"<div class=\"extension-settings\">" +
+//			"<list class=\"extension-settings-list\">" +
+//			"<div class=\"vbox extension-list-item\">" +
+//			"<div class=\"hbox\">" +
+//			"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Remote Branches</h1></div>"+
+//			"<div id=\"remoteBranchSectionActionsArea\" class=\"pageActions\"></div>" +
+//			"</div>" +
+//			"</div>" +
+//			"</div>" +
+//			"</list>" +
+//			"</section>" +		
+//			"<section class=\"extension-settings-content\">" +
+//			"<div class=\"extension-settings\">" +
+//				"<list id=\"remoteBranchNode\" class=\"extension-settings-list\">" +
+//				"</list>" +
+//			"</div>" + 
+//			"</section>" + 
+//		"</div>";
+		
 		var branchesSectionSkeleton = 
-		"<div class=\"displayTable\">" + 
-			
-			"<section class=\"extension-settings-content\">" +
-			"<div class=\"extension-settings\">" +
-			"<list class=\"extension-settings-list\">" +
-			"<div class=\"vbox extension-list-item\">" +
-			"<div class=\"hbox\">" +
-			"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Remote Branches</h1></div>"+
-			"<div id=\"remoteBranchSectionActionsArea\" class=\"pageActions\"></div>" +
-			"</div>" +
-			"</div>" +
-			"</div>" +
-			"</list>" +
-			"</section>" +		
-			"<section class=\"extension-settings-content\">" +
-			"<div class=\"extension-settings\">" +
-				"<list id=\"remoteBranchNode\" class=\"extension-settings-list\">" +
-				"</list>" +
-			"</div>" + 
-			"</section>" + 
-		"</div>";
+			"<div class=\"displayTable\">" + 
+				"<h1>Remote Branches</h1>" +
+				"<section class=\"extension-settings-content\">" +
+					"<div class=\"extension-settings\">" +
+						"<list id=\"remoteBranchNode\" class=\"extension-settings-list\">" +
+						"</list>" +
+					"</div>" + 
+				"</section>" + 
+			"</div>";
 		
 		var parentNode = dojo.byId("mainNode");
 		dojo.place(branchesSectionSkeleton, parentNode);
@@ -523,7 +534,7 @@ exports.GitRepositoryExplorer = (function() {
 			"<list class=\"extension-settings-list\">" +
 			"<div class=\"vbox extension-list-item\">" +
 			"<div class=\"hbox\">" +
-			"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Commits</h1></div>"+
+			"<div class=\"vbox stretch details-view\"><h1 id=\"commitHeader\" style=\"padding-top: 4px; border-bottom: none;\">Commits</h1></div>"+
 			"<div id=\"commitSectionActionsArea\" class=\"pageActions\"></div>" +
 			"</div>" +
 			"</div>" +
@@ -558,6 +569,8 @@ exports.GitRepositoryExplorer = (function() {
 						break;
 					}
 				}
+				
+				dojo.byId("commitHeader").innerHTML = "Commits for \"" + currentBranch.Name + "\" branch";
 				
 				var h2 = dojo.byId("commitsSectionSeeMore");
 				var seeMoreLink = dojo.create("a", {className: "navlinkonpage", href: "/git/git-log.html#" + currentBranch.CommitLocation + "?page=1"}, h2);
@@ -683,20 +696,32 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var tagLocation = repository.TagLocation;
 		
+//		var tagsSectionSkeleton = 
+//		"<div class=\"displayTable\">" + 
+//			"<section class=\"extension-settings-content\">" +
+//			"<div class=\"extension-settings\">" +
+//			"<list class=\"extension-settings-list\">" +
+//				"<div class=\"vbox extension-list-item\">" +
+//					"<div class=\"hbox\">" +
+//						"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Tags" + (mode === "full" ? "" : " (5 most recent)") + "</h1></div>"+
+//						"<div id=\"tagSectionActionsArea\" class=\"pageActions\"></div>" +
+//					"</div>" +
+//				"</div>" +
+//			"</list>" +
+//			"</div>" +
+//			"</section>" +
+//			(mode === "full" ? "" : ("<h2 id=\"tagSubHeader\"><a href=\"/git/git-repository.html#" + tagLocation + "\">See all tags</a></h2>")) +
+//			"<section class=\"extension-settings-content\">" +
+//			"<div class=\"extension-settings\">" +
+//				"<list id=\"tagNode\" class=\"extension-settings-list\">" +
+//				"</list>" +
+//			"</div>" + 
+//			"</section>" + 
+//		"</div>";
+		
 		var tagsSectionSkeleton = 
 		"<div class=\"displayTable\">" + 
-			"<section class=\"extension-settings-content\">" +
-			"<div class=\"extension-settings\">" +
-			"<list class=\"extension-settings-list\">" +
-				"<div class=\"vbox extension-list-item\">" +
-					"<div class=\"hbox\">" +
-						"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Tags" + (mode === "full" ? "" : " (5 most recent)") + "</h1></div>"+
-						"<div id=\"tagSectionActionsArea\" class=\"pageActions\"></div>" +
-					"</div>" +
-				"</div>" +
-			"</list>" +
-			"</div>" +
-			"</section>" +
+			"<h1>Tags" + (mode === "full" ? "" : " (5 most recent)") + "</h1>" +
 			(mode === "full" ? "" : ("<h2 id=\"tagSubHeader\"><a href=\"/git/git-repository.html#" + tagLocation + "\">See all tags</a></h2>")) +
 			"<section class=\"extension-settings-content\">" +
 			"<div class=\"extension-settings\">" +
