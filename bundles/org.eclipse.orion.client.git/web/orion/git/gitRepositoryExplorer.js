@@ -11,7 +11,7 @@
 
 /*global define console document */
 
-define(['dojo', 'orion/explorer', 'orion/util'], function(dojo, mExplorer, mUtil) {
+define(['require', 'dojo', 'orion/explorer', 'orion/util'], function(require, dojo, mExplorer, mUtil) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -30,6 +30,43 @@ exports.GitRepositoryExplorer = (function() {
 		this.selectionToolsId = selectionToolsId;
 		this.checkbox = false;
 	}
+	
+	GitRepositoryExplorer.prototype.handleError = function(error, registry) {
+		var display = [];
+		display.Severity = "Error";
+		display.HTML = false;
+		try {
+			var resp = JSON.parse(error.responseText);
+			display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+		} catch (Exception) {
+			display.Message = error.message;
+		}
+		registry.getService("orion.page.message").setProgressResult(display);
+	}
+	
+	GitRepositoryExplorer.prototype.setDefaultPath = function(defaultPath){
+		this.defaultPath = defaultPath;
+	};
+	
+	GitRepositoryExplorer.prototype.changedItem = function(parent, children) {
+		console.info("item changed: " + parent + " " + children);
+		this.redisplayClonesList();
+	};
+	
+	GitRepositoryExplorer.prototype.redisplayClonesList = function(){
+		if (dojo.hash()) {
+			this.displayRepository(dojo.hash());
+		} else {
+			var path = this.defaultPath;
+			var relativePath = mUtil.makeRelative(path);
+			
+			//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
+			var gitapiCloneUrl = require.toUrl("gitapi/clone._");
+			gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
+			
+			this.displayRepository(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath);
+		};
+	};
 	
 	GitRepositoryExplorer.prototype.displayRepository = function(location){
 		var that = this;
@@ -67,10 +104,7 @@ exports.GitRepositoryExplorer = (function() {
 					that.displayTags(repository.TagLocation, repository);
 					
 					that.registry.getService("orion.page.command").registerCommandContribution("eclipse.addBranch2", 100, "branchSectionActionsArea");
-					that.registry.getService("orion.page.command").renderCommands(dojo.byId("branchSectionActionsArea"), "dom", repository, this, "tool", false); 
-					
-	//				that.registry.getService("orion.page.command").registerCommandContribution("eclipse.addTag", 100, "tagSectionActionsArea");
-	//				that.registry.getService("orion.page.command").renderCommands(dojo.byId("tagSectionActionsArea"), "dom", {}, this, "tool", false);  
+					that.registry.getService("orion.page.command").renderCommands(dojo.byId("branchSectionActionsArea"), "dom", repository, this, "tool", false);
 				} else if (resp.Children[0].Type === "Clone"){
 					that.displayRepositories(resp.Children, true);
 				} else if (resp.Children[0].Type === "Branch"){
@@ -79,7 +113,7 @@ exports.GitRepositoryExplorer = (function() {
 						function(resp){
 							that.displayRepositories(resp.Children, true);
 							that.displayBranches(location, null, "full");
-							that.displayRemoteBranches(resp.Children[0].RemoteLocation, "full");
+							that.displayRemoteBranches(resp.Children[0].RemoteLocation, resp.Children[0], "full");
 						}, function () {
 							
 						}
@@ -89,7 +123,7 @@ exports.GitRepositoryExplorer = (function() {
 					that.registry.getService("orion.git.provider").getGitClone(tags.Children[0].CloneLocation).then(
 						function(resp){
 							that.displayRepositories(resp.Children, true);
-							that.displayTags(location, null, "full");
+							that.displayTags(location, resp.Children[0], "full");
 						}, function () {
 							
 						}
@@ -98,7 +132,7 @@ exports.GitRepositoryExplorer = (function() {
 				
 				progressService.setProgressMessage("");
 			}, function(error){
-				
+				that.handleError(error, that.registry);
 			}
 		);
 	};
@@ -310,8 +344,8 @@ exports.GitRepositoryExplorer = (function() {
 		var title = dojo.create( "span", { "class":"extension-title", innerHTML: branch.Name + (branch.Current ? " (Active)" : "") }, detailsView );
 		dojo.create( "div", null, detailsView );
 		var description = dojo.create( "span", { "class":"extension-description", 
-			innerHTML: "tracks " + branch.RemoteLocation[0].Children[0].Name 
-			+ ", last modified " + dojo.date.locale.format(new Date(branch.Commit.Time), {formatLength: "short"})
+			innerHTML: (branch.RemoteLocation[0] ? ("tracks " + branch.RemoteLocation[0].Children[0].Name + ", ") : "") 
+			+ "last modified " + dojo.date.locale.format(new Date(branch.Commit.Time), {formatLength: "short"})
 			+ " by " + branch.Commit.AuthorName}, detailsView );
 		
 		var actionsArea = dojo.create( "div", {"id":"branchActionsArea"}, horizontalBox );
@@ -320,7 +354,7 @@ exports.GitRepositoryExplorer = (function() {
 	
 	// Git remote branches
 	
-	GitRepositoryExplorer.prototype.displayRemoteBranches = function(remoteLocation, mode){
+	GitRepositoryExplorer.prototype.displayRemoteBranches = function(remoteLocation, repository, mode){
 		
 		var branchesSectionSkeleton = 
 		"<div class=\"displayTable\">" + 
@@ -357,14 +391,14 @@ exports.GitRepositoryExplorer = (function() {
 			function(resp){
 				var remotes = resp.Children;
 				dojo.empty("remoteBranchNode");
-				that.displayRemoteBranches2(remotes);
+				that.displayRemoteBranches2(remotes, repository);
 			}, function(error){
 				
 			}
 		);
 	};
 	
-	GitRepositoryExplorer.prototype.displayRemoteBranches2 = function(remotes, deferred){
+	GitRepositoryExplorer.prototype.displayRemoteBranches2 = function(remotes, repository, deferred){
 		var that = this;
 		if (deferred == null)
 			deferred = new dojo.Deferred();
@@ -374,9 +408,10 @@ exports.GitRepositoryExplorer = (function() {
 				function(resp){
 					var remoteBranches = resp.Children;
 					for(var i=0; (i<remoteBranches.length && i<5);i++){
+						remoteBranches[i].Repository = repository;
 						that.renderRemoteBranch(remoteBranches[i]);
 					}
-					that.displayRemoteBranches2(remotes.slice(1), deferred);
+					that.displayRemoteBranches2(remotes.slice(1), repository, deferred);
 				}, function () {
 					
 				}
@@ -459,33 +494,63 @@ exports.GitRepositoryExplorer = (function() {
 				var seeMoreLink = dojo.create("a", {className: "navlinkonpage", href: "/git/git-log.html#" + currentBranch.CommitLocation + "?page=1"}, h2);
 				dojo.place(document.createTextNode("See the full log"), seeMoreLink);
 				
-				that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.fetch", 100, "commitSectionActionsArea");
-				that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.merge", 100, "commitSectionActionsArea");
-				that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.rebase", 100, "commitSectionActionsArea");
-				that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.resetIndex", 100, "commitSectionActionsArea");
-				that.registry.getService("orion.page.command").renderCommands(dojo.byId("commitSectionActionsArea"), "dom", currentBranch.RemoteLocation[0].Children[0], that, "button", false); 
+				if (currentBranch.RemoteLocation[0]){
+					that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.fetch", 100, "commitSectionActionsArea");
+					that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.merge", 100, "commitSectionActionsArea");
+					that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.rebase", 100, "commitSectionActionsArea");
+					that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.resetIndex", 100, "commitSectionActionsArea");
+					that.registry.getService("orion.page.command").renderCommands(dojo.byId("commitSectionActionsArea"), "dom", currentBranch.RemoteLocation[0].Children[0], that, "button", false); 
+				}
 				
 				that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.push", 100, "commitSectionActionsArea");
 				that.registry.getService("orion.page.command").renderCommands(dojo.byId("commitSectionActionsArea"), "dom", currentBranch, that, "button", false); 
 				
-				that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD", "bla",
+				
+				if (currentBranch.RemoteLocation[0] == null){
+					dojo.empty("commitNode");
+					that.renderNoCommit();
+					return;
+				};
+				
+				that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD", "",
 					function(resp){
 						dojo.empty("commitNode");
+						
+						var anyCommits = false;
+						
 						for (var i=0; i<resp.Children.length; i++){
+							anyCommits = true;
 							that.renderCommit(resp.Children[i], true);
 						}
 						
 						that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id, "", 
-							function(resp){
+							function(resp){	
 								for (var i=0; i<resp.Children.length; i++){
+									anyCommits = true;
 									that.renderCommit(resp.Children[i], false);
 								}
+								
+								if (!anyCommits)
+									that.renderNoCommit();
 							}
 						);	
 					}
 				);
 			}
 		);
+	};
+	
+	GitRepositoryExplorer.prototype.renderNoCommit = function(){
+		var extensionListItemCollapsed = dojo.create( "div", { "class":"extension-list-item-collaped" }, dojo.byId("commitNode") );
+		var extensionListItem = dojo.create( "div", { "class":"vbox extension-list-item" }, extensionListItemCollapsed );
+		var horizontalBox = dojo.create( "div", { "class":"hbox" }, extensionListItem );
+		
+		var detailsView = dojo.create( "div", { "class":"vbox stretch details-view"}, horizontalBox );
+		var title = dojo.create( "span", { "class":"extension-title", innerHTML: "The branch is up to date."}, detailsView );
+		dojo.create( "div", null, detailsView );
+		
+		var description = dojo.create( "span", { "class":"extension-description", 
+			innerHTML: "You have no outgoing and incoming commits."}, detailsView );	
 	};
 		
 	GitRepositoryExplorer.prototype.renderCommit = function(commit, outgoing){

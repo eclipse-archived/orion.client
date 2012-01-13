@@ -241,6 +241,9 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				function getBranchItem(){
+					if (item.Repository)
+						return item.Repository.BranchLocation;
+					
 					for(var child_no in item.parent.parent.children){
 						if(item.parent.parent.children[child_no].Name==="Branches"){
 							return item.parent.parent.children[child_no];
@@ -254,15 +257,14 @@ var exports = {};
 						return;
 					}
 								
+					var repositoryLocation;
 					if (item.Repository != null) {
-						serviceRegistry.getService("orion.git.provider").checkoutTag(item.Repository.Location, item.Name, name).then(function() {
-							dojo.hitch(explorer, explorer.displayBranches)(item.Repository.BranchLocation);
-						}, displayErrorOnStatus);
-						return;
+						repositoryLocation = item.Repository.Location;
+					} else {
+						repositoryLocation = item.parent.parent.Location
 					}
 					
-					console.info(item.parent.parent.Location + " " + item.Name + " " + name);
-					serviceRegistry.getService("orion.git.provider").checkoutTag(item.parent.parent.Location, item.Name, name).then(function() {
+					serviceRegistry.getService("orion.git.provider").checkoutTag(repositoryLocation, item.Name, name).then(function() {
 						dojo.hitch(explorer, explorer.changedItem)(getBranchItem());
 					}, displayErrorOnStatus);
 				}, undefined, true);
@@ -295,11 +297,18 @@ var exports = {};
 						 displayErrorOnStatus
 					);
 				} else {
-					service.addBranch(item.parent.parent.BranchLocation, null, item.Name).then(
+					var branchLocation;
+					if (item.Repository != null) {
+						branchLocation = item.Repository.BranchLocation
+					} else {
+						branchLocation = item.parent.parent.BranchLocation;
+					}
+					
+					service.addBranch(branchLocation, null, item.Name).then(
 						function(branch){
 							service.checkoutBranch(branch.CloneLocation, branch.Name).then(
 								function(){
-									dojo.hitch(explorer, explorer.changedItem)(item.parent.parent.parent);
+									dojo.hitch(explorer, explorer.changedItem)(item.Repository ? item.Repository.BranchLocation : item.parent.parent.parent);
 									progressService.setProgressResult("Ok");
 								},
 								displayErrorOnStatus
@@ -338,28 +347,6 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(addBranchCommand, "object");
-		
-		var addBranchCommand = new mCommands.Command({
-			name: "New Branch",
-			tooltip: "Add a new local branch to the repository",
-			imageClass: "core-sprite-add",
-			id: "eclipse.addBranch2",
-			parameters: branchNameParameters,
-			callback: function(data) {
-				exports.getNewItemName(data.items, explorer, false, data.domNode.id, "Branch name", function(name) {
-					if (!name && name == "") {
-						return;
-					}
-					serviceRegistry.getService("orion.git.provider").addBranch(data.items.BranchLocation, name).then(function() {
-						dojo.hitch(explorer, explorer.displayBranches)(data.items.BranchLocation, data.items);
-					}, displayErrorOnStatus);
-				});
-			},
-			visibleWhen: function(item) {
-				return item.Type === "Clone";
-			}
-		});
-		commandService.addCommand(addBranchCommand, "dom");
 
 		var removeBranchCommand = new mCommands.Command({
 			name: "Delete", // "Delete Branch"
@@ -676,6 +663,7 @@ var exports = {};
 								if (item.Type === "Remote") {
 									dojo.hitch(explorer, explorer.changedItem)(item);
 								}
+								dojo.hitch(explorer, explorer.changedItem)(item);
 							}, displayErrorOnStatus);
 						}, func, "Fetch Git Repository");
 					});
@@ -789,6 +777,7 @@ var exports = {};
 							+ statusLocation + "\">Git Status page</a>.<span>";
 					}
 
+					dojo.hitch(explorer, explorer.changedItem)(item);
 					progressService.setProgressResult(display);
 				}, function (error) {
 						var display = [];
@@ -869,6 +858,7 @@ var exports = {};
 							+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
 							+ statusLocation +"\">Git Status page</a>.<span>";
 					} 
+					dojo.hitch(explorer, explorer.changedItem)(item);
 					serviceRegistry.getService("orion.page.message").setProgressResult(display);
 					}, 
 					displayErrorOnStatus
@@ -1189,6 +1179,7 @@ var exports = {};
 							display.Severity = "Info";
 							display.HTML = false;
 							display.Message = "Ok";
+							dojo.hitch(explorer, explorer.changedItem)(item);
 							progressService.setProgressResult(display);
 						}, function (error){
 							var display = {};
@@ -1713,7 +1704,7 @@ var exports = {};
 									dojo.hitch(explorer, explorer.redisplayClonesList)();
 								}
 							},
-							displayErrorOnStatus);
+							this.displayErrorOnStatus);
 				}
 				
 			}
