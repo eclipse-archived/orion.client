@@ -662,19 +662,19 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 	 * dependent modes have been registered with the Mirror before calling {@link #setMode}.</p>
 	 * </li>
 	 * 
-	 * @param {orion.textview.TextView} textView
-	 * @param {orion.textview.AnnotationModel} annotationModel
-	 * @param {orion.mirror.Mirror} codeMirror
+	 * @param {orion.textview.TextView} textView The TextView to provide style for.
+	 * @param {orion.mirror.Mirror} codeMirror The Mirror object to load modes from.
+	 * @param {orion.textview.AnnotationModel} [annotationModel]
 	 */
-	function CodeMirrorStyler(textView, annotationModel, codeMirror) {
-		this.init(textView, annotationModel, codeMirror);
+	function CodeMirrorStyler(textView, codeMirror, annotationModel) {
+		this.init(textView, codeMirror, annotationModel);
 	}
 
 	var LINESTYLE_OVERSHOOT = 20;
 
 	CodeMirrorStyler.prototype = /** @lends orion.mirror.CodeMirrorStyler.prototype */ {
 		/** @private */
-		init: function(textView, annotationModel, codeMirror) {
+		init: function(textView, codeMirror, annotationModel) {
 			this.textView = textView;
 			this.annotationModel = annotationModel;
 			this.modeApplier = new ModeApplier(textView.getModel(), codeMirror);
