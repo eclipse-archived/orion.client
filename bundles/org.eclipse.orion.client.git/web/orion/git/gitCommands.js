@@ -299,7 +299,7 @@ var exports = {};
 				} else {
 					var branchLocation;
 					if (item.Repository != null) {
-						branchLocation = item.Repository.BranchLocation
+						branchLocation = item.Repository.BranchLocation;
 					} else {
 						branchLocation = item.parent.parent.BranchLocation;
 					}
@@ -333,12 +333,22 @@ var exports = {};
 			id: "eclipse.addBranch",
 			parameters: branchNameParameters,
 			callback: function(data) {
-				exports.getNewItemName(data.items, explorer, false, data.domNode.id, "Branch name", function(name) {
+				var item = data.items;
+				
+				exports.getNewItemName(item, explorer, false, data.domNode.id, "Branch name", function(name) {
 					if (!name && name == "") {
 						return;
 					}
-					serviceRegistry.getService("orion.git.provider").addBranch(data.items.Location, name).then(function() {
-						dojo.hitch(explorer, explorer.changedItem)(data.items);
+					
+					var branchLocation;
+					if (item.Type === "Clone") {
+						branchLocation = item.BranchLocation;
+					} else {
+						branchLocation = item.Location;
+					}
+					
+					serviceRegistry.getService("orion.git.provider").addBranch(branchLocation, name).then(function() {
+						dojo.hitch(explorer, explorer.changedItem)(item);
 					}, displayErrorOnStatus);
 				});
 			},
