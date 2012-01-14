@@ -277,7 +277,7 @@ exports.ExplorerRenderer = (function() {
 				checkColumn.appendChild(check);
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 					var newValue = evt.target.checked ? false : true;
-					this.onCheck(tableRow, evt.target, newValue);
+					this.onCheck(tableRow, evt.target, newValue, true);
 				}));
 				return checkColumn;
 			}
@@ -287,14 +287,14 @@ exports.ExplorerRenderer = (function() {
 			return rowId + "selectedState";
 		},
 			
-		onCheck: function(tableRow, checkBox, checked){
+		onCheck: function(tableRow, checkBox, checked, manually){
 			checkBox.checked = checked;
 			if(this._highlightSelection && tableRow){
 				dojo.toggleClass(tableRow, "checkedRow", checked);
 			}
 			dojo.toggleClass(checkBox, "selectionCheckmarkChecked", checked);
 			if(this.onCheckedFunc){
-				this.onCheckedFunc(checkBox.itemId, checked);
+				this.onCheckedFunc(checkBox.itemId, checked, manually);
 			}
 			this._storeSelections();
 			if (this.explorer.selection) {
