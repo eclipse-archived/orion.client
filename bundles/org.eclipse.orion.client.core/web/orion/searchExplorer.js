@@ -127,9 +127,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 		this.currentDetailIndex = 0;
 		var currentDetailIndex = window.sessionStorage[this.queryObj.queryStr + "_search_result_currentDetailIndex"];
-		if (typeof currentDetailIndex=== "string") {
+		if (typeof currentDetailIndex === "string") {
 			if (currentDetailIndex.length > 0) {
 				this.currentDetailIndex= JSON.parse(currentDetailIndex);
+				if(this.currentDetailIndex === null || this.currentDetailIndex === undefined){
+					this.currentDetailIndex = 0;
+				}
 			} 
 		}
 	};
