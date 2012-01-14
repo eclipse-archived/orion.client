@@ -58,6 +58,13 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 			},
 			onScroll: function(event) {
 				self.cancel();
+			},
+			onMouseUp: function(event) {
+				// ignore the event if this is a click inside of the contentAssistPanel
+				// the click is handled by the accept function
+				if (event.event.target.parentElement !== self.contentAssistPanel) {
+					self.cancel();
+				}
 			}
 		};
 		this.init();
@@ -202,6 +209,7 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 					this.textView.removeEventListener("ModelChanging", this.contentAssistListener.onModelChanging);
 					this.textView.removeEventListener("ModelChanged", this.contentAssistListener.onModelChanged);
 					this.textView.removeEventListener("Scroll", this.contentAssistListener.onScroll);
+					this.textView.removeEventListener("MouseUp", this.contentAssistListener.onMouseUp);
 					this.listenerAdded = false;
 				}
 				this.active = false;
@@ -285,6 +293,7 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 							this.textView.addEventListener("ModelChanging", this.contentAssistListener.onModelChanging);
 							this.textView.addEventListener("ModelChanged", this.contentAssistListener.onModelChanged);
 							this.textView.addEventListener("Scroll", this.contentAssistListener.onScroll);
+							this.textView.addEventListener("MouseUp", this.contentAssistListener.onMouseUp);
 						}
 						this.listenerAdded = true;
 						this.contentAssistPanel.onclick = this.click.bind(this);
