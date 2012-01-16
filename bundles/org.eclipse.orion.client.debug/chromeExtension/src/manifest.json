@@ -1,0 +1,9 @@
+{
+	"name":"Orion Debug Extension for Chrome",
+	"version":"0.1",
+	"content_scripts":[{
+		"matches":["http://*/*", "file://*/*"],
+		"js":["debug.js"]
+	}],
+	"optional-permissions":["http://*/json", "file://*/json"]
+}

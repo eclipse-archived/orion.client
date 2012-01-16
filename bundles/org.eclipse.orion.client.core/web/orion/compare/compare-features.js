@@ -19,6 +19,8 @@ orion.TwoWayCompareUIFactory = (function() {
 		this._parentDivID = option.parentDivID;
 		this._commandSpanId = option.commandSpanId;
 		this._showTitle = option.showTitle;
+		this._leftTitle = option.leftTitle;
+		this._rightTitle = option.rightTitle;
 		this._showLineStatus = option.showLineStatus;
 	}	
 	TwoWayCompareUIFactory.prototype = {
@@ -42,7 +44,7 @@ orion.TwoWayCompareUIFactory = (function() {
 				td.id = this._commandSpanId; 
 				row.appendChild(td);
 				td.noWrap = true;
-				row.align = "right";
+				td.align = "right";
 				table.align = "right";
 			}
 			return table;
@@ -73,8 +75,8 @@ orion.TwoWayCompareUIFactory = (function() {
 			child.placeAt(parent);
 		},
 		
-		_createTileDiv: function(titleDivId, createCommandArea) {
-			var table = this._createNoWrapTextDiv(titleDivId , "Compare...", null, createCommandArea);
+		_createTileDiv: function(titleDivId, titleStr, createCommandArea) {
+			var table = this._createNoWrapTextDiv(titleDivId , titleStr ? titleStr: "Compare...", "left", createCommandArea);
 			var titleContainer = new dijit.layout.ContentPane({region: "top"});
 			dojo.addClass(titleContainer.domNode, 'titleContainer');
 			titleContainer.attr('content', table);
@@ -101,6 +103,13 @@ orion.TwoWayCompareUIFactory = (function() {
 			bc.startup();
 			return bc;
 		},
+				
+		_destroyDijitRegistry: function(id){
+			var dojitDiv = dijit.byId(id);
+			if(dojitDiv){
+				dojitDiv.destroyRecursive();
+			}
+		},
 		
 		_createLeftBorder:function(){
 			var bc = new dijit.layout.BorderContainer({region:"leading" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
@@ -108,9 +117,11 @@ orion.TwoWayCompareUIFactory = (function() {
 			
 			if(this._showTitle){
 				this._leftTitleDivId = this._parentDivID + "_left_title_id";
-				this._appendDomNode(bc , this._createTileDiv(this._leftTitleDivId));
+				this._destroyDijitRegistry(this._leftTitleDivId);
+				this._appendDomNode(bc , this._createTileDiv(this._leftTitleDivId, this._leftTitle, false));
 			}
 			this._leftEditorParentDivId = this._parentDivID + "_left_editor_id";
+			this._destroyDijitRegistry(this._leftEditorParentDivId);
 			this._appendDomNode(bc , this._createLeftEditorParentDiv(this._leftEditorParentDivId));
 
 			if(this._showLineStatus){
@@ -128,10 +139,11 @@ orion.TwoWayCompareUIFactory = (function() {
 			
 			if(this._showTitle){
 				this._rightTitleDivId = this._parentDivID + "_right_title_id";
-				this._appendDomNode(bc ,this._createTileDiv(this._rightTitleDivId, true));
+				this._appendDomNode(bc ,this._createTileDiv(this._rightTitleDivId, this._rightTitle, true));
 			}
 			
 			this._rightEditorParentDivId = this._parentDivID + "_right_editor_id";
+			this._destroyDijitRegistry(this._rightEditorParentDivId);
 			this._diffCanvasDivId = this._parentDivID + "_diff_canvas_id";
 			this._appendDomNode(bc , this._createRightEditorParentDiv(this._rightEditorParentDivId , this._diffCanvasDivId));
 

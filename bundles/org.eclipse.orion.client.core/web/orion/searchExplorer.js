@@ -72,7 +72,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	SearchResultModel.prototype.locationToIndex = function(location, setCurrentIndex){
 		var lookAt = this.indexedFileItems();
 		for(var i = 0 ; i < lookAt.length; i++){
-			if(lookAt[i].location == location){
+			if(lookAt[i].location === location){
 				if(setCurrentIndex){
 					this.currentFileIndex = i;
 				}
@@ -85,10 +85,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return 0;
 	};
 	
-	SearchResultModel.prototype.setCurrent = function(currentFileIndex, currentDetailIndex) {
+	SearchResultModel.prototype.setCurrent = function(currentFileIndex, currentDetailIndex, storeStatus) {
 		this.currentFileIndex = currentFileIndex;
 		this.currentDetailIndex = currentDetailIndex;
-		this.storeStatus();
+		if(storeStatus){
+			this.storeStatus();
+		}
 	};
 	
 	SearchResultModel.prototype.storeStatus = function() {
@@ -125,9 +127,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 		this.currentDetailIndex = 0;
 		var currentDetailIndex = window.sessionStorage[this.queryObj.queryStr + "_search_result_currentDetailIndex"];
-		if (typeof currentDetailIndex=== "string") {
+		if (typeof currentDetailIndex === "string") {
 			if (currentDetailIndex.length > 0) {
 				this.currentDetailIndex= JSON.parse(currentDetailIndex);
+				if(this.currentDetailIndex === null || this.currentDetailIndex === undefined){
+					this.currentDetailIndex = 0;
+				}
 			} 
 		}
 	};
@@ -320,7 +325,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				continue;
 			}
 			//Add the search result (file) as leaf node
-			var childNode = {parent: this._listRoot, type: "file", name: this._resultLocation[i].name, 
+			var childNode = {parent: this._listRoot, type: "file", name: this._resultLocation[i].name, ETag: this._resultLocation[i].metaData.ETag,
 					linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location, 
 					stale: (this._resultLocation[i].lastModified !== this._resultLocation[i].metaData.LocalTimeStamp) };
 			childNode.fullPathName = mSearchUtils.fullPathNameByMeta(this._resultLocation[i].metaData.Parents);
@@ -367,6 +372,87 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		
 	};
 	
+	
+	SearchResultModel.prototype.generateRepalceModel = function(replaceStr, modelList, index, onComplete){
+		var model = modelList[index];
+		if(!model || index === modelList.length){
+			onComplete(modelList);
+			return;
+		}
+		if(model.children){
+			this.generateNewContents(model, replaceStr);
+			this.generateRepalceModel(replaceStr, modelList, index+1, onComplete);
+		} else {
+			this.fileClient.read(model.location).then(
+				dojo.hitch(this, function(contents) {
+					this.searchWithinFile(model, contents);
+					this.generateNewContents(model, replaceStr);
+					this.generateRepalceModel(replaceStr, modelList, index+1, onComplete);
+				}),
+				dojo.hitch(this, function(error) {
+					console.error("Error loading file contents: " + error.message);
+					this.generateRepalceModel(replaceStr, modelList, index+1, onComplete);
+				})
+			);
+		}
+		
+	};
+	
+	SearchResultModel.prototype.matchesReplaced = function(model){
+		var matchesReplaced = 0;
+		if(model.children){
+			for(var j = 0; j < model.children.length; j++){
+				if(!(model.children[j].checked === false)){
+					matchesReplaced += model.children[j].matches.length;
+				}
+			}
+		}
+		return matchesReplaced;
+	};
+	
+	SearchResultModel.prototype.writeNewContent = function(modelList, reportList,  index, onComplete){
+		var model = modelList[index];
+		if(!model || index === modelList.length){
+			onComplete(modelList);
+			return;
+		}
+		var matchesReplaced = this.matchesReplaced(model);
+		if(matchesReplaced > 0){
+			var contents = model.newContents.join(this._lineDelimiter);
+			var etag = model.ETag;
+			var args = { "ETag" : etag };
+			this.fileClient.write(model.location, contents, args).then(
+					dojo.hitch(this, function(result) {
+						reportList.push({model: model, matchesReplaced: matchesReplaced, status: "pass" });
+						this.writeNewContent( modelList, reportList, index+1, onComplete);
+					}),
+					dojo.hitch(this, function(error) {
+						// expected error - HTTP 412 Precondition Failed 
+						// occurs when file is out of sync with the server
+						if (error.status === 412) {
+							var forceSave = confirm("Resource is out of sync with the server. Do you want to save it anyway?");
+							if (forceSave) {
+								// repeat save operation, but without ETag 
+								this.fileClient.write(model.location, contents).then(
+										dojo.hitch(this, function(result) {
+											reportList.push({model: model, matchesReplaced: matchesReplaced, status: "pass" });
+										}));
+							}
+							reportList.push({model: model, matchesReplaced: matchesReplaced, status: "warning" });
+						}
+						// unknown error
+						else {
+							error.log = true;
+							reportList.push({model: model, matchesReplaced: matchesReplaced, status: "failed" });
+						}
+						this.writeNewContent( modelList, reportList, index+1, onComplete);
+					})
+			);
+		} else {
+			this.writeNewContent( modelList, reportList, index+1, onComplete);
+		}
+		
+	};
 	
 	SearchResultModel.prototype.loadOneFileMetaData =  function(index, onComplete){
 		var item = this._resultLocation[index];
@@ -533,29 +619,43 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return result;
 	};
 	
-	SearchResultModel.prototype.generateNewContents = function( fileModelNode, replaceStr){
+	SearchResultModel.prototype.generateNewContents = function( fileModelNode, replaceStr, forceGenerate){
 		if(fileModelNode){
 			var fileContents = fileModelNode.contents;
-			fileModelNode.newContents = [];
+			var updating;
+			if(fileModelNode.newContents && !forceGenerate){
+				updating = true;
+			} else {
+				updating = false;
+				fileModelNode.newContents = [];
+			}
 			for(var i = 0; i < fileContents.length ; i++){
 				var lineStringOrigin = fileContents[i];
 				var changingLine = false;
+				var checked = true;
 				for(var j = 0; j < fileModelNode.children.length; j++){
 					var lnumber = fileModelNode.children[j].lineNumber - 1;
 					if(lnumber === i){
+						checked = fileModelNode.children[j].checked;
 						changingLine = true;
 						break;
 					}
 				}
 				if(changingLine){
 					var newStr;
-					if(this.queryObj.inFileQuery.wildCard){
+					if(checked === false){
+						newStr = lineStringOrigin;
+					} else if (this.queryObj.inFileQuery.wildCard){
 						newStr = mSearchUtils.replaceRegEx(lineStringOrigin, this.queryObj.inFileQuery.regExp, replaceStr);
 					} else {
 						newStr = mSearchUtils.replaceStringLiteral(lineStringOrigin, this.queryObj.inFileQuery.searchStr, replaceStr);
 					}
-					fileModelNode.newContents.push(newStr);
-				} else {
+					if(updating){
+						fileModelNode.newContents[i] = newStr;
+					} else {
+						fileModelNode.newContents.push(newStr);
+					}
+				} else if(!updating){
 					fileModelNode.newContents.push(lineStringOrigin);
 				}
 			}
@@ -586,12 +686,15 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					}
 				}
 			}
-			fileModelNode.name = fileModelNode.name + " (" + totalMatches + " matches)";
+			fileModelNode.totalMatches = totalMatches;
 		}
 	};
 	
 	SearchResultModel.prototype._fileExpanded = function(fileIndex, detailIndex){
 		var filItem = this.indexedFileItems()[fileIndex];
+		if(detailIndex === null || detailIndex === undefined){
+			return {childrenNumber: 0, childDiv: dojo.byId(this.getId(filItem))};
+		}
 		if(filItem.children && filItem.children.length > 0){
 			if(detailIndex < 0){
 				detailIndex = filItem.children.length -1;
@@ -617,7 +720,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 						  if(fileUIItem){
 							  var linkUIItem = dojo.byId(itemId + "NameColumn");
 							  if(linkUIItem) {
-								  dojo.place(document.createTextNode(parentItem.name), linkUIItem, "only");
+								  var renderName = parentItem.totalMatches ? parentItem.name + " (" + parentItem.totalMatches + " matches)" : parentItem.name;
+								  dojo.place(document.createTextNode(renderName), linkUIItem, "only");
 							  }
 						  }
 						  onComplete(parentItem.children);
@@ -671,12 +775,90 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			}));
 			return th;
 		}
-	},
+	};
+	
 	SearchResultRenderer.prototype.getCellHeaderElement = function(col_no){	
 		if(col_no === 0){
-			return dojo.create("th", {innerHTML: "<h2> Matches</h2>"});
+			if(this.explorer._state === "result_view"){
+				return dojo.create("th", {innerHTML: "<h2> Search results</h2>"});
+			} else {
+				var headerStr =" Matches to be replaced by \"" + this.explorer._replaceStr + "\"";
+				var th = dojo.create("th", {});
+				return dojo.create("h2", {innerHTML: headerStr});
+			}
 		} else if(this.explorer.model.useFlatList && col_no === 1){
 			return dojo.create("th", {innerHTML: "<h2>Location</h2>"});
+		}
+	};
+	
+	
+	SearchResultRenderer.prototype.deselectElement = function(){
+		var expanded = this.explorer.model._fileExpanded(this.explorer.model.currentFileIndex, this.explorer.model.currentDetailIndex);
+		if(expanded.childDiv) {
+			dojo.toggleClass(expanded.childDiv, "currentSearchMatch", false);
+		}
+	};
+	
+	SearchResultRenderer.prototype.selectElement = function(item, storeStatus){
+		if(item.type === "file"){
+			var fileItemIndex = this.explorer.model.getFileItemIndex(item);
+			if(!(fileItemIndex === this.explorer.model.currentFileIndex && this.explorer.model.currentDetailIndex === null)){
+				this.deselectElement();
+				this.explorer.model.setCurrent(fileItemIndex, null, storeStatus);
+				dojo.toggleClass(this.explorer.model.getId(item), "currentSearchMatch", true);
+				this.explorer.buildPreview();
+			}
+		} else {
+			var fileItem = item.parent;
+			var fileItemIndex = this.explorer.model.getFileItemIndex(fileItem);
+			if(fileItemIndex > -1){
+				var fileDetailItemIndex = this.explorer.model.getFileDetailItemIndex(fileItemIndex, item);
+				if(this.explorer.model.currentFileIndex === fileItemIndex && this.explorer.model.currentDetailIndex === fileDetailItemIndex) {
+					return;
+				}
+				this.deselectElement();
+				this.explorer.model.setCurrent(fileItemIndex, fileDetailItemIndex);
+				dojo.toggleClass(this.explorer.model.getId(item), "currentSearchMatch", true);
+			}
+		}
+	};
+	
+	SearchResultRenderer.prototype.renderFileElement = function(item, tableRow, spanHolder, renderName){
+		if(this.explorer._state === "result_view"){
+			var link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: item.linkLocation}, spanHolder, "last");
+			dojo.place(document.createTextNode(renderName), link, "only");
+		} else {
+			var nameSpan = dojo.create("span", { className: "primaryColumn"}, spanHolder, "last");
+			dojo.place(document.createTextNode(renderName), nameSpan, "only");
+			nameSpan.title = "Click to compare";
+			var itemId = this.explorer.model.getId(item);
+			var fileItemIndex = this.explorer.model.getFileItemIndex(item);
+			if(fileItemIndex === this.explorer.model.currentFileIndex && 
+			   this.explorer.model.currentDetailIndex === null){
+				dojo.toggleClass(itemId, "currentSearchMatch", true);
+			}
+			
+			var that = this;
+			dojo.connect(nameSpan, "onmouseover", nameSpan, function() {
+				nameSpan.style.cursor ="pointer";
+				dojo.toggleClass(itemId, "fileNameCheckedRow", true);
+			});
+			dojo.connect(nameSpan, "onmouseout", nameSpan, function() {
+				nameSpan.style.cursor ="default";
+				dojo.toggleClass(itemId, "fileNameCheckedRow", false);
+			});
+			dojo.connect(nameSpan, "onclick", nameSpan, function() {
+				that.selectElement(item, false);
+			});
+		}
+	};
+	
+	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
+		if(this.explorer._state === "result_view"){
+			var link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: item.linkLocation}, spanHolder, "last");
+			return dojo.create("span", null, link, "only");
+		} else {
+			return dojo.create("span", null, spanHolder, "last");
 		}
 	};
 	
@@ -698,6 +880,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				var href = item.linkLocation;
 				span = dojo.create("span", null, col, "only");
 				if(item.type ===  "file"){
+					var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name;
 					if(item.stale){
 						var icon = dojo.create("span", null, span, "last");
 						dojo.addClass(icon, "imageSprite");
@@ -705,32 +888,17 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 						icon = dojo.create("span", null, span, "last");
 						dojo.addClass(icon, "imageSprite");
 						dojo.addClass(icon, "core-sprite-file");
-						dojo.place(document.createTextNode(item.name), span, "last");
+						dojo.place(document.createTextNode(renderName), span, "last");
 						
 					} else {
 						this.getExpandImage(tableRow, span, "core-sprite-file");
-						link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
-						dojo.place(document.createTextNode(item.name), link, "only");
+						this.renderFileElement(item, tableRow, span, renderName);
 					}
 				} else {
 					var that = this;
 					dojo.connect(tableRow, "onclick", tableRow, function() {
-						var fileItem = item.parent;
-						var fileItemIndex = that.explorer.model.getFileItemIndex(fileItem);
-						if(fileItemIndex > -1){
-							var fileDetailItemIndex = that.explorer.model.getFileDetailItemIndex(fileItemIndex, item);
-							if(fileDetailItemIndex > -1){
-								if(that.explorer.model.currentFileIndex === fileItemIndex && that.explorer.model.currentDetailIndex === fileDetailItemIndex) {
-									return;
-								}
-								var expanded = that.explorer.model._fileExpanded(that.explorer.model.currentFileIndex, that.explorer.model.currentDetailIndex);
-								if(expanded.childDiv) {
-									dojo.toggleClass(expanded.childDiv, "currentSearchMatch", false);
-								}
-								that.explorer.model.setCurrent(fileItemIndex, fileDetailItemIndex);
-								expanded = that.explorer.model._fileExpanded(that.explorer.model.currentFileIndex, that.explorer.model.currentDetailIndex);
-								dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
-							}
+						if(that.explorer._state === "result_view"){
+							that.selectElement(item,true);
 						}
 					});
 					var icon = dojo.create("span", null, span, "last");
@@ -740,8 +908,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					dojo.addClass(icon, "imageSprite");
 					dojo.addClass(icon, "core-sprite-rightarrow");
 					
-					link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
-					var linkSpan = dojo.create("span", null, link, "only");
+					var linkSpan = this.getDetailElement(item, tableRow, span);
 					dojo.place(document.createTextNode(item.lineNumber + " : "), linkSpan, "last");
 					var startIndex = 0;
 					var gap = this.explorer.model.queryObj.inFileQuery.searchStrLength;
@@ -801,7 +968,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		//replace_preview: after user inputs the replace string and enters into the preview 
 		//replace_report: after user finishes preview and commits the replace
 		this._state = "result_view";
-		this._replacable = false;
+		this._replacable = true;
 		this.declareCommands();
 	}
 	SearchResultExplorer.prototype = new mExplorer.Explorer();
@@ -835,10 +1002,22 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			tooltip: "Replace all selected matches",
 			id: "orion.globalSearch.replaceAll",
 			callback: function(data) {
-				//that.replaceAll();
+				that.replaceAll();
 			},
 			visibleWhen : function(item) {
 				return that._state === "replace_preview";
+			}
+		});
+	
+		var reportFinishCommand = new mCommands.Command({
+			name: "Done",
+			tooltip: "Finish replace",
+			id: "orion.globalSearch.reportFinish",
+			callback : function() {
+				return window.location.reload();
+			},
+			visibleWhen : function(item) {
+				return that._state === "report";
 			}
 		});
 	
@@ -857,10 +1036,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService.addCommand(saveResultsCommand, "dom");
 		this._commandService.addCommand(cancelReplaceCommand, "dom");
 		this._commandService.addCommand(replaceAllCommand, "dom");
+		this._commandService.addCommand(reportFinishCommand, "dom");
 		this._commandService.addCommandGroup("orion.searchActions.unlabeled", 200, null, null, "pageActions");
 		this._commandService.registerCommandContribution("orion.saveSearchResults", 1, "pageActions", "orion.searchActions.unlabeled");
 		this._commandService.registerCommandContribution("orion.globalSearch.cancellReplace", 2, "pageActions", "orion.searchActions.unlabeled");
 		this._commandService.registerCommandContribution("orion.globalSearch.replaceAll", 3, "pageActions", "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("orion.globalSearch.reportFinish", 4, "pageActions", "orion.searchActions.unlabeled");
 
 		var previousPage = new mCommands.Command({
 			name : "< Previous Page",
@@ -903,6 +1084,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			imageClass : "core-sprite-move_down",
 			id: "orion.search.nextResult",
 			groupId: "orion.searchGroup",
+			visibleWhen : function(item) {
+				return that._state === "result_view";
+			},
 			callback : function() {
 				that.gotoNext(true, true);
 		}});
@@ -911,6 +1095,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			imageClass : "core-sprite-move_up",
 			id: "orion.search.prevResult",
 			groupId: "orion.searchGroup",
+			visibleWhen : function(item) {
+				return that._state === "result_view";
+			},
 			callback : function() {
 				that.gotoNext(false, true);
 		}});
@@ -919,6 +1106,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			imageClass : "core-sprite-expandAll",
 			id: "orion.search.expandAll",
 			groupId: "orion.searchGroup",
+			visibleWhen : function(item) {
+				return that._state === "result_view" || that._state === "replace_preview";
+			},
 			callback : function() {
 				that.expandAll();
 		}});
@@ -927,6 +1117,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			imageClass : "core-sprite-collapseAll",
 			id: "orion.search.collapseAll",
 			groupId: "orion.searchGroup",
+			visibleWhen : function(item) {
+				return that._state === "result_view" || that._state === "replace_preview";
+			},
 			callback : function() {
 				that.collapseAll();
 		}});
@@ -946,27 +1139,48 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService.registerCommandContribution("orion.search.nextPage", 6, "pageNavigationActions");
 	};
 	
+
+	SearchResultExplorer.prototype.replaceAll = function() {
+		var reportList = [];
+		var that = this;
+		this._state = "report";
+		this.initCommands();
+		this.reportStatus("Wringting files...");	
+		this.model.writeNewContent( this.model.indexedFileItems(), reportList, 0, function(modellist){
+			dojo.empty("results");
+			var reporter = new SearchReportExplorer("results", reportList);
+			reporter.report();
+			that.reportStatus("");	
+		});
+	};
+
+	
 	SearchResultExplorer.prototype.replacePreview = function(replaceStr) {
 		var that = this;
 		this._state = "replace_preview";
+		this._replaceStr = replaceStr;
 		this.checkbox = true;
 		this.initCommands();
 
 		dojo.empty("results");
-		var uiFactory = new mSearchFeatures.SearchUIFactory({
+		this._uiFactory = new mSearchFeatures.SearchUIFactory({
 			parentDivID: "results"
 		});
-		uiFactory.buildUI();
+		this._uiFactory.buildUI();
 		var parentPane = dijit.byId("orion.innerSearchResults");
 		if(parentPane.isLeftPaneOpen()){
 			parentPane.toggle();
 		}
-		this.renderer = new SearchResultRenderer({checkbox: true, highlightSelection:false,
-												  getCheckedFunc: function(item){return that.getItemChecked(item);},
-												  onCheckedFunc: function(rowId, checked){that.onRowChecked(rowId, checked);}}, this);
-		this.createTree(uiFactory.getMatchDivID(), this.model);
-		this.gotoCurrent();
-		this.buildPreview(uiFactory, replaceStr);
+		
+		this.reportStatus("Preparing preview...");	
+		this.model.generateRepalceModel(replaceStr, this.model.indexedFileItems(), 0, function(modellist){
+			that.renderer = new SearchResultRenderer({checkbox: true, highlightSelection:false,
+													  getCheckedFunc: function(item){return that.getItemChecked(item);},
+													  onCheckedFunc: function(rowId, checked, manually){that.onRowChecked(rowId, checked, manually);}}, that);
+			that.createTree(that._uiFactory.getMatchDivID(), that.model);
+			that.renderer.selectElement(that.model.indexedFileItems()[0], false);
+			that.reportStatus("");	
+		});
 	};
 	
 	SearchResultExplorer.prototype.getItemChecked = function(item) {
@@ -976,30 +1190,43 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return item.checked;
 	};
 	
-	SearchResultExplorer.prototype.onRowChecked = function(rowId, checked) {
+	SearchResultExplorer.prototype.onRowChecked = function(rowId, checked, manually) {
 		if(!rowId){
-			this.onItemChecked(this.model.getRealRoot(), checked);
+			this.onItemChecked(this.model.getRealRoot(), checked, manually);
 			return;
 		}
 		var row = dojo.byId(rowId);
 		if(row && row._item){
-			this.onItemChecked(row._item, checked);
+			this.onItemChecked(row._item, checked, manually);
 		}
 	};
 	
-	SearchResultExplorer.prototype.onItemChecked = function(item, checked) {
+	SearchResultExplorer.prototype.onNewContentChanged = function(fileItem) {
+		this.model.generateNewContents(fileItem, this._replaceStr);
+		var fileItemIndex = this.model.getFileItemIndex(fileItem);
+		if(fileItemIndex === this.model.currentFileIndex){
+			this.buildPreview();
+		}
+	};
+	
+	SearchResultExplorer.prototype.onItemChecked = function(item, checked, manually) {
 		item.checked = checked;
 		if(item.type === "file" || item.isRoot){
 			if(item.children){
 				for(var i = 0; i < item.children.length; i++){
 					var checkBox  = dojo.byId(this.renderer.getCheckBoxId(this.model.getId(item.children[i])));
 					if(checkBox){
-						this.renderer.onCheck(null, checkBox, checked);
+						this.renderer.onCheck(null, checkBox, checked, false);
 					} else {
 						item.children[i].checked = checked;
 					}
 				}
 			}
+			if(item.type === "file"){
+				this.onNewContentChanged(item);
+			}
+		} else if(manually){
+			this.onNewContentChanged(item.parent);
 		}
 	};
 	
@@ -1011,12 +1238,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._state = "result_view";
 		this.checkbox = false;
 		this.initCommands();
+		this.model.restoreLocationStatus();
 
 		dojo.empty("results");
 		this.renderer = new SearchResultRenderer({checkbox: false}, this);
 		this.createTree("results", this.model);
 		this.gotoCurrent();
-		//this.reportStatus("");	
 	};
 	
 	SearchResultExplorer.prototype._resolveFileType = function(fileLocation){
@@ -1028,13 +1255,15 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return "";
 	};
 	
-	SearchResultExplorer.prototype.buildPreview = function(uiFactory, replaceStr) {
+	SearchResultExplorer.prototype.buildPreview = function() {
+		var uiFactory = this._uiFactory;
 		var fileItem = this.model.indexedFileItems()[this.model.currentFileIndex];
-		this.model.generateNewContents(fileItem, replaceStr);
-		
+		dojo.empty(uiFactory.getCompareDivID());
 		var uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
 			parentDivID: uiFactory.getCompareDivID(),
-			showTitle: false,
+			showTitle: true,
+			leftTitle: "Replaced File (" + fileItem.name + ")",
+			rightTitle: "Original File (" + fileItem.name + ")",
 			showLineStatus: false
 		});
 		uiFactoryCompare.buildUI();
@@ -1121,7 +1350,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 		dojo.empty("pageNavigationActions");
 		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "tool");
-		
+		if(this._state !== "result_view"){
+			return;
+		}
 		var optionMenu = dijit.byId("globalSearchOptMenu");
 		if (optionMenu) {
 			optionMenu.destroy();
@@ -1152,8 +1383,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		});
 		dojo.addClass(menuButton.domNode, "commandImage");
 		dojo.place(menuButton.domNode, "pageNavigationActions", "last");
-		
-		
 	};
 	
 	SearchResultExplorer.prototype.reportStatus = function(message) {
@@ -1341,13 +1570,13 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.model.lastNavDirection = next;
 		if(nextItem){
 			var newExpanded = this.model._fileExpanded(nextItem.newFileIndex, nextItem.newDetailIndex); 
-			this.model.setCurrent(nextItem.newFileIndex, nextItem.newDetailIndex);
+			this.model.setCurrent(nextItem.newFileIndex, nextItem.newDetailIndex, true);
 			if(newExpanded.childrenNumber > 0) {
 				this.model.highlightSelectionLater = false;
 				if(nextItem.newDetailIndex < 0 ){
-					this.model.setCurrent(nextItem.newFileIndex, newExpanded.childrenNumber - 1);
+					this.model.setCurrent(nextItem.newFileIndex, newExpanded.childrenNumber - 1, true);
 				} else if(nextItem.newDetailIndex >= newExpanded.childrenNumber){
-					this.model.setCurrent(nextItem.newFileIndex, 0);
+					this.model.setCurrent(nextItem.newFileIndex, 0, true);
 				}
 			}
 			if(newExpanded.childDiv)	{
@@ -1375,6 +1604,88 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultExplorer.prototype.constructor = SearchResultExplorer;
 
+	
+	function SearchReportExplorer(parentId, reportList){
+		this.parentId = parentId;
+		this.reportList = reportList;
+		this.renderer = new SearchReportRenderer({checkbox: false}, this);
+	};
+	SearchReportExplorer.prototype = new mExplorer.Explorer();
+	
+	SearchReportExplorer.prototype.report = function() {
+		this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, this.reportList));
+	};
+
+	SearchReportExplorer.prototype.constructor = SearchReportExplorer;
+
+	
+	function SearchReportRenderer(options, explorer){
+		this._init(options);
+		this.options = options;
+		this.explorer = explorer;
+	};
+	
+	SearchReportRenderer.prototype = new mExplorer.SelectionRenderer();
+	
+	SearchReportRenderer.prototype.getCellHeaderElement = function(col_no){
+		switch(col_no){
+			case 0: 
+				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Files replaced</h2>"});
+				break;
+			case 1: 
+				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Status</h2>"});
+				break;
+		}
+	};
+	
+	SearchReportRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		switch(col_no){
+		case 0:
+			var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"});
+			var div = dojo.create("div", null, col, "only");
+			var span = dojo.create("span", { className: "primaryColumn"}, div, "last");
+
+			dojo.place(document.createTextNode(item.model.fullPathName + "/" + item.model.name), span, "only");
+			
+			var operationIcon = dojo.create("span", null, div, "first");
+			dojo.addClass(operationIcon, "imageSprite");
+			
+			if(item.status){
+				switch (item.status) {
+					case "warning":
+						dojo.addClass(operationIcon, "core-sprite-warning");
+						return col;
+					case "failed":
+						dojo.addClass(operationIcon, "core-sprite-error");
+						return col;
+					case "pass":
+						dojo.addClass(operationIcon, "core-sprite-ok");
+						return col;
+				}
+			}
+			return col;
+		case 1:
+			var statusMessage;
+			if(item.status){
+				switch (item.status) {
+					case "warning":
+						statusMessage = "User aborted file writing";
+						break;;
+					case "failed":
+						statusMessage = "Failed to write file";
+						break;;
+					case "pass":
+						statusMessage = item.matchesReplaced + " out of " + item.model.totalMatches + " matches replaced";
+						break;
+				}
+				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: statusMessage});
+			}
+		}
+	};
+	
+	SearchReportRenderer.prototype.constructor = SearchReportRenderer;
+	
+	
 	//return module exports
 	return {
 		SearchResultExplorer: SearchResultExplorer
