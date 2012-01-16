@@ -11,7 +11,7 @@
 
 /*global define console document */
 
-define(['require', 'dojo', 'orion/explorer', 'orion/util'], function(require, dojo, mExplorer, mUtil) {
+define(['require', 'dojo', 'orion/explorer', 'orion/util', 'orion/breadcrumbs'], function(require, dojo, mExplorer, mUtil, mBreadcrumbs) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -111,9 +111,12 @@ exports.GitRepositoryExplorer = (function() {
 		progressService.setProgressMessage("Loading...");
 		this.registry.getService("orion.git.provider").getGitClone(location).then(
 			function(resp){
+								
 				if (resp.Children.length == 1 && resp.Children[0].Type === "Clone") {
 					var repositories = resp.Children;
 					
+					that.initTitleBar(repositories[0]);
+	
 					that.displayRepositories(repositories);
 					that.displayStatus(repositories[0]);
 					that.displayCommits(repositories[0]);
@@ -123,6 +126,8 @@ exports.GitRepositoryExplorer = (function() {
 				} else if (resp.Children[0].Type === "Clone"){
 					var repositories = resp.Children;
 					
+					that.initTitleBar();
+					
 					that.displayRepositories(repositories, "full", true);
 				} else if (resp.Children[0].Type === "Branch"){
 					var branches = resp.Children;
@@ -130,6 +135,8 @@ exports.GitRepositoryExplorer = (function() {
 					that.registry.getService("orion.git.provider").getGitClone(branches[0].CloneLocation).then(
 						function(resp){
 							var repositories = resp.Children;
+							
+							that.initTitleBar(repositories[0], "Branches");
 							
 							that.displayRepositories(repositories, "mini", true);
 							that.displayBranches(repositories[0], "full");
@@ -145,6 +152,8 @@ exports.GitRepositoryExplorer = (function() {
 						function(resp){
 							var repositories = resp.Children;
 							
+							that.initTitleBar(repositories[0], "Tags");
+							
 							that.displayRepositories(repositories, "mini", true);
 							that.displayTags(repositories[0], "full");
 						}, function () {
@@ -159,6 +168,50 @@ exports.GitRepositoryExplorer = (function() {
 			}
 		);
 	};
+	
+	GitRepositoryExplorer.prototype.initTitleBar = function(repository, sectionName){
+		var that = this;
+		var pageTitle = dojo.byId("pageTitle");
+		var item = {};
+		
+		if (repository && sectionName){
+			pageTitle.innerHTML = "Git Repository (" + sectionName + ")";
+			
+			item.Name = sectionName;
+			item.Parents = [];
+			item.Parents[0] = {};
+			item.Parents[0].Name = repository.Name;
+			item.Parents[0].Location = repository.Location;
+			item.Parents[0].ChildrenLocation = repository.Location;
+			item.Parents[1] = {};
+			item.Parents[1].Name = "Repositories";
+		} else if (repository) {
+			pageTitle.innerHTML = "Git Repository";
+			
+			item.Name = repository.Name;
+			item.Parents = [];
+			item.Parents[0] = {};
+			item.Parents[0].Name = "Repositories";
+		} else {
+			pageTitle.innerHTML = "Git Repositories";
+			
+			item.Name = "";
+		}
+		
+		var location = dojo.byId("location");
+		var breadcrumb = new mBreadcrumbs.BreadCrumbs({
+			container: location,
+			resource: item,
+			makeHref:function(seg, location){
+				console.info(seg + " " + location);
+				that.makeHref(seg, location);
+			}
+		});		
+	};
+	
+	GitRepositoryExplorer.prototype.makeHref = function(seg, location) {
+		seg.href = "/git/git-repository.html#" + (location ? location : "");
+	}
 	
 	// Git repo
 	
