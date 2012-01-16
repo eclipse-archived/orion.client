@@ -112,6 +112,11 @@ exports.GitRepositoryExplorer = (function() {
 		this.registry.getService("orion.git.provider").getGitClone(location).then(
 			function(resp){
 								
+				if (resp.Children.length === 0) {
+					progressService.setProgressMessage("");
+					return;
+				} 
+				
 				if (resp.Children.length == 1 && resp.Children[0].Type === "Clone") {
 					var repositories = resp.Children;
 					
