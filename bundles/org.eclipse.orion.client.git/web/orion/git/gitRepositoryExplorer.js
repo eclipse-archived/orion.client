@@ -361,20 +361,16 @@ exports.GitRepositoryExplorer = (function() {
 		this.registry.getService("orion.page.command").registerCommandContribution("eclipse.addBranch", 2000, "branchSectionActionsArea");
 		this.registry.getService("orion.page.command").renderCommands(dojo.byId("branchSectionActionsArea"), "dom", repository, this, "tool", false);
 
-		this.registry.getService("orion.git.provider").getGitBranch(branchLocation).then(
+		this.registry.getService("orion.git.provider").getGitBranch(branchLocation + (mode === "full" ? "?commits=1" : "?commits=1&page=1&pageSize=5")).then(
 			function(resp){
 				var branches = resp.Children;
-				that.decorateBranches(branches).then(
-					function(){
-						dojo.empty("branchNode");
-						for(var i=0; (i<branches.length && (i<5 || mode === "full"));i++){
-							branches[i].ParentLocation = branchLocation;
-							that.renderBranch(branches[i]);
-						}
-					}
-				);
+				dojo.empty("branchNode");
+				for(var i=0; i<branches.length;i++){
+					branches[i].ParentLocation = branchLocation;
+					that.renderBranch(branches[i]);
+				}
 			}, function(error){
-				
+				that.handleError(error, that.registry);
 			}
 		);
 	};
@@ -389,10 +385,12 @@ exports.GitRepositoryExplorer = (function() {
 		var detailsView = dojo.create( "div", { "class":"vbox stretch details-view"}, horizontalBox );
 		var title = dojo.create( "span", { "class":"extension-title", innerHTML: branch.Name + (branch.Current ? " (Active)" : "") }, detailsView );
 		dojo.create( "div", null, detailsView );
+		
+		var commit = branch.Commit.Children[0];
 		var description = dojo.create( "span", { "class":"extension-description", 
 			innerHTML: (branch.RemoteLocation[0] ? ("tracks " + branch.RemoteLocation[0].Children[0].Name + ", ") : "") 
-			+ "last modified " + dojo.date.locale.format(new Date(branch.Commit.Time), {formatLength: "short"})
-			+ " by " + branch.Commit.AuthorName}, detailsView );
+			+ "last modified " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})
+			+ " by " + commit.AuthorName}, detailsView );
 		
 		var actionsArea = dojo.create( "div", {"id":"branchActionsArea"}, horizontalBox );
 		this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", branch, this, "button", false);	
