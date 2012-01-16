@@ -506,9 +506,9 @@ define("orion/editor/jsContentAssist", [], function() {
 			var proposals = [];
 
 			if (selection.offset > 0) {
-				//if the character preceeding the prefix is a '.' character, then we are completing an object member
-				var preceedingChar = buffer.charAt(selection.offset - prefix.length - 1);
-				if (preceedingChar === '.') {
+				//if the character preceding the prefix is a '.' character, then we are completing an object member
+				var precedingChar = buffer.charAt(selection.offset - prefix.length - 1);
+				if (precedingChar === '.') {
 					return getMemberProposals(prefix, buffer, selection);
 				}
 			}
