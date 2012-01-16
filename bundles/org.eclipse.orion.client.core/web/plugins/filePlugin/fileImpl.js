@@ -400,7 +400,7 @@ eclipse.FileServiceImpl= (function() {
 		 * Performs a search with the given query.
 		 * @param {String} query The search query
 		 */
-		search: function(query) {
+		search: function(location, query) {
 			return dojo.xhrGet({
 				url: "/filesearch" + query,
 				handleAs: "json",
