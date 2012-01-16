@@ -32,8 +32,6 @@ define(function(){
 	operator["&"] = {first:"&", sep:"&", named: true, ifemp: "=", allow: "U"};
 	operator["#"] = {first:"#", sep:",", named: false, ifemp: "", allow: "U+R"};
 
-
-
 	var VARSPEC_REGEXP = /^((?:(?:[a-zA-Z0-9_])|(?:%[0-9A-F][0-9A-F]))(?:(?:[a-zA-Z0-9_.])|(?:%[0-9A-F][0-9A-F]))*)(?:(\*)|:([0-9]+))?$/;
 
 	function parseVarSpecs(text) {
@@ -52,6 +50,38 @@ define(function(){
 		}
 		return result;
 	}
+	
+	function encodeString(value, encoding) {
+		if (encoding === "U") {
+			return encodeURIComponent(value).replace(/!/g, '%21').replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/\*/g, '%2A');
+		}
+		if (encoding === "U+R") {
+			return encodeURI(value);
+		}
+		throw new Error("Unknown allowed character set: " + encoding);
+	}
+	
+	function encodeArray(value, encoding, separator) {
+		var result = [];
+		for (var i=0; i < value.length; i++) {
+			if (typeof(value[i]) !== "undefined") {
+				result.push(encodeString(value[i], encoding));
+			}
+		}
+		return result.join(separator);
+	}
+	
+	function encodeObject(value, encoding, nameValueSeparator, pairSeparator ) {
+		var keys = Object.keys(value);
+		var result = [];
+		for (var i=0; i < keys.length; i++) {
+			if (typeof(value[keys[i]]) !== "undefined") {
+				result.push(encodeString(keys[i], encoding) + nameValueSeparator + encodeString(value[keys[i]], encoding));
+			}
+		}
+		return result.join(pairSeparator);
+	}
+	
 	
 	function Expression(text) {
 		if (text.length === 0) {
@@ -72,16 +102,46 @@ define(function(){
 		expand: function(params) {
 			var result = [];
 			for (var i=0; i < this._varSpecList.length; i++) {
-				var name = this._varSpecList[i].name;
-
-				var value = expandVarSpecValue();
-				if (value !== null) {
-					var resultText = result.length === 0 ? this._operator.first: this._operator.sep;
-					
-					if (this._operator.named) {
-						resultText += encodeURI(name);
-						var resultValue = 
+				var varSpec = this._varSpecList[i];
+				var name = varSpec.name;
+				var value = params[name];
+				var valueType = typeof(value);
+				if (valueType !== "undefined" && value !== null) {
+					var resultText = result.length === 0 ? this._operator.first: this._operator.sep;				
+					if (valueType === "string") {
+						if (this._operator.named) {
+							resultText += encodeString(name, "U+R");
+							resultText += (value.length === 0) ? this._operator.ifemp : "=";
+						}
+						if (varSpec.prefix !== -1 && varSpec.prefix < value.length) {
+							value = value.substring(0, varSpec.prefix);
+						}
+						
+						resultText += encodeString(value, this._operator.allow);
+					} else if (Array.isArray(value)) {
+						if (!varSpec.explode) {
+							if (this._operator.named) {
+								resultText += encodeString(name, "U+R");
+								resultText += (value.length === 0) ? this._operator.ifemp : "=";
+							}							
+							resultText += encodeArray(value, this._operator.allow, ",");
+						} else {
+							resultText += encodeArray(value, this._operator.allow, this._operator.sep);
+						}				
+					} else if (valueType === "object") {
+						if (!varSpec.explode) {
+							if (this._operator.named) {
+								resultText += encodeString(name, "U+R");
+								resultText += (Object.keys(value).length === 0) ? this._operator.ifemp : "=";
+							}
+							resultText += encodeObject(value, this._operator.allow, ",", ",");
+						} else {
+							resultText += encodeObject(value, this._operator.allow, "=", this._operator.sep);
+						}
+					} else {
+						throw new Error("bad param type: " + name + " : " + valueType);
 					}
+					result.push(resultText);
 				}
 			}
 			return result.join("");
@@ -99,7 +159,7 @@ define(function(){
 			if (curlyEndIndex === -1) {
 				throw new Error("Invalid template: " + text);
 			}
-			result.push(new Literal(text.substring(curlyStartIndex + 1, curlyEndIndex)));
+			result.push(new Expression(text.substring(curlyStartIndex + 1, curlyEndIndex)));
 			current = curlyEndIndex + 1;
 			curlyStartIndex = text.indexOf("{", current);			
 		}
