@@ -22,6 +22,10 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 	 * @private
 	 */
 	function _doServiceCall(fileService, funcName, funcArgs) {
+		//if the function is not implemented in the file service, we throw an exception to the caller
+		if(!fileService[funcName]){
+			throw funcName + " is not supportted in this file system";
+		}
 		var clientDeferred = new dojo.Deferred();
 		fileService[funcName].apply(fileService, funcArgs).then(
 			//on success, just forward the result to the client
@@ -425,8 +429,8 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		 * Performs a search with the given query.
 		 * @param {String} query The search query
 		 */
-		search: function(query) {
-			return _doServiceCall(this._getService(), "search", arguments);
+		search: function(location, query) {
+			return _doServiceCall(this._getService(location), "search", arguments);
 		}
 	};//end FileClient prototype
 	FileClient.prototype.constructor = FileClient;

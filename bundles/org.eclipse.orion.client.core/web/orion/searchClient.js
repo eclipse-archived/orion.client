@@ -40,12 +40,18 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 		 * @param {Boolean} [useSimpleFormat] Use simple format that only shows the file name to show the result, other wise use a complex format with search details.
 		 */
 		search: function(resultsNode, query, excludeFile,  generateHeadingAndSaveLink, onResultReady,  hideSummaries, useSimpleFormat) {
-			this._fileService.search(query).then(
-				dojo.hitch(this, function(jsonData) {
-					this.showSearchResult(resultsNode, query, excludeFile, generateHeadingAndSaveLink, onResultReady, 
-							hideSummaries, useSimpleFormat, jsonData); 
-				})
-			);
+			var qObj = mSearchUtils.parseQueryStr(query);
+			try{
+				this._fileService.search(qObj.location, query).then(
+					dojo.hitch(this, function(jsonData) {
+						this.showSearchResult(resultsNode, query, excludeFile, generateHeadingAndSaveLink, onResultReady, 
+								hideSummaries, useSimpleFormat, jsonData); 
+					})
+				);
+			}
+			catch(error){
+				this.registry.getService("orion.page.message").setErrorMessage(error);	
+			}
 		},
 		handleError: function(response, resultsNode) {
 			console.error(response);
