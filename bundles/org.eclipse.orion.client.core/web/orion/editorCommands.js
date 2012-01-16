@@ -175,26 +175,19 @@ exports.EditorCommandFactory = (function() {
 			
 				// iterate through the extension points and generate commands for each one.
 				var actionReferences = this.serviceRegistry.getServiceReferences("orion.edit.command");
-						
-				for (var i=0; i<actionReferences.length; i++) {
-					var service = this.serviceRegistry.getService(actionReferences[i]);
-					var info = {};
-					var propertyNames = actionReferences[i].getPropertyNames();
-					for (var j = 0; j < propertyNames.length; j++) {
-						info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
-					}
-					var command = new mCommands.Command({
+				var makeCommand = function(info, service) {
+					return new mCommands.Command({
 						name: info.name,
 						image: info.img,
 						id: info.name,
 						callback: dojo.hitch(editor, function(data) {
 							// command service will provide editor parameter but editor widget callback will not
-							editor = data.items || this;
+							editor = data ? data.items || this : this;
 							var selection = editor.getSelection();
 							var model = editor.getModel();
 							var text = model.getText();
 							service.run(model.getText(selection.start,selection.end),text,selection).then(function(result){
-								if (result.text) {
+								if (result && result.text) {
 									editor.setText(result.text);
 									if (result.selection) {
 										editor.setSelection(result.selection.start, result.selection.end);
@@ -203,13 +196,22 @@ exports.EditorCommandFactory = (function() {
 								} else {
 									if (typeof result === 'string') {
 										editor.setText(result, selection.start, selection.end);
-										editor.setSelection(selection.start, selection.end);
+										editor.setSelection(selection.start, selection.start + result.length);
 										editor.getTextView().focus();
 									}
 								}
 							});
 							return true;
 						})});
+				};
+				for (var i=0; i<actionReferences.length; i++) {
+					var service = this.serviceRegistry.getService(actionReferences[i]);
+					var info = {};
+					var propertyNames = actionReferences[i].getPropertyNames();
+					for (var j = 0; j < propertyNames.length; j++) {
+						info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
+					}
+					var command = makeCommand(info, service);
 					this.commandService.addCommand(command, "dom");
 					if (info.img) {
 						// image will be placed on toolbar

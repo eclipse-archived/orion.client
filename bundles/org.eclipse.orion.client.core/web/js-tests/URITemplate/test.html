@@ -4,8 +4,7 @@
 <!-- standard scripts -->
 	<script src="../../orion/plugin.js"></script>
 	<script src="../../requirejs/require.js"></script>
-	<script>
-	/*global require window*/
+	<script type="text/javascript">
 	require({
 		  baseUrl: '../..',
 		  packages: [
@@ -35,17 +34,12 @@
 		});
 	
 	window.onload = function() {
-		require(["orion/test", "./testcase-editor", "./testcase-codemirror"], function(test, editor, codeMirror) {
-			test.run(editor);
-			test.run(codeMirror);
+		require(["orion/test","./testcase"], function(test, testcase) {
+			test.run(testcase);			
 		});
 	};
 	</script>
-	<title>TEST: Editor</title>
 </head>
 <body>
-	<div style="padding-bottom:1em;">Editor tests</div>
-	
-	<div id="editorDiv"></div>
 </body>
 </html>

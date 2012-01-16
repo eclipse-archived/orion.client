@@ -82,51 +82,52 @@ define(['require', 'dojo'], function(require, dojo) {
 					dojo.addClass(slash, "breadcrumb");
 					crumbs.appendChild(slash);
 				} else {
-					// get rid of any href since we are already here
+					// we are at the root.  Get rid of any href since we are already here
 					seg.href = "";
 					// don't need the breadcrumb style because we are here.
 					dojo.removeClass(seg, "breadcrumb");
 					dojo.addClass(seg, "currentLocation");
+					return;
 				}
 			}
-			// walk up the parent chain and insert a crumb for each parent
-			if (this._resource && this._resource.Parents) {
-				var parents = this._resource.Parents;
-				for (var i = parents.length; --i >= 0 ;){
-					seg = document.createElement('a');
-					dojo.addClass(seg, "breadcrumb");
-					dojo.place(document.createTextNode(parents[i].Name), seg, "only");
-					this.path += parents[i].Name; 
-					if(this._makeHref) {
-						this._makeHref(seg , parents[i].ChildrenLocation);
+			if (this._resource) {
+				if (this._resource.Parents) {
+				// walk up the parent chain and insert a crumb for each parent
+					var parents = this._resource.Parents;
+					for (var i = parents.length; --i >= 0 ;){
+						seg = document.createElement('a');
+						dojo.addClass(seg, "breadcrumb");
+						dojo.place(document.createTextNode(parents[i].Name), seg, "only");
+						this.path += parents[i].Name; 
+						if(this._makeHref) {
+							this._makeHref(seg , parents[i].ChildrenLocation);
+						}
+						else {
+							seg.href = require.toUrl("navigate/table.html") +"#" + parents[i].ChildrenLocation;
+						}
+						crumbs.appendChild(seg);
+						slash = document.createElement('span');
+						dojo.place(document.createTextNode(' / '), slash, "only");
+						this.path += '/';
+						dojo.addClass(slash, "breadcrumb");
+						crumbs.appendChild(slash);
 					}
-					else {
-						seg.href = require.toUrl("navigate/table.html") +"#" + parents[i].ChildrenLocation;
-					}
-					crumbs.appendChild(seg);
-					slash = document.createElement('span');
-					dojo.place(document.createTextNode(' / '), slash, "only");
-					this.path += '/';
-					dojo.addClass(slash, "breadcrumb");
-					crumbs.appendChild(slash);
 				}
 				//add a final entry for the current location
-				if (this._resource) {
-					seg = document.createElement('a');
-					dojo.place(document.createTextNode(this._resource.Name), seg, "only");
-					dojo.addClass(seg, "breadcrumb");
-					dojo.addClass(seg, "currentLocation");
-					this.path+=this._resource.Name;
-					crumbs.appendChild(seg);
-				}
+				seg = document.createElement('a');
+				dojo.place(document.createTextNode(this._resource.Name), seg, "only");
+				dojo.addClass(seg, "breadcrumb");
+				dojo.addClass(seg, "currentLocation");
+				this.path+=this._resource.Name;
+				crumbs.appendChild(seg);
 			} 
 			// if we had no resource, or had no parents, we need some kind of current location in the breadcrumb
 			if (crumbs.childNodes.length === 0) {
-					seg = document.createElement('a');
-					dojo.place(document.createTextNode(document.title), seg, "only");
-					dojo.addClass(seg, "breadcrumb");
-					dojo.addClass(seg, "currentLocation");
-					crumbs.appendChild(seg);
+				seg = document.createElement('a');
+				dojo.place(document.createTextNode(document.title), seg, "only");
+				dojo.addClass(seg, "breadcrumb");
+				dojo.addClass(seg, "currentLocation");
+				crumbs.appendChild(seg);
 			}
 		}
 	};
