@@ -330,19 +330,16 @@ exports.GitRepositoryExplorer = (function() {
 		var branchLocation = repository.BranchLocation;
 		
 		var branchesSectionSkeleton = 
-		"<div class=\"displayTable\">" + 
-			
-			"<section class=\"extension-settings-content\">" +
-			"<div class=\"extension-settings\">" +
-			"<list class=\"extension-settings-list\">" +
-			"<div class=\"vbox extension-list-item\">" +
+		"<div class=\"displayTable\">" +
+			"<section style=\" width: 100%; border-bottom: 1px solid #EEEEEE; margin: 0; padding: 0;\">" +
+			//"<div class=\"extension-settings\">" +
+			"<div class=\"vbox\" style=\"width: 100%\">" +
 			"<div class=\"hbox\">" +
 			"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Branches</h1></div>"+
 			"<div id=\"branchSectionActionsArea\" class=\"pageActions\"></div>" +
 			"</div>" +
 			"</div>" +
-			"</div>" +
-			"</list>" +
+		//	"</div>" +
 			"</section>" +
 			(mode === "full" ? "" : ("<h2><a href=\"/git/git-repository.html#" + branchLocation + "\">See all branches</a></h2>")) +		
 			"<section class=\"extension-settings-content\">" +
@@ -361,7 +358,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.empty("branchNode");
 		dojo.byId("branchNode").innerHTML = "Loading...";
 		
-		this.registry.getService("orion.page.command").registerCommandContribution("eclipse.addBranch", 100, "branchSectionActionsArea");
+		this.registry.getService("orion.page.command").registerCommandContribution("eclipse.addBranch", 2000, "branchSectionActionsArea");
 		this.registry.getService("orion.page.command").renderCommands(dojo.byId("branchSectionActionsArea"), "dom", repository, this, "tool", false);
 
 		this.registry.getService("orion.git.provider").getGitBranch(branchLocation).then(
@@ -529,20 +526,16 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var commitsSectionSkeleton = 
 		"<div class=\"displayTable\">" + 
-			
-			"<section class=\"extension-settings-content\">" +
-			"<div class=\"extension-settings\">" +
-			"<list class=\"extension-settings-list\">" +
-			"<div class=\"vbox extension-list-item\">" +
+			"<section style=\" width: 100%; border-bottom: 1px solid #EEEEEE; margin: 0; padding: 0;\">" +
+			//"<div class=\"extension-settings\">" +
+			"<div class=\"vbox\" style=\"width: 100%\">" +
 			"<div class=\"hbox\">" +
 			"<div class=\"vbox stretch details-view\"><h1 id=\"commitHeader\" style=\"padding-top: 4px; border-bottom: none;\">Commits</h1></div>"+
 			"<div id=\"commitSectionActionsArea\" class=\"pageActions\"></div>" +
 			"</div>" +
 			"</div>" +
-			"</div>" +
-			"</list>" +
+		//	"</div>" +
 			"</section>" +
-			
 			"<h2 id=\"commitsSectionSeeMore\"></h2>" +			
 			"<section class=\"extension-settings-content\">" +
 			"<div class=\"extension-settings\">" +
@@ -595,30 +588,32 @@ exports.GitRepositoryExplorer = (function() {
 					return;
 				};
 				
-				that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD", "",
-					function(resp){
-						dojo.empty("commitNode");
-						
-						var anyCommits = false;
-						
-						for (var i=0; i<resp.Children.length; i++){
-							anyCommits = true;
-							that.renderCommit(resp.Children[i], true);
-						}
-						
-						that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id, "", 
-							function(resp){	
-								for (var i=0; i<resp.Children.length; i++){
-									anyCommits = true;
-									that.renderCommit(resp.Children[i], false);
-								}
-								
-								if (!anyCommits)
-									that.renderNoCommit();
+				if (currentBranch.RemoteLocation[0].Children[0].CommitLocation){
+					that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD", "",
+						function(resp){
+							dojo.empty("commitNode");
+							
+							var anyCommits = false;
+							
+							for (var i=0; i<resp.Children.length; i++){
+								anyCommits = true;
+								that.renderCommit(resp.Children[i], true);
 							}
-						);	
-					}
-				);
+							
+							that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id, "", 
+								function(resp){	
+									for (var i=0; i<resp.Children.length; i++){
+										anyCommits = true;
+										that.renderCommit(resp.Children[i], false);
+									}
+									
+									if (!anyCommits)
+										that.renderNoCommit();
+								}
+							);	
+						}
+					);
+				}
 			}
 		);
 	};
@@ -820,17 +815,15 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var remotesSectionSkeleton = 
 		"<div class=\"displayTable\">" + 
-			"<section class=\"extension-settings-content\">" +
-			"<div class=\"extension-settings\">" +
-			"<list class=\"extension-settings-list\">" +
-			"<div class=\"vbox extension-list-item\">" +
+			"<section style=\" width: 100%; border-bottom: 1px solid #EEEEEE; margin: 0; padding: 0;\">" +
+			//"<div class=\"extension-settings\">" +
+			"<div class=\"vbox\" style=\"width: 100%\">" +
 			"<div class=\"hbox\">" +
 			"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Remotes</h1></div>"+
 			"<div id=\"remoteSectionActionsArea\" class=\"pageActions\"></div>" +
 			"</div>" +
 			"</div>" +
-			"</div>" +
-			"</list>" +
+		//	"</div>" +
 			"</section>" +		
 			"<section class=\"extension-settings-content\">" +
 			"<div class=\"extension-settings\">" +
@@ -838,7 +831,7 @@ exports.GitRepositoryExplorer = (function() {
 				"</list>" +
 			"</div>" + 
 			"</section>" + 
-		"</div>";
+		"</div>";		
 		
 		var parentNode = dojo.byId("mainNode");
 		dojo.place(remotesSectionSkeleton, parentNode);
@@ -848,7 +841,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.empty("remoteNode");
 		dojo.byId("remoteNode").innerHTML = "Loading...";
 		
-		this.registry.getService("orion.page.command").registerCommandContribution("eclipse.addRemote", 100, "remoteSectionActionsArea");
+		this.registry.getService("orion.page.command").registerCommandContribution("eclipse.addRemote", 2000, "remoteSectionActionsArea");
 		this.registry.getService("orion.page.command").renderCommands(dojo.byId("remoteSectionActionsArea"), "dom", repository, this, "tool", false);
 
 		this.registry.getService("orion.git.provider").getGitRemote(remoteLocation).then(
