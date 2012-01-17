@@ -391,11 +391,12 @@ a:hover {
 }
 
 .progressPane {
-	padding-left: 8px;
-	padding-right: 8px;
 	vertical-align: bottom;
 	background-position: 0px 0px; 
 	text-align: right;
+	border: 0 none;
+	width: 16px;
+	height: 16px;
 }
 
 .progressPane_operations {
