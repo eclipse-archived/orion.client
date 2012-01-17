@@ -427,6 +427,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			}
 		}
 		
+		if(dijit.popup.hide)
+			dijit.popup.hide(loginDialog); //close doesn't work on FF
 		dijit.popup.close(loginDialog);
 	}
 
