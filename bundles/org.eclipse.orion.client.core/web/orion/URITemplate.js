@@ -12,6 +12,21 @@
 /*global define console */
 
 define(function(){
+	
+	var OPERATOR = {
+		NUL: {first:"", sep:",", named: false, ifemp: "", allow: "U"},
+		"+": {first:"", sep:",", named: false, ifemp: "", allow: "U+R"},
+		".": {first:".", sep:",", named: false, ifemp: "", allow: "U"},
+		"/": {first:"/", sep:"/", named: false, ifemp: "", allow: "U"},
+		";": {first:";", sep:";", named: true, ifemp: "", allow: "U"},
+		"?": {first:"?", sep:"&", named: true, ifemp: "=", allow: "U"},
+		"&": {first:"&", sep:"&", named: true, ifemp: "=", allow: "U"},
+		"#": {first:"#", sep:",", named: false, ifemp: "", allow: "U+R"},
+		",": {first:"", sep:",", named: false, ifemp: "", allow: "U+R-,"}		
+	};
+
+	var VARSPEC_REGEXP = /^((?:(?:[a-zA-Z0-9_])|(?:%[0-9A-F][0-9A-F]))(?:(?:[a-zA-Z0-9_.])|(?:%[0-9A-F][0-9A-F]))*)(?:(\*)|:([0-9]+))?$/;
+
 	function Literal(text) {
 		this._text = text;
 	}
@@ -22,41 +37,17 @@ define(function(){
 		}
 	};
 	
-	var operator = {};
-	operator.NUL = {first:"", sep:",", named: false, ifemp: "", allow: "U"};
-	operator["+"] = {first:"", sep:",", named: false, ifemp: "", allow: "U+R"};
-	operator["."] = {first:".", sep:",", named: false, ifemp: "", allow: "U"};
-	operator["/"] = {first:"/", sep:"/", named: false, ifemp: "", allow: "U"};
-	operator[";"] = {first:";", sep:";", named: true, ifemp: "", allow: "U"};
-	operator["?"] = {first:"?", sep:"&", named: true, ifemp: "=", allow: "U"};
-	operator["&"] = {first:"&", sep:"&", named: true, ifemp: "=", allow: "U"};
-	operator["#"] = {first:"#", sep:",", named: false, ifemp: "", allow: "U+R"};
-
-	var VARSPEC_REGEXP = /^((?:(?:[a-zA-Z0-9_])|(?:%[0-9A-F][0-9A-F]))(?:(?:[a-zA-Z0-9_.])|(?:%[0-9A-F][0-9A-F]))*)(?:(\*)|:([0-9]+))?$/;
-
-	function parseVarSpecs(text) {
-		var result = [];
-		var rawSpecs = text.split(",");
-		for (var i=0; i < rawSpecs.length; i++) {
-			var match = rawSpecs[i].match(VARSPEC_REGEXP);
-			if (match === null) {
-				throw new Error("Bad VarSpec: " + text);
-			}
-			result.push({
-				name: match[1], 
-				explode: !!match[2], 
-				prefix: match[3] ? parseInt(match[3], 10) : -1
-			}); 
-		}
-		return result;
-	}
-	
 	function encodeString(value, encoding) {
 		if (encoding === "U") {
-			return encodeURIComponent(value).replace(/!/g, '%21').replace(/'/g, '%27').replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/\*/g, '%2A');
+			return encodeURIComponent(value).replace(/[!'()*]/g, function(str) {
+				return '%' + str.charCodeAt(0).toString(16).toUpperCase();
+			});
 		}
 		if (encoding === "U+R") {
-			return encodeURI(value);
+			return encodeURI(value).replace(/%5B/g, '[').replace(/%5D/g, ']');
+		}
+		if (encoding === "U+R-,") {
+			return encodeURI(value).replace(/%5B/g, '[').replace(/%5D/g, ']').replace(/,/g, '%2C');
 		}
 		throw new Error("Unknown allowed character set: " + encoding);
 	}
@@ -82,17 +73,33 @@ define(function(){
 		return result.join(pairSeparator);
 	}
 	
+	function parseVarSpecs(text) {
+		var result = [];
+		var rawSpecs = text.split(",");
+		for (var i=0; i < rawSpecs.length; i++) {
+			var match = rawSpecs[i].match(VARSPEC_REGEXP);
+			if (match === null) {
+				throw new Error("Bad VarSpec: " + text);
+			}
+			result.push({
+				name: match[1], 
+				explode: !!match[2], 
+				prefix: match[3] ? parseInt(match[3], 10) : -1
+			}); 
+		}
+		return result;
+	}
 	
 	function Expression(text) {
 		if (text.length === 0) {
 			throw new Error("Invalid Expression: 0 length expression");
 		}
 		
-		this._operator = operator[text[0]];
+		this._operator = OPERATOR[text[0]];
 		if (this._operator) {
 			text = text.substring(1);
 		} else {
-			this._operator = operator.NUL;
+			this._operator = OPERATOR.NUL;
 		}
 		
 		this._varSpecList = parseVarSpecs(text);
@@ -150,8 +157,7 @@ define(function(){
 
 	function parseTemplate(text) {
 		var result = [];
-		var current = 0;
-		
+		var current = 0;	
 		var curlyStartIndex = text.indexOf("{", current);
 		while (curlyStartIndex !== -1) {
 			result.push(new Literal(text.substring(current, curlyStartIndex)));
@@ -172,10 +178,10 @@ define(function(){
 	}
 	
 	URITemplate.prototype = {
-		expand: function(vars) {
+		expand: function(params) {
 			var result = [];
 			for (var i = 0; i < this._templateComponents.length; i++) {
-				result.push(this._templateComponents[i].expand(vars));
+				result.push(this._templateComponents[i].expand(params));
 			}
 			return result.join("");
 		}
