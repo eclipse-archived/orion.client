@@ -15,6 +15,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 	
 	dojo.declare("orion.widgets.OperationsDialog", [dijit.TooltipDialog], {
 		widgetsInTemplate: true,
+		closable: true,
 		templateString: dojo.cache('orion', 'widgets/templates/OperationsDialog.html'),
 
 		constructor : function() {
@@ -98,8 +99,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 		},
 		_onBlur: function(){
 			this.inherited(arguments);
+			if(dijit.popup.hide)
+				dijit.popup.hide(this); //close doesn't work on FF
 			dijit.popup.close(this);
 		}
-	
 	});
 });

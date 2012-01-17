@@ -142,6 +142,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 					return function(){authService.logout().then(dojo.hitch(_self, function(){
 						this.addUserItem(i, authService, this.authenticatedServices[i].label);
 						if(this.isSingleService()){
+							if(dijit.popup.hide)
+								dijit.popup.hide(this); //close doesn't work on FF
 							dijit.popup.close(this);
 						}
 						localStorage.removeItem(i);
@@ -231,6 +233,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				dojo.connect(a, "onclick", dojo.hitch(_self, function(authService){
 					return function(){authService.login(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(){
 						if(_self.isSingleService())
+							if(dijit.popup.hide)
+								dijit.popup.hide(_self); //close doesn't work on FF
 							dijit.popup.close(_self);
 						});};
 					})(authService));
