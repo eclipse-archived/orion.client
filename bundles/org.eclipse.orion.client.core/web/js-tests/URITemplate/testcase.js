@@ -76,5 +76,25 @@ define(["orion/assert", "orion/URITemplate"], function(assert, URITemplate) {
 		assert.equal(new URITemplate("{+keys}").expand(variables), "semi,;,dot,.,comma,,");
 		assert.equal(new URITemplate("{+keys*}").expand(variables), "semi=;,dot=.,comma=,");
 	};
+	
+	tests.testCommaReservedExpansion = function() {
+		assert.equal(new URITemplate("{,var}").expand(variables), "value");
+		assert.equal(new URITemplate("{,hello}").expand(variables), "Hello%20World!");
+		assert.equal(new URITemplate("{,half}").expand(variables), "50%25");
+		assert.equal(new URITemplate("{base}index").expand(variables), "http%3A%2F%2Fexample.com%2Fhome%2Findex");
+		assert.equal(new URITemplate("{,base}index").expand(variables), "http://example.com/home/index");
+		assert.equal(new URITemplate("O{,empty}X").expand(variables), "OX");
+		assert.equal(new URITemplate("O{,undef}X").expand(variables), "OX");		
+		assert.equal(new URITemplate("{,path}/here").expand(variables), "/foo/bar/here");
+		assert.equal(new URITemplate("here?ref={,path}").expand(variables), "here?ref=/foo/bar");
+		assert.equal(new URITemplate("up{,path}{var}/here").expand(variables), "up/foo/barvalue/here");
+		assert.equal(new URITemplate("{,x,hello,y}").expand(variables), "1024,Hello%20World!,768");
+		assert.equal(new URITemplate("{,path,x}/here").expand(variables), "/foo/bar,1024/here");
+		assert.equal(new URITemplate("{,path:6}/here").expand(variables), "/foo/b/here");
+		assert.equal(new URITemplate("{,list}").expand(variables), "red,green,blue");
+		assert.equal(new URITemplate("{,list*}").expand(variables), "red,green,blue");
+		assert.equal(new URITemplate("{,keys}").expand(variables), "semi,;,dot,.,comma,%2C");
+		assert.equal(new URITemplate("{,keys*}").expand(variables), "semi=;,dot=.,comma=%2C");
+	};
 	return tests;
 });
