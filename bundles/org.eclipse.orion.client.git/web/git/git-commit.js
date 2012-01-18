@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -53,11 +53,11 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 
 		commandService.registerCommandContribution("eclipse.removeTag", 1000);
 
-		explorer.displayCommit(dojo.hash());
+		explorer.display(dojo.hash());
 
 		//every time the user manually changes the hash, we need to load the commit with that name
 		dojo.subscribe("/dojo/hashchange", explorer, function() {
-			explorer.displayCommit(dojo.hash());
+			explorer.display(dojo.hash());
 		});
 	});
 }); //end of define
