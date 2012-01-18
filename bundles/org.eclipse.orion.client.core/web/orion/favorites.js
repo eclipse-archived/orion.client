@@ -63,12 +63,27 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			this._notifyListeners();
 		},
 		
+		/**
+		 * Checks to see if the favorite already exists
+		 * @param path the path to the favorite to search for
+		 * @return true iff the path exists in the favorites list
+		 */
+		favoriteExists: function(path) {
+			for (var i in this._favorites) {
+				if (this._favorites[i].path === path) {
+					return true;
+				}
+			}
+			return false;
+		},
+		
 		addFavoriteUrl: function(url) {
 			this.addFavorite(url, url, false, true);
 		},
 						
 		addFavorite: function(theName, thePath, isDirectory, isExternalResource) {
 			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory, "isFavorite": true, "isExternalResource": isExternalResource });
+			this._favorites.sort(this._sorter);
 			this._storeFavorites();
 			this._notifyListeners();
 		},
@@ -80,6 +95,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 					break;
 				}
 			}
+			this._favorites.sort(this._sorter);
 			this._storeFavorites();
 			this._notifyListeners();
 		},
@@ -96,6 +112,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 				}
 			}
 			if (changed) {
+				this._favorites.sort(this._sorter);
 				this._storeFavorites();
 				this._notifyListeners();
 			}
@@ -104,6 +121,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		
 		addFavoriteSearch: function(theName, theQuery) {
 			this._searches.push({ "name": theName, "query": theQuery, "isSearch": true });
+			this._searches.sort(this._sorter);
 			this._storeSearches();
 			this._notifyListeners();
 		},
@@ -115,6 +133,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 					break;
 				}
 			}
+			this._searches.sort(this._sorter);
 			this._storeSearches();
 			this._notifyListeners();
 		},
@@ -131,6 +150,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 				}
 			}
 			if (changed) {
+				this._searches.sort(this._sorter);
 				this._storeSearches();
 				this._notifyListeners();
 			}
@@ -160,6 +180,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 						favorites._searches.push(search[i]);
 					}
 				}
+				favorites._favorites.sort(favorites._sorter);
 				favorites._notifyListeners();
 			});
 		}, 
@@ -176,6 +197,16 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs){
 				prefs.put("search", storedSearches);
 			}); 
+		},
+		
+		_sorter: function(fav1,fav2) {
+			if (fav1.name > fav2.name) {
+				return 1;
+			} else if (fav1.name < fav2.name) {
+				return -1;
+			} else {
+				return 0;
+			}
 		},
 		
 		getFavorites: function() {
