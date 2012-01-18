@@ -6,6 +6,10 @@
 
     NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
 
+    Contributors:
+      Douglas Crockford - original implementation
+      Andy Clement - Fix for bug#367639
+
     See http://www.JSON.org/js.html
 
 
@@ -1690,7 +1694,7 @@ var JSLINT = (function () {
 // token -- this is called by advance to get the next token.
 
             token: function () {
-                var b, c, captures, d, depth, high, i, l, low, q, t;
+                var b, c, ch, captures, d, depth, high, i, l, low, q, t;
 
                 function match(x) {
                     var r = x.exec(s), r1;
@@ -1866,7 +1870,10 @@ var JSLINT = (function () {
                         }
                         if (s) {
                             if (xmode === 'html') {
-                                return it('(error)', s.charAt(0));
+                                ch = s.charAt(0);
+                                // skip the problem character
+                                s = s.substr(1);
+                                return it('(error)', ch);
                             } else {
                                 errorAt("Unexpected '{a}'.",
                                         line, character, s.substr(0, 1));
