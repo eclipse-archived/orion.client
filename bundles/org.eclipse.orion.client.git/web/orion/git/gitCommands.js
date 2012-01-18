@@ -158,7 +158,7 @@ var exports = {};
 			}
 			dojo.hitch(this, exports.handleSshAuthenticationError)(serviceRegistry, jsonData.JsonData, options, callee, title);
 			return;
-		case 403:
+		case 400:
 			if(jsonData.JsonData && jsonData.JsonData.HostKey){
 				if(jsonData.failedOperation){
 					options.failedOperation = jsonData.failedOperation;
@@ -1625,6 +1625,8 @@ var exports = {};
 									dojo.hitch(explorer, explorer.redisplayClonesList)();
 								}
 							}, func, "Clone Git Repository");
+						}, function(jsonData, secondArg) {
+							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Clone Git Repository");
 						});
 					});
 				};
@@ -1668,6 +1670,8 @@ var exports = {};
 									if(explorer.redisplayClonesList)
 										dojo.hitch(explorer, explorer.redisplayClonesList)();
 								}, func, "Init Git Repository");
+							}, function(jsonData, secondArg) {
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Clone Git Repository");
 							});
 						});
 					}
