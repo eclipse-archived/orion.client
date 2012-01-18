@@ -17,12 +17,12 @@ define(['require', 'dojo', 'orion/selection', 'orion/status', 'orion/progress', 
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/editor/textMateStyler', 'orion/breadcrumbs', 'examples/textview/textStyler', 'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher','orion/searchAndReplace/orionTextSearchAdaptor',
-        'orion/editor/asyncStyler', 'orion/edit/dispatcher', 'orion/contentTypes',
+        'orion/editor/asyncStyler', 'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer' ], 
 		function(require, dojo, mSelection, mStatus, mProgress, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextMateStyler, mBreadcrumbs, mTextStyler, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mSearchAdaptor, mAsyncStyler, mDispatcher, mContentTypes) {
+				mSearchAdaptor, mAsyncStyler, mDispatcher, mContentTypes, PageUtil) {
 	
 var exports = exports || {};
 	
@@ -152,9 +152,14 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				} catch(e) {}
 				return error.responseText;
 			}
-			
-			var input = mUtil.getPositionInfo(location);
-			var fileURI = input.filePath;
+			if (location && location[0] !== "#") {
+				location = "#" + location;
+			}
+			var input = PageUtil.matchResourceParameters(location);
+			var fileURI = input.resource;
+			if (input.line) {
+				input.line = parseInt(input.line,10);
+			}
 			// populate editor
 			if (fileURI) {
 				if (fileURI === this.lastFilePath) {
@@ -279,8 +284,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		
 		shouldGoToURI: function(editor, fileURI) {
 			if (editor.isDirty()) {
-				var oldStripped = mUtil.getPositionInfo(this.lastFilePath).filePath;
-				var newStripped = mUtil.getPositionInfo(fileURI).filePath;
+				var oldStripped = PageUtil.matchResourceParameters(this.lastFilePath).resource;
+				var newStripped = PageUtil.matchResourceParameters(fileURI).resource;
 				if (oldStripped !== newStripped) {
 					return window.confirm("There are unsaved changes.  Do you still want to navigate away?");
 				}
