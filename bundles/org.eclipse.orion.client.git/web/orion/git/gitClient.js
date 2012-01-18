@@ -78,9 +78,10 @@ eclipse.GitService = (function() {
 					return dojo.hitch(service, service._getGitServiceResponse)(jsonData, xhrArgs, gitRepoUrl ? "Cloning repository: " + gitRepoUrl : "Initializing repository: " + gitName);
 				},
 				error : function(error, ioArgs) {
-					mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
+					var error =	mAuth.handleAuthenticationError(ioArgs.xhr, function(){});
+					if(error!=null)
+						return error;
 					console.error("HTTP status code: ", ioArgs.xhr.status);
-					return error;
 				}
 			});
 			

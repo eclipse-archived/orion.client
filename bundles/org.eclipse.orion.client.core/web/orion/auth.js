@@ -50,14 +50,17 @@ define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widg
 			}
 			forbiddenAccessDlg.set("content", message);
 			forbiddenAccessDlg.show();
-		}
-		if (error.status === 401) { 
+			return;
+		} else if (error.status === 401) { 
 			
 	
 				// open popup and add OP response handler
 				// TODO add error handling here
 				try{
 					var responseObj = JSON.parse(error.responseText);
+					if(!responseObj.SignInKey){
+						return responseObj;
+					}
 					var lastSignInKeyValue = localStorage.getItem(responseObj.SignInKey);
 					
 					var storageListener = function(e){
@@ -80,11 +83,19 @@ define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widg
 										
 						pendingAuthentication[responseObj.SignInKey] = responseObj;
 						mGlobalCommands.setPendingAuthentication(pendingAuthentication);
+						return;
 					}
 					
 				} catch (e){
 				}
+		} else{
+			try{
+				return JSON.parse(error.responseText);
+			}catch(e){
+				return {Message: error.Message, HttpCode: error.status};
+			}
 		}
+		
 	}
 	return {
 		handleAuthenticationError : handleAuthenticationError
