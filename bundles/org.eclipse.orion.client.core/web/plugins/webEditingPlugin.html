@@ -93,7 +93,8 @@ window.onload = function() {
 	provider.registerServiceProvider("orion.edit.editor", {}, {
 		id: "orion.editor",
 		name: "Orion Editor",
-		href: "../edit/edit.html#${Location}"});
+		uriTemplate: "../edit/edit.html#{Location,params*}",
+		orionTemplate: "../edit/edit.html#{,Location,params*}"});
 	
 	provider.registerServiceProvider("orion.navigate.openWith", {}, {
 			editor: "orion.editor",
