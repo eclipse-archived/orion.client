@@ -124,10 +124,12 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				});
 			},
 			_openOperationsPopup: function(){
-				dijit.popup.open({
-					popup: this._operationsDialog,
-					around: this._progressPane
-				});
+				try{
+					dijit.popup.open({
+						popup: this._operationsDialog,
+						around: this._progressPane
+					});
+				}catch(e){}
 				dijit.focus(this._operationsDialog.domNode);
 			},
 			_generateOperationsInfo: function(operations){
