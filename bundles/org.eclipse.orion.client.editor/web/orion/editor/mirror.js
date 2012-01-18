@@ -381,8 +381,9 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 			return newLines;
 		},
 		/**
-		 * Sets the CodeMirror mode to be used for highlighting. The mode must be defined in the {@link orion.mirror.Mirror}
-		 * that this <code>ModeApplier</code> was created with.
+		 * Sets the CodeMirror mode to be used for highlighting. The mode must be registered with the {@link orion.mirror.Mirror}
+		 * that this <code>ModeApplier</code> was created with. (The methods {@link orion.mirror.Mirror#defineMode} and
+		 * {@link orion.mirror.Mirror#defineMIME} can be used to register a mode with a Mirror.)
 		 * @param {String} modeSpec Mode name or MIME type.
 		 * @param {Boolean} [highlightImmediately=false]
 		 */
@@ -599,7 +600,7 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 		 * Converts a <code>MirrorLineStyle</code> to a {@link orion.textview.StyleRange[]}.
 		 * @param {orion.mirror.MirrorLineStyle} style The line style to convert.
 		 * @param {Number} [lineIndex] The line index of the line having the given style. If omitted, the returned 
-		 * {@orion.textview.StyleRange[]} objects will have offsets relative to the line, not the document.
+		 * {@link orion.textview.StyleRange[]} objects will have offsets relative to the line, not the document.
 		 * 
 		 * @returns {orion.textview.StyleRange[][]} An array of 2 elements. The first element is an {@link orion.textview.StyleRange[]}
 		 * giving the styles for the line. 
