@@ -240,89 +240,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		return location;
 	}
 	
-	function getPositionInfo(fileString) {
-		var filePath, start, end, line, offset, length;
-		// most likely this is just the hash portion of a URL.  In case not...
-		var hashSegments = fileString.split('#');
-		var postHash = hashSegments[hashSegments.length - 1];
-		// Split on "?" but only if it's part of "?line" or "?char"
-		var queryRegex = /\?(?=(?:line|char))/;
-		var querySegments = postHash.split(queryRegex);
-		filePath = makeRelative(querySegments[0]);
-		if (querySegments.length > 1) {
-			// Split on "&" but only if it's part of "&line" or "&char"
-			var segmentsRegex = /\&(?=(?:line|char))/;
-			var segments = querySegments[1].split(segmentsRegex);
-			for (var i = 0; i < segments.length; i++) {
-				var subsegments = segments[i].split('=');
-				if (subsegments.length > 1) {
-					var positions;
-					switch (subsegments[0]) {
-					case 'char':
-						positions = subsegments[1].split(',');
-						if (line === undefined) {
-							start = window.parseInt(positions[0]);
-							if (positions.length > 1) {
-								end = window.parseInt(positions[1]);
-							}
-						} else {
-							offset = window.parseInt(positions[0]);
-							if (positions.length > 1) {
-								length = window.parseInt(positions[1]);
-							}
-						}
-						break;
-					case 'line':
-						positions = subsegments[1].split(',');
-						line = window.parseInt(positions[0]);
-						break;
-					default:
-						// ignore anything unrecognized
-						break;
-					}
-				}  // ignore any unrecognized segments without '='
-			}
-		}
-		return {"filePath": filePath, "start": start, "end": end, "line": line, "offset": offset, "length": length};
-	}
-		
-	/**
-	 * Construct a URL hash that represents the given file path at the given position,
-	 * with the specified selection range. 
-	 * @param {String} filePath path of the file on the server
-	 * @param {Number} start starting position within the content of the file
-	 * @param {Number} end ending position of selection within the content of the file
-	 * @param {Number} line line number within the content of the file, used only when no start is specified
-	 * @param {Number} offset offset within the line number, used only when line is specified
-	 * @param {Number} length length of the selection, used to compute the ending point from a start or line offset
-	 * @name orion.util#hashFromPosition
-	 * @function
-	 */
-	function hashFromPosition(filePath, start, end, line, offset, length) {
-		var hash;
-		if (typeof(start) === "number") {
-			hash = '#' + filePath + "?char=" + start;
-			if (typeof(end) === "number") {
-				hash = hash + "," + end;
-			} else if (typeof(length) === "number") {
-				hash = hash +  "," + (start + length);
-			}
-			return hash;
-		}
-		if (typeof(line) === "number") {
-			hash = '#' + filePath + "?line=" + line;
-			if (typeof(offset) === "number") {
-				hash = hash + "&char=" + offset;
-				if (typeof(length) === "number") {
-					hash = hash + "," + (offset + length);
-				}
-			}
-			return hash;
-		}
-		return "#"+filePath;
-	}
-		
-	
 	function makeFullPath(location) {
 		if (!location) {
 			return location;
@@ -458,8 +375,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		getUserText: getUserText,
 		openInNewWindow: openInNewWindow,
 		followLink: followLink,
-		getPositionInfo: getPositionInfo,
-		hashFromPosition: hashFromPosition,
 		makeRelative: makeRelative,
 		makeFullPath: makeFullPath,
 		isAtRoot: isAtRoot,

@@ -167,13 +167,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 						if (!foundValidHit) {
 							foundValidHit = true;
 						}
-						var loc;
-						// if we know what to highlight...
-						if (token && hit.LineNumber) {
-							loc = mUtil.hashFromPosition(hit.Location, /* start */ null, /* end */ null, hit.LineNumber, hit.Offset, token.length);
-						} else {
-							loc = hit.Location;
-						}
+						var loc = hit.Location;
 						resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, name: hit.Name, lastModified: hit.LastModified});
 						
 					}
@@ -216,13 +210,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 						if (hit.LineNumber) { // FIXME LineNumber === 0 
 							dojo.place(document.createTextNode(' (Line ' + hit.LineNumber + ')'), hitLink);
 						}
-						var loc;
-						// if we know what to highlight...
-						if (token && hit.LineNumber) {
-							loc = mUtil.hashFromPosition(hit.Location,  null, null, hit.LineNumber, hit.Offset, token.length);
-						} else {
-							loc = hit.Location;
-						}
+						var loc = hit.Location;
 						hitLink.setAttribute('href', require.toUrl("edit/edit.html") + "#" + loc);
 						col.appendChild(hitLink);
 						
