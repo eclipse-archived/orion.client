@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define */
+/*global window define */
 
 define(["orion/assert", "orion/URITemplate", "orion/PageUtil"], function(assert, URITemplate, PageUtil) {
 	var tests = {};
@@ -26,6 +26,29 @@ define(["orion/assert", "orion/URITemplate", "orion/PageUtil"], function(assert,
 		assert.equal(PageUtil.matchResourceParameters("http://localhost#" + aResource + ",a=1,b=2,test=pass").test, "pass");
 		assert.equal(PageUtil.matchResourceParameters("http://localhost#" + aResource + ",a=1,b=2,test=" + encodeURIComponent("p,a,s,s")).test, "p,a,s,s");
 		assert.equal(PageUtil.matchResourceParameters("http://localhost#" + aResource + ",a=1,b=2,test=pass,resource=bad").resource, aResource);
+	};
+	
+	tests.testLocationBasicResourceParameters = function() {
+		try {
+			window.location.hash = aResource;
+			assert.equal(PageUtil.matchResourceParameters().resource, aResource);
+			
+			window.location.hash = encodeURIComponent(aResource);
+			assert.equal(PageUtil.matchResourceParameters().resource, aResource);
+	
+			window.location.hash = aResource + ",a=1,b=2,test=pass";
+			assert.equal(PageUtil.matchResourceParameters().a, "1");
+			assert.equal(PageUtil.matchResourceParameters().b, "2");
+			assert.equal(PageUtil.matchResourceParameters().test, "pass");
+			
+			window.location.hash = aResource + ",a=1,b=2,test=" + encodeURIComponent("p,a,s,s");
+			assert.equal(PageUtil.matchResourceParameters().test, "p,a,s,s");
+			
+			window.location.hash = aResource + ",a=1,b=2,test=pass,resource=bad";
+			assert.equal(PageUtil.matchResourceParameters().resource, aResource);
+		} finally {
+			window.location.hash = "";
+		}
 	};
 
 	tests.testURITemplateResourceParameters = function() {		
