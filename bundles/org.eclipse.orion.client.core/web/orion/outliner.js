@@ -10,7 +10,7 @@
  ******************************************************************************/
  /*global define document window*/
 
-define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands) {
+define(['dojo', 'orion/util', 'orion/commands', 'orion/URITemplate'], function(dojo, mUtil, mCommands, URITemplate) {
 
 	/**
 	 * Constructs a new Outliner with the given options.
@@ -128,7 +128,7 @@ define(['dojo', 'orion/util', 'orion/commands'], function(dojo, mUtil, mCommands
 				    line = element.line || null,
 				    offset = element.column || null,
 				    text = element.text || null,
-				    href = mUtil.hashFromPosition(title, start, end, line, offset, null, text);
+				    href = new URITemplate("#{,resource,params*}").expand({resource: title, params: element});
 				this._createLink(element.label, href, elementNode);
 			} else if (element.label) {
 				dojo.place(document.createTextNode(element.label), elementNode, "only");
