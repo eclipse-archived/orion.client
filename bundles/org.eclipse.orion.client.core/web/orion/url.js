@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/* global define */
+/*global define */
 define(function() {
 	var buildMap = {};
 	function jsEscape(text) {
