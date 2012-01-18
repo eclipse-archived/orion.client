@@ -403,6 +403,9 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 		 * operation, and will not dispatch a {@link #event:HighlightEvent}.
 		 */
 		highlight: function(startLine, endLine, partial) {
+			if (!this.mode) {
+				return;
+			}
 			var lineCount = this.model.getLineCount();
 			startLine = typeof startLine === "undefined" ? 0 : startLine;
 			endLine = typeof endLine === "undefined" ? lineCount - 1 : Math.min(endLine, lineCount - 1);
@@ -730,14 +733,16 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 				modeApplier.highlight(lineIndex, Math.min(lineIndex + LINESTYLE_OVERSHOOT, lineCount - 1), true /*don't dispatch*/);
 				style = modeApplier.getLineStyle(lineIndex);
 			}
-			// Now we have a style for the line. It may not be correct in the case where lineIndex is at the end of a large
-			// buffer. But in that case, the highlight job kicked off by ModelChanged will eventually reach it and fix it up.
-			var rangesAndErrors = modeApplier.toStyleRangesAndErrors(style, lineIndex);
-			if (rangesAndErrors) {
-				e.ranges = rangesAndErrors[0];
-				
-				// TODO: deal with error annotations in rangesAndErrors[1]
-				// We should use code from aSyncStyler here
+			if (style) {
+				// Now we have a style for the line. It may not be correct in the case where lineIndex is at the end of a large
+				// buffer. But in that case, the highlight job kicked off by ModelChanged will eventually reach it and fix it up.
+				var rangesAndErrors = modeApplier.toStyleRangesAndErrors(style, lineIndex);
+				if (rangesAndErrors) {
+					e.ranges = rangesAndErrors[0];
+
+					// TODO: deal with error annotations in rangesAndErrors[1]
+					// We should use code from aSyncStyler here
+				}
 			}
 		},
 		/** @private */
