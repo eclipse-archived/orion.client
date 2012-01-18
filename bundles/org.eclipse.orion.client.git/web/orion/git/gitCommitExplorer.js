@@ -11,8 +11,8 @@
 
 /*global define console document */
 
-define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', 'orion/compare/compare-container'], 
-		function(dojo, mExplorer, mUtil, mDiffProvider , mCompareContainer) {
+define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/breadcrumbs'], 
+		function(dojo, mExplorer, mUtil, mDiffProvider , mCompareContainer, mBreadcrumbs) {
 	var exports = {};
 
 	exports.GitCommitExplorer = (function() {
@@ -32,6 +32,42 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			this.checkbox = false;
 		}
 		
+		GitCommitExplorer.prototype.handleError = function(error, registry) {
+			var display = {};
+			display.Severity = "Error";
+			display.HTML = false;
+			try {
+				var resp = JSON.parse(error.responseText);
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+			} catch (Exception) {
+				display.Message = error.message;
+			}
+			registry.getService("orion.page.message").setProgressResult(display);
+			
+			if (error.status === 404) {
+				// Create the page skeleton
+				var repositoryPageSkeleton =
+					"<div id=\"mainNode\" class=\"settings\">" +	
+						"<div class=\"displayTable\">" + 
+							"<h1>No Commits</h1>" +
+						"</div>" + 
+					"</div>";
+				
+				var parentNode = dojo.byId(this.parentId);
+				dojo.place(repositoryPageSkeleton, parentNode, "only");
+				
+				this.initTitleBar();
+			}
+		};
+		
+		GitCommitExplorer.prototype.changedItem = function(parent, children) {
+			this.redisplay();
+		};
+		
+		GitCommitExplorer.prototype.redisplay = function(){
+			this.display(dojo.hash());
+		};
+		
 		GitCommitExplorer.prototype.display = function(location){
 			var that = this;
 			var progressService = this.registry.getService("orion.page.message");
@@ -48,39 +84,63 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 					} else if (resp.Children.length == 1 && resp.Children[0].Type === "Commit") {
 						var commits = resp.Children;
 						
-						that.initTitleBar(commits[0]);
-		
-						that.displayCommit(commits[0]);
-						that.displayTags(commits[0]);
-						that.displayDiffs(commits[0]);
+						that.registry.getService("orion.git.provider").getGitClone(resp.CloneLocation).then(
+							function(resp){
+								var repositories = resp.Children;
+								
+								that.initTitleBar(commits[0], repositories[0]);
+				
+								that.displayCommit(commits[0]);
+								that.displayTags(commits[0]);
+								that.displayDiffs(commits[0]);
+							}, function () {
+								that.handleError(error, that.registry);
+							}
+						);
 					}
+					
+					progressService.setProgressMessage("");
 				}, function(error){
 					that.handleError(error, that.registry);
 				}
 			);
 		};
 		
-		GitCommitExplorer.prototype.initTitleBar = function(commit){
+		GitCommitExplorer.prototype.initTitleBar = function(commit, repository){
 			var that = this;
 			var pageTitle = dojo.byId("pageTitle");
 			var item = {};
 			
 			if (commit){
-				pageTitle.innerHTML = commit.Message;
+				pageTitle.innerHTML = "Git Commit";
+				
+				item.Name = commit.Name;
+				item.Parents = [];
+				item.Parents[0] = {};
+				item.Parents[0].Name = repository.Name;
+				item.Parents[0].Location = repository.Location;
+				item.Parents[0].ChildrenLocation = repository.Location;
+				item.Parents[1] = {};
+				item.Parents[1].Name = "Repositories";
 			} else {
-				pageTitle.innerHTML = "Git Commit";	
+				pageTitle.innerHTML = "Git Commit";
+				
 				item.Name = "";
 			}
 			
-//			var location = dojo.byId("location");
-//			var breadcrumb = new mBreadcrumbs.BreadCrumbs({
-//				container: location,
-//				resource: item,
-//				makeHref:function(seg, location){
-//					console.info(seg + " " + location);
-//					that.makeHref(seg, location);
-//				}
-//			});		
+			var location = dojo.byId("location");
+			var breadcrumb = new mBreadcrumbs.BreadCrumbs({
+				container: location,
+				resource: item,
+				makeHref:function(seg, location){
+					console.info(seg + " " + location);
+					that.makeHref(seg, location);
+				}
+			});		
+		};
+		
+		GitCommitExplorer.prototype.makeHref = function(seg, location) {
+			seg.href = "/git/git-repository.html#" + (location ? location : "");
 		};
 
 		GitCommitExplorer.prototype.displayCommit = function(commit){
@@ -207,45 +267,51 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 		GitCommitExplorer.prototype.displayTags = function(commit){
 			var tags = commit.Tags;
 			
-			var tagSkeleton = 
-			"<div class=\"displayTable\">" + 
-				"<section style=\" width: 100%; border-bottom: 1px solid #EEEEEE; margin: 0; padding: 0;\">" +
-				"<div class=\"vbox\" style=\"width: 100%\">" +
-				"<div class=\"hbox\">" +
-				"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Tags</h1></div>"+
-				"<div id=\"remoteSectionActionsArea\" class=\"pageActions\"></div>" +
-				"</div>" +
-				"</div>" +
-				"</section>" +		
-				"<section class=\"extension-settings-content\">" +
-				"<div class=\"extension-settings\">" +
-					"<list id=\"tagNode\" class=\"extension-settings-list\">" +
-					"</list>" +
-				"</div>" + 
-				"</section>" + 
-			"</div>";	
+			var tagSkeleton;
+			
+			if (tags == null || tags.length === 0){
+				tagSkeleton = 
+					"<div class=\"displayTable\">" + 
+						"<section style=\" width: 100%; border-bottom: 1px solid #EEEEEE; margin: 0; padding: 0;\">" +
+						"<div class=\"vbox\" style=\"width: 100%\">" +
+						"<div class=\"hbox\">" +
+						"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">No Tags</h1></div>"+
+						"<div id=\"tagSectionActionsArea\" class=\"pageActions\"></div>" +
+						"</div>" +
+						"</div>" +
+						"</section>"
+					"</div>";	
+			} else {
+				tagSkeleton = 
+					"<div class=\"displayTable\">" + 
+						"<section style=\" width: 100%; border-bottom: 1px solid #EEEEEE; margin: 0; padding: 0;\">" +
+						"<div class=\"vbox\" style=\"width: 100%\">" +
+						"<div class=\"hbox\">" +
+						"<div class=\"vbox stretch details-view\"><h1 style=\"padding-top: 4px; border-bottom: none;\">Tags</h1></div>"+
+						"<div id=\"tagSectionActionsArea\" class=\"pageActions\"></div>" +
+						"</div>" +
+						"</div>" +
+						"</section>" +		
+						"<section class=\"extension-settings-content\">" +
+						"<div class=\"extension-settings\">" +
+							"<list id=\"tagNode\" class=\"extension-settings-list\">" +
+							"</list>" +
+						"</div>" + 
+						"</section>" + 
+					"</div>";	
+			}
+			
+			
 			
 			var parentNode = dojo.byId("mainNode");
 			dojo.place(tagSkeleton, parentNode);
 			
-			if (tags.length === 0){
-				this.renderNoTag();
-				return;
-			}
-			
+			this.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.addTag", 2000, "tagSectionActionsArea");
+			this.registry.getService("orion.page.command").renderCommands(dojo.byId("tagSectionActionsArea"), "dom", commit, this, "tool", false);
+
 			for(var i=0; (i<tags.length && i<10);i++){
 				this.renderTag(tags[i]);
 			}
-		};
-		
-		GitCommitExplorer.prototype.renderNoTag = function(){
-			var extensionListItemCollapsed = dojo.create( "div", { "class":"extension-list-item-collaped" }, dojo.byId("tagNode") );
-			var extensionListItem = dojo.create( "div", { "class":"vbox extension-list-item" }, extensionListItemCollapsed );
-			var horizontalBox = dojo.create( "div", { "class":"hbox" }, extensionListItem );
-			
-			var detailsView = dojo.create( "div", { "class":"vbox stretch details-view"}, horizontalBox );
-			var title = dojo.create( "span", { "class":"extension-title", innerHTML: "No tags."}, detailsView );
-			dojo.create( "div", null, detailsView );
 		};
 
 		GitCommitExplorer.prototype.renderTag = function(tag){

@@ -1234,8 +1234,8 @@ var exports = {};
 					}
 					serviceRegistry.getService("orion.git.provider").doAddTag(item.Location, tagName).then(
 						function(jsonData, secondArg) {
-							if (explorer.displayTags) {
-								dojo.hitch(explorer, explorer.displayTags)(jsonData.Tags, null);
+							if (explorer.changedItem) {
+								dojo.hitch(explorer, explorer.changedItem)();
 							} else {
 								var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
 								var tr = dojo.byId(trId);
@@ -1269,12 +1269,7 @@ var exports = {};
 				var item = data.items;
 				if (confirm("Are you sure you want to delete tag " + item.Name + "?")) {
 					serviceRegistry.getService("orion.git.provider").doRemoveTag(item.Location).then(function() {
-						if (explorer.changedItem) {
-							dojo.hitch(explorer, explorer.changedItem)(item.parent);
-						} else if (explorer.displayCommit) {
-							// TODO: call displayTags and reload tags only
-							dojo.hitch(explorer, explorer.displayCommit)(item.CommitLocation + "?page=1&pageSize=1", null);
-						}
+						dojo.hitch(explorer, explorer.changedItem)(item.parent);
 					}, displayErrorOnStatus);
 				}
 			},
