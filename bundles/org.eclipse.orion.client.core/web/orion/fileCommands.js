@@ -12,8 +12,8 @@
 /*global window define orion */
 /*browser:true*/
 
-define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
-	function(require, dojo, mUtil, mCommands, mRegex, mContentTypes){
+define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
+	function(require, dojo, mUtil, mCommands, mRegex, mContentTypes, URITemplate){
 
 	/**
 	 * Utility methods
@@ -810,30 +810,12 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				editors.push({
 					id: id,
 					name: serviceRef.getProperty("name"),
-					href: serviceRef.getProperty("href")
+					uriTemplate: new URITemplate(serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate"))
 				});
 			}
 			return editors;
 		}
-		function getObject(parent, fields) {
-			if (parent === null || typeof parent === "undefined") { return parent; }
-			fields = fields.split(".");
-			var value;
-			for (var i=0; i < fields.length; i++) {
-				value = parent[fields[i]];
-				parent = value;
-				if (value === null || typeof value === "undefined") { break; }
-			}
-			return value;
-		}
-		function makeHrefCallback(editorHref) {
-			return function(item) {
-				// String substitution: replace ${foo} with item.foo, ${foo.bar} with item.foo.bar, etc.
-				return editorHref.replace(/\$\{([\d\w-_$.]+)\}/g, function(str, properties) {
-					return getObject(item, properties);
-				});
-			};
-		}
+
 		function toNamePattern(exts, filenames) {
 			exts = exts.map(function(ext) { return mRegex.escape(ext); });
 			filenames = filenames.map(function(ext) { return mRegex.escape(ext); });
@@ -891,7 +873,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						filenames = filenames.concat(contentType.filename);	
 					}
 				}
-				var href = editor.href;
+				var uriTemplate = editor.uriTemplate;
 				var validationProperties = { Directory: false, Name: toNamePattern(exts, filenames) };
 				var properties = {
 						name: editor.name || editor.id,
@@ -903,7 +885,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand
 					};
 				// Pretend that this is a real service
-				var fakeService = { run: makeHrefCallback(href) };
+				var fakeService = { run: uriTemplate.expand.bind(uriTemplate) };
 				fileCommands.push({properties: properties, service: fakeService});
 			}
 		}
