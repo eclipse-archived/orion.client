@@ -548,6 +548,13 @@ exports.TwoWayCompareContainer = (function() {
 		this._commandService.renderCommands(commandSpanId, "dom", that, that, "tool");
 	};
 	
+	TwoWayCompareContainer.prototype.gotoMatch = function(lineNumber, match, newMatch, defaultGap){	
+		var offsetRight = this._textViewRight.getModel().getLineStart(lineNumber) + match.startIndex;
+		this._editorRight.moveSelection(offsetRight, offsetRight + (match.length ? match.length : defaultGap));
+		var offsetLeft = this._textViewLeft.getModel().getLineStart(lineNumber) + newMatch.startIndex;
+		this._editorLeft.moveSelection(offsetLeft, offsetLeft + newMatch.length);
+	};
+	
 	TwoWayCompareContainer.prototype.nextDiff = function(){	
 		this._compareMatchRenderer.nextDiff();
 	};
