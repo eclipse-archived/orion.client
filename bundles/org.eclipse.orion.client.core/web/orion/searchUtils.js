@@ -156,18 +156,18 @@ orion.searchUtils.generateInFileQuery = function(searchStr) {
 	return inFileQuery;
 };
 	
-orion.searchUtils.replaceRegEx = function(text, regEx, replaceStr){
+orion.searchUtils.replaceRegEx = function(text, regEx, replacingStr){
 	var regexp = new RegExp(regEx.pattern, regEx.flags);
-	return text.replace(regexp, replaceStr); 
+	return text.replace(regexp, replacingStr); 
 	
 };
 
-orion.searchUtils.replaceStringLiteral = function(text, keyword, replaceStr){
+orion.searchUtils.replaceStringLiteral = function(text, keyword, replacingStr){
 	var regexp = mRegex.parse("/" + keyword + "/gim");
-	return orion.searchUtils.replaceRegEx(text,regexp, replaceStr);
+	return orion.searchUtils.replaceRegEx(text,regexp, replacingStr);
 };
 
-orion.searchUtils.replaceCheckedMatches = function(text, replaceStr, originalMatches, checkedMatches, defaultMatchLength){
+orion.searchUtils.replaceCheckedMatches = function(text, replacingStr, originalMatches, checkedMatches, defaultMatchLength){
 	var gap = defaultMatchLength;
 	var startIndex = 0;
 	var replacedStr = "";
@@ -187,8 +187,8 @@ orion.searchUtils.replaceCheckedMatches = function(text, replaceStr, originalMat
 			}
 		}
 		if(needReplace){
-			newMatches.push({startIndex: replacedStr.length, length: replaceStr.length});
-			replacedStr = replacedStr + replaceStr;
+			newMatches.push({startIndex: replacedStr.length, length: replacingStr.length});
+			replacedStr = replacedStr + replacingStr;
 		} else {
 			newMatches.push({startIndex: replacedStr.length, length: gap});
 			replacedStr = replacedStr + text.substring(originalMatches[i].startIndex, originalMatches[i].startIndex + gap);

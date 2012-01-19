@@ -660,6 +660,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					var newStr;
 					if(!checked){
 						newStr = lineStringOrigin;
+						for(var k = 0; k < fileModelNode.children[startNumber].matches.length; k++ ){
+							fileModelNode.children[startNumber+k].newMatches = fileModelNode.children[startNumber+k].matches;
+						}
 					} else{
 						var result =  mSearchUtils.replaceCheckedMatches(lineStringOrigin, replaceStr, originalMatches, checkedMatches, this.queryObj.inFileQuery.searchStrLength);
 						newStr = result.replacedStr;
