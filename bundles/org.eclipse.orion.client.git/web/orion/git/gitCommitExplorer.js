@@ -133,7 +133,6 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 				container: location,
 				resource: item,
 				makeHref:function(seg, location){
-					console.info(seg + " " + location);
 					that.makeHref(seg, location);
 				}
 			});		
@@ -191,12 +190,18 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			
 			var detailsView = dojo.create( "div", { "class":"vbox stretch details-view"}, horizontalBox );
 			
-			dojo.create( "span", { "class":"extension-title", innerHTML: commit.Message }, detailsView );
+			dojo.create( "div", {"style":"padding-top:10px"}, detailsView );
+			dojo.create( "span", { "class":"extension-description", innerHTML: " commit: " + commit.Name}, detailsView );
+			
+			if (commit.Parents && commit.Parents.length > 0){
+				dojo.create( "div", null, detailsView );
+				
+				dojo.place(document.createTextNode("parent: "), detailsView);
+				link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, detailsView);
+				dojo.place(document.createTextNode(commit.Parents[0].Name), link);
+			}
 			
 			dojo.create( "div", {"style":"padding-top:10px"}, detailsView );
-			dojo.create( "span", { "class":"extension-description", innerHTML: " SHA " + commit.Name}, detailsView );
-			
-			dojo.create( "div", null, detailsView );
 			dojo.create( "span", { "class":"extension-description", 
 				innerHTML: " authored by " + commit.AuthorName + " (" + commit.AuthorEmail
 				+ ") on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView );
@@ -204,6 +209,18 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			dojo.create( "div", null, detailsView );
 			dojo.create( "span", { "class":"extension-description", 
 				innerHTML: "committed by " + commit.CommitterName  + " (" + commit.CommitterEmail + ")"}, detailsView );
+			
+			var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
+			
+			var div = dojo.create( "div", {"style":"padding-top:20px; padding-left:20px"}, detailsView );
+			dojo.create( "span", { "class":"extension-title", innerHTML: commitMessage0 }, div );
+			
+			var commitMessage1 = commit.Message.substring(commitMessage0.length + 1, commit.Message.length);
+			
+			if (commitMessage1.length > 0){
+				div = dojo.create( "div", {"style":"padding-left:20px"}, detailsView );
+				dojo.place(document.createTextNode(commitMessage1), div);
+			}
 		};
 		
 		// Git diffs
