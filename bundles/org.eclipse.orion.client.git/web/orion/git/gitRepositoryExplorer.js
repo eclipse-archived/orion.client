@@ -554,7 +554,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", null, detailsView );
 		
 //		var description = dojo.create( "span", { "class":"extension-description", 
-//			innerHTML: "You have no outgoing and incoming commits."}, detailsView );	
+//			innerHTML: "You have no outgoing or incoming commits."}, detailsView );	
 	};
 		
 	GitRepositoryExplorer.prototype.renderRemoteBranch = function(remoteBranch){
@@ -684,7 +684,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", null, detailsView );
 		
 		var description = dojo.create( "span", { "class":"extension-description", 
-			innerHTML: "You have no outgoing and incoming commits."}, detailsView );	
+			innerHTML: "You have no outgoing or incoming commits."}, detailsView );	
 	};
 		
 	GitRepositoryExplorer.prototype.renderCommit = function(commit, outgoing){
@@ -835,7 +835,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", null, detailsView );
 		
 //		var description = dojo.create( "span", { "class":"extension-description", 
-//			innerHTML: "You have no outgoing and incoming commits."}, detailsView );	
+//			innerHTML: "You have no outgoing or incoming commits."}, detailsView );	
 	};
 		
 	GitRepositoryExplorer.prototype.renderTag = function(tag){
@@ -929,7 +929,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", null, detailsView );
 		
 //		var description = dojo.create( "span", { "class":"extension-description", 
-//			innerHTML: "You have no outgoing and incoming commits."}, detailsView );	
+//			innerHTML: "You have no outgoing or incoming commits."}, detailsView );	
 	};
 	
 	GitRepositoryExplorer.prototype.renderRemote = function(remote){
