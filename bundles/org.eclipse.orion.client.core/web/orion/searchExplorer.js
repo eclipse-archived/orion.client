@@ -403,7 +403,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		if(model.children){
 			for(var j = 0; j < model.children.length; j++){
 				if(!(model.children[j].checked === false)){
-					matchesReplaced += model.children[j].matches.length;
+					matchesReplaced += 1;//model.children[j].matches.length;
 				}
 			}
 		}
@@ -622,6 +622,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	SearchResultModel.prototype.generateNewContents = function( fileModelNode, replaceStr, forceGenerate){
 		if(fileModelNode){
 			var fileContents = fileModelNode.contents;
+			if(!fileContents){
+				return;
+			}
 			var updating;
 			if(fileModelNode.newContents && !forceGenerate){
 				updating = true;
@@ -632,23 +635,37 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			for(var i = 0; i < fileContents.length ; i++){
 				var lineStringOrigin = fileContents[i];
 				var changingLine = false;
-				var checked = true;
+				var checked = false;
+				var fullChecked = false;
+				var checkedMatches = [];
+				var originalMatches;
+				var startNumber = 0;
 				for(var j = 0; j < fileModelNode.children.length; j++){
 					var lnumber = fileModelNode.children[j].lineNumber - 1;
 					if(lnumber === i){
-						checked = fileModelNode.children[j].checked;
+						startNumber = j;
+						for(var k = 0; k < fileModelNode.children[j].matches.length; k++ ){
+							if(fileModelNode.children[j+k].checked !== false){
+								checkedMatches.push(k);
+							}
+						}
+						checked = (checkedMatches.length > 0);
+						fullChecked = (checkedMatches.length === fileModelNode.children[j].matches.length);
+						originalMatches = fileModelNode.children[j].matches; 
 						changingLine = true;
 						break;
 					}
 				}
 				if(changingLine){
 					var newStr;
-					if(checked === false){
+					if(!checked){
 						newStr = lineStringOrigin;
-					} else if (this.queryObj.inFileQuery.wildCard){
-						newStr = mSearchUtils.replaceRegEx(lineStringOrigin, this.queryObj.inFileQuery.regExp, replaceStr);
-					} else {
-						newStr = mSearchUtils.replaceStringLiteral(lineStringOrigin, this.queryObj.inFileQuery.searchStr, replaceStr);
+					} else{
+						var result =  mSearchUtils.replaceCheckedMatches(lineStringOrigin, replaceStr, originalMatches, checkedMatches, this.queryObj.inFileQuery.searchStrLength);
+						newStr = result.replacedStr;
+						for(var k = 0; k < fileModelNode.children[startNumber].matches.length; k++ ){
+							fileModelNode.children[startNumber+k].newMatches = result.newMatches;
+						}
 					}
 					if(updating){
 						fileModelNode.newContents[i] = newStr;
@@ -680,8 +697,16 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					}
 					if(result){
 						var lineNumber = i+1;
-						var detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + ",line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
-						fileModelNode.children.push(detailNode);
+						if(this.queryObj.replace === null){
+							var detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + ",line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
+							fileModelNode.children.push(detailNode);
+						} else {
+							for(var j = 0; j < result.length; j++){
+								matchNumber = j+1;
+								var detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, matchNumber: matchNumber, name: lineStringOrigin, location: fileModelNode.location + "-" + lineNumber + "-" + matchNumber};
+								fileModelNode.children.push(detailNode);
+							}
+						}
 						totalMatches += result.length;
 					}
 				}
@@ -816,9 +841,15 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				if(this.explorer.model.currentFileIndex === fileItemIndex && this.explorer.model.currentDetailIndex === fileDetailItemIndex) {
 					return;
 				}
+				rebuildPreview = (fileItemIndex !== this.explorer.model.currentFileIndex);
 				this.deselectElement();
 				this.explorer.model.setCurrent(fileItemIndex, fileDetailItemIndex);
 				dojo.toggleClass(this.explorer.model.getId(item), "currentSearchMatch", true);
+				
+				if(rebuildPreview){
+					this.explorer.buildPreview();
+				}
+				this.explorer.twoWayCompareContainer.gotoMatch(item.lineNumber-1, item.matches[item.matchNumber-1], item.newMatches[item.matchNumber-1], this.explorer.model.queryObj.inFileQuery.searchStrLength );
 			}
 		}
 	};
@@ -853,12 +884,74 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
+	SearchResultRenderer.prototype.renderDetailElement = function(item, tableRow, spanHolder){
+		var linkSpan = this.getDetailElement(item, tableRow, spanHolder);
+		if(this.explorer._state === "result_view" || item.matches.length <= 1){
+			dojo.place(document.createTextNode(item.lineNumber + " : "), linkSpan, "last");
+		} else {
+			dojo.place(document.createTextNode(item.lineNumber + "(" + item.matchNumber+ ") : "), linkSpan, "last");
+		}
+		var startIndex = 0;
+		var gap = this.explorer.model.queryObj.inFileQuery.searchStrLength;
+		for(var i = 0; i < item.matches.length; i++){
+			if(startIndex >= item.name.length)
+				break;
+			if(this.explorer._state !== "result_view"){
+				if(i !== (item.matchNumber - 1)){
+					continue;
+				}
+			}
+			
+			if(startIndex !== item.matches[i].startIndex){
+				dojo.place(document.createTextNode(item.name.substring(startIndex, item.matches[i].startIndex)), linkSpan, "last");
+			}
+			var matchSegBold = dojo.create("b", null, linkSpan, "last");
+			if(this.explorer.model.queryObj.inFileQuery.wildCard){
+				gap = item.matches[i].length;
+			}
+			dojo.place(document.createTextNode(item.name.substring(item.matches[i].startIndex, item.matches[i].startIndex + gap)), matchSegBold, "only");
+			startIndex = item.matches[i].startIndex + gap;
+			if(this.explorer._state !== "result_view"){
+				break;
+			}
+		}
+		if(startIndex < (item.name.length - 1)){
+			dojo.place(document.createTextNode(item.name.substring(startIndex)), linkSpan, "last");
+		}
+	};
+		
 	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
 		if(this.explorer._state === "result_view"){
 			var link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: item.linkLocation}, spanHolder, "last");
 			return dojo.create("span", null, link, "only");
 		} else {
-			return dojo.create("span", null, spanHolder, "last");
+			var nameSpan = dojo.create("span", { className: "primaryColumn"}, spanHolder, "last");
+			//dojo.place(document.createTextNode(renderName), nameSpan, "only");
+			nameSpan.title = "Click to compare";
+			var itemId = this.explorer.model.getId(item);
+			
+			var fileItem = item.parent;
+			var fileItemIndex = this.explorer.model.getFileItemIndex(fileItem);
+			if(fileItemIndex > -1){
+				var fileDetailItemIndex = this.explorer.model.getFileDetailItemIndex(fileItemIndex, item);
+				if(this.explorer.model.currentFileIndex === fileItemIndex && this.explorer.model.currentDetailIndex === fileDetailItemIndex) {
+					dojo.toggleClass(itemId, "currentSearchMatch", true);
+				}
+			}
+			
+			var that = this;
+			dojo.connect(nameSpan, "onmouseover", nameSpan, function() {
+				nameSpan.style.cursor ="pointer";
+				dojo.toggleClass(itemId, "fileNameCheckedRow", true);
+			});
+			dojo.connect(nameSpan, "onmouseout", nameSpan, function() {
+				nameSpan.style.cursor ="default";
+				dojo.toggleClass(itemId, "fileNameCheckedRow", false);
+			});
+			dojo.connect(nameSpan, "onclick", nameSpan, function() {
+				that.selectElement(item, false);
+			});
+			return nameSpan;
 		}
 	};
 	
@@ -908,26 +1001,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					dojo.addClass(icon, "imageSprite");
 					dojo.addClass(icon, "core-sprite-rightarrow");
 					
-					var linkSpan = this.getDetailElement(item, tableRow, span);
-					dojo.place(document.createTextNode(item.lineNumber + " : "), linkSpan, "last");
-					var startIndex = 0;
-					var gap = this.explorer.model.queryObj.inFileQuery.searchStrLength;
-					for(var i = 0; i < item.matches.length; i++){
-						if(startIndex >= item.name.length)
-							break;
-						if(startIndex !== item.matches[i].startIndex){
-							dojo.place(document.createTextNode(item.name.substring(startIndex, item.matches[i].startIndex)), linkSpan, "last");
-						}
-						var matchSegBold = dojo.create("b", null, linkSpan, "last");
-						if(this.explorer.model.queryObj.inFileQuery.wildCard){
-							gap = item.matches[i].length;
-						}
-						dojo.place(document.createTextNode(item.name.substring(item.matches[i].startIndex, item.matches[i].startIndex + gap)), matchSegBold, "only");
-						startIndex = item.matches[i].startIndex + gap;
-					}
-					if(startIndex < (item.name.length - 1)){
-						dojo.place(document.createTextNode(item.name.substring(startIndex)), linkSpan, "last");
-					}
+					this.renderDetailElement(item, tableRow, span);
 				}
 			}
 			return col;
@@ -958,6 +1032,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService = commandService;
 		this.fileClient = new mFileClient.FileClient(this.registry);
 		this.checkbox = false;
+		this.defaulRows = 40;
 		this.renderer = new SearchResultRenderer({checkbox: false}, this);
 		this.totalNumber = totalNumber;
 		this.numberOnPage = resultLocation.length;
@@ -967,7 +1042,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		//result_view: viewing the seach result
 		//replace_preview: after user inputs the replace string and enters into the preview 
 		//replace_report: after user finishes preview and commits the replace
-		this._state = "result_view";
+		
+		this._state = (this.model.queryObj.replace === null ? "result_view" : "replace_preview");
+		this._replaceStr = this.model.queryObj.replace;
 		this._replacable = true;
 		this.declareCommands();
 	}
@@ -997,6 +1074,30 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			}
 		});
 	
+		var previewCurrentPageCommand = new mCommands.Command({
+			name: "Repalce Current Page",
+			tooltip: "Preview the current page with changes",
+			id: "orion.previewCurrentPage",
+			callback: function(data) {
+				that.preview();
+			},
+			visibleWhen : function(item) {
+				return that._state === "result_view";
+			}
+		});
+		
+		var previewAllPagesCommand = new mCommands.Command({
+			name: "Repalce All Pages",
+			tooltip: "Preview the all pages with changes",
+			id: "orion.previewAllPages",
+			callback: function(data) {
+				that.preview(true);
+			},
+			visibleWhen : function(item) {
+				return (that._state === "result_view") && (that.model.queryObj.start !== 0 || that.model.queryObj.rows < that.totalNumber);
+			}
+		});
+		
 		var replaceAllCommand = new mCommands.Command({
 			name: "Replace",
 			tooltip: "Replace all selected matches",
@@ -1009,15 +1110,15 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			}
 		});
 	
-		var reportFinishCommand = new mCommands.Command({
-			name: "Done",
-			tooltip: "Finish replace",
-			id: "orion.globalSearch.reportFinish",
+		var searchAgainCommand = new mCommands.Command({
+			name: "Search Again",
+			tooltip: "Search again",
+			id: "orion.globalSearch.searchAgain",
 			callback : function() {
-				return window.location.reload();
+				return that.searchAgain();
 			},
 			visibleWhen : function(item) {
-				return that._state === "report";
+				return that._state === "report" || that._state === "replace_preview";
 			}
 		});
 	
@@ -1034,14 +1135,18 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		});
 	
 		this._commandService.addCommand(saveResultsCommand, "dom");
-		this._commandService.addCommand(cancelReplaceCommand, "dom");
+		this._commandService.addCommand(previewCurrentPageCommand, "dom");
+		this._commandService.addCommand(previewAllPagesCommand, "dom");
+		//this._commandService.addCommand(cancelReplaceCommand, "dom");
+		this._commandService.addCommand(searchAgainCommand, "dom");
 		this._commandService.addCommand(replaceAllCommand, "dom");
-		this._commandService.addCommand(reportFinishCommand, "dom");
 		this._commandService.addCommandGroup("orion.searchActions.unlabeled", 200, null, null, "pageActions");
 		this._commandService.registerCommandContribution("orion.saveSearchResults", 1, "pageActions", "orion.searchActions.unlabeled");
-		this._commandService.registerCommandContribution("orion.globalSearch.cancellReplace", 2, "pageActions", "orion.searchActions.unlabeled");
-		this._commandService.registerCommandContribution("orion.globalSearch.replaceAll", 3, "pageActions", "orion.searchActions.unlabeled");
-		this._commandService.registerCommandContribution("orion.globalSearch.reportFinish", 4, "pageActions", "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("orion.previewCurrentPage", 2, "pageActions", "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("orion.previewAllPages", 3, "pageActions", "orion.searchActions.unlabeled");
+		//this._commandService.registerCommandContribution("orion.globalSearch.cancellReplace", 4, "pageActions", "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("orion.globalSearch.searchAgain", 5, "pageActions", "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("orion.globalSearch.replaceAll", 6, "pageActions", "orion.searchActions.unlabeled");
 
 		var previousPage = new mCommands.Command({
 			name : "< Previous Page",
@@ -1139,6 +1244,33 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService.registerCommandContribution("orion.search.nextPage", 6, "pageNavigationActions");
 	};
 	
+	SearchResultExplorer.prototype.preview = function(all) {
+		var replaceInputDiv = dojo.byId("search_replaceString");
+		if(replaceInputDiv){
+			var qParams = mSearchUtils.copyQueryParams(this.model.queryObj, true);
+			qParams.replace = replaceInputDiv.value;
+			if(all){
+				qParams.start = 0;
+				qParams.rows = this.totalNumber;
+			}
+			var href =  mSearchUtils.generateSearchHref(qParams);
+			window.location.href = href;
+		}
+	};
+
+	SearchResultExplorer.prototype.searchAgain = function() {
+		var qParams = mSearchUtils.copyQueryParams(this.model.queryObj, true);
+		qParams.replace = null;
+		if(qParams.rows > this.defaulRows ){
+			qParams.rows = this.defaulRows;
+		}
+		var href =  mSearchUtils.generateSearchHref(qParams);
+		if(href === window.location.href){
+			window.location.reload();
+		} else {
+			window.location.href = href;
+		}
+	};
 
 	SearchResultExplorer.prototype.replaceAll = function() {
 		var reportList = [];
@@ -1281,8 +1413,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			newFileContent: fileItem.newContents.join(this.model._lineDelimiter)
 		};
 		
-		var twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(this.registry, uiFactoryCompare, options);
-		twoWayCompareContainer.startup();
+		this.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(this.registry, uiFactoryCompare, options);
+		this.twoWayCompareContainer.startup();
 		return;
 	};
 	
@@ -1337,12 +1469,13 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService.renderCommands("pageActions", "dom", that, that, "tool");
 		if(this._replacable){
 			if(this._state === "result_view"){
-				var replaceStrDiv= dojo.create("input", {type: "search", id: "replaceString", placeholder: "replace text", title:"Type a text to replace all with"}, "pageActions", "last");
+				var replaceStrDiv= dojo.create("input", {type: "search", id: "search_replaceString", placeholder: "replace text", title:"Type a text to replace all with"}, "pageActions", "last");
 				dojo.addClass(replaceStrDiv, "searchbox");
-				dojo.connect(replaceStrDiv, "onkeypress", function(e){
-					if (e.charOrCode === dojo.keys.ENTER) {
+				dojo.connect(replaceStrDiv, "onkeyup", function(e){
+					if (e.keyCode === dojo.keys.ENTER) {
 						if (replaceStrDiv.value.length > 0) {
-							that.replacePreview(replaceStrDiv.value);
+							that.preview(e.ctrlKey);
+							//that.replacePreview(replaceStrDiv.value);
 						} 
 					}
 				});
@@ -1407,10 +1540,14 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 		
 		this.model.loadOneFileMetaData(0, function(onComplete){
-			that.initCommands();
-			that.createTree(that.parentNode, that.model);
-			that.gotoCurrent();
-			that.reportStatus("");	
+			if(that._state === "result_view"){
+				that.initCommands();
+				that.createTree(that.parentNode, that.model);
+				that.gotoCurrent();
+				that.reportStatus("");	
+			} else {
+				that.replacePreview(that._replaceStr);
+			}
 		});
 	};
 	

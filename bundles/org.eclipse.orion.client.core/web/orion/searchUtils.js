@@ -41,7 +41,7 @@ orion.searchUtils.parseQueryStr = function(queryStr) {
 	}
 	//var obj = dojo.queryToObject(queryStr);
 	var splitQ = queryStr.split("&");
-	var queryObj = {queryStr: queryStr, start:0, rows:10, sort:"Path asc"};
+	var queryObj = {queryStr: queryStr, start:0, rows:10, sort:"Path asc", replace: null};
 	for(var i=0; i < splitQ.length; i++){
 		var splitparameters = splitQ[i].split("=");
 		if(splitparameters.length === 2){
@@ -53,54 +53,32 @@ orion.searchUtils.parseQueryStr = function(queryStr) {
 				queryObj.start = parseInt(splitparameters[1]);
 			} else if(splitparameters[0] === "sort"){
 				queryObj.sort = splitparameters[1];
+			} else if(splitparameters[0] === "replace"){
+				queryObj.replace = splitparameters[1];
 			}
 		}
 	}
 	return queryObj;
 };
 
-orion.searchUtils.copyQueryParams = function(queryObj) {
+orion.searchUtils.copyQueryParams = function(queryObj, copyReplace) {
 	return {
 		sort: queryObj.sort,
 		rows: queryObj.rows,
 		start: queryObj.start,
 		searchStr: queryObj.searchStr,
-		location: queryObj.location
+		location: queryObj.location,
+		replace: copyReplace ? queryObj.replace: null
 	};
 };
 
 orion.searchUtils.generateSearchHref = function(options) {
 	var base =  require.toUrl("search/search.html");
-	var sort = "Path asc", rows = 40, start = 0 , searchStr = "", loc = "";
-	if(options){
-		if(options.sort){
-			sort = options.sort;
-		}
-		if(options.rows){
-			rows = options.rows;
-		}
-		if(options.start){
-			start = options.start;
-		}
-		if(options.searchStr){
-			searchStr = options.searchStr;
-		}
-		if(options.location){
-			loc = options.location;
-			if(loc.length > 0 && loc[loc.length -1] !== '*'){
-				loc = loc + "*";
-			}
-			if(loc !== ""){
-				loc = "+Location:" + loc;
-			}
-		}
-	}
 	return base + "#" + orion.searchUtils.generateSearchQuery(options);
 };
 
 orion.searchUtils.generateSearchQuery = function(options) {
-	var base =  require.toUrl("search/search.html");
-	var sort = "Path asc", rows = 40, start = 0 , searchStr = "", loc = "";
+	var sort = "Path asc", rows = 40, start = 0 , searchStr = "", loc = "", replace = "";
 	if(options){
 		if(options.sort){
 			sort = options.sort;
@@ -124,8 +102,11 @@ orion.searchUtils.generateSearchQuery = function(options) {
 				loc = "+Location:" + loc;
 			}
 		}
+		if(options.replace !== null && options.replace !== undefined){
+			replace = "&replace=" + options.replace;
+		}
 	}
-	return "?" + "sort=" + sort + "&rows=" + rows + "&start=" + start + "&q=" + searchStr + loc;
+	return "?" + "sort=" + sort + "&rows=" + rows + "&start=" + start + "&q=" + searchStr + loc + replace;
 };
 
 orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj) {
@@ -184,6 +165,40 @@ orion.searchUtils.replaceRegEx = function(text, regEx, replaceStr){
 orion.searchUtils.replaceStringLiteral = function(text, keyword, replaceStr){
 	var regexp = mRegex.parse("/" + keyword + "/gim");
 	return orion.searchUtils.replaceRegEx(text,regexp, replaceStr);
+};
+
+orion.searchUtils.replaceCheckedMatches = function(text, replaceStr, originalMatches, checkedMatches, defaultMatchLength){
+	var gap = defaultMatchLength;
+	var startIndex = 0;
+	var replacedStr = "";
+	var newMatches = [];
+	for(var i = 0; i < originalMatches.length; i++){
+		if(startIndex !== originalMatches[i].startIndex){
+			replacedStr = replacedStr + text.substring(startIndex, originalMatches[i].startIndex);
+		}
+		if(originalMatches[i].length){
+			gap = originalMatches[i].length;
+		}
+		var needReplace = false;
+		for (var j = 0; j < checkedMatches.length; j++){
+			if(checkedMatches[j] === i){
+				needReplace = true;
+				break;
+			}
+		}
+		if(needReplace){
+			newMatches.push({startIndex: replacedStr.length, length: replaceStr.length});
+			replacedStr = replacedStr + replaceStr;
+		} else {
+			newMatches.push({startIndex: replacedStr.length, length: gap});
+			replacedStr = replacedStr + text.substring(originalMatches[i].startIndex, originalMatches[i].startIndex + gap);
+		}
+		startIndex = originalMatches[i].startIndex + gap;
+	}
+	if(startIndex < (text.length - 1)){
+		replacedStr = replacedStr + text.substring(startIndex);
+	}
+	return {replacedStr: replacedStr, newMatches: newMatches};
 };
 
 orion.searchUtils.fullPathNameByMeta = function(parents){
