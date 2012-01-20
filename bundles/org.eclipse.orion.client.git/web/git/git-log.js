@@ -45,12 +45,12 @@ var serviceRegistry;
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 			
 			// Commit details
-			var commitDetails = new mGitCommitDetails.CommitDetails({parent: "commitDetailsPane", commandService: commandService, linkService: linkService, detailsPane: dijit.byId("orion.innerNavigator")});
+			var commitDetails = new mGitCommitDetails.CommitDetails({parent: "commitDetailsPane", commandService: commandService, linkService: linkService, detailsPane: dijit.byId("orion.gitlog")});
 			// Commit navigator
 			var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, commitDetails, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools", "pageNavigationActions");
 			
 			// global commands
-			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, navigator);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, navigator);
 			
 			//TODO this should be removed and contributed by a plug-in
 			mGitCommands.createFileCommands(serviceRegistry, commandService, navigator, "pageActions", "selectionTools");
@@ -288,7 +288,7 @@ function initTitleBar(fileClient, navigator, item, searcher){
 
 function makeRightPane(explorer){
 		// set up the splitter bar and its key binding
-		var splitArea = dijit.byId("orion.innerNavigator");
+		var splitArea = dijit.byId("orion.gitlog");
 		
 		//by default the pane should be closed
 		if(splitArea.isRightPaneOpen()){

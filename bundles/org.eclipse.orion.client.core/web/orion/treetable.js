@@ -66,6 +66,7 @@ define(['dojo'], function(dojo) {
 			this._indent = options.indent === undefined ? 16 : options.indent;
 			this._labelColumnIndex = options.labelColumnIndex === undefined ? 0 : options.labelColumnIndex;
 			this._id = options.id === undefined ? "treetable" : options.id;
+			this._tableStyle = options.tableStyle;
 			
 			// Generate the table
 			this._root = this._treeModel.getRoot(function (root) {
@@ -85,6 +86,9 @@ define(['dojo'], function(dojo) {
 			dojo.empty(this._parent);
 			var table = document.createElement('table');
 			table.id = this._id;
+			if (this._tableStyle) {
+				dojo.addClass(table, this._tableStyle);
+			}
 			this._renderer.initTable(table, this);
 			var tbody = document.createElement('tbody');
 			tbody.id = this._id+"tbody";

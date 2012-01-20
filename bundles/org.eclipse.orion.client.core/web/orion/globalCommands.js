@@ -248,7 +248,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	// BEGIN TOP BANNER FRAGMENT
 	var topHTMLFragment =
 	//Top row:  Logo + discovery links + user
-	'<div id="banner" class="layoutBlock topRowBanner">' +
+	'<div id="staticBanner" class="layoutBlock topRowBanner">' +
 		'<a id="home" class="layoutLeft primaryNav" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small.gif") + '" alt="Orion Logo"/></a>' +
 		'<div id="primaryNav" class="layoutLeft primaryNav"></div>' +
 		'<div id="globalActions" class="layoutLeft primaryNav"></div>' +
@@ -464,7 +464,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		if (toolbar) {
 			dojo.place(toolbarFragment, toolbar, "only");
 		} else {
-			toolbar = dojo.create ("div", {id: "pageToolbar", "class": "paneHeading"}, "titleArea", "after");
+			toolbar = dojo.create ("div", {id: "pageToolbar", "class": "paneHeading layoutBlock"}, "titleArea", "after");
 			dojo.place(toolbarFragment, toolbar, "only");
 		}
 		

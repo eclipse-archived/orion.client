@@ -100,7 +100,8 @@ exports.Explorer = (function() {
 				showRoot: false,
 				parent: parentId,
 				labelColumnIndex: this.renderer.getLabelColumnIndex(),
-				renderer: this.renderer
+				renderer: this.renderer,
+				tableStyle: "mainPadding"
 			});
 			this.renderer._initializeUIState();
 		},
