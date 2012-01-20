@@ -3782,8 +3782,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				textArea.style.whiteSpace = "pre";
 				textArea.style.left = "-1000px";
 				textArea.tabIndex = 1;
-				textArea.autocapitalize = false;
-				textArea.autocorrect = false;
+				textArea.autocapitalize = "off";
+				textArea.autocorrect = "off";
 				textArea.className = "viewContainer";
 				textArea.style.background = "transparent";
 				textArea.style.color = "transparent";
