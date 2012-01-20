@@ -362,31 +362,16 @@ a:hover {
     background: #ededed;
     overflow-x: auto;
     min-width: 200px;
-    padding-left: 16px;
-	padding-top: 16px;
 }
 
-.auxpaneNoPadding {
-    background: #ededed;
+.auxPadding {
+	padding-left: 8px;
+	padding-top: 4px;
 }
 
 .nihilo .dijitBorderContainer {
 	border: 0;
 	padding: 0;
-}
-
-.nihilo .dijitContentPane {
-    padding: 0;
-}
-
-.nihilo .dijitContentPane .auxpane {
-    padding-left: 16px;
-	padding-top: 16px;
-}
-
-.nihilo .dijitContentPane .mainpane {
-    padding-left: 16px;
-	padding-top: 16px;
 }
 
 .nihilo .dijitSplitContainer-child, .nihilo .dijitBorderContainer-child {
@@ -425,8 +410,11 @@ a:hover {
 .mainpane {
     background: #FFFFFF;
 	overflow: auto;
-    padding-left: 16px;
-	padding-top: 16px;
+}
+
+.mainPadding {
+	padding-left: 4px;
+	padding-top: 4px;
 }
 
 .help {
@@ -528,8 +516,8 @@ a:hover {
 	font-size: 9pt;
 	font-weight: bold;
 	color: #666666;
-	padding-left: 16px;
-	padding-right: 16px;
+	padding-left: 8px;
+	padding-right: 8px;
 }
 
 .pageToolbarLeft {
@@ -540,7 +528,7 @@ a:hover {
 .pageToolbarRight {
 	background: transparent;
 	text-align: right;
-	padding-right: 16px;
+	padding-right: 8px;
 }
 
 .slideContainer {

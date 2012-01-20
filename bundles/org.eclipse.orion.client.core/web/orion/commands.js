@@ -591,6 +591,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					child.destroy();
 				}
 			}
+			if (scope === "dom" || scope === "global") {
+				mUtil.forceLayout(parent);
+			}
 		},
 		
 		_render: function(commandItems, parent, scope, items, handler, renderType, forceText, userData, commandList, activeCommandClass, inactiveCommandClass) {
