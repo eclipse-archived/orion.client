@@ -929,6 +929,7 @@ var exports = {};
 												dojo.query(".treeTableRow").forEach(function(node, i) {
 													dojo.toggleClass(node, "outgoingCommitsdRow", false);
 												});
+											dojo.hitch(explorer, explorer.changedItem)({});
 										}, func, "Push Git Repository");
 									}, function(jsonData, secondArg) {
 										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Push Git Repository");
@@ -958,6 +959,7 @@ var exports = {};
 														dojo.query(".treeTableRow").forEach(function(node, i) {
 															dojo.toggleClass(node, "outgoingCommitsdRow", false);
 														});
+													dojo.hitch(explorer, explorer.changedItem)({});
 												}, func, "Push Git Repository");
 											}, function(jsonData, secondArg) {
 												exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Clone Git Repository");
