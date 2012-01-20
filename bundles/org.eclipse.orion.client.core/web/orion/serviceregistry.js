@@ -325,8 +325,8 @@ define(["dojo"], function(dojo){
 		/**
 		 * Registers a service with this registry.
 		 * @param {String} name the name of the service being registered
-		 * @param {Object} The service implementation
-		 * @param {Object} A JSON collection of declarative service properties
+		 * @param {Object} implementation The service implementation
+		 * @param {Object} properties A JSON collection of declarative service properties
 		 */
 		registerService: function(name, implementation, properties) {
 			var serviceId = this._entries.length;
