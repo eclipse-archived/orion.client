@@ -137,8 +137,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	 * @property {Boolean} [readonly=false] whether or not the view is read-only.
 	 * @property {Boolean} [fullSelection=true] whether or not the view is in full selection mode.
 	 * @property {Boolean} [sync=false] whether or not the view creation should be synchronous (if possible).
-	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces
-	 * @property {String|String[]} [stylesheet] one or more stylesheet URIs for the view.
+	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces.
+	 * @property {String|String[]} [stylesheet] one or more stylesheet for the view. Each stylesheet can be either a URI or a string containing the CSS rules.
 	 * @property {String} [themeClass] the CSS class for the view theming.
 	 * @property {Number} [tabSize] The number of spaces in a tab.
 	 */
@@ -755,6 +755,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 			}
 			return false;
+		},
+		/**
+		* Returns if the view is loaded.
+		* <p>
+		* @returns {Boolean} <code>true</code> if the view is loaded.
+		*
+		* @see #onLoad
+		*/
+		isLoaded: function () {
+			return !!this._clientDiv;
 		},
 		/** 
 		 * @class This is the event sent when the user right clicks or otherwise invokes the context menu of the view. 
@@ -1415,7 +1425,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					if (!recreate) {
 						var update = defaultOptions[option].update;
 						if (created && update) {
-							update.call(this, newValue);
+							if (update.call(this, newValue)) {
+								recreate = true;
+							}
 							continue;
 						}
 					}
@@ -3642,23 +3654,29 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (this._stylesheet) {
 				var stylesheet = typeof(this._stylesheet) === "string" ? [this._stylesheet] : this._stylesheet;
 				for (var i = 0; i < stylesheet.length; i++) {
-					if (this._sync) {
+					var sheet = stylesheet[i];
+					var isLink = this._isLinkURL(sheet);
+					if (isLink && this._sync) {
 						try {
 							var objXml = new XMLHttpRequest();
 							if (objXml.overrideMimeType) {
 								objXml.overrideMimeType("text/css");
 							}
-							objXml.open("GET", stylesheet[i], false);
+							objXml.open("GET", sheet, false);
 							objXml.send(null);
-							html.push("<style>");
-							html.push(objXml.responseText);
-							html.push("</style>");
-							continue;
+							sheet = objXml.responseText;
+							isLink = false;
 						} catch (e) {}
 					}
-					html.push("<link rel='stylesheet' type='text/css' href='");
-					html.push(stylesheet[i]);
-					html.push("'></link>");
+					if (isLink) {
+						html.push("<link rel='stylesheet' type='text/css' href='");
+						html.push(sheet);
+						html.push("'></link>");
+					} else {
+						html.push("<style>");
+						html.push(sheet);
+						html.push("</style>");
+					}
 				}
 			}
 			/*
@@ -3908,7 +3926,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				fullSelection: {value: true, recreate: false, update: this._setFullSelection},
 				tabSize: {value: 8, recreate: false, update: this._setTabSize},
 				expandTab: {value: false, recreate: false, update: null},
-				stylesheet: {value: [], recreate: true, update: null},
+				stylesheet: {value: [], recreate: false, update: this._setStyleSheet},
 				themeClass: {value: undefined, recreate: false, update: this._setThemeClass},
 				sync: {value: false, recreate: false, update: null}
 			};
@@ -4855,6 +4873,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._createActions();
 			this._createFrame();
 		},
+		_isLinkURL: function(string) {
+			return string.toLowerCase().lastIndexOf(".css") === string.length - 4;
+		},
 		_modifyContent: function(e, updateCaret) {
 			if (this._readonly && !e._code) {
 				return;
@@ -5424,6 +5445,72 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._setSelection(selection, true, true);
 			return true;
 		},
+		_setStyleSheet: function(stylesheet) {
+			var oldstylesheet = this._stylesheet;
+			if (!(oldstylesheet instanceof Array)) {
+				oldstylesheet = [oldstylesheet];
+			}
+			this._stylesheet = stylesheet;
+			if (!(stylesheet instanceof Array)) {
+				stylesheet = [stylesheet];
+			}
+			var document = this._frameDocument;
+			var documentStylesheet = document.styleSheets;
+			var head = document.getElementsByTagName("head")[0];
+			var changed = false;
+			var i = 0, sheet, oldsheet, documentSheet, ownerNode, styleNode, textNode;
+			while (i < stylesheet.length) {
+				if (i >= oldstylesheet.length) { break; }
+				sheet = stylesheet[i];
+				oldsheet = oldstylesheet[i];
+				if (sheet !== oldsheet) {
+					if (this._isLinkURL(sheet)) {
+						return true;
+					} else {
+						documentSheet = documentStylesheet[i+1];
+						ownerNode = documentSheet.ownerNode;
+						styleNode = document.createElement('STYLE');
+						textNode = document.createTextNode(sheet);
+						styleNode.appendChild(textNode);
+						head.replaceChild(styleNode, ownerNode);
+						changed = true;
+					}
+				}
+				i++;
+			}
+			if (i < oldstylesheet.length) {
+				while (i < oldstylesheet.length) {
+					sheet = oldstylesheet[i];
+					if (this._isLinkURL(sheet)) {
+						return true;
+					} else {
+						documentSheet = documentStylesheet[i+1];
+						ownerNode = documentSheet.ownerNode;
+						head.removeChild(ownerNode);
+						changed = true;
+					}
+					i++;
+				}
+			} else {
+				while (i < stylesheet.length) {
+					sheet = stylesheet[i];
+					if (this._isLinkURL(sheet)) {
+						return true;
+					} else {
+						styleNode = document.createElement('STYLE');
+						textNode = document.createTextNode(sheet);
+						styleNode.appendChild(textNode);
+						head.appendChild(styleNode);
+						changed = true;
+					}
+					i++;
+				}
+			}
+			if (changed) {
+				this._updateStyle();
+			}
+			return false;
+		},
 		_setFullSelection: function(fullSelection, init) {
 			this._fullSelection = fullSelection;
 			
@@ -5560,15 +5647,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (this._themeClass) { viewContainerClass += " " + this._themeClass; }
 				document.body.className = viewContainerClass;
 				if (!init) {
-					if (isIE) {
-						document.body.style.lineHeight = "normal";
-					}
-					this._lineHeight = this._calculateLineHeight();
-					this._viewPadding = this._calculatePadding();
-					if (isIE) {
-						document.body.style.lineHeight = this._lineHeight + "px";
-					}
-					this.redraw();
+					this._updateStyle();
 				}
 			}
 		},
@@ -6105,6 +6184,18 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				div.rulerChanged = false;
 				div = div.nextSibling;
 			}
+		},
+		_updateStyle: function () {
+			var document = this._frameDocument;
+			if (isIE) {
+				document.body.style.lineHeight = "normal";
+			}
+			this._lineHeight = this._calculateLineHeight();
+			this._viewPadding = this._calculatePadding();
+			if (isIE) {
+				document.body.style.lineHeight = this._lineHeight + "px";
+			}
+			this.redraw();
 		}
 	};//end prototype
 	mEventTarget.EventTarget.addMixin(TextView.prototype);
