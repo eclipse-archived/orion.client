@@ -130,9 +130,11 @@ define([], function() {
 			if (!contentTypeA || !contentTypeB) { return false; }
 			if (contentTypeA.id === contentTypeB.id) { return true; }
 			else {
-				var parent = contentTypeA;
+				var parent = contentTypeA, seen = {};
 				while (parent && (parent = this.getContentType(parent['extends']))) {
 					if (parent.id === contentTypeB.id) { return true; }
+					if (seen[parent.id]) { throw new Error("Cycle: " + parent.id); }
+					seen[parent.id] = true;
 				}
 			}
 			return false;
