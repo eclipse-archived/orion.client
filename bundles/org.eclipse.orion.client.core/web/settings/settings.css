@@ -125,6 +125,14 @@ padding:4px;
 border-radius:2px;
 }
 
+.additions-light {
+float: right;
+font-size:.9em;
+color:white;
+padding:4px;
+border-radius:2px;
+}
+
 .settings h1 {
 font-size: 1.2em;
 font-weight: bold;

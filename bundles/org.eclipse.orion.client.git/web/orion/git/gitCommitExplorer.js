@@ -133,7 +133,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			var tableNode = dojo.byId( 'table' );	
 			dojo.empty( tableNode );
 			var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
-			var item = { id: "Plugins", "class":"pluginTitle", innerHTML: (commit ? "Commit Details:" :  "No Commits") };
+			var item = { id: "Plugins", "class":"pluginTitle", innerHTML: (commit ? "Commit Details" :  "No Commits") };
 			dojo.create( "div", item, titleWrapper );
 			
 			if (!commit)
@@ -208,7 +208,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			
 			var tableNode = dojo.byId( 'table' );
 			var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );
-			var item = { id: "Plugins", "class":"pluginTitle", innerHTML: "Diffs:" };
+			var item = { id: "diffHeader", "class":"pluginTitle", innerHTML: "Diffs" };
 			dojo.create( "div", item, titleWrapper );
 			
 			var content =
@@ -264,7 +264,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );
 			var item = { id: "Plugins", "class":"pluginTitle", innerHTML: ((tags && tags.length > 0) ? "Tags:" : "No Tags") };
 			dojo.create( "div", item, titleWrapper );
-			dojo.create( "div", { id: "tagSectionActionsArea", "class":"additions"}, titleWrapper );
+			dojo.create( "div", { id: "tagSectionActionsArea", "class":"additions-light"}, titleWrapper );
 			
 			this.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.addTag", 2000, "tagSectionActionsArea");
 			this.registry.getService("orion.page.command").renderCommands(dojo.byId("tagSectionActionsArea"), "dom", commit, this, "tool", false);
