@@ -443,6 +443,22 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 	}
 	
 	TextStyler.prototype = {
+		getClassNameForToken: function(token) {
+			switch (token) {
+				case "singleLineComment": return singleCommentStyle.styleClass;
+				case "multiLineComment": return multiCommentStyle.styleClass;
+				case "docComment": return docCommentStyle.styleClass;
+				case "docHtmlComment": return htmlMarkupStyle.styleClass;
+				case "tasktag": return tasktagStyle.styleClass;
+				case "doctag": return doctagStyle.styleClass;
+				case "string": return stringStyle.styleClass;
+				case "keyword": return keywordStyle.styleClass;
+				case "space": return spaceStyle.styleClass;
+				case "tab": return tabStyle.styleClass;
+				case "caretLine": return caretLineStyle.styleClass;
+			}
+			return null;
+		},
 		destroy: function() {
 			var view = this.view;
 			if (view) {
