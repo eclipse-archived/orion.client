@@ -351,11 +351,18 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	
 	/**
 	 * Create a stylized pane heading.
-	 * @param {DomNode} node the node containing the title elements.
-	 * @param {String} heading the pane heading
+	 * @param {DomNode} titleElement the node containing the title elements.
+	 * @param {String} headingLabel the pane heading
+	 * @param {String} headingId the id for the heading label
+	 * @param {String} commandId the id for command tools
+	 * @param {Object} command service for rendering commands
+	 * @param {Object} the handler for commands
+	 * @param {Boolean} isTrimmed specifies whether the caller has already trimmed the paneHeading with styling
 	 */
-	function createPaneHeading(titleElement, headingLabel, headingId, commandId, commandService, handler) {
-		dojo.addClass(titleElement, "paneHeadingContainer");
+	function createPaneHeading(titleElement, headingLabel, headingId, commandId, commandService, handler, isTrimmed) {
+		if (!isTrimmed) {
+			dojo.addClass(titleElement, "paneHeadingContainer");
+		}
 		var title = dojo.place("<span class='paneHeading'>"+headingLabel+"</span>", titleElement, "only");
 		if (headingId) {
 			title.id = headingId;
@@ -363,6 +370,25 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		if (commandService) {
 			var commands = dojo.place("<span id='" + commandId + "' class='paneHeadingToolbar'></span>", titleElement, "last");
 			commandService.renderCommands(commands, "dom", handler, handler, "tool");
+		}
+	}
+	
+	/**
+	 * Force a layout in the parent tree of the specified node, if there are layout managers assigned.
+	 *
+	 * @param {DomNode} node the node triggering new layout.
+	 */
+	function forceLayout(node) {
+		if (typeof node === "string") {
+			node = dojo.byId(node);
+		}
+		while (node) {
+			var widget = dijit.byId(node.id);
+			if (widget && typeof widget.layout === "function") {
+				widget.layout();
+				return;
+			}
+			node = node.parentNode;
 		}
 	}
 	
@@ -383,6 +409,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		getText: getText,
 		safeText: safeText,
 		setText: setText,
-		createPaneHeading: createPaneHeading
+		createPaneHeading: createPaneHeading,
+		forceLayout: forceLayout
 	};
 });
