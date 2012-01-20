@@ -31,7 +31,7 @@ exports.GitRepositoryExplorer = (function() {
 		this.checkbox = false;
 	}
 	
-	GitRepositoryExplorer.prototype.handleError = function(error, registry) {
+	GitRepositoryExplorer.prototype.handleError = function(error) {
 		var display = {};
 		display.Severity = "Error";
 		display.HTML = false;
@@ -41,42 +41,13 @@ exports.GitRepositoryExplorer = (function() {
 		} catch (Exception) {
 			display.Message = error.message;
 		}
-		registry.getService("orion.page.message").setProgressResult(display);
+		this.registry.getService("orion.page.message").setProgressResult(display);
 		
 		if (error.status === 404) {
-			// Create the page skeleton
-			var repositoryPageSkeleton =
-				"<div id=\"mainNode\" class=\"settings\">" +
-					
-					"<div class=\"displayTable\">" + 
-						"<h1>Repository</h1>" +
-						"<h2><a href=\"/git/git-repository.html#\">See all your repositories</a></h2>" +
-						"<section class=\"extension-settings-content\">" +
-						"<div class=\"extension-settings\">" +
-							"<list id=\"repositoryNode\" class=\"extension-settings-list\">" +
-								
-								"<div class=\"extension-list-item-collaped\">" +
-									"<div class=\"vbox extension-list-item\">" +
-										"<div class=\"hbox\">" +
-											"<div class=\"vbox stretch details-view\">" +
-												"<span class=\"extension-title\">Repository does not exist.</span>" +
-												"<div></div>" +
-												"<span class=\"extension-description\">Go back to the full repository list.</span>" +
-											"</div>" +
-											"<div id=\"statusActionsArea\">" +
-										"</div>" +
-									"</div>" +
-								"</div>" +
-							
-							"</list>" +
-						"</div>" + 
-						"</section>" + 
-					"</div>" + 
-									
-				"</div>";
-			
-			var parentNode = dojo.byId(this.parentId);
-			dojo.place(repositoryPageSkeleton, parentNode, "only");
+			if (error.status === 404) {
+				this.initTitleBar();
+				this.displayRepositories();
+			}
 		}
 	};
 	
@@ -114,6 +85,7 @@ exports.GitRepositoryExplorer = (function() {
 								
 				if (resp.Children.length === 0) {
 					progressService.setProgressMessage("");
+					that.displayRepositories(null, "full");
 					return;
 				} 
 				
@@ -147,7 +119,7 @@ exports.GitRepositoryExplorer = (function() {
 							that.displayBranches(repositories[0], "full");
 							that.displayRemoteBranches(repositories[0], "full");
 						}, function () {
-							that.handleError(error, that.registry);
+							dojo.hitch(that, that.handleError)(error);
 						}
 					);
 				} else if (resp.Children[0].Type === "Tag"){
@@ -162,14 +134,14 @@ exports.GitRepositoryExplorer = (function() {
 							that.displayRepositories(repositories, "mini", true);
 							that.displayTags(repositories[0], "full");
 						}, function () {
-							that.handleError(error, that.registry);
+							dojo.hitch(that, that.handleError)(error);
 						}
 					);
 				}
 				
 				progressService.setProgressMessage("");
 			}, function(error){
-				that.handleError(error, that.registry);
+				dojo.hitch(that, that.handleError)(error);
 			}
 		);
 	};
@@ -254,10 +226,18 @@ exports.GitRepositoryExplorer = (function() {
 		var tableNode = dojo.byId( 'table' );	
 		dojo.empty( tableNode );
 		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
-		var item = { id: "repositoryHeader", "class":"pluginTitle", innerHTML: "Repository" };
+		var item = { id: "repositoryHeader", "class":"pluginTitle", innerHTML: (mode === "full" ? "Repositories" : "Repository") };
 		dojo.create( "div", item, titleWrapper );
 		var subItem = { id: "branchSubHeader", innerHTML: (mode === "full" ? "" : "<a href=\"/git/git-repository.html#\">See all repositories</a>")};
 		dojo.create( "div", subItem, tableNode );
+		
+
+		if (!repositories){
+			dojo.byId("repositoryHeader").innerHTML = (mode === "full" ? "No Repositories" : "Repository Not Found");
+			if (mode === "full")
+				dojo.empty("branchSubHeader");
+			return;
+		}
 		
 		var content =	
 			'<div class="displaytable">' +
@@ -416,7 +396,7 @@ exports.GitRepositoryExplorer = (function() {
 					that.renderBranch(branches[i]);
 				}
 			}, function(error){
-				that.handleError(error, that.registry);
+				dojo.hitch(that, that.handleError)(error);
 			}
 		);
 	};
@@ -636,7 +616,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "span", { "class":"plugin-icon gitImageSprite " + imgSpriteName, "style":"vertical-align: middle;"}, horizontalBox );
 		
 		if (commit.AuthorImage) {
-			var authorImage = dojo.create("span", {"style" : "vertical-align: bottom; padding: 5px;"}, horizontalBox);
+			var authorImage = dojo.create("span", {"class":"plugin-icon"}, horizontalBox);
 			
 			var image = new Image();
 			image.src = commit.AuthorImage;
@@ -771,7 +751,7 @@ exports.GitRepositoryExplorer = (function() {
 					that.renderTag(tags[i]);
 				};
 			}, function(error){
-				that.handleError(error, that.registry);
+				dojo.hitch(that, that.handleError)(error);
 			}
 		);
 	};
@@ -842,7 +822,7 @@ exports.GitRepositoryExplorer = (function() {
 					that.renderRemote(remotes[i]);
 				};
 			}, function(error){
-				that.handleError(error, that.registry);
+				dojo.hitch(that, that.handleError)(error);
 			}
 		);
 	};

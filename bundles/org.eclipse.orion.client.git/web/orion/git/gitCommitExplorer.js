@@ -81,7 +81,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 								that.displayTags(commits[0]);
 								that.displayDiffs(commits[0]);
 							}, function () {
-								that.handleError(error, that.registry);
+								dojo.hitch(that, that.handleError)(error);
 							}
 						);
 					}	
