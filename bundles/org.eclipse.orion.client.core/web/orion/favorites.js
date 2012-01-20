@@ -63,20 +63,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			this._notifyListeners();
 		},
 		
-		/**
-		 * Checks to see if the favorite already exists
-		 * @param path the path to the favorite to search for
-		 * @return true iff the path exists in the favorites list
-		 */
-		favoriteExists: function(path) {
-			for (var i in this._favorites) {
-				if (this._favorites[i].path === path) {
-					return true;
-				}
-			}
-			return false;
-		},
-		
 		addFavoriteUrl: function(url) {
 			this.addFavorite(url, url, false, true);
 		},
