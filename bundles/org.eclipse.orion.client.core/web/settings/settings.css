@@ -11,638 +11,340 @@
 @import "../org.dojotoolkit/dojox/grid/resources/nihiloGrid.css";
 
 html,body {
-	height: 100%;
+height: 100%;
 }
 
 h1 {
-	position: relative;
-	margin-top: 18px;
+position: relative;
+margin-top: 18px;
+}
+
+select{
+font-size:1em;
+border: 1px #999 solid;
+color: #666;
+}
+
+button{
+background: white;
+   color: #666;
+   border: solid 1px #999;
+   border-radius:2px;
+   font-size:0.9em;
+}
+
+
+#pluginUrlEntry{
+   background: white;
+   color: #666;
+   border: solid 1px #999;
+   border-radius:2px;
+   font-size:0.9em;
+   padding:1px;
 }
 
 .statusPane {
-	font-weight: bold;
+font-weight: bold;
 }
 
 .categories{
-	-webkit-border-end: 1px solid #c6c9ce;
-	-webkit-border-end-width: 1px;
-	-webkit-border-end-style: solid;
-	-webkit-border-end-color: rgb(198, 201, 206);
-	-moz-border-end: 1px solid #c6c9ce;
-	-moz-border-end-width: 1px;
-	-moz-border-end-style: solid;
-	-moz-border-end-color: rgb(198, 201, 206);
-	background: -webkit-linear-gradient(rgba(234, 238, 243, 0.2), #EAEEF3), -webkit-linear-gradient(left, #EAEEF3, #EAEEF3 97%, #D3D7DB);
-	background-image: -webkit-linear-gradient(top, rgba(234, 238, 243, 0.199219), rgb(234, 238, 243)), -webkit-linear-gradient(left, rgb(234, 238, 243), rgb(234, 238, 243) 97%, rgb(211, 215, 219));
-	background: -moz-linear-gradient(rgba(234, 238, 243, 0.2), #EAEEF3), -moz-linear-gradient(left, #EAEEF3, #EAEEF3 97%, #D3D7DB);
-	background-image: -moz-linear-gradient(top, rgba(234, 238, 243, 0.199219), rgb(234, 238, 243)), -moz-linear-gradient(left, rgb(234, 238, 243), rgb(234, 238, 243) 97%, rgb(211, 215, 219));
-	
-	background-repeat-x: initial, initial;
-	background-repeat-y: initial, initial;
-	background-attachment: initial, initial;
-	background-position-x: initial, initial;
-	background-position-y: initial, initial;
-	background-origin: initial, initial;
-	background-clip: initial, initial;
-	background-color: initial;
+background: #EDEDED;
 }
-
-
 
 #content-title {
-	-webkit-padding-end: 14px;
-	-webkit-user-select: none;
-	-moz-padding-end: 14px;
-	-moz-user-select: none;
-	color: #53637D;
-	cursor: pointer;
-	font-size: 150%;
-	font-weight: normal;
-	margin: 0;
-	padding-bottom: 14px;
-	padding-top: 13px;
-	text-align: end;
-	text-shadow: white 0 1px 2px;
+font-size: 1.2em;
+font-weight: bold;
+color: #666;
+margin: 0;
+padding-bottom: 14px;
+padding-top: 13px;
+margin-right: 16px;
+text-align: right;
 }
 
-h1 {
-	display: block;
-	font-size: 1em;
-	-webkit-margin-before: 0.67em;
-	-webkit-margin-after: 0.67em;
-	-webkit-margin-start: 0px;
-	-webkit-margin-end: 0px;
-	-moz-margin-before: 0.67em;
-	-moz-margin-after: 0.67em;
-	-moz-margin-start: 0px;
-	-moz-margin-end: 0px;
-	font-weight: bold;
-}
 
 #categories > ul {
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
+list-style-type: none;
+margin: 0;
+padding: 0;
 }
 
 
 #navbar {
-	margin: 0;
-	padding: 0;
+margin: 0;
+padding: 0;
 }
 
 .navbar-item {
-	border-bottom: 1px solid transparent;
-	border-top: 1px solid transparent;
-	color: #426DC9;
-	cursor: pointer;
-	display: block;
-	font-size: 90%;
-	outline: none;
-	padding: 7px 0;
-	text-align: end;
-	text-shadow: white 0 1px 1px;
-	-webkit-padding-end: 24px;
-	-moz-padding-end: 24px;
+border-bottom: 1px solid transparent;
+border-top: 1px solid transparent;
+color: #666;
+display: block;
+font-size: 90%;
+outline: none;
+padding: 7px 0;
+text-align: right;
+padding-right:20px;
 }
 
 ul, menu, dir {
-	display: block;
-	list-style-type: disc;
-	-webkit-margin-before: 1em;
-	-webkit-margin-after: 1em;
-	-webkit-margin-start: 0px;
-	-webkit-margin-end: 0px;
-	-webkit-padding-start: 40px;
-	-moz-margin-before: 1em;
-	-moz-margin-after: 1em;
-	-moz-margin-start: 0px;
-	-moz-margin-end: 0px;
-	-moz-padding-start: 40px;
+display: block;
+list-style-type: disc;
 }
 
 .navbar-item-selected {
-	-webkit-box-shadow: 0px 1px 0px #f7f7f7;
-	-moz-box-shadow: 0px 1px 0px #f7f7f7;
-	background: -webkit-linear-gradient(left, #BBCEE9, #BBCEE9 97%, #AABEDC);
-	background: -moz-linear-gradient(left, #BBCEE9, #BBCEE9 97%, #AABEDC);
-	border-bottom: 1px solid #8FAAD9;
-	border-top: 1px solid #8FAAD9;
-	color: black;
-	text-shadow: #BBCEE9 0 1px 1px;
+background: #feff66;
+color: #666;
 }
 
 .settings {
-  	padding-left: 20px;
- 	padding-right: 20px;
+   padding-left: 20px;
+  padding-right: 40px;
+}
+
+.pluginwrapper{
+padding-bottom: 40px;
+padding-top: 24px;
+border-bottom: 1px dotted #BFBFBF;
+}
+
+.pluginTitle {
+float: left;
+font-size: 1.2em;
+font-weight: bold;
+color: #666;
+margin: 0;
+}
+
+.additions {
+float: right;
+background: #666;
+font-size:.9em;
+color:white;
+padding:4px;
+border-radius:2px;
 }
 
 .settings h1 {
-	-webkit-padding-end: 24px;
-	-webkit-user-select: none;
-	-moz-padding-end: 24px;
-	-moz-user-select: none;
-	border-bottom: 1px solid #EEE;
-	color: #53637D;
-	font-size: 150%;
-	font-weight: normal;
-	margin: 0;
-	padding-bottom: 4px;
-	padding-top: 13px;
-	text-shadow: white 0 1px 2px;
-}
-
-.displaytable {
-	#display: table;
-	width: 100%;
-}
-
-.displaytable > section > h3 + div, .displaytable > section > h3 + table {
-	padding-top: 17px;
-	padding-bottom: 20px;
-}
-
-section > div:only-of-type {
-	-webkit-box-flex: 1;
-	-moz-box-flex: 1;
-}
-
-.displaytable > section > * {
-	display: table-cell;
-	vertical-align: baseline;
-	border-bottom: 1px solid #EEE;
+font-size: 1.2em;
+font-weight: bold;
+color: #666;
+margin: 0;
+padding-bottom: 14px;
+padding-top: 13px;
+border-bottom: 1px dotted #BFBFBF;
 }
 
 .settings section {
-	-webkit-box-orient: horizontal;
-	-moz-box-orient: horizontal;
-	border-bottom: 1px solid #EEE;
-	display: -webkit-box;
-	display: -moz-box;
-	margin-top: 17px;
-	padding-bottom: 20px;
-	width:100%;
+color:#666;
+border-bottom: 1px dotted #BFBFBF;
+display: -webkit-box;
+display: -moz-box;
+margin-top: 17px;
+padding-bottom: 20px;
+width:100%;
+margin-right:16px;
 }
 
 
 .settings section > h3 {
-	margin: 0;
-	vertical-align: middle;
-	width: 130px;
-	-webkit-padding-end: 10px;
-	-moz-padding-end: 10px;
+margin: 0;
+vertical-align: middle;
+width: 130px;
+padding-right:10px;
 }
 
 .settings section > div {
-	margin: 0;
-	vertical-align: middle;
-	width: 130px;
-	-webkit-padding-end: 10px;
-	-moz-padding-end: 10px;
+margin: 0;
+vertical-align: middle;
 }
 
 .settings section > div > div{
-	margin: 10px 0;
+margin: 10px 0;
 }
 
 .settings section > div > div > label > span{
-	min-width: 145px;
-	display: inline-block;
-	min-width: 100px;
+min-width: 145px;
+display: inline-block;
+min-width: 100px;
 }
 
 .displaytable > section {
-	display: table-row;
+display: table-row;
 }
 
 .web-content-select-label {
-	min-width: 145px;
+min-width: 145px;
 }
 
 .web-content-select-label > span:only-of-type {
-	display: inline-block;
-	min-width: 100px;
+display: inline-block;
+min-width: 100px;
 }
 
-.collection {
-	-webkit-margin-end: 3em;
-	-moz-margin-end: 3em;
-	width: 12em;
+input[type="checkbox"]{
+margin: 3px 3px 3px 4px;
+margin-left: 0;
+margin-right: 0;
+position: relative;
+top: 1px;
 }
 
-.buttonselect {
-	-webkit-appearance: button;
-	-webkit-border-radius: 2px;
-	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	-webkit-padding-start: 2px;
-	-webkit-user-select: none;
-	-moz-appearance: button;
-	-moz-border-radius: 2px;
-	-moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	-moz-padding-start: 2px;
-	-moz-user-select: none;
-	background-position: center right;
-	background-repeat: no-repeat;
-	border: 1px solid #AAA;
-	color: #555;
-	font-size: inherit;
-	margin: 0;
-	overflow: hidden;
-	padding-top: 2px;
-	padding-bottom: 2px;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+.addPluginClosed{
+float:right;
+width: 10px;
+height: 10px;
+background: #FEFF66;
+background: #666;
+padding: 4px;
+color: white;
+font-size: 8pt;
+border-radius: 4px;
+top: 10px;
 }
 
-select {
-	-webkit-appearance: button;
-	-webkit-border-radius: 2px;
-	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	-webkit-padding-end: 20px;
-	-webkit-padding-start: 2px;
-	-webkit-user-select: none;
-	-moz-appearance: button;
-	-moz-border-radius: 2px;
-	-moz-padding-end: 20px;
-	-moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	-moz-padding-start: 2px;
-	-moz-user-select: none;
-	background-image: url("../images/select.png"), -webkit-linear-gradient(#fafafa, #f4f4f4 40%, #e5e5e5);
-	background-image: url("../images/select.png"), -moz-linear-gradient(#fafafa, #f4f4f4 40%, #e5e5e5);
-	background-position: center right;
-	background-repeat: no-repeat;
-	border: 1px solid #AAA;
-	color: #555;
-	font-size: inherit;
-	margin: 0;
-	overflow: hidden;
-	padding-top: 2px;
-	padding-bottom: 2px;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+.interactionOpen {
+border-bottom: 1px dotted #BFBFBF;
+height: 30px;
+padding-bottom: 5px;
+padding-top: 5px;
+margin-right:16px;
+-webkit-padding-start: 5px;
+-webkit-padding-end: 4px;
+-webkit-transition: padding 500ms, height 400ms, opacity 800ms;
+-moz-padding-start: 4px;
+-moz-padding-end: 3px;
+-moz-transition: padding 500ms, height 400ms, opacity 800ms;
+-ms-padding-start: 4px;
+-ms-padding-end: 3px;
+-ms-transition: padding 500ms, height 400ms, opacity 800ms;
 }
 
-option {
-	font-weight: normal;
-	font: inherit;
+.interactionClosed {
+height: 0;
+opacity: 0;
+margin-right:16px;
+-webkit-padding-start: 4px;
+-webkit-padding-end: 3px;
+-webkit-transition: padding 300ms, height 700ms, opacity 200ms;
+-moz-padding-start: 4px;
+-moz-padding-end: 3px;
+-moz-transition: padding 300ms, height 700ms, opacity 200ms;
+-ms-padding-start: 4px;
+-ms-padding-end: 3px;
+-ms-transition: padding 500ms, height 400ms, opacity 800ms;
 }
 
-#dev-toggle {
-	display: block;
-	float: right;
-	margin-top: -28px;
-	-webkit-margin-end: 8px;
-	-moz-margin-end: 8px;
-}
-
-input, textarea, keygen, select, button, isindex {
-	margin: 0em;
-	font: -webkit-small-control;
-	font: -moz-small-control;
-	color: initial;
-	letter-spacing: normal;
-	word-spacing: normal;
-	line-height: normal;
-	text-transform: none;
-	text-indent: 0px;
-	text-shadow: none;
-	display: inline-block;
-	text-align: -webkit-auto;
-	text-align: -moz-auto;
-}
-
-input[type="checkbox"], input[type="radio"] {
-	margin-left: 0;
-	margin-right: 0;
-	position: relative;
-	top: 1px;
-}
-
-input[type="checkbox"] {
-	margin: 3px 3px 3px 4px;
-}
-
-input[type="checkbox"] {
-	-webkit-appearance: checkbox;
-	-moz-appearance: checkbox;
-	box-sizing: border-box;
-}
-
-.dev-open {
-	border-bottom: 1px solid #CDCDCD;
-	height: 32px;
-	padding-bottom: 7px;
-	padding-top: 4px;
-	-webkit-padding-start: 4px;
-	-webkit-padding-end: 3px;
-	-webkit-transition: padding 300ms, height 300ms, opacity 700ms;
-	-moz-padding-start: 4px;
-	-moz-padding-end: 3px;
-	-moz-transition: padding 300ms, height 300ms, opacity 700ms;
-}
-
-.dev-closed {
-	height: 0;
-	opacity: 0;
-	-webkit-padding-start: 4px;
-	-webkit-padding-end: 3px;
-	-webkit-transition: padding 300ms, height 700ms, opacity 200ms;
-	-moz-padding-start: 4px;
-	-moz-padding-end: 3px;
-	-moz-transition: padding 300ms, height 700ms, opacity 200ms;
-}
-
-.dev-button-visible {
-	display: inherit;
-	opacity: 1;
-	-webkit-transition: opacity 200ms;
-	-moz-transition: opacity 200ms;
-}
-
-table {
-	border-collapse: separate;
-	border-spacing: 2px;
-}
-
-#extension-settings .displaytable > section {
-	display: block;
+#plugin-settings .displaytable > section {
+display: block;
+width:100%;
 }
 
 div.page section:last-child {
-	border-bottom: none;
+border-bottom: none;
 }
 
-#extension-settings .displaytable > section > * {
-	display: block;
+#plugin-settings .displaytable > section > * {
+display: block;
 }
 
-#extension-settings-list {
-	min-height: 0;
-	overflow-y: hidden;
+#plugin-settings-list {
+min-height: 0;
+overflow-y: hidden;
+width:100%;
 }
 
-.extension-list-item {
-	padding-bottom: 7px;
-	padding-top: 7px;
-	width: 100%;
-	-webkit-user-select: auto;
-	-moz-user-select: auto;
-}
-
-.vbox {
-	display: -webkit-box;
-	display: -moz-box;
-	-webkit-box-orient: vertical;
-	-moz-box-orient: vertical;
-}
-
-.hbox {
-	display: -webkit-box;
-	display: -moz-box;
-	-webkit-box-orient: horizontal;
-	-moz-box-orient: horizontal;
-}
-
-.extension-list-item-collaped {
-	height: auto;
-	margin-bottom: 16px;
-	-webkit-transition: padding 300ms, overflow 300ms, opacity 700ms;
-	-moz-transition: padding 300ms, overflow 300ms, opacity 700ms;
+.plugin-list-item {
+padding-top: 20px;
+margin-bottom: 20px;
+width: 100%;
 }
 
 list, grid {
-	display: block;
-	outline: none;
-	overflow: auto;
-	position: relative;
+display: block;
+outline: none;
+overflow: auto;
+position: relative;
 }
 
-.extension-zippy-container {
-	cursor: pointer;
-	width: 20px;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-}
-
-.extension-icon {
-	height: 48px;
-	vertical-align: text-top;
-	width: 48px;
-	-webkit-padding-start: 15px;
-	-webkit-padding-end: 15px;
-	-webkit-user-select: none;
-	-moz-padding-start: 15px;
-	-moz-padding-end: 15px;
-	-moz-user-select: none;
-}
-
-.details-view {
-	-webkit-padding-end: 10px;
-	-moz-padding-end: 10px;
+.plugin-icon {
+float: left;
+position: relative;
+height: 48px;
+vertical-align: text-top;
+width: 48px;
+padding-right: 15px;
 }
 
 .stretch {
-	-webkit-box-flex: 1;
-	-moz-box-flex: 1;
+float:left;
+position:relative;
 }
 
 list > *, grid > * {
-	cursor: default;
-	line-height: 20px;
-	white-space: pre;
+
+display: block;
+outline: none;
+overflow: auto;
+position: relative;
+line-height: 20px;
+white-space: pre;
 }
 
-.extension-title {
-	font-size: 16px;
-	font-weight: 500;
-	-webkit-padding-end: 20px;
-	-moz-padding-end: 20px;
+.plugin-title {
+font-size: 16px;
+font-weight: 500;
+padding-right:20px;
 }
 
-/* Get rid of display: table, which causes width issues. */
-#extension-settings .displaytable {
+#plugin-settings .displaytable {
 display: block;
 }
-/* Get rid of display: table row, which causes width issues. */
-#extension-settings .displaytable > section {
-  display: block;
-}
-/* Get rid of display: table cell, which causes width issues. */
-#extension-settings .displaytable > section > * {
-  display: block;
-}
 
-.extension-settings-content {
+.plugin-settings-content {
   border-bottom : 0px solid #eee;
   margin-top: 3px;
+  width:100%;
 }
 
-#extension-settings-list {
-  min-height: 0;
-  overflow-y: hidden;
-}
-
-/* Get rid of the light-blue background on list item hover. */
-#extension-settings-list:not([disabled]) > :hover {
-  background-color: white;
-  border-color: #CDCDCD;
-}
-
-.extension-list-item-collaped {
-  height: auto;
-  margin-bottom: 16px;
-  -webkit-transition: padding 300ms, overflow 300ms, opacity 700ms;
-  -moz-transition: padding 300ms, overflow 300ms, opacity 700ms;
-}
-
-.extension-list-item-expanded {
-  height: auto;
-  margin-bottom: 16px;
-  overflow: visible;
-  -webkit-transition: padding 300ms, overflow 300ms, opacity 700ms;
-  -moz-transition: padding 300ms, overflow 300ms, opacity 700ms;
-}
-
-.extension-settings {
+.plugin-settings {
   overflow-x: hidden;
 }
 
-.extension-title {
-  font-size: 16px;
-  font-weight: 500;
-  -webkit-padding-end: 20px;
-  -moz-padding-end: 20px;
-}
-
-.extension-version {
+.plugin-version {
   font-size: 13px;
   font-weight: 400;
-  -webkit-padding-end: 7px;
-  -moz-padding-end: 7px;
+  padding-right:10px;
 }
   
-.extension-description {
+.plugin-description {
   font-size: 13px;
   white-space: normal;
-  -webkit-padding-end: 5px;
-  -moz-padding-end: 5px;
+  padding-right:10px;
 }
 
-.extension-checkbox-span {
-  -webkit-margin-start: 7px;
-  -moz-margin-start: 7px;
+.plugin-delete {
+   float: right;
+   position: relative;
+   background: white;
+   color: #666;
+   border: solid 1px #999;
+   border-radius:2px;
+   font-size:0.9em;
 }
 
-.extension-checkbox-label {
-  -webkit-margin-end: 10px;
-  -moz-margin-end: 10px;
+.plugin-action-area {
+   float: right;
+   position: relative;
+   background: white;
+   color: #666;
+   font-size:0.9em;
 }
 
-.extension-delete {
-  -webkit-margin-start: 5px;
-  -moz-margin-start: 5px;
+.plugin-links-view {
+  padding-right: 15px;
 }
 
-.extension-details-hidden {
-  opacity: 0;
-  max-height: 0;
-  -webkit-transition: max-height 400ms, opacity 200ms;
-  -moz-transition: max-height 400ms, opacity 200ms;
-}
-
-.extension-details-visible {
-  opacity: 1;
-  max-height: 100px;
-  -webkit-transition: max-height 200ms, opacity 300ms;
-  -moz-transition: max-height 200ms, opacity 300ms;
-}
-
-.extension-links-view {
-  -webkit-padding-start: 15px;
-  -moz-padding-start: 15px;
-}
-
-.extension-links-trailing {
-  -webkit-padding-end: 7px;
-  -moz-padding-end: 7px;
-}
-
-.extension-zippy-container {
-  cursor: pointer;
-  width: 20px;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-}
-
-.informative-text {
-  color: gray;
-}
-
-.extension-zippy-default {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAALCAYAAABcUvyWAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAACsSURBVChTY3h778z/k9c+/EcHDFunB/5nYJb5f+bJdxQ5JnFpDQaGv08Y4sMDGK6++cMAA0z///8Ds68e3ckQGRLKcPbBR4jcqY1l/4EUHOs7+v+///zTfyZGuGYI4+L+jQwpM3YzMDEwoErxKFowhNrrgIyqgBvDLGP2f/6ea2DXMZzaVA6WYJc1/j977324kxkOLkkCSrD/n7TtBoo/GC7umva/Zf4lDJ8DAMX+kKcegZRQAAAAAElFTkSuQmCC");
-  background-repeat: no-repeat;
-  background-position: center top;
-  position: absolute;
-  left: 12px;
-  top: 25px;
-  width: 6px;
-  height: 16px;
-  opacity: .25;
-}
-
-.extension-zippy-collapsed {
-  -webkit-transition: -webkit-transform .1s;
-  -webkit-transform: rotate(0deg);
-  -moz-transition: -moz-transform .1s;
-  -moz-transform: rotate(0deg);
-}
-
-.extension-zippy-collapsed:hover {
-  opacity: .5;
-  -webkit-transform: rotate(5deg);
-  -webkit-transition: -webkit-transform .1s, opacity .1s;
-  -moz-transform: rotate(5deg);
-  -moz-transition: -moz-transform .1s, opacity .1s;
-}
-
-.extension-zippy-expanded {
-  -webkit-transition: -webkit-transform .1s;
-  -webkit-transform: rotate(90deg);
-  -moz-transition: -moz-transform .1s;
-  -moz-transform: rotate(90deg);
-}
-
-.extension-zippy-expanded:hover {
-  -webkit-transition: -webkit-transform .1s;
-  -webkit-transform: rotate(85deg);
-  -moz-transition: -moz-transform .1s;
-  -moz-transform: rotate(85deg);
-}
-
-.extension-enabling {
-  position: relative;
-  top: 3px;
-}
-
-.extension-enabling-label {
-  color: black;
-  -webkit-padding-start: 3px;
-  -webkit-padding-end: 9px;
-  -moz-padding-start: 3px;
-  -moz-padding-end: 9px;
-}
-
-.extension-enabling-label-bold {
-  font-weight: bold;
-}
-
-.extension-inspect-table {
-  padding: 0;
-  border-spacing: 0;
-}
-
-.extension-inspect-left-column {
-  vertical-align: text-top;
+.plugin-links-trailing {
+  padding-right: 7px;
 }
