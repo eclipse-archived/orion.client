@@ -400,6 +400,8 @@ var exports = {};
 							if (jsonData.Result.Severity == "Ok")
 								dojo.hitch(explorer, explorer.changedItem)(item.parent);
 						}, func, "Delete Remote Branch");
+					}, function(jsonData, secondArg) {
+						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Removing remote branch: " + item.Name);
 					});
 				});
 			},
@@ -503,6 +505,8 @@ var exports = {};
 								}
 							}, displayErrorOnStatus);
 						}, func, "Pull Git Repository");
+					}, function(jsonData, secondArg) {
+						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Pull Git Repository");
 					});
 				});
 			},
@@ -685,6 +689,8 @@ var exports = {};
 								dojo.hitch(explorer, explorer.changedItem)(item);
 							}, displayErrorOnStatus);
 						}, func, "Fetch Git Repository");
+					}, function(jsonData, secondArg) {
+						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Clone Git Repository");
 					});
 				});
 			},
@@ -743,6 +749,8 @@ var exports = {};
 										});
 								}, displayErrorOnStatus);
 							}, func, "Fetch Git Repository");
+						}, function(jsonData, secondArg) {
+							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Fetch Git Repository");
 						});
 					});
 				}
@@ -923,6 +931,8 @@ var exports = {};
 												});
 											dojo.hitch(explorer, explorer.changedItem)({});
 										}, func, "Push Git Repository");
+									}, function(jsonData, secondArg) {
+										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Push Git Repository");
 									});
 								});
 					} else {
@@ -951,6 +961,8 @@ var exports = {};
 														});
 													dojo.hitch(explorer, explorer.changedItem)({});
 												}, func, "Push Git Repository");
+											}, function(jsonData, secondArg) {
+												exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Clone Git Repository");
 											});
 										});
 							})
@@ -1000,6 +1012,8 @@ var exports = {};
 											dojo.toggleClass(node, "outgoingCommitsdRow", false);
 										});
 								}, func, "Push Git Repository");
+							}, function(jsonData, secondArg) {
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Push Git Repository");
 							});
 						});
 					} else {
@@ -1024,6 +1038,8 @@ var exports = {};
 													dojo.toggleClass(node, "outgoingCommitsdRow", false);
 												});
 										}, func, "Push Git Repository");
+									}, function(jsonData, secondArg) {
+										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Pushing remote: " + remote);
 									});
 								});
 							})
@@ -1444,6 +1460,8 @@ var exports = {};
 									});
 							});
 						}, func, "Fetch Git Repository");
+					}, function(jsonData, secondArg) {
+						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Fetch Git Repository");
 					});
 				});
 			},
@@ -1549,6 +1567,8 @@ var exports = {};
 										refreshStatusCallBack();
 									}
 								}, func, "Push Git Repository");
+						}, function(jsonData, secondArg) {
+							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Push Git Repository");
 						});
 					});
 				} else {
@@ -1576,6 +1596,8 @@ var exports = {};
 										}
 									}, func, "Push Git Repository");
 								});
+							}, function(jsonData, secondArg) {
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Pushing remote: " + remote);
 							});
 						})
 					});
@@ -1668,7 +1690,7 @@ var exports = {};
 										dojo.hitch(explorer, explorer.redisplayClonesList)();
 								}, func, "Init Git Repository");
 							}, function(jsonData, secondArg) {
-								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Clone Git Repository");
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Init Git Repository");
 							});
 						});
 					}
