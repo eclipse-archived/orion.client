@@ -804,13 +804,24 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultRenderer.prototype.getCellHeaderElement = function(col_no){	
 		if(col_no === 0){
-			if(this.explorer._state === "result_view"){
-				return dojo.create("th", {innerHTML: "<h2> Search results</h2>"});
+			var title = dojo.create("th", {innerHTML: "<h2>Results</h2>"});
+			if(this.explorer._state === "result_view" && this.explorer.model.queryObj.searchStrTitle){
+				if(this.explorer.numberOnPage < 1){
+					title.innerHTML = "<b>" + "No matches" + "</b>" +
+					" found by keyword " + "<b>" + this.explorer.model.queryObj.searchStrTitle + "</b>" + " in:";
+					return;
+				} else {
+					var startNumber = this.explorer.model.queryObj.start + 1;
+					var endNumber = startNumber + this.explorer.numberOnPage - 1;
+					title.innerHTML = "Files " + "<b>" + startNumber + "-"  + endNumber + "</b>" + " of " + this.explorer.totalNumber + 
+					" found by keyword " + "<b>" + this.explorer.model.queryObj.searchStrTitle + "</b>";
+				}
 			} else {
 				var headerStr =" Matches to be replaced by \"" + this.explorer._replaceStr + "\"";
 				var th = dojo.create("th", {});
 				return dojo.create("h2", {innerHTML: headerStr});
 			}
+			return title;
 		} else if(this.explorer.model.useFlatList && col_no === 1){
 			return dojo.create("th", {innerHTML: "<h2>Location</h2>"});
 		}
@@ -1277,7 +1288,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var that = this;
 		this._state = "report";
 		this.initCommands();
-		this.reportStatus("Wringting files...");	
+		this.reportStatus("Writing files...");	
 		this.model.writeNewContent( this.model.indexedFileItems(), reportList, 0, function(modellist){
 			dojo.empty("results");
 			var reporter = new SearchReportExplorer("results", reportList);
@@ -1484,6 +1495,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		dojo.empty("pageNavigationActions");
 		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "tool");
 		if(this._state !== "result_view"){
+			mUtil.forceLayout("pageNavigationActions");
 			return;
 		}
 		var optionMenu = dijit.byId("globalSearchOptMenu");
@@ -1516,6 +1528,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		});
 		dojo.addClass(menuButton.domNode, "commandImage");
 		dojo.place(menuButton.domNode, "pageNavigationActions", "last");
+		mUtil.forceLayout("pageNavigationActions");
 	};
 	
 	SearchResultExplorer.prototype.reportStatus = function(message) {
@@ -1524,19 +1537,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultExplorer.prototype.startUp = function() {
 		var that = this;
-		var pageTitle = dojo.byId("pageTitle");
-		if(pageTitle && this.model.queryObj.searchStrTitle){
-			if(this.numberOnPage < 1){
-				pageTitle.innerHTML = "<b>" + "No matches" + "</b>" +
-				" found by keyword " + "<b>" + this.model.queryObj.searchStrTitle + "</b>" + " in:";
-				return;
-			} else {
-				this.reportStatus("Generating search result...");	
-				var startNumber = this.model.queryObj.start + 1;
-				var endNumber = startNumber + this.numberOnPage - 1;
-				pageTitle.innerHTML = "Files " + "<b>" + startNumber + "-"  + endNumber + "</b>" + " of " + this.totalNumber + 
-				" found by keyword " + "<b>" + this.model.queryObj.searchStrTitle + "</b>" + " in:";
-			}
+		if(this.numberOnPage > 0){
+			this.reportStatus("Generating search result...");	
 		}
 		
 		this.model.loadOneFileMetaData(0, function(onComplete){

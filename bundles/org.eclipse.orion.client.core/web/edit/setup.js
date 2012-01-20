@@ -54,11 +54,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 	}());
 	
-	var splitArea = dijit.byId("orion.innerCoding"),
+	var splitArea = dijit.byId("topContainer"),
 		outlineDomNode = dojo.byId("outline"),
 		editorDomNode = dojo.byId("editor"),
-		searchFloat = dojo.byId("searchFloat"),
-		leftPane = dojo.byId("leftPane");
+		searchFloat = dojo.byId("searchFloat");
 
 	// Temporary.  This will evolve into something pluggable.
 	var syntaxHighlightProviders = serviceRegistry.getServiceReferences("orion.edit.highlighter");
@@ -479,7 +478,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	inputManager.setInput(dojo.hash(), editor);
 	
 	// TODO search location needs to be gotten from somewhere
-	mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, editor, editor, escHandler);
+	mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, editor, editor, escHandler);
 	mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);

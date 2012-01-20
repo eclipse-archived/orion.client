@@ -56,10 +56,10 @@ dojo.addOnLoad(function(){
 			explorer.loadResourceList(dojo.hash());
 		}
 	
-		var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
+		var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", toolbar: "outlinerToolbar", serviceRegistry: serviceRegistry});
 							
 		// global commands
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, explorer);
+		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
 		// commands shared by navigators
 		mFileCommands.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools");
 		

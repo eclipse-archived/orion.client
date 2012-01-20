@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global window define document */
 
-define(['require', 'dojo'], function(require, dojo) {
+define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 
 	/**
 	 * Constructs a new BreadCrumb with the given options.
@@ -46,15 +46,19 @@ define(['require', 'dojo'], function(require, dojo) {
 		},
 		getNavigatorRootSegment: function(){
 			if (this._firstSegmentName) {
-				var seg = document.createElement('a');
+				var seg;
+				if (this._resource && this._resource.Parents) {
+					seg = document.createElement('a');
+					if(this._makeHref) {
+						this._makeHref(seg , "");
+					} else {
+						seg.href = require.toUrl("navigate/table.html") + "#";
+					}
+				} else {
+					seg = document.createElement('span');
+				}
 				var segText = this._firstSegmentName;
 				dojo.place(document.createTextNode(segText), seg, "only");
-				if(this._makeHref) {
-					this._makeHref(seg , "");
-				}
-				else {
-					seg.href = require.toUrl("navigate/table.html") + "#";
-				}
 				return seg;
 			}
 			return null;
@@ -77,7 +81,7 @@ define(['require', 'dojo'], function(require, dojo) {
 				crumbs.appendChild(seg);
 				if (this._resource && this._resource.Parents) {
 					slash = document.createElement('span');
-					dojo.place(document.createTextNode(' / '), slash, "only");
+					dojo.place(document.createTextNode(' >> '), slash, "only");
 					this.path+="/";
 					dojo.addClass(slash, "breadcrumb");
 					crumbs.appendChild(slash);
@@ -87,6 +91,7 @@ define(['require', 'dojo'], function(require, dojo) {
 					// don't need the breadcrumb style because we are here.
 					dojo.removeClass(seg, "breadcrumb");
 					dojo.addClass(seg, "currentLocation");
+					mUtil.forceLayout(container);
 					return;
 				}
 			}
@@ -107,16 +112,15 @@ define(['require', 'dojo'], function(require, dojo) {
 						}
 						crumbs.appendChild(seg);
 						slash = document.createElement('span');
-						dojo.place(document.createTextNode(' / '), slash, "only");
+						dojo.place(document.createTextNode(' >> '), slash, "only");
 						this.path += '/';
 						dojo.addClass(slash, "breadcrumb");
 						crumbs.appendChild(slash);
 					}
 				}
 				//add a final entry for the current location
-				seg = document.createElement('a');
-				dojo.place(document.createTextNode(this._resource.Name), seg, "only");
-				dojo.addClass(seg, "breadcrumb");
+				seg = document.createElement('span');
+				dojo.place("<br>" + this._resource.Name, seg, "only");
 				dojo.addClass(seg, "currentLocation");
 				this.path+=this._resource.Name;
 				crumbs.appendChild(seg);
@@ -129,6 +133,7 @@ define(['require', 'dojo'], function(require, dojo) {
 				dojo.addClass(seg, "currentLocation");
 				crumbs.appendChild(seg);
 			}
+			mUtil.forceLayout(container);
 		}
 	};
 	BreadCrumbs.prototype.constructor = BreadCrumbs;
