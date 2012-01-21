@@ -37,17 +37,17 @@
 		require(["./site"]);
 		</script>
 <body style="visibility:hidden" class="nihilo">
-	<div id="eclipse.edit-site" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
-		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
+	<div id="eclipse.edit-site" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
+		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-		
-		<div dojoType="dijit.layout.ContentPane" class="mainpane" region="center" style="width: 100%" >
-			<div id="site"></div>
+		<div id="centerPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" splitter="false">
+			<div class="paneHeading" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
+			</div>
+			<div class="mainpane" id="site" dojoType="dijit.layout.ContentPane" splitter="false"region="center">
+			</div>
 		</div>
-		
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
 		</div>
-
 	</div>
 	
 </body>

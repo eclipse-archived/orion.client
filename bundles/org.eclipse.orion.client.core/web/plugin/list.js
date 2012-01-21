@@ -39,7 +39,7 @@ dojo.addOnLoad(function() {
 		};
 		
 		// global commands
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
 	
 		// add install stuff to page actions toolbar
 		// We could use the command framework for the links but we are being lazy since we have to add a textbox anyway

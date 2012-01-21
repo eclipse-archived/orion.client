@@ -41,7 +41,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 			var siteService = new mSiteService.SiteService(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
-			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
 			
 			var updateTitle = function() {
 				var editor = dijit.byId("site-editor");
