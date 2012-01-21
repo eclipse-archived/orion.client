@@ -38,10 +38,10 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 		
 		// Clone details
-		var cloneDetails = new mGitCloneDetails.CloneDetails({parent: "cloneDetailsPane", serviceRegistry: serviceRegistry, detailsPane: dijit.byId("orion.innerNavigator")});
+		var cloneDetails = new mGitCloneDetails.CloneDetails({parent: "cloneDetailsPane", serviceRegistry: serviceRegistry, detailsPane: dijit.byId("eclipse.git-clones")});
 		
 		var explorer = new mGitClonesExplorer.GitClonesExplorer(serviceRegistry, /* selection */ null, cloneDetails, "clonesList", "pageActions"/*, "selectionTools"*/);
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, explorer);
+		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
 		
 		var fileClient = new mFileClient.FileClient(serviceRegistry, function(reference) {
 			var pattern = reference.getProperty("pattern");
@@ -122,7 +122,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 
 	function makeRightPane(explorer){
 		// set up the splitter bar and its key binding
-		var splitArea = dijit.byId("orion.innerNavigator");
+		var splitArea = dijit.byId("eclipse.git-clones");
 		
 		//by default the pane should be closed
 		if(splitArea.isRightPaneOpen()){
