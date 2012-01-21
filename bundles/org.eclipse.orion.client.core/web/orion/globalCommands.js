@@ -291,7 +291,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	// END BOTTOM BANNER FRAGEMENT
 
 	var toolbarFragment = 
-		'<div class="layoutleft pageToolbarLeft pageActions" id="pageActions"></div>' +
+		'<div class="layoutLeft pageToolbarLeft pageActions" id="pageActions"></div>' +
 		'<div class="layoutRight pageToolbarRight pageActions pageNavigationActions" id="pageNavigationActions"></div>' +
 		'<div id="parameterArea" class="layoutBlock slideContainer">' +
 			'<span id="pageParameterArea" class="leftSlide">' +
