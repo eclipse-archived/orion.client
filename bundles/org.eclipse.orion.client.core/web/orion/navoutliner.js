@@ -123,7 +123,14 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			var spacer= dojo.byId("spacer");
 			mUtil.getUserText(imageId+"EditBox", spacer, true, "", 
 				function(newText) {
-					reg.getService("orion.core.favorite").addFavoriteUrl(newText);
+					var favService = reg.getService("orion.core.favorite");
+					favService.hasFavorite(newText).then(function(result) {
+						if (!result) {
+							favService.addFavoriteUrl(newText);
+						} else {
+							reg.getService("orion.page.message").setMessage("Dubplicate favorite...ignoring", 2000);
+						}
+					});
 				},
 				null, "Type or paste a URL"
 			);			

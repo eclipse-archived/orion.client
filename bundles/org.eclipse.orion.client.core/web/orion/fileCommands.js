@@ -309,7 +309,21 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				}
 				return true;},
 			callback: function(data) {
-				serviceRegistry.getService("orion.core.favorite").makeFavorites(data.items);
+				var items = dojo.isArray(data.items) ? data.items : [data.items];
+				var favService = serviceRegistry.getService("orion.core.favorite");
+				var doAdd = function(item) {
+					return function(result) {
+						if (!result) {
+							favService.makeFavorites(item);
+						} else {
+							serviceRegistry.getService("orion.page.message").setMessage("Duplicate favorite...ignoring", 2000);
+						}
+					};
+				};
+				for (var i = 0; i < items.length; i++) {
+					var item = items[i];
+					favService.hasFavorite(item.Location).then(doAdd(item));
+				}
 			}});
 		commandService.addCommand(favoriteCommand, "object");
 		

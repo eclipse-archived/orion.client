@@ -112,6 +112,15 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			this._notifyListeners();
 		},
 		
+		hasFavorite: function(path) {
+			for (var i in this._favorites) {
+				if (this._favorites[i].path === path) {
+					return true;
+				}
+			}
+			return false;
+		},
+
 		removeSearch: function(query) {
 			for (var i in this._searches) {
 				if (this._searches[i].query === query) {
@@ -186,9 +195,11 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		},
 		
 		_sorter: function(fav1,fav2) {
-			if (fav1.name > fav2.name) {
+			var name1 = fav1.name.toLowerCase();
+			var name2 = fav2.name.toLowerCase();
+			if (name1 > name2) {
 				return 1;
-			} else if (fav1.name < fav2.name) {
+			} else if (name1 < name2) {
 				return -1;
 			} else {
 				return 0;
