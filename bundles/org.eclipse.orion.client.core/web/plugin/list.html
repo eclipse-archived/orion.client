@@ -37,17 +37,19 @@
 		</script>
 	</head>
 	<body style="height: 100%; visibility:hidden" class="nihilo">
-
-	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="background: #c5c5c5; width: 100%; height: 100%;">
-		<div dojoType="dijit.layout.ContentPane" id="toolbar" region="top" class="toolbar">
+	<div id="orion.pluginsList" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
+		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-		<div dojoType="dijit.layout.ContentPane" class="mainpane" region="center">
-			<div id="registry-tree">Loading&#8230;</div>
+		<div id="centerPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" splitter="false">
+			<div class="paneHeading" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
+			</div>
+			<div class="mainpane" dojoType="dijit.layout.ContentPane" splitter="false"region="center">		
+				<div class="mainPadding" id="registry-tree">Loading&#8230;</div>	
+			</div>
 		</div>
-		
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
 		</div>
+	</div>				
 
-	</div>
 	</body>
 </html>

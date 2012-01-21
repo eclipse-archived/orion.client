@@ -38,17 +38,17 @@
 		</script>
 	</head>
 <body style="visibility:hidden" class="nihilo">
-	<div id="eclipse.sites" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" style="width: 100%; height: 100%;">
-		<div class="toolbar" id="toolbar" dojoType="dijit.layout.ContentPane" region="top">
+	<div id="eclipse.sites" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
+		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-		
-		<div dojoType="dijit.layout.ContentPane" region="center" class="mainpane">
-			<div id="site-table"></div>
+		<div id="centerPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" splitter="false">
+			<div class="paneHeading" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
+			</div>
+			<div class="mainpane" id="site-table" dojoType="dijit.layout.ContentPane" splitter="false"region="center">
+			</div>
 		</div>
-		
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
 		</div>
-
 	</div>
 	
 </body>

@@ -37,8 +37,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
 			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, searcher, "results", commandService, "pageActions");
-			var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", serviceRegistry: serviceRegistry});
-			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, searcher);
+			var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", toolbar: "outlinerToolbar", serviceRegistry: serviceRegistry});
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, searcher);
 			
 			var item = dojo.hash();
 			searchResultsGenerator.loadResults(item);
