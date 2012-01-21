@@ -316,13 +316,13 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						if (!result) {
 							favService.makeFavorites(item);
 						} else {
-							serviceRegistry.getService("orion.page.message").setMessage("Duplicate favorite...ignoring", 2000);
+							serviceRegistry.getService("orion.page.message").setMessage(item.Name + " is already a favorite.", 2000);
 						}
 					};
 				};
 				for (var i = 0; i < items.length; i++) {
 					var item = items[i];
-					favService.hasFavorite(item.Location).then(doAdd(item));
+					favService.hasFavorite(item.ChildrenLocation || item.Location).then(doAdd(item));
 				}
 			}});
 		commandService.addCommand(favoriteCommand, "object");

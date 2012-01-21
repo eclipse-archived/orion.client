@@ -128,7 +128,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 						if (!result) {
 							favService.addFavoriteUrl(newText);
 						} else {
-							reg.getService("orion.page.message").setMessage("Dubplicate favorite...ignoring", 2000);
+							reg.getService("orion.page.message").setMessage(newText + " is already a favorite.", 2000);
 						}
 					});
 				},
