@@ -55,14 +55,19 @@
 			href: qualifyURL("../sites/sites.html")
 		});
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: "Plugins",
-			id: "orion.plugins",
-			href: qualifyURL("../plugin/list.html")
-		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
 			name: "Repositories",
 			id: "orion.repositories",
 			href: qualifyURL("../git/git-repository.html#")
+		});
+		provider.registerServiceProvider("orion.page.link", serviceImpl, {
+			name: "Settings",
+			id: "orion.sites",
+			href: qualifyURL("../settings/settings.html")
+		});
+		provider.registerServiceProvider("orion.page.link", serviceImpl, {
+			name: "Plugins",
+			id: "orion.plugins",
+			href: qualifyURL("../plugin/list.html")
 		});
 		provider.connect();
 	};
