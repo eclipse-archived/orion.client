@@ -548,7 +548,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
-			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
 
 			preferencesStatusService.setMessage("Loading...");		
 			manageDefaultData( preferences, initialSettings );			
