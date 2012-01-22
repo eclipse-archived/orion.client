@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Andy Clement (vmware) - bug 344614
  *******************************************************************************/
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
@@ -110,6 +111,11 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		dojo.query("a", resultsDiv).forEach(function(link) {
 			dojo.connect(link, "onmouseup", function(evt) {
 				if (!dojo.mouseButtons.isMiddle(evt) && !dojo.isCopyKey(evt)) {
+					widget.hide();
+				}
+			});
+			dojo.connect(link,"onkeyup",widget,function(evt) {
+				if (evt.keyCode === dojo.keys.ENTER) {
 					widget.hide();
 				}
 			});
