@@ -803,11 +803,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			var title = dojo.create("th", {innerHTML: "<h2>Results</h2>"});
 			
 			if( this.explorer.model.queryObj.searchStrTitle){
-				if(this.explorer.numberOnPage < 1){
-					title.innerHTML = "<b>" + "No matches" + "</b>" +
-					" matching " + "<b>" + this.explorer.model.queryObj.searchStrTitle + "</b>" + " in:";
-					return;
-				} else {
+				if(this.explorer.numberOnPage > 0){
 					var startNumber = this.explorer.model.queryObj.start + 1;
 					var endNumber = startNumber + this.explorer.numberOnPage - 1;
 					if(this.explorer._state === "result_view"){
@@ -1541,18 +1537,18 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var that = this;
 		var pageTitle = dojo.byId("pageTitle");
 		if(pageTitle && this.model.queryObj.searchStrTitle){
-			if(this.numberOnPage < 1){
-				pageTitle.innerHTML = "<b>" + "No matches" + "</b>" +
-				" matching " + "<b>" + this.model.queryObj.searchStrTitle + "</b>" + " in:";
-				return;
-			} else {
+			if (this.numberOnPage > 0) {
 				this.reportStatus("Generating search result...");	
 				if(this._state === "result_view"){
 					pageTitle.innerHTML = "Search Results";
 				} else {
 					pageTitle.innerHTML = "Replace All Matches";
 				}
-			}
+			} else {
+				that.parentNode.innerHTML = "<b>" + "No matches" + "</b>" +
+				" for " + "<b>" + this.model.queryObj.searchStrTitle + "</b>";
+				return;
+			} 
 		}
 		
 		this.model.loadOneFileMetaData(0, function(onComplete){
