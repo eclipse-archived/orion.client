@@ -1331,7 +1331,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			parentDivID: "results"
 		});
 		this._uiFactory.buildUI();
-		var parentPane = dijit.byId("orion.innerSearchResults");
+		// FIXME shouldn't know this id, should be passed in
+		var parentPane = dijit.byId("orion.searchResults");
 		if(parentPane.isLeftPaneOpen()){
 			parentPane.toggle();
 		}
@@ -1395,7 +1396,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultExplorer.prototype.cancellReplace = function() {
-		var parentPane = dijit.byId("orion.innerSearchResults");
+		// FIXME this id should be passed in
+		var parentPane = dijit.byId("orion.searchResults");
 		if(!parentPane.isLeftPaneOpen()){
 			parentPane.toggle();
 		}
@@ -1686,7 +1688,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		if (element.offsetWidth === 0 || element.offsetHeight === 0) {
 			return false;
 		}
-		var parentNode = dojo.byId("orion.innerSearchResults");
+		// FIXME shouldn't know this id, should be passed in
+		var parentNode = dojo.byId("orion.searchResults");
 		var parentRect = parentNode.getClientRects()[0],
 		rects = element.getClientRects(),
 		on_top = function(r) {

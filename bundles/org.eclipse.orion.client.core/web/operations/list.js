@@ -31,7 +31,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 			var operationsTable = new mOperationsTable.OperationsExplorer(serviceRegistry, selection, "tasks-lisk", "pageActions", "selectionTools");
 			
 			// global commands
-			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
 			mOperationsCommands.createOperationsCommands(serviceRegistry, commandService, operationsTable, operationsClient);
 			
 			commandService.addCommandGroup("eclipse.taskGroup.unlabeled", 100, null, null, "pageActions");
