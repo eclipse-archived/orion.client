@@ -18,27 +18,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	 * @name orion.util
 	 */
 
-	var _userName = null;
-
-	/**
-	 * Sets the current user name
-	 * @param {String} username The user name
-	 * @name orion.util#setUsername
-	 * @function
-	 */
-	function setUserName(userName) {
-		_userName = userName;
-	}
-
-	/**
-	 * Gets the current user name
-	 * @return {String} The user name
-	 * @function
-	 */
-	function getUserName() {
-		return _userName;
-	}
-	
 	function getUserKeyString(binding) {
 		var userString = "";
 		var isMac = navigator.platform.indexOf("Mac") !== -1;
@@ -394,8 +373,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	
 	//return module exports
 	return {
-		setUserName: setUserName,
-		getUserName: getUserName,
 		getUserKeyString: getUserKeyString,
 		openDialog: openDialog,
 		getUserText: getUserText,

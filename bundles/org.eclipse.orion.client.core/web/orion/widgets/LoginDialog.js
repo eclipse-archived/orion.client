@@ -74,7 +74,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 		}
 		
 		if(this.isSingleService() && jsonData){
-			mUtil.setUserName(jsonData.login);
 			var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login;
 			if(userName.length > 40)
 				userName = userName.substring(0, 30) + "...";
