@@ -26,7 +26,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 		
 		postCreate : function() {
 			this.inherited(arguments);
-			this.allOperationsLink.href = require.toUrl("operations/list.html");
 		},
 	
 		setPendingAuthentication: function(services){
