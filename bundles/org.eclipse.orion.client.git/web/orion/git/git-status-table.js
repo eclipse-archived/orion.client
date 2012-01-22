@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['require', 'dojo',  'orion/compare/compare-container', 'orion/commands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'dijit/layout/ContentPane'], function(
-		require, dojo,  mCompareContainer, mCommands, mGitCommitNavigator, mGitCommands) {
+define(['require', 'dojo',  'orion/compare/compare-container', 'orion/commands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'orion/util', 'dijit/layout/ContentPane'], function(
+		require, dojo,  mCompareContainer, mCommands, mGitCommitNavigator, mGitCommands, mUtil) {
 
 	var orion = orion || {};
 
@@ -770,9 +770,10 @@ orion.GitStatusController = (function() {
 			//render browser title
 			document.title = location;
 			//render page title
+			//FIXME we should not know these global page ids inside component implementations
 			dojo.place(document.createTextNode(title), "pageTitle", "only");
 			if(withBranchName) {
-				//render git log title on local branch 
+				//render git status title on local branch 
 				this._logTableRenderer.modifyHeader(branchName);
 				if(this._curBranch && this._curRemote){
 					branchName = (this._curBranch.RemoteLocation.length > 0 ? this._curBranch.RemoteLocation[0].Name : "") + "/" + this._curBranch.Name;
@@ -782,6 +783,8 @@ orion.GitStatusController = (function() {
 				//render page tilte details (clone name + remote name + local branch name)
 				dojo.place(document.createTextNode(this._curClone.Name + " on " + branchName), "location", "only");
 			}
+			mUtil.forceLayout("pageTitle");
+
 		},
 		
 		_getCloneInfo:function(){
