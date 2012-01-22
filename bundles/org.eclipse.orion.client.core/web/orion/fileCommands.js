@@ -562,6 +562,23 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				item = forceSingleItem(item);
 				return item.Location && mUtil.isAtRoot(item.Location);}});
 		commandService.addCommand(linkProjectCommand, "dom");
+		
+		var goUpCommand = new mCommands.Command({
+			name: "Go Up",
+			tooltip: "Move up to the parent folder",
+			imageClass: "core-sprite-move_up",
+			id: "eclipse.upFolder",
+			callback: function(data) {
+				var parents = forceSingleItem(data.items).Parents;
+				if (parents && parents.length > 0) {
+					window.document.location="#" + parents[0].ChildrenLocation;
+				}
+			},
+			visibleWhen: function(item) {
+				item = forceSingleItem(item);
+				return item.Parents;}});
+		commandService.addCommand(goUpCommand, "dom");
+
 					
 		var importCommand = new mCommands.Command({
 			name : "Import from zip...",

@@ -108,6 +108,7 @@ dojo.addOnLoad(function(){
 		//new file and new folder in the nav bar do not label the group (we don't want a menu)
 		commandService.registerCommandContribution("eclipse.newFile", 1, "pageActions", "eclipse.fileGroup.unlabeled");
 		commandService.registerCommandContribution("eclipse.newFolder", 2, "pageActions", "eclipse.fileGroup.unlabeled", false, null, new mCommands.URLBinding("newFolder", "name"));
+		commandService.registerCommandContribution("eclipse.upFolder", 3, "pageActions", "eclipse.fileGroup.unlabeled", false, new mCommands.CommandKeyBinding(38, false, false, true));
 		commandService.registerCommandContribution("eclipse.newProject", 3, "pageActions", "eclipse.fileGroup.unlabeled");
 		commandService.registerCommandContribution("eclipse.linkProject", 4, "pageActions", "eclipse.fileGroup.unlabeled");
 		// selection based command contributions in nav toolbar
