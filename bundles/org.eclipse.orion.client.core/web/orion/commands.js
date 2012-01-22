@@ -659,7 +659,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 										new CommandTooltip({
 											connectId: [menuButton.domNode],
 											label: "Actions menu",
-											position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
+											position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
 											commandParent: parent,
 											commandService: this
 										});
@@ -912,7 +912,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					new CommandTooltip({
 						connectId: [link],
 						label: this.tooltip,
-						position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
+						position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
 						commandParent: parent,
 						commandService: context.commandService
 					});
@@ -968,7 +968,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				new CommandTooltip({
 					connectId: [image],
 					label: this.tooltip || this.name,
-					position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
+					position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
 					commandParent: parent,
 					commandService: context.commandService
 				});
@@ -1010,7 +1010,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				new CommandTooltip({
 					connectId: [element],
 					label: this.tooltip,
-					position: ["below", "above", "right", "left"], // otherwise defaults to right and obscures adjacent commands
+					position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
 					commandParent: parent,
 					commandService: context.commandService
 				});
