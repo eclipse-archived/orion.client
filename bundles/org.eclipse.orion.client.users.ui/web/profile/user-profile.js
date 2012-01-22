@@ -39,7 +39,7 @@ define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient'
 				usersClient: usersClient
 			});
 			
-			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, profile);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, profile);
 			mGlobalCommands.generateDomCommandsInBanner(commandService, profile);
 		});
 	});

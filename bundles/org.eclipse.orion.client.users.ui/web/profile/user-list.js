@@ -30,7 +30,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 		
-			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, usersList, usersList);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, usersList, usersList);
 			mGlobalCommands.generateDomCommandsInBanner(commandService, usersList);
 		
 			var usersList = new mUsersList.UsersList(serviceRegistry, selection, searcher, "usersList", "pageActions", "selectionTools");

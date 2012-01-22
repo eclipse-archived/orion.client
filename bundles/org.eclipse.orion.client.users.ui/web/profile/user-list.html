@@ -41,35 +41,22 @@
 		</script>
 </head>
 <body style="height: 100%; visibility:hidden" class="nihilo">
-	<div dojoType="dijit.layout.BorderContainer" design="headline"
-		liveSplitters="true" persist="true" gutters="false"
-		style="background: #c5c5c5; width: 100%; height: 100%;">
-		<div id="toolbar" class="toolbar" dojoType="dijit.layout.ContentPane"
-			region="top" style="vertical-align: middle;">
-			<div style="float: left;">
-				<table>
-					<tr>
-						<td><a id="home" href="../navigate/table.html"><img
-								class="toolbarLabel" src="../images/orion.png"
-								alt="Eclipse Logo" align="top"> </a></td>
-						<td><b class="statuspane" id="statusPane"></b>
-						</td>
-					</tr>
-				</table>
-			</div>
-			<div id="eclipseWebToolbar" style="float: right;"
-				class="innerToolbar">
-			</div>
+	<div id="orion.profile" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
+		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-		<div class="mainpane" id="usersPane"
-			dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-			<div>
-			<div id="usersList" style="padding: 20px;">
-			</div>			
+		<div id="centerPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" splitter="false">
+			<div class="paneHeading" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
+			</div>
+			<div class="mainpane" id="usersPane" dojoType="dijit.layout.ContentPane" splitter="false"region="center">	
+				<div>
+					<div id="usersList" class="mainPadding">
+					</div>			
+				</div>
 			</div>
 		</div>
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
 		</div>
 	</div>
+
 </body>
 </html>
