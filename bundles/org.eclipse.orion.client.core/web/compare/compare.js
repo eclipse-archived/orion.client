@@ -36,7 +36,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/oper
 				var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
 				var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 
-				mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+				mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
 				var uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
 					parentDivID: "compareContainer",
 					showTitle: true,
