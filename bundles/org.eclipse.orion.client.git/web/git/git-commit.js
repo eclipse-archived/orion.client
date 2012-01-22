@@ -40,7 +40,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 
 		var explorer = new mGitCommitExplorer.GitCommitExplorer(serviceRegistry, linkService, /* selection */ null, "artifacts", "pageActions"/*, "selectionTools"*/);
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher, explorer);
+		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
 
 		// define commands
 		mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
