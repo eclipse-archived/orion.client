@@ -102,7 +102,7 @@ dojo.addOnLoad(function() {
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 		
 		// global banner
-		mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
 		
 		function runTests(fileURI) {
 			//console.log("installing non-persistent plugin: " + fileURI);
