@@ -99,9 +99,6 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 				gitPrivateKey: this.gitPrivateKey.value, gitPassphrase: this.gitPassphrase.value,
 				knownHosts: this.gitSshKnownHosts.value});
 		}
-		if(this._progressService &&  this.options.failedOperation){
-			dojo.hitch(this._progressService, this._progressService.removeOperation)(this.options.failedOperation.Location, this.options.failedOperation.Id);
-		}
 	}
 });
 });
