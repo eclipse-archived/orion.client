@@ -23,3 +23,23 @@
 @import "css/git.css";
 
 @import "../settings/settings.css";
+
+.git-decor-icon {
+	float: left;
+	position: relative;
+	height: 16px;
+	vertical-align: text-top;
+	width: 16px;
+	padding-right: 20px;
+}
+
+.git-author-icon {
+	float: left;
+	position: relative;
+	height: 30px;
+	vertical-align: text-top;
+	width: 30px;
+	border: 1px solid lightGrey;
+	padding: 2px;
+	margin-right: 18px;
+}

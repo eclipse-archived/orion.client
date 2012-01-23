@@ -152,19 +152,16 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			
 		    var extensionListItem = dojo.create( "div", { "class":"plugin-list-item" }, list );
 			var horizontalBox = dojo.create( "div", null, extensionListItem );
-			var icon = dojo.create( "span", { "class":"plugin-icon gitImageSprite git-sprite-modification"}, horizontalBox );
+			var icon = dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-modification"}, horizontalBox );
 			var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
 			
 			if (commit.AuthorImage) {
-				var authorImage = dojo.create("span", null, detailsView);
-				
+				var authorImage = dojo.create("span", {"class":"git-author-icon"}, detailsView);
 				var image = new Image();
 				image.src = commit.AuthorImage;
 				image.name = commit.AuthorName;
 				image.width = 50;
 				image.height = 50;
-				dojo.addClass(image, "gitAuthorImage");
-				
 				dojo.place(image, authorImage, "first");
 			}
 			
@@ -290,7 +287,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			var extensionListItem = dojo.create( "div", { "class":"plugin-list-item" }, dojo.byId("tagNode") );
 			var horizontalBox = dojo.create( "div", null, extensionListItem );
 
-			dojo.create( "span", { "class":"plugin-icon gitImageSprite git-sprite-tag" }, horizontalBox );
+			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-tag" }, horizontalBox );
 
 			var detailsView = dojo.create( "div", {"class":"stretch"}, horizontalBox );
 			var title = dojo.create( "span", { "class":"plugin-title", innerHTML: tag.Name }, detailsView );
