@@ -2942,7 +2942,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (reset) {
 				var attrs = node.attributes;
 				for (var i= attrs.length; i-->0;) {
-					node.removeAttributeNode(attrs[i]); 
+					if (attrs[i].specified) {
+						node.removeAttributeNode(attrs[i]); 
+					}
 				}
 			}
 			if (!style) {
