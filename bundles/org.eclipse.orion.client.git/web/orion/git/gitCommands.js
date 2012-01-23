@@ -99,11 +99,11 @@ var exports = {};
 				sshService.getKnownHosts().then(function(knownHosts){
 					options.knownHosts = knownHosts;
 					func(options);
-					if(options.failedOperation){
-						var progressService = serviceRegistry.getService("orion.page.progress");
-						dojo.hitch(progressService, progressService.removeOperation)(options.failedOperation.Location, options.failedOperation.Id);
-					}
 				});
+				if(options.failedOperation){
+					var progressService = serviceRegistry.getService("orion.page.progress");
+					dojo.hitch(progressService, progressService.removeOperation)(options.failedOperation.Location, options.failedOperation.Id);
+				}
 			});
 		}
 	};
@@ -118,6 +118,10 @@ var exports = {};
 				});		
 		credentialsDialog.startup();
 		credentialsDialog.show();
+		if(options.failedOperation){
+			var progressService = serviceRegistry.getService("orion.page.progress");
+			dojo.hitch(progressService, progressService.removeOperation)(options.failedOperation.Location, options.failedOperation.Id);
+		}
 	};
 
 	exports.getDefaultSshOptions = function(serviceRegistry, authParameters){
@@ -167,7 +171,17 @@ var exports = {};
 				return;
 			}
 		default:
-			console.error("error " + jsonData.HttpCode + " while running operation: " + jsonData.DetailedMessage);
+			var display = [];
+			display.Severity = "Error";
+			display.HTML = false;
+			
+			try {
+				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
+			} catch (Exception) {
+				display.Message = error.message;
+			}
+			
+			serviceRegistry.getService("orion.page.message").setProgressResult(display);
 			break;
 		}
 			

@@ -209,10 +209,15 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 					that._serviceRegistry.getService("orion.page.message").setProgressMessage("");
 					var severity = this._operationsDialog.parseProgressResult(operationJson.Result).Severity;
 					if(severity=="Error" || severity=="Warning"){
-						dojo.hitch(that, that._openOperationsPopup)();
 						operationJson.Result.failedOperation = {Location: operationLocation, Id: operationJson.Id, Name: operationJson.Name};
+						result.callback(operationJson);
+						setTimeout(function(){
+							if(that._myOperations[operationJson.Id]) // give 10 miliseconds for the operation handler to remove the operation
+								dojo.hitch(that, that._openOperationsPopup)();							
+						}, 10);
+					}else{
+						result.callback(operationJson);
 					}
-					result.callback(operationJson);
 					
 					if(!operationJson.Failed && operationJson.Idempotent==true){
 						window.setTimeout(function() {
