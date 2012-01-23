@@ -3414,7 +3414,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					} else {
 						changeStart = -1;
 					}
-					delete div.modelChangedEvent;
+					div.modelChangedEvent = undefined;
 				}
 				oldSpan = div.firstChild;
 			}
@@ -3428,7 +3428,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					oldStyle = oldSpan.viewStyle;
 					if (oldText === text && this._compare(style, oldStyle)) {
 						oldEnd += oldText.length;
-						delete oldSpan._rectsCache;
+						oldSpan._rectsCache = undefined;
 						span = oldSpan = oldSpan.nextSibling;
 						continue;
 					} else {
@@ -3669,7 +3669,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						} catch (e) {}
 					}
 					if (isLink) {
-						html.push("<link rel='stylesheet' type='text/css' href='");
+						html.push("<link rel='stylesheet' type='text/css' ");
+						/*
+						* Bug in IE7. The window load event is not sent unless a load handler is added to the link node.
+						*/
+						if (isIE < 9) {
+							html.push("onload='window' ");
+						}
+						html.push("href='");
 						html.push(sheet);
 						html.push("'></link>");
 					} else {
