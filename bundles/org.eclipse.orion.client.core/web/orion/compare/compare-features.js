@@ -67,7 +67,6 @@ orion.TwoWayCompareUIFactory = (function() {
 			canvas.height = 3000;
 			dojo.toggleClass(canvas, "compareCanvas", true);
 			canvasContainer.attr('content', canvas);
-			canvasContainer.startup();
 			return canvasContainer;
 		},
 		
@@ -100,28 +99,18 @@ orion.TwoWayCompareUIFactory = (function() {
 			dojo.addClass(bc.domNode, 'borderContainer');
 			this._appendDomNode(bc,this._createCompareCanvasDiv(canvasId));
 			this._appendDomNode(bc,this._createEditorParentDiv(editorParentDivId));
-			bc.startup();
 			return bc;
 		},
 				
-		_destroyDijitRegistry: function(id){
-			var dojitDiv = dijit.byId(id);
-			if(dojitDiv){
-				dojitDiv.destroyRecursive();
-			}
-		},
-		
 		_createLeftBorder:function(){
 			var bc = new dijit.layout.BorderContainer({region:"leading" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
 			dojo.addClass(bc.domNode, 'leftBorder');
 			
 			if(this._showTitle){
 				this._leftTitleDivId = this._parentDivID + "_left_title_id";
-				this._destroyDijitRegistry(this._leftTitleDivId);
 				this._appendDomNode(bc , this._createTileDiv(this._leftTitleDivId, this._leftTitle, false));
 			}
 			this._leftEditorParentDivId = this._parentDivID + "_left_editor_id";
-			this._destroyDijitRegistry(this._leftEditorParentDivId);
 			this._appendDomNode(bc , this._createLeftEditorParentDiv(this._leftEditorParentDivId));
 
 			if(this._showLineStatus){
@@ -129,7 +118,6 @@ orion.TwoWayCompareUIFactory = (function() {
 				this._appendDomNode(bc , this._createStatusDiv(this._leftStatusDivId));
 			}
 			
-			bc.startup();
 			return bc;
 		},
 		
@@ -143,7 +131,6 @@ orion.TwoWayCompareUIFactory = (function() {
 			}
 			
 			this._rightEditorParentDivId = this._parentDivID + "_right_editor_id";
-			this._destroyDijitRegistry(this._rightEditorParentDivId);
 			this._diffCanvasDivId = this._parentDivID + "_diff_canvas_id";
 			this._appendDomNode(bc , this._createRightEditorParentDiv(this._rightEditorParentDivId , this._diffCanvasDivId));
 
@@ -152,16 +139,23 @@ orion.TwoWayCompareUIFactory = (function() {
 				this._appendDomNode(bc , this._createStatusDiv(this._rightStatusDivId));
 			}
 			
-			bc.startup();
 			return bc;
 		},
 		
 		buildUI:function(){
+			this._topWidgetId = this._parentDivID + "_topWidget";
+			var topWidget = dijit.byId(this._topWidgetId);
+			if(topWidget){
+				topWidget.destroyRecursive();
+			}
 			var leftB = this._createLeftBorder();
 			var rightB = this._createRightBorder();
-			var parent = dijit.byId(this._parentDivID);
-			parent.addChild(leftB);
-			parent.addChild(rightB);
+			var marginBox = dojo.marginBox(this._parentDivID);
+			topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, width: marginBox.w, height: marginBox.h, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
+			topWidget.placeAt(this._parentDivID);
+			topWidget.addChild(leftB);
+			topWidget.addChild(rightB);
+			topWidget.startup();
 		},
 		
 		getEditorParentDivId: function(left){

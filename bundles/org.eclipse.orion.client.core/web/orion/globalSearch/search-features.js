@@ -21,39 +21,34 @@ orion.SearchUIFactory = (function() {
 	SearchUIFactory.prototype = {
 		
 		buildUI:function(){
-			this._matchDivId = this._parentDivID + "_matches";
-			this._compareDivId = this._parentDivID + "_compare";
-			var topDiv = dijit.byId(this._matchDivId);
-			if(topDiv){
-				topDiv.destroyRecursive();
-			}
-			var bottomDiv = dijit.byId(this._compareDivId);
-			if(bottomDiv){
-				bottomDiv.destroyRecursive();
+			this._topWidgetId = this._parentDivID + "_topWidget";
+			this._matchWidgetId = this._parentDivID + "_matches";
+			this._compareWidgetId = this._parentDivID + "_compare";
+			var topWidget = dijit.byId(this._topWidgetId);
+			if(topWidget){
+				topWidget.destroyRecursive();
 			}
 			
-			var splitter = dijit.byId(this._compareDivId + "_splitter");
-			if(splitter){
-				splitter.destroyRecursive();
-			}
+			var marginBox = dojo.marginBox(this._parentDivID);
+
+			topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, width: marginBox.w, height: marginBox.h, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
+			var matchWidget = new dijit.layout.BorderContainer({id: this._matchWidgetId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
+			var compareWidget = new dijit.layout.BorderContainer({id:this._compareWidgetId, region:"bottom" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
+			dojo.addClass(matchWidget.domNode, 'topBorder');
+			dojo.addClass(compareWidget.domNode, 'bottomBorderReplace');
 			
-			topDiv = new dijit.layout.BorderContainer({id: this._matchDivId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
-			bottomDiv = new dijit.layout.BorderContainer({id:this._compareDivId, region:"bottom" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
-			dojo.addClass(topDiv.domNode, 'topBorder');
-			dojo.addClass(bottomDiv.domNode, 'bottomBorderReplace');
-			
-			var parent = dijit.byId(this._parentDivID);
-			parent.addChild(topDiv);
-			parent.addChild(bottomDiv);
-			parent.startup();
+			topWidget.placeAt(this._parentDivID);
+			topWidget.addChild(matchWidget);
+			topWidget.addChild(compareWidget);
+			topWidget.startup();
 		},
 		
 		getMatchDivID: function(){
-			return this._matchDivId;
+			return this._matchWidgetId;
 		},
 		
 		getCompareDivID: function(){
-			return this._compareDivId;
+			return this._compareWidgetId;
 		}
 
 	};
