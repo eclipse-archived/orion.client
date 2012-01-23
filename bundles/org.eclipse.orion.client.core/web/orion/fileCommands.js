@@ -916,7 +916,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand
 					};
 				// Pretend that this is a real service
-				var fakeService = { run: uriTemplate.expand.bind(uriTemplate) };
+				var fakeService = { run: dojo.hitch(uriTemplate, uriTemplate.expand) };
 				fileCommands.push({properties: properties, service: fakeService});
 			}
 		}

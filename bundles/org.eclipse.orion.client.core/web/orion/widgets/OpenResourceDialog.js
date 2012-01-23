@@ -100,7 +100,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		var that = this;
 		setTimeout(function() {
 			var query = that.searcher.createSearchQuery(null, text);
-			that.searcher.search(that.results, query, false, false, dojo.hitch(that, that.decorateResult), true /*no highlight*/,true/*use simple format */);
+			that.searcher.search(that.results, query, false, false, dojo.hitch(that, that.decorateResult), true /*no highlight*/);
 		}, 0);
 	},
 	
