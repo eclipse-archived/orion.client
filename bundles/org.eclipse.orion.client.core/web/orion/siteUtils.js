@@ -100,7 +100,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 			imageClass: "core-sprite-edit",
 			id: "eclipse.site.edit",
 			visibleWhen: function(item) {
-				return item.HostingStatus && item.HostingStatus.Status === "stopped";
+				return item.HostingStatus;
 			},
 			hrefCallback: function(data) { return generateEditSiteHref(data.items);}});
 		commandService.addCommand(editCommand, "object");

@@ -113,7 +113,7 @@ eclipse.sites.SiteRenderer = (function() {
 			var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper"}, actionCol, "only");
 			
 			// contact the command service to render appropriate commands here.
-			this._commandService.renderCommands(actionsWrapper, "object", item, {} /*handler*/, "tool");
+			this._commandService.renderCommands(actionsWrapper, "object", item, {} /*handler*/, "button");
 			
 			dojo.place(siteConfigCol, tableRow, "last");
 			dojo.place(statusCol, tableRow, "last");
