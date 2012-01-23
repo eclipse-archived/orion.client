@@ -22,15 +22,26 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			this.inherited(arguments);
 			this.options = arguments[0] || {};
 			this._operations = [];
+			this._myOperations = [];
 		},
 		postCreate: function(){
 			this.inherited(arguments);
 			this.allOperationsLink.href = require.toUrl("operations/list.html");
 			this._setOperationsVisibility();
 		},
-		setOperations: function(operations){
-			this._operations = operations.Children ? operations.Children : [];
+		setOperations: function(operations, myOperations){
+			this._operations = [];
+			myOperations = myOperations || {};
+			this._myOperations = [];
+			for(var i=0; i<operations.Children.length; i++){
+				if(myOperations[operations.Children[i].Id]){
+					this._myOperations.push(operations.Children[i]);
+				} else {
+					this._operations.push(operations.Children[i]);
+				}
+			}
 			this._operations.sort(function(op1, op2){return parseInt(op2.Modified) - parseInt(op1.Modified);});
+			this._myOperations.sort(function(op1, op2){return parseInt(op2.Modified) - parseInt(op1.Modified);});
 			this._renderOperations();
 		},
 		parseProgressResult: function(message){
@@ -48,9 +59,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			return {Message: status.Message || status, Severity: status.Severity};
 		},
 		_renderOperations: function(){
-			dojo.empty(this.operationsList);
-			for(var i=0; i<this._operations.length; i++){
-				var operation = this._operations[i];
+			this._renderOperationsTable(this.myOperationsList, this._myOperations);
+			this._renderOperationsTable(this.operationsList, this._operations);
+		},
+		_renderOperationsTable: function(operationsTable, operations){
+			dojo.empty(operationsTable);
+			for(var i=0; i<operations.length; i++){
+				var operation = operations[i];
 				var tr = dojo.create("tr");
 				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: operation.Name}, tr);
 				var div = dojo.create("div", null, col, "only");
@@ -89,13 +104,17 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 					
 				}
 				
-				dojo.place(tr, this.operationsList, "last");
+				dojo.place(tr, operationsTable, "last");
 			}
 			this._setOperationsVisibility();
 		},
 		_setOperationsVisibility: function(){			
 			this.operationsList.style.display = this._operations.length > 0 ? "" : "none";
-			this.allOperations.style.display = this._operations.length > 0 ? "none": "";
+			this.otherOperations.style.display  = this._operations.length > 0 ? "" : "none";
+			this.myOperationsList.style.display = this._myOperations.length > 0 ? "" : "none";
+			this.myOperationsListEmpty.style.display = this._myOperations.length > 0 ? "none" : "";
+			this.operationsDontExist.style.display = this._operations.length + this._myOperations.length > 0 ? "none": "";
+			this.operationsExist.style.display = this._operations.length + this._myOperations.length > 0 ? "" : "none";
 		},
 		_onBlur: function(){
 			this.inherited(arguments);
