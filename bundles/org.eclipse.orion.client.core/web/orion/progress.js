@@ -24,6 +24,8 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 		this._operationsClient = operationsClient;
 		this._initDone = false;
 		this._topicListeners = {};
+		this._myOperations = {};
+		this._lastOperation = null;
 	}
 	
 	ProgressService.prototype = /** @lends orion.progress.ProgressService.prototype */ {
@@ -133,7 +135,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				dijit.focus(this._operationsDialog.domNode);
 			},
 			_generateOperationsInfo: function(operations){
-				this._operationsDialog.setOperations(operations);
+				this._operationsDialog.setOperations(operations, this._myOperations);
 				
 				if(!operations.Children || operations.Children.length==0){
 					this._progressPane.className = "progressPane progressPane_empty";
@@ -143,12 +145,17 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				var status = "";
 				for(var i=0; i<operations.Children.length; i++){
 					var operation = operations.Children[i];
+					if(!this._myOperations[operation.Id])
+						continue; //only operations run by this page change status
 					if(operation.Running==true){
 						status = "running";
 						break;
 					}
-					if(operation.Result){
-						switch (this._operationsDialog.parseProgressResult(operation.Result).Severity) {
+				}
+				
+				if(status==="" && this._lastOperation!=null){
+					if(this._lastOperation.Result){
+						switch (this._operationsDialog.parseProgressResult(this._lastOperation.Result).Severity) {
 						case "Warning":
 							if(status!=="error")
 								status="warning";
@@ -183,6 +190,9 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			 * @returns {dojo.Deferred} notified when operation finishes
 			 */
 			followOperation: function(operationJson, deferred, operationLocation){
+				if(operationJson.Id){
+					this._myOperations[operationJson.Id] = true;
+				}
 				var result = deferred ? deferred : new dojo.Deferred();
 				this.writeOperation(operationJson);
 				var that = this;
@@ -215,6 +225,12 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			},
 			removeOperation: function(operationLocation, operationId){
 				that = this;
+				if(operationId){
+					if(this._lastOperation!=null && this._lastOperation.Id === operationId){
+						this._lastOperation = null;
+					}
+					delete this._myOperations[operationId];
+				}
 				dojo.hitch(that._operationsClient, that._operationsClient.removeOperation)(operationLocation).then(function(){
 					var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
 					for(var i=0; i<operations.Children.length; i++){
@@ -270,6 +286,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			},
 			writeOperation: function(operationj){
 				var operationJson = JSON.parse(JSON.stringify(operationj));
+				this._lastOperation = operationJson;
 				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
 				for(var i=0; i<operations.Children.length; i++){
 					var operation = operations.Children[i];

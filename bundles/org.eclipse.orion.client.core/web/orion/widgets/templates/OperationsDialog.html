@@ -9,9 +9,15 @@
 					<td style="text-align: right;"><a dojoAttachPoint="allOperationsLink">All Operations</a></td>
 				</tr>
 			</table>
-			<table dojoAttachPoint="operationsList" style="display: none;">
-			</table>
-			<span class="secondaryColumn" dojoAttachPoint="allOperations">No operations running.</span>
+			<span dojoAttachPoint="operationsExist">
+				<span class="secondaryColumn" dojoAttachPoint="myOperationsListEmpty">No operations running on this page.</span>
+				<table dojoAttachPoint="myOperationsList" style="display: none;">
+				</table>
+				<span class="secondaryColumn" dojoAttachPoint="otherOperations"><br>Operations from other pages:</span>
+				<table dojoAttachPoint="operationsList" style="display: none;">
+				</table>
+			</span>
+			<span class="secondaryColumn" dojoAttachPoint="operationsDontExist">No operations running.</span>
 		</div>
 	</div>
 	<div class="dijitTooltipConnector" role="presentation"></div>
