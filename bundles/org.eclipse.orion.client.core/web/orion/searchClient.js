@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others 
+ * Copyright (c) 2010, 2012 IBM Corporation and others 
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -13,7 +13,7 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExplorer', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(require, dojo, dijit, mAuth, mUtil, mExplorer, mSearchUtils){
+define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(require, dojo, dijit, mAuth, mUtil, mSearchUtils){
 
 	/**
 	 * Creates a new search client.
@@ -39,13 +39,13 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 		 * @param {Boolean} [hideSummaries] Don't show the summary of what matched beside each result.
 		 * @param {Boolean} [useSimpleFormat] Use simple format that only shows the file name to show the result, other wise use a complex format with search details.
 		 */
-		search: function(resultsNode, query, excludeFile,  generateHeadingAndSaveLink, onResultReady,  hideSummaries, useSimpleFormat) {
+		search: function(resultsNode, query, excludeFile,  generateHeadingAndSaveLink, onResultReady,  hideSummaries) {
 			var qObj = mSearchUtils.parseQueryStr(query);
 			try{
 				this._fileService.search(qObj.location, query).then(
 					dojo.hitch(this, function(jsonData) {
 						this.showSearchResult(resultsNode, query, excludeFile, generateHeadingAndSaveLink, onResultReady, 
-								hideSummaries, useSimpleFormat, jsonData); 
+								hideSummaries, jsonData); 
 					})
 				);
 			}
@@ -143,45 +143,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 			return div;
 		},
 		
-		showSearchResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, useSimpleFormat, jsonData) {
-			if(useSimpleFormat) {
-				this.showSimpleResult(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData);
-			} else {
-				this.showComplexResult(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData);
-			}
-		},
-		
-		showComplexResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
-			var nonhash= window.location.href.split('#')[0];
-			var foundValidHit = false;
-			var resultLocation = [];
-			dojo.empty(resultsNode);
-			var token = jsonData.responseHeader.params.q;
-			token= token.substring(token.indexOf("}")+1);
-			if (jsonData.response.numFound > 0) {
-				for (var i=0; i < jsonData.response.docs.length; i++) {
-					var hit = jsonData.response.docs[i];
-					// ignore hits in the file that launched the search
-					if (!hit.Directory && hit.Location !== excludeFile) {
-						var col;
-						if (!foundValidHit) {
-							foundValidHit = true;
-						}
-						var loc = hit.Location;
-						resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, name: hit.Name, lastModified: hit.LastModified});
-						
-					}
-				}
-				if (typeof(onResultReady) === "function") {
-					onResultReady(resultsNode);
-				}
-			}
-			var explorer = new mExplorer.SearchResultExplorer(this.registry, this._commandService, resultLocation,  resultsNode, query, jsonData.response.numFound);
-			explorer.startUp();
-		},
-		
-		showSimpleResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
-			var nonhash= window.location.href.split('#')[0];
+		showSearchResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
 			var foundValidHit = false;
 			dojo.empty(resultsNode);
 			var token = jsonData.responseHeader.params.q;
@@ -196,7 +158,6 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchExp
 						if (!foundValidHit) {
 							foundValidHit = true;
 							if (generateHeading) {
-								var favoriteName = token || query;
 								var heading = table.insertRow(0);
 								col = heading.insertCell(0);
 								col.innerHTML = "<h2>Search Results On</h2>";
