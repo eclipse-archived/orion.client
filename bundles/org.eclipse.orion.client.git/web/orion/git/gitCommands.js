@@ -1386,6 +1386,7 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(cherryPickCommand, "object");
+		commandService.addCommand(cherryPickCommand, "dom");
 	};
 
 	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack, cmdBaseNumber, navigator) {

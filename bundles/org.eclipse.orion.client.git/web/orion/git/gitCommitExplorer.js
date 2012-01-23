@@ -11,8 +11,8 @@
 
 /*global define console document */
 
-define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/breadcrumbs'], 
-		function(dojo, mExplorer, mUtil, mDiffProvider , mCompareContainer, mBreadcrumbs) {
+define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/breadcrumbs', 'orion/git/gitCommands'], 
+		function(dojo, mExplorer, mUtil, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
 	var exports = {};
 
 	exports.GitCommitExplorer = (function() {
@@ -80,6 +80,9 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 								that.displayCommit(commits[0]);
 								that.displayTags(commits[0]);
 								that.displayDiffs(commits[0]);
+								
+								// render commands
+								mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", commits[0]);
 							}, function () {
 								dojo.hitch(that, that.handleError)(error);
 							}
