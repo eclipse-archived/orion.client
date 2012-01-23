@@ -1,358 +1,380 @@
 @import "../org.dojotoolkit/dojo/resources/dojo.css";
+
 @import "../org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
+
 @import "../org.dojotoolkit/dijit/themes/nihilo/Tree.css";
-@import "../org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
+
+@import
+	"../org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
+
 @import "../org.dojotoolkit/dijit/themes/nihilo/form/Common.css";
+
 @import "../org.dojotoolkit/dijit/themes/nihilo/form/Button.css";
+
 @import "../css/ide.css";
+
 @import "../css/breadcrumbs.css";
+
 @import "../css/commands.css";
+
 @import "../org.dojotoolkit/dojox/grid/resources/Grid.css";
+
 @import "../org.dojotoolkit/dojox/grid/resources/nihiloGrid.css";
 
 html,body {
-height: 100%;
+	height: 100%;
 }
 
 h1 {
-position: relative;
-margin-top: 18px;
+	position: relative;
+	margin-top: 18px;
 }
 
-select{
-font-size:1em;
-border: 1px #999 solid;
-color: #666;
+select {
+	font-size: 1em;
+	border: 1px #999 solid;
+	color: #666;
 }
 
-button{
-background: white;
-   color: #666;
-   border: solid 1px #999;
-   border-radius:2px;
-   font-size:0.9em;
+button {
+	background: white;
+	color: #666;
+	border: solid 1px #999;
+	border-radius: 2px;
+	font-size: 0.9em;
 }
 
-
-#pluginUrlEntry{
-   background: white;
-   color: #666;
-   border: solid 1px #999;
-   border-radius:2px;
-   font-size:0.9em;
-   padding:1px;
+#pluginUrlEntry {
+	background: white;
+	color: #666;
+	border: solid 1px #999;
+	border-radius: 2px;
+	font-size: 0.9em;
+	padding: 1px;
 }
 
 .statusPane {
-font-weight: bold;
+	font-weight: bold;
 }
 
-.categories{
-background: #EDEDED;
+.categories {
+	background: #EDEDED;
 }
 
 #content-title {
-font-size: 1.2em;
-font-weight: bold;
-color: #666;
-margin: 0;
-padding-bottom: 14px;
-padding-top: 13px;
-margin-right: 16px;
-text-align: right;
+	font-size: 1.2em;
+	font-weight: bold;
+	color: #666;
+	margin: 0;
+	padding-bottom: 14px;
+	padding-top: 13px;
+	margin-right: 16px;
+	text-align: right;
 }
 
-
-#categories > ul {
-list-style-type: none;
-margin: 0;
-padding: 0;
+#categories>ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
 }
-
 
 #navbar {
-margin: 0;
-padding: 0;
+	margin: 0;
+	padding: 0;
 }
 
 .navbar-item {
-border-bottom: 1px solid transparent;
-border-top: 1px solid transparent;
-color: #666;
-display: block;
-font-size: 90%;
-outline: none;
-padding: 7px 0;
-text-align: right;
-padding-right:20px;
+	border-bottom: 1px solid transparent;
+	border-top: 1px solid transparent;
+	color: #666;
+	display: block;
+	font-size: 90%;
+	outline: none;
+	padding: 7px 0;
+	text-align: right;
+	padding-right: 20px;
 }
 
-ul, menu, dir {
-display: block;
-list-style-type: disc;
+ul,menu,dir {
+	display: block;
+	list-style-type: disc;
 }
 
 .navbar-item-selected {
-background: #feff66;
-color: #666;
+	background: #feff66;
+	color: #666;
 }
 
 .settings {
-   padding-left: 20px;
-  padding-right: 40px;
+	padding-left: 20px;
+	padding-right: 40px;
 }
 
-.pluginwrapper{
-padding-bottom: 40px;
-padding-top: 24px;
-border-bottom: 1px dotted #BFBFBF;
+.pluginwrapper {
+	padding-bottom: 40px;
+	padding-top: 24px;
+	border-bottom: 1px dotted #BFBFBF;
 }
 
 .pluginTitle {
-float: left;
-font-size: 1.2em;
-font-weight: bold;
-color: #666;
-margin: 0;
+	float: left;
+	font-size: 1.2em;
+	font-weight: bold;
+	color: #666;
+	margin: 0;
+}
+
+.sectionProgress {
+	float: left; font-size : 1.2em; font-weight : bold; color : #666;
+	margin-left: 2px;
+	text-decoration: blink;
+	font-size: 1.2em;
+	font-weight: bold;
+	color: #666;
+}
+
+.pluginSubTitle {
+	font-size: 1.1em;
+	font-weight: normal;
+	color: #666;
+	padding: 5px;
 }
 
 .additions {
-float: right;
-background: #666;
-font-size:.9em;
-color:white;
-padding:4px;
-border-radius:2px;
+	float: right;
+	background: #666;
+	font-size: .9em;
+	color: white;
+	padding: 4px;
+	border-radius: 2px;
 }
 
 .additions-light {
-float: right;
-font-size:.9em;
-color:white;
-padding:4px;
-border-radius:2px;
+	float: right;
+	font-size: .9em;
+	color: white;
+	padding: 4px;
+	border-radius: 2px;
 }
 
 .settings h1 {
-font-size: 1.2em;
-font-weight: bold;
-color: #666;
-margin: 0;
-padding-bottom: 14px;
-padding-top: 13px;
-border-bottom: 1px dotted #BFBFBF;
+	font-size: 1.2em;
+	font-weight: bold;
+	color: #666;
+	margin: 0;
+	padding-bottom: 14px;
+	padding-top: 13px;
+	border-bottom: 1px dotted #BFBFBF;
 }
 
 .settings section {
-color:#666;
-border-bottom: 1px dotted #BFBFBF;
-display: -webkit-box;
-display: -moz-box;
-margin-top: 17px;
-padding-bottom: 20px;
-width:100%;
-margin-right:16px;
+	color: #666;
+	border-bottom: 1px dotted #BFBFBF;
+	display: -webkit-box;
+	display: -moz-box;
+	margin-top: 17px;
+	padding-bottom: 20px;
+	width: 100%;
+	margin-right: 16px;
 }
 
-
-.settings section > h3 {
-margin: 0;
-vertical-align: middle;
-width: 130px;
-padding-right:10px;
+.settings section>h3 {
+	margin: 0;
+	vertical-align: middle;
+	width: 130px;
+	padding-right: 10px;
 }
 
-.settings section > div {
-margin: 0;
-vertical-align: middle;
+.settings section>div {
+	margin: 0;
+	vertical-align: middle;
 }
 
-.settings section > div > div{
-margin: 10px 0;
+.settings section>div>div {
+	margin: 10px 0;
 }
 
-.settings section > div > div > label > span{
-min-width: 145px;
-display: inline-block;
-min-width: 100px;
+.settings section>div>div>label>span {
+	min-width: 145px;
+	display: inline-block;
+	min-width: 100px;
 }
 
-.displaytable > section {
-display: table-row;
+.displaytable>section {
+	display: table-row;
 }
 
 .web-content-select-label {
-min-width: 145px;
+	min-width: 145px;
 }
 
-.web-content-select-label > span:only-of-type {
-display: inline-block;
-min-width: 100px;
+.web-content-select-label>span:only-of-type {
+	display: inline-block;
+	min-width: 100px;
 }
 
-input[type="checkbox"]{
-margin: 3px 3px 3px 4px;
-margin-left: 0;
-margin-right: 0;
-position: relative;
-top: 1px;
+input[type="checkbox"] {
+	margin: 3px 3px 3px 4px;
+	margin-left: 0;
+	margin-right: 0;
+	position: relative;
+	top: 1px;
 }
 
-.addPluginClosed{
-float:right;
-width: 10px;
-height: 10px;
-background: #FEFF66;
-background: #666;
-padding: 4px;
-color: white;
-font-size: 8pt;
-border-radius: 4px;
-top: 10px;
+.addPluginClosed {
+	float: right;
+	width: 10px;
+	height: 10px;
+	background: #FEFF66;
+	background: #666;
+	padding: 4px;
+	color: white;
+	font-size: 8pt;
+	border-radius: 4px;
+	top: 10px;
 }
 
 .interactionOpen {
-border-bottom: 1px dotted #BFBFBF;
-height: 30px;
-padding-bottom: 5px;
-padding-top: 5px;
-margin-right:16px;
--webkit-padding-start: 5px;
--webkit-padding-end: 4px;
--webkit-transition: padding 500ms, height 400ms, opacity 800ms;
--moz-padding-start: 4px;
--moz-padding-end: 3px;
--moz-transition: padding 500ms, height 400ms, opacity 800ms;
--ms-padding-start: 4px;
--ms-padding-end: 3px;
--ms-transition: padding 500ms, height 400ms, opacity 800ms;
+	border-bottom: 1px dotted #BFBFBF;
+	height: 30px;
+	padding-bottom: 5px;
+	padding-top: 5px;
+	margin-right: 16px;
+	-webkit-padding-start: 5px;
+	-webkit-padding-end: 4px;
+	-webkit-transition: padding 500ms, height 400ms, opacity 800ms;
+	-moz-padding-start: 4px;
+	-moz-padding-end: 3px;
+	-moz-transition: padding 500ms, height 400ms, opacity 800ms;
+	-ms-padding-start: 4px;
+	-ms-padding-end: 3px;
+	-ms-transition: padding 500ms, height 400ms, opacity 800ms;
 }
 
 .interactionClosed {
-height: 0;
-opacity: 0;
-margin-right:16px;
--webkit-padding-start: 4px;
--webkit-padding-end: 3px;
--webkit-transition: padding 300ms, height 700ms, opacity 200ms;
--moz-padding-start: 4px;
--moz-padding-end: 3px;
--moz-transition: padding 300ms, height 700ms, opacity 200ms;
--ms-padding-start: 4px;
--ms-padding-end: 3px;
--ms-transition: padding 500ms, height 400ms, opacity 800ms;
+	height: 0;
+	opacity: 0;
+	margin-right: 16px;
+	-webkit-padding-start: 4px;
+	-webkit-padding-end: 3px;
+	-webkit-transition: padding 300ms, height 700ms, opacity 200ms;
+	-moz-padding-start: 4px;
+	-moz-padding-end: 3px;
+	-moz-transition: padding 300ms, height 700ms, opacity 200ms;
+	-ms-padding-start: 4px;
+	-ms-padding-end: 3px;
+	-ms-transition: padding 500ms, height 400ms, opacity 800ms;
 }
 
-#plugin-settings .displaytable > section {
-display: block;
-width:100%;
+#plugin-settings .displaytable>section {
+	display: block;
+	width: 100%;
 }
 
 div.page section:last-child {
-border-bottom: none;
+	border-bottom: none;
 }
 
-#plugin-settings .displaytable > section > * {
-display: block;
+#plugin-settings .displaytable>section>* {
+	display: block;
 }
 
 #plugin-settings-list {
-min-height: 0;
-overflow-y: hidden;
-width:100%;
+	min-height: 0;
+	overflow-y: hidden;
+	width: 100%;
 }
 
 .plugin-list-item {
-padding-top: 20px;
-margin-bottom: 20px;
-width: 100%;
+	padding-top: 20px;
+	margin-bottom: 20px;
+	width: 100%;
 }
 
-list, grid {
-display: block;
-outline: none;
-overflow: auto;
-position: relative;
+list,grid {
+	display: block;
+	outline: none;
+	overflow: auto;
+	position: relative;
 }
 
 .plugin-icon {
-float: left;
-position: relative;
-height: 48px;
-vertical-align: text-top;
-width: 48px;
-padding-right: 15px;
+	float: left;
+	position: relative;
+	height: 48px;
+	vertical-align: text-top;
+	width: 48px;
+	padding-right: 15px;
 }
 
 .stretch {
-float:left;
-position:relative;
+	float: left;
+	position: relative;
 }
 
-list > *, grid > * {
-
-display: block;
-outline: none;
-overflow: auto;
-position: relative;
-line-height: 20px;
-white-space: pre;
+list>*,grid>* {
+	display: block;
+	outline: none;
+	overflow: auto;
+	position: relative;
+	line-height: 20px;
+	white-space: pre;
 }
 
 .plugin-title {
-font-size: 16px;
-font-weight: 500;
-padding-right:20px;
+	font-size: 16px;
+	font-weight: 500;
+	padding-right: 20px;
 }
 
 #plugin-settings .displaytable {
-display: block;
+	display: block;
 }
 
 .plugin-settings-content {
-  border-bottom : 0px solid #eee;
-  margin-top: 3px;
-  width:100%;
+	border-bottom: 0px solid #eee;
+	margin-top: 3px;
+	width: 100%;
 }
 
 .plugin-settings {
-  overflow-x: hidden;
+	overflow-x: hidden;
 }
 
 .plugin-version {
-  font-size: 13px;
-  font-weight: 400;
-  padding-right:10px;
+	font-size: 13px;
+	font-weight: 400;
+	padding-right: 10px;
 }
-  
+
 .plugin-description {
-  font-size: 13px;
-  white-space: normal;
-  padding-right:10px;
+	font-size: 13px;
+	white-space: normal;
+	padding-right: 10px;
 }
 
 .plugin-delete {
-   float: right;
-   position: relative;
-   background: white;
-   color: #666;
-   border: solid 1px #999;
-   border-radius:2px;
-   font-size:0.9em;
+	float: right;
+	position: relative;
+	background: white;
+	color: #666;
+	border: solid 1px #999;
+	border-radius: 2px;
+	font-size: 0.9em;
 }
 
 .plugin-action-area {
-   float: right;
-   position: relative;
-   background: white;
-   color: #666;
-   font-size:0.9em;
+	float: right;
+	position: relative;
+	background: white;
+	color: #666;
+	font-size: 0.9em;
 }
 
 .plugin-links-view {
-  padding-right: 15px;
+	padding-right: 15px;
 }
 
 .plugin-links-trailing {
-  padding-right: 7px;
+	padding-right: 7px;
 }
