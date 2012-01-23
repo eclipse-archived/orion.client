@@ -396,7 +396,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				dojo.place(document.createTextNode("\"" + searchPattern + "\"..."), b, "only");
 				searchFloat.style.display = "block";
 				var query = searcher.createSearchQuery(searchPattern);
-				searcher.search(searchFloat, query, inputManager.getInput(),false,null,false,true);
+				searcher.search(searchFloat, query, inputManager.getInput(),false,null,false);
 			}, 0);
 			return true;
 		});
@@ -479,7 +479,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editor);});
 	inputManager.setInput(dojo.hash(), editor);
 	
-	// TODO search location needs to be gotten from somewhere
 	mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, editor, editor, escHandler);
 	mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 		
