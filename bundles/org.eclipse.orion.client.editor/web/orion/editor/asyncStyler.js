@@ -77,10 +77,24 @@ define("orion/editor/asyncStyler", [], function() {
 			}
 		},
 		/**
-		 * TODO doc orion.edit.highlighter.styleReady
+		 * @name orion.editor.StyleReadyEvent
+		 * @class Represents the styling for a range of lines, as provided by a service.
+		 * @description Represents the styling for a range of lines, as provided by a service.
+		 * @property {Object} lineStyles A map of style information. Each key of the map is a line index, and the value 
+		 * is a {@link orion.editor.StyleReadyEvent#LineStyle} giving the style information for the line.
+		 */
+		/**
+		 * @name orion.editor.StyleReadyEvent#LineStyle
+		 * @class Represents style information for a line.
+		 * @description Represents style information for a line.
+		 * <p>Note that the offsets given in the {@link #ranges} and {@link #errors} properties are relative to the start of the
+		 * line that this LineStyle is associated with, not the start of the document.</p>
+		 * @property {orion.textview.StyleRange[]} ranges Optional; Gives the styles for this line.
+		 * @property {orion.textview.StyleRange[]} errors Optional; Gives the error styles for this line. Error styles will be 
+		 * presented as annotations in the UI.
 		 */
 		onStyleReady: function(e) {
-			var style = e.style;
+			var style = e.lineStyles || e.style;
 			var min = Number.MAX_VALUE, max = -1;
 			var model = this.textView.getModel();
 			for (var lineIndex in style) {
@@ -142,8 +156,8 @@ define("orion/editor/asyncStyler", [], function() {
 			}
 			var style = this.lineStyles[e.lineIndex];
 			if (style) {
-				// AsyncStyler expects the 'ranges' property to have identical shape to {@link orion.textview.LineStyleEvent#ranges},
-				// with one exception: AynscStyler requires the start and end indices to be line-relative, not document-relative.
+				// The 'ranges', 'errors' are of type {@link orion.textview.LineStyleEvent#ranges}, except the 
+				// start and end indices are line-relative offsets, not document-relative.
 				if (style.ranges) { e.ranges = _toDocumentOffset(style.ranges, e.lineStart); }
 				else if (style.style) { e.style = style.style; }
 			}
