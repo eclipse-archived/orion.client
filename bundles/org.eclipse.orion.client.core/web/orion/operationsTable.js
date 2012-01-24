@@ -141,7 +141,7 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 				var result =  this.parseProgressResult(item.Result);
 				
 				if(result.Severity){
-					switch (status.Severity) {
+					switch (result.Severity) {
 						case "Warning":
 							dojo.addClass(operationIcon, "core-sprite-warning");
 							return col;
