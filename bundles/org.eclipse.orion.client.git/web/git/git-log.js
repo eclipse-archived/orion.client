@@ -82,8 +82,6 @@ var serviceRegistry;
 			commandService.registerCommandContribution("eclipse.orion.git.nextLogPage", 2, "pageNavigationActions");
 
 			loadResource(navigator, searcher);
-			
-			makeRightPane(navigator);
 		
 			// every time the user manually changes the hash, we need to load the
 			// workspace with that name
@@ -107,10 +105,7 @@ function loadResource(navigator, searcher){
 			var loadResource = function(resource){
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
 				initTitleBar(fileClient, navigator, resource, searcher);
-				
-				// clear and close the commit details pane
-				navigator.loadCommitDetails(null);
-				
+
 				if (resource.Type === "RemoteTrackingBranch"){
 					var gitService = serviceRegistry.getService("orion.git.provider");
 					gitService.getLog(resource.HeadLocation, resource.Id, "Getting git incoming changes", function(scopedCommitsJsonData) {
@@ -285,35 +280,6 @@ function initTitleBar(fileClient, navigator, item, searcher){
 	}
 	
 };
-
-function makeRightPane(explorer){
-		// set up the splitter bar and its key binding
-		var splitArea = dijit.byId("orion.gitlog");
-		
-		//by default the pane should be closed
-		if(splitArea.isRightPaneOpen()){
-			splitArea.toggle();
-		}
-				
-		var bufferedSelection = [];
-		
-		window.document.onkeydown = function (evt){
-			evt = evt || window.event;
-			var handled = false;
-			if(evt.ctrlKey && evt.keyCode  === 79){ // Ctrl+o handler for toggling outline 
-				splitArea.toggle();
-				handled = true;			
-			} 
-			if (handled) {
-				if (window.document.all) { 
-					evt.keyCode = 0;
-				} else { 
-					evt.preventDefault();
-					evt.stopPropagation();
-				}		
-			}
-		};
-}
 
 function makeHref(fileClient, seg, location, isRemote) {
 	if (!location) {

@@ -112,11 +112,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				if (providerToUse) {
 					var providerType = providerToUse.getProperty("type");
 					if (providerType === "highlighter") {
-						var service = serviceRegistry.getService(providerToUse);
-						if (service.setContentType) {
-							service.setContentType(fileContentType);
-						}
-						this.styler = new mAsyncStyler.AsyncStyler(textView, service, annotationModel);
+						this.styler = new mAsyncStyler.AsyncStyler(textView, serviceRegistry, annotationModel);
+						this.styler.setContentType(fileContentType);
 					} else if (providerType === "grammar" || typeof providerType === "undefined") {
 						var grammar = providerToUse.getProperty("grammar");
 						this.styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);

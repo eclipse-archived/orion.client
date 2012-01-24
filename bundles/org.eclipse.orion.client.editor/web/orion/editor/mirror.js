@@ -269,22 +269,22 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 	var TAB = "token_tab",
 	    SPACE = "token_space",
 
-	    /** Max number of lines to immediately re-highlight after an edit. Remaining lines are handled by follow-up jobs. */
+	    /* Max number of lines to immediately re-highlight after an edit. Remaining lines are handled by follow-up jobs. */
 	    MAX_REHIGHLIGHT = 500,
 
-	    /** Time in ms to wait between highlight jobs. */
+	    /* Time in ms to wait between highlight jobs. */
 	    JOB_INTERVAL = 50,
 
-	    /** Maximum duration in ms of the re-highlight job.*/
+	    /* Maximum duration in ms of the re-highlight job.*/
 	    JOB_DURATION = 30,
 
-	    /**
+	    /*
 	     * During a highlight job, when mode doesn't define a "compareStates" method and we find more than this many
 	     * consecutive unchanged lines, the job aborts. (Assumes rest of file is already correctly highlighted.)
 	     */
 	    ABORT_THRESHOLD = 3,
 
-	    /** Maximum number of lines to backtrack when searching for previous state to resume parsing from. */
+	    /* Maximum number of lines to backtrack when searching for previous state to resume parsing from. */
 	    MAX_BACKTRACK = 40;
 	
 	ModeApplier.prototype = /** @lends orion.mirror.ModeApplier.prototype */ {

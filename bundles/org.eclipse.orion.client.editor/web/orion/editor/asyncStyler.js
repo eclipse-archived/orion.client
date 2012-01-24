@@ -9,24 +9,34 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 /*jslint browser:true regexp:true*/
-/*global define console*/
+/*global define*/
 define("orion/editor/asyncStyler", [], function() {
+	var SERVICE_NAME = "orion.edit.highlighter";
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
-	
+
+	function isRelevant(serviceReference) {
+		return serviceReference.getName() === SERVICE_NAME && serviceReference.getProperty("type") === "highlighter";
+	}
+
 	/**
-	 * Pushes styles provided by a service into the textView.
+	 * Pushes styles provided by <code>orion.edit.highlighter</code> services into a TextView.
+	 * @param {orion.textview.TextView} textView
+	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
+	 * @param {orion.textview.AnnotationModel} [annotationModel]
 	 */
-	function AsyncStyler(textView, service, annotationModel) {
-		this.initialize(textView, service, annotationModel);
+	function AsyncStyler(textView, serviceRegistry, annotationModel) {
+		this.initialize(textView, serviceRegistry, annotationModel);
 		this.lineStyles = [];
 	}
 	AsyncStyler.prototype = {
-		initialize: function(textView, service, annotationModel) {
+		initialize: function(textView, serviceRegistry, annotationModel) {
 			this.textView = textView;
-			this.service = service;
+			this.serviceRegistry = serviceRegistry;
 			this.annotationModel = annotationModel; 
+			this.services = [];
+
 			var self = this;
-			this._listener = {
+			this.listener = {
 				onModelChanging: function(e) {
 					self.onModelChanging(e);
 				},
@@ -41,30 +51,52 @@ define("orion/editor/asyncStyler", [], function() {
 				},
 				onStyleReady: function(e) {
 					self.onStyleReady(e);
+				},
+				onServiceAdded: function(serviceRef, service) {
+					self.onServiceAdded(serviceRef, service);
+				},
+				onServiceRemoved: function(serviceRef, service) {
+					self.onServiceRemoved(serviceRef, service);
 				}
 			};
-			textView.addEventListener("ModelChanging", this._listener.onModelChanging);
-			textView.addEventListener("ModelChanged", this._listener.onModelChanged);
-			textView.addEventListener("Destroy", this._listener.onDestroy);
-			textView.addEventListener("LineStyle", this._listener.onLineStyle);
-			service.addEventListener("orion.edit.highlighter.styleReady", this._listener.onStyleReady);
+			textView.addEventListener("ModelChanging", this.listener.onModelChanging);
+			textView.addEventListener("ModelChanged", this.listener.onModelChanged);
+			textView.addEventListener("Destroy", this.listener.onDestroy);
+			textView.addEventListener("LineStyle", this.listener.onLineStyle);
+			serviceRegistry.addEventListener("serviceAdded", this.listener.onServiceAdded);
+			serviceRegistry.addEventListener("serviceRemoved", this.listener.onServiceRemoved);
+
+			var serviceRefs = serviceRegistry.getServiceReferences(SERVICE_NAME);
+			for (var i = 0; i < serviceRefs.length; i++) {
+				var serviceRef = serviceRefs[i];
+				if (isRelevant(serviceRef)) {
+					this.addServiceListener(serviceRegistry.getService(serviceRef));
+				}
+			}
 		},
 		onDestroy: function(e) {
 			this.destroy();
 		},
 		destroy: function() {
 			if (this.textView) {
-				this.textView.removeEventListener("ModelChanging", this._listener.onModelChanging);
-				this.textView.removeEventListener("ModelChanged", this._listener.onModelChanged);
-				this.textView.removeEventListener("Destroy", this._listener.onDestroy);
-				this.textView.removeEventListener("LineStyle", this._listener.onLineStyle);
+				this.textView.removeEventListener("ModelChanging", this.listener.onModelChanging);
+				this.textView.removeEventListener("ModelChanged", this.listener.onModelChanged);
+				this.textView.removeEventListener("Destroy", this.listener.onDestroy);
+				this.textView.removeEventListener("LineStyle", this.listener.onLineStyle);
 				this.textView = null;
 			}
-			if (this.service) {
-				this.service.removeEventListener("orion.edit.highlighter.styleReady", this._listener.onStyleReady);
-				this.service = null;
+			if (this.services) {
+				for (var i = 0; i < this.services.length; i++) {
+					this.removeServiceListener(this.services[i]);
+				}
+				this.services = null;
 			}
-			this._listener = null;
+			if (this.serviceRegistry) {
+				this.serviceRegistry.removeEventListener("serviceAdded", this.listener.onServiceAdded);
+				this.serviceRegistry.removeEventListener("onServiceRemoved", this.listener.onServiceRemoved);
+				this.serviceRegistry = null;
+			}
+			this.listener = null;
 			this.lineStyles = null;
 		},
 		onModelChanging: function(e) {
@@ -77,10 +109,24 @@ define("orion/editor/asyncStyler", [], function() {
 			}
 		},
 		/**
-		 * TODO doc orion.edit.highlighter.styleReady
+		 * @name orion.editor.StyleReadyEvent
+		 * @class Represents the styling for a range of lines, as provided by a service.
+		 * @description Represents the styling for a range of lines, as provided by a service.
+		 * @property {Object} lineStyles A map of style information. Each key of the map is a line index, and the value 
+		 * is a {@link orion.editor.StyleReadyEvent#LineStyle} giving the style information for the line.
+		 */
+		/**
+		 * @name orion.editor.StyleReadyEvent#LineStyle
+		 * @class Represents style information for a line.
+		 * @description Represents style information for a line.
+		 * <p>Note that the offsets given in the {@link #ranges} and {@link #errors} properties are relative to the start of the
+		 * line that this LineStyle is associated with, not the start of the document.</p>
+		 * @property {orion.textview.StyleRange[]} ranges Optional; Gives the styles for this line.
+		 * @property {orion.textview.StyleRange[]} errors Optional; Gives the error styles for this line. Error styles will be 
+		 * presented as annotations in the UI.
 		 */
 		onStyleReady: function(e) {
-			var style = e.style;
+			var style = e.lineStyles || e.style;
 			var min = Number.MAX_VALUE, max = -1;
 			var model = this.textView.getModel();
 			for (var lineIndex in style) {
@@ -113,8 +159,8 @@ define("orion/editor/asyncStyler", [], function() {
 						for (var j=0; j < errors.length; j++) {
 							var err = errors[j];
 							toAdd.push({
-								start: err.start,
-								end: err.end,
+								start: err.start + lineStart,
+								end: err.end + lineStart,
 								type: HIGHLIGHT_ERROR_ANNOTATION,
 								title: "Syntax error.",
 								html: "<div class='annotationHTML error'></div>",
@@ -142,8 +188,8 @@ define("orion/editor/asyncStyler", [], function() {
 			}
 			var style = this.lineStyles[e.lineIndex];
 			if (style) {
-				// AsyncStyler expects the 'ranges' property to have identical shape to {@link orion.textview.LineStyleEvent#ranges},
-				// with one exception: AynscStyler requires the start and end indices to be line-relative, not document-relative.
+				// The 'ranges', 'errors' are of type {@link orion.textview.LineStyleEvent#ranges}, except the 
+				// start and end indices are line-relative offsets, not document-relative.
 				if (style.ranges) { e.ranges = _toDocumentOffset(style.ranges, e.lineStart); }
 				else if (style.style) { e.style = style.style; }
 			}
@@ -154,6 +200,41 @@ define("orion/editor/asyncStyler", [], function() {
 				result.push(null);
 			}
 			return result;
+		},
+		setContentType: function(contentType) {
+			this.contentType = contentType;
+			if (this.services) {
+				for (var i = 0; i < this.services.length; i++) {
+					var service = this.services[i];
+					if (service.setContentType) {
+						service.setContentType(this.contentType);
+					}
+				}
+			}
+		},
+		onServiceAdded: function(serviceRef, service) {
+			if (isRelevant(serviceRef)) {
+				this.addServiceListener(service);
+			}
+		},
+		onServiceRemoved: function(serviceRef, service) {
+			if (this.services.indexOf(service) !== -1) {
+				this.removeServiceListener(service);
+			}
+		},
+		addServiceListener: function(service) {
+			service.addEventListener("orion.edit.highlighter.styleReady", this.listener.onStyleReady);
+			this.services.push(service);
+			if (service.setContentType && this.contentType) {
+				service.setContentType(this.contentType);
+			}
+		},
+		removeServiceListener: function(service) {
+			service.removeEventListener("orion.edit.highlighter.styleReady", this.listener.onStyleReady);
+			var serviceIndex = this.services.indexOf(service);
+			if (serviceIndex !== -1) {
+				this.services.splice(serviceIndex, 1);
+			}
 		}
 	};
 	
