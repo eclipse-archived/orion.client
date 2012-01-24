@@ -22,30 +22,49 @@ define(['orion/edit/dispatcher'], function() {
 		this.editor = editor;
 		this.contentType = contentType;
 		this.contentTypeService = serviceRegistry.getService("orion.file.contenttypes");
-		if (this.editor.getTextView()) {
-			this._wire();
-		} else {
-			var self = this;
-			this.editor.addEventListener("TextViewInstalled", function() {
-				self._wire();
-			});
-		}
+		this.serviceReferences = {};
+
+		var self = this;
+		this.listener = {
+			onServiceAdded: function(serviceReference, service) {
+				self._onServiceAdded(serviceReference, service);
+			},
+			onServiceRemoved: function(serviceReference, service) {
+				self._onServiceRemoved(serviceReference, service);
+			}
+		};
+		this.serviceRegistry.addEventListener("serviceAdded", this.listener.onServiceAdded);
+		this.serviceRegistry.addEventListener("serviceRemoved", this.listener.onServiceRemoved);
+		this._init();
 	}
 	Dispatcher.prototype = /** @lends orion.edit.Dispatcher.prototype */ {
-		_wire: function() {
+		_init: function() {
+			var self = this;
+			if (this.editor.getTextView()) {
+				this._wire(this.serviceRegistry);
+			} else {
+				this.editor.addEventListener("TextViewInstalled", function() {
+					self._wire(self.serviceRegistry);
+				});
+			}
+		},
+		_wire: function(serviceRegistry) {
 			// Find registered services that are interested in this contenttype
-			var listeners = this.serviceRegistry.getServiceReferences("orion.edit.model");
-			for (var i=0; i < listeners.length; i++) {
-				var listener = listeners[i], listenerContentType = listener.getProperty("contentType");
-				if (typeof listenerContentType !== undefined && listenerContentType !== null) {
-					var self = this;
-					this.contentTypeService.isSomeExtensionOf(this.contentType, listenerContentType).then(
-						function(isSupported) {
-							if (isSupported) {
-								self._wireService(listener, self.serviceRegistry.getService(listener));
-							}
-						});
-				 }
+			var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.model");
+			for (var i=0; i < serviceRefs.length; i++) {
+				this._wireServiceReference(serviceRefs[i]);
+			}
+		},
+		_wireServiceReference: function(serviceRef) {
+			var refContentType = serviceRef.getProperty("contentType");
+			if (typeof refContentType !== undefined && refContentType !== null) {
+				var self = this;
+				this.contentTypeService.isSomeExtensionOf(this.contentType, refContentType).then(
+					function(isSupported) {
+						if (isSupported) {
+							self._wireService(serviceRef, self.serviceRegistry.getService(serviceRef));
+						}
+					});
 			}
 		},
 		_wireService: function(serviceReference, service) {
@@ -56,15 +75,37 @@ define(['orion/edit/dispatcher'], function() {
 				var type = types[i];
 				var method = service["on" + type];
 				if (method) {
-					this._wireServiceMethod(service, method, textView, type);
+					this._wireServiceMethod(serviceReference, service, method, textView, type);
 				}
 			}
 		},
-		_wireServiceMethod: function(service, serviceMethod, textView, type) {
-			//console.debug("Connect " + type + " -> " + ("on" + type));
-			textView.addEventListener(type, function(event) {
+		_wireServiceMethod: function(serviceReference, service, serviceMethod, textView, type) {
+			//console.log("  Add listener " + type + " for " + serviceReference.getServiceId());
+			var listener = function(event) {
 				serviceMethod(event).then(/*No return value*/);
-			}, false);
+			};
+			var serviceId = serviceReference.getServiceId();
+			this.serviceReferences[serviceId] = this.serviceReferences[serviceId] || [];
+			this.serviceReferences[serviceId].push([textView, type, listener]);
+			textView.addEventListener(type, listener);
+		},
+		_onServiceRemoved: function(serviceReference, service) {
+			var serviceId = serviceReference.getServiceId();
+			var serviceReferences = this.serviceReferences[serviceId];
+			if (serviceReferences) {
+				for (var i=0; i < serviceReferences.length; i++) {
+					var listener = serviceReferences[i];
+					var textView = listener[0], type = listener[1], func = listener[2];
+					//console.log("  Remove listener " + type + " for " + serviceId);
+					textView.removeEventListener(type, func);
+				}
+				delete this.serviceReferences[serviceId];
+			}
+		},
+		_onServiceAdded: function(serviceReference, service) {
+			if (serviceReference.getName() === "orion.edit.model") {
+				this._wireServiceReference(serviceReference);
+			}
 		}
 	};
 	return {Dispatcher: Dispatcher};
