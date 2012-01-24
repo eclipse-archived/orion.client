@@ -237,17 +237,36 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 					delete this._myOperations[operationId];
 				}
 				dojo.hitch(that._operationsClient, that._operationsClient.removeOperation)(operationLocation).then(function(){
-					var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
-					for(var i=0; i<operations.Children.length; i++){
-						var operation = operations.Children[i];
-						if(operation.Id && operation.Id===operationId){
-							operations.Children.splice(i, 1);
-							break;
-						}
-					}
-					localStorage.setItem("orionOperations", JSON.stringify(operations));
-					dojo.hitch(that, that._generateOperationsInfo)(operations); 
+					dojo.hitch(that, that.removeOperationFromTheList)(operationId);
 				});
+			},
+			removeOperationFromTheList: function(operationId){
+				if(this._lastOperation!=null && this._lastOperation.Id === operationId){
+					this._lastOperation = null;
+				}
+				delete this._myOperations[operationId];
+				
+				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
+				for(var i=0; i<operations.Children.length; i++){
+					var operation = operations.Children[i];
+					if(operation.Id && operation.Id===operationId){
+						operations.Children.splice(i, 1);
+						break;
+					}
+				}
+				localStorage.setItem("orionOperations", JSON.stringify(operations));
+				this._generateOperationsInfo(operations); 
+			},
+			removeCompletedOperations: function(){
+				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
+				for(var i=operations.Children.length-1; i>=0; i--){
+					var operation = operations.Children[i];
+					if(!operation.Running){
+						operations.Children.splice(i, 1);
+					}
+				}
+				localStorage.setItem("orionOperations", JSON.stringify(operations));
+				this._generateOperationsInfo(operations);
 			},
 			setProgressResult: function(result){
 				this._serviceRegistry.getService("orion.page.message").setProgressResult(result);

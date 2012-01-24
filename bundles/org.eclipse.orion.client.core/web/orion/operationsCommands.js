@@ -55,7 +55,10 @@ define(['require', 'dojo', 'orion/commands'],
 				tooltip : "Remove all completed operations",
 				id : "eclipse.removeCompletedOperations",
 				callback : function(data) {
-					operationsClient.removeCompletedOperations();
+					var progress = serviceRegistry.getService("orion.page.progress");
+					operationsClient.removeCompletedOperations().then(dojo.hitch(progress, function(item){
+						progress.removeCompletedOperations();
+					}));
 				},
 				visibleWhen : function(item) {
 					return true;
@@ -70,9 +73,12 @@ define(['require', 'dojo', 'orion/commands'],
 				id : "eclipse.removeOperation",
 				callback : function(data) {
 					var items = dojo.isArray(data.items) ? data.items : [data.items];
+					var progress = serviceRegistry.getService("orion.page.progress");
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
-						operationsClient.removeOperation(item.Location);
+						operationsClient.removeOperation(item.Location).then(dojo.hitch(progress, function(item){
+							progress.removeOperationFromTheList(item.Id);
+						}, item));
 					}
 				},
 				visibleWhen : function(items) {
