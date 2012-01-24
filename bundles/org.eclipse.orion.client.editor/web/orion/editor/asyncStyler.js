@@ -113,8 +113,8 @@ define("orion/editor/asyncStyler", [], function() {
 						for (var j=0; j < errors.length; j++) {
 							var err = errors[j];
 							toAdd.push({
-								start: err.start,
-								end: err.end,
+								start: err.start + lineStart,
+								end: err.end + lineStart,
 								type: HIGHLIGHT_ERROR_ANNOTATION,
 								title: "Syntax error.",
 								html: "<div class='annotationHTML error'></div>",
