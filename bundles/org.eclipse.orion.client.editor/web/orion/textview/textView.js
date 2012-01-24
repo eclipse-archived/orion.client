@@ -2132,9 +2132,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._lastMouseMoveX = e.clientX;
 			this._lastMouseMoveY = e.clientY;
 			this._setLinksVisible(changed && !this._isMouseDown && (isMac ? e.metaKey : e.ctrlKey));
-			if (!this._isMouseDown || this._dragOffset !== -1) {
-				return;
-			}
+
 			/*
 			* Feature in IE8 and older, the sequence of events in the IE8 event model
 			* for a doule-click is:
@@ -2161,6 +2159,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					this._clickCount = 2;
 					return this._handleMouse(e, this._clickCount);
 				}
+			}
+			if (!this._isMouseDown || this._dragOffset !== -1) {
+				return;
 			}
 			
 			var x = e.clientX;

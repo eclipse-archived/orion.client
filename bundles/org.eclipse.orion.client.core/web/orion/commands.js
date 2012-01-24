@@ -648,10 +648,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 								var menuCommand = children[0].eclipseCommand;
 								if (needMenu) {
 									menuButton = new dijit.form.DropDownButton({
-										label: group.title === "*" ? "" : group.title, // TODO undocumented hack
+										label: group.title === "*" ? "Actions" : group.title, // TODO undocumented hack
+										showLabel:  group.title !== "*",
 										dropDown: newMenu
 								        });
 									dojo.addClass(menuButton.domNode, "commandLink");
+									dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
 									var overclass = null;
 									if (group.title === "*") {
 										dojo.addClass(menuButton.domNode, "textless");

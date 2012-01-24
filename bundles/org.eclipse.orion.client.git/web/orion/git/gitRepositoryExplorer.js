@@ -11,7 +11,7 @@
 
 /*global define console document */
 
-define(['require', 'dojo', 'orion/explorer', 'orion/util', 'orion/breadcrumbs'], function(require, dojo, mExplorer, mUtil, mBreadcrumbs) {
+define(['require', 'dojo', 'orion/explorer', 'orion/util', 'orion/breadcrumbs', 'orion/git/widgets/CommitTooltipDialog'], function(require, dojo, mExplorer, mUtil, mBreadcrumbs) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -180,7 +180,6 @@ exports.GitRepositoryExplorer = (function() {
 			container: location,
 			resource: item,
 			makeHref:function(seg, location){
-				console.info(seg + " " + location);
 				that.makeHref(seg, location);
 			}
 		});		
@@ -624,8 +623,25 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
 		
-		titleLink = dojo.create("a", {className: "plugin-title navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, detailsView);
+		var titleLink = dojo.create("a", {className: "plugin-title navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, detailsView);
 		dojo.place(document.createTextNode(commit.Message), titleLink);		
+		
+		var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
+		    commit: commit
+		});
+		
+		dojo.connect(titleLink, "onmouseover", titleLink, function() {
+			dijit.popup.open({
+				popup: tooltipDialog,
+				around: titleLink,
+				orient: {'BR':'TL', 'TR':'BL'}
+			});
+		});
+		dojo.connect(titleLink, "onmouseout", titleLink, function() {
+			if(dijit.popup.hide)
+				dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+			dijit.popup.close(tooltipDialog);
+		});
 		
 		dojo.create( "div", null, detailsView );
 		var description = dojo.create( "span", { "class":"plugin-description", 
@@ -717,10 +733,27 @@ exports.GitRepositoryExplorer = (function() {
 		
 		if (tag.Commit){
 			var commit = tag.Commit.Children[0];
-			link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, description);
+			var link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, description);
 			dojo.place(document.createTextNode(commit.Message), link);	
 			dojo.place(document.createTextNode(" by " + commit.AuthorName + " on " + 
 				dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})), description, "last");
+			
+			var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
+			    commit: commit
+			});
+			
+			dojo.connect(link, "onmouseover", link, function() {
+				dijit.popup.open({
+					popup: tooltipDialog,
+					around: link,
+					orient: {'BR':'TL', 'TR':'BL'}
+				});
+			});
+			dojo.connect(link, "onmouseout", link, function() {
+				if(dijit.popup.hide)
+					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+				dijit.popup.close(tooltipDialog);
+			});
 		}
 
 		var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"plugin-action-area"}, horizontalBox );
