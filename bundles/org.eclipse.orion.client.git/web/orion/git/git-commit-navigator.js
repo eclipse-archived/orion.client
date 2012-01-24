@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,7 +12,7 @@
 /*global dojo eclipse:true widgets*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['dojo', 'orion/explorer', 'orion/util', 'orion/git/gitCommands'], function(dojo, mExplorer, mUtil, mGitCommands) {
+define(['dojo', 'orion/explorer', 'orion/util', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], function(dojo, mExplorer, mUtil, mGitCommands) {
 
 var exports =  {};
 exports.GitCommitNavigator = (function() {
@@ -34,10 +34,7 @@ exports.GitCommitNavigator = (function() {
 		this.isDirectory = true;
 		this.model = null;
 		this.myTree = null;
-		this.commitDetails = commitDetails;
 		this.renderer = new exports.GitCommitRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator", minimal: this.minimal}, this);
-		if(this.commitDetails)
-			this.commitDetails.render(null);
 	}
 	
 	GitCommitNavigator.prototype = new mExplorer.Explorer();
@@ -126,12 +123,7 @@ exports.GitCommitNavigator = (function() {
 		return waitDeferred;
 
 	};
-		
-	GitCommitNavigator.prototype.loadCommitDetails = function(commitDetails) {
-		if(this.commitDetails)
-			this.commitDetails.loadCommitDetails(commitDetails);
-	};
-		
+	
 	return GitCommitNavigator;
 }());
 
@@ -208,20 +200,26 @@ exports.GitCommitRenderer = (function() {
 			col = document.createElement('td');
 			div = dojo.create("div", {style: "margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 20px;"}, col, "only");
 				
-			link = dojo.create("a", {className: "navlinkonpage"}, div, "last");
-			if(this.explorer.commitDetails){
-				// clicking the link should update the commit details pane, if there is one
-				dojo.connect(link, "onclick", link, dojo.hitch(this, function() {
-					this.explorer.loadCommitDetails(item);	
-				}));			
-				dojo.connect(link, "onmouseover", link, function() {
-					link.style.cursor = /*self._controller.loading ? 'wait' :*/"pointer";
+			link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + item.Location + "?page=1&pageSize=1"}, div, "last");			
+			dojo.place(document.createTextNode(item.Message), link, "only");		
+			
+			
+			var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
+			    commit: item
+			});
+			
+			dojo.connect(link, "onmouseover", link, function() {
+				dijit.popup.open({
+					popup: tooltipDialog,
+					around: link,
+					orient: {'BR':'TL', 'TR':'BL'}
 				});
-				dojo.connect(link, "onmouseout", link, function() {
-					link.style.cursor = /*self._controller.loading ? 'wait' :*/"default";
-				});
-			}
-			dojo.place(document.createTextNode(item.Message), link, "only");	
+			});
+			dojo.connect(link, "onmouseout", link, function() {
+				if(dijit.popup.hide)
+					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+				dijit.popup.close(tooltipDialog);
+			});
 			
 			if (incomingCommit)
 				dojo.toggleClass(tableRow, "incomingCommitsdRow", true);
