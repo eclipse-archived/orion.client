@@ -78,25 +78,24 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				
 				var result =  this.parseProgressResult(operation.Result);
 				
-				if(result.Severity){
-					switch (status.Severity) {
-						case "Warning":
-							dojo.addClass(operationIcon, "core-sprite-warning");
-							return col;
-						case "Error":
-							dojo.addClass(operationIcon, "core-sprite-error");
-							return col;
-					}
-				}
 				
-				if(operation.Running===true)
-					dojo.addClass(operationIcon, "core-sprite-start");
-				else if(operation.Canceled===true)
-					dojo.addClass(operationIcon, "core-sprite-stop");
-				else if(operation.Failed===true)
-					dojo.addClass(operationIcon, "core-sprite-error");
-				else
-					dojo.addClass(operationIcon, "core-sprite-ok");
+				switch (result.Severity) {
+					case "Warning":
+						dojo.addClass(operationIcon, "core-sprite-warning");
+						break;
+					case "Error":
+						dojo.addClass(operationIcon, "core-sprite-error");
+						break;
+					default:
+						if(operation.Running===true)
+							dojo.addClass(operationIcon, "core-sprite-start");
+						else if(operation.Canceled===true)
+							dojo.addClass(operationIcon, "core-sprite-stop");
+						else if(operation.Failed===true)
+							dojo.addClass(operationIcon, "core-sprite-error");
+						else
+							dojo.addClass(operationIcon, "core-sprite-ok");								
+				}
 				
 				if(result.Message || operation.Message){
 					dojo.create("br", null, div, "last");
