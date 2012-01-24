@@ -15,62 +15,36 @@
 define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container'], 
 		function(require, dojo, dijit, mExplorer, mUtil, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer) {
 
-	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, queryStr, explorer) {
+	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, queryStr, options) {
 		this.registry= serviceRegistry;
 		this.fileClient = fileClient; 
 		this._resultLocation = resultLocation;
-		this._treeRoot = {
-				built: false,
-				isRoot: true,
-				children:[]
-		};
 		this._listRoot = {
 				built: false,
 				isRoot: true,
 				children:[]
 		};
 		this.currentDetail = null;
-		this.indexedFileItems_tree = [];
-		this.modelLocHash_tree = [];
-		this.indexedFileItems_flat = [];
-		this.modelLocHash_flat = [];
+		this.indexedFileItems = [];
+		this.modelLocHash = [];
 		this._lineDelimiter = "\n"; 
-		this.explorer = explorer;
+		this.onHighlightSelection = options.onHighlightSelection;
+		this.onMatchNumberChanged = options.onMatchNumberChanged;
 		this.queryObj = mSearchUtils.parseQueryStr(queryStr);
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
 	
-	SearchResultModel.prototype.getRealRoot = function(){
-		if(this.useFlatList){
-			return this._listRoot;
-		} else {
-			return this._treeRoot;
-		}
-	};
-	
-	SearchResultModel.prototype.modelLocHash = function(){
-		if(this.useFlatList){
-			return this.modelLocHash_flat;
-		} else {
-			return this.modelLocHash_tree;
-		}
-	};
-	
-	SearchResultModel.prototype.indexedFileItems = function(){
-		if(this.useFlatList){
-			return this.indexedFileItems_flat;
-		} else {
-			return this.indexedFileItems_tree;
-		}
+	SearchResultModel.prototype.normalMode = function(){
+		return (this.queryObj.replace === null);
 	};
 	
 	SearchResultModel.prototype.indexToLocation = function(index){
-		var fileModel = this.indexedFileItems()[index];
+		var fileModel = this.indexedFileItems[index];
 		return fileModel.location;
 	};
 	
 	SearchResultModel.prototype.locationToIndex = function(location, setCurrentIndex){
-		var lookAt = this.indexedFileItems();
+		var lookAt = this.indexedFileItems;
 		for(var i = 0 ; i < lookAt.length; i++){
 			if(lookAt[i].location === location){
 				if(setCurrentIndex){
@@ -99,7 +73,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultModel.prototype.restoreGlobalStatus = function() {
-		this.useFlatList = true;
 		this.defaultReplaceStr = this.queryObj.searchStrTitle;
 		var defaultReplaceStr = window.sessionStorage["global_search_default_replace_string"];
 		if (typeof defaultReplaceStr === "string") {
@@ -131,100 +104,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultModel.prototype.getRoot = function(onItem){
-		onItem(this.getRealRoot());
-	};
-	
-	SearchResultModel.prototype.markUpSharedParent = function(parentMetaData, directChildLocation){
-		if(!this.sharedParentHash[parentMetaData.Location]){
-			this.sharedParentHash[parentMetaData.Location] = directChildLocation;
-			return;
-		}
-		var hashValue = this.sharedParentHash[parentMetaData.Location];
-		if(typeof(hashValue) === "string"){
-			if(hashValue !== directChildLocation)
-				this.sharedParentHash[parentMetaData.Location] = 2;
-		}
-	};
-	
-	SearchResultModel.prototype.prepareCompressHash = function(){
-		this.sharedParentHash = [];
-		for(var i = 0 ; i < this._resultLocation.length; i++){
-			var parents = this._resultLocation[i].metaData.Parents;
-			if(parents.length === 0)
-				continue;
-			var diectChildLocation = this._resultLocation[i].location;
-			for(var j = 0; j< parents.length; j++){
-				var parentMeta = parents[j];
-				this.markUpSharedParent(parentMeta, diectChildLocation);
-				diectChildLocation = parentMeta.Location;
-			}
-		}
-	};
-
-	SearchResultModel.prototype.compressParents = function(parents, currentIndex, newParents){
-		if(parents.length === 0)
-			return;
-		if(currentIndex > (parents.length - 1))
-			return;
-		var newParentName = parents[currentIndex].Name;
-		var location = parents[currentIndex].Location;
-		var newIndex = currentIndex + 1;
-		var stop = false;
-		if(newIndex < parents.length){
-			for(var j = currentIndex + 1; j < parents.length; j++){
-				newIndex = j;
-				if(this.sharedParentHash[parents[j].Location] === 2){
-					break;
-				} else {
-					newParentName =  parents[j].Name + "/" + newParentName;
-					if(j === (parents.length - 1))
-						stop = true;
-				}
-			}
-		}
-		newParents.push({Location: location, Name:newParentName});
-		if(!stop)
-			this.compressParents(parents, newIndex, newParents);
-	};
-	
-	SearchResultModel.prototype.compressTree = function(){
-		for(var i = 0; i < this._resultLocation.length ; i++){
-			if(!this._resultLocation[i].metaData) {
-				continue;
-			}
-			var parents = this._resultLocation[i].metaData.Parents;
-			if(parents.length === 0)
-				continue;
-			this.prepareCompressHash();
-			var newParents = [];
-			this.compressParents(parents, 0, newParents);
-			this._resultLocation[i].metaData.compressedParents = newParents;
-		}
-	};
-	
-	SearchResultModel.prototype._findExistingParent = function(parents, index){
-		var parentLocation = parents[index].Location;
-		var parentValue = this.modelLocHash()[parentLocation];
-		if(parentValue) {
-			return {parent: parentValue, index: index};
-		}
-		if(index === (parents.length - 1)) {
-			return null;
-		}
-		return this._findExistingParent(parents, index+1);
-	};
-	
-	SearchResultModel.prototype.fullPathNameByTree = function(childNode, fullPath){
-		if(!childNode || !childNode.parent){
-			return;
-		}
-		if(childNode.parent.isRoot){
-			return;
-		}
-		var separator = (fullPath.name === "") ? "" : "/";
-		fullPath.name = childNode.parent.name + separator + fullPath.name;
-		if(childNode.parent)
-			this.fullPathNameByTree(childNode.parent, fullPath);
+		onItem(this._listRoot);
 	};
 	
 	SearchResultModel.prototype.buildResultModel = function(){
@@ -233,81 +113,18 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.restoreLocationStatus();
 	};
 	
-	SearchResultModel.prototype.buildTreeModel = function(compress, callback){
-		if(this._treeRoot.built){
-			callback();
-			return;
-		}
-		this._treeRoot.built = true;
-		if(compress)
-			this.compressTree();
-		for(var i = 0; i < this._resultLocation.length; i++){
-			if(!this._resultLocation[i].metaData) {
-				continue;
-			}
-			var parents;
-			if(compress)
-				parents = this._resultLocation[i].metaData.compressedParents;
-			else
-				parents = this._resultLocation[i].metaData.Parents;
-			var existingParent = this._findExistingParent(parents, 0);
-			var parentIndex, parent;
-			if(existingParent){
-				parent = existingParent.parent;
-				parentIndex = existingParent.index;
-			} else {
-				parent = this._treeRoot;
-				parentIndex = parents.length;
-			}
-			
-			//add parents chain top down if needed
-			if(parentIndex > 0){
-				for(var j = parentIndex - 1; j > -1; j--){
-					var parentNode = {parent: parent, children: [], type: "dir", name: parents[j].Name, location: parents[j].Location};
-					parent.children.push(parentNode);
-					this.modelLocHash_tree[parents[j].Location] = parentNode;
-					parent = parentNode;
-				}
-			}
-			
-			//Add the search result (file) as leaf node
-			var fullPath = {name: ""};
-			var childNode = {parent: parent, type: "file", name: this._resultLocation[i].name, 
-					linkLocation: this._resultLocation[i].linkLocation,
-					location: this._resultLocation[i].location,
-					stale: (this._resultLocation[i].lastModified !== this._resultLocation[i].metaData.LocalTimeStamp) };
-
-			this.fullPathNameByTree(childNode, fullPath);
-			childNode.fullPathName = fullPath.name;
-			this.modelLocHash_tree[childNode.location] = childNode;
-			parent.children.push(childNode);
-		}
-		this.indexedFileItems_tree = [];
-		var tempList = [];
-		this.prepareFileItems_tree(tempList);
-		var that = this;
-		this.checkStale(tempList, 0, function(list){
-			for(var i=0; i < list.length; i++){
-				if(!list[i].stale){
-					that.indexedFileItems_tree.push(list[i]);
-				}
-			}
-			callback();
-		});
-	};
-	
 	SearchResultModel.prototype.buildFlatModel = function(){
 		if(this._listRoot.built){
 			return;
 		}
 		this._listRoot.built = true;
-		this.indexedFileItems_flat = [];
+		this.indexedFileItems = [];
 		for(var i = 0; i < this._resultLocation.length; i++){
 			var childNode = {parent: this._listRoot, type: "file", name: this._resultLocation[i].name,lastModified: this._resultLocation[i].lastModified,
 							linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location};
-			this.modelLocHash_flat[childNode.location] = childNode;
+			this.modelLocHash[childNode.location] = childNode;
 			this._listRoot.children.push(childNode);
-			this.indexedFileItems_flat.push(childNode);
+			this.indexedFileItems.push(childNode);
 		}
 	};
 	
@@ -358,17 +175,21 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultModel.prototype.matchesReplaced = function(model){
 		var matchesReplaced = 0;
+		if(!model.children){
+			return model.checked === false ? 0: 1;
+		}
 		if(model.children){
 			for(var j = 0; j < model.children.length; j++){
 				if(!(model.children[j].checked === false)){
-					matchesReplaced += 1;//model.children[j].matches.length;
+					matchesReplaced += 1;
 				}
 			}
 		}
 		return matchesReplaced;
 	};
 	
-	SearchResultModel.prototype.writeNewContent = function(modelList, reportList,  index, onComplete){
+	
+	SearchResultModel.prototype.writeIncrementalNewContent = function(replaceStr, modelList, reportList,  index, onComplete){
 		var model = modelList[index];
 		if(!model || index === modelList.length){
 			onComplete(modelList);
@@ -376,90 +197,45 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 		var matchesReplaced = this.matchesReplaced(model);
 		if(matchesReplaced > 0){
-			var contents = model.newContents.join(this._lineDelimiter);
-			var etag = model.ETag;
-			var args = { "ETag" : etag };
-			this.fileClient.write(model.location, contents, args).then(
+			this.getFileContent(model, dojo.hitch(this, function(fileItem){
+				matchesReplaced = this.matchesReplaced(fileItem);
+				var newContents = [];
+				this.generateNewContents(fileItem.contents, newContents, fileItem, replaceStr); 
+				var contents = newContents.join(this._lineDelimiter);
+				
+				var etag = fileItem.ETag;
+				var args = etag ? { "ETag" : etag }: null;
+				this.fileClient.write(model.location, contents, args).then(
 					dojo.hitch(this, function(result) {
 						reportList.push({model: model, matchesReplaced: matchesReplaced, status: "pass" });
-						this.writeNewContent( modelList, reportList, index+1, onComplete);
+						this.writeIncrementalNewContent( replaceStr, modelList, reportList, index+1, onComplete);
 					}),
 					dojo.hitch(this, function(error) {
 						// expected error - HTTP 412 Precondition Failed 
 						// occurs when file is out of sync with the server
 						if (error.status === 412) {
-							var forceSave = window.confirm("Resource is out of sync with the server. Do you want to save it anyway?");
-							if (forceSave) {
-								// repeat save operation, but without ETag 
-								this.fileClient.write(model.location, contents).then(
-										dojo.hitch(this, function(result) {
-											reportList.push({model: model, matchesReplaced: matchesReplaced, status: "pass" });
-										}));
-							}
-							reportList.push({model: model, matchesReplaced: matchesReplaced, status: "warning" });
+							reportList.push({model: model, message: "Resource has been changed by others.", matchesReplaced: matchesReplaced, status: "failed" });
 						}
 						// unknown error
 						else {
 							error.log = true;
-							reportList.push({model: model, matchesReplaced: matchesReplaced, status: "failed" });
+							reportList.push({model: model, message: "Failed to write file.",  matchesReplaced: matchesReplaced, status: "failed" });
 						}
-						this.writeNewContent( modelList, reportList, index+1, onComplete);
+						this.writeIncrementalNewContent(replaceStr, modelList, reportList, index+1, onComplete);
 					})
-			);
+				);
+				
+			}), true);
+			
 		} else {
-			this.writeNewContent( modelList, reportList, index+1, onComplete);
+			this.writeIncrementalNewContent( replaceStr, modelList, reportList, index+1, onComplete);
 		}
 		
 	};
 	
-	SearchResultModel.prototype.loadOneFileMetaData =  function(index, onComplete){
-		var item = this.indexedFileItems_flat[index];
-		var that = this;
-		this.fileClient.read(item.location, true).then(
-			dojo.hitch(this, function(meta) {
-				item.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
-				item.parentLocation = meta.Parents[0].Location;
-				item.stale = (item.lastModified !== meta.LocalTimeStamp);
-				if(item.stale){
-					this.checkStale(item, function(item){
-						that.explorer.renderer.renderLocationElement(item);
-						that.explorer.renderer.staleFileElement(item);
-					});
-				} else {
-					this.explorer.renderer.renderLocationElement(item);
-				}
-			    if(index === (this._resultLocation.length-1)){	
-			    	if(onComplete){
-			    		onComplete();
-			    	} else {
-			    		return; 
-			    	}
-			    } else {
-					this.loadOneFileMetaData(index+1, onComplete);
-			    }
-			}),
-			dojo.hitch(this, function(error) {
-				console.error("Error loading file metadata: " + error.message);
-				if(index === (this._resultLocation.length-1)){
-			    	if(onComplete){
-			    		onComplete();
-			    	} else {
-			    		return; 
-			    	}
-				} else {
-					this.loadOneFileMetaData( index+1, onComplete);
-				}
-			})
-		);
-	};
-
-	SearchResultModel.prototype.prepareFileItems_tree = function(list){
-		this.walkTreeNode(this._treeRoot, list);
-	};
-	
 	SearchResultModel.prototype.getFileItemIndex = function(fileItem){
-		for(var i = 0; i < this.indexedFileItems().length; i++){
-			if(fileItem === this.indexedFileItems()[i]) {
+		for(var i = 0; i < this.indexedFileItems.length; i++){
+			if(fileItem === this.indexedFileItems[i]) {
 				return i;
 			}
 		}
@@ -470,7 +246,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		if(fileItemIndex < 0) {
 			return -1;
 		}
-		var fileItem = this.indexedFileItems()[fileItemIndex];
+		var fileItem = this.indexedFileItems[fileItemIndex];
 		if(fileItem.children && fileItem.children.length > 0){
 			for(var i = 0; i < fileItem.children.length ; i++){
 				if(detailItem === fileItem.children[i]) {
@@ -481,21 +257,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return -1;
 	};
 	
-	SearchResultModel.prototype.walkTreeNode = function(currentNode, list){
-		if(!currentNode.children){
-			if(currentNode.type === "file") {
-				list.push(currentNode);
-			}
-		} else {
-			for (var i = 0; i < currentNode.children.length; i++ ){
-				this.walkTreeNode(currentNode.children[i], list);
-			}
-		}
-	};
-	
 	SearchResultModel.prototype.getId = function(item){
 		var result;
-		if (item === this.getRealRoot()) {
+		if (item === this._listRoot) {
 			result = this.rootId;
 		} else {
 			result = item.location;
@@ -596,21 +360,16 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return result;
 	};
 	
-	SearchResultModel.prototype.generateNewContents = function( fileModelNode, replaceStr, forceGenerate){
-		if(fileModelNode){
-			var fileContents = fileModelNode.contents;
-			if(!fileContents){
-				return;
-			}
+	SearchResultModel.prototype.generateNewContents = function( oldContents, newContents, fileModelNode, replaceStr){
+		if(fileModelNode && oldContents){
 			var updating;
-			if(fileModelNode.newContents && !forceGenerate){
+			if(newContents.length > 0){
 				updating = true;
 			} else {
 				updating = false;
-				fileModelNode.newContents = [];
 			}
-			for(var i = 0; i < fileContents.length ; i++){
-				var lineStringOrigin = fileContents[i];
+			for(var i = 0; i < oldContents.length ; i++){
+				var lineStringOrigin = oldContents[i];
 				var changingLine = false;
 				var checked = false;
 				var fullChecked = false;
@@ -648,12 +407,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 						}
 					}
 					if(updating){
-						fileModelNode.newContents[i] = newStr;
+						newContents[i] = newStr;
 					} else {
-						fileModelNode.newContents.push(newStr);
+						newContents.push(newStr);
 					}
 				} else if(!updating){
-					fileModelNode.newContents.push(lineStringOrigin);
+					newContents.push(lineStringOrigin);
 				}
 			}
 		}
@@ -661,7 +420,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultModel.prototype.searchWithinFile = function( fileModelNode, fileContentText){
 		var fileContents = fileContentText.split(this._lineDelimiter);
-		fileModelNode.contents = fileContents;
+		if(!this.normalMode()){
+			fileModelNode.contents = fileContents;
+		}
 		if(fileModelNode){
 			fileModelNode.children = [];
 			var totalMatches = 0;
@@ -677,7 +438,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					}
 					if(result){
 						var lineNumber = i+1;
-						if(this.queryObj.replace === null){
+						if(this.normalMode()){
 							var detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + ",line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
 							fileModelNode.children.push(detailNode);
 						} else {
@@ -695,20 +456,25 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
-	SearchResultModel.prototype._fileExpanded = function(fileIndex, detailIndex){
-		var filItem = this.indexedFileItems()[fileIndex];
-		if(detailIndex === null || detailIndex === undefined){
-			return {childrenNumber: 0, childDiv: dojo.byId(this.getId(filItem))};
+	
+	SearchResultModel.prototype.getFileContent = function(fileItem, onComplete, writing){
+		if(fileItem.contents){
+			onComplete(fileItem);
+		} else {
+			this.fileClient.read(fileItem.location).then(
+				dojo.hitch(this, function(jsonData) {
+					this.searchWithinFile(fileItem, jsonData);
+					if(this.onMatchNumberChanged && !writing){
+						this.onMatchNumberChanged(fileItem);
+					}
+					onComplete(fileItem);
+				}),
+				dojo.hitch(this, function(error) {
+					console.error("Error loading file content: " + error.message);
+					onComplete(null);
+				})
+			);
 		}
-		if(filItem.children && filItem.children.length > 0){
-			if(detailIndex < 0){
-				detailIndex = filItem.children.length -1;
-			} else if (detailIndex >= filItem.children.length){
-				detailIndex = 0;
-			}
-			return  {childrenNumber: filItem.children.length, childDiv: dojo.byId(this.getId(filItem.children[detailIndex])/*+"NameColumn"*/)};
-		}
-		return {childrenNumber: 0, childDiv: null};
 	};
 	
 	SearchResultModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
@@ -720,27 +486,19 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			this.fileClient.read(parentItem.location).then(
 					dojo.hitch(this, function(jsonData) {
 						  this.searchWithinFile(parentItem, jsonData);
-						  var itemId = this.getId(parentItem);
-						  var fileUIItem = dojo.byId(itemId);
-						  if(fileUIItem){
-							  var linkUIItem = dojo.byId(itemId + "NameColumn");
-							  if(linkUIItem) {
-								  var renderName = parentItem.totalMatches ? parentItem.name + " (" + parentItem.totalMatches + " matches)" : parentItem.name;
-								  dojo.place(document.createTextNode(renderName), linkUIItem, "only");
-							  }
+						  if(this.onMatchNumberChanged){
+							  this.onMatchNumberChanged(parentItem);
 						  }
 						  onComplete(parentItem.children);
 						  if(this.highlightSelectionLater){
-							  if(parentItem === this.indexedFileItems()[this.currentFileIndex]){
+							  if(parentItem === this.indexedFileItems[this.currentFileIndex]){
 								  if(this.currentDetailIndex < 0) {
 									  this.currentDetailIndex = parentItem.children.length -1;
 								  } else if (this.currentDetailIndex >= parentItem.children.length){
 									  this.currentDetailIndex = 0;
 								  }
-								  var expanded = this._fileExpanded(this.currentFileIndex, this.currentDetailIndex);
-								  dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
-								  if(!this.explorer.visible(expanded.childDiv)) {
-									  expanded.childDiv.scrollIntoView(!this.lastNavDirection);
+								  if(this.onHighlightSelection){
+									  this.onHighlightSelection(true);
 								  }
 								  this.highlightSelectionLater = false;
 							  }
@@ -770,7 +528,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			var check = document.createElement("span");
 			dojo.addClass(check, "selectionCheckmark");
 			if(this.getCheckedFunc){
-				check.checked = this.getCheckedFunc(this.explorer.model.getRealRoot());
+				check.checked = this.getCheckedFunc(this.explorer.model._listRoot);
 				dojo.toggleClass(check, "selectionCheckmarkChecked", check.checked);
 			}
 			th.appendChild(check);
@@ -804,14 +562,14 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				return dojo.create("h2", {innerHTML: headerStr});
 			}
 			return title;
-		} else if(this.explorer.model.useFlatList && col_no === 1){
+		} else if(col_no === 1){
 			return dojo.create("th", {innerHTML: "<h2>Location</h2>"});
 		}
 	};
 	
 	
 	SearchResultRenderer.prototype.deselectElement = function(){
-		var expanded = this.explorer.model._fileExpanded(this.explorer.model.currentFileIndex, this.explorer.model.currentDetailIndex);
+		var expanded = this.explorer._fileExpanded(this.explorer.model.currentFileIndex, this.explorer.model.currentDetailIndex);
 		if(expanded.childDiv) {
 			dojo.toggleClass(expanded.childDiv, "currentSearchMatch", false);
 		}
@@ -834,15 +592,16 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				if(this.explorer.model.currentFileIndex === fileItemIndex && this.explorer.model.currentDetailIndex === fileDetailItemIndex) {
 					return;
 				}
-				var rebuildPreview = (fileItemIndex !== this.explorer.model.currentFileIndex);
 				this.deselectElement();
-				this.explorer.model.setCurrent(fileItemIndex, fileDetailItemIndex);
+				this.explorer.model.setCurrent(fileItemIndex, fileDetailItemIndex, storeStatus);
 				dojo.toggleClass(this.explorer.model.getId(item), "currentSearchMatch", true);
-				
-				if(rebuildPreview){
-					this.explorer.buildPreview();
+				if(this.explorer._state !== "result_view"){
+					var rebuildPreview = (fileItemIndex !== this.explorer.model.currentFileIndex);
+					if(rebuildPreview){
+						this.explorer.buildPreview();
+					}
+					this.explorer.twoWayCompareContainer.gotoMatch(item.lineNumber-1, item.matches[item.matchNumber-1], item.newMatches[item.matchNumber-1], this.explorer.model.queryObj.inFileQuery.searchStrLength );
 				}
-				this.explorer.twoWayCompareContainer.gotoMatch(item.lineNumber-1, item.matches[item.matchNumber-1], item.newMatches[item.matchNumber-1], this.explorer.model.queryObj.inFileQuery.searchStrLength );
 			}
 		}
 	};
@@ -862,12 +621,18 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
-	SearchResultRenderer.prototype.renderFileElement = function(item, tableRow, spanHolder, renderName){
+	SearchResultRenderer.prototype.replaceFileElement = function(item){
+		var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name;
+		var linkDiv = dojo.byId( this.getFileSpanId(item) + "_link");
+		dojo.place(document.createTextNode(renderName), linkDiv, "only");
+	};
+	
+	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName){
 		if(this.explorer._state === "result_view"){
-			var link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: item.linkLocation}, spanHolder, "last");
+			var link = dojo.create("a", {className: "navlink", id: spanHolder.id+"_link", href: item.linkLocation}, spanHolder, "last");
 			dojo.place(document.createTextNode(renderName), link, "only");
 		} else {
-			var nameSpan = dojo.create("span", { className: "primaryColumn"}, spanHolder, "last");
+			var nameSpan = dojo.create("span", { className: "primaryColumn", id: spanHolder.id+"_link"}, spanHolder, "last");
 			dojo.place(document.createTextNode(renderName), nameSpan, "only");
 			nameSpan.title = "Click to compare";
 			var itemId = this.explorer.model.getId(item);
@@ -929,8 +694,14 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 		
 	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
+		var that = this;
 		if(this.explorer._state === "result_view"){
 			var link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: item.linkLocation}, spanHolder, "last");
+			dojo.connect(link, "onclick", link, function() {
+				if(that.explorer._state === "result_view"){
+					that.selectElement(item,true);
+				}
+			});
 			return dojo.create("span", null, link, "only");
 		} else {
 			var nameSpan = dojo.create("span", { className: "primaryColumn"}, spanHolder, "last");
@@ -1000,7 +771,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				if(item.type ===  "file"){
 					var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name;
 					this.getExpandImage(tableRow, span, "core-sprite-file");
-					this.renderFileElement(item, tableRow, span, renderName);
+					this.renderFileElement(item, span, renderName);
 				} else {
 					var that = this;
 					dojo.connect(tableRow, "onclick", tableRow, function() {
@@ -1020,7 +791,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			}
 			return col;
 		case 1:
-			if(this.explorer.model.useFlatList && item.type ===  "file"){
+			if(item.type ===  "file"){
 				col = document.createElement('td');
 				span = dojo.create("span", {id: this.getLocationSpanId(item)}, col, "only");
 				if(item.parentLocation){
@@ -1047,15 +818,17 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.totalNumber = totalNumber;
 		this.numberOnPage = resultLocation.length;
 		this.queryStr = queryStr;
-		this.model = new SearchResultModel(registry, this.fileClient, resultLocation, queryStr, this);
+		var that = this;
+		this.model = new SearchResultModel(registry, this.fileClient, resultLocation, queryStr, 
+						 {onHighlightSelection: function(next){that.onHighlightSelection(next);},
+						  onMatchNumberChanged: function(fileItem){that.renderer.replaceFileElement(fileItem);}});
+		this._replaceStr = this.model.queryObj.replace;
 		//there are 3 states:
 		//result_view: viewing the seach result
 		//replace_preview: after user inputs the replace string and enters into the preview 
 		//replace_report: after user finishes preview and commits the replace
 		
 		this._state = (this.model.queryObj.replace === null ? "result_view" : "replace_preview");
-		this._replaceStr = this.model.queryObj.replace;
-		this._replacable = true;
 		this.declareCommands();
 	}
 	SearchResultExplorer.prototype = new mExplorer.Explorer();
@@ -1220,6 +993,48 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService.registerCommandContribution("orion.search.nextPage", 6, "pageNavigationActions");
 	};
 	
+	SearchResultExplorer.prototype.loadOneFileMetaData =  function(index, onComplete){
+		var item = this.model.indexedFileItems[index];
+		var that = this;
+		this.fileClient.read(item.location, true).then(
+			dojo.hitch(this, function(meta) {
+				item.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
+				item.parentLocation = meta.Parents[0].Location;
+				item.stale = (item.lastModified !== meta.LocalTimeStamp);
+				item.ETag = meta.ETag;
+				if(item.stale){
+					this.model.checkStale(item, function(item){
+						that.renderer.renderLocationElement(item);
+						that.renderer.staleFileElement(item);
+					});
+				} else {
+					this.renderer.renderLocationElement(item);
+				}
+			    if(index === (this.model.indexedFileItems.length-1)){	
+			    	if(onComplete){
+			    		onComplete();
+			    	} else {
+			    		return; 
+			    	}
+			    } else {
+					this.loadOneFileMetaData(index+1, onComplete);
+			    }
+			}),
+			dojo.hitch(this, function(error) {
+				console.error("Error loading file metadata: " + error.message);
+				if(index === (this.model.indexedFileItems.length-1)){
+			    	if(onComplete){
+			    		onComplete();
+			    	} else {
+			    		return; 
+			    	}
+				} else {
+					this.loadOneFileMetaData( index+1, onComplete);
+				}
+			})
+		);
+	};
+
 	SearchResultExplorer.prototype.preview = function() {
 		var that = this;
 		this._commandService.openParameterCollector("tool", null, "pageActions", function(parentDiv) {
@@ -1275,6 +1090,22 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._commandService.renderCommands("globalSearchReplaceCommands", "dom", this, this, "tool");
 	};
 	
+	SearchResultExplorer.prototype._fileExpanded = function(fileIndex, detailIndex){
+		var filItem = this.model.indexedFileItems[fileIndex];
+		if(detailIndex === null || detailIndex === undefined){
+			return {childrenNumber: 0, childDiv: dojo.byId(this.model.getId(filItem))};
+		}
+		if(filItem.children && filItem.children.length > 0){
+			if(detailIndex < 0){
+				detailIndex = filItem.children.length -1;
+			} else if (detailIndex >= filItem.children.length){
+				detailIndex = 0;
+			}
+			return  {childrenNumber: filItem.children.length, childDiv: dojo.byId(this.model.getId(filItem.children[detailIndex]))};
+		}
+		return {childrenNumber: 0, childDiv: null};
+	};
+	
 	SearchResultExplorer.prototype.doPreview = function(replacingStr, all) {
 		window.sessionStorage["global_search_default_replace_string"] = replacingStr;
 		var qParams = mSearchUtils.copyQueryParams(this.model.queryObj, true);
@@ -1307,9 +1138,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this._state = "report";
 		this.initCommands();
 		this.reportStatus("Writing files...");	
-		this.model.writeNewContent( this.model.indexedFileItems(), reportList, 0, function(modellist){
-			dojo.empty("results");
-			var reporter = new SearchReportExplorer("results", reportList);
+		this.model.writeIncrementalNewContent( this._replaceStr, this.model.indexedFileItems, reportList, 0, function(modellist){
+			
+			dojo.empty(that.getParentDivId());
+			var reporter = new SearchReportExplorer(that.getParentDivId(), reportList);
 			reporter.report();
 			that.reportStatus("");	
 		});
@@ -1317,15 +1149,14 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 
 	
 	SearchResultExplorer.prototype.replacePreview = function(replaceStr) {
-		var that = this;
 		this._state = "replace_preview";
 		this._replaceStr = replaceStr;
 		this.checkbox = true;
 		this.initCommands();
 
-		dojo.empty("results");
+		dojo.empty(this.getParentDivId());
 		this._uiFactory = new mSearchFeatures.SearchUIFactory({
-			parentDivID: "results"
+			parentDivID: this.getParentDivId()
 		});
 		this._uiFactory.buildUI();
 		// FIXME shouldn't know this id, should be passed in
@@ -1335,14 +1166,13 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 		
 		this.reportStatus("Preparing preview...");	
-		this.model.generateReplaceModel(replaceStr, this.model.indexedFileItems(), 0, function(modellist){
-			that.renderer = new SearchResultRenderer({checkbox: true, highlightSelection:false,
+		var that = this;
+		this.renderer = new SearchResultRenderer({checkbox: true, highlightSelection:false,
 													  getCheckedFunc: function(item){return that.getItemChecked(item);},
 													  onCheckedFunc: function(rowId, checked, manually){that.onRowChecked(rowId, checked, manually);}}, that);
-			that.createTree(that._uiFactory.getMatchDivID(), that.model);
-			that.renderer.selectElement(that.model.indexedFileItems()[0], false);
-			that.reportStatus("");	
-		});
+		this.createTree(this._uiFactory.getMatchDivID(), this.model);
+		this.renderer.selectElement(this.model.indexedFileItems[0], false);
+		this.reportStatus("");	
 	};
 	
 	SearchResultExplorer.prototype.getItemChecked = function(item) {
@@ -1354,7 +1184,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultExplorer.prototype.onRowChecked = function(rowId, checked, manually) {
 		if(!rowId){
-			this.onItemChecked(this.model.getRealRoot(), checked, manually);
+			this.onItemChecked(this.model._listRoot, checked, manually);
 			return;
 		}
 		var row = dojo.byId(rowId);
@@ -1367,7 +1197,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.model.generateNewContents(fileItem, this._replaceStr);
 		var fileItemIndex = this.model.getFileItemIndex(fileItem);
 		if(fileItemIndex === this.model.currentFileIndex){
-			this.buildPreview();
+			this.buildPreview(true);
 		}
 	};
 	
@@ -1392,23 +1222,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
-	SearchResultExplorer.prototype.cancellReplace = function() {
-		// FIXME this id should be passed in
-		var parentPane = dijit.byId("orion.searchResults");
-		if(!parentPane.isLeftPaneOpen()){
-			parentPane.toggle();
-		}
-		this._state = "result_view";
-		this.checkbox = false;
-		this.initCommands();
-		this.model.restoreLocationStatus();
-
-		dojo.empty("results");
-		this.renderer = new SearchResultRenderer({checkbox: false}, this);
-		this.createTree("results", this.model);
-		this.gotoCurrent();
-	};
-	
 	SearchResultExplorer.prototype._resolveFileType = function(fileLocation){
 		var fileName = fileLocation;
 		var splits = fileName.split(".");
@@ -1418,35 +1231,41 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return "";
 	};
 	
-	SearchResultExplorer.prototype.buildPreview = function() {
+	SearchResultExplorer.prototype.buildPreview = function(updating) {
 		var uiFactory = this._uiFactory;
-		var fileItem = this.model.indexedFileItems()[this.model.currentFileIndex];
+		var fileItem = this.model.indexedFileItems[this.model.currentFileIndex];
 		dojo.empty(uiFactory.getCompareDivID());
-		var uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
-			parentDivID: uiFactory.getCompareDivID(),
-			showTitle: true,
-			leftTitle: "Replaced File (" + fileItem.name + ")",
-			rightTitle: "Original File (" + fileItem.name + ")",
-			showLineStatus: false
-		});
-		uiFactoryCompare.buildUI();
+		if(!updating || !this._currentReplacedContents){
+			this._currentReplacedContents = [];
+		}
+		var that = this;
+		this.model.getFileContent(fileItem, function(fileItem){
+			that.model.generateNewContents(fileItem.contents, that._currentReplacedContents, fileItem, that._replaceStr); 
+			var uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
+				parentDivID: uiFactory.getCompareDivID(),
+				showTitle: true,
+				leftTitle: "Replaced File (" + fileItem.name + ")",
+				rightTitle: "Original File (" + fileItem.name + ")",
+				showLineStatus: false
+			});
+			uiFactoryCompare.buildUI();
 
-		// Diff operations
-		var fType = this._resolveFileType(fileItem.location);
-		var options = {
-			readonly: true,
-			hasConflicts: false,
-			baseFileName: fileItem.location,
-			newFileName: fileItem.location,
-			baseFileType: fType,
-			newFileType: fType,
-			baseFileContent: fileItem.contents.join(this.model._lineDelimiter),
-			newFileContent: fileItem.newContents.join(this.model._lineDelimiter)
-		};
-		
-		this.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(this.registry, uiFactoryCompare, options);
-		this.twoWayCompareContainer.startup();
-		return;
+			// Diff operations
+			var fType = that._resolveFileType(fileItem.location);
+			var options = {
+				readonly: true,
+				hasConflicts: false,
+				baseFileName: fileItem.location,
+				newFileName: fileItem.location,
+				baseFileType: fType,
+				newFileType: fType,
+				baseFileContent: fileItem.contents.join(that.model._lineDelimiter),
+				newFileContent: that._currentReplacedContents.join(that.model._lineDelimiter)
+			};
+			
+			that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactoryCompare, options);
+			that.twoWayCompareContainer.startup();
+		});
 	};
 	
 	
@@ -1557,11 +1376,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			this.createTree(this.parentNode, this.model);
 			this.gotoCurrent();
 			this.reportStatus("");	
-			this.model.loadOneFileMetaData(0);
+			this.loadOneFileMetaData(0);
 		} else {
-			this.model.loadOneFileMetaData(0,function(){
-				that.replacePreview(that._replaceStr);
-			});
+			that.replacePreview(that._replaceStr);
+			this.loadOneFileMetaData(0);
 		}
 	};
 	
@@ -1577,10 +1395,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultExplorer.prototype.expandAll = function() {
-		var root = this.model.getRealRoot();
+		var root = this.model._listRoot;
 		if(root.isRoot){
 			for (var i = 0; i < root.children.length ; i++){
-				this.expandRecursively(root.children[i]);
+				if(this.model.matchesReplaced(root.children[i]) > 0){
+					this.expandRecursively(root.children[i]);
+				}
 			}
 		} else {
 			this.expandRecursively(root);
@@ -1589,7 +1409,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultExplorer.prototype.collapseAll = function() {
-		var root = this.model.getRealRoot();
+		var root = this.model._listRoot;
 		if(root.isRoot){
 			for (var i = 0; i < root.children.length ; i++){
 				this.myTree.collapse(root.children[i]);
@@ -1631,7 +1451,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			return {newFileIndex:this.model.currentFileIndex, newDetailIndex:this.model.currentDetailIndex};
 		}
 		
-		var filItem = this.model.indexedFileItems()[this.model.currentFileIndex];
+		var filItem = this.model.indexedFileItems[this.model.currentFileIndex];
 		if(filItem.children && filItem.children.length > 0){
 			var newDetailIndex, newFileIndex;
 			if(next) {
@@ -1650,8 +1470,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			}
 			
 			if(newFileIndex < 0) {
-				newFileIndex = this.model.indexedFileItems().length -1;
-			} else if(newFileIndex >= this.model.indexedFileItems().length) {
+				newFileIndex = this.model.indexedFileItems.length -1;
+			} else if(newFileIndex >= this.model.indexedFileItems.length) {
 				newFileIndex = 0;
 			}
 			
@@ -1660,12 +1480,20 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return null;
 	};
 
+	SearchResultExplorer.prototype.getParentDivId = function(secondLevel){
+		if(this._state === "result_view" || !secondLevel){
+			return "results";
+		} else {
+			return this._uiFactory.getMatchDivID();
+		}
+	};
+	
 	SearchResultExplorer.prototype.visible = function(element) {
 		if (element.offsetWidth === 0 || element.offsetHeight === 0) {
 			return false;
 		}
 		// FIXME shouldn't know this id, should be passed in
-		var parentNode = dojo.byId("orion.searchResults");
+		var parentNode = dojo.byId(this.getParentDivId());
 		var parentRect = parentNode.getClientRects()[0],
 		rects = element.getClientRects(),
 		on_top = function(r) {
@@ -1687,11 +1515,15 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.gotoNext(true, false);
 	};
 	
+	SearchResultExplorer.prototype.onHighlightLater = function()	{
+		this.gotoNext(true, false);
+	};
+	
 	SearchResultExplorer.prototype.gotoNext = function(next, calculateNext)	{
-		if(this.model.indexedFileItems().length === 0){
+		if(this.model.indexedFileItems.length === 0){
 			return;
 		}
-		var curentExpanded = this.model._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex); 
+		var curentExpanded = this._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex); 
 		if(curentExpanded.childDiv) {
 			dojo.toggleClass(curentExpanded.childDiv, "currentSearchMatch", false);
 		}
@@ -1699,7 +1531,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.model.highlightSelectionLater = true;
 		this.model.lastNavDirection = next;
 		if(nextItem){
-			var newExpanded = this.model._fileExpanded(nextItem.newFileIndex, nextItem.newDetailIndex); 
+			var newExpanded = this._fileExpanded(nextItem.newFileIndex, nextItem.newDetailIndex); 
 			this.model.setCurrent(nextItem.newFileIndex, nextItem.newDetailIndex, true);
 			if(newExpanded.childrenNumber > 0) {
 				this.model.highlightSelectionLater = false;
@@ -1710,28 +1542,29 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				}
 			}
 			if(newExpanded.childDiv)	{
-				dojo.toggleClass(newExpanded.childDiv, "currentSearchMatch", true);
-				if(!this.visible(newExpanded.childDiv)) {
-					newExpanded.childDiv.scrollIntoView(!next);
-				}
+				this.onHighlightSelection(next);
 				return;
 			}
 		} 
 		var parentChain = [];
-		var filItem = this.model.indexedFileItems()[this.model.currentFileIndex];
+		var filItem = this.model.indexedFileItems[this.model.currentFileIndex];
 		this.findUIParentChain(filItem, parentChain);
 		for(var i = parentChain.length -1 ; i > -1 ; i--){
 			this.myTree.expand(parentChain[i]);
 		}
 		if(!this.model.highlightSelectionLater){
-			var expanded = this.model._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex);
-			dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
-			if(!this.visible(expanded.childDiv)) {
-				expanded.childDiv.scrollIntoView(!next);
-			}
+			this.onHighlightSelection(next);
 		}
 	};
 	
+	SearchResultExplorer.prototype.onHighlightSelection = function(next)	{
+		var expanded = this._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex);
+		dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
+		if(!this.visible(expanded.childDiv)) {
+			expanded.childDiv.scrollIntoView(!next);
+		}
+	};
+
 	SearchResultExplorer.prototype.constructor = SearchResultExplorer;
 
 	
@@ -1799,13 +1632,13 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			if(item.status){
 				switch (item.status) {
 					case "warning":
-						statusMessage = "User aborted file writing";
+						statusMessage = item.message;
 						break;;
 					case "failed":
-						statusMessage = "Failed to write file";
+						statusMessage = item.message;
 						break;;
 					case "pass":
-						statusMessage = item.matchesReplaced + " out of " + item.model.totalMatches + " matches replaced";
+						statusMessage = item.matchesReplaced + " out of " + item.model.totalMatches + " matches replaced.";
 						break;
 				}
 				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: statusMessage});
