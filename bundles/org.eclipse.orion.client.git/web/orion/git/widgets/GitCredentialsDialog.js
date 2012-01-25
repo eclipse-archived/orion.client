@@ -89,15 +89,19 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 		if(this._sshService){
 			var self = this;
 			this._sshService.getKnownHosts().then(function(knownHosts){
-				self.options.func({ gitSshUsername: self.gitSshUsername.value, gitSshPassword: self.isSshPassword.checked ? self.gitSshPassword.value : "",
-					gitPrivateKey: self.isPrivateKey.checked ? self.gitPrivateKey.value : "", gitPassphrase: self.isPrivateKey.checked ? self.gitPassphrase.value: "",
-					knownHosts: knownHosts});
+				if(self.options.func)
+					self.options.func({ gitSshUsername: self.gitSshUsername.value, gitSshPassword: self.isSshPassword.checked ? self.gitSshPassword.value : "",
+						gitPrivateKey: self.isPrivateKey.checked ? self.gitPrivateKey.value : "", gitPassphrase: self.isPrivateKey.checked ? self.gitPassphrase.value: "",
+						knownHosts: knownHosts});
+				delete self.options.func; //prevent performing this action twice (IE)
 			});
 			
 		}else{
-			this.options.func({ gitSshUsername: this.gitSshUsername.value, gitSshPassword: this.gitSshPassword.value,
-				gitPrivateKey: this.gitPrivateKey.value, gitPassphrase: this.gitPassphrase.value,
-				knownHosts: this.gitSshKnownHosts.value});
+			if(this.options.func)
+				this.options.func({ gitSshUsername: this.gitSshUsername.value, gitSshPassword: this.gitSshPassword.value,
+					gitPrivateKey: this.gitPrivateKey.value, gitPassphrase: this.gitPassphrase.value,
+					knownHosts: this.gitSshKnownHosts.value});
+			delete this.options.func; //prevent performing this action twice (IE)
 		}
 	}
 });
