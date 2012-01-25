@@ -143,7 +143,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 				return;
 			
 			var content =	
-				'<div class="displaytable">' +
+				'<div class="git-table">' +
 					'<div class="plugin-settings">' +
 						'<list id="commitNode" class="plugin-settings-list"></list>' +
 					'</div>' +
@@ -153,7 +153,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 
 		    var list = dojo.byId( "commitNode" );		
 			
-		    var extensionListItem = dojo.create( "div", { "class":"plugin-list-item" }, list );
+		    var extensionListItem = dojo.create( "div", { "class":"git-list-item" }, list );
 			var horizontalBox = dojo.create( "div", null, extensionListItem );
 			var icon = dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-modification"}, horizontalBox );
 			var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
@@ -212,7 +212,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			dojo.create( "div", item, titleWrapper );
 			
 			var content =
-				'<div class="displaytable">' +
+				'<div class="git-table">' +
 					'<div class="plugin-settings">' +
 						'<list id="diffNode" class="plugin-settings-list"></list>' +
 					'</div>' +
@@ -226,7 +226,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 		};
 
 		GitCommitExplorer.prototype.renderDiff = function(diff, index){
-			var extensionListItem = dojo.create( "div", { "class":"plugin-list-item" }, dojo.byId("diffNode") );
+			var extensionListItem = dojo.create( "div", { "class":"git-list-item" }, dojo.byId("diffNode") );
 			var horizontalBox = dojo.create( "div", null, extensionListItem );
 
 			var detailsView = dojo.create( "div", {"class":"stretch", "style":"width:100%; height:420px"}, horizontalBox );
@@ -273,7 +273,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 				return;
 			
 			var content =
-				'<div class="displaytable">' +
+				'<div class="git-table">' +
 					'<div class="plugin-settings">' +
 						'<list id="tagNode" class="plugin-settings-list"></list>' +
 					'</div>' +
@@ -287,7 +287,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 		};
 
 		GitCommitExplorer.prototype.renderTag = function(tag){
-			var extensionListItem = dojo.create( "div", { "class":"plugin-list-item" }, dojo.byId("tagNode") );
+			var extensionListItem = dojo.create( "div", { "class":"git-list-item" }, dojo.byId("tagNode") );
 			var horizontalBox = dojo.create( "div", null, extensionListItem );
 
 			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-tag" }, horizontalBox );
@@ -297,7 +297,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 
 			dojo.create( "div", null, horizontalBox );
 
-			var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"plugin-action-area"}, horizontalBox );
+			var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"git-action-area"}, horizontalBox );
 			this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", tag, this, "button", false);	
 		};
 

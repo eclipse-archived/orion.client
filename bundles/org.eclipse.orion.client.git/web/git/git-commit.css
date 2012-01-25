@@ -41,3 +41,21 @@
 	padding: 2px;
 	margin-right: 18px;
 }
+
+.git-action-area {
+	float: right;
+	position: relative;
+	color: #666;
+	font-size: 0.9em;
+}
+
+.git-list-item {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	width: 100%;
+}
+
+.git-table {
+	padding-top: 15px;
+	padding-top: 15px;
+}
