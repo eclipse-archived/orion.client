@@ -23,6 +23,18 @@
 	padding: 2px;
 }
 
+.gitCommitMessage {
+	font-size: 16px;
+    font-weight: 500;
+    padding-right: 20px;
+}
+
+.gitCommitDescription {
+	font-size: 13px;
+    padding-right: 10px;
+    white-space: normal;
+}
+
 .gitRepoItem {
 	background: url(../images/repository.gif);
 }
