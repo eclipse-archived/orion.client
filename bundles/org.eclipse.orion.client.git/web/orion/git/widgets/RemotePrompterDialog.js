@@ -125,12 +125,14 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 	execute : function() {
 		var selectedItems = this.treeWidget.getSelectedItems();
 		this.onHide();
-		if(selectedItems[0].Type==="RemoteTrackingBranch"){
-			this.options.func(selectedItems[0], selectedItems[0].parent);
-		}else{
-			this.options.func(null, selectedItems[0], this.newBranch.value);
+		if(this.options.func){
+			if(selectedItems[0].Type==="RemoteTrackingBranch"){
+				this.options.func(selectedItems[0], selectedItems[0].parent);
+			}else{
+				this.options.func(null, selectedItems[0], this.newBranch.value);
+			}
 		}
-		
+		delete this.options.func; //prevent performing this action twice (IE)
 	}
 });
 });

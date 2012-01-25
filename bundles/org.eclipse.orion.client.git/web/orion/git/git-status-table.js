@@ -855,7 +855,7 @@ orion.GitStatusController = (function() {
 					retDeffered.callback();
 					return;
 				}
-		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null, {checkbox: false, minimal: true}, this._remoteTableRenderer.getLogContentId());    
+		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, {checkbox: false, minimal: true}, this._remoteTableRenderer.getLogContentId());    
 				dojo.place(document.createTextNode(""), this._remoteTableRenderer.getLogContentId(), "only");
 				// refresh the commit list for the remote
 				var path = this._curBranch.RemoteLocation[0].Children[0].Location + "?page=1&pageSize=5";
@@ -887,7 +887,7 @@ orion.GitStatusController = (function() {
 					}
 				});
 			} else {
-		        this._gitCommitNavigatorLog = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, null, {checkbox: false, minimal: true},this._logTableRenderer.getLogContentId());
+		        this._gitCommitNavigatorLog = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, {checkbox: false, minimal: true},this._logTableRenderer.getLogContentId());
 		        dojo.place(document.createTextNode(""), this._logTableRenderer.getLogContentId(), "only");
 				var path = (that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) + "?page=1&pageSize=5";
 				dojo.xhrGet({ //TODO Bug 367352
