@@ -630,6 +630,20 @@ exports.GitRepositoryExplorer = (function() {
 		    commit: commit
 		});
 		
+		var _timer;
+		
+		var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
+		    commit: commit,
+		    onMouseLeave: function(){
+		    	if(dijit.popup.hide)
+					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+				dijit.popup.close(tooltipDialog);
+            },
+            onMouseEnter: function(){
+		    	clearTimeout(_timer);
+            }
+		});
+		
 		dojo.connect(titleLink, "onmouseover", titleLink, function() {
 			dijit.popup.open({
 				popup: tooltipDialog,
@@ -637,10 +651,13 @@ exports.GitRepositoryExplorer = (function() {
 				orient: {'BR':'TL', 'TR':'BL'}
 			});
 		});
+		
 		dojo.connect(titleLink, "onmouseout", titleLink, function() {
-			if(dijit.popup.hide)
-				dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-			dijit.popup.close(tooltipDialog);
+			_timer = setTimeout(function(){
+				if(dijit.popup.hide)
+					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+				dijit.popup.close(tooltipDialog);
+			}, 200);
 		});
 		
 		dojo.create( "div", null, detailsView );
@@ -738,8 +755,18 @@ exports.GitRepositoryExplorer = (function() {
 			dojo.place(document.createTextNode(" by " + commit.AuthorName + " on " + 
 				dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})), description, "last");
 			
+			var _timer;
+			
 			var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
-			    commit: commit
+			    commit: commit,
+			    onMouseLeave: function(){
+			    	if(dijit.popup.hide)
+						dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+					dijit.popup.close(tooltipDialog);
+	            },
+	            onMouseEnter: function(){
+			    	clearTimeout(_timer);
+	            }
 			});
 			
 			dojo.connect(link, "onmouseover", link, function() {
@@ -749,11 +776,15 @@ exports.GitRepositoryExplorer = (function() {
 					orient: {'BR':'TL', 'TR':'BL'}
 				});
 			});
+			
 			dojo.connect(link, "onmouseout", link, function() {
-				if(dijit.popup.hide)
-					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-				dijit.popup.close(tooltipDialog);
+				_timer = setTimeout(function(){
+					if(dijit.popup.hide)
+						dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+					dijit.popup.close(tooltipDialog);
+				}, 200);
 			});
+				
 		}
 
 		var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"plugin-action-area"}, horizontalBox );
