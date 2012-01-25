@@ -21,7 +21,7 @@ exports.GitCommitNavigator = (function() {
 	 * @name orion.git.GitCommitNavigator
 	 * @class A table-based git commit navigator
 	 */
-	function GitCommitNavigator(serviceRegistry, selection, commitDetails, options, parentId, pageTitleId, toolbarId, selectionToolsId, pageNavId) {
+	function GitCommitNavigator(serviceRegistry, selection, options, parentId, pageTitleId, toolbarId, selectionToolsId, pageNavId) {
 		this.registry = serviceRegistry;
 		this.selection = selection;
 		this.checkbox = options != null ? options.checkbox : true;
