@@ -21,7 +21,7 @@ exports.GitCommitNavigator = (function() {
 	 * @name orion.git.GitCommitNavigator
 	 * @class A table-based git commit navigator
 	 */
-	function GitCommitNavigator(serviceRegistry, selection, commitDetails, options, parentId, pageTitleId, toolbarId, selectionToolsId, pageNavId) {
+	function GitCommitNavigator(serviceRegistry, selection, options, parentId, pageTitleId, toolbarId, selectionToolsId, pageNavId) {
 		this.registry = serviceRegistry;
 		this.selection = selection;
 		this.checkbox = options != null ? options.checkbox : true;
@@ -203,9 +203,18 @@ exports.GitCommitRenderer = (function() {
 			link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + item.Location + "?page=1&pageSize=1"}, div, "last");			
 			dojo.place(document.createTextNode(item.Message), link, "only");		
 			
+			var _timer;
 			
 			var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
-			    commit: item
+			    commit: item,
+			    onMouseLeave: function(){
+			    	if(dijit.popup.hide)
+						dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+					dijit.popup.close(tooltipDialog);
+	            },
+	            onMouseEnter: function(){
+			    	clearTimeout(_timer);
+	            }
 			});
 			
 			dojo.connect(link, "onmouseover", link, function() {
@@ -215,10 +224,13 @@ exports.GitCommitRenderer = (function() {
 					orient: {'BR':'TL', 'TR':'BL'}
 				});
 			});
+			
 			dojo.connect(link, "onmouseout", link, function() {
-				if(dijit.popup.hide)
-					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-				dijit.popup.close(tooltipDialog);
+				_timer = setTimeout(function(){
+					if(dijit.popup.hide)
+						dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+					dijit.popup.close(tooltipDialog);
+				}, 200);
 			});
 			
 			if (incomingCommit)

@@ -13,10 +13,10 @@
 /*browser:true*/
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands',
         'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
-        'orion/breadcrumbs', 'orion/ssh/sshTools', 'orion/git/git-commit-details', 'orion/git/git-commit-navigator', 'orion/git/gitCommands',
+        'orion/breadcrumbs', 'orion/ssh/sshTools', 'orion/git/git-commit-navigator', 'orion/git/gitCommands',
 	    'orion/links', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mAuth, mDialogs, mSelection, mFileClient, mOperationsClient,
-					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitDetails, mGitCommitNavigator, mGitCommands, mLinks) {
+					mSearchClient, mGlobalCommands, mGitClient, mBreadcrumbs, mSshTools, mGitCommitNavigator, mGitCommands, mLinks) {
 
 // TODO: This is naughty -- feel bad and then fix it please
 var serviceRegistry;
@@ -43,11 +43,9 @@ var serviceRegistry;
 			var gitClient = new mGitClient.GitService(serviceRegistry);
 			
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
-			
-			// Commit details
-			var commitDetails = new mGitCommitDetails.CommitDetails({parent: "commitDetailsPane", commandService: commandService, linkService: linkService, detailsPane: dijit.byId("orion.gitlog")});
+
 			// Commit navigator
-			var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, commitDetails, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools", "pageNavigationActions");
+			var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools", "pageNavigationActions");
 			
 			// global commands
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, navigator);
