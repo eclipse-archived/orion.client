@@ -697,9 +697,6 @@ var exports = {};
 											explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);
 									});
 								}
-								if (item.Type === "Remote") {
-									dojo.hitch(explorer, explorer.changedItem)(item);
-								}
 								dojo.hitch(explorer, explorer.changedItem)(item);
 							}, displayErrorOnStatus);
 						}, func, "Fetch Git Repository");
