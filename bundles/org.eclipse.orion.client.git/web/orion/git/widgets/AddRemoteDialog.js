@@ -33,7 +33,9 @@ dojo.declare("orion.git.widgets.AddRemoteDialog", [dijit.Dialog, orion.widgets._
 		this.gitRemoteURILabelText = "Remote URI:";
 	},
 	execute: function() {
-		this.options.func(this.gitRemote.value, this.gitRemoteURI.value);
+		if(this.options.func)
+			this.options.func(this.gitRemote.value, this.gitRemoteURI.value);
+		delete this.options.func; //prevent performing this action twice (IE)
 	}
 });
 
