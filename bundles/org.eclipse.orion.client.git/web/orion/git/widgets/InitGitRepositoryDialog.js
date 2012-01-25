@@ -32,7 +32,9 @@ dojo.declare("orion.git.widgets.InitGitRepositoryDialog", [dijit.Dialog, orion.w
 		this.gitTargetLabelText = "Target:";
 	},
 	execute: function() {
-		this.options.func(this.gitTarget.value);
+		if(this.options.func)
+			this.options.func(this.gitTarget.value);
+		delete this.options.func; //prevent performing this action twice (IE)
 	}
 });
 });
