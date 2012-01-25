@@ -76,16 +76,10 @@ define(['require', 'dojo'], function(require, dojo) {
 				if (item.shouldDisplayActions()) {
 					var actionsWrapper = dojo.create(
 						"span",
-						{id: tableRow.id + "actionswrapper", style: {visibility: "hidden"}},
+						{id: tableRow.id + "actionswrapper"},
 						actionColumn,
 						"only");
-					dojo.connect(tableRow, "onmouseover", tableRow, function() {
-						dojo.style(actionsWrapper, "visibility", "visible");
-					});
-					dojo.connect(tableRow, "onmouseout", tableRow, function() {
-						dojo.style(actionsWrapper, "visibility", "hidden");
-					});
-					this._commandService.renderCommands(actionsWrapper, "object", item, {}, "tool");	
+					this._commandService.renderCommands(actionsWrapper, "object", item, {}, "button");	
 				}
 				dojo.place(labelColumn, tableRow, "last");
 				dojo.place(actionColumn, tableRow, "last");
