@@ -2366,7 +2366,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (this._frameWidth !== newWidth || this._frameHeight !== newHeight) {
 				this._frameWidth = newWidth;
 				this._frameHeight = newHeight;
-				this._updatePage();
+				/*
+				* Feature in IE7. For some reason, sometimes Internet Explorer 7 
+				* returns incorrect values for element.getBoundingClientRect() when 
+				* inside a resize handler. The fix is to queue the work.
+				*/
+				if (isIE < 9) {
+					this._queueUpdatePage();
+				} else {
+					this._updatePage();
+				}
 			}
 		},
 		_handleRulerEvent: function (e) {
