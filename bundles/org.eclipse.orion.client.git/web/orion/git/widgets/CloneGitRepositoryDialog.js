@@ -55,11 +55,13 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 		}
 	},
 	execute: function() {
+		if(this.options.func)
 		this.options.func(
 				this.options.advancedOnly ? undefined : this.gitUrl.value,
 				(this.advancedShown && this.isNewProject.checked) ? undefined : this.gitPath.value,
 				(this.advancedShown && !this.isNewProject.checked) ? undefined : this.gitName.value
 				);
+		delete this.options.func; //prevent performing this action twice (IE)
 	},
 	showAdvanced: function(){
 		this.advancedShown = true;
