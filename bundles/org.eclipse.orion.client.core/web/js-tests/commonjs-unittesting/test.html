@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<script type="text/javascript" src="../../orion/plugin.js"></script>
-	<script type="text/javascript" src="../../requirejs/require.js"></script>
+	<script src="../../orion/plugin.js"></script>
+	<script src="../../requirejs/require.js"></script>
 	<script type="text/javascript">
+	/*global window define require*/
 	require({
 		  baseUrl: '../..',
 		  packages: [
@@ -33,8 +34,8 @@
 		});
 	</script>
 	<script type="text/javascript">
-	exports = {};
-	module = {};
+	var exports = {};
+	var module = {};
 	
 	// needed for FF 3.6
 	if (!Object.keys) {
@@ -47,15 +48,15 @@
 		        }
 		    }
 		    return keys;
-		}
+		};
 	}
 	
 	define("assert", ["orion/assert"], function(assert) {
-		return assert
+		return assert;
 	});
 	
 	define("test", ["orion/test"], function(test) {
-		return test
+		return test;
 	});
 	window.onload = function() {
 		require(['test', 'assert'], function(test) {

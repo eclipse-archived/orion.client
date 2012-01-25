@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global eclipse orion console localStorage document window dojo*/
+/*global define top orion console localStorage document window dojo*/
 define(["orion/assert","dojo"], function(assert, dojo) {
 	var tests = {};
 	
