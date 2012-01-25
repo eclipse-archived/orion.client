@@ -9,9 +9,12 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define*/
+/*global define */
+/*jslint eqeq: true */
+
+// This is an implementation of CommonJS UnitTesting 1.0 Assert
+
 define(function() {
-	var exports = {};
 	function AssertionError(options) {
 		if (options) {
 			this.message = options.message;
@@ -59,37 +62,7 @@ define(function() {
 		}
 		return result;
 	};
-	exports.AssertionError = AssertionError;
-
-	exports.ok = function(guard, message_opt) {
-		if (!!!guard) {
-			throw new AssertionError({
-				message : message_opt || "ok failed",
-				expected : true,
-				actual : guard
-			});
-		}
-	};
-
-	exports.equal = function(actual, expected, message_opt) {
-		if (actual != expected) {
-			throw new AssertionError({
-				message : message_opt || "equal failed",
-				expected : expected,
-				actual : actual
-			});
-		}
-	};
-	exports.notEqual = function(actual, expected, message_opt) {
-		if (actual == expected) {
-			throw new AssertionError({
-				message : message_opt || "notEqual failed",
-				expected : expected,
-				actual : actual
-			});
-		}
-	};
-
+	
 	function _keys(obj) {
 		var keys = [];
 		for ( var key in obj) {
@@ -108,7 +81,7 @@ define(function() {
 		} else if (actual instanceof Date && expected instanceof Date) {
 			return actual.getTime() === expected.getTime();
 		} else if (typeof actual !== 'object' || typeof expected !== 'object') {
-			return actual == expected;
+			return actual == expected; // use of == is defined in spec
 		} else {
 			if (actual.prototype !== expected.prototype) {
 				return false;
@@ -139,74 +112,103 @@ define(function() {
 		}
 	}
 
-	exports.deepEqual = function(actual, expected, message_opt) {
-		if (!_deepEqual(actual, expected)) {
-			throw new AssertionError({
-				message : message_opt || "deepEqual failed",
-				expected : expected,
-				actual : actual
-			});
-		}
-	};
+	function Assert() {
+	}
 
-	exports.notDeepEqual = function(actual, expected, message_opt) {
-		if (_deepEqual(actual, expected)) {
+	Assert.prototype = {
+		AssertionError: AssertionError,
+		ok: function(guard, message_opt) {
+			if (!!!guard) {
+				throw new AssertionError({
+					message : message_opt || "ok failed",
+					expected : true,
+					actual : guard
+				});
+			}
+		},
+		equal: function(actual, expected, message_opt) {
+			if (actual != expected) { // use of != is defined in spec
+				throw new AssertionError({
+					message : message_opt || "equal failed",
+					expected : expected,
+					actual : actual
+				});
+			}
+		},
+		notEqual: function(actual, expected, message_opt) {
+			if (actual == expected) { // use of == is defined in spec
+				throw new AssertionError({
+					message : message_opt || "notEqual failed",
+					expected : expected,
+					actual : actual
+				});
+			}
+		},
+		deepEqual: function(actual, expected, message_opt) {
+			if (!_deepEqual(actual, expected)) {
+				throw new AssertionError({
+					message : message_opt || "deepEqual failed",
+					expected : expected,
+					actual : actual
+				});
+			}
+		},
+		notDeepEqual: function(actual, expected, message_opt) {
+			if (_deepEqual(actual, expected)) {
+				throw new AssertionError({
+					message : message_opt || "notDeepEqual failed",
+					expected : expected,
+					actual : actual
+				});
+			}
+		},
+		strictEqual: function(actual, expected, message_opt) {
+			if (actual !== expected) {
+				throw new AssertionError({
+					message : message_opt || "strictEqual failed",
+					expected : expected,
+					actual : actual
+				});
+			}
+		},
+		notStrictEqual: function(actual, expected, message_opt) {
+			if (actual === expected) {
+				throw new AssertionError({
+					message : message_opt || "notStrictEqual failed",
+					expected : expected,
+					actual : actual
+				});
+			}
+		},
+		fail: function(message_opt) {
+			var message = "Failed";
+			if (message_opt) {
+				message += ": " + message_opt;
+			}
 			throw new AssertionError({
-				message : message_opt || "notDeepEqual failed",
-				expected : expected,
-				actual : actual
+				message : message
 			});
-		}
-	};
-
-	exports.strictEqual = function(actual, expected, message_opt) {
-		if (actual !== expected) {
-			throw new AssertionError({
-				message : message_opt || "strictEqual failed",
-				expected : expected,
-				actual : actual
-			});
-		}
-	};
-
-	exports.notStrictEqual = function(actual, expected, message_opt) {
-		if (actual === expected) {
-			throw new AssertionError({
-				message : message_opt || "notStrictEqual failed",
-				expected : expected,
-				actual : actual
-			});
-		}
-	};
-
-	exports.fail = function(message_opt) {
-		var message = "Failed";
-		if (message_opt) {
-			message += ": " + message_opt;
-		}
-		throw new AssertionError({
-			message : message
-		});
-	};
+		},
+		throws: function(block, Error_opt, message_opt) {
+			if (typeof Error_opt === "string") {
+				message_opt = Error_opt;
+				Error_opt = undefined;
+			}
 	
-	exports.raises = function(block, Error_opt, message_opt) {
-		if (typeof Error_opt === "string") {
-			message_opt = Error_opt;
-			Error_opt = undefined;
-		}
-
-		try {
-			block();
-			throw new AssertionError({
-				message : message_opt || "throws failed"
-			});
-		} catch (e) {
-			if (Error_opt && !(e instanceof Error_opt)) {
-				throw e;
+			try {
+				block();
+				throw new AssertionError({
+					message : message_opt || "throws failed"
+				});
+			} catch (e) {
+				if (Error_opt && !(e instanceof Error_opt)) {
+					throw e;
+				}
 			}
 		}
 	};
-	exports["throws"] = exports.raises;
 	
+	var exports = new Assert();
+	exports.Assert = Assert;
 	return exports;
 }());

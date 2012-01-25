@@ -9,6 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/*global define setTimeout*/
+
 define(["orion/assert","dojo", "orion/test"], function(assert, dojo, mTest) {
 	
 var tests = {};
@@ -44,7 +46,7 @@ tests["test expected asynch failure"] = function() {
 			return d;
 		}
 	};
-	var newTest = mTest.newTest();
+	var newTest = new mTest.Test();
 	// by adding a dummy listener we avoid the error from useConsole() which is added if there are no listeners
 	newTest.addEventListener("testDone", function() {});	
 	

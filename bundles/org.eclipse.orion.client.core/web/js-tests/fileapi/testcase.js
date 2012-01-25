@@ -75,7 +75,8 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 			var references = serviceRegistry.getServiceReferences("orion.file");
 			var reference = references[0];
 			var root = reference.getProperty("root");
-			return serviceRegistry.getService(reference).read(root + "newfile.html").then(function(result) {
+			var service = serviceRegistry.getService(reference);
+			return service.read(root + "newfile.html").then(function(result) {
 				assert.ok(false);
 			}, function(result) {
 				assert.ok(result.status === 404);
@@ -105,7 +106,8 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 			var references = serviceRegistry.getServiceReferences("orion.file");
 			var reference = references[0];
 			var root = reference.getProperty("root");
-			return serviceRegistry.getService(reference).list(root + "newdir").then(function(result) {
+			var service = serviceRegistry.getService(reference);
+			return service.list(root + "newdir").then(function(result) {
 				assert.ok(false);
 			}, function(result) {
 				assert.ok(result.status === 404);

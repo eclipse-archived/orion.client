@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define */
+/*global define console setTimeout*/
 
 
 define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert, mServiceRegistry) {
@@ -55,7 +55,7 @@ define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert,
 	};
 	
 	tests.testRegisterUnregisterMultipleServices = function() {
-		
+		var count = 0;
 		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);	
@@ -129,6 +129,7 @@ define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert,
 //	};
 
 	tests.testEvents = function() {
+		var count = 0;
 		var serviceAddedCount = 0;
 		var serviceRemovedCount = 0;
 		var eventResult;
@@ -153,7 +154,7 @@ define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert,
 		assert.equal(1, serviceAddedCount);
 		assert.equal(0, serviceRemovedCount);
 
-		var service = registry.getService(registration.getServiceReference())
+		var service = registry.getService(registration.getServiceReference());
 		var eventHandler = function(result) {
 			eventResult = result;
 		};
@@ -177,7 +178,7 @@ define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert,
 		var b = new dojo.Deferred();
 		var called = false;
 		
-		window.setTimeout(function() {
+		setTimeout(function() {
 			a.resolve();
 			b.progress();
 			b.resolve();
@@ -204,7 +205,7 @@ define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert,
 		var b = new dojo.Deferred();
 		var called = false;
 
-		window.setTimeout(function() {
+		setTimeout(function() {
 			a.resolve();
 			b.progress();
 			b.resolve();
