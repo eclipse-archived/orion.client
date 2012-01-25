@@ -144,6 +144,40 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		},
 		
 		showSearchResult: function(resultsNode, query, excludeFile, generateHeading, onResultReady, hideSummaries, jsonData) {
+			
+			//Helper function to append a path String to the end of a search result dom node 
+			var appendPath = (function() { 
+			
+				//Map to track the names we have already seen. If the name is a key in the map, it means
+				//we have seen it already. Optionally, the value associated to the key may be a function' 
+				//containing some deferred work we need to do if we see the same name again.
+				var namesSeenMap = {};
+				
+				function doAppend(domElement, hit) {
+					var path = hit.Path;
+					path = path.substring(0, path.length-hit.Name.length-1);
+					domElement.appendChild(document.createTextNode(' - ' + path + ' '));
+				}
+				
+				function appendPath(domElement, hit) {
+					var name = hit.Name;
+					if (namesSeenMap.hasOwnProperty(name)) {
+						//Seen the name before
+						doAppend(domElement, hit);
+						var deferred = namesSeenMap[name];
+						if (typeof(deferred)==='function') {
+							//We have seen the name before, but prior element left some deferred processing
+							namesSeenMap[name] = null;
+							deferred();
+						}
+					} else {
+						//Not seen before, so, if we see it again in future we must append the path
+						namesSeenMap[name] = function() { doAppend(domElement, hit); };
+					}
+				}
+				return appendPath;
+			}()); //End of appendPath function
+
 			var foundValidHit = false;
 			dojo.empty(resultsNode);
 			var token = jsonData.responseHeader.params.q;
@@ -174,6 +208,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 						var loc = hit.Location;
 						hitLink.setAttribute('href', require.toUrl("edit/edit.html") + "#" + loc);
 						col.appendChild(hitLink);
+						appendPath(col, hit);
 						
 						if (!hideSummaries && jsonData.highlighting && jsonData.highlighting[hit.Id] && jsonData.highlighting[hit.Id].Text) {
 							var highlightText = jsonData.highlighting[hit.Id].Text[0];
