@@ -274,7 +274,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		'</div>' +
 		'<div class="layoutBlock">' +
 			'<div class="footerBlock">' +
-				'This is a Beta build of Orion.  You can use it, play with it and explore the capabilities but BEWARE your data may be lost.' +
+				'This is a Beta build of Orion. Please try it out but BEWARE your data may be lost.' +
 			'</div>' +
 			'<div class="footerBlock">' +
 				'<a href="http://wiki.eclipse.org/Orion/FAQ" target="_blank">FAQ</a> | ' + 
