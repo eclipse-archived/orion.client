@@ -198,7 +198,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 					var head = dojo.create("thead", null, fileSystemTable);
 					var row = dojo.create("tr", null, head);
 					var col = dojo.create("td", null, row);
-					mUtil.createPaneHeading(col, "File Servers");
+					mUtil.createPaneHeading(col, "File Servers", true);
 
 					var body = dojo.create("tbody", null, fileSystemTable);
 					for(var j = 0; j < allReferences.length; ++j) {
@@ -226,7 +226,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			thead = dojo.create("thead", null, navOutlineTable);
 			row = dojo.create("tr", null, thead);
 			headCol = dojo.create("td", null, row);
-			mUtil.createPaneHeading(headCol, "Favorites", null, "faveCommands", this._registry.getService("orion.page.command"), this);
+			mUtil.createPaneHeading(headCol, "Favorites", true, null, "faveCommands", this._registry.getService("orion.page.command"), this);
 
 			// favorites
 			var tr, col1, href, link, actionsWrapper;
@@ -267,7 +267,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				thead = dojo.create("thead", null, navOutlineTable);
 				row = dojo.create("tr", null, thead);
 				headCol = dojo.create("td", null, row);
-				mUtil.createPaneHeading(headCol, "Searches");
+				mUtil.createPaneHeading(headCol, "Searches", true);
 
 				tbody = dojo.create("tbody", null, navOutlineTable);
 				for (var i=0; i < searches.length; i++) {
