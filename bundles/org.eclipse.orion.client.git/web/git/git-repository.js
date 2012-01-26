@@ -35,10 +35,10 @@ mBootstrap.startup().then(function(core) {
 	new mProgress.ProgressService(serviceRegistry, operationsClient);
 	
 	// ...
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 	var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
 	var gitClient = new mGitClient.GitService(serviceRegistry);
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 	
 	var explorer = new mGitRepositoryExplorer.GitRepositoryExplorer(serviceRegistry, linkService, /* selection */ null, "artifacts", "pageActions"/*, "selectionTools"*/);
 	mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
