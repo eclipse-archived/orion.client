@@ -1611,6 +1611,15 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			var span = dojo.create("span", { className: "primaryColumn"}, div, "last");
 
 			dojo.place(document.createTextNode(item.model.fullPathName + "/" + item.model.name), span, "only");
+			dojo.connect(span, "onclick", span, function() {
+				window.open(item.model.linkLocation);
+			});
+			dojo.connect(span, "onmouseover", span, function() {
+				span.style.cursor ="pointer";
+			});
+			dojo.connect(span, "onmouseout", span, function() {
+				span.style.cursor ="default";
+			});
 			
 			var operationIcon = dojo.create("span", null, div, "first");
 			dojo.addClass(operationIcon, "imageSprite");
