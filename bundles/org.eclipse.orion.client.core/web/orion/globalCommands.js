@@ -25,8 +25,10 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	 * @name orion.globalCommands.CommandParameterCollector
 	 */	
 	function CommandParameterCollector (toolbar) {
-		// get  node's parent.  If it is managed by dijit, we will need to layout
-		this.layoutWidgetId = toolbar.parentNode.id;
+		// get node's parent.  If it is managed by dijit, we will need to layout
+		if (toolbar) {
+			this.layoutWidgetId = toolbar.parentNode.id;
+		}
 	}
 	CommandParameterCollector.prototype =  {
 	
@@ -41,6 +43,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			}
 			if (this.parameterContainer) {
 				dojo.removeClass(this.parameterContainer, this.activeClass);
+				dojo.removeClass(this.parameterContainer.parentNode, "slideContainerActive");
 			}
 			if (this.dismissArea) {
 				 dojo.empty(this.dismissArea);
@@ -106,6 +109,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 
 
 				// all parameters have been generated.  Activate the area.
+				dojo.addClass(this.parameterContainer.parentNode, "slideContainerActive");
 				dojo.addClass(this.parameterContainer, this.activeClass);
 				mUtil.forceLayout(this.parameterContainer);
 				if (focusNode) {
@@ -249,10 +253,10 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	var topHTMLFragment =
 	//Top row:  Logo + discovery links + user
 	'<div id="staticBanner" class="layoutBlock topRowBanner">' +
-		'<a id="home" class="layoutLeft primaryNav" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small.gif") + '" alt="Orion Logo"/></a>' +
+		'<a id="home" class="layoutLeft primaryNav" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
 		'<div id="primaryNav" class="layoutLeft primaryNav"></div>' +
 		'<div id="globalActions" class="layoutLeft primaryNav"></div>' +
-		'<div id="help" class="layoutRight help"><a id="help" href="' + require.toUrl("help/index.jsp") + '"><img src="' + require.toUrl("images/help_banner.gif") + '" alt="Help"/></a></div>'+
+		'<div id="help" class="layoutRight help"><a id="help" href="' + require.toUrl("help/index.jsp") + '"><img src="' + require.toUrl("images/help.gif") + '" alt="Help"/></a></div>'+
 		'<div id="userInfo" class="layoutRight primaryNav"></div>' +
 		'<div class="layoutRight primaryNav">|</div>' +
 	'</div>' +
@@ -464,8 +468,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		if (toolbar) {
 			dojo.place(toolbarFragment, toolbar, "only");
 		} else {
-			toolbar = dojo.create ("div", {id: "pageToolbar", "class": "paneHeading layoutBlock"}, "titleArea", "after");
-			dojo.place(toolbarFragment, toolbar, "only");
+			window.console.log("No toolbar requested");
 		}
 		
 		// Set up a custom parameter collector that slides out of the toolbar.
@@ -496,7 +499,6 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				}
 				if (info.href && info.name) {
 					var link = dojo.create("a", {href: info.href}, primaryNav, "last");
-					dojo.addClass(link, "commandLink");
 					text = document.createTextNode(info.name);
 					dojo.place(text, link, "only");
 				}
