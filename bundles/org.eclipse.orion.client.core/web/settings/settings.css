@@ -107,6 +107,8 @@ ul,menu,dir {
 }
 
 .settings {
+	min-width:850px;
+	max-width:1000px;
 	padding-left: 20px;
 	padding-right: 40px;
 }
@@ -376,6 +378,6 @@ list>*,grid>* {
 	padding-right: 15px;
 }
 
-.plugin-links-trailing {
+.plugin-links {
 	padding-right: 7px;
 }
