@@ -458,7 +458,7 @@ exports.GitRepositoryExplorer = (function() {
 		);
 	};
 	
-	GitRepositoryExplorer.prototype.displayRemoteBranches2 = function(remotes, repository, deferred){
+	GitRepositoryExplorer.prototype.displayRemoteBranches2 = function(remotes, repository, deferred, anyRemoteBranch){
 		var that = this;
 		if (deferred == null)
 			deferred = new dojo.Deferred();
@@ -471,12 +471,16 @@ exports.GitRepositoryExplorer = (function() {
 						remoteBranches[i].Repository = repository;
 						that.renderRemoteBranch(remoteBranches[i], i);
 					}
-					that.displayRemoteBranches2(remotes.slice(1), repository, deferred);
+					that.displayRemoteBranches2(remotes.slice(1), repository, deferred, (anyRemoteBranch || (remoteBranches.length > 0)));
 				}, function () {
 					
 				}
 			);
 		} else {
+			if (!anyRemoteBranch){
+				dojo.style(dojo.byId("remoteBranchSectionProgress"), "visibility", "hidden");
+				dojo.byId("remoteBranchHeader").innerHTML = "No Remote Branches";
+			}
 			deferred.callback();
 		}
 		
@@ -585,6 +589,19 @@ exports.GitRepositoryExplorer = (function() {
 							);	
 						}
 					);
+				} else {
+					that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20", 
+						function(resp){	
+							dojo.style(dojo.byId("commitSectionProgress"), "visibility", "hidden");
+						
+							for (var i=0; i<resp.Children.length; i++){
+								that.renderCommit(resp.Children[i], false, i);
+							}
+							
+							if (resp.Children.length == 0)
+								that.renderNoCommit();
+						}
+					);	
 				}
 			}
 		);
