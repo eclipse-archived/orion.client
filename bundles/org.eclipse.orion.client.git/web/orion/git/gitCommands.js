@@ -1127,7 +1127,7 @@ var exports = {};
 					var obj = JSON.parse(item.responseText);
 					cloneLocation = obj.JsonData.CloneLocation;
 				}
-
+				var gitService = serviceRegistry.getService("orion.git.provider");
 				dojo.xhrGet({
 					url : cloneLocation,
 					headers : {
@@ -1136,21 +1136,13 @@ var exports = {};
 					handleAs : "json",
 					timeout : 5000,
 					load : function(clone, secondArg) {
-						dojo.xhrGet({
-							url : clone.Children[0].BranchLocation,
-							headers : {
-								"Orion-Version" : "1"
-							},
-							handleAs : "json",
-							timeout : 5000,
-							load : function(branches, secondArg) {
-								dojo.forEach(branches.Children, function(branch, i) {
-									if (branch.Current == true){
-										clientDeferred.callback(require.toUrl("git/git-log.html") + "#" + branch.CommitLocation + "?page=1");
-										return;
-									}
-								});
-							}
+						gitService.getGitClone(clone.Children[0].BranchLocation, function(branches){
+							dojo.forEach(branches.Children, function(branch, i) {
+								if (branch.Current == true){
+									clientDeferred.callback(require.toUrl("git/git-log.html") + "#" + branch.CommitLocation + "?page=1");
+									return;
+								}
+							});
 						});
 					}
 				});
