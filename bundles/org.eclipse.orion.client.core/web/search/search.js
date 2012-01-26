@@ -40,21 +40,31 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", toolbar: "outlinerToolbar", serviceRegistry: serviceRegistry});
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, searcher);
 			
-			var item = dojo.hash();
-			searchResultsGenerator.loadResults(item);
-			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, item, null, null,  /* no images */ false, /* client handle page nav area */ true);     
+			var queryString =extractQueryString();
+			searchResultsGenerator.loadResults(queryString);
+			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, queryString, null, null,  /* no images */ false, /* client handle page nav area */ true);     
 
 			initTitleBreadCrumb(fileClient, searcher);
 			//every time the user manually changes the hash, we need to load the results with that name
 			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
 				initTitleBreadCrumb(fileClient, searcher);
-				var query = dojo.hash();
+				var query = extractQueryString();
 				searchResultsGenerator.loadResults(query);
 				mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, query, null, null,  /* no images */ false, /* client handle page nav area */ true);     
 			});
 		});
 	});
 
+	function extractQueryString(){
+		//In fire fox, dojo.hash() transforms white space as "%20", where we can use it if the hash contains "replace=xx xx"
+		var qStr = window.location.hash;
+		var index = qStr.indexOf("#");
+		if(index >= 0){
+			qStr = qStr.substring(index+1);
+		}
+		return qStr;
+	}
+	
 	function parseHash(){
 		var hash = dojo.hash();
 		var hasLocation = (hash.indexOf("+Location:") > -1);
