@@ -301,22 +301,6 @@ a:hover {
 	margin-left: 16px;
 }
 
-.paneHeadingContainerFixed {
-	background-color: #f8f8f8;
-	border-bottom: 1px solid #ebebeb;
-	border-top: 1px solid #ebebeb;
-	min-width: 300px;
-}
-
-.paneHeadingContainer {
-	background-color: #f8f8f8;
-	border-bottom: 1px solid #ebebeb;
-	border-top: 1px solid #ebebeb;
-	padding-top: 8px;
-	padding-bottom: 4px;
-	
-}
-
 .paneHeadingCommands {
 	text-align: right;
 }
@@ -524,12 +508,19 @@ a:hover {
 }
 
 .paneHeading {
+	background-color: #f8f8f8;
 	vertical-align: middle;
-	min-height: 24px;
+	border-bottom: 1px solid #ebebeb;
+	border-top: 1px solid #ebebeb;
+	min-height: 26px;
 	width: 100%;
 	font-size: 9pt;
 	font-weight: bold;
 	color: #808080;
+}
+
+.paneHeadingFixed {
+	min-width: 300px;
 }
 
 .auxpaneHeading {
@@ -537,7 +528,7 @@ a:hover {
 	border-bottom: 1px solid #ebebeb;
 	border-top: 1px solid #ebebeb;
 	vertical-align: middle;
-	min-height: 24px;
+	min-height: 26px;
 	width: 100%;
 	font-size: 9pt;
 	font-weight: bold;
