@@ -28,7 +28,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 				
 			// global commands
-			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
 			
 			// Populate recent projects
 			serviceRegistry.getService("orion.core.preference").getPreferences("/window/recent").then(function(prefs){
