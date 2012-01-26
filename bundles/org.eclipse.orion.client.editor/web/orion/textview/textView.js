@@ -3754,7 +3754,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_isDocumentReady: function() {
 			var frameDocument = this._frameDocument;
 			if (!frameDocument) { return false; }
-			 window.console.log("here=" + frameDocument.readyState);
 			if (frameDocument.readyState === "complete") {
 				return true;
 			} else if (frameDocument.readyState === "interactive" && isFirefox) {
