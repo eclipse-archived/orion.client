@@ -3628,7 +3628,18 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			* event is trigged.
 			*/
 			this._loadHandler = function(e) {
-				self._handleLoad(e);
+				/*
+				* Bug in Firefox. Firefox does not send any load events for the elements inside the iframe
+				* when document.write() is called during the load event for the iframe. The fix is to async
+				* the work.
+				*/
+				if (self._sync) {
+					self._handleLoad(e);
+				} else {
+					setTimeout(function() {
+						self._handleLoad(e);
+					}, 0);
+				}
 			};
 			addHandler(frame, "load", this._loadHandler, !!isFirefox);
 			if (!isWebkit) {
@@ -3715,23 +3726,20 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var frameWindow = this._frameWindow = this._frame.contentWindow;
 			var frameDocument = this._frameDocument = frameWindow.document;
 			var self = this;
-			function write() {
-				frameDocument.open("text/html", "replace");
-				frameDocument.write(self._getFrameHTML());
-				frameDocument.close();
-				self._windowLoadHandler = function(e) {
-					/*
-					* Bug in Safari.  Safari sends the window load event before the
-					* style sheets are loaded. The fix is to defer creation of the
-					* contents until the document readyState changes to complete.
-					*/
-					if (self._isDocumentReady()) {
-						self._createContent();
-					}
-				};
-				addHandler(frameWindow, "load", self._windowLoadHandler);
-			}
-			write();
+			frameDocument.open("text/html", "replace");
+			frameDocument.write(self._getFrameHTML());
+			frameDocument.close();
+			self._windowLoadHandler = function(e) {
+				/*
+				* Bug in Safari.  Safari sends the window load event before the
+				* style sheets are loaded. The fix is to defer creation of the
+				* contents until the document readyState changes to complete.
+				*/
+				if (frameDocument.readyState === "complete") {
+					self._createContent();
+				}
+			};
+			addHandler(frameWindow, "load", self._windowLoadHandler);
 			if (this._sync) {
 				this._createContent();
 			} else {
@@ -3742,7 +3750,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				*/
 				this._createViewTimer = function() {
 					if (self._clientDiv) { return; }
-					if (self._isDocumentReady()) {
+					if (frameDocument.readyState === "complete") {
 						self._createContent();
 					} else {
 						setTimeout(self._createViewTimer, 10);
@@ -3750,47 +3758,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				};
 				setTimeout(this._createViewTimer, 10);
 			}
-		},
-		_isDocumentReady: function() {
-			var frameDocument = this._frameDocument;
-			if (!frameDocument) { return false; }
-			if (frameDocument.readyState === "complete") {
-				return true;
-			} else if (frameDocument.readyState === "interactive" && isFirefox) {
-				/*
-				* Bug in Firefox. Firefox does not change the document ready state to complete 
-				* all the time. The fix is to wait for the ready state to be "interactive" and check that 
-				* all css rules are initialized.
-				*/
-				var styleSheets = frameDocument.styleSheets;
-				var styleSheetCount = 1;
-				if (this._stylesheet) {
-					styleSheetCount += typeof(this._stylesheet) === "string" ? 1 : this._stylesheet.length;
-				}
-				if (styleSheetCount === styleSheets.length) {
-					var index = 0;
-					while (index < styleSheets.length) {
-						var count = 0;
-						try {
-							count = styleSheets.item(index).cssRules.length;
-						} catch (ex) {
-							/*
-							* Feature in Firefox. To determine if a stylesheet is loaded the number of css rules is used, if the 
-							* stylesheet is not loaded this operation will throw an invalid access error. When a stylesheet from
-							* a different domain is loaded, accessing the css rules will result in a security exception. In this
-							* case count is set to 1 to indicate the stylesheet is loaded.
-							*/
-							if (ex.code !== DOMException.INVALID_ACCESS_ERR) {
-								count = 1;
-							}
-						}
-						if (count === 0) { break; }
-						index++;
-					}
-					return index === styleSheets.length;
-				}	
-			}
-			return false;
 		},
 		_createContent: function() {
 			if (this._clientDiv) { return; }

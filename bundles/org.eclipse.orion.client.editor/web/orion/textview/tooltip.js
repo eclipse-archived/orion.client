@@ -192,7 +192,7 @@ define("orion/textview/tooltip", ['orion/textview/textView', 'orion/textview/tex
 				annotation = annotations[0];
 				if (annotation.title) {
 					title = annotation.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-					return "<div>" + annotation.html + "&nbsp;<span style='vertical-align:mddle;'>" + title + "</span><div>";
+					return "<div>" + annotation.html + "&nbsp;<span style='vertical-align:middle;'>" + title + "</span><div>";
 				} else {
 					var newModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 					var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
@@ -209,7 +209,7 @@ define("orion/textview/tooltip", ['orion/textview/textView', 'orion/textview/tex
 						title = getText(annotation.start, annotation.end);
 					}
 					title = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-					tooltipHTML += "<div>" + annotation.html + "&nbsp;<span style='vertical-align:mddle;'>" + title + "</span><div>";
+					tooltipHTML += "<div>" + annotation.html + "&nbsp;<span style='vertical-align:middle;'>" + title + "</span><div>";
 				}
 				return tooltipHTML;
 			}
