@@ -593,14 +593,16 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					return;
 				}
 				this.deselectElement();
-				this.explorer.model.setCurrent(fileItemIndex, fileDetailItemIndex, storeStatus);
 				dojo.toggleClass(this.explorer.model.getId(item), "currentSearchMatch", true);
 				if(this.explorer._state !== "result_view"){
 					var rebuildPreview = (fileItemIndex !== this.explorer.model.currentFileIndex);
+					this.explorer.model.setCurrent(fileItemIndex, fileDetailItemIndex, storeStatus);
 					if(rebuildPreview){
 						this.explorer.buildPreview();
 					}
 					this.explorer.twoWayCompareContainer.gotoMatch(item.lineNumber-1, item.matches[item.matchNumber-1], item.newMatches[item.matchNumber-1], this.explorer.model.queryObj.inFileQuery.searchStrLength );
+				} else {
+					this.explorer.model.setCurrent(fileItemIndex, fileDetailItemIndex, storeStatus);
 				}
 			}
 		}
