@@ -44,10 +44,8 @@ exports.GitRepositoryExplorer = (function() {
 		this.registry.getService("orion.page.message").setProgressResult(display);
 		
 		if (error.status === 404) {
-			if (error.status === 404) {
-				this.initTitleBar();
-				this.displayRepositories();
-			}
+			this.initTitleBar();
+			this.displayRepositories();
 		}
 	};
 	
