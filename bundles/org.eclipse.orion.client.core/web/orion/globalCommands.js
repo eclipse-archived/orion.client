@@ -92,7 +92,6 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			}
 			if (this.parameterArea) {
 				var focusNode = fillFunction(this.parameterArea);
-				
 				if (!dojo.byId("parameterClose") && this.dismissArea) {
 				// add the close button if the fill function did not.
 					var spacer = dojo.create("span", null, this.dismissArea, "last");
@@ -202,8 +201,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				});
 				var spacer;
 				var parentDismiss = parameterArea;
-				var finish = function () {
-					this._collectAndCall(commandInvocation, parameterArea);
+				var finish = function (collector) {
+					collector._collectAndCall(commandInvocation, parameterArea);
 					localClose();
 				};
 
@@ -218,13 +217,13 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 					options.title = "More options...";
 					dojo.connect(options, "onclick", dojo.hitch(this, function() {
 						commandInvocation.parameters.optionsRequested = true;
-						finish();
+						finish(this);
 					}));
 					// onClick events do not register for spans when using the keyboard without a screen reader
 					dojo.connect(options, "onkeypress", dojo.hitch(this, function (e) {
 						if(e.keyCode === dojo.keys.ENTER) {			
 							commandInvocation.parameters.optionsRequested = true;
-							finish();
+							finish(this);
 						}
 					}));
 				}
@@ -236,11 +235,13 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				ok.title = "Submit";
 				dojo.addClass(ok, "core-sprite-ok");
 				dojo.addClass(ok, "dismiss");
-				dojo.connect(ok, "onclick", dojo.hitch(this, finish));
+				dojo.connect(ok, "onclick", dojo.hitch(this, function() {
+					finish(this);
+				}));
 				// onClick events do not register for spans when using the keyboard without a screen reader
 				dojo.connect(ok, "onkeypress", dojo.hitch(this, function (e) {
 					if(e.keyCode === dojo.keys.ENTER) {
-						finish();
+						finish(this);
 					}
 				}));
 				
