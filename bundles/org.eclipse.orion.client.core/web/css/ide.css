@@ -107,16 +107,18 @@ a:hover {
 
 .primaryNav {
 	font-size: 8pt;
-	color: #808080;
+	color: #bfbfbf;
 }
 
 .primaryNav a {
 	font-size: 8pt;
-	color: #808080;
+	color: #bfbfbf;
+	margin-right: 6px;
+	margin-left: 6px;
 }
 
 .primaryNav a:hover {
-	color: #808080;
+	color: #bfbfbf;
 	cursor: hand;
 	text-decoration: underline;
 }
@@ -300,14 +302,19 @@ a:hover {
 }
 
 .paneHeadingContainerFixed {
+	background-color: #f8f8f8;
+	border-bottom: 1px solid #ebebeb;
+	border-top: 1px solid #ebebeb;
 	min-width: 300px;
 }
 
 .paneHeadingContainer {
-	border-bottom: 1px dotted #bfbfbf;
-	margin: 8px;
+	background-color: #f8f8f8;
+	border-bottom: 1px solid #ebebeb;
+	border-top: 1px solid #ebebeb;
 	padding-top: 8px;
 	padding-bottom: 4px;
+	
 }
 
 .paneHeadingCommands {
@@ -359,7 +366,8 @@ a:hover {
 
 .auxpane {
 	border: 0;
-    background: #ededed;
+	border-top: 1px solid #d5d5d5;
+    background: #f8f8f8;
     overflow-x: auto;
     min-width: 200px;
 }
@@ -408,6 +416,7 @@ a:hover {
 }
 
 .mainpane {
+	border-top: 1px solid #d5d5d5;
     background: #FFFFFF;
 	overflow: auto;
 }
@@ -459,13 +468,22 @@ a:hover {
 }
 
 .toolbar {
-	border: 0 !important;
-	padding: 0 !important;
-	margin: 0 !important;
-	overflow: hidden; /* works around a "mystery pixels" problem in IE, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339302 */
-	cursor: pointer;
-	font-size: 0.9em;
-	min-height: 24px; 
+	vertical-align: middle;
+	min-height: 30px;
+	width: 100%;
+	color: #808080;
+}
+
+.auxToolbar {
+    background: #f8f8f8;
+ 	min-height: 30px;
+	width: 100%;
+	color: #808080;
+}
+
+.mainToolbar {
+ 	min-height: 30px;
+ 	background: #ffffff;
 }
 
 .pageTitle {
@@ -492,32 +510,38 @@ a:hover {
 .topRowBanner {
 	margin: 0;
 	border: 0;
-	border-bottom: 1px solid #d5d5d5;
-	background-color: #fdfdfd;
+	background-color: #2e2e2e;
 	height: 22px;
 }
 
 .titleArea {
 	margin: 0;
 	border: 0;
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fdfdfd', endColorstr='#eeeeee'); /* IE */
-	background: -webkit-gradient(linear, left top, left bottom, from(#fdfdfd), to(#eeeeee)); 
-	background: -moz-linear-gradient(top,  #fdfdfd,  #eeeeee); 
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f7f7f7'); /* IE */
+	background: -webkit-gradient(linear, left top, left bottom, from(#fffff), to(#f7f7f7)); 
+	background: -moz-linear-gradient(top,  #fffff,  #f7f7f7); 
 	border-bottom: 1px solid #d5d5d5;
 }
 
 .paneHeading {
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#dfdfdf'); /* IE */
-	background: -webkit-gradient(linear, left top, left bottom, from(#eeeeee), to(#dfdfdf)); 
-	background: -moz-linear-gradient(top,  #eeeeee,  #dfdfdf); 
 	vertical-align: middle;
 	min-height: 24px;
 	width: 100%;
 	font-size: 9pt;
 	font-weight: bold;
-	color: #666666;
-	padding-left: 8px;
-	padding-right: 8px;
+	color: #808080;
+}
+
+.auxpaneHeading {
+	background-color: #fafafa;
+	border-bottom: 1px solid #ebebeb;
+	border-top: 1px solid #ebebeb;
+	vertical-align: middle;
+	min-height: 24px;
+	width: 100%;
+	font-size: 9pt;
+	font-weight: bold;
+	color: #808080;
 }
 
 .pageToolbarLeft {
@@ -535,6 +559,14 @@ a:hover {
 	background: transparent;
 	height: auto;
 	clear: both;
+	float: left;
+	border: 1px solid #ebebeb; 
+	border-radius: 1px;
+	visibility: hidden;
+}
+
+.slideContainerActive {
+	visibility: visible;
 }
 
 .leftSlide {
@@ -543,6 +575,7 @@ a:hover {
 	float: left;
 	opacity: 0;
 	height: 0;
+	display: inline-block;
  	transition: opacity .5s ease-out;
 	-o-transition: opacity .5s ease-out;
 	-moz-transition: opacity .5s ease-out;
@@ -550,7 +583,8 @@ a:hover {
 }
 
 .activeCommand {
-	border: 1px solid #ffd400;
+	background: #d2d2d2;
+	border: 1px solid #818181;
 	padding: 2px;
 }
 
@@ -565,6 +599,7 @@ a:hover {
 	float: right;
 	height: 0;
 	width: auto;
+	display: inline-block;
 	opacity: 0;
  	transition: opacity .5s ease-out;
 	-o-transition: opacity .5s ease-out;
