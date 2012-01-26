@@ -195,7 +195,7 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 			contentTypes: [ bad ]
 		});
 		var contentTypeService = new contentTypesModule.ContentTypeService(mockRegistry);
-		assert.raises(function() {
+		assert.throws(function() {
 				contentTypeService.isExtensionOf(bad, bad);
 			}, Error, "Cycle detected");
 	};
