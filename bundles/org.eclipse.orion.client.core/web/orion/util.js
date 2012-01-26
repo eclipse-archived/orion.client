@@ -336,12 +336,9 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	 * @param {String} commandId the id for command tools
 	 * @param {Object} command service for rendering commands
 	 * @param {Object} the handler for commands
-	 * @param {Boolean} isTrimmed specifies whether the caller has already trimmed the paneHeading with styling
 	 */
-	function createPaneHeading(titleElement, headingLabel, headingId, commandId, commandService, handler, isTrimmed) {
-		if (!isTrimmed) {
-			dojo.addClass(titleElement, "paneHeadingContainer");
-		}
+	function createPaneHeading(titleElement, headingLabel, headingId, commandId, commandService, handler) {
+		dojo.addClass(titleElement, "paneHeadingContainer");
 		var title = dojo.place("<span class='paneHeading'>"+headingLabel+"</span>", titleElement, "only");
 		if (headingId) {
 			title.id = headingId;

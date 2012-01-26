@@ -44,10 +44,8 @@ exports.GitRepositoryExplorer = (function() {
 		this.registry.getService("orion.page.message").setProgressResult(display);
 		
 		if (error.status === 404) {
-			if (error.status === 404) {
-				this.initTitleBar();
-				this.displayRepositories();
-			}
+			this.initTitleBar();
+			this.displayRepositories();
 		}
 	};
 	
@@ -360,7 +358,7 @@ exports.GitRepositoryExplorer = (function() {
 		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
 		var item = { id: "branchHeader", "class":"pluginTitle", innerHTML: "Branches" };
 		dojo.create( "div", item, titleWrapper );
-		dojo.create( "div", { id: "branchSectionProgress", class: "sectionProgress", innerHTML: "..."}, titleWrapper );
+		dojo.create( "div", { id: "branchSectionProgress", className: "sectionProgress", innerHTML: "..."}, titleWrapper );
 		dojo.create( "div", { id: "branchSectionActionsArea", "class":"additions-light"}, titleWrapper );
 		var subItem = { id: "branchSubHeader", "class":"pluginSubTitle", innerHTML: (mode === "full" ? "" : "<a href=\"/git/git-repository.html#" + branchLocation + "\">See all branches</a></h2>")};
 		dojo.create( "div", subItem, tableNode );
@@ -423,7 +421,7 @@ exports.GitRepositoryExplorer = (function() {
 		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
 		var item = { id: "remoteBranchHeader", "class":"pluginTitle", innerHTML: "Remote Branches" };
 		dojo.create( "div", item, titleWrapper );
-		dojo.create( "div", { id: "remoteBranchSectionProgress", class: "sectionProgress", innerHTML: "..."}, titleWrapper );
+		dojo.create( "div", { id: "remoteBranchSectionProgress", className: "sectionProgress", innerHTML: "..."}, titleWrapper );
 		
 		var content =	
 			'<div class="git-table">' +
@@ -508,7 +506,7 @@ exports.GitRepositoryExplorer = (function() {
 		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
 		var item = { id: "commitHeader", "class":"pluginTitle", innerHTML: "Commits" };
 		dojo.create( "div", item, titleWrapper );
-		dojo.create( "div", { id: "commitSectionProgress", class: "sectionProgress", innerHTML: "..."}, titleWrapper );
+		dojo.create( "div", { id: "commitSectionProgress", className: "sectionProgress", innerHTML: "..."}, titleWrapper );
 		dojo.create( "div", { id: "commitSectionActionsArea", "class":"additions-light"}, titleWrapper );
 		var subItem = { id: "commitSubHeader", "class":"pluginSubTitle"};
 		dojo.create( "div", subItem, tableNode );
@@ -709,7 +707,7 @@ exports.GitRepositoryExplorer = (function() {
 		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
 		var item = { id: "tagHeader", "class":"pluginTitle", innerHTML: ("Tags" + (mode === "full" ? "" : " (5 most recent)"))};
 		dojo.create( "div", item, titleWrapper );
-		dojo.create( "div", { id: "tagSectionProgress", class: "sectionProgress", innerHTML: "..."}, titleWrapper );
+		dojo.create( "div", { id: "tagSectionProgress", className: "sectionProgress", innerHTML: "..."}, titleWrapper );
 		var subItem = { id: "tagSubHeader", "class":"pluginSubTitle", innerHTML: (mode === "full" ? "" : "<a href=\"/git/git-repository.html#" + tagLocation + "\">See all tags</a>")};
 		dojo.create( "div", subItem, tableNode );
 		
@@ -814,7 +812,7 @@ exports.GitRepositoryExplorer = (function() {
 		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
 		var item = { id: "remoteHeader", "class":"pluginTitle", innerHTML: "Remotes" };
 		dojo.create( "div", item, titleWrapper );
-		dojo.create( "div", { id: "remoteSectionProgress", class: "sectionProgress", innerHTML: "..."}, titleWrapper );
+		dojo.create( "div", { id: "remoteSectionProgress", className: "sectionProgress", innerHTML: "..."}, titleWrapper );
 		dojo.create( "div", { id: "remoteSectionActionsArea", "class":"additions-light"}, titleWrapper );
 		
 		this.registry.getService("orion.page.command").registerCommandContribution("eclipse.addRemote", 2000, "remoteSectionActionsArea");
