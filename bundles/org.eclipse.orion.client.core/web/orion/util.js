@@ -332,14 +332,19 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	 * Create a stylized pane heading.
 	 * @param {DomNode} titleElement the node containing the title elements.
 	 * @param {String} headingLabel the pane heading
+	 * @param {Boolean} isAuxStyle specifies whether heading is an auxiliary pane or main pane
 	 * @param {String} headingId the id for the heading label
 	 * @param {String} commandId the id for command tools
 	 * @param {Object} command service for rendering commands
 	 * @param {Object} the handler for commands
 	 */
-	function createPaneHeading(titleElement, headingLabel, headingId, commandId, commandService, handler) {
-		dojo.addClass(titleElement, "paneHeadingContainer");
-		var title = dojo.place("<span class='paneHeading'>"+headingLabel+"</span>", titleElement, "only");
+	function createPaneHeading(titleElement, headingLabel, isAuxStyle, headingId, commandId, commandService, handler) {
+		if (isAuxStyle) {
+			dojo.addClass(titleElement, "auxpaneHeading");
+		} else {
+			dojo.addClass(titleElement, "paneHeading");
+		}
+		var title = dojo.place("<span>"+headingLabel+"</span>", titleElement, "only");
 		if (headingId) {
 			title.id = headingId;
 		}

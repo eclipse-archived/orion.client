@@ -265,9 +265,8 @@ orion.GitStatusTableRenderer = (function() {
 	GitStatusTableRenderer.prototype = {
 		render: function (renderSeparator) {
 			var headingSection = dojo.create("div", null, this._parentId);
-			dojo.addClass(headingSection, "paneHeadingContainer paneHeadingContainerFixed");
+			dojo.addClass(headingSection, "auxpaneHeading paneHeadingFixed");
 			var title = dojo.create("span", {id : this._type + "_header" ,innerHTML: this._header}, headingSection);
-			dojo.addClass(title, "paneHeading");
 			var localTools = dojo.create("span", null, headingSection);
 			dojo.addClass(localTools,  "paneHeadingToolbar");
 			
@@ -325,9 +324,8 @@ orion.GitCommitZoneRenderer = (function() {
 		render: function (renderSeparator) {
 			this._commitZone = dojo.create("div", null, this._parentId, "last");
 			var headingSection = dojo.create("div", null, this._commitZone);
-			dojo.addClass(headingSection, "paneHeadingContainer paneHeadingContainerFixed");
+			dojo.addClass(headingSection, "auxpaneHeading paneHeadingFixed");
 			var title = dojo.create("span", {innerHTML: "Commit message"}, headingSection);
-			dojo.addClass(title, "paneHeading");
 			
 			var commitTable = dojo.create("table", null, this._commitZone);
 			var commitRow = dojo.create("tr", null, commitTable);
@@ -490,9 +488,8 @@ orion.GitLogTableRenderer = (function() {
 		render: function (renderSeparator) {
 			var section = dojo.create("div", {id:this._sectionId}, this._parentId);
 			var headingSection = dojo.create("div", null, section);
-			dojo.addClass(headingSection, "paneHeadingContainer paneHeadingContainerFixed");
+			dojo.addClass(headingSection, "auxpaneHeading paneHeadingFixed");
 			var title = dojo.create("span", {id : this._type + "_header" ,innerHTML: this._header}, headingSection);
-			dojo.addClass(title, "paneHeading");
 			var localTools = dojo.create("span", null, headingSection);
 			dojo.addClass(localTools,  "paneHeadingToolbar");
 			this._cmdSpanAdditional = dojo.create("span", {}, localTools, "last");
