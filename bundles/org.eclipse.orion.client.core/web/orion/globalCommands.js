@@ -97,13 +97,19 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				// add the close button if the fill function did not.
 					var spacer = dojo.create("span", null, this.dismissArea, "last");
 					dojo.addClass(spacer, "dismiss");
-					var close = dojo.create("span", {id: "parameterClose"}, this.dismissArea, "last");
+					var close = dojo.create("span", {id: "parameterClose", role: "button", tabindex: "0"}, this.dismissArea, "last");
 					dojo.addClass(close, "imageSprite");
 					dojo.addClass(close, "core-sprite-delete");
 					dojo.addClass(close, "dismiss");
 					close.title = "Close";
 					dojo.connect(close, "onclick", dojo.hitch(this, function(event) {
 						this.close(commandNode);
+					}));
+					// onClick events do not register for spans when using the keyboard without a screen reader
+					dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) {
+						if(e.keyCode === dojo.keys.ENTER) {
+							this.close(commandNode);
+						}
 					}));
 				}
 
@@ -196,38 +202,51 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				});
 				var spacer;
 				var parentDismiss = parameterArea;
+				var finish = function () {
+					this._collectAndCall(commandInvocation, parameterArea);
+					localClose();
+				};
 
 				if (commandInvocation.parameters.options) {
 					commandInvocation.parameters.optionsRequested = false;
 					spacer = dojo.create("span", null, parentDismiss, "last");
 					dojo.addClass(spacer, "dismiss");
 					
-					var options = dojo.create("span", null, parentDismiss, "last");
+					var options = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last");
 					dojo.addClass(options, "core-sprite-options");
 					dojo.addClass(options, "dismiss");
 					options.title = "More options...";
-					dojo.connect(options, "onclick", dojo.hitch(this, function () {
+					dojo.connect(options, "onclick", dojo.hitch(this, function() {
 						commandInvocation.parameters.optionsRequested = true;
-						this._collectAndCall(commandInvocation, parameterArea);
-						localClose();
+						finish();
+					}));
+					// onClick events do not register for spans when using the keyboard without a screen reader
+					dojo.connect(options, "onkeypress", dojo.hitch(this, function (e) {
+						if(e.keyCode === dojo.keys.ENTER) {			
+							commandInvocation.parameters.optionsRequested = true;
+							finish();
+						}
 					}));
 				}
 				// OK and cancel buttons
 				spacer = dojo.create("span", null, parentDismiss, "last");
 				dojo.addClass(spacer, "dismiss");
 
-				var ok = dojo.create("span", null, parentDismiss, "last");
+				var ok = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last");
 				ok.title = "Submit";
 				dojo.addClass(ok, "core-sprite-ok");
 				dojo.addClass(ok, "dismiss");
-				dojo.connect(ok, "onclick", dojo.hitch(this, function () {
-					this._collectAndCall(commandInvocation, parameterArea);
-					localClose();
+				dojo.connect(ok, "onclick", dojo.hitch(this, finish));
+				// onClick events do not register for spans when using the keyboard without a screen reader
+				dojo.connect(ok, "onkeypress", dojo.hitch(this, function (e) {
+					if(e.keyCode === dojo.keys.ENTER) {
+						finish();
+					}
 				}));
 				
 				spacer = dojo.create("span", null, parentDismiss, "last");
 				dojo.addClass(spacer, "dismiss");
-				var close = dojo.create("span", {id: "parameterClose"}, parentDismiss, "last");
+				var close = dojo.create("span", {id: "parameterClose", role: "button", tabindex: "0"}, parentDismiss, "last");
 				dojo.addClass(close, "imageSprite");
 				dojo.addClass(close, "core-sprite-delete");
 				dojo.addClass(close, "dismiss");
@@ -235,7 +254,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				dojo.connect(close, "onclick", dojo.hitch(this, function(event) {
 					localClose();
 				}));
-
+				// onClick events do not register for spans when using the keyboard without a screen reader
+				dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) {
+					if(e.keyCode === dojo.keys.ENTER) {
+						localClose();
+					}
+				}));
 				return first;
 			});
 		 }
