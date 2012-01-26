@@ -109,7 +109,16 @@ function loadResource(navigator, searcher){
 					gitService.getLog(resource.HeadLocation, resource.Id, "Getting git incoming changes", function(scopedCommitsJsonData) {
 							navigator.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
 							navigator.renderer.setOutgoingCommits([]);
-							navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);															
+							gitService.doGitLog(resource.CommitLocation + "?" + new dojo._Url(path).query, function(jsonData) {
+								resource.Children = jsonData.Children;
+								if(jsonData.NextLocation){
+									resource.NextLocation = resource.Location + "?" + new dojo._Url(jsonData.NextLocation).query;
+								}
+								if(jsonData.PreviousLocation ){
+									resource.PreviousLocation  = resource.Location + "?" + new dojo._Url(jsonData.PreviousLocation).query;
+								}
+								navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);															
+							});
 					});
 				} else if (resource.toRef){
 					if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1)
