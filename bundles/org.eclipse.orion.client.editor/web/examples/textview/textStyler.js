@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  * Contributors: IBM Corporation - initial API and implementation
- *               Alex Lakatos - fix for bug 369781
+ *               Alex Lakatos - fix for bug#369781
  ******************************************************************************/
 
 /*global document window navigator define */
