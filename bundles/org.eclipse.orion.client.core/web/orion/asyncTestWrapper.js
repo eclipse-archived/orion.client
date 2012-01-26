@@ -47,7 +47,7 @@ orion.JSTestAdapter = (function() {
 			
 			/* After the tests, the registry must be cleaned up */
 			var shutdown = new dojo.Deferred();
-			queue.call("Shutdown " + test , function(callbacks) {
+			queue.call("Shutdown " + test, function(callbacks) {
 				shutdown.resolve(callbacks.noop());
 			});
 			
@@ -61,10 +61,12 @@ orion.JSTestAdapter = (function() {
 					}
 				});
 				service.addEventListener("runDone", function(runName, obj) {
-					shutdown.then(function(noop) {
-						loaderPluginRegistry.shutdown();
-						noop();
-					});
+					if (!runName) {
+						shutdown.then(function(noop) {
+							loaderPluginRegistry.shutdown();
+							noop();
+						});
+					}
 				});
 					
 				console.log("Launching test suite: " + test);

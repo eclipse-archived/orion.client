@@ -27,7 +27,9 @@ tests["test subtest"] = {
 
 tests["test basic asynch"] = function() {
 	var d = new dojo.Deferred();
-	setTimeout(function(){d.callback();}, 100);
+	setTimeout(function(){
+		d.resolve();
+	}, 100);
 	return d;
 };
 
@@ -40,17 +42,22 @@ tests["test expected asynch failure"] = function() {
 				try {
 					assert.ok(false, "expected failure");
 				} catch (e) {
-					d.errback(e);			
+					d.reject(e);			
 				}
-			},100);
+			}, 100);
 			return d;
 		}
 	};
 	var newTest = new mTest.Test();
 	// by adding a dummy listener we avoid the error from useConsole() which is added if there are no listeners
-	newTest.addEventListener("testDone", function() {});	
+	var failures = 0;
+	newTest.addEventListener("testDone", function(name, obj) {
+		if (obj.result === false) {
+			failures++;
+		}
+	});	
 	
-	return newTest.run(failureTest).then(function(failures) {
+	return newTest.run(failureTest).then(function() {
 		assert.equal(failures, 1);
 	});
 };
@@ -61,10 +68,8 @@ tests["test basic list"] = function() {
 		},
 		"test obj": {
 			"test2": function() {
-				
 			}
-		}
-		
+		}	
 	};
 	assert.deepEqual(mTest.list(listTests), ["test 1", "test obj.test2"]);
 };
