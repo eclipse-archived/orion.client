@@ -148,12 +148,9 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.initTitleBar = function(repository, sectionName){
 		var that = this;
-		var pageTitle = dojo.byId("pageTitle");
 		var item = {};
 		
 		if (repository && sectionName){
-			pageTitle.innerHTML = "Git Repository (" + sectionName + ")";
-			
 			item.Name = sectionName;
 			item.Parents = [];
 			item.Parents[0] = {};
@@ -163,16 +160,12 @@ exports.GitRepositoryExplorer = (function() {
 			item.Parents[1] = {};
 			item.Parents[1].Name = "Repositories";
 		} else if (repository) {
-			pageTitle.innerHTML = "Git Repository";
-			
 			item.Name = repository.Name;
 			item.Parents = [];
 			item.Parents[0] = {};
 			item.Parents[0].Name = "Repositories";
 		} else {
-			pageTitle.innerHTML = "Git Repositories";
-			
-			item.Name = "";
+			item.Name = "Repositories";
 		}
 		
 		var location = dojo.byId("location");
@@ -227,8 +220,8 @@ exports.GitRepositoryExplorer = (function() {
 		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
 		var item = { id: "repositoryHeader", "class":"pluginTitle", innerHTML: (mode === "full" ? "Repositories" : "Repository") };
 		dojo.create( "div", item, titleWrapper );
-		var subItem = { id: "repositorySubHeader", "class":"pluginSubTitle", innerHTML: (mode === "full" ? "" : "<a href=\"/git/git-repository.html#\">See all repositories</a>")};
-		dojo.create( "div", subItem, tableNode );
+//		var subItem = { id: "repositorySubHeader", "class":"pluginSubTitle", innerHTML: (mode === "full" ? "" : "<a href=\"/git/git-repository.html#\">See all repositories</a>")};
+//		dojo.create( "div", subItem, tableNode );
 		
 		if (!repositories){
 			dojo.byId("repositoryHeader").innerHTML = (mode === "full" ? "No Repositories" : "Repository Not Found");
