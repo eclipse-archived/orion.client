@@ -79,27 +79,53 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			}
 		});
 		dojo.connect(this,"onKeyPress",this,function(evt) {
-			var links, currentFocus, currentSelectionIndex;
-			if (evt.keyCode === dojo.keys.DOWN_ARROW && this.results) {
+			var favlinks, links, text, currentFocus, favCurrentSelectionIndex, currentSelectionIndex;
+			var incrementFocus = function(currList, index, nextEntry) {
+				if (index < currList.length - 1) {
+					return currList[index+1];
+				} else {
+					return nextEntry;
+				}
+			};
+			var decrementFocus = function(currList, index, prevEntry) {
+				if (index > 0) {
+					return currList[index-1];
+				} else {
+					return prevEntry;
+				}
+			};
+			
+			if (evt.keyCode === dojo.keys.DOWN_ARROW || evt.keyCode === dojo.keys.UP_ARROW) {
 				links = dojo.query("a", this.results);
+				favlinks = dojo.query("a", this.favresults);
 				currentFocus = dijit.getFocus();
 				currentSelectionIndex = links.indexOf(currentFocus.node);
-				if (currentSelectionIndex === -1) {
-					dijit.focus(links[0]);
-				} else if (currentSelectionIndex<links.length) {
-					dijit.focus(links[currentSelectionIndex+1]);
-				}   
-				dojo.stopEvent(evt);
-			} else if (evt.keyCode === dojo.keys.UP_ARROW) {
-				links = dojo.query("a", this.results);
-				currentFocus = dijit.getFocus();
-				currentSelectionIndex = links.indexOf(currentFocus.node);
-				if (currentSelectionIndex < 1) {
-					// jump to input element
-					var text = this.resourceName && this.resourceName.get("textbox");
-					dijit.focus(text);
-				} else if (currentSelectionIndex > 0) {
-					dijit.focus(links[currentSelectionIndex-1]);
+				favCurrentSelectionIndex = favlinks.indexOf(currentFocus.node);
+				if (evt.keyCode === dojo.keys.DOWN_ARROW) {
+					if (favCurrentSelectionIndex >= 0) {
+						dijit.focus(incrementFocus(favlinks, favCurrentSelectionIndex, links.length > 0 ? links[0] : favlinks[0]));
+					} else if (currentSelectionIndex >= 0) {
+						dijit.focus(incrementFocus(links, currentSelectionIndex, favlinks.length > 0 ? favlinks[0] : links[0]));
+					} else if (links.length > 0 || favlinks.length > 0) {
+						// coming from the text box
+						dijit.focus(incrementFocus(favlinks, -1, links[0]));
+					}   
+				} else {
+					if (favCurrentSelectionIndex >= 0) {
+						// jump to text box if index === 0
+						text = this.resourceName && this.resourceName.get("textbox");
+						dijit.focus(decrementFocus(favlinks, favCurrentSelectionIndex, text));
+					} else if (currentSelectionIndex >= 0) {
+						// jump to text box if index === 0 and favlinks is empty
+						text = this.resourceName && this.resourceName.get("textbox");
+						dijit.focus(decrementFocus(links, currentSelectionIndex, favlinks.length > 0 ? favlinks[favlinks.length-1] : text));
+					} else if (links.length > 0) {
+						// coming from the text box go to end of list
+						dijit.focus(links[links.length-1]);
+					} else if (favlinks.length > 0) {
+						// coming from the text box go to end of list
+						dijit.focus(favlinks[favlinks.length-1]);
+					}
 				}
 				dojo.stopEvent(evt);
 			}
