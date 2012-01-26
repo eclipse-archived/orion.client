@@ -1378,10 +1378,30 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			this.createTree(this.parentNode, this.model);
 			this.gotoCurrent();
 			this.reportStatus("");	
-			this.loadOneFileMetaData(0);
+			this.loadOneFileMetaData(0, function(){that.refreshIndex();});
 		} else {
 			that.replacePreview(that._replaceStr);
 			this.loadOneFileMetaData(0);
+		}
+	};
+	
+	SearchResultExplorer.prototype.refreshIndex = function(){
+		var newIndex = [];
+		var currentFileItem = this.model.indexedFileItems[this.model.currentFileIndex];
+		for(var i = 0; i <  this.model.indexedFileItems.length; i++){
+			if(!this.model.indexedFileItems[i].stale){
+				newIndex.push(this.model.indexedFileItems[i]);
+			} else if(this.model.currentFileIndex === i){
+				this.model.currentFileIndex = -1;
+			}
+		}
+		this.model.indexedFileItems = newIndex;
+		if(this.model.currentFileIndex === -1){
+			this.model.currentFileIndex = 0;
+			this.model.currentDetailIndex = 0;
+			this.gotoCurrent();
+		} else {
+			this.model.currentFileIndex = this.model.getFileItemIndex(currentFileItem);
 		}
 	};
 	
@@ -1561,6 +1581,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultExplorer.prototype.onHighlightSelection = function(next)	{
 		var expanded = this._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex);
+		if(!expanded.childDiv){
+			return;
+		}
 		dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
 		if(!this.visible(expanded.childDiv)) {
 			expanded.childDiv.scrollIntoView(!next);
