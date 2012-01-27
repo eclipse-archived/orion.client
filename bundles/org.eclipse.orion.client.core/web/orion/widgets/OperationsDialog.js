@@ -33,13 +33,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			this._operations = [];
 			myOperations = myOperations || {};
 			this._myOperations = [];
-			for(var i=0; i<operations.Children.length; i++){
-				if(myOperations[operations.Children[i].Id]){
-					this._myOperations.push(operations.Children[i]);
-				} else {
-					this._operations.push(operations.Children[i]);
+			if(operations.Children)
+				for(var i=0; i<operations.Children.length; i++){
+					if(myOperations[operations.Children[i].Id]){
+						this._myOperations.push(operations.Children[i]);
+					} else {
+						this._operations.push(operations.Children[i]);
+					}
 				}
-			}
 			this._operations.sort(function(op1, op2){return parseInt(op2.Modified) - parseInt(op1.Modified);});
 			this._myOperations.sort(function(op1, op2){return parseInt(op2.Modified) - parseInt(op1.Modified);});
 			this._renderOperations();
