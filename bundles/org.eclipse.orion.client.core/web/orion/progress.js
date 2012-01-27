@@ -79,7 +79,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			 * @returns {Date}
 			 */
 			getLastListUpdate: function(){
-				var list = JSON.parse(localStorage.getItem("orionOperations") || "{}");
+				var list = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
 				return list.lastClientDate ? new Date(list.lastClientDate) : new Date(0);
 			},
 			_checkOperationsChanges: function(){
