@@ -663,7 +663,8 @@ a:hover {
 	position: absolute;
 	left: 20px;
 	top: 10px;
-	width: 300px;
+	min-width: 300px;
+	max-width: 650px;
 	border: 1px solid #bfbfbf;
 	padding: 4px;
 }
