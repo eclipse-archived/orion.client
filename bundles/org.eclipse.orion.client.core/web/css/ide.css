@@ -445,6 +445,7 @@ a:hover {
 
 .progressPane {
 	vertical-align: bottom;
+	margin-right: 8px;
 	background-position: 0px 0px; 
 	text-align: right;
 	border: 0 none;
