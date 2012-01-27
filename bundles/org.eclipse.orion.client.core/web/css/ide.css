@@ -428,15 +428,19 @@ a:hover {
 }
 
 .progressInfo {
-	background-color: #d5e2f9;
+	background-color:#f1f6fe;
 }
 
 .progressWarning {
-	background-color: #fbf8c4;
+	background-color: #fcf8dc;
 }
 
 .progressError {
-	background-color: #ffcccc;
+	background-color: #fff3fb;
+}
+
+.progressNormal {
+	background-color: transparent;
 }
 
 .progressPane {
@@ -565,11 +569,12 @@ a:hover {
 
 .slideContainer {
 	height: auto;
-	width: 100%;
+	width: 97%;
 	clear: both;
 	float: left;
 	border: 1px solid #ebebeb; 
-	border-radius: 1px;
+	border-radius: 3px;
+	margin: 4px;
 	display: none;
 }
 
