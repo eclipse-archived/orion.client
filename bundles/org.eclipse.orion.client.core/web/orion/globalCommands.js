@@ -316,9 +316,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		'<div class="layoutLeft pageToolbarLeft pageActions" id="pageActions"></div>' +
 		'<div class="layoutRight pageToolbarRight pageActions pageNavigationActions" id="statusPane"></div>' +
 		'<div class="layoutRight pageToolbarRight pageActions pageNavigationActions" id="pageNavigationActions"></div>' +
-		'<div id="notificationArea" class="layoutBlock slideContainer">' +
-				'<img src="'+ require.toUrl("images/none.png") +'" id="progressPane"></img>' +
-				'<span id="notifications"></span>' +
+		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
+				'<div class="layoutLeft" id="notifications"></div>' +
+				'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane"></img>' +
 		'</div>' +
 		'<div id="parameterArea" class="layoutBlock slideContainer">' +
 			'<span id="pageParameterArea" class="leftSlide">' +

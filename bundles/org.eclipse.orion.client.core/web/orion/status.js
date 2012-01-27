@@ -93,6 +93,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		 */
 		setProgressMessage : function(message) {
 			dojo.place(window.document.createTextNode(message), this.progressDomId, "only");
+			dojo.addClass(this.notificationContainerDomId, "progressNormal");
 			if (message.length > 0) {
 				dojo.addClass(this.notificationContainerDomId, "slideContainerActive");
 			} else {
@@ -119,6 +120,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			var msg = status.Message || status;
 			var src = require.toUrl("images/info.gif");
 			var extraClass = "progressInfo";
+			var removedClasses = "progressWarning progressError progressNormal";
 			var alt = "info";
 			if (status.Severity) {
 				switch (status.Severity) {
@@ -126,11 +128,13 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 					src = require.toUrl("images/warning.gif");
 					alt = "warning";
 					extraClass="progressWarning";
+					removedClasses = "progressInfo progressError progressNormal";
 					break;
 				case "Error":
 					src = require.toUrl("images/error.gif");
 					alt = "error";
 					extraClass="progressError";
+					removedClasses = "progressWarning progressInfo progressNormal";
 					break;
 				}
 			}
@@ -148,6 +152,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			});
 			dojo.connect(image, "onclick", this, function() {
 				this.setProgressMessage("");
+				dojo.removeClass(this.notificationContainerDomId, "slideContainerActive");
 			});
 			dojo.place(image, this.progressDomId, "only");
 			if (status.HTML) { // msg is HTML to be inserted directly
@@ -156,6 +161,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				dojo.place(window.document.createTextNode("   " + msg), this.progressDomId, "last");
 				if (extraClass && this.progressDomId !== this.domId) {
 					dojo.addClass(this.notificationContainerDomId, extraClass);
+					dojo.removeClass(this.notificationContainerDomId, removedClasses);
 				}
 			}
 			dojo.addClass(this.notificationContainerDomId, "slideContainerActive");
