@@ -283,6 +283,10 @@ function pluginUrlBlur(){
 	}
 }
 
+function createpropertiesTable(){
+	// TODO: work in progress
+}
+
 
 /*	showPlugins - iterates over the plugin array, reads
 	meta-data and creates a dom entry for each plugin.
@@ -314,6 +318,8 @@ function showPlugins( event ){
 	var item = { id: "Plugins", "class":"pluginTitle", innerHTML: "Plugins [" + settingsPluginList.length +"]" };
 
 	dojo.create( "div", item, titleWrapper );
+	
+	dojo.create( "a", { id: "oldlink", href:"../plugin/list.html", innerHTML:"Services", "class":"oldLink", onclick:"addNewPlugins()"}, titleWrapper );
 	
 	dojo.create( "div", { id: "addpluginscontrol", innerHTML:"Add Plugins", "class":"additions", onclick:"addNewPlugins()"}, titleWrapper );
 	
@@ -351,18 +357,15 @@ function showPlugins( event ){
 		var name = derivePluginNameFromLocation( location );
 		
 		var extensionListItem = dojo.create( "div", { "class":"plugin-list-item" }, list );
-		var horizontalBox = dojo.create( "div", null, extensionListItem );
-		var zippy = dojo.create( "div", { "class":"container" }, horizontalBox );
-		var icon = dojo.create( "img", { "class":"plugin-icon", "src": iconSource }, horizontalBox );
-		var detailsView = dojo.create( "div", { "class":"stretch", "src": iconSource }, horizontalBox );
+		var container = dojo.create( "div", { "class":"container" }, extensionListItem );
+		var icon = dojo.create( "img", { "class":"plugin-icon", "src": iconSource }, container );
+		var detailsView = dojo.create( "div", { "class":"stretch" }, container );
 		var title = dojo.create( "span", { "class":"plugin-title", innerHTML: name }, detailsView );
 		dojo.create( "div", null, detailsView );
 		var description = dojo.create( "span", { "class":"plugin-description", innerHTML: "A plugin for Eclipse Orion" }, detailsView );
-		dojo.create( "a", { "class":"plugin-links-trailing", href: location, innerHTML: "Plugin Website" }, detailsView ); 
+		dojo.create( "a", { "class":"plugin-link", href: location, innerHTML: "Plugin Website" }, detailsView ); 
 		
-		dojo.create( "div", null, horizontalBox );
-		
-		var removeButton = dojo.create( "button", { "id":location, "class":"plugin-delete", innerHTML: "Remove", onClick: "removePlugin(event)" }, horizontalBox );	
+		var removeButton = dojo.create( "button", { "id":location, "class":"plugin-delete", innerHTML: "Remove", onClick: "removePlugin(event)" }, container );	
 	}	                
 }
 
@@ -479,6 +482,13 @@ function drawUserInterface( settings ){
 	var nav = dojo.byId( 'navbar' );
 	
 	selectCategory({currentTarget: nav.childNodes[1]});
+	
+	/* Adjusting width of mainNode - the css class is shared 
+	   so tailoring it for the preference apps */
+	
+	var mainNode = dojo.byId( "mainNode" );	
+	dojo.style( mainNode, "max-width", "700px" );
+	dojo.style( mainNode, "min-width", "500px" );
 }
 
 
@@ -545,7 +555,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 		
 			// Register services
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
-			preferencesStatusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications", "notificationArea");
+			preferencesStatusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
 			var siteService = new mSiteService.SiteService(serviceRegistry);
