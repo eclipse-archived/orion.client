@@ -238,7 +238,7 @@ orion.GitStatusContentRenderer = (function() {
 				}
 			});
 			
-			var actionCol = dojo.create("td", {id: row.id+"actions"}, row, "last");
+			var actionCol = dojo.create("td", {id: row.id+"actionswrapper"}, row, "last");
 			dojo.addClass(actionCol, "statusAction");
 			actionCol.noWrap= true;
 			var actionsWrapper = dojo.create("span", {id: row.id+"actionsWrapper"}, actionCol, "only");

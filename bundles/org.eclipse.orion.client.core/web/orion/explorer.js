@@ -247,7 +247,7 @@ exports.ExplorerRenderer = (function() {
 			renderType = renderType || "tool";
 			var commandService = this.explorer.registry.getService("orion.page.command");
 			var actionsColumn = document.createElement('td');
-			actionsColumn.id = tableRow.id + "actions";
+			actionsColumn.id = tableRow.id + "actionswrapper";
 			if (columnClass) {
 				dojo.addClass(actionsColumn, columnClass);
 			}
