@@ -140,8 +140,9 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 					col.appendChild(favLink);
 				}
 				dojo.place(table, that.favresults, "only");
+				dojo.place("<hr/>", that.favresults, "last");
 			} else {
-				dojo.place("<div>No favorites</div>", that.favresults, "only");
+				dojo.empty(that.favresults);
 			}
 			that.decorateResult(that.favresults);
 		};
