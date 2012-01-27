@@ -44,7 +44,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 						window.setTimeout(function() {
 							dojo.hitch(that, that._checkOperationsChanges());
 						}, 5000);
-					}, function(error){throw new Error(error);});
+					}, function(error){console.error(error);});
 				}else{
 					dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}')));
 					window.setTimeout(function() {
@@ -57,7 +57,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 						//refresh operation list every time when user changes
 						that._operationsClient.getRunningOperations().then(function(operationsList){
 							dojo.hitch(that, that._loadOperationsList)(operationsList);
-						},function(error){throw new Error(error);});
+						},function(error){console.error(error);});
 					}
 				}, false);
 				
@@ -102,7 +102,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 									operationsToDelete.push(i);
 									return error;
 								}
-								throw new Error(error); //TODO what to do on error?
+								console.error(error); //TODO what to do on error?
 							});
 						})(i);
 					}
