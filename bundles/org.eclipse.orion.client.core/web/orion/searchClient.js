@@ -85,18 +85,27 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		 * @param {String} searchLocation The base location of the search service
 		 * @param {String} query The text to search for, or null when searching purely on file name
 		 * @param {String} [nameQuery] The name of a file to search for
+		 * @param {String} [sort] The field to sort search results on. By default results will sort by path
 		 */
-		createSearchQuery: function(query, nameQuery)  {
+		createSearchQuery: function(query, nameQuery, sort)  {
+			if (!sort) {
+				sort = "Path";
+			}
+			sort += " asc";//ascending sort order
 			if (nameQuery) {
 				//assume implicit trailing wildcard if there isn't one already
 				var wildcard= (/\*$/.test(nameQuery) ? "" : "*");
-				return "?rows=100&start=0&q=" + "Name:" + this._luceneEscape(nameQuery, true) + wildcard;
+				return  mSearchUtils.generateSearchQuery({sort: sort,
+					rows: 100,
+					start: 0,
+					searchStr: "Name:" + this._luceneEscape(nameQuery, true) + wildcard,
+					location: this.location});
 			}
-			return  mSearchUtils.generateSearchQuery({sort: "Path asc",
-													 rows: 40,
-													 start: 0,
-													 searchStr: this._luceneEscape(query, true),
-													 location: this.location});
+			return  mSearchUtils.generateSearchQuery({sort: sort,
+				rows: 40,
+				start: 0,
+				searchStr: this._luceneEscape(query, true),
+				location: this.location});
 		},
 		/**
 		 * Escapes all characters in the string that require escaping in Lucene queries.
