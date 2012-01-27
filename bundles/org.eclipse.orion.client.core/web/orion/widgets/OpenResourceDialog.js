@@ -118,8 +118,14 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 					var row = table.insertRow(-1);
 					col = row.insertCell(0);
 					col.colspan = 2;
+//					var image = new Image();
+//					dojo.addClass(image, "commandSprite");
+//					dojo.addClass(image, "core-sprite-makeFavorite");
+//					dojo.addClass(image, "commandImage");
+//					col.appendChild(image);
 					var favLink = document.createElement('a');
 					dojo.place(document.createTextNode(fav.name), favLink);
+					
 					var loc;
 					if (fav.isExternalResource) {
 						// should open link in new tab, but for now, follow the behavior of navoutliner.js
