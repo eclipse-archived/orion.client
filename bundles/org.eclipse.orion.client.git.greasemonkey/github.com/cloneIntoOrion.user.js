@@ -1,5 +1,6 @@
 // ==UserScript==
-// @name           Clone into Orion
+// @name           Clone from Github into Orion
+// @version        0.2
 // @namespace      http://eclipse.org/orion
 // @description    Allows to clone repositories from Github into Orion
 // @include        https://github.com/*/*
@@ -22,17 +23,32 @@
  *  <p class="url-description"><strong>Read+Write</strong> access</p>
  * </div>
  */
+(function () {
+	try {
 
-try {
-	var nativeClonesUl = document.getElementsByClassName("native-clones")[0];
-	var gitRepoUrl = document.getElementsByClassName("url-field")[0].value;
-	var newLi = document.createElement("li");
-	var newLink = document.createElement("a");
-	newLink.setAttribute("href", "http://localhost:8080/git/git-clone.html?cloneGitRepository=" + gitRepoUrl);
-	newLink.setAttribute("target", "_blank");
-	newLink.appendChild(document.createTextNode("Clone into Orion"));
-	newLi.appendChild(newLink);
-	nativeClonesUl.appendChild(newLi);
-} catch (e) {
-	// silently ignore, not on the right page
-}
+		var nativeClonesUl = document.getElementsByClassName("native-clones")[0];
+		var gitRepoUrl = document.getElementsByClassName("url-field")[0].value;
+		var orionSmallGif = "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACsAAAAOCAYAAAC2POVFAAAAAXNSR0IArs4c6QAABUpJREFUSMfFll1sHFcZhp9zdnZn1xs7tjebqBvbUrxJ6/inMu1N4wuaKkikgggat1X5KdA6iUoQSL2jlwhZCJCQkBKVpq1UpNKEn0YRCTQqitM0EsgWiUtLDU0g3vgva7Nr7493d2Zn5nxcbG2apimX+aS5+XTOnPe853lnjuIjValUZGZ2lqmpKTLT0yQ3b2agr5/tO7YTj8fRWivuYCkAEZHFpSVeevFl3vnbu7S1tbJly2bK5RI3FrJ0dHTx1FPfZGdvD1YodOcEi4jMzy/IwUPPyPCjj8mpU6dlcXFJSqWS5PN5+eulS3L48HfliSe+KpOTk2KMkTsmtu668uOf/FT2Dz8m4+MTt4gREclkrsvXn/yWPPPtw1IsFgTAGCNrj4jcNOd2fQAJaiJB7ZZ+EARSLpfF87xb1l97n5VdXOKdyUn27HmI+++/7xYulVLKGCPfePJrHDn6PFNT/8R1Xbl48SLl8iqO45JMJiiVytLS0qx8P5CJiQkKhQIP7Prs/8SsvidB4QLelUMgAV7mBxJK7EM336caeanx+usn2bo1RRAEEvoQt9XVVS5ceJvu7m6s69dnCYwwtGsIy7I+kUettfrP0pJsiDcxfS3Dzp09nDx5ipXlAhta4uRyeXY9sIvV1YqIGN588xz/ztxgoLerITR/RoKrhzC1a6CjjaiU/kyw8idk+bio9q+owGg++OAK58bOk0wmMcaI1lpls1leffVXPPLIl9ArK3lsO0JTU9On4tIUj9PW1oZbr6EUhMMRegf6eO6577Pvi/uYmLjEzMwMSik2tmwkFo0QjW9BvGUJZkYx7g3QsbVMN47YmYX5n+FVF8SOKJpb2gh84ZVXfkkulwPAsixisSjRaAxtTIDvB2itP1WsMYa656FUYzEjhni8ibbWVlpbWzCmjud5DXS0IqQVSofB+RdSfRe4TS6daeqFy6zh3d7eTKlU5MSJ3+L7vqyZqBRYiUQCz/PJ53OIiKg1NR+rcrlMqVjEtmMopbHtCAvzC/z+9Gkuvv0X0untpFKp9Y1ZVggxPlKfB/RNjn4scvjOHKEWwfM8+vv7uOeeHl544RgDA/2k093E43FEwEqn00TCFuPj4wwODt7OVTnzxzeoOS733tuPZVkoNPMLN7h65QqdnV08++z3SCY3qXrdEzGCGAUKlNL//2OvowD4vk84bDM0NMTKSoGXXzrGgw/tRlBorbGSySS7dz/I2bNn+czgIL7vy0eDZoyRTCbDideO09fbSzqdxvM8HNehoyOFkhTZxSxGzLpTAhjxUcoCuxtU+LauoiC84W4IaYwYqtUKkUiYhx/ey9TU3xkbe4tI2MayNDocDqvh4f10p+/myNHn+c2vf8fs3JwUiyXJZrMydv4tRkd/hIjh4MERotGoqtVq1ByHrR0d7B/+MtWqw9Ejv6BSrUgoFEIpReDXMRKCWB+67XOfzKxSsHEP9sYBjBFMIATGYIyhqSmmnn56hPb2BLVqrRE2gEQiofL5ZTn+2nHO/OEMY+fH2LQpSaG4QrFYJJ1Oc2BkhK6uznUmPdfFdWr09PTw+OOPcuzYi4ydO8/evZ9HKXCcCjWnjlJxZWrTwvzPCZbfAON+KDSMlfgCbP0OOtysCsWq+L6LCfz1sKVSd3HgwAijPxylWnVupr5er0sul+P99/9BsbiCbdvs2LGDbdu2Ydv2+ljXdWV2bp6obZNK3UW9XufadIZYLEpHKsXs3Bw1x6Grs5Pm5ubG/cMvi6m8h9SuNrTG0uj4IMraoADqXiBzszMoDV2dXaz9FHzfl8uXL5NMbua/c8bERMhYc/8AAAAASUVORK5CYII=)";
+
+		var li = document.createElement("li");
+		var a = document.createElement("a");
+		a.className = "minibutton";
+		a.href = "http://orion.eclipse.org:8080/git/git-clone.html?cloneGitRepository=" + gitRepoUrl;
+		a.target = "_blank";
+
+		var span = document.createElement("span");
+		span.innerHTML = "Clone into";
+		span.style["background-repeat"] = "no-repeat";
+		span.style["background-position"] = "right 2px";
+		span.style["padding-left"] = "2px";
+		span.style["padding-right"] = "45px";
+		span.style["background-image"] = orionSmallGif;
+		span.style["margin-right"] = "5px";
+
+		a.appendChild(span);
+		li.appendChild(a);
+		nativeClonesUl.appendChild(li);
+	} catch (e) {
+		// silently ignore, not on the right page
+	}
+})();

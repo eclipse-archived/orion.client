@@ -1,5 +1,6 @@
 // ==UserScript==
-// @name           Clone into Orion
+// @name           Clone from Bugzilla into Orion
+// @version        0.2
 // @namespace      http://eclipse.org/orion
 // @description    Allows to clone repository for the selected bug into Orion
 // @include        /^https://bugs\.eclipse\.org/bugs/show_bug\.cgi\?id=\d+$/
@@ -49,46 +50,48 @@
  *   </tr>
  *   ...
  */
+(function () {
+	String.prototype.trim = function() {
+		return this.replace(/^\s+|\s+$/g, "");
+	};
 
-String.prototype.trim = function() {
-	return this.replace(/^\s+|\s+$/g, "");
-};
+	var map = {};
+	map["Orion_Client"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git";
+	map["Orion_Editor"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git";
+	map["Orion_Git"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.server.git";
+	map["Orion_Server"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.server.git";
+	map["Platform_Ant"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.git";
+	map["Platform_Compare"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.team.git";
+	map["Platform_CVS"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.team.git";
+	map["Platform_Debug"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.debug.git";
+	map["Platform_Doc"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.common.git";
+	map["Platform_Releng"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.maps.git";
+	map["Platform_Resources"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.resources.git";
+	map["Platform_Runtime"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.runtime.git";
+	map["Platform_SWT"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.swt.git";
+	map["Platform_Team"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.team.git";
+	map["Platform_Text"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git";
+	map["Platform_UI"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.ui.git";
+	map["Platform_User Assistance"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.ua.git";
+	// TODO: add more
 
-var map = {};
-map["Orion_Client"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git";
-map["Orion_Editor"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git";
-map["Orion_Git"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.server.git";
-map["Orion_Server"] = "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.server.git";
-map["Platform_Ant"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.git";
-map["Platform_Compare"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.team.git";
-map["Platform_CVS"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.team.git";
-map["Platform_Debug"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.debug.git";
-map["Platform_Doc"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.common.git";
-map["Platform_Releng"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.maps.git";
-map["Platform_Resources"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.resources.git";
-map["Platform_Runtime"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.runtime.git";
-map["Platform_SWT"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.swt.git";
-map["Platform_Team"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.team.git";
-map["Platform_Text"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git";
-map["Platform_UI"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.ui.git";
-map["Platform_User Assistance"] = "git://git.eclipse.org/gitroot/platform/eclipse.platform.ua.git";
+	var product = document.getElementById("product");
+	var component = document.getElementById("component");
 
-var product = document.getElementById("product");
-var component = document.getElementById("component");
+	if (product && component) {
+		product = product.options[product.selectedIndex].value;
+		component = component.options[component.selectedIndex].value;
+	} else {
+		product = document.getElementById("field_container_product").textContent.trim();
+		component = document.getElementById("field_container_product").parentNode.nextElementSibling.children[1].textContent.trim();
+	}
 
-if (product && component) {
-	product = product.options[product.selectedIndex].value;
-	component = component.options[component.selectedIndex].value;
-} else {
-	product = document.getElementById("field_container_product").textContent.trim();
-	component = document.getElementById("field_container_product").parentNode.nextElementSibling.children[1].textContent.trim();
-}
-
-var gitRepoUrl = map[product + "_" + component];
-if (gitRepoUrl) {
-	var newLink = document.createElement("a");
-	newLink.setAttribute("href", "http://localhost:8080/git/git-clone.html?cloneGitRepository=" + gitRepoUrl);
-	newLink.setAttribute("target", "_blank");
-	newLink.appendChild(document.createTextNode("Clone into Orion"));
-	document.getElementById("field_container_product").parentNode.nextElementSibling.children[1].appendChild(newLink);
-}
+	var gitRepoUrl = map[product + "_" + component];
+	if (gitRepoUrl) {
+		var a = document.createElement("a");
+		a.href = "http://orion.eclipse.org:8080/git/git-clone.html?cloneGitRepository=" + gitRepoUrl;
+		a.target = "_blank";
+		a.appendChild(document.createTextNode("Clone into Orion"));
+		document.getElementById("field_container_product").parentNode.nextElementSibling.children[1].appendChild(a);
+	}
+})();
