@@ -42,7 +42,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	(function() {
 		selection = new mSelection.Selection(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
+		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
 		new mProgress.ProgressService(serviceRegistry, operationsClient);
 		new mDialogs.DialogService(serviceRegistry);
 		commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});

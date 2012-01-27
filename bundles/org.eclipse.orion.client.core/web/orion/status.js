@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*global define window Image */
  
-define(['require', 'dojo'], function(require, dojo) {
+define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 	
 	/**
 	 * Service for reporting status
@@ -21,10 +21,11 @@ define(['require', 'dojo'], function(require, dojo) {
 	 * @param {String} domId ID of the DOM node under which status will be displayed.
 	 * @param {String} progressDomId ID of the DOM node used to display progress messages.
 	 */
-	function StatusReportingService(serviceRegistry, operationsClient, domId, progressDomId) {
+	function StatusReportingService(serviceRegistry, operationsClient, domId, progressDomId, notificationContainerDomId) {
 		this._serviceRegistry = serviceRegistry;
 		this._serviceRegistration = serviceRegistry.registerService("orion.page.message", this);
 		this._operationsClient = operationsClient;
+		this.notificationContainerDomId = notificationContainerDomId;
 		this.domId = domId;
 		this.progressDomId = progressDomId || domId;
 	}
@@ -92,6 +93,12 @@ define(['require', 'dojo'], function(require, dojo) {
 		 */
 		setProgressMessage : function(message) {
 			dojo.place(window.document.createTextNode(message), this.progressDomId, "only");
+			if (message.length > 0) {
+				dojo.addClass(this.notificationContainerDomId, "slideContainerActive");
+			} else {
+				dojo.removeClass(this.notificationContainerDomId, "slideContainerActive");
+			}
+			mUtil.forceLayout(this.notificationContainerDomId);
 		},
 		
 		/**
@@ -111,16 +118,19 @@ define(['require', 'dojo'], function(require, dojo) {
 			}
 			var msg = status.Message || status;
 			var src = require.toUrl("images/info.gif");
+			var extraClass = "progressInfo";
 			var alt = "info";
 			if (status.Severity) {
 				switch (status.Severity) {
 				case "Warning":
 					src = require.toUrl("images/warning.gif");
 					alt = "warning";
+					extraClass="progressWarning";
 					break;
 				case "Error":
 					src = require.toUrl("images/error.gif");
 					alt = "error";
+					extraClass="progressError";
 					break;
 				}
 			}
@@ -144,7 +154,12 @@ define(['require', 'dojo'], function(require, dojo) {
 				dojo.place(msg, this.progressDomId, "last");
 			} else {  // msg is plain text
 				dojo.place(window.document.createTextNode("   " + msg), this.progressDomId, "last");
+				if (extraClass && this.progressDomId !== this.domId) {
+					dojo.addClass(this.notificationContainerDomId, extraClass);
+				}
 			}
+			dojo.addClass(this.notificationContainerDomId, "slideContainerActive");
+			mUtil.forceLayout(this.notificationContainerDomId);
 		},
 		
 		/**

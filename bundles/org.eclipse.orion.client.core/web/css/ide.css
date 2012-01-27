@@ -78,8 +78,13 @@ a:hover {
 	margin-right: 4px;
 	margin-left: 4px;
 	margin-bottom: 4px;
-	border-right: 1px solid #c5c5c5;
-	width: 40%;
+}
+
+.footerRightBlock {
+	float: right;
+	margin-right: 4px;
+	margin-left: 4px;
+	margin-bottom: 4px;
 }
 
 .navlinkonpage {
@@ -422,6 +427,18 @@ a:hover {
 	margin-right: 8px;
 }
 
+.progressInfo {
+	background-color: #d5e2f9;
+}
+
+.progressWarning {
+	background-color: #fbf8c4;
+}
+
+.progressError {
+	background-color: #ffcccc;
+}
+
 .progressPane {
 	vertical-align: bottom;
 	background-position: 0px 0px; 
@@ -547,17 +564,17 @@ a:hover {
 }
 
 .slideContainer {
-	background: transparent;
 	height: auto;
+	width: 100%;
 	clear: both;
 	float: left;
 	border: 1px solid #ebebeb; 
 	border-radius: 1px;
-	visibility: hidden;
+	display: none;
 }
 
 .slideContainerActive {
-	visibility: visible;
+	display: block;
 }
 
 .leftSlide {

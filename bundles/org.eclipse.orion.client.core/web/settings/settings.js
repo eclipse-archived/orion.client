@@ -545,7 +545,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 		
 			// Register services
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
-			preferencesStatusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
+			preferencesStatusService = new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications", "notificationArea");
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
 			var siteService = new mSiteService.SiteService(serviceRegistry);

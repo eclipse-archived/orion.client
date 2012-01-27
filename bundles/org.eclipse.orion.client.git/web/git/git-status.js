@@ -31,7 +31,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress',  'orion/com
 			new mDialogs.DialogService(serviceRegistry);
 			
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 		
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
