@@ -26,6 +26,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 		this._topicListeners = {};
 		this._myOperations = {};
 		this._lastOperation = null;
+		this._lastIconClass = null;
 	}
 	
 	ProgressService.prototype = /** @lends orion.progress.ProgressService.prototype */ {
@@ -134,11 +135,20 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				}catch(e){}
 				dijit.focus(this._operationsDialog.domNode);
 			},
+			
+			_switchIconTo: function(iconClass) {
+				if (this._lastIconClass) {
+					dojo.removeClass(this._progressPane, this._lastIconClass);
+				}
+				this._lastIconClass = iconClass;
+				dojo.addClass(this._progressPane, this._lastIconClass);
+			}, 
+			
 			_generateOperationsInfo: function(operations){
 				this._operationsDialog.setOperations(operations, this._myOperations);
 				
 				if(!operations.Children || operations.Children.length==0){
-					this._progressPane.className = "progressPane progressPane_empty";
+					this._switchIconTo("progressPane_empty");
 					this._progressPane.title = "Operations";
 					return;
 				}
@@ -168,19 +178,19 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				switch(status){
 				case "running":
 					this._progressPane.title = "Operations running";
-					this._progressPane.className = "progressPane progressPane_running";
+					this._switchIconTo("progressPane_running");
 					break;
 				case "warning":
 					this._progressPane.title = "Some operations finished with warning";
-					this._progressPane.className = "progressPane progressPane_warning";
+					this._switchIconTo("progressPane_warning");
 					break;
 				case "error":
 					this._progressPane.title = "Some operations finished with error";
-					this._progressPane.className = "progressPane progressPane_error";
+					this._switchIconTo("progressPane_error");
 					break;
 				default:
 					this._progressPane.title = "Operations";
-					this._progressPane.className = "progressPane progressPane_operations";					
+					this._switchIconTo("progressPane_operations");					
 				}
 			},
 			/**
