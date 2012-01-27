@@ -78,6 +78,32 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 				}
 			}
 		});
+		dojo.connect(this,"onKeyPress",this,function(evt) {
+			var links, currentFocus, currentSelectionIndex;
+			if (evt.keyCode === dojo.keys.DOWN_ARROW && this.results) {
+				links = dojo.query("a", this.results);
+				currentFocus = dijit.getFocus();
+				currentSelectionIndex = links.indexOf(currentFocus.node);
+				if (currentSelectionIndex === -1) {
+					dijit.focus(links[0]);
+				} else if (currentSelectionIndex<links.length) {
+					dijit.focus(links[currentSelectionIndex+1]);
+				}   
+				dojo.stopEvent(evt);
+			} else if (evt.keyCode === dojo.keys.UP_ARROW) {
+				links = dojo.query("a", this.results);
+				currentFocus = dijit.getFocus();
+				currentSelectionIndex = links.indexOf(currentFocus.node);
+				if (currentSelectionIndex < 1) {
+					// jump to input element
+					var text = this.resourceName && this.resourceName.get("textbox");
+					dijit.focus(text);
+				} else if (currentSelectionIndex > 0) {
+					dijit.focus(links[currentSelectionIndex-1]);
+				}
+				dojo.stopEvent(evt);
+			}
+		});
 		dojo.connect(this, "onMouseUp", function(e) {
 			// WebKit focuses <body> after link is clicked; override that
 			e.target.focus();
