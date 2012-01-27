@@ -78,10 +78,17 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 	
 	function _mergeOperations(lists){
 		if(lists.length===1){
-			return lists[0][1];
+			if(lists[0][0])
+				return lists[0][1];
+			console.error(lists[0][1]);
+			return {Children: []};
 		}
 		var result = {Children: []};
 		for(var i=0; i<lists.length; i++){
+			if(!lists[i][0]){
+				console.error(lists[i][1]);
+				continue;
+			}
 			if(lists[i][1] && lists[i][1].Children)
 				result.Children = result.Children.concat(lists[i][1].Children);
 		}
