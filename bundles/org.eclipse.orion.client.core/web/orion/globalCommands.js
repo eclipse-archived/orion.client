@@ -555,8 +555,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			dojo.place(text, title, "last");
 		}
 	
-		var openResourceDialog = function(searcher, /* optional */ editor) {
-			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher});
+		var openResourceDialog = function(searcher, serviceRegistry, /* optional */ editor) {
+			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher, serviceRegistry:serviceRegistry});
 			if (editor) {
 				dojo.connect(dialog, "onHide", function() {
 					editor.getTextView().focus(); // Focus editor after dialog close, Dojo's doesn't work
@@ -570,14 +570,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			tooltip: "Choose a file by name and open an editor on it",
 			id: "eclipse.openResource",
 			callback: function(data) {
-				openResourceDialog(searcher, editor);
+				openResourceDialog(searcher, serviceRegistry, editor);
 			}});
 			
 		// We need a mod key binding in the editor, for now use the old one (ctrl-shift-r)
 		if (editor) {
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("r", true, true, false), "Find File Named...");
 			editor.getTextView().setAction("Find File Named...", function() {
-					openResourceDialog(searcher, editor);
+					openResourceDialog(searcher, serviceRegistry, editor);
 					return true;
 				});
 		}

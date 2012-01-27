@@ -13,8 +13,8 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox',
-		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], function(dojo, dijit) {
+define(['require', 'dojo', 'dijit', "orion/util", 'dijit/Dialog', 'dijit/form/TextBox', 
+		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], function(require, dojo, dijit, mUtil) {
 
 /**
  * Usage: <code>new widgets.OpenResourceDialog(options).show();</code>
@@ -34,6 +34,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	time: null,
 	options: null,
 	searcher: null,
+	favService: null,
 	
 	/** @private */
 	constructor : function() {
@@ -45,6 +46,11 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		if (!this.searcher) {
 			throw new Error("Missing required argument: searcher");
 		}
+		var serviceRegistry = this.options.serviceRegistry;
+		if (!serviceRegistry) {
+			throw new Error("Missing required argument: serviceRegistry");
+		}
+		this.favService = serviceRegistry.getService("orion.core.favorite");
 	},
 	
 	/** @private */
@@ -76,7 +82,65 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			// WebKit focuses <body> after link is clicked; override that
 			e.target.focus();
 		});
+		this.populateFavorites();
 	},
+	
+	/** @private kick off initial population of favorites */
+	populateFavorites: function() {
+		dojo.place("<div>Populating favorites&#x2026;</div>", this.favresults, "only");
+		
+		
+		// initially, show all favorites
+		this.favService.getFavorites().then(this.showFavorites());
+		// need to add the listener since favorites may not 
+		// have been initialized after first getting the favorites
+		this.favService.addEventListener("favoritesChanged", this.showFavorites());
+	},
+	
+	/** 
+	 * @private 
+	 * render the favorites that we have found, if any.
+	 * this function wraps another function that does the actual work
+	 * we need this so we can have access to the proper scope.
+	 */
+	showFavorites: function() {
+		var that = this;
+		
+		return function(favs) {
+			if (favs.navigator) {
+				favs = favs.navigator;
+			}
+			if (favs.length > 0) {
+				var table = document.createElement('table');
+				for (var i=0; i < favs.length; i++) {
+					var fav = favs[i];
+					var col;
+					var row = table.insertRow(-1);
+					col = row.insertCell(0);
+					col.colspan = 2;
+					var favLink = document.createElement('a');
+					dojo.place(document.createTextNode(fav.name), favLink);
+					var loc;
+					if (fav.isExternalResource) {
+						// should open link in new tab, but for now, follow the behavior of navoutliner.js
+						loc = fav.path;
+					} else {
+						loc	= fav.directory ? require.toUrl("navigate/table.html") + "#" + fav.path : require.toUrl("edit/edit.html") + "#" + fav.path;
+						if (loc === "#") {
+							loc = "";
+						}
+					}
+					favLink.setAttribute('href', loc);
+					col.appendChild(favLink);
+				}
+				dojo.place(table, that.favresults, "only");
+			} else {
+				dojo.place("<div>No favorites</div>", that.favresults, "only");
+			}
+			that.decorateResult(that.favresults);
+		};
+	},
+
 	
 	/** @private */
 	checkSearch: function() {
@@ -93,16 +157,23 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	/** @private */
 	doSearch: function() {
 		var text = this.resourceName && this.resourceName.get("value");
-		if (!text) {
-			return;
+
+		var showFavs = this.showFavorites();
+		// update favorites
+		this.favService.queryFavorites(text).then(function(favs) {
+			showFavs(favs);
+		});
+
+		// don't do a server-side query for an empty text box
+		if (text) {
+			dojo.place("<div>Searching&#x2026;</div>", this.results, "only");
+			// Gives Webkit a chance to show the "Searching" message
+			var that = this;
+			setTimeout(function() {
+				var query = that.searcher.createSearchQuery(null, text, "Name");
+				that.searcher.search(that.results, query, false, false, dojo.hitch(that, that.decorateResult), true /*no highlight*/);
+			}, 0);
 		}
-		dojo.place("<div>Searching&#x2026;</div>", this.results, "only");
-		// Gives Webkit a chance to show the "Searching" message
-		var that = this;
-		setTimeout(function() {
-			var query = that.searcher.createSearchQuery(null, text, "Name");
-			that.searcher.search(that.results, query, false, false, dojo.hitch(that, that.decorateResult), true /*no highlight*/);
-		}, 0);
 	},
 	
 	/** @private */
