@@ -73,6 +73,8 @@ mBootstrap.startup().then(function(core) {
 	// render commands
 	mGitCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
 	
+	// process the URL to find our bindings, since we can't be sure these bindings were defined when the URL was first processed.
+	commandService.processURL(window.location.href);
 	
 	fileClient.loadWorkspace().then(
 		function(workspace){
