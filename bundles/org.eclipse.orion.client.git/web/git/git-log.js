@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -250,9 +250,9 @@ function initTitleBar(fileClient, navigator, item, searcher){
 						
 						serviceRegistry.getService("orion.git.provider").getGitClone(cloneURI).then(function(jsonData){
 							if(jsonData.Children && jsonData.Children.length>0) {
-								setPageTitle(branchName, jsonData.Children[0].Name, jsonData.Children[0].ContentLocation, isRemote, isBranch);
+								setPageTitle(branchName, jsonData.Children[0].Name, jsonData.Children[0].Location, isRemote, isBranch);
 							} else {
-								setPageTitle(branchName, jsonData.Name, jsonData.ContentLocation, isRemote, isBranch);
+								setPageTitle(branchName, jsonData.Name, jsonData.Location, isRemote, isBranch);
 							}
 						});
 					}else{
@@ -320,7 +320,7 @@ function setPageTitle(branchName, cloneName, cloneLocation, isRemote, isBranch){
 		title += "for local branch <b>" + branchName + "</b>";
 	
 	if(cloneLocation){
-		title = title + " on <a href='" + require.toUrl("git/git-clone.html") + "#" + cloneLocation + "'>" + cloneName + "</a>";
+		title = title + " on <a href='" + require.toUrl("git/git-repository.html") + "#" + cloneLocation + "'>" + cloneName + "</a>";
 	}
 	pageTitle.innerHTML = title;
 	if(branchName){
