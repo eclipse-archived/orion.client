@@ -27,7 +27,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			var selection = new mSelection.Selection(serviceRegistry);
 			
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
+			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 		
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, usersList, usersList);

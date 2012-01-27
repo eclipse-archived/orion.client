@@ -27,7 +27,7 @@ define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient'
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
 			var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
+			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 			
 			var profile = new mProfile.Profile({

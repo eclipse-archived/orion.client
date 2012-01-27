@@ -26,11 +26,11 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 		document.body.style.visibility = "visible";
 		dojo.parser.parse();
 
-		new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 		new mDialogs.DialogService(serviceRegistry);
 		var selection = new mSelection.Selection(serviceRegistry);
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
 		new mProgress.ProgressService(serviceRegistry, operationsClient);
 
 		// ...

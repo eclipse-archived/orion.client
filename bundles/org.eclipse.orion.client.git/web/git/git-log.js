@@ -29,7 +29,7 @@ var serviceRegistry;
 			dojo.parser.parse();
 			
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
+			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 			new mDialogs.DialogService(serviceRegistry);
 			var selection = new mSelection.Selection(serviceRegistry);

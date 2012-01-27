@@ -25,7 +25,7 @@ dojo.addOnLoad(function(){
 		var preferences = core.preferences;
 		var selection = new mSelection.Selection(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications");
+		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
 		new mProgress.ProgressService(serviceRegistry, operationsClient);
 		new mDialogs.DialogService(serviceRegistry);
 		new mSsh.SshService(serviceRegistry);

@@ -297,15 +297,11 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	// BEGIN BOTTOM BANNER FRAGMENT
 	// styling of the surrounding div (text-align, etc) is in ide.css "footer"
 	var bottomHTMLFragment = 
-		'<div class="layoutBlock layoutRight progress">' +
-				'<img src="'+ require.toUrl("images/none.png") +'" id="progressPane"></img>' +
-				'<span id="notifications"></span>' +
-		'</div>' +
 		'<div class="layoutBlock">' +
 			'<div class="footerBlock">' +
 				'This is a Beta build of Orion. Please try it out but BEWARE your data may be lost.' +
 			'</div>' +
-			'<div class="footerBlock">' +
+			'<div class="footerRightBlock">' +
 				'<a href="http://wiki.eclipse.org/Orion/FAQ" target="_blank">FAQ</a> | ' + 
 				'<a href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&version=0.4" target="_blank">Report a Bug</a> | ' +
 				'<a href="http://www.eclipse.org/legal/privacy.php" target="_blank">Privacy Policy</a> | ' + 
@@ -313,15 +309,17 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				'<a href="http://www.eclipse.org/legal/copyright.php" target="_blank">Copyright Agent</a> | '+
 				'<a href="' + require.toUrl("/operations/list.html") +'" target="_blank">Server Operations</a>' +
 			'</div>' +
-			'<div class="layoutRight" style="text-align: right; margin-right: 8px;">' +
-				'<span id="statusPane"></span>' +
-			'</div>' +
 		'</div>';
 	// END BOTTOM BANNER FRAGEMENT
 
 	var toolbarFragment = 
 		'<div class="layoutLeft pageToolbarLeft pageActions" id="pageActions"></div>' +
+		'<div class="layoutRight pageToolbarRight pageActions pageNavigationActions" id="statusPane"></div>' +
 		'<div class="layoutRight pageToolbarRight pageActions pageNavigationActions" id="pageNavigationActions"></div>' +
+		'<div id="notificationArea" class="layoutBlock slideContainer">' +
+				'<img src="'+ require.toUrl("images/none.png") +'" id="progressPane"></img>' +
+				'<span id="notifications"></span>' +
+		'</div>' +
 		'<div id="parameterArea" class="layoutBlock slideContainer">' +
 			'<span id="pageParameterArea" class="leftSlide">' +
 				'<span id="pageCommandParameters" class="parameters"></span>' +
@@ -493,7 +491,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		if (toolbar) {
 			dojo.place(toolbarFragment, toolbar, "only");
 		} else {
-			window.console.log("No toolbar requested");
+			toolbar = dojo.create ("div", {id: "pageToolbar", "class": "toolbar layoutBlock"}, "titleArea", "after");
+			dojo.place(toolbarFragment, toolbar, "only");
 		}
 		
 		// Set up a custom parameter collector that slides out of the toolbar.

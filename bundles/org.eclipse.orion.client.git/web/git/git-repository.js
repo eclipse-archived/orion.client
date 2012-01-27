@@ -26,13 +26,13 @@ mBootstrap.startup().then(function(core) {
 	document.body.style.visibility = "visible";
 	dojo.parser.parse();
 	
-	new mStatus.StatusReportingService(serviceRegistry, "statusPane", "notifications");
 	new mDialogs.DialogService(serviceRegistry);
 	var selection = new mSelection.Selection(serviceRegistry);
 	new mSshTools.SshService(serviceRegistry);
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 	new mProgress.ProgressService(serviceRegistry, operationsClient);
+	new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
 	
 	// ...
 	var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
