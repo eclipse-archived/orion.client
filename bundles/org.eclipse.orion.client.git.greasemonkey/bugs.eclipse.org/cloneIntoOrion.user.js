@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Clone from Bugzilla into Orion
-// @version        0.2
+// @version        0.4
 // @namespace      http://eclipse.org/orion
 // @description    Allows to clone repository for the selected bug into Orion
 // @include        /^https://bugs\.eclipse\.org/bugs/show_bug\.cgi\?id=\d+$/
@@ -89,7 +89,7 @@
 	var gitRepoUrl = map[product + "_" + component];
 	if (gitRepoUrl) {
 		var a = document.createElement("a");
-		a.href = "http://orion.eclipse.org:8080/git/git-clone.html?cloneGitRepository=" + gitRepoUrl;
+		a.href = "http://orion.eclipse.org:8080/git/git-repository.html?cloneGitRepository=" + gitRepoUrl;
 		a.target = "_blank";
 		a.appendChild(document.createTextNode("Clone into Orion"));
 		document.getElementById("field_container_product").parentNode.nextElementSibling.children[1].appendChild(a);
