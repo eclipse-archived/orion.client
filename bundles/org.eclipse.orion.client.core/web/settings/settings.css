@@ -107,6 +107,8 @@ ul,menu,dir {
 }
 
 .settings {
+	min-width:1000px;
+	max-width:1300px;
 	padding-left: 20px;
 	padding-right: 40px;
 }
@@ -123,6 +125,13 @@ ul,menu,dir {
 	font-weight: bold;
 	color: #666;
 	margin: 0;
+}
+
+.oldLink {
+	float: left;
+	color: #666;
+	margin: 2px;
+	padding-left: 5px;
 }
 
 .sectionProgress {
@@ -311,6 +320,8 @@ list,grid {
 .stretch {
 	float: left;
 	position: relative;
+	white-space:normal;
+	max-width:600px;
 }
 
 list>*,grid>* {
@@ -352,6 +363,8 @@ list>*,grid>* {
 	font-size: 13px;
 	white-space: normal;
 	padding-right: 10px;
+	min-width:100px;
+	max-width:200px;
 }
 
 .plugin-delete {
@@ -376,6 +389,7 @@ list>*,grid>* {
 	padding-right: 15px;
 }
 
-.plugin-links-trailing {
+.plugin-links {
 	padding-right: 7px;
 }
+

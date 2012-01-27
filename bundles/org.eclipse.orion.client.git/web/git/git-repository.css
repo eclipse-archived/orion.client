@@ -2,7 +2,8 @@
 
 @import "../org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
 
-@import "../org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
+@import
+	"../org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
 
 @import "../org.dojotoolkit/dijit/themes/nihilo/form/Common.css";
 
@@ -60,4 +61,12 @@
 .git-table {
 	padding-top: 15px;
 	padding-top: 15px;
+}
+
+.tag-description {
+	font-size: 13px;
+	white-space: normal;
+	padding-right: 10px;
+	min-width: 100px;
+	max-width: 600px;
 }
