@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           Clone from git.eclipse.org into Orion
-// @version        0.2
+// @version        0.4
 // @namespace      http://eclipse.org/orion
 // @description    Allows to clone repositories into Orion
 // @include        http://git.eclipse.org/c/*
@@ -30,7 +30,7 @@
 			contentTableRows = document.getElementById("cgit").children[2].children[0].children[0].children;
 		for (var i = contentTableRows.length - 3; i < contentTableRows.length; i++) {
 			var gitRepoUrl = contentTableRows[i].children[0].textContent;
-			contentTableRows[i].children[0].innerHTML = "<a href='http://orion.eclipse.org:8080/git/git-clone.html?cloneGitRepository=" + gitRepoUrl + "' target='_blank'>" + gitRepoUrl + "</a>";
+			contentTableRows[i].children[0].innerHTML = "<a href='http://orion.eclipse.org:8080/git/git-repository.html?cloneGitRepository=" + gitRepoUrl + "' target='_blank'>" + gitRepoUrl + "</a>";
 		}
 	}
 
