@@ -134,7 +134,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	};
 	
 	// Turns an info object containing the service properties and the service (or reference) into Command options.
-	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference) {
+	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry) {
 		function getPattern(wildCard){
 			var pattern = '^';
 	        for (var i = 0; i < wildCard.length; i++ ) {
@@ -234,8 +234,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				var shallowItemClone = extensionCommandUtils._cloneItemWithoutChildren(item);
 				if(serviceOrReference.run) {
 					return serviceOrReference.run(shallowItemClone);
-				} else if (serviceOrReference.getService) {
-					serviceOrReference.getService(serviceOrReference).run(shallowItemClone);
+				} else if (serviceRegistry) {
+					return serviceRegistry.getService(serviceOrReference).run(shallowItemClone);
 				}
 			});
 		} else {
@@ -256,8 +256,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				}
 				if(serviceOrReference.run) {
 					serviceOrReference.run(shallowItemsClone);
-				} else if (serviceOrReference.getService) {
-					serviceOrReference.getService(serviceOrReference).run(shallowItemsClone);
+				} else if (serviceRegistry) {
+					serviceRegistry.getService(serviceOrReference).run(shallowItemsClone);
 				}
 			});
 		}

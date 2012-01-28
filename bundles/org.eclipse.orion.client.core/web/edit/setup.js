@@ -173,6 +173,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					var load = dojo.hitch(this, function(metadata, contents) {
 						// Metadata
 						this._fileMetadata = metadata;
+						mGlobalCommands.setPageTarget([metadata, metadata.Parents && metadata.Parents[0]], serviceRegistry, commandService, ["", " on folder"]);
 						this.setTitle(metadata.Location);
 						this._contentType = contentTypeService.getFileContentType(metadata);
 						syntaxHighlighter.highlight(fileURI, editor, this._contentType);
