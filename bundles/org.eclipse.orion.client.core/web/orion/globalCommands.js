@@ -642,8 +642,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 		if (!searchField) {
 			throw "failed to generate HTML for banner";
 		}
-		dojo.connect(searchField, "onkeypress", function(e){
-			if (e.charOrCode === dojo.keys.ENTER) {
+		dojo.connect(searchField, "onkeydown", function(e){
+			if (e.keyCode === dojo.keys.ENTER) {
 				if (searcher) {
 					if (searchField.value.length > 0) {
 						var query = searcher.createSearchQuery(searchField.value);
@@ -653,6 +653,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 					window.alert("Can't search: no search service is available");
 				}
 			}
+			e.stopPropagation();
 		});
 		
 		// Put page title in title area.  
@@ -697,8 +698,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 		commandService.registerCommandContribution("orion.makeFavorite", 1, "globalActions", null, false, new mCommands.CommandKeyBinding("f", true, true));
 
 	
-		var openResourceDialog = function(searcher, /* optional */ editor) {
-			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher});
+		var openResourceDialog = function(searcher, serviceRegistry, /* optional */ editor) {
+			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher, serviceRegistry:serviceRegistry});
 			if (editor) {
 				dojo.connect(dialog, "onHide", function() {
 					editor.getTextView().focus(); // Focus editor after dialog close, Dojo's doesn't work
@@ -712,14 +713,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 			tooltip: "Choose a file by name and open an editor on it",
 			id: "eclipse.openResource",
 			callback: function(data) {
-				openResourceDialog(searcher, editor);
+				openResourceDialog(searcher, serviceRegistry, editor);
 			}});
 			
 		// We need a mod key binding in the editor, for now use the old one (ctrl-shift-r)
 		if (editor) {
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("r", true, true, false), "Find File Named...");
 			editor.getTextView().setAction("Find File Named...", function() {
-					openResourceDialog(searcher, editor);
+					openResourceDialog(searcher, serviceRegistry, editor);
 					return true;
 				});
 		}

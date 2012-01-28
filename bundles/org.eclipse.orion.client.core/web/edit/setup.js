@@ -392,7 +392,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				var b = dojo.create("b", null, searchFloat, "last");
 				dojo.place(document.createTextNode("\"" + searchPattern + "\"..."), b, "only");
 				searchFloat.style.display = "block";
-				var query = searcher.createSearchQuery(searchPattern);
+				var query = searcher.createSearchQuery(searchPattern, null, "Name");
 				searcher.search(searchFloat, query, inputManager.getInput(),false,null,false);
 			}, 0);
 			return true;
