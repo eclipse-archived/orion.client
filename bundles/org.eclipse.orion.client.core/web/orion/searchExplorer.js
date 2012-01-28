@@ -1067,7 +1067,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			replaceStringDiv.placeholder="Replace With";
 			//dojo.addClass(replaceStringDiv, 'searchCmdGroupMargin');
 			replaceStringDiv.onkeydown = function(e){
-				e.stopPropagation();
 				if (e.keyCode === dojo.keys.ENTER) {
 					var replaceInputDiv = dojo.byId("globalSearchReplaceWith");
 					return that.doPreview(replaceInputDiv.value);
@@ -1406,16 +1405,35 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	        }
 	    });
 		
-		dojo.connect(document, "onkeydown", dojo.hitch(this, function (e) {
+	    var resultParentDiv = dojo.byId(this.getParentDivId());
+	    resultParentDiv.focus();
+	    
+		dojo.connect(resultParentDiv, "onkeydown", dojo.hitch(this, function (e) {
 			if(e.keyCode === dojo.keys.DOWN_ARROW){
-				this.gotoNext(true, true);
+				if(!e.ctrlKey){
+					this.gotoNext(true, true);
+					e.preventDefault();
+					return false;
+				}
 			} else if(e.keyCode === dojo.keys.UP_ARROW){
-				this.gotoNext(false, true);
+				if(!e.ctrlKey){
+					this.gotoNext(false, true);
+					e.preventDefault();
+					return false;
+				}
 			} else if(e.keyCode === dojo.keys.RIGHT_ARROW){
-				//var currentModel = this.model.getCurrentModel();
-				//this.popupContext(currentModel);
+				if(!e.ctrlKey){
+					//var currentModel = this.model.getCurrentModel();
+					//this.popupContext(currentModel);
+					e.preventDefault();
+					return false;
+				}
 			} else if(e.keyCode === dojo.keys.LEFT_ARROW){
-				//dijit.popup.close(this.myTooltipDialog);
+				if(!e.ctrlKey){
+					//dijit.popup.close(this.myTooltipDialog);
+					e.preventDefault();
+					return false;
+				}
 			} else if(e.keyCode === dojo.keys.ENTER) {
 				var currentModel = this.model.getCurrentModel();
 				if(e.ctrlKey){
@@ -1424,7 +1442,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					window.location.href = currentModel.linkLocation;
 				}
 			}
-			e.stopPropagation();
 		}));
 	};
 	
