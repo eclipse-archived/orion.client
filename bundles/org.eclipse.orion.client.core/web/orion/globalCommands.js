@@ -479,7 +479,15 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 	 * @name orion.globalCommands#generateRelatedLinks
 	 * @function
 	 */
-	function generateRelatedLinks(serviceRegistry, item, exclusions, commandService) {
+	function generateRelatedLinks(serviceRegistry, itemOrArray, itemLabels, exclusions, commandService) {
+		var items;
+		items = itemOrArray;
+		if (!dojo.isArray(itemOrArray)) {
+			items = [itemOrArray];
+			if (!itemLabels) {
+				itemLabels = [""];
+			}
+		}
 		var contributedLinks = serviceRegistry.getServiceReferences("orion.page.link.related");
 		if (contributedLinks.length <= 0) {
 			return;
@@ -517,28 +525,35 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 				// exclude anything in the list of exclusions
 				var position = dojo.indexOf(exclusions, info.id);
 				if (position < 0) {
-					// look for it in the command service.  Total reach.
-					command = commandService.findCommand(info.id);
-					if (!command) {
-						// if it's not there look for it in orion.navigate.command and create it
-						var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
-						for (var j=0; j<commandsReferences.length; j++) {
-							var id = commandsReferences[j].getProperty("id");
-							if (id === info.id) {
-								var navInfo = {};
-								for (var k = 0; k < propertyNames.length; k++) {
-									navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
+					for (var itemIndex=0; itemIndex < items.length; itemIndex++) {
+						var item = items[itemIndex];
+						// look for it in the command service.  Total reach.
+						command = commandService.findCommand(info.id);
+						if (!command) {
+							// if it's not there look for it in orion.navigate.command and create it
+							var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
+							for (var j=0; j<commandsReferences.length; j++) {
+								var id = commandsReferences[j].getProperty("id");
+								if (id === info.id) {
+									var navInfo = {};
+									propertyNames = commandsReferences[j].getPropertyNames();
+									for (var k = 0; k < propertyNames.length; k++) {
+										navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
+									}
+									if (itemLabels[itemIndex]) {
+										navInfo.name += itemLabels[itemIndex];
+									}
+									var commandOptions = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry);
+									command = new mCommands.Command(commandOptions);
 								}
-								var commandOptions = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j]);
-								command = new mCommands.Command(commandOptions);
 							}
 						}
-					}
-					if (command) {
-						if (!command.visibleWhen || command.visibleWhen(item)) {
-							foundLink = true;
-							var invocation = new mCommands.CommandInvocation(commandService, item, item, null, command);
-							command._addMenuItem(linksMenu, invocation);
+						if (command) {
+							if (!command.visibleWhen || command.visibleWhen(item)) {
+								foundLink = true;
+								var invocation = new mCommands.CommandInvocation(commandService, item, item, null, command);
+								command._addMenuItem(linksMenu, invocation);
+							}
 						}
 					}
 				}
@@ -571,9 +586,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 	function setPageCommandExclusions(excluded) {
 		exclusions = excluded;
 	}
-	function setPageTarget(item, serviceRegistry, commandService) {
-		pageItem = item;
-		generateRelatedLinks(serviceRegistry, item, exclusions, commandService);
+	function setPageTarget(itemOrArray, serviceRegistry, commandService, itemLabels) {
+		pageItem = itemOrArray;
+		generateRelatedLinks(serviceRegistry, itemOrArray, itemLabels, exclusions, commandService);
 	}
 	
 	
@@ -845,7 +860,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 					for (var i=0; i<openWithCommands.length; i++) {
 						var commandInfo = openWithCommands[i].properties;
 						var service = openWithCommands[i].service;
-						var commandOptions = mExtensionCommands._createCommandOptions(commandInfo, service);
+						var commandOptions = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry);
 						var command = new mCommands.Command(commandOptions);
 						command.isEditor = commandInfo.isEditor;
 						var openWithGroupCreated = false;
