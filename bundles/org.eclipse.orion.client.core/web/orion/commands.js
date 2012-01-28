@@ -227,6 +227,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				}
 			}
 		},
+		
+		findCommand: function(commandId) {
+			return this._objectScope[commandId] || 
+						this._domScope[commandId] || 
+						this._globalScope[commandId];
+		}, 
+		
 		/**
 		 * Run the command with the specified commandId.
 		 *
@@ -392,34 +399,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			default:
 				throw "unrecognized command scope " + scope;
 			}
-			if (topic) {
-				this._addToTopic(command, topic);
-			}
 		},
-		
-		/**
-		 * Adds the specified command to the topic list.
-		 */
-		_addToTopic: function(command, topic) {
-			var parentTable = this._topics;
-			if (topic) {
-				var segments = topic.split("/");
-				for (var i = 0; i < segments.length; i++) {
-					if (segments[i].length > 1) {
-						if (!parentTable[segments[i]]) {
-							// create an empty slot with children.  Use topic property to identify slots we created.
-							parentTable[segments[i]] = {topic: true, children: {}};
-						} 
-						parentTable = parentTable[segments[i]].children;
-					}
-				}
-				parentTable[command.id] = command;
-			}
-		},
-		
-		renderRelatedTasks: function(topic, parent, items, renderType, forceText) {
-		},
-		
 		
 		/**
 		 * Registers a command group and specifies visual information about the group.
@@ -736,7 +716,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							} else {
 								render = false;
 							}
-						} 
+						} else if (scope === "object") {
+							// if there is a scope id on the contribution it's not supposed to show up here
+							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=368699
+							render = !positionOrder[i].scopeId;
+						}
 						// only check bindings that would otherwise render (ie, dom id matches parent, etc.)
 						var checkBinding = render && (scope === "global" || scope === "dom");
 						invocation = new CommandInvocation(this, handler, items, userData, command);
