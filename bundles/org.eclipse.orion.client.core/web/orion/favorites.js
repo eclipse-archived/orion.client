@@ -120,6 +120,61 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			}
 			return false;
 		},
+		
+		/** @private special characters in regex */
+		_SPECIAL_CHARS : "^$\\+[]().",
+
+		
+		/**
+		 * Queries the favorites using s pseudo-regular expression.  
+		 * The format of the regex is the same as that recognized by
+		 * the open resources dialog: * represents any text, ? is a 
+		 * single character.  And there is an implicit * at the end of
+		 * the queryText.
+		 *
+		 * Empty queryText matches all favorites
+		 * 
+		 * @param queryText the name of the favorites to look for.  
+		 * @return a possibly empty array of favorites that matches 
+		 * the queryText
+		 */
+		queryFavorites: function(queryText) {
+			var i;
+			if (!queryText) {
+				// matches all
+				return this._favorites;
+			}
+			
+			// convert query string
+			// * --> .*
+			// ? --> .?
+			// $ --> \$  (and any other special chars
+			var convertedQuery = "";
+			for (i = 0; i < queryText.length; i++) {
+				var char = queryText.charAt(i);
+				if (char === "*") {
+					convertedQuery += ".*";
+				} else if (char === "?") {
+					convertedQuery += ".?";
+				} else if (this._SPECIAL_CHARS.indexOf(char) >= 0) {
+					convertedQuery += ("\\" + char);
+				} else {
+					convertedQuery += char;
+				}
+			}
+			convertedQuery += ".*";
+			var regex = new RegExp(convertedQuery);
+			
+			// for now, just search the beginning, but we need to support
+			// the regex that is available in open resources dialog
+			var result = [];
+			for (i in this._favorites) {
+				if (this._favorites[i].name.search(regex) === 0) {
+					result.push(this._favorites[i]);
+				}
+			}
+			return result;
+		},
 
 		removeSearch: function(query) {
 			for (var i in this._searches) {
