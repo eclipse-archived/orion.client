@@ -258,6 +258,12 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			{ Source: "/",
 			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.editor/web"
 			},
+			{ Source: "/org.dojotoolkit/dojo",
+			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.core/web/dojo"
+			},
+			{ Source: "/org.dojotoolkit/dojox",
+			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.core/web/dojox"
+			},
 			{ Source: "/file",
 			  Target: hostPrefix + "file"
 			},
