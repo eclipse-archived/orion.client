@@ -47,6 +47,7 @@ var serviceRegistry;
 			// Commit navigator
 			var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools", "pageNavigationActions");
 			
+			mGlobalCommands.setPageCommandExclusions(["eclipse.git.remote", "eclipse.git.log"]);
 			// global commands
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, navigator);
 			
@@ -79,17 +80,17 @@ var serviceRegistry;
 			commandService.registerCommandContribution("eclipse.orion.git.previousLogPage", 1, "pageNavigationActions");
 			commandService.registerCommandContribution("eclipse.orion.git.nextLogPage", 2, "pageNavigationActions");
 
-			loadResource(navigator, searcher);
+			loadResource(navigator, searcher, commandService);
 		
 			// every time the user manually changes the hash, we need to load the
 			// workspace with that name
 			dojo.subscribe("/dojo/hashchange", navigator, function() {
-				loadResource(navigator, searcher);
+				loadResource(navigator, searcher, commandService);
 			});
 		});
 	});
 
-function loadResource(navigator, searcher){
+function loadResource(navigator, searcher, commandService){
 	var path = dojo.hash();
 	dojo.xhrGet({ //TODO Bug 367352
 		url : path,
@@ -102,8 +103,7 @@ function loadResource(navigator, searcher){
 			
 			var loadResource = function(resource){
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
-				initTitleBar(fileClient, navigator, resource, searcher);
-
+				initTitleBar(fileClient, navigator, resource, searcher, commandService);
 				if (resource.Type === "RemoteTrackingBranch"){
 					var gitService = serviceRegistry.getService("orion.git.provider");
 					gitService.getLog(resource.HeadLocation, resource.Id, "Getting git incoming changes", function(scopedCommitsJsonData) {
@@ -220,7 +220,7 @@ function getRemoteFileURI(){
 	return fileURI;
 }
 
-function initTitleBar(fileClient, navigator, item, searcher){
+function initTitleBar(fileClient, navigator, item, searcher, commandService){
 	
 	var isRemote = (item.Type === "RemoteTrackingBranch");
 	var isBranch = (item.toRef && item.toRef.Type === "Branch");
@@ -237,6 +237,7 @@ function initTitleBar(fileClient, navigator, item, searcher){
 	if(fileURI){
 		fileClient.read(fileURI, true).then(
 				dojo.hitch(this, function(metadata) {
+					mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService); 
 					var branchName;
 					if (isRemote)
 						branchName = item.Name;
