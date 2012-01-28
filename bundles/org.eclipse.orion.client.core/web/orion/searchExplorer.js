@@ -1756,43 +1756,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchReportRenderer.prototype.constructor = SearchReportRenderer;
 	
-	function ContextTipExplorer(parentId, reportList){
-		this.parentId = parentId;
-		this.reportList = reportList;
-		this.renderer = new ContextTipRenderer({checkbox: false}, this);
-	};
-	ContextTipExplorer.prototype = new mExplorer.Explorer();
-	
-	ContextTipExplorer.prototype.report = function() {
-		this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, [this.model]));
-	};
-
-	ContextTipExplorer.prototype.constructor = ContextTipExplorer;
-
-	
-	function ContextTipRenderer(options, explorer){
-		this._init(options);
-		this.options = options;
-		this.explorer = explorer;
-	};
-	
-	ContextTipRenderer.prototype = new mExplorer.SelectionRenderer();
-	
-	ContextTipRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		switch(col_no){
-		case 0:
-			var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"});
-			var div = dojo.create("div", null, col, "only");
-			var span = dojo.create("span", {}, div, "last");
-
-			dojo.place(document.createTextNode(item.linkLocation), span, "only");
-			return col;
-		}
-	};
-	
-	ContextTipRenderer.prototype.constructor = ContextTipRenderer;
-	
-	
 	//return module exports
 	return {
 		SearchResultExplorer: SearchResultExplorer
