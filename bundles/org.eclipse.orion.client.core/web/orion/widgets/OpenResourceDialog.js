@@ -13,8 +13,8 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox',
-		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], function(dojo, dijit) {
+define(['require', 'dojo', 'dijit', "orion/util", 'dijit/Dialog', 'dijit/form/TextBox', 
+		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], function(require, dojo, dijit, mUtil) {
 
 /**
  * Usage: <code>new widgets.OpenResourceDialog(options).show();</code>
@@ -34,6 +34,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	time: null,
 	options: null,
 	searcher: null,
+	favService: null,
 	
 	/** @private */
 	constructor : function() {
@@ -45,6 +46,11 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		if (!this.searcher) {
 			throw new Error("Missing required argument: searcher");
 		}
+		var serviceRegistry = this.options.serviceRegistry;
+		if (!serviceRegistry) {
+			throw new Error("Missing required argument: serviceRegistry");
+		}
+		this.favService = serviceRegistry.getService("orion.core.favorite");
 	},
 	
 	/** @private */
@@ -72,11 +78,128 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 				}
 			}
 		});
+		dojo.connect(this,"onKeyPress",this,function(evt) {
+			var favlinks, links, text, currentFocus, favCurrentSelectionIndex, currentSelectionIndex;
+			var incrementFocus = function(currList, index, nextEntry) {
+				if (index < currList.length - 1) {
+					return currList[index+1];
+				} else {
+					return nextEntry;
+				}
+			};
+			var decrementFocus = function(currList, index, prevEntry) {
+				if (index > 0) {
+					return currList[index-1];
+				} else {
+					return prevEntry;
+				}
+			};
+			
+			if (evt.keyCode === dojo.keys.DOWN_ARROW || evt.keyCode === dojo.keys.UP_ARROW) {
+				links = dojo.query("a", this.results);
+				favlinks = dojo.query("a", this.favresults);
+				currentFocus = dijit.getFocus();
+				currentSelectionIndex = links.indexOf(currentFocus.node);
+				favCurrentSelectionIndex = favlinks.indexOf(currentFocus.node);
+				if (evt.keyCode === dojo.keys.DOWN_ARROW) {
+					if (favCurrentSelectionIndex >= 0) {
+						dijit.focus(incrementFocus(favlinks, favCurrentSelectionIndex, links.length > 0 ? links[0] : favlinks[0]));
+					} else if (currentSelectionIndex >= 0) {
+						dijit.focus(incrementFocus(links, currentSelectionIndex, favlinks.length > 0 ? favlinks[0] : links[0]));
+					} else if (links.length > 0 || favlinks.length > 0) {
+						// coming from the text box
+						dijit.focus(incrementFocus(favlinks, -1, links[0]));
+					}   
+				} else {
+					if (favCurrentSelectionIndex >= 0) {
+						// jump to text box if index === 0
+						text = this.resourceName && this.resourceName.get("textbox");
+						dijit.focus(decrementFocus(favlinks, favCurrentSelectionIndex, text));
+					} else if (currentSelectionIndex >= 0) {
+						// jump to text box if index === 0 and favlinks is empty
+						text = this.resourceName && this.resourceName.get("textbox");
+						dijit.focus(decrementFocus(links, currentSelectionIndex, favlinks.length > 0 ? favlinks[favlinks.length-1] : text));
+					} else if (links.length > 0) {
+						// coming from the text box go to end of list
+						dijit.focus(links[links.length-1]);
+					} else if (favlinks.length > 0) {
+						// coming from the text box go to end of list
+						dijit.focus(favlinks[favlinks.length-1]);
+					}
+				}
+				dojo.stopEvent(evt);
+			}
+		});
 		dojo.connect(this, "onMouseUp", function(e) {
 			// WebKit focuses <body> after link is clicked; override that
 			e.target.focus();
 		});
+		this.populateFavorites();
 	},
+	
+	/** @private kick off initial population of favorites */
+	populateFavorites: function() {
+		dojo.place("<div>Populating favorites&#x2026;</div>", this.favresults, "only");
+		
+		
+		// initially, show all favorites
+		this.favService.getFavorites().then(this.showFavorites());
+		// need to add the listener since favorites may not 
+		// have been initialized after first getting the favorites
+		this.favService.addEventListener("favoritesChanged", this.showFavorites());
+	},
+	
+	/** 
+	 * @private 
+	 * render the favorites that we have found, if any.
+	 * this function wraps another function that does the actual work
+	 * we need this so we can have access to the proper scope.
+	 */
+	showFavorites: function() {
+		var that = this;
+		
+		return function(favs) {
+			if (favs.navigator) {
+				favs = favs.navigator;
+			}
+			if (favs.length > 0) {
+				var table = document.createElement('table');
+				for (var i=0; i < favs.length; i++) {
+					var fav = favs[i];
+					var col;
+					var row = table.insertRow(-1);
+					col = row.insertCell(0);
+					col.colspan = 2;
+//					var image = new Image();
+//					dojo.addClass(image, "commandSprite");
+//					dojo.addClass(image, "core-sprite-makeFavorite");
+//					dojo.addClass(image, "commandImage");
+//					col.appendChild(image);
+					var favLink = document.createElement('a');
+					dojo.place(document.createTextNode(fav.name), favLink);
+					
+					var loc;
+					if (fav.isExternalResource) {
+						// should open link in new tab, but for now, follow the behavior of navoutliner.js
+						loc = fav.path;
+					} else {
+						loc	= fav.directory ? require.toUrl("navigate/table.html") + "#" + fav.path : require.toUrl("edit/edit.html") + "#" + fav.path;
+						if (loc === "#") {
+							loc = "";
+						}
+					}
+					favLink.setAttribute('href', loc);
+					col.appendChild(favLink);
+				}
+				dojo.place(table, that.favresults, "only");
+				dojo.place("<hr/>", that.favresults, "last");
+			} else {
+				dojo.empty(that.favresults);
+			}
+			that.decorateResult(that.favresults);
+		};
+	},
+
 	
 	/** @private */
 	checkSearch: function() {
@@ -93,16 +216,23 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	/** @private */
 	doSearch: function() {
 		var text = this.resourceName && this.resourceName.get("value");
-		if (!text) {
-			return;
+
+		var showFavs = this.showFavorites();
+		// update favorites
+		this.favService.queryFavorites(text).then(function(favs) {
+			showFavs(favs);
+		});
+
+		// don't do a server-side query for an empty text box
+		if (text) {
+			dojo.place("<div>Searching&#x2026;</div>", this.results, "only");
+			// Gives Webkit a chance to show the "Searching" message
+			var that = this;
+			setTimeout(function() {
+				var query = that.searcher.createSearchQuery(null, text, "Name");
+				that.searcher.search(that.results, query, false, false, dojo.hitch(that, that.decorateResult), true /*no highlight*/);
+			}, 0);
 		}
-		dojo.place("<div>Searching&#x2026;</div>", this.results, "only");
-		// Gives Webkit a chance to show the "Searching" message
-		var that = this;
-		setTimeout(function() {
-			var query = that.searcher.createSearchQuery(null, text, "Name");
-			that.searcher.search(that.results, query, false, false, dojo.hitch(that, that.decorateResult), true /*no highlight*/);
-		}, 0);
 	},
 	
 	/** @private */
