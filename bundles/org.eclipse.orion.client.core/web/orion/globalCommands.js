@@ -12,9 +12,11 @@
 /*global window document define login logout localStorage orion */
 /*browser:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textview/keyBinding',
-        'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog'], function(require, dojo, dijit, mCommands, mUtil, mKeyBinding){
+define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding',
+        'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog'], 
+        function(require, dojo, dijit, mCommands, mExtensionCommands, mUtil, mKeyBinding){
 
+	
 	/**
 	 * Constructs a new command parameter collector
 	 * @param {DOMElement} the toolbar containing the parameter collector
@@ -280,7 +282,6 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	'<div id="staticBanner" class="layoutBlock topRowBanner">' +
 		'<a id="home" class="layoutLeft primaryNav" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
 		'<div id="primaryNav" class="layoutLeft primaryNav"></div>' +
-		'<div id="globalActions" class="layoutLeft primaryNav"></div>' +
 		'<div id="help" class="layoutRight help"><a id="help" href="' + require.toUrl("help/index.jsp") + '"><img src="' + require.toUrl("images/help.gif") + '" alt="Help"/></a></div>'+
 		'<div id="userInfo" class="layoutRight primaryNav"></div>' +
 		'<div class="layoutRight primaryNav">|</div>' +
@@ -289,6 +290,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	'<div id="titleArea" class="layoutBlock titleArea">' +
 		'<div id="pageTitle" class="layoutLeft pageTitle"></div>' +
 		'<input type="search" id="search" placeholder="Search root" title="Type a keyword or wild card to search in root" class="layoutRight searchbox">' +
+		'<div id="relatedLinks" class="layoutRight pageNav"></div>' +
+		'<div id="globalActions" class="layoutRight pageNav"></div>' +
 		'<div id="dimension" class="layoutBlock dimension"></div>' +
 		'<div id="location" class="layoutBlock currentLocation"></div>' +
 	'</div>';
@@ -358,8 +361,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	
 	function startProgressService(serviceRegistry){
 		var progressService = serviceRegistry.getService("orion.page.progress");
-		if(progressService)
+		if(progressService) {
 			dojo.hitch(progressService, progressService.init)("progressPane");
+		}
 	}
 
 	/**
@@ -434,8 +438,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			}
 		}
 		
-		if(dijit.popup.hide)
+		if (dijit.popup.hide) {
 			dijit.popup.hide(loginDialog); //close doesn't work on FF
+		}
 		dijit.popup.close(loginDialog);
 	}
 
@@ -467,6 +472,108 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				commandService.renderCommands(toolbar, "dom", navItem || item || handler, navHandler || handler, "tool", !useImage);  // use true when we want to force toolbar items to text
 			}
 		}
+	}
+	
+	/**
+	 * Adds the related links to the banner
+	 * @name orion.globalCommands#generateRelatedLinks
+	 * @function
+	 */
+	function generateRelatedLinks(serviceRegistry, item, exclusions, commandService) {
+		var contributedLinks = serviceRegistry.getServiceReferences("orion.page.link.related");
+		if (contributedLinks.length <= 0) {
+			return;
+		}
+		var related = dojo.byId("relatedLinks");
+		if(!related){
+			// document not loaded
+			return;
+		}
+		var foundLink = false;
+		var linksMenu = dijit.byId("relatedLinksMenu");
+		if (linksMenu) {
+			// see http://bugs.dojotoolkit.org/ticket/10296
+			linksMenu.focusedChild = null;
+			dojo.forEach(linksMenu.getChildren(), function(child) {
+				linksMenu.removeChild(child);
+				child.destroy();
+			});
+		} else {
+			linksMenu = new dijit.Menu({
+				style: "display: none;",
+				id: "relatedLinksMenu"
+			});
+		}
+		
+		// assemble the related links
+		for (var i=0; i<contributedLinks.length; i++) {
+			var info = {};
+			var propertyNames = contributedLinks[i].getPropertyNames();
+			for (var j = 0; j < propertyNames.length; j++) {
+				info[propertyNames[j]] = contributedLinks[i].getProperty(propertyNames[j]);
+			}
+			if (info.id && info.name) {
+				var command;
+				// exclude anything in the list of exclusions
+				var position = dojo.indexOf(exclusions, info.id);
+				if (position < 0) {
+					// look for it in the command service.  Total reach.
+					command = commandService.findCommand(info.id);
+					if (!command) {
+						// if it's not there look for it in orion.navigate.command and create it
+						var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
+						for (var j=0; j<commandsReferences.length; j++) {
+							var id = commandsReferences[j].getProperty("id");
+							if (id === info.id) {
+								var navInfo = {};
+								for (var k = 0; k < propertyNames.length; k++) {
+									navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
+								}
+								var commandOptions = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j]);
+								command = new mCommands.Command(commandOptions);
+							}
+						}
+					}
+					if (command) {
+						if (!command.visibleWhen || command.visibleWhen(item)) {
+							foundLink = true;
+							var invocation = new mCommands.CommandInvocation(commandService, item, item, null, command);
+							command._addMenuItem(linksMenu, invocation);
+						}
+					}
+				}
+			}
+		}
+		
+		var menuButton = dijit.byId("related");
+		if (menuButton) {
+			if (!foundLink) {
+				menuButton.destroy();
+			}
+		} else {
+			if (foundLink) {
+				menuButton = new dijit.form.DropDownButton({
+					id: "related",
+					label: "Related Pages",
+					dropDown: linksMenu
+				});
+				dojo.place(menuButton.domNode, related, "only");
+			}
+		}	
+		mUtil.forceLayout(related);
+	}
+	
+	/**
+	 * Support for establishing a page item associated with global commands and related links
+	 */
+	var pageItem;
+	var exclusions = [];
+	function setPageCommandExclusions(excluded) {
+		exclusions = excluded;
+	}
+	function setPageTarget(item, serviceRegistry, commandService) {
+		pageItem = item;
+		generateRelatedLinks(serviceRegistry, item, exclusions, commandService);
 	}
 	
 	
@@ -554,6 +661,41 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 			text = document.createTextNode(document.title);
 			dojo.place(text, title, "last");
 		}
+		
+		// Assemble global commands
+		var favoriteCommand = new mCommands.Command({
+			name: "Make Favorite",
+			tooltip: "Add a file or folder to the favorites list",
+			imageClass: "core-sprite-makeFavorite",
+			id: "orion.makeFavorite",
+			visibleWhen: function(item) {
+				var items = dojo.isArray(item) ? item : [item];
+				for (var i=0; i < items.length; i++) {
+					if (!items[i].Location) {
+						return false;
+					}
+				}
+				return true;},
+			callback: function(data) {
+				var items = dojo.isArray(data.items) ? data.items : [data.items];
+				var favService = serviceRegistry.getService("orion.core.favorite");
+				var doAdd = function(item) {
+					return function(result) {
+						if (!result) {
+							favService.makeFavorites(item);
+						} else {
+							serviceRegistry.getService("orion.page.message").setMessage(item.Name + " is already a favorite.", 2000);
+						}
+					};
+				};
+				for (var i = 0; i < items.length; i++) {
+					var item = items[i];
+					favService.hasFavorite(item.ChildrenLocation || item.Location).then(doAdd(item));
+				}
+			}});
+		commandService.addCommand(favoriteCommand, "global");
+		commandService.registerCommandContribution("orion.makeFavorite", 1, "globalActions", null, false, new mCommands.CommandKeyBinding("f", true, true));
+
 	
 		var openResourceDialog = function(searcher, /* optional */ editor) {
 			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher});
@@ -604,7 +746,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				return true;
 			}});
 		commandService.addCommand(toggleBanner, "global");
-		commandService.registerCommandContribution("orion.toggleTrim", 1, "globalActions", null, true, new mCommands.CommandKeyBinding("m", true, true));
+		commandService.registerCommandContribution("orion.toggleTrim", 100, "globalActions", null, true, new mCommands.CommandKeyBinding("m", true, true));
 		
 		if (editor) {
 			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('m', true, true), "Toggle Trim");
@@ -613,7 +755,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		
 		// We are using 't' for the non-editor binding because of git-hub's use of t for similar function
 		commandService.addCommand(openResourceCommand, "global");
-		commandService.registerCommandContribution("eclipse.openResource", 1, "globalActions", null, true, new mCommands.CommandKeyBinding('t'));
+		commandService.registerCommandContribution("eclipse.openResource", 100, "globalActions", null, true, new mCommands.CommandKeyBinding('t'));
 		
 		var keyAssistNode = dojo.byId("keyAssist");
 		dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){ 
@@ -677,19 +819,44 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 				return true;
 			}});
 		commandService.addCommand(keyAssistCommand, "global");
-		commandService.registerCommandContribution("eclipse.keyAssist", 1, "globalActions", null, true, new mCommands.CommandKeyBinding(191, false, true));
+		commandService.registerCommandContribution("eclipse.keyAssist", 100, "globalActions", null, true, new mCommands.CommandKeyBinding(191, false, true));
 		if (editor) {
 			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('L', true, true), "Show Keys");
 			editor.getTextView().setAction("Show Keys", keyAssistCommand.callback);
 		}
-
-		// generate global commands
-		var toolbar = dojo.byId("globalActions");
-		if (toolbar) {	
-			dojo.empty(toolbar);
-			// need to have some item, for global scoped commands it won't matter
-			var item = handler || {};
-			commandService.renderCommands(toolbar, "global", item, handler, "tool");
+		
+		// render global commands
+		var globalTools = dojo.byId("globalActions");
+		if (globalTools) {	
+			dojo.empty(globalTools);
+			// need to have some item associated with the command
+			var item = pageItem || handler || {};
+			commandService.renderCommands(globalTools, "global", item, handler, "tool");
+		}
+		
+		// provide free "open with" object level unless already done
+		var index = dojo.indexOf(exclusions, "eclipse.openWith");
+		if (index < 0) {
+			var contentTypeService = serviceRegistry.getService("orion.file.contenttypes");
+			if (contentTypeService) {
+				contentTypeService.getContentTypesMap().then(function(map) {
+					var openWithCommands = mExtensionCommands._createOpenWithCommands(serviceRegistry, map);
+					for (var i=0; i<openWithCommands.length; i++) {
+						var commandInfo = openWithCommands[i].properties;
+						var service = openWithCommands[i].service;
+						var commandOptions = mExtensionCommands._createCommandOptions(commandInfo, service);
+						var command = new mCommands.Command(commandOptions);
+						command.isEditor = commandInfo.isEditor;
+						var openWithGroupCreated = false;
+						commandService.addCommand(command, "object");
+						if (!openWithGroupCreated) {
+							openWithGroupCreated = true;
+							commandService.addCommandGroup("eclipse.openWith", 1000, "Open With");
+						}
+						commandService.registerCommandContribution(command.id, i, null, "eclipse.openWith");
+					}
+				});
+			}
 		}
 		
 		generateUserInfo(serviceRegistry);
@@ -716,11 +883,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 	//return the module exports
 	return {
 		generateUserInfo: generateUserInfo,
+		generateRelatedLinks: generateRelatedLinks,
 		generateDomCommandsInBanner: generateDomCommandsInBanner,
 		generateBanner: generateBanner,
 		notifyAuthenticationSite: notifyAuthenticationSite,
 		setPendingAuthentication: setPendingAuthentication,
 		CommandParameterCollector: CommandParameterCollector,
-		getAuthenticationIds: getAuthenticationIds
+		getAuthenticationIds: getAuthenticationIds,
+		setPageTarget: setPageTarget,
+		setPageCommandExclusions: setPageCommandExclusions
 	};
 });

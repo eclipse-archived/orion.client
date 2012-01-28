@@ -128,6 +128,13 @@ a:hover {
 	text-decoration: underline;
 }
 
+.pageNav {
+	color: #808080;
+	font-size: 8pt;
+	margin-right: 6px;
+	margin-left: 6px;
+}
+
 .pageActions {
 	color: #808080;
 	cursor: pointer;

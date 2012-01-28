@@ -49,16 +49,15 @@ dojo.addOnLoad(function(){
 				parentId: "explorer-tree", breadcrumbId: "location", toolbarId: "pageActions", selectionToolsId: "selectionTools"});
 		
 		function refresh() {
-//			if (dojo.hash().length === 0 && fileServices.length === 1) {
-//				dojo.hash(fileServices[0].getProperty("top"));
-//				return;
-//			}
-			explorer.loadResourceList(dojo.hash());
+			explorer.loadResourceList(dojo.hash(), false, function() {
+				mGlobalCommands.setPageTarget(explorer.treeRoot, serviceRegistry, commandService);
+			});
 		}
 	
 		var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", toolbar: "outlinerToolbar", serviceRegistry: serviceRegistry});
 							
 		// global commands
+		mGlobalCommands.setPageCommandExclusions(["eclipse.openWith"]);
 		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
 		// commands shared by navigators
 		mFileCommands.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools");
@@ -93,7 +92,13 @@ dojo.addOnLoad(function(){
 		// commands appearing in nav tool bar
 		commandService.registerCommandContribution("eclipse.openResource", 500, "pageActions");
 		// commands appearing in local actions menu
-		commandService.registerCommandContribution("eclipse.makeFavorite", 1, null, "eclipse.fileGroup");
+		
+		// favorites is special cased because it's only been defined at the global level and we need to contribute it here
+		var faveCommand = commandService.findCommand("orion.makeFavorite");
+		if (faveCommand) {
+			commandService.addCommand(faveCommand, "object");
+			commandService.registerCommandContribution("orion.makeFavorite", 1, null, "eclipse.fileGroup");
+		}
 		commandService.registerCommandContribution("eclipse.renameResource", 2, null, "eclipse.fileGroup");
 		commandService.registerCommandContribution("eclipse.copyFile", 3, null, "eclipse.fileGroup");
 		commandService.registerCommandContribution("eclipse.moveFile", 4, null, "eclipse.fileGroup");
