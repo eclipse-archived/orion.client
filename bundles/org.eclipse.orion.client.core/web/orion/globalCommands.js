@@ -535,8 +535,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 		if (!searchField) {
 			throw "failed to generate HTML for banner";
 		}
-		dojo.connect(searchField, "onkeypress", function(e){
-			if (e.charOrCode === dojo.keys.ENTER) {
+		dojo.connect(searchField, "onkeydown", function(e){
+			if (e.keyCode === dojo.keys.ENTER) {
 				if (searcher) {
 					if (searchField.value.length > 0) {
 						var query = searcher.createSearchQuery(searchField.value);
@@ -546,6 +546,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'orion/textv
 					window.alert("Can't search: no search service is available");
 				}
 			}
+			e.stopPropagation();
 		});
 		
 		// Put page title in title area.  
