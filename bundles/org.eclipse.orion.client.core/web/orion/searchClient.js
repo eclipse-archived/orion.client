@@ -98,8 +98,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 				return  mSearchUtils.generateSearchQuery({sort: sort,
 					rows: 100,
 					start: 0,
-					searchStr: "Name:" + this._luceneEscape(nameQuery, true) + wildcard,
-					location: this.location});
+					searchStr: "Name:" + this._luceneEscape(nameQuery, true) + wildcard});
 			}
 			return  mSearchUtils.generateSearchQuery({sort: sort,
 				rows: 40,
