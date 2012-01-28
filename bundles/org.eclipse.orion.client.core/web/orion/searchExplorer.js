@@ -12,7 +12,7 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container'], 
+define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'dijit/TooltipDialog'], 
 		function(require, dojo, dijit, mExplorer, mUtil, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer) {
 
 	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, queryStr, options) {
@@ -240,6 +240,18 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			}
 		}
 		return -1;
+	};
+	
+	SearchResultModel.prototype.getCurrentModel = function(){
+		if(this.indexedFileItems.length === 0){
+			return null;
+		}
+		var fileModel = this.indexedFileItems[this.currentFileIndex];
+		if(fileModel.children && fileModel.children.length > 0 && this.currentDetailIndex >=0){
+			return fileModel.children[this.currentDetailIndex];
+		} else {
+			return fileModel;
+		}
 	};
 	
 	SearchResultModel.prototype.getFileDetailItemIndex = function(fileItemIndex, detailItem){
@@ -478,6 +490,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
+		if(!parentItem){
+			return;
+		}
 		if (parentItem.children) {
 			onComplete(parentItem.children);
 		} else if (parentItem.type === "detail") {
@@ -698,7 +713,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
 		var that = this;
 		if(this.explorer._state === "result_view"){
-			var link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: item.linkLocation}, spanHolder, "last");
+			var link = dojo.create("a", {className: "navlink", id: this.getDetailLinkId(item), href: item.linkLocation}, spanHolder, "last");
 			dojo.connect(link, "onclick", link, function() {
 				if(that.explorer._state === "result_view"){
 					that.selectElement(item,true);
@@ -744,6 +759,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return this.explorer.model.getId(item) + "_fileSpan";
 	};
 	
+	SearchResultRenderer.prototype.getDetailLinkId = function(item){
+		return this.explorer.model.getId(item) + "_detailLink";
+	};
+	
 	SearchResultRenderer.prototype.renderLocationElement = function(item){
 		var spanHolder = dojo.byId(this.getLocationSpanId(item));
 		var qParams = mSearchUtils.copyQueryParams(this.explorer.model.queryObj, true);
@@ -765,7 +784,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				span = dojo.create("span", null, col, "only");
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				this.getExpandImage(tableRow, span);
-				link = dojo.create("span", {/*className: "navlinkonpage",*/ id: tableRow.id+"NameColumn"}, span, "last");
+				link = dojo.create("span", {/*className: "navlinkonpage",*/ id: tableRow.id+"_dir"}, span, "last");
 				dojo.place(document.createTextNode(item.name), link, "only");
 			} else {
 				col = document.createElement('td');
@@ -1048,6 +1067,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			replaceStringDiv.placeholder="Replace With";
 			//dojo.addClass(replaceStringDiv, 'searchCmdGroupMargin');
 			replaceStringDiv.onkeydown = function(e){
+				e.stopPropagation();
 				if (e.keyCode === dojo.keys.ENTER) {
 					var replaceInputDiv = dojo.byId("globalSearchReplaceWith");
 					return that.doPreview(replaceInputDiv.value);
@@ -1355,6 +1375,59 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.registry.getService("orion.page.message").setProgressMessage(message);	
 	};
 	
+	SearchResultExplorer.prototype.popupContext = function(model){
+		var that =this;
+	    var modelLinkId = this.renderer.getDetailLinkId(model);
+		var tableNode = dojo.create( "div");
+		dojo.create( "span", { innerHTML: model.linkLocation + "\n" }, tableNode );
+	    that.contextTipDialog.attr("content", tableNode);
+        dijit.popup.open({
+        	popup: that.contextTipDialog,
+	        around: dojo.byId(modelLinkId),
+	        orient: {'BR':'TL', 'TR':'BL'}
+	    });
+	};
+	
+	SearchResultExplorer.prototype.startKeyBoardListening = function() {
+		if(this._state !== "result_view"){
+			return;
+		}
+		var that = this;
+		this.contextTipDialogOpened = false;
+	    this.contextTipDialog = new dijit.TooltipDialog({
+	        content: "",
+	        onMouseLeave: function(){
+	            dijit.popup.close(that.contextTipDialog);
+	            that.contextTipDialogOpened = false;
+	        },
+	        onBlur: function(){
+	            dijit.popup.close(that.contextTipDialog);
+	            that.contextTipDialogOpened = false;
+	        }
+	    });
+		
+		dojo.connect(document, "onkeydown", dojo.hitch(this, function (e) {
+			if(e.keyCode === dojo.keys.DOWN_ARROW){
+				this.gotoNext(true, true);
+			} else if(e.keyCode === dojo.keys.UP_ARROW){
+				this.gotoNext(false, true);
+			} else if(e.keyCode === dojo.keys.RIGHT_ARROW){
+				//var currentModel = this.model.getCurrentModel();
+				//this.popupContext(currentModel);
+			} else if(e.keyCode === dojo.keys.LEFT_ARROW){
+				//dijit.popup.close(this.myTooltipDialog);
+			} else if(e.keyCode === dojo.keys.ENTER) {
+				var currentModel = this.model.getCurrentModel();
+				if(e.ctrlKey){
+					window.open(currentModel.linkLocation);
+				} else {
+					window.location.href = currentModel.linkLocation;
+				}
+			}
+			e.stopPropagation();
+		}));
+	};
+	
 	SearchResultExplorer.prototype.startUp = function() {
 		var pageTitle = dojo.byId("pageTitle");
 		if(pageTitle && this.model.queryObj.searchStrTitle){
@@ -1372,6 +1445,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			} 
 		}
 		var that = this;
+		this.startKeyBoardListening();
 		this.model.buildResultModel();
 		if(this._state === "result_view"){
 			this.initCommands();
@@ -1681,6 +1755,42 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchReportRenderer.prototype.constructor = SearchReportRenderer;
+	
+	function ContextTipExplorer(parentId, reportList){
+		this.parentId = parentId;
+		this.reportList = reportList;
+		this.renderer = new ContextTipRenderer({checkbox: false}, this);
+	};
+	ContextTipExplorer.prototype = new mExplorer.Explorer();
+	
+	ContextTipExplorer.prototype.report = function() {
+		this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, [this.model]));
+	};
+
+	ContextTipExplorer.prototype.constructor = ContextTipExplorer;
+
+	
+	function ContextTipRenderer(options, explorer){
+		this._init(options);
+		this.options = options;
+		this.explorer = explorer;
+	};
+	
+	ContextTipRenderer.prototype = new mExplorer.SelectionRenderer();
+	
+	ContextTipRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		switch(col_no){
+		case 0:
+			var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"});
+			var div = dojo.create("div", null, col, "only");
+			var span = dojo.create("span", {}, div, "last");
+
+			dojo.place(document.createTextNode(item.linkLocation), span, "only");
+			return col;
+		}
+	};
+	
+	ContextTipRenderer.prototype.constructor = ContextTipRenderer;
 	
 	
 	//return module exports
