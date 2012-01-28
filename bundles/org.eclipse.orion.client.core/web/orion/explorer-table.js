@@ -12,8 +12,8 @@
 /*global define */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/contentTypes', 'dojo/number'],
-		function(require, dojo, mUtil, mExplorer, mBreadcrumbs, mFileCommands){
+define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
+		function(require, dojo, mUtil, mExplorer, mBreadcrumbs, mFileCommands, mExtensionCommands){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -125,7 +125,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 				// Images: always generate link to file. Non-images: use the "open with" href if one matches,
 				// otherwise use default editor.
 				if (!this.openWithCommands) {
-					this.openWithCommands = mFileCommands.getOpenWithCommands(this.commandService);
+					this.openWithCommands = mExtensionCommands.getOpenWithCommands(this.commandService);
 					for (i=0; i < this.openWithCommands.length; i++) {
 						if (this.openWithCommands[i].isEditor === "default") {
 							this.defaultEditor = this.openWithCommands[i];
@@ -230,8 +230,9 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 	 * @param path The path of the resource to load
 	 * @param [force] If true, force reload even if the path is unchanged. Useful
 	 * when the client knows the resource underlying the current path has changed.
+	 * @param postLoad a function to call after loading the resource
 	 */
-	FileExplorer.prototype.loadResourceList = function(path, force) {
+	FileExplorer.prototype.loadResourceList = function(path, force, postLoad) {
 		// console.log("loadResourceList old " + this._lastHash + " new " + path);
 		path = mUtil.makeRelative(path);
 		if (!force && path === this._lastHash) {
@@ -289,6 +290,9 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 						});
 					}
 					mFileCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
+					if (typeof postLoad === "function") {
+						postLoad();
+					}
 					this.model = new Model(this.registry, this.treeRoot, this.fileClient);
 					this.createTree(this.parentId, this.model);
 					this.onchange && this.onchange(this.treeRoot);
