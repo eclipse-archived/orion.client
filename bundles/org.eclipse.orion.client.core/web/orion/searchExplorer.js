@@ -658,6 +658,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			return;
 		}
 		var iconSpan = dojo.byId(this.getDetailIconId(item));
+		if(!iconSpan){
+			return;
+		}
 		dojo.empty(iconSpan);
 		if(direction === "right"){
 			var icon = dojo.create("span", null, iconSpan, "last");
@@ -823,6 +826,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var href =  mSearchUtils.generateSearchHref(qParams);
 		link = dojo.create("a", {className: "navlink", href: href}, spanHolder, "last");
 		link.title = "Search again in this folder with \"" + this.explorer.model.queryObj.searchStrTitle + "\"";
+		var that = this;
+		dojo.connect(link, "onclick", link, function() {
+			that.explorer.closeContextTip();
+		});
 		dojo.place(document.createTextNode(item.fullPathName), link, "only");
 	};
 	
@@ -847,28 +854,38 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					this.renderFileElement(item, span, renderName);
 				} else {
 					var that = this;
-					dojo.connect(tableRow, "onclick", tableRow, function() {
-						if(that.explorer._state === "result_view"){
+					if(that.explorer._state === "result_view"){
+						dojo.connect(tableRow, "onclick", tableRow, function() {
 							that.selectElement(item,true);
-						}
-					});
-					var iconSpan = dojo.create("span", {id: this.getDetailIconId(item)}, span, "last");
-					var icon = dojo.create("span", {id: this.getDetailIconId(item)}, iconSpan, "last");
+						});
+						dojo.connect(tableRow, "onmouseover", tableRow, function() {
+							tableRow.style.cursor ="pointer";
+						});
+						dojo.connect(tableRow, "onmouseout", tableRow, function() {
+							tableRow.style.cursor ="default";
+						});
+					}
+					var iconSpan = dojo.create("span", {}, span, "last");
+					var icon = dojo.create("span", {}, iconSpan, "last");
 					dojo.addClass(icon, "imageSprite");
 					dojo.addClass(icon, "core-sprite-none");
 					this.renderDetailElement(item, tableRow, span);
+					iconSpan = dojo.create("span", {id: this.getDetailIconId(item)}, span, "last");
+					icon = dojo.create("span", {}, iconSpan, "only");
+					dojo.addClass(icon, "imageSprite");
+					dojo.addClass(icon, "core-sprite-none");
 				}
 			}
 			return col;
 		case 1:
+			col = document.createElement('td');
 			if(item.type ===  "file"){
-				col = document.createElement('td');
 				span = dojo.create("span", {id: this.getLocationSpanId(item)}, col, "only");
 				if(item.parentLocation){
 					this.renderLocationElement(item);
 				}
-				return col;
-			}
+			} 
+			return col;
 		}
 	};
 	SearchResultRenderer.prototype.constructor = SearchResultRenderer;
@@ -1425,15 +1442,24 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	
 	SearchResultExplorer.prototype.popupContext = function(model){
 		var that =this;
-	    var modelLinkId = this.renderer.getDetailLinkId(model);
+	    var modelLinkId = this.renderer.getDetailIconId(model);
 		var tableNode = this.renderer.generateContextTip(model);
 	    that.contextTipDialog.attr("content", tableNode);
 		//var pos = dojo.position(modelLinkId, true);
         dijit.popup.open({
         	popup: that.contextTipDialog,
 	        around: dojo.byId(modelLinkId),
-	        orient: {'TR':'TL', 'TR':'BL'}
+	        orient: {'TR':'TL', 'TR':'TL'}
 	    });
+	};
+	
+	SearchResultExplorer.prototype.closeContextTip = function(){
+		if(this._state === "result_view"){
+			dijit.popup.close(this.contextTipDialog);
+			this._popUpContext = false;
+			this.renderer.replaceDetailIcon(this.model.getCurrentModel(), "right");
+		}
+		
 	};
 	
 	SearchResultExplorer.prototype.startKeyBoardListening = function() {
@@ -1441,23 +1467,21 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			return;
 		}
 		var that = this;
-		this.contextTipDialogOpened = false;
 	    this.contextTipDialog = new dijit.TooltipDialog({
 	        content: "",
-	        onMouseLeave: function(){
-	            dijit.popup.close(that.contextTipDialog);
-	            that.contextTipDialogOpened = false;
-	        },
 	        onBlur: function(){
-	            dijit.popup.close(that.contextTipDialog);
-	            that.contextTipDialogOpened = false;
+	            that.closeContextTip();
 	        }
 	    });
-		
 	    var resultParentDiv = dojo.byId(this.getParentDivId());
+	    this.eventHandlers = [];
 	    resultParentDiv.focus();
-	    
-		dojo.connect(resultParentDiv, "onkeydown", dojo.hitch(this, function (e) {
+		var h1 = dojo.connect(resultParentDiv, "onblur", dojo.hitch(this, function (e) {
+			this.closeContextTip();
+		}));
+		this.eventHandlers.push(h1);
+		
+		var h2 = dojo.connect(resultParentDiv, "onkeydown", dojo.hitch(this, function (e) {
 			if(e.keyCode === dojo.keys.DOWN_ARROW){
 				if(!e.ctrlKey){
 					this.gotoNext(true, true);
@@ -1481,9 +1505,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				}
 			} else if(e.keyCode === dojo.keys.LEFT_ARROW){
 				if(!e.ctrlKey){
-					this._popUpContext = false;
-					this.renderer.replaceDetailIcon(this.model.getCurrentModel(), "right");
-					dijit.popup.close(this.myTooltipDialog);
+					this.closeContextTip();
 					e.preventDefault();
 					return false;
 				}
@@ -1496,6 +1518,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				}
 			}
 		}));
+		this.eventHandlers.push(h2);
 	};
 	
 	SearchResultExplorer.prototype.startUp = function() {
