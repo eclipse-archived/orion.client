@@ -148,31 +148,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
-	SearchResultModel.prototype.generateReplaceModel = function(replaceStr, modelList, index, onComplete){
-		var model = modelList[index];
-		if(!model || index === modelList.length){
-			onComplete(modelList);
-			return;
-		}
-		if(model.children){
-			this.generateNewContents(model, replaceStr);
-			this.generateReplaceModel(replaceStr, modelList, index+1, onComplete);
-		} else {
-			this.fileClient.read(model.location).then(
-				dojo.hitch(this, function(contents) {
-					this.searchWithinFile(model, contents);
-					this.generateNewContents(model, replaceStr);
-					this.generateReplaceModel(replaceStr, modelList, index+1, onComplete);
-				}),
-				dojo.hitch(this, function(error) {
-					console.error("Error loading file contents: " + error.message);
-					this.generateReplaceModel(replaceStr, modelList, index+1, onComplete);
-				})
-			);
-		}
-		
-	};
-	
 	SearchResultModel.prototype.matchesReplaced = function(model){
 		var matchesReplaced = 0;
 		if(!model.children){
@@ -430,6 +405,33 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
+	SearchResultModel.prototype.generateMatchContext = function(contextAroundLength, fileContents, lineNumber/*zero based*/){
+		var context = [];
+		var totalContextLength = contextAroundLength*2 + 1;
+		var startFrom, endTo;
+		if(fileContents.length <= totalContextLength){
+			startFrom = 0;
+			endTo = fileContents.length -1;
+		} else {
+			startFrom = lineNumber - contextAroundLength;
+			if(startFrom < 0){
+				startFrom = 0;
+				endTo = startFrom + totalContextLength - 1;
+			} else {
+				endTo = lineNumber + contextAroundLength;
+				if(endTo > (fileContents.length -1)){
+					endTo = fileContents.length -1;
+					startFrom = endTo - totalContextLength + 1;
+				}
+				
+			}
+		}
+		for(var i = startFrom; i <= endTo; i++){
+			context.push({context: fileContents[i], current: (i === lineNumber)});
+		}
+		return context;
+	};
+	
 	SearchResultModel.prototype.searchWithinFile = function( fileModelNode, fileContentText){
 		var fileContents = fileContentText.split(this._lineDelimiter);
 		if(!this.normalMode()){
@@ -451,7 +453,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					if(result){
 						var lineNumber = i+1;
 						if(this.normalMode()){
-							var detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + ",line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
+							var detailNode = {parent: fileModelNode, context: this.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + ",line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
 							fileModelNode.children.push(detailNode);
 						} else {
 							for(var j = 0; j < result.length; j++){
@@ -587,6 +589,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var expanded = this.explorer._fileExpanded(this.explorer.model.currentFileIndex, this.explorer.model.currentDetailIndex);
 		if(expanded.childDiv) {
 			dojo.toggleClass(expanded.childDiv, "currentSearchMatch", false);
+			this.replaceDetailIcon(this.explorer.model.getCurrentModel(), "none");
 		}
 	};
 	
@@ -618,6 +621,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					this.explorer.twoWayCompareContainer.gotoMatch(item.lineNumber-1, item.matches[item.matchNumber-1], item.newMatches[item.matchNumber-1], this.explorer.model.queryObj.inFileQuery.searchStrLength );
 				} else {
 					this.explorer.model.setCurrent(fileItemIndex, fileDetailItemIndex, storeStatus);
+					if(this.explorer._popUpContext){
+						this.explorer.popupContext(this.explorer.model.getCurrentModel());
+						this.replaceDetailIcon(this.explorer.model.getCurrentModel(), "left");
+					} else {
+						this.replaceDetailIcon(this.explorer.model.getCurrentModel(), "right");
+					}
 				}
 			}
 		}
@@ -642,6 +651,27 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name;
 		var linkDiv = dojo.byId( this.getFileSpanId(item) + "_link");
 		dojo.place(document.createTextNode(renderName), linkDiv, "only");
+	};
+	
+	SearchResultRenderer.prototype.replaceDetailIcon = function(item , direction){
+		if(this.explorer._state !== "result_view"){
+			return;
+		}
+		var iconSpan = dojo.byId(this.getDetailIconId(item));
+		dojo.empty(iconSpan);
+		if(direction === "right"){
+			var icon = dojo.create("span", null, iconSpan, "last");
+			dojo.addClass(icon, "imageSprite");
+			dojo.addClass(icon, "core-sprite-rightarrow");
+		} else if(direction === "left"){
+			var icon = dojo.create("span", null, iconSpan, "last");
+			dojo.addClass(icon, "imageSprite");
+			dojo.addClass(icon, "core-sprite-leftarrow");
+		} else {
+			var icon = dojo.create("span", null, iconSpan, "last");
+			dojo.addClass(icon, "imageSprite");
+			dojo.addClass(icon, "core-sprite-none");
+		}
 	};
 	
 	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName){
@@ -674,6 +704,50 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
+	SearchResultRenderer.prototype.generateContextTip = function(detailModel){
+		var tableNode = dojo.create( "table");
+		for(var i = 0; i < detailModel.context.length; i++){
+			var lineDiv = dojo.create("tr",{},tableNode);
+			if(detailModel.context[i].current){
+				var lineTd = dojo.create( "td", { noWrap: true}, lineDiv );
+				this.generateDetailHighlight(detailModel, dojo.create("span",{className: "primaryColumn"},lineTd));
+			} else {
+				dojo.create( "td", { noWrap: true, innerHTML: detailModel.context[i].context}, lineDiv );
+			}
+		}
+		return tableNode;
+	};
+	
+	SearchResultRenderer.prototype.generateDetailHighlight = function(detailModel, parentSpan){
+		var startIndex = 0;
+		var gap = this.explorer.model.queryObj.inFileQuery.searchStrLength;
+		for(var i = 0; i < detailModel.matches.length; i++){
+			if(startIndex >= detailModel.name.length)
+				break;
+			if(this.explorer._state !== "result_view"){
+				if(i !== (detailModel.matchNumber - 1)){
+					continue;
+				}
+			}
+			
+			if(startIndex !== detailModel.matches[i].startIndex){
+				dojo.place(document.createTextNode(detailModel.name.substring(startIndex, detailModel.matches[i].startIndex)), parentSpan, "last");
+			}
+			var matchSegBold = dojo.create("b", null, parentSpan, "last");
+			if(this.explorer.model.queryObj.inFileQuery.wildCard){
+				gap = detailModel.matches[i].length;
+			}
+			dojo.place(document.createTextNode(detailModel.name.substring(detailModel.matches[i].startIndex, detailModel.matches[i].startIndex + gap)), matchSegBold, "only");
+			startIndex = detailModel.matches[i].startIndex + gap;
+			if(this.explorer._state !== "result_view"){
+				break;
+			}
+		}
+		if(startIndex < (detailModel.name.length - 1)){
+			dojo.place(document.createTextNode(detailModel.name.substring(startIndex)), parentSpan, "last");
+		}
+	};
+	
 	SearchResultRenderer.prototype.renderDetailElement = function(item, tableRow, spanHolder){
 		var linkSpan = this.getDetailElement(item, tableRow, spanHolder);
 		if(this.explorer._state === "result_view" || item.matches.length <= 1){
@@ -681,33 +755,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		} else {
 			dojo.place(document.createTextNode(item.lineNumber + "(" + item.matchNumber+ ") : "), linkSpan, "last");
 		}
-		var startIndex = 0;
-		var gap = this.explorer.model.queryObj.inFileQuery.searchStrLength;
-		for(var i = 0; i < item.matches.length; i++){
-			if(startIndex >= item.name.length)
-				break;
-			if(this.explorer._state !== "result_view"){
-				if(i !== (item.matchNumber - 1)){
-					continue;
-				}
-			}
-			
-			if(startIndex !== item.matches[i].startIndex){
-				dojo.place(document.createTextNode(item.name.substring(startIndex, item.matches[i].startIndex)), linkSpan, "last");
-			}
-			var matchSegBold = dojo.create("b", null, linkSpan, "last");
-			if(this.explorer.model.queryObj.inFileQuery.wildCard){
-				gap = item.matches[i].length;
-			}
-			dojo.place(document.createTextNode(item.name.substring(item.matches[i].startIndex, item.matches[i].startIndex + gap)), matchSegBold, "only");
-			startIndex = item.matches[i].startIndex + gap;
-			if(this.explorer._state !== "result_view"){
-				break;
-			}
-		}
-		if(startIndex < (item.name.length - 1)){
-			dojo.place(document.createTextNode(item.name.substring(startIndex)), linkSpan, "last");
-		}
+		this.generateDetailHighlight(item, linkSpan);
 	};
 		
 	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
@@ -763,6 +811,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return this.explorer.model.getId(item) + "_detailLink";
 	};
 	
+	SearchResultRenderer.prototype.getDetailIconId = function(item){
+		return this.explorer.model.getId(item) + "_detailIcon";
+	};
+	
 	SearchResultRenderer.prototype.renderLocationElement = function(item){
 		var spanHolder = dojo.byId(this.getLocationSpanId(item));
 		var qParams = mSearchUtils.copyQueryParams(this.explorer.model.queryObj, true);
@@ -800,13 +852,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 							that.selectElement(item,true);
 						}
 					});
-					var icon = dojo.create("span", null, span, "last");
+					var iconSpan = dojo.create("span", {id: this.getDetailIconId(item)}, span, "last");
+					var icon = dojo.create("span", {id: this.getDetailIconId(item)}, iconSpan, "last");
 					dojo.addClass(icon, "imageSprite");
 					dojo.addClass(icon, "core-sprite-none");
-					icon = dojo.create("span", null, span, "last");
-					dojo.addClass(icon, "imageSprite");
-					dojo.addClass(icon, "core-sprite-rightarrow");
-					
 					this.renderDetailElement(item, tableRow, span);
 				}
 			}
@@ -1067,7 +1116,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			replaceStringDiv.placeholder="Replace With";
 			//dojo.addClass(replaceStringDiv, 'searchCmdGroupMargin');
 			replaceStringDiv.onkeydown = function(e){
-				e.stopPropagation();
 				if (e.keyCode === dojo.keys.ENTER) {
 					var replaceInputDiv = dojo.byId("globalSearchReplaceWith");
 					return that.doPreview(replaceInputDiv.value);
@@ -1378,13 +1426,13 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	SearchResultExplorer.prototype.popupContext = function(model){
 		var that =this;
 	    var modelLinkId = this.renderer.getDetailLinkId(model);
-		var tableNode = dojo.create( "div");
-		dojo.create( "span", { innerHTML: model.linkLocation + "\n" }, tableNode );
+		var tableNode = this.renderer.generateContextTip(model);
 	    that.contextTipDialog.attr("content", tableNode);
+		//var pos = dojo.position(modelLinkId, true);
         dijit.popup.open({
         	popup: that.contextTipDialog,
 	        around: dojo.byId(modelLinkId),
-	        orient: {'BR':'TL', 'TR':'BL'}
+	        orient: {'TR':'TL', 'TR':'BL'}
 	    });
 	};
 	
@@ -1406,16 +1454,39 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	        }
 	    });
 		
-		dojo.connect(document, "onkeydown", dojo.hitch(this, function (e) {
+	    var resultParentDiv = dojo.byId(this.getParentDivId());
+	    resultParentDiv.focus();
+	    
+		dojo.connect(resultParentDiv, "onkeydown", dojo.hitch(this, function (e) {
 			if(e.keyCode === dojo.keys.DOWN_ARROW){
-				this.gotoNext(true, true);
+				if(!e.ctrlKey){
+					this.gotoNext(true, true);
+					e.preventDefault();
+					return false;
+				}
 			} else if(e.keyCode === dojo.keys.UP_ARROW){
-				this.gotoNext(false, true);
+				if(!e.ctrlKey){
+					this.gotoNext(false, true);
+					e.preventDefault();
+					return false;
+				}
 			} else if(e.keyCode === dojo.keys.RIGHT_ARROW){
-				//var currentModel = this.model.getCurrentModel();
-				//this.popupContext(currentModel);
+				if(!e.ctrlKey){
+					this._popUpContext = true;
+					this.renderer.replaceDetailIcon(this.model.getCurrentModel(), "left");
+					var currentModel = this.model.getCurrentModel();
+					this.popupContext(currentModel);
+					e.preventDefault();
+					return false;
+				}
 			} else if(e.keyCode === dojo.keys.LEFT_ARROW){
-				//dijit.popup.close(this.myTooltipDialog);
+				if(!e.ctrlKey){
+					this._popUpContext = false;
+					this.renderer.replaceDetailIcon(this.model.getCurrentModel(), "right");
+					dijit.popup.close(this.myTooltipDialog);
+					e.preventDefault();
+					return false;
+				}
 			} else if(e.keyCode === dojo.keys.ENTER) {
 				var currentModel = this.model.getCurrentModel();
 				if(e.ctrlKey){
@@ -1424,7 +1495,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 					window.location.href = currentModel.linkLocation;
 				}
 			}
-			e.stopPropagation();
 		}));
 	};
 	
@@ -1619,10 +1689,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		if(this.model.indexedFileItems.length === 0){
 			return;
 		}
-		var curentExpanded = this._fileExpanded(this.model.currentFileIndex, this.model.currentDetailIndex); 
-		if(curentExpanded.childDiv) {
-			dojo.toggleClass(curentExpanded.childDiv, "currentSearchMatch", false);
-		}
+		this.renderer.deselectElement();
 		var nextItem = this._decideNext(next, calculateNext);
 		this.model.highlightSelectionLater = true;
 		this.model.lastNavDirection = next;
@@ -1661,6 +1728,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		dojo.toggleClass(expanded.childDiv, "currentSearchMatch", true);
 		if(!this.visible(expanded.childDiv)) {
 			expanded.childDiv.scrollIntoView(!next);
+		}
+		if(this._popUpContext){
+			this.popupContext(this.model.getCurrentModel());
+			this.renderer.replaceDetailIcon(this.model.getCurrentModel(), "left");
+		} else {
+			this.renderer.replaceDetailIcon(this.model.getCurrentModel(), "right");
 		}
 	};
 
