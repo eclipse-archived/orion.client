@@ -578,6 +578,17 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 		mUtil.forceLayout(related);
 	}
 	
+	function renderGlobalCommands(commandService, handler, pageItem) {
+		var globalTools = dojo.byId("globalActions");
+		if (globalTools) {	
+			dojo.empty(globalTools);
+			// need to have some item associated with the command
+			var item = dojo.isArray(pageItem) ? pageItem[0] : pageItem;
+			item = item || handler || {};
+			commandService.renderCommands(globalTools, "global", item, handler, "tool");
+		}
+	}
+	
 	/**
 	 * Support for establishing a page item associated with global commands and related links
 	 */
@@ -589,6 +600,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 	function setPageTarget(itemOrArray, serviceRegistry, commandService, itemLabels) {
 		pageItem = itemOrArray;
 		generateRelatedLinks(serviceRegistry, itemOrArray, itemLabels, exclusions, commandService);
+		renderGlobalCommands(commandService, null, itemOrArray);
 	}
 	
 	
@@ -841,14 +853,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 			editor.getTextView().setAction("Show Keys", keyAssistCommand.callback);
 		}
 		
-		// render global commands
-		var globalTools = dojo.byId("globalActions");
-		if (globalTools) {	
-			dojo.empty(globalTools);
-			// need to have some item associated with the command
-			var item = pageItem || handler || {};
-			commandService.renderCommands(globalTools, "global", item, handler, "tool");
-		}
+		renderGlobalCommands(commandService, handler, pageItem);
 		
 		// provide free "open with" object level unless already done
 		var index = dojo.indexOf(exclusions, "eclipse.openWith");
