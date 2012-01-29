@@ -47,8 +47,14 @@ define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/sear
 					}
 				}
 			}
+			if(this.eventHandlers){
+				for (var i=0; i < this.eventHandlers.length; i++) {
+					dojo.disconnect(this.eventHandlers[i]);
+				}
+			}
 			var explorer = new mSearchExplorer.SearchResultExplorer(this.registry, this.commandService, resultLocation,  resultsNode, query, jsonData.response.numFound);
 			explorer.startUp();
+			this.eventHandlers = explorer.eventHandlers;
 		},
 
 		/**
