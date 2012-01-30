@@ -461,7 +461,7 @@ a:hover {
 }
 
 .progressPane_operations {
-	background: url(../images/progress_none.gif) no-repeat center;  /* TODO move icon to sprite*/
+	background: url(../images/progress_none.png) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .progressPane_running {
