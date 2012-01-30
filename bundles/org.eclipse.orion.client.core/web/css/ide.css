@@ -761,12 +761,12 @@ a:hover {
 	padding: 0px;
 }
 
-.lightTreeTableRow {
-	background-color: #FFFFFF;
+.lightTreeTableRow > td {
+	border-bottom: 1px solid #e6e6e6;
 }
 
-.darkTreeTableRow {
-	background-color: #f7f7f7;
+.darkTreeTableRow > td {
+	border-bottom: 1px solid #e6e6e6;
 }
 
 .testNavTreetable {
