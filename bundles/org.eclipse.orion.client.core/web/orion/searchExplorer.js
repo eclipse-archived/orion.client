@@ -1160,7 +1160,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		
 		
 		var innerReplaceAllCommand = new mCommands.Command({
-			name : "Replace All",
+			name : "Preview Changes",
 			image : require.toUrl("images/replaceAll.gif"),
 			id : "orion.globalSearch.innerReplaceAll",
 			groupId : "orion.searchGroup",
