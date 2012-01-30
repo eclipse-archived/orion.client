@@ -708,7 +708,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					var keyBinding = null;
 					var urlBinding = null;
 					if (command) {
-						if (scope === "dom") {
+						if (scope === "dom" || scope === "global") {
 							if (renderType === "tool" || renderType === "button") {
 								render = parent.id === positionOrder[i].scopeId;
 							} else if (renderType=== "menu") {
@@ -720,7 +720,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							// if there is a scope id on the contribution it's not supposed to show up here
 							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=368699
 							render = !positionOrder[i].scopeId;
-						}
+						} 
 						// only check bindings that would otherwise render (ie, dom id matches parent, etc.)
 						var checkBinding = render && (scope === "global" || scope === "dom");
 						invocation = new CommandInvocation(this, handler, items, userData, command);
