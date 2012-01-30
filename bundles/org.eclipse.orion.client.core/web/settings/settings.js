@@ -380,8 +380,7 @@ function reloadPlugins(){
 	var d = new dojo.Deferred();
 
 	for( var i = 0; i < settingsPluginList.length; i++) {
-	
-		settingsPluginList[i]._load().then( function(){
+		settingsPluginList[i].update().then( function(){
 			count++;
 			if( count === settingsPluginList.length ){
 				d.resolve();
