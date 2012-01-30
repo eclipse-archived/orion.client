@@ -708,7 +708,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultRenderer.prototype.generateContextTip = function(detailModel){
-		var tableNode = dojo.create( "table");
+		var tableNode = dojo.create( "table",{bgcolor:"#FFFFCC"});
 		for(var i = 0; i < detailModel.context.length; i++){
 			var lineDiv = dojo.create("tr",{},tableNode);
 			if(detailModel.context[i].current){
