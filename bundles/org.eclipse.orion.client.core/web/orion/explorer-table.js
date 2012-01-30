@@ -203,7 +203,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 		this.selectionToolsId = options.selectionToolsId;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new FileRenderer({checkbox: true, cachePrefix: "Navigator"}, this, this.commandService, this.contentTypeService);
+		this.renderer = new FileRenderer({checkbox: true, decorateAlternatingLines: false, cachePrefix: "Navigator"}, this, this.commandService, this.contentTypeService);
 	}
 	
 	FileExplorer.prototype = new mExplorer.Explorer();
