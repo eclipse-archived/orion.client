@@ -68,7 +68,7 @@ dojo.addOnLoad(function(){
 			tooltip: "Open or close the left pane",
 			id: "eclipse.toggleSplitter",
 			callback: function() {
-				var splitArea = dijit.byId("orion.innerNavigator");
+				var splitArea = dijit.byId("eclipse.navigate-table");
 				splitArea.toggle();}
 		});
 		commandService.addCommand(toggleOutlineCommand, "dom");

@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global define window document console localStorage */
+/*global define setTimeout addEventListener document console localStorage */
 
 define(["dojo", "orion/serviceregistry", "dojo/DeferredList"], function(dojo, mServiceregistry){
 var eclipse = eclipse || {};
@@ -25,6 +25,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	
 	var _channel = null;
 	var _deferredLoad = new dojo.Deferred();
+	var _deferredUpdate = null;
 	var _loaded = false;
 	
 	var _currentMessageId = 0;
@@ -100,6 +101,11 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 					if (!_loaded) {
 						_loaded = true;
 						_deferredLoad.resolve(_self);
+					}
+					
+					if (_deferredUpdate) {
+						_deferredUpdate.resolve(_self);
+						_deferredUpdate = null;
 					}
 				} else if ("dispatchEvent" === message.method){
 					var serviceRegistration = _serviceRegistrations[message.serviceId];
@@ -181,10 +187,30 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 		return result;
 	};
 	
+	this.update = function() {
+		if (!_loaded) {
+			return this._load();
+		}
+		
+		var updatePromise;
+		if (_deferredUpdate === null) {
+			_deferredUpdate = new dojo.Deferred();
+			updatePromise = _deferredUpdate;
+			internalRegistry.disconnect(_channel);
+			_channel = internalRegistry.connect(url, _responseHandler);
+			setTimeout(function() {
+				if (_deferredUpdate === updatePromise) {
+					_deferredUpdate.reject(new Error("Load timeout for plugin: " + url));
+				}
+			}, 15000);
+		}
+		return _deferredUpdate;
+	};
+	
 	this._load = function(isInstall) {
 		if (!_channel) {
 			_channel = internalRegistry.connect(url, _responseHandler);
-			window.setTimeout(function() {
+			setTimeout(function() {
 				if (!_loaded) {
 					if (!isInstall) {
 						data = {};
@@ -218,7 +244,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	var _channels = [];
 	var _pluginEventTarget = new mServiceregistry.EventTarget();
 
-	window.addEventListener("message", function(event) {
+	addEventListener("message", function(event) {
 		for (var i = 0, source = event.source; i < _channels.length; i++) {
 			if (source === _channels[i].target) {
 				if (typeof _channels[i].useStructuredClone === "undefined") {
