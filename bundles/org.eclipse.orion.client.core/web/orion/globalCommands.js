@@ -692,7 +692,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/extensionCommands',
 		// Assemble global commands
 		var favoriteCommand = new mCommands.Command({
 			name: "Make Favorite",
-			tooltip: "Add a file or folder to the favorites list",
+			tooltip: "Add to the favorites list",
 			imageClass: "core-sprite-makeFavorite",
 			id: "orion.makeFavorite",
 			visibleWhen: function(item) {
