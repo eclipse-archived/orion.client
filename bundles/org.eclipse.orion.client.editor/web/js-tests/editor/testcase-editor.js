@@ -15,53 +15,74 @@
 define(["orion/assert", "orion/editor/editor"],
 		function(assert, mEditor) {
 	var tests = {};
-	
+
 	// ************************************************************************************************
 	// Test supporting util methods
-	
+	var bind = mEditor.util.bind;
+
 	// Test our implementation of "bind"
-	tests["test Editor - bind"] = function() {
-		var binder = mEditor.util.bind;
-		
-		// Test: bound function gets proper context
-		var context1 = {},
-		    bound1 = binder.call(
+	tests["test bind - 'this'"] = function() {
+		var outerThis = {},
+		    innerThis,
+		    func = bind.call(
 				function () {
-					assert.strictEqual(this, context1);
-				}, context1);
-		bound1();
-		
-		// Test: argument is passed to bound function
-		var context2 = {},
-		    bound2 = binder.call(
-				function(arg1) {
-					assert.strictEqual(this, context2);
-					assert.strictEqual(arg1, "foo");
-				}, context2);
-		bound2("foo");
-		
-		// Test: fixed arguments are passed to bound function
-		var context3 = {},
-		    bound3 = binder.call(
-				function(arg1, arg2) {
-					assert.strictEqual(context3, this);
-					assert.strictEqual(arg1, "a");
-					assert.strictEqual(arg2, "b");
-				}, context3, "a", "b");
-		bound3();
-		
-		// Test: fixed arguments prepend arguments passed to bound function
-		var context4 = {},
-		    bound4 = binder.call(
-				function(arg1, arg2, arg3, arg4) {
-					assert.strictEqual(context4, this);
-					assert.strictEqual(arg1, "a");
-					assert.strictEqual(arg2, "b");
-					assert.strictEqual(arg3, "c");
-					assert.strictEqual(arg4, "d");
-				}, context4, "a", "b");
-		bound4("c", "d");
+					innerThis = this;
+				}, outerThis);
+		func();
+		assert.strictEqual(outerThis, innerThis);
 	};
-	
+
+	tests["test bind - param"] = function() {
+		var outerThis = {},
+		    innerThis,
+		    param,
+		    func = bind.call(
+				function(p1) {
+					innerThis = this;
+					param = p1;
+				}, outerThis);
+		func("foo");
+		assert.strictEqual(outerThis, innerThis);
+		assert.strictEqual(param, "foo");
+	};
+
+	// Test our implementation of "bind"
+	tests["test bind - multiple params"] = function() {
+		var outerThis = {},
+		    innerThis,
+		    param1,
+		    param2,
+		    func = bind.call(
+				function(p1, p2) {
+					innerThis = this;
+					param1 = p1;
+					param2 = p2;
+				}, outerThis, "a", "b");
+		func();
+		assert.strictEqual(outerThis, innerThis);
+		assert.strictEqual(param1, "a");
+		assert.strictEqual(param2, "b");
+	};
+
+	tests["test bind - fixed params precede call site params"] = function() {
+		var outerThis = {},
+		    innerThis,
+		    param1, param2, param3, param4,
+		    func = bind.call(
+				function(p1, p2, p3, p4) {
+					innerThis = this;
+					param1 = p1;
+					param2 = p2;
+					param3 = p3;
+					param4 = p4;
+				}, outerThis, "a", "b");
+		func("c", "d");
+		assert.strictEqual(outerThis, innerThis);
+		assert.strictEqual(param1, "a");
+		assert.strictEqual(param2, "b");
+		assert.strictEqual(param3, "c");
+		assert.strictEqual(param4, "d");
+	};
+
 	return tests;
 });
