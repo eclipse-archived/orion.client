@@ -19,9 +19,9 @@ define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/sear
 	 * @name orion.searchResults.SearchResultsGenerator
 	 * @class A search results generator for display search results to an end user
 	 */
-	function SearchResultsGenerator(serviceRegistry, resultsId, commandService) {
+	function SearchResultsGenerator(serviceRegistry, resultsId, commandService, fileService) {
 		this.registry = serviceRegistry;
-		this.fileService = this.registry.getService("orion.core.file");
+		this.fileService = fileService;
 		this.resultsId = resultsId;
 		this.commandService = commandService;
 	}
