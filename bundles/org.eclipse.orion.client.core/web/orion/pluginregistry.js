@@ -242,6 +242,12 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 	function _clear(plugin) {
 		delete _storage["plugin."+plugin.getLocation()];
 	}
+	
+	function _persist(plugin) {
+		var expiresSeconds = 60 * 60;
+		plugin.getData()._expires = new Date().getTime() + 1000 * expiresSeconds;
+		_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
+	}
 
 	var internalRegistry = {
 			registerService: dojo.hitch(serviceRegistry, serviceRegistry.registerService),
@@ -282,7 +288,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				}
 			},
 			updatePlugin: function(plugin) {
-				_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
+				_persist(plugin);
 				_pluginEventTarget.dispatchEvent("pluginUpdated", plugin);
 			},
 			postMessage: function(message, channel) {
@@ -301,10 +307,6 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 		return null;
 	}
 	
-	function _persist(plugin) {
-		_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
-	}
-	
 	/**
 	 * Starts the plugin registry
 	 * @name orion.pluginregistry.PluginRegistry#startup
@@ -317,11 +319,11 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 			var pluginURL = pluginURLs[i];
 			pluginURL = _normalizeURL(pluginURL);
 			var key = "plugin." + pluginURL;
-			if (_storage[key]) {
+			var pluginData = _storage[key] ? JSON.parse(_storage[key]) : null;
+			if (pluginData && pluginData._expires && pluginData._expires > new Date().getTime()) {
 				if (_getPlugin(pluginURL) === null) {
-					var pluginData = JSON.parse(_storage[key]);
-					var plugin = new eclipse.Plugin(pluginURL, pluginData, internalRegistry); 
-					_plugins.push(plugin);
+					delete pluginData._expires;
+					_plugins.push(new eclipse.Plugin(pluginURL, pluginData, internalRegistry));
 				}
 			} else {
 				_storage[key] ="{}";
