@@ -558,7 +558,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultRenderer.prototype.getCellHeaderElement = function(col_no){	
-		if(col_no === 0){
+		if(col_no === 1){
 			var title = dojo.create("th", {innerHTML: "<h2>Results</h2>"});
 			
 			if( this.explorer.model.queryObj.searchStrTitle){
@@ -579,8 +579,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				return dojo.create("h2", {innerHTML: headerStr});
 			}
 			return title;
-		} else if(col_no === 1){
+		} else if(col_no === 2){
 			return dojo.create("th", {innerHTML: "<h2>Location</h2>"});
+		} else if(col_no === 0){
+			return dojo.create("th", {innerHTML: ""});
 		}
 	};
 	
@@ -633,17 +635,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultRenderer.prototype.staleFileElement = function(item){
-		var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name;
 		if(item.stale){
 			var span = dojo.byId(this.getFileSpanId(item));
 			dojo.empty(span);
-			var icon = dojo.create("span", null, span, "last");
-			dojo.addClass(icon, "imageSprite");
-			dojo.addClass(icon, "core-sprite-none");
-			icon = dojo.create("span", null, span, "last");
-			dojo.addClass(icon, "imageSprite");
-			dojo.addClass(icon, "core-sprite-file");
-			dojo.place(document.createTextNode(renderName), span, "last");
+			dojo.place(document.createTextNode(item.name), span, "last");
+			span = dojo.byId(this.getFileIconId(item));
+			dojo.empty(span);
 		}
 	};
 	
@@ -670,11 +667,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			var icon = dojo.create("span", null, iconSpan, "last");
 			dojo.addClass(icon, "imageSprite");
 			dojo.addClass(icon, "core-sprite-leftarrow");
-		} else {
-			var icon = dojo.create("span", null, iconSpan, "last");
-			dojo.addClass(icon, "imageSprite");
-			dojo.addClass(icon, "core-sprite-none");
-		}
+		} 
 	};
 	
 	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName){
@@ -751,14 +744,20 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
-	SearchResultRenderer.prototype.renderDetailElement = function(item, tableRow, spanHolder){
+	SearchResultRenderer.prototype.renderDetailElement = function(item, tableRow, spanHolder, renderNumber){
 		var linkSpan = this.getDetailElement(item, tableRow, spanHolder);
-		if(this.explorer._state === "result_view" || item.matches.length <= 1){
-			dojo.place(document.createTextNode(item.lineNumber + " : "), linkSpan, "last");
-		} else {
-			dojo.place(document.createTextNode(item.lineNumber + "(" + item.matchNumber+ ") : "), linkSpan, "last");
+		if(renderNumber){
+			this.renderDetailLineNumber(item, linkSpan);
 		}
 		this.generateDetailHighlight(item, linkSpan);
+	};
+		
+	SearchResultRenderer.prototype.renderDetailLineNumber = function(item, spanHolder){
+		if(this.explorer._state === "result_view" || item.matches.length <= 1){
+			dojo.place(document.createTextNode(item.lineNumber + ":"), spanHolder, "last");
+		} else {
+			dojo.place(document.createTextNode(item.lineNumber + "(" + item.matchNumber+ "):"), spanHolder, "last");
+		}
 	};
 		
 	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
@@ -810,6 +809,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		return this.explorer.model.getId(item) + "_fileSpan";
 	};
 	
+	SearchResultRenderer.prototype.getFileIconId = function(item){
+		return this.explorer.model.getId(item) + "_fileIcon";
+	};
+	
 	SearchResultRenderer.prototype.getDetailLinkId = function(item){
 		return this.explorer.model.getId(item) + "_detailLink";
 	};
@@ -834,50 +837,47 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 	};
 	
 	SearchResultRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		
 		switch(col_no){
 		case 0:
 			var col, span, link;
-			if (item.type ===  "dir") {
-				col = document.createElement('td');
-				span = dojo.create("span", null, col, "only");
-				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, span);
-				link = dojo.create("span", {/*className: "navlinkonpage",*/ id: tableRow.id+"_dir"}, span, "last");
-				dojo.place(document.createTextNode(item.name), link, "only");
+			col = document.createElement('td');
+			if(item.type ===  "file"){
+				col.noWrap = true;
+				span = dojo.create("span", {id: this.getFileIconId(item)}, col, "only");
+				this.getExpandImage(tableRow, span, "core-sprite-file");
 			} else {
-				col = document.createElement('td');
-				span = dojo.create("span", {id: this.getFileSpanId(item)}, col, "only");
-				if(item.type ===  "file"){
-					var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name;
-					this.getExpandImage(tableRow, span, "core-sprite-file");
-					this.renderFileElement(item, span, renderName);
-				} else {
-					var that = this;
-					if(that.explorer._state === "result_view"){
-						dojo.connect(tableRow, "onclick", tableRow, function() {
-							that.selectElement(item,true);
-						});
-						dojo.connect(tableRow, "onmouseover", tableRow, function() {
-							tableRow.style.cursor ="pointer";
-						});
-						dojo.connect(tableRow, "onmouseout", tableRow, function() {
-							tableRow.style.cursor ="default";
-						});
-					}
-					var iconSpan = dojo.create("span", {}, span, "last");
-					var icon = dojo.create("span", {}, iconSpan, "last");
-					dojo.addClass(icon, "imageSprite");
-					dojo.addClass(icon, "core-sprite-none");
-					this.renderDetailElement(item, tableRow, span);
-					iconSpan = dojo.create("span", {id: this.getDetailIconId(item)}, span, "last");
-					icon = dojo.create("span", {}, iconSpan, "only");
-					dojo.addClass(icon, "imageSprite");
-					dojo.addClass(icon, "core-sprite-none");
-				}
+				span = dojo.create("span", {}, col, "only");
+				col.noWrap = true;
+				col.align = "right";
+				this.renderDetailLineNumber(item,  span);
 			}
 			return col;
 		case 1:
+			var col, span, link;
+			col = document.createElement('td');
+			span = dojo.create("span", {id: this.getFileSpanId(item)}, col, "only");
+			if(item.type ===  "file"){
+				var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name;
+				this.renderFileElement(item, span, renderName);
+			} else {
+				var that = this;
+				if(that.explorer._state === "result_view"){
+					dojo.connect(tableRow, "onclick", tableRow, function() {
+						that.selectElement(item,true);
+					});
+					dojo.connect(tableRow, "onmouseover", tableRow, function() {
+						tableRow.style.cursor ="pointer";
+					});
+					dojo.connect(tableRow, "onmouseout", tableRow, function() {
+						tableRow.style.cursor ="default";
+					});
+				}
+				this.renderDetailElement(item, tableRow, span);
+				var iconSpan = dojo.create("span", {id: this.getDetailIconId(item)}, span, "last");
+			}
+			return col;
+			
+		case 2:
 			col = document.createElement('td');
 			if(item.type ===  "file"){
 				span = dojo.create("span", {id: this.getLocationSpanId(item)}, col, "only");
@@ -1257,7 +1257,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.renderer = new SearchResultRenderer({checkbox: true, highlightSelection:false,
 													  getCheckedFunc: function(item){return that.getItemChecked(item);},
 													  onCheckedFunc: function(rowId, checked, manually){that.onRowChecked(rowId, checked, manually);}}, that);
-		this.createTree(this._uiFactory.getMatchDivID(), this.model);
+		this.createTree(this._uiFactory.getMatchDivID(), this.model, 20);
 		this.renderer.selectElement(this.model.indexedFileItems[0], false);
 		this.reportStatus("");	
 	};
@@ -1542,7 +1542,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.model.buildResultModel();
 		if(this._state === "result_view"){
 			this.initCommands();
-			this.createTree(this.parentNode, this.model);
+			this.createTree(this.parentNode, this.model, 20);
 			this.gotoCurrent();
 			this.reportStatus("");	
 			this.loadOneFileMetaData(0, function(){that.refreshIndex();});
