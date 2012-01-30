@@ -166,7 +166,7 @@ dojo.addOnLoad(function() {
 			var count = 0;
 			var d = new dojo.Deferred();
 			for (var i = 0; i < plugins.length; i++) {
-				plugins[i]._load().then(function() {
+				plugins[i].update().then(function() {
 					count++;
 					if (count === plugins.length) {
 						d.resolve();
