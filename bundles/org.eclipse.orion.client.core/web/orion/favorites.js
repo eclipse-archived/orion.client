@@ -151,15 +151,15 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			// $ --> \$  (and any other special chars
 			var convertedQuery = "";
 			for (i = 0; i < queryText.length; i++) {
-				var char = queryText.charAt(i);
-				if (char === "*") {
+				var c = queryText.charAt(i);
+				if (c === "*") {
 					convertedQuery += ".*";
-				} else if (char === "?") {
+				} else if (c === "?") {
 					convertedQuery += ".?";
-				} else if (this._SPECIAL_CHARS.indexOf(char) >= 0) {
-					convertedQuery += ("\\" + char);
+				} else if (this._SPECIAL_CHARS.indexOf(c) >= 0) {
+					convertedQuery += ("\\" + c);
 				} else {
-					convertedQuery += char;
+					convertedQuery += c;
 				}
 			}
 			convertedQuery += ".*";
