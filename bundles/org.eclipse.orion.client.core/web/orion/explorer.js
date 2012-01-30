@@ -83,8 +83,9 @@ exports.Explorer = (function() {
 		 * 
 		 * @param parentId id of parent dom element
 		 * @param model providing data to display
+		 * @param indent custom indent on tree
 		 */
-		createTree: function (parentId, model){
+		createTree: function (parentId, model, indent){
 			var treeId = parentId + "innerTree";
 			var existing = dojo.byId(treeId);
 			if (existing) {
@@ -101,6 +102,7 @@ exports.Explorer = (function() {
 				parent: parentId,
 				labelColumnIndex: this.renderer.getLabelColumnIndex(),
 				renderer: this.renderer,
+				indent: indent,
 				tableStyle: "mainPadding"
 			});
 			this.renderer._initializeUIState();
