@@ -54,7 +54,7 @@ BootstrapTest.prototype.testBootstrap = function(queue) {
 				"/js-tests/preferences/test.html",
 				"/js-tests/pluginRegistry/test.html",
 				"/js-tests/testRunAsynch/test.html",
-				"/js-tests/editor/test-editor.html",
+				"/js-tests/editor/test.html",
 				"/js-tests/textview/test.html",
 				"/js-tests/jsContentAssist/test.html",
 				"/js-tests/contentTypes/test.html"
