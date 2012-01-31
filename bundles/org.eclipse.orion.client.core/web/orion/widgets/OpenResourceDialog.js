@@ -161,11 +161,11 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	 */
 	showFavorites: function() {
 		var that = this;
-		var renderFunction = mSearchRenderer.makeRenderFunction(that.favresults, false, dojo.hitch(that, that.decorateResult), true);
 		return function(favs) {
 			if (favs.navigator) {
 				favs = favs.navigator;
 			}
+			var renderFunction = mSearchRenderer.makeRenderFunction(that.favresults, false, dojo.hitch(that, that.decorateResult));
 			renderFunction(favs);
 			if (favs && favs.length > 0) {
 				dojo.place("<hr/>", that.favresults, "last");

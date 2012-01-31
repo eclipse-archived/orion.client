@@ -15,15 +15,6 @@
 
 define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchRenderer', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(require, dojo, dijit, mAuth, mUtil, mSearchRenderer, mSearchUtils){
 
-//	function legacySearch(resultsNode, query, excludeFile,  generateHeadingAndSaveLink, onResultReady,  hideSummaries) {
-//		var renderer = mSearchRenderer.makeRenderFunction(resultsNode, generateHeadingAndSaveLink, onResultReady, hideSummaries);
-//		this.searchAndRender(query, excludeFile, renderer);
-//	}
-//	
-//	function legacySearchError() {
-//		throw "This method was removed: use 'searchAndRender' instead.";
-//	}
-
 	/**
 	 * Creates a new search client.
 	 * @param {Object} options The options object
@@ -49,8 +40,9 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchRen
 			try {
 				this._fileService.search(qObj.location, query).then(function(jsonData) {
 					/**
-					 * transforms the jsonData so that the result is understandable by the
-					 * renderer
+					 * transforms the jsonData so that the result conforms to the same
+					 * format as the favourites list. This way renderer implementation can
+					 * be reused for both.
 					 * jsonData.response.docs{ Name, Location, Directory, LineNumber }
 					 */
 					var transform = function(jsonData) {

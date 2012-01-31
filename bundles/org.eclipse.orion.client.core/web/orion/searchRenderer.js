@@ -27,10 +27,9 @@ define(	   ['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searc
      * @param {DOMNode} resultsNode Node under which results will be added.
 	 * @param {String} [heading] the heading text (HTML), or null if none required
 	 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
-	 * @param {Boolean} [hideSummaries] Don't show the summary of what matched beside each result.
 	 * @returns a render function.
 	 */
-	function makeRenderFunction(resultsNode, heading, onResultReady,  hideSummaries) {
+	function makeRenderFunction(resultsNode, heading, onResultReady) {
 		
 		/**
 		 * Displays links to resources under the given DOM node.
