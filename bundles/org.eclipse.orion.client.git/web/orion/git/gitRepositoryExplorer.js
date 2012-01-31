@@ -147,6 +147,7 @@ exports.GitRepositoryExplorer = (function() {
 	GitRepositoryExplorer.prototype.initTitleBar = function(repository, sectionName){
 		var that = this;
 		var item = {};
+		var pageTitle;		
 		
 		if (repository && sectionName){
 			item.Name = sectionName;
@@ -157,14 +158,19 @@ exports.GitRepositoryExplorer = (function() {
 			item.Parents[0].ChildrenLocation = repository.Location;
 			item.Parents[1] = {};
 			item.Parents[1].Name = "Repositories";
+			pageTitle = sectionName + " on " + repository.Name + " - Git";
 		} else if (repository) {
 			item.Name = repository.Name;
 			item.Parents = [];
 			item.Parents[0] = {};
 			item.Parents[0].Name = "Repositories";
+			pageTitle = repository.Name + " - Git";
 		} else {
 			item.Name = "Repositories";
+			pageTitle = "Repositories - Git";
 		}
+		
+		document.title = pageTitle;
 		
 		var location = dojo.byId("location");
 		var breadcrumb = new mBreadcrumbs.BreadCrumbs({
