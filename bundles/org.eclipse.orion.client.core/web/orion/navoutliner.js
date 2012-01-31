@@ -187,28 +187,24 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 		},
 		render: function(favorites, searches, serviceRegistry) {
 			dojo.empty(this._parent);
-			var filledToolbar = false;
+			var link;
 			if (serviceRegistry) {
 				var allReferences = serviceRegistry.getServiceReferences("orion.core.file");
-				var fileSystems = [];
 				// top level folder outline if there is more than one file service
 				if (allReferences.length > 1) {
+					mUtil.createPaneHeading(this._parent, "fileServerSectionHeading", "File Servers", true);
+					
 					var fileSystemTable = dojo.create("table", {id: "fileSystemTable"});
 					dojo.addClass(fileSystemTable, "favoritesTable");
-					var head = dojo.create("thead", null, fileSystemTable);
-					var row = dojo.create("tr", null, head);
-					var col = dojo.create("td", null, row);
-					mUtil.createPaneHeading(col, "File Servers", true);
-
 					var body = dojo.create("tbody", null, fileSystemTable);
-					for(var j = 0; j < allReferences.length; ++j) {
-						var name = allReferences[j].getProperty("Name");
-						var location = allReferences[j].getProperty("top");
+					for(var i = 0; i < allReferences.length; ++i) {
+						var name = allReferences[i].getProperty("Name");
+						var location = allReferences[i].getProperty("top");
 						if (name && location) {
 							var navLocation = require.toUrl("navigate/table.html") + "#" + location;
 							var row = dojo.create("tr", null, body);
 							var col = dojo.create("td", null, row);
-							var link = dojo.create("a", {href: navLocation}, col);
+							link = dojo.create("a", {href: navLocation}, col);
 							dojo.addClass(link, "navlinkonpage");
 							var label = window.document.createTextNode(name);
 							dojo.place(label, link, "last");
@@ -218,19 +214,15 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				}
 			}
 			
-			var navOutlineTable = dojo.create("table", {id: "navOutlineTable"});
-			dojo.addClass(navOutlineTable, "favoritesTable");
-			var thead, row, headCol, tbody;
 
-			// heading and commands
-			thead = dojo.create("thead", null, navOutlineTable);
-			row = dojo.create("tr", null, thead);
-			headCol = dojo.create("td", null, row);
-			mUtil.createPaneHeading(headCol, "Favorites", true, null, "faveCommands", this._registry.getService("orion.page.command"), this);
+			// Favorites heading
+			mUtil.createPaneHeading(this._parent, "favoritesHeading", "Favorites", true, null, "faveCommands", this._registry.getService("orion.page.command"), this);
 
 			// favorites
-			var tr, col1, href, link, actionsWrapper;
-			tbody = dojo.create("tbody", null, navOutlineTable);
+			var navOutlineTable = dojo.create("table", {id: "favoritesTable"});
+			dojo.addClass(navOutlineTable, "favoritesTable");
+			var id, tr, col1, href, actionsWrapper;
+			var tbody = dojo.create("tbody", null, navOutlineTable);
 
 			for (var j=0; j < favorites.length; j++) {
 				var fave = favorites[j];
@@ -243,8 +235,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 					}
 				}
 				var clazz = fave.directory ? "navlinkonpage" : "navlink";
-				var editable="";
-				var id = "fave"+j;
+				id = "fave"+j;
 				tr = dojo.create("tr");
 				tr.id = "row"+id;
 				col1 = dojo.create("td", null, tr, "last");
@@ -262,25 +253,24 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			spacer = dojo.create("td", {colspan: 2}, spacer);
 			dojo.create("span", {id: "spacer"}, spacer);
 
+			// Searches if we have them
 			if (searches.length > 0) {
-				// heading and commands
-				thead = dojo.create("thead", null, navOutlineTable);
-				row = dojo.create("tr", null, thead);
-				headCol = dojo.create("td", null, row);
-				mUtil.createPaneHeading(headCol, "Searches", true);
+				mUtil.createPaneHeading(this._parent, "searchesHeading", "Searches", true);
+				navOutlineTable = dojo.create("table", {id: "searchTable"});
+				dojo.addClass(navOutlineTable, "favoritesTable");
 
 				tbody = dojo.create("tbody", null, navOutlineTable);
-				for (var i=0; i < searches.length; i++) {
-					var search = searches[i];
+				for (var k=0; k < searches.length; k++) {
+					var search = searches[k];
 					href=require.toUrl("search/search.html") + "#" + search.query;
-					var id = "search"+i;
+					id = "search"+k;
 					tr = dojo.create("tr");
 					tr.id = "searchRow"+id;
 					col1 = dojo.create("td", null, tr, "last");
 					link = dojo.create("a", {id:id, href: href}, col1, "only");
 					dojo.place(window.document.createTextNode(search.name), link, "only");
 					actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col1, "last");
-					this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", search, this, "tool", false, i);
+					this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", search, this, "tool", false, k);
 					dojo.place(tr, tbody, "last");
 				}
 			}

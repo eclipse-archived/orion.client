@@ -330,28 +330,40 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	
 	/**
 	 * Create a stylized pane heading.
-	 * @param {DomNode} titleElement the node containing the title elements.
-	 * @param {String} headingLabel the pane heading
-	 * @param {Boolean} isAuxStyle specifies whether heading is an auxiliary pane or main pane
-	 * @param {String} headingId the id for the heading label
-	 * @param {String} commandId the id for command tools
-	 * @param {Object} command service for rendering commands
-	 * @param {Object} the handler for commands
+	 * @param {DomNode} parent the parent node of the title element
+	 * @param {String} the string to use as the heading id. It will also be used to prefix any generated id's.
+	 * @param {String} headingLabel the pane heading text
+	 * @param {Boolean} isAuxStyle specifies whether heading is in an auxiliary pane or main pane
+	 * @param {String} headingId the id for the heading label.  Optional
+	 * @param {String} commandId the id for command tools.  Optional
+	 * @param {Object} command service for rendering commands.  Optional, no commands are rendered if not specified.
+	 * @param {Object} the handler for commands.  Optional.  
 	 */
-	function createPaneHeading(titleElement, headingLabel, isAuxStyle, headingId, commandId, commandService, handler) {
+	function createPaneHeading(parent, id, headingLabel, isAuxStyle, headingId, commandId, commandService, handler) {
+		headingId = headingId || id+"heading";
+		commandId = commandId || id+"commands";
+		var paneHeadingFragment = 
+			'<div id="' + id + '">' +
+				'<div class="layoutLeft" id="' + id + '"><span style: "inline-block;" id="' + headingId + '">' + headingLabel + '</span></div>' +
+				'<div class="layoutRight" id="' + commandId + '"></div>' +
+				'<div id="' + parent.id + 'slideContainer" class="layoutBlock slideContainer">' +
+					'<span id="' + parent.id + 'slideOut" class="leftSlide">' +
+						'<span id="' + parent.id + 'pageCommandParameters" class="parameters"></span>' +
+						'<span id="' + parent.id + 'pageCommandDismiss" class="parameters"></span>' +
+					'</span>' +
+				'</div>'+
+			'</div>';
+			
+		dojo.place(paneHeadingFragment, parent, "last");
 		if (isAuxStyle) {
-			dojo.addClass(titleElement, "auxpaneHeading");
+			dojo.addClass(id, "auxpaneHeading");
 		} else {
-			dojo.addClass(titleElement, "paneHeading");
-		}
-		var title = dojo.place("<span>"+headingLabel+"</span>", titleElement, "only");
-		if (headingId) {
-			title.id = headingId;
+			dojo.addClass(id, "paneHeading");
 		}
 		if (commandService) {
-			var commands = dojo.place("<span id='" + commandId + "' class='paneHeadingToolbar'></span>", titleElement, "last");
-			commandService.renderCommands(commands, "dom", handler, handler, "tool");
+			commandService.renderCommands(dojo.byId(commandId), "dom", handler, handler, "tool");
 		}
+		return dojo.byId(id);
 	}
 	
 	/**
