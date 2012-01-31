@@ -229,7 +229,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			var extensionListItem = dojo.create( "div", { "class":"git-list-item" }, dojo.byId("diffNode") );
 			var horizontalBox = dojo.create( "div", null, extensionListItem );
 
-			var detailsView = dojo.create( "div", {"class":"stretch", "style":"width:100%; height:420px"}, horizontalBox );
+			var detailsView = dojo.create( "div", {"style":"height:420px"}, horizontalBox );
 			
 			var diffPath = diff.OldPath;
 			
