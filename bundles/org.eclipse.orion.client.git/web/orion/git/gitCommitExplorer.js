@@ -97,12 +97,10 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 		
 		GitCommitExplorer.prototype.initTitleBar = function(commit, repository){
 			var that = this;
-			var pageTitle = dojo.byId("pageTitle");
 			var item = {};
+			var pageTitle;
 			
 			if (commit){
-				pageTitle.innerHTML = "Git Commit";
-				
 				item.Name = commit.Name;
 				item.Parents = [];
 				item.Parents[0] = {};
@@ -111,14 +109,16 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 				item.Parents[0].ChildrenLocation = repository.Location;
 				item.Parents[1] = {};
 				item.Parents[1].Name = "Repositories";
+				pageTitle = commit.Name + " on " + repository.Name + " - Git";
 			} else {
-				pageTitle.innerHTML = "Git Commit";
-				
 				item.Name = "";
+				pageTitle = "Git";
 			}
 			
+			document.title = pageTitle;
+			
 			var location = dojo.byId("location");
-			var breadcrumb = new mBreadcrumbs.BreadCrumbs({
+			new mBreadcrumbs.BreadCrumbs({
 				container: location,
 				resource: item,
 				makeHref:function(seg, location){
@@ -136,8 +136,8 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			var tableNode = dojo.byId( 'table' );	
 			dojo.empty( tableNode );
 			var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
-			var item = { id: "Plugins", "class":"pluginTitle", innerHTML: (commit ? "Commit Details" :  "No Commits") };
-			dojo.create( "div", item, titleWrapper );
+			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-modification"}, titleWrapper );
+			dojo.create( "div", { id: "Plugins", "class":"pluginTitle", innerHTML: (commit ? "Commit Details" :  "No Commits") }, titleWrapper );
 			
 			if (!commit)
 				return;
@@ -155,7 +155,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			
 		    var extensionListItem = dojo.create( "div", { "class":"git-list-item" }, list );
 			var horizontalBox = dojo.create( "div", null, extensionListItem );
-			var icon = dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-modification"}, horizontalBox );
+//			var icon = dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-modification"}, horizontalBox );
 			var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
 			
 			if (commit.AuthorImage) {
@@ -229,7 +229,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			var extensionListItem = dojo.create( "div", { "class":"git-list-item" }, dojo.byId("diffNode") );
 			var horizontalBox = dojo.create( "div", null, extensionListItem );
 
-			var detailsView = dojo.create( "div", {"class":"stretch", "style":"width:100%; height:420px"}, horizontalBox );
+			var detailsView = dojo.create( "div", {"style":"height:420px"}, horizontalBox );
 			
 			var diffPath = diff.OldPath;
 			
@@ -262,8 +262,8 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			
 			var tableNode = dojo.byId( 'table' );
 			var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );
-			var item = { id: "Plugins", "class":"pluginTitle", innerHTML: ((tags && tags.length > 0) ? "Tags:" : "No Tags") };
-			dojo.create( "div", item, titleWrapper );
+			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-tag" }, titleWrapper );
+			dojo.create( "div", { id: "Plugins", "class":"pluginTitle", innerHTML: ((tags && tags.length > 0) ? "Tags:" : "No Tags") }, titleWrapper );
 			dojo.create( "div", { id: "tagSectionActionsArea", "class":"additions-light"}, titleWrapper );
 			
 			this.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.addTag", 2000, "tagSectionActionsArea");
@@ -290,7 +290,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			var extensionListItem = dojo.create( "div", { "class":"git-list-item" }, dojo.byId("tagNode") );
 			var horizontalBox = dojo.create( "div", null, extensionListItem );
 
-			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-tag" }, horizontalBox );
+//			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-tag" }, horizontalBox );
 
 			var detailsView = dojo.create( "div", {"class":"stretch"}, horizontalBox );
 			var title = dojo.create( "span", { "class":"plugin-title", innerHTML: tag.Name }, detailsView );
