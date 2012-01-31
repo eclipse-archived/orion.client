@@ -16,19 +16,19 @@ define(["orion/assert", "orion/serviceregistry", "orion/searchRenderer"],
 	tests.testEmptyRendererWithQueryName = function() {
 		var renderer = mSearchRenderer.makeRenderFunction(dojo.query("#results")[0], false, function(results) {
 			assert.equal(results.innerHTML, "<div>No matches found for <b>No results</b></div>");
-		}, true);
+		});
 		renderer([], "No results");
 	};
 	tests.testEmptyRendererNoName = function() {
 		var renderer = mSearchRenderer.makeRenderFunction(dojo.query("#results")[0], false, function(results) {
 			assert.equal(results.innerHTML, "");
-		}, true);
+		});
 		renderer([]);
 	};
 	tests.testExternalResource = function() {
 		var renderer = mSearchRenderer.makeRenderFunction(dojo.query("#results")[0], false, function(results) {
 			assert.equal(results.innerHTML, "<table><tbody><tr><td><a href=\"http://eclipse.org\">link</a></td></tr></tbody></table>");
-		}, true);
+		});
 		renderer([{
 			name: 'link',
 			path: 'http://eclipse.org',
@@ -38,7 +38,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/searchRenderer"],
 	tests.testDirectory = function() {
 		var renderer = mSearchRenderer.makeRenderFunction(dojo.query("#results")[0], false, function(results) {
 			assert.equal(results.innerHTML, "<table><tbody><tr><td><a href=\"../../navigate/table.html#foo/blap\">link</a></td></tr></tbody></table>");
-		}, true);
+		});
 		renderer([{
 			name: 'link',
 			path: 'foo/blap',
@@ -48,7 +48,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/searchRenderer"],
 	tests.testFile = function() {
 		var renderer = mSearchRenderer.makeRenderFunction(dojo.query("#results")[0], false, function(results) {
 			assert.equal(results.innerHTML, "<table><tbody><tr><td><a href=\"../../edit/edit.html#foo/blap.js\">link</a></td></tr></tbody></table>");
-		}, true);
+		});
 		renderer([{
 			name: 'link',
 			path: 'foo/blap.js',
