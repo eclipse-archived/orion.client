@@ -97,12 +97,10 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 		
 		GitCommitExplorer.prototype.initTitleBar = function(commit, repository){
 			var that = this;
-			var pageTitle = dojo.byId("pageTitle");
 			var item = {};
+			var pageTitle;
 			
 			if (commit){
-				pageTitle.innerHTML = "Git Commit";
-				
 				item.Name = commit.Name;
 				item.Parents = [];
 				item.Parents[0] = {};
@@ -111,14 +109,16 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 				item.Parents[0].ChildrenLocation = repository.Location;
 				item.Parents[1] = {};
 				item.Parents[1].Name = "Repositories";
+				pageTitle = commit.Name + " on " + repository.Name + " - Git";
 			} else {
-				pageTitle.innerHTML = "Git Commit";
-				
 				item.Name = "";
+				pageTitle = "Git";
 			}
 			
+			document.title = pageTitle;
+			
 			var location = dojo.byId("location");
-			var breadcrumb = new mBreadcrumbs.BreadCrumbs({
+			new mBreadcrumbs.BreadCrumbs({
 				container: location,
 				resource: item,
 				makeHref:function(seg, location){
