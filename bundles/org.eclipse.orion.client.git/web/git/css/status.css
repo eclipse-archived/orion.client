@@ -1,16 +1,16 @@
 .statusTable {
-	border-spacing: 0px;
+	border-spacing: 0;
 }
 
 .statusCheckBoxRow {
 	margin-right: 5px; 
 	margin-left: 2px;
-	verticalAlign: middle;
+	vertical-align: middle;
 }
 
 .statusCheckBoxOverall {
-	margin-right: 5px; 
-	verticalAlign: middle;
+	margin-left: 5px; 
+	vertical-align: middle;
 }
 
 .statusAction {
@@ -25,7 +25,7 @@
 	margin-left: 5px; 
 	margin-right: 5px; 
 	width: 99%; 
-	overflow: false;
+	overflow: hidden;
 }
 
 .inlineCompareTitle {
