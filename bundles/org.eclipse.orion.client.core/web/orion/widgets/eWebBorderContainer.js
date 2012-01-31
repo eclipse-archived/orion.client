@@ -203,7 +203,6 @@ dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 			// change to open state
 			var styleProps = dojo.mixin({
 				display: "block", 
-				overflow: "auto",
 				visibility: "visible"
 			}, this._openStyleProps);
 
