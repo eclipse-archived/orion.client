@@ -659,15 +659,15 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			return;
 		}
 		dojo.empty(iconSpan);
+		var icon = dojo.create("span", null, iconSpan, "last");
+		dojo.addClass(icon, "imageSprite");
 		if(direction === "right"){
-			var icon = dojo.create("span", null, iconSpan, "last");
-			dojo.addClass(icon, "imageSprite");
 			dojo.addClass(icon, "core-sprite-rightarrow");
 		} else if(direction === "left"){
-			var icon = dojo.create("span", null, iconSpan, "last");
-			dojo.addClass(icon, "imageSprite");
 			dojo.addClass(icon, "core-sprite-leftarrow");
-		} 
+		} else {
+			dojo.addClass(icon, "core-sprite-none");
+		}
 	};
 	
 	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName){
@@ -874,6 +874,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 				}
 				this.renderDetailElement(item, tableRow, span);
 				var iconSpan = dojo.create("span", {id: this.getDetailIconId(item)}, span, "last");
+				var icon = dojo.create("span", null, iconSpan, "last");
+				dojo.addClass(icon, "imageSprite");
+				dojo.addClass(icon, "core-sprite-none");
 			}
 			return col;
 			
@@ -1753,8 +1756,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			expanded.childDiv.scrollIntoView(!next);
 		}
 		if(this._popUpContext){
-			this.popupContext(this.model.getCurrentModel());
 			this.renderer.replaceDetailIcon(this.model.getCurrentModel(), "left");
+			this.popupContext(this.model.getCurrentModel());
 		} else {
 			this.renderer.replaceDetailIcon(this.model.getCurrentModel(), "right");
 		}
