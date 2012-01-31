@@ -264,19 +264,16 @@ orion.GitStatusTableRenderer = (function() {
 	}
 	GitStatusTableRenderer.prototype = {
 		render: function (renderSeparator) {
-			var headingSection = dojo.create("div", null, this._parentId);
-			dojo.addClass(headingSection, "auxpaneHeading paneHeadingFixed");
-			var title = dojo.create("span", {id : this._type + "_header" ,innerHTML: this._header}, headingSection);
-			var localTools = dojo.create("span", null, headingSection);
-			dojo.addClass(localTools,  "paneHeadingToolbar");
-			
-			var check = dojo.create("input", {type: "checkbox"}, localTools);
+			var headingSection = mUtil.createPaneHeading(this._parentId, this._type + "heading", this._header, true, this._type + "_header", this._type + "commands");
+			dojo.addClass(headingSection, "paneHeadingFixed");
+			var check = dojo.create("input", {type: "checkbox"}, this._type+"_header", "after");
 			dojo.addClass(check, "statusCheckBoxOverall");
 			this.checkBox = check;
 			dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
 				this.contentRenderer.toggleSelectAll(evt.target.checked);
 				this.renderAction();
 			}));
+			var localTools = dojo.byId(this._type+"commands");
 			this._cmdSpan = dojo.create("span", {}, localTools, "last");
 			dojo.addClass(this._cmdSpan, "paneHeadingCommands");
 			this._statusContentId = this._parentId + "_" + this._type;
@@ -487,14 +484,11 @@ orion.GitLogTableRenderer = (function() {
 	GitLogTableRenderer.prototype = {
 		render: function (renderSeparator) {
 			var section = dojo.create("div", {id:this._sectionId}, this._parentId);
-			var headingSection = dojo.create("div", null, section);
-			dojo.addClass(headingSection, "auxpaneHeading paneHeadingFixed");
-			var title = dojo.create("span", {id : this._type + "_header" ,innerHTML: this._header}, headingSection);
-			var localTools = dojo.create("span", null, headingSection);
-			dojo.addClass(localTools,  "paneHeadingToolbar");
-			this._cmdSpanAdditional = dojo.create("span", {}, localTools, "last");
+			var headingSection = mUtil.createPaneHeading(section, this._type + "heading", this._header, true, this._type + "_header", this._type + "commands");
+			dojo.addClass(headingSection, "paneHeadingFixed");
+			this._cmdSpanAdditional = dojo.create("span", {}, this._type + "commands", "last");
 			dojo.addClass(this._cmdSpanAdditional, "statusLogCmd paneHeadingCommands");
-			this._cmdSpan = dojo.create("span", {}, localTools, "last");
+			this._cmdSpan = dojo.create("span", {}, this._type + "commands", "last");
 			dojo.addClass(this._cmdSpan, "statusLogCmd paneHeadingCommands");
 			this._logContentId = this._parentId + "_" + this._type + "_content";
 			var contentDiv = dojo.create("div", {id:this._logContentId }, section, "last");
