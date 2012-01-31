@@ -817,14 +817,14 @@ var exports = {};
 
 					dojo.hitch(explorer, explorer.changedItem)(item);
 					progressService.setProgressResult(display);
-				}, function (error) {
+				}, function (error, ioArgs) {
 						var display = [];
 
 						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
 
 						display.Severity = "Error";
 						display.HTML = true;
-						display.Message = "<span>" + dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage
+						display.Message = "<span>" + dojo.fromJson(ioArgs.xhr.responseText).DetailedMessage
 						+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
 						+ statusLocation +"\">Git Status page</a>.<span>";
 
@@ -1523,14 +1523,14 @@ var exports = {};
 							
 							progressService.setProgressResult(display);
 						}
-					}, function (error) {
+					}, function (error, ioArgs) {
 						var display = [];
 						
 						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
 						
 						display.Severity = "Error";
 						display.HTML = true;
-						display.Message = "<span>" + dojo.fromJson(error.ioArgs.xhr.responseText).DetailedMessage
+						display.Message = "<span>" + dojo.fromJson(ioArgs.xhr.responseText).DetailedMessage
 						+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
 						+ statusLocation +"\">Git Status page</a>.<span>";
 						
