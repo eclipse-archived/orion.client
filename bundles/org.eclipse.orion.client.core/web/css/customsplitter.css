@@ -23,13 +23,13 @@
 .nihilo .dojoxToggleSplitterLeft .dojoxToggleSplitterIconOpen, 
 .nihilo .dojoxToggleSplitterRight .dojoxToggleSplitterIconClosed 
 {
-   background: url(../images/core_sprites.png) no-repeat top left;
-   background-position: -173px -119px; width: 10px; height: 27px;
+	background: url(../images/core_sprites.png) no-repeat top left;
+	background-position: -173px -58px; width: 10px; height: 27px;
 }
 
 .nihilo .dojoxToggleSplitterRight .dojoxToggleSplitterIconOpen, 
 .nihilo .dojoxToggleSplitterLeft .dojoxToggleSplitterIconClosed 
 {
 	background: url(../images/core_sprites.png) no-repeat top left;
-	background-position: -173px -58px; width: 10px; height: 27px;
+	background-position: -173px -119px; width: 10px; height: 27px;
 } 
