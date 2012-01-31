@@ -2447,6 +2447,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleUnload: function (e) {
 			if (!e) { e = window.event; }
+			this._frameLoaded = false;
 			this._destroyView();
 		},
 		_handleInput: function (e) {
@@ -3622,6 +3623,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			frame.style.height = "100%";
 			frame.scrolling = "no";
 			var self = this;
+			self._frameLoaded = false;
 			/*
 			* Note that it is not possible to create the contents of the frame if the
 			* parent is not connected to the document.  Only create it when the load
@@ -3633,6 +3635,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* when document.write() is called during the load event for the iframe. The fix is to async
 				* the work.
 				*/
+				self._frameLoaded = true;
 				if (self._sync) {
 					self._handleLoad(e);
 				} else {
@@ -3652,6 +3655,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* attribute changes.
 				*/
 				addHandler(parentDocument, "DOMAttrModified", this._attrModifiedHandler = function(e) {
+					if (!self._frameLoaded) { return; }
 					self._handleDOMAttrModified(e);
 				});
 			}
