@@ -83,6 +83,13 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				var list = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
 				return list.lastClientDate ? new Date(list.lastClientDate) : new Date(0);
 			},
+			_markOperationAsFailed: function(operation, error, ioArgs){
+				operation.Message = "Operation status is unknown";
+				operation.Running = false;
+				operation.Failed = true;
+				operation.Result = {HttpCode: ioArgs ? ioArgs.xhr.staus : 500, Severity: error, Message: error.Message ? error.Message : error};
+				this.writeOperation(operation);
+			},
 			_checkOperationsChanges: function(){
 				var that = this;
 				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
@@ -103,7 +110,8 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 									operationsToDelete.push(i);
 									return error;
 								}
-								console.error(error); //TODO what to do on error?
+								var operation = operations.Children[i];
+								dojo.hitch(that, that._markOperationAsFailed(operation, error, ioArgs));
 							});
 						})(i);
 					}
@@ -211,7 +219,8 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 						that._operationsClient.getOperation(operationJson.Location).then(function(jsonData, ioArgs) {
 								dojo.hitch(that, that.followOperation(jsonData, result, operationJson.Location));
 							}, function(error, secondArg){
-								dojo.hitch(that, that.setProgressResult)(error);
+								dojo.hitch(that, that.setProgressResult)({Severity: "Error", Message: error});
+								dojo.hitch(that, that._markOperationAsFailed(operationJson, error, secondArg));
 								result.errback(error, secondArg);
 								});
 					}, 2000);
