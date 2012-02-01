@@ -43,14 +43,38 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 			commandService.registerCommandContribution("eclipse.cancelOperation", 2);
 			commandService.registerCommandContribution("eclipse.cancelOperation", 2, "selectionTools", "eclipse.selectionGroup");
 			
-			operationsClient.addOperationChangeListener(function(taskList){
-				dojo.hitch(operationsTable, operationsTable.mergeOperations)(taskList);
-			});
+			function displayError(error){
+				var display = [];
+				display.Severity = "Error";
+				display.HTML = false;
+				
+				try {
+					var jsonData = JSON.parse(error);
+					display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
+				} catch (Exception) {
+					display.Message = error;
+				}
+				
+				serviceRegistry.getService("orion.page.message").setProgressResult(display);
+			}
 			
+			try{
+				operationsClient.addOperationChangeListener(function(taskList){
+					dojo.hitch(operationsTable, operationsTable.mergeOperations)(taskList);
+				});
+			}catch (e) {
+				displayError(e);
+				dojo.hitch(operationsTable, operationsTable.mergeOperations)({Children: []});
+			}
 			window.addEventListener("storage", function(e){
-				if(mGlobalCommands.getAuthenticationIds().indexOf(e.key)>=0){
-					dojo.hitch(operationsTable, operationsTable.loadOperations)({Children: []});
-					operationsClient.resetChangeListeners();
+				try{
+					if(mGlobalCommands.getAuthenticationIds().indexOf(e.key)>=0){
+						dojo.hitch(operationsTable, operationsTable.loadOperations)({Children: []});
+						operationsClient.resetChangeListeners();
+					}
+				}catch (e) {
+					displayError(e);
+					dojo.hitch(operationsTable, operationsTable.mergeOperations)({Children: []});
 				}
 			}, false);
 			
