@@ -45,6 +45,26 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		return _doServiceCall(operationsService, "getOperations", [options]);
 	}
 	
+	function NoMatchingOperationsClient(location){
+		this._location = location;
+	}
+	
+	function returnNoMatchingError(){
+		var result = new dojo.Deferred();
+		result.errback("No Matching OperationService for location:" + this._location);
+		return result;
+	}
+	
+	NoMatchingOperationsClient.prototype = {
+			getOperation: returnNoMatchingError,
+			getOperations: returnNoMatchingError,
+			removeCompletedOperations: returnNoMatchingError,
+			removeOperation: returnNoMatchingError,
+			cancelOperation: returnNoMatchingError
+	};
+	
+	NoMatchingOperationsClient.prototype.constructor = NoMatchingOperationsClient;
+	
 	function OperationsClient(serviceRegistry){
 		this._services = [];
 		this._patterns = [];
@@ -72,7 +92,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 					return this._services[i];
 				}
 			}
-			throw "No Matching OperationService for location:" + location;
+			return new NoMatchingOperationsClient(location);
 		};
 	}
 	
@@ -133,6 +153,10 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			getOperations: function(){
 				var result = new dojo.Deferred();
 				var results = [];
+				if(this._services.length<1){
+					result.errback("No operations services registered.");
+					return result;
+				}
 				for(var i=0; i<this._services.length; i++){
 					results[i] = _getOperations(this._services[i]);
 				}
@@ -144,6 +168,10 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			getRunningOperations: function(){
 				var result = new dojo.Deferred();
 				var results = [];
+				if(this._services.length<1){
+					result.errback("No operations services registered.");
+					return result;
+				}
 				for(var i=0; i<this._services.length; i++){
 					results[i] = _getOperations(this._services[i], {RunningOnly: true});
 				}
@@ -157,6 +185,10 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			},
 			removeCompletedOperations: function(){
 				var results = [];
+				if(this._services.length<1){
+					result.errback("No operations services registered.");
+					return result;
+				}
 				for(var i=0; i<this._services.length; i++){
 					results[i] = _doServiceCall(this._services[i], "removeCompletedOperations");
 				}
@@ -174,6 +206,9 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			addOperationChangeListener: function(listener){
 				this._operationListeners.push(listener);
 				if(this._operationListeners.length===1){
+					if(this._services.length<1){
+						throw "No operations services registered.";
+					}
 					for(var i=0; i<this._services.length; i++){
 						dojo.hitch(this, _registerOperationChangeListener)(this._services[i], dojo.hitch(this, _notifyChangeListeners));
 					}
@@ -195,6 +230,9 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			
 			resetChangeListeners: function(){
 				this._currentLongpollingIds = [];
+				if(this._services.length<1){
+					throw "No operations services registered.";
+				}
 				for(var i=0; i<this._services.length; i++){
 					dojo.hitch(this, _registerOperationChangeListener)(this._services[i], dojo.hitch(this, _notifyChangeListeners));
 				}
