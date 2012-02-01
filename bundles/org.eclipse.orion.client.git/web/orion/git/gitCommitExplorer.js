@@ -171,7 +171,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			
 			var commitMessage1 = commit.Message.substring(commitMessage0.length, commit.Message.length);
 			
-			if (commitMessage1.length > 0){
+			if (commitMessage1.trim().length > 0){
 				div = dojo.create( "pre", null, detailsView );
 				dojo.place(document.createTextNode(cut ? "..." + commitMessage1 : commitMessage1.trim()), div);
 				dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
