@@ -61,12 +61,10 @@ orion.JSTestAdapter = (function() {
 					}
 				});
 				service.addEventListener("runDone", function(runName, obj) {
-					if (!runName) {
-						shutdown.then(function(noop) {
-							loaderPluginRegistry.shutdown();
-							noop();
-						});
-					}
+					shutdown.then(function(noop) {
+						loaderPluginRegistry.shutdown();
+						noop();
+					});
 				});
 					
 				console.log("Launching test suite: " + test);
