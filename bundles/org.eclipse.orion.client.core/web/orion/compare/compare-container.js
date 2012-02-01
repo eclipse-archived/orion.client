@@ -9,12 +9,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
+/*global define window*/
+/*jslint browser:true devel:true */
 define(['require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-inline-model', 'orion/compare/compare-2way-model', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands',
-        'orion/textview/textModel','orion/textview/textView','examples/textview/textStyler' , 'orion/compare/compareUtils', 'orion/editor/asyncStyler', 'orion/editor/textMateStyler','orion/compare/diff-provider', 'orion/compare/jsdiffAdapter'], 
+        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight'], 
 		function(require, dojo, mDiffParser, mRulers, mCompareModel, mTwoWayCompareModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
-				mGapModel , mCommands, mTextModel, mTextView, mTextStyler , mCompareUtils, mAsyncStyler, mTextMateStyler, mDiffProvider, mJSDiffAdapter) {
+				mGapModel , mCommands, mTextModel, mTextView, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight) {
 
 var exports = {};
 
@@ -94,12 +95,12 @@ exports.CompareContainer = (function() {
 			that._diffProvider.provide(that._complexURL, onsave, that._hasConflicts, function(diffParam){
 				that._baseFile.URL = (diffParam.baseFile && typeof(diffParam.baseFile.URL) === "string") ? diffParam.baseFile.URL : that._baseFile.URL;
 				that._baseFile.Name = (diffParam.baseFile && typeof(diffParam.baseFile.Name) === "string") ? diffParam.baseFile.Name : that._baseFile.Name;
-				that._baseFile.Type = (diffParam.baseFile && typeof(diffParam.baseFile.Type) === "string") ? diffParam.baseFile.Type : that._baseFile.Type;
+				that._baseFile.Type = (diffParam.baseFile && typeof(diffParam.baseFile.Type) === "object") ? diffParam.baseFile.Type : that._baseFile.Type;
 				that._baseFile.Content = (diffParam.baseFile && typeof(diffParam.baseFile.Content) === "string") ? diffParam.baseFile.Content : that._baseFile.Content;
 				
 				that._newFile.URL = (diffParam.newFile && typeof(diffParam.newFile.URL) === "string") ? diffParam.newFile.URL : that._newFile.URL;
 				that._newFile.Name = (diffParam.newFile && typeof(diffParam.newFile.Name) === "string") ? diffParam.newFile.Name : that._newFile.Name;
-				that._newFile.Type = (diffParam.newFile && typeof(diffParam.newFile.Type) === "string") ? diffParam.newFile.Type : that._newFile.Type;
+				that._newFile.Type = (diffParam.newFile && typeof(diffParam.newFile.Type) === "object") ? diffParam.newFile.Type : that._newFile.Type;
 				that._newFile.Content = (diffParam.newFile && typeof(diffParam.newFile.Content) === "string") ? diffParam.newFile.Content : that._newFile.Content;
 				
 				that._diffContent = typeof(diffParam.diff) === "string" ? diffParam.diff : that._diffContent;
@@ -221,24 +222,23 @@ exports.DefaultDiffProvider = (function() {
 			return fileName;
 		},
 		
-		//temporary
-		//TODO : get the file type from file service
-		_resolveFileType: function(fileURL){
-			var fileName = this._resolveFileName(fileURL);
-			var splits = fileName.split(".");
-			if (splits.length > 0) {
-				return splits.pop().toLowerCase();
-			}
-			return "";
+		_getContentType: function(fileURL){
+			var filename = this._resolveFileName(fileURL);
+			return this.serviceRegistry.getService("orion.file.contenttypes").getFilenameContentType(filename);
 		},
 		
 		_resolveComplexFileURL: function(complexURL, errorCallback) {
 			var that = this;
 			this._diffProvider.getDiffFileURI(complexURL).then(function(jsonData, secondArg) {
-				that.callBack({ baseFile:{URL: jsonData.Old, Name: that._resolveFileName(jsonData.Old), Type: that._resolveFileType(jsonData.Old)},
-					 			newFile:{URL: jsonData.New, Name: that._resolveFileName(jsonData.New), Type: that._resolveFileType(jsonData.New)},
+				var dl = new dojo.DeferredList([ that._getContentType(jsonData.Old), that._getContentType(jsonData.New) ]);
+				dl.then(function(results) {
+					var baseFileContentType = results[0][1];
+					var newFileContentType = results[1][1];
+					that.callBack({ baseFile:{URL: jsonData.Old, Name: that._resolveFileName(jsonData.Old), Type: baseFileContentType},
+					 			newFile:{URL: jsonData.New, Name: that._resolveFileName(jsonData.New), Type: newFileContentType},
 					 			diff: that._diffContent
 							 });
+				}, errorCallback);
 			}, errorCallback);
 		},
 		
@@ -250,44 +250,6 @@ exports.DefaultDiffProvider = (function() {
 	};
 	return DefaultDiffProvider;
 }());
-
-
-exports.CompareSyntaxHighlighter = (function() {
-	function CompareSyntaxHighlighter(serviceRegistry){
-		this.styler = null;
-		this.syntaxHighlightProviders = serviceRegistry.getServiceReferences("orion.edit.highlighter");
-		this.serviceRegistry = serviceRegistry;
-	}	
-	CompareSyntaxHighlighter.prototype = {
-			highlight: function(fileName, fileType, textView) {
-				if (this.styler) {
-					this.styler.destroy();
-					this.styler = null;
-				}
-				if (fileName && fileType) {
-					switch(fileType) {
-						case "js":
-							this.styler = new mTextStyler.TextStyler(textView, "js");
-							break;
-						case "java":
-							this.styler = new mTextStyler.TextStyler(textView, "java");
-							break;
-						case "html":
-							//TODO
-							break;
-						case "xml":
-							//TODO
-							break;
-						case "css":
-							this.styler = new mTextStyler.TextStyler(textView, "css");
-							break;
-					}
-				}
-			}
-	};
-	return CompareSyntaxHighlighter;
-}());
-
 
 //Diff block styler , this will always be called after the text styler
 exports.DiffStyler = (function() {
@@ -344,13 +306,16 @@ exports.DiffStyler = (function() {
 //the wrapper to order the text and diff styler so that we can always have diff highlighted on top of text syntax
 exports.TwoWayCompareStyler = (function() {
 	function TwoWayCompareStyler(registry, compareMatchRenderer){
-		this._syntaxHighlither = new exports.CompareSyntaxHighlighter(registry);
+		this._syntaxHighlither = new Highlight.SyntaxHighlighter(registry);
 		this._diffHighlither = new exports.DiffStyler(compareMatchRenderer);
 	}	
 	TwoWayCompareStyler.prototype = {
-		highlight: function(fileName, fileType, editorWidget) {
-			this._syntaxHighlither.highlight(fileName, fileType, editorWidget);
-			this._diffHighlither.highlight(editorWidget);
+		highlight: function(fileName, contentType, editorWidget) {
+			var self = this;
+			this._syntaxHighlither.setup(contentType, editorWidget, null /* TODO AnnotationModel */, fileName).then(
+				function() {
+					self._diffHighlither.highlight(editorWidget);
+				});
 		}
 	};
 	return TwoWayCompareStyler;
@@ -578,7 +543,7 @@ exports.TwoWayCompareContainer = (function() {
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: readOnly,
-				stylesheet: require.toUrl("orion/compare/editor.css") ,
+				stylesheet: [ require.toUrl("orion/compare/editor.css"), require.toUrl("css/default-theme.css") ],
 				tabSize: 4
 			});
 			view.addEventListener("Load", function(){

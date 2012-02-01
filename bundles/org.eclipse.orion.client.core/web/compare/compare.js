@@ -12,8 +12,8 @@
 /*global define document */
 
 define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
-		'orion/compare/compare-features', 'orion/compare/compare-container', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'],
-		function(dojo, mBootstrap, mStatus, mProgress, mOperationsClient, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mCompareContainer) {
+		'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/contentTypes', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'],
+		function(dojo, mBootstrap, mStatus, mProgress, mOperationsClient, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mCompareContainer, mContentTypes) {
 
 		dojo.addOnLoad(function(){
 			mBootstrap.startup().then(function(core) {
@@ -29,6 +29,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/oper
 				});
 				// File operations
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
+				var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 				var searcher = new mSearchClient.Searcher({
 					serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient
 				});
