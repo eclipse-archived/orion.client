@@ -170,12 +170,15 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 					var row = table.insertRow(-1);
 					col = row.insertCell(0);
 					col.colspan = 2;
-//					var image = new Image();
-//					dojo.addClass(image, "commandSprite");
-//					dojo.addClass(image, "core-sprite-makeFavorite");
-//					dojo.addClass(image, "commandImage");
-//					col.appendChild(image);
+					var image = new Image();
+					dojo.addClass(image, "commandSprite");
+					dojo.addClass(image, "core-sprite-makeFavorite");
+					dojo.addClass(image, "commandImage");
+					// without an image, chrome will draw a border  (?)
+					image.src = require.toUrl("images/none.png");
+					col.appendChild(image);
 					var favLink = document.createElement('a');
+					dojo.style(favLink, "verticalAlign", "middle");
 					dojo.place(document.createTextNode(fav.name), favLink);
 					
 					var loc;
