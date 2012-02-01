@@ -35,9 +35,9 @@
 .git-author-icon {
 	float: left;
 	position: relative;
-	height: 50px;
+	height: 35px;
 	vertical-align: text-top;
-	width: 50px;
+	width: 35px;
 	border: 1px solid lightGrey;
 	padding: 2px;
 	margin-right: 18px;
@@ -57,8 +57,8 @@
 }
 
 .git-table {
-	padding-top: 15px;
-	padding-top: 15px;
+	padding-left: 10px;
+    padding-top: 10px;
 }
 
 .tag-description {
@@ -110,4 +110,12 @@
     margin-left: 2px;
     text-decoration: blink;
     margin-top: 8px;
+}
+
+pre {
+	margin-left: 10px;
+    padding: 15px;
+    background-color: #fdfdfd;
+    border: 1px solid #ebebeb;
+    font-family: Courier,"Courier New";
 }
