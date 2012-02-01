@@ -47,7 +47,7 @@ define(['require'],
 	var bottomHTMLFragment = 
 		'<div class="layoutBlock">' +
 			'<div class="footerBlock">' +
-				'This is a Beta build of Orion. Please try it out but BEWARE your data may be lost.' +
+				'Orion is in Beta. Please try it out but BEWARE your data may be lost.' +
 			'</div>' +
 			'<div class="footerRightBlock">' +
 				'<a href="http://wiki.eclipse.org/Orion/FAQ" target="_blank">FAQ</a> | ' + 
