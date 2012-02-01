@@ -11,7 +11,8 @@
 
 /*global define console document */
 
-define(['require', 'dojo', 'orion/explorer', 'orion/util', 'orion/breadcrumbs', 'orion/git/widgets/CommitTooltipDialog'], function(require, dojo, mExplorer, mUtil, mBreadcrumbs) {
+define(['require', 'dojo', 'orion/explorer', 'orion/util', 'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(require, dojo, mExplorer, mUtil, mBreadcrumbs, mGitCommands) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -148,6 +149,9 @@ exports.GitRepositoryExplorer = (function() {
 		var that = this;
 		var item = {};
 		var pageTitle;		
+		
+		// render commands
+		mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", (repository ? repository : {}));
 		
 		if (repository && sectionName){
 			item.Name = sectionName;

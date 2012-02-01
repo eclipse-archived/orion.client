@@ -49,6 +49,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 		// define the command contributions - where things appear, first the groups
 		commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
 		commandService.registerCommandContribution("eclipse.orion.git.cherryPick", 100, "pageActions", "eclipse.gitGroup");
+		commandService.registerCommandContribution("eclipse.orion.git.openCommitCommand", 102, "pageActions", "eclipse.gitGroup", true, new mCommands.CommandKeyBinding('h', true, true));
 
 		// object contributions
 		commandService.registerCommandContribution("eclipse.removeTag", 1000);
