@@ -21,6 +21,28 @@ define([], function() {
 	 * @property {String[]} filename Optional; List of filenames characterizing this ContentType.
 	 */
 	
+	function getFilenameContentType(/**String*/ filename) {
+		function winner(best, other, filename, extension) {
+			var nameMatch = other.filename.indexOf(filename) >= 0;
+			var extMatch = other.extension.indexOf(extension) >= 0;
+			if (nameMatch || extMatch) {
+				if (!best || (nameMatch && best.extension.indexOf(extension) >= 0)) {
+					return other;
+				}
+			}
+			return best;
+		}
+		var extension = filename && filename.split(".").pop();
+		var contentTypes = this.getContentTypes(), best = null;
+		for (var i=0; i < contentTypes.length; i++) {
+			var type = contentTypes[i];
+			if (winner(best, type, filename, extension) === type) {
+				best = type;
+			}
+		}
+		return best;
+	}
+
 	/**
 	 * @name orion.file.ContentTypeService
 	 * @class A service for querying {@link orion.file.ContentType}s.
@@ -85,29 +107,11 @@ define([], function() {
 		},
 		/**
 		 * Looks up the ContentType for a file, given the file's metadata.
-		 * @param {Object} fileMetadata Metadata for a file.
+		 * @param {Object} fileMetadata Metadata for a file or search result.
 		 * @returns {orion.file.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
 		 */
 		getFileContentType: function(fileMetadata) {
-			function winner(best, other, filename, extension) {
-				var nameMatch = other.filename.indexOf(filename) >= 0;
-				var extMatch = other.extension.indexOf(extension) >= 0;
-				if (nameMatch || extMatch) {
-					if (!best || (nameMatch && best.extension.indexOf(extension) >= 0)) {
-						return other;
-					}
-				}
-				return best;
-			}
-			var filename = fileMetadata.Name, extension = filename.split(".").pop();
-			var contentTypes = this.getContentTypes(), best = null;
-			for (var i=0; i < contentTypes.length; i++) {
-				var type = contentTypes[i];
-				if (winner(best, type, filename, extension) === type) {
-					best = type;
-				}
-			}
-			return best;
+			return getFilenameContentType.call(this, fileMetadata.Name);
 		},
 		/**
 		 * Gets a ContentType by ID.

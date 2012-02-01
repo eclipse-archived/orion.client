@@ -33,12 +33,14 @@ define("examples/textview/textStylerOptions", [], function() {
 				self._onStorage(e);
 			}
 		};
-		if (this._view.isLoaded()) {
-			this._updateStylesheet();
-		} else {
-			this._view.addEventListener("Load", this._listener.onLoad);
+		if (this._view) {
+			if (this._view.isLoaded()) {
+				this._updateStylesheet();
+			} else {
+				this._view.addEventListener("Load", this._listener.onLoad);
+			}
+			window.addEventListener("storage", this._listener.onStorage, false);
 		}
-		window.addEventListener("storage", this._listener.onStorage, false);
 	}
 	
 	TextStylerOptions.prototype = /** @lends examples.textview.TextStylerOptions.prototype */ {
