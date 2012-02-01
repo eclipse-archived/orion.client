@@ -155,6 +155,15 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 		});
 	};
 
+	tests.test_getFilenameContentType = function() {
+		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+			assertContentTypesEqual(contentTypeService.getFilenameContentType("aaaaaaa"), null, "No content type for unrecognized file");
+			assertContentTypesEqual(contentTypeService.getFilenameContentType("test.file.xml"), basicTypes[2]);
+			assertContentTypesEqual(contentTypeService.getFilenameContentType("test.file.txt"), basicTypes[2]);
+			assertContentTypesEqual(contentTypeService.getFilenameContentType("build.xml"), basicTypes[3], "filename match beats extension match");
+		});
+	};
+
 	tests.test_isExtensionOf = function() {
 		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
 			function assertIsExtensionOf(typeA, typeB, expected, msg) {

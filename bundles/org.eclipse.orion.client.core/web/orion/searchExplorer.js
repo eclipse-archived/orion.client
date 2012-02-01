@@ -121,7 +121,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		this.indexedFileItems = [];
 		for(var i = 0; i < this._resultLocation.length; i++){
 			var childNode = {parent: this._listRoot, type: "file", name: this._resultLocation[i].name,lastModified: this._resultLocation[i].lastModified,
-							linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location};
+							linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location, model:this._resultLocation[i].model};
 			this.modelLocHash[childNode.location] = childNode;
 			this._listRoot.children.push(childNode);
 			this.indexedFileItems.push(childNode);
@@ -1312,13 +1312,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 		}
 	};
 	
-	SearchResultExplorer.prototype._resolveFileType = function(fileLocation){
-		var fileName = fileLocation;
-		var splits = fileName.split(".");
-		if (splits.length > 0) {
-			return splits.pop().toLowerCase();
-		}
-		return "";
+	SearchResultExplorer.prototype._getContentType = function(fileItem){
+		return this.registry.getService("orion.file.contenttypes").getFilenameContentType(fileItem.name);
 	};
 	
 	SearchResultExplorer.prototype.buildPreview = function(updating) {
@@ -1341,20 +1336,22 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/util', 'orion/fileCl
 			uiFactoryCompare.buildUI();
 
 			// Diff operations
-			var fType = that._resolveFileType(fileItem.location);
-			var options = {
-				readonly: true,
-				hasConflicts: false,
-				baseFileName: fileItem.location,
-				newFileName: fileItem.location,
-				baseFileType: fType,
-				newFileType: fType,
-				baseFileContent: fileItem.contents.join(that.model._lineDelimiter),
-				newFileContent: that._currentReplacedContents.join(that.model._lineDelimiter)
-			};
-			
-			that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactoryCompare, options);
-			that.twoWayCompareContainer.startup();
+			var fType = that._getContentType(fileItem);
+			dojo.when(fType, function(fType) {
+				var options = {
+					readonly: true,
+					hasConflicts: false,
+					baseFileName: fileItem.location,
+					newFileName: fileItem.location,
+					baseFileType: fType,
+					newFileType: fType,
+					baseFileContent: fileItem.contents.join(that.model._lineDelimiter),
+					newFileContent: that._currentReplacedContents.join(that.model._lineDelimiter)
+				};
+				
+				that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactoryCompare, options);
+				that.twoWayCompareContainer.startup();
+			});
 		});
 	};
 	

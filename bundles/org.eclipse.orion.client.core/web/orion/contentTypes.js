@@ -106,12 +106,20 @@ define([], function() {
 			return this.map;
 		},
 		/**
-		 * Looks up the ContentType for a file, given the file's metadata.
+		 * Looks up the ContentType for a file or search result, given the metadata.
 		 * @param {Object} fileMetadata Metadata for a file or search result.
 		 * @returns {orion.file.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
 		 */
 		getFileContentType: function(fileMetadata) {
 			return getFilenameContentType.call(this, fileMetadata.Name);
+		},
+		/**
+		 * Looks up the ContentType, given a filename.
+		 * @param {String} filename The filename.
+		 * @returns {orion.file.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
+		 */
+		getFilenameContentType: function(filename) {
+			return getFilenameContentType.call(this, filename);
 		},
 		/**
 		 * Gets a ContentType by ID.

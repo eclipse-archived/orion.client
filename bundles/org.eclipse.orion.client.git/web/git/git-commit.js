@@ -14,11 +14,11 @@ var eclipse;
 /*browser:true*/
 define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/dialogs', 'orion/selection',
 	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
-	'orion/git/gitCommitExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/links',
+	'orion/git/gitCommitExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/links', 'orion/contentTypes',
 	'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'],
 	function(dojo, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection,
 		mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
-		mGitCommitExplorer, mGitCommands, mGitClient, mLinks) {
+		mGitCommitExplorer, mGitCommands, mGitClient, mLinks, mContentTypes) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
@@ -38,6 +38,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 		var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
 		var gitClient = new mGitClient.GitService(serviceRegistry);
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
+		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 
 		var explorer = new mGitCommitExplorer.GitCommitExplorer(serviceRegistry, linkService, /* selection */ null, "artifacts", "pageActions"/*, "selectionTools"*/);
 		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
