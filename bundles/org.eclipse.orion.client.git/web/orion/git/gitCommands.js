@@ -1778,6 +1778,36 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(applyPatchCommand, "object");
+		
+		var openCommitCommand = new mCommands.Command({
+			name : "Open Commit",
+			tooltip: "Open the commit with the given name",
+			id : "eclipse.orion.git.openCommitCommand",
+			imageClass: "git-sprite-apply_patch",
+			spriteClass: "gitCommandSprite",
+			callback: function(data) {
+				var commitName = prompt("Type the commit name");
+				if (commitName) {
+					if (data.items.Type === "Clone") {
+						window.location = "/git/git-commit.html#/gitapi/commit/" + commitName + data.items.ContentLocation + "?page=1&pageSize=1";
+					} else {
+						var gitService = serviceRegistry.getService("orion.git.provider");
+						gitService.getGitClone(data.items.CloneLocation).then(
+							function(jsonData){
+								var repository = jsonData.Children[0];
+								window.location = "/git/git-commit.html#/gitapi/commit/" + commitName + repository.ContentLocation + "?page=1&pageSize=1";
+							},
+							this.displayErrorOnStatus
+						);
+					}
+				}
+			},
+			visibleWhen : function(item) {
+				console.info(item);
+				return item.Type === "Clone" || item.CloneLocation;
+			}
+		});
+		commandService.addCommand(openCommitCommand, "dom");
 	};
 }());
 return exports;	

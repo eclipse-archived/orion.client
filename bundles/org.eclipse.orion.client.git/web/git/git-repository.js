@@ -51,6 +51,7 @@ mBootstrap.startup().then(function(core) {
 	commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
 	commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup", false, null, new mCommands.URLBinding("cloneGitRepository", "url"));
 	commandService.registerCommandContribution("eclipse.initGitRepository", 101, "pageActions", "eclipse.gitGroup");
+	commandService.registerCommandContribution("eclipse.orion.git.openCommitCommand", 102, "pageActions", "eclipse.gitGroup", true, new mCommands.CommandKeyBinding('h', true, true));
 	
 	// object contributions
 	commandService.registerCommandContribution("eclipse.openCloneContent", 100);
@@ -84,8 +85,8 @@ mBootstrap.startup().then(function(core) {
 	});
 	commandService.addCommand(viewAllCommand, "dom");
 	
-	// render commands
-	mGitCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
+//	// render commands
+//	mGitCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
 	
 	// process the URL to find our bindings, since we can't be sure these bindings were defined when the URL was first processed.
 	commandService.processURL(window.location.href);

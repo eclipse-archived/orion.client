@@ -81,6 +81,8 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 								that.displayTags(commits[0]);
 								that.displayDiffs(commits[0]);
 								
+								commits[0].CloneLocation = repositories[0].Location;
+								
 								// render commands
 								mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", commits[0]);
 							}, function () {
