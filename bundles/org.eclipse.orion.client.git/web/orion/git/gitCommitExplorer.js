@@ -155,31 +155,52 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			
 		    var extensionListItem = dojo.create( "div", { "class":"git-list-item" }, list );
 			var horizontalBox = dojo.create( "div", null, extensionListItem );
-//			var icon = dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-modification"}, horizontalBox );
 			var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
+			
+			var cut = false;
+			var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
+			if (commitMessage0.length > 80){
+				cut = true;
+				commitMessage0 = commitMessage0.substring(0, 80);
+			};
+			
+			var div = dojo.create( "div", null, detailsView );
+			dojo.create( "span", { "class":"plugin-title", innerHTML: commitMessage0 + (cut ? "..." : "") }, div );
+			
+			dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
+			
+			var commitMessage1 = commit.Message.substring(commitMessage0.length, commit.Message.length);
+			
+			if (commitMessage1.trim().length > 0){
+				div = dojo.create( "pre", null, detailsView );
+				dojo.place(document.createTextNode(cut ? "..." + commitMessage1 : commitMessage1.trim()), div);
+				dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
+			}
+						
+			dojo.create( "span", { "class":"plugin-description", innerHTML: " commit: " + commit.Name}, detailsView );
+			
+			if (commit.Parents && commit.Parents.length > 0){
+				dojo.create( "div", null, detailsView );
+				
+				var parentMessage = dojo.create( "span", { "class":"plugin-description"}, detailsView );
+				
+				dojo.place(document.createTextNode("parent: "), parentMessage);
+				link = dojo.create("a", {className: "pnavlinkonpage", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, parentMessage);
+				dojo.place(document.createTextNode(commit.Parents[0].Name), link);
+			}
+			
+			dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
 			
 			if (commit.AuthorImage) {
 				var authorImage = dojo.create("span", {"class":"git-author-icon"}, detailsView);
 				var image = new Image();
 				image.src = commit.AuthorImage;
 				image.name = commit.AuthorName;
-				image.width = 50;
-				image.height = 50;
+				image.width = 35;
+				image.height = 35;
 				dojo.place(image, authorImage, "first");
 			}
 			
-			dojo.create( "div", {"style":"padding-top:10px"}, detailsView );
-			dojo.create( "span", { "class":"plugin-description", innerHTML: " commit: " + commit.Name}, detailsView );
-			
-			if (commit.Parents && commit.Parents.length > 0){
-				dojo.create( "div", null, detailsView );
-				
-				dojo.place(document.createTextNode("parent: "), detailsView);
-				link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, detailsView);
-				dojo.place(document.createTextNode(commit.Parents[0].Name), link);
-			}
-			
-			dojo.create( "div", {"style":"padding-top:10px"}, detailsView );
 			dojo.create( "span", { "class":"plugin-description", 
 				innerHTML: " authored by " + commit.AuthorName + " (" + commit.AuthorEmail
 				+ ") on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView );
@@ -187,18 +208,6 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			dojo.create( "div", null, detailsView );
 			dojo.create( "span", { "class":"plugin-description", 
 				innerHTML: "committed by " + commit.CommitterName  + " (" + commit.CommitterEmail + ")"}, detailsView );
-			
-			var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
-			
-			var div = dojo.create( "div", {"style":"padding-top:20px; padding-left:20px"}, detailsView );
-			dojo.create( "span", { "class":"plugin-title", innerHTML: commitMessage0 }, div );
-			
-			var commitMessage1 = commit.Message.substring(commitMessage0.length + 1, commit.Message.length);
-			
-			if (commitMessage1.length > 0){
-				div = dojo.create( "div", {"style":"padding-left:20px"}, detailsView );
-				dojo.place(document.createTextNode(commitMessage1), div);
-			}
 		};
 		
 		// Git diffs
