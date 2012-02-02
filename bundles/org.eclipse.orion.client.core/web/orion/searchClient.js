@@ -48,7 +48,25 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchRen
 			var qObj = mSearchUtils.parseQueryStr(query);
 			try {
 				this._fileService.search(qObj.location, query).then(function(jsonData) {
-					renderer(jsonData);
+					/**
+					 * transforms the jsonData so that the result is understandable by the
+					 * renderer
+					 * jsonData.response.docs{ Name, Location, Directory, LineNumber }
+					 */
+					var transform = function(jsonData) {
+						var transformed = [];
+						for (var i=0; i < jsonData.response.docs.length; i++) {
+							var hit = jsonData.response.docs[i];
+							transformed.push({name: hit.Name, 
+											  path: hit.Location, 
+											  directory: hit.Directory, 
+											  lineNumber: hit.LineNumber});
+						}
+						return transformed;
+					};
+					var token = jsonData.responseHeader.params.q;
+					token= token.substring(token.indexOf("}")+1);
+					renderer(transform(jsonData), token);
 				});
 			}
 			catch(error){

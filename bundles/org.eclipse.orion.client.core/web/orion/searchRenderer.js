@@ -25,18 +25,21 @@ define(	   ['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searc
 	 * Create a renderer to display search results.
 	 * @public
      * @param {DOMNode} resultsNode Node under which results will be added.
-	 * @param {Boolean} [generateHeading] generate a heading for the results
+	 * @param {String} [heading] the heading text (HTML), or null if none required
 	 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
 	 * @param {Boolean} [hideSummaries] Don't show the summary of what matched beside each result.
 	 * @returns a render function.
 	 */
-	function makeRenderFunction(resultsNode, generateHeading, onResultReady,  hideSummaries) {
-	
+	function makeRenderFunction(resultsNode, heading, onResultReady,  hideSummaries) {
+		
 		/**
-		 * Displays search results under the given DOM node.
-		 * @param {?}       jsonData the results of the search. 
+		 * Displays links to resources under the given DOM node.
+		 * @param [{name, path, lineNumber, directory, isExternalResource}] resources array of resources.  
+		 *	Both directory and isExternalResource cannot be true at the same time.
+		 * @param Strimg queryName (Optional) a human readable name to display when there are no matches.  If 
+		 *       not used, then there is nothing displayed for no matches
 		 */
-		function render(jsonData) {
+		function render(resources, queryName) {
 		
 			//Helper function to append a path String to the end of a search result dom node 
 			var appendPath = (function() { 
@@ -46,17 +49,17 @@ define(	   ['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searc
 				//containing some deferred work we need to do if we see the same name again.
 				var namesSeenMap = {};
 				
-				function doAppend(domElement, hit) {
-					var path = hit.Path;
-					path = path.substring(0, path.length-hit.Name.length-1);
+				function doAppend(domElement, resource) {
+					var path = resource.path;
+					path = path.substring(0, path.length-resource.name.length-1);
 					domElement.appendChild(document.createTextNode(' - ' + path + ' '));
 				}
 				
-				function appendPath(domElement, hit) {
-					var name = hit.Name;
+				function appendPath(domElement, resource) {
+					var name = resource.name;
 					if (namesSeenMap.hasOwnProperty(name)) {
 						//Seen the name before
-						doAppend(domElement, hit);
+						doAppend(domElement, resource);
 						var deferred = namesSeenMap[name];
 						if (typeof(deferred)==='function') {
 							//We have seen the name before, but prior element left some deferred processing
@@ -65,7 +68,7 @@ define(	   ['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searc
 						}
 					} else {
 						//Not seen before, so, if we see it again in future we must append the path
-						namesSeenMap[name] = function() { doAppend(domElement, hit); };
+						namesSeenMap[name] = function() { doAppend(domElement, resource); };
 					}
 				}
 				return appendPath;
@@ -73,44 +76,43 @@ define(	   ['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searc
 
 			var foundValidHit = false;
 			dojo.empty(resultsNode);
-			var token = jsonData.responseHeader.params.q;
-			token= token.substring(token.indexOf("}")+1);
-			if (jsonData.response.numFound > 0) {
+			if (resources.length > 0) {
 				var table = document.createElement('table');
-				for (var i=0; i < jsonData.response.docs.length; i++) {
-					var hit = jsonData.response.docs[i];
-//TODO:				// ignore hits in the file that launched the search
-//TODO:				if (!hit.Directory && hit.Location !== excludeFile) {
-						var col;
-						if (!foundValidHit) {
-							foundValidHit = true;
-							if (generateHeading) {
-								var heading = table.insertRow(0);
-								col = heading.insertCell(0);
-								col.innerHTML = "<h2>Search Results On</h2>";
-							}
+				for (var i=0; i < resources.length; i++) {
+					var resource = resources[i];
+					var col;
+					if (!foundValidHit) {
+						foundValidHit = true;
+						if (heading) {
+							var headingRow = table.insertRow(0);
+							col = headingRow.insertCell(0);
+							col.innerHTML = heading;
 						}
-						var row = table.insertRow(-1);
-						col = row.insertCell(0);
-						col.colspan = 2;
-						var hitLink = document.createElement('a');
-						dojo.place(document.createTextNode(hit.Name), hitLink);
-						if (hit.LineNumber) { // FIXME LineNumber === 0 
-							dojo.place(document.createTextNode(' (Line ' + hit.LineNumber + ')'), hitLink);
+					}
+					var row = table.insertRow(-1);
+					col = row.insertCell(0);
+					col.colspan = 2;
+					var resourceLink = document.createElement('a');
+					dojo.place(document.createTextNode(resource.name), resourceLink);
+					if (resource.LineNumber) { // FIXME LineNumber === 0 
+						dojo.place(document.createTextNode(' (Line ' + resource.LineNumber + ')'), resourceLink);
+					}
+					var loc = resource.location;
+					if (resource.isExternalResource) {
+						// should open link in new tab, but for now, follow the behavior of navoutliner.js
+						loc = resource.path;
+					} else {
+						loc	= resource.directory ? 
+								require.toUrl("navigate/table.html") + "#" + resource.path : 
+								require.toUrl("edit/edit.html") + "#" + resource.path;
+						if (loc === "#") {
+							loc = "";
 						}
-						var loc = hit.Location;
-						hitLink.setAttribute('href', require.toUrl("edit/edit.html") + "#" + loc);
-						col.appendChild(hitLink);
-						appendPath(col, hit);
-						
-						if (!hideSummaries && jsonData.highlighting && jsonData.highlighting[hit.Id] && jsonData.highlighting[hit.Id].Text) {
-							var highlightText = jsonData.highlighting[hit.Id].Text[0];
-							var highlight = table.insertRow(-1);
-							col = highlight.insertCell(0);
-							col.colspan = 2;
-							dojo.place(this.formatHighlight(highlightText), col, "only");
-						}
-//TODO:				}
+					}
+
+					resourceLink.setAttribute('href', loc);
+					col.appendChild(resourceLink);
+					appendPath(col, resource);
 				}
 				dojo.place(table, resultsNode, "last");
 				if (typeof(onResultReady) === "function") {
@@ -118,70 +120,18 @@ define(	   ['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searc
 				}
 			}
 			if (!foundValidHit) {
-				var div = dojo.place("<div>No matches found for </div>", resultsNode, "only");
-				var b = dojo.create("b", null, div, "last");
-				dojo.place(document.createTextNode(token), b, "only");
+				// only display no matches found if we have a proper name
+				if (queryName) {
+					var div = dojo.place("<div>No matches found for </div>", resultsNode, "only");
+					var b = dojo.create("b", null, div, "last");
+					dojo.place(document.createTextNode(queryName), b, "only");
+					if (typeof(onResultReady) === "function") {
+						onResultReady(resultsNode);
+					}
+				}
 			} 
 		}
 		return render;
 	}
-//	Renderer.prototype = /**@lends orion.searchClient.Searcher.prototype*/ {
-//		handleError: function(response, resultsNode) {
-//			throw "Is anybody using this?";
-//			console.error(response);
-//			var errorText = document.createTextNode(response);
-//			dojo.place(errorText, resultsNode, "only");
-//			return response;
-//		},
-//		setLocationByMetaData: function(meta){
-//			var locationName = "root";
-//			if(meta &&  meta.Directory && meta.Location && meta.Parents){
-//				this.setLocationByURL(meta.Location);
-//				locationName = meta.Name;
-//			} 
-//			var searchInputDom = dojo.byId("search");
-//			if(searchInputDom && searchInputDom.placeholder){
-//				if(locationName.length > 13){
-//					searchInputDom.placeholder = "Search " + locationName.substring(0, 10) + "...";
-//				} else {
-//					searchInputDom.placeholder = "Search " + locationName;
-//				}
-//			}
-//			if(searchInputDom && searchInputDom.title){
-//				searchInputDom.title = "Type a keyword or wild card to search in " + locationName;
-//			}
-//		},
-//		setLocationByURL: function(locationURL){
-//			this.location = locationURL;
-//		},
-		
-// This doesn't appear to be used at all.
-//		/**
-//		 * Creates a div representing the highlight snippet of a search result.
-//		 * @param {String} str The highlight string we got from the server
-//		 * @return {DomNode}
-//		 * @private
-//		 */
-//		function formatHighlight(str) {
-//			var start = "##match",
-//			    end = "match##",
-//			    array = str.split(/(##match|match##)/),
-//			    div = dojo.create("div"),
-//			    bold;
-//			for (var i=0; i < array.length; i++) {
-//				var token = array[i];
-//				if (token === start) {
-//					bold = dojo.create("b");
-//				} else if (token === end) {
-//					dojo.place(bold, div, "last");
-//					bold = null;
-//				} else {
-//					dojo.place(document.createTextNode(token), (bold || div), "last");
-//				}
-//			}
-//			return div;
-//		}
-//		
-//	};
 	return {makeRenderFunction:makeRenderFunction};
 });
