@@ -13,8 +13,9 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
 
-define(['require', 'dojo', 'dijit', "orion/util", 'dijit/Dialog', 'dijit/form/TextBox', 
-		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], function(require, dojo, dijit, mUtil) {
+define(['require', 'dojo', 'dijit', "orion/util", 'orion/searchRenderer', 'dijit/Dialog', 'dijit/form/TextBox', 
+		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], 
+		function(require, dojo, dijit, mUtil, mSearchRenderer) {
 
 /**
  * Usage: <code>new widgets.OpenResourceDialog(options).show();</code>
@@ -233,7 +234,8 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			var that = this;
 			setTimeout(function() {
 				var query = that.searcher.createSearchQuery(null, text, "Name");
-				that.searcher.search(that.results, query, false, false, dojo.hitch(that, that.decorateResult), true /*no highlight*/);
+				var renderFunction = mSearchRenderer.makeRenderFunction(that.results, false, dojo.hitch(that, that.decorateResult), true);
+				that.searcher.search(query, false, renderFunction);
 			}, 0);
 		}
 	},
