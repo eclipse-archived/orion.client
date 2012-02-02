@@ -134,6 +134,10 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		}
 		dijit.popup.close(loginDialog);
 	}
+	
+	function authenticatedService(SignInKey){
+		loginDialog.authenticatedService(SignInKey);
+	}
 
 	/**
 	 * Adds the DOM-related commands to the banner
@@ -601,6 +605,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		setPendingAuthentication: setPendingAuthentication,
 		getAuthenticationIds: getAuthenticationIds,
 		setPageTarget: setPageTarget,
-		setPageCommandExclusions: setPageCommandExclusions
+		setPageCommandExclusions: setPageCommandExclusions,
+		authenticatedService: authenticatedService
 	};
 });

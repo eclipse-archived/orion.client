@@ -50,6 +50,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 		
 	},
 	
+	authenticatedService: function(SignInKey){
+		if(this.unauthenticatedServices[SignInKey] && !this.unauthenticatedServices[SignInKey].authService){
+			this.authenticatedServices[SignInKey] = this.unauthenticatedServices[SignInKey];
+			delete this.unauthenticatedServices[SignInKey];
+		}
+	},
+	
 	addUserItem: function(key, authService, label, jsonData){
 		if(jsonData){
 			if(this.unauthenticatedServices[key]){
@@ -121,6 +128,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			dojo.addClass(td, "LoginWindowRight");
 			var jsonData = this.authenticatedServices[i].data;
 			var authService = this.authenticatedServices[i].authService;
+			if(!authService){
+				dojo.place(tr, this.authenticatedList, "last");
+				return;
+			}
 			if(jsonData.Location)
 				dojo.create("a", {href: (require.toUrl("profile/user-profile.html") + "#" + jsonData.Location), innerHTML: "Profile"}, td, "last");
 			dojo.place(document.createTextNode(" "), td, "last");
@@ -171,6 +182,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 	},
 	
 	renderUnauthenticatedServices: function(){
+		this.emptyListInfo.style.display = this.unauthenticatedServices.length===0 && this.authenticatedServices.length===0 ? '' : 'none';
 		dojo.empty(this.otherUnauthenticatedList);
 		var _self = this;
 		this.otherUnauthenticated.style.display = this.isEmpty(this.unauthenticatedServices) ? 'none' : '';
