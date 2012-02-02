@@ -85,7 +85,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 		var currentModel = this.iterator.cursor();
 		if(currentModel){
 			var fileItem = this.fileModel(currentModel);
-			var matchIndex = ( currentModel.type === "file" ? -1: this.model2Index(currentModel) );
+			var matchIndex = ( currentModel.type === "file" ? -2: this.model2Index(currentModel) );
 			window.sessionStorage[this.queryObj.queryStr + "_search_result_currentFileLocation"] = fileItem.location;
 			window.sessionStorage[this.queryObj.queryStr + "_search_result_currentDetailIndex"] = JSON.stringify(matchIndex);
 		}
