@@ -64,6 +64,8 @@ define(['dojo'], function(dojo) {
 			this._renderer = options.renderer;
 			this._showRoot = options.showRoot === undefined ? false : options.showRoot;
 			this._indent = options.indent === undefined ? 16 : options.indent;
+			this._onCollapse = options.onCollapse;
+			this._onExpand = options.onExpand;
 			this._labelColumnIndex = options.labelColumnIndex === undefined ? 0 : options.labelColumnIndex;
 			this._id = options.id === undefined ? "treetable" : options.id;
 			this._tableStyle = options.tableStyle;
@@ -234,6 +236,9 @@ define(['dojo'], function(dojo) {
 					if (postExpandFunc) {
 						postExpandFunc.apply(this, args);
 					}
+					if(tree._onExpand){
+						tree._onExpand(row._item);
+					}
 				});
 			}
 		}, 
@@ -280,6 +285,9 @@ define(['dojo'], function(dojo) {
 				row._expanded = false;
 				this._removeChildRows(id);
 				this._rowsChanged();
+			}
+			if(this._onCollapse){
+				this._onCollapse(row._item);
 			}
 		}
 	};  // end prototype

@@ -83,9 +83,9 @@ exports.Explorer = (function() {
 		 * 
 		 * @param parentId id of parent dom element
 		 * @param model providing data to display
-		 * @param indent custom indent on tree
+		 * @param options optional parameters of the tree(custom indent, onCollapse callback)
 		 */
-		createTree: function (parentId, model, indent){
+		createTree: function (parentId, model, options){
 			var treeId = parentId + "innerTree";
 			var existing = dojo.byId(treeId);
 			if (existing) {
@@ -102,7 +102,9 @@ exports.Explorer = (function() {
 				parent: parentId,
 				labelColumnIndex: this.renderer.getLabelColumnIndex(),
 				renderer: this.renderer,
-				indent: indent,
+				indent: options ? options.indent: undefined,
+				onCollapse: options ? options.onCollapse: undefined,
+				onExpand: options ? options.onExpand: undefined,
 				tableStyle: "mainPadding"
 			});
 			this.renderer._initializeUIState();

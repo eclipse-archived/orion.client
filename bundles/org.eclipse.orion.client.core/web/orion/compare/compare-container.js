@@ -513,7 +513,13 @@ exports.TwoWayCompareContainer = (function() {
 		this._commandService.renderCommands(commandSpanId, "dom", that, that, "tool");
 	};
 	
-	TwoWayCompareContainer.prototype.gotoMatch = function(lineNumber, match, newMatch, defaultGap){	
+	TwoWayCompareContainer.prototype.gotoMatch = function(lineNumber, match, newMatch, defaultGap, onScroll, onLoad){	
+		if(!this.onScroll){
+			this.onScroll = onScroll;
+		}
+		if(!this.onLoad){
+			this.onLoad = onLoad;
+		}
 		var offsetRight = this._textViewRight.getModel().getLineStart(lineNumber) + match.startIndex;
 		this._editorRight.moveSelection(offsetRight, offsetRight + (match.length ? match.length : defaultGap));
 		var offsetLeft = this._textViewLeft.getModel().getLineStart(lineNumber) + newMatch.startIndex;
@@ -550,6 +556,9 @@ exports.TwoWayCompareContainer = (function() {
 				that._viewLoadedCounter++;
 				if(that._viewLoadedCounter === 2){				
 					that._compareMatchRenderer.matchPositionFromAnnotation(-1);
+				}
+				if(that.onLoad){
+					that.onLoad();
 				}
 			});
 			return view;
@@ -631,6 +640,9 @@ exports.TwoWayCompareContainer = (function() {
 				if(that._compareMatchRenderer){
 					that._compareMatchRenderer.matchPositionFrom(true);
 					that._compareMatchRenderer.render();
+				}
+				if(that.onScroll){
+					that.onScroll();
 				}
 			}); 
 		} else {
