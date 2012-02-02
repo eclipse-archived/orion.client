@@ -72,6 +72,7 @@ define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widg
 						window.removeEventListener("storage", storageListener, false); // ... but only once
 						delete pendingAuthentication[responseObj.SignInKey];
 						mGlobalCommands.setPendingAuthentication(pendingAuthentication);
+						mGlobalCommands.authenticatedService(responseObj.SignInKey);
 						if (retry) {
 							retry();
 						}
