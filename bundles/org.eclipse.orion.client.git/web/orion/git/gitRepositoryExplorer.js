@@ -410,8 +410,12 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", null, detailsView );
 		
 		var commit = branch.Commit.Children[0];
+		
+		var tracksMessage = ((branch.RemoteLocation.length == 1 && branch.RemoteLocation[0].Children.length == 1) ? 
+				"tracks " + branch.RemoteLocation[0].Children[0].Name + ", " : "tracks no branch, ");
+		
 		var description = dojo.create( "span", { "class":"plugin-description", 
-			innerHTML: (branch.RemoteLocation[0] ? ("tracks " + branch.RemoteLocation[0].Children[0].Name + ", ") : "") 
+			innerHTML: tracksMessage 
 			+ "last modified " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})
 			+ " by " + commit.AuthorName}, detailsView );
 		
@@ -534,13 +538,15 @@ exports.GitRepositoryExplorer = (function() {
 					}
 				}
 				
+				var tracksRemoteBranch = (currentBranch.RemoteLocation.length == 1 && currentBranch.RemoteLocation[0].Children.length == 1);
+				
 				dojo.byId("commitHeader").innerHTML = "Commits for \"" + currentBranch.Name + "\" branch";
 				
 				that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10, "viewAllCommitSectionActionsArea");
 				that.registry.getService("orion.page.command").renderCommands(dojo.byId("viewAllCommitSectionActionsArea"), "dom", 
 					{"ViewAllLink":"/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":"See Full Log", "ViewAllTooltip":"See the full log"}, that, "tool", false);
 						
-				if (currentBranch.RemoteLocation[0]){
+				if (tracksRemoteBranch){
 					that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.fetch", 100, "commitSectionActionsArea");
 					that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.merge", 100, "commitSectionActionsArea");
 					that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.rebase", 100, "commitSectionActionsArea");
@@ -557,7 +563,7 @@ exports.GitRepositoryExplorer = (function() {
 					return;
 				};
 				
-				if (currentBranch.RemoteLocation[0].Children[0].CommitLocation){
+				if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
 					that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD", "",
 						function(resp){
 							dojo.style(dojo.byId("commitSectionProgress"), "visibility", "hidden");
@@ -588,7 +594,7 @@ exports.GitRepositoryExplorer = (function() {
 							dojo.style(dojo.byId("commitSectionProgress"), "visibility", "hidden");
 						
 							for (var i=0; i<resp.Children.length; i++){
-								that.renderCommit(resp.Children[i], false, i);
+								that.renderCommit(resp.Children[i], true, i);
 							}
 							
 							if (resp.Children.length == 0)
