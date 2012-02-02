@@ -108,12 +108,18 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					var progressTimeout = setTimeout(function() {
 						editor.setInput(fullPathName, "Fetching " + fullPathName, null);
 					}, 800); // wait 800ms before displaying
-					var load = dojo.hitch(this, function(metadata, contents) {
-						// Metadata
-						this._fileMetadata = metadata;
-						mGlobalCommands.setPageTarget([metadata, metadata.Parents && metadata.Parents[0]], serviceRegistry, commandService, ["", " on folder"]);
-						this.setTitle(metadata.Location);
-						this._contentType = contentTypeService.getFileContentType(metadata);
+					var setInput = dojo.hitch(this, function(contents, metadata) {
+						if (metadata) {
+							this._fileMetadata = metadata;
+							mGlobalCommands.setPageTarget([metadata, metadata.Parents && metadata.Parents[0]], serviceRegistry, commandService, ["", " on folder"]);
+							this.setTitle(metadata.Location);
+							this._contentType = contentTypeService.getFileContentType(metadata);
+						} else {
+							// No metadata
+							this._fileMetadata = null;
+							this.setTitle(fileURI);
+							this._contentType = contentTypeService.getFilenameContentType(this.getTitle());
+						}
 						syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), fileURI)
 							.then(dojo.hitch(this, function() {
 								editor.highlightAnnotations();
@@ -127,28 +133,23 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							}));
 						clearTimeout(progressTimeout);
 					});
-					
-					var metadata = null, contents = null;
-					fileClient.read(fileURI).then(function(result) {
-							contents = result;
-							if (metadata !== null) {
-								load(metadata, contents);
-							}
-						}, dojo.hitch(this, function(error) {
-							clearTimeout(progressTimeout);
-							editor.setInput(fullPathName, "An error occurred: " + errorMessage(error), null);
+					var load = dojo.hitch(this, function(results) {
+						var contentsOk = results[0][0], contents = contentsOk ? results[0][1] : null;
+						var metadataOk = results[1][0], metadata = metadataOk ? results[1][1] : null;
+						var error;
+						clearTimeout(progressTimeout);
+						if (!contentsOk) {
+							error = results[0][1];
 							console.error("HTTP status code: ", error.status);
-						}));
-					fileClient.read(fileURI, true).then(function(result) {
-							metadata = result;
-							if (contents !== null) {
-								load(metadata, contents);
-							}
-						}, dojo.hitch(this, function(error) {
-							clearTimeout(progressTimeout);
+							contents = "An error occurred: " + errorMessage(error);
+						}
+						if (!metadataOk) {
+							error = results[1][1];
 							console.error("Error loading file metadata: " + errorMessage(error));
-							this.setTitle(fileURI);
-						}));
+						}
+						setInput(contents, metadata);
+					});
+					new dojo.DeferredList([fileClient.read(fileURI), fileClient.read(fileURI, true)]).then(load, load);
 				}
 				this.lastFilePath = fileURI;
 			} else {
@@ -174,7 +175,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			var titlePane = dojo.byId("location");
 			if (titlePane) {
 				dojo.empty(titlePane);
-				var root = fileClient.fileServiceName(this._fileMetadata.Location);
+				var root = fileClient.fileServiceName(this._fileMetadata && this._fileMetadata.Location);
 				new mBreadcrumbs.BreadCrumbs({
 					container: "location", 
 					resource: this._fileMetadata,
