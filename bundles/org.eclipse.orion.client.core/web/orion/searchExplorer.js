@@ -823,22 +823,22 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 			var col, span, link;
 			col = document.createElement('td');
 			span = dojo.create("span", {id: this.getFileSpanId(item)}, col, "only");
+			var that = this;
+			if(that.explorer._state === "result_view"){
+				dojo.connect(tableRow, "onclick", tableRow, function() {
+					that.selectElement(null, item);
+				});
+				dojo.connect(tableRow, "onmouseover", tableRow, function() {
+					tableRow.style.cursor ="pointer";
+				});
+				dojo.connect(tableRow, "onmouseout", tableRow, function() {
+					tableRow.style.cursor ="default";
+				});
+			}
 			if(item.type ===  "file"){
 				var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name;
 				this.renderFileElement(item, span, renderName);
 			} else {
-				var that = this;
-				if(that.explorer._state === "result_view"){
-					dojo.connect(tableRow, "onclick", tableRow, function() {
-						that.selectElement(null, item);
-					});
-					dojo.connect(tableRow, "onmouseover", tableRow, function() {
-						tableRow.style.cursor ="pointer";
-					});
-					dojo.connect(tableRow, "onmouseout", tableRow, function() {
-						tableRow.style.cursor ="default";
-					});
-				}
 				this.renderDetailElement(item, tableRow, span);
 				var iconSpan = dojo.create("span", {id: this.getDetailIconId(item)}, span, "last");
 				var icon = dojo.create("span", null, iconSpan, "last");
