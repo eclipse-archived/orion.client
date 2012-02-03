@@ -122,6 +122,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 				progressService.showWhile(deferred, "Starting...").then(startCallback, errorCallback);
 			}});
 		commandService.addCommand(startCommand, "object");
+		commandService.addCommand(startCommand, "dom");
 		
 		var stopCommand = new mCommands.Command({
 			name: "Stop",
@@ -140,6 +141,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 				progressService.showWhile(deferred, "Stopping " + data.items.Name + "...").then(stopCallback, errorCallback);
 			}});
 		commandService.addCommand(stopCommand, "object");
+		commandService.addCommand(stopCommand, "dom");
 		
 		var deleteCommand = new mCommands.Command({
 			name: "Delete",
