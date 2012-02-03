@@ -7,7 +7,7 @@
 		window.onload = function() {
 			var provider = new eclipse.PluginProvider();
 			var serviceImpl = {
-				run : function(text, fullText, selection) {
+				run : function(text, fullText, selection, fileName) {
 					var tokens = text.split(',');
 					// don't do it if it's not the number of tokens we expect.
 					if (tokens.length !== 3) {
@@ -30,6 +30,10 @@
 			};
 			var serviceProps = {
 				name : "toRGB",
+				tooltip : "Converts n,n,n decimal to #RRGGBB for use in CSS",
+				id : "org.eclipse.orion.client.core.toRGB",
+				// TODO do we have a way to specify css AND html?
+				validationProperties: {"Name":"*.css"},  
 				key : [ "b", true, true ]
 			};
 			provider.registerServiceProvider("orion.edit.command", serviceImpl, serviceProps);
