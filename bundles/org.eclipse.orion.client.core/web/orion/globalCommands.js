@@ -239,7 +239,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 									if (itemLabels[itemIndex]) {
 										navInfo.name += itemLabels[itemIndex];
 									}
-									var commandOptions = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry);
+									var commandOptions = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry, true);
 									command = new mCommands.Command(commandOptions);
 								}
 							}
@@ -566,7 +566,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 					for (var i=0; i<openWithCommands.length; i++) {
 						var commandInfo = openWithCommands[i].properties;
 						var service = openWithCommands[i].service;
-						var commandOptions = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry);
+						var commandOptions = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, true);
 						var command = new mCommands.Command(commandOptions);
 						command.isEditor = commandInfo.isEditor;
 						var openWithGroupCreated = false;

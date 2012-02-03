@@ -16,7 +16,8 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['dojo', 'orion/commands', 'orion/globalCommands', 'orion/textview/keyBinding', 'orion/textview/undoStack'], function(dojo, mCommands, mGlobalCommands, mKeyBinding, mUndoStack) {
+define(['dojo', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/textview/keyBinding', 'orion/textview/undoStack'], 
+	function(dojo, mCommands, mGlobalCommands, mExtensionCommands, mKeyBinding, mUndoStack) {
 
 var exports = {};
 
@@ -30,7 +31,7 @@ exports.EditorCommandFactory = (function() {
 		this.pageNavId = navToolbarId;
 		this.isReadOnly = isReadOnly;
 	}
-	EditorCommandFactory .prototype = {
+	EditorCommandFactory.prototype = {
 		/**
 		 * Creates the common text editing commands.  Also generates commands for any installed plug-ins that
 		 * contribute editor actions.  
@@ -158,14 +159,22 @@ exports.EditorCommandFactory = (function() {
 		
 				// The shape of the contributed actions is (for now):
 				// info - information about the action (object).
-				//        required attribute: name - the name of the action
+				//        required attribute: name - the name of the command
+				//        required attribute: id - the id of the action, namespace qualified
+				//        optional attribute: tooltip - the tooltip to use for the command
 				//        optional attribute: key - an array with values to pass to the orion.textview.KeyBinding constructor
 				//        optional attribute: img - a URL to an image for the action
+				//        optional attribute: validationProperties - an object containing key/value pairs for validating the
+				//          the resource metadata to determine whether the command is valid for the given resource.
+				//          Wildcards are supported.  For example the validation property
+				//				{"Git":"*", "Directory":"false"}
+				//              specifies that the property "Git" must be present, and that the property "Directory" must be false.
 				// run - the implementation of the action (function).
-				//        arguments passed to run: (selectedText, fullText, selection)
+				//        arguments passed to run: (selectedText, fullText, selection, resourceName)
 				//          selectedText (string) - the currently selected text in the editor
 				//          fullText (string) - the complete text of the editor
 				//          selection (object) - an object with attributes: start, end
+				//          resourceName (string) - the resource being edited
 				//        the return value of the run function will be used as follows:
 				//          if the return value is a string, the current selection in the editor will be replaced with the returned string
 				//          if the return value is an object, its "text" attribute (required) will be used to replace the contents of the editor,
@@ -173,18 +182,15 @@ exports.EditorCommandFactory = (function() {
 			
 				// iterate through the extension points and generate commands for each one.
 				var actionReferences = this.serviceRegistry.getServiceReferences("orion.edit.command");
-				var makeCommand = function(info, service) {
-					return new mCommands.Command({
-						name: info.name,
-						image: info.img,
-						id: info.name,
-						callback: dojo.hitch(editor, function(data) {
+				var input = this.inputManager;
+				var makeCommand = function(info, service, options) {
+					options.callback = dojo.hitch(editor, function(data) {
 							// command service will provide editor parameter but editor widget callback will not
 							editor = data ? data.items || this : this;
 							var selection = editor.getSelection();
 							var model = editor.getModel();
 							var text = model.getText();
-							service.run(model.getText(selection.start,selection.end),text,selection).then(function(result){
+							service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()).then(function(result){
 								if (result && result.text) {
 									editor.setText(result.text);
 									if (result.selection) {
@@ -200,7 +206,8 @@ exports.EditorCommandFactory = (function() {
 								}
 							});
 							return true;
-						})});
+						});
+					return new mCommands.Command(options);
 				};
 				for (var i=0; i<actionReferences.length; i++) {
 					var service = this.serviceRegistry.getService(actionReferences[i]);
@@ -209,7 +216,12 @@ exports.EditorCommandFactory = (function() {
 					for (var j = 0; j < propertyNames.length; j++) {
 						info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
 					}
-					var command = makeCommand(info, service);
+					info.forceSingleItem = true;  // for compatibility with mExtensionCommands._createCommandOptions
+					var command = makeCommand(info, service, 
+						mExtensionCommands._createCommandOptions(info, actionReferences[i], this.serviceRegistry, false, function(items) {
+							// items is the editor and we care about the file metadata for validation
+							return input.getFileMetadata();
+						}));
 					this.commandService.addCommand(command, "dom");
 					this.commandService.registerCommandContribution(command.id, i, this.toolbarId, "orion.editorActions.contributed");
 					// We must regenerate the command toolbar everytime we process an extension because

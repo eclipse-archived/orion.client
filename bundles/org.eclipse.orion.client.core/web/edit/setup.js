@@ -112,6 +112,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						if (metadata) {
 							this._fileMetadata = metadata;
 							mGlobalCommands.setPageTarget([metadata, metadata.Parents && metadata.Parents[0]], serviceRegistry, commandService, ["", " on folder"]);
+							mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 							this.setTitle(metadata.Location);
 							this._contentType = contentTypeService.getFileContentType(metadata);
 						} else {
