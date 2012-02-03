@@ -140,8 +140,22 @@ var exports = {};
 		});
 		return def;
 	};
+	
+	function translateResponseToStatus(response){
+		var json;
+		try{
+			json = JSON.parse(response.responseText);
+		}catch (e) {
+			json = {Result: response.responseText};
+		}
+		json.HttpCode = response.status;
+		return json;
+	};
 
 	exports.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee, title){
+		if(jsonData && jsonData.status){
+			jsonData = translateResponseToStatus(jsonData);
+		}
 		if(!jsonData || !jsonData.HttpCode){
 			if(callback){
 				callback(jsonData);
@@ -152,6 +166,9 @@ var exports = {};
 		case 200:
 		case 201:
 		case 202:
+			if(callback){
+				callback(jsonData.Result);
+			}
 			return;
 		case 401:
 			if(jsonData.JsonData){
