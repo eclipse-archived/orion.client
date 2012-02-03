@@ -33,7 +33,7 @@
 		var li = document.createElement("li");
 		var a = document.createElement("a");
 		a.className = "minibutton";
-		a.href = "http://orion.eclipse.org:8080/git/git-repository.html?cloneGitRepository=" + gitRepoUrl;
+		a.href = "http://orionhub.org/git/git-repository.html?cloneGitRepository=" + gitRepoUrl;
 		a.target = "_blank";
 
 		var span = document.createElement("span");
