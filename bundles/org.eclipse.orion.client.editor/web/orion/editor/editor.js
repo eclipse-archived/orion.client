@@ -12,7 +12,7 @@
  /*global define window */
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
-define("orion/editor/editor", ['orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip'], function(mKeyBinding, mEventTarget, mTooltip) {
+define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip'], function(messages, mKeyBinding, mEventTarget, mTooltip) {
 
 	/**
 	 * @name orion.editor.util
@@ -423,7 +423,7 @@ define("orion/editor/editor", ['orion/textview/keyBinding', 'orion/textview/even
 						start: start,
 						end: end,
 						type: this.currentLineType,
-						title: "Current Line",
+						title: messages.currentLine,
 						html: "<div class='annotationHTML currentLine'></div>",
 						overviewStyle: {styleClass: "annotationOverview currentLine"},
 						lineStyle: {styleClass: "annotationLine currentLine"}

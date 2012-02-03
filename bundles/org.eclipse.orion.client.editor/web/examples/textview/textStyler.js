@@ -12,7 +12,7 @@
 
 /*global document window navigator define */
 
-define("examples/textview/textStyler", ['orion/textview/annotations'], function(mAnnotations) {
+define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'orion/textview/annotations'], function(messages, mAnnotations) {
 
 	var JS_KEYWORDS =
 		["break",
@@ -963,7 +963,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 						start: bracket,
 						end: bracket + 1,
 						type: "orion.annotation.matchingBracket",
-						title: "Matching Bracket",
+						title:  messages.matchingBracket,
 						html: "<div class='annotationHTML matchingBracket'></div>",
 						overviewStyle: {styleClass: "annotationOverview matchingBracket"},
 						rangeStyle: {styleClass: "annotationRange matchingBracket"}
@@ -972,7 +972,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 						start: mapCaret,
 						end: mapCaret + 1,
 						type: "orion.annotation.currentBracket",
-						title: "Current Bracket",
+						title: messages.currentBracket,
 						html: "<div class='annotationHTML currentBracket'></div>",
 						overviewStyle: {styleClass: "annotationOverview currentBracket"},
 						rangeStyle: {styleClass: "annotationRange currentBracket"}

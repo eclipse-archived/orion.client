@@ -11,7 +11,7 @@
 
 /*global define setTimeout clearTimeout setInterval clearInterval Node */
 
-define("orion/textview/tooltip", ['orion/textview/textView', 'orion/textview/textModel', 'orion/textview/projectionTextModel'], function(mTextView, mTextModel, mProjectionTextModel) {
+define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/textview/textView', 'orion/textview/textModel', 'orion/textview/projectionTextModel'], function(messages, mTextView, mTextModel, mProjectionTextModel) {
 
 	/** @private */
 	function Tooltip (view) {
@@ -201,7 +201,7 @@ define("orion/textview/tooltip", ['orion/textview/textView', 'orion/textview/tex
 					return newModel;
 				}
 			} else {
-				var tooltipHTML = "<div><em>Multiple annotations:</em></div>";
+				var tooltipHTML = "<div><em>" + messages.multipleAnnotations + "</em></div>";
 				for (var i = 0; i < annotations.length; i++) {
 					annotation = annotations[i];
 					title = annotation.title;
