@@ -477,7 +477,7 @@ exports.TwoWayCompareContainer = (function() {
 		}
 		var that = this;
 		var nextDiffCommand = new mCommands.Command({
-			name : "Next Diff",
+			tooltip : "Go to next diff",
 			imageClass : "core-sprite-move_down",
 			id: "orion.compare.nextDiff",
 			groupId: "orion.compareGroup",
@@ -485,7 +485,7 @@ exports.TwoWayCompareContainer = (function() {
 				that.nextDiff();
 		}});
 		var prevDiffCommand = new mCommands.Command({
-			name : "Previous Diff",
+			tooltip : "Go to previous diff",
 			imageClass : "core-sprite-move_up",
 			id: "orion.compare.prevDiff",
 			groupId: "orion.compareGroup",
@@ -493,7 +493,7 @@ exports.TwoWayCompareContainer = (function() {
 				that.prevDiff();
 		}});
 		var copyToLeftCommand = new mCommands.Command({
-			name : "Copy Current Change From Right to left",
+			tooltip : "Copy current change from right to left",
 			imageClass : "core-sprite-leftarrow",
 			id: "orion.compare.copyToLeft",
 			groupId: "orion.compareGroup",
