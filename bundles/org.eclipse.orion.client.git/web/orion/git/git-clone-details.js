@@ -231,7 +231,7 @@ exports.CloneDetails = (function() {
 			dojo.place(cloneMetaTable, this._parent, "only");
 			
 			var commands = dojo.byId("configurationCommands");
-			this._registry.getService("orion.page.command").renderCommands(commands, "dom", this, this, "tool");
+			this._registry.getService("orion.page.command").renderCommands(commands, "dom", this, this, "button");
 		}
 	};
 	return CloneDetails;

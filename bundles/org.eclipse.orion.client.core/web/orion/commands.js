@@ -115,6 +115,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		this._objectScope = {};
 		this._globalScope = {};
 		this._namedGroups = {};
+		this._ungrouped = {};
 		this._topics = {};
 		this._activeBindings = {};
 		this._activeModalCommandNode = null;
@@ -469,8 +470,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 * @param {orion.commands.URLBinding} urlBinding a url binding for the command.  Optional.
 		 */
 		registerCommandContribution: function(commandId, position, scopeId, parentPath, bindingOnly, keyBinding, urlBinding) {
-			// first ensure the parentPath is represented
-			var parentTable = this._createEntryForPath(parentPath);
+			var parentTable;
+			if (!scopeId && !parentPath) {
+				parentTable = this._ungrouped;
+			} else {
+				// first ensure the parentPath is represented
+				parentTable = this._createEntryForPath(parentPath);
+			}
 			
 			// store the contribution
 			parentTable[commandId] = {scopeId: scopeId, position: position};
@@ -498,7 +504,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		},
 		
 		_isLastChildSeparator: function(parent, style) {
-			if (style === "tool") {
+			if (style === "tool" || style === "button") {
 				return parent.childNodes.length > 0 && dojo.hasClass(parent.childNodes[parent.childNodes.length - 1], "commandSeparator");
 			}
 			if (style === "menu") {
@@ -551,6 +557,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			var refCommands;
 			if (scope === "object") {
 				refCommands = this._objectScope;
+				// render unnamed/ungrouped item scopes first
+				this._render(this._ungrouped, parent, scope, items, handler, renderType, forceText, userData, refCommands, activeCommandClass, inactiveCommandClass);
 			} else if (scope === "dom") {
 				refCommands = this._domScope;
 			} else if (scope === "global") {
@@ -560,7 +568,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			}
 			this._render(this._namedGroups, parent, scope, items, handler, renderType, forceText, userData, refCommands, activeCommandClass, inactiveCommandClass);
 			// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
-			if (renderType === "tool") {
+			if (renderType === "tool" || renderType === "button") {
 				if (this._isLastChildSeparator(parent, renderType)) {
 					parent.removeChild(parent.childNodes[parent.childNodes.length-1]);
 				}
@@ -722,7 +730,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							render = !positionOrder[i].scopeId;
 						} 
 						// only check bindings that would otherwise render (ie, dom id matches parent, etc.)
+						if (render && command.visibleWhen) {
+							render = command.visibleWhen(items);
+						}
 						var checkBinding = render && (scope === "global" || scope === "dom");
+						
 						invocation = new CommandInvocation(this, handler, items, userData, command);
 						invocation.domParent = parent;
 
@@ -743,9 +755,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							if (urlBinding.bindingOnly) {
 								render = false;
 							}
-						}
-						if (render && command.visibleWhen) {
-							render = command.visibleWhen(items);
 						}
 					}
 					if (render) {
@@ -827,14 +836,31 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		generateSeparatorImage: function(parent) {
 			var sep = dojo.create("span", null, parent, "last");
 			dojo.addClass(sep, "core-sprite-sep");  // location in sprite
-			dojo.addClass(sep, "commandImage");   // expected spacing
-			dojo.addClass(sep, "commandSprite");  // sets sprite background
+			dojo.addClass(sep, "imageSprite");  // sets sprite background
 			dojo.addClass(sep, "commandSeparator");
 			return sep;
 		}
 
 	};  // end command service prototype
 	CommandService.prototype.constructor = CommandService;
+	
+	function addImageToElement(command, element, name) {
+		dojo.addClass(element, "commandImage");
+		var node;
+		if (command.imageClass) {
+			node = dojo.create("span", {}, element, "last");
+			dojo.addClass(node, command.spriteClass);
+			dojo.addClass(node, command.imageClass);
+		} else {
+			node = new Image();
+			node.alt = command.name;
+			node.name = name;
+			node.id = name;
+			node.src = command.image;	
+			dojo.place(node, element, "last");
+		}
+		return node;
+	}
 
 	/**
 	 * Constructs a new command with the given options.
@@ -873,7 +899,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 	Command.prototype = /** @lends orion.commands.Command.prototype */ {
 		_init: function(options) {
 			this.id = options.id;  // unique id
-			this.name = options.name || "Empty Command";
+			this.name = options.name;
 			this.tooltip = options.tooltip || options.name;
 			this.callback = options.callback; // optional callback that should be called when command is activated (clicked)
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
@@ -885,54 +911,38 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			this.visibleWhen = options.visibleWhen;
 			this.parameters = options.parameters;
 		},
+		/*
+		 *  Adds a "tool" representation for the command.  
+		 *  For href commands, this is just a link.
+		 *  For non-href commands, this is an image button.  If there is no image button, use bolded text button.
+		 */
 		_addTool: function(parent, forceText, name, context, activeCommandClass, inactiveCommandClass) {
-			context.handler = context.handler || this;
-			var link = dojo.create("a", {tabindex: "0", role: "button", href: "javascript:void(0)"}); // the link must have an href for keyboard use
-			link.id = this.name+"link";
-			var image = null;
-			if (forceText || !this.hasImage()) {
-				var text = window.document.createTextNode(this.name);
-				dojo.place(text, link, "last");
-				dojo.addClass(link, 'commandLink');
-				if (this.tooltip) {
-					new CommandTooltip({
-						connectId: [link],
-						label: this.tooltip,
-						position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
-						commandParent: parent,
-						commandService: context.commandService
-					});
-				}
-			} else {
-				image = new Image();
-				image.alt = this.name;
-				image.name = name;
-				image.id = name;
+			if (parent.tagName === 'UL') {
+				parent = dojo.create("li", {"class": "commandListItem"}, parent, last);
 			}
-			context.domParent = parent;
+			context.handler = context.handler || this;
+			var element, image;
 			if (this.hrefCallback) {
+				element = dojo.create("a", {tabindex: "0"});
+				dojo.addClass(element, "commandLink");
+				dojo.place(window.document.createTextNode(this.name), element, "last");
 				var href = this.hrefCallback.call(context.handler, context);
 				if(href.then){
 					href.then(function(l){
-						link.href = l;
+						element.href = l;
 					});
 				}else{
-					link.href = href; 
+					element.href = href; 
 				}
 			} else {
-				if (image) {
-					context.domNode = image;
-					dojo.connect(image, "onclick", this, function() {
-						// collect parameters in advance if specified
-						if (this.parameters && context.collectsParameters()) {
-							context.commandService._collectParameters("tool", context);
-						} else if (this.callback) {
-							this.callback.call(context.handler, context);
-						}
-					});
+				element = dojo.create("span", {tabindex: "0", role: "button"});
+				if (forceText || !this.hasImage()) {
+					var text = window.document.createTextNode(this.name);
+					dojo.place(text, element, "last");
+					dojo.addClass(element, "commandMissingImageButton commandButton");
 				} else {
-					context.domNode = link;
-					dojo.connect(link, "onclick", this, function() {
+					image = addImageToElement(this, element, name);
+					dojo.connect(element, "onclick", this, function() {
 						// collect parameters in advance if specified
 						if (this.parameters && context.collectsParameters()) {
 							context.commandService._collectParameters("tool", context);
@@ -941,57 +951,67 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						}
 					});
 				}
+				var overClass = image ? "commandImageOver" : "commandButtonOver";
+				this._setupActivateVisuals(element, element, activeCommandClass, inactiveCommandClass, overClass);			
+
 			}
-			if (image) {
-				// TODO get image in the focus order for accessibility 
-				image.src = this.image;	
-				dojo.addClass(image, 'commandImage');
-				if (this.imageClass) {
-					dojo.addClass(image, this.spriteClass);
-					dojo.addClass(image, this.imageClass);
-				} 
-				dojo.place(image, link, "last");
+			context.domNode = element;
+			context.domParent = parent;
+			if (this.tooltip) {
 				new CommandTooltip({
-					connectId: [image],
-					label: this.tooltip || this.name,
+					connectId: [element],
+					label: this.tooltip,
 					position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
 					commandParent: parent,
 					commandService: context.commandService
 				});
-			} 
-			var visual = image ? image : link;
-			var overClass = image ? "commandOver" : null;
-			this._setupActivateVisuals(visual, visual, activeCommandClass, inactiveCommandClass, overClass);			
-			dojo.place(link, parent, "last");
+			}
+			dojo.place(element, parent, "last");
 		},
-		
+	
+		/*
+		 *  Adds a "button" representation for the command.  
+		 *  For href commands, this is just a link.
+		 *  For non-href commands, this is a text button.  If there is no name, use an image.
+		 */
 		_addButton: function(parent, forceText, name, context, activeCommandClass, inactiveCommandClass) {
 			context.handler = context.handler || this;
 			var element;
 			if (this.hrefCallback) {
-				element = dojo.create("a", {tabindex: "0", role: "button", href: "javascript:void(0)"}); // the link must have an href for keyboard use
+				element = dojo.create("a", {tabindex: "0"});
 				dojo.addClass(element, "commandLink");
-			} else {
-				element = dojo.create("button");
-				element.type = "button";
-				dojo.addClass(element, "commandButton");
-				if (this.hasImage()) {
-					var image = new Image();
-					image.alt = this.name;
-					image.name = name;
-					image.id = name;
-					image.src = this.image;	
-					dojo.place(image, element, "last");
-					if (this.imageClass) {
-						dojo.addClass(image, this.spriteClass);
-						dojo.addClass(image, this.imageClass);
-					} 
-					dojo.addClass(image, "commandButtonImage");
+				dojo.place(window.document.createTextNode(this.name), element, "last");
+				var href = this.hrefCallback.call(context.handler, context);
+				if(href.then){
+					href.then(function(l){
+						element.href = l;
+					});
+				}else{
+					element.href = href; 
 				}
+			} else {
+				element = dojo.create("span", {tabindex: "0", role: "button"});
+				dojo.connect(element, "onclick", this, function() {
+					// collect parameters in advance if specified
+					if (this.parameters && context.collectsParameters()) {
+						context.commandService._collectParameters("button", context);
+					} else if (this.callback) {
+						this.callback.call(context.handler, context);
+					}
+				});
+				var overClass;
+				if (this.name) {
+					dojo.place(window.document.createTextNode(this.name), element, "last");
+					dojo.addClass(element, "commandButton");
+					overClass = "commandButtonOver";
+				} else {
+					// TODO we need a way to force a button contribution to look like a tool.  This is a very rare case.
+					addImageToElement(this, element, name);
+					overClass = "commandImageOver";
+				}
+				this._setupActivateVisuals(element, element, activeCommandClass, inactiveCommandClass, overClass);			
 			}
 			element.id = name;
-			var text = window.document.createTextNode(this.name);
-			dojo.place(text, element, "last");
 			if (this.tooltip) {
 				new CommandTooltip({
 					connectId: [element],
@@ -1003,27 +1023,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			}
 			context.domParent = parent;
 			context.domNode = element;
-			var location;
-			if (this.hrefCallback) {
-				var href = this.hrefCallback.call(context.handler, context);
-				if(href.then){
-					href.then(function(l){
-						element.href = l;
-					});
-				}else{
-					element.href = href; 
-				}
-			} else {
-				dojo.connect(element, "onclick", this, function() {
-					// collect parameters in advance if specified
-					if (this.parameters && context.collectsParameters()) {
-						context.commandService._collectParameters("button", context);
-					} else if (this.callback) {
-						this.callback.call(context.handler, context);
-					}
-				});
-				this._setupActivateVisuals(element, element, activeCommandClass, inactiveCommandClass, "commandButtonOver");			
-			}
 			dojo.place(element, parent, "last");
 		},
 		_addMenuItem: function(parent, context) {
@@ -1071,7 +1070,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			if (this.imageClass) {
 				dojo.addClass(menuitem.iconNode, this.spriteClass);
 			} else if (this.image) {
-				dojo.addClass(menuitem.iconNode, 'commandImage');
+				dojo.addClass(menuitem.iconNode, "commandMenuItem");
 				// reaching...
 				menuitem.iconNode.src = this.image;
 			}
@@ -1137,9 +1136,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						onClick: this.makeChoiceCallback(choice, items)
 					});
 					if (choice.imageClass) {
-						dojo.addClass(menuitem.iconNode, choice.spriteClass || 'commandSprite');
+						dojo.addClass(menuitem.iconNode, choice.spriteClass || "commandSprite");
 					} else if (choice.image) {
-						dojo.addClass(menuitem.iconNode, 'commandImage');
+						dojo.addClass(menuitem.iconNode, "commandImage");
 						menuitem.iconNode.src = choice.image;
 					}			
 				} else {  // anything not named is a separator

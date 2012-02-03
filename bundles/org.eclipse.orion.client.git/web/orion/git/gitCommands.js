@@ -32,17 +32,17 @@ var exports = {};
 			throw "could not find toolbar " + toolbarId;
 		}
 		var commandService = registry.getService("orion.page.command");
-		commandService.renderCommands(toolbar, "dom", item, explorer, "tool", true);  // true forces text links
+		commandService.renderCommands(toolbar, "dom", item, explorer, "button"); 
 		if (pageNavId) {
 			toolbar = dojo.byId(pageNavId);
 			if (toolbar) {
 				dojo.empty(toolbar);
-				commandService.renderCommands(toolbar, "dom", item, explorer, "tool", true);  
+				commandService.renderCommands(toolbar, "dom", item, explorer, "button", true);  
 			}
 		}
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			commandService.renderCommands(selectionTools, "dom", null, explorer, "tool", true);
+			commandService.renderCommands(selectionTools, "dom", null, explorer, "button", true);
 		}
 
 		// Stuff we do only the first time
@@ -52,7 +52,7 @@ var exports = {};
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					commandService.renderCommands(selectionTools, "dom", selections, explorer, "tool", true);
+					commandService.renderCommands(selectionTools, "dom", selections, explorer, "button", true);
 				}
 			});
 		}
@@ -1474,6 +1474,7 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(fetchCommand, "object");
+		commandService.addCommand(fetchCommand, "dom");
 		commandService.registerCommandContribution("eclipse.orion.git.fetch", cmdBaseNumber+1);	
 
 		var mergeCommand = new mCommands.Command({
@@ -1542,6 +1543,7 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(mergeCommand, "object");
+		commandService.addCommand(mergeCommand, "dom");
 		commandService.registerCommandContribution("eclipse.orion.git.merge", cmdBaseNumber+2);	
 
 		var pushCommand = new mCommands.Command({
@@ -1614,6 +1616,7 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(pushCommand, "object");
+		commandService.addCommand(pushCommand, "dom");
 		commandService.registerCommandContribution("eclipse.orion.git.push", cmdBaseNumber+3);
 	};
 

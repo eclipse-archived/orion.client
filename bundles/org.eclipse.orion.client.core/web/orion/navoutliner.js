@@ -40,7 +40,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 		var navoutliner = this;
 		
 		var addFaveURLCommand = new mCommands.Command({
-			name: "Add Favorite",
+			name: "Add",
 			tooltip: "Add link as favorite",
 			imageClass: "core-sprite-add",
 			id: "eclipse.addExternalFave",

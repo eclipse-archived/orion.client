@@ -61,10 +61,10 @@ define(['require'],
 	// END BOTTOM BANNER FRAGEMENT
 
 	var toolbarHTMLFragment = 
-		'<div class="layoutLeft pageToolbarLeft pageActions" id="pageActions"></div>' +
+		'<div class="layoutLeft pageActions" id="pageActions"></div>' +
 		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane"></img>' +
-		'<div class="layoutRight pageToolbarRight pageActions pageNavigationActions" id="statusPane"></div>' +
-		'<div class="layoutRight pageToolbarRight pageActions pageNavigationActions" id="pageNavigationActions"></div>' +
+		'<div class="layoutRight" id="statusPane"></div>' +
+		'<div class="layoutRight" id="pageActions pageNavigationActions"></div>' +
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
 				'<div class="layoutLeft" id="notifications"></div>' +
 		'</div>' +

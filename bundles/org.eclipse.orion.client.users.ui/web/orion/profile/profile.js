@@ -332,7 +332,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 					this.commandService.addCommand(command, "dom");					
 					this.commandService.registerCommandContribution(info.id, i, this.pageActionsPlaceholder.id, "eclipse.profileActionsGroup");
 				}
-				this.commandService.renderCommands(this.pageActionsPlaceholder, "dom", {}, {}, "tool");
+				this.commandService.renderCommands(this.pageActionsPlaceholder, "dom", {}, {}, "button");
 				
 			}
 			
