@@ -48,10 +48,10 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			throw new Error("Missing required argument: searcher");
 		}
 		var serviceRegistry = this.options.serviceRegistry;
-		if (!serviceRegistry) {
-			throw new Error("Missing required argument: serviceRegistry");
+		this.favService = this.options.favoriteService;
+		if (!this.favService) {
+			throw new Error("Missing required argument: favService");
 		}
-		this.favService = serviceRegistry.getService("orion.core.favorite");
 	},
 	
 	/** @private */
