@@ -35,7 +35,9 @@
         "addBlockComment": "Add Block Comment",
         "removeBlockComment": "Remove Block Comment",
         "linkedModeEntered": "Linked Mode entered",
-        "linkedModeExited": "Linked Mode exited"
+        "linkedModeExited": "Linked Mode exited",
+        "syntaxError": "Syntax Error",
+        "contentAssist": "Content Assist"
     },
     "pt-br": true
 });

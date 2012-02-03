@@ -34,5 +34,7 @@
     "addBlockComment": "Adicionar Coment\u00E1rio de Bloco",
     "removeBlockComment": "Remover Coment\u00E1rio de Bloco",
 	"linkedModeEntered": "Modo Vinculado Iniciado",
-    "linkedModeExited": "Modo Vinculado Terminado"
+    "linkedModeExited": "Modo Vinculado Terminado",
+    "syntaxError": "Erro de Sintaxe",
+    "contentAssist": "Assist\u00EAncia de conte\u00FAdo"
 });
