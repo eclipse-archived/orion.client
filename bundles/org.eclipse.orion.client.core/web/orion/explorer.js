@@ -104,7 +104,6 @@ exports.Explorer = (function() {
 				renderer: this.renderer,
 				indent: options ? options.indent: undefined,
 				onCollapse: options ? options.onCollapse: undefined,
-				onExpand: options ? options.onExpand: undefined,
 				tableStyle: "mainPadding"
 			});
 			this.renderer._initializeUIState();
