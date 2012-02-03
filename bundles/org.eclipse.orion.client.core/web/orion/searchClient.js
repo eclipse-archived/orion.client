@@ -13,7 +13,7 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchRenderer', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(require, dojo, dijit, mAuth, mUtil, mSearchRenderer, mSearchUtils){
+define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(require, dojo, dijit, mAuth, mUtil, mSearchUtils){
 
 	/**
 	 * Creates a new search client.
