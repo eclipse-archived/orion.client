@@ -84,6 +84,8 @@ exports.GitRepositoryExplorer = (function() {
 								
 				if (resp.Children.length === 0) {
 					progressService.setProgressMessage("");
+					that.initTitleBar();
+					
 					that.displayRepositories(null, "full");
 					return;
 				} 
