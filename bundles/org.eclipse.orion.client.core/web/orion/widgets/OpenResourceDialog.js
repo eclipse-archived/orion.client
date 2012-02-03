@@ -13,9 +13,9 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
 
-define(['require', 'dojo', 'dijit', "orion/util", 'dijit/Dialog', 'dijit/form/TextBox', 
-		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], function(require, dojo, dijit, mUtil) {
-
+define(['require', 'dojo', 'dijit', "orion/util", 'orion/searchRenderer', 'orion/favorites', 'dijit/Dialog', 'dijit/form/TextBox', 
+		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], 
+		function(require, dojo, dijit, mUtil, mSearchRenderer, mFavorites) {
 /**
  * Usage: <code>new widgets.OpenResourceDialog(options).show();</code>
  * 
@@ -51,6 +51,10 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			throw new Error("Missing required argument: serviceRegistry");
 		}
 		this.favService = serviceRegistry.getService("orion.core.favorite");
+		if (!this.favService) {
+			new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+			this.favService = serviceRegistry.getService("orion.core.favorite");
+		}
 	},
 	
 	/** @private */
@@ -157,49 +161,15 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	 */
 	showFavorites: function() {
 		var that = this;
-		
 		return function(favs) {
 			if (favs.navigator) {
 				favs = favs.navigator;
 			}
-			if (favs.length > 0) {
-				var table = document.createElement('table');
-				for (var i=0; i < favs.length; i++) {
-					var fav = favs[i];
-					var col;
-					var row = table.insertRow(-1);
-					col = row.insertCell(0);
-					col.colspan = 2;
-					var image = new Image();
-					dojo.addClass(image, "commandSprite");
-					dojo.addClass(image, "core-sprite-makeFavorite");
-					dojo.addClass(image, "commandImage");
-					// without an image, chrome will draw a border  (?)
-					image.src = require.toUrl("images/none.png");
-					col.appendChild(image);
-					var favLink = document.createElement('a');
-					dojo.style(favLink, "verticalAlign", "middle");
-					dojo.place(document.createTextNode(fav.name), favLink);
-					
-					var loc;
-					if (fav.isExternalResource) {
-						// should open link in new tab, but for now, follow the behavior of navoutliner.js
-						loc = fav.path;
-					} else {
-						loc	= fav.directory ? require.toUrl("navigate/table.html") + "#" + fav.path : require.toUrl("edit/edit.html") + "#" + fav.path;
-						if (loc === "#") {
-							loc = "";
-						}
-					}
-					favLink.setAttribute('href', loc);
-					col.appendChild(favLink);
-				}
-				dojo.place(table, that.favresults, "only");
+			var renderFunction = mSearchRenderer.makeRenderFunction(that.favresults, false, dojo.hitch(that, that.decorateResult));
+			renderFunction(favs);
+			if (favs && favs.length > 0) {
 				dojo.place("<hr/>", that.favresults, "last");
-			} else {
-				dojo.empty(that.favresults);
 			}
-			that.decorateResult(that.favresults);
 		};
 	},
 
@@ -233,7 +203,8 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			var that = this;
 			setTimeout(function() {
 				var query = that.searcher.createSearchQuery(null, text, "Name");
-				that.searcher.search(that.results, query, false, false, dojo.hitch(that, that.decorateResult), true /*no highlight*/);
+				var renderFunction = mSearchRenderer.makeRenderFunction(that.results, false, dojo.hitch(that, that.decorateResult), true);
+				that.searcher.search(query, false, renderFunction);
 			}, 0);
 		}
 	},
