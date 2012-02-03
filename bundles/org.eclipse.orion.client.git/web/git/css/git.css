@@ -62,6 +62,7 @@
 .gitCommandSprite {
 	background: url(../images/git_sprites.png) no-repeat top left;
 	vertical-align: middle;
+	display: inline-block;
 }
 
 .gitImageSprite {

@@ -997,7 +997,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 			}
 		});
 		var nextResultCommand = new mCommands.Command({
-			name : "Next result",
+			tooltip : "Next result",
 			imageClass : "core-sprite-move_down",
 			id: "orion.search.nextResult",
 			groupId: "orion.searchGroup",
@@ -1008,7 +1008,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 				that.gotoNext(true, true);
 		}});
 		var prevResultCommand = new mCommands.Command({
-			name : "Previous result",
+			tooltip : "Previous result",
 			imageClass : "core-sprite-move_up",
 			id: "orion.search.prevResult",
 			groupId: "orion.searchGroup",
@@ -1150,7 +1150,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 
 		// Register command contributions
 		this._commandService.registerCommandContribution("orion.globalSearch.innerReplaceAll", 1, "globalSearchReplaceCommands");
-		this._commandService.renderCommands("globalSearchReplaceCommands", "dom", this, this, "tool");
+		this._commandService.renderCommands("globalSearchReplaceCommands", "dom", this, this, "button");
 	};
 	
 	SearchResultExplorer.prototype._fileExpanded = function(fileIndex, detailIndex){
@@ -1379,10 +1379,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 	SearchResultExplorer.prototype.initCommands = function(){	
 		var that = this;
 		dojo.empty("pageActions");
-		this._commandService.renderCommands("pageActions", "dom", that, that, "tool");
+		this._commandService.renderCommands("pageActions", "dom", that, that, "button");
 
 		dojo.empty("pageNavigationActions");
-		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "tool");
+		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "button");
 		if(this._state !== "result_view"){
 			mUtil.forceLayout("pageNavigationActions");
 			return;

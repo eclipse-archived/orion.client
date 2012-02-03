@@ -136,32 +136,11 @@ a:hover {
 }
 
 .pageActions {
-	color: #808080;
-	cursor: pointer;
-	vertical-align: middle;
-	font-size: 9pt;
-	font-weight: normal;
+	font: 9pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
 }
 
-.pageActions:visited {
-	color: #808080;
-}
-
-.pageActions:hover {
-	color: #808080;
-	cursor: hand;
-}
-
-.pageActions a {
-	color: #808080;
-	cursor: pointer;
-	text-decoration: none;
-}
-
-.pageActions a:hover {
-	color: #808080;
-	cursor: hand;
-	text-decoration: underline;
+.sectionActions {
+	font: 8pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
 }
 
 .pageNavigationActions {
@@ -214,7 +193,7 @@ a:hover {
 }
 
 .selectionCheckmark {
-	background-position: 0px 0px; 
+	background-position: 0 0;
 	width: 16px; height: 16px; 
 	background: url(../images/check.gif) no-repeat center; 
 	display: inline-block; 
@@ -226,7 +205,7 @@ a:hover {
 }
 
 .selectionCheckmarkChecked {
-	background-position: 0px 0px; 
+	background-position: 0 0; 
 	width: 16px; height: 16px; 
 	background: url(../images/check_on.gif) no-repeat center; 
 	display: inline-block; 
@@ -238,7 +217,7 @@ a:hover {
 }
 
 .core-sprite-twistie_closed { 
-	background-position: 0px 0px; 
+	background-position: 0 0; 
 	width: 16px; height: 16px; 
 	background: url(../images/twistie_closed.gif) no-repeat center;
 	display: inline-block; 
@@ -249,7 +228,7 @@ a:hover {
 }
 
 .core-sprite-twistie_open { 
-	background-position: 0px 0px; 
+	background-position: 0 0; 
 	width: 16px; height: 16px; 
 	background: url(../images/twistie_open.gif) no-repeat center;
 	display: inline-block; 
@@ -260,7 +239,7 @@ a:hover {
 }
 	
 .core-sprite-file_model { 	
-	background-position: 0px 0px; 
+	background-position: 0 0; 
 	width: 16px; height: 16px; 
 	background: url(../images/file_model.gif) no-repeat center; 
 	display: inline-block; 
@@ -273,15 +252,15 @@ a:hover {
 /* less hit-area since we aren't worried about touch */
 @media all and (min-device-width: 1025px) {
 	.core-sprite-twistie_open, .core-sprite-twistie_closed, .core-sprite-file_model { 	
-		padding: 0px;
+		padding: 0;
 		padding-left: 4px;
 		padding-right: 4px;
-		margin: 0px;
+		margin: 0;
 		margin-right: 2px;
 	}
 	
 	.selectionCheckmark, .selectionCheckmarkChecked { 	
-		padding: 0px;
+		padding: 0;
 		padding-left: 2px;
 		padding-right: 2px;
 		margin-right: 2px;
@@ -453,9 +432,9 @@ a:hover {
 .progressPane {
 	vertical-align: bottom;
 	margin-right: 8px;
-	background-position: 0px 0px; 
+	background-position: 0 0; 
 	text-align: right;
-	border: 0 none;
+	border: 0;
 	width: 16px;
 	height: 16px;
 }
@@ -563,18 +542,6 @@ a:hover {
 	font-weight: bold;
 	color: #808080;
 }
-
-.pageToolbarLeft {
-	background: transparent;
-	text-align: left;
-}
-
-.pageToolbarRight {
-	background: transparent;
-	text-align: right;
-	padding-right: 8px;
-}
-
 .slideContainer {
 	height: auto;
 	width: 97%;
@@ -596,7 +563,6 @@ a:hover {
 	float: left;
 	opacity: 0;
 	height: 0;
-	display: inline-block;
  	transition: opacity .5s ease-out;
 	-o-transition: opacity .5s ease-out;
 	-moz-transition: opacity .5s ease-out;
@@ -604,9 +570,8 @@ a:hover {
 }
 
 .activeCommand {
-	background: #d2d2d2;
-	border: 1px solid #818181;
-	padding: 2px;
+	background-color: #e3e3e3;
+	border: 1px solid #9a9a9a;
 }
 
 .leftSlideActive {
@@ -620,7 +585,6 @@ a:hover {
 	float: right;
 	height: 0;
 	width: auto;
-	display: inline-block;
 	opacity: 0;
  	transition: opacity .5s ease-out;
 	-o-transition: opacity .5s ease-out;
@@ -758,7 +722,7 @@ a:hover {
 }
 
 .checkColumn {
-	padding: 0px;
+	padding: 0;
 }
 
 .lightTreeTableRow > td {
@@ -770,12 +734,10 @@ a:hover {
 }
 
 .testNavTreetable {
-	cellspacing: 0; /* mistake? */
 	min-width: 150px;
 }
 
 .testResultTreetable {
-	cellspacing: 0; /* mistake? */
 	min-width: 600px;
 }
 
@@ -864,4 +826,3 @@ a:hover {
 #test-tree {
 	margin: 8px;
 }
-

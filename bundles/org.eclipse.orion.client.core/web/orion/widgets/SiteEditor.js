@@ -110,7 +110,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			this._commandService.addCommand(addMappingCommand, "dom");
 			var toolbarId = this.addMappingToolbar.id;
 			this._commandService.registerCommandContribution("eclipse.site.mappings.add", 1, toolbarId);
-			this._commandService.renderCommands(this.addMappingToolbar, "dom", this.mappings, this, "tool");
+			this._commandService.renderCommands(this.addMappingToolbar, "dom", this.mappings, this, "button");
 			
 			var convertCommand = new mCommands.Command({
 				name: "Convert to Self-Hosting",

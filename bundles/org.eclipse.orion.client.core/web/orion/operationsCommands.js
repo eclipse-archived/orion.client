@@ -29,10 +29,10 @@ define(['require', 'dojo', 'orion/commands'],
 				throw "could not find toolbar " + toolbarId;
 			}
 			var service = registry.getService("orion.page.command");
-			service.renderCommands(toolbar, "dom", item, explorer, "tool", true);  // true for force icons to text
+			service.renderCommands(toolbar, "dom", item, explorer, "button");  
 			if (selectionToolbarId) {
 				var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-				service.renderCommands(selectionTools, "dom", null, explorer, "tool", true); // true would force icons to text
+				service.renderCommands(selectionTools, "dom", null, explorer, "button");
 			}
 
 			// Stuff we do only the first time
@@ -42,7 +42,7 @@ define(['require', 'dojo', 'orion/commands'],
 					var selectionTools = dojo.byId(selectionToolbarId);
 					if (selectionTools) {
 						dojo.empty(selectionTools);
-						registry.getService("orion.page.command").renderCommands(selectionTools, "dom", selections, explorer, "tool", true);
+						registry.getService("orion.page.command").renderCommands(selectionTools, "dom", selections, explorer, "button");
 					}
 				});
 			}

@@ -78,11 +78,11 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		var service = registry.getService("orion.page.command");
 		// close any open slideouts because if we are retargeting the command
 		if (item.Location !== lastItemLoaded.Location) {
-			service.closeParameterCollector("tool");
+			service.closeParameterCollector("button");
 			lastItemLoaded.Location = item.Location;
 		}
 
-		service.renderCommands(toolbar, "dom", item, explorer, "tool", true).then(function() {
+		service.renderCommands(toolbar, "dom", item, explorer, "button").then(function() {
 			if (lastItemLoaded.Location) {
 				service.processURL(window.location.href);
 			}
@@ -90,7 +90,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
 			dojo.addClass(selectionTools, "selectionTools");
-			service.renderCommands(selectionTools, "dom", null, explorer, "tool", true); // true would force icons to text
+			service.renderCommands(selectionTools, "dom", null, explorer, "button"); // true would force icons to text
 		}
 		
 		// Stuff we do only the first time
@@ -101,7 +101,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					registry.getService("orion.page.command").renderCommands(selectionTools, "dom", selections, explorer, "tool", true);
+					registry.getService("orion.page.command").renderCommands(selectionTools, "dom", selections, explorer, "button");
 				}
 			});
 		}

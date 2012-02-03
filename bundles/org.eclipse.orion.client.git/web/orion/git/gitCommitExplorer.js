@@ -278,7 +278,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			dojo.create( "div", { id: "tagSectionActionsArea", "class":"additions-light"}, titleWrapper );
 			
 			this.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.addTag", 2000, "tagSectionActionsArea");
-			this.registry.getService("orion.page.command").renderCommands(dojo.byId("tagSectionActionsArea"), "dom", commit, this, "tool", false);
+			this.registry.getService("orion.page.command").renderCommands(dojo.byId("tagSectionActionsArea"), "dom", commit, this, "button", false);
 			
 			if (!tags && tags.length > 0)
 				return;
@@ -309,7 +309,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			dojo.create( "div", null, horizontalBox );
 
 			var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"git-action-area"}, horizontalBox );
-			this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", tag, this, "button", false);	
+			this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", tag, this, "tool", false);	
 		};
 
 		return GitCommitExplorer;

@@ -345,7 +345,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		var paneHeadingFragment = 
 			'<div id="' + id + '">' +
 				'<div class="layoutLeft" id="' + id + '"><span style: "inline-block;" id="' + headingId + '">' + headingLabel + '</span></div>' +
-				'<div class="layoutRight" id="' + commandId + '"></div>' +
+				'<div class="layoutRight sectionActions" id="' + commandId + '"></div>' +
 				'<div id="' + parent.id + 'slideContainer" class="layoutBlock slideContainer">' +
 					'<span id="' + parent.id + 'slideOut" class="leftSlide">' +
 						'<span id="' + parent.id + 'pageCommandParameters" class="parameters"></span>' +
@@ -361,7 +361,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 			dojo.addClass(id, "paneHeading");
 		}
 		if (commandService) {
-			commandService.renderCommands(dojo.byId(commandId), "dom", handler, handler, "tool");
+			commandService.renderCommands(dojo.byId(commandId), "dom", handler, handler, "button");
 		}
 		return dojo.byId(id);
 	}

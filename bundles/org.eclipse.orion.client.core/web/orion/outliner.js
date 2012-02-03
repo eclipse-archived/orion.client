@@ -109,7 +109,7 @@ define(['dojo', 'orion/util', 'orion/commands', 'orion/URITemplate'], function(d
 			}
 			if (outlineProviders.length > 1) {
 				this._commandService.registerCommandContribution("eclipse.edit.outline.switch", 1, this.menuNode.id);
-				this._commandService.renderCommands(this.menuNode, "dom", null, this, "tool", true);
+				this._commandService.renderCommands(this.menuNode, "dom", null, this, "button");
 			}
 		},
 		_renderElement: function(/**DOMNode*/ parentNode, /**Object*/ element, title) {

@@ -289,8 +289,8 @@ orion.TextSearcher = (function() {
 			this._commandService.registerCommandContribution("orion.search.findPrev", 2, "localSearchFindCommands");
 			this._commandService.registerCommandContribution("orion.search.replace", 1, "localSearchReplaceCommands");
 			this._commandService.registerCommandContribution("orion.search.replaceAll", 2, "localSearchReplaceCommands");
-			this._commandService.renderCommands("localSearchFindCommands", "dom", that, that, "tool");
-			this._commandService.renderCommands("localSearchReplaceCommands", "dom", that, that, "tool");
+			this._commandService.renderCommands("localSearchFindCommands", "dom", that, that, "button");
+			this._commandService.renderCommands("localSearchReplaceCommands", "dom", that, that, "button");
 		},
 
 		/**

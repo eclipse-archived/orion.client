@@ -510,7 +510,7 @@ exports.TwoWayCompareContainer = (function() {
 		if (!this._readonly) {
 			this._commandService.registerCommandContribution("orion.compare.copyToLeft", 1, commandSpanId);
 		}
-		this._commandService.renderCommands(commandSpanId, "dom", that, that, "tool");
+		this._commandService.renderCommands(commandSpanId, "dom", that, that, "button");
 	};
 	
 	TwoWayCompareContainer.prototype.gotoMatch = function(lineNumber, match, newMatch, defaultGap, onScroll, onLoad){	
@@ -711,7 +711,7 @@ exports.InlineCompareContainer = (function() {
 				dojo.style("fileNameInViewer", "color", "#6d6d6d");
 				that._statusService.setProgressMessage("");
 				dojo.empty("compare_rightContainerCommands");
-				that._commandService.renderCommands("compare_rightContainerCommands", "dom", that, that, "tool");
+				that._commandService.renderCommands("compare_rightContainerCommands", "dom", that, that, "button");
 			};
 		}
 		

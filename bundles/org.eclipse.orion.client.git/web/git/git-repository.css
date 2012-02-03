@@ -11,6 +11,8 @@
 
 @import "../org.dojotoolkit/dojox/layout/resources/ToggleSplitter.css";
 
+@import "../settings/settings.css";
+
 @import "../css/ide.css";
 
 @import "../css/UploaderFileList.css";
@@ -22,8 +24,6 @@
 @import "../css/commands.css";
 
 @import "css/git.css";
-
-@import "../settings/settings.css";
 
 .git-decor-icon {
 	float: left;
