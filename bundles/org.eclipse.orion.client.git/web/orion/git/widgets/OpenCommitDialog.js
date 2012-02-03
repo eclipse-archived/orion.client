@@ -77,7 +77,6 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 		dojo.connect(this, "onMouseUp", function(e) {
 			// WebKit focuses <body> after link is clicked; override that
 			e.target.focus();
-			this.hide();
 		});
 	},
 	
