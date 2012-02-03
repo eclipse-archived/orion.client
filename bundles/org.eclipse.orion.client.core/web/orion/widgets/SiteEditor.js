@@ -122,8 +122,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					return !!item.Location && !this.isSelfHosting(projects);
 				}),
 				callback: dojo.hitch(this, this.convertToSelfHostedSite, this._projects)});
-			this._commandService.addCommand(convertCommand, "object");
-			this._commandService.registerCommandContribution("eclipse.site.convert", 2);
+			this._commandService.addCommand(convertCommand, "dom");
 			
 			this._refreshFields();
 		}));
@@ -138,8 +137,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					return !!item.Location /*looks like a site config*/;
 				},
 				callback: dojo.hitch(this, this.onSubmit)});
-		this._commandService.addCommand(saveCommand, "object");
-		this._commandService.registerCommandContribution("eclipse.site.save", 0);
+		this._commandService.addCommand(saveCommand, "dom");
 	},
 	
 	checkOptions: function(options, names) {
@@ -417,8 +415,8 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		}
 		
 		dojo.empty(this._commandsContainer);
-		this._commandService.renderCommands(this._commandsContainer, "object", this._siteConfiguration, {},
-			"tool", true /*forceText*/, this._siteConfiguration /*userData*/);
+		this._commandService.renderCommands(this._commandsContainer, "dom", this._siteConfiguration, {},
+			"button", null, this._siteConfiguration /*userData*/);
 	},
 	
 	/**
