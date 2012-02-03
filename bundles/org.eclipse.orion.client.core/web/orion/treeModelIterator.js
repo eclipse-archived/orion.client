@@ -16,21 +16,21 @@ define([], function(){
 
 var exports = {};
 
-exports.TreeIterator = (function() {
+exports.TreeModelIterator = (function() {
 	/**
 	 * Creates a new tree iterator.
 	 *
-	 * @name orion.treeIterator.TreeIterator
+	 * @name orion.TreeModelIterator.TreeModelIterator
 	 * @class A tree model based iterator component.
 	 * @param {list} firstLevelChildren The first level children of the tree root, each item has children and parent property recursively.
 	 * @param {Object} options The options object which provides iterate patterns and all call back functions when iteration happens.
 	 */
-	function TreeIterator(firstLevelChildren, options) {
+	function TreeModelIterator(firstLevelChildren, options) {
 		this.firstLevelChildren = firstLevelChildren;
 		this.reset();
 		this._init(options);
 	}
-	TreeIterator.prototype = /** @lends orion.treeIterator.TreeIterator.prototype */ {
+	TreeModelIterator.prototype = /** @lends orion.TreeModelIterator.TreeModelIterator.prototype */ {
 		
 		_init: function(options){
 			if(!options){
@@ -224,7 +224,7 @@ exports.TreeIterator = (function() {
 			return this._prevCursor;
 		}
 	};
-	return TreeIterator;
+	return TreeModelIterator
 }());
 
 return exports;
