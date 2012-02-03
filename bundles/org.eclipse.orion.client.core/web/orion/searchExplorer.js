@@ -1026,7 +1026,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 				that.gotoNext(false, true);
 		}});
 		var expandAllCommand = new mCommands.Command({
-			name : "Expand all results",
+			tooltip : "Expand all results",
 			imageClass : "core-sprite-expandAll",
 			id: "orion.search.expandAll",
 			groupId: "orion.searchGroup",
@@ -1037,7 +1037,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 				that.expandAll();
 		}});
 		var collapseAllCommand = new mCommands.Command({
-			name : "Collapse all results",
+			tooltip : "Collapse all results",
 			imageClass : "core-sprite-collapseAll",
 			id: "orion.search.collapseAll",
 			groupId: "orion.searchGroup",
@@ -1128,7 +1128,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 			parentDiv.appendChild(replaceStringDiv);
 
 			// create the command span for Replace
-			span = document.createElement('span');
+			var span = document.createElement('span');
 			dojo.addClass(span, "parameters");
 			span.id = "globalSearchReplaceCommands";
 			parentDiv.appendChild(span);
@@ -1775,7 +1775,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 		this.parentId = parentId;
 		this.reportList = reportList;
 		this.renderer = new SearchReportRenderer({checkbox: false}, this);
-	};
+	}
 	SearchReportExplorer.prototype = new mExplorer.Explorer();
 	
 	SearchReportExplorer.prototype.report = function() {

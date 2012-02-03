@@ -64,7 +64,7 @@ define(['require'],
 		'<div class="layoutLeft pageActions" id="pageActions"></div>' +
 		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane"></img>' +
 		'<div class="layoutRight" id="statusPane"></div>' +
-		'<div class="layoutRight" id="pageActions pageNavigationActions"></div>' +
+		'<div class="layoutRight pageActions" id="pageNavigationActions"></div>' +
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
 				'<div class="layoutLeft" id="notifications"></div>' +
 		'</div>' +
