@@ -384,8 +384,8 @@ exports.GitRepositoryExplorer = (function() {
 				dojo.style(dojo.byId("branchSectionProgress"), "visibility", "hidden");
 				
 				if (mode !== "full" && branches.length !== 0){
-					that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10, "branchSectionsActionsArea");
-					that.registry.getService("orion.page.command").renderCommands(dojo.byId("branchSectionsActionsArea"), "dom", 
+					that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10, "branchSectionActionsArea");
+					that.registry.getService("orion.page.command").renderCommands(dojo.byId("branchSectionActionsArea"), "dom", 
 						{"ViewAllLink":"/git/git-repository.html#" + branchLocation + "?page=1", "ViewAllLabel":"View All", "ViewAllTooltip":"View all local and remote tracking branches"}, that, "button");
 				}
 				
