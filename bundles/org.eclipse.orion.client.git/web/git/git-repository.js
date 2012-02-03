@@ -78,9 +78,10 @@ mBootstrap.startup().then(function(core) {
 			return require.toUrl(data.items.ViewAllLink);
 		},
 		visibleWhen : function(item) {
+		
 			this.name = item.ViewAllLabel;
 			this.tooltip = item.ViewAllTooltip;
-			return item.ViewAllLink !== null;
+			return item.ViewAllLabel && item.ViewAllTooltip && item.ViewAllLink;
 		}
 	});
 	commandService.addCommand(viewAllCommand, "dom");
