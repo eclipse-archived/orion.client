@@ -65,7 +65,6 @@ define(['dojo'], function(dojo) {
 			this._showRoot = options.showRoot === undefined ? false : options.showRoot;
 			this._indent = options.indent === undefined ? 16 : options.indent;
 			this._onCollapse = options.onCollapse;
-			this._onExpand = options.onExpand;
 			this._labelColumnIndex = options.labelColumnIndex === undefined ? 0 : options.labelColumnIndex;
 			this._id = options.id === undefined ? "treetable" : options.id;
 			this._tableStyle = options.tableStyle;
@@ -235,9 +234,6 @@ define(['dojo'], function(dojo) {
 					tree._rowsChanged();
 					if (postExpandFunc) {
 						postExpandFunc.apply(this, args);
-					}
-					if(tree._onExpand){
-						tree._onExpand(row._item);
 					}
 				});
 			}

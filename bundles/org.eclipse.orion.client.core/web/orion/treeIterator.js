@@ -33,8 +33,12 @@ exports.TreeIterator = (function() {
 	TreeIterator.prototype = /** @lends orion.treeIterator.TreeIterator.prototype */ {
 		
 		_init: function(options){
+			if(!options){
+				return;
+			}
 			this.isExpanded = options.isExpanded;//optional callback providing that if a model item is expanded even if it has children. Default is true if it has children.
 			this.isExpandable = options.isExpandable;//optional  callback providing that if a model item is expandable.Default is true .
+			this.forceExpandFunc = options.forceExpandFunc;//optional  callback providing the expansion on the caller side.
 		},
 			
 		_topLevel: function(modelItem) {
@@ -52,14 +56,15 @@ exports.TreeIterator = (function() {
 			return expanded;
 		},
 		
+		//This is for the force expand
 		_expandable: function(model){
 			if(!model){
 				return true;//root is always expandable
 			}
-			if(this.isExpandable && expanded){
+			if(this.isExpandable){
 				return this.isExpandable(model);
 			}
-			return true;
+			return false;//If there is no isExpandable provided, we assume nothing is expandable
 		},
 		
 		_diveIn: function(model){
@@ -77,12 +82,13 @@ exports.TreeIterator = (function() {
 			return model;
 		},
 		
-		_forward: function(forceDiveIn){
+		_forward: function(forceExpand){
 			//first we will try to dive into the current cursor
 			var next = this._diveIn(this._cursor);
 			if(!next){
-				if(forceDiveIn && this._expandable(this._cursor)){
-					return null;//ask the caller to set the cursor
+				if(forceExpand && this._expandable(this._cursor) && this.forceExpandFunc){
+					var that = this;
+					return this.forceExpandFunc(this._cursor, "first", function(model){if(mdoel){that.setCursor(model);};});
 				}
 				next = this._findSibling(this._cursor, true);
 				if(next){
@@ -92,13 +98,13 @@ exports.TreeIterator = (function() {
 			return next;
 		},
 		
-		_backward: function(forceDiveIn){
+		_backward: function(forceExpand){
 			var previous = this._findSibling(this._cursor, false);
 			if(previous && previous !== this._cursor.parent){
 				previous = this._drillToLast(previous);
 			}
-			if(forceDiveIn && this._expandable(previous)){
-				return null;//ask the caller to set the cursor
+			if(forceExpand && previous && this._expandable(previous) && this.forceExpandFunc && previous !== this._cursor.parent){
+				return this.forceExpandFunc(previous, "last", function(model){if(mdoel){that.setCursor(model);};});
 			}
 			if(previous){
 				this.setCursor(previous);
@@ -156,18 +162,20 @@ exports.TreeIterator = (function() {
 		 */
 		setTree: function(firstLevelChildren) {
 			this.firstLevelChildren = firstLevelChildren;
+			if(this.firstLevelChildren.length > 0){
+				this.root = this.firstLevelChildren[0].parent;
+			}
 		},
 		
 		/**
 		 * Iterate from the current cursor
 		 * @param {boolean} forward the iteration direction. If true then iterate to next, otherwise previous.
-		 * @param {boolean} forceDiveIn optional. the flag for the current cursor to dive into its children. 
-		 *                  If the cursor has no children yet or its children are not expanded, this method will call postExpandFunc.
-		 *                  If there is no postExpandFunc defined it will return  null.
-		 * @param {function} postExpandFunc optional. The call back function when forceDive is true.
+		 * @param {boolean} forceExpand optional. the flag for the current cursor to dive into its children. 
+		 *                  If the cursor has no children yet or its children are not expanded, this method will call forceExpandFunc.
+		 *                  If there is no forceExpandFunc defined it will not expand.
 		 */
-		iterate: function(forward, forceDiveIn, postExpandFunc) {
-			return forward ? this._forward(forceDiveIn, postExpandFunc) : this._backward(forceDiveIn, postExpandFunc);
+		iterate: function(forward, forceExpand) {
+			return forward ? this._forward(forceExpand) : this._backward(forceExpand);
 		},
 		
 		/**
