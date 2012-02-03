@@ -44,26 +44,6 @@
 				{href: qualifyURL("../navigate/table.html"), linkName: "Navigator", description: "Go to the Orion navigator.  Create a new folder and then choose import from the 'More' menu.  Select the zip file you just generated."}
 			]
 		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: "Navigator",
-			id: "orion.navigator",
-			href: qualifyURL("../navigate/table.html#")
-		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: "Sites",
-			id: "orion.sites",
-			href: qualifyURL("../sites/sites.html")
-		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: "Repositories",
-			id: "orion.repositories",
-			href: qualifyURL("../git/git-repository.html#")
-		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: "Settings",
-			id: "orion.sites",
-			href: qualifyURL("../settings/settings.html")
-		});
 		provider.connect();
 	};
 	</script>
