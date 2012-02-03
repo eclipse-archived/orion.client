@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/searchRenderer',
+	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/searchRenderer', 'orion/favorites',
 	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog'], 
-        function(require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mSearchRenderer){
+        function(require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mSearchRenderer, mFavorites){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -422,7 +422,12 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 
 	
 		var openResourceDialog = function(searcher, serviceRegistry, /* optional */ editor) {
-			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher, searchRenderer:mSearchRenderer, serviceRegistry:serviceRegistry});
+			var favoriteService = serviceRegistry.getService("orion.core.favorite");
+			//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
+			if (!favoriteService) {
+				favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+			}
+			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher, searchRenderer:mSearchRenderer, favoriteService:favoriteService});
 			if (editor) {
 				dojo.connect(dialog, "onHide", function() {
 					editor.getTextView().focus(); // Focus editor after dialog close, Dojo's doesn't work
