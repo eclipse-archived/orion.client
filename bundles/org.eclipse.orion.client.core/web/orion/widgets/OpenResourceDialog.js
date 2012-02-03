@@ -13,9 +13,9 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
 
-define(['require', 'dojo', 'dijit', "orion/util", 'orion/searchRenderer', 'orion/favorites', 'dijit/Dialog', 'dijit/form/TextBox', 
+define(['require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
 		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], 
-		function(require, dojo, dijit, mUtil, mSearchRenderer, mFavorites) {
+		function(require, dojo, dijit) {
 /**
  * Usage: <code>new widgets.OpenResourceDialog(options).show();</code>
  * 
@@ -43,6 +43,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		this.time = 0;
 		this.options = arguments[0];
 		this.searcher = this.options && this.options.searcher;
+		this.searchRenderer = this.options && this.options.searchRenderer;
 		if (!this.searcher) {
 			throw new Error("Missing required argument: searcher");
 		}
@@ -51,10 +52,6 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			throw new Error("Missing required argument: serviceRegistry");
 		}
 		this.favService = serviceRegistry.getService("orion.core.favorite");
-		if (!this.favService) {
-			new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
-			this.favService = serviceRegistry.getService("orion.core.favorite");
-		}
 	},
 	
 	/** @private */
@@ -165,7 +162,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			if (favs.navigator) {
 				favs = favs.navigator;
 			}
-			var renderFunction = mSearchRenderer.makeRenderFunction(that.favresults, false, dojo.hitch(that, that.decorateResult));
+			var renderFunction = that.searchRenderer.makeRenderFunction(that.favresults, false, dojo.hitch(that, that.decorateResult));
 			renderFunction(favs);
 			if (favs && favs.length > 0) {
 				dojo.place("<hr/>", that.favresults, "last");
@@ -203,7 +200,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			var that = this;
 			setTimeout(function() {
 				var query = that.searcher.createSearchQuery(null, text, "Name");
-				var renderFunction = mSearchRenderer.makeRenderFunction(that.results, false, dojo.hitch(that, that.decorateResult), true);
+				var renderFunction = that.searchRenderer.makeRenderFunction(that.results, false, dojo.hitch(that, that.decorateResult), true);
 				that.searcher.search(query, false, renderFunction);
 			}, 0);
 		}
