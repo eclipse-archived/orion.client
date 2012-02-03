@@ -12,7 +12,9 @@
 /*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
 define(['require', 'dojo', 'orion/commands', 'orion/util',
-        'orion/git/widgets/CloneGitRepositoryDialog', 'orion/git/widgets/InitGitRepositoryDialog', 'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog'], 
+        'orion/git/widgets/CloneGitRepositoryDialog', 'orion/git/widgets/InitGitRepositoryDialog', 
+        'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 
+        'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog'], 
         function(require, dojo, mCommands, mUtil) {
 
 /**
@@ -1807,6 +1809,37 @@ var exports = {};
 			},
 			visibleWhen : function(item) {
 				console.info(item);
+				return item.Type === "Clone" || item.CloneLocation;
+			}
+		});
+		commandService.addCommand(openCommitCommand, "dom");
+		
+		var openCommitCommand = new mCommands.Command({
+			name : "Open Commit",
+			tooltip: "Open the commit with the given name",
+			id : "eclipse.orion.git.openCommitCommand",
+			imageClass: "git-sprite-apply_patch",
+			spriteClass: "gitCommandSprite",
+			callback: function(data) {
+				var repository;
+				if (data.items.Type === "Clone") {
+					repository = data.items;
+					new orion.git.widgets.OpenCommitDialog(
+						{repository: repository, serviceRegistry: serviceRegistry}
+					).show();
+				} else {
+					var gitService = serviceRegistry.getService("orion.git.provider");
+					gitService.getGitClone(data.items.CloneLocation).then(
+						function(jsonData){
+							repository = jsonData.Children[0];
+							new orion.git.widgets.OpenCommitDialog(
+								{repository: repository, serviceRegistry: serviceRegistry}
+							).show();
+						}
+					);
+				}
+			},
+			visibleWhen : function(item) {
 				return item.Type === "Clone" || item.CloneLocation;
 			}
 		});

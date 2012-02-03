@@ -43,6 +43,17 @@
 	margin-right: 18px;
 }
 
+.git-author-icon-small {
+	float: left;
+	position: relative;
+	height: 35px;
+	vertical-align: text-top;
+	width: 35px;
+	border: 1px solid lightGrey;
+	padding: 2px;
+	margin-right: 18px;
+}
+
 .git-action-area {
 	float: right;
 	position: relative;
