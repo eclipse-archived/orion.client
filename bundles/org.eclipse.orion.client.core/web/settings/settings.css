@@ -21,6 +21,7 @@ select {
 	font-size: 1em;
 	border: 1px #999 solid;
 	color: #666;
+	cursor: pointer;
 }
 
 button {
@@ -29,6 +30,7 @@ button {
 	border: solid 1px #999;
 	border-radius: 2px;
 	font-size: 0.9em;
+	cursor: pointer;
 }
 
 #pluginUrlEntry {
@@ -145,6 +147,7 @@ ul,menu,dir {
 	color: white;
 	padding: 4px;
 	border-radius: 2px;
+	cursor: pointer;
 }
 
 .additions-light {

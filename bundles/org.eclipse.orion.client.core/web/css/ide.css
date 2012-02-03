@@ -1,5 +1,6 @@
 html {
   overflow-x: hidden; /* workaround to get rid of horizontal scrollbar */
+  cursor: default;
 }
 
 html, body {
@@ -543,7 +544,6 @@ a:hover {
 	width: 100%;
 	border: 0;
 	padding: 0;
-	cursor: pointer;
 	font-size: 0.9em;
 	min-height: 2.5em; 
 	border-top: 1px solid #dbdbdb
