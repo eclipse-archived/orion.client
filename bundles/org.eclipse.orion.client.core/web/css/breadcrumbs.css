@@ -8,6 +8,7 @@ a.breadcrumb:hover {
 	text-decoration: none;
 	border-bottom: 1px dotted;
 	color: #F58B0F;
+	cursor: pointer;
 }
 
 a.breadcrumb:visited {
@@ -19,7 +20,6 @@ a.breadcrumb:visited {
 	font-size: 10pt;
 	color: #808080;
 	text-decoration: none;
-	cursor: pointer;
 	text-wrap: normal;
 }
 
@@ -29,5 +29,4 @@ a.currentLocation:hover {
 	color: #666666;
 	text-decoration: none;
 	border-bottom: 0;
-	cursor: pointer;
 }
