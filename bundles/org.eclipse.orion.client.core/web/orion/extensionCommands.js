@@ -134,7 +134,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	};
 	
 	// Turns an info object containing the service properties and the service (or reference) into Command options.
-	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry) {
+	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry, /**boolean*/ createNavigateCommandCallback, /**optional function**/ validationItemConverter) {
 		function getPattern(wildCard){
 			var pattern = '^';
 	        for (var i = 0; i < wildCard.length; i++ ) {
@@ -200,9 +200,12 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		var commandOptions = {
 			name: info.name,
 			image: info.image,
-			id: info.id,
+			id: info.id || info.name,
 			tooltip: info.tooltip,
 			visibleWhen: dojo.hitch(info, function(items){
+				if (typeof validationItemConverter === "function") {
+					items = validationItemConverter(items);
+				}
 				if(dojo.isArray(items)){
 					if ((this.forceSingleItem || this.href) && items.length !== 1) {
 						return false;
@@ -228,38 +231,41 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			}),
 			isEditor: info.isEditor
 		};
-		if (info.href) {
-			commandOptions.hrefCallback = dojo.hitch(info, function(data){
-				var item = dojo.isArray(data.items) ? data.items[0] : data.items;
-				var shallowItemClone = extensionCommandUtils._cloneItemWithoutChildren(item);
-				if(serviceOrReference.run) {
-					return serviceOrReference.run(shallowItemClone);
-				} else if (serviceRegistry) {
-					return serviceRegistry.getService(serviceOrReference).run(shallowItemClone);
-				}
-			});
-		} else {
-			commandOptions.callback = dojo.hitch(info, function(data){
-				var shallowItemsClone;
-				if (this.forceSingleItem) {
-					var item = dojo.isArray() ? data.items[0] : data.items;
-					shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(item);
-				} else {
-					if (dojo.isArray(data.items)) {
-						shallowItemsClone = [];
-						for (var j = 0; j<data.items.length; j++) {
-							shallowItemsClone.push(extensionCommandUtils._cloneItemWithoutChildren(data.items[j]));
-						}
-					} else {
-						shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(data.items);
+		
+		if (createNavigateCommandCallback) {
+			if (info.href) {
+				commandOptions.hrefCallback = dojo.hitch(info, function(data){
+					var item = dojo.isArray(data.items) ? data.items[0] : data.items;
+					var shallowItemClone = extensionCommandUtils._cloneItemWithoutChildren(item);
+					if(serviceOrReference.run) {
+						return serviceOrReference.run(shallowItemClone);
+					} else if (serviceRegistry) {
+						return serviceRegistry.getService(serviceOrReference).run(shallowItemClone);
 					}
-				}
-				if(serviceOrReference.run) {
-					serviceOrReference.run(shallowItemsClone);
-				} else if (serviceRegistry) {
-					serviceRegistry.getService(serviceOrReference).run(shallowItemsClone);
-				}
-			});
+				});
+			} else {
+				commandOptions.callback = dojo.hitch(info, function(data){
+					var shallowItemsClone;
+					if (this.forceSingleItem) {
+						var item = dojo.isArray() ? data.items[0] : data.items;
+						shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(item);
+					} else {
+						if (dojo.isArray(data.items)) {
+							shallowItemsClone = [];
+							for (var j = 0; j<data.items.length; j++) {
+								shallowItemsClone.push(extensionCommandUtils._cloneItemWithoutChildren(data.items[j]));
+							}
+						} else {
+							shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(data.items);
+						}
+					}
+					if(serviceOrReference.run) {
+						serviceOrReference.run(shallowItemsClone);
+					} else if (serviceRegistry) {
+						serviceRegistry.getService(serviceOrReference).run(shallowItemsClone);
+					}
+				});
+			}  // otherwise the caller will make an appropriate callback for the extension
 		}
 		return commandOptions;
 	};
