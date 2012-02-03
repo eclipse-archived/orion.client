@@ -12,9 +12,10 @@
 /*global window document define login logout localStorage orion */
 /*browser:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding',
-        'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog'], 
-        function(require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding){
+define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
+	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/searchRenderer',
+	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog'], 
+        function(require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mSearchRenderer){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -421,7 +422,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 
 	
 		var openResourceDialog = function(searcher, serviceRegistry, /* optional */ editor) {
-			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher, serviceRegistry:serviceRegistry});
+			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher, searchRenderer:mSearchRenderer, serviceRegistry:serviceRegistry});
 			if (editor) {
 				dojo.connect(dialog, "onHide", function() {
 					editor.getTextView().focus(); // Focus editor after dialog close, Dojo's doesn't work
