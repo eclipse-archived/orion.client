@@ -12,7 +12,7 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mKeyBinding, mEventTarget) {
+define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(messages, mKeyBinding, mEventTarget) {
 
 	/**
 	 * @name orion.editor.ContentAssist
@@ -73,8 +73,8 @@ define("orion/editor/contentAssist", ['orion/textview/keyBinding', 'orion/textvi
 		/** @private */
 		init: function() {
 			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			this.textView.setKeyBinding(isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "Content Assist");
-			this.textView.setAction("Content Assist", function() {
+			this.textView.setKeyBinding(isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), messages.contentAssist);
+			this.textView.setAction(messages.contentAssist, function() {
 				this.showContentAssist(true);
 				return true;
 			}.bind(this));

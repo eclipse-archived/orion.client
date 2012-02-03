@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*jslint browser:true regexp:true*/
 /*global define*/
-define("orion/editor/asyncStyler", [], function() {
+define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages'], function(messages) {
 	var SERVICE_NAME = "orion.edit.highlighter";
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
 
@@ -162,7 +162,7 @@ define("orion/editor/asyncStyler", [], function() {
 								start: err.start + lineStart,
 								end: err.end + lineStart,
 								type: HIGHLIGHT_ERROR_ANNOTATION,
-								title: "Syntax error.",
+								title: messages.syntaxError,
 								html: "<div class='annotationHTML error'></div>",
 								rangeStyle: {styleClass: "annotationRange error"}
 								});
