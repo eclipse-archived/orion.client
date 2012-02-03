@@ -10,8 +10,9 @@
  ******************************************************************************/
 
 /*global define*/
-define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', 'orion/editor/asyncStyler'], 
-		function(dojo, mTextStyler, mTextMateStyler, mAsyncStyler) {
+define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', 'orion/editor/asyncStyler',
+			'examples/textview/textStylerOptions'], 
+		function(dojo, mTextStyler, mTextMateStyler, mAsyncStyler, mTextStylerOptions) {
 	/**
 	 * Returns a promise that will provide a styler for the given content type.
 	 * @static
@@ -40,20 +41,28 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 			}
 			return null;
 		}
-		function getDefaultStyler(contentType) {
+		function createDefaultStyler(contentType) {
+			var styler = null;
 			switch (contentType && contentType.id) {
 				case "text.javascript":
 				case "text.json":
-					return new mTextStyler.TextStyler(textView, "js", annotationModel);
+					styler = new mTextStyler.TextStyler(textView, "js", annotationModel);
+					break;
 				case "text.java":
-					return new mTextStyler.TextStyler(textView, "java", annotationModel);
+					styler = new mTextStyler.TextStyler(textView, "java", annotationModel);
+					break;
 				case "text.css":
-					return new mTextStyler.TextStyler(textView, "css", annotationModel);
+					styler = new mTextStyler.TextStyler(textView, "css", annotationModel);
+					break;
 			}
-			return null;
+			if (styler) {
+				// Temporary. Add support for the preference page.
+				new mTextStylerOptions.TextStylerOptions(styler);
+			}
+			return styler;
 		}
 		// Check default styler
-		var styler = getDefaultStyler(contentType);
+		var styler = createDefaultStyler(contentType);
 		if (styler) {
 			var result = new dojo.Deferred();
 			result.callback(styler);
@@ -132,6 +141,9 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 						self.styler = styler;
 						return styler;
 					});
+		},
+		getStyler: function() {
+			return this.styler;
 		}
 	};
 	return {
