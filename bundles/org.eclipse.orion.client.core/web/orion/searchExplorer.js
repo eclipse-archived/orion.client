@@ -12,8 +12,8 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'dijit/TooltipDialog'], 
-		function(require, dojo, dijit, mExplorer, mTreeIterator, mUtil, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer) {
+define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'dijit/TooltipDialog'], 
+		function(require, dojo, dijit, mExplorer, mTreeModelIterator, mUtil, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer) {
 
 	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, queryStr, options) {
 		this.registry= serviceRegistry;
@@ -878,7 +878,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 		var that = this;
 		this.model = new SearchResultModel(registry, this.fileClient, resultLocation, queryStr, 
 						 { onMatchNumberChanged: function(fileItem){that.renderer.replaceFileElement(fileItem);}});
-		this.iterator = new mTreeIterator.TreeIterator([], 
+		this.iterator = new mTreeModelIterator.TreeModelIterator([], 
 		   		   {isExpanded: dojo.hitch(this, function(model) {
 		   						 	return this.isExpanded(model);
 		   						 }),
@@ -1118,6 +1118,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 			replaceStringDiv.onkeydown = function(e){
 				if (e.keyCode === dojo.keys.ENTER) {
 					var replaceInputDiv = dojo.byId("globalSearchReplaceWith");
+					that._commandService.closeParameterCollector("tool");
 					return that.doPreview(replaceInputDiv.value);
 				}
 				if( e.keyCode === 27/*ESC*/ ){
@@ -1511,17 +1512,21 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 		//var curModel = this.model.getSelected();
 		if(modelToExpand && modelToExpand.children && modelToExpand.children.length > 0 && typeof(childPosition) === "string"){
 			var childIndex = 0;
+			var forward = true;
 			if(childPosition === "first" ){
 				childIndex = 0;
 			} else if (childPosition === "last"){
 				childIndex =  modelToExpand.children.length -1;
+				forward = false;
 			} else {
 				childIndex = JSON.parse(childPosition);
+				forward = false;
 			}
 			if(typeof(childIndex) === "string" || childIndex <0 || childIndex >= modelToExpand.children.length){
 				childIndex = 0;
 			}	
 			this.renderer.selectElement(null, modelToExpand.children[childIndex]);
+			this.onHighlightSelection(forward);
 		}
 	};
 			
@@ -1530,6 +1535,15 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 			this.onExpand(modelToExpand , childPosition, callback);
 		}));
 		return null;
+	};
+	
+	SearchResultExplorer.prototype.checkRow = function(currentModel) {
+		if(this.renderer._useCheckboxSelection){
+			var tableRow = this.getRowdDiv(currentModel);
+			var checkBox  = dojo.byId(this.renderer.getCheckBoxId(tableRow.id));
+			var checked = !checkBox.checked;
+			this.renderer.onCheck(tableRow, checkBox, checked, true);
+		}
 	};
 	
 	SearchResultExplorer.prototype.onEnter = function(e) {
@@ -1544,10 +1558,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 				window.location.href = currentModel.linkLocation;
 			}
 		} else {
-			var tableRow = this.getRowdDiv(currentModel);
-			var checkBox  = dojo.byId(this.renderer.getCheckBoxId(tableRow.id));
-			var checked = !checkBox.checked;
-			this.renderer.onCheck(tableRow, checkBox, checked, true);
+			this.checkRow();
 		}
 	};
 	
@@ -1715,7 +1726,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 			return false;
 		}
 		// FIXME shouldn't know this id, should be passed in
-		var parentNode = dojo.byId(this.getParentDivId());
+		var parentNode = dojo.byId(this.getParentDivId(true));
 		var parentRect = parentNode.getClientRects()[0],
 		rects = element.getClientRects(),
 		on_top = function(r) {
@@ -1741,7 +1752,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 			}));
 			//this.myTree.expand(this.model.getSelected());
 		} else {
-			this.onHighlightSelection(true);
+			this.onHighlightSelection(false);
 		}
 	};
 	
@@ -1764,7 +1775,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeIterator', 'orio
 		var currentRowDiv = this.getRowdDiv();
 		dojo.toggleClass(currentRowDiv, "currentSearchMatch", true);
 		if(!this.visible(currentRowDiv)) {
-			expanded.childDiv.scrollIntoView(!next);
+			currentRowDiv.scrollIntoView(!next);
 		}
 	};
 
