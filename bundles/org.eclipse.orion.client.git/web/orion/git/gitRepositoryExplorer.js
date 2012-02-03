@@ -642,10 +642,6 @@ exports.GitRepositoryExplorer = (function() {
 		var titleLink = dojo.create("a", {"class": "plugin-title navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, detailsView);
 		dojo.place(document.createTextNode(commit.Message), titleLink);		
 		
-		var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
-		    commit: commit
-		});
-		
 		var _timer;
 		
 		var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({

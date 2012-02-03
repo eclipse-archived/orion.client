@@ -116,11 +116,15 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 	},
 	
 	displayCommit: function(commit, parentNode){	
-		var tableNode = dojo.create( "div", {"style":"padding:10px; width:450px"}, parentNode);
+		var tableNode = dojo.create( "div", {"style":"padding:10px; max-width:480px"}, parentNode);
 		
 		var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
-		link = dojo.create("a", {"class": "gitCommitMessage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode);
+		var link = dojo.create("a", {"class": "gitCommitMessage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode);
 		dojo.place(document.createTextNode(commitMessage0), link);
+		
+		dojo.connect(link, "onclick", link, dojo.hitch(this, function() {
+			this.hide();
+		}));
 
 		dojo.create( "div", {"style":"padding-top:15px"}, tableNode );
 		dojo.create( "span", {"class": "gitCommitDescription", innerHTML: " commit: " + commit.Name}, tableNode );
@@ -128,14 +132,18 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 			dojo.create( "div", null, tableNode );
 			
 			dojo.place(document.createTextNode("parent: "), tableNode);
-			link = dojo.create("a", {"class": "gitCommitDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, tableNode);
-			dojo.place(document.createTextNode(commit.Parents[0].Name), link);
+			var parentLink = dojo.create("a", {"class": "gitCommitDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, tableNode);
+			dojo.place(document.createTextNode(commit.Parents[0].Name), parentLink);
+			
+			dojo.connect(parentLink, "onclick", parentLink, dojo.hitch(this, function() {
+				this.hide();
+			}));
 		}
 
 		dojo.create( "div", {"style":"padding-top:15px"}, tableNode );
 		
 		if (commit.AuthorImage) {
-			var authorImage = dojo.create("span", {"class":"git-author-icon-small"}, tableNode);
+			var authorImage = dojo.create("span", {"class":"git-author-icon-small", "style":"margin-bottom:30px"}, tableNode);
 			var image = new Image();
 			image.src = commit.AuthorImage;
 			image.name = commit.AuthorName;
@@ -143,11 +151,10 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 			image.height = 35;
 			dojo.place(image, authorImage, "first");
 		}
-
+		
 		dojo.create( "span", { "class":"plugin-description", 
 			innerHTML: " authored by " + commit.AuthorName + " (" + commit.AuthorEmail
 			+ ") on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, tableNode );
-
 		dojo.create( "div", null, tableNode );
 		dojo.create( "span", { "class":"plugin-description", 
 			innerHTML: "committed by " + commit.CommitterName  + " (" + commit.CommitterEmail + ")"}, tableNode );
