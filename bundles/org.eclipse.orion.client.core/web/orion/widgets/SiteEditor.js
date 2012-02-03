@@ -327,6 +327,9 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			},
 			{ Source: "/task",
 			  Target: hostPrefix + "task"
+			},
+			{ Source: "/help",
+			  Target: hostPrefix + "help"
 			}
 		];
 	},
