@@ -12,8 +12,8 @@
 /*global define */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
-		function(require, dojo, mUtil, mExplorer, mBreadcrumbs, mFileCommands, mExtensionCommands){
+define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHandler', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
+		function(require, dojo, mUtil, mExplorer, mNavHandler, mBreadcrumbs, mFileCommands, mExtensionCommands){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -72,6 +72,10 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 		}
 	};
 		
+	FileRenderer.prototype.getRowActionElement = function(tableRowId){
+		return dojo.byId(tableRowId+"NameColumn");
+	};
+	
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		function isImage(contentType) {
 			switch (contentType && contentType.id) {
@@ -295,6 +299,12 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/breadcrumbs', 
 					}
 					this.model = new Model(this.registry, this.treeRoot, this.fileClient);
 					this.createTree(this.parentId, this.model);
+					//Hook up iterator
+					if(!this.navHandler){
+						this.navHandler = new mNavHandler.ExplorerNavHandler(this);
+					}
+					this.navHandler.refreshModel(this.model);
+					this.navHandler.cursorOn();
 					this.onchange && this.onchange(this.treeRoot);
 				}),
 				dojo.hitch(self, function(error) {

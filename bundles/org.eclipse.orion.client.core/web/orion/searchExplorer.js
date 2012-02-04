@@ -567,7 +567,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 
 	SearchResultRenderer.prototype.deselectElement = function(model){
 		var currentRow = this.explorer.getRowdDiv(model);
 		if(currentRow) {
-			dojo.toggleClass(currentRow, "currentSearchMatch", false);
+			dojo.toggleClass(currentRow, "treeIterationCursor", false);
 			this.replaceDetailIcon(model ? model: this.explorer.model.getSelected(), "none");
 		}
 	};
@@ -588,7 +588,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 
 		}
 		this.deselectElement(previousModel);
 		this.explorer.model.setSelected(currentModel, fromIteration);
-		dojo.toggleClass(this.explorer.model.getId(currentModel), "currentSearchMatch", true);
+		dojo.toggleClass(this.explorer.model.getId(currentModel), "treeIterationCursor", true);
 		var that = this;
 		if(this.explorer._state !== "result_view"){
 			if(!this.explorer.model.sameFile()){
@@ -1774,7 +1774,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 
 	
 	SearchResultExplorer.prototype.onHighlightSelection = function(next){
 		var currentRowDiv = this.getRowdDiv();
-		dojo.toggleClass(currentRowDiv, "currentSearchMatch", true);
+		dojo.toggleClass(currentRowDiv, "treeIterationCursor", true);
 		if(!this.visible(currentRowDiv)) {
 			currentRowDiv.scrollIntoView(!next);
 		}
