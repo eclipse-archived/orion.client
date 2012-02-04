@@ -1150,6 +1150,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 
 			groupId : "orion.searchGroup",
 			callback : function() {
 				var replaceInputDiv = dojo.byId("globalSearchReplaceWith");
+				that._commandService.closeParameterCollector("tool");
 				return that.doPreview(replaceInputDiv.value);
 			}
 		});
