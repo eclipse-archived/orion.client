@@ -87,11 +87,17 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		isExpandable: function(model){
+			if(!model){
+				return false;
+			}
 			var expandImage = dojo.byId(this.renderer.expandCollapseImageId(this.model.getId(model)));
 			return expandImage ? true: false;
 		},
 		
 		isExpanded: function(model){
+			if(!model){
+				return false;
+			}
 			return this.myTree.isExpanded(this.model.getId(model));
 		},
 		
@@ -136,6 +142,9 @@ exports.ExplorerNavHandler = (function() {
 		
 		getRowdDiv: function(model){
 			var rowModel = model ? model: this._modelIterator.cursor();
+			if(!rowModel){
+				return null;
+			}
 			return dojo.byId(this.model.getId(rowModel));
 		},
 		
@@ -155,6 +164,9 @@ exports.ExplorerNavHandler = (function() {
 		_checkRow: function(model, toggle) {
 			if(this.renderer._useCheckboxSelection){
 				var tableRow = this.getRowdDiv(model);
+				if(!tableRow){
+					return;
+				}
 				var checkBox  = dojo.byId(this.renderer.getCheckBoxId(tableRow.id));
 				var checked = toggle ? !checkBox.checked : true;
 				if(checked !== checkBox.checked){
@@ -226,6 +238,9 @@ exports.ExplorerNavHandler = (function() {
 		onEnter: function(e) {
 			if(this.renderer.getRowActionElement){
 				var curModel = this._modelIterator.cursor();
+				if(!curModel){
+					return;
+				}
 				var div = this.renderer.getRowActionElement(this.model.getId(curModel));
 				if(div.href){
 					if(e.ctrlKey){
