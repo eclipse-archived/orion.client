@@ -183,7 +183,7 @@ exports.TreeModelIterator = (function() {
 		 */
 		collapse: function(collapsedModel) {
 			if(this._inParentChain(this._cursor, collapsedModel)){
-				this._cursor = collapsedModel;
+				this.setCursor(collapsedModel);
 				return this._cursor;
 			}
 			return null;

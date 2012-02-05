@@ -76,6 +76,12 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 		return dojo.byId(tableRowId+"NameColumn");
 	};
 	
+	FileRenderer.prototype.onRowIterate = function(model){
+		if(this.explorer.navHandler){
+			this.explorer.navHandler.cursorOn(model);
+		}
+	};
+	
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		function isImage(contentType) {
 			switch (contentType && contentType.id) {
@@ -161,6 +167,18 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 			if (item.LocalTimeStamp) {
 				var fileDate = new Date(item.LocalTimeStamp);
 				dateColumn.innerHTML = dojo.date.locale.format(fileDate);
+			}
+			var that = this;
+			if(this.onRowIterate){
+				dojo.connect(dateColumn, "onclick", dateColumn, function() {
+					that.onRowIterate(item);
+				});
+				dojo.connect(dateColumn, "onmouseover", dateColumn, function() {
+					dateColumn.style.cursor ="pointer";
+				});
+				dojo.connect(dateColumn, "onmouseout", dateColumn, function() {
+					dateColumn.style.cursor ="default";
+				});
 			}
 
 			return dateColumn;
@@ -298,7 +316,8 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 						postLoad();
 					}
 					this.model = new Model(this.registry, this.treeRoot, this.fileClient);
-					this.createTree(this.parentId, this.model);
+					this.createTree(this.parentId, this.model, { onCollapse: function(model){if(self.navHandler){ 
+																							 self.navHandler.onCollapse(model);}}});
 					//Hook up iterator
 					if(!this.navHandler){
 						this.navHandler = new mNavHandler.ExplorerNavHandler(this);
