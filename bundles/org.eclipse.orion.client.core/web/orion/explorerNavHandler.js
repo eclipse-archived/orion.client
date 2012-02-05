@@ -32,8 +32,6 @@ exports.ExplorerNavHandler = (function() {
 		this.myTree = this.explorer.myTree;
 		
 	    this._listeners = [];
-	    var parentDiv = this.myTree._parent;
-	    parentDiv.focus();
 		
 		this._modelIterator = new mTreeModelIterator.TreeModelIterator([],
 		   		   {isExpanded: dojo.hitch(this, function(model) {
@@ -52,6 +50,8 @@ exports.ExplorerNavHandler = (function() {
 		   		   });
 		this._init(options);
 		
+	    var parentDiv = this.myTree._parent;
+	    parentDiv.focus();
 		var keyListener = dojo.connect(parentDiv, "onkeydown", dojo.hitch(this, function (e) {
 			if(e.keyCode === dojo.keys.DOWN_ARROW){
 				return this.onUpArrow(e);
@@ -74,6 +74,14 @@ exports.ExplorerNavHandler = (function() {
 			}
 		}));
 		this._listeners.push(keyListener);
+		var l1 = dojo.connect(parentDiv, "onblur", dojo.hitch(this, function (e) {
+			this.toggleCursor(null, false);
+		}));
+		var l2 = dojo.connect(parentDiv, "onfocus", dojo.hitch(this, function (e) {
+			this.toggleCursor(null, true);
+		}));
+		this._listeners.push(l1);
+		this._listeners.push(l2);
 	};
 	
 	ExplorerNavHandler.prototype = /** @lends orion.ExplorerNavHandler.ExplorerNavHandler.prototype */ {
@@ -114,7 +122,7 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		toggleCursor:  function(model, on){
-			var currentRow = this.getRowdDiv(model);
+			var currentRow = this.getRowDiv(model);
 			if(currentRow) {
 				dojo.toggleClass(currentRow, "treeIterationCursor", on);
 			}
@@ -140,7 +148,7 @@ exports.ExplorerNavHandler = (function() {
 			this.toggleCursor(currentModel, true);
 		},
 		
-		getRowdDiv: function(model){
+		getRowDiv: function(model){
 			var rowModel = model ? model: this._modelIterator.cursor();
 			if(!rowModel){
 				return null;
@@ -157,13 +165,16 @@ exports.ExplorerNavHandler = (function() {
 				if(selecting){
 					this._checkRow(this._modelIterator.prevCursor(), true);
 				}
-				//this.onHighlightSelection(next);
+				var currentRowDiv = this.getRowDiv();
+				if(currentRowDiv && !this._visible(currentRowDiv)) {
+					currentRowDiv.scrollIntoView(!forward);
+				}
 			}
 		},
 		
 		_checkRow: function(model, toggle) {
 			if(this.renderer._useCheckboxSelection){
-				var tableRow = this.getRowdDiv(model);
+				var tableRow = this.getRowDiv(model);
 				if(!tableRow){
 					return;
 				}
@@ -172,6 +183,33 @@ exports.ExplorerNavHandler = (function() {
 				if(checked !== checkBox.checked){
 					this.renderer.onCheck(tableRow, checkBox, checked, true);
 				}
+			}
+		},
+		
+		_visible: function(rowDiv) {
+			if (rowDiv.offsetWidth === 0 || rowDiv.offsetHeight === 0) {
+				return false;
+			}
+		    var parentNode = this.myTree._parent;
+			var parentRect = parentNode.getClientRects()[0],
+			rects = rowDiv.getClientRects(),
+			on_top = function(r) {
+				var x = (r.left + r.right)/2, y = (r.top + r.bottom)/2;
+			    // document.elementFromPoint(x, y) === element; TODO: what is this ???
+			};
+			for (var i = 0, l = rects.length; i < l; i++) {
+				var r = rects[i];
+			    var in_viewport = (r.top >= parentRect.top && r.top <= parentRect.bottom && r.bottom >= parentRect.top && r.bottom <= parentRect.bottom);
+			    if (in_viewport ) {
+					return true;
+			    }
+			}
+			return false;
+		},
+			
+		onCollapse: function(model)	{
+			if(this._modelIterator.collapse(model)){
+				this.cursorOn();
 			}
 		},
 		
@@ -232,6 +270,7 @@ exports.ExplorerNavHandler = (function() {
 		//Space key toggles the check box on the current row if the renderer uses check box
 		onSpace: function(e) {
 			this._checkRow(null, true);
+			e.preventDefault();
 		},
 		
 		//Enter key simulates a href call if the current row has an href link rendered. The render has to provide the getRowActionElement function that returns the href DIV.
