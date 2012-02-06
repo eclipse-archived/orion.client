@@ -349,8 +349,8 @@ define("orion/textview/undoStack", [], function() {
 				return;
 			}
 			if (this._undoStart !== undefined && 
-				!((addedCharCount === 1 && removedCharCount === 0 && start === this._undoStart + this._undoText.length) ||
-					(addedCharCount === 0 && removedCharCount === 1 && (((start + 1) === this._undoStart) || (start === this._undoStart)))))
+				!((addedCharCount === 1 && removedCharCount === 0 && this._undoType === 1 && start === this._undoStart + this._undoText.length) ||
+					(addedCharCount === 0 && removedCharCount === 1 && this._undoType === -1 && (((start + 1) === this._undoStart) || (start === this._undoStart)))))
 			{
 				this._commitUndo();
 			}
