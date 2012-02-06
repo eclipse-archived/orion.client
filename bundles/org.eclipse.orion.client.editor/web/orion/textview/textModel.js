@@ -332,6 +332,7 @@ define("orion/textview/textModel", ['orion/textview/eventTarget'], function(mEve
 			if (text === undefined) { text = ""; }
 			if (start === undefined) { start = 0; }
 			if (end === undefined) { end = this.getCharCount(); }
+			if (start === end && text === "") { return; }
 			var startLine = this.getLineAtOffset(start);
 			var endLine = this.getLineAtOffset(end);
 			var eventStart = start;
