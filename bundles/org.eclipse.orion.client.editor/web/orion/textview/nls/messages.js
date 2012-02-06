@@ -12,7 +12,7 @@
  ******************************************************************************/
  /*global define*/
  
- define({
+ define("orion/textview/nls/messages", {
     "root": {
         "multipleAnnotations": "Multiple annotations:",
         "line": "Line: {0}",
