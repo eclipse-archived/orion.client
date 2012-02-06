@@ -55,7 +55,8 @@ tests["test expected asynch failure"] = function() {
 		if (obj.result === false) {
 			failures++;
 		}
-	});	
+	});
+	newTest.useLocal = true;
 	
 	return newTest.run(failureTest).then(function() {
 		assert.equal(failures, 1);
@@ -73,5 +74,62 @@ tests["test basic list"] = function() {
 	};
 	assert.deepEqual(mTest.list(listTests), ["test 1", "test obj.test2"]);
 };
+
+tests["test blow stack with promise"] = function() {
+	var first = new dojo.Deferred(),
+		d = first, i, recurses = 0, max = 1500;
+	function returnPromise() {
+		recurses++;
+		return first;
+	}
+	for (i = 0; i < max; i++) {
+		d = d.then(returnPromise);
+	}
+	first.resolve();
+	
+	assert.equal(first.fired, 0);
+	assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
+};
+
+tests["test blow stack with value"] = function() {
+	var first = new dojo.Deferred(),
+		d = first, i, recurses = 0, max = 1500;
+	
+	function returnValue() {
+		recurses++;
+		return 1;
+	}
+
+	for (i = 0; i < max; i++) {
+		d = d.then(returnValue);
+	}
+	first.resolve();
+	assert.equal(first.fired, 0);
+	assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
+};
+
+tests["test blow stack with exception"] = function() {
+	var first = new dojo.Deferred(),
+		d = first, i, recurses = 0, max = 1500;
+	
+	dojo.config.deferredOnError = function(){};
+	try {
+		function throwException() {
+			recurses++;
+			throw "exception";
+		}
+	
+		for (i = 0; i < max; i++) {
+			d = d.then(throwException, throwException);
+		}
+	
+		first.resolve();
+	} finally {
+		delete dojo.config.deferredOnError;
+	}
+	assert.equal(first.fired, 0);
+	assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
+};
+
 return tests;
 });
