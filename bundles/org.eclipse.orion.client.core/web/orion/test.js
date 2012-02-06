@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*jslint regexp: true */
-/*global define console top self eclipse setTimeout*/
+/*global define window console top self eclipse setTimeout*/
 
 define(['dojo', 'orion/assert'], function(dojo, assert) {
 
@@ -161,6 +161,7 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 			return _list(name, obj);
 		};
 		
+		window._gTestPluginProviderRegistered = false;
 		this.run = function(prefix, obj) {
 			if (typeof obj === "undefined") {
 				obj = prefix;
@@ -177,7 +178,12 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 			if (!this.useLocal && top !== self && typeof(eclipse) !== "undefined" && eclipse.PluginProvider) {
 				var result = new dojo.Deferred();
 				try {
+					if (window._gTestPluginProviderRegistered) {
+						result.reject("Error: skipping test provider -- only one top-level test provider is allowed");
+						return result;
+					}
 					var provider = new eclipse.PluginProvider();
+					window._gTestPluginProviderRegistered = true;
 					var serviceProvider = provider.registerServiceProvider("orion.test.runner", {
 						run: function() {
 							dojo.when(_run(), dojo.hitch(result, "resolve"));
