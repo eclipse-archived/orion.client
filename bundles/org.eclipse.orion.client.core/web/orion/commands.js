@@ -174,29 +174,32 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					if (this._activeBindings[id].keyBinding.match(event)) {
 						var activeBinding = this._activeBindings[id];
 						var invocation = activeBinding.invocation;
-						var command = activeBinding.command;
-						if (command.hrefCallback) {
-							stop(event);
-							var href = command.hrefCallback.call(invocation.handler || window, invocation);
-							if (href.then){
-								href.then(function(l){
-									window.open(l);
-								});
-							} else {
-								// We assume window open since there's no link gesture to tell us what to do.
-								window.open(href);
-							}
-							return;
-						} else if (command.callback) {
-							stop(event);
-							window.setTimeout(dojo.hitch(this, function() {
-								if (invocation.parameters && this.collectsParameters()) {
-									this._collectParameters("tool", invocation);
+						// an invocation should be there if the command has rendered.
+						if (invocation) {
+							var command = activeBinding.command;
+							if (command.hrefCallback) {
+								stop(event);
+								var href = command.hrefCallback.call(invocation.handler || window, invocation);
+								if (href.then){
+									href.then(function(l){
+										window.open(l);
+									});
 								} else {
-									command.callback.call(invocation.handler || window, invocation);
-								}	
-							}), 0);
-							return;
+									// We assume window open since there's no link gesture to tell us what to do.
+									window.open(href);
+								}
+								return;
+							} else if (command.callback) {
+								stop(event);
+								window.setTimeout(dojo.hitch(this, function() {
+									if (invocation.parameters && this.collectsParameters()) {
+										this._collectParameters("tool", invocation);
+									} else {
+										command.callback.call(invocation.handler || window, invocation);
+									}	
+								}), 0);
+								return;
+							}
 						}
 					}
 				}
@@ -217,7 +220,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						var urlBinding = this._urlBindings[id];
 						var command = urlBinding.command;
 						var invocation = urlBinding.invocation;
-						if (invocation.parameters && command.callback) {
+						// If the command has not rendered (visibleWhen=false, etc.) we don't have an invocation.
+						if (invocation && invocation.parameters && command.callback) {
 							invocation.parameters.setValue(match.parameterName, match.parameterValue);
 							window.setTimeout(dojo.hitch(this, function() {
 								this._collectParameters("tool", invocation);
@@ -729,19 +733,20 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=368699
 							render = !positionOrder[i].scopeId;
 						} 
-						// only check bindings that would otherwise render (ie, dom id matches parent, etc.)
-						if (render && command.visibleWhen) {
-							render = command.visibleWhen(items);
-						}
 						var checkBinding = render && (scope === "global" || scope === "dom");
 						
 						invocation = new CommandInvocation(this, handler, items, userData, command);
 						invocation.domParent = parent;
-
+						
+						var enabled = render && (command.visibleWhen ? command.visibleWhen(items) : true);
 						// ensure that keybindings are bound to the current handler, items, and user data
 						if (checkBinding && this._activeBindings[command.id] && this._activeBindings[command.id].keyBinding) {
 							keyBinding = this._activeBindings[command.id];
-							keyBinding.invocation = invocation;
+							if (enabled) {
+								keyBinding.invocation = invocation;
+							} else {
+								keyBinding.invocation = null;
+							}
 							// if it is a binding only, don't render the command.
 							if (keyBinding.bindingOnly) {
 								render = false;
@@ -751,11 +756,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						// same for url bindings
 						if (checkBinding && this._urlBindings[command.id] && this._urlBindings[command.id].urlBinding) {
 							urlBinding = this._urlBindings[command.id];
-							urlBinding.invocation = invocation;
+							if (enabled) {
+								urlBinding.invocation = invocation;
+							} else {
+								urlBinding.invocation = null;
+							}
 							if (urlBinding.bindingOnly) {
 								render = false;
 							}
 						}
+						render = render && enabled;
 					}
 					if (render) {
 						// special case.  The item wants to provide a set of choices
@@ -917,9 +927,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 *  For non-href commands, this is an image button.  If there is no image button, use bolded text button.
 		 */
 		_addTool: function(parent, forceText, name, context, activeCommandClass, inactiveCommandClass) {
-			if (parent.tagName === 'UL') {
-				parent = dojo.create("li", {"class": "commandListItem"}, parent, last);
-			}
 			context.handler = context.handler || this;
 			var element, image;
 			if (this.hrefCallback) {
