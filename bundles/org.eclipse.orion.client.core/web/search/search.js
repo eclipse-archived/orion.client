@@ -43,12 +43,13 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			
 			var queryString =extractQueryString();
 			searchResultsGenerator.loadResults(queryString);
+
 			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, queryString, null, null,  /* no images */ false, /* client handle page nav area */ true);     
 
-			initTitleBreadCrumb(fileClient, searcher);
+			initTitleBreadCrumb(fileClient, searcher, serviceRegistry, commandService);
 			//every time the user manually changes the hash, we need to load the results with that name
 			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
-				initTitleBreadCrumb(fileClient, searcher);
+				initTitleBreadCrumb(fileClient, searcher, serviceRegistry, commandService);
 				var query = extractQueryString();
 				searchResultsGenerator.loadResults(query);
 				mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, query, null, null,  /* no images */ false, /* client handle page nav area */ true);     
@@ -98,12 +99,15 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 		);
 	}
 
-	function initTitleBreadCrumb(fileClient, searcher){
+	function initTitleBreadCrumb(fileClient, searcher, serviceRegistry, commandService){
 		var searchLoc = parseHash();
 		
 		if(searchLoc.searchLocation){
 			fileClient.read(searchLoc.searchLocation, true).then(
 					dojo.hitch(this, function(metadata) {
+						if (serviceRegistry && commandService) {
+							mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService);
+						}
 						var breadCrumbDomNode = dojo.byId("location");
 						if (breadCrumbDomNode) {
 							//If current location is not the root, set the search location in the searcher
