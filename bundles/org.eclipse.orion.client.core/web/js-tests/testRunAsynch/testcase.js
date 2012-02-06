@@ -87,8 +87,10 @@ tests["test blow stack with promise"] = function() {
 	}
 	first.resolve();
 	
-	assert.equal(first.fired, 0);
-	assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
+	return d.then(function() {
+		assert.equal(first.fired, 0);
+		assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
+	});
 };
 
 tests["test blow stack with value"] = function() {
@@ -104,8 +106,11 @@ tests["test blow stack with value"] = function() {
 		d = d.then(returnValue);
 	}
 	first.resolve();
-	assert.equal(first.fired, 0);
-	assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
+	
+	return d.then(function() {
+		assert.equal(first.fired, 0);
+		assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
+	});
 };
 
 tests["test blow stack with exception"] = function() {
@@ -127,9 +132,13 @@ tests["test blow stack with exception"] = function() {
 	} finally {
 		delete dojo.config.deferredOnError;
 	}
-	assert.equal(first.fired, 0);
-	assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
+	
+	return d.then(function(){
+		assert.ok(false, "Expected an exception");
+	}, function() {
+		assert.equal(first.fired, 0);
+		assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
+	});
 };
-
 return tests;
 });
