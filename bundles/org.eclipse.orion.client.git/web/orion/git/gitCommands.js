@@ -1276,13 +1276,11 @@ var exports = {};
 					}
 					serviceRegistry.getService("orion.git.provider").doAddTag(item.Location, tagName).then(
 						function(jsonData, secondArg) {
-							if (explorer.changedItem) {
-								dojo.hitch(explorer, explorer.changedItem)();
-							} else {
-								var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
-								var tr = dojo.byId(trId);
-								dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[6] /* tags column */, "last"), "only");
-							}
+							dojo.hitch(explorer, explorer.changedItem)(item);
+							var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+							var tr = dojo.byId(trId);
+							if(tr)
+								dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[5] /* tags column */, "last"), "only");
 						},
 						function (error){
 							var display = [];
@@ -1293,7 +1291,7 @@ var exports = {};
 							serviceRegistry.getService("orion.page.message").setProgressResult(display);
 						});
 					return clientDeferred;
-				}, 4);
+				}, 3);
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit";
