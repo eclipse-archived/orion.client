@@ -12,7 +12,7 @@
  ******************************************************************************/
  /*global define*/
  
- define({
+ define("orion/editor/nls/pt-br/messages", {
     "currentLine": "Linha Currente",
     "incrementalFind": "Localiza\u00E7\u00E3o Incremental: {0}",
     "incrementalFindNotFound": "Localiza\u00E7\u00E3o Incremental: {0} (n\u00E3o encontrado)",
