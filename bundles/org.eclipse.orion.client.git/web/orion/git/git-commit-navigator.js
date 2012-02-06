@@ -218,14 +218,20 @@ exports.GitCommitRenderer = (function() {
 			});
 			
 			dojo.connect(link, "onmouseover", link, function() {
-				dijit.popup.open({
-					popup: tooltipDialog,
-					around: link,
-					orient: {'BR':'TL', 'TR':'BL'}
-				});
+				clearTimeout(_timer);
+				
+				_timer = setTimeout(function(){
+					dijit.popup.open({
+						popup: tooltipDialog,
+						around: link,
+						orient: {'BR':'TL', 'TR':'BL'}
+					});
+				}, 600);
 			});
 			
 			dojo.connect(link, "onmouseout", link, function() {
+				clearTimeout(_timer);
+				
 				_timer = setTimeout(function(){
 					if(dijit.popup.hide)
 						dijit.popup.hide(tooltipDialog); //close doesn't work on FF
