@@ -327,7 +327,7 @@ define("orion/textview/undoStack", [], function() {
 		_commitUndo: function () {
 			if (this._undoStart !== undefined) {
 				if (this._undoType === -1) {
-					this.add(new Change(this._undoStart, "", this._undoText, ""));
+					this.add(new Change(this._undoStart, "", this._undoText));
 				} else {
 					this.add(new Change(this._undoStart, this._undoText, ""));
 				}
