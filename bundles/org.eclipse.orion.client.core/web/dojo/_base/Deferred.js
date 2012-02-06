@@ -3,6 +3,51 @@ define("dojo/_base/Deferred", ["dojo/lib/kernel", "dojo/_base/lang"], function(d
 (function(){
 	var mutator = function(){};
 	var freeze = Object.freeze || function(){};
+	// allows "notify" to be called without exhausting the stack
+	var queueTask = (function() {
+		var head, tail, remainingHead, remainingTail, running = false, noop = function(){};
+		return function (task) {
+			if (running) {
+				if (!head) {
+					head = {task: task, next: null};
+					tail = head;
+				} else {
+					tail.next = {task: task, next: null};
+					tail = tail.next;
+				}
+				return;
+			}
+			running = true;
+			do {
+				// try-block is created outside task loop to reduce overhead
+				try {
+					while (task) {
+						task();
+						if (remainingHead) {
+							if (!head) {
+								head = remainingHead;
+							} else {
+								tail.next = remainingHead;
+							}
+							tail = remainingTail;
+						}
+						if (head) {
+							remainingHead = head.next;
+							remainingTail = tail;
+							task = head.task;
+							head = tail = null;
+						} else {
+							task = null;
+						}
+					}
+					running = false;
+				} catch(e) {
+					task  =  noop;
+					console.error(e);
+				}
+			} while (running);
+		};
+	}());
 	// A deferred provides an API for creating and resolving a promise.
 	dojo.Deferred = function(/*Function?*/canceller){
 	// summary:
@@ -155,7 +200,7 @@ define("dojo/_base/Deferred", ["dojo/lib/kernel", "dojo/_base/lang"], function(d
 			}
 			result = value;
 			finished = true;
-			notify();
+			queueTask(notify);
 		}
 		function notify(){
 			var mutated;
@@ -266,7 +311,7 @@ define("dojo/_base/Deferred", ["dojo/lib/kernel", "dojo/_base/lang"], function(d
 				nextListener = head = listener;
 			}
 			if(finished){
-				notify();
+				queueTask(notify);
 			}
 			return returnDeferred.promise;
 		};
