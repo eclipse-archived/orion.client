@@ -44,30 +44,25 @@ define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/Deferred
 			
 			var loaderServiceRegistry = new mServiceregistry.ServiceRegistry();
 			var loaderPluginRegistry = new mPluginregistry.PluginRegistry(loaderServiceRegistry, {});
-			var testRunnerDeferred = new dojo.Deferred();
 			loaderPluginRegistry.installPlugin(test).then(function() {
-				var service = loaderServiceRegistry.getService("orion.test.runner");
-				service.addEventListener("testDone", function(testName, testResult) {
-					if (typeof testSuite[testName] !== "undefined") {
-						testSuite[testName].testDone(testResult);
-					}
+				var references = loaderServiceRegistry.getServiceReferences("orion.test.runner");
+				var testRunDeferreds = [];
+				
+				for(var i =0; i < references.length; i++) {
+					var service = loaderServiceRegistry.getService(references[i]);
+					service.addEventListener("testDone", function(testName, testResult) {
+						if (typeof testSuite[testName] !== "undefined") {
+							testSuite[testName].testDone(testResult);
+						}
+					});
+					console.log("Launching test suite: " + test);
+					testRunDeferreds.push(service.run());
+				}
+				var dl = new dojo.DeferredList(testRunDeferreds, false, false, true);
+				dl.then( function() {
+					loaderPluginRegistry.shutdown();
 				});
-				var runCount = 0;
-				service.addEventListener("runStart", function() {
-					runCount++;
-				});
-				service.addEventListener("runDone", function() {
-					runCount--;
-					if (runCount === 0) {
-						loaderPluginRegistry.shutdown();
-						testRunnerDeferred.resolve();
-					}
-				});
-					
-				console.log("Launching test suite: " + test);
-				service.run();
 			});
-			return testRunnerDeferred;
 		}
 		
 		var first = true;
@@ -160,34 +155,30 @@ define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/Deferred
 		
 		/* Install the test plugin and get the list of tests it contains */
 		return testPluginRegistry.installPlugin(fileURI).then(function() {
-			var service = testServiceRegistry.getService("orion.test.runner");
-			return service.list().then( function(testNames) {
-				var testName;
-				var testSuite = {};
-				
-				/* for each test in the suite, hook up an jstestdriver async test */
-				for (var i = 0; i < testNames.length; i++) {
-					testName = testNames[i];
-					testSuite[testName] = createAsyncTest(testName);
-				} 
-				console.log(fileURI + " : registered " + testNames.length + " tests" );
-				
-				/* jstestdriver will clear out the html body when the loader test is finished,
-				 * we must shut down the plugin registry nicely, and then reload the test plugin later */
+			var references = testServiceRegistry.getServiceReferences("orion.test.runner");
+			var testRunDeferreds = [];
+
+			var testSuite = {};				
+			for(var i =0; i < references.length; i++) {
+				var service = testServiceRegistry.getService(references[i]);
+
+				testRunDeferreds.push(service.list().then(function(testNames) {
+					var testName;
+					/* for each test in the suite, hook up an jstestdriver async test */
+					for (var j = 0; j < testNames.length; j++) {
+						testName = testNames[j];
+						testSuite[testName] = createAsyncTest(testName);
+					} 
+					console.log(fileURI + " : registered " + testNames.length + " tests" );
+				}));
+			}
+			
+			var dl = new dojo.DeferredList(testRunDeferreds, false, false, true);
+			return dl.then( function() {
 				testPluginRegistry.shutdown();
-				
 				loader.ready(testSuite);
 				return loader;
 			});
-		}, function(e) {
-			console.log(fileURI + " : error getting orion.test.runner service " + e);
-			loader.error(e);
-			return { 
-				testName: fileURI, 
-				loadMethod: function() { 
-					throw e; 
-				} 
-			};
 		});
 	}
 
