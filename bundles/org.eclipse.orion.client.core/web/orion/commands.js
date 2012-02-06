@@ -942,15 +942,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					dojo.addClass(element, "commandMissingImageButton commandButton");
 				} else {
 					image = addImageToElement(this, element, name);
-					dojo.connect(element, "onclick", this, function() {
-						// collect parameters in advance if specified
-						if (this.parameters && context.collectsParameters()) {
-							context.commandService._collectParameters("tool", context);
-						} else if (this.callback) {
-							this.callback.call(context.handler, context);
-						}
-					});
 				}
+				dojo.connect(element, "onclick", this, function() {
+					// collect parameters in advance if specified
+					if (this.parameters && context.collectsParameters()) {
+						context.commandService._collectParameters("tool", context);
+					} else if (this.callback) {
+						this.callback.call(context.handler, context);
+					}
+				});
 				var overClass = image ? "commandImageOver" : "commandButtonOver";
 				this._setupActivateVisuals(element, element, activeCommandClass, inactiveCommandClass, overClass);			
 
