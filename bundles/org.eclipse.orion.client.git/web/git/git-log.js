@@ -36,8 +36,6 @@ var serviceRegistry;
 			new mSshTools.SshService(serviceRegistry);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 			var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
-			
-			var branch;
 		
 			// Git operations
 			var gitClient = new mGitClient.GitService(serviceRegistry);
@@ -103,49 +101,52 @@ function loadResource(navigator, searcher, commandService){
 			
 			var loadResource = function(resource){
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
-				initTitleBar(fileClient, navigator, resource, searcher, commandService);
-				if (resource.Type === "RemoteTrackingBranch"){
-					var gitService = serviceRegistry.getService("orion.git.provider");
-					gitService.getLog(resource.HeadLocation, resource.Id, "Getting git incoming changes", function(scopedCommitsJsonData) {
-							navigator.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
-							navigator.renderer.setOutgoingCommits([]);
-							gitService.doGitLog(resource.CommitLocation + "?" + new dojo._Url(path).query, function(jsonData) {
-								resource.Children = jsonData.Children;
-								if(jsonData.NextLocation){
-									resource.NextLocation = resource.Location + "?" + new dojo._Url(jsonData.NextLocation).query;
-								}
-								if(jsonData.PreviousLocation ){
-									resource.PreviousLocation  = resource.Location + "?" + new dojo._Url(jsonData.PreviousLocation).query;
-								}
-								navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);															
+				initTitleBar(fileClient, navigator, resource, searcher, commandService).then(
+					function(){
+						if (resource.Type === "RemoteTrackingBranch"){
+							var gitService = serviceRegistry.getService("orion.git.provider");
+							gitService.getLog(resource.HeadLocation, resource.Id, "Getting git incoming changes", function(scopedCommitsJsonData) {
+									navigator.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
+									navigator.renderer.setOutgoingCommits([]);
+									gitService.doGitLog(resource.CommitLocation + "?" + new dojo._Url(path).query, function(jsonData) {
+										resource.Children = jsonData.Children;
+										if(jsonData.NextLocation){
+											resource.NextLocation = resource.Location + "?" + new dojo._Url(jsonData.NextLocation).query;
+										}
+										if(jsonData.PreviousLocation ){
+											resource.PreviousLocation  = resource.Location + "?" + new dojo._Url(jsonData.PreviousLocation).query;
+										}
+										navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);															
+									});
 							});
-					});
-				} else if (resource.toRef){
-					if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1)
-						dojo.xhrGet({
-							url : resource.toRef.RemoteLocation[0].Children[0].Location,
-							headers : {
-								"Orion-Version" : "1"
-							},
-							handleAs : "json",
-							timeout : 5000,
-							load : function(remoteJsonData, secondArg) {
-								var gitService = serviceRegistry.getService("orion.git.provider");
-								gitService.getLog(remoteJsonData.CommitLocation, "HEAD", "Getting git outgoing changes", function(scopedCommitsJsonData) {
-										navigator.renderer.setIncomingCommits([]);
-										navigator.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
+						} else if (resource.toRef){
+							if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1)
+								dojo.xhrGet({
+									url : resource.toRef.RemoteLocation[0].Children[0].Location,
+									headers : {
+										"Orion-Version" : "1"
+									},
+									handleAs : "json",
+									timeout : 5000,
+									load : function(remoteJsonData, secondArg) {
+										var gitService = serviceRegistry.getService("orion.git.provider");
+										gitService.getLog(remoteJsonData.CommitLocation, "HEAD", "Getting git outgoing changes", function(scopedCommitsJsonData) {
+												navigator.renderer.setIncomingCommits([]);
+												navigator.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
+												navigator.loadCommitsList(dojo.hash(), resource);
+										});
+									},
+									error : function(error, ioArgs){
 										navigator.loadCommitsList(dojo.hash(), resource);
+									}
 								});
-							},
-							error : function(error, ioArgs){
+							else
 								navigator.loadCommitsList(dojo.hash(), resource);
-							}
-						});
-					else
-						navigator.loadCommitsList(dojo.hash(), resource);
-				} else {
-					navigator.loadCommitsList(dojo.hash(), resource);
-				}
+						} else {
+							navigator.loadCommitsList(dojo.hash(), resource);
+						}
+					}
+				);
 			};
 			
 			if(secondArg.xhr.status===200){
@@ -222,6 +223,8 @@ function getRemoteFileURI(){
 
 function initTitleBar(fileClient, navigator, item, searcher, commandService){
 	
+	var deferred = new dojo.Deferred();
+	
 	var isRemote = (item.Type === "RemoteTrackingBranch");
 	var isBranch = (item.toRef && item.toRef.Type === "Branch");
 	
@@ -236,51 +239,56 @@ function initTitleBar(fileClient, navigator, item, searcher, commandService){
 	
 	if(fileURI){
 		fileClient.read(fileURI, true).then(
-				dojo.hitch(this, function(metadata) {
-					mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService); 
-					var branchName;
-					if (isRemote)
-						branchName = item.Name;
-					else if (isBranch)
-						branchName = item.toRef.Name;
-					else
-						branchName = null;
+			dojo.hitch(this, function(metadata) {
+				mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService); 
+				var branchName;
+				if (isRemote)
+					branchName = item.Name;
+				else if (isBranch)
+					branchName = item.toRef.Name;
+				else
+					branchName = null;
 
-					if(item && item.CloneLocation){
-						var cloneURI = item.CloneLocation;
-						
-						serviceRegistry.getService("orion.git.provider").getGitClone(cloneURI).then(function(jsonData){
-							if(jsonData.Children && jsonData.Children.length>0) {
-								setPageTitle(branchName, jsonData.Children[0].Name, jsonData.Children[0].Location, isRemote, isBranch);
-							} else {
-								setPageTitle(branchName, jsonData.Name, jsonData.Location, isRemote, isBranch);
-							}
-						});
-					}else{
-						setPageTitle(branchName);
-					}
-					var location = dojo.byId("location");
-					if (location) {
-						//If current location is not the root, set the search location in the searcher
-						searcher.setLocationByMetaData(metadata);
-						dojo.empty(location);
-						var breadcrumb = new mBreadcrumbs.BreadCrumbs({
-							container: "location",
-							resource: metadata ,
-							makeHref:function(seg,location){makeHref(fileClient, seg,location, isRemote);
-							}
-						});
-					}
-					navigator.isDirectory = metadata.Directory;
-					mGitCommands.updateNavTools(serviceRegistry, navigator, "pageActions", "selectionTools", navigator._lastTreeRoot);
-					navigator.updateCommands();
-				}),
-				dojo.hitch(this, function(error) {
-					console.error("Error loading file metadata: " + error.message);
-				})
+				if(item && item.CloneLocation){
+					var cloneURI = item.CloneLocation;
+					
+					serviceRegistry.getService("orion.git.provider").getGitClone(cloneURI).then(function(jsonData){
+						if(jsonData.Children && jsonData.Children.length>0) {
+							setPageTitle(branchName, jsonData.Children[0].Name, jsonData.Children[0].Location, isRemote, isBranch);
+						} else {
+							setPageTitle(branchName, jsonData.Name, jsonData.Location, isRemote, isBranch);
+						}
+					});
+				}else{
+					setPageTitle(branchName);
+				}
+				var location = dojo.byId("location");
+				if (location) {
+					//If current location is not the root, set the search location in the searcher
+					searcher.setLocationByMetaData(metadata);
+					dojo.empty(location);
+					var breadcrumb = new mBreadcrumbs.BreadCrumbs({
+						container: "location",
+						resource: metadata ,
+						makeHref:function(seg,location){makeHref(fileClient, seg,location, isRemote);
+						}
+					});
+				}
+				navigator.isDirectory = metadata.Directory;
+				mGitCommands.updateNavTools(serviceRegistry, navigator, "pageActions", "selectionTools", navigator._lastTreeRoot);
+				navigator.updateCommands();
+				
+				deferred.callback();
+			}),
+			dojo.hitch(this, function(error) {
+				deferred.errback(error);
+			})
 		);
+	} else {
+		deferred.callback();
 	}
 	
+	return deferred;
 };
 
 function makeHref(fileClient, seg, location, isRemote) {

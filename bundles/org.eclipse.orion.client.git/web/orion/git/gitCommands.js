@@ -35,13 +35,15 @@ var exports = {};
 		}
 		var commandService = registry.getService("orion.page.command");
 		commandService.renderCommands(toolbar, "dom", item, explorer, "button"); 
+		
 		if (pageNavId) {
-			toolbar = dojo.byId(pageNavId);
-			if (toolbar) {
-				dojo.empty(toolbar);
-				commandService.renderCommands(toolbar, "dom", item, explorer, "button", true);  
+			var pageNav = dojo.byId(pageNavId);
+			if (pageNav) {
+				dojo.empty(pageNav);
+				commandService.renderCommands(pageNav, "dom", item, explorer, "button", true);  
 			}
 		}
+		
 		if (selectionToolbarId) {
 			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
 			commandService.renderCommands(selectionTools, "dom", null, explorer, "button", true);
