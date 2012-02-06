@@ -31,19 +31,20 @@ define(["orion/assert", "orion/textview/eventTarget", "orion/textview/textModel"
 			return this.model.getText(start, end);
 		},
 		setText: function(text, start, end) {
+		},
+		addEventListener: function(){
 		}
 		// Dispatch "Changing", "Changed", "LineStyle", "Scroll" (?), "Destroy", "Verify"
 	};
 	
 	// ************************************************************************************************
-	tests["CodeMirror - 1"] = function() {
+	tests["test CodeMirror - 1"] = function() {
 		var view = new MockTextView();
-		var codeMirror = new mMirror.CodeMirror();
+		var codeMirror = new mMirror.Mirror();
 		var annotationModel = new mAnnotations.AnnotationModel(view.getModel());
 		codeMirror.defineMode("test", SampleMode);
 		var styler = new mMirror.CodeMirrorStyler(view, codeMirror, annotationModel);
-		
-		
+		assert.ok(styler);
 	};
 	
 	return tests;
