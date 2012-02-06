@@ -18,16 +18,12 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 		var current = 0;
 		var promise = new dojo.Deferred();
 
-		function _run() {
-			function _runNextTick() {
-				setTimeout(_run, 0);
-			}
-		
+		function _next() {
 			while(current !== length) {
 				try {				
 					var result = tasks[current++]();
 					if (result && typeof result.then === "function") {
-						result.then(_runNextTick,_runNextTick);
+						result.then(_next,_next);
 						return promise;
 					}
 				} catch(e){
@@ -36,7 +32,7 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 			promise.resolve();
 			return promise;
 		}
-		return _run();
+		return _next();
 	}
 	
 	function _list(prefix, obj) {
