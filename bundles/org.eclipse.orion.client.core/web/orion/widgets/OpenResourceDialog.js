@@ -34,6 +34,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	time: null,
 	options: null,
 	searcher: null,
+	searchRenderer: null,
 	favService: null,
 	
 	/** @private */
@@ -43,11 +44,13 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		this.time = 0;
 		this.options = arguments[0];
 		this.searcher = this.options && this.options.searcher;
-		this.searchRenderer = this.options && this.options.searchRenderer;
 		if (!this.searcher) {
 			throw new Error("Missing required argument: searcher");
 		}
-		var serviceRegistry = this.options.serviceRegistry;
+		this.searchRenderer = this.options && this.options.searchRenderer;
+		if (!this.searchRenderer || typeof(this.searchRenderer.makeRenderFunction) !== "function") {
+			throw new Error("Missing required argument: searchRenderer");
+		}
 		this.favService = this.options.favoriteService;
 		if (!this.favService) {
 			throw new Error("Missing required argument: favService");
