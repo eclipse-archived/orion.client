@@ -12,7 +12,7 @@
  ******************************************************************************/
  /*global define*/
  
- define({
+ define("orion/textview/nls/fr-fr/messages", {
     "multipleAnnotations": "Annotations multiples:",
     "line": "Ligne: {0}",
     "matchingBracket": "Crochet Correspondant",
