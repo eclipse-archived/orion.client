@@ -34,16 +34,18 @@ exports.GitCommitNavigator = (function() {
 		this.isDirectory = true;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new exports.GitCommitRenderer({checkbox: this.checkbox, cachePrefix: "GitCommitsNavigator", minimal: this.minimal}, this);
+		this.renderer = new exports.GitCommitRenderer({cachePrefix: "GitCommitsNavigator", minimal: this.minimal}, this);
 	}
 	
 	GitCommitNavigator.prototype = new mExplorer.Explorer();
 	
-
 	GitCommitNavigator.prototype.loadCommitsList = function(path, treeRoot, force) {
 
 		var waitDeferred = new dojo.Deferred();
 
+		// show checkboxes only for file commits
+		this.renderer._useCheckboxSelection = !this.isDirectory && this.checkbox;
+		
 		path = mUtil.makeRelative(path);
 		if (path === this._lastHash && !force) {
 			waitDeferred.callback();
@@ -91,8 +93,6 @@ exports.GitCommitNavigator = (function() {
 		dojo.place(document.createTextNode(path), b, "last");
 		dojo.place(b, progress, "last");
 		dojo.place(document.createTextNode("..."), progress, "last");
-
-		var self = this;
 
 		if (this.toolbarId && this.selectionToolsId)
 			mGitCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, treeRoot, this.pageNavId);
@@ -192,7 +192,7 @@ exports.GitCommitRenderer = (function() {
 				outgoingCommit = true;
 			}
 		});
-
+		
 		switch(col_no){
 		case 0:
 			var col, div, link;
@@ -200,7 +200,7 @@ exports.GitCommitRenderer = (function() {
 			col = document.createElement('td');
 			div = dojo.create("div", {style: "margin-left: 5px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px; padding-left: 20px;"}, col, "only");
 				
-			link = dojo.create("a", {className: "navlinkonpage", href: "/git/git-commit.html#" + item.Location + "?page=1&pageSize=1"}, div, "last");			
+			link = dojo.create("a", {className: "navlink", href: "/git/git-commit.html#" + item.Location + "?page=1&pageSize=1"}, div, "last");			
 			dojo.place(document.createTextNode(item.Message), link, "only");		
 			
 			var _timer;
