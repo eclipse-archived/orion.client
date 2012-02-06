@@ -285,7 +285,8 @@ orion.GitStatusTableRenderer = (function() {
 				commandService.registerCommandContribution("orion.gitStage", 1, id);
 				commandService.registerCommandContribution("orion.gitCheckout", 2, id);
 				commandService.registerCommandContribution("orion.gitStageAll", 3, id);	
-				commandService.registerCommandContribution("orion.gitSavePatch", 4, id);
+				commandService.registerCommandContribution("orion.gitCheckoutAll", 4, id);	
+				commandService.registerCommandContribution("orion.gitSavePatch", 5, id);
 			}
 		
 			dojo.addClass(this._cmdSpan, "paneHeadingCommands");
@@ -989,7 +990,7 @@ orion.GitStatusController = (function() {
 							return;
 						}
 						self._statusService.setProgressMessage("Checking out...");
-						self.checkout(data.items.object);
+						self.checkout([data.items.object.name]);
 					});
 				},
 				visibleWhen: function(item) {
@@ -1028,6 +1029,28 @@ orion.GitStatusController = (function() {
 					return return_value;
 				}
 			});		
+			
+			var checkoutAllCommand = new mCommands.Command({
+				name: "Checkout",
+				tooltip: "Discard all the selected changes",
+				imageClass: "git-sprite-checkout",
+				spriteClass: "gitCommandSprite",
+				id: "orion.gitCheckoutAll",
+				callback: function(data) {
+					self._registry.getService("orion.page.dialog").confirm("Your changes to all the selected files will be lost. Are you sure you want to checkout?", function(doit) {
+						if (!doit) {
+							return;
+						}
+						self._statusService.setProgressMessage("Checking out...");
+						self.checkoutSelected();
+					});
+				},
+				visibleWhen: function(item) {
+					var return_value = (item.type === "unstagedItems" && self.hasUnstaged && self._unstagedContentRenderer.getSelected().length > 0);
+					return return_value;
+				}
+			});		
+			
 			var savePatchCommand = new mCommands.Command({
 				name: "Save Patch",
 				tooltip: "Save workspace changes as a patch",
@@ -1174,6 +1197,7 @@ orion.GitStatusController = (function() {
 			commandService.addCommand(checkoutCommand, "object");
 			commandService.addCommand(checkoutCommand, "dom");
 			commandService.addCommand(stageAllCommand, "dom");
+			commandService.addCommand(checkoutAllCommand, "dom");
 			commandService.addCommand(savePatchCommand, "dom");
 			commandService.addCommand(unstageAllCommand, "dom");
 			commandService.addCommand(unstageCommand, "object");
@@ -1470,6 +1494,23 @@ orion.GitStatusController = (function() {
 				this.stageMultipleFiles(selectedItems);
 		},
 
+		checkoutSelected: function(){
+			var selection = this._unstagedContentRenderer.getSelected();
+			if(selection.length === 0)
+				return;
+			this._prepareStage(selection, true);
+			this._unstagedTableRenderer.select(false);
+			this._stagedTableRenderer.select(false);
+			var nameList = [];
+			for ( var i = 0; i < selection.length; i++) {
+				var itemModel = selection[i].modelItem;
+				if (itemModel && itemModel.name) {
+					nameList.push(itemModel.name);
+				}
+			}
+			this.checkout(nameList);
+		},
+
 		stageOneSelection: function (selection, index){
 			var that = this;
 			var itemModel = selection[index].modelItem;
@@ -1506,10 +1547,10 @@ orion.GitStatusController = (function() {
 			});
 		},
 
-		checkout: function(itemModel){
+		checkout: function(itemNameList){
 			var self = this;
 			var location = this._model.items.CloneLocation;
-			self._registry.getService("orion.git.provider").checkoutPath(location, [itemModel.name], function(jsonData, secondArg) {
+			self._registry.getService("orion.git.provider").checkoutPath(location, itemNameList, function(jsonData, secondArg) {
 				self.getGitStatus(self._url);
 			}, function(response, ioArgs) {
 				self.handleServerErrors(response, ioArgs);
