@@ -732,12 +732,13 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			fileCommands.push({properties: info, service: impl});
 		}
 		
-		if (!contentTypesMapCache) {
-			serviceRegistry.getService("orion.file.contenttypes").getContentTypesMap().then(function(map) {
+		function getContentTypesMap() {
+			return contentTypesMapCache || serviceRegistry.getService("orion.file.contenttypes").getContentTypesMap().then(function(map) {
 				contentTypesMapCache = map;
+				return contentTypesMapCache;
 			});
 		}
-		dojo.when(contentTypesMapCache, dojo.hitch(this, function() {
+		dojo.when(getContentTypesMap(), dojo.hitch(this, function() {
 			fileCommands = fileCommands.concat(mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypesMapCache));
 		
 			for (i=0; i < fileCommands.length; i++) {

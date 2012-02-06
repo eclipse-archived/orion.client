@@ -12,7 +12,7 @@
  ******************************************************************************/
  /*global define*/
  
- define({
+ define("orion/editor/nls/messages", {
     "root": {
         "currentLine": "Current Line",
         "incrementalFind": "Incremental find: {0}",
