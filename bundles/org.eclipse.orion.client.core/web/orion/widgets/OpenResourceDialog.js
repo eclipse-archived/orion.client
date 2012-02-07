@@ -145,9 +145,8 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	populateFavorites: function() {
 		dojo.place("<div>Populating favorites&#x2026;</div>", this.favresults, "only");
 		
-		
 		// initially, show all favorites
-		dojo.when(this.favService.getFavorites(), this.showFavorites());
+		this.favService.getFavorites().then(this.showFavorites());
 		// need to add the listener since favorites may not 
 		// have been initialized after first getting the favorites
 		this.favService.addEventListener("favoritesChanged", this.showFavorites());

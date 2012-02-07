@@ -426,6 +426,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
 			if (!favoriteService) {
 				favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+				//service must be accessed via the registry so we get async behaviour
+				favoriteService = serviceRegistry.getService("orion.core.favorite");
 			}
 			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher, searchRenderer:searcher.defaultRenderer, favoriteService:favoriteService});
 			if (editor) {
