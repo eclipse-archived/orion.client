@@ -34,7 +34,7 @@ define(['require'],
 	//Title area
 	'<div id="titleArea" class="layoutBlock titleArea">' +
 		'<div id="pageTitle" class="layoutLeft pageTitle"></div>' +
-		'<input type="search" id="search" placeholder="Search root" title="Type a keyword or wild card to search in root" class="layoutRight searchbox">' +
+		'<input type="search" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutRight searchbox">' +
 		'<div id="relatedLinks" class="layoutRight pageNav"></div>' +
 		'<div id="globalActions" class="layoutRight pageNav"></div>' +
 		'<div id="dimension" class="layoutBlock dimension"></div>' +

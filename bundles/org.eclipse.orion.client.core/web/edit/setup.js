@@ -179,6 +179,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			var titlePane = dojo.byId("location");
 			if (titlePane) {
 				dojo.empty(titlePane);
+				searcher.setLocationByMetaData(this._fileMetadata, {index: "first"});
 				var root = fileClient.fileServiceName(this._fileMetadata && this._fileMetadata.Location);
 				new mBreadcrumbs.BreadCrumbs({
 					container: "location", 
