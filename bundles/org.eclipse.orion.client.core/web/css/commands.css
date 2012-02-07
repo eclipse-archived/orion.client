@@ -18,9 +18,9 @@
 
 .commandImageOver {
 	margin: 0;
-	background-color: #e3e3e3;
-	border: 1px solid #9a9a9a;
-    border-radius: 3px;
+	background-color: #e6e6e6;
+	border: 1px solid #808080;
+    border-radius: 2px;
 }
 
 /* should be used in conjunction with .commandButton when a tool has no icon. */
@@ -45,9 +45,9 @@
 
 .commandButtonOver {
 	margin: 0;
-	background-color: #e3e3e3;
-	border: 1px solid #9a9a9a;
-    border-radius: 6px;
+	background-color: #e6e6e6;
+	border: 1px solid #808080;
+    border-radius: 2px;
 }
 
 .commandMenuItem {
