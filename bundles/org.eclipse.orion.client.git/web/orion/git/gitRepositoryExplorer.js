@@ -227,14 +227,15 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var tableNode = dojo.byId( 'table' );	
 		dojo.empty( tableNode );
-		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );
-		dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-repository" }, titleWrapper );
-		dojo.create( "div", { id: "repositoryHeader", "class":"sectionTitle", innerHTML: (mode === "full" ? "Repositories" : "Repository") }, titleWrapper );
+
+		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"repositorySectionHeader"}, tableNode );
 		
+		dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-repository" }, titleWrapper );
+		dojo.create( "div", { id: "repositorySectionTitle", "class":"layoutLeft", innerHTML: (mode === "full" ? "Repositories" : "Repository") }, titleWrapper );
+		dojo.create( "div", { id: "repositorySectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
+				
 		if (!repositories){
-			dojo.byId("repositoryHeader").innerHTML = (mode === "full" ? "No Repositories" : "Repository Not Found");
-			if (mode === "full")
-				dojo.empty("repositorySubHeader");
+			dojo.byId("repositorySectionTitle").innerHTML = (mode === "full" ? "No Repositories" : "Repository Not Found");
 			return;
 		}
 		
@@ -289,9 +290,11 @@ exports.GitRepositoryExplorer = (function() {
 		var that = this;
 		
 		var tableNode = dojo.byId( 'table' );
-		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
-		var item = { id: "workingDirectoryHeader", "class":"sectionTitle", innerHTML: "Working Directory" };
-		dojo.create( "div", item, titleWrapper );
+
+		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"workingDirectorySectionHeader"}, tableNode );
+		
+		dojo.create( "div", { id: "workingDirectorySectionTitle", "class":"layoutLeft", innerHTML: "Working Directory" }, titleWrapper );
+		dojo.create( "div", { id: "workingDirectorySectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 		
 		var content =	
 			'<div class="git-table">' +
@@ -363,12 +366,27 @@ exports.GitRepositoryExplorer = (function() {
 		var that = this;
 		
 		var tableNode = dojo.byId( 'table' );
-		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );
+		
+		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"branchSectionHeader"}, tableNode );
+		
 		dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-branch" }, titleWrapper );
-		dojo.create( "div", { id: "branchHeader", "class":"sectionTitle", innerHTML: "Branches" }, titleWrapper );
-		dojo.create( "div", { id: "branchSectionProgress", "class": "sectionProgress", innerHTML: "..."}, titleWrapper );
+		dojo.create( "div", { id: "branchSectionTitle", "class":"layoutLeft", innerHTML: "Branches" }, titleWrapper );
+		dojo.create( "div", { id: "branchSectionProgress", "class": "layoutLeft", innerHTML: "..."}, titleWrapper );
 		dojo.create( "div", { id: "branchSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 
+		var parentId = "branchSectionHeader";
+		
+		var slideout = 
+			'<div id="' + parentId + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
+				'<span id="' + parentId + 'slideOut" class="slide">' +
+				   '<span id="' + parentId + 'pageCommandParameters" class="parameters"></span>' +
+				   '<span id="' + parentId + 'pageCommandDismiss" class="parametersDismiss"></span>' +
+				'</span>' +
+			'</div>';
+	
+	
+		dojo.place( slideout, titleWrapper );
+		
 		var content =	
 			'<div class="git-table">' +
 				'<div class="plugin-settings">' +
@@ -433,10 +451,13 @@ exports.GitRepositoryExplorer = (function() {
 		var that = this;
 		
 		var tableNode = dojo.byId( 'table' );
-		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );
+
+		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"remoteBranchSectionHeader"}, tableNode );
+		
 		dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-branch" }, titleWrapper );
-		dojo.create( "div", { id: "remoteBranchHeader", "class":"sectionTitle", innerHTML: "Remote Branches" }, titleWrapper );
-		dojo.create( "div", { id: "remoteBranchSectionProgress", "class": "sectionProgress", innerHTML: "..."}, titleWrapper );
+		dojo.create( "div", { id: "remoteBranchSectionTitle", "class":"layoutLeft", innerHTML: "Remote Branches" }, titleWrapper );
+		dojo.create( "div", { id: "remoteBranchSectionProgress", "class": "layoutLeft", innerHTML: "..."}, titleWrapper );
+		dojo.create( "div", { id: "remoteBranchSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 		
 		var content =	
 			'<div class="git-table">' +
@@ -453,7 +474,7 @@ exports.GitRepositoryExplorer = (function() {
 				dojo.style(dojo.byId("remoteBranchSectionProgress"), "visibility", "hidden");
 				
 				if (remotes.length === 0){
-					dojo.byId("remoteBranchHeader").innerHTML = "No Remote Branches";
+					dojo.byId("remoteBranchSectionTitle").innerHTML = "No Remote Branches";
 					return;
 				}
 				
@@ -485,7 +506,7 @@ exports.GitRepositoryExplorer = (function() {
 		} else {
 			if (!anyRemoteBranch){
 				dojo.style(dojo.byId("remoteBranchSectionProgress"), "visibility", "hidden");
-				dojo.byId("remoteBranchHeader").innerHTML = "No Remote Branches";
+				dojo.byId("remoteBranchSectionTitle").innerHTML = "No Remote Branches";
 			}
 			deferred.callback();
 		}
@@ -512,12 +533,26 @@ exports.GitRepositoryExplorer = (function() {
 		var that = this;
 		
 		var tableNode = dojo.byId( 'table' );
-		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
-		var item = { id: "commitHeader", "class":"sectionTitle", innerHTML: "Commits" };
-		dojo.create( "div", item, titleWrapper );
-		dojo.create( "div", { id: "commitSectionProgress", "class": "sectionProgress", innerHTML: "..."}, titleWrapper );
+
+		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"commitSectionHeader"}, tableNode );
+		
+		dojo.create( "div", { id: "commitSectionTitle", "class":"layoutLeft", innerHTML: "Branches" }, titleWrapper );
+		dojo.create( "div", { id: "commitSectionProgress", "class": "layoutLeft", innerHTML: "..."}, titleWrapper );
 		dojo.create( "div", { id: "commitSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 		
+		var parentId = "commitSectionHeader";
+		
+		var slideout = 
+			'<div id="' + parentId + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
+				'<span id="' + parentId + 'slideOut" class="slide">' +
+				   '<span id="' + parentId + 'pageCommandParameters" class="parameters"></span>' +
+				   '<span id="' + parentId + 'pageCommandDismiss" class="parametersDismiss"></span>' +
+				'</span>' +
+			'</div>';
+	
+	
+		dojo.place( slideout, titleWrapper );
+
 		var content =	
 			'<div class="git-table">' +
 				'<div class="plugin-settings">' +
@@ -540,7 +575,7 @@ exports.GitRepositoryExplorer = (function() {
 				
 				var tracksRemoteBranch = (currentBranch.RemoteLocation.length == 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 				
-				dojo.byId("commitHeader").innerHTML = "Commits for \"" + currentBranch.Name + "\" branch";
+				dojo.byId("commitSectionTitle").innerHTML = "Commits for \"" + currentBranch.Name + "\" branch";
 				
 				that.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10, "commitSectionActionsArea");
 				that.registry.getService("orion.page.command").renderCommands(dojo.byId("commitSectionActionsArea"), "dom", 
@@ -714,10 +749,12 @@ exports.GitRepositoryExplorer = (function() {
 		var that = this;
 		
 		var tableNode = dojo.byId( 'table' );
-		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );
+
+		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"tagSectionHeader"}, tableNode );
+		
 		dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-tag" }, titleWrapper );
-		dojo.create( "div", { id: "tagHeader", "class":"sectionTitle", innerHTML: ("Tags" + (mode === "full" ? "" : " (5 most recent)"))}, titleWrapper );
-		dojo.create( "div", { id: "tagSectionProgress", "class": "sectionProgress", innerHTML: "..."}, titleWrapper );
+		dojo.create( "div", { id: "tagSectionTitle", "class":"layoutLeft", innerHTML: ("Tags" + (mode === "full" ? "" : " (5 most recent)")) }, titleWrapper );
+		dojo.create( "div", { id: "tagSectionProgress", "class": "layoutLeft", innerHTML: "..."}, titleWrapper );
 		dojo.create( "div", { id: "viewAllTagSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 
 		var content =	
@@ -744,7 +781,7 @@ exports.GitRepositoryExplorer = (function() {
 				}
 
 				if (tags.length === 0) {
-					dojo.byId("tagHeader").innerHTML = "No Tags";
+					dojo.byId("tagSectionTitle").innerHTML = "No Tags";
 					return;
 				}
 				
@@ -827,11 +864,26 @@ exports.GitRepositoryExplorer = (function() {
 		var that = this;
 		
 		var tableNode = dojo.byId( 'table' );
-		var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
+
+		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"remoteSectionHeader"}, tableNode );
+		
 		dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-remote" }, titleWrapper );
-		dojo.create( "div", { id: "remoteHeader", "class":"sectionTitle", innerHTML: "Remotes" }, titleWrapper );
-		dojo.create( "div", { id: "remoteSectionProgress", "class": "sectionProgress", innerHTML: "..."}, titleWrapper );
+		dojo.create( "div", { id: "remoteSectionTitle", "class":"layoutLeft", innerHTML: "Remotes" }, titleWrapper );
+		dojo.create( "div", { id: "remoteSectionProgress", "class": "layoutLeft", innerHTML: "..."}, titleWrapper );
 		dojo.create( "div", { id: "remoteSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
+
+		var parentId = "remoteSectionHeader";
+		
+		var slideout = 
+			'<div id="' + parentId + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
+				'<span id="' + parentId + 'slideOut" class="slide">' +
+				   '<span id="' + parentId + 'pageCommandParameters" class="parameters"></span>' +
+				   '<span id="' + parentId + 'pageCommandDismiss" class="parametersDismiss"></span>' +
+				'</span>' +
+			'</div>';
+	
+	
+		dojo.place( slideout, titleWrapper );
 		
 		this.registry.getService("orion.page.command").registerCommandContribution("eclipse.addRemote", 2000, "remoteSectionActionsArea");
 		this.registry.getService("orion.page.command").renderCommands(dojo.byId("remoteSectionActionsArea"), "dom", repository, this, "button");
@@ -852,7 +904,7 @@ exports.GitRepositoryExplorer = (function() {
 				dojo.style(dojo.byId("remoteSectionProgress"), "visibility", "hidden");
 				
 				if (remotes.length === 0){
-					dojo.byId("remoteHeader").innerHTML = "No Remotes";
+					dojo.byId("remoteSectionTitle").innerHTML = "No Remotes";
 					return;
 				}
 				
