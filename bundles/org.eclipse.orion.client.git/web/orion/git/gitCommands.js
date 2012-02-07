@@ -453,29 +453,43 @@ var exports = {};
 		});
 		commandService.addCommand(removeRemoteBranchCommand, "object");
 
+		var addRemoteParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:'), 
+		                                                               new mCommands.CommandParameter('url', 'url', 'Url:')], false);
+		
 		var addRemoteCommand = new mCommands.Command({
 			name: "New Remote",
 			tooltip: "Add a new remote to the repository",
 			imageClass: "core-sprite-add",
 			id: "eclipse.addRemote",
+			parameters: addRemoteParameters,
 			callback : function(data) {
 				var item = data.items;
-				var dialog = new orion.git.widgets.AddRemoteDialog({
-					func : function(remote, remoteURI){
-						var remoteLocation;
-						if (item.Type === "Clone") {
-							remoteLocation = item.RemoteLocation;
-						} else {
-							remoteLocation = item.Location;
+				
+				var createRemoteFunction = function(remoteLocation, name, url) {
+					serviceRegistry.getService("orion.git.provider").addRemote(remoteLocation, name, url).then(function() {
+						dojo.hitch(explorer, explorer.changedItem)(item);
+					}, displayErrorOnStatus);
+				};
+				
+				var remoteLocation;
+				if (item.Type === "Clone") {
+					remoteLocation = item.RemoteLocation;
+				} else {
+					remoteLocation = item.Location;
+				}
+				
+				if (data.parameters.valueFor("name") && data.parameters.valueFor("url") && !data.parameters.optionsRequested) {
+					createRemoteFunction(remoteLocation, data.parameters.valueFor("name"), data.parameters.valueFor("url"));
+				} else {
+					var dialog = new orion.git.widgets.AddRemoteDialog({
+						func : function(remote, remoteURI){
+							createRemoteFunction(remoteLocation, remote, remoteURI);
 						}
-						
-						serviceRegistry.getService("orion.git.provider").addRemote(remoteLocation, remote, remoteURI).then(function() {
-							dojo.hitch(explorer, explorer.changedItem)(item);
-						}, displayErrorOnStatus);
-					}
-				});
-				dialog.startup();
-				dialog.show();
+					});
+					dialog.startup();
+					dialog.show();
+					
+				}	
 			},
 			visibleWhen: function(item) {
 				return (item.GroupNode && item.Name === "Remotes") ||  (item.Type === "Clone" && explorer.parentId === "artifacts");
