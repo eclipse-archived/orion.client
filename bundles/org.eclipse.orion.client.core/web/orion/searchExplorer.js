@@ -122,6 +122,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 
 		onItem(this._listRoot);
 	};
 	
+	SearchResultModel.prototype.getTopIterationNodes = function(){
+		return this.indexedFileItems;
+	};
+	
 	SearchResultModel.prototype.buildResultModel = function(){
 		this.restoreGlobalStatus();
 		this.buildFlatModel();
@@ -1218,7 +1222,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 
 			that.reportStatus("");	
 		});
 	};
-
 	
 	SearchResultExplorer.prototype.replacePreview = function(replaceStr) {
 		this._state = "replace_preview";
@@ -1231,11 +1234,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 
 			parentDivID: this.getParentDivId()
 		});
 		this._uiFactory.buildUI();
-		// FIXME shouldn't know this id, should be passed in
-		var parentPane = dijit.byId("orion.searchResults");
-		if(parentPane.isLeftPaneOpen()){
-			parentPane.toggle();
-		}
 		
 		this.reportStatus("Preparing preview...");	
 		var that = this;
