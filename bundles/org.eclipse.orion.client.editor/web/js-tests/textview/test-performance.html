@@ -33,7 +33,7 @@
 		});
 	
 	window.onload = function() {
-		require(["orion/test","./test-performance"], function(test, performanceTest) {
+		require(["orion/test","./test-performance", 'dojo'], function(test, performanceTest, dojo) {
 			test.run(performanceTest);		
 		});
 	};
