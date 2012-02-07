@@ -38,14 +38,28 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 		this._registry = options.serviceRegistry;
 		this._toolbar = toolbar;
 		var navoutliner = this;
+		var reg = options.serviceRegistry;
 		
 		var addFaveURLCommand = new mCommands.Command({
 			name: "Add",
 			tooltip: "Add link as favorite",
 			imageClass: "core-sprite-add",
 			id: "eclipse.addExternalFave",
+			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("url", "text", 'URL:', '')], false),
 			callback: dojo.hitch(this, function(data) {
-				this.getUserURL(data.domNode.id);
+				if (data.parameters) {
+					var newText = data.parameters.valueFor('url');
+					if (newText) {
+						var favService = reg.getService("orion.core.favorite");
+						favService.hasFavorite(newText).then(function(result) {
+							if (!result) {
+								favService.addFavoriteUrl(newText);
+							} else {
+								reg.getService("orion.page.message").setMessage(newText + " is already a favorite.", 2000);
+							}
+						});
+					}
+				}
 			})
 		});		
 		var deleteFaveCommand = new mCommands.Command({
@@ -117,24 +131,6 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 		}
 	}
 	NavigationOutliner.prototype = /** @lends orion.navoutliner.NavigationOutliner.prototype */ {
-	
-		getUserURL: function(imageId) {
-			var reg = this._registry;
-			var spacer= dojo.byId("spacer");
-			mUtil.getUserText(imageId+"EditBox", spacer, true, "", 
-				function(newText) {
-					var favService = reg.getService("orion.core.favorite");
-					favService.hasFavorite(newText).then(function(result) {
-						if (!result) {
-							favService.addFavoriteUrl(newText);
-						} else {
-							reg.getService("orion.page.message").setMessage(newText + " is already a favorite.", 2000);
-						}
-					});
-				},
-				null, "Type or paste a URL"
-			);			
-		},
 		
 		editFavoriteName: function(fave, commandId, imageId, faveIndex) {
 			var reg = this._registry;

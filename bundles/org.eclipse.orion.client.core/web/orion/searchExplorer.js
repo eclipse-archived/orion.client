@@ -1107,7 +1107,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 
 
 	SearchResultExplorer.prototype.preview = function() {
 		var that = this;
-		this._commandService.openParameterCollector("tool", null, "pageActions", function(parentDiv) {
+		this._commandService.openParameterCollector("pageActions", function(parentDiv) {
 			// create replace text
 			var replaceStringDiv = document.createElement('input');
 			replaceStringDiv.type = "text";
@@ -1118,11 +1118,11 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 
 			replaceStringDiv.onkeydown = function(e){
 				if (e.keyCode === dojo.keys.ENTER) {
 					var replaceInputDiv = dojo.byId("globalSearchReplaceWith");
-					that._commandService.closeParameterCollector("tool");
+					that._commandService.closeParameterCollector();
 					return that.doPreview(replaceInputDiv.value);
 				}
 				if( e.keyCode === 27/*ESC*/ ){
-					that._commandService.closeParameterCollector("tool");
+					that._commandService.closeParameterCollector();
 					return false;
 				}
 			};
@@ -1150,7 +1150,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 
 			groupId : "orion.searchGroup",
 			callback : function() {
 				var replaceInputDiv = dojo.byId("globalSearchReplaceWith");
-				that._commandService.closeParameterCollector("tool");
+				that._commandService.closeParameterCollector();
 				return that.doPreview(replaceInputDiv.value);
 			}
 		});

@@ -343,13 +343,13 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		headingId = headingId || id+"heading";
 		commandId = commandId || id+"commands";
 		var paneHeadingFragment = 
-			'<div id="' + id + '">' +
+			'<div class="toolComposite" id="' + id + '">' +
 				'<div class="layoutLeft" id="' + id + '"><span style: "inline-block;" id="' + headingId + '">' + headingLabel + '</span></div>' +
 				'<div class="layoutRight sectionActions" id="' + commandId + '"></div>' +
-				'<div id="' + parent.id + 'slideContainer" class="layoutBlock slideContainer">' +
-					'<span id="' + parent.id + 'slideOut" class="leftSlide">' +
+				'<div id="' + parent.id + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
+					'<span id="' + parent.id + 'slideOut" class="slide">' +
 						'<span id="' + parent.id + 'pageCommandParameters" class="parameters"></span>' +
-						'<span id="' + parent.id + 'pageCommandDismiss" class="parameters"></span>' +
+						'<span id="' + parent.id + 'pageCommandDismiss" class="parametersDismiss"></span>' +
 					'</span>' +
 				'</div>'+
 			'</div>';
