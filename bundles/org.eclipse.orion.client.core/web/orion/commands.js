@@ -941,15 +941,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					dojo.addClass(element, "commandMissingImageButton commandButton");
 				} else {
 					image = addImageToElement(this, element, name);
-				}
-				dojo.connect(element, "onclick", this, function() {
-					// collect parameters in advance if specified
-					if (this.parameters && context.collectsParameters()) {
-						context.commandService._collectParameters(context);
-					} else if (this.callback) {
-						this.callback.call(context.handler, context);
+					// ensure there is accessible text describing this image
+					var label = this.name || this.tooltip;
+					if (label) {
+						dojo.attr(element, "aria-label", label);
 					}
-				});
+				}
+				this._hookCallback(element, context);
 				var overClass = image ? "commandImageOver" : "commandButtonOver";
 				this._setupActivateVisuals(element, element, activeCommandClass, inactiveCommandClass, overClass);			
 
@@ -990,14 +988,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				}
 			} else {
 				element = dojo.create("span", {tabindex: "0", role: "button"});
-				dojo.connect(element, "onclick", this, function() {
-					// collect parameters in advance if specified
-					if (this.parameters && context.collectsParameters()) {
-						context.commandService._collectParameters(context);
-					} else if (this.callback) {
-						this.callback.call(context.handler, context);
-					}
-				});
+				this._hookCallback(element, context);
 				var overClass;
 				if (this.name) {
 					dojo.place(window.document.createTextNode(this.name), element, "last");
@@ -1075,6 +1066,31 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			}
 			context.domNode = menuitem.domNode;
 
+		},
+		
+		/*
+		 * stateless helper
+		 */
+		_hookCallback: function(domNode, context) {
+			dojo.connect(domNode, "onclick", this, function() {
+				// collect parameters in advance if specified
+				if (this.parameters && context.collectsParameters()) {
+					context.commandService._collectParameters(context);
+				} else if (this.callback) {
+					this.callback.call(context.handler, context);
+				}
+			});
+			// onClick events do not register for spans when using the keyboard
+			dojo.connect(domNode, "onkeypress", this, function(e) {
+				if (e.keyCode === dojo.keys.ENTER || e.keyCode === dojo.keys.SPACE) {						
+				// collect parameters in advance if specified						
+					if (this.parameters && context.collectsParameters()) {							
+						context.commandService._collectParameters(context);						
+					} else if (this.callback) {
+						this.callback.call(context.handler, context);						
+					}					
+				}				
+			});
 		},
 		
 		/*
