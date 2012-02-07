@@ -137,6 +137,7 @@ a:hover {
 
 .pageActions {
 	font: 9pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
+	min-height: 30px;
 }
 
 .sectionActions {
@@ -145,6 +146,7 @@ a:hover {
 
 .pageNavigationActions {
 	text-align: right;
+	min-height: 30px;
 }
 
 .parameters {
@@ -414,20 +416,51 @@ a:hover {
 }
 
 .progressInfo {
-	background-color:#f1f6fe;
+	background-color: #e4f6fb;
+	border: 1px solid #b8dae6;
 }
 
 .progressWarning {
-	background-color: #fcf8dc;
+	background-color: #fbf3e4;
+	border: 1px solid #e6d7b8;
 }
 
 .progressError {
-	background-color: #fff3fb;
+	background-color: #fbf4ec;
+	border: 1px solid #e6b8c7;
 }
 
 .progressNormal {
-	background-color: transparent;
+	background-color: #f1fae4;
+	border: 1px solid #1a863a;
 }
+
+.progressErrorImage {
+	background-position: 0 0; 
+	width: 16px; 
+	height: 16px; 
+	background: url(../images/error.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle;
+} 
+
+.progressErrorWarning {
+	background-position: 0 0; 
+	width: 16px; 
+	height: 16px; 
+	background: url(../images/warning.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle;
+} 
+
+.progressInfoImage {
+	background-position: 0 0; 
+	width: 16px; 
+	height: 16px; 
+	background: url(../images/info.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle;
+} 
 
 .progressPane {
 	vertical-align: bottom;
@@ -461,14 +494,14 @@ a:hover {
 
 .toolbar {
 	vertical-align: middle;
-	min-height: 30px;
+	min-height: 32px;
 	width: 100%;
 	color: #808080;
 }
 
 .auxToolbar {
     background: #f8f8f8;
- 	min-height: 30px;
+ 	min-height: 32px;
 	width: 100%;
 	color: #808080;
 }
@@ -547,10 +580,16 @@ a:hover {
 	width: 97%;
 	clear: both;
 	float: left;
-	border: 1px solid #ebebeb; 
-	border-radius: 3px;
-	margin: 4px;
+	border-radius: 2px;
+	margin-left: 4px;
+	margin-right: 4px;
+	margin: 2px;
 	display: none;
+}
+
+.slideParameters {
+	border: 1px solid #808080;
+	background-color: #d7d7d7;
 }
 
 .slideContainerActive {

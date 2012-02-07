@@ -118,31 +118,27 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				//it is not JSON, just continue;
 			}
 			var msg = status.Message || status;
-			var src = require.toUrl("images/info.gif");
+			var imageClass = "progressInfoImage";
 			var extraClass = "progressInfo";
 			var removedClasses = "progressWarning progressError progressNormal";
 			var alt = "info";
 			if (status.Severity) {
 				switch (status.Severity) {
 				case "Warning":
-					src = require.toUrl("images/warning.gif");
+					imageClass = "progressWarningImage";
 					alt = "warning";
 					extraClass="progressWarning";
 					removedClasses = "progressInfo progressError progressNormal";
 					break;
 				case "Error":
-					src = require.toUrl("images/error.gif");
+					imageClass = "progressErrorImage"
 					alt = "error";
 					extraClass="progressError";
 					removedClasses = "progressWarning progressInfo progressNormal";
 					break;
 				}
 			}
-			var image = new Image();
-			image.alt = alt;
-			image.title = "Press to clear message";
-			image.name = alt;
-			image.src = src;
+			var image = dojo.create("span", {"class": imageClass});
 			dojo.style(image, "opacity", "0.7");
 			dojo.connect(image, "onmouseover", this, function() {
 				dojo.style(image, "opacity", "1");

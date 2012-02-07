@@ -68,7 +68,7 @@ define(['require'],
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
 				'<div class="layoutLeft" id="notifications"></div>' +
 		'</div>' +
-		'<div id="parameterArea" class="layoutBlock slideContainer">' +
+		'<div id="parameterArea" class="layoutBlock slideParameters slideContainer">' +
 			'<span id="pageParameterArea" class="leftSlide">' +
 				'<span id="pageCommandParameters" class="parameters"></span>' +
 				'<span id="pageCommandDismiss" class="parameters"></span>' +
