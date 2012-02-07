@@ -370,22 +370,29 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				
-				exports.getNewItemName(item, explorer, false, data.domNode.id, "Branch name", function(name) {
-					if (!name && name == "") {
-						return;
-					}
-					
-					var branchLocation;
-					if (item.Type === "Clone") {
-						branchLocation = item.BranchLocation;
-					} else {
-						branchLocation = item.Location;
-					}
-					
+				var createBranchFunction = function(branchLocation, name) {
 					serviceRegistry.getService("orion.git.provider").addBranch(branchLocation, name).then(function() {
 						dojo.hitch(explorer, explorer.changedItem)(item);
 					}, displayErrorOnStatus);
-				});
+				};
+				
+				var branchLocation;
+				if (item.Type === "Clone") {
+					branchLocation = item.BranchLocation;
+				} else {
+					branchLocation = item.Location;
+				}
+				
+				if (data.parameters.valueFor("name") && !data.parameters.optionsRequested) {
+					createBranchFunction(branchLocation, data.parameters.valueFor("name"));
+				} else {
+					exports.getNewItemName(item, explorer, false, data.domNode.id, "Branch name", function(name) {
+						if (!name && name == "") {
+							return;
+						}		
+						createBranchFunction(branchLocation, name);
+					});
+				}
 			},
 			visibleWhen: function(item) {
 				return (item.GroupNode && item.Name === "Branches") || (item.Type === "Clone" && explorer.parentId === "artifacts");
