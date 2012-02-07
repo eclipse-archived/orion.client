@@ -161,6 +161,7 @@ function(mSetup, mTestPerformance) {
 	bTest.onclick = test;
 	bPerform.onclick = performanceTest;
 	var prefix = "test";
+	mTestPerformance.noDojo = true;
 	for (var property in mTestPerformance) {
 		if (property.indexOf(prefix) === 0) {
 			var option = document.createElement("OPTION");
