@@ -31,16 +31,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog'], functi
 			var tableNode = dojo.create( "div", {"style":"padding:10px; max-width:480px"}, this.containerNode);
 			
 			var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
-			link = dojo.create("a", {"class": "gitCommitMessage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode);
+			link = dojo.create("a", {"class": "gitMainDescription", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode);
 			dojo.place(document.createTextNode(commitMessage0), link);
 
 			dojo.create( "div", {"style":"padding-top:15px"}, tableNode );
-			dojo.create( "span", {"class": "gitCommitDescription", innerHTML: " commit: " + commit.Name}, tableNode );
+			dojo.create( "span", {"class": "gitSecondaryDescription", innerHTML: " commit: " + commit.Name}, tableNode );
 			if (commit.Parents && commit.Parents.length > 0){
 				dojo.create( "div", null, tableNode );
 				
 				dojo.place(document.createTextNode("parent: "), tableNode);
-				link = dojo.create("a", {"class": "gitCommitDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, tableNode);
+				link = dojo.create("a", {"class": "gitSecondaryDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, tableNode);
 				dojo.place(document.createTextNode(commit.Parents[0].Name), link);
 			}
 
@@ -56,11 +56,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog'], functi
 				dojo.place(image, authorImage, "first");
 			}
 			
-			dojo.create( "span", { "class":"plugin-description", 
+			dojo.create( "span", { "class":"gitSecondaryDescription", 
 				innerHTML: " authored by " + commit.AuthorName + " (" + commit.AuthorEmail
 				+ ") on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, tableNode );
 			dojo.create( "div", null, tableNode );
-			dojo.create( "span", { "class":"plugin-description", 
+			dojo.create( "span", { "class":"gitSecondaryDescription", 
 				innerHTML: "committed by " + commit.CommitterName  + " (" + commit.CommitterEmail + ")"}, tableNode );
 		},
 		

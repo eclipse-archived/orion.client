@@ -139,7 +139,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			dojo.empty( tableNode );
 			var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
 			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-modification"}, titleWrapper );
-			dojo.create( "div", { id: "Plugins", "class":"pluginTitle", innerHTML: (commit ? "Commit Details" :  "No Commits") }, titleWrapper );
+			dojo.create( "div", { id: "Plugins", "class":"sectionTitle", innerHTML: (commit ? "Commit Details" :  "No Commits") }, titleWrapper );
 			
 			if (!commit)
 				return;
@@ -167,7 +167,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			};
 			
 			var div = dojo.create( "div", null, detailsView );
-			dojo.create( "span", { "class":"plugin-title", innerHTML: commitMessage0 + (cut ? "..." : "") }, div );
+			dojo.create( "span", { "class":"gitMainDescription", innerHTML: commitMessage0 + (cut ? "..." : "") }, div );
 			
 			dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
 			
@@ -179,12 +179,12 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 				dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
 			}
 						
-			dojo.create( "span", { "class":"plugin-description", innerHTML: " commit: " + commit.Name}, detailsView );
+			dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: " commit: " + commit.Name}, detailsView );
 			
 			if (commit.Parents && commit.Parents.length > 0){
 				dojo.create( "div", null, detailsView );
 				
-				var parentMessage = dojo.create( "span", { "class":"plugin-description"}, detailsView );
+				var parentMessage = dojo.create( "span", { "class":"gitSecondaryDescription"}, detailsView );
 				
 				dojo.place(document.createTextNode("parent: "), parentMessage);
 				link = dojo.create("a", {className: "pnavlinkonpage", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, parentMessage);
@@ -203,12 +203,12 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 				dojo.place(image, authorImage, "first");
 			}
 			
-			dojo.create( "span", { "class":"plugin-description", 
+			dojo.create( "span", { "class":"gitSecondaryDescription", 
 				innerHTML: " authored by " + commit.AuthorName + " (" + commit.AuthorEmail
 				+ ") on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView );
 			
 			dojo.create( "div", null, detailsView );
-			dojo.create( "span", { "class":"plugin-description", 
+			dojo.create( "span", { "class":"gitSecondaryDescription", 
 				innerHTML: "committed by " + commit.CommitterName  + " (" + commit.CommitterEmail + ")"}, detailsView );
 		};
 		
@@ -219,7 +219,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			
 			var tableNode = dojo.byId( 'table' );
 			var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );
-			var item = { id: "diffHeader", "class":"pluginTitle", innerHTML: "Diffs" };
+			var item = { id: "diffHeader", "class":"sectionTitle", innerHTML: "Diffs" };
 			dojo.create( "div", item, titleWrapper );
 			
 			var content =
@@ -248,7 +248,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 				diffPath = diff.NewPath;
 			}
 			
-			var title = dojo.create( "span", { "class":"plugin-title", innerHTML: diffPath + " (" + diff.ChangeType + ") " }, detailsView );
+			var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: diffPath + " (" + diff.ChangeType + ") " }, detailsView );
 			
 			var description = dojo.create( "div", { id:"diff_" + index , "style":"height: 90%"}, detailsView );
 			
@@ -274,7 +274,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			var tableNode = dojo.byId( 'table' );
 			var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );
 			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-tag" }, titleWrapper );
-			dojo.create( "div", { id: "Plugins", "class":"pluginTitle", innerHTML: ((tags && tags.length > 0) ? "Tags:" : "No Tags") }, titleWrapper );
+			dojo.create( "div", { id: "Plugins", "class":"sectionTitle", innerHTML: ((tags && tags.length > 0) ? "Tags:" : "No Tags") }, titleWrapper );
 			dojo.create( "div", { id: "tagSectionActionsArea", "class":"additions-light"}, titleWrapper );
 			
 			this.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.addTag", 2000, "tagSectionActionsArea");
@@ -304,7 +304,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 //			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-tag" }, horizontalBox );
 
 			var detailsView = dojo.create( "div", {"class":"stretch"}, horizontalBox );
-			var title = dojo.create( "span", { "class":"plugin-title", innerHTML: tag.Name }, detailsView );
+			var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: tag.Name }, detailsView );
 
 			dojo.create( "div", null, horizontalBox );
 
