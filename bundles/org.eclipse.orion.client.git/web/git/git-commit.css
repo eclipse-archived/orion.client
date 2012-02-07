@@ -29,15 +29,14 @@
 	vertical-align: text-top;
 	width: 16px;
 	padding-right: 10px;
-	margin-top: 9px;
 }
 
 .git-author-icon {
 	float: left;
 	position: relative;
-	height: 35px;
+	height: 30px;
 	vertical-align: text-top;
-	width: 35px;
+	width: 30px;
 	border: 1px solid lightGrey;
 	padding: 2px;
 	margin-right: 18px;
@@ -68,8 +67,8 @@
 }
 
 .git-table {
+	padding-top: 10px;
 	padding-left: 10px;
-    padding-top: 10px;
 }
 
 .tag-description {
@@ -88,13 +87,12 @@
 	border-bottom: 1px solid #e6e6e6;
 }
 
-.pluginwrapper {
+.sectionWrapper {
+	margin-top: 15px;
+	padding-top: 5px;
+	padding-left: 5px;
     border: 1px solid #e6e6e6;
     background: #f8f8f8;
-    padding-bottom: 35px;
-    padding-top: 0px;
-    padding-left: 10px;
-    margin-top: 20px;
 }
 
 .stretch {
@@ -121,6 +119,11 @@
     margin-left: 2px;
     text-decoration: blink;
     margin-top: 9px;
+}
+
+.plugin-settings {
+    overflow-x: hidden;
+    width: 100%;
 }
 
 pre {
