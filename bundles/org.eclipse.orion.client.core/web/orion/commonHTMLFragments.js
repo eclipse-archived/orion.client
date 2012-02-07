@@ -66,7 +66,7 @@ define(['require'],
 		'<div class="layoutRight" id="statusPane"></div>' +
 		'<div class="layoutRight pageActions" id="pageNavigationActions"></div>' +
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
-				'<div class="layoutLeft" id="notifications"></div>' +
+				'<div class="layoutLeft" id="notifications" aria-live="assertive" aria-atomic="true"></div>' +
 				// still need to hook it up and get correct icon  '<div class="layoutRight core-sprite-delete imageSprite" id="close"></div>' +
 		'</div>' +
 		'<div id="parameterArea" class="layoutBlock slideParameters slideContainer">' +
