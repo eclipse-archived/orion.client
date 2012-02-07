@@ -941,6 +941,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					dojo.addClass(element, "commandMissingImageButton commandButton");
 				} else {
 					image = addImageToElement(this, element, name);
+					// ensure there is accessible text describing this image
+					var label = this.name || this.tooltip;
+					if (label) {
+						dojo.attr(element, "aria-label", label);
+					}
 				}
 				this._hookCallback(element, context);
 				var overClass = image ? "commandImageOver" : "commandButtonOver";
