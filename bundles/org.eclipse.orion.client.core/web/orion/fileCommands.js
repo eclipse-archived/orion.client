@@ -78,7 +78,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		var service = registry.getService("orion.page.command");
 		// close any open slideouts because if we are retargeting the command
 		if (item.Location !== lastItemLoaded.Location) {
-			service.closeParameterCollector("button");
+			service.closeParameterCollector();
 			lastItemLoaded.Location = item.Location;
 		}
 

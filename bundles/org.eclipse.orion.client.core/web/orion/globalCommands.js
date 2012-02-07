@@ -147,7 +147,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 	 */
 	function generateDomCommandsInBanner(commandService, handler, item, navHandler, navItem, ignoreForNow, clientManagesPageNav) {
 		// close any open slideouts because we are retargeting
-		commandService.closeParameterCollector("button");
+		commandService.closeParameterCollector();
 		var toolbar = dojo.byId("pageActions");
 		if (toolbar) {	
 			dojo.empty(toolbar);
@@ -320,14 +320,14 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		var toolbar = dojo.byId("pageToolbar");
 		if (toolbar) {
 			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only");
+			dojo.addClass(toolbar, "toolComposite");
 		} else {
-			toolbar = dojo.create ("div", {id: "pageToolbar", "class": "toolbar layoutBlock"}, "titleArea", "after");
+			toolbar = dojo.create ("div", {id: "pageToolbar", "class": "toolbar toolComposite layoutBlock"}, "titleArea", "after");
 			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only");
 		}
 		
-		// Set up a custom parameter collector that slides out of the toolbar.
-		commandService.setParameterCollector("button", new mParameterCollectors.CommandParameterCollector(toolbar));
-		commandService.setParameterCollector("tool", new mParameterCollectors.CommandParameterCollector(toolbar));
+		// Set up a custom parameter collector that slides out of adjacent tool areas.
+		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector());
 
 		
 		// place an empty div for keyAssist

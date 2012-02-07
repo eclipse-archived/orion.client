@@ -67,15 +67,12 @@ define(['require'],
 		'<div class="layoutRight pageActions" id="pageNavigationActions"></div>' +
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
 				'<div class="layoutLeft" id="notifications"></div>' +
+				// still need to hook it up and get correct icon  '<div class="layoutRight core-sprite-delete imageSprite" id="close"></div>' +
 		'</div>' +
 		'<div id="parameterArea" class="layoutBlock slideParameters slideContainer">' +
-			'<span id="pageParameterArea" class="leftSlide">' +
+			'<span id="pageParameterArea" class="slide">' +
 				'<span id="pageCommandParameters" class="parameters"></span>' +
-				'<span id="pageCommandDismiss" class="parameters"></span>' +
-			'</span>' +
-			'<span id="pageNavigationParameterArea" class="rightSlide">' +
-				'<span id="pageNavigationCommandParameters" class="parameters"></span>' +
-				'<span id="pageNavigationDismiss" class="parameters"></span>' +
+				'<span id="pageCommandDismiss" class="parametersDismiss"></span>' +
 			'</span>' +
 		'</div>';
 	

@@ -140,6 +140,10 @@ a:hover {
 	min-height: 30px;
 }
 
+/* marker for finding section and main toolbars */
+.toolComposite {
+}
+
 .sectionActions {
 	font: 8pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
 }
@@ -154,10 +158,14 @@ a:hover {
 	vertical-align: middle;
 }
 
-.dismiss {
-    border: 1px solid transparent;
+.parametersDismiss {
+	color: #404040;
+	vertical-align: middle;
 }
 
+.dismiss {
+	border: 1px solid transparent;
+}
 .dismiss:hover {
 	background-color: #ffeecc;
     border: 1px solid #ffcc66;
@@ -596,7 +604,7 @@ a:hover {
 	display: block;
 }
 
-.leftSlide {
+.slide {
 	text-align: left;
 	vertical-align: middle;
 	float: left;
@@ -613,27 +621,13 @@ a:hover {
 	border: 1px solid #9a9a9a;
 }
 
-.leftSlideActive {
-	padding: 8px;
-	opacity: 1;
-	height: auto;
+/* marker used by parameter collectors to identify commands */
+.commandMarker {
 }
 
-.rightSlide {
-	vertical-align: middle;
-	float: right;
-	height: 0;
-	width: auto;
-	opacity: 0;
- 	transition: opacity .5s ease-out;
-	-o-transition: opacity .5s ease-out;
-	-moz-transition: opacity .5s ease-out;
-	-webkit-transition: opacity .5s ease-out;
-}
-
-.rightSlideActive {
-	opacity: 1;
+.slideActive {
 	padding: 8px;
+	opacity: 1;
 	height: auto;
 }
 
