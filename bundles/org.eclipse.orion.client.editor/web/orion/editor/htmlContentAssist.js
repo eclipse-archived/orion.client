@@ -11,6 +11,8 @@
  *******************************************************************************/
 /*global define */
 
+define("orion/editor/htmlContentAssist", [], function() {
+
 /**
  * @name orion.contentAssist.HTMLContentAssistProvider
  * @class Provides content assist for HTML.
@@ -161,3 +163,9 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 		return proposals;
 	}
 };
+
+return {
+	HTMLContentAssistProvider: HTMLContentAssistProvider
+};
+
+});
