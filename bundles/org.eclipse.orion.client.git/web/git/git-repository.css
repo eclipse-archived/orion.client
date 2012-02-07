@@ -115,13 +115,7 @@
 }
 
 .sectionProgress {
-    color: #666666;
-    float: left;
-    font-size: 1.1em;
-    font-weight: bold;
-    margin-left: 2px;
     text-decoration: blink;
-    margin-top: 9px;
 }
 
 .plugin-settings {
