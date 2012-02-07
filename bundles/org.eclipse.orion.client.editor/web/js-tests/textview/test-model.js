@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define defineGlobal */
+/*global define */
 
 define(["orion/assert", 'orion/textview/textModel', 'orion/textview/annotations'], function(assert, mTextModel) {
 
