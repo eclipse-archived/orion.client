@@ -119,7 +119,7 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 		var tableNode = dojo.create( "div", {"style":"padding:10px; max-width:480px"}, parentNode);
 		
 		var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
-		var link = dojo.create("a", {"class": "gitCommitMessage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode);
+		var link = dojo.create("a", {"class": "gitMainDescription", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode);
 		dojo.place(document.createTextNode(commitMessage0), link);
 		
 		dojo.connect(link, "onclick", link, dojo.hitch(this, function() {
@@ -127,12 +127,12 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 		}));
 
 		dojo.create( "div", {"style":"padding-top:15px"}, tableNode );
-		dojo.create( "span", {"class": "gitCommitDescription", innerHTML: " commit: " + commit.Name}, tableNode );
+		dojo.create( "span", {"class": "gitSecondaryDescription", innerHTML: " commit: " + commit.Name}, tableNode );
 		if (commit.Parents && commit.Parents.length > 0){
 			dojo.create( "div", null, tableNode );
 			
 			dojo.place(document.createTextNode("parent: "), tableNode);
-			var parentLink = dojo.create("a", {"class": "gitCommitDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, tableNode);
+			var parentLink = dojo.create("a", {"class": "gitSecondaryDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, tableNode);
 			dojo.place(document.createTextNode(commit.Parents[0].Name), parentLink);
 			
 			dojo.connect(parentLink, "onclick", parentLink, dojo.hitch(this, function() {
@@ -152,11 +152,11 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 			dojo.place(image, authorImage, "first");
 		}
 		
-		dojo.create( "span", { "class":"plugin-description", 
+		dojo.create( "span", { "class":"gitSecondaryDescription", 
 			innerHTML: " authored by " + commit.AuthorName + " (" + commit.AuthorEmail
 			+ ") on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, tableNode );
 		dojo.create( "div", null, tableNode );
-		dojo.create( "span", { "class":"plugin-description", 
+		dojo.create( "span", { "class":"gitSecondaryDescription", 
 			innerHTML: "committed by " + commit.CommitterName  + " (" + commit.CommitterEmail + ")"}, tableNode );
 	},
 	
