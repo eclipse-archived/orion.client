@@ -1290,29 +1290,25 @@ var exports = {};
 			parameters: tagNameParameters,
 			callback: function(data) {
 				var item = data.items;
-				var clientDeferred = new dojo.Deferred();
-				exports.getNewItemName(item, explorer, false, data.domNode.id, "Tag name", function(tagName){
-					if(!tagName || tagName === ""){
-						return;
-					}
-					serviceRegistry.getService("orion.git.provider").doAddTag(item.Location, tagName).then(
-						function(jsonData, secondArg) {
-							dojo.hitch(explorer, explorer.changedItem)(item);
-							var trId = jsonData.Location.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
-							var tr = dojo.byId(trId);
-							if(tr)
-								dojo.place(document.createTextNode(tagName), dojo.create("p", {style: "margin: 5px"}, tr.children[5] /* tags column */, "last"), "only");
-						},
-						function (error){
-							var display = [];
-							display.Severity = "Error";
-							display.HTML = false;
-							var resp = JSON.parse(error.responseText);
-							display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
-							serviceRegistry.getService("orion.page.message").setProgressResult(display);
-						});
-					return clientDeferred;
-				}, 3);
+				
+				var createTagFunction = function(commitLocation, tagName) {						
+					serviceRegistry.getService("orion.git.provider").doAddTag(commitLocation, tagName).then(function() {
+						dojo.hitch(explorer, explorer.changedItem)(item);
+					}, displayErrorOnStatus);
+				};
+				
+				var commitLocation = item.Location;
+				
+				if (data.parameters.valueFor("name") && !data.parameters.optionsRequested) {
+					createTagFunction(commitLocation, data.parameters.valueFor("name"));
+				} else {
+					exports.getNewItemName(item, explorer, false, data.domNode.id, "Tag name", function(name) {
+						if (!name && name == "") {
+							return;
+						}		
+						createTagFunction(commitLocation, name);
+					});
+				}
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit";

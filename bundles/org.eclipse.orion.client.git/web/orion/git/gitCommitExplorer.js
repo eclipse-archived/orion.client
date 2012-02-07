@@ -137,10 +137,13 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			
 			var tableNode = dojo.byId( 'table' );	
 			dojo.empty( tableNode );
-			var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );	
-			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-modification"}, titleWrapper );
-			dojo.create( "div", { id: "Plugins", "class":"sectionTitle", innerHTML: (commit ? "Commit Details" :  "No Commits") }, titleWrapper );
 			
+			var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"commitSectionHeader"}, tableNode );
+			
+			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-modification" }, titleWrapper );
+			dojo.create( "div", { id: "commitSectionTitle", "class":"layoutLeft", innerHTML: (commit ? "Commit Details" :  "No Commits") }, titleWrapper );
+			dojo.create( "div", { id: "commitSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
+
 			if (!commit)
 				return;
 			
@@ -218,10 +221,12 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			var diffs = commit.Diffs;
 			
 			var tableNode = dojo.byId( 'table' );
-			var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );
-			var item = { id: "diffHeader", "class":"sectionTitle", innerHTML: "Diffs" };
-			dojo.create( "div", item, titleWrapper );
+
+			var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"diffSectionHeader"}, tableNode );
 			
+			dojo.create( "div", { id: "diffSectionTitle", "class":"layoutLeft", innerHTML: "Diffs" }, titleWrapper );
+			dojo.create( "div", { id: "diffSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
+						
 			var content =
 				'<div class="git-table">' +
 					'<div class="plugin-settings">' +
@@ -272,10 +277,25 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			var tags = commit.Tags;
 			
 			var tableNode = dojo.byId( 'table' );
-			var titleWrapper = dojo.create( "div", {"class":"pluginwrapper"}, tableNode );
+
+			var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"tagSectionHeader"}, tableNode );
+			
 			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-tag" }, titleWrapper );
-			dojo.create( "div", { id: "Plugins", "class":"sectionTitle", innerHTML: ((tags && tags.length > 0) ? "Tags:" : "No Tags") }, titleWrapper );
-			dojo.create( "div", { id: "tagSectionActionsArea", "class":"additions-light"}, titleWrapper );
+			dojo.create( "div", { id: "tagSectionTitle", "class":"layoutLeft", innerHTML: ((tags && tags.length > 0) ? "Tags:" : "No Tags") }, titleWrapper );
+			dojo.create( "div", { id: "tagSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
+
+			var parentId = "tagSectionHeader";
+			
+			var slideout = 
+				'<div id="' + parentId + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
+					'<span id="' + parentId + 'slideOut" class="slide">' +
+					   '<span id="' + parentId + 'pageCommandParameters" class="parameters"></span>' +
+					   '<span id="' + parentId + 'pageCommandDismiss" class="parametersDismiss"></span>' +
+					'</span>' +
+				'</div>';
+		
+		
+			dojo.place( slideout, titleWrapper );
 			
 			this.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.addTag", 2000, "tagSectionActionsArea");
 			this.registry.getService("orion.page.command").renderCommands(dojo.byId("tagSectionActionsArea"), "dom", commit, this, "button", false);
