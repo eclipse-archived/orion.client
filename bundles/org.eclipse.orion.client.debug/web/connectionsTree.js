@@ -11,7 +11,6 @@
  *******************************************************************************/
 
 /*global define*/
-/*jslint browser:true*/
 
 define(['require', 'dojo'], function(require, dojo) {
 
@@ -26,24 +25,27 @@ define(['require', 'dojo'], function(require, dojo) {
 		DebugConnectionTreeModel.prototype = /** @lends orion.debug.DebugConnectionTreeModel.prototype */{
 			addConnection: function(connection) {
 				/* first check for a duplicate */
-				var port = connection.getPort();
+				var id = connection.getId();
 				for (var i = 0; i < this._root.length; i++) {
 					var current = this._root[i];
-					if (current.getPort() === port) {
+					if (current.getId() === id) {
 						return false;
 					}
 				}
 				this._root.push(connection);
 				return true;
 			},
-			getRoot: function(/**function*/ onItem) {
-				onItem(this);
+			clear: function() {
+				this._root = [];
 			},
 			getChildren: function(/**dojo.data.Item*/ parentItem, /**Function(items)*/ onComplete) {
 				onComplete(parentItem === this ? this._root : parentItem.getChildren());
 			},
 			getId: function(/**dojo.data.Item|String*/ item) {
 				return (item === this || item === this._id) ? this._id : item.toString();
+			},
+			getRoot: function(/**function*/ onItem) {
+				onItem(this);
 			},
 			removeConnection: function(connection) {
 				for (var i = 0; i < this._root.length; i++) {
@@ -79,7 +81,7 @@ define(['require', 'dojo'], function(require, dojo) {
 						{id: tableRow.id + "actionswrapper"},
 						actionColumn,
 						"only");
-					this._commandService.renderCommands(actionsWrapper, "object", item, {}, "tool");	
+					this._commandService.renderCommands(actionsWrapper, "object", item, {}, "button");	
 				}
 				dojo.place(labelColumn, tableRow, "last");
 				dojo.place(actionColumn, tableRow, "last");
