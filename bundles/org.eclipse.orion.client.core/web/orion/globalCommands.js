@@ -14,7 +14,7 @@
 
 define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
 	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/favorites',
-	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog'], 
+	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu'], 
         function(require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mFavorites){
 
 	/**
@@ -34,6 +34,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 	var notifyAuthenticationSite = qualifyURL(require.toUrl('auth/NotifyAuthentication.html'));
 	var authRendered = {};
 	var loginDialog = new orion.widgets.LoginDialog();
+	var userMenu = new orion.widgets.UserMenu();
 	
 	function getLabel(authService, serviceReference){
 		if(authService.getLabel){
@@ -76,7 +77,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			var menuButton = new dijit.form.DropDownButton({
 				id: "logins",
 				label: "Security",
-				dropDown: loginDialog,
+				dropDown: userMenu,
 				title: "Login statuses"
 		        });
 		        dojo.addClass(menuButton.domNode, "commandImage");
@@ -92,9 +93,11 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 					authenticationIds.push(key);
 					authService.getUser().then(function(jsonData){
 						loginDialog.addUserItem(key, authService, label, jsonData);
+						userMenu.addUserItem(key, authService, label, jsonData);
 					}, 
 					function(errorData){
 						loginDialog.addUserItem(key, authService, label);
+						userMenu.addUserItem(key, authService, label, jsonData);
 					});
 					window.addEventListener("storage", function(e){
 						if(authRendered[key] === localStorage.getItem(key)){
@@ -105,9 +108,11 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 						
 						authService.getUser().then(function(jsonData){
 							loginDialog.addUserItem(key, authService, label, jsonData);
+							userMenu.addUserItem(key, authService, label, jsonData);
 						}, 
 						function(errorData){
 							loginDialog.addUserItem(key, authService, label);
+							userMenu.addUserItem(key, authService, label);
 						});				
 					}, false);
 				});							
