@@ -90,8 +90,10 @@ exports.ExplorerNavHandler = (function() {
 			if(!options){
 				return;
 			}
-			this.postIterateFunc = options.postIterateFunc;//optional callback providing that if a model item is expanded even if it has children. Default is true if it has children.
-			this.postSelectFunc = options.isExpandable;//optional  callback providing that if a model item is expandable.Default is true .
+			this.preventDefaultFunc = options.preventDefaultFunc;//optional callback. If this function returns true then the default behavior of all key press will stop at this time.
+			                                                     //The key event is passed to preventDefaultFunc. It can implement its own behavior based o nteh key event.
+			this.postDefaultFunc = options.postDefaultFunc;//optional callback. If this function provides addtional behaviors after the default behavior.
+			                                               //Some explorers may want to do something else whne the cursor is changed, etc.
 		},
 		
 		isExpandable: function(model){
@@ -249,6 +251,9 @@ exports.ExplorerNavHandler = (function() {
 			}
 			if(!this._modelIterator.topLevel(curModel)){
 				this.cursorOn(curModel.parent);
+			//The cursor is now on a top level item which is collapsed. We need to ask the explorer is it wants to scope up.	
+			} else if (this.explorer.scopeUp && typeof this.explorer.scopeUp === "function"){
+				this.explorer.scopeUp();
 			}
 		},
 		

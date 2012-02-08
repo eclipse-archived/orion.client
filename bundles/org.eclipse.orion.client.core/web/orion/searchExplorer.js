@@ -554,10 +554,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/treeModelIterator', 
 						"<b>" +  this.explorer._replaceStr + "</b>" + " for files " + "<b>" + startNumber + "-"  + endNumber + "</b>" + " of " + this.explorer.totalNumber;
 					}
 				}
-			} else {
-				var headerStr =" Matches to be replaced by \"" + this.explorer._replaceStr + "\"";
-				var th = dojo.create("th", {});
-				return dojo.create("h2", {innerHTML: headerStr});
 			}
 			return title;
 		} else if(col_no === 2){
