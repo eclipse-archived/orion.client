@@ -1825,24 +1825,25 @@ var exports = {};
 			imageClass: "git-sprite-apply_patch",
 			spriteClass: "gitCommandSprite",
 			callback: function(data) {
-				var commitName = prompt("Type the commit name");
-				if (commitName) {
-					if (data.items.Type === "Clone") {
-						window.location = "/git/git-commit.html#/gitapi/commit/" + commitName + data.items.ContentLocation + "?page=1&pageSize=1";
-					} else {
-						var gitService = serviceRegistry.getService("orion.git.provider");
-						gitService.getGitClone(data.items.CloneLocation).then(
-							function(jsonData){
-								var repository = jsonData.Children[0];
-								window.location = "/git/git-commit.html#/gitapi/commit/" + commitName + repository.ContentLocation + "?page=1&pageSize=1";
-							},
-							this.displayErrorOnStatus
-						);
-					}
+				var repository;
+				if (data.items.Type === "Clone") {
+					repository = data.items;
+					new orion.git.widgets.OpenCommitDialog(
+						{repository: repository, serviceRegistry: serviceRegistry}
+					).show();
+				} else {
+					var gitService = serviceRegistry.getService("orion.git.provider");
+					gitService.getGitClone(data.items.CloneLocation).then(
+						function(jsonData){
+							repository = jsonData.Children[0];
+							new orion.git.widgets.OpenCommitDialog(
+								{repository: repository, serviceRegistry: serviceRegistry}
+							).show();
+						}
+					);
 				}
 			},
 			visibleWhen : function(item) {
-				console.info(item);
 				return item.Type === "Clone" || item.CloneLocation;
 			}
 		});
