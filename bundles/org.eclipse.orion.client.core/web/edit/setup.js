@@ -234,8 +234,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		
 		shouldGoToURI: function(editor, fileURI) {
 			if (editor.isDirty()) {
-				var oldStripped = PageUtil.matchResourceParameters(this.lastFilePath).resource;
-				var newStripped = PageUtil.matchResourceParameters(fileURI).resource;
+				var oldStripped = PageUtil.matchResourceParameters("#" + this.lastFilePath).resource;
+				var newStripped = PageUtil.matchResourceParameters("#" + fileURI).resource;
 				if (oldStripped !== newStripped) {
 					return window.confirm("There are unsaved changes.  Do you still want to navigate away?");
 				}
