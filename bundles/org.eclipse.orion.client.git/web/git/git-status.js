@@ -36,7 +36,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress',  'orion/com
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 		
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
-		
+			mGlobalCommands.setPageCommandExclusions(["eclipse.git.status"]);
 			var controller = new mGitStatusTable.GitStatusController({renderLog :true},serviceRegistry , commandService , statusService,"unstagedZone" , "stagedZone");
 			controller.getGitStatus(dojo.hash(),true);
 		
