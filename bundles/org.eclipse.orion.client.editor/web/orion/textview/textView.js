@@ -3002,11 +3002,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var self = this;
 			this._autoScrollTimerID = setTimeout(function () {self._autoScrollTimer();}, this._AUTO_SCROLL_RATE);
 		},
-		_calculateLineHeight: function() {
+		_calculateMetrics: function() {
 			var parent = this._clientDiv;
 			var document = this._frameDocument;
 			var c = " ";
 			var line = document.createElement("DIV");
+			var model = this._model;
+			var lineText = model.getLine(0);
+			var e = {type:"LineStyle", textView: this, 0: 0, lineText: lineText, lineStart: 0};
+			this.onLineStyle(e);
+			this._applyStyle(e.style, line);
 			line.style.position = "fixed";
 			line.style.left = "-1000px";
 			var span1 = document.createElement("SPAN");
@@ -3056,9 +3061,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					style.style.fontWeight = "bold";
 				}
 			}
-			this._largestFontStyle = style;
+			var trim = this._getLineTrim(line);
 			parent.removeChild(line);
-			return lineHeight;
+			return {lineHeight: lineHeight, largestFontStyle: style, lineTrim: trim, viewPadding: this._calculatePadding()};
 		},
 		_calculatePadding: function() {
 			var document = this._frameDocument;
@@ -3380,6 +3385,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var lineDiv = div || document.createElement("DIV");
 			if (!div || !this._compare(div.viewStyle, e.style)) {
 				this._applyStyle(e.style, lineDiv, div);
+				if (div) { div._trim = null; }
 				lineDiv.viewStyle = e.style;
 			}
 			lineDiv.lineIndex = lineIndex;
@@ -3414,7 +3420,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				*/
 				c = "\u200C";
 			}
-			ranges.push({text: c, style: this._largestFontStyle, ignoreChars: 1});
+			ranges.push({text: c, style: this._metrics.largestFontStyle, ignoreChars: 1});
 			
 			var range, span, style, oldSpan, oldStyle, text, oldText, end = 0, oldEnd = 0, next;
 			var changeCount, changeStart;
@@ -3892,10 +3898,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (!isPad) {
 				clientDiv.contentEditable = "true";
 			}
-			this._lineHeight = this._calculateLineHeight();
-			this._viewPadding = this._calculatePadding();
+			var metrics = this._metrics = this._calculateMetrics();
 			if (isIE) {
-				body.style.lineHeight = this._lineHeight + "px";
+				body.style.lineHeight = (metrics.lineHeight - (metrics.lineTrim.top + metrics.lineTrim.bottom)) + "px";
 			}
 			this._setTabSize(this._tabSize, true);
 			this._hookEvents();
@@ -4033,6 +4038,27 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				model = model.getBaseModel();
 			}
 			return model.getText(start, end);
+		},
+		_getBorder: function (node) {
+			var left,top,right,bottom;
+			if (this._frameWindow.getComputedStyle) {
+				var style = this._frameWindow.getComputedStyle(node, null);
+				left = style.getPropertyValue("border-left-width");
+				top = style.getPropertyValue("border-top-width");
+				right = style.getPropertyValue("border-right-width");
+				bottom = style.getPropertyValue("border-bottom-width");
+			} else if (node.currentStyle) {
+				left = node.currentStyle.borderLeftWidth;
+				top = node.currentStyle.borderTopWidth;
+				right = node.currentStyle.borderRightWidth;
+				bottom = node.currentStyle.borderBottomWidth;
+			}
+			return {
+				left: parseInt(left, 10) || 0,
+				top: parseInt(top, 10) || 0,
+				right: parseInt(right, 10) || 0,
+				bottom: parseInt(bottom, 10) || 0
+			};
 		},
 		_getBoundsAtOffset: function (offset) {
 			var model = this._model;
@@ -4277,23 +4303,42 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return text;
 		},
 		_getViewPadding: function() {
-			return this._viewPadding;
+			return this._metrics.viewPadding;
 		},
-		_getLineBoundingClientRect: function (child) {
+		_getLineTrim: function(line) {
+			var trim = line._trim;
+			if (!trim) {
+				trim = this._getPadding(line);
+				var border = this._getBorder(line);
+				trim.left += border.left;
+				trim.top += border.top;
+				trim.right += border.right;
+				trim.bottom += border.bottom;
+				line._trim = trim;
+			}
+			return trim;
+		},
+		_getLineBoundingClientRect: function (child, noTrim) {
 			var rect = child.getBoundingClientRect();
+			rect = {left: rect.left, top: rect.top, right: rect.left, bottom: rect.bottom};
 			var lastChild = child.lastChild;
 			//Remove any artificial trailing whitespace in the line
 			while (lastChild && lastChild.ignoreChars === lastChild.firstChild.length) {
 				lastChild = lastChild.previousSibling;
 			}
-			if (!lastChild) {
-				return {left: rect.left, top: rect.top, right: rect.left, bottom: rect.bottom};
+			if (lastChild) {
+				var lastRect = lastChild.getBoundingClientRect();
+				rect.right = lastRect.right + this._getLineTrim(child).right;
 			}
-			var lastRect = lastChild.getBoundingClientRect();
-			return {left: rect.left, top: rect.top, right: lastRect.right, bottom: rect.bottom};
+			if (noTrim) {
+				var padding = this._getLineTrim(child);
+				rect.left = rect.left + padding.left;
+				rect.right = rect.right - padding.right;
+			}
+			return rect;
 		},
 		_getLineHeight: function() {
-			return this._lineHeight;
+			return this._metrics.lineHeight;
 		},
 		_getLineNode: function (lineIndex) {
 			var clientDiv = this._clientDiv;
@@ -4459,23 +4504,23 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_getPadding: function (node) {
 			var left,top,right,bottom;
-			if (node.currentStyle) {
-				left = node.currentStyle.paddingLeft;
-				top = node.currentStyle.paddingTop;
-				right = node.currentStyle.paddingRight;
-				bottom = node.currentStyle.paddingBottom;
-			} else if (this._frameWindow.getComputedStyle) {
+			if (this._frameWindow.getComputedStyle) {
 				var style = this._frameWindow.getComputedStyle(node, null);
 				left = style.getPropertyValue("padding-left");
 				top = style.getPropertyValue("padding-top");
 				right = style.getPropertyValue("padding-right");
 				bottom = style.getPropertyValue("padding-bottom");
+			} else if (node.currentStyle) {
+				left = node.currentStyle.paddingLeft;
+				top = node.currentStyle.paddingTop;
+				right = node.currentStyle.paddingRight;
+				bottom = node.currentStyle.paddingBottom;
 			}
 			return {
-					left: parseInt(left, 10), 
-					top: parseInt(top, 10),
-					right: parseInt(right, 10),
-					bottom: parseInt(bottom, 10)
+				left: parseInt(left, 10) || 0, 
+				top: parseInt(top, 10) || 0,
+				right: parseInt(right, 10) || 0,
+				bottom: parseInt(bottom, 10) || 0
 			};
 		},
 		_getScroll: function() {
@@ -4511,7 +4556,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (!child) {
 				child = dummy = this._createLine(clientDiv, null, document, lineIndex, model);
 			}
-			var lineRect = this._getLineBoundingClientRect(child);
+			var lineRect = this._getLineBoundingClientRect(child, true);
 			if (x < lineRect.left) { x = lineRect.left; }
 			if (x > lineRect.right) { x = lineRect.right; }
 			/*
@@ -4525,7 +4570,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				for (var i=1; i<rects.length; i++) {
 					minLeft = Math.min(rects[i].left, minLeft);
 				}
-				deltaX = minLeft - lineRect.left;
+				deltaX = minLeft - lineRect.left - this._getLineTrim(child).left;
 			}
 			var scrollX = this._getScroll().x;
 			function _getClientRects(element) {
@@ -6184,10 +6229,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (isIE) {
 				document.body.style.lineHeight = "normal";
 			}
-			this._lineHeight = this._calculateLineHeight();
-			this._viewPadding = this._calculatePadding();
+			var metrics = this._metrics = this._calculateMetrics();
 			if (isIE) {
-				document.body.style.lineHeight = this._lineHeight + "px";
+				document.body.style.lineHeight = (metrics.lineHeight - (metrics.lineTrim.top + metrics.lineTrim.bottom)) + "px";
 			}
 			this.redraw();
 		}
