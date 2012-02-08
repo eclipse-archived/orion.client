@@ -187,12 +187,12 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				linksMenu.removeChild(child);
 				child.destroy();
 			});
-		} else {
-			linksMenu = new dijit.Menu({
-				style: "display: none;",
-				id: "relatedLinksMenu"
-			});
-		}
+			linksMenu.destroy();
+		} 
+		linksMenu = new dijit.Menu({
+			style: "display: none;",
+			id: "relatedLinksMenu"
+		});
 		return linksMenu;
 	}
 	
@@ -262,6 +262,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 								}
 								var commandOptions = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry, true);
 								command = new mCommands.Command(commandOptions);
+								break;
 							}
 						}
 					} 
@@ -273,16 +274,15 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 						} else {
 							if (typeof alternateItem === "function") {
 								// asynch call to consider an alternate target item for just this command
-								var thisCommand = command;
-								window.setTimeout(function() {
-									dojo.when(alternateItem(), function (newItem) {
+								window.setTimeout(dojo.hitch(command, function() {
+									dojo.when(alternateItem(), dojo.hitch(this, function (newItem) {
 										if (newItem && (item === pageItem)) { // there is an alternate, and it still applies to the current page target
-											if (thisCommand.visibleWhen(newItem)) {
-												_addRelatedLinkCommand(thisCommand, new mCommands.CommandInvocation(commandService, newItem, newItem, null, thisCommand));
+											if (this.visibleWhen(newItem)) {
+												_addRelatedLinkCommand(this, new mCommands.CommandInvocation(commandService, newItem, newItem, null, this));
 											}
 										}
-									});
-								}, 0);
+									}));
+								}), 0);
 							}
 						}
 					}

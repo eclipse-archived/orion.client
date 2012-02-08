@@ -922,16 +922,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			context.handler = context.handler || this;
 			var element, image;
 			if (this.hrefCallback) {
-				element = dojo.create("a", {tabindex: "0"});
-				dojo.addClass(element, "commandLink");
-				dojo.place(window.document.createTextNode(this.name), element, "last");
-				var href = this.hrefCallback.call(context.handler, context);
-				if(href.then){
-					href.then(function(l){
-						element.href = l;
-					});
-				}else{
-					element.href = href; 
+				element = this._makeLink(context);
+				if (!element) {
+					return;
 				}
 			} else {
 				element = dojo.create("span", {tabindex: "0", role: "button"});
@@ -975,16 +968,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			context.handler = context.handler || this;
 			var element;
 			if (this.hrefCallback) {
-				element = dojo.create("a", {tabindex: "0"});
-				dojo.addClass(element, "commandLink");
-				dojo.place(window.document.createTextNode(this.name), element, "last");
-				var href = this.hrefCallback.call(context.handler, context);
-				if(href.then){
-					href.then(function(l){
-						element.href = l;
-					});
-				}else{
-					element.href = href; 
+				element = this._makeLink(context);
+				if (!element) {
+					return;
 				}
 			} else {
 				element = dojo.create("span", {tabindex: "0", role: "button"});
@@ -1038,8 +1024,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 						loc.then(dojo.hitch(this, function(l) { 
 							menuitem.set("label", "<a href='"+l+"'>"+this.name+"</a>");
 						}));
-					} else {
+					} else if (loc) {
 						menuitem.set("label", "<a href='"+loc+"'>"+this.name+"</a>");
+					} else {
+						return;
 					}
 				}
 			} else if (this.callback) {
@@ -1067,6 +1055,26 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 			context.domNode = menuitem.domNode;
 
 		},
+		
+		/*
+		 * stateless helper
+		 */
+		 _makeLink: function(context) {
+			var element = dojo.create("a", {tabindex: "0"});
+			dojo.addClass(element, "commandLink");
+			dojo.place(window.document.createTextNode(this.name), element, "last");
+			var href = this.hrefCallback.call(context.handler, context);
+			if (href.then){
+				href.then(function(l){
+					element.href = l;
+				});
+			} else if (href) {
+				element.href = href; 
+			} else {  // no href, we don't want the link
+				return null;
+			}
+			return element;
+		 },
 		
 		/*
 		 * stateless helper
