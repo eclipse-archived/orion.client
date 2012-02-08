@@ -55,6 +55,37 @@
 				href: true,
 				tooltip: "Go to Git Remote"
 			});
+
+			// shouldn't need two of these, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=370903
+			temp.href = "../git-repository.html";
+			var gitRepositoryURL = temp.href;
+
+			provider.registerServiceProvider("orion.navigate.command", {
+				run : function(item) {
+					return gitRepositoryURL + "#" + item.CloneLocation;
+				}
+			}, {
+				name: "Git Repository",
+				id: "eclipse.git.repository.fromGit",
+				validationProperties: {"CloneLocation":"*"},
+				forceSingleItem: true,
+				href: true,
+				tooltip: "Go to the git repository"
+			});
+			
+			provider.registerServiceProvider("orion.navigate.command", {
+				run : function(item) {
+					return gitRepositoryURL + "#" + item.Git.CloneLocation;
+				}
+			}, {
+				name: "Git Repository",
+				id: "eclipse.git.repository.fromResource",
+				validationProperties: {"Git:CloneLocation":"*"},
+				forceSingleItem: true,
+				href: true,
+				tooltip: "Go to the git repository"
+			});
+
 			
 			provider.registerServiceProvider("orion.page.link.related", null, {
 				id: "eclipse.git.status"
@@ -68,6 +99,16 @@
 				id: "eclipse.git.remote"
 			});
 			
+			provider.registerServiceProvider("orion.page.link.related", null, {
+				id: "eclipse.git.repository.fromResource"
+			});
+
+			provider.registerServiceProvider("orion.page.link.related", null, {
+				id: "eclipse.git.repository.fromGit"
+			});
+			
+			// ideally these commands should also be declared here.
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=370903
 			provider.registerServiceProvider("orion.page.link.related", null, {
 				id: "orion.git.gotoEclipseGit"
 			});
