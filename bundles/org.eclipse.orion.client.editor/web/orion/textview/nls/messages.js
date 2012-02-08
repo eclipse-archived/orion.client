@@ -17,7 +17,11 @@
         "multipleAnnotations": "Multiple annotations:",
         "line": "Line: {0}",
         "matchingBracket": "Matching Bracket",
-        "currentBracket": "Current Bracket"
+        "currentBracket": "Current Bracket",
+        "formatMessage": function(msg) {
+			var args = arguments;
+			return msg.replace(/\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
+		}
     },
     "pt-br": true,
     "fr-fr": true

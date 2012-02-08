@@ -36,5 +36,6 @@
 	"linkedModeEntered": "Modo Vinculado Iniciado",
     "linkedModeExited": "Modo Vinculado Terminado",
     "syntaxError": "Erro de Sintaxe",
-    "contentAssist": "Assist\u00EAncia de conte\u00FAdo"
+    "contentAssist": "Assist\u00EAncia de conte\u00FAdo",
+    "lineColumn": "Linha {0} : Col {1}"
 });
