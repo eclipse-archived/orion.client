@@ -170,31 +170,16 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		}
 	}
 	
-	/**
-	 * Adds the related links to the banner
-	 * @name orion.globalCommands#generateRelatedLinks
-	 * @function
-	 */
-	function generateRelatedLinks(serviceRegistry, itemOrArray, itemLabels, exclusions, commandService) {
-		var items;
-		items = itemOrArray;
-		if (!dojo.isArray(itemOrArray)) {
-			items = [itemOrArray];
-			if (!itemLabels) {
-				itemLabels = [""];
-			}
-		}
-		var contributedLinks = serviceRegistry.getServiceReferences("orion.page.link.related");
-		if (contributedLinks.length <= 0) {
-			return;
-		}
+	var linksMenu;
+	var pageItem;
+	var exclusions = [];
+	
+	function _makeEmptyLinksMenu() {
 		var related = dojo.byId("relatedLinks");
 		if(!related){
 			// document not loaded
 			return;
 		}
-		var foundLink = false;
-		var linksMenu = dijit.byId("relatedLinksMenu");
 		if (linksMenu) {
 			// see http://bugs.dojotoolkit.org/ticket/10296
 			linksMenu.focusedChild = null;
@@ -208,7 +193,48 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				id: "relatedLinksMenu"
 			});
 		}
-		
+		return linksMenu;
+	}
+	
+	function _addRelatedLinkCommand(command, invocation) {
+		if (!linksMenu) {
+			linksMenu = new dijit.Menu({
+				style: "display: none;",
+				id: "relatedLinksMenu"
+			});
+		}
+		command._addMenuItem(linksMenu, invocation);
+
+		var menuButton = dijit.byId("related");
+		var domNode = dojo.byId("relatedLinks");
+		if (domNode && !menuButton) {
+			menuButton = new dijit.form.DropDownButton({
+				id: "related",
+				label: "Related pages",
+				dropDown: linksMenu
+			});
+			dojo.place(menuButton.domNode, domNode, "only");
+			mUtil.forceLayout(domNode);
+		}	
+	}
+	
+	/**
+	 * Adds the related links to the banner
+	 * @name orion.globalCommands#generateRelatedLinks
+	 * @function
+	 */
+	function generateRelatedLinks(serviceRegistry, item, exclusions, commandService, alternateItem) {
+		var contributedLinks = serviceRegistry.getServiceReferences("orion.page.link.related");
+		if (contributedLinks.length <= 0) {
+			return;
+		}
+		var related = dojo.byId("relatedLinks");
+		if(!related){
+			// document not loaded
+			return;
+		}
+		var menu = _makeEmptyLinksMenu();
+		var foundLink = false;
 		// assemble the related links
 		for (var i=0; i<contributedLinks.length; i++) {
 			var info = {};
@@ -216,46 +242,53 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			for (var j = 0; j < propertyNames.length; j++) {
 				info[propertyNames[j]] = contributedLinks[i].getProperty(propertyNames[j]);
 			}
-			if (info.id && info.name) {
+			if (info.id) {
 				var command;
 				// exclude anything in the list of exclusions
 				var position = dojo.indexOf(exclusions, info.id);
 				if (position < 0) {
-					for (var itemIndex=0; itemIndex < items.length; itemIndex++) {
-						var item = items[itemIndex];
-						// look for it in the command service.  Total reach.
-						command = commandService.findCommand(info.id);
-						if (!command) {
-							// if it's not there look for it in orion.navigate.command and create it
-							var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
-							for (var j=0; j<commandsReferences.length; j++) {
-								var id = commandsReferences[j].getProperty("id");
-								if (id === info.id) {
-									var navInfo = {};
-									propertyNames = commandsReferences[j].getPropertyNames();
-									for (var k = 0; k < propertyNames.length; k++) {
-										navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
-									}
-									if (itemLabels[itemIndex]) {
-										navInfo.name += itemLabels[itemIndex];
-									}
-									var commandOptions = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry, true);
-									command = new mCommands.Command(commandOptions);
+					// We first look for it in the command service.  
+					command = commandService.findCommand(info.id);
+					if (!command) {
+						// if it's not there look for it in orion.navigate.command and create it
+						var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
+						for (var j=0; j<commandsReferences.length; j++) {
+							var id = commandsReferences[j].getProperty("id");
+							if (id === info.id) {
+								var navInfo = {};
+								propertyNames = commandsReferences[j].getPropertyNames();
+								for (var k = 0; k < propertyNames.length; k++) {
+									navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
 								}
+								var commandOptions = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry, true);
+								command = new mCommands.Command(commandOptions);
 							}
 						}
-						if (command) {
-							if (!command.visibleWhen || command.visibleWhen(item)) {
-								foundLink = true;
-								var invocation = new mCommands.CommandInvocation(commandService, item, item, null, command);
-								command._addMenuItem(linksMenu, invocation);
+					} 
+					if (command) {
+						if (!command.visibleWhen || command.visibleWhen(item)) {
+							foundLink = true;
+							var invocation = new mCommands.CommandInvocation(commandService, item, item, null, command);
+							command._addMenuItem(menu, invocation);
+						} else {
+							if (typeof alternateItem === "function") {
+								// asynch call to consider an alternate target item for just this command
+								var thisCommand = command;
+								window.setTimeout(function() {
+									dojo.when(alternateItem(), function (newItem) {
+										if (newItem && (item === pageItem)) { // there is an alternate, and it still applies to the current page target
+											if (thisCommand.visibleWhen(newItem)) {
+												_addRelatedLinkCommand(thisCommand, new mCommands.CommandInvocation(commandService, newItem, newItem, null, thisCommand));
+											}
+										}
+									});
+								}, 0);
 							}
 						}
 					}
 				}
-			}
+			} 
 		}
-		
 		var menuButton = dijit.byId("related");
 		if (menuButton) {
 			if (!foundLink) {
@@ -265,8 +298,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			if (foundLink) {
 				menuButton = new dijit.form.DropDownButton({
 					id: "related",
-					label: "Related Pages",
-					dropDown: linksMenu
+					label: "Related pages",
+					dropDown: menu
 				});
 				dojo.place(menuButton.domNode, related, "only");
 			}
@@ -288,15 +321,16 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 	/**
 	 * Support for establishing a page item associated with global commands and related links
 	 */
-	var pageItem;
-	var exclusions = [];
+
 	function setPageCommandExclusions(excluded) {
 		exclusions = excluded;
 	}
-	function setPageTarget(itemOrArray, serviceRegistry, commandService, itemLabels) {
-		pageItem = itemOrArray;
-		generateRelatedLinks(serviceRegistry, itemOrArray, itemLabels, exclusions, commandService);
-		renderGlobalCommands(commandService, null, itemOrArray);
+	
+	function setPageTarget(item, serviceRegistry, commandService, /*optional*/ alternateItem) {
+		pageItem = item;
+		generateRelatedLinks(serviceRegistry, item, exclusions, commandService, alternateItem);
+		renderGlobalCommands(commandService, null, item);
+		// in the future we should do breadcrumb management and search scoping here
 	}
 	
 	

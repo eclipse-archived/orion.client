@@ -133,8 +133,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		return fileCommands;
 	};
 	
-	// Turns an info object containing the service properties and the service (or reference) into Command options.
-	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry, /**boolean*/ createNavigateCommandCallback, /**optional function**/ validationItemConverter) {
+	extensionCommandUtils._makeValidationFunction = function(info, validationItemConverter) {
 		function getPattern(wildCard){
 			var pattern = '^';
 	        for (var i = 0; i < wildCard.length; i++ ) {
@@ -151,8 +150,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	                }
 	        }
 	        pattern += '$';
-	        
-	        return new RegExp(pattern);
+        
+        return new RegExp(pattern);
 		}
 		
 		function matchSinglePattern(item, keyWildCard, valueWildCard){
@@ -197,40 +196,48 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			return true;
 		}
 		
+		return dojo.hitch(info, function(items){
+			if (typeof validationItemConverter === "function") {
+				items = validationItemConverter(items);
+			}
+			if(dojo.isArray(items)){
+				if ((this.forceSingleItem || this.href) && items.length !== 1) {
+					return false;
+				}
+				if(!this.forceSingleItem && items.length < 1){
+					return false;
+				}
+			} else{
+				items = [items];
+			}
+			
+			if(!this.validationProperties){
+				return true;
+			}
+			
+			for(var i in items){
+				if(!validateSingleItem(items[i], this.validationProperties)){
+					return false;
+				}
+			}
+			return true;
+			
+		});
+	};
+	
+	// Turns an info object containing the service properties and the service (or reference) into Command options.
+	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry, /**boolean*/ createNavigateCommandCallback, /**optional function**/ validationItemConverter) {
+
+		
 		var commandOptions = {
 			name: info.name,
 			image: info.image,
 			id: info.id || info.name,
 			tooltip: info.tooltip,
-			visibleWhen: dojo.hitch(info, function(items){
-				if (typeof validationItemConverter === "function") {
-					items = validationItemConverter(items);
-				}
-				if(dojo.isArray(items)){
-					if ((this.forceSingleItem || this.href) && items.length !== 1) {
-						return false;
-					}
-					if(!this.forceSingleItem && items.length < 1){
-						return false;
-					}
-				} else{
-					items = [items];
-				}
-				
-				if(!this.validationProperties){
-					return true;
-				}
-				
-				for(var i in items){
-					if(!validateSingleItem(items[i], this.validationProperties)){
-						return false;
-					}
-				}
-				return true;
-				
-			}),
 			isEditor: info.isEditor
 		};
+		
+		commandOptions.visibleWhen = extensionCommandUtils._makeValidationFunction(info, validationItemConverter);
 		
 		if (createNavigateCommandCallback) {
 			if (info.href) {
