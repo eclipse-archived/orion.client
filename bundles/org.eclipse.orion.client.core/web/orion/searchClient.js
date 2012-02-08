@@ -160,9 +160,11 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		     * @param {DOMNode} resultsNode Node under which results will be added.
 			 * @param {String} [heading] the heading text (HTML), or null if none required
 			 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
+			 * @param {Function(DOMNode)} [decorator] A function to be called that knows how to decorate each row in the result table
+			 *   This function is passed a <td> element.
 			 * @returns a render function.
 			 */
-			makeRenderFunction: function(resultsNode, heading, onResultReady) {
+			makeRenderFunction: function(resultsNode, heading, onResultReady, decorator) {
 				
 				/**
 				 * Displays links to resources under the given DOM node.
@@ -208,7 +210,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		
 					var foundValidHit = false;
 					dojo.empty(resultsNode);
-					if (resources.length > 0) {
+					if (resources && resources.length > 0) {
 						var table = document.createElement('table');
 						for (var i=0; i < resources.length; i++) {
 							var resource = resources[i];
@@ -224,6 +226,9 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 							var row = table.insertRow(-1);
 							col = row.insertCell(0);
 							col.colspan = 2;
+							if (decorator) {
+								decorator(col);
+							}
 							var resourceLink = document.createElement('a');
 							dojo.place(document.createTextNode(resource.name), resourceLink);
 							if (resource.LineNumber) { // FIXME LineNumber === 0 
@@ -243,6 +248,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 							}
 		
 							resourceLink.setAttribute('href', loc);
+							dojo.style(resourceLink, "verticalAlign", "middle");
 							col.appendChild(resourceLink);
 							appendPath(col, resource);
 						}

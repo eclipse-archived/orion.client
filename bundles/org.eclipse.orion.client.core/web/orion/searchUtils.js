@@ -43,18 +43,22 @@ orion.searchUtils.parseQueryStr = function(queryStr) {
 	var splitQ = queryStr.split("&");
 	var queryObj = {queryStr: queryStr, start:0, rows:10, sort:"Path asc", replace: null};
 	for(var i=0; i < splitQ.length; i++){
-		var splitparameters = splitQ[i].split("=");
-		if(splitparameters.length === 2){
-			if(splitparameters[0] === "q"){
-				orion.searchUtils.parseLocationAndSearchStr(splitparameters[1], queryObj);
-			} else if(splitparameters[0] === "rows"){
-				queryObj.rows = parseInt(splitparameters[1]);
-			} else if(splitparameters[0] === "start"){
-				queryObj.start = parseInt(splitparameters[1]);
-			} else if(splitparameters[0] === "sort"){
-				queryObj.sort = splitparameters[1];
-			} else if(splitparameters[0] === "replace"){
-				queryObj.replace = splitparameters[1];
+		var qIndex = splitQ[i].indexOf("q=");
+		var rIndex = splitQ[i].indexOf("replace=");
+		if(qIndex >= 0){
+			orion.searchUtils.parseLocationAndSearchStr(splitQ[i].substring(qIndex+2), queryObj);
+		} else if(rIndex >= 0){
+			queryObj.replace = splitQ[i].substring(rIndex+8);
+		} else {
+			var splitparameters = splitQ[i].split("=");
+			if(splitparameters.length === 2){
+				if(splitparameters[0] === "rows"){
+					queryObj.rows = parseInt(splitparameters[1]);
+				} else if(splitparameters[0] === "start"){
+					queryObj.start = parseInt(splitparameters[1]);
+				} else if(splitparameters[0] === "sort"){
+					queryObj.sort = splitparameters[1];
+				} 
 			}
 		}
 	}

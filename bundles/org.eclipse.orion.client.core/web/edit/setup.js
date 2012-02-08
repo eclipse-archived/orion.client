@@ -345,7 +345,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				dojo.place(document.createTextNode("\"" + searchPattern + "\"..."), b, "only");
 				searchFloat.style.display = "block";
 				var query = searcher.createSearchQuery(searchPattern, null, "Name");
-				var renderer = searcher.defaultRenderer.makeRenderFunction(searchFloat, false, null);
+				var renderer = searcher.defaultRenderer.makeRenderFunction(searchFloat, false);
 				searcher.search(query, inputManager.getInput(), renderer);
 			}, 0);
 			return true;
