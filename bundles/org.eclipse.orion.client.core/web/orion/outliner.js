@@ -186,6 +186,7 @@ define(['dojo', 'orion/util', 'orion/commands', 'orion/URITemplate'], function(d
 		this._preferences = options.preferences;
 		this._serviceRegistration = this._serviceRegistry.registerService("orion.edit.outline", this);
 		this._outlinePref = this._preferences.getPreferences("/edit/outline");
+		this._provider = new dojo.Deferred();
 	}
 	OutlineService.prototype = /** @lends orion.outliner.OutlineService.prototype */ {
 		setOutlineProviders: function(/**ServiceReference[]*/ providers) {
@@ -206,7 +207,10 @@ define(['dojo', 'orion/util', 'orion/commands', 'orion/URITemplate'], function(d
 			});
 		},
 		setProvider: function(/**ServiceReference*/ provider) {
-			this.outlineProvider = provider;
+			if (this._provider.fired !== -1) {
+				this._provider = new dojo.Deferred();
+			}
+			this._provider.callback(provider);
 			var id = provider.getProperty("id");
 			if (id) {
 				this._outlinePref.then(function(pref) {
@@ -214,13 +218,17 @@ define(['dojo', 'orion/util', 'orion/commands', 'orion/URITemplate'], function(d
 				});
 			}
 		},
+		/** @returns {dojo.Deferred} */
+		getProvider: function() {
+			return this._provider;
+		},
 		emitOutline: function(contents, title, providerId) {
-			if (this.outlineProvider) {
-				var self = this;
-				this._serviceRegistry.getService(this.outlineProvider).getOutline(contents, title).then(function(outline) {
-					self._serviceRegistration.dispatchEvent("outline", outline, title, self.outlineProvider.getProperty("id"));
+			var self = this;
+			dojo.when(this.getProvider(), function(provider) {
+				self._serviceRegistry.getService(provider).getOutline(contents, title).then(function(outline) {
+					self._serviceRegistration.dispatchEvent("outline", outline, title, provider.getProperty("id"));
 				});
-			}
+			});
 		}
 	};
 	OutlineService.prototype.constructor = OutlineService;
