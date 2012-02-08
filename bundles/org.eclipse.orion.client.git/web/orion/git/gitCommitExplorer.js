@@ -11,8 +11,8 @@
 
 /*global define console document */
 
-define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/breadcrumbs', 'orion/git/gitCommands'], 
-		function(dojo, mExplorer, mUtil, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
+define(['dojo', 'orion/explorer', 'orion/util', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/breadcrumbs', 'orion/git/gitCommands'], 
+		function(dojo, mExplorer, mUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
 	var exports = {};
 
 	exports.GitCommitExplorer = (function() {
@@ -21,9 +21,10 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 		 * Creates a new Git commit explorer.
 		 * @class Git commit explorer
 		 */
-		function GitCommitExplorer(registry, linkService, selection, parentId, toolbarId, selectionToolsId){
+		function GitCommitExplorer(registry, commandService, linkService, selection, parentId, toolbarId, selectionToolsId){
 			this.parentId = parentId;
 			this.registry = registry;
+			this.commandService = commandService;
 			this.linkService = linkService;
 			this.selection = selection;
 			this.parentId = parentId;
@@ -127,6 +128,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 					that.makeHref(seg, location);
 				}
 			});		
+			mGlobalCommands.setPageTarget(repository, this.registry, this.commandService);
 		};
 		
 		GitCommitExplorer.prototype.makeHref = function(seg, location) {
@@ -297,8 +299,8 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 		
 			dojo.place( slideout, titleWrapper );
 			
-			this.registry.getService("orion.page.command").registerCommandContribution("eclipse.orion.git.addTag", 2000, "tagSectionActionsArea");
-			this.registry.getService("orion.page.command").renderCommands(dojo.byId("tagSectionActionsArea"), "dom", commit, this, "button", false);
+			this.commandService.registerCommandContribution("eclipse.orion.git.addTag", 2000, "tagSectionActionsArea");
+			this.commandService.renderCommands(dojo.byId("tagSectionActionsArea"), "dom", commit, this, "button", false);
 			
 			if (!tags && tags.length > 0)
 				return;
@@ -329,7 +331,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/compare/diff-provider', '
 			dojo.create( "div", null, horizontalBox );
 
 			var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"git-action-area"}, horizontalBox );
-			this.registry.getService("orion.page.command").renderCommands(actionsArea, "object", tag, this, "tool", false);	
+			this.commandService.renderCommands(actionsArea, "object", tag, this, "tool", false);	
 		};
 
 		return GitCommitExplorer;
