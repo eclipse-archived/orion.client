@@ -1848,36 +1848,37 @@ var exports = {};
 		});
 		commandService.addCommand(openCommitCommand, "dom");
 		
-		var openCommitCommand = new mCommands.Command({
-			name : "Open Commit",
-			tooltip: "Open the commit with the given name",
-			id : "eclipse.orion.git.openCommitCommand",
-			imageClass: "git-sprite-apply_patch",
-			spriteClass: "gitCommandSprite",
-			callback: function(data) {
-				var repository;
-				if (data.items.Type === "Clone") {
-					repository = data.items;
-					new orion.git.widgets.OpenCommitDialog(
-						{repository: repository, serviceRegistry: serviceRegistry}
-					).show();
-				} else {
-					var gitService = serviceRegistry.getService("orion.git.provider");
-					gitService.getGitClone(data.items.CloneLocation).then(
-						function(jsonData){
-							repository = jsonData.Children[0];
-							new orion.git.widgets.OpenCommitDialog(
-								{repository: repository, serviceRegistry: serviceRegistry}
-							).show();
-						}
-					);
+		var mapToGithubCommand = new mCommands.Command({
+			name : "Go to github",
+			tooltip: "Go to the associated github repository",
+			id : "orion.git.gotoGithub",
+			hrefCallback : function(data) {
+				var item = data.items;
+				return item.GitUrl.substr(0, item.GitUrl.lastIndexOf('.'));
+			},
+			visibleWhen : function(item) {
+				return item.GitUrl && item.GitUrl.indexOf("https://github.com") === 0;
+			}
+		});
+		commandService.addCommand(mapToGithubCommand, "dom");
+
+		var mapToEclipseOrgCommand = new mCommands.Command({
+			name : "Go to eclipse.org",
+			tooltip: "Go to the associated eclipse.org git repository",
+			id : "orion.git.gotoEclipseGit",
+			hrefCallback : function(data) {
+				var item = data.items;
+				var token = "git.eclipse.org/gitroot";
+				var found = item.GitUrl.indexOf(token);
+				if (found > -1) {
+					return "http://git.eclipse.org/c" + item.GitUrl.substr(found+token.length, item.GitUrl.length);
 				}
 			},
 			visibleWhen : function(item) {
-				return item.Type === "Clone" || item.CloneLocation;
+				return item.GitUrl && item.GitUrl.indexOf("git.eclipse.org/gitroot") > -1;
 			}
 		});
-		commandService.addCommand(openCommitCommand, "dom");
+		commandService.addCommand(mapToEclipseOrgCommand, "dom");
 	};
 }());
 return exports;	

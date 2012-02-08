@@ -68,6 +68,14 @@
 				id: "eclipse.git.remote"
 			});
 			
+			provider.registerServiceProvider("orion.page.link.related", null, {
+				id: "orion.git.gotoEclipseGit"
+			});
+
+			provider.registerServiceProvider("orion.page.link.related", null, {
+				id: "orion.git.gotoGithub"
+			});
+						
 			temp.href = "../../gitapi/diff/";
 			var base = temp.href;
 			provider.registerServiceProvider("orion.core.diff", {

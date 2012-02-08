@@ -40,7 +40,7 @@ mBootstrap.startup().then(function(core) {
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 	
-	var explorer = new mGitRepositoryExplorer.GitRepositoryExplorer(serviceRegistry, linkService, /* selection */ null, "artifacts", "pageActions"/*, "selectionTools"*/);
+	var explorer = new mGitRepositoryExplorer.GitRepositoryExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "pageActions"/*, "selectionTools"*/);
 	mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
 	
 	// define commands
