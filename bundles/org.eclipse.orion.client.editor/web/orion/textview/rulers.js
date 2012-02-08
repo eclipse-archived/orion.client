@@ -604,6 +604,7 @@ define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/text
 		if (model.getBaseModel) {
 			start = model.mapOffset(start);
 			end = model.mapOffset(end);
+			model = model.getBaseModel();
 		}
 		var annotation, iter = annotationModel.getAnnotations(start, end);
 		while (!annotation && iter.hasNext()) {
@@ -611,7 +612,7 @@ define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/text
 			if (!this.isAnnotationTypeVisible(a.type)) { continue; }
 			annotation = a;
 		}
-		if (annotation) {
+		if (annotation && model.getLineAtOffset(annotation.start) === model.getLineAtOffset(start)) {
 			var tooltip = mTooltip.Tooltip.getTooltip(this._view);
 			if (tooltip) {
 				tooltip.setTarget(null);
