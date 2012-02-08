@@ -39,8 +39,8 @@ var serviceRegistry;
 		
 			// Git operations
 			var gitClient = new mGitClient.GitService(serviceRegistry);
-			
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			var fileClient = new mFileClient.FileClient(serviceRegistry);
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, fileService: fileClient, commandService: commandService});
 
 			// Commit navigator
 			var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools", "pageNavigationActions");
@@ -100,6 +100,8 @@ function loadResource(navigator, searcher, commandService){
 		load : function(resource, secondArg) {
 			
 			var loadResource = function(resource){
+				//TODO if this were in the scope of the onload above, we would have the right file client instance.  Shouldn't need to
+				// create one each time.
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
 				initTitleBar(fileClient, navigator, resource, searcher, commandService).then(
 					function(){
