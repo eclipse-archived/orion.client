@@ -10,7 +10,7 @@
 <script type="text/javascript" src="../orion/editor/htmlGrammar.js"></script>
 <script type="text/javascript" src="../orion/editor/htmlContentAssist.js"></script>
 <script type="text/javascript">
-/*global window eclipse orion HTMLContentAssistProvider*/
+/*global window eclipse orion */
 window.onload = function() {
 	var provider = new eclipse.PluginProvider();
 	
@@ -115,7 +115,7 @@ window.onload = function() {
 			contentType: ["text.javascript"]
 		});
 	provider.registerServiceProvider("orion.edit.contentAssist",
-		new HTMLContentAssistProvider(),
+		new orion.editor.HTMLContentAssistProvider(),
 		{	name: "HTML content assist",
 			contentType: ["text.html"]
 		});

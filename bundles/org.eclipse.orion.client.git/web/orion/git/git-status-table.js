@@ -1174,7 +1174,7 @@ orion.GitStatusController = (function() {
 					return require.toUrl("git/git-log.html") +"#" + (data.items.branch ? data.items.branch.CommitLocation : data.items.model.items.CommitLocation) + "?page=1";
 				},
 				visibleWhen : function(item) {
-					return item.type === "gitLog";
+					return item.type === "gitLog" && ((item.branch && item.branch.CommitLocation) || (item.model && item.model.items && item.model.items.CommitLocation));
 				}
 			});
 		

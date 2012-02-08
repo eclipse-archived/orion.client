@@ -111,7 +111,13 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					var setInput = dojo.hitch(this, function(contents, metadata) {
 						if (metadata) {
 							this._fileMetadata = metadata;
-							mGlobalCommands.setPageTarget([metadata, metadata.Parents && metadata.Parents[0]], serviceRegistry, commandService, ["", " on folder"]);
+							// page target is the file but if any interesting links fail, try our parent folder metadata.
+							mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService, 
+								function() {
+									if (metadata.Parents && metadata.Parents.length > 0) {
+										return fileClient.read(metadata.Parents[0].Location, true);
+									}
+								});
 							mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 							this.setTitle(metadata.Location);
 							this._contentType = contentTypeService.getFileContentType(metadata);
@@ -179,6 +185,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			var titlePane = dojo.byId("location");
 			if (titlePane) {
 				dojo.empty(titlePane);
+				searcher.setLocationByMetaData(this._fileMetadata, {index: "first"});
 				var root = fileClient.fileServiceName(this._fileMetadata && this._fileMetadata.Location);
 				new mBreadcrumbs.BreadCrumbs({
 					container: "location", 
@@ -338,7 +345,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				dojo.place(document.createTextNode("\"" + searchPattern + "\"..."), b, "only");
 				searchFloat.style.display = "block";
 				var query = searcher.createSearchQuery(searchPattern, null, "Name");
-				var renderer = searcher.defaultRenderer.makeRenderFunction(searchFloat, false, null);
+				var renderer = searcher.defaultRenderer.makeRenderFunction(searchFloat, false);
 				searcher.search(query, inputManager.getInput(), renderer);
 			}, 0);
 			return true;

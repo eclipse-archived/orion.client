@@ -57,20 +57,25 @@
 			});
 			
 			provider.registerServiceProvider("orion.page.link.related", null, {
-				name: "Git Status",
 				id: "eclipse.git.status"
 			});
 			
 			provider.registerServiceProvider("orion.page.link.related", null, {
-				name: "Git Log",
 				id: "eclipse.git.log"
 			});
 			
 			provider.registerServiceProvider("orion.page.link.related", null, {
-				name: "Git Remote",
 				id: "eclipse.git.remote"
 			});
 			
+			provider.registerServiceProvider("orion.page.link.related", null, {
+				id: "orion.git.gotoEclipseGit"
+			});
+
+			provider.registerServiceProvider("orion.page.link.related", null, {
+				id: "orion.git.gotoGithub"
+			});
+						
 			temp.href = "../../gitapi/diff/";
 			var base = temp.href;
 			provider.registerServiceProvider("orion.core.diff", {

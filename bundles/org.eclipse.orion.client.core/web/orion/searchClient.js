@@ -72,16 +72,28 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 			dojo.place(errorText, resultsNode, "only");
 			return response;
 		},
-		setLocationByMetaData: function(meta){
-			var locationName = "root";
-			if(meta &&  meta.Directory && meta.Location && meta.Parents){
-				this.setLocationByURL(meta.Location);
-				locationName = meta.Name;
+		setLocationByMetaData: function(meta, useParentLocation){
+			var locationName = "";
+			var noneRootMeta = null;
+			if(useParentLocation && meta && meta.Parents && meta.Parents.length > 0){
+				if(useParentLocation.index === "last"){
+					noneRootMeta = meta.Parents[meta.Parents.length-1];
+				} else {
+					noneRootMeta = meta.Parents[0];
+				}
+			} else if(meta &&  meta.Directory && meta.Location && meta.Parents){
+				noneRootMeta = meta;
 			} 
+			if(noneRootMeta){
+				this.setLocationByURL(noneRootMeta.Location);
+				locationName = noneRootMeta.Name;
+			} else if(meta){
+				locationName = this._fileService.fileServiceName(meta && meta.Location);
+			}
 			var searchInputDom = dojo.byId("search");
 			if(searchInputDom && searchInputDom.placeholder){
-				if(locationName.length > 13){
-					searchInputDom.placeholder = "Search " + locationName.substring(0, 10) + "...";
+				if(locationName.length > 23){
+					searchInputDom.placeholder = "Search " + locationName.substring(0, 20) + "...";
 				} else {
 					searchInputDom.placeholder = "Search " + locationName;
 				}
@@ -148,9 +160,11 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		     * @param {DOMNode} resultsNode Node under which results will be added.
 			 * @param {String} [heading] the heading text (HTML), or null if none required
 			 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
+			 * @param {Function(DOMNode)} [decorator] A function to be called that knows how to decorate each row in the result table
+			 *   This function is passed a <td> element.
 			 * @returns a render function.
 			 */
-			makeRenderFunction: function(resultsNode, heading, onResultReady) {
+			makeRenderFunction: function(resultsNode, heading, onResultReady, decorator) {
 				
 				/**
 				 * Displays links to resources under the given DOM node.
@@ -196,7 +210,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		
 					var foundValidHit = false;
 					dojo.empty(resultsNode);
-					if (resources.length > 0) {
+					if (resources && resources.length > 0) {
 						var table = document.createElement('table');
 						for (var i=0; i < resources.length; i++) {
 							var resource = resources[i];
@@ -212,6 +226,9 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 							var row = table.insertRow(-1);
 							col = row.insertCell(0);
 							col.colspan = 2;
+							if (decorator) {
+								decorator(col);
+							}
 							var resourceLink = document.createElement('a');
 							dojo.place(document.createTextNode(resource.name), resourceLink);
 							if (resource.LineNumber) { // FIXME LineNumber === 0 
@@ -231,6 +248,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 							}
 		
 							resourceLink.setAttribute('href', loc);
+							dojo.style(resourceLink, "verticalAlign", "middle");
 							col.appendChild(resourceLink);
 							appendPath(col, resource);
 						}
