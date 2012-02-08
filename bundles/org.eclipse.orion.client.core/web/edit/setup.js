@@ -111,7 +111,13 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					var setInput = dojo.hitch(this, function(contents, metadata) {
 						if (metadata) {
 							this._fileMetadata = metadata;
-							mGlobalCommands.setPageTarget([metadata, metadata.Parents && metadata.Parents[0]], serviceRegistry, commandService, ["", " on folder"]);
+							// page target is the file but if any interesting links fail, try our parent folder metadata.
+							mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService, 
+								function() {
+									if (metadata.Parents && metadata.Parents.length > 0) {
+										return fileClient.read(metadata.Parents[0].Location, true);
+									}
+								});
 							mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 							this.setTitle(metadata.Location);
 							this._contentType = contentTypeService.getFileContentType(metadata);
