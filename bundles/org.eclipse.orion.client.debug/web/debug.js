@@ -14,10 +14,8 @@
 /*jslint browser:true*/
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
-	'orion/console', 'debug/debugTab'], 
-	function(require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mDebugTab) {
-
-	var console;
+	'orion/console', 'debug/debugTab', 'debug/debugMessaging'], 
+	function(require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mDebugTab, mDebugMessaging) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -39,33 +37,82 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 				return;
 			}
 
+			var connection, console, messaging;
 			var hash = dojo.hash();
-			var connection = new mDebugTab.RemoteDebugTab(hash);
-			connection.addCloseListener(function() {
-				var location = dojo.byId("location");
-				if (location) {
-					location.innerHTML = null;
-				}
-				console.appendOutput("<< Disconnected from external browser >>");
-				console.setAcceptInput(false);
-			});
-			connection.addUrlListener(function(url) {
-				var location = dojo.byId("location");
-				if (location) {
-					if (url === "about:blank") {
-						location.innerHTML = null;
-					} else {
-						location.innerHTML = url;
+			if (hash.indexOf("ws://") === 0) {
+				connection = new mDebugTab.RemoteDebugTab(hash);
+			} else {
+				if (hash.indexOf("id") === 0) {
+					var id = parseInt(hash.substring(2), 10);
+					if (id) {
+						messaging = new mDebugMessaging.DebugMessaging("debugPage-" + id);
+						connection = new mDebugTab.LocalDebugTab(id, messaging);
 					}
 				}
-			});
+				if (!connection) {
+					return;
+				}
+			}
 
-			console = new mConsole.Console("debug-console");
-			console.addInputListener(function(inputEvent) {
-				connection.evaluate(inputEvent, function(result) {
-					console.appendOutput(JSON.stringify(result));
+			var init = function() {
+				dojo.addOnUnload(function() {
+					connection.detach();
 				});
-			});
+
+				connection.addDetachListener(function() {
+					var location = dojo.byId("location");
+					if (location) {
+						location.innerHTML = null;
+					}
+					console.appendOutput("<< Disconnected from debug target >>");
+					console.setAcceptInput(false);
+				});
+				connection.addUrlListener(function(url) {
+					var location = dojo.byId("location");
+					if (location) {
+						if (url === "about:blank") {
+							location.innerHTML = null;
+						} else {
+							location.innerHTML = url;
+						}
+					}
+				});
+
+				console = new mConsole.Console("debug-console");
+				console.addInputListener(function(inputEvent) {
+					connection.evaluate(inputEvent, function(result) {
+						if (result.error) {
+							console.appendOutput("<< " + result.error + " >>");
+						} else {
+							console.appendOutput(JSON.stringify(result.result));
+						}
+					});
+				});
+
+				connection.attach(function (error) {
+					if (error) {
+						console.appendOutput("<< " + error + " >>");
+						console.setAcceptInput(false);
+					}
+				});
+			};
+
+			if (messaging) {
+				messaging.verifyExtension(function(error) {
+					if (error) {
+						var label = dojo.create("label");
+						label.innerHTML = error;
+						dojo.place(label, "debug-console", "first");
+						var url = require.toUrl("debug/ext/debugChromeExtension.crx");
+						var urlLink = dojo.create("a", {href: url}, "debug-console", "last");
+						dojo.place(document.createTextNode("   [Click to install it]"), urlLink, "last");
+						return;
+					}
+					init();
+				});
+			} else {
+				init();
+			}
 		});
 	});
 });
