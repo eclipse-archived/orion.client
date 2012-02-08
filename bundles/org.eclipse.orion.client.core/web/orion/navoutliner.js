@@ -269,6 +269,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 					this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", search, this, "tool", false, k);
 					dojo.place(tr, tbody, "last");
 				}
+				dojo.place(navOutlineTable, this._parent, "last");
 			}
 		}
 	};//end navigation outliner prototype

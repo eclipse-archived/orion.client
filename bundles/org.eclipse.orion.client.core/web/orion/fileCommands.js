@@ -666,6 +666,11 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				id: "eclipse.pasteSelections",
 				callback: function() {
 					if (bufferedSelection.length > 0) {
+						// Do not allow pasting into the Root of the Workspace
+						if (mUtil.isAtRoot(this.treeRoot.Location)) {
+							errorHandler("Cannot paste into the Workspace root");
+							return;
+						}
 						for (var i=0; i<bufferedSelection.length; i++) {
 							var location = bufferedSelection[i].Location;
 							var name = null;

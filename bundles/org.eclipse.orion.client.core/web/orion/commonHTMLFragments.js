@@ -34,7 +34,7 @@ define(['require'],
 	//Title area
 	'<div id="titleArea" class="layoutBlock titleArea">' +
 		'<div id="pageTitle" class="layoutLeft pageTitle"></div>' +
-		'<input type="search" id="search" placeholder="Search root" title="Type a keyword or wild card to search in root" class="layoutRight searchbox">' +
+		'<input type="search" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutRight searchbox">' +
 		'<div id="relatedLinks" class="layoutRight pageNav"></div>' +
 		'<div id="globalActions" class="layoutRight pageNav"></div>' +
 		'<div id="dimension" class="layoutBlock dimension"></div>' +
@@ -66,7 +66,7 @@ define(['require'],
 		'<div class="layoutRight" id="statusPane"></div>' +
 		'<div class="layoutRight pageActions" id="pageNavigationActions"></div>' +
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
-				'<div class="layoutLeft" id="notifications"></div>' +
+				'<div class="layoutLeft" id="notifications" aria-live="assertive" aria-atomic="true"></div>' +
 				// still need to hook it up and get correct icon  '<div class="layoutRight core-sprite-delete imageSprite" id="close"></div>' +
 		'</div>' +
 		'<div id="parameterArea" class="layoutBlock slideParameters slideContainer">' +

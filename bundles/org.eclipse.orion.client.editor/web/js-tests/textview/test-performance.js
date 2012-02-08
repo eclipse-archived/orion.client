@@ -9,13 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define defineGlobal setTimeout window */
+/*global define require setTimeout window */
 
-define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
-
-	/*
-	* TODO async tests are run simultaneously in orion test framework Bug#362595
-	*/
+define(['examples/textview/demoSetup'], function(mSetup) {
 
 	var tests = {};
 	
@@ -45,8 +41,23 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 		return mSetup.setupView(text, lang, options);
 	}
 	
+	function getDeferred () {
+		var dojo = tests.noDojo ? null : require("dojo");
+		if (dojo) {
+			return new dojo.Deferred();
+		}
+		return null;
+	}
+	
+	function resolve(d) {
+		if (d && d.resolve) {
+			d.resolve(true);
+		}
+		return d;
+	}
+	
 	function doAction(action, max) {
-//		var d = new dojo.Deferred();
+		var d = getDeferred();
 		var view = mSetup.view || setupView(mSetup.getFile("/examples/textview/text.txt"), "java");
 		var model = view.getModel();
 		if (action.toLowerCase().indexOf("down") !== -1) {
@@ -63,12 +74,12 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 			if (model.getLineAtOffset(view.getCaretOffset()) !== caretLine && (max === undefined || --max > 0)) {
 				setTimeout(t, 0);
 			} else {
-//				d.resolve(true);
+				resolve(d);
 				log("time(",action,")=", (new Date().getTime() - start));
 			}
 		}
 		t();
-//		return d;
+		return d;
 	}
 	
 	tests.testPageDown = function () {
@@ -97,7 +108,7 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 	};
 	
 	tests.testCaretUpDown = function () {
-//		var d = new dojo.Deferred();
+		var d = getDeferred();
 		var buffer = "", i;
 		for (i = 0; i < 256;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -122,17 +133,17 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 			if (--max > 0) {			
 				setTimeout(t, 0);
 			} else {
+				resolve(d);
 				log ("time(CaretUpDown)=", (new Date().getTime() - start));
-//				d.resolve(true);
 			}
 		}
 		view.focus();
 		t();
-//		return d;
+		return d;
 	};
 	
 	tests.testInsertText = function () {
-//		var d = new dojo.Deferred();
+		var d = getDeferred();
 		var buffer = "", i;
 		for (i = 0; i < 512;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -146,17 +157,17 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 			if (--max > 0) {			
 				setTimeout(t, 0);
 			} else {
+				resolve(d);
 				log ("time(InsertText)=", (new Date().getTime() - start));
-//				d.resolve(true);
 			}
 		}
 		view.focus();
 		t();
-//		return d;
+		return d;
 	};
 	
 	tests.testAppendText = function () {
-//		var d = new dojo.Deferred();
+		var d = getDeferred();
 		var buffer = "", i;
 		for (i = 0; i < 512;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -171,17 +182,17 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 			if (--max > 0) {			
 				setTimeout(t, 0);
 			} else {
+				resolve(d);
 				log ("time(AppendText)=", (new Date().getTime() - start));
-//				d.resolve(true);
 			}
 		}
 		view.focus();
 		t();
-//		return d;
+		return d;
 	};
 	
 	tests.testChangeText = function () {
-//		var d = new dojo.Deferred();
+		var d = getDeferred();
 		var buffer = "", i;
 		for (i = 0; i < 1024;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -201,17 +212,17 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 			if (--max > 0) {			
 				setTimeout(t, 0);
 			} else {
+				resolve(d);
 				log ("time(ChangeText)=", (new Date().getTime() - start));
-//				d.resolve(true);
 			}
 		}
 		view.focus();
 		t();
-//		return d;
+		return d;
 	};
 	
 	tests.testCaretNextPrevious = function () {
-//		var d = new dojo.Deferred();
+		var d = getDeferred();
 		var buffer = "", i;
 		for (i = 0; i < 256;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -237,17 +248,17 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 			if (--max > 0) {			
 				setTimeout(t, 0);
 			} else {
+				resolve(d);
 				log ("time(CaretNextPrevious)=", (new Date().getTime() - start));
-//				d.resolve(true);
 			}
 		}
 		view.focus();
 		t();
-//		return d;
+		return d;
 	};
 	
 	tests.testScrollLeft = function () {
-//		var d = new dojo.Deferred();
+		var d = getDeferred();
 		var buffer = "";
 		for (var i = 0; i < 1000;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -263,16 +274,16 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 				view.setHorizontalPixel(hscroll + 4);
 				setTimeout(t, 0);
 			} else {
+				resolve(d);
 				log ("time(setHorizontalPixel)=", (new Date().getTime() - start));
-//				d.resolve(true);
 			}
 		}
 		view.focus();
 		t();
-//		return d;
+		return d;
 	};
 	tests.testGetLocationAtOffset = function () {
-//		var d = new dojo.Deferred();
+		var d = getDeferred();
 		var count = 10;
 		var buffer = "";
 		for (var i = 0; i < 10;i++) {
@@ -281,21 +292,24 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 		//test hit test without any styles
 		var view = setupView(buffer, null);
 		view.focus();
-		setTimeout(function() {
-			var length = buffer.length;
-			var start = new Date().getTime();
-			for (i = 0; i < count;i++) {
-				for (var j = 0; j < length;j++) {
-					view.getLocationAtOffset(j);
-				}
+		var start = new Date().getTime();
+		var length = buffer.length;
+		function t() {
+			for (var j = 0; j < length;j++) {
+				view.getLocationAtOffset(j);
 			}
-			log("time(getLocationAtOffset)=" + (new Date().getTime() - start));
-//			d.resolve(true);
-		}, 0);
-//		return d;
+			if (--count > 0) {
+				setTimeout(t, 0);
+			} else {
+				resolve(d);
+				log("time(getLocationAtOffset)=" + (new Date().getTime() - start));
+			}
+		}
+		t();
+		return d;
 	};
 	tests.testGetLocationAtOffsetStyled = function () {
-//		var d = new dojo.Deferred();
+		var d = getDeferred();
 		var count = 10;
 		var buffer = "";
 		for (var i = 0; i < 10;i++) {
@@ -304,64 +318,73 @@ define([/*'dojo', */'examples/textview/demoSetup'], function(/*dojo, */mSetup) {
 		//test hit test with styles
 		var view = setupView(buffer, "js");
 		view.focus();
-		setTimeout(function() {
-			var length = buffer.length;
-			var start = new Date().getTime();
-			for (i = 0; i < count;i++) {
-				for (var j = 0; j < length;j++) {
-					view.getLocationAtOffset(j);
-				}
+		var start = new Date().getTime();
+		var length = buffer.length;
+		function t() {
+			for (var j = 0; j < length;j++) {
+				view.getLocationAtOffset(j);
 			}
-			log("time(getLocationAtOffset)[styled]=" + (new Date().getTime() - start));
-//			d.resolve(true);
-		}, 0);
-//		return d;
+			if (--count > 0) {
+				setTimeout(t, 0);
+			} else {
+				resolve(d);
+				log("time(getLocationAtOffset)[styled]=" + (new Date().getTime() - start));
+			}
+		}
+		t();
+		return d;
 	};
 	tests.testGetOffsetAtLocation = function () {
-//		var d = new dojo.Deferred();
+		var d = getDeferred();
 		var count = 100;
 		var buffer = "";
-		for (var i = 0; i < 6;i++) {
+		for (var i = 0; i < 3;i++) {
 			buffer += "var nada for nada function " + i + " ";
 		}
 		//test hit test without any styles
 		var view = setupView(buffer, null);
 		view.focus();
 		var location = view.getLocationAtOffset(buffer.length);
-		setTimeout(function() {
-			var start = new Date().getTime();
-			for (i = 0; i < count;i++) {
-				for (var j = 0; j < location.x; j++) {
-					view.getOffsetAtLocation(j, location.y);
-				}
+		var start = new Date().getTime();
+		function t() {
+			for (var j = 0; j < location.x; j++) {
+				view.getOffsetAtLocation(j, location.y);
 			}
-			log("time(getOffseAtLocation)=" + (new Date().getTime() - start));
-//			d.resolve(true);
-		}, 0);
-//		return d;
+			if (--count > 0) {
+				setTimeout(t, 0);
+			} else {
+				resolve(d);
+				log("time(getOffseAtLocation)=" + (new Date().getTime() - start));
+			}
+		}
+		t();
+		return d;
 	};
 	tests.testGetOffsetAtLocationStyled = function () {
-//		var d = new dojo.Deferred();
+		var d = getDeferred();
 		var count = 100;
 		var buffer = "";
-		for (var i = 0; i < 6;i++) {
+		for (var i = 0; i < 3;i++) {
 			buffer += "var nada for nada function " + i + " ";
 		}
 		//test hit test with styles
 		var view = setupView(buffer, "js");
 		view.focus();
 		var location = view.getLocationAtOffset(buffer.length);
-		setTimeout(function() {
-			var start = new Date().getTime();
-			for (i = 0; i < count;i++) {
-				for (var j = 0; j < location.x; j++) {
-					view.getOffsetAtLocation(j, location.y);
-				}
+		var start = new Date().getTime();
+		function t() {
+			for (var j = 0; j < location.x; j++) {
+				view.getOffsetAtLocation(j, location.y);
 			}
-			log("time(getOffseAtLocation)[styled]=" + (new Date().getTime() - start));
-//			d.resolve(true);
-		}, 0);
-//		return d;
+			if (--count > 0) {
+				setTimeout(t, 0);
+			} else {
+				resolve(d);
+				log("time(getOffseAtLocation)[styled]=" + (new Date().getTime() - start));
+			}
+		}
+		t();
+		return d;
 	};
 	
 	return tests;
