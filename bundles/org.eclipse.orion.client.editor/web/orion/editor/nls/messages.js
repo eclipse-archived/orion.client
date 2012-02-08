@@ -37,7 +37,12 @@
         "linkedModeEntered": "Linked Mode entered",
         "linkedModeExited": "Linked Mode exited",
         "syntaxError": "Syntax Error",
-        "contentAssist": "Content Assist"
+        "contentAssist": "Content Assist",
+		"lineColumn": "Line {0} : Col {1}",
+        "formatMessage": function(msg) {
+			var args = arguments;
+			return msg.replace(/\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
+		}
     },
     "pt-br": true
 });
