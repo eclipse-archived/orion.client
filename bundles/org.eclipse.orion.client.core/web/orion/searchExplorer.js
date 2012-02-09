@@ -111,7 +111,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		this.indexedFileItems = [];
 		for(var i = 0; i < this._resultLocation.length; i++){
 			var childNode = {parent: this._listRoot, type: "file", name: this._resultLocation[i].name,lastModified: this._resultLocation[i].lastModified,
-							linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location, model:this._resultLocation[i].model};
+							linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location, 
+							parentLocation:  mSearchUtils.path2FolderName(this._resultLocation[i].location, this._resultLocation[i].name, true),
+							fullPathName: mSearchUtils.path2FolderName(this._resultLocation[i].path, this._resultLocation[i].name)};
 			this.location2ModelMap[childNode.location] = childNode;
 			this._listRoot.children.push(childNode);
 			this.indexedFileItems.push(childNode);
@@ -712,8 +714,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		return this.explorer.model.getId(item) + "_detailIcon";
 	};
 	
-	SearchResultRenderer.prototype.renderLocationElement = function(item){
-		var spanHolder = dojo.byId(this.getLocationSpanId(item));
+	SearchResultRenderer.prototype.renderLocationElement = function(item, onSpan){
+		var spanHolder = onSpan ? onSpan: dojo.byId(this.getLocationSpanId(item));
+		dojo.empty(spanHolder);
 		var qParams = mSearchUtils.copyQueryParams(this.explorer.model.queryObj, true);
 		qParams.location = item.parentLocation;
 		qParams.start = 0;
@@ -780,7 +783,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			if(item.type ===  "file"){
 				span = dojo.create("span", {id: this.getLocationSpanId(item)}, col, "only");
 				if(item.parentLocation){
-					this.renderLocationElement(item);
+					this.renderLocationElement(item, span);
 				}
 			} 
 			return col;
@@ -982,11 +985,11 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 				item.ETag = meta.ETag;
 				if(item.stale){
 					this.model.checkStale(item, function(item){
-						that.renderer.renderLocationElement(item);
+						//that.renderer.renderLocationElement(item);
 						that.renderer.staleFileElement(item);
 					});
 				} else {
-					this.renderer.renderLocationElement(item);
+					//this.renderer.renderLocationElement(item);
 				}
 			    if(index === (this.model.indexedFileItems.length-1)){	
 			    	if(onComplete){
@@ -1406,6 +1409,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	};
 	
 	SearchResultExplorer.prototype.preventDefaultFunc = function(e, model){
+		if(!model){
+			return true;
+		}
 		if(!this.model.replaceMode() && !e.ctrlKey && model.type === "detail"){
 			if(e.keyCode === dojo.keys.LEFT_ARROW && this._popUpContext){
 				this.closeContextTip();
