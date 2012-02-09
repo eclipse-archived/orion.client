@@ -68,6 +68,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 				}
 				this.addChild(new dijit.MenuItem({
 					label: where ? "<a target='_blank' href="+loginForm+">Sign In To "+ where +"</a>" : "<a target='_blank' href="+loginForm+">Sign In</a>",
+					onKeyDown: function(evt){if(evt.keyCode===13) window.open(loginForm);},
 					_onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 				}), startIndex);
 				
@@ -81,6 +82,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 						}
 						_self.addChild(new dijit.MenuItem({
 							label: where ? "<a target='_blank' href="+loginForm+">Sign In To "+where+"</a>" : "<a target='_blank' href="+loginForm+">Sign In</a>",
+							onKeyDown: function(evt){if(evt.keyCode===13) window.open(loginForm);},
 							_onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 						}), startIndex);
 					});
@@ -102,25 +104,20 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 				this.removeChild(children[i]);
 			}
 			if(this.isSingleService()){
+				//add sign out only for single service.
+				//When there are more services user may use Sign out on the tooltip that is always available 
 				for(var i in this.authenticatedServices){
 					this._renderAuthenticatedService(i, 0);
 				}
-			}else{
-				var pos = 0;
-				for(var i in this.authenticatedServices){
-					this._renderAuthenticatedService(i, pos++, this.getUserLabel(this.authenticatedServices[i]));
-				}
-				for(var i in this.unauthenticatedServices){
-					this._renderUnauthenticatedService(i, pos++, this.getUserLabel(this.unauthenticatedServices[i]));
-				}
-				this.addChild(new dijit.MenuSeparator());
 			}
 			 this.addChild(new dijit.MenuItem({
 				 label: "<a href="+require.toUrl("settings/settings.html") + ">Settings</a>",
+				 onKeyDown: function(evt){if(evt.keyCode===13) window.location=require.toUrl("settings/settings.html");},
 				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 			 }));
 			 this.addChild(new dijit.MenuItem({
 				 label: "<a href="+require.toUrl("operations/list.html") + ">Background Operations</a>",
+				 onKeyDown: function(evt){if(evt.keyCode===13) window.location=require.toUrl("operations/list.html");},
 				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 			 }));
 			 this.addChild(new dijit.MenuSeparator());
@@ -131,6 +128,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 				}));
 			menu.addChild(new dijit.MenuItem({
 				 label: "<a href="+require.toUrl("help/index.jsp") + ">Documentation</a>",
+				 onKeyDown: function(evt){if(evt.keyCode===13) window.location=require.toUrl("help/index.jsp");},
 				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 			 }));
 			if(this.keyAssistFunction){
@@ -142,6 +140,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 			/* TODO where is About Orion page?
 			menu.addChild(new dijit.MenuItem({
 				 label: "<a href="+require.toUrl("about.html") + ">About Orion</a>",
+				 onKeyDown: function(evt){if(evt.keyCode===13) window.location=require.toUrl("about.html");},
 				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 			 }));
 			 */
