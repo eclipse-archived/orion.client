@@ -76,27 +76,28 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 		function _createTestWrapper(name, test) {
 			return function() {
 				_dispatchEvent("testStart", name);
+				var startTime = new Date().getTime();
 				try {
 					var testResult = test();
 					if (testResult && typeof testResult.then === "function") {
 						return testResult.then(function() {
-							_dispatchEvent("testDone", name, {result: true});
+							_dispatchEvent("testDone", name, {result: true, elapsed: new Date().getTime() - startTime});
 						}, function(e) {
-							_dispatchEvent("testDone", name, {result: false, message: e.toString(), stack: e.stack || e.stacktrace});
+							_dispatchEvent("testDone", name, {result: false, elapsed: new Date().getTime() - startTime, message: e.toString(), stack: e.stack || e.stacktrace});
 						});
 					} else {
-						_dispatchEvent("testDone", name, {result: true});
+						_dispatchEvent("testDone", name, {result: true, elapsed: new Date().getTime() - startTime});
 						return testResult;
 					}
 				} catch(e) {
-					_dispatchEvent("testDone", name, {result: false, message: e.toString(), stack: e.stack || e.stacktrace});
+					_dispatchEvent("testDone", name, {result: false, elapsed: new Date().getTime() - startTime, message: e.toString(), stack: e.stack || e.stacktrace});
 					return e;
 				}
 			};
 		}		
 		
 		function _createRunWrapper(prefix, obj) {
-			return function() {
+			return function(optTestName) {
 				var tasks = [];
 				_dispatchEvent("runStart", prefix);
 				for ( var property in obj) {
@@ -104,7 +105,9 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 						var name = prefix ? prefix + "." + property : property;
 						var test = obj[property];
 						if (typeof test === "function") {
-							tasks.push(_createTestWrapper(name, test));
+							if (!optTestName || name === optTestName) {
+								tasks.push(_createTestWrapper(name, test));
+							}
 						} else if (typeof test === "object") {
 							tasks.push(_createRunWrapper(name, test));
 						}
@@ -158,17 +161,12 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 		};
 		
 		window._gTestPluginProviderRegistered = false;
-		this.run = function(prefix, obj) {
-			if (typeof obj === "undefined") {
-				obj = prefix;
-				prefix = "";
-			}
-	
+		this.run = function(obj, optTestName) {
 			if (!obj || typeof obj !== "object") {
 				throw new Error("not a test object");
 			}
 			
-			var _run = _createRunWrapper(prefix, obj);
+			var _run = _createRunWrapper("", obj);
 			var that = this;
 			
 			if (!this.useLocal && top !== self && typeof(eclipse) !== "undefined" && eclipse.PluginProvider) {
@@ -182,11 +180,12 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 					window._gTestPluginProviderRegistered = true;
 					var serviceProvider = provider.registerServiceProvider("orion.test.runner", {
 						run: function() {
-							dojo.when(_run(), dojo.hitch(result, "resolve"));
+							var testName = arguments[0] || optTestName;
+							dojo.when(_run(testName), dojo.hitch(result, "resolve"));
 							return result;
 						},
 						list: function() {
-							return _list(prefix, obj);
+							return _list("", obj);
 						}
 					});
 	
@@ -195,11 +194,12 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 						that.addEventListener("runDone", function(name, obj) { serviceProvider.dispatchEvent("runDone", name, obj); });
 						that.addEventListener("testStart", function(name) { serviceProvider.dispatchEvent("testStart", name); });
 						that.addEventListener("testDone", function(name, obj) { serviceProvider.dispatchEvent("testDone", name, obj); });
+						//that.addConsoleListeners();
 					}, function() {
 						if (!that.hasEventListener()) {
 							that.addConsoleListeners();
 						}
-						dojo.when(_run(), dojo.hitch(result, "resolve"));
+						dojo.when(_run(optTestName), dojo.hitch(result, "resolve"));
 					});
 					return result;
 				} catch (e) {
@@ -211,7 +211,7 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 			if (!this.hasEventListener()) {
 				this.addConsoleListeners();
 			}
-			return _run();
+			return _run(optTestName);
 		};
 	}		
 
