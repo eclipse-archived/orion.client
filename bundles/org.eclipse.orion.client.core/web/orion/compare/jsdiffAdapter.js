@@ -34,14 +34,26 @@ orion.JSDiffAdapter = (function() {
 			var diff = JsDiff.diffLines(oldStr, newStr);
 			var map = [];
 			var changContents = [];
-			var previousDiff = null;
 			linesAdded = 0;
 			linesRemoved = 0;
 			changeIndex = -1;
 			var oFileLineCounter = 0;
+			var previousDelim = true;
 		    for (var i = 0; i < diff.length; i++) {
-		    	var current = diff[i],
-		        lines = current.lines || current.value.replace(/\n$/, "").split("\n");
+		    	var current = diff[i];
+		        //var lines = current.lines || current.value.replace(/\n$/, "").split("\n");
+		        lines = current.lines || current.value.split("\n");
+		        var currentLineNumber = lines.length;
+		        var startNumber = 0;
+		        if(lines.length > 1 && lines[lines.length-1] === ""){
+		        	currentLineNumber--;
+		        }
+		        if(currentLineNumber > 1 && !previousDelim){
+		        	if(lines[0] === ""){
+		        		currentLineNumber--;
+		        		startNumber++;
+		        	}
+		        }
 		        current.lines = lines;
 		        if(!current.added && !current.removed){
 		        	if(linesAdded || linesRemoved){
@@ -51,18 +63,22 @@ orion.JSDiffAdapter = (function() {
 						changeIndex = -1;
 						oFileLineCounter += linesRemoved;
 		        	}
-		        	map.push([current.lines.length, current.lines.length, 0]);
-					oFileLineCounter += current.lines.length;
+		        	map.push([currentLineNumber, currentLineNumber, 0]);
+					oFileLineCounter += currentLineNumber;
 		        } else if (current.added){
 		        	if(changeIndex === -1){
 		        		changeIndex = changContents.length +1;
 		        	}
-		        	linesAdded += current.lines.length;
-		        	for(var j = 0; j < current.lines.length ; j++){
+		        	linesAdded += currentLineNumber;
+		        	for(var j = startNumber; j < (currentLineNumber + startNumber) ; j++){
 		        		changContents.push(current.lines[j]);
 		        	}
 		        } else {
-		        	linesRemoved += current.lines.length;
+		        	linesRemoved += currentLineNumber;
+		        }
+		        previousDelim = false;
+		        if(lines.length > 1 && lines[lines.length-1] === ""){
+			        previousDelim = true;
 		        }
 		    }
         	if(linesAdded || linesRemoved){
