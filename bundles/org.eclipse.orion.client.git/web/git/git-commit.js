@@ -56,11 +56,11 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 		commandService.registerCommandContribution("eclipse.removeTag", 1000);
 		
 		var showDiffCommand = new mCommands.Command({
-			name: "Show Diff",
-			tooltip: "Show the diff in the side-by-side compare view",
+			name: "Compare",
+			tooltip: "View the side-by-side compare",
 			imageClass: "git-sprite-open_compare",
 			spriteClass: "gitCommandSprite",
-			id: "eclipse.orion.git.showDiff",
+			id: "eclipse.orion.git.diff.showFullCompare",
 			hrefCallback: function(data) {
 				return require.toUrl("compare/compare.html") +"?readonly#" + data.items.DiffLocation;
 			},
@@ -70,7 +70,24 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 		});		
 
 		commandService.addCommand(showDiffCommand, "object");
-		commandService.registerCommandContribution("eclipse.orion.git.showDiff", 1000);	
+		commandService.registerCommandContribution("eclipse.orion.git.diff.showFullCompare", 1000);
+		
+		var showDiffCommand = new mCommands.Command({
+			name: "Working Directory Version",
+			tooltip: "View the working directory version of the file",
+			imageClass: "git-sprite-open_compare",
+			spriteClass: "gitCommandSprite",
+			id: "eclipse.orion.git.diff.showCurrent",
+			hrefCallback: function(data) {
+				return require.toUrl("edit/edit.html") +"#" + data.items.ContentLocation;
+			},
+			visibleWhen: function(item) {
+				return item.Type === "Diff";
+			}
+		});		
+
+		commandService.addCommand(showDiffCommand, "object");
+		commandService.registerCommandContribution("eclipse.orion.git.diff.showCurrent", 2000);	
 
 		explorer.display(dojo.hash());
 
