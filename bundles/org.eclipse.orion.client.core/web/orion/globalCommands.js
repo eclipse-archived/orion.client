@@ -194,6 +194,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 	var linksMenu;
 	var pageItem;
 	var exclusions = [];
+	var favoriteTarget = null;
 	
 	function _makeEmptyLinksMenu() {
 		var related = dojo.byId("relatedLinks");
@@ -344,10 +345,10 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		exclusions = excluded;
 	}
 	
-	function setPageTarget(item, serviceRegistry, commandService, /*optional*/ alternateItem) {
+	function setPageTarget(item, serviceRegistry, commandService, /*optional*/ alternateItem, /* optional */ pageFavoriteTarget) {
 		pageItem = item;
 		generateRelatedLinks(serviceRegistry, item, exclusions, commandService, alternateItem);
-		renderGlobalCommands(commandService, null, item);
+		favoriteTarget = pageFavoriteTarget;
 		// in the future we should do breadcrumb management and search scoping here
 	}
 	
@@ -438,6 +439,63 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			dojo.place(text, title, "last");
 		}
 		
+		function makeFavorite() {
+			var favoriteService = serviceRegistry.getService("orion.core.favorite");
+			//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
+			if (!favoriteService) {
+				favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+				favoriteService = serviceRegistry.getService("orion.core.favorite");
+			}
+			if (favoriteTarget && favoriteTarget.Location) {
+				favoriteService.hasFavorite(favoriteTarget.ChildrenLocation || favoriteTarget.Location).then(function(result) {
+					if (!result) {
+						favoriteService.makeFavorites([favoriteTarget]);
+						serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + " has been added to the favorites list.", 2000);
+					} else {
+						serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + " is already a favorite.", 2000);
+					}
+				});
+			} else {
+				var url = window.location.pathname + window.location.hash;
+				favoriteService.hasFavorite(url).then(function(result) {
+					if (!result) {
+						favoriteService.addFavoriteUrl(url);
+						serviceRegistry.getService("orion.page.message").setMessage(url + " has been added to the favorites list.", 2000);
+					} else {
+						serviceRegistry.getService("orion.page.message").setMessage(url + " is already a favorite.", 2000);
+					}
+				});
+			}
+		}
+		
+		// Hook up favorites button
+		var faveButton = dojo.byId("pageFavorite");
+		if (faveButton) {
+			dojo.addClass(faveButton, "commandButton");
+			dojo.connect(faveButton, "onclick", this, function() {
+				makeFavorite();
+			});
+			// onClick events do not register for spans when using the keyboard
+			dojo.connect(faveButton, "onkeypress", this, function(e) {
+				if (e.keyCode === dojo.keys.ENTER || e.keyCode === dojo.keys.SPACE) {						
+					makeFavorite();
+				}
+			});
+			dojo.connect(faveButton, "onmouseover", faveButton, function() {dojo.addClass(this, "commandButtonOver");});
+			dojo.connect(faveButton, "onfocus", faveButton, function() {dojo.addClass(this, "commandButtonOver");});
+			dojo.connect(faveButton, "onmouseout", faveButton, function() {dojo.removeClass(this, "commandButtonOver");});
+			dojo.connect(faveButton, "onblur", faveButton, function() {dojo.removeClass(this, "commandButtonOver");});
+			new mCommands.CommandTooltip({
+				connectId: [faveButton],
+				label: "Add this page to the favorites list",
+				position: ["below", "left", "right", "above"], // below since this is at top of page.
+				commandParent: parent,
+				commandService: commandService
+			});
+
+		}
+
+		
 		// Assemble global commands
 		var favoriteCommand = new mCommands.Command({
 			name: "Make Favorite",
@@ -469,9 +527,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 					favService.hasFavorite(item.ChildrenLocation || item.Location).then(doAdd(item));
 				}
 			}});
-		commandService.addCommand(favoriteCommand, "global");
-		commandService.registerCommandContribution("orion.makeFavorite", 1, "globalActions", null, false, new mCommands.CommandKeyBinding("f", true, true));
-
+		commandService.addCommand(favoriteCommand, "dom");
 	
 		var openResourceDialog = function(searcher, serviceRegistry, /* optional */ editor) {
 			var favoriteService = serviceRegistry.getService("orion.core.favorite");
