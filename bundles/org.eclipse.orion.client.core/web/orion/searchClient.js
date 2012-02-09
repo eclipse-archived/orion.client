@@ -185,7 +185,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 						var namesSeenMap = {};
 						
 						function doAppend(domElement, resource) {
-							var path = resource.folderName ? resource.folderName : mSearchUtils.path2FolderName(resource.path, resource.name);
+							var path = resource.folderName ? resource.folderName : resource.path;
 							domElement.appendChild(document.createTextNode(' - ' + path + ' '));
 						}
 						
