@@ -27,6 +27,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 		isSingleService : function(){
 			return this.length(this.unauthenticatedServices) + this.length(this.authenticatedServices) === 1;
 		},
+		hasServices: function(){
+			return this.length(this.unauthenticatedServices) + this.length(this.authenticatedServices) > 0;
+		},
 		length: function(obj) {
 			var length = 0;
 			for(var prop in obj) {
@@ -36,35 +39,23 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 			return length;
 		},
 		
-		_renderAuthenticatedService: function(key, parent, startIndex){
+		_renderAuthenticatedService: function(key, startIndex, who){
 			var _self = this;
 			var authService = this.authenticatedServices[key].authService;
-			var jsonData = this.authenticatedServices[key].data;
-			if(!authService){
-				var loginForm = this.authenticatedServices[key].SignInLocation;
-				parent.addChild(new dijit.MenuItem({
-					label: "Logged in to " + this.getHostname(loginForm)
-				}), startIndex);
-			}else {
-				parent.addChild(new dijit.MenuItem({
-					label: "Sign Out",
-					onClick: dojo.hitch(this, function(authService, key){
-						return function(){authService.logout().then(dojo.hitch(_self, function(){
-							this.addUserItem(key, authService, this.authenticatedServices[key].label);
-							localStorage.removeItem(key);
-							}));};
-						})(authService, key)
-				}), startIndex);
-				if(jsonData.Location){
-					parent.addChild(new dijit.MenuItem({
-						label: "<a href="+require.toUrl("profile/user-profile.html") + "#" + jsonData.Location+">Profile</a>",
-						_onClick: function(evt) { this.getParent().onItemClick(this, evt); }
-					}), startIndex+1);	
-				}
+			if(authService && authService.logout){
+					this.addChild(new dijit.MenuItem({
+						label: who ? "Sign Out " + who : "Sign Out",
+						onClick: dojo.hitch(this, function(authService, key){
+							return function(){authService.logout().then(dojo.hitch(_self, function(){
+								this.addUserItem(key, authService, this.authenticatedServices[key].label);
+								localStorage.removeItem(key);
+								}));};
+							})(authService, key)
+					}), startIndex);
 			}
 		},
 		
-		_renderUnauthenticatedService: function(key, parent, startIndex){
+		_renderUnauthenticatedService: function(key, startIndex, where){
 			var _self = this;
 			var authService = this.unauthenticatedServices[key].authService;
 			
@@ -75,8 +66,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 				}else{
 					loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key;
 				}
-				parent.addChild(new dijit.MenuItem({
-					label: "<a target='_blank' href="+loginForm+">Sign In</a>",
+				this.addChild(new dijit.MenuItem({
+					label: where ? "<a target='_blank' href="+loginForm+">Sign In To "+ where +"</a>" : "<a target='_blank' href="+loginForm+">Sign In</a>",
 					_onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 				}), startIndex);
 				
@@ -88,15 +79,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 						}else{
 							loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key;
 						}
-						parent.addChild(new dijit.MenuItem({
-							label: "<a target='_blank' href="+loginForm+">Sign In</a>",
+						_self.addChild(new dijit.MenuItem({
+							label: where ? "<a target='_blank' href="+loginForm+">Sign In To "+where+"</a>" : "<a target='_blank' href="+loginForm+">Sign In</a>",
 							_onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 						}), startIndex);
 					});
 				})(key);
 			}else if(authService.login){
-				parent.addChild(new dijit.MenuItem({
-					label: "<a target='_blank' style='cursor: hand;'>Sign In</a>",
+				this.addChild(new dijit.MenuItem({
+					label: where ? "Sign In To " + where : "Sign In",
 					onClick:  dojo.hitch(_self, function(authService){
 						return function(){authService.login(eclipse.globalCommandUtils.notifyAuthenticationSite);};
 					})(authService)
@@ -112,30 +103,18 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 			}
 			if(this.isSingleService()){
 				for(var i in this.authenticatedServices){
-					this._renderAuthenticatedService(i, this, 0);
-				}
-				for(var i in this.unauthenticatedServices){
-					this._renderUnauthenticatedService(i, this, 0);
+					this._renderAuthenticatedService(i, 0);
 				}
 			}else{
+				var pos = 0;
 				for(var i in this.authenticatedServices){
-					var menu = new dijit.Menu();
-					this.addChild(new dijit.PopupMenuItem({
-						label: this.getUserLabel(this.authenticatedServices[i]),
-						popup: menu
-					}));
-					this._renderAuthenticatedService(i, menu, 0);
+					this._renderAuthenticatedService(i, pos++, this.getUserLabel(this.authenticatedServices[i]));
 				}
 				for(var i in this.unauthenticatedServices){
-					var menu = new dijit.Menu();
-					this.addChild(new dijit.PopupMenuItem({
-						label: this.getUserLabel(this.unauthenticatedServices[i]),
-						popup: menu
-					}));
-					this._renderUnauthenticatedService(i, menu, 0);
+					this._renderUnauthenticatedService(i, pos++, this.getUserLabel(this.unauthenticatedServices[i]));
 				}
+				this.addChild(new dijit.MenuSeparator());
 			}
-			 this.addChild(new dijit.MenuSeparator());
 			 this.addChild(new dijit.MenuItem({
 				 label: "<a href="+require.toUrl("settings/settings.html") + ">Settings</a>",
 				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
@@ -160,6 +139,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 					 onClick: this.keyAssistFunction
 				 }));	
 			}
+			/* TODO where is About Orion page?
+			menu.addChild(new dijit.MenuItem({
+				 label: "<a href="+require.toUrl("about.html") + ">About Orion</a>",
+				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
+			 }));
+			 */
 		},
 		
 		getUserLabel: function(userData){
@@ -209,7 +194,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 					displayName = displayName.substring(0, 30) + "...";
 				dojo.create("a", {innerHTML: displayName,
 						href: require.toUrl("profile/user-profile.html") + "#" + jsonData.Location,
-						title: "View profile of " + userName
+						title: "View profile of " + userName,
+						style: "margin-right: 0px"
 					}, dojo.byId('userInfo'), "only");
 			}else if(this.isSingleService() && !jsonData){
 				if(authService.getAuthForm){
@@ -223,26 +209,53 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 							dojo.create("a", {innerHTML: "Sign In",
 								href: loginForm,
 								title: "Sign In",
+								style: "margin-right: 0px",
 								target: "_blank"
 							}, dojo.byId('userInfo'), "only");
 						});
 					})(key);
 				}else if(authService.login){
-					dojo.create("a", {innerHTML: "Sign In",
+					var a = dojo.create("a", {innerHTML: "Sign In",
 						title: "Sign In",
-						onClick:  function(){alert("login");authService.login(eclipse.globalCommandUtils.notifyAuthenticationSite);},
-						style: 'cursor: hand;'
+						style: "margin-right: 0px",
 					}, dojo.byId('userInfo'), "only");
+					
+					dojo.connect(a, "onmouseover", a, function() {
+						a.style.cursor = "pointer";
+					});
+					dojo.connect(a, "onmouseout", a, function() {
+						a.style.cursor = "default";
+					});
+					
+					dojo.connect(a, "onclick", function(){
+							authService.login(eclipse.globalCommandUtils.notifyAuthenticationSite);
+						});
+					
 				}
+			} else if(this.hasServices()) {
+				var a = dojo.create("a", {innerHTML: "Profiles",
+					style: "margin-right: 0px"
+					}, dojo.byId('userInfo'), "only");
+				
+				dojo.connect(a, "onmouseover", a, function() {
+					a.style.cursor = "pointer";
+				});
+				dojo.connect(a, "onmouseout", a, function() {
+					a.style.cursor = "default";
+				});
+				
+				dojo.connect(a, "onclick", function(){
+					try{
+						dijit.popup.open({
+				            popup: _self.options.loginDialog,
+				            around: dojo.byId('userInfo')
+				        });
+					}catch (e) {/*Known key is null FF error*/}
+						dijit.focus(_self.options.loginDialog.domNode);
+					});
+				
 			} else {
-				dojo.create("a", {innerHTML: "Profiles",
-						onClick: function(){
-							dijit.popup.open({
-					            popup: loginDialog,
-					            around: dojo.byId('userInfo')
-					        });	
-						}
-					}, dojo.byId('userInfo'), "only");				
+				dojo.empty(dojo.byId('userInfo'));
 			}
 		},
 	});

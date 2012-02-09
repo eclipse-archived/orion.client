@@ -27,7 +27,6 @@ define(['require'],
 	'<div id="staticBanner" class="layoutBlock topRowBanner">' +
 		'<a id="home" class="layoutLeft primaryNav" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
 		'<div id="primaryNav" class="layoutLeft primaryNav"></div>' +
-		'<div id="help" class="layoutRight help"><a id="help" href="' + require.toUrl("help/index.jsp") + '"><img src="' + require.toUrl("images/help.gif") + '" alt="Help"/></a></div>'+
 		'<div id="userMenu" class="layoutRight primaryNav"></div>' +
 		'<div id="userInfo" class="layoutRight primaryNav"></div>' +
 		'<div class="layoutRight primaryNav">|</div>' +
@@ -55,8 +54,7 @@ define(['require'],
 				'<a href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&version=0.4" target="_blank">Report a Bug</a> | ' +
 				'<a href="http://www.eclipse.org/legal/privacy.php" target="_blank">Privacy Policy</a> | ' + 
 				'<a href="http://www.eclipse.org/legal/termsofuse.php" target="_blank">Terms of Use</a> | '+ 
-				'<a href="http://www.eclipse.org/legal/copyright.php" target="_blank">Copyright Agent</a> | '+
-				'<a href="' + require.toUrl("/operations/list.html") +'" target="_blank">Server Operations</a>' +
+				'<a href="http://www.eclipse.org/legal/copyright.php" target="_blank">Copyright Agent</a>'+
 			'</div>' +
 		'</div>';
 	// END BOTTOM BANNER FRAGEMENT
