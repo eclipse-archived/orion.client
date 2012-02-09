@@ -217,6 +217,10 @@ orion.searchUtils.fullPathNameByMeta = function(parents){
 	}
 	return fullPath;
 };
+
+orion.searchUtils.path2FolderName = function(filePath, fileName){
+	return filePath.substring(0, filePath.length-fileName.length-1);
+};
 	
 return orion.searchUtils;
 });
