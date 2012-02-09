@@ -195,7 +195,7 @@ exports.GitRepositoryExplorer = (function() {
 	
 	// Git repo
 	
-	GitRepositoryExplorer.prototype.decorateRepositories = function(repositories, deferred){
+	GitRepositoryExplorer.prototype.decorateRepositories = function(repositories, mode, deferred){
 		var that = this;
 		if (deferred == null)
 			deferred = new dojo.Deferred();
@@ -213,7 +213,53 @@ exports.GitRepositoryExplorer = (function() {
 					path += resp.Name;
 					
 					repositories[0].Content.Path = path;
-					that.decorateRepositories(repositories.slice(1), deferred);
+					
+					if (mode !== "full"){
+						that.decorateRepositories(repositories.slice(1), mode, deferred);
+						return;
+					}
+					
+					that.registry.getService("orion.git.provider").getGitStatus(repositories[0].StatusLocation).then(
+						function(resp){
+							repositories[0].Status = resp;
+
+							that.registry.getService("orion.git.provider").getGitBranch(repositories[0].BranchLocation).then(
+								function(resp){
+									var branches = resp.Children;
+									var currentBranch;
+									for (var i=0; i<branches.length; i++){
+										if (branches[i].Current){
+											currentBranch = branches[i];
+											break;
+										}
+									}
+									
+									if (currentBranch.RemoteLocation[0] == null){
+										that.decorateRepositories(repositories.slice(1), mode, deferred);
+										return;
+									};
+									
+									var tracksRemoteBranch = (currentBranch.RemoteLocation.length == 1 && currentBranch.RemoteLocation[0].Children.length === 1);
+									
+									if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
+										that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD", "",
+											function(resp){
+												repositories[0].CommitsToPush = resp.Children.length;
+											}
+										);
+									} else {
+										that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20", 
+											function(resp){	
+												repositories[0].CommitsToPush = resp.Children.length;
+											}
+										);	
+									}
+									
+									that.decorateRepositories(repositories.slice(1), mode, deferred);
+								}
+							);
+						}	
+					);
 				}
 			);
 		} else {
@@ -249,16 +295,16 @@ exports.GitRepositoryExplorer = (function() {
 		
 		dojo.place( content, tableNode );
 		
-		this.decorateRepositories(repositories).then(
+		this.decorateRepositories(repositories, mode).then(
 			function(){
 				for(var i=0; i<repositories.length;i++){
-					that.renderRepository(repositories[i], i, repositories.length, links);
+					that.renderRepository(repositories[i], i, repositories.length, mode, links);
 				}
 			}
 		);
 	};
 	
-	GitRepositoryExplorer.prototype.renderRepository = function(repository, index, length, links){
+	GitRepositoryExplorer.prototype.renderRepository = function(repository, index, length, mode, links){
 		var extensionListItem = dojo.create( "div", { "class":"git-list-item " + ((length == 1) ? "" : ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow"))}, dojo.byId("repositoryNode") );
 		var horizontalBox = dojo.create( "div", null, extensionListItem );
 		
@@ -277,6 +323,23 @@ exports.GitRepositoryExplorer = (function() {
 			innerHTML: (repository.GitUrl != null ? repository.GitUrl : "(no remote)") }, detailsView );
 		dojo.create( "div", null, detailsView );
 		var description = dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: "location: " + repository.Content.Path }, detailsView );
+		
+		var status = repository.Status;
+		
+		if (mode === "full"){
+			var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length;
+			var staged = status.Changed.length + status.Added.length + status.Removed.length;
+			
+			var workspaceState = ((unstaged > 0 || staged > 0) 
+				? unstaged + " file(s) to stage and " + staged + " file(s) to commit."
+				: "Nothing to commit.");
+			dojo.create( "div", {"style":"padding-top:10px"}, detailsView );		
+			dojo.create( "span", { "class":"gitSecondaryDescription", "style":"padding-left:10px", innerHTML: workspaceState}, detailsView );
+			
+			var commitsState = repository.CommitsToPush;
+			dojo.create( "span", { "class":"gitSecondaryDescription", "style":"padding-left:10px", 
+				innerHTML: ((commitsState > 0 ) ? commitsState + " commit(s) to push." : "Nothing to push.")}, detailsView );
+		}
 		
 		var actionsArea = dojo.create( "div", {"id":"repositoryActionsArea", "class":"git-action-area" }, horizontalBox );
 		this.commandService.renderCommands(actionsArea, "object", repository, this, "tool");
