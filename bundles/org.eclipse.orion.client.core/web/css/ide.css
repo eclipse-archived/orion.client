@@ -75,16 +75,12 @@ a:hover {
 
 .footerBlock {
 	float: left;
-	margin-right: 4px;
-	margin-left: 4px;
-	margin-bottom: 4px;
+	margin: 4px;
 }
 
 .footerRightBlock {
 	float: right;
-	margin-right: 4px;
-	margin-left: 4px;
-	margin-bottom: 4px;
+	margin: 4px;
 }
 
 .navlinkonpage {
@@ -110,9 +106,15 @@ a:hover {
 	border-bottom: 1px dotted;
 }
 
+.logo {
+	padding-top: 2px;
+}
+
 .primaryNav {
 	font-size: 8pt;
 	color: #bfbfbf;
+	padding-top: 4px;
+	vertical-align: baseline;
 }
 
 .primaryNav a {
@@ -120,6 +122,8 @@ a:hover {
 	color: #bfbfbf;
 	margin-right: 6px;
 	margin-left: 6px;
+	padding-top: 4px;
+	vertical-align: baseline;
 }
 
 .primaryNav a:hover {
@@ -138,6 +142,10 @@ a:hover {
 .pageActions {
 	font: 9pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
 	min-height: 30px;
+}
+
+.status {
+	padding-top: 6px;
 }
 
 /* marker for finding section and main toolbars */

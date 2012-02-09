@@ -117,7 +117,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 									if (metadata.Parents && metadata.Parents.length > 0) {
 										return fileClient.read(metadata.Parents[0].Location, true);
 									}
-								});
+								}, metadata);
 							mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 							this.setTitle(metadata.Location);
 							this._contentType = contentTypeService.getFileContentType(metadata);

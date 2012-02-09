@@ -25,7 +25,7 @@ define(['require'],
 	var topHTMLFragment =
 	//Top row:  Logo + discovery links + user
 	'<div id="staticBanner" class="layoutBlock topRowBanner">' +
-		'<a id="home" class="layoutLeft primaryNav" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
+		'<a id="home" class="layoutLeft logo" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
 		'<div id="primaryNav" class="layoutLeft primaryNav"></div>' +
 		'<div id="userMenu" class="layoutRight primaryNav"></div>' +
 		'<div id="userInfo" class="layoutRight primaryNav"></div>' +
@@ -36,7 +36,9 @@ define(['require'],
 		'<div id="pageTitle" class="layoutLeft pageTitle"></div>' +
 		'<input type="search" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutRight searchbox">' +
 		'<div id="relatedLinks" class="layoutRight pageNav"></div>' +
-		'<div id="globalActions" class="layoutRight pageNav"></div>' +
+		'<div id="extras" class="layoutRight pageNav">' +
+			'<span id="pageFavorite" tabindex: "0", role: "button" class="imageSprite core-sprite-makeFavorite"></span>' +
+		'</div>' +
 		'<div id="dimension" class="layoutBlock dimension"></div>' +
 		'<div id="location" class="layoutBlock currentLocation"></div>' +
 	'</div>';
@@ -57,12 +59,12 @@ define(['require'],
 				'<a href="http://www.eclipse.org/legal/copyright.php" target="_blank">Copyright Agent</a>'+
 			'</div>' +
 		'</div>';
-	// END BOTTOM BANNER FRAGEMENT
+	// END BOTTOM BANNER FRAGMENT
 
 	var toolbarHTMLFragment = 
 		'<div class="layoutLeft pageActions" id="pageActions"></div>' +
 		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane"></img>' +
-		'<div class="layoutRight" id="statusPane"></div>' +
+		'<div class="layoutRight status" id="statusPane"></div>' +
 		'<div class="layoutRight pageActions" id="pageNavigationActions"></div>' +
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
 				'<div class="layoutLeft" id="notifications" aria-live="assertive" aria-atomic="true"></div>' +
