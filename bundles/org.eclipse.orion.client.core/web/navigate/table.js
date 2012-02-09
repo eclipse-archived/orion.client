@@ -50,7 +50,7 @@ dojo.addOnLoad(function(){
 		
 		function refresh() {
 			explorer.loadResourceList(dojo.hash(), false, function() {
-				mGlobalCommands.setPageTarget(explorer.treeRoot, serviceRegistry, commandService);
+				mGlobalCommands.setPageTarget(explorer.treeRoot, serviceRegistry, commandService, null, /* favorites target */explorer.treeRoot);
 			});
 		}
 	
