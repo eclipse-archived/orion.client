@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define */
 /*jslint browser:true*/
-define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTarget) {
+define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/textview/eventTarget"], function(messages, mEventTarget) {
 	// TODO this affects indentation, which we don't support. Should be a parameter.
 	var tabSize = 4;
 	
@@ -675,6 +675,7 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 	}
 
 	var LINESTYLE_OVERSHOOT = 20;
+	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
 
 	CodeMirrorStyler.prototype = /** @lends orion.mirror.CodeMirrorStyler.prototype */ {
 		/** @private */
@@ -733,56 +734,40 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 				modeApplier.highlight(lineIndex, Math.min(lineIndex + LINESTYLE_OVERSHOOT, lineCount - 1), true /*don't dispatch*/);
 				style = modeApplier.getLineStyle(lineIndex);
 			}
-
-			var min = Number.MAX_VALUE, max = -1;
 			var model = this.textView.getModel();
-		
 			if (style) {
 				// Now we have a style for the line. It may not be correct in the case where lineIndex is at the end of a large
 				// buffer. But in that case, the highlight job kicked off by ModelChanged will eventually reach it and fix it up.
 				var rangesAndErrors = modeApplier.toStyleRangesAndErrors(style, lineIndex);
 				if (rangesAndErrors) {
 					e.ranges = rangesAndErrors[0];
-
-					for (var i=0; i < e.ranges.length; i++) {
-						min = Math.min(min, model.getLineAtOffset(e.ranges[i].start));
-						max = Math.max(max, model.getLineAtOffset(e.ranges[i].end));
-					}
-					
-					//console.debug("Got style for lines " + (min+1) + " to " + (max+1));
 					var annotationModel = this.annotationModel;
 					if (annotationModel) {
-						var toRemove = [];
-						var toAdd = [];
-
-						if (rangesAndErrors[1]) {
-							for (var i=0; i < rangesAndErrors[1].length; i++) {
-								var error = rangesAndErrors[1][i];
+						var toRemove = [], toAdd = [];
+						var errors = rangesAndErrors[1];
+						if (errors) {
+							for (var i=0; i < errors.length; i++) {
+								var error = errors[i];
 								if (error.style.styleClass === "cm-error") {
 									toAdd.push({
 										start: error.start,
 										end: error.end,
-										type: "orion.annotation.highlightError",
-										title: "Syntax error.",
+										type: HIGHLIGHT_ERROR_ANNOTATION,
+										title: messages.syntaxError,
 										html: "<div class='annotationHTML error'></div>",
 										rangeStyle: {styleClass: "annotationRange error"}
 										});
 								}
 							}
-							
 						}
-						min = Math.max(min, 0);
-						max = Math.min(max, model.getLineCount() -1);
-						var annos = annotationModel.getAnnotations(model.getLineStart(min), model.getLineEnd(max));
+						var annos = annotationModel.getAnnotations(model.getLineStart(lineIndex), model.getLineEnd(lineIndex));
 						while (annos.hasNext()) {
 							var anno = annos.next();
-							if (anno.type === "orion.annotation.highlightError") {
+							if (anno.type === HIGHLIGHT_ERROR_ANNOTATION) {
 								toRemove.push(anno);
 							}
 						}
 						annotationModel.replaceAnnotations(toRemove, toAdd);
-						//console.debug("Redrawing lines " + (min+1) + " to " + (max+1));
-						this.textView.redrawLines(min, max+1);
 					}
 				}
 			}
