@@ -72,6 +72,8 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 		}
 	};
 		
+	//This is an optional function for explorerNavHandler. It provides the div with the "href" attribute.
+	//The explorerNavHandler hooked up by the explorer will check if the href exist as the attribute and react on enter key press.
 	FileRenderer.prototype.getRowActionElement = function(tableRowId){
 		return dojo.byId(tableRowId+"NameColumn");
 	};
@@ -247,6 +249,18 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 		}
 	};
 		
+	//This is an optional function for explorerNavHandler. It changes the href of the window.locatino to navigate to the parent page.
+	//The explorerNavHandler hooked up by the explorer will check if this optional function exist and call it when left arrow key hits on a top level item that is aleady collapsed.
+	FileExplorer.prototype.scopeUp = function(){
+		if(this.treeRoot && this.treeRoot.Parents){
+			if(this.treeRoot.Parents.length === 0){
+				window.location.href = "#";
+			} else if(this.treeRoot.Parents[0].ChildrenLocation){
+				window.location.href = "#" + this.treeRoot.Parents[0].ChildrenLocation;
+			}
+		}
+	};
+	
 	/**
 	 * Load the resource at the given path.
 	 * @param path The path of the resource to load

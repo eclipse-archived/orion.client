@@ -47,14 +47,11 @@ define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/sear
 					}
 				}
 			}
-			if(this.eventHandlers){
-				for (var i=0; i < this.eventHandlers.length; i++) {
-					dojo.disconnect(this.eventHandlers[i]);
-				}
+			if(this.explorer && this.explorer.navHandler){
+				this.explorer.navHandler.removeListeners();
 			}
-			var explorer = new mSearchExplorer.SearchResultExplorer(this.registry, this.commandService, resultLocation,  resultsNode, query, jsonData.response.numFound);
-			explorer.startUp();
-			this.eventHandlers = explorer.eventHandlers;
+			this.explorer = new mSearchExplorer.SearchResultExplorer(this.registry, this.commandService, resultLocation,  resultsNode, query, jsonData.response.numFound);
+			this.explorer.startUp();
 		},
 
 		/**
@@ -90,9 +87,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/sear
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
 			var parent = dojo.byId(this.resultsId);
 			dojo.place(document.createTextNode("Searching..."), parent, "only");
-			var results = dojo.create("div", null, parent);
-			this._search(results, query);
-			dojo.place(results, parent, "only");
+			this._search(parent, query);
 		}
 		
 	};

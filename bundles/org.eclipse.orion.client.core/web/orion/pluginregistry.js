@@ -237,7 +237,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
  * @class The Orion plugin registry
  * @name orion.pluginregistry.PluginRegistry
  */
-eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
+eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	var _self = this;
 	var _storage = opt_storage || localStorage || {};
 	var _plugins = [];
@@ -282,8 +282,10 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage) {
 				var iframe = document.createElement("iframe");
 		        iframe.id = url;
 		        iframe.name = url;
-		        iframe.style.display = "none";
-		        iframe.style.visibility = "hidden";
+		        if (!opt_visible) {
+			        iframe.style.display = "none";
+			        iframe.style.visibility = "hidden";
+		        }
 		        iframe.src = url;
 		        document.body.appendChild(iframe);
 		        var channel = {iframe: iframe, target: iframe.contentWindow, handler: handler, url: url};

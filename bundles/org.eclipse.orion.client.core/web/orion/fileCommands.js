@@ -728,13 +728,17 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		var fileCommands = [];
 		var i;
 		for (i=0; i<commandsReferences.length; i++) {
-			var impl = serviceRegistry.getService(commandsReferences[i]);
-			var info = {};
-			var propertyNames = commandsReferences[i].getPropertyNames();
-			for (var j = 0; j < propertyNames.length; j++) {
-				info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
+			// Exclude any navigation commands themselves, since we are the navigator.
+			var id = commandsReferences[i].getProperty("id");
+			if (id !== "orion.navigateFromFileMetadata") {
+				var impl = serviceRegistry.getService(commandsReferences[i]);
+				var info = {};
+				var propertyNames = commandsReferences[i].getPropertyNames();
+				for (var j = 0; j < propertyNames.length; j++) {
+					info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
+				}
+				fileCommands.push({properties: info, service: impl});
 			}
-			fileCommands.push({properties: info, service: impl});
 		}
 		
 		function getContentTypesMap() {

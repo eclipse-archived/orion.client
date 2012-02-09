@@ -13,12 +13,6 @@
 
 define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/textview/annotations', 'orion/textview/tooltip'], function(messages, mAnnotations, mTooltip) {
 
-	/** @private */
-	function formatMessage(msg) {
-		var args = arguments;
-		return msg.replace(/\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
-	}
-	
 	/**
 	 * Constructs a new ruler. 
 	 * <p>
@@ -560,7 +554,7 @@ define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/text
 				var lineStart = model.getLineStart(mapLine);
 				mapLine = model.getBaseModel().getLineAtOffset(model.mapOffset(lineStart));
 			}
-			return formatMessage(messages.line, mapLine + 1);
+			return messages.formatMessage(messages.line, mapLine + 1);
 		}
 		return Ruler.prototype._getTooltipContents.call(this, lineIndex, annotations);
 	};
@@ -610,6 +604,7 @@ define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/text
 		if (model.getBaseModel) {
 			start = model.mapOffset(start);
 			end = model.mapOffset(end);
+			model = model.getBaseModel();
 		}
 		var annotation, iter = annotationModel.getAnnotations(start, end);
 		while (!annotation && iter.hasNext()) {
@@ -617,7 +612,7 @@ define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/text
 			if (!this.isAnnotationTypeVisible(a.type)) { continue; }
 			annotation = a;
 		}
-		if (annotation) {
+		if (annotation && model.getLineAtOffset(annotation.start) === model.getLineAtOffset(start)) {
 			var tooltip = mTooltip.Tooltip.getTooltip(this._view);
 			if (tooltip) {
 				tooltip.setTarget(null);

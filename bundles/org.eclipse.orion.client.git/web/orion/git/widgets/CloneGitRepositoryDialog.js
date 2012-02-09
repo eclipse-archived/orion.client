@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -35,6 +35,7 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 		this.advancedShown = false;
 	},
 	postCreate : function(){
+		var that = this;
 		this.inherited(arguments);
 		if (this.options.url) {
 			this.gitUrl.value = this.options.url;
@@ -42,7 +43,7 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 		if(this.options.advancedOnly){
 			this.Basic.style.display="none";
 			this.Advanced.style.display="";
-			this.gitName.focus();
+			setTimeout(function(){that.gitName.focus();}, 400);
 		}
 		
 		dojo.connect(this.changeGitPath, "onclick", null, dojo.hitch(this, this.openDirectoryPickerDialog));
