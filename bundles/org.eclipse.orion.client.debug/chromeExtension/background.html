@@ -1,0 +1,139 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+/*jslint browser:true*/
+
+<html>
+<script>
+var ADD_EVENT_TARGET = "add-event-target";
+var REMOVE_EVENT_TARGET = "remove-event-target";
+var REQUEST_ATTACH = "attach";
+var REQUEST_CONNECT_LOCAL = "connect-local";
+var REQUEST_CONNECT_PORT = "connect-port";
+var REQUEST_DETACH = "detach";
+var REQUEST_ENABLE = "enable";
+var REQUEST_GET_ID = "get-id";
+var REQUEST_GET_URL = "get-url";
+var REQUEST_GET_VERSION = "get-version";
+var REQUEST_SEND_COMMAND = "send-command";
+
+var counter = 0;
+var eventTargets = {};
+
+chrome.debugger.onDetach.addListener(function(source) {
+	for (current in eventTargets) {
+		chrome.tabs.sendRequest(eventTargets[current], {id: "event-" + source.tabId + "-" + counter++, content: {id: "detached", data: {}}});
+	}
+});
+chrome.debugger.onEvent.addListener(function(source, method, params) {
+	for (current in eventTargets) {
+		chrome.tabs.sendRequest(eventTargets[current], {id: "event-" + source.tabId + "-" + counter++, content: {id: method, data: params || {}}});
+	}
+});
+chrome.tabs.onCreated.addListener(function(tab) {
+	for (current in eventTargets) {
+		chrome.tabs.sendRequest(eventTargets[current], {id: "event-global-" + counter++, content: {id: "tabCreated", data: {id: tab.id, url: tab.url}}});
+	}
+});
+chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+	for (current in eventTargets) {
+		chrome.tabs.sendRequest(eventTargets[current], {id: "event-global-" + counter++, content: {id: "tabRemoved", data: {id: tabId}}});
+	}
+});
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+	if (changeInfo.url) {
+		for (current in eventTargets) {
+			chrome.tabs.sendRequest(eventTargets[current], {id: "event-" + tabId + "-" + counter++, content: {id: "updateUrl", data: {url: changeInfo.url}}});
+		}
+	}
+});
+
+chrome.extension.onRequest.addListener(
+	function(request, sender, sendResponse) {
+		var content = request.content;
+		if (content.id === REQUEST_CONNECT_LOCAL) {
+			chrome.windows.getAll({populate: true}, function(windows) {
+				var data = [];
+				for (var i = 0; i < windows.length; i++) {
+					var tabs = windows[i].tabs;
+					for (var j = 0; j < tabs.length; j++) {
+						var current = tabs[j];
+						var url = current.url;
+						data.push({
+							id: current.id,
+							url: url
+						});
+					}
+				}
+				sendResponse({id: request.id, content: {data: {tabs: data}}});
+			});
+		} else if (content.id === REQUEST_CONNECT_PORT) {
+			var port = content.data.port;
+			if (isNaN(port) || !(1000 <= port && port < 65535)) {
+				sendResponse({id: request.id, content: {data: {error: "Invalid port, value must be 1000 - 65535"}}});
+			} else {
+				var url = "http://localhost:" + port + "/json";
+				var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState === 4) {
+						if (xhr.responseText.length > 0) {
+							sendResponse({id: request.id, content: {data: {tabs: JSON.parse(xhr.responseText)}}});
+						}
+					}
+				};
+				xhr.onerror = function() {
+					sendResponse({id: request.id, content: {data: {error: "TODO get the error message"}}}); // TODO
+				};
+				xhr.open("GET", url, true);
+				xhr.setRequestHeader('Cache-Control','no-cache');
+				xhr.send(null);
+			}
+		} else if (content.id === REQUEST_ATTACH) {
+			var id = content.data.id;
+			chrome.debugger.attach({tabId: id}, "0.1", function() {
+				sendResponse({id: request.id, content: {data: chrome.extension.lastError ? {error: chrome.extension.lastError} : {}}});
+			});
+		} else if (content.id === REQUEST_DETACH) {
+			var id = content.data.id;
+			chrome.debugger.detach({tabId: id}, function() {
+				sendResponse({id: request.id, content: {data: chrome.extension.lastError ? {error: chrome.extension.lastError} : {}}});
+			});
+		} else if (content.id === REQUEST_SEND_COMMAND) {
+			chrome.debugger.sendCommand({tabId: content.data.id}, content.data.command, content.data.args || {}, function(result) {
+				sendResponse({id: request.id, content: {data: chrome.extension.lastError ? {error: chrome.extension.lastError} : {result: result}}});
+			});
+		} else if (content.id === ADD_EVENT_TARGET) {
+			eventTargets["t" + sender.tab.id] = sender.tab.id;
+		} else if (content.id === REMOVE_EVENT_TARGET) {
+			delete eventTargets["t" + sender.tab.id];
+		} else if (content.id === REQUEST_GET_ID) {
+			sendResponse({id: request.id, content: {data: {id: sender.tab.id}}});
+		} else if (content.id === REQUEST_GET_URL) {
+			chrome.tabs.get(content.data.id, function(tab) {
+				sendResponse({id: request.id, content: {data: chrome.extension.lastError ? {error: chrome.extension.lastError} : {url: tab.url}}});
+			});
+		} else if (content.id === REQUEST_GET_VERSION) {
+			chrome.management.getAll(function (extensions) {
+				for (var i = 0; i < extensions.length; i++) {
+					var current = extensions[i];
+					if (current.name === "Orion Debug Extension for Chrome") {
+						sendResponse({id: request.id, content: {data: {version: current.version}}});
+						return;
+					}
+				}
+				sendResponse({id: request.id, content: {data: {}}});
+			});
+		}
+	}
+);
+</script>
+</html>
