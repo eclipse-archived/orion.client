@@ -326,9 +326,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		_collectParameters: function(commandInvocation) {
 			var collected = false;
 			if (this._parameterCollector) {
-				collected = this._parameterCollector.collectParameters(commandInvocation);
+				commandInvocation.parameters.updateParameters(commandInvocation);
+				collected = commandInvocation.parameters.hasParameters() ? this._parameterCollector.collectParameters(commandInvocation) : false;
 			}
-			if (!collected) {
+			if (!collected && commandInvocation.parameters.hasParameters()) {
 				// if parameter collection has been set up, we should have some default collection using
 				// tooltip dialogs.
 				var tooltipDialog = new dijit.TooltipDialog({
@@ -1326,7 +1327,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		this.label = label;
 		this.value = value;
 	}
-	CommandParameter.prototype = /** @lends orion.commands.ParametersDescription.prototype */ {
+	CommandParameter.prototype = /** @lends orion.commands.CommandParameter.prototype */ {
 		/**
 		 * Returns whether the user has requested to assign values to optional parameters
 		 * 
@@ -1345,20 +1346,45 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 	 * signalled a desire to provide optional information.
 	 *
 	 * @param {Array} parameters an array of CommandParameters that are required
-	 * @param {Boolean} options specifies whether additional, optional parameters can be specified
-	 * 
+	 * @param {Boolean} [options] specifies whether additional, optional parameters can be specified
+	 * @param {Function} [getParameters] a function used to define the parameters just before the command is invoked.  This is used
+	 *			when a particular invocation of the command will change the parameters.  Any stored parameters will be ignored, and
+	 *          replaced with those returned by this function.  If no parameters (empty array or null) are returned, then it is assumed
+	 *          that the command should not try to obtain parameters before invoking the command's callback.  The function will be passed
+	 *          the CommandInvocation as a parameter.
 	 * @name orion.commands.ParametersDescription
 	 * 
 	 */
-	function ParametersDescription (parameters, options) {
-		this.parameterTable = {};
-		for (var i=0; i<parameters.length; i++) {
-			this.parameterTable[parameters[i].name] = parameters[i];
-		}
+	function ParametersDescription (parameters, options, getParameters) {
+		this._storeParameters(parameters);
 		this.options = options;
 		this.optionsRequested = false;
+		this.getParameters = getParameters;
 	}
-	ParametersDescription.prototype = /** @lends orion.commands.ParametersDescription.prototype */ {		
+	ParametersDescription.prototype = /** @lends orion.commands.ParametersDescription.prototype */ {	
+	
+		_storeParameters: function(parameterArray) {
+			this.parameterTable = null;
+			if (parameterArray) {
+				this.parameterTable = {};
+				for (var i=0; i<parameterArray.length; i++) {
+					this.parameterTable[parameterArray[i].name] = parameterArray[i];
+				}
+			}
+		},
+		
+		/**
+		 * Update the stored parameters by running the stored function if one has been supplied.
+		 */
+		updateParameters: function(commandInvocation) {
+			if (typeof this.getParameters === "function") {
+				this._storeParameters(this.getParameters(commandInvocation));
+			}
+		},
+		
+		hasParameters: function() {
+			return !(this.parameterTable === null);
+		},
 		/**
 		 * Returns the CommandParameter with the given name, or <code>null</code> if there is no parameter
 		 * by that name.
@@ -1423,7 +1449,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value);
 				parameters.push(newParm);
 			});
-			return new ParametersDescription(parameters, this.options);
+			return new ParametersDescription(parameters, this.options, this.getParameters);
 		 }
 	};
 	ParametersDescription.prototype.constructor = ParametersDescription;
