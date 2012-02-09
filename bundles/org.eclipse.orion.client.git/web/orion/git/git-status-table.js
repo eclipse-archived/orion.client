@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['require', 'dojo',  'orion/compare/compare-container', 'orion/commands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'orion/util', 'dijit/layout/ContentPane'], function(
-		require, dojo,  mCompareContainer, mCommands, mGitCommitNavigator, mGitCommands, mUtil) {
+define(['require', 'dojo',  'orion/compare/compare-container', 'orion/commands', 'orion/globalCommands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'orion/util', 'dijit/layout/ContentPane'], function(
+		require, dojo,  mCompareContainer, mCommands, mGlobalCommands, mGitCommitNavigator, mGitCommands, mUtil) {
 
 	var orion = orion || {};
 
@@ -735,7 +735,10 @@ orion.GitStatusController = (function() {
 			}
 			this._curRemote =  ( this._remoteInfo &&  this._remoteInfo.Children && this._remoteInfo.Children.length > 0 ) ? this._remoteInfo.Children[0]:null;
 			this._curClone = this._cloneInfo.Children[0];
-			
+			mGlobalCommands.setPageTarget(this._curClone, this._registry, this._commandService, dojo.hitch(this._curBranch || this._curRemote,
+				function() {
+					return this;
+				}));
 			this._initTitleBar(true);
 			this._logTableRenderer.renderAction();
 			this._remoteTableRenderer.renderAction();
@@ -784,7 +787,6 @@ orion.GitStatusController = (function() {
 						that._processStatus();
 						return;
 					}
-						
 					gitService.getGitBranch(that._cloneInfo.Children[0].BranchLocation).then(function(children){
 						that._branchInfo = children;
 						gitService.getGitRemote(that._cloneInfo.Children[0].RemoteLocation).then(function(children){

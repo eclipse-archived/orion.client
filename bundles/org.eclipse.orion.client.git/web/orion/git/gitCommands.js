@@ -1713,34 +1713,43 @@ var exports = {};
 		});
 		commandService.addCommand(cloneGitRepositoryCommand, "dom");
 
+		var initRepositoryParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("folderName", "text", "New folder:")], true);
+		
 		var initGitRepositoryCommand = new mCommands.Command({
 			name : "Init Repository",
 			tooltip : "Create a new Git repository in a new folder",
 			id : "eclipse.initGitRepository",
+			parameters: initRepositoryParameters,
 			callback : function(data) {
 				var gitService = serviceRegistry.getService("orion.git.provider");
-				var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
-					serviceRegistry: serviceRegistry,
-					title: "Init Git Repository",
-					fileClient: fileClient,
-					advancedOnly: true,
-					func : function(gitUrl, path, name){
-						exports.getDefaultSshOptions(serviceRegistry).then(function(options){
-							var func = arguments.callee;
-							gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath).then(function(jsonData, secondArg){
-								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData){
-									if(explorer.redisplayClonesList)
-										dojo.hitch(explorer, explorer.redisplayClonesList)();
-								}, func, "Init Git Repository");
-							}, function(jsonData, secondArg) {
-								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Init Git Repository");
-							});
+				var initRepositoryFunction = function(gitUrl, path, name) {
+					exports.getDefaultSshOptions(serviceRegistry).then(function(options){
+						var func = arguments.callee;
+						gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath).then(function(jsonData, secondArg){
+							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData){
+								if(explorer.redisplayClonesList)
+									dojo.hitch(explorer, explorer.redisplayClonesList)();
+							}, func, "Init Git Repository");
+						}, function(jsonData, secondArg) {
+							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Init Git Repository");
 						});
-					}
-				});
-						
-				dialog.startup();
-				dialog.show();
+					});
+				};
+				
+				if (data.parameters.valueFor("folderName") && !data.parameters.optionsRequested) {
+					initRepositoryFunction(null, null, data.parameters.valueFor("folderName"));
+				} else {
+					var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
+						serviceRegistry: serviceRegistry,
+						title: "Init Git Repository",
+						fileClient: fileClient,
+						advancedOnly: true,
+						func: initRepositoryFunction
+					});
+							
+					dialog.startup();
+					dialog.show();
+				}
 			},
 			visibleWhen : function(item) {
 				return true;
@@ -1825,24 +1834,25 @@ var exports = {};
 			imageClass: "git-sprite-apply_patch",
 			spriteClass: "gitCommandSprite",
 			callback: function(data) {
-				var commitName = prompt("Type the commit name");
-				if (commitName) {
-					if (data.items.Type === "Clone") {
-						window.location = "/git/git-commit.html#/gitapi/commit/" + commitName + data.items.ContentLocation + "?page=1&pageSize=1";
-					} else {
-						var gitService = serviceRegistry.getService("orion.git.provider");
-						gitService.getGitClone(data.items.CloneLocation).then(
-							function(jsonData){
-								var repository = jsonData.Children[0];
-								window.location = "/git/git-commit.html#/gitapi/commit/" + commitName + repository.ContentLocation + "?page=1&pageSize=1";
-							},
-							this.displayErrorOnStatus
-						);
-					}
+				var repository;
+				if (data.items.Type === "Clone") {
+					repository = data.items;
+					new orion.git.widgets.OpenCommitDialog(
+						{repository: repository, serviceRegistry: serviceRegistry}
+					).show();
+				} else {
+					var gitService = serviceRegistry.getService("orion.git.provider");
+					gitService.getGitClone(data.items.CloneLocation).then(
+						function(jsonData){
+							repository = jsonData.Children[0];
+							new orion.git.widgets.OpenCommitDialog(
+								{repository: repository, serviceRegistry: serviceRegistry}
+							).show();
+						}
+					);
 				}
 			},
 			visibleWhen : function(item) {
-				console.info(item);
 				return item.Type === "Clone" || item.CloneLocation;
 			}
 		});
