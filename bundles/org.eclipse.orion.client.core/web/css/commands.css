@@ -7,10 +7,9 @@
 .commandImage {
 	border: 1px solid transparent;
 	background-color: transparent;
-	margin: 1px;
-	padding: 1;
-	padding-left: 4px;
-	padding-right: 4px;
+	border: 1px solid transparent;
+	margin: 3px;
+	padding: 2px;
 	vertical-align: baseline;
 	cursor: pointer;
 	display: inline-block;
@@ -30,9 +29,8 @@
 .commandButton {
 	color: #808080;
 	border: 1px solid transparent;
-	padding: 1px;
-	padding-left: 4px;
-	padding-right: 4px;
+	margin: 3px;
+	padding: 2px;
 	background-color: transparent;
 	text-align: center;
 	vertical-align: baseline;
@@ -53,12 +51,8 @@
 }
 
 .commandLink {
-	margin: 1px;
-	margin-left: 3px;
-	margin-right: 3px;
-	padding: 1px;
-	padding-left: 4px;
-	padding-right: 4px;
+	margin: 4px;
+	padding: 2px;
 	display: inline-block;
 	vertical-align: baseline;
 }
