@@ -42,7 +42,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/sear
 							foundValidHit = true;
 						}
 						var loc = hit.Location;
-						resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, name: hit.Name, lastModified: hit.LastModified});
+						resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, path: hit.Path, name: hit.Name, lastModified: hit.LastModified});
 						
 					}
 				}
