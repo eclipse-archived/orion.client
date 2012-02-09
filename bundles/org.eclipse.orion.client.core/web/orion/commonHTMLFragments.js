@@ -37,6 +37,7 @@ define(['require'],
 		'<input type="search" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutRight searchbox">' +
 		'<div id="relatedLinks" class="layoutRight pageNav"></div>' +
 		'<div id="extras" class="layoutRight pageNav">' +
+			'<div id="globalActions" class="pageNav"></div>' +
 			'<span id="pageFavorite" tabindex: "0", role: "button" class="imageSprite core-sprite-makeFavorite"></span>' +
 		'</div>' +
 		'<div id="dimension" class="layoutBlock dimension"></div>' +
