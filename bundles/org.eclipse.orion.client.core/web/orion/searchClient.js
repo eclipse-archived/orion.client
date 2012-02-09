@@ -51,6 +51,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 							var hit = jsonData.response.docs[i];
 							transformed.push({name: hit.Name, 
 											  path: hit.Location, 
+											  folderName: mSearchUtils.path2FolderName(hit.Path, hit.Name),
 											  directory: hit.Directory, 
 											  lineNumber: hit.LineNumber});
 						}
@@ -184,8 +185,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 						var namesSeenMap = {};
 						
 						function doAppend(domElement, resource) {
-							var path = resource.path;
-							path = path.substring(0, path.length-resource.name.length-1);
+							var path = resource.folderName ? resource.folderName : mSearchUtils.path2FolderName(resource.path, resource.name);
 							domElement.appendChild(document.createTextNode(' - ' + path + ' '));
 						}
 						
