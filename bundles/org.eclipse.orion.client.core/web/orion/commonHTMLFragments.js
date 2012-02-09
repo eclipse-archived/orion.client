@@ -28,6 +28,7 @@ define(['require'],
 		'<a id="home" class="layoutLeft primaryNav" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
 		'<div id="primaryNav" class="layoutLeft primaryNav"></div>' +
 		'<div id="help" class="layoutRight help"><a id="help" href="' + require.toUrl("help/index.jsp") + '"><img src="' + require.toUrl("images/help.gif") + '" alt="Help"/></a></div>'+
+		'<div id="userMenu" class="layoutRight primaryNav"></div>' +
 		'<div id="userInfo" class="layoutRight primaryNav"></div>' +
 		'<div class="layoutRight primaryNav">|</div>' +
 	'</div>' +
