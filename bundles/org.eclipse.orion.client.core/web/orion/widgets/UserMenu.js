@@ -121,29 +121,24 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 			 }));
 			 this.addChild(new dijit.MenuSeparator());
-			 var menu = new dijit.Menu();
-				this.addChild(new dijit.PopupMenuItem({
-					label: "Help",
-					popup: menu
-				}));
-			menu.addChild(new dijit.MenuItem({
-				 label: "<a href="+require.toUrl("help/index.jsp") + ">Documentation</a>",
+			this.addChild(new dijit.MenuItem({
+				 label: "<a href="+require.toUrl("help/index.jsp") + ">Help</a>",
 				 onKeyDown: function(evt){if(evt.keyCode===13) window.location=require.toUrl("help/index.jsp");},
 				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 			 }));
 			if(this.keyAssistFunction){
-				menu.addChild(new dijit.MenuItem({
+				this.addChild(new dijit.MenuItem({
 					 label: "Keyboard Help",
 					 onClick: this.keyAssistFunction
 				 }));	
 			}
-			/* TODO where is About Orion page?
-			menu.addChild(new dijit.MenuItem({
-				 label: "<a href="+require.toUrl("about.html") + ">About Orion</a>",
-				 onKeyDown: function(evt){if(evt.keyCode===13) window.location=require.toUrl("about.html");},
+			
+			this.addChild(new dijit.MenuItem({
+				 label: "<a href='"+require.toUrl("help/about.html") + "'>About Orion</a>",
+				 onKeyDown: function(evt){if(evt.keyCode===13) window.location=require.toUrl("help/about.html");},
 				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 			 }));
-			 */
+			
 		},
 		
 		getUserLabel: function(userData){
