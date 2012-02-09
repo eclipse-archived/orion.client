@@ -1463,6 +1463,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		CommandMenuItem: CommandMenuItem,
 		URLBinding: URLBinding,
 		ParametersDescription: ParametersDescription,
-		CommandParameter: CommandParameter
+		CommandParameter: CommandParameter,
+		CommandTooltip: CommandTooltip
 	};
 });
