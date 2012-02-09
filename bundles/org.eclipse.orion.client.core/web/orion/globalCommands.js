@@ -34,7 +34,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 	var notifyAuthenticationSite = qualifyURL(require.toUrl('auth/NotifyAuthentication.html'));
 	var authRendered = {};
 	var loginDialog = new orion.widgets.LoginDialog();
-	var userMenu = new orion.widgets.UserMenu();
+	var userMenu = new orion.widgets.UserMenu({loginDialog: loginDialog});
 	
 	function getLabel(authService, serviceReference){
 		if(authService.getLabel){
@@ -77,7 +77,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			var menuButton = new dijit.form.DropDownButton({
 				id: "logins",
 				dropDown: userMenu,
-				title: "User options"
+				title: "Options",
+				alt: "Options"
 		        });
 		        dojo.addClass(menuButton.domNode, "commandImage");
 		        dojo.place(menuButton.domNode, userMenuPlaceholder, "only");
@@ -128,10 +129,24 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		for(i in services){
 			if(services.hasOwnProperty(i)){
 				//open prompt if there is at least one pending authentication
-				dijit.popup.open({
-		            popup: loginDialog,
-		            around: dojo.byId('userInfo')
-		        });		
+				var userInfo = dojo.byId('userInfo');
+				if(!userInfo.innerHTML){
+					window.setTimeout(function(){ //wait a few milliseconds for the content to generate 
+						try{
+							dijit.popup.open({
+								popup: loginDialog,
+								around: dojo.byId('userInfo')
+							});
+						}catch(e){}
+					}, 500);
+				}else{
+					try{
+						dijit.popup.open({
+							popup: loginDialog,
+							around: dojo.byId('userInfo')
+						});	
+					}catch(e){}
+				}
 				return;
 			}
 		}
