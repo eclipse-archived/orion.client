@@ -75,19 +75,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 		}
 		dojo.hitch(this, this.renderAuthenticatedServices)();
 		dojo.hitch(this, this.renderUnauthenticatedServices)();
-		
-		if(!dijit.byId('logins')){
-			return;
-		}
-		
-		if(this.isSingleService() && jsonData){
-			var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login;
-			if(userName.length > 40)
-				userName = userName.substring(0, 30) + "...";
-			dijit.byId('logins').setLabel(userName);
-		}else{
-			dijit.byId('logins').setLabel("Security");
-		}
 	},
 	
 	renderAuthenticatedServices: function(){
@@ -287,7 +274,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 	    url = img.src; // get qualified url
 	    img.src = null; // no server request
 		return url.match(re)[1].toString();
-		}
-	
+		},
+	_onBlur: function(){
+		this.inherited(arguments);
+		if(dijit.popup.hide)
+			dijit.popup.hide(this); //close doesn't work on FF
+		dijit.popup.close(this);
+	}
 	});
+	
 });

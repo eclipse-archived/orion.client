@@ -68,55 +68,56 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		
 		var authServices = serviceRegistry.getServiceReferences("orion.core.auth");
 		authenticationIds = [];
-		var userInfo = dojo.byId("userInfo");
-		if(!userInfo){
+		var userMenuPlaceholder = dojo.byId("userMenu");
+		if(!userMenuPlaceholder){
 			return;
 		}
 		
 		if(!dijit.byId('logins')){
 			var menuButton = new dijit.form.DropDownButton({
 				id: "logins",
-				label: "Security",
 				dropDown: userMenu,
-				title: "Login statuses"
+				title: "User options"
 		        });
 		        dojo.addClass(menuButton.domNode, "commandImage");
-		        dojo.place(menuButton.domNode, userInfo, "only");
+		        dojo.place(menuButton.domNode, userMenuPlaceholder, "only");
 			}
 		
 		
 		for(var i=0; i<authServices.length; i++){
 			var servicePtr = authServices[i];
 			var authService = serviceRegistry.getService(servicePtr);		
-			getLabel(authService, servicePtr).then(function(label){			
-				authService.getKey().then(function(key){
-					authenticationIds.push(key);
-					authService.getUser().then(function(jsonData){
-						loginDialog.addUserItem(key, authService, label, jsonData);
-						userMenu.addUserItem(key, authService, label, jsonData);
-					}, 
-					function(errorData){
-						loginDialog.addUserItem(key, authService, label);
-						userMenu.addUserItem(key, authService, label, jsonData);
-					});
-					window.addEventListener("storage", function(e){
-						if(authRendered[key] === localStorage.getItem(key)){
-							return;
-						}
-						
-						authRendered[key] = localStorage.getItem(key);
-						
+			dojo.hitch(this, function(authService, servicePtr){
+					getLabel(authService, servicePtr).then(function(label){			
+					authService.getKey().then(function(key){
+						authenticationIds.push(key);
 						authService.getUser().then(function(jsonData){
 							loginDialog.addUserItem(key, authService, label, jsonData);
 							userMenu.addUserItem(key, authService, label, jsonData);
 						}, 
 						function(errorData){
 							loginDialog.addUserItem(key, authService, label);
-							userMenu.addUserItem(key, authService, label);
-						});				
-					}, false);
-				});							
-			});
+							userMenu.addUserItem(key, authService, label, jsonData);
+						});
+						window.addEventListener("storage", function(e){
+							if(authRendered[key] === localStorage.getItem(key)){
+								return;
+							}
+							
+							authRendered[key] = localStorage.getItem(key);
+							
+							authService.getUser().then(function(jsonData){
+								loginDialog.addUserItem(key, authService, label, jsonData);
+								userMenu.addUserItem(key, authService, label, jsonData);
+							}, 
+							function(errorData){
+								loginDialog.addUserItem(key, authService, label);
+								userMenu.addUserItem(key, authService, label);
+							});				
+						}, false);
+					});							
+				});
+			})(authService, servicePtr);
 		}
 		
 	}
@@ -129,7 +130,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				//open prompt if there is at least one pending authentication
 				dijit.popup.open({
 		            popup: loginDialog,
-		            around: dojo.byId('logins')
+		            around: dojo.byId('userInfo')
 		        });		
 				return;
 			}
@@ -594,6 +595,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('L', true, true), "Show Keys");
 			editor.getTextView().setAction("Show Keys", keyAssistCommand.callback);
 		}
+		
+		userMenu.setKeyAssist(keyAssistCommand.callback);
 		
 		renderGlobalCommands(commandService, handler, pageItem);
 		
