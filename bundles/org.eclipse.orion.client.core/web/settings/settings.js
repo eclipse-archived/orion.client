@@ -338,8 +338,8 @@ function drawUserInterface( settings ) {
 	   so tailoring it for the preference apps */
 	
 	var mainNode = dojo.byId( "mainNode" );	
-	dojo.style( mainNode, "max-width", "700px" );
-	dojo.style( mainNode, "min-width", "500px" );
+	dojo.style( mainNode, "maxWidth", "700px" );
+	dojo.style( mainNode, "minWidth", "500px" );
 }
 
 
