@@ -8,7 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion console define*/
+/*global dojo dijit widgets orion  window console define*/
 /*jslint browser:true*/
 
 define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/TooltipDialog', 'orion/widgets/ServiceCarousel'], function(require, dojo, dijit, mUtil, mCommands) {
@@ -188,7 +188,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 		addPlugin: function( plugin ){
 			this.statusService.setMessage("Installed " + plugin.getLocation(), 5000);
 			this.settings.preferences.getPreferences("/plugins").then(function(plugins) {
-				plugins.put(this.newPluginUrl, true);
+				plugins.put(plugin.getLocation(), true);
 			}); // this will force a sync
 			
 			this.addRows();
