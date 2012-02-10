@@ -251,6 +251,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 			} else {
 				dojo.empty(dojo.byId('userInfo'));
 			}
-		},
+		}
 	});
 });
