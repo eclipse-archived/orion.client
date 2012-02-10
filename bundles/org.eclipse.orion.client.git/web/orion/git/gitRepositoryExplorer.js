@@ -82,20 +82,14 @@ exports.GitRepositoryExplorer = (function() {
 		progressService.setProgressMessage("Loading...");
 		this.registry.getService("orion.git.provider").getGitClone(location).then(
 			function(resp){
-								
-				if (resp.Children.length === 0) {
-					progressService.setProgressMessage("");
-					that.initTitleBar();
-					
-					that.displayRepositories(null, "full");
-					return;
-				} 
 				
-				if (resp.Children.length == 1 && resp.Children[0].Type === "Clone") {
+				if (resp.Children.length === 0) {
+					that.initTitleBar({});
+					that.displayRepositories([], "full");
+				} else if (resp.Children.length == 1 && resp.Children[0].Type === "Clone") {
 					var repositories = resp.Children;
 					
 					that.initTitleBar(repositories[0]);
-	
 					that.displayRepositories(repositories);
 					that.displayStatus(repositories[0]);
 					that.displayCommits(repositories[0]);
@@ -105,8 +99,7 @@ exports.GitRepositoryExplorer = (function() {
 				} else if (resp.Children[0].Type === "Clone"){
 					var repositories = resp.Children;
 					
-					that.initTitleBar();
-					
+					that.initTitleBar(repositories);
 					that.displayRepositories(repositories, "full", true);
 				} else if (resp.Children[0].Type === "Branch"){
 					var branches = resp.Children;
@@ -148,15 +141,17 @@ exports.GitRepositoryExplorer = (function() {
 		);
 	};
 	
-	GitRepositoryExplorer.prototype.initTitleBar = function(repository, sectionName){
+	GitRepositoryExplorer.prototype.initTitleBar = function(resource, sectionName){
 		var that = this;
 		var item = {};
 		var pageTitle;		
 		
 		// render commands
-		mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", (repository ? repository : {}));
+		mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", resource);
 		
-		if (repository && sectionName){
+		if (resource && resource.Type === "Clone" && sectionName){
+			var repository = resource;
+			
 			item.Name = sectionName;
 			item.Parents = [];
 			item.Parents[0] = {};
@@ -166,7 +161,9 @@ exports.GitRepositoryExplorer = (function() {
 			item.Parents[1] = {};
 			item.Parents[1].Name = "Repositories";
 			pageTitle = sectionName + " on " + repository.Name + " - Git";
-		} else if (repository) {
+		} else if (resource && resource.Type === "Clone") {
+			var repository = resource;
+			
 			item.Name = repository.Name;
 			item.Parents = [];
 			item.Parents[0] = {};
@@ -281,7 +278,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", { id: "repositorySectionTitle", "class":"layoutLeft", innerHTML: (mode === "full" ? "Repositories" : "Repository") }, titleWrapper );
 		dojo.create( "div", { id: "repositorySectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 				
-		if (!repositories){
+		if (!repositories || repositories.length === 0){
 			dojo.byId("repositorySectionTitle").innerHTML = (mode === "full" ? "No Repositories" : "Repository Not Found");
 			return;
 		}

@@ -43,10 +43,12 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 			throw new Error("Missing required argument: serviceRegistry");
 		}
 		
-		this.repository = this.options.repository;
-		if (!this.repository) {
-			throw new Error("Missing required argument: repository");
+		this.repositories = this.options.repositories;
+		if (!this.repositories) {
+			throw new Error("Missing required argument: repositories");
 		}
+		
+		this.commitName = this.options.commitName;
 	},
 	
 	/** @private */
@@ -78,6 +80,8 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 			// WebKit focuses <body> after link is clicked; override that
 			e.target.focus();
 		});
+		
+		this.resourceName.set("value", this.commitName);
 	},
 	
 	/** @private */
@@ -92,6 +96,28 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 		}
 	},
 	
+	_findCommitLocation: function(repositories, commitName, deferred) {
+		var that = this;
+		if (deferred == null)
+			deferred = new dojo.Deferred();
+		
+		if (repositories.length > 0) {
+			that.serviceRegistry.getService("orion.git.provider").doGitLog(
+				"/gitapi/commit/" + commitName + repositories[0].ContentLocation + "?page=1&pageSize=1", null, null, "Looking for the commit").then(
+				function(resp){
+					deferred.callback(resp.Children[0]);
+				},
+				function(error) {
+					that._findCommitLocation(repositories.slice(1), commitName, deferred);
+				}
+			);
+		} else {
+			deferred.errback();
+		}
+		
+		return deferred;
+	},
+	
 	/** @private */
 	doSearch: function() {
 		var text = this.resourceName && this.resourceName.get("value");
@@ -101,15 +127,16 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 			dojo.place("<div>Searching&#x2026;</div>", this.results, "only");
 			var that = this;
 			
-			this.serviceRegistry.getService("orion.git.provider").doGitLog(
-				"/gitapi/commit/" + text + this.repository.ContentLocation + "?page=1&pageSize=1").then(
+			this.serviceRegistry.getService("orion.page.message").setProgressMessage("Looking for the commit");
+			this._findCommitLocation(this.repositories, text).then(
 				function(resp){
-					var commit = resp.Children[0];
+					var commit = resp;
 					dojo.empty(that.results);
 					that.displayCommit(commit, that.results);
 				},
 				function(error) {
-					dojo.place("<div>No matches found</div>", that.results, "only");
+					dojo.place("<div>No commits found</div>", that.results, "only");
+					that.serviceRegistry.getService("orion.page.message").setProgressMessage("");
 				}
 			);
 		}
