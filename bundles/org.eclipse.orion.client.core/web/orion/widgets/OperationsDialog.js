@@ -57,7 +57,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			} catch(error) {
 				//it is not JSON, just continue;
 			}
-			return {Message: status.Message || status, Severity: status.Severity};
+			var ret = {Message: status.Message || status, Severity: status.Severity};
+			if(status.DetailedMessage && status.DetailedMessage !== ret.Message){
+				ret.DetailedMessage = status.DetailedMessage;
+			}
+			return ret;
 		},
 		_renderOperations: function(){
 			this._renderOperationsTable(this.myOperationsList, this._myOperations);
@@ -99,8 +103,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				}
 				
 				if(result.Message || operation.Message){
+					var message = result.Message || operation.Message;
+					if(result.DetailedMessage && result.DetailedMessage!=="")
+						message += ": " + result.DetailedMessage;
 					dojo.create("br", null, div, "last");
-					dojo.create("span", {className: "secondaryColumn", style: "margin-left: 18px;", innerHTML: result.Message || operation.Message}, div, "last");
+					dojo.create("span", {className: "secondaryColumn", style: "margin-left: 18px;", innerHTML: message}, div, "last");
 					
 				}
 				
